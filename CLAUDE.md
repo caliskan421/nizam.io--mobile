@@ -36,7 +36,7 @@ Spec her zaman bir **backend etiketinden** okunur (ilk pin: `v0.1.0-api`). Etike
 ## Teslim
 
 Her değişiklik PR ile gelir; şablon `.github/pull_request_template.md`. "Bitti" yalnız
-CI yeşil + kabul ölçütü kanıtıyla söylenir. Dilim sonunda Codex tek koşum (salt okunur)
+CI yeşil + kabul ölçütü kanıtıyla söylenir. Faz sonunda Codex tek koşum (salt okunur)
 hükmü `docs/reviews/` altına yazılır; faz kapanışı `../program/DURUM.md`'ye işlenir.
 Ürün sahibine oturum içinde soru sorulmaz; kırmızı karar (ör. mobil yenileme ömrü,
 uygulama kimliği/imzalama) faz dosyasındaki varsayılanla ilerler ve DURUM.md'ye yazılır.

@@ -1,7 +1,8 @@
 # NIZAM.IO — Mobil istemci
 
-NIZAM.IO'nun iOS/Android istemcisi. Durum: **iskelet henüz yok** — ilk kod MOB-1 fazında
-(`../program/fazlar/F14-mob-1-kimlik-kabuk-can.md`) gelir.
+NIZAM.IO'nun iOS/Android istemcisi. Durum: **iskelet henüz yok** — ilk kod MOB-0 mobil altyapı
+fazında (`../program/fazlar/F14-mob-1-kimlik-kabuk-can.md`; ekransız) gelir. Ekran tasarımı ve UI
+geliştirmesi program sonrası ayrı çalışmadadır (`../program/` D-0174).
 
 ## Yığın
 
@@ -22,7 +23,7 @@ Android 8.0 (API 26)+.
 - Yenileme belirteci ömrü sunucu yapılandırmasındadır
   (`NIZAMIO_SESSION_MOBILE_REFRESH_TTL`, varsayılan 24 saat).
 
-## Dizin düzeni (plan — MOB-1)
+## Dizin düzeni (plan — MOB-0)
 
 ```text
 lib/core/                 http, güvenli depo, sunucu bağı, tema, i18n
@@ -32,5 +33,6 @@ integration_test/         gerçek backend'e karşı akışlar
 
 ## Süreç
 
-Faz sırası ve durum: `../program/DURUM.md`. Her değişiklik PR + CI; dilim sonunda
-Codex tek koşum. Bu depoda `project-control` kaydı tutulmaz. Mağaza yayını ayrı fazdadır.
+Faz sırası ve durum: `../program/DURUM.md`. Her değişiklik PR + CI; faz sonunda
+Codex tek koşum. Bu depoda `project-control` kaydı tutulmaz. Mağaza yayını ve imzalama program
+dışıdır (D-0174).

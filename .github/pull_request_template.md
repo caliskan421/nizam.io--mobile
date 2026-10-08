@@ -1,6 +1,6 @@
 ## Ne değişti
 
-- Faz / dilim: <!-- ör. F14 MOB-1 -->
+- Faz / dilim: <!-- ör. F14 MOB-0 -->
 - Değişen modül(ler):
 
 ## Backend sözleşmesi

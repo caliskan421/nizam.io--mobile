@@ -15,8 +15,8 @@ android {
     }
 
     defaultConfig {
-        // YER TUTUCU uygulama kimliği (KR-13 varsayılanı: emülatör, imzasız). Gerçek kimlik ve
-        // imzalama program dışıdır (D-0174); README "Uygulama kimliği" bölümü.
+        // YER TUTUCU uygulama kimliği (varsayılan: emülatör, imzasız). Gerçek kimlik ve
+        // imzalama bu altyapı çalışmasının dışındadır; README "Uygulama kimliği" bölümü.
         applicationId = "io.nizamio.placeholder.nizamio"
         // Asgari platform: Android 8.0 (API 26) — K-11 / D-0030.
         minSdk = 26
@@ -45,7 +45,7 @@ android {
 
     buildTypes {
         release {
-            // İmzalama program dışıdır (KR-13, D-0174): yayın derlemesi yalnız `--obfuscate`
+            // İmzalama bu altyapı çalışmasının dışındadır: yayın derlemesi yalnız `--obfuscate`
             // denetimi içindir ve debug anahtarıyla imzalanır; dağıtılmaz.
             signingConfig = signingConfigs.getByName("debug")
         }

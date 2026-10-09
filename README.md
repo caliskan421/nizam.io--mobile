@@ -42,8 +42,8 @@ giriş noktasıyla seçilir.
 ## Uygulama kimliği ve imzalama
 
 `io.nizamio.placeholder.nizamio` (Android `applicationId`, iOS bundle id) **yer tutucudur**.
-KR-13 varsayılanı "emülatör, imzasız": gerçek kimlik, imzalama ve mağaza yayını program
-dışıdır (D-0174). `make build-prod-apk` yalnız `--obfuscate` derlemesini sınamak içindir ve
+Varsayılan "emülatör, imzasız"dır (ürün sahibi kararı bekliyor): gerçek kimlik, imzalama ve
+mağaza yayını bu altyapı çalışmasının dışındadır. `make build-prod-apk` yalnız `--obfuscate` derlemesini sınamak içindir ve
 Flutter şablonunun debug anahtarıyla imzalanır; dağıtılmaz.
 
 ## Dizin düzeni ve sınır kuralı
@@ -209,7 +209,7 @@ Senaryolar (`test_integration/backend_test.dart`):
   (`v0.1.0-api`). Etiketsiz `main`'den üretim yoktur.
 - Bağlanma durum makinesi: bağ yok → sunucu doğrulandı → oturum → kapsam.
 - Yenileme belirteci ömrü sunucu yapılandırmasındadır
-  (`NIZAMIO_SESSION_MOBILE_REFRESH_TTL`, varsayılan 24 saat — KR-03).
+  (`NIZAMIO_SESSION_MOBILE_REFRESH_TTL`, varsayılan 24 saat; değer ürün sahibi kararı bekliyor).
 
 ## Süreç
 

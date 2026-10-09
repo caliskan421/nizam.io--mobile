@@ -31,7 +31,7 @@ verify: deps lint test
 build-dev-apk:
 	flutter build apk --debug --flavor dev -t lib/main_dev.dart
 
-# Yayın derlemesi yalnız --obfuscate denetimi içindir (imzalama program dışı, KR-13).
+# Yayın derlemesi yalnız --obfuscate denetimi içindir (imzalama bu altyapı çalışmasının dışında).
 build-prod-apk:
 	flutter build apk --release --flavor prod -t lib/main_prod.dart \
 		--obfuscate --split-debug-info=build/symbols

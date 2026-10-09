@@ -285,7 +285,7 @@ final class SessionControllerProvider
   }
 }
 
-String _$sessionControllerHash() => r'5c544516becb13c23cdac82aa31ca64316648e76';
+String _$sessionControllerHash() => r'69ea681eebb94002e3fa4aeb10dffe27d088d446';
 
 @ProviderFor(bindingState)
 final bindingStateProvider = BindingStateProvider._();
@@ -494,4 +494,4 @@ final class ApiDioProvider extends $FunctionalProvider<Dio?, Dio?, Dio?>
   }
 }
 
-String _$apiDioHash() => r'82ab1984ed9e8c65131dd39d284d9d924759f2c3';
+String _$apiDioHash() => r'7da665024b1a5ba43a2aad5ccbb3b82d81aea455';

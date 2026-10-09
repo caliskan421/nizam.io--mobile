@@ -62,7 +62,7 @@ void main() {
     store = RecordingStore();
     calls = [];
     respond = (_) => rotated('2');
-    session = SessionController(TokenStore(store), (t) async {
+    session = SessionController(TokenStore(store), (t, _) async {
       calls.add(t);
       return respond(t);
     });
@@ -234,7 +234,7 @@ void main() {
       // Açılış: kayıt yok ya da işaretli → geri yüklenmez.
       final fresh = SessionController(
         TokenStore(store),
-        (_) async => throw StateError('gitmemeli'),
+        (_, _) async => throw StateError('gitmemeli'),
       );
       await fresh.restore(instanceId: 'inst-1');
       expect(fresh.state.value, isNot(isA<SessionActive>()));
@@ -253,7 +253,7 @@ void main() {
       );
       expect(store.values.containsKey(TokenStore.inflightKey), isTrue);
       var sent = 0;
-      final fresh = SessionController(TokenStore(store), (_) async {
+      final fresh = SessionController(TokenStore(store), (_, _) async {
         sent++;
         return rotated('3');
       });
@@ -295,7 +295,7 @@ void main() {
       expect(store.values.containsKey(TokenStore.inflightKey), isTrue);
       final fresh = SessionController(
         TokenStore(store),
-        (_) async => throw StateError('gitmemeli'),
+        (_, _) async => throw StateError('gitmemeli'),
       );
       await fresh.restore(instanceId: 'inst-1');
       expect(fresh.state.value, isA<SessionReauthRequired>());
@@ -328,7 +328,7 @@ void main() {
     test('farklı kurulumda açılış: geri yüklenmez, depo temizlenir', () async {
       final fresh = SessionController(
         TokenStore(store),
-        (_) async => throw StateError('x'),
+        (_, _) async => throw StateError('x'),
       );
       await fresh.restore(instanceId: 'inst-2');
       expect(fresh.state.value, isA<SessionNone>());
@@ -340,7 +340,7 @@ void main() {
         store.values[TokenStore.key] = '{"v":1,"account_id":"a"}';
         final fresh = SessionController(
           TokenStore(store),
-          (_) async => throw StateError('x'),
+          (_, _) async => throw StateError('x'),
         );
         await fresh.restore(instanceId: 'inst-1');
         expect(fresh.state.value, isA<SessionNone>());
@@ -377,7 +377,7 @@ void main() {
   test('giriş çifti depoya yazılamazsa oturum açılmaz', () async {
     final s2 = SessionController(
       TokenStore(MemorySecureStore()..failWrites = true),
-      (_) async {
+      (_, _) async {
         throw StateError('çağrılmamalı');
       },
     );
@@ -410,7 +410,7 @@ void main() {
     );
     final s2 = SessionController(
       TokenStore(mem),
-      (_) async => throw StateError('x'),
+      (_, _) async => throw StateError('x'),
     );
     await s2.restore(instanceId: 'inst-1');
     expect(s2.state.value, isA<SessionNone>());
@@ -420,7 +420,7 @@ void main() {
   test('açılış: geçerli kayıt geri yüklenir', () async {
     final s2 = SessionController(
       TokenStore(store),
-      (_) async => throw StateError('x'),
+      (_, _) async => throw StateError('x'),
     );
     await s2.restore(instanceId: 'inst-1');
     expect(s2.accessToken, 'access-token-1');

@@ -41,6 +41,7 @@ Dio createApiDio({
   required ServerAddress server,
   required Flavor flavor,
   required SessionController session,
+  required String instanceId,
   required ScopeController scope,
   HttpClientAdapter? adapter,
 }) {
@@ -48,7 +49,7 @@ Dio createApiDio({
   if (adapter != null) dio.httpClientAdapter = adapter;
   dio.interceptors.addAll([
     ApiGuardInterceptor(server: server, flavor: flavor, scope: scope),
-    AuthInterceptor(session: session, dio: () => dio),
+    AuthInterceptor(session: session, instanceId: instanceId, dio: () => dio),
     ErrorLogInterceptor(),
   ]);
   return dio;

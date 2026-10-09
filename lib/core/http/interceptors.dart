@@ -115,9 +115,16 @@ class ApiGuardInterceptor extends Interceptor {
 /// 2. halka — kimlik. Bearer erişim belirteci; 401 → tek uçuş yenileme → istek YALNIZ BİR KEZ
 /// tekrarlanır. Giriş/yenileme (S0) ve çıkışın 401'i yenileme tetiklemez.
 class AuthInterceptor extends Interceptor {
-  AuthInterceptor({required this.session, required this.dio});
+  AuthInterceptor({
+    required this.session,
+    required this.instanceId,
+    required this.dio,
+  });
 
   final SessionController session;
+
+  /// Bu Dio'nun bağlı olduğu kurulum: Bearer yalnız bu kuruluma ait çiftten alınır.
+  final String instanceId;
 
   /// Tekrar isteği aynı zincirden geçsin diye sahibi olan Dio.
   final Dio Function() dio;
@@ -127,7 +134,7 @@ class AuthInterceptor extends Interceptor {
     final op = operationOf(options);
     options.headers.remove('Authorization');
     if (op == null || !op.auth) return handler.next(options);
-    final token = session.accessToken;
+    final token = session.accessTokenFor(instanceId);
     if (token == null) {
       return handler.reject(_reject(options, ClientErrorCode.notSignedIn));
     }
@@ -147,7 +154,8 @@ class AuthInterceptor extends Interceptor {
         op == null ||
         !op.auth ||
         op.operationId == 'logout' ||
-        o.extra[_retriedKey] == true) {
+        o.extra[_retriedKey] == true ||
+        session.accessTokenFor(instanceId) == null) {
       return handler.next(err);
     }
     try {

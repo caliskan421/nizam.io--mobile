@@ -35,7 +35,17 @@ class IdentityService {
             : ClientErrorCode.serverNotVerified,
       );
     }
+    final generation = session.generation;
     final r = await _repo().login(email: email, password: password);
+    // Yanıt beklenirken çıkış / yeniden bağlanma / bağ yeniden doğrulaması olduysa sonuç
+    // kullanılmaz: çift depoya yazılmaz, atılır (CX-r1-Ö-01).
+    final now = binding.current;
+    if (now is! BindingVerified ||
+        now.info.address != bound.info.address ||
+        now.info.instanceId != bound.info.instanceId ||
+        session.generation != generation) {
+      throw ApiError(ClientErrorCode.sessionEnded);
+    }
     final access = r.accessToken;
     final refresh = r.refreshToken;
     final refreshExpiresAt = r.refreshExpiresAt;
@@ -53,16 +63,18 @@ class IdentityService {
         forcePasswordChange: r.forcePasswordChange,
         instanceId: bound.info.instanceId,
       ),
+      generation: generation,
     );
   }
 
   /// Oturumdaki hesap. Zorunlu parola değişikliği yanıtı bayrağı oturum durumuna taşır.
   Future<MeResponse> me() async {
+    final generation = session.generation;
     try {
       return await _repo().me();
     } on ApiError catch (e) {
       if (e.code == 'identity.force_password_change_required') {
-        await session.markForcePasswordChange(true);
+        await session.markForcePasswordChange(true, generation: generation);
       }
       rethrow;
     }

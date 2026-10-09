@@ -124,6 +124,14 @@ engeller (sunucuda tüketilmiş belirteç bir daha gönderilmez). Süreç içind
 yenileme belirteci ayrıca bellekte "yanmış" işaretlenir. Aynı işaret, yanıt beklenirken
 çöken sürecin açılışında da çifti düşürür (K-05'in yeniden başlatma hâli).
 
+**Geciken yanıtlar (nesil):** oturumun bir nesli vardır; giriş, çıkış, yeniden bağlanma ve
+"yeniden giriş gerekli" geçişleri onu artırır. Bekleyen giriş/yenileme/`me` yanıtı ancak
+başladığı nesil (yenilemede aynı kaynak çift; girişte aynı origin + `instance_id` ile hâlâ
+doğrulanmış bağ) geçerliyse uygulanır; değilse getirdiği çift depoya yazılmaz, kullanılmaz,
+yalnız atılır — sunucudaki o oturum kendi ömrüyle ölür. Bearer yalnız dio'nun bağlı olduğu
+kuruluma ait çiftten alınır; çıkış kapsamı da temizler. Eşzamanlı bağ doğrulamalarında yalnız
+en son başlatılanın sonucu uygulanır.
+
 Güvenli depo: `FlutterSecureStore` (iOS Keychain `first_unlock_this_device`; Android Keystore,
 `allowBackup=false`). Testlerde ve cihazsız entegrasyonda `MemorySecureStore`.
 

@@ -250,6 +250,61 @@ void main() {
     });
   });
 
+  group('G1/G2 get_it yalnız bileşim kökünde (ADR-0001, D-0182)', () {
+    const getIt = "import 'package:get_it/get_it.dart';";
+    test('core → get_it yasak', () {
+      expect(rules('core/session/a.dart', getIt), ['G1']);
+    });
+    test('presentation → get_it yasak', () {
+      expect(rules('features/identity/presentation/a.dart', getIt), ['G1']);
+    });
+    test('application → get_it yasak', () {
+      expect(rules('features/identity/application/a.dart', getIt), ['G1']);
+    });
+    test('data ve domain → get_it yasak', () {
+      expect(rules('features/identity/data/a.dart', getIt), ['G1']);
+      expect(rules('features/identity/domain/a.dart', getIt), ['G1']);
+    });
+    test('feature açık yüzü → get_it yasak', () {
+      expect(rules('features/identity/identity.dart', getIt), ['G1']);
+    });
+    test('app/** ve <f>_module.dart → get_it serbest', () {
+      expect(rules('app/di/dependencies.dart', getIt), isEmpty);
+      expect(rules('features/identity/identity_module.dart', getIt), isEmpty);
+    });
+    test('başka adlı feature kök dosyası modül sayılmaz', () {
+      expect(
+        rules('features/identity/kayit_module.dart', getIt),
+        containsAll(['B5', 'G1']),
+      );
+    });
+    test('modül yalnız app/di tarafından import edilir', () {
+      const mod =
+          "import 'package:nizamio/features/identity/identity_module.dart';";
+      expect(rules('app/di/composition.dart', mod), isEmpty);
+      expect(rules('app/bootstrap.dart', mod), ['G2']);
+      expect(
+        rules(
+          'features/identity/identity.dart',
+          "export 'identity_module.dart';",
+        ),
+        ['G2'],
+      );
+      expect(rules('features/work/application/a.dart', mod), ['G2']);
+      expect(rules('core/a.dart', mod), containsAll(['B1', 'G2']));
+    });
+    test('modül kendi katmanlarını ve core\'u import edebilir', () {
+      expect(
+        rules(
+          'features/identity/identity_module.dart',
+          "import 'application/identity_service.dart';\nimport 'data/identity_repository.dart';\n"
+              "import '../../core/session/session_controller.dart';",
+        ),
+        isEmpty,
+      );
+    });
+  });
+
   test('gerçek lib/ ağacı kurallara uyar', () {
     final violations = <Violation>[];
     for (final f in Directory(

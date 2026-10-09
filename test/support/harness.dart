@@ -1,35 +1,39 @@
 // Gerçek provider bağlarıyla (lib/core/providers.dart) sahte bağdaştırıcı + bellek deposu.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
+import 'package:nizamio/app/di/composition.dart';
 import 'package:nizamio/core/config/flavor.dart';
-import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/features/identity/identity.dart';
 
 import 'fake_backend.dart';
 
 class Harness {
-  Harness({Flavor flavor = Flavor.prod, FakeHandler? handler})
-    : backend = FakeBackend(handler ?? discoveryHandler),
-      store = MemorySecureStore() {
-    container = ProviderContainer(
-      overrides: [
-        flavorProvider.overrideWithValue(flavor),
-        secureStoreProvider.overrideWithValue(store),
-        httpAdapterProvider.overrideWithValue(backend),
-      ],
+  Harness({
+    Flavor flavor = Flavor.prod,
+    FakeHandler? handler,
+    MemorySecureStore? store,
+  }) : backend = FakeBackend(handler ?? discoveryHandler),
+       store = store ?? MemorySecureStore() {
+    // Gerçek bileşim kökü (lib/app/di, get_it + Riverpod portları); yalnız depo ve HTTP
+    // bağdaştırıcısı sahte.
+    composition = Composition.create(
+      flavor: flavor,
+      secureStore: this.store,
+      httpAdapter: backend,
     );
   }
 
   final FakeBackend backend;
   final MemorySecureStore store;
-  late final ProviderContainer container;
+  late final Composition composition;
+  ProviderContainer get container => composition.container;
 
   T read<T>(ProviderListenable<T> p) => container.read(p);
 
   IdentityService get identity => read(identityServiceProvider);
 
-  void dispose() => container.dispose();
+  Future<void> dispose() => composition.dispose();
 }
 
 const testUrl = 'https://nizam.example.test';

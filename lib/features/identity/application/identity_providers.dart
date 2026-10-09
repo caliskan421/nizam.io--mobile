@@ -1,18 +1,12 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../core/api/generated/clients/identity_client.dart';
-import '../../../core/providers.dart';
-import '../data/identity_repository.dart';
 import 'identity_service.dart';
 
 part 'identity_providers.g.dart';
 
+/// PORT: kimlik servisi bileşim kökünde (`identity_module.dart`, get_it) kurulur ve burada
+/// geçersiz kılınır; sunum katmanı servisi bu sağlayıcıdan okur.
 @Riverpod(keepAlive: true)
-IdentityService identityService(Ref ref) => IdentityService(
-  binding: ref.watch(serverBindingProvider),
-  session: ref.watch(sessionControllerProvider),
-  repository: () {
-    final dio = ref.read(apiDioProvider);
-    return dio == null ? null : IdentityRepository(IdentityClient(dio));
-  },
+IdentityService identityService(Ref ref) => throw UnimplementedError(
+  'identityServiceProvider bileşim kökünde (lib/app/di) bağlanır',
 );

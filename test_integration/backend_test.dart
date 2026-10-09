@@ -9,6 +9,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/app/di/composition.dart';
 import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/config/flavor.dart';
 import 'package:nizamio/core/errors/api_error.dart';
@@ -40,16 +41,13 @@ final adminPassword =
 /// Mobil core yığını: gerçek provider bağları, gerçek HTTP, bellek içi güvenli depo.
 class Mobile {
   Mobile(Flavor flavor) : store = MemorySecureStore() {
-    container = ProviderContainer(
-      overrides: [
-        flavorProvider.overrideWithValue(flavor),
-        secureStoreProvider.overrideWithValue(store),
-      ],
-    );
+    // Gerçek bileşim kökü; HTTP gerçek (bağdaştırıcı verilmez), yalnız depo bellek içi.
+    composition = Composition.create(flavor: flavor, secureStore: store);
   }
 
   final MemorySecureStore store;
-  late final ProviderContainer container;
+  late final Composition composition;
+  ProviderContainer get container => composition.container;
 
   ServerBindingController get binding => container.read(serverBindingProvider);
   IdentityService get identity => container.read(identityServiceProvider);
@@ -57,7 +55,7 @@ class Mobile {
   AppPhase get phase => container.read(appPhaseProvider);
   Future<TokenPair?> stored() => TokenStore(store).load();
 
-  void dispose() => container.dispose();
+  Future<void> dispose() => composition.dispose();
 }
 
 Matcher apiError(String code) =>

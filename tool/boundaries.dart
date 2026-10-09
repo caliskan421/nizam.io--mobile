@@ -20,6 +20,11 @@
 //   S3  `debugPrint` ve `dart:developer` yalnız `lib/core/logging/**` içinde (log tek yoldan
 //       ve redaksiyonla; `print` ayrıca avoid_print ile yasak).
 //   S4  domain katmanı Flutter/dio/Riverpod import etmez (saf Dart).
+//   G1  `package:get_it` yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` içinde
+//       (ADR-0001, D-0182: get_it = bileşim kökü; core ve feature katmanları servis bulucu
+//       kullanmaz, bağımlılık yapıcıdan gelir).
+//   G2  `features/<f>/<f>_module.dart` (modül kayıt fonksiyonu) yalnız `lib/app/di/**`
+//       tarafından import edilir.
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
@@ -77,6 +82,8 @@ class _Place {
       feature = parts[1];
       if (parts.length == 3 && parts[2] == '${parts[1]}.dart') {
         layer = 'facade';
+      } else if (parts.length == 3 && parts[2] == '${parts[1]}_module.dart') {
+        layer = 'module';
       } else if (parts.length >= 4 && _layers.contains(parts[2])) {
         layer = parts[2];
       } else {
@@ -141,7 +148,7 @@ List<Violation> checkSource(String libPath, String content) {
         'B5',
         'lib/$libPath',
         1,
-        'features/<f>/ altında yalnız presentation|application|domain|data ve <f>.dart olur',
+        'features/<f>/ altında yalnız presentation|application|domain|data, <f>.dart ve <f>_module.dart olur',
       ),
     );
   }
@@ -207,8 +214,25 @@ void _checkUri(
     }
   }
 
+  if (uri.startsWith('package:get_it/') &&
+      here.area != 'app' &&
+      !(here.area == 'feature' && here.layer == 'module')) {
+    add(
+      'G1',
+      'get_it yalnız lib/app/** ve features/<f>/<f>_module.dart içinde (bileşim kökü; servis bulucu yok)',
+    );
+  }
+
   if (target == null) return;
   final there = _Place(target);
+  if (there.area == 'feature' &&
+      there.layer == 'module' &&
+      !here.path.startsWith('app/di/')) {
+    add(
+      'G2',
+      'modül kayıt fonksiyonu yalnız lib/app/di/ tarafından import edilir: $uri',
+    );
+  }
 
   switch (here.area) {
     case 'core':
@@ -223,13 +247,16 @@ void _checkUri(
         add('B2', 'features, app katmanını import edemez: $uri');
       } else if (there.area == 'feature') {
         if (there.feature != here.feature) {
-          if (there.layer != 'facade') {
+          if (there.layer != 'facade' && there.layer != 'module') {
             add(
               'B3',
               "başka feature'ın iç katmanı: $uri (yalnız features/${there.feature}/${there.feature}.dart)",
             );
           }
-        } else if (here.layer != 'facade' && here.layer != 'unknown') {
+        } else if (here.layer != 'facade' &&
+            here.layer != 'module' &&
+            here.layer != 'unknown' &&
+            there.layer != 'module') {
           final allowed = _allowedLayerDeps[here.layer]!;
           if (there.layer == 'facade' || !allowed.contains(there.layer)) {
             add(

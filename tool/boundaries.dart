@@ -29,6 +29,9 @@
 //       features içinde yalnız `data` katmanında ve `<f>_module.dart`'ta (istemci kurulumu)
 //       import edilir. data DTO'yu domain varlığına eşler; presentation/application/domain
 //       ve açık yüz sözleşme tiplerini görmez (backend alan değişikliği UI'a sızmaz).
+//       Üretilmiş kod yalnız üretilmiş koddan `export` edilir (barrel üzerinden transitif
+//       sızma kapalı). Koşullu import/export URI'leri ve `part` yönergeleri de denetlenir;
+//       `package:` yolları normalize edilir (`..` ile kaçış).
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
@@ -158,10 +161,25 @@ List<Violation> checkSource(String libPath, String content) {
   }
 
   for (final directive in unit.directives) {
-    if (directive is! NamespaceDirective) continue;
-    final uri = directive.uri.stringValue;
-    if (uri == null) continue;
-    _checkUri(here, uri, (rule, msg) => add(rule, directive, msg), generated);
+    if (directive is! NamespaceDirective && directive is! PartDirective) {
+      continue;
+    }
+    final uris = [
+      (directive as UriBasedDirective).uri.stringValue,
+      // Koşullu import/export (`if (dart.library.io) '…'`) her dalı ayrıca denetlenir.
+      if (directive is NamespaceDirective)
+        for (final c in directive.configurations) c.uri.stringValue,
+    ];
+    for (final uri in uris) {
+      if (uri == null) continue;
+      _checkUri(
+        here,
+        uri,
+        (rule, msg) => add(rule, directive, msg),
+        generated,
+        isExport: directive is ExportDirective,
+      );
+    }
   }
 
   unit.accept(_Visitor(here, generated, add));
@@ -172,11 +190,13 @@ void _checkUri(
   _Place here,
   String uri,
   void Function(String rule, String msg) add,
-  bool generated,
-) {
+  bool generated, {
+  bool isExport = false,
+}) {
   String? target; // lib göreli hedef
   if (uri.startsWith('package:$packageName/')) {
-    target = uri.substring('package:$packageName/'.length);
+    target = p.posix.normalize(uri.substring('package:$packageName/'.length));
+    if (target.startsWith('..')) target = null;
   } else if (!uri.contains(':')) {
     target = p.posix.normalize(p.posix.join(p.posix.dirname(here.path), uri));
     if (target.startsWith('..')) target = null;
@@ -229,14 +249,20 @@ void _checkUri(
 
   if (target == null) return;
   final there = _Place(target);
-  if (here.area == 'feature' &&
-      target.startsWith(generatedApiDir) &&
-      here.layer != 'data' &&
-      here.layer != 'module') {
-    add(
-      'A1',
-      'üretilmiş API kodu features içinde yalnız data katmanında ve <f>_module.dart\'ta: $uri (domain varlığına eşleyin)',
-    );
+  if (target.startsWith(generatedApiDir) && !generated) {
+    if (isExport) {
+      add(
+        'A1',
+        'üretilmiş API kodu yalnız üretilmiş koddan dışa verilir (barrel ile sızma): $uri',
+      );
+    } else if (here.area == 'feature' &&
+        here.layer != 'data' &&
+        here.layer != 'module') {
+      add(
+        'A1',
+        'üretilmiş API kodu features içinde yalnız data katmanında ve <f>_module.dart\'ta: $uri (domain varlığına eşleyin)',
+      );
+    }
   }
   if (there.area == 'feature' &&
       there.layer == 'module' &&

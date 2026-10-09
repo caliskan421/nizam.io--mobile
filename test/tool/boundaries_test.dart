@@ -352,6 +352,49 @@ void main() {
       expect(rules('features/identity/identity_module.dart', dto), isEmpty);
       expect(rules('core/http/a.dart', dto), isEmpty);
     });
+    test('koşullu import dalı da denetlenir', () {
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import 'stub.dart' if (dart.library.io) "
+              "'package:nizamio/core/api/generated/models/me_response.dart';",
+        ),
+        ['A1'],
+      );
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import '../../../core/errors/api_error.dart' if (dart.library.io) "
+              "'../../../core/api/generated/models/me_response.dart';",
+        ),
+        ['A1'],
+      );
+    });
+    test('package: yolunda .. normalize edilir', () {
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import 'package:nizamio/features/../core/api/generated/models/me_response.dart';",
+        ),
+        ['A1'],
+      );
+    });
+    test('part yönergesi de denetlenir', () {
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "part '../../../core/api/generated/models/me_response.g.dart';",
+        ),
+        ['A1'],
+      );
+    });
+    test('barrel ile transitif sızma: üretilmiş kod yalnız üretilmiş koddan export', () {
+      const exp =
+          "export 'package:nizamio/core/api/generated/models/me_response.dart';";
+      expect(rules('core/api/models.dart', exp), ['A1']);
+      expect(rules('features/identity/data/dtos.dart', exp), ['A1']);
+      expect(rules('core/api/generated/export.dart', exp), isEmpty);
+    });
     test('core/api dışı core serbest (hata, oturum)', () {
       expect(
         rules(

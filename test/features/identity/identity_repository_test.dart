@@ -41,7 +41,7 @@ void main() {
     expect(me, const CurrentAccount(accountId: 'acc-1', email: 'a@b.c'));
   });
 
-  test('login (mobil) → LoginGrant; toString belirteç içermez', () async {
+  test('login (mobil) → LoginGrant; toString alan içermez', () async {
     final g = await _repo(
       '{"account_id":"acc-1","expires_at":100,"force_password_change":true,'
       '"access_token":"AT-gizli","refresh_token":"RT-gizli","refresh_expires_at":200}',
@@ -52,7 +52,9 @@ void main() {
     expect(g.refreshToken, 'RT-gizli');
     expect(g.refreshExpiresAt, 200);
     expect(g.forcePasswordChange, isTrue);
-    expect(g.toString(), isNot(contains('gizli')));
+    for (final secret in ['acc-1', 'AT-gizli', 'RT-gizli', '100', '200']) {
+      expect(g.toString(), isNot(contains(secret)));
+    }
   });
 
   test(

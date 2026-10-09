@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 /// Giriş yanıtının domain karşılığı (`data` katmanında eşlenir). Mobil belirteç alanları
 /// sunucu mobil sınıfı tanımadıysa (web yanıtı) boştur; doğrulaması uygulama katmanındadır.
-/// Web oturum belirteci (`token`) taşınmaz. [toString] belirteç içermez.
+/// Web oturum belirteci (`token`) taşınmaz. [toString] alan içermez (belirteç, hesap kimliği).
 @immutable
 final class LoginGrant {
   const LoginGrant({
@@ -26,5 +26,5 @@ final class LoginGrant {
   final bool forcePasswordChange;
 
   @override
-  String toString() => 'LoginGrant(accountId: $accountId)';
+  String toString() => 'LoginGrant(…)';
 }

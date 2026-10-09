@@ -20,6 +20,7 @@ Android 8.0 (API 26)+.
 | `make gen-check` | `make gen` + `git diff --exit-code` + porcelain boş (CI kapısı) |
 | `make lint` | `dart format` denetimi + `flutter analyze --fatal-infos` + sınır kuralı |
 | `make test` | birim testleri (`test/`) |
+| `make integration` | gerçek backend entegrasyonu (aşağıda); yerelde YALNIZ `../program/araclar/verify-sirasi.sh "$PWD" integration` ile |
 | `make build-dev-apk` | `flutter build apk --debug --flavor dev -t lib/main_dev.dart` |
 | `make build-prod-apk` | `flutter build apk --release --flavor prod -t lib/main_prod.dart --obfuscate --split-debug-info=build/symbols` |
 
@@ -53,6 +54,8 @@ lib/app/                            composition root (bağımlılıkların somut
 lib/core/                           http, güvenli depo, sunucu bağı, oturum, kapsam, hata, i18n, tema
 lib/features/<modul>/               presentation, application, domain, data + <modul>.dart açık yüzü
 tool/                               üretim ve denetim betikleri
+test/                               birim testleri (sahte bağdaştırıcı, bellek deposu)
+test_integration/                   gerçek backend entegrasyonu + backend/ (up.sh, down.sh, …)
 ```
 
 `tool/check_boundaries.dart` (AST tabanlı; `make boundaries`, CI) şu kuralları zorlar —
@@ -114,6 +117,45 @@ verilmeyen alanı gövdeye yazmaz.
 
 Güvenli depo: `FlutterSecureStore` (iOS Keychain `first_unlock_this_device`; Android Keystore,
 `allowBackup=false`). Testlerde ve cihazsız entegrasyonda `MemorySecureStore`.
+
+## Gerçek backend entegrasyonu (`make integration`)
+
+`test_integration/backend/` F06 web `e2e/backend` deseninin mobil uyarlamasıdır:
+
+1. `up.sh`: `api-pin.json` etiketinden `git archive` → geçici kopyada `FROM` satırları digest'li →
+   `nizamio-f14/backend:<etiket>` imajı → `migrations/roles.sql` → `migrate up` → ilk yönetici
+   (`nizamio-f14/bootstrap`, geçici araç; backend çalışma imajına girmez — `check-isolation.sh image`,
+   APK'lara girmez — `check-isolation.sh apk`) → iki server: `127.0.0.1:18140` ve asgari mobil
+   sürümü `99.0.0` olan `127.0.0.1:18141`. Yerel Postgres: Compose projesi `nizamio_f14_mobile`,
+   DB `nizamio_f14_test`, `127.0.0.1:15440`.
+2. `flutter test test_integration/ --concurrency=1`: fixture yalnız API ile (yönetici girişi, web girişi).
+3. `down.sh`: yalnız adıyla (`nizamio-f14-server`, `nizamio-f14-server-minver`, Compose projesi).
+   İmajlar önbellek için kalır; silmek gerekirse yalnız `nizamio-f14/*` adıyla.
+
+Yerel inşacı: buildx varsa BuildKit (CI ile aynı, günlükte pinli FROM denetimi); yoksa klasik
+inşacı (Dockerfile'lar BuildKit'e özgü özellik kullanmaz; FROM digest'li ve çalışma imajı katman
+denetimi yine koşar).
+
+**Neden cihazsız, host VM'de (`flutter test test_integration/`)?** `integration_test/` dizini
+`flutter test`'te cihaz ister (Ubuntu CI'da emülatör hem yavaş hem kırılgan). Bu fazın sınadığı
+şey UI değil core katmanıdır: sunucu bağı, dio zinciri, oturum/K-05, kimlik servisi. Bunlar host
+Dart VM'de gerçek `dart:io` HTTP/TLS ile birebir koşar; platform kanalı isteyen tek parça olan
+güvenli depo `MemorySecureStore` ile değiştirilir (aynı `SecureStore` arayüzü; `FlutterSecureStore`
+yalnız flutter_secure_storage'ı sarar). Cihaz üstü (platform kanalı, Keychain/Keystore) doğrulama
+ekran çalışmasıyla gelir.
+
+Senaryolar (`test_integration/backend_test.dart`):
+
+| Test | Kanıtladığı |
+|---|---|
+| sunucu doğrulama | well-known + profile + sürüm uyumu → `BindingVerified` |
+| prod flavor: http adres | gerçek backend önündeki sayan vekile **hiç istek yok**; giriş başlamaz |
+| NIZAM.IO olmayan sunucu | yalnız keşif isteği; giriş isteği oluşmaz |
+| güvenilmeyen sertifikalı https | `client.tls_error`; istek ulaşmaz |
+| sürüm uyumsuzluğu (99.0.0) | `BindingUpdateRequired`; yalnız keşif + profil, parola gövdede yok |
+| giriş → me → yenileme → me → çıkış | rotasyon, çıkıştan sonra eski erişim belirteci 401, log'da belirteç yok |
+| K-05 | vekil yenileme yanıtını kaybeder (backend döndürür): yeniden giriş gerekli, ikinci yenileme isteği yok, **aynı hesabın web oturumu `/v1/me` 200** |
+| kontrol | kaybolan belirteci tekrar kullanmak (istemcinin YAPMADIĞI şey) hesabın bütün oturumlarını düşürür — kuralın gerekçesi |
 
 ## Backend ile ilişki
 

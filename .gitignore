@@ -41,7 +41,7 @@ migrate_working_dir/
 # Backend etiketi checkout'u (CI) ve entegrasyon durum dizini
 /.backend/
 /.frontend/
-/integration_test/.state/
+/test_integration/.state/
 
 # Loglar
 *.log

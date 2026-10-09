@@ -120,3 +120,84 @@ jobs:
         run: |
           make build-prod-apk
           ls build/symbols/*.symbols >/dev/null || { echo "::error::--split-debug-info sembolleri yok (obfuscate uygulanmadı)"; exit 1; }
+
+      - name: 'Ayrım: entegrasyon ilk yönetici aracı APK''larda yok'
+        run: test_integration/backend/check-isolation.sh apk
+
+  integration:
+    name: 'Entegrasyon (gerçek backend, etiket imajı; host VM, cihazsız)'
+    runs-on: ubuntu-latest
+    needs: verify
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
+        env:
+          # CI'ya özel, tek kullanımlık servis konteyneri kimliği; sır değildir.
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: nizamio_f14_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d nizamio_f14_test"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      NIZAMIO_IT_MODE: ci
+      NIZAMIO_BACKEND_DIR: .backend
+    steps:
+      - name: Kaynak kodu al
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Flutter kur (pubspec.yaml environment.flutter)
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: stable
+          cache: true
+
+      - name: Bağımlılıklar (--enforce-lockfile)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Backend API pinini oku (api-pin.json)
+        id: pin
+        run: echo "tag=$(jq -r .backendTag api-pin.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Backend etiketini getir (salt okunur deploy key)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: caliskan421/nizam.io--backend
+          ref: refs/tags/${{ steps.pin.outputs.tag }}
+          ssh-key: ${{ secrets.BACKEND_DEPLOY_KEY }}
+          path: .backend
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: 'Paylaşılan daemon: betiklerde docker tag/rmi yok (genel etiket değişmez)'
+        run: |
+          if grep -nE '^[^#]*docker[[:space:]]+((image[[:space:]]+)?tag|rmi|image[[:space:]]+(rm|prune)|system[[:space:]]+prune)([[:space:]]|$)' test_integration/backend/*.sh; then
+            echo "::error::entegrasyon betiklerinde imaj etiketleme/silme komutu var"
+            exit 1
+          fi
+          echo "entegrasyon betiklerinde docker tag/rmi yok"
+
+      - name: 'Backend: etiketten docker build → roller → migrate → ilk yönetici → iki server'
+        run: test_integration/backend/up.sh
+
+      - name: 'Ayrım: ilk yönetici aracı backend çalışma imajında yok'
+        run: test_integration/backend/check-isolation.sh image
+
+      - name: 'Entegrasyon: doğrulama, prod reddi, sürüm uyumsuzluğu, giriş→me→yenileme→çıkış, K-05 + web oturumu'
+        run: make integration-test
+
+      - name: Backend günlüğü (hata durumunda)
+        if: failure()
+        run: |
+          docker logs nizamio-f14-server || true
+          docker logs nizamio-f14-server-minver || true
+
+      - name: Backend'i kapat
+        if: always()
+        run: test_integration/backend/down.sh

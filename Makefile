@@ -4,7 +4,7 @@
 
 DART_DIRS := lib test tool
 
-.PHONY: deps format format-check analyze boundaries test lint verify build-dev-apk build-prod-apk
+.PHONY: gen gen-check deps format format-check analyze boundaries test lint verify build-dev-apk build-prod-apk
 
 deps:
 	flutter pub get --enforce-lockfile
@@ -35,3 +35,13 @@ build-dev-apk:
 build-prod-apk:
 	flutter build apk --release --flavor prod -t lib/main_prod.dart \
 		--obfuscate --split-debug-info=build/symbols
+
+# Üretim: api-pin.json pinlerinden (backend ETİKETİ, web COMMIT'i) bütün üretilmiş kod.
+# NIZAMIO_BACKEND_DIR / NIZAMIO_FRONTEND_DIR verilmezse ../nizam.io--backend ve ../nizam.io--frontend.
+gen:
+	dart run tool/gen.dart
+
+# CI kapısı: yeniden üret → izlenen dosyalarda fark yok ve izlenmeyen üretilmiş dosya yok.
+gen-check: gen
+	git diff --exit-code
+	@test -z "$$(git status --porcelain)" || { git status --porcelain; echo "commit'lenmemiş üretilmiş dosya var"; exit 1; }

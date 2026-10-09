@@ -16,6 +16,8 @@ Android 8.0 (API 26)+.
 | Komut | Ne yapar |
 |---|---|
 | `make deps` | `flutter pub get --enforce-lockfile` |
+| `make gen` | bütün üretilmiş kodu pinli kaynaklardan yeniden üretir (aşağıda "Üretim") |
+| `make gen-check` | `make gen` + `git diff --exit-code` + porcelain boş (CI kapısı) |
 | `make lint` | `dart format` denetimi + `flutter analyze --fatal-infos` + sınır kuralı |
 | `make test` | birim testleri (`test/`) |
 | `make build-dev-apk` | `flutter build apk --debug --flavor dev -t lib/main_dev.dart` |
@@ -65,6 +67,35 @@ ayrıntı ve kural kimlikleri `tool/boundaries.dart` başlığında, negatif mat
   `dart:convert` ve `Map<String, …>` yasak.
 - `flutter_secure_storage` yalnız `lib/core/storage/`; `badCertificateCallback` /
   `HttpOverrides` hiçbir yerde; `debugPrint`/`dart:developer` yalnız `lib/core/logging/`.
+
+## Üretim (`make gen`, `tool/gen.dart`)
+
+Kaynaklar yalnız `api-pin.json` pinlerinden okunur; çalışma ağacı okunmaz:
+
+| Kaynak | Pin | Çıktı (commit'lenir) |
+|---|---|---|
+| backend `docs/api/openapi.yaml` | `backendTag` (`git show refs/tags/<tag>:…`) | `lib/core/api/generated/` — swagger_parser ile freezed modeller + retrofit istemciler; `operations.gen.dart` (operationId → kapsam sınıfı S0–S3, CSRF, kapsam başlıkları, kimlik) |
+| backend `docs/api/error-codes.json` | `backendTag` | `lib/core/api/generated/error_catalog.gen.dart`; ARB anahtar kümesi |
+| web `src/shared/i18n/tr/errors.ts` | `web.commit` | sunucu hata kodlarının TR metinleri → `lib/core/i18n/arb/app_tr.arb` → gen-l10n (`lib/core/i18n/generated/`) |
+| `i18n/client_errors.tr.json` | bu depo | mobilin kendi `client.*` kodları ve metinleri → aynı ARB + `ClientErrorCode` |
+| web `tokens/tokens.json` | `web.commit` | `lib/core/theme/generated/tokens.gen.dart` (`NizamioColors` ThemeExtension açık/koyu, palet, boşluk, yarıçap, tipografi — değerler yer tutucu) |
+| `pubspec.yaml` `version` | bu depo | `lib/core/config/generated/app_version.gen.dart` |
+
+Sonra `build_runner` (freezed, json_serializable, retrofit, riverpod_generator) ve `dart format`.
+Backend/web dizinleri `NIZAMIO_BACKEND_DIR` / `NIZAMIO_FRONTEND_DIR` (varsayılan kardeş
+dizinler; CI'da `.backend/` etiket checkout'u ve `.frontend/` commit checkout'u).
+
+Katılık: katalogdaki her zarf ve alan kodunun web'de TR metni yoksa, web dosyasının biçimi
+değişmişse (tanınmayan satır), metinde ICU özel karakteri varsa, ARB anahtarı çakışırsa veya
+spec'te kapsam sınıfı ↔ kapsam başlığı / yazma ↔ CSRF tutarsızsa üretim düşer
+(`test/tool/gen_test.dart`). Metin tamlığı `test/core/generated/generated_test.dart`'ta sınanır.
+
+Üretici seçimi: `swagger_parser` (saf Dart; Java/Docker gerektirmez). Her istekte
+`@Extras` ile `operationId` taşınır; ara katman kapsam sınıfını bu kimlikle bulur, haritada
+olmayan istek gönderilmez. `X-Requested-With`, `X-Nizamio-Program`, `X-Nizamio-Department`,
+`X-Nizamio-Client` parametreleri üretilen imzalardan çıkarılır (ara katman koyar).
+OpenAPI 3.0.3 `nullable` alanları freezed'de `?` olur; `include_if_null: false` (build.yaml)
+verilmeyen alanı gövdeye yazmaz.
 
 ## Backend ile ilişki
 

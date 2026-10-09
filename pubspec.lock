@@ -629,6 +629,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.3"
+  protobuf:
+    dependency: transitive
+    description:
+      name: protobuf
+      sha256: "13b6717366aa7ec3792dd62c19c7d33a785708224365f2db23c5ca01f1c1a0f2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.0"
   pub_semver:
     dependency: transitive
     description:
@@ -653,6 +661,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  retrofit:
+    dependency: "direct main"
+    description:
+      name: retrofit
+      sha256: d700c1e7599bc6327cbe19ec7a2c87b595f6063ce888e8015f30cab655972331
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.10.0"
+  retrofit_generator:
+    dependency: "direct dev"
+    description:
+      name: retrofit_generator
+      sha256: "9d6eddb495edd114d546d875ef165f557dca0dbcbdf6787b9255a4a52d40f15b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.2.11"
   riverpod:
     dependency: transitive
     description:
@@ -770,6 +794,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  swagger_parser:
+    dependency: "direct dev"
+    description:
+      name: swagger_parser
+      sha256: "9cfecfad00a2671c35b66ccde7a38435bc9099f58891d4feba4f6ecc03b440b6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.45.0"
   term_glyph:
     dependency: transitive
     description:

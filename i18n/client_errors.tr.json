@@ -1,0 +1,21 @@
+{
+  "$comment": "Mobil istemcinin KENDİ ürettiği kararlı hata kodları (sunucu kataloğunda yoktur; 'client.' önekli) ve TR metinleri. ELLE yazılır. Sunucu kodlarının metinleri buraya yazılmaz: web ile tek kaynaktan (api-pin.json web.trErrorsPath) gelir. tool/gen.dart bu dosyadan ARB ve ClientErrorCode sabitlerini üretir.",
+  "codes": {
+    "client.network_error": "Sunucuya ulaşılamadı. Bağlantınızı kontrol edip yeniden deneyin.",
+    "client.timeout": "Sunucu zamanında yanıt vermedi. Biraz sonra yeniden deneyin.",
+    "client.invalid_response": "Sunucudan beklenmeyen bir yanıt geldi.",
+    "client.scope_missing": "Bu işlem için önce program veya departman seçilmeli.",
+    "client.unknown_operation": "Bu işlem uygulamanın bu sürümünde tanımlı değil.",
+    "client.not_signed_in": "Bu işlem için giriş yapılmalı.",
+    "client.reauth_required": "Oturum doğrulanamadı. Güvenliğiniz için yeniden giriş yapın.",
+    "client.session_ended": "Oturum sona erdi. Yeniden giriş yapın.",
+    "client.server_not_verified": "Önce sunucu adresi doğrulanmalı.",
+    "client.invalid_server_address": "Sunucu adresi geçersiz.",
+    "client.insecure_server": "Sunucu adresi https ile başlamalı; güvenli olmayan bağlantı kurulmaz.",
+    "client.tls_error": "Sunucunun güvenlik sertifikası doğrulanamadı; bağlantı kurulmadı.",
+    "client.server_unrecognized": "Bu adres bir NIZAM.IO sunucusu değil.",
+    "client.unsupported_api_version": "Sunucunun API sürümü bu uygulamayla uyumlu değil.",
+    "client.update_required": "Bu sunucuya bağlanmak için uygulamayı güncelleyin.",
+    "client.secure_storage_error": "Oturum bilgisi cihazda güvenli olarak saklanamadı. Yeniden giriş yapın."
+  }
+}

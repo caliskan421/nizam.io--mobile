@@ -1,0 +1,7 @@
+# flutter gen-l10n (tool/gen.dart çağırır). ARB'nin kendisi de üretilmiştir: lib/core/i18n/arb/app_tr.arb.
+arb-dir: lib/core/i18n/arb
+template-arb-file: app_tr.arb
+output-dir: lib/core/i18n/generated
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false

@@ -21,6 +21,7 @@ dependencies:
   intl: ^0.20.3
   json_annotation: ^4.12.0
   meta: ^1.19.0
+  retrofit: ^4.10.0
   riverpod_annotation: ^4.0.7
 
 dev_dependencies:
@@ -34,5 +35,9 @@ dev_dependencies:
   analyzer: ^13.3.0
   path: ^1.9.1
   yaml: ^3.1.4
+  swagger_parser: ^1.45.0
+  retrofit_generator: ^10.2.11
 flutter:
   uses-material-design: true
+  # gen-l10n (l10n.yaml); çıktı lib/core/i18n/generated/ commit'lenir.
+  generate: true

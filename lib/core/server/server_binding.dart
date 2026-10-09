@@ -116,6 +116,8 @@ class ServerBindingController {
   );
 
   ValueListenable<BindingState> get state => _state;
+
+  int _epoch = 0;
   BindingState get current => _state.value;
 
   String get _appVersion => appVersionOverride ?? appVersion;
@@ -128,7 +130,12 @@ class ServerBindingController {
   }
 
   /// Kullanıcının girdiği adresi doğrular.
+  ///
+  /// Eşzamanlı doğrulamalarda yalnız EN SON başlatılanın sonucu uygulanır; geç biten eski
+  /// doğrulama durumu, bağ kaydını ya da oturumu değiştirmez (CX-r1-Ö-01 sınıfı).
   Future<BindingState> verify(String input) async {
+    final epoch = ++_epoch;
+    bool stale() => epoch != _epoch;
     final ServerAddress address;
     try {
       address = ServerAddress.parse(input, flavor);
@@ -141,6 +148,7 @@ class ServerBindingController {
     );
     try {
       final system = await apiCall(client.systemInfo);
+      if (stale()) return _state.value;
       if (system.productId != nizamioProductId) {
         return _fail(ApiError(ClientErrorCode.serverUnrecognized), address);
       }
@@ -148,6 +156,7 @@ class ServerBindingController {
         return _fail(ApiError(ClientErrorCode.unsupportedApiVersion), address);
       }
       final profile = await apiCall(client.instanceProfile);
+      if (stale()) return _state.value;
       if (profile.apiVersion != apiVersion) {
         return _fail(ApiError(ClientErrorCode.unsupportedApiVersion), address);
       }
@@ -173,12 +182,14 @@ class ServerBindingController {
         serverVersion: system.serverVersion,
       );
       final saved = await _loadSaved();
+      if (stale()) return _state.value;
       if (saved != null &&
           (saved.$1 != address.toString() || saved.$2 != info.instanceId)) {
         Log.info('bağ: farklı sunucu/kurulum; yerel oturum temizleniyor');
         for (final l in _rebindListeners) {
           await l();
         }
+        if (stale()) return _state.value;
       }
       await store.write(
         storeKey,
@@ -187,8 +198,10 @@ class ServerBindingController {
           'instance_id': info.instanceId,
         }),
       );
+      if (stale()) return _state.value;
       return _state.value = BindingVerified(info);
     } on ApiError catch (e) {
+      if (stale()) return _state.value;
       // NIZAM.IO olmayan bir sunucu keşif ucunda zarfsız/404 yanıt verir.
       final unrecognized =
           e.code == ClientErrorCode.invalidResponse || e.status == 404;
@@ -199,6 +212,7 @@ class ServerBindingController {
         address,
       );
     } on Object {
+      if (stale()) return _state.value;
       // Güvenli depo (bağ kaydı) okunamadı/yazılamadı ya da yeniden bağlanma temizliği düştü:
       // bağ doğrulanmış SAYILMAZ (fail-closed).
       return _fail(ApiError(ClientErrorCode.secureStorageError), address);

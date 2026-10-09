@@ -9,7 +9,11 @@ import 'token_pair.dart';
 import 'token_store.dart';
 
 /// `POST /v1/auth/refresh` çağrısı (üretilmiş IdentityClient; kimlik ara katmanı OLMADAN).
-typedef RefreshCall = Future<RefreshResponse> Function(String refreshToken);
+/// [instanceId]: çiftin ait olduğu kurulum; çağrı yalnız güncel bağ bu kurulumsa ağa çıkar.
+typedef RefreshCall = Future<RefreshResponse> Function(
+  String refreshToken,
+  String instanceId,
+);
 
 /// Belirteçlerin tek sahibi: bellekteki çift + güvenli depo + yenileme.
 ///
@@ -46,9 +50,23 @@ class SessionController {
   TokenPair? _pair;
   Future<String>? _inflight;
 
+  /// Oturum nesli (CX-r1-Ö-01): [establish], [clear] ve yeniden giriş gerektiren son her
+  /// geçişte artar. Bekleyen bir giriş/yenileme/me yanıtı ancak başladığı nesil hâlâ geçerliyse
+  /// (ve yenilemede kaynak çift aynıysa) uygulanır; aksi hâlde getirdiği çift depoya YAZILMAZ,
+  /// bellekte kullanılmaz, yalnız atılır (sunucudaki oturum kendi ömrüyle ölür).
+  int _generation = 0;
+  int get generation => _generation;
+
   ValueListenable<SessionState> get state => _state;
 
   String? get accessToken => _pair?.accessToken;
+
+  /// Erişim belirteci YALNIZ çift [instanceId] kurulumuna aitse (eski bağın dio'su yeni
+  /// kurulumun belirtecini taşımaz; tersi de).
+  String? accessTokenFor(String instanceId) {
+    final p = _pair;
+    return p != null && p.instanceId == instanceId ? p.accessToken : null;
+  }
 
   /// Uygulama açılışı: güvenli depodaki çift — yalnız [instanceId] doğrulanan bağın kurulumuyla
   /// eşleşiyorsa, süresi dolmamışsa ve yarım kalmış bir yenileme işareti yoksa.
@@ -81,7 +99,14 @@ class SessionController {
   }
 
   /// Giriş sonrası: çift önce depoya yazılır, sonra bellekte etkinleşir.
-  Future<void> establish(TokenPair pair) async {
+  ///
+  /// [generation]: girişin başladığı nesil; o arada çıkış/yeniden bağlanma olduysa çift
+  /// kullanılmaz (`client.session_ended`).
+  Future<void> establish(TokenPair pair, {int? generation}) async {
+    if (generation != null && generation != _generation) {
+      throw ApiError(ClientErrorCode.sessionEnded);
+    }
+    final gen = ++_generation;
     if (!await _attempt(() => _store.save(pair))) {
       Log.warn('oturum: güvenli depoya yazılamadı; oturum açılmadı');
       throw ApiError(ClientErrorCode.secureStorageError);
@@ -89,20 +114,29 @@ class SessionController {
     // Önceki çiftten kalmış işaret yeni çifti açılışta düşürmesin (silinemezse yalnız yeniden
     // giriş istenir — güvenli yön).
     await _attempt(_store.clearRefreshInFlight);
+    if (gen != _generation) {
+      // Yazma sürerken temizlendi: temizliğin silmesi bu yazmadan sonra sıralanır.
+      throw ApiError(ClientErrorCode.sessionEnded);
+    }
     _set(pair, _active(pair));
   }
 
   /// Zorunlu parola değişikliği bayrağı (`identity.force_password_change_required` görülünce).
-  Future<void> markForcePasswordChange(bool value) async {
+  /// [generation]: bayrağı getiren isteğin başladığı nesil (başka oturuma uygulanmaz).
+  Future<void> markForcePasswordChange(bool value, {int? generation}) async {
+    if (generation != null && generation != _generation) return;
     final p = _pair;
     if (p == null || p.forcePasswordChange == value) return;
     final next = p.copyWith(forcePasswordChange: value);
     await _attempt(() => _store.save(next));
+    if (!identical(_pair, p)) return;
     _set(next, _active(next));
   }
 
   /// Yerel oturumu kapatır (sunucu çıkışından sonra ya da çıkış başarısız olsa da).
   Future<void> clear() async {
+    _generation++;
+    _inflight = null;
     await _wipe();
     _set(null, const SessionNone());
   }
@@ -120,19 +154,38 @@ class SessionController {
     if (_burnt.contains(p.refreshToken)) {
       return Future.error(ApiError(ClientErrorCode.reauthRequired));
     }
-    return _inflight ??= _rotate(p).whenComplete(() => _inflight = null);
+    final pending = _inflight;
+    if (pending != null) return pending;
+    final f = _rotate(p);
+    _inflight = f;
+    f.then((_) {}, onError: (Object _) {}).whenComplete(() {
+      if (identical(_inflight, f)) _inflight = null;
+    });
+    return f;
+  }
+
+  /// Bekleyen sonuç hâlâ geçerli mi? Değilse hiçbir yerel durum/depo değiştirilmez.
+  void _ensureCurrent(int gen, TokenPair p) {
+    if (gen != _generation || !identical(_pair, p)) {
+      _burnt.add(p.refreshToken);
+      Log.info('oturum: geçersizleşmiş yenileme sonucu atıldı');
+      throw ApiError(ClientErrorCode.sessionEnded);
+    }
   }
 
   Future<String> _rotate(TokenPair p) async {
+    final gen = _generation;
     if (!await _attempt(_store.markRefreshInFlight)) {
       // Belirteç gönderilmedi (tüketilmedi); oturum sürer, istek başarısız.
       Log.warn('oturum: yenileme işareti yazılamadı; yenileme gönderilmedi');
       throw ApiError(ClientErrorCode.secureStorageError);
     }
+    _ensureCurrent(gen, p);
     final RefreshResponse r;
     try {
-      r = await _refreshCall(p.refreshToken);
+      r = await _refreshCall(p.refreshToken, p.instanceId);
     } on ApiError catch (e) {
+      _ensureCurrent(gen, p);
       if (e.status == 429) {
         Log.info('oturum: yenileme hız sınırında (429); belirteç korunur');
         await _attempt(_store.clearRefreshInFlight);
@@ -152,11 +205,13 @@ class SessionController {
       await _end(ReauthReason.refreshAmbiguous);
       throw ApiError(ClientErrorCode.reauthRequired);
     } on Object {
+      _ensureCurrent(gen, p);
       // Ayrıştırma vb. beklenmeyen hata: sunucu döndürmüş olabilir → belirsiz (CX-Ö-01).
       Log.warn('oturum: yenileme yanıtı işlenemedi; K-05 — tekrar deneme yok');
       await _end(ReauthReason.refreshAmbiguous);
       throw ApiError(ClientErrorCode.reauthRequired);
     }
+    _ensureCurrent(gen, p);
     final access = r.accessToken;
     final refresh = r.refreshToken;
     if (access == null ||
@@ -178,6 +233,7 @@ class SessionController {
       instanceId: p.instanceId,
     );
     if (!await _attempt(() => _store.save(next))) {
+      _ensureCurrent(gen, p);
       // Yeni çift kalıcılaşmadı: oturum etkin SAYILMAZ (CX-Ö-04). Eski yenileme belirteci
       // sunucuda tüketildi; depodan silinir — silinemezse yazma-öncesi işaret açılışta
       // geri yüklemeyi engeller, bu süreçte de "yanmış" listesi gönderimi engeller.
@@ -186,12 +242,18 @@ class SessionController {
       throw ApiError(ClientErrorCode.secureStorageError);
     }
     _burnt.add(p.refreshToken);
+    // Yazma sürerken temizlendiyse temizliğin silmesi bu yazmadan sonra sıralanmıştır; işarete
+    // dokunulmaz (yeni oturumun işareti olabilir).
+    _ensureCurrent(gen, p);
     await _attempt(_store.clearRefreshInFlight);
+    _ensureCurrent(gen, p);
     _set(next, _active(next));
     return access;
   }
 
   Future<void> _end(ReauthReason reason) async {
+    _generation++;
+    _inflight = null;
     final p = _pair;
     if (p != null) _burnt.add(p.refreshToken);
     await _wipe();

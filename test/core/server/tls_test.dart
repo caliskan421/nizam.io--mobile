@@ -66,7 +66,7 @@ void main() {
 
     final session = SessionController(
       TokenStore(store),
-      (_) => throw StateError('yok'),
+      (_, _) => throw StateError('yok'),
     );
     final identity = IdentityService(
       binding: binding,

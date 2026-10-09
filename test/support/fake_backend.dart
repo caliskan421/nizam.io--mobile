@@ -7,8 +7,9 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 
 class Seen {
-  Seen(this.method, this.path, this.headers, this.body);
+  Seen(this.method, this.path, this.headers, this.body, {this.host = ''});
   final String method;
+  final String host;
   final String path;
   final Map<String, Object?> headers;
   final Object? body;
@@ -72,6 +73,7 @@ class FakeBackend implements HttpClientAdapter {
       options.uri.path,
       Map.of(options.headers),
       body,
+      host: options.uri.host,
     );
     requests.add(seen);
     return handler(seen);

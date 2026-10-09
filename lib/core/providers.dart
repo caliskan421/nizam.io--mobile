@@ -48,9 +48,10 @@ SessionController sessionController(Ref ref) {
   final scope = ref.watch(scopeControllerProvider);
   final controller = SessionController(
     TokenStore(ref.watch(secureStoreProvider)),
-    (refreshToken) {
+    (refreshToken, instanceId) {
       final b = binding.current;
-      if (b is! BindingVerified) {
+      // Yenileme yalnız çiftin ait olduğu kuruluma gider (CX-r1-Ö-01).
+      if (b is! BindingVerified || b.info.instanceId != instanceId) {
         throw ApiError(ClientErrorCode.serverNotVerified);
       }
       final dio = createPublicDio(
@@ -71,6 +72,13 @@ SessionController sessionController(Ref ref) {
     scope.clear();
     await controller.clear();
   });
+  // Kapsam oturuma aittir: oturum etkin değilse (çıkış, yeniden giriş gerekli) temizlenir.
+  void onSession() {
+    if (controller.state.value is! SessionActive) scope.clear();
+  }
+
+  controller.state.addListener(onSession);
+  ref.onDispose(() => controller.state.removeListener(onSession));
   return controller;
 }
 
@@ -109,6 +117,7 @@ Dio? apiDio(Ref ref) {
     server: b.info.address,
     flavor: ref.watch(flavorProvider),
     session: ref.watch(sessionControllerProvider),
+    instanceId: b.info.instanceId,
     scope: ref.watch(scopeControllerProvider),
     adapter: ref.watch(httpAdapterProvider),
   );

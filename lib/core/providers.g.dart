@@ -8,16 +8,16 @@ part of 'providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Derleme çeşidi; `app/bootstrap.dart` giriş noktasına göre geçersiz kılar.
+/// Derleme çeşidi.
 
 @ProviderFor(flavor)
 final flavorProvider = FlavorProvider._();
 
-/// Derleme çeşidi; `app/bootstrap.dart` giriş noktasına göre geçersiz kılar.
+/// Derleme çeşidi.
 
 final class FlavorProvider extends $FunctionalProvider<Flavor, Flavor, Flavor>
     with $Provider<Flavor> {
-  /// Derleme çeşidi; `app/bootstrap.dart` giriş noktasına göre geçersiz kılar.
+  /// Derleme çeşidi.
   FlavorProvider._()
     : super(
         from: null,
@@ -51,53 +51,7 @@ final class FlavorProvider extends $FunctionalProvider<Flavor, Flavor, Flavor>
   }
 }
 
-String _$flavorHash() => r'007a4be4164bcf1913126f462542972ea142b606';
-
-/// Güvenli depo (testte MemorySecureStore ile geçersiz kılınır).
-
-@ProviderFor(secureStore)
-final secureStoreProvider = SecureStoreProvider._();
-
-/// Güvenli depo (testte MemorySecureStore ile geçersiz kılınır).
-
-final class SecureStoreProvider
-    extends $FunctionalProvider<SecureStore, SecureStore, SecureStore>
-    with $Provider<SecureStore> {
-  /// Güvenli depo (testte MemorySecureStore ile geçersiz kılınır).
-  SecureStoreProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'secureStoreProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$secureStoreHash();
-
-  @$internal
-  @override
-  $ProviderElement<SecureStore> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  SecureStore create(Ref ref) {
-    return secureStore(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(SecureStore value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<SecureStore>(value),
-    );
-  }
-}
-
-String _$secureStoreHash() => r'aa467fa993206876a457815842372408ded21ef3';
+String _$flavorHash() => r'76df7b3631e4559e6b8cf95f241d8591916d8b48';
 
 /// HTTP bağdaştırıcısı; null = dio varsayılanı (IOHttpClientAdapter, platform TLS).
 
@@ -149,7 +103,7 @@ final class HttpAdapterProvider
   }
 }
 
-String _$httpAdapterHash() => r'8a40f9ca9de79fe420fa6db688c592e7b3e855b8';
+String _$httpAdapterHash() => r'69743f1b37580e64db22ceeb156e6895c9880c9f';
 
 @ProviderFor(scopeController)
 final scopeControllerProvider = ScopeControllerProvider._();
@@ -191,7 +145,7 @@ final class ScopeControllerProvider
   }
 }
 
-String _$scopeControllerHash() => r'f13afb8aae2d80e404e89ed0c6ed3624ea69ca1f';
+String _$scopeControllerHash() => r'd1878a6c4153e3200f6131f2d50f4d3ec6c0ea6b';
 
 @ProviderFor(serverBinding)
 final serverBindingProvider = ServerBindingProvider._();
@@ -238,7 +192,7 @@ final class ServerBindingProvider
   }
 }
 
-String _$serverBindingHash() => r'b6762c44eddfc59dbbc47278a5eec100a6fb5abe';
+String _$serverBindingHash() => r'f3b980d101bc2a8f750ab40e173d23c06a44f461';
 
 @ProviderFor(sessionController)
 final sessionControllerProvider = SessionControllerProvider._();
@@ -285,7 +239,7 @@ final class SessionControllerProvider
   }
 }
 
-String _$sessionControllerHash() => r'69ea681eebb94002e3fa4aeb10dffe27d088d446';
+String _$sessionControllerHash() => r'698f60c71c7fff11a0d7ba0a85fd5140be9f364f';
 
 @ProviderFor(bindingState)
 final bindingStateProvider = BindingStateProvider._();

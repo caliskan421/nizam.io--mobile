@@ -2,85 +2,44 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'api/generated/clients/identity_client.dart';
-import 'api/generated/models/refresh_request.dart';
 import 'app_phase.dart';
 import 'config/flavor.dart';
-import 'errors/api_error.dart';
 import 'http/dio_factory.dart';
-import 'i18n/generated/client_error_codes.gen.dart';
 import 'scope/scope_controller.dart';
 import 'server/server_binding.dart';
 import 'session/session_controller.dart';
 import 'session/session_state.dart';
-import 'session/token_store.dart';
-import 'storage/flutter_secure_store.dart';
-import 'storage/secure_store.dart';
 
 part 'providers.g.dart';
 
-/// Derleme çeşidi; `app/bootstrap.dart` giriş noktasına göre geçersiz kılar.
-@Riverpod(keepAlive: true)
-Flavor flavor(Ref ref) =>
-    throw UnimplementedError('flavorProvider bootstrap\'ta verilir');
+// Riverpod = reaktif durum ve sunuma açılan yüz (ADR-0001, D-0182).
+//
+// Aşağıdaki ilk beş sağlayıcı PORTTUR: altyapı tekillerinin kendisi ve kablolaması bileşim
+// kökündedir (`lib/app/di/`, get_it). Bootstrap bu portları get_it'teki örneklerle geçersiz
+// kılar; core get_it'i import etmez (sınır kuralı G1). Port geçersiz kılınmadan okunursa
+// UnimplementedError — sessiz varsayılan örnek yoktur.
 
-/// Güvenli depo (testte MemorySecureStore ile geçersiz kılınır).
+Never _unbound(String name) =>
+    throw UnimplementedError('$name bileşim kökünde (lib/app/di) bağlanır');
+
+/// Derleme çeşidi.
 @Riverpod(keepAlive: true)
-SecureStore secureStore(Ref ref) => FlutterSecureStore();
+Flavor flavor(Ref ref) => _unbound('flavorProvider');
 
 /// HTTP bağdaştırıcısı; null = dio varsayılanı (IOHttpClientAdapter, platform TLS).
 @Riverpod(keepAlive: true)
-HttpClientAdapter? httpAdapter(Ref ref) => null;
+HttpClientAdapter? httpAdapter(Ref ref) => _unbound('httpAdapterProvider');
 
 @Riverpod(keepAlive: true)
-ScopeController scopeController(Ref ref) => ScopeController();
+ScopeController scopeController(Ref ref) => _unbound('scopeControllerProvider');
 
 @Riverpod(keepAlive: true)
-ServerBindingController serverBinding(Ref ref) => ServerBindingController(
-  flavor: ref.watch(flavorProvider),
-  store: ref.watch(secureStoreProvider),
-  adapter: ref.watch(httpAdapterProvider),
-);
+ServerBindingController serverBinding(Ref ref) =>
+    _unbound('serverBindingProvider');
 
 @Riverpod(keepAlive: true)
-SessionController sessionController(Ref ref) {
-  final binding = ref.watch(serverBindingProvider);
-  final scope = ref.watch(scopeControllerProvider);
-  final controller = SessionController(
-    TokenStore(ref.watch(secureStoreProvider)),
-    (refreshToken, instanceId) {
-      final b = binding.current;
-      // Yenileme yalnız çiftin ait olduğu kuruluma gider (CX-r1-Ö-01).
-      if (b is! BindingVerified || b.info.instanceId != instanceId) {
-        throw ApiError(ClientErrorCode.serverNotVerified);
-      }
-      final dio = createPublicDio(
-        server: b.info.address,
-        flavor: ref.read(flavorProvider),
-        adapter: ref.read(httpAdapterProvider),
-      );
-      return apiCall(
-        () =>
-            IdentityClient(dio)
-                .refresh(body: RefreshRequest(refreshToken: refreshToken)),
-      );
-    },
-  );
-  // Farklı sunucu/kuruluma yeniden bağlanma: yerel oturum ve kapsam temizlenir (bağ
-  // denetleyicisi oturumu bilmez; yön tek: oturum → bağ).
-  binding.addRebindListener(() async {
-    scope.clear();
-    await controller.clear();
-  });
-  // Kapsam oturuma aittir: oturum etkin değilse (çıkış, yeniden giriş gerekli) temizlenir.
-  void onSession() {
-    if (controller.state.value is! SessionActive) scope.clear();
-  }
-
-  controller.state.addListener(onSession);
-  ref.onDispose(() => controller.state.removeListener(onSession));
-  return controller;
-}
+SessionController sessionController(Ref ref) =>
+    _unbound('sessionControllerProvider');
 
 T _listen<T>(Ref ref, ValueListenable<T> listenable) {
   void onChange() => ref.invalidateSelf();

@@ -7,7 +7,7 @@ geliştirmesi program sonrası ayrı çalışmadadır (D-0174).
 ## Yığın
 
 Flutter **3.47.2** stable (Dart 3.13.2; pin `pubspec.yaml` `environment.flutter`, CI aynı
-alanı okur) · Riverpod 3 (kod üretimli) · go_router · dio · freezed + json_serializable
+alanı okur) · get_it 9 (bileşim kökü) · Riverpod 3 (kod üretimli; reaktif durum) · go_router · dio · freezed + json_serializable
 (OpenAPI'den üretim) · flutter_secure_storage · intl/ARB. Asgari platform: iOS 16+,
 Android 8.0 (API 26)+.
 
@@ -50,7 +50,8 @@ Flutter şablonunun debug anahtarıyla imzalanır; dağıtılmaz.
 
 ```text
 lib/main_dev.dart, main_prod.dart   giriş noktaları
-lib/app/                            composition root (bağımlılıkların somut bağı)
+lib/app/                            bootstrap, router, kabuk
+lib/app/di/                         bileşim kökü: get_it nesne grafiği + Riverpod portlarının bağlanması
 lib/core/                           http, güvenli depo, sunucu bağı, oturum, kapsam, hata, i18n, tema
 lib/features/<modul>/               presentation, application, domain, data + <modul>.dart açık yüzü
 tool/                               üretim ve denetim betikleri
@@ -68,6 +69,8 @@ ayrıntı ve kural kimlikleri `tool/boundaries.dart` başlığında, negatif mat
   data → domain · domain → (yok; saf Dart).
 - Elle DTO yok: JSON (de)serileştirme yalnız üretilmiş API kodunda; features içinde
   `dart:convert` ve `Map<String, …>` yasak.
+- `get_it` yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` (G1); modül dosyası yalnız
+  `lib/app/di/**` tarafından import edilir (G2).
 - `flutter_secure_storage` yalnız `lib/core/storage/`; `badCertificateCallback` /
   `HttpOverrides` hiçbir yerde; `debugPrint`/`dart:developer` yalnız `lib/core/logging/`.
 
@@ -101,6 +104,17 @@ OpenAPI 3.0.3 `nullable` alanları freezed'de `?` olur; `include_if_null: false`
 verilmeyen alanı gövdeye yazmaz.
 
 ## Core katmanı (ekransız)
+
+**Bağımlılıklar (ADR-0001, `docs/architecture/adr-0001-di-get-it.md`; D-0182):** altyapı
+tekilleri (güvenli depo, belirteç deposu, kapsam, sunucu bağı, oturum denetleyicisi, HTTP
+bağdaştırıcısı, flavor) ve kabloları (yeniden bağlanma → oturum/kapsam temizliği, oturum →
+kapsam temizliği, kuruluma bağlı yenileme çağrısı) yalnız `lib/app/di/dependencies.dart`'ta
+get_it'e kaydedilir; `Composition.create()` kendi `GetIt.asNewInstance()` örneğini kurar
+(global örnek yok). Riverpod reaktif yüzdür: `bindingState`, `sessionState`, `scopeState`,
+`appPhase`, `apiDio` türetilir; altyapı sağlayıcıları core'da **port**tur
+(`UnimplementedError`) ve bileşim kökünde get_it örnekleriyle geçersiz kılınır. Feature
+modülü `features/<f>/<f>_module.dart` yalnız `lib/app/di/`'den çağrılır; katmanlar get_it'i
+görmez (sınır kuralı G1/G2).
 
 | Parça | Dosya | Davranış |
 |---|---|---|

@@ -3,6 +3,11 @@
 Bu depo NIZAM.IO'nun Flutter mobil istemcisidir. Süreç kaydı **bu depodadır** (PR + CI);
 yönetim deposundaki eski kayıt sistemine (`project-control`) bağlı değildir.
 
+**Yığın:** Flutter 3.47.2 · get_it (bileşim kökü, `lib/app/di/`) · Riverpod 3 (reaktif durum;
+altyapı sağlayıcıları port) · go_router · dio · freezed/json_serializable (OpenAPI'den) ·
+flutter_secure_storage · intl/ARB. DI ayrımı: `docs/architecture/adr-0001-di-get-it.md`
+(D-0182); get_it yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` (sınır kuralı G1/G2).
+
 ## Okuma sırası (oturum başı)
 
 1. `../program/DURUM.md` — aktif faz ve sıradaki tek iş (yönetim deposu `NIZAM.IO/program/`).

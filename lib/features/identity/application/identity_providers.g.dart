@@ -8,14 +8,21 @@ part of 'identity_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// PORT: kimlik servisi bileşim kökünde (`identity_module.dart`, get_it) kurulur ve burada
+/// geçersiz kılınır; sunum katmanı servisi bu sağlayıcıdan okur.
 
 @ProviderFor(identityService)
 final identityServiceProvider = IdentityServiceProvider._();
+
+/// PORT: kimlik servisi bileşim kökünde (`identity_module.dart`, get_it) kurulur ve burada
+/// geçersiz kılınır; sunum katmanı servisi bu sağlayıcıdan okur.
 
 final class IdentityServiceProvider
     extends
         $FunctionalProvider<IdentityService, IdentityService, IdentityService>
     with $Provider<IdentityService> {
+  /// PORT: kimlik servisi bileşim kökünde (`identity_module.dart`, get_it) kurulur ve burada
+  /// geçersiz kılınır; sunum katmanı servisi bu sağlayıcıdan okur.
   IdentityServiceProvider._()
     : super(
         from: null,
@@ -49,4 +56,4 @@ final class IdentityServiceProvider
   }
 }
 
-String _$identityServiceHash() => r'd30c2ab08df4ea168993853d622eb603916cb234';
+String _$identityServiceHash() => r'f57236b74fa6c84b40220b865808332ffad8754b';

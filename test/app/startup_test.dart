@@ -1,7 +1,7 @@
 // CX-Ö-03: taze container açılışı — eski kurulumun belirteçleri yeni kuruluma taşınmaz.
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/app/bootstrap.dart';
+import 'package:nizamio/app/di/composition.dart';
 import 'package:nizamio/core/config/flavor.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/server/server_binding.dart';
@@ -47,20 +47,19 @@ Future<MemorySecureStore> seeded(String instanceId) async {
   return store;
 }
 
-ProviderContainer container(MemorySecureStore store, FakeBackend backend) =>
-    ProviderContainer(
-      overrides: [
-        flavorProvider.overrideWithValue(Flavor.prod),
-        secureStoreProvider.overrideWithValue(store),
-        httpAdapterProvider.overrideWithValue(backend),
-      ],
+Composition compose(MemorySecureStore store, FakeBackend backend) =>
+    Composition.create(
+      flavor: Flavor.prod,
+      secureStore: store,
+      httpAdapter: backend,
     );
 
 void main() {
   test('taze açılış + değişmiş instance_id → oturum geri yüklenmez, belirteçler silinir', () async {
     final store = await seeded('inst-1');
-    final c = container(store, FakeBackend(instance('inst-2')));
-    addTearDown(c.dispose);
+    final comp = compose(store, FakeBackend(instance('inst-2')));
+    addTearDown(comp.dispose);
+    final c = comp.container;
     await startup(c);
     expect(c.read(bindingStateProvider), isA<BindingVerified>());
     expect(c.read(sessionStateProvider), isA<SessionNone>());
@@ -69,8 +68,9 @@ void main() {
 
   test('taze açılış + aynı kurulum → oturum geri yüklenir', () async {
     final store = await seeded('inst-1');
-    final c = container(store, FakeBackend(instance('inst-1')));
-    addTearDown(c.dispose);
+    final comp = compose(store, FakeBackend(instance('inst-1')));
+    addTearDown(comp.dispose);
+    final c = comp.container;
     await startup(c);
     expect(c.read(sessionStateProvider), isA<SessionActive>());
   });

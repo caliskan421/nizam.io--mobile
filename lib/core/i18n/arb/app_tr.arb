@@ -1,0 +1,764 @@
+{
+  "@@locale": "tr",
+  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit 54afb002428e09fdc2727565e226880c1a25bb8c src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.1.0-api (8c8c83b33e90aef4e8e3edd82713fc709c39c518)); istemci kodları: i18n/client_errors.tr.json",
+  "errAuditEntryRejected": "İşlem kaydı yazılamadığı için istek tamamlanamadı.",
+  "@errAuditEntryRejected": {
+    "description": "audit.entry_rejected"
+  },
+  "errCollaborationAgendaItemNotFound": "Gündem maddesi bulunamadı.",
+  "@errCollaborationAgendaItemNotFound": {
+    "description": "collaboration.agenda_item_not_found"
+  },
+  "errCollaborationAgendaLimitReached": "Gündem madde sınırına ulaşıldı.",
+  "@errCollaborationAgendaLimitReached": {
+    "description": "collaboration.agenda_limit_reached"
+  },
+  "errCollaborationInputInvalid": "Girilen bilgiler geçersiz.",
+  "@errCollaborationInputInvalid": {
+    "description": "collaboration.input_invalid"
+  },
+  "errCollaborationInvalidCursor": "Liste konumu geçersiz; listeyi yenileyin.",
+  "@errCollaborationInvalidCursor": {
+    "description": "collaboration.invalid_cursor"
+  },
+  "errCollaborationMeetingNotFound": "Toplantı bulunamadı.",
+  "@errCollaborationMeetingNotFound": {
+    "description": "collaboration.meeting_not_found"
+  },
+  "errCollaborationMessageNotFound": "Mesaj bulunamadı.",
+  "@errCollaborationMessageNotFound": {
+    "description": "collaboration.message_not_found"
+  },
+  "errCollaborationMessageUnread": "Mesaj henüz okunmadı.",
+  "@errCollaborationMessageUnread": {
+    "description": "collaboration.message_unread"
+  },
+  "errCollaborationNotAuthorized": "Bu işlem için yetkiniz yok.",
+  "@errCollaborationNotAuthorized": {
+    "description": "collaboration.not_authorized"
+  },
+  "errCollaborationNotDeleted": "Kayıt silinmiş durumda değil.",
+  "@errCollaborationNotDeleted": {
+    "description": "collaboration.not_deleted"
+  },
+  "errCollaborationNoteConverted": "Not zaten göreve dönüştürüldü.",
+  "@errCollaborationNoteConverted": {
+    "description": "collaboration.note_converted"
+  },
+  "errCollaborationNoteImmutable": "Bu not artık değiştirilemez.",
+  "@errCollaborationNoteImmutable": {
+    "description": "collaboration.note_immutable"
+  },
+  "errCollaborationNoteNotFound": "Not bulunamadı.",
+  "@errCollaborationNoteNotFound": {
+    "description": "collaboration.note_not_found"
+  },
+  "errCollaborationParticipantInvalid": "Katılımcı seçimi geçersiz.",
+  "@errCollaborationParticipantInvalid": {
+    "description": "collaboration.participant_invalid"
+  },
+  "errCollaborationPermanentRequiresDeleted": "Kalıcı silme için kayıt önce silinmiş olmalı.",
+  "@errCollaborationPermanentRequiresDeleted": {
+    "description": "collaboration.permanent_requires_deleted"
+  },
+  "errCollaborationScopeInvalid": "Seçili kapsam bu işlem için geçersiz.",
+  "@errCollaborationScopeInvalid": {
+    "description": "collaboration.scope_invalid"
+  },
+  "errCollaborationTargetDepartmentInvalid": "Hedef departman geçersiz.",
+  "@errCollaborationTargetDepartmentInvalid": {
+    "description": "collaboration.target_department_invalid"
+  },
+  "errIdentityAccountEmailDeleted": "Bu e-posta silinmiş bir hesaba ait.",
+  "@errIdentityAccountEmailDeleted": {
+    "description": "identity.account_email_deleted"
+  },
+  "errIdentityAccountExists": "Bu e-postayla bir hesap zaten var.",
+  "@errIdentityAccountExists": {
+    "description": "identity.account_exists"
+  },
+  "errIdentityAccountNotFound": "Hesap bulunamadı.",
+  "@errIdentityAccountNotFound": {
+    "description": "identity.account_not_found"
+  },
+  "errIdentityAccountNotLocked": "Hesap kilitli değil.",
+  "@errIdentityAccountNotLocked": {
+    "description": "identity.account_not_locked"
+  },
+  "errIdentityAccountReferenced": "Hesap başka kayıtlarda kullanıldığı için kalıcı silinemez.",
+  "@errIdentityAccountReferenced": {
+    "description": "identity.account_referenced"
+  },
+  "errIdentityCaptchaInvalid": "Güvenlik doğrulaması başarısız; yeniden deneyin.",
+  "@errIdentityCaptchaInvalid": {
+    "description": "identity.captcha_invalid"
+  },
+  "errIdentityCaptchaRequired": "Güvenlik doğrulaması gerekli.",
+  "@errIdentityCaptchaRequired": {
+    "description": "identity.captcha_required"
+  },
+  "errIdentityCredentialsInvalid": "E-posta veya parola hatalı.",
+  "@errIdentityCredentialsInvalid": {
+    "description": "identity.credentials_invalid"
+  },
+  "errIdentityForcePasswordChangeRequired": "Devam etmek için parolanızı değiştirmelisiniz.",
+  "@errIdentityForcePasswordChangeRequired": {
+    "description": "identity.force_password_change_required"
+  },
+  "errIdentityInputInvalid": "Girilen bilgiler geçersiz.",
+  "@errIdentityInputInvalid": {
+    "description": "identity.input_invalid"
+  },
+  "errIdentityInvalidCursor": "Liste konumu geçersiz; listeyi yenileyin.",
+  "@errIdentityInvalidCursor": {
+    "description": "identity.invalid_cursor"
+  },
+  "errIdentityInvalidEmail": "E-posta adresi geçersiz.",
+  "@errIdentityInvalidEmail": {
+    "description": "identity.invalid_email"
+  },
+  "errIdentityInvalidFullName": "Ad soyad geçersiz.",
+  "@errIdentityInvalidFullName": {
+    "description": "identity.invalid_full_name"
+  },
+  "errIdentityIpBlocked": "Bu ağdan çok sayıda başarısız deneme yapıldı; bir süre sonra yeniden deneyin.",
+  "@errIdentityIpBlocked": {
+    "description": "identity.ip_blocked"
+  },
+  "errIdentityLoginLocked": "Çok sayıda başarısız giriş nedeniyle hesap geçici olarak kilitlendi.",
+  "@errIdentityLoginLocked": {
+    "description": "identity.login_locked"
+  },
+  "errIdentityNotDeleted": "Hesap silinmiş durumda değil.",
+  "@errIdentityNotDeleted": {
+    "description": "identity.not_deleted"
+  },
+  "errIdentityPasswordNeedsDigit": "Parola en az bir rakam içermeli.",
+  "@errIdentityPasswordNeedsDigit": {
+    "description": "identity.password_needs_digit"
+  },
+  "errIdentityPasswordNeedsLower": "Parola en az bir küçük harf içermeli.",
+  "@errIdentityPasswordNeedsLower": {
+    "description": "identity.password_needs_lower"
+  },
+  "errIdentityPasswordNeedsUpper": "Parola en az bir büyük harf içermeli.",
+  "@errIdentityPasswordNeedsUpper": {
+    "description": "identity.password_needs_upper"
+  },
+  "errIdentityPasswordTooShort": "Parola çok kısa.",
+  "@errIdentityPasswordTooShort": {
+    "description": "identity.password_too_short"
+  },
+  "errIdentityPermanentRequiresDeleted": "Kalıcı silme için hesap önce silinmiş olmalı.",
+  "@errIdentityPermanentRequiresDeleted": {
+    "description": "identity.permanent_requires_deleted"
+  },
+  "errIdentitySessionInvalid": "Oturumunuz geçersiz veya süresi dolmuş; yeniden giriş yapın.",
+  "@errIdentitySessionInvalid": {
+    "description": "identity.session_invalid"
+  },
+  "errIdentityWeakPassword": "Parola yeterince güçlü değil.",
+  "@errIdentityWeakPassword": {
+    "description": "identity.weak_password"
+  },
+  "errNotificationsInputInvalid": "Girilen bilgiler geçersiz.",
+  "@errNotificationsInputInvalid": {
+    "description": "notifications.input_invalid"
+  },
+  "errNotificationsInvalidCursor": "Liste konumu geçersiz; listeyi yenileyin.",
+  "@errNotificationsInvalidCursor": {
+    "description": "notifications.invalid_cursor"
+  },
+  "errNotificationsNotificationNotFound": "Bildirim bulunamadı.",
+  "@errNotificationsNotificationNotFound": {
+    "description": "notifications.notification_not_found"
+  },
+  "errNotificationsScopeInvalid": "Seçili kapsam bu işlem için geçersiz.",
+  "@errNotificationsScopeInvalid": {
+    "description": "notifications.scope_invalid"
+  },
+  "errNotificationsSubscriptionNotFound": "Bildirim aboneliği bulunamadı.",
+  "@errNotificationsSubscriptionNotFound": {
+    "description": "notifications.subscription_not_found"
+  },
+  "errNotificationsSubscriptionOwnerConflict": "Bu bildirim aboneliği başka bir hesaba ait.",
+  "@errNotificationsSubscriptionOwnerConflict": {
+    "description": "notifications.subscription_owner_conflict"
+  },
+  "errNotificationsTargetInvalid": "Bildirim hedefi geçersiz.",
+  "@errNotificationsTargetInvalid": {
+    "description": "notifications.target_invalid"
+  },
+  "errOrganizationAccountNotFound": "Kullanıcı bulunamadı.",
+  "@errOrganizationAccountNotFound": {
+    "description": "organization.account_not_found"
+  },
+  "errOrganizationAssignmentNotFound": "Atama bulunamadı.",
+  "@errOrganizationAssignmentNotFound": {
+    "description": "organization.assignment_not_found"
+  },
+  "errOrganizationAuthorityUnavailable": "Yetki bilgisi şu anda alınamıyor; biraz sonra yeniden deneyin.",
+  "@errOrganizationAuthorityUnavailable": {
+    "description": "organization.authority_unavailable"
+  },
+  "errOrganizationCompanyExists": "Şirket kaydı zaten var.",
+  "@errOrganizationCompanyExists": {
+    "description": "organization.company_exists"
+  },
+  "errOrganizationCompanyNotFound": "Şirket kaydı bulunamadı.",
+  "@errOrganizationCompanyNotFound": {
+    "description": "organization.company_not_found"
+  },
+  "errOrganizationConfirmationRequired": "Bu değişiklik görevleri etkiliyor; devam etmek için onaylayın.",
+  "@errOrganizationConfirmationRequired": {
+    "description": "organization.confirmation_required"
+  },
+  "errOrganizationDepartmentCodeConflict": "Bu departman kodu başka bir departmanda kullanılıyor.",
+  "@errOrganizationDepartmentCodeConflict": {
+    "description": "organization.department_code_conflict"
+  },
+  "errOrganizationDepartmentExists": "Bu adla bir departman zaten var.",
+  "@errOrganizationDepartmentExists": {
+    "description": "organization.department_exists"
+  },
+  "errOrganizationDepartmentInUse": "Departman kullanımda olduğu için silinemez.",
+  "@errOrganizationDepartmentInUse": {
+    "description": "organization.department_in_use"
+  },
+  "errOrganizationDepartmentNotFound": "Departman bulunamadı.",
+  "@errOrganizationDepartmentNotFound": {
+    "description": "organization.department_not_found"
+  },
+  "errOrganizationInputInvalid": "Girilen bilgiler geçersiz.",
+  "@errOrganizationInputInvalid": {
+    "description": "organization.input_invalid"
+  },
+  "errOrganizationInvalidCode": "Departman kodu geçersiz.",
+  "@errOrganizationInvalidCode": {
+    "description": "organization.invalid_code"
+  },
+  "errOrganizationInvalidKind": "Departman türü geçersiz.",
+  "@errOrganizationInvalidKind": {
+    "description": "organization.invalid_kind"
+  },
+  "errOrganizationInvalidName": "Ad geçersiz.",
+  "@errOrganizationInvalidName": {
+    "description": "organization.invalid_name"
+  },
+  "errOrganizationInvalidRole": "Rol geçersiz.",
+  "@errOrganizationInvalidRole": {
+    "description": "organization.invalid_role"
+  },
+  "errOrganizationInvalidSort": "Sıralama seçimi geçersiz.",
+  "@errOrganizationInvalidSort": {
+    "description": "organization.invalid_sort"
+  },
+  "errOrganizationLastAdmin": "Son yönetici kaldırılamaz.",
+  "@errOrganizationLastAdmin": {
+    "description": "organization.last_admin"
+  },
+  "errOrganizationMembershipExists": "Kullanıcı bu departmanda zaten üye.",
+  "@errOrganizationMembershipExists": {
+    "description": "organization.membership_exists"
+  },
+  "errOrganizationMembershipNotFound": "Üyelik bulunamadı.",
+  "@errOrganizationMembershipNotFound": {
+    "description": "organization.membership_not_found"
+  },
+  "errOrganizationMembershipRequired": "Bu işlem için departman üyeliği gerekli.",
+  "@errOrganizationMembershipRequired": {
+    "description": "organization.membership_required"
+  },
+  "errOrganizationNotAuthorized": "Bu işlem için yetkiniz yok.",
+  "@errOrganizationNotAuthorized": {
+    "description": "organization.not_authorized"
+  },
+  "errOrganizationNotDeleted": "Kayıt silinmiş durumda değil.",
+  "@errOrganizationNotDeleted": {
+    "description": "organization.not_deleted"
+  },
+  "errOrganizationPermanentRequiresDeleted": "Kalıcı silme için kayıt önce silinmiş olmalı.",
+  "@errOrganizationPermanentRequiresDeleted": {
+    "description": "organization.permanent_requires_deleted"
+  },
+  "errOrganizationTaskTitle": "Etkilenen görev.",
+  "@errOrganizationTaskTitle": {
+    "description": "organization.task_title"
+  },
+  "errOrganizationTransferAvailable": "Bu hesap başka bir departmandan aktarılabilir.",
+  "@errOrganizationTransferAvailable": {
+    "description": "organization.transfer_available"
+  },
+  "errOrganizationTransferUnavailable": "Bu hesap aktarılamaz.",
+  "@errOrganizationTransferUnavailable": {
+    "description": "organization.transfer_unavailable"
+  },
+  "errPlatformBodyInvalid": "İstek içeriği geçersiz.",
+  "@errPlatformBodyInvalid": {
+    "description": "platform.body_invalid"
+  },
+  "errPlatformBodyTooLarge": "İstek içeriği çok büyük.",
+  "@errPlatformBodyTooLarge": {
+    "description": "platform.body_too_large"
+  },
+  "errPlatformBodyUnknownField": "İstek tanınmayan bir alan içeriyor; uygulamayı güncelleyin.",
+  "@errPlatformBodyUnknownField": {
+    "description": "platform.body_unknown_field"
+  },
+  "errPlatformConflictRetry": "Eşzamanlı bir değişiklik oldu; yeniden deneyin.",
+  "@errPlatformConflictRetry": {
+    "description": "platform.conflict_retry"
+  },
+  "errPlatformCsrfHeaderMissing": "İstek güvenlik doğrulamasından geçemedi.",
+  "@errPlatformCsrfHeaderMissing": {
+    "description": "platform.csrf_header_missing"
+  },
+  "errPlatformInternal": "Beklenmeyen bir sunucu hatası oluştu.",
+  "@errPlatformInternal": {
+    "description": "platform.internal"
+  },
+  "errPlatformMethodNotAllowed": "Bu işlem desteklenmiyor.",
+  "@errPlatformMethodNotAllowed": {
+    "description": "platform.method_not_allowed"
+  },
+  "errPlatformNotReady": "Sunucu şu anda hazır değil; biraz sonra yeniden deneyin.",
+  "@errPlatformNotReady": {
+    "description": "platform.not_ready"
+  },
+  "errPlatformPanic": "Beklenmeyen bir sunucu hatası oluştu.",
+  "@errPlatformPanic": {
+    "description": "platform.panic"
+  },
+  "errPlatformRateLimited": "Çok fazla istek gönderildi; biraz bekleyip yeniden deneyin.",
+  "@errPlatformRateLimited": {
+    "description": "platform.rate_limited"
+  },
+  "errPlatformRouteNotFound": "İstenen kaynak bulunamadı.",
+  "@errPlatformRouteNotFound": {
+    "description": "platform.route_not_found"
+  },
+  "errPlatformScopeMissing": "Bu işlem için program veya departman seçilmeli.",
+  "@errPlatformScopeMissing": {
+    "description": "platform.scope_missing"
+  },
+  "errPlatformUnauthenticated": "Oturum açmanız gerekiyor.",
+  "@errPlatformUnauthenticated": {
+    "description": "platform.unauthenticated"
+  },
+  "errProgramAlreadyExists": "Bu program zaten var.",
+  "@errProgramAlreadyExists": {
+    "description": "program.already_exists"
+  },
+  "errProgramDepartmentNotFound": "Departman bu programda bulunamadı.",
+  "@errProgramDepartmentNotFound": {
+    "description": "program.department_not_found"
+  },
+  "errProgramDuplicateTransferItem": "Aktarım listesinde aynı kayıt birden fazla kez var.",
+  "@errProgramDuplicateTransferItem": {
+    "description": "program.duplicate_transfer_item"
+  },
+  "errProgramIdempotencyKeyReused": "Bu istek anahtarı farklı bir istekle kullanılmış.",
+  "@errProgramIdempotencyKeyReused": {
+    "description": "program.idempotency_key_reused"
+  },
+  "errProgramInputInvalid": "Girilen bilgiler geçersiz.",
+  "@errProgramInputInvalid": {
+    "description": "program.input_invalid"
+  },
+  "errProgramInvalidCursor": "Liste konumu geçersiz; listeyi yenileyin.",
+  "@errProgramInvalidCursor": {
+    "description": "program.invalid_cursor"
+  },
+  "errProgramInvalidDescription": "Açıklama geçersiz.",
+  "@errProgramInvalidDescription": {
+    "description": "program.invalid_description"
+  },
+  "errProgramInvalidLimit": "Sayfa boyutu geçersiz.",
+  "@errProgramInvalidLimit": {
+    "description": "program.invalid_limit"
+  },
+  "errProgramInvalidName": "Program adı geçersiz.",
+  "@errProgramInvalidName": {
+    "description": "program.invalid_name"
+  },
+  "errProgramInvalidTransfer": "Aktarım isteği geçersiz.",
+  "@errProgramInvalidTransfer": {
+    "description": "program.invalid_transfer"
+  },
+  "errProgramInvalidYear": "Yıl geçersiz.",
+  "@errProgramInvalidYear": {
+    "description": "program.invalid_year"
+  },
+  "errProgramNotAuthorized": "Bu işlem için yetkiniz yok.",
+  "@errProgramNotAuthorized": {
+    "description": "program.not_authorized"
+  },
+  "errProgramNotFound": "Program bulunamadı.",
+  "@errProgramNotFound": {
+    "description": "program.not_found"
+  },
+  "errProgramPasswordInvalid": "Parola hatalı.",
+  "@errProgramPasswordInvalid": {
+    "description": "program.password_invalid"
+  },
+  "errProgramPasswordRequired": "Bu işlem için parolanızı girin.",
+  "@errProgramPasswordRequired": {
+    "description": "program.password_required"
+  },
+  "errProgramProgramInUse": "Program kullanımda olduğu için silinemez.",
+  "@errProgramProgramInUse": {
+    "description": "program.program_in_use"
+  },
+  "errProgramRequestKeyInvalid": "İstek anahtarı geçersiz.",
+  "@errProgramRequestKeyInvalid": {
+    "description": "program.request_key_invalid"
+  },
+  "errProgramRequestKeyRequired": "İstek anahtarı gerekli.",
+  "@errProgramRequestKeyRequired": {
+    "description": "program.request_key_required"
+  },
+  "errProgramTransferAlreadyReversed": "Bu aktarım zaten geri alındı.",
+  "@errProgramTransferAlreadyReversed": {
+    "description": "program.transfer_already_reversed"
+  },
+  "errProgramTransferBlocked": "Aktarım engellendi.",
+  "@errProgramTransferBlocked": {
+    "description": "program.transfer_blocked"
+  },
+  "errProgramTransferConflict": "Aktarım başka bir işlemle çakışıyor.",
+  "@errProgramTransferConflict": {
+    "description": "program.transfer_conflict"
+  },
+  "errProgramTransferInputInvalid": "Aktarım bilgileri geçersiz.",
+  "@errProgramTransferInputInvalid": {
+    "description": "program.transfer_input_invalid"
+  },
+  "errProgramTransferNotFound": "Aktarım bulunamadı.",
+  "@errProgramTransferNotFound": {
+    "description": "program.transfer_not_found"
+  },
+  "errProgramTransferNotReversible": "Bu aktarım geri alınamaz.",
+  "@errProgramTransferNotReversible": {
+    "description": "program.transfer_not_reversible"
+  },
+  "errProgramTransferPreviewStale": "Aktarım önizlemesi eskidi; yeniden önizleyin.",
+  "@errProgramTransferPreviewStale": {
+    "description": "program.transfer_preview_stale"
+  },
+  "errProvisioningVersionMismatch": "Sunucu sürümleri uyumsuz; yöneticinize başvurun.",
+  "@errProvisioningVersionMismatch": {
+    "description": "provisioning.version_mismatch"
+  },
+  "errProvisioningWriteNotAllowed": "Kurulum şu anda değişikliğe kapalı (salt okunur).",
+  "@errProvisioningWriteNotAllowed": {
+    "description": "provisioning.write_not_allowed"
+  },
+  "errRecordsBusy": "Dosya işlemi şu anda yoğun; biraz sonra yeniden deneyin.",
+  "@errRecordsBusy": {
+    "description": "records.busy"
+  },
+  "errRecordsContentRejected": "Dosya içeriği kabul edilmedi.",
+  "@errRecordsContentRejected": {
+    "description": "records.content_rejected"
+  },
+  "errRecordsFileNotFound": "Dosya bulunamadı.",
+  "@errRecordsFileNotFound": {
+    "description": "records.file_not_found"
+  },
+  "errRecordsInputInvalid": "Girilen bilgiler geçersiz.",
+  "@errRecordsInputInvalid": {
+    "description": "records.input_invalid"
+  },
+  "errRecordsInvalidCursor": "Liste konumu geçersiz; listeyi yenileyin.",
+  "@errRecordsInvalidCursor": {
+    "description": "records.invalid_cursor"
+  },
+  "errRecordsInvalidFile": "Dosya geçersiz.",
+  "@errRecordsInvalidFile": {
+    "description": "records.invalid_file"
+  },
+  "errRecordsMoved": "Dosya taşındı; listeyi yenileyin.",
+  "@errRecordsMoved": {
+    "description": "records.moved"
+  },
+  "errRecordsNameInvalid": "Dosya adı geçersiz.",
+  "@errRecordsNameInvalid": {
+    "description": "records.name_invalid"
+  },
+  "errRecordsNameTaken": "Bu adla bir dosya zaten var.",
+  "@errRecordsNameTaken": {
+    "description": "records.name_taken"
+  },
+  "errRecordsNotAuthorized": "Bu işlem için yetkiniz yok.",
+  "@errRecordsNotAuthorized": {
+    "description": "records.not_authorized"
+  },
+  "errRecordsTooLarge": "Dosya çok büyük.",
+  "@errRecordsTooLarge": {
+    "description": "records.too_large"
+  },
+  "errRecordsTooManyFiles": "Dosya sayısı sınırına ulaşıldı.",
+  "@errRecordsTooManyFiles": {
+    "description": "records.too_many_files"
+  },
+  "errRecordsTransferActive": "Devam eden bir aktarım nedeniyle dosya değiştirilemez.",
+  "@errRecordsTransferActive": {
+    "description": "records.transfer_active"
+  },
+  "errReportingCapacityFull": "Rapor kapasitesi dolu; biraz sonra yeniden deneyin.",
+  "@errReportingCapacityFull": {
+    "description": "reporting.capacity_full"
+  },
+  "errReportingExportInProgress": "Devam eden bir dışa aktarım var; tamamlanmasını bekleyin.",
+  "@errReportingExportInProgress": {
+    "description": "reporting.export_in_progress"
+  },
+  "errReportingInputInvalid": "Girilen bilgiler geçersiz.",
+  "@errReportingInputInvalid": {
+    "description": "reporting.input_invalid"
+  },
+  "errReportingNotAuthorized": "Bu işlem için yetkiniz yok.",
+  "@errReportingNotAuthorized": {
+    "description": "reporting.not_authorized"
+  },
+  "errReportingNotFound": "Rapor bulunamadı.",
+  "@errReportingNotFound": {
+    "description": "reporting.not_found"
+  },
+  "errStorageInconsistent": "Dosya deposu tutarsız durumda; yöneticinize başvurun.",
+  "@errStorageInconsistent": {
+    "description": "storage.inconsistent"
+  },
+  "errStorageInvalidKey": "Dosya anahtarı geçersiz.",
+  "@errStorageInvalidKey": {
+    "description": "storage.invalid_key"
+  },
+  "errStorageNotFound": "Dosya bulunamadı.",
+  "@errStorageNotFound": {
+    "description": "storage.not_found"
+  },
+  "errStoragePermanent": "Dosya işlemi kalıcı olarak reddedildi.",
+  "@errStoragePermanent": {
+    "description": "storage.permanent"
+  },
+  "errStorageQuota": "Depolama kotası doldu.",
+  "@errStorageQuota": {
+    "description": "storage.quota"
+  },
+  "errStorageTransient": "Dosya deposuna geçici olarak erişilemiyor; yeniden deneyin.",
+  "@errStorageTransient": {
+    "description": "storage.transient"
+  },
+  "errWorkAssigneeNotMember": "Atanan kişi bu departmanın üyesi değil.",
+  "@errWorkAssigneeNotMember": {
+    "description": "work.assignee_not_member"
+  },
+  "errWorkAssignmentDuplicate": "Bu kişi zaten atanmış.",
+  "@errWorkAssignmentDuplicate": {
+    "description": "work.assignment_duplicate"
+  },
+  "errWorkAttachmentRequired": "Bu işlem için ek dosya gerekli.",
+  "@errWorkAttachmentRequired": {
+    "description": "work.attachment_required"
+  },
+  "errWorkClaimNotAvailable": "Bu görev üstlenilemez.",
+  "@errWorkClaimNotAvailable": {
+    "description": "work.claim_not_available"
+  },
+  "errWorkCompletionDateFuture": "Tamamlanma tarihi ileri bir tarih olamaz.",
+  "@errWorkCompletionDateFuture": {
+    "description": "work.completion_date_future"
+  },
+  "errWorkCompletionDateMissing": "Tamamlanma tarihi gerekli.",
+  "@errWorkCompletionDateMissing": {
+    "description": "work.completion_date_missing"
+  },
+  "errWorkCompletionWindow": "Tamamlanma tarihi izin verilen aralığın dışında.",
+  "@errWorkCompletionWindow": {
+    "description": "work.completion_window"
+  },
+  "errWorkConstraintViolation": "İşlem bir kısıtı ihlal ediyor.",
+  "@errWorkConstraintViolation": {
+    "description": "work.constraint_violation"
+  },
+  "errWorkDateRequestAlreadyReviewed": "Tarih talebi zaten değerlendirildi.",
+  "@errWorkDateRequestAlreadyReviewed": {
+    "description": "work.date_request_already_reviewed"
+  },
+  "errWorkDateRequestInvalid": "Tarih talebi geçersiz.",
+  "@errWorkDateRequestInvalid": {
+    "description": "work.date_request_invalid"
+  },
+  "errWorkDateRequestPendingExists": "Bekleyen bir tarih talebi zaten var.",
+  "@errWorkDateRequestPendingExists": {
+    "description": "work.date_request_pending_exists"
+  },
+  "errWorkDateRequestPendingUndeletable": "Bekleyen tarih talebi silinemez.",
+  "@errWorkDateRequestPendingUndeletable": {
+    "description": "work.date_request_pending_undeletable"
+  },
+  "errWorkDepartmentUnavailable": "Departman şu anda kullanılamıyor.",
+  "@errWorkDepartmentUnavailable": {
+    "description": "work.department_unavailable"
+  },
+  "errWorkDependencyCycle": "Bu bağımlılık döngü oluşturur.",
+  "@errWorkDependencyCycle": {
+    "description": "work.dependency_cycle"
+  },
+  "errWorkDependencyDateOrder": "Bağımlılık tarih sırasıyla çelişiyor.",
+  "@errWorkDependencyDateOrder": {
+    "description": "work.dependency_date_order"
+  },
+  "errWorkDependencyDuplicate": "Bu bağımlılık zaten var.",
+  "@errWorkDependencyDuplicate": {
+    "description": "work.dependency_duplicate"
+  },
+  "errWorkDependencyNotCompleted": "Bağımlı olunan görev henüz tamamlanmadı.",
+  "@errWorkDependencyNotCompleted": {
+    "description": "work.dependency_not_completed"
+  },
+  "errWorkExtendDaysOutOfRange": "Uzatma gün sayısı izin verilen aralıkta değil.",
+  "@errWorkExtendDaysOutOfRange": {
+    "description": "work.extend_days_out_of_range"
+  },
+  "errWorkInputInvalid": "Girilen bilgiler geçersiz.",
+  "@errWorkInputInvalid": {
+    "description": "work.input_invalid"
+  },
+  "errWorkInvalidInput": "Alan değeri geçersiz.",
+  "@errWorkInvalidInput": {
+    "description": "work.invalid_input"
+  },
+  "errWorkItemCompleted": "Görev zaten tamamlandı.",
+  "@errWorkItemCompleted": {
+    "description": "work.item_completed"
+  },
+  "errWorkItemNotCompleted": "Görev henüz tamamlanmadı.",
+  "@errWorkItemNotCompleted": {
+    "description": "work.item_not_completed"
+  },
+  "errWorkItemNotFound": "Görev bulunamadı.",
+  "@errWorkItemNotFound": {
+    "description": "work.item_not_found"
+  },
+  "errWorkNotAssigned": "Bu görev size atanmamış.",
+  "@errWorkNotAssigned": {
+    "description": "work.not_assigned"
+  },
+  "errWorkNotAuthorized": "Bu işlem için yetkiniz yok.",
+  "@errWorkNotAuthorized": {
+    "description": "work.not_authorized"
+  },
+  "errWorkNotDeleted": "Görev silinmiş durumda değil.",
+  "@errWorkNotDeleted": {
+    "description": "work.not_deleted"
+  },
+  "errWorkNoteNotFound": "Not bulunamadı.",
+  "@errWorkNoteNotFound": {
+    "description": "work.note_not_found"
+  },
+  "errWorkNoteNotYours": "Bu not size ait değil.",
+  "@errWorkNoteNotYours": {
+    "description": "work.note_not_yours"
+  },
+  "errWorkNoteRateLimited": "Çok sık not eklendi; biraz bekleyip yeniden deneyin.",
+  "@errWorkNoteRateLimited": {
+    "description": "work.note_rate_limited"
+  },
+  "errWorkPermanentRequiresDeleted": "Kalıcı silme için görev önce silinmiş olmalı.",
+  "@errWorkPermanentRequiresDeleted": {
+    "description": "work.permanent_requires_deleted"
+  },
+  "errWorkProgramScopeInvalid": "Görev seçili programda bulunamadı.",
+  "@errWorkProgramScopeInvalid": {
+    "description": "work.program_scope_invalid"
+  },
+  "errWorkProtectedField": "Bu alan değiştirilemez.",
+  "@errWorkProtectedField": {
+    "description": "work.protected_field"
+  },
+  "errWorkRevertReasonRequired": "Geri alma için gerekçe gerekli.",
+  "@errWorkRevertReasonRequired": {
+    "description": "work.revert_reason_required"
+  },
+  "errWorkStaleCompletion": "Görev başka biri tarafından güncellendi; yenileyip yeniden deneyin.",
+  "@errWorkStaleCompletion": {
+    "description": "work.stale_completion"
+  },
+  "errWorkStaleTransition": "Görev durumu değişti; yenileyip yeniden deneyin.",
+  "@errWorkStaleTransition": {
+    "description": "work.stale_transition"
+  },
+  "errWorkTransferActive": "Devam eden bir aktarım nedeniyle görev değiştirilemez.",
+  "@errWorkTransferActive": {
+    "description": "work.transfer_active"
+  },
+  "errWorkTransitionNotAllowed": "Bu durum geçişine izin verilmiyor.",
+  "@errWorkTransitionNotAllowed": {
+    "description": "work.transition_not_allowed"
+  },
+  "errClientInsecureServer": "Sunucu adresi https ile başlamalı; güvenli olmayan bağlantı kurulmaz.",
+  "@errClientInsecureServer": {
+    "description": "client.insecure_server"
+  },
+  "errClientInvalidResponse": "Sunucudan beklenmeyen bir yanıt geldi.",
+  "@errClientInvalidResponse": {
+    "description": "client.invalid_response"
+  },
+  "errClientInvalidServerAddress": "Sunucu adresi geçersiz.",
+  "@errClientInvalidServerAddress": {
+    "description": "client.invalid_server_address"
+  },
+  "errClientNetworkError": "Sunucuya ulaşılamadı. Bağlantınızı kontrol edip yeniden deneyin.",
+  "@errClientNetworkError": {
+    "description": "client.network_error"
+  },
+  "errClientNotSignedIn": "Bu işlem için giriş yapılmalı.",
+  "@errClientNotSignedIn": {
+    "description": "client.not_signed_in"
+  },
+  "errClientReauthRequired": "Oturum doğrulanamadı. Güvenliğiniz için yeniden giriş yapın.",
+  "@errClientReauthRequired": {
+    "description": "client.reauth_required"
+  },
+  "errClientScopeMissing": "Bu işlem için önce program veya departman seçilmeli.",
+  "@errClientScopeMissing": {
+    "description": "client.scope_missing"
+  },
+  "errClientSecureStorageError": "Oturum bilgisi cihazda güvenli olarak saklanamadı. Yeniden giriş yapın.",
+  "@errClientSecureStorageError": {
+    "description": "client.secure_storage_error"
+  },
+  "errClientServerNotVerified": "Önce sunucu adresi doğrulanmalı.",
+  "@errClientServerNotVerified": {
+    "description": "client.server_not_verified"
+  },
+  "errClientServerUnrecognized": "Bu adres bir NIZAM.IO sunucusu değil.",
+  "@errClientServerUnrecognized": {
+    "description": "client.server_unrecognized"
+  },
+  "errClientSessionEnded": "Oturum sona erdi. Yeniden giriş yapın.",
+  "@errClientSessionEnded": {
+    "description": "client.session_ended"
+  },
+  "errClientTimeout": "Sunucu zamanında yanıt vermedi. Biraz sonra yeniden deneyin.",
+  "@errClientTimeout": {
+    "description": "client.timeout"
+  },
+  "errClientTlsError": "Sunucunun güvenlik sertifikası doğrulanamadı; bağlantı kurulmadı.",
+  "@errClientTlsError": {
+    "description": "client.tls_error"
+  },
+  "errClientUnknownOperation": "Bu işlem uygulamanın bu sürümünde tanımlı değil.",
+  "@errClientUnknownOperation": {
+    "description": "client.unknown_operation"
+  },
+  "errClientUnsupportedApiVersion": "Sunucunun API sürümü bu uygulamayla uyumlu değil.",
+  "@errClientUnsupportedApiVersion": {
+    "description": "client.unsupported_api_version"
+  },
+  "errClientUpdateRequired": "Bu sunucuya bağlanmak için uygulamayı güncelleyin.",
+  "@errClientUpdateRequired": {
+    "description": "client.update_required"
+  }
+}

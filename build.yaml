@@ -1,0 +1,9 @@
+# build_runner: freezed + json_serializable (üretilmiş API modelleri), retrofit, riverpod_generator.
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # PATCH gövdelerinde verilmeyen alan gönderilmez (null ≠ "yok").
+          include_if_null: false
+          explicit_to_json: true

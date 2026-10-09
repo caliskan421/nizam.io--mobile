@@ -1,9 +1,13 @@
 name: ci
 
 # NIZAM.IO mobil istemcisi — kalite kapısı (F14 MOB-0 kapsam 11).
-# Sıra: kurulum (pubspec.lock donuk) → biçim → analiz → sınır kuralı → birim testleri;
-# ayrı iş: Android derlemesi (dev debug + prod release --obfuscate).
+# Sıra: kurulum (pubspec.lock donuk) → üretim kapısı (pinlerden yeniden üret, diff = 0) →
+# biçim → analiz → sınır kuralı → birim testleri; ayrı iş: Android derlemesi.
 # Eylemler commit SHA'sına, Flutter sürümü pubspec.yaml `environment.flutter` alanına sabittir.
+#
+# Backend deposu özeldir: salt okunur deploy key (BACKEND_DEPLOY_KEY) ile yalnız api-pin.json'daki
+# ETİKET getirilir (.backend/, kimlik bilgisi saklanmaz). Web deposu açıktır: yalnız pinli COMMIT
+# (.frontend/; tasarım token'ları + TR hata metinleri).
 
 on:
   push:
@@ -35,6 +39,42 @@ jobs:
 
       - name: Bağımlılıklar (--enforce-lockfile)
         run: flutter pub get --enforce-lockfile
+
+      - name: Pinleri oku (api-pin.json)
+        id: pin
+        run: |
+          echo "tag=$(jq -r .backendTag api-pin.json)" >> "$GITHUB_OUTPUT"
+          echo "web_repo=$(jq -r .web.repository api-pin.json)" >> "$GITHUB_OUTPUT"
+          echo "web_commit=$(jq -r .web.commit api-pin.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Backend sözleşmesini etiketten getir (salt okunur deploy key)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: caliskan421/nizam.io--backend
+          ref: refs/tags/${{ steps.pin.outputs.tag }}
+          ssh-key: ${{ secrets.BACKEND_DEPLOY_KEY }}
+          path: .backend
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Web kaynaklarını sabit commit'ten getir (token'lar, TR metinler)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ steps.pin.outputs.web_repo }}
+          ref: ${{ steps.pin.outputs.web_commit }}
+          path: .frontend
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: 'Üretim kapısı: make gen (swagger_parser, ARB, token, build_runner), diff = 0'
+        env:
+          NIZAMIO_BACKEND_DIR: .backend
+          NIZAMIO_FRONTEND_DIR: .frontend
+        run: |
+          if ! make gen-check; then
+            echo "::error::Üretilmiş dosyalar pinli kaynaklarla uyuşmuyor; 'make gen' koşup commit'leyin."
+            exit 1
+          fi
 
       - name: Biçim denetimi (dart format)
         run: make format-check

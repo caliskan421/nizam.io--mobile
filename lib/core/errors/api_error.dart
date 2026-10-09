@@ -53,6 +53,16 @@ ApiError toApiError(Object error) {
       inner is CertificateException) {
     return ApiError(ClientErrorCode.tlsError);
   }
+  // 2xx yanıt geldi ama dio beklenen tipe dönüştüremedi (ör. nesne yerine liste): geçersiz yanıt.
+  if (error.type == DioExceptionType.unknown &&
+      (error.response != null ||
+          inner is TypeError ||
+          inner is FormatException)) {
+    return ApiError(
+      ClientErrorCode.invalidResponse,
+      status: error.response?.statusCode,
+    );
+  }
   switch (error.type) {
     case DioExceptionType.connectionTimeout:
     case DioExceptionType.sendTimeout:
@@ -96,11 +106,17 @@ ApiError _fromResponse(Response<Object?>? response) {
   );
 }
 
-/// Üretilmiş istemci çağrısını sarar: her hata [ApiError] olarak fırlatılır.
+/// Üretilmiş istemci çağrısını sarar: her hata [ApiError] olarak fırlatılır. 2xx gövdesi
+/// üretilmiş DTO'ya ayrıştırılamazsa (TypeError, FormatException, CheckedFromJsonException …)
+/// `client.invalid_response` olur — ayrıştırma hatası hiçbir zaman ham sızmaz (CX-Ö-01).
 Future<T> apiCall<T>(Future<T> Function() call) async {
   try {
     return await call();
+  } on ApiError {
+    rethrow;
   } on DioException catch (e) {
     throw toApiError(e);
+  } on Object {
+    throw ApiError(ClientErrorCode.invalidResponse);
   }
 }

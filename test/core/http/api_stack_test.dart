@@ -4,6 +4,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/api/api_meta.dart';
+import 'package:nizamio/core/api/generated/clients/identity_client.dart';
 import 'package:nizamio/core/api/generated/clients/organization_client.dart';
 import 'package:nizamio/core/api/generated/clients/program_client.dart';
 import 'package:nizamio/core/config/flavor.dart';
@@ -203,6 +204,113 @@ void main() {
         apiError(ClientErrorCode.insecureServer),
       );
       expect(h.backend.requests.length, before);
+    });
+  });
+
+  group('CX-Ö-02: kapı gerçek yolu operasyonun yol şablonuyla eşleştirir', () {
+    test('S2 yoluna S1 operationId (extras ile) → gönderilmez', () async {
+      final before = h.backend.requests.length;
+      await expectLater(
+        h
+            .read(apiDioProvider)!
+            .get<Object?>(
+              '/v1/program',
+              options: Options(
+                extra: {
+                  'openapi': {'operationId': 'me'},
+                },
+              ),
+            ),
+        apiError(ClientErrorCode.unknownOperation),
+      );
+      expect(h.backend.requests.length, before);
+    });
+
+    test(
+      'üretilmiş istemciye başka işlemin extras\'ı verilirse gönderilmez',
+      () async {
+        final before = h.backend.requests.length;
+        await expectLater(
+          apiCall(
+            () =>
+                ProgramClient(h.read(apiDioProvider)!)
+                    .readProgram(extras: IdentityClient.meOpenapiExtras),
+          ),
+          apiError(ClientErrorCode.unknownOperation),
+        );
+        expect(h.backend.requests.length, before);
+      },
+    );
+
+    test('operationId taşımayan ama bilinen yol → gönderilmez', () async {
+      final before = h.backend.requests.length;
+      await expectLater(
+        h.read(apiDioProvider)!.get<Object?>('/v1/program'),
+        apiError(ClientErrorCode.unknownOperation),
+      );
+      expect(h.backend.requests.length, before);
+    });
+
+    test('yol parametreli şablon eşleşir; fazladan segment eşleşmez', () async {
+      h.backend.handler = (r) => jsonResponse(200, {'members': null});
+      final client = OrganizationClient(h.read(apiDioProvider)!);
+      await apiCall(() => client.listMembers(id: 'dep-1'));
+      expect(h.backend.requests.last.path, '/v1/departments/dep-1/members');
+      final before = h.backend.requests.length;
+      await expectLater(
+        h
+            .read(apiDioProvider)!
+            .get<Object?>(
+              '/v1/departments/dep-1/members/x',
+              options: Options(
+                extra: {
+                  'openapi': {'operationId': 'listMembers'},
+                },
+              ),
+            ),
+        apiError(ClientErrorCode.unknownOperation),
+      );
+      expect(h.backend.requests.length, before);
+    });
+  });
+
+  group('CX-Ö-01: 200 gövdesi DTO\'ya ayrıştırılamazsa', () {
+    test(
+      'yenileme: belirsiz → yeniden giriş, ikinci yenileme isteği yok',
+      () async {
+        h.backend.handler = (r) => switch (r.path) {
+          '/v1/me' => envelope(401, 'platform.unauthenticated'),
+          '/v1/auth/refresh' => jsonResponse(200, {'account_id': 5}),
+          _ => handler(r),
+        };
+        await expectLater(
+          h.identity.me(),
+          apiError(ClientErrorCode.reauthRequired),
+        );
+        expect(
+          (h.read(sessionStateProvider) as SessionReauthRequired).reason,
+          ReauthReason.refreshAmbiguous,
+        );
+        await expectLater(
+          h.identity.me(),
+          apiError(ClientErrorCode.notSignedIn),
+        );
+        expect(h.backend.count('POST', '/v1/auth/refresh'), 1);
+        expect(h.store.values.containsKey(TokenStore.key), isFalse);
+      },
+    );
+
+    test('diğer uçlar: client.invalid_response (TypeError sızmaz)', () async {
+      h.backend.handler = (r) => jsonResponse(200, {'account_id': 1});
+      await expectLater(
+        h.identity.me(),
+        apiError(ClientErrorCode.invalidResponse),
+      );
+      h.backend.handler = (r) => jsonResponse(200, ['liste']);
+      await expectLater(
+        h.identity.me(),
+        apiError(ClientErrorCode.invalidResponse),
+      );
     });
   });
 

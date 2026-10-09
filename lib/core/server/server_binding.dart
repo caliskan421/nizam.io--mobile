@@ -198,6 +198,10 @@ class ServerBindingController {
             : e,
         address,
       );
+    } on Object {
+      // Güvenli depo (bağ kaydı) okunamadı/yazılamadı ya da yeniden bağlanma temizliği düştü:
+      // bağ doğrulanmış SAYILMAZ (fail-closed).
+      return _fail(ApiError(ClientErrorCode.secureStorageError), address);
     }
   }
 

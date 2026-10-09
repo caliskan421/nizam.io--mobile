@@ -19,11 +19,14 @@ Future<void> bootstrap(Flavor flavor) async {
   await startup(container);
 }
 
-/// Açılış: kayıtlı sunucu bağı her açılışta yeniden doğrulanır (sürüm denetimi dahil);
-/// oturum yalnız doğrulanmış bağda geri yüklenir.
+/// Açılış (CX-Ö-03): önce oturum denetleyicisi kurulur (yeniden bağlanma dinleyicisi bağ
+/// doğrulamasından ÖNCE kayıtlı olsun); sonra kayıtlı bağ yeniden doğrulanır (sürüm denetimi
+/// dahil; farklı kurulum → oturum temizliği); oturum yalnız doğrulanmış bağda ve yalnız
+/// belirteç kaydı AYNI kuruluma (instance_id) aitse geri yüklenir.
 Future<void> startup(ProviderContainer container) async {
+  final session = container.read(sessionControllerProvider);
   final binding = await container.read(serverBindingProvider).restore();
   if (binding is BindingVerified) {
-    await container.read(sessionControllerProvider).restore();
+    await session.restore(instanceId: binding.info.instanceId);
   }
 }

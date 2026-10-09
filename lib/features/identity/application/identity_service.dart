@@ -27,7 +27,8 @@ class IdentityService {
   /// Giriş. Sunucu bağı DOĞRULANMAMIŞSA (bağ yok, güvensiz/yanlış sunucu, TLS hatası,
   /// güncelleme gerekli) ağa hiçbir istek çıkmaz ve parola gönderilmez.
   Future<void> login({required String email, required String password}) async {
-    if (binding.current is! BindingVerified) {
+    final bound = binding.current;
+    if (bound is! BindingVerified) {
       throw ApiError(
         binding.current is BindingUpdateRequired
             ? ClientErrorCode.updateRequired
@@ -50,6 +51,7 @@ class IdentityService {
         refreshToken: refresh,
         refreshExpiresAt: refreshExpiresAt,
         forcePasswordChange: r.forcePasswordChange,
+        instanceId: bound.info.instanceId,
       ),
     );
   }

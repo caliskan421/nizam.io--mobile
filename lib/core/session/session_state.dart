@@ -27,6 +27,10 @@ enum ReauthReason {
 
   /// Sunucu yenilemeyi açıkça reddetti (401).
   refreshRejected,
+
+  /// Güvenli depo yazılamadı/okunamadı: yeni çift kalıcılaşmadı ya da kayıt okunamadı.
+  /// Oturum etkin sayılmaz (CX-Ö-04).
+  secureStorageFailure,
 }
 
 /// Yeniden giriş gerekli; belirteçler silindi, yenileme isteği GÖNDERİLMEZ.

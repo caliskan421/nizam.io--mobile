@@ -236,6 +236,26 @@ void main() {
       expect(h.read(sessionStateProvider), isA<SessionNone>());
     });
 
+    test('bağ kaydı güvenli depoya yazılamazsa doğrulanmış sayılmaz (ham hata sızmaz)', () async {
+      h = Harness();
+      h.store.failWrites = true;
+      expect(
+        await h.read(serverBindingProvider).verify(testUrl),
+        failedWith(ClientErrorCode.secureStorageError),
+      );
+    });
+
+    test(
+      'keşif 200 gövdesi ayrıştırılamazsa tanınmayan sunucu (TypeError sızmaz)',
+      () async {
+        h = Harness(handler: (r) => jsonResponse(200, {'product_id': 7}));
+        expect(
+          await h.read(serverBindingProvider).verify(testUrl),
+          failedWith(ClientErrorCode.serverUnrecognized),
+        );
+      },
+    );
+
     test('açılış: kayıtlı bağ yeniden doğrulanır (sürüm yükseldiyse güncelleme gerekli)', () async {
       var minimum = '0.0.0';
       h = Harness(handler: (r) => discoveryHandler(r, minimum: minimum));

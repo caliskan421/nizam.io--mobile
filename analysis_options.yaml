@@ -1,0 +1,41 @@
+# NIZAM.IO mobil — statik analiz (F14 MOB-0 kapsam 1–2).
+# `flutter analyze` CI'da uyarı ve bilgi dahil sıfır bulgu ister (--fatal-infos).
+# Katman/sınır kuralı ayrıca tool/check_boundaries.dart ile denetlenir (analizörün
+# import kısıtı kuralı olmadığı için AST tabanlı küçük betik; test/tool/ altında testli).
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+  errors:
+    # Üretilmiş dosyalarda yalnız üreticinin sorumluluğundaki uyarılar.
+    invalid_annotation_target: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - '**/*.g.dart'
+    - '**/*.freezed.dart'
+    - lib/core/api/generated/**
+    - lib/core/i18n/generated/**
+    - test/tool/fixtures/**
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_dynamic_calls
+    - avoid_print
+    - avoid_slow_async_io
+    - avoid_type_to_string
+    - cancel_subscriptions
+    - close_sinks
+    - directives_ordering
+    - prefer_final_locals
+    - prefer_single_quotes
+    - only_throw_errors
+    - unawaited_futures
+    - unnecessary_lambdas
+    - unnecessary_statements
+    - use_super_parameters

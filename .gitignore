@@ -1,6 +1,5 @@
-# Platform/teknoloji seçimi henüz yapılmamıştır (bkz. README.md).
-# Aşağıdaki asgari küme, native veya cross-platform (ör. Flutter) seçilirse
-# seçilsin ortak olan dosyaları kapsar; framework seçimiyle güncellenir.
+# NIZAM.IO mobil (Flutter). Üretilmiş API/i18n kodu commit'lenir (CI "yeniden üret, diff = 0");
+# yalnız derleme/araç çıktıları burada dışlanır.
 
 # OS
 .DS_Store
@@ -9,18 +8,40 @@ Thumbs.db
 # Editör
 .vscode/
 .idea/
+*.iml
+*.ipr
+*.iws
 *.swp
 
 # Ortam / secret — depoya girmez
 .env
 .env.*
 !.env.example
+key.properties
+**/*.keystore
+**/*.jks
 
-# Bağımlılık ve build çıktıları (framework seçimiyle güncellenir)
-node_modules/
-build/
-dist/
+# Dart / Flutter
 .dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+app.*.symbols
+app.*.map.json
+.widget_preview/
+migrate_working_dir/
+
+# Android
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Backend etiketi checkout'u (CI) ve entegrasyon durum dizini
+/.backend/
+/.frontend/
+/integration_test/.state/
 
 # Loglar
 *.log

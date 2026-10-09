@@ -22,7 +22,12 @@ Future<void> bootstrap(Flavor flavor) async {
   final composition = Composition.create(flavor: flavor);
   // Tercihler runApp'ten önce (tema titreşimi yok). Güvenlik açılış sırası (startup) ayrıdır
   // ve tercihlere bağlı değildir; tercih okuma hatası sistem temasına düşer.
-  await composition.locator<ThemeModeController>().load();
+  // Tamamlanmayan platform çağrısı açılışı kilitlemesin (CX-r3-Ö-01): süre aşımında sistem
+  // teması ile devam edilir.
+  await composition.locator<ThemeModeController>().load().timeout(
+    const Duration(milliseconds: 500),
+    onTimeout: () {},
+  );
   runApp(
     UncontrolledProviderScope(
       container: composition.container,

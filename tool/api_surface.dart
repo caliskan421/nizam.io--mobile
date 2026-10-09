@@ -9,6 +9,8 @@
 //       getter/setter) `lib/core/api/generated/**`'da tanımlanmış bir tipi içermez.
 //       DTO yalnız gövdelerde ve özel (`_`) bildirimlerde kalır; dışarıya domain varlığı
 //       döner.
+//   A0  Denetim kendisi fail-closed'dır: çözümlenemeyen kütüphane, derleme hatası, sahibi
+//       taranmamış part, bulunamayan SDK veya boş hedef kümesi ihlaldir (sessiz "temiz" yok).
 //   A3  Aynı yüzey kuralı `lib/core/**` (üretilmiş kodun kendisi hariç) için de geçerlidir:
 //       features'ın serbestçe import ettiği core, üretilmiş tipi dolaylı taşıyamaz.
 //
@@ -20,6 +22,7 @@ import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/diagnostic/diagnostic.dart';
 import 'package:analyzer/file_system/overlay_file_system.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:path/path.dart' as p;
@@ -46,10 +49,16 @@ Future<List<Violation>> checkApiSurface(
       modificationStamp: 0,
     );
   }
+  final sdk = _sdkPath();
+  if (sdk == null) {
+    return [
+      Violation('A0', 'lib', 1, 'Dart SDK bulunamadı; denetim koşulamadı'),
+    ];
+  }
   final collection = AnalysisContextCollection(
     includedPaths: [lib],
     resourceProvider: provider,
-    sdkPath: _sdkPath(),
+    sdkPath: sdk,
   );
   final session = collection.contextFor(lib).currentSession;
 
@@ -69,9 +78,46 @@ Future<List<Violation>> checkApiSurface(
         ..sort();
 
   final out = <Violation>[];
+  if (targets.isEmpty) {
+    return [
+      Violation('A0', 'lib', 1, 'denetlenecek kütüphane yok (yanlış kök?)'),
+    ];
+  }
+  final scanned = <String>{};
+  final parts = <String>[];
   for (final rel in targets) {
     final result = await session.getResolvedLibrary(p.join(lib, rel));
-    if (result is! ResolvedLibraryResult) continue; // part dosyası vb.
+    if (result is NotLibraryButPartResult) {
+      parts.add(rel); // sahibi aşağıda doğrulanır
+      continue;
+    }
+    if (result is! ResolvedLibraryResult) {
+      out.add(
+        Violation('A0', 'lib/$rel', 1, 'çözümlenemedi: ${result.runtimeType}'),
+      );
+      continue;
+    }
+    scanned.add(rel);
+    final errors = [
+      for (final unit in result.units)
+        for (final d in unit.diagnostics)
+          if (d.severity == Severity.error)
+            (p.relative(unit.path, from: root), unit.lineInfo, d),
+    ];
+    if (errors.isNotEmpty) {
+      // Çözümlenemeyen tip InvalidType olur ve sızıntı görünmez: derleme hatası ihlaldir.
+      for (final (path, lineInfo, d) in errors) {
+        out.add(
+          Violation(
+            'A0',
+            path,
+            lineInfo.getLocation(d.offset).lineNumber,
+            'derleme hatası, açık API denetlenemez: ${d.message}',
+          ),
+        );
+      }
+      continue;
+    }
     final rule = rel.startsWith('core/') ? 'A3' : 'A2';
     final reported =
         <String>{}; // alanın getter/setter'ı, değişken + getter tekrarı
@@ -89,12 +135,33 @@ Future<List<Violation>> checkApiSurface(
       );
     }
   }
+  // Part dosyasının açık bildirimleri sahibi kütüphanenin yüzeyindedir; sahibi taranmadıysa
+  // (kapsam dışı ya da yok) yüzey denetlenmemiştir.
+  for (final rel in parts) {
+    final owner = await session.getResolvedLibraryContaining(p.join(lib, rel));
+    final ownerRel = owner is ResolvedLibraryResult
+        ? p
+              .relative(owner.element.firstFragment.source.fullName, from: lib)
+              .replaceAll(r'\', '/')
+        : null;
+    if (ownerRel == null || !scanned.contains(ownerRel)) {
+      out.add(
+        Violation(
+          'A0',
+          'lib/$rel',
+          1,
+          'part dosyasının sahibi taranmadı: ${ownerRel ?? owner.runtimeType}',
+        ),
+      );
+    }
+  }
   return out;
 }
 
+/// Kapsam dosya sonekine göre DARALTILMAZ (`.g.dart` kökü ile kaçış yok, CX-a-Ö-04);
+/// yalnız üretilmiş API dizini muaftır.
 bool _inScope(String rel) {
-  if (!rel.endsWith('.dart') || rel.endsWith('.g.dart')) return false;
-  if (rel.endsWith('.freezed.dart')) return false;
+  if (!rel.endsWith('.dart')) return false;
   if (rel.startsWith(generatedApiDir)) return false;
   if (rel.startsWith('core/')) return true;
   final parts = rel.split('/');

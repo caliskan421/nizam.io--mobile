@@ -60,8 +60,8 @@ test_integration/                   gerçek backend entegrasyonu + backend/ (up.
 ```
 
 `tool/check_boundaries.dart` (AST tabanlı + A2/A3 için tip çözümlemeli; `make boundaries`, CI) şu kuralları zorlar —
-ayrıntı ve kural kimlikleri `tool/boundaries.dart` başlığında, negatif matris
-`test/tool/boundaries_test.dart`'ta:
+ayrıntı ve kural kimlikleri `tool/boundaries.dart` ve `tool/api_surface.dart` başlıklarında,
+negatif matrisler `test/tool/boundaries_test.dart` ve `test/tool/api_surface_test.dart`'ta:
 
 - `core` → `features`/`app` yasak; `features` → `app` yasak.
 - Bir feature başka feature'ın iç katmanını import etmez (yalnız `features/<g>/<g>.dart`).
@@ -74,11 +74,14 @@ ayrıntı ve kural kimlikleri `tool/boundaries.dart` başlığında, negatif mat
 - Üretilmiş API kodu (`lib/core/api/generated/**`: DTO, enum, istemci) features içinde yalnız
   `data` katmanında ve `<f>_module.dart`'ta import edilir (A1). `data` DTO'yu `domain`
   varlığına eşler; presentation/application/domain ve açık yüz sözleşme tiplerini görmez.
-  Üretilmiş kod yalnız üretilmiş koddan `export` edilir. `part`/`part of` yalnız aynı dizinde (B6).
+  Üretilmiş kod yalnız üretilmiş koddan `export` edilir. `part`/`part of` yalnız aynı dizinde (B6);
+  koşullu import/export üretilmiş kod dışında yasak (B7).
 - Açık API yüzeyi (A2 `features/*/data`, A3 `core`; `tool/api_surface.dart`, **tip
   çözümlemeli**): genel tipler, kalıtılanlar dahil üyeler, yapıcılar, typedef, üst düzey
   bildirimler — çıkarımlı tipler ve typedef zincirleri dahil — üretilmiş tip taşımaz. DTO yalnız
   gövdede ve özel bildirimde kalır; core'un karşılıkları `ApiFieldError`, `RefreshGrant`.
+  Denetim fail-closed'dır (A0): çözümlenemeyen kütüphane, derleme hatası, sahipsiz part veya
+  bulunamayan SDK ihlaldir.
 - `flutter_secure_storage` yalnız `lib/core/storage/`; `badCertificateCallback` /
   `HttpOverrides` hiçbir yerde; `debugPrint`/`dart:developer` yalnız `lib/core/logging/`.
 

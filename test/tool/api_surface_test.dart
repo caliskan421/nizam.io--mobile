@@ -93,6 +93,27 @@ final _cases = <String, (String, String, Set<String>)>{
         'String f() => _P().m?.email ?? "";',
     <String>{},
   ),
+  '.g.dart kütüphane kökü + part (CX-a-Ö-04)': (
+    '$_data/zz_root.g.dart',
+    "${_me}part 'zz_root_part.dart';",
+    {'A2'},
+  ),
+  '.g.dart kökünün parçası (sahibi tarandı)': (
+    '$_data/zz_root_part.dart',
+    "part of 'zz_root.g.dart';\n"
+        "final exposed = const MeResponse(accountId: 'a', email: 'b');",
+    <String>{},
+  ),
+  'sahibi olmayan part → A0 (CX-a-Ö-05)': (
+    '$_data/zz_orphan.dart',
+    "part of 'zz_none.dart';\nfinal x = 1;",
+    {'A0'},
+  ),
+  'çözümlenemeyen import → A0, sessiz temiz değil (CX-a-Ö-05)': (
+    '$_data/zz_broken.dart',
+    "import 'zz_yok.dart';\nclass R { Yok? y; }",
+    {'A0'},
+  ),
 };
 
 void main() {
@@ -118,6 +139,11 @@ void main() {
       expect(got, expected, reason: overlayed.join('\n'));
     });
   }
+
+  test('boş hedef kümesi → A0', () async {
+    final v = await checkApiSurface('.', only: const []);
+    expect(v.map((e) => e.rule), ['A0']);
+  });
 
   test('gerçek lib/ ağacında açık API sızıntısı yok', () {
     expect(real.map((v) => v.toString()), isEmpty);

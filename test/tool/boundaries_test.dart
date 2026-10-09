@@ -352,6 +352,16 @@ void main() {
       expect(rules('features/identity/identity_module.dart', dto), isEmpty);
       expect(rules('core/http/a.dart', dto), isEmpty);
     });
+    test('B7 koşullu import/export yasak (üretilmiş kod hariç)', () {
+      const cond = "import 'a.dart' if (dart.library.io) 'b.dart';";
+      expect(rules('features/identity/data/x.dart', cond), ['B7']);
+      expect(rules('core/http/x.dart', cond), ['B7']);
+      expect(
+        rules('app/x.dart', "export 'a.dart' if (dart.library.io) 'b.dart';"),
+        ['B7'],
+      );
+      expect(rules('core/api/generated/x.dart', cond), isEmpty);
+    });
     test('koşullu import dalı da denetlenir', () {
       expect(
         rules(
@@ -359,7 +369,7 @@ void main() {
           "import 'stub.dart' if (dart.library.io) "
               "'package:nizamio/core/api/generated/models/me_response.dart';",
         ),
-        ['A1'],
+        unorderedEquals(['A1', 'B7']),
       );
       expect(
         rules(
@@ -367,7 +377,7 @@ void main() {
           "import '../../../core/errors/api_error.dart' if (dart.library.io) "
               "'../../../core/api/generated/models/me_response.dart';",
         ),
-        ['A1'],
+        unorderedEquals(['A1', 'B7']),
       );
     });
     test('package: yolunda .. normalize edilir', () {

@@ -34,6 +34,9 @@
 //       `package:` yolları normalize edilir (`..` ile kaçış).
 //   A2/A3  Açık API yüzeyinde üretilmiş tip yok (data katmanı ve core): TİP ÇÖZÜMLEMESİ
 //       gerektirdiği için tool/api_surface.dart'tadır.
+//   B7  Koşullu import/export (`if (dart.library.io) '…'`) üretilmiş kod dışında yasak: tip
+//       çözümlemeli A2/A3 denetimi tek yapılandırmayı çözümler, dallar arası farklı tip
+//       seçimi denetimden kaçardı.
 //   B6  `part` / `part of` yalnız aynı dizindeki dosyayı gösterir (katmanlar arası part
 //       tüneli ve kütüphane adıyla `part of` yasak).
 import 'package:analyzer/dart/analysis/utilities.dart';
@@ -182,6 +185,15 @@ List<Violation> checkSource(String libPath, String content) {
     }
     if (directive is! NamespaceDirective && directive is! PartDirective) {
       continue;
+    }
+    if (!generated &&
+        directive is NamespaceDirective &&
+        directive.configurations.isNotEmpty) {
+      add(
+        'B7',
+        directive,
+        'koşullu import/export yasak (A2/A3 tek yapılandırmayı çözümler)',
+      );
     }
     final uris = [
       (directive as UriBasedDirective).uri.stringValue,

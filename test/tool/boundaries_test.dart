@@ -305,6 +305,64 @@ void main() {
     });
   });
 
+  group('A1 üretilmiş API kodu yalnız data katmanında', () {
+    const dto =
+        "import 'package:nizamio/core/api/generated/models/me_response.dart';";
+    test('application → DTO yasak (package: ve göreli)', () {
+      expect(rules('features/identity/application/a.dart', dto), ['A1']);
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import '../../../core/api/generated/models/me_response.dart';",
+        ),
+        ['A1'],
+      );
+    });
+    test('presentation ve domain → DTO yasak', () {
+      expect(rules('features/identity/presentation/a.dart', dto), ['A1']);
+      expect(rules('features/identity/domain/a.dart', dto), ['A1']);
+    });
+    test('enum ve istemci de sayılır', () {
+      expect(
+        rules(
+          'features/work/presentation/a.dart',
+          "import 'package:nizamio/core/api/generated/models/roster_member_status.dart';",
+        ),
+        ['A1'],
+      );
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import 'package:nizamio/core/api/generated/clients/identity_client.dart';",
+        ),
+        ['A1'],
+      );
+    });
+    test('açık yüz DTO dışa veremez', () {
+      expect(
+        rules(
+          'features/identity/identity.dart',
+          "export '../../core/api/generated/models/me_response.dart';",
+        ),
+        ['A1'],
+      );
+    });
+    test('data ve <f>_module.dart → serbest; core → serbest', () {
+      expect(rules('features/identity/data/a.dart', dto), isEmpty);
+      expect(rules('features/identity/identity_module.dart', dto), isEmpty);
+      expect(rules('core/http/a.dart', dto), isEmpty);
+    });
+    test('core/api dışı core serbest (hata, oturum)', () {
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import '../../../core/errors/api_error.dart';",
+        ),
+        isEmpty,
+      );
+    });
+  });
+
   test('gerçek lib/ ağacı kurallara uyar', () {
     final violations = <Violation>[];
     for (final f in Directory(

@@ -7,6 +7,7 @@ yönetim deposundaki eski kayıt sistemine (`project-control`) bağlı değildir
 altyapı sağlayıcıları port) · go_router · dio · freezed/json_serializable (OpenAPI'den) ·
 flutter_secure_storage · intl/ARB. DI ayrımı: `docs/architecture/adr-0001-di-get-it.md`
 (D-0182); get_it yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` (sınır kuralı G1/G2).
+Üretilmiş API DTO'ları features içinde yalnız `data` katmanında; dışarıya domain varlığı döner (A1).
 
 ## Okuma sırası (oturum başı)
 

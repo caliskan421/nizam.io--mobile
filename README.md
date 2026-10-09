@@ -71,6 +71,9 @@ ayrıntı ve kural kimlikleri `tool/boundaries.dart` başlığında, negatif mat
   `dart:convert` ve `Map<String, …>` yasak.
 - `get_it` yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` (G1); modül dosyası yalnız
   `lib/app/di/**` tarafından import edilir (G2).
+- Üretilmiş API kodu (`lib/core/api/generated/**`: DTO, enum, istemci) features içinde yalnız
+  `data` katmanında ve `<f>_module.dart`'ta import edilir (A1). `data` DTO'yu `domain`
+  varlığına eşler; presentation/application/domain ve açık yüz sözleşme tiplerini görmez.
 - `flutter_secure_storage` yalnız `lib/core/storage/`; `badCertificateCallback` /
   `HttpOverrides` hiçbir yerde; `debugPrint`/`dart:developer` yalnız `lib/core/logging/`.
 
@@ -127,7 +130,7 @@ görmez (sınır kuralı G1/G2).
 | Log | `lib/core/logging/log.dart` | tek yol; Bearer, JSON/anahtar=değer gizlileri, JWT ve o anki belirteçler (birebir) maskelenir; yayında çıkış yok. |
 | Arka plan maskesi | `lib/core/security/privacy_mask.dart` | `AppLifecycleListener`: ön plan dışında opak katman (altyapı; ekran yok). |
 | Durum makinesi | `lib/core/app_phase.dart`, `lib/app/router.dart` | bağ → oturum → kapsam fazı; go_router yönlendirmesi fazdan türetilir (rotalar boş yer tutucu). |
-| Kimlik servisi | `lib/features/identity/` (`data`, `application`) | giriş yalnız `BindingVerified`'da (aksi hâlde istek/parola gitmez); çıkış sunucu hatasında da yereli temizler; `me` 403 zorunlu parola → bayrak. |
+| Kimlik servisi | `lib/features/identity/` (`domain`, `data`, `application`) | giriş yalnız `BindingVerified`'da (aksi hâlde istek/parola gitmez); çıkış sunucu hatasında da yereli temizler; `me` 403 zorunlu parola → bayrak. DTO'lar `data`'da `CurrentAccount`/`LoginGrant` domain varlıklarına eşlenir (A1). |
 
 **Yazma-öncesi işaret (yenileme ile depo hatası/çökme):** yenileme isteği ağa çıkmadan önce
 depoya `nizamio.session.refresh_inflight` işareti yazılır (yazılamazsa istek gönderilmez);

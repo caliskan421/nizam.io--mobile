@@ -25,6 +25,10 @@
 //       kullanmaz, bağımlılık yapıcıdan gelir).
 //   G2  `features/<f>/<f>_module.dart` (modül kayıt fonksiyonu) yalnız `lib/app/di/**`
 //       tarafından import edilir.
+//   A1  Üretilmiş API kodu (`lib/core/api/generated/**`: DTO'lar, enum'lar, istemciler)
+//       features içinde yalnız `data` katmanında ve `<f>_module.dart`'ta (istemci kurulumu)
+//       import edilir. data DTO'yu domain varlığına eşler; presentation/application/domain
+//       ve açık yüz sözleşme tiplerini görmez (backend alan değişikliği UI'a sızmaz).
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
@@ -225,6 +229,15 @@ void _checkUri(
 
   if (target == null) return;
   final there = _Place(target);
+  if (here.area == 'feature' &&
+      target.startsWith(generatedApiDir) &&
+      here.layer != 'data' &&
+      here.layer != 'module') {
+    add(
+      'A1',
+      'üretilmiş API kodu features içinde yalnız data katmanında ve <f>_module.dart\'ta: $uri (domain varlığına eşleyin)',
+    );
+  }
   if (there.area == 'feature' &&
       there.layer == 'module' &&
       !here.path.startsWith('app/di/')) {

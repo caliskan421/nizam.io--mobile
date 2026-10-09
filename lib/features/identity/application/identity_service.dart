@@ -1,10 +1,10 @@
-import '../../../core/api/generated/models/me_response.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/server/server_binding.dart';
 import '../../../core/session/session_controller.dart';
 import '../../../core/session/token_pair.dart';
 import '../data/identity_repository.dart';
+import '../domain/current_account.dart';
 
 /// Kimlik servisi (ekransız; F14 kapsam 5).
 class IdentityService {
@@ -57,7 +57,7 @@ class IdentityService {
       TokenPair(
         accountId: r.accountId,
         accessToken: access,
-        accessExpiresAt: r.expiresAt,
+        accessExpiresAt: r.accessExpiresAt,
         refreshToken: refresh,
         refreshExpiresAt: refreshExpiresAt,
         forcePasswordChange: r.forcePasswordChange,
@@ -68,7 +68,7 @@ class IdentityService {
   }
 
   /// Oturumdaki hesap. Zorunlu parola değişikliği yanıtı bayrağı oturum durumuna taşır.
-  Future<MeResponse> me() async {
+  Future<CurrentAccount> me() async {
     final generation = session.generation;
     try {
       return await _repo().me();

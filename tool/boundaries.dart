@@ -32,6 +32,13 @@
 //       Üretilmiş kod yalnız üretilmiş koddan `export` edilir (barrel üzerinden transitif
 //       sızma kapalı). Koşullu import/export URI'leri ve `part` yönergeleri de denetlenir;
 //       `package:` yolları normalize edilir (`..` ile kaçış).
+//   A2  features `data` katmanının AÇIK API'si (genel sınıf/mixin/enum/extension başlığı,
+//       genel alan, metot imzası, genel üst düzey işlev/değişken/typedef) üretilmiş API
+//       tiplerini anmaz; DTO yalnız gövdelerde ve özel (`_`) üyelerde kalır. Yapıcılar
+//       muaftır (üretilmiş istemciyi yalnız `<f>_module.dart` kurabilir). Üretilmiş ad
+//       kümesi `generatedDeclarations` ile `lib/core/api/generated/**`'dan çıkarılır.
+//   B6  `part` / `part of` yalnız aynı dizindeki dosyayı gösterir (katmanlar arası part
+//       tüneli ve kütüphane adıyla `part of` yasak).
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
@@ -110,7 +117,13 @@ class _Place {
 }
 
 /// [libPath]: `lib/` göreli yol (ör. `features/identity/data/x.dart`).
-List<Violation> checkSource(String libPath, String content) {
+/// [generatedDecls]: üretilmiş dosya (`lib/` göreli) → dışa verdiği adlar (A2); bkz.
+/// [generatedDeclarations].
+List<Violation> checkSource(
+  String libPath,
+  String content, {
+  Map<String, Set<String>> generatedDecls = const {},
+}) {
   final unit = parseString(
     content: content,
     path: '/lib/$libPath',
@@ -161,6 +174,21 @@ List<Violation> checkSource(String libPath, String content) {
   }
 
   for (final directive in unit.directives) {
+    // B6 — part tüneli.
+    if (directive is PartDirective || directive is PartOfDirective) {
+      final uri = directive is PartDirective
+          ? directive.uri.stringValue
+          : (directive as PartOfDirective).uri?.stringValue;
+      final target = uri == null ? null : _resolve(here.path, uri);
+      if (target == null ||
+          p.posix.dirname(target) != p.posix.dirname(here.path)) {
+        add(
+          'B6',
+          directive,
+          'part/part of yalnız aynı dizindeki dosyayı URI ile gösterir: ${uri ?? 'kütüphane adı'}',
+        );
+      }
+    }
     if (directive is! NamespaceDirective && directive is! PartDirective) {
       continue;
     }
@@ -183,7 +211,170 @@ List<Violation> checkSource(String libPath, String content) {
   }
 
   unit.accept(_Visitor(here, generated, add));
+
+  // A2 — data katmanının açık API'si.
+  if (here.area == 'feature' && here.layer == 'data') {
+    final names = <String>{};
+    for (final d in unit.directives.whereType<ImportDirective>()) {
+      for (final uri in [
+        d.uri.stringValue,
+        for (final c in d.configurations) c.uri.stringValue,
+      ]) {
+        final target = uri == null ? null : _resolve(here.path, uri);
+        if (target == null || !target.startsWith(generatedApiDir)) continue;
+        var imported = {...?generatedDecls[target]};
+        for (final c in d.combinators) {
+          if (c is ShowCombinator) {
+            imported = imported.intersection(
+              c.shownNames.map((n) => n.name).toSet(),
+            );
+          } else if (c is HideCombinator) {
+            imported = imported.difference(
+              c.hiddenNames.map((n) => n.name).toSet(),
+            );
+          }
+        }
+        names.addAll(imported);
+      }
+    }
+    if (names.isNotEmpty) {
+      for (final member in unit.declarations) {
+        final hits = <String>{};
+        final scan = _SignatureScanner(names, hits);
+        if (member is TopLevelVariableDeclaration) {
+          final vars = member.variables;
+          if (vars.variables.any((v) => !v.name.lexeme.startsWith('_'))) {
+            vars.accept(scan);
+          }
+        } else {
+          final name = _declName(member);
+          if (name == null || name.startsWith('_')) continue;
+          member.accept(scan);
+        }
+        for (final n in hits) {
+          add(
+            'A2',
+            member,
+            "data katmanının açık API'si üretilmiş tip anıyor: $n (domain varlığı döndürün; DTO yalnız gövdede/özel üyede)",
+          );
+        }
+      }
+    }
+  }
   return out;
+}
+
+/// Üst düzey bildirimin adı (değişkenler hariç); adsız extension için null.
+String? _declName(CompilationUnitMember m) => switch (m) {
+  final ClassDeclaration c => c.namePart.typeName.lexeme,
+  final EnumDeclaration e => e.namePart.typeName.lexeme,
+  final ExtensionTypeDeclaration e => e.namePart.typeName.lexeme,
+  final MixinDeclaration x => x.name.lexeme,
+  final ExtensionDeclaration x => x.name?.lexeme,
+  final TypeAlias t => t.name.lexeme,
+  final FunctionDeclaration f => f.name.lexeme,
+  _ => null,
+};
+
+/// [sources]: `lib/` göreli yol → içerik. Her üretilmiş dosyanın dışa verdiği adlar
+/// (kendi bildirimleri + üretilmiş koddan `export` ettikleri, kapanışa kadar).
+Map<String, Set<String>> generatedDeclarations(Map<String, String> sources) {
+  final own = <String, Set<String>>{};
+  final exports = <String, List<String>>{};
+  for (final MapEntry(key: path, value: content) in sources.entries) {
+    if (!path.startsWith(generatedApiDir)) continue;
+    final unit = parseString(
+      content: content,
+      path: '/lib/$path',
+      throwIfDiagnostics: false,
+    ).unit;
+    own[path] = {
+      for (final m in unit.declarations)
+        if (m is TopLevelVariableDeclaration)
+          for (final v in m.variables.variables) v.name.lexeme
+        else
+          ?_declName(m),
+    };
+    exports[path] = [
+      for (final d in unit.directives.whereType<ExportDirective>())
+        if (d.uri.stringValue case final u?) ?_resolve(path, u),
+    ];
+  }
+  final out = {
+    for (final e in own.entries) e.key: {...e.value},
+  };
+  var changed = true;
+  while (changed) {
+    changed = false;
+    for (final MapEntry(key: path, value: targets) in exports.entries) {
+      for (final t in targets) {
+        final add = out[t];
+        if (add != null && !out[path]!.containsAll(add)) {
+          out[path]!.addAll(add);
+          changed = true;
+        }
+      }
+    }
+  }
+  return out;
+}
+
+/// Açık imzadaki tip/ad kullanımlarını toplar; gövdeler, yapıcılar ve özel üyeler atlanır.
+class _SignatureScanner extends RecursiveAstVisitor<void> {
+  _SignatureScanner(this.names, this.hits);
+
+  final Set<String> names;
+  final Set<String> hits;
+
+  @override
+  void visitBlockFunctionBody(BlockFunctionBody node) {}
+
+  @override
+  void visitExpressionFunctionBody(ExpressionFunctionBody node) {}
+
+  @override
+  void visitConstructorDeclaration(ConstructorDeclaration node) {}
+
+  @override
+  void visitMethodDeclaration(MethodDeclaration node) {
+    if (node.name.lexeme.startsWith('_')) return;
+    super.visitMethodDeclaration(node);
+  }
+
+  @override
+  void visitFieldDeclaration(FieldDeclaration node) {
+    if (node.fields.variables.every((v) => v.name.lexeme.startsWith('_'))) {
+      return;
+    }
+    super.visitFieldDeclaration(node);
+  }
+
+  @override
+  void visitNamedType(NamedType node) {
+    if (names.contains(node.name.lexeme)) hits.add(node.name.lexeme);
+    super.visitNamedType(node);
+  }
+
+  @override
+  void visitSimpleIdentifier(SimpleIdentifier node) {
+    // Tipsiz genel alan/değişken başlatıcısı (`final x = MeResponse(…)`).
+    if (names.contains(node.name)) hits.add(node.name);
+    super.visitSimpleIdentifier(node);
+  }
+}
+
+/// `lib/` göreli kaynak yolundan URI'nin `lib/` göreli hedefi; paket dışı veya `lib/`
+/// dışına kaçan yolda null.
+String? _resolve(String fromPath, String uri) {
+  String target;
+  if (uri.startsWith('package:$packageName/')) {
+    target = p.posix.normalize(uri.substring('package:$packageName/'.length));
+  } else if (!uri.contains(':')) {
+    target = p.posix.normalize(p.posix.join(p.posix.dirname(fromPath), uri));
+  } else {
+    return null;
+  }
+  return target.startsWith('..') ? null : target;
 }
 
 void _checkUri(
@@ -193,14 +384,7 @@ void _checkUri(
   bool generated, {
   bool isExport = false,
 }) {
-  String? target; // lib göreli hedef
-  if (uri.startsWith('package:$packageName/')) {
-    target = p.posix.normalize(uri.substring('package:$packageName/'.length));
-    if (target.startsWith('..')) target = null;
-  } else if (!uri.contains(':')) {
-    target = p.posix.normalize(p.posix.join(p.posix.dirname(here.path), uri));
-    if (target.startsWith('..')) target = null;
-  }
+  final target = _resolve(here.path, uri); // lib göreli hedef
 
   // Paket kuralları.
   if (uri.startsWith('package:flutter_secure_storage/') &&

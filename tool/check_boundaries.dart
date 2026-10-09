@@ -17,11 +17,16 @@ void main() {
           .where((f) => f.path.endsWith('.dart'))
           .toList()
         ..sort((a, b) => a.path.compareTo(b.path));
-  final violations = <Violation>[];
-  for (final file in files) {
-    final rel = file.path.replaceAll(r'\', '/').substring('lib/'.length);
-    violations.addAll(checkSource(rel, file.readAsStringSync()));
-  }
+  final sources = {
+    for (final file in files)
+      file.path.replaceAll(r'\', '/').substring('lib/'.length): file
+          .readAsStringSync(),
+  };
+  final decls = generatedDeclarations(sources);
+  final violations = <Violation>[
+    for (final MapEntry(key: rel, value: content) in sources.entries)
+      ...checkSource(rel, content, generatedDecls: decls),
+  ];
   for (final v in violations) {
     stderr.writeln(v);
   }

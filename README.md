@@ -74,6 +74,8 @@ ayrıntı ve kural kimlikleri `tool/boundaries.dart` başlığında, negatif mat
 - Üretilmiş API kodu (`lib/core/api/generated/**`: DTO, enum, istemci) features içinde yalnız
   `data` katmanında ve `<f>_module.dart`'ta import edilir (A1). `data` DTO'yu `domain`
   varlığına eşler; presentation/application/domain ve açık yüz sözleşme tiplerini görmez.
+  Üretilmiş kod yalnız üretilmiş koddan `export` edilir; `data`'nın açık API'si (genel imza,
+  alan, typedef) üretilmiş tip anmaz (A2). `part`/`part of` yalnız aynı dizinde (B6).
 - `flutter_secure_storage` yalnız `lib/core/storage/`; `badCertificateCallback` /
   `HttpOverrides` hiçbir yerde; `debugPrint`/`dart:developer` yalnız `lib/core/logging/`.
 

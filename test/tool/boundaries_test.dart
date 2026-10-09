@@ -385,7 +385,7 @@ void main() {
           'features/identity/application/a.dart',
           "part '../../../core/api/generated/models/me_response.g.dart';",
         ),
-        ['A1'],
+        unorderedEquals(['A1', 'B6']),
       );
     });
     test('barrel ile transitif sızma: üretilmiş kod yalnız üretilmiş koddan export', () {
@@ -406,16 +406,150 @@ void main() {
     });
   });
 
-  test('gerçek lib/ ağacı kurallara uyar', () {
-    final violations = <Violation>[];
-    for (final f in Directory(
-      'lib',
-    ).listSync(recursive: true).whereType<File>()) {
-      if (!f.path.endsWith('.dart')) continue;
-      violations.addAll(
-        checkSource(f.path.substring('lib/'.length), f.readAsStringSync()),
+  group('B6 part tüneli', () {
+    test('aynı dizindeki part serbest (.g.dart)', () {
+      expect(
+        rules('features/identity/application/a.dart', "part 'a.g.dart';"),
+        isEmpty,
       );
-    }
+      expect(
+        rules('features/identity/application/a.g.dart', "part of 'a.dart';"),
+        isEmpty,
+      );
+    });
+    test('data kütüphanesi + domain parçası (CX-a-Ö-01 tüneli)', () {
+      expect(
+        rules(
+          'features/identity/data/repo.dart',
+          "import 'package:nizamio/core/api/generated/models/me_response.dart';\n"
+              "part '../domain/leak.dart';",
+        ),
+        ['B6'],
+      );
+      expect(
+        rules(
+          'features/identity/domain/leak.dart',
+          "part of '../data/repo.dart';",
+        ),
+        ['B6'],
+      );
+    });
+    test('kütüphane adıyla part of yasak', () {
+      expect(rules('features/identity/domain/a.dart', 'part of x.y;'), ['B6']);
+    });
+  });
+
+  group("A2 data katmanının açık API'si DTO anmaz", () {
+    const decls = {
+      'core/api/generated/models/me_response.dart': {'MeResponse'},
+      'core/api/generated/clients/identity_client.dart': {'IdentityClient'},
+      'core/api/generated/export.dart': {'MeResponse', 'IdentityClient'},
+    };
+    const imp =
+        "import 'package:nizamio/core/api/generated/models/me_response.dart';\n";
+    List<String> a2(
+      String src, {
+      String path = 'features/identity/data/r.dart',
+    }) => checkSource(
+      path,
+      src,
+      generatedDecls: decls,
+    ).map((v) => v.rule).toList();
+
+    test('genel metot dönüşü / parametresi', () {
+      expect(
+        a2('${imp}class R { Future<MeResponse> me() async => throw 0; }'),
+        ['A2'],
+      );
+      expect(a2('${imp}class R { void f(MeResponse m) {} }'), ['A2']);
+    });
+    test('genel alan, getter, üst düzey işlev/değişken, typedef', () {
+      expect(a2('${imp}class R { MeResponse? last; }'), ['A2']);
+      expect(a2('${imp}class R { MeResponse get m => throw 0; }'), ['A2']);
+      expect(a2('${imp}MeResponse f() => throw 0;'), ['A2']);
+      expect(a2('${imp}final m = MeResponse(accountId: "", email: "");'), [
+        'A2',
+      ]);
+      expect(a2('${imp}typedef Me = MeResponse;'), ['A2']);
+    });
+    test('kalıtım, extension ve extension type', () {
+      expect(a2('${imp}abstract class R implements MeResponse {}'), ['A2']);
+      expect(a2('${imp}extension X on MeResponse { int get n => 1; }'), ['A2']);
+      expect(a2('${imp}extension type Me(MeResponse r) {}'), ['A2']);
+    });
+    test('takma adlı import ve barrel (export.dart) da sayılır', () {
+      expect(
+        a2(
+          "import 'package:nizamio/core/api/generated/models/me_response.dart' as api;\n"
+          'class R { api.MeResponse? m; }',
+        ),
+        ['A2'],
+      );
+      expect(
+        a2(
+          "import '../../../core/api/generated/export.dart';\n"
+          'class R { MeResponse? m; }',
+        ),
+        ['A2'],
+      );
+    });
+    test('gövde, özel üye, özel sınıf ve yapıcı serbest', () {
+      expect(
+        a2(
+          '${imp}class R {\n'
+          '  R(this._c);\n'
+          '  final MeResponse _c;\n'
+          '  String me() { final MeResponse m = _c; return m.email; }\n'
+          '  static String _map(MeResponse r) => r.email;\n'
+          '}\n'
+          'class _P { MeResponse? m; }',
+        ),
+        isEmpty,
+      );
+    });
+    test('show/hide uygulanır; data dışı katman A2 değil A1 alır', () {
+      expect(
+        a2(
+          "import 'package:nizamio/core/api/generated/export.dart' hide MeResponse;\n"
+          'class R { MeResponse? m; }',
+        ),
+        isEmpty,
+      );
+      expect(
+        a2(
+          '${imp}class R { MeResponse? m; }',
+          path: 'features/identity/application/r.dart',
+        ),
+        ['A1'],
+      );
+    });
+    test('generatedDeclarations export kapanışını izler', () {
+      final d = generatedDeclarations({
+        'core/api/generated/models/a.dart': 'class A {}\nenum E { x }',
+        'core/api/generated/export.dart': "export 'models/a.dart';",
+        'core/api/generated/top.dart':
+            "export 'export.dart';\ntypedef T = int;",
+        'features/x/data/y.dart': 'class Y {}',
+      });
+      expect(d['core/api/generated/top.dart'], {'A', 'E', 'T'});
+      expect(d.containsKey('features/x/data/y.dart'), isFalse);
+    });
+  });
+
+  test('gerçek lib/ ağacı kurallara uyar', () {
+    final sources = {
+      for (final f in Directory(
+        'lib',
+      ).listSync(recursive: true).whereType<File>())
+        if (f.path.endsWith('.dart'))
+          f.path.substring('lib/'.length): f.readAsStringSync(),
+    };
+    final decls = generatedDeclarations(sources);
+    expect(decls['core/api/generated/export.dart'], contains('MeResponse'));
+    final violations = [
+      for (final MapEntry(key: path, value: src) in sources.entries)
+        ...checkSource(path, src, generatedDecls: decls),
+    ];
     expect(violations.map((v) => v.toString()), isEmpty);
   });
 }

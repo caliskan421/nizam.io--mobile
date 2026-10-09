@@ -12,8 +12,25 @@ import '../session/session_controller.dart';
 
 /// `options.extra` anahtarları.
 const _opKey = 'nizamio.operation';
-const _retriedKey = 'nizamio.retried';
-const _tokenKey = 'nizamio.access_token';
+const _stateKey = 'nizamio.request_state';
+
+/// İsteğin başladığı andaki bağlam (CX-r2-Ö-01). Özel sınıf: çağıran `extra` ile taklit
+/// edemez. Tekrar edilen istek DAİMA başladığı oturum neslinde ve başladığı kapsamla gider.
+class _RequestState {
+  bool retried = false;
+  int? generation;
+  String? accessToken;
+  String? programId;
+  String? departmentId;
+}
+
+_RequestState _stateOf(RequestOptions o) {
+  final v = o.extra[_stateKey];
+  if (v is _RequestState) return v;
+  final s = _RequestState();
+  o.extra[_stateKey] = s;
+  return s;
+}
 
 /// Üretilmiş istemcinin `@Extras` ile taşıdığı operationId.
 String? _operationId(RequestOptions o) {
@@ -95,16 +112,27 @@ class ApiGuardInterceptor extends Interceptor {
       headers['X-Requested-With'] = 'XMLHttpRequest';
     }
     if (op.scope == ScopeClass.s2 || op.scope == ScopeClass.s3) {
-      final sel = scope?.current;
-      if (sel == null || !sel.hasProgram) {
+      final st = _stateOf(options);
+      if (!st.retried) {
+        // İlk gönderim: güncel kapsam yakalanır; tekrar aynı kapsamla gider.
+        final sel = scope?.current;
+        st
+          ..programId = (sel != null && sel.hasProgram) ? sel.programId : null
+          ..departmentId = (sel != null && sel.hasDepartment)
+              ? sel.departmentId
+              : null;
+      }
+      final program = st.programId;
+      if (program == null) {
         return handler.reject(_reject(options, ClientErrorCode.scopeMissing));
       }
-      headers['X-Nizamio-Program'] = sel.programId;
+      headers['X-Nizamio-Program'] = program;
       if (op.scope == ScopeClass.s3) {
-        if (!sel.hasDepartment) {
+        final department = st.departmentId;
+        if (department == null) {
           return handler.reject(_reject(options, ClientErrorCode.scopeMissing));
         }
-        headers['X-Nizamio-Department'] = sel.departmentId;
+        headers['X-Nizamio-Department'] = department;
       }
     }
     options.extra[_opKey] = op;
@@ -134,12 +162,17 @@ class AuthInterceptor extends Interceptor {
     final op = operationOf(options);
     options.headers.remove('Authorization');
     if (op == null || !op.auth) return handler.next(options);
+    final st = _stateOf(options);
+    if (st.retried && st.generation != session.generation) {
+      return handler.reject(_reject(options, ClientErrorCode.sessionEnded));
+    }
     final token = session.accessTokenFor(instanceId);
     if (token == null) {
       return handler.reject(_reject(options, ClientErrorCode.notSignedIn));
     }
     options.headers['Authorization'] = 'Bearer $token';
-    options.extra[_tokenKey] = token;
+    if (!st.retried) st.generation = session.generation;
+    st.accessToken = token;
     handler.next(options);
   }
 
@@ -150,23 +183,33 @@ class AuthInterceptor extends Interceptor {
   ) async {
     final o = err.requestOptions;
     final op = operationOf(o);
+    final st = _stateOf(o);
     if (err.response?.statusCode != 401 ||
         op == null ||
         !op.auth ||
         op.operationId == 'logout' ||
-        o.extra[_retriedKey] == true ||
-        session.accessTokenFor(instanceId) == null) {
+        st.retried) {
       return handler.next(err);
     }
+    DioException ended() => DioException(
+      requestOptions: o,
+      response: err.response,
+      error: ApiError(ClientErrorCode.sessionEnded),
+    );
+    // İstek başka bir oturum neslinde başladıysa (çıkış, başka hesapla giriş, yeniden
+    // bağlanma): yenileme YOK, tekrar YOK — yeni oturumun Bearer'ı eski istekle gitmez.
+    if (st.generation != session.generation) return handler.next(ended());
+    if (session.accessTokenFor(instanceId) == null) return handler.next(err);
     try {
-      await session.refresh(failedAccessToken: o.extra[_tokenKey] as String?);
+      await session.refresh(failedAccessToken: st.accessToken);
     } on ApiError catch (e) {
       return handler.next(
         DioException(requestOptions: o, response: err.response, error: e),
       );
     }
+    if (st.generation != session.generation) return handler.next(ended());
     try {
-      o.extra[_retriedKey] = true;
+      st.retried = true;
       final response = await dio().fetch<Object?>(o);
       return handler.resolve(response);
     } on DioException catch (e) {

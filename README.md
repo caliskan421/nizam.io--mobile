@@ -130,7 +130,9 @@ başladığı nesil (yenilemede aynı kaynak çift; girişte aynı origin + `ins
 doğrulanmış bağ) geçerliyse uygulanır; değilse getirdiği çift depoya yazılmaz, kullanılmaz,
 yalnız atılır — sunucudaki o oturum kendi ömrüyle ölür. Bearer yalnız dio'nun bağlı olduğu
 kuruluma ait çiftten alınır; çıkış kapsamı da temizler. Eşzamanlı bağ doğrulamalarında yalnız
-en son başlatılanın sonucu uygulanır.
+en son başlatılanın sonucu uygulanır. 401 sonrası tekrar edilen istek DAİMA başladığı oturum neslinde ve başladığı
+kapsamla gider; nesil değiştiyse (çıkış, başka hesapla giriş) yenileme ve tekrar yapılmaz
+(`client.session_ended`).
 
 Güvenli depo: `FlutterSecureStore` (iOS Keychain `first_unlock_this_device`; Android Keystore,
 `allowBackup=false`). Testlerde ve cihazsız entegrasyonda `MemorySecureStore`.
@@ -142,7 +144,8 @@ Güvenli depo: `FlutterSecureStore` (iOS Keychain `first_unlock_this_device`; An
 1. `up.sh`: `api-pin.json` etiketinden `git archive` → geçici kopyada `FROM` satırları digest'li →
    `nizamio-f14/backend:<etiket>` imajı → `migrations/roles.sql` → `migrate up` → ilk yönetici
    (`nizamio-f14/bootstrap`, geçici araç; backend çalışma imajına girmez — `check-isolation.sh image`,
-   APK'lara girmez — `check-isolation.sh apk`) → iki server: `127.0.0.1:18140` ve asgari mobil
+   APK'lara girmez — `check-isolation.sh apk`; kapının körleşmediği `check-isolation-selftest.sh`
+   ile CI'da sınanır) → iki server: `127.0.0.1:18140` ve asgari mobil
    sürümü `99.0.0` olan `127.0.0.1:18141`. Yerel Postgres: Compose projesi `nizamio_f14_mobile`,
    DB `nizamio_f14_test`, `127.0.0.1:15440`.
 2. `flutter test test_integration/ --concurrency=1`: fixture yalnız API ile (yönetici girişi, web girişi).

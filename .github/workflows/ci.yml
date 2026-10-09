@@ -88,6 +88,9 @@ jobs:
       - name: Birim testleri
         run: make test
 
+      - name: 'Ayrım kapısı öz-testi: yasak işaretli sentetik APK reddedilir (SIGPIPE/pipefail körlüğü yok)'
+        run: test_integration/backend/check-isolation-selftest.sh
+
   android:
     name: 'Android derlemesi (dev debug, prod release --obfuscate)'
     runs-on: ubuntu-latest

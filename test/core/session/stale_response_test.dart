@@ -6,7 +6,9 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/api/generated/clients/identity_client.dart';
+import 'package:nizamio/core/api/generated/clients/program_client.dart';
 import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/server/server_binding.dart';
 import 'package:nizamio/core/session/session_state.dart';
@@ -86,7 +88,15 @@ class Gated {
   }
 }
 
-Future<void> settle() => Future<void>.delayed(const Duration(milliseconds: 20));
+/// Koşul sağlanana dek (en çok 5 sn) bekler; ardından kısa bir tur daha.
+Future<void> settle(bool Function() ready) async {
+  final until = DateTime.now().add(const Duration(seconds: 5));
+  while (!ready()) {
+    if (DateTime.now().isAfter(until)) fail('bekleme koşulu sağlanmadı');
+    await Future<void>.delayed(const Duration(milliseconds: 5));
+  }
+  await Future<void>.delayed(const Duration(milliseconds: 5));
+}
 
 void main() {
   late Gated g;
@@ -99,7 +109,7 @@ void main() {
       ..meUnauthorized = true
       ..refreshGate = Completer();
     final me = g.h.identity.me();
-    await settle();
+    await settle(() => g.h.backend.count('POST', '/v1/auth/refresh') == 1);
     expect(g.h.backend.count('POST', '/v1/auth/refresh'), 1);
     await g.h.read(sessionControllerProvider).clear();
     final mark = g.sent;
@@ -119,7 +129,7 @@ void main() {
       ..meUnauthorized = true
       ..refreshGate = Completer();
     final me = g.h.identity.me();
-    await settle();
+    await settle(() => g.h.backend.count('POST', '/v1/auth/refresh') == 1);
     g.instance = 'inst-2';
     expect(
       await g.h.read(serverBindingProvider).verify(testUrl),
@@ -143,7 +153,7 @@ void main() {
     );
     g.loginGate = Completer();
     final login = g.h.identity.login(email: 'a@b.test', password: 'p');
-    await settle();
+    await settle(() => g.loginN == 1);
     await g.h.identity.logout();
     g.loginGate!.complete();
     await expectLater(login, throwsA(isA<ApiError>()));
@@ -159,7 +169,7 @@ void main() {
       );
       g.loginGate = Completer();
       final login = g.h.identity.login(email: 'a@b.test', password: 'p');
-      await settle();
+      await settle(() => g.loginN == 1);
       g.instance = 'inst-2';
       expect(
         await g.h.read(serverBindingProvider).verify(testUrl),
@@ -180,7 +190,7 @@ void main() {
       );
       g.loginGate = Completer();
       final login = g.h.identity.login(email: 'a@b.test', password: 'p');
-      await settle();
+      await settle(() => g.loginN == 1);
       // Bağ geçişte (doğrulanıyor): yakalanan bağ artık güncel değil.
       final verifying = g.h.read(serverBindingProvider).verify(testUrl);
       g.loginGate!.complete();
@@ -201,7 +211,7 @@ void main() {
       return original(r);
     };
     final me = g.h.identity.me();
-    await settle();
+    await settle(() => g.h.backend.count('GET', '/v1/me') == 1);
     await g.h.identity.logout();
     await g.h.identity.login(email: 'a@b.test', password: 'p');
     gate.complete();
@@ -244,7 +254,7 @@ void main() {
       ..meUnauthorized = true
       ..refreshGate = Completer();
     final me = g.h.identity.me();
-    await settle();
+    await settle(() => g.h.backend.count('POST', '/v1/auth/refresh') == 1);
     g.refreshGate!.complete();
     expect((await me).accountId, 'acc-1');
     expect(g.h.read(sessionStateProvider), isA<SessionActive>());
@@ -270,7 +280,9 @@ void main() {
     };
     final binding = g.h.read(serverBindingProvider);
     final a = binding.verify('https://a.example.test');
-    await settle();
+    await settle(
+      () => g.h.backend.requests.any((r) => r.host == 'a.example.test'),
+    );
     final b = await binding.verify('https://b.example.test');
     expect(b, isA<BindingVerified>());
     gate.complete();
@@ -281,5 +293,96 @@ void main() {
       g.h.store.values[ServerBindingController.storeKey],
       contains('inst-b'),
     );
+  });
+
+  test('CX-r2-Ö-01: A isteği bekler → çıkış → B girişi → A isteği 401: yenileme yok, tekrar yok, B Bearer\'ı gitmez', () async {
+    await g.bindAndLogin(); // A: access-token-1
+    final gate = Completer<void>();
+    final original = g.handle;
+    g.h.backend.handler = (r) async {
+      if (r.path == '/v1/me' &&
+          r.header('Authorization') == 'Bearer access-token-1') {
+        await gate.future;
+        return envelope(401, 'platform.unauthenticated');
+      }
+      return original(r);
+    };
+    final me = g.h.identity.me();
+    await settle(() => g.h.backend.count('GET', '/v1/me') == 1);
+    await g.h.identity.logout();
+    await g.h.identity.login(
+      email: 'b@b.test',
+      password: 'p',
+    ); // B: access-token-2
+    final mark = g.sent;
+    gate.complete();
+    await expectLater(
+      me,
+      throwsA(
+        isA<ApiError>().having(
+          (e) => e.code,
+          'code',
+          ClientErrorCode.sessionEnded,
+        ),
+      ),
+    );
+    expect(g.h.backend.count('POST', '/v1/auth/refresh'), 0);
+    expect(
+      g.since(mark).where((r) => r.path == '/v1/me'),
+      isEmpty,
+      reason: 'eski istek tekrarlanmadı',
+    );
+    expect(
+      g.h.read(sessionStateProvider),
+      isA<SessionActive>(),
+      reason: 'B oturumu etkilenmedi',
+    );
+  });
+
+  test('401 → yenileme sürerken kapsam değişirse tekrar BAŞLANGIÇ kapsamıyla gider', () async {
+    await g.bindAndLogin();
+    g.h.read(scopeControllerProvider).selectProgram('p-1');
+    g.refreshGate = Completer();
+    final original = g.handle;
+    g.h.backend.handler = (r) async {
+      if (r.path == '/v1/program') {
+        if (r.header('Authorization') != 'Bearer access-token-r') {
+          return envelope(401, 'platform.unauthenticated');
+        }
+        return jsonResponse(200, {
+          'program_id': r.header('X-Nizamio-Program'),
+          'name': 'P',
+        });
+      }
+      return original(r);
+    };
+    final read = apiCall(ProgramClient(g.h.read(apiDioProvider)!).readProgram);
+    await settle(() => g.h.backend.count('POST', '/v1/auth/refresh') == 1);
+    g.h.read(scopeControllerProvider).selectProgram('p-2');
+    g.refreshGate!.complete();
+    expect((await read).programId, 'p-1');
+    expect(
+      g.h.backend.requests
+          .where((r) => r.path == '/v1/program')
+          .map((r) => r.header('X-Nizamio-Program')),
+      ['p-1', 'p-1'],
+    );
+  });
+
+  test('429 Retry-After: otomatik tekrar yok (tek istek)', () async {
+    await g.bindAndLogin();
+    final original = g.handle;
+    g.h.backend.handler = (r) async => r.path == '/v1/me'
+        ? envelope(
+            429,
+            'platform.rate_limited',
+            headers: {
+              'retry-after': ['1'],
+            },
+          )
+        : original(r);
+    await expectLater(g.h.identity.me(), throwsA(isA<ApiError>()));
+    await Future<void>.delayed(const Duration(milliseconds: 1100));
+    expect(g.h.backend.count('GET', '/v1/me'), 1);
   });
 }

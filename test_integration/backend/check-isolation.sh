@@ -6,6 +6,10 @@
 #   apk    — mobil derleme çıktıları (build/app/outputs) araç adını/kaynağını içermez.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
+# Boru hattında `grep -q` KULLANILMAZ (CX-r2-K-01): grep erken çıkınca üretici SIGPIPE (141)
+# alır ve pipefail altında eşleşme "yok" sanılırdı. Girdi önce dosyaya alınır, sonra aranır.
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
 
 case "${1:-}" in
   image)
@@ -14,21 +18,23 @@ case "${1:-}" in
     name="nizamio-f14-isocheck"
     docker rm -f "$name" >/dev/null 2>&1 || true
     docker create --name "$name" "$image" >/dev/null
-    trap 'docker rm -f "$name" >/dev/null 2>&1 || true' EXIT
-    bins="$(docker export "$name" | tar -t | sed -nE 's#^usr/local/bin/([^/]+)$#\1#p' | sort | tr '\n' ' ')"
+    trap 'docker rm -f "$name" >/dev/null 2>&1 || true; rm -rf "$tmp"' EXIT
+    docker export "$name" | tar -t >"$tmp/files.txt"
+    bins="$(sed -nE 's#^usr/local/bin/([^/]+)$#\1#p' "$tmp/files.txt" | sort | tr '\n' ' ')"
     echo "backend imajı /usr/local/bin: $bins"
-    if docker export "$name" | tar -t | grep -q 'e2e-bootstrap'; then
+    if grep -q 'e2e-bootstrap' "$tmp/files.txt"; then
       echo "HATA: entegrasyon aracı backend çalışma imajında" >&2
       exit 1
     fi
     [[ "$bins" == "migrate server setup " ]] || { echo "HATA: beklenmeyen ikili kümesi" >&2; exit 1; }
     ;;
   apk)
-    out="$root/build/app/outputs"
+    out="${NIZAMIO_IT_APK_DIR:-$root/build/app/outputs}"
     test -d "$out" || { echo "HATA: $out yok (önce flutter build apk)" >&2; exit 1; }
     found=0
     while IFS= read -r apk; do
-      if unzip -p "$apk" | LC_ALL=C grep -a -q -e 'e2e-bootstrap' -e 'FakeControlPlaneAdaptor' -e 'IssueActivationCode'; then
+      unzip -p "$apk" >"$tmp/apk.bin"
+      if LC_ALL=C grep -a -q -e 'e2e-bootstrap' -e 'FakeControlPlaneAdaptor' -e 'IssueActivationCode' "$tmp/apk.bin"; then
         echo "HATA: entegrasyon aracı izi $apk içinde" >&2
         exit 1
       fi

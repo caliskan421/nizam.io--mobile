@@ -102,8 +102,12 @@ class ServerBindingController {
   final SecureStore store;
   final List<Future<void> Function()> _rebindListeners = [];
 
-  void addRebindListener(Future<void> Function() listener) =>
-      _rebindListeners.add(listener);
+  /// Dinleyiciyi kaydeder; dönen işlev onu söker (bileşim kökünün `dispose`'u çağırır —
+  /// sökülen dinleyici, sürmekte olan bir doğrulamada da çalışmaz). İdempotenttir.
+  void Function() addRebindListener(Future<void> Function() listener) {
+    _rebindListeners.add(listener);
+    return () => _rebindListeners.remove(listener);
+  }
 
   /// Test: uygulama sürümü yerine geçer.
   final String? appVersionOverride;
@@ -186,7 +190,8 @@ class ServerBindingController {
       if (saved != null &&
           (saved.$1 != address.toString() || saved.$2 != info.instanceId)) {
         Log.info('bağ: farklı sunucu/kurulum; yerel oturum temizleniyor');
-        for (final l in _rebindListeners) {
+        for (final l in List.of(_rebindListeners)) {
+          if (!_rebindListeners.contains(l)) continue; // bu arada söküldü
           await l();
         }
         if (stale()) return _state.value;

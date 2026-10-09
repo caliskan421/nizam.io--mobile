@@ -97,6 +97,24 @@ olmayan istek gönderilmez. `X-Requested-With`, `X-Nizamio-Program`, `X-Nizamio-
 OpenAPI 3.0.3 `nullable` alanları freezed'de `?` olur; `include_if_null: false` (build.yaml)
 verilmeyen alanı gövdeye yazmaz.
 
+## Core katmanı (ekransız)
+
+| Parça | Dosya | Davranış |
+|---|---|---|
+| Sunucu adresi | `lib/core/server/server_address.dart` | prod: yalnız https (localhost dahil http reddi); dev: http yalnız `localhost`/`127.0.0.1`/`10.0.2.2`/`::1`; kullanıcı bilgisi/sorgu/yol reddi. Reddedilen adrese **hiç istek gitmez**. |
+| Sunucu bağı | `lib/core/server/server_binding.dart` | bağ yok → doğrulanıyor → doğrulandı / güncelleme gerekli / başarısız. Sıra: adres → `/.well-known/nizamio-instance` (`product_id == nizamio`, `api_version`) → `/v1/instance/profile` (`api_version`, `minimum_mobile_version` ≤ uygulama → değilse `BindingUpdateRequired`). TLS hatası `client.tls_error` olarak ayrı görünür. Bağ (adres + instance_id) güvenli depoda; farklı kuruluma yeniden bağlanma oturumu temizler. Her açılışta yeniden doğrulanır. |
+| HTTP | `lib/core/http/` | dio; yönlendirme izlenmez; zincir: **kapı** (spec'te olmayan operationId / bağ dışı adres / eksik S2–S3 kapsamı → istek gönderilmez; `X-Nizamio-Client: mobile`, yazmalarda `X-Requested-With`, kapsam başlıkları) → **kimlik** (Bearer; 401 → tek uçuş yenileme → bir kez tekrar; giriş/yenileme/çıkış 401'i yenileme tetiklemez) → **hata/günlük** (her hata `ApiError`). |
+| Hata | `lib/core/errors/` | `ApiError{code, messageKey, requestId, fields[], status, retryAfter}`; sunucu `message` gösterilmez; metin `errorText()` ile ARB'den; 429 `Retry-After` okunur, otomatik tekrar yok. |
+| Oturum | `lib/core/session/` | belirteçler yalnız `SecureStore`'da (`TokenStore`, tek anahtar, üzerine yazma — yeni kaydedilmeden eski silinmez). Yenileme sonuç tablosu `session_controller.dart` başlığında; **K-05:** zaman aşımı/ağ/TLS/5xx/409/geçersiz yanıt = belirsiz → belirteçler silinir, `SessionReauthRequired(refreshAmbiguous)`, aynı belirteçle tekrar yok. `force_password_change` durumda taşınır. |
+| Kapsam | `lib/core/scope/` | örtük varsayılan yok; S2 program, S3 + departman. |
+| Log | `lib/core/logging/log.dart` | tek yol; Bearer, JSON/anahtar=değer gizlileri, JWT ve o anki belirteçler (birebir) maskelenir; yayında çıkış yok. |
+| Arka plan maskesi | `lib/core/security/privacy_mask.dart` | `AppLifecycleListener`: ön plan dışında opak katman (altyapı; ekran yok). |
+| Durum makinesi | `lib/core/app_phase.dart`, `lib/app/router.dart` | bağ → oturum → kapsam fazı; go_router yönlendirmesi fazdan türetilir (rotalar boş yer tutucu). |
+| Kimlik servisi | `lib/features/identity/` (`data`, `application`) | giriş yalnız `BindingVerified`'da (aksi hâlde istek/parola gitmez); çıkış sunucu hatasında da yereli temizler; `me` 403 zorunlu parola → bayrak. |
+
+Güvenli depo: `FlutterSecureStore` (iOS Keychain `first_unlock_this_device`; Android Keystore,
+`allowBackup=false`). Testlerde ve cihazsız entegrasyonda `MemorySecureStore`.
+
 ## Backend ile ilişki
 
 - Sözleşme: backend `docs/api/openapi.yaml` + `error-codes.json`, **etiketten**

@@ -1,10 +1,12 @@
 // Kullanım: dart run tool/check_boundaries.dart  (CI ve `make lint`)
-// lib/ altındaki her .dart dosyasına tool/boundaries.dart kurallarını uygular; ihlal varsa 1 döner.
+// lib/ altındaki her .dart dosyasına tool/boundaries.dart (sözdizimsel) ve tool/api_surface.dart
+// (tip çözümlemeli A2/A3) kurallarını uygular; ihlal varsa 1 döner.
 import 'dart:io';
 
+import 'api_surface.dart';
 import 'boundaries.dart';
 
-void main() {
+Future<void> main() async {
   final lib = Directory('lib');
   if (!lib.existsSync()) {
     stderr.writeln('check_boundaries: lib/ yok (depo kökünden koşun)');
@@ -22,10 +24,11 @@ void main() {
       file.path.replaceAll(r'\', '/').substring('lib/'.length): file
           .readAsStringSync(),
   };
-  final decls = generatedDeclarations(sources);
   final violations = <Violation>[
     for (final MapEntry(key: rel, value: content) in sources.entries)
-      ...checkSource(rel, content, generatedDecls: decls),
+      ...checkSource(rel, content),
+    // A2/A3: tip çözümlemeli açık API yüzeyi.
+    ...await checkApiSurface('.'),
   ];
   for (final v in violations) {
     stderr.writeln(v);

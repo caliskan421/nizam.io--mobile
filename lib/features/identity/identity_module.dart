@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../core/api/generated/clients/identity_client.dart';
 import '../../core/server/server_binding.dart';
 import '../../core/session/session_controller.dart';
 import 'application/identity_providers.dart';
@@ -21,7 +20,7 @@ void registerIdentityModule(GetIt locator, {required Dio? Function() apiDio}) {
       session: locator<SessionController>(),
       repository: () {
         final dio = apiDio();
-        return dio == null ? null : IdentityRepository(IdentityClient(dio));
+        return dio == null ? null : IdentityRepository(dio);
       },
     ),
   );

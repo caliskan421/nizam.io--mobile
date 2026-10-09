@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import '../../../core/api/generated/clients/identity_client.dart';
 import '../../../core/api/generated/models/login_request.dart';
 import '../../../core/api/generated/models/login_response.dart';
@@ -10,7 +12,9 @@ import '../domain/login_grant.dart';
 /// Üretilmiş DTO'lar bu katmanda kalır; dışarıya domain varlıkları döner (sınır kuralı A1).
 /// Bütün hatalar [ApiError] olarak fırlar.
 class IdentityRepository {
-  IdentityRepository(this._client);
+  /// [dio]: doğrulanmış bağın API istemcisi. Üretilmiş istemci burada kurulur; açık yapıcı
+  /// üretilmiş tip anmaz (sınır kuralı A2).
+  IdentityRepository(Dio dio) : _client = IdentityClient(dio);
 
   final IdentityClient _client;
 

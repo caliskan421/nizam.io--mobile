@@ -1,7 +1,6 @@
 // identity data katmanı: üretilmiş DTO → domain varlığı eşlemesi (sınır kuralı A1).
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nizamio/core/api/generated/clients/identity_client.dart';
 import 'package:nizamio/features/identity/data/identity_repository.dart';
 import 'package:nizamio/features/identity/domain/current_account.dart';
 
@@ -29,10 +28,8 @@ class _Adapter implements HttpClientAdapter {
 }
 
 IdentityRepository _repo(String body) => IdentityRepository(
-  IdentityClient(
-    Dio(BaseOptions(baseUrl: 'https://api.test'))
-      ..httpClientAdapter = _Adapter(body),
-  ),
+  Dio(BaseOptions(baseUrl: 'https://api.test'))
+    ..httpClientAdapter = _Adapter(body),
 );
 
 void main() {

@@ -1,0 +1,125 @@
+// tool/api_surface.dart (A2/A3, tip çözümlemeli) negatif/pozitif matrisi + gerçek lib/ ağacı.
+// Vakalar diskte değil bellek katmanında (overlay) kütüphane olarak çözümlenir.
+@Timeout(Duration(minutes: 3))
+library;
+
+import 'package:flutter_test/flutter_test.dart';
+
+import '../../tool/api_surface.dart';
+import '../../tool/boundaries.dart';
+
+const _me =
+    "import 'package:nizamio/core/api/generated/models/me_response.dart';\n";
+const _data = 'features/identity/data';
+
+/// Vaka adı → (lib göreli yol, içerik, beklenen kural kümesi).
+final _cases = <String, (String, String, Set<String>)>{
+  'genel metot dönüşü': (
+    '$_data/zz_return.dart',
+    '${_me}class R { Future<MeResponse> me() async => throw 0; }',
+    {'A2'},
+  ),
+  'çıkarımlı genel değişken (CX-a-Ö-02)': (
+    '$_data/zz_inferred.dart',
+    "${_me}final MeResponse _dto = const MeResponse(accountId: 'a', email: 'b');\n"
+        'final exposed = _dto;',
+    {'A2'},
+  ),
+  'çıkarımlı genel alan': (
+    '$_data/zz_field.dart',
+    "${_me}class R { final _d = const MeResponse(accountId: 'a', email: 'b'); "
+        'late final exposed = _d; }',
+    {'A2'},
+  ),
+  'genel yapıcı parametresi (CX-a-Ö-02)': (
+    '$_data/zz_ctor.dart',
+    '${_me}class R { R(MeResponse value) : _v = value; final MeResponse _v; '
+        'String get email => _v.email; }',
+    {'A2'},
+  ),
+  'core typedef zinciri (CX-a-Ö-02)': (
+    '$_data/zz_alias_use.dart',
+    "import '../../../core/zz_alias.dart';\nclass R { Me? m; }",
+    {'A2'},
+  ),
+  'core typedef kendisi': (
+    'core/zz_alias.dart',
+    '${_me}typedef Me = MeResponse;',
+    {'A3'},
+  ),
+  'core genel API': (
+    'core/zz_leak.dart',
+    '${_me}class C { MeResponse? last; }',
+    {'A3'},
+  ),
+  'üst tip (implements)': (
+    '$_data/zz_super.dart',
+    '${_me}abstract class R implements MeResponse {}',
+    {'A2'},
+  ),
+  'extension ve extension type': (
+    '$_data/zz_ext.dart',
+    '${_me}extension X on MeResponse { int get n => 1; }\n'
+        'extension type E(MeResponse r) {}',
+    {'A2'},
+  ),
+  'işlev ve kayıt tipi içinde': (
+    '$_data/zz_nested.dart',
+    '${_me}class R { void Function(MeResponse)? cb; (int, {MeResponse m})? rec; }',
+    {'A2'},
+  ),
+  'takma adlı import (çözümleme)': (
+    '$_data/zz_prefix.dart',
+    "import 'package:nizamio/core/api/generated/models/me_response.dart' as api;\n"
+        'class R { api.MeResponse? m; }',
+    {'A2'},
+  ),
+  'yerel aynı adlı tip yanlış pozitif değil (CX-a-K-02)': (
+    '$_data/zz_shadow.dart',
+    "import 'package:nizamio/core/api/generated/models/me_response.dart' as api;\n"
+        'class MeResponse { const MeResponse(); }\n'
+        'class R { MeResponse? m; api.MeResponse? _p; String? get e => _p?.email; }',
+    <String>{},
+  ),
+  'gövde ve özel bildirimler serbest': (
+    '$_data/zz_private.dart',
+    '${_me}class R {\n'
+        "  final MeResponse _c = const MeResponse(accountId: 'a', email: 'b');\n"
+        '  String me() { final m = _c; return m.email; }\n'
+        '  static String _map(MeResponse r) => r.email;\n'
+        '  String other() => _map(_c);\n'
+        '}\n'
+        'class _P { MeResponse? m; }\n'
+        'String f() => _P().m?.email ?? "";',
+    <String>{},
+  ),
+};
+
+void main() {
+  late List<Violation> overlayed;
+  late List<Violation> real;
+
+  setUpAll(() async {
+    overlayed = await checkApiSurface(
+      '.',
+      overlays: {for (final c in _cases.values) c.$1: c.$2},
+      only: [for (final c in _cases.values) c.$1],
+    );
+    real = await checkApiSurface('.');
+  });
+
+  for (final MapEntry(key: name, value: (path, _, expected))
+      in _cases.entries) {
+    test(name, () {
+      final got = overlayed
+          .where((v) => v.path == 'lib/$path')
+          .map((v) => v.rule)
+          .toSet();
+      expect(got, expected, reason: overlayed.join('\n'));
+    });
+  }
+
+  test('gerçek lib/ ağacında açık API sızıntısı yok', () {
+    expect(real.map((v) => v.toString()), isEmpty);
+  });
+}

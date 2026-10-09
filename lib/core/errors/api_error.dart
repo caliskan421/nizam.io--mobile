@@ -1,11 +1,22 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:meta/meta.dart';
 
 import '../api/generated/error_catalog.gen.dart';
 import '../api/generated/models/error_envelope.dart';
 import '../api/generated/models/field_error.dart';
 import '../i18n/generated/client_error_codes.gen.dart';
+
+/// Alan doğrulama hatası (sunucu zarfının `fields[]` öğesi; üretilmiş DTO'dan eşlenir —
+/// sınır kuralı A3). Sunucunun `message` metni taşınmaz: metin `code`'dan ARB ile gelir.
+@immutable
+final class ApiFieldError {
+  const ApiFieldError({required this.field, required this.code});
+
+  final String field;
+  final String code;
+}
 
 /// Uygulamanın tek hata biçimi (F14 kapsam 6–7): `{code, messageKey, requestId, fields[]}`.
 /// Sunucunun `message` alanı kullanıcıya gösterilmez; metin `code`'dan ARB ile gelir.
@@ -21,7 +32,7 @@ class ApiError implements Exception {
   /// Kararlı kod: sunucu kataloğu (`identity.credentials_invalid`) ya da `client.*`.
   final String code;
   final String? requestId;
-  final List<FieldError> fields;
+  final List<ApiFieldError> fields;
   final int? status;
 
   /// 429 yanıtının `Retry-After` süresi. Otomatik yeniden deneme yapılmaz; çağıran karar verir.
@@ -91,7 +102,10 @@ ApiError _fromResponse(Response<Object?>? response) {
       return ApiError(
         env.code,
         requestId: env.requestId,
-        fields: env.fields ?? const [],
+        fields: [
+          for (final f in env.fields ?? const <FieldError>[])
+            ApiFieldError(field: f.field, code: f.code),
+        ],
         status: status,
         retryAfter: retryAfter,
       );

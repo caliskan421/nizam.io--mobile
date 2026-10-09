@@ -59,7 +59,7 @@ test/                               birim testleri (sahte bağdaştırıcı, bel
 test_integration/                   gerçek backend entegrasyonu + backend/ (up.sh, down.sh, …)
 ```
 
-`tool/check_boundaries.dart` (AST tabanlı; `make boundaries`, CI) şu kuralları zorlar —
+`tool/check_boundaries.dart` (AST tabanlı + A2/A3 için tip çözümlemeli; `make boundaries`, CI) şu kuralları zorlar —
 ayrıntı ve kural kimlikleri `tool/boundaries.dart` başlığında, negatif matris
 `test/tool/boundaries_test.dart`'ta:
 
@@ -74,8 +74,11 @@ ayrıntı ve kural kimlikleri `tool/boundaries.dart` başlığında, negatif mat
 - Üretilmiş API kodu (`lib/core/api/generated/**`: DTO, enum, istemci) features içinde yalnız
   `data` katmanında ve `<f>_module.dart`'ta import edilir (A1). `data` DTO'yu `domain`
   varlığına eşler; presentation/application/domain ve açık yüz sözleşme tiplerini görmez.
-  Üretilmiş kod yalnız üretilmiş koddan `export` edilir; `data`'nın açık API'si (genel imza,
-  alan, typedef) üretilmiş tip anmaz (A2). `part`/`part of` yalnız aynı dizinde (B6).
+  Üretilmiş kod yalnız üretilmiş koddan `export` edilir. `part`/`part of` yalnız aynı dizinde (B6).
+- Açık API yüzeyi (A2 `features/*/data`, A3 `core`; `tool/api_surface.dart`, **tip
+  çözümlemeli**): genel tipler, kalıtılanlar dahil üyeler, yapıcılar, typedef, üst düzey
+  bildirimler — çıkarımlı tipler ve typedef zincirleri dahil — üretilmiş tip taşımaz. DTO yalnız
+  gövdede ve özel bildirimde kalır; core'un karşılıkları `ApiFieldError`, `RefreshGrant`.
 - `flutter_secure_storage` yalnız `lib/core/storage/`; `badCertificateCallback` /
   `HttpOverrides` hiçbir yerde; `debugPrint`/`dart:developer` yalnız `lib/core/logging/`.
 

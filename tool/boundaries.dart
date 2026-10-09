@@ -20,6 +20,13 @@
 //   S3  `debugPrint` ve `dart:developer` yalnız `lib/core/logging/**` içinde (log tek yoldan
 //       ve redaksiyonla; `print` ayrıca avoid_print ile yasak).
 //   S4  domain katmanı Flutter/dio/Riverpod import etmez (saf Dart).
+//   S5  shared_preferences yalnız `lib/core/storage/**` içinde (tercih deposu soyutlaması;
+//       gizli veri SecureStore'a — S1).
+//   S6  firebase_* yalnız `lib/app/**` ve `lib/core/telemetry/**` içinde (başlatma ve
+//       telemetri tek yerden; feature katmanları SDK'yı doğrudan görmez).
+//   U1  Boşluk için `SizedBox` yasak, standart `Gap` (package:gap): çocuksuz
+//       `SizedBox(width/height)`, `SizedBox.square`, `SizedBox.fromSize`. Çocuklu SizedBox
+//       (boyut kısıtı) ve `SizedBox.shrink/expand` serbest.
 //   G1  `package:get_it` yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` içinde
 //       (ADR-0001, D-0182: get_it = bileşim kökü; core ve feature katmanları servis bulucu
 //       kullanmaz, bağımlılık yapıcıdan gelir).
@@ -273,6 +280,21 @@ void _checkUri(
       'flutter_secure_storage yalnız lib/core/storage/ içinde import edilir',
     );
   }
+  if (uri.startsWith('package:shared_preferences/') &&
+      !here.path.startsWith('core/storage/')) {
+    add(
+      'S5',
+      'shared_preferences yalnız lib/core/storage/ içinde import edilir',
+    );
+  }
+  if (uri.startsWith('package:firebase_') &&
+      here.area != 'app' &&
+      !here.path.startsWith('core/telemetry/')) {
+    add(
+      'S6',
+      'firebase yalnız lib/app/** ve lib/core/telemetry/** içinde import edilir',
+    );
+  }
   if (uri == 'dart:developer' && !here.path.startsWith('core/logging/')) {
     add(
       'S3',
@@ -438,6 +460,49 @@ class _Visitor extends RecursiveAstVisitor<void> {
       }
     }
     super.visitNamedType(node);
+  }
+
+  // U1 — `const SizedBox(...)` InstanceCreationExpression, `SizedBox(...)` (const/new'siz)
+  // çözümlenmemiş AST'de MethodInvocation olarak gelir; ikisi de denetlenir.
+  void _spacer(AstNode node, String? ctor, ArgumentList args) {
+    if (generated) return;
+    if (ctor != null && ctor != 'square' && ctor != 'fromSize') return;
+    final hasChild = args.arguments.any(
+      (a) => a is NamedArgument && a.name.lexeme == 'child',
+    );
+    if (!hasChild) {
+      add('U1', node, 'boşluk için SizedBox yerine Gap (package:gap) kullanın');
+    }
+  }
+
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    final type = node.constructorName.type;
+    if (type.name.lexeme == 'SizedBox') {
+      _spacer(node, node.constructorName.name?.name, node.argumentList);
+    } else if (type.importPrefix?.name.lexeme == 'SizedBox' &&
+        node.constructorName.name == null) {
+      // Çözümsüz AST `const SizedBox.square(…)`'ı önek.Tip olarak ayrıştırır.
+      _spacer(node, type.name.lexeme, node.argumentList);
+    }
+    super.visitInstanceCreationExpression(node);
+  }
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    final target = node.target;
+    if (target == null && node.methodName.name == 'SizedBox') {
+      _spacer(node, null, node.argumentList);
+    } else if (target is SimpleIdentifier && target.name == 'SizedBox') {
+      _spacer(node, node.methodName.name, node.argumentList);
+    } else if (target is PrefixedIdentifier &&
+        target.identifier.name == 'SizedBox') {
+      _spacer(node, node.methodName.name, node.argumentList);
+    } else if (target is SimpleIdentifier &&
+        node.methodName.name == 'SizedBox') {
+      _spacer(node, null, node.argumentList); // önekli: m.SizedBox(...)
+    }
+    super.visitMethodInvocation(node);
   }
 
   @override

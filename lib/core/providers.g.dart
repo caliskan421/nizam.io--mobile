@@ -241,6 +241,54 @@ final class SessionControllerProvider
 
 String _$sessionControllerHash() => r'698f60c71c7fff11a0d7ba0a85fd5140be9f364f';
 
+@ProviderFor(themeModeController)
+final themeModeControllerProvider = ThemeModeControllerProvider._();
+
+final class ThemeModeControllerProvider
+    extends
+        $FunctionalProvider<
+          ThemeModeController,
+          ThemeModeController,
+          ThemeModeController
+        >
+    with $Provider<ThemeModeController> {
+  ThemeModeControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'themeModeControllerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$themeModeControllerHash();
+
+  @$internal
+  @override
+  $ProviderElement<ThemeModeController> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ThemeModeController create(Ref ref) {
+    return themeModeController(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ThemeModeController value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ThemeModeController>(value),
+    );
+  }
+}
+
+String _$themeModeControllerHash() =>
+    r'c312d01d793778a55fee6bea9b457f4d5bd0f5e4';
+
 @ProviderFor(bindingState)
 final bindingStateProvider = BindingStateProvider._();
 
@@ -363,6 +411,52 @@ final class ScopeStateProvider
 }
 
 String _$scopeStateHash() => r'c21641859d5db8912fdde39e723b79352276b466';
+
+/// Kalıcı tema modu (sistem/açık/koyu); değiştirmek için `themeModeControllerProvider.set`.
+
+@ProviderFor(themeMode)
+final themeModeProvider = ThemeModeProvider._();
+
+/// Kalıcı tema modu (sistem/açık/koyu); değiştirmek için `themeModeControllerProvider.set`.
+
+final class ThemeModeProvider
+    extends $FunctionalProvider<ThemeMode, ThemeMode, ThemeMode>
+    with $Provider<ThemeMode> {
+  /// Kalıcı tema modu (sistem/açık/koyu); değiştirmek için `themeModeControllerProvider.set`.
+  ThemeModeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'themeModeProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$themeModeHash();
+
+  @$internal
+  @override
+  $ProviderElement<ThemeMode> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ThemeMode create(Ref ref) {
+    return themeMode(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ThemeMode value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ThemeMode>(value),
+    );
+  }
+}
+
+String _$themeModeHash() => r'11648140d16d1b7ee579fab9382af2c8b3201ba5';
 
 @ProviderFor(appPhase)
 final appPhaseProvider = AppPhaseProvider._();

@@ -7,6 +7,8 @@ import '../../core/config/flavor.dart';
 import '../../core/errors/api_error.dart';
 import '../../core/http/dio_factory.dart';
 import '../../core/i18n/generated/client_error_codes.gen.dart';
+import '../../core/preferences/app_preferences.dart';
+import '../../core/preferences/theme_mode_controller.dart';
 import '../../core/scope/scope_controller.dart';
 import '../../core/server/server_binding.dart';
 import '../../core/session/refresh_grant.dart';
@@ -14,7 +16,9 @@ import '../../core/session/session_controller.dart';
 import '../../core/session/session_state.dart';
 import '../../core/session/token_store.dart';
 import '../../core/storage/flutter_secure_store.dart';
+import '../../core/storage/preference_store.dart';
 import '../../core/storage/secure_store.dart';
+import '../../core/storage/shared_preference_store.dart';
 
 /// Altyapı nesne grafiği (ADR-0001, D-0182): bütün altyapı tekilleri ve aralarındaki
 /// KABLOLAMA yalnız burada kaydedilir; ömür (tembel tekil, `dispose`) get_it'tedir.
@@ -26,13 +30,15 @@ import '../../core/storage/secure_store.dart';
 ///   oturumu bilmez; yön tek: oturum → bağ).
 /// - Oturum etkin değilse (çıkış, yeniden giriş gerekli) kapsam temizlenir.
 ///
-/// [secureStore] / [httpAdapter] yalnız testler ve cihazsız entegrasyon içindir; verilmezse
-/// flutter_secure_storage ve dio'nun varsayılan bağdaştırıcısı (platform TLS) kullanılır.
+/// [secureStore] / [httpAdapter] / [preferenceStore] yalnız testler ve cihazsız entegrasyon
+/// içindir; verilmezse flutter_secure_storage, dio'nun varsayılan bağdaştırıcısı (platform
+/// TLS) ve shared_preferences kullanılır.
 void configureDependencies(
   GetIt locator, {
   required Flavor flavor,
   SecureStore? secureStore,
   HttpClientAdapter? httpAdapter,
+  PreferenceStore? preferenceStore,
 }) {
   locator
     ..registerSingleton<Flavor>(flavor)
@@ -41,6 +47,16 @@ void configureDependencies(
     )
     ..registerLazySingleton<TokenStore>(
       () => TokenStore(locator<SecureStore>()),
+    )
+    ..registerLazySingleton<PreferenceStore>(
+      () => preferenceStore ?? SharedPreferenceStore(),
+    )
+    ..registerLazySingleton<AppPreferences>(
+      () => AppPreferences(locator<PreferenceStore>()),
+    )
+    ..registerLazySingleton<ThemeModeController>(
+      () => ThemeModeController(locator<AppPreferences>()),
+      dispose: (c) => c.dispose(),
     )
     ..registerLazySingleton<ScopeController>(ScopeController.new)
     ..registerLazySingleton<ServerBindingController>(

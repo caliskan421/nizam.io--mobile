@@ -477,6 +477,63 @@ void main() {
     });
   });
 
+  group('S5/S6 tercih ve firebase yalıtımı', () {
+    test('shared_preferences yalnız core/storage', () {
+      const sp = "import 'package:shared_preferences/shared_preferences.dart';";
+      expect(rules('core/storage/shared_preference_store.dart', sp), isEmpty);
+      expect(rules('core/preferences/a.dart', sp), ['S5']);
+      expect(rules('features/identity/data/a.dart', sp), ['S5']);
+      expect(rules('app/bootstrap.dart', sp), ['S5']);
+    });
+    test('firebase yalnız app ve core/telemetry', () {
+      const fb = "import 'package:firebase_core/firebase_core.dart';";
+      expect(rules('app/bootstrap.dart', fb), isEmpty);
+      expect(rules('core/telemetry/a.dart', fb), isEmpty);
+      expect(rules('core/http/a.dart', fb), ['S6']);
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import 'package:firebase_analytics/firebase_analytics.dart';",
+        ),
+        ['S6'],
+      );
+    });
+  });
+
+  group('U1 boşluk standardı Gap', () {
+    test('çocuksuz SizedBox (const, constsuz, square, fromSize) yasak', () {
+      for (final src in [
+        'final w = const SizedBox(height: 8);',
+        'final w = SizedBox(width: 8);',
+        'final w = SizedBox.square(dimension: 8);',
+        'final w = const SizedBox.square(dimension: 8);',
+        'final w = const SizedBox.fromSize(size: Size(1, 1));',
+        'final w = m.SizedBox(height: 8);',
+        'final w = m.SizedBox.square(dimension: 8);',
+      ]) {
+        expect(rules('features/identity/presentation/a.dart', src), [
+          'U1',
+        ], reason: src);
+      }
+      expect(rules('app/app.dart', 'final w = SizedBox(height: 4);'), ['U1']);
+    });
+    test('çocuklu SizedBox, shrink/expand ve Gap serbest', () {
+      for (final src in [
+        'final w = SizedBox(width: 40, child: Text(""));',
+        'final w = const SizedBox.shrink();',
+        'final w = const SizedBox.expand();',
+        'final w = SizedBox.expand(child: x);',
+        'final w = const Gap(8);',
+      ]) {
+        expect(
+          rules('features/identity/presentation/a.dart', src),
+          isEmpty,
+          reason: src,
+        );
+      }
+    });
+  });
+
   test('gerçek lib/ ağacı kurallara uyar', () {
     final violations = <Violation>[];
     for (final f in Directory(

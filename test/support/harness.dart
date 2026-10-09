@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:nizamio/app/di/composition.dart';
 import 'package:nizamio/core/config/flavor.dart';
+import 'package:nizamio/core/storage/preference_store.dart';
 import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/features/identity/identity.dart';
 
@@ -21,11 +22,13 @@ class Harness {
       flavor: flavor,
       secureStore: this.store,
       httpAdapter: backend,
+      preferenceStore: prefs,
     );
   }
 
   final FakeBackend backend;
   final MemorySecureStore store;
+  final MemoryPreferenceStore prefs = MemoryPreferenceStore();
   late final Composition composition;
   ProviderContainer get container => composition.container;
 

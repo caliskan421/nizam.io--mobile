@@ -8,8 +8,12 @@ geliştirmesi program sonrası ayrı çalışmadadır (D-0174).
 
 Flutter **3.47.2** stable (Dart 3.13.2; pin `pubspec.yaml` `environment.flutter`, CI aynı
 alanı okur) · get_it 9 (bileşim kökü) · Riverpod 3 (kod üretimli; reaktif durum) · go_router · dio · freezed + json_serializable
-(OpenAPI'den üretim) · flutter_secure_storage · intl/ARB. Asgari platform: iOS 16+,
-Android 8.0 (API 26)+.
+(OpenAPI'den üretim) · flutter_secure_storage · intl/ARB · shared_preferences (gizli olmayan
+tercihler) · google_fonts 8 (yazı tipleri uygulamayla gelir) · gap (boşluk standardı) · drift +
+path_provider (yerel veri) · Firebase (core, messaging, analytics, crashlytics, remote_config;
+başlatılmamış) · flutter_native_splash + flutter_launcher_icons (yer tutucu marka). Paket
+kararları: `docs/architecture/adr-0002-paketler-tercih-yerel-veri-firebase.md`. Asgari platform:
+iOS 16+, Android 8.0 (API 26)+.
 
 ## Komutlar
 
@@ -83,6 +87,8 @@ negatif matrisler `test/tool/boundaries_test.dart` ve `test/tool/api_surface_tes
   gövdede ve özel bildirimde kalır; core'un karşılıkları `ApiFieldError`, `RefreshGrant`.
   Denetim fail-closed'dır (A0): çözümlenemeyen kütüphane, derleme hatası, sahipsiz part veya
   bulunamayan SDK ihlaldir.
+- `shared_preferences` yalnız `lib/core/storage/` (S5); firebase yalnız `lib/app/**` ve
+  `lib/core/telemetry/**` (S6); boşluk için çocuksuz `SizedBox` yasak, `Gap` (U1).
 - `flutter_secure_storage` yalnız `lib/core/storage/`; `badCertificateCallback` /
   `HttpOverrides` hiçbir yerde; `debugPrint`/`dart:developer` yalnız `lib/core/logging/`.
 

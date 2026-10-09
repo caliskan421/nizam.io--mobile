@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'app_phase.dart';
 import 'config/flavor.dart';
 import 'http/dio_factory.dart';
+import 'preferences/theme_mode_controller.dart';
 import 'scope/scope_controller.dart';
 import 'server/server_binding.dart';
 import 'session/session_controller.dart';
@@ -14,7 +16,7 @@ part 'providers.g.dart';
 
 // Riverpod = reaktif durum ve sunuma açılan yüz (ADR-0001, D-0182).
 //
-// Aşağıdaki ilk beş sağlayıcı PORTTUR: altyapı tekillerinin kendisi ve kablolaması bileşim
+// Aşağıdaki ilk altı sağlayıcı PORTTUR: altyapı tekillerinin kendisi ve kablolaması bileşim
 // kökündedir (`lib/app/di/`, get_it). Bootstrap bu portları get_it'teki örneklerle geçersiz
 // kılar; core get_it'i import etmez (sınır kuralı G1). Port geçersiz kılınmadan okunursa
 // UnimplementedError — sessiz varsayılan örnek yoktur.
@@ -41,6 +43,10 @@ ServerBindingController serverBinding(Ref ref) =>
 SessionController sessionController(Ref ref) =>
     _unbound('sessionControllerProvider');
 
+@Riverpod(keepAlive: true)
+ThemeModeController themeModeController(Ref ref) =>
+    _unbound('themeModeControllerProvider');
+
 T _listen<T>(Ref ref, ValueListenable<T> listenable) {
   void onChange() => ref.invalidateSelf();
   listenable.addListener(onChange);
@@ -59,6 +65,11 @@ SessionState sessionState(Ref ref) =>
 @Riverpod(keepAlive: true)
 ScopeSelection scopeState(Ref ref) =>
     _listen(ref, ref.watch(scopeControllerProvider).state);
+
+/// Kalıcı tema modu (sistem/açık/koyu); değiştirmek için `themeModeControllerProvider.set`.
+@Riverpod(keepAlive: true)
+ThemeMode themeMode(Ref ref) =>
+    _listen(ref, ref.watch(themeModeControllerProvider).state);
 
 @Riverpod(keepAlive: true)
 AppPhase appPhase(Ref ref) => deriveAppPhase(

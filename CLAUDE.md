@@ -5,9 +5,11 @@ yönetim deposundaki eski kayıt sistemine (`project-control`) bağlı değildir
 
 **Yığın:** Flutter 3.47.2 · get_it (bileşim kökü, `lib/app/di/`) · Riverpod 3 (reaktif durum;
 altyapı sağlayıcıları port) · go_router · dio · freezed/json_serializable (OpenAPI'den) ·
-flutter_secure_storage · intl/ARB. DI ayrımı: `docs/architecture/adr-0001-di-get-it.md`
+flutter_secure_storage · intl/ARB · shared_preferences · google_fonts (gömülü) · gap · drift ·
+Firebase (başlatılmamış) · splash/simge (ADR-0002). DI ayrımı: `docs/architecture/adr-0001-di-get-it.md`
 (D-0182); get_it yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` (sınır kuralı G1/G2).
 Üretilmiş API DTO'ları features içinde yalnız `data` katmanında; dışarıya domain varlığı döner (A1).
+Boşluk standardı `Gap` (U1); tercih yalnız `AppPreferences` üzerinden (S5); firebase yalnız app/core/telemetry (S6).
 
 ## Okuma sırası (oturum başı)
 

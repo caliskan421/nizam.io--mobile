@@ -53,41 +53,54 @@ void configureDependencies(
     locator.registerSingleton<HttpClientAdapter>(httpAdapter);
   }
 
-  void Function()? detachScope;
-  locator.registerLazySingleton<SessionController>(() {
-    final binding = locator<ServerBindingController>();
-    final scope = locator<ScopeController>();
-    final controller = SessionController(locator<TokenStore>(), (
-      refreshToken,
-      instanceId,
-    ) {
-      final b = binding.current;
-      if (b is! BindingVerified || b.info.instanceId != instanceId) {
-        throw ApiError(ClientErrorCode.serverNotVerified);
+  // Kablo sökücüleri: SessionController atılırken (locator.reset) hem oturum→kapsam hem
+  // bağ→oturum (yeniden bağlanma) dinleyicileri sökülür; eski bağ nesnesi tutulsa ya da
+  // doğrulaması sürse bile eski grafik çalışmaz (CX-g-K-01). İdempotent.
+  final detach = <void Function()>[];
+  locator.registerLazySingleton<SessionController>(
+    () {
+      final binding = locator<ServerBindingController>();
+      final scope = locator<ScopeController>();
+      final controller = SessionController(locator<TokenStore>(), (
+        refreshToken,
+        instanceId,
+      ) {
+        final b = binding.current;
+        if (b is! BindingVerified || b.info.instanceId != instanceId) {
+          throw ApiError(ClientErrorCode.serverNotVerified);
+        }
+        final dio = createPublicDio(
+          server: b.info.address,
+          flavor: flavor,
+          adapter: httpAdapter,
+        );
+        return apiCall(
+          () =>
+              IdentityClient(dio)
+                  .refresh(body: RefreshRequest(refreshToken: refreshToken)),
+        );
+      });
+      detach.add(
+        binding.addRebindListener(() async {
+          scope.clear();
+          await controller.clear();
+        }),
+      );
+      void onSession() {
+        if (controller.state.value is! SessionActive) scope.clear();
       }
-      final dio = createPublicDio(
-        server: b.info.address,
-        flavor: flavor,
-        adapter: httpAdapter,
-      );
-      return apiCall(
-        () =>
-            IdentityClient(dio)
-                .refresh(body: RefreshRequest(refreshToken: refreshToken)),
-      );
-    });
-    binding.addRebindListener(() async {
-      scope.clear();
-      await controller.clear();
-    });
-    void onSession() {
-      if (controller.state.value is! SessionActive) scope.clear();
-    }
 
-    controller.state.addListener(onSession);
-    detachScope = () => controller.state.removeListener(onSession);
-    return controller;
-  }, dispose: (_) => detachScope?.call());
+      controller.state.addListener(onSession);
+      detach.add(() => controller.state.removeListener(onSession));
+      return controller;
+    },
+    dispose: (_) {
+      for (final d in detach) {
+        d();
+      }
+      detach.clear();
+    },
+  );
 }
 
 /// Bileşim kökünün kayıtlı HTTP bağdaştırıcısı (yoksa null = platform varsayılanı).

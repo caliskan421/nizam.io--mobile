@@ -1,6 +1,8 @@
 // Bileşim kökünün davranışını SABİTLEYEN test (D-0182 get_it taşımasından ÖNCE yazıldı; taşıma
 // sonrası aynen geçmeli): taze açılış sırası, yeniden bağlanma kablosu, oturum→kapsam temizliği,
 // yenileme çağrısının kuruluma bağlılığı, Bearer'ın kuruluma bağlılığı.
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +13,7 @@ import 'package:nizamio/core/config/flavor.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/core/server/server_binding.dart';
 import 'package:nizamio/core/session/session_controller.dart';
 import 'package:nizamio/core/session/session_state.dart';
@@ -193,6 +196,78 @@ void main() {
       addTearDown(c.dispose);
       expect(() => c.read(sessionControllerProvider), throwsA(anything));
       expect(() => c.read(identityServiceProvider), throwsA(anything));
+    });
+  });
+
+  group('CX-g-K-01: dispose sonrası eski grafik çalışmaz', () {
+    Future<
+      (Composition, ServerBindingController, SessionController, ScopeController)
+    >
+    loggedIn(FakeHandler h) async {
+      final comp = Composition.create(
+        flavor: Flavor.prod,
+        secureStore: MemorySecureStore(),
+        httpAdapter: FakeBackend(h),
+      );
+      final binding = comp.locator<ServerBindingController>();
+      final session = comp.locator<SessionController>();
+      final scope = comp.locator<ScopeController>();
+      await binding.verify(testUrl);
+      await comp.container
+          .read(identityServiceProvider)
+          .login(email: 'a@b.test', password: 'p');
+      scope.selectProgram('p-1');
+      return (comp, binding, session, scope);
+    }
+
+    test('eski bağ dispose SONRASI yeniden bağlanırsa eski oturum/kapsam temizlenmez', () async {
+      final (comp, binding, session, scope) = await loggedIn(handler);
+      await comp.dispose();
+      instance = 'inst-2';
+      await binding.verify(testUrl);
+      expect(
+        session.state.value,
+        isA<SessionActive>(),
+        reason: 'sökülmüş dinleyici çalışmadı',
+      );
+      expect(scope.current.programId, 'p-1');
+    });
+
+    test('bekleyen doğrulama sırasında dispose: doğrulama bitince eski grafik çalışmaz', () async {
+      final gate = Completer<void>();
+      var gated = false;
+      Future<ResponseBody> h(Seen r) async {
+        if (gated && r.path == '/.well-known/nizamio-instance') {
+          await gate.future;
+        }
+        return handler(r);
+      }
+
+      final (comp, binding, session, scope) = await loggedIn(h);
+      gated = true;
+      instance = 'inst-2';
+      final pending = binding.verify(testUrl);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      await comp.dispose();
+      gate.complete();
+      await pending;
+      expect(session.state.value, isA<SessionActive>());
+      expect(scope.current.programId, 'p-1');
+    });
+
+    test('iki kez dispose güvenli', () async {
+      final (comp, _, _, _) = await loggedIn(handler);
+      await comp.dispose();
+      await comp.dispose();
+    });
+
+    test('dispose öncesi kablo hâlâ çalışır (regresyon)', () async {
+      final (comp, binding, session, scope) = await loggedIn(handler);
+      addTearDown(comp.dispose);
+      instance = 'inst-2';
+      await binding.verify(testUrl);
+      expect(session.state.value, isA<SessionNone>());
+      expect(scope.current.hasProgram, isFalse);
     });
   });
 }

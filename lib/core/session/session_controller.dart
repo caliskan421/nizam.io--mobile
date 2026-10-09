@@ -1,16 +1,17 @@
 import 'package:flutter/foundation.dart';
 
-import '../api/generated/models/refresh_response.dart';
 import '../errors/api_error.dart';
 import '../i18n/generated/client_error_codes.gen.dart';
 import '../logging/log.dart';
+import 'refresh_grant.dart';
 import 'session_state.dart';
 import 'token_pair.dart';
 import 'token_store.dart';
 
 /// `POST /v1/auth/refresh` çağrısı (üretilmiş IdentityClient; kimlik ara katmanı OLMADAN).
+/// Yanıt DTO'su bileşim kökünde [RefreshGrant]'a eşlenir (sınır kuralı A3).
 /// [instanceId]: çiftin ait olduğu kurulum; çağrı yalnız güncel bağ bu kurulumsa ağa çıkar.
-typedef RefreshCall = Future<RefreshResponse> Function(
+typedef RefreshCall = Future<RefreshGrant> Function(
   String refreshToken,
   String instanceId,
 );
@@ -181,7 +182,7 @@ class SessionController {
       throw ApiError(ClientErrorCode.secureStorageError);
     }
     _ensureCurrent(gen, p);
-    final RefreshResponse r;
+    final RefreshGrant r;
     try {
       r = await _refreshCall(p.refreshToken, p.instanceId);
     } on ApiError catch (e) {
@@ -226,7 +227,7 @@ class SessionController {
     final next = TokenPair(
       accountId: r.accountId,
       accessToken: access,
-      accessExpiresAt: r.expiresAt,
+      accessExpiresAt: r.accessExpiresAt,
       refreshToken: refresh,
       refreshExpiresAt: r.refreshExpiresAt,
       forcePasswordChange: p.forcePasswordChange,

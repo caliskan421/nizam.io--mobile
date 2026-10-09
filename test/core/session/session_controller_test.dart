@@ -2,9 +2,9 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nizamio/core/api/generated/models/refresh_response.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
+import 'package:nizamio/core/session/refresh_grant.dart';
 import 'package:nizamio/core/session/session_controller.dart';
 import 'package:nizamio/core/session/session_state.dart';
 import 'package:nizamio/core/session/token_pair.dart';
@@ -44,18 +44,18 @@ TokenPair pair(String n, {bool force = false}) => TokenPair(
   instanceId: 'inst-1',
 );
 
-RefreshResponse rotated(String n) => RefreshResponse(
+RefreshGrant rotated(String n) => RefreshGrant(
   accountId: 'acc-1',
   accessToken: 'access-token-$n',
   refreshToken: 'refresh-token-$n',
-  expiresAt: _future,
+  accessExpiresAt: _future,
   refreshExpiresAt: _future,
 );
 
 void main() {
   late RecordingStore store;
   late List<String> calls;
-  late FutureOr<RefreshResponse> Function(String) respond;
+  late FutureOr<RefreshGrant> Function(String) respond;
   late SessionController session;
 
   setUp(() async {
@@ -123,9 +123,9 @@ void main() {
     });
 
     test('yanıt 200 ama belirteç eksik → belirsiz', () async {
-      respond = (_) => RefreshResponse(
+      respond = (_) => RefreshGrant(
         accountId: 'acc-1',
-        expiresAt: 1,
+        accessExpiresAt: 1,
         refreshExpiresAt: 1,
       );
       await expectLater(session.refresh(), throwsA(isA<ApiError>()));
@@ -288,7 +288,7 @@ void main() {
     });
 
     test('yenileme sırasında süreç çöktü (işaret diskte): açılışta geri yükleme yok', () async {
-      final gate = Completer<RefreshResponse>();
+      final gate = Completer<RefreshGrant>();
       respond = (_) => gate.future;
       unawaited(session.refresh().then((_) {}, onError: (Object _) {}));
       await Future<void>.delayed(Duration.zero);
@@ -350,7 +350,7 @@ void main() {
   });
 
   test('tek uçuş: eşzamanlı üç yenileme → tek istek', () async {
-    final gate = Completer<RefreshResponse>();
+    final gate = Completer<RefreshGrant>();
     respond = (_) => gate.future;
     final futures = [session.refresh(), session.refresh(), session.refresh()];
     gate.complete(rotated('2'));

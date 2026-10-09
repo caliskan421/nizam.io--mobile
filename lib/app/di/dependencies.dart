@@ -9,6 +9,7 @@ import '../../core/http/dio_factory.dart';
 import '../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../core/scope/scope_controller.dart';
 import '../../core/server/server_binding.dart';
+import '../../core/session/refresh_grant.dart';
 import '../../core/session/session_controller.dart';
 import '../../core/session/session_state.dart';
 import '../../core/session/token_store.dart';
@@ -74,11 +75,19 @@ void configureDependencies(
           flavor: flavor,
           adapter: httpAdapter,
         );
-        return apiCall(
-          () =>
-              IdentityClient(dio)
-                  .refresh(body: RefreshRequest(refreshToken: refreshToken)),
-        );
+        // DTO → RefreshGrant eşlemesi apiCall içinde: hata sınıflaması (ayrıştırma hatası →
+        // belirsiz, K-05) değişmez.
+        return apiCall(() async {
+          final r = await IdentityClient(dio)
+              .refresh(body: RefreshRequest(refreshToken: refreshToken));
+          return RefreshGrant(
+            accountId: r.accountId,
+            accessToken: r.accessToken,
+            accessExpiresAt: r.expiresAt,
+            refreshToken: r.refreshToken,
+            refreshExpiresAt: r.refreshExpiresAt,
+          );
+        });
       });
       detach.add(
         binding.addRebindListener(() async {

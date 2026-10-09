@@ -305,6 +305,178 @@ void main() {
     });
   });
 
+  group('A1 üretilmiş API kodu yalnız data katmanında', () {
+    const dto =
+        "import 'package:nizamio/core/api/generated/models/me_response.dart';";
+    test('application → DTO yasak (package: ve göreli)', () {
+      expect(rules('features/identity/application/a.dart', dto), ['A1']);
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import '../../../core/api/generated/models/me_response.dart';",
+        ),
+        ['A1'],
+      );
+    });
+    test('presentation ve domain → DTO yasak', () {
+      expect(rules('features/identity/presentation/a.dart', dto), ['A1']);
+      expect(rules('features/identity/domain/a.dart', dto), ['A1']);
+    });
+    test('enum ve istemci de sayılır', () {
+      expect(
+        rules(
+          'features/work/presentation/a.dart',
+          "import 'package:nizamio/core/api/generated/models/roster_member_status.dart';",
+        ),
+        ['A1'],
+      );
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import 'package:nizamio/core/api/generated/clients/identity_client.dart';",
+        ),
+        ['A1'],
+      );
+    });
+    test('açık yüz DTO dışa veremez', () {
+      expect(
+        rules(
+          'features/identity/identity.dart',
+          "export '../../core/api/generated/models/me_response.dart';",
+        ),
+        ['A1'],
+      );
+    });
+    test('data ve <f>_module.dart → serbest; core → serbest', () {
+      expect(rules('features/identity/data/a.dart', dto), isEmpty);
+      expect(rules('features/identity/identity_module.dart', dto), isEmpty);
+      expect(rules('core/http/a.dart', dto), isEmpty);
+    });
+    test('B8 yüzde-kodlu ve ./.. bileşenli URI fail-closed (CX-a-Ö-06)', () {
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import 'package:nizamio/core/api/g%65nerated/models/me_response.dart';",
+        ),
+        ['B8'],
+      );
+      expect(
+        rules(
+          'features/identity/identity.dart',
+          "export 'package:nizamio/core/api/g%65nerated/models/me_response.dart';",
+        ),
+        ['B8'],
+      );
+      expect(
+        rules('core/session/a.dart', "import 'package:get%5Fit/get_it.dart';"),
+        ['B8'],
+      );
+      expect(
+        rules(
+          'app/bootstrap.dart',
+          "import 'package:nizamio/features/identity/identity%5Fmodule.dart';",
+        ),
+        ['B8'],
+      );
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import 'package:nizamio/features/../core/api/generated/models/me_response.dart';",
+        ),
+        ['B8'],
+      );
+      expect(rules('features/identity/data/a.g.dart', "part of 'a%2Edart';"), [
+        'B6',
+      ]);
+    });
+    test('B7 koşullu import/export yasak (üretilmiş kod hariç)', () {
+      const cond = "import 'a.dart' if (dart.library.io) 'b.dart';";
+      expect(rules('features/identity/data/x.dart', cond), ['B7']);
+      expect(rules('core/http/x.dart', cond), ['B7']);
+      expect(
+        rules('app/x.dart', "export 'a.dart' if (dart.library.io) 'b.dart';"),
+        ['B7'],
+      );
+      expect(rules('core/api/generated/x.dart', cond), isEmpty);
+    });
+    test('koşullu import dalı da denetlenir', () {
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import 'stub.dart' if (dart.library.io) "
+              "'package:nizamio/core/api/generated/models/me_response.dart';",
+        ),
+        unorderedEquals(['A1', 'B7']),
+      );
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import '../../../core/errors/api_error.dart' if (dart.library.io) "
+              "'../../../core/api/generated/models/me_response.dart';",
+        ),
+        unorderedEquals(['A1', 'B7']),
+      );
+    });
+    test('part yönergesi de denetlenir', () {
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "part '../../../core/api/generated/models/me_response.g.dart';",
+        ),
+        unorderedEquals(['A1', 'B6']),
+      );
+    });
+    test('barrel ile transitif sızma: üretilmiş kod yalnız üretilmiş koddan export', () {
+      const exp =
+          "export 'package:nizamio/core/api/generated/models/me_response.dart';";
+      expect(rules('core/api/models.dart', exp), ['A1']);
+      expect(rules('features/identity/data/dtos.dart', exp), ['A1']);
+      expect(rules('core/api/generated/export.dart', exp), isEmpty);
+    });
+    test('core/api dışı core serbest (hata, oturum)', () {
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import '../../../core/errors/api_error.dart';",
+        ),
+        isEmpty,
+      );
+    });
+  });
+
+  group('B6 part tüneli', () {
+    test('aynı dizindeki part serbest (.g.dart)', () {
+      expect(
+        rules('features/identity/application/a.dart', "part 'a.g.dart';"),
+        isEmpty,
+      );
+      expect(
+        rules('features/identity/application/a.g.dart', "part of 'a.dart';"),
+        isEmpty,
+      );
+    });
+    test('data kütüphanesi + domain parçası (CX-a-Ö-01 tüneli)', () {
+      expect(
+        rules(
+          'features/identity/data/repo.dart',
+          "import 'package:nizamio/core/api/generated/models/me_response.dart';\n"
+              "part '../domain/leak.dart';",
+        ),
+        ['B6'],
+      );
+      expect(
+        rules(
+          'features/identity/domain/leak.dart',
+          "part of '../data/repo.dart';",
+        ),
+        ['B6'],
+      );
+    });
+    test('kütüphane adıyla part of yasak', () {
+      expect(rules('features/identity/domain/a.dart', 'part of x.y;'), ['B6']);
+    });
+  });
+
   test('gerçek lib/ ağacı kurallara uyar', () {
     final violations = <Violation>[];
     for (final f in Directory(

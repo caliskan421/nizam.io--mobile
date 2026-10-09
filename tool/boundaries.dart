@@ -25,6 +25,23 @@
 //       kullanmaz, bağımlılık yapıcıdan gelir).
 //   G2  `features/<f>/<f>_module.dart` (modül kayıt fonksiyonu) yalnız `lib/app/di/**`
 //       tarafından import edilir.
+//   A1  Üretilmiş API kodu (`lib/core/api/generated/**`: DTO'lar, enum'lar, istemciler)
+//       features içinde yalnız `data` katmanında ve `<f>_module.dart`'ta (istemci kurulumu)
+//       import edilir. data DTO'yu domain varlığına eşler; presentation/application/domain
+//       ve açık yüz sözleşme tiplerini görmez (backend alan değişikliği UI'a sızmaz).
+//       Üretilmiş kod yalnız üretilmiş koddan `export` edilir (barrel üzerinden transitif
+//       sızma kapalı). Koşullu import/export URI'leri ve `part` yönergeleri de denetlenir;
+//       `package:` yolları normalize edilir (`..` ile kaçış).
+//   A2/A3  Açık API yüzeyinde üretilmiş tip yok (data katmanı ve core): TİP ÇÖZÜMLEMESİ
+//       gerektirdiği için tool/api_surface.dart'tadır.
+//   B8  URI kanonik olmalı: yüzde-kodlama (`g%65nerated`, `get%5Fit`) ve `.`/`..` yol
+//       bileşeni yasak — derleyici bunları çözer, ham dize karşılaştırması aşılırdı.
+//       Fail-closed: kanonik olmayan URI başka kurallara hiç girmeden ihlaldir.
+//   B7  Koşullu import/export (`if (dart.library.io) '…'`) üretilmiş kod dışında yasak: tip
+//       çözümlemeli A2/A3 denetimi tek yapılandırmayı çözümler, dallar arası farklı tip
+//       seçimi denetimden kaçardı.
+//   B6  `part` / `part of` yalnız aynı dizindeki dosyayı gösterir (katmanlar arası part
+//       tüneli ve kütüphane adıyla `part of` yasak).
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
@@ -154,29 +171,99 @@ List<Violation> checkSource(String libPath, String content) {
   }
 
   for (final directive in unit.directives) {
-    if (directive is! NamespaceDirective) continue;
-    final uri = directive.uri.stringValue;
-    if (uri == null) continue;
-    _checkUri(here, uri, (rule, msg) => add(rule, directive, msg), generated);
+    // B6 — part tüneli.
+    if (directive is PartDirective || directive is PartOfDirective) {
+      final uri = directive is PartDirective
+          ? directive.uri.stringValue
+          : (directive as PartOfDirective).uri?.stringValue;
+      final target = uri == null || !_canonical(uri)
+          ? null
+          : _resolve(here.path, uri);
+      if (target == null ||
+          p.posix.dirname(target) != p.posix.dirname(here.path)) {
+        add(
+          'B6',
+          directive,
+          'part/part of yalnız aynı dizindeki dosyayı URI ile gösterir: ${uri ?? 'kütüphane adı'}',
+        );
+      }
+    }
+    if (directive is! NamespaceDirective && directive is! PartDirective) {
+      continue;
+    }
+    if (!generated &&
+        directive is NamespaceDirective &&
+        directive.configurations.isNotEmpty) {
+      add(
+        'B7',
+        directive,
+        'koşullu import/export yasak (A2/A3 tek yapılandırmayı çözümler)',
+      );
+    }
+    final uris = [
+      (directive as UriBasedDirective).uri.stringValue,
+      // Koşullu import/export (`if (dart.library.io) '…'`) her dalı ayrıca denetlenir.
+      if (directive is NamespaceDirective)
+        for (final c in directive.configurations) c.uri.stringValue,
+    ];
+    for (final uri in uris) {
+      if (uri == null) continue;
+      if (!_canonical(uri)) {
+        add(
+          'B8',
+          directive,
+          'kanonik olmayan URI (yüzde-kodlama veya ./..): $uri',
+        );
+        continue;
+      }
+      _checkUri(
+        here,
+        uri,
+        (rule, msg) => add(rule, directive, msg),
+        generated,
+        isExport: directive is ExportDirective,
+      );
+    }
   }
 
   unit.accept(_Visitor(here, generated, add));
+
   return out;
+}
+
+/// Paket/SDK URI'sinde yüzde-kodlama ve `.`/`..` bileşeni yok; göreli URI'de yüzde-kodlama
+/// yok (göreli `..` meşrudur ve normalize edilir).
+bool _canonical(String uri) {
+  if (uri.contains('%')) return false;
+  if (uri.contains(':')) {
+    final segments = uri.substring(uri.indexOf(':') + 1).split('/');
+    if (segments.any((s) => s == '.' || s == '..')) return false;
+  }
+  return true;
+}
+
+/// `lib/` göreli kaynak yolundan URI'nin `lib/` göreli hedefi; paket dışı veya `lib/`
+/// dışına kaçan yolda null.
+String? _resolve(String fromPath, String uri) {
+  String target;
+  if (uri.startsWith('package:$packageName/')) {
+    target = p.posix.normalize(uri.substring('package:$packageName/'.length));
+  } else if (!uri.contains(':')) {
+    target = p.posix.normalize(p.posix.join(p.posix.dirname(fromPath), uri));
+  } else {
+    return null;
+  }
+  return target.startsWith('..') ? null : target;
 }
 
 void _checkUri(
   _Place here,
   String uri,
   void Function(String rule, String msg) add,
-  bool generated,
-) {
-  String? target; // lib göreli hedef
-  if (uri.startsWith('package:$packageName/')) {
-    target = uri.substring('package:$packageName/'.length);
-  } else if (!uri.contains(':')) {
-    target = p.posix.normalize(p.posix.join(p.posix.dirname(here.path), uri));
-    if (target.startsWith('..')) target = null;
-  }
+  bool generated, {
+  bool isExport = false,
+}) {
+  final target = _resolve(here.path, uri); // lib göreli hedef
 
   // Paket kuralları.
   if (uri.startsWith('package:flutter_secure_storage/') &&
@@ -225,6 +312,21 @@ void _checkUri(
 
   if (target == null) return;
   final there = _Place(target);
+  if (target.startsWith(generatedApiDir) && !generated) {
+    if (isExport) {
+      add(
+        'A1',
+        'üretilmiş API kodu yalnız üretilmiş koddan dışa verilir (barrel ile sızma): $uri',
+      );
+    } else if (here.area == 'feature' &&
+        here.layer != 'data' &&
+        here.layer != 'module') {
+      add(
+        'A1',
+        'üretilmiş API kodu features içinde yalnız data katmanında ve <f>_module.dart\'ta: $uri (domain varlığına eşleyin)',
+      );
+    }
+  }
   if (there.area == 'feature' &&
       there.layer == 'module' &&
       !here.path.startsWith('app/di/')) {

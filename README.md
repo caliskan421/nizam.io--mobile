@@ -59,9 +59,9 @@ test/                               birim testleri (sahte bağdaştırıcı, bel
 test_integration/                   gerçek backend entegrasyonu + backend/ (up.sh, down.sh, …)
 ```
 
-`tool/check_boundaries.dart` (AST tabanlı; `make boundaries`, CI) şu kuralları zorlar —
-ayrıntı ve kural kimlikleri `tool/boundaries.dart` başlığında, negatif matris
-`test/tool/boundaries_test.dart`'ta:
+`tool/check_boundaries.dart` (AST tabanlı + A2/A3 için tip çözümlemeli; `make boundaries`, CI) şu kuralları zorlar —
+ayrıntı ve kural kimlikleri `tool/boundaries.dart` ve `tool/api_surface.dart` başlıklarında,
+negatif matrisler `test/tool/boundaries_test.dart` ve `test/tool/api_surface_test.dart`'ta:
 
 - `core` → `features`/`app` yasak; `features` → `app` yasak.
 - Bir feature başka feature'ın iç katmanını import etmez (yalnız `features/<g>/<g>.dart`).
@@ -71,6 +71,18 @@ ayrıntı ve kural kimlikleri `tool/boundaries.dart` başlığında, negatif mat
   `dart:convert` ve `Map<String, …>` yasak.
 - `get_it` yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` (G1); modül dosyası yalnız
   `lib/app/di/**` tarafından import edilir (G2).
+- Üretilmiş API kodu (`lib/core/api/generated/**`: DTO, enum, istemci) features içinde yalnız
+  `data` katmanında ve `<f>_module.dart`'ta import edilir (A1). `data` DTO'yu `domain`
+  varlığına eşler; presentation/application/domain ve açık yüz sözleşme tiplerini görmez.
+  Üretilmiş kod yalnız üretilmiş koddan `export` edilir. `part`/`part of` yalnız aynı dizinde (B6);
+  koşullu import/export üretilmiş kod dışında yasak (B7); URI kanonik olmalı — yüzde-kodlama ve paket URI'sinde
+  `.`/`..` yasak (B8).
+- Açık API yüzeyi (A2 `features/*/data`, A3 `core`; `tool/api_surface.dart`, **tip
+  çözümlemeli**): genel tipler, kalıtılanlar dahil üyeler, yapıcılar, typedef, üst düzey
+  bildirimler — çıkarımlı tipler ve typedef zincirleri dahil — üretilmiş tip taşımaz. DTO yalnız
+  gövdede ve özel bildirimde kalır; core'un karşılıkları `ApiFieldError`, `RefreshGrant`.
+  Denetim fail-closed'dır (A0): çözümlenemeyen kütüphane, derleme hatası, sahipsiz part veya
+  bulunamayan SDK ihlaldir.
 - `flutter_secure_storage` yalnız `lib/core/storage/`; `badCertificateCallback` /
   `HttpOverrides` hiçbir yerde; `debugPrint`/`dart:developer` yalnız `lib/core/logging/`.
 
@@ -127,7 +139,7 @@ görmez (sınır kuralı G1/G2).
 | Log | `lib/core/logging/log.dart` | tek yol; Bearer, JSON/anahtar=değer gizlileri, JWT ve o anki belirteçler (birebir) maskelenir; yayında çıkış yok. |
 | Arka plan maskesi | `lib/core/security/privacy_mask.dart` | `AppLifecycleListener`: ön plan dışında opak katman (altyapı; ekran yok). |
 | Durum makinesi | `lib/core/app_phase.dart`, `lib/app/router.dart` | bağ → oturum → kapsam fazı; go_router yönlendirmesi fazdan türetilir (rotalar boş yer tutucu). |
-| Kimlik servisi | `lib/features/identity/` (`data`, `application`) | giriş yalnız `BindingVerified`'da (aksi hâlde istek/parola gitmez); çıkış sunucu hatasında da yereli temizler; `me` 403 zorunlu parola → bayrak. |
+| Kimlik servisi | `lib/features/identity/` (`domain`, `data`, `application`) | giriş yalnız `BindingVerified`'da (aksi hâlde istek/parola gitmez); çıkış sunucu hatasında da yereli temizler; `me` 403 zorunlu parola → bayrak. DTO'lar `data`'da `CurrentAccount`/`LoginGrant` domain varlıklarına eşlenir (A1). |
 
 **Yazma-öncesi işaret (yenileme ile depo hatası/çökme):** yenileme isteği ağa çıkmadan önce
 depoya `nizamio.session.refresh_inflight` işareti yazılır (yazılamazsa istek gönderilmez);

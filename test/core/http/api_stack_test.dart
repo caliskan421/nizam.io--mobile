@@ -395,7 +395,9 @@ void main() {
         expect(e.code, 'organization.input_invalid');
         expect(e.messageKey, 'errors.organization.input_invalid');
         expect(e.requestId, 'req-9');
+        expect(e.fields.single.field, 'name');
         expect(e.fields.single.code, 'organization.name_required');
+        expect(e.fields.single.message, 'x');
         expect(e.status, 422);
         expect(e.toString(), isNot(contains('iç ileti')));
       }

@@ -9,13 +9,19 @@ import '../api/generated/models/field_error.dart';
 import '../i18n/generated/client_error_codes.gen.dart';
 
 /// Alan doğrulama hatası (sunucu zarfının `fields[]` öğesi; üretilmiş DTO'dan eşlenir —
-/// sınır kuralı A3). Sunucunun `message` metni taşınmaz: metin `code`'dan ARB ile gelir.
+/// sınır kuralı A3). Alanlar DTO ile birebir; [message] sunucu metnidir ve kullanıcıya
+/// gösterilmez (metin [code]'dan ARB ile gelir).
 @immutable
 final class ApiFieldError {
-  const ApiFieldError({required this.field, required this.code});
+  const ApiFieldError({
+    required this.field,
+    required this.code,
+    required this.message,
+  });
 
   final String field;
   final String code;
+  final String message;
 }
 
 /// Uygulamanın tek hata biçimi (F14 kapsam 6–7): `{code, messageKey, requestId, fields[]}`.
@@ -104,7 +110,7 @@ ApiError _fromResponse(Response<Object?>? response) {
         requestId: env.requestId,
         fields: [
           for (final f in env.fields ?? const <FieldError>[])
-            ApiFieldError(field: f.field, code: f.code),
+            ApiFieldError(field: f.field, code: f.code, message: f.message),
         ],
         status: status,
         retryAfter: retryAfter,

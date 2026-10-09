@@ -352,6 +352,43 @@ void main() {
       expect(rules('features/identity/identity_module.dart', dto), isEmpty);
       expect(rules('core/http/a.dart', dto), isEmpty);
     });
+    test('B8 yüzde-kodlu ve ./.. bileşenli URI fail-closed (CX-a-Ö-06)', () {
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import 'package:nizamio/core/api/g%65nerated/models/me_response.dart';",
+        ),
+        ['B8'],
+      );
+      expect(
+        rules(
+          'features/identity/identity.dart',
+          "export 'package:nizamio/core/api/g%65nerated/models/me_response.dart';",
+        ),
+        ['B8'],
+      );
+      expect(
+        rules('core/session/a.dart', "import 'package:get%5Fit/get_it.dart';"),
+        ['B8'],
+      );
+      expect(
+        rules(
+          'app/bootstrap.dart',
+          "import 'package:nizamio/features/identity/identity%5Fmodule.dart';",
+        ),
+        ['B8'],
+      );
+      expect(
+        rules(
+          'features/identity/application/a.dart',
+          "import 'package:nizamio/features/../core/api/generated/models/me_response.dart';",
+        ),
+        ['B8'],
+      );
+      expect(rules('features/identity/data/a.g.dart', "part of 'a%2Edart';"), [
+        'B6',
+      ]);
+    });
     test('B7 koşullu import/export yasak (üretilmiş kod hariç)', () {
       const cond = "import 'a.dart' if (dart.library.io) 'b.dart';";
       expect(rules('features/identity/data/x.dart', cond), ['B7']);
@@ -378,15 +415,6 @@ void main() {
               "'../../../core/api/generated/models/me_response.dart';",
         ),
         unorderedEquals(['A1', 'B7']),
-      );
-    });
-    test('package: yolunda .. normalize edilir', () {
-      expect(
-        rules(
-          'features/identity/application/a.dart',
-          "import 'package:nizamio/features/../core/api/generated/models/me_response.dart';",
-        ),
-        ['A1'],
       );
     });
     test('part yönergesi de denetlenir', () {

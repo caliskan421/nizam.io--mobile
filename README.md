@@ -75,7 +75,8 @@ negatif matrisler `test/tool/boundaries_test.dart` ve `test/tool/api_surface_tes
   `data` katmanında ve `<f>_module.dart`'ta import edilir (A1). `data` DTO'yu `domain`
   varlığına eşler; presentation/application/domain ve açık yüz sözleşme tiplerini görmez.
   Üretilmiş kod yalnız üretilmiş koddan `export` edilir. `part`/`part of` yalnız aynı dizinde (B6);
-  koşullu import/export üretilmiş kod dışında yasak (B7).
+  koşullu import/export üretilmiş kod dışında yasak (B7); URI kanonik olmalı — yüzde-kodlama ve paket URI'sinde
+  `.`/`..` yasak (B8).
 - Açık API yüzeyi (A2 `features/*/data`, A3 `core`; `tool/api_surface.dart`, **tip
   çözümlemeli**): genel tipler, kalıtılanlar dahil üyeler, yapıcılar, typedef, üst düzey
   bildirimler — çıkarımlı tipler ve typedef zincirleri dahil — üretilmiş tip taşımaz. DTO yalnız

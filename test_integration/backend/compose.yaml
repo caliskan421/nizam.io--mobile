@@ -1,0 +1,17 @@
+# YALNIZ yerel mobil entegrasyon veritabanı (F14). Proje adı sabittir (paylaşılan makine kuralı,
+# OTURUM §5/§7): nizamio_f14_mobile. CI'da bunun yerine GitHub Actions Postgres servisi.
+name: nizamio_f14_mobile
+services:
+  db:
+    image: postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nizamio_f14_test
+    ports:
+      - '127.0.0.1:${NIZAMIO_IT_PG_PORT:-15440}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d nizamio_f14_test']
+      interval: 2s
+      timeout: 3s
+      retries: 30

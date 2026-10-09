@@ -2,9 +2,9 @@
 # Ağır koşumlar (gerçek backend entegrasyonu) yerelde YALNIZ sıra kilidiyle başlatılır:
 #   ../program/araclar/verify-sirasi.sh "$PWD" integration
 
-DART_DIRS := lib test tool
+DART_DIRS := lib test tool test_integration
 
-.PHONY: gen gen-check deps format format-check analyze boundaries test lint verify build-dev-apk build-prod-apk
+.PHONY: integration integration-test gen gen-check deps format format-check analyze boundaries test lint verify build-dev-apk build-prod-apk
 
 deps:
 	flutter pub get --enforce-lockfile
@@ -45,3 +45,16 @@ gen:
 gen-check: gen
 	git diff --exit-code
 	@test -z "$$(git status --porcelain)" || { git status --porcelain; echo "commit'lenmemiş üretilmiş dosya var"; exit 1; }
+
+# Gerçek backend entegrasyonu (F14 adım 4): etiket imajı → migrate → ilk yönetici → server'lar
+# → host VM'de flutter test (cihazsız) → kaynaklar ADIYLA kapatılır (başarısızlıkta da).
+# Yerelde YALNIZ sıra kilidiyle: ../program/araclar/verify-sirasi.sh "$$PWD" integration
+integration:
+	@test_integration/backend/up.sh; rc=$$?; \
+	if [ $$rc -eq 0 ]; then test_integration/backend/check-isolation.sh image; rc=$$?; fi; \
+	if [ $$rc -eq 0 ]; then $(MAKE) integration-test; rc=$$?; fi; \
+	test_integration/backend/down.sh; exit $$rc
+
+# Yalnız testler (backend zaten ayakta: CI ya da elle up.sh).
+integration-test:
+	flutter test test_integration/ --concurrency=1 --reporter=expanded

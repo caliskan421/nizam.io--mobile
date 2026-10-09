@@ -9,11 +9,10 @@ abstract final class Log {
   static void Function(String line) _sink = _defaultSink;
   static final Set<String> _secrets = {};
 
-  /// Testler ve olası yerel günlük dosyası için çıkış değiştirilir.
-  @visibleForTesting
+  /// Çıkış değiştirilir (testler, entegrasyon testleri, ileride yerel günlük dosyası).
+  /// Değiştirilen çıkış da yalnız redaksiyondan geçmiş satırları alır.
   static set sink(void Function(String line) value) => _sink = value;
 
-  @visibleForTesting
   static void resetSink() => _sink = _defaultSink;
 
   /// Bilinen gizli değerler (o anki belirteçler) birebir maskelenir — biçim bağımsız güvence.

@@ -17,13 +17,17 @@ class RecordingStore extends MemorySecureStore {
 
   @override
   Future<void> write(String key, String value) async {
-    ops.add('write:${TokenPair.decode(value)?.refreshToken}');
+    ops.add(
+      key == TokenStore.key
+          ? 'write:${TokenPair.decode(value)?.refreshToken}'
+          : 'write:$key',
+    );
     await super.write(key, value);
   }
 
   @override
   Future<void> delete(String key) async {
-    ops.add('delete');
+    ops.add('delete:$key');
     await super.delete(key);
   }
 }
@@ -37,6 +41,7 @@ TokenPair pair(String n, {bool force = false}) => TokenPair(
   refreshToken: 'refresh-token-$n',
   refreshExpiresAt: _future,
   forcePasswordChange: force,
+  instanceId: 'inst-1',
 );
 
 RefreshResponse rotated(String n) => RefreshResponse(
@@ -183,23 +188,165 @@ void main() {
     () async {
       final token = await session.refresh();
       expect(token, 'access-token-2');
-      expect(store.ops, [
-        'write:refresh-token-2',
-      ], reason: 'silme yok, tek üzerine yazma');
+      expect(
+        store.ops,
+        [
+          'write:${TokenStore.inflightKey}',
+          'write:refresh-token-2',
+          'delete:${TokenStore.inflightKey}',
+        ],
+        reason: 'çift silinmez, tek üzerine yazma; ağdan önce işaret, kalıcılaşınca silinir',
+      );
       expect((await TokenStore(store).load())!.refreshToken, 'refresh-token-2');
       expect(session.accessToken, 'access-token-2');
     },
   );
 
-  test('başarı ama depo yazılamadı: bellekte yeni çift, iptal edilmiş eski kayıt silinir', () async {
-    store.failWrites = true;
-    expect(await session.refresh(), 'access-token-2');
-    expect(
-      store.values,
-      isEmpty,
-      reason: 'sonraki açılışta iptal edilmiş belirteç tekrar kullanılmaz',
+  group('CX-Ö-04: yeni çift kalıcılaşmazsa oturum etkin sayılmaz; eski belirteç bir daha gitmez', () {
+    test('yazma hatası: secure_storage_error, yeniden giriş gerekli, ikinci istek yok', () async {
+      store.failWritesFor.add(TokenStore.key);
+      await expectLater(
+        session.refresh(),
+        throwsA(
+          isA<ApiError>().having(
+            (e) => e.code,
+            'code',
+            ClientErrorCode.secureStorageError,
+          ),
+        ),
+      );
+      expect(
+        (session.state.value as SessionReauthRequired).reason,
+        ReauthReason.secureStorageFailure,
+      );
+      expect(session.accessToken, isNull);
+      await expectLater(session.refresh(), throwsA(isA<ApiError>()));
+      expect(calls, hasLength(1));
+      expect(
+        store.ops.where((o) => o.startsWith('write:refresh-token')).toSet(),
+        {'write:refresh-token-2'},
+      );
+      // Yerel yazma ağ tekrarı olmadan sınırlı denendi.
+      expect(
+        store.ops.where((o) => o == 'write:refresh-token-2').length,
+        SessionController.storeAttempts,
+      );
+      // Açılış: kayıt yok ya da işaretli → geri yüklenmez.
+      final fresh = SessionController(
+        TokenStore(store),
+        (_) async => throw StateError('gitmemeli'),
+      );
+      await fresh.restore(instanceId: 'inst-1');
+      expect(fresh.state.value, isNot(isA<SessionActive>()));
+    });
+
+    test('yazma + silme hatası: iptal edilmiş eski çift diskte kalsa da açılışta gönderilmez', () async {
+      store
+        ..failWritesFor.add(TokenStore.key)
+        ..failDeletes = true;
+      await expectLater(session.refresh(), throwsA(isA<ApiError>()));
+      expect(session.state.value, isA<SessionReauthRequired>());
+      expect(
+        (await TokenStore(store).load())!.refreshToken,
+        'refresh-token-1',
+        reason: 'silme başarısız: eski kayıt diskte',
+      );
+      expect(store.values.containsKey(TokenStore.inflightKey), isTrue);
+      var sent = 0;
+      final fresh = SessionController(TokenStore(store), (_) async {
+        sent++;
+        return rotated('3');
+      });
+      await fresh.restore(instanceId: 'inst-1');
+      expect(fresh.state.value, isA<SessionReauthRequired>());
+      await expectLater(fresh.refresh(), throwsA(isA<ApiError>()));
+      expect(
+        sent,
+        0,
+        reason: 'eski (iptal edilmiş olabilecek) belirteç bir daha gönderilmez',
+      );
+    });
+
+    test('yazma-öncesi işaret yazılamazsa yenileme ağa ÇIKMAZ', () async {
+      store.failWritesFor.add(TokenStore.inflightKey);
+      await expectLater(
+        session.refresh(),
+        throwsA(
+          isA<ApiError>().having(
+            (e) => e.code,
+            'code',
+            ClientErrorCode.secureStorageError,
+          ),
+        ),
+      );
+      expect(calls, isEmpty);
+      expect(
+        session.accessToken,
+        'access-token-1',
+        reason: 'belirteç tüketilmedi',
+      );
+    });
+
+    test('yenileme sırasında süreç çöktü (işaret diskte): açılışta geri yükleme yok', () async {
+      final gate = Completer<RefreshResponse>();
+      respond = (_) => gate.future;
+      unawaited(session.refresh().then((_) {}, onError: (Object _) {}));
+      await Future<void>.delayed(Duration.zero);
+      expect(store.values.containsKey(TokenStore.inflightKey), isTrue);
+      final fresh = SessionController(
+        TokenStore(store),
+        (_) async => throw StateError('gitmemeli'),
+      );
+      await fresh.restore(instanceId: 'inst-1');
+      expect(fresh.state.value, isA<SessionReauthRequired>());
+      expect(store.values.containsKey(TokenStore.key), isFalse);
+      gate.complete(rotated('2'));
+    });
+  });
+
+  test('CX-Ö-01: 200 gövdesi ayrıştırılamadı (DTO hatası) → belirsiz, ikinci istek yok', () async {
+    respond = (_) => throw TypeError();
+    await expectLater(
+      session.refresh(),
+      throwsA(
+        isA<ApiError>().having(
+          (e) => e.code,
+          'code',
+          ClientErrorCode.reauthRequired,
+        ),
+      ),
     );
-    expect(session.state.value, isA<SessionActive>());
+    expect(
+      (session.state.value as SessionReauthRequired).reason,
+      ReauthReason.refreshAmbiguous,
+    );
+    await expectLater(session.refresh(), throwsA(isA<ApiError>()));
+    expect(calls, hasLength(1));
+  });
+
+  group('CX-Ö-03: belirteç kaydı kuruluma (instance_id) bağlı', () {
+    test('farklı kurulumda açılış: geri yüklenmez, depo temizlenir', () async {
+      final fresh = SessionController(
+        TokenStore(store),
+        (_) async => throw StateError('x'),
+      );
+      await fresh.restore(instanceId: 'inst-2');
+      expect(fresh.state.value, isA<SessionNone>());
+      expect(store.values.containsKey(TokenStore.key), isFalse);
+    });
+    test(
+      'eski biçimli (kuruluma bağlı olmayan) kayıt geri yüklenmez',
+      () async {
+        store.values[TokenStore.key] = '{"v":1,"account_id":"a"}';
+        final fresh = SessionController(
+          TokenStore(store),
+          (_) async => throw StateError('x'),
+        );
+        await fresh.restore(instanceId: 'inst-1');
+        expect(fresh.state.value, isA<SessionNone>());
+        expect(store.values.containsKey(TokenStore.key), isFalse);
+      },
+    );
   });
 
   test('tek uçuş: eşzamanlı üç yenileme → tek istek', () async {
@@ -258,13 +405,14 @@ void main() {
         refreshToken: 'y' * 10,
         refreshExpiresAt: 1,
         forcePasswordChange: false,
+        instanceId: 'inst-1',
       ),
     );
     final s2 = SessionController(
       TokenStore(mem),
       (_) async => throw StateError('x'),
     );
-    await s2.restore();
+    await s2.restore(instanceId: 'inst-1');
     expect(s2.state.value, isA<SessionNone>());
     expect(mem.values, isEmpty);
   });
@@ -274,7 +422,7 @@ void main() {
       TokenStore(store),
       (_) async => throw StateError('x'),
     );
-    await s2.restore();
+    await s2.restore(instanceId: 'inst-1');
     expect(s2.accessToken, 'access-token-1');
   });
 

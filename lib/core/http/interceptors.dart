@@ -50,11 +50,35 @@ class ApiGuardInterceptor extends Interceptor {
   final Flavor flavor;
   final ScopeController? scope;
 
+  late final List<(RegExp, ApiOperation)> _templates = [
+    for (final op in operations.values) (_templateRegExp(op.path), op),
+  ];
+
+  ApiOperation? _resolve(String method, String path) {
+    ApiOperation? found;
+    for (final (re, op) in _templates) {
+      if (op.method == method && re.hasMatch(path)) {
+        if (found != null) return null; // belirsiz eşleşme: fail-closed
+        found = op;
+      }
+    }
+    return found;
+  }
+
+  /// `/v1/departments/{id}/members` → `^/v1/departments/[^/]+/members$`.
+  static RegExp _templateRegExp(String template) {
+    final parts = template.split(RegExp(r'\{[^/{}]+\}')).map(RegExp.escape);
+    return RegExp('^${parts.join('[^/]+')}\$');
+  }
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    // İşlem, çağıranın verdiği metaveriden DEĞİL gerçek yöntem + yoldan bulunur; taşınan
+    // operationId bununla birebir aynı olmalıdır (CX-Ö-02: başka işlemin extras'ı ile kapsam
+    // sınıfı düşürülemez).
     final id = _operationId(options);
-    final op = id == null ? null : operations[id];
-    if (op == null || op.method != options.method.toUpperCase()) {
+    final op = _resolve(options.method.toUpperCase(), options.uri.path);
+    if (op == null || id != op.operationId) {
       return handler.reject(_reject(options, ClientErrorCode.unknownOperation));
     }
     // Sunucu bağının dışına (başka host/şema) istek yok; prod'da düz http hiç yok.

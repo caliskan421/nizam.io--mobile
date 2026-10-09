@@ -10,23 +10,30 @@ abstract interface class SecureStore {
   Future<void> delete(String key);
 }
 
-/// Bellek içi uygulama (testler, host VM entegrasyon testleri). Yazma hatası benzetimi için
-/// [failWrites].
+/// Bellek içi uygulama (testler, host VM entegrasyon testleri). Hata benzetimi: [failWrites]
+/// (her yazma), [failWritesFor] (yalnız bu anahtarlar), [failDeletes].
 class MemorySecureStore implements SecureStore {
   final Map<String, String> values = {};
   bool failWrites = false;
+  final Set<String> failWritesFor = {};
+  bool failDeletes = false;
 
   @override
   Future<String?> read(String key) async => values[key];
 
   @override
   Future<void> write(String key, String value) async {
-    if (failWrites) {
+    if (failWrites || failWritesFor.contains(key)) {
       throw StateError('MemorySecureStore: yazma hatası (benzetim)');
     }
     values[key] = value;
   }
 
   @override
-  Future<void> delete(String key) async => values.remove(key);
+  Future<void> delete(String key) async {
+    if (failDeletes) {
+      throw StateError('MemorySecureStore: silme hatası (benzetim)');
+    }
+    values.remove(key);
+  }
 }

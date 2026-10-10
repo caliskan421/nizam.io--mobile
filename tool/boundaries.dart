@@ -28,11 +28,11 @@
 //       `shared_preference_store.dart`) yalnız `core/storage/**`,
 //       `core/preferences/app_preferences.dart` ve `lib/app/di/**` tarafından import edilir:
 //       serbest anahtarla yazma yalnız tipli `AppPreferences` içinden (gizli veri kaçmasın).
-//       S5/S6 paketleri hiçbir yerden `export` edilemez (barrel ile taşıma yok).
+//       Ham depo ve S5/S6 paketleri hiçbir yerden `export` edilemez (barrel ile taşıma yok).
 //   U1  Boşluk için `SizedBox` yasak, standart `Gap` (package:gap): çocuksuz
 //       `SizedBox(width/height)`, `SizedBox.square`, `SizedBox.fromSize`. Çocuklu SizedBox
-//       (boyut kısıtı) ve `SizedBox.shrink/expand` serbest. `SizedBox.new(...)` ve
-//       `typedef X = SizedBox` de yakalanır; dosya kendi `SizedBox` sınıfını tanımlıyorsa
+//       (boyut kısıtı) ve `SizedBox.shrink/expand` serbest. `SizedBox.new(...)`, yapıcı
+//       tear-off'u (`SizedBox.new`, `SizedBox.square`) ve `typedef X = SizedBox` de yakalanır; dosya kendi `SizedBox` sınıfını tanımlıyorsa
 //       (Flutter'ınki değil) kural uygulanmaz.
 //   G1  `package:get_it` yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` içinde
 //       (ADR-0001, D-0182: get_it = bileşim kökü; core ve feature katmanları servis bulucu
@@ -350,8 +350,15 @@ void _checkUri(
 
   if (target == null) return;
   final there = _Place(target);
-  if ((target == 'core/storage/preference_store.dart' ||
-          target == 'core/storage/shared_preference_store.dart') &&
+  final rawPrefs =
+      target == 'core/storage/preference_store.dart' ||
+      target == 'core/storage/shared_preference_store.dart';
+  if (rawPrefs && isExport) {
+    add(
+      'S7',
+      'ham tercih deposu dışa verilemez (barrel ile taşıma yasak): $uri',
+    );
+  } else if (rawPrefs &&
       !here.path.startsWith('core/storage/') &&
       here.path != 'core/preferences/app_preferences.dart' &&
       !here.path.startsWith('app/di/')) {
@@ -501,6 +508,59 @@ class _Visitor extends RecursiveAstVisitor<void> {
     if (!hasChild) {
       add('U1', node, 'boşluk için SizedBox yerine Gap (package:gap) kullanın');
     }
+  }
+
+  // Yapıcı tear-off'u (`final f = SizedBox.new; f(height: 8)`) argümanı görünmeden çağrılır:
+  // boşluk yapıcılarının tear-off'u koşulsuz yasak. Çağrı biçimi MethodInvocation olarak
+  // ayrı denetlenir; burada yalnız çağrılmayan başvuru gelir.
+  // Çağrılan biçim (`SizedBox.new(...)`) MethodInvocation olarak gelir; PrefixedIdentifier /
+  // PropertyAccess ise çağrılmayan başvurudur (tear-off).
+  static const _spacerCtors = {'new', 'square', 'fromSize'};
+
+  void _tearOff(AstNode node) {
+    if (!generated && !ownSizedBox) {
+      add(
+        'U1',
+        node,
+        'SizedBox yapıcı tear-off yasak (U1 atlatma); Gap kullanın',
+      );
+    }
+  }
+
+  @override
+  void visitPrefixedIdentifier(PrefixedIdentifier node) {
+    if (node.prefix.name == 'SizedBox' &&
+        _spacerCtors.contains(node.identifier.name)) {
+      _tearOff(node);
+    }
+    super.visitPrefixedIdentifier(node);
+  }
+
+  @override
+  void visitPropertyAccess(PropertyAccess node) {
+    final t = node.target;
+    if (t is PrefixedIdentifier &&
+        t.identifier.name == 'SizedBox' &&
+        _spacerCtors.contains(node.propertyName.name)) {
+      _tearOff(node); // m.SizedBox.new
+    }
+    super.visitPropertyAccess(node);
+  }
+
+  @override
+  void visitConstructorReference(ConstructorReference node) {
+    final c = node.constructorName;
+    if (!generated &&
+        !ownSizedBox &&
+        c.type.name.lexeme == 'SizedBox' &&
+        const {null, 'new', 'square', 'fromSize'}.contains(c.name?.name)) {
+      add(
+        'U1',
+        node,
+        'SizedBox yapıcı tear-off yasak (U1 atlatma); Gap kullanın',
+      );
+    }
+    super.visitConstructorReference(node);
   }
 
   @override

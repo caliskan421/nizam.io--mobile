@@ -531,6 +531,17 @@ void main() {
         ['S7'],
       );
       expect(
+        rules('core/storage/barrel.dart', "export 'preference_store.dart';"),
+        ['S7'],
+      );
+      expect(
+        rules(
+          'core/storage/barrel.dart',
+          "export 'shared_preference_store.dart';",
+        ),
+        ['S7'],
+      );
+      expect(
         rules(
           'core/telemetry/barrel.dart',
           "export 'package:firebase_core/firebase_core.dart';",
@@ -560,6 +571,9 @@ void main() {
         'final w = SizedBox.new(height: 8);',
         'final w = const SizedBox.new(height: 8);',
         'typedef Box = SizedBox;',
+        'final f = SizedBox.new;',
+        'final f = SizedBox.square;',
+        'final g = m.SizedBox.new;',
       ]) {
         expect(rules('features/identity/presentation/a.dart', src), [
           'U1',

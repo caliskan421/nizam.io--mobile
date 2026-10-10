@@ -178,6 +178,33 @@ final _cases = <String, (String, String, Set<String>)>{
         'dynamic analytics() => FirebaseAnalytics.instance;',
     {'A5'},
   ),
+  'A4: AppPreferences ham depoyu adlandırılmış tiple verir (CX-r3-Ö-04)': (
+    'core/preferences/zz_app_prefs_leak.dart',
+    "import '../storage/preference_store.dart';\n"
+        'class AppPrefs2 {\n'
+        '  AppPrefs2(this._store);\n'
+        '  final PreferenceStore _store;\n'
+        '  PreferenceStore get raw => _store;\n'
+        '}',
+    {'A4'},
+  ),
+  'A4: tip parametresi sınırı': (
+    'core/preferences/zz_bound.dart',
+    "import '../storage/preference_store.dart';\n"
+        'class Holder<T extends PreferenceStore> { Holder(this._t); final T _t; '
+        'int get n => _t.hashCode; }',
+    {'A4'},
+  ),
+  'A4: yalnız yapıcı girdisi serbest (AppPreferences biçimi)': (
+    'core/preferences/zz_ctor_only.dart',
+    "import '../storage/preference_store.dart';\n"
+        'class Prefs3 {\n'
+        '  Prefs3(this._store);\n'
+        '  final PreferenceStore _store;\n'
+        "  Future<String?> theme() => _store.getString('k');\n"
+        '}',
+    <String>{},
+  ),
 };
 
 void main() {

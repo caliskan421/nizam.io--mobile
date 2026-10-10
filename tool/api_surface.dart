@@ -17,8 +17,8 @@
 //   A4  Yalıtılmış SDK ve ham tercih portu (`package:shared_preferences`, `package:firebase_*`,
 //       `core/storage/preference_store.dart`, `shared_preference_store.dart`) hiçbir
 //       kütüphanenin açık API'sinde görünmez (getter, fabrika, typedef, kalıtım dahil) —
-//       yalnız tanım dosyaları, `core/preferences/app_preferences.dart` ve `lib/app/di/**`
-//       muaf. S5/S6/S7 (tool/boundaries.dart) doğrudan import/export'u, A4 açık API ile
+//       yalnız ham depo dosyaları ve `lib/app/di/**` muaf; diğer her yerde (AppPreferences
+//       dahil) yalnız YAPICI GİRDİSİ olarak görünebilir (içeri akış). S5/S6/S7 (tool/boundaries.dart) doğrudan import/export'u, A4 açık API ile
 //       dolaylı taşımayı kapatır. Bütün kütüphaneler (presentation dahil) taranır.
 //   A5  Bağdaştırıcı dosyaları (ham tercih deposu, `AppPreferences`, telemetri — S5/S6/S7'nin
 //       kesin dosya listesi; `app/di` hariç) açık API'de tipi SİLİNMİŞ değer veremez:
@@ -131,10 +131,18 @@ Future<List<Violation>> checkApiSurface(
       continue;
     }
     final surface = _publicSurface(result.element).toList();
-    void check(String rule, bool Function(Element) match, String message) {
+    void check(
+      String rule,
+      bool Function(Element) match,
+      String message, {
+      bool inboundOk = false,
+    }) {
       final reported =
           <String>{}; // alanın getter/setter'ı, değişken + getter tekrarı
       for (final (element, what, type) in surface) {
+        // Yönsel muafiyet: yapıcı girdisi içeri akıştır (çağıranın nesneye zaten sahip olması
+        // gerekir); dönüş, alan, getter, tip sınırı dışarı akıştır.
+        if (inboundOk && element is ConstructorElement) continue;
         final leaked = _typeIn(type, match, <DartType>{});
         if (leaked == null || !reported.add(what)) continue;
         out.add(
@@ -190,8 +198,9 @@ Future<List<Violation>> checkApiSurface(
       check(
         'A4',
         _isSensitive,
-        'açık API yalıtılmış SDK/ham tercih tipi taşıyor (yalnız tanım dosyaları, '
-            'AppPreferences ve app/di)',
+        'açık API yalıtılmış SDK/ham tercih tipi taşıyor (yalnız ham depo dosyaları ve '
+            'app/di; diğerlerinde yalnız yapıcı girdisi)',
+        inboundOk: true,
       );
     }
   }
@@ -266,9 +275,7 @@ String? _erased(DartType t, [Set<DartType>? seen]) {
 
 /// A4 muafları: ham port/SDK tipini açık API'de taşıyabilecek tek yerler.
 bool _sensitiveAllowed(String rel) =>
-    _rawPrefs.contains(rel) ||
-    rel == 'core/preferences/app_preferences.dart' ||
-    rel.startsWith('app/di/');
+    _rawPrefs.contains(rel) || rel.startsWith('app/di/');
 
 bool _isSensitive(Element element) {
   final uri = element.library?.uri.toString() ?? '';

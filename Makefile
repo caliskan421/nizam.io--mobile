@@ -40,8 +40,10 @@ build-prod-apk:
 # NIZAMIO_BACKEND_DIR / NIZAMIO_FRONTEND_DIR verilmezse ../nizam.io--backend ve ../nizam.io--frontend.
 
 # Simge + açılış ekranı (assets/branding → android/ios). flutter_launcher_icons iOS projesinde
-# ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS'ı bozar; geri alınır.
+# ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS'ı bozar; geri alınır (dosya önceden
+# temiz değilse hedef durur — kaydedilmemiş Xcode değişikliği kaybolmaz).
 branding:
+	@git diff --quiet -- ios/Runner.xcodeproj/project.pbxproj || { echo "branding: project.pbxproj kaydedilmemiş değişiklik içeriyor; önce commit/stash"; exit 1; }
 	dart run flutter_launcher_icons
 	dart run flutter_native_splash:create
 	git checkout -- ios/Runner.xcodeproj/project.pbxproj

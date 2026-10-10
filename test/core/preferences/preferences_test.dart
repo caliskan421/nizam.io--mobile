@@ -1,6 +1,9 @@
 // Tercihler: tipli anahtar, hata → varsayılan, tema modu denetleyicisi + Riverpod yüzü.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/app/bootstrap.dart';
 import 'package:nizamio/core/preferences/app_preferences.dart';
 import 'package:nizamio/core/preferences/theme_mode_controller.dart';
 import 'package:nizamio/core/providers.dart';
@@ -60,4 +63,28 @@ void main() {
       expect(h.prefs.values[AppPreferences.themeModeKey], 'dark');
     },
   );
+
+  test(
+    'tamamlanmayan tercih okuması açılışı kilitlemez (CX-r3-Ö-01)',
+    () async {
+      final c = ThemeModeController(AppPreferences(_HangingStore()));
+      final sw = Stopwatch()..start();
+      await loadPreferences(c, timeout: const Duration(milliseconds: 50));
+      expect(sw.elapsed, lessThan(const Duration(seconds: 2)));
+      expect(c.state.value, ThemeMode.system);
+      c.dispose();
+    },
+  );
+}
+
+/// Hiç tamamlanmayan platform kanalı benzetimi.
+class _HangingStore implements PreferenceStore {
+  @override
+  Future<String?> getString(String key) => Completer<String?>().future;
+
+  @override
+  Future<void> setString(String key, String value) => Completer<void>().future;
+
+  @override
+  Future<void> remove(String key) => Completer<void>().future;
 }

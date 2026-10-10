@@ -24,10 +24,7 @@ Future<void> bootstrap(Flavor flavor) async {
   // ve tercihlere bağlı değildir; tercih okuma hatası sistem temasına düşer.
   // Tamamlanmayan platform çağrısı açılışı kilitlemesin (CX-r3-Ö-01): süre aşımında sistem
   // teması ile devam edilir.
-  await composition.locator<ThemeModeController>().load().timeout(
-    const Duration(milliseconds: 500),
-    onTimeout: () {},
-  );
+  await loadPreferences(composition.locator<ThemeModeController>());
   runApp(
     UncontrolledProviderScope(
       container: composition.container,
@@ -36,6 +33,13 @@ Future<void> bootstrap(Flavor flavor) async {
   );
   await startup(composition.container);
 }
+
+/// Tercihleri açılışa sınırlı süre bekletir: tamamlanmayan platform çağrısında [timeout]
+/// sonunda sistem temasıyla devam edilir (CX-r3-Ö-01).
+Future<void> loadPreferences(
+  ThemeModeController theme, {
+  Duration timeout = const Duration(milliseconds: 500),
+}) => theme.load().timeout(timeout, onTimeout: () {});
 
 Stream<LicenseEntry> _fontLicenses() async* {
   for (final (font, file) in const [

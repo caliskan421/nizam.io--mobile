@@ -24,9 +24,16 @@
 //       gizli veri SecureStore'a — S1).
 //   S6  firebase_* yalnız `lib/app/**` ve `lib/core/telemetry/**` içinde (başlatma ve
 //       telemetri tek yerden; feature katmanları SDK'yı doğrudan görmez).
+//   S7  Ham tercih deposu (`core/storage/preference_store.dart`,
+//       `shared_preference_store.dart`) yalnız `core/storage/**`,
+//       `core/preferences/app_preferences.dart` ve `lib/app/di/**` tarafından import edilir:
+//       serbest anahtarla yazma yalnız tipli `AppPreferences` içinden (gizli veri kaçmasın).
+//       S5/S6 paketleri hiçbir yerden `export` edilemez (barrel ile taşıma yok).
 //   U1  Boşluk için `SizedBox` yasak, standart `Gap` (package:gap): çocuksuz
 //       `SizedBox(width/height)`, `SizedBox.square`, `SizedBox.fromSize`. Çocuklu SizedBox
-//       (boyut kısıtı) ve `SizedBox.shrink/expand` serbest.
+//       (boyut kısıtı) ve `SizedBox.shrink/expand` serbest. `SizedBox.new(...)` ve
+//       `typedef X = SizedBox` de yakalanır; dosya kendi `SizedBox` sınıfını tanımlıyorsa
+//       (Flutter'ınki değil) kural uygulanmaz.
 //   G1  `package:get_it` yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` içinde
 //       (ADR-0001, D-0182: get_it = bileşim kökü; core ve feature katmanları servis bulucu
 //       kullanmaz, bağımlılık yapıcıdan gelir).
@@ -233,7 +240,11 @@ List<Violation> checkSource(String libPath, String content) {
     }
   }
 
-  unit.accept(_Visitor(here, generated, add));
+  // Dosya kendi SizedBox'ını tanımlıyorsa U1 Flutter'ınkini değil onu görür.
+  final ownSizedBox = unit.declarations.any(
+    (d) => d is ClassDeclaration && d.namePart.typeName.lexeme == 'SizedBox',
+  );
+  unit.accept(_Visitor(here, generated, add, ownSizedBox: ownSizedBox));
 
   return out;
 }
@@ -279,6 +290,11 @@ void _checkUri(
       'S1',
       'flutter_secure_storage yalnız lib/core/storage/ içinde import edilir',
     );
+  }
+  if (isExport &&
+      (uri.startsWith('package:shared_preferences/') ||
+          uri.startsWith('package:firebase_'))) {
+    add('S7', 'SDK paketi dışa verilemez (barrel ile taşıma yasak): $uri');
   }
   if (uri.startsWith('package:shared_preferences/') &&
       !here.path.startsWith('core/storage/')) {
@@ -334,6 +350,16 @@ void _checkUri(
 
   if (target == null) return;
   final there = _Place(target);
+  if ((target == 'core/storage/preference_store.dart' ||
+          target == 'core/storage/shared_preference_store.dart') &&
+      !here.path.startsWith('core/storage/') &&
+      here.path != 'core/preferences/app_preferences.dart' &&
+      !here.path.startsWith('app/di/')) {
+    add(
+      'S7',
+      'ham tercih deposu yalnız AppPreferences ve bileşim kökünden kullanılır: $uri',
+    );
+  }
   if (target.startsWith(generatedApiDir) && !generated) {
     if (isExport) {
       add(
@@ -394,10 +420,11 @@ void _checkUri(
 }
 
 class _Visitor extends RecursiveAstVisitor<void> {
-  _Visitor(this.here, this.generated, this.add);
+  _Visitor(this.here, this.generated, this.add, {this.ownSizedBox = false});
 
   final _Place here;
   final bool generated;
+  final bool ownSizedBox;
   final void Function(String rule, AstNode node, String message) add;
 
   void _member(AstNode node, String name) {
@@ -465,7 +492,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
   // U1 — `const SizedBox(...)` InstanceCreationExpression, `SizedBox(...)` (const/new'siz)
   // çözümlenmemiş AST'de MethodInvocation olarak gelir; ikisi de denetlenir.
   void _spacer(AstNode node, String? ctor, ArgumentList args) {
-    if (generated) return;
+    if (generated || ownSizedBox) return;
+    if (ctor == 'new') ctor = null;
     if (ctor != null && ctor != 'square' && ctor != 'fromSize') return;
     final hasChild = args.arguments.any(
       (a) => a is NamedArgument && a.name.lexeme == 'child',
@@ -473,6 +501,18 @@ class _Visitor extends RecursiveAstVisitor<void> {
     if (!hasChild) {
       add('U1', node, 'boşluk için SizedBox yerine Gap (package:gap) kullanın');
     }
+  }
+
+  @override
+  void visitGenericTypeAlias(GenericTypeAlias node) {
+    final t = node.type;
+    if (!generated &&
+        !ownSizedBox &&
+        t is NamedType &&
+        t.name.lexeme == 'SizedBox') {
+      add('U1', node, 'SizedBox takma adı yasak (U1 atlatma); Gap kullanın');
+    }
+    super.visitGenericTypeAlias(node);
   }
 
   @override

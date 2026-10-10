@@ -500,6 +500,53 @@ void main() {
     });
   });
 
+  group('S7 ham tercih deposu ve SDK export', () {
+    const raw = "import 'package:nizamio/core/storage/preference_store.dart';";
+    test('ham port yalnız AppPreferences, core/storage ve app/di', () {
+      expect(rules('core/preferences/app_preferences.dart', raw), isEmpty);
+      expect(rules('app/di/dependencies.dart', raw), isEmpty);
+      expect(
+        rules(
+          'core/storage/shared_preference_store.dart',
+          "import 'preference_store.dart';",
+        ),
+        isEmpty,
+      );
+      expect(rules('core/session/a.dart', raw), ['S7']);
+      expect(rules('core/preferences/theme_mode_controller.dart', raw), ['S7']);
+      expect(
+        rules(
+          'features/identity/data/a.dart',
+          "import '../../../core/storage/shared_preference_store.dart';",
+        ),
+        ['S7'],
+      );
+    });
+    test('SDK paketleri izinli dizinden bile export edilemez', () {
+      expect(
+        rules(
+          'core/storage/barrel.dart',
+          "export 'package:shared_preferences/shared_preferences.dart';",
+        ),
+        ['S7'],
+      );
+      expect(
+        rules(
+          'core/telemetry/barrel.dart',
+          "export 'package:firebase_core/firebase_core.dart';",
+        ),
+        ['S7'],
+      );
+      expect(
+        rules(
+          'app/x.dart',
+          "export 'package:firebase_analytics/firebase_analytics.dart';",
+        ),
+        ['S7'],
+      );
+    });
+  });
+
   group('U1 boşluk standardı Gap', () {
     test('çocuksuz SizedBox (const, constsuz, square, fromSize) yasak', () {
       for (final src in [
@@ -510,12 +557,25 @@ void main() {
         'final w = const SizedBox.fromSize(size: Size(1, 1));',
         'final w = m.SizedBox(height: 8);',
         'final w = m.SizedBox.square(dimension: 8);',
+        'final w = SizedBox.new(height: 8);',
+        'final w = const SizedBox.new(height: 8);',
+        'typedef Box = SizedBox;',
       ]) {
         expect(rules('features/identity/presentation/a.dart', src), [
           'U1',
         ], reason: src);
       }
       expect(rules('app/app.dart', 'final w = SizedBox(height: 4);'), ['U1']);
+    });
+    test('dosyanın kendi SizedBox sınıfı yanlış pozitif değil', () {
+      expect(
+        rules(
+          'features/identity/presentation/a.dart',
+          'class SizedBox { SizedBox({int? height}); }\n'
+              'final w = SizedBox(height: 8);',
+        ),
+        isEmpty,
+      );
     });
     test('çocuklu SizedBox, shrink/expand ve Gap serbest', () {
       for (final src in [

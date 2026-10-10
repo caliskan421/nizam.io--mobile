@@ -482,13 +482,15 @@ void main() {
       const sp = "import 'package:shared_preferences/shared_preferences.dart';";
       expect(rules('core/storage/shared_preference_store.dart', sp), isEmpty);
       expect(rules('core/preferences/a.dart', sp), ['S5']);
+      expect(rules('core/storage/prefs_facade.dart', sp), ['S5']);
       expect(rules('features/identity/data/a.dart', sp), ['S5']);
       expect(rules('app/bootstrap.dart', sp), ['S5']);
     });
     test('firebase yalnız app ve core/telemetry', () {
       const fb = "import 'package:firebase_core/firebase_core.dart';";
       expect(rules('app/bootstrap.dart', fb), isEmpty);
-      expect(rules('core/telemetry/a.dart', fb), isEmpty);
+      expect(rules('core/telemetry/telemetry.dart', fb), isEmpty);
+      expect(rules('core/telemetry/a.dart', fb), ['S6']);
       expect(rules('core/http/a.dart', fb), ['S6']);
       expect(
         rules(
@@ -513,6 +515,7 @@ void main() {
         isEmpty,
       );
       expect(rules('core/session/a.dart', raw), ['S7']);
+      expect(rules('core/storage/prefs_facade.dart', raw), ['S7']);
       expect(rules('core/preferences/theme_mode_controller.dart', raw), ['S7']);
       expect(
         rules(
@@ -528,7 +531,7 @@ void main() {
           'core/storage/barrel.dart',
           "export 'package:shared_preferences/shared_preferences.dart';",
         ),
-        ['S7'],
+        unorderedEquals(['S5', 'S7']),
       );
       expect(
         rules('core/storage/barrel.dart', "export 'preference_store.dart';"),
@@ -546,7 +549,7 @@ void main() {
           'core/telemetry/barrel.dart',
           "export 'package:firebase_core/firebase_core.dart';",
         ),
-        ['S7'],
+        unorderedEquals(['S6', 'S7']),
       );
       expect(
         rules(

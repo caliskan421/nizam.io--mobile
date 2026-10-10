@@ -148,6 +148,36 @@ final _cases = <String, (String, String, Set<String>)>{
         '}',
     <String>{},
   ),
+  'A5: ham depo dynamic ile taşınır (CX-r3-Ö-04)': (
+    'core/storage/shared_preference_store.dart',
+    "import 'package:shared_preferences/shared_preferences.dart';\n"
+        "import 'preference_store.dart';\n"
+        'class SharedPreferenceStore implements PreferenceStore {\n'
+        '  @override Future<String?> getString(String k) async => null;\n'
+        '  @override Future<void> setString(String k, String v) async {}\n'
+        '  @override Future<void> remove(String k) async {}\n'
+        '}\n'
+        'dynamic get raw => SharedPreferencesAsync();',
+    {'A5'},
+  ),
+  'A5: AppPreferences Object ve geri çağrı ile taşır': (
+    'core/preferences/app_preferences.dart',
+    "import '../storage/preference_store.dart';\n"
+        'class AppPreferences {\n'
+        '  AppPreferences(this._s);\n'
+        '  final PreferenceStore _s;\n'
+        '  Object get store => _s;\n'
+        '  Future<void> Function(String, String) get writer => _s.setString;\n'
+        '  List<dynamic> all() => [];\n'
+        '}',
+    {'A5'},
+  ),
+  'A5: telemetri tipsiz nesne': (
+    'core/telemetry/telemetry.dart',
+    "import 'package:firebase_analytics/firebase_analytics.dart';\n"
+        'dynamic analytics() => FirebaseAnalytics.instance;',
+    {'A5'},
+  ),
 };
 
 void main() {

@@ -87,10 +87,11 @@ negatif matrisler `test/tool/boundaries_test.dart` ve `test/tool/api_surface_tes
   gövdede ve özel bildirimde kalır; core'un karşılıkları `ApiFieldError`, `RefreshGrant`.
   Denetim fail-closed'dır (A0): çözümlenemeyen kütüphane, derleme hatası, sahipsiz part veya
   bulunamayan SDK ihlaldir.
-- `shared_preferences` yalnız `lib/core/storage/` (S5); firebase yalnız `lib/app/**` ve
-  `lib/core/telemetry/**` (S6); boşluk için çocuksuz `SizedBox` yasak, `Gap` (U1). Ham tercih deposu yalnız
+- `shared_preferences` yalnız `core/storage/shared_preference_store.dart` (S5); firebase yalnız
+  `lib/app/**` ve `core/telemetry/telemetry.dart` (S6); boşluk için çocuksuz `SizedBox` yasak, `Gap` (U1). Ham tercih deposu yalnız
   `AppPreferences` ve `app/di`'den (S7); SDK ve ham depo dışa verilemez; açık API'de bu tipler
-  görünmez (A4, tip çözümlemeli).
+  görünmez (A4, tip çözümlemeli); bu bağdaştırıcı dosyalarının açık API'si `dynamic`/`Object`/
+  geri çağrı veremez (A5) ve `dynamic` üzerinde çağrı lint ile yasak (`avoid_dynamic_calls`).
 - `flutter_secure_storage` yalnız `lib/core/storage/`; `badCertificateCallback` /
   `HttpOverrides` hiçbir yerde; `debugPrint`/`dart:developer` yalnız `lib/core/logging/`.
 

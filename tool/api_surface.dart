@@ -20,6 +20,11 @@
 //       yalnız tanım dosyaları, `core/preferences/app_preferences.dart` ve `lib/app/di/**`
 //       muaf. S5/S6/S7 (tool/boundaries.dart) doğrudan import/export'u, A4 açık API ile
 //       dolaylı taşımayı kapatır. Bütün kütüphaneler (presentation dahil) taranır.
+//   A5  Bağdaştırıcı dosyaları (ham tercih deposu, `AppPreferences`, telemetri — S5/S6/S7'nin
+//       kesin dosya listesi; `app/di` hariç) açık API'de tipi SİLİNMİŞ değer veremez:
+//       `dynamic`, `Object`, işlev tipi (geri çağrı) dönüş/parametre/alan olarak yasak (iç
+//       içe tip argümanları dahil). SDK nesnesi böylece adlandırılmış güvenli tip dışında
+//       taşınamaz (CX-r3-Ö-04). `Object` üyeleri (`==`, `toString`…) sayılmaz.
 //
 // A1 (tool/boundaries.dart) üretilmiş koda doğrudan erişimi data + modül dosyasıyla sınırlar;
 // A2/A3 kalan dolaylı yolu (açık API'de tip olarak sızma) kapatır.
@@ -151,6 +156,36 @@ Future<List<Violation>> checkApiSurface(
         'gövdede/özel bildirimde)',
       );
     }
+    if (_adapters.contains(rel)) {
+      final reported = <String>{};
+      for (final (element, what, type) in surface) {
+        if (element.library?.isDartCore ?? false) continue; // Object üyeleri
+        if (element.name == '==') continue;
+        // Örtük `Object` üst tipi taşıma değildir.
+        if (element is InterfaceElement &&
+            type is InterfaceType &&
+            type.isDartCoreObject) {
+          continue;
+        }
+        final types = switch (element) {
+          final ExecutableElement e => [
+            e.returnType,
+            for (final f in e.formalParameters) f.type,
+          ],
+          _ => [type],
+        };
+        final erased = types.map(_erased).nonNulls.firstOrNull;
+        if (erased == null || !reported.add(what)) continue;
+        out.add(
+          Violation(
+            'A5',
+            'lib/$rel',
+            _line(result, element),
+            'bağdaştırıcı açık API tipi silinmiş değer veriyor: $what → $erased',
+          ),
+        );
+      }
+    }
     if (!_sensitiveAllowed(rel)) {
       check(
         'A4',
@@ -199,6 +234,35 @@ const _rawPrefs = {
   'core/storage/preference_store.dart',
   'core/storage/shared_preference_store.dart',
 };
+
+/// A5 kapsamı: S5/S6/S7 kesin dosya listesindeki bağdaştırıcılar (`app/di` hariç).
+const _adapters = {
+  ..._rawPrefs,
+  'core/preferences/app_preferences.dart',
+  'core/telemetry/telemetry.dart',
+};
+
+/// `dynamic`, `Object`/`Object?` veya işlev tipi (iç içe dahil) varsa açıklaması.
+String? _erased(DartType t, [Set<DartType>? seen]) {
+  seen ??= {};
+  if (!seen.add(t)) return null;
+  if (t is DynamicType) return 'dynamic';
+  if (t is InvalidType) return 'çözümlenemeyen tip';
+  if (t is FunctionType) return 'işlev tipi (geri çağrı)';
+  if (t is InterfaceType) {
+    if (t.isDartCoreObject) return 'Object';
+    if (t.isDartCoreFunction) return 'Function';
+    for (final a in t.typeArguments) {
+      if (_erased(a, seen) case final e?) return e;
+    }
+  }
+  if (t is RecordType) {
+    for (final f in [...t.positionalFields, ...t.namedFields]) {
+      if (_erased(f.type, seen) case final e?) return e;
+    }
+  }
+  return null;
+}
 
 /// A4 muafları: ham port/SDK tipini açık API'de taşıyabilecek tek yerler.
 bool _sensitiveAllowed(String rel) =>

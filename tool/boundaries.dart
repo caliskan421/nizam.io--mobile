@@ -20,13 +20,14 @@
 //   S3  `debugPrint` ve `dart:developer` yalnız `lib/core/logging/**` içinde (log tek yoldan
 //       ve redaksiyonla; `print` ayrıca avoid_print ile yasak).
 //   S4  domain katmanı Flutter/dio/Riverpod import etmez (saf Dart).
-//   S5  shared_preferences yalnız `lib/core/storage/**` içinde (tercih deposu soyutlaması;
-//       gizli veri SecureStore'a — S1).
-//   S6  firebase_* yalnız `lib/app/**` ve `lib/core/telemetry/**` içinde (başlatma ve
-//       telemetri tek yerden; feature katmanları SDK'yı doğrudan görmez).
+//   S5  shared_preferences YALNIZ `lib/core/storage/shared_preference_store.dart` içinde
+//       (kesin dosya; aynı dizinde ikinci bir bağdaştırıcı yok — gizli veri SecureStore'a, S1).
+//   S6  firebase_* yalnız `lib/app/**` ve `lib/core/telemetry/telemetry.dart` içinde (kesin
+//       dosya; başlatma ve telemetri tek yerden).
 //   S7  Ham tercih deposu (`core/storage/preference_store.dart`,
-//       `shared_preference_store.dart`) yalnız `core/storage/**`,
-//       `core/preferences/app_preferences.dart` ve `lib/app/di/**` tarafından import edilir:
+//       `shared_preference_store.dart`) yalnız bu iki dosya,
+//       `core/preferences/app_preferences.dart` ve `lib/app/di/**` tarafından import edilir
+//       (kesin dosya listesi — tip silme/geri çağrı ile taşıyan facade yazılamaz; A5):
 //       serbest anahtarla yazma yalnız tipli `AppPreferences` içinden (gizli veri kaçmasın).
 //       Ham depo ve S5/S6 paketleri hiçbir yerden `export` edilemez (barrel ile taşıma yok).
 //   U1  Boşluk için `SizedBox` yasak, standart `Gap` (package:gap): çocuksuz
@@ -297,18 +298,18 @@ void _checkUri(
     add('S7', 'SDK paketi dışa verilemez (barrel ile taşıma yasak): $uri');
   }
   if (uri.startsWith('package:shared_preferences/') &&
-      !here.path.startsWith('core/storage/')) {
+      here.path != 'core/storage/shared_preference_store.dart') {
     add(
       'S5',
-      'shared_preferences yalnız lib/core/storage/ içinde import edilir',
+      'shared_preferences yalnız lib/core/storage/shared_preference_store.dart içinde',
     );
   }
   if (uri.startsWith('package:firebase_') &&
       here.area != 'app' &&
-      !here.path.startsWith('core/telemetry/')) {
+      here.path != 'core/telemetry/telemetry.dart') {
     add(
       'S6',
-      'firebase yalnız lib/app/** ve lib/core/telemetry/** içinde import edilir',
+      'firebase yalnız lib/app/** ve lib/core/telemetry/telemetry.dart içinde',
     );
   }
   if (uri == 'dart:developer' && !here.path.startsWith('core/logging/')) {
@@ -359,7 +360,8 @@ void _checkUri(
       'ham tercih deposu dışa verilemez (barrel ile taşıma yasak): $uri',
     );
   } else if (rawPrefs &&
-      !here.path.startsWith('core/storage/') &&
+      here.path != 'core/storage/preference_store.dart' &&
+      here.path != 'core/storage/shared_preference_store.dart' &&
       here.path != 'core/preferences/app_preferences.dart' &&
       !here.path.startsWith('app/di/')) {
     add(

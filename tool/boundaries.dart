@@ -20,6 +20,21 @@
 //   S3  `debugPrint` ve `dart:developer` yalnız `lib/core/logging/**` içinde (log tek yoldan
 //       ve redaksiyonla; `print` ayrıca avoid_print ile yasak).
 //   S4  domain katmanı Flutter/dio/Riverpod import etmez (saf Dart).
+//   S5  shared_preferences YALNIZ `lib/core/storage/shared_preference_store.dart` içinde
+//       (kesin dosya; aynı dizinde ikinci bir bağdaştırıcı yok — gizli veri SecureStore'a, S1).
+//   S6  firebase_* yalnız `lib/app/**` ve `lib/core/telemetry/telemetry.dart` içinde (kesin
+//       dosya; başlatma ve telemetri tek yerden).
+//   S7  Ham tercih deposu (`core/storage/preference_store.dart`,
+//       `shared_preference_store.dart`) yalnız bu iki dosya,
+//       `core/preferences/app_preferences.dart` ve `lib/app/di/**` tarafından import edilir
+//       (kesin dosya listesi — tip silme/geri çağrı ile taşıyan facade yazılamaz; A5):
+//       serbest anahtarla yazma yalnız tipli `AppPreferences` içinden (gizli veri kaçmasın).
+//       Ham depo ve S5/S6 paketleri hiçbir yerden `export` edilemez (barrel ile taşıma yok).
+//   U1  Boşluk için `SizedBox` yasak, standart `Gap` (package:gap): çocuksuz
+//       `SizedBox(width/height)`, `SizedBox.square`, `SizedBox.fromSize`. Çocuklu SizedBox
+//       (boyut kısıtı) ve `SizedBox.shrink/expand` serbest. `SizedBox.new(...)`, yapıcı
+//       tear-off'u (`SizedBox.new`, `SizedBox.square`) ve `typedef X = SizedBox` de yakalanır; dosya kendi `SizedBox` sınıfını tanımlıyorsa
+//       (Flutter'ınki değil) kural uygulanmaz.
 //   G1  `package:get_it` yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` içinde
 //       (ADR-0001, D-0182: get_it = bileşim kökü; core ve feature katmanları servis bulucu
 //       kullanmaz, bağımlılık yapıcıdan gelir).
@@ -226,7 +241,11 @@ List<Violation> checkSource(String libPath, String content) {
     }
   }
 
-  unit.accept(_Visitor(here, generated, add));
+  // Dosya kendi SizedBox'ını tanımlıyorsa U1 Flutter'ınkini değil onu görür.
+  final ownSizedBox = unit.declarations.any(
+    (d) => d is ClassDeclaration && d.namePart.typeName.lexeme == 'SizedBox',
+  );
+  unit.accept(_Visitor(here, generated, add, ownSizedBox: ownSizedBox));
 
   return out;
 }
@@ -273,6 +292,26 @@ void _checkUri(
       'flutter_secure_storage yalnız lib/core/storage/ içinde import edilir',
     );
   }
+  if (isExport &&
+      (uri.startsWith('package:shared_preferences/') ||
+          uri.startsWith('package:firebase_'))) {
+    add('S7', 'SDK paketi dışa verilemez (barrel ile taşıma yasak): $uri');
+  }
+  if (uri.startsWith('package:shared_preferences/') &&
+      here.path != 'core/storage/shared_preference_store.dart') {
+    add(
+      'S5',
+      'shared_preferences yalnız lib/core/storage/shared_preference_store.dart içinde',
+    );
+  }
+  if (uri.startsWith('package:firebase_') &&
+      here.area != 'app' &&
+      here.path != 'core/telemetry/telemetry.dart') {
+    add(
+      'S6',
+      'firebase yalnız lib/app/** ve lib/core/telemetry/telemetry.dart içinde',
+    );
+  }
   if (uri == 'dart:developer' && !here.path.startsWith('core/logging/')) {
     add(
       'S3',
@@ -312,6 +351,24 @@ void _checkUri(
 
   if (target == null) return;
   final there = _Place(target);
+  final rawPrefs =
+      target == 'core/storage/preference_store.dart' ||
+      target == 'core/storage/shared_preference_store.dart';
+  if (rawPrefs && isExport) {
+    add(
+      'S7',
+      'ham tercih deposu dışa verilemez (barrel ile taşıma yasak): $uri',
+    );
+  } else if (rawPrefs &&
+      here.path != 'core/storage/preference_store.dart' &&
+      here.path != 'core/storage/shared_preference_store.dart' &&
+      here.path != 'core/preferences/app_preferences.dart' &&
+      !here.path.startsWith('app/di/')) {
+    add(
+      'S7',
+      'ham tercih deposu yalnız AppPreferences ve bileşim kökünden kullanılır: $uri',
+    );
+  }
   if (target.startsWith(generatedApiDir) && !generated) {
     if (isExport) {
       add(
@@ -372,10 +429,11 @@ void _checkUri(
 }
 
 class _Visitor extends RecursiveAstVisitor<void> {
-  _Visitor(this.here, this.generated, this.add);
+  _Visitor(this.here, this.generated, this.add, {this.ownSizedBox = false});
 
   final _Place here;
   final bool generated;
+  final bool ownSizedBox;
   final void Function(String rule, AstNode node, String message) add;
 
   void _member(AstNode node, String name) {
@@ -438,6 +496,115 @@ class _Visitor extends RecursiveAstVisitor<void> {
       }
     }
     super.visitNamedType(node);
+  }
+
+  // U1 — `const SizedBox(...)` InstanceCreationExpression, `SizedBox(...)` (const/new'siz)
+  // çözümlenmemiş AST'de MethodInvocation olarak gelir; ikisi de denetlenir.
+  void _spacer(AstNode node, String? ctor, ArgumentList args) {
+    if (generated || ownSizedBox) return;
+    if (ctor == 'new') ctor = null;
+    if (ctor != null && ctor != 'square' && ctor != 'fromSize') return;
+    final hasChild = args.arguments.any(
+      (a) => a is NamedArgument && a.name.lexeme == 'child',
+    );
+    if (!hasChild) {
+      add('U1', node, 'boşluk için SizedBox yerine Gap (package:gap) kullanın');
+    }
+  }
+
+  // Yapıcı tear-off'u (`final f = SizedBox.new; f(height: 8)`) argümanı görünmeden çağrılır:
+  // boşluk yapıcılarının tear-off'u koşulsuz yasak. Çağrı biçimi MethodInvocation olarak
+  // ayrı denetlenir; burada yalnız çağrılmayan başvuru gelir.
+  // Çağrılan biçim (`SizedBox.new(...)`) MethodInvocation olarak gelir; PrefixedIdentifier /
+  // PropertyAccess ise çağrılmayan başvurudur (tear-off).
+  static const _spacerCtors = {'new', 'square', 'fromSize'};
+
+  void _tearOff(AstNode node) {
+    if (!generated && !ownSizedBox) {
+      add(
+        'U1',
+        node,
+        'SizedBox yapıcı tear-off yasak (U1 atlatma); Gap kullanın',
+      );
+    }
+  }
+
+  @override
+  void visitPrefixedIdentifier(PrefixedIdentifier node) {
+    if (node.prefix.name == 'SizedBox' &&
+        _spacerCtors.contains(node.identifier.name)) {
+      _tearOff(node);
+    }
+    super.visitPrefixedIdentifier(node);
+  }
+
+  @override
+  void visitPropertyAccess(PropertyAccess node) {
+    final t = node.target;
+    if (t is PrefixedIdentifier &&
+        t.identifier.name == 'SizedBox' &&
+        _spacerCtors.contains(node.propertyName.name)) {
+      _tearOff(node); // m.SizedBox.new
+    }
+    super.visitPropertyAccess(node);
+  }
+
+  @override
+  void visitConstructorReference(ConstructorReference node) {
+    final c = node.constructorName;
+    if (!generated &&
+        !ownSizedBox &&
+        c.type.name.lexeme == 'SizedBox' &&
+        const {null, 'new', 'square', 'fromSize'}.contains(c.name?.name)) {
+      add(
+        'U1',
+        node,
+        'SizedBox yapıcı tear-off yasak (U1 atlatma); Gap kullanın',
+      );
+    }
+    super.visitConstructorReference(node);
+  }
+
+  @override
+  void visitGenericTypeAlias(GenericTypeAlias node) {
+    final t = node.type;
+    if (!generated &&
+        !ownSizedBox &&
+        t is NamedType &&
+        t.name.lexeme == 'SizedBox') {
+      add('U1', node, 'SizedBox takma adı yasak (U1 atlatma); Gap kullanın');
+    }
+    super.visitGenericTypeAlias(node);
+  }
+
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    final type = node.constructorName.type;
+    if (type.name.lexeme == 'SizedBox') {
+      _spacer(node, node.constructorName.name?.name, node.argumentList);
+    } else if (type.importPrefix?.name.lexeme == 'SizedBox' &&
+        node.constructorName.name == null) {
+      // Çözümsüz AST `const SizedBox.square(…)`'ı önek.Tip olarak ayrıştırır.
+      _spacer(node, type.name.lexeme, node.argumentList);
+    }
+    super.visitInstanceCreationExpression(node);
+  }
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    final target = node.target;
+    if (target == null && node.methodName.name == 'SizedBox') {
+      _spacer(node, null, node.argumentList);
+    } else if (target is SimpleIdentifier && target.name == 'SizedBox') {
+      _spacer(node, node.methodName.name, node.argumentList);
+    } else if (target is PrefixedIdentifier &&
+        target.identifier.name == 'SizedBox') {
+      _spacer(node, node.methodName.name, node.argumentList);
+    } else if (target is SimpleIdentifier &&
+        node.methodName.name == 'SizedBox') {
+      _spacer(node, null, node.argumentList); // önekli: m.SizedBox(...)
+    }
+    super.visitMethodInvocation(node);
   }
 
   @override

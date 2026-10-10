@@ -20,6 +20,7 @@ import 'package:nizamio/core/server/server_binding.dart';
 import 'package:nizamio/core/session/session_state.dart';
 import 'package:nizamio/core/session/token_pair.dart';
 import 'package:nizamio/core/session/token_store.dart';
+import 'package:nizamio/core/storage/preference_store.dart';
 import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/features/identity/identity.dart';
 
@@ -42,7 +43,11 @@ final adminPassword =
 class Mobile {
   Mobile(Flavor flavor) : store = MemorySecureStore() {
     // Gerçek bileşim kökü; HTTP gerçek (bağdaştırıcı verilmez), yalnız depo bellek içi.
-    composition = Composition.create(flavor: flavor, secureStore: store);
+    composition = Composition.create(
+      flavor: flavor,
+      secureStore: store,
+      preferenceStore: MemoryPreferenceStore(),
+    );
   }
 
   final MemorySecureStore store;

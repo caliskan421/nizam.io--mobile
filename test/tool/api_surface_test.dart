@@ -114,6 +114,97 @@ final _cases = <String, (String, String, Set<String>)>{
     "import 'zz_yok.dart';\nclass R { Yok? y; }",
     {'A0'},
   ),
+  'A4: izinli dizindeki facade ham depoyu getter ile taşır (CX-r3-Ö-04)': (
+    'core/storage/zz_prefs_facade.dart',
+    "import 'preference_store.dart';\nimport 'shared_preference_store.dart';\n"
+        'PreferenceStore get raw => SharedPreferenceStore();',
+    {'A4'},
+  ),
+  'A4: typedef ve kalıtım': (
+    'core/session/zz_prefs_alias.dart',
+    "import '../storage/preference_store.dart';\n"
+        'typedef Prefs = PreferenceStore;\n'
+        'abstract class P implements PreferenceStore {}',
+    {'A4'},
+  ),
+  'A4: telemetri Firebase nesnesini dışa verir': (
+    'core/telemetry/zz_tel.dart',
+    "import 'package:firebase_analytics/firebase_analytics.dart';\n"
+        'FirebaseAnalytics analytics() => FirebaseAnalytics.instance;',
+    {'A4'},
+  ),
+  'A4: shared_preferences tipi fabrika ile': (
+    'core/storage/zz_sp_factory.dart',
+    "import 'package:shared_preferences/shared_preferences.dart';\n"
+        'SharedPreferencesAsync open() => SharedPreferencesAsync();',
+    {'A4'},
+  ),
+  'A4: SDK yalnız gövde/özel üyede serbest': (
+    'core/telemetry/zz_tel_ok.dart',
+    "import 'package:firebase_analytics/firebase_analytics.dart';\n"
+        'class Telemetry {\n'
+        '  FirebaseAnalytics get _a => FirebaseAnalytics.instance;\n'
+        '  Future<void> event(String name) => _a.logEvent(name: name);\n'
+        '}',
+    <String>{},
+  ),
+  'A5: ham depo dynamic ile taşınır (CX-r3-Ö-04)': (
+    'core/storage/shared_preference_store.dart',
+    "import 'package:shared_preferences/shared_preferences.dart';\n"
+        "import 'preference_store.dart';\n"
+        'class SharedPreferenceStore implements PreferenceStore {\n'
+        '  @override Future<String?> getString(String k) async => null;\n'
+        '  @override Future<void> setString(String k, String v) async {}\n'
+        '  @override Future<void> remove(String k) async {}\n'
+        '}\n'
+        'dynamic get raw => SharedPreferencesAsync();',
+    {'A5'},
+  ),
+  'A5: AppPreferences Object ve geri çağrı ile taşır': (
+    'core/preferences/app_preferences.dart',
+    "import '../storage/preference_store.dart';\n"
+        'class AppPreferences {\n'
+        '  AppPreferences(this._s);\n'
+        '  final PreferenceStore _s;\n'
+        '  Object get store => _s;\n'
+        '  Future<void> Function(String, String) get writer => _s.setString;\n'
+        '  List<dynamic> all() => [];\n'
+        '}',
+    {'A5'},
+  ),
+  'A5: telemetri tipsiz nesne': (
+    'core/telemetry/telemetry.dart',
+    "import 'package:firebase_analytics/firebase_analytics.dart';\n"
+        'dynamic analytics() => FirebaseAnalytics.instance;',
+    {'A5'},
+  ),
+  'A4: AppPreferences ham depoyu adlandırılmış tiple verir (CX-r3-Ö-04)': (
+    'core/preferences/zz_app_prefs_leak.dart',
+    "import '../storage/preference_store.dart';\n"
+        'class AppPrefs2 {\n'
+        '  AppPrefs2(this._store);\n'
+        '  final PreferenceStore _store;\n'
+        '  PreferenceStore get raw => _store;\n'
+        '}',
+    {'A4'},
+  ),
+  'A4: tip parametresi sınırı': (
+    'core/preferences/zz_bound.dart',
+    "import '../storage/preference_store.dart';\n"
+        'class Holder<T extends PreferenceStore> { Holder(this._t); final T _t; '
+        'int get n => _t.hashCode; }',
+    {'A4'},
+  ),
+  'A4: yalnız yapıcı girdisi serbest (AppPreferences biçimi)': (
+    'core/preferences/zz_ctor_only.dart',
+    "import '../storage/preference_store.dart';\n"
+        'class Prefs3 {\n'
+        '  Prefs3(this._store);\n'
+        '  final PreferenceStore _store;\n'
+        "  Future<String?> theme() => _store.getString('k');\n"
+        '}',
+    <String>{},
+  ),
 };
 
 void main() {

@@ -14,6 +14,18 @@
 //   A3  Aynı yüzey kuralı `lib/core/**` (üretilmiş kodun kendisi hariç) için de geçerlidir:
 //       features'ın serbestçe import ettiği core, üretilmiş tipi dolaylı taşıyamaz.
 //
+//   A4  Yalıtılmış SDK ve ham tercih portu (`package:shared_preferences`, `package:firebase_*`,
+//       `core/storage/preference_store.dart`, `shared_preference_store.dart`) hiçbir
+//       kütüphanenin açık API'sinde görünmez (getter, fabrika, typedef, kalıtım dahil) —
+//       yalnız ham depo dosyaları ve `lib/app/di/**` muaf; diğer her yerde (AppPreferences
+//       dahil) yalnız YAPICI GİRDİSİ olarak görünebilir (içeri akış). S5/S6/S7 (tool/boundaries.dart) doğrudan import/export'u, A4 açık API ile
+//       dolaylı taşımayı kapatır. Bütün kütüphaneler (presentation dahil) taranır.
+//   A5  Bağdaştırıcı dosyaları (ham tercih deposu, `AppPreferences`, telemetri — S5/S6/S7'nin
+//       kesin dosya listesi; `app/di` hariç) açık API'de tipi SİLİNMİŞ değer veremez:
+//       `dynamic`, `Object`, işlev tipi (geri çağrı) dönüş/parametre/alan olarak yasak (iç
+//       içe tip argümanları dahil). SDK nesnesi böylece adlandırılmış güvenli tip dışında
+//       taşınamaz (CX-r3-Ö-04). `Object` üyeleri (`==`, `toString`…) sayılmaz.
+//
 // A1 (tool/boundaries.dart) üretilmiş koda doğrudan erişimi data + modül dosyasıyla sınırlar;
 // A2/A3 kalan dolaylı yolu (açık API'de tip olarak sızma) kapatır.
 import 'dart:io';
@@ -73,7 +85,7 @@ Future<List<Violation>> checkApiSurface(
               ])
           .map((r) => r.replaceAll(r'\', '/'))
           .toSet()
-          .where(_inScope)
+          .where(_scanned)
           .toList()
         ..sort();
 
@@ -118,20 +130,77 @@ Future<List<Violation>> checkApiSurface(
       }
       continue;
     }
-    final rule = rel.startsWith('core/') ? 'A3' : 'A2';
-    final reported =
-        <String>{}; // alanın getter/setter'ı, değişken + getter tekrarı
-    for (final (element, what, type) in _publicSurface(result.element)) {
-      final leaked = _generatedIn(type, <DartType>{});
-      if (leaked == null || !reported.add(what)) continue;
-      out.add(
-        Violation(
-          rule,
-          'lib/$rel',
-          _line(result, element),
-          'açık API üretilmiş tip taşıyor: $what → $leaked '
-              '(domain varlığı döndürün; DTO yalnız gövdede/özel bildirimde)',
-        ),
+    final surface = _publicSurface(result.element).toList();
+    void check(
+      String rule,
+      bool Function(Element) match,
+      String message, {
+      bool inboundOk = false,
+    }) {
+      final reported =
+          <String>{}; // alanın getter/setter'ı, değişken + getter tekrarı
+      for (final (element, what, type) in surface) {
+        // Yönsel muafiyet: yapıcı girdisi içeri akıştır (çağıranın nesneye zaten sahip olması
+        // gerekir); dönüş, alan, getter, tip sınırı dışarı akıştır.
+        if (inboundOk && element is ConstructorElement) continue;
+        final leaked = _typeIn(type, match, <DartType>{});
+        if (leaked == null || !reported.add(what)) continue;
+        out.add(
+          Violation(
+            rule,
+            'lib/$rel',
+            _line(result, element),
+            '$message: $what → $leaked',
+          ),
+        );
+      }
+    }
+
+    if (_dtoScope(rel)) {
+      check(
+        rel.startsWith('core/') ? 'A3' : 'A2',
+        _isGenerated,
+        'açık API üretilmiş tip taşıyor (domain varlığı döndürün; DTO yalnız '
+        'gövdede/özel bildirimde)',
+      );
+    }
+    if (_adapters.contains(rel)) {
+      final reported = <String>{};
+      for (final (element, what, type) in surface) {
+        if (element.library?.isDartCore ?? false) continue; // Object üyeleri
+        if (element.name == '==') continue;
+        // Örtük `Object` üst tipi taşıma değildir.
+        if (element is InterfaceElement &&
+            type is InterfaceType &&
+            type.isDartCoreObject) {
+          continue;
+        }
+        final types = switch (element) {
+          final ExecutableElement e => [
+            e.returnType,
+            for (final f in e.formalParameters) f.type,
+          ],
+          _ => [type],
+        };
+        final erased = types.map(_erased).nonNulls.firstOrNull;
+        if (erased == null || !reported.add(what)) continue;
+        out.add(
+          Violation(
+            'A5',
+            'lib/$rel',
+            _line(result, element),
+            'bağdaştırıcı açık API tipi silinmiş değer veriyor: $what → $erased',
+          ),
+        );
+      }
+    }
+    if (!_sensitiveAllowed(rel)) {
+      check(
+        'A4',
+        _isSensitive,
+        'açık API yalıtılmış SDK/ham tercih tipi taşıyor (yalnız ham depo dosyaları ve '
+            'app/di; diğerlerinde yalnız yapıcı girdisi)',
+        inboundOk: true,
       );
     }
   }
@@ -158,14 +227,61 @@ Future<List<Violation>> checkApiSurface(
   return out;
 }
 
-/// Kapsam dosya sonekine göre DARALTILMAZ (`.g.dart` kökü ile kaçış yok, CX-a-Ö-04);
-/// yalnız üretilmiş API dizini muaftır.
-bool _inScope(String rel) {
-  if (!rel.endsWith('.dart')) return false;
-  if (rel.startsWith(generatedApiDir)) return false;
+/// Taranan kütüphaneler: üretilmiş API dizini dışındaki her `.dart` (sonekle DARALTILMAZ —
+/// `.g.dart` kökü ile kaçış yok, CX-a-Ö-04).
+bool _scanned(String rel) =>
+    rel.endsWith('.dart') && !rel.startsWith(generatedApiDir);
+
+/// A2/A3 kapsamı: core ve features/*/data.
+bool _dtoScope(String rel) {
   if (rel.startsWith('core/')) return true;
   final parts = rel.split('/');
   return parts.length >= 4 && parts[0] == 'features' && parts[2] == 'data';
+}
+
+const _rawPrefs = {
+  'core/storage/preference_store.dart',
+  'core/storage/shared_preference_store.dart',
+};
+
+/// A5 kapsamı: S5/S6/S7 kesin dosya listesindeki bağdaştırıcılar (`app/di` hariç).
+const _adapters = {
+  ..._rawPrefs,
+  'core/preferences/app_preferences.dart',
+  'core/telemetry/telemetry.dart',
+};
+
+/// `dynamic`, `Object`/`Object?` veya işlev tipi (iç içe dahil) varsa açıklaması.
+String? _erased(DartType t, [Set<DartType>? seen]) {
+  seen ??= {};
+  if (!seen.add(t)) return null;
+  if (t is DynamicType) return 'dynamic';
+  if (t is InvalidType) return 'çözümlenemeyen tip';
+  if (t is FunctionType) return 'işlev tipi (geri çağrı)';
+  if (t is InterfaceType) {
+    if (t.isDartCoreObject) return 'Object';
+    if (t.isDartCoreFunction) return 'Function';
+    for (final a in t.typeArguments) {
+      if (_erased(a, seen) case final e?) return e;
+    }
+  }
+  if (t is RecordType) {
+    for (final f in [...t.positionalFields, ...t.namedFields]) {
+      if (_erased(f.type, seen) case final e?) return e;
+    }
+  }
+  return null;
+}
+
+/// A4 muafları: ham port/SDK tipini açık API'de taşıyabilecek tek yerler.
+bool _sensitiveAllowed(String rel) =>
+    _rawPrefs.contains(rel) || rel.startsWith('app/di/');
+
+bool _isSensitive(Element element) {
+  final uri = element.library?.uri.toString() ?? '';
+  return uri.startsWith('package:shared_preferences/') ||
+      uri.startsWith('package:firebase_') ||
+      _rawPrefs.any((r) => uri == 'package:$packageName/$r');
 }
 
 /// `flutter test` altında çalıştırılabilir dart değil flutter_tester'dır; SDK yolu
@@ -269,34 +385,38 @@ Iterable<(Element, String, DartType)> _publicSurface(
   }
 }
 
-/// [type] içinde üretilmiş kodda tanımlı bir tip/typedef varsa adı, yoksa null.
-String? _generatedIn(DartType type, Set<DartType> seen) {
+/// [type] içinde [match]'e uyan bir tip/typedef varsa adı, yoksa null.
+String? _typeIn(
+  DartType type,
+  bool Function(Element) match,
+  Set<DartType> seen,
+) {
   if (!seen.add(type)) return null;
   if (type.alias case final alias?) {
-    if (_isGenerated(alias.element)) return alias.element.name;
+    if (match(alias.element)) return alias.element.name;
     for (final a in alias.typeArguments) {
-      if (_generatedIn(a, seen) case final n?) return n;
+      if (_typeIn(a, match, seen) case final n?) return n;
     }
   }
   switch (type) {
     case InterfaceType():
-      if (_isGenerated(type.element)) return type.element.name;
+      if (match(type.element)) return type.element.name;
       for (final a in type.typeArguments) {
-        if (_generatedIn(a, seen) case final n?) return n;
+        if (_typeIn(a, match, seen) case final n?) return n;
       }
     case FunctionType():
-      if (_generatedIn(type.returnType, seen) case final n?) return n;
+      if (_typeIn(type.returnType, match, seen) case final n?) return n;
       for (final f in type.formalParameters) {
-        if (_generatedIn(f.type, seen) case final n?) return n;
+        if (_typeIn(f.type, match, seen) case final n?) return n;
       }
       for (final tp in type.typeParameters) {
         if (tp.bound case final b?) {
-          if (_generatedIn(b, seen) case final n?) return n;
+          if (_typeIn(b, match, seen) case final n?) return n;
         }
       }
     case RecordType():
       for (final f in [...type.positionalFields, ...type.namedFields]) {
-        if (_generatedIn(f.type, seen) case final n?) return n;
+        if (_typeIn(f.type, match, seen) case final n?) return n;
       }
     default:
   }

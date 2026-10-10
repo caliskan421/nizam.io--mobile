@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../core/app_phase.dart';
 import '../core/config/flavor.dart';
@@ -35,12 +36,17 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
     super.dispose();
   }
 
-  ThemeData _theme(Brightness b, NizamioColors c) => ThemeData(
-    brightness: b,
-    colorScheme: ColorScheme.fromSeed(seedColor: c.primary, brightness: b),
-    scaffoldBackgroundColor: c.background,
-    extensions: [c],
-  );
+  ThemeData _theme(Brightness b, NizamioColors c) {
+    final base = ThemeData(
+      brightness: b,
+      colorScheme: ColorScheme.fromSeed(seedColor: c.primary, brightness: b),
+      scaffoldBackgroundColor: c.background,
+      extensions: [c],
+    );
+    // Yazı tipi token'dan (Inter); dosyalar uygulamayla gelir (assets/fonts), ağdan
+    // indirilmez — bootstrap `allowRuntimeFetching = false`.
+    return base.copyWith(textTheme: GoogleFonts.interTextTheme(base.textTheme));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +56,7 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
       debugShowCheckedModeBanner: ref.watch(flavorProvider) == Flavor.dev,
       theme: _theme(Brightness.light, NizamioColors.light),
       darkTheme: _theme(Brightness.dark, NizamioColors.dark),
+      themeMode: ref.watch(themeModeProvider),
       locale: const Locale('tr'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [

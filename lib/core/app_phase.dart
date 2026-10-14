@@ -3,7 +3,7 @@ import 'server/server_binding.dart';
 import 'session/session_state.dart';
 
 /// Uygulama durum makinesi (platform §6, K-11): bağ yok → sunucu doğrulandı → oturum → kapsam.
-/// Router bu değerden türetilir (app/router.dart).
+/// Router bu değerden türetilir (app/router/router.dart).
 enum AppPhase {
   unbound,
   verifying,

@@ -761,6 +761,10 @@
   "@errClientUpdateRequired": {
     "description": "client.update_required"
   },
+  "uiButtonsBusy": "Meşgul",
+  "@uiButtonsBusy": {
+    "description": "ui.buttons.busy"
+  },
   "uiCommonRetry": "Yeniden dene",
   "@uiCommonRetry": {
     "description": "ui.common.retry"
@@ -848,5 +852,61 @@
   "uiInputsValidationMustChoose": "Bir seçim yapın.",
   "@uiInputsValidationMustChoose": {
     "description": "ui.inputs.validation_must_choose"
+  },
+  "uiRouterTabHome": "Ana sayfa",
+  "@uiRouterTabHome": {
+    "description": "ui.router.tab_home"
+  },
+  "uiRouterTabWork": "İşler",
+  "@uiRouterTabWork": {
+    "description": "ui.router.tab_work"
+  },
+  "uiRouterTabProfile": "Profil",
+  "@uiRouterTabProfile": {
+    "description": "ui.router.tab_profile"
+  },
+  "uiRouterNavLabel": "Ana gezinme",
+  "@uiRouterNavLabel": {
+    "description": "ui.router.nav_label"
+  },
+  "uiRouterPageServer": "Sunucu",
+  "@uiRouterPageServer": {
+    "description": "ui.router.page_server"
+  },
+  "uiRouterPageUpdateRequired": "Güncelleme gerekli",
+  "@uiRouterPageUpdateRequired": {
+    "description": "ui.router.page_update_required"
+  },
+  "uiRouterPageLogin": "Giriş",
+  "@uiRouterPageLogin": {
+    "description": "ui.router.page_login"
+  },
+  "uiRouterPagePassword": "Parola değiştir",
+  "@uiRouterPagePassword": {
+    "description": "ui.router.page_password"
+  },
+  "uiRouterPageScope": "Kapsam seçimi",
+  "@uiRouterPageScope": {
+    "description": "ui.router.page_scope"
+  },
+  "uiRouterPageDetail": "Ayrıntı",
+  "@uiRouterPageDetail": {
+    "description": "ui.router.page_detail"
+  },
+  "uiRouterPlaceholder": "Bu ekran henüz hazır değil.",
+  "@uiRouterPlaceholder": {
+    "description": "ui.router.placeholder"
+  },
+  "uiRouterNotFoundTitle": "Sayfa bulunamadı",
+  "@uiRouterNotFoundTitle": {
+    "description": "ui.router.not_found_title"
+  },
+  "uiRouterNotFoundMessage": "Aradığınız sayfa yok ya da kaldırılmış.",
+  "@uiRouterNotFoundMessage": {
+    "description": "ui.router.not_found_message"
+  },
+  "uiRouterNotFoundAction": "Ana sayfaya dön",
+  "@uiRouterNotFoundAction": {
+    "description": "ui.router.not_found_action"
   }
 }

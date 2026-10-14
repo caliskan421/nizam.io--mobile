@@ -1234,6 +1234,12 @@ abstract class AppLocalizations {
   /// **'Bu sunucuya bağlanmak için uygulamayı güncelleyin.'**
   String get errClientUpdateRequired;
 
+  /// ui.buttons.busy
+  ///
+  /// In tr, this message translates to:
+  /// **'Meşgul'**
+  String get uiButtonsBusy;
+
   /// ui.common.retry
   ///
   /// In tr, this message translates to:
@@ -1365,6 +1371,90 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bir seçim yapın.'**
   String get uiInputsValidationMustChoose;
+
+  /// ui.router.tab_home
+  ///
+  /// In tr, this message translates to:
+  /// **'Ana sayfa'**
+  String get uiRouterTabHome;
+
+  /// ui.router.tab_work
+  ///
+  /// In tr, this message translates to:
+  /// **'İşler'**
+  String get uiRouterTabWork;
+
+  /// ui.router.tab_profile
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil'**
+  String get uiRouterTabProfile;
+
+  /// ui.router.nav_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Ana gezinme'**
+  String get uiRouterNavLabel;
+
+  /// ui.router.page_server
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucu'**
+  String get uiRouterPageServer;
+
+  /// ui.router.page_update_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Güncelleme gerekli'**
+  String get uiRouterPageUpdateRequired;
+
+  /// ui.router.page_login
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş'**
+  String get uiRouterPageLogin;
+
+  /// ui.router.page_password
+  ///
+  /// In tr, this message translates to:
+  /// **'Parola değiştir'**
+  String get uiRouterPagePassword;
+
+  /// ui.router.page_scope
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapsam seçimi'**
+  String get uiRouterPageScope;
+
+  /// ui.router.page_detail
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayrıntı'**
+  String get uiRouterPageDetail;
+
+  /// ui.router.placeholder
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ekran henüz hazır değil.'**
+  String get uiRouterPlaceholder;
+
+  /// ui.router.not_found_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Sayfa bulunamadı'**
+  String get uiRouterNotFoundTitle;
+
+  /// ui.router.not_found_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Aradığınız sayfa yok ya da kaldırılmış.'**
+  String get uiRouterNotFoundMessage;
+
+  /// ui.router.not_found_action
+  ///
+  /// In tr, this message translates to:
+  /// **'Ana sayfaya dön'**
+  String get uiRouterNotFoundAction;
 }
 
 class _AppLocalizationsDelegate

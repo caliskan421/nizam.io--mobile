@@ -1,6 +1,6 @@
 // Durum makinesi: bağ yok → sunucu doğrulandı → oturum → kapsam; router türetimi.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nizamio/app/router.dart';
+import 'package:nizamio/app/router/router.dart';
 import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/config/flavor.dart';
 import 'package:nizamio/core/errors/api_error.dart';

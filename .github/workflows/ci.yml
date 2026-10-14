@@ -2,7 +2,8 @@ name: ci
 
 # NIZAM.IO mobil istemcisi — kalite kapısı (F14 MOB-0 kapsam 11).
 # Sıra: kurulum (pubspec.lock donuk) → üretim kapısı (pinlerden yeniden üret, diff = 0) →
-# biçim → analiz → sınır kuralı → birim testleri; ayrı iş: Android derlemesi.
+# biçim → analiz → sınır kuralı → test varlığı (Q2) → birim testleri + kapsama (Q1); ayrı işler:
+# golden (Linux, sabit runner), Android derlemesi, entegrasyon.
 # Eylemler commit SHA'sına, Flutter sürümü pubspec.yaml `environment.flutter` alanına sabittir.
 #
 # Backend deposu özeldir: salt okunur deploy key (BACKEND_DEPLOY_KEY) ile yalnız api-pin.json'daki
@@ -13,6 +14,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Golden referansı üretimi (`golden-update` işi). Yalnız varsayılan daldaki iş akışı elle
+  # tetiklenebilir; main'e girmeden referans gerekiyorsa `golden` işinin başarısızlık
+  # artefaktı (golden-referans) kullanılır.
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -24,6 +29,7 @@ permissions:
 jobs:
   verify:
     name: 'format · analyze · sınır · test'
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -85,11 +91,84 @@ jobs:
       - name: Sınır kuralı (tool/check_boundaries.dart)
         run: make boundaries
 
-      - name: Birim testleri
-        run: make test
+      - name: 'Test varlığı (Q2: tool/check_test_presence.dart)'
+        run: make test-presence
+
+      - name: 'Birim testleri + kapsama eşikleri (Q1: tool/check_coverage.dart)'
+        run: make coverage
 
       - name: 'Ayrım kapısı öz-testi: yasak işaretli sentetik APK reddedilir (SIGPIPE/pipefail körlüğü yok)'
         run: test_integration/backend/check-isolation-selftest.sh
+
+  # Golden referansı yalnız burada üretilir/doğrulanır: runner etiketi SABİT (ubuntu-latest
+  # taşınınca piksel kayması sessiz olmasın). Etiket değişimi bilinçli bir PR'dır; referanslar
+  # yeni runner'da `golden-update` ile yeniden üretilip incelenir.
+  golden:
+    name: 'Golden (Linux, ubuntu-24.04)'
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Kaynak kodu al
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Flutter kur (pubspec.yaml environment.flutter)
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: stable
+          cache: true
+
+      - name: Bağımlılıklar (--enforce-lockfile)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Golden testleri (referansla karşılaştır)
+        id: golden
+        run: make golden
+
+      # Başarısızlıkta (referans yok/değişmiş) aynı runner'da referansı üretip artefakt yapar;
+      # iş yine kırmızı kalır. Artefakt incelenmeden commit'lenmez (ADR-0003: görsel fark
+      # incelenmeden referans değişmez).
+      - name: Referans üret (yalnız golden başarısızsa)
+        if: failure() && steps.golden.outcome == 'failure'
+        run: make golden-update
+
+      - name: Üretilen referansları yükle (golden-referans)
+        if: failure() && steps.golden.outcome == 'failure'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: golden-referans
+          path: test/**/goldens/**
+          if-no-files-found: warn
+
+  golden-update:
+    name: 'Golden referansı üret (elle, ubuntu-24.04)'
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Kaynak kodu al
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Flutter kur (pubspec.yaml environment.flutter)
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: stable
+          cache: true
+
+      - name: Bağımlılıklar (--enforce-lockfile)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Referansları üret (--update-goldens)
+        run: make golden-update
+
+      - name: Üretilen referansları yükle (golden-referans)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: golden-referans
+          path: test/**/goldens/**
+          if-no-files-found: error
 
   android:
     name: 'Android derlemesi (dev debug, prod release --obfuscate)'

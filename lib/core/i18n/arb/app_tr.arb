@@ -801,6 +801,58 @@
   "@uiFeedbackSecondsUnit": {
     "description": "ui.feedback.seconds_unit"
   },
+  "uiInputsPasswordShow": "Parolayı göster",
+  "@uiInputsPasswordShow": {
+    "description": "ui.inputs.password_show"
+  },
+  "uiInputsPasswordHide": "Parolayı gizle",
+  "@uiInputsPasswordHide": {
+    "description": "ui.inputs.password_hide"
+  },
+  "uiInputsSearch": "Ara",
+  "@uiInputsSearch": {
+    "description": "ui.inputs.search"
+  },
+  "uiInputsSearchClear": "Aramayı temizle",
+  "@uiInputsSearchClear": {
+    "description": "ui.inputs.search_clear"
+  },
+  "uiInputsSelectPlaceholder": "Seçin",
+  "@uiInputsSelectPlaceholder": {
+    "description": "ui.inputs.select_placeholder"
+  },
+  "uiInputsInvalidValue": "Değer geçersiz.",
+  "@uiInputsInvalidValue": {
+    "description": "ui.inputs.invalid_value"
+  },
+  "uiInputsValidationRequired": "Bu alan zorunludur.",
+  "@uiInputsValidationRequired": {
+    "description": "ui.inputs.validation_required"
+  },
+  "uiInputsValidationEmail": "Geçerli bir e-posta adresi girin.",
+  "@uiInputsValidationEmail": {
+    "description": "ui.inputs.validation_email"
+  },
+  "uiInputsValidationTooShort": "Değer çok kısa.",
+  "@uiInputsValidationTooShort": {
+    "description": "ui.inputs.validation_too_short"
+  },
+  "uiInputsValidationTooLong": "Değer çok uzun.",
+  "@uiInputsValidationTooLong": {
+    "description": "ui.inputs.validation_too_long"
+  },
+  "uiInputsValidationMismatch": "Değerler eşleşmiyor.",
+  "@uiInputsValidationMismatch": {
+    "description": "ui.inputs.validation_mismatch"
+  },
+  "uiInputsValidationMustAccept": "Devam etmek için onaylamanız gerekir.",
+  "@uiInputsValidationMustAccept": {
+    "description": "ui.inputs.validation_must_accept"
+  },
+  "uiInputsValidationMustChoose": "Bir seçim yapın.",
+  "@uiInputsValidationMustChoose": {
+    "description": "ui.inputs.validation_must_choose"
+  },
   "uiRouterTabHome": "Ana sayfa",
   "@uiRouterTabHome": {
     "description": "ui.router.tab_home"

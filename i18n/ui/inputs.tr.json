@@ -1,0 +1,18 @@
+{
+  "$comment": "Girdi kiti ve doğrulayıcı metinleri. ELLE yazılır; make gen ARB'ye birleştirir.",
+  "texts": {
+    "ui.inputs.password_show": "Parolayı göster",
+    "ui.inputs.password_hide": "Parolayı gizle",
+    "ui.inputs.search": "Ara",
+    "ui.inputs.search_clear": "Aramayı temizle",
+    "ui.inputs.select_placeholder": "Seçin",
+    "ui.inputs.invalid_value": "Değer geçersiz.",
+    "ui.inputs.validation_required": "Bu alan zorunludur.",
+    "ui.inputs.validation_email": "Geçerli bir e-posta adresi girin.",
+    "ui.inputs.validation_too_short": "Değer çok kısa.",
+    "ui.inputs.validation_too_long": "Değer çok uzun.",
+    "ui.inputs.validation_mismatch": "Değerler eşleşmiyor.",
+    "ui.inputs.validation_must_accept": "Devam etmek için onaylamanız gerekir.",
+    "ui.inputs.validation_must_choose": "Bir seçim yapın."
+  }
+}

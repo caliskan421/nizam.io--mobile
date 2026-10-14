@@ -776,5 +776,25 @@
   "uiCommonClose": "Kapat",
   "@uiCommonClose": {
     "description": "ui.common.close"
+  },
+  "uiFeedbackLoading": "Yükleniyor",
+  "@uiFeedbackLoading": {
+    "description": "ui.feedback.loading"
+  },
+  "uiFeedbackOffline": "Çevrimdışısınız. Sunucuya ulaşılamıyor.",
+  "@uiFeedbackOffline": {
+    "description": "ui.feedback.offline"
+  },
+  "uiFeedbackErrorTitle": "Bir sorun oluştu",
+  "@uiFeedbackErrorTitle": {
+    "description": "ui.feedback.error_title"
+  },
+  "uiFeedbackRetryWait": "Yeniden denemek için bekleyin",
+  "@uiFeedbackRetryWait": {
+    "description": "ui.feedback.retry_wait"
+  },
+  "uiFeedbackSecondsUnit": "sn",
+  "@uiFeedbackSecondsUnit": {
+    "description": "ui.feedback.seconds_unit"
   }
 }

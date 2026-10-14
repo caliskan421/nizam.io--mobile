@@ -1257,6 +1257,36 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kapat'**
   String get uiCommonClose;
+
+  /// ui.feedback.loading
+  ///
+  /// In tr, this message translates to:
+  /// **'Yükleniyor'**
+  String get uiFeedbackLoading;
+
+  /// ui.feedback.offline
+  ///
+  /// In tr, this message translates to:
+  /// **'Çevrimdışısınız. Sunucuya ulaşılamıyor.'**
+  String get uiFeedbackOffline;
+
+  /// ui.feedback.error_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir sorun oluştu'**
+  String get uiFeedbackErrorTitle;
+
+  /// ui.feedback.retry_wait
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeniden denemek için bekleyin'**
+  String get uiFeedbackRetryWait;
+
+  /// ui.feedback.seconds_unit
+  ///
+  /// In tr, this message translates to:
+  /// **'sn'**
+  String get uiFeedbackSecondsUnit;
 }
 
 class _AppLocalizationsDelegate

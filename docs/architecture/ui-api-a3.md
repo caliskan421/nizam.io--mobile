@@ -219,7 +219,7 @@ List<CatalogEntry> get allCatalogEntries => [...feedbackCatalogEntries];
 class CatalogPage extends StatelessWidget { const CatalogPage({super.key}); }
 ```
 
-Rota: `/dev/catalog`. `createRouter` imzası genişler (W21, `lib/app/router.dart` yalnız katalog
+Rota: `/dev/catalog`. `createRouter` imzası genişler (W21, `lib/app/router.dart` — O4/W36 sonrası `lib/app/router/router.dart` — yalnız katalog
 satırları; `lib/app/app.dart` yalnız çağrı satırı):
 
 ```dart
@@ -234,5 +234,5 @@ GoRouter createRouter(ValueNotifier<AppPhase> phase, {bool devCatalog = false});
 
 | Yol | Sahip |
 |---|---|
-| `lib/core/ui/widgets/nz_size.dart`, `lib/core/ui/widgets/feedback/**`, `lib/app/dev/**`, `i18n/ui/feedback.tr.json`, `lib/app/router.dart` (katalog satırları), `lib/app/app.dart` (createRouter çağrısı) | W21 |
+| `lib/core/ui/widgets/nz_size.dart`, `lib/core/ui/widgets/feedback/**`, `lib/app/dev/**`, `i18n/ui/feedback.tr.json`, `lib/app/router.dart` (katalog satırları; O4/W36 ile `lib/app/router/router.dart`), `lib/app/app.dart` (createRouter çağrısı) | W21 |
 | `lib/core/ui/page/**`, `lib/core/ui/state/**`, `lib/core/ui/extensions/ref_ext.dart` | W22 |

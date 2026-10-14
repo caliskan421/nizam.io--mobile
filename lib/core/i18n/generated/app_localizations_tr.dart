@@ -692,6 +692,46 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiFeedbackSecondsUnit => 'sn';
 
   @override
+  String get uiInputsPasswordShow => 'Parolayı göster';
+
+  @override
+  String get uiInputsPasswordHide => 'Parolayı gizle';
+
+  @override
+  String get uiInputsSearch => 'Ara';
+
+  @override
+  String get uiInputsSearchClear => 'Aramayı temizle';
+
+  @override
+  String get uiInputsSelectPlaceholder => 'Seçin';
+
+  @override
+  String get uiInputsInvalidValue => 'Değer geçersiz.';
+
+  @override
+  String get uiInputsValidationRequired => 'Bu alan zorunludur.';
+
+  @override
+  String get uiInputsValidationEmail => 'Geçerli bir e-posta adresi girin.';
+
+  @override
+  String get uiInputsValidationTooShort => 'Değer çok kısa.';
+
+  @override
+  String get uiInputsValidationTooLong => 'Değer çok uzun.';
+
+  @override
+  String get uiInputsValidationMismatch => 'Değerler eşleşmiyor.';
+
+  @override
+  String get uiInputsValidationMustAccept =>
+      'Devam etmek için onaylamanız gerekir.';
+
+  @override
+  String get uiInputsValidationMustChoose => 'Bir seçim yapın.';
+
+  @override
   String get uiRouterTabHome => 'Ana sayfa';
 
   @override

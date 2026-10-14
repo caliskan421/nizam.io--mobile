@@ -1294,6 +1294,84 @@ abstract class AppLocalizations {
   /// **'sn'**
   String get uiFeedbackSecondsUnit;
 
+  /// ui.inputs.password_show
+  ///
+  /// In tr, this message translates to:
+  /// **'Parolayı göster'**
+  String get uiInputsPasswordShow;
+
+  /// ui.inputs.password_hide
+  ///
+  /// In tr, this message translates to:
+  /// **'Parolayı gizle'**
+  String get uiInputsPasswordHide;
+
+  /// ui.inputs.search
+  ///
+  /// In tr, this message translates to:
+  /// **'Ara'**
+  String get uiInputsSearch;
+
+  /// ui.inputs.search_clear
+  ///
+  /// In tr, this message translates to:
+  /// **'Aramayı temizle'**
+  String get uiInputsSearchClear;
+
+  /// ui.inputs.select_placeholder
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçin'**
+  String get uiInputsSelectPlaceholder;
+
+  /// ui.inputs.invalid_value
+  ///
+  /// In tr, this message translates to:
+  /// **'Değer geçersiz.'**
+  String get uiInputsInvalidValue;
+
+  /// ui.inputs.validation_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu alan zorunludur.'**
+  String get uiInputsValidationRequired;
+
+  /// ui.inputs.validation_email
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçerli bir e-posta adresi girin.'**
+  String get uiInputsValidationEmail;
+
+  /// ui.inputs.validation_too_short
+  ///
+  /// In tr, this message translates to:
+  /// **'Değer çok kısa.'**
+  String get uiInputsValidationTooShort;
+
+  /// ui.inputs.validation_too_long
+  ///
+  /// In tr, this message translates to:
+  /// **'Değer çok uzun.'**
+  String get uiInputsValidationTooLong;
+
+  /// ui.inputs.validation_mismatch
+  ///
+  /// In tr, this message translates to:
+  /// **'Değerler eşleşmiyor.'**
+  String get uiInputsValidationMismatch;
+
+  /// ui.inputs.validation_must_accept
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam etmek için onaylamanız gerekir.'**
+  String get uiInputsValidationMustAccept;
+
+  /// ui.inputs.validation_must_choose
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir seçim yapın.'**
+  String get uiInputsValidationMustChoose;
+
   /// ui.router.tab_home
   ///
   /// In tr, this message translates to:

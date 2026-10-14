@@ -761,6 +761,10 @@
   "@errClientUpdateRequired": {
     "description": "client.update_required"
   },
+  "uiButtonsBusy": "Meşgul",
+  "@uiButtonsBusy": {
+    "description": "ui.buttons.busy"
+  },
   "uiCommonRetry": "Yeniden dene",
   "@uiCommonRetry": {
     "description": "ui.common.retry"

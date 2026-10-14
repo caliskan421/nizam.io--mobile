@@ -1234,6 +1234,12 @@ abstract class AppLocalizations {
   /// **'Bu sunucuya bağlanmak için uygulamayı güncelleyin.'**
   String get errClientUpdateRequired;
 
+  /// ui.buttons.busy
+  ///
+  /// In tr, this message translates to:
+  /// **'Meşgul'**
+  String get uiButtonsBusy;
+
   /// ui.common.retry
   ///
   /// In tr, this message translates to:

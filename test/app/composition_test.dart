@@ -2,9 +2,11 @@
 // sonrası aynen geçmeli): taze açılış sırası, yeniden bağlanma kablosu, oturum→kapsam temizliği,
 // yenileme çağrısının kuruluma bağlılığı, Bearer'ın kuruluma bağlılığı.
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:nizamio/app/bootstrap.dart';
@@ -19,6 +21,7 @@ import 'package:nizamio/core/session/session_controller.dart';
 import 'package:nizamio/core/session/session_state.dart';
 import 'package:nizamio/core/session/token_pair.dart';
 import 'package:nizamio/core/session/token_store.dart';
+import 'package:nizamio/core/storage/preference_store.dart';
 import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/features/identity/identity.dart';
 
@@ -69,8 +72,141 @@ Future<MemorySecureStore> seeded(String id) async {
   return store;
 }
 
+/// Q3 — kayıt denetimi (ADR-0003 karar 13). Port listesi KODDAN toplanır: `lib/` altında
+/// `_unbound('<ad>')` (core) ya da `throw UnimplementedError('<ad> …')` (feature) ile
+/// bileşim kökünde bağlanmayı bekleyen her sağlayıcı bir porttur. Dart'ta ada göre sağlayıcı
+/// nesnesi çözülemediğinden nesne eşlemesi aşağıdaki [portProviders] tablosundadır; tablo
+/// koddan toplanan listeyle birebir olmak ZORUNDA (yeni port eklenip tabloya yazılmazsa test
+/// kırılır), tablodaki her port da bileşim kökünde okunur.
+final portProviders = <String, ProviderBase<Object?>>{
+  'flavorProvider': flavorProvider,
+  'httpAdapterProvider': httpAdapterProvider,
+  'scopeControllerProvider': scopeControllerProvider,
+  'serverBindingProvider': serverBindingProvider,
+  'sessionControllerProvider': sessionControllerProvider,
+  'themeModeControllerProvider': themeModeControllerProvider,
+  'identityServiceProvider': identityServiceProvider,
+};
+
+Set<String> discoverPorts() {
+  final unbound = RegExp(r"_unbound\(\s*'(\w+)'");
+  final unimplemented = RegExp(r"throw UnimplementedError\(\s*'(\w+)");
+  final names = <String>{};
+  for (final f in Directory('lib').listSync(recursive: true)) {
+    if (f is! File || !f.path.endsWith('.dart')) continue;
+    if (f.path.endsWith('.g.dart') || f.path.contains('/generated/')) continue;
+    final text = f.readAsStringSync();
+    for (final m in [
+      ...unbound.allMatches(text),
+      ...unimplemented.allMatches(text),
+    ]) {
+      names.add(m.group(1)!);
+    }
+  }
+  return names;
+}
+
+bool isUnbound(Object e) =>
+    e is UnimplementedError ||
+    (e is ProviderException && e.exception is UnimplementedError);
+
+/// [container]'da okununca `UnimplementedError` atan portların adları.
+Set<String> unboundPorts(ProviderContainer container) {
+  final out = <String>{};
+  for (final MapEntry(:key, :value) in portProviders.entries) {
+    try {
+      container.read(value);
+    } catch (e) {
+      if (isUnbound(e)) {
+        out.add(key);
+      } else {
+        rethrow;
+      }
+    }
+  }
+  return out;
+}
+
+void registrationTests() {
+  group('Q3: kayıt denetimi (bütün portlar bileşim kökünde bağlı)', () {
+    test(
+      'koddan toplanan port listesi tabloyla birebir (yeni port unutulmaz)',
+      () {
+        final found = discoverPorts();
+        expect(found, isNotEmpty);
+        expect(
+          portProviders.keys.toSet(),
+          found,
+          reason: 'yeni port: portProviders tablosuna ekle; kaldırılan port: tablodan sil',
+        );
+      },
+    );
+
+    test(
+      'her feature modülünün *Overrides listesi bileşim kökünde yayılır',
+      () {
+        final composition = File('lib/app/di/composition.dart')
+            .readAsStringSync();
+        final fn = RegExp(r'List<Override>\s+(\w+Overrides)\(');
+        final defined = <String>{};
+        for (final f in Directory('lib/features').listSync(recursive: true)) {
+          if (f is! File || !f.path.endsWith('_module.dart')) continue;
+          for (final m in fn.allMatches(f.readAsStringSync())) {
+            defined.add(m.group(1)!);
+          }
+        }
+        expect(defined, isNotEmpty);
+        for (final name in defined) {
+          expect(
+            composition,
+            contains('...$name(locator)'),
+            reason: '$name bileşim köküne eklenmemiş',
+          );
+        }
+      },
+    );
+
+    test(
+      'bileşim kökü kurulunca hiçbir port UnimplementedError atmaz',
+      () async {
+        final comp = Composition.create(
+          flavor: Flavor.prod,
+          secureStore: MemorySecureStore(),
+          preferenceStore: MemoryPreferenceStore(),
+        );
+        addTearDown(comp.dispose);
+        expect(unboundPorts(comp.container), isEmpty);
+      },
+    );
+
+    test('negatif: geçersiz kılınmayan port yakalanır (testin dişi var)', () {
+      // Boş kap: bütün portlar bağsız.
+      final bare = ProviderContainer();
+      addTearDown(bare.dispose);
+      expect(unboundPorts(bare), portProviders.keys.toSet());
+
+      // Yalnız identity portu unutulmuş bir kap: tam olarak o port raporlanır.
+      final missing = ProviderContainer(
+        overrides: [
+          flavorProvider.overrideWithValue(Flavor.prod),
+          httpAdapterProvider.overrideWithValue(null),
+        ],
+      );
+      addTearDown(missing.dispose);
+      expect(
+        unboundPorts(missing),
+        portProviders.keys.toSet().difference({
+          'flavorProvider',
+          'httpAdapterProvider',
+        }),
+      );
+    });
+  });
+}
+
 void main() {
   setUp(() => instance = 'inst-1');
+  registrationTests();
 
   test('taze açılış, aynı kurulum: bağ doğrulanır → oturum geri yüklenir → Bearer gider', () async {
     final h = Harness(handler: handler, store: await seeded('inst-1'));

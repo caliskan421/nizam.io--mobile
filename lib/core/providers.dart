@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'app_phase.dart';
 import 'config/flavor.dart';
 import 'http/dio_factory.dart';
+import 'network/connectivity_monitor.dart';
 import 'preferences/theme_mode_controller.dart';
 import 'scope/scope_controller.dart';
 import 'server/server_binding.dart';
@@ -47,6 +48,10 @@ SessionController sessionController(Ref ref) =>
 ThemeModeController themeModeController(Ref ref) =>
     _unbound('themeModeControllerProvider');
 
+@Riverpod(keepAlive: true)
+ConnectivityMonitor connectivityMonitor(Ref ref) =>
+    _unbound('connectivityMonitorProvider');
+
 T _listen<T>(Ref ref, ValueListenable<T> listenable) {
   void onChange() => ref.invalidateSelf();
   listenable.addListener(onChange);
@@ -71,6 +76,11 @@ ScopeSelection scopeState(Ref ref) =>
 ThemeMode themeMode(Ref ref) =>
     _listen(ref, ref.watch(themeModeControllerProvider).state);
 
+/// Sunucuya erişim durumu (çevrimiçi/çevrimdışı/bilinmiyor); yalnız durum yayar.
+@Riverpod(keepAlive: true)
+ConnectivityState connectivityState(Ref ref) =>
+    _listen(ref, ref.watch(connectivityMonitorProvider).state);
+
 @Riverpod(keepAlive: true)
 AppPhase appPhase(Ref ref) => deriveAppPhase(
   ref.watch(bindingStateProvider),
@@ -89,6 +99,7 @@ Dio? apiDio(Ref ref) {
     session: ref.watch(sessionControllerProvider),
     instanceId: b.info.instanceId,
     scope: ref.watch(scopeControllerProvider),
+    connectivity: ref.watch(connectivityMonitorProvider),
     adapter: ref.watch(httpAdapterProvider),
   );
   ref.onDispose(dio.close);

@@ -105,7 +105,10 @@ List<CatalogEntry> get inputsCatalogEntries => [
       size: size,
     ),
   ),
-  _entry('NzSearchField', (size) => NzSearchField(size: size)),
+  _entry(
+    'NzSearchField',
+    (size) => NzSearchField(label: 'Search (${size.name})', size: size),
+  ),
   _entry('NzCheckbox', (size) => _CheckboxDemo(size: size)),
   _entry('NzSwitch', (size) => _SwitchDemo(size: size)),
   _entry('NzSelect', (size) => _SelectDemo(size: size)),

@@ -649,16 +649,16 @@ void main() {
         'final cs = Colors;',
       ], 'U2');
     });
-    test('izinli yollar ve geçiş istisnası', () {
+    test('izinli yollar; app/app.dart artık muaf değil', () {
       const src = 'final c = const Color(0xFF000000); final d = Colors.red;';
       for (final path in [
         'core/ui/theme/app_theme.dart',
         'core/theme/generated/tokens.gen.dart',
         'core/security/privacy_mask.dart',
-        'app/app.dart',
       ]) {
         expect(rules(path, src), isEmpty, reason: path);
       }
+      expect(rules('app/app.dart', src), ['U2', 'U2']);
       // Kesin dosya: komşusu serbest değil.
       expect(rules('core/security/other.dart', src), ['U2', 'U2']);
       expect(
@@ -692,12 +692,12 @@ void main() {
         'final s = TextStyle(fontWeight: FontWeight.w600);',
       ], 'U3');
     });
-    test('izinli yollar; geçiş istisnası yalnız google_fonts', () {
+    test('izinli yollar; app/app.dart google_fonts içe aktaramaz', () {
       const style = 'const s = TextStyle(fontSize: 14);';
       const gf = "import 'package:google_fonts/google_fonts.dart';";
       expectNone('core/ui/theme/nz_text_styles.dart', [style, gf]);
       expectNone('app/bootstrap.dart', [gf]);
-      expectNone('app/app.dart', [gf]);
+      expect(rules('app/app.dart', gf), ['U3']);
       expect(rules('app/app.dart', style), ['U3']);
       expect(rules('app/bootstrap.dart', style), ['U3']);
       expect(rules('core/http/a.dart', gf), ['U3']);
@@ -880,7 +880,11 @@ void main() {
         2,
         reason: raw.where((v) => v.rule == 'U3').join('\n'),
       );
-      expect(count('U4') + count('U5') + count('U6'), 0);
+      // U5: yalnız context_ext.dart (izinli tek dosya) iki `.extension<…>()` çağrısı taşır.
+      expect(raw.where((v) => v.rule == 'U5').map((v) => v.path).toSet(), {
+        'lib/core/ui/extensions/context_ext.dart',
+      });
+      expect(count('U4') + count('U6'), 0);
     },
   );
 

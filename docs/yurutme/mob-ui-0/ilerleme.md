@@ -9,7 +9,7 @@ oturum buradan başlar. Uygulayıcılar bu dosyaya yazmaz.
 |---|---|---|
 | O1 — A0 | TAMAM (son denetim Opus; nihai Codex kapısı O5'te) | `4737566` + kapanış PR'ı #27 |
 | O2 — Temel | TAMAM | `b483efe` + kapanış PR'ı |
-| O3 — Kabuk | Bekliyor | — |
+| O3 — Kabuk | TAMAM | `f9fd6cc` + kapanış PR'ı |
 | O4 — Kit + Router | Bekliyor | — |
 | O5 — Pilot + Kapanış | Bekliyor | — |
 
@@ -35,6 +35,15 @@ oturum buradan başlar. Uygulayıcılar bu dosyaya yazmaz.
 - (O2) **Mutlak yol:** uygulayıcı yalnız istemdeki mutlak worktree yolunda çalışır; ortamın
   gösterdiği başlangıç dizinine güvenmez (W14/W15 başlangıç dizinini başka worktree gördü,
   yazma olmadı).
+- (O3) **Golden testleri yalnız `goldenTestWidgets` ile** (`test/support/golden.dart`: uygulama
+  yazı tipleri + MaterialIcons `FontManifest`'ten yüklenir). İkonlu golden'da tofu (boş kare)
+  kabul edilmez; koordinatör her referansı görsel inceler (W21 ilk turda tofu üretti).
+- (O3) **Riverpod otomatik yeniden deneme kapalı:** üretim `ProviderContainer(retry: (_, _) => null)`;
+  testte kurulan her container da aynı ayarı alır. Yeniden deneme yalnız kullanıcı dokunuşuyla.
+- (O3) **Bağımlı uygulayıcı** henüz birleşmemiş bileşen için sahte/geçici dosya oluşturmaz;
+  sabit imzaya göre yazar, `KISMİ` raporlar; koordinatör bağımlılık birleşince `rebase --onto`
+  ile `main`'e taşır ve kapıları koşar. Paralel bağımlılıkta imza koordinatörce iki isteme de
+  aynen yazılır.
 
 ## Kırmızılar
 
@@ -160,3 +169,55 @@ oturum buradan başlar. Uygulayıcılar bu dosyaya yazmaz.
     `bb1fa5f`/`e948312` push edilmedi.
   - Uzak ve yerel `mob-ui/w11–w15` dalları silinmedi; içerikleri squash ile `main`'de;
     worktree'ler kaldırıldı.
+
+### O3 — 2026-10-15 — TAMAM
+- O3 öncesi: mobil `main` `042e0b8` (O2 kapanışı, CI 38622268258 success).
+- PR'lar (squash; uygulayıcılar Sonnet 5.5, koordinatör Opus 5.5; sıra imza → W21 → W22):
+  - #34 Adım 1 imza belgesi `docs/architecture/ui-api-a3.md` (koordinatör) → `f911e04` (main CI 38627917213 success)
+  - #35 W21 feedback kiti + dev katalog + golden yazı tipi yükleyici → `2a22478` (PR CI 38634181623; main CI 38635987132 success)
+  - #36 W22 NzPage, NzAsyncView, ref.listenErrors/Success; Riverpod otomatik yeniden deneme kapalı → `f9fd6cc` (PR CI ve main CI 38638183608 success: verify, golden, Android, entegrasyon)
+- main HEAD: `f9fd6cc`, CI: 38638183608 success.
+- Kapsama (main ile aynı ağaç, W22 birleşik HEAD): core %94,72 (969/1023) · application %100 (39/39) ·
+  data %100 (17/17) · presentation — (dosya yok) · widgets %99,56 (226/227). Testler 486 (golden hariç) + 9 golden.
+- Çıkış ölçütü (main'de): feedback kiti (`NzLoader`, `NzSkeleton`, `NzEmptyState`, `NzErrorState`,
+  `NzBanner`, `NzToast`) + `NzSize` + dev katalog (`/dev/catalog`, yalnız dev flavor; prod'da rota yok —
+  testli); `NzPage`; `NzAsyncView`; `ref.listenErrors/listenSuccess` + `sessionEndedErrorCodes`;
+  golden'lar Linux referanslı.
+- Golden: `test/core/ui/widgets/feedback/goldens/nz_{loader,skeleton,empty_state,error_state,banner,toast}.png`
+  Linux CI 38633601203 `golden-referans` artefaktından. Koordinatör PNG'leri çözdü (1024 genişlik,
+  hepsi opak, açık #FFFFFF / koyu #020617 zemin, 122–1888 renk) ve görsel inceledi: ilk tur
+  (CI 38632719755) ikonları **tofu** çiziyordu (MaterialIcons yüklenmiyordu) → reddedildi; W21
+  `loadAppFonts()` ekledi, ikinci tur ikonlar gerçek; token sayfası referansları bayt düzeyinde aynı
+  kaldı (Inter değişmedi). `NzErrorState` 429 görünümünde "Yeniden denemek için bekleyin 30 sn" +
+  devre dışı düğme doğrulandı.
+- İmza belgesi doğrulaması: W22, W21'in gerçek bileşenleriyle uyarlama gerektirmeden derlendi ve
+  geçti (imza kırılması yok). Ek (additive) yüzey: `CatalogPage({entries})` (test), `NzSize.pick`,
+  `catalogPath` sabiti.
+- Denetim bulguları (koordinatör, Opus):
+  - **Kritik — Riverpod 3 otomatik yeniden deneme:** üretim `ProviderContainer` `retry` vermiyordu;
+    hata veren sağlayıcılar (429 dahil) üstel geri çekilmeyle kendiliğinden yeniden çalışıyordu →
+    A3 "yeniden deneme yalnız dokunuşla" ve `retryAfter` sayacı boşa çıkıyordu. W22 `retry: (_, _) => null`
+    + test (satır kaldırılınca kırmızı) ile düzeltti (#36).
+  - **Önemli — golden tofu:** yukarıda; W21 düzeltti (#35).
+  - **Küçük — NzAsyncView:** hatadan sonra yeniden yüklemede (Riverpod 3 `AsyncLoading` önceki hatayı
+    taşır) gösterge yerine eski hata kalıyordu; sıra veri → yükleniyor → hata yapıldı + test (#36).
+- Son denetim: ayrı denetçi koşulmadı; denetim koordinatör (Opus). Nihai Codex kapısı O5'te (değişmedi).
+- Sapmalar (kabul edilen):
+  - `sessionEndedErrorCodes` = `client.session_ended`, `client.not_signed_in`, `client.reauth_required`,
+    `identity.force_password_change_required` (kaynak satırları `ref_ext.dart`'ta);
+    `client.scope_missing` kasıtlı dışarıda (yalnız birim eksikse faz `scoped` kalır, kullanıcı görmeli).
+  - Katalog kodu prod ikilisine derlenir (`router.dart` import'u) ama rota prod'da tanımlı değil;
+    dev uygulamada kataloğa giriş noktası yok (rota hazır).
+  - Katalog etiketleri/örnek metinleri geliştirici aracı olduğundan ARB dışı.
+  - `NzErrorState` ikon boyutu boşluk token'ından (`space6/space12`) — ikon boyutu token'ı yok.
+- Sıkılaştırılan kurallar: yukarıdaki listede (O3).
+- Kırmızılar: yok.
+- Devir (O4'e):
+  - Kit grupları `feedback` emsalini izler (`feedback_test_support.dart` tabaka kurgusu salt okunur
+    içe aktarılabilir); `catalog_registry.dart`'a grup satırını koordinatör birleştirmede ekler.
+  - W35 (`NzDialog.confirm`) W31'in `NzButton`'ına bağlı: imza iki isteme de aynen yazıldı;
+    W35 W31 birleşince `rebase --onto`.
+  - W36 router taşıması `catalogPath`/`devCatalog` davranışını ve faz kapısı testlerini korur.
+  - O1/O2'den süren açıklar (README komut tablosu, `main` dal koruması, yerel ana ağaç `2524a14`,
+    yönetim deposu push'u, token bekleyenler) değişmedi.
+  - Uzak/yerel `mob-ui/o3-imzalar`, `w21`, `w22` dalları silinmedi; worktree'ler kaldırıldı.

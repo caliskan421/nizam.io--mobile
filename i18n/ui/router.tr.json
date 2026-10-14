@@ -1,0 +1,19 @@
+{
+  "$comment": "Router metinleri (kabuk sekmeleri, yer tutucu ekran başlıkları, 404). ELLE yazılır; make gen ARB'ye birleştirir.",
+  "texts": {
+    "ui.router.tab_home": "Ana sayfa",
+    "ui.router.tab_work": "İşler",
+    "ui.router.tab_profile": "Profil",
+    "ui.router.nav_label": "Ana gezinme",
+    "ui.router.page_server": "Sunucu",
+    "ui.router.page_update_required": "Güncelleme gerekli",
+    "ui.router.page_login": "Giriş",
+    "ui.router.page_password": "Parola değiştir",
+    "ui.router.page_scope": "Kapsam seçimi",
+    "ui.router.page_detail": "Ayrıntı",
+    "ui.router.placeholder": "Bu ekran henüz hazır değil.",
+    "ui.router.not_found_title": "Sayfa bulunamadı",
+    "ui.router.not_found_message": "Aradığınız sayfa yok ya da kaldırılmış.",
+    "ui.router.not_found_action": "Ana sayfaya dön"
+  }
+}

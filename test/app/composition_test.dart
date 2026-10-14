@@ -211,6 +211,23 @@ void main() {
   setUp(() => instance = 'inst-1');
   registrationTests();
 
+  testWidgets('hata veren sağlayıcı kendiliğinden yeniden denenmez (A3)', (
+    tester,
+  ) async {
+    final h = Harness();
+    addTearDown(h.dispose);
+    var runs = 0;
+    final failing = FutureProvider<int>((ref) {
+      runs++;
+      return Future<int>.error(ApiError(ClientErrorCode.timeout));
+    });
+    h.container.listen(failing, (_, _) {});
+    await tester.pump();
+    expect(runs, 1);
+    await tester.pump(const Duration(minutes: 5));
+    expect(runs, 1, reason: 'üstel geri çekilmeyle otomatik deneme yok');
+  });
+
   test('taze açılış, aynı kurulum: bağ doğrulanır → oturum geri yüklenir → Bearer gider', () async {
     final h = Harness(handler: handler, store: await seeded('inst-1'));
     addTearDown(h.dispose);

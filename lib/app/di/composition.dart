@@ -52,6 +52,9 @@ class Composition {
       apiDio: () => container.read(apiDioProvider),
     );
     container = ProviderContainer(
+      // Otomatik yeniden deneme YOK (A3 / CLAUDE.md): Riverpod 3 varsayılanı hata veren
+      // sağlayıcıyı kendiliğinden yeniden çalıştırır; yeniden deneme yalnız kullanıcı dokunuşuyla.
+      retry: (_, _) => null,
       overrides: [
         flavorProvider.overrideWithValue(flavor),
         httpAdapterProvider.overrideWithValue(registeredHttpAdapter(locator)),

@@ -5,35 +5,17 @@ import 'package:go_router/go_router.dart';
 import 'package:nizamio/app/dev/catalog_page.dart';
 import 'package:nizamio/app/router.dart';
 import 'package:nizamio/core/app_phase.dart';
-import 'package:nizamio/core/i18n/generated/app_localizations.dart';
 
-import '../core/ui/widgets/feedback/feedback_test_support.dart';
+import '../../core/ui/widgets/feedback/feedback_test_support.dart';
+import 'router_test_support.dart';
 
 Future<GoRouter> _pump(
   WidgetTester tester,
   ValueNotifier<AppPhase> phase, {
   required bool devCatalog,
-}) async {
-  tester.view.devicePixelRatio = 1;
-  tester.view.physicalSize = const Size(800, 1200);
-  addTearDown(tester.view.reset);
-  final router = createRouter(phase, devCatalog: devCatalog);
-  addTearDown(router.dispose);
-  await tester.pumpWidget(
-    MaterialApp.router(
-      theme: theme(false),
-      locale: const Locale('tr'),
-      supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: testLocalizationDelegates,
-      routerConfig: router,
-    ),
-  );
-  await tester.pump();
-  return router;
-}
+}) => pumpRouter(tester, phase, devCatalog: devCatalog);
 
-String _location(GoRouter r) =>
-    r.routerDelegate.currentConfiguration.uri.toString();
+String _location(GoRouter r) => locationOf(r);
 
 bool _hasCatalogRoute(GoRouter r) =>
     r.configuration.routes.any((x) => x is GoRoute && x.path == catalogPath);

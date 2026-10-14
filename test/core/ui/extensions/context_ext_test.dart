@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
 import 'package:nizamio/core/ui/extensions/context_ext.dart';
+import 'package:nizamio/core/ui/layout/layout.dart';
 import 'package:nizamio/core/ui/theme/app_theme.dart';
 
 void main() {
@@ -50,5 +51,22 @@ void main() {
     expect(c.colors, same(NizamioColors.dark));
     expect(c.text.titleMd.color, NizamioColors.dark.text);
     expect(c.theme.brightness, Brightness.dark);
+  });
+
+  testWidgets('layout genişlikten doğru pencere sınıfını verir', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    for (final (w, cls) in [
+      (360.0, WindowClass.compact),
+      (700.0, WindowClass.medium),
+      (1024.0, WindowClass.expanded),
+    ]) {
+      tester.view.physicalSize = Size(w, 900);
+      final c = await pump(tester, ThemeMode.light);
+      expect(c.layout.resolvedClass, cls);
+      expect(c.layout.width, w);
+    }
   });
 }

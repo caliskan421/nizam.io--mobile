@@ -10,7 +10,7 @@ oturum buradan başlar. Uygulayıcılar bu dosyaya yazmaz.
 | O1 — A0 | TAMAM (son denetim Opus; nihai Codex kapısı O5'te) | `4737566` + kapanış PR'ı #27 |
 | O2 — Temel | TAMAM | `b483efe` + kapanış PR'ı |
 | O3 — Kabuk | TAMAM | `f9fd6cc` + kapanış PR'ı |
-| O4 — Kit + Router | Bekliyor | — |
+| O4 — Kit + Router | TAMAM | `4aaa11d` + kapanış PR'ı |
 | O5 — Pilot + Kapanış | Bekliyor | — |
 
 ## Sıkılaştırılan kurallar (bir sonraki oturumdan itibaren her uygulayıcıya KESİN)
@@ -44,6 +44,13 @@ oturum buradan başlar. Uygulayıcılar bu dosyaya yazmaz.
   sabit imzaya göre yazar, `KISMİ` raporlar; koordinatör bağımlılık birleşince `rebase --onto`
   ile `main`'e taşır ve kapıları koşar. Paralel bağımlılıkta imza koordinatörce iki isteme de
   aynen yazılır.
+- (O4) **Paralel kit dalgasında üretilmiş i18n** (`app_tr.arb`, `app_localizations*.dart`) her
+  birleşmede `main`'den alınıp `make gen` ile yeniden üretilir; elle birleştirilmez.
+  `catalog_registry.dart` grup satırını koordinatör ekler (içe aktarmalar alfabetik —
+  `directives_ordering`).
+- (O4) **Güvenlik yüzeyi değişikliği** (router, oturum, bağ) iki commit'le gelir: önce mevcut
+  kodda yeşil davranış testi, sonra testleri değiştirmeyen taşıma; koordinatör kapı işlevinde
+  en az bir mutasyonla testlerin kırmızıya döndüğünü görür.
 
 ## Kırmızılar
 
@@ -221,3 +228,55 @@ oturum buradan başlar. Uygulayıcılar bu dosyaya yazmaz.
   - O1/O2'den süren açıklar (README komut tablosu, `main` dal koruması, yerel ana ağaç `2524a14`,
     yönetim deposu push'u, token bekleyenler) değişmedi.
   - Uzak/yerel `mob-ui/o3-imzalar`, `w21`, `w22` dalları silinmedi; worktree'ler kaldırıldı.
+
+### O4 — 2026-10-15 — TAMAM
+- O4 öncesi: mobil `main` `f9fd6cc` (O3 uygulama), `8697c96` (O3 kaydı, CI 38642013921 success).
+- PR'lar (squash; uygulayıcılar Sonnet 5.5, koordinatör Opus 5.5; sıra W36 → W31 → W32 → W33 → W35 → W34):
+  - #41 W36 A5 router (tipli rotalar, uyarlanabilir kabuk, 404, faz kapısı) → `924db60` (main CI 38645906102 success)
+  - #38 W31 buttons (NzButton, NzIconButton) → `c6b3905` (main CI 38647632001 success)
+  - #42 W32 inputs + form (NzTextField, NzPasswordField, NzSearchField, NzCheckbox, NzSwitch, NzSelect, NzForm) → `75b999c` (main CI 38649540469 success)
+  - #40 W33 surfaces (NzCard, NzSection, NzDivider, NzBadge, NzAvatar) → `413f14a` (main CI 38651053649 success)
+  - #43 W35 overlays (NzDialog.confirm, NzBottomSheet) → `229bc06` (main CI 38652757741 success)
+  - #39 W34 lists (NzListTile, NzPagedList) → `4aaa11d` (PR CI 38653002103; main CI 38654428749 success: verify, golden, Android, entegrasyon)
+- main HEAD: `4aaa11d`, CI: 38654428749 success.
+- Kapsama (main ile aynı ağaç, W34 birleşik HEAD): core %95,11 (973/1023) · application %100 (39/39) ·
+  data %100 (17/17) · presentation — (dosya yok) · widgets %99,52 (1044/1049). Testler 781 (golden hariç) + 27 golden.
+- Çıkış ölçütü (main'de): kit v0 tamamı (feedback, buttons, inputs+form, surfaces, lists, overlays) +
+  katalog tüm gruplar (`catalog_registry.dart`, 6 grup); tipli router (`lib/app/router/`,
+  go_router_builder) + `NzAdaptiveShell` (compact NavigationBar / medium Rail / expanded genişletilmiş
+  Rail, sekme yığını korunur) + 404; faz kapısı testleri yeşil; Q1 widgets %99,52 ≥ %70.
+- W36 (güvenlik yüzeyi) denetimi: commit sırası `c50c1b9` davranış testi (eski kodda yeşil, 41 test) →
+  `8698a02` taşıma (testlerde yalnız import) → `2223324` yeni testler (faz × rota matrisi `router.go`
+  + platform `handlePushRoute`; bilinmeyen yol kapıyı aşamaz; scoped dışına çıkışta yığın temizlenir).
+  Koordinatör `gateRedirect`'i satır satır okudu; mutasyon (a) scoped koşulu kaldırma → 27+ test kırmızı,
+  (b) katalog muafiyetini koşulsuz yapma → katalog testi kırmızı. `extra`/dize `go()` kullanımı yok.
+- Golden: 18 yeni referans (buttons 2, inputs 7, surfaces 5, lists 2, overlays 2) PR CI `golden-referans`
+  artefaktlarından (38641161755, 38643922580, 38641720774, 38641524725, 38648372084); koordinatör hepsini
+  çözdü (1024 genişlik, opak, açık/koyu zemin, 43–5115 renk) ve görsel inceledi: ikonlar gerçek
+  (O3 yükleyicisi), `NzAvatar` Türkçe baş harf ("İI"), form eşleşmeyen sunucu hatası şeridi, yıkıcı onay
+  kırmızı, 2.0 ölçekte taşma yok (`NzPagedList` compact 2.0 hücresinde içerik görünüm alanında
+  kesilir — kaydırılabilir liste, beklenen).
+- İmza doğrulaması: W35, W31'in `NzButton`'ını paralel sabit imzayla kullandı; W31 birleşince uyarlama
+  gerektirmeden geçti.
+- Son denetim: ayrı denetçi koşulmadı; denetim koordinatör (Opus). Nihai Codex kapısı O5'te (değişmedi).
+- Sapmalar (kabul edilen):
+  - W36: `gateRedirect` scoped'da kapı dışı her yolu (kabuk, feature, bilinmeyen → 404) açar; scoped
+    dışında yalnız faz hedefi. `test/app/app_phase_test.dart` import satırı (sahiplik dışı, zorunlu).
+    Kabuk 3 yer tutucu sekme (home/work/profile); kayıtlı feature rotası yok.
+  - W32: `nz_field_errors.dart` üç yapı (`NzFieldErrors`, `NzFormScope`, `NzServerFieldError`);
+    eşleşmeyen alan hatası şeridi bir kare gecikmeli; "çok kısa" metni sayı içermez (yer tutucu yasağı).
+  - W35: `overlays.tr.json` yok (yalnız `ui.common.*`); macOS'ta AlertDialog `namesRoute` koymadığı için
+    anlamsal test başlık etiketiyle.
+  - W33/W35: grup metni yok, metni çağıran verir.
+  - W31: "meşgul" `Semantics.value` ile (Flutter'da ayrı bayrak yok).
+- Sıkılaştırılan kurallar: yukarıdaki listede (O4).
+- Kırmızılar: yok.
+- Devir (O5'e):
+  - Boundaries kural önerisi (W36, uygulanmadı): `lib/features/**` ve `lib/app/**` içinde dize yolla
+    `go/push/replace`, `extra:` ve `GoRouterState.extra` okuması yasak (katalog sabiti hariç) — A7 pilotunda
+    ADR ile karar.
+  - Feature rota kaydı `registeredFeatureRoutes` boş; A7 pilot feature'ı ilk kaydı yapar.
+  - Kataloğa dev uygulamada giriş noktası yok (rota hazır).
+  - O1–O3'ten süren açıklar (README komut tablosu, `main` dal koruması, yerel ana ağaç `2524a14`,
+    yönetim deposu push'u, token bekleyenler, `localeProvider` bağlanmadı) değişmedi.
+  - Uzak/yerel `mob-ui/w31–w36` dalları silinmedi; worktree'ler kaldırıldı.

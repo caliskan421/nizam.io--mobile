@@ -1,0 +1,9 @@
+{
+  "$comment": "Ortak arayüz metinleri (birden çok ekranda aynen kullanılanlar). ELLE yazılır; make gen ARB'ye birleştirir.",
+  "texts": {
+    "ui.common.retry": "Yeniden dene",
+    "ui.common.cancel": "İptal",
+    "ui.common.ok": "Tamam",
+    "ui.common.close": "Kapat"
+  }
+}

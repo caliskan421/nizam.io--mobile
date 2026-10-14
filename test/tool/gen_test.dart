@@ -206,4 +206,75 @@ $op
       throwsFormatException,
     );
   });
+
+  group('UI metin kaynağı', () {
+    String file(String body) => '{"texts": {$body}}';
+    test('geçerli dosyalar birleşir; ARB anahtarı camelCase', () {
+      final ui = parseUiTexts({
+        'common.tr.json': file('"ui.common.retry": "Yeniden dene"'),
+        'auth.tr.json': file('"ui.auth.sign_in": "Giriş"'),
+      });
+      expect(ui, {
+        'ui.auth.sign_in': 'Giriş',
+        'ui.common.retry': 'Yeniden dene',
+      });
+      expect(arbKey('ui.common.retry'), 'uiCommonRetry');
+      expect(arbKey('ui.auth.sign_in'), 'uiAuthSignIn');
+      final arb = buildArb({}, 'x', ui);
+      expect(arb, contains('"uiCommonRetry": "Yeniden dene"'));
+    });
+    test('dosya adı ile önek uyuşmazlığı düşer', () {
+      expect(
+        () => parseUiTexts({'auth.tr.json': file('"ui.common.retry": "x"')}),
+        throwsFormatException,
+      );
+    });
+    test('geçersiz dosya adı düşer', () {
+      expect(
+        () => parseUiTexts({'Auth.json': file('"ui.auth.a": "x"')}),
+        throwsFormatException,
+      );
+    });
+    test('yinelenen anahtar düşer', () {
+      expect(
+        () => parseUiTexts({
+          'common.tr.json': file('"ui.common.a": "x", "ui.common.a": "y"'),
+        }),
+        throwsFormatException,
+      );
+    });
+    test('ARB anahtar çakışması düşer', () {
+      expect(
+        () => parseUiTexts({
+          'common.tr.json': file('"ui.common.a_b": "x", "ui.common.a.b": "y"'),
+        }),
+        throwsFormatException,
+      );
+    });
+    test('boş metin ve ICU karakteri düşer', () {
+      expect(
+        () => parseUiTexts({'common.tr.json': file('"ui.common.a": " "')}),
+        throwsFormatException,
+      );
+      expect(
+        () => parseUiTexts({'common.tr.json': file('"ui.common.a": "{n}"')}),
+        throwsFormatException,
+      );
+    });
+    test('hata kodu / ARB anahtarı çakışması düşer', () {
+      final ui = {'ui.common.retry': 'x'};
+      expect(
+        () => checkUiAgainstErrors(ui, ['client.timeout']),
+        returnsNormally,
+      );
+      expect(
+        () => checkUiAgainstErrors(ui, ['ui.common.retry']),
+        throwsFormatException,
+      );
+      expect(
+        () => checkUiAgainstErrors(ui, ['ui.other.x']),
+        throwsFormatException,
+      );
+    });
+  });
 }

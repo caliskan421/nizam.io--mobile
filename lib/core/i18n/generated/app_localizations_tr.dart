@@ -660,4 +660,16 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get errClientUpdateRequired =>
       'Bu sunucuya bağlanmak için uygulamayı güncelleyin.';
+
+  @override
+  String get uiCommonRetry => 'Yeniden dene';
+
+  @override
+  String get uiCommonCancel => 'İptal';
+
+  @override
+  String get uiCommonOk => 'Tamam';
+
+  @override
+  String get uiCommonClose => 'Kapat';
 }

@@ -9,6 +9,7 @@ environment:
   flutter: 3.47.2
 
 dependencies:
+  connectivity_plus: ^7.3.2
   dio: ^5.11.1
   drift: ^2.35.2
   drift_flutter: ^0.3.1
@@ -52,6 +53,7 @@ dev_dependencies:
   drift_dev: ^2.35.1
   flutter_native_splash: ^2.4.8
   flutter_launcher_icons: ^0.14.4
+  go_router_builder: ^4.5.0
 flutter:
   uses-material-design: true
   # Yazı tipleri google_fonts adlandırmasıyla (Aile-Ağırlık.ttf) uygulamayla gelir; çalışma

@@ -5,13 +5,14 @@
 //              (dizin: NIZAMIO_BACKEND_DIR, yoksa ../nizam.io--backend; CI'da .backend/)
 //   web      : `git show <web.commit>:<yol>` — tokens.json, TR hata metinleri
 //              (dizin: NIZAMIO_FRONTEND_DIR, yoksa ../nizam.io--frontend; CI'da .frontend/)
-//   mobil    : i18n/client_errors.tr.json (istemci kodları), pubspec.yaml version
+//   mobil    : i18n/client_errors.tr.json (istemci kodları), i18n/ui/*.tr.json (UI metinleri), pubspec.yaml version
 //
 // Çıktılar (commit'lenir; CI yeniden üretip `git diff --exit-code` + porcelain boş ister):
 //   lib/core/api/generated/            swagger_parser (freezed modeller + retrofit istemciler),
 //                                      operations.gen.dart (operationId → kapsam sınıfı haritası),
 //                                      error_catalog.gen.dart
-//   lib/core/i18n/arb/app_tr.arb       TR metinler (sunucu kodları web'den, client.* mobilden)
+//   lib/core/i18n/arb/app_tr.arb       TR metinler (sunucu kodları web'den, client.* mobilden,
+//                                      ui.<grup>.* i18n/ui/<grup>.tr.json'dan)
 //   lib/core/i18n/generated/           gen-l10n çıktısı, error_messages.gen.dart,
 //                                      client_error_codes.gen.dart
 //   lib/core/theme/generated/tokens.gen.dart
@@ -139,13 +140,24 @@ swagger_parser:
     parseWebTrErrors(webTrText),
     client,
   );
+  final uiDir = Directory(p.join(root, 'i18n/ui'));
+  final ui = parseUiTexts({
+    if (uiDir.existsSync())
+      for (final f in uiDir.listSync().whereType<File>().where(
+        (f) => f.path.endsWith('.tr.json'),
+      ))
+        p.basename(f.path): f.readAsStringSync(),
+  });
+  checkUiAgainstErrors(ui, messages.keys);
   final arbDir = Directory(p.join(root, 'lib/core/i18n/arb'))
     ..createSync(recursive: true);
   File(p.join(arbDir.path, 'app_tr.arb')).writeAsStringSync(
     buildArb(
       messages,
       'BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: $webSrc ${web['trErrorsPath']} '
-      '(katalog: $backendSrc); istemci kodları: i18n/client_errors.tr.json',
+      '(katalog: $backendSrc); istemci kodları: i18n/client_errors.tr.json; '
+      'UI metinleri: i18n/ui/*.tr.json',
+      ui,
     ),
   );
   final l10nOut = Directory(p.join(root, 'lib/core/i18n/generated'));

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/errors/api_error.dart';
-import 'package:nizamio/core/i18n/generated/app_localizations.dart';
 import 'package:nizamio/core/errors/error_text.dart';
+import 'package:nizamio/core/i18n/generated/app_localizations.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/security/privacy_mask.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';

@@ -185,7 +185,8 @@ void registrationTests() {
       addTearDown(bare.dispose);
       expect(unboundPorts(bare), portProviders.keys.toSet());
 
-      // Yalnız identity portu unutulmuş bir kap: tam olarak o port raporlanır.
+      // Yalnız flavor ve http portları bağlı bir kap: bağlanmayan diğer portların
+      // hepsi (ve yalnız onlar) raporlanır.
       final missing = ProviderContainer(
         overrides: [
           flavorProvider.overrideWithValue(Flavor.prod),

@@ -85,6 +85,9 @@ const packageName = 'nizamio';
 /// Üretilmiş API kodu (DTO yalnız burada).
 const generatedApiDir = 'core/api/generated/';
 
+/// Üretilmiş i18n kodu (ADR-0003 Ek A): api/generated ile aynı muafiyet kapsamı.
+const generatedI18nDir = 'core/i18n/generated/';
+
 const _layers = {'presentation', 'application', 'domain', 'data'};
 
 const _allowedLayerDeps = <String, Set<String>>{
@@ -182,7 +185,9 @@ List<Violation> checkSource(
     );
   }
 
-  final generated = libPath.startsWith(generatedApiDir);
+  final generated =
+      libPath.startsWith(generatedApiDir) ||
+      libPath.startsWith(generatedI18nDir);
 
   // B5 — yerleşim.
   if (here.area == 'root' &&
@@ -780,9 +785,11 @@ class _UiVisitor extends RecursiveAstVisitor<void> {
       if (target is PrefixedIdentifier) {
         _hit(node, target.identifier.name, name); // m.MediaQuery.of(…)
       }
-      if (extensionBanned && name == 'extension') {
-        add('U5', node, _extMessage);
-      }
+    }
+    // Hedefli `t.extension<T>()` ve `extension ThemeData` içindeki örtük-this
+    // `extension<T>()` çağrısı aynı ihlaldir.
+    if (extensionBanned && name == 'extension') {
+      add('U5', node, _extMessage);
     }
     super.visitMethodInvocation(node);
   }

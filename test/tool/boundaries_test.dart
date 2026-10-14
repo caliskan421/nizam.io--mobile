@@ -759,6 +759,8 @@ void main() {
         'final v = theme.extensions;',
         'final f = theme.extension;',
         'final f = Theme.of(context).extension;',
+        // Örtük this: ThemeData üzerine yazılmış extension bloğu (hedefsiz çağrı).
+        'extension E on ThemeData { X? get x => extension<X>(); }',
       ], 'U5');
       expectAll('core/ui/theme/a.dart', [
         'final c = t.extension<NizamioColors>();',
@@ -767,6 +769,25 @@ void main() {
         'final c = t.extension<NizamioColors>();',
       ], 'U5');
     });
+    test(
+      'üretilmiş i18n kodu U5 dışıdır (api/generated ile aynı muafiyet)',
+      () {
+        expectNone('core/i18n/generated/app_localizations.dart', [
+          'final c = Theme.of(context).extension<NizamioColors>();',
+          'extension E on ThemeData { X? get x => extension<X>(); }',
+        ]);
+        expectNone('core/api/generated/x.dart', [
+          'final c = Theme.of(context).extension<NizamioColors>();',
+        ]);
+        expect(
+          rules(
+            'core/i18n/generated/x.dart',
+            "import 'a.dart' if (dart.library.io) 'b.dart';",
+          ),
+          isEmpty,
+        );
+      },
+    );
     test('izinli tek dosya', () {
       expectNone(ext, [
         'NizamioColors get colors => Theme.of(this).extension<NizamioColors>()!;',

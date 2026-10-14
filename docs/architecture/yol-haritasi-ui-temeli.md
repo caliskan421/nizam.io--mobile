@@ -82,7 +82,7 @@ lib/features/<f>/presentation/
   - **U2** `Color(...)`, `Color.fromARGB/RGBO`, `Colors.*` yalnız `lib/core/ui/theme/**` ve
     üretilmiş token dosyasında (+ `core/security/privacy_mask.dart`, kesin dosya). **Geçiş
     istisnası:** `lib/app/app.dart` yalnız A1 birleşene kadar U2'den (ve U3'ün `google_fonts`
-    maddesinden) muaftır; A1 PR'ı muafiyeti siler. Tam tanım ve ölçüm: ADR-0003 Ek A.
+    maddesinden) muaftır; A1 PR'ı muafiyeti siler (O2/W11'de silindi). Tam tanım ve ölçüm: ADR-0003 Ek A.
   - **U3** `TextStyle(...)` yapıcısı yalnız `lib/core/ui/theme/**` (ekran `copyWith` ile
     yalnız rengi/ağırlığı değiştirebilir); `google_fonts` importu yalnız tema + bootstrap.
   - **U4** `MediaQuery.of(context)` yasak → `MediaQuery.sizeOf/paddingOf/…` ya da
@@ -309,8 +309,10 @@ akış testi. Bu dilim sonraki her feature'ın şablonudur.
 - Domain varlıkları `domain/` altında saf Dart, değişmez; çok alanlıysa `freezed` (json yok).
   Enum'lar için domain enum'u; bilinmeyen sunucu değeri `unknown` üyesine düşer (yeni backend
   etiketi uygulamayı kırmasın).
-- Ortak liste/sayfalama: `core/domain/page_slice.dart` (`items`, `nextCursor`/`total`) —
-  backend sayfalama biçimi `openapi.yaml`'dan doğrulanarak.
+- Ortak liste/sayfalama: `core/domain/page_slice.dart` (`items`, `nextCursor`, `truncated`) —
+  backend sayfalama biçimi `openapi.yaml`'dan doğrulanarak (`v0.1.0-api`: yalnız imleç —
+  `limit`/`cursor` → `next_cursor`; `total` yok; imleçsiz listelerde `X-Result-Truncated`).
+  Rehber: `docs/architecture/veri-kalibi.md`.
 - İstek gövdesi elle `Map` ile kurulmaz (D2); her zaman üretilmiş request DTO.
 - Yerel önbellek (drift) ilk ekranlarda **yok**; ihtiyaç doğan feature'da ADR ile.
 

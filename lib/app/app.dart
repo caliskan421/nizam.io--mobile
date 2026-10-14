@@ -9,7 +9,7 @@ import '../core/i18n/generated/app_localizations.dart';
 import '../core/providers.dart';
 import '../core/security/privacy_mask.dart';
 import '../core/ui/theme/app_theme.dart';
-import 'router.dart';
+import 'router/router.dart';
 
 /// Minimal kabuk: tema token'ları, TR yerelleştirme, durum makinesinden türetilen router ve
 /// arka plan maskesi. Ekran yoktur (D-0174).

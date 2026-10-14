@@ -687,4 +687,47 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiFeedbackSecondsUnit => 'sn';
+
+  @override
+  String get uiRouterTabHome => 'Ana sayfa';
+
+  @override
+  String get uiRouterTabWork => 'İşler';
+
+  @override
+  String get uiRouterTabProfile => 'Profil';
+
+  @override
+  String get uiRouterNavLabel => 'Ana gezinme';
+
+  @override
+  String get uiRouterPageServer => 'Sunucu';
+
+  @override
+  String get uiRouterPageUpdateRequired => 'Güncelleme gerekli';
+
+  @override
+  String get uiRouterPageLogin => 'Giriş';
+
+  @override
+  String get uiRouterPagePassword => 'Parola değiştir';
+
+  @override
+  String get uiRouterPageScope => 'Kapsam seçimi';
+
+  @override
+  String get uiRouterPageDetail => 'Ayrıntı';
+
+  @override
+  String get uiRouterPlaceholder => 'Bu ekran henüz hazır değil.';
+
+  @override
+  String get uiRouterNotFoundTitle => 'Sayfa bulunamadı';
+
+  @override
+  String get uiRouterNotFoundMessage =>
+      'Aradığınız sayfa yok ya da kaldırılmış.';
+
+  @override
+  String get uiRouterNotFoundAction => 'Ana sayfaya dön';
 }

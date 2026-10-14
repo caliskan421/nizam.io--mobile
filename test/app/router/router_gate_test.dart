@@ -2,7 +2,7 @@
 // ÖNCE yazıldı ve taşımadan sonra değişmeden geçer: kapı davranışı birebir korunur.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nizamio/app/router.dart';
+import 'package:nizamio/app/router/router.dart';
 import 'package:nizamio/core/app_phase.dart';
 
 import '../../core/ui/widgets/feedback/feedback_test_support.dart';

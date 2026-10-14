@@ -1,0 +1,6 @@
+{
+  "$comment": "Düğme kiti metinleri (yüklenirken anlamsal durum). ELLE yazılır; make gen ARB'ye birleştirir.",
+  "texts": {
+    "ui.buttons.busy": "Meşgul"
+  }
+}

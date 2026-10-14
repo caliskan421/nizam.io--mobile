@@ -662,6 +662,9 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu sunucuya bağlanmak için uygulamayı güncelleyin.';
 
   @override
+  String get uiButtonsBusy => 'Meşgul';
+
+  @override
   String get uiCommonRetry => 'Yeniden dene';
 
   @override
@@ -687,4 +690,87 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiFeedbackSecondsUnit => 'sn';
+
+  @override
+  String get uiInputsPasswordShow => 'Parolayı göster';
+
+  @override
+  String get uiInputsPasswordHide => 'Parolayı gizle';
+
+  @override
+  String get uiInputsSearch => 'Ara';
+
+  @override
+  String get uiInputsSearchClear => 'Aramayı temizle';
+
+  @override
+  String get uiInputsSelectPlaceholder => 'Seçin';
+
+  @override
+  String get uiInputsInvalidValue => 'Değer geçersiz.';
+
+  @override
+  String get uiInputsValidationRequired => 'Bu alan zorunludur.';
+
+  @override
+  String get uiInputsValidationEmail => 'Geçerli bir e-posta adresi girin.';
+
+  @override
+  String get uiInputsValidationTooShort => 'Değer çok kısa.';
+
+  @override
+  String get uiInputsValidationTooLong => 'Değer çok uzun.';
+
+  @override
+  String get uiInputsValidationMismatch => 'Değerler eşleşmiyor.';
+
+  @override
+  String get uiInputsValidationMustAccept =>
+      'Devam etmek için onaylamanız gerekir.';
+
+  @override
+  String get uiInputsValidationMustChoose => 'Bir seçim yapın.';
+
+  @override
+  String get uiRouterTabHome => 'Ana sayfa';
+
+  @override
+  String get uiRouterTabWork => 'İşler';
+
+  @override
+  String get uiRouterTabProfile => 'Profil';
+
+  @override
+  String get uiRouterNavLabel => 'Ana gezinme';
+
+  @override
+  String get uiRouterPageServer => 'Sunucu';
+
+  @override
+  String get uiRouterPageUpdateRequired => 'Güncelleme gerekli';
+
+  @override
+  String get uiRouterPageLogin => 'Giriş';
+
+  @override
+  String get uiRouterPagePassword => 'Parola değiştir';
+
+  @override
+  String get uiRouterPageScope => 'Kapsam seçimi';
+
+  @override
+  String get uiRouterPageDetail => 'Ayrıntı';
+
+  @override
+  String get uiRouterPlaceholder => 'Bu ekran henüz hazır değil.';
+
+  @override
+  String get uiRouterNotFoundTitle => 'Sayfa bulunamadı';
+
+  @override
+  String get uiRouterNotFoundMessage =>
+      'Aradığınız sayfa yok ya da kaldırılmış.';
+
+  @override
+  String get uiRouterNotFoundAction => 'Ana sayfaya dön';
 }

@@ -231,6 +231,96 @@ void main() {
     });
   }
 
+  group('G3 sunumda servis/depo kurma (tip çözümlemeli)', () {
+    const svc = 'features/zz/application/zz_service.dart';
+    const repo = 'features/zz/data/zz_repository.dart';
+    const other = 'features/zz/application/zz_helper.dart';
+    const pres = 'features/zz/presentation/pages';
+    const imports =
+        "import 'package:nizamio/features/zz/application/zz_service.dart';\n"
+        "import 'package:nizamio/features/zz/application/zz_service.dart' as s;\n"
+        "import 'package:nizamio/features/zz/data/zz_repository.dart' as r;\n"
+        "import 'package:nizamio/features/zz/application/zz_helper.dart';\n";
+    final support = {
+      svc:
+          'class ZzService {\n'
+          '  ZzService();\n  ZzService.named();\n'
+          '  factory ZzService.make() => ZzService();\n}\n',
+      repo: 'class ZzRepository { const ZzRepository(int x); }\n',
+      other: 'class ZzHelper { ZzHelper(); }\n',
+    };
+    final cases = <String, (String, Set<String>)>{
+      'doğrudan yapıcı (tablo 1)': ('final a = ZzService();', {'G3'}),
+      'adlı yapıcı': ('final a = ZzService.named();', {'G3'}),
+      'fabrika yapıcı': ('final a = ZzService.make();', {'G3'}),
+      'önekli import (tablo 3)': ('final a = r.ZzRepository(1);', {'G3'}),
+      'önekli import const': ('final a = const r.ZzRepository(1);', {'G3'}),
+      'typedef takma adı (tablo 2)': (
+        'typedef Svc = ZzService;\nfinal a = Svc();',
+        {'G3'},
+      ),
+      'typedef adlı yapıcı': (
+        'typedef Svc = ZzService;\nfinal a = Svc.named();',
+        {'G3'},
+      ),
+      'tear-off (tablo 3)': ('final f = r.ZzRepository.new;', {'G3'}),
+      'typedef tear-off': (
+        'typedef Svc = ZzService;\nfinal f = Svc.new;',
+        {'G3'},
+      ),
+      'ad tabanlı değil: Service ile bitmeyen sınıf serbest': (
+        'final a = ZzHelper();',
+        <String>{},
+      ),
+      'ad tabanlı değil: takma ad Service ile bitse de hedef Helper': (
+        'typedef MyService = ZzHelper;\nfinal a = MyService();',
+        <String>{},
+      ),
+      'servis tipi başvurusu (kurma değil) serbest': (
+        'ZzService? held; void f(ZzService x) {}',
+        <String>{},
+      ),
+    };
+    late List<Violation> got;
+    setUpAll(() async {
+      got = await checkServiceConstruction(
+        '.',
+        overlays: {
+          ...support,
+          for (final (i, e) in cases.entries.indexed)
+            '$pres/p$i.dart': '$imports${e.value.$1}\n',
+          // presentation dışı: serbest (modül/bileşim).
+          'features/zz/zz_module.dart': '${imports}final a = ZzService();\n',
+          'features/zz/application/zz_use.dart':
+              "import 'zz_service.dart';\nfinal a = ZzService();\n",
+        },
+      );
+    });
+    for (final (i, e) in cases.entries.indexed) {
+      test(e.key, () {
+        final rules = got
+            .where((v) => v.path == 'lib/$pres/p$i.dart')
+            .map((v) => v.rule)
+            .toSet();
+        expect(rules, e.value.$2, reason: got.join('\n'));
+      });
+    }
+    test('presentation dışı (module, application) serbest', () {
+      expect(got.where((v) => !v.path.contains('/presentation/')), isEmpty);
+    });
+    test('derleme hatası → A0 (sessiz temiz değil)', () async {
+      final v = await checkServiceConstruction(
+        '.',
+        overlays: {'$pres/broken.dart': 'final a = Yok();'},
+        only: ['$pres/broken.dart'],
+      );
+      expect(v.map((e) => e.rule).toSet(), {'A0'});
+    });
+    test('gerçek lib/ ağacında ihlal yok', () async {
+      expect(await checkServiceConstruction('.'), isEmpty);
+    });
+  });
+
   test('boş hedef kümesi → A0', () async {
     final v = await checkApiSurface('.', only: const []);
     expect(v.map((e) => e.rule), ['A0']);

@@ -611,6 +611,258 @@ void main() {
     });
   });
 
+  const pres = 'features/x/presentation/a.dart';
+
+  void expectAll(String path, Iterable<String> srcs, String rule) {
+    for (final src in srcs) {
+      expect(rules(path, src), [rule], reason: src);
+    }
+  }
+
+  void expectNone(String path, Iterable<String> srcs) {
+    for (final src in srcs) {
+      expect(rules(path, src), isEmpty, reason: src);
+    }
+  }
+
+  group('U2 ham renk', () {
+    test('tablodaki ve atlatma örnekleri yasak', () {
+      expectAll(pres, ['final c = const Color(0xFF112233);'], 'U2');
+      expectAll('core/session/b.dart', ['final c = Colors.red;'], 'U2');
+      expectAll(pres, [
+        'final c = Color(0x1);',
+        'final c = Color.fromARGB(255, 0, 0, 0);',
+        'final c = const Color.fromRGBO(0, 0, 0, 1);',
+        'final c = Color.from(alpha: 1, red: 0, green: 0, blue: 0);',
+        'final c = Color.new(1);',
+        'final c = CupertinoColors.systemRed;',
+        'final c = Colors.red.shade50;',
+        "import 'package:flutter/material.dart' as m;\nfinal c = m.Colors.red;",
+        'final c = m.Color.fromARGB(255, 0, 0, 0);',
+        'final c = m.Color(0x1);',
+        'final c = const m.Color(0x1);',
+        'typedef C = Color;',
+        'typedef C = m.Color;',
+        'typedef Cs = Colors;',
+        'final f = Color.new;',
+        'final f = m.Color.new;',
+        'final cs = Colors;',
+      ], 'U2');
+    });
+    test('izinli yollar ve geçiş istisnası', () {
+      const src = 'final c = const Color(0xFF000000); final d = Colors.red;';
+      for (final path in [
+        'core/ui/theme/app_theme.dart',
+        'core/theme/generated/tokens.gen.dart',
+        'core/security/privacy_mask.dart',
+        'app/app.dart',
+      ]) {
+        expect(rules(path, src), isEmpty, reason: path);
+      }
+      // Kesin dosya: komşusu serbest değil.
+      expect(rules('core/security/other.dart', src), ['U2', 'U2']);
+      expect(
+        checkSource('core/ui/theme/a.dart', src, allowances: false),
+        hasLength(2),
+      );
+    });
+    test('token erişimi ve renk tipi/yöntemi serbest', () {
+      expectNone(pres, [
+        'final c = context.colors.textMuted;',
+        'Color? c; final d = Color.lerp(a, b, 0.5);',
+        'final d = c.withValues(alpha: 0.5);',
+        'final colors = <int>[]; final x = colors.length;',
+      ]);
+    });
+  });
+
+  group('U3 ham metin stili', () {
+    test('tablodaki ve atlatma örnekleri yasak', () {
+      expectAll(pres, [
+        'const s = TextStyle(fontSize: 12);',
+        'final s = m.TextStyle(fontSize: 12);',
+        'final s = TextStyle.new;',
+        'final s = TextStyle.new(fontSize: 1);',
+        'typedef T = TextStyle;',
+        "import 'package:google_fonts/google_fonts.dart';",
+        "import 'package:google_fonts/google_fonts.dart' as gf;",
+        "export 'package:google_fonts/google_fonts.dart';",
+      ], 'U3');
+      expectAll('core/ui/widgets/buttons/nz_button.dart', [
+        'final s = TextStyle(fontWeight: FontWeight.w600);',
+      ], 'U3');
+    });
+    test('izinli yollar; geçiş istisnası yalnız google_fonts', () {
+      const style = 'const s = TextStyle(fontSize: 14);';
+      const gf = "import 'package:google_fonts/google_fonts.dart';";
+      expectNone('core/ui/theme/nz_text_styles.dart', [style, gf]);
+      expectNone('app/bootstrap.dart', [gf]);
+      expectNone('app/app.dart', [gf]);
+      expect(rules('app/app.dart', style), ['U3']);
+      expect(rules('app/bootstrap.dart', style), ['U3']);
+      expect(rules('core/http/a.dart', gf), ['U3']);
+      expect(
+        checkSource(
+          'app/bootstrap.dart',
+          gf,
+          allowances: false,
+        ).map((v) => v.rule),
+        ['U3'],
+      );
+    });
+    test('copyWith her yerde serbest', () {
+      expectNone(pres, [
+        'final s = context.text.titleMd.copyWith(color: context.colors.danger, fontWeight: FontWeight.w700);',
+        'final s = TextStyle.lerp(a, b, 0.5);',
+      ]);
+    });
+  });
+
+  group('U4 MediaQuery.of / maybeOf', () {
+    test('tablodaki ve atlatma örnekleri yasak', () {
+      expectAll(pres, [
+        'final s = MediaQuery.of(context).size;',
+        'final p = MediaQuery.maybeOf(context)?.padding;',
+        'final s = m.MediaQuery.of(context);',
+        'final s = m.MediaQuery.maybeOf(context);',
+        'final f = MediaQuery.of;',
+        'final f = MediaQuery.maybeOf;',
+        'final f = m.MediaQuery.of;',
+        'typedef M = MediaQuery;',
+      ], 'U4');
+      expectAll('core/ui/layout/a.dart', ['final s = MediaQuery.of(c);'], 'U4');
+      expectAll('app/app.dart', ['final s = MediaQuery.of(c);'], 'U4');
+    });
+    test('boyut yöntemleri ve sarmalayıcı serbest (pozitif)', () {
+      expectNone(pres, [
+        'final w = MediaQuery.sizeOf(context).width;',
+        'final p = MediaQuery.paddingOf(context);',
+        'final i = MediaQuery.viewInsetsOf(context);',
+        'final t = MediaQuery.textScalerOf(context);',
+        'final s = MediaQuery.maybeSizeOf(context);',
+        'final s = MediaQuery.maybePaddingOf(context);',
+        'final s = m.MediaQuery.sizeOf(context);',
+        'final w = MediaQuery.withClampedTextScaling(child: x);',
+        'final w = MediaQuery(data: d, child: x);',
+      ]);
+    });
+  });
+
+  group('U5 tema uzantısı erişimi', () {
+    const ext = 'core/ui/extensions/context_ext.dart';
+    test('tablodaki ve atlatma örnekleri yasak', () {
+      expectAll(pres, [
+        'final c = Theme.of(context).extension<NizamioColors>()!;',
+        'final t = Theme.of(context); final s = t.extension<NzTextStyles>();',
+        'final c = Theme.of(context).extensions[NizamioColors];',
+        'final v = Theme.of(context).extensions.values;',
+        'final v = theme.extensions;',
+        'final f = theme.extension;',
+        'final f = Theme.of(context).extension;',
+      ], 'U5');
+      expectAll('core/ui/theme/a.dart', [
+        'final c = t.extension<NizamioColors>();',
+      ], 'U5');
+      expectAll('core/ui/extensions/other_ext.dart', [
+        'final c = t.extension<NizamioColors>();',
+      ], 'U5');
+    });
+    test('izinli tek dosya', () {
+      expectNone(ext, [
+        'NizamioColors get colors => Theme.of(this).extension<NizamioColors>()!;',
+        'final m = Theme.of(this).extensions;',
+      ]);
+      expect(
+        checkSource(
+          ext,
+          'final c = Theme.of(c).extension<X>();',
+          allowances: false,
+        ).map((v) => v.rule),
+        ['U5'],
+      );
+    });
+    test(
+      'ThemeData(extensions: […]) adlandırılmış argüman yanlış pozitif değil',
+      () {
+        expectNone('app/app.dart', [
+          'final t = ThemeData(extensions: [c]);',
+          'final t = ThemeData(extensions: <ThemeExtension>[c, d]);',
+          'final t = base.copyWith(extensions: [c]);',
+        ]);
+        expectNone(pres, ['final t = ThemeData(extensions: [c]);']);
+      },
+    );
+  });
+
+  group('U6 sayfa kabuğu', () {
+    test('tablodaki ve atlatma örnekleri yasak', () {
+      expectAll('features/x/presentation/pages/p.dart', [
+        'final w = Scaffold(body: x);',
+        'final w = const Scaffold(body: x);',
+        'final w = m.Scaffold(body: x);',
+        'final w = Scaffold.new(body: x);',
+        'final f = Scaffold.new;',
+        'typedef S = Scaffold;',
+        'class P extends Scaffold { P(); }',
+      ], 'U6');
+      expectAll('features/x/presentation/widgets/w.dart', [
+        'final w = const CupertinoPageScaffold(child: x);',
+        'final w = m.CupertinoPageScaffold(child: x);',
+        'final f = CupertinoPageScaffold.new;',
+        'typedef S = CupertinoPageScaffold;',
+      ], 'U6');
+    });
+    test('presentation dışı ve NzPage serbest', () {
+      for (final path in [
+        'core/ui/pages/nz_page.dart',
+        'app/app.dart',
+        'features/x/application/a.dart',
+      ]) {
+        expectNone(path, ['final w = Scaffold(body: x);']);
+      }
+      expectNone('features/x/presentation/pages/p.dart', [
+        'final w = NzPage(title: t, body: x);',
+        'final m = Scaffold.of(context);',
+        'final m = ScaffoldMessenger.of(context);',
+      ]);
+    });
+  });
+
+  test(
+    'izinler kapalıyken ham ölçüm: U2=64, U3 TextStyle=0, google_fonts=2',
+    () {
+      final raw = <Violation>[];
+      for (final f in Directory(
+        'lib',
+      ).listSync(recursive: true).whereType<File>()) {
+        if (!f.path.endsWith('.dart')) continue;
+        raw.addAll(
+          checkSource(
+            f.path.substring('lib/'.length),
+            f.readAsStringSync(),
+            allowances: false,
+          ),
+        );
+      }
+      int count(String rule) => raw.where((v) => v.rule == rule).length;
+      expect(
+        count('U2'),
+        64,
+        reason: raw.where((v) => v.rule == 'U2').join('\n'),
+      );
+      expect(
+        raw.where((v) => v.rule == 'U2' && v.path == 'lib/app/app.dart'),
+        isEmpty,
+      );
+      expect(
+        count('U3'),
+        2,
+        reason: raw.where((v) => v.rule == 'U3').join('\n'),
+      );
+      expect(count('U4') + count('U5') + count('U6'), 0);
+    },
+  );
+
   test('gerçek lib/ ağacı kurallara uyar', () {
     final violations = <Violation>[];
     for (final f in Directory(

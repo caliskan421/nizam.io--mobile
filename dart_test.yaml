@@ -1,0 +1,4 @@
+# Golden testleri etiketle ayrılır (ADR-0003 karar 8). Referans (*.png) yalnız Linux'ta üretilir
+# ve doğrulanır; `make test` golden etiketini dışlar, `make golden` yalnız onu koşar.
+tags:
+  golden:

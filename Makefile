@@ -4,7 +4,7 @@
 
 DART_DIRS := lib test tool test_integration
 
-.PHONY: integration integration-test gen gen-check deps format format-check analyze boundaries test lint verify build-dev-apk build-prod-apk branding
+.PHONY: integration integration-test gen gen-check deps format format-check analyze boundaries test coverage test-presence golden golden-update lint verify build-dev-apk build-prod-apk branding
 
 deps:
 	flutter pub get --enforce-lockfile
@@ -21,12 +21,34 @@ analyze:
 boundaries:
 	dart run tool/check_boundaries.dart
 
+# Golden testleri (etiket `golden`, dart_test.yaml) birim koşumundan ayrıdır: referans yalnız
+# Linux'ta, sabit runner'da (CI `golden` işi) üretilir/doğrulanır (ADR-0003 karar 8).
 test:
-	flutter test test/
+	flutter test test/ --exclude-tags golden
+
+# Q1: testleri kapsamayla koşar (test'in aynısı + lcov), sonra dizin eşiklerini uygular.
+coverage:
+	flutter test test/ --exclude-tags golden --coverage
+	dart run tool/check_coverage.dart coverage/lcov.info
+
+# Q2: service/repository/controller/kit bileşeni için aynı göreli yolda test dosyası.
+test-presence:
+	dart run tool/check_test_presence.dart
+
+# Golden doğrulama: yalnız Linux; macOS'ta atlanır (referans yerelde üretilmez/commit'lenmez).
+golden:
+	@if [ "$$(uname -s)" = Linux ]; then flutter test test/ --tags golden; \
+	else echo "golden: yalnız Linux'ta koşar (atlandı: $$(uname -s)); referans CI'da üretilir"; fi
+
+# Referans üretimi: yalnız Linux (CI `golden-update` işi / golden işi başarısızlığında artefakt).
+golden-update:
+	@if [ "$$(uname -s)" = Linux ]; then flutter test test/ --tags golden --update-goldens; \
+	else echo "golden-update: yalnız Linux'ta (CI golden-update işi); yerel çıktı commit'lenmez"; exit 1; fi
 
 lint: format-check analyze boundaries
 
-verify: deps lint test
+# coverage, birim testlerini de koşar (test hedefiyle aynı küme).
+verify: deps lint test-presence coverage golden
 
 build-dev-apk:
 	flutter build apk --debug --flavor dev -t lib/main_dev.dart

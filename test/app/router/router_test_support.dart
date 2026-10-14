@@ -25,6 +25,12 @@ Future<GoRouter> pumpRouter(
   addTearDown(tester.view.reset);
   final router = createRouter(phase, devCatalog: devCatalog);
   addTearDown(router.dispose);
+  await pumpRouterWidget(tester, router);
+  return router;
+}
+
+/// Hazır yönlendiriciyi uygulamaya bağlar (Riverpod kapsamı, TR yerelleştirme) ve ilk kareyi çizer.
+Future<void> pumpRouterWidget(WidgetTester tester, GoRouter router) async {
   await tester.pumpWidget(
     ProviderScope(
       retry: (_, _) => null,
@@ -41,7 +47,6 @@ Future<GoRouter> pumpRouter(
     ),
   );
   await tester.pump();
-  return router;
 }
 
 /// Geçerli konum (yol + sorgu).

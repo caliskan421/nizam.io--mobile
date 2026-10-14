@@ -35,6 +35,23 @@
 //       (boyut kısıtı) ve `SizedBox.shrink/expand` serbest. `SizedBox.new(...)`, yapıcı
 //       tear-off'u (`SizedBox.new`, `SizedBox.square`) ve `typedef X = SizedBox` de yakalanır; dosya kendi `SizedBox` sınıfını tanımlıyorsa
 //       (Flutter'ınki değil) kural uygulanmaz.
+//   U2  Ham renk yasak: `Color(…)`, `Color.from/fromARGB/fromRGBO/new`, `Colors.<x>`,
+//       `CupertinoColors.<x>` (ADR-0003 Ek A). İzinli: `lib/core/ui/theme/**`,
+//       `lib/core/theme/generated/**`, `lib/core/security/privacy_mask.dart` (kesin dosya) ve
+//       A1 geçiş istisnası (`_a1Transition`). Takma adlı importlar ve `typedef` takma adları
+//       yakalanır.
+//   U3  Ham metin stili yasak: `TextStyle(…)` yalnız `lib/core/ui/theme/**`;
+//       `package:google_fonts` importu `lib/core/ui/theme/**`, `lib/app/bootstrap.dart` ve
+//       A1 geçiş istisnasında. `copyWith` her yerde serbest.
+//   U4  `MediaQuery.of` / `MediaQuery.maybeOf` (ve tear-off'ları) yasak; `sizeOf`,
+//       `paddingOf`, `maybeSizeOf` … serbest.
+//   U5  `.extension<…>()` ve `ThemeData.extensions` erişimi yalnız
+//       `lib/core/ui/extensions/context_ext.dart` içinde (`ThemeData(extensions: …)` kurulum,
+//       erişim değil).
+//   U6  `Scaffold` / `CupertinoPageScaffold` yapıcısı `lib/features/**/presentation/**` içinde
+//       yasak (sayfa kabuğu `NzPage`).
+//   G3  Sunum katmanında `*Service`/`*Repository` yapıcı çağrısı yasak: TİP ÇÖZÜMLEMELİ,
+//       tool/api_surface.dart'tadır (`checkServiceConstruction`).
 //   G1  `package:get_it` yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` içinde
 //       (ADR-0001, D-0182: get_it = bileşim kökü; core ve feature katmanları servis bulucu
 //       kullanmaz, bağımlılık yapıcıdan gelir).
@@ -134,8 +151,18 @@ class _Place {
   String? layer;
 }
 
+/// A1 GEÇİŞ İSTİSNASI — A1 birleşince silinir (ADR-0003 karar 18). `lib/app/app.dart`
+/// yalnız bu birleşmeye kadar U2'den ve U3'ün `google_fonts` maddesinden muaftır.
+/// Bu işlev ve iki çağrı yeri silinir; başka geçiş istisnası yoktur.
+bool _a1Transition(String path) => path == 'app/app.dart';
+
 /// [libPath]: `lib/` göreli yol (ör. `features/identity/data/x.dart`).
-List<Violation> checkSource(String libPath, String content) {
+/// [allowances]: false ise U2–U6'nın izinli yolları devre dışı (ham ölçüm; yalnız testler).
+List<Violation> checkSource(
+  String libPath,
+  String content, {
+  bool allowances = true,
+}) {
   final unit = parseString(
     content: content,
     path: '/lib/$libPath',
@@ -237,6 +264,11 @@ List<Violation> checkSource(String libPath, String content) {
         (rule, msg) => add(rule, directive, msg),
         generated,
         isExport: directive is ExportDirective,
+        googleFontsAllowed:
+            allowances &&
+            (here.path.startsWith('core/ui/theme/') ||
+                here.path == 'app/bootstrap.dart' ||
+                _a1Transition(here.path)),
       );
     }
   }
@@ -246,6 +278,32 @@ List<Violation> checkSource(String libPath, String content) {
     (d) => d is ClassDeclaration && d.namePart.typeName.lexeme == 'SizedBox',
   );
   unit.accept(_Visitor(here, generated, add, ownSizedBox: ownSizedBox));
+  if (!generated) {
+    final path = here.path;
+    final colorOk =
+        allowances &&
+        (path.startsWith('core/ui/theme/') ||
+            path.startsWith('core/theme/generated/') ||
+            path == 'core/security/privacy_mask.dart' ||
+            _a1Transition(path));
+    unit.accept(
+      _UiVisitor(
+        add,
+        bans: [
+          if (!colorOk) _colorBan,
+          if (!(allowances && path.startsWith('core/ui/theme/'))) _textStyleBan,
+          _mediaQueryBan,
+          if (here.area == 'feature' && here.layer == 'presentation') ...[
+            _scaffoldBan,
+            _cupertinoScaffoldBan,
+          ],
+        ],
+        wildcard: colorOk ? const {} : _colorNamespaces,
+        extensionBanned:
+            !(allowances && path == 'core/ui/extensions/context_ext.dart'),
+      ),
+    );
+  }
 
   return out;
 }
@@ -281,6 +339,7 @@ void _checkUri(
   void Function(String rule, String msg) add,
   bool generated, {
   bool isExport = false,
+  required bool googleFontsAllowed,
 }) {
   final target = _resolve(here.path, uri); // lib göreli hedef
 
@@ -338,6 +397,14 @@ void _checkUri(
         add('S4', 'domain katmanı saf Dart olmalı: $uri');
       }
     }
+  }
+
+  if (uri.startsWith('package:google_fonts/') && !googleFontsAllowed) {
+    add(
+      'U3',
+      'google_fonts yalnız lib/core/ui/theme/** ve lib/app/bootstrap.dart içinde '
+          '(GoogleFonts.*() ham TextStyle döndürür): $uri',
+    );
   }
 
   if (uri.startsWith('package:get_it/') &&
@@ -619,3 +686,167 @@ class _Visitor extends RecursiveAstVisitor<void> {
     super.visitSimpleIdentifier(node);
   }
 }
+
+/// U2–U6 için yasak başvuru: [cls] sınıfının [members] üyeleri (`null` = yapıcı).
+class _Ban {
+  const _Ban(this.rule, this.cls, this.members, this.message);
+
+  final String rule;
+  final String cls;
+  final Set<String?> members;
+  final String message;
+}
+
+const _colorBan = _Ban('U2', 'Color', {
+  null,
+  'new',
+  'from',
+  'fromARGB',
+  'fromRGBO',
+}, 'ham renk yasak; tema token\'ı kullanın (context.colors.*)');
+const _textStyleBan = _Ban('U3', 'TextStyle', {
+  null,
+  'new',
+}, 'ham TextStyle yasak; context.text.* kullanın (copyWith serbest)');
+const _mediaQueryBan = _Ban(
+  'U4',
+  'MediaQuery',
+  {'of', 'maybeOf'},
+  'MediaQuery.of/maybeOf yasak; sizeOf/paddingOf/… ya da context.layout kullanın',
+);
+const _scaffoldBan = _Ban('U6', 'Scaffold', {
+  null,
+  'new',
+}, 'Scaffold sunumda yasak; NzPage kullanın');
+const _cupertinoScaffoldBan = _Ban('U6', 'CupertinoPageScaffold', {
+  null,
+  'new',
+}, 'CupertinoPageScaffold sunumda yasak; NzPage kullanın');
+
+/// Üyesi ne olursa olsun yasak olan ad alanları (U2).
+const _colorNamespaces = {'Colors', 'CupertinoColors'};
+
+/// U2–U6 — sözdizimsel; takma adlı import (`m.Colors.red`), `typedef` takma adı ve
+/// yapıcı tear-off'u yakalanır (U1 ile aynı yöntem; çözümleme gerekmez).
+class _UiVisitor extends RecursiveAstVisitor<void> {
+  _UiVisitor(
+    this.add, {
+    required this.bans,
+    required this.wildcard,
+    required this.extensionBanned,
+  });
+
+  final List<_Ban> bans;
+  final Set<String> wildcard;
+  final bool extensionBanned;
+  final void Function(String rule, AstNode node, String message) add;
+
+  void _hit(AstNode node, String cls, String? member) {
+    for (final b in bans) {
+      if (b.cls == cls && b.members.contains(member)) {
+        add(b.rule, node, b.message);
+        return;
+      }
+    }
+  }
+
+  @override
+  void visitSimpleIdentifier(SimpleIdentifier node) {
+    if (wildcard.contains(node.name)) {
+      add('U2', node, 'ham renk yasak: ${node.name}; tema token\'ı kullanın');
+    }
+    super.visitSimpleIdentifier(node);
+  }
+
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    final type = node.constructorName.type;
+    final ctor = node.constructorName.name?.name;
+    _hit(node, type.name.lexeme, ctor);
+    // Çözümsüz AST `const Color.fromARGB(…)`'ı önek.Tip olarak ayrıştırır.
+    if (ctor == null && type.importPrefix != null) {
+      _hit(node, type.importPrefix!.name.lexeme, type.name.lexeme);
+    }
+    super.visitInstanceCreationExpression(node);
+  }
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    final target = node.target;
+    final name = node.methodName.name;
+    _hit(node, name, null); // Color(…) ve m.Color(…)
+    if (target != null) {
+      if (target is SimpleIdentifier) _hit(node, target.name, name);
+      if (target is PrefixedIdentifier) {
+        _hit(node, target.identifier.name, name); // m.MediaQuery.of(…)
+      }
+      if (extensionBanned && name == 'extension') {
+        add('U5', node, _extMessage);
+      }
+    }
+    super.visitMethodInvocation(node);
+  }
+
+  @override
+  void visitPrefixedIdentifier(PrefixedIdentifier node) {
+    _hit(node, node.prefix.name, node.identifier.name); // tear-off: Color.new
+    if (extensionBanned && _extMembers.contains(node.identifier.name)) {
+      add('U5', node, _extMessage);
+    }
+    super.visitPrefixedIdentifier(node);
+  }
+
+  @override
+  void visitPropertyAccess(PropertyAccess node) {
+    final t = node.target;
+    final name = node.propertyName.name;
+    if (t is PrefixedIdentifier) {
+      _hit(node, t.identifier.name, name); // m.Color.new
+    }
+    if (extensionBanned && _extMembers.contains(name)) {
+      add('U5', node, _extMessage);
+    }
+    super.visitPropertyAccess(node);
+  }
+
+  @override
+  void visitConstructorReference(ConstructorReference node) {
+    final c = node.constructorName;
+    _hit(node, c.type.name.lexeme, c.name?.name);
+    super.visitConstructorReference(node);
+  }
+
+  void _alias(AstNode node, NamedType type) {
+    final n = type.name.lexeme;
+    if (wildcard.contains(n) || bans.any((b) => b.cls == n)) {
+      add(
+        bans.where((b) => b.cls == n).firstOrNull?.rule ?? 'U2',
+        node,
+        '$n takma adı yasak (atlatma)',
+      );
+    }
+  }
+
+  @override
+  void visitGenericTypeAlias(GenericTypeAlias node) {
+    final t = node.type;
+    if (t is NamedType) _alias(node, t);
+    super.visitGenericTypeAlias(node);
+  }
+
+  @override
+  void visitExtendsClause(ExtendsClause node) {
+    final n = node.superclass.name.lexeme;
+    for (final b in bans) {
+      if (b.cls == n && b.members.contains(null)) {
+        add(b.rule, node, '$n alt sınıflanamaz (yapıcı yasağının atlatması)');
+      }
+    }
+    super.visitExtendsClause(node);
+  }
+}
+
+const _extMembers = {'extension', 'extensions'};
+const _extMessage =
+    'tema uzantısına yalnız lib/core/ui/extensions/context_ext.dart erişir '
+    '(context.colors / context.text kullanın)';

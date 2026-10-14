@@ -26,12 +26,19 @@
 //       içe tip argümanları dahil). SDK nesnesi böylece adlandırılmış güvenli tip dışında
 //       taşınamaz (CX-r3-Ö-04). `Object` üyeleri (`==`, `toString`…) sayılmaz.
 //
+//   G3  `lib/features/**/presentation/**` içinde çözümlenmiş sınıf adı `Service`/`Repository`
+//       ile biten yapıcı çağrısı ya da tear-off'u yasak (`checkServiceConstruction`): takma
+//       ad, typedef, adlı/fabrika yapıcı ve önekli import hedef sınıfa çözülür.
+//
 // A1 (tool/boundaries.dart) üretilmiş koda doğrudan erişimi data + modül dosyasıyla sınırlar;
 // A2/A3 kalan dolaylı yolu (açık API'de tip olarak sızma) kapatır.
 import 'dart:io';
 
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/dart/analysis/session.dart';
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/diagnostic/diagnostic.dart';
@@ -53,26 +60,12 @@ Future<List<Violation>> checkApiSurface(
 }) async {
   root = p.normalize(p.absolute(root));
   final lib = p.join(root, 'lib');
-  final provider = OverlayResourceProvider(PhysicalResourceProvider.INSTANCE);
-  for (final MapEntry(key: rel, value: content) in overlays.entries) {
-    provider.setOverlay(
-      p.join(lib, rel),
-      content: content,
-      modificationStamp: 0,
-    );
-  }
-  final sdk = _sdkPath();
-  if (sdk == null) {
+  final session = _session(lib, overlays);
+  if (session == null) {
     return [
       Violation('A0', 'lib', 1, 'Dart SDK bulunamadı; denetim koşulamadı'),
     ];
   }
-  final collection = AnalysisContextCollection(
-    includedPaths: [lib],
-    resourceProvider: provider,
-    sdkPath: sdk,
-  );
-  final session = collection.contextFor(lib).currentSession;
 
   final targets =
       (only ??
@@ -225,6 +218,130 @@ Future<List<Violation>> checkApiSurface(
     }
   }
   return out;
+}
+
+AnalysisSession? _session(String lib, Map<String, String> overlays) {
+  final provider = OverlayResourceProvider(PhysicalResourceProvider.INSTANCE);
+  for (final MapEntry(key: rel, value: content) in overlays.entries) {
+    provider.setOverlay(
+      p.join(lib, rel),
+      content: content,
+      modificationStamp: 0,
+    );
+  }
+  final sdk = _sdkPath();
+  if (sdk == null) return null;
+  return AnalysisContextCollection(
+    includedPaths: [lib],
+    resourceProvider: provider,
+    sdkPath: sdk,
+  ).contextFor(lib).currentSession;
+}
+
+/// G3: sunum katmanında servis/depo kurma. Argümanlar [checkApiSurface] ile aynıdır.
+/// Sunum dosyası yoksa denetlenecek bir şey yoktur (A0 değil); derleme hatası fail-closed.
+Future<List<Violation>> checkServiceConstruction(
+  String root, {
+  Map<String, String> overlays = const {},
+  Iterable<String>? only,
+}) async {
+  root = p.normalize(p.absolute(root));
+  final lib = p.join(root, 'lib');
+  final targets =
+      (only ??
+              [
+                ...Directory(lib)
+                    .listSync(recursive: true)
+                    .whereType<File>()
+                    .map((f) => p.relative(f.path, from: lib)),
+                ...overlays.keys,
+              ])
+          .map((r) => r.replaceAll(r'\', '/'))
+          .toSet()
+          .where(_presentation)
+          .toList()
+        ..sort();
+  if (targets.isEmpty) return [];
+  final session = _session(lib, overlays);
+  if (session == null) {
+    return [
+      Violation('A0', 'lib', 1, 'Dart SDK bulunamadı; denetim koşulamadı'),
+    ];
+  }
+  final out = <Violation>[];
+  for (final rel in targets) {
+    final result = await session.getResolvedUnit(p.join(lib, rel));
+    if (result is! ResolvedUnitResult) {
+      out.add(
+        Violation('A0', 'lib/$rel', 1, 'çözümlenemedi: ${result.runtimeType}'),
+      );
+      continue;
+    }
+    final errors = result.diagnostics.where(
+      (d) => d.severity == Severity.error,
+    );
+    if (errors.isNotEmpty) {
+      for (final d in errors) {
+        out.add(
+          Violation(
+            'A0',
+            'lib/$rel',
+            result.lineInfo.getLocation(d.offset).lineNumber,
+            'derleme hatası, G3 denetlenemez: ${d.message}',
+          ),
+        );
+      }
+      continue;
+    }
+    result.unit.accept(
+      _ServiceVisitor((node, cls) {
+        out.add(
+          Violation(
+            'G3',
+            'lib/$rel',
+            result.lineInfo.getLocation(node.offset).lineNumber,
+            'sunumda $cls kurulamaz; bağımlılık Riverpod portundan okunur '
+                '(ref.watch(<x>Provider))',
+          ),
+        );
+      }),
+    );
+  }
+  return out;
+}
+
+bool _presentation(String rel) {
+  final parts = rel.split('/');
+  return rel.endsWith('.dart') &&
+      parts.length >= 4 &&
+      parts[0] == 'features' &&
+      parts[2] == 'presentation';
+}
+
+bool _serviceName(String name) =>
+    name.endsWith('Service') || name.endsWith('Repository');
+
+class _ServiceVisitor extends RecursiveAstVisitor<void> {
+  _ServiceVisitor(this.report);
+
+  final void Function(AstNode node, String cls) report;
+
+  void _check(AstNode node, ConstructorElement? ctor) {
+    final cls = ctor?.enclosingElement.name;
+    if (cls != null && _serviceName(cls)) report(node, cls);
+  }
+
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    _check(node, node.constructorName.element);
+    super.visitInstanceCreationExpression(node);
+  }
+
+  @override
+  void visitConstructorReference(ConstructorReference node) {
+    _check(node, node.constructorName.element);
+    super.visitConstructorReference(node);
+  }
 }
 
 /// Taranan kütüphaneler: üretilmiş API dizini dışındaki her `.dart` (sonekle DARALTILMAZ —

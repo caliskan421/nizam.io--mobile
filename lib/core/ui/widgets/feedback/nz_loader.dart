@@ -20,11 +20,11 @@ class NzLoader extends StatelessWidget {
   final String? semanticLabel;
   final bool _fill;
 
-  double get _extent => switch (size) {
-    NzSize.sm => NizamioSpacing.space6,
-    NzSize.md => NizamioSpacing.space8,
-    NzSize.lg => NizamioSpacing.space12,
-  };
+  double get _extent => size.pick(
+    sm: NizamioSpacing.space6,
+    md: NizamioSpacing.space8,
+    lg: NizamioSpacing.space12,
+  );
 
   @override
   Widget build(BuildContext context) {

@@ -796,5 +796,13 @@
   "uiFeedbackSecondsUnit": "sn",
   "@uiFeedbackSecondsUnit": {
     "description": "ui.feedback.seconds_unit"
+  },
+  "uiListsEmptyTitle": "Gösterilecek kayıt yok",
+  "@uiListsEmptyTitle": {
+    "description": "ui.lists.empty_title"
+  },
+  "uiListsTruncated": "Liste kısaltıldı; yalnız ilk kayıtlar gösteriliyor.",
+  "@uiListsTruncated": {
+    "description": "ui.lists.truncated"
   }
 }

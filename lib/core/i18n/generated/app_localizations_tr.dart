@@ -687,4 +687,11 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiFeedbackSecondsUnit => 'sn';
+
+  @override
+  String get uiListsEmptyTitle => 'Gösterilecek kayıt yok';
+
+  @override
+  String get uiListsTruncated =>
+      'Liste kısaltıldı; yalnız ilk kayıtlar gösteriliyor.';
 }

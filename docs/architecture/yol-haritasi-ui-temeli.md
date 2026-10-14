@@ -309,8 +309,10 @@ akış testi. Bu dilim sonraki her feature'ın şablonudur.
 - Domain varlıkları `domain/` altında saf Dart, değişmez; çok alanlıysa `freezed` (json yok).
   Enum'lar için domain enum'u; bilinmeyen sunucu değeri `unknown` üyesine düşer (yeni backend
   etiketi uygulamayı kırmasın).
-- Ortak liste/sayfalama: `core/domain/page_slice.dart` (`items`, `nextCursor`/`total`) —
-  backend sayfalama biçimi `openapi.yaml`'dan doğrulanarak.
+- Ortak liste/sayfalama: `core/domain/page_slice.dart` (`items`, `nextCursor`, `truncated`) —
+  backend sayfalama biçimi `openapi.yaml`'dan doğrulanarak (`v0.1.0-api`: yalnız imleç —
+  `limit`/`cursor` → `next_cursor`; `total` yok; imleçsiz listelerde `X-Result-Truncated`).
+  Rehber: `docs/architecture/veri-kalibi.md`.
 - İstek gövdesi elle `Map` ile kurulmaz (D2); her zaman üretilmiş request DTO.
 - Yerel önbellek (drift) ilk ekranlarda **yok**; ihtiyaç doğan feature'da ADR ile.
 

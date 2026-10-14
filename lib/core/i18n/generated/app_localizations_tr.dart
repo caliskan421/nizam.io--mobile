@@ -662,6 +662,9 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu sunucuya bağlanmak için uygulamayı güncelleyin.';
 
   @override
+  String get uiButtonsBusy => 'Meşgul';
+
+  @override
   String get uiCommonRetry => 'Yeniden dene';
 
   @override

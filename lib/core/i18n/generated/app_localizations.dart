@@ -1372,6 +1372,18 @@ abstract class AppLocalizations {
   /// **'Bir seçim yapın.'**
   String get uiInputsValidationMustChoose;
 
+  /// ui.lists.empty_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Gösterilecek kayıt yok'**
+  String get uiListsEmptyTitle;
+
+  /// ui.lists.truncated
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste kısaltıldı; yalnız ilk kayıtlar gösteriliyor.'**
+  String get uiListsTruncated;
+
   /// ui.router.tab_home
   ///
   /// In tr, this message translates to:

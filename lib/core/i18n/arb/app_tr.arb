@@ -853,6 +853,14 @@
   "@uiInputsValidationMustChoose": {
     "description": "ui.inputs.validation_must_choose"
   },
+  "uiListsEmptyTitle": "Gösterilecek kayıt yok",
+  "@uiListsEmptyTitle": {
+    "description": "ui.lists.empty_title"
+  },
+  "uiListsTruncated": "Liste kısaltıldı; yalnız ilk kayıtlar gösteriliyor.",
+  "@uiListsTruncated": {
+    "description": "ui.lists.truncated"
+  },
   "uiRouterTabHome": "Ana sayfa",
   "@uiRouterTabHome": {
     "description": "ui.router.tab_home"

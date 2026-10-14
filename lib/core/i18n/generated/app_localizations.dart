@@ -1233,6 +1233,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu sunucuya bağlanmak için uygulamayı güncelleyin.'**
   String get errClientUpdateRequired;
+
+  /// ui.common.retry
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeniden dene'**
+  String get uiCommonRetry;
+
+  /// ui.common.cancel
+  ///
+  /// In tr, this message translates to:
+  /// **'İptal'**
+  String get uiCommonCancel;
+
+  /// ui.common.ok
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamam'**
+  String get uiCommonOk;
+
+  /// ui.common.close
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapat'**
+  String get uiCommonClose;
 }
 
 class _AppLocalizationsDelegate

@@ -39,3 +39,12 @@ linter:
     - unnecessary_lambdas
     - unnecessary_statements
     - use_super_parameters
+    # UI temeli (ADR-0003 / yol haritası A0): widget ağacı kuralları.
+    - prefer_const_constructors
+    - prefer_const_literals_to_create_immutables
+    - sort_child_properties_last
+    - use_key_in_widget_constructors
+    - avoid_unnecessary_containers
+    - use_colored_box
+    - use_decorated_box
+    - sized_box_for_whitespace

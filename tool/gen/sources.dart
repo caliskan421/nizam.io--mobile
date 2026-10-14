@@ -131,8 +131,97 @@ Map<String, String> parseClientErrors(String text) {
 /// Hata kodu → ARB anahtarı (gen-l10n Dart tanımlayıcısı ister): `identity.credentials_invalid`
 /// → `errIdentityCredentialsInvalid`.
 String arbKey(String code) {
-  final parts = code.split(RegExp(r'[._]')).where((p) => p.isNotEmpty);
-  return 'err${parts.map((p) => p[0].toUpperCase() + p.substring(1)).join()}';
+  final parts = code.split(RegExp(r'[._]')).where((p) => p.isNotEmpty).toList();
+  String cap(String p) => p[0].toUpperCase() + p.substring(1);
+  // UI metinleri: `ui.common.retry` → `uiCommonRetry` ("err" öneki yalnız hata kodlarında).
+  if (parts.first == 'ui') {
+    return 'ui${parts.skip(1).map(cap).join()}';
+  }
+  return 'err${parts.map(cap).join()}';
+}
+
+/// `i18n/ui/<grup>.tr.json` dosyaları (dosya adı → içerik) → tam anahtar → metin.
+/// Anahtar `ui.<grup>.<ad>` olmalı (grup = dosya adı); yinelenen anahtar, boş metin, ICU özel
+/// karakteri ve ARB anahtar çakışması düşer. Sunucu/istemci hata kodlarıyla çakışma
+/// [checkUiAgainstErrors] ile denetlenir.
+Map<String, String> parseUiTexts(Map<String, String> filesByName) {
+  final out = <String, String>{};
+  final arb = <String, String>{};
+  for (final name in filesByName.keys.toList()..sort()) {
+    final m = RegExp(r'^([a-z][a-z0-9_]*)\.tr\.json$').firstMatch(name);
+    if (m == null) {
+      throw FormatException(
+        'UI metin dosyası adı <grup>.tr.json olmalı: $name',
+      );
+    }
+    final group = m.group(1)!;
+    // jsonDecode yinelenen anahtarı sessizce ezer; ham metinde ayrıca sayılır.
+    final seen = <String>{};
+    for (final k in RegExp(
+      r'"(ui\.[^"]*)"\s*:',
+    ).allMatches(filesByName[name]!)) {
+      if (!seen.add(k.group(1)!)) {
+        throw FormatException('$name: yinelenen UI anahtarı: ${k.group(1)}');
+      }
+    }
+    final root = jsonDecode(filesByName[name]!) as Map<String, Object?>;
+    final texts = root['texts'];
+    if (texts is! Map<String, Object?>) {
+      throw FormatException('$name: "texts" nesnesi yok');
+    }
+    final keyRe = RegExp(
+      '^ui\\.$group\\.[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*\$',
+    );
+    for (final MapEntry(:key, :value) in texts.entries) {
+      if (!keyRe.hasMatch(key)) {
+        throw FormatException(
+          '$name: anahtar "ui.$group." önekli değil/geçersiz: $key',
+        );
+      }
+      if (value is! String || value.trim().isEmpty) {
+        throw FormatException('$name: metin boş ya da dize değil: $key');
+      }
+      if (RegExp(r'[{}]').hasMatch(value)) {
+        throw FormatException(
+          '$name: metinde ICU özel karakteri ({ }) var: $key',
+        );
+      }
+      if (out.containsKey(key)) {
+        throw FormatException('yinelenen UI anahtarı: $key');
+      }
+      final k = arbKey(key);
+      final prev = arb[k];
+      if (prev != null) {
+        throw FormatException('ARB anahtar çakışması: $prev ve $key → $k');
+      }
+      arb[k] = key;
+      out[key] = value;
+    }
+  }
+  return out;
+}
+
+/// `ui.*` anahtarları sunucu/istemci hata kodlarıyla (ve ARB anahtarlarıyla) çakışmamalı.
+void checkUiAgainstErrors(Map<String, String> ui, Iterable<String> errorCodes) {
+  final codes = errorCodes.toSet();
+  final errArb = {for (final c in codes) arbKey(c): c};
+  for (final key in ui.keys) {
+    if (codes.contains(key)) {
+      throw FormatException('UI anahtarı hata koduyla çakışıyor: $key');
+    }
+    final hit = errArb[arbKey(key)];
+    if (hit != null) {
+      throw FormatException(
+        'UI anahtarı ARB anahtarında hata koduyla çakışıyor: $key ve $hit',
+      );
+    }
+  }
+  final stray = codes.where((c) => c.startsWith('ui.')).toList()..sort();
+  if (stray.isNotEmpty) {
+    throw FormatException(
+      'hata kodu "ui." ad alanını kullanıyor: ${stray.join(', ')}',
+    );
+  }
 }
 
 /// ARB'ye girecek TR metinleri: sunucu kodları (katalog ∪ fields) web metninden, istemci
@@ -168,11 +257,18 @@ Map<String, String> buildTrMessages(
   return out;
 }
 
-String buildArb(Map<String, String> messages, String sourceNote) {
+String buildArb(
+  Map<String, String> messages,
+  String sourceNote, [
+  Map<String, String> ui = const {},
+]) {
   final m = <String, Object?>{
     '@@locale': 'tr',
     '@@x-generated': sourceNote,
-    for (final MapEntry(:key, :value) in messages.entries) ...{
+    for (final MapEntry(:key, :value) in <MapEntry<String, String>>[
+      ...messages.entries,
+      ...ui.entries,
+    ]) ...{
       arbKey(key): value,
       '@${arbKey(key)}': {'description': key},
     },

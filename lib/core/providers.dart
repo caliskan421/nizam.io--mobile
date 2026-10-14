@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'app_phase.dart';
 import 'config/flavor.dart';
 import 'http/dio_factory.dart';
+import 'preferences/locale_controller.dart';
 import 'preferences/theme_mode_controller.dart';
 import 'scope/scope_controller.dart';
 import 'server/server_binding.dart';
@@ -47,6 +48,10 @@ SessionController sessionController(Ref ref) =>
 ThemeModeController themeModeController(Ref ref) =>
     _unbound('themeModeControllerProvider');
 
+@Riverpod(keepAlive: true)
+LocaleController localeController(Ref ref) =>
+    _unbound('localeControllerProvider');
+
 T _listen<T>(Ref ref, ValueListenable<T> listenable) {
   void onChange() => ref.invalidateSelf();
   listenable.addListener(onChange);
@@ -70,6 +75,11 @@ ScopeSelection scopeState(Ref ref) =>
 @Riverpod(keepAlive: true)
 ThemeMode themeMode(Ref ref) =>
     _listen(ref, ref.watch(themeModeControllerProvider).state);
+
+/// Kalıcı uygulama dili (altyapı; yalnız `tr`); değiştirmek için `localeControllerProvider.set`.
+@Riverpod(keepAlive: true)
+Locale locale(Ref ref) =>
+    _listen(ref, ref.watch(localeControllerProvider).state);
 
 @Riverpod(keepAlive: true)
 AppPhase appPhase(Ref ref) => deriveAppPhase(

@@ -289,6 +289,52 @@ final class ThemeModeControllerProvider
 String _$themeModeControllerHash() =>
     r'c312d01d793778a55fee6bea9b457f4d5bd0f5e4';
 
+@ProviderFor(localeController)
+final localeControllerProvider = LocaleControllerProvider._();
+
+final class LocaleControllerProvider
+    extends
+        $FunctionalProvider<
+          LocaleController,
+          LocaleController,
+          LocaleController
+        >
+    with $Provider<LocaleController> {
+  LocaleControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'localeControllerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$localeControllerHash();
+
+  @$internal
+  @override
+  $ProviderElement<LocaleController> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  LocaleController create(Ref ref) {
+    return localeController(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(LocaleController value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<LocaleController>(value),
+    );
+  }
+}
+
+String _$localeControllerHash() => r'a85c6ae22b2170b3b6e8aa5af9c572fa718196b7';
+
 @ProviderFor(bindingState)
 final bindingStateProvider = BindingStateProvider._();
 
@@ -457,6 +503,51 @@ final class ThemeModeProvider
 }
 
 String _$themeModeHash() => r'11648140d16d1b7ee579fab9382af2c8b3201ba5';
+
+/// Kalıcı uygulama dili (altyapı; yalnız `tr`); değiştirmek için `localeControllerProvider.set`.
+
+@ProviderFor(locale)
+final localeProvider = LocaleProvider._();
+
+/// Kalıcı uygulama dili (altyapı; yalnız `tr`); değiştirmek için `localeControllerProvider.set`.
+
+final class LocaleProvider extends $FunctionalProvider<Locale, Locale, Locale>
+    with $Provider<Locale> {
+  /// Kalıcı uygulama dili (altyapı; yalnız `tr`); değiştirmek için `localeControllerProvider.set`.
+  LocaleProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'localeProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$localeHash();
+
+  @$internal
+  @override
+  $ProviderElement<Locale> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Locale create(Ref ref) {
+    return locale(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Locale value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Locale>(value),
+    );
+  }
+}
+
+String _$localeHash() => r'31905af6c49dd50d8eed2ece209392478a6554f9';
 
 @ProviderFor(appPhase)
 final appPhaseProvider = AppPhaseProvider._();

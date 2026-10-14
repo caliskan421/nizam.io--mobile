@@ -1,6 +1,6 @@
 {
   "@@locale": "tr",
-  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit 54afb002428e09fdc2727565e226880c1a25bb8c src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.1.0-api (8c8c83b33e90aef4e8e3edd82713fc709c39c518)); istemci kodları: i18n/client_errors.tr.json",
+  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit 54afb002428e09fdc2727565e226880c1a25bb8c src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.1.0-api (8c8c83b33e90aef4e8e3edd82713fc709c39c518)); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
   "errAuditEntryRejected": "İşlem kaydı yazılamadığı için istek tamamlanamadı.",
   "@errAuditEntryRejected": {
     "description": "audit.entry_rejected"
@@ -760,5 +760,21 @@
   "errClientUpdateRequired": "Bu sunucuya bağlanmak için uygulamayı güncelleyin.",
   "@errClientUpdateRequired": {
     "description": "client.update_required"
+  },
+  "uiCommonRetry": "Yeniden dene",
+  "@uiCommonRetry": {
+    "description": "ui.common.retry"
+  },
+  "uiCommonCancel": "İptal",
+  "@uiCommonCancel": {
+    "description": "ui.common.cancel"
+  },
+  "uiCommonOk": "Tamam",
+  "@uiCommonOk": {
+    "description": "ui.common.ok"
+  },
+  "uiCommonClose": "Kapat",
+  "@uiCommonClose": {
+    "description": "ui.common.close"
   }
 }

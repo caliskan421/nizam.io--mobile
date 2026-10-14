@@ -86,6 +86,7 @@ final portProviders = <String, ProviderBase<Object?>>{
   'sessionControllerProvider': sessionControllerProvider,
   'themeModeControllerProvider': themeModeControllerProvider,
   'connectivityMonitorProvider': connectivityMonitorProvider,
+  'localeControllerProvider': localeControllerProvider,
   'identityServiceProvider': identityServiceProvider,
 };
 

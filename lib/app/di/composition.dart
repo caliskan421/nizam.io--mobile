@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import '../../core/config/flavor.dart';
 import '../../core/network/connectivity_link.dart';
 import '../../core/network/connectivity_monitor.dart';
+import '../../core/preferences/locale_controller.dart';
 import '../../core/preferences/theme_mode_controller.dart';
 import '../../core/providers.dart';
 import '../../core/scope/scope_controller.dart';
@@ -55,6 +56,7 @@ class Composition {
         flavorProvider.overrideWithValue(flavor),
         httpAdapterProvider.overrideWithValue(registeredHttpAdapter(locator)),
         scopeControllerProvider.overrideWithValue(locator<ScopeController>()),
+        localeControllerProvider.overrideWithValue(locator<LocaleController>()),
         themeModeControllerProvider.overrideWithValue(
           locator<ThemeModeController>(),
         ),

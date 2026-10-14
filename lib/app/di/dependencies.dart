@@ -10,6 +10,7 @@ import '../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../core/network/connectivity_link.dart';
 import '../../core/network/connectivity_monitor.dart';
 import '../../core/preferences/app_preferences.dart';
+import '../../core/preferences/locale_controller.dart';
 import '../../core/preferences/theme_mode_controller.dart';
 import '../../core/scope/scope_controller.dart';
 import '../../core/server/server_binding.dart';
@@ -66,6 +67,10 @@ void configureDependencies(
     ..registerLazySingleton<ConnectivityMonitor>(
       () => ConnectivityMonitor(connectivityLink)..start().ignore(),
       dispose: (m) => m.dispose(),
+    )
+    ..registerLazySingleton<LocaleController>(
+      () => LocaleController(locator<AppPreferences>()),
+      dispose: (c) => c.dispose(),
     )
     ..registerLazySingleton<ScopeController>(ScopeController.new)
     ..registerLazySingleton<ServerBindingController>(

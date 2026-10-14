@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'app_phase.dart';
 import 'config/flavor.dart';
 import 'http/dio_factory.dart';
+import 'network/connectivity_monitor.dart';
 import 'preferences/locale_controller.dart';
 import 'preferences/theme_mode_controller.dart';
 import 'scope/scope_controller.dart';
@@ -49,6 +50,10 @@ ThemeModeController themeModeController(Ref ref) =>
     _unbound('themeModeControllerProvider');
 
 @Riverpod(keepAlive: true)
+ConnectivityMonitor connectivityMonitor(Ref ref) =>
+    _unbound('connectivityMonitorProvider');
+
+@Riverpod(keepAlive: true)
 LocaleController localeController(Ref ref) =>
     _unbound('localeControllerProvider');
 
@@ -76,6 +81,11 @@ ScopeSelection scopeState(Ref ref) =>
 ThemeMode themeMode(Ref ref) =>
     _listen(ref, ref.watch(themeModeControllerProvider).state);
 
+/// Sunucuya erişim durumu (çevrimiçi/çevrimdışı/bilinmiyor); yalnız durum yayar.
+@Riverpod(keepAlive: true)
+ConnectivityState connectivityState(Ref ref) =>
+    _listen(ref, ref.watch(connectivityMonitorProvider).state);
+
 /// Kalıcı uygulama dili (altyapı; yalnız `tr`); değiştirmek için `localeControllerProvider.set`.
 @Riverpod(keepAlive: true)
 Locale locale(Ref ref) =>
@@ -99,6 +109,7 @@ Dio? apiDio(Ref ref) {
     session: ref.watch(sessionControllerProvider),
     instanceId: b.info.instanceId,
     scope: ref.watch(scopeControllerProvider),
+    connectivity: ref.watch(connectivityMonitorProvider),
     adapter: ref.watch(httpAdapterProvider),
   );
   ref.onDispose(dio.close);

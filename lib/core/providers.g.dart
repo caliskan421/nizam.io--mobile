@@ -289,6 +289,54 @@ final class ThemeModeControllerProvider
 String _$themeModeControllerHash() =>
     r'c312d01d793778a55fee6bea9b457f4d5bd0f5e4';
 
+@ProviderFor(connectivityMonitor)
+final connectivityMonitorProvider = ConnectivityMonitorProvider._();
+
+final class ConnectivityMonitorProvider
+    extends
+        $FunctionalProvider<
+          ConnectivityMonitor,
+          ConnectivityMonitor,
+          ConnectivityMonitor
+        >
+    with $Provider<ConnectivityMonitor> {
+  ConnectivityMonitorProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'connectivityMonitorProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$connectivityMonitorHash();
+
+  @$internal
+  @override
+  $ProviderElement<ConnectivityMonitor> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ConnectivityMonitor create(Ref ref) {
+    return connectivityMonitor(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ConnectivityMonitor value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ConnectivityMonitor>(value),
+    );
+  }
+}
+
+String _$connectivityMonitorHash() =>
+    r'875d7b6265cdd2ecf28f7e2b0e1ea05f43021d12';
+
 @ProviderFor(localeController)
 final localeControllerProvider = LocaleControllerProvider._();
 
@@ -504,6 +552,58 @@ final class ThemeModeProvider
 
 String _$themeModeHash() => r'11648140d16d1b7ee579fab9382af2c8b3201ba5';
 
+/// Sunucuya erişim durumu (çevrimiçi/çevrimdışı/bilinmiyor); yalnız durum yayar.
+
+@ProviderFor(connectivityState)
+final connectivityStateProvider = ConnectivityStateProvider._();
+
+/// Sunucuya erişim durumu (çevrimiçi/çevrimdışı/bilinmiyor); yalnız durum yayar.
+
+final class ConnectivityStateProvider
+    extends
+        $FunctionalProvider<
+          ConnectivityState,
+          ConnectivityState,
+          ConnectivityState
+        >
+    with $Provider<ConnectivityState> {
+  /// Sunucuya erişim durumu (çevrimiçi/çevrimdışı/bilinmiyor); yalnız durum yayar.
+  ConnectivityStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'connectivityStateProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$connectivityStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<ConnectivityState> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ConnectivityState create(Ref ref) {
+    return connectivityState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ConnectivityState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ConnectivityState>(value),
+    );
+  }
+}
+
+String _$connectivityStateHash() => r'71170bccb563cd03a42669470b365248ed9cd878';
+
 /// Kalıcı uygulama dili (altyapı; yalnız `tr`); değiştirmek için `localeControllerProvider.set`.
 
 @ProviderFor(locale)
@@ -633,4 +733,4 @@ final class ApiDioProvider extends $FunctionalProvider<Dio?, Dio?, Dio?>
   }
 }
 
-String _$apiDioHash() => r'7da665024b1a5ba43a2aad5ccbb3b82d81aea455';
+String _$apiDioHash() => r'd9b1bd720599c068470c634d43e1491c452417e6';

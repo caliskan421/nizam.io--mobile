@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 
 import '../config/flavor.dart';
+import '../network/connectivity_monitor.dart';
 import '../scope/scope_controller.dart';
 import '../server/server_address.dart';
 import '../session/session_controller.dart';
+import 'connectivity_interceptor.dart';
 import 'interceptors.dart';
 
 /// Ortak taban ayarları. Yönlendirme izlenmez (https → http yönlendirmesiyle parola sızmaz;
@@ -43,6 +45,7 @@ Dio createApiDio({
   required SessionController session,
   required String instanceId,
   required ScopeController scope,
+  ConnectivityMonitor? connectivity,
   HttpClientAdapter? adapter,
 }) {
   final dio = Dio(baseOptions(server));
@@ -50,6 +53,7 @@ Dio createApiDio({
   dio.interceptors.addAll([
     ApiGuardInterceptor(server: server, flavor: flavor, scope: scope),
     AuthInterceptor(session: session, instanceId: instanceId, dio: () => dio),
+    if (connectivity != null) ConnectivityInterceptor(connectivity),
     ErrorLogInterceptor(),
   ]);
   return dio;

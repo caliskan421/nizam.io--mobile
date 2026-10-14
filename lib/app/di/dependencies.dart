@@ -7,6 +7,8 @@ import '../../core/config/flavor.dart';
 import '../../core/errors/api_error.dart';
 import '../../core/http/dio_factory.dart';
 import '../../core/i18n/generated/client_error_codes.gen.dart';
+import '../../core/network/connectivity_link.dart';
+import '../../core/network/connectivity_monitor.dart';
 import '../../core/preferences/app_preferences.dart';
 import '../../core/preferences/locale_controller.dart';
 import '../../core/preferences/theme_mode_controller.dart';
@@ -31,15 +33,18 @@ import '../../core/storage/shared_preference_store.dart';
 ///   oturumu bilmez; yön tek: oturum → bağ).
 /// - Oturum etkin değilse (çıkış, yeniden giriş gerekli) kapsam temizlenir.
 ///
-/// [secureStore] / [httpAdapter] / [preferenceStore] yalnız testler ve cihazsız entegrasyon
-/// içindir; verilmezse flutter_secure_storage, dio'nun varsayılan bağdaştırıcısı (platform
-/// TLS) ve shared_preferences kullanılır.
+/// [secureStore] / [httpAdapter] / [preferenceStore] yalnız testler ve cihazsız
+/// entegrasyon içindir; verilmezse flutter_secure_storage, dio'nun varsayılan bağdaştırıcısı (platform
+/// TLS) ve shared_preferences kullanılır. [connectivityLink] platform ağ ipucudur (A3b);
+/// verilmezse ipucu yoktur, durum yalnız istek sonuçlarından türer (testler platform kanalına
+/// dokunmaz; uygulama `PlusConnectivityLink` verir).
 void configureDependencies(
   GetIt locator, {
   required Flavor flavor,
   SecureStore? secureStore,
   HttpClientAdapter? httpAdapter,
   PreferenceStore? preferenceStore,
+  ConnectivityLink? connectivityLink,
 }) {
   locator
     ..registerSingleton<Flavor>(flavor)
@@ -58,6 +63,10 @@ void configureDependencies(
     ..registerLazySingleton<ThemeModeController>(
       () => ThemeModeController(locator<AppPreferences>()),
       dispose: (c) => c.dispose(),
+    )
+    ..registerLazySingleton<ConnectivityMonitor>(
+      () => ConnectivityMonitor(connectivityLink)..start().ignore(),
+      dispose: (m) => m.dispose(),
     )
     ..registerLazySingleton<LocaleController>(
       () => LocaleController(locator<AppPreferences>()),

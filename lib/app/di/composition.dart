@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../core/config/flavor.dart';
+import '../../core/network/connectivity_link.dart';
+import '../../core/network/connectivity_monitor.dart';
 import '../../core/preferences/locale_controller.dart';
 import '../../core/preferences/theme_mode_controller.dart';
 import '../../core/providers.dart';
@@ -31,6 +33,7 @@ class Composition {
     SecureStore? secureStore,
     HttpClientAdapter? httpAdapter,
     PreferenceStore? preferenceStore,
+    ConnectivityLink? connectivityLink,
   }) {
     final locator = GetIt.asNewInstance();
     configureDependencies(
@@ -39,6 +42,7 @@ class Composition {
       secureStore: secureStore,
       httpAdapter: httpAdapter,
       preferenceStore: preferenceStore,
+      connectivityLink: connectivityLink,
     );
     late final ProviderContainer container;
     // Feature modülleri yalnız buradan kaydedilir (sınır kuralı G2). Reaktif API istemcisi
@@ -55,6 +59,9 @@ class Composition {
         localeControllerProvider.overrideWithValue(locator<LocaleController>()),
         themeModeControllerProvider.overrideWithValue(
           locator<ThemeModeController>(),
+        ),
+        connectivityMonitorProvider.overrideWithValue(
+          locator<ConnectivityMonitor>(),
         ),
         serverBindingProvider.overrideWithValue(
           locator<ServerBindingController>(),

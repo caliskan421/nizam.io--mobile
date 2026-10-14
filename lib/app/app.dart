@@ -24,7 +24,10 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
   late final ValueNotifier<AppPhase> _phase = ValueNotifier(
     ref.read(appPhaseProvider),
   );
-  late final GoRouter _router = createRouter(_phase);
+  late final GoRouter _router = createRouter(
+    _phase,
+    devCatalog: ref.read(flavorProvider) == Flavor.dev,
+  );
   final PrivacyMaskController _mask = PrivacyMaskController();
   final ThemeData _light = AppTheme.light();
   final ThemeData _dark = AppTheme.dark();

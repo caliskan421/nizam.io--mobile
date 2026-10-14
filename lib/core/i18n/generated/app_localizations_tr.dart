@@ -672,4 +672,19 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCommonClose => 'Kapat';
+
+  @override
+  String get uiFeedbackLoading => 'Yükleniyor';
+
+  @override
+  String get uiFeedbackOffline => 'Çevrimdışısınız. Sunucuya ulaşılamıyor.';
+
+  @override
+  String get uiFeedbackErrorTitle => 'Bir sorun oluştu';
+
+  @override
+  String get uiFeedbackRetryWait => 'Yeniden denemek için bekleyin';
+
+  @override
+  String get uiFeedbackSecondsUnit => 'sn';
 }

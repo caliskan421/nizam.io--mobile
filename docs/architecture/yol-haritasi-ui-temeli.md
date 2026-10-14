@@ -82,7 +82,7 @@ lib/features/<f>/presentation/
   - **U2** `Color(...)`, `Color.fromARGB/RGBO`, `Colors.*` yalnız `lib/core/ui/theme/**` ve
     üretilmiş token dosyasında (+ `core/security/privacy_mask.dart`, kesin dosya). **Geçiş
     istisnası:** `lib/app/app.dart` yalnız A1 birleşene kadar U2'den (ve U3'ün `google_fonts`
-    maddesinden) muaftır; A1 PR'ı muafiyeti siler. Tam tanım ve ölçüm: ADR-0003 Ek A.
+    maddesinden) muaftır; A1 PR'ı muafiyeti siler (O2/W11'de silindi). Tam tanım ve ölçüm: ADR-0003 Ek A.
   - **U3** `TextStyle(...)` yapıcısı yalnız `lib/core/ui/theme/**` (ekran `copyWith` ile
     yalnız rengi/ağırlığı değiştirebilir); `google_fonts` importu yalnız tema + bootstrap.
   - **U4** `MediaQuery.of(context)` yasak → `MediaQuery.sizeOf/paddingOf/…` ya da

@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../core/app_phase.dart';
 import '../core/config/flavor.dart';
 import '../core/i18n/generated/app_localizations.dart';
 import '../core/providers.dart';
 import '../core/security/privacy_mask.dart';
-import '../core/theme/generated/tokens.gen.dart';
+import '../core/ui/theme/app_theme.dart';
 import 'router.dart';
 
 /// Minimal kabuk: tema token'ları, TR yerelleştirme, durum makinesinden türetilen router ve
@@ -27,6 +26,8 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
   );
   late final GoRouter _router = createRouter(_phase);
   final PrivacyMaskController _mask = PrivacyMaskController();
+  final ThemeData _light = AppTheme.light();
+  final ThemeData _dark = AppTheme.dark();
 
   @override
   void dispose() {
@@ -36,26 +37,14 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
     super.dispose();
   }
 
-  ThemeData _theme(Brightness b, NizamioColors c) {
-    final base = ThemeData(
-      brightness: b,
-      colorScheme: ColorScheme.fromSeed(seedColor: c.primary, brightness: b),
-      scaffoldBackgroundColor: c.background,
-      extensions: [c],
-    );
-    // Yazı tipi token'dan (Inter); dosyalar uygulamayla gelir (assets/fonts), ağdan
-    // indirilmez — bootstrap `allowRuntimeFetching = false`.
-    return base.copyWith(textTheme: GoogleFonts.interTextTheme(base.textTheme));
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.listen(appPhaseProvider, (_, next) => _phase.value = next);
     return MaterialApp.router(
       title: 'NIZAM.IO',
       debugShowCheckedModeBanner: ref.watch(flavorProvider) == Flavor.dev,
-      theme: _theme(Brightness.light, NizamioColors.light),
-      darkTheme: _theme(Brightness.dark, NizamioColors.dark),
+      theme: _light,
+      darkTheme: _dark,
       themeMode: ref.watch(themeModeProvider),
       locale: const Locale('tr'),
       supportedLocales: AppLocalizations.supportedLocales,

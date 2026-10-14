@@ -37,12 +37,11 @@
 //       (Flutter'ınki değil) kural uygulanmaz.
 //   U2  Ham renk yasak: `Color(…)`, `Color.from/fromARGB/fromRGBO/new`, `Colors.<x>`,
 //       `CupertinoColors.<x>` (ADR-0003 Ek A). İzinli: `lib/core/ui/theme/**`,
-//       `lib/core/theme/generated/**`, `lib/core/security/privacy_mask.dart` (kesin dosya) ve
-//       A1 geçiş istisnası (`_a1Transition`). Takma adlı importlar ve `typedef` takma adları
-//       yakalanır.
+//       `lib/core/theme/generated/**`, `lib/core/security/privacy_mask.dart` (kesin dosya).
+//       Takma adlı importlar ve `typedef` takma adları yakalanır.
 //   U3  Ham metin stili yasak: `TextStyle(…)` yalnız `lib/core/ui/theme/**`;
-//       `package:google_fonts` importu `lib/core/ui/theme/**`, `lib/app/bootstrap.dart` ve
-//       A1 geçiş istisnasında. `copyWith` her yerde serbest.
+//       `package:google_fonts` importu `lib/core/ui/theme/**`, `lib/app/bootstrap.dart` içinde.
+//       `copyWith` her yerde serbest.
 //   U4  `MediaQuery.of` / `MediaQuery.maybeOf` (ve tear-off'ları) yasak; `sizeOf`,
 //       `paddingOf`, `maybeSizeOf` … serbest.
 //   U5  `.extension<…>()` ve `ThemeData.extensions` erişimi yalnız
@@ -153,11 +152,6 @@ class _Place {
   String? feature;
   String? layer;
 }
-
-/// A1 GEÇİŞ İSTİSNASI — A1 birleşince silinir (ADR-0003 karar 18). `lib/app/app.dart`
-/// yalnız bu birleşmeye kadar U2'den ve U3'ün `google_fonts` maddesinden muaftır.
-/// Bu işlev ve iki çağrı yeri silinir; başka geçiş istisnası yoktur.
-bool _a1Transition(String path) => path == 'app/app.dart';
 
 /// [libPath]: `lib/` göreli yol (ör. `features/identity/data/x.dart`).
 /// [allowances]: false ise U2–U6'nın izinli yolları devre dışı (ham ölçüm; yalnız testler).
@@ -272,8 +266,7 @@ List<Violation> checkSource(
         googleFontsAllowed:
             allowances &&
             (here.path.startsWith('core/ui/theme/') ||
-                here.path == 'app/bootstrap.dart' ||
-                _a1Transition(here.path)),
+                here.path == 'app/bootstrap.dart'),
       );
     }
   }
@@ -289,8 +282,7 @@ List<Violation> checkSource(
         allowances &&
         (path.startsWith('core/ui/theme/') ||
             path.startsWith('core/theme/generated/') ||
-            path == 'core/security/privacy_mask.dart' ||
-            _a1Transition(path));
+            path == 'core/security/privacy_mask.dart');
     unit.accept(
       _UiVisitor(
         add,

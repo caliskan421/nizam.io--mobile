@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/config/flavor.dart';
+import '../core/preferences/locale_controller.dart';
 import '../core/preferences/theme_mode_controller.dart';
 import '../core/providers.dart';
 import '../core/server/server_binding.dart';
@@ -24,7 +25,10 @@ Future<void> bootstrap(Flavor flavor) async {
   // ve tercihlere bağlı değildir; tercih okuma hatası sistem temasına düşer.
   // Tamamlanmayan platform çağrısı açılışı kilitlemesin (CX-r3-Ö-01): süre aşımında sistem
   // teması ile devam edilir.
-  await loadPreferences(composition.locator<ThemeModeController>());
+  await loadPreferences(
+    composition.locator<ThemeModeController>(),
+    composition.locator<LocaleController>(),
+  );
   runApp(
     UncontrolledProviderScope(
       container: composition.container,
@@ -35,11 +39,15 @@ Future<void> bootstrap(Flavor flavor) async {
 }
 
 /// Tercihleri açılışa sınırlı süre bekletir: tamamlanmayan platform çağrısında [timeout]
-/// sonunda sistem temasıyla devam edilir (CX-r3-Ö-01).
+/// sonunda varsayılanlarla (sistem teması, Türkçe) devam edilir (CX-r3-Ö-01).
 Future<void> loadPreferences(
-  ThemeModeController theme, {
+  ThemeModeController theme,
+  LocaleController locale, {
   Duration timeout = const Duration(milliseconds: 500),
-}) => theme.load().timeout(timeout, onTimeout: () {});
+}) =>
+    Future.wait([theme.load(), locale.load()])
+        .then((_) {})
+        .timeout(timeout, onTimeout: () {});
 
 Stream<LicenseEntry> _fontLicenses() async* {
   for (final (font, file) in const [

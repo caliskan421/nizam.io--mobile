@@ -8,6 +8,7 @@ import '../../core/errors/api_error.dart';
 import '../../core/http/dio_factory.dart';
 import '../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../core/preferences/app_preferences.dart';
+import '../../core/preferences/locale_controller.dart';
 import '../../core/preferences/theme_mode_controller.dart';
 import '../../core/scope/scope_controller.dart';
 import '../../core/server/server_binding.dart';
@@ -56,6 +57,10 @@ void configureDependencies(
     )
     ..registerLazySingleton<ThemeModeController>(
       () => ThemeModeController(locator<AppPreferences>()),
+      dispose: (c) => c.dispose(),
+    )
+    ..registerLazySingleton<LocaleController>(
+      () => LocaleController(locator<AppPreferences>()),
       dispose: (c) => c.dispose(),
     )
     ..registerLazySingleton<ScopeController>(ScopeController.new)

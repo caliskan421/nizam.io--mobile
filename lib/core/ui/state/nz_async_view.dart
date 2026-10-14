@@ -43,9 +43,9 @@ class NzAsyncView<T> extends StatelessWidget {
       if (emptyView != null && (isEmpty?.call(v) ?? false)) return emptyView;
       return data(v);
     }
-    if (value.hasError) {
-      return NzErrorState(error: toApiError(value.error!), onRetry: onRetry);
-    }
-    return loading ?? const NzLoader.page();
+    // Hatadan sonra yeniden yükleme (AsyncLoading) önceki hatayı taşır; yükleniyor göstergesi
+    // hata görünümünden önce gelir ki "yeniden dene" sonrası geri bildirim görünsün.
+    if (value.isLoading) return loading ?? const NzLoader.page();
+    return NzErrorState(error: toApiError(value.error!), onRetry: onRetry);
   }
 }

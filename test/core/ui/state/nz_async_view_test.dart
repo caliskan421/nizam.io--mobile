@@ -164,4 +164,27 @@ void main() {
     expect(find.text('veri 1'), findsOneWidget);
     expect(find.byType(NzErrorState), findsNothing);
   });
+
+  testWidgets('hatadan sonra yeniden yükleme: gösterge görünür, hata kalkar', (
+    tester,
+  ) async {
+    _factory = () => Future.error(ApiError(ClientErrorCode.timeout));
+    final container = await _pump(tester, const _View());
+    await tester.pump();
+    expect(find.byType(NzErrorState), findsOneWidget);
+
+    final c = Completer<int>();
+    _factory = () => c.future;
+    container.invalidate(_p);
+    await tester.pump();
+    expect(container.read(_p).isLoading, isTrue);
+    expect(container.read(_p).hasError, isTrue, reason: 'önceki hata taşınır');
+    expect(find.byType(NzLoader), findsOneWidget);
+    expect(find.byType(NzErrorState), findsNothing);
+
+    c.complete(3);
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('veri 3'), findsOneWidget);
+  });
 }

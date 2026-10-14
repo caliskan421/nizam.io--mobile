@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/config/flavor.dart';
+import '../core/network/connectivity_link.dart';
 import '../core/preferences/theme_mode_controller.dart';
 import '../core/providers.dart';
 import '../core/server/server_binding.dart';
@@ -19,7 +20,10 @@ Future<void> bootstrap(Flavor flavor) async {
   // istek yok (çevrimdışı açılış, gizlilik). OFL lisans metinleri lisans sayfasına eklenir.
   GoogleFonts.config.allowRuntimeFetching = false;
   LicenseRegistry.addLicense(_fontLicenses);
-  final composition = Composition.create(flavor: flavor);
+  final composition = Composition.create(
+    flavor: flavor,
+    connectivityLink: PlusConnectivityLink(),
+  );
   // Tercihler runApp'ten önce (tema titreşimi yok). Güvenlik açılış sırası (startup) ayrıdır
   // ve tercihlere bağlı değildir; tercih okuma hatası sistem temasına düşer.
   // Tamamlanmayan platform çağrısı açılışı kilitlemesin (CX-r3-Ö-01): süre aşımında sistem

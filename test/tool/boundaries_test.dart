@@ -195,6 +195,45 @@ void main() {
         ['D2'],
       );
     });
+    test('çıkarımlı ve tipli Map literal istek gövdesi (Codex 8)', () {
+      for (final src in [
+        "final body = {'password': password};",
+        "final body = <String, Object?>{'password': password};",
+        'final body = <String, dynamic>{};',
+        "final body = const {'a': 1};",
+        "final body = {if (c) 'k': v};",
+        "final body = {for (final x in xs) 'k\$x': x};",
+        "final body = {'a' 'b': 1};",
+        "final body = {...other, 'k': 1};",
+      ]) {
+        expect(
+          rules('features/identity/data/a.dart', src),
+          contains('D2'),
+          reason: src,
+        );
+        expect(
+          rules('features/identity/presentation/a.dart', src),
+          contains('D2'),
+          reason: src,
+        );
+      }
+    });
+    test('Map literal pozitifleri: küme, boş, anahtarı dize olmayan, core', () {
+      for (final src in [
+        "final s = {'a', 'b'};",
+        "final s = <String>{'a'};",
+        'final m = {};',
+        'final m = {k: v};',
+        'final m = <int, String>{1: "a"};',
+      ]) {
+        expect(
+          rules('features/identity/data/a.dart', src),
+          isEmpty,
+          reason: src,
+        );
+      }
+      expect(rules('core/http/a.dart', "final h = {'a': 1};"), isEmpty);
+    });
     test('core içinde Map<String, dynamic> serbest (dio başlıkları)', () {
       expect(
         rules('core/http/a.dart', 'Map<String, dynamic> h = {};'),
@@ -218,6 +257,18 @@ void main() {
         ),
         ['S2'],
       );
+    });
+    test('HttpOverrides tip yolları: typedef, extends, önekli (Codex 8)', () {
+      for (final src in [
+        'typedef O = HttpOverrides;',
+        'class X extends HttpOverrides {}',
+        'class X implements HttpOverrides {}',
+        "import 'dart:io' as io;\nio.HttpOverrides? o;",
+        'HttpOverrides? o;',
+        'void f<T extends HttpOverrides>() {}',
+      ]) {
+        expect(rules('core/a.dart', src), contains('S2'), reason: src);
+      }
     });
     test('HttpOverrides yasak', () {
       expect(
@@ -474,6 +525,88 @@ void main() {
     });
     test('kütüphane adıyla part of yasak', () {
       expect(rules('features/identity/domain/a.dart', 'part of x.y;'), ['B6']);
+    });
+  });
+
+  group('B9 yerel dosya / mutlak URI (Codex 7)', () {
+    test('file:, http: ve mutlak yol import/export/part B9 verir', () {
+      for (final src in [
+        "import 'file:///x/lib/features/identity/data/x.dart';",
+        "export 'file:///x/lib/features/identity/data/x.dart';",
+        "import 'http://h/x.dart';",
+        "import '/abs/lib/core/storage/preference_store.dart';",
+        "import '//host/x.dart';",
+        "import 'file:///x/lib/core/storage/preference_store.dart';",
+        "import 'file:///x/lib/features/identity/identity_module.dart';",
+        "import 'file:///x/lib/core/api/generated/models/me_response.dart';",
+        "import 'file:///x/get_it/lib/get_it.dart';",
+      ]) {
+        expect(rules('core/session/a.dart', src), contains('B9'), reason: src);
+        expect(
+          rules('features/identity/presentation/a.dart', src),
+          contains('B9'),
+          reason: src,
+        );
+      }
+      expect(
+        rules('core/session/a.dart', "part 'file:///x/a.part.dart';"),
+        containsAll(['B6', 'B9']),
+      );
+    });
+    test('büyük harfli şema ve ters eğik çizgi B8 verir', () {
+      for (final src in [
+        "import 'PACKAGE:get_it/get_it.dart';",
+        "import 'Package:flutter_secure_storage/flutter_secure_storage.dart';",
+        "import 'File:///x.dart';",
+        r"import 'package:nizamio\\core\\a.dart';",
+      ]) {
+        expect(rules('core/session/a.dart', src), contains('B8'), reason: src);
+      }
+    });
+    test('dart:, package: ve göreli URI serbest', () {
+      expect(
+        rules(
+          'core/session/a.dart',
+          "import 'dart:async';\nimport 'package:dio/dio.dart';\nimport '../http/b.dart';",
+        ),
+        isEmpty,
+      );
+    });
+  });
+
+  group('S1/S4 hassas paket export yasağı (Codex 7)', () {
+    test('flutter_secure_storage izinli dizinden bile export edilemez', () {
+      expect(
+        rules(
+          'core/storage/barrel.dart',
+          "export 'package:flutter_secure_storage/flutter_secure_storage.dart';",
+        ),
+        ['S1'],
+      );
+    });
+    test('flutter/dio/riverpod export edilemez (domain transitif sızma)', () {
+      for (final pkg in [
+        'package:flutter/widgets.dart',
+        'package:flutter/material.dart',
+        'package:dio/dio.dart',
+        'package:flutter_riverpod/flutter_riverpod.dart',
+        'package:riverpod_annotation/riverpod_annotation.dart',
+      ]) {
+        for (final path in [
+          'core/http/barrel.dart',
+          'app/x.dart',
+          'features/identity/identity.dart',
+          'features/identity/application/a.dart',
+        ]) {
+          expect(rules(path, "export '$pkg';"), ['S4'], reason: '$path $pkg');
+        }
+      }
+    });
+    test('import serbest (yalnız domain katmanı S4)', () {
+      expect(
+        rules('core/http/a.dart', "import 'package:dio/dio.dart';"),
+        isEmpty,
+      );
     });
   });
 

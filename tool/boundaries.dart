@@ -13,13 +13,17 @@
 //       `<f>.dart` açık yüzü bulunur; `lib/` kökünde yalnız main*.dart.
 //   D1  Elle DTO yasak (üretilmiş `lib/core/api/generated/**` dışı): json_annotation importu,
 //       Json* açıklamaları, fromJson/toJson adlı her bildirim.
-//   D2  features/** içinde `dart:convert` importu ve `Map<String, …>` tip açıklaması yasak
-//       (elle JSON gövdesi kurmanın iki kaçış yolu).
-//   S1  flutter_secure_storage yalnız `lib/core/storage/**` içinde.
-//   S2  `badCertificateCallback`, `HttpOverrides` hiçbir yerde (TLS hatası yutulmaz).
+//   D2  features/** içinde `dart:convert` importu, `Map<String, …>` tip açıklaması ve
+//       dize anahtarlı Map literal (`{'k': v}`, `<String, X>{…}`) yasak (elle JSON gövdesi
+//       kurmanın kaçış yolları).
+//   S1  flutter_secure_storage yalnız `lib/core/storage/**` içinde; oradan bile `export`
+//       edilemez (barrel ile taşıma yok).
+//   S2  `badCertificateCallback`, `HttpOverrides` (ifade ve tip konumu: typedef, extends)
+//       hiçbir yerde (TLS hatası yutulmaz).
 //   S3  `debugPrint` ve `dart:developer` yalnız `lib/core/logging/**` içinde (log tek yoldan
 //       ve redaksiyonla; `print` ayrıca avoid_print ile yasak).
-//   S4  domain katmanı Flutter/dio/Riverpod import etmez (saf Dart).
+//   S4  domain katmanı Flutter/dio/Riverpod import etmez (saf Dart); hiçbir dosya bu
+//       paketleri `export` edemez (core barrel'ı ile domain'e transitif sızma yok).
 //   S5  shared_preferences YALNIZ `lib/core/storage/shared_preference_store.dart` içinde
 //       (kesin dosya; aynı dizinde ikinci bir bağdaştırıcı yok — gizli veri SecureStore'a, S1).
 //   S6  firebase_* yalnız `lib/app/**` ve `lib/core/telemetry/telemetry.dart` içinde (kesin
@@ -49,6 +53,10 @@
 //       erişim değil).
 //   U6  `Scaffold` / `CupertinoPageScaffold` yapıcısı `lib/features/**/presentation/**` içinde
 //       yasak (sayfa kabuğu `NzPage`).
+//   U1–U6 ayrıca TİP ÇÖZÜMLEMELİ koşar (tool/api_surface.dart `checkUiResolved`, Codex 6):
+//       bu dosyadaki ad tabanlı denetim `typedef C = Color` + `C(...)`, yerel `SizedBox`
+//       sınıfı yanında önekli Flutter `SizedBox` ve örtük `extensions` erişimini göremez;
+//       çözümlenmiş element görür. Politika (izinli yollar) `uiPolicyFor` ile ortaktır.
 //   G3  Sunum katmanında `*Service`/`*Repository` yapıcı çağrısı yasak: TİP ÇÖZÜMLEMELİ,
 //       tool/api_surface.dart'tadır (`checkServiceConstruction`).
 //   N1  Gezinme kimlik kuralı (ADR-0003 karar 21): `lib/features/**` ve `lib/app/**`
@@ -70,8 +78,11 @@
 //       `package:` yolları normalize edilir (`..` ile kaçış).
 //   A2/A3  Açık API yüzeyinde üretilmiş tip yok (data katmanı ve core): TİP ÇÖZÜMLEMESİ
 //       gerektirdiği için tool/api_surface.dart'tadır.
-//   B8  URI kanonik olmalı: yüzde-kodlama (`g%65nerated`, `get%5Fit`) ve `.`/`..` yol
-//       bileşeni yasak — derleyici bunları çözer, ham dize karşılaştırması aşılırdı.
+//   B9  Yalnız `dart:`, `package:` ve göreli URI: `file:`/`http:`/mutlak yol import, export
+//       ve part'ı yasak (yol tabanlı B1–B4, G1/G2, A1, S7 kontrollerini çözümsüz
+//       bırakıp aşmasın). Fail-closed: B8 gibi başka kurala girmeden ihlaldir.
+//   B8  URI kanonik olmalı: yüzde-kodlama (`g%65nerated`, `get%5Fit`), `.`/`..` yol
+//       bileşeni, ters eğik çizgi ve büyük harfli şema (`PACKAGE:`) yasak — derleyici bunları çözer, ham dize karşılaştırması aşılırdı.
 //       Fail-closed: kanonik olmayan URI başka kurallara hiç girmeden ihlaldir.
 //   B7  Koşullu import/export (`if (dart.library.io) '…'`) üretilmiş kod dışında yasak: tip
 //       çözümlemeli A2/A3 denetimi tek yapılandırmayı çözümler, dallar arası farklı tip
@@ -109,6 +120,13 @@ const _jsonAnnotations = {
   'JsonConverter',
   'JsonLiteral',
 };
+
+const _domainBanned = [
+  'package:flutter/',
+  'package:dio/',
+  'package:flutter_riverpod/',
+  'package:riverpod',
+];
 
 final _jsonMember = RegExp(r'(from|to)json$', caseSensitive: false);
 
@@ -262,6 +280,14 @@ List<Violation> checkSource(
         );
         continue;
       }
+      if (_nonLocalScheme(uri)) {
+        add(
+          'B9',
+          directive,
+          'yalnız dart:, package: ve göreli URI (file:/mutlak yol yol denetimlerini aşar): $uri',
+        );
+        continue;
+      }
       _checkUri(
         here,
         uri,
@@ -282,27 +308,13 @@ List<Violation> checkSource(
   );
   unit.accept(_Visitor(here, generated, add, ownSizedBox: ownSizedBox));
   if (!generated) {
-    final path = here.path;
-    final colorOk =
-        allowances &&
-        (path.startsWith('core/ui/theme/') ||
-            path.startsWith('core/theme/generated/') ||
-            path == 'core/security/privacy_mask.dart');
+    final policy = uiPolicyFor(libPath, allowances: allowances);
     unit.accept(
       _UiVisitor(
         add,
-        bans: [
-          if (!colorOk) _colorBan,
-          if (!(allowances && path.startsWith('core/ui/theme/'))) _textStyleBan,
-          _mediaQueryBan,
-          if (here.area == 'feature' && here.layer == 'presentation') ...[
-            _scaffoldBan,
-            _cupertinoScaffoldBan,
-          ],
-        ],
-        wildcard: colorOk ? const {} : _colorNamespaces,
-        extensionBanned:
-            !(allowances && path == 'core/ui/extensions/context_ext.dart'),
+        bans: policy.bans,
+        wildcard: policy.wildcard,
+        extensionBanned: policy.extensionBanned,
       ),
     );
   }
@@ -310,15 +322,65 @@ List<Violation> checkSource(
   return out;
 }
 
+/// U2–U6 politikası: [libPath] için geçerli yasaklar. Sözdizimsel ([checkSource]) ve tip
+/// çözümlemeli (`checkUiResolved`, tool/api_surface.dart) denetim AYNI politikayı kullanır.
+class UiPolicy {
+  const UiPolicy(this.bans, this.wildcard, this.extensionBanned);
+
+  final List<UiBan> bans;
+  final Set<String> wildcard;
+  final bool extensionBanned;
+}
+
+UiPolicy uiPolicyFor(String libPath, {bool allowances = true}) {
+  final here = _Place(libPath);
+  final colorOk =
+      allowances &&
+      (libPath.startsWith('core/ui/theme/') ||
+          libPath.startsWith('core/theme/generated/') ||
+          libPath == 'core/security/privacy_mask.dart');
+  return UiPolicy(
+    [
+      if (!colorOk) _colorBan,
+      if (!(allowances && libPath.startsWith('core/ui/theme/'))) _textStyleBan,
+      _mediaQueryBan,
+      if (here.area == 'feature' && here.layer == 'presentation') ...[
+        _scaffoldBan,
+        _cupertinoScaffoldBan,
+      ],
+    ],
+    colorOk ? const {} : _colorNamespaces,
+    !(allowances && libPath == 'core/ui/extensions/context_ext.dart'),
+  );
+}
+
+/// Üretilmiş kod (api + i18n): U/S kurallarının muaf kapsamı.
+bool isGeneratedPath(String libPath) =>
+    libPath.startsWith(generatedApiDir) || libPath.startsWith(generatedI18nDir);
+
 /// Paket/SDK URI'sinde yüzde-kodlama ve `.`/`..` bileşeni yok; göreli URI'de yüzde-kodlama
 /// yok (göreli `..` meşrudur ve normalize edilir).
 bool _canonical(String uri) {
-  if (uri.contains('%')) return false;
+  if (uri.contains('%') || uri.contains('\\')) return false;
   if (uri.contains(':')) {
+    // Şema büyük/küçük harf duyarsızdır (`PACKAGE:get_it/…` derleyicide geçerlidir);
+    // ham dize karşılaştırmaları küçük harfle yazıldığından büyük harfli şema kanonik değil.
+    final scheme = uri.substring(0, uri.indexOf(':'));
+    if (scheme != scheme.toLowerCase()) return false;
     final segments = uri.substring(uri.indexOf(':') + 1).split('/');
     if (segments.any((s) => s == '.' || s == '..')) return false;
   }
   return true;
+}
+
+/// `dart:`/`package:` dışı şema ya da mutlak yol (`file:`, `http:`, `/x`, `//h/x`): yol
+/// tabanlı denetimler (B1–B4, G1/G2, A1, S7) bunları çözemez; lib içinde yasak.
+bool _nonLocalScheme(String uri) {
+  if (uri.startsWith('/')) return true;
+  final i = uri.indexOf(':');
+  if (i < 0) return false;
+  final scheme = uri.substring(0, i);
+  return scheme != 'dart' && scheme != 'package';
 }
 
 /// `lib/` göreli kaynak yolundan URI'nin `lib/` göreli hedefi; paket dışı veya `lib/`
@@ -347,10 +409,11 @@ void _checkUri(
 
   // Paket kuralları.
   if (uri.startsWith('package:flutter_secure_storage/') &&
-      !here.path.startsWith('core/storage/')) {
+      (!here.path.startsWith('core/storage/') || isExport)) {
     add(
       'S1',
-      'flutter_secure_storage yalnız lib/core/storage/ içinde import edilir',
+      'flutter_secure_storage yalnız lib/core/storage/ içinde import edilir '
+          've dışa verilemez (barrel ile taşıma yasak)',
     );
   }
   if (isExport &&
@@ -388,13 +451,15 @@ void _checkUri(
       'features/** içinde dart:convert yasak (JSON yalnız üretilmiş tiplerle)',
     );
   }
-  if (here.area == 'feature' && here.layer == 'domain') {
-    for (final banned in const [
-      'package:flutter/',
-      'package:dio/',
-      'package:flutter_riverpod/',
-      'package:riverpod',
-    ]) {
+  if (isExport && !generated && _domainBanned.any(uri.startsWith)) {
+    // Hiçbir dosya Flutter/dio/Riverpod'u dışa veremez: domain katmanı core/açık yüz
+    // barrel'ından saf-Dart sınırını aşmadan alamaz (Codex 7).
+    add(
+      'S4',
+      'Flutter/dio/Riverpod dışa verilemez (barrel ile taşıma yasak): $uri',
+    );
+  } else if (here.area == 'feature' && here.layer == 'domain') {
+    for (final banned in _domainBanned) {
       if (uri.startsWith(banned)) {
         add('S4', 'domain katmanı saf Dart olmalı: $uri');
       }
@@ -549,8 +614,47 @@ class _Visitor extends RecursiveAstVisitor<void> {
     super.visitVariableDeclaration(node);
   }
 
+  // D2 — `Map` adı geçmeyen Map literalleri: `{'password': p}` (çıkarımlı) ve
+  // `<String, Object?>{…}` (tipli). Kapsam `Map<String, …>` açıklamasıyla aynıdır: features/**.
+  @override
+  void visitSetOrMapLiteral(SetOrMapLiteral node) {
+    if (here.area == 'feature') {
+      final args = node.typeArguments?.arguments;
+      final typed =
+          args != null &&
+          args.length == 2 &&
+          args.first is NamedType &&
+          (args.first as NamedType).name.lexeme == 'String';
+      if (typed || node.elements.any(_stringKeyed)) {
+        add(
+          'D2',
+          node,
+          'features/** içinde dize anahtarlı Map literal yasak (elle JSON gövdesi)',
+        );
+      }
+    }
+    super.visitSetOrMapLiteral(node);
+  }
+
+  static bool _stringKeyed(CollectionElement e) => switch (e) {
+    MapLiteralEntry(:final key) => key is StringLiteral,
+    IfElement(:final thenElement, :final elseElement) =>
+      _stringKeyed(thenElement) ||
+          (elseElement != null && _stringKeyed(elseElement)),
+    ForElement(:final body) => _stringKeyed(body),
+    _ => false,
+  };
+
   @override
   void visitNamedType(NamedType node) {
+    // S2 — tip konumu (`typedef O = HttpOverrides`, `extends`, önekli `io.HttpOverrides`).
+    if (node.name.lexeme == 'HttpOverrides') {
+      add(
+        'S2',
+        node,
+        'HttpOverrides yasak: TLS/HTTP doğrulaması asla gevşetilmez',
+      );
+    }
     if (here.area == 'feature' && node.name.lexeme == 'Map') {
       final args = node.typeArguments?.arguments;
       if (args != null &&
@@ -690,8 +794,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
 }
 
 /// U2–U6 için yasak başvuru: [cls] sınıfının [members] üyeleri (`null` = yapıcı).
-class _Ban {
-  const _Ban(this.rule, this.cls, this.members, this.message);
+class UiBan {
+  const UiBan(this.rule, this.cls, this.members, this.message);
 
   final String rule;
   final String cls;
@@ -699,28 +803,28 @@ class _Ban {
   final String message;
 }
 
-const _colorBan = _Ban('U2', 'Color', {
+const _colorBan = UiBan('U2', 'Color', {
   null,
   'new',
   'from',
   'fromARGB',
   'fromRGBO',
 }, 'ham renk yasak; tema token\'ı kullanın (context.colors.*)');
-const _textStyleBan = _Ban('U3', 'TextStyle', {
+const _textStyleBan = UiBan('U3', 'TextStyle', {
   null,
   'new',
 }, 'ham TextStyle yasak; context.text.* kullanın (copyWith serbest)');
-const _mediaQueryBan = _Ban(
+const _mediaQueryBan = UiBan(
   'U4',
   'MediaQuery',
   {'of', 'maybeOf'},
   'MediaQuery.of/maybeOf yasak; sizeOf/paddingOf/… ya da context.layout kullanın',
 );
-const _scaffoldBan = _Ban('U6', 'Scaffold', {
+const _scaffoldBan = UiBan('U6', 'Scaffold', {
   null,
   'new',
 }, 'Scaffold sunumda yasak; NzPage kullanın');
-const _cupertinoScaffoldBan = _Ban('U6', 'CupertinoPageScaffold', {
+const _cupertinoScaffoldBan = UiBan('U6', 'CupertinoPageScaffold', {
   null,
   'new',
 }, 'CupertinoPageScaffold sunumda yasak; NzPage kullanın');
@@ -738,7 +842,7 @@ class _UiVisitor extends RecursiveAstVisitor<void> {
     required this.extensionBanned,
   });
 
-  final List<_Ban> bans;
+  final List<UiBan> bans;
   final Set<String> wildcard;
   final bool extensionBanned;
   final void Function(String rule, AstNode node, String message) add;

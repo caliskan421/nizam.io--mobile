@@ -51,6 +51,42 @@ void main() {
         ],
       );
     });
+    test(
+      'gerçek yerleşim: application/*_controller.dart de zorunlu (Codex 9)',
+      () {
+        expect(
+          missingTests([
+            'features/identity/application/login_controller.dart',
+            'features/scope/application/program_list_controller.dart',
+          ], {}),
+          [
+            'test/features/identity/application/login_controller_test.dart',
+            'test/features/scope/application/program_list_controller_test.dart',
+          ],
+        );
+        expect(
+          missingTests(
+            ['features/identity/application/login_controller.dart'],
+            {'features/identity/application/login_controller_test.dart'},
+          ),
+          isEmpty,
+        );
+      },
+    );
+    test(
+      'application altında controller olmayan ve iç içe dosyalar istenmez',
+      () {
+        expect(
+          missingTests([
+            'features/a/application/a_controller.g.dart',
+            'features/a/application/controller_helper.dart',
+            'features/a/application/sub/b_controller.dart',
+            'features/a/application/a_providers.dart',
+          ], {}),
+          isEmpty,
+        );
+      },
+    );
     test('desen dışı, iç içe ve üretilmiş dosyalar istenmez', () {
       expect(
         missingTests([

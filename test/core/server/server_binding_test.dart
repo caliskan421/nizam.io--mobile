@@ -177,6 +177,12 @@ void main() {
         await h.read(serverBindingProvider).verify(testUrl),
         failedWith(ClientErrorCode.unsupportedApiVersion),
       );
+      expect(
+        h.read(appPhaseProvider).name,
+        'updateRequired',
+        reason: 'API uyumsuzluğu açık güncelleme ekranıdır',
+      );
+      await expectLoginBlocked(h, ClientErrorCode.serverNotVerified);
     });
 
     test('minimum_mobile_version > uygulama → güncelleme gerekli DURUMU; giriş başlamaz', () async {

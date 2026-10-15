@@ -13,7 +13,7 @@ import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../application/server_connect_controller.dart';
 
 /// Açık "güncelleme gerekli" ekranı (faz: `updateRequired`). Sunucunun asgari mobil sürümü
-/// uygulamadan yüksektir: giriş akışı BAŞLAMAZ, bu ekranda giriş alanı yoktur. "Yeniden
+/// uygulamadan yüksektir ya da API sürümü uyumsuzdur (iki gerekçe ayrı metinle): giriş akışı BAŞLAMAZ, bu ekranda giriş alanı yoktur. "Yeniden
 /// denetle" aynı adresi yeniden doğrular (sunucu asgari sürümü düşürmüş olabilir).
 class UpdateRequiredPage extends ConsumerWidget {
   const UpdateRequiredPage({super.key});
@@ -23,6 +23,15 @@ class UpdateRequiredPage extends ConsumerWidget {
     ref.listenErrors(serverConnectControllerProvider, context);
     final l = context.l10n;
     final binding = ref.watch(bindingStateProvider);
+    // İki gerekçe: sunucunun asgari mobil sürümü (BindingUpdateRequired) ya da API sürümü
+    // uyumsuzluğu (BindingFailed + client.unsupported_api_version).
+    final apiMismatch =
+        binding is BindingFailed && binding.isApiVersionMismatch;
+    final address = switch (binding) {
+      BindingUpdateRequired(:final address) => address,
+      BindingFailed(:final address) when apiMismatch => address,
+      _ => null,
+    };
     final busy = ref.watch(serverConnectControllerProvider).isLoading;
     return NzPage(
       title: l.uiServerUpdateTitle,
@@ -32,18 +41,25 @@ class UpdateRequiredPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(l.uiServerUpdateMessage, style: context.text.bodyMd),
-            if (binding is BindingUpdateRequired) ...[
+            Text(
+              apiMismatch
+                  ? l.uiServerUpdateApiMessage
+                  : l.uiServerUpdateMessage,
+              style: context.text.bodyMd,
+            ),
+            if (address != null) ...[
               const Gap(NizamioSpacing.space6),
-              _Fact(label: l.uiServerUpdateServer, value: '${binding.address}'),
-              _Fact(
-                label: l.uiServerUpdateRequiredVersion,
-                value: binding.minimumVersion,
-              ),
-              _Fact(
-                label: l.uiServerUpdateInstalledVersion,
-                value: binding.appVersion,
-              ),
+              _Fact(label: l.uiServerUpdateServer, value: '$address'),
+              if (binding is BindingUpdateRequired) ...[
+                _Fact(
+                  label: l.uiServerUpdateRequiredVersion,
+                  value: binding.minimumVersion,
+                ),
+                _Fact(
+                  label: l.uiServerUpdateInstalledVersion,
+                  value: binding.appVersion,
+                ),
+              ],
               const Gap(NizamioSpacing.space6),
               NzButton.secondary(
                 label: l.uiServerUpdateRecheck,
@@ -51,7 +67,7 @@ class UpdateRequiredPage extends ConsumerWidget {
                 expand: true,
                 onPressed: () => ref
                     .read(serverConnectControllerProvider.notifier)
-                    .connect('${binding.address}'),
+                    .connect('$address'),
               ),
             ],
           ],

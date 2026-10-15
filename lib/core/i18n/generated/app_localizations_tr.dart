@@ -883,6 +883,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu sunucu uygulamanın daha yeni bir sürümünü gerektiriyor. Giriş yapabilmek için uygulamayı güncelleyin.';
 
   @override
+  String get uiServerUpdateApiMessage =>
+      'Bu sunucunun API sürümü uygulamayla uyumlu değil. Giriş yapabilmek için uygulamayı güncelleyin ya da sunucu yöneticinize başvurun.';
+
+  @override
   String get uiServerUpdateServer => 'Sunucu';
 
   @override

@@ -438,7 +438,7 @@ void main() {
         final refreshing = c.refresh();
         await Future<void>.delayed(Duration.zero);
         final writeGate = Completer<void>();
-      m.gate = writeGate;
+        m.gate = writeGate;
         final flag = c.markForcePasswordChange(false);
         await Future<void>.delayed(Duration.zero);
         refreshGate.complete(rotated('2'));

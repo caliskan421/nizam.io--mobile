@@ -36,6 +36,26 @@ void main() {
     );
     expect(
       deriveAppPhase(
+        BindingFailed(
+          ApiError('client.unsupported_api_version'),
+          address: address,
+        ),
+        active,
+        none,
+      ),
+      AppPhase.updateRequired,
+      reason: 'API sürümü uyumsuzluğu da açık güncelleme ekranıdır; oturum olsa da kabuk açılmaz',
+    );
+    expect(
+      deriveAppPhase(
+        BindingFailed(ApiError('client.server_unrecognized'), address: address),
+        active,
+        none,
+      ),
+      AppPhase.bindingFailed,
+    );
+    expect(
+      deriveAppPhase(
         BindingUpdateRequired(
           address: address,
           minimumVersion: '9.0.0',

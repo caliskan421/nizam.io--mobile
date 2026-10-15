@@ -452,6 +452,78 @@ void main() {
     },
   );
 
+  group(
+    'CX-W51-2 ek: kuyruk içinde yeniden denetim (çıkış sonrası yazma yok)',
+    () {
+      test('yenileme sonucu bayrak yazımının arkasında beklerken çıkış → depoda çift yok', () async {
+        final m = GatedWriteStore();
+        final refreshGate = Completer<RefreshGrant>();
+        final c = SessionController(
+          TokenStore(m),
+          (_, _) => refreshGate.future,
+        );
+        await c.establish(pair('1', force: true));
+
+        final refreshing = c.refresh();
+        final refreshed = expectLater(
+          refreshing,
+          throwsA(
+            isA<ApiError>().having(
+              (e) => e.code,
+              'code',
+              ClientErrorCode.sessionEnded,
+            ),
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+        final writeGate = Completer<void>();
+        m.gate = writeGate;
+        final flag = c.markForcePasswordChange(false);
+        await Future<void>.delayed(Duration.zero);
+        refreshGate.complete(
+          rotated('2'),
+        ); // ön denetimden geçer, kuyruğa girer
+        await Future<void>.delayed(Duration.zero);
+        final cleared = c.clear();
+        await Future<void>.delayed(Duration.zero);
+        writeGate.complete();
+
+        await flag;
+        await cleared;
+        await refreshed;
+        expect(await TokenStore(m).load(), isNull);
+        expect(m.values.containsKey(TokenStore.key), isFalse);
+        expect(c.state.value, isA<SessionNone>());
+        expect(c.accessToken, isNull);
+      });
+
+      test(
+        'bayrak yazımı sürerken çıkış → silinmiş depoya eski çift yazılmaz',
+        () async {
+          final m = GatedWriteStore();
+          final c = SessionController(
+            TokenStore(m),
+            (_, _) async => rotated('2'),
+          );
+          await c.establish(pair('1', force: true));
+
+          final writeGate = Completer<void>();
+          m.gate = writeGate;
+          final flag = c.markForcePasswordChange(false);
+          await Future<void>.delayed(Duration.zero);
+          final cleared = c.clear();
+          await Future<void>.delayed(Duration.zero);
+          writeGate.complete();
+
+          await flag;
+          await cleared;
+          expect(await TokenStore(m).load(), isNull);
+          expect(c.state.value, isA<SessionNone>());
+        },
+      );
+    },
+  );
+
   test('giriş çifti depoya yazılamazsa oturum açılmaz', () async {
     final s2 = SessionController(
       TokenStore(MemorySecureStore()..failWrites = true),

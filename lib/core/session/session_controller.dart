@@ -153,7 +153,9 @@ class SessionController {
   Future<void> clear() async {
     _generation++;
     _inflight = null;
-    await _wipe();
+    // Kuyruktaki yazımlardan SONRA silinir: bayrak yazımı çıkıştan sonra depoya eski çifti
+    // geri yazamaz (kuyruktaki her yazma işi başında nesil/çift denetimi yapar).
+    await _serial(_wipe);
     _set(null, const SessionNone());
   }
 
@@ -262,7 +264,7 @@ class SessionController {
         // sunucuda tüketildi; depodan silinir — silinemezse yazma-öncesi işaret açılışta
         // geri yüklemeyi engeller, bu süreçte de "yanmış" listesi gönderimi engeller.
         Log.warn('oturum: yeni çift depoya yazılamadı; yeniden giriş gerekli');
-        await _end(ReauthReason.secureStorageFailure);
+        await _end(ReauthReason.secureStorageFailure, queued: false);
         throw ApiError(ClientErrorCode.secureStorageError);
       }
       _burnt.add(p.refreshToken);
@@ -276,12 +278,13 @@ class SessionController {
     return result;
   }
 
-  Future<void> _end(ReauthReason reason) async {
+  /// [queued]: silme yazım kuyruğuna alınır; kuyruğun İÇİNDEN çağrılırken false (kilitlenme olmaz).
+  Future<void> _end(ReauthReason reason, {bool queued = true}) async {
     _generation++;
     _inflight = null;
     final p = _pair;
     if (p != null) _burnt.add(p.refreshToken);
-    await _wipe();
+    await (queued ? _serial(_wipe) : _wipe());
     _set(null, SessionReauthRequired(reason));
   }
 

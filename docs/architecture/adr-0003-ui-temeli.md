@@ -1,6 +1,6 @@
 # ADR-0003 — UI temeli: kit, pencere sınıfı, durum kalıbı, UI kuralları ve kapılar
 
-- **Durum:** Kabul edildi (2026-10-14)
+- **Durum:** Kabul edildi (2026-10-14) · son hâli 2026-10-15 (O5: kararlar 20–23; MOB-UI-0 kapandı, main `60dde43`)
 - **Karar dayanağı:** [yol haritası — UI temeli](yol-haritasi-ui-temeli.md) §6 "Açık kararlar";
   ürün sahibine oturum içinde soru sorulmaz — her açık karar yol haritası varsayılanıyla
   kapanır (MOB-UI-0 O1). Yürütme planı: [`docs/yurutme/mob-ui-0/`](../yurutme/mob-ui-0/README.md).

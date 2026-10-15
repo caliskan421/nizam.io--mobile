@@ -11,7 +11,7 @@ oturum buradan başlar. Uygulayıcılar bu dosyaya yazmaz.
 | O2 — Temel | TAMAM | `b483efe` + kapanış PR'ı |
 | O3 — Kabuk | TAMAM | `f9fd6cc` + kapanış PR'ı |
 | O4 — Kit + Router | TAMAM | `4aaa11d` + kapanış PR'ı |
-| O5 — Pilot + Kapanış | Bekliyor | — |
+| O5 — Pilot + Kapanış | TAMAM — **MOB-UI-0 KAPANDI** | `60dde43` + kapanış PR'ı |
 
 ## Sıkılaştırılan kurallar (bir sonraki oturumdan itibaren her uygulayıcıya KESİN)
 
@@ -280,3 +280,57 @@ oturum buradan başlar. Uygulayıcılar bu dosyaya yazmaz.
   - O1–O3'ten süren açıklar (README komut tablosu, `main` dal koruması, yerel ana ağaç `2524a14`,
     yönetim deposu push'u, token bekleyenler, `localeProvider` bağlanmadı) değişmedi.
   - Uzak/yerel `mob-ui/w31–w36` dalları silinmedi; worktree'ler kaldırıldı.
+
+### O5 — 2026-10-15 — TAMAM
+- O5 öncesi: mobil `main` `65c52d8` (O4 kaydı, CI 38657033553 success).
+- PR'lar (squash; uygulayıcılar Sonnet 5.5, koordinatör Opus 5.5):
+  - #45 ADR-0003 kararlar 20–22 (son seçili kapsam: SecureStore + oturumla silinir, pilotta bellekte; gezinme kuralı N1; pilot yerleşimi) → `5aa57bd` (main CI 38704960182 success)
+  - #46 W42 N1 gezinme kuralı (tip çözümlemeli; bugünkü ihlal 0; mutasyonda 16 test kırmızı) → `f3ed0d5` (main CI 38710009027 success)
+  - #47 W41 A7 pilot dikey dilim (server/identity/scope; `changePassword`) + 401 yenileme düzeltmesi → `3e39551` (main CI 38715198850 success, entegrasyon dahil)
+  - Codex düzeltmeleri: #48 W52 (Codex 3, 11a) → `8e69bfb` (main CI 38721319776 success) · #49 W51 (Codex 1, 2, 4, 5 + koordinatör eki) → `5d493b2` (main CI 38724641694 success) · #50 W53 (Codex 6–9 + ADR karar 23) → `60dde43` (main CI 38728484617 success: verify, golden, Android, entegrasyon)
+- main HEAD (uygulama): `60dde43`.
+- Kapsama (`60dde43`): core %95,47 (990/1037) · application %100 (127/127) · data %100 (31/31) ·
+  presentation %98,95 (284/287) · widgets %99,54 (1071/1076). Testler 993 (golden hariç) + 27 golden.
+- Pilot zincir (A7): bağ → giriş → zorunlu parola değişikliği → program seçimi → ana kabuk (S2
+  `GET /v1/program` ile kapsam başlığı kanıtı) → çıkış. Uçtan uca kanıt:
+  - Kilitli yerel entegrasyon `program/araclar/verify-sirasi.sh … integration` (main `3e39551`):
+    **9/9 geçti** (pilot akışı + mevcut 8), compose projesi adıyla kaldırıldı.
+  - Her PR'da CI entegrasyon işi yeşil. İlk koşumda pilot testi sözleşme dışı `year` iddiası
+    yüzünden düştü; test yalnız sözleşmenin garanti ettiği alanlara indirildi.
+  - Zorunlu parola değişikliği yolu tohumda yok; birim/widget/pilot akış testleriyle kanıtlandı.
+- Koordinatör denetim bulguları (O5):
+  - **Önemli — 401 yenileme:** `AuthInterceptor` her 401'de yenileme + tekrar yapıyordu (yanlış mevcut
+    parolayla parola değişikliği iki kez gidiyordu) → W41 düzeltti; Codex 1 ile kapsam
+    `platform.unauthenticated`'a daraltıldı.
+  - **Kritik — çıkış sonrası depoya yazma:** Codex 2 düzeltmesinin ilk hâlinde süren bayrak yazımı
+    çıkış silmesinden sonra eski çifti depoya yazabiliyordu → kırmızı testle gösterildi, silme yazım
+    kuyruğuna alındı (#49 `bd9377c`).
+- **Codex nihai denetimi** (tek koşum, salt okunur, `2524a14..3e39551`): hüküm **UYGUN DEĞİL**
+  (9 Önemli, 2 Küçük) → 9 Önemli kapatıldı, 2 Küçük kısmen/devredildi; kanıt tablosu
+  `docs/reviews/MOB-UI-0-codex.md` "Düzeltme kanıtları". Codex ikinci kez koşulmadı.
+- Sapmalar (kabul edilen):
+  - Program listesi `truncated` başlıktan okunamıyor (üretilmiş istemci başlık vermiyor); ≥200 satır
+    kesilmiş sayılır (Codex 10 → A8).
+  - Çıkışta bellekteki çift, silme kuyruğu boşalana kadar durur; nesil anında artar, sunucu çıkışı önce
+    yapılır (risk düşük). `restore()`/`establish()` kuyruk dışında.
+  - `checkUiResolved` sözdizimsel U denetimiyle aynı yeri iki kez raporlayabilir; `check_boundaries`
+    tekilleştirir.
+- Sıkılaştırılan kurallar: ADR-0003 karar 21 (N1, core dahil) ve 23 (B9, S1/S4 export, D2 literal, S2/A5
+  tip yolları, tip çözümlemeli U1–U6, G3 kalıtım, Q2 application controller, Q3 AST) — artık araçta.
+- Kırmızılar: yok.
+
+## MOB-UI-0 KAPANDI — 2026-10-15
+
+- Uygulama `main` `60dde43`; yol haritası durumu "Uygulandı"; ADR-0003 son hâli (kararlar 1–23).
+- Çıkış ölçütü: pilot zincir uçtan uca çalışır (entegrasyon 9/9); Codex hükmünün Önemli bulguları
+  kapatıldı; bütün kapılar yeşil.
+- **A8 ("tasarım gelince") için açık kalanlar:**
+  - `TOKEN-BEKLİYOR`: **2** işaret (`grep -r` ile ölçüldü) — `lib/core/ui/theme/app_theme.dart`
+    (`_Pending`: gölge, süre, opaklık, ikon boyutu, kenarlık) ve `lib/core/ui/layout/nz_layout.dart`
+    (içerik genişliği). Opaklık/süre sabitlerinin tek noktada toplanması (Codex 11) bu işe bağlı.
+  - `X-Result-Truncated` başlığının okunması (Codex 10; üretici yanıt başlıklarını açmalı).
+  - Son seçili kapsamın kalıcılığı (ADR-0003 karar 20: SecureStore, oturumla silinir).
+  - `localeProvider` uygulamaya bağlanmadı (yalnız `tr`).
+  - Dev uygulamada kataloğa giriş noktası yok; kabuk sekmeleri (work) yer tutucu.
+  - README komut tablosu (coverage/test-presence/golden), `main` dal koruması, yerel ana çalışma ağacı
+    `2524a14` + untracked eski kopyalar, uzak/yerel `mob-ui/*` dalları silinmedi.

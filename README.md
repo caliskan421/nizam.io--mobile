@@ -24,6 +24,10 @@ iOS 16+, Android 8.0 (API 26)+.
 | `make gen-check` | `make gen` + `git diff --exit-code` + porcelain boş (CI kapısı) |
 | `make lint` | `dart format` denetimi + `flutter analyze --fatal-infos` + sınır kuralı |
 | `make test` | birim testleri (`test/`) |
+| `make coverage` | `make test` + `--coverage` + `tool/check_coverage.dart` (Q1 dizin eşikleri: core/application/data %80 · widgets %70 · presentation %60) |
+| `make test-presence` | `tool/check_test_presence.dart` (Q2: service/repository/controller/`nz_*` için aynı göreli yolda test) |
+| `make golden` | golden testleri (`--tags golden`); yalnız Linux'ta koşar, macOS'ta atlanır (referans CI'da üretilir) |
+| `make verify` | `deps` + `lint` + `test-presence` + `coverage` + `golden` |
 | `make integration` | gerçek backend entegrasyonu (aşağıda); yerelde YALNIZ `../program/araclar/verify-sirasi.sh "$PWD" integration` ile |
 | `make build-dev-apk` | `flutter build apk --debug --flavor dev -t lib/main_dev.dart` |
 | `make build-prod-apk` | `flutter build apk --release --flavor prod -t lib/main_prod.dart --obfuscate --split-debug-info=build/symbols` |
@@ -144,7 +148,7 @@ görmez (sınır kuralı G1/G2).
 | HTTP | `lib/core/http/` | dio; yönlendirme izlenmez; zincir: **kapı** (işlem gerçek yöntem + yolun spec yol şablonlarıyla eşleşmesinden bulunur ve taşınan operationId birebir aynı olmalı — başka işlemin `extras`'ı ile kapsam sınıfı düşürülemez; bağ dışı adres / eksik S2–S3 kapsamı → istek gönderilmez; `X-Nizamio-Client: mobile`, yazmalarda `X-Requested-With`, kapsam başlıkları) → **kimlik** (Bearer; 401 → tek uçuş yenileme → bir kez tekrar; giriş/yenileme/çıkış 401'i yenileme tetiklemez) → **hata/günlük** (her hata `ApiError`). |
 | Hata | `lib/core/errors/` | `ApiError{code, messageKey, requestId, fields[], status, retryAfter}`; 2xx gövdesi DTO'ya ayrıştırılamazsa `client.invalid_response` (ham ayrıştırma hatası sızmaz); sunucu `message` gösterilmez; metin `errorText()` ile ARB'den; 429 `Retry-After` okunur, otomatik tekrar yok. |
 | Oturum | `lib/core/session/` | belirteçler yalnız `SecureStore`'da (`TokenStore`, tek anahtar, üzerine yazma — yeni kaydedilmeden eski silinmez); kayıt kuruluma (`instance_id`) bağlıdır: açılışta doğrulanan bağın kurulumu farklıysa geri yüklenmez, silinir. Yenileme sonuç tablosu `session_controller.dart` başlığında; **K-05:** zaman aşımı/ağ/TLS/5xx/409/geçersiz ya da ayrıştırılamayan yanıt = belirsiz → belirteçler silinir, `SessionReauthRequired(refreshAmbiguous)`, aynı belirteçle tekrar yok. `force_password_change` durumda taşınır. |
-| Kapsam | `lib/core/scope/` | örtük varsayılan yok; S2 program, S3 + departman. |
+| Kapsam | `lib/core/scope/` | örtük varsayılan yok; S2 program, S3 + departman. Son seçim `SecureStore`'da hesap + kuruluma bağlı (`ScopeStore`); yalnız aynı oturumda geri yüklenir, çıkış/yeniden giriş/yeniden bağlanmada silinir (ADR-0003 karar 20). |
 | Log | `lib/core/logging/log.dart` | tek yol; Bearer, JSON/anahtar=değer gizlileri, JWT ve o anki belirteçler (birebir) maskelenir; yayında çıkış yok. |
 | Arka plan maskesi | `lib/core/security/privacy_mask.dart` | `AppLifecycleListener`: ön plan dışında opak katman (altyapı; ekran yok). |
 | Durum makinesi | `lib/core/app_phase.dart`, `lib/app/router.dart` | bağ → oturum → kapsam fazı; go_router yönlendirmesi fazdan türetilir (rotalar boş yer tutucu). |

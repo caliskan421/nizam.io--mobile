@@ -30,6 +30,15 @@
 //       ile biten yapıcı çağrısı ya da tear-off'u yasak (`checkServiceConstruction`): takma
 //       ad, typedef, adlı/fabrika yapıcı ve önekli import hedef sınıfa çözülür.
 //
+//   N1  `lib/features/**` ve `lib/app/**` (yalnız `lib/app/router/**` hariç) içinde go_router
+//       `GoRouterHelper` uzantısı / `GoRouter` üzerinde `go`, `push`, `pushReplacement`,
+//       `replace`, `goNamed`, `pushNamed`, `pushReplacementNamed`, `replaceNamed` kullanımı
+//       (çağrı ve tear-off), go_router parametresi olan `extra:` adlandırılmış argümanı ve
+//       `GoRouterState.extra` okuması yasak (`checkNavigation`, ADR-0003 karar 21). Hedef
+//       elementin tanımlandığı kütüphane `package:go_router/` olmalıdır: tipli rotanın
+//       (`XRoute().go(context)`, mixin `routes.g.dart`'ta) ve dio `RequestOptions.extra`
+//       kural dışıdır; ad değil çözümlenmiş element sayılır.
+//
 // A1 (tool/boundaries.dart) üretilmiş koda doğrudan erişimi data + modül dosyasıyla sınırlar;
 // A2/A3 kalan dolaylı yolu (açık API'de tip olarak sızma) kapatır.
 import 'dart:io';
@@ -308,6 +317,130 @@ Future<List<Violation>> checkServiceConstruction(
     );
   }
   return out;
+}
+
+const _navMethods = {
+  'go',
+  'push',
+  'pushReplacement',
+  'replace',
+  'goNamed',
+  'pushNamed',
+  'pushReplacementNamed',
+  'replaceNamed',
+};
+
+bool _navScope(String rel) =>
+    rel.endsWith('.dart') &&
+    (rel.startsWith('features/') || rel.startsWith('app/')) &&
+    !rel.startsWith('app/router/');
+
+bool _isGoRouterLib(Element? e) =>
+    e?.library?.uri.toString().startsWith('package:go_router/') ?? false;
+
+/// N1: gezinme kimlik kuralı. Argümanlar [checkApiSurface] ile aynıdır.
+Future<List<Violation>> checkNavigation(
+  String root, {
+  Map<String, String> overlays = const {},
+  Iterable<String>? only,
+}) async {
+  root = p.normalize(p.absolute(root));
+  final lib = p.join(root, 'lib');
+  final targets =
+      (only ??
+              [
+                ...Directory(lib)
+                    .listSync(recursive: true)
+                    .whereType<File>()
+                    .map((f) => p.relative(f.path, from: lib)),
+                ...overlays.keys,
+              ])
+          .map((r) => r.replaceAll(r'\', '/'))
+          .toSet()
+          .where(_navScope)
+          .toList()
+        ..sort();
+  if (targets.isEmpty) return [];
+  final session = _session(lib, overlays);
+  if (session == null) {
+    return [
+      Violation('A0', 'lib', 1, 'Dart SDK bulunamadı; denetim koşulamadı'),
+    ];
+  }
+  final out = <Violation>[];
+  for (final rel in targets) {
+    final result = await session.getResolvedUnit(p.join(lib, rel));
+    if (result is! ResolvedUnitResult) {
+      out.add(
+        Violation('A0', 'lib/$rel', 1, 'çözümlenemedi: ${result.runtimeType}'),
+      );
+      continue;
+    }
+    final errors = result.diagnostics.where(
+      (d) => d.severity == Severity.error,
+    );
+    if (errors.isNotEmpty) {
+      for (final d in errors) {
+        out.add(
+          Violation(
+            'A0',
+            'lib/$rel',
+            result.lineInfo.getLocation(d.offset).lineNumber,
+            'derleme hatası, N1 denetlenemez: ${d.message}',
+          ),
+        );
+      }
+      continue;
+    }
+    result.unit.accept(
+      _NavVisitor((node, what) {
+        out.add(
+          Violation(
+            'N1',
+            'lib/$rel',
+            result.lineInfo.getLocation(node.offset).lineNumber,
+            '$what yasak; rota nesne değil kimlik taşır, gezinme tipli rota ile '
+                '(XRoute(id: …).go/push(context))',
+          ),
+        );
+      }),
+    );
+  }
+  return out;
+}
+
+class _NavVisitor extends RecursiveAstVisitor<void> {
+  _NavVisitor(this.report);
+
+  final void Function(AstNode node, String what) report;
+
+  @override
+  void visitSimpleIdentifier(SimpleIdentifier node) {
+    super.visitSimpleIdentifier(node);
+    if (node.inDeclarationContext()) return;
+    final element = node.element?.baseElement;
+    if (element == null || !_isGoRouterLib(element)) return;
+    final name = node.name;
+    if (element is FormalParameterElement) {
+      // Yalnız adlandırılmış argüman etiketi (`extra: x`); gövdedeki kullanım değil.
+      if (name == 'extra' && node.parent is Label) {
+        report(node, 'go_router `extra:` argümanı');
+      }
+      return;
+    }
+    final owner = element.enclosingElement;
+    if (_navMethods.contains(name) &&
+        element is MethodElement &&
+        ((owner is ExtensionElement && owner.name == 'GoRouterHelper') ||
+            (owner is InterfaceElement && owner.name == 'GoRouter'))) {
+      report(node, '`$name` ile dize/ad tabanlı gezinme');
+    } else if (name == 'extra' &&
+        element is GetterElement &&
+        owner is InterfaceElement &&
+        owner.name == 'GoRouterState') {
+      report(node, '`GoRouterState.extra` okuması');
+    }
+  }
 }
 
 bool _presentation(String rel) {

@@ -9,6 +9,7 @@ import '../core/i18n/generated/app_localizations.dart';
 import '../core/providers.dart';
 import '../core/security/privacy_mask.dart';
 import '../core/ui/theme/app_theme.dart';
+import 'dev/catalog_entry_button.dart';
 import 'router/router.dart';
 
 /// Minimal kabuk: tema token'ları, TR yerelleştirme, durum makinesinden türetilen router ve
@@ -40,16 +41,35 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
     super.dispose();
   }
 
+  bool get _isDev => ref.watch(flavorProvider) == Flavor.dev;
+
+  /// Dev flavor'da katalog giriş noktası (her fazda; katalog fazdan muaftır). Prod'da ağaca
+  /// hiç eklenmez.
+  Widget _withDevEntry(Widget child) => !_isDev
+      ? child
+      : Stack(
+          textDirection: TextDirection.ltr,
+          children: [
+            child,
+            CatalogEntryButton(onOpen: _openCatalog),
+          ],
+        );
+
+  void _openCatalog() {
+    if (_router.routeInformationProvider.value.uri.path == catalogPath) return;
+    _router.push(catalogPath);
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen(appPhaseProvider, (_, next) => _phase.value = next);
     return MaterialApp.router(
       title: 'NIZAM.IO',
-      debugShowCheckedModeBanner: ref.watch(flavorProvider) == Flavor.dev,
+      debugShowCheckedModeBanner: _isDev,
       theme: _light,
       darkTheme: _dark,
       themeMode: ref.watch(themeModeProvider),
-      locale: const Locale('tr'),
+      locale: ref.watch(localeProvider),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -60,7 +80,7 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
       routerConfig: _router,
       builder: (context, child) => PrivacyMask(
         controller: _mask,
-        child: child ?? const SizedBox.shrink(),
+        child: _withDevEntry(child ?? const SizedBox.shrink()),
       ),
     );
   }

@@ -24,6 +24,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import 'gen/emit.dart';
+import 'gen/response_headers.dart';
 import 'gen/sensitive.dart';
 import 'gen/sources.dart';
 
@@ -127,6 +128,25 @@ swagger_parser:
       final masked = maskSensitiveModels(src);
       if (masked != src) f.writeAsStringSync(masked);
     }
+  }
+
+  // Kesilme başlığı bildiren operasyonlar yanıt başlıklarına erişim verir (Codex 10 / A8);
+  // başlıksız operasyonların imzası değişmez (swagger_parser `original_http_response` kapalı).
+  final clientsDir = Directory(p.join(apiOut.path, 'clients'));
+  final clientFiles = {
+    for (final f
+        in clientsDir
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((f) => f.path.endsWith('_client.dart')))
+      f.path: f.readAsStringSync(),
+  };
+  final wrapped = wrapHeaderResponses(
+    clientFiles,
+    operationsDeclaringHeader(specText),
+  );
+  for (final e in wrapped.entries) {
+    if (e.value != clientFiles[e.key]) File(e.key).writeAsStringSync(e.value);
   }
 
   // 2) operasyon ve hata kataloğu haritaları.

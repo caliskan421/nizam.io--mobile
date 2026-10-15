@@ -91,7 +91,21 @@ void main() {
     sizes: pilotSizes,
   );
 
-  testWidgets('200 satıra ulaşan liste kesilmiş bildirimi gösterir', (
+  testWidgets('X-Result-Truncated başlığı kesilmiş bildirimi gösterir', (
+    tester,
+  ) async {
+    final backend = PilotBackend()
+      ..programsTruncated = true
+      ..programs = [
+        for (var i = 0; i < 200; i++) {'program_id': 'p$i', 'name': 'P $i'},
+      ];
+    final h = await real(tester, () => pilotHarness(backend, signedIn: true));
+    await pumpScreen(tester, h, const ScopePage());
+    await settle(tester);
+    expect(find.text(_l.uiScopeTruncated), findsOneWidget);
+  });
+
+  testWidgets('başlıksız 200 satır kesilmiş bildirimi göstermez', (
     tester,
   ) async {
     final backend = PilotBackend()
@@ -101,7 +115,7 @@ void main() {
     final h = await real(tester, () => pilotHarness(backend, signedIn: true));
     await pumpScreen(tester, h, const ScopePage());
     await settle(tester);
-    expect(find.text(_l.uiScopeTruncated), findsOneWidget);
+    expect(find.text(_l.uiScopeTruncated), findsNothing);
   });
 
   testWidgets(

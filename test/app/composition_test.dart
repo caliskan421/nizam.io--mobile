@@ -4,6 +4,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:analyzer/dart/analysis/utilities.dart';
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
@@ -92,22 +95,243 @@ final portProviders = <String, ProviderBase<Object?>>{
   'scopeServiceProvider': scopeServiceProvider,
 };
 
-Set<String> discoverPorts() {
-  final unbound = RegExp(r"_unbound\(\s*'(\w+)'");
-  final unimplemented = RegExp(r"throw UnimplementedError\(\s*'(\w+)");
+const compositionPath = 'lib/app/di/composition.dart';
+
+Map<String, String> libSources() => {
+  for (final f in Directory('lib').listSync(recursive: true))
+    if (f is File &&
+        f.path.endsWith('.dart') &&
+        !f.path.endsWith('.g.dart') &&
+        !f.path.contains('/generated/'))
+      f.path: f.readAsStringSync(),
+};
+
+CompilationUnit _parse(String path, String src) =>
+    parseString(content: src, path: path, throwIfDiagnostics: false).unit;
+
+bool _isRiverpodAnnotation(Annotation a) {
+  final n = a.name is PrefixedIdentifier
+      ? (a.name as PrefixedIdentifier).identifier.name
+      : a.name.name;
+  return n == 'Riverpod' || n == 'riverpod';
+}
+
+/// Gövdede (iç işlev gövdelerine inmeden) `throw UnimplementedError(…)` ya da [helpers]'tan
+/// birinin çağrısı var mı. Yorumlar ve dizeler AST'de yoktur.
+class _UnboundFinder extends RecursiveAstVisitor<void> {
+  _UnboundFinder(this.helpers);
+
+  final Set<String> helpers;
+  bool found = false;
+
+  @override
+  void visitThrowExpression(ThrowExpression node) {
+    final e = node.expression;
+    final name = switch (e) {
+      InstanceCreationExpression() => e.constructorName.type.name.lexeme,
+      MethodInvocation() when e.target == null => e.methodName.name,
+      _ => null,
+    };
+    if (name == 'UnimplementedError') found = true;
+    super.visitThrowExpression(node);
+  }
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    if (node.target == null && helpers.contains(node.methodName.name)) {
+      found = true;
+    }
+    super.visitMethodInvocation(node);
+  }
+
+  @override
+  void visitFunctionExpression(FunctionExpression node) {}
+}
+
+bool _unboundBody(FunctionBody body, Set<String> helpers) {
+  final f = _UnboundFinder(helpers);
+  body.accept(f);
+  return f.found;
+}
+
+String _providerName(String declName) =>
+    '${declName[0].toLowerCase()}${declName.substring(1)}Provider';
+
+/// Q3 port envanteri (AST): `@Riverpod`/`@riverpod` açıklamalı işlev (ya da sınıfın `build`
+/// metodu) gövdesi bağsız bir port ise: `throw UnimplementedError(…)` (tırnak türü, bağımsız
+/// değişken, blok/ifade gövdesi fark etmez) ya da aynı yazılımda yalnız `UnimplementedError`
+/// fırlatan bir yardımcının (`_unbound`) çağrısı. Sağlayıcı adı bildirim adından türer.
+Set<String> discoverPortsIn(Map<String, String> sources) {
+  final units = [for (final e in sources.entries) _parse(e.key, e.value)];
+  // `_unbound(name)` gibi yardımcılar: açıklamasız üst düzey işlev, gövdesi UnimplementedError.
+  final helpers = <String>{};
+  for (final u in units) {
+    for (final d in u.declarations) {
+      if (d is FunctionDeclaration &&
+          d.metadata.isEmpty &&
+          _unboundBody(d.functionExpression.body, const {})) {
+        helpers.add(d.name.lexeme);
+      }
+    }
+  }
   final names = <String>{};
-  for (final f in Directory('lib').listSync(recursive: true)) {
-    if (f is! File || !f.path.endsWith('.dart')) continue;
-    if (f.path.endsWith('.g.dart') || f.path.contains('/generated/')) continue;
-    final text = f.readAsStringSync();
-    for (final m in [
-      ...unbound.allMatches(text),
-      ...unimplemented.allMatches(text),
-    ]) {
-      names.add(m.group(1)!);
+  for (final u in units) {
+    for (final d in u.declarations) {
+      if (d is FunctionDeclaration &&
+          d.metadata.any(_isRiverpodAnnotation) &&
+          _unboundBody(d.functionExpression.body, helpers)) {
+        names.add(_providerName(d.name.lexeme));
+      } else if (d is ClassDeclaration &&
+          d.metadata.any(_isRiverpodAnnotation)) {
+        for (final m
+            in d.body is BlockClassBody
+                ? (d.body as BlockClassBody).members
+                : const <ClassMember>[]) {
+          if (m is MethodDeclaration &&
+              m.name.lexeme == 'build' &&
+              _unboundBody(m.body, helpers)) {
+            names.add(_providerName(d.namePart.typeName.lexeme));
+          }
+        }
+      }
     }
   }
   return names;
+}
+
+Set<String> discoverPorts() => discoverPortsIn(libSources());
+
+/// `ProviderContainer(overrides: […])` listesine GERÇEKTEN katılan sağlayıcı adları (AST):
+/// `<ad>.overrideWithValue/overrideWith(…)` öğeleri ve `...<f>Overrides(locator)` yayılımının
+/// [sources]'ta tanımlı işlevinin döndürdüğü liste. Yorum satırları ve koşullu (`if`/`for`)
+/// öğeler sayılmaz. Liste bulunamazsa boş küme (test başarısız olur: fail-closed).
+Set<String> overrideTargetsIn(
+  String compositionPath,
+  Map<String, String> sources,
+) {
+  final units = {
+    for (final e in sources.entries) e.key: _parse(e.key, e.value),
+  };
+  final functions = <String, FunctionDeclaration>{};
+  for (final u in units.values) {
+    for (final d in u.declarations) {
+      if (d is FunctionDeclaration) functions[d.name.lexeme] = d;
+    }
+  }
+  ListLiteral? listOf(FunctionBody body) {
+    if (body is ExpressionFunctionBody && body.expression is ListLiteral) {
+      return body.expression as ListLiteral;
+    }
+    if (body is BlockFunctionBody) {
+      for (final st in body.block.statements) {
+        if (st is ReturnStatement && st.expression is ListLiteral) {
+          return st.expression as ListLiteral;
+        }
+      }
+    }
+    return null;
+  }
+
+  final targets = <String>{};
+  final visiting = <String>{};
+  void walk(ListLiteral list) {
+    for (final el in list.elements) {
+      if (el is MethodInvocation &&
+          el.target is SimpleIdentifier &&
+          const {
+            'overrideWithValue',
+            'overrideWith',
+          }.contains(el.methodName.name)) {
+        targets.add((el.target as SimpleIdentifier).name);
+      } else if (el is SpreadElement) {
+        final e = el.expression;
+        if (e is MethodInvocation && e.target == null) {
+          final fn = functions[e.methodName.name];
+          final inner = fn == null ? null : listOf(fn.functionExpression.body);
+          if (inner != null && visiting.add(e.methodName.name)) {
+            walk(inner);
+          }
+        } else if (e is ListLiteral) {
+          walk(e);
+        }
+      }
+    }
+  }
+
+  final comp = units[compositionPath];
+  if (comp == null) return targets;
+  final finder = _ContainerOverrides();
+  comp.accept(finder);
+  for (final l in finder.lists) {
+    walk(l);
+  }
+  return targets;
+}
+
+/// `ProviderContainer(…, overrides: [...])` çağrılarının `overrides` listeleri.
+class _ContainerOverrides extends RecursiveAstVisitor<void> {
+  final lists = <ListLiteral>[];
+
+  void _args(ArgumentList args) {
+    for (final a in args.arguments) {
+      if (a is NamedArgument &&
+          a.name.lexeme == 'overrides' &&
+          a.argumentExpression is ListLiteral) {
+        lists.add(a.argumentExpression as ListLiteral);
+      }
+    }
+  }
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    if (node.target == null && node.methodName.name == 'ProviderContainer') {
+      _args(node.argumentList);
+    }
+    super.visitMethodInvocation(node);
+  }
+
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    if (node.constructorName.type.name.lexeme == 'ProviderContainer') {
+      _args(node.argumentList);
+    }
+    super.visitInstanceCreationExpression(node);
+  }
+}
+
+/// `*_module.dart` dosyalarında tanımlı `List<Override> <ad>Overrides(…)` işlevleri.
+Set<String> moduleOverrideFunctions(Map<String, String> sources) {
+  final out = <String>{};
+  for (final e in sources.entries) {
+    if (!e.key.endsWith('_module.dart')) continue;
+    for (final d in _parse(e.key, e.value).declarations) {
+      if (d is FunctionDeclaration &&
+          d.returnType is NamedType &&
+          (d.returnType as NamedType).name.lexeme == 'List' &&
+          d.name.lexeme.endsWith('Overrides')) {
+        out.add(d.name.lexeme);
+      }
+    }
+  }
+  return out;
+}
+
+/// Bileşim kökünün `overrides:` listesinde doğrudan yayılan (`...f(…)`) işlev adları.
+Set<String> spreadFunctionsIn(
+  String compositionPath,
+  Map<String, String> sources,
+) {
+  final unit = _parse(compositionPath, sources[compositionPath] ?? '');
+  final finder = _ContainerOverrides();
+  unit.accept(finder);
+  return {
+    for (final l in finder.lists)
+      for (final el in l.elements)
+        if (el is SpreadElement &&
+            el.expression is MethodInvocation &&
+            (el.expression as MethodInvocation).target == null)
+          (el.expression as MethodInvocation).methodName.name,
+  };
 }
 
 bool isUnbound(Object e) =>
@@ -147,28 +371,29 @@ void registrationTests() {
     );
 
     test(
-      'her feature modülünün *Overrides listesi bileşim kökünde yayılır',
+      'her feature modülünün *Overrides listesi bileşim kökünde yayılır (AST)',
       () {
-        final composition = File('lib/app/di/composition.dart')
-            .readAsStringSync();
-        final fn = RegExp(r'List<Override>\s+(\w+Overrides)\(');
-        final defined = <String>{};
-        for (final f in Directory('lib/features').listSync(recursive: true)) {
-          if (f is! File || !f.path.endsWith('_module.dart')) continue;
-          for (final m in fn.allMatches(f.readAsStringSync())) {
-            defined.add(m.group(1)!);
-          }
-        }
+        final sources = libSources();
+        final defined = moduleOverrideFunctions(sources);
         expect(defined, isNotEmpty);
-        for (final name in defined) {
-          expect(
-            composition,
-            contains('...$name(locator)'),
-            reason: '$name bileşim köküne eklenmemiş',
-          );
-        }
+        expect(
+          spreadFunctionsIn(compositionPath, sources),
+          containsAll(defined),
+          reason: 'modül Overrides işlevi ProviderContainer(overrides:) içinde yayılmamış',
+        );
       },
     );
+
+    test('her port ProviderContainer(overrides:) listesine gerçekten katılır (AST)', () {
+      final sources = libSources();
+      final ports = discoverPortsIn(sources);
+      expect(ports, isNotEmpty);
+      expect(
+        overrideTargetsIn(compositionPath, sources),
+        containsAll(ports),
+        reason: 'bileşim kökü overrides listesinde olmayan port',
+      );
+    });
 
     test(
       'bileşim kökü kurulunca hiçbir port UnimplementedError atmaz',
@@ -182,6 +407,108 @@ void registrationTests() {
         expect(unboundPorts(comp.container), isEmpty);
       },
     );
+
+    group('AST envanteri negatifleri (Codex 9)', () {
+      const hdr =
+          "import 'package:riverpod_annotation/riverpod_annotation.dart';\n";
+      test('throw UnimplementedError() (bağımsız değişkensiz) port sayılır', () {
+        expect(
+          discoverPortsIn({
+            'a.dart':
+                '$hdr@Riverpod(keepAlive: true)\nFoo foo(Ref ref) => throw UnimplementedError();',
+          }),
+          {'fooProvider'},
+        );
+      });
+      test('çift tırnak, blok gövde ve yardımcı çağrısı port sayılır', () {
+        expect(
+          discoverPortsIn({
+            'a.dart':
+                '$hdr@riverpod\nFoo foo(Ref ref) { throw UnimplementedError("x"); }\n'
+                '@Riverpod(keepAlive: true)\nBar bar(Ref ref) { return _nope("bar"); }\n'
+                'Never _nope(String n) => throw UnimplementedError(n);',
+          }),
+          {'fooProvider', 'barProvider'},
+        );
+      });
+      test('sınıf tabanlı build() portu sayılır', () {
+        expect(
+          discoverPortsIn({
+            'a.dart':
+                '$hdr@riverpod\nclass Baz extends _\$Baz {\n'
+                '  @override\n  int build() => throw UnimplementedError();\n}',
+          }),
+          {'bazProvider'},
+        );
+      });
+      test('yorum, dize, açıklamasız ve bağlı sağlayıcılar port değildir', () {
+        expect(
+          discoverPortsIn({
+            'a.dart':
+                '$hdr// throw UnimplementedError();\n'
+                '@Riverpod(keepAlive: true)\nint ok(Ref ref) => 1;\n'
+                '@Riverpod(keepAlive: true)\nString s(Ref ref) => "throw UnimplementedError()";\n'
+                'void plain() { throw UnimplementedError(); }\n'
+                '@Riverpod(keepAlive: true)\nint lam(Ref ref) { final f = () => throw UnimplementedError(); return 1; }',
+          }),
+          isEmpty,
+        );
+      });
+
+      const comp = 'lib/app/di/composition.dart';
+      String compSrc(String overrides) =>
+          'class Composition { Composition() {\n'
+          '  container = ProviderContainer(retry: (_, _) => null, overrides: [\n'
+          '$overrides\n  ]);\n} }';
+      const mod = 'lib/features/x/x_module.dart';
+      const modSrc =
+          'List<Override> xOverrides(GetIt l) => [\n'
+          '  xServiceProvider.overrideWith((ref) => l()),\n];';
+      test('yorum satırındaki override sayılmaz', () {
+        final sources = {
+          comp: compSrc(
+            '  // flavorProvider.overrideWithValue(flavor),\n'
+            '  /* ...xOverrides(locator), */\n'
+            '  gProvider.overrideWithValue(1),',
+          ),
+          mod: modSrc,
+        };
+        expect(overrideTargetsIn(comp, sources), {'gProvider'});
+        expect(spreadFunctionsIn(comp, sources), isEmpty);
+      });
+      test('yayılım modül işlevinin listesini genişletir', () {
+        final sources = {
+          comp: compSrc('  ...xOverrides(locator),'),
+          mod: modSrc,
+        };
+        expect(overrideTargetsIn(comp, sources), {'xServiceProvider'});
+        expect(spreadFunctionsIn(comp, sources), {'xOverrides'});
+        expect(moduleOverrideFunctions(sources), {'xOverrides'});
+      });
+      test('ProviderContainer(overrides:) dışındaki liste sayılmaz', () {
+        final sources = {
+          comp:
+              'void f() {\n'
+              '  final unused = [aProvider.overrideWithValue(1)];\n'
+              '  other(overrides: [bProvider.overrideWithValue(1)]);\n'
+              '  ProviderContainer(overrides: [cProvider.overrideWithValue(1)]);\n}',
+        };
+        expect(overrideTargetsIn(comp, sources), {'cProvider'});
+      });
+      test('koşullu öğe ve bulunamayan işlev yayılımı sayılmaz', () {
+        final sources = {
+          comp: compSrc(
+            '  if (false) aProvider.overrideWithValue(1),\n'
+            '  ...yokOverrides(locator),',
+          ),
+        };
+        expect(overrideTargetsIn(comp, sources), isEmpty);
+      });
+      test('bileşim dosyası ya da liste yoksa boş (fail-closed)', () {
+        expect(overrideTargetsIn(comp, {}), isEmpty);
+        expect(overrideTargetsIn(comp, {comp: 'void f() {}'}), isEmpty);
+      });
+    });
 
     test('negatif: geçersiz kılınmayan port yakalanır (testin dişi var)', () {
       // Boş kap: bütün portlar bağsız.

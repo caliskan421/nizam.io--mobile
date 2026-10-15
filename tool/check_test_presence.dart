@@ -1,5 +1,6 @@
 // Kullanım: dart run tool/check_test_presence.dart  (CI ve `make test-presence`)
-// ADR-0003 karar 12 (Q2): service/repository/controller/kit bileşeni için aynı göreli yolda
+// ADR-0003 karar 12 (Q2): service/repository/controller (presentation/controllers ve
+// application/*_controller.dart)/kit bileşeni için aynı göreli yolda
 // test/…/<ad>_test.dart bulunmalı; eksik varsa 1 döner. Üretilmiş dosyalar hariç.
 import 'dart:io';
 
@@ -7,6 +8,9 @@ final _patterns = <RegExp>[
   RegExp(r'^features/[^/]+/application/[^/]+_service\.dart$'),
   RegExp(r'^features/[^/]+/data/[^/]+_repository\.dart$'),
   RegExp(r'^features/[^/]+/presentation/controllers/[^/]+\.dart$'),
+  // Gerçek yerleşim (ADR-0003 karar 3: ekran/akış controller'ı `@riverpod` AsyncNotifier,
+  // application katmanında): `features/<f>/application/<ad>_controller.dart` (Codex 9).
+  RegExp(r'^features/[^/]+/application/[^/]+_controller\.dart$'),
   RegExp(r'^core/ui/widgets/(?:.+/)?nz_[^/]+\.dart$'),
 ];
 

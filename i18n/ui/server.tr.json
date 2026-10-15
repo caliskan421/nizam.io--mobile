@@ -1,0 +1,16 @@
+{
+  "$comment": "Sunucu bağlama ve güncelleme-gerekli ekranlarının metinleri (features/server). ELLE yazılır; make gen ARB'ye birleştirir. Hata metinleri buraya yazılmaz: errorText(code).",
+  "texts": {
+    "ui.server.title": "Sunucuya bağlan",
+    "ui.server.intro": "Şirketinizin NIZAM.IO sunucu adresini girin.",
+    "ui.server.url_label": "Sunucu adresi",
+    "ui.server.url_hint": "https://nizam.sirketiniz.com",
+    "ui.server.connect": "Bağlan",
+    "ui.server.update_title": "Güncelleme gerekli",
+    "ui.server.update_message": "Bu sunucu uygulamanın daha yeni bir sürümünü gerektiriyor. Giriş yapabilmek için uygulamayı güncelleyin.",
+    "ui.server.update_server": "Sunucu",
+    "ui.server.update_required_version": "Gerekli sürüm",
+    "ui.server.update_installed_version": "Kurulu sürüm",
+    "ui.server.update_recheck": "Yeniden denetle"
+  }
+}

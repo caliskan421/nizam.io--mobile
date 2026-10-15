@@ -692,6 +692,56 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiFeedbackSecondsUnit => 'sn';
 
   @override
+  String get uiIdentityLoginTitle => 'Giriş yap';
+
+  @override
+  String get uiIdentityLoginServer => 'Sunucu';
+
+  @override
+  String get uiIdentityLoginEmail => 'E-posta';
+
+  @override
+  String get uiIdentityLoginPassword => 'Parola';
+
+  @override
+  String get uiIdentityLoginSubmit => 'Giriş yap';
+
+  @override
+  String get uiIdentityPasswordTitle => 'Parola değiştir';
+
+  @override
+  String get uiIdentityPasswordIntro =>
+      'Devam etmek için parolanızı değiştirmeniz gerekiyor. Parola değişince diğer cihazlardaki oturumlarınız kapanır.';
+
+  @override
+  String get uiIdentityPasswordCurrent => 'Mevcut parola';
+
+  @override
+  String get uiIdentityPasswordNew => 'Yeni parola';
+
+  @override
+  String get uiIdentityPasswordConfirm => 'Yeni parola (tekrar)';
+
+  @override
+  String get uiIdentityPasswordSubmit => 'Parolayı değiştir';
+
+  @override
+  String get uiIdentityProfileTitle => 'Profil';
+
+  @override
+  String get uiIdentityProfileEmail => 'E-posta';
+
+  @override
+  String get uiIdentitySignOut => 'Çıkış yap';
+
+  @override
+  String get uiIdentitySignOutConfirmTitle => 'Çıkış yapılsın mı?';
+
+  @override
+  String get uiIdentitySignOutConfirmMessage =>
+      'Bu cihazdaki oturum kapatılır.';
+
+  @override
   String get uiInputsPasswordShow => 'Parolayı göster';
 
   @override
@@ -780,4 +830,67 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiRouterNotFoundAction => 'Ana sayfaya dön';
+
+  @override
+  String get uiScopeTitle => 'Program seçimi';
+
+  @override
+  String get uiScopeIntro => 'Çalışacağınız programı seçin.';
+
+  @override
+  String get uiScopeEmptyTitle => 'Program yok';
+
+  @override
+  String get uiScopeEmptyMessage =>
+      'Hesabınıza atanmış bir program bulunmuyor. Yöneticinizle görüşün.';
+
+  @override
+  String get uiScopeTruncated =>
+      'Liste en çok 200 programı gösterir; bazı programlar görünmüyor olabilir.';
+
+  @override
+  String get uiScopeHomeTitle => 'Ana sayfa';
+
+  @override
+  String get uiScopeHomeProgram => 'Seçili program';
+
+  @override
+  String get uiScopeHomeYear => 'Yıl';
+
+  @override
+  String get uiScopeHomeChange => 'Kapsamı değiştir';
+
+  @override
+  String get uiServerTitle => 'Sunucuya bağlan';
+
+  @override
+  String get uiServerIntro => 'Şirketinizin NIZAM.IO sunucu adresini girin.';
+
+  @override
+  String get uiServerUrlLabel => 'Sunucu adresi';
+
+  @override
+  String get uiServerUrlHint => 'https://nizam.sirketiniz.com';
+
+  @override
+  String get uiServerConnect => 'Bağlan';
+
+  @override
+  String get uiServerUpdateTitle => 'Güncelleme gerekli';
+
+  @override
+  String get uiServerUpdateMessage =>
+      'Bu sunucu uygulamanın daha yeni bir sürümünü gerektiriyor. Giriş yapabilmek için uygulamayı güncelleyin.';
+
+  @override
+  String get uiServerUpdateServer => 'Sunucu';
+
+  @override
+  String get uiServerUpdateRequiredVersion => 'Gerekli sürüm';
+
+  @override
+  String get uiServerUpdateInstalledVersion => 'Kurulu sürüm';
+
+  @override
+  String get uiServerUpdateRecheck => 'Yeniden denetle';
 }

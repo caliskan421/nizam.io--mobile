@@ -1,6 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/identity/identity.dart';
+import '../../features/scope/scope.dart';
+import '../../features/server/server.dart';
 import 'pages.dart';
 import 'shell.dart';
 import 'transitions.dart';
@@ -23,8 +26,7 @@ class ServerRoute extends NzRouteData with $ServerRoute {
   const ServerRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      RouterPlaceholderPage(title: (l) => l.uiRouterPageServer);
+  Widget build(BuildContext context, GoRouterState state) => const ServerPage();
 }
 
 @TypedGoRoute<UpdateRequiredRoute>(path: '/update-required')
@@ -33,7 +35,7 @@ class UpdateRequiredRoute extends NzRouteData with $UpdateRequiredRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      RouterPlaceholderPage(title: (l) => l.uiRouterPageUpdateRequired);
+      const UpdateRequiredPage();
 }
 
 @TypedGoRoute<LoginRoute>(path: '/login')
@@ -41,8 +43,7 @@ class LoginRoute extends NzRouteData with $LoginRoute {
   const LoginRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      RouterPlaceholderPage(title: (l) => l.uiRouterPageLogin);
+  Widget build(BuildContext context, GoRouterState state) => const LoginPage();
 }
 
 @TypedGoRoute<PasswordRoute>(path: '/password')
@@ -51,7 +52,7 @@ class PasswordRoute extends NzRouteData with $PasswordRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      RouterPlaceholderPage(title: (l) => l.uiRouterPagePassword);
+      const PasswordChangePage();
 }
 
 @TypedGoRoute<ScopeRoute>(path: '/scope')
@@ -59,8 +60,7 @@ class ScopeRoute extends NzRouteData with $ScopeRoute {
   const ScopeRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      RouterPlaceholderPage(title: (l) => l.uiRouterPageScope);
+  Widget build(BuildContext context, GoRouterState state) => const ScopePage();
 }
 
 // ---- Kabuk (yalnız `scoped` fazı): üç yer tutucu sekme ----
@@ -115,8 +115,7 @@ class HomeRoute extends NzRouteData with $HomeRoute {
   const HomeRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      RouterPlaceholderPage(title: (l) => l.uiRouterTabHome);
+  Widget build(BuildContext context, GoRouterState state) => const HomePage();
 }
 
 class HomeDetailRoute extends NzRouteData with $HomeDetailRoute {
@@ -154,7 +153,7 @@ class ProfileRoute extends NzRouteData with $ProfileRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      RouterPlaceholderPage(title: (l) => l.uiRouterTabProfile);
+      const ProfilePage();
 }
 
 // ---- Birleştirme ----

@@ -801,6 +801,70 @@
   "@uiFeedbackSecondsUnit": {
     "description": "ui.feedback.seconds_unit"
   },
+  "uiIdentityLoginTitle": "Giriş yap",
+  "@uiIdentityLoginTitle": {
+    "description": "ui.identity.login_title"
+  },
+  "uiIdentityLoginServer": "Sunucu",
+  "@uiIdentityLoginServer": {
+    "description": "ui.identity.login_server"
+  },
+  "uiIdentityLoginEmail": "E-posta",
+  "@uiIdentityLoginEmail": {
+    "description": "ui.identity.login_email"
+  },
+  "uiIdentityLoginPassword": "Parola",
+  "@uiIdentityLoginPassword": {
+    "description": "ui.identity.login_password"
+  },
+  "uiIdentityLoginSubmit": "Giriş yap",
+  "@uiIdentityLoginSubmit": {
+    "description": "ui.identity.login_submit"
+  },
+  "uiIdentityPasswordTitle": "Parola değiştir",
+  "@uiIdentityPasswordTitle": {
+    "description": "ui.identity.password_title"
+  },
+  "uiIdentityPasswordIntro": "Devam etmek için parolanızı değiştirmeniz gerekiyor. Parola değişince diğer cihazlardaki oturumlarınız kapanır.",
+  "@uiIdentityPasswordIntro": {
+    "description": "ui.identity.password_intro"
+  },
+  "uiIdentityPasswordCurrent": "Mevcut parola",
+  "@uiIdentityPasswordCurrent": {
+    "description": "ui.identity.password_current"
+  },
+  "uiIdentityPasswordNew": "Yeni parola",
+  "@uiIdentityPasswordNew": {
+    "description": "ui.identity.password_new"
+  },
+  "uiIdentityPasswordConfirm": "Yeni parola (tekrar)",
+  "@uiIdentityPasswordConfirm": {
+    "description": "ui.identity.password_confirm"
+  },
+  "uiIdentityPasswordSubmit": "Parolayı değiştir",
+  "@uiIdentityPasswordSubmit": {
+    "description": "ui.identity.password_submit"
+  },
+  "uiIdentityProfileTitle": "Profil",
+  "@uiIdentityProfileTitle": {
+    "description": "ui.identity.profile_title"
+  },
+  "uiIdentityProfileEmail": "E-posta",
+  "@uiIdentityProfileEmail": {
+    "description": "ui.identity.profile_email"
+  },
+  "uiIdentitySignOut": "Çıkış yap",
+  "@uiIdentitySignOut": {
+    "description": "ui.identity.sign_out"
+  },
+  "uiIdentitySignOutConfirmTitle": "Çıkış yapılsın mı?",
+  "@uiIdentitySignOutConfirmTitle": {
+    "description": "ui.identity.sign_out_confirm_title"
+  },
+  "uiIdentitySignOutConfirmMessage": "Bu cihazdaki oturum kapatılır.",
+  "@uiIdentitySignOutConfirmMessage": {
+    "description": "ui.identity.sign_out_confirm_message"
+  },
   "uiInputsPasswordShow": "Parolayı göster",
   "@uiInputsPasswordShow": {
     "description": "ui.inputs.password_show"
@@ -916,5 +980,85 @@
   "uiRouterNotFoundAction": "Ana sayfaya dön",
   "@uiRouterNotFoundAction": {
     "description": "ui.router.not_found_action"
+  },
+  "uiScopeTitle": "Program seçimi",
+  "@uiScopeTitle": {
+    "description": "ui.scope.title"
+  },
+  "uiScopeIntro": "Çalışacağınız programı seçin.",
+  "@uiScopeIntro": {
+    "description": "ui.scope.intro"
+  },
+  "uiScopeEmptyTitle": "Program yok",
+  "@uiScopeEmptyTitle": {
+    "description": "ui.scope.empty_title"
+  },
+  "uiScopeEmptyMessage": "Hesabınıza atanmış bir program bulunmuyor. Yöneticinizle görüşün.",
+  "@uiScopeEmptyMessage": {
+    "description": "ui.scope.empty_message"
+  },
+  "uiScopeTruncated": "Liste en çok 200 programı gösterir; bazı programlar görünmüyor olabilir.",
+  "@uiScopeTruncated": {
+    "description": "ui.scope.truncated"
+  },
+  "uiScopeHomeTitle": "Ana sayfa",
+  "@uiScopeHomeTitle": {
+    "description": "ui.scope.home_title"
+  },
+  "uiScopeHomeProgram": "Seçili program",
+  "@uiScopeHomeProgram": {
+    "description": "ui.scope.home_program"
+  },
+  "uiScopeHomeYear": "Yıl",
+  "@uiScopeHomeYear": {
+    "description": "ui.scope.home_year"
+  },
+  "uiScopeHomeChange": "Kapsamı değiştir",
+  "@uiScopeHomeChange": {
+    "description": "ui.scope.home_change"
+  },
+  "uiServerTitle": "Sunucuya bağlan",
+  "@uiServerTitle": {
+    "description": "ui.server.title"
+  },
+  "uiServerIntro": "Şirketinizin NIZAM.IO sunucu adresini girin.",
+  "@uiServerIntro": {
+    "description": "ui.server.intro"
+  },
+  "uiServerUrlLabel": "Sunucu adresi",
+  "@uiServerUrlLabel": {
+    "description": "ui.server.url_label"
+  },
+  "uiServerUrlHint": "https://nizam.sirketiniz.com",
+  "@uiServerUrlHint": {
+    "description": "ui.server.url_hint"
+  },
+  "uiServerConnect": "Bağlan",
+  "@uiServerConnect": {
+    "description": "ui.server.connect"
+  },
+  "uiServerUpdateTitle": "Güncelleme gerekli",
+  "@uiServerUpdateTitle": {
+    "description": "ui.server.update_title"
+  },
+  "uiServerUpdateMessage": "Bu sunucu uygulamanın daha yeni bir sürümünü gerektiriyor. Giriş yapabilmek için uygulamayı güncelleyin.",
+  "@uiServerUpdateMessage": {
+    "description": "ui.server.update_message"
+  },
+  "uiServerUpdateServer": "Sunucu",
+  "@uiServerUpdateServer": {
+    "description": "ui.server.update_server"
+  },
+  "uiServerUpdateRequiredVersion": "Gerekli sürüm",
+  "@uiServerUpdateRequiredVersion": {
+    "description": "ui.server.update_required_version"
+  },
+  "uiServerUpdateInstalledVersion": "Kurulu sürüm",
+  "@uiServerUpdateInstalledVersion": {
+    "description": "ui.server.update_installed_version"
+  },
+  "uiServerUpdateRecheck": "Yeniden denetle",
+  "@uiServerUpdateRecheck": {
+    "description": "ui.server.update_recheck"
   }
 }

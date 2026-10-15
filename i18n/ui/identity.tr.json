@@ -1,0 +1,21 @@
+{
+  "$comment": "Giriş, zorunlu parola değişikliği ve profil ekranlarının metinleri (features/identity). ELLE yazılır; make gen ARB'ye birleştirir. Hata metinleri buraya yazılmaz: errorText(code).",
+  "texts": {
+    "ui.identity.login_title": "Giriş yap",
+    "ui.identity.login_server": "Sunucu",
+    "ui.identity.login_email": "E-posta",
+    "ui.identity.login_password": "Parola",
+    "ui.identity.login_submit": "Giriş yap",
+    "ui.identity.password_title": "Parola değiştir",
+    "ui.identity.password_intro": "Devam etmek için parolanızı değiştirmeniz gerekiyor. Parola değişince diğer cihazlardaki oturumlarınız kapanır.",
+    "ui.identity.password_current": "Mevcut parola",
+    "ui.identity.password_new": "Yeni parola",
+    "ui.identity.password_confirm": "Yeni parola (tekrar)",
+    "ui.identity.password_submit": "Parolayı değiştir",
+    "ui.identity.profile_title": "Profil",
+    "ui.identity.profile_email": "E-posta",
+    "ui.identity.sign_out": "Çıkış yap",
+    "ui.identity.sign_out_confirm_title": "Çıkış yapılsın mı?",
+    "ui.identity.sign_out_confirm_message": "Bu cihazdaki oturum kapatılır."
+  }
+}

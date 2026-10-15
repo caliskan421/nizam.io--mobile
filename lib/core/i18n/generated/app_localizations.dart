@@ -1294,6 +1294,102 @@ abstract class AppLocalizations {
   /// **'sn'**
   String get uiFeedbackSecondsUnit;
 
+  /// ui.identity.login_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş yap'**
+  String get uiIdentityLoginTitle;
+
+  /// ui.identity.login_server
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucu'**
+  String get uiIdentityLoginServer;
+
+  /// ui.identity.login_email
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta'**
+  String get uiIdentityLoginEmail;
+
+  /// ui.identity.login_password
+  ///
+  /// In tr, this message translates to:
+  /// **'Parola'**
+  String get uiIdentityLoginPassword;
+
+  /// ui.identity.login_submit
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş yap'**
+  String get uiIdentityLoginSubmit;
+
+  /// ui.identity.password_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Parola değiştir'**
+  String get uiIdentityPasswordTitle;
+
+  /// ui.identity.password_intro
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam etmek için parolanızı değiştirmeniz gerekiyor. Parola değişince diğer cihazlardaki oturumlarınız kapanır.'**
+  String get uiIdentityPasswordIntro;
+
+  /// ui.identity.password_current
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut parola'**
+  String get uiIdentityPasswordCurrent;
+
+  /// ui.identity.password_new
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni parola'**
+  String get uiIdentityPasswordNew;
+
+  /// ui.identity.password_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni parola (tekrar)'**
+  String get uiIdentityPasswordConfirm;
+
+  /// ui.identity.password_submit
+  ///
+  /// In tr, this message translates to:
+  /// **'Parolayı değiştir'**
+  String get uiIdentityPasswordSubmit;
+
+  /// ui.identity.profile_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil'**
+  String get uiIdentityProfileTitle;
+
+  /// ui.identity.profile_email
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta'**
+  String get uiIdentityProfileEmail;
+
+  /// ui.identity.sign_out
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkış yap'**
+  String get uiIdentitySignOut;
+
+  /// ui.identity.sign_out_confirm_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkış yapılsın mı?'**
+  String get uiIdentitySignOutConfirmTitle;
+
+  /// ui.identity.sign_out_confirm_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu cihazdaki oturum kapatılır.'**
+  String get uiIdentitySignOutConfirmMessage;
+
   /// ui.inputs.password_show
   ///
   /// In tr, this message translates to:
@@ -1467,6 +1563,126 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Ana sayfaya dön'**
   String get uiRouterNotFoundAction;
+
+  /// ui.scope.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Program seçimi'**
+  String get uiScopeTitle;
+
+  /// ui.scope.intro
+  ///
+  /// In tr, this message translates to:
+  /// **'Çalışacağınız programı seçin.'**
+  String get uiScopeIntro;
+
+  /// ui.scope.empty_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Program yok'**
+  String get uiScopeEmptyTitle;
+
+  /// ui.scope.empty_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabınıza atanmış bir program bulunmuyor. Yöneticinizle görüşün.'**
+  String get uiScopeEmptyMessage;
+
+  /// ui.scope.truncated
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste en çok 200 programı gösterir; bazı programlar görünmüyor olabilir.'**
+  String get uiScopeTruncated;
+
+  /// ui.scope.home_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Ana sayfa'**
+  String get uiScopeHomeTitle;
+
+  /// ui.scope.home_program
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili program'**
+  String get uiScopeHomeProgram;
+
+  /// ui.scope.home_year
+  ///
+  /// In tr, this message translates to:
+  /// **'Yıl'**
+  String get uiScopeHomeYear;
+
+  /// ui.scope.home_change
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapsamı değiştir'**
+  String get uiScopeHomeChange;
+
+  /// ui.server.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucuya bağlan'**
+  String get uiServerTitle;
+
+  /// ui.server.intro
+  ///
+  /// In tr, this message translates to:
+  /// **'Şirketinizin NIZAM.IO sunucu adresini girin.'**
+  String get uiServerIntro;
+
+  /// ui.server.url_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucu adresi'**
+  String get uiServerUrlLabel;
+
+  /// ui.server.url_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'https://nizam.sirketiniz.com'**
+  String get uiServerUrlHint;
+
+  /// ui.server.connect
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlan'**
+  String get uiServerConnect;
+
+  /// ui.server.update_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Güncelleme gerekli'**
+  String get uiServerUpdateTitle;
+
+  /// ui.server.update_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sunucu uygulamanın daha yeni bir sürümünü gerektiriyor. Giriş yapabilmek için uygulamayı güncelleyin.'**
+  String get uiServerUpdateMessage;
+
+  /// ui.server.update_server
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucu'**
+  String get uiServerUpdateServer;
+
+  /// ui.server.update_required_version
+  ///
+  /// In tr, this message translates to:
+  /// **'Gerekli sürüm'**
+  String get uiServerUpdateRequiredVersion;
+
+  /// ui.server.update_installed_version
+  ///
+  /// In tr, this message translates to:
+  /// **'Kurulu sürüm'**
+  String get uiServerUpdateInstalledVersion;
+
+  /// ui.server.update_recheck
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeniden denetle'**
+  String get uiServerUpdateRecheck;
 }
 
 class _AppLocalizationsDelegate

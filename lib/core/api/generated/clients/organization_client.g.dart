@@ -21,7 +21,7 @@ class _OrganizationClient implements OrganizationClient {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<MyDepartmentList> myDepartments({
+  Future<HttpResponse<MyDepartmentList>> myDepartments({
     Map<String, dynamic>? extras =
         OrganizationClient.myDepartmentsOpenapiExtras,
   }) async {
@@ -31,7 +31,7 @@ class _OrganizationClient implements OrganizationClient {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<MyDepartmentList>(
+    final _options = _setStreamType<HttpResponse<MyDepartmentList>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -49,11 +49,12 @@ class _OrganizationClient implements OrganizationClient {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
-    return _value;
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
-  Future<DepartmentList> listDepartments({
+  Future<HttpResponse<DepartmentList>> listDepartments({
     Map<String, dynamic>? extras =
         OrganizationClient.listDepartmentsOpenapiExtras,
   }) async {
@@ -63,7 +64,7 @@ class _OrganizationClient implements OrganizationClient {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<DepartmentList>(
+    final _options = _setStreamType<HttpResponse<DepartmentList>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -81,7 +82,8 @@ class _OrganizationClient implements OrganizationClient {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
-    return _value;
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
@@ -187,7 +189,7 @@ class _OrganizationClient implements OrganizationClient {
   }
 
   @override
-  Future<RosterList> listMembers({
+  Future<HttpResponse<RosterList>> listMembers({
     required String id,
     Map<String, dynamic>? extras = OrganizationClient.listMembersOpenapiExtras,
   }) async {
@@ -197,7 +199,7 @@ class _OrganizationClient implements OrganizationClient {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<RosterList>(
+    final _options = _setStreamType<HttpResponse<RosterList>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -215,7 +217,8 @@ class _OrganizationClient implements OrganizationClient {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
-    return _value;
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
@@ -324,7 +327,7 @@ class _OrganizationClient implements OrganizationClient {
   }
 
   @override
-  Future<AssignableList> listAssignable({
+  Future<HttpResponse<AssignableList>> listAssignable({
     required String id,
     Map<String, dynamic>? extras =
         OrganizationClient.listAssignableOpenapiExtras,
@@ -335,7 +338,7 @@ class _OrganizationClient implements OrganizationClient {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<AssignableList>(
+    final _options = _setStreamType<HttpResponse<AssignableList>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -353,7 +356,8 @@ class _OrganizationClient implements OrganizationClient {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
-    return _value;
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
@@ -459,7 +463,7 @@ class _OrganizationClient implements OrganizationClient {
   }
 
   @override
-  Future<UserList> listUsers({
+  Future<HttpResponse<UserList>> listUsers({
     String? role,
     String? search,
     String? sortBy,
@@ -481,7 +485,7 @@ class _OrganizationClient implements OrganizationClient {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<UserList>(
+    final _options = _setStreamType<HttpResponse<UserList>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -499,7 +503,8 @@ class _OrganizationClient implements OrganizationClient {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
-    return _value;
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override

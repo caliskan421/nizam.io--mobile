@@ -52,6 +52,9 @@ class PilotBackend {
     {'program_id': 'prog-2', 'name': 'Program İki'},
   ];
 
+  /// Doluysa `GET /v1/programs` yanıtına `X-Result-Truncated: true` başlığı eklenir.
+  bool programsTruncated = false;
+
   /// Doluysa `GET /v1/programs` bu kodla (HTTP 403) düşer.
   String? programsError;
 
@@ -94,7 +97,15 @@ class PilotBackend {
       case 'GET /v1/programs':
         final err = programsError;
         if (err != null) return errorBody(403, err);
-        return jsonResponse(200, {'programs': programs});
+        return jsonResponse(
+          200,
+          {'programs': programs},
+          headers: programsTruncated
+              ? {
+                  'X-Result-Truncated': ['true'],
+                }
+              : null,
+        );
       case 'GET /v1/program':
         final id = r.header('X-Nizamio-Program');
         final row = programs.firstWhere(

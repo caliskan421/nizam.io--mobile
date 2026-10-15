@@ -21,7 +21,7 @@ class _ProgramClient implements ProgramClient {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<ProgramList> listPrograms({
+  Future<HttpResponse<ProgramList>> listPrograms({
     Map<String, dynamic>? extras = ProgramClient.listProgramsOpenapiExtras,
   }) async {
     final _extra = <String, dynamic>{};
@@ -30,7 +30,7 @@ class _ProgramClient implements ProgramClient {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<ProgramList>(
+    final _options = _setStreamType<HttpResponse<ProgramList>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -48,7 +48,8 @@ class _ProgramClient implements ProgramClient {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
-    return _value;
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override

@@ -13,6 +13,7 @@ import '../../core/preferences/app_preferences.dart';
 import '../../core/preferences/locale_controller.dart';
 import '../../core/preferences/theme_mode_controller.dart';
 import '../../core/scope/scope_controller.dart';
+import '../../core/scope/scope_store.dart';
 import '../../core/server/server_binding.dart';
 import '../../core/session/refresh_grant.dart';
 import '../../core/session/session_controller.dart';
@@ -31,7 +32,8 @@ import '../../core/storage/shared_preference_store.dart';
 ///   (CX-r1-Ö-01).
 /// - Farklı sunucu/kuruluma yeniden bağlanma oturumu ve kapsamı temizler (bağ denetleyicisi
 ///   oturumu bilmez; yön tek: oturum → bağ).
-/// - Oturum etkin değilse (çıkış, yeniden giriş gerekli) kapsam temizlenir.
+/// - Oturum etkin değilse (çıkış, yeniden giriş gerekli) kapsam temizlenir; kayıtlı son seçim
+///   (güvenli depo) de aynı iki yerde (bu ve yeniden bağlanma) silinir.
 ///
 /// [secureStore] / [httpAdapter] / [preferenceStore] yalnız testler ve cihazsız
 /// entegrasyon içindir; verilmezse flutter_secure_storage, dio'nun varsayılan bağdaştırıcısı (platform
@@ -72,7 +74,9 @@ void configureDependencies(
       () => LocaleController(locator<AppPreferences>()),
       dispose: (c) => c.dispose(),
     )
-    ..registerLazySingleton<ScopeController>(ScopeController.new)
+    ..registerLazySingleton<ScopeController>(
+      () => ScopeController(store: ScopeStore(locator<SecureStore>())),
+    )
     ..registerLazySingleton<ServerBindingController>(
       () => ServerBindingController(
         flavor: flavor,
@@ -119,6 +123,16 @@ void configureDependencies(
           );
         });
       });
+      // Kapsam kalıcılığı (ADR-0003 karar 20): seçim yalnız etkin oturum + doğrulanmış bağ
+      // varken, o hesap + kurulum adına güvenli depoya yazılır.
+      scope.attachOwner(() {
+        final s = controller.state.value;
+        final b = binding.current;
+        return s is SessionActive && b is BindingVerified
+            ? ScopeOwner(accountId: s.accountId, instanceId: b.info.instanceId)
+            : null;
+      });
+      detach.add(() => scope.attachOwner(null));
       detach.add(
         binding.addRebindListener(() async {
           scope.clear();

@@ -12,6 +12,7 @@ oturum buradan başlar. Uygulayıcılar bu dosyaya yazmaz.
 | O3 — Kabuk | TAMAM | `f9fd6cc` + kapanış PR'ı |
 | O4 — Kit + Router | TAMAM | `4aaa11d` + kapanış PR'ı |
 | O5 — Pilot + Kapanış | TAMAM — **MOB-UI-0 KAPANDI** | `60dde43` + kapanış PR'ı |
+| O6 — A8 devri (tasarımdan bağımsız) | TAMAM | `0511958` + kapanış PR'ı |
 
 ## Sıkılaştırılan kurallar (bir sonraki oturumdan itibaren her uygulayıcıya KESİN)
 
@@ -334,3 +335,44 @@ oturum buradan başlar. Uygulayıcılar bu dosyaya yazmaz.
   - Dev uygulamada kataloğa giriş noktası yok; kabuk sekmeleri (work) yer tutucu.
   - README komut tablosu (coverage/test-presence/golden), `main` dal koruması, yerel ana çalışma ağacı
     `2524a14` + untracked eski kopyalar, uzak/yerel `mob-ui/*` dalları silinmedi.
+  - **O6 sonrası durum:** `X-Result-Truncated`, son seçili kapsam, `localeProvider`, katalog girişi, README
+    komut tablosu ve yerel ana ağaç kapandı (aşağıda O6). Hâlâ açık olanlar: `TOKEN-BEKLİYOR` (2), kabuk
+    sekmeleri, `main` dal koruması, uzak `mob-ui/*` dalları.
+
+## O6 — 2026-10-15 — A8 devri (tasarımdan bağımsız kalemler) — TAMAM
+
+- Açılış: O5 kapanışı (#51, `617b033`), main CI 38732456582 **success**, açık PR yok, O5 worktree'leri
+  kaldırılmış. Koordinatör `main` üzerinde beş kapıyı yeniden koştu ve hepsi yeşil: 993 test; kapsama O5 kaydıyla
+  birebir (core %95,47 · application %100 · data %100 · presentation %98,95 · widgets %99,54).
+- Yerel ana çalışma ağacı `2524a14`'ten `origin/main`'e ileri sarıldı. İzlenmeyen eski kopyalar
+  (`yol-haritasi-ui-temeli.md`, `docs/yurutme/`) #22 öncesi taslaklardı (main sürümleri daha yeni). Silinmedi,
+  oturum dışına taşındı.
+- PR'lar (squash; uygulayıcılar Sonnet 5.5, koordinatör Opus 5.5; her PR'da CI 4/4 yeşil, entegrasyon dahil):
+  - **#52 W61 (Codex 10)** → `9e66867` (main CI 38747124538 success): `X-Result-Truncated` başlıktan okunur.
+    - Üretim sonrası dönüşüm (`tool/gen/response_headers.dart`) yalnız 2xx'te başlık bildiren 6 operasyonu
+      `HttpResponse<T>` ile sarar.
+    - Liste openapi'den türetilir ve testle kilitlidir. Başlıksız operasyonların imzası değişmedi.
+    - "≥ 200 satır" sezgisi kaldırıldı.
+    - Tur 2: pilot test desteği başlığı taşır; başlıksız 200 satırda bildirim yok testi eklendi.
+  - **#53 W62 (ADR-0003 karar 20)** → `0621d99`: son seçili kapsam `ScopeStore`'da (SecureStore, hesap +
+    kurulum).
+    - İki commit düzeni: önce mevcut kodda yeşil ömür testleri, sonra uygulama.
+    - Koordinatör mutasyonları:
+      - `clear()` silmesi kaldırılınca 9 test kırmızı.
+      - `restore` sahip eşleşmesi kaldırılınca 2 test kırmızı.
+  - **#54 W63** → `0511958`: `MaterialApp.locale` ← `localeProvider`. Dev flavor'da her fazda katalog giriş
+    düğmesi var, prod ağacında yok. Dize gezinmesi N1 gereği `lib/app/router/shell.dart` içinde.
+- Koordinatör denetim notları:
+  - W61 raporunda presentation/widgets kapsaması 5'er satır düşük göründü. lcov farkı yalnız `const` yapıcı
+    satırlarında çıktı (koşudan koşuya değişen ölçüm; W61 o dosyalara dokunmadı). Eşikler çok üstünde.
+  - W63 katalog düğmesi sağ üst köşede. Bugün hiçbir sayfa AppBar `actions` kullanmıyor; kullanılırsa
+    konum yeniden değerlendirilir.
+  - Test çıktısında google_fonts "binding not initialized" uyarı gürültüsü var; testi düşürmüyor
+    (küçük, ayrı iş).
+  - `scope_controller.dart` ↔ `scope_store.dart` karşılıklı import yapıyor (geçerli; sınır kuralı geçti).
+- Sıkılaştırılan kurallar: yok.
+- Kırmızılar:
+  - `main` dal koruması kapalı (GitHub ayarı). Hesap ayarı değişikliği olduğu için ürün sahibine bırakıldı.
+  - Uzak `mob-ui/*` dalları silinmedi (yalnız birleşmiş O6 yerel dalları ve worktree'leri temizlendi).
+- A8'de kalan (tasarıma bağlı): `TOKEN-BEKLİYOR` 2 işaret (gölge/süre/opaklık/ikon/kenarlık, içerik
+  genişliği; Codex 11 opaklık/süre toplaması buna bağlı), kabuk sekmeleri (work) yer tutucu.

@@ -469,6 +469,51 @@ void main() {
     });
   });
 
+  group('A5 genel tip parametresi (Codex 8)', () {
+    // Aynı bağdaştırıcı yolu farklı gövdelerle denendiğinden vaka başına ayrı çözümleme.
+    final cases = <String, (String, String, Set<String>)>{
+      'T expose<T>() => _s.setString as T': (
+        'core/preferences/app_preferences.dart',
+        "import '../storage/preference_store.dart';\n"
+            'class AppPreferences {\n'
+            '  AppPreferences(this._s);\n'
+            '  final PreferenceStore _s;\n'
+            '  T expose<T>() => _s.setString as T;\n'
+            '}',
+        {'A5'},
+      ),
+      'sınırlı T extends Object alan': (
+        'core/telemetry/telemetry.dart',
+        'class Telemetry<T extends Object> { Telemetry(this.v); T v; }',
+        {'A5'},
+      ),
+      'tip parametresi parametre olarak': (
+        'core/preferences/app_preferences.dart',
+        'class AppPreferences { void put<T>(T v) {} }',
+        {'A5'},
+      ),
+      'somut sınırlı T extends num serbest': (
+        'core/preferences/app_preferences.dart',
+        'class AppPreferences {\n'
+            '  T clamp<T extends num>(T v) => v;\n'
+            '  String? get theme => null;\n'
+            '}',
+        <String>{},
+      ),
+    };
+    for (final MapEntry(key: name, value: (path, src, expected))
+        in cases.entries) {
+      test(name, () async {
+        final v = await checkApiSurface(
+          '.',
+          overlays: {path: src},
+          only: [path],
+        );
+        expect(v.map((e) => e.rule).toSet(), expected, reason: v.join('\n'));
+      });
+    }
+  });
+
   group('U1–U6 tip çözümlemeli (Codex 6)', () {
     const alias = 'core/ui/theme/zz_alias.dart';
     const pres = 'features/zz/presentation/pages';

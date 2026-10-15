@@ -13,11 +13,13 @@
 //       `<f>.dart` açık yüzü bulunur; `lib/` kökünde yalnız main*.dart.
 //   D1  Elle DTO yasak (üretilmiş `lib/core/api/generated/**` dışı): json_annotation importu,
 //       Json* açıklamaları, fromJson/toJson adlı her bildirim.
-//   D2  features/** içinde `dart:convert` importu ve `Map<String, …>` tip açıklaması yasak
-//       (elle JSON gövdesi kurmanın iki kaçış yolu).
+//   D2  features/** içinde `dart:convert` importu, `Map<String, …>` tip açıklaması ve
+//       dize anahtarlı Map literal (`{'k': v}`, `<String, X>{…}`) yasak (elle JSON gövdesi
+//       kurmanın kaçış yolları).
 //   S1  flutter_secure_storage yalnız `lib/core/storage/**` içinde; oradan bile `export`
 //       edilemez (barrel ile taşıma yok).
-//   S2  `badCertificateCallback`, `HttpOverrides` hiçbir yerde (TLS hatası yutulmaz).
+//   S2  `badCertificateCallback`, `HttpOverrides` (ifade ve tip konumu: typedef, extends)
+//       hiçbir yerde (TLS hatası yutulmaz).
 //   S3  `debugPrint` ve `dart:developer` yalnız `lib/core/logging/**` içinde (log tek yoldan
 //       ve redaksiyonla; `print` ayrıca avoid_print ile yasak).
 //   S4  domain katmanı Flutter/dio/Riverpod import etmez (saf Dart); hiçbir dosya bu
@@ -612,8 +614,47 @@ class _Visitor extends RecursiveAstVisitor<void> {
     super.visitVariableDeclaration(node);
   }
 
+  // D2 — `Map` adı geçmeyen Map literalleri: `{'password': p}` (çıkarımlı) ve
+  // `<String, Object?>{…}` (tipli). Kapsam `Map<String, …>` açıklamasıyla aynıdır: features/**.
+  @override
+  void visitSetOrMapLiteral(SetOrMapLiteral node) {
+    if (here.area == 'feature') {
+      final args = node.typeArguments?.arguments;
+      final typed =
+          args != null &&
+          args.length == 2 &&
+          args.first is NamedType &&
+          (args.first as NamedType).name.lexeme == 'String';
+      if (typed || node.elements.any(_stringKeyed)) {
+        add(
+          'D2',
+          node,
+          'features/** içinde dize anahtarlı Map literal yasak (elle JSON gövdesi)',
+        );
+      }
+    }
+    super.visitSetOrMapLiteral(node);
+  }
+
+  static bool _stringKeyed(CollectionElement e) => switch (e) {
+    MapLiteralEntry(:final key) => key is StringLiteral,
+    IfElement(:final thenElement, :final elseElement) =>
+      _stringKeyed(thenElement) ||
+          (elseElement != null && _stringKeyed(elseElement)),
+    ForElement(:final body) => _stringKeyed(body),
+    _ => false,
+  };
+
   @override
   void visitNamedType(NamedType node) {
+    // S2 — tip konumu (`typedef O = HttpOverrides`, `extends`, önekli `io.HttpOverrides`).
+    if (node.name.lexeme == 'HttpOverrides') {
+      add(
+        'S2',
+        node,
+        'HttpOverrides yasak: TLS/HTTP doğrulaması asla gevşetilmez',
+      );
+    }
     if (here.area == 'feature' && node.name.lexeme == 'Map') {
       final args = node.typeArguments?.arguments;
       if (args != null &&

@@ -24,7 +24,8 @@
 //       kesin dosya listesi; `app/di` hariç) açık API'de tipi SİLİNMİŞ değer veremez:
 //       `dynamic`, `Object`, işlev tipi (geri çağrı) dönüş/parametre/alan olarak yasak (iç
 //       içe tip argümanları dahil). SDK nesnesi böylece adlandırılmış güvenli tip dışında
-//       taşınamaz (CX-r3-Ö-04). `Object` üyeleri (`==`, `toString`…) sayılmaz.
+//       taşınamaz (CX-r3-Ö-04). `Object` üyeleri (`==`, `toString`…) sayılmaz. Sınırsız/`Object`
+//       sınırlı genel tip parametresi (`T expose<T>() => raw as T`) da silinmiş sayılır (Codex 8).
 //
 //   G3  `lib/features/**/presentation/**` içinde çözümlenmiş sınıf adı `Service`/`Repository`
 //       ile biten yapıcı çağrısı ya da tear-off'u yasak (`checkServiceConstruction`): takma
@@ -742,6 +743,13 @@ String? _erased(DartType t, [Set<DartType>? seen]) {
   if (t is DynamicType) return 'dynamic';
   if (t is InvalidType) return 'çözümlenemeyen tip';
   if (t is FunctionType) return 'işlev tipi (geri çağrı)';
+  if (t is TypeParameterType) {
+    // `T expose<T>() => raw as T`: genel tip parametresi tipi silinmiş değer taşır;
+    // yalnız somut sınırlı (`T extends num`) tip parametresi serbesttir.
+    return _erased(t.bound, seen) == null
+        ? null
+        : 'genel tip parametresi (${t.element.name})';
+  }
   if (t is InterfaceType) {
     if (t.isDartCoreObject) return 'Object';
     if (t.isDartCoreFunction) return 'Function';

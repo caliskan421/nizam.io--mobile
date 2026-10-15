@@ -195,6 +195,45 @@ void main() {
         ['D2'],
       );
     });
+    test('çıkarımlı ve tipli Map literal istek gövdesi (Codex 8)', () {
+      for (final src in [
+        "final body = {'password': password};",
+        "final body = <String, Object?>{'password': password};",
+        "final body = <String, dynamic>{};",
+        "final body = const {'a': 1};",
+        "final body = {if (c) 'k': v};",
+        "final body = {for (final x in xs) 'k\$x': x};",
+        "final body = {'a' 'b': 1};",
+        "final body = {...other, 'k': 1};",
+      ]) {
+        expect(
+          rules('features/identity/data/a.dart', src),
+          contains('D2'),
+          reason: src,
+        );
+        expect(
+          rules('features/identity/presentation/a.dart', src),
+          contains('D2'),
+          reason: src,
+        );
+      }
+    });
+    test('Map literal pozitifleri: küme, boş, anahtarı dize olmayan, core', () {
+      for (final src in [
+        "final s = {'a', 'b'};",
+        "final s = <String>{'a'};",
+        'final m = {};',
+        'final m = {k: v};',
+        'final m = <int, String>{1: "a"};',
+      ]) {
+        expect(
+          rules('features/identity/data/a.dart', src),
+          isEmpty,
+          reason: src,
+        );
+      }
+      expect(rules('core/http/a.dart', "final h = {'a': 1};"), isEmpty);
+    });
     test('core içinde Map<String, dynamic> serbest (dio başlıkları)', () {
       expect(
         rules('core/http/a.dart', 'Map<String, dynamic> h = {};'),
@@ -218,6 +257,18 @@ void main() {
         ),
         ['S2'],
       );
+    });
+    test('HttpOverrides tip yolları: typedef, extends, önekli (Codex 8)', () {
+      for (final src in [
+        'typedef O = HttpOverrides;',
+        'class X extends HttpOverrides {}',
+        'class X implements HttpOverrides {}',
+        "import 'dart:io' as io;\nio.HttpOverrides? o;",
+        'HttpOverrides? o;',
+        'void f<T extends HttpOverrides>() {}',
+      ]) {
+        expect(rules('core/a.dart', src), contains('S2'), reason: src);
+      }
     });
     test('HttpOverrides yasak', () {
       expect(

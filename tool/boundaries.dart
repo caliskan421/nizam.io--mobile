@@ -15,11 +15,13 @@
 //       Json* açıklamaları, fromJson/toJson adlı her bildirim.
 //   D2  features/** içinde `dart:convert` importu ve `Map<String, …>` tip açıklaması yasak
 //       (elle JSON gövdesi kurmanın iki kaçış yolu).
-//   S1  flutter_secure_storage yalnız `lib/core/storage/**` içinde.
+//   S1  flutter_secure_storage yalnız `lib/core/storage/**` içinde; oradan bile `export`
+//       edilemez (barrel ile taşıma yok).
 //   S2  `badCertificateCallback`, `HttpOverrides` hiçbir yerde (TLS hatası yutulmaz).
 //   S3  `debugPrint` ve `dart:developer` yalnız `lib/core/logging/**` içinde (log tek yoldan
 //       ve redaksiyonla; `print` ayrıca avoid_print ile yasak).
-//   S4  domain katmanı Flutter/dio/Riverpod import etmez (saf Dart).
+//   S4  domain katmanı Flutter/dio/Riverpod import etmez (saf Dart); hiçbir dosya bu
+//       paketleri `export` edemez (core barrel'ı ile domain'e transitif sızma yok).
 //   S5  shared_preferences YALNIZ `lib/core/storage/shared_preference_store.dart` içinde
 //       (kesin dosya; aynı dizinde ikinci bir bağdaştırıcı yok — gizli veri SecureStore'a, S1).
 //   S6  firebase_* yalnız `lib/app/**` ve `lib/core/telemetry/telemetry.dart` içinde (kesin
@@ -74,8 +76,11 @@
 //       `package:` yolları normalize edilir (`..` ile kaçış).
 //   A2/A3  Açık API yüzeyinde üretilmiş tip yok (data katmanı ve core): TİP ÇÖZÜMLEMESİ
 //       gerektirdiği için tool/api_surface.dart'tadır.
-//   B8  URI kanonik olmalı: yüzde-kodlama (`g%65nerated`, `get%5Fit`) ve `.`/`..` yol
-//       bileşeni yasak — derleyici bunları çözer, ham dize karşılaştırması aşılırdı.
+//   B9  Yalnız `dart:`, `package:` ve göreli URI: `file:`/`http:`/mutlak yol import, export
+//       ve part'ı yasak (yol tabanlı B1–B4, G1/G2, A1, S7 kontrollerini çözümsüz
+//       bırakıp aşmasın). Fail-closed: B8 gibi başka kurala girmeden ihlaldir.
+//   B8  URI kanonik olmalı: yüzde-kodlama (`g%65nerated`, `get%5Fit`), `.`/`..` yol
+//       bileşeni, ters eğik çizgi ve büyük harfli şema (`PACKAGE:`) yasak — derleyici bunları çözer, ham dize karşılaştırması aşılırdı.
 //       Fail-closed: kanonik olmayan URI başka kurallara hiç girmeden ihlaldir.
 //   B7  Koşullu import/export (`if (dart.library.io) '…'`) üretilmiş kod dışında yasak: tip
 //       çözümlemeli A2/A3 denetimi tek yapılandırmayı çözümler, dallar arası farklı tip
@@ -113,6 +118,13 @@ const _jsonAnnotations = {
   'JsonConverter',
   'JsonLiteral',
 };
+
+const _domainBanned = [
+  'package:flutter/',
+  'package:dio/',
+  'package:flutter_riverpod/',
+  'package:riverpod',
+];
 
 final _jsonMember = RegExp(r'(from|to)json$', caseSensitive: false);
 
@@ -266,6 +278,14 @@ List<Violation> checkSource(
         );
         continue;
       }
+      if (_nonLocalScheme(uri)) {
+        add(
+          'B9',
+          directive,
+          'yalnız dart:, package: ve göreli URI (file:/mutlak yol yol denetimlerini aşar): $uri',
+        );
+        continue;
+      }
       _checkUri(
         here,
         uri,
@@ -339,12 +359,26 @@ bool isGeneratedPath(String libPath) =>
 /// Paket/SDK URI'sinde yüzde-kodlama ve `.`/`..` bileşeni yok; göreli URI'de yüzde-kodlama
 /// yok (göreli `..` meşrudur ve normalize edilir).
 bool _canonical(String uri) {
-  if (uri.contains('%')) return false;
+  if (uri.contains('%') || uri.contains('\\')) return false;
   if (uri.contains(':')) {
+    // Şema büyük/küçük harf duyarsızdır (`PACKAGE:get_it/…` derleyicide geçerlidir);
+    // ham dize karşılaştırmaları küçük harfle yazıldığından büyük harfli şema kanonik değil.
+    final scheme = uri.substring(0, uri.indexOf(':'));
+    if (scheme != scheme.toLowerCase()) return false;
     final segments = uri.substring(uri.indexOf(':') + 1).split('/');
     if (segments.any((s) => s == '.' || s == '..')) return false;
   }
   return true;
+}
+
+/// `dart:`/`package:` dışı şema ya da mutlak yol (`file:`, `http:`, `/x`, `//h/x`): yol
+/// tabanlı denetimler (B1–B4, G1/G2, A1, S7) bunları çözemez; lib içinde yasak.
+bool _nonLocalScheme(String uri) {
+  if (uri.startsWith('/')) return true;
+  final i = uri.indexOf(':');
+  if (i < 0) return false;
+  final scheme = uri.substring(0, i);
+  return scheme != 'dart' && scheme != 'package';
 }
 
 /// `lib/` göreli kaynak yolundan URI'nin `lib/` göreli hedefi; paket dışı veya `lib/`
@@ -373,10 +407,11 @@ void _checkUri(
 
   // Paket kuralları.
   if (uri.startsWith('package:flutter_secure_storage/') &&
-      !here.path.startsWith('core/storage/')) {
+      (!here.path.startsWith('core/storage/') || isExport)) {
     add(
       'S1',
-      'flutter_secure_storage yalnız lib/core/storage/ içinde import edilir',
+      'flutter_secure_storage yalnız lib/core/storage/ içinde import edilir '
+          've dışa verilemez (barrel ile taşıma yasak)',
     );
   }
   if (isExport &&
@@ -414,13 +449,15 @@ void _checkUri(
       'features/** içinde dart:convert yasak (JSON yalnız üretilmiş tiplerle)',
     );
   }
-  if (here.area == 'feature' && here.layer == 'domain') {
-    for (final banned in const [
-      'package:flutter/',
-      'package:dio/',
-      'package:flutter_riverpod/',
-      'package:riverpod',
-    ]) {
+  if (isExport && !generated && _domainBanned.any(uri.startsWith)) {
+    // Hiçbir dosya Flutter/dio/Riverpod'u dışa veremez: domain katmanı core/açık yüz
+    // barrel'ından saf-Dart sınırını aşmadan alamaz (Codex 7).
+    add(
+      'S4',
+      'Flutter/dio/Riverpod dışa verilemez (barrel ile taşıma yasak): $uri',
+    );
+  } else if (here.area == 'feature' && here.layer == 'domain') {
+    for (final banned in _domainBanned) {
       if (uri.startsWith(banned)) {
         add('S4', 'domain katmanı saf Dart olmalı: $uri');
       }

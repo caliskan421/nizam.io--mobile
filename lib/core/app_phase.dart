@@ -26,6 +26,8 @@ AppPhase deriveAppPhase(
       return AppPhase.unbound;
     case BindingVerifying():
       return AppPhase.verifying;
+    case BindingFailed(isApiVersionMismatch: true):
+      return AppPhase.updateRequired;
     case BindingFailed():
       return AppPhase.bindingFailed;
     case BindingUpdateRequired():

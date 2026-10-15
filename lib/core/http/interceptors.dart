@@ -177,16 +177,12 @@ class AuthInterceptor extends Interceptor {
   }
 
   /// 401 erişim belirtecinin düştüğü anlamına mı geliyor? Yenileme + tekrar YALNIZ zarf kodu
-  /// `platform.unauthenticated` ise yapılır. Diğer 401 kodları (ör. `identity.credentials_invalid`:
-  /// parola değiştirmede yanlış mevcut parola) belirteçle ilgisizdir: gereksiz rotasyon ve
-  /// isteğin ikinci kez gönderilmesi olmadan olduğu gibi döner. Zarf okunamıyorsa (gövdesiz /
-  /// biçimsiz 401 → `client.invalid_response`) nedeni bilinmez; mevcut davranış korunur ve
-  /// yenileme denenir.
-  static bool _expiresAccess(DioException err) {
-    final code = toApiError(err).code;
-    return code == 'platform.unauthenticated' ||
-        code == ClientErrorCode.invalidResponse;
-  }
+  /// `platform.unauthenticated` ise yapılır (sözleşme: erişim belirteci süresi bu kodla bildirilir).
+  /// Diğer her 401 — farklı kod (ör. `identity.credentials_invalid`), gövdesiz ya da biçimsiz
+  /// (`client.invalid_response`) — nedeni belirsizdir: yenileme 0, tekrar 0, hata olduğu gibi döner
+  /// (aksi hâlde parola değiştirme gibi yazmalar iki kez gider).
+  static bool _expiresAccess(DioException err) =>
+      toApiError(err).code == 'platform.unauthenticated';
 
   @override
   Future<void> onError(

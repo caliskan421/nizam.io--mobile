@@ -7,7 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'refresh_response.freezed.dart';
 part 'refresh_response.g.dart';
 
-@Freezed()
+@Freezed(toStringOverride: false)
 abstract class RefreshResponse with _$RefreshResponse {
   const factory RefreshResponse({
     @JsonKey(name: 'account_id') required String accountId,

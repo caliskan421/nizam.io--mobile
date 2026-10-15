@@ -7,7 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'change_password_request.freezed.dart';
 part 'change_password_request.g.dart';
 
-@Freezed()
+@Freezed(toStringOverride: false)
 abstract class ChangePasswordRequest with _$ChangePasswordRequest {
   const factory ChangePasswordRequest({
     @JsonKey(name: 'current_password') required String currentPassword,

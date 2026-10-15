@@ -79,6 +79,11 @@ final class BindingFailed extends BindingState {
   const BindingFailed(this.error, {this.address});
   final ApiError error;
   final ServerAddress? address;
+
+  /// Sunucunun API sürümü uygulamayla uyumsuz (keşif ya da profil): açık "güncelleme gerekli"
+  /// ekranıdır (CLAUDE.md). Bağ yine DOĞRULANMIŞ değildir; giriş başlamaz (fail-closed).
+  bool get isApiVersionMismatch =>
+      error.code == ClientErrorCode.unsupportedApiVersion;
 }
 
 /// Sunucu bağı denetleyicisi. Doğrulama sırası (fail-closed, hiçbir adım atlanmaz):

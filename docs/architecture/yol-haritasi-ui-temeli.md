@@ -1,6 +1,6 @@
 # Yol haritası — UI temeli (MOB-UI-0)
 
-- **Durum:** Kabul (2026-10-14, MOB-UI-0 O1; kararlar ve ölçümler
+- **Durum:** **Uygulandı (2026-10-15, main `60dde43` + kapanış kaydı; MOB-UI-0 KAPANDI)** · Kabul (2026-10-14, MOB-UI-0 O1; kararlar ve ölçümler
   [ADR-0003](adr-0003-ui-temeli.md)) · program dışı çalışma (D-0174: ekranlar program dışı)
 - **Yürütme:** dalga planı ve oturum istemleri [`docs/yurutme/mob-ui-0/`](../yurutme/mob-ui-0/README.md)
 - **Önkoşul:** MOB-0 kapandı (F14). Tasarım henüz yok → bu çalışma **tasarımdan bağımsız

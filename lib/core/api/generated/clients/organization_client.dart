@@ -167,7 +167,7 @@ abstract class OrganizationClient {
 
   /// Hesabın departmanları ve rolleri.
   @GET('/v1/me/departments')
-  Future<MyDepartmentList> myDepartments({
+  Future<HttpResponse<MyDepartmentList>> myDepartments({
     @Extras()
     Map<String, dynamic>? extras =
         OrganizationClient.myDepartmentsOpenapiExtras,
@@ -175,7 +175,7 @@ abstract class OrganizationClient {
 
   /// Departman listesi.
   @GET('/v1/departments')
-  Future<DepartmentList> listDepartments({
+  Future<HttpResponse<DepartmentList>> listDepartments({
     @Extras()
     Map<String, dynamic>? extras =
         OrganizationClient.listDepartmentsOpenapiExtras,
@@ -211,7 +211,7 @@ abstract class OrganizationClient {
 
   /// Departman üye listesi (yönetim yüzü).
   @GET('/v1/departments/{id}/members')
-  Future<RosterList> listMembers({
+  Future<HttpResponse<RosterList>> listMembers({
     @Path('id') required String id,
     @Extras()
     Map<String, dynamic>? extras = OrganizationClient.listMembersOpenapiExtras,
@@ -252,7 +252,7 @@ abstract class OrganizationClient {
 
   /// Departmana atanabilir hesap havuzu.
   @GET('/v1/departments/{id}/assignable')
-  Future<AssignableList> listAssignable({
+  Future<HttpResponse<AssignableList>> listAssignable({
     @Path('id') required String id,
     @Extras()
     Map<String, dynamic>? extras =
@@ -294,7 +294,7 @@ abstract class OrganizationClient {
   ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/admin/users')
-  Future<UserList> listUsers({
+  Future<HttpResponse<UserList>> listUsers({
     @Query('role') String? role,
     @Query('search') String? search,
     @Query('sort_by') String? sortBy,

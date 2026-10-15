@@ -13,20 +13,29 @@ class ProgramRepository {
   /// [dio]: doğrulanmış bağın API istemcisi (kapsam başlığını ara katman ekler).
   ProgramRepository(Dio dio) : _client = ProgramClient(dio);
 
-  /// Sunucunun imleçsiz listede kestiği üst sınır (`X-Result-Truncated`, openapi
-  /// `ResultTruncated`: en çok 200 satır).
+  /// Sunucunun imleçsiz listede kestiği üst sınır (openapi `ResultTruncated`: en çok 200
+  /// satır). Yalnız bilgidir: kesilme satır sayısından değil, [truncationHeader] başlığından
+  /// okunur.
   static const maxRows = 200;
+
+  /// Sözleşmedeki kesilme başlığı; yalnız kesildiğinde ve yalnız `true` değeriyle gönderilir.
+  static const truncationHeader = 'X-Result-Truncated';
 
   final ProgramClient _client;
 
   /// `GET /v1/programs` (S1: kapsam başlığı gönderilmez). Sözleşmede imleç yoktur: düz liste.
-  /// Üretilmiş istemci yanıt başlıklarını göstermez; `X-Result-Truncated` yerine "satır sayısı
-  /// üst sınıra ulaştı" kesilme sayılır (sınırda tam 200 satır da kesilmiş kabul edilir —
-  /// güvenli yön: kullanıcı listenin tamamı olmayabileceğini görür).
+  /// Kesilme `X-Result-Truncated` yanıt başlığından okunur: başlığın tek değeri tam olarak
+  /// `true` ise kesilmiştir; başlık yoksa ya da değeri başkaysa kesilmemiş sayılır (sözleşme
+  /// başlığı yalnız `true` ile gönderir; tanımsız değer kesilme bildirimi değildir).
   Future<PageSlice<Program>> listPrograms() async {
     final r = await apiCall(_client.listPrograms);
-    final items = r.programs.map(_program).toList();
-    return PageSlice(items: items, truncated: items.length >= maxRows);
+    final values = r.response.headers[truncationHeader];
+    final truncated =
+        values != null && values.length == 1 && values[0] == 'true';
+    return PageSlice(
+      items: r.data.programs.map(_program).toList(),
+      truncated: truncated,
+    );
   }
 
   /// `GET /v1/program` (S2: `X-Nizamio-Program` ara katmandan, seçili kapsamdan).

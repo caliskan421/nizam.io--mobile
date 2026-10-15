@@ -70,7 +70,7 @@ abstract class ProgramClient {
 
   /// Program (dönem) listesi.
   @GET('/v1/programs')
-  Future<ProgramList> listPrograms({
+  Future<HttpResponse<ProgramList>> listPrograms({
     @Extras()
     Map<String, dynamic>? extras = ProgramClient.listProgramsOpenapiExtras,
   });

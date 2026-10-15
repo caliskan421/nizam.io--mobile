@@ -10,10 +10,11 @@ import 'package:nizamio/features/scope/domain/program.dart';
 
 /// Tek yanıtlı sahte bağdaştırıcı; isteği kaydeder.
 class _Adapter implements HttpClientAdapter {
-  _Adapter(this.body, [this.status = 200]);
+  _Adapter(this.body, [this.status = 200, this.headers = const {}]);
 
   final String body;
   final int status;
+  final Map<String, List<String>> headers;
   final List<RequestOptions> seen = [];
 
   @override
@@ -28,6 +29,7 @@ class _Adapter implements HttpClientAdapter {
       status,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
+        ...headers,
       },
     );
   }
@@ -36,8 +38,12 @@ class _Adapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-(ProgramRepository, _Adapter) _repo(String body, {int status = 200}) {
-  final adapter = _Adapter(body, status);
+(ProgramRepository, _Adapter) _repo(
+  String body, {
+  int status = 200,
+  Map<String, List<String>> headers = const {},
+}) {
+  final adapter = _Adapter(body, status, headers);
   return (
     ProgramRepository(
       Dio(BaseOptions(baseUrl: 'https://api.test'))
@@ -77,11 +83,59 @@ void main() {
       expect(slice.truncated, isFalse);
     });
 
-    test('üst sınıra (200) ulaşan liste kesilmiş sayılır', () async {
-      final (repo, _) = _repo(_list(ProgramRepository.maxRows));
+    test('X-Result-Truncated: true → kesilmiş', () async {
+      final (repo, _) = _repo(
+        _list(3),
+        headers: {
+          'X-Result-Truncated': ['true'],
+        },
+      );
+      final slice = await repo.listPrograms();
+      expect(slice.truncated, isTrue);
+      expect(slice.items, hasLength(3));
+    });
+
+    test('başlık adı büyük/küçük harf duyarsız', () async {
+      final (repo, _) = _repo(
+        _list(1),
+        headers: {
+          'x-result-truncated': ['true'],
+        },
+      );
       expect((await repo.listPrograms()).truncated, isTrue);
-      final (below, _) = _repo(_list(ProgramRepository.maxRows - 1));
-      expect((await below.listPrograms()).truncated, isFalse);
+    });
+
+    test('başlık yok: 200 satır bile kesilmiş sayılmaz', () async {
+      final (repo, _) = _repo(_list(ProgramRepository.maxRows));
+      final slice = await repo.listPrograms();
+      expect(slice.items, hasLength(ProgramRepository.maxRows));
+      expect(slice.truncated, isFalse);
+    });
+
+    test('başlık değeri true değilse kesilmiş sayılmaz', () async {
+      for (final value in ['false', 'TRUE', '1', '']) {
+        final (repo, _) = _repo(
+          _list(2),
+          headers: {
+            'X-Result-Truncated': [value],
+          },
+        );
+        expect(
+          (await repo.listPrograms()).truncated,
+          isFalse,
+          reason: 'değer "$value"',
+        );
+      }
+    });
+
+    test('başlık birden çok değer taşırsa kesilmiş sayılmaz', () async {
+      final (repo, _) = _repo(
+        _list(2),
+        headers: {
+          'X-Result-Truncated': ['true', 'true'],
+        },
+      );
+      expect((await repo.listPrograms()).truncated, isFalse);
     });
 
     test('program.not_authorized → ApiError', () async {

@@ -199,7 +199,7 @@ void main() {
       for (final src in [
         "final body = {'password': password};",
         "final body = <String, Object?>{'password': password};",
-        "final body = <String, dynamic>{};",
+        'final body = <String, dynamic>{};',
         "final body = const {'a': 1};",
         "final body = {if (c) 'k': v};",
         "final body = {for (final x in xs) 'k\$x': x};",

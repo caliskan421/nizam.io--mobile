@@ -9,7 +9,9 @@ import '../core/network/connectivity_link.dart';
 import '../core/preferences/locale_controller.dart';
 import '../core/preferences/theme_mode_controller.dart';
 import '../core/providers.dart';
+import '../core/scope/scope_store.dart';
 import '../core/server/server_binding.dart';
+import '../core/session/session_state.dart';
 import 'app.dart';
 import 'di/composition.dart';
 
@@ -72,4 +74,17 @@ Future<void> startup(ProviderContainer container) async {
   if (binding is BindingVerified) {
     await session.restore(instanceId: binding.info.instanceId);
   }
+  // Son seçili kapsam (ADR-0003 karar 20): YALNIZ oturum etkin olarak geri yüklendiyse ve
+  // kayıt o anki hesap + kurulumla birebir eşleşirse uygulanır; aksi hâlde kayıt silinir ve
+  // seçim yapılmaz (örtük varsayılan kapsam yok, C-04).
+  final scope = container.read(scopeControllerProvider);
+  final s = session.state.value;
+  if (binding is BindingVerified && s is SessionActive) {
+    await scope.restore(
+      ScopeOwner(accountId: s.accountId, instanceId: binding.info.instanceId),
+    );
+  } else {
+    scope.clear();
+  }
+  await scope.settled;
 }

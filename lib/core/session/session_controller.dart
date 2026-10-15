@@ -51,6 +51,17 @@ class SessionController {
   TokenPair? _pair;
   Future<String>? _inflight;
 
+  /// Çift yazımlarını (bayrak güncellemesi, yenileme sonucu) sıraya sokar: bayrak yazımı,
+  /// sürmekte olan yenilemenin sonucunu geçersizleştirmez ve eski belirteçleri yenisinin
+  /// üzerine yazamaz (CX-W51-2). Her adım güncel çifti kendi çalışma anında okur.
+  Future<void> _writeTail = Future<void>.value();
+
+  Future<T> _serial<T>(Future<T> Function() op) {
+    final run = _writeTail.then((_) => op());
+    _writeTail = run.then((_) {}, onError: (Object _) {});
+    return run;
+  }
+
   /// Oturum nesli (CX-r1-Ö-01): [establish], [clear] ve yeniden giriş gerektiren son her
   /// geçişte artar. Bekleyen bir giriş/yenileme/me yanıtı ancak başladığı nesil hâlâ geçerliyse
   /// (ve yenilemede kaynak çift aynıysa) uygulanır; aksi hâlde getirdiği çift depoya YAZILMAZ,
@@ -124,15 +135,19 @@ class SessionController {
 
   /// Zorunlu parola değişikliği bayrağı (`identity.force_password_change_required` görülünce).
   /// [generation]: bayrağı getiren isteğin başladığı nesil (başka oturuma uygulanmaz).
-  Future<void> markForcePasswordChange(bool value, {int? generation}) async {
-    if (generation != null && generation != _generation) return;
-    final p = _pair;
-    if (p == null || p.forcePasswordChange == value) return;
-    final next = p.copyWith(forcePasswordChange: value);
-    await _attempt(() => _store.save(next));
-    if (!identical(_pair, p)) return;
-    _set(next, _active(next));
-  }
+  ///
+  /// Yenileme ile aynı koordinasyondadır ([_serial]): bayrak her zaman o andaki EN GÜNCEL çift
+  /// üzerinde birleştirilir; süren yenileme sonucu bayrak yüzünden atılmaz.
+  Future<void> markForcePasswordChange(bool value, {int? generation}) =>
+      _serial(() async {
+        if (generation != null && generation != _generation) return;
+        final p = _pair;
+        if (p == null || p.forcePasswordChange == value) return;
+        final next = p.copyWith(forcePasswordChange: value);
+        await _attempt(() => _store.save(next));
+        if (!identical(_pair, p)) return;
+        _set(next, _active(next));
+      });
 
   /// Yerel oturumu kapatır (sunucu çıkışından sonra ya da çıkış başarısız olsa da).
   Future<void> clear() async {
@@ -166,8 +181,13 @@ class SessionController {
   }
 
   /// Bekleyen sonuç hâlâ geçerli mi? Değilse hiçbir yerel durum/depo değiştirilmez.
+  /// Çift kimliği belirteç dizgeleriyle karşılaştırılır (bayrak farkı çifti değiştirmiş sayılmaz).
   void _ensureCurrent(int gen, TokenPair p) {
-    if (gen != _generation || !identical(_pair, p)) {
+    final cur = _pair;
+    if (gen != _generation ||
+        cur == null ||
+        cur.accessToken != p.accessToken ||
+        cur.refreshToken != p.refreshToken) {
       _burnt.add(p.refreshToken);
       Log.info('oturum: geçersizleşmiş yenileme sonucu atıldı');
       throw ApiError(ClientErrorCode.sessionEnded);
@@ -224,32 +244,36 @@ class SessionController {
       await _end(ReauthReason.refreshAmbiguous);
       throw ApiError(ClientErrorCode.reauthRequired);
     }
-    final next = TokenPair(
-      accountId: r.accountId,
-      accessToken: access,
-      accessExpiresAt: r.accessExpiresAt,
-      refreshToken: refresh,
-      refreshExpiresAt: r.refreshExpiresAt,
-      forcePasswordChange: p.forcePasswordChange,
-      instanceId: p.instanceId,
-    );
-    if (!await _attempt(() => _store.save(next))) {
+    final result = await _serial<String>(() async {
       _ensureCurrent(gen, p);
-      // Yeni çift kalıcılaşmadı: oturum etkin SAYILMAZ (CX-Ö-04). Eski yenileme belirteci
-      // sunucuda tüketildi; depodan silinir — silinemezse yazma-öncesi işaret açılışta
-      // geri yüklemeyi engeller, bu süreçte de "yanmış" listesi gönderimi engeller.
-      Log.warn('oturum: yeni çift depoya yazılamadı; yeniden giriş gerekli');
-      await _end(ReauthReason.secureStorageFailure);
-      throw ApiError(ClientErrorCode.secureStorageError);
-    }
-    _burnt.add(p.refreshToken);
-    // Yazma sürerken temizlendiyse temizliğin silmesi bu yazmadan sonra sıralanmıştır; işarete
-    // dokunulmaz (yeni oturumun işareti olabilir).
-    _ensureCurrent(gen, p);
-    await _attempt(_store.clearRefreshInFlight);
-    _ensureCurrent(gen, p);
-    _set(next, _active(next));
-    return access;
+      // Bayrak, bu arada güncellenmiş olabilecek en güncel çiftten alınır.
+      final next = TokenPair(
+        accountId: r.accountId,
+        accessToken: access,
+        accessExpiresAt: r.accessExpiresAt,
+        refreshToken: refresh,
+        refreshExpiresAt: r.refreshExpiresAt,
+        forcePasswordChange: _pair!.forcePasswordChange,
+        instanceId: p.instanceId,
+      );
+      if (!await _attempt(() => _store.save(next))) {
+        _ensureCurrent(gen, p);
+        // Yeni çift kalıcılaşmadı: oturum etkin SAYILMAZ (CX-Ö-04). Eski yenileme belirteci
+        // sunucuda tüketildi; depodan silinir — silinemezse yazma-öncesi işaret açılışta
+        // geri yüklemeyi engeller, bu süreçte de "yanmış" listesi gönderimi engeller.
+        Log.warn('oturum: yeni çift depoya yazılamadı; yeniden giriş gerekli');
+        await _end(ReauthReason.secureStorageFailure);
+        throw ApiError(ClientErrorCode.secureStorageError);
+      }
+      _burnt.add(p.refreshToken);
+      // Yazma sürerken temizlendiyse temizliğin silmesi bu yazmadan sonra sıralanmıştır.
+      _ensureCurrent(gen, p);
+      _set(next, _active(next));
+      return access;
+    });
+    // İşarete yalnız aynı oturum nesli sürüyorsa dokunulur (yeni oturumun işareti olabilir).
+    if (gen == _generation) await _attempt(_store.clearRefreshInFlight);
+    return result;
   }
 
   Future<void> _end(ReauthReason reason) async {

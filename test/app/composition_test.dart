@@ -24,6 +24,7 @@ import 'package:nizamio/core/session/token_store.dart';
 import 'package:nizamio/core/storage/preference_store.dart';
 import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/features/identity/identity.dart';
+import 'package:nizamio/features/scope/scope.dart';
 
 import '../support/fake_backend.dart';
 import '../support/harness.dart';
@@ -88,6 +89,7 @@ final portProviders = <String, ProviderBase<Object?>>{
   'connectivityMonitorProvider': connectivityMonitorProvider,
   'localeControllerProvider': localeControllerProvider,
   'identityServiceProvider': identityServiceProvider,
+  'scopeServiceProvider': scopeServiceProvider,
 };
 
 Set<String> discoverPorts() {

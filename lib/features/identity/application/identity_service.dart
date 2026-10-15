@@ -2,6 +2,7 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/server/server_binding.dart';
 import '../../../core/session/session_controller.dart';
+import '../../../core/session/session_state.dart';
 import '../../../core/session/token_pair.dart';
 import '../data/identity_repository.dart';
 import '../domain/current_account.dart';
@@ -78,6 +79,44 @@ class IdentityService {
       }
       rethrow;
     }
+  }
+
+  /// Parola değiştirme (`POST /v1/auth/password`). Oturum AÇIK değilse (yok, yeniden giriş
+  /// gerekli) ağa hiçbir istek çıkmaz. Yanıt belirteç taşımaz: erişim/yenileme belirteçleri
+  /// aynen kalır, yalnız zorunlu-değişiklik bayrağı düşer (faz `passwordChangeRequired` →
+  /// `sessionOpen`). Yanıt beklenirken çıkış / yeniden bağlanma / bağ yeniden doğrulaması
+  /// olduysa sonuç oturuma UYGULANMAZ ([login] emsali). Dönen: sunucunun düşürdüğü diğer
+  /// oturum sayısı.
+  Future<int> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    switch (session.state.value) {
+      case SessionActive():
+        break;
+      case SessionReauthRequired():
+        throw ApiError(ClientErrorCode.reauthRequired);
+      case SessionNone():
+        throw ApiError(ClientErrorCode.notSignedIn);
+    }
+    final bound = binding.current;
+    if (bound is! BindingVerified) {
+      throw ApiError(ClientErrorCode.serverNotVerified);
+    }
+    final generation = session.generation;
+    final revoked = await _repo().changePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+    );
+    final now = binding.current;
+    if (now is! BindingVerified ||
+        now.info.address != bound.info.address ||
+        now.info.instanceId != bound.info.instanceId ||
+        session.generation != generation) {
+      throw ApiError(ClientErrorCode.sessionEnded);
+    }
+    await session.markForcePasswordChange(false, generation: generation);
+    return revoked;
   }
 
   /// Çıkış: sunucu çıkışı denenir; sonucu ne olursa olsun yerel belirteçler silinir.

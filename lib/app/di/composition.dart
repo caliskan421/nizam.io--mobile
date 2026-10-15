@@ -14,6 +14,7 @@ import '../../core/session/session_controller.dart';
 import '../../core/storage/preference_store.dart';
 import '../../core/storage/secure_store.dart';
 import '../../features/identity/identity_module.dart';
+import '../../features/scope/scope_module.dart';
 import 'dependencies.dart';
 
 /// Bileşim kökü: get_it nesne grafiği + onu Riverpod portlarına bağlayan ProviderContainer.
@@ -51,6 +52,7 @@ class Composition {
       locator,
       apiDio: () => container.read(apiDioProvider),
     );
+    registerScopeModule(locator, apiDio: () => container.read(apiDioProvider));
     container = ProviderContainer(
       // Otomatik yeniden deneme YOK (A3 / CLAUDE.md): Riverpod 3 varsayılanı hata veren
       // sağlayıcıyı kendiliğinden yeniden çalıştırır; yeniden deneme yalnız kullanıcı dokunuşuyla.
@@ -75,6 +77,7 @@ class Composition {
           locator<SessionController>(),
         ),
         ...identityOverrides(locator),
+        ...scopeOverrides(locator),
       ],
     );
     return Composition._(locator, container);

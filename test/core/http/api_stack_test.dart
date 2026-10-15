@@ -335,6 +335,34 @@ void main() {
       },
     );
 
+    test('401 identity.credentials_invalid → yenileme YOK, istek tek kez, hata aynen', () async {
+      h.backend.handler = (r) => r.path == '/v1/me'
+          ? envelope(401, 'identity.credentials_invalid')
+          : handler(r);
+      await expectLater(
+        h.identity.me(),
+        apiError('identity.credentials_invalid'),
+      );
+      expect(h.backend.count('POST', '/v1/auth/refresh'), 0);
+      expect(h.backend.count('GET', '/v1/me'), 1);
+      expect(h.read(sessionStateProvider), isA<SessionActive>());
+      expect(h.store.values[TokenStore.key], contains('refresh-token-1'));
+    });
+
+    test('gövdesiz 401 → mevcut davranış: yenileme + tek tekrar', () async {
+      var first = true;
+      h.backend.handler = (r) {
+        if (r.path == '/v1/me' && first) {
+          first = false;
+          return ResponseBody.fromString('', 401);
+        }
+        return handler(r);
+      };
+      expect((await h.identity.me()).accountId, 'acc-1');
+      expect(h.backend.count('POST', '/v1/auth/refresh'), 1);
+      expect(h.backend.count('GET', '/v1/me'), 2);
+    });
+
     test('eşzamanlı üç 401 → tek yenileme', () async {
       meStatus = 401;
       final results = await Future.wait([

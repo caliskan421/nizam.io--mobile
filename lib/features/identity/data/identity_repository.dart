@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../core/api/generated/clients/identity_client.dart';
+import '../../../core/api/generated/models/change_password_request.dart';
 import '../../../core/api/generated/models/login_request.dart';
 import '../../../core/api/generated/models/login_response.dart';
 import '../../../core/api/generated/models/me_response.dart';
@@ -32,6 +33,24 @@ class IdentityRepository {
 
   /// `POST /v1/auth/logout` — bu oturumu ve mobil eşli yenileme soyunu kapatır (TF-ID-07).
   Future<void> logout() => apiCall(_client.logout);
+
+  /// `POST /v1/auth/password` — yanıtta belirteç YOKTUR (mevcut oturum aynen sürer); sunucu
+  /// hesabın DİĞER oturumlarını düşürür. Dönen: düşürülen oturum sayısı. Parolalar yalnız
+  /// istek gövdesine girer; hiçbir yerde saklanmaz, `toString`'e yazılmaz.
+  Future<int> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final r = await apiCall(
+      () => _client.changePassword(
+        body: ChangePasswordRequest(
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+        ),
+      ),
+    );
+    return r.revokedSessions;
+  }
 
   /// `GET /v1/me`.
   Future<CurrentAccount> me() async => _account(await apiCall(_client.me));

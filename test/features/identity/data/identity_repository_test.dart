@@ -1,14 +1,19 @@
 // identity data katmanı: üretilmiş DTO → domain varlığı eşlemesi (sınır kuralı A1).
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/features/identity/data/identity_repository.dart';
 import 'package:nizamio/features/identity/domain/current_account.dart';
 
 /// Tek yanıtlı sahte bağdaştırıcı.
 class _Adapter implements HttpClientAdapter {
-  _Adapter(this.body);
+  _Adapter(this.body, [this.status = 200]);
 
   final String body;
+  final int status;
 
   @override
   Future<ResponseBody> fetch(
@@ -17,7 +22,7 @@ class _Adapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async => ResponseBody.fromString(
     body,
-    200,
+    status,
     headers: {
       Headers.contentTypeHeader: [Headers.jsonContentType],
     },
@@ -27,9 +32,9 @@ class _Adapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-IdentityRepository _repo(String body) => IdentityRepository(
+IdentityRepository _repo(String body, {int status = 200}) => IdentityRepository(
   Dio(BaseOptions(baseUrl: 'https://api.test'))
-    ..httpClientAdapter = _Adapter(body),
+    ..httpClientAdapter = _Adapter(body, status),
 );
 
 void main() {
@@ -67,4 +72,86 @@ void main() {
       expect(g.toString(), isNot(contains('gizli')));
     },
   );
+
+  group('changePassword', () {
+    test(
+      'POST /v1/auth/password: gövde alanları ve revoked_sessions',
+      () async {
+        final adapter = _Recording('{"revoked_sessions":3}');
+        final repo = IdentityRepository(
+          Dio(BaseOptions(baseUrl: 'https://api.test'))
+            ..httpClientAdapter = adapter,
+        );
+        final revoked = await repo.changePassword(
+          currentPassword: 'eski-p',
+          newPassword: 'yeni-p',
+        );
+        expect(revoked, 3);
+        expect(adapter.path, '/v1/auth/password');
+        expect(adapter.body, {
+          'current_password': 'eski-p',
+          'new_password': 'yeni-p',
+        });
+      },
+    );
+
+    test('belirteç içermeyen yanıt; sunucu hatası ApiError olur', () async {
+      await expectLater(
+        _repo(
+          '{"code":"identity.credentials_invalid","message":"x","request_id":"r"}',
+          status: 401,
+        ).changePassword(currentPassword: 'a', newPassword: 'b'),
+        throwsA(
+          isA<ApiError>().having(
+            (e) => e.code,
+            'code',
+            'identity.credentials_invalid',
+          ),
+        ),
+      );
+    });
+
+    test('ayrıştırılamayan yanıt → client.invalid_response', () async {
+      await expectLater(
+        _repo('{"x":1}').changePassword(currentPassword: 'a', newPassword: 'b'),
+        throwsA(
+          isA<ApiError>().having(
+            (e) => e.code,
+            'code',
+            ClientErrorCode.invalidResponse,
+          ),
+        ),
+      );
+    });
+  });
+}
+
+/// İsteğin yolunu ve gövdesini kaydeden sahte bağdaştırıcı.
+class _Recording implements HttpClientAdapter {
+  _Recording(this.response);
+
+  final String response;
+  String? path;
+  Object? body;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<List<int>>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    path = options.uri.path;
+    final bytes = await requestStream!.expand((c) => c).toList();
+    body = jsonDecode(utf8.decode(bytes));
+    return ResponseBody.fromString(
+      response,
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
 }

@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/providers.dart';
@@ -261,5 +262,140 @@ void main() {
       await h.identity.logout();
       expect(h.backend.requests, isEmpty);
     });
+  });
+
+  group('changePassword', () {
+    Future<ResponseBody> forced(Seen r) async {
+      switch ('${r.method} ${r.path}') {
+        case 'POST /v1/auth/login':
+          return jsonResponse(200, loginBody('1', force: true));
+        case 'POST /v1/auth/password':
+          return jsonResponse(200, {'revoked_sessions': 2});
+      }
+      return _ok(r);
+    }
+
+    test('oturum yok → notSignedIn, ağa istek çıkmaz', () async {
+      final h = await _verified(forced);
+      final before = h.backend.requests.length;
+      await expectLater(
+        h.identity.changePassword(currentPassword: 'a', newPassword: 'b'),
+        throwsA(apiCode(ClientErrorCode.notSignedIn)),
+      );
+      expect(h.backend.requests.length, before);
+    });
+
+    test('yeniden giriş gerekli → reauthRequired, istek çıkmaz', () async {
+      final h = await _verified(forced);
+      await h.identity.login(email: 'a@b.test', password: 'p');
+      // Yarım kalmış yenileme işareti: açılışta çift geri yüklenmez → yeniden giriş gerekli.
+      await h.store.write(TokenStore.inflightKey, '1');
+      await h.read(sessionControllerProvider).restore(instanceId: 'inst-1');
+      expect(h.read(sessionStateProvider), isA<SessionReauthRequired>());
+      final before = h.backend.requests.length;
+      await expectLater(
+        h.identity.changePassword(currentPassword: 'a', newPassword: 'b'),
+        throwsA(apiCode(ClientErrorCode.reauthRequired)),
+      );
+      expect(h.backend.requests.length, before);
+    });
+
+    test('başarı: bayrak düşer (passwordChangeRequired → sessionOpen), belirteçler AYNEN kalır', () async {
+      final h = await _verified(forced);
+      await h.identity.login(email: 'a@b.test', password: 'p');
+      expect(h.read(appPhaseProvider), AppPhase.passwordChangeRequired);
+      final session = h.read(sessionControllerProvider);
+      final before = session.debugPair!;
+      final storedBefore = h.store.values[TokenStore.key];
+
+      final revoked = await h.identity.changePassword(
+        currentPassword: 'eski',
+        newPassword: 'yeni',
+      );
+
+      expect(revoked, 2);
+      expect(h.read(appPhaseProvider), AppPhase.sessionOpen);
+      final after = session.debugPair!;
+      expect(after.accessToken, before.accessToken);
+      expect(after.refreshToken, before.refreshToken);
+      expect(after.forcePasswordChange, isFalse);
+      // Depodaki çift de aynı belirteçleri taşır (yalnız bayrak değişti).
+      final stored = await TokenStore(h.store).load();
+      expect(stored!.accessToken, before.accessToken);
+      expect(stored.refreshToken, before.refreshToken);
+      expect(storedBefore, isNotNull);
+      expect(h.backend.count('POST', '/v1/auth/refresh'), 0);
+      final req = h.backend.requests.last;
+      expect(req.path, '/v1/auth/password');
+      expect(req.header('Authorization'), 'Bearer ${before.accessToken}');
+      expect(req.body, {'current_password': 'eski', 'new_password': 'yeni'});
+    });
+
+    test('sunucu hatası: ApiError, bayrak ve belirteçler değişmez', () async {
+      final h = await _verified((r) {
+        if (r.path == '/v1/auth/password') {
+          return envelope(422, 'identity.input_invalid');
+        }
+        return forced(r);
+      });
+      await h.identity.login(email: 'a@b.test', password: 'p');
+      final before = h.read(sessionControllerProvider).debugPair!;
+      await expectLater(
+        h.identity.changePassword(currentPassword: 'a', newPassword: 'b'),
+        throwsA(apiCode('identity.input_invalid')),
+      );
+      expect(h.read(appPhaseProvider), AppPhase.passwordChangeRequired);
+      expect(
+        h.read(sessionControllerProvider).debugPair!.accessToken,
+        before.accessToken,
+      );
+    });
+
+    test('yanıt beklenirken çıkış olursa sonuç oturuma uygulanmaz', () async {
+      final gate = Completer<void>();
+      final h = await _verified((r) async {
+        if (r.path == '/v1/auth/password') await gate.future;
+        return forced(r);
+      });
+      await h.identity.login(email: 'a@b.test', password: 'p');
+      final pending = h.identity.changePassword(
+        currentPassword: 'a',
+        newPassword: 'b',
+      );
+      final expectation = expectLater(
+        pending,
+        throwsA(apiCode(ClientErrorCode.sessionEnded)),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      await h.read(sessionControllerProvider).clear();
+      gate.complete();
+      await expectation;
+      expect(h.read(sessionStateProvider), isA<SessionNone>());
+      expect(h.store.values.containsKey(TokenStore.key), isFalse);
+    });
+
+    test(
+      'bağ yok → serverNotVerified (oturum açıksa bile istek yok)',
+      () async {
+        final h = await _verified(forced);
+        await h.identity.login(email: 'a@b.test', password: 'p');
+        // Bağ yeniden doğrulanıyor: doğrulanmış sayılmaz.
+        final gate = Completer<void>();
+        h.backend.handler = (r) async {
+          await gate.future;
+          return forced(r);
+        };
+        final verifying = h.read(serverBindingProvider).verify(testUrl);
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        final before = h.backend.requests.length;
+        await expectLater(
+          h.identity.changePassword(currentPassword: 'a', newPassword: 'b'),
+          throwsA(apiCode(ClientErrorCode.serverNotVerified)),
+        );
+        expect(h.backend.requests.length, before);
+        gate.complete();
+        await verifying;
+      },
+    );
   });
 }

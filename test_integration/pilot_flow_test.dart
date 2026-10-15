@@ -92,7 +92,7 @@ void main() {
       // 3. Test kurulumu: benzersiz adlı program (S1 createProgram, yönetici API'si).
       final name = 'Pilot ${DateTime.now().microsecondsSinceEpoch}';
       final created = await ProgramClient(c.read(apiDioProvider)!)
-          .createProgram(body: CreateProgramRequest(name: name, year: 2026));
+          .createProgram(body: CreateProgramRequest(name: name));
       expect(created.created, isTrue);
 
       // 4. Program listesi (ProgramListController → ScopeService.programs).
@@ -116,7 +116,8 @@ void main() {
       final current = await scope.currentProgram();
       expect(current.id, created.programId);
       expect(current.name, name);
-      expect(current.year, 2026);
+      // `year` doğrulanmaz: isteğe bağlı alan; v0.1.0-api S2 yanıtında dönmüyor. Kapsam başlığı
+      // kanıtı id + name ile tamdır (sözleşmenin garanti ettiği alanlar).
       expect(proxy.count('GET', '/v1/program'), 1);
 
       // 7. Kapsamı değiştir → sessionOpen; seçim yokken S2 isteği ağa ÇIKMAZ.

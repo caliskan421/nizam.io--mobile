@@ -16,7 +16,8 @@ import '../nz_size.dart';
 /// Veri [load] geri çağrısıyla gelir (servis/repository/Riverpod bilinmez); ilk sayfa
 /// `PageRequest(limit: pageSize)`, sonrakiler `PageRequest(limit: pageSize, cursor: …)` ile istenir.
 ///
-/// - Sonraki sayfa isteği aynı anda en çok bir tanedir.
+/// - Sonraki sayfa isteği aynı anda en çok bir tanedir; ilk sayfa (yenileme dahil) sürerken
+///   ek sayfa istenmez, yenileme başlarken imleç sıfırlanır, her istek kendi neslini taşır.
 /// - Otomatik yeniden deneme YOKTUR: ilk sayfa hatası [NzErrorState], sonraki sayfa hatası alt
 ///   satırda [NzErrorState.inline]; yeniden deneme yalnız dokunuşla.
 /// - Aşağı çek yenile ilk sayfayı yeniden yükler (imleç sıfırlanır). Yenileme hatası mevcut
@@ -57,6 +58,10 @@ class _NzPagedListState<T> extends State<NzPagedList<T>> {
   // Yenileme/yeniden yükleme sonrası eski isteklerin sonucu yok sayılır.
   int _generation = 0;
 
+  // İlk sayfa isteği (yükleyici gösterilsin ya da gösterilmesin) sürerken ek sayfa istenmez;
+  // görsel [_loadingFirst] durumundan bağımsızdır.
+  bool _firstInFlight = false;
+
   bool get _hasMore => _cursor != null;
 
   @override
@@ -70,6 +75,9 @@ class _NzPagedListState<T> extends State<NzPagedList<T>> {
     final generation = ++_generation;
     setState(() {
       if (showLoader) _loadingFirst = true;
+      _firstInFlight = true;
+      // Eski imleç yenileme boyunca kullanılamaz; uçuştaki ek sayfa sonucu nesil ile atılır.
+      _cursor = null;
       _loadingMore = false;
       _firstError = null;
       _moreError = null;
@@ -82,6 +90,7 @@ class _NzPagedListState<T> extends State<NzPagedList<T>> {
         _cursor = slice.nextCursor;
         _truncated = slice.truncated;
         _loadingFirst = false;
+        _firstInFlight = false;
       });
     } on Object catch (error) {
       if (!mounted || generation != _generation) return;
@@ -91,6 +100,7 @@ class _NzPagedListState<T> extends State<NzPagedList<T>> {
         _truncated = false;
         _firstError = toApiError(error);
         _loadingFirst = false;
+        _firstInFlight = false;
       });
     }
   }
@@ -98,6 +108,7 @@ class _NzPagedListState<T> extends State<NzPagedList<T>> {
   Future<void> _loadMore() async {
     if (_loadingMore ||
         _loadingFirst ||
+        _firstInFlight ||
         _cursor == null ||
         _moreError != null) {
       return;
@@ -132,7 +143,9 @@ class _NzPagedListState<T> extends State<NzPagedList<T>> {
   // Son satır çizildiğinde (liste kısa ya da sona gelindi) sonraki sayfa istenir; yineleme
   // koruması [_loadingMore] ve [_moreError] ile.
   void _maybeLoadMore() {
-    if (!_hasMore || _loadingMore || _moreError != null) return;
+    if (!_hasMore || _loadingMore || _firstInFlight || _moreError != null) {
+      return;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) unawaited(_loadMore());
     });

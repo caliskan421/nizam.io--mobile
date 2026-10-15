@@ -11,6 +11,7 @@ import '../core/security/privacy_mask.dart';
 import '../core/ui/theme/app_theme.dart';
 import 'dev/catalog_entry_button.dart';
 import 'router/router.dart';
+import 'router/shell.dart' show openDevCatalog;
 
 /// Minimal kabuk: tema token'ları, TR yerelleştirme, durum makinesinden türetilen router ve
 /// arka plan maskesi. Ekran yoktur (D-0174).
@@ -55,10 +56,7 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
           ],
         );
 
-  void _openCatalog() {
-    if (_router.routeInformationProvider.value.uri.path == catalogPath) return;
-    _router.push(catalogPath);
-  }
+  void _openCatalog() => openDevCatalog(_router);
 
   @override
   Widget build(BuildContext context) {

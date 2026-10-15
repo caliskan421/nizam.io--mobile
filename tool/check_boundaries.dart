@@ -1,6 +1,6 @@
 // Kullanım: dart run tool/check_boundaries.dart  (CI ve `make lint`)
 // lib/ altındaki her .dart dosyasına tool/boundaries.dart (sözdizimsel) ve tool/api_surface.dart
-// (tip çözümlemeli A2/A3, G3, N1) kurallarını uygular; ihlal varsa 1 döner.
+// (tip çözümlemeli A2/A3, G3, N1, U1–U6) kurallarını uygular; ihlal varsa 1 döner.
 import 'dart:io';
 
 import 'api_surface.dart';
@@ -33,7 +33,12 @@ Future<void> main() async {
     ...await checkServiceConstruction('.'),
     // N1: tip çözümlemeli gezinme kimlik kuralı.
     ...await checkNavigation('.'),
+    // U1–U6: tip çözümlemeli (typedef/önek/kalıtım/örtük üye atlatmaları).
+    ...await checkUiResolved('.'),
   ];
+  // Sözdizimsel ve tip çözümlemeli denetim aynı yeri iki kez raporlayabilir.
+  final seen = <String>{};
+  violations.retainWhere((v) => seen.add('${v.rule}|${v.path}|${v.line}'));
   for (final v in violations) {
     stderr.writeln(v);
   }

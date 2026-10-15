@@ -268,6 +268,23 @@ void main() {
         'typedef Svc = ZzService;\nfinal f = Svc.new;',
         {'G3'},
       ),
+      'alt sınıf + super (Codex 6 G3)': (
+        'class Local extends ZzService { Local() : super(); }',
+        {'G3'},
+      ),
+      'alt sınıf adlı super (Codex 6 G3)': (
+        'class Local extends ZzService { Local() : super.named(); }',
+        {'G3'},
+      ),
+      'alt sınıf typedef üzerinden (Codex 6 G3)': (
+        'typedef Svc = ZzService;\nclass Local extends Svc { Local(); }',
+        {'G3'},
+      ),
+      'yönlendirmeli fabrika (Codex 6 G3)': (
+        'class Base { Base(); factory Base.make() = ZzFooService; }\n'
+            'class ZzFooService extends Base {}',
+        {'G3'},
+      ),
       'ad tabanlı değil: Service ile bitmeyen sınıf serbest': (
         'final a = ZzHelper();',
         <String>{},
@@ -433,9 +450,12 @@ void main() {
     test('lib/app/router/** içinde dize yol ve extra serbest', () {
       expect(got.where((v) => v.path.startsWith('lib/app/router/')), isEmpty);
     });
-    test('kapsam dışı (core) denetlenmez', () {
-      expect(got.where((v) => v.path.startsWith('lib/core/')), isEmpty);
-    });
+    test(
+      'lib/core/** kapsamda: dolaylı dize gezinme yardımcısı (Codex 6 N1)',
+      () {
+        expect(got.where((v) => v.path == 'lib/core/zz_nav.dart'), isNotEmpty);
+      },
+    );
     test('derleme hatası -> A0 (sessiz temiz değil)', () async {
       final v = await checkNavigation(
         '.',
@@ -446,6 +466,125 @@ void main() {
     });
     test('gerçek lib/ ağacında ihlal yok', () async {
       expect(await checkNavigation('.'), isEmpty);
+    });
+  });
+
+  group('U1–U6 tip çözümlemeli (Codex 6)', () {
+    const alias = 'core/ui/theme/zz_alias.dart';
+    const pres = 'features/zz/presentation/pages';
+    const imports =
+        "import 'package:flutter/material.dart';\n"
+        "import 'package:flutter/widgets.dart' as m;\n"
+        "import 'package:nizamio/core/ui/theme/zz_alias.dart';\n";
+    const zx =
+        'class Zx extends ThemeExtension<Zx> {\n'
+        '  @override Zx copyWith() => this;\n'
+        '  @override Zx lerp(ThemeExtension<Zx>? o, double t) => this;\n}\n';
+    final cases = <String, (String, Set<String>)>{
+      'U1: yerel SizedBox + önekli Flutter SizedBox': (
+        'class SizedBox { SizedBox({double? height}); }\n'
+            'final w = m.SizedBox(height: 8);',
+        {'U1'},
+      ),
+      'U1: yerel SizedBox + önekli const kare': (
+        'class SizedBox { SizedBox({double? height}); }\n'
+            'final w = const m.SizedBox.square(dimension: 8);',
+        {'U1'},
+      ),
+      'U1 pozitif: yalnız yerel SizedBox serbest': (
+        'class SizedBox { SizedBox({double? height}); }\n'
+            'final w = SizedBox(height: 8);',
+        <String>{},
+      ),
+      'U1 pozitif: çocuklu Flutter SizedBox serbest': (
+        'final w = m.SizedBox(height: 8, child: const Text(""));',
+        <String>{},
+      ),
+      'U2: typedef C = Color çağrısı': ('final c = C(0xFF000000);', {'U2'}),
+      'U2: typedef Color adlı yapıcı': (
+        'final c = C.fromARGB(1, 2, 3, 4);',
+        {'U2'},
+      ),
+      'U2: typedef Color tear-off': ('final f = C.new;', {'U2'}),
+      'U2: typedef Colors.x': ('final c = Cs.red;', {'U2'}),
+      'U2: önekli Color': ('final c = m.Color(1);', {'U2'}),
+      'U3: typedef T = TextStyle': ('final t = T(fontSize: 3);', {'U3'}),
+      'U6: typedef S = Scaffold': (
+        'final w = S(body: m.SizedBox.shrink());',
+        {'U6'},
+      ),
+      'U4: typedef M = MediaQuery.of': (
+        'Object f(BuildContext context) => M.of(context);',
+        {'U4'},
+      ),
+      'U4 pozitif: sizeOf serbest': (
+        'Object f(BuildContext context) => M.sizeOf(context);',
+        <String>{},
+      ),
+      'U5: extension içinde örtük extensions[...]': (
+        '${zx}extension E on ThemeData { Object? get x => extensions[Zx]; }',
+        {'U5'},
+      ),
+      'U5: örtük extension<T>() çağrısı': (
+        '${zx}extension E on ThemeData { Object? get x => extension<Zx>(); }',
+        {'U5'},
+      ),
+      'U5: örtük tear-off final f = extension<T>': (
+        '${zx}extension E on ThemeData {\n'
+            '  Object? get x { final f = extension<Zx>; return f; }\n}',
+        {'U5'},
+      ),
+      'U5: typedef ThemeData üzerinden extensions': (
+        'typedef TD = ThemeData;\nObject? f(TD t) => t.extensions;',
+        {'U5'},
+      ),
+      'U5 pozitif: ThemeData(extensions:) ve ilgisiz extension adı': (
+        '${zx}final t = ThemeData(extensions: [Zx()]);\n'
+            'class Other { Object? extension() => null; Object? get extensions => null; }\n'
+            'Object? f(Other o) => o.extension() ?? o.extensions;',
+        <String>{},
+      ),
+    };
+    late List<Violation> got;
+    setUpAll(() async {
+      got = await checkUiResolved(
+        '.',
+        overlays: {
+          alias:
+              "import 'package:flutter/material.dart';\n"
+              'typedef C = Color;\ntypedef T = TextStyle;\n'
+              'typedef S = Scaffold;\ntypedef Cs = Colors;\n'
+              'typedef M = MediaQuery;\n',
+          for (final (i, e) in cases.entries.indexed)
+            '$pres/p$i.dart': '$imports${e.value.$1}\n',
+          // izinli dosya (tema dizini): renk/metin stili serbest.
+          'core/ui/theme/zz_use.dart':
+              "import 'zz_alias.dart';\nfinal c = C(1);\nfinal t = T();\n",
+        },
+      );
+    });
+    for (final (i, e) in cases.entries.indexed) {
+      test(e.key, () {
+        final rules = got
+            .where((v) => v.path == 'lib/$pres/p$i.dart')
+            .map((v) => v.rule)
+            .toSet();
+        expect(rules, e.value.$2, reason: got.join('\n'));
+      });
+    }
+    test('izinli tema dizini ve alias dosyası serbest', () {
+      expect(got.where((v) => v.path.startsWith('lib/core/')), isEmpty);
+    });
+    test('derleme hatası → A0 (sessiz temiz değil)', () async {
+      final v = await checkUiResolved(
+        '.',
+        overlays: {'$pres/broken.dart': 'final a = Yok();'},
+        only: ['$pres/broken.dart'],
+      );
+      expect(v.map((e) => e.rule).toSet(), {'A0'});
+    });
+    test('gerçek lib/ ağacında ihlal yok', () async {
+      expect(await checkUiResolved('.'), isEmpty);
     });
   });
 

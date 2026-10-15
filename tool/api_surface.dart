@@ -30,7 +30,7 @@
 //       ile biten yapıcı çağrısı ya da tear-off'u yasak (`checkServiceConstruction`): takma
 //       ad, typedef, adlı/fabrika yapıcı ve önekli import hedef sınıfa çözülür.
 //
-//   N1  `lib/features/**` ve `lib/app/**` (yalnız `lib/app/router/**` hariç) içinde go_router
+//   N1  `lib/features/**`, `lib/core/**` ve `lib/app/**` (yalnız `lib/app/router/**` hariç) içinde go_router
 //       `GoRouterHelper` uzantısı / `GoRouter` üzerinde `go`, `push`, `pushReplacement`,
 //       `replace`, `goNamed`, `pushNamed`, `pushReplacementNamed`, `replaceNamed` kullanımı
 //       (çağrı ve tear-off), go_router parametresi olan `extra:` adlandırılmış argümanı ve
@@ -38,6 +38,14 @@
 //       elementin tanımlandığı kütüphane `package:go_router/` olmalıdır: tipli rotanın
 //       (`XRoute().go(context)`, mixin `routes.g.dart`'ta) ve dio `RequestOptions.extra`
 //       kural dışıdır; ad değil çözümlenmiş element sayılır.
+//
+//   U1–U6 tip çözümlemeli (`checkUiResolved`, Codex 6): sözdizimsel denetimin (tool/boundaries.dart)
+//       çağrı yerindeki AD karşılaştırmasını aşan atlatmaları kapatır — `typedef C = Color`
+//       dışa aktarılıp `C(...)`, önekli `m.SizedBox(...)` (dosyada yerel `SizedBox` olsa da),
+//       `typedef TD = ThemeData` ile `extensions`, `extension ThemeData` içinde örtük
+//       `extensions[...]` / `final f = extension<T>;`. Politika boundaries.dart `uiPolicyFor`.
+//   G3 ayrıca alt sınıflamayı (`extends SomeService`, `super(...)`, yönlendirmeli fabrika) da
+//       kapsar. N1 kapsamına `lib/core/**` dahildir (dolaylı dize gezinme yardımcısı).
 //
 // A1 (tool/boundaries.dart) üretilmiş koda doğrudan erişimi data + modül dosyasıyla sınırlar;
 // A2/A3 kalan dolaylı yolu (açık API'de tip olarak sızma) kapatır.
@@ -319,6 +327,209 @@ Future<List<Violation>> checkServiceConstruction(
   return out;
 }
 
+/// U1–U6 tip çözümlemeli denetim (Codex 6): çağrı yerindeki AD değil çözümlenmiş element
+/// sayılır. `typedef C = Color` ile dışa aktarılıp `C(...)` çağrılması, önekli
+/// `m.SizedBox(...)` (dosyada yerel `SizedBox` sınıfı olsa da), `typedef TD = ThemeData` ile
+/// `extensions` erişimi ve `extension ThemeData` içindeki örtük `extensions[...]` /
+/// `final f = extension<T>;` burada yakalanır. Politika [uiPolicyFor] ile sözdizimsel
+/// denetimle aynıdır (izinli dizinler dahil). [allowances]: false = izinler kapalı (ölçüm).
+Future<List<Violation>> checkUiResolved(
+  String root, {
+  Map<String, String> overlays = const {},
+  Iterable<String>? only,
+  bool allowances = true,
+}) async {
+  root = p.normalize(p.absolute(root));
+  final lib = p.join(root, 'lib');
+  final targets =
+      (only ??
+              [
+                ...Directory(lib)
+                    .listSync(recursive: true)
+                    .whereType<File>()
+                    .map((f) => p.relative(f.path, from: lib)),
+                ...overlays.keys,
+              ])
+          .map((r) => r.replaceAll(r'\', '/'))
+          .toSet()
+          .where((r) => r.endsWith('.dart') && !isGeneratedPath(r))
+          .toList()
+        ..sort();
+  if (targets.isEmpty) return [];
+  final session = _session(lib, overlays);
+  if (session == null) {
+    return [
+      Violation('A0', 'lib', 1, 'Dart SDK bulunamadı; denetim koşulamadı'),
+    ];
+  }
+  final out = <Violation>[];
+  for (final rel in targets) {
+    final result = await session.getResolvedUnit(p.join(lib, rel));
+    if (result is! ResolvedUnitResult) {
+      out.add(
+        Violation('A0', 'lib/$rel', 1, 'çözümlenemedi: ${result.runtimeType}'),
+      );
+      continue;
+    }
+    final errors = result.diagnostics.where(
+      (d) => d.severity == Severity.error,
+    );
+    if (errors.isNotEmpty) {
+      for (final d in errors) {
+        out.add(
+          Violation(
+            'A0',
+            'lib/$rel',
+            result.lineInfo.getLocation(d.offset).lineNumber,
+            'derleme hatası, U1–U6 denetlenemez: ${d.message}',
+          ),
+        );
+      }
+      continue;
+    }
+    result.unit.accept(
+      _UiResolvedVisitor(uiPolicyFor(rel, allowances: allowances), (
+        rule,
+        node,
+        message,
+      ) {
+        out.add(
+          Violation(
+            rule,
+            'lib/$rel',
+            result.lineInfo.getLocation(node.offset).lineNumber,
+            message,
+          ),
+        );
+      }),
+    );
+  }
+  return out;
+}
+
+/// Flutter çatısı ve `dart:ui` (Color, TextStyle … buradan gelir).
+bool _isFlutterLib(Element? e) {
+  final uri = e?.library?.uri.toString() ?? '';
+  return uri.startsWith('package:flutter/') || uri == 'dart:ui';
+}
+
+class _UiResolvedVisitor extends RecursiveAstVisitor<void> {
+  _UiResolvedVisitor(this.policy, this.report);
+
+  final UiPolicy policy;
+  final void Function(String rule, AstNode node, String message) report;
+
+  static const _spacerCtors = {null, 'new', 'square', 'fromSize'};
+
+  String? _ctorName(ConstructorElement c) {
+    final n = c.name;
+    return n == null || n.isEmpty ? null : n;
+  }
+
+  void _ctor(AstNode node, ConstructorElement? ctor, {ArgumentList? args}) {
+    final cls = ctor?.enclosingElement;
+    if (ctor == null || cls is! InterfaceElement || !_isFlutterLib(cls)) return;
+    final name = _ctorName(ctor);
+    for (final b in policy.bans) {
+      if (b.cls == cls.name && b.members.contains(name)) {
+        report(b.rule, node, '${b.message} (çözümlenmiş: ${cls.name})');
+        return;
+      }
+    }
+    if (cls.name == 'SizedBox' && _spacerCtors.contains(name)) {
+      final hasChild =
+          args != null &&
+          args.arguments.any(
+            (a) => a is NamedArgument && a.name.lexeme == 'child',
+          );
+      if (args == null || !hasChild) {
+        report(
+          'U1',
+          node,
+          'boşluk için SizedBox yerine Gap (package:gap) kullanın '
+              '(çözümlenmiş Flutter SizedBox)',
+        );
+      }
+    }
+  }
+
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    _ctor(node, node.constructorName.element, args: node.argumentList);
+    super.visitInstanceCreationExpression(node);
+  }
+
+  @override
+  void visitConstructorReference(ConstructorReference node) {
+    _ctor(node, node.constructorName.element);
+    super.visitConstructorReference(node);
+  }
+
+  @override
+  void visitGenericTypeAlias(GenericTypeAlias node) {
+    final t = node.type;
+    final el = t is NamedType ? t.type?.element : null;
+    if (el is InterfaceElement && _isFlutterLib(el) && el.name == 'SizedBox') {
+      report('U1', node, 'SizedBox takma adı yasak (U1 atlatma); Gap kullanın');
+    }
+    super.visitGenericTypeAlias(node);
+  }
+
+  @override
+  void visitExtendsClause(ExtendsClause node) {
+    final el = node.superclass.type?.element;
+    if (el is InterfaceElement && _isFlutterLib(el)) {
+      for (final b in policy.bans) {
+        if (b.cls == el.name && b.members.contains(null)) {
+          report(b.rule, node, '${el.name} alt sınıflanamaz (yapıcı yasağı)');
+        }
+      }
+    }
+    super.visitExtendsClause(node);
+  }
+
+  @override
+  void visitSimpleIdentifier(SimpleIdentifier node) {
+    super.visitSimpleIdentifier(node);
+    if (node.inDeclarationContext()) return;
+    final element = node.element?.baseElement;
+    final owner = element?.enclosingElement;
+    if (element == null ||
+        owner is! InterfaceElement ||
+        !_isFlutterLib(owner)) {
+      return;
+    }
+    final name = node.name;
+    if (element is! ConstructorElement) {
+      // Ad alanı üyesi: `Colors.red`, `typedef Cs = Colors; Cs.red`.
+      if (policy.wildcard.contains(owner.name)) {
+        report('U2', node, 'ham renk yasak: ${owner.name}.$name');
+      }
+      // Statik üye yasakları: `MediaQuery.of` (typedef/önek dahil).
+      if (element is ExecutableElement && element.isStatic ||
+          element is FieldElement && element.isStatic) {
+        for (final b in policy.bans) {
+          if (b.cls == owner.name && b.members.contains(name)) {
+            report(b.rule, node, '${b.message} (çözümlenmiş: ${owner.name})');
+          }
+        }
+      }
+    }
+    // U5: ThemeData.extension/extensions (örtük this ve tear-off dahil).
+    if (policy.extensionBanned &&
+        owner.name == 'ThemeData' &&
+        (name == 'extension' || name == 'extensions') &&
+        element is! FormalParameterElement) {
+      report(
+        'U5',
+        node,
+        'tema uzantısına yalnız lib/core/ui/extensions/context_ext.dart erişir '
+            '(context.colors / context.text kullanın)',
+      );
+    }
+  }
+}
+
 const _navMethods = {
   'go',
   'push',
@@ -332,7 +543,9 @@ const _navMethods = {
 
 bool _navScope(String rel) =>
     rel.endsWith('.dart') &&
-    (rel.startsWith('features/') || rel.startsWith('app/')) &&
+    (rel.startsWith('features/') ||
+        rel.startsWith('app/') ||
+        rel.startsWith('core/')) &&
     !rel.startsWith('app/router/');
 
 bool _isGoRouterLib(Element? e) =>
@@ -474,6 +687,27 @@ class _ServiceVisitor extends RecursiveAstVisitor<void> {
   void visitConstructorReference(ConstructorReference node) {
     _check(node, node.constructorName.element);
     super.visitConstructorReference(node);
+  }
+
+  // Alt sınıflama da kurmadır (Codex 6): `class Local extends SomeService` ve `super(...)`.
+  @override
+  void visitExtendsClause(ExtendsClause node) {
+    final cls = node.superclass.type?.element?.name;
+    if (cls != null && _serviceName(cls)) report(node, cls);
+    super.visitExtendsClause(node);
+  }
+
+  @override
+  void visitSuperConstructorInvocation(SuperConstructorInvocation node) {
+    _check(node, node.element);
+    super.visitSuperConstructorInvocation(node);
+  }
+
+  @override
+  void visitConstructorDeclaration(ConstructorDeclaration node) {
+    final redirected = node.redirectedConstructor;
+    if (redirected != null) _check(redirected, redirected.element);
+    super.visitConstructorDeclaration(node);
   }
 }
 

@@ -51,6 +51,11 @@
 //       yasak (sayfa kabuğu `NzPage`).
 //   G3  Sunum katmanında `*Service`/`*Repository` yapıcı çağrısı yasak: TİP ÇÖZÜMLEMELİ,
 //       tool/api_surface.dart'tadır (`checkServiceConstruction`).
+//   N1  Gezinme kimlik kuralı (ADR-0003 karar 21): `lib/features/**` ve `lib/app/**`
+//       (`lib/app/router/**` hariç) içinde go_router `context.go/push/pushReplacement/replace/
+//       goNamed/pushNamed/pushReplacementNamed/replaceNamed`, `extra:` argümanı ve
+//       `GoRouterState.extra` yasak; tipli rota `.go/.push(context)` serbest. TİP
+//       ÇÖZÜMLEMELİ, tool/api_surface.dart'tadır (`checkNavigation`).
 //   G1  `package:get_it` yalnız `lib/app/**` ve `features/<f>/<f>_module.dart` içinde
 //       (ADR-0001, D-0182: get_it = bileşim kökü; core ve feature katmanları servis bulucu
 //       kullanmaz, bağımlılık yapıcıdan gelir).

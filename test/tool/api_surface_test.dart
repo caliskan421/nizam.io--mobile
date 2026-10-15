@@ -321,6 +321,134 @@ void main() {
     });
   });
 
+  group('N1 gezinme kimlik kuralı (tip çözümlemeli)', () {
+    const dir = 'features/zz/presentation/pages';
+    const imports =
+        "import 'package:flutter/widgets.dart';\n"
+        "import 'package:go_router/go_router.dart';\n"
+        "import 'package:go_router/go_router.dart' as gr;\n"
+        "import 'package:dio/dio.dart';\n"
+        "import 'package:nizamio/app/router/routes.dart';\n";
+    final cases = <String, (String, Set<String>)>{
+      'context.go(dize)': ("void f(BuildContext c) => c.go('/x');", {'N1'}),
+      'context.push(dize)': ("void f(BuildContext c) => c.push('/x');", {'N1'}),
+      'GoRouter.of(context).go': (
+        "void f(BuildContext c) => GoRouter.of(c).go('/x');",
+        {'N1'},
+      ),
+      'context.goNamed': ("void f(BuildContext c) => c.goNamed('a');", {'N1'}),
+      'context.pushNamed': (
+        "void f(BuildContext c) => c.pushNamed('a');",
+        {'N1'},
+      ),
+      'context.pushReplacement': (
+        "void f(BuildContext c) => c.pushReplacement('/x');",
+        {'N1'},
+      ),
+      'context.replace': ("void f(BuildContext c) => c.replace('/x');", {'N1'}),
+      'context.pushReplacementNamed': (
+        "void f(BuildContext c) => c.pushReplacementNamed('a');",
+        {'N1'},
+      ),
+      'context.replaceNamed': (
+        "void f(BuildContext c) => c.replaceNamed('a');",
+        {'N1'},
+      ),
+      'tear-off context.go': (
+        'void f(BuildContext c) { final g = c.go; g; }',
+        {'N1'},
+      ),
+      'tear-off GoRouter.go': (
+        'void f(GoRouter r) { final g = r.go; g; }',
+        {'N1'},
+      ),
+      'extra: nesne': (
+        "void f(BuildContext c) => c.go('/x', extra: Object());",
+        {'N1'},
+      ),
+      'GoRouterState.extra okuması': (
+        'Object? f(GoRouterState s) => s.extra;',
+        {'N1'},
+      ),
+      'takma adlı import': (
+        "void f(BuildContext c) => gr.GoRouterHelper(c).go('/x');",
+        {'N1'},
+      ),
+      'takma adlı import GoRouter': (
+        "void f(gr.GoRouter r) => r.push('/x');",
+        {'N1'},
+      ),
+      'pozitif: tipli rota .go': (
+        'void f(BuildContext c) => const HomeRoute().go(c);',
+        <String>{},
+      ),
+      'pozitif: tipli rota .push': (
+        "void f(BuildContext c) => const HomeDetailRoute(id: '1').push(c);",
+        <String>{},
+      ),
+      'pozitif: dio options.extra': (
+        "void f(RequestOptions o) { o.extra['k'] = 1; final e = o.extra; e; }",
+        <String>{},
+      ),
+      'pozitif: dio Options(extra:)': (
+        "final o = Options(extra: {'k': 1});",
+        <String>{},
+      ),
+      'pozitif: ilgisiz go/extra adları': (
+        'class Z { void go() {} Object? get extra => null; }\n'
+            'void f(Z z) { z.go(); z.extra; }',
+        <String>{},
+      ),
+    };
+    late List<Violation> got;
+    setUpAll(() async {
+      got = await checkNavigation(
+        '.',
+        overlays: {
+          for (final (i, e) in cases.entries.indexed)
+            '$dir/p$i.dart': '$imports${e.value.$1}\n',
+          // app/ ağacı (router hariç) da kapsamdadır; router içinde dize yol serbest.
+          'app/zz_nav.dart':
+              "${imports}void f(BuildContext c) => c.go('/x');\n",
+          'app/router/zz_router.dart':
+              "${imports}void f(BuildContext c) => c.go('/x');\n"
+              'Object? g(GoRouterState s) => s.extra;\n',
+          'core/zz_nav.dart':
+              "${imports}void f(BuildContext c) => c.go('/x');\n",
+        },
+      );
+    });
+    for (final (i, e) in cases.entries.indexed) {
+      test(e.key, () {
+        final rules = got
+            .where((v) => v.path == 'lib/$dir/p$i.dart')
+            .map((v) => v.rule)
+            .toSet();
+        expect(rules, e.value.$2, reason: got.join('\n'));
+      });
+    }
+    test('lib/app/** (router hariç) kapsamda', () {
+      expect(got.where((v) => v.path == 'lib/app/zz_nav.dart'), isNotEmpty);
+    });
+    test('lib/app/router/** içinde dize yol ve extra serbest', () {
+      expect(got.where((v) => v.path.startsWith('lib/app/router/')), isEmpty);
+    });
+    test('kapsam dışı (core) denetlenmez', () {
+      expect(got.where((v) => v.path.startsWith('lib/core/')), isEmpty);
+    });
+    test('derleme hatası -> A0 (sessiz temiz değil)', () async {
+      final v = await checkNavigation(
+        '.',
+        overlays: {'$dir/broken.dart': 'final a = Yok();'},
+        only: ['$dir/broken.dart'],
+      );
+      expect(v.map((e) => e.rule).toSet(), {'A0'});
+    });
+    test('gerçek lib/ ağacında ihlal yok', () async {
+      expect(await checkNavigation('.'), isEmpty);
+    });
+  });
+
   test('boş hedef kümesi → A0', () async {
     final v = await checkApiSurface('.', only: const []);
     expect(v.map((e) => e.rule), ['A0']);

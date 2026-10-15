@@ -1,6 +1,6 @@
 // Kullanım: dart run tool/check_boundaries.dart  (CI ve `make lint`)
 // lib/ altındaki her .dart dosyasına tool/boundaries.dart (sözdizimsel) ve tool/api_surface.dart
-// (tip çözümlemeli A2/A3, G3) kurallarını uygular; ihlal varsa 1 döner.
+// (tip çözümlemeli A2/A3, G3, N1) kurallarını uygular; ihlal varsa 1 döner.
 import 'dart:io';
 
 import 'api_surface.dart';
@@ -31,6 +31,8 @@ Future<void> main() async {
     ...await checkApiSurface('.'),
     // G3: tip çözümlemeli sunumda servis/depo kurma yasağı.
     ...await checkServiceConstruction('.'),
+    // N1: tip çözümlemeli gezinme kimlik kuralı.
+    ...await checkNavigation('.'),
   ];
   for (final v in violations) {
     stderr.writeln(v);

@@ -72,82 +72,147 @@ class _NzErrorStateState extends State<NzErrorState> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final colors = context.colors;
-    final text = context.text;
-    final message = errorText(l, widget.error);
     final waiting = widget.onRetry != null && _remaining > 0;
     final onPressed = widget.onRetry == null || waiting ? null : widget.onRetry;
-
     final countdown = waiting
-        ? MergeSemantics(
-            child: Wrap(
-              alignment: widget._inline
-                  ? WrapAlignment.start
-                  : WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: NizamioSpacing.space1,
-              children: [
-                Text(
-                  l.uiFeedbackRetryWait,
-                  style: text.bodySm.copyWith(color: colors.textMuted),
-                ),
-                Text(
-                  '$_remaining',
-                  style: text.labelMd.copyWith(color: colors.textMuted),
-                ),
-                Text(
-                  l.uiFeedbackSecondsUnit,
-                  style: text.bodySm.copyWith(color: colors.textMuted),
-                ),
-              ],
-            ),
-          )
+        ? _RetryCountdown(remaining: _remaining, inline: widget._inline)
         : null;
+    final message = errorText(l, widget.error);
 
-    if (widget._inline) {
-      return Semantics(
-        container: true,
-        liveRegion: true,
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: NizamioSpacing.space3,
-          runSpacing: NizamioSpacing.space2,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ExcludeSemantics(
-                  child: Icon(
-                    Icons.error_outline,
-                    color: colors.danger,
-                    size: NizamioSpacing.space6,
-                  ),
+    return widget._inline
+        ? _InlineErrorBody(
+            message: message,
+            countdown: countdown,
+            showRetry: widget.onRetry != null,
+            onPressed: onPressed,
+          )
+        : _PageErrorBody(
+            message: message,
+            countdown: countdown,
+            showRetry: widget.onRetry != null,
+            onPressed: onPressed,
+          );
+  }
+}
+
+/// Geri sayım satırı ("Yeniden deneme: N sn"); tek anlamsal öğe.
+class _RetryCountdown extends StatelessWidget {
+  const _RetryCountdown({required this.remaining, required this.inline});
+
+  final int remaining;
+  final bool inline;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    final text = context.text;
+    return MergeSemantics(
+      child: Wrap(
+        alignment: inline ? WrapAlignment.start : WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: NizamioSpacing.space1,
+        children: [
+          Text(
+            l.uiFeedbackRetryWait,
+            style: text.bodySm.copyWith(color: colors.textMuted),
+          ),
+          Text(
+            '$remaining',
+            style: text.labelMd.copyWith(color: colors.textMuted),
+          ),
+          Text(
+            l.uiFeedbackSecondsUnit,
+            style: text.bodySm.copyWith(color: colors.textMuted),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Liste içi / kart içi tek satırlık biçim.
+class _InlineErrorBody extends StatelessWidget {
+  const _InlineErrorBody({
+    required this.message,
+    required this.countdown,
+    required this.showRetry,
+    required this.onPressed,
+  });
+
+  final String message;
+  final Widget? countdown;
+  final bool showRetry;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    final text = context.text;
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: NizamioSpacing.space3,
+        runSpacing: NizamioSpacing.space2,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ExcludeSemantics(
+                child: Icon(
+                  Icons.error_outline,
+                  color: colors.danger,
+                  size: NizamioSpacing.space6,
                 ),
-                const Gap(NizamioSpacing.space2),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(message, style: text.bodyMd),
-                      ?countdown,
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (widget.onRetry != null)
-              TextButton(
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(0, NizamioSpacing.space12),
-                ),
-                onPressed: onPressed,
-                child: Text(l.uiCommonRetry),
               ),
-          ],
-        ),
-      );
-    }
+              const Gap(NizamioSpacing.space2),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(message, style: text.bodyMd),
+                    ?countdown,
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (showRetry)
+            TextButton(
+              style: TextButton.styleFrom(
+                minimumSize: const Size(0, NizamioSpacing.space12),
+              ),
+              onPressed: onPressed,
+              child: Text(l.uiCommonRetry),
+            ),
+        ],
+      ),
+    );
+  }
+}
 
+/// Sayfa/bölüm ortası biçimi (ikon + başlık + metin + düğme).
+class _PageErrorBody extends StatelessWidget {
+  const _PageErrorBody({
+    required this.message,
+    required this.countdown,
+    required this.showRetry,
+    required this.onPressed,
+  });
+
+  final String message;
+  final Widget? countdown;
+  final bool showRetry;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    final text = context.text;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(NizamioSpacing.space6),
@@ -179,15 +244,12 @@ class _NzErrorStateState extends State<NzErrorState> {
                 textAlign: TextAlign.center,
                 style: text.bodyMd.copyWith(color: colors.textMuted),
               ),
-              ?countdown == null
-                  ? null
-                  : Padding(
-                      padding: const EdgeInsets.only(
-                        top: NizamioSpacing.space2,
-                      ),
-                      child: countdown,
-                    ),
-              if (widget.onRetry != null) ...[
+              if (countdown != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: NizamioSpacing.space2),
+                  child: countdown,
+                ),
+              if (showRetry) ...[
                 const Gap(NizamioSpacing.space6),
                 FilledButton(
                   onPressed: onPressed,

@@ -349,18 +349,44 @@ void main() {
       expect(h.store.values[TokenStore.key], contains('refresh-token-1'));
     });
 
-    test('gövdesiz 401 → mevcut davranış: yenileme + tek tekrar', () async {
-      var first = true;
-      h.backend.handler = (r) {
-        if (r.path == '/v1/me' && first) {
-          first = false;
-          return ResponseBody.fromString('', 401);
-        }
-        return handler(r);
-      };
-      expect((await h.identity.me()).accountId, 'acc-1');
-      expect(h.backend.count('POST', '/v1/auth/refresh'), 1);
-      expect(h.backend.count('GET', '/v1/me'), 2);
+    test('gövdesiz 401 → yenileme YOK, istek tek kez, hata aynen', () async {
+      h.backend.handler = (r) =>
+          r.path == '/v1/me' ? ResponseBody.fromString('', 401) : handler(r);
+      await expectLater(
+        h.identity.me(),
+        apiError(ClientErrorCode.invalidResponse),
+      );
+      expect(h.backend.count('POST', '/v1/auth/refresh'), 0);
+      expect(h.backend.count('GET', '/v1/me'), 1);
+      expect(h.read(sessionStateProvider), isA<SessionActive>());
+      expect(h.store.values[TokenStore.key], contains('refresh-token-1'));
+    });
+
+    test('bozuk gövdeli 401 → yenileme YOK, istek tek kez', () async {
+      h.backend.handler = (r) => r.path == '/v1/me'
+          ? ResponseBody.fromString('{bozuk', 401)
+          : handler(r);
+      await expectLater(
+        h.identity.me(),
+        apiError(ClientErrorCode.invalidResponse),
+      );
+      expect(h.backend.count('POST', '/v1/auth/refresh'), 0);
+      expect(h.backend.count('GET', '/v1/me'), 1);
+    });
+
+    test('parola değiştirme gövdesiz 401 → istek iki kez GİTMEZ', () async {
+      h.backend.handler = (r) => r.path == '/v1/auth/password'
+          ? ResponseBody.fromString('', 401)
+          : handler(r);
+      await expectLater(
+        h.identity.changePassword(
+          currentPassword: 'Gizli-Parola-1',
+          newPassword: 'Yeni-Parola-22',
+        ),
+        throwsA(anything),
+      );
+      expect(h.backend.count('POST', '/v1/auth/refresh'), 0);
+      expect(h.backend.count('POST', '/v1/auth/password'), 1);
     });
 
     test('eşzamanlı üç 401 → tek yenileme', () async {

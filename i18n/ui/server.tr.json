@@ -8,6 +8,7 @@
     "ui.server.connect": "Bağlan",
     "ui.server.update_title": "Güncelleme gerekli",
     "ui.server.update_message": "Bu sunucu uygulamanın daha yeni bir sürümünü gerektiriyor. Giriş yapabilmek için uygulamayı güncelleyin.",
+    "ui.server.update_api_message": "Bu sunucunun API sürümü uygulamayla uyumlu değil. Giriş yapabilmek için uygulamayı güncelleyin ya da sunucu yöneticinize başvurun.",
     "ui.server.update_server": "Sunucu",
     "ui.server.update_required_version": "Gerekli sürüm",
     "ui.server.update_installed_version": "Kurulu sürüm",

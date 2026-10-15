@@ -40,11 +40,6 @@ int get hashCode {
   return Object.hash(runtimeType,_this.email,_this.password,_this.captchaToken);
 }
 
-@override
-String toString() {
-  final _this = this as LoginRequest;
-  return 'LoginRequest(email: ${_this.email}, password: ${_this.password}, captchaToken: ${_this.captchaToken})';
-}
 
 
 }
@@ -246,10 +241,6 @@ int get hashCode {
     return Object.hash(runtimeType,email,password,captchaToken);
 }
 
-@override
-String toString() {
-    return 'LoginRequest(email: $email, password: $password, captchaToken: $captchaToken)';
-}
 
 
 }

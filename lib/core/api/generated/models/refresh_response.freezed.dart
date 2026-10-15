@@ -40,11 +40,6 @@ int get hashCode {
   return Object.hash(runtimeType,_this.accountId,_this.expiresAt,_this.refreshExpiresAt,_this.token,_this.accessToken,_this.refreshToken);
 }
 
-@override
-String toString() {
-  final _this = this as RefreshResponse;
-  return 'RefreshResponse(accountId: ${_this.accountId}, expiresAt: ${_this.expiresAt}, refreshExpiresAt: ${_this.refreshExpiresAt}, token: ${_this.token}, accessToken: ${_this.accessToken}, refreshToken: ${_this.refreshToken})';
-}
 
 
 }
@@ -252,10 +247,6 @@ int get hashCode {
     return Object.hash(runtimeType,accountId,expiresAt,refreshExpiresAt,token,accessToken,refreshToken);
 }
 
-@override
-String toString() {
-    return 'RefreshResponse(accountId: $accountId, expiresAt: $expiresAt, refreshExpiresAt: $refreshExpiresAt, token: $token, accessToken: $accessToken, refreshToken: $refreshToken)';
-}
 
 
 }

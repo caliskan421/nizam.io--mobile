@@ -315,6 +315,57 @@ void main() {
       expect(find.text('Satır 500'), findsNothing);
     });
 
+    testWidgets(
+      'yenileme beklerken liste sonu çizilse de ek sayfa istenmez (tek istek)',
+      (tester) async {
+        final loader = _Loader();
+        await tester.pumpWidget(_app(loader, pageSize: 10));
+        loader.complete(_slice(0, 10, next: 'c1'));
+        await tester.pump();
+        await tester.drag(find.byType(ListView), const Offset(0, 400));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        expect(loader.requests, hasLength(2));
+        expect(loader.requests.last.cursor, isNull);
+
+        // Yenileme beklerken yeniden çizim (liste sonu satırı) ek istek başlatmamalı.
+        await _scrollToEnd(tester);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        expect(loader.requests, hasLength(2));
+
+        loader.complete(_slice(100, 2));
+        await tester.pumpAndSettle();
+        expect(find.text('Satır 100'), findsOneWidget);
+        expect(find.text('Satır 0'), findsNothing);
+        expect(loader.requests, hasLength(2));
+      },
+    );
+
+    testWidgets('ters yanıt sırası: yenileme önce döner, eski ek sayfa sonra', (
+      tester,
+    ) async {
+      final loader = _Loader();
+      await tester.pumpWidget(_app(loader));
+      loader.complete(_slice(0, 10, next: 'c1'));
+      await tester.pump();
+      await _scrollToEnd(tester); // ek sayfa uçuşta
+      await tester.drag(find.byType(ListView), const Offset(0, 5000));
+      await tester.pump();
+      await tester.drag(find.byType(ListView), const Offset(0, 400));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(loader.requests.last.cursor, isNull);
+
+      loader._pending[1].complete(_slice(100, 2)); // yenileme önce
+      await tester.pumpAndSettle();
+      loader._pending[0].complete(_slice(500, 2)); // eski ek sayfa sonra
+      await tester.pumpAndSettle();
+      expect(find.text('Satır 100'), findsOneWidget);
+      expect(find.text('Satır 500'), findsNothing);
+      expect(find.text('Satır 0'), findsNothing);
+    });
+
     testWidgets('boş listede de aşağı çekilebilir', (tester) async {
       final loader = _Loader();
       await tester.pumpWidget(_app(loader));

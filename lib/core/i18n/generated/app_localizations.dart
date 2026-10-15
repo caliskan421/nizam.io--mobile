@@ -1660,6 +1660,12 @@ abstract class AppLocalizations {
   /// **'Bu sunucu uygulamanın daha yeni bir sürümünü gerektiriyor. Giriş yapabilmek için uygulamayı güncelleyin.'**
   String get uiServerUpdateMessage;
 
+  /// ui.server.update_api_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sunucunun API sürümü uygulamayla uyumlu değil. Giriş yapabilmek için uygulamayı güncelleyin ya da sunucu yöneticinize başvurun.'**
+  String get uiServerUpdateApiMessage;
+
   /// ui.server.update_server
   ///
   /// In tr, this message translates to:

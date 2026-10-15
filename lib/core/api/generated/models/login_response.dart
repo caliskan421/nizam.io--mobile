@@ -7,7 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'login_response.freezed.dart';
 part 'login_response.g.dart';
 
-@Freezed()
+@Freezed(toStringOverride: false)
 abstract class LoginResponse with _$LoginResponse {
   const factory LoginResponse({
     @JsonKey(name: 'account_id') required String accountId,

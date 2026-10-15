@@ -40,11 +40,6 @@ int get hashCode {
   return Object.hash(runtimeType,_this.currentPassword,_this.newPassword);
 }
 
-@override
-String toString() {
-  final _this = this as ChangePasswordRequest;
-  return 'ChangePasswordRequest(currentPassword: ${_this.currentPassword}, newPassword: ${_this.newPassword})';
-}
 
 
 }
@@ -244,10 +239,6 @@ int get hashCode {
     return Object.hash(runtimeType,currentPassword,newPassword);
 }
 
-@override
-String toString() {
-    return 'ChangePasswordRequest(currentPassword: $currentPassword, newPassword: $newPassword)';
-}
 
 
 }

@@ -40,11 +40,6 @@ int get hashCode {
   return Object.hash(runtimeType,_this.password);
 }
 
-@override
-String toString() {
-  final _this = this as DeleteProgramRequest;
-  return 'DeleteProgramRequest(password: ${_this.password})';
-}
 
 
 }
@@ -242,10 +237,6 @@ int get hashCode {
     return Object.hash(runtimeType,password);
 }
 
-@override
-String toString() {
-    return 'DeleteProgramRequest(password: $password)';
-}
 
 
 }

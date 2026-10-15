@@ -7,7 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'refresh_request.freezed.dart';
 part 'refresh_request.g.dart';
 
-@Freezed()
+@Freezed(toStringOverride: false)
 abstract class RefreshRequest with _$RefreshRequest {
   const factory RefreshRequest({
     /// Mobil yenileme belirteci. Boş/yoksa web çerezi okunur.

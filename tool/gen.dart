@@ -24,6 +24,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import 'gen/emit.dart';
+import 'gen/sensitive.dart';
 import 'gen/sources.dart';
 
 Future<void> main(List<String> args) async {
@@ -116,6 +117,17 @@ swagger_parser:
     - nizamio_web_refresh
 ''');
   await _run('dart', ['run', 'swagger_parser', '-f', config.path], root);
+  // Gizli alanlı modellerde freezed `toString` üretmesin (parola/belirteç string'e düşmez).
+  final modelsDir = Directory(p.join(apiOut.path, 'models'));
+  if (modelsDir.existsSync()) {
+    for (final f in modelsDir.listSync().whereType<File>().where(
+      (f) => f.path.endsWith('.dart'),
+    )) {
+      final src = f.readAsStringSync();
+      final masked = maskSensitiveModels(src);
+      if (masked != src) f.writeAsStringSync(masked);
+    }
+  }
 
   // 2) operasyon ve hata kataloğu haritaları.
   final spec = summarizeSpec(specText);

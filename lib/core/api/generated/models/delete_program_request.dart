@@ -7,7 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'delete_program_request.freezed.dart';
 part 'delete_program_request.g.dart';
 
-@Freezed()
+@Freezed(toStringOverride: false)
 abstract class DeleteProgramRequest with _$DeleteProgramRequest {
   const factory DeleteProgramRequest({required String password}) =
       _DeleteProgramRequest;

@@ -41,11 +41,6 @@ int get hashCode {
   return Object.hash(runtimeType,_this.refreshToken);
 }
 
-@override
-String toString() {
-  final _this = this as RefreshRequest;
-  return 'RefreshRequest(refreshToken: ${_this.refreshToken})';
-}
 
 
 }
@@ -244,10 +239,6 @@ int get hashCode {
     return Object.hash(runtimeType,refreshToken);
 }
 
-@override
-String toString() {
-    return 'RefreshRequest(refreshToken: $refreshToken)';
-}
 
 
 }

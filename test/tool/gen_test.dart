@@ -1,6 +1,15 @@
 // tool/gen/sources.dart: üretim kaynaklarının katı okunması (negatif durumlar).
-import 'package:flutter_test/flutter_test.dart';
+import 'dart:io';
 
+import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/api/generated/models/change_password_request.dart';
+import 'package:nizamio/core/api/generated/models/delete_program_request.dart';
+import 'package:nizamio/core/api/generated/models/login_request.dart';
+import 'package:nizamio/core/api/generated/models/login_response.dart';
+import 'package:nizamio/core/api/generated/models/refresh_request.dart';
+import 'package:nizamio/core/api/generated/models/refresh_response.dart';
+
+import '../../tool/gen/sensitive.dart';
 import '../../tool/gen/sources.dart';
 
 const _catalogJson = '''
@@ -275,6 +284,135 @@ $op
         () => checkUiAgainstErrors(ui, ['ui.other.x']),
         throwsFormatException,
       );
+    });
+  });
+
+  group('gizli alanlı DTO\'lar (CX-W51-4): toString değer sızdırmaz', () {
+    const secret = 'SIR-DEGER-9f3a';
+
+    test('gerçek DTO örnekleri parola/belirteç yazmaz', () {
+      final samples = <Object>[
+        const LoginRequest(
+          email: 'a@b.test',
+          password: secret,
+          captchaToken: secret,
+        ),
+        const ChangePasswordRequest(
+          currentPassword: secret,
+          newPassword: '$secret-yeni',
+        ),
+        const DeleteProgramRequest(password: secret),
+        const RefreshRequest(refreshToken: secret),
+        const LoginResponse(
+          accountId: 'acc-1',
+          expiresAt: 1,
+          forcePasswordChange: false,
+          token: secret,
+          accessToken: secret,
+          refreshToken: secret,
+        ),
+        const RefreshResponse(
+          accountId: 'acc-1',
+          expiresAt: 1,
+          refreshExpiresAt: 2,
+          token: secret,
+          accessToken: secret,
+          refreshToken: secret,
+        ),
+      ];
+      for (final dto in samples) {
+        expect('$dto', isNot(contains(secret)), reason: '${dto.runtimeType}');
+        expect('$dto', isNot(contains('SIR-')), reason: '${dto.runtimeType}');
+      }
+    });
+
+    test('üretilmiş modellerde String parola/belirteç/sır alanı olan HER model maskeli', () {
+      final dir = Directory('lib/core/api/generated/models');
+      var sensitive = 0;
+      for (final f in dir.listSync().whereType<File>().where(
+        (f) =>
+            f.path.endsWith('.dart') &&
+            !f.path.endsWith('.g.dart') &&
+            !f.path.endsWith('.freezed.dart'),
+      )) {
+        final src = f.readAsStringSync();
+        if (!hasSensitiveFields(src)) continue;
+        sensitive++;
+        final freezed = File(
+          f.path.replaceFirst(RegExp(r'\.dart$'), '.freezed.dart'),
+        ).readAsStringSync();
+        expect(
+          src,
+          contains('@Freezed(toStringOverride: false)'),
+          reason: f.path,
+        );
+        expect(freezed, isNot(contains('String toString()')), reason: f.path);
+      }
+      expect(
+        sensitive,
+        6,
+        reason: 'hassas model kümesi değişti: listeyi bilerek güncelleyin',
+      );
+    });
+  });
+
+  group('maskSensitiveModels (tool/gen/sensitive.dart)', () {
+    String model(String body, {String ann = '@Freezed()'}) =>
+        '''
+$ann
+abstract class M with _\$M {
+  const factory M({
+$body
+  }) = _M;
+}
+''';
+
+    test(
+      'alan adı kuralı: yalnız String alanlar; bool bayrak hassas değil',
+      () {
+        expect(
+          hasSensitiveFields(
+            model("@JsonKey(name: 'x') required String currentPassword,"),
+          ),
+          isTrue,
+        );
+        expect(hasSensitiveFields(model('String? accessToken,')), isTrue);
+        expect(
+          hasSensitiveFields(model('required String clientSecret,')),
+          isTrue,
+        );
+        expect(
+          hasSensitiveFields(model('required bool forcePasswordChange,')),
+          isFalse,
+        );
+        expect(hasSensitiveFields(model('bool? resetPassword,')), isFalse);
+        expect(hasSensitiveFields(model('required String email,')), isFalse);
+      },
+    );
+
+    test(
+      'hassas model @Freezed(toStringOverride: false) olur; diğeri aynen kalır',
+      () {
+        final masked = maskSensitiveModels(model('required String password,'));
+        expect(masked, contains('@Freezed(toStringOverride: false)'));
+        expect(masked, isNot(contains('@Freezed()')));
+        final plain = model('required String email,');
+        expect(maskSensitiveModels(plain), plain);
+      },
+    );
+
+    test('hassas modelde beklenen @Freezed() yoksa düşer (fail-closed)', () {
+      expect(
+        () => maskSensitiveModels(
+          model('required String password,', ann: '@freezed'),
+        ),
+        throwsStateError,
+      );
+    });
+
+    test('maskeleme idempotent', () {
+      final once = maskSensitiveModels(model('required String password,'));
+      expect(maskSensitiveModels(once), once);
     });
   });
 }

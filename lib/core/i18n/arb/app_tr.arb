@@ -981,6 +981,10 @@
   "@uiRouterNotFoundAction": {
     "description": "ui.router.not_found_action"
   },
+  "uiRouterDevCatalogOpen": "Bileşen kataloğunu aç",
+  "@uiRouterDevCatalogOpen": {
+    "description": "ui.router.dev_catalog_open"
+  },
   "uiScopeTitle": "Program seçimi",
   "@uiScopeTitle": {
     "description": "ui.scope.title"

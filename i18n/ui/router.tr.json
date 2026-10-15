@@ -14,6 +14,7 @@
     "ui.router.placeholder": "Bu ekran henüz hazır değil.",
     "ui.router.not_found_title": "Sayfa bulunamadı",
     "ui.router.not_found_message": "Aradığınız sayfa yok ya da kaldırılmış.",
-    "ui.router.not_found_action": "Ana sayfaya dön"
+    "ui.router.not_found_action": "Ana sayfaya dön",
+    "ui.router.dev_catalog_open": "Bileşen kataloğunu aç"
   }
 }

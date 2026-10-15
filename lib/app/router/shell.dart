@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/i18n/generated/app_localizations.dart';
 import '../../core/ui/extensions/context_ext.dart';
 import '../../core/ui/layout/layout.dart';
+import 'router.dart' show catalogPath;
 
 /// Kabuk sekmesi: simge + ARB etiketi. Sıra, `routes.dart` içindeki dal sırasıyla birebirdir.
 class NzShellTab {
@@ -103,4 +104,11 @@ class NzAdaptiveShell extends StatelessWidget {
           ],
         ),
       );
+}
+
+/// Dev flavor'daki katalog girişi için: katalogu yığına koyar (zaten katalogdaysa dokunmaz).
+/// Dize tabanlı gezinme (N1) yalnız `lib/app/router/**` içindedir; katalog rotası fazdan muaftır.
+void openDevCatalog(GoRouter router) {
+  if (router.routeInformationProvider.value.uri.path == catalogPath) return;
+  router.push(catalogPath);
 }

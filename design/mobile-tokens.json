@@ -52,7 +52,16 @@
     "avatar4": "avatar-4",
     "avatar5": "avatar-5",
     "onAvatar": "on-avatar",
-    "switchKnob": "switch-knob"
+    "switchKnob": "switch-knob",
+    "ganttTodo": "gp-todo",
+    "ganttDoing": "gp-doing",
+    "ganttReview": "gp-review",
+    "ganttBack": "gp-back",
+    "ganttDone": "gp-done",
+    "ganttLate": "gp-late",
+    "ganttLateLine": "gp-late-line",
+    "ganttInk": "gp-ink",
+    "ganttInkMuted": "gp-ink-muted"
   },
   "$colorNotes": {
     "success": "Tasarım README 'tamam accent-text' der; ayrı başarı rengi yoktur.",
@@ -62,7 +71,8 @@
     "inProgress": "README: 'devam violet'. Koyu temada küçük metin olarak kullanılmaz (3.1:1); yalnız işaret/çubuk/ikon.",
     "roleAdmin": "Rol işaret noktası (pastel); metin rengi değil. Görünüm rengi; yetki kuralı taşımaz.",
     "avatar1": "Kişi avatarı renk sırası (avatar1…avatar5, iki temada aynı); baş harfler onAvatar. NzAvatar tone.",
-    "switchKnob": "Anahtar başı; iki temada beyaz (NzSwitch)."
+    "switchKnob": "Anahtar başı; iki temada beyaz (NzSwitch).",
+    "ganttTodo": "Zaman çizelgesi çubuk dolguları (gp-*): yalnız çubuk zemini; üstündeki yazı her iki temada ganttInk (koyu). Gecikmiş kısım ganttLate, gecikme kenarı danger."
   },
   "spacingScale": {
     "$comment": "4 pt yerleşim ızgarası (mevcut kit kullanır). Tasarım dosyasında ızgara yoktur; tasarımın anlamsal boşlukları (m-gutter, m-gap-*) ayrıca üretilir.",

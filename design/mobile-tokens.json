@@ -52,7 +52,15 @@
     "avatar4": "avatar-4",
     "avatar5": "avatar-5",
     "onAvatar": "on-avatar",
-    "switchKnob": "switch-knob"
+    "switchKnob": "switch-knob",
+    "bubbleMine": "bubble-mine",
+    "bubbleOther": "bubble-other",
+    "quoteFill": "quote-fill",
+    "refChip": "ref-chip",
+    "dayChip": "day-chip",
+    "folderBack": "folder-back",
+    "folderFront": "folder-front",
+    "folderFrontMid": "folder-front-mid"
   },
   "$colorNotes": {
     "success": "Tasarım README 'tamam accent-text' der; ayrı başarı rengi yoktur.",

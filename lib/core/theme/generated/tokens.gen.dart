@@ -56,6 +56,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     required this.avatar5,
     required this.onAvatar,
     required this.switchKnob,
+    required this.bubbleMine,
+    required this.bubbleOther,
+    required this.quoteFill,
+    required this.refChip,
+    required this.dayChip,
+    required this.folderBack,
+    required this.folderFront,
+    required this.folderFrontMid,
   });
 
   final Color background;
@@ -105,6 +113,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
   final Color avatar5;
   final Color onAvatar;
   final Color switchKnob;
+  final Color bubbleMine;
+  final Color bubbleOther;
+  final Color quoteFill;
+  final Color refChip;
+  final Color dayChip;
+  final Color folderBack;
+  final Color folderFront;
+  final Color folderFrontMid;
 
   static const light = NizamioColors(
     background: Color(0xFFF6F6F3),
@@ -154,6 +170,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     avatar5: Color(0xFFFF8A65),
     onAvatar: Color(0xFF121212),
     switchKnob: Color(0xFFFFFFFF),
+    bubbleMine: Color(0xFFF3FDD4),
+    bubbleOther: Color(0xFFF1F1ED),
+    quoteFill: Color(0x0D161615),
+    refChip: Color(0xFFECF2D4),
+    dayChip: Color(0xD9E7E7E2),
+    folderBack: Color(0xFFA8A8A2),
+    folderFront: Color(0x99FFFFFF),
+    folderFrontMid: Color(0x8CD2D2CC),
   );
 
   static const dark = NizamioColors(
@@ -204,6 +228,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     avatar5: Color(0xFFFF8A65),
     onAvatar: Color(0xFF121212),
     switchKnob: Color(0xFFFFFFFF),
+    bubbleMine: Color(0xFF414B22),
+    bubbleOther: Color(0xFF1F1F1F),
+    quoteFill: Color(0x0FFFFFFF),
+    refChip: Color(0xFF373D23),
+    dayChip: Color(0xCC282828),
+    folderBack: Color(0xFF6E6E6E),
+    folderFront: Color(0x8CAFAFAF),
+    folderFrontMid: Color(0x8C5F5F5F),
   );
 
   @override
@@ -255,6 +287,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     Color? avatar5,
     Color? onAvatar,
     Color? switchKnob,
+    Color? bubbleMine,
+    Color? bubbleOther,
+    Color? quoteFill,
+    Color? refChip,
+    Color? dayChip,
+    Color? folderBack,
+    Color? folderFront,
+    Color? folderFrontMid,
   }) {
     return NizamioColors(
       background: background ?? this.background,
@@ -304,6 +344,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       avatar5: avatar5 ?? this.avatar5,
       onAvatar: onAvatar ?? this.onAvatar,
       switchKnob: switchKnob ?? this.switchKnob,
+      bubbleMine: bubbleMine ?? this.bubbleMine,
+      bubbleOther: bubbleOther ?? this.bubbleOther,
+      quoteFill: quoteFill ?? this.quoteFill,
+      refChip: refChip ?? this.refChip,
+      dayChip: dayChip ?? this.dayChip,
+      folderBack: folderBack ?? this.folderBack,
+      folderFront: folderFront ?? this.folderFront,
+      folderFrontMid: folderFrontMid ?? this.folderFrontMid,
     );
   }
 
@@ -358,6 +406,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       avatar5: Color.lerp(avatar5, other.avatar5, t)!,
       onAvatar: Color.lerp(onAvatar, other.onAvatar, t)!,
       switchKnob: Color.lerp(switchKnob, other.switchKnob, t)!,
+      bubbleMine: Color.lerp(bubbleMine, other.bubbleMine, t)!,
+      bubbleOther: Color.lerp(bubbleOther, other.bubbleOther, t)!,
+      quoteFill: Color.lerp(quoteFill, other.quoteFill, t)!,
+      refChip: Color.lerp(refChip, other.refChip, t)!,
+      dayChip: Color.lerp(dayChip, other.dayChip, t)!,
+      folderBack: Color.lerp(folderBack, other.folderBack, t)!,
+      folderFront: Color.lerp(folderFront, other.folderFront, t)!,
+      folderFrontMid: Color.lerp(folderFrontMid, other.folderFrontMid, t)!,
     );
   }
 }

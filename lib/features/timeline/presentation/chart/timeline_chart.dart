@@ -196,18 +196,21 @@ class _TimelineChartState extends State<TimelineChart> {
                     onLongPressMoveUpdate: _longPressMove,
                     onLongPressEnd: (_) => _dragCode = null,
                     child: RepaintBoundary(
-                      child: CustomPaint(
-                        size: Size(layout.contentWidth, layout.bodyHeight),
-                        painter: TimelineChartPainter(
-                          layout: layout,
-                          ink: ink,
-                          scroll: v,
-                          viewportHeight: box.maxHeight,
-                        ),
-                        child: _BarSemantics(
-                          layout: layout,
-                          onSelect: widget.onSelect,
-                          onOverview: widget.onOverview,
+                      child: SizedBox(
+                        width: layout.contentWidth,
+                        height: layout.bodyHeight,
+                        child: CustomPaint(
+                          painter: TimelineChartPainter(
+                            layout: layout,
+                            ink: ink,
+                            scroll: v,
+                            viewportHeight: box.maxHeight,
+                          ),
+                          child: _BarSemantics(
+                            layout: layout,
+                            onSelect: widget.onSelect,
+                            onOverview: widget.onOverview,
+                          ),
                         ),
                       ),
                     ),

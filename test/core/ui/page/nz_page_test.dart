@@ -114,6 +114,31 @@ void main() {
     expect(retried, 1);
   });
 
+  testWidgets(
+    'fill: üst çubuk + gövde kalan yüksekliği doldurur; çevrimdışı şerit',
+    (tester) async {
+      _size(tester, 390);
+      var retried = 0;
+      await tester.pumpWidget(
+        _app(
+          NzPage.fill(
+            topBar: const SliverToBoxAdapter(
+              child: SizedBox(height: 60, child: Text('çubuk')),
+            ),
+            body: const ColoredBox(key: _bodyKey, color: Color(0x00000000)),
+            onRetry: () => retried++,
+          ),
+          connectivity: ConnectivityState.offline,
+        ),
+      );
+      expect(find.text('çubuk'), findsOneWidget);
+      final banner = tester.getSize(find.byType(NzBanner)).height;
+      expect(tester.getSize(find.byKey(_bodyKey)).height, 800 - 60 - banner);
+      await tester.tap(find.text('Yeniden dene'));
+      expect(retried, 1);
+    },
+  );
+
   for (final s in [ConnectivityState.online, ConnectivityState.unknown]) {
     testWidgets('$s: şerit yok', (tester) async {
       await tester.pumpWidget(

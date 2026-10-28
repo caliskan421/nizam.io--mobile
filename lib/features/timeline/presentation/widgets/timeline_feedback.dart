@@ -22,11 +22,16 @@ class TimelineToast extends StatefulWidget {
 
 class _TimelineToastState extends State<TimelineToast>
     with SingleTickerProviderStateMixin {
-  late final _life =
-      AnimationController(vsync: this, duration: TimelineToast.lifetime)
-        ..forward().whenComplete(() {
-          if (mounted) widget.onDone();
-        });
+  late final AnimationController _life;
+
+  @override
+  void initState() {
+    super.initState();
+    _life = AnimationController(vsync: this, duration: TimelineToast.lifetime);
+    _life.forward().whenComplete(() {
+      if (mounted) widget.onDone();
+    });
+  }
 
   @override
   void dispose() {
@@ -76,11 +81,19 @@ class TimelineUndoSnack extends StatefulWidget {
 
 class _TimelineUndoSnackState extends State<TimelineUndoSnack>
     with SingleTickerProviderStateMixin {
-  late final _life =
-      AnimationController(vsync: this, duration: TimelineUndoSnack.lifetime)
-        ..forward().whenComplete(() {
-          if (mounted) widget.onExpired();
-        });
+  late final AnimationController _life;
+
+  @override
+  void initState() {
+    super.initState();
+    _life = AnimationController(
+      vsync: this,
+      duration: TimelineUndoSnack.lifetime,
+    );
+    _life.forward().whenComplete(() {
+      if (mounted) widget.onExpired();
+    });
+  }
 
   @override
   void dispose() {

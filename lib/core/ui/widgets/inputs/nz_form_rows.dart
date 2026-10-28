@@ -204,7 +204,8 @@ class _RowView extends StatelessWidget {
           child: line([
             Expanded(child: label),
             const Gap(NizamioSpacing.space3),
-            row.trailing!,
+            // Dar ekranda/büyük metinde denetim taşmasın: sığmazsa daralır.
+            Flexible(flex: 3, child: row.trailing!),
           ]),
         );
       case _RowKind.value:

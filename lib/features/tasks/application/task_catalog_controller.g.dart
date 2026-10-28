@@ -10,16 +10,25 @@ part of 'task_catalog_controller.dart';
 // ignore_for_file: type=lint, type=warning
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
 /// koordinatörlük ve arşiv ekranları bunu okur; yeniden yükleme yalnız dokunuşla.
+///
+/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (oturum boyunca;
+/// kalıcılık backend bağlanınca kaynaktan gelir). Katalog henüz yüklenmediyse yok sayılır.
 
 @ProviderFor(TaskCatalogController)
 final taskCatalogControllerProvider = TaskCatalogControllerProvider._();
 
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
 /// koordinatörlük ve arşiv ekranları bunu okur; yeniden yükleme yalnız dokunuşla.
+///
+/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (oturum boyunca;
+/// kalıcılık backend bağlanınca kaynaktan gelir). Katalog henüz yüklenmediyse yok sayılır.
 final class TaskCatalogControllerProvider
     extends $AsyncNotifierProvider<TaskCatalogController, TaskCatalog> {
   /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
   /// koordinatörlük ve arşiv ekranları bunu okur; yeniden yükleme yalnız dokunuşla.
+  ///
+  /// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (oturum boyunca;
+  /// kalıcılık backend bağlanınca kaynaktan gelir). Katalog henüz yüklenmediyse yok sayılır.
   TaskCatalogControllerProvider._()
     : super(
         from: null,
@@ -40,10 +49,13 @@ final class TaskCatalogControllerProvider
 }
 
 String _$taskCatalogControllerHash() =>
-    r'484ad2f4aaaf292bbf96d75d49c4de4782c6b5bc';
+    r'af3df38dbd64b1c8e852bd874e391a1854bcdcaa';
 
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
 /// koordinatörlük ve arşiv ekranları bunu okur; yeniden yükleme yalnız dokunuşla.
+///
+/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (oturum boyunca;
+/// kalıcılık backend bağlanınca kaynaktan gelir). Katalog henüz yüklenmediyse yok sayılır.
 
 abstract class _$TaskCatalogController extends $AsyncNotifier<TaskCatalog> {
   FutureOr<TaskCatalog> build();

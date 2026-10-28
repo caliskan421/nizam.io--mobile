@@ -29,6 +29,8 @@ class NzFlyoutItem extends NzFlyoutEntry {
     this.dot,
     this.caption,
     this.accent = false,
+    this.trailing,
+    this.selected = false,
   }) : assert(icon == null || dot == null, 'ikon ya da nokta');
 
   final String label;
@@ -41,6 +43,12 @@ class NzFlyoutItem extends NzFlyoutEntry {
 
   /// İkon `accentText` (sayfadaki "yeni" eylemi).
   final bool accent;
+
+  /// Sağda mono sayı (ör. görünüm sayısı).
+  final String? trailing;
+
+  /// Seçili satır (etkin görünüm/sıralama): kalın etiket, vurgulu zemin.
+  final bool selected;
 }
 
 /// Alt menüden açılan cam kısayol menüsü (README `m-flyout`): `glass-menu`, köşe
@@ -210,7 +218,8 @@ class _Row extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: caption == null ? item.label : '${item.label}, $caption',
+      label: [item.label, ?caption, ?item.trailing].join(', '),
+      selected: item.selected,
       onTap: select,
       excludeSemantics: true,
       child: Material(
@@ -218,64 +227,76 @@ class _Row extends StatelessWidget {
         child: InkWell(
           onTap: select,
           borderRadius: BorderRadius.circular(NizamioRadius.group),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: NizamioSpacing.space12,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: item.selected ? c.navHighlight : null,
+              borderRadius: BorderRadius.circular(NizamioRadius.group),
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: NizamioSpacing.gapMd,
-                vertical: NizamioSpacing.space1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: NizamioSpacing.space12,
               ),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: NizamioSpacing.space6,
-                    child: Center(
-                      child: icon != null
-                          ? Icon(
-                              icon,
-                              size: NizamioSize.iconSizeSm,
-                              color: item.accent
-                                  ? c.accentText
-                                  : c.glassInkFaint,
-                            )
-                          : DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: dot ?? c.textMuted,
-                                shape: BoxShape.circle,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: NizamioSpacing.gapMd,
+                  vertical: NizamioSpacing.space1,
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: NizamioSpacing.space6,
+                      child: Center(
+                        child: icon != null
+                            ? Icon(
+                                icon,
+                                size: NizamioSize.iconSizeSm,
+                                color: item.accent
+                                    ? c.accentText
+                                    : c.glassInkFaint,
+                              )
+                            : DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: dot ?? c.textMuted,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(NizamioSize.dot / 2),
+                                ),
                               ),
-                              child: const Padding(
-                                padding: EdgeInsets.all(NizamioSize.dot / 2),
-                              ),
-                            ),
+                      ),
                     ),
-                  ),
-                  const Gap(NizamioSpacing.gapMd),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: t.bodyMd.copyWith(
-                            color: c.glassInk,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        if (caption != null)
+                    const Gap(NizamioSpacing.gapMd),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            caption,
+                            item.label,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: t.caption.copyWith(color: c.glassInkFaint),
+                            style: t.bodyMd.copyWith(
+                              color: c.glassInk,
+                              fontWeight: item.selected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                            ),
                           ),
-                      ],
+                          if (caption != null)
+                            Text(
+                              caption,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: t.caption.copyWith(color: c.glassInkFaint),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    if (item.trailing case final n?) ...[
+                      const Gap(NizamioSpacing.space2),
+                      Text(n, style: t.monoSm.copyWith(color: c.glassInkFaint)),
+                    ],
+                  ],
+                ),
               ),
             ),
           ),

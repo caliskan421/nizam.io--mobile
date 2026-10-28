@@ -1,25 +1,167 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 
+import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
+import '../../../core/ui/page/nz_shell_events.dart';
+import '../../../core/ui/state/nz_async_view.dart';
+import '../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../scope/scope.dart';
+import '../application/task_catalog_controller.dart';
+import '../application/tasks_list_controller.dart';
+import '../domain/task_catalog.dart';
+import '../domain/task_query.dart';
+import 'quick_action_sheets.dart';
+import 'task_widgets.dart';
+import 'tasks/tasks_filter_sheet.dart';
+import 'tasks/tasks_list_parts.dart';
 
-/// YER TUTUCU (iskelet): prototip ekranı bu dosyada uygulanır.
-class TasksPage extends StatelessWidget {
+/// Görevler listesi (prototip `tasks`): cam üst çubuk, başlık + ara/filtre/yeni görev
+/// daireleri, Liste / Zaman çizelgesi anahtarı, yerinde açılan arama, 4×2 görünüm
+/// kutucukları, etkin filtre çipleri, sıralama menülü liste başlığı, görev kartları (8'er
+/// sayfalı; koordinatörlüğe göre sıralamada açılır gruplar), filtre alt sayfası. [view] ve
+/// [people] başlangıç süzgecidir. Alt menüde "Görevler"e yeniden dokunmak kısayol menüsünü
+/// açar.
+class TasksPage extends ConsumerStatefulWidget {
   const TasksPage({super.key, this.view, this.people = const []});
 
   final NzTaskView? view;
   final List<String> people;
 
+  /// Kabukta bu sayfanın sekme sırası.
+  static const shellTab = 1;
+
   @override
-  Widget build(BuildContext context) => NzPage(
-    title: context.l10n.uiTasksTitle,
-    body: Center(
-      child: Text(
-        [context.l10n.uiRouterPlaceholder].join('\n'),
-        textAlign: TextAlign.center,
-        style: context.text.bodyMd,
-      ),
-    ),
+  ConsumerState<TasksPage> createState() => _TasksPageState();
+}
+
+class _TasksPageState extends ConsumerState<TasksPage> {
+  final _search = TextEditingController();
+  final _searchFocus = FocusNode();
+
+  TasksListControllerProvider get _provider => tasksListControllerProvider(
+    widget.view == null
+        ? TaskView.all
+        : TaskView.values.byName(widget.view!.name),
+    widget.people.join(','),
   );
+
+  @override
+  void dispose() {
+    _search.dispose();
+    _searchFocus.dispose();
+    super.dispose();
+  }
+
+  void _toggleSearch() {
+    final ctl = ref.read(_provider.notifier);
+    final opening = !ref.read(_provider).searchOpen;
+    ctl.toggleSearch();
+    if (opening) {
+      _searchFocus.requestFocus();
+    } else {
+      _search.clear();
+      _searchFocus.unfocus();
+    }
+  }
+
+  void _openFilters() => showTasksFilterSheet(context, provider: _provider);
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final nav = context.appNav;
+    ref.listen(shellReselectEventsProvider, (_, next) {
+      final visible = ModalRoute.of(context)?.isCurrent ?? true;
+      final catalog = ref.read(taskCatalogControllerProvider).value;
+      if (next?.tab != TasksPage.shellTab || !visible || catalog == null) {
+        return;
+      }
+      showTasksShortcuts(
+        context,
+        catalog: catalog,
+        provider: _provider,
+        onNewTask: () => showNewTaskSheet(context),
+        onTimeline: nav.openTimeline,
+        onSearch: () {
+          if (!ref.read(_provider).searchOpen) _toggleSearch();
+        },
+        onFilters: _openFilters,
+      );
+    });
+    final state = ref.watch(_provider);
+    final catalog = ref.watch(taskCatalogControllerProvider);
+    return NzPage.feed(
+      onRetry: () => ref.invalidate(taskCatalogControllerProvider),
+      topBar: const RootTopBar(),
+      children: [
+        NzPageHeader(
+          title: l.uiTasksTitle,
+          actions: [
+            NzIconButton.circle(
+              icon: Icons.search_rounded,
+              semanticLabel: l.uiTasksSearch,
+              onPressed: _toggleSearch,
+            ),
+            NzIconButton.circle(
+              icon: Icons.filter_list_rounded,
+              semanticLabel: l.uiTasksFiltersButton,
+              dot: state.filter.hasExtra ? context.colors.accentText : null,
+              onPressed: _openFilters,
+            ),
+            NzIconButton.circleAccent(
+              icon: Icons.add_rounded,
+              semanticLabel: l.uiTasksNewTask,
+              onPressed: () => showNewTaskSheet(context),
+            ),
+          ],
+        ),
+        const Gap(NizamioSpacing.space3),
+        TaskSegmented(
+          semanticLabel: l.uiTasksMode,
+          labels: [l.uiTasksModeList, l.uiTasksModeTimeline],
+          icons: const [Icons.view_list_rounded, Icons.view_timeline_outlined],
+          selected: 0,
+          onSelected: (i) {
+            if (i == 1) nav.openTimeline();
+          },
+        ),
+        NzReveal(
+          open: state.searchOpen,
+          child: Padding(
+            padding: const EdgeInsets.only(top: NizamioSpacing.space5),
+            child: NzSearchField(
+              controller: _search,
+              focusNode: _searchFocus,
+              label: l.uiTasksSearchHint,
+              hint: l.uiTasksSearchHint,
+              onChanged: ref.read(_provider.notifier).setQuery,
+              onClear: () => ref.read(_provider.notifier).setQuery(''),
+            ),
+          ),
+        ),
+        const Gap(NizamioSpacing.space5),
+        NzAsyncView<TaskCatalog>(
+          value: catalog,
+          onRetry: () => ref.invalidate(taskCatalogControllerProvider),
+          data: (c) => TasksListBody(
+            catalog: c,
+            state: state,
+            provider: _provider,
+            onClearAll: () {
+              _search.clear();
+              ref.read(_provider.notifier).clearAll();
+            },
+            onOpen: nav.openTask,
+          ),
+        ),
+      ],
+    );
+  }
 }

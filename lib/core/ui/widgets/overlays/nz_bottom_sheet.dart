@@ -22,7 +22,9 @@ abstract final class NzBottomSheet {
   /// kapatma/sürükleme/geri `null` döner. [dismissible] false ise dışarı dokunma, sürükleme,
   /// geri tuşu ve kapat düğmesi kapalıdır (sayfa içeriği kendi eylemiyle kapatır).
   /// [actions] alt sabit düğme satırıdır (ör. "Vazgeç / Oluştur"; iki düğmede 1:2 genişlik).
-  /// [expandable] tutamağı genişlet/daralt düğmesi yapar.
+  /// [expandable] tutamağı genişlet/daralt düğmesi yapar; [expansion] verilirse genişlik
+  /// durumu dışarıdadır (ekran bir satırı açınca sayfayı kendisi büyütebilir).
+  /// [headerAction] başlık satırında kapat düğmesinin solunda durur (ör. "Tümünü temizle").
   static Future<T?> show<T>(
     BuildContext context, {
     required String title,
@@ -31,6 +33,8 @@ abstract final class NzBottomSheet {
     String? description,
     NzSheetActionsBuilder? actions,
     bool expandable = false,
+    ValueNotifier<bool>? expansion,
+    Widget? headerAction,
   }) {
     return showModalBottomSheet<T>(
       context: context,
@@ -55,6 +59,8 @@ abstract final class NzBottomSheet {
           description: description,
           dismissible: dismissible,
           expandable: expandable,
+          expansion: expansion,
+          headerAction: headerAction,
           actions: actions?.call(sheetContext),
           child: Builder(builder: builder),
         ),
@@ -77,6 +83,8 @@ class NzBottomSheetContent extends StatefulWidget {
     this.description,
     this.actions,
     this.expandable = false,
+    this.expansion,
+    this.headerAction,
   });
 
   final String title;
@@ -86,12 +94,45 @@ class NzBottomSheetContent extends StatefulWidget {
   final List<Widget>? actions;
   final bool expandable;
 
+  /// Dış genişlik durumu ([expandable] ile); null → iç durum.
+  final ValueNotifier<bool>? expansion;
+  final Widget? headerAction;
+
   @override
   State<NzBottomSheetContent> createState() => _NzBottomSheetContentState();
 }
 
 class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
-  var _expanded = false;
+  late ValueNotifier<bool> _expansion =
+      widget.expansion ?? ValueNotifier(false);
+
+  bool get _expanded => _expansion.value;
+
+  @override
+  void initState() {
+    super.initState();
+    _expansion.addListener(_changed);
+  }
+
+  @override
+  void didUpdateWidget(NzBottomSheetContent old) {
+    super.didUpdateWidget(old);
+    if (old.expansion != widget.expansion) {
+      _expansion.removeListener(_changed);
+      if (old.expansion == null) _expansion.dispose();
+      _expansion = widget.expansion ?? ValueNotifier(false)
+        ..addListener(_changed);
+    }
+  }
+
+  @override
+  void dispose() {
+    _expansion.removeListener(_changed);
+    if (widget.expansion == null) _expansion.dispose();
+    super.dispose();
+  }
+
+  void _changed() => setState(() {});
 
   // Genişletilebilir sayfanın daraltılmış payı (prototip yüksekliği ≈ %62); genişleyince tam.
   static const _collapsedFraction = 0.62;
@@ -147,7 +188,7 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
                   excludeSemantics: true,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: () => setState(() => _expanded = !_expanded),
+                    onTap: () => _expansion.value = !_expanded,
                     child: handle,
                   ),
                 )
@@ -185,6 +226,7 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
                   ),
                 ),
               ),
+              ?widget.headerAction,
               if (widget.dismissible)
                 IconButton(
                   tooltip: l.uiCommonClose,

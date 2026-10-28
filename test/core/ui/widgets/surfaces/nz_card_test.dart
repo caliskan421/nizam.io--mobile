@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
+import 'package:nizamio/core/ui/theme/nz_surfaces.dart';
 import 'package:nizamio/core/ui/widgets/nz_size.dart';
 import 'package:nizamio/core/ui/widgets/surfaces/nz_card.dart';
 
@@ -59,20 +60,64 @@ void main() {
     expect(heights, [10 + 2 * 12, 10 + 2 * 16, 10 + 2 * 24]);
   });
 
-  testWidgets('varyant: dolu zemin / kenarlık rengi', (tester) async {
+  BoxDecoration decoration(WidgetTester tester) =>
+      tester
+              .widget<DecoratedBox>(
+                find
+                    .descendant(
+                      of: find.byType(NzCard),
+                      matching: find.byType(DecoratedBox),
+                    )
+                    .first,
+              )
+              .decoration
+          as BoxDecoration;
+
+  testWidgets('varyant: dolu zemin / tasarım kartı (degrade, kenar, gölge)', (
+    tester,
+  ) async {
     await tester.pumpWidget(testApp(const NzCard.filled(child: Text('a'))));
-    var material = tester.widget<Material>(
-      find.descendant(of: find.byType(NzCard), matching: find.byType(Material)),
+    expect(decoration(tester).color, NizamioColors.light.surfaceRaised);
+    for (final dark in [false, true]) {
+      final c = dark ? NizamioColors.dark : NizamioColors.light;
+      final s = dark ? NizamioShadows.dark : NizamioShadows.light;
+      await tester.pumpWidget(
+        testApp(const NzCard.outlined(child: Text('a')), dark: dark),
+      );
+      await tester.pumpAndSettle();
+      final d = decoration(tester);
+      expect(d.gradient, c.cardFill);
+      expect((d.border! as Border).top.color, c.border);
+      expect(d.boxShadow, s.card);
+      expect(
+        find.descendant(
+          of: find.byType(NzCard),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is CustomPaint && w.foregroundPainter is NzEdgeLightPainter,
+          ),
+        ),
+        findsOneWidget,
+      );
+    }
+    expect(NizamioShadows.dark.card, isEmpty);
+    expect(NizamioShadows.light.card, hasLength(2));
+  });
+
+  testWidgets('padding verilirse boyut dolgusunun yerine geçer', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      testApp(
+        const NzCard.outlined(
+          padding: EdgeInsets.all(NizamioSpacing.rowPad),
+          child: SizedBox(height: 10),
+        ),
+      ),
     );
-    expect(material.color, NizamioColors.light.surfaceRaised);
-    await tester.pumpWidget(testApp(const NzCard.outlined(child: Text('a'))));
-    material = tester.widget<Material>(
-      find.descendant(of: find.byType(NzCard), matching: find.byType(Material)),
-    );
-    expect(material.color, NizamioColors.light.surface);
     expect(
-      (material.shape! as RoundedRectangleBorder).side.color,
-      NizamioColors.light.border,
+      tester.getSize(find.byType(NzCard)).height,
+      10 + 2 * NizamioSpacing.rowPad,
     );
   });
 

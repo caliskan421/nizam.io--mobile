@@ -9,4 +9,5 @@ export 'domain/current_account.dart' show CurrentAccount;
 export 'presentation/login_page.dart' show LoginPage;
 export 'presentation/password_change_page.dart' show PasswordChangePage;
 export 'presentation/profile_page.dart' show ProfilePage;
-export 'presentation/sign_out_button.dart' show SignOutButton;
+export 'presentation/sign_out_button.dart'
+    show SignOutButton, confirmSignOut, signOutProvider;

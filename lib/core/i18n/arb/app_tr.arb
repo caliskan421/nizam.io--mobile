@@ -801,6 +801,354 @@
   "@uiFeedbackSecondsUnit": {
     "description": "ui.feedback.seconds_unit"
   },
+  "uiHomeGreeting": "Merhaba",
+  "@uiHomeGreeting": {
+    "description": "ui.home.greeting"
+  },
+  "uiHomeSummaryLabel": "Özet",
+  "@uiHomeSummaryLabel": {
+    "description": "ui.home.summary_label"
+  },
+  "uiHomeKpiDone": "Tamamlanma",
+  "@uiHomeKpiDone": {
+    "description": "ui.home.kpi_done"
+  },
+  "uiHomeKpiDoing": "Devam eden",
+  "@uiHomeKpiDoing": {
+    "description": "ui.home.kpi_doing"
+  },
+  "uiHomeKpiLate": "Gecikmede",
+  "@uiHomeKpiLate": {
+    "description": "ui.home.kpi_late"
+  },
+  "uiHomeKpiReview": "Onay bekleyen",
+  "@uiHomeKpiReview": {
+    "description": "ui.home.kpi_review"
+  },
+  "uiHomeKpiDoneOf": "görevden",
+  "@uiHomeKpiDoneOf": {
+    "description": "ui.home.kpi_done_of"
+  },
+  "uiHomeKpiDoneTail": "tanesi bitti",
+  "@uiHomeKpiDoneTail": {
+    "description": "ui.home.kpi_done_tail"
+  },
+  "uiHomeKpiDoingTail": "tanesi zamanında",
+  "@uiHomeKpiDoingTail": {
+    "description": "ui.home.kpi_doing_tail"
+  },
+  "uiHomeKpiLateLead": "Açık görevlerde",
+  "@uiHomeKpiLateLead": {
+    "description": "ui.home.kpi_late_lead"
+  },
+  "uiHomeKpiReviewCaption": "Kanıt yüklendi, onayda",
+  "@uiHomeKpiReviewCaption": {
+    "description": "ui.home.kpi_review_caption"
+  },
+  "uiHomeOpenList": "listeyi aç",
+  "@uiHomeOpenList": {
+    "description": "ui.home.open_list"
+  },
+  "uiHomeQuickActions": "hızlı işlemler",
+  "@uiHomeQuickActions": {
+    "description": "ui.home.quick_actions"
+  },
+  "uiHomeQaTask": "Yeni görev",
+  "@uiHomeQaTask": {
+    "description": "ui.home.qa_task"
+  },
+  "uiHomeQaMeeting": "Toplantı",
+  "@uiHomeQaMeeting": {
+    "description": "ui.home.qa_meeting"
+  },
+  "uiHomeQaInvite": "Davet et",
+  "@uiHomeQaInvite": {
+    "description": "ui.home.qa_invite"
+  },
+  "uiHomeQaReport": "Rapor",
+  "@uiHomeQaReport": {
+    "description": "ui.home.qa_report"
+  },
+  "uiHomeQaTaskLong": "Yeni görev",
+  "@uiHomeQaTaskLong": {
+    "description": "ui.home.qa_task_long"
+  },
+  "uiHomeQaMeetingLong": "Toplantı oluştur",
+  "@uiHomeQaMeetingLong": {
+    "description": "ui.home.qa_meeting_long"
+  },
+  "uiHomeQaInviteLong": "Kullanıcı davet et",
+  "@uiHomeQaInviteLong": {
+    "description": "ui.home.qa_invite_long"
+  },
+  "uiHomeQaReportLong": "Rapor oluştur",
+  "@uiHomeQaReportLong": {
+    "description": "ui.home.qa_report_long"
+  },
+  "uiHomeFormSoon": "Bu form mobilde sonraki adımda eklenecek; şimdilik web portalını kullanabilirsin.",
+  "@uiHomeFormSoon": {
+    "description": "ui.home.form_soon"
+  },
+  "uiHomeTeam": "ekip",
+  "@uiHomeTeam": {
+    "description": "ui.home.team"
+  },
+  "uiHomeUsers": "kullanıcı",
+  "@uiHomeUsers": {
+    "description": "ui.home.users"
+  },
+  "uiHomeCoordinatorshipsLc": "koordinatörlük",
+  "@uiHomeCoordinatorshipsLc": {
+    "description": "ui.home.coordinatorships_lc"
+  },
+  "uiHomeRoleAdmin": "Admin",
+  "@uiHomeRoleAdmin": {
+    "description": "ui.home.role_admin"
+  },
+  "uiHomeRoleCoordinator": "Koordinatör",
+  "@uiHomeRoleCoordinator": {
+    "description": "ui.home.role_coordinator"
+  },
+  "uiHomeRoleMember": "Üye",
+  "@uiHomeRoleMember": {
+    "description": "ui.home.role_member"
+  },
+  "uiHomeRoleAdminLc": "admin",
+  "@uiHomeRoleAdminLc": {
+    "description": "ui.home.role_admin_lc"
+  },
+  "uiHomeRoleCoordinatorLc": "koordinatör",
+  "@uiHomeRoleCoordinatorLc": {
+    "description": "ui.home.role_coordinator_lc"
+  },
+  "uiHomeRoleMemberLc": "üye",
+  "@uiHomeRoleMemberLc": {
+    "description": "ui.home.role_member_lc"
+  },
+  "uiHomeHistoryTitle": "İşlem geçmişi",
+  "@uiHomeHistoryTitle": {
+    "description": "ui.home.history_title"
+  },
+  "uiHomeHistoryLast": "Son işlem",
+  "@uiHomeHistoryLast": {
+    "description": "ui.home.history_last"
+  },
+  "uiHomeHistoryToday": "bugün",
+  "@uiHomeHistoryToday": {
+    "description": "ui.home.history_today"
+  },
+  "uiHomeHistoryOpen": "İşlem geçmişini aç",
+  "@uiHomeHistoryOpen": {
+    "description": "ui.home.history_open"
+  },
+  "uiHomeCoordinatorships": "Koordinatörlükler",
+  "@uiHomeCoordinatorships": {
+    "description": "ui.home.coordinatorships"
+  },
+  "uiHomeSortLate": "Gecikme",
+  "@uiHomeSortLate": {
+    "description": "ui.home.sort_late"
+  },
+  "uiHomeSortProgress": "İlerleme",
+  "@uiHomeSortProgress": {
+    "description": "ui.home.sort_progress"
+  },
+  "uiHomeSortName": "Ada göre",
+  "@uiHomeSortName": {
+    "description": "ui.home.sort_name"
+  },
+  "uiHomeSortChange": "Sıralama ölçütünü değiştir",
+  "@uiHomeSortChange": {
+    "description": "ui.home.sort_change"
+  },
+  "uiHomeSortFlip": "Sırayı ters çevir",
+  "@uiHomeSortFlip": {
+    "description": "ui.home.sort_flip"
+  },
+  "uiHomeSortDescending": "büyükten küçüğe",
+  "@uiHomeSortDescending": {
+    "description": "ui.home.sort_descending"
+  },
+  "uiHomeSortAscending": "küçükten büyüğe",
+  "@uiHomeSortAscending": {
+    "description": "ui.home.sort_ascending"
+  },
+  "uiHomeFilterLabel": "Koordinatörlük durumu",
+  "@uiHomeFilterLabel": {
+    "description": "ui.home.filter_label"
+  },
+  "uiHomeFilterAll": "Tümü",
+  "@uiHomeFilterAll": {
+    "description": "ui.home.filter_all"
+  },
+  "uiHomeFilterLate": "Gecikmesi olan",
+  "@uiHomeFilterLate": {
+    "description": "ui.home.filter_late"
+  },
+  "uiHomeFilterOnTrack": "Yolunda",
+  "@uiHomeFilterOnTrack": {
+    "description": "ui.home.filter_on_track"
+  },
+  "uiHomeFilterUnassigned": "Koordinatörsüz",
+  "@uiHomeFilterUnassigned": {
+    "description": "ui.home.filter_unassigned"
+  },
+  "uiHomeFilterEmpty": "Bu filtreye uyan koordinatörlük yok.",
+  "@uiHomeFilterEmpty": {
+    "description": "ui.home.filter_empty"
+  },
+  "uiHomeUnassigned": "Koordinatör atanmamış",
+  "@uiHomeUnassigned": {
+    "description": "ui.home.unassigned"
+  },
+  "uiHomeTasksLc": "görev",
+  "@uiHomeTasksLc": {
+    "description": "ui.home.tasks_lc"
+  },
+  "uiHomeLateLc": "geciken",
+  "@uiHomeLateLc": {
+    "description": "ui.home.late_lc"
+  },
+  "uiHomeNoLate": "gecikme yok",
+  "@uiHomeNoLate": {
+    "description": "ui.home.no_late"
+  },
+  "uiHomeShowAll": "Tümünü göster",
+  "@uiHomeShowAll": {
+    "description": "ui.home.show_all"
+  },
+  "uiHomeCollapse": "Daralt",
+  "@uiHomeCollapse": {
+    "description": "ui.home.collapse"
+  },
+  "uiHomeNotifications": "Bildirimler",
+  "@uiHomeNotifications": {
+    "description": "ui.home.notifications"
+  },
+  "uiHomeWaitingTail": "iş seni bekliyor",
+  "@uiHomeWaitingTail": {
+    "description": "ui.home.waiting_tail"
+  },
+  "uiHomeMenu": "Menü",
+  "@uiHomeMenu": {
+    "description": "ui.home.menu"
+  },
+  "uiHomeShortcuts": "Ana sayfa kısayolları",
+  "@uiHomeShortcuts": {
+    "description": "ui.home.shortcuts"
+  },
+  "uiHomeWaitingForYou": "seni bekleyenler",
+  "@uiHomeWaitingForYou": {
+    "description": "ui.home.waiting_for_you"
+  },
+  "uiHomeDateRequest": "Tarih talebi",
+  "@uiHomeDateRequest": {
+    "description": "ui.home.date_request"
+  },
+  "uiHomeAwaitingApproval": "Onay bekliyor",
+  "@uiHomeAwaitingApproval": {
+    "description": "ui.home.awaiting_approval"
+  },
+  "uiHomeGo": "git",
+  "@uiHomeGo": {
+    "description": "ui.home.go"
+  },
+  "uiHomeGroupTracking": "takip",
+  "@uiHomeGroupTracking": {
+    "description": "ui.home.group_tracking"
+  },
+  "uiHomeGroupContent": "içerik",
+  "@uiHomeGroupContent": {
+    "description": "ui.home.group_content"
+  },
+  "uiHomeGroupAdmin": "yönetim",
+  "@uiHomeGroupAdmin": {
+    "description": "ui.home.group_admin"
+  },
+  "uiHomeGroupLab": "deneysel",
+  "@uiHomeGroupLab": {
+    "description": "ui.home.group_lab"
+  },
+  "uiHomeModuleHome": "Ana sayfa",
+  "@uiHomeModuleHome": {
+    "description": "ui.home.module_home"
+  },
+  "uiHomeModuleTracking": "İş takibi",
+  "@uiHomeModuleTracking": {
+    "description": "ui.home.module_tracking"
+  },
+  "uiHomeModuleTasks": "Görevler",
+  "@uiHomeModuleTasks": {
+    "description": "ui.home.module_tasks"
+  },
+  "uiHomeModuleCalendar": "Takvim",
+  "@uiHomeModuleCalendar": {
+    "description": "ui.home.module_calendar"
+  },
+  "uiHomeModuleMemory": "Kurumsal hafıza",
+  "@uiHomeModuleMemory": {
+    "description": "ui.home.module_memory"
+  },
+  "uiHomeModuleArchive": "Arşiv",
+  "@uiHomeModuleArchive": {
+    "description": "ui.home.module_archive"
+  },
+  "uiHomeModuleMeetings": "Toplantılar",
+  "@uiHomeModuleMeetings": {
+    "description": "ui.home.module_meetings"
+  },
+  "uiHomeModuleMessages": "Mesajlar",
+  "@uiHomeModuleMessages": {
+    "description": "ui.home.module_messages"
+  },
+  "uiHomeModuleSheets": "Tablolar",
+  "@uiHomeModuleSheets": {
+    "description": "ui.home.module_sheets"
+  },
+  "uiHomeModuleRequests": "Talepler",
+  "@uiHomeModuleRequests": {
+    "description": "ui.home.module_requests"
+  },
+  "uiHomeModuleBudget": "Bütçe",
+  "@uiHomeModuleBudget": {
+    "description": "ui.home.module_budget"
+  },
+  "uiHomeModuleUsers": "Kullanıcılar",
+  "@uiHomeModuleUsers": {
+    "description": "ui.home.module_users"
+  },
+  "uiHomeModuleSeason": "Teknofest ve sezon",
+  "@uiHomeModuleSeason": {
+    "description": "ui.home.module_season"
+  },
+  "uiHomeModuleSimulation": "Simülasyon",
+  "@uiHomeModuleSimulation": {
+    "description": "ui.home.module_simulation"
+  },
+  "uiHomeBeta": "beta",
+  "@uiHomeBeta": {
+    "description": "ui.home.beta"
+  },
+  "uiHomeDeletedRecords": "Silinen kayıtlar",
+  "@uiHomeDeletedRecords": {
+    "description": "ui.home.deleted_records"
+  },
+  "uiHomeHelp": "Yardım ve rehberler",
+  "@uiHomeHelp": {
+    "description": "ui.home.help"
+  },
+  "uiHomeProfile": "Profil ve hesap",
+  "@uiHomeProfile": {
+    "description": "ui.home.profile"
+  },
+  "uiHomeSoonTail": "mobilde sonraki adımda eklenecek",
+  "@uiHomeSoonTail": {
+    "description": "ui.home.soon_tail"
+  },
+  "uiHomeAppName": "NIZAM.IO",
+  "@uiHomeAppName": {
+    "description": "ui.home.app_name"
+  },
   "uiIdentityLoginTitle": "Giriş yap",
   "@uiIdentityLoginTitle": {
     "description": "ui.identity.login_title"
@@ -929,7 +1277,7 @@
   "@uiRouterTabHome": {
     "description": "ui.router.tab_home"
   },
-  "uiRouterTabWork": "İşler",
+  "uiRouterTabWork": "Görevler",
   "@uiRouterTabWork": {
     "description": "ui.router.tab_work"
   },
@@ -985,6 +1333,18 @@
   "@uiRouterDevCatalogOpen": {
     "description": "ui.router.dev_catalog_open"
   },
+  "uiRouterTabHomeCaption": "bugün",
+  "@uiRouterTabHomeCaption": {
+    "description": "ui.router.tab_home_caption"
+  },
+  "uiRouterAssistant": "Asistana sor",
+  "@uiRouterAssistant": {
+    "description": "ui.router.assistant"
+  },
+  "uiRouterAssistantSoon": "Asistan mobilde sonraki adımda eklenecek",
+  "@uiRouterAssistantSoon": {
+    "description": "ui.router.assistant_soon"
+  },
   "uiScopeTitle": "Program seçimi",
   "@uiScopeTitle": {
     "description": "ui.scope.title"
@@ -1004,18 +1364,6 @@
   "uiScopeTruncated": "Liste en çok 200 programı gösterir; bazı programlar görünmüyor olabilir.",
   "@uiScopeTruncated": {
     "description": "ui.scope.truncated"
-  },
-  "uiScopeHomeTitle": "Ana sayfa",
-  "@uiScopeHomeTitle": {
-    "description": "ui.scope.home_title"
-  },
-  "uiScopeHomeProgram": "Seçili program",
-  "@uiScopeHomeProgram": {
-    "description": "ui.scope.home_program"
-  },
-  "uiScopeHomeYear": "Yıl",
-  "@uiScopeHomeYear": {
-    "description": "ui.scope.home_year"
   },
   "uiScopeHomeChange": "Kapsamı değiştir",
   "@uiScopeHomeChange": {

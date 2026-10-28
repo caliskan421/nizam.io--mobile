@@ -93,6 +93,7 @@ final portProviders = <String, ProviderBase<Object?>>{
   'localeControllerProvider': localeControllerProvider,
   'identityServiceProvider': identityServiceProvider,
   'scopeServiceProvider': scopeServiceProvider,
+  'homeDashboardRepositoryProvider': homeDashboardRepositoryProvider,
 };
 
 const compositionPath = 'lib/app/di/composition.dart';

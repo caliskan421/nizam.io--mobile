@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../network/connectivity_monitor.dart';
 import '../../providers.dart';
+import '../../theme/generated/tokens.gen.dart';
 import '../extensions/context_ext.dart';
 import '../layout/layout.dart';
 import '../widgets/feedback/nz_banner.dart';
@@ -26,11 +27,34 @@ class NzPage extends ConsumerWidget {
     this.floatingAction,
     this.loading = false,
     this.onRetry,
-  });
+  }) : topBar = null,
+       children = const [];
+
+  /// Kök akış sayfası (ana sayfa gibi): [topBar] yapışkan cam sliver'dır (`NzTopBar`), [children]
+  /// tek kaydırma görünümünde alt alta dizilir. İçerik üst çubuğun ve (kabuk `extendBody` ile)
+  /// yüzen alt menünün altından geçer; sonda alt güvenli alan + menü yüksekliği kadar boşluk
+  /// kalır. Yatay boşluk ve azami genişlik standart sayfayla aynıdır.
+  const NzPage.feed({
+    super.key,
+    required Widget this.topBar,
+    required this.children,
+    this.width = NzContentWidth.list,
+    this.onRetry,
+  }) : title = '',
+       body = const SizedBox.shrink(),
+       actions = const [],
+       floatingAction = null,
+       loading = false;
 
   /// AppBar başlığı (ARB'den).
   final String title;
   final Widget body;
+
+  /// [NzPage.feed]: üst çubuk sliver'ı.
+  final Widget? topBar;
+
+  /// [NzPage.feed]: akış öğeleri (aralarındaki boşluğu çağıran `Gap` ile verir).
+  final List<Widget> children;
   final NzContentWidth width;
 
   /// AppBar eylemleri.
@@ -46,6 +70,36 @@ class NzPage extends ConsumerWidget {
     final offline =
         ref.watch(connectivityStateProvider) == ConnectivityState.offline;
     final layout = context.layout;
+    final topBar = this.topBar;
+    if (topBar != null) {
+      final side = layout.pagePadding;
+      final extra =
+          (MediaQuery.sizeOf(context).width -
+                  2 * side -
+                  layout.contentMaxWidth(width))
+              .clamp(0, double.infinity) /
+          2;
+      return NzTextScaleLimit(
+        child: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              topBar,
+              if (offline)
+                SliverToBoxAdapter(child: NzBanner.offline(onAction: onRetry)),
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  side + extra,
+                  NizamioSpacing.gapXl,
+                  side + extra,
+                  MediaQuery.paddingOf(context).bottom + NizamioSpacing.gapXl,
+                ),
+                sliver: SliverList.list(children: children),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return NzTextScaleLimit(
       child: Scaffold(
         appBar: AppBar(title: Text(title), actions: actions),

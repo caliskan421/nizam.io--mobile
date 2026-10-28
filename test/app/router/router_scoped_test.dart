@@ -2,12 +2,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nizamio/app/router/pages.dart';
 import 'package:nizamio/app/router/router.dart';
 import 'package:nizamio/app/router/shell.dart';
 import 'package:nizamio/core/app_phase.dart';
+import 'package:nizamio/core/ui/page/nz_shell_events.dart';
+import 'package:nizamio/core/ui/widgets/navigation/nz_floating_nav.dart';
 
 import '../../core/ui/widgets/feedback/feedback_test_support.dart';
 import 'router_test_support.dart';
@@ -138,24 +141,34 @@ void main() {
   });
 
   group('kabuk', () {
-    testWidgets('compact: alt NavigationBar, ray yok', (tester) async {
+    testWidgets('compact: yüzen cam alt menü, ray yok', (tester) async {
       await _scoped(tester, width: 400);
-      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byType(NzFloatingNav), findsOneWidget);
       expect(find.byType(NavigationRail), findsNothing);
       expect(
-        find.descendant(
-          of: find.byType(NavigationBar),
-          matching: find.byType(NavigationDestination),
-        ),
-        findsNWidgets(shellTabs.length),
+        tester.widget<NzFloatingNav>(find.byType(NzFloatingNav)).items,
+        hasLength(shellTabs.length),
       );
     });
+
+    testWidgets(
+      'compact: kökte etkin sekmeye yeniden dokunma kısayol olayıdır',
+      (tester) async {
+        final router = await _scoped(tester, width: 400);
+        final container = ProviderScope.containerOf(_ctx(tester));
+        expect(container.read(shellReselectEventsProvider), isNull);
+        await tester.tap(find.byIcon(shellTabs[0].icon));
+        await settle(tester);
+        expect(container.read(shellReselectEventsProvider)?.tab, 0);
+        expect(locationOf(router), '/home');
+      },
+    );
 
     testWidgets('medium: NavigationRail (daralmış), alt çubuk yok', (
       tester,
     ) async {
       await _scoped(tester, width: 700);
-      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(NzFloatingNav), findsNothing);
       expect(
         tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
         isFalse,
@@ -164,7 +177,7 @@ void main() {
 
     testWidgets('expanded: genişletilmiş ray', (tester) async {
       await _scoped(tester, width: 1100);
-      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(NzFloatingNav), findsNothing);
       expect(
         tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
         isTrue,
@@ -185,17 +198,17 @@ void main() {
       await settle(tester);
       expect(locationOf(router), '/home/detail/5');
 
-      await tester.tap(find.text('İşler'));
+      await tester.tap(find.byIcon(shellTabs[1].icon));
       await settle(tester);
       expect(locationOf(router), '/work');
 
-      await tester.tap(find.text('Ana sayfa'));
+      await tester.tap(find.byIcon(shellTabs[0].icon));
       await settle(tester);
       expect(locationOf(router), '/home/detail/5');
       expect(find.textContaining('5'), findsWidgets);
 
-      // Seçili sekmeye yeniden dokunma kök konuma döner.
-      await tester.tap(find.text('Ana sayfa'));
+      // Seçili sekmeye (kökte değilken) yeniden dokunma kök konuma döner.
+      await tester.tap(find.byIcon(shellTabs[0].icon));
       await settle(tester);
       expect(locationOf(router), '/home');
     });
@@ -207,7 +220,7 @@ void main() {
       await tester.tap(find.text('Profil'));
       await settle(tester);
       expect(locationOf(router), '/profile');
-      await tester.tap(find.text('İşler'));
+      await tester.tap(find.text('Görevler'));
       await settle(tester);
       expect(locationOf(router), '/work/detail/9');
     });
@@ -256,7 +269,7 @@ void main() {
         expect(locationOf(router), '/home');
         expect(router.canPop(), isFalse);
         expect(find.textContaining('ESKI'), findsNothing);
-        await tester.tap(find.text('İşler'));
+        await tester.tap(find.byIcon(shellTabs[1].icon));
         await settle(tester);
         expect(locationOf(router), '/work');
         expect(find.textContaining('ESKI'), findsNothing);

@@ -6,9 +6,6 @@
     "ui.scope.empty_title": "Program yok",
     "ui.scope.empty_message": "Hesabınıza atanmış bir program bulunmuyor. Yöneticinizle görüşün.",
     "ui.scope.truncated": "Liste en çok 200 programı gösterir; bazı programlar görünmüyor olabilir.",
-    "ui.scope.home_title": "Ana sayfa",
-    "ui.scope.home_program": "Seçili program",
-    "ui.scope.home_year": "Yıl",
     "ui.scope.home_change": "Kapsamı değiştir"
   }
 }

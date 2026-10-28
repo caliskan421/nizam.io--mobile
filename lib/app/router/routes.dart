@@ -96,7 +96,10 @@ class AppShellRoute extends StatefulShellRouteData {
     BuildContext context,
     GoRouterState state,
     StatefulNavigationShell navigationShell,
-  ) => NzAdaptiveShell(navigationShell: navigationShell);
+  ) => NzAdaptiveShell(
+    navigationShell: navigationShell,
+    location: state.uri.path,
+  );
 }
 
 class HomeBranch extends StatefulShellBranchData {
@@ -115,7 +118,14 @@ class HomeRoute extends NzRouteData with $HomeRoute {
   const HomeRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const HomePage();
+  Widget build(BuildContext context, GoRouterState state) => HomePage(
+    navigation: HomeNavigation(
+      openTasks: () => const WorkRoute().go(context),
+      openTask: (code) => WorkDetailRoute(id: code).go(context),
+      openCoordinatorship: (code) => HomeDetailRoute(id: code).go(context),
+      openProfile: () => const ProfileRoute().go(context),
+    ),
+  );
 }
 
 class HomeDetailRoute extends NzRouteData with $HomeDetailRoute {

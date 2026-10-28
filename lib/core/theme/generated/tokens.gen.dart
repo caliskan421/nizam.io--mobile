@@ -30,6 +30,25 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     required this.success,
     required this.info,
     required this.scrim,
+    required this.surfaceTop,
+    required this.edgeLight,
+    required this.primaryTop,
+    required this.buttonTop,
+    required this.buttonBottom,
+    required this.buttonBorder,
+    required this.inProgress,
+    required this.onInProgress,
+    required this.glassBar,
+    required this.glassFloat,
+    required this.glassMenu,
+    required this.glassEdge,
+    required this.glassInk,
+    required this.glassInkFaint,
+    required this.navHighlight,
+    required this.scrimSoft,
+    required this.roleAdmin,
+    required this.roleCoordinator,
+    required this.roleMember,
   });
 
   final Color background;
@@ -53,6 +72,25 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
   final Color success;
   final Color info;
   final Color scrim;
+  final Color surfaceTop;
+  final Color edgeLight;
+  final Color primaryTop;
+  final Color buttonTop;
+  final Color buttonBottom;
+  final Color buttonBorder;
+  final Color inProgress;
+  final Color onInProgress;
+  final Color glassBar;
+  final Color glassFloat;
+  final Color glassMenu;
+  final Color glassEdge;
+  final Color glassInk;
+  final Color glassInkFaint;
+  final Color navHighlight;
+  final Color scrimSoft;
+  final Color roleAdmin;
+  final Color roleCoordinator;
+  final Color roleMember;
 
   static const light = NizamioColors(
     background: Color(0xFFF6F6F3),
@@ -76,6 +114,25 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     success: Color(0xFF4A6A00),
     info: Color(0xFF5C5C57),
     scrim: Color(0x66161615),
+    surfaceTop: Color(0xFFFFFFFF),
+    edgeLight: Color(0xCCFFFFFF),
+    primaryTop: Color(0xFFD8F866),
+    buttonTop: Color(0xFFFFFFFF),
+    buttonBottom: Color(0xFFF4F4F0),
+    buttonBorder: Color(0xFFD5D5CE),
+    inProgress: Color(0xFF7A26C1),
+    onInProgress: Color(0xFFFFFFFF),
+    glassBar: Color(0xC7F6F6F3),
+    glassFloat: Color(0xC7FFFFFF),
+    glassMenu: Color(0xEBFFFFFF),
+    glassEdge: Color(0x1A161615),
+    glassInk: Color(0xFF161615),
+    glassInkFaint: Color(0xFF71716B),
+    navHighlight: Color(0x14161615),
+    scrimSoft: Color(0x2E161615),
+    roleAdmin: Color(0xFFE57A9A),
+    roleCoordinator: Color(0xFF74C27A),
+    roleMember: Color(0xFF73A9E3),
   );
 
   static const dark = NizamioColors(
@@ -100,6 +157,25 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     success: Color(0xFFC8F53C),
     info: Color(0xFFA1A1A1),
     scrim: Color(0x8C000000),
+    surfaceTop: Color(0xFF1C1C1C),
+    edgeLight: Color(0x12FFFFFF),
+    primaryTop: Color(0xFFD8F866),
+    buttonTop: Color(0xFF323232),
+    buttonBottom: Color(0xFF262626),
+    buttonBorder: Color(0xFF3C3C3C),
+    inProgress: Color(0xFF9B30D9),
+    onInProgress: Color(0xFFFFFFFF),
+    glassBar: Color(0xC70B0B0B),
+    glassFloat: Color(0xBD121212),
+    glassMenu: Color(0xDB181818),
+    glassEdge: Color(0x14FFFFFF),
+    glassInk: Color(0xFFF5F5F5),
+    glassInkFaint: Color(0xFF8A8A8A),
+    navHighlight: Color(0x21FFFFFF),
+    scrimSoft: Color(0x47000000),
+    roleAdmin: Color(0xFFE57A9A),
+    roleCoordinator: Color(0xFF74C27A),
+    roleMember: Color(0xFF73A9E3),
   );
 
   @override
@@ -125,6 +201,25 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     Color? success,
     Color? info,
     Color? scrim,
+    Color? surfaceTop,
+    Color? edgeLight,
+    Color? primaryTop,
+    Color? buttonTop,
+    Color? buttonBottom,
+    Color? buttonBorder,
+    Color? inProgress,
+    Color? onInProgress,
+    Color? glassBar,
+    Color? glassFloat,
+    Color? glassMenu,
+    Color? glassEdge,
+    Color? glassInk,
+    Color? glassInkFaint,
+    Color? navHighlight,
+    Color? scrimSoft,
+    Color? roleAdmin,
+    Color? roleCoordinator,
+    Color? roleMember,
   }) {
     return NizamioColors(
       background: background ?? this.background,
@@ -148,6 +243,25 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       success: success ?? this.success,
       info: info ?? this.info,
       scrim: scrim ?? this.scrim,
+      surfaceTop: surfaceTop ?? this.surfaceTop,
+      edgeLight: edgeLight ?? this.edgeLight,
+      primaryTop: primaryTop ?? this.primaryTop,
+      buttonTop: buttonTop ?? this.buttonTop,
+      buttonBottom: buttonBottom ?? this.buttonBottom,
+      buttonBorder: buttonBorder ?? this.buttonBorder,
+      inProgress: inProgress ?? this.inProgress,
+      onInProgress: onInProgress ?? this.onInProgress,
+      glassBar: glassBar ?? this.glassBar,
+      glassFloat: glassFloat ?? this.glassFloat,
+      glassMenu: glassMenu ?? this.glassMenu,
+      glassEdge: glassEdge ?? this.glassEdge,
+      glassInk: glassInk ?? this.glassInk,
+      glassInkFaint: glassInkFaint ?? this.glassInkFaint,
+      navHighlight: navHighlight ?? this.navHighlight,
+      scrimSoft: scrimSoft ?? this.scrimSoft,
+      roleAdmin: roleAdmin ?? this.roleAdmin,
+      roleCoordinator: roleCoordinator ?? this.roleCoordinator,
+      roleMember: roleMember ?? this.roleMember,
     );
   }
 
@@ -176,6 +290,25 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       success: Color.lerp(success, other.success, t)!,
       info: Color.lerp(info, other.info, t)!,
       scrim: Color.lerp(scrim, other.scrim, t)!,
+      surfaceTop: Color.lerp(surfaceTop, other.surfaceTop, t)!,
+      edgeLight: Color.lerp(edgeLight, other.edgeLight, t)!,
+      primaryTop: Color.lerp(primaryTop, other.primaryTop, t)!,
+      buttonTop: Color.lerp(buttonTop, other.buttonTop, t)!,
+      buttonBottom: Color.lerp(buttonBottom, other.buttonBottom, t)!,
+      buttonBorder: Color.lerp(buttonBorder, other.buttonBorder, t)!,
+      inProgress: Color.lerp(inProgress, other.inProgress, t)!,
+      onInProgress: Color.lerp(onInProgress, other.onInProgress, t)!,
+      glassBar: Color.lerp(glassBar, other.glassBar, t)!,
+      glassFloat: Color.lerp(glassFloat, other.glassFloat, t)!,
+      glassMenu: Color.lerp(glassMenu, other.glassMenu, t)!,
+      glassEdge: Color.lerp(glassEdge, other.glassEdge, t)!,
+      glassInk: Color.lerp(glassInk, other.glassInk, t)!,
+      glassInkFaint: Color.lerp(glassInkFaint, other.glassInkFaint, t)!,
+      navHighlight: Color.lerp(navHighlight, other.navHighlight, t)!,
+      scrimSoft: Color.lerp(scrimSoft, other.scrimSoft, t)!,
+      roleAdmin: Color.lerp(roleAdmin, other.roleAdmin, t)!,
+      roleCoordinator: Color.lerp(roleCoordinator, other.roleCoordinator, t)!,
+      roleMember: Color.lerp(roleMember, other.roleMember, t)!,
     );
   }
 }
@@ -190,6 +323,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
     required this.sheet,
     required this.thumb,
     required this.knob,
+    required this.card,
   });
 
   final List<BoxShadow> float;
@@ -198,9 +332,10 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
   final List<BoxShadow> sheet;
   final List<BoxShadow> thumb;
   final List<BoxShadow> knob;
+  final List<BoxShadow> card;
 
   static const light = NizamioShadows(
-    float: [
+    float: <BoxShadow>[
       BoxShadow(
         color: Color(0x24161615),
         offset: Offset(0.0, 10.0),
@@ -208,7 +343,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
         spreadRadius: 0.0,
       ),
     ],
-    menu: [
+    menu: <BoxShadow>[
       BoxShadow(
         color: Color(0x29161615),
         offset: Offset(0.0, 20.0),
@@ -216,7 +351,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
         spreadRadius: 0.0,
       ),
     ],
-    drawer: [
+    drawer: <BoxShadow>[
       BoxShadow(
         color: Color(0x24161615),
         offset: Offset(-24.0, 0.0),
@@ -224,7 +359,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
         spreadRadius: 0.0,
       ),
     ],
-    sheet: [
+    sheet: <BoxShadow>[
       BoxShadow(
         color: Color(0x24161615),
         offset: Offset(0.0, 24.0),
@@ -232,7 +367,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
         spreadRadius: 0.0,
       ),
     ],
-    thumb: [
+    thumb: <BoxShadow>[
       BoxShadow(
         color: Color(0x1F161615),
         offset: Offset(0.0, 1.0),
@@ -240,7 +375,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
         spreadRadius: 0.0,
       ),
     ],
-    knob: [
+    knob: <BoxShadow>[
       BoxShadow(
         color: Color(0x59000000),
         offset: Offset(0.0, 1.0),
@@ -248,10 +383,24 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
         spreadRadius: 0.0,
       ),
     ],
+    card: <BoxShadow>[
+      BoxShadow(
+        color: Color(0x0D161615),
+        offset: Offset(0.0, 1.0),
+        blurRadius: 2.0,
+        spreadRadius: 0.0,
+      ),
+      BoxShadow(
+        color: Color(0x0F161615),
+        offset: Offset(0.0, 6.0),
+        blurRadius: 20.0,
+        spreadRadius: 0.0,
+      ),
+    ],
   );
 
   static const dark = NizamioShadows(
-    float: [
+    float: <BoxShadow>[
       BoxShadow(
         color: Color(0x73000000),
         offset: Offset(0.0, 12.0),
@@ -259,7 +408,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
         spreadRadius: 0.0,
       ),
     ],
-    menu: [
+    menu: <BoxShadow>[
       BoxShadow(
         color: Color(0x8C000000),
         offset: Offset(0.0, 20.0),
@@ -267,7 +416,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
         spreadRadius: 0.0,
       ),
     ],
-    drawer: [
+    drawer: <BoxShadow>[
       BoxShadow(
         color: Color(0x73000000),
         offset: Offset(-24.0, 0.0),
@@ -275,7 +424,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
         spreadRadius: 0.0,
       ),
     ],
-    sheet: [
+    sheet: <BoxShadow>[
       BoxShadow(
         color: Color(0x99000000),
         offset: Offset(0.0, 24.0),
@@ -283,7 +432,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
         spreadRadius: 0.0,
       ),
     ],
-    thumb: [
+    thumb: <BoxShadow>[
       BoxShadow(
         color: Color(0x40000000),
         offset: Offset(0.0, 1.0),
@@ -291,7 +440,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
         spreadRadius: 0.0,
       ),
     ],
-    knob: [
+    knob: <BoxShadow>[
       BoxShadow(
         color: Color(0x59000000),
         offset: Offset(0.0, 1.0),
@@ -299,6 +448,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
         spreadRadius: 0.0,
       ),
     ],
+    card: <BoxShadow>[],
   );
 
   @override
@@ -309,6 +459,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
     List<BoxShadow>? sheet,
     List<BoxShadow>? thumb,
     List<BoxShadow>? knob,
+    List<BoxShadow>? card,
   }) {
     return NizamioShadows(
       float: float ?? this.float,
@@ -317,6 +468,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
       sheet: sheet ?? this.sheet,
       thumb: thumb ?? this.thumb,
       knob: knob ?? this.knob,
+      card: card ?? this.card,
     );
   }
 
@@ -330,6 +482,7 @@ class NizamioShadows extends ThemeExtension<NizamioShadows> {
       sheet: BoxShadow.lerpList(sheet, other.sheet, t)!,
       thumb: BoxShadow.lerpList(thumb, other.thumb, t)!,
       knob: BoxShadow.lerpList(knob, other.knob, t)!,
+      card: BoxShadow.lerpList(card, other.card, t)!,
     );
   }
 }
@@ -383,6 +536,18 @@ abstract final class NizamioSize {
   static const double iconSizeSm = 16.0;
   static const double borderWidth = 1.0;
   static const double focusRingWidth = 2.0;
+  static const double controlSm = 36.0;
+  static const double controlMd = 44.0;
+  static const double controlLg = 52.0;
+  static const double iconTile = 36.0;
+  static const double iconTileLg = 40.0;
+  static const double glassButton = 40.0;
+  static const double progress = 4.0;
+  static const double progressLg = 6.0;
+  static const double dot = 8.0;
+  static const double statusDot = 7.0;
+  static const double drawerWidth = 318.0;
+  static const double flyoutWidth = 248.0;
 }
 
 /// Arka plan bulanıklığı (backdrop) yarıçapları.
@@ -392,6 +557,21 @@ abstract final class NizamioBlur {
   static const double float = 22.0;
   static const double menu = 24.0;
   static const double folder = 8.0;
+}
+
+/// Hareket: süre ve eğriler tasarım `components/bundle.css` (`--m-dur-*`, `--m-ease-*`),
+/// basma ölçekleri mobil eşleme. Azaltılmış hareket `NzMotion` ile uygulanır.
+abstract final class NizamioMotion {
+  static const Duration durSheet = Duration(milliseconds: 420);
+  static const Duration durExit = Duration(milliseconds: 240);
+  static const Duration durNav = Duration(milliseconds: 620);
+  static const Duration durPress = Duration(milliseconds: 160);
+  static const Cubic easeSheet = Cubic(0.32, 0.72, 0.0, 1.0);
+  static const Cubic easeSpring = Cubic(0.34, 1.42, 0.5, 1.0);
+  static const Cubic easeOut = Cubic(0.2, 0.8, 0.2, 1.0);
+  static const Cubic easeExit = Cubic(0.4, 0.0, 1.0, 1.0);
+  static const double pressButton = 0.96;
+  static const double pressCard = 0.985;
 }
 
 /// Tasarım metin stili (kaynak birimleri: px, em). `NzTextStyles` rollere çevirir.

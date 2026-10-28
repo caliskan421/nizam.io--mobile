@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../domain/home_dashboard_repository.dart';
 import 'scope_service.dart';
 
 part 'scope_providers.g.dart';
@@ -10,3 +11,10 @@ part 'scope_providers.g.dart';
 ScopeService scopeService(Ref ref) => throw UnimplementedError(
   'scopeServiceProvider bileşim kökünde (lib/app/di) bağlanır',
 );
+
+/// PORT: ana sayfa özetinin kaynağı (`scope_module.dart`'ta bağlanır; bugün geliştirme örneği).
+@Riverpod(keepAlive: true)
+HomeDashboardRepository homeDashboardRepository(Ref ref) =>
+    throw UnimplementedError(
+      'homeDashboardRepositoryProvider bileşim kökünde (lib/app/di) bağlanır',
+    );

@@ -99,6 +99,32 @@ Future<void> main(List<String> args) async {
     );
   }
   final designTokensText = designFile.readAsStringSync();
+  // Hareket token'ları (süre/eğri) tasarımın tokens.json'unda yok; tasarım sisteminin
+  // components/bundle.css'inden okunur — aynı blob pini yöntemiyle.
+  final motionSource =
+      ((jsonDecode(mobileTokensText) as Map<String, Object?>)['motion']
+              as Map<String, Object?>?)?['source']
+          as Map<String, Object?>?;
+  String? motionCss;
+  if (motionSource != null) {
+    final path = motionSource['path'];
+    final blob = motionSource['blob'];
+    if (path is! String ||
+        blob is! String ||
+        !RegExp(r'^[0-9a-f]{40}$').hasMatch(blob)) {
+      fail('$mobileTokensPath: motion.source.path / blob (40 hane) yok');
+    }
+    final file = File(p.join(root, path));
+    if (!file.existsSync()) fail('hareket kaynağı yok: $path');
+    final actual = await _git(root, ['hash-object', '--', path]);
+    if (actual != blob) {
+      fail(
+        'hareket kaynağı değişti: $path blob $actual ≠ pin $blob '
+        '(farkı inceleyip $mobileTokensPath motion.source.blob alanını güncelleyin)',
+      );
+    }
+    motionCss = file.readAsStringSync();
+  }
   final webTrText = await _git(frontendDir, [
     'show',
     '$webCommit:${web['trErrorsPath']}',
@@ -234,7 +260,7 @@ swagger_parser:
     root,
     'lib/core/theme/generated/tokens.gen.dart',
     emitTokens(
-      resolveTokens(designTokensText, mobileTokensText),
+      resolveTokens(designTokensText, mobileTokensText, motionCss: motionCss),
       '$designPath (blob ${designBlob.substring(0, 12)}) + $mobileTokensPath',
     ),
   );

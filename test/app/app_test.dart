@@ -152,7 +152,8 @@ void main() {
       expect(h.read(appPhaseProvider), AppPhase.scoped);
       expect(_entry, findsOneWidget);
 
-      await tester.tap(find.byType(NzIconButton));
+      // Ana sayfa üst çubuğunda da ikon düğmeleri var: katalog girişi ikonuyla seçilir.
+      await tester.tap(find.byIcon(Icons.widgets_outlined));
       await settle(tester);
       expect(find.byType(CatalogPage), findsOneWidget);
       await tester.tap(find.byType(BackButton));

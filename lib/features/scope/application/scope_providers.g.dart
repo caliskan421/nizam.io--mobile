@@ -56,3 +56,56 @@ final class ScopeServiceProvider
 }
 
 String _$scopeServiceHash() => r'79dd23c80dbce21bf68c74769b6004849924cb53';
+
+/// PORT: ana sayfa özetinin kaynağı (`scope_module.dart`'ta bağlanır; bugün geliştirme örneği).
+
+@ProviderFor(homeDashboardRepository)
+final homeDashboardRepositoryProvider = HomeDashboardRepositoryProvider._();
+
+/// PORT: ana sayfa özetinin kaynağı (`scope_module.dart`'ta bağlanır; bugün geliştirme örneği).
+
+final class HomeDashboardRepositoryProvider
+    extends
+        $FunctionalProvider<
+          HomeDashboardRepository,
+          HomeDashboardRepository,
+          HomeDashboardRepository
+        >
+    with $Provider<HomeDashboardRepository> {
+  /// PORT: ana sayfa özetinin kaynağı (`scope_module.dart`'ta bağlanır; bugün geliştirme örneği).
+  HomeDashboardRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'homeDashboardRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$homeDashboardRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<HomeDashboardRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  HomeDashboardRepository create(Ref ref) {
+    return homeDashboardRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(HomeDashboardRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<HomeDashboardRepository>(value),
+    );
+  }
+}
+
+String _$homeDashboardRepositoryHash() =>
+    r'1a49010f24795778367da239b236d453486dc4bd';

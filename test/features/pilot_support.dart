@@ -141,7 +141,12 @@ void useScreen(WidgetTester tester, ScreenSize screen) {
 }
 
 /// [page]'i gerçek bileşim kökünün portlarıyla çizer (bağlantı çevrimiçi).
-Future<void> pumpScreen(WidgetTester tester, Harness h, Widget page) async {
+Future<void> pumpScreen(
+  WidgetTester tester,
+  Harness h,
+  Widget page, {
+  bool dark = false,
+}) async {
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: h.container,
@@ -151,7 +156,7 @@ Future<void> pumpScreen(WidgetTester tester, Harness h, Widget page) async {
           connectivityStateProvider.overrideWithValue(ConnectivityState.online),
         ],
         child: MaterialApp(
-          theme: theme(false),
+          theme: theme(dark),
           locale: const Locale('tr'),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: testLocalizationDelegates,

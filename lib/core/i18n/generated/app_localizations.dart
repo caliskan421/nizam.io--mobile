@@ -1294,6 +1294,528 @@ abstract class AppLocalizations {
   /// **'sn'**
   String get uiFeedbackSecondsUnit;
 
+  /// ui.home.greeting
+  ///
+  /// In tr, this message translates to:
+  /// **'Merhaba'**
+  String get uiHomeGreeting;
+
+  /// ui.home.summary_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Özet'**
+  String get uiHomeSummaryLabel;
+
+  /// ui.home.kpi_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanma'**
+  String get uiHomeKpiDone;
+
+  /// ui.home.kpi_doing
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam eden'**
+  String get uiHomeKpiDoing;
+
+  /// ui.home.kpi_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikmede'**
+  String get uiHomeKpiLate;
+
+  /// ui.home.kpi_review
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekleyen'**
+  String get uiHomeKpiReview;
+
+  /// ui.home.kpi_done_of
+  ///
+  /// In tr, this message translates to:
+  /// **'görevden'**
+  String get uiHomeKpiDoneOf;
+
+  /// ui.home.kpi_done_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'tanesi bitti'**
+  String get uiHomeKpiDoneTail;
+
+  /// ui.home.kpi_doing_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'tanesi zamanında'**
+  String get uiHomeKpiDoingTail;
+
+  /// ui.home.kpi_late_lead
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık görevlerde'**
+  String get uiHomeKpiLateLead;
+
+  /// ui.home.kpi_review_caption
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt yüklendi, onayda'**
+  String get uiHomeKpiReviewCaption;
+
+  /// ui.home.open_list
+  ///
+  /// In tr, this message translates to:
+  /// **'listeyi aç'**
+  String get uiHomeOpenList;
+
+  /// ui.home.quick_actions
+  ///
+  /// In tr, this message translates to:
+  /// **'hızlı işlemler'**
+  String get uiHomeQuickActions;
+
+  /// ui.home.qa_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni görev'**
+  String get uiHomeQaTask;
+
+  /// ui.home.qa_meeting
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı'**
+  String get uiHomeQaMeeting;
+
+  /// ui.home.qa_invite
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet et'**
+  String get uiHomeQaInvite;
+
+  /// ui.home.qa_report
+  ///
+  /// In tr, this message translates to:
+  /// **'Rapor'**
+  String get uiHomeQaReport;
+
+  /// ui.home.qa_task_long
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni görev'**
+  String get uiHomeQaTaskLong;
+
+  /// ui.home.qa_meeting_long
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı oluştur'**
+  String get uiHomeQaMeetingLong;
+
+  /// ui.home.qa_invite_long
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı davet et'**
+  String get uiHomeQaInviteLong;
+
+  /// ui.home.qa_report_long
+  ///
+  /// In tr, this message translates to:
+  /// **'Rapor oluştur'**
+  String get uiHomeQaReportLong;
+
+  /// ui.home.form_soon
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu form mobilde sonraki adımda eklenecek; şimdilik web portalını kullanabilirsin.'**
+  String get uiHomeFormSoon;
+
+  /// ui.home.team
+  ///
+  /// In tr, this message translates to:
+  /// **'ekip'**
+  String get uiHomeTeam;
+
+  /// ui.home.users
+  ///
+  /// In tr, this message translates to:
+  /// **'kullanıcı'**
+  String get uiHomeUsers;
+
+  /// ui.home.coordinatorships_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlük'**
+  String get uiHomeCoordinatorshipsLc;
+
+  /// ui.home.role_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Admin'**
+  String get uiHomeRoleAdmin;
+
+  /// ui.home.role_coordinator
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör'**
+  String get uiHomeRoleCoordinator;
+
+  /// ui.home.role_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye'**
+  String get uiHomeRoleMember;
+
+  /// ui.home.role_admin_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'admin'**
+  String get uiHomeRoleAdminLc;
+
+  /// ui.home.role_coordinator_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatör'**
+  String get uiHomeRoleCoordinatorLc;
+
+  /// ui.home.role_member_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'üye'**
+  String get uiHomeRoleMemberLc;
+
+  /// ui.home.history_title
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem geçmişi'**
+  String get uiHomeHistoryTitle;
+
+  /// ui.home.history_last
+  ///
+  /// In tr, this message translates to:
+  /// **'Son işlem'**
+  String get uiHomeHistoryLast;
+
+  /// ui.home.history_today
+  ///
+  /// In tr, this message translates to:
+  /// **'bugün'**
+  String get uiHomeHistoryToday;
+
+  /// ui.home.history_open
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem geçmişini aç'**
+  String get uiHomeHistoryOpen;
+
+  /// ui.home.coordinatorships
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlükler'**
+  String get uiHomeCoordinatorships;
+
+  /// ui.home.sort_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikme'**
+  String get uiHomeSortLate;
+
+  /// ui.home.sort_progress
+  ///
+  /// In tr, this message translates to:
+  /// **'İlerleme'**
+  String get uiHomeSortProgress;
+
+  /// ui.home.sort_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Ada göre'**
+  String get uiHomeSortName;
+
+  /// ui.home.sort_change
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıralama ölçütünü değiştir'**
+  String get uiHomeSortChange;
+
+  /// ui.home.sort_flip
+  ///
+  /// In tr, this message translates to:
+  /// **'Sırayı ters çevir'**
+  String get uiHomeSortFlip;
+
+  /// ui.home.sort_descending
+  ///
+  /// In tr, this message translates to:
+  /// **'büyükten küçüğe'**
+  String get uiHomeSortDescending;
+
+  /// ui.home.sort_ascending
+  ///
+  /// In tr, this message translates to:
+  /// **'küçükten büyüğe'**
+  String get uiHomeSortAscending;
+
+  /// ui.home.filter_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük durumu'**
+  String get uiHomeFilterLabel;
+
+  /// ui.home.filter_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get uiHomeFilterAll;
+
+  /// ui.home.filter_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikmesi olan'**
+  String get uiHomeFilterLate;
+
+  /// ui.home.filter_on_track
+  ///
+  /// In tr, this message translates to:
+  /// **'Yolunda'**
+  String get uiHomeFilterOnTrack;
+
+  /// ui.home.filter_unassigned
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörsüz'**
+  String get uiHomeFilterUnassigned;
+
+  /// ui.home.filter_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu filtreye uyan koordinatörlük yok.'**
+  String get uiHomeFilterEmpty;
+
+  /// ui.home.unassigned
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör atanmamış'**
+  String get uiHomeUnassigned;
+
+  /// ui.home.tasks_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'görev'**
+  String get uiHomeTasksLc;
+
+  /// ui.home.late_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'geciken'**
+  String get uiHomeLateLc;
+
+  /// ui.home.no_late
+  ///
+  /// In tr, this message translates to:
+  /// **'gecikme yok'**
+  String get uiHomeNoLate;
+
+  /// ui.home.show_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü göster'**
+  String get uiHomeShowAll;
+
+  /// ui.home.collapse
+  ///
+  /// In tr, this message translates to:
+  /// **'Daralt'**
+  String get uiHomeCollapse;
+
+  /// ui.home.notifications
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirimler'**
+  String get uiHomeNotifications;
+
+  /// ui.home.waiting_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'iş seni bekliyor'**
+  String get uiHomeWaitingTail;
+
+  /// ui.home.menu
+  ///
+  /// In tr, this message translates to:
+  /// **'Menü'**
+  String get uiHomeMenu;
+
+  /// ui.home.shortcuts
+  ///
+  /// In tr, this message translates to:
+  /// **'Ana sayfa kısayolları'**
+  String get uiHomeShortcuts;
+
+  /// ui.home.waiting_for_you
+  ///
+  /// In tr, this message translates to:
+  /// **'seni bekleyenler'**
+  String get uiHomeWaitingForYou;
+
+  /// ui.home.date_request
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talebi'**
+  String get uiHomeDateRequest;
+
+  /// ui.home.awaiting_approval
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekliyor'**
+  String get uiHomeAwaitingApproval;
+
+  /// ui.home.go
+  ///
+  /// In tr, this message translates to:
+  /// **'git'**
+  String get uiHomeGo;
+
+  /// ui.home.group_tracking
+  ///
+  /// In tr, this message translates to:
+  /// **'takip'**
+  String get uiHomeGroupTracking;
+
+  /// ui.home.group_content
+  ///
+  /// In tr, this message translates to:
+  /// **'içerik'**
+  String get uiHomeGroupContent;
+
+  /// ui.home.group_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'yönetim'**
+  String get uiHomeGroupAdmin;
+
+  /// ui.home.group_lab
+  ///
+  /// In tr, this message translates to:
+  /// **'deneysel'**
+  String get uiHomeGroupLab;
+
+  /// ui.home.module_home
+  ///
+  /// In tr, this message translates to:
+  /// **'Ana sayfa'**
+  String get uiHomeModuleHome;
+
+  /// ui.home.module_tracking
+  ///
+  /// In tr, this message translates to:
+  /// **'İş takibi'**
+  String get uiHomeModuleTracking;
+
+  /// ui.home.module_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler'**
+  String get uiHomeModuleTasks;
+
+  /// ui.home.module_calendar
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvim'**
+  String get uiHomeModuleCalendar;
+
+  /// ui.home.module_memory
+  ///
+  /// In tr, this message translates to:
+  /// **'Kurumsal hafıza'**
+  String get uiHomeModuleMemory;
+
+  /// ui.home.module_archive
+  ///
+  /// In tr, this message translates to:
+  /// **'Arşiv'**
+  String get uiHomeModuleArchive;
+
+  /// ui.home.module_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantılar'**
+  String get uiHomeModuleMeetings;
+
+  /// ui.home.module_messages
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesajlar'**
+  String get uiHomeModuleMessages;
+
+  /// ui.home.module_sheets
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablolar'**
+  String get uiHomeModuleSheets;
+
+  /// ui.home.module_requests
+  ///
+  /// In tr, this message translates to:
+  /// **'Talepler'**
+  String get uiHomeModuleRequests;
+
+  /// ui.home.module_budget
+  ///
+  /// In tr, this message translates to:
+  /// **'Bütçe'**
+  String get uiHomeModuleBudget;
+
+  /// ui.home.module_users
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcılar'**
+  String get uiHomeModuleUsers;
+
+  /// ui.home.module_season
+  ///
+  /// In tr, this message translates to:
+  /// **'Teknofest ve sezon'**
+  String get uiHomeModuleSeason;
+
+  /// ui.home.module_simulation
+  ///
+  /// In tr, this message translates to:
+  /// **'Simülasyon'**
+  String get uiHomeModuleSimulation;
+
+  /// ui.home.beta
+  ///
+  /// In tr, this message translates to:
+  /// **'beta'**
+  String get uiHomeBeta;
+
+  /// ui.home.deleted_records
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinen kayıtlar'**
+  String get uiHomeDeletedRecords;
+
+  /// ui.home.help
+  ///
+  /// In tr, this message translates to:
+  /// **'Yardım ve rehberler'**
+  String get uiHomeHelp;
+
+  /// ui.home.profile
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil ve hesap'**
+  String get uiHomeProfile;
+
+  /// ui.home.soon_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'mobilde sonraki adımda eklenecek'**
+  String get uiHomeSoonTail;
+
+  /// ui.home.app_name
+  ///
+  /// In tr, this message translates to:
+  /// **'NIZAM.IO'**
+  String get uiHomeAppName;
+
   /// ui.identity.login_title
   ///
   /// In tr, this message translates to:
@@ -1489,7 +2011,7 @@ abstract class AppLocalizations {
   /// ui.router.tab_work
   ///
   /// In tr, this message translates to:
-  /// **'İşler'**
+  /// **'Görevler'**
   String get uiRouterTabWork;
 
   /// ui.router.tab_profile
@@ -1570,6 +2092,24 @@ abstract class AppLocalizations {
   /// **'Bileşen kataloğunu aç'**
   String get uiRouterDevCatalogOpen;
 
+  /// ui.router.tab_home_caption
+  ///
+  /// In tr, this message translates to:
+  /// **'bugün'**
+  String get uiRouterTabHomeCaption;
+
+  /// ui.router.assistant
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistana sor'**
+  String get uiRouterAssistant;
+
+  /// ui.router.assistant_soon
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistan mobilde sonraki adımda eklenecek'**
+  String get uiRouterAssistantSoon;
+
   /// ui.scope.title
   ///
   /// In tr, this message translates to:
@@ -1599,24 +2139,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Liste en çok 200 programı gösterir; bazı programlar görünmüyor olabilir.'**
   String get uiScopeTruncated;
-
-  /// ui.scope.home_title
-  ///
-  /// In tr, this message translates to:
-  /// **'Ana sayfa'**
-  String get uiScopeHomeTitle;
-
-  /// ui.scope.home_program
-  ///
-  /// In tr, this message translates to:
-  /// **'Seçili program'**
-  String get uiScopeHomeProgram;
-
-  /// ui.scope.home_year
-  ///
-  /// In tr, this message translates to:
-  /// **'Yıl'**
-  String get uiScopeHomeYear;
 
   /// ui.scope.home_change
   ///

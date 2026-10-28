@@ -236,12 +236,77 @@ $op
       expect(t.blur, {'bar': 18});
       expect(t.spacingScale, {'1': 4});
       expect(t.metrics, {'iconSize': 20});
-      final f = t.shadowsLight['float']!;
+      final f = t.shadowsLight['float']!.single;
       expect(
         (f.dx, f.dy, f.blur, f.spread, f.argb),
         (-24, 0, 60, 0, 0x24161615),
       );
-      expect(t.shadowsDark['knob']!.argb, t.shadowsLight['knob']!.argb);
+      expect(
+        t.shadowsDark['knob']!.single.argb,
+        t.shadowsLight['knob']!.single.argb,
+      );
+    });
+    test(
+      'mobil gölge çok katmanlı ya da none; tasarım adıyla çakışırsa düşer',
+      () {
+        String withShadows(String body) => mobile().replaceFirst(
+          '"metrics"',
+          '"shadows": {"\$comment": "x", $body}, "metrics"',
+        );
+        final t = resolveTokens(
+          design(),
+          withShadows(
+            '"card": {"light": "0 1px 2px rgba(22,22,21,0.05), 0 6px 20px rgba(22,22,21,0.06)", "dark": "none"}',
+          ),
+        );
+        expect(t.shadowsLight['card']!.map((s) => (s.dy, s.blur)), [
+          (1, 2),
+          (6, 20),
+        ]);
+        expect(t.shadowsDark['card'], isEmpty);
+        expect(
+          () => resolveTokens(
+            design(),
+            withShadows('"float": {"light": "none", "dark": "none"}'),
+          ),
+          fails('çakışıyor'),
+        );
+        expect(
+          () =>
+              resolveTokens(design(), withShadows('"card": {"light": "none"}')),
+          fails('iki temada'),
+        );
+      },
+    );
+    test('hareket bundle.css özel özelliklerinden; bozuk/eksik kaynak düşer', () {
+      final mob = mobile().replaceFirst(
+        '"metrics"',
+        '"motion": {"source": {"path": "x", "blob": "x"}, "pressScale": {"button": 0.96}}, "metrics"',
+      );
+      const css =
+          ':root { --m-ease-sheet: cubic-bezier(.32, .72, 0, 1); --m-dur-press: .16s; '
+          '--m-dur-exit: 240ms; } .m-btn { transition: transform var(--m-dur-press); }';
+      final m = resolveTokens(design(), mob, motionCss: css).motion!;
+      expect(m.durations, {'press': 160, 'exit': 240});
+      expect(m.curves['sheet'], [0.32, 0.72, 0, 1]);
+      expect(m.pressScale, {'button': 0.96});
+      expect(() => resolveTokens(design(), mob), fails('kaynak CSS'));
+      expect(
+        () => resolveTokens(design(), mob, motionCss: '--m-dur-press: fast;'),
+        fails('tanınmayan'),
+      );
+      expect(
+        () => resolveTokens(design(), mob, motionCss: '.a { color: red }'),
+        fails('yok'),
+      );
+      expect(
+        () => resolveTokens(
+          design(),
+          mob.replaceFirst('0.96', '1.2'),
+          motionCss: css,
+        ),
+        fails('pressScale'),
+      );
     });
     test('tasarımda olmayan token\'a eşleme düşer', () {
       expect(
@@ -314,10 +379,25 @@ $op
           (jsonDecode(mobileText) as Map<String, Object?>)['source']!
               as Map<String, Object?>;
       final path = src['path']! as String;
-      final t = resolveTokens(File(path).readAsStringSync(), mobileText);
+      final motionSrc =
+          ((jsonDecode(mobileText) as Map<String, Object?>)['motion']!
+                  as Map<String, Object?>)['source']!
+              as Map<String, Object?>;
+      final motionPath = motionSrc['path']! as String;
+      final t = resolveTokens(
+        File(path).readAsStringSync(),
+        mobileText,
+        motionCss: File(motionPath).readAsStringSync(),
+      );
       expect(t.light.keys, t.dark.keys);
-      final blob = Process.runSync('git', ['hash-object', '--', path]);
-      expect((blob.stdout as String).trim(), src['blob']);
+      expect(t.motion!.durations.keys, containsAll(['press', 'sheet', 'exit']));
+      for (final (p, b) in [
+        (path, src['blob']),
+        (motionPath, motionSrc['blob']),
+      ]) {
+        final blob = Process.runSync('git', ['hash-object', '--', p]);
+        expect((blob.stdout as String).trim(), b, reason: p);
+      }
     });
   });
 

@@ -692,6 +692,268 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiFeedbackSecondsUnit => 'sn';
 
   @override
+  String get uiHomeGreeting => 'Merhaba';
+
+  @override
+  String get uiHomeSummaryLabel => 'Özet';
+
+  @override
+  String get uiHomeKpiDone => 'Tamamlanma';
+
+  @override
+  String get uiHomeKpiDoing => 'Devam eden';
+
+  @override
+  String get uiHomeKpiLate => 'Gecikmede';
+
+  @override
+  String get uiHomeKpiReview => 'Onay bekleyen';
+
+  @override
+  String get uiHomeKpiDoneOf => 'görevden';
+
+  @override
+  String get uiHomeKpiDoneTail => 'tanesi bitti';
+
+  @override
+  String get uiHomeKpiDoingTail => 'tanesi zamanında';
+
+  @override
+  String get uiHomeKpiLateLead => 'Açık görevlerde';
+
+  @override
+  String get uiHomeKpiReviewCaption => 'Kanıt yüklendi, onayda';
+
+  @override
+  String get uiHomeOpenList => 'listeyi aç';
+
+  @override
+  String get uiHomeQuickActions => 'hızlı işlemler';
+
+  @override
+  String get uiHomeQaTask => 'Yeni görev';
+
+  @override
+  String get uiHomeQaMeeting => 'Toplantı';
+
+  @override
+  String get uiHomeQaInvite => 'Davet et';
+
+  @override
+  String get uiHomeQaReport => 'Rapor';
+
+  @override
+  String get uiHomeQaTaskLong => 'Yeni görev';
+
+  @override
+  String get uiHomeQaMeetingLong => 'Toplantı oluştur';
+
+  @override
+  String get uiHomeQaInviteLong => 'Kullanıcı davet et';
+
+  @override
+  String get uiHomeQaReportLong => 'Rapor oluştur';
+
+  @override
+  String get uiHomeFormSoon =>
+      'Bu form mobilde sonraki adımda eklenecek; şimdilik web portalını kullanabilirsin.';
+
+  @override
+  String get uiHomeTeam => 'ekip';
+
+  @override
+  String get uiHomeUsers => 'kullanıcı';
+
+  @override
+  String get uiHomeCoordinatorshipsLc => 'koordinatörlük';
+
+  @override
+  String get uiHomeRoleAdmin => 'Admin';
+
+  @override
+  String get uiHomeRoleCoordinator => 'Koordinatör';
+
+  @override
+  String get uiHomeRoleMember => 'Üye';
+
+  @override
+  String get uiHomeRoleAdminLc => 'admin';
+
+  @override
+  String get uiHomeRoleCoordinatorLc => 'koordinatör';
+
+  @override
+  String get uiHomeRoleMemberLc => 'üye';
+
+  @override
+  String get uiHomeHistoryTitle => 'İşlem geçmişi';
+
+  @override
+  String get uiHomeHistoryLast => 'Son işlem';
+
+  @override
+  String get uiHomeHistoryToday => 'bugün';
+
+  @override
+  String get uiHomeHistoryOpen => 'İşlem geçmişini aç';
+
+  @override
+  String get uiHomeCoordinatorships => 'Koordinatörlükler';
+
+  @override
+  String get uiHomeSortLate => 'Gecikme';
+
+  @override
+  String get uiHomeSortProgress => 'İlerleme';
+
+  @override
+  String get uiHomeSortName => 'Ada göre';
+
+  @override
+  String get uiHomeSortChange => 'Sıralama ölçütünü değiştir';
+
+  @override
+  String get uiHomeSortFlip => 'Sırayı ters çevir';
+
+  @override
+  String get uiHomeSortDescending => 'büyükten küçüğe';
+
+  @override
+  String get uiHomeSortAscending => 'küçükten büyüğe';
+
+  @override
+  String get uiHomeFilterLabel => 'Koordinatörlük durumu';
+
+  @override
+  String get uiHomeFilterAll => 'Tümü';
+
+  @override
+  String get uiHomeFilterLate => 'Gecikmesi olan';
+
+  @override
+  String get uiHomeFilterOnTrack => 'Yolunda';
+
+  @override
+  String get uiHomeFilterUnassigned => 'Koordinatörsüz';
+
+  @override
+  String get uiHomeFilterEmpty => 'Bu filtreye uyan koordinatörlük yok.';
+
+  @override
+  String get uiHomeUnassigned => 'Koordinatör atanmamış';
+
+  @override
+  String get uiHomeTasksLc => 'görev';
+
+  @override
+  String get uiHomeLateLc => 'geciken';
+
+  @override
+  String get uiHomeNoLate => 'gecikme yok';
+
+  @override
+  String get uiHomeShowAll => 'Tümünü göster';
+
+  @override
+  String get uiHomeCollapse => 'Daralt';
+
+  @override
+  String get uiHomeNotifications => 'Bildirimler';
+
+  @override
+  String get uiHomeWaitingTail => 'iş seni bekliyor';
+
+  @override
+  String get uiHomeMenu => 'Menü';
+
+  @override
+  String get uiHomeShortcuts => 'Ana sayfa kısayolları';
+
+  @override
+  String get uiHomeWaitingForYou => 'seni bekleyenler';
+
+  @override
+  String get uiHomeDateRequest => 'Tarih talebi';
+
+  @override
+  String get uiHomeAwaitingApproval => 'Onay bekliyor';
+
+  @override
+  String get uiHomeGo => 'git';
+
+  @override
+  String get uiHomeGroupTracking => 'takip';
+
+  @override
+  String get uiHomeGroupContent => 'içerik';
+
+  @override
+  String get uiHomeGroupAdmin => 'yönetim';
+
+  @override
+  String get uiHomeGroupLab => 'deneysel';
+
+  @override
+  String get uiHomeModuleHome => 'Ana sayfa';
+
+  @override
+  String get uiHomeModuleTracking => 'İş takibi';
+
+  @override
+  String get uiHomeModuleTasks => 'Görevler';
+
+  @override
+  String get uiHomeModuleCalendar => 'Takvim';
+
+  @override
+  String get uiHomeModuleMemory => 'Kurumsal hafıza';
+
+  @override
+  String get uiHomeModuleArchive => 'Arşiv';
+
+  @override
+  String get uiHomeModuleMeetings => 'Toplantılar';
+
+  @override
+  String get uiHomeModuleMessages => 'Mesajlar';
+
+  @override
+  String get uiHomeModuleSheets => 'Tablolar';
+
+  @override
+  String get uiHomeModuleRequests => 'Talepler';
+
+  @override
+  String get uiHomeModuleBudget => 'Bütçe';
+
+  @override
+  String get uiHomeModuleUsers => 'Kullanıcılar';
+
+  @override
+  String get uiHomeModuleSeason => 'Teknofest ve sezon';
+
+  @override
+  String get uiHomeModuleSimulation => 'Simülasyon';
+
+  @override
+  String get uiHomeBeta => 'beta';
+
+  @override
+  String get uiHomeDeletedRecords => 'Silinen kayıtlar';
+
+  @override
+  String get uiHomeHelp => 'Yardım ve rehberler';
+
+  @override
+  String get uiHomeProfile => 'Profil ve hesap';
+
+  @override
+  String get uiHomeSoonTail => 'mobilde sonraki adımda eklenecek';
+
+  @override
+  String get uiHomeAppName => 'NIZAM.IO';
+
+  @override
   String get uiIdentityLoginTitle => 'Giriş yap';
 
   @override
@@ -792,7 +1054,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiRouterTabHome => 'Ana sayfa';
 
   @override
-  String get uiRouterTabWork => 'İşler';
+  String get uiRouterTabWork => 'Görevler';
 
   @override
   String get uiRouterTabProfile => 'Profil';
@@ -835,6 +1097,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiRouterDevCatalogOpen => 'Bileşen kataloğunu aç';
 
   @override
+  String get uiRouterTabHomeCaption => 'bugün';
+
+  @override
+  String get uiRouterAssistant => 'Asistana sor';
+
+  @override
+  String get uiRouterAssistantSoon =>
+      'Asistan mobilde sonraki adımda eklenecek';
+
+  @override
   String get uiScopeTitle => 'Program seçimi';
 
   @override
@@ -850,15 +1122,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiScopeTruncated =>
       'Liste en çok 200 programı gösterir; bazı programlar görünmüyor olabilir.';
-
-  @override
-  String get uiScopeHomeTitle => 'Ana sayfa';
-
-  @override
-  String get uiScopeHomeProgram => 'Seçili program';
-
-  @override
-  String get uiScopeHomeYear => 'Yıl';
 
   @override
   String get uiScopeHomeChange => 'Kapsamı değiştir';

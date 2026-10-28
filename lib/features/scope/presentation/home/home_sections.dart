@@ -1,0 +1,373 @@
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+
+import '../../../../core/i18n/generated/app_localizations.dart';
+import '../../../../core/theme/generated/tokens.gen.dart';
+import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../domain/home_dashboard.dart';
+import 'home_texts.dart';
+
+/// İki ya da daha çok eşit sütun; satırdaki öğeler aynı yüksekliğe uzar (prototip `grid`).
+class HomeGrid extends StatelessWidget {
+  const HomeGrid({
+    super.key,
+    required this.columns,
+    required this.gap,
+    required this.children,
+  });
+
+  final int columns;
+  final double gap;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    spacing: gap,
+    children: [
+      for (var r = 0; r < children.length; r += columns)
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: gap,
+            children: [
+              for (var i = r; i < r + columns; i++)
+                Expanded(
+                  child: i < children.length
+                      ? children[i]
+                      : const SizedBox.shrink(),
+                ),
+            ],
+          ),
+        ),
+    ],
+  );
+}
+
+/// Küçük harfli mono bölüm etiketi + isteğe bağlı sağ açıklama.
+class HomeKicker extends StatelessWidget {
+  const HomeKicker(this.label, {super.key, this.trailing});
+
+  final String label;
+  final String? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final trailing = this.trailing;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            label,
+            style: context.text.kicker.copyWith(color: c.textMuted),
+          ),
+        ),
+        if (trailing != null) ...[
+          const Gap(NizamioSpacing.space3),
+          Expanded(
+            child: Text(
+              trailing,
+              textAlign: TextAlign.end,
+              style: context.text.caption.copyWith(color: c.textMuted),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Karşılama: tarih + "Merhaba" ve ad (ad tek satırda kesilir; tam ad okuyucuda).
+class HomeGreeting extends StatelessWidget {
+  const HomeGreeting({super.key, required this.name, required this.today});
+
+  final String name;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final t = context.text;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l.dateKicker(today),
+          style: t.kicker.copyWith(color: context.colors.textMuted),
+        ),
+        const Gap(NizamioSpacing.space1 + NizamioSpacing.space1 / 2),
+        Semantics(
+          header: true,
+          label: '${l.uiHomeGreeting} $name',
+          excludeSemantics: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.uiHomeGreeting, style: t.displayLg),
+              Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: t.displayLg,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 2×2 özet kutuları (tamamlanma, devam eden, gecikmede, onay bekleyen).
+class HomeKpiGrid extends StatelessWidget {
+  const HomeKpiGrid({super.key, required this.tasks, required this.onOpen});
+
+  final TaskTotals tasks;
+
+  /// Kutuya dokunma → ilgili görev listesi.
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final t = tasks;
+    double ratio(int a, int b) => b == 0 ? 0 : a / b;
+    NzKpiTile tile({
+      required IconData icon,
+      required Color tone,
+      required String label,
+      required String value,
+      required double progress,
+      required String caption,
+      Color? valueColor,
+    }) => NzKpiTile(
+      icon: icon,
+      tone: tone,
+      label: label,
+      value: value,
+      valueColor: valueColor,
+      progress: progress,
+      caption: caption,
+      onTap: onOpen,
+      semanticLabel: '$label: $value. $caption. ${l.uiHomeOpenList}',
+    );
+    return Semantics(
+      container: true,
+      label: l.uiHomeSummaryLabel,
+      child: HomeGrid(
+        columns: 2,
+        gap: NizamioSpacing.gapMd,
+        children: [
+          tile(
+            icon: Icons.check_rounded,
+            tone: c.accentText,
+            label: l.uiHomeKpiDone,
+            value: l.percent(ratio(t.done, t.total)),
+            progress: ratio(t.done, t.total),
+            caption: l.kpiDoneCaption(t),
+          ),
+          tile(
+            icon: Icons.bolt_rounded,
+            tone: c.inProgress,
+            label: l.uiHomeKpiDoing,
+            value: '${t.inProgress}',
+            progress: ratio(t.inProgress, t.total),
+            caption: l.kpiDoingCaption(t),
+          ),
+          tile(
+            icon: Icons.warning_amber_rounded,
+            tone: c.danger,
+            label: l.uiHomeKpiLate,
+            value: '${t.late}',
+            valueColor: c.danger,
+            progress: ratio(t.late, t.open),
+            caption: l.kpiLateCaption(t),
+          ),
+          tile(
+            icon: Icons.schedule_rounded,
+            tone: c.warning,
+            label: l.uiHomeKpiReview,
+            value: '${t.awaitingApproval}',
+            progress: ratio(t.awaitingApproval, t.open),
+            caption: l.uiHomeKpiReviewCaption,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Hızlı işlem türü (kutucuk ve kısayol menüsü aynı listeyi kullanır).
+enum HomeQuickAction { task, meeting, invite, report }
+
+/// Dört hızlı işlem kutucuğu.
+class HomeQuickActions extends StatelessWidget {
+  const HomeQuickActions({super.key, required this.onAction});
+
+  final ValueChanged<HomeQuickAction> onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        HomeKicker(l.uiHomeQuickActions),
+        const Gap(NizamioSpacing.gapMd),
+        HomeGrid(
+          columns: 4,
+          gap: NizamioSpacing.space2,
+          children: [
+            for (final a in HomeQuickAction.values)
+              NzActionTile(
+                icon: quickActionIcon(a),
+                label: quickActionLabel(l, a),
+                primary: a == HomeQuickAction.task,
+                onPressed: () => onAction(a),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+IconData quickActionIcon(HomeQuickAction a) => switch (a) {
+  HomeQuickAction.task => Icons.add_rounded,
+  HomeQuickAction.meeting => Icons.videocam_outlined,
+  HomeQuickAction.invite => Icons.person_add_alt_outlined,
+  HomeQuickAction.report => Icons.description_outlined,
+};
+
+String quickActionLabel(AppLocalizations l, HomeQuickAction a) => switch (a) {
+  HomeQuickAction.task => l.uiHomeQaTask,
+  HomeQuickAction.meeting => l.uiHomeQaMeeting,
+  HomeQuickAction.invite => l.uiHomeQaInvite,
+  HomeQuickAction.report => l.uiHomeQaReport,
+};
+
+/// Kısayol menüsündeki uzun ad ("Toplantı oluştur").
+String quickActionLongLabel(AppLocalizations l, HomeQuickAction a) =>
+    switch (a) {
+      HomeQuickAction.task => l.uiHomeQaTaskLong,
+      HomeQuickAction.meeting => l.uiHomeQaMeetingLong,
+      HomeQuickAction.invite => l.uiHomeQaInviteLong,
+      HomeQuickAction.report => l.uiHomeQaReportLong,
+    };
+
+/// Ekip: rol başına sayı kutusu (rol rengi yalnız işarettir).
+class HomeTeam extends StatelessWidget {
+  const HomeTeam({super.key, required this.dashboard, required this.onOpen});
+
+  final HomeDashboard dashboard;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final team = dashboard.team;
+    Widget tile(Color dot, int n, String role) => NzCard.outlined(
+      padding: const EdgeInsets.all(NizamioSpacing.space3),
+      onTap: onOpen,
+      semanticLabel: '$role: $n. ${l.uiHomeOpenList}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: NizamioSpacing.space1,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+            child: const Padding(padding: EdgeInsets.all(NizamioSize.dot / 2)),
+          ),
+          Text('$n', maxLines: 1, style: context.text.titleMd),
+          Text(
+            role,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: context.text.caption.copyWith(color: c.textMuted),
+          ),
+        ],
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        HomeKicker(l.uiHomeTeam, trailing: l.teamSummary(dashboard)),
+        const Gap(NizamioSpacing.gapMd),
+        HomeGrid(
+          columns: 3,
+          gap: NizamioSpacing.space2,
+          children: [
+            tile(c.roleAdmin, team.admins, l.uiHomeRoleAdmin),
+            tile(c.roleCoordinator, team.coordinators, l.uiHomeRoleCoordinator),
+            tile(c.roleMember, team.members, l.uiHomeRoleMember),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// İşlem geçmişi giriş kartı.
+class HomeHistoryCard extends StatelessWidget {
+  const HomeHistoryCard({
+    super.key,
+    required this.activity,
+    required this.now,
+    required this.onOpen,
+  });
+
+  final LastActivity? activity;
+  final DateTime now;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final a = activity;
+    return NzCard.outlined(
+      onTap: onOpen,
+      semanticLabel: l.uiHomeHistoryOpen,
+      child: Row(
+        children: [
+          const NzIconTile(icon: Icons.history_rounded),
+          const Gap(NizamioSpacing.space3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: NizamioSpacing.space1 / 2,
+              children: [
+                Text(
+                  l.uiHomeHistoryTitle,
+                  style: context.text.list.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (a != null)
+                  Text(
+                    l.lastActivity(a, now),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.text.caption.copyWith(color: c.textMuted),
+                  ),
+              ],
+            ),
+          ),
+          const Gap(NizamioSpacing.space3),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: NizamioSize.iconSizeSm,
+            color: c.textFaint,
+          ),
+        ],
+      ),
+    );
+  }
+}

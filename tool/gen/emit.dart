@@ -172,9 +172,9 @@ void _emitExtension(
     ..writeln();
 }
 
-String _shadow(ShadowSpec s) =>
-    '[BoxShadow(color: ${_argb(s.argb)}, offset: Offset(${_num(s.dx)}, ${_num(s.dy)}), '
-    'blurRadius: ${_num(s.blur)}, spreadRadius: ${_num(s.spread)})]';
+String _shadow(List<ShadowSpec> layers) =>
+    '<BoxShadow>[${layers.map((s) => 'BoxShadow(color: ${_argb(s.argb)}, offset: Offset(${_num(s.dx)}, ${_num(s.dy)}), '
+        'blurRadius: ${_num(s.blur)}, spreadRadius: ${_num(s.spread)})').join(', ')}]';
 
 void _emitScalars(
   StringBuffer b,
@@ -253,6 +253,34 @@ String emitTokens(ResolvedTokens t, String source) {
     'Arka plan bulanıklığı (backdrop) yarıçapları.',
     t.blur,
   );
+
+  final motion = t.motion;
+  if (motion != null) {
+    b
+      ..writeln(
+        '/// Hareket: süre ve eğriler tasarım `components/bundle.css` (`--m-dur-*`, `--m-ease-*`),',
+      )
+      ..writeln(
+        '/// basma ölçekleri mobil eşleme. Azaltılmış hareket `NzMotion` ile uygulanır.',
+      )
+      ..writeln('abstract final class NizamioMotion {');
+    for (final MapEntry(:key, :value) in motion.durations.entries) {
+      b.writeln(
+        '  static const Duration dur${_cap(key)} = Duration(milliseconds: $value);',
+      );
+    }
+    for (final MapEntry(:key, :value) in motion.curves.entries) {
+      b.writeln(
+        '  static const Cubic ease${_cap(key)} = Cubic(${value.map(_num).join(', ')});',
+      );
+    }
+    for (final MapEntry(:key, :value) in motion.pressScale.entries) {
+      b.writeln('  static const double press${_cap(key)} = ${_num(value)};');
+    }
+    b
+      ..writeln('}')
+      ..writeln();
+  }
 
   b
     ..writeln(

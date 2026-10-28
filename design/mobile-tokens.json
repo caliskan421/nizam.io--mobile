@@ -1,5 +1,5 @@
 {
-  "$comment": "Mobil tasarım token'larının TEK eşleme kaynağı (ADR-0003 karar 24). Değerler tasarım sisteminden okunur (source.path; içerik `git hash-object` blob kimliğiyle sabit); bu dosya yalnız anlamsal rol → tasarım token adı eşlemesini ve tasarım dosyasında karşılığı olmayan mobil değerleri tutar. Renk değeri burada yazılmaz. Değiştirmek = bu dosya ya da kaynak + blob + make gen + PR.",
+  "$comment": "Mobil tasarım token'larının TEK eşleme kaynağı (ADR-0003 karar 24). Değerler tasarım sisteminden okunur (source.path; içerik `git hash-object` blob kimliğiyle sabit); bu dosya yalnız anlamsal rol → tasarım token adı eşlemesini ve tasarım dosyasında karşılığı olmayan mobil değerleri tutar. Renk değeri burada yazılmaz; tek istisna tasarım dosyasında olmayan, prototipte kullanılan gölgedir (`shadows`, kaydı docs/design-tokens.md). Hareket (süre/eğri) tasarım sisteminin components/bundle.css'inden aynı blob pini yöntemiyle okunur (`motion.source`). Değiştirmek = bu dosya ya da kaynak + blob + make gen + PR.",
   "version": 1,
   "source": {
     "path": "docs/design/design sytem/tokens.json",
@@ -26,11 +26,34 @@
     "onWarning": "on-gold",
     "success": "accent-text",
     "info": "ink-muted",
-    "scrim": "scrim"
+    "scrim": "scrim",
+    "surfaceTop": "surface-top",
+    "edgeLight": "edge-light",
+    "primaryTop": "accent-top",
+    "buttonTop": "btn-top",
+    "buttonBottom": "btn-bottom",
+    "buttonBorder": "btn-border",
+    "inProgress": "violet",
+    "onInProgress": "on-violet",
+    "glassBar": "glass-bar",
+    "glassFloat": "glass-float",
+    "glassMenu": "glass-menu",
+    "glassEdge": "glass-edge",
+    "glassInk": "glass-ink",
+    "glassInkFaint": "glass-ink-faint",
+    "navHighlight": "nav-highlight",
+    "scrimSoft": "scrim-soft",
+    "roleAdmin": "role-admin",
+    "roleCoordinator": "role-koord",
+    "roleMember": "role-uye"
   },
   "$colorNotes": {
     "success": "Tasarım README 'tamam accent-text' der; ayrı başarı rengi yoktur.",
-    "info": "Tasarımda bilgi rengi yoktur; nötr ikincil metne bağlandı (açık karar, docs/design-tokens.md)."
+    "info": "Tasarımda bilgi rengi yoktur; nötr ikincil metne bağlandı (açık karar, docs/design-tokens.md).",
+    "surfaceTop": "Kart/panel degradesinin üst durağı (README: kart surface-top → bg-surface); NzCard ve NzKpiTile.",
+    "primaryTop": "Ana eylem düğmesinin üst degrade durağı (accent ile biter).",
+    "inProgress": "README: 'devam violet'. Koyu temada küçük metin olarak kullanılmaz (3.1:1); yalnız işaret/çubuk/ikon.",
+    "roleAdmin": "Rol işaret noktası (pastel); metin rengi değil. Görünüm rengi; yetki kuralı taşımaz."
   },
   "spacingScale": {
     "$comment": "4 pt yerleşim ızgarası (mevcut kit kullanır). Tasarım dosyasında ızgara yoktur; tasarımın anlamsal boşlukları (m-gutter, m-gap-*) ayrıca üretilir.",
@@ -51,6 +74,37 @@
     "iconSize": 20,
     "iconSizeSm": 16,
     "borderWidth": 1,
-    "focusRingWidth": 2
+    "focusRingWidth": 2,
+    "$controlNote": "Kontrol yükseklikleri prototip --control-sm/md/lg (36/44/52). Görsel yükseklik; dokunma alanı en az 48 korunur.",
+    "controlSm": 36,
+    "controlMd": 44,
+    "controlLg": 52,
+    "iconTile": 36,
+    "iconTileLg": 40,
+    "glassButton": 40,
+    "progress": 4,
+    "progressLg": 6,
+    "dot": 8,
+    "statusDot": 7,
+    "drawerWidth": 318,
+    "flyoutWidth": 248
+  },
+  "shadows": {
+    "$comment": "Tasarım tokens.json'da olmayan gölgeler. card: prototip --shadow-card (açık tema .t-card); koyu temada kart dış gölgesi yok (prototip hesaplanmış stili: yalnız edge-light iç ışığı).",
+    "card": {
+      "light": "0 1px 2px rgba(22,22,21,0.05), 0 6px 20px rgba(22,22,21,0.06)",
+      "dark": "none"
+    }
+  },
+  "motion": {
+    "$comment": "Süre/eğri: bundle.css --m-dur-* / --m-ease-* (README 'Hareket'). Basma ölçekleri: bundle.css .m-btn:active / .m-press:active scale(.96), .m-kpi:active / .m-taskcard:active scale(.985).",
+    "source": {
+      "path": "docs/design/design sytem/components/bundle.css",
+      "blob": "7344e140ae4d84517e88e5cdb124a53169021693"
+    },
+    "pressScale": {
+      "button": 0.96,
+      "card": 0.985
+    }
   }
 }

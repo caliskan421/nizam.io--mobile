@@ -24,17 +24,25 @@ class SignOutButton extends ConsumerWidget {
       icon: Icons.logout,
       loading: busy,
       expand: true,
-      onPressed: () async {
-        final confirmed = await NzDialog.confirm(
-          context,
-          title: l.uiIdentitySignOutConfirmTitle,
-          message: l.uiIdentitySignOutConfirmMessage,
-          confirmLabel: l.uiIdentitySignOut,
-          tone: NzDialogTone.destructive,
-        );
-        if (!confirmed || !context.mounted) return;
-        await ref.read(logoutControllerProvider.notifier).signOut();
-      },
+      onPressed: () => confirmSignOut(context, ref),
     );
   }
 }
+
+/// Onay diyaloğu → `LogoutController.signOut` (çekmecedeki "Çıkış yap" satırı da bunu çağırır).
+/// Hata gösterimi için çağıran `ref.listenErrors(signOutProvider, …)` ile dinler.
+Future<void> confirmSignOut(BuildContext context, WidgetRef ref) async {
+  final l = context.l10n;
+  final confirmed = await NzDialog.confirm(
+    context,
+    title: l.uiIdentitySignOutConfirmTitle,
+    message: l.uiIdentitySignOutConfirmMessage,
+    confirmLabel: l.uiIdentitySignOut,
+    tone: NzDialogTone.destructive,
+  );
+  if (!confirmed || !context.mounted) return;
+  await ref.read(logoutControllerProvider.notifier).signOut();
+}
+
+/// Çıkış işleminin durumu (hata dinlemek için açık yüz).
+final signOutProvider = logoutControllerProvider;

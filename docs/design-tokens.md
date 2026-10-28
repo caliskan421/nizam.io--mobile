@@ -15,10 +15,15 @@ rol eşlemesinin gerekçesini ve tasarım kaynaklarındaki çelişkileri kaydede
    Çözümleyici (`tool/gen/sources.dart` `resolveTokens`) bilinmeyen renk biçimini, tek temada
    tanımlı rengi, döngülü başvuruyu, eşlemede olmayan token'ı, em olmayan harf aralığını düşürür.
    CSS `#RRGGBBAA` → Flutter `0xAARRGGBB` (alfa başa taşınır); `rgba()` alfası ×255 yuvarlanır.
-4. **Çıktı:** `lib/core/theme/generated/tokens.gen.dart` — `NizamioColors`, `NizamioShadows`
+4. **Hareket:** süre ve eğriler tasarım sisteminin `components/bundle.css` `:root` özel
+   özelliklerinden (`--m-dur-*`, `--m-ease-*`) okunur; dosya `design/mobile-tokens.json`
+   `motion.source` (yol + blob) ile aynı yöntemle sabittir (değişirse `make gen` düşer). Basma
+   ölçekleri (`.96` düğme, `.985` kart) eşlemede `motion.pressScale` (kaynak seçiciler yorumda).
+5. **Çıktı:** `lib/core/theme/generated/tokens.gen.dart` — `NizamioColors`, `NizamioShadows`
    (ThemeExtension), `NizamioSpacing` (`spaceN` ızgara + `gutter`, `gapXs…gapXl`, `rowPad`,
-   `cardPad`), `NizamioRadius`, `NizamioSize`, `NizamioBlur`, `NizamioTypography` (aile + 19
-   tasarım stili). Web `tokens/tokens.json` artık okunmaz.
+   `cardPad`), `NizamioRadius`, `NizamioSize`, `NizamioBlur`, `NizamioMotion` (süre, `Cubic`,
+   basma ölçeği), `NizamioTypography` (aile + 19 tasarım stili). Web `tokens/tokens.json`
+   artık okunmaz.
 
 ## Rol eşlemesi
 
@@ -34,6 +39,12 @@ rol eşlemesinin gerekçesini ve tasarım kaynaklarındaki çelişkileri kaydede
 | success | accent-text | README: "tamam accent-text" |
 | info | ink-muted | **varsayım** — tasarımda bilgi rengi yok |
 | scrim | scrim | |
+| surfaceTop / edgeLight | surface-top / edge-light | kart degradesi üst durağı, üst iç ışık (`NzSurfaceFills`, `NzEdgeLightPainter`) |
+| primaryTop / buttonTop / buttonBottom / buttonBorder | accent-top / btn-top / btn-bottom / btn-border | ana ve ikincil düğme degradeleri, ikincil kenar |
+| inProgress / onInProgress | violet / on-violet | README "devam violet"; koyu temada küçük metin değil, işaret/çubuk |
+| glassBar / glassFloat / glassMenu / glassEdge / glassInk / glassInkFaint | glass-* | üst çubuk, alt menü + asistan + menü dairesi, flyout (`NzGlass`) |
+| navHighlight / scrimSoft | nav-highlight / scrim-soft | alt menü vurgusu, flyout örtüsü |
+| roleAdmin / roleCoordinator / roleMember | role-admin / role-koord / role-uye | rol işaret noktası (görünüm rengi; yetki kuralı değil) |
 
 Metin rolleri (`NzTextStyles`): displayLg `m-greet`, titleLg `m-h1`, titleMd `m-h1-detail`,
 titleSm `m-sheet-title`, labelLg `m-card-title`, bodyLg `m-input`, bodyMd `m-body`, labelMd `m-tab`,
@@ -69,15 +80,37 @@ Prototip (`mobile.html`, 390×844, Chromium) hesaplanmış stilleriyle `tokens.j
 - `m-kpi` Poppins ile `tabular-nums` ister; Poppins'te `tnum` özelliği yok → rakamlar orantılı kalır.
   Poppins'te `→` glifi yok (yedeğe düşer).
 
+## Ana sayfa (2026-10-28): çelişkilerin çözümü
+
+| Konu | Çözüm |
+|---|---|
+| Kart dolgusu 14 / 16 | KPI ve koordinatörlük kartı `m-row-pad` (14; README "KPI kutucuğu iç yatay boşluğu"), görev/giriş kartı `m-card-pad` (16). `NzCard` `padding` alır; ekran token verir. |
+| Düğme yüksekliği 52 / 44 | Görsel yükseklik prototip `--control-sm/md/lg` (36/44/52 → `NizamioSize.controlSm/Md/Lg`); dokunma alanı her boyutta ≥ 48 (`MaterialTapTargetSize.padded`, bölünmüş düğmede parça başına 48). |
+| Açık tema kart gölgesi | Eşlemede `shadows.card` (prototip `--shadow-card`, iki katman); koyu temada boş (prototip hesaplanmış stili yalnız iç ışık). Üretici çok katmanlı/`none` gölgeyi okur; ad tasarım gölgesiyle çakışırsa düşer. |
+| Hareket yalnız bundle.css | `motion.source` pini + üretim (yukarıda); `NzMotion.of` hareketi azaltta süreyi sıfırlar. |
+| Kontrast: `ink-faint` / `bg-raised` 4.34 | Filtre rayındaki sayaç (raydaki tek `ink-faint` metin) `textMuted`'a alındı (her iki temada ≥ 4.5); test listesi değişmedi. |
+| Kontrast: `gold` metin 4.25 (açık) | "Koordinatör atanmamış" prototipte gold metin; burada gold yalnız durum noktası, yazı `textMuted`. Bekleyen işler flyout'unda gold yalnız nokta. |
+| Poppins `tnum` yok | KPI rakamı tek değer (hizalama gerekmez) Poppins `m-kpi`; sütun hizası gereken sayılar (yüzde · görev, geciken, sayaçlar) Geist Mono (`kicker`/`monoSm`). |
+| `→` / ikonlar | Poppins'te `→` yok; ok ve bütün ikonlar mevcut ikon sistemi (Material Icons, yuvarlak/çizgi varyantları; 20/16 token). Prototipin 1.75 çizgili SVG ikonları birebir değildir (bilinen görsel fark). |
+| Açık temada cam | Prototip alt menü/menü dairesini açık temada da koyu cam (`rgba(18,18,18,.74)`, sabit kodlu) çizer; tokens.json `glass-float` açık değeri (beyaz %78) uygulandı. |
+| Metin büyütme | Üst çubuk ve alt menü sabit yükseklikli gezinme çubuklarıdır; içlerindeki metin en çok 1.3× büyür (tam metin okuyucu etiketinde). Sayfa içeriği 2.0×'e kadar büyür, kesilmeden sarılır (KPI açıklaması 3, koordinatörlük adı 2 satır). |
+| Ekip toplamı | Prototip "18 kullanıcı" ile rol toplamı (2+15+3=20) çelişir; kullanıcı sayısı rol toplamından hesaplanır. |
+
+Prototipin "son girilen modül" üçüncü alt menü öğesi yerine, modül ekranları gelene kadar Profil
+(çıkış) sekmesi kalır; çekmecede de çıkış vardır. Diğer ekranlara özgü eksikler (sohbet balonu,
+hap sekme başparmağı, zaman çizelgesi `gp-*` renkleri, klasör camı, alt sayfa form satırları,
+`m-sh-knob`) bu çalışmada eşlenmedi.
+
 ## Açık kararlar (tasarım/ürün sahibi)
 
 1. **Kontrast:** açık temada `border-control` zemin üzerinde 2.75, yüzeyde 2.98 (README "3:1 üstü"
    der); `gold` metin olarak 4.25 ve `on-gold`/`gold` 4.25 (< 4.5); `ink-faint`/`bg-raised` 4.34.
    Değerler değiştirilmedi; `test/core/ui/theme/contrast_test.dart` bunları sabitler.
 2. **`info` rengi** tasarımda yok; nötr `ink-muted`'a bağlandı.
-3. **Hareket token'ları** `tokens.json`'a alınmalı mı (şimdilik üretilmez).
-4. **Kart görünümü:** degrade (`surface-top → bg-surface`) + iç ışık (`edge-light`) ve açık tema
-   gölgesi kit bileşenlerine bu oturumda taşınmadı (düz `surface` + 1px kenar).
+3. **Hareket token'ları** `tokens.json`'a alınmalı mı — şimdilik `bundle.css`'ten pinle üretilir.
+4. **Kart görünümü:** uygulandı (ana sayfa, 2026-10-28): degrade + iç ışık + açık tema gölgesi
+   `NzCard.outlined`'da; ikincil düğme kenarı `btn-border` (koyu zeminde 3:1 altı — dolgu
+   degradesi ve etiket kontrolü tanıtır; tasarım kararı olarak açık).
 5. **Marka:** "RoketPortal" adı/logosu tema çalışmasından ayrı; uygulama adı, kimlik ve simge değişmedi.
 6. Golden referansları (`test/**/goldens/`, 27 dosya) eski temaya aittir; CI `golden` işi bu
    değişiklikle kırmızıya döner. Linux `golden-update` çıktısı görsel incelemeden sonra alınmalıdır.

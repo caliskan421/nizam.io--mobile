@@ -79,4 +79,15 @@ void main() {
     await tester.pump();
     expect(_location(router), '/home');
   });
+
+  test('ana sayfa önizlemesi yalnız devCatalog açıkken kapıdan muaf', () {
+    for (final phase in AppPhase.values) {
+      expect(gateRedirect(phase, homePreviewPath, devCatalog: true), isNull);
+      // Prod'da rota tanımsızdır; scoped fazında kapı açık yolu bırakır (404 sayfası).
+      expect(
+        gateRedirect(phase, homePreviewPath),
+        phase == AppPhase.scoped ? isNull : routeForPhase(phase),
+      );
+    }
+  });
 }

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/app_phase.dart';
 import '../dev/catalog_page.dart';
+import '../dev/home_preview_page.dart';
 import 'pages.dart';
 import 'routes.dart';
 import 'transitions.dart';
@@ -26,6 +27,9 @@ String routeForPhase(AppPhase phase) => switch (phase) {
 /// Bileşen kataloğu rotası (yalnız dev flavor; [createRouter] `devCatalog: true`).
 const catalogPath = '/dev/catalog';
 
+/// Ana sayfa önizlemesi (yalnız dev flavor; kapıdan muaf, görsel denetim için).
+const homePreviewPath = '/dev/home';
+
 /// Faz kapısı: [location] için yönlendirme hedefi; null → konumda kalınır.
 ///
 /// - Katalog (yalnız `devCatalog` açıkken) fazdan muaftır.
@@ -39,7 +43,9 @@ String? gateRedirect(
   String location, {
   bool devCatalog = false,
 }) {
-  if (devCatalog && location == catalogPath) return null;
+  if (devCatalog && (location == catalogPath || location == homePreviewPath)) {
+    return null;
+  }
   final target = routeForPhase(phase);
   if (location == target) return null;
   if (phase == AppPhase.scoped && !_gatePaths.contains(location)) return null;
@@ -73,7 +79,13 @@ GoRouter createRouter(
     if (devCatalog)
       GoRoute(
         path: catalogPath,
-        builder: (context, state) => const CatalogPage(),
+        builder: (context, state) =>
+            CatalogPage(onOpenHomePreview: () => context.push(homePreviewPath)),
+      ),
+    if (devCatalog)
+      GoRoute(
+        path: homePreviewPath,
+        builder: (context, state) => const HomePreviewPage(),
       ),
   ],
 );

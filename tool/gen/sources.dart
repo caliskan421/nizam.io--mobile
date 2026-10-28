@@ -417,6 +417,7 @@ class ResolvedTokens {
     required this.metrics,
     required this.shadowsLight,
     required this.shadowsDark,
+    this.motion,
   });
 
   /// Rol adları (mobil eşleme sırası).
@@ -435,8 +436,32 @@ class ResolvedTokens {
   final Map<String, double> size;
   final Map<String, double> blur;
   final Map<String, double> metrics;
-  final Map<String, ShadowSpec> shadowsLight;
-  final Map<String, ShadowSpec> shadowsDark;
+
+  /// Gölge katmanları (tasarım `m-sh-*` tek katman; mobil `shadows` çok katman ya da `none`).
+  final Map<String, List<ShadowSpec>> shadowsLight;
+  final Map<String, List<ShadowSpec>> shadowsDark;
+
+  /// Hareket (süre/eğri/basma ölçeği); eşlemede `motion` yoksa null.
+  final MotionTokens? motion;
+}
+
+/// Hareket token'ları: süre ve eğriler `components/bundle.css` `:root` özel özelliklerinden
+/// (`--m-dur-*`, `--m-ease-*`), basma ölçekleri mobil eşlemeden.
+class MotionTokens {
+  MotionTokens({
+    required this.durations,
+    required this.curves,
+    required this.pressScale,
+  });
+
+  /// `exit` → milisaniye.
+  final Map<String, int> durations;
+
+  /// `sheet` → cubic-bezier(x1, y1, x2, y2).
+  final Map<String, List<double>> curves;
+
+  /// `button` → 0.96.
+  final Map<String, double> pressScale;
 }
 
 /// Tasarım token adı → Dart tanımlayıcısı: `m-` / `m-r-` / `m-sh-` / `m-blur-` öneki atılır,
@@ -505,6 +530,68 @@ ShadowSpec parseShadow(String v, String where) {
   );
 }
 
+/// CSS çok katmanlı gölge (`a, b`; parantez içi virgül bölünmez) ya da `none` (boş liste).
+List<ShadowSpec> parseShadowList(String v, String where) {
+  if (v.trim() == 'none') return const [];
+  final parts = <String>[];
+  var depth = 0;
+  var start = 0;
+  for (var i = 0; i < v.length; i++) {
+    final ch = v[i];
+    if (ch == '(') depth++;
+    if (ch == ')') depth--;
+    if (ch == ',' && depth == 0) {
+      parts.add(v.substring(start, i));
+      start = i + 1;
+    }
+  }
+  parts.add(v.substring(start));
+  return [for (final p in parts) parseShadow(p, where)];
+}
+
+final _cssDur = RegExp(r'^--m-dur-([a-z]+):\s*(\d*\.?\d+)(ms|s)$');
+final _cssEase = RegExp(
+  r'^--m-ease-([a-z]+):\s*cubic-bezier\(\s*(-?\d*\.?\d+)\s*,\s*(-?\d*\.?\d+)\s*,\s*(-?\d*\.?\d+)\s*,\s*(-?\d*\.?\d+)\s*\)$',
+);
+
+/// `components/bundle.css` içindeki `--m-dur-*` ve `--m-ease-*` bildirimleri. Aynı ad farklı
+/// değerle iki kez geçerse ya da biçim tanınmazsa düşer; hiç bildirim yoksa düşer.
+({Map<String, int> durations, Map<String, List<double>> curves}) parseMotionCss(
+  String css,
+) {
+  final durations = <String, int>{};
+  final curves = <String, List<double>>{};
+  final decls = RegExp(r'--m-(?:dur|ease)-[a-z]+\s*:[^;}]*').allMatches(css);
+  for (final m in decls) {
+    final d = m.group(0)!.trim();
+    final dm = _cssDur.firstMatch(d);
+    final em = _cssEase.firstMatch(d);
+    if (dm != null) {
+      final v = double.parse(dm.group(2)!);
+      final ms = (dm.group(3) == 's' ? v * 1000 : v).round();
+      final prev = durations[tokenIdent('m-${dm.group(1)}')];
+      if (prev != null && prev != ms) {
+        throw FormatException('motion: --m-dur-${dm.group(1)} çelişkili');
+      }
+      durations[tokenIdent('m-${dm.group(1)}')] = ms;
+    } else if (em != null) {
+      final c = [for (var i = 2; i <= 5; i++) double.parse(em.group(i)!)];
+      final id = tokenIdent('m-${em.group(1)}');
+      final prev = curves[id];
+      if (prev != null && prev.join(',') != c.join(',')) {
+        throw FormatException('motion: --m-ease-${em.group(1)} çelişkili');
+      }
+      curves[id] = c;
+    } else {
+      throw FormatException('motion: tanınmayan bildirim: $d');
+    }
+  }
+  if (durations.isEmpty || curves.isEmpty) {
+    throw const FormatException('motion: --m-dur-* / --m-ease-* yok');
+  }
+  return (durations: durations, curves: curves);
+}
+
 /// CSS font yığını → [birincil, ...yedekler] (tırnaklar atılır).
 List<String> parseFontStack(String v) {
   final out = [
@@ -516,7 +603,12 @@ List<String> parseFontStack(String v) {
   return out;
 }
 
-ResolvedTokens resolveTokens(String designText, String mobileText) {
+/// [motionCss]: eşlemede `motion` bölümü varsa onun `source.path`'inin içeriği (bundle.css).
+ResolvedTokens resolveTokens(
+  String designText,
+  String mobileText, {
+  String? motionCss,
+}) {
   final d = jsonDecode(designText) as Map<String, Object?>;
   final mob = jsonDecode(mobileText) as Map<String, Object?>;
   if (d['version'] != 1) {
@@ -645,8 +737,8 @@ ResolvedTokens resolveTokens(String designText, String mobileText) {
     return out;
   }
 
-  final shadowsLight = <String, ShadowSpec>{};
-  final shadowsDark = <String, ShadowSpec>{};
+  final shadowsLight = <String, List<ShadowSpec>>{};
+  final shadowsDark = <String, List<ShadowSpec>>{};
   for (final t in list(d['shadow'], 'shadow')) {
     final name = t['name']! as String;
     final id = tokenIdent(name, 'm-sh-');
@@ -657,8 +749,31 @@ ResolvedTokens resolveTokens(String designText, String mobileText) {
     if (byMode['dark'] == null || byMode['light'] == null) {
       throw FormatException('tokens: gölge $name iki temada tanımlı değil');
     }
-    shadowsDark[id] = parseShadow(byMode['dark']!, name);
-    shadowsLight[id] = parseShadow(byMode['light']!, name);
+    shadowsDark[id] = [parseShadow(byMode['dark']!, name)];
+    shadowsLight[id] = [parseShadow(byMode['light']!, name)];
+  }
+  // Mobil gölgeler: tasarım dosyasında olmayan, prototipte kullanılan değerler (açık karar
+  // kaydı docs/design-tokens.md). Ad tasarım gölgesiyle çakışamaz.
+  final mobShadows = mob['shadows'];
+  if (mobShadows != null) {
+    if (mobShadows is! Map<String, Object?>) {
+      throw const FormatException('mobile-tokens: "shadows" nesne değil');
+    }
+    for (final MapEntry(key: id, value: v) in mobShadows.entries) {
+      if (id.startsWith(r'$')) continue;
+      if (shadowsDark.containsKey(id)) {
+        throw FormatException('mobile-tokens: gölge $id tasarımla çakışıyor');
+      }
+      if (v is! Map<String, Object?> ||
+          v['dark'] is! String ||
+          v['light'] is! String) {
+        throw FormatException(
+          'mobile-tokens: gölge $id iki temada tanımlı değil',
+        );
+      }
+      shadowsDark[id] = parseShadowList(v['dark']! as String, 'shadows.$id');
+      shadowsLight[id] = parseShadowList(v['light']! as String, 'shadows.$id');
+    }
   }
 
   Map<String, double> mobileNums(String key) {
@@ -690,6 +805,35 @@ ResolvedTokens resolveTokens(String designText, String mobileText) {
     );
   }
 
+  MotionTokens? motion;
+  final mobMotion = mob['motion'];
+  if (mobMotion != null) {
+    if (mobMotion is! Map<String, Object?> || motionCss == null) {
+      throw const FormatException(
+        'mobile-tokens: "motion" için kaynak CSS (source.path) okunmadı',
+      );
+    }
+    final parsed = parseMotionCss(motionCss);
+    final press = mobMotion['pressScale'];
+    if (press is! Map<String, Object?>) {
+      throw const FormatException('mobile-tokens: motion.pressScale yok');
+    }
+    final pressScale = <String, double>{
+      for (final MapEntry(key: k, value: v) in press.entries)
+        if (!k.startsWith(r'$'))
+          k: v is num && v > 0 && v <= 1
+              ? v.toDouble()
+              : throw FormatException(
+                  'mobile-tokens: pressScale.$k (0, 1] değil',
+                ),
+    };
+    motion = MotionTokens(
+      durations: parsed.durations,
+      curves: parsed.curves,
+      pressScale: pressScale,
+    );
+  }
+
   return ResolvedTokens(
     roles: roles,
     light: light,
@@ -704,6 +848,7 @@ ResolvedTokens resolveTokens(String designText, String mobileText) {
     metrics: metrics,
     shadowsLight: shadowsLight,
     shadowsDark: shadowsDark,
+    motion: motion,
   );
 }
 

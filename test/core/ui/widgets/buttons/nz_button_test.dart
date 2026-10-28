@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
+import 'package:nizamio/core/ui/theme/nz_surfaces.dart';
 import 'package:nizamio/core/ui/widgets/buttons/nz_button.dart';
 import 'package:nizamio/core/ui/widgets/nz_size.dart';
 
@@ -237,17 +238,54 @@ void main() {
     expect(find.byType(TextButton), findsOneWidget);
   });
 
-  testWidgets('piksel: tabaka 1024 geniş, dolgu renkleri', (tester) async {
+  // Ana ve ikincil eylem degradelidir (tam renk tek satırda kalmaz): düz dolgu (danger) ve
+  // degradeler ve ikincil kenar widget düzeyinde sınanır.
+  testWidgets('piksel: tabaka 1024 geniş, dolgu ve kenar renkleri', (
+    tester,
+  ) async {
     await pumpSheet(tester, _variants);
     await expectSheetPixels(tester, [
-      NizamioColors.light.primary,
       NizamioColors.light.danger,
-      NizamioColors.light.borderControl,
-      NizamioColors.dark.primary,
       NizamioColors.dark.danger,
-      NizamioColors.dark.borderControl,
     ]);
   });
+
+  testWidgets(
+    'ana/ikincil eylem degradesi; görsel yükseklik kontrol token\'ı',
+    (tester) async {
+      for (final (button, gradient) in [
+        (
+          NzButton.primary(label: 'a', onPressed: () {}),
+          NizamioColors.light.primaryFill,
+        ),
+        (
+          NzButton.secondary(label: 'a', onPressed: () {}),
+          NizamioColors.light.secondaryFill,
+        ),
+      ]) {
+        await tester.pumpWidget(testApp(Center(child: button)));
+        final boxes = tester.widgetList<DecoratedBox>(
+          find.descendant(
+            of: find.byType(NzButton),
+            matching: find.byType(DecoratedBox),
+          ),
+        );
+        expect(
+          boxes.map((b) => (b.decoration as BoxDecoration).gradient),
+          contains(gradient),
+        );
+        final decorated = find.descendant(
+          of: find.byType(NzButton),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is DecoratedBox &&
+                (w.decoration as BoxDecoration).gradient == gradient,
+          ),
+        );
+        expect(tester.getSize(decorated).height, NizamioSize.controlMd);
+      }
+    },
+  );
 
   goldenTestWidgets(
     'golden: bütün varyantlar × açık/koyu × compact/expanded × 1.0/2.0',

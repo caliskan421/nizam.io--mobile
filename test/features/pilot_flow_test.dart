@@ -11,6 +11,7 @@ import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/widgets/buttons/nz_button.dart';
+import 'package:nizamio/core/ui/widgets/navigation/nz_floating_nav.dart';
 
 import '../support/harness.dart';
 import '../support/screen_matrix.dart';
@@ -75,19 +76,23 @@ void main() {
     await tester.tap(find.text('Program İki'));
     await settle(tester);
     expect(h.read(appPhaseProvider), AppPhase.scoped);
-    expect(find.text(_l.uiScopeHomeProgram), findsOneWidget);
+    expect(find.text(_l.uiHomeGreeting), findsOneWidget);
     expect(find.text('Program İki'), findsOneWidget);
     final s2 = h.backend.requests.where((r) => r.path == '/v1/program').single;
     expect(s2.header('X-Nizamio-Program'), 'prog-2');
     expect(
       find.byType(
-        screen.windowClass.isCompact ? NavigationBar : NavigationRail,
+        screen.windowClass.isCompact ? NzFloatingNav : NavigationRail,
       ),
       findsOneWidget,
     );
 
     // 5. Profil sekmesi: e-posta ve çıkış.
-    await tester.tap(find.text(_l.uiRouterTabProfile).first);
+    await tester.tap(
+      screen.windowClass.isCompact
+          ? find.byIcon(Icons.person_outline_rounded)
+          : find.text(_l.uiRouterTabProfile).first,
+    );
     await settle(tester);
     expect(find.text('a@b.test'), findsOneWidget);
     await tester.tap(find.text(_l.uiIdentitySignOut));
@@ -125,7 +130,10 @@ void main() {
     );
     await settle(tester);
     expect(find.text('Program Bir'), findsOneWidget);
-    await tester.tap(find.text(_l.uiScopeHomeChange));
+    // Kapsam değiştirme çekmecede (üst çubuk menü dairesi).
+    await tester.tap(find.byIcon(Icons.menu_rounded));
+    await settle(tester);
+    await tester.tap(find.textContaining(_l.uiScopeHomeChange));
     await settle(tester);
     expect(h.read(appPhaseProvider), AppPhase.sessionOpen);
     expect(find.text(_l.uiScopeIntro), findsOneWidget);

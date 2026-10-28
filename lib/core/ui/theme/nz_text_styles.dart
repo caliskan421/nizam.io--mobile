@@ -11,7 +11,8 @@ import '../../theme/generated/tokens.gen.dart';
 /// Rol → tasarım stili: displayLg `m-greet` · titleLg `m-h1` · titleMd `m-h1-detail` ·
 /// titleSm `m-sheet-title` · bodyLg `m-input` · bodyMd `m-body` · bodySm/caption `m-caption` ·
 /// labelLg `m-card-title` · labelMd `m-tab` · mono `m-code` · kicker `m-kicker` ·
-/// monoSm `m-mono-sm` · numeral `m-kpi`.
+/// monoSm `m-mono-sm` · numeral `m-kpi` · brand `m-brand` · program `m-program` ·
+/// navLabel `m-nav-label` · list `m-list`.
 @immutable
 class NzTextStyles extends ThemeExtension<NzTextStyles> {
   const NzTextStyles({
@@ -29,6 +30,10 @@ class NzTextStyles extends ThemeExtension<NzTextStyles> {
     required this.kicker,
     required this.monoSm,
     required this.numeral,
+    required this.brand,
+    required this.program,
+    required this.navLabel,
+    required this.list,
   });
 
   /// Yazı tipi dosyaları uygulamayla gelir (assets/fonts); `GoogleFonts` ağdan indirmez
@@ -71,6 +76,10 @@ class NzTextStyles extends ThemeExtension<NzTextStyles> {
       monoSm: role(NizamioTypography.monoSm, tabular: true),
       // Poppins'te `tnum` yok; özellik zararsızdır ama rakamlar orantılı kalır (docs/design-tokens.md).
       numeral: role(NizamioTypography.kpi, tabular: true),
+      brand: role(NizamioTypography.brand),
+      program: role(NizamioTypography.program, tabular: true),
+      navLabel: role(NizamioTypography.navLabel),
+      list: role(NizamioTypography.list),
     );
   }
 
@@ -95,6 +104,18 @@ class NzTextStyles extends ThemeExtension<NzTextStyles> {
   /// KPI büyük rakamı.
   final TextStyle numeral;
 
+  /// Üst çubuktaki ürün adı.
+  final TextStyle brand;
+
+  /// Ürün adının altındaki program satırı, alt menü alt yazısı (mono 10/13).
+  final TextStyle program;
+
+  /// Alt menüde etkin öğenin etiketi.
+  final TextStyle navLabel;
+
+  /// Çekmece / menü satırı.
+  final TextStyle list;
+
   @override
   NzTextStyles copyWith({
     TextStyle? displayLg,
@@ -111,6 +132,10 @@ class NzTextStyles extends ThemeExtension<NzTextStyles> {
     TextStyle? kicker,
     TextStyle? monoSm,
     TextStyle? numeral,
+    TextStyle? brand,
+    TextStyle? program,
+    TextStyle? navLabel,
+    TextStyle? list,
   }) {
     return NzTextStyles(
       displayLg: displayLg ?? this.displayLg,
@@ -127,6 +152,10 @@ class NzTextStyles extends ThemeExtension<NzTextStyles> {
       kicker: kicker ?? this.kicker,
       monoSm: monoSm ?? this.monoSm,
       numeral: numeral ?? this.numeral,
+      brand: brand ?? this.brand,
+      program: program ?? this.program,
+      navLabel: navLabel ?? this.navLabel,
+      list: list ?? this.list,
     );
   }
 
@@ -149,6 +178,10 @@ class NzTextStyles extends ThemeExtension<NzTextStyles> {
       kicker: l(kicker, other.kicker),
       monoSm: l(monoSm, other.monoSm),
       numeral: l(numeral, other.numeral),
+      brand: l(brand, other.brand),
+      program: l(program, other.program),
+      navLabel: l(navLabel, other.navLabel),
+      list: l(list, other.list),
     );
   }
 

@@ -125,4 +125,32 @@ void main() {
     );
     expect(t.takeException(), isNull);
   });
+
+  testWidgets('alt satırda ek işaretler (trailing)', (t) async {
+    await t.pumpWidget(
+      testApp(
+        const SizedBox(
+          width: 360,
+          child: NzTaskCard(
+            code: 'ALT-7',
+            title: 'Hidrofor',
+            statusLabel: 'Devam ediyor',
+            statusTone: NzTone.progress,
+            assigneeText: 'Kerem Özdal',
+            badge: '41 gün gecikti',
+            trailing: [
+              NzStatusLabel.badge(
+                label: 'Talep · 31 Eki',
+                tone: NzTone.waiting,
+              ),
+              Text('1'),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Talep · 31 Eki'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
 }

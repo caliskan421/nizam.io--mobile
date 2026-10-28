@@ -1,0 +1,226 @@
+// TaskDetailPage: başlık bölümü, tarih talebi kartı (onay/ret), durum/öncelik alt sayfaları
+// ve kuralları, sekmeler (özet, alt görev, dosya, not), düzenle/kanıt yükle/sil formları,
+// silinmiş görev + geri al, kısayol menüsü; dar ekran × 2.0 metin × açık/koyu taşma yok.
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
+import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/ui/page/nz_shell_events.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
+
+import '../../../support/harness.dart';
+import '../../../support/recording_app_nav.dart';
+import '../../pilot_support.dart';
+
+final _l = AppLocalizationsTr();
+
+Future<(Harness, RecordingAppNav)> _open(
+  WidgetTester tester, {
+  String code = 'ALT-7',
+  bool dark = false,
+}) async {
+  final h = await real(
+    tester,
+    () => pilotHarness(PilotBackend(), signedIn: true),
+  );
+  h.read(scopeControllerProvider).selectProgram('prog-1');
+  final nav = RecordingAppNav();
+  await pumpScreen(
+    tester,
+    h,
+    TaskDetailPage(code: code),
+    nav: nav,
+    dark: dark,
+  );
+  await settle(tester);
+  return (h, nav);
+}
+
+Future<void> _tap(WidgetTester tester, Finder f) async {
+  await tester.ensureVisible(f);
+  await tester.pump();
+  await tester.tap(f);
+  await settle(tester);
+}
+
+Future<void> _top(WidgetTester tester) async {
+  await tester.drag(find.byType(Scrollable).first, const Offset(0, 4000));
+  await settle(tester);
+}
+
+void main() {
+  setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
+
+  testWidgets('başlık, talep kartı, özet ve ilerleme', (tester) async {
+    await _open(tester);
+    expect(find.text('ALT-7'), findsOneWidget);
+    expect(find.text('Altyapı ve tesisat'), findsOneWidget);
+    expect(
+      find.text('Havalimanı yerleşkesi hidrofor sistemi kurulumu'),
+      findsOneWidget,
+    );
+    expect(find.text(_l.uiTasksStatusDoing), findsOneWidget);
+    expect(find.text(_l.uiTasksPrioHigh), findsOneWidget);
+    expect(find.text(_l.uiTasksRequestTitle), findsOneWidget);
+    expect(find.text('31.10.2026'), findsOneWidget);
+    expect(find.text('+51 ${_l.uiTasksDaysLc}'), findsOneWidget);
+    expect(find.text('Deniz Aydemir'), findsOneWidget);
+    expect(find.text('10.06.2026'), findsOneWidget);
+    expect(find.text('22.06 → 10.09.2026'), findsOneWidget);
+    await tester.ensureVisible(find.text('41 ${_l.uiTasksEvLateTail}'));
+  });
+
+  testWidgets('talep onayı ve durum kuralı bildirimleri', (tester) async {
+    await _open(tester);
+    await _tap(tester, find.text(_l.uiTasksApprove));
+    expect(
+      find.text(
+        '${_l.uiTasksTApproved} · ALT-7 ${_l.uiTasksTNewDue} 31.10.2026',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text(_l.uiTasksRequestTitle), findsNothing);
+    expect(find.text('22.06 → 31.10.2026'), findsOneWidget);
+
+    await _tap(tester, find.text(_l.uiTasksStatusDoing));
+    expect(find.text('2 ${_l.uiTasksOpenSubsTail}'), findsOneWidget);
+    await _tap(tester, find.text(_l.uiTasksStatusDone));
+    expect(
+      find.text('${_l.uiTasksTSubsBlock} · 1/3 ${_l.uiTasksTFinishedLc}'),
+      findsOneWidget,
+    );
+    await _tap(tester, find.text(_l.uiTasksStatusDoing));
+    await _tap(tester, find.text(_l.uiTasksStatusReview).last);
+    expect(find.text('ALT-7 · ${_l.uiTasksStatusReview}'), findsOneWidget);
+
+    await _tap(tester, find.text(_l.uiTasksPrioHigh));
+    await _tap(tester, find.text(_l.uiTasksPrioLow).last);
+    expect(
+      find.text('${_l.uiTasksPriority}: ${_l.uiTasksPrioLow}'),
+      findsOneWidget,
+    );
+    await _tap(tester, find.byIcon(Icons.notifications_none_rounded));
+    expect(find.text('${_l.uiTasksTReminded} · Kerem Özdal'), findsOneWidget);
+  });
+
+  testWidgets('alt görev, kanıt yükleme ve not sekmeleri', (tester) async {
+    await _open(tester);
+    await _tap(tester, find.text(_l.uiTasksTabSubtasks));
+    expect(find.text('Pompa tedarikçisinden teyit al'), findsOneWidget);
+    expect(find.text('1 / 3 ${_l.uiTasksDoneLc}'), findsOneWidget);
+    await _tap(tester, find.bySemanticsLabel(RegExp('Basınç testi')).first);
+    await _tap(
+      tester,
+      find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.label == 'Basınç testi ${_l.uiTasksDoneLc}',
+      ),
+    );
+    expect(find.text(_l.uiTasksTSubEvidence), findsOneWidget);
+
+    await _top(tester);
+    await _tap(tester, find.text(_l.uiTasksUpload));
+    expect(find.text(_l.uiTasksUploadTitle), findsOneWidget);
+    await _tap(tester, find.text(_l.uiTasksUploadOk));
+    expect(find.text(_l.uiTasksTUploaded), findsOneWidget);
+    expect(find.text('Saha_fotografi_20261021.jpg'), findsOneWidget);
+
+    await _top(tester);
+    await _tap(tester, find.text(_l.uiTasksTabNotes));
+    expect(find.text(_l.uiTasksInMemory), findsOneWidget);
+    // Yükleme bildirimi alt kenardan çekilsin.
+    await tester.pump(const Duration(seconds: 6));
+    await settle(tester);
+    await tester.enterText(
+      find.byType(EditableText).last,
+      'Basınç testi yarın',
+    );
+    await _tap(tester, find.byIcon(Icons.arrow_upward_rounded).last);
+    expect(find.text('Basınç testi yarın'), findsOneWidget);
+    expect(
+      tester
+          .widget<EditableText>(find.byType(EditableText).last)
+          .controller
+          .text,
+      isEmpty,
+    );
+  });
+
+  testWidgets('düzenle doğrulaması; sil ve geri al', (tester) async {
+    await _open(tester);
+    await _tap(tester, find.byIcon(Icons.edit_outlined).first);
+    expect(find.text(_l.uiTasksEditTask), findsWidgets);
+    await tester.enterText(find.byType(EditableText).first, '');
+    await _tap(tester, find.text(_l.uiTasksSave));
+    expect(find.text(_l.uiTasksErrTitleEmpty), findsOneWidget);
+    await tester.enterText(
+      find.byType(EditableText).first,
+      'Hidrofor kurulumu',
+    );
+    await _tap(tester, find.text(_l.uiTasksSave));
+    expect(find.text('ALT-7 ${_l.uiTasksTUpdatedTail}'), findsOneWidget);
+    expect(find.text('Hidrofor kurulumu'), findsOneWidget);
+
+    await _tap(tester, find.byIcon(Icons.more_vert_rounded));
+    await _tap(tester, find.text(_l.uiTasksDeleteTask));
+    expect(find.text('ALT-7 ${_l.uiTasksDeleteQTail}'), findsOneWidget);
+    await _tap(tester, find.text(_l.uiTasksDeleteOk));
+    expect(find.text('ALT-7 ${_l.uiTasksDeletedTail}'), findsOneWidget);
+    expect(find.text(_l.uiTasksTDeleted), findsOneWidget);
+    await _tap(tester, find.text(_l.uiTasksUndo));
+    expect(find.text('Hidrofor kurulumu'), findsOneWidget);
+  });
+
+  testWidgets('kısayol menüsü: zaman çizelgesi ve görev listesi', (
+    tester,
+  ) async {
+    final (h, nav) = await _open(tester);
+    h.read(shellReselectEventsProvider.notifier).fire(1);
+    await settle(tester);
+    expect(find.text('ALT-7 · ${_l.uiTasksFlyThisTask}'), findsOneWidget);
+    await _tap(tester, find.text(_l.uiTasksFlyTimeline));
+    h.read(shellReselectEventsProvider.notifier).fire(1);
+    await settle(tester);
+    await _tap(tester, find.text(_l.uiTasksTaskList));
+    expect(nav.calls, ['timeline:ALT', 'tasks']);
+  });
+
+  testWidgets('bilinmeyen görev', (tester) async {
+    await _open(tester, code: 'YOK-1');
+    expect(find.text(_l.uiTasksNotFound), findsOneWidget);
+  });
+
+  for (final (width, scale) in [(360.0, 1.0), (360.0, 2.0), (390.0, 2.0)]) {
+    for (final dark in [false, true]) {
+      testWidgets(
+        'taşma yok: ${width.toInt()} geniş, ${scale}x, ${dark ? 'koyu' : 'açık'}',
+        (tester) async {
+          tester.view.devicePixelRatio = 1;
+          tester.view.physicalSize = Size(width, 844);
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(tester.view.reset);
+          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+          await _open(tester, dark: dark);
+          for (final tab in [
+            _l.uiTasksTabSubtasks,
+            _l.uiTasksTabFiles,
+            _l.uiTasksTabNotes,
+          ]) {
+            await _tap(tester, find.text(tab));
+            final scrollable = find.byType(Scrollable).first;
+            for (var i = 0; i < 4; i++) {
+              await tester.drag(scrollable, const Offset(0, -400));
+              await tester.pump();
+            }
+            await _top(tester);
+          }
+          await _tap(tester, find.text(_l.uiTasksTabSubtasks));
+          await _tap(tester, find.text('Montaj ekibini planla'));
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+}

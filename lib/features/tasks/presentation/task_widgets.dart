@@ -113,7 +113,7 @@ class TaskSegmented extends StatelessWidget {
         ),
       ),
     );
-    return compact ? child : Expanded(child: child);
+    return compact ? Flexible(child: child) : Expanded(child: child);
   }
 }
 

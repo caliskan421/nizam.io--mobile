@@ -62,4 +62,42 @@ void main() {
       expect(find.text('seni bekleyenler'), findsNothing);
     },
   );
+
+  testWidgets('sağ sayı ve seçili satır (kalın, vurgulu zemin)', (t) async {
+    await t.pumpWidget(
+      testApp(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => NzFlyoutMenu.show(
+              context,
+              semanticLabel: 'Görevler',
+              entries: [
+                NzFlyoutItem(
+                  label: 'Geciken',
+                  dot: NizamioColors.light.danger,
+                  trailing: '15',
+                  selected: true,
+                  onSelected: () {},
+                ),
+                NzFlyoutItem(label: 'Biten', trailing: '39', onSelected: () {}),
+              ],
+            ),
+            child: const Text('aç'),
+          ),
+        ),
+      ),
+    );
+    await t.tap(find.text('aç'));
+    await t.pumpAndSettle();
+    expect(find.text('15'), findsOneWidget);
+    expect(find.text('39'), findsOneWidget);
+    expect(
+      t.widget<Text>(find.text('Geciken')).style!.fontWeight,
+      FontWeight.w600,
+    );
+    expect(
+      t.widget<Text>(find.text('Biten')).style!.fontWeight,
+      FontWeight.w500,
+    );
+  });
 }

@@ -1464,5 +1464,349 @@
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {
     "description": "ui.timeline.title"
+  },
+  "uiTimelineView": "Görünüm",
+  "@uiTimelineView": {
+    "description": "ui.timeline.view"
+  },
+  "uiTimelineList": "Liste",
+  "@uiTimelineList": {
+    "description": "ui.timeline.list"
+  },
+  "uiTimelineCoord": "Koordinatörlük",
+  "@uiTimelineCoord": {
+    "description": "ui.timeline.coord"
+  },
+  "uiTimelineCoordAll": "tümü",
+  "@uiTimelineCoordAll": {
+    "description": "ui.timeline.coord_all"
+  },
+  "uiTimelineCoordNone": "seçilmedi",
+  "@uiTimelineCoordNone": {
+    "description": "ui.timeline.coord_none"
+  },
+  "uiTimelineCoordSelected": "seçili",
+  "@uiTimelineCoordSelected": {
+    "description": "ui.timeline.coord_selected"
+  },
+  "uiTimelineCoordOpenTail": "açık",
+  "@uiTimelineCoordOpenTail": {
+    "description": "ui.timeline.coord_open_tail"
+  },
+  "uiTimelineCoordClear": "Seçimi kaldır",
+  "@uiTimelineCoordClear": {
+    "description": "ui.timeline.coord_clear"
+  },
+  "uiTimelineCoordSelectAll": "Tümünü seç",
+  "@uiTimelineCoordSelectAll": {
+    "description": "ui.timeline.coord_select_all"
+  },
+  "uiTimelineFilter": "Filtre",
+  "@uiTimelineFilter": {
+    "description": "ui.timeline.filter"
+  },
+  "uiTimelineFilterLabel": "Filtreler · durum, kişi, öncelik",
+  "@uiTimelineFilterLabel": {
+    "description": "ui.timeline.filter_label"
+  },
+  "uiTimelineFilters": "Filtreler",
+  "@uiTimelineFilters": {
+    "description": "ui.timeline.filters"
+  },
+  "uiTimelineClear": "Temizle",
+  "@uiTimelineClear": {
+    "description": "ui.timeline.clear"
+  },
+  "uiTimelineStatus": "Durum",
+  "@uiTimelineStatus": {
+    "description": "ui.timeline.status"
+  },
+  "uiTimelineStatusAll": "Tümü",
+  "@uiTimelineStatusAll": {
+    "description": "ui.timeline.status_all"
+  },
+  "uiTimelineStatusOpen": "Açık",
+  "@uiTimelineStatusOpen": {
+    "description": "ui.timeline.status_open"
+  },
+  "uiTimelineStatusLate": "Geciken",
+  "@uiTimelineStatusLate": {
+    "description": "ui.timeline.status_late"
+  },
+  "uiTimelineStatusDone": "Biten",
+  "@uiTimelineStatusDone": {
+    "description": "ui.timeline.status_done"
+  },
+  "uiTimelinePerson": "Kişi",
+  "@uiTimelinePerson": {
+    "description": "ui.timeline.person"
+  },
+  "uiTimelinePriority": "Öncelik",
+  "@uiTimelinePriority": {
+    "description": "ui.timeline.priority"
+  },
+  "uiTimelinePrioHigh": "Yüksek",
+  "@uiTimelinePrioHigh": {
+    "description": "ui.timeline.prio_high"
+  },
+  "uiTimelinePrioMid": "Orta",
+  "@uiTimelinePrioMid": {
+    "description": "ui.timeline.prio_mid"
+  },
+  "uiTimelinePrioLow": "Düşük",
+  "@uiTimelinePrioLow": {
+    "description": "ui.timeline.prio_low"
+  },
+  "uiTimelineScale": "Ölçek",
+  "@uiTimelineScale": {
+    "description": "ui.timeline.scale"
+  },
+  "uiTimelineScaleDay": "Gün",
+  "@uiTimelineScaleDay": {
+    "description": "ui.timeline.scale_day"
+  },
+  "uiTimelineScaleWeek": "Hafta",
+  "@uiTimelineScaleWeek": {
+    "description": "ui.timeline.scale_week"
+  },
+  "uiTimelineScaleMonth": "Ay",
+  "@uiTimelineScaleMonth": {
+    "description": "ui.timeline.scale_month"
+  },
+  "uiTimelineOverview": "Genel bakış",
+  "@uiTimelineOverview": {
+    "description": "ui.timeline.overview"
+  },
+  "uiTimelineOverviewHint": "Her koordinatörlük bir sütun; sütuna dokununca o koordinatörlük açılır.",
+  "@uiTimelineOverviewHint": {
+    "description": "ui.timeline.overview_hint"
+  },
+  "uiTimelineCoordHint": "Koordinatörlük, çizelgenin üstündeki menüden seçilir.",
+  "@uiTimelineCoordHint": {
+    "description": "ui.timeline.coord_hint"
+  },
+  "uiTimelineShowTasksTail": "görevi göster",
+  "@uiTimelineShowTasksTail": {
+    "description": "ui.timeline.show_tasks_tail"
+  },
+  "uiTimelineLegend": "Lejant",
+  "@uiTimelineLegend": {
+    "description": "ui.timeline.legend"
+  },
+  "uiTimelineLegendOpen": "Lejantı göster",
+  "@uiTimelineLegendOpen": {
+    "description": "ui.timeline.legend_open"
+  },
+  "uiTimelineStTodo": "Başlamadı",
+  "@uiTimelineStTodo": {
+    "description": "ui.timeline.st_todo"
+  },
+  "uiTimelineStDoing": "Devam ediyor",
+  "@uiTimelineStDoing": {
+    "description": "ui.timeline.st_doing"
+  },
+  "uiTimelineStReview": "Onay bekliyor",
+  "@uiTimelineStReview": {
+    "description": "ui.timeline.st_review"
+  },
+  "uiTimelineStBack": "Geri gönderildi",
+  "@uiTimelineStBack": {
+    "description": "ui.timeline.st_back"
+  },
+  "uiTimelineStDone": "Tamamlandı",
+  "@uiTimelineStDone": {
+    "description": "ui.timeline.st_done"
+  },
+  "uiTimelineStDoneLate": "Geç bitti",
+  "@uiTimelineStDoneLate": {
+    "description": "ui.timeline.st_done_late"
+  },
+  "uiTimelineStLate": "Gecikmede",
+  "@uiTimelineStLate": {
+    "description": "ui.timeline.st_late"
+  },
+  "uiTimelineStRequest": "Tarih talebi",
+  "@uiTimelineStRequest": {
+    "description": "ui.timeline.st_request"
+  },
+  "uiTimelineLegendToday": "Yeşil çizgi bugünü gösterir; soldaki kutu bugünün tarihi.",
+  "@uiTimelineLegendToday": {
+    "description": "ui.timeline.legend_today"
+  },
+  "uiTimelineLegendStrip": "Alttaki şerit sezonun haritası: çerçeve baktığın aralık, kırmızı hafta gecikmenin başladığı hafta. Dokunarak ya da sürükleyerek o haftaya git.",
+  "@uiTimelineLegendStrip": {
+    "description": "ui.timeline.legend_strip"
+  },
+  "uiTimelineLegendBar": "Çubuğa dokun: tarihleri − / + ile ya da tarih alanından değiştir, çubuk anında güncellenir. Seçili çubuğu basılı tutup sürükleyerek de kaydırabilirsin.",
+  "@uiTimelineLegendBar": {
+    "description": "ui.timeline.legend_bar"
+  },
+  "uiTimelineToday": "Bugün",
+  "@uiTimelineToday": {
+    "description": "ui.timeline.today"
+  },
+  "uiTimelineSeasonMap": "Sezon haritası · parmağını kaydırarak çizelgede gez",
+  "@uiTimelineSeasonMap": {
+    "description": "ui.timeline.season_map"
+  },
+  "uiTimelineEmpty": "Bu filtrede görev yok.",
+  "@uiTimelineEmpty": {
+    "description": "ui.timeline.empty"
+  },
+  "uiTimelineEmptyNoCoord": "Koordinatörlük seç.",
+  "@uiTimelineEmptyNoCoord": {
+    "description": "ui.timeline.empty_no_coord"
+  },
+  "uiTimelineDependent": "bağımlı",
+  "@uiTimelineDependent": {
+    "description": "ui.timeline.dependent"
+  },
+  "uiTimelineDaysLate": "gün gecikmede",
+  "@uiTimelineDaysLate": {
+    "description": "ui.timeline.days_late"
+  },
+  "uiTimelineDaysLateDone": "gün geç bitti",
+  "@uiTimelineDaysLateDone": {
+    "description": "ui.timeline.days_late_done"
+  },
+  "uiTimelineSelectedTask": "Seçili görev",
+  "@uiTimelineSelectedTask": {
+    "description": "ui.timeline.selected_task"
+  },
+  "uiTimelineOpenTask": "Görev ayrıntısında aç",
+  "@uiTimelineOpenTask": {
+    "description": "ui.timeline.open_task"
+  },
+  "uiTimelineEvidenceTail": "kanıt dosyası",
+  "@uiTimelineEvidenceTail": {
+    "description": "ui.timeline.evidence_tail"
+  },
+  "uiTimelineNoEvidence": "kanıt yok",
+  "@uiTimelineNoEvidence": {
+    "description": "ui.timeline.no_evidence"
+  },
+  "uiTimelineStart": "başlangıç",
+  "@uiTimelineStart": {
+    "description": "ui.timeline.start"
+  },
+  "uiTimelineEnd": "bitiş",
+  "@uiTimelineEnd": {
+    "description": "ui.timeline.end"
+  },
+  "uiTimelineDayBack": "bir gün geri",
+  "@uiTimelineDayBack": {
+    "description": "ui.timeline.day_back"
+  },
+  "uiTimelineDayForward": "bir gün ileri",
+  "@uiTimelineDayForward": {
+    "description": "ui.timeline.day_forward"
+  },
+  "uiTimelineShiftAll": "tümünü kaydır",
+  "@uiTimelineShiftAll": {
+    "description": "ui.timeline.shift_all"
+  },
+  "uiTimelineShiftWeekBack": "−1 hf",
+  "@uiTimelineShiftWeekBack": {
+    "description": "ui.timeline.shift_week_back"
+  },
+  "uiTimelineShiftDayBack": "−1 g",
+  "@uiTimelineShiftDayBack": {
+    "description": "ui.timeline.shift_day_back"
+  },
+  "uiTimelineShiftDayForward": "+1 g",
+  "@uiTimelineShiftDayForward": {
+    "description": "ui.timeline.shift_day_forward"
+  },
+  "uiTimelineShiftWeekForward": "+1 hf",
+  "@uiTimelineShiftWeekForward": {
+    "description": "ui.timeline.shift_week_forward"
+  },
+  "uiTimelineDay": "gün",
+  "@uiTimelineDay": {
+    "description": "ui.timeline.day"
+  },
+  "uiTimelineDuration": "süre",
+  "@uiTimelineDuration": {
+    "description": "ui.timeline.duration"
+  },
+  "uiTimelineWeekShort": "hf",
+  "@uiTimelineWeekShort": {
+    "description": "ui.timeline.week_short"
+  },
+  "uiTimelineSave": "Tarihleri kaydet",
+  "@uiTimelineSave": {
+    "description": "ui.timeline.save"
+  },
+  "uiTimelineSendRequest": "Talep olarak gönder",
+  "@uiTimelineSendRequest": {
+    "description": "ui.timeline.send_request"
+  },
+  "uiTimelineRemind": "Atanana hatırlat",
+  "@uiTimelineRemind": {
+    "description": "ui.timeline.remind"
+  },
+  "uiTimelineRequestPending": "Bu görev için zaten bekleyen bir talep var",
+  "@uiTimelineRequestPending": {
+    "description": "ui.timeline.request_pending"
+  },
+  "uiTimelineRequestNoChange": "Önce tarihleri değiştir, sonra talep gönder",
+  "@uiTimelineRequestNoChange": {
+    "description": "ui.timeline.request_no_change"
+  },
+  "uiTimelineRequestSent": "Tarih talebi gönderildi · yeni bitiş",
+  "@uiTimelineRequestSent": {
+    "description": "ui.timeline.request_sent"
+  },
+  "uiTimelineRequestSentTail": "onay bekliyor",
+  "@uiTimelineRequestSentTail": {
+    "description": "ui.timeline.request_sent_tail"
+  },
+  "uiTimelineReminded": "Hatırlatma gönderildi",
+  "@uiTimelineReminded": {
+    "description": "ui.timeline.reminded"
+  },
+  "uiTimelineUndoneTail": "tarihleri geri alındı",
+  "@uiTimelineUndoneTail": {
+    "description": "ui.timeline.undone_tail"
+  },
+  "uiTimelineShiftedForward": "gün ileri kaydırıldı",
+  "@uiTimelineShiftedForward": {
+    "description": "ui.timeline.shifted_forward"
+  },
+  "uiTimelineShiftedBack": "gün geri kaydırıldı",
+  "@uiTimelineShiftedBack": {
+    "description": "ui.timeline.shifted_back"
+  },
+  "uiTimelineDurationOf": "süresi",
+  "@uiTimelineDurationOf": {
+    "description": "ui.timeline.duration_of"
+  },
+  "uiTimelineExtended": "gün uzatıldı",
+  "@uiTimelineExtended": {
+    "description": "ui.timeline.extended"
+  },
+  "uiTimelineShortened": "gün kısaltıldı",
+  "@uiTimelineShortened": {
+    "description": "ui.timeline.shortened"
+  },
+  "uiTimelineUndo": "Geri al",
+  "@uiTimelineUndo": {
+    "description": "ui.timeline.undo"
+  },
+  "uiTimelineTasksLc": "görev",
+  "@uiTimelineTasksLc": {
+    "description": "ui.timeline.tasks_lc"
+  },
+  "uiTimelineDoneLc": "bitti",
+  "@uiTimelineDoneLc": {
+    "description": "ui.timeline.done_lc"
+  },
+  "uiTimelineLateLc": "gecikmede",
+  "@uiTimelineLateLc": {
+    "description": "ui.timeline.late_lc"
+  },
+  "uiTimelineOpen": "aç",
+  "@uiTimelineOpen": {
+    "description": "ui.timeline.open"
   }
 }

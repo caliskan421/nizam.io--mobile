@@ -28,7 +28,8 @@ class NzPage extends ConsumerWidget {
     this.loading = false,
     this.onRetry,
   }) : topBar = null,
-       children = const [];
+       children = const [],
+       _fill = false;
 
   /// Kök akış sayfası (ana sayfa gibi): [topBar] yapışkan cam sliver'dır (`NzTopBar`), [children]
   /// tek kaydırma görünümünde alt alta dizilir. İçerik üst çubuğun ve (kabuk `extendBody` ile)
@@ -44,7 +45,24 @@ class NzPage extends ConsumerWidget {
        body = const SizedBox.shrink(),
        actions = const [],
        floatingAction = null,
-       loading = false;
+       loading = false,
+       _fill = false;
+
+  /// Kabuk dışı tam ekran sayfa (zaman çizelgesi gibi): [topBar] kök/ayrıntı üst çubuğu
+  /// sliver'ı, [body] kalan yüksekliği doldurur ve kendi kaydırmasını yönetir (dış görünüm
+  /// kaymaz). Yatay boşluk ve alt güvenli alan [body]'nindir.
+  const NzPage.fill({
+    super.key,
+    required Widget this.topBar,
+    required this.body,
+    this.onRetry,
+  }) : title = '',
+       children = const [],
+       width = NzContentWidth.list,
+       actions = const [],
+       floatingAction = null,
+       loading = false,
+       _fill = true;
 
   /// AppBar başlığı (ARB'den).
   final String title;
@@ -64,6 +82,7 @@ class NzPage extends ConsumerWidget {
 
   /// Çevrimdışı şeridindeki "yeniden dene".
   final VoidCallback? onRetry;
+  final bool _fill;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -71,6 +90,21 @@ class NzPage extends ConsumerWidget {
         ref.watch(connectivityStateProvider) == ConnectivityState.offline;
     final layout = context.layout;
     final topBar = this.topBar;
+    if (topBar != null && _fill) {
+      return NzTextScaleLimit(
+        child: Scaffold(
+          body: CustomScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            slivers: [
+              topBar,
+              if (offline)
+                SliverToBoxAdapter(child: NzBanner.offline(onAction: onRetry)),
+              SliverFillRemaining(hasScrollBody: true, child: body),
+            ],
+          ),
+        ),
+      );
+    }
     if (topBar != null) {
       final side = layout.pagePadding;
       final extra =

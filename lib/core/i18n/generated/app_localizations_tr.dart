@@ -662,6 +662,15 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu sunucuya bağlanmak için uygulamayı güncelleyin.';
 
   @override
+  String get uiActivityTitle => 'İşlem geçmişi';
+
+  @override
+  String get uiArchiveTitle => 'Arşiv';
+
+  @override
+  String get uiArchiveFolderTitle => 'Klasör';
+
+  @override
   String get uiButtonsBusy => 'Meşgul';
 
   @override
@@ -675,6 +684,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCommonClose => 'Kapat';
+
+  @override
+  String get uiCoordTitle => 'Koordinatörlükler';
+
+  @override
+  String get uiCoordDetailTitle => 'Koordinatörlük';
 
   @override
   String get uiFeedbackLoading => 'Yükleniyor';
@@ -1051,13 +1066,13 @@ class AppLocalizationsTr extends AppLocalizations {
       'Liste kısaltıldı; yalnız ilk kayıtlar gösteriliyor.';
 
   @override
+  String get uiMessagesTitle => 'Mesajlar';
+
+  @override
+  String get uiMessagesChatTitle => 'Sohbet';
+
+  @override
   String get uiRouterTabHome => 'Ana sayfa';
-
-  @override
-  String get uiRouterTabWork => 'Görevler';
-
-  @override
-  String get uiRouterTabProfile => 'Profil';
 
   @override
   String get uiRouterNavLabel => 'Ana gezinme';
@@ -1076,9 +1091,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiRouterPageScope => 'Kapsam seçimi';
-
-  @override
-  String get uiRouterPageDetail => 'Ayrıntı';
 
   @override
   String get uiRouterPlaceholder => 'Bu ekran henüz hazır değil.';
@@ -1105,6 +1117,21 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiRouterAssistantSoon =>
       'Asistan mobilde sonraki adımda eklenecek';
+
+  @override
+  String get uiRouterTabHistory => 'Geçmiş';
+
+  @override
+  String get uiRouterTabTasks => 'Görevler';
+
+  @override
+  String get uiRouterTabCoordinatorships => 'Koordinatörlükler';
+
+  @override
+  String get uiRouterTabArchive => 'Arşiv';
+
+  @override
+  String get uiRouterTabMessages => 'Mesajlar';
 
   @override
   String get uiScopeTitle => 'Program seçimi';
@@ -1163,4 +1190,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiServerUpdateRecheck => 'Yeniden denetle';
+
+  @override
+  String get uiTasksTitle => 'Görevler';
+
+  @override
+  String get uiTasksDetailTitle => 'Görev';
+
+  @override
+  String get uiTimelineTitle => 'Zaman çizelgesi';
 }

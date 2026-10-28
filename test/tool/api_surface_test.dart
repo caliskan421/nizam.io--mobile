@@ -400,7 +400,7 @@ void main() {
         <String>{},
       ),
       'pozitif: tipli rota .push': (
-        "void f(BuildContext c) => const HomeDetailRoute(id: '1').push(c);",
+        "void f(BuildContext c) => const TaskDetailRoute(code: '1').push(c);",
         <String>{},
       ),
       'pozitif: dio options.extra': (

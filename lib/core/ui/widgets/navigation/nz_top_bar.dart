@@ -4,6 +4,8 @@ import 'package:gap/gap.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_surfaces.dart';
+import '../buttons/nz_icon_button.dart';
+import '../nz_size.dart';
 import '../surfaces/nz_glass.dart';
 
 /// Kök sayfa üst çubuğu (tasarım `AppBar`, kök biçimi) — kaydırma görünümünün ilk sliver'ı:
@@ -16,16 +18,43 @@ import '../surfaces/nz_glass.dart';
 class NzTopBar extends StatelessWidget {
   const NzTopBar({
     super.key,
-    required this.title,
+    required String this.title,
     this.subtitle,
     this.leading,
     this.actions = const [],
-  });
+  }) : code = null,
+       onBack = null,
+       backLabel = null,
+       _detail = false;
 
-  final String title;
+  /// Ayrıntı sayfası çubuğu (görev ayrıntısı, işlem geçmişi, koordinatörlük ayrıntısı): aynı
+  /// yapışkan `glass-bar` cam; solda geri düğmesi (48 dokunma), yanında ya soluk mono [code]
+  /// (`m-code`, `ink-muted`; ör. `ALT-7`) ya da [title] (17/24 600 → `labelLg`); sağda en çok
+  /// iki ikon eylem ([actions], ör. `NzIconButton`). [onBack] null → `Navigator.maybePop`.
+  /// [backLabel] null → Material yerel "Geri" metni.
+  const NzTopBar.detail({
+    super.key,
+    this.code,
+    this.title,
+    this.onBack,
+    this.backLabel,
+    this.actions = const [],
+  }) : assert(code == null || title == null, 'code ve title birlikte verilmez'),
+       assert(actions.length <= 2, 'en çok iki eylem'),
+       subtitle = null,
+       leading = null,
+       _detail = true;
+
+  final String? title;
   final String? subtitle;
   final Widget? leading;
   final List<Widget> actions;
+
+  /// Ayrıntı çubuğunda mono kimlik.
+  final String? code;
+  final VoidCallback? onBack;
+  final String? backLabel;
+  final bool _detail;
 
   static const maxTextScale = 1.3;
 
@@ -56,6 +85,7 @@ class _TopBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlaps) {
+    if (bar._detail) return _detail(context);
     final c = context.colors;
     final t = context.text;
     final subtitle = bar.subtitle;
@@ -84,7 +114,7 @@ class _TopBarDelegate extends SliverPersistentHeaderDelegate {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        bar.title,
+                        bar.title ?? '',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: t.brand,
@@ -102,6 +132,65 @@ class _TopBarDelegate extends SliverPersistentHeaderDelegate {
               ),
               ...bar.actions,
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+extension on _TopBarDelegate {
+  Widget _detail(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    final code = bar.code;
+    final title = bar.title;
+    final back = bar.onBack ?? () => Navigator.maybePop(context);
+    return NzGlass(
+      tone: NzGlassTone.bar,
+      edge: false,
+      child: MediaQuery.withClampedTextScaling(
+        maxScaleFactor: NzTopBar.maxTextScale,
+        child: SizedBox.expand(
+          child: Padding(
+            // Prototip `header`: 8 px üst ve yan dolgu; düğmeler 44 görsel / 48 dokunma.
+            padding: EdgeInsets.only(
+              top: top + NizamioSpacing.space2,
+              left: NizamioSpacing.space1,
+              right: NizamioSpacing.space1,
+            ),
+            child: Row(
+              children: [
+                NzIconButton(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  semanticLabel:
+                      bar.backLabel ??
+                      MaterialLocalizations.of(context).backButtonTooltip,
+                  onPressed: back,
+                  size: NzSize.sm,
+                ),
+                const Gap(NizamioSpacing.space1),
+                Expanded(
+                  child: code != null
+                      ? Text(
+                          code,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: t.mono.copyWith(color: c.textMuted),
+                        )
+                      : Semantics(
+                          header: true,
+                          child: Text(
+                            title ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: t.labelLg,
+                          ),
+                        ),
+                ),
+                ...bar.actions,
+              ],
+            ),
           ),
         ),
       ),

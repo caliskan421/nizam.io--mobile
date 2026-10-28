@@ -71,29 +71,29 @@ void main() {
     );
     await _tapShow(tester);
     expect(find.text('Merhaba'), findsOneWidget);
-    expect(
-      tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor,
-      NizamioColors.light.text,
-    );
+    expect(_fill(tester), NizamioColors.light.text);
+    expect(_icon(tester).icon, Icons.info_outline_rounded);
     await tester.pump(const Duration(seconds: 10));
   });
 
-  testWidgets('ton → arka plan rolü', (tester) async {
+  testWidgets('ton → zemin hep ink; ton ikon ve ikon renginde', (tester) async {
+    final dark = NizamioColors.dark;
     final expected = {
-      NzToastTone.info: NizamioColors.light.text,
-      NzToastTone.success: NizamioColors.light.success,
-      NzToastTone.danger: NizamioColors.light.danger,
+      NzToastTone.info: (
+        Icons.info_outline_rounded,
+        NizamioColors.light.background,
+      ),
+      NzToastTone.success: (Icons.check_rounded, dark.accentText),
+      NzToastTone.danger: (Icons.error_outline_rounded, dark.danger),
     };
     for (final MapEntry(:key, :value) in expected.entries) {
       await tester.pumpWidget(
         testApp(_trigger((c) => NzToast.show(c, 'x', tone: key))),
       );
       await _tapShow(tester);
-      expect(
-        tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor,
-        value,
-        reason: '$key',
-      );
+      expect(_fill(tester), NizamioColors.light.text, reason: '$key');
+      expect(_icon(tester).icon, value.$1, reason: '$key');
+      expect(_icon(tester).color, value.$2, reason: '$key');
       await tester.pump(const Duration(seconds: 10));
     }
   });
@@ -104,10 +104,7 @@ void main() {
     );
     await _tapShow(tester);
     expect(find.text('Kaydedildi'), findsOneWidget);
-    expect(
-      tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor,
-      NizamioColors.light.success,
-    );
+    expect(_icon(tester).icon, Icons.check_rounded);
     await tester.pump(const Duration(seconds: 10));
   });
 
@@ -117,10 +114,7 @@ void main() {
     await _tapShow(tester);
     final l = tester.element(find.byType(SnackBar)).l10n;
     expect(find.text(errorText(l, err)), findsOneWidget);
-    expect(
-      tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor,
-      NizamioColors.light.danger,
-    );
+    expect(_icon(tester).icon, Icons.error_outline_rounded);
     await tester.pump(const Duration(seconds: 10));
   });
 
@@ -206,6 +200,53 @@ void main() {
     await tester.pump(const Duration(seconds: 10));
   });
 
+  testWidgets('koyu tema: zemin koyu ink, yazı bg-base; ortada sarılır', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      testApp(_trigger((c) => NzToast.show(c, 'Kısa')), dark: true),
+    );
+    await _tapShow(tester);
+    expect(_fill(tester), NizamioColors.dark.text);
+    final text = tester.widget<Text>(find.text('Kısa'));
+    expect(text.style!.color, NizamioColors.dark.background);
+    final bubble = tester.getSize(
+      find
+          .descendant(
+            of: find.byType(NzToastBubble),
+            matching: find.byType(DecoratedBox),
+          )
+          .first,
+    );
+    expect(bubble.width, lessThan(400));
+    await tester.pump(const Duration(seconds: 10));
+  });
+
+  testWidgets('alt menülü kabukta menünün üstünde durur', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme(false),
+        locale: const Locale('tr'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: testLocalizationDelegates,
+        home: Scaffold(
+          extendBody: true,
+          body: _trigger((c) => NzToast.show(c, 'Üstte')),
+          bottomNavigationBar: const SizedBox(
+            key: ValueKey('nav'),
+            height: 100,
+            child: Placeholder(),
+          ),
+        ),
+      ),
+    );
+    await _tapShow(tester);
+    final navTop = tester.getTopLeft(find.byKey(const ValueKey('nav'))).dy;
+    final toastBottom = tester.getBottomLeft(find.text('Üstte')).dy;
+    expect(toastBottom, lessThan(navTop));
+    await tester.pump(const Duration(seconds: 10));
+  });
+
   test('actionLabel ve onAction birlikte verilmelidir', () {
     // assert, BuildContext gerektirmeden önce çalışır.
     expect(
@@ -214,15 +255,13 @@ void main() {
     );
   });
 
-  testWidgets('piksel: tabaka 1024 geniş, ton arka planları', (tester) async {
+  testWidgets('piksel: tabaka 1024 geniş, ink zemin (açık/koyu)', (
+    tester,
+  ) async {
     await _pumpToasts(tester);
     await expectSheetPixels(tester, [
       NizamioColors.light.text,
-      NizamioColors.light.success,
-      NizamioColors.light.danger,
       NizamioColors.dark.text,
-      NizamioColors.dark.success,
-      NizamioColors.dark.danger,
     ]);
     await tester.pump(const Duration(seconds: 10));
   });
@@ -239,6 +278,22 @@ void main() {
     },
   );
 }
+
+Color? _fill(WidgetTester tester) {
+  final box = tester.widget<DecoratedBox>(
+    find
+        .descendant(
+          of: find.byType(NzToastBubble),
+          matching: find.byType(DecoratedBox),
+        )
+        .first,
+  );
+  return (box.decoration as BoxDecoration).color;
+}
+
+Icon _icon(WidgetTester tester) => tester.widget<Icon>(
+  find.descendant(of: find.byType(NzToastBubble), matching: find.byType(Icon)),
+);
 
 class _NoContext implements BuildContext {
   @override

@@ -1,0 +1,7 @@
+{
+  "$comment": "Görev listesi, görev ayrıntısı ve hızlı işlem formları (yeni görev, toplantı, davet) metinleri (features/tasks). ELLE yazılır; make gen ARB'ye birleştirir. Yer tutucu ({ }) yasak: sayılı cümleler parça parça yazılıp sunumda birleştirilir.",
+  "texts": {
+    "ui.tasks.title": "Görevler",
+    "ui.tasks.detail_title": "Görev"
+  }
+}

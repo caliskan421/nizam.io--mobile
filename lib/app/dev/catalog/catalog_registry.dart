@@ -6,6 +6,7 @@ import 'home_kit_catalog.dart';
 import 'inputs_catalog.dart';
 import 'lists_catalog.dart';
 import 'overlays_catalog.dart';
+import 'prototype_kit_catalog.dart';
 import 'surfaces_catalog.dart';
 
 /// Katalogtaki bütün girişler; her kit grubu kendi satırını ekler.
@@ -18,4 +19,5 @@ List<CatalogEntry> get allCatalogEntries => [
   ...homeKitCatalogEntries,
   ...overlaysCatalogEntries,
   ...listsCatalogEntries,
+  ...prototypeKitCatalogEntries,
 ];

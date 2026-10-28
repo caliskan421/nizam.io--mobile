@@ -13,29 +13,6 @@ import '../../domain/home_dashboard.dart';
 import 'home_sections.dart';
 import 'home_texts.dart';
 
-/// Ana sayfadaki gezinme ve eylem hedefleri. Rota tanımları `app/router`'dadır (features app'i
-/// import etmez, B2); kabuk tipli rotalarla doldurur. Henüz ekranı olmayan hedefler burada
-/// değil, çağıran sayfada açık yer tutucuya (bildirim) düşer.
-@immutable
-class HomeNavigation {
-  const HomeNavigation({
-    required this.openTasks,
-    required this.openTask,
-    required this.openCoordinatorship,
-    required this.openProfile,
-  });
-
-  /// Görev listesi (KPI, ekip, çekmece "Görevler").
-  final VoidCallback openTasks;
-
-  /// Tek görev (kod, ör. `ALT-7`).
-  final ValueChanged<String> openTask;
-
-  /// Koordinatörlük ayrıntısı (kod, ör. `ALT`).
-  final ValueChanged<String> openCoordinatorship;
-  final VoidCallback openProfile;
-}
-
 /// Alt menüde "Ana sayfa"ya yeniden dokununca açılan kısayol menüsü.
 Future<void> showHomeShortcuts(
   BuildContext context, {
@@ -78,32 +55,6 @@ Future<void> showHomeShortcuts(
   );
 }
 
-/// Hızlı işlem alt sayfası: formlar sonraki adımın işidir; sayfa açılır, ne geleceğini söyler.
-Future<void> showQuickActionSheet(BuildContext context, HomeQuickAction a) {
-  final l = context.l10n;
-  return NzBottomSheet.show<void>(
-    context,
-    title: quickActionLongLabel(l, a),
-    builder: (sheetContext) => Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          l.uiHomeFormSoon,
-          style: sheetContext.text.bodyMd.copyWith(
-            color: sheetContext.colors.textMuted,
-          ),
-        ),
-        const Gap(NizamioSpacing.space6),
-        NzButton.secondary(
-          label: l.uiCommonClose,
-          expand: true,
-          onPressed: () => Navigator.of(sheetContext).pop(),
-        ),
-      ],
-    ),
-  );
-}
-
 /// Çekmece satırının hedefi (ekranı olmayanlar yer tutucuya düşer).
 enum HomeModule {
   home,
@@ -125,12 +76,14 @@ enum HomeModule {
   help,
 }
 
-/// Sağdan açılan çekmece: hesap, kapsam (program) değiştirme, tüm modüller, çıkış.
+/// Sağdan açılan uygulama çekmecesi: hesap, kapsam (program) değiştirme, tüm modüller, çıkış.
+/// Kök sayfaların menü dairesinden (`NzAppNav.openMenu`) açılır; [current] bulunulan modül.
 Future<void> showHomeDrawer(
   BuildContext context, {
+  required HomeModule? current,
   required String greetingName,
   required String? programName,
-  required ModuleCounts counts,
+  required ModuleCounts? counts,
   required ValueChanged<HomeModule> onModule,
   required VoidCallback onProfile,
   required VoidCallback onChangeScope,
@@ -147,25 +100,27 @@ Future<void> showHomeDrawer(
         then();
       }
 
-      Widget count(int n, {Color? fill, Color? ink}) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: fill ?? c.surfaceOverlay,
-          borderRadius: BorderRadius.circular(NizamioRadius.pill),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: NizamioSpacing.space2,
-            vertical: NizamioSpacing.space1 / 2,
-          ),
-          child: Text(
-            '$n',
-            style: sheet.text.monoSm.copyWith(
-              color: ink ?? c.text,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      );
+      Widget? count(int? n, {Color? fill, Color? ink}) => n == null
+          ? null
+          : DecoratedBox(
+              decoration: BoxDecoration(
+                color: fill ?? c.surfaceOverlay,
+                borderRadius: BorderRadius.circular(NizamioRadius.pill),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: NizamioSpacing.space2,
+                  vertical: NizamioSpacing.space1 / 2,
+                ),
+                child: Text(
+                  '$n',
+                  style: sheet.text.monoSm.copyWith(
+                    color: ink ?? c.text,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            );
       NzMenuRow row(
         HomeModule m,
         IconData icon,
@@ -174,7 +129,7 @@ Future<void> showHomeDrawer(
       }) => NzMenuRow(
         icon: icon,
         label: label,
-        current: m == HomeModule.home,
+        current: m == current,
         trailing: trailing,
         onTap: () => close(() => onModule(m)),
       );
@@ -269,8 +224,8 @@ Future<void> showHomeDrawer(
                   mainAxisSize: MainAxisSize.min,
                   spacing: NizamioSpacing.space1,
                   children: [
-                    count(counts.tasksAwaitingApproval, ink: c.warning),
-                    count(counts.lateTasks, fill: c.danger, ink: c.onDanger),
+                    ?count(counts?.tasksAwaitingApproval, ink: c.warning),
+                    ?count(counts?.lateTasks, fill: c.danger, ink: c.onDanger),
                   ],
                 ),
               ),
@@ -304,7 +259,7 @@ Future<void> showHomeDrawer(
                 HomeModule.messages,
                 Icons.mail_outline_rounded,
                 l.uiHomeModuleMessages,
-                trailing: count(counts.unreadMessages),
+                trailing: count(counts?.unreadMessages),
               ),
               row(
                 HomeModule.sheets,
@@ -322,7 +277,7 @@ Future<void> showHomeDrawer(
                 Icons.assignment_turned_in_outlined,
                 l.uiHomeModuleRequests,
                 trailing: count(
-                  counts.pendingRequests,
+                  counts?.pendingRequests,
                   fill: c.warning,
                   ink: c.onWarning,
                 ),

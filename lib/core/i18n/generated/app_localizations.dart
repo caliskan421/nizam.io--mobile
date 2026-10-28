@@ -1234,6 +1234,24 @@ abstract class AppLocalizations {
   /// **'Bu sunucuya bağlanmak için uygulamayı güncelleyin.'**
   String get errClientUpdateRequired;
 
+  /// ui.activity.title
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem geçmişi'**
+  String get uiActivityTitle;
+
+  /// ui.archive.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Arşiv'**
+  String get uiArchiveTitle;
+
+  /// ui.archive.folder_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Klasör'**
+  String get uiArchiveFolderTitle;
+
   /// ui.buttons.busy
   ///
   /// In tr, this message translates to:
@@ -1263,6 +1281,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kapat'**
   String get uiCommonClose;
+
+  /// ui.coord.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlükler'**
+  String get uiCoordTitle;
+
+  /// ui.coord.detail_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük'**
+  String get uiCoordDetailTitle;
 
   /// ui.feedback.loading
   ///
@@ -2002,23 +2032,23 @@ abstract class AppLocalizations {
   /// **'Liste kısaltıldı; yalnız ilk kayıtlar gösteriliyor.'**
   String get uiListsTruncated;
 
+  /// ui.messages.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesajlar'**
+  String get uiMessagesTitle;
+
+  /// ui.messages.chat_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Sohbet'**
+  String get uiMessagesChatTitle;
+
   /// ui.router.tab_home
   ///
   /// In tr, this message translates to:
   /// **'Ana sayfa'**
   String get uiRouterTabHome;
-
-  /// ui.router.tab_work
-  ///
-  /// In tr, this message translates to:
-  /// **'Görevler'**
-  String get uiRouterTabWork;
-
-  /// ui.router.tab_profile
-  ///
-  /// In tr, this message translates to:
-  /// **'Profil'**
-  String get uiRouterTabProfile;
 
   /// ui.router.nav_label
   ///
@@ -2055,12 +2085,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kapsam seçimi'**
   String get uiRouterPageScope;
-
-  /// ui.router.page_detail
-  ///
-  /// In tr, this message translates to:
-  /// **'Ayrıntı'**
-  String get uiRouterPageDetail;
 
   /// ui.router.placeholder
   ///
@@ -2109,6 +2133,36 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Asistan mobilde sonraki adımda eklenecek'**
   String get uiRouterAssistantSoon;
+
+  /// ui.router.tab_history
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçmiş'**
+  String get uiRouterTabHistory;
+
+  /// ui.router.tab_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler'**
+  String get uiRouterTabTasks;
+
+  /// ui.router.tab_coordinatorships
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlükler'**
+  String get uiRouterTabCoordinatorships;
+
+  /// ui.router.tab_archive
+  ///
+  /// In tr, this message translates to:
+  /// **'Arşiv'**
+  String get uiRouterTabArchive;
+
+  /// ui.router.tab_messages
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesajlar'**
+  String get uiRouterTabMessages;
 
   /// ui.scope.title
   ///
@@ -2217,6 +2271,24 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Yeniden denetle'**
   String get uiServerUpdateRecheck;
+
+  /// ui.tasks.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler'**
+  String get uiTasksTitle;
+
+  /// ui.tasks.detail_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get uiTasksDetailTitle;
+
+  /// ui.timeline.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman çizelgesi'**
+  String get uiTimelineTitle;
 }
 
 class _AppLocalizationsDelegate

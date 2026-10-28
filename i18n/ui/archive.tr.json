@@ -1,0 +1,7 @@
+{
+  "$comment": "Arşiv klasörleri, klasör ayrıntısı ve dosya önizleme metinleri (features/archive). ELLE yazılır; make gen ARB'ye birleştirir. Yer tutucu ({ }) yasak: sayılı cümleler parça parça yazılıp sunumda birleştirilir.",
+  "texts": {
+    "ui.archive.title": "Arşiv",
+    "ui.archive.folder_title": "Klasör"
+  }
+}

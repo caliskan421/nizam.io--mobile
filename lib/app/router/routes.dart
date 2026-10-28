@@ -1,10 +1,16 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/ui/page/nz_app_nav.dart';
+import '../../features/activity/activity.dart';
+import '../../features/archive/archive.dart';
+import '../../features/coordinatorships/coordinatorships.dart';
 import '../../features/identity/identity.dart';
+import '../../features/messages/messages.dart';
 import '../../features/scope/scope.dart';
 import '../../features/server/server.dart';
-import 'pages.dart';
+import '../../features/tasks/tasks.dart';
+import '../../features/timeline/timeline.dart';
 import 'shell.dart';
 import 'transitions.dart';
 
@@ -13,7 +19,7 @@ part 'routes.g.dart';
 // Tipli rotalar (go_router_builder, A5). Kurallar:
 //  - Rota NESNE değil KİMLİK taşır: yol/sorgu parametresi; `extra` ile nesne taşıma ve dize yolla
 //    `go()` yasaktır (derin bağlantıda ve yeniden başlatmada kaybolur). Gezinme
-//    `const HomeDetailRoute(id: x).go(context)` ile yapılır; veri controller'dan yüklenir.
+//    `TaskDetailRoute(code: x).push(context)` ile yapılır; veri controller'dan yüklenir.
 //  - Faz kapısı `router.dart` içindeki [gateRedirect]'tedir; rotalar kapıyı bilmez.
 //  - Feature rota kaydı: her feature açık yüzünden `List<RouteBase> get <f>Routes` verir;
 //    [registeredFeatureRoutes] bunları birleştirir (app → feature facade, B2/B3).
@@ -63,7 +69,12 @@ class ScopeRoute extends NzRouteData with $ScopeRoute {
   Widget build(BuildContext context, GoRouterState state) => const ScopePage();
 }
 
-// ---- Kabuk (yalnız `scoped` fazı): üç yer tutucu sekme ----
+// ---- Kabuk (yalnız `scoped` fazı): prototip gezinmesi ----
+//
+// Alt menü üç öğedir (README "Gezinme"): Ana sayfa, Görevler ve son girilen modül
+// (Koordinatörlükler, Arşiv, Mesajlar — üçü aynı dalda, dal yığını son konumu korur). Dal
+// kökleri sekme geçişiyle ([NzTabRouteData]), alt sayfalar itme geçişiyle açılır. Zaman
+// çizelgesi ve sohbet kabuk dışındadır: alt menü gizlenir.
 
 @TypedStatefulShellRoute<AppShellRoute>(
   branches: [
@@ -71,20 +82,30 @@ class ScopeRoute extends NzRouteData with $ScopeRoute {
       routes: [
         TypedGoRoute<HomeRoute>(
           path: '/home',
-          routes: [TypedGoRoute<HomeDetailRoute>(path: 'detail/:id')],
+          routes: [TypedGoRoute<HistoryRoute>(path: 'history')],
         ),
       ],
     ),
-    TypedStatefulShellBranch<WorkBranch>(
+    TypedStatefulShellBranch<TasksBranch>(
       routes: [
-        TypedGoRoute<WorkRoute>(
-          path: '/work',
-          routes: [TypedGoRoute<WorkDetailRoute>(path: 'detail/:id')],
+        TypedGoRoute<TasksRoute>(
+          path: '/tasks',
+          routes: [TypedGoRoute<TaskDetailRoute>(path: ':code')],
         ),
       ],
     ),
-    TypedStatefulShellBranch<ProfileBranch>(
-      routes: [TypedGoRoute<ProfileRoute>(path: '/profile')],
+    TypedStatefulShellBranch<ModulesBranch>(
+      routes: [
+        TypedGoRoute<CoordinatorshipsRoute>(
+          path: '/coordinatorships',
+          routes: [TypedGoRoute<CoordinatorshipRoute>(path: ':code')],
+        ),
+        TypedGoRoute<ArchiveRoute>(
+          path: '/archive',
+          routes: [TypedGoRoute<ArchiveFolderRoute>(path: ':code')],
+        ),
+        TypedGoRoute<MessagesRoute>(path: '/messages'),
+      ],
     ),
   ],
 )
@@ -106,58 +127,125 @@ class HomeBranch extends StatefulShellBranchData {
   const HomeBranch();
 }
 
-class WorkBranch extends StatefulShellBranchData {
-  const WorkBranch();
+class TasksBranch extends StatefulShellBranchData {
+  const TasksBranch();
 }
 
-class ProfileBranch extends StatefulShellBranchData {
-  const ProfileBranch();
+class ModulesBranch extends StatefulShellBranchData {
+  const ModulesBranch();
 }
 
-class HomeRoute extends NzRouteData with $HomeRoute {
+class HomeRoute extends NzTabRouteData with $HomeRoute {
   const HomeRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => HomePage(
-    navigation: HomeNavigation(
-      openTasks: () => const WorkRoute().go(context),
-      openTask: (code) => WorkDetailRoute(id: code).go(context),
-      openCoordinatorship: (code) => HomeDetailRoute(id: code).go(context),
-      openProfile: () => const ProfileRoute().go(context),
-    ),
+  Widget build(BuildContext context, GoRouterState state) => const HomePage();
+}
+
+class HistoryRoute extends NzRouteData with $HistoryRoute {
+  const HistoryRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const ActivityPage();
+}
+
+class TasksRoute extends NzTabRouteData with $TasksRoute {
+  const TasksRoute({this.view, this.people = const []});
+
+  /// Başlangıç görünümü (`NzTaskView.name`); yalnız ad taşınır.
+  final String? view;
+
+  /// Başlangıç kişi süzgeci (kişi kimlikleri).
+  final List<String> people;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => TasksPage(
+    view: NzTaskView.values.where((v) => v.name == view).firstOrNull,
+    people: people,
   );
 }
 
-class HomeDetailRoute extends NzRouteData with $HomeDetailRoute {
-  const HomeDetailRoute({required this.id});
+class TaskDetailRoute extends NzRouteData with $TaskDetailRoute {
+  const TaskDetailRoute({required this.code});
 
-  /// Yalnız kimlik; veri controller'dan yüklenir.
+  /// Görev kodu (`ALT-7`); veri controller'dan yüklenir.
+  final String code;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      TaskDetailPage(code: code);
+}
+
+class CoordinatorshipsRoute extends NzTabRouteData with $CoordinatorshipsRoute {
+  const CoordinatorshipsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const CoordinatorshipsPage();
+}
+
+class CoordinatorshipRoute extends NzRouteData with $CoordinatorshipRoute {
+  const CoordinatorshipRoute({required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      CoordinatorshipPage(code: code);
+}
+
+class ArchiveRoute extends NzTabRouteData with $ArchiveRoute {
+  const ArchiveRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const ArchivePage();
+}
+
+class ArchiveFolderRoute extends NzRouteData with $ArchiveFolderRoute {
+  const ArchiveFolderRoute({required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      ArchiveFolderPage(code: code);
+}
+
+class MessagesRoute extends NzTabRouteData with $MessagesRoute {
+  const MessagesRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const MessagesPage();
+}
+
+// ---- Kabuk dışı (alt menü gizli) ----
+
+@TypedGoRoute<TimelineRoute>(path: '/timeline')
+class TimelineRoute extends NzRouteData with $TimelineRoute {
+  const TimelineRoute({this.coord});
+
+  /// Başlangıçta seçili koordinatörlük kodu.
+  final String? coord;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      TimelinePage(coordinatorship: coord);
+}
+
+@TypedGoRoute<ChatRoute>(path: '/chat/:id')
+class ChatRoute extends NzRouteData with $ChatRoute {
+  const ChatRoute({required this.id});
+
   final String id;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      RouterPlaceholderPage(title: (l) => l.uiRouterPageDetail, detailId: id);
+  Widget build(BuildContext context, GoRouterState state) => ChatPage(id: id);
 }
 
-class WorkRoute extends NzRouteData with $WorkRoute {
-  const WorkRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      RouterPlaceholderPage(title: (l) => l.uiRouterTabWork);
-}
-
-class WorkDetailRoute extends NzRouteData with $WorkDetailRoute {
-  const WorkDetailRoute({required this.id});
-
-  /// Yalnız kimlik; veri controller'dan yüklenir.
-  final String id;
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      RouterPlaceholderPage(title: (l) => l.uiRouterPageDetail, detailId: id);
-}
-
+@TypedGoRoute<ProfileRoute>(path: '/profile')
 class ProfileRoute extends NzRouteData with $ProfileRoute {
   const ProfileRoute();
 

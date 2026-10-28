@@ -80,14 +80,36 @@ void main() {
     expect(_location(router), '/home');
   });
 
-  test('ana sayfa önizlemesi yalnız devCatalog açıkken kapıdan muaf', () {
-    for (final phase in AppPhase.values) {
-      expect(gateRedirect(phase, homePreviewPath, devCatalog: true), isNull);
-      // Prod'da rota tanımsızdır; scoped fazında kapı açık yolu bırakır (404 sayfası).
-      expect(
-        gateRedirect(phase, homePreviewPath),
-        phase == AppPhase.scoped ? isNull : routeForPhase(phase),
-      );
-    }
+  testWidgets('prototip modu: katalogdan açılır, oturumsuz kabuğa girer', (
+    tester,
+  ) async {
+    final phase = ValueNotifier(AppPhase.unbound);
+    final prototype = ValueNotifier(false);
+    addTearDown(phase.dispose);
+    addTearDown(prototype.dispose);
+    final router = await pumpRouter(
+      tester,
+      phase,
+      devCatalog: true,
+      devPrototype: prototype,
+    );
+    router.go('/tasks');
+    await tester.pump();
+    await tester.pump();
+    expect(_location(router), '/server');
+    router.go(catalogPath);
+    await tester.pump();
+    await tester.pump();
+    await tester.tap(find.text('Prototype'));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(prototype.value, isTrue);
+    expect(_location(router), '/home');
+    router.go('/tasks');
+    await tester.pump();
+    await tester.pump();
+    expect(_location(router), '/tasks');
+    await tester.pump(const Duration(seconds: 1));
   });
 }

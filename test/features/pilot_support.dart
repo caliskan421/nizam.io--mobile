@@ -9,10 +9,12 @@ import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations.dart';
 import 'package:nizamio/core/network/connectivity_monitor.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/ui/page/nz_app_nav.dart';
 
 import '../core/ui/widgets/feedback/feedback_test_support.dart';
 import '../support/fake_backend.dart';
 import '../support/harness.dart';
+import '../support/recording_app_nav.dart';
 import '../support/screen_matrix.dart';
 
 /// Sertifika doğrulanamadı (TLS): dio `badCertificate` istisnası.
@@ -146,6 +148,7 @@ Future<void> pumpScreen(
   Harness h,
   Widget page, {
   bool dark = false,
+  NzAppNav? nav,
 }) async {
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -160,7 +163,7 @@ Future<void> pumpScreen(
           locale: const Locale('tr'),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: testLocalizationDelegates,
-          home: page,
+          home: NzAppNavScope(nav: nav ?? RecordingAppNav(), child: page),
         ),
       ),
     ),
@@ -169,9 +172,10 @@ Future<void> pumpScreen(
 }
 
 /// Eşzamansız işlerin (sahte ağ, durum yayını, geçişler) oturması için: gerçek zaman dilimi
-/// (sahte HTTP bağdaştırıcısı akışları gerçek mikro görevlerle ilerler) + birkaç kare.
+/// (sahte HTTP bağdaştırıcısı akışları gerçek mikro görevlerle ilerler) + birkaç kare. Toplam
+/// kare süresi en uzun rota geçişini (`NizamioMotion.durSheet`) aşar.
 Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 4; i++) {
+  for (var i = 0; i < 6; i++) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 20)),
     );

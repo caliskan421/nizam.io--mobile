@@ -45,6 +45,8 @@ rol eşlemesinin gerekçesini ve tasarım kaynaklarındaki çelişkileri kaydede
 | glassBar / glassFloat / glassMenu / glassEdge / glassInk / glassInkFaint | glass-* | üst çubuk, alt menü + asistan + menü dairesi, flyout (`NzGlass`) |
 | navHighlight / scrimSoft | nav-highlight / scrim-soft | alt menü vurgusu, flyout örtüsü |
 | roleAdmin / roleCoordinator / roleMember | role-admin / role-koord / role-uye | rol işaret noktası (görünüm rengi; yetki kuralı değil) |
+| avatar1…avatar5 / onAvatar | avatar-1…5 / on-avatar | kişi avatarı renk sırası (`NzAvatar` `tone`, `NzAvatar.toneOf`); iki temada aynı |
+| switchKnob | switch-knob | anahtar başı (`NzToggle`); iki temada beyaz |
 
 Metin rolleri (`NzTextStyles`): displayLg `m-greet`, titleLg `m-h1`, titleMd `m-h1-detail`,
 titleSm `m-sheet-title`, labelLg `m-card-title`, bodyLg `m-input`, bodyMd `m-body`, labelMd `m-tab`,
@@ -100,6 +102,17 @@ Prototipin "son girilen modül" üçüncü alt menü öğesi yerine, modül ekra
 (çıkış) sekmesi kalır; çekmecede de çıkış vardır. Diğer ekranlara özgü eksikler (sohbet balonu,
 hap sekme başparmağı, zaman çizelgesi `gp-*` renkleri, klasör camı, alt sayfa form satırları,
 `m-sh-knob`) bu çalışmada eşlenmedi.
+
+## Prototip kiti (2026-10-29)
+
+Ekranların ortak bileşenleri (`NzTopBar.detail`, `NzPageHeader`, `NzIconButton.circle/circleAccent`,
+`NzPillTabs`, `NzFormRows`, `NzReveal`, `NzToggle`, `NzStatusLabel`/`NzTone`, `NzTaskCard`,
+`NzAvatarStack`, `NzKicker`; alt sayfa, anahtar, arama alanı ve toast prototip biçimine geçti).
+Yeni renk rolleri yukarıda; `make gen` tek koşum, yalnız `tokens.gen.dart` değişti. Kontrast:
+hap sekme sayacı ve durum kelimesi `ink-faint` / ton rengi yerine `ink-muted` / `ink` (renk
+noktada); toast ton rengi yalnız ikonda (karşı temanın `accent-text` / `danger` rengi).
+Token'ı olmayan prototip geometrisi (anahtar 50×30, tutamak 36×4, öncelik çubukları) bileşen
+içinde yorumlu sabittir. Golden referansları bu bileşenler için eskidir (Linux `golden-update`).
 
 ## Açık kararlar (tasarım/ürün sahibi)
 

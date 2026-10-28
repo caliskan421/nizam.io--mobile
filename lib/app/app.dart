@@ -8,8 +8,10 @@ import '../core/config/flavor.dart';
 import '../core/i18n/generated/app_localizations.dart';
 import '../core/providers.dart';
 import '../core/security/privacy_mask.dart';
+import '../core/ui/page/nz_app_nav.dart';
 import '../core/ui/theme/app_theme.dart';
 import 'dev/catalog_entry_button.dart';
+import 'router/app_nav.dart';
 import 'router/router.dart';
 import 'router/shell.dart' show openDevCatalog;
 
@@ -26,10 +28,15 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
   late final ValueNotifier<AppPhase> _phase = ValueNotifier(
     ref.read(appPhaseProvider),
   );
+  // Prototip modu yalnız dev flavor'da vardır (katalogdan açılır; prod'da null).
+  late final ValueNotifier<bool>? _prototype =
+      ref.read(flavorProvider) == Flavor.dev ? ValueNotifier(false) : null;
   late final GoRouter _router = createRouter(
     _phase,
     devCatalog: ref.read(flavorProvider) == Flavor.dev,
+    devPrototype: _prototype,
   );
+  late final NzAppNav _nav = GoRouterAppNav(_router, ref);
   final PrivacyMaskController _mask = PrivacyMaskController();
   final ThemeData _light = AppTheme.light();
   final ThemeData _dark = AppTheme.dark();
@@ -38,6 +45,7 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
   void dispose() {
     _router.dispose();
     _phase.dispose();
+    _prototype?.dispose();
     _mask.dispose();
     super.dispose();
   }
@@ -76,9 +84,12 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       routerConfig: _router,
-      builder: (context, child) => PrivacyMask(
-        controller: _mask,
-        child: _withDevEntry(child ?? const SizedBox.shrink()),
+      builder: (context, child) => NzAppNavScope(
+        nav: _nav,
+        child: PrivacyMask(
+          controller: _mask,
+          child: _withDevEntry(child ?? const SizedBox.shrink()),
+        ),
       ),
     );
   }

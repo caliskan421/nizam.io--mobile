@@ -45,43 +45,6 @@ class HomeGrid extends StatelessWidget {
   );
 }
 
-/// Küçük harfli mono bölüm etiketi + isteğe bağlı sağ açıklama.
-class HomeKicker extends StatelessWidget {
-  const HomeKicker(this.label, {super.key, this.trailing});
-
-  final String label;
-  final String? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final trailing = this.trailing;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: [
-        Semantics(
-          header: true,
-          child: Text(
-            label,
-            style: context.text.kicker.copyWith(color: c.textMuted),
-          ),
-        ),
-        if (trailing != null) ...[
-          const Gap(NizamioSpacing.space3),
-          Expanded(
-            child: Text(
-              trailing,
-              textAlign: TextAlign.end,
-              style: context.text.caption.copyWith(color: c.textMuted),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
 /// Karşılama: tarih + "Merhaba" ve ad (ad tek satırda kesilir; tam ad okuyucuda).
 class HomeGreeting extends StatelessWidget {
   const HomeGreeting({super.key, required this.name, required this.today});
@@ -218,7 +181,7 @@ class HomeQuickActions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        HomeKicker(l.uiHomeQuickActions),
+        NzKicker(l.uiHomeQuickActions),
         const Gap(NizamioSpacing.gapMd),
         HomeGrid(
           columns: 4,
@@ -298,7 +261,7 @@ class HomeTeam extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        HomeKicker(l.uiHomeTeam, trailing: l.teamSummary(dashboard)),
+        NzKicker(l.uiHomeTeam, trailing: l.teamSummary(dashboard)),
         const Gap(NizamioSpacing.gapMd),
         HomeGrid(
           columns: 3,

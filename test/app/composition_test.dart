@@ -28,6 +28,7 @@ import 'package:nizamio/core/storage/preference_store.dart';
 import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/features/identity/identity.dart';
 import 'package:nizamio/features/scope/scope.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../support/fake_backend.dart';
 import '../support/harness.dart';
@@ -94,6 +95,7 @@ final portProviders = <String, ProviderBase<Object?>>{
   'identityServiceProvider': identityServiceProvider,
   'scopeServiceProvider': scopeServiceProvider,
   'homeDashboardRepositoryProvider': homeDashboardRepositoryProvider,
+  'taskCatalogRepositoryProvider': taskCatalogRepositoryProvider,
 };
 
 const compositionPath = 'lib/app/di/composition.dart';

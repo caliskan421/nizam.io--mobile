@@ -216,4 +216,113 @@ void main() {
       );
     },
   );
+
+  group('prototip biçimi', () {
+    Future<void> openWith(
+      WidgetTester tester, {
+      String? description,
+      bool expandable = false,
+      bool withActions = true,
+      List<String>? log,
+    }) async {
+      await tester.pumpWidget(
+        testApp(
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                final r = await NzBottomSheet.show<String>(
+                  context,
+                  title: 'Yeni görev',
+                  description: description,
+                  expandable: expandable,
+                  actions: withActions
+                      ? (sheet) => [
+                          TextButton(
+                            onPressed: () => Navigator.of(sheet).pop(),
+                            child: const Text('Vazgeç'),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.of(sheet).pop('oluştu'),
+                            child: const Text('Oluştur'),
+                          ),
+                        ]
+                      : null,
+                  builder: (_) => const Text('gövde'),
+                );
+                log?.add('$r');
+              },
+              child: const Text('aç'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('aç'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('açıklama ve alt eylem satırı (1:2); eylem sonucu döner', (
+      tester,
+    ) async {
+      final log = <String>[];
+      await openWith(tester, description: 'Kısa açıklama', log: log);
+      expect(find.text('Kısa açıklama'), findsOneWidget);
+      final cancel = tester.getSize(find.text('Vazgeç').hitTestable());
+      expect(cancel, isNotNull);
+      final w1 = tester.getSize(find.byType(TextButton).last).width;
+      final w2 = tester.getSize(find.byType(FilledButton)).width;
+      expect(w2, greaterThan(w1 * 1.5));
+      await tester.tap(find.text('Oluştur'));
+      await tester.pumpAndSettle();
+      expect(log, ['oluştu']);
+    });
+
+    testWidgets('başlık m-sheet-title; zemin surface; tutamak border-control', (
+      tester,
+    ) async {
+      await openWith(tester);
+      final ctx = tester.element(find.text('Yeni görev'));
+      final title = tester.widget<Text>(find.text('Yeni görev'));
+      expect(title.style!.fontSize, NizamioTypography.sheetTitle.size);
+      expect(
+        find.descendant(
+          of: find.byType(NzBottomSheetContent),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is DecoratedBox &&
+                (w.decoration as BoxDecoration?)?.color ==
+                    NizamioColors.light.borderControl,
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(ctx, isNotNull);
+    });
+
+    testWidgets('expandable: tutamak genişletir/daraltır (anlamsal durum)', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await openWith(tester, expandable: true, withActions: false);
+      final h0 = tester.getSize(find.byType(NzBottomSheetContent)).height;
+      await tester.tap(find.bySemanticsLabel('Genişlet'));
+      await tester.pumpAndSettle();
+      final h1 = tester.getSize(find.byType(NzBottomSheetContent)).height;
+      expect(h1, greaterThan(h0));
+      expect(find.bySemanticsLabel('Daralt'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Daralt'));
+      await tester.pumpAndSettle();
+      expect(tester.getSize(find.byType(NzBottomSheetContent)).height, h0);
+      handle.dispose();
+    });
+
+    testWidgets('360 / 2.0 metin, eylemli: taşma yok', (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(compactWidth, 640);
+      addTearDown(tester.view.reset);
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await openWith(tester, description: 'Uzun bir açıklama metni burada');
+      expect(tester.takeException(), isNull);
+    });
+  });
 }

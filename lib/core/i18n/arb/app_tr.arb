@@ -761,6 +761,18 @@
   "@errClientUpdateRequired": {
     "description": "client.update_required"
   },
+  "uiActivityTitle": "İşlem geçmişi",
+  "@uiActivityTitle": {
+    "description": "ui.activity.title"
+  },
+  "uiArchiveTitle": "Arşiv",
+  "@uiArchiveTitle": {
+    "description": "ui.archive.title"
+  },
+  "uiArchiveFolderTitle": "Klasör",
+  "@uiArchiveFolderTitle": {
+    "description": "ui.archive.folder_title"
+  },
   "uiButtonsBusy": "Meşgul",
   "@uiButtonsBusy": {
     "description": "ui.buttons.busy"
@@ -780,6 +792,14 @@
   "uiCommonClose": "Kapat",
   "@uiCommonClose": {
     "description": "ui.common.close"
+  },
+  "uiCoordTitle": "Koordinatörlükler",
+  "@uiCoordTitle": {
+    "description": "ui.coord.title"
+  },
+  "uiCoordDetailTitle": "Koordinatörlük",
+  "@uiCoordDetailTitle": {
+    "description": "ui.coord.detail_title"
   },
   "uiFeedbackLoading": "Yükleniyor",
   "@uiFeedbackLoading": {
@@ -1273,17 +1293,17 @@
   "@uiListsTruncated": {
     "description": "ui.lists.truncated"
   },
+  "uiMessagesTitle": "Mesajlar",
+  "@uiMessagesTitle": {
+    "description": "ui.messages.title"
+  },
+  "uiMessagesChatTitle": "Sohbet",
+  "@uiMessagesChatTitle": {
+    "description": "ui.messages.chat_title"
+  },
   "uiRouterTabHome": "Ana sayfa",
   "@uiRouterTabHome": {
     "description": "ui.router.tab_home"
-  },
-  "uiRouterTabWork": "Görevler",
-  "@uiRouterTabWork": {
-    "description": "ui.router.tab_work"
-  },
-  "uiRouterTabProfile": "Profil",
-  "@uiRouterTabProfile": {
-    "description": "ui.router.tab_profile"
   },
   "uiRouterNavLabel": "Ana gezinme",
   "@uiRouterNavLabel": {
@@ -1308,10 +1328,6 @@
   "uiRouterPageScope": "Kapsam seçimi",
   "@uiRouterPageScope": {
     "description": "ui.router.page_scope"
-  },
-  "uiRouterPageDetail": "Ayrıntı",
-  "@uiRouterPageDetail": {
-    "description": "ui.router.page_detail"
   },
   "uiRouterPlaceholder": "Bu ekran henüz hazır değil.",
   "@uiRouterPlaceholder": {
@@ -1344,6 +1360,26 @@
   "uiRouterAssistantSoon": "Asistan mobilde sonraki adımda eklenecek",
   "@uiRouterAssistantSoon": {
     "description": "ui.router.assistant_soon"
+  },
+  "uiRouterTabHistory": "Geçmiş",
+  "@uiRouterTabHistory": {
+    "description": "ui.router.tab_history"
+  },
+  "uiRouterTabTasks": "Görevler",
+  "@uiRouterTabTasks": {
+    "description": "ui.router.tab_tasks"
+  },
+  "uiRouterTabCoordinatorships": "Koordinatörlükler",
+  "@uiRouterTabCoordinatorships": {
+    "description": "ui.router.tab_coordinatorships"
+  },
+  "uiRouterTabArchive": "Arşiv",
+  "@uiRouterTabArchive": {
+    "description": "ui.router.tab_archive"
+  },
+  "uiRouterTabMessages": "Mesajlar",
+  "@uiRouterTabMessages": {
+    "description": "ui.router.tab_messages"
   },
   "uiScopeTitle": "Program seçimi",
   "@uiScopeTitle": {
@@ -1416,5 +1452,17 @@
   "uiServerUpdateRecheck": "Yeniden denetle",
   "@uiServerUpdateRecheck": {
     "description": "ui.server.update_recheck"
+  },
+  "uiTasksTitle": "Görevler",
+  "@uiTasksTitle": {
+    "description": "ui.tasks.title"
+  },
+  "uiTasksDetailTitle": "Görev",
+  "@uiTasksDetailTitle": {
+    "description": "ui.tasks.detail_title"
+  },
+  "uiTimelineTitle": "Zaman çizelgesi",
+  "@uiTimelineTitle": {
+    "description": "ui.timeline.title"
   }
 }

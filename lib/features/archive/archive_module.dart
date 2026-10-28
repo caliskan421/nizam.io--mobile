@@ -1,0 +1,8 @@
+import 'package:flutter_riverpod/misc.dart';
+import 'package:get_it/get_it.dart';
+
+/// archive modülünün kayıt fonksiyonu (ADR-0001). YALNIZ bileşim kökünden çağrılır (G2).
+void registerArchiveModule(GetIt locator) {}
+
+/// archive'in Riverpod portlarını get_it örnekleriyle bağlar.
+List<Override> archiveOverrides(GetIt locator) => const [];

@@ -49,6 +49,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     required this.roleAdmin,
     required this.roleCoordinator,
     required this.roleMember,
+    required this.avatar1,
+    required this.avatar2,
+    required this.avatar3,
+    required this.avatar4,
+    required this.avatar5,
+    required this.onAvatar,
+    required this.switchKnob,
   });
 
   final Color background;
@@ -91,6 +98,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
   final Color roleAdmin;
   final Color roleCoordinator;
   final Color roleMember;
+  final Color avatar1;
+  final Color avatar2;
+  final Color avatar3;
+  final Color avatar4;
+  final Color avatar5;
+  final Color onAvatar;
+  final Color switchKnob;
 
   static const light = NizamioColors(
     background: Color(0xFFF6F6F3),
@@ -133,6 +147,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     roleAdmin: Color(0xFFE57A9A),
     roleCoordinator: Color(0xFF74C27A),
     roleMember: Color(0xFF73A9E3),
+    avatar1: Color(0xFFC8F53C),
+    avatar2: Color(0xFFB39DFF),
+    avatar3: Color(0xFFFFD166),
+    avatar4: Color(0xFF6EC1FF),
+    avatar5: Color(0xFFFF8A65),
+    onAvatar: Color(0xFF121212),
+    switchKnob: Color(0xFFFFFFFF),
   );
 
   static const dark = NizamioColors(
@@ -176,6 +197,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     roleAdmin: Color(0xFFE57A9A),
     roleCoordinator: Color(0xFF74C27A),
     roleMember: Color(0xFF73A9E3),
+    avatar1: Color(0xFFC8F53C),
+    avatar2: Color(0xFFB39DFF),
+    avatar3: Color(0xFFFFD166),
+    avatar4: Color(0xFF6EC1FF),
+    avatar5: Color(0xFFFF8A65),
+    onAvatar: Color(0xFF121212),
+    switchKnob: Color(0xFFFFFFFF),
   );
 
   @override
@@ -220,6 +248,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     Color? roleAdmin,
     Color? roleCoordinator,
     Color? roleMember,
+    Color? avatar1,
+    Color? avatar2,
+    Color? avatar3,
+    Color? avatar4,
+    Color? avatar5,
+    Color? onAvatar,
+    Color? switchKnob,
   }) {
     return NizamioColors(
       background: background ?? this.background,
@@ -262,6 +297,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       roleAdmin: roleAdmin ?? this.roleAdmin,
       roleCoordinator: roleCoordinator ?? this.roleCoordinator,
       roleMember: roleMember ?? this.roleMember,
+      avatar1: avatar1 ?? this.avatar1,
+      avatar2: avatar2 ?? this.avatar2,
+      avatar3: avatar3 ?? this.avatar3,
+      avatar4: avatar4 ?? this.avatar4,
+      avatar5: avatar5 ?? this.avatar5,
+      onAvatar: onAvatar ?? this.onAvatar,
+      switchKnob: switchKnob ?? this.switchKnob,
     );
   }
 
@@ -309,6 +351,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       roleAdmin: Color.lerp(roleAdmin, other.roleAdmin, t)!,
       roleCoordinator: Color.lerp(roleCoordinator, other.roleCoordinator, t)!,
       roleMember: Color.lerp(roleMember, other.roleMember, t)!,
+      avatar1: Color.lerp(avatar1, other.avatar1, t)!,
+      avatar2: Color.lerp(avatar2, other.avatar2, t)!,
+      avatar3: Color.lerp(avatar3, other.avatar3, t)!,
+      avatar4: Color.lerp(avatar4, other.avatar4, t)!,
+      avatar5: Color.lerp(avatar5, other.avatar5, t)!,
+      onAvatar: Color.lerp(onAvatar, other.onAvatar, t)!,
+      switchKnob: Color.lerp(switchKnob, other.switchKnob, t)!,
     );
   }
 }

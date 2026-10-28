@@ -62,8 +62,8 @@ void main() {
     await tester.tap(find.text('Bildirim'));
     await tester.pump();
     expect(values, [true]);
-    expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
-    await tester.tap(find.byType(Switch));
+    expect(tester.widget<NzToggle>(find.byType(NzToggle)).value, isTrue);
+    await tester.tap(find.byType(NzToggle));
     await tester.pump();
     expect(values, [true, false]);
   });
@@ -74,7 +74,7 @@ void main() {
     );
     await tester.tap(find.text('K'));
     await tester.pump();
-    expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+    expect(tester.widget<NzToggle>(find.byType(NzToggle)).value, isFalse);
   });
 
   testWidgets('satır >= 48; açıklama ve leading çizilir', (tester) async {
@@ -92,7 +92,7 @@ void main() {
         ),
       );
       expect(
-        tester.getSize(find.byType(SwitchListTile)).height,
+        tester.getSize(find.byType(NzSwitch)).height,
         greaterThanOrEqualTo(NizamioSpacing.space12),
         reason: size.name,
       );
@@ -106,9 +106,77 @@ void main() {
     await tester.pumpWidget(
       testApp(NzSwitch(label: 'Bildirim', value: true, onChanged: (_) {})),
     );
-    final node = tester.getSemantics(find.byType(SwitchListTile));
+    final node = tester.getSemantics(find.byType(NzSwitch));
     expect(node.label, contains('Bildirim'));
     expect(node.getSemanticsData().flagsCollection.isToggled, Tristate.isTrue);
+    handle.dispose();
+  });
+
+  testWidgets(
+    'NzToggle: ray açık accent / kapalı overlay, baş switchKnob; >= 48',
+    (tester) async {
+      for (final dark in [false, true]) {
+        final c = dark ? NizamioColors.dark : NizamioColors.light;
+        for (final on in [true, false]) {
+          await tester.pumpWidget(
+            testApp(
+              Center(
+                child: NzToggle(value: on, onChanged: (_) {}),
+              ),
+              dark: dark,
+            ),
+          );
+          await tester.pumpAndSettle();
+          final track = tester.widget<AnimatedContainer>(
+            find.descendant(
+              of: find.byType(NzToggle),
+              matching: find.byType(AnimatedContainer),
+            ),
+          );
+          expect(
+            (track.decoration! as BoxDecoration).color,
+            on ? c.primary : c.surfaceOverlay,
+          );
+          final knob = tester.widget<DecoratedBox>(
+            find
+                .descendant(
+                  of: find.byType(NzToggle),
+                  matching: find.byType(DecoratedBox),
+                )
+                .last,
+          );
+          expect((knob.decoration as BoxDecoration).color, c.switchKnob);
+          final size = tester.getSize(find.byType(NzToggle));
+          expect(size.width, greaterThanOrEqualTo(NizamioSpacing.space12));
+          expect(size.height, greaterThanOrEqualTo(NizamioSpacing.space12));
+        }
+      }
+    },
+  );
+
+  testWidgets('NzToggle: etiketliyse anahtar düğümü, değilse gizli', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    var v = false;
+    await tester.pumpWidget(
+      testApp(
+        StatefulBuilder(
+          builder: (context, setState) => NzToggle(
+            value: v,
+            semanticLabel: 'Kanıt',
+            onChanged: (x) => setState(() => v = x),
+          ),
+        ),
+      ),
+    );
+    final node = tester.getSemantics(find.byType(NzToggle));
+    expect(node.label, 'Kanıt');
+    await tester.tap(find.byType(NzToggle));
+    await tester.pumpAndSettle();
+    expect(v, isTrue);
+    await tester.pumpWidget(testApp(NzToggle(value: false, onChanged: (_) {})));
+    expect(find.bySemanticsLabel('Kanıt'), findsNothing);
     handle.dispose();
   });
 

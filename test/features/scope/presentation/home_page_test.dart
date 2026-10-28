@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/errors/error_text.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
@@ -15,24 +14,13 @@ import 'package:nizamio/core/ui/widgets/surfaces/nz_kpi_tile.dart';
 import 'package:nizamio/features/scope/presentation/home_page.dart';
 
 import '../../../support/harness.dart';
+import '../../../support/recording_app_nav.dart';
 import '../../../support/screen_matrix.dart';
 import '../../pilot_support.dart';
 
 final _l = AppLocalizationsTr();
 
-/// Gezinme çağrılarını kaydeder.
-class _Nav {
-  final calls = <String>[];
-
-  HomeNavigation get navigation => HomeNavigation(
-    openTasks: () => calls.add('tasks'),
-    openTask: (code) => calls.add('task:$code'),
-    openCoordinatorship: (code) => calls.add('coord:$code'),
-    openProfile: () => calls.add('profile'),
-  );
-}
-
-Future<(Harness, _Nav)> _open(
+Future<(Harness, RecordingAppNav)> _open(
   WidgetTester tester, {
   PilotBackend? backend,
   String program = 'prog-2',
@@ -42,8 +30,8 @@ Future<(Harness, _Nav)> _open(
     () => pilotHarness(backend ?? PilotBackend(), signedIn: true),
   );
   h.read(scopeControllerProvider).selectProgram(program);
-  final nav = _Nav();
-  await pumpScreen(tester, h, HomePage(navigation: nav.navigation));
+  final nav = RecordingAppNav();
+  await pumpScreen(tester, h, const HomePage(), nav: nav);
   await settle(tester);
   return (h, nav);
 }
@@ -87,7 +75,7 @@ void main() {
           ? errorBody(403, 'program.not_authorized')
           : backend.handle(r);
       h.read(scopeControllerProvider).selectProgram('prog-1');
-      await pumpScreen(tester, h, HomePage(navigation: _Nav().navigation));
+      await pumpScreen(tester, h, const HomePage());
       await settle(tester);
       expect(
         find.text(errorText(_l, ApiError('program.not_authorized'))),
@@ -152,15 +140,14 @@ void main() {
   );
 
   testWidgets(
-    'hızlı işlem alt sayfası açılır ve kapanır; rapor yer tutucu bildirimi',
+    'hızlı işlem alt sayfası (görevler feature) açılır ve kapanır; rapor yer tutucu',
     (tester) async {
       await _open(tester);
       await _tapVisible(tester, find.text(_l.uiHomeQaMeeting));
       expect(find.text(_l.uiHomeQaMeetingLong), findsOneWidget);
-      expect(find.text(_l.uiHomeFormSoon), findsOneWidget);
-      await tester.tap(find.text(_l.uiCommonClose).last);
+      await tester.tapAt(const Offset(10, 10));
       await settle(tester);
-      expect(find.text(_l.uiHomeFormSoon), findsNothing);
+      expect(find.text(_l.uiHomeQaMeetingLong), findsNothing);
       await _tapVisible(tester, find.text(_l.uiHomeQaReport));
       expect(
         find.text('${_l.uiHomeQaReportLong} ${_l.uiHomeSoonTail}'),
@@ -187,31 +174,14 @@ void main() {
     },
   );
 
-  testWidgets('çekmece: modül yer tutucusu, görevler, kapsam değiştirme', (
+  testWidgets('menü dairesi uygulama menüsünü, geçmiş kartı geçmişi açar', (
     tester,
   ) async {
-    final (h, nav) = await _open(tester, program: 'prog-1');
-    Future<void> openDrawer() async {
-      await tester.tap(find.byIcon(Icons.menu_rounded));
-      await settle(tester);
-    }
-
-    await openDrawer();
-    await tester.tap(find.text(_l.uiHomeModuleCalendar));
+    final (_, nav) = await _open(tester);
+    await tester.tap(find.byIcon(Icons.menu_rounded));
     await settle(tester);
-    expect(
-      find.text('${_l.uiHomeModuleCalendar} ${_l.uiHomeSoonTail}'),
-      findsOneWidget,
-    );
-    await openDrawer();
-    await tester.tap(find.text(_l.uiHomeModuleTasks));
-    await settle(tester);
-    expect(nav.calls, ['tasks']);
-    await openDrawer();
-    await tester.tap(find.textContaining(_l.uiScopeHomeChange));
-    await settle(tester);
-    expect(h.read(scopeStateProvider).hasProgram, isFalse);
-    expect(h.read(appPhaseProvider), AppPhase.sessionOpen);
+    await _tapVisible(tester, find.text(_l.uiHomeHistoryTitle));
+    expect(nav.calls, ['menu', 'history']);
   });
 
   for (final (width, scale) in [(360.0, 1.0), (360.0, 2.0), (390.0, 2.0)]) {
@@ -229,12 +199,7 @@ void main() {
             () => pilotHarness(PilotBackend(), signedIn: true),
           );
           h.read(scopeControllerProvider).selectProgram('prog-2');
-          await pumpScreen(
-            tester,
-            h,
-            HomePage(navigation: _Nav().navigation),
-            dark: dark,
-          );
+          await pumpScreen(tester, h, const HomePage(), dark: dark);
           await settle(tester);
           final scrollable = find.byType(Scrollable).first;
           for (var i = 0; i < 12; i++) {

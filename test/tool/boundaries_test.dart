@@ -983,7 +983,7 @@ void main() {
   });
 
   test(
-    'izinler kapalıyken ham ölçüm: U2=95, U3 TextStyle=0, google_fonts=2',
+    'izinler kapalıyken ham ölçüm: U2=109, U3 TextStyle=0, google_fonts=2',
     () {
       final raw = <Violation>[];
       for (final f in Directory(
@@ -999,11 +999,11 @@ void main() {
         );
       }
       int count(String rule) => raw.where((v) => v.rule == rule).length;
-      // tokens.gen.dart 94 (40 rol × 2 mod + 12 tasarım gölgesi + 2 mobil kart gölgesi katmanı;
-      // ADR-0003 karar 24, ana sayfa rolleri) + privacy_mask.dart 1.
+      // tokens.gen.dart 108 (47 rol × 2 mod + 12 tasarım gölgesi + 2 mobil kart gölgesi
+      // katmanı; ADR-0003 karar 24, ana sayfa + prototip kit rolleri) + privacy_mask.dart 1.
       expect(
         count('U2'),
-        95,
+        109,
         reason: raw.where((v) => v.rule == 'U2').join('\n'),
       );
       expect(

@@ -13,8 +13,14 @@ import '../../core/server/server_binding.dart';
 import '../../core/session/session_controller.dart';
 import '../../core/storage/preference_store.dart';
 import '../../core/storage/secure_store.dart';
+import '../../features/activity/activity_module.dart';
+import '../../features/archive/archive_module.dart';
+import '../../features/coordinatorships/coordinatorships_module.dart';
 import '../../features/identity/identity_module.dart';
+import '../../features/messages/messages_module.dart';
 import '../../features/scope/scope_module.dart';
+import '../../features/tasks/tasks_module.dart';
+import '../../features/timeline/timeline_module.dart';
 import 'dependencies.dart';
 
 /// Bileşim kökü: get_it nesne grafiği + onu Riverpod portlarına bağlayan ProviderContainer.
@@ -53,6 +59,12 @@ class Composition {
       apiDio: () => container.read(apiDioProvider),
     );
     registerScopeModule(locator, apiDio: () => container.read(apiDioProvider));
+    registerActivityModule(locator);
+    registerArchiveModule(locator);
+    registerCoordinatorshipsModule(locator);
+    registerMessagesModule(locator);
+    registerTasksModule(locator);
+    registerTimelineModule(locator);
     container = ProviderContainer(
       // Otomatik yeniden deneme YOK (A3 / CLAUDE.md): Riverpod 3 varsayılanı hata veren
       // sağlayıcıyı kendiliğinden yeniden çalıştırır; yeniden deneme yalnız kullanıcı dokunuşuyla.
@@ -78,6 +90,12 @@ class Composition {
         ),
         ...identityOverrides(locator),
         ...scopeOverrides(locator),
+        ...activityOverrides(locator),
+        ...archiveOverrides(locator),
+        ...coordinatorshipsOverrides(locator),
+        ...messagesOverrides(locator),
+        ...tasksOverrides(locator),
+        ...timelineOverrides(locator),
       ],
     );
     return Composition._(locator, container);

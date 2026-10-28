@@ -13,11 +13,20 @@ import '../surfaces/nz_glass.dart';
 /// Alt menü öğesi: ikon, etiket ve etkinken görünen mono alt yazı.
 @immutable
 class NzNavItem {
-  const NzNavItem({required this.icon, required this.label, this.caption});
+  const NzNavItem({
+    required this.icon,
+    required this.label,
+    this.caption,
+    this.wide = false,
+  });
 
   final IconData icon;
   final String label;
   final String? caption;
+
+  /// Uzun etiket (ör. "Koordinatörlükler"): etkinken öğe daha çok genişler, diğerleri daralır,
+  /// etiket bir punto küçülür (prototip `longSlot`).
+  final bool wide;
 }
 
 /// Kapsülün sağındaki ayrı cam daire (asistan).
@@ -67,6 +76,9 @@ class NzFloatingNav extends StatelessWidget {
   static const _itemW = NizamioSize.tap + NizamioSpacing.rowPad;
   static const _activeMax = 142.0;
   static const _activeMin = 96.0;
+  // Uzun etiketli öğe etkinken: kapalı öğeler 48, etkin en çok 174 (prototip [48, 48, 174]).
+  static const _itemWideMode = NizamioSpacing.space12;
+  static const _activeMaxWide = 174.0;
 
   /// Gövdenin altta ayırması gereken yükseklik (kapsül + alt boşluk + güvenli alan).
   static double reservedHeight(BuildContext context) =>
@@ -96,10 +108,12 @@ class NzFloatingNav extends StatelessWidget {
                   (action == null
                       ? 0
                       : NizamioSize.nav + NizamioSpacing.space3);
-              final fixed = 2 * _pad + (items.length - 1) * (_itemW + _pad);
+              final wide = items[currentIndex].wide;
+              final itemW = wide ? _itemWideMode : _itemW;
+              final fixed = 2 * _pad + (items.length - 1) * (itemW + _pad);
               final active = math.max(
                 _activeMin,
-                math.min(_activeMax, room - fixed),
+                math.min(wide ? _activeMaxWide : _activeMax, room - fixed),
               );
               return Row(
                 children: [
@@ -107,6 +121,7 @@ class NzFloatingNav extends StatelessWidget {
                     items: items,
                     current: currentIndex,
                     activeWidth: active,
+                    itemWidth: itemW,
                     onSelect: onSelect,
                     semanticLabel: semanticLabel,
                   ),
@@ -127,6 +142,7 @@ class _Capsule extends StatelessWidget {
     required this.items,
     required this.current,
     required this.activeWidth,
+    required this.itemWidth,
     required this.onSelect,
     required this.semanticLabel,
   });
@@ -134,6 +150,7 @@ class _Capsule extends StatelessWidget {
   final List<NzNavItem> items;
   final int current;
   final double activeWidth;
+  final double itemWidth;
   final ValueChanged<int> onSelect;
   final String semanticLabel;
 
@@ -143,7 +160,7 @@ class _Capsule extends StatelessWidget {
     const pad = NzFloatingNav._pad;
     final widths = [
       for (var i = 0; i < items.length; i++)
-        i == current ? activeWidth : NzFloatingNav._itemW,
+        i == current ? activeWidth : itemWidth,
     ];
     final xs = <double>[];
     var x = pad;
@@ -270,7 +287,12 @@ class _NavButton extends StatelessWidget {
                           maxLines: 1,
                           softWrap: false,
                           overflow: TextOverflow.ellipsis,
-                          style: t.navLabel.copyWith(color: c.glassInk),
+                          style: t.navLabel.copyWith(
+                            color: c.glassInk,
+                            fontSize: item.wide
+                                ? t.caption.fontSize
+                                : t.navLabel.fontSize,
+                          ),
                         ),
                         if (caption != null)
                           Text(

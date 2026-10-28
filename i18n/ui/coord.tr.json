@@ -1,0 +1,7 @@
+{
+  "$comment": "Koordinatörlük listesi ve ayrıntısı metinleri (features/coordinatorships). ELLE yazılır; make gen ARB'ye birleştirir. Yer tutucu ({ }) yasak: sayılı cümleler parça parça yazılıp sunumda birleştirilir.",
+  "texts": {
+    "ui.coord.title": "Koordinatörlükler",
+    "ui.coord.detail_title": "Koordinatörlük"
+  }
+}

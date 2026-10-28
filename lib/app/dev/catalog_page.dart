@@ -13,13 +13,13 @@ const _previewWidths = <double>[360, 700, 1024];
 /// Bileşen kataloğu (yalnız dev flavor, `/dev/catalog`): bütün giriş × açık/koyu × genişlik ×
 /// metin ölçeği. Geliştirici aracıdır; etiketler ARB'ye girmez.
 class CatalogPage extends StatefulWidget {
-  const CatalogPage({super.key, this.entries, this.onOpenHomePreview});
+  const CatalogPage({super.key, this.entries, this.onOpenPrototype});
 
   /// null → [allCatalogEntries] (testler kendi girişini verir).
   final List<CatalogEntry>? entries;
 
-  /// Ana sayfa önizlemesini açar (`/dev/home`); null → düğme yok.
-  final VoidCallback? onOpenHomePreview;
+  /// Prototip modunu açar (oturumsuz, örnek verili ekranlar); null → düğme yok.
+  final VoidCallback? onOpenPrototype;
 
   @override
   State<CatalogPage> createState() => _CatalogPageState();
@@ -52,8 +52,8 @@ class _CatalogPageState extends State<CatalogPage> {
       appBar: AppBar(
         title: const Text('Catalog'),
         actions: [
-          if (widget.onOpenHomePreview case final open?)
-            TextButton(onPressed: open, child: const Text('Home preview')),
+          if (widget.onOpenPrototype case final open?)
+            TextButton(onPressed: open, child: const Text('Prototype')),
         ],
       ),
       body: Column(

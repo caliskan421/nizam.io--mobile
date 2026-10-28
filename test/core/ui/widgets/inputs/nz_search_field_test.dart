@@ -101,15 +101,44 @@ void main() {
     expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
   });
 
-  testWidgets('dokunma alanı her boyutta >= 48', (tester) async {
+  testWidgets('dokunma alanı her boyutta >= 48; görsel hap 44', (tester) async {
     for (final size in NzSize.values) {
       await tester.pumpWidget(testApp(NzSearchField(size: size)));
       expect(
-        tester.getSize(find.byType(TextField)).height,
+        tester.getSize(find.byType(NzSearchField)).height,
         greaterThanOrEqualTo(NizamioSpacing.space12),
         reason: size.name,
       );
+      expect(
+        tester.getSize(find.byType(TextField)).height,
+        moreOrLessEquals(NizamioSize.controlMd, epsilon: 1),
+        reason: size.name,
+      );
     }
+  });
+
+  testWidgets('hap biçimi: köşe pill, kenar border-control, dolgu surface', (
+    tester,
+  ) async {
+    for (final dark in [false, true]) {
+      await tester.pumpWidget(testApp(const NzSearchField(), dark: dark));
+      await tester.pumpAndSettle();
+      final c = dark ? NizamioColors.dark : NizamioColors.light;
+      final deco = tester.widget<TextField>(find.byType(TextField)).decoration!;
+      final border = deco.enabledBorder! as OutlineInputBorder;
+      expect(border.borderRadius.topLeft.x, NizamioRadius.pill);
+      expect(border.borderSide.color, c.borderControl);
+      expect(deco.fillColor, c.surface);
+    }
+  });
+
+  testWidgets('ayrı ipucu verilince etiket okuyucuya bağlanır', (tester) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      testApp(const NzSearchField(label: 'Kişi', hint: 'Ad yazın')),
+    );
+    expect(find.bySemanticsLabel(RegExp('Kişi')), findsWidgets);
+    handle.dispose();
   });
 
   testWidgets('anlamsal: etiket metin alanına bağlıdır', (tester) async {

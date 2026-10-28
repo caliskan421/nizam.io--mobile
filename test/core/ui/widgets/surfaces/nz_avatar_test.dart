@@ -134,4 +134,82 @@ void main() {
       );
     },
   );
+
+  group('tone / extent', () {
+    BoxDecoration deco(WidgetTester t) =>
+        t
+                .widget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byType(NzAvatar),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as BoxDecoration;
+
+    test('toneOf kararlı ve 0–4 aralığında', () {
+      for (final n in ['Kadir Özbek', 'Ali Avcı', 'Merve Koçoğlu', '']) {
+        final a = NzAvatar.toneOf(n);
+        expect(a, inInclusiveRange(0, NzAvatar.toneCount - 1));
+        expect(NzAvatar.toneOf(n), a);
+      }
+    });
+
+    testWidgets('tone → avatarN dolgu, onAvatar yazı; nötr → overlay + ink', (
+      t,
+    ) async {
+      final c = NizamioColors.light;
+      final fills = [c.avatar1, c.avatar2, c.avatar3, c.avatar4, c.avatar5];
+      for (var i = 0; i < 5; i++) {
+        await t.pumpWidget(
+          testApp(
+            Center(
+              child: NzAvatar.initials(name: 'Ali Veli', tone: i),
+            ),
+          ),
+        );
+        expect(deco(t).color, fills[i]);
+        expect(t.widget<Text>(find.text('AV')).style!.color, c.onAvatar);
+      }
+      await t.pumpWidget(
+        testApp(
+          const Center(
+            child: NzAvatar.initials(
+              name: 'Ali Veli',
+              tone: NzAvatar.neutralTone,
+            ),
+          ),
+        ),
+      );
+      expect(deco(t).color, c.surfaceOverlay);
+      expect(t.widget<Text>(find.text('AV')).style!.color, c.text);
+    });
+
+    testWidgets('extent çapları 26/32/44/52', (t) async {
+      for (final e in NzAvatarSize.values) {
+        await t.pumpWidget(
+          testApp(
+            Center(
+              child: NzAvatar.initials(name: 'Ali', extent: e),
+            ),
+          ),
+        );
+        expect(t.getSize(find.byType(NzAvatar)), Size.square(e.diameter));
+      }
+      expect(NzAvatarSize.values.map((e) => e.diameter), [26, 32, 44, 52]);
+    });
+
+    testWidgets('extent 2.0 metinde taşma yok', (t) async {
+      t.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
+      await t.pumpWidget(
+        testApp(
+          const Center(
+            child: NzAvatar.initials(name: 'Mm Mm', extent: NzAvatarSize.sm),
+          ),
+        ),
+      );
+      expect(t.takeException(), isNull);
+    });
+  });
 }

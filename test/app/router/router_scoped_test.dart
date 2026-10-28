@@ -11,12 +11,34 @@ import 'package:nizamio/app/router/shell.dart';
 import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_floating_nav.dart';
+import 'package:nizamio/features/coordinatorships/coordinatorships.dart';
+import 'package:nizamio/features/messages/messages.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../core/ui/widgets/feedback/feedback_test_support.dart';
 import 'router_test_support.dart';
 
 /// Kabuk içi / feature / derin rotalar: yalnız `scoped` fazında açılırlar.
-const _scopedOnly = ['/work', '/profile', '/home/detail/5', '/work/detail/7'];
+const _scopedOnly = [
+  '/tasks',
+  '/profile',
+  '/home/history',
+  '/tasks/ALT-7',
+  '/coordinatorships',
+  '/coordinatorships/ALT',
+  '/archive',
+  '/archive/ALT',
+  '/messages',
+  '/timeline',
+  '/chat/gen',
+];
+
+/// Kabuk sekme simgeleri (sıra dal sırası; üçüncüsü varsayılan modül Koordinatörlükler).
+const _tabIcons = [
+  Icons.home_outlined,
+  Icons.checklist_rounded,
+  Icons.apartment_rounded,
+];
 
 BuildContext _ctx(WidgetTester tester) =>
     tester.element(find.byType(NzAdaptiveShell));
@@ -37,17 +59,28 @@ void main() {
     expect(const PasswordRoute().location, '/password');
     expect(const ScopeRoute().location, '/scope');
     expect(const HomeRoute().location, '/home');
-    expect(const HomeDetailRoute(id: 'a b').location, '/home/detail/a%20b');
-    expect(const WorkDetailRoute(id: '7').location, '/work/detail/7');
+    expect(const HistoryRoute().location, '/home/history');
+    expect(const TaskDetailRoute(code: 'a b').location, '/tasks/a%20b');
+    expect(
+      const TasksRoute(view: 'late', people: ['p1']).location,
+      '/tasks?view=late&people=p1',
+    );
+    expect(
+      const CoordinatorshipRoute(code: 'ALT').location,
+      '/coordinatorships/ALT',
+    );
+    expect(const ArchiveFolderRoute(code: 'ALT').location, '/archive/ALT');
+    expect(const TimelineRoute(coord: 'ALT').location, '/timeline?coord=ALT');
+    expect(const ChatRoute(id: 'gen').location, '/chat/gen');
   });
 
   test('gateRedirect: saf karar tablosu', () {
     expect(gateRedirect(AppPhase.scoped, '/home'), isNull);
-    expect(gateRedirect(AppPhase.scoped, '/work'), isNull);
+    expect(gateRedirect(AppPhase.scoped, '/tasks'), isNull);
     expect(gateRedirect(AppPhase.scoped, '/yok'), isNull); // 404'e düşer
     expect(gateRedirect(AppPhase.scoped, '/login'), '/home');
     expect(gateRedirect(AppPhase.scoped, '/server'), '/home');
-    expect(gateRedirect(AppPhase.unbound, '/work'), '/server');
+    expect(gateRedirect(AppPhase.unbound, '/tasks'), '/server');
     expect(gateRedirect(AppPhase.unbound, '/yok'), '/server');
     expect(gateRedirect(AppPhase.unbound, '/dev/catalog'), '/server');
     expect(
@@ -55,6 +88,29 @@ void main() {
       isNull,
     );
     expect(gateRedirect(AppPhase.scoped, '/dev/catalog'), isNull);
+    // Prototip modu yalnız devCatalog ile; kapı rotaları normal kalır.
+    expect(
+      gateRedirect(AppPhase.unbound, '/tasks', devPrototype: true),
+      '/server',
+    );
+    expect(
+      gateRedirect(
+        AppPhase.unbound,
+        '/tasks',
+        devCatalog: true,
+        devPrototype: true,
+      ),
+      isNull,
+    );
+    expect(
+      gateRedirect(
+        AppPhase.unbound,
+        '/login',
+        devCatalog: true,
+        devPrototype: true,
+      ),
+      '/server',
+    );
   });
 
   group('faz × korunan rota matrisi (kabuk ve derin rotalar)', () {
@@ -100,7 +156,16 @@ void main() {
         router.go(path);
         await settle(tester);
         expect(locationOf(router), path);
-        expect(find.byType(NzAdaptiveShell), findsOneWidget);
+        // Zaman çizelgesi, sohbet ve profil kabuk dışıdır (alt menü yok).
+        final fullScreen =
+            path == '/timeline' ||
+            path == '/profile' ||
+            path.startsWith('/chat/');
+        expect(
+          find.byType(NzAdaptiveShell),
+          fullScreen ? findsNothing : findsOneWidget,
+          reason: path,
+        );
       }
     });
   });
@@ -147,22 +212,55 @@ void main() {
       expect(find.byType(NavigationRail), findsNothing);
       expect(
         tester.widget<NzFloatingNav>(find.byType(NzFloatingNav)).items,
-        hasLength(shellTabs.length),
+        hasLength(_tabIcons.length),
       );
     });
 
     testWidgets(
-      'compact: kökte etkin sekmeye yeniden dokunma kısayol olayıdır',
+      'compact: etkin sekmeye yeniden dokunma kısayol olayıdır (alt sayfada da)',
       (tester) async {
         final router = await _scoped(tester, width: 400);
         final container = ProviderScope.containerOf(_ctx(tester));
         expect(container.read(shellReselectEventsProvider), isNull);
-        await tester.tap(find.byIcon(shellTabs[0].icon));
+        await tester.tap(find.byIcon(_tabIcons[0]));
         await settle(tester);
         expect(container.read(shellReselectEventsProvider)?.tab, 0);
         expect(locationOf(router), '/home');
+        // Ana sayfa olayı dinleyip kısayol menüsünü açtı; dışarı dokunup kapat.
+        await tester.tapAt(const Offset(390, 10));
+        await settle(tester);
+        const HistoryRoute().go(_ctx(tester));
+        await settle(tester);
+        await tester.tap(find.byIcon(_tabIcons[0]));
+        await settle(tester);
+        expect(container.read(shellReselectEventsProvider)?.seq, 2);
+        expect(locationOf(router), '/home/history');
       },
     );
+
+    testWidgets('üçüncü öğe son girilen modüldür', (tester) async {
+      final router = await _scoped(tester, width: 400);
+      router.go('/messages');
+      await settle(tester);
+      expect(find.byIcon(Icons.chat_bubble_outline_rounded), findsOneWidget);
+      router.go('/home');
+      await settle(tester);
+      expect(find.byIcon(Icons.chat_bubble_outline_rounded), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.chat_bubble_outline_rounded));
+      await settle(tester);
+      expect(locationOf(router), '/messages');
+    });
+
+    testWidgets('zaman çizelgesi ve sohbet kabuk dışıdır (alt menü yok)', (
+      tester,
+    ) async {
+      final router = await _scoped(tester, width: 400);
+      for (final path in ['/timeline', '/chat/gen']) {
+        router.go(path);
+        await settle(tester);
+        expect(find.byType(NzFloatingNav), findsNothing, reason: path);
+      }
+    });
 
     testWidgets('medium: NavigationRail (daralmış), alt çubuk yok', (
       tester,
@@ -189,40 +287,34 @@ void main() {
       final shell = router.configuration.routes
           .whereType<StatefulShellRoute>()
           .single;
-      expect(shell.branches.length, shellTabs.length);
+      expect(shell.branches.length, _tabIcons.length);
     });
 
     testWidgets('sekme değiştirip dönünce iç rota korunur', (tester) async {
       final router = await _scoped(tester);
-      const HomeDetailRoute(id: '5').go(_ctx(tester));
+      const HistoryRoute().go(_ctx(tester));
       await settle(tester);
-      expect(locationOf(router), '/home/detail/5');
+      expect(locationOf(router), '/home/history');
 
-      await tester.tap(find.byIcon(shellTabs[1].icon));
+      await tester.tap(find.byIcon(_tabIcons[1]));
       await settle(tester);
-      expect(locationOf(router), '/work');
+      expect(locationOf(router), '/tasks');
 
-      await tester.tap(find.byIcon(shellTabs[0].icon));
+      await tester.tap(find.byIcon(_tabIcons[0]));
       await settle(tester);
-      expect(locationOf(router), '/home/detail/5');
-      expect(find.textContaining('5'), findsWidgets);
-
-      // Seçili sekmeye (kökte değilken) yeniden dokunma kök konuma döner.
-      await tester.tap(find.byIcon(shellTabs[0].icon));
-      await settle(tester);
-      expect(locationOf(router), '/home');
+      expect(locationOf(router), '/home/history');
     });
 
     testWidgets('expanded rayda da sekme yığını korunur', (tester) async {
       final router = await _scoped(tester, width: 1100);
-      const WorkDetailRoute(id: '9').go(_ctx(tester));
+      const TaskDetailRoute(code: '9').go(_ctx(tester));
       await settle(tester);
-      await tester.tap(find.text('Profil'));
+      await tester.tap(find.text('Ana sayfa'));
       await settle(tester);
-      expect(locationOf(router), '/profile');
+      expect(locationOf(router), '/home');
       await tester.tap(find.text('Görevler'));
       await settle(tester);
-      expect(locationOf(router), '/work/detail/9');
+      expect(locationOf(router), '/tasks/9');
     });
   });
 
@@ -240,39 +332,38 @@ void main() {
         addTearDown(notifier.dispose);
         final router = await pumpRouter(tester, notifier);
 
-        // Eski sunucunun ekranları: başka sekmede iç rota + üstte itilmiş ayrıntı.
-        const WorkDetailRoute(id: 'ESKI-SEKME').go(_ctx(tester));
+        // Eski sunucunun ekranları: başka sekmede iç rota + üstte itilmiş tam ekran.
+        const TaskDetailRoute(code: 'ESKI-SEKME').go(_ctx(tester));
         await settle(tester);
-        unawaited(
-          const HomeDetailRoute(id: 'ESKI-ITILMIS').push<void>(_ctx(tester)),
-        );
+        unawaited(const ChatRoute(id: 'ESKI-ITILMIS').push<void>(_ctx(tester)));
         await settle(tester);
-        expect(find.textContaining('ESKI-ITILMIS'), findsOneWidget);
+        expect(find.byType(ChatPage), findsOneWidget);
         expect(router.canPop(), isTrue);
 
         notifier.value = away;
         await settle(tester);
         expect(locationOf(router), routeForPhase(away));
         expect(router.canPop(), isFalse);
-        expect(find.textContaining('ESKI'), findsNothing);
+        expect(find.byType(ChatPage), findsNothing);
+        expect(find.byType(TaskDetailPage), findsNothing);
         expect(find.byType(NzAdaptiveShell), findsNothing);
 
         // Geri tuşu (sistem pop) eski ekranı getirmez.
         await tester.binding.handlePopRoute();
         await settle(tester);
         expect(locationOf(router), routeForPhase(away));
-        expect(find.textContaining('ESKI'), findsNothing);
+        expect(find.byType(ChatPage), findsNothing);
 
         // Yeni oturum: temiz /home, eski iç rota ve yığın yok.
         notifier.value = AppPhase.scoped;
         await settle(tester);
         expect(locationOf(router), '/home');
         expect(router.canPop(), isFalse);
-        expect(find.textContaining('ESKI'), findsNothing);
-        await tester.tap(find.byIcon(shellTabs[1].icon));
+        expect(find.byType(ChatPage), findsNothing);
+        await tester.tap(find.byIcon(_tabIcons[1]));
         await settle(tester);
-        expect(locationOf(router), '/work');
-        expect(find.textContaining('ESKI'), findsNothing);
+        expect(locationOf(router), '/tasks');
+        expect(find.byType(TaskDetailPage), findsNothing);
       });
     }
   });
@@ -317,27 +408,30 @@ void main() {
     }
   });
 
-  testWidgets('geçiş: tek yerde solma; animasyonlar azaltılınca geçişsiz', (
-    tester,
-  ) async {
-    await _scoped(tester);
-    int fades(String id) => find
-        .ancestor(
-          of: find.textContaining(id),
-          matching: find.byType(FadeTransition),
-        )
-        .evaluate()
-        .length;
+  testWidgets(
+    'geçiş: tek yerde (solma + kayma); animasyonlar azaltılınca geçişsiz',
+    (tester) async {
+      await _scoped(tester);
+      int fades(Type page) => find
+          .ancestor(
+            of: find.byType(page),
+            matching: find.byType(FadeTransition),
+          )
+          .evaluate()
+          .length;
 
-    const HomeDetailRoute(id: 'ANIM').go(_ctx(tester));
-    await settle(tester);
-    final withFade = fades('ANIM');
+      const TaskDetailRoute(code: 'ANIM').go(_ctx(tester));
+      await settle(tester);
+      final withFade = fades(TaskDetailPage);
 
-    tester.platformDispatcher.accessibilityFeaturesTestValue =
-        const FakeAccessibilityFeatures(disableAnimations: true);
-    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
-    const WorkDetailRoute(id: 'DURAGAN').go(_ctx(tester));
-    await settle(tester);
-    expect(fades('DURAGAN'), withFade - 1);
-  });
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      const CoordinatorshipRoute(code: 'DURAGAN').go(_ctx(tester));
+      await settle(tester);
+      expect(fades(CoordinatorshipPage), withFade - 1);
+    },
+  );
 }

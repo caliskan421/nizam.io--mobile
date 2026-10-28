@@ -138,4 +138,111 @@ void main() {
       );
     },
   );
+
+  group('circle', () {
+    Material circleMaterial(WidgetTester t) => t.widget<Material>(
+      find
+          .descendant(
+            of: find.byType(NzIconButton),
+            matching: find.byType(Material),
+          )
+          .first,
+    );
+
+    testWidgets(
+      'circle: surface dolgu + border-control kenar; 44 görsel, 48 dokunma',
+      (t) async {
+        for (final dark in [false, true]) {
+          final c = dark ? NizamioColors.dark : NizamioColors.light;
+          var n = 0;
+          await t.pumpWidget(
+            testApp(
+              Center(
+                child: NzIconButton.circle(
+                  icon: Icons.search,
+                  semanticLabel: 'Ara',
+                  onPressed: () => n++,
+                ),
+              ),
+              dark: dark,
+            ),
+          );
+          await t.pumpAndSettle();
+          final m = circleMaterial(t);
+          expect(m.color, c.surface);
+          expect((m.shape! as CircleBorder).side.color, c.borderControl);
+          expect(t.getSize(find.byType(NzIconButton)), const Size.square(48));
+          expect(
+            t.getSize(find.byType(InkWell)),
+            const Size.square(NizamioSize.tap),
+          );
+          await t.tap(find.byType(NzIconButton));
+          expect(n, 1);
+        }
+      },
+    );
+
+    testWidgets('circleAccent: accent dolgu, accent-ink ikon', (t) async {
+      await t.pumpWidget(
+        testApp(
+          Center(
+            child: NzIconButton.circleAccent(
+              icon: Icons.add,
+              semanticLabel: 'Yeni görev',
+              onPressed: () {},
+            ),
+          ),
+        ),
+      );
+      expect(circleMaterial(t).color, NizamioColors.light.primary);
+      expect(
+        t.widget<Icon>(find.byIcon(Icons.add)).color,
+        NizamioColors.light.onPrimary,
+      );
+    });
+
+    testWidgets('nokta yalnız verilince; etiket okuyucuda', (t) async {
+      final handle = t.ensureSemantics();
+      await t.pumpWidget(
+        testApp(
+          Center(
+            child: NzIconButton.circle(
+              icon: Icons.tune,
+              semanticLabel: 'Filtreler',
+              dot: NizamioColors.light.accentText,
+              onPressed: () {},
+            ),
+          ),
+        ),
+      );
+      final dots = find.descendant(
+        of: find.byType(NzIconButton),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is DecoratedBox &&
+              (w.decoration as BoxDecoration?)?.color ==
+                  NizamioColors.light.accentText,
+        ),
+      );
+      expect(dots, findsOneWidget);
+      expect(find.bySemanticsLabel('Filtreler'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('devre dışı: çağrı yok', (t) async {
+      await t.pumpWidget(
+        testApp(
+          const Center(
+            child: NzIconButton.circle(
+              icon: Icons.search,
+              semanticLabel: 'Ara',
+              onPressed: null,
+            ),
+          ),
+        ),
+      );
+      await t.tap(find.byType(NzIconButton));
+      expect(t.takeException(), isNull);
+    });
+  });
 }

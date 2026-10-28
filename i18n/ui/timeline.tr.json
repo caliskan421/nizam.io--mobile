@@ -1,0 +1,6 @@
+{
+  "$comment": "Dikey Gantt zaman çizelgesi metinleri (features/timeline). ELLE yazılır; make gen ARB'ye birleştirir. Yer tutucu ({ }) yasak: sayılı cümleler parça parça yazılıp sunumda birleştirilir.",
+  "texts": {
+    "ui.timeline.title": "Zaman çizelgesi"
+  }
+}

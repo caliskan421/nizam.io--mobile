@@ -1,0 +1,7 @@
+{
+  "$comment": "Sohbet listesi ve sohbet metinleri (features/messages). ELLE yazılır; make gen ARB'ye birleştirir. Yer tutucu ({ }) yasak: sayılı cümleler parça parça yazılıp sunumda birleştirilir.",
+  "texts": {
+    "ui.messages.title": "Mesajlar",
+    "ui.messages.chat_title": "Sohbet"
+  }
+}

@@ -88,11 +88,10 @@ void main() {
     );
 
     // 5. Profil sekmesi: e-posta ve çıkış.
-    await tester.tap(
-      screen.windowClass.isCompact
-          ? find.byIcon(Icons.person_outline_rounded)
-          : find.text(_l.uiRouterTabProfile).first,
-    );
+    // Profil çekmecedeki hesap satırından (prototip: alt menüde profil yok).
+    await tester.tap(find.byIcon(Icons.menu_rounded));
+    await settle(tester);
+    await tester.tap(find.text(_l.uiHomeProfile));
     await settle(tester);
     expect(find.text('a@b.test'), findsOneWidget);
     await tester.tap(find.text(_l.uiIdentitySignOut));

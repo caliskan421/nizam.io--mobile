@@ -574,43 +574,47 @@ Future<void> showActivityFilters(BuildContext context) {
           padding: const EdgeInsets.only(bottom: NizamioSpacing.space1),
           child: NzKicker(s),
         );
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: _Link(
-                label: l.uiActivityClear,
-                onTap: commands.clearExtra,
+        // Onay kutusu satırları mürekkebini kendi Material'ına çizer (sayfa zemini üstünde).
+        return Material(
+          type: MaterialType.transparency,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: _Link(
+                  label: l.uiActivityClear,
+                  onTap: commands.clearExtra,
+                ),
               ),
-            ),
-            kicker(l.uiActivityByRole),
-            for (final id in log.people)
-              if (catalog.person(id) case final p?)
-                NzCheckbox(
-                  label: p.name,
-                  value: query.people.contains(id),
-                  onChanged: (_) => commands.togglePerson(id),
-                  trailing: Text(
-                    '${l.activityRole(p.role)} · '
-                    '${log.entries.where((e) => e.actorId == id).length}',
-                    style: t.caption.copyWith(color: c.textMuted),
+              kicker(l.uiActivityByRole),
+              for (final id in log.people)
+                if (catalog.person(id) case final p?)
+                  NzCheckbox(
+                    label: p.name,
+                    value: query.people.contains(id),
+                    onChanged: (_) => commands.togglePerson(id),
+                    trailing: Text(
+                      '${l.activityRole(p.role)} · '
+                      '${log.entries.where((e) => e.actorId == id).length}',
+                      style: t.caption.copyWith(color: c.textMuted),
+                    ),
                   ),
-                ),
-            const Gap(NizamioSpacing.space4),
-            kicker(l.uiActivityCoordinatorship),
-            for (final code in log.coordinatorships)
-              if (catalog.coordinatorship(code) case final k?)
-                NzCheckbox(
-                  label: k.name,
-                  value: query.coordinatorship == code,
-                  onChanged: (_) => commands.toggleCoordinatorship(code),
-                  trailing: Text(
-                    code,
-                    style: t.monoSm.copyWith(color: c.textMuted),
+              const Gap(NizamioSpacing.space4),
+              kicker(l.uiActivityCoordinatorship),
+              for (final code in log.coordinatorships)
+                if (catalog.coordinatorship(code) case final k?)
+                  NzCheckbox(
+                    label: k.name,
+                    value: query.coordinatorship == code,
+                    onChanged: (_) => commands.toggleCoordinatorship(code),
+                    trailing: Text(
+                      code,
+                      style: t.monoSm.copyWith(color: c.textMuted),
+                    ),
                   ),
-                ),
-          ],
+            ],
+          ),
         );
       },
     ),

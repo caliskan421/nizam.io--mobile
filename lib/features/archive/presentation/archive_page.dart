@@ -225,6 +225,7 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
       selected: on,
       label: '$label $count',
       excludeSemantics: true,
+      onTap: onTap,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(NizamioRadius.pill),
@@ -262,6 +263,7 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
               expanded: view.tagsOpen,
               label: pillLabel,
               excludeSemantics: true,
+              onTap: ctrl.toggleTags,
               child: InkWell(
                 onTap: ctrl.toggleTags,
                 borderRadius: BorderRadius.circular(NizamioRadius.pill),
@@ -400,6 +402,7 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
                                 button: true,
                                 label: l.colorLabel(o),
                                 excludeSemantics: true,
+                                onTap: () => ctrl.setDraftColor(o),
                                 child: InkResponse(
                                   onTap: () => ctrl.setDraftColor(o),
                                   radius: 14,
@@ -430,6 +433,7 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
                         enabled: canAdd,
                         label: l.uiArchiveAddTag,
                         excludeSemantics: true,
+                        onTap: canAdd ? _add : null,
                         child: InkResponse(
                           onTap: canAdd ? _add : null,
                           radius: 22,
@@ -528,6 +532,7 @@ class _Folders extends ConsumerWidget {
             button: true,
             label: '${l.sortLabel(view.sort)}, ${l.uiArchiveSortHint}',
             excludeSemantics: true,
+            onTap: ref.read(archiveControllerProvider.notifier).cycleSort,
             child: InkWell(
               onTap: ref.read(archiveControllerProvider.notifier).cycleSort,
               child: ConstrainedBox(

@@ -97,6 +97,7 @@ class _PreviewState extends ConsumerState<_Preview> {
       button: true,
       label: label,
       excludeSemantics: true,
+      onTap: onTap,
       child: InkResponse(
         onTap: onTap,
         radius: 22,

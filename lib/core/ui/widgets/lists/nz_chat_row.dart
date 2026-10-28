@@ -178,6 +178,7 @@ class NzChatRow extends StatelessWidget {
       button: true,
       label: [name, preview, time, ?semanticHint].join(', '),
       excludeSemantics: true,
+      onTap: onTap,
       child: NzPressable(
         child: InkWell(
           onTap: onTap,

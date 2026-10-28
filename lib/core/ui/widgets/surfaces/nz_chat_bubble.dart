@@ -349,6 +349,7 @@ class _Quote extends StatelessWidget {
       button: true,
       label: quote.semanticLabel,
       excludeSemantics: true,
+      onTap: quote.onTap,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: quote.onTap,
@@ -402,6 +403,7 @@ class _ReactionChip extends StatelessWidget {
       selected: r.mine,
       label: '${r.semanticLabel} ${r.count}',
       excludeSemantics: true,
+      onTap: r.onTap,
       child: InkWell(
         onTap: r.onTap,
         borderRadius: BorderRadius.circular(NizamioRadius.pill),

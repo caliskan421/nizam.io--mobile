@@ -104,6 +104,7 @@ class ChatMessageBody extends StatelessWidget {
                       link: true,
                       label: tok.text,
                       excludeSemantics: true,
+                      onTap: () => onOpenTask(code),
                       child: GestureDetector(
                         onTap: () => onOpenTask(code),
                         child: Text(tok.text, style: mono),
@@ -204,6 +205,7 @@ class _PollOption extends StatelessWidget {
       checked: on,
       label: '$label %$percent',
       excludeSemantics: true,
+      onTap: onTap,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
@@ -335,6 +337,7 @@ class ChatHeader extends StatelessWidget {
                         label:
                             '${chat.name} ${chat.group ? l.uiMessagesGroupInfo : l.uiMessagesPersonInfo}',
                         excludeSemantics: true,
+                        onTap: onInfo,
                         child: InkWell(
                           onTap: onInfo,
                           borderRadius: BorderRadius.circular(
@@ -399,6 +402,7 @@ class ChatHeader extends StatelessWidget {
                   button: true,
                   label: '${l.uiMessagesPinned}: ${pin.summary}',
                   excludeSemantics: true,
+                  onTap: onNextPin,
                   child: InkWell(
                     onTap: onNextPin,
                     child: Container(
@@ -667,6 +671,7 @@ class ChatAttachPanel extends StatelessWidget {
                       selected: view.refs.contains(ref),
                       label: '$label, $sub',
                       excludeSemantics: true,
+                      onTap: () => onToggle(ref),
                       child: InkWell(
                         onTap: () => onToggle(ref),
                         child: Container(

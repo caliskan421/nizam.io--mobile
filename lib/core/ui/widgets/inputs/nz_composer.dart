@@ -118,6 +118,7 @@ class NzComposer extends StatelessWidget {
                     expanded: attachOpen,
                     label: attachLabel,
                     excludeSemantics: true,
+                    onTap: onAttach,
                     child: AnimatedRotation(
                       turns: attachOpen ? 0.125 : 0,
                       duration: spring,
@@ -140,6 +141,7 @@ class NzComposer extends StatelessWidget {
                     enabled: canSend,
                     label: sendLabel,
                     excludeSemantics: true,
+                    onTap: canSend ? onSend : null,
                     child: AnimatedScale(
                       scale: canSend ? 1 : 0.92,
                       duration: spring,
@@ -240,6 +242,7 @@ class NzRefChip extends StatelessWidget {
             button: true,
             label: '$removeLabel: $label',
             excludeSemantics: true,
+            onTap: onRemove,
             child: InkResponse(
               onTap: onRemove,
               radius: NizamioSpacing.space4,

@@ -253,6 +253,7 @@ class _Files extends ConsumerWidget {
         selected: on,
         label: label,
         excludeSemantics: true,
+        onTap: () => ctrl.setTag(tag),
         child: InkWell(
           onTap: () => ctrl.setTag(tag),
           borderRadius: BorderRadius.circular(NizamioRadius.pill),
@@ -392,6 +393,7 @@ class _FileRow extends StatelessWidget {
       button: true,
       label: '${file.name}, $sub, ${l.tagLabel(file.tag)}',
       excludeSemantics: true,
+      onTap: onTap,
       child: InkWell(
         onTap: onTap,
         child: Container(

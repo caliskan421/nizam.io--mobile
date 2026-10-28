@@ -41,6 +41,7 @@ class NzFolder extends StatelessWidget {
       button: onTap != null,
       label: '$name, $caption',
       excludeSemantics: true,
+      onTap: onTap,
       child: NzPressable(
         enabled: onTap != null,
         child: InkWell(

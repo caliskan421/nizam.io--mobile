@@ -121,6 +121,7 @@ Future<ChatAction?> showMessageActions(
                       selected: message.myReaction == r,
                       label: l.reaction(r),
                       excludeSemantics: true,
+                      onTap: () => done(ChatActReact(r)),
                       child: Material(
                         color: message.myReaction == r
                             ? c.primary.withValues(alpha: 0.2)

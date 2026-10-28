@@ -458,6 +458,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               button: true,
               label: l.uiMessagesToBottom,
               excludeSemantics: true,
+              onTap: _toBottom,
               child: GestureDetector(
                 onTap: _toBottom,
                 child: NzGlass.circle(

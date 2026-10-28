@@ -323,6 +323,7 @@ class _FilterPill extends StatelessWidget {
       selected: selected,
       label: count > 0 ? '$label $count' : label,
       excludeSemantics: true,
+      onTap: onTap,
       child: Material(
         color: selected ? c.text : c.surfaceRaised,
         shape: const StadiumBorder(),

@@ -8,17 +8,17 @@ part of 'archive_nav_caption.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Alt menüde bu modül etkinken görünen mono alt yazı (ör. "76 görev"); null → yok.
+/// Alt menüde bu modül etkinken görünen mono alt yazı ("227 dosya"); veri yokken null.
 
 @ProviderFor(archiveNavCaption)
 final archiveNavCaptionProvider = ArchiveNavCaptionProvider._();
 
-/// Alt menüde bu modül etkinken görünen mono alt yazı (ör. "76 görev"); null → yok.
+/// Alt menüde bu modül etkinken görünen mono alt yazı ("227 dosya"); veri yokken null.
 
 final class ArchiveNavCaptionProvider
     extends $FunctionalProvider<String?, String?, String?>
     with $Provider<String?> {
-  /// Alt menüde bu modül etkinken görünen mono alt yazı (ör. "76 görev"); null → yok.
+  /// Alt menüde bu modül etkinken görünen mono alt yazı ("227 dosya"); veri yokken null.
   ArchiveNavCaptionProvider._()
     : super(
         from: null,
@@ -52,4 +52,4 @@ final class ArchiveNavCaptionProvider
   }
 }
 
-String _$archiveNavCaptionHash() => r'5f2a3414a2aec6ce90a5aa6dd472468940017fe2';
+String _$archiveNavCaptionHash() => r'5d85eda00161901cfc75c4bc9bb96127dc7c13a2';

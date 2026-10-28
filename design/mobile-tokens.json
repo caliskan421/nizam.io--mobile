@@ -61,7 +61,15 @@
     "ganttLate": "gp-late",
     "ganttLateLine": "gp-late-line",
     "ganttInk": "gp-ink",
-    "ganttInkMuted": "gp-ink-muted"
+    "ganttInkMuted": "gp-ink-muted",
+    "bubbleMine": "bubble-mine",
+    "bubbleOther": "bubble-other",
+    "quoteFill": "quote-fill",
+    "refChip": "ref-chip",
+    "dayChip": "day-chip",
+    "folderBack": "folder-back",
+    "folderFront": "folder-front",
+    "folderFrontMid": "folder-front-mid"
   },
   "$colorNotes": {
     "success": "Tasarım README 'tamam accent-text' der; ayrı başarı rengi yoktur.",

@@ -251,4 +251,20 @@ void main() {
       reason: 'şerit maskenin altında kalır; dokunuşu maske keser',
     );
   });
+
+  testWidgets(
+    'bare: AppBar ve dolgu yok, gövde tam alan; klavye gövdeyi küçültmez',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(390, 844);
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        _app(const NzPage.bare(body: SizedBox.expand(key: _bodyKey))),
+      );
+      expect(find.byType(AppBar), findsNothing);
+      expect(tester.getSize(find.byKey(_bodyKey)), const Size(390, 844));
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+      expect(scaffold.resizeToAvoidBottomInset, isFalse);
+    },
+  );
 }

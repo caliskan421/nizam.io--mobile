@@ -65,6 +65,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     required this.ganttLateLine,
     required this.ganttInk,
     required this.ganttInkMuted,
+    required this.bubbleMine,
+    required this.bubbleOther,
+    required this.quoteFill,
+    required this.refChip,
+    required this.dayChip,
+    required this.folderBack,
+    required this.folderFront,
+    required this.folderFrontMid,
   });
 
   final Color background;
@@ -123,6 +131,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
   final Color ganttLateLine;
   final Color ganttInk;
   final Color ganttInkMuted;
+  final Color bubbleMine;
+  final Color bubbleOther;
+  final Color quoteFill;
+  final Color refChip;
+  final Color dayChip;
+  final Color folderBack;
+  final Color folderFront;
+  final Color folderFrontMid;
 
   static const light = NizamioColors(
     background: Color(0xFFF6F6F3),
@@ -181,6 +197,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     ganttLateLine: Color(0xFFD02B2B),
     ganttInk: Color(0xFF17181C),
     ganttInkMuted: Color(0xFF4A4D55),
+    bubbleMine: Color(0xFFF3FDD4),
+    bubbleOther: Color(0xFFF1F1ED),
+    quoteFill: Color(0x0D161615),
+    refChip: Color(0xFFECF2D4),
+    dayChip: Color(0xD9E7E7E2),
+    folderBack: Color(0xFFA8A8A2),
+    folderFront: Color(0x99FFFFFF),
+    folderFrontMid: Color(0x8CD2D2CC),
   );
 
   static const dark = NizamioColors(
@@ -240,6 +264,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     ganttLateLine: Color(0xFFFF5A5A),
     ganttInk: Color(0xFF17181C),
     ganttInkMuted: Color(0xFF4A4D55),
+    bubbleMine: Color(0xFF414B22),
+    bubbleOther: Color(0xFF1F1F1F),
+    quoteFill: Color(0x0FFFFFFF),
+    refChip: Color(0xFF373D23),
+    dayChip: Color(0xCC282828),
+    folderBack: Color(0xFF6E6E6E),
+    folderFront: Color(0x8CAFAFAF),
+    folderFrontMid: Color(0x8C5F5F5F),
   );
 
   @override
@@ -300,6 +332,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     Color? ganttLateLine,
     Color? ganttInk,
     Color? ganttInkMuted,
+    Color? bubbleMine,
+    Color? bubbleOther,
+    Color? quoteFill,
+    Color? refChip,
+    Color? dayChip,
+    Color? folderBack,
+    Color? folderFront,
+    Color? folderFrontMid,
   }) {
     return NizamioColors(
       background: background ?? this.background,
@@ -358,6 +398,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       ganttLateLine: ganttLateLine ?? this.ganttLateLine,
       ganttInk: ganttInk ?? this.ganttInk,
       ganttInkMuted: ganttInkMuted ?? this.ganttInkMuted,
+      bubbleMine: bubbleMine ?? this.bubbleMine,
+      bubbleOther: bubbleOther ?? this.bubbleOther,
+      quoteFill: quoteFill ?? this.quoteFill,
+      refChip: refChip ?? this.refChip,
+      dayChip: dayChip ?? this.dayChip,
+      folderBack: folderBack ?? this.folderBack,
+      folderFront: folderFront ?? this.folderFront,
+      folderFrontMid: folderFrontMid ?? this.folderFrontMid,
     );
   }
 
@@ -421,6 +469,14 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       ganttLateLine: Color.lerp(ganttLateLine, other.ganttLateLine, t)!,
       ganttInk: Color.lerp(ganttInk, other.ganttInk, t)!,
       ganttInkMuted: Color.lerp(ganttInkMuted, other.ganttInkMuted, t)!,
+      bubbleMine: Color.lerp(bubbleMine, other.bubbleMine, t)!,
+      bubbleOther: Color.lerp(bubbleOther, other.bubbleOther, t)!,
+      quoteFill: Color.lerp(quoteFill, other.quoteFill, t)!,
+      refChip: Color.lerp(refChip, other.refChip, t)!,
+      dayChip: Color.lerp(dayChip, other.dayChip, t)!,
+      folderBack: Color.lerp(folderBack, other.folderBack, t)!,
+      folderFront: Color.lerp(folderFront, other.folderFront, t)!,
+      folderFrontMid: Color.lerp(folderFrontMid, other.folderFrontMid, t)!,
     );
   }
 }

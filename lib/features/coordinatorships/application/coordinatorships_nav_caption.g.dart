@@ -8,18 +8,21 @@ part of 'coordinatorships_nav_caption.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Alt menüde bu modül etkinken görünen mono alt yazı (ör. "76 görev"); null → yok.
+/// Alt menüde bu modül etkinken görünen mono alt yazı ("11 koordinatörlük"); katalog
+/// yüklenmeden null.
 
 @ProviderFor(coordinatorshipsNavCaption)
 final coordinatorshipsNavCaptionProvider =
     CoordinatorshipsNavCaptionProvider._();
 
-/// Alt menüde bu modül etkinken görünen mono alt yazı (ör. "76 görev"); null → yok.
+/// Alt menüde bu modül etkinken görünen mono alt yazı ("11 koordinatörlük"); katalog
+/// yüklenmeden null.
 
 final class CoordinatorshipsNavCaptionProvider
     extends $FunctionalProvider<String?, String?, String?>
     with $Provider<String?> {
-  /// Alt menüde bu modül etkinken görünen mono alt yazı (ör. "76 görev"); null → yok.
+  /// Alt menüde bu modül etkinken görünen mono alt yazı ("11 koordinatörlük"); katalog
+  /// yüklenmeden null.
   CoordinatorshipsNavCaptionProvider._()
     : super(
         from: null,
@@ -54,4 +57,4 @@ final class CoordinatorshipsNavCaptionProvider
 }
 
 String _$coordinatorshipsNavCaptionHash() =>
-    r'1ca7edf4c1caa25f32735e34a7a40f693c214014';
+    r'2e0d65686c4ff8c1cc998f5cec0472fcad13469b';

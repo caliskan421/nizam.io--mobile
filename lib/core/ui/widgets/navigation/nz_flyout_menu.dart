@@ -29,6 +29,8 @@ class NzFlyoutItem extends NzFlyoutEntry {
     this.dot,
     this.caption,
     this.accent = false,
+    this.count,
+    this.selected = false,
   }) : assert(icon == null || dot == null, 'ikon ya da nokta');
 
   final String label;
@@ -41,6 +43,13 @@ class NzFlyoutItem extends NzFlyoutEntry {
 
   /// İkon `accentText` (sayfadaki "yeni" eylemi).
   final bool accent;
+
+  /// Sağda mono sayaç (ör. kayıt türü sayısı); null → yok.
+  final String? count;
+
+  /// Geçerli seçim (görünüm/sıralama/bulunulan sayfa): satır zemini `navHighlight`, etiket
+  /// 600; okuyucuda seçili.
+  final bool selected;
 }
 
 /// Alt menüden açılan cam kısayol menüsü (README `m-flyout`): `glass-menu`, köşe
@@ -203,6 +212,7 @@ class _Row extends StatelessWidget {
     final caption = item.caption;
     final icon = item.icon;
     final dot = item.dot;
+    final count = item.count;
     void select() {
       Navigator.of(context).pop();
       item.onSelected();
@@ -210,72 +220,88 @@ class _Row extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: caption == null ? item.label : '${item.label}, $caption',
+      selected: item.selected,
+      label: [item.label, ?caption, ?count].join(', '),
       onTap: select,
       excludeSemantics: true,
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          onTap: select,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: item.selected ? c.navHighlight : null,
           borderRadius: BorderRadius.circular(NizamioRadius.group),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: NizamioSpacing.space12,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: NizamioSpacing.gapMd,
-                vertical: NizamioSpacing.space1,
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: select,
+            borderRadius: BorderRadius.circular(NizamioRadius.group),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: NizamioSpacing.space12,
               ),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: NizamioSpacing.space6,
-                    child: Center(
-                      child: icon != null
-                          ? Icon(
-                              icon,
-                              size: NizamioSize.iconSizeSm,
-                              color: item.accent
-                                  ? c.accentText
-                                  : c.glassInkFaint,
-                            )
-                          : DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: dot ?? c.textMuted,
-                                shape: BoxShape.circle,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: NizamioSpacing.gapMd,
+                  vertical: NizamioSpacing.space1,
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: NizamioSpacing.space6,
+                      child: Center(
+                        child: icon != null
+                            ? Icon(
+                                icon,
+                                size: NizamioSize.iconSizeSm,
+                                color: item.accent
+                                    ? c.accentText
+                                    : c.glassInkFaint,
+                              )
+                            : DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: dot ?? c.textMuted,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(NizamioSize.dot / 2),
+                                ),
                               ),
-                              child: const Padding(
-                                padding: EdgeInsets.all(NizamioSize.dot / 2),
-                              ),
-                            ),
+                      ),
                     ),
-                  ),
-                  const Gap(NizamioSpacing.gapMd),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: t.bodyMd.copyWith(
-                            color: c.glassInk,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        if (caption != null)
+                    const Gap(NizamioSpacing.gapMd),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            caption,
+                            item.label,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: t.caption.copyWith(color: c.glassInkFaint),
+                            style: t.bodyMd.copyWith(
+                              color: c.glassInk,
+                              fontWeight: item.selected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                            ),
                           ),
-                      ],
+                          if (caption != null)
+                            Text(
+                              caption,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: t.caption.copyWith(color: c.glassInkFaint),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    if (count != null) ...[
+                      const Gap(NizamioSpacing.space2),
+                      Text(
+                        count,
+                        style: t.monoSm.copyWith(color: c.glassInkFaint),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
           ),

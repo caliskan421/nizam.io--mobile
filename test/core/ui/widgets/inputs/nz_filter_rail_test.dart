@@ -74,4 +74,38 @@ void main() {
     await t.pumpWidget(testApp(SizedBox(width: 328, child: _rail(0, (_) {}))));
     expect(t.takeException(), isNull);
   });
+
+  testWidgets('renk noktası etiketin solunda çizilir; nokta yoksa çizilmez', (
+    t,
+  ) async {
+    const dot = Color(0xFF7A5CFF);
+    await t.pumpWidget(
+      testApp(
+        NzFilterRail(
+          semanticLabel: 'Tür',
+          selected: 0,
+          onSelected: (_) {},
+          options: const [
+            NzFilterOption(label: 'Tümü', count: 3),
+            NzFilterOption(label: 'Görev', count: 2, dot: dot),
+          ],
+        ),
+      ),
+    );
+    final dots = find.byWidgetPredicate(
+      (w) =>
+          w is DecoratedBox &&
+          w.decoration is BoxDecoration &&
+          (w.decoration as BoxDecoration).shape == BoxShape.circle,
+    );
+    expect(dots, findsOneWidget);
+    expect(
+      ((t.widget<DecoratedBox>(dots)).decoration as BoxDecoration).color,
+      dot,
+    );
+    expect(
+      t.getTopLeft(dots).dx,
+      lessThan(t.getTopLeft(find.text('Görev')).dx),
+    );
+  });
 }

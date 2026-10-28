@@ -62,4 +62,55 @@ void main() {
       expect(find.text('seni bekleyenler'), findsNothing);
     },
   );
+
+  testWidgets('sayaç sağda; seçili satır okuyucuda seçili ve vurgulu', (
+    t,
+  ) async {
+    final handle = t.ensureSemantics();
+    await t.pumpWidget(
+      testApp(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => NzFlyoutMenu.show(
+              context,
+              semanticLabel: 'Kısayollar',
+              entries: [
+                NzFlyoutItem(
+                  label: 'Tümü',
+                  icon: Icons.list,
+                  count: '38',
+                  selected: true,
+                  onSelected: () {},
+                ),
+                NzFlyoutItem(label: 'Görev', count: '9', onSelected: () {}),
+              ],
+            ),
+            child: const Text('aç'),
+          ),
+        ),
+      ),
+    );
+    await t.tap(find.text('aç'));
+    await t.pumpAndSettle();
+    expect(find.text('38'), findsOneWidget);
+    expect(
+      t.getTopLeft(find.text('38')).dx,
+      greaterThan(t.getTopLeft(find.text('Tümü')).dx),
+    );
+    expect(
+      t.getSemantics(find.bySemanticsLabel('Tümü, 38')),
+      matchesSemantics(
+        label: 'Tümü, 38',
+        isButton: true,
+        isSelected: true,
+        hasSelectedState: true,
+        hasTapAction: true,
+      ),
+    );
+    expect(
+      t.widget<Text>(find.text('Tümü')).style?.fontWeight,
+      FontWeight.w600,
+    );
+    handle.dispose();
+  });
 }

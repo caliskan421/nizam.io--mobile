@@ -5,6 +5,7 @@ import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../nz_size.dart';
 import 'nz_field_errors.dart';
+import 'nz_text_field.dart' show NzFieldLabelAbove;
 import 'nz_validators.dart';
 
 enum _PasswordKind { current, newPassword }
@@ -38,6 +39,7 @@ class NzPasswordField extends StatefulWidget {
     this.onSubmitted,
     this.enabled = true,
     this.size = NzSize.md,
+    this.labelAbove = false,
     this.textInputAction = TextInputAction.done,
     this.focusNode,
   }) : _kind = _PasswordKind.current;
@@ -55,6 +57,7 @@ class NzPasswordField extends StatefulWidget {
     this.onSubmitted,
     this.enabled = true,
     this.size = NzSize.md,
+    this.labelAbove = false,
     this.textInputAction = TextInputAction.next,
     this.focusNode,
   }) : _kind = _PasswordKind.newPassword;
@@ -70,6 +73,9 @@ class NzPasswordField extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
   final bool enabled;
   final NzSize size;
+
+  /// true → etiket alanın üstünde (bkz. `NzTextField.labelAbove`).
+  final bool labelAbove;
   final TextInputAction textInputAction;
   final FocusNode? focusNode;
   final _PasswordKind _kind;
@@ -101,7 +107,7 @@ class _NzPasswordFieldState extends State<NzPasswordField>
   Widget build(BuildContext context) {
     final l = context.l10n;
     final validator = widget.validator;
-    return TextFormField(
+    final field = TextFormField(
       controller: widget.controller,
       focusNode: widget.focusNode,
       enabled: widget.enabled,
@@ -122,7 +128,7 @@ class _NzPasswordFieldState extends State<NzPasswordField>
       enableSuggestions: false,
       enableInteractiveSelection: _visible,
       decoration: InputDecoration(
-        labelText: widget.label,
+        labelText: widget.labelAbove ? null : widget.label,
         hintText: widget.hint,
         helperText: widget.helper,
         helperMaxLines: 4,
@@ -154,6 +160,9 @@ class _NzPasswordFieldState extends State<NzPasswordField>
       },
       onFieldSubmitted: widget.onSubmitted,
     );
+    return widget.labelAbove
+        ? NzFieldLabelAbove(label: widget.label, child: field)
+        : field;
   }
 }
 

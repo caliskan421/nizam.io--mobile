@@ -765,6 +765,166 @@
   "@uiActivityTitle": {
     "description": "ui.activity.title"
   },
+  "uiActivityIntro": "Portaldaki tüm işlemler değiştirilemez biçimde saklanır.",
+  "@uiActivityIntro": {
+    "description": "ui.activity.intro"
+  },
+  "uiActivityCsv": "CSV olarak indir",
+  "@uiActivityCsv": {
+    "description": "ui.activity.csv"
+  },
+  "uiActivityCsvExport": "CSV indirme",
+  "@uiActivityCsvExport": {
+    "description": "ui.activity.csv_export"
+  },
+  "uiActivitySearchHint": "İşlem, hedef veya kişi ara",
+  "@uiActivitySearchHint": {
+    "description": "ui.activity.search_hint"
+  },
+  "uiActivityFilters": "Filtreler",
+  "@uiActivityFilters": {
+    "description": "ui.activity.filters"
+  },
+  "uiActivityFiltersLabel": "Filtreler · yapan, koordinatörlük",
+  "@uiActivityFiltersLabel": {
+    "description": "ui.activity.filters_label"
+  },
+  "uiActivityTypeLabel": "Tür",
+  "@uiActivityTypeLabel": {
+    "description": "ui.activity.type_label"
+  },
+  "uiActivityTypeAll": "Tümü",
+  "@uiActivityTypeAll": {
+    "description": "ui.activity.type_all"
+  },
+  "uiActivityTypeTask": "Görev",
+  "@uiActivityTypeTask": {
+    "description": "ui.activity.type_task"
+  },
+  "uiActivityTypeFile": "Dosya",
+  "@uiActivityTypeFile": {
+    "description": "ui.activity.type_file"
+  },
+  "uiActivityTypeMeeting": "Toplantı",
+  "@uiActivityTypeMeeting": {
+    "description": "ui.activity.type_meeting"
+  },
+  "uiActivityTypeMessage": "Mesaj",
+  "@uiActivityTypeMessage": {
+    "description": "ui.activity.type_message"
+  },
+  "uiActivityTypeAccount": "Hesap",
+  "@uiActivityTypeAccount": {
+    "description": "ui.activity.type_account"
+  },
+  "uiActivityChipType": "Tür:",
+  "@uiActivityChipType": {
+    "description": "ui.activity.chip_type"
+  },
+  "uiActivityRemoveType": "Tür filtresini kaldır",
+  "@uiActivityRemoveType": {
+    "description": "ui.activity.remove_type"
+  },
+  "uiActivityRemoveCoord": "Koordinatörlük filtresini kaldır",
+  "@uiActivityRemoveCoord": {
+    "description": "ui.activity.remove_coord"
+  },
+  "uiActivityRemoveTail": "filtresini kaldır",
+  "@uiActivityRemoveTail": {
+    "description": "ui.activity.remove_tail"
+  },
+  "uiActivityClearAll": "Tümünü temizle",
+  "@uiActivityClearAll": {
+    "description": "ui.activity.clear_all"
+  },
+  "uiActivityRecords": "Kayıtlar",
+  "@uiActivityRecords": {
+    "description": "ui.activity.records"
+  },
+  "uiActivityToday": "Bugün",
+  "@uiActivityToday": {
+    "description": "ui.activity.today"
+  },
+  "uiActivityYesterday": "Dün",
+  "@uiActivityYesterday": {
+    "description": "ui.activity.yesterday"
+  },
+  "uiActivityEmpty": "Bu filtrelerle eşleşen kayıt yok.",
+  "@uiActivityEmpty": {
+    "description": "ui.activity.empty"
+  },
+  "uiActivityClearFilters": "Filtreleri temizle",
+  "@uiActivityClearFilters": {
+    "description": "ui.activity.clear_filters"
+  },
+  "uiActivityMore": "Daha fazla göster",
+  "@uiActivityMore": {
+    "description": "ui.activity.more"
+  },
+  "uiActivityShownTail": "kayıt gösteriliyor",
+  "@uiActivityShownTail": {
+    "description": "ui.activity.shown_tail"
+  },
+  "uiActivityFooter": "Kayıtlar değiştirilemez ve silinemez; denetim için saklanır.",
+  "@uiActivityFooter": {
+    "description": "ui.activity.footer"
+  },
+  "uiActivityClear": "Temizle",
+  "@uiActivityClear": {
+    "description": "ui.activity.clear"
+  },
+  "uiActivityByRole": "yapan · rolüne göre",
+  "@uiActivityByRole": {
+    "description": "ui.activity.by_role"
+  },
+  "uiActivityCoordinatorship": "koordinatörlük",
+  "@uiActivityCoordinatorship": {
+    "description": "ui.activity.coordinatorship"
+  },
+  "uiActivityApplyTail": "kaydı göster",
+  "@uiActivityApplyTail": {
+    "description": "ui.activity.apply_tail"
+  },
+  "uiActivityRoleAdmin": "Admin",
+  "@uiActivityRoleAdmin": {
+    "description": "ui.activity.role_admin"
+  },
+  "uiActivityRoleCoordinator": "Koordinatör",
+  "@uiActivityRoleCoordinator": {
+    "description": "ui.activity.role_coordinator"
+  },
+  "uiActivityRoleMember": "Üye",
+  "@uiActivityRoleMember": {
+    "description": "ui.activity.role_member"
+  },
+  "uiActivityCountTail": "kayıt",
+  "@uiActivityCountTail": {
+    "description": "ui.activity.count_tail"
+  },
+  "uiActivityShortcuts": "İşlem geçmişi kısayolları",
+  "@uiActivityShortcuts": {
+    "description": "ui.activity.shortcuts"
+  },
+  "uiActivitySectionType": "kayıt türü",
+  "@uiActivitySectionType": {
+    "description": "ui.activity.section_type"
+  },
+  "uiActivitySectionHistory": "işlem geçmişi",
+  "@uiActivitySectionHistory": {
+    "description": "ui.activity.section_history"
+  },
+  "uiActivityFlyFilter": "Kişi ve koordinatörlük filtresi",
+  "@uiActivityFlyFilter": {
+    "description": "ui.activity.fly_filter"
+  },
+  "uiActivityFlyHome": "Ana sayfaya dön",
+  "@uiActivityFlyHome": {
+    "description": "ui.activity.fly_home"
+  },
+  "uiActivitySoonTail": "mobilde sonraki adımda eklenecek",
+  "@uiActivitySoonTail": {
+    "description": "ui.activity.soon_tail"
+  },
   "uiArchiveTitle": "Arşiv",
   "@uiArchiveTitle": {
     "description": "ui.archive.title"
@@ -800,6 +960,334 @@
   "uiCoordDetailTitle": "Koordinatörlük",
   "@uiCoordDetailTitle": {
     "description": "ui.coord.detail_title"
+  },
+  "uiCoordCountTail": "koordinatörlük",
+  "@uiCoordCountTail": {
+    "description": "ui.coord.count_tail"
+  },
+  "uiCoordTasksTail": "görev",
+  "@uiCoordTasksTail": {
+    "description": "ui.coord.tasks_tail"
+  },
+  "uiCoordLateCoordsTail": "koordinatörlükte gecikme",
+  "@uiCoordLateCoordsTail": {
+    "description": "ui.coord.late_coords_tail"
+  },
+  "uiCoordDoneTail": "bitti",
+  "@uiCoordDoneTail": {
+    "description": "ui.coord.done_tail"
+  },
+  "uiCoordLateTail": "gecikmede",
+  "@uiCoordLateTail": {
+    "description": "ui.coord.late_tail"
+  },
+  "uiCoordNoLead": "Koordinatör yok",
+  "@uiCoordNoLead": {
+    "description": "ui.coord.no_lead"
+  },
+  "uiCoordMemberSuffix": "(üye)",
+  "@uiCoordMemberSuffix": {
+    "description": "ui.coord.member_suffix"
+  },
+  "uiCoordListLabel": "Koordinatörlük listesi",
+  "@uiCoordListLabel": {
+    "description": "ui.coord.list_label"
+  },
+  "uiCoordSortName": "Ada göre",
+  "@uiCoordSortName": {
+    "description": "ui.coord.sort_name"
+  },
+  "uiCoordSortLate": "Gecikmeye göre",
+  "@uiCoordSortLate": {
+    "description": "ui.coord.sort_late"
+  },
+  "uiCoordSortProgress": "İlerlemeye göre",
+  "@uiCoordSortProgress": {
+    "description": "ui.coord.sort_progress"
+  },
+  "uiCoordShortcuts": "Koordinatörlük kısayolları",
+  "@uiCoordShortcuts": {
+    "description": "ui.coord.shortcuts"
+  },
+  "uiCoordFlySectionList": "koordinatörlükler",
+  "@uiCoordFlySectionList": {
+    "description": "ui.coord.fly_section_list"
+  },
+  "uiCoordFlySectionSort": "sıralama",
+  "@uiCoordFlySectionSort": {
+    "description": "ui.coord.fly_section_sort"
+  },
+  "uiCoordFlyTimelineAll": "Tümünü zaman çizelgesinde gör",
+  "@uiCoordFlyTimelineAll": {
+    "description": "ui.coord.fly_timeline_all"
+  },
+  "uiCoordFlyAdd": "Koordinatörlük ekle",
+  "@uiCoordFlyAdd": {
+    "description": "ui.coord.fly_add"
+  },
+  "uiCoordToastAddForm": "Koordinatörlük formu açılır",
+  "@uiCoordToastAddForm": {
+    "description": "ui.coord.toast_add_form"
+  },
+  "uiCoordFlyAllList": "Tüm liste",
+  "@uiCoordFlyAllList": {
+    "description": "ui.coord.fly_all_list"
+  },
+  "uiCoordSubUnitsTail": "alt birim",
+  "@uiCoordSubUnitsTail": {
+    "description": "ui.coord.sub_units_tail"
+  },
+  "uiCoordPeopleTail": "kişi",
+  "@uiCoordPeopleTail": {
+    "description": "ui.coord.people_tail"
+  },
+  "uiCoordStateActive": "Aktif",
+  "@uiCoordStateActive": {
+    "description": "ui.coord.state_active"
+  },
+  "uiCoordMessageTeam": "Ekibe mesaj",
+  "@uiCoordMessageTeam": {
+    "description": "ui.coord.message_team"
+  },
+  "uiCoordAssignTask": "Görev ata",
+  "@uiCoordAssignTask": {
+    "description": "ui.coord.assign_task"
+  },
+  "uiCoordTabsLabel": "Koordinatörlük bölümleri",
+  "@uiCoordTabsLabel": {
+    "description": "ui.coord.tabs_label"
+  },
+  "uiCoordTabGeneral": "Genel",
+  "@uiCoordTabGeneral": {
+    "description": "ui.coord.tab_general"
+  },
+  "uiCoordTabUnits": "Birimler",
+  "@uiCoordTabUnits": {
+    "description": "ui.coord.tab_units"
+  },
+  "uiCoordTabTeam": "Ekip",
+  "@uiCoordTabTeam": {
+    "description": "ui.coord.tab_team"
+  },
+  "uiCoordTabAbout": "Hakkında",
+  "@uiCoordTabAbout": {
+    "description": "ui.coord.tab_about"
+  },
+  "uiCoordSummary": "Özet",
+  "@uiCoordSummary": {
+    "description": "ui.coord.summary"
+  },
+  "uiCoordKpiOpen": "açık görev",
+  "@uiCoordKpiOpen": {
+    "description": "ui.coord.kpi_open"
+  },
+  "uiCoordKpiLate": "geciken",
+  "@uiCoordKpiLate": {
+    "description": "ui.coord.kpi_late"
+  },
+  "uiCoordKpiDone": "tamamlanma",
+  "@uiCoordKpiDone": {
+    "description": "ui.coord.kpi_done"
+  },
+  "uiCoordPctNoteOf": "görevden",
+  "@uiCoordPctNoteOf": {
+    "description": "ui.coord.pct_note_of"
+  },
+  "uiCoordPctNoteDone": "tamamlandı",
+  "@uiCoordPctNoteDone": {
+    "description": "ui.coord.pct_note_done"
+  },
+  "uiCoordSeasonAverage": "sezon ortalaması",
+  "@uiCoordSeasonAverage": {
+    "description": "ui.coord.season_average"
+  },
+  "uiCoordAttention": "dikkat gerektirenler",
+  "@uiCoordAttention": {
+    "description": "ui.coord.attention"
+  },
+  "uiCoordAllTasks": "Tüm görevler",
+  "@uiCoordAllTasks": {
+    "description": "ui.coord.all_tasks"
+  },
+  "uiCoordDaysLateTail": "gün gecikti",
+  "@uiCoordDaysLateTail": {
+    "description": "ui.coord.days_late_tail"
+  },
+  "uiCoordShortcutsLabel": "Kısayollar",
+  "@uiCoordShortcutsLabel": {
+    "description": "ui.coord.shortcuts_label"
+  },
+  "uiCoordLinkTimeline": "Zaman çizelgesinde gör",
+  "@uiCoordLinkTimeline": {
+    "description": "ui.coord.link_timeline"
+  },
+  "uiCoordLinkArchive": "Arşiv klasörü",
+  "@uiCoordLinkArchive": {
+    "description": "ui.coord.link_archive"
+  },
+  "uiCoordLinkMeetings": "Toplantılar",
+  "@uiCoordLinkMeetings": {
+    "description": "ui.coord.link_meetings"
+  },
+  "uiCoordLinkReport": "Birim raporu",
+  "@uiCoordLinkReport": {
+    "description": "ui.coord.link_report"
+  },
+  "uiCoordFilesTail": "dosya",
+  "@uiCoordFilesTail": {
+    "description": "ui.coord.files_tail"
+  },
+  "uiCoordPlannedTail": "planlı",
+  "@uiCoordPlannedTail": {
+    "description": "ui.coord.planned_tail"
+  },
+  "uiCoordNone": "yok",
+  "@uiCoordNone": {
+    "description": "ui.coord.none"
+  },
+  "uiCoordReportFormat": "PDF",
+  "@uiCoordReportFormat": {
+    "description": "ui.coord.report_format"
+  },
+  "uiCoordToastMeetingsTail": "toplantıları açılır",
+  "@uiCoordToastMeetingsTail": {
+    "description": "ui.coord.toast_meetings_tail"
+  },
+  "uiCoordToastReportTail": "raporu hazırlanıyor",
+  "@uiCoordToastReportTail": {
+    "description": "ui.coord.toast_report_tail"
+  },
+  "uiCoordUnits": "alt birimler",
+  "@uiCoordUnits": {
+    "description": "ui.coord.units"
+  },
+  "uiCoordAdd": "Ekle",
+  "@uiCoordAdd": {
+    "description": "ui.coord.add"
+  },
+  "uiCoordToastAddUnitTail": "altına alt birim ekleme formu açılır",
+  "@uiCoordToastAddUnitTail": {
+    "description": "ui.coord.toast_add_unit_tail"
+  },
+  "uiCoordToastUnitTail": "alt birimi açılır",
+  "@uiCoordToastUnitTail": {
+    "description": "ui.coord.toast_unit_tail"
+  },
+  "uiCoordTeam": "ekip",
+  "@uiCoordTeam": {
+    "description": "ui.coord.team"
+  },
+  "uiCoordAddMember": "Üye ekle",
+  "@uiCoordAddMember": {
+    "description": "ui.coord.add_member"
+  },
+  "uiCoordRoleLead": "koordinatör",
+  "@uiCoordRoleLead": {
+    "description": "ui.coord.role_lead"
+  },
+  "uiCoordRoleMember": "üye",
+  "@uiCoordRoleMember": {
+    "description": "ui.coord.role_member"
+  },
+  "uiCoordUnassigned": "Koordinatör atanmamış",
+  "@uiCoordUnassigned": {
+    "description": "ui.coord.unassigned"
+  },
+  "uiCoordUnassignedHint": "Görev atanabilmesi için bir sorumlu seç",
+  "@uiCoordUnassignedHint": {
+    "description": "ui.coord.unassigned_hint"
+  },
+  "uiCoordRoleAssign": "ata",
+  "@uiCoordRoleAssign": {
+    "description": "ui.coord.role_assign"
+  },
+  "uiCoordToastPickLeadTail": "için koordinatör seçimi açılır",
+  "@uiCoordToastPickLeadTail": {
+    "description": "ui.coord.toast_pick_lead_tail"
+  },
+  "uiCoordToastPersonTail": "kişisel takip açılır",
+  "@uiCoordToastPersonTail": {
+    "description": "ui.coord.toast_person_tail"
+  },
+  "uiCoordMoreMembersTail": "üye daha",
+  "@uiCoordMoreMembersTail": {
+    "description": "ui.coord.more_members_tail"
+  },
+  "uiCoordCollapse": "Daralt",
+  "@uiCoordCollapse": {
+    "description": "ui.coord.collapse"
+  },
+  "uiCoordAbout": "hakkında",
+  "@uiCoordAbout": {
+    "description": "ui.coord.about"
+  },
+  "uiCoordFactParent": "Üst birim",
+  "@uiCoordFactParent": {
+    "description": "ui.coord.fact_parent"
+  },
+  "uiCoordFactFounded": "Kuruluş",
+  "@uiCoordFactFounded": {
+    "description": "ui.coord.fact_founded"
+  },
+  "uiCoordFactVisibility": "Görünürlük",
+  "@uiCoordFactVisibility": {
+    "description": "ui.coord.fact_visibility"
+  },
+  "uiCoordVisibilityAll": "Tüm koordinatörler",
+  "@uiCoordVisibilityAll": {
+    "description": "ui.coord.visibility_all"
+  },
+  "uiCoordFeed": "son etkinlik",
+  "@uiCoordFeed": {
+    "description": "ui.coord.feed"
+  },
+  "uiCoordMoreActions": "Diğer işlemler",
+  "@uiCoordMoreActions": {
+    "description": "ui.coord.more_actions"
+  },
+  "uiCoordMenuTitleTail": "işlemleri",
+  "@uiCoordMenuTitleTail": {
+    "description": "ui.coord.menu_title_tail"
+  },
+  "uiCoordMenuEdit": "Bilgileri düzenle",
+  "@uiCoordMenuEdit": {
+    "description": "ui.coord.menu_edit"
+  },
+  "uiCoordToastEditTail": "düzenleme formu açılır",
+  "@uiCoordToastEditTail": {
+    "description": "ui.coord.toast_edit_tail"
+  },
+  "uiCoordMenuMeeting": "Toplantı planla",
+  "@uiCoordMenuMeeting": {
+    "description": "ui.coord.menu_meeting"
+  },
+  "uiCoordMenuParent": "Üst birimi değiştir",
+  "@uiCoordMenuParent": {
+    "description": "ui.coord.menu_parent"
+  },
+  "uiCoordToastParent": "Üst birim seçimi açılır",
+  "@uiCoordToastParent": {
+    "description": "ui.coord.toast_parent"
+  },
+  "uiCoordMenuMerge": "Başka koordinatörlükle birleştir",
+  "@uiCoordMenuMerge": {
+    "description": "ui.coord.menu_merge"
+  },
+  "uiCoordToastMerge": "Birleştirme önizlemesi açılır",
+  "@uiCoordToastMerge": {
+    "description": "ui.coord.toast_merge"
+  },
+  "uiCoordMenuDeactivate": "Pasifleştir",
+  "@uiCoordMenuDeactivate": {
+    "description": "ui.coord.menu_deactivate"
+  },
+  "uiCoordToastDeactivatedTail": "pasifleştirildi · görevler arşivde kalır",
+  "@uiCoordToastDeactivatedTail": {
+    "description": "ui.coord.toast_deactivated_tail"
+  },
+  "uiCoordNotFound": "Bu koordinatörlük bulunamadı.",
+  "@uiCoordNotFound": {
+    "description": "ui.coord.not_found"
   },
   "uiFeedbackLoading": "Yükleniyor",
   "@uiFeedbackLoading": {
@@ -1232,6 +1720,26 @@
   "uiIdentitySignOutConfirmMessage": "Bu cihazdaki oturum kapatılır.",
   "@uiIdentitySignOutConfirmMessage": {
     "description": "ui.identity.sign_out_confirm_message"
+  },
+  "uiIdentityLoginIntro": "E-posta adresin ve parolanla devam et.",
+  "@uiIdentityLoginIntro": {
+    "description": "ui.identity.login_intro"
+  },
+  "uiIdentityLoginSubmitting": "Giriş yapılıyor…",
+  "@uiIdentityLoginSubmitting": {
+    "description": "ui.identity.login_submitting"
+  },
+  "uiIdentityLoginEmailHint": "ad@alan.com",
+  "@uiIdentityLoginEmailHint": {
+    "description": "ui.identity.login_email_hint"
+  },
+  "uiIdentityLoginPasswordHint": "Parolan",
+  "@uiIdentityLoginPasswordHint": {
+    "description": "ui.identity.login_password_hint"
+  },
+  "uiIdentityLoginVersionPrefix": "v",
+  "@uiIdentityLoginVersionPrefix": {
+    "description": "ui.identity.login_version_prefix"
   },
   "uiInputsPasswordShow": "Parolayı göster",
   "@uiInputsPasswordShow": {

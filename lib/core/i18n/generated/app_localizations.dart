@@ -1240,6 +1240,246 @@ abstract class AppLocalizations {
   /// **'İşlem geçmişi'**
   String get uiActivityTitle;
 
+  /// ui.activity.intro
+  ///
+  /// In tr, this message translates to:
+  /// **'Portaldaki tüm işlemler değiştirilemez biçimde saklanır.'**
+  String get uiActivityIntro;
+
+  /// ui.activity.csv
+  ///
+  /// In tr, this message translates to:
+  /// **'CSV olarak indir'**
+  String get uiActivityCsv;
+
+  /// ui.activity.csv_export
+  ///
+  /// In tr, this message translates to:
+  /// **'CSV indirme'**
+  String get uiActivityCsvExport;
+
+  /// ui.activity.search_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem, hedef veya kişi ara'**
+  String get uiActivitySearchHint;
+
+  /// ui.activity.filters
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtreler'**
+  String get uiActivityFilters;
+
+  /// ui.activity.filters_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtreler · yapan, koordinatörlük'**
+  String get uiActivityFiltersLabel;
+
+  /// ui.activity.type_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Tür'**
+  String get uiActivityTypeLabel;
+
+  /// ui.activity.type_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get uiActivityTypeAll;
+
+  /// ui.activity.type_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get uiActivityTypeTask;
+
+  /// ui.activity.type_file
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya'**
+  String get uiActivityTypeFile;
+
+  /// ui.activity.type_meeting
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı'**
+  String get uiActivityTypeMeeting;
+
+  /// ui.activity.type_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj'**
+  String get uiActivityTypeMessage;
+
+  /// ui.activity.type_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap'**
+  String get uiActivityTypeAccount;
+
+  /// ui.activity.chip_type
+  ///
+  /// In tr, this message translates to:
+  /// **'Tür:'**
+  String get uiActivityChipType;
+
+  /// ui.activity.remove_type
+  ///
+  /// In tr, this message translates to:
+  /// **'Tür filtresini kaldır'**
+  String get uiActivityRemoveType;
+
+  /// ui.activity.remove_coord
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük filtresini kaldır'**
+  String get uiActivityRemoveCoord;
+
+  /// ui.activity.remove_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'filtresini kaldır'**
+  String get uiActivityRemoveTail;
+
+  /// ui.activity.clear_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü temizle'**
+  String get uiActivityClearAll;
+
+  /// ui.activity.records
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıtlar'**
+  String get uiActivityRecords;
+
+  /// ui.activity.today
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get uiActivityToday;
+
+  /// ui.activity.yesterday
+  ///
+  /// In tr, this message translates to:
+  /// **'Dün'**
+  String get uiActivityYesterday;
+
+  /// ui.activity.empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu filtrelerle eşleşen kayıt yok.'**
+  String get uiActivityEmpty;
+
+  /// ui.activity.clear_filters
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtreleri temizle'**
+  String get uiActivityClearFilters;
+
+  /// ui.activity.more
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha fazla göster'**
+  String get uiActivityMore;
+
+  /// ui.activity.shown_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kayıt gösteriliyor'**
+  String get uiActivityShownTail;
+
+  /// ui.activity.footer
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıtlar değiştirilemez ve silinemez; denetim için saklanır.'**
+  String get uiActivityFooter;
+
+  /// ui.activity.clear
+  ///
+  /// In tr, this message translates to:
+  /// **'Temizle'**
+  String get uiActivityClear;
+
+  /// ui.activity.by_role
+  ///
+  /// In tr, this message translates to:
+  /// **'yapan · rolüne göre'**
+  String get uiActivityByRole;
+
+  /// ui.activity.coordinatorship
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlük'**
+  String get uiActivityCoordinatorship;
+
+  /// ui.activity.apply_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kaydı göster'**
+  String get uiActivityApplyTail;
+
+  /// ui.activity.role_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Admin'**
+  String get uiActivityRoleAdmin;
+
+  /// ui.activity.role_coordinator
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör'**
+  String get uiActivityRoleCoordinator;
+
+  /// ui.activity.role_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye'**
+  String get uiActivityRoleMember;
+
+  /// ui.activity.count_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kayıt'**
+  String get uiActivityCountTail;
+
+  /// ui.activity.shortcuts
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem geçmişi kısayolları'**
+  String get uiActivityShortcuts;
+
+  /// ui.activity.section_type
+  ///
+  /// In tr, this message translates to:
+  /// **'kayıt türü'**
+  String get uiActivitySectionType;
+
+  /// ui.activity.section_history
+  ///
+  /// In tr, this message translates to:
+  /// **'işlem geçmişi'**
+  String get uiActivitySectionHistory;
+
+  /// ui.activity.fly_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi ve koordinatörlük filtresi'**
+  String get uiActivityFlyFilter;
+
+  /// ui.activity.fly_home
+  ///
+  /// In tr, this message translates to:
+  /// **'Ana sayfaya dön'**
+  String get uiActivityFlyHome;
+
+  /// ui.activity.soon_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'mobilde sonraki adımda eklenecek'**
+  String get uiActivitySoonTail;
+
   /// ui.archive.title
   ///
   /// In tr, this message translates to:
@@ -1293,6 +1533,498 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Koordinatörlük'**
   String get uiCoordDetailTitle;
+
+  /// ui.coord.count_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlük'**
+  String get uiCoordCountTail;
+
+  /// ui.coord.tasks_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görev'**
+  String get uiCoordTasksTail;
+
+  /// ui.coord.late_coords_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlükte gecikme'**
+  String get uiCoordLateCoordsTail;
+
+  /// ui.coord.done_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'bitti'**
+  String get uiCoordDoneTail;
+
+  /// ui.coord.late_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gecikmede'**
+  String get uiCoordLateTail;
+
+  /// ui.coord.no_lead
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör yok'**
+  String get uiCoordNoLead;
+
+  /// ui.coord.member_suffix
+  ///
+  /// In tr, this message translates to:
+  /// **'(üye)'**
+  String get uiCoordMemberSuffix;
+
+  /// ui.coord.list_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük listesi'**
+  String get uiCoordListLabel;
+
+  /// ui.coord.sort_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Ada göre'**
+  String get uiCoordSortName;
+
+  /// ui.coord.sort_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikmeye göre'**
+  String get uiCoordSortLate;
+
+  /// ui.coord.sort_progress
+  ///
+  /// In tr, this message translates to:
+  /// **'İlerlemeye göre'**
+  String get uiCoordSortProgress;
+
+  /// ui.coord.shortcuts
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük kısayolları'**
+  String get uiCoordShortcuts;
+
+  /// ui.coord.fly_section_list
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlükler'**
+  String get uiCoordFlySectionList;
+
+  /// ui.coord.fly_section_sort
+  ///
+  /// In tr, this message translates to:
+  /// **'sıralama'**
+  String get uiCoordFlySectionSort;
+
+  /// ui.coord.fly_timeline_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü zaman çizelgesinde gör'**
+  String get uiCoordFlyTimelineAll;
+
+  /// ui.coord.fly_add
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük ekle'**
+  String get uiCoordFlyAdd;
+
+  /// ui.coord.toast_add_form
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük formu açılır'**
+  String get uiCoordToastAddForm;
+
+  /// ui.coord.fly_all_list
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm liste'**
+  String get uiCoordFlyAllList;
+
+  /// ui.coord.sub_units_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'alt birim'**
+  String get uiCoordSubUnitsTail;
+
+  /// ui.coord.people_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi'**
+  String get uiCoordPeopleTail;
+
+  /// ui.coord.state_active
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif'**
+  String get uiCoordStateActive;
+
+  /// ui.coord.message_team
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekibe mesaj'**
+  String get uiCoordMessageTeam;
+
+  /// ui.coord.assign_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev ata'**
+  String get uiCoordAssignTask;
+
+  /// ui.coord.tabs_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük bölümleri'**
+  String get uiCoordTabsLabel;
+
+  /// ui.coord.tab_general
+  ///
+  /// In tr, this message translates to:
+  /// **'Genel'**
+  String get uiCoordTabGeneral;
+
+  /// ui.coord.tab_units
+  ///
+  /// In tr, this message translates to:
+  /// **'Birimler'**
+  String get uiCoordTabUnits;
+
+  /// ui.coord.tab_team
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekip'**
+  String get uiCoordTabTeam;
+
+  /// ui.coord.tab_about
+  ///
+  /// In tr, this message translates to:
+  /// **'Hakkında'**
+  String get uiCoordTabAbout;
+
+  /// ui.coord.summary
+  ///
+  /// In tr, this message translates to:
+  /// **'Özet'**
+  String get uiCoordSummary;
+
+  /// ui.coord.kpi_open
+  ///
+  /// In tr, this message translates to:
+  /// **'açık görev'**
+  String get uiCoordKpiOpen;
+
+  /// ui.coord.kpi_late
+  ///
+  /// In tr, this message translates to:
+  /// **'geciken'**
+  String get uiCoordKpiLate;
+
+  /// ui.coord.kpi_done
+  ///
+  /// In tr, this message translates to:
+  /// **'tamamlanma'**
+  String get uiCoordKpiDone;
+
+  /// ui.coord.pct_note_of
+  ///
+  /// In tr, this message translates to:
+  /// **'görevden'**
+  String get uiCoordPctNoteOf;
+
+  /// ui.coord.pct_note_done
+  ///
+  /// In tr, this message translates to:
+  /// **'tamamlandı'**
+  String get uiCoordPctNoteDone;
+
+  /// ui.coord.season_average
+  ///
+  /// In tr, this message translates to:
+  /// **'sezon ortalaması'**
+  String get uiCoordSeasonAverage;
+
+  /// ui.coord.attention
+  ///
+  /// In tr, this message translates to:
+  /// **'dikkat gerektirenler'**
+  String get uiCoordAttention;
+
+  /// ui.coord.all_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm görevler'**
+  String get uiCoordAllTasks;
+
+  /// ui.coord.days_late_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gün gecikti'**
+  String get uiCoordDaysLateTail;
+
+  /// ui.coord.shortcuts_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısayollar'**
+  String get uiCoordShortcutsLabel;
+
+  /// ui.coord.link_timeline
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman çizelgesinde gör'**
+  String get uiCoordLinkTimeline;
+
+  /// ui.coord.link_archive
+  ///
+  /// In tr, this message translates to:
+  /// **'Arşiv klasörü'**
+  String get uiCoordLinkArchive;
+
+  /// ui.coord.link_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantılar'**
+  String get uiCoordLinkMeetings;
+
+  /// ui.coord.link_report
+  ///
+  /// In tr, this message translates to:
+  /// **'Birim raporu'**
+  String get uiCoordLinkReport;
+
+  /// ui.coord.files_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'dosya'**
+  String get uiCoordFilesTail;
+
+  /// ui.coord.planned_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'planlı'**
+  String get uiCoordPlannedTail;
+
+  /// ui.coord.none
+  ///
+  /// In tr, this message translates to:
+  /// **'yok'**
+  String get uiCoordNone;
+
+  /// ui.coord.report_format
+  ///
+  /// In tr, this message translates to:
+  /// **'PDF'**
+  String get uiCoordReportFormat;
+
+  /// ui.coord.toast_meetings_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'toplantıları açılır'**
+  String get uiCoordToastMeetingsTail;
+
+  /// ui.coord.toast_report_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'raporu hazırlanıyor'**
+  String get uiCoordToastReportTail;
+
+  /// ui.coord.units
+  ///
+  /// In tr, this message translates to:
+  /// **'alt birimler'**
+  String get uiCoordUnits;
+
+  /// ui.coord.add
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekle'**
+  String get uiCoordAdd;
+
+  /// ui.coord.toast_add_unit_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'altına alt birim ekleme formu açılır'**
+  String get uiCoordToastAddUnitTail;
+
+  /// ui.coord.toast_unit_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'alt birimi açılır'**
+  String get uiCoordToastUnitTail;
+
+  /// ui.coord.team
+  ///
+  /// In tr, this message translates to:
+  /// **'ekip'**
+  String get uiCoordTeam;
+
+  /// ui.coord.add_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye ekle'**
+  String get uiCoordAddMember;
+
+  /// ui.coord.role_lead
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatör'**
+  String get uiCoordRoleLead;
+
+  /// ui.coord.role_member
+  ///
+  /// In tr, this message translates to:
+  /// **'üye'**
+  String get uiCoordRoleMember;
+
+  /// ui.coord.unassigned
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör atanmamış'**
+  String get uiCoordUnassigned;
+
+  /// ui.coord.unassigned_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev atanabilmesi için bir sorumlu seç'**
+  String get uiCoordUnassignedHint;
+
+  /// ui.coord.role_assign
+  ///
+  /// In tr, this message translates to:
+  /// **'ata'**
+  String get uiCoordRoleAssign;
+
+  /// ui.coord.toast_pick_lead_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'için koordinatör seçimi açılır'**
+  String get uiCoordToastPickLeadTail;
+
+  /// ui.coord.toast_person_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kişisel takip açılır'**
+  String get uiCoordToastPersonTail;
+
+  /// ui.coord.more_members_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'üye daha'**
+  String get uiCoordMoreMembersTail;
+
+  /// ui.coord.collapse
+  ///
+  /// In tr, this message translates to:
+  /// **'Daralt'**
+  String get uiCoordCollapse;
+
+  /// ui.coord.about
+  ///
+  /// In tr, this message translates to:
+  /// **'hakkında'**
+  String get uiCoordAbout;
+
+  /// ui.coord.fact_parent
+  ///
+  /// In tr, this message translates to:
+  /// **'Üst birim'**
+  String get uiCoordFactParent;
+
+  /// ui.coord.fact_founded
+  ///
+  /// In tr, this message translates to:
+  /// **'Kuruluş'**
+  String get uiCoordFactFounded;
+
+  /// ui.coord.fact_visibility
+  ///
+  /// In tr, this message translates to:
+  /// **'Görünürlük'**
+  String get uiCoordFactVisibility;
+
+  /// ui.coord.visibility_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm koordinatörler'**
+  String get uiCoordVisibilityAll;
+
+  /// ui.coord.feed
+  ///
+  /// In tr, this message translates to:
+  /// **'son etkinlik'**
+  String get uiCoordFeed;
+
+  /// ui.coord.more_actions
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer işlemler'**
+  String get uiCoordMoreActions;
+
+  /// ui.coord.menu_title_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'işlemleri'**
+  String get uiCoordMenuTitleTail;
+
+  /// ui.coord.menu_edit
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilgileri düzenle'**
+  String get uiCoordMenuEdit;
+
+  /// ui.coord.toast_edit_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'düzenleme formu açılır'**
+  String get uiCoordToastEditTail;
+
+  /// ui.coord.menu_meeting
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı planla'**
+  String get uiCoordMenuMeeting;
+
+  /// ui.coord.menu_parent
+  ///
+  /// In tr, this message translates to:
+  /// **'Üst birimi değiştir'**
+  String get uiCoordMenuParent;
+
+  /// ui.coord.toast_parent
+  ///
+  /// In tr, this message translates to:
+  /// **'Üst birim seçimi açılır'**
+  String get uiCoordToastParent;
+
+  /// ui.coord.menu_merge
+  ///
+  /// In tr, this message translates to:
+  /// **'Başka koordinatörlükle birleştir'**
+  String get uiCoordMenuMerge;
+
+  /// ui.coord.toast_merge
+  ///
+  /// In tr, this message translates to:
+  /// **'Birleştirme önizlemesi açılır'**
+  String get uiCoordToastMerge;
+
+  /// ui.coord.menu_deactivate
+  ///
+  /// In tr, this message translates to:
+  /// **'Pasifleştir'**
+  String get uiCoordMenuDeactivate;
+
+  /// ui.coord.toast_deactivated_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'pasifleştirildi · görevler arşivde kalır'**
+  String get uiCoordToastDeactivatedTail;
+
+  /// ui.coord.not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu koordinatörlük bulunamadı.'**
+  String get uiCoordNotFound;
 
   /// ui.feedback.loading
   ///
@@ -1941,6 +2673,36 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu cihazdaki oturum kapatılır.'**
   String get uiIdentitySignOutConfirmMessage;
+
+  /// ui.identity.login_intro
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta adresin ve parolanla devam et.'**
+  String get uiIdentityLoginIntro;
+
+  /// ui.identity.login_submitting
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş yapılıyor…'**
+  String get uiIdentityLoginSubmitting;
+
+  /// ui.identity.login_email_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'ad@alan.com'**
+  String get uiIdentityLoginEmailHint;
+
+  /// ui.identity.login_password_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Parolan'**
+  String get uiIdentityLoginPasswordHint;
+
+  /// ui.identity.login_version_prefix
+  ///
+  /// In tr, this message translates to:
+  /// **'v'**
+  String get uiIdentityLoginVersionPrefix;
 
   /// ui.inputs.password_show
   ///

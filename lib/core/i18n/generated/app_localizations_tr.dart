@@ -665,6 +665,128 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiActivityTitle => 'İşlem geçmişi';
 
   @override
+  String get uiActivityIntro =>
+      'Portaldaki tüm işlemler değiştirilemez biçimde saklanır.';
+
+  @override
+  String get uiActivityCsv => 'CSV olarak indir';
+
+  @override
+  String get uiActivityCsvExport => 'CSV indirme';
+
+  @override
+  String get uiActivitySearchHint => 'İşlem, hedef veya kişi ara';
+
+  @override
+  String get uiActivityFilters => 'Filtreler';
+
+  @override
+  String get uiActivityFiltersLabel => 'Filtreler · yapan, koordinatörlük';
+
+  @override
+  String get uiActivityTypeLabel => 'Tür';
+
+  @override
+  String get uiActivityTypeAll => 'Tümü';
+
+  @override
+  String get uiActivityTypeTask => 'Görev';
+
+  @override
+  String get uiActivityTypeFile => 'Dosya';
+
+  @override
+  String get uiActivityTypeMeeting => 'Toplantı';
+
+  @override
+  String get uiActivityTypeMessage => 'Mesaj';
+
+  @override
+  String get uiActivityTypeAccount => 'Hesap';
+
+  @override
+  String get uiActivityChipType => 'Tür:';
+
+  @override
+  String get uiActivityRemoveType => 'Tür filtresini kaldır';
+
+  @override
+  String get uiActivityRemoveCoord => 'Koordinatörlük filtresini kaldır';
+
+  @override
+  String get uiActivityRemoveTail => 'filtresini kaldır';
+
+  @override
+  String get uiActivityClearAll => 'Tümünü temizle';
+
+  @override
+  String get uiActivityRecords => 'Kayıtlar';
+
+  @override
+  String get uiActivityToday => 'Bugün';
+
+  @override
+  String get uiActivityYesterday => 'Dün';
+
+  @override
+  String get uiActivityEmpty => 'Bu filtrelerle eşleşen kayıt yok.';
+
+  @override
+  String get uiActivityClearFilters => 'Filtreleri temizle';
+
+  @override
+  String get uiActivityMore => 'Daha fazla göster';
+
+  @override
+  String get uiActivityShownTail => 'kayıt gösteriliyor';
+
+  @override
+  String get uiActivityFooter =>
+      'Kayıtlar değiştirilemez ve silinemez; denetim için saklanır.';
+
+  @override
+  String get uiActivityClear => 'Temizle';
+
+  @override
+  String get uiActivityByRole => 'yapan · rolüne göre';
+
+  @override
+  String get uiActivityCoordinatorship => 'koordinatörlük';
+
+  @override
+  String get uiActivityApplyTail => 'kaydı göster';
+
+  @override
+  String get uiActivityRoleAdmin => 'Admin';
+
+  @override
+  String get uiActivityRoleCoordinator => 'Koordinatör';
+
+  @override
+  String get uiActivityRoleMember => 'Üye';
+
+  @override
+  String get uiActivityCountTail => 'kayıt';
+
+  @override
+  String get uiActivityShortcuts => 'İşlem geçmişi kısayolları';
+
+  @override
+  String get uiActivitySectionType => 'kayıt türü';
+
+  @override
+  String get uiActivitySectionHistory => 'işlem geçmişi';
+
+  @override
+  String get uiActivityFlyFilter => 'Kişi ve koordinatörlük filtresi';
+
+  @override
+  String get uiActivityFlyHome => 'Ana sayfaya dön';
+
+  @override
+  String get uiActivitySoonTail => 'mobilde sonraki adımda eklenecek';
+
+  @override
   String get uiArchiveTitle => 'Arşiv';
 
   @override
@@ -690,6 +812,253 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordDetailTitle => 'Koordinatörlük';
+
+  @override
+  String get uiCoordCountTail => 'koordinatörlük';
+
+  @override
+  String get uiCoordTasksTail => 'görev';
+
+  @override
+  String get uiCoordLateCoordsTail => 'koordinatörlükte gecikme';
+
+  @override
+  String get uiCoordDoneTail => 'bitti';
+
+  @override
+  String get uiCoordLateTail => 'gecikmede';
+
+  @override
+  String get uiCoordNoLead => 'Koordinatör yok';
+
+  @override
+  String get uiCoordMemberSuffix => '(üye)';
+
+  @override
+  String get uiCoordListLabel => 'Koordinatörlük listesi';
+
+  @override
+  String get uiCoordSortName => 'Ada göre';
+
+  @override
+  String get uiCoordSortLate => 'Gecikmeye göre';
+
+  @override
+  String get uiCoordSortProgress => 'İlerlemeye göre';
+
+  @override
+  String get uiCoordShortcuts => 'Koordinatörlük kısayolları';
+
+  @override
+  String get uiCoordFlySectionList => 'koordinatörlükler';
+
+  @override
+  String get uiCoordFlySectionSort => 'sıralama';
+
+  @override
+  String get uiCoordFlyTimelineAll => 'Tümünü zaman çizelgesinde gör';
+
+  @override
+  String get uiCoordFlyAdd => 'Koordinatörlük ekle';
+
+  @override
+  String get uiCoordToastAddForm => 'Koordinatörlük formu açılır';
+
+  @override
+  String get uiCoordFlyAllList => 'Tüm liste';
+
+  @override
+  String get uiCoordSubUnitsTail => 'alt birim';
+
+  @override
+  String get uiCoordPeopleTail => 'kişi';
+
+  @override
+  String get uiCoordStateActive => 'Aktif';
+
+  @override
+  String get uiCoordMessageTeam => 'Ekibe mesaj';
+
+  @override
+  String get uiCoordAssignTask => 'Görev ata';
+
+  @override
+  String get uiCoordTabsLabel => 'Koordinatörlük bölümleri';
+
+  @override
+  String get uiCoordTabGeneral => 'Genel';
+
+  @override
+  String get uiCoordTabUnits => 'Birimler';
+
+  @override
+  String get uiCoordTabTeam => 'Ekip';
+
+  @override
+  String get uiCoordTabAbout => 'Hakkında';
+
+  @override
+  String get uiCoordSummary => 'Özet';
+
+  @override
+  String get uiCoordKpiOpen => 'açık görev';
+
+  @override
+  String get uiCoordKpiLate => 'geciken';
+
+  @override
+  String get uiCoordKpiDone => 'tamamlanma';
+
+  @override
+  String get uiCoordPctNoteOf => 'görevden';
+
+  @override
+  String get uiCoordPctNoteDone => 'tamamlandı';
+
+  @override
+  String get uiCoordSeasonAverage => 'sezon ortalaması';
+
+  @override
+  String get uiCoordAttention => 'dikkat gerektirenler';
+
+  @override
+  String get uiCoordAllTasks => 'Tüm görevler';
+
+  @override
+  String get uiCoordDaysLateTail => 'gün gecikti';
+
+  @override
+  String get uiCoordShortcutsLabel => 'Kısayollar';
+
+  @override
+  String get uiCoordLinkTimeline => 'Zaman çizelgesinde gör';
+
+  @override
+  String get uiCoordLinkArchive => 'Arşiv klasörü';
+
+  @override
+  String get uiCoordLinkMeetings => 'Toplantılar';
+
+  @override
+  String get uiCoordLinkReport => 'Birim raporu';
+
+  @override
+  String get uiCoordFilesTail => 'dosya';
+
+  @override
+  String get uiCoordPlannedTail => 'planlı';
+
+  @override
+  String get uiCoordNone => 'yok';
+
+  @override
+  String get uiCoordReportFormat => 'PDF';
+
+  @override
+  String get uiCoordToastMeetingsTail => 'toplantıları açılır';
+
+  @override
+  String get uiCoordToastReportTail => 'raporu hazırlanıyor';
+
+  @override
+  String get uiCoordUnits => 'alt birimler';
+
+  @override
+  String get uiCoordAdd => 'Ekle';
+
+  @override
+  String get uiCoordToastAddUnitTail => 'altına alt birim ekleme formu açılır';
+
+  @override
+  String get uiCoordToastUnitTail => 'alt birimi açılır';
+
+  @override
+  String get uiCoordTeam => 'ekip';
+
+  @override
+  String get uiCoordAddMember => 'Üye ekle';
+
+  @override
+  String get uiCoordRoleLead => 'koordinatör';
+
+  @override
+  String get uiCoordRoleMember => 'üye';
+
+  @override
+  String get uiCoordUnassigned => 'Koordinatör atanmamış';
+
+  @override
+  String get uiCoordUnassignedHint => 'Görev atanabilmesi için bir sorumlu seç';
+
+  @override
+  String get uiCoordRoleAssign => 'ata';
+
+  @override
+  String get uiCoordToastPickLeadTail => 'için koordinatör seçimi açılır';
+
+  @override
+  String get uiCoordToastPersonTail => 'kişisel takip açılır';
+
+  @override
+  String get uiCoordMoreMembersTail => 'üye daha';
+
+  @override
+  String get uiCoordCollapse => 'Daralt';
+
+  @override
+  String get uiCoordAbout => 'hakkında';
+
+  @override
+  String get uiCoordFactParent => 'Üst birim';
+
+  @override
+  String get uiCoordFactFounded => 'Kuruluş';
+
+  @override
+  String get uiCoordFactVisibility => 'Görünürlük';
+
+  @override
+  String get uiCoordVisibilityAll => 'Tüm koordinatörler';
+
+  @override
+  String get uiCoordFeed => 'son etkinlik';
+
+  @override
+  String get uiCoordMoreActions => 'Diğer işlemler';
+
+  @override
+  String get uiCoordMenuTitleTail => 'işlemleri';
+
+  @override
+  String get uiCoordMenuEdit => 'Bilgileri düzenle';
+
+  @override
+  String get uiCoordToastEditTail => 'düzenleme formu açılır';
+
+  @override
+  String get uiCoordMenuMeeting => 'Toplantı planla';
+
+  @override
+  String get uiCoordMenuParent => 'Üst birimi değiştir';
+
+  @override
+  String get uiCoordToastParent => 'Üst birim seçimi açılır';
+
+  @override
+  String get uiCoordMenuMerge => 'Başka koordinatörlükle birleştir';
+
+  @override
+  String get uiCoordToastMerge => 'Birleştirme önizlemesi açılır';
+
+  @override
+  String get uiCoordMenuDeactivate => 'Pasifleştir';
+
+  @override
+  String get uiCoordToastDeactivatedTail =>
+      'pasifleştirildi · görevler arşivde kalır';
+
+  @override
+  String get uiCoordNotFound => 'Bu koordinatörlük bulunamadı.';
 
   @override
   String get uiFeedbackLoading => 'Yükleniyor';
@@ -1017,6 +1386,21 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiIdentitySignOutConfirmMessage =>
       'Bu cihazdaki oturum kapatılır.';
+
+  @override
+  String get uiIdentityLoginIntro => 'E-posta adresin ve parolanla devam et.';
+
+  @override
+  String get uiIdentityLoginSubmitting => 'Giriş yapılıyor…';
+
+  @override
+  String get uiIdentityLoginEmailHint => 'ad@alan.com';
+
+  @override
+  String get uiIdentityLoginPasswordHint => 'Parolan';
+
+  @override
+  String get uiIdentityLoginVersionPrefix => 'v';
 
   @override
   String get uiInputsPasswordShow => 'Parolayı göster';

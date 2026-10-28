@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gap/gap.dart';
 
 import '../../../errors/api_error.dart';
 import '../../../theme/generated/tokens.gen.dart';
@@ -33,6 +34,7 @@ class NzTextField extends StatefulWidget {
     this.enabled = true,
     this.readOnly = false,
     this.size = NzSize.md,
+    this.labelAbove = false,
     this.leading,
     this.trailing,
     this.textInputAction = TextInputAction.next,
@@ -57,6 +59,7 @@ class NzTextField extends StatefulWidget {
     this.enabled = true,
     this.readOnly = false,
     this.size = NzSize.md,
+    this.labelAbove = false,
     this.leading,
     this.trailing,
     this.textInputAction = TextInputAction.next,
@@ -80,6 +83,7 @@ class NzTextField extends StatefulWidget {
     this.enabled = true,
     this.readOnly = false,
     this.size = NzSize.md,
+    this.labelAbove = false,
     this.leading,
     this.trailing,
     this.focusNode,
@@ -105,6 +109,7 @@ class NzTextField extends StatefulWidget {
     this.enabled = true,
     this.readOnly = false,
     this.size = NzSize.md,
+    this.labelAbove = false,
     this.leading,
     this.trailing,
     this.textInputAction = TextInputAction.next,
@@ -130,6 +135,10 @@ class NzTextField extends StatefulWidget {
   final bool enabled;
   final bool readOnly;
   final NzSize size;
+
+  /// true → etiket kutunun içinde yüzmez, üstünde durur (prototip `.t-label`: 13/600, altında
+  /// 8 boşluk; giriş ekranı). Okuyucuda etiket alanla birleşir.
+  final bool labelAbove;
 
   /// Girdinin başında (ör. simge).
   final Widget? leading;
@@ -161,7 +170,7 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
     final number = widget._kind == _TextFieldKind.number;
     final validator = widget.validator;
     final l = context.l10n;
-    return TextFormField(
+    final field = TextFormField(
       controller: widget.controller,
       initialValue: widget.controller == null ? widget.initialValue : null,
       focusNode: widget.focusNode,
@@ -186,7 +195,7 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
       maxLines: multiline ? 6 : 1,
       maxLength: widget.maxLength,
       decoration: InputDecoration(
-        labelText: widget.label,
+        labelText: widget.labelAbove ? null : widget.label,
         hintText: widget.hint,
         helperText: widget.helper,
         helperMaxLines: 4,
@@ -210,7 +219,42 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
       },
       onFieldSubmitted: widget.onSubmitted,
     );
+    return widget.labelAbove
+        ? NzFieldLabelAbove(label: widget.label, child: field)
+        : field;
   }
+}
+
+/// Alanın üstündeki etiket (prototip `.t-label`): 13/600 `ink`, altında 8; okuyucuda etiket
+/// ile alan tek düğümdür. [NzTextField] ve `NzPasswordField` `labelAbove` ile kullanır.
+class NzFieldLabelAbove extends StatelessWidget {
+  const NzFieldLabelAbove({
+    super.key,
+    required this.label,
+    required this.child,
+  });
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => MergeSemantics(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: context.text.labelMd.copyWith(
+            fontWeight: FontWeight.w600,
+            color: context.colors.text,
+          ),
+        ),
+        const Gap(NizamioSpacing.space2),
+        child,
+      ],
+    ),
+  );
 }
 
 /// Boyuta göre yazı rolü ve dikey iç boşluk (tek görünüm fark noktası). Dokunma alanı

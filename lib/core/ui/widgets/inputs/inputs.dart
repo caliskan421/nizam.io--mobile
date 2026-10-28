@@ -1,4 +1,5 @@
 export 'nz_checkbox.dart';
+export 'nz_composer.dart';
 export 'nz_field_errors.dart';
 export 'nz_filter_rail.dart';
 export 'nz_form.dart';

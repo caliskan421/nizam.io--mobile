@@ -8,17 +8,17 @@ part of 'messages_nav_caption.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Alt menüde bu modül etkinken görünen mono alt yazı (ör. "76 görev"); null → yok.
+/// Alt menüde bu modül etkinken görünen mono alt yazı ("5 okunmamış"); veri yokken null.
 
 @ProviderFor(messagesNavCaption)
 final messagesNavCaptionProvider = MessagesNavCaptionProvider._();
 
-/// Alt menüde bu modül etkinken görünen mono alt yazı (ör. "76 görev"); null → yok.
+/// Alt menüde bu modül etkinken görünen mono alt yazı ("5 okunmamış"); veri yokken null.
 
 final class MessagesNavCaptionProvider
     extends $FunctionalProvider<String?, String?, String?>
     with $Provider<String?> {
-  /// Alt menüde bu modül etkinken görünen mono alt yazı (ör. "76 görev"); null → yok.
+  /// Alt menüde bu modül etkinken görünen mono alt yazı ("5 okunmamış"); veri yokken null.
   MessagesNavCaptionProvider._()
     : super(
         from: null,
@@ -53,4 +53,4 @@ final class MessagesNavCaptionProvider
 }
 
 String _$messagesNavCaptionHash() =>
-    r'3f85c748883b244cd0d0351162ac1d0c4c3eddf0';
+    r'a51c3cf0d57d6f50bdfbad01bb68ab7f9c9576fe';

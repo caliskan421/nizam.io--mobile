@@ -671,6 +671,242 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveFolderTitle => 'Klasör';
 
   @override
+  String get uiArchiveSearch => 'Arşivde ara';
+
+  @override
+  String get uiArchiveSearchHint => 'Dosya, görev, kişi veya etiket';
+
+  @override
+  String get uiArchiveUpload => 'Dosya yükle';
+
+  @override
+  String get uiArchiveUploadShort => 'Yükle';
+
+  @override
+  String get uiArchiveUploadSoon => 'Dosya yükleme sonraki adımda tasarlanacak';
+
+  @override
+  String get uiArchiveTags => 'Etiketler';
+
+  @override
+  String get uiArchiveTagsClear => 'Temizle';
+
+  @override
+  String get uiArchiveNewTag => 'Yeni etiket';
+
+  @override
+  String get uiArchiveTagColor => 'Etiket rengi';
+
+  @override
+  String get uiArchiveAddTag => 'Etiketi ekle';
+
+  @override
+  String get uiArchiveTagAdded => 'etiketi eklendi';
+
+  @override
+  String get uiArchiveColorViolet => 'Mor';
+
+  @override
+  String get uiArchiveColorGold => 'Sarı';
+
+  @override
+  String get uiArchiveColorGreen => 'Yeşil';
+
+  @override
+  String get uiArchiveColorRed => 'Kırmızı';
+
+  @override
+  String get uiArchiveColorGray => 'Gri';
+
+  @override
+  String get uiArchiveTagField => 'Saha görselleri';
+
+  @override
+  String get uiArchiveTagResult => 'Sonuç dosyası';
+
+  @override
+  String get uiArchiveTagData => 'Güncel durum verisi';
+
+  @override
+  String get uiArchiveTagFieldShort => 'Saha';
+
+  @override
+  String get uiArchiveTagResultShort => 'Sonuç';
+
+  @override
+  String get uiArchiveTagDataShort => 'Güncel';
+
+  @override
+  String get uiArchiveStorage => 'Depolama';
+
+  @override
+  String get uiArchiveMb => 'MB';
+
+  @override
+  String get uiArchiveKb => 'KB';
+
+  @override
+  String get uiArchiveFilesLc => 'dosya';
+
+  @override
+  String get uiArchiveFoldersLc => 'klasör';
+
+  @override
+  String get uiArchiveCoordinatorshipsLc => 'koordinatörlükler';
+
+  @override
+  String get uiArchiveSortRecent => 'Son yükleme';
+
+  @override
+  String get uiArchiveSortName => 'Ada göre';
+
+  @override
+  String get uiArchiveSortSize => 'Boyuta göre';
+
+  @override
+  String get uiArchiveSortHint => 'Sıralamayı değiştir';
+
+  @override
+  String get uiArchiveNoFiles => 'Dosya yok';
+
+  @override
+  String get uiArchiveEmptySearch => 'Bu aramayla eşleşen klasör yok.';
+
+  @override
+  String get uiArchiveDownloadAll => 'Tümünü indir';
+
+  @override
+  String get uiArchiveDownloadAllToast =>
+      'Tüm arşiv hazırlanıyor · bitince bildirim gelir';
+
+  @override
+  String get uiArchiveCreateFolder => 'Klasör oluştur';
+
+  @override
+  String get uiArchiveCreateFolderSoon =>
+      'Klasör oluşturma sonraki adımda tasarlanacak';
+
+  @override
+  String get uiArchiveShortcuts => 'Arşiv kısayolları';
+
+  @override
+  String get uiArchiveSectionArchive => 'arşiv';
+
+  @override
+  String get uiArchiveSectionGo => 'git';
+
+  @override
+  String get uiArchiveGoCoordinatorships => 'Koordinatörlükler';
+
+  @override
+  String get uiArchiveSectionFolders => 'arşiv klasörleri';
+
+  @override
+  String get uiArchiveAllArchive => 'Tüm arşiv';
+
+  @override
+  String get uiArchiveZip => 'Klasörü ZIP olarak indir';
+
+  @override
+  String get uiArchiveZipToast => 'klasörü ZIP olarak hazırlanıyor';
+
+  @override
+  String get uiArchiveCoordinatorship => 'Koordinatörlük';
+
+  @override
+  String get uiArchiveNoLead => 'Koordinatör yok';
+
+  @override
+  String get uiArchiveTabs => 'Klasör';
+
+  @override
+  String get uiArchiveTabTasks => 'Görev klasörleri';
+
+  @override
+  String get uiArchiveTabFiles => 'Dosyalar';
+
+  @override
+  String get uiArchiveFilterAll => 'Tümü';
+
+  @override
+  String get uiArchiveTagFilter => 'Etiket süzgeci';
+
+  @override
+  String get uiArchiveRemoveTaskFilter => 'Görev filtresini kaldır';
+
+  @override
+  String get uiArchiveEmptyFiles => 'Bu filtreyle eşleşen dosya yok.';
+
+  @override
+  String get uiArchivePreview => 'Dosya önizleme';
+
+  @override
+  String get uiArchivePrev => 'Önceki dosya';
+
+  @override
+  String get uiArchiveNext => 'Sonraki dosya';
+
+  @override
+  String get uiArchivePreviewArea => 'Önizleme alanı';
+
+  @override
+  String get uiArchiveFactTask => 'Görev';
+
+  @override
+  String get uiArchiveFactTag => 'Etiket';
+
+  @override
+  String get uiArchiveFactBy => 'Yükleyen';
+
+  @override
+  String get uiArchiveFactDate => 'Tarih';
+
+  @override
+  String get uiArchiveUploaderUnknown => 'Admin';
+
+  @override
+  String get uiArchiveDownload => 'İndir';
+
+  @override
+  String get uiArchiveDownloading => 'indiriliyor';
+
+  @override
+  String get uiArchiveRetag => 'Etiketi değiştir';
+
+  @override
+  String get uiArchiveMove => 'Başka klasöre taşı';
+
+  @override
+  String get uiArchiveDelete => 'Dosyayı sil';
+
+  @override
+  String get uiArchiveRetagSoon => 'Etiket seçimi sonraki adımda tasarlanacak';
+
+  @override
+  String get uiArchiveMoveSoon => 'Klasör seçimi sonraki adımda tasarlanacak';
+
+  @override
+  String get uiArchiveDeleted => 'Dosya silinen kayıtlara taşındı';
+
+  @override
+  String get uiArchiveKindImage => 'Resim';
+
+  @override
+  String get uiArchiveKindDocument => 'Belge';
+
+  @override
+  String get uiArchiveKindPdf => 'PDF';
+
+  @override
+  String get uiArchiveKindImageShort => 'IMG';
+
+  @override
+  String get uiArchiveKindDocumentShort => 'DOC';
+
+  @override
+  String get uiArchiveKindPdfShort => 'PDF';
+
+  @override
   String get uiButtonsBusy => 'Meşgul';
 
   @override
@@ -1070,6 +1306,298 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMessagesChatTitle => 'Sohbet';
+
+  @override
+  String get uiMessagesSearch => 'Sohbetlerde ara';
+
+  @override
+  String get uiMessagesSearchHint => 'Kişi, grup veya mesaj';
+
+  @override
+  String get uiMessagesNewMessage => 'Yeni mesaj';
+
+  @override
+  String get uiMessagesNewChatSoon => 'Yeni sohbet sonraki adımda tasarlanacak';
+
+  @override
+  String get uiMessagesFilters => 'Sohbet süzgeci';
+
+  @override
+  String get uiMessagesFilterAll => 'Tümü';
+
+  @override
+  String get uiMessagesFilterUnread => 'Okunmamış';
+
+  @override
+  String get uiMessagesFilterGroups => 'Gruplar';
+
+  @override
+  String get uiMessagesFilterPeople => 'Kişiler';
+
+  @override
+  String get uiMessagesYou => 'Sen';
+
+  @override
+  String get uiMessagesEmpty => 'Eşleşen sohbet yok.';
+
+  @override
+  String get uiMessagesUnreadLc => 'okunmamış';
+
+  @override
+  String get uiMessagesShortcuts => 'Mesaj kısayolları';
+
+  @override
+  String get uiMessagesSectionMessages => 'mesajlar';
+
+  @override
+  String get uiMessagesUnreadOnly => 'Okunmamışlar';
+
+  @override
+  String get uiMessagesMarkAllRead => 'Tümünü okundu say';
+
+  @override
+  String get uiMessagesToday => 'Bugün';
+
+  @override
+  String get uiMessagesYesterday => 'Dün';
+
+  @override
+  String get uiMessagesMembersLc => 'üye';
+
+  @override
+  String get uiMessagesTyping => 'yazıyor…';
+
+  @override
+  String get uiMessagesOnline => 'çevrimiçi';
+
+  @override
+  String get uiMessagesLastSeen => 'son görülme';
+
+  @override
+  String get uiMessagesYesterdayLc => 'dün';
+
+  @override
+  String get uiMessagesSearchChat => 'Sohbette ara';
+
+  @override
+  String get uiMessagesSearchChatSoon =>
+      'Sohbette arama sonraki adımda tasarlanacak';
+
+  @override
+  String get uiMessagesPinned => 'Sabitlenen mesaj';
+
+  @override
+  String get uiMessagesNewMessages => 'okunmamış mesajlar';
+
+  @override
+  String get uiMessagesEdited => 'düzenlendi';
+
+  @override
+  String get uiMessagesToBottom => 'En alta in';
+
+  @override
+  String get uiMessagesMessageHint => 'Mesaj';
+
+  @override
+  String get uiMessagesSend => 'Gönder';
+
+  @override
+  String get uiMessagesAttach => 'Görev, koordinatörlük veya arşiv ekle';
+
+  @override
+  String get uiMessagesPhotoVideo => 'Fotoğraf ve video';
+
+  @override
+  String get uiMessagesFile => 'Dosya';
+
+  @override
+  String get uiMessagesPortalRefs => 'portaldan atıf';
+
+  @override
+  String get uiMessagesRefTask => 'Görev';
+
+  @override
+  String get uiMessagesRefCoordinatorship => 'Koordinatörlük';
+
+  @override
+  String get uiMessagesRefArchive => 'Arşiv';
+
+  @override
+  String get uiMessagesSearchTask => 'Görev ara';
+
+  @override
+  String get uiMessagesSearchCoordinatorship => 'Koordinatörlük ara';
+
+  @override
+  String get uiMessagesSearchFile => 'Arşivde dosya ara';
+
+  @override
+  String get uiMessagesRemove => 'Kaldır';
+
+  @override
+  String get uiMessagesCancel => 'Vazgeç';
+
+  @override
+  String get uiMessagesEditMessage => 'Mesajı düzenle';
+
+  @override
+  String get uiMessagesReplySelf => 'Kendine yanıt';
+
+  @override
+  String get uiMessagesReplyTo => 'kişisine yanıt';
+
+  @override
+  String get uiMessagesVotedTail => 'kişi oy verdi';
+
+  @override
+  String get uiMessagesVotesLc => 'oy';
+
+  @override
+  String get uiMessagesReactLike => 'Beğen';
+
+  @override
+  String get uiMessagesReactHeart => 'Kalp';
+
+  @override
+  String get uiMessagesReactCheck => 'Onay';
+
+  @override
+  String get uiMessagesReactStar => 'Yıldız';
+
+  @override
+  String get uiMessagesMessageActions => 'Mesaj işlemleri';
+
+  @override
+  String get uiMessagesMessage => 'Mesaj';
+
+  @override
+  String get uiMessagesQuoteJump => 'Alıntılanan mesaja git';
+
+  @override
+  String get uiMessagesReply => 'Yanıtla';
+
+  @override
+  String get uiMessagesCopy => 'Kopyala';
+
+  @override
+  String get uiMessagesPin => 'Sabitle';
+
+  @override
+  String get uiMessagesUnpin => 'Sabiti kaldır';
+
+  @override
+  String get uiMessagesEdit => 'Düzenle';
+
+  @override
+  String get uiMessagesCopied => 'Mesaj kopyalandı';
+
+  @override
+  String get uiMessagesPinnedToast => 'Mesaj sabitlendi';
+
+  @override
+  String get uiMessagesUnpinnedToast => 'Sabitleme kaldırıldı';
+
+  @override
+  String get uiMessagesPollResults => 'Anket sonuçları';
+
+  @override
+  String get uiMessagesPollResultsLc => 'anket sonuçları';
+
+  @override
+  String get uiMessagesToTask => 'Göreve dönüştür';
+
+  @override
+  String get uiMessagesDelete => 'Sil';
+
+  @override
+  String get uiMessagesDeleted => 'Mesaj silindi';
+
+  @override
+  String get uiMessagesNotVoted => 'Henüz oy vermeyenler';
+
+  @override
+  String get uiMessagesNotVotedNone => 'Grubun diğer üyeleri henüz oy vermedi';
+
+  @override
+  String get uiMessagesRemind => 'Hatırlat';
+
+  @override
+  String get uiMessagesReminded => 'Oy vermeyenlere hatırlatma gönderildi';
+
+  @override
+  String get uiMessagesEndPoll => 'Anketi bitir';
+
+  @override
+  String get uiMessagesPollEnded => 'Anket bitti';
+
+  @override
+  String get uiMessagesPollConcluded => 'Anket sonuçlandı';
+
+  @override
+  String get uiMessagesConcluded => 'sonuçlandı';
+
+  @override
+  String get uiMessagesGroupInfo => 'grup bilgisi';
+
+  @override
+  String get uiMessagesPersonInfo => 'kişi bilgisi';
+
+  @override
+  String get uiMessagesInfo => 'bilgisi';
+
+  @override
+  String get uiMessagesMute => 'Sessize al';
+
+  @override
+  String get uiMessagesMutedTail => 'sessize alındı';
+
+  @override
+  String get uiMessagesLeaveGroup => 'Gruptan çık';
+
+  @override
+  String get uiMessagesBlock => 'Engelle';
+
+  @override
+  String get uiMessagesActionSoon => 'Bu işlem sonraki adımda tasarlanacak';
+
+  @override
+  String get uiMessagesShared => 'paylaşılanlar';
+
+  @override
+  String get uiMessagesMembers => 'üyeler';
+
+  @override
+  String get uiMessagesAllUsers => 'Tüm kullanıcılar';
+
+  @override
+  String get uiMessagesGroup => 'Grup';
+
+  @override
+  String get uiMessagesWroteHere => 'bu sohbette yazdı';
+
+  @override
+  String get uiMessagesMember => 'üye';
+
+  @override
+  String get uiMessagesManager => 'yönetici';
+
+  @override
+  String get uiMessagesPhoto => 'Fotoğraf';
+
+  @override
+  String get uiMessagesDownloading => 'indiriliyor';
+
+  @override
+  String get uiMessagesRoleAdmin => 'Admin';
+
+  @override
+  String get uiMessagesRoleCoordinator => 'Koordinatör';
+
+  @override
+  String get uiMessagesRoleMember => 'Üye';
+
+  @override
+  String get uiMessagesNewChatHint => 'Kişi seç';
 
   @override
   String get uiRouterTabHome => 'Ana sayfa';

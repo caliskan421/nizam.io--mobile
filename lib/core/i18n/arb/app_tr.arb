@@ -773,6 +773,318 @@
   "@uiArchiveFolderTitle": {
     "description": "ui.archive.folder_title"
   },
+  "uiArchiveSearch": "Arşivde ara",
+  "@uiArchiveSearch": {
+    "description": "ui.archive.search"
+  },
+  "uiArchiveSearchHint": "Dosya, görev, kişi veya etiket",
+  "@uiArchiveSearchHint": {
+    "description": "ui.archive.search_hint"
+  },
+  "uiArchiveUpload": "Dosya yükle",
+  "@uiArchiveUpload": {
+    "description": "ui.archive.upload"
+  },
+  "uiArchiveUploadShort": "Yükle",
+  "@uiArchiveUploadShort": {
+    "description": "ui.archive.upload_short"
+  },
+  "uiArchiveUploadSoon": "Dosya yükleme sonraki adımda tasarlanacak",
+  "@uiArchiveUploadSoon": {
+    "description": "ui.archive.upload_soon"
+  },
+  "uiArchiveTags": "Etiketler",
+  "@uiArchiveTags": {
+    "description": "ui.archive.tags"
+  },
+  "uiArchiveTagsClear": "Temizle",
+  "@uiArchiveTagsClear": {
+    "description": "ui.archive.tags_clear"
+  },
+  "uiArchiveNewTag": "Yeni etiket",
+  "@uiArchiveNewTag": {
+    "description": "ui.archive.new_tag"
+  },
+  "uiArchiveTagColor": "Etiket rengi",
+  "@uiArchiveTagColor": {
+    "description": "ui.archive.tag_color"
+  },
+  "uiArchiveAddTag": "Etiketi ekle",
+  "@uiArchiveAddTag": {
+    "description": "ui.archive.add_tag"
+  },
+  "uiArchiveTagAdded": "etiketi eklendi",
+  "@uiArchiveTagAdded": {
+    "description": "ui.archive.tag_added"
+  },
+  "uiArchiveColorViolet": "Mor",
+  "@uiArchiveColorViolet": {
+    "description": "ui.archive.color_violet"
+  },
+  "uiArchiveColorGold": "Sarı",
+  "@uiArchiveColorGold": {
+    "description": "ui.archive.color_gold"
+  },
+  "uiArchiveColorGreen": "Yeşil",
+  "@uiArchiveColorGreen": {
+    "description": "ui.archive.color_green"
+  },
+  "uiArchiveColorRed": "Kırmızı",
+  "@uiArchiveColorRed": {
+    "description": "ui.archive.color_red"
+  },
+  "uiArchiveColorGray": "Gri",
+  "@uiArchiveColorGray": {
+    "description": "ui.archive.color_gray"
+  },
+  "uiArchiveTagField": "Saha görselleri",
+  "@uiArchiveTagField": {
+    "description": "ui.archive.tag_field"
+  },
+  "uiArchiveTagResult": "Sonuç dosyası",
+  "@uiArchiveTagResult": {
+    "description": "ui.archive.tag_result"
+  },
+  "uiArchiveTagData": "Güncel durum verisi",
+  "@uiArchiveTagData": {
+    "description": "ui.archive.tag_data"
+  },
+  "uiArchiveTagFieldShort": "Saha",
+  "@uiArchiveTagFieldShort": {
+    "description": "ui.archive.tag_field_short"
+  },
+  "uiArchiveTagResultShort": "Sonuç",
+  "@uiArchiveTagResultShort": {
+    "description": "ui.archive.tag_result_short"
+  },
+  "uiArchiveTagDataShort": "Güncel",
+  "@uiArchiveTagDataShort": {
+    "description": "ui.archive.tag_data_short"
+  },
+  "uiArchiveStorage": "Depolama",
+  "@uiArchiveStorage": {
+    "description": "ui.archive.storage"
+  },
+  "uiArchiveMb": "MB",
+  "@uiArchiveMb": {
+    "description": "ui.archive.mb"
+  },
+  "uiArchiveKb": "KB",
+  "@uiArchiveKb": {
+    "description": "ui.archive.kb"
+  },
+  "uiArchiveFilesLc": "dosya",
+  "@uiArchiveFilesLc": {
+    "description": "ui.archive.files_lc"
+  },
+  "uiArchiveFoldersLc": "klasör",
+  "@uiArchiveFoldersLc": {
+    "description": "ui.archive.folders_lc"
+  },
+  "uiArchiveCoordinatorshipsLc": "koordinatörlükler",
+  "@uiArchiveCoordinatorshipsLc": {
+    "description": "ui.archive.coordinatorships_lc"
+  },
+  "uiArchiveSortRecent": "Son yükleme",
+  "@uiArchiveSortRecent": {
+    "description": "ui.archive.sort_recent"
+  },
+  "uiArchiveSortName": "Ada göre",
+  "@uiArchiveSortName": {
+    "description": "ui.archive.sort_name"
+  },
+  "uiArchiveSortSize": "Boyuta göre",
+  "@uiArchiveSortSize": {
+    "description": "ui.archive.sort_size"
+  },
+  "uiArchiveSortHint": "Sıralamayı değiştir",
+  "@uiArchiveSortHint": {
+    "description": "ui.archive.sort_hint"
+  },
+  "uiArchiveNoFiles": "Dosya yok",
+  "@uiArchiveNoFiles": {
+    "description": "ui.archive.no_files"
+  },
+  "uiArchiveEmptySearch": "Bu aramayla eşleşen klasör yok.",
+  "@uiArchiveEmptySearch": {
+    "description": "ui.archive.empty_search"
+  },
+  "uiArchiveDownloadAll": "Tümünü indir",
+  "@uiArchiveDownloadAll": {
+    "description": "ui.archive.download_all"
+  },
+  "uiArchiveDownloadAllToast": "Tüm arşiv hazırlanıyor · bitince bildirim gelir",
+  "@uiArchiveDownloadAllToast": {
+    "description": "ui.archive.download_all_toast"
+  },
+  "uiArchiveCreateFolder": "Klasör oluştur",
+  "@uiArchiveCreateFolder": {
+    "description": "ui.archive.create_folder"
+  },
+  "uiArchiveCreateFolderSoon": "Klasör oluşturma sonraki adımda tasarlanacak",
+  "@uiArchiveCreateFolderSoon": {
+    "description": "ui.archive.create_folder_soon"
+  },
+  "uiArchiveShortcuts": "Arşiv kısayolları",
+  "@uiArchiveShortcuts": {
+    "description": "ui.archive.shortcuts"
+  },
+  "uiArchiveSectionArchive": "arşiv",
+  "@uiArchiveSectionArchive": {
+    "description": "ui.archive.section_archive"
+  },
+  "uiArchiveSectionGo": "git",
+  "@uiArchiveSectionGo": {
+    "description": "ui.archive.section_go"
+  },
+  "uiArchiveGoCoordinatorships": "Koordinatörlükler",
+  "@uiArchiveGoCoordinatorships": {
+    "description": "ui.archive.go_coordinatorships"
+  },
+  "uiArchiveSectionFolders": "arşiv klasörleri",
+  "@uiArchiveSectionFolders": {
+    "description": "ui.archive.section_folders"
+  },
+  "uiArchiveAllArchive": "Tüm arşiv",
+  "@uiArchiveAllArchive": {
+    "description": "ui.archive.all_archive"
+  },
+  "uiArchiveZip": "Klasörü ZIP olarak indir",
+  "@uiArchiveZip": {
+    "description": "ui.archive.zip"
+  },
+  "uiArchiveZipToast": "klasörü ZIP olarak hazırlanıyor",
+  "@uiArchiveZipToast": {
+    "description": "ui.archive.zip_toast"
+  },
+  "uiArchiveCoordinatorship": "Koordinatörlük",
+  "@uiArchiveCoordinatorship": {
+    "description": "ui.archive.coordinatorship"
+  },
+  "uiArchiveNoLead": "Koordinatör yok",
+  "@uiArchiveNoLead": {
+    "description": "ui.archive.no_lead"
+  },
+  "uiArchiveTabs": "Klasör",
+  "@uiArchiveTabs": {
+    "description": "ui.archive.tabs"
+  },
+  "uiArchiveTabTasks": "Görev klasörleri",
+  "@uiArchiveTabTasks": {
+    "description": "ui.archive.tab_tasks"
+  },
+  "uiArchiveTabFiles": "Dosyalar",
+  "@uiArchiveTabFiles": {
+    "description": "ui.archive.tab_files"
+  },
+  "uiArchiveFilterAll": "Tümü",
+  "@uiArchiveFilterAll": {
+    "description": "ui.archive.filter_all"
+  },
+  "uiArchiveTagFilter": "Etiket süzgeci",
+  "@uiArchiveTagFilter": {
+    "description": "ui.archive.tag_filter"
+  },
+  "uiArchiveRemoveTaskFilter": "Görev filtresini kaldır",
+  "@uiArchiveRemoveTaskFilter": {
+    "description": "ui.archive.remove_task_filter"
+  },
+  "uiArchiveEmptyFiles": "Bu filtreyle eşleşen dosya yok.",
+  "@uiArchiveEmptyFiles": {
+    "description": "ui.archive.empty_files"
+  },
+  "uiArchivePreview": "Dosya önizleme",
+  "@uiArchivePreview": {
+    "description": "ui.archive.preview"
+  },
+  "uiArchivePrev": "Önceki dosya",
+  "@uiArchivePrev": {
+    "description": "ui.archive.prev"
+  },
+  "uiArchiveNext": "Sonraki dosya",
+  "@uiArchiveNext": {
+    "description": "ui.archive.next"
+  },
+  "uiArchivePreviewArea": "Önizleme alanı",
+  "@uiArchivePreviewArea": {
+    "description": "ui.archive.preview_area"
+  },
+  "uiArchiveFactTask": "Görev",
+  "@uiArchiveFactTask": {
+    "description": "ui.archive.fact_task"
+  },
+  "uiArchiveFactTag": "Etiket",
+  "@uiArchiveFactTag": {
+    "description": "ui.archive.fact_tag"
+  },
+  "uiArchiveFactBy": "Yükleyen",
+  "@uiArchiveFactBy": {
+    "description": "ui.archive.fact_by"
+  },
+  "uiArchiveFactDate": "Tarih",
+  "@uiArchiveFactDate": {
+    "description": "ui.archive.fact_date"
+  },
+  "uiArchiveUploaderUnknown": "Admin",
+  "@uiArchiveUploaderUnknown": {
+    "description": "ui.archive.uploader_unknown"
+  },
+  "uiArchiveDownload": "İndir",
+  "@uiArchiveDownload": {
+    "description": "ui.archive.download"
+  },
+  "uiArchiveDownloading": "indiriliyor",
+  "@uiArchiveDownloading": {
+    "description": "ui.archive.downloading"
+  },
+  "uiArchiveRetag": "Etiketi değiştir",
+  "@uiArchiveRetag": {
+    "description": "ui.archive.retag"
+  },
+  "uiArchiveMove": "Başka klasöre taşı",
+  "@uiArchiveMove": {
+    "description": "ui.archive.move"
+  },
+  "uiArchiveDelete": "Dosyayı sil",
+  "@uiArchiveDelete": {
+    "description": "ui.archive.delete"
+  },
+  "uiArchiveRetagSoon": "Etiket seçimi sonraki adımda tasarlanacak",
+  "@uiArchiveRetagSoon": {
+    "description": "ui.archive.retag_soon"
+  },
+  "uiArchiveMoveSoon": "Klasör seçimi sonraki adımda tasarlanacak",
+  "@uiArchiveMoveSoon": {
+    "description": "ui.archive.move_soon"
+  },
+  "uiArchiveDeleted": "Dosya silinen kayıtlara taşındı",
+  "@uiArchiveDeleted": {
+    "description": "ui.archive.deleted"
+  },
+  "uiArchiveKindImage": "Resim",
+  "@uiArchiveKindImage": {
+    "description": "ui.archive.kind_image"
+  },
+  "uiArchiveKindDocument": "Belge",
+  "@uiArchiveKindDocument": {
+    "description": "ui.archive.kind_document"
+  },
+  "uiArchiveKindPdf": "PDF",
+  "@uiArchiveKindPdf": {
+    "description": "ui.archive.kind_pdf"
+  },
+  "uiArchiveKindImageShort": "IMG",
+  "@uiArchiveKindImageShort": {
+    "description": "ui.archive.kind_image_short"
+  },
+  "uiArchiveKindDocumentShort": "DOC",
+  "@uiArchiveKindDocumentShort": {
+    "description": "ui.archive.kind_document_short"
+  },
+  "uiArchiveKindPdfShort": "PDF",
+  "@uiArchiveKindPdfShort": {
+    "description": "ui.archive.kind_pdf_short"
+  },
   "uiButtonsBusy": "Meşgul",
   "@uiButtonsBusy": {
     "description": "ui.buttons.busy"
@@ -1300,6 +1612,394 @@
   "uiMessagesChatTitle": "Sohbet",
   "@uiMessagesChatTitle": {
     "description": "ui.messages.chat_title"
+  },
+  "uiMessagesSearch": "Sohbetlerde ara",
+  "@uiMessagesSearch": {
+    "description": "ui.messages.search"
+  },
+  "uiMessagesSearchHint": "Kişi, grup veya mesaj",
+  "@uiMessagesSearchHint": {
+    "description": "ui.messages.search_hint"
+  },
+  "uiMessagesNewMessage": "Yeni mesaj",
+  "@uiMessagesNewMessage": {
+    "description": "ui.messages.new_message"
+  },
+  "uiMessagesNewChatSoon": "Yeni sohbet sonraki adımda tasarlanacak",
+  "@uiMessagesNewChatSoon": {
+    "description": "ui.messages.new_chat_soon"
+  },
+  "uiMessagesFilters": "Sohbet süzgeci",
+  "@uiMessagesFilters": {
+    "description": "ui.messages.filters"
+  },
+  "uiMessagesFilterAll": "Tümü",
+  "@uiMessagesFilterAll": {
+    "description": "ui.messages.filter_all"
+  },
+  "uiMessagesFilterUnread": "Okunmamış",
+  "@uiMessagesFilterUnread": {
+    "description": "ui.messages.filter_unread"
+  },
+  "uiMessagesFilterGroups": "Gruplar",
+  "@uiMessagesFilterGroups": {
+    "description": "ui.messages.filter_groups"
+  },
+  "uiMessagesFilterPeople": "Kişiler",
+  "@uiMessagesFilterPeople": {
+    "description": "ui.messages.filter_people"
+  },
+  "uiMessagesYou": "Sen",
+  "@uiMessagesYou": {
+    "description": "ui.messages.you"
+  },
+  "uiMessagesEmpty": "Eşleşen sohbet yok.",
+  "@uiMessagesEmpty": {
+    "description": "ui.messages.empty"
+  },
+  "uiMessagesUnreadLc": "okunmamış",
+  "@uiMessagesUnreadLc": {
+    "description": "ui.messages.unread_lc"
+  },
+  "uiMessagesShortcuts": "Mesaj kısayolları",
+  "@uiMessagesShortcuts": {
+    "description": "ui.messages.shortcuts"
+  },
+  "uiMessagesSectionMessages": "mesajlar",
+  "@uiMessagesSectionMessages": {
+    "description": "ui.messages.section_messages"
+  },
+  "uiMessagesUnreadOnly": "Okunmamışlar",
+  "@uiMessagesUnreadOnly": {
+    "description": "ui.messages.unread_only"
+  },
+  "uiMessagesMarkAllRead": "Tümünü okundu say",
+  "@uiMessagesMarkAllRead": {
+    "description": "ui.messages.mark_all_read"
+  },
+  "uiMessagesToday": "Bugün",
+  "@uiMessagesToday": {
+    "description": "ui.messages.today"
+  },
+  "uiMessagesYesterday": "Dün",
+  "@uiMessagesYesterday": {
+    "description": "ui.messages.yesterday"
+  },
+  "uiMessagesMembersLc": "üye",
+  "@uiMessagesMembersLc": {
+    "description": "ui.messages.members_lc"
+  },
+  "uiMessagesTyping": "yazıyor…",
+  "@uiMessagesTyping": {
+    "description": "ui.messages.typing"
+  },
+  "uiMessagesOnline": "çevrimiçi",
+  "@uiMessagesOnline": {
+    "description": "ui.messages.online"
+  },
+  "uiMessagesLastSeen": "son görülme",
+  "@uiMessagesLastSeen": {
+    "description": "ui.messages.last_seen"
+  },
+  "uiMessagesYesterdayLc": "dün",
+  "@uiMessagesYesterdayLc": {
+    "description": "ui.messages.yesterday_lc"
+  },
+  "uiMessagesSearchChat": "Sohbette ara",
+  "@uiMessagesSearchChat": {
+    "description": "ui.messages.search_chat"
+  },
+  "uiMessagesSearchChatSoon": "Sohbette arama sonraki adımda tasarlanacak",
+  "@uiMessagesSearchChatSoon": {
+    "description": "ui.messages.search_chat_soon"
+  },
+  "uiMessagesPinned": "Sabitlenen mesaj",
+  "@uiMessagesPinned": {
+    "description": "ui.messages.pinned"
+  },
+  "uiMessagesNewMessages": "okunmamış mesajlar",
+  "@uiMessagesNewMessages": {
+    "description": "ui.messages.new_messages"
+  },
+  "uiMessagesEdited": "düzenlendi",
+  "@uiMessagesEdited": {
+    "description": "ui.messages.edited"
+  },
+  "uiMessagesToBottom": "En alta in",
+  "@uiMessagesToBottom": {
+    "description": "ui.messages.to_bottom"
+  },
+  "uiMessagesMessageHint": "Mesaj",
+  "@uiMessagesMessageHint": {
+    "description": "ui.messages.message_hint"
+  },
+  "uiMessagesSend": "Gönder",
+  "@uiMessagesSend": {
+    "description": "ui.messages.send"
+  },
+  "uiMessagesAttach": "Görev, koordinatörlük veya arşiv ekle",
+  "@uiMessagesAttach": {
+    "description": "ui.messages.attach"
+  },
+  "uiMessagesPhotoVideo": "Fotoğraf ve video",
+  "@uiMessagesPhotoVideo": {
+    "description": "ui.messages.photo_video"
+  },
+  "uiMessagesFile": "Dosya",
+  "@uiMessagesFile": {
+    "description": "ui.messages.file"
+  },
+  "uiMessagesPortalRefs": "portaldan atıf",
+  "@uiMessagesPortalRefs": {
+    "description": "ui.messages.portal_refs"
+  },
+  "uiMessagesRefTask": "Görev",
+  "@uiMessagesRefTask": {
+    "description": "ui.messages.ref_task"
+  },
+  "uiMessagesRefCoordinatorship": "Koordinatörlük",
+  "@uiMessagesRefCoordinatorship": {
+    "description": "ui.messages.ref_coordinatorship"
+  },
+  "uiMessagesRefArchive": "Arşiv",
+  "@uiMessagesRefArchive": {
+    "description": "ui.messages.ref_archive"
+  },
+  "uiMessagesSearchTask": "Görev ara",
+  "@uiMessagesSearchTask": {
+    "description": "ui.messages.search_task"
+  },
+  "uiMessagesSearchCoordinatorship": "Koordinatörlük ara",
+  "@uiMessagesSearchCoordinatorship": {
+    "description": "ui.messages.search_coordinatorship"
+  },
+  "uiMessagesSearchFile": "Arşivde dosya ara",
+  "@uiMessagesSearchFile": {
+    "description": "ui.messages.search_file"
+  },
+  "uiMessagesRemove": "Kaldır",
+  "@uiMessagesRemove": {
+    "description": "ui.messages.remove"
+  },
+  "uiMessagesCancel": "Vazgeç",
+  "@uiMessagesCancel": {
+    "description": "ui.messages.cancel"
+  },
+  "uiMessagesEditMessage": "Mesajı düzenle",
+  "@uiMessagesEditMessage": {
+    "description": "ui.messages.edit_message"
+  },
+  "uiMessagesReplySelf": "Kendine yanıt",
+  "@uiMessagesReplySelf": {
+    "description": "ui.messages.reply_self"
+  },
+  "uiMessagesReplyTo": "kişisine yanıt",
+  "@uiMessagesReplyTo": {
+    "description": "ui.messages.reply_to"
+  },
+  "uiMessagesVotedTail": "kişi oy verdi",
+  "@uiMessagesVotedTail": {
+    "description": "ui.messages.voted_tail"
+  },
+  "uiMessagesVotesLc": "oy",
+  "@uiMessagesVotesLc": {
+    "description": "ui.messages.votes_lc"
+  },
+  "uiMessagesReactLike": "Beğen",
+  "@uiMessagesReactLike": {
+    "description": "ui.messages.react_like"
+  },
+  "uiMessagesReactHeart": "Kalp",
+  "@uiMessagesReactHeart": {
+    "description": "ui.messages.react_heart"
+  },
+  "uiMessagesReactCheck": "Onay",
+  "@uiMessagesReactCheck": {
+    "description": "ui.messages.react_check"
+  },
+  "uiMessagesReactStar": "Yıldız",
+  "@uiMessagesReactStar": {
+    "description": "ui.messages.react_star"
+  },
+  "uiMessagesMessageActions": "Mesaj işlemleri",
+  "@uiMessagesMessageActions": {
+    "description": "ui.messages.message_actions"
+  },
+  "uiMessagesMessage": "Mesaj",
+  "@uiMessagesMessage": {
+    "description": "ui.messages.message"
+  },
+  "uiMessagesQuoteJump": "Alıntılanan mesaja git",
+  "@uiMessagesQuoteJump": {
+    "description": "ui.messages.quote_jump"
+  },
+  "uiMessagesReply": "Yanıtla",
+  "@uiMessagesReply": {
+    "description": "ui.messages.reply"
+  },
+  "uiMessagesCopy": "Kopyala",
+  "@uiMessagesCopy": {
+    "description": "ui.messages.copy"
+  },
+  "uiMessagesPin": "Sabitle",
+  "@uiMessagesPin": {
+    "description": "ui.messages.pin"
+  },
+  "uiMessagesUnpin": "Sabiti kaldır",
+  "@uiMessagesUnpin": {
+    "description": "ui.messages.unpin"
+  },
+  "uiMessagesEdit": "Düzenle",
+  "@uiMessagesEdit": {
+    "description": "ui.messages.edit"
+  },
+  "uiMessagesCopied": "Mesaj kopyalandı",
+  "@uiMessagesCopied": {
+    "description": "ui.messages.copied"
+  },
+  "uiMessagesPinnedToast": "Mesaj sabitlendi",
+  "@uiMessagesPinnedToast": {
+    "description": "ui.messages.pinned_toast"
+  },
+  "uiMessagesUnpinnedToast": "Sabitleme kaldırıldı",
+  "@uiMessagesUnpinnedToast": {
+    "description": "ui.messages.unpinned_toast"
+  },
+  "uiMessagesPollResults": "Anket sonuçları",
+  "@uiMessagesPollResults": {
+    "description": "ui.messages.poll_results"
+  },
+  "uiMessagesPollResultsLc": "anket sonuçları",
+  "@uiMessagesPollResultsLc": {
+    "description": "ui.messages.poll_results_lc"
+  },
+  "uiMessagesToTask": "Göreve dönüştür",
+  "@uiMessagesToTask": {
+    "description": "ui.messages.to_task"
+  },
+  "uiMessagesDelete": "Sil",
+  "@uiMessagesDelete": {
+    "description": "ui.messages.delete"
+  },
+  "uiMessagesDeleted": "Mesaj silindi",
+  "@uiMessagesDeleted": {
+    "description": "ui.messages.deleted"
+  },
+  "uiMessagesNotVoted": "Henüz oy vermeyenler",
+  "@uiMessagesNotVoted": {
+    "description": "ui.messages.not_voted"
+  },
+  "uiMessagesNotVotedNone": "Grubun diğer üyeleri henüz oy vermedi",
+  "@uiMessagesNotVotedNone": {
+    "description": "ui.messages.not_voted_none"
+  },
+  "uiMessagesRemind": "Hatırlat",
+  "@uiMessagesRemind": {
+    "description": "ui.messages.remind"
+  },
+  "uiMessagesReminded": "Oy vermeyenlere hatırlatma gönderildi",
+  "@uiMessagesReminded": {
+    "description": "ui.messages.reminded"
+  },
+  "uiMessagesEndPoll": "Anketi bitir",
+  "@uiMessagesEndPoll": {
+    "description": "ui.messages.end_poll"
+  },
+  "uiMessagesPollEnded": "Anket bitti",
+  "@uiMessagesPollEnded": {
+    "description": "ui.messages.poll_ended"
+  },
+  "uiMessagesPollConcluded": "Anket sonuçlandı",
+  "@uiMessagesPollConcluded": {
+    "description": "ui.messages.poll_concluded"
+  },
+  "uiMessagesConcluded": "sonuçlandı",
+  "@uiMessagesConcluded": {
+    "description": "ui.messages.concluded"
+  },
+  "uiMessagesGroupInfo": "grup bilgisi",
+  "@uiMessagesGroupInfo": {
+    "description": "ui.messages.group_info"
+  },
+  "uiMessagesPersonInfo": "kişi bilgisi",
+  "@uiMessagesPersonInfo": {
+    "description": "ui.messages.person_info"
+  },
+  "uiMessagesInfo": "bilgisi",
+  "@uiMessagesInfo": {
+    "description": "ui.messages.info"
+  },
+  "uiMessagesMute": "Sessize al",
+  "@uiMessagesMute": {
+    "description": "ui.messages.mute"
+  },
+  "uiMessagesMutedTail": "sessize alındı",
+  "@uiMessagesMutedTail": {
+    "description": "ui.messages.muted_tail"
+  },
+  "uiMessagesLeaveGroup": "Gruptan çık",
+  "@uiMessagesLeaveGroup": {
+    "description": "ui.messages.leave_group"
+  },
+  "uiMessagesBlock": "Engelle",
+  "@uiMessagesBlock": {
+    "description": "ui.messages.block"
+  },
+  "uiMessagesActionSoon": "Bu işlem sonraki adımda tasarlanacak",
+  "@uiMessagesActionSoon": {
+    "description": "ui.messages.action_soon"
+  },
+  "uiMessagesShared": "paylaşılanlar",
+  "@uiMessagesShared": {
+    "description": "ui.messages.shared"
+  },
+  "uiMessagesMembers": "üyeler",
+  "@uiMessagesMembers": {
+    "description": "ui.messages.members"
+  },
+  "uiMessagesAllUsers": "Tüm kullanıcılar",
+  "@uiMessagesAllUsers": {
+    "description": "ui.messages.all_users"
+  },
+  "uiMessagesGroup": "Grup",
+  "@uiMessagesGroup": {
+    "description": "ui.messages.group"
+  },
+  "uiMessagesWroteHere": "bu sohbette yazdı",
+  "@uiMessagesWroteHere": {
+    "description": "ui.messages.wrote_here"
+  },
+  "uiMessagesMember": "üye",
+  "@uiMessagesMember": {
+    "description": "ui.messages.member"
+  },
+  "uiMessagesManager": "yönetici",
+  "@uiMessagesManager": {
+    "description": "ui.messages.manager"
+  },
+  "uiMessagesPhoto": "Fotoğraf",
+  "@uiMessagesPhoto": {
+    "description": "ui.messages.photo"
+  },
+  "uiMessagesDownloading": "indiriliyor",
+  "@uiMessagesDownloading": {
+    "description": "ui.messages.downloading"
+  },
+  "uiMessagesRoleAdmin": "Admin",
+  "@uiMessagesRoleAdmin": {
+    "description": "ui.messages.role_admin"
+  },
+  "uiMessagesRoleCoordinator": "Koordinatör",
+  "@uiMessagesRoleCoordinator": {
+    "description": "ui.messages.role_coordinator"
+  },
+  "uiMessagesRoleMember": "Üye",
+  "@uiMessagesRoleMember": {
+    "description": "ui.messages.role_member"
+  },
+  "uiMessagesNewChatHint": "Kişi seç",
+  "@uiMessagesNewChatHint": {
+    "description": "ui.messages.new_chat_hint"
   },
   "uiRouterTabHome": "Ana sayfa",
   "@uiRouterTabHome": {

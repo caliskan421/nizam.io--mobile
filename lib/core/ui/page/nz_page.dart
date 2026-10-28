@@ -28,7 +28,8 @@ class NzPage extends ConsumerWidget {
     this.loading = false,
     this.onRetry,
   }) : topBar = null,
-       children = const [];
+       children = const [],
+       _bare = false;
 
   /// Kök akış sayfası (ana sayfa gibi): [topBar] yapışkan cam sliver'dır (`NzTopBar`), [children]
   /// tek kaydırma görünümünde alt alta dizilir. İçerik üst çubuğun ve (kabuk `extendBody` ile)
@@ -44,7 +45,23 @@ class NzPage extends ConsumerWidget {
        body = const SizedBox.shrink(),
        actions = const [],
        floatingAction = null,
-       loading = false;
+       loading = false,
+       _bare = false;
+
+  /// Kendi üst ve alt çubuğunu çizen tam ekran sayfa (sohbet gibi): AppBar, yatay dolgu ve
+  /// güvenli alan yoktur; [body] bütün alanı alır ve güvenli alanı/klavyeyi kendisi yönetir
+  /// (`MediaQuery.paddingOf` / `viewInsetsOf`; Scaffold gövdeyi klavye için küçültmez).
+  /// Metin ölçeği sınırı ve toast kabuğu (Scaffold) standart sayfayla aynıdır.
+  const NzPage.bare({super.key, required this.body})
+    : title = '',
+      topBar = null,
+      children = const [],
+      width = NzContentWidth.list,
+      actions = const [],
+      floatingAction = null,
+      loading = false,
+      onRetry = null,
+      _bare = true;
 
   /// AppBar başlığı (ARB'den).
   final String title;
@@ -65,10 +82,17 @@ class NzPage extends ConsumerWidget {
   /// Çevrimdışı şeridindeki "yeniden dene".
   final VoidCallback? onRetry;
 
+  final bool _bare;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final offline =
         ref.watch(connectivityStateProvider) == ConnectivityState.offline;
+    if (_bare) {
+      return NzTextScaleLimit(
+        child: Scaffold(resizeToAvoidBottomInset: false, body: body),
+      );
+    }
     final layout = context.layout;
     final topBar = this.topBar;
     if (topBar != null) {

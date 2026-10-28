@@ -127,10 +127,7 @@ class TasksListBody extends ConsumerWidget {
                       r.groups[gi].coordinatorship,
                       first: gi == 0,
                     ),
-                    onTap: () => ctl.toggleGroup(
-                      r.groups[gi].coordinatorship,
-                      first: gi == 0,
-                    ),
+                    onTap: () => ctl.toggleGroup(r.groups[gi].coordinatorship),
                   ),
                   if (state.isGroupOpen(
                     r.groups[gi].coordinatorship,

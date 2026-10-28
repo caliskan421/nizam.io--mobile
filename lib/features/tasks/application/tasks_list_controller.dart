@@ -19,7 +19,7 @@ final class TasksListState {
     this.filter = const TaskFilter(),
     this.searchOpen = false,
     this.limit = pageSize,
-    this.openGroups = const {},
+    this.flippedGroups = const {},
     this.openFilterGroups = const {TaskFilterGroup.people},
   });
 
@@ -33,12 +33,12 @@ final class TasksListState {
   final bool searchOpen;
   final int limit;
 
-  /// Koordinatörlüğe göre listede açık/kapalı gruplar (yoksa yalnız ilk grup açık).
-  final Map<String, bool> openGroups;
+  /// Koordinatörlüğe göre listede varsayılanından (yalnız ilk grup açık) çevrilmiş gruplar.
+  final Set<String> flippedGroups;
   final Set<TaskFilterGroup> openFilterGroups;
 
   bool isGroupOpen(String code, {required bool first}) =>
-      openGroups[code] ?? first;
+      flippedGroups.contains(code) ? !first : first;
 
   TasksListState copyWith({
     TaskView? view,
@@ -47,7 +47,7 @@ final class TasksListState {
     TaskFilter? filter,
     bool? searchOpen,
     int? limit,
-    Map<String, bool>? openGroups,
+    Set<String>? flippedGroups,
     Set<TaskFilterGroup>? openFilterGroups,
   }) => TasksListState(
     view: view ?? this.view,
@@ -56,7 +56,7 @@ final class TasksListState {
     filter: filter ?? this.filter,
     searchOpen: searchOpen ?? this.searchOpen,
     limit: limit ?? this.limit,
-    openGroups: openGroups ?? this.openGroups,
+    flippedGroups: flippedGroups ?? this.flippedGroups,
     openFilterGroups: openFilterGroups ?? this.openFilterGroups,
   );
 }
@@ -141,13 +141,8 @@ class TasksListController extends _$TasksListController {
   void showMore() =>
       state = state.copyWith(limit: state.limit + TasksListState.pageSize);
 
-  void toggleGroup(String code, {required bool first}) =>
-      state = state.copyWith(
-        openGroups: {
-          ...state.openGroups,
-          code: !state.isGroupOpen(code, first: first),
-        },
-      );
+  void toggleGroup(String code) =>
+      state = state.copyWith(flippedGroups: _toggle(state.flippedGroups, code));
 
   void toggleFilterGroup(TaskFilterGroup g) => state = state.copyWith(
     openFilterGroups: _toggle(state.openFilterGroups, g),

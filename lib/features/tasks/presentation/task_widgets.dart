@@ -5,6 +5,7 @@ import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/theme/nz_motion.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../core/ui/widgets/surfaces/surfaces.dart';
 
 /// Görev ekranlarının küçük ortak parçaları (prototip `.rp-seg`, `.rp-chipbtn`,
 /// `.rp-linkbtn`, seçim satırları). Kit'e alınacak kadar genel değiller; yalnız bu feature.
@@ -164,15 +165,7 @@ class TaskChip extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (dot != null) ...[
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: dot,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const SizedBox.square(
-                        dimension: NizamioSize.statusDot,
-                      ),
-                    ),
+                    NzDot(color: dot, size: NizamioSize.statusDot),
                     const Gap(NizamioSpacing.space1 + 2),
                   ],
                   Flexible(

@@ -17,16 +17,18 @@ final class SampleTaskCatalogRepository implements TaskCatalogRepository {
 }
 
 // Prototip `SUBS` (biten/toplam alt görev) ve `REQ` (bekleyen tarih talebi) tabloları.
-const _subtaskCounts = {
-  'MEK-6': (2, 3),
-  'İDA-5': (1, 2),
-  'ULA-1': (1, 3),
-  'İDA-2': (2, 2),
+(int, int)? _subtaskCounts(String code) => switch (code) {
+  'MEK-6' => (2, 3),
+  'İDA-5' => (1, 2),
+  'ULA-1' => (1, 3),
+  'İDA-2' => (2, 2),
+  _ => null,
 };
 const _subtaskTitles = ['Hazırlık ve keşif', 'Uygulama', 'Kontrol ve teslim'];
-final _requests = {
-  'ULA-1': DateTime(2026, 11, 15),
-  'EĞİ-1': DateTime(2026, 10, 27),
+DateTime? _requests(String code) => switch (code) {
+  'ULA-1' => DateTime(2026, 11, 15),
+  'EĞİ-1' => DateTime(2026, 10, 27),
+  _ => null,
 };
 
 /// Ayrıntı ekranının alt görev, talep, dosya ve not listelerini örnek sayılardan kurar
@@ -72,8 +74,8 @@ TaskItem _withDetails(TaskItem t) {
       ],
     );
   }
-  final sub = _subtaskCounts[t.code];
-  final req = _requests[t.code];
+  final sub = _subtaskCounts(t.code);
+  final req = _requests(t.code);
   return t.copyWith(
     subtasks: sub == null
         ? const []

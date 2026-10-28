@@ -67,8 +67,8 @@ class NzButton extends StatelessWidget {
   final bool expand;
   final _ButtonVariant _variant;
 
-  static const _borderWidth = 1.0;
-  static const _focusWidth = 2.0;
+  static const _borderWidth = NizamioSize.borderWidth;
+  static const _focusWidth = NizamioSize.focusRingWidth;
   static const _disabledContentAlpha = 0.38;
   static const _disabledFillAlpha = 0.12;
   static const _overlayAlpha = 0.12;
@@ -99,12 +99,15 @@ class NzButton extends StatelessWidget {
 
     final Color foreground = switch (v) {
       _ButtonVariant.primary => c.onPrimary,
-      _ButtonVariant.secondary || _ButtonVariant.ghost => c.primary,
-      _ButtonVariant.danger => c.onPrimary,
+      // accent (lime) yalnız dolgudur; yazı rengi olarak ikincil `text`, hayalet `accentText`.
+      _ButtonVariant.secondary => c.text,
+      _ButtonVariant.ghost => c.accentText,
+      _ButtonVariant.danger => c.onDanger,
     };
     final Color accent = switch (v) {
       _ButtonVariant.danger => c.danger,
-      _ => c.primary,
+      _ButtonVariant.primary => c.primary,
+      _ => c.accentText,
     };
 
     return ButtonStyle(
@@ -124,7 +127,7 @@ class NzButton extends StatelessWidget {
       elevation: const WidgetStatePropertyAll(0),
       shape: WidgetStatePropertyAll(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(NizamioRadius.radiusLg),
+          borderRadius: BorderRadius.circular(NizamioRadius.group),
         ),
       ),
       textStyle: WidgetStatePropertyAll(
@@ -135,8 +138,6 @@ class NzButton extends StatelessWidget {
         _ButtonVariant.danger => WidgetStateProperty.resolveWith(
           (s) => disabled(s)
               ? c.text.withValues(alpha: _disabledFillAlpha)
-              : v == _ButtonVariant.primary && hot(s)
-              ? c.primaryHover
               : accent,
         ),
         _ => const WidgetStatePropertyAll(null),
@@ -164,10 +165,10 @@ class NzButton extends StatelessWidget {
               : null;
         }
         if (s.contains(WidgetState.focused)) {
-          return BorderSide(color: c.text, width: _focusWidth);
+          return BorderSide(color: c.focusRing, width: _focusWidth);
         }
         return v == _ButtonVariant.secondary
-            ? BorderSide(color: c.border, width: _borderWidth)
+            ? BorderSide(color: c.borderControl, width: _borderWidth)
             : null;
       }),
     );

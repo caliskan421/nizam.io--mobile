@@ -4,8 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../theme/generated/tokens.gen.dart';
 
 /// Anlamsal metin rolleri (ADR-0003, A1). Ekran ham `TextStyle` yazmaz; rol seçer ve gerekirse
-/// `copyWith(color:/fontWeight:)` ile değiştirir. Boyut/ağırlık/satır yüksekliği token'dan
-/// (`NizamioTypography`); renk varsayılanı `NizamioColors.text`.
+/// `copyWith(color:/fontWeight:)` ile değiştirir. Aile/boyut/ağırlık/satır yüksekliği/harf aralığı
+/// tasarım metin stillerinden (`NizamioTypography`, ADR-0003 karar 24); renk varsayılanı
+/// `NizamioColors.text`.
+///
+/// Rol → tasarım stili: displayLg `m-greet` · titleLg `m-h1` · titleMd `m-h1-detail` ·
+/// titleSm `m-sheet-title` · bodyLg `m-input` · bodyMd `m-body` · bodySm/caption `m-caption` ·
+/// labelLg `m-card-title` · labelMd `m-tab` · mono `m-code` · kicker `m-kicker` ·
+/// monoSm `m-mono-sm` · numeral `m-kpi`.
 @immutable
 class NzTextStyles extends ThemeExtension<NzTextStyles> {
   const NzTextStyles({
@@ -20,76 +26,51 @@ class NzTextStyles extends ThemeExtension<NzTextStyles> {
     required this.labelMd,
     required this.caption,
     required this.mono,
+    required this.kicker,
+    required this.monoSm,
+    required this.numeral,
   });
 
   /// Yazı tipi dosyaları uygulamayla gelir (assets/fonts); `GoogleFonts` ağdan indirmez
-  /// (bootstrap'te kapatılır). `TextStyle(...)` yapıcısı yerine `GoogleFonts.*` kullanılır.
+  /// (bootstrap'te kapatılır). Aile adı token'dan `GoogleFonts.getFont`'a gider: bilinmeyen aile
+  /// ya da eksik ağırlık dosyası sessiz yedeğe düşmez (test: nz_text_styles_test).
   factory NzTextStyles.fromColors(NizamioColors c) {
-    TextStyle sans(double size, FontWeight weight, double height) =>
-        GoogleFonts.inter(
-          fontSize: size,
-          fontWeight: weight,
-          height: height,
+    const fallbacks = {
+      NizamioTypography.familySans: NizamioTypography.familySansFallback,
+      NizamioTypography.familyDisplay: NizamioTypography.familyDisplayFallback,
+      NizamioTypography.familyMono: NizamioTypography.familyMonoFallback,
+    };
+    TextStyle role(NizamioTypeSpec t, {bool tabular = false}) =>
+        GoogleFonts.getFont(
+          t.family,
+          fontSize: t.size,
+          fontWeight: t.weight,
+          // CSS satır yüksekliği px; Flutter oran ister. Boşluk CSS gibi üst/alta eşit dağılır.
+          height: t.lineHeight / t.size,
+          letterSpacing: t.letterSpacingEm * t.size,
           color: c.text,
-        ).copyWith(fontFamilyFallback: NizamioTypography.familySansFallback);
+        ).copyWith(
+          fontFamilyFallback: fallbacks[t.family],
+          leadingDistribution: TextLeadingDistribution.even,
+          fontFeatures: tabular ? const [FontFeature.tabularFigures()] : null,
+        );
 
     return NzTextStyles(
-      displayLg: sans(
-        NizamioTypography.size3xl,
-        NizamioTypography.weightBold,
-        NizamioTypography.lineHeightTight,
-      ),
-      titleLg: sans(
-        NizamioTypography.size2xl,
-        NizamioTypography.weightSemibold,
-        NizamioTypography.lineHeightTight,
-      ),
-      titleMd: sans(
-        NizamioTypography.sizeXl,
-        NizamioTypography.weightSemibold,
-        NizamioTypography.lineHeightTight,
-      ),
-      titleSm: sans(
-        NizamioTypography.sizeLg,
-        NizamioTypography.weightSemibold,
-        NizamioTypography.lineHeightTight,
-      ),
-      bodyLg: sans(
-        NizamioTypography.sizeMd,
-        NizamioTypography.weightRegular,
-        NizamioTypography.lineHeightNormal,
-      ),
-      bodyMd: sans(
-        NizamioTypography.sizeSm,
-        NizamioTypography.weightRegular,
-        NizamioTypography.lineHeightNormal,
-      ),
-      bodySm: sans(
-        NizamioTypography.sizeXs,
-        NizamioTypography.weightRegular,
-        NizamioTypography.lineHeightNormal,
-      ),
-      labelLg: sans(
-        NizamioTypography.sizeMd,
-        NizamioTypography.weightMedium,
-        NizamioTypography.lineHeightTight,
-      ),
-      labelMd: sans(
-        NizamioTypography.sizeSm,
-        NizamioTypography.weightMedium,
-        NizamioTypography.lineHeightTight,
-      ),
-      caption: sans(
-        NizamioTypography.sizeXs,
-        NizamioTypography.weightRegular,
-        NizamioTypography.lineHeightNormal,
-      ),
-      mono: GoogleFonts.jetBrainsMono(
-        fontSize: NizamioTypography.sizeSm,
-        fontWeight: NizamioTypography.weightRegular,
-        height: NizamioTypography.lineHeightNormal,
-        color: c.text,
-      ).copyWith(fontFamilyFallback: NizamioTypography.familyMonoFallback),
+      displayLg: role(NizamioTypography.greet),
+      titleLg: role(NizamioTypography.h1),
+      titleMd: role(NizamioTypography.h1Detail),
+      titleSm: role(NizamioTypography.sheetTitle),
+      bodyLg: role(NizamioTypography.input),
+      bodyMd: role(NizamioTypography.body),
+      bodySm: role(NizamioTypography.caption),
+      labelLg: role(NizamioTypography.cardTitle),
+      labelMd: role(NizamioTypography.tab),
+      caption: role(NizamioTypography.caption),
+      mono: role(NizamioTypography.code, tabular: true),
+      kicker: role(NizamioTypography.kicker, tabular: true),
+      monoSm: role(NizamioTypography.monoSm, tabular: true),
+      // Poppins'te `tnum` yok; özellik zararsızdır ama rakamlar orantılı kalır (docs/design-tokens.md).
+      numeral: role(NizamioTypography.kpi, tabular: true),
     );
   }
 
@@ -105,6 +86,15 @@ class NzTextStyles extends ThemeExtension<NzTextStyles> {
   final TextStyle caption;
   final TextStyle mono;
 
+  /// Küçük harfli mono bölüm etiketi (`tüm görevler · 76`).
+  final TextStyle kicker;
+
+  /// Rozet sayısı, sayaç, flyout başlığı.
+  final TextStyle monoSm;
+
+  /// KPI büyük rakamı.
+  final TextStyle numeral;
+
   @override
   NzTextStyles copyWith({
     TextStyle? displayLg,
@@ -118,6 +108,9 @@ class NzTextStyles extends ThemeExtension<NzTextStyles> {
     TextStyle? labelMd,
     TextStyle? caption,
     TextStyle? mono,
+    TextStyle? kicker,
+    TextStyle? monoSm,
+    TextStyle? numeral,
   }) {
     return NzTextStyles(
       displayLg: displayLg ?? this.displayLg,
@@ -131,6 +124,9 @@ class NzTextStyles extends ThemeExtension<NzTextStyles> {
       labelMd: labelMd ?? this.labelMd,
       caption: caption ?? this.caption,
       mono: mono ?? this.mono,
+      kicker: kicker ?? this.kicker,
+      monoSm: monoSm ?? this.monoSm,
+      numeral: numeral ?? this.numeral,
     );
   }
 
@@ -150,6 +146,9 @@ class NzTextStyles extends ThemeExtension<NzTextStyles> {
       labelMd: l(labelMd, other.labelMd),
       caption: l(caption, other.caption),
       mono: l(mono, other.mono),
+      kicker: l(kicker, other.kicker),
+      monoSm: l(monoSm, other.monoSm),
+      numeral: l(numeral, other.numeral),
     );
   }
 

@@ -74,7 +74,7 @@ class _NzSkeletonState extends State<NzSkeleton>
       _SkeletonKind.block => _bar(
         color,
         height: widget.height!,
-        radius: NizamioRadius.radiusLg,
+        radius: NizamioRadius.tile,
       ),
       _SkeletonKind.list => Column(
         mainAxisSize: MainAxisSize.min,
@@ -118,14 +118,10 @@ class _NzSkeletonState extends State<NzSkeleton>
         if (n > 1 && i == n - 1)
           FractionallySizedBox(
             widthFactor: _shortFactor,
-            child: _bar(
-              color,
-              height: _lineHeight,
-              radius: NizamioRadius.radiusSm,
-            ),
+            child: _bar(color, height: _lineHeight, radius: NizamioRadius.pill),
           )
         else
-          _bar(color, height: _lineHeight, radius: NizamioRadius.radiusSm),
+          _bar(color, height: _lineHeight, radius: NizamioRadius.pill),
       ],
     ],
   );

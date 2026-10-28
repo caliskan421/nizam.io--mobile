@@ -1,4 +1,5 @@
 // tool/gen/sources.dart: üretim kaynaklarının katı okunması (negatif durumlar).
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -177,34 +178,146 @@ $op
     });
   });
 
-  group('resolveTokens', () {
-    const base = '''
-{"version": 1, "palette": {"primary": {"600": "#1f4e79"}},
- "modes": {"light": {"primary": "{primary.600}"}, "dark": {"primary": "PLACEHOLDER"}},
- "typography": {"fontFamily": {"sans": ["Inter"]}, "fontSize": {"md": 16},
-   "fontWeight": {"regular": 400}, "lineHeight": {"normal": 1.5}},
- "spacing": {"1": 4}, "radius": {"sm": 4}}''';
-    test('başvuru çözülür', () {
-      final t = resolveTokens(
-        base.replaceFirst('PLACEHOLDER', '{primary.600}'),
-      );
-      expect(t.light['primary'], '#1f4e79');
+  group('resolveTokens (tasarım + mobil eşleme)', () {
+    // Negatifler doğru nedenle düşmeli (bozuk JSON da FormatException'dır).
+    Matcher fails(String part) => throwsA(
+      isA<FormatException>().having(
+        (e) => e.message,
+        'message',
+        contains(part),
+      ),
+    );
+    String design({
+      String colors =
+          '{"name": "bg-base", "value": {"dark": "#0b0b0b", "light": "#f6f6f3"}},'
+          '{"name": "scrim", "value": {"dark": "#0000008c", "light": "#16161566"}},'
+          '{"name": "glass", "value": {"dark": "rgba(11, 11, 11, 0.78)", "light": "rgba(255,255,255,1)"}},'
+          '{"name": "other", "value": {"dark": "{bg-base}", "light": "{bg-base}"}}',
+      String letterSpacing = '"-0.015em"',
+      String shadow = '{"dark": "0 12px 32px rgba(0,0,0,0.45)", "light": "-24px 0 60px rgba(22,22,21,0.14)"}',
+    }) =>
+        '''
+{"version": 1,
+ "color": {"themes": [{"id": "dark"}, {"id": "light"}], "tokens": [$colors]},
+ "type": {"families": {"sans": "\\"Inter\\", system-ui", "mono": "\\"Geist Mono\\", monospace"},
+   "groups": [{"name": "D", "family": "sans", "styles": [
+     {"name": "m-h1-detail", "fontSize": "24px", "lineHeight": "30px", "fontWeight": 600, "letterSpacing": $letterSpacing}]}]},
+ "spacing": {"tokens": [{"name": "m-gap-xs", "value": "4px"}]},
+ "radius": {"tokens": [{"name": "m-r-card", "value": "20px"}]},
+ "shadow": {"tokens": [{"name": "m-sh-float", "value": $shadow}, {"name": "m-sh-knob", "value": "0 1px 3px rgba(0,0,0,0.35)"}]},
+ "size": {"tokens": [{"name": "m-tap", "value": "44px"}]},
+ "blur": {"tokens": [{"name": "m-blur-bar", "value": "18px"}]}}''';
+    String mobile({
+      String colors = '"background": "bg-base", "scrim": "scrim", "glass": "glass", "other": "other"',
+    }) =>
+        '''
+{"version": 1, "source": {"path": "x", "blob": "x"}, "colors": {$colors},
+ "spacingScale": {"\$comment": "x", "1": 4}, "metrics": {"iconSize": 20}}''';
+
+    test('roller çözülür; CSS #RRGGBBAA ve rgba() ARGB sırasına çevrilir', () {
+      final t = resolveTokens(design(), mobile());
+      expect(t.roles, ['background', 'scrim', 'glass', 'other']);
+      expect(t.light['background'], 0xFFF6F6F3);
+      expect(t.dark['scrim'], 0x8C000000);
+      expect(t.light['scrim'], 0x66161615);
+      expect(t.dark['glass'], 0xC70B0B0B);
+      expect(t.light['glass'], 0xFFFFFFFF);
+      expect(t.dark['other'], t.dark['background']);
     });
-    test('çözülemeyen başvuru düşer', () {
+    test('tipografi, ölçüler ve gölgeler kaynak birimleriyle okunur', () {
+      final t = resolveTokens(design(), mobile());
+      expect(t.families['mono'], ['Geist Mono', 'monospace']);
+      final h = t.typeStyles['h1Detail']!;
+      expect((h.family, h.size, h.lineHeight, h.weight), ('sans', 24, 30, 600));
+      expect(h.letterSpacingEm, -0.015);
+      expect(t.spacing, {'gapXs': 4});
+      expect(t.radius, {'card': 20});
+      expect(t.size, {'tap': 44});
+      expect(t.blur, {'bar': 18});
+      expect(t.spacingScale, {'1': 4});
+      expect(t.metrics, {'iconSize': 20});
+      final f = t.shadowsLight['float']!;
       expect(
-        () => resolveTokens(base.replaceFirst('PLACEHOLDER', '{primary.700}')),
-        throwsFormatException,
+        (f.dx, f.dy, f.blur, f.spread, f.argb),
+        (-24, 0, 60, 0, 0x24161615),
+      );
+      expect(t.shadowsDark['knob']!.argb, t.shadowsLight['knob']!.argb);
+    });
+    test('tasarımda olmayan token\'a eşleme düşer', () {
+      expect(
+        () => resolveTokens(design(), mobile(colors: '"text": "ink"')),
+        fails('tasarımda olmayan token'),
       );
     });
-    test('hex olmayan palet değeri düşer', () {
+    test('desteklenmeyen renk biçimi düşer (hsl, kısa hex)', () {
+      for (final (v, why) in [
+        ('hsl(0, 0%, 0%)', 'desteklenmeyen renk'),
+        ('#fff', 'desteklenmeyen renk'),
+        ('rgba(300,0,0,1)', '255 üstü'),
+      ]) {
+        expect(
+          () => resolveTokens(
+            design(colors: '{"name": "bg-base", "value": "$v"}'),
+            mobile(colors: '"background": "bg-base"'),
+          ),
+          fails(why),
+          reason: v,
+        );
+      }
+    });
+    test('tek temada tanımlı renk ve döngülü başvuru düşer', () {
       expect(
         () => resolveTokens(
-          base
-              .replaceFirst('#1f4e79', 'blue')
-              .replaceFirst('PLACEHOLDER', '{primary.600}'),
+          design(colors: '{"name": "bg-base", "value": {"dark": "#000000"}}'),
+          mobile(colors: '"background": "bg-base"'),
         ),
-        throwsFormatException,
+        fails('iki temada'),
       );
+      expect(
+        () => resolveTokens(
+          design(
+            colors:
+                '{"name": "a", "value": "{b}"}, {"name": "b", "value": "{a}"}',
+          ),
+          mobile(colors: '"x": "a"'),
+        ),
+        fails('döngülü'),
+      );
+    });
+    test('em olmayan harf aralığı ve px olmayan gölge düşer', () {
+      expect(
+        () => resolveTokens(design(letterSpacing: '"-0.2px"'), mobile()),
+        fails('em değil'),
+      );
+      expect(
+        () => resolveTokens(design(shadow: '"0 12rem 32px #000000"'), mobile()),
+        fails('gölge değil'),
+      );
+    });
+    test('mobil metrics tasarım size adıyla çakışırsa düşer', () {
+      expect(
+        () => resolveTokens(
+          design(),
+          mobile().replaceFirst('"iconSize": 20', '"tap": 48'),
+        ),
+        fails('çakışıyor'),
+      );
+    });
+    test('tokenIdent önek atar, kebab → camel', () {
+      expect(tokenIdent('m-gap-xs'), 'gapXs');
+      expect(tokenIdent('m-r-bubble-tail', 'm-r-'), 'bubbleTail');
+      expect(() => tokenIdent('gap-xs'), throwsFormatException);
+    });
+    test('depodaki kaynaklar çözülür; pin blob tasarım dosyasıyla aynı', () {
+      final mobileText = File('design/mobile-tokens.json').readAsStringSync();
+      final src =
+          (jsonDecode(mobileText) as Map<String, Object?>)['source']!
+              as Map<String, Object?>;
+      final path = src['path']! as String;
+      final t = resolveTokens(File(path).readAsStringSync(), mobileText);
+      expect(t.light.keys, t.dark.keys);
+      final blob = Process.runSync('git', ['hash-object', '--', path]);
+      expect((blob.stdout as String).trim(), src['blob']);
     });
   });
 

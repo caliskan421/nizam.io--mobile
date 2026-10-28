@@ -40,7 +40,7 @@ class NzCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = _resolveStyle(context);
-    final radius = BorderRadius.circular(NizamioRadius.radiusLg);
+    final radius = BorderRadius.circular(NizamioRadius.card);
     final padding = EdgeInsets.all(
       size.pick(
         sm: NizamioSpacing.space3,
@@ -86,8 +86,8 @@ class NzCard extends StatelessWidget {
   ({Color fill, Color? border}) _resolveStyle(BuildContext context) {
     final colors = context.colors;
     return switch (_variant) {
-      _CardVariant.filled => (fill: colors.backgroundMuted, border: null),
-      _CardVariant.outlined => (fill: colors.background, border: colors.border),
+      _CardVariant.filled => (fill: colors.surfaceRaised, border: null),
+      _CardVariant.outlined => (fill: colors.surface, border: colors.border),
     };
   }
 }

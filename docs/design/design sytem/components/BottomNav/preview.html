@@ -1,0 +1,31 @@
+<!-- @dsCard group="Gezinme" height=390 subtitle="kapsül, flyout, asistan" -->
+<!doctype html>
+<html lang="tr" data-theme="dark">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../bundle.js"></script><title>Alt menü</title>
+<style>html,body{margin:0;background:var(--bg-base)} .wrap{padding:16px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start} .ph{width:358px;max-width:100%}</style>
+</head>
+<body>
+<div class="m-screen wrap">
+
+<div class="ph" style="display:flex;flex-direction:column;gap:16px">
+<div role="menu" aria-label="Görevler" class="m-flyout">
+<p class="m-flyout__title">görevler</p>
+<button type="button" role="menuitem" class="m-flyout__row"><svg class="m-icon m-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span>Yeni görev</span><span></span></button>
+<button type="button" role="menuitem" class="m-flyout__row"><svg class="m-icon m-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg><span>Zaman çizelgesi</span><span></span></button>
+<p class="m-flyout__sep">görünüm</p>
+<button type="button" role="menuitem" class="m-flyout__row" data-on="true"><span class="m-dot" style="background:var(--danger);justify-self:center"></span><span>Geciken</span><span class="m-mono" style="font-size:12px">15</span></button>
+</div>
+<div class="m-nav">
+<nav class="m-nav__capsule" aria-label="Ana menü">
+<button type="button" class="m-nav__item" aria-label="Ana sayfa"><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg></button>
+<button type="button" class="m-nav__item" aria-current="page" aria-expanded="true"><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6l1.5 1.5L8 5M4 12l1.5 1.5L8 11M4 18l1.5 1.5L8 17M11 6h9M11 12h9M11 18h9"></path></svg><span class="m-nav__label"><b>Görevler</b><small>76 görev</small></span></button>
+<button type="button" class="m-nav__item" aria-label="Koordinatörlükler"><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17M15 9h4a1 1 0 0 1 1 1v11M3 21h18M9 7h2M9 11h2M9 15h2"></path></svg><span class="m-nav__count">3</span></button>
+</nav>
+<button type="button" class="m-nav__ai" aria-label="Asistana sor"><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5v3M8 6h8a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3zM9.5 11.5v1M14.5 11.5v1M9.5 16h5M2.5 11v4M21.5 11v4"></path></svg></button>
+</div>
+</div>
+</div>
+<script>window.RoketPortalMobil && window.RoketPortalMobil.init(document);</script>
+</body>
+</html>

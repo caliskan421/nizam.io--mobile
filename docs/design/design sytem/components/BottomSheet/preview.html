@@ -1,0 +1,28 @@
+<!-- @dsCard group="Katmanlar" height=560 subtitle="tutamaç, başlık, gövde, alt eylemler" -->
+<!doctype html>
+<html lang="tr" data-theme="dark">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../bundle.js"></script><title>Alt sayfa</title>
+<style>html,body{margin:0;background:var(--bg-base)} .wrap{padding:16px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start} .ph{width:358px;max-width:100%}</style>
+</head>
+<body>
+<div class="m-screen wrap">
+
+<div class="ph" style="position:relative;height:520px;overflow:hidden;border-radius:24px;display:flex;flex-direction:column;justify-content:flex-end">
+<button type="button" class="m-scrim" aria-label="Kapat"></button>
+<div class="m-sheet" role="dialog" aria-modal="true" aria-labelledby="bs-t" style="height:470px">
+<button type="button" class="m-sheet__grab" aria-label="Genişlet"><span></span></button>
+<div class="m-sheet__head"><div style="flex:1 1 auto;padding-top:6px"><h2 id="bs-t" class="m-sheet__title">Yeni görev</h2><p class="m-cap" style="margin-top:4px">Görev oluşturulduğunda atanan kişiye bildirim gider.</p></div><button type="button" class="m-iconbtn" aria-label="Kapat"><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></div>
+<div class="m-sheet__body">
+<label><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Başlık</span><input class="m-title-input" placeholder="Ne yapılması gerekiyor?"></label>
+<div class="m-rows">
+<div class="m-rows__item"><div class="m-row"><svg class="m-icon m-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17M15 9h4a1 1 0 0 1 1 1v11M3 21h18"></path></svg><button type="button" class="m-row__btn" aria-expanded="false"><span>Koordinatörlük</span><span class="m-row__value m-trunc">Seç</span><span class="m-row__chev"><svg class="m-icon m-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></span></button></div></div>
+<div class="m-rows__item"><div class="m-row"><svg class="m-icon m-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"></path></svg><button type="button" class="m-row__btn" aria-expanded="false"><span>Tarih</span><span class="m-row__value m-trunc" data-set="true">28 Eki → 4 Kas</span><span class="m-row__chev"><svg class="m-icon m-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></span></button></div></div>
+</div>
+</div>
+<div class="m-sheet__foot"><button type="button" class="m-btn m-btn--secondary">Vazgeç</button><button type="button" class="m-btn m-btn--primary">Oluştur</button></div>
+</div></div>
+</div>
+<script>window.RoketPortalMobil && window.RoketPortalMobil.init(document);</script>
+</body>
+</html>

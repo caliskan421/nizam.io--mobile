@@ -64,12 +64,12 @@ void main() {
     var material = tester.widget<Material>(
       find.descendant(of: find.byType(NzCard), matching: find.byType(Material)),
     );
-    expect(material.color, NizamioColors.light.backgroundMuted);
+    expect(material.color, NizamioColors.light.surfaceRaised);
     await tester.pumpWidget(testApp(const NzCard.outlined(child: Text('a'))));
     material = tester.widget<Material>(
       find.descendant(of: find.byType(NzCard), matching: find.byType(Material)),
     );
-    expect(material.color, NizamioColors.light.background);
+    expect(material.color, NizamioColors.light.surface);
     expect(
       (material.shape! as RoundedRectangleBorder).side.color,
       NizamioColors.light.border,
@@ -101,9 +101,9 @@ void main() {
   ) async {
     await pumpSheet(tester, _variants);
     await expectSheetPixels(tester, [
-      NizamioColors.light.backgroundMuted,
+      NizamioColors.light.surfaceRaised,
       NizamioColors.light.border,
-      NizamioColors.dark.backgroundMuted,
+      NizamioColors.dark.surfaceRaised,
       NizamioColors.dark.border,
     ]);
   });

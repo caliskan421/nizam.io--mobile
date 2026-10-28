@@ -3,9 +3,11 @@
 // Kaynaklar YALNIZ api-pin.json'daki pinlerden okunur (çalışma ağacı okunmaz):
 //   backend  : `git show refs/tags/<backendTag>:<yol>` — openapi.yaml, error-codes.json
 //              (dizin: NIZAMIO_BACKEND_DIR, yoksa ../nizam.io--backend; CI'da .backend/)
-//   web      : `git show <web.commit>:<yol>` — tokens.json, TR hata metinleri
+//   web      : `git show <web.commit>:<yol>` — TR hata metinleri
 //              (dizin: NIZAMIO_FRONTEND_DIR, yoksa ../nizam.io--frontend; CI'da .frontend/)
-//   mobil    : i18n/client_errors.tr.json (istemci kodları), i18n/ui/*.tr.json (UI metinleri), pubspec.yaml version
+//   mobil    : i18n/client_errors.tr.json (istemci kodları), i18n/ui/*.tr.json (UI metinleri), pubspec.yaml version,
+//              design/mobile-tokens.json (rol eşlemesi) + onun `source.path`'i (tasarım sistemi
+//              tokens.json; içerik `source.blob` = `git hash-object` ile sabit, ADR-0003 karar 24)
 //
 // Çıktılar (commit'lenir; CI yeniden üretip `git diff --exit-code` + porcelain boş ister):
 //   lib/core/api/generated/            swagger_parser (freezed modeller + retrofit istemciler),
@@ -72,10 +74,31 @@ Future<void> main(List<String> args) async {
     'show',
     'refs/tags/$tag:${pin['errorCatalogPath']}',
   ], trim: false);
-  final tokensText = await _git(frontendDir, [
-    'show',
-    '$webCommit:${web['tokensPath']}',
-  ], trim: false);
+  // Tasarım token'ları: mobil eşleme dosyası + sabitlenmiş tasarım kaynağı (çalışma ağacı;
+  // içerik blob kimliğiyle doğrulanır — tasarım dosyası değişirse üretim düşer).
+  const mobileTokensPath = 'design/mobile-tokens.json';
+  final mobileTokensText = File(p.join(root, mobileTokensPath))
+      .readAsStringSync();
+  final designSource =
+      (jsonDecode(mobileTokensText) as Map<String, Object?>)['source']
+          as Map<String, Object?>?;
+  final designPath = designSource?['path'];
+  final designBlob = designSource?['blob'];
+  if (designPath is! String ||
+      designBlob is! String ||
+      !RegExp(r'^[0-9a-f]{40}$').hasMatch(designBlob)) {
+    fail('$mobileTokensPath: source.path / source.blob (40 hane) yok');
+  }
+  final designFile = File(p.join(root, designPath));
+  if (!designFile.existsSync()) fail('tasarım kaynağı yok: $designPath');
+  final actualBlob = await _git(root, ['hash-object', '--', designPath]);
+  if (actualBlob != designBlob) {
+    fail(
+      'tasarım kaynağı değişti: $designPath blob $actualBlob ≠ pin $designBlob '
+      '(farkı inceleyip $mobileTokensPath source.blob alanını güncelleyin)',
+    );
+  }
+  final designTokensText = designFile.readAsStringSync();
   final webTrText = await _git(frontendDir, [
     'show',
     '$webCommit:${web['trErrorsPath']}',
@@ -210,7 +233,10 @@ swagger_parser:
   _write(
     root,
     'lib/core/theme/generated/tokens.gen.dart',
-    emitTokens(resolveTokens(tokensText), '$webSrc — ${web['tokensPath']}'),
+    emitTokens(
+      resolveTokens(designTokensText, mobileTokensText),
+      '$designPath (blob ${designBlob.substring(0, 12)}) + $mobileTokensPath',
+    ),
   );
   _write(
     root,

@@ -233,8 +233,8 @@ void main() {
   ) async {
     await pumpSheet(tester, _variants);
     await expectSheetPixels(tester, [
-      NizamioColors.light.backgroundMuted,
-      NizamioColors.dark.backgroundMuted,
+      NizamioColors.light.surface,
+      NizamioColors.dark.surface,
     ]);
   });
 

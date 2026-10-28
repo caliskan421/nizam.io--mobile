@@ -1,0 +1,56 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css">
+<title>RoketPortal Mobil</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg-base); color: var(--ink); font-family: var(--font-sans); overflow: hidden; }
+  .cover { position: relative; height: 288px; overflow: hidden; }
+  .art { position: absolute; top: 0; left: 480px; width: 480px; height: 288px; overflow: hidden; }
+  .art svg { display: block; width: 480px; height: 288px; }
+  .lime { fill: var(--accent); }
+  .ink { fill: var(--ink); }
+  .vio { fill: var(--violet); }
+  .gold { fill: var(--gold); }
+  .cut { fill: var(--bg-base); }
+  .blk { rx: var(--m-r-sheet); }
+  .tab { rx: 18px; }
+  .cap { rx: 32px; }
+  .thumb { rx: 27px; }
+  .tick { rx: var(--m-r-bubble-tail); }
+  .words { position: absolute; left: 24px; bottom: 24px; max-width: 440px; }
+  .name { margin: 0; font-family: var(--font-display); font-size: 64px; line-height: .95; font-weight: 600; letter-spacing: -.02em; color: var(--ink); }
+  .tag { margin: 12px 0 0 2px; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      accent 144×228 slab bled off the top (the brand lime, largest) · ink 128×144 · violet 172×176 bled off the top-right · gold 96×36 tab pill (a state, kept small) · ink 360×64 capsule + 64 disc along the bottom — about a third of 960×288
+  arrangement one tall lime slab with satellites, upper blocks ending on one line 88px above the edge, the capsule row m-gap-lg below, m-card-pad gutters
+  pattern     pills, from "liquid capsule navigation": the bottom nav as a capsule (m-nav 64, rx 32) with a lime highlight pill (54 tall, rx 26) and the assistant disc; two tab-thumb pills cut from the ink block at an m-gap-xl pitch
+  scales      corners m-r-sheet 28; tab pill m-tab-h 36 (rx 18); capsule m-nav 64; thumbs m-r-bubble-tail 6; gutters m-card-pad 16
+-->
+<rect class="lime blk" x="24" y="-28" width="144" height="228" rx="28"/>
+<rect class="ink blk" x="184" y="56" width="128" height="144" rx="28"/>
+<rect class="cut tick" x="200" y="148" width="96" height="12" rx="6"/>
+<rect class="cut tick" x="200" y="172" width="64" height="12" rx="6"/>
+<rect class="vio blk" x="328" y="-28" width="172" height="176" rx="28"/>
+<rect class="gold tab" x="328" y="164" width="96" height="36" rx="18"/>
+<rect class="ink cap" x="24" y="216" width="360" height="64" rx="32"/>
+<rect class="lime thumb" x="29" y="221" width="150" height="54" rx="27"/>
+<rect class="ink cap" x="400" y="216" width="64" height="64" rx="32"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">RoketPortal<br>Mobil</h1>
+<p class="tag">Teknofest koordinasyonu için telefon arayüzü.</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-// Token sayfası (yalnız test): renk rolleri 3x4 ızgara + metin rolleri örneği.
+// Token sayfası (yalnız test): renk rolleri 5x4 ızgara + metin rolleri örneği.
 // Golden ve piksel kanıtı aynı ağacı kullanır.
 import 'package:flutter/material.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
@@ -12,20 +12,28 @@ const tokenPad = 16.0;
 const tokenGap = 8.0;
 const tokenColumns = 4;
 
-/// Izgara sırası (`NizamioColors` alan sırası).
+/// Izgara sırası (`NizamioColors` alan sırası; yarı saydam `scrim` piksel kanıtına girmez).
 List<Color> tokenRoles(NizamioColors c) => [
   c.background,
-  c.backgroundMuted,
+  c.surface,
+  c.surfaceRaised,
+  c.surfaceOverlay,
   c.border,
-  c.danger,
-  c.info,
-  c.onPrimary,
-  c.primary,
-  c.primaryHover,
-  c.success,
+  c.borderStrong,
+  c.borderControl,
   c.text,
   c.textMuted,
+  c.textFaint,
+  c.primary,
+  c.onPrimary,
+  c.accentText,
+  c.focusRing,
+  c.danger,
+  c.onDanger,
   c.warning,
+  c.onWarning,
+  c.success,
+  c.info,
 ];
 
 /// Rol [i] kutusunun merkezi (boundary yerel koordinatı, mantıksal piksel).
@@ -53,7 +61,11 @@ class _TokenPage extends StatelessWidget {
           children: [
             for (var r = 0; r < roles.length ~/ tokenColumns; r++)
               Padding(
-                padding: EdgeInsets.only(bottom: r < 2 ? tokenGap : tokenPad),
+                padding: EdgeInsets.only(
+                  bottom: r < roles.length ~/ tokenColumns - 1
+                      ? tokenGap
+                      : tokenPad,
+                ),
                 child: Row(
                   children: [
                     for (var c = 0; c < tokenColumns; c++)
@@ -84,6 +96,9 @@ class _TokenPage extends StatelessWidget {
               style: t.caption.copyWith(color: context.colors.textMuted),
             ),
             Text('mono', style: t.mono),
+            Text('kicker', style: t.kicker),
+            Text('monoSm', style: t.monoSm),
+            Text('numeral', style: t.numeral),
           ],
         ),
       ),

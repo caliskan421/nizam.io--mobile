@@ -118,16 +118,25 @@ void main() {
   });
 
   group('tasarım token\'ları', () {
-    test('rol başvuruları palete çözülmüş', () {
-      expect(NizamioColors.light.primary, NizamioPalette.primary600);
-      expect(NizamioColors.dark.primary, NizamioPalette.primary300);
+    test('roller tasarım kaynağından ARGB olarak çözülmüş', () {
+      // accent (#c8f53c) iki modda aynı; scrim CSS #16161566 → ARGB 0x66161615.
+      expect(NizamioColors.light.primary, const Color(0xFFC8F53C));
+      expect(NizamioColors.dark.primary, NizamioColors.light.primary);
+      expect(NizamioColors.light.scrim, const Color(0x66161615));
+      expect(NizamioColors.dark.scrim, const Color(0x8C000000));
     });
     test('ThemeExtension lerp/copyWith', () {
       final mid = NizamioColors.light.lerp(NizamioColors.dark, 1);
       expect(mid.background, NizamioColors.dark.background);
       expect(
-        NizamioColors.light.copyWith(primary: NizamioPalette.danger500).primary,
-        NizamioPalette.danger500,
+        NizamioColors.light
+            .copyWith(primary: NizamioColors.dark.danger)
+            .primary,
+        NizamioColors.dark.danger,
+      );
+      expect(
+        NizamioShadows.light.lerp(NizamioShadows.dark, 1).sheet,
+        NizamioShadows.dark.sheet,
       );
     });
   });

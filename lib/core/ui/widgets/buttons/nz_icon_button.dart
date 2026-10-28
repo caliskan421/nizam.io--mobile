@@ -24,7 +24,7 @@ class NzIconButton extends StatelessWidget {
 
   static const _disabledContentAlpha = 0.38;
   static const _overlayAlpha = 0.12;
-  static const _focusWidth = 2.0;
+  static const _focusWidth = NizamioSize.focusRingWidth;
 
   double get _extent => size.pick(
     sm: NizamioSpacing.space10,
@@ -47,7 +47,7 @@ class NzIconButton extends StatelessWidget {
       tapTargetSize: MaterialTapTargetSize.padded,
       shape: WidgetStatePropertyAll(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(NizamioRadius.radiusLg),
+          borderRadius: BorderRadius.circular(NizamioRadius.group),
         ),
       ),
       foregroundColor: WidgetStateProperty.resolveWith(
@@ -60,12 +60,12 @@ class NzIconButton extends StatelessWidget {
             s.contains(WidgetState.hovered) ||
                 s.contains(WidgetState.pressed) ||
                 s.contains(WidgetState.focused)
-            ? c.primary.withValues(alpha: _overlayAlpha)
+            ? c.text.withValues(alpha: _overlayAlpha)
             : null,
       ),
       side: WidgetStateProperty.resolveWith(
         (s) => s.contains(WidgetState.focused)
-            ? BorderSide(color: c.text, width: _focusWidth)
+            ? BorderSide(color: c.focusRing, width: _focusWidth)
             : null,
       ),
     );

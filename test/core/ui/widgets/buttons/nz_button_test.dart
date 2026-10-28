@@ -242,10 +242,10 @@ void main() {
     await expectSheetPixels(tester, [
       NizamioColors.light.primary,
       NizamioColors.light.danger,
-      NizamioColors.light.border,
+      NizamioColors.light.borderControl,
       NizamioColors.dark.primary,
       NizamioColors.dark.danger,
-      NizamioColors.dark.border,
+      NizamioColors.dark.borderControl,
     ]);
   });
 

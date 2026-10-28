@@ -368,92 +368,342 @@ SpecSummary summarizeSpec(String specText) {
 }
 
 // ---------------------------------------------------------------- tasarım token'ları
+//
+// İki girdi (ADR-0003 karar 24): tasarım sisteminin `tokens.json`'u (değerlerin tek kaynağı) ve
+// mobil eşleme dosyası `design/mobile-tokens.json` (anlamsal rol → tasarım token adı; tasarımda
+// karşılığı olmayan mobil değerler). Renkler ARGB tamsayısına çevrilir: CSS `#RRGGBBAA` →
+// `0xAARRGGBB`.
+
+/// Çözülmüş gölge (CSS `x y blur [spread] renk`).
+class ShadowSpec {
+  ShadowSpec(this.dx, this.dy, this.blur, this.spread, this.argb);
+  final double dx;
+  final double dy;
+  final double blur;
+  final double spread;
+  final int argb;
+}
+
+/// Tasarım metin stili (px ve em birimleriyle, kaynaktaki gibi).
+class TypeSpec {
+  TypeSpec({
+    required this.family,
+    required this.size,
+    required this.lineHeight,
+    required this.weight,
+    required this.letterSpacingEm,
+  });
+
+  /// `families` anahtarı (`sans`, `display`, `mono`).
+  final String family;
+  final double size;
+  final double lineHeight;
+  final int weight;
+  final double letterSpacingEm;
+}
 
 class ResolvedTokens {
   ResolvedTokens({
-    required this.palette,
+    required this.roles,
     required this.light,
     required this.dark,
-    required this.fontFamily,
-    required this.fontSize,
-    required this.fontWeight,
-    required this.lineHeight,
+    required this.families,
+    required this.typeStyles,
+    required this.spacingScale,
     required this.spacing,
     required this.radius,
+    required this.size,
+    required this.blur,
+    required this.metrics,
+    required this.shadowsLight,
+    required this.shadowsDark,
   });
-  final Map<String, Map<String, String>> palette;
-  final Map<String, String> light;
-  final Map<String, String> dark;
-  final Map<String, List<String>> fontFamily;
-  final Map<String, num> fontSize;
-  final Map<String, int> fontWeight;
-  final Map<String, num> lineHeight;
-  final Map<String, num> spacing;
-  final Map<String, num> radius;
+
+  /// Rol adları (mobil eşleme sırası).
+  final List<String> roles;
+  final Map<String, int> light;
+  final Map<String, int> dark;
+
+  /// Aile anahtarı → [birincil ad, ...yedekler].
+  final Map<String, List<String>> families;
+
+  /// Dart tanımlayıcısı (`m-h1-detail` → `h1Detail`) → stil.
+  final Map<String, TypeSpec> typeStyles;
+  final Map<String, double> spacingScale;
+  final Map<String, double> spacing;
+  final Map<String, double> radius;
+  final Map<String, double> size;
+  final Map<String, double> blur;
+  final Map<String, double> metrics;
+  final Map<String, ShadowSpec> shadowsLight;
+  final Map<String, ShadowSpec> shadowsDark;
 }
 
-final _hex = RegExp(r'^#[0-9a-fA-F]{6}$');
+/// Tasarım token adı → Dart tanımlayıcısı: `m-` / `m-r-` / `m-sh-` / `m-blur-` öneki atılır,
+/// kalan kebab-case camelCase olur (`m-gap-xs` → `gapXs`).
+String tokenIdent(String name, [String prefix = 'm-']) {
+  if (!name.startsWith(prefix)) {
+    throw FormatException('tokens: "$name" "$prefix" önekli değil');
+  }
+  final parts = name.substring(prefix.length).split('-');
+  if (parts.any((p) => !RegExp(r'^[a-z0-9]+$').hasMatch(p))) {
+    throw FormatException('tokens: geçersiz ad: $name');
+  }
+  return parts.first +
+      parts.skip(1).map((p) => p[0].toUpperCase() + p.substring(1)).join();
+}
 
-ResolvedTokens resolveTokens(String text) {
-  final t = jsonDecode(text) as Map<String, Object?>;
-  if (t['version'] != 1) {
-    throw FormatException('tokens: desteklenmeyen sürüm ${t['version']}');
+final _hex6 = RegExp(r'^#([0-9a-fA-F]{6})$');
+final _hex8 = RegExp(r'^#([0-9a-fA-F]{6})([0-9a-fA-F]{2})$');
+final _rgba = RegExp(
+  r'^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0|1|0?\.\d+|1\.0+)\s*\)$',
+);
+
+/// CSS renk değeri → ARGB. Desteklenen: `#RRGGBB`, `#RRGGBBAA` (CSS sırası; alfa SONDA),
+/// `rgba(r, g, b, a)`. Başka biçim düşer (sessiz yanlış renk olmaz).
+int cssColorToArgb(String v) {
+  final s = v.trim();
+  final m6 = _hex6.firstMatch(s);
+  if (m6 != null) return 0xFF000000 | int.parse(m6.group(1)!, radix: 16);
+  final m8 = _hex8.firstMatch(s);
+  if (m8 != null) {
+    final alpha = int.parse(m8.group(2)!, radix: 16);
+    return (alpha << 24) | int.parse(m8.group(1)!, radix: 16);
   }
-  final palette = <String, Map<String, String>>{};
-  for (final MapEntry(:key, :value)
-      in (t['palette']! as Map<String, Object?>).entries) {
-    final scale = <String, String>{};
-    for (final MapEntry(key: tone, value: hex)
-        in (value! as Map<String, Object?>).entries) {
-      if (hex is! String || !_hex.hasMatch(hex)) {
-        throw FormatException('tokens: palette.$key.$tone hex değil: $hex');
-      }
-      scale[tone] = hex;
+  final m = _rgba.firstMatch(s);
+  if (m != null) {
+    final c = [for (var i = 1; i <= 3; i++) int.parse(m.group(i)!)];
+    if (c.any((x) => x > 255)) {
+      throw FormatException('tokens: rgba kanalı 255 üstü: $v');
     }
-    palette[key] = scale;
+    final a = (double.parse(m.group(4)!) * 255).round();
+    return (a << 24) | (c[0] << 16) | (c[1] << 8) | c[2];
   }
-  Map<String, String> mode(String name) {
-    final m =
-        (t['modes']! as Map<String, Object?>)[name]! as Map<String, Object?>;
+  throw FormatException('tokens: desteklenmeyen renk biçimi: $v');
+}
+
+double _px(String v, String where) {
+  final m = RegExp(r'^(-?\d+(?:\.\d+)?)(px)?$').firstMatch(v.trim());
+  if (m == null || (m.group(2) == null && double.parse(m.group(1)!) != 0)) {
+    throw FormatException('tokens: $where px değil: $v');
+  }
+  return double.parse(m.group(1)!);
+}
+
+/// CSS gölgesi: `x y blur [spread] renk` (tek katman).
+ShadowSpec parseShadow(String v, String where) {
+  final m = RegExp(
+    r'^(-?[\d.]+(?:px)?)\s+(-?[\d.]+(?:px)?)\s+([\d.]+(?:px)?)(?:\s+(-?[\d.]+(?:px)?))?\s+(\S.*)$',
+  ).firstMatch(v.trim());
+  if (m == null) throw FormatException('tokens: $where gölge değil: $v');
+  return ShadowSpec(
+    _px(m.group(1)!, where),
+    _px(m.group(2)!, where),
+    _px(m.group(3)!, where),
+    m.group(4) == null ? 0 : _px(m.group(4)!, where),
+    cssColorToArgb(m.group(5)!),
+  );
+}
+
+/// CSS font yığını → [birincil, ...yedekler] (tırnaklar atılır).
+List<String> parseFontStack(String v) {
+  final out = [
+    for (final p in v.split(',')) p.trim().replaceAll(RegExp('^"|"\$'), ''),
+  ];
+  if (out.isEmpty || out.first.isEmpty) {
+    throw FormatException('tokens: boş font yığını: $v');
+  }
+  return out;
+}
+
+ResolvedTokens resolveTokens(String designText, String mobileText) {
+  final d = jsonDecode(designText) as Map<String, Object?>;
+  final mob = jsonDecode(mobileText) as Map<String, Object?>;
+  if (d['version'] != 1) {
+    throw FormatException(
+      'tokens: desteklenmeyen tasarım sürümü ${d['version']}',
+    );
+  }
+  if (mob['version'] != 1) {
+    throw FormatException(
+      'mobile-tokens: desteklenmeyen sürüm ${mob['version']}',
+    );
+  }
+  List<Map<String, Object?>> list(Object? section, String name) {
+    final s = section is Map<String, Object?> ? section['tokens'] : null;
+    if (s is! List<Object?>) throw FormatException('tokens: $name.tokens yok');
+    return s.cast<Map<String, Object?>>();
+  }
+
+  // Renkler: tema kimlikleri tam olarak dark + light.
+  final color = d['color'] as Map<String, Object?>?;
+  final themes = ((color?['themes'] as List<Object?>?) ?? [])
+      .map((t) => (t! as Map<String, Object?>)['id'])
+      .toSet();
+  if (themes.length != 2 || !themes.containsAll({'dark', 'light'})) {
+    throw FormatException('tokens: temalar dark/light değil: $themes');
+  }
+  final raw = <String, Map<String, String>>{};
+  for (final t in list(color, 'color')) {
+    final name = t['name']! as String;
+    final v = t['value'];
+    if (raw.containsKey(name)) {
+      throw FormatException('tokens: yinelenen renk $name');
+    }
+    raw[name] = v is String
+        ? {'dark': v, 'light': v}
+        : (v! as Map<String, Object?>).map((k, x) => MapEntry(k, x! as String));
+    if (!raw[name]!.keys.toSet().containsAll({'dark', 'light'})) {
+      throw FormatException('tokens: $name iki temada tanımlı değil');
+    }
+  }
+  int colorOf(String name, String mode, [int depth = 0]) {
+    final v = raw[name]?[mode];
+    if (v == null) throw FormatException('tokens: renk yok: $name');
+    final ref = RegExp(r'^\{([a-z0-9-]+)\}$').firstMatch(v);
+    if (ref == null) return cssColorToArgb(v);
+    if (depth > 4) throw FormatException('tokens: döngülü başvuru: $name');
+    return colorOf(ref.group(1)!, mode, depth + 1);
+  }
+
+  final mapping = mob['colors'];
+  if (mapping is! Map<String, Object?> || mapping.isEmpty) {
+    throw const FormatException('mobile-tokens: "colors" eşlemesi yok');
+  }
+  final roles = <String>[];
+  final light = <String, int>{};
+  final dark = <String, int>{};
+  for (final MapEntry(key: role, value: target) in mapping.entries) {
+    if (!RegExp(r'^[a-z][A-Za-z0-9]*$').hasMatch(role)) {
+      throw FormatException('mobile-tokens: geçersiz rol adı: $role');
+    }
+    if (target is! String || !raw.containsKey(target)) {
+      throw FormatException(
+        'mobile-tokens: $role → tasarımda olmayan token: $target',
+      );
+    }
+    roles.add(role);
+    light[role] = colorOf(target, 'light');
+    dark[role] = colorOf(target, 'dark');
+  }
+
+  // Tipografi.
+  final type = d['type'] as Map<String, Object?>?;
+  final families = <String, List<String>>{
+    for (final MapEntry(:key, :value)
+        in ((type?['families'] as Map<String, Object?>?) ?? {}).entries)
+      key: parseFontStack(value! as String),
+  };
+  final typeStyles = <String, TypeSpec>{};
+  for (final g
+      in ((type?['groups'] as List<Object?>?) ?? [])
+          .cast<Map<String, Object?>>()) {
+    final family = g['family']! as String;
+    if (!families.containsKey(family)) {
+      throw FormatException('tokens: ${g['name']} bilinmeyen aile: $family');
+    }
+    for (final s
+        in (g['styles']! as List<Object?>).cast<Map<String, Object?>>()) {
+      final name = s['name']! as String;
+      final id = tokenIdent(name);
+      if (typeStyles.containsKey(id)) {
+        throw FormatException('tokens: yinelenen stil $name');
+      }
+      final ls = s['letterSpacing'] as String?;
+      final lsMatch = ls == null
+          ? null
+          : RegExp(r'^(-?\d*\.?\d+)em$').firstMatch(ls);
+      if (ls != null && lsMatch == null) {
+        throw FormatException('tokens: $name letterSpacing em değil: $ls');
+      }
+      final weight = s['fontWeight'];
+      if (weight is! int || weight % 100 != 0 || weight < 100 || weight > 900) {
+        throw FormatException('tokens: $name fontWeight geçersiz: $weight');
+      }
+      typeStyles[id] = TypeSpec(
+        family: family,
+        size: _px(s['fontSize']! as String, name),
+        lineHeight: _px(s['lineHeight']! as String, name),
+        weight: weight,
+        letterSpacingEm: lsMatch == null ? 0 : double.parse(lsMatch.group(1)!),
+      );
+    }
+  }
+  if (typeStyles.isEmpty) {
+    throw const FormatException('tokens: metin stili yok');
+  }
+
+  Map<String, double> scalars(String section, String prefix) {
+    final out = <String, double>{};
+    for (final t in list(d[section], section)) {
+      final id = tokenIdent(t['name']! as String, prefix);
+      if (out.containsKey(id)) {
+        throw FormatException('tokens: yinelenen $section $id');
+      }
+      out[id] = _px(t['value']! as String, '$section.${t['name']}');
+    }
+    return out;
+  }
+
+  final shadowsLight = <String, ShadowSpec>{};
+  final shadowsDark = <String, ShadowSpec>{};
+  for (final t in list(d['shadow'], 'shadow')) {
+    final name = t['name']! as String;
+    final id = tokenIdent(name, 'm-sh-');
+    final v = t['value'];
+    final byMode = v is String
+        ? {'dark': v, 'light': v}
+        : (v! as Map<String, Object?>).map((k, x) => MapEntry(k, x! as String));
+    if (byMode['dark'] == null || byMode['light'] == null) {
+      throw FormatException('tokens: gölge $name iki temada tanımlı değil');
+    }
+    shadowsDark[id] = parseShadow(byMode['dark']!, name);
+    shadowsLight[id] = parseShadow(byMode['light']!, name);
+  }
+
+  Map<String, double> mobileNums(String key) {
+    final m = mob[key];
+    if (m is! Map<String, Object?>) {
+      throw FormatException('mobile-tokens: "$key" yok');
+    }
     return {
-      for (final MapEntry(:key, :value) in m.entries)
-        key: () {
-          final match = RegExp(r'^\{([a-z]+)\.(\d+)\}$')
-              .firstMatch(value! as String);
-          final hex = match == null
-              ? null
-              : palette[match.group(1)]?[match.group(2)];
-          if (hex == null) {
-            throw FormatException(
-              'tokens: modes.$name.$key çözülemedi: $value',
-            );
-          }
-          return hex;
-        }(),
+      for (final MapEntry(key: k, value: v) in m.entries)
+        if (!k.startsWith(r'$'))
+          k: v is num
+              ? v.toDouble()
+              : throw FormatException('mobile-tokens: $key.$k sayı değil'),
     };
   }
 
-  final light = mode('light');
-  final dark = mode('dark');
-  if ((light.keys.toList()..sort()).join() !=
-      (dark.keys.toList()..sort()).join()) {
-    throw const FormatException('tokens: light/dark rol kümeleri farklı');
+  final spacingScale = mobileNums('spacingScale');
+  if (spacingScale.keys.any((k) => int.tryParse(k) == null)) {
+    throw const FormatException(
+      'mobile-tokens: spacingScale anahtarı tamsayı olmalı',
+    );
   }
-  final typo = t['typography']! as Map<String, Object?>;
-  Map<String, V> mapOf<V>(Object? m) =>
-      (m! as Map<String, Object?>).map((k, v) => MapEntry(k, v as V));
+  final size = scalars('size', 'm-');
+  final metrics = mobileNums('metrics');
+  final clash = metrics.keys.toSet().intersection(size.keys.toSet());
+  if (clash.isNotEmpty) {
+    throw FormatException(
+      'mobile-tokens: metrics tasarım size adıyla çakışıyor: $clash',
+    );
+  }
+
   return ResolvedTokens(
-    palette: palette,
+    roles: roles,
     light: light,
     dark: dark,
-    fontFamily: (typo['fontFamily']! as Map<String, Object?>).map(
-      (k, v) => MapEntry(k, (v! as List<Object?>).cast<String>()),
-    ),
-    fontSize: mapOf<num>(typo['fontSize']),
-    fontWeight: mapOf<int>(typo['fontWeight']),
-    lineHeight: mapOf<num>(typo['lineHeight']),
-    spacing: mapOf<num>(t['spacing']),
-    radius: mapOf<num>(t['radius']),
+    families: families,
+    typeStyles: typeStyles,
+    spacingScale: spacingScale,
+    spacing: scalars('spacing', 'm-'),
+    radius: scalars('radius', 'm-r-'),
+    size: size,
+    blur: scalars('blur', 'm-blur-'),
+    metrics: metrics,
+    shadowsLight: shadowsLight,
+    shadowsDark: shadowsDark,
   );
 }
 

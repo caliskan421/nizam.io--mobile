@@ -18,6 +18,14 @@ List<int> _rgba(Color c) => [
   (c.a * 255).round(),
 ];
 
+/// Sayfa (20 rol + 14 metin rolü) 800x600 varsayılan yüzeye sığmaz.
+void _tallView(WidgetTester tester) {
+  tester.view
+    ..physicalSize = const Size(800, 1000)
+    ..devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+}
+
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
@@ -28,6 +36,7 @@ void main() {
     testWidgets(
       '$name: hedef 400 genişlikte, rol kutuları token rengiyle dolu',
       (tester) async {
+        _tallView(tester);
         await tester.pumpWidget(tokenPage(dark: dark));
         final size = tester.getSize(find.byKey(tokenPageKey));
         expect(size.width, tokenPageWidth);
@@ -59,6 +68,7 @@ void main() {
     );
 
     goldenTestWidgets('$name: token sayfası golden', (tester) async {
+      _tallView(tester);
       await tester.pumpWidget(tokenPage(dark: dark));
       await expectLater(
         find.byKey(tokenPageKey),

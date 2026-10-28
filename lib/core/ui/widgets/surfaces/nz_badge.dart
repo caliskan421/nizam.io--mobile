@@ -65,7 +65,7 @@ class NzBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: style.tone.withValues(alpha: _tintAlpha),
           border: Border.all(color: style.tone),
-          borderRadius: BorderRadius.circular(NizamioRadius.radiusFull),
+          borderRadius: BorderRadius.circular(NizamioRadius.pill),
         ),
         child: Padding(
           padding: EdgeInsets.symmetric(

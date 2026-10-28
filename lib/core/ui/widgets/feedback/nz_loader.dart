@@ -36,7 +36,7 @@ class NzLoader extends StatelessWidget {
         width: _extent,
         height: _extent,
         child: CircularProgressIndicator(
-          color: context.colors.primary,
+          color: context.colors.accentText,
           strokeWidth: NizamioSpacing.space1,
         ),
       ),

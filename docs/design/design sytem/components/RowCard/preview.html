@@ -1,0 +1,24 @@
+<!-- @dsCard group="Formlar" height=420 subtitle="açılır satır, segment, anahtar" -->
+<!doctype html>
+<html lang="tr" data-theme="dark">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../bundle.js"></script><title>Satır kartı</title>
+<style>html,body{margin:0;background:var(--bg-base)} .wrap{padding:16px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start} .ph{width:358px;max-width:100%}</style>
+</head>
+<body>
+<div class="m-screen wrap">
+
+<div class="ph"><div class="m-rows">
+<div class="m-rows__item"><div class="m-row"><svg class="m-icon m-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17M15 9h4a1 1 0 0 1 1 1v11M3 21h18"></path></svg><button type="button" class="m-row__btn" aria-expanded="true"><span>Koordinatörlük</span><span class="m-row__value m-trunc" data-set="true">Altyapı ve tesisat</span><span class="m-row__chev"><svg class="m-icon m-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></span></button></div>
+<div class="m-acc" id="acc1" data-open="true"><div><div style="display:flex;flex-direction:column;padding:0 6px 8px 40px">
+<button type="button" role="radio" aria-checked="true" class="m-opt"><span class="m-trunc">Altyapı ve tesisat</span><span class="m-mono" style="font-size:11px;color:var(--ink-faint)">ALT</span><span class="m-opt__check"><svg class="m-icon m-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span></button>
+<button type="button" role="radio" aria-checked="false" class="m-opt"><span class="m-trunc">Elektrik ve enerji</span><span class="m-mono" style="font-size:11px;color:var(--ink-faint)">ELE</span><span></span></button>
+</div></div></div></div>
+<div class="m-rows__item"><div class="m-row"><svg class="m-icon m-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0"></path></svg><button type="button" class="m-row__btn" aria-expanded="false"><span>Atanan</span><span class="m-row__value m-trunc">Seç</span><span class="m-row__chev"><svg class="m-icon m-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></span></button></div></div>
+<div class="m-rows__item"><div class="m-row"><span class="m-prio" data-level="2" aria-hidden="true" style="justify-content:center"><span class="m-prio__bars"><span></span><span></span><span></span></span></span><span>Öncelik</span><span class="m-seg" role="group" aria-label="Öncelik"><button type="button" aria-pressed="false">Düşük</button><button type="button" aria-pressed="true">Orta</button><button type="button" aria-pressed="false">Yüksek</button></span></div></div>
+<div class="m-rows__item"><div class="m-row"><svg class="m-icon m-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5l-7.8 7.8a5 5 0 0 1-7.1-7.1l8.2-8.2a3.3 3.3 0 0 1 4.7 4.7l-8.2 8.2a1.7 1.7 0 0 1-2.4-2.4l7.5-7.5"></path></svg><label for="sw1">Kanıt dosyası zorunlu</label><button id="sw1" type="button" role="switch" aria-checked="true" class="m-switch"></button></div></div>
+</div></div>
+</div>
+<script>window.RoketPortalMobil && window.RoketPortalMobil.init(document);</script>
+</body>
+</html>

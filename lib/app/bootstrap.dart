@@ -58,7 +58,8 @@ Future<void> loadPreferences(
 Stream<LicenseEntry> _fontLicenses() async* {
   for (final (font, file) in const [
     ('Inter', 'assets/fonts/OFL-Inter.txt'),
-    ('JetBrains Mono', 'assets/fonts/OFL-JetBrainsMono.txt'),
+    ('Poppins', 'assets/fonts/OFL-Poppins.txt'),
+    ('Geist Mono', 'assets/fonts/OFL-GeistMono.txt'),
   ]) {
     yield LicenseEntryWithLineBreaks([font], await rootBundle.loadString(file));
   }

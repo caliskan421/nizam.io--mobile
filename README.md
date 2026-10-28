@@ -101,7 +101,7 @@ negatif matrisler `test/tool/boundaries_test.dart` ve `test/tool/api_surface_tes
 
 ## Üretim (`make gen`, `tool/gen.dart`)
 
-Kaynaklar yalnız `api-pin.json` pinlerinden okunur; çalışma ağacı okunmaz:
+API/hata metni kaynakları yalnız `api-pin.json` pinlerinden okunur (çalışma ağacı okunmaz); tasarım token'ları bu depodaki sabitlenmiş tasarım dosyasından:
 
 | Kaynak | Pin | Çıktı (commit'lenir) |
 |---|---|---|
@@ -109,7 +109,7 @@ Kaynaklar yalnız `api-pin.json` pinlerinden okunur; çalışma ağacı okunmaz:
 | backend `docs/api/error-codes.json` | `backendTag` | `lib/core/api/generated/error_catalog.gen.dart`; ARB anahtar kümesi |
 | web `src/shared/i18n/tr/errors.ts` | `web.commit` | sunucu hata kodlarının TR metinleri → `lib/core/i18n/arb/app_tr.arb` → gen-l10n (`lib/core/i18n/generated/`) |
 | `i18n/client_errors.tr.json` | bu depo | mobilin kendi `client.*` kodları ve metinleri → aynı ARB + `ClientErrorCode` |
-| web `tokens/tokens.json` | `web.commit` | `lib/core/theme/generated/tokens.gen.dart` (`NizamioColors` ThemeExtension açık/koyu, palet, boşluk, yarıçap, tipografi — değerler yer tutucu) |
+| `docs/design/design sytem/tokens.json` + `design/mobile-tokens.json` | bu depo; tasarım dosyası `source.blob` (`git hash-object`) ile sabit | `lib/core/theme/generated/tokens.gen.dart` (`NizamioColors`/`NizamioShadows` ThemeExtension açık/koyu, boşluk, yarıçap, ölçü, blur, tasarım metin stilleri). Kaynak zinciri ve açık kararlar: [docs/design-tokens.md](docs/design-tokens.md) |
 | `pubspec.yaml` `version` | bu depo | `lib/core/config/generated/app_version.gen.dart` |
 
 Sonra `build_runner` (freezed, json_serializable, retrofit, riverpod_generator) ve `dart format`.

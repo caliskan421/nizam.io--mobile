@@ -150,7 +150,7 @@ class _Groups extends StatelessWidget {
               DecoratedBox(
                 decoration: BoxDecoration(
                   border: Border.all(color: colors.border),
-                  borderRadius: BorderRadius.circular(NizamioRadius.radiusLg),
+                  borderRadius: BorderRadius.circular(NizamioRadius.tile),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(NizamioSpacing.space3),

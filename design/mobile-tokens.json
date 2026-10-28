@@ -1,0 +1,56 @@
+{
+  "$comment": "Mobil tasarım token'larının TEK eşleme kaynağı (ADR-0003 karar 24). Değerler tasarım sisteminden okunur (source.path; içerik `git hash-object` blob kimliğiyle sabit); bu dosya yalnız anlamsal rol → tasarım token adı eşlemesini ve tasarım dosyasında karşılığı olmayan mobil değerleri tutar. Renk değeri burada yazılmaz. Değiştirmek = bu dosya ya da kaynak + blob + make gen + PR.",
+  "version": 1,
+  "source": {
+    "path": "docs/design/design sytem/tokens.json",
+    "blob": "2e1521ab9fe632f81f418ed085d5ba0330c35bc6"
+  },
+  "colors": {
+    "background": "bg-base",
+    "surface": "bg-surface",
+    "surfaceRaised": "bg-raised",
+    "surfaceOverlay": "bg-overlay",
+    "border": "border-subtle",
+    "borderStrong": "border-strong",
+    "borderControl": "border-control",
+    "text": "ink",
+    "textMuted": "ink-muted",
+    "textFaint": "ink-faint",
+    "primary": "accent",
+    "onPrimary": "accent-ink",
+    "accentText": "accent-text",
+    "focusRing": "focus-ring",
+    "danger": "danger",
+    "onDanger": "on-danger",
+    "warning": "gold",
+    "onWarning": "on-gold",
+    "success": "accent-text",
+    "info": "ink-muted",
+    "scrim": "scrim"
+  },
+  "$colorNotes": {
+    "success": "Tasarım README 'tamam accent-text' der; ayrı başarı rengi yoktur.",
+    "info": "Tasarımda bilgi rengi yoktur; nötr ikincil metne bağlandı (açık karar, docs/design-tokens.md)."
+  },
+  "spacingScale": {
+    "$comment": "4 pt yerleşim ızgarası (mevcut kit kullanır). Tasarım dosyasında ızgara yoktur; tasarımın anlamsal boşlukları (m-gutter, m-gap-*) ayrıca üretilir.",
+    "0": 0,
+    "1": 4,
+    "2": 8,
+    "3": 12,
+    "4": 16,
+    "5": 20,
+    "6": 24,
+    "8": 32,
+    "10": 40,
+    "12": 48,
+    "16": 64
+  },
+  "metrics": {
+    "$comment": "Tasarım README / components/bundle.css değerleri; tokens.json'da karşılıkları yok.",
+    "iconSize": 20,
+    "iconSizeSm": 16,
+    "borderWidth": 1,
+    "focusRingWidth": 2
+  }
+}

@@ -7,6 +7,8 @@ import 'package:nizamio/core/ui/theme/app_theme.dart';
 import 'package:nizamio/core/ui/theme/nz_text_styles.dart';
 
 void main() {
+  // Yazı tipleri gerçekten varlıktan yüklensin (binding yoksa google_fonts yükleyemez).
+  TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
   final cases = <(String, Brightness, NizamioColors, ThemeData Function())>[
@@ -24,37 +26,43 @@ void main() {
         expect(s.brightness, brightness);
         expect(s.primary, c.primary);
         expect(s.onPrimary, c.onPrimary);
-        expect(s.secondary, c.primaryHover);
-        expect(s.onSecondary, c.onPrimary);
+        expect(s.secondary, c.accentText);
+        expect(s.onSecondary, c.background);
         expect(s.error, c.danger);
-        expect(s.onError, c.background);
-        expect(s.surface, c.background);
+        expect(s.onError, c.onDanger);
+        expect(s.surface, c.surface);
         expect(s.onSurface, c.text);
         expect(s.onSurfaceVariant, c.textMuted);
-        expect(s.outline, c.border);
+        expect(s.outline, c.borderControl);
         expect(s.outlineVariant, c.border);
         expect(s.surfaceContainerLowest, c.background);
-        for (final v in [
-          s.surfaceContainerLow,
-          s.surfaceContainer,
-          s.surfaceContainerHigh,
-          s.surfaceContainerHighest,
-        ]) {
-          expect(v, c.backgroundMuted);
-        }
+        expect(s.surfaceContainerLow, c.surface);
+        expect(s.surfaceContainer, c.surfaceRaised);
+        expect(s.surfaceContainerHigh, c.surfaceRaised);
+        expect(s.surfaceContainerHighest, c.surfaceOverlay);
         expect(s.inverseSurface, c.text);
         expect(s.onInverseSurface, c.background);
+        expect(s.scrim, c.scrim);
+        // Ters yüzeydeki vurgu karşı modun accentText'i (snackbar eylemi okunur kalır).
         expect(
           s.inversePrimary,
           brightness == Brightness.light
-              ? NizamioPalette.primary300
-              : NizamioPalette.primary600,
+              ? NizamioColors.dark.accentText
+              : NizamioColors.light.accentText,
         );
         expect(t.scaffoldBackgroundColor, c.background);
       });
 
       test('uzantılar kayıtlı ve renkler aynı moddan', () {
         expect(t.extension<NizamioColors>(), same(c));
+        expect(
+          t.extension<NizamioShadows>(),
+          same(
+            brightness == Brightness.light
+                ? NizamioShadows.light
+                : NizamioShadows.dark,
+          ),
+        );
         final nz = t.extension<NzTextStyles>()!;
         expect(nz.bodyMd.color, c.text);
         expect(nz.mono.color, c.text);
@@ -74,11 +82,11 @@ void main() {
 
       test('bileşen temaları token yarıçap/boşluk/renk kullanır', () {
         final filled = t.filledButtonTheme.style!;
-        expect(filled.minimumSize!.resolve({}), const Size(0, 48));
+        expect(filled.minimumSize!.resolve({}), const Size(0, NizamioSize.tap));
         expect(filled.backgroundColor!.resolve({}), c.primary);
         expect(
           filled.backgroundColor!.resolve({WidgetState.pressed}),
-          c.primaryHover,
+          c.primary,
         );
         expect(filled.foregroundColor!.resolve({}), c.onPrimary);
         expect(
@@ -88,20 +96,27 @@ void main() {
         expect(
           filled.shape!.resolve({}),
           RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(NizamioRadius.radiusLg),
+            borderRadius: BorderRadius.circular(NizamioRadius.group),
           ),
         );
 
         final outlined = t.outlinedButtonTheme.style!;
-        expect(outlined.side!.resolve({})!.color, c.border);
-        expect(outlined.foregroundColor!.resolve({}), c.primary);
+        expect(outlined.side!.resolve({})!.color, c.borderControl);
+        expect(
+          outlined.side!.resolve({WidgetState.focused})!.color,
+          c.focusRing,
+        );
+        expect(outlined.foregroundColor!.resolve({}), c.text);
 
         final input = t.inputDecorationTheme;
-        expect(input.fillColor, c.backgroundMuted);
+        expect(input.fillColor, c.surface);
         expect(
-          (input.focusedBorder! as OutlineInputBorder).borderSide.color,
-          c.primary,
+          (input.enabledBorder! as OutlineInputBorder).borderSide.color,
+          c.borderControl,
         );
+        final focused = input.focusedBorder! as OutlineInputBorder;
+        expect(focused.borderSide.color, c.focusRing);
+        expect(focused.borderSide.width, NizamioSize.focusRingWidth);
         expect(
           (input.errorBorder! as OutlineInputBorder).borderSide.color,
           c.danger,
@@ -109,16 +124,18 @@ void main() {
         expect(input.errorStyle!.color, c.danger);
 
         final card = t.cardTheme;
-        expect(card.color, c.background);
+        expect(card.color, c.surface);
         expect(
           (card.shape! as RoundedRectangleBorder).borderRadius,
-          BorderRadius.circular(NizamioRadius.radiusXl),
+          BorderRadius.circular(NizamioRadius.card),
         );
 
         expect(t.dividerTheme.color, c.border);
         expect(t.snackBarTheme.backgroundColor, c.text);
         expect(t.snackBarTheme.contentTextStyle!.color, c.background);
-        expect(t.bottomSheetTheme.backgroundColor, c.background);
+        expect(t.bottomSheetTheme.backgroundColor, c.surface);
+        expect(t.bottomSheetTheme.modalBarrierColor, c.scrim);
+        expect(t.iconTheme.size, NizamioSize.iconSize);
         expect(t.bottomSheetTheme.showDragHandle, isTrue);
         expect(t.navigationBarTheme.backgroundColor, c.background);
         expect(t.navigationBarTheme.height, NizamioSpacing.space16);
@@ -126,11 +143,11 @@ void main() {
           t.navigationBarTheme.iconTheme!.resolve({
             WidgetState.selected,
           })!.color,
-          c.primary,
+          c.accentText,
         );
         expect(t.navigationBarTheme.iconTheme!.resolve({})!.color, c.textMuted);
         expect(t.navigationRailTheme.backgroundColor, c.background);
-        expect(t.navigationRailTheme.selectedIconTheme!.color, c.primary);
+        expect(t.navigationRailTheme.selectedIconTheme!.color, c.accentText);
         expect(t.navigationRailTheme.unselectedIconTheme!.color, c.textMuted);
       });
     });

@@ -134,8 +134,8 @@ class _NzSelectState<T> extends State<NzSelect<T>> with NzServerFieldError {
               isExpanded: true,
               focusNode: _focus,
               style: style.text.copyWith(color: context.colors.text),
-              dropdownColor: context.colors.background,
-              borderRadius: BorderRadius.circular(NizamioRadius.radiusLg),
+              dropdownColor: context.colors.surface,
+              borderRadius: BorderRadius.circular(NizamioRadius.group),
               itemHeight: null,
               hint: hint == null
                   ? null

@@ -11,6 +11,9 @@ extension NzContext on BuildContext {
   /// Renk rolleri (token).
   NizamioColors get colors => Theme.of(this).extension<NizamioColors>()!;
 
+  /// Gölgeler (token; açık/koyu).
+  NizamioShadows get shadows => Theme.of(this).extension<NizamioShadows>()!;
+
   /// Anlamsal metin rolleri.
   NzTextStyles get text => Theme.of(this).extension<NzTextStyles>()!;
 

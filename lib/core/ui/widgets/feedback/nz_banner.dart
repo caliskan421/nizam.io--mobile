@@ -84,7 +84,7 @@ class NzBanner extends StatelessWidget {
         decoration: BoxDecoration(
           color: tone.withValues(alpha: _tintAlpha),
           border: Border.all(color: tone),
-          borderRadius: BorderRadius.circular(NizamioRadius.radiusLg),
+          borderRadius: BorderRadius.circular(NizamioRadius.tile),
         ),
         child: Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,

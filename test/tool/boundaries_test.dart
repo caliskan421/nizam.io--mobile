@@ -982,44 +982,39 @@ void main() {
     });
   });
 
-  test(
-    'izinler kapalıyken ham ölçüm: U2=64, U3 TextStyle=0, google_fonts=2',
-    () {
-      final raw = <Violation>[];
-      for (final f in Directory(
-        'lib',
-      ).listSync(recursive: true).whereType<File>()) {
-        if (!f.path.endsWith('.dart')) continue;
-        raw.addAll(
-          checkSource(
-            f.path.substring('lib/'.length),
-            f.readAsStringSync(),
-            allowances: false,
-          ),
-        );
-      }
-      int count(String rule) => raw.where((v) => v.rule == rule).length;
-      expect(
-        count('U2'),
-        64,
-        reason: raw.where((v) => v.rule == 'U2').join('\n'),
+  test('izinler kapalıyken ham ölçüm: U2=55, U3 TextStyle=0, google_fonts=2', () {
+    final raw = <Violation>[];
+    for (final f in Directory(
+      'lib',
+    ).listSync(recursive: true).whereType<File>()) {
+      if (!f.path.endsWith('.dart')) continue;
+      raw.addAll(
+        checkSource(
+          f.path.substring('lib/'.length),
+          f.readAsStringSync(),
+          allowances: false,
+        ),
       );
-      expect(
-        raw.where((v) => v.rule == 'U2' && v.path == 'lib/app/app.dart'),
-        isEmpty,
-      );
-      expect(
-        count('U3'),
-        2,
-        reason: raw.where((v) => v.rule == 'U3').join('\n'),
-      );
-      // U5: yalnız context_ext.dart (izinli tek dosya) iki `.extension<…>()` çağrısı taşır.
-      expect(raw.where((v) => v.rule == 'U5').map((v) => v.path).toSet(), {
-        'lib/core/ui/extensions/context_ext.dart',
-      });
-      expect(count('U4') + count('U6'), 0);
-    },
-  );
+    }
+    int count(String rule) => raw.where((v) => v.rule == rule).length;
+    // tokens.gen.dart 54 (21 rol × 2 mod + 12 gölge rengi; ADR-0003 karar 24) +
+    // privacy_mask.dart 1.
+    expect(
+      count('U2'),
+      55,
+      reason: raw.where((v) => v.rule == 'U2').join('\n'),
+    );
+    expect(
+      raw.where((v) => v.rule == 'U2' && v.path == 'lib/app/app.dart'),
+      isEmpty,
+    );
+    expect(count('U3'), 2, reason: raw.where((v) => v.rule == 'U3').join('\n'));
+    // U5: yalnız context_ext.dart (izinli tek dosya) iki `.extension<…>()` çağrısı taşır.
+    expect(raw.where((v) => v.rule == 'U5').map((v) => v.path).toSet(), {
+      'lib/core/ui/extensions/context_ext.dart',
+    });
+    expect(count('U4') + count('U6'), 0);
+  });
 
   test('gerçek lib/ ağacı kurallara uyar', () {
     final violations = <Violation>[];

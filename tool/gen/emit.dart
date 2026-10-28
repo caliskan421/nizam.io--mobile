@@ -116,120 +116,199 @@ String emitErrorMessages(Map<String, String> messages, String source) {
   return b.toString();
 }
 
-String _hexColor(String hex) => 'Color(0xFF${hex.substring(1).toUpperCase()})';
+String _argb(int v) =>
+    'Color(0x${v.toRadixString(16).padLeft(8, '0').toUpperCase()})';
 
-String _ident(String prefix, String key) {
-  final cleaned = key.replaceAll(RegExp('[^A-Za-z0-9]'), '');
-  return prefix + cleaned[0].toUpperCase() + cleaned.substring(1);
+String _num(double v) => v.toString();
+
+String _cap(String s) => s[0].toUpperCase() + s.substring(1);
+
+/// Mod bağımlı alanlar için ThemeExtension sınıfı (renk ya da gölge).
+void _emitExtension(
+  StringBuffer b, {
+  required String name,
+  required String doc,
+  required String type,
+  required List<String> fields,
+  required Map<String, String> light,
+  required Map<String, String> dark,
+  required String Function(String a, String b) lerp,
+}) {
+  b
+    ..writeln('/// $doc')
+    ..writeln('@immutable')
+    ..writeln('class $name extends ThemeExtension<$name> {')
+    ..writeln('  const $name({')
+    ..writeln(fields.map((r) => '    required this.$r,').join('\n'))
+    ..writeln('  });')
+    ..writeln()
+    ..writeln(fields.map((r) => '  final $type $r;').join('\n'))
+    ..writeln()
+    ..writeln('  static const light = $name(')
+    ..writeln(fields.map((r) => '    $r: ${light[r]},').join('\n'))
+    ..writeln('  );')
+    ..writeln()
+    ..writeln('  static const dark = $name(')
+    ..writeln(fields.map((r) => '    $r: ${dark[r]},').join('\n'))
+    ..writeln('  );')
+    ..writeln()
+    ..writeln('  @override')
+    ..writeln('  $name copyWith({')
+    ..writeln(fields.map((r) => '    $type? $r,').join('\n'))
+    ..writeln('  }) {')
+    ..writeln('    return $name(')
+    ..writeln(fields.map((r) => '      $r: $r ?? this.$r,').join('\n'))
+    ..writeln('    );')
+    ..writeln('  }')
+    ..writeln()
+    ..writeln('  @override')
+    ..writeln('  $name lerp($name? other, double t) {')
+    ..writeln('    if (other == null) return this;')
+    ..writeln('    return $name(')
+    ..writeln(fields.map((r) => '      $r: ${lerp(r, 'other.$r')},').join('\n'))
+    ..writeln('    );')
+    ..writeln('  }')
+    ..writeln('}')
+    ..writeln();
+}
+
+String _shadow(ShadowSpec s) =>
+    '[BoxShadow(color: ${_argb(s.argb)}, offset: Offset(${_num(s.dx)}, ${_num(s.dy)}), '
+    'blurRadius: ${_num(s.blur)}, spreadRadius: ${_num(s.spread)})]';
+
+void _emitScalars(
+  StringBuffer b,
+  String cls,
+  String doc,
+  Map<String, double> values, [
+  String prefix = '',
+]) {
+  b
+    ..writeln('/// $doc')
+    ..writeln('abstract final class $cls {');
+  for (final MapEntry(:key, :value) in values.entries) {
+    final id = prefix.isEmpty ? key : '$prefix$key';
+    b.writeln('  static const double $id = ${_num(value)};');
+  }
+  b
+    ..writeln('}')
+    ..writeln();
 }
 
 String emitTokens(ResolvedTokens t, String source) {
-  final roles = t.light.keys.toList()..sort();
   final b = StringBuffer()
     ..write(generatedHeader(source))
     ..writeln('//')
     ..writeln(
-      '// Değerler YER TUTUCUDUR (F14 kapsam 8); ürün tasarımı sonra gelir. Web ile tek kaynak.',
+      '// Değerler tasarım sistemi tokens.json\'dan; rol eşlemesi ve mobil değerler design/mobile-tokens.json\'dan.',
     )
     ..writeln()
     ..writeln("import 'package:flutter/material.dart';")
-    ..writeln()
-    ..writeln('/// Palet (açık/koyu rollerin başvurduğu tonlar).')
-    ..writeln('abstract final class NizamioPalette {');
-  for (final MapEntry(key: name, value: scale) in t.palette.entries) {
-    final tones = scale.keys.toList()
-      ..sort((a, b) => int.parse(a).compareTo(int.parse(b)));
-    for (final tone in tones) {
-      b.writeln('  static const $name$tone = ${_hexColor(scale[tone]!)};');
-    }
-  }
+    ..writeln();
+  _emitExtension(
+    b,
+    name: 'NizamioColors',
+    doc: 'Anlamsal renk rolleri — Material temasına ThemeExtension olarak eklenir.',
+    type: 'Color',
+    fields: t.roles,
+    light: {for (final r in t.roles) r: _argb(t.light[r]!)},
+    dark: {for (final r in t.roles) r: _argb(t.dark[r]!)},
+    lerp: (a, o) => 'Color.lerp($a, $o, t)!',
+  );
+  final shadows = t.shadowsLight.keys.toList();
+  _emitExtension(
+    b,
+    name: 'NizamioShadows',
+    doc: 'Gölgeler (CSS blur değeri `blurRadius` olarak taşınır) — ThemeExtension.',
+    type: 'List<BoxShadow>',
+    fields: shadows,
+    light: {for (final s in shadows) s: _shadow(t.shadowsLight[s]!)},
+    dark: {for (final s in shadows) s: _shadow(t.shadowsDark[s]!)},
+    lerp: (a, o) => 'BoxShadow.lerpList($a, $o, t)!',
+  );
+
+  final scale = t.spacingScale.keys.toList()
+    ..sort((a, b) => int.parse(a).compareTo(int.parse(b)));
+  _emitScalars(
+    b,
+    'NizamioSpacing',
+    'Boşluk (mantıksal piksel): 4 pt ızgara `spaceN` (mobil) + tasarımın anlamsal boşlukları.',
+    {for (final k in scale) 'space$k': t.spacingScale[k]!, ...t.spacing},
+  );
+  _emitScalars(
+    b,
+    'NizamioRadius',
+    'Köşe yarıçapları (mantıksal piksel).',
+    t.radius,
+  );
+  _emitScalars(
+    b,
+    'NizamioSize',
+    'Sabit ölçüler: dokunma hedefi, çubuk yükseklikleri; ikon ve çizgi kalınlıkları (mobil).',
+    {...t.size, ...t.metrics},
+  );
+  _emitScalars(
+    b,
+    'NizamioBlur',
+    'Arka plan bulanıklığı (backdrop) yarıçapları.',
+    t.blur,
+  );
+
   b
-    ..writeln('}')
-    ..writeln()
     ..writeln(
-      '/// Mod rolleri — Material temasına ThemeExtension olarak eklenir.',
+      '/// Tasarım metin stili (kaynak birimleri: px, em). `NzTextStyles` rollere çevirir.',
     )
     ..writeln('@immutable')
-    ..writeln('class NizamioColors extends ThemeExtension<NizamioColors> {')
-    ..writeln('  const NizamioColors({')
-    ..writeln(roles.map((r) => '    required this.$r,').join('\n'))
+    ..writeln('class NizamioTypeSpec {')
+    ..writeln('  const NizamioTypeSpec({')
+    ..writeln('    required this.family,')
+    ..writeln('    required this.size,')
+    ..writeln('    required this.lineHeight,')
+    ..writeln('    required this.weight,')
+    ..writeln('    required this.letterSpacingEm,')
     ..writeln('  });')
     ..writeln()
-    ..writeln(roles.map((r) => '  final Color $r;').join('\n'))
+    ..writeln('  final String family;')
+    ..writeln('  final double size;')
+    ..writeln('  final double lineHeight;')
+    ..writeln('  final FontWeight weight;')
+    ..writeln('  final double letterSpacingEm;')
+    ..writeln('}')
     ..writeln()
-    ..writeln('  static const light = NizamioColors(')
-    ..writeln(roles.map((r) => '    $r: ${_hexColor(t.light[r]!)},').join('\n'))
-    ..writeln('  );')
-    ..writeln()
-    ..writeln('  static const dark = NizamioColors(')
-    ..writeln(roles.map((r) => '    $r: ${_hexColor(t.dark[r]!)},').join('\n'))
-    ..writeln('  );')
-    ..writeln()
-    ..writeln('  @override')
-    ..writeln('  NizamioColors copyWith({')
-    ..writeln(roles.map((r) => '    Color? $r,').join('\n'))
-    ..writeln('  }) {')
-    ..writeln('    return NizamioColors(')
-    ..writeln(roles.map((r) => '      $r: $r ?? this.$r,').join('\n'))
-    ..writeln('    );')
-    ..writeln('  }')
-    ..writeln()
-    ..writeln('  @override')
-    ..writeln('  NizamioColors lerp(NizamioColors? other, double t) {')
-    ..writeln('    if (other == null) return this;')
-    ..writeln('    return NizamioColors(')
     ..writeln(
-      roles.map((r) => '      $r: Color.lerp($r, other.$r, t)!,').join('\n'),
+      '/// Tipografi: aileler (birincil ad + yedek yığın) ve tasarım metin stilleri.',
     )
-    ..writeln('    );')
-    ..writeln('  }')
-    ..writeln('}')
-    ..writeln()
-    ..writeln('/// Boşluk ölçeği (mantıksal piksel).')
-    ..writeln('abstract final class NizamioSpacing {');
-  final spacing = t.spacing.keys.toList()
-    ..sort((a, b) => int.parse(a).compareTo(int.parse(b)));
-  for (final k in spacing) {
-    b.writeln('  static const double space$k = ${t.spacing[k]!.toDouble()};');
-  }
-  b
-    ..writeln('}')
-    ..writeln()
-    ..writeln('/// Köşe yarıçapları (mantıksal piksel).')
-    ..writeln('abstract final class NizamioRadius {');
-  for (final MapEntry(:key, :value) in t.radius.entries) {
-    b.writeln(
-      '  static const double ${_ident('radius', key)} = ${value.toDouble()};',
-    );
-  }
-  b
-    ..writeln('}')
-    ..writeln()
-    ..writeln('/// Tipografi.')
     ..writeln('abstract final class NizamioTypography {');
-  for (final MapEntry(:key, :value) in t.fontFamily.entries) {
+  for (final MapEntry(:key, :value) in t.families.entries) {
     b
       ..writeln(
-        '  static const ${_ident('family', key)} = ${dartString(value.first)};',
+        '  static const family${_cap(key)} = ${dartString(value.first)};',
       )
       ..writeln(
-        '  static const ${_ident('family', key)}Fallback = <String>[${value.skip(1).map(dartString).join(', ')}];',
+        '  static const family${_cap(key)}Fallback = <String>[${value.skip(1).map(dartString).join(', ')}];',
       );
   }
-  for (final MapEntry(:key, :value) in t.fontSize.entries) {
-    b.writeln(
-      '  static const double ${_ident('size', key)} = ${value.toDouble()};',
-    );
+  for (final MapEntry(:key, :value) in t.typeStyles.entries) {
+    b
+      ..writeln('  static const $key = NizamioTypeSpec(')
+      ..writeln('    family: family${_cap(value.family)},')
+      ..writeln('    size: ${_num(value.size)},')
+      ..writeln('    lineHeight: ${_num(value.lineHeight)},')
+      ..writeln('    weight: FontWeight.w${value.weight},')
+      ..writeln('    letterSpacingEm: ${_num(value.letterSpacingEm)},')
+      ..writeln('  );');
   }
-  for (final MapEntry(:key, :value) in t.fontWeight.entries) {
-    b.writeln('  static const ${_ident('weight', key)} = FontWeight.w$value;');
-  }
-  for (final MapEntry(:key, :value) in t.lineHeight.entries) {
-    b.writeln(
-      '  static const double ${_ident('lineHeight', key)} = ${value.toDouble()};',
-    );
-  }
-  b.writeln('}');
+  b
+    ..writeln()
+    ..writeln(
+      '  /// Bütün tasarım stilleri (ad → stil); dağıtılan yazı tipi ağırlıkları buradan denetlenir.',
+    )
+    ..writeln('  static const styles = <String, NizamioTypeSpec>{')
+    ..writeln(
+      t.typeStyles.keys.map((k) => '    ${dartString(k)}: $k,').join('\n'),
+    )
+    ..writeln('  };')
+    ..writeln('}');
   return b.toString();
 }
 

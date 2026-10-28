@@ -301,7 +301,7 @@ void main() {
     await pumpSheet(tester, _variants);
     await tester.pump();
     await expectSheetPixels(tester, [
-      NizamioColors.light.backgroundMuted,
+      NizamioColors.light.surface,
       NizamioColors.light.danger,
       NizamioColors.dark.danger,
     ]);

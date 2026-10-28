@@ -1,43 +1,125 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
-import '../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
+import '../application/quick_forms_controller.dart';
+import 'quick/invite_form.dart';
+import 'quick/meeting_form.dart';
+import 'quick/new_task_form.dart';
+import 'task_texts.dart';
+import 'task_widgets.dart';
 
-/// YER TUTUCU (iskelet): prototipin hızlı işlem alt sayfaları (yeni görev, toplantı, kullanıcı
-/// davet) bu dosyada uygulanır. Ana sayfa, kısayol menüleri ve koordinatörlük ayrıntısı çağırır.
-Future<void> showNewTaskSheet(
+/// Hızlı işlem alt sayfaları (prototip `markup_shared_overlays` "Yeni görev", "Toplantı
+/// oluştur", "Kullanıcı davet et"). Ana sayfa, kısayol menüleri ve koordinatörlük ayrıntısı
+/// çağırır. Taslak sayfa kapanınca korunur; başarılı gönderimde sayfa kapanır ve sonuç
+/// bildirimi çıkar. Sayfa tutamakla büyür/küçülür; tarih, davetli, gündem ve koordinatörlük
+/// satırı açılınca kendiliğinden büyür.
+Future<void> showNewTaskSheet(BuildContext context, {String? coordinatorship}) {
+  final container = ProviderScope.containerOf(context, listen: false);
+  container
+      .read(newTaskFormControllerProvider.notifier)
+      .prepare(coordinatorship: coordinatorship);
+  final l = context.l10n;
+  return _show(
+    context,
+    title: l.uiTasksNewTask,
+    description: l.uiTasksNtDesc,
+    ok: l.uiTasksCreate,
+    onOk: (sheet) {
+      final r = container.read(newTaskFormControllerProvider.notifier).submit();
+      if (r == null) return null;
+      return '${r.code} ${l.uiTasksTCreatedTail} · '
+          '${r.notified} ${l.uiTasksTNotifiedTail}';
+    },
+    body: (expansion) => NewTaskFormBody(expansion: expansion),
+  );
+}
+
+Future<void> showMeetingSheet(BuildContext context, {String? coordinatorship}) {
+  final container = ProviderScope.containerOf(context, listen: false);
+  container
+      .read(meetingFormControllerProvider.notifier)
+      .prepare(coordinatorship: coordinatorship);
+  final l = context.l10n;
+  return _show(
+    context,
+    title: l.uiTasksMtTitle,
+    description: l.uiTasksMtDesc,
+    ok: l.uiTasksCreate,
+    onOk: (sheet) {
+      final f = container.read(meetingFormControllerProvider.notifier).submit();
+      if (f == null) return null;
+      final when =
+          '${TaskDates.short(f.date)} '
+          '${f.hour.toString().padLeft(2, '0')}:'
+          '${f.minute.toString().padLeft(2, '0')}';
+      final who = f.mode == MeetingMode.coordinatorships
+          ? '${f.coordinatorships.length} ${l.uiTasksTCoordsInvited}'
+          : '${f.people.length} ${l.uiTasksTPeopleInvited}';
+      return '${l.uiTasksTMeeting} · $when · $who';
+    },
+    body: (expansion) => MeetingFormBody(expansion: expansion),
+  );
+}
+
+/// [coordinatorship] verilirse o koordinatörlük seçili, rol Üye açılır (koordinatörlük
+/// ayrıntısı "Üye ekle").
+Future<void> showInviteSheet(BuildContext context, {String? coordinatorship}) {
+  final container = ProviderScope.containerOf(context, listen: false);
+  container
+      .read(inviteFormControllerProvider.notifier)
+      .prepare(coordinatorship: coordinatorship);
+  final l = context.l10n;
+  return _show(
+    context,
+    title: l.uiTasksIvTitle,
+    description: l.uiTasksIvDesc,
+    ok: l.uiTasksIvSend,
+    onOk: (sheet) {
+      final f = container.read(inviteFormControllerProvider.notifier).submit();
+      if (f == null) return null;
+      return '${l.uiTasksTInvited} ${f.email}';
+    },
+    body: (expansion) => InviteFormBody(expansion: expansion),
+  );
+}
+
+/// Ortak alt sayfa: [onOk] başarıda bildirim metnini döner (sayfa kapanır, bildirim çıkar),
+/// doğrulama hatasında null (hata formda görünür).
+Future<void> _show(
   BuildContext context, {
-  String? coordinatorship,
-}) => _placeholder(context, context.l10n.uiHomeQaTaskLong);
-
-Future<void> showMeetingSheet(
-  BuildContext context, {
-  String? coordinatorship,
-}) => _placeholder(context, context.l10n.uiHomeQaMeetingLong);
-
-Future<void> showInviteSheet(BuildContext context) =>
-    _placeholder(context, context.l10n.uiHomeQaInviteLong);
-
-Future<void> _placeholder(BuildContext context, String title) =>
-    NzBottomSheet.show<void>(
-      context,
-      title: title,
-      builder: (sheet) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            sheet.l10n.uiHomeFormSoon,
-            style: sheet.text.bodyMd.copyWith(color: sheet.colors.textMuted),
-          ),
-          const Gap(NizamioSpacing.space6),
-          NzButton.secondary(
-            label: sheet.l10n.uiCommonClose,
-            expand: true,
-            onPressed: () => Navigator.of(sheet).pop(),
-          ),
-        ],
-      ),
-    );
+  required String title,
+  required String description,
+  required String ok,
+  required String? Function(BuildContext sheet) onOk,
+  required Widget Function(ValueNotifier<bool> expansion) body,
+}) async {
+  // Sayfa içeriği kapanış canlandırması bitince bırakır; burada elle kapatılmaz.
+  final expansion = ValueNotifier(false);
+  String? toast;
+  await NzBottomSheet.show<void>(
+    context,
+    title: title,
+    description: description,
+    expandable: true,
+    expansion: expansion,
+    actions: (sheet) => sheetActions(
+      sheet,
+      cancel: context.l10n.uiTasksCancel,
+      ok: ok,
+      onOk: () {
+        final msg = onOk(sheet);
+        if (msg == null) return;
+        toast = msg;
+        Navigator.of(sheet).pop();
+      },
+    ),
+    builder: (_) => body(expansion),
+  );
+  final msg = toast;
+  if (msg != null && context.mounted) {
+    NzToast.show(context, msg);
+  }
+}

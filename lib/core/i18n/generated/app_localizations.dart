@@ -4096,6 +4096,1626 @@ abstract class AppLocalizations {
   /// **'Görev'**
   String get uiTasksDetailTitle;
 
+  /// ui.tasks.tasks_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'görev'**
+  String get uiTasksTasksLc;
+
+  /// ui.tasks.search
+  ///
+  /// In tr, this message translates to:
+  /// **'Ara'**
+  String get uiTasksSearch;
+
+  /// ui.tasks.search_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlık, kimlik veya kişi'**
+  String get uiTasksSearchHint;
+
+  /// ui.tasks.filters_button
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtreler · kişi, koordinatörlük, öncelik'**
+  String get uiTasksFiltersButton;
+
+  /// ui.tasks.new_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni görev'**
+  String get uiTasksNewTask;
+
+  /// ui.tasks.mode
+  ///
+  /// In tr, this message translates to:
+  /// **'Görünüm'**
+  String get uiTasksMode;
+
+  /// ui.tasks.mode_list
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste'**
+  String get uiTasksModeList;
+
+  /// ui.tasks.mode_timeline
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman çizelgesi'**
+  String get uiTasksModeTimeline;
+
+  /// ui.tasks.views
+  ///
+  /// In tr, this message translates to:
+  /// **'Görünümler'**
+  String get uiTasksViews;
+
+  /// ui.tasks.view_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get uiTasksViewAll;
+
+  /// ui.tasks.view_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Geciken'**
+  String get uiTasksViewLate;
+
+  /// ui.tasks.view_doing
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam'**
+  String get uiTasksViewDoing;
+
+  /// ui.tasks.view_review
+  ///
+  /// In tr, this message translates to:
+  /// **'Onayda'**
+  String get uiTasksViewReview;
+
+  /// ui.tasks.view_request
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talebi'**
+  String get uiTasksViewRequest;
+
+  /// ui.tasks.view_todo
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlamadı'**
+  String get uiTasksViewTodo;
+
+  /// ui.tasks.view_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Biten'**
+  String get uiTasksViewDone;
+
+  /// ui.tasks.list_all
+  ///
+  /// In tr, this message translates to:
+  /// **'tüm görevler'**
+  String get uiTasksListAll;
+
+  /// ui.tasks.list_late
+  ///
+  /// In tr, this message translates to:
+  /// **'geciken görevler'**
+  String get uiTasksListLate;
+
+  /// ui.tasks.list_doing
+  ///
+  /// In tr, this message translates to:
+  /// **'devam eden görevler'**
+  String get uiTasksListDoing;
+
+  /// ui.tasks.list_review
+  ///
+  /// In tr, this message translates to:
+  /// **'onay bekleyenler'**
+  String get uiTasksListReview;
+
+  /// ui.tasks.list_request
+  ///
+  /// In tr, this message translates to:
+  /// **'tarih talebi olanlar'**
+  String get uiTasksListRequest;
+
+  /// ui.tasks.list_todo
+  ///
+  /// In tr, this message translates to:
+  /// **'başlamayanlar'**
+  String get uiTasksListTodo;
+
+  /// ui.tasks.list_done
+  ///
+  /// In tr, this message translates to:
+  /// **'tamamlananlar'**
+  String get uiTasksListDone;
+
+  /// ui.tasks.task_list
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev listesi'**
+  String get uiTasksTaskList;
+
+  /// ui.tasks.sort_menu
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıralama'**
+  String get uiTasksSortMenu;
+
+  /// ui.tasks.sort_created
+  ///
+  /// In tr, this message translates to:
+  /// **'Tanımlanma tarihine göre'**
+  String get uiTasksSortCreated;
+
+  /// ui.tasks.sort_due
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş tarihine göre'**
+  String get uiTasksSortDue;
+
+  /// ui.tasks.sort_start
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç tarihine göre'**
+  String get uiTasksSortStart;
+
+  /// ui.tasks.sort_coord
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlüğe göre'**
+  String get uiTasksSortCoord;
+
+  /// ui.tasks.sort_created_short
+  ///
+  /// In tr, this message translates to:
+  /// **'Tanımlanma tarihi'**
+  String get uiTasksSortCreatedShort;
+
+  /// ui.tasks.sort_due_short
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş tarihi'**
+  String get uiTasksSortDueShort;
+
+  /// ui.tasks.sort_start_short
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç tarihi'**
+  String get uiTasksSortStartShort;
+
+  /// ui.tasks.sort_coord_short
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük'**
+  String get uiTasksSortCoordShort;
+
+  /// ui.tasks.dir_created_asc
+  ///
+  /// In tr, this message translates to:
+  /// **'eskiden yeniye'**
+  String get uiTasksDirCreatedAsc;
+
+  /// ui.tasks.dir_created_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'yeniden eskiye'**
+  String get uiTasksDirCreatedDesc;
+
+  /// ui.tasks.dir_due_asc
+  ///
+  /// In tr, this message translates to:
+  /// **'yakından uzağa'**
+  String get uiTasksDirDueAsc;
+
+  /// ui.tasks.dir_due_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'uzaktan yakına'**
+  String get uiTasksDirDueDesc;
+
+  /// ui.tasks.dir_start_asc
+  ///
+  /// In tr, this message translates to:
+  /// **'erkenden geçe'**
+  String get uiTasksDirStartAsc;
+
+  /// ui.tasks.dir_start_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'geçten erkene'**
+  String get uiTasksDirStartDesc;
+
+  /// ui.tasks.dir_tap
+  ///
+  /// In tr, this message translates to:
+  /// **'yönü değiştirmek için dokun'**
+  String get uiTasksDirTap;
+
+  /// ui.tasks.status_todo
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlamadı'**
+  String get uiTasksStatusTodo;
+
+  /// ui.tasks.status_doing
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam ediyor'**
+  String get uiTasksStatusDoing;
+
+  /// ui.tasks.status_review
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekliyor'**
+  String get uiTasksStatusReview;
+
+  /// ui.tasks.status_returned
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri gönderildi'**
+  String get uiTasksStatusReturned;
+
+  /// ui.tasks.status_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlandı'**
+  String get uiTasksStatusDone;
+
+  /// ui.tasks.prio_high
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüksek'**
+  String get uiTasksPrioHigh;
+
+  /// ui.tasks.prio_medium
+  ///
+  /// In tr, this message translates to:
+  /// **'Orta'**
+  String get uiTasksPrioMedium;
+
+  /// ui.tasks.prio_low
+  ///
+  /// In tr, this message translates to:
+  /// **'Düşük'**
+  String get uiTasksPrioLow;
+
+  /// ui.tasks.card_start
+  ///
+  /// In tr, this message translates to:
+  /// **'başlangıç'**
+  String get uiTasksCardStart;
+
+  /// ui.tasks.card_due
+  ///
+  /// In tr, this message translates to:
+  /// **'bitiş'**
+  String get uiTasksCardDue;
+
+  /// ui.tasks.card_priority
+  ///
+  /// In tr, this message translates to:
+  /// **'öncelik'**
+  String get uiTasksCardPriority;
+
+  /// ui.tasks.subtasks_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'alt görev'**
+  String get uiTasksSubtasksTail;
+
+  /// ui.tasks.late_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gün gecikti'**
+  String get uiTasksLateTail;
+
+  /// ui.tasks.request_badge
+  ///
+  /// In tr, this message translates to:
+  /// **'Talep'**
+  String get uiTasksRequestBadge;
+
+  /// ui.tasks.files_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kanıt dosyası'**
+  String get uiTasksFilesTail;
+
+  /// ui.tasks.notes_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'not'**
+  String get uiTasksNotesTail;
+
+  /// ui.tasks.empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu görünümde görev yok.'**
+  String get uiTasksEmpty;
+
+  /// ui.tasks.clear_filters
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtreleri temizle'**
+  String get uiTasksClearFilters;
+
+  /// ui.tasks.show_more
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha fazla göster'**
+  String get uiTasksShowMore;
+
+  /// ui.tasks.coords_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlük'**
+  String get uiTasksCoordsLc;
+
+  /// ui.tasks.clear
+  ///
+  /// In tr, this message translates to:
+  /// **'Temizle'**
+  String get uiTasksClear;
+
+  /// ui.tasks.remove_filter_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'filtresini kaldır'**
+  String get uiTasksRemoveFilterTail;
+
+  /// ui.tasks.priority
+  ///
+  /// In tr, this message translates to:
+  /// **'Öncelik'**
+  String get uiTasksPriority;
+
+  /// ui.tasks.priority_filter_remove
+  ///
+  /// In tr, this message translates to:
+  /// **'Öncelik filtresini kaldır'**
+  String get uiTasksPriorityFilterRemove;
+
+  /// ui.tasks.filters
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtreler'**
+  String get uiTasksFilters;
+
+  /// ui.tasks.clear_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü temizle'**
+  String get uiTasksClearAll;
+
+  /// ui.tasks.group_people
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi'**
+  String get uiTasksGroupPeople;
+
+  /// ui.tasks.group_coord
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük'**
+  String get uiTasksGroupCoord;
+
+  /// ui.tasks.selected_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'seçili'**
+  String get uiTasksSelectedTail;
+
+  /// ui.tasks.all_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'tümü'**
+  String get uiTasksAllLc;
+
+  /// ui.tasks.filter_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı grupta seçenekler “veya”, gruplar arası “ve” ile birleşir.'**
+  String get uiTasksFilterHint;
+
+  /// ui.tasks.show_tasks_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görevi göster'**
+  String get uiTasksShowTasksTail;
+
+  /// ui.tasks.shortcuts
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler kısayolları'**
+  String get uiTasksShortcuts;
+
+  /// ui.tasks.fly_view
+  ///
+  /// In tr, this message translates to:
+  /// **'görünüm'**
+  String get uiTasksFlyView;
+
+  /// ui.tasks.fly_sort
+  ///
+  /// In tr, this message translates to:
+  /// **'sıralama'**
+  String get uiTasksFlySort;
+
+  /// ui.tasks.fly_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'görevler'**
+  String get uiTasksFlyTasks;
+
+  /// ui.tasks.fly_timeline_caption
+  ///
+  /// In tr, this message translates to:
+  /// **'Dikey Gantt'**
+  String get uiTasksFlyTimelineCaption;
+
+  /// ui.tasks.fly_search
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev ara'**
+  String get uiTasksFlySearch;
+
+  /// ui.tasks.fly_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi, koordinatörlük, öncelik'**
+  String get uiTasksFlyFilter;
+
+  /// ui.tasks.fly_this_task
+  ///
+  /// In tr, this message translates to:
+  /// **'bu görev'**
+  String get uiTasksFlyThisTask;
+
+  /// ui.tasks.fly_status
+  ///
+  /// In tr, this message translates to:
+  /// **'Durum'**
+  String get uiTasksFlyStatus;
+
+  /// ui.tasks.fly_go
+  ///
+  /// In tr, this message translates to:
+  /// **'git'**
+  String get uiTasksFlyGo;
+
+  /// ui.tasks.fly_timeline
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman çizelgesinde gör'**
+  String get uiTasksFlyTimeline;
+
+  /// ui.tasks.edit_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevi düzenle'**
+  String get uiTasksEditTask;
+
+  /// ui.tasks.more_actions
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer işlemler'**
+  String get uiTasksMoreActions;
+
+  /// ui.tasks.not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev bulunamadı'**
+  String get uiTasksNotFound;
+
+  /// ui.tasks.deleted_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'silinen kayıtlara taşındı'**
+  String get uiTasksDeletedTail;
+
+  /// ui.tasks.deleted_files_kept
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt dosyaları arşivde kaldı.'**
+  String get uiTasksDeletedFilesKept;
+
+  /// ui.tasks.undo
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri al'**
+  String get uiTasksUndo;
+
+  /// ui.tasks.request_date
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih değişikliği iste'**
+  String get uiTasksRequestDate;
+
+  /// ui.tasks.remind
+  ///
+  /// In tr, this message translates to:
+  /// **'Atanana hatırlat'**
+  String get uiTasksRemind;
+
+  /// ui.tasks.upload
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt yükle'**
+  String get uiTasksUpload;
+
+  /// ui.tasks.request_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih değişikliği talebi'**
+  String get uiTasksRequestTitle;
+
+  /// ui.tasks.reject
+  ///
+  /// In tr, this message translates to:
+  /// **'Reddet'**
+  String get uiTasksReject;
+
+  /// ui.tasks.approve
+  ///
+  /// In tr, this message translates to:
+  /// **'Onayla'**
+  String get uiTasksApprove;
+
+  /// ui.tasks.days_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'gün'**
+  String get uiTasksDaysLc;
+
+  /// ui.tasks.no_reason
+  ///
+  /// In tr, this message translates to:
+  /// **'Gerekçe yazılmamış'**
+  String get uiTasksNoReason;
+
+  /// ui.tasks.detail_tabs
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev ayrıntısı'**
+  String get uiTasksDetailTabs;
+
+  /// ui.tasks.tab_summary
+  ///
+  /// In tr, this message translates to:
+  /// **'Özet'**
+  String get uiTasksTabSummary;
+
+  /// ui.tasks.tab_subtasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görev'**
+  String get uiTasksTabSubtasks;
+
+  /// ui.tasks.tab_files
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya'**
+  String get uiTasksTabFiles;
+
+  /// ui.tasks.tab_notes
+  ///
+  /// In tr, this message translates to:
+  /// **'Not'**
+  String get uiTasksTabNotes;
+
+  /// ui.tasks.assignee
+  ///
+  /// In tr, this message translates to:
+  /// **'Atanan'**
+  String get uiTasksAssignee;
+
+  /// ui.tasks.creator
+  ///
+  /// In tr, this message translates to:
+  /// **'Oluşturan'**
+  String get uiTasksCreator;
+
+  /// ui.tasks.created
+  ///
+  /// In tr, this message translates to:
+  /// **'Tanımlandı'**
+  String get uiTasksCreated;
+
+  /// ui.tasks.date_range
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih aralığı'**
+  String get uiTasksDateRange;
+
+  /// ui.tasks.evidence_file
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt dosyası'**
+  String get uiTasksEvidenceFile;
+
+  /// ui.tasks.none
+  ///
+  /// In tr, this message translates to:
+  /// **'Yok'**
+  String get uiTasksNone;
+
+  /// ui.tasks.progress
+  ///
+  /// In tr, this message translates to:
+  /// **'ilerleme'**
+  String get uiTasksProgress;
+
+  /// ui.tasks.ev_created
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev tanımlandı'**
+  String get uiTasksEvCreated;
+
+  /// ui.tasks.ev_started
+  ///
+  /// In tr, this message translates to:
+  /// **'Planlanan başlangıç'**
+  String get uiTasksEvStarted;
+
+  /// ui.tasks.ev_will_start
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlayacak'**
+  String get uiTasksEvWillStart;
+
+  /// ui.tasks.ev_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlandı'**
+  String get uiTasksEvDone;
+
+  /// ui.tasks.ev_done_late
+  ///
+  /// In tr, this message translates to:
+  /// **'(geç)'**
+  String get uiTasksEvDoneLate;
+
+  /// ui.tasks.ev_due_passed
+  ///
+  /// In tr, this message translates to:
+  /// **'Plan bitişi geçti'**
+  String get uiTasksEvDuePassed;
+
+  /// ui.tasks.ev_late_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gündür gecikmede'**
+  String get uiTasksEvLateTail;
+
+  /// ui.tasks.ev_today
+  ///
+  /// In tr, this message translates to:
+  /// **'bugün'**
+  String get uiTasksEvToday;
+
+  /// ui.tasks.ev_due
+  ///
+  /// In tr, this message translates to:
+  /// **'Planlanan bitiş'**
+  String get uiTasksEvDue;
+
+  /// ui.tasks.subs_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi ve tarih isteğe bağlıdır; kanıtı zorunlu olan alt görev, kanıt yüklenmeden bitirilemez. Görev, tüm alt görevler bitmeden tamamlanamaz.'**
+  String get uiTasksSubsHint;
+
+  /// ui.tasks.done_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'tamamlandı'**
+  String get uiTasksDoneLc;
+
+  /// ui.tasks.sub_untitled
+  ///
+  /// In tr, this message translates to:
+  /// **'Adsız alt görev'**
+  String get uiTasksSubUntitled;
+
+  /// ui.tasks.sub_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görev adı'**
+  String get uiTasksSubName;
+
+  /// ui.tasks.sub_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi'**
+  String get uiTasksSubPerson;
+
+  /// ui.tasks.sub_date
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih'**
+  String get uiTasksSubDate;
+
+  /// ui.tasks.sub_evidence
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt'**
+  String get uiTasksSubEvidence;
+
+  /// ui.tasks.sub_file
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya'**
+  String get uiTasksSubFile;
+
+  /// ui.tasks.required
+  ///
+  /// In tr, this message translates to:
+  /// **'Zorunlu'**
+  String get uiTasksRequired;
+
+  /// ui.tasks.optional
+  ///
+  /// In tr, this message translates to:
+  /// **'Opsiyonel'**
+  String get uiTasksOptional;
+
+  /// ui.tasks.pick_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi seç'**
+  String get uiTasksPickPerson;
+
+  /// ui.tasks.no_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi yok'**
+  String get uiTasksNoPerson;
+
+  /// ui.tasks.clear_date
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarihi kaldır'**
+  String get uiTasksClearDate;
+
+  /// ui.tasks.sub_delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görevi sil'**
+  String get uiTasksSubDelete;
+
+  /// ui.tasks.sub_add
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görev ekle'**
+  String get uiTasksSubAdd;
+
+  /// ui.tasks.needs_person
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi atanmalı'**
+  String get uiTasksNeedsPerson;
+
+  /// ui.tasks.evidence_required_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'kanıt zorunlu'**
+  String get uiTasksEvidenceRequiredLc;
+
+  /// ui.tasks.one_evidence
+  ///
+  /// In tr, this message translates to:
+  /// **'1 kanıt'**
+  String get uiTasksOneEvidence;
+
+  /// ui.tasks.start
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç'**
+  String get uiTasksStart;
+
+  /// ui.tasks.due
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş'**
+  String get uiTasksDue;
+
+  /// ui.tasks.no_files
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz kanıt dosyası yok.'**
+  String get uiTasksNoFiles;
+
+  /// ui.tasks.subtask_prefix
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görev:'**
+  String get uiTasksSubtaskPrefix;
+
+  /// ui.tasks.deleted_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'silinmiş'**
+  String get uiTasksDeletedLc;
+
+  /// ui.tasks.kb
+  ///
+  /// In tr, this message translates to:
+  /// **'KB'**
+  String get uiTasksKb;
+
+  /// ui.tasks.no_notes
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz not yok.'**
+  String get uiTasksNoNotes;
+
+  /// ui.tasks.note_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Not yaz…'**
+  String get uiTasksNoteHint;
+
+  /// ui.tasks.send
+  ///
+  /// In tr, this message translates to:
+  /// **'Gönder'**
+  String get uiTasksSend;
+
+  /// ui.tasks.in_memory
+  ///
+  /// In tr, this message translates to:
+  /// **'✓ Hafızada'**
+  String get uiTasksInMemory;
+
+  /// ui.tasks.to_memory
+  ///
+  /// In tr, this message translates to:
+  /// **'Hafızaya ekle'**
+  String get uiTasksToMemory;
+
+  /// ui.tasks.sheet_status
+  ///
+  /// In tr, this message translates to:
+  /// **'durum'**
+  String get uiTasksSheetStatus;
+
+  /// ui.tasks.sheet_priority
+  ///
+  /// In tr, this message translates to:
+  /// **'öncelik'**
+  String get uiTasksSheetPriority;
+
+  /// ui.tasks.open_subs_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'alt görev açık'**
+  String get uiTasksOpenSubsTail;
+
+  /// ui.tasks.copy
+  ///
+  /// In tr, this message translates to:
+  /// **'Kopyala'**
+  String get uiTasksCopy;
+
+  /// ui.tasks.copy_suffix
+  ///
+  /// In tr, this message translates to:
+  /// **'(kopya)'**
+  String get uiTasksCopySuffix;
+
+  /// ui.tasks.delete_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevi sil'**
+  String get uiTasksDeleteTask;
+
+  /// ui.tasks.edit_desc_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'değişiklikler işlem geçmişine yazılır'**
+  String get uiTasksEditDescTail;
+
+  /// ui.tasks.field_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlık'**
+  String get uiTasksFieldTitle;
+
+  /// ui.tasks.field_title_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev başlığı'**
+  String get uiTasksFieldTitleHint;
+
+  /// ui.tasks.err_title_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlık boş bırakılamaz'**
+  String get uiTasksErrTitleEmpty;
+
+  /// ui.tasks.field_coord
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük'**
+  String get uiTasksFieldCoord;
+
+  /// ui.tasks.coordinators_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörler'**
+  String get uiTasksCoordinatorsLc;
+
+  /// ui.tasks.members_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'üyeler'**
+  String get uiTasksMembersLc;
+
+  /// ui.tasks.no_coordinators
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu koordinatörlükte koordinatör yok.'**
+  String get uiTasksNoCoordinators;
+
+  /// ui.tasks.no_members
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu koordinatörlükte üye yok.'**
+  String get uiTasksNoMembers;
+
+  /// ui.tasks.err_assign_one
+  ///
+  /// In tr, this message translates to:
+  /// **'En az bir kişi ata'**
+  String get uiTasksErrAssignOne;
+
+  /// ui.tasks.err_dates
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş, başlangıçtan önce olamaz'**
+  String get uiTasksErrDates;
+
+  /// ui.tasks.save
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydet'**
+  String get uiTasksSave;
+
+  /// ui.tasks.cancel
+  ///
+  /// In tr, this message translates to:
+  /// **'Vazgeç'**
+  String get uiTasksCancel;
+
+  /// ui.tasks.date_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Onaylanınca yeni tarihler göreve uygulanır'**
+  String get uiTasksDateDesc;
+
+  /// ui.tasks.now_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'şu an'**
+  String get uiTasksNowLc;
+
+  /// ui.tasks.new_start
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni başlangıç'**
+  String get uiTasksNewStart;
+
+  /// ui.tasks.new_due
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni bitiş'**
+  String get uiTasksNewDue;
+
+  /// ui.tasks.reason
+  ///
+  /// In tr, this message translates to:
+  /// **'Gerekçe'**
+  String get uiTasksReason;
+
+  /// ui.tasks.reason_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn. malzeme tedariki gecikti'**
+  String get uiTasksReasonHint;
+
+  /// ui.tasks.send_request
+  ///
+  /// In tr, this message translates to:
+  /// **'Talep gönder'**
+  String get uiTasksSendRequest;
+
+  /// ui.tasks.upload_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt dosyası yükle'**
+  String get uiTasksUploadTitle;
+
+  /// ui.tasks.upload_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya görevin arşiv klasörüne kaydedilir'**
+  String get uiTasksUploadDesc;
+
+  /// ui.tasks.task_folder
+  ///
+  /// In tr, this message translates to:
+  /// **'görev klasörü'**
+  String get uiTasksTaskFolder;
+
+  /// ui.tasks.task_itself
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevin kendisi'**
+  String get uiTasksTaskItself;
+
+  /// ui.tasks.tag
+  ///
+  /// In tr, this message translates to:
+  /// **'Etiket'**
+  String get uiTasksTag;
+
+  /// ui.tasks.tag_site
+  ///
+  /// In tr, this message translates to:
+  /// **'Saha görselleri'**
+  String get uiTasksTagSite;
+
+  /// ui.tasks.tag_result
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonuç dosyası'**
+  String get uiTasksTagResult;
+
+  /// ui.tasks.tag_status
+  ///
+  /// In tr, this message translates to:
+  /// **'Güncel durum verisi'**
+  String get uiTasksTagStatus;
+
+  /// ui.tasks.file_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya adı'**
+  String get uiTasksFileName;
+
+  /// ui.tasks.err_file_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya adı gerekli'**
+  String get uiTasksErrFileName;
+
+  /// ui.tasks.pick_file
+  ///
+  /// In tr, this message translates to:
+  /// **'Fotoğraf çek ya da dosya seç'**
+  String get uiTasksPickFile;
+
+  /// ui.tasks.proto_only
+  ///
+  /// In tr, this message translates to:
+  /// **'Prototipte yalnızca kayıt oluşturulur.'**
+  String get uiTasksProtoOnly;
+
+  /// ui.tasks.upload_ok
+  ///
+  /// In tr, this message translates to:
+  /// **'Yükle'**
+  String get uiTasksUploadOk;
+
+  /// ui.tasks.delete_q_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'silinsin mi?'**
+  String get uiTasksDeleteQTail;
+
+  /// ui.tasks.delete_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinen kayıtlardan geri alınabilir'**
+  String get uiTasksDeleteDesc;
+
+  /// ui.tasks.delete_body_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'silinen kayıtlara taşınır. Kanıt dosyaları arşivde kalır.'**
+  String get uiTasksDeleteBodyTail;
+
+  /// ui.tasks.delete_ok
+  ///
+  /// In tr, this message translates to:
+  /// **'Sil'**
+  String get uiTasksDeleteOk;
+
+  /// ui.tasks.t_subs_block
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görevler bitmeden görev tamamlanamaz'**
+  String get uiTasksTSubsBlock;
+
+  /// ui.tasks.t_finished_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'bitti'**
+  String get uiTasksTFinishedLc;
+
+  /// ui.tasks.t_evidence_block
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt dosyası olmadan görev tamamlanamaz'**
+  String get uiTasksTEvidenceBlock;
+
+  /// ui.tasks.t_created_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'oluşturuldu'**
+  String get uiTasksTCreatedTail;
+
+  /// ui.tasks.t_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev silinen kayıtlara taşındı'**
+  String get uiTasksTDeleted;
+
+  /// ui.tasks.t_restored_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'geri alındı'**
+  String get uiTasksTRestoredTail;
+
+  /// ui.tasks.t_updated_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'güncellendi'**
+  String get uiTasksTUpdatedTail;
+
+  /// ui.tasks.t_request_sent
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih değişikliği talebi gönderildi · onay bekliyor'**
+  String get uiTasksTRequestSent;
+
+  /// ui.tasks.t_uploaded
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt dosyası yüklendi · görevin arşiv klasörüne eklendi'**
+  String get uiTasksTUploaded;
+
+  /// ui.tasks.t_pending_exists
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu görev için zaten bekleyen bir talep var'**
+  String get uiTasksTPendingExists;
+
+  /// ui.tasks.t_reminded
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatma gönderildi'**
+  String get uiTasksTReminded;
+
+  /// ui.tasks.t_approved
+  ///
+  /// In tr, this message translates to:
+  /// **'Talep onaylandı'**
+  String get uiTasksTApproved;
+
+  /// ui.tasks.t_new_due
+  ///
+  /// In tr, this message translates to:
+  /// **'yeni bitiş'**
+  String get uiTasksTNewDue;
+
+  /// ui.tasks.t_rejected
+  ///
+  /// In tr, this message translates to:
+  /// **'Talep reddedildi'**
+  String get uiTasksTRejected;
+
+  /// ui.tasks.t_informed
+  ///
+  /// In tr, this message translates to:
+  /// **'bilgilendirildi'**
+  String get uiTasksTInformed;
+
+  /// ui.tasks.t_sub_evidence
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu alt görev için kanıt zorunlu · önce kanıt yükle'**
+  String get uiTasksTSubEvidence;
+
+  /// ui.tasks.t_sub_removed_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görevinden kaldırıldı'**
+  String get uiTasksTSubRemovedTail;
+
+  /// ui.tasks.t_sub_file_kept
+  ///
+  /// In tr, this message translates to:
+  /// **'kanıt dosyası arşivde kaldı'**
+  String get uiTasksTSubFileKept;
+
+  /// ui.tasks.t_note_memory
+  ///
+  /// In tr, this message translates to:
+  /// **'Not kurumsal hafızaya deneyim olarak eklendi'**
+  String get uiTasksTNoteMemory;
+
+  /// ui.tasks.t_notified_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kişiye bildirim gitti'**
+  String get uiTasksTNotifiedTail;
+
+  /// ui.tasks.nt_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev oluşturulduğunda atanan kişiye bildirim gider.'**
+  String get uiTasksNtDesc;
+
+  /// ui.tasks.create
+  ///
+  /// In tr, this message translates to:
+  /// **'Oluştur'**
+  String get uiTasksCreate;
+
+  /// ui.tasks.nt_title_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Ne yapılması gerekiyor?'**
+  String get uiTasksNtTitleHint;
+
+  /// ui.tasks.row_date
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih'**
+  String get uiTasksRowDate;
+
+  /// ui.tasks.evidence_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt dosyası zorunlu'**
+  String get uiTasksEvidenceRequired;
+
+  /// ui.tasks.pick
+  ///
+  /// In tr, this message translates to:
+  /// **'Seç'**
+  String get uiTasksPick;
+
+  /// ui.tasks.coord_first
+  ///
+  /// In tr, this message translates to:
+  /// **'Önce koordinatörlük'**
+  String get uiTasksCoordFirst;
+
+  /// ui.tasks.nobody_here
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu koordinatörlükte kimse yok.'**
+  String get uiTasksNobodyHere;
+
+  /// ui.tasks.people_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi'**
+  String get uiTasksPeopleLc;
+
+  /// ui.tasks.role_coordinator_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatör'**
+  String get uiTasksRoleCoordinatorLc;
+
+  /// ui.tasks.role_member_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'üye'**
+  String get uiTasksRoleMemberLc;
+
+  /// ui.tasks.weeks_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'hafta'**
+  String get uiTasksWeeksLc;
+
+  /// ui.tasks.one_month
+  ///
+  /// In tr, this message translates to:
+  /// **'1 ay'**
+  String get uiTasksOneMonth;
+
+  /// ui.tasks.err_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlık gerekli.'**
+  String get uiTasksErrTitle;
+
+  /// ui.tasks.err_coord
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük seç.'**
+  String get uiTasksErrCoord;
+
+  /// ui.tasks.err_assignee
+  ///
+  /// In tr, this message translates to:
+  /// **'En az bir kişi ata.'**
+  String get uiTasksErrAssignee;
+
+  /// ui.tasks.err_dates_full
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş, başlangıçtan önce olamaz.'**
+  String get uiTasksErrDatesFull;
+
+  /// ui.tasks.mt_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı oluştur'**
+  String get uiTasksMtTitle;
+
+  /// ui.tasks.mt_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı sahibi sensin. Davetlilere bildirim gider.'**
+  String get uiTasksMtDesc;
+
+  /// ui.tasks.mt_title_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantının konusu ne?'**
+  String get uiTasksMtTitleHint;
+
+  /// ui.tasks.row_time
+  ///
+  /// In tr, this message translates to:
+  /// **'Saat'**
+  String get uiTasksRowTime;
+
+  /// ui.tasks.row_invitees
+  ///
+  /// In tr, this message translates to:
+  /// **'Davetliler'**
+  String get uiTasksRowInvitees;
+
+  /// ui.tasks.row_agenda
+  ///
+  /// In tr, this message translates to:
+  /// **'Gündem'**
+  String get uiTasksRowAgenda;
+
+  /// ui.tasks.items_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'madde'**
+  String get uiTasksItemsLc;
+
+  /// ui.tasks.add_item
+  ///
+  /// In tr, this message translates to:
+  /// **'Madde ekle'**
+  String get uiTasksAddItem;
+
+  /// ui.tasks.agenda_item
+  ///
+  /// In tr, this message translates to:
+  /// **'Gündem maddesi'**
+  String get uiTasksAgendaItem;
+
+  /// ui.tasks.add_item_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Maddeyi ekle'**
+  String get uiTasksAddItemLabel;
+
+  /// ui.tasks.remove_item_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'. maddeyi kaldır'**
+  String get uiTasksRemoveItemTail;
+
+  /// ui.tasks.item_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'. madde'**
+  String get uiTasksItemTail;
+
+  /// ui.tasks.mode_people
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişiler'**
+  String get uiTasksModePeople;
+
+  /// ui.tasks.invite_members
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyeleri de davet et'**
+  String get uiTasksInviteMembers;
+
+  /// ui.tasks.with_members
+  ///
+  /// In tr, this message translates to:
+  /// **'üyelerle'**
+  String get uiTasksWithMembers;
+
+  /// ui.tasks.coord_abbr
+  ///
+  /// In tr, this message translates to:
+  /// **'koord.'**
+  String get uiTasksCoordAbbr;
+
+  /// ui.tasks.err_past
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih geçmişe çekilemez.'**
+  String get uiTasksErrPast;
+
+  /// ui.tasks.err_mt_coords
+  ///
+  /// In tr, this message translates to:
+  /// **'Davetli olarak en az bir koordinatörlük seç.'**
+  String get uiTasksErrMtCoords;
+
+  /// ui.tasks.err_mt_people
+  ///
+  /// In tr, this message translates to:
+  /// **'En az bir kişi seç.'**
+  String get uiTasksErrMtPeople;
+
+  /// ui.tasks.t_meeting
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı oluşturuldu'**
+  String get uiTasksTMeeting;
+
+  /// ui.tasks.t_coords_invited
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlük davetli'**
+  String get uiTasksTCoordsInvited;
+
+  /// ui.tasks.t_people_invited
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi davetli'**
+  String get uiTasksTPeopleInvited;
+
+  /// ui.tasks.iv_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı davet et'**
+  String get uiTasksIvTitle;
+
+  /// ui.tasks.iv_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet e-postası gönderilir; kullanıcı ilk girişte şifresini belirler.'**
+  String get uiTasksIvDesc;
+
+  /// ui.tasks.iv_send
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet gönder'**
+  String get uiTasksIvSend;
+
+  /// ui.tasks.iv_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad soyad'**
+  String get uiTasksIvName;
+
+  /// ui.tasks.iv_name_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad Soyad'**
+  String get uiTasksIvNameHint;
+
+  /// ui.tasks.iv_email
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta'**
+  String get uiTasksIvEmail;
+
+  /// ui.tasks.iv_email_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta adresi'**
+  String get uiTasksIvEmailHint;
+
+  /// ui.tasks.iv_role
+  ///
+  /// In tr, this message translates to:
+  /// **'Rol'**
+  String get uiTasksIvRole;
+
+  /// ui.tasks.role_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye'**
+  String get uiTasksRoleMember;
+
+  /// ui.tasks.role_coordinator
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör'**
+  String get uiTasksRoleCoordinator;
+
+  /// ui.tasks.role_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Admin'**
+  String get uiTasksRoleAdmin;
+
+  /// ui.tasks.optional_any
+  ///
+  /// In tr, this message translates to:
+  /// **'İsteğe bağlı'**
+  String get uiTasksOptionalAny;
+
+  /// ui.tasks.rd_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm koordinatörlükleri, kullanıcıları ve sezonu yönetir.'**
+  String get uiTasksRdAdmin;
+
+  /// ui.tasks.rd_coordinator
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçtiğin koordinatörlüklerde görev atar ve dosyaları onaylar.'**
+  String get uiTasksRdCoordinator;
+
+  /// ui.tasks.rd_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Atanan görevleri yürütür, kanıt dosyası yükler.'**
+  String get uiTasksRdMember;
+
+  /// ui.tasks.err_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad soyad gerekli.'**
+  String get uiTasksErrName;
+
+  /// ui.tasks.err_email
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçerli bir e-posta gir.'**
+  String get uiTasksErrEmail;
+
+  /// ui.tasks.err_iv_coord
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör için en az bir koordinatörlük seç.'**
+  String get uiTasksErrIvCoord;
+
+  /// ui.tasks.t_invited
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet gönderildi:'**
+  String get uiTasksTInvited;
+
+  /// ui.tasks.expand_sheet
+  ///
+  /// In tr, this message translates to:
+  /// **'Sayfayı büyüt'**
+  String get uiTasksExpandSheet;
+
+  /// ui.tasks.collapse_sheet
+  ///
+  /// In tr, this message translates to:
+  /// **'Sayfayı küçült'**
+  String get uiTasksCollapseSheet;
+
   /// ui.timeline.title
   ///
   /// In tr, this message translates to:

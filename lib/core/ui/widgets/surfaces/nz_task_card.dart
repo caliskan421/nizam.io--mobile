@@ -55,6 +55,7 @@ class NzTaskCard extends StatelessWidget {
     this.badgeTone = NzTone.danger,
     this.onTap,
     this.semanticLabel,
+    this.trailing = const [],
   });
 
   final String code;
@@ -78,6 +79,9 @@ class NzTaskCard extends StatelessWidget {
   final VoidCallback? onTap;
   final String? semanticLabel;
 
+  /// Alt satırda rozetin ardından ek işaretler (ör. ikinci rozet, dosya/not sayaçları).
+  final List<Widget> trailing;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -90,7 +94,10 @@ class NzTaskCard extends StatelessWidget {
     final badge = this.badge;
     final hasTile = start != null || end != null || priority != null;
     final hasFoot =
-        assignees.isNotEmpty || assigneeText != null || badge != null;
+        assignees.isNotEmpty ||
+        assigneeText != null ||
+        badge != null ||
+        trailing.isNotEmpty;
 
     return NzCard.outlined(
       padding: const EdgeInsets.all(NizamioSpacing.cardPad),
@@ -219,6 +226,10 @@ class NzTaskCard extends StatelessWidget {
                   Flexible(
                     child: NzStatusLabel.badge(label: badge, tone: badgeTone),
                   ),
+                ],
+                for (final w in trailing) ...[
+                  const Gap(NizamioSpacing.space2),
+                  Flexible(child: w),
                 ],
               ],
             ),

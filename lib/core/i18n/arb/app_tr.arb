@@ -2669,6 +2669,1086 @@
   "@uiTasksDetailTitle": {
     "description": "ui.tasks.detail_title"
   },
+  "uiTasksTasksLc": "görev",
+  "@uiTasksTasksLc": {
+    "description": "ui.tasks.tasks_lc"
+  },
+  "uiTasksSearch": "Ara",
+  "@uiTasksSearch": {
+    "description": "ui.tasks.search"
+  },
+  "uiTasksSearchHint": "Başlık, kimlik veya kişi",
+  "@uiTasksSearchHint": {
+    "description": "ui.tasks.search_hint"
+  },
+  "uiTasksFiltersButton": "Filtreler · kişi, koordinatörlük, öncelik",
+  "@uiTasksFiltersButton": {
+    "description": "ui.tasks.filters_button"
+  },
+  "uiTasksNewTask": "Yeni görev",
+  "@uiTasksNewTask": {
+    "description": "ui.tasks.new_task"
+  },
+  "uiTasksMode": "Görünüm",
+  "@uiTasksMode": {
+    "description": "ui.tasks.mode"
+  },
+  "uiTasksModeList": "Liste",
+  "@uiTasksModeList": {
+    "description": "ui.tasks.mode_list"
+  },
+  "uiTasksModeTimeline": "Zaman çizelgesi",
+  "@uiTasksModeTimeline": {
+    "description": "ui.tasks.mode_timeline"
+  },
+  "uiTasksViews": "Görünümler",
+  "@uiTasksViews": {
+    "description": "ui.tasks.views"
+  },
+  "uiTasksViewAll": "Tümü",
+  "@uiTasksViewAll": {
+    "description": "ui.tasks.view_all"
+  },
+  "uiTasksViewLate": "Geciken",
+  "@uiTasksViewLate": {
+    "description": "ui.tasks.view_late"
+  },
+  "uiTasksViewDoing": "Devam",
+  "@uiTasksViewDoing": {
+    "description": "ui.tasks.view_doing"
+  },
+  "uiTasksViewReview": "Onayda",
+  "@uiTasksViewReview": {
+    "description": "ui.tasks.view_review"
+  },
+  "uiTasksViewRequest": "Tarih talebi",
+  "@uiTasksViewRequest": {
+    "description": "ui.tasks.view_request"
+  },
+  "uiTasksViewTodo": "Başlamadı",
+  "@uiTasksViewTodo": {
+    "description": "ui.tasks.view_todo"
+  },
+  "uiTasksViewDone": "Biten",
+  "@uiTasksViewDone": {
+    "description": "ui.tasks.view_done"
+  },
+  "uiTasksListAll": "tüm görevler",
+  "@uiTasksListAll": {
+    "description": "ui.tasks.list_all"
+  },
+  "uiTasksListLate": "geciken görevler",
+  "@uiTasksListLate": {
+    "description": "ui.tasks.list_late"
+  },
+  "uiTasksListDoing": "devam eden görevler",
+  "@uiTasksListDoing": {
+    "description": "ui.tasks.list_doing"
+  },
+  "uiTasksListReview": "onay bekleyenler",
+  "@uiTasksListReview": {
+    "description": "ui.tasks.list_review"
+  },
+  "uiTasksListRequest": "tarih talebi olanlar",
+  "@uiTasksListRequest": {
+    "description": "ui.tasks.list_request"
+  },
+  "uiTasksListTodo": "başlamayanlar",
+  "@uiTasksListTodo": {
+    "description": "ui.tasks.list_todo"
+  },
+  "uiTasksListDone": "tamamlananlar",
+  "@uiTasksListDone": {
+    "description": "ui.tasks.list_done"
+  },
+  "uiTasksTaskList": "Görev listesi",
+  "@uiTasksTaskList": {
+    "description": "ui.tasks.task_list"
+  },
+  "uiTasksSortMenu": "Sıralama",
+  "@uiTasksSortMenu": {
+    "description": "ui.tasks.sort_menu"
+  },
+  "uiTasksSortCreated": "Tanımlanma tarihine göre",
+  "@uiTasksSortCreated": {
+    "description": "ui.tasks.sort_created"
+  },
+  "uiTasksSortDue": "Bitiş tarihine göre",
+  "@uiTasksSortDue": {
+    "description": "ui.tasks.sort_due"
+  },
+  "uiTasksSortStart": "Başlangıç tarihine göre",
+  "@uiTasksSortStart": {
+    "description": "ui.tasks.sort_start"
+  },
+  "uiTasksSortCoord": "Koordinatörlüğe göre",
+  "@uiTasksSortCoord": {
+    "description": "ui.tasks.sort_coord"
+  },
+  "uiTasksSortCreatedShort": "Tanımlanma tarihi",
+  "@uiTasksSortCreatedShort": {
+    "description": "ui.tasks.sort_created_short"
+  },
+  "uiTasksSortDueShort": "Bitiş tarihi",
+  "@uiTasksSortDueShort": {
+    "description": "ui.tasks.sort_due_short"
+  },
+  "uiTasksSortStartShort": "Başlangıç tarihi",
+  "@uiTasksSortStartShort": {
+    "description": "ui.tasks.sort_start_short"
+  },
+  "uiTasksSortCoordShort": "Koordinatörlük",
+  "@uiTasksSortCoordShort": {
+    "description": "ui.tasks.sort_coord_short"
+  },
+  "uiTasksDirCreatedAsc": "eskiden yeniye",
+  "@uiTasksDirCreatedAsc": {
+    "description": "ui.tasks.dir_created_asc"
+  },
+  "uiTasksDirCreatedDesc": "yeniden eskiye",
+  "@uiTasksDirCreatedDesc": {
+    "description": "ui.tasks.dir_created_desc"
+  },
+  "uiTasksDirDueAsc": "yakından uzağa",
+  "@uiTasksDirDueAsc": {
+    "description": "ui.tasks.dir_due_asc"
+  },
+  "uiTasksDirDueDesc": "uzaktan yakına",
+  "@uiTasksDirDueDesc": {
+    "description": "ui.tasks.dir_due_desc"
+  },
+  "uiTasksDirStartAsc": "erkenden geçe",
+  "@uiTasksDirStartAsc": {
+    "description": "ui.tasks.dir_start_asc"
+  },
+  "uiTasksDirStartDesc": "geçten erkene",
+  "@uiTasksDirStartDesc": {
+    "description": "ui.tasks.dir_start_desc"
+  },
+  "uiTasksDirTap": "yönü değiştirmek için dokun",
+  "@uiTasksDirTap": {
+    "description": "ui.tasks.dir_tap"
+  },
+  "uiTasksStatusTodo": "Başlamadı",
+  "@uiTasksStatusTodo": {
+    "description": "ui.tasks.status_todo"
+  },
+  "uiTasksStatusDoing": "Devam ediyor",
+  "@uiTasksStatusDoing": {
+    "description": "ui.tasks.status_doing"
+  },
+  "uiTasksStatusReview": "Onay bekliyor",
+  "@uiTasksStatusReview": {
+    "description": "ui.tasks.status_review"
+  },
+  "uiTasksStatusReturned": "Geri gönderildi",
+  "@uiTasksStatusReturned": {
+    "description": "ui.tasks.status_returned"
+  },
+  "uiTasksStatusDone": "Tamamlandı",
+  "@uiTasksStatusDone": {
+    "description": "ui.tasks.status_done"
+  },
+  "uiTasksPrioHigh": "Yüksek",
+  "@uiTasksPrioHigh": {
+    "description": "ui.tasks.prio_high"
+  },
+  "uiTasksPrioMedium": "Orta",
+  "@uiTasksPrioMedium": {
+    "description": "ui.tasks.prio_medium"
+  },
+  "uiTasksPrioLow": "Düşük",
+  "@uiTasksPrioLow": {
+    "description": "ui.tasks.prio_low"
+  },
+  "uiTasksCardStart": "başlangıç",
+  "@uiTasksCardStart": {
+    "description": "ui.tasks.card_start"
+  },
+  "uiTasksCardDue": "bitiş",
+  "@uiTasksCardDue": {
+    "description": "ui.tasks.card_due"
+  },
+  "uiTasksCardPriority": "öncelik",
+  "@uiTasksCardPriority": {
+    "description": "ui.tasks.card_priority"
+  },
+  "uiTasksSubtasksTail": "alt görev",
+  "@uiTasksSubtasksTail": {
+    "description": "ui.tasks.subtasks_tail"
+  },
+  "uiTasksLateTail": "gün gecikti",
+  "@uiTasksLateTail": {
+    "description": "ui.tasks.late_tail"
+  },
+  "uiTasksRequestBadge": "Talep",
+  "@uiTasksRequestBadge": {
+    "description": "ui.tasks.request_badge"
+  },
+  "uiTasksFilesTail": "kanıt dosyası",
+  "@uiTasksFilesTail": {
+    "description": "ui.tasks.files_tail"
+  },
+  "uiTasksNotesTail": "not",
+  "@uiTasksNotesTail": {
+    "description": "ui.tasks.notes_tail"
+  },
+  "uiTasksEmpty": "Bu görünümde görev yok.",
+  "@uiTasksEmpty": {
+    "description": "ui.tasks.empty"
+  },
+  "uiTasksClearFilters": "Filtreleri temizle",
+  "@uiTasksClearFilters": {
+    "description": "ui.tasks.clear_filters"
+  },
+  "uiTasksShowMore": "Daha fazla göster",
+  "@uiTasksShowMore": {
+    "description": "ui.tasks.show_more"
+  },
+  "uiTasksCoordsLc": "koordinatörlük",
+  "@uiTasksCoordsLc": {
+    "description": "ui.tasks.coords_lc"
+  },
+  "uiTasksClear": "Temizle",
+  "@uiTasksClear": {
+    "description": "ui.tasks.clear"
+  },
+  "uiTasksRemoveFilterTail": "filtresini kaldır",
+  "@uiTasksRemoveFilterTail": {
+    "description": "ui.tasks.remove_filter_tail"
+  },
+  "uiTasksPriority": "Öncelik",
+  "@uiTasksPriority": {
+    "description": "ui.tasks.priority"
+  },
+  "uiTasksPriorityFilterRemove": "Öncelik filtresini kaldır",
+  "@uiTasksPriorityFilterRemove": {
+    "description": "ui.tasks.priority_filter_remove"
+  },
+  "uiTasksFilters": "Filtreler",
+  "@uiTasksFilters": {
+    "description": "ui.tasks.filters"
+  },
+  "uiTasksClearAll": "Tümünü temizle",
+  "@uiTasksClearAll": {
+    "description": "ui.tasks.clear_all"
+  },
+  "uiTasksGroupPeople": "Kişi",
+  "@uiTasksGroupPeople": {
+    "description": "ui.tasks.group_people"
+  },
+  "uiTasksGroupCoord": "Koordinatörlük",
+  "@uiTasksGroupCoord": {
+    "description": "ui.tasks.group_coord"
+  },
+  "uiTasksSelectedTail": "seçili",
+  "@uiTasksSelectedTail": {
+    "description": "ui.tasks.selected_tail"
+  },
+  "uiTasksAllLc": "tümü",
+  "@uiTasksAllLc": {
+    "description": "ui.tasks.all_lc"
+  },
+  "uiTasksFilterHint": "Aynı grupta seçenekler “veya”, gruplar arası “ve” ile birleşir.",
+  "@uiTasksFilterHint": {
+    "description": "ui.tasks.filter_hint"
+  },
+  "uiTasksShowTasksTail": "görevi göster",
+  "@uiTasksShowTasksTail": {
+    "description": "ui.tasks.show_tasks_tail"
+  },
+  "uiTasksShortcuts": "Görevler kısayolları",
+  "@uiTasksShortcuts": {
+    "description": "ui.tasks.shortcuts"
+  },
+  "uiTasksFlyView": "görünüm",
+  "@uiTasksFlyView": {
+    "description": "ui.tasks.fly_view"
+  },
+  "uiTasksFlySort": "sıralama",
+  "@uiTasksFlySort": {
+    "description": "ui.tasks.fly_sort"
+  },
+  "uiTasksFlyTasks": "görevler",
+  "@uiTasksFlyTasks": {
+    "description": "ui.tasks.fly_tasks"
+  },
+  "uiTasksFlyTimelineCaption": "Dikey Gantt",
+  "@uiTasksFlyTimelineCaption": {
+    "description": "ui.tasks.fly_timeline_caption"
+  },
+  "uiTasksFlySearch": "Görev ara",
+  "@uiTasksFlySearch": {
+    "description": "ui.tasks.fly_search"
+  },
+  "uiTasksFlyFilter": "Kişi, koordinatörlük, öncelik",
+  "@uiTasksFlyFilter": {
+    "description": "ui.tasks.fly_filter"
+  },
+  "uiTasksFlyThisTask": "bu görev",
+  "@uiTasksFlyThisTask": {
+    "description": "ui.tasks.fly_this_task"
+  },
+  "uiTasksFlyStatus": "Durum",
+  "@uiTasksFlyStatus": {
+    "description": "ui.tasks.fly_status"
+  },
+  "uiTasksFlyGo": "git",
+  "@uiTasksFlyGo": {
+    "description": "ui.tasks.fly_go"
+  },
+  "uiTasksFlyTimeline": "Zaman çizelgesinde gör",
+  "@uiTasksFlyTimeline": {
+    "description": "ui.tasks.fly_timeline"
+  },
+  "uiTasksEditTask": "Görevi düzenle",
+  "@uiTasksEditTask": {
+    "description": "ui.tasks.edit_task"
+  },
+  "uiTasksMoreActions": "Diğer işlemler",
+  "@uiTasksMoreActions": {
+    "description": "ui.tasks.more_actions"
+  },
+  "uiTasksNotFound": "Görev bulunamadı",
+  "@uiTasksNotFound": {
+    "description": "ui.tasks.not_found"
+  },
+  "uiTasksDeletedTail": "silinen kayıtlara taşındı",
+  "@uiTasksDeletedTail": {
+    "description": "ui.tasks.deleted_tail"
+  },
+  "uiTasksDeletedFilesKept": "Kanıt dosyaları arşivde kaldı.",
+  "@uiTasksDeletedFilesKept": {
+    "description": "ui.tasks.deleted_files_kept"
+  },
+  "uiTasksUndo": "Geri al",
+  "@uiTasksUndo": {
+    "description": "ui.tasks.undo"
+  },
+  "uiTasksRequestDate": "Tarih değişikliği iste",
+  "@uiTasksRequestDate": {
+    "description": "ui.tasks.request_date"
+  },
+  "uiTasksRemind": "Atanana hatırlat",
+  "@uiTasksRemind": {
+    "description": "ui.tasks.remind"
+  },
+  "uiTasksUpload": "Kanıt yükle",
+  "@uiTasksUpload": {
+    "description": "ui.tasks.upload"
+  },
+  "uiTasksRequestTitle": "Tarih değişikliği talebi",
+  "@uiTasksRequestTitle": {
+    "description": "ui.tasks.request_title"
+  },
+  "uiTasksReject": "Reddet",
+  "@uiTasksReject": {
+    "description": "ui.tasks.reject"
+  },
+  "uiTasksApprove": "Onayla",
+  "@uiTasksApprove": {
+    "description": "ui.tasks.approve"
+  },
+  "uiTasksDaysLc": "gün",
+  "@uiTasksDaysLc": {
+    "description": "ui.tasks.days_lc"
+  },
+  "uiTasksNoReason": "Gerekçe yazılmamış",
+  "@uiTasksNoReason": {
+    "description": "ui.tasks.no_reason"
+  },
+  "uiTasksDetailTabs": "Görev ayrıntısı",
+  "@uiTasksDetailTabs": {
+    "description": "ui.tasks.detail_tabs"
+  },
+  "uiTasksTabSummary": "Özet",
+  "@uiTasksTabSummary": {
+    "description": "ui.tasks.tab_summary"
+  },
+  "uiTasksTabSubtasks": "Alt görev",
+  "@uiTasksTabSubtasks": {
+    "description": "ui.tasks.tab_subtasks"
+  },
+  "uiTasksTabFiles": "Dosya",
+  "@uiTasksTabFiles": {
+    "description": "ui.tasks.tab_files"
+  },
+  "uiTasksTabNotes": "Not",
+  "@uiTasksTabNotes": {
+    "description": "ui.tasks.tab_notes"
+  },
+  "uiTasksAssignee": "Atanan",
+  "@uiTasksAssignee": {
+    "description": "ui.tasks.assignee"
+  },
+  "uiTasksCreator": "Oluşturan",
+  "@uiTasksCreator": {
+    "description": "ui.tasks.creator"
+  },
+  "uiTasksCreated": "Tanımlandı",
+  "@uiTasksCreated": {
+    "description": "ui.tasks.created"
+  },
+  "uiTasksDateRange": "Tarih aralığı",
+  "@uiTasksDateRange": {
+    "description": "ui.tasks.date_range"
+  },
+  "uiTasksEvidenceFile": "Kanıt dosyası",
+  "@uiTasksEvidenceFile": {
+    "description": "ui.tasks.evidence_file"
+  },
+  "uiTasksNone": "Yok",
+  "@uiTasksNone": {
+    "description": "ui.tasks.none"
+  },
+  "uiTasksProgress": "ilerleme",
+  "@uiTasksProgress": {
+    "description": "ui.tasks.progress"
+  },
+  "uiTasksEvCreated": "Görev tanımlandı",
+  "@uiTasksEvCreated": {
+    "description": "ui.tasks.ev_created"
+  },
+  "uiTasksEvStarted": "Planlanan başlangıç",
+  "@uiTasksEvStarted": {
+    "description": "ui.tasks.ev_started"
+  },
+  "uiTasksEvWillStart": "Başlayacak",
+  "@uiTasksEvWillStart": {
+    "description": "ui.tasks.ev_will_start"
+  },
+  "uiTasksEvDone": "Tamamlandı",
+  "@uiTasksEvDone": {
+    "description": "ui.tasks.ev_done"
+  },
+  "uiTasksEvDoneLate": "(geç)",
+  "@uiTasksEvDoneLate": {
+    "description": "ui.tasks.ev_done_late"
+  },
+  "uiTasksEvDuePassed": "Plan bitişi geçti",
+  "@uiTasksEvDuePassed": {
+    "description": "ui.tasks.ev_due_passed"
+  },
+  "uiTasksEvLateTail": "gündür gecikmede",
+  "@uiTasksEvLateTail": {
+    "description": "ui.tasks.ev_late_tail"
+  },
+  "uiTasksEvToday": "bugün",
+  "@uiTasksEvToday": {
+    "description": "ui.tasks.ev_today"
+  },
+  "uiTasksEvDue": "Planlanan bitiş",
+  "@uiTasksEvDue": {
+    "description": "ui.tasks.ev_due"
+  },
+  "uiTasksSubsHint": "Kişi ve tarih isteğe bağlıdır; kanıtı zorunlu olan alt görev, kanıt yüklenmeden bitirilemez. Görev, tüm alt görevler bitmeden tamamlanamaz.",
+  "@uiTasksSubsHint": {
+    "description": "ui.tasks.subs_hint"
+  },
+  "uiTasksDoneLc": "tamamlandı",
+  "@uiTasksDoneLc": {
+    "description": "ui.tasks.done_lc"
+  },
+  "uiTasksSubUntitled": "Adsız alt görev",
+  "@uiTasksSubUntitled": {
+    "description": "ui.tasks.sub_untitled"
+  },
+  "uiTasksSubName": "Alt görev adı",
+  "@uiTasksSubName": {
+    "description": "ui.tasks.sub_name"
+  },
+  "uiTasksSubPerson": "Kişi",
+  "@uiTasksSubPerson": {
+    "description": "ui.tasks.sub_person"
+  },
+  "uiTasksSubDate": "Tarih",
+  "@uiTasksSubDate": {
+    "description": "ui.tasks.sub_date"
+  },
+  "uiTasksSubEvidence": "Kanıt",
+  "@uiTasksSubEvidence": {
+    "description": "ui.tasks.sub_evidence"
+  },
+  "uiTasksSubFile": "Dosya",
+  "@uiTasksSubFile": {
+    "description": "ui.tasks.sub_file"
+  },
+  "uiTasksRequired": "Zorunlu",
+  "@uiTasksRequired": {
+    "description": "ui.tasks.required"
+  },
+  "uiTasksOptional": "Opsiyonel",
+  "@uiTasksOptional": {
+    "description": "ui.tasks.optional"
+  },
+  "uiTasksPickPerson": "Kişi seç",
+  "@uiTasksPickPerson": {
+    "description": "ui.tasks.pick_person"
+  },
+  "uiTasksNoPerson": "Kişi yok",
+  "@uiTasksNoPerson": {
+    "description": "ui.tasks.no_person"
+  },
+  "uiTasksClearDate": "Tarihi kaldır",
+  "@uiTasksClearDate": {
+    "description": "ui.tasks.clear_date"
+  },
+  "uiTasksSubDelete": "Alt görevi sil",
+  "@uiTasksSubDelete": {
+    "description": "ui.tasks.sub_delete"
+  },
+  "uiTasksSubAdd": "Alt görev ekle",
+  "@uiTasksSubAdd": {
+    "description": "ui.tasks.sub_add"
+  },
+  "uiTasksNeedsPerson": "kişi atanmalı",
+  "@uiTasksNeedsPerson": {
+    "description": "ui.tasks.needs_person"
+  },
+  "uiTasksEvidenceRequiredLc": "kanıt zorunlu",
+  "@uiTasksEvidenceRequiredLc": {
+    "description": "ui.tasks.evidence_required_lc"
+  },
+  "uiTasksOneEvidence": "1 kanıt",
+  "@uiTasksOneEvidence": {
+    "description": "ui.tasks.one_evidence"
+  },
+  "uiTasksStart": "Başlangıç",
+  "@uiTasksStart": {
+    "description": "ui.tasks.start"
+  },
+  "uiTasksDue": "Bitiş",
+  "@uiTasksDue": {
+    "description": "ui.tasks.due"
+  },
+  "uiTasksNoFiles": "Henüz kanıt dosyası yok.",
+  "@uiTasksNoFiles": {
+    "description": "ui.tasks.no_files"
+  },
+  "uiTasksSubtaskPrefix": "Alt görev:",
+  "@uiTasksSubtaskPrefix": {
+    "description": "ui.tasks.subtask_prefix"
+  },
+  "uiTasksDeletedLc": "silinmiş",
+  "@uiTasksDeletedLc": {
+    "description": "ui.tasks.deleted_lc"
+  },
+  "uiTasksKb": "KB",
+  "@uiTasksKb": {
+    "description": "ui.tasks.kb"
+  },
+  "uiTasksNoNotes": "Henüz not yok.",
+  "@uiTasksNoNotes": {
+    "description": "ui.tasks.no_notes"
+  },
+  "uiTasksNoteHint": "Not yaz…",
+  "@uiTasksNoteHint": {
+    "description": "ui.tasks.note_hint"
+  },
+  "uiTasksSend": "Gönder",
+  "@uiTasksSend": {
+    "description": "ui.tasks.send"
+  },
+  "uiTasksInMemory": "✓ Hafızada",
+  "@uiTasksInMemory": {
+    "description": "ui.tasks.in_memory"
+  },
+  "uiTasksToMemory": "Hafızaya ekle",
+  "@uiTasksToMemory": {
+    "description": "ui.tasks.to_memory"
+  },
+  "uiTasksSheetStatus": "durum",
+  "@uiTasksSheetStatus": {
+    "description": "ui.tasks.sheet_status"
+  },
+  "uiTasksSheetPriority": "öncelik",
+  "@uiTasksSheetPriority": {
+    "description": "ui.tasks.sheet_priority"
+  },
+  "uiTasksOpenSubsTail": "alt görev açık",
+  "@uiTasksOpenSubsTail": {
+    "description": "ui.tasks.open_subs_tail"
+  },
+  "uiTasksCopy": "Kopyala",
+  "@uiTasksCopy": {
+    "description": "ui.tasks.copy"
+  },
+  "uiTasksCopySuffix": "(kopya)",
+  "@uiTasksCopySuffix": {
+    "description": "ui.tasks.copy_suffix"
+  },
+  "uiTasksDeleteTask": "Görevi sil",
+  "@uiTasksDeleteTask": {
+    "description": "ui.tasks.delete_task"
+  },
+  "uiTasksEditDescTail": "değişiklikler işlem geçmişine yazılır",
+  "@uiTasksEditDescTail": {
+    "description": "ui.tasks.edit_desc_tail"
+  },
+  "uiTasksFieldTitle": "Başlık",
+  "@uiTasksFieldTitle": {
+    "description": "ui.tasks.field_title"
+  },
+  "uiTasksFieldTitleHint": "Görev başlığı",
+  "@uiTasksFieldTitleHint": {
+    "description": "ui.tasks.field_title_hint"
+  },
+  "uiTasksErrTitleEmpty": "Başlık boş bırakılamaz",
+  "@uiTasksErrTitleEmpty": {
+    "description": "ui.tasks.err_title_empty"
+  },
+  "uiTasksFieldCoord": "Koordinatörlük",
+  "@uiTasksFieldCoord": {
+    "description": "ui.tasks.field_coord"
+  },
+  "uiTasksCoordinatorsLc": "koordinatörler",
+  "@uiTasksCoordinatorsLc": {
+    "description": "ui.tasks.coordinators_lc"
+  },
+  "uiTasksMembersLc": "üyeler",
+  "@uiTasksMembersLc": {
+    "description": "ui.tasks.members_lc"
+  },
+  "uiTasksNoCoordinators": "Bu koordinatörlükte koordinatör yok.",
+  "@uiTasksNoCoordinators": {
+    "description": "ui.tasks.no_coordinators"
+  },
+  "uiTasksNoMembers": "Bu koordinatörlükte üye yok.",
+  "@uiTasksNoMembers": {
+    "description": "ui.tasks.no_members"
+  },
+  "uiTasksErrAssignOne": "En az bir kişi ata",
+  "@uiTasksErrAssignOne": {
+    "description": "ui.tasks.err_assign_one"
+  },
+  "uiTasksErrDates": "Bitiş, başlangıçtan önce olamaz",
+  "@uiTasksErrDates": {
+    "description": "ui.tasks.err_dates"
+  },
+  "uiTasksSave": "Kaydet",
+  "@uiTasksSave": {
+    "description": "ui.tasks.save"
+  },
+  "uiTasksCancel": "Vazgeç",
+  "@uiTasksCancel": {
+    "description": "ui.tasks.cancel"
+  },
+  "uiTasksDateDesc": "Onaylanınca yeni tarihler göreve uygulanır",
+  "@uiTasksDateDesc": {
+    "description": "ui.tasks.date_desc"
+  },
+  "uiTasksNowLc": "şu an",
+  "@uiTasksNowLc": {
+    "description": "ui.tasks.now_lc"
+  },
+  "uiTasksNewStart": "Yeni başlangıç",
+  "@uiTasksNewStart": {
+    "description": "ui.tasks.new_start"
+  },
+  "uiTasksNewDue": "Yeni bitiş",
+  "@uiTasksNewDue": {
+    "description": "ui.tasks.new_due"
+  },
+  "uiTasksReason": "Gerekçe",
+  "@uiTasksReason": {
+    "description": "ui.tasks.reason"
+  },
+  "uiTasksReasonHint": "Örn. malzeme tedariki gecikti",
+  "@uiTasksReasonHint": {
+    "description": "ui.tasks.reason_hint"
+  },
+  "uiTasksSendRequest": "Talep gönder",
+  "@uiTasksSendRequest": {
+    "description": "ui.tasks.send_request"
+  },
+  "uiTasksUploadTitle": "Kanıt dosyası yükle",
+  "@uiTasksUploadTitle": {
+    "description": "ui.tasks.upload_title"
+  },
+  "uiTasksUploadDesc": "Dosya görevin arşiv klasörüne kaydedilir",
+  "@uiTasksUploadDesc": {
+    "description": "ui.tasks.upload_desc"
+  },
+  "uiTasksTaskFolder": "görev klasörü",
+  "@uiTasksTaskFolder": {
+    "description": "ui.tasks.task_folder"
+  },
+  "uiTasksTaskItself": "Görevin kendisi",
+  "@uiTasksTaskItself": {
+    "description": "ui.tasks.task_itself"
+  },
+  "uiTasksTag": "Etiket",
+  "@uiTasksTag": {
+    "description": "ui.tasks.tag"
+  },
+  "uiTasksTagSite": "Saha görselleri",
+  "@uiTasksTagSite": {
+    "description": "ui.tasks.tag_site"
+  },
+  "uiTasksTagResult": "Sonuç dosyası",
+  "@uiTasksTagResult": {
+    "description": "ui.tasks.tag_result"
+  },
+  "uiTasksTagStatus": "Güncel durum verisi",
+  "@uiTasksTagStatus": {
+    "description": "ui.tasks.tag_status"
+  },
+  "uiTasksFileName": "Dosya adı",
+  "@uiTasksFileName": {
+    "description": "ui.tasks.file_name"
+  },
+  "uiTasksErrFileName": "Dosya adı gerekli",
+  "@uiTasksErrFileName": {
+    "description": "ui.tasks.err_file_name"
+  },
+  "uiTasksPickFile": "Fotoğraf çek ya da dosya seç",
+  "@uiTasksPickFile": {
+    "description": "ui.tasks.pick_file"
+  },
+  "uiTasksProtoOnly": "Prototipte yalnızca kayıt oluşturulur.",
+  "@uiTasksProtoOnly": {
+    "description": "ui.tasks.proto_only"
+  },
+  "uiTasksUploadOk": "Yükle",
+  "@uiTasksUploadOk": {
+    "description": "ui.tasks.upload_ok"
+  },
+  "uiTasksDeleteQTail": "silinsin mi?",
+  "@uiTasksDeleteQTail": {
+    "description": "ui.tasks.delete_q_tail"
+  },
+  "uiTasksDeleteDesc": "Silinen kayıtlardan geri alınabilir",
+  "@uiTasksDeleteDesc": {
+    "description": "ui.tasks.delete_desc"
+  },
+  "uiTasksDeleteBodyTail": "silinen kayıtlara taşınır. Kanıt dosyaları arşivde kalır.",
+  "@uiTasksDeleteBodyTail": {
+    "description": "ui.tasks.delete_body_tail"
+  },
+  "uiTasksDeleteOk": "Sil",
+  "@uiTasksDeleteOk": {
+    "description": "ui.tasks.delete_ok"
+  },
+  "uiTasksTSubsBlock": "Alt görevler bitmeden görev tamamlanamaz",
+  "@uiTasksTSubsBlock": {
+    "description": "ui.tasks.t_subs_block"
+  },
+  "uiTasksTFinishedLc": "bitti",
+  "@uiTasksTFinishedLc": {
+    "description": "ui.tasks.t_finished_lc"
+  },
+  "uiTasksTEvidenceBlock": "Kanıt dosyası olmadan görev tamamlanamaz",
+  "@uiTasksTEvidenceBlock": {
+    "description": "ui.tasks.t_evidence_block"
+  },
+  "uiTasksTCreatedTail": "oluşturuldu",
+  "@uiTasksTCreatedTail": {
+    "description": "ui.tasks.t_created_tail"
+  },
+  "uiTasksTDeleted": "Görev silinen kayıtlara taşındı",
+  "@uiTasksTDeleted": {
+    "description": "ui.tasks.t_deleted"
+  },
+  "uiTasksTRestoredTail": "geri alındı",
+  "@uiTasksTRestoredTail": {
+    "description": "ui.tasks.t_restored_tail"
+  },
+  "uiTasksTUpdatedTail": "güncellendi",
+  "@uiTasksTUpdatedTail": {
+    "description": "ui.tasks.t_updated_tail"
+  },
+  "uiTasksTRequestSent": "Tarih değişikliği talebi gönderildi · onay bekliyor",
+  "@uiTasksTRequestSent": {
+    "description": "ui.tasks.t_request_sent"
+  },
+  "uiTasksTUploaded": "Kanıt dosyası yüklendi · görevin arşiv klasörüne eklendi",
+  "@uiTasksTUploaded": {
+    "description": "ui.tasks.t_uploaded"
+  },
+  "uiTasksTPendingExists": "Bu görev için zaten bekleyen bir talep var",
+  "@uiTasksTPendingExists": {
+    "description": "ui.tasks.t_pending_exists"
+  },
+  "uiTasksTReminded": "Hatırlatma gönderildi",
+  "@uiTasksTReminded": {
+    "description": "ui.tasks.t_reminded"
+  },
+  "uiTasksTApproved": "Talep onaylandı",
+  "@uiTasksTApproved": {
+    "description": "ui.tasks.t_approved"
+  },
+  "uiTasksTNewDue": "yeni bitiş",
+  "@uiTasksTNewDue": {
+    "description": "ui.tasks.t_new_due"
+  },
+  "uiTasksTRejected": "Talep reddedildi",
+  "@uiTasksTRejected": {
+    "description": "ui.tasks.t_rejected"
+  },
+  "uiTasksTInformed": "bilgilendirildi",
+  "@uiTasksTInformed": {
+    "description": "ui.tasks.t_informed"
+  },
+  "uiTasksTSubEvidence": "Bu alt görev için kanıt zorunlu · önce kanıt yükle",
+  "@uiTasksTSubEvidence": {
+    "description": "ui.tasks.t_sub_evidence"
+  },
+  "uiTasksTSubRemovedTail": "görevinden kaldırıldı",
+  "@uiTasksTSubRemovedTail": {
+    "description": "ui.tasks.t_sub_removed_tail"
+  },
+  "uiTasksTSubFileKept": "kanıt dosyası arşivde kaldı",
+  "@uiTasksTSubFileKept": {
+    "description": "ui.tasks.t_sub_file_kept"
+  },
+  "uiTasksTNoteMemory": "Not kurumsal hafızaya deneyim olarak eklendi",
+  "@uiTasksTNoteMemory": {
+    "description": "ui.tasks.t_note_memory"
+  },
+  "uiTasksTNotifiedTail": "kişiye bildirim gitti",
+  "@uiTasksTNotifiedTail": {
+    "description": "ui.tasks.t_notified_tail"
+  },
+  "uiTasksNtDesc": "Görev oluşturulduğunda atanan kişiye bildirim gider.",
+  "@uiTasksNtDesc": {
+    "description": "ui.tasks.nt_desc"
+  },
+  "uiTasksCreate": "Oluştur",
+  "@uiTasksCreate": {
+    "description": "ui.tasks.create"
+  },
+  "uiTasksNtTitleHint": "Ne yapılması gerekiyor?",
+  "@uiTasksNtTitleHint": {
+    "description": "ui.tasks.nt_title_hint"
+  },
+  "uiTasksRowDate": "Tarih",
+  "@uiTasksRowDate": {
+    "description": "ui.tasks.row_date"
+  },
+  "uiTasksEvidenceRequired": "Kanıt dosyası zorunlu",
+  "@uiTasksEvidenceRequired": {
+    "description": "ui.tasks.evidence_required"
+  },
+  "uiTasksPick": "Seç",
+  "@uiTasksPick": {
+    "description": "ui.tasks.pick"
+  },
+  "uiTasksCoordFirst": "Önce koordinatörlük",
+  "@uiTasksCoordFirst": {
+    "description": "ui.tasks.coord_first"
+  },
+  "uiTasksNobodyHere": "Bu koordinatörlükte kimse yok.",
+  "@uiTasksNobodyHere": {
+    "description": "ui.tasks.nobody_here"
+  },
+  "uiTasksPeopleLc": "kişi",
+  "@uiTasksPeopleLc": {
+    "description": "ui.tasks.people_lc"
+  },
+  "uiTasksRoleCoordinatorLc": "koordinatör",
+  "@uiTasksRoleCoordinatorLc": {
+    "description": "ui.tasks.role_coordinator_lc"
+  },
+  "uiTasksRoleMemberLc": "üye",
+  "@uiTasksRoleMemberLc": {
+    "description": "ui.tasks.role_member_lc"
+  },
+  "uiTasksWeeksLc": "hafta",
+  "@uiTasksWeeksLc": {
+    "description": "ui.tasks.weeks_lc"
+  },
+  "uiTasksOneMonth": "1 ay",
+  "@uiTasksOneMonth": {
+    "description": "ui.tasks.one_month"
+  },
+  "uiTasksErrTitle": "Başlık gerekli.",
+  "@uiTasksErrTitle": {
+    "description": "ui.tasks.err_title"
+  },
+  "uiTasksErrCoord": "Koordinatörlük seç.",
+  "@uiTasksErrCoord": {
+    "description": "ui.tasks.err_coord"
+  },
+  "uiTasksErrAssignee": "En az bir kişi ata.",
+  "@uiTasksErrAssignee": {
+    "description": "ui.tasks.err_assignee"
+  },
+  "uiTasksErrDatesFull": "Bitiş, başlangıçtan önce olamaz.",
+  "@uiTasksErrDatesFull": {
+    "description": "ui.tasks.err_dates_full"
+  },
+  "uiTasksMtTitle": "Toplantı oluştur",
+  "@uiTasksMtTitle": {
+    "description": "ui.tasks.mt_title"
+  },
+  "uiTasksMtDesc": "Toplantı sahibi sensin. Davetlilere bildirim gider.",
+  "@uiTasksMtDesc": {
+    "description": "ui.tasks.mt_desc"
+  },
+  "uiTasksMtTitleHint": "Toplantının konusu ne?",
+  "@uiTasksMtTitleHint": {
+    "description": "ui.tasks.mt_title_hint"
+  },
+  "uiTasksRowTime": "Saat",
+  "@uiTasksRowTime": {
+    "description": "ui.tasks.row_time"
+  },
+  "uiTasksRowInvitees": "Davetliler",
+  "@uiTasksRowInvitees": {
+    "description": "ui.tasks.row_invitees"
+  },
+  "uiTasksRowAgenda": "Gündem",
+  "@uiTasksRowAgenda": {
+    "description": "ui.tasks.row_agenda"
+  },
+  "uiTasksItemsLc": "madde",
+  "@uiTasksItemsLc": {
+    "description": "ui.tasks.items_lc"
+  },
+  "uiTasksAddItem": "Madde ekle",
+  "@uiTasksAddItem": {
+    "description": "ui.tasks.add_item"
+  },
+  "uiTasksAgendaItem": "Gündem maddesi",
+  "@uiTasksAgendaItem": {
+    "description": "ui.tasks.agenda_item"
+  },
+  "uiTasksAddItemLabel": "Maddeyi ekle",
+  "@uiTasksAddItemLabel": {
+    "description": "ui.tasks.add_item_label"
+  },
+  "uiTasksRemoveItemTail": ". maddeyi kaldır",
+  "@uiTasksRemoveItemTail": {
+    "description": "ui.tasks.remove_item_tail"
+  },
+  "uiTasksItemTail": ". madde",
+  "@uiTasksItemTail": {
+    "description": "ui.tasks.item_tail"
+  },
+  "uiTasksModePeople": "Kişiler",
+  "@uiTasksModePeople": {
+    "description": "ui.tasks.mode_people"
+  },
+  "uiTasksInviteMembers": "Üyeleri de davet et",
+  "@uiTasksInviteMembers": {
+    "description": "ui.tasks.invite_members"
+  },
+  "uiTasksWithMembers": "üyelerle",
+  "@uiTasksWithMembers": {
+    "description": "ui.tasks.with_members"
+  },
+  "uiTasksCoordAbbr": "koord.",
+  "@uiTasksCoordAbbr": {
+    "description": "ui.tasks.coord_abbr"
+  },
+  "uiTasksErrPast": "Tarih geçmişe çekilemez.",
+  "@uiTasksErrPast": {
+    "description": "ui.tasks.err_past"
+  },
+  "uiTasksErrMtCoords": "Davetli olarak en az bir koordinatörlük seç.",
+  "@uiTasksErrMtCoords": {
+    "description": "ui.tasks.err_mt_coords"
+  },
+  "uiTasksErrMtPeople": "En az bir kişi seç.",
+  "@uiTasksErrMtPeople": {
+    "description": "ui.tasks.err_mt_people"
+  },
+  "uiTasksTMeeting": "Toplantı oluşturuldu",
+  "@uiTasksTMeeting": {
+    "description": "ui.tasks.t_meeting"
+  },
+  "uiTasksTCoordsInvited": "koordinatörlük davetli",
+  "@uiTasksTCoordsInvited": {
+    "description": "ui.tasks.t_coords_invited"
+  },
+  "uiTasksTPeopleInvited": "kişi davetli",
+  "@uiTasksTPeopleInvited": {
+    "description": "ui.tasks.t_people_invited"
+  },
+  "uiTasksIvTitle": "Kullanıcı davet et",
+  "@uiTasksIvTitle": {
+    "description": "ui.tasks.iv_title"
+  },
+  "uiTasksIvDesc": "Davet e-postası gönderilir; kullanıcı ilk girişte şifresini belirler.",
+  "@uiTasksIvDesc": {
+    "description": "ui.tasks.iv_desc"
+  },
+  "uiTasksIvSend": "Davet gönder",
+  "@uiTasksIvSend": {
+    "description": "ui.tasks.iv_send"
+  },
+  "uiTasksIvName": "Ad soyad",
+  "@uiTasksIvName": {
+    "description": "ui.tasks.iv_name"
+  },
+  "uiTasksIvNameHint": "Ad Soyad",
+  "@uiTasksIvNameHint": {
+    "description": "ui.tasks.iv_name_hint"
+  },
+  "uiTasksIvEmail": "E-posta",
+  "@uiTasksIvEmail": {
+    "description": "ui.tasks.iv_email"
+  },
+  "uiTasksIvEmailHint": "E-posta adresi",
+  "@uiTasksIvEmailHint": {
+    "description": "ui.tasks.iv_email_hint"
+  },
+  "uiTasksIvRole": "Rol",
+  "@uiTasksIvRole": {
+    "description": "ui.tasks.iv_role"
+  },
+  "uiTasksRoleMember": "Üye",
+  "@uiTasksRoleMember": {
+    "description": "ui.tasks.role_member"
+  },
+  "uiTasksRoleCoordinator": "Koordinatör",
+  "@uiTasksRoleCoordinator": {
+    "description": "ui.tasks.role_coordinator"
+  },
+  "uiTasksRoleAdmin": "Admin",
+  "@uiTasksRoleAdmin": {
+    "description": "ui.tasks.role_admin"
+  },
+  "uiTasksOptionalAny": "İsteğe bağlı",
+  "@uiTasksOptionalAny": {
+    "description": "ui.tasks.optional_any"
+  },
+  "uiTasksRdAdmin": "Tüm koordinatörlükleri, kullanıcıları ve sezonu yönetir.",
+  "@uiTasksRdAdmin": {
+    "description": "ui.tasks.rd_admin"
+  },
+  "uiTasksRdCoordinator": "Seçtiğin koordinatörlüklerde görev atar ve dosyaları onaylar.",
+  "@uiTasksRdCoordinator": {
+    "description": "ui.tasks.rd_coordinator"
+  },
+  "uiTasksRdMember": "Atanan görevleri yürütür, kanıt dosyası yükler.",
+  "@uiTasksRdMember": {
+    "description": "ui.tasks.rd_member"
+  },
+  "uiTasksErrName": "Ad soyad gerekli.",
+  "@uiTasksErrName": {
+    "description": "ui.tasks.err_name"
+  },
+  "uiTasksErrEmail": "Geçerli bir e-posta gir.",
+  "@uiTasksErrEmail": {
+    "description": "ui.tasks.err_email"
+  },
+  "uiTasksErrIvCoord": "Koordinatör için en az bir koordinatörlük seç.",
+  "@uiTasksErrIvCoord": {
+    "description": "ui.tasks.err_iv_coord"
+  },
+  "uiTasksTInvited": "Davet gönderildi:",
+  "@uiTasksTInvited": {
+    "description": "ui.tasks.t_invited"
+  },
+  "uiTasksExpandSheet": "Sayfayı büyüt",
+  "@uiTasksExpandSheet": {
+    "description": "ui.tasks.expand_sheet"
+  },
+  "uiTasksCollapseSheet": "Sayfayı küçült",
+  "@uiTasksCollapseSheet": {
+    "description": "ui.tasks.collapse_sheet"
+  },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {
     "description": "ui.timeline.title"

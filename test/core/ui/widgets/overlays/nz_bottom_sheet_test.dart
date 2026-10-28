@@ -325,4 +325,45 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  testWidgets('dış genişlik denetimi (expansion) ve başlık eylemi', (
+    tester,
+  ) async {
+    final expansion = ValueNotifier(false);
+    var cleared = 0;
+    await tester.pumpWidget(
+      testApp(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => NzBottomSheet.show<void>(
+              context,
+              title: 'Filtreler',
+              expandable: true,
+              expansion: expansion,
+              headerAction: TextButton(
+                onPressed: () => cleared++,
+                child: const Text('Tümünü temizle'),
+              ),
+              builder: (_) => const Text('içerik'),
+            ),
+            child: const Text('aç'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('aç'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tümünü temizle'));
+    expect(cleared, 1);
+    final h0 = tester.getSize(find.byType(NzBottomSheetContent)).height;
+    expansion.value = true;
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byType(NzBottomSheetContent)).height,
+      greaterThan(h0),
+    );
+    expansion.value = false;
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(NzBottomSheetContent)).height, h0);
+  });
 }

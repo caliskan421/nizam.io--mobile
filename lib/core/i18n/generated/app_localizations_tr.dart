@@ -2110,6 +2110,834 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksDetailTitle => 'Görev';
 
   @override
+  String get uiTasksTasksLc => 'görev';
+
+  @override
+  String get uiTasksSearch => 'Ara';
+
+  @override
+  String get uiTasksSearchHint => 'Başlık, kimlik veya kişi';
+
+  @override
+  String get uiTasksFiltersButton =>
+      'Filtreler · kişi, koordinatörlük, öncelik';
+
+  @override
+  String get uiTasksNewTask => 'Yeni görev';
+
+  @override
+  String get uiTasksMode => 'Görünüm';
+
+  @override
+  String get uiTasksModeList => 'Liste';
+
+  @override
+  String get uiTasksModeTimeline => 'Zaman çizelgesi';
+
+  @override
+  String get uiTasksViews => 'Görünümler';
+
+  @override
+  String get uiTasksViewAll => 'Tümü';
+
+  @override
+  String get uiTasksViewLate => 'Geciken';
+
+  @override
+  String get uiTasksViewDoing => 'Devam';
+
+  @override
+  String get uiTasksViewReview => 'Onayda';
+
+  @override
+  String get uiTasksViewRequest => 'Tarih talebi';
+
+  @override
+  String get uiTasksViewTodo => 'Başlamadı';
+
+  @override
+  String get uiTasksViewDone => 'Biten';
+
+  @override
+  String get uiTasksListAll => 'tüm görevler';
+
+  @override
+  String get uiTasksListLate => 'geciken görevler';
+
+  @override
+  String get uiTasksListDoing => 'devam eden görevler';
+
+  @override
+  String get uiTasksListReview => 'onay bekleyenler';
+
+  @override
+  String get uiTasksListRequest => 'tarih talebi olanlar';
+
+  @override
+  String get uiTasksListTodo => 'başlamayanlar';
+
+  @override
+  String get uiTasksListDone => 'tamamlananlar';
+
+  @override
+  String get uiTasksTaskList => 'Görev listesi';
+
+  @override
+  String get uiTasksSortMenu => 'Sıralama';
+
+  @override
+  String get uiTasksSortCreated => 'Tanımlanma tarihine göre';
+
+  @override
+  String get uiTasksSortDue => 'Bitiş tarihine göre';
+
+  @override
+  String get uiTasksSortStart => 'Başlangıç tarihine göre';
+
+  @override
+  String get uiTasksSortCoord => 'Koordinatörlüğe göre';
+
+  @override
+  String get uiTasksSortCreatedShort => 'Tanımlanma tarihi';
+
+  @override
+  String get uiTasksSortDueShort => 'Bitiş tarihi';
+
+  @override
+  String get uiTasksSortStartShort => 'Başlangıç tarihi';
+
+  @override
+  String get uiTasksSortCoordShort => 'Koordinatörlük';
+
+  @override
+  String get uiTasksDirCreatedAsc => 'eskiden yeniye';
+
+  @override
+  String get uiTasksDirCreatedDesc => 'yeniden eskiye';
+
+  @override
+  String get uiTasksDirDueAsc => 'yakından uzağa';
+
+  @override
+  String get uiTasksDirDueDesc => 'uzaktan yakına';
+
+  @override
+  String get uiTasksDirStartAsc => 'erkenden geçe';
+
+  @override
+  String get uiTasksDirStartDesc => 'geçten erkene';
+
+  @override
+  String get uiTasksDirTap => 'yönü değiştirmek için dokun';
+
+  @override
+  String get uiTasksStatusTodo => 'Başlamadı';
+
+  @override
+  String get uiTasksStatusDoing => 'Devam ediyor';
+
+  @override
+  String get uiTasksStatusReview => 'Onay bekliyor';
+
+  @override
+  String get uiTasksStatusReturned => 'Geri gönderildi';
+
+  @override
+  String get uiTasksStatusDone => 'Tamamlandı';
+
+  @override
+  String get uiTasksPrioHigh => 'Yüksek';
+
+  @override
+  String get uiTasksPrioMedium => 'Orta';
+
+  @override
+  String get uiTasksPrioLow => 'Düşük';
+
+  @override
+  String get uiTasksCardStart => 'başlangıç';
+
+  @override
+  String get uiTasksCardDue => 'bitiş';
+
+  @override
+  String get uiTasksCardPriority => 'öncelik';
+
+  @override
+  String get uiTasksSubtasksTail => 'alt görev';
+
+  @override
+  String get uiTasksLateTail => 'gün gecikti';
+
+  @override
+  String get uiTasksRequestBadge => 'Talep';
+
+  @override
+  String get uiTasksFilesTail => 'kanıt dosyası';
+
+  @override
+  String get uiTasksNotesTail => 'not';
+
+  @override
+  String get uiTasksEmpty => 'Bu görünümde görev yok.';
+
+  @override
+  String get uiTasksClearFilters => 'Filtreleri temizle';
+
+  @override
+  String get uiTasksShowMore => 'Daha fazla göster';
+
+  @override
+  String get uiTasksCoordsLc => 'koordinatörlük';
+
+  @override
+  String get uiTasksClear => 'Temizle';
+
+  @override
+  String get uiTasksRemoveFilterTail => 'filtresini kaldır';
+
+  @override
+  String get uiTasksPriority => 'Öncelik';
+
+  @override
+  String get uiTasksPriorityFilterRemove => 'Öncelik filtresini kaldır';
+
+  @override
+  String get uiTasksFilters => 'Filtreler';
+
+  @override
+  String get uiTasksClearAll => 'Tümünü temizle';
+
+  @override
+  String get uiTasksGroupPeople => 'Kişi';
+
+  @override
+  String get uiTasksGroupCoord => 'Koordinatörlük';
+
+  @override
+  String get uiTasksSelectedTail => 'seçili';
+
+  @override
+  String get uiTasksAllLc => 'tümü';
+
+  @override
+  String get uiTasksFilterHint =>
+      'Aynı grupta seçenekler “veya”, gruplar arası “ve” ile birleşir.';
+
+  @override
+  String get uiTasksShowTasksTail => 'görevi göster';
+
+  @override
+  String get uiTasksShortcuts => 'Görevler kısayolları';
+
+  @override
+  String get uiTasksFlyView => 'görünüm';
+
+  @override
+  String get uiTasksFlySort => 'sıralama';
+
+  @override
+  String get uiTasksFlyTasks => 'görevler';
+
+  @override
+  String get uiTasksFlyTimelineCaption => 'Dikey Gantt';
+
+  @override
+  String get uiTasksFlySearch => 'Görev ara';
+
+  @override
+  String get uiTasksFlyFilter => 'Kişi, koordinatörlük, öncelik';
+
+  @override
+  String get uiTasksFlyThisTask => 'bu görev';
+
+  @override
+  String get uiTasksFlyStatus => 'Durum';
+
+  @override
+  String get uiTasksFlyGo => 'git';
+
+  @override
+  String get uiTasksFlyTimeline => 'Zaman çizelgesinde gör';
+
+  @override
+  String get uiTasksEditTask => 'Görevi düzenle';
+
+  @override
+  String get uiTasksMoreActions => 'Diğer işlemler';
+
+  @override
+  String get uiTasksNotFound => 'Görev bulunamadı';
+
+  @override
+  String get uiTasksDeletedTail => 'silinen kayıtlara taşındı';
+
+  @override
+  String get uiTasksDeletedFilesKept => 'Kanıt dosyaları arşivde kaldı.';
+
+  @override
+  String get uiTasksUndo => 'Geri al';
+
+  @override
+  String get uiTasksRequestDate => 'Tarih değişikliği iste';
+
+  @override
+  String get uiTasksRemind => 'Atanana hatırlat';
+
+  @override
+  String get uiTasksUpload => 'Kanıt yükle';
+
+  @override
+  String get uiTasksRequestTitle => 'Tarih değişikliği talebi';
+
+  @override
+  String get uiTasksReject => 'Reddet';
+
+  @override
+  String get uiTasksApprove => 'Onayla';
+
+  @override
+  String get uiTasksDaysLc => 'gün';
+
+  @override
+  String get uiTasksNoReason => 'Gerekçe yazılmamış';
+
+  @override
+  String get uiTasksDetailTabs => 'Görev ayrıntısı';
+
+  @override
+  String get uiTasksTabSummary => 'Özet';
+
+  @override
+  String get uiTasksTabSubtasks => 'Alt görev';
+
+  @override
+  String get uiTasksTabFiles => 'Dosya';
+
+  @override
+  String get uiTasksTabNotes => 'Not';
+
+  @override
+  String get uiTasksAssignee => 'Atanan';
+
+  @override
+  String get uiTasksCreator => 'Oluşturan';
+
+  @override
+  String get uiTasksCreated => 'Tanımlandı';
+
+  @override
+  String get uiTasksDateRange => 'Tarih aralığı';
+
+  @override
+  String get uiTasksEvidenceFile => 'Kanıt dosyası';
+
+  @override
+  String get uiTasksNone => 'Yok';
+
+  @override
+  String get uiTasksProgress => 'ilerleme';
+
+  @override
+  String get uiTasksEvCreated => 'Görev tanımlandı';
+
+  @override
+  String get uiTasksEvStarted => 'Planlanan başlangıç';
+
+  @override
+  String get uiTasksEvWillStart => 'Başlayacak';
+
+  @override
+  String get uiTasksEvDone => 'Tamamlandı';
+
+  @override
+  String get uiTasksEvDoneLate => '(geç)';
+
+  @override
+  String get uiTasksEvDuePassed => 'Plan bitişi geçti';
+
+  @override
+  String get uiTasksEvLateTail => 'gündür gecikmede';
+
+  @override
+  String get uiTasksEvToday => 'bugün';
+
+  @override
+  String get uiTasksEvDue => 'Planlanan bitiş';
+
+  @override
+  String get uiTasksSubsHint =>
+      'Kişi ve tarih isteğe bağlıdır; kanıtı zorunlu olan alt görev, kanıt yüklenmeden bitirilemez. Görev, tüm alt görevler bitmeden tamamlanamaz.';
+
+  @override
+  String get uiTasksDoneLc => 'tamamlandı';
+
+  @override
+  String get uiTasksSubUntitled => 'Adsız alt görev';
+
+  @override
+  String get uiTasksSubName => 'Alt görev adı';
+
+  @override
+  String get uiTasksSubPerson => 'Kişi';
+
+  @override
+  String get uiTasksSubDate => 'Tarih';
+
+  @override
+  String get uiTasksSubEvidence => 'Kanıt';
+
+  @override
+  String get uiTasksSubFile => 'Dosya';
+
+  @override
+  String get uiTasksRequired => 'Zorunlu';
+
+  @override
+  String get uiTasksOptional => 'Opsiyonel';
+
+  @override
+  String get uiTasksPickPerson => 'Kişi seç';
+
+  @override
+  String get uiTasksNoPerson => 'Kişi yok';
+
+  @override
+  String get uiTasksClearDate => 'Tarihi kaldır';
+
+  @override
+  String get uiTasksSubDelete => 'Alt görevi sil';
+
+  @override
+  String get uiTasksSubAdd => 'Alt görev ekle';
+
+  @override
+  String get uiTasksNeedsPerson => 'kişi atanmalı';
+
+  @override
+  String get uiTasksEvidenceRequiredLc => 'kanıt zorunlu';
+
+  @override
+  String get uiTasksOneEvidence => '1 kanıt';
+
+  @override
+  String get uiTasksStart => 'Başlangıç';
+
+  @override
+  String get uiTasksDue => 'Bitiş';
+
+  @override
+  String get uiTasksNoFiles => 'Henüz kanıt dosyası yok.';
+
+  @override
+  String get uiTasksSubtaskPrefix => 'Alt görev:';
+
+  @override
+  String get uiTasksDeletedLc => 'silinmiş';
+
+  @override
+  String get uiTasksKb => 'KB';
+
+  @override
+  String get uiTasksNoNotes => 'Henüz not yok.';
+
+  @override
+  String get uiTasksNoteHint => 'Not yaz…';
+
+  @override
+  String get uiTasksSend => 'Gönder';
+
+  @override
+  String get uiTasksInMemory => '✓ Hafızada';
+
+  @override
+  String get uiTasksToMemory => 'Hafızaya ekle';
+
+  @override
+  String get uiTasksSheetStatus => 'durum';
+
+  @override
+  String get uiTasksSheetPriority => 'öncelik';
+
+  @override
+  String get uiTasksOpenSubsTail => 'alt görev açık';
+
+  @override
+  String get uiTasksCopy => 'Kopyala';
+
+  @override
+  String get uiTasksCopySuffix => '(kopya)';
+
+  @override
+  String get uiTasksDeleteTask => 'Görevi sil';
+
+  @override
+  String get uiTasksEditDescTail => 'değişiklikler işlem geçmişine yazılır';
+
+  @override
+  String get uiTasksFieldTitle => 'Başlık';
+
+  @override
+  String get uiTasksFieldTitleHint => 'Görev başlığı';
+
+  @override
+  String get uiTasksErrTitleEmpty => 'Başlık boş bırakılamaz';
+
+  @override
+  String get uiTasksFieldCoord => 'Koordinatörlük';
+
+  @override
+  String get uiTasksCoordinatorsLc => 'koordinatörler';
+
+  @override
+  String get uiTasksMembersLc => 'üyeler';
+
+  @override
+  String get uiTasksNoCoordinators => 'Bu koordinatörlükte koordinatör yok.';
+
+  @override
+  String get uiTasksNoMembers => 'Bu koordinatörlükte üye yok.';
+
+  @override
+  String get uiTasksErrAssignOne => 'En az bir kişi ata';
+
+  @override
+  String get uiTasksErrDates => 'Bitiş, başlangıçtan önce olamaz';
+
+  @override
+  String get uiTasksSave => 'Kaydet';
+
+  @override
+  String get uiTasksCancel => 'Vazgeç';
+
+  @override
+  String get uiTasksDateDesc => 'Onaylanınca yeni tarihler göreve uygulanır';
+
+  @override
+  String get uiTasksNowLc => 'şu an';
+
+  @override
+  String get uiTasksNewStart => 'Yeni başlangıç';
+
+  @override
+  String get uiTasksNewDue => 'Yeni bitiş';
+
+  @override
+  String get uiTasksReason => 'Gerekçe';
+
+  @override
+  String get uiTasksReasonHint => 'Örn. malzeme tedariki gecikti';
+
+  @override
+  String get uiTasksSendRequest => 'Talep gönder';
+
+  @override
+  String get uiTasksUploadTitle => 'Kanıt dosyası yükle';
+
+  @override
+  String get uiTasksUploadDesc => 'Dosya görevin arşiv klasörüne kaydedilir';
+
+  @override
+  String get uiTasksTaskFolder => 'görev klasörü';
+
+  @override
+  String get uiTasksTaskItself => 'Görevin kendisi';
+
+  @override
+  String get uiTasksTag => 'Etiket';
+
+  @override
+  String get uiTasksTagSite => 'Saha görselleri';
+
+  @override
+  String get uiTasksTagResult => 'Sonuç dosyası';
+
+  @override
+  String get uiTasksTagStatus => 'Güncel durum verisi';
+
+  @override
+  String get uiTasksFileName => 'Dosya adı';
+
+  @override
+  String get uiTasksErrFileName => 'Dosya adı gerekli';
+
+  @override
+  String get uiTasksPickFile => 'Fotoğraf çek ya da dosya seç';
+
+  @override
+  String get uiTasksProtoOnly => 'Prototipte yalnızca kayıt oluşturulur.';
+
+  @override
+  String get uiTasksUploadOk => 'Yükle';
+
+  @override
+  String get uiTasksDeleteQTail => 'silinsin mi?';
+
+  @override
+  String get uiTasksDeleteDesc => 'Silinen kayıtlardan geri alınabilir';
+
+  @override
+  String get uiTasksDeleteBodyTail =>
+      'silinen kayıtlara taşınır. Kanıt dosyaları arşivde kalır.';
+
+  @override
+  String get uiTasksDeleteOk => 'Sil';
+
+  @override
+  String get uiTasksTSubsBlock => 'Alt görevler bitmeden görev tamamlanamaz';
+
+  @override
+  String get uiTasksTFinishedLc => 'bitti';
+
+  @override
+  String get uiTasksTEvidenceBlock =>
+      'Kanıt dosyası olmadan görev tamamlanamaz';
+
+  @override
+  String get uiTasksTCreatedTail => 'oluşturuldu';
+
+  @override
+  String get uiTasksTDeleted => 'Görev silinen kayıtlara taşındı';
+
+  @override
+  String get uiTasksTRestoredTail => 'geri alındı';
+
+  @override
+  String get uiTasksTUpdatedTail => 'güncellendi';
+
+  @override
+  String get uiTasksTRequestSent =>
+      'Tarih değişikliği talebi gönderildi · onay bekliyor';
+
+  @override
+  String get uiTasksTUploaded =>
+      'Kanıt dosyası yüklendi · görevin arşiv klasörüne eklendi';
+
+  @override
+  String get uiTasksTPendingExists =>
+      'Bu görev için zaten bekleyen bir talep var';
+
+  @override
+  String get uiTasksTReminded => 'Hatırlatma gönderildi';
+
+  @override
+  String get uiTasksTApproved => 'Talep onaylandı';
+
+  @override
+  String get uiTasksTNewDue => 'yeni bitiş';
+
+  @override
+  String get uiTasksTRejected => 'Talep reddedildi';
+
+  @override
+  String get uiTasksTInformed => 'bilgilendirildi';
+
+  @override
+  String get uiTasksTSubEvidence =>
+      'Bu alt görev için kanıt zorunlu · önce kanıt yükle';
+
+  @override
+  String get uiTasksTSubRemovedTail => 'görevinden kaldırıldı';
+
+  @override
+  String get uiTasksTSubFileKept => 'kanıt dosyası arşivde kaldı';
+
+  @override
+  String get uiTasksTNoteMemory =>
+      'Not kurumsal hafızaya deneyim olarak eklendi';
+
+  @override
+  String get uiTasksTNotifiedTail => 'kişiye bildirim gitti';
+
+  @override
+  String get uiTasksNtDesc =>
+      'Görev oluşturulduğunda atanan kişiye bildirim gider.';
+
+  @override
+  String get uiTasksCreate => 'Oluştur';
+
+  @override
+  String get uiTasksNtTitleHint => 'Ne yapılması gerekiyor?';
+
+  @override
+  String get uiTasksRowDate => 'Tarih';
+
+  @override
+  String get uiTasksEvidenceRequired => 'Kanıt dosyası zorunlu';
+
+  @override
+  String get uiTasksPick => 'Seç';
+
+  @override
+  String get uiTasksCoordFirst => 'Önce koordinatörlük';
+
+  @override
+  String get uiTasksNobodyHere => 'Bu koordinatörlükte kimse yok.';
+
+  @override
+  String get uiTasksPeopleLc => 'kişi';
+
+  @override
+  String get uiTasksRoleCoordinatorLc => 'koordinatör';
+
+  @override
+  String get uiTasksRoleMemberLc => 'üye';
+
+  @override
+  String get uiTasksWeeksLc => 'hafta';
+
+  @override
+  String get uiTasksOneMonth => '1 ay';
+
+  @override
+  String get uiTasksErrTitle => 'Başlık gerekli.';
+
+  @override
+  String get uiTasksErrCoord => 'Koordinatörlük seç.';
+
+  @override
+  String get uiTasksErrAssignee => 'En az bir kişi ata.';
+
+  @override
+  String get uiTasksErrDatesFull => 'Bitiş, başlangıçtan önce olamaz.';
+
+  @override
+  String get uiTasksMtTitle => 'Toplantı oluştur';
+
+  @override
+  String get uiTasksMtDesc =>
+      'Toplantı sahibi sensin. Davetlilere bildirim gider.';
+
+  @override
+  String get uiTasksMtTitleHint => 'Toplantının konusu ne?';
+
+  @override
+  String get uiTasksRowTime => 'Saat';
+
+  @override
+  String get uiTasksRowInvitees => 'Davetliler';
+
+  @override
+  String get uiTasksRowAgenda => 'Gündem';
+
+  @override
+  String get uiTasksItemsLc => 'madde';
+
+  @override
+  String get uiTasksAddItem => 'Madde ekle';
+
+  @override
+  String get uiTasksAgendaItem => 'Gündem maddesi';
+
+  @override
+  String get uiTasksAddItemLabel => 'Maddeyi ekle';
+
+  @override
+  String get uiTasksRemoveItemTail => '. maddeyi kaldır';
+
+  @override
+  String get uiTasksItemTail => '. madde';
+
+  @override
+  String get uiTasksModePeople => 'Kişiler';
+
+  @override
+  String get uiTasksInviteMembers => 'Üyeleri de davet et';
+
+  @override
+  String get uiTasksWithMembers => 'üyelerle';
+
+  @override
+  String get uiTasksCoordAbbr => 'koord.';
+
+  @override
+  String get uiTasksErrPast => 'Tarih geçmişe çekilemez.';
+
+  @override
+  String get uiTasksErrMtCoords =>
+      'Davetli olarak en az bir koordinatörlük seç.';
+
+  @override
+  String get uiTasksErrMtPeople => 'En az bir kişi seç.';
+
+  @override
+  String get uiTasksTMeeting => 'Toplantı oluşturuldu';
+
+  @override
+  String get uiTasksTCoordsInvited => 'koordinatörlük davetli';
+
+  @override
+  String get uiTasksTPeopleInvited => 'kişi davetli';
+
+  @override
+  String get uiTasksIvTitle => 'Kullanıcı davet et';
+
+  @override
+  String get uiTasksIvDesc =>
+      'Davet e-postası gönderilir; kullanıcı ilk girişte şifresini belirler.';
+
+  @override
+  String get uiTasksIvSend => 'Davet gönder';
+
+  @override
+  String get uiTasksIvName => 'Ad soyad';
+
+  @override
+  String get uiTasksIvNameHint => 'Ad Soyad';
+
+  @override
+  String get uiTasksIvEmail => 'E-posta';
+
+  @override
+  String get uiTasksIvEmailHint => 'E-posta adresi';
+
+  @override
+  String get uiTasksIvRole => 'Rol';
+
+  @override
+  String get uiTasksRoleMember => 'Üye';
+
+  @override
+  String get uiTasksRoleCoordinator => 'Koordinatör';
+
+  @override
+  String get uiTasksRoleAdmin => 'Admin';
+
+  @override
+  String get uiTasksOptionalAny => 'İsteğe bağlı';
+
+  @override
+  String get uiTasksRdAdmin =>
+      'Tüm koordinatörlükleri, kullanıcıları ve sezonu yönetir.';
+
+  @override
+  String get uiTasksRdCoordinator =>
+      'Seçtiğin koordinatörlüklerde görev atar ve dosyaları onaylar.';
+
+  @override
+  String get uiTasksRdMember =>
+      'Atanan görevleri yürütür, kanıt dosyası yükler.';
+
+  @override
+  String get uiTasksErrName => 'Ad soyad gerekli.';
+
+  @override
+  String get uiTasksErrEmail => 'Geçerli bir e-posta gir.';
+
+  @override
+  String get uiTasksErrIvCoord =>
+      'Koordinatör için en az bir koordinatörlük seç.';
+
+  @override
+  String get uiTasksTInvited => 'Davet gönderildi:';
+
+  @override
+  String get uiTasksExpandSheet => 'Sayfayı büyüt';
+
+  @override
+  String get uiTasksCollapseSheet => 'Sayfayı küçült';
+
+  @override
   String get uiTimelineTitle => 'Zaman çizelgesi';
 
   @override

@@ -1199,4 +1199,270 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTimelineTitle => 'Zaman çizelgesi';
+
+  @override
+  String get uiTimelineView => 'Görünüm';
+
+  @override
+  String get uiTimelineList => 'Liste';
+
+  @override
+  String get uiTimelineCoord => 'Koordinatörlük';
+
+  @override
+  String get uiTimelineCoordAll => 'tümü';
+
+  @override
+  String get uiTimelineCoordNone => 'seçilmedi';
+
+  @override
+  String get uiTimelineCoordSelected => 'seçili';
+
+  @override
+  String get uiTimelineCoordOpenTail => 'açık';
+
+  @override
+  String get uiTimelineCoordClear => 'Seçimi kaldır';
+
+  @override
+  String get uiTimelineCoordSelectAll => 'Tümünü seç';
+
+  @override
+  String get uiTimelineFilter => 'Filtre';
+
+  @override
+  String get uiTimelineFilterLabel => 'Filtreler · durum, kişi, öncelik';
+
+  @override
+  String get uiTimelineFilters => 'Filtreler';
+
+  @override
+  String get uiTimelineClear => 'Temizle';
+
+  @override
+  String get uiTimelineStatus => 'Durum';
+
+  @override
+  String get uiTimelineStatusAll => 'Tümü';
+
+  @override
+  String get uiTimelineStatusOpen => 'Açık';
+
+  @override
+  String get uiTimelineStatusLate => 'Geciken';
+
+  @override
+  String get uiTimelineStatusDone => 'Biten';
+
+  @override
+  String get uiTimelinePerson => 'Kişi';
+
+  @override
+  String get uiTimelinePriority => 'Öncelik';
+
+  @override
+  String get uiTimelinePrioHigh => 'Yüksek';
+
+  @override
+  String get uiTimelinePrioMid => 'Orta';
+
+  @override
+  String get uiTimelinePrioLow => 'Düşük';
+
+  @override
+  String get uiTimelineScale => 'Ölçek';
+
+  @override
+  String get uiTimelineScaleDay => 'Gün';
+
+  @override
+  String get uiTimelineScaleWeek => 'Hafta';
+
+  @override
+  String get uiTimelineScaleMonth => 'Ay';
+
+  @override
+  String get uiTimelineOverview => 'Genel bakış';
+
+  @override
+  String get uiTimelineOverviewHint =>
+      'Her koordinatörlük bir sütun; sütuna dokununca o koordinatörlük açılır.';
+
+  @override
+  String get uiTimelineCoordHint =>
+      'Koordinatörlük, çizelgenin üstündeki menüden seçilir.';
+
+  @override
+  String get uiTimelineShowTasksTail => 'görevi göster';
+
+  @override
+  String get uiTimelineLegend => 'Lejant';
+
+  @override
+  String get uiTimelineLegendOpen => 'Lejantı göster';
+
+  @override
+  String get uiTimelineStTodo => 'Başlamadı';
+
+  @override
+  String get uiTimelineStDoing => 'Devam ediyor';
+
+  @override
+  String get uiTimelineStReview => 'Onay bekliyor';
+
+  @override
+  String get uiTimelineStBack => 'Geri gönderildi';
+
+  @override
+  String get uiTimelineStDone => 'Tamamlandı';
+
+  @override
+  String get uiTimelineStDoneLate => 'Geç bitti';
+
+  @override
+  String get uiTimelineStLate => 'Gecikmede';
+
+  @override
+  String get uiTimelineStRequest => 'Tarih talebi';
+
+  @override
+  String get uiTimelineLegendToday =>
+      'Yeşil çizgi bugünü gösterir; soldaki kutu bugünün tarihi.';
+
+  @override
+  String get uiTimelineLegendStrip =>
+      'Alttaki şerit sezonun haritası: çerçeve baktığın aralık, kırmızı hafta gecikmenin başladığı hafta. Dokunarak ya da sürükleyerek o haftaya git.';
+
+  @override
+  String get uiTimelineLegendBar =>
+      'Çubuğa dokun: tarihleri − / + ile ya da tarih alanından değiştir, çubuk anında güncellenir. Seçili çubuğu basılı tutup sürükleyerek de kaydırabilirsin.';
+
+  @override
+  String get uiTimelineToday => 'Bugün';
+
+  @override
+  String get uiTimelineSeasonMap =>
+      'Sezon haritası · parmağını kaydırarak çizelgede gez';
+
+  @override
+  String get uiTimelineEmpty => 'Bu filtrede görev yok.';
+
+  @override
+  String get uiTimelineEmptyNoCoord => 'Koordinatörlük seç.';
+
+  @override
+  String get uiTimelineDependent => 'bağımlı';
+
+  @override
+  String get uiTimelineDaysLate => 'gün gecikmede';
+
+  @override
+  String get uiTimelineDaysLateDone => 'gün geç bitti';
+
+  @override
+  String get uiTimelineSelectedTask => 'Seçili görev';
+
+  @override
+  String get uiTimelineOpenTask => 'Görev ayrıntısında aç';
+
+  @override
+  String get uiTimelineEvidenceTail => 'kanıt dosyası';
+
+  @override
+  String get uiTimelineNoEvidence => 'kanıt yok';
+
+  @override
+  String get uiTimelineStart => 'başlangıç';
+
+  @override
+  String get uiTimelineEnd => 'bitiş';
+
+  @override
+  String get uiTimelineDayBack => 'bir gün geri';
+
+  @override
+  String get uiTimelineDayForward => 'bir gün ileri';
+
+  @override
+  String get uiTimelineShiftAll => 'tümünü kaydır';
+
+  @override
+  String get uiTimelineShiftWeekBack => '−1 hf';
+
+  @override
+  String get uiTimelineShiftDayBack => '−1 g';
+
+  @override
+  String get uiTimelineShiftDayForward => '+1 g';
+
+  @override
+  String get uiTimelineShiftWeekForward => '+1 hf';
+
+  @override
+  String get uiTimelineDay => 'gün';
+
+  @override
+  String get uiTimelineDuration => 'süre';
+
+  @override
+  String get uiTimelineWeekShort => 'hf';
+
+  @override
+  String get uiTimelineSave => 'Tarihleri kaydet';
+
+  @override
+  String get uiTimelineSendRequest => 'Talep olarak gönder';
+
+  @override
+  String get uiTimelineRemind => 'Atanana hatırlat';
+
+  @override
+  String get uiTimelineRequestPending =>
+      'Bu görev için zaten bekleyen bir talep var';
+
+  @override
+  String get uiTimelineRequestNoChange =>
+      'Önce tarihleri değiştir, sonra talep gönder';
+
+  @override
+  String get uiTimelineRequestSent => 'Tarih talebi gönderildi · yeni bitiş';
+
+  @override
+  String get uiTimelineRequestSentTail => 'onay bekliyor';
+
+  @override
+  String get uiTimelineReminded => 'Hatırlatma gönderildi';
+
+  @override
+  String get uiTimelineUndoneTail => 'tarihleri geri alındı';
+
+  @override
+  String get uiTimelineShiftedForward => 'gün ileri kaydırıldı';
+
+  @override
+  String get uiTimelineShiftedBack => 'gün geri kaydırıldı';
+
+  @override
+  String get uiTimelineDurationOf => 'süresi';
+
+  @override
+  String get uiTimelineExtended => 'gün uzatıldı';
+
+  @override
+  String get uiTimelineShortened => 'gün kısaltıldı';
+
+  @override
+  String get uiTimelineUndo => 'Geri al';
+
+  @override
+  String get uiTimelineTasksLc => 'görev';
+
+  @override
+  String get uiTimelineDoneLc => 'bitti';
+
+  @override
+  String get uiTimelineLateLc => 'gecikmede';
+
+  @override
+  String get uiTimelineOpen => 'aç';
 }

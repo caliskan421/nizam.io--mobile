@@ -56,6 +56,15 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     required this.avatar5,
     required this.onAvatar,
     required this.switchKnob,
+    required this.ganttTodo,
+    required this.ganttDoing,
+    required this.ganttReview,
+    required this.ganttBack,
+    required this.ganttDone,
+    required this.ganttLate,
+    required this.ganttLateLine,
+    required this.ganttInk,
+    required this.ganttInkMuted,
   });
 
   final Color background;
@@ -105,6 +114,15 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
   final Color avatar5;
   final Color onAvatar;
   final Color switchKnob;
+  final Color ganttTodo;
+  final Color ganttDoing;
+  final Color ganttReview;
+  final Color ganttBack;
+  final Color ganttDone;
+  final Color ganttLate;
+  final Color ganttLateLine;
+  final Color ganttInk;
+  final Color ganttInkMuted;
 
   static const light = NizamioColors(
     background: Color(0xFFF6F6F3),
@@ -154,6 +172,15 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     avatar5: Color(0xFFFF8A65),
     onAvatar: Color(0xFF121212),
     switchKnob: Color(0xFFFFFFFF),
+    ganttTodo: Color(0xFFD3D6DC),
+    ganttDoing: Color(0xFFD2A2EE),
+    ganttReview: Color(0xFFFFDC85),
+    ganttBack: Color(0xFFFFB4A4),
+    ganttDone: Color(0xFFD6F56F),
+    ganttLate: Color(0xFFFFA0A0),
+    ganttLateLine: Color(0xFFD02B2B),
+    ganttInk: Color(0xFF17181C),
+    ganttInkMuted: Color(0xFF4A4D55),
   );
 
   static const dark = NizamioColors(
@@ -204,6 +231,15 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     avatar5: Color(0xFFFF8A65),
     onAvatar: Color(0xFF121212),
     switchKnob: Color(0xFFFFFFFF),
+    ganttTodo: Color(0xFFB4B7BE),
+    ganttDoing: Color(0xFFC27CE6),
+    ganttReview: Color(0xFFFFD166),
+    ganttBack: Color(0xFFFF9A85),
+    ganttDone: Color(0xFFC8F53C),
+    ganttLate: Color(0xFFFF7D7D),
+    ganttLateLine: Color(0xFFFF5A5A),
+    ganttInk: Color(0xFF17181C),
+    ganttInkMuted: Color(0xFF4A4D55),
   );
 
   @override
@@ -255,6 +291,15 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     Color? avatar5,
     Color? onAvatar,
     Color? switchKnob,
+    Color? ganttTodo,
+    Color? ganttDoing,
+    Color? ganttReview,
+    Color? ganttBack,
+    Color? ganttDone,
+    Color? ganttLate,
+    Color? ganttLateLine,
+    Color? ganttInk,
+    Color? ganttInkMuted,
   }) {
     return NizamioColors(
       background: background ?? this.background,
@@ -304,6 +349,15 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       avatar5: avatar5 ?? this.avatar5,
       onAvatar: onAvatar ?? this.onAvatar,
       switchKnob: switchKnob ?? this.switchKnob,
+      ganttTodo: ganttTodo ?? this.ganttTodo,
+      ganttDoing: ganttDoing ?? this.ganttDoing,
+      ganttReview: ganttReview ?? this.ganttReview,
+      ganttBack: ganttBack ?? this.ganttBack,
+      ganttDone: ganttDone ?? this.ganttDone,
+      ganttLate: ganttLate ?? this.ganttLate,
+      ganttLateLine: ganttLateLine ?? this.ganttLateLine,
+      ganttInk: ganttInk ?? this.ganttInk,
+      ganttInkMuted: ganttInkMuted ?? this.ganttInkMuted,
     );
   }
 
@@ -358,6 +412,15 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       avatar5: Color.lerp(avatar5, other.avatar5, t)!,
       onAvatar: Color.lerp(onAvatar, other.onAvatar, t)!,
       switchKnob: Color.lerp(switchKnob, other.switchKnob, t)!,
+      ganttTodo: Color.lerp(ganttTodo, other.ganttTodo, t)!,
+      ganttDoing: Color.lerp(ganttDoing, other.ganttDoing, t)!,
+      ganttReview: Color.lerp(ganttReview, other.ganttReview, t)!,
+      ganttBack: Color.lerp(ganttBack, other.ganttBack, t)!,
+      ganttDone: Color.lerp(ganttDone, other.ganttDone, t)!,
+      ganttLate: Color.lerp(ganttLate, other.ganttLate, t)!,
+      ganttLateLine: Color.lerp(ganttLateLine, other.ganttLateLine, t)!,
+      ganttInk: Color.lerp(ganttInk, other.ganttInk, t)!,
+      ganttInkMuted: Color.lerp(ganttInkMuted, other.ganttInkMuted, t)!,
     );
   }
 }

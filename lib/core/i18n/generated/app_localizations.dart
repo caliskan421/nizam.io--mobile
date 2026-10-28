@@ -2289,6 +2289,522 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Zaman çizelgesi'**
   String get uiTimelineTitle;
+
+  /// ui.timeline.view
+  ///
+  /// In tr, this message translates to:
+  /// **'Görünüm'**
+  String get uiTimelineView;
+
+  /// ui.timeline.list
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste'**
+  String get uiTimelineList;
+
+  /// ui.timeline.coord
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük'**
+  String get uiTimelineCoord;
+
+  /// ui.timeline.coord_all
+  ///
+  /// In tr, this message translates to:
+  /// **'tümü'**
+  String get uiTimelineCoordAll;
+
+  /// ui.timeline.coord_none
+  ///
+  /// In tr, this message translates to:
+  /// **'seçilmedi'**
+  String get uiTimelineCoordNone;
+
+  /// ui.timeline.coord_selected
+  ///
+  /// In tr, this message translates to:
+  /// **'seçili'**
+  String get uiTimelineCoordSelected;
+
+  /// ui.timeline.coord_open_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'açık'**
+  String get uiTimelineCoordOpenTail;
+
+  /// ui.timeline.coord_clear
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçimi kaldır'**
+  String get uiTimelineCoordClear;
+
+  /// ui.timeline.coord_select_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü seç'**
+  String get uiTimelineCoordSelectAll;
+
+  /// ui.timeline.filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtre'**
+  String get uiTimelineFilter;
+
+  /// ui.timeline.filter_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtreler · durum, kişi, öncelik'**
+  String get uiTimelineFilterLabel;
+
+  /// ui.timeline.filters
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtreler'**
+  String get uiTimelineFilters;
+
+  /// ui.timeline.clear
+  ///
+  /// In tr, this message translates to:
+  /// **'Temizle'**
+  String get uiTimelineClear;
+
+  /// ui.timeline.status
+  ///
+  /// In tr, this message translates to:
+  /// **'Durum'**
+  String get uiTimelineStatus;
+
+  /// ui.timeline.status_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get uiTimelineStatusAll;
+
+  /// ui.timeline.status_open
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık'**
+  String get uiTimelineStatusOpen;
+
+  /// ui.timeline.status_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Geciken'**
+  String get uiTimelineStatusLate;
+
+  /// ui.timeline.status_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Biten'**
+  String get uiTimelineStatusDone;
+
+  /// ui.timeline.person
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi'**
+  String get uiTimelinePerson;
+
+  /// ui.timeline.priority
+  ///
+  /// In tr, this message translates to:
+  /// **'Öncelik'**
+  String get uiTimelinePriority;
+
+  /// ui.timeline.prio_high
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüksek'**
+  String get uiTimelinePrioHigh;
+
+  /// ui.timeline.prio_mid
+  ///
+  /// In tr, this message translates to:
+  /// **'Orta'**
+  String get uiTimelinePrioMid;
+
+  /// ui.timeline.prio_low
+  ///
+  /// In tr, this message translates to:
+  /// **'Düşük'**
+  String get uiTimelinePrioLow;
+
+  /// ui.timeline.scale
+  ///
+  /// In tr, this message translates to:
+  /// **'Ölçek'**
+  String get uiTimelineScale;
+
+  /// ui.timeline.scale_day
+  ///
+  /// In tr, this message translates to:
+  /// **'Gün'**
+  String get uiTimelineScaleDay;
+
+  /// ui.timeline.scale_week
+  ///
+  /// In tr, this message translates to:
+  /// **'Hafta'**
+  String get uiTimelineScaleWeek;
+
+  /// ui.timeline.scale_month
+  ///
+  /// In tr, this message translates to:
+  /// **'Ay'**
+  String get uiTimelineScaleMonth;
+
+  /// ui.timeline.overview
+  ///
+  /// In tr, this message translates to:
+  /// **'Genel bakış'**
+  String get uiTimelineOverview;
+
+  /// ui.timeline.overview_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Her koordinatörlük bir sütun; sütuna dokununca o koordinatörlük açılır.'**
+  String get uiTimelineOverviewHint;
+
+  /// ui.timeline.coord_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük, çizelgenin üstündeki menüden seçilir.'**
+  String get uiTimelineCoordHint;
+
+  /// ui.timeline.show_tasks_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görevi göster'**
+  String get uiTimelineShowTasksTail;
+
+  /// ui.timeline.legend
+  ///
+  /// In tr, this message translates to:
+  /// **'Lejant'**
+  String get uiTimelineLegend;
+
+  /// ui.timeline.legend_open
+  ///
+  /// In tr, this message translates to:
+  /// **'Lejantı göster'**
+  String get uiTimelineLegendOpen;
+
+  /// ui.timeline.st_todo
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlamadı'**
+  String get uiTimelineStTodo;
+
+  /// ui.timeline.st_doing
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam ediyor'**
+  String get uiTimelineStDoing;
+
+  /// ui.timeline.st_review
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekliyor'**
+  String get uiTimelineStReview;
+
+  /// ui.timeline.st_back
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri gönderildi'**
+  String get uiTimelineStBack;
+
+  /// ui.timeline.st_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlandı'**
+  String get uiTimelineStDone;
+
+  /// ui.timeline.st_done_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Geç bitti'**
+  String get uiTimelineStDoneLate;
+
+  /// ui.timeline.st_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikmede'**
+  String get uiTimelineStLate;
+
+  /// ui.timeline.st_request
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talebi'**
+  String get uiTimelineStRequest;
+
+  /// ui.timeline.legend_today
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeşil çizgi bugünü gösterir; soldaki kutu bugünün tarihi.'**
+  String get uiTimelineLegendToday;
+
+  /// ui.timeline.legend_strip
+  ///
+  /// In tr, this message translates to:
+  /// **'Alttaki şerit sezonun haritası: çerçeve baktığın aralık, kırmızı hafta gecikmenin başladığı hafta. Dokunarak ya da sürükleyerek o haftaya git.'**
+  String get uiTimelineLegendStrip;
+
+  /// ui.timeline.legend_bar
+  ///
+  /// In tr, this message translates to:
+  /// **'Çubuğa dokun: tarihleri − / + ile ya da tarih alanından değiştir, çubuk anında güncellenir. Seçili çubuğu basılı tutup sürükleyerek de kaydırabilirsin.'**
+  String get uiTimelineLegendBar;
+
+  /// ui.timeline.today
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get uiTimelineToday;
+
+  /// ui.timeline.season_map
+  ///
+  /// In tr, this message translates to:
+  /// **'Sezon haritası · parmağını kaydırarak çizelgede gez'**
+  String get uiTimelineSeasonMap;
+
+  /// ui.timeline.empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu filtrede görev yok.'**
+  String get uiTimelineEmpty;
+
+  /// ui.timeline.empty_no_coord
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük seç.'**
+  String get uiTimelineEmptyNoCoord;
+
+  /// ui.timeline.dependent
+  ///
+  /// In tr, this message translates to:
+  /// **'bağımlı'**
+  String get uiTimelineDependent;
+
+  /// ui.timeline.days_late
+  ///
+  /// In tr, this message translates to:
+  /// **'gün gecikmede'**
+  String get uiTimelineDaysLate;
+
+  /// ui.timeline.days_late_done
+  ///
+  /// In tr, this message translates to:
+  /// **'gün geç bitti'**
+  String get uiTimelineDaysLateDone;
+
+  /// ui.timeline.selected_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili görev'**
+  String get uiTimelineSelectedTask;
+
+  /// ui.timeline.open_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev ayrıntısında aç'**
+  String get uiTimelineOpenTask;
+
+  /// ui.timeline.evidence_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kanıt dosyası'**
+  String get uiTimelineEvidenceTail;
+
+  /// ui.timeline.no_evidence
+  ///
+  /// In tr, this message translates to:
+  /// **'kanıt yok'**
+  String get uiTimelineNoEvidence;
+
+  /// ui.timeline.start
+  ///
+  /// In tr, this message translates to:
+  /// **'başlangıç'**
+  String get uiTimelineStart;
+
+  /// ui.timeline.end
+  ///
+  /// In tr, this message translates to:
+  /// **'bitiş'**
+  String get uiTimelineEnd;
+
+  /// ui.timeline.day_back
+  ///
+  /// In tr, this message translates to:
+  /// **'bir gün geri'**
+  String get uiTimelineDayBack;
+
+  /// ui.timeline.day_forward
+  ///
+  /// In tr, this message translates to:
+  /// **'bir gün ileri'**
+  String get uiTimelineDayForward;
+
+  /// ui.timeline.shift_all
+  ///
+  /// In tr, this message translates to:
+  /// **'tümünü kaydır'**
+  String get uiTimelineShiftAll;
+
+  /// ui.timeline.shift_week_back
+  ///
+  /// In tr, this message translates to:
+  /// **'−1 hf'**
+  String get uiTimelineShiftWeekBack;
+
+  /// ui.timeline.shift_day_back
+  ///
+  /// In tr, this message translates to:
+  /// **'−1 g'**
+  String get uiTimelineShiftDayBack;
+
+  /// ui.timeline.shift_day_forward
+  ///
+  /// In tr, this message translates to:
+  /// **'+1 g'**
+  String get uiTimelineShiftDayForward;
+
+  /// ui.timeline.shift_week_forward
+  ///
+  /// In tr, this message translates to:
+  /// **'+1 hf'**
+  String get uiTimelineShiftWeekForward;
+
+  /// ui.timeline.day
+  ///
+  /// In tr, this message translates to:
+  /// **'gün'**
+  String get uiTimelineDay;
+
+  /// ui.timeline.duration
+  ///
+  /// In tr, this message translates to:
+  /// **'süre'**
+  String get uiTimelineDuration;
+
+  /// ui.timeline.week_short
+  ///
+  /// In tr, this message translates to:
+  /// **'hf'**
+  String get uiTimelineWeekShort;
+
+  /// ui.timeline.save
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarihleri kaydet'**
+  String get uiTimelineSave;
+
+  /// ui.timeline.send_request
+  ///
+  /// In tr, this message translates to:
+  /// **'Talep olarak gönder'**
+  String get uiTimelineSendRequest;
+
+  /// ui.timeline.remind
+  ///
+  /// In tr, this message translates to:
+  /// **'Atanana hatırlat'**
+  String get uiTimelineRemind;
+
+  /// ui.timeline.request_pending
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu görev için zaten bekleyen bir talep var'**
+  String get uiTimelineRequestPending;
+
+  /// ui.timeline.request_no_change
+  ///
+  /// In tr, this message translates to:
+  /// **'Önce tarihleri değiştir, sonra talep gönder'**
+  String get uiTimelineRequestNoChange;
+
+  /// ui.timeline.request_sent
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talebi gönderildi · yeni bitiş'**
+  String get uiTimelineRequestSent;
+
+  /// ui.timeline.request_sent_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'onay bekliyor'**
+  String get uiTimelineRequestSentTail;
+
+  /// ui.timeline.reminded
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatma gönderildi'**
+  String get uiTimelineReminded;
+
+  /// ui.timeline.undone_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'tarihleri geri alındı'**
+  String get uiTimelineUndoneTail;
+
+  /// ui.timeline.shifted_forward
+  ///
+  /// In tr, this message translates to:
+  /// **'gün ileri kaydırıldı'**
+  String get uiTimelineShiftedForward;
+
+  /// ui.timeline.shifted_back
+  ///
+  /// In tr, this message translates to:
+  /// **'gün geri kaydırıldı'**
+  String get uiTimelineShiftedBack;
+
+  /// ui.timeline.duration_of
+  ///
+  /// In tr, this message translates to:
+  /// **'süresi'**
+  String get uiTimelineDurationOf;
+
+  /// ui.timeline.extended
+  ///
+  /// In tr, this message translates to:
+  /// **'gün uzatıldı'**
+  String get uiTimelineExtended;
+
+  /// ui.timeline.shortened
+  ///
+  /// In tr, this message translates to:
+  /// **'gün kısaltıldı'**
+  String get uiTimelineShortened;
+
+  /// ui.timeline.undo
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri al'**
+  String get uiTimelineUndo;
+
+  /// ui.timeline.tasks_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'görev'**
+  String get uiTimelineTasksLc;
+
+  /// ui.timeline.done_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'bitti'**
+  String get uiTimelineDoneLc;
+
+  /// ui.timeline.late_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'gecikmede'**
+  String get uiTimelineLateLc;
+
+  /// ui.timeline.open
+  ///
+  /// In tr, this message translates to:
+  /// **'aç'**
+  String get uiTimelineOpen;
 }
 
 class _AppLocalizationsDelegate

@@ -49,6 +49,17 @@ void _size(WidgetTester tester, double width, [double height = 800]) {
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
+  testWidgets('showTitleBar false: AppBar yok, gövde çizilir', (tester) async {
+    await tester.pumpWidget(
+      _app(
+        const NzPage(title: 'Başlık', showTitleBar: false, body: Text('gövde')),
+      ),
+    );
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.text('Başlık'), findsNothing);
+    expect(find.text('gövde'), findsOneWidget);
+  });
+
   testWidgets('başlık ve gövde çizilir; Scaffold kabuğu', (tester) async {
     await tester.pumpWidget(
       _app(const NzPage(title: 'Başlık', body: Text('gövde'))),

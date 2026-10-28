@@ -201,9 +201,16 @@ extension on _TopBarDelegate {
 /// Ürün işareti (üst çubukta 32 px): `accent-top → accent` karo üstünde baş harf. Marka logosu
 /// değildir — marka politikası (ad/simge) ayrı karardır; işaret yalnız yerleşimi taşır.
 class NzBrandMark extends StatelessWidget {
-  const NzBrandMark({super.key, required this.monogram});
+  const NzBrandMark({
+    super.key,
+    required this.monogram,
+    this.extent = NizamioSpacing.space8,
+  });
 
   final String monogram;
+
+  /// Kenar uzunluğu (üst çubuk 32; giriş ekranı 44).
+  final double extent;
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +222,7 @@ class NzBrandMark extends StatelessWidget {
           borderRadius: BorderRadius.circular(NizamioRadius.folder),
         ),
         child: SizedBox.square(
-          dimension: NizamioSpacing.space8,
+          dimension: extent,
           child: Center(
             child: Text(
               monogram,

@@ -5,13 +5,17 @@ import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
 
-/// Filtre seçeneği: etiket + isteğe bağlı sayaç.
+/// Filtre seçeneği: etiket + isteğe bağlı sayaç ve renk noktası (prototip `.rp-dot`, ör.
+/// işlem geçmişinde kayıt türü rengi; anlamı etiket taşır).
 @immutable
 class NzFilterOption {
-  const NzFilterOption({required this.label, this.count});
+  const NzFilterOption({required this.label, this.count, this.dot});
 
   final String label;
   final int? count;
+
+  /// Etiketin solunda 8 px nokta rengi; null → yok.
+  final Color? dot;
 }
 
 /// Tek seçimli filtre rayı (prototip `.rp-seg`): `bg-raised` ray, 1 px `border-subtle`, köşe
@@ -86,6 +90,7 @@ class _RailItem extends StatelessWidget {
     final dark = context.theme.brightness == Brightness.dark;
     final radius = BorderRadius.circular(NizamioRadius.tile);
     final count = option.count;
+    final dot = option.dot;
     return Semantics(
       button: true,
       selected: selected,
@@ -119,6 +124,15 @@ class _RailItem extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (dot != null) ...[
+                DecoratedBox(
+                  decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+                  child: const Padding(
+                    padding: EdgeInsets.all(NizamioSize.dot / 2),
+                  ),
+                ),
+                const Gap(NizamioSpacing.space1 + NizamioSpacing.space1 / 2),
+              ],
               Text(
                 option.label,
                 maxLines: 1,

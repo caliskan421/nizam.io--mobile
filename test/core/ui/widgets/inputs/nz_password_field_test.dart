@@ -248,4 +248,28 @@ void main() {
       );
     },
   );
+
+  testWidgets('labelAbove: etiket alanın üstünde, kutuda yüzen etiket yok', (
+    t,
+  ) async {
+    final handle = t.ensureSemantics();
+    await t.pumpWidget(
+      testApp(
+        const NzPasswordField(
+          label: 'E-posta',
+          labelAbove: true,
+          hint: 'ad@alan.com',
+        ),
+      ),
+    );
+    expect(find.text('E-posta'), findsOneWidget);
+    final field = t.widget<TextField>(find.byType(TextField));
+    expect(field.decoration?.labelText, isNull);
+    expect(
+      t.getBottomLeft(find.text('E-posta')).dy,
+      lessThanOrEqualTo(t.getTopLeft(find.byType(TextField)).dy),
+    );
+    expect(find.bySemanticsLabel(RegExp('E-posta')), findsOneWidget);
+    handle.dispose();
+  });
 }

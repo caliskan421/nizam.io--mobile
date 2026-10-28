@@ -16,6 +16,11 @@
     "ui.identity.profile_email": "E-posta",
     "ui.identity.sign_out": "Çıkış yap",
     "ui.identity.sign_out_confirm_title": "Çıkış yapılsın mı?",
-    "ui.identity.sign_out_confirm_message": "Bu cihazdaki oturum kapatılır."
+    "ui.identity.sign_out_confirm_message": "Bu cihazdaki oturum kapatılır.",
+    "ui.identity.login_intro": "E-posta adresin ve parolanla devam et.",
+    "ui.identity.login_submitting": "Giriş yapılıyor…",
+    "ui.identity.login_email_hint": "ad@alan.com",
+    "ui.identity.login_password_hint": "Parolan",
+    "ui.identity.login_version_prefix": "v"
   }
 }

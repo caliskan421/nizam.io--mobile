@@ -8,17 +8,17 @@ part of 'activity_nav_caption.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Alt menüde işlem geçmişindeyken görünen mono alt yazı (ör. "38 kayıt"); null → yok.
+/// Alt menüde işlem geçmişindeyken görünen mono alt yazı ("38 kayıt"); yüklenmeden null.
 
 @ProviderFor(activityNavCaption)
 final activityNavCaptionProvider = ActivityNavCaptionProvider._();
 
-/// Alt menüde işlem geçmişindeyken görünen mono alt yazı (ör. "38 kayıt"); null → yok.
+/// Alt menüde işlem geçmişindeyken görünen mono alt yazı ("38 kayıt"); yüklenmeden null.
 
 final class ActivityNavCaptionProvider
     extends $FunctionalProvider<String?, String?, String?>
     with $Provider<String?> {
-  /// Alt menüde işlem geçmişindeyken görünen mono alt yazı (ör. "38 kayıt"); null → yok.
+  /// Alt menüde işlem geçmişindeyken görünen mono alt yazı ("38 kayıt"); yüklenmeden null.
   ActivityNavCaptionProvider._()
     : super(
         from: null,
@@ -53,4 +53,4 @@ final class ActivityNavCaptionProvider
 }
 
 String _$activityNavCaptionHash() =>
-    r'f510a1e2b166057285c1c9ffcd58ca440af474aa';
+    r'9f46340b67e876a276e4184166ba3017b1630d40';

@@ -27,6 +27,7 @@ class NzPage extends ConsumerWidget {
     this.floatingAction,
     this.loading = false,
     this.onRetry,
+    this.showTitleBar = true,
   }) : topBar = null,
        children = const [];
 
@@ -44,10 +45,14 @@ class NzPage extends ConsumerWidget {
        body = const SizedBox.shrink(),
        actions = const [],
        floatingAction = null,
-       loading = false;
+       loading = false,
+       showTitleBar = false;
 
   /// AppBar başlığı (ARB'den).
   final String title;
+
+  /// false → üst AppBar çizilmez (giriş gibi başlığını gövdede taşıyan tam ekranlar).
+  final bool showTitleBar;
   final Widget body;
 
   /// [NzPage.feed]: üst çubuk sliver'ı.
@@ -102,7 +107,9 @@ class NzPage extends ConsumerWidget {
     }
     return NzTextScaleLimit(
       child: Scaffold(
-        appBar: AppBar(title: Text(title), actions: actions),
+        appBar: showTitleBar
+            ? AppBar(title: Text(title), actions: actions)
+            : null,
         floatingActionButton: floatingAction,
         body: SafeArea(
           child: Stack(

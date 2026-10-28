@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nizamio/core/config/generated/app_version.gen.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/errors/error_text.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
@@ -11,6 +12,8 @@ import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/session/session_state.dart';
 import 'package:nizamio/core/ui/widgets/buttons/nz_button.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_password_field.dart';
+import 'package:nizamio/core/ui/widgets/inputs/nz_text_field.dart';
+import 'package:nizamio/core/ui/widgets/navigation/nz_top_bar.dart';
 import 'package:nizamio/features/identity/presentation/login_page.dart';
 
 import '../../../support/screen_matrix.dart';
@@ -146,5 +149,46 @@ void main() {
       tester.widget<NzPasswordField>(find.byType(NzPasswordField)).toString(),
       isNot(contains(secretLogin)),
     );
+  });
+
+  testWidgets(
+    'prototip düzeni: ürün işareti 44, ad + sürüm, başlık, açıklama, üstte etiketler',
+    (tester) async {
+      final h = await real(tester, () => pilotHarness(PilotBackend()));
+      await pumpScreen(tester, h, const LoginPage());
+      expect(find.byType(AppBar), findsNothing);
+      expect(tester.getSize(find.byType(NzBrandMark)), const Size(44, 44));
+      expect(find.text(_l.uiHomeAppName), findsOneWidget);
+      expect(
+        find.text('${_l.uiIdentityLoginVersionPrefix}$appVersion'),
+        findsOneWidget,
+      );
+      expect(find.text(_l.uiIdentityLoginIntro), findsOneWidget);
+      expect(find.byType(NzFieldLabelAbove), findsNWidgets(2));
+      // Etiket alanın üstünde (kutuda yüzen etiket yok).
+      expect(
+        tester.getBottomLeft(find.text(_l.uiIdentityLoginEmail)).dy,
+        lessThanOrEqualTo(tester.getTopLeft(_email).dy),
+      );
+      expect(
+        tester
+            .getSize(find.widgetWithText(NzButton, _l.uiIdentityLoginSubmit))
+            .height,
+        greaterThanOrEqualTo(52),
+      );
+    },
+  );
+
+  testWidgets('gönderim sürerken düğme "Giriş yapılıyor…"', (tester) async {
+    final backend = PilotBackend();
+    final h = await real(tester, () => pilotHarness(backend));
+    await pumpScreen(tester, h, const LoginPage());
+    await tester.enterText(_email, 'a@b.test');
+    await tester.enterText(_password, secretLogin);
+    await tester.tap(find.widgetWithText(NzButton, _l.uiIdentityLoginSubmit));
+    await tester.pump();
+    expect(find.text(_l.uiIdentityLoginSubmitting), findsOneWidget);
+    await settle(tester);
+    expect(find.text(_l.uiIdentityLoginSubmitting), findsNothing);
   });
 }

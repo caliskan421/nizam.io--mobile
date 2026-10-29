@@ -148,10 +148,12 @@ class NzTaskCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (start case final s?) ...[
-                      Flexible(child: _DateCell(date: s)),
+                      // Tarih tam görünmeli (dd.MM.yyyy); öncelik sütunu daralır.
+                      Flexible(flex: 3, child: _DateCell(date: s)),
                       const Gap(NizamioSpacing.space5),
                     ],
-                    if (end case final e?) Flexible(child: _DateCell(date: e)),
+                    if (end case final e?)
+                      Flexible(flex: 3, child: _DateCell(date: e)),
                     const Spacer(),
                     if (priority != null)
                       Flexible(

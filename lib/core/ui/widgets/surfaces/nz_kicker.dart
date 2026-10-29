@@ -47,14 +47,17 @@ class NzKicker extends StatelessWidget {
         ],
       );
     }
+    // İki gevşek esnek öğe + spaceBetween: açıklama sağ kenara yaslanır, ikisi de uzunsa yarı
+    // yarıya sarılır (Flexible + Expanded boşluğu yarıya bölüp açıklamayı ortada bırakıyordu).
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
         Flexible(child: kicker),
         if (trailing != null) ...[
           const Gap(NizamioSpacing.space3),
-          Expanded(
+          Flexible(
             child: Text(
               trailing,
               textAlign: TextAlign.end,

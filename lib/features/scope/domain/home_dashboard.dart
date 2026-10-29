@@ -41,22 +41,29 @@ final class HomeDashboard {
   final ModuleCounts counts;
 }
 
-/// Görev sayıları.
+/// Görev sayıları. Sunucu karşılığı `DashboardReport` (`GET /v1/reports/dashboard`):
+/// [total] ← `total_tasks`, [done] ← `completed_tasks`, [late] ← `overdue_tasks`,
+/// [awaitingApproval] ← `pending_approvals`, [inProgress] ← `task_status_distribution`
+/// içindeki `devam_ediyor` sayısı (sunucunun `active_tasks` alanı `total − completed`
+/// olduğundan başlanmamışları da sayar; o değer `DashboardReport.activeTasks`'tadır).
 @immutable
 final class TaskTotals {
   const TaskTotals({
     required this.total,
     required this.done,
     required this.inProgress,
-    required this.inProgressOnTime,
     required this.late,
     required this.awaitingApproval,
+    this.inProgressOnTime,
   });
 
   final int total;
   final int done;
   final int inProgress;
-  final int inProgressOnTime;
+
+  /// Zamanında ilerleyen görevler. Sunucuda yok — entegrasyonda karar (`overdue_tasks`
+  /// başlanmamışları da kapsadığından çıkarma ile türetilemez); sunucu kaynağında null.
+  final int? inProgressOnTime;
   final int late;
   final int awaitingApproval;
 
@@ -96,7 +103,13 @@ final class LastActivity {
   final String actorName;
 }
 
-/// Koordinatörlük özeti: görev dağılımı sayılarla (yüzde sunumda hesaplanır).
+/// Departman türü (sunucu `kind`: `koordinatorluk` | `calisma_grubu`).
+enum CoordinatorshipKind { coordinatorship, workingGroup, unknown }
+
+/// Koordinatörlük özeti: görev dağılımı sayılarla (yüzde sunumda hesaplanır). Sunucu
+/// karşılığı `CoordinatorshipStat` (dashboard içinde ve
+/// `GET /v1/reports/dashboard/coordinatorships`); isteğe bağlı alanlar yalnız sunucu
+/// kaynağında dolar, örnek fikstürde null kalır.
 @immutable
 final class CoordinatorshipSummary {
   const CoordinatorshipSummary({
@@ -108,21 +121,54 @@ final class CoordinatorshipSummary {
     required this.inReview,
     required this.done,
     required this.late,
+    this.leadAccountIds = const [],
+    this.kind,
+    this.serverTotal,
+    this.completionRate,
+    this.memberCount,
+    this.meetingCount,
+    this.lastActivityAt,
+    this.description,
   });
 
-  /// Kısa kod (`ALT`); rota kimliği.
+  /// Rota kimliği. Örnek fikstürde kısa kod (`ALT`); sunucu kaynağında `department_id`
+  /// (backend'de kısa kod kavramı yok — entegrasyonda karar).
   final String code;
   final String name;
 
   /// Koordinatör adları; boş → atanmamış.
   final List<String> leads;
+
+  /// Koordinatörlerin hesap kimlikleri ([leads] ile aynı sırada; örnekte boş).
+  final List<String> leadAccountIds;
+
+  /// Sunucu `not_started_tasks`.
   final int todo;
+
+  /// Sunucu `in_progress_tasks` (yalnız `devam_ediyor`).
   final int inProgress;
+
+  /// Sunucuda ayrı alan yok — kalan sayı (`total − completed − in_progress −
+  /// not_started`; `onaya_sunuldu` + `iade_edildi`). Entegrasyonda karar.
   final int inReview;
   final int done;
   final int late;
 
-  int get total => todo + inProgress + inReview + done;
+  final CoordinatorshipKind? kind;
+
+  /// Sunucunun `total_tasks` değeri; varsa [total] bunu döner.
+  final int? serverTotal;
+
+  /// Sunucu `completion_rate`: yüzde (0–100); görev yoksa 0.
+  final double? completionRate;
+  final int? memberCount;
+  final int? meetingCount;
+
+  /// Son görev güncellemesi (işlem geçmişi değil).
+  final DateTime? lastActivityAt;
+  final String? description;
+
+  int get total => serverTotal ?? todo + inProgress + inReview + done;
   bool get hasLead => leads.isNotEmpty;
 
   /// 0–100, tam sayıya yuvarlanmış tamamlanma.

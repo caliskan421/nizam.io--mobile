@@ -105,4 +105,79 @@ void main() {
     expect(trCompare('Çevre', 'Cami'), greaterThan(0));
     expect(trLower('IŞIK İzmir'), 'ışık izmir');
   });
+
+  test(
+    'geçişte sıralama korunur, süzgeç/görünüm/arama yeni rotayla sıfırlanır',
+    () async {
+      final (container, _) = await _setup();
+      final all = tasksListControllerProvider(TaskView.all, '');
+      final sub = container.listen(all, (_, _) {});
+      final ctl = container.read(all.notifier)
+        ..selectSort(TaskSort.created)
+        ..toggleFilterGroup(TaskFilterGroup.priority)
+        ..togglePriority(TaskPriority.high)
+        ..toggleSearch()
+        ..setQuery('pompa');
+      expect(container.read(all).descending, isTrue);
+      sub.close();
+      ctl.showMore();
+      // KPI kartından `view=late` ile açılan liste (prototip `openTasks({view:'late'})`).
+      final late = tasksListControllerProvider(TaskView.late, '');
+      container.listen(late, (_, _) {});
+      final s = container.read(late);
+      expect(s.view, TaskView.late);
+      expect(s.sort, TaskSort.created);
+      expect(s.descending, isTrue);
+      expect(s.openFilterGroups, contains(TaskFilterGroup.priority));
+      expect(s.filter, const TaskFilter());
+      expect(s.searchOpen, isFalse);
+      expect(s.limit, TasksListState.pageSize);
+    },
+  );
+
+  test('sonuç sağlayıcısı yalnız sorgu değişince yeniden hesaplanır', () async {
+    final (container, c) = await _setup();
+    final p = tasksListControllerProvider(TaskView.all, '');
+    final r = tasksListResultProvider(TaskView.all, '');
+    var builds = 0;
+    container.listen(r, (_, _) => builds++);
+    final first = container.read(r);
+    expect(first?.tasks.length, 76);
+    final ctl = container.read(p.notifier)
+      ..toggleSearch()
+      ..showMore()
+      ..toggleFilterGroup(TaskFilterGroup.priority)
+      ..setQuery('');
+    // Arama açmak, sayfalamak, boş sorgu, filtre bölümü açmak: aynı sonuç örneği.
+    expect(identical(container.read(r), first), isTrue);
+    expect(builds, 0);
+    ctl.setQuery('hidrofor');
+    expect(container.read(r)?.tasks.map((t) => t.code), ['ALT-7']);
+    expect(builds, 1);
+    expect(identical(tasksListResultOf(p), r), isFalse);
+    expect(tasksListResultOf(p), r);
+    expect(c.task('ALT-7')?.code, 'ALT-7');
+  });
+
+  test('TaskFilter değer eşitliği ve filtre seçenek sayıları', () async {
+    final (container, c) = await _setup();
+    // Çalışma anında kurulan (const olmayan) kümeler: eşitlik kimliğe değil değere bakar.
+    final ids = ['aa', 'ko'];
+    expect(
+      const TaskFilter(people: {'ko', 'aa'}),
+      TaskFilter(people: ids.toSet()),
+    );
+    expect(
+      const TaskFilter(people: {'ko', 'aa'}).hashCode,
+      TaskFilter(people: ids.reversed.toSet()).hashCode,
+    );
+    expect(const TaskFilter(query: 'a') == const TaskFilter(), isFalse);
+    final o = container.read(taskFilterOptionsProvider)!;
+    // Kişiler görev sayısına göre azalan; görevi olmayan düşer.
+    final counts = [for (final (_, n) in o.people) n];
+    expect(counts, [...counts]..sort((a, b) => b - a));
+    expect(counts.every((n) => n > 0), isTrue);
+    expect(o.priorities.values.fold<int>(0, (a, b) => a + b), c.tasks.length);
+    expect(o.coordinatorships.fold<int>(0, (a, e) => a + e.$2), c.tasks.length);
+  });
 }

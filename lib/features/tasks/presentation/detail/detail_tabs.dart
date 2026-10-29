@@ -224,13 +224,11 @@ class DetailSubtasks extends ConsumerWidget {
     super.key,
     required this.task,
     required this.catalog,
-    required this.state,
     required this.actions,
   });
 
   final TaskItem task;
   final TaskCatalog catalog;
-  final TaskDetailState state;
   final TaskDetailActions actions;
 
   @override
@@ -238,7 +236,11 @@ class DetailSubtasks extends ConsumerWidget {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final ctl = ref.read(taskDetailControllerProvider(task.code).notifier);
+    final p = taskDetailControllerProvider(task.code);
+    final ctl = ref.read(p.notifier);
+    final (openSubs, editing) = ref.watch(
+      p.select((s) => (s.openSubtasks, s.editingSubtask)),
+    );
     final subs = task.subtasks;
     final done = task.subtasksDone;
     final team =
@@ -273,8 +275,8 @@ class DetailSubtasks extends ConsumerWidget {
             sub: u,
             catalog: catalog,
             team: team,
-            open: state.openSubtasks.contains(u.id),
-            editing: state.editingSubtask == u.id,
+            open: openSubs.contains(u.id),
+            editing: editing == u.id,
             onCheck: () => actions.toggleSubtask(u.id),
             onOpen: () => ctl.toggleSubtaskOpen(u.id),
             onTitle: (v) => ctl.setSubtaskTitle(u.id, v),
@@ -731,13 +733,11 @@ class DetailNotes extends ConsumerStatefulWidget {
     super.key,
     required this.task,
     required this.catalog,
-    required this.draft,
     required this.actions,
   });
 
   final TaskItem task;
   final TaskCatalog catalog;
-  final String draft;
   final TaskDetailActions actions;
 
   @override
@@ -745,13 +745,10 @@ class DetailNotes extends ConsumerStatefulWidget {
 }
 
 class _DetailNotesState extends ConsumerState<DetailNotes> {
-  late final _controller = TextEditingController(text: widget.draft);
+  TaskDetailControllerProvider get _p =>
+      taskDetailControllerProvider(widget.task.code);
 
-  @override
-  void didUpdateWidget(DetailNotes old) {
-    super.didUpdateWidget(old);
-    if (widget.draft != _controller.text) _controller.text = widget.draft;
-  }
+  late final _controller = TextEditingController(text: ref.read(_p).noteDraft);
 
   @override
   void dispose() {
@@ -764,9 +761,12 @@ class _DetailNotesState extends ConsumerState<DetailNotes> {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final ctl = ref.read(
-      taskDetailControllerProvider(widget.task.code).notifier,
-    );
+    final ctl = ref.read(_p.notifier);
+    // Taslak dışarıdan değişince (gönderimde silinir) alan eşitlenir; yazarken yeniden
+    // kurulum yok.
+    ref.listen(_p.select((s) => s.noteDraft), (_, next) {
+      if (next != _controller.text) _controller.text = next;
+    });
     final notes = widget.task.noteEntries;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

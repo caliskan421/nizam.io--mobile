@@ -1,8 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show ProviderListenableSelect;
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../domain/task_catalog.dart';
 import '../domain/task_query.dart';
+import 'task_catalog_controller.dart';
 
 part 'tasks_list_controller.g.dart';
 
@@ -61,20 +64,65 @@ final class TasksListState {
   );
 }
 
+/// Görevler listesinin geçişlerde korunan tercihleri (prototip `openTasks(patch)` yalnız
+/// görünüm/süzgeç/arama/sayfayı sıfırlar; sıralama, yön, açık gruplar ve filtre sayfasının
+/// açık bölümleri kalır).
+typedef TasksListPrefs = ({
+  TaskSort sort,
+  bool descending,
+  Set<String> flippedGroups,
+  Set<TaskFilterGroup> openFilterGroups,
+});
+
+/// [TasksListPrefs] deposu: oturum boyunca yaşar; her yeni liste denetleyicisi (KPI kartı,
+/// ekip kutusu, çekmece rozeti `view`/`people` ile açılan liste) buradan başlar.
+@Riverpod(keepAlive: true)
+class TasksListPrefsStore extends _$TasksListPrefsStore {
+  @override
+  TasksListPrefs build() => (
+    sort: TaskSort.due,
+    descending: false,
+    flippedGroups: const <String>{},
+    openFilterGroups: const {TaskFilterGroup.people},
+  );
+
+  void save(TasksListState s) => state = (
+    sort: s.sort,
+    descending: s.descending,
+    flippedGroups: s.flippedGroups,
+    openFilterGroups: s.openFilterGroups,
+  );
+}
+
 /// Görevler listesi denetleyicisi. [view] ve [people] (virgülle ayrılmış kişi kimlikleri)
-/// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri).
+/// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: sayfa
+/// (autoDispose; aynı rota sayfası yığında/sekmede durdukça durum korunur), tercihler
+/// [TasksListPrefsStore]'da.
 @riverpod
 class TasksListController extends _$TasksListController {
   @override
-  TasksListState build(TaskView view, String people) => TasksListState(
-    view: view,
-    filter: TaskFilter(
-      people: {
-        for (final p in people.split(','))
-          if (p.isNotEmpty) p,
-      },
-    ),
-  );
+  TasksListState build(TaskView view, String people) {
+    final prefs = ref.read(tasksListPrefsStoreProvider);
+    return TasksListState(
+      view: view,
+      sort: prefs.sort,
+      descending: prefs.descending,
+      flippedGroups: prefs.flippedGroups,
+      openFilterGroups: prefs.openFilterGroups,
+      filter: TaskFilter(
+        people: {
+          for (final p in people.split(','))
+            if (p.isNotEmpty) p,
+        },
+      ),
+    );
+  }
+
+  @override
+  set state(TasksListState value) {
+    super.state = value;
+    ref.read(tasksListPrefsStoreProvider.notifier).save(value);
+  }
 
   void selectView(TaskView v) =>
       state = state.copyWith(view: v, limit: TasksListState.pageSize);
@@ -165,4 +213,39 @@ class TasksListController extends _$TasksListController {
 
   static Set<T> _toggle<T>(Set<T> s, T x) =>
       s.contains(x) ? ({...s}..remove(x)) : {...s, x};
+}
+
+/// Seçili görünümün süzülmüş/sıralı listesi ve görünüm sayıları; yalnız sorguyu etkileyen
+/// alanlar (görünüm, sıralama, yön, süzgeç) ya da katalog değişince yeniden hesaplanır
+/// (arama alanını açmak, sayfalamak, grup açmak hesaplamaz). Katalog yokken null.
+@riverpod
+TaskQueryResult? tasksListResult(Ref ref, TaskView view, String people) {
+  final catalog = ref.watch(taskCatalogControllerProvider).value;
+  final q = ref.watch(
+    tasksListControllerProvider(
+      view,
+      people,
+    ).select((s) => (s.view, s.sort, s.descending, s.filter)),
+  );
+  if (catalog == null) return null;
+  return queryTasks(
+    catalog,
+    view: q.$1,
+    sort: q.$2,
+    descending: q.$3,
+    filter: q.$4,
+  );
+}
+
+/// [list] denetleyicisinin aynı başlangıç süzgeçli sonuç sağlayıcısı.
+TasksListResultProvider tasksListResultOf(TasksListControllerProvider list) {
+  final (view, people) = list.argument! as (TaskView, String);
+  return tasksListResultProvider(view, people);
+}
+
+/// Filtre alt sayfasının seçenek sayıları; katalog değişince bir kez hesaplanır.
+@riverpod
+TaskFilterOptions? taskFilterOptions(Ref ref) {
+  final catalog = ref.watch(taskCatalogControllerProvider).value;
+  return catalog == null ? null : filterOptions(catalog);
 }

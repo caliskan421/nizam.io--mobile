@@ -25,175 +25,164 @@ Color viewDot(TaskView v, NizamioColors c) => switch (v) {
   TaskView.done => c.accentText,
 };
 
-/// Liste gövdesi: görünüm kutucukları, çipler, başlık + sıralama, kartlar, sayfalama.
-class TasksListBody extends ConsumerWidget {
-  const TasksListBody({
-    super.key,
-    required this.catalog,
-    required this.state,
-    required this.provider,
-    required this.onClearAll,
-    required this.onOpen,
-  });
+/// Liste gövdesi (görünüm kutucukları, çipler, başlık + sıralama, kartlar, sayfalama) akışın
+/// öğeleri olarak: sayfa bunları `NzPage.feed` tembel listesine doğrudan koyar; ekran dışı
+/// kartlar kurulmaz/yerleştirilmez (tek `Column` içinde 76 kart yerine), her öğe kendi
+/// boyama sınırında. Kartlar görev koduyla anahtarlıdır (sıralama/süzgeç değişince öğe
+/// eşleşmesi korunur).
+List<Widget> tasksListChildren(
+  BuildContext context, {
+  required TaskCatalog catalog,
+  required TasksListState state,
+  required TaskQueryResult result,
+  required TasksListController ctl,
+  required VoidCallback onClearAll,
+  required ValueChanged<String> onOpen,
+}) {
+  final l = context.l10n;
+  final c = context.colors;
+  final t = context.text;
+  final r = result;
+  final byCoord = state.sort == TaskSort.coordinatorship;
+  final list = r.tasks;
+  final chips = _chips(context, catalog, state, ctl);
 
-  final TaskCatalog catalog;
-  final TasksListState state;
-  final TasksListControllerProvider provider;
-  final VoidCallback onClearAll;
-  final ValueChanged<String> onOpen;
+  final rows = <Widget>[];
+  Widget item(Key key, Widget child) => Padding(
+    key: key,
+    padding: EdgeInsets.only(top: rows.isEmpty ? 0 : NizamioSpacing.gapMd),
+    child: child,
+  );
+  void card(TaskItem task) => rows.add(
+    item(
+      ValueKey('task:${task.code}'),
+      TaskCardView(
+        task: task,
+        catalog: catalog,
+        showGroup: !byCoord,
+        onTap: () => onOpen(task.code),
+      ),
+    ),
+  );
+  if (byCoord) {
+    for (var gi = 0; gi < r.groups.length; gi++) {
+      final g = r.groups[gi];
+      final open = state.isGroupOpen(g.coordinatorship, first: gi == 0);
+      rows.add(
+        item(
+          ValueKey('group:${g.coordinatorship}'),
+          _GroupHead(
+            group: g,
+            name:
+                catalog.coordinatorship(g.coordinatorship)?.name ??
+                g.coordinatorship,
+            open: open,
+            onTap: () => ctl.toggleGroup(g.coordinatorship),
+          ),
+        ),
+      );
+      if (open) g.tasks.forEach(card);
+    }
+  } else {
+    list.take(state.limit).forEach(card);
+  }
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final c = context.colors;
-    final t = context.text;
-    final ctl = ref.read(provider.notifier);
-    final r = queryTasks(
-      catalog,
-      view: state.view,
-      sort: state.sort,
-      descending: state.descending,
-      filter: state.filter,
-    );
-    final byCoord = state.sort == TaskSort.coordinatorship;
-    final list = r.tasks;
-    final shown = byCoord ? list : list.take(state.limit).toList();
-    final chips = _chips(context, ctl);
-
-    TaskCardView card(TaskItem task) => TaskCardView(
-      task: task,
-      catalog: catalog,
-      showGroup: !byCoord,
-      onTap: () => onOpen(task.code),
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+  return [
+    TaskViewGrid(
+      counts: r.counts,
+      selected: state.view,
+      onSelected: ctl.selectView,
+    ),
+    if (chips.isNotEmpty) ...[
+      const Gap(NizamioSpacing.space3),
+      Wrap(
+        spacing: NizamioSpacing.space2,
+        runSpacing: NizamioSpacing.space2,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          ...chips,
+          TaskLink(label: l.uiTasksClear, onTap: onClearAll),
+        ],
+      ),
+    ],
+    const Gap(NizamioSpacing.space3),
+    Row(
       children: [
-        TaskViewGrid(
-          counts: r.counts,
-          selected: state.view,
-          onSelected: ctl.selectView,
-        ),
-        if (chips.isNotEmpty) ...[
-          const Gap(NizamioSpacing.space3),
-          Wrap(
-            spacing: NizamioSpacing.space2,
-            runSpacing: NizamioSpacing.space2,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              ...chips,
-              TaskLink(label: l.uiTasksClear, onTap: onClearAll),
-            ],
-          ),
-        ],
-        const Gap(NizamioSpacing.space3),
-        Row(
-          children: [
-            Expanded(
-              child: Semantics(
-                header: true,
-                child: Text(
-                  '${l.viewListTitle(state.view)} · ${list.length}',
-                  style: t.kicker.copyWith(color: c.text),
-                ),
-              ),
+        Expanded(
+          child: Semantics(
+            header: true,
+            child: Text(
+              '${l.viewListTitle(state.view)} · ${list.length}',
+              style: t.kicker.copyWith(color: c.text),
             ),
-            TaskSortMenu(
-              sort: state.sort,
-              descending: state.descending,
-              onSelected: ctl.selectSort,
-            ),
-          ],
-        ),
-        const Gap(NizamioSpacing.space1),
-        Semantics(
-          container: true,
-          label: l.uiTasksTaskList,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: NizamioSpacing.gapMd,
-            children: [
-              if (byCoord)
-                for (var gi = 0; gi < r.groups.length; gi++) ...[
-                  _GroupHead(
-                    group: r.groups[gi],
-                    name:
-                        catalog
-                            .coordinatorship(r.groups[gi].coordinatorship)
-                            ?.name ??
-                        r.groups[gi].coordinatorship,
-                    open: state.isGroupOpen(
-                      r.groups[gi].coordinatorship,
-                      first: gi == 0,
-                    ),
-                    onTap: () => ctl.toggleGroup(r.groups[gi].coordinatorship),
-                  ),
-                  if (state.isGroupOpen(
-                    r.groups[gi].coordinatorship,
-                    first: gi == 0,
-                  ))
-                    for (final task in r.groups[gi].tasks) card(task),
-                ]
-              else
-                for (final task in shown) card(task),
-              if (list.isEmpty)
-                NzEmptyState(
-                  title: l.uiTasksEmpty,
-                  actionLabel: l.uiTasksClearFilters,
-                  onAction: onClearAll,
-                ),
-            ],
           ),
         ),
-        if (!byCoord && list.length > state.limit) ...[
-          const Gap(NizamioSpacing.space5),
-          NzButton.secondary(
-            label: l.uiTasksShowMore,
-            expand: true,
-            onPressed: ctl.showMore,
-          ),
-        ],
-        const Gap(NizamioSpacing.space3),
-        Text(
-          byCoord
-              ? l.groupedCountLine(list.length, r.groups.length)
-              : l.countLine(
-                  state.limit < list.length ? state.limit : list.length,
-                  list.length,
-                ),
-          textAlign: TextAlign.center,
-          style: t.caption.copyWith(color: c.textMuted),
+        TaskSortMenu(
+          sort: state.sort,
+          descending: state.descending,
+          onSelected: ctl.selectSort,
         ),
       ],
-    );
-  }
+    ),
+    const Gap(NizamioSpacing.space1),
+    ...rows,
+    if (list.isEmpty)
+      NzEmptyState(
+        title: l.uiTasksEmpty,
+        actionLabel: l.uiTasksClearFilters,
+        onAction: onClearAll,
+      ),
+    if (!byCoord && list.length > state.limit) ...[
+      const Gap(NizamioSpacing.space5),
+      NzButton.secondary(
+        label: l.uiTasksShowMore,
+        expand: true,
+        onPressed: ctl.showMore,
+      ),
+    ],
+    const Gap(NizamioSpacing.space3),
+    Text(
+      byCoord
+          ? l.groupedCountLine(list.length, r.groups.length)
+          : l.countLine(
+              state.limit < list.length ? state.limit : list.length,
+              list.length,
+            ),
+      textAlign: TextAlign.center,
+      style: t.caption.copyWith(color: c.textMuted),
+    ),
+  ];
+}
 
-  List<Widget> _chips(BuildContext context, TasksListController ctl) {
-    final l = context.l10n;
-    final f = state.filter;
-    return [
-      for (final p in f.people)
-        _FilterChip(
-          label: catalog.person(p)?.name ?? p,
-          removeLabel:
-              '${catalog.person(p)?.name ?? p} ${l.uiTasksRemoveFilterTail}',
-          onRemove: () => ctl.togglePerson(p),
-        ),
-      for (final code in f.coordinatorships)
-        _FilterChip(
-          label: catalog.coordinatorship(code)?.name ?? code,
-          removeLabel: '$code ${l.uiTasksRemoveFilterTail}',
-          onRemove: () => ctl.toggleCoordinatorship(code),
-        ),
-      for (final p in f.priorities)
-        _FilterChip(
-          label: '${l.uiTasksPriority}: ${l.priorityLabel(p)}',
-          removeLabel: l.uiTasksPriorityFilterRemove,
-          onRemove: () => ctl.togglePriority(p),
-        ),
-    ];
-  }
+List<Widget> _chips(
+  BuildContext context,
+  TaskCatalog catalog,
+  TasksListState state,
+  TasksListController ctl,
+) {
+  final l = context.l10n;
+  final f = state.filter;
+  return [
+    for (final p in f.people)
+      _FilterChip(
+        label: catalog.person(p)?.name ?? p,
+        removeLabel:
+            '${catalog.person(p)?.name ?? p} ${l.uiTasksRemoveFilterTail}',
+        onRemove: () => ctl.togglePerson(p),
+      ),
+    for (final code in f.coordinatorships)
+      _FilterChip(
+        label: catalog.coordinatorship(code)?.name ?? code,
+        removeLabel: '$code ${l.uiTasksRemoveFilterTail}',
+        onRemove: () => ctl.toggleCoordinatorship(code),
+      ),
+    for (final p in f.priorities)
+      _FilterChip(
+        label: '${l.uiTasksPriority}: ${l.priorityLabel(p)}',
+        removeLabel: l.uiTasksPriorityFilterRemove,
+        onRemove: () => ctl.togglePriority(p),
+      ),
+  ];
 }
 
 /// 4×2 görünüm kutucukları; "Tümü" iki sütun.
@@ -607,6 +596,7 @@ class TaskCardView extends StatelessWidget {
                 task.coordinatorship
           : null,
       title: task.title,
+      muted: task.isDone,
       statusLabel: l.statusLabel(task.status),
       statusTone: statusTone(task.status),
       start: NzTaskCardDate(
@@ -662,7 +652,6 @@ class TaskCardView extends StatelessWidget {
 /// `cur === 'tasks'`): görünümler + sayıları, sıralama, görev eylemleri.
 Future<void> showTasksShortcuts(
   BuildContext context, {
-  required TaskCatalog catalog,
   required TasksListControllerProvider provider,
   required VoidCallback onNewTask,
   required VoidCallback onTimeline,
@@ -674,13 +663,8 @@ Future<void> showTasksShortcuts(
   final container = ProviderScope.containerOf(context, listen: false);
   final state = container.read(provider);
   final ctl = container.read(provider.notifier);
-  final r = queryTasks(
-    catalog,
-    view: state.view,
-    sort: state.sort,
-    descending: state.descending,
-    filter: state.filter,
-  );
+  final r = container.read(tasksListResultOf(provider));
+  if (r == null) return Future.value();
   return NzFlyoutMenu.show(
     context,
     semanticLabel: l.uiTasksShortcuts,

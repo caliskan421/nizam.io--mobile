@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
 
 import '../../../core/api/generated/clients/records_client.dart';
 import '../../../core/api/generated/models/archive_folder.dart' as api;
@@ -19,15 +20,12 @@ import '../domain/records.dart';
 /// records uçlarına (görev dosyaları + arşiv) üretilmiş istemciyle erişim. Üretilmiş DTO'lar bu
 /// katmanda kalır; dışarıya domain varlıkları döner (A1/A2). Bütün hatalar [ApiError] olarak fırlar.
 ///
-/// İkili yanıtlar (dosya ve ZIP indirme): üretilmiş istemci bu uçları `Stream<String>` olarak
-/// UTF-8 çözerek döndürür; ikili gövdede bu ya hata verir ya da veriyi bozar. Bu yüzden indirmeler
-/// aynı yöntem + yol + operationId metaverisiyle (`*OpenapiExtras`, ara katmanın işlem eşlemesi
-/// için) doğrudan [Dio] ile bayt olarak alınır. Üretici düzeltilince üretilmiş çağrıya dönülür.
+/// İkili yanıtlar (dosya ve ZIP indirme) üretilmiş istemciden bayt olarak gelir
+/// (`tool/gen/wire_types.dart`).
 class ApiRecordsRepository implements RecordsRepository {
   /// [dio]: doğrulanmış bağın API istemcisi (kapsam başlıklarını ara katman ekler).
-  ApiRecordsRepository(Dio dio) : _dio = dio, _client = RecordsClient(dio);
+  ApiRecordsRepository(Dio dio) : _client = RecordsClient(dio);
 
-  final Dio _dio;
   final RecordsClient _client;
 
   @override
@@ -52,13 +50,8 @@ class ApiRecordsRepository implements RecordsRepository {
   }
 
   @override
-  Future<Uint8List> downloadFile(String fileId) => _bytes(
-    RecordsDownloadTargets.file(fileId),
-    Options(
-      responseType: ResponseType.bytes,
-      extra: RecordsClient.downloadFileOpenapiExtras,
-    ),
-  );
+  Future<Uint8List> downloadFile(String fileId) =>
+      _bytes(() => _client.downloadFile(id: fileId));
 
   @override
   Future<RecordFile> renameFile(String fileId, String displayName) async =>
@@ -125,39 +118,25 @@ class ApiRecordsRepository implements RecordsRepository {
   }
 
   @override
-  Future<Uint8List> downloadFolderZip(String folderId) => _bytes(
-    RecordsDownloadTargets.folderZip(folderId),
-    Options(
-      responseType: ResponseType.bytes,
-      extra: RecordsClient.archiveFolderZipOpenapiExtras,
-    ),
-  );
+  Future<Uint8List> downloadFolderZip(String folderId) =>
+      _bytes(() => _client.archiveFolderZip(id: folderId));
 
   @override
-  Future<Uint8List> downloadSelectionZip(List<String> fileIds) => _bytes(
-    RecordsDownloadTargets.selectionZip(fileIds),
-    Options(
-      responseType: ResponseType.bytes,
-      extra: RecordsClient.archiveSelectionZipOpenapiExtras,
-    ),
-  );
+  Future<Uint8List> downloadSelectionZip(List<String> fileIds) {
+    RecordsDownloadTargets.checkSelection(fileIds);
+    return _bytes(
+      () => _client.archiveSelectionZip(fileIds: fileIds.join(',')),
+    );
+  }
 
   @override
-  Future<Uint8List> downloadPeriodZip() => _bytes(
-    RecordsDownloadTargets.periodZip,
-    Options(
-      responseType: ResponseType.bytes,
-      extra: RecordsClient.archiveFullZipOpenapiExtras,
-    ),
-  );
+  Future<Uint8List> downloadPeriodZip() => _bytes(_client.archiveFullZip);
 
-  /// İkili GET: gövde bayt olarak okunur; hata zarfı [apiCall] ile [ApiError] olur. [options]
-  /// `ResponseType.bytes` + işlemin operationId metaverisini taşır (Dio birleştirirken `extra`
-  /// haritasını kopyalar; sabit harita değişmez).
-  Future<Uint8List> _bytes(String path, Options options) async {
-    final r = await apiCall(() => _dio.get<List<int>>(path, options: options));
-    final data = r.data;
-    if (data == null) return Uint8List(0);
+  /// İkili yanıt: gövde bayt olarak okunur; hata zarfı [apiCall] ile [ApiError] olur.
+  Future<Uint8List> _bytes(
+    Future<HttpResponse<List<int>>> Function() call,
+  ) async {
+    final data = (await apiCall(call)).data;
     return data is Uint8List ? data : Uint8List.fromList(data);
   }
 

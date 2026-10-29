@@ -19,18 +19,23 @@ class RootTopBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final program = ref.watch(currentProgramControllerProvider).value;
-    final waiting =
-        ref.watch(homeDashboardControllerProvider).value?.pending.length ?? 0;
+    final program = ref.watch(
+      currentProgramControllerProvider.select((p) => p.value?.name),
+    );
+    final pending = ref.watch(
+      homeDashboardControllerProvider.select(
+        (d) => d.value?.pending ?? const [],
+      ),
+    );
     return NzTopBar(
       leading: NzBrandMark(monogram: l.uiHomeAppName.characters.first),
       title: l.uiHomeAppName,
-      subtitle: program?.name,
+      subtitle: program,
       actions: [
         NzIconButton(
           icon: Icons.notifications_none_rounded,
-          semanticLabel: l.notificationsLabel(waiting),
-          dot: waiting > 0 ? context.colors.danger : null,
+          semanticLabel: l.notificationsLabel(pending),
+          dot: pending.isNotEmpty ? context.colors.danger : null,
           onPressed: () => NzToast.show(context, l.soon(l.uiHomeNotifications)),
         ),
         NzIconButton.glass(

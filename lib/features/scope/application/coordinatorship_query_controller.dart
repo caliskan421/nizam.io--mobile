@@ -39,26 +39,30 @@ final class CoordinatorshipQuery {
         CoordinatorshipFilter.unassigned => !c.hasLead,
       };
 
-  /// Filtreye uyan, sıralanmış tam liste.
+  /// Filtreye uyan, sıralanmış tam liste (prototip `CS`): gecikmede eşitlik adla, yönle
+  /// birlikte döner (büyükten küçüğe → A→Z, tersinde Z→A); ilerlemede eşitler sunucu sırasını
+  /// korur (kararlı); ad ölçütü Türkçe sıradır.
   List<CoordinatorshipSummary> filtered(List<CoordinatorshipSummary> all) {
-    int byName(CoordinatorshipSummary a, CoordinatorshipSummary b) =>
-        compareTurkish(a.name, b.name);
+    final indexed = [
+      for (final (i, c) in all.indexed)
+        if (matches(filter, c)) (i, c),
+    ];
     int compare(CoordinatorshipSummary a, CoordinatorshipSummary b) =>
         switch (sort) {
-          CoordinatorshipSort.late => a.late.compareTo(b.late),
+          CoordinatorshipSort.late =>
+            a.late != b.late
+                ? a.late.compareTo(b.late)
+                : compareTurkish(b.name, a.name),
           CoordinatorshipSort.progress => a.donePercent.compareTo(
             b.donePercent,
           ),
-          CoordinatorshipSort.name => byName(a, b),
+          CoordinatorshipSort.name => compareTurkish(a.name, b.name),
         };
-    // Eşitlikte ad sırası (A→Z) yönden bağımsız kalır.
-    return [
-      for (final c in all)
-        if (matches(filter, c)) c,
-    ]..sort((a, b) {
-      final d = descending ? compare(b, a) : compare(a, b);
-      return d != 0 ? d : byName(a, b);
+    indexed.sort((x, y) {
+      final d = descending ? compare(y.$2, x.$2) : compare(x.$2, y.$2);
+      return d != 0 ? d : x.$1.compareTo(y.$1);
     });
+    return [for (final (_, c) in indexed) c];
   }
 
   /// Ekranda görünen kartlar (daraltılmışken ilk [collapsedCount]).

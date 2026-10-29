@@ -71,21 +71,41 @@ extension HomeTexts on AppLocalizations {
     CoordinatorshipFilter.unassigned => uiHomeFilterUnassigned,
   };
 
-  /// "ALT-7 · Tarih talebi · 15 Kas" / "İDA-2 · Onay bekliyor".
+  /// "ALT-7 · Tarih talebi · +51 gün" / "ULA-1 · Tarih talebi · 15 Kas" / "İDA-2 · Onay
+  /// bekliyor".
   String pendingCaption(PendingItem p) {
     final date = p.requestedDate;
+    final shift = p.requestedShiftDays;
+    final when = shift != null
+        ? ' · +$shift $uiHomeShiftDaysTail'
+        : date == null
+        ? ''
+        : ' · ${DateFormat('d MMM', 'tr').format(date)}';
     return switch (p.kind) {
-      PendingKind.dateChange =>
-        '${p.taskCode} · $uiHomeDateRequest'
-            '${date == null ? '' : ' · ${DateFormat('d MMM', 'tr').format(date)}'}',
+      PendingKind.dateChange => '${p.taskCode} · $uiHomeDateRequest$when',
       PendingKind.approval => '${p.taskCode} · $uiHomeAwaitingApproval',
     };
   }
 
-  /// "Bildirimler · 6 iş seni bekliyor".
-  String notificationsLabel(int waiting) => waiting == 0
-      ? uiHomeNotifications
-      : '$uiHomeNotifications · $waiting $uiHomeWaitingTail';
+  /// Zil etiketi: "Bildirimler · 3 tarih talebi ve 3 onay seni bekliyor" (yalnız biri varsa o
+  /// parça); bekleyen yoksa "Bildirimler".
+  String notificationsLabel(List<PendingItem> pending) {
+    int n(PendingKind k) => pending.where((p) => p.kind == k).length;
+    final parts = [
+      if (n(PendingKind.dateChange) case final d when d > 0)
+        '$d $uiHomeNotifyDateRequests',
+      if (n(PendingKind.approval) case final a when a > 0)
+        '$a $uiHomeNotifyApprovals',
+    ];
+    return parts.isEmpty
+        ? uiHomeNotifications
+        : '$uiHomeNotifications · ${parts.join(' $uiHomeNotifyAnd ')} '
+              '$uiHomeNotifyTail';
+  }
+
+  /// Çekmecedeki sezon kartının alt satırı: "2026 sezonu" (yıl yoksa kapsam değiştirme).
+  String seasonCaption(int? year, String fallback) =>
+      year == null ? fallback : '$year $uiHomeSeasonTail';
 
   /// "Takvim mobilde sonraki adımda eklenecek".
   String soon(String what) => '$what $uiHomeSoonTail';

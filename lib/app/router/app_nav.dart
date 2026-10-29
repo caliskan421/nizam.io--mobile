@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/config/generated/app_version.gen.dart';
 import '../../core/ui/extensions/context_ext.dart';
 import '../../core/ui/page/nz_app_nav.dart';
 import '../../core/ui/widgets/feedback/nz_toast.dart';
@@ -77,7 +78,9 @@ class GoRouterAppNav implements NzAppNav {
       ShellModule.archive => HomeModule.archive,
       ShellModule.messages => HomeModule.messages,
       null =>
-        location.startsWith(const TasksRoute().location)
+        // Zaman çizelgesi görevler modülünün parçasıdır (prototip `ON.tasks`).
+        location.startsWith(const TasksRoute().location) ||
+                location.startsWith(const TimelineRoute().location)
             ? HomeModule.tasks
             : location.startsWith(const HomeRoute().location)
             ? HomeModule.home
@@ -87,7 +90,11 @@ class GoRouterAppNav implements NzAppNav {
       context,
       current: current,
       greetingName: dashboard?.greetingName ?? '',
+      greetingRole: dashboard?.greetingRole,
+      greetingEmail: dashboard?.greetingEmail,
       programName: program?.name,
+      programYear: program?.year,
+      version: appVersion,
       counts: dashboard?.counts,
       onProfile: openProfile,
       onChangeScope: () =>

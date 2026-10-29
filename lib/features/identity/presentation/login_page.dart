@@ -151,6 +151,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   name: 'email',
                   controller: _email,
                   enabled: !login.isLoading,
+                  // Prototip hata durumu: iki alan birden tehlike kenarlı, ileti formun altında.
+                  invalid: shownError != null,
                   validator: NzValidators.all([
                     NzValidators.requiredText,
                     NzValidators.email,
@@ -166,6 +168,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   name: 'password',
                   controller: _password,
                   enabled: !login.isLoading,
+                  invalid: shownError != null,
                   validator: NzValidators.requiredText,
                   onSubmitted: (_) => NzForm.of(formContext).submit(),
                 ),

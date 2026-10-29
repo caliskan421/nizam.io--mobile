@@ -3046,6 +3046,48 @@ abstract class AppLocalizations {
   /// **'NIZAM.IO'**
   String get uiHomeAppName;
 
+  /// ui.home.shift_days_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gün'**
+  String get uiHomeShiftDaysTail;
+
+  /// ui.home.notify_date_requests
+  ///
+  /// In tr, this message translates to:
+  /// **'tarih talebi'**
+  String get uiHomeNotifyDateRequests;
+
+  /// ui.home.notify_approvals
+  ///
+  /// In tr, this message translates to:
+  /// **'onay'**
+  String get uiHomeNotifyApprovals;
+
+  /// ui.home.notify_and
+  ///
+  /// In tr, this message translates to:
+  /// **'ve'**
+  String get uiHomeNotifyAnd;
+
+  /// ui.home.notify_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'seni bekliyor'**
+  String get uiHomeNotifyTail;
+
+  /// ui.home.season_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'sezonu'**
+  String get uiHomeSeasonTail;
+
+  /// ui.home.version_prefix
+  ///
+  /// In tr, this message translates to:
+  /// **'v'**
+  String get uiHomeVersionPrefix;
+
   /// ui.identity.login_title
   ///
   /// In tr, this message translates to:

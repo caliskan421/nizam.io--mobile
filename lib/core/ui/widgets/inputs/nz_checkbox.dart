@@ -19,6 +19,7 @@ class NzCheckbox extends StatefulWidget {
     required this.onChanged,
     this.description,
     this.trailing,
+    this.labelLeading,
     this.name,
     this.fieldError,
     this.validator,
@@ -34,6 +35,9 @@ class NzCheckbox extends StatefulWidget {
 
   /// Satırın sonunda (ör. bilgi simgesi).
   final Widget? trailing;
+
+  /// Etiketin solunda, onay kutusundan sonra (ör. kişi avatarı); okuyucuda etiketle birleşir.
+  final Widget? labelLeading;
   final String? name;
   final ApiFieldError? fieldError;
   final NzValidator<bool>? validator;
@@ -87,7 +91,16 @@ class _NzCheckboxState extends State<NzCheckbox> with NzServerFieldError {
                   },
             controlAffinity: ListTileControlAffinity.leading,
             contentPadding: EdgeInsets.zero,
-            title: Text(widget.label, style: style),
+            title: switch (widget.labelLeading) {
+              final leading? => Row(
+                children: [
+                  ExcludeSemantics(child: leading),
+                  const Gap(NizamioSpacing.space2),
+                  Expanded(child: Text(widget.label, style: style)),
+                ],
+              ),
+              null => Text(widget.label, style: style),
+            },
             subtitle: widget.description == null
                 ? null
                 : Text(widget.description!, style: context.text.bodySm),

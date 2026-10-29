@@ -17,6 +17,8 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
     final today = DateTime(now.year, now.month, now.day);
     return HomeDashboard(
       greetingName: 'Elif Nur Karaağaçlı',
+      greetingRole: TeamRole.admin,
+      greetingEmail: 'elif.karaagacli@ornek.test',
       tasks: const TaskTotals(
         total: 79,
         done: 39,
@@ -148,6 +150,7 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
           title: 'Hidrofor sistemi kurulumu',
           kind: PendingKind.dateChange,
           requestedDate: today.add(const Duration(days: 51)),
+          requestedShiftDays: 51,
         ),
         PendingItem(
           taskCode: 'ULA-1',

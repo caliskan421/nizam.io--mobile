@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/errors/api_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
-import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
@@ -73,23 +73,83 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
           ),
         ],
       ),
+      // Kayıt satırları akışın doğrudan öğeleridir: liste tembel kurulur (yalnız görünen
+      // satırlar), tek büyük Column değil.
       children: [
         Text(
           l.uiActivityIntro,
           style: context.text.bodyMd.copyWith(color: context.colors.textMuted),
         ),
         const Gap(NizamioSpacing.space3),
-        NzAsyncView<ActivityView>(
-          value: view,
-          onRetry: _retry,
-          data: (v) => _Body(
-            view: v,
-            search: _search,
-            onOpenFilters: () => showActivityFilters(context),
-          ),
-        ),
+        ...switch (view) {
+          AsyncValue(value: final v?) => _records(context, v),
+          AsyncError(:final error) => [
+            NzErrorState(error: toApiError(error), onRetry: _retry),
+          ],
+          _ => [const NzLoader.page()],
+        },
       ],
     );
+  }
+
+  List<Widget> _records(BuildContext context, ActivityView v) {
+    final l = context.l10n;
+    final c = context.colors;
+    final t = context.text;
+    final commands = ref.read(activityQueryControllerProvider.notifier);
+    final today = ref.read(activityLogControllerProvider).value?.today;
+    return [
+      _Controls(
+        view: v,
+        search: _search,
+        onOpenFilters: () => showActivityFilters(context),
+      ),
+      const Gap(NizamioSpacing.space4),
+      for (final (i, day) in v.days.indexed) ...[
+        if (i > 0) const Gap(NizamioSpacing.space5),
+        _DayHeader(
+          key: ValueKey(day.day),
+          label: l.activityDay(day.day, today ?? day.day),
+          count: day.count,
+        ),
+        for (final (j, e) in day.entries.indexed)
+          _EntryRow(
+            key: ObjectKey(e),
+            entry: e,
+            divided: j < day.entries.length - 1,
+            onTap: switch (taskCodeOf(e)) {
+              final code? => () => context.appNav.openTask(code),
+              null => null,
+            },
+          ),
+      ],
+      if (v.total == 0)
+        NzEmptyState(
+          title: l.uiActivityEmpty,
+          actionLabel: l.uiActivityClearFilters,
+          onAction: commands.clearAll,
+        ),
+      const Gap(NizamioSpacing.space4),
+      if (v.canShowMore) ...[
+        NzButton.secondary(
+          label: l.uiActivityMore,
+          expand: true,
+          onPressed: commands.showMore,
+        ),
+        const Gap(NizamioSpacing.gapMd),
+      ],
+      Text(
+        l.activityShown(v.shown, v.total),
+        textAlign: TextAlign.center,
+        style: t.caption.copyWith(color: c.textMuted),
+      ),
+      const Gap(NizamioSpacing.gapMd),
+      Text(
+        l.uiActivityFooter,
+        textAlign: TextAlign.center,
+        style: t.caption.copyWith(color: c.textMuted),
+      ),
+    ];
   }
 
   void _showShortcuts(ActivityView view) {
@@ -137,8 +197,10 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
   }
 }
 
-class _Body extends ConsumerWidget {
-  const _Body({
+/// Arama + filtre dairesi, tür rayı ve etkin süzgeç çipleri (kayıt bölgesinin başı; okuyucuda
+/// "Kayıtlar" bölgesi satırlarla birlikte gelir).
+class _Controls extends ConsumerWidget {
+  const _Controls({
     required this.view,
     required this.search,
     required this.onOpenFilters,
@@ -152,10 +214,8 @@ class _Body extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final c = context.colors;
-    final t = context.text;
     final query = ref.watch(activityQueryControllerProvider);
     final commands = ref.read(activityQueryControllerProvider.notifier);
-    final log = ref.watch(activityLogControllerProvider).value;
     final catalog = ref.watch(taskCatalogControllerProvider).value;
     final kinds = [null, ...ActivityKind.values];
     final chips = <(String, String, VoidCallback)>[
@@ -227,66 +287,13 @@ class _Body extends ConsumerWidget {
             ],
           ),
         ],
-        const Gap(NizamioSpacing.space4),
-        Semantics(
-          container: true,
-          label: l.uiActivityRecords,
-          explicitChildNodes: true,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final (i, day) in view.days.indexed) ...[
-                if (i > 0) const Gap(NizamioSpacing.space5),
-                _DayHeader(
-                  label: l.activityDay(day.day, log?.today ?? day.day),
-                  count: day.count,
-                ),
-                for (final (j, e) in day.entries.indexed)
-                  _EntryRow(
-                    entry: e,
-                    divided: j < day.entries.length - 1,
-                    onTap: switch (taskCodeOf(e)) {
-                      final code? => () => context.appNav.openTask(code),
-                      null => null,
-                    },
-                  ),
-              ],
-              if (view.total == 0)
-                NzEmptyState(
-                  title: l.uiActivityEmpty,
-                  actionLabel: l.uiActivityClearFilters,
-                  onAction: commands.clearAll,
-                ),
-            ],
-          ),
-        ),
-        const Gap(NizamioSpacing.space4),
-        if (view.canShowMore) ...[
-          NzButton.secondary(
-            label: l.uiActivityMore,
-            expand: true,
-            onPressed: commands.showMore,
-          ),
-          const Gap(NizamioSpacing.gapMd),
-        ],
-        Text(
-          l.activityShown(view.shown, view.total),
-          textAlign: TextAlign.center,
-          style: t.caption.copyWith(color: c.textMuted),
-        ),
-        const Gap(NizamioSpacing.gapMd),
-        Text(
-          l.uiActivityFooter,
-          textAlign: TextAlign.center,
-          style: t.caption.copyWith(color: c.textMuted),
-        ),
       ],
     );
   }
 }
 
 class _DayHeader extends StatelessWidget {
-  const _DayHeader({required this.label, required this.count});
+  const _DayHeader({super.key, required this.label, required this.count});
 
   final String label;
   final int count;
@@ -325,6 +332,7 @@ class _DayHeader extends StatelessWidget {
 
 class _EntryRow extends StatelessWidget {
   const _EntryRow({
+    super.key,
     required this.entry,
     required this.divided,
     required this.onTap,
@@ -549,6 +557,13 @@ Future<void> showActivityFilters(BuildContext context) {
   return NzBottomSheet.show<void>(
     context,
     title: l.uiActivityFilters,
+    // Prototip: "Temizle" başlık satırında.
+    headerAction: Consumer(
+      builder: (context, ref, _) => _Link(
+        label: l.uiActivityClear,
+        onTap: ref.read(activityQueryControllerProvider.notifier).clearExtra,
+      ),
+    ),
     actions: (sheet) => [
       Consumer(
         builder: (context, ref, _) {
@@ -580,18 +595,16 @@ Future<void> showActivityFilters(BuildContext context) {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: _Link(
-                  label: l.uiActivityClear,
-                  onTap: commands.clearExtra,
-                ),
-              ),
               kicker(l.uiActivityByRole),
               for (final id in log.people)
                 if (catalog.person(id) case final p?)
                   NzCheckbox(
                     label: p.name,
+                    labelLeading: NzAvatar.initials(
+                      name: p.name,
+                      tone: NzAvatar.neutralTone,
+                      extent: NzAvatarSize.sm,
+                    ),
                     value: query.people.contains(id),
                     onChanged: (_) => commands.togglePerson(id),
                     trailing: Text(

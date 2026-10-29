@@ -53,6 +53,16 @@ void main() {
     expect(_editable(tester).obscureText, isTrue);
   });
 
+  testWidgets('invalid: metinsiz hata kenarlığı', (tester) async {
+    await tester.pumpWidget(
+      testApp(const NzPasswordField(label: 'Parola', invalid: true)),
+    );
+    final theme = Theme.of(tester.element(find.byType(TextField)));
+    final d = tester.widget<TextField>(find.byType(TextField)).decoration!;
+    expect(d.enabledBorder, theme.inputDecorationTheme.errorBorder);
+    expect(d.focusedBorder, theme.inputDecorationTheme.focusedErrorBorder);
+  });
+
   testWidgets('göster/gizle düğmesi >= 48 dokunma alanı', (tester) async {
     await tester.pumpWidget(testApp(const NzPasswordField(label: 'Parola')));
     final size = tester.getSize(find.byType(IconButton));

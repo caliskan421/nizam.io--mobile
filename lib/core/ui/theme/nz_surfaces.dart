@@ -34,7 +34,15 @@ extension NzGlassSpec on NzGlassTone {
     NzGlassTone.menu => c.glassMenu,
   };
 
-  ImageFilter filter() {
+  /// Ton başına tek nesne (her kurulumda yeni filtre + 20'lik matris listesi üretilmez; aynı
+  /// nesne `RenderBackdropFilter`'da boyama geçersizlemesini de tetiklemez).
+  ImageFilter filter() => _filters[index];
+
+  static final List<ImageFilter> _filters = [
+    for (final t in NzGlassTone.values) t._build(),
+  ];
+
+  ImageFilter _build() {
     final (sigma, saturation) = switch (this) {
       NzGlassTone.bar => (NizamioBlur.bar, 1.4),
       NzGlassTone.float => (NizamioBlur.float, 1.5),

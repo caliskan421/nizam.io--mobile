@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
 import 'package:nizamio/core/ui/theme/nz_surfaces.dart';
@@ -32,6 +33,37 @@ void main() {
       }
     });
   }
+
+  test('ton filtresi önbellekte: aynı ton aynı nesne, tonlar ayrı', () {
+    for (final tone in NzGlassTone.values) {
+      expect(tone.filter(), same(tone.filter()));
+    }
+    expect(NzGlassTone.bar.filter(), isNot(same(NzGlassTone.menu.filter())));
+  });
+
+  testWidgets('üstte BackdropGroup varsa onun anahtarını paylaşır', (t) async {
+    final group = BackdropKey();
+    await t.pumpWidget(
+      testApp(
+        BackdropGroup(
+          backdropKey: group,
+          child: const Row(
+            children: [
+              NzGlass(tone: NzGlassTone.float, child: Text('a')),
+              NzGlass(tone: NzGlassTone.float, child: Text('b')),
+            ],
+          ),
+        ),
+      ),
+    );
+    final layers = t.renderObjectList<RenderBackdropFilter>(
+      find.byType(BackdropFilter),
+    );
+    expect(layers, hasLength(2));
+    for (final r in layers) {
+      expect(r.backdropKey, same(group));
+    }
+  });
 
   testWidgets('daire biçimi ve kenarsız', (t) async {
     await t.pumpWidget(

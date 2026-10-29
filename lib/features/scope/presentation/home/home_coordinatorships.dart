@@ -183,11 +183,21 @@ class _CoordCard extends StatelessWidget {
             ],
           ),
           const Gap(NizamioSpacing.space2),
-          Text(progress, style: mono),
-          Text(
-            late,
-            style: mono.copyWith(
-              color: c.late > 0 ? colors.danger : colors.textFaint,
+          // Prototip: ilerleme solda, gecikme sağda tek satır; sığmazsa alt satıra sarılır.
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: double.infinity),
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: NizamioSpacing.space2,
+              children: [
+                Text(progress, style: mono),
+                Text(
+                  late,
+                  style: mono.copyWith(
+                    color: c.late > 0 ? colors.danger : colors.textFaint,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

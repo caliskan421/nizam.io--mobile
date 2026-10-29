@@ -1,6 +1,8 @@
 // HomePage: seçili programın adı S2 GET /v1/program yanıtından gelir (kapsam başlığı isteğe
 // girer, üst çubukta); özet geliştirme örneğinden. Yerel etkileşimler (sıralama, filtre, tümünü
 // göster, hızlı işlem, çekmece, kısayol menüsü), gezinme hedefleri, dar ekran ve 2.0 metin.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +13,8 @@ import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/core/ui/widgets/buttons/nz_split_button.dart';
 import 'package:nizamio/core/ui/widgets/surfaces/nz_kpi_tile.dart';
+import 'package:nizamio/features/scope/domain/home_dashboard.dart';
+import 'package:nizamio/features/scope/presentation/home/home_menus.dart';
 import 'package:nizamio/features/scope/presentation/home_page.dart';
 
 import '../../../support/harness.dart';
@@ -97,7 +101,107 @@ void main() {
     await tester.tap(find.text(_l.uiHomeKpiLate));
     await settle(tester);
     await _tapVisible(tester, find.text('Altyapı ve tesisat'));
-    expect(nav.calls, ['tasks', 'coord:ALT']);
+    expect(nav.calls, ['tasks:late', 'coord:ALT']);
+  });
+
+  testWidgets(
+    'her KPI kendi görünümüyle, ekip kutuları rol kişileriyle görevleri açar',
+    (tester) async {
+      final (_, nav) = await _open(tester);
+      for (final label in [
+        _l.uiHomeKpiDone,
+        _l.uiHomeKpiDoing,
+        _l.uiHomeKpiReview,
+      ]) {
+        await _tapVisible(tester, find.text(label));
+      }
+      await _tapVisible(tester, find.text(_l.uiHomeRoleAdmin));
+      await _tapVisible(tester, find.text(_l.uiHomeRoleMember));
+      expect(nav.calls, [
+        'tasks:done',
+        'tasks:inProgress',
+        'tasks:review',
+        'tasks:ma,my',
+        'tasks:bk,gn,mey',
+      ]);
+    },
+  );
+
+  testWidgets('zil etiketi bekleyenleri türüne göre sayar', (tester) async {
+    await _open(tester);
+    expect(
+      find.bySemanticsLabel(
+        '${_l.uiHomeNotifications} · 3 ${_l.uiHomeNotifyDateRequests} '
+        '${_l.uiHomeNotifyAnd} 3 ${_l.uiHomeNotifyApprovals} '
+        '${_l.uiHomeNotifyTail}',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('çekmece: rol · e-posta, sezon kartı, sürüm; satır modül seçer', (
+    tester,
+  ) async {
+    await _open(tester);
+    final picked = <HomeModule>[];
+    var scope = 0;
+    final ctx = tester.element(find.byType(HomePage));
+    unawaited(
+      showHomeDrawer(
+        ctx,
+        current: HomeModule.home,
+        greetingName: 'Elif Nur Karaağaçlı',
+        greetingRole: TeamRole.admin,
+        greetingEmail: 'elif.karaagacli@ornek.test',
+        programName: 'Örnek Sezon 2026',
+        programYear: 2026,
+        version: '0.1.0',
+        counts: null,
+        onModule: picked.add,
+        onProfile: () {},
+        onChangeScope: () => scope++,
+        onSignOut: () {},
+      ),
+    );
+    await settle(tester);
+    expect(
+      find.text('${_l.uiHomeRoleAdmin} · elif.karaagacli@ornek.test'),
+      findsOneWidget,
+    );
+    expect(find.text('ÖS'), findsOneWidget);
+    expect(find.text('2026 ${_l.uiHomeSeasonTail}'), findsOneWidget);
+    await tester.tap(find.text('Örnek Sezon 2026'));
+    await settle(tester);
+    expect(scope, 1);
+    // Sürüm satırı çekmecenin sonunda (liste tembel; kaydırınca kurulur).
+    unawaited(
+      showHomeDrawer(
+        tester.element(find.byType(HomePage)),
+        current: null,
+        greetingName: 'Elif Nur Karaağaçlı',
+        programName: null,
+        version: '0.1.0',
+        counts: null,
+        onModule: picked.add,
+        onProfile: () {},
+        onChangeScope: () {},
+        onSignOut: () {},
+      ),
+    );
+    await settle(tester);
+    expect(find.text(_l.uiHomeProfile), findsOneWidget);
+    final version = find.text(
+      '${_l.uiHomeAppName} ${_l.uiHomeVersionPrefix}0.1.0',
+    );
+    await tester.scrollUntilVisible(
+      version,
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(version, findsOneWidget);
+    await tester.tap(find.text(_l.uiHomeHelp));
+    await settle(tester);
+    expect(picked, [HomeModule.help]);
   });
 
   testWidgets(
@@ -163,6 +267,13 @@ void main() {
       h.read(shellReselectEventsProvider.notifier).fire(HomePage.shellTab);
       await settle(tester);
       expect(find.text(_l.uiHomeWaitingForYou), findsOneWidget);
+      // Prototip: ALT-7 kaydırma olarak ("+51 gün"), diğer tarih talepleri tarih olarak.
+      expect(
+        find.text(
+          'ALT-7 · ${_l.uiHomeDateRequest} · +51 ${_l.uiHomeShiftDaysTail}',
+        ),
+        findsOneWidget,
+      );
       await tester.tap(find.text('Hidrofor sistemi kurulumu'));
       await settle(tester);
       expect(find.text(_l.uiHomeWaitingForYou), findsNothing);

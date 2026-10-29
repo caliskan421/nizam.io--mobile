@@ -69,6 +69,22 @@ void main() {
     },
   );
 
+  testWidgets(
+    'kapsül ve asistan camı tek BackdropGroup içinde; anahtar kurulumlar arasında sabit',
+    (t) async {
+      await t.pumpWidget(MaterialAppWrap(child: _nav(0, (_) {})));
+      final groups = find.byType(BackdropGroup);
+      expect(groups, findsOneWidget);
+      final key = t.widget<BackdropGroup>(groups).backdropKey;
+      expect(
+        find.descendant(of: groups, matching: find.byType(BackdropFilter)),
+        findsNWidgets(2),
+      );
+      await t.pumpWidget(MaterialAppWrap(child: _nav(1, (_) {})));
+      expect(t.widget<BackdropGroup>(groups).backdropKey, same(key));
+    },
+  );
+
   testWidgets('ayrılan yükseklik: kapsül + alt boşluk + güvenli alan', (
     t,
   ) async {

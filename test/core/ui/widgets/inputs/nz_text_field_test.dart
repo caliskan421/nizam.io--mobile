@@ -237,6 +237,22 @@ void main() {
     });
   });
 
+  testWidgets('invalid: metinsiz hata kenarlığı (enabled + focused)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      testApp(const NzTextField(label: 'E', invalid: true)),
+    );
+    final theme = Theme.of(tester.element(find.byType(TextField)));
+    final d = tester.widget<TextField>(find.byType(TextField)).decoration!;
+    expect(d.enabledBorder, theme.inputDecorationTheme.errorBorder);
+    expect(d.focusedBorder, theme.inputDecorationTheme.focusedErrorBorder);
+    expect(d.errorText, isNull);
+    await tester.pumpWidget(testApp(const NzTextField(label: 'E')));
+    final plain = tester.widget<TextField>(find.byType(TextField)).decoration!;
+    expect(plain.enabledBorder, isNot(theme.inputDecorationTheme.errorBorder));
+  });
+
   testWidgets('devre dışı: yazılamaz', (tester) async {
     final changes = <String>[];
     await tester.pumpWidget(

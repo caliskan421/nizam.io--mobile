@@ -15,6 +15,7 @@ import '../../identity/identity.dart';
 import '../../tasks/tasks.dart';
 import '../application/current_program_controller.dart';
 import '../application/home_dashboard_controller.dart';
+import '../application/home_team_people.dart';
 import '../application/scope_selection_controller.dart';
 import '../domain/home_dashboard.dart';
 import 'home/home_coordinatorships.dart';
@@ -110,11 +111,24 @@ class _Feed extends StatelessWidget {
       children: [
         HomeGreeting(name: d.greetingName, today: now),
         const Gap(NizamioSpacing.gapXl),
-        HomeKpiGrid(tasks: d.tasks, onOpen: nav.openTasks),
+        HomeKpiGrid(
+          tasks: d.tasks,
+          onOpen: (view) => nav.openTasks(view: view),
+        ),
         const Gap(NizamioSpacing.gapXl),
         HomeQuickActions(onAction: onQuickAction),
         const Gap(NizamioSpacing.gapXl),
-        HomeTeam(dashboard: d, onOpen: nav.openTasks),
+        // Kişi kümeleri ortak katalogdan; yalnız bu bölüm izler (katalog değişimi akışı kurmaz).
+        Consumer(
+          builder: (context, ref, _) {
+            final people = ref.watch(homeTeamPeopleProvider);
+            return HomeTeam(
+              dashboard: d,
+              onOpen: (role) =>
+                  nav.openTasks(people: people?.of(role) ?? const []),
+            );
+          },
+        ),
         const Gap(NizamioSpacing.gapXl),
         HomeHistoryCard(
           activity: d.lastActivity,

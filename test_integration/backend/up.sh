@@ -162,6 +162,8 @@ NIZAMIO_LOGIN_LOCK_DURATION=1m
 NIZAMIO_LOGIN_ATTEMPT_RETENTION=48h
 NIZAMIO_LOGIN_ATTEMPT_CLEANUP_INTERVAL=1m
 NIZAMIO_DISCOVERY_RATE_LIMIT_PER_MINUTE=60
+# v0.3.0-api'den beri video varsayılanı livekit (LiveKit alanları zorunlu); entegrasyon konferanssız.
+NIZAMIO_VIDEO_PROVIDER=none
 ENV
 
 echo "== migrate up (migrator kimliği; yedek kontrolü: atılabilir entegrasyon DB için 'migrate verify')"

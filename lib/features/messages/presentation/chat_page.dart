@@ -58,7 +58,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   final _flash = ValueNotifier<String?>(null);
 
   /// Akıştaki sıra (ters: 0 = en yeni); görünmeyen mesaja atlamak için liste yazar.
-  final _order = <String, int>{};
+  final _order = HashMap<String, int>();
   int _sentCount = 0;
 
   /// Gönderilmiş say (prototip: 500 ms), okundu say (1600 ms), yazıyor (3200 ms).
@@ -591,8 +591,8 @@ class _MessageList extends ConsumerStatefulWidget {
   final TaskCatalog catalog;
   final List<String> people;
   final ScrollController scroll;
-  final Map<String, GlobalKey> keys;
-  final Map<String, int> order;
+  final HashMap<String, GlobalKey> keys;
+  final HashMap<String, int> order;
   final ValueListenable<String?> flash;
   final ValueListenable<double> headerH;
   final ValueListenable<double> composerH;

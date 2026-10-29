@@ -91,7 +91,10 @@ void main() {
     // Profil çekmecedeki hesap satırından (prototip: alt menüde profil yok).
     await tester.tap(find.byIcon(Icons.menu_rounded));
     await settle(tester);
-    await tester.tap(find.text(_l.uiHomeProfile));
+    // Hesap satırı prototipteki gibi "rol · e-posta" yazar; adı semantikte.
+    await tester.tap(
+      find.bySemanticsLabel(RegExp(RegExp.escape(_l.uiHomeProfile))),
+    );
     await settle(tester);
     expect(find.text('a@b.test'), findsOneWidget);
     await tester.tap(find.text(_l.uiIdentitySignOut));
@@ -132,7 +135,8 @@ void main() {
     // Kapsam değiştirme çekmecede (üst çubuk menü dairesi).
     await tester.tap(find.byIcon(Icons.menu_rounded));
     await settle(tester);
-    await tester.tap(find.textContaining(_l.uiScopeHomeChange));
+    // Sezon kartı (program adı) kapsam seçimine döner.
+    await tester.tap(find.bySemanticsLabel(RegExp('^Program Bir, ')));
     await settle(tester);
     expect(h.read(appPhaseProvider), AppPhase.sessionOpen);
     expect(find.text(_l.uiScopeIntro), findsOneWidget);

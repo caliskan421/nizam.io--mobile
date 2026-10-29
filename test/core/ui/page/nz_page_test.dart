@@ -281,11 +281,11 @@ void main() {
             title: Text('üst'),
           ),
           pinned: const SizedBox(height: 40, child: Text('sekmeler')),
-          children: const [SizedBox(height: 200, child: Text('baş'))],
           after: [
             for (var i = 0; i < 200; i++)
               SizedBox(height: 50, child: Text('satır $i')),
           ],
+          children: const [SizedBox(height: 200, child: Text('baş'))],
         ),
       ),
     );

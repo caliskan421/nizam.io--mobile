@@ -51,6 +51,26 @@ void main() {
     },
   );
 
+  testWidgets('etkin öğe basıldığı an tetiklenir; bırakış tekrar tetiklemez', (
+    t,
+  ) async {
+    final picked = <int>[];
+    await t.pumpWidget(MaterialAppWrap(child: _nav(0, picked.add)));
+    final g = await t.startGesture(t.getCenter(find.byIcon(Icons.home)));
+    await t.pump();
+    expect(picked, [0], reason: 'parmak kalkmadan');
+    await g.up();
+    await t.pump();
+    expect(picked, [0]);
+    // Etkin olmayan öğe bırakınca geçer.
+    final g2 = await t.startGesture(t.getCenter(find.byIcon(Icons.list)));
+    await t.pump();
+    expect(picked, [0]);
+    await g2.up();
+    await t.pump();
+    expect(picked, [0, 1]);
+  });
+
   testWidgets(
     'vurgu yeni sekmeye kayar; 360 genişlikte sığar; 2.0 metinde taşma yok',
     (t) async {

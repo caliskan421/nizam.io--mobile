@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart' show kPrimaryButton;
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -46,7 +47,9 @@ class NzNavAction {
 /// Yüzen cam alt menü (tasarım `BottomNav`): ekran kenarından `m-gutter`, alttan `m-gap-xl`
 /// içeride, `m-nav` (64) yüksekliğinde kapsül; etkin öğe genişler (etiket + alt yazı), vurgu
 /// `nav-highlight` ile `easeSpring` / `durNav` kayar. Etkin öğeye yeniden dokunmak da
-/// [onSelect]'i çağırır (kabuk kısayol menüsünü açar). `Scaffold.bottomNavigationBar` olarak
+/// [onSelect]'i çağırır (kabuk kısayol menüsünü açar): parmak kalkınca değil, BASILDIĞI AN
+/// (menü basılı tutulurken açılır; bırakış ikinci kez tetiklemez). Diğer öğeler dokunuşta
+/// (bırakınca) geçer. `Scaffold.bottomNavigationBar` olarak
 /// kullanılır; `extendBody` ile içerik altından geçer ve gövdenin alt dolgusu [reservedHeight]
 /// kadar artar.
 ///
@@ -261,60 +264,69 @@ class _NavButton extends StatelessWidget {
       label: item.label,
       onTap: onTap,
       excludeSemantics: true,
-      child: GestureDetector(
+      // Etkin öğe: basış anında (pointer down) tetiklenir; kısayol menüsü parmak kalkmadan açılır.
+      child: Listener(
         behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: ClipRect(
-          child: AnimatedPadding(
-            duration: duration,
-            curve: NizamioMotion.easeSpring,
-            padding: EdgeInsets.symmetric(
-              horizontal: active ? NizamioSpacing.rowPad : 0,
-            ),
-            child: Row(
-              mainAxisAlignment: active
-                  ? MainAxisAlignment.start
-                  : MainAxisAlignment.center,
-              children: [
-                NzPressable(
-                  child: Icon(
-                    item.icon,
-                    size: NizamioSize.iconSize,
-                    color: active ? c.glassInk : c.textMuted,
+        onPointerDown: active
+            ? (e) {
+                if (e.buttons == kPrimaryButton) onTap();
+              }
+            : null,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: active ? null : onTap,
+          child: ClipRect(
+            child: AnimatedPadding(
+              duration: duration,
+              curve: NizamioMotion.easeSpring,
+              padding: EdgeInsets.symmetric(
+                horizontal: active ? NizamioSpacing.rowPad : 0,
+              ),
+              child: Row(
+                mainAxisAlignment: active
+                    ? MainAxisAlignment.start
+                    : MainAxisAlignment.center,
+                children: [
+                  NzPressable(
+                    child: Icon(
+                      item.icon,
+                      size: NizamioSize.iconSize,
+                      color: active ? c.glassInk : c.textMuted,
+                    ),
                   ),
-                ),
-                if (active) ...[
-                  const Gap(NizamioSpacing.gapMd),
-                  Flexible(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.label,
-                          maxLines: 1,
-                          softWrap: false,
-                          overflow: TextOverflow.ellipsis,
-                          style: t.navLabel.copyWith(
-                            color: c.glassInk,
-                            fontSize: item.wide
-                                ? t.caption.fontSize
-                                : t.navLabel.fontSize,
-                          ),
-                        ),
-                        if (caption != null)
+                  if (active) ...[
+                    const Gap(NizamioSpacing.gapMd),
+                    Flexible(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            caption,
+                            item.label,
                             maxLines: 1,
                             softWrap: false,
                             overflow: TextOverflow.ellipsis,
-                            style: t.program.copyWith(color: c.glassInkFaint),
+                            style: t.navLabel.copyWith(
+                              color: c.glassInk,
+                              fontSize: item.wide
+                                  ? t.caption.fontSize
+                                  : t.navLabel.fontSize,
+                            ),
                           ),
-                      ],
+                          if (caption != null)
+                            Text(
+                              caption,
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.ellipsis,
+                              style: t.program.copyWith(color: c.glassInkFaint),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

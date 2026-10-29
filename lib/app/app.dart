@@ -44,14 +44,12 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
     super.dispose();
   }
 
-  bool get _isDev => ref.watch(flavorProvider) == Flavor.dev;
-
   @override
   Widget build(BuildContext context) {
     ref.listen(appPhaseProvider, (_, next) => _phase.value = next);
     return MaterialApp.router(
       title: 'NIZAM.IO',
-      debugShowCheckedModeBanner: _isDev,
+      debugShowCheckedModeBanner: false,
       theme: _light,
       darkTheme: _dark,
       themeMode: ref.watch(themeModeProvider),

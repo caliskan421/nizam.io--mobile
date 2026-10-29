@@ -31,10 +31,18 @@ class CoordGeneralTab extends StatelessWidget {
     final d = detail;
     final s = d.stats;
     final name = s.name;
+    // Prototip KPI'ları görev listesine gider; "geciken" gecikenler görünümüyle açılır
+    // (görev listesinde koordinatörlük süzgeci gezinme niyetinde yok).
+    void lateTasks() => nav.openTasks(view: NzTaskView.late);
     final kpis = [
-      (l.uiCoordKpiOpen, '${s.open}', c.text),
-      (l.uiCoordKpiLate, '${s.late}', s.late > 0 ? c.danger : c.text),
-      (l.uiCoordKpiDone, l.coordPercent(s.ratio), c.text),
+      (l.uiCoordKpiOpen, '${s.open}', c.text, nav.openTasks),
+      (
+        l.uiCoordKpiLate,
+        '${s.late}',
+        s.late > 0 ? c.danger : c.text,
+        lateTasks,
+      ),
+      (l.uiCoordKpiDone, l.coordPercent(s.ratio), c.text, nav.openTasks),
     ];
     final links = [
       (
@@ -82,14 +90,15 @@ class CoordGeneralTab extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          for (final (i, (label, value, color)) in kpis.indexed)
+                          for (final (i, (label, value, color, onTap))
+                              in kpis.indexed)
                             Expanded(
                               child: _Kpi(
                                 label: label,
                                 value: value,
                                 color: color,
                                 divided: i > 0,
-                                onTap: nav.openTasks,
+                                onTap: onTap,
                               ),
                             ),
                         ],
@@ -112,7 +121,7 @@ class CoordGeneralTab extends StatelessWidget {
           const Gap(NizamioSpacing.gapXl),
           NzKicker(
             l.uiCoordAttention,
-            action: CoordLink(label: l.uiCoordAllTasks, onTap: nav.openTasks),
+            action: CoordLink(label: l.uiCoordAllTasks, onTap: lateTasks),
           ),
           const Gap(NizamioSpacing.space2),
           CoordGroup(

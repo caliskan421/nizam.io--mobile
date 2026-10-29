@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorships_controller.dart';
 import 'package:nizamio/features/coordinatorships/coordinatorships.dart';
 import 'package:nizamio/features/coordinatorships/domain/coordinatorship_overview.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../pilot_support.dart';
 
@@ -18,7 +19,9 @@ void main() {
         c.read(coordinatorshipsControllerProvider),
         CoordinatorshipSort.name,
       );
-      var list = await c.read(coordinatorshipListProvider.future);
+      await c.read(taskCatalogControllerProvider.future);
+      // Eşzamanlı türetim: katalog hazırken liste aynı karede dolu.
+      var list = c.read(coordinatorshipListProvider).requireValue;
       expect(list, hasLength(11));
       // Türkçe A→Z: Altyapı, Eğitim, Elektrik, Fuar, İdari…
       expect(list.take(5).map((s) => s.code), [
@@ -36,14 +39,14 @@ void main() {
       c
           .read(coordinatorshipsControllerProvider.notifier)
           .sortBy(CoordinatorshipSort.late);
-      list = await c.read(coordinatorshipListProvider.future);
+      list = c.read(coordinatorshipListProvider).requireValue;
       // İdari 4; Altyapı ve Ulaşım 3 (eşitlikte ad).
       expect(list.take(3).map((s) => s.code), ['İDA', 'ALT', 'ULA']);
 
       c
           .read(coordinatorshipsControllerProvider.notifier)
           .sortBy(CoordinatorshipSort.progress);
-      list = await c.read(coordinatorshipListProvider.future);
+      list = c.read(coordinatorshipListProvider).requireValue;
       expect(list.first.code, 'MEK'); // 7/8
       expect(list.last.code, 'İDA'); // 1/11
     },
@@ -54,7 +57,7 @@ void main() {
     final c = h.container;
     c.listen(coordinatorshipsNavCaptionProvider, (_, _) {});
     expect(c.read(coordinatorshipsNavCaptionProvider), isNull);
-    await c.read(coordinatorshipListProvider.future);
+    await c.read(taskCatalogControllerProvider.future);
     expect(c.read(coordinatorshipsNavCaptionProvider), '11 koordinatörlük');
   });
 }

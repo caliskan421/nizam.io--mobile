@@ -73,24 +73,25 @@ abstract class _$CoordinatorshipsController
   }
 }
 
-/// Görev kataloğundan türetilmiş, seçili ölçütle sıralı koordinatörlük listesi.
+/// Görev kataloğundan türetilmiş, seçili ölçütle sıralı koordinatörlük listesi. Eşzamanlı
+/// türetilir: katalog (keepAlive) hazırsa sayfanın ilk karesi doludur (yükleme titremesi yok).
 
 @ProviderFor(coordinatorshipList)
 final coordinatorshipListProvider = CoordinatorshipListProvider._();
 
-/// Görev kataloğundan türetilmiş, seçili ölçütle sıralı koordinatörlük listesi.
+/// Görev kataloğundan türetilmiş, seçili ölçütle sıralı koordinatörlük listesi. Eşzamanlı
+/// türetilir: katalog (keepAlive) hazırsa sayfanın ilk karesi doludur (yükleme titremesi yok).
 
 final class CoordinatorshipListProvider
     extends
         $FunctionalProvider<
           AsyncValue<List<CoordinatorshipStats>>,
-          List<CoordinatorshipStats>,
-          FutureOr<List<CoordinatorshipStats>>
+          AsyncValue<List<CoordinatorshipStats>>,
+          AsyncValue<List<CoordinatorshipStats>>
         >
-    with
-        $FutureModifier<List<CoordinatorshipStats>>,
-        $FutureProvider<List<CoordinatorshipStats>> {
-  /// Görev kataloğundan türetilmiş, seçili ölçütle sıralı koordinatörlük listesi.
+    with $Provider<AsyncValue<List<CoordinatorshipStats>>> {
+  /// Görev kataloğundan türetilmiş, seçili ölçütle sıralı koordinatörlük listesi. Eşzamanlı
+  /// türetilir: katalog (keepAlive) hazırsa sayfanın ilk karesi doludur (yükleme titremesi yok).
   CoordinatorshipListProvider._()
     : super(
         from: null,
@@ -107,15 +108,24 @@ final class CoordinatorshipListProvider
 
   @$internal
   @override
-  $FutureProviderElement<List<CoordinatorshipStats>> $createElement(
+  $ProviderElement<AsyncValue<List<CoordinatorshipStats>>> $createElement(
     $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
+  ) => $ProviderElement(pointer);
 
   @override
-  FutureOr<List<CoordinatorshipStats>> create(Ref ref) {
+  AsyncValue<List<CoordinatorshipStats>> create(Ref ref) {
     return coordinatorshipList(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<List<CoordinatorshipStats>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<AsyncValue<List<CoordinatorshipStats>>>(value),
+    );
   }
 }
 
 String _$coordinatorshipListHash() =>
-    r'63f8d271d099b094ec3e25a0abad2754587defe7';
+    r'14f48aab01cc2bedf1f193b249d40f81194a3c2a';

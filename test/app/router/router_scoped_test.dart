@@ -82,33 +82,14 @@ void main() {
     expect(gateRedirect(AppPhase.scoped, '/server'), '/home');
     expect(gateRedirect(AppPhase.unbound, '/tasks'), '/server');
     expect(gateRedirect(AppPhase.unbound, '/yok'), '/server');
-    expect(gateRedirect(AppPhase.unbound, '/dev/catalog'), '/server');
-    expect(
-      gateRedirect(AppPhase.unbound, '/dev/catalog', devCatalog: true),
-      isNull,
-    );
-    expect(gateRedirect(AppPhase.scoped, '/dev/catalog'), isNull);
-    // Prototip modu yalnız devCatalog ile; kapı rotaları normal kalır.
+    // Prototip modu (yalnız dev flavor): kabuk/feature rotaları açık; kapı rotaları normal kalır.
     expect(
       gateRedirect(AppPhase.unbound, '/tasks', devPrototype: true),
-      '/server',
-    );
-    expect(
-      gateRedirect(
-        AppPhase.unbound,
-        '/tasks',
-        devCatalog: true,
-        devPrototype: true,
-      ),
       isNull,
     );
+    expect(gateRedirect(AppPhase.unbound, '/home', devPrototype: true), isNull);
     expect(
-      gateRedirect(
-        AppPhase.unbound,
-        '/login',
-        devCatalog: true,
-        devPrototype: true,
-      ),
+      gateRedirect(AppPhase.unbound, '/login', devPrototype: true),
       '/server',
     );
   });
@@ -187,9 +168,11 @@ void main() {
       },
     );
 
-    testWidgets('scoped, prod: /dev/catalog tanımsız → 404', (tester) async {
+    testWidgets('scoped: kaldırılan /dev/catalog tanımsız → 404', (
+      tester,
+    ) async {
       final router = await _scoped(tester);
-      router.go(catalogPath);
+      router.go('/dev/catalog');
       await settle(tester);
       expect(find.byType(NotFoundPage), findsOneWidget);
     });

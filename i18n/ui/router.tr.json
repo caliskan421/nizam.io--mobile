@@ -12,7 +12,6 @@
     "ui.router.not_found_title": "Sayfa bulunamadı",
     "ui.router.not_found_message": "Aradığınız sayfa yok ya da kaldırılmış.",
     "ui.router.not_found_action": "Ana sayfaya dön",
-    "ui.router.dev_catalog_open": "Bileşen kataloğunu aç",
     "ui.router.tab_home_caption": "bugün",
     "ui.router.assistant": "Asistana sor",
     "ui.router.assistant_soon": "Asistan mobilde sonraki adımda eklenecek",

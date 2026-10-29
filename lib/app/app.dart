@@ -10,10 +10,8 @@ import '../core/providers.dart';
 import '../core/security/privacy_mask.dart';
 import '../core/ui/page/nz_app_nav.dart';
 import '../core/ui/theme/app_theme.dart';
-import 'dev/catalog_entry_button.dart';
 import 'router/app_nav.dart';
 import 'router/router.dart';
-import 'router/shell.dart' show openDevCatalog;
 
 /// Minimal kabuk: tema token'ları, TR yerelleştirme, durum makinesinden türetilen router ve
 /// arka plan maskesi. Ekran yoktur (D-0174).
@@ -28,13 +26,10 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
   late final ValueNotifier<AppPhase> _phase = ValueNotifier(
     ref.read(appPhaseProvider),
   );
-  // Prototip modu yalnız dev flavor'da vardır (katalogdan açılır; prod'da null).
-  late final ValueNotifier<bool>? _prototype =
-      ref.read(flavorProvider) == Flavor.dev ? ValueNotifier(false) : null;
+  // Prototip modu yalnız dev flavor'da: oturumsuz, örnek veriyle ana sayfadan açılır.
   late final GoRouter _router = createRouter(
     _phase,
-    devCatalog: ref.read(flavorProvider) == Flavor.dev,
-    devPrototype: _prototype,
+    devPrototype: ref.read(flavorProvider) == Flavor.dev,
   );
   late final NzAppNav _nav = GoRouterAppNav(_router, ref);
   final PrivacyMaskController _mask = PrivacyMaskController();
@@ -45,26 +40,11 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
   void dispose() {
     _router.dispose();
     _phase.dispose();
-    _prototype?.dispose();
     _mask.dispose();
     super.dispose();
   }
 
   bool get _isDev => ref.watch(flavorProvider) == Flavor.dev;
-
-  /// Dev flavor'da katalog giriş noktası (her fazda; katalog fazdan muaftır). Prod'da ağaca
-  /// hiç eklenmez.
-  Widget _withDevEntry(Widget child) => !_isDev
-      ? child
-      : Stack(
-          textDirection: TextDirection.ltr,
-          children: [
-            child,
-            CatalogEntryButton(onOpen: _openCatalog),
-          ],
-        );
-
-  void _openCatalog() => openDevCatalog(_router);
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +68,7 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
         nav: _nav,
         child: PrivacyMask(
           controller: _mask,
-          child: _withDevEntry(child ?? const SizedBox.shrink()),
+          child: child ?? const SizedBox.shrink(),
         ),
       ),
     );

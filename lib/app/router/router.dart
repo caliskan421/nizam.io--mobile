@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/app_phase.dart';
-import '../dev/catalog_page.dart';
 import 'pages.dart';
 import 'routes.dart';
 import 'transitions.dart';
@@ -23,13 +22,9 @@ String routeForPhase(AppPhase phase) => switch (phase) {
   AppPhase.scoped => const HomeRoute().location,
 };
 
-/// Bileşen kataloğu rotası (yalnız dev flavor; [createRouter] `devCatalog: true`).
-const catalogPath = '/dev/catalog';
-
 /// Faz kapısı: [location] için yönlendirme hedefi; null → konumda kalınır.
 ///
-/// - Katalog (yalnız `devCatalog` açıkken) fazdan muaftır.
-/// - Prototip modu (yalnız `devCatalog` açıkken ve [devPrototype] true): oturum/kapsam olmadan
+/// - Prototip modu (yalnız dev flavor, [devPrototype] true): oturum/kapsam olmadan
 ///   kabuk ve feature rotaları açılır (ekranlar geliştirme örnek verisiyle çalışır; backend
 ///   isteği atan ekranlar hata görünümüne düşer). Kapı rotaları normal kalır. Prod'da yoktur.
 /// - `scoped` dışındaki her fazda yalnız faz hedefi açıktır: başka her yol (kabuk rotaları,
@@ -40,12 +35,9 @@ const catalogPath = '/dev/catalog';
 String? gateRedirect(
   AppPhase phase,
   String location, {
-  bool devCatalog = false,
   bool devPrototype = false,
 }) {
-  if (devCatalog && location == catalogPath) return null;
-  if (devCatalog &&
-      devPrototype &&
+  if (devPrototype &&
       (location == routeForPhase(AppPhase.scoped) ||
           !_gatePaths.contains(location))) {
     return null;
@@ -68,38 +60,24 @@ final Set<String> _gatePaths = {
 /// Router hiçbir servisi çağırmaz; yalnız [phase]'i okur. [featureRoutes] feature rota
 /// kaydıdır (varsayılan: [registeredFeatureRoutes]).
 ///
-/// [devPrototype]: yalnız dev flavor'da verilir (katalogdaki "Prototype" düğmesi açar).
+/// [devPrototype]: yalnız dev flavor'da true verilir; uygulama ana sayfada, örnek veriyle açılır.
 GoRouter createRouter(
   ValueNotifier<AppPhase> phase, {
-  bool devCatalog = false,
-  ValueNotifier<bool>? devPrototype,
+  bool devPrototype = false,
   List<RouteBase>? featureRoutes,
 }) => GoRouter(
-  initialLocation: routeForPhase(phase.value),
-  refreshListenable: devPrototype == null
-      ? phase
-      : Listenable.merge([phase, devPrototype]),
+  initialLocation: devPrototype
+      ? routeForPhase(AppPhase.scoped)
+      : routeForPhase(phase.value),
+  refreshListenable: phase,
   redirect: (context, state) => gateRedirect(
     phase.value,
     state.matchedLocation,
-    devCatalog: devCatalog,
-    devPrototype: devPrototype?.value ?? false,
+    devPrototype: devPrototype,
   ),
   errorPageBuilder: (context, state) =>
       nzTransitionPage<void>(state: state, child: const NotFoundPage()),
   routes: [
     ...buildAppRoutes(featureRoutes: featureRoutes ?? registeredFeatureRoutes),
-    if (devCatalog)
-      GoRoute(
-        path: catalogPath,
-        builder: (context, state) => CatalogPage(
-          onOpenPrototype: devPrototype == null
-              ? null
-              : () {
-                  devPrototype.value = true;
-                  context.go(const HomeRoute().location);
-                },
-        ),
-      ),
   ],
 );

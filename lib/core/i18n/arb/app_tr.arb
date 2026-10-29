@@ -2553,10 +2553,6 @@
   "@uiRouterNotFoundAction": {
     "description": "ui.router.not_found_action"
   },
-  "uiRouterDevCatalogOpen": "Bileşen kataloğunu aç",
-  "@uiRouterDevCatalogOpen": {
-    "description": "ui.router.dev_catalog_open"
-  },
   "uiRouterTabHomeCaption": "bugün",
   "@uiRouterTabHomeCaption": {
     "description": "ui.router.tab_home_caption"

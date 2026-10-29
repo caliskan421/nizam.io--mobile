@@ -25,7 +25,7 @@ başlangıç değerlerini kaydeder.
 | 4 | "Base view" | Soyut sınıf hiyerarşisi **yok**; bileşim: `NzPage` (kabuk) + `NzAsyncView` (durum görünümü) + `WidgetRef` uzantıları (`listenErrors`, `listenSuccess`). |
 | 5 | `connectivity_plus` | Eklenir (bağımlılık). Yalnız ipucu; asıl ölçüt sunucu yanıtıdır (A3b). Çevrimiçine dönüşte otomatik yeniden deneme yok. |
 | 6 | `go_router_builder` | Eklenir (dev bağımlılığı); tipli rotalar, nesne değil kimlik taşınır (A5). |
-| 7 | Widget kataloğu | Uygulama içi dev rotası `lib/app/dev/catalog_page.dart` (yalnız dev flavor); widgetbook eklenmez. |
+| 7 | Widget kataloğu | ~~Uygulama içi dev rotası `lib/app/dev/catalog_page.dart`~~ — 2026-10-29 ürün sahibi isteğiyle kaldırıldı (giriş ikonu, sayfa ve kayıtları). Kit bileşenleri golden + davranış testleriyle doğrulanır; dev flavor prototip modunda (oturumsuz ana sayfa, örnek veri) açılır. Widgetbook eklenmez. |
 | 8 | Golden altyapısı | Flutter yerleşik `matchesGoldenFile`; referans **yalnız Linux'ta** üretilir ve doğrulanır (CI tek platform). Golden testleri etiketle ayrılır; macOS'ta `make test` golden koşmaz. Üretim yolu O1/W02'nin kurduğu araçtır (`Makefile` / CI; yol README'de). Yerel macOS çıktısı commit'lenmez. |
 | 9 | `riverpod_lint` | Eklenmez; analyzer eklenti desteği netleşince ayrı PR ile değerlendirilir. |
 | 10 | Kapsama eşikleri (Q1) | Satır kapsaması: `lib/core/**` %80 · `lib/features/*/application/**` %80 · `lib/features/*/data/**` %80 · `lib/features/*/presentation/**` %60 · `lib/core/ui/widgets/**` %70 (bu dizin `lib/core/**` eşiğinden ayrı ölçülür). Üretilmiş dosyalar (`generated/`, `*.g.dart`, `*.freezed.dart`) hariç. Eşik **yalnız ADR ile** değişir; geçiş notu yok (Ek B: bugün hepsi eşik üstünde). |

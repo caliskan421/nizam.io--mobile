@@ -13,7 +13,6 @@ import '../../features/archive/archive.dart';
 import '../../features/coordinatorships/coordinatorships.dart';
 import '../../features/messages/messages.dart';
 import '../../features/tasks/tasks.dart';
-import 'router.dart' show catalogPath;
 import 'routes.dart';
 
 /// Alt menünün üçüncü öğesi: son girilen modül (README "Gezinme"). Üçü aynı kabuk dalındadır.
@@ -226,11 +225,4 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
       ],
     ),
   );
-}
-
-/// Dev flavor'daki katalog girişi için: katalogu yığına koyar (zaten katalogdaysa dokunmaz).
-/// Dize tabanlı gezinme (N1) yalnız `lib/app/router/**` içindedir; katalog rotası fazdan muaf.
-void openDevCatalog(GoRouter router) {
-  if (router.routeInformationProvider.value.uri.path == catalogPath) return;
-  router.push(catalogPath);
 }

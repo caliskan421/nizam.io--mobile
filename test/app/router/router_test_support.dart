@@ -19,19 +19,14 @@ import '../../support/harness.dart';
 Future<GoRouter> pumpRouter(
   WidgetTester tester,
   ValueNotifier<AppPhase> phase, {
-  bool devCatalog = false,
-  ValueNotifier<bool>? devPrototype,
+  bool devPrototype = false,
   double width = 800,
   double height = 1200,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = Size(width, height);
   addTearDown(tester.view.reset);
-  final router = createRouter(
-    phase,
-    devCatalog: devCatalog,
-    devPrototype: devPrototype,
-  );
+  final router = createRouter(phase, devPrototype: devPrototype);
   addTearDown(router.dispose);
   await pumpRouterWidget(tester, router);
   return router;

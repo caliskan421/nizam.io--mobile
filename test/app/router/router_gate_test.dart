@@ -120,15 +120,15 @@ void main() {
   });
 
   testWidgets(
-    'platform derin bağlantısı yönlendiriciye ulaşır (kanıt: katalog muaf)',
+    'platform derin bağlantısı yönlendiriciye ulaşır (kanıt: scoped fazında açık rota)',
     (tester) async {
-      // Derin bağlantı testlerinin boş geçmediğinin kanıtı: muaf rota bağlantıyla açılır.
-      final notifier = ValueNotifier(AppPhase.unbound);
+      // Derin bağlantı testlerinin boş geçmediğinin kanıtı: açık rota bağlantıyla açılır.
+      final notifier = ValueNotifier(AppPhase.scoped);
       addTearDown(notifier.dispose);
-      final router = await pumpRouter(tester, notifier, devCatalog: true);
-      await tester.binding.handlePushRoute(catalogPath);
+      final router = await pumpRouter(tester, notifier);
+      await tester.binding.handlePushRoute('/profile');
       await settle(tester);
-      expect(locationOf(router), catalogPath);
+      expect(locationOf(router), '/profile');
     },
   );
 }

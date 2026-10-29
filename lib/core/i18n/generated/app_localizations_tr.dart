@@ -2018,9 +2018,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiRouterNotFoundAction => 'Ana sayfaya dön';
 
   @override
-  String get uiRouterDevCatalogOpen => 'Bileşen kataloğunu aç';
-
-  @override
   String get uiRouterTabHomeCaption => 'bugün';
 
   @override

@@ -3922,12 +3922,6 @@ abstract class AppLocalizations {
   /// **'Ana sayfaya dön'**
   String get uiRouterNotFoundAction;
 
-  /// ui.router.dev_catalog_open
-  ///
-  /// In tr, this message translates to:
-  /// **'Bileşen kataloğunu aç'**
-  String get uiRouterDevCatalogOpen;
-
   /// ui.router.tab_home_caption
   ///
   /// In tr, this message translates to:

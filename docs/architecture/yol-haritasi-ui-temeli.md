@@ -324,7 +324,7 @@ akış testi. Bu dilim sonraki her feature'ın şablonudur.
       bölünür; `const` yapıcı.
 - [ ] Controller'da iş kuralı yok; servis/repository'de. Controller DTO görmez.
 - [ ] Kullanıcı metni yalnız ARB'den (`context.l10n`); hata metni yalnız `errorText`.
-- [ ] Yeni kit bileşeni: katalog girişi + golden + davranış testi.
+- [ ] Yeni kit bileşeni: golden + davranış testi.
 - [ ] Yeni tercih: `AppPreferences` adlandırılmış metot + controller + sağlayıcı.
 - [ ] Yeni rota: tipli rota sınıfı; nesne değil kimlik taşır.
 - [ ] Uyarlanabilirlik: compact ve expanded'da test edildi; metin ölçeği 2.0'da taşma yok.

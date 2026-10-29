@@ -1,10 +1,10 @@
 import 'package:meta/meta.dart';
 
-/// Mesaj tepkisi (mesaj başına bir tane).
+/// Mesaj tepkisi (mesaj başına bir tane). Sunucuda yok — entegrasyonda karar.
 enum ChatReaction { like, heart, check, star }
 
 /// Mesaj atfının türü: portal görevi, koordinatörlük, arşiv dosyası ya da cihazdan eklenen
-/// fotoğraf/belge.
+/// fotoğraf/belge. Sunucuda yok (mesaj düz metindir) — entegrasyonda karar.
 enum ChatRefKind { task, coordinatorship, file, photo, document }
 
 /// Mesajdaki atıf. [id] görev/koordinatörlük kodu ya da dosya adıdır.
@@ -29,7 +29,7 @@ final class ChatRef {
   int get hashCode => Object.hash(kind, id);
 }
 
-/// Mesaja eklenmiş arşiv dosyası.
+/// Mesaja eklenmiş arşiv dosyası. Sunucuda yok — entegrasyonda karar.
 @immutable
 final class ChatFile {
   const ChatFile({
@@ -55,7 +55,7 @@ final class ChatPollOption {
   final int votes;
 }
 
-/// Anket (çoklu seçim). [meta] "Çoklu seçim · isimli" ve [deadline] "son 25 Ekim 18:00" örnek
+/// Anket (çoklu seçim). Sunucuda yok — entegrasyonda karar. [meta] "Çoklu seçim · isimli" ve [deadline] "son 25 Ekim 18:00" örnek
 /// veridir (sunucu metni).
 @immutable
 final class ChatPoll {
@@ -122,7 +122,13 @@ final class ChatPoll {
   );
 }
 
-/// Sohbet mesajı. [from] görev kataloğundaki kişi kimliğidir.
+/// Sohbet mesajı. [from] örnek veride görev kataloğundaki kişi kimliğidir; sunucudan gelen
+/// mesajda gönderenin hesap kimliğidir (`Message.sender_account_id`).
+///
+/// Sunucu eşlemesi (`data/message_api_repository.dart`): [id] ← `message_id`, [from] ←
+/// `sender_account_id`, [to] ← `receiver_account_id`, [at] ← `created_at`, [text] ← `content`,
+/// [read] ← `is_read`, [readAt] ← `read_at`. Konu, kutu yönü ve görünen adlar [ChatMessage]'a
+/// değil `MailboxMessage`'a (`mailbox.dart`) girer.
 @immutable
 final class ChatMessage {
   const ChatMessage({
@@ -130,6 +136,8 @@ final class ChatMessage {
     required this.from,
     required this.at,
     required this.text,
+    this.to,
+    this.readAt,
     this.reactions = const {},
     this.myReaction,
     this.read = false,
@@ -145,20 +153,38 @@ final class ChatMessage {
   final String from;
   final DateTime at;
   final String text;
+
+  /// Alıcının hesap kimliği (`receiver_account_id`); örnek veride ve grup sohbetinde `null`.
+  final String? to;
+
+  /// Alıcının mesajı ilk okuduğu an (`read_at`); okunmadıysa ya da örnek veride `null`.
+  final DateTime? readAt;
+
+  /// Sunucuda yok — entegrasyonda karar.
   final Map<ChatReaction, int> reactions;
+
+  /// Sunucuda yok — entegrasyonda karar.
   final ChatReaction? myReaction;
 
-  /// Kendi mesajında: karşı taraf okudu.
+  /// Alıcı okudu (`is_read`). Kendi mesajında: karşı taraf okudu; gelen mesajda: ben okudum.
   final bool read;
 
-  /// Kendi mesajında: sunucuya ulaştı (gönderilirken false).
+  /// Kendi mesajında: sunucuya ulaştı (gönderilirken false). İstemci durumu; sunucu alanı değil.
   final bool sent;
+
+  /// Sunucuda yok (yanıt zinciri) — entegrasyonda karar.
   final String? replyTo;
+
+  /// Sunucuda yok (ek dosya) — entegrasyonda karar.
   final ChatFile? file;
+
+  /// Sunucuda yok (düzenleme ucu yok) — entegrasyonda karar.
   final bool edited;
+
+  /// Sunucuda yok — entegrasyonda karar.
   final ChatPoll? poll;
 
-  /// Yazma alanında eklenen atıflar.
+  /// Yazma alanında eklenen atıflar. Sunucuda yok — entegrasyonda karar.
   final List<ChatRef> refs;
 
   /// Önizleme/alıntı metni: anket sorusu ya da metin.
@@ -177,6 +203,8 @@ final class ChatMessage {
     from: from,
     at: at,
     text: text ?? this.text,
+    to: to,
+    readAt: readAt,
     reactions: reactions ?? this.reactions,
     myReaction: myReaction == null ? this.myReaction : myReaction(),
     read: read ?? this.read,
@@ -211,7 +239,10 @@ final class ChatMessage {
   }
 }
 
-/// Sohbet (grup ya da birebir).
+/// Sohbet (grup ya da birebir). Sunucuda konuşma kavramı yoktur: birebir sohbet, gelen ve
+/// giden kutularındaki `MailboxMessage`'ların karşı tarafa göre birleşimidir (istemcide).
+/// [group], [members], [mention], [pins], [newBefore], [typing], [online], [lastSeen] ve
+/// [muted] sunucuda yok — entegrasyonda karar.
 @immutable
 final class Chat {
   const Chat({
@@ -297,7 +328,9 @@ final class Chat {
       copyWith(messages: [for (final m in messages) m.id == id ? f(m) : m]);
 }
 
-/// Mesajlar kutusu: sohbetler (liste sırasıyla) ve bahsedilebilir kişiler.
+/// Mesajlar kutusu: sohbetler (liste sırasıyla) ve bahsedilebilir kişiler. Sunucu karşılığı
+/// `MessageRepository` (`message_repository.dart`): [people] ≈ alıcı adayları
+/// (`MessageRecipientGroup`), [unreadChats] sunucuda yok (sunucu toplamı mesaj sayısıdır).
 @immutable
 final class ChatInbox {
   ChatInbox({required List<Chat> chats, required List<String> people})

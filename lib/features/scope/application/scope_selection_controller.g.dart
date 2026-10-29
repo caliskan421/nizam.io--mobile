@@ -40,7 +40,7 @@ final class ScopeSelectionControllerProvider
 }
 
 String _$scopeSelectionControllerHash() =>
-    r'49e22bdf781d662123b66283d1101e298b0fe7a3';
+    r'27950b19e9fb6071ca93c5cc2aefe4a860467a0c';
 
 /// Kapsam seçimi eylemleri. Seçimin sonucu durum değildir: `scopeStateProvider` değişir, faz
 /// makinesi (`sessionOpen` ↔ `scoped`) ekranı yönlendirir; durum yalnız eylemin hatasıdır.

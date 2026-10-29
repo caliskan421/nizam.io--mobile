@@ -4576,6 +4576,12 @@ abstract class AppLocalizations {
   /// **'Hesabınıza atanmış bir program bulunmuyor. Yöneticinizle görüşün.'**
   String get uiScopeEmptyMessage;
 
+  /// ui.scope.continue_with_sample
+  ///
+  /// In tr, this message translates to:
+  /// **'Örnek verilerle devam et'**
+  String get uiScopeContinueWithSample;
+
   /// ui.scope.truncated
   ///
   /// In tr, this message translates to:

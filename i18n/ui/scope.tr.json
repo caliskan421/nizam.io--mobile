@@ -5,6 +5,7 @@
     "ui.scope.intro": "Çalışacağınız programı seçin.",
     "ui.scope.empty_title": "Program yok",
     "ui.scope.empty_message": "Hesabınıza atanmış bir program bulunmuyor. Yöneticinizle görüşün.",
+    "ui.scope.continue_with_sample": "Örnek verilerle devam et",
     "ui.scope.truncated": "Liste en çok 200 programı gösterir; bazı programlar görünmüyor olabilir.",
     "ui.scope.home_change": "Kapsamı değiştir"
   }

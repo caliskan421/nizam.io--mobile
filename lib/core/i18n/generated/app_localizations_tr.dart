@@ -2362,6 +2362,9 @@ class AppLocalizationsTr extends AppLocalizations {
       'Hesabınıza atanmış bir program bulunmuyor. Yöneticinizle görüşün.';
 
   @override
+  String get uiScopeContinueWithSample => 'Örnek verilerle devam et';
+
+  @override
   String get uiScopeTruncated =>
       'Liste en çok 200 programı gösterir; bazı programlar görünmüyor olabilir.';
 

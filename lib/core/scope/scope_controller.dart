@@ -7,11 +7,24 @@ import 'scope_store.dart';
 /// departman seçimi ister; seçim yoksa istek GÖNDERİLMEZ (`client.scope_missing`).
 @immutable
 final class ScopeSelection {
-  const ScopeSelection({this.programId, this.departmentId});
+  const ScopeSelection({
+    this.programId,
+    this.departmentId,
+    this.sample = false,
+  });
   final String? programId;
   final String? departmentId;
 
-  bool get hasProgram => programId != null && programId!.isNotEmpty;
+  /// Örnek kapsam (ürün sahibi 2026-10-29): oturum açık ama program yokken kabuk statik örnek
+  /// verilerle açılır. Program kimliği YOKTUR: S2/S3 istekleri ara katmanda reddedilir
+  /// (`client.scope_missing`), sunucuya sahte kimlik gitmez. Kalıcılaştırılmaz.
+  final bool sample;
+
+  /// Kabuk açık mı (`scoped` fazı): gerçek program seçimi ya da örnek kapsam.
+  bool get hasProgram => sample || (programId != null && programId!.isNotEmpty);
+
+  /// Sunucuya gönderilebilir program kimliği var mı (örnek kapsamda yok).
+  bool get hasServerProgram => programId != null && programId!.isNotEmpty;
   bool get hasDepartment => departmentId != null && departmentId!.isNotEmpty;
 }
 
@@ -54,6 +67,13 @@ class ScopeController {
   void selectProgram(String programId) {
     _state.value = ScopeSelection(programId: programId);
     _persistSelection();
+  }
+
+  /// Örnek kapsam: kabuk statik verilerle açılır; depoya yazılmaz ([ScopeSelection.sample]).
+  void selectSample() {
+    _generation++;
+    _state.value = const ScopeSelection(sample: true);
+    _enqueue(_delete);
   }
 
   void selectDepartment(String departmentId) {
@@ -108,7 +128,7 @@ class ScopeController {
       // Kuyrukta beklerken çıkış/yeniden bağlanma olduysa yazılmaz.
       if (gen != _generation) return;
       final sel = _state.value;
-      if (!sel.hasProgram) return;
+      if (!sel.hasServerProgram) return;
       if (!await _attempt(() => store.save(owner, sel))) {
         Log.warn('kapsam: seçim kalıcılaştırılamadı; yalnız bellekte');
       }

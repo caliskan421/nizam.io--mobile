@@ -1,6 +1,7 @@
 // ScopePage: program listesi, boş durum, program.not_authorized, seçim; sunucu iletisi
 // gösterilmez. compact + expanded.
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/scope/scope_store.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/errors/api_error.dart';
@@ -66,6 +67,30 @@ void main() {
     expect(find.text(_l.uiScopeEmptyTitle), findsOneWidget);
     expect(find.byType(NzListTile), findsNothing);
   }, sizes: pilotSizes);
+
+  testScreens(
+    'program yok → "örnek verilerle devam et": scoped, program kimliği yok, depoya yazılmaz',
+    (tester, screen) async {
+      useScreen(tester, screen);
+      final backend = PilotBackend()..programs = [];
+      final h = await real(tester, () => pilotHarness(backend, signedIn: true));
+      await pumpScreen(tester, h, const ScopePage());
+      await settle(tester);
+      await tester.tap(find.text(_l.uiScopeContinueWithSample));
+      await settle(tester);
+      final sel = h.read(scopeStateProvider);
+      expect(sel.sample, isTrue);
+      expect(sel.programId, isNull);
+      expect(sel.hasServerProgram, isFalse);
+      expect(h.read(appPhaseProvider), AppPhase.scoped);
+      expect(h.store.values.containsKey(ScopeStore.key), isFalse);
+      expect(
+        h.backend.requests.where((r) => r.header('X-Nizamio-Program') != null),
+        isEmpty,
+      );
+    },
+    sizes: pilotSizes,
+  );
 
   testScreens(
     'program.not_authorized → NzErrorState, errorText; sunucu iletisi yok',

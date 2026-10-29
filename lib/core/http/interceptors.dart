@@ -117,7 +117,9 @@ class ApiGuardInterceptor extends Interceptor {
         // İlk gönderim: güncel kapsam yakalanır; tekrar aynı kapsamla gider.
         final sel = scope?.current;
         st
-          ..programId = (sel != null && sel.hasProgram) ? sel.programId : null
+          ..programId = (sel != null && sel.hasServerProgram)
+              ? sel.programId
+              : null
           ..departmentId = (sel != null && sel.hasDepartment)
               ? sel.departmentId
               : null;

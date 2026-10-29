@@ -17,6 +17,9 @@ class ScopeSelectionController extends _$ScopeSelectionController {
     state = await AsyncValue.guard(() async => service.select(programId));
   }
 
+  /// Program yokken statik örnek verilerle kabuğa geçer (örnek kapsam; sunucuya istek yok).
+  void selectSample() => ref.read(scopeServiceProvider).selectSample();
+
   /// Seçimi kaldırır ("kapsamı değiştir").
   Future<void> clear() async {
     final service = ref.read(scopeServiceProvider);

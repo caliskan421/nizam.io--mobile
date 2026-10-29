@@ -14,7 +14,7 @@ class CurrentProgramController extends _$CurrentProgramController {
   @override
   Future<Program?> build() {
     final selection = ref.watch(scopeStateProvider);
-    if (!selection.hasProgram) return Future.value();
+    if (!selection.hasServerProgram) return Future.value();
     return ref.read(scopeServiceProvider).currentProgram();
   }
 }

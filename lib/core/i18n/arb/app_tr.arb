@@ -2989,6 +2989,10 @@
   "@uiScopeEmptyMessage": {
     "description": "ui.scope.empty_message"
   },
+  "uiScopeContinueWithSample": "Örnek verilerle devam et",
+  "@uiScopeContinueWithSample": {
+    "description": "ui.scope.continue_with_sample"
+  },
   "uiScopeTruncated": "Liste en çok 200 programı gösterir; bazı programlar görünmüyor olabilir.",
   "@uiScopeTruncated": {
     "description": "ui.scope.truncated"

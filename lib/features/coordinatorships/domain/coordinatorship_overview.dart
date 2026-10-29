@@ -1,8 +1,10 @@
 import 'package:meta/meta.dart';
 
 import '../../../core/domain/turkish_collation.dart';
+import '../../scope/scope.dart' show DepartmentRole;
 import '../../tasks/tasks.dart';
 import 'coordinatorship_profile.dart';
+import 'department.dart' show MemberStatus;
 
 /// Koordinatörlük listesinin sıralama ölçütü (prototip kısayol menüsü: ad / gecikme /
 /// ilerleme).
@@ -98,20 +100,33 @@ final class AttentionItem {
   final int overdueDays;
 }
 
-/// Ekip satırı (koordinatör ya da üye) ve bağlı olduğu birim.
+/// Ekip satırı (koordinatör ya da üye) ve bağlı olduğu birim. Sunucuda departman üye
+/// listesinin (`GET /v1/departments/{id}/members`, `RosterMember`) satırıdır: [name] ↔
+/// `full_name`, [lead] ↔ `role == koordinator`; [accountId], [membershipId], [role] ve
+/// [status] yalnız sunucudan eşlenen satırda doludur (örnek veride `null`).
 @immutable
 final class TeamMember {
   const TeamMember({
     required this.name,
-    required this.unit,
     required this.lead,
+    this.unit = '',
+    this.accountId,
+    this.membershipId,
+    this.role,
+    this.status,
   });
 
   final String name;
 
-  /// Alt birim adı (yoksa üst birim).
+  /// Alt birim adı (yoksa üst birim). Sunucuda yok — alt birim kavramı backend'de
+  /// bulunmaz; sunucudan eşlenen satırda boş dizgedir (entegrasyonda karar).
   final String unit;
   final bool lead;
+
+  final String? accountId;
+  final String? membershipId;
+  final DepartmentRole? role;
+  final MemberStatus? status;
 }
 
 /// Son etkinlik satırı (yapanın adı çözülmüş).

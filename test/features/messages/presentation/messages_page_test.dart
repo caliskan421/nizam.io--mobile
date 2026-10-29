@@ -18,7 +18,14 @@ final _l = AppLocalizationsTr();
 Future<(Harness, RecordingAppNav)> _open(
   WidgetTester tester, {
   bool dark = false,
+  bool tall = false,
 }) async {
+  if (tall) {
+    // Satırlar tembel kurulur: 8 sohbetin hepsi görünsün.
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 1400);
+    addTearDown(tester.view.reset);
+  }
   final h = await real(
     tester,
     () => pilotHarness(PilotBackend(), signedIn: true),
@@ -43,7 +50,7 @@ void main() {
   testWidgets('satırlar: son mesaj, saat, okunmamış; sohbet açılır', (
     tester,
   ) async {
-    final (_, nav) = await _open(tester);
+    final (_, nav) = await _open(tester, tall: true);
     expect(find.text(_l.uiMessagesTitle), findsOneWidget);
     expect(find.byType(NzChatRow), findsNWidgets(8));
     expect(find.text('Genel'), findsOneWidget);
@@ -80,27 +87,30 @@ void main() {
     expect(find.text(_l.uiMessagesEmpty), findsOneWidget);
   });
 
-  testWidgets('yeni mesaj: kişi seçimi var olan sohbeti açar', (tester) async {
+  testWidgets('yeni mesaj: prototip yer tutucu bildirimi', (tester) async {
     final (_, nav) = await _open(tester);
     await _tap(tester, find.byIcon(Icons.edit_outlined).first);
-    expect(find.text(_l.uiMessagesNewChatHint), findsOneWidget);
-    await _tap(
-      tester,
-      find.text('Kerem Özdal · ${_l.uiMessagesRoleCoordinator}'),
-    );
-    expect(nav.calls, ['chat:kadir']);
-    await _tap(tester, find.byIcon(Icons.edit_outlined).first);
-    await _tap(
-      tester,
-      find.text('Yusuf Çevik · ${_l.uiMessagesRoleCoordinator}'),
-    );
     expect(find.text(_l.uiMessagesNewChatSoon), findsOneWidget);
+    expect(nav.calls, isEmpty);
+  });
+
+  testWidgets('geri dönüşte süzgeç ve arama korunur', (tester) async {
+    final (h, _) = await _open(tester);
+    await _tap(tester, find.byIcon(Icons.search_rounded).first);
+    await tester.enterText(find.byType(TextField).first, 'trafo');
+    await settle(tester);
+    await pumpScreen(tester, h, const SizedBox.shrink());
+    await settle(tester);
+    await pumpScreen(tester, h, const MessagesPage());
+    await settle(tester);
+    expect(find.text('trafo'), findsOneWidget);
+    expect(find.byType(NzChatRow), findsNWidgets(2));
   });
 
   testWidgets('kısayol: okunmamışlar süzgeci; tümünü okundu say', (
     tester,
   ) async {
-    final (h, _) = await _open(tester);
+    final (h, _) = await _open(tester, tall: true);
     h.read(shellReselectEventsProvider.notifier).fire(MessagesPage.shellTab);
     await settle(tester);
     await tester.tap(find.text(_l.uiMessagesUnreadOnly));

@@ -13,7 +13,6 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/lists/lists.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
-import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
@@ -37,7 +36,10 @@ class MessagesPage extends ConsumerStatefulWidget {
 }
 
 class _MessagesPageState extends ConsumerState<MessagesPage> {
-  final _search = TextEditingController();
+  // Denetleyici durumu sayfadan uzun yaşar (keepAlive): geri dönüşte sorgu kutuda kalır.
+  late final _search = TextEditingController(
+    text: ref.read(messagesControllerProvider).query,
+  );
   final _focus = FocusNode();
 
   @override
@@ -95,41 +97,8 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
     );
   }
 
-  /// Yeni mesaj: kişi seçimi; o kişiyle sohbet varsa açılır, yoksa yer tutucu bildirimi.
-  void _newChat() {
-    final l = context.l10n;
-    final inbox = ref.read(chatsControllerProvider).value;
-    final catalog = ref.read(taskCatalogControllerProvider).value;
-    if (inbox == null || catalog == null) return;
-    final nav = context.appNav;
-    void toast(String m) => NzToast.show(context, m);
-    NzBottomSheet.show<void>(
-      context,
-      title: l.uiMessagesNewMessage,
-      description: l.uiMessagesNewChatHint,
-      builder: (sheet) => NzMenuGroup(
-        rows: [
-          for (final id in inbox.people)
-            if (catalog.person(id) case final p?)
-              NzMenuRow(
-                icon: Icons.person_outline_rounded,
-                label: '${p.name} · ${l.role(p.role)}',
-                onTap: () {
-                  Navigator.of(sheet).pop();
-                  final dm = inbox.chats
-                      .where((c) => !c.group && c.person == id)
-                      .firstOrNull;
-                  if (dm != null) {
-                    nav.openChat(dm.id);
-                  } else {
-                    toast(l.uiMessagesNewChatSoon);
-                  }
-                },
-              ),
-        ],
-      ),
-    );
-  }
+  /// Yeni mesaj: prototip gibi yer tutucu bildirimi (sohbet oluşturma sonraki adımda).
+  void _newChat() => NzToast.show(context, context.l10n.uiMessagesNewChatSoon);
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +114,8 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
     void retry() => ref
       ..invalidate(chatsControllerProvider)
       ..invalidate(taskCatalogControllerProvider);
+    final box = inbox.value;
+    final cat = catalog.value;
     return NzPage.feed(
       onRetry: retry,
       topBar: const RootTopBar(),
@@ -182,29 +153,30 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
           ),
         ),
         const Gap(NizamioSpacing.space3),
-        NzAsyncView<ChatInbox>(
-          value: inbox,
-          onRetry: retry,
-          data: (box) => NzAsyncView<TaskCatalog>(
-            value: catalog,
+        if (box == null || cat == null)
+          NzAsyncView<ChatInbox>(
+            value: inbox,
             onRetry: retry,
-            data: (cat) => _List(inbox: box, catalog: cat, view: view),
-          ),
-        ),
+            data: (_) => NzAsyncView<TaskCatalog>(
+              value: catalog,
+              onRetry: retry,
+              data: (_) => const SizedBox.shrink(),
+            ),
+          )
+        else
+          // Sohbet satırları ayrı akış öğeleridir (tembel kurulum; uzun kutuda yalnız
+          // görünenler kurulur).
+          ..._list(context, box, cat, view),
       ],
     );
   }
-}
 
-class _List extends ConsumerWidget {
-  const _List({required this.inbox, required this.catalog, required this.view});
-
-  final ChatInbox inbox;
-  final TaskCatalog catalog;
-  final MessagesViewState view;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  List<Widget> _list(
+    BuildContext context,
+    ChatInbox inbox,
+    TaskCatalog catalog,
+    MessagesViewState view,
+  ) {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
@@ -213,53 +185,58 @@ class _List extends ConsumerWidget {
       filter: view.filter,
       query: view.query,
     );
-    final ctrl = ref.read(messagesControllerProvider.notifier);
     final filters = [
       (ChatFilter.all, l.uiMessagesFilterAll, 0),
       (ChatFilter.unread, l.uiMessagesFilterUnread, inbox.unreadChats),
       (ChatFilter.groups, l.uiMessagesFilterGroups, 0),
       (ChatFilter.people, l.uiMessagesFilterPeople, 0),
     ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Semantics(
-          container: true,
-          label: l.uiMessagesFilters,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              spacing: 6,
-              children: [
-                for (final (f, label, n) in filters)
-                  _FilterPill(
-                    label: label,
-                    count: n,
-                    selected: view.filter == f,
-                    onTap: () => ctrl.setFilter(f),
-                  ),
-              ],
-            ),
+    return [
+      Semantics(
+        container: true,
+        label: l.uiMessagesFilters,
+        // Prototip `.rp-wheel`: haplar kenar boşluğunun dışına taşarak kayar.
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          child: Row(
+            spacing: 6,
+            children: [
+              for (final (f, label, n) in filters)
+                _FilterPill(
+                  label: label,
+                  count: n,
+                  selected: view.filter == f,
+                  onTap: () => _ctrl.setFilter(f),
+                ),
+            ],
           ),
         ),
-        const Gap(NizamioSpacing.space2),
-        for (final chat in list) _row(context, chat),
-        if (list.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: NizamioSpacing.space8,
-            ),
-            child: Text(
-              l.uiMessagesEmpty,
-              textAlign: TextAlign.center,
-              style: t.caption.copyWith(color: c.textMuted),
-            ),
+      ),
+      const Gap(NizamioSpacing.space2),
+      for (final chat in list)
+        _ChatListRow(key: ValueKey(chat.id), chat: chat, catalog: catalog),
+      if (list.isEmpty)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: NizamioSpacing.space8),
+          child: Text(
+            l.uiMessagesEmpty,
+            textAlign: TextAlign.center,
+            style: t.caption.copyWith(color: c.textMuted),
           ),
-      ],
-    );
+        ),
+    ];
   }
+}
 
-  Widget _row(BuildContext context, Chat chat) {
+class _ChatListRow extends StatelessWidget {
+  const _ChatListRow({super.key, required this.chat, required this.catalog});
+
+  final Chat chat;
+  final TaskCatalog catalog;
+
+  @override
+  Widget build(BuildContext context) {
     final l = context.l10n;
     final last = chat.last;
     final mine = last.from == catalog.me;
@@ -274,29 +251,26 @@ class _List extends ConsumerWidget {
         : last.poll?.question ?? last.file?.name ?? '';
     final preview = who + body.replaceAll(RegExp(r'\s+'), ' ');
     final person = chat.person;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0),
-      child: NzChatRow(
-        name: chat.name,
-        initials: chatInitials(chat.name),
-        group: chat.group,
-        tone: person == null ? 0 : personTone(person, chat.name),
-        online: chat.online,
-        preview: preview,
-        time: l.listTime(last.at, catalog.today),
-        unread: chat.unread,
-        mention: chat.mention,
-        muted: chat.muted,
-        tick: !mine
-            ? NzChatTick.none
-            : last.read
-            ? NzChatTick.read
-            : NzChatTick.delivered,
-        semanticHint: chat.unread > 0
-            ? '${chat.unread} ${l.uiMessagesUnreadLc}'
-            : null,
-        onTap: () => context.appNav.openChat(chat.id),
-      ),
+    return NzChatRow(
+      name: chat.name,
+      initials: chatInitials(chat.name),
+      group: chat.group,
+      tone: person == null ? 0 : personTone(person, chat.name),
+      online: chat.online,
+      preview: preview,
+      time: l.listTime(last.at, catalog.today),
+      unread: chat.unread,
+      mention: chat.mention,
+      muted: chat.muted,
+      tick: !mine
+          ? NzChatTick.none
+          : last.read
+          ? NzChatTick.read
+          : NzChatTick.delivered,
+      semanticHint: chat.unread > 0
+          ? '${chat.unread} ${l.uiMessagesUnreadLc}'
+          : null,
+      onTap: () => context.appNav.openChat(chat.id),
     );
   }
 }

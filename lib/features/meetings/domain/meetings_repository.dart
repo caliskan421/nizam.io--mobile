@@ -3,7 +3,7 @@ import 'meeting.dart';
 
 /// Toplantı uçlarının kaynağı (domain portu; gerçekleştirme `data/meetings_api_repository.dart`).
 /// Bütün uçlar S2'dir: program başlığı ara katmandan, seçili kapsamdan gelir. Görünürlük sunucu
-/// kuralıdır (COLLABORATION-K19). Konferans uçları `v0.2.0-api`'de yoktur.
+/// kuralıdır (COLLABORATION-K19). Konferans uçları `v0.3.0-api` ile geldi.
 abstract interface class MeetingsRepository {
   /// `createMeeting`.
   Future<MeetingCreated> createMeeting(MeetingDraft draft);
@@ -80,4 +80,14 @@ abstract interface class MeetingsRepository {
 
   /// `convertNoteToTask`.
   Future<NoteConversion> convertNoteToTask(String noteId, NoteTaskDraft draft);
+
+  /// `startConference` — toplantının konferansını başlatır (yönetici ve bağlı departmanın
+  /// koordinatörü). Aktif konferans varsa yenisi açılmaz, mevcut döner.
+  Future<MeetingConference> startConference(String meetingId);
+
+  /// `endConference` — konferansı bitirir (aktif konferans yoksa da başarılıdır).
+  Future<void> endConference(String meetingId);
+
+  /// `joinConference` — katılım token'ı (toplantıyı gören her rol; hesap başına dakikada 30).
+  Future<ConferenceJoinToken> joinConference(String meetingId);
 }

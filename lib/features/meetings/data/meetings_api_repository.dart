@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/generated/clients/collaboration_client.dart';
 import '../../../core/api/generated/models/agenda_item.dart' as api;
 import '../../../core/api/generated/models/agenda_item_request.dart';
+import '../../../core/api/generated/models/conference.dart' as api;
 import '../../../core/api/generated/models/convert_note_request.dart';
 import '../../../core/api/generated/models/convert_note_request_priority.dart';
 import '../../../core/api/generated/models/create_meeting_request.dart';
@@ -128,6 +129,8 @@ class ApiMeetingsRepository implements MeetingsRepository {
       participants: List.unmodifiable(r.participants.map(_participant)),
       agenda: List.unmodifiable(r.agenda.map(_agenda)),
       notes: _notes(r.notes),
+      conference: r.conference == null ? null : _conference(r.conference!),
+      conferenceAvailable: r.conferenceAvailable,
     );
   }
 
@@ -283,6 +286,43 @@ class ApiMeetingsRepository implements MeetingsRepository {
     );
     return NoteConversion(workItemId: r.workItemId, note: _note(r.note));
   }
+
+  @override
+  Future<MeetingConference> startConference(String meetingId) async {
+    final r = await apiCall(() => _client.startConference(id: meetingId));
+    return _conference(r.conference);
+  }
+
+  @override
+  Future<void> endConference(String meetingId) =>
+      apiCall(() => _client.endConference(id: meetingId));
+
+  /// Yanıttaki token gizlidir: yalnız domain tipine taşınır, burada log'a yazılmaz.
+  @override
+  Future<ConferenceJoinToken> joinConference(String meetingId) async {
+    final r = await apiCall(() => _client.joinConference(id: meetingId));
+    return ConferenceJoinToken(
+      token: r.token,
+      url: r.url,
+      expiresAt: r.expiresAt,
+      role: enumFromWire(
+        ConferenceRole.values,
+        r.role.json,
+        ConferenceRole.unknown,
+      ),
+    );
+  }
+
+  static MeetingConference _conference(api.Conference c) => MeetingConference(
+    id: c.id,
+    status: enumFromWire(
+      ConferenceStatus.values,
+      c.status.json,
+      ConferenceStatus.unknown,
+    ),
+    startedAt: c.startedAt,
+    startedByAccountId: c.startedByAccountId,
+  );
 
   /// `meeting_date` tel biçimi: UTC → RFC 3339 (`…Z`); yerel → saat dilimsiz duvar saati
   /// (`YYYY-MM-DDTHH:MM:SS`, sunucu kurulum saat diliminde yorumlar).

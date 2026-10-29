@@ -1574,6 +1574,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeAppName => 'NIZAM.IO';
 
   @override
+  String get uiHomeShiftDaysTail => 'gün';
+
+  @override
+  String get uiHomeNotifyDateRequests => 'tarih talebi';
+
+  @override
+  String get uiHomeNotifyApprovals => 'onay';
+
+  @override
+  String get uiHomeNotifyAnd => 've';
+
+  @override
+  String get uiHomeNotifyTail => 'seni bekliyor';
+
+  @override
+  String get uiHomeSeasonTail => 'sezonu';
+
+  @override
+  String get uiHomeVersionPrefix => 'v';
+
+  @override
   String get uiIdentityLoginTitle => 'Giriş yap';
 
   @override

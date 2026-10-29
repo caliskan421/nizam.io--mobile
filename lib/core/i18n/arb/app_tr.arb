@@ -1969,6 +1969,34 @@
   "@uiHomeAppName": {
     "description": "ui.home.app_name"
   },
+  "uiHomeShiftDaysTail": "gün",
+  "@uiHomeShiftDaysTail": {
+    "description": "ui.home.shift_days_tail"
+  },
+  "uiHomeNotifyDateRequests": "tarih talebi",
+  "@uiHomeNotifyDateRequests": {
+    "description": "ui.home.notify_date_requests"
+  },
+  "uiHomeNotifyApprovals": "onay",
+  "@uiHomeNotifyApprovals": {
+    "description": "ui.home.notify_approvals"
+  },
+  "uiHomeNotifyAnd": "ve",
+  "@uiHomeNotifyAnd": {
+    "description": "ui.home.notify_and"
+  },
+  "uiHomeNotifyTail": "seni bekliyor",
+  "@uiHomeNotifyTail": {
+    "description": "ui.home.notify_tail"
+  },
+  "uiHomeSeasonTail": "sezonu",
+  "@uiHomeSeasonTail": {
+    "description": "ui.home.season_tail"
+  },
+  "uiHomeVersionPrefix": "v",
+  "@uiHomeVersionPrefix": {
+    "description": "ui.home.version_prefix"
+  },
   "uiIdentityLoginTitle": "Giriş yap",
   "@uiIdentityLoginTitle": {
     "description": "ui.identity.login_title"

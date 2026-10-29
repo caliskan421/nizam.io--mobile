@@ -47,6 +47,29 @@ void main() {
     expect(q.copyWith(expanded: true).visible(_all), hasLength(5));
   });
 
+  test(
+    'gecikme eşitliği yönle döner (küçükten büyüğe: Z→A); ilerleme kararlı',
+    () {
+      const asc = CoordinatorshipQuery(descending: false);
+      expect(_names(asc.filtered(_all)), [
+        'Ulaşım',
+        'Çevre',
+        'Fuar',
+        'Bütçe',
+        'İdari',
+      ]);
+      // İlerleme eşitleri gelen (sunucu) sırasını korur.
+      final same = [_c('Zeta'), _c('Alfa'), _c('Mavi')];
+      const prog = CoordinatorshipQuery(sort: CoordinatorshipSort.progress);
+      expect(_names(prog.filtered(same)), ['Zeta', 'Alfa', 'Mavi']);
+      expect(_names(prog.copyWith(descending: false).filtered(same)), [
+        'Zeta',
+        'Alfa',
+        'Mavi',
+      ]);
+    },
+  );
+
   test('filtreler sunucu sayılarına bakar', () {
     int n(CoordinatorshipFilter f) =>
         _all.where((c) => CoordinatorshipQuery.matches(f, c)).length;

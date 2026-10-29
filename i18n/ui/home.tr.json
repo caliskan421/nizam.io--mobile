@@ -87,6 +87,13 @@
     "ui.home.help": "Yardım ve rehberler",
     "ui.home.profile": "Profil ve hesap",
     "ui.home.soon_tail": "mobilde sonraki adımda eklenecek",
-    "ui.home.app_name": "NIZAM.IO"
+    "ui.home.app_name": "NIZAM.IO",
+    "ui.home.shift_days_tail": "gün",
+    "ui.home.notify_date_requests": "tarih talebi",
+    "ui.home.notify_approvals": "onay",
+    "ui.home.notify_and": "ve",
+    "ui.home.notify_tail": "seni bekliyor",
+    "ui.home.season_tail": "sezonu",
+    "ui.home.version_prefix": "v"
   }
 }

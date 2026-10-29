@@ -84,6 +84,10 @@ Future<void> showHomeDrawer(
   required String greetingName,
   required String? programName,
   required ModuleCounts? counts,
+  TeamRole? greetingRole,
+  String? greetingEmail,
+  int? programYear,
+  String? version,
   required ValueChanged<HomeModule> onModule,
   required VoidCallback onProfile,
   required VoidCallback onChangeScope,
@@ -95,6 +99,14 @@ Future<void> showHomeDrawer(
     semanticLabel: l.uiHomeMenu,
     builder: (sheet) {
       final c = sheet.colors;
+      // Prototip başlığı: "Admin · e-posta"; bilinmiyorsa profil bağlantısının adı.
+      final roleLabel = switch (greetingRole) {
+        TeamRole.admin => l.uiHomeRoleAdmin,
+        TeamRole.coordinator => l.uiHomeRoleCoordinator,
+        TeamRole.member => l.uiHomeRoleMember,
+        null => null,
+      };
+      final accountCaption = [?roleLabel, ?greetingEmail].join(' · ');
       void close(VoidCallback then) {
         Navigator.of(sheet).pop();
         then();
@@ -148,6 +160,7 @@ Future<void> showHomeDrawer(
                 child: Semantics(
                   button: true,
                   label: '$greetingName, ${l.uiHomeProfile}',
+                  hint: accountCaption.isEmpty ? null : accountCaption,
                   excludeSemantics: true,
                   child: InkWell(
                     onTap: () => close(onProfile),
@@ -169,7 +182,9 @@ Future<void> showHomeDrawer(
                                   style: sheet.text.labelLg,
                                 ),
                                 Text(
-                                  l.uiHomeProfile,
+                                  accountCaption.isEmpty
+                                      ? l.uiHomeProfile
+                                      : accountCaption,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: sheet.text.caption.copyWith(
@@ -194,17 +209,12 @@ Future<void> showHomeDrawer(
             ],
           ),
           const Gap(NizamioSpacing.gapLg),
-          // Kapsam (program) değiştirme: prototipte sezon düğmesi; mevcut kapsam akışına bağlı.
-          NzMenuGroup(
-            rows: [
-              NzMenuRow(
-                icon: Icons.unfold_more_rounded,
-                label: programName == null
-                    ? l.uiScopeHomeChange
-                    : '$programName · ${l.uiScopeHomeChange}',
-                onTap: () => close(onChangeScope),
-              ),
-            ],
+          // Kapsam (program) kartı (prototip sezon düğmesi: violet monogram, ad, "2026 sezonu",
+          // ↕); dokunuş mevcut kapsam değiştirme akışına bağlı.
+          _SeasonCard(
+            name: programName ?? l.uiScopeHomeChange,
+            caption: l.seasonCaption(programYear, l.uiScopeHomeChange),
+            onTap: () => close(onChangeScope),
           ),
           const Gap(NizamioSpacing.gapLg),
           NzMenuGroup(
@@ -325,8 +335,99 @@ Future<void> showHomeDrawer(
               ),
             ],
           ),
+          if (version != null) ...[
+            const Gap(NizamioSpacing.gapLg),
+            Text(
+              '${l.uiHomeAppName} ${l.uiHomeVersionPrefix}$version',
+              textAlign: TextAlign.center,
+              style: sheet.text.monoSm.copyWith(color: c.textFaint),
+            ),
+          ],
         ],
       );
     },
   );
+}
+
+/// Çekmecedeki kapsam kartı: violet monogram karosu, program adı, alt satır, ↕ simgesi.
+class _SeasonCard extends StatelessWidget {
+  const _SeasonCard({
+    required this.name,
+    required this.caption,
+    required this.onTap,
+  });
+
+  final String name;
+  final String caption;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    // Sayısal sözcükler ("2026") monograma girmez: "Örnek Sezon 2026" → "ÖS".
+    final monogram = NzAvatar.initialsOf(
+      name.split(' ').where((w) => int.tryParse(w) == null).join(' '),
+    );
+    return NzCard.filled(
+      padding: const EdgeInsets.symmetric(
+        horizontal: NizamioSpacing.space3,
+        vertical: NizamioSpacing.gapMd,
+      ),
+      onTap: onTap,
+      semanticLabel: '$name, $caption',
+      child: Row(
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: c.inProgress,
+              borderRadius: BorderRadius.circular(NizamioRadius.tile),
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints.tightFor(
+                width: NizamioSize.controlSm - NizamioSpacing.space1,
+                height: NizamioSize.controlSm - NizamioSpacing.space1,
+              ),
+              child: Center(
+                child: Text(
+                  monogram,
+                  maxLines: 1,
+                  style: t.caption.copyWith(
+                    color: c.onInProgress,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const Gap(NizamioSpacing.space3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: t.bodyMd.copyWith(fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  caption,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: t.caption.copyWith(color: c.textMuted),
+                ),
+              ],
+            ),
+          ),
+          const Gap(NizamioSpacing.space3),
+          Icon(
+            Icons.unfold_more_rounded,
+            size: NizamioSize.iconSizeSm,
+            color: c.textFaint,
+          ),
+        ],
+      ),
+    );
+  }
 }

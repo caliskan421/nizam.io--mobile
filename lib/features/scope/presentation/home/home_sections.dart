@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/i18n/generated/app_localizations.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
@@ -92,8 +93,8 @@ class HomeKpiGrid extends StatelessWidget {
 
   final TaskTotals tasks;
 
-  /// Kutuya dokunma → ilgili görev listesi.
-  final VoidCallback onOpen;
+  /// Kutuya dokunma → görev listesi o kutunun görünümüyle (prototip `go.done/doing/late/review`).
+  final ValueChanged<NzTaskView> onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +103,7 @@ class HomeKpiGrid extends StatelessWidget {
     final t = tasks;
     double ratio(int a, int b) => b == 0 ? 0 : a / b;
     NzKpiTile tile({
+      required NzTaskView view,
       required IconData icon,
       required Color tone,
       required String label,
@@ -117,7 +119,7 @@ class HomeKpiGrid extends StatelessWidget {
       valueColor: valueColor,
       progress: progress,
       caption: caption,
-      onTap: onOpen,
+      onTap: () => onOpen(view),
       semanticLabel: '$label: $value. $caption. ${l.uiHomeOpenList}',
     );
     return Semantics(
@@ -128,6 +130,7 @@ class HomeKpiGrid extends StatelessWidget {
         gap: NizamioSpacing.gapMd,
         children: [
           tile(
+            view: NzTaskView.done,
             icon: Icons.check_rounded,
             tone: c.accentText,
             label: l.uiHomeKpiDone,
@@ -136,6 +139,7 @@ class HomeKpiGrid extends StatelessWidget {
             caption: l.kpiDoneCaption(t),
           ),
           tile(
+            view: NzTaskView.inProgress,
             icon: Icons.bolt_rounded,
             tone: c.inProgress,
             label: l.uiHomeKpiDoing,
@@ -144,6 +148,7 @@ class HomeKpiGrid extends StatelessWidget {
             caption: l.kpiDoingCaption(t),
           ),
           tile(
+            view: NzTaskView.late,
             icon: Icons.warning_amber_rounded,
             tone: c.danger,
             label: l.uiHomeKpiLate,
@@ -153,6 +158,7 @@ class HomeKpiGrid extends StatelessWidget {
             caption: l.kpiLateCaption(t),
           ),
           tile(
+            view: NzTaskView.review,
             icon: Icons.schedule_rounded,
             tone: c.warning,
             label: l.uiHomeKpiReview,
@@ -229,16 +235,18 @@ class HomeTeam extends StatelessWidget {
   const HomeTeam({super.key, required this.dashboard, required this.onOpen});
 
   final HomeDashboard dashboard;
-  final VoidCallback onOpen;
+
+  /// Kutuya dokunma → görev listesi o roldeki kişilerle süzülmüş (prototip `go.admin/koord/uye`).
+  final ValueChanged<TeamRole> onOpen;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
     final team = dashboard.team;
-    Widget tile(Color dot, int n, String role) => NzCard.outlined(
+    Widget tile(TeamRole r, Color dot, int n, String role) => NzCard.outlined(
       padding: const EdgeInsets.all(NizamioSpacing.space3),
-      onTap: onOpen,
+      onTap: () => onOpen(r),
       semanticLabel: '$role: $n. ${l.uiHomeOpenList}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,9 +275,19 @@ class HomeTeam extends StatelessWidget {
           columns: 3,
           gap: NizamioSpacing.space2,
           children: [
-            tile(c.roleAdmin, team.admins, l.uiHomeRoleAdmin),
-            tile(c.roleCoordinator, team.coordinators, l.uiHomeRoleCoordinator),
-            tile(c.roleMember, team.members, l.uiHomeRoleMember),
+            tile(TeamRole.admin, c.roleAdmin, team.admins, l.uiHomeRoleAdmin),
+            tile(
+              TeamRole.coordinator,
+              c.roleCoordinator,
+              team.coordinators,
+              l.uiHomeRoleCoordinator,
+            ),
+            tile(
+              TeamRole.member,
+              c.roleMember,
+              team.members,
+              l.uiHomeRoleMember,
+            ),
           ],
         ),
       ],

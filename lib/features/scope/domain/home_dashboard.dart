@@ -14,10 +14,16 @@ final class HomeDashboard {
     required this.pending,
     required this.counts,
     this.lastActivity,
+    this.greetingRole,
+    this.greetingEmail,
   });
 
   /// Karşılamadaki ad (oturumdaki kişinin görünen adı).
   final String greetingName;
+
+  /// Oturumdaki kişinin rolü ve e-postası (çekmece başlığı "Admin · e-posta"); bilinmiyorsa null.
+  final TeamRole? greetingRole;
+  final String? greetingEmail;
   final TaskTotals tasks;
   final TeamTotals team;
   final LastActivity? lastActivity;
@@ -50,6 +56,9 @@ final class TaskTotals {
   /// Tamamlanmamış görevler.
   int get open => total - done;
 }
+
+/// Kullanıcı rolü (ekip kutuları, çekmece başlığı).
+enum TeamRole { admin, coordinator, member }
 
 /// Kullanıcı sayıları (rol dağılımı sunucudan gelir).
 @immutable
@@ -120,6 +129,7 @@ final class PendingItem {
     required this.title,
     required this.kind,
     this.requestedDate,
+    this.requestedShiftDays,
   });
 
   /// Görev kodu (`ALT-7`); rota kimliği.
@@ -129,6 +139,10 @@ final class PendingItem {
 
   /// Tarih talebinde istenen yeni bitiş.
   final DateTime? requestedDate;
+
+  /// Tarih talebi kaydırma olarak gösterilecekse gün sayısı ("+51 gün"); [requestedDate]'ten
+  /// önce gelir.
+  final int? requestedShiftDays;
 }
 
 /// Modül rozet sayıları (çekmece).

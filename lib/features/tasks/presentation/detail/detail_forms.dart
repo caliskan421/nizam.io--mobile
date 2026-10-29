@@ -148,11 +148,11 @@ class _EditTaskFormState extends ConsumerState<EditTaskForm> {
         TaskSegmented(
           semanticLabel: l.uiTasksPriority,
           labels: [
-            for (final p in TaskPriority.values.reversed) l.priorityLabel(p),
+            for (final p in TaskPriority.pickable.reversed) l.priorityLabel(p),
           ],
-          selected: TaskPriority.values.length - 1 - d.priority.index,
+          selected: TaskPriority.pickable.reversed.toList().indexOf(d.priority),
           onSelected: (i) => ctl.updateEdit(
-            d.copyWith(priority: TaskPriority.values.reversed.toList()[i]),
+            d.copyWith(priority: TaskPriority.pickable.reversed.toList()[i]),
           ),
         ),
         const Gap(NizamioSpacing.space4),

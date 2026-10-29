@@ -36,12 +36,9 @@ class DetailSummary extends StatelessWidget {
     final done = task.completedAt;
 
     final events = <(Color, String, String, bool)>[
-      (
-        c.accentText,
-        l.uiTasksEvCreated,
-        TaskDates.short(task.createdAt),
-        false,
-      ),
+      // Oluşturma anı sunucu görev yüzlerinde yok (isteğe bağlı): yoksa olay gösterilmez.
+      if (task.createdAt case final created?)
+        (c.accentText, l.uiTasksEvCreated, TaskDates.short(created), false),
       (
         started ? c.inProgress : c.textFaint,
         started ? l.uiTasksEvStarted : l.uiTasksEvWillStart,
@@ -107,10 +104,15 @@ class DetailSummary extends StatelessWidget {
                   ],
                 ),
         ),
-        row(l.uiTasksCreator, strong(name(task.creator))),
+        row(
+          l.uiTasksCreator,
+          strong(task.creator == null ? l.uiTasksNone : name(task.creator!)),
+        ),
         row(
           l.uiTasksCreated,
-          strong(TaskDates.full(task.createdAt), mono: true),
+          task.createdAt == null
+              ? strong(l.uiTasksNone)
+              : strong(TaskDates.full(task.createdAt!), mono: true),
         ),
         row(
           l.uiTasksDateRange,

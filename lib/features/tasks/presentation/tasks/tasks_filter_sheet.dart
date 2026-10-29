@@ -179,7 +179,7 @@ class _FilterBody extends ConsumerWidget {
           l.uiTasksPriority,
           s.filter.priorities.length,
           [
-            for (final p in TaskPriority.values.reversed)
+            for (final p in TaskPriority.pickable.reversed)
               TaskCheckRow(
                 label: l.priorityLabel(p),
                 count: options.priorities[p] ?? 0,

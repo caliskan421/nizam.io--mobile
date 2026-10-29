@@ -155,10 +155,10 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
                 compact: true,
                 semanticLabel: l.uiTasksPriority,
                 labels: [
-                  for (final p in TaskPriority.values) l.priorityLabel(p),
+                  for (final p in TaskPriority.pickable) l.priorityLabel(p),
                 ],
-                selected: f.priority.index,
-                onSelected: (i) => ctl.setPriority(TaskPriority.values[i]),
+                selected: TaskPriority.pickable.indexOf(f.priority),
+                onSelected: (i) => ctl.setPriority(TaskPriority.pickable[i]),
               ),
             ),
             NzFormRow.toggle(

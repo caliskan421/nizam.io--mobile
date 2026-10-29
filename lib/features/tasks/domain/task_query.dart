@@ -153,7 +153,7 @@ TaskQueryResult queryTasks(
       c.coordinatorship(t.coordinatorship)?.name ?? t.coordinatorship;
   int cmp(TaskItem a, TaskItem b) => switch (sort) {
     TaskSort.created => _or(
-      k * a.createdAt.compareTo(b.createdAt),
+      k * _compareNullable(a.createdAt, b.createdAt),
       () => a.due.compareTo(b.due),
     ),
     TaskSort.due => _or(doneLast(a, b), () => k * a.due.compareTo(b.due)),
@@ -185,6 +185,13 @@ TaskQueryResult queryTasks(
 }
 
 int _or(int a, int Function() b) => a != 0 ? a : b();
+
+/// `null` (sunucunun taşımadığı oluşturma anı) en sona.
+int _compareNullable(DateTime? a, DateTime? b) => a == null
+    ? (b == null ? 0 : 1)
+    : b == null
+    ? -1
+    : a.compareTo(b);
 
 List<T> _stableSort<T>(List<T> list, int Function(T, T) cmp) {
   final indexed = [for (var i = 0; i < list.length; i++) (i, list[i])];

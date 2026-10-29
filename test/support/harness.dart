@@ -14,12 +14,14 @@ class Harness {
     Flavor flavor = Flavor.prod,
     FakeHandler? handler,
     MemorySecureStore? store,
+    LoginPrefill? loginPrefill,
   }) : backend = FakeBackend(handler ?? discoveryHandler),
        store = store ?? MemorySecureStore() {
     // Gerçek bileşim kökü (lib/app/di, get_it + Riverpod portları); yalnız depo ve HTTP
     // bağdaştırıcısı sahte.
     composition = Composition.create(
       flavor: flavor,
+      loginPrefill: loginPrefill,
       secureStore: this.store,
       httpAdapter: backend,
       preferenceStore: prefs,

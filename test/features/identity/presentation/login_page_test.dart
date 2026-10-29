@@ -14,6 +14,7 @@ import 'package:nizamio/core/ui/widgets/buttons/nz_button.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_password_field.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_text_field.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_top_bar.dart';
+import 'package:nizamio/features/identity/identity.dart' show LoginPrefill;
 import 'package:nizamio/features/identity/presentation/login_page.dart';
 
 import '../../../support/screen_matrix.dart';
@@ -199,5 +200,45 @@ void main() {
     expect(find.text(_l.uiIdentityLoginSubmitting), findsOneWidget);
     await settle(tester);
     expect(find.text(_l.uiIdentityLoginSubmitting), findsNothing);
+  });
+
+  group('ön dolgu (yalnız dev bileşim kökü verir)', () {
+    testWidgets('verilmezse alanlar boş', (tester) async {
+      final h = await real(tester, () => pilotHarness(PilotBackend()));
+      await pumpScreen(tester, h, const LoginPage());
+      expect(tester.widget<TextFormField>(_email).controller!.text, isEmpty);
+      expect(_passwordText(tester), isEmpty);
+    });
+
+    testWidgets('verilirse alanlar dolu; dokunuşla giriş, parola temizlenir', (
+      tester,
+    ) async {
+      final h = await real(
+        tester,
+        () => pilotHarness(
+          PilotBackend(),
+          loginPrefill: const LoginPrefill(
+            email: 'a@b.test',
+            password: secretLogin,
+          ),
+        ),
+      );
+      await pumpScreen(tester, h, const LoginPage());
+      expect(tester.widget<TextFormField>(_email).controller!.text, 'a@b.test');
+      expect(_passwordText(tester), secretLogin);
+      await tester.tap(find.widgetWithText(NzButton, _l.uiIdentityLoginSubmit));
+      await settle(tester);
+      expect(h.read(sessionStateProvider), isA<SessionActive>());
+      expect(h.backend.requests.last.body, {
+        'email': 'a@b.test',
+        'password': secretLogin,
+      });
+      expect(_passwordText(tester), isEmpty);
+    });
+
+    test('toString parolayı yazmaz', () {
+      const p = LoginPrefill(email: 'a@b.test', password: secretLogin);
+      expect(p.toString(), isNot(contains(secretLogin)));
+    });
   });
 }

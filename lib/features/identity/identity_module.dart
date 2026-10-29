@@ -6,6 +6,7 @@ import '../../core/server/server_binding.dart';
 import '../../core/session/session_controller.dart';
 import 'application/identity_providers.dart';
 import 'application/identity_service.dart';
+import 'application/login_prefill.dart';
 import 'data/identity_repository.dart';
 
 /// identity modülünün kayıt fonksiyonu (ADR-0001, D-0182). YALNIZ bileşim kökünden
@@ -26,7 +27,11 @@ void registerIdentityModule(GetIt locator, {required Dio? Function() apiDio}) {
   );
 }
 
-/// identity'nin Riverpod portlarını get_it örnekleriyle bağlar.
-List<Override> identityOverrides(GetIt locator) => [
-  identityServiceProvider.overrideWith((ref) => locator<IdentityService>()),
-];
+/// identity'nin Riverpod portlarını get_it örnekleriyle bağlar. [loginPrefill]: yalnız dev
+/// (giriş formu ön dolgusu); null ise form boş açılır.
+List<Override> identityOverrides(GetIt locator, {LoginPrefill? loginPrefill}) =>
+    [
+      identityServiceProvider.overrideWith((ref) => locator<IdentityService>()),
+      if (loginPrefill != null)
+        loginPrefillProvider.overrideWithValue(loginPrefill),
+    ];

@@ -10,6 +10,7 @@ import 'package:nizamio/core/i18n/generated/app_localizations.dart';
 import 'package:nizamio/core/network/connectivity_monitor.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_app_nav.dart';
+import 'package:nizamio/features/identity/identity.dart' show LoginPrefill;
 
 import '../core/ui/widgets/feedback/feedback_test_support.dart';
 import '../support/fake_backend.dart';
@@ -130,8 +131,9 @@ Future<Harness> pilotHarness(
   PilotBackend backend, {
   bool verified = true,
   bool signedIn = false,
+  LoginPrefill? loginPrefill,
 }) async {
-  final h = Harness(handler: backend.handle);
+  final h = Harness(handler: backend.handle, loginPrefill: loginPrefill);
   addTearDown(h.dispose);
   if (verified) await h.read(serverBindingProvider).verify(testUrl);
   if (signedIn) await h.identity.login(email: 'a@b.test', password: 'p');

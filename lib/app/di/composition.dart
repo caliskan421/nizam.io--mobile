@@ -17,6 +17,7 @@ import '../../features/activity/activity_module.dart';
 import '../../features/archive/archive_module.dart';
 import '../../features/calendar/calendar_module.dart';
 import '../../features/coordinatorships/coordinatorships_module.dart';
+import '../../features/identity/identity.dart' show LoginPrefill;
 import '../../features/identity/identity_module.dart';
 import '../../features/messages/messages_module.dart';
 import '../../features/scope/scope_module.dart';
@@ -35,9 +36,10 @@ class Composition {
   final ProviderContainer container;
 
   /// [secureStore] / [httpAdapter] / [preferenceStore]: yalnız testler ve cihazsız
-  /// entegrasyon.
+  /// entegrasyon. [loginPrefill]: yalnız dev (giriş formu ön dolgusu).
   factory Composition.create({
     required Flavor flavor,
+    LoginPrefill? loginPrefill,
     SecureStore? secureStore,
     HttpClientAdapter? httpAdapter,
     PreferenceStore? preferenceStore,
@@ -90,7 +92,7 @@ class Composition {
         sessionControllerProvider.overrideWithValue(
           locator<SessionController>(),
         ),
-        ...identityOverrides(locator),
+        ...identityOverrides(locator, loginPrefill: loginPrefill),
         ...scopeOverrides(locator),
         ...activityOverrides(locator),
         ...archiveOverrides(locator),

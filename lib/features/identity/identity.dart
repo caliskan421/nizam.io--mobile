@@ -5,6 +5,7 @@ library;
 
 export 'application/identity_providers.dart' show identityServiceProvider;
 export 'application/identity_service.dart' show IdentityService;
+export 'application/login_prefill.dart' show LoginPrefill;
 export 'domain/current_account.dart' show CurrentAccount;
 export 'domain/download_ticket.dart' show DownloadTicket;
 export 'presentation/login_page.dart' show LoginPage;

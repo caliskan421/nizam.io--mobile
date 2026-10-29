@@ -17,6 +17,7 @@ import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_size.dart';
 import '../application/login_controller.dart';
+import '../application/login_prefill.dart';
 
 /// Giriş ekranı (faz: `serverVerified` / `reauthRequired`). Giriş başarılıysa oturum açılır
 /// ve faz makinesi yönlendirir; ekran kendisi gezinmez. Hata metni yalnız `errorText(code)`
@@ -36,6 +37,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   /// Parola alanını sıfırlamak için anahtar nesli (alan durumu: görünürlük, doğrulama).
   int _passwordGeneration = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Yalnız dev: bileşim kökü verirse form dolu açılır (prod'da null).
+    final prefill = ref.read(loginPrefillProvider);
+    if (prefill != null) {
+      _email.text = prefill.email;
+      _password.text = prefill.password;
+    }
+  }
 
   @override
   void dispose() {

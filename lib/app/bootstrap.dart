@@ -17,8 +17,13 @@ import 'di/composition.dart';
 
 /// Uygulamayı verilen flavor ile başlatır. [devServer]: yalnız dev — kayıtlı bağ yoksa açılışta
 /// bu adres doğrulanır (uygulama doğrudan giriş ekranında açılır). Composition root: somut bağlar burada ve
-/// `app/` altındadır; `core/` ve `features/` app'e bağımlı değildir.
-Future<void> bootstrap(Flavor flavor, {String devServer = ''}) async {
+/// `app/` altındadır; `core/` ve `features/` app'e bağımlı değildir. [loginPrefill]: yalnız dev —
+/// giriş formu bu değerlerle dolu açılır (prod'da yok sayılır).
+Future<void> bootstrap(
+  Flavor flavor, {
+  String devServer = '',
+  LoginPrefill? loginPrefill,
+}) async {
   WidgetsFlutterBinding.ensureInitialized();
   // Yazı tipleri yalnız uygulama varlıklarından (assets/fonts); çalışma anında Google'a
   // istek yok (çevrimdışı açılış, gizlilik). OFL lisans metinleri lisans sayfasına eklenir.
@@ -26,6 +31,7 @@ Future<void> bootstrap(Flavor flavor, {String devServer = ''}) async {
   LicenseRegistry.addLicense(_fontLicenses);
   final composition = Composition.create(
     flavor: flavor,
+    loginPrefill: flavor == Flavor.dev ? loginPrefill : null,
     connectivityLink: PlusConnectivityLink(),
   );
   // Tercihler runApp'ten önce (tema titreşimi yok). Güvenlik açılış sırası (startup) ayrıdır

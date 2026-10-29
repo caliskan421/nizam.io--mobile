@@ -267,4 +267,33 @@ void main() {
       expect(scaffold.resizeToAvoidBottomInset, isFalse);
     },
   );
+
+  testWidgets('feed: pinned şerit üst çubuğun altına yapışır; after tembel', (
+    tester,
+  ) async {
+    _size(tester, 390, 600);
+    await tester.pumpWidget(
+      _app(
+        NzPage.feed(
+          topBar: const SliverAppBar(
+            pinned: true,
+            toolbarHeight: 56,
+            title: Text('üst'),
+          ),
+          pinned: const SizedBox(height: 40, child: Text('sekmeler')),
+          children: const [SizedBox(height: 200, child: Text('baş'))],
+          after: [
+            for (var i = 0; i < 200; i++)
+              SizedBox(height: 50, child: Text('satır $i')),
+          ],
+        ),
+      ),
+    );
+    expect(find.text('sekmeler'), findsOneWidget);
+    expect(find.text('satır 199'), findsNothing, reason: 'tembel kurulum');
+    await tester.drag(find.text('baş'), const Offset(0, -1500));
+    await tester.pumpAndSettle();
+    final y = tester.getTopLeft(find.text('sekmeler')).dy;
+    expect(y, closeTo(56, 1), reason: 'üst çubuğun hemen altında');
+  });
 }

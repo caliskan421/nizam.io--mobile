@@ -366,4 +366,35 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(NzBottomSheetContent)).height, h0);
   });
+
+  testWidgets('showHeader:false → başlık ve kapat çizilmez; ad semantikte', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      testApp(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => NzBottomSheet.show<void>(
+              context,
+              title: 'Mesaj işlemleri',
+              showHeader: false,
+              builder: (_) => const Text('içerik'),
+            ),
+            child: const Text('aç'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('aç'));
+    await tester.pumpAndSettle();
+    expect(find.text('içerik'), findsOneWidget);
+    expect(find.text('Mesaj işlemleri'), findsNothing);
+    expect(find.byTooltip('Kapat'), findsNothing);
+    expect(find.bySemanticsLabel('Mesaj işlemleri'), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(find.text('içerik'), findsNothing);
+    handle.dispose();
+  });
 }

@@ -25,6 +25,9 @@ abstract final class NzBottomSheet {
   /// [expandable] tutamağı genişlet/daralt düğmesi yapar; [expansion] verilirse genişlik
   /// durumu dışarıdadır (ekran bir satırı açınca sayfayı kendisi büyütebilir).
   /// [headerAction] başlık satırında kapat düğmesinin solunda durur (ör. "Tümünü temizle").
+  /// [showHeader] false → prototipteki başlıksız sayfa: yalnız tutamak; başlık satırı ve kapat
+  /// düğmesi çizilmez, [title] ekran okuyucuya sayfanın adı olarak bildirilir (kapatma dışarı
+  /// dokunma, sürükleme ya da geri ile).
   static Future<T?> show<T>(
     BuildContext context, {
     required String title,
@@ -35,6 +38,7 @@ abstract final class NzBottomSheet {
     bool expandable = false,
     ValueNotifier<bool>? expansion,
     Widget? headerAction,
+    bool showHeader = true,
   }) {
     return showModalBottomSheet<T>(
       context: context,
@@ -61,6 +65,7 @@ abstract final class NzBottomSheet {
           expandable: expandable,
           expansion: expansion,
           headerAction: headerAction,
+          showHeader: showHeader,
           actions: actions?.call(sheetContext),
           child: Builder(builder: builder),
         ),
@@ -85,6 +90,7 @@ class NzBottomSheetContent extends StatefulWidget {
     this.expandable = false,
     this.expansion,
     this.headerAction,
+    this.showHeader = true,
   });
 
   final String title;
@@ -97,6 +103,9 @@ class NzBottomSheetContent extends StatefulWidget {
   /// Dış genişlik durumu ([expandable] ile); null → iç durum.
   final ValueNotifier<bool>? expansion;
   final Widget? headerAction;
+
+  /// false → başlık satırı (başlık, açıklama, kapat) çizilmez; [title] semantik addır.
+  final bool showHeader;
 
   @override
   State<NzBottomSheetContent> createState() => _NzBottomSheetContentState();
@@ -194,52 +203,55 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
                 )
               : ExcludeSemantics(child: handle),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            NizamioSpacing.space4,
-            0,
-            NizamioSpacing.space2,
-            NizamioSpacing.space3,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: _titleTop),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Semantics(
-                        header: true,
-                        child: Text(widget.title, style: t.titleSm),
-                      ),
-                      if (description != null) ...[
-                        const Gap(NizamioSpacing.space1),
-                        Text(
-                          description,
-                          style: t.caption.copyWith(color: c.textMuted),
+        if (!widget.showHeader)
+          const Gap(NizamioSpacing.space1)
+        else
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              NizamioSpacing.space4,
+              0,
+              NizamioSpacing.space2,
+              NizamioSpacing.space3,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: _titleTop),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Semantics(
+                          header: true,
+                          child: Text(widget.title, style: t.titleSm),
                         ),
+                        if (description != null) ...[
+                          const Gap(NizamioSpacing.space1),
+                          Text(
+                            description,
+                            style: t.caption.copyWith(color: c.textMuted),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-              ?widget.headerAction,
-              if (widget.dismissible)
-                IconButton(
-                  tooltip: l.uiCommonClose,
-                  constraints: const BoxConstraints(
-                    minWidth: NizamioSpacing.space12,
-                    minHeight: NizamioSpacing.space12,
+                ?widget.headerAction,
+                if (widget.dismissible)
+                  IconButton(
+                    tooltip: l.uiCommonClose,
+                    constraints: const BoxConstraints(
+                      minWidth: NizamioSpacing.space12,
+                      minHeight: NizamioSpacing.space12,
+                    ),
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.of(context).maybePop(),
                   ),
-                  icon: const Icon(Icons.close_rounded),
-                  onPressed: () => Navigator.of(context).maybePop(),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
         Flexible(
           fit: widget.expandable ? FlexFit.tight : FlexFit.loose,
           child: SingleChildScrollView(
@@ -302,7 +314,7 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
           )
         : column;
 
-    return DecoratedBox(
+    final sheet = DecoratedBox(
       decoration: BoxDecoration(
         color: c.surface,
         borderRadius: _radius,
@@ -316,6 +328,14 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
         ),
         child: sized,
       ),
+    );
+    if (widget.showHeader) return sheet;
+    return Semantics(
+      scopesRoute: true,
+      namesRoute: true,
+      explicitChildNodes: true,
+      label: widget.title,
+      child: sheet,
     );
   }
 }

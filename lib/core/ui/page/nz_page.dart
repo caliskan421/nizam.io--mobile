@@ -6,8 +6,10 @@ import '../../providers.dart';
 import '../../theme/generated/tokens.gen.dart';
 import '../extensions/context_ext.dart';
 import '../layout/layout.dart';
+import '../theme/nz_surfaces.dart';
 import '../widgets/feedback/nz_banner.dart';
 import '../widgets/feedback/nz_loader.dart';
+import '../widgets/surfaces/nz_glass.dart';
 
 /// Her ekranın kabuğu (U6: features presentation'da Scaffold yasağının tek karşılığı).
 ///
@@ -30,6 +32,8 @@ class NzPage extends ConsumerWidget {
     this.showTitleBar = true,
   }) : topBar = null,
        children = const [],
+       pinned = null,
+       after = const [],
        _fill = false,
        _bare = false;
 
@@ -37,12 +41,17 @@ class NzPage extends ConsumerWidget {
   /// tek kaydırma görünümünde alt alta dizilir. İçerik üst çubuğun ve (kabuk `extendBody` ile)
   /// yüzen alt menünün altından geçer; sonda alt güvenli alan + menü yüksekliği kadar boşluk
   /// kalır. Yatay boşluk ve azami genişlik standart sayfayla aynıdır.
+  /// [pinned] verilirse [children]'dan sonra üst çubuğun altına yapışan cam şerittir (prototip
+  /// `position: sticky` sekme hapları); ardından [after] öğeleri gelir. Öğeler tembel kurulur
+  /// (uzun listeleri tek `Column` yerine ayrı öğe olarak verin).
   const NzPage.feed({
     super.key,
     required Widget this.topBar,
     required this.children,
     this.width = NzContentWidth.list,
     this.onRetry,
+    this.pinned,
+    this.after = const [],
   }) : title = '',
        body = const SizedBox.shrink(),
        actions = const [],
@@ -62,6 +71,8 @@ class NzPage extends ConsumerWidget {
     this.onRetry,
   }) : title = '',
        children = const [],
+       pinned = null,
+       after = const [],
        width = NzContentWidth.list,
        actions = const [],
        floatingAction = null,
@@ -78,6 +89,8 @@ class NzPage extends ConsumerWidget {
     : title = '',
       topBar = null,
       children = const [],
+      pinned = null,
+      after = const [],
       width = NzContentWidth.list,
       actions = const [],
       floatingAction = null,
@@ -99,6 +112,12 @@ class NzPage extends ConsumerWidget {
 
   /// [NzPage.feed]: akış öğeleri (aralarındaki boşluğu çağıran `Gap` ile verir).
   final List<Widget> children;
+
+  /// [NzPage.feed]: yapışkan şerit (bkz. yapıcı).
+  final Widget? pinned;
+
+  /// [NzPage.feed]: [pinned] şeridinden sonraki öğeler.
+  final List<Widget> after;
   final NzContentWidth width;
 
   /// AppBar eylemleri.
@@ -146,6 +165,8 @@ class NzPage extends ConsumerWidget {
                   layout.contentMaxWidth(width))
               .clamp(0, double.infinity) /
           2;
+      final bottom =
+          MediaQuery.paddingOf(context).bottom + NizamioSpacing.gapXl;
       return NzTextScaleLimit(
         child: Scaffold(
           body: CustomScrollView(
@@ -158,10 +179,31 @@ class NzPage extends ConsumerWidget {
                   side + extra,
                   NizamioSpacing.gapXl,
                   side + extra,
-                  MediaQuery.paddingOf(context).bottom + NizamioSpacing.gapXl,
+                  pinned == null ? bottom : 0,
                 ),
                 sliver: SliverList.list(children: children),
               ),
+              if (pinned case final pinned?) ...[
+                PinnedHeaderSliver(
+                  child: NzGlass(
+                    tone: NzGlassTone.bar,
+                    edge: false,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: side + extra),
+                      child: pinned,
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    side + extra,
+                    0,
+                    side + extra,
+                    bottom,
+                  ),
+                  sliver: SliverList.list(children: after),
+                ),
+              ],
             ],
           ),
         ),

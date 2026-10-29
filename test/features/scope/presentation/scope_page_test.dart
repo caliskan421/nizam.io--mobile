@@ -1,13 +1,13 @@
 // ScopePage: program listesi, boş durum, program.not_authorized, seçim; sunucu iletisi
 // gösterilmez. compact + expanded.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nizamio/core/scope/scope_store.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/errors/error_text.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/scope/scope_store.dart';
 import 'package:nizamio/core/ui/widgets/feedback/nz_empty_state.dart';
 import 'package:nizamio/core/ui/widgets/feedback/nz_error_state.dart';
 import 'package:nizamio/core/ui/widgets/lists/nz_list_tile.dart';

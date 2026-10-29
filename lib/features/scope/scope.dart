@@ -15,5 +15,5 @@ export 'domain/home_dashboard.dart' show HomeDashboard;
 export 'domain/program.dart' show Program;
 export 'presentation/home/home_menus.dart' show HomeModule, showHomeDrawer;
 export 'presentation/home_page.dart' show HomePage;
-export 'presentation/root_top_bar.dart' show RootTopBar;
+export 'presentation/root_top_bar.dart' show RootTopBar, watchNotificationBell;
 export 'presentation/scope_page.dart' show ScopePage;

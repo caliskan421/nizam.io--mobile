@@ -5,6 +5,8 @@ import 'package:gap/gap.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
+import '../../../core/ui/layout/nz_pane.dart';
+import '../../../core/ui/motion/page_content_entrance.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
@@ -194,116 +196,129 @@ class _Body extends ConsumerWidget {
       coordinatorshipDetailControllerProvider(code).notifier,
     );
     const tabs = CoordinatorshipTab.values;
-    final layout = context.layout;
-    final extra =
-        (MediaQuery.sizeOf(context).width -
-                2 * layout.pagePadding -
-                layout.contentMaxWidth(NzContentWidth.list))
-            .clamp(0.0, double.infinity) /
-        2;
-    final side = layout.pagePadding + extra;
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: EdgeInsets.fromLTRB(side, NizamioSpacing.gapXl, side, 0),
-          sliver: SliverList.list(
-            children: [
-              Semantics(
-                header: true,
-                child: Text(d.stats.name, style: t.titleMd),
-              ),
-              const Gap(NizamioSpacing.space1),
-              Text.rich(
-                TextSpan(
-                  text: l.coordIdentityLine(d),
-                  children: [
-                    TextSpan(
-                      text: l.uiCoordStateActive,
-                      style: t.caption.copyWith(
-                        color: c.accentText,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                style: t.caption.copyWith(color: c.textMuted),
-              ),
-              const Gap(NizamioSpacing.space4),
-              Row(
-                spacing: NizamioSpacing.space2,
-                children: [
-                  Expanded(
-                    child: NzButton.secondary(
-                      label: l.uiCoordMessageTeam,
-                      icon: Icons.chat_bubble_outline_rounded,
-                      expand: true,
-                      onPressed: () =>
-                          context.appNav.openChat(d.profile.chatId),
-                    ),
-                  ),
-                  Expanded(
-                    child: NzButton.primary(
-                      label: l.uiCoordAssignTask,
-                      icon: Icons.add_rounded,
-                      expand: true,
-                      onPressed: () =>
-                          showNewTaskSheet(context, coordinatorship: code),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        // Yapışkan sekmeler: üst çubuğun altında kalır; zemin yarı saydam taban rengi.
-        PinnedHeaderSliver(
-          child: ColoredBox(
-            color: c.background.withValues(alpha: 0.92),
-            child: Padding(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Sağ bölmede yan 28 (`.tb-rpane`), sayfa sonu 40.
+        final side = NzPaneScope.sideInset(
+          context,
+          constraints,
+          NzContentWidth.list,
+        );
+        return CustomScrollView(
+          slivers: [
+            SliverPadding(
+              // Tablet sağ bölmesi: kaynak gap 22, kimlik -6 → 16.
               padding: EdgeInsets.fromLTRB(
                 side,
-                NizamioSpacing.space4,
+                NzPaneScope.maybeOf(context)?.role == NzPaneRole.detail
+                    ? NizamioSpacing.space4
+                    : NizamioSpacing.gapXl,
                 side,
-                NizamioSpacing.space3,
+                0,
               ),
-              child: NzPillTabs(
-                semanticLabel: l.uiCoordTabsLabel,
-                selected: tabs.indexOf(view.tab),
-                onSelected: (i) => commands.selectTab(tabs[i]),
-                tabs: [
-                  NzPillTab(label: l.uiCoordTabGeneral),
-                  NzPillTab(
-                    label: l.uiCoordTabUnits,
-                    count: d.profile.units.length,
+              sliver: SliverList.list(
+                children: [
+                  Semantics(
+                    header: true,
+                    child: Text(d.stats.name, style: t.titleMd),
                   ),
-                  NzPillTab(label: l.uiCoordTabTeam, count: d.people),
-                  NzPillTab(label: l.uiCoordTabAbout),
+                  const Gap(NizamioSpacing.space1),
+                  Text.rich(
+                    TextSpan(
+                      text: l.coordIdentityLine(d),
+                      children: [
+                        TextSpan(
+                          text: l.uiCoordStateActive,
+                          style: t.caption.copyWith(
+                            color: c.accentText,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    style: t.caption.copyWith(color: c.textMuted),
+                  ),
+                  const Gap(NizamioSpacing.space4),
+                  Row(
+                    spacing: NizamioSpacing.space2,
+                    children: [
+                      Expanded(
+                        child: NzButton.secondary(
+                          label: l.uiCoordMessageTeam,
+                          icon: Icons.chat_bubble_outline_rounded,
+                          expand: true,
+                          onPressed: () =>
+                              context.appNav.openChat(d.profile.chatId),
+                        ),
+                      ),
+                      Expanded(
+                        child: NzButton.primary(
+                          label: l.uiCoordAssignTask,
+                          icon: Icons.add_rounded,
+                          expand: true,
+                          onPressed: () =>
+                              showNewTaskSheet(context, coordinatorship: code),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
-          ),
-        ),
-        SliverPadding(
-          padding: EdgeInsets.fromLTRB(
-            side,
-            NizamioSpacing.space3,
-            side,
-            MediaQuery.paddingOf(context).bottom + NizamioSpacing.gapXl,
-          ),
-          sliver: SliverToBoxAdapter(
-            child: switch (view.tab) {
-              CoordinatorshipTab.general => CoordGeneralTab(detail: d),
-              CoordinatorshipTab.units => CoordUnitsTab(detail: d),
-              CoordinatorshipTab.team => CoordTeamTab(
-                detail: d,
-                membersOpen: view.membersOpen,
-                onToggleMembers: commands.toggleMembers,
+            // Yapışkan sekmeler: üst çubuğun altında kalır; zemin yarı saydam taban rengi.
+            PinnedHeaderSliver(
+              child: ColoredBox(
+                color: c.background.withValues(alpha: 0.92),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    side,
+                    NizamioSpacing.space4,
+                    side,
+                    NizamioSpacing.space3,
+                  ),
+                  child: NzPillTabs(
+                    semanticLabel: l.uiCoordTabsLabel,
+                    selected: tabs.indexOf(view.tab),
+                    onSelected: (i) => commands.selectTab(tabs[i]),
+                    tabs: [
+                      NzPillTab(label: l.uiCoordTabGeneral),
+                      NzPillTab(
+                        label: l.uiCoordTabUnits,
+                        count: d.profile.units.length,
+                      ),
+                      NzPillTab(label: l.uiCoordTabTeam, count: d.people),
+                      NzPillTab(label: l.uiCoordTabAbout),
+                    ],
+                  ),
+                ),
               ),
-              CoordinatorshipTab.about => CoordAboutTab(detail: d),
-            },
-          ),
-        ),
-      ],
+            ),
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                side,
+                NizamioSpacing.space3,
+                side,
+                NzPaneScope.pageBottom(context),
+              ),
+              sliver: SliverToBoxAdapter(
+                child: PageContentEntrance(
+                  key: ValueKey(view.tab),
+                  child: switch (view.tab) {
+                    CoordinatorshipTab.general => CoordGeneralTab(detail: d),
+                    CoordinatorshipTab.units => CoordUnitsTab(detail: d),
+                    CoordinatorshipTab.team => CoordTeamTab(
+                      detail: d,
+                      membersOpen: view.membersOpen,
+                      onToggleMembers: commands.toggleMembers,
+                    ),
+                    CoordinatorshipTab.about => CoordAboutTab(detail: d),
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

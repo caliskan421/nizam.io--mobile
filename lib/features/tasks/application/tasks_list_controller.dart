@@ -95,10 +95,10 @@ class TasksListPrefsStore extends _$TasksListPrefsStore {
 }
 
 /// Görevler listesi denetleyicisi. [view] ve [people] (virgülle ayrılmış kişi kimlikleri)
-/// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: sayfa
-/// (autoDispose; aynı rota sayfası yığında/sekmede durdukça durum korunur), tercihler
-/// [TasksListPrefsStore]'da.
-@riverpod
+/// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: uygulama
+/// (keepAlive; prototip `S_tasks` alt ekran durumu kalıcıdır: tablette modül gidiş-dönüşünde
+/// arama ve süzgeç kalır), tercihler [TasksListPrefsStore]'da.
+@Riverpod(keepAlive: true)
 class TasksListController extends _$TasksListController {
   @override
   TasksListState build(TaskView view, String people) {

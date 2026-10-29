@@ -218,13 +218,13 @@ void main() {
 
     await tester.tap(find.text(_l.uiTimelineFilter));
     await settle(tester);
-    await tester.tap(find.text('Kaan Erol'));
+    await tester.tap(find.text('Ali Avcı'));
     await settle(tester);
     await tester.tap(find.text(_l.uiTimelineClear));
     await settle(tester);
     // Temizle kişiyi kaldırır, durumu korur: hâlâ 13'ten az görev.
     expect(find.text(_l.showTasks(13)), findsNothing);
-    await tester.tap(find.text('Kaan Erol'));
+    await tester.tap(find.text('Ali Avcı'));
     await settle(tester);
     await tester.ensureVisible(apply);
     await tester.tap(apply);

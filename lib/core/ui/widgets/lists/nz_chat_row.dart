@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../buttons/nz_pressable.dart';
+import '../nz_icon.dart';
 import '../surfaces/nz_avatar.dart';
 
 /// Son mesajın okundu durumu (yalnız kendi son mesajında çift tik).
@@ -175,6 +176,8 @@ class NzChatRow extends StatelessWidget {
       ),
     );
     return Semantics(
+      // Kendi düğümü: okuyucu sınırı satırın tamamıdır (kaynak `button`).
+      container: true,
       button: true,
       label: [name, preview, time, ?semanticHint].join(', '),
       excludeSemantics: true,
@@ -223,7 +226,9 @@ class NzChatRow extends StatelessWidget {
                               Text(
                                 time,
                                 maxLines: 1,
+                                // Kaynak saat: Geist 11/20 (satır 21.5).
                                 style: t.monoSm.copyWith(
+                                  height: 20 / 11,
                                   color: hasUnread ? c.accentText : c.textFaint,
                                 ),
                               ),
@@ -233,7 +238,7 @@ class NzChatRow extends StatelessWidget {
                           Row(
                             children: [
                               if (tick != NzChatTick.none) ...[
-                                Icon(
+                                NzIcon(
                                   tick == NzChatTick.sent
                                       ? Icons.done_rounded
                                       : Icons.done_all_rounded,
@@ -242,7 +247,7 @@ class NzChatRow extends StatelessWidget {
                                       ? c.accentText
                                       : c.textFaint,
                                 ),
-                                const Gap(NizamioSpacing.space1),
+                                const Gap(NizamioSpacing.space2),
                               ],
                               Expanded(
                                 child: Text(

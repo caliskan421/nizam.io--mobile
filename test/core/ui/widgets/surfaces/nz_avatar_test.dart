@@ -28,9 +28,9 @@ void main() {
       expect(NzAvatar.initialsOf('ayşe iğdir'), 'Aİ');
     });
 
-    test('tek sözcük bir harf; çok sözcükte ilk ve son', () {
+    test('tek sözcük bir harf; çok sözcükte ilk iki sözcük (kaynak ini)', () {
       expect(NzAvatar.initialsOf('Ali'), 'A');
-      expect(NzAvatar.initialsOf('Ali Veli Demir'), 'AD');
+      expect(NzAvatar.initialsOf('Ali Veli Demir'), 'AV');
     });
 
     test('boşluk kırpılır; boş ad boş döner', () {

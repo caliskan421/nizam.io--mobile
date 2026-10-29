@@ -1032,6 +1032,211 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiButtonsBusy => 'Meşgul';
 
   @override
+  String get uiCalendarTitle => 'Takvim';
+
+  @override
+  String get uiCalendarToday => 'Bugün';
+
+  @override
+  String get uiCalendarPlanMeeting => 'Seçili güne toplantı planla';
+
+  @override
+  String get uiCalendarGrid => 'Takvim ızgarası';
+
+  @override
+  String get uiCalendarCollapse => 'Haftaya daralt';
+
+  @override
+  String get uiCalendarExpand => 'Aya genişlet';
+
+  @override
+  String get uiCalendarPrevMonth => 'Önceki ay';
+
+  @override
+  String get uiCalendarNextMonth => 'Sonraki ay';
+
+  @override
+  String get uiCalendarPrevWeek => 'Önceki hafta';
+
+  @override
+  String get uiCalendarNextWeek => 'Sonraki hafta';
+
+  @override
+  String get uiCalendarWeekLc => 'hafta';
+
+  @override
+  String get uiCalendarWeekdaysShort => 'Pt Sa Ça Pe Cu Ct Pz';
+
+  @override
+  String get uiCalendarRelToday => 'bugün';
+
+  @override
+  String get uiCalendarRelTomorrow => 'yarın';
+
+  @override
+  String get uiCalendarRelYesterday => 'dün';
+
+  @override
+  String get uiCalendarRelAfter => 'gün sonra';
+
+  @override
+  String get uiCalendarRelBefore => 'gün önce';
+
+  @override
+  String get uiCalendarRecordsLc => 'kayıt';
+
+  @override
+  String get uiCalendarSeasonLc => 'sezon';
+
+  @override
+  String get uiCalendarGroupMeetings => 'toplantılar';
+
+  @override
+  String get uiCalendarGroupTasks => 'görevler';
+
+  @override
+  String get uiCalendarGroupRequests => 'talepler';
+
+  @override
+  String get uiCalendarGroupSheets => 'tablo kayıtları';
+
+  @override
+  String get uiCalendarParticipantsLc => 'katılımcı';
+
+  @override
+  String get uiCalendarAgendaLc => 'gündem';
+
+  @override
+  String get uiCalendarPeopleLc => 'kişi';
+
+  @override
+  String get uiCalendarTaskEnds => 'Bitiyor';
+
+  @override
+  String get uiCalendarTaskStarts => 'Başlıyor';
+
+  @override
+  String get uiCalendarLateLc => 'gecikti';
+
+  @override
+  String get uiCalendarDoneLc => 'yapıldı';
+
+  @override
+  String get uiCalendarReqPurchase => 'Satın alma';
+
+  @override
+  String get uiCalendarReqQuote => 'Fiyat teklifi';
+
+  @override
+  String get uiCalendarReqExpense => 'Masraf';
+
+  @override
+  String get uiCalendarReqBudget => 'Ek bütçe';
+
+  @override
+  String get uiCalendarStatePending => 'Onay bekliyor';
+
+  @override
+  String get uiCalendarStateApproved => 'Onaylandı';
+
+  @override
+  String get uiCalendarStateOrdered => 'Sipariş verildi';
+
+  @override
+  String get uiCalendarStateDelivered => 'Teslim alındı';
+
+  @override
+  String get uiCalendarEmpty => 'Bu gün için planlanmış bir şey yok.';
+
+  @override
+  String get uiCalendarPlan => 'Toplantı planla';
+
+  @override
+  String get uiCalendarAllCoordinatorships => 'Tüm koordinatörlükler';
+
+  @override
+  String get uiCalendarPreview => 'Kayıt önizleme';
+
+  @override
+  String get uiCalendarKickerMeeting => 'toplantı';
+
+  @override
+  String get uiCalendarKickerRequest => 'talep';
+
+  @override
+  String get uiCalendarKickerSheet => 'tablo kaydı';
+
+  @override
+  String get uiCalendarFactTime => 'Zaman';
+
+  @override
+  String get uiCalendarFactPlace => 'Yer';
+
+  @override
+  String get uiCalendarFactInvited => 'Davetli';
+
+  @override
+  String get uiCalendarFactType => 'Tür';
+
+  @override
+  String get uiCalendarFactCoordinatorship => 'Koordinatörlük';
+
+  @override
+  String get uiCalendarFactAmount => 'Tutar';
+
+  @override
+  String get uiCalendarFactState => 'Durum';
+
+  @override
+  String get uiCalendarFactNeed => 'İhtiyaç tarihi';
+
+  @override
+  String get uiCalendarFactTask => 'Bağlı görev';
+
+  @override
+  String get uiCalendarFactTable => 'Tablo';
+
+  @override
+  String get uiCalendarFactDate => 'Tarih';
+
+  @override
+  String get uiCalendarFactPerson => 'Kişi';
+
+  @override
+  String get uiCalendarQuotePending => 'Teklif bekleniyor';
+
+  @override
+  String get uiCalendarSheetDone => 'Yapıldı';
+
+  @override
+  String get uiCalendarSheetWaiting => 'Bekliyor';
+
+  @override
+  String get uiCalendarRemind => 'Hatırlat';
+
+  @override
+  String get uiCalendarReminded => 'Katılımcılara hatırlatma gönderildi';
+
+  @override
+  String get uiCalendarWriteGroup => 'Gruba yaz';
+
+  @override
+  String get uiCalendarClose => 'Kapat';
+
+  @override
+  String get uiCalendarGoTask => 'Bağlı göreve git';
+
+  @override
+  String get uiCalendarGoCoordinatorship => 'Koordinatörlüğe git';
+
+  @override
+  String get uiCalendarPickTitle => 'Bir kayıt seç';
+
+  @override
+  String get uiCalendarPickBody =>
+      'Soldaki listeden bir göreve dokun, ayrıntısı burada açılır. Toplantı ve talepler önizleme penceresinde açılır.';
+
+  @override
   String get uiCommonRetry => 'Yeniden dene';
 
   @override
@@ -1330,16 +1535,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeKpiReview => 'Onay bekleyen';
 
   @override
-  String get uiHomeKpiDoneOf => 'görevden';
+  String get uiHomeKpiDoneOf => 'görevin';
 
   @override
-  String get uiHomeKpiDoneTail => 'tanesi bitti';
+  String get uiHomeKpiDoneTail => 'bitti';
 
   @override
   String get uiHomeKpiDoingTail => 'tanesi zamanında';
 
   @override
-  String get uiHomeKpiLateLead => 'Açık görevlerde';
+  String get uiHomeKpiLateLead => 'Açık görevlerin';
 
   @override
   String get uiHomeKpiReviewCaption => 'Kanıt yüklendi, onayda';
@@ -1604,7 +1809,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiIdentityLoginEmail => 'E-posta';
 
   @override
-  String get uiIdentityLoginPassword => 'Parola';
+  String get uiIdentityLoginPassword => 'Şifre';
 
   @override
   String get uiIdentityLoginSubmit => 'Giriş yap';
@@ -1645,7 +1850,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu cihazdaki oturum kapatılır.';
 
   @override
-  String get uiIdentityLoginIntro => 'E-posta adresin ve parolanla devam et.';
+  String get uiIdentityLoginIntro => 'E-posta adresin ve şifrenle devam et.';
 
   @override
   String get uiIdentityLoginSubmitting => 'Giriş yapılıyor…';
@@ -1654,16 +1859,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiIdentityLoginEmailHint => 'ad@alan.com';
 
   @override
-  String get uiIdentityLoginPasswordHint => 'Parolan';
+  String get uiIdentityLoginPasswordHint => 'Şifren';
 
   @override
   String get uiIdentityLoginVersionPrefix => 'v';
 
   @override
-  String get uiInputsPasswordShow => 'Parolayı göster';
+  String get uiIdentityLoginFooter => 'Developed by KAYACAN, COSMAN, CALISKAN';
 
   @override
-  String get uiInputsPasswordHide => 'Parolayı gizle';
+  String get uiInputsPasswordShow => 'Şifreyi göster';
+
+  @override
+  String get uiInputsPasswordHide => 'Şifreyi gizle';
 
   @override
   String get uiInputsSearch => 'Ara';
@@ -2062,6 +2270,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiRouterTabMessages => 'Mesajlar';
+
+  @override
+  String get uiRouterAssistantSoonTablet =>
+      'Asistan tablette sonraki adımda tasarlanacak';
+
+  @override
+  String get uiRouterAllModules => 'Tüm modüller';
 
   @override
   String get uiScopeTitle => 'Program seçimi';
@@ -3229,4 +3444,58 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTimelineOpen => 'aç';
+
+  @override
+  String get uiTimelineGanttBack => 'Görevler';
+
+  @override
+  String get uiTimelineGanttBackLabel => 'Geri: Görevler';
+
+  @override
+  String get uiTimelineGanttFilter => 'Görev filtresi';
+
+  @override
+  String get uiTimelineGanttScaleSeason => 'Sezon';
+
+  @override
+  String get uiTimelineGanttAllCoords => 'Tüm koordinatörlükler';
+
+  @override
+  String get uiTimelineGanttAllCoordsLc => 'tüm koordinatörlükler';
+
+  @override
+  String get uiTimelineGanttLabelHead => 'koordinatörlük · görev';
+
+  @override
+  String get uiTimelineGanttLateTail => 'gecikme';
+
+  @override
+  String get uiTimelineGanttTodayPill => 'bugün';
+
+  @override
+  String get uiTimelineGanttEmpty => 'Bu filtreyle eşleşen görev yok.';
+
+  @override
+  String get uiTimelineGanttLegendLate => 'Gecikme';
+
+  @override
+  String get uiTimelineGanttLegendFest => 'Teknofest günleri';
+
+  @override
+  String get uiTimelineGanttCardStatus => 'durum';
+
+  @override
+  String get uiTimelineGanttCardDate => 'tarih';
+
+  @override
+  String get uiTimelineGanttCardAssignee => 'atanan';
+
+  @override
+  String get uiTimelineGanttUnassigned => 'Atanmamış';
+
+  @override
+  String get uiTimelineGanttDaysLate => 'gün gecikti';
+
+  @override
+  String get uiTimelineGanttOpenTask => 'Görev ayrıntısını aç';
 }

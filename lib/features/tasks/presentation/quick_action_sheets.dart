@@ -54,11 +54,15 @@ Future<void> showNewTaskSheet(
   );
 }
 
-Future<void> showMeetingSheet(BuildContext context, {String? coordinatorship}) {
+Future<void> showMeetingSheet(
+  BuildContext context, {
+  String? coordinatorship,
+  DateTime? date,
+}) {
   final container = ProviderScope.containerOf(context, listen: false);
   container
       .read(meetingFormControllerProvider.notifier)
-      .prepare(coordinatorship: coordinatorship);
+      .prepare(coordinatorship: coordinatorship, date: date);
   final l = context.l10n;
   return _show(
     context,

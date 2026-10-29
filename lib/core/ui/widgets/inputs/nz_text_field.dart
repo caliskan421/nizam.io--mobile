@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../errors/api_error.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../../layout/nz_pane.dart';
 import '../nz_size.dart';
 import 'nz_field_errors.dart';
 import 'nz_validators.dart';
@@ -248,24 +249,35 @@ class NzFieldLabelAbove extends StatelessWidget {
   final String label;
   final Widget child;
 
+  // Tablet girişi: `.t-label` 13/20, `margin-bottom 8` + alan sütununun `gap 8`.
+  static const _tabletLine = 20.0;
+
   @override
-  Widget build(BuildContext context) => MergeSemantics(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: context.text.labelMd.copyWith(
-            fontWeight: FontWeight.w600,
-            color: context.colors.text,
+  Widget build(BuildContext context) {
+    final tablet = NzTabletMetrics.tabletVisualAt(
+      MediaQuery.sizeOf(context).width,
+    );
+    final style = context.text.labelMd.copyWith(
+      fontWeight: FontWeight.w600,
+      color: context.colors.text,
+    );
+    return MergeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: tablet
+                ? style.copyWith(height: _tabletLine / style.fontSize!)
+                : style,
           ),
-        ),
-        const Gap(NizamioSpacing.space2),
-        child,
-      ],
-    ),
-  );
+          Gap(tablet ? NizamioSpacing.space4 : NizamioSpacing.space2),
+          child,
+        ],
+      ),
+    );
+  }
 }
 
 /// Boyuta göre yazı rolü ve dikey iç boşluk (tek görünüm fark noktası). Dokunma alanı

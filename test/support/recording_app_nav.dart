@@ -25,6 +25,9 @@ class RecordingAppNav implements NzAppNav {
   void openTask(String code) => calls.add('task:$code');
 
   @override
+  void openCalendar() => calls.add('calendar');
+
+  @override
   void openTimeline({String? coordinatorship}) =>
       calls.add(['timeline', ?coordinatorship].join(':'));
 

@@ -2,7 +2,7 @@ import '../../domain/archive.dart';
 
 /// GELİŞTİRME ÖRNEĞİ — gerçek servis değildir. Arşiv ekranı backend hazır olmadan kurulsun diye
 /// prototipteki 11 klasörü (227 dosya, 559,3 MB) döner; ağ isteği atmaz. Koordinatörler görev
-/// kataloğunun kurmaca kişileridir. Bileşim kökünde (`archive_module.dart`) tek yerde bağlanır.
+/// kataloğunun prototip kişileridir. Bileşim kökünde (`archive_module.dart`) tek yerde bağlanır.
 final class SampleArchiveRepository implements ArchiveRepository {
   const SampleArchiveRepository();
 

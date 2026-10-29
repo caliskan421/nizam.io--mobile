@@ -72,30 +72,30 @@ abstract class _$TasksListPrefsStore extends $Notifier<TasksListPrefs> {
 }
 
 /// Görevler listesi denetleyicisi. [view] ve [people] (virgülle ayrılmış kişi kimlikleri)
-/// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: sayfa
-/// (autoDispose; aynı rota sayfası yığında/sekmede durdukça durum korunur), tercihler
-/// [TasksListPrefsStore]'da.
+/// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: uygulama
+/// (keepAlive; prototip `S_tasks` alt ekran durumu kalıcıdır: tablette modül gidiş-dönüşünde
+/// arama ve süzgeç kalır), tercihler [TasksListPrefsStore]'da.
 
 @ProviderFor(TasksListController)
 final tasksListControllerProvider = TasksListControllerFamily._();
 
 /// Görevler listesi denetleyicisi. [view] ve [people] (virgülle ayrılmış kişi kimlikleri)
-/// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: sayfa
-/// (autoDispose; aynı rota sayfası yığında/sekmede durdukça durum korunur), tercihler
-/// [TasksListPrefsStore]'da.
+/// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: uygulama
+/// (keepAlive; prototip `S_tasks` alt ekran durumu kalıcıdır: tablette modül gidiş-dönüşünde
+/// arama ve süzgeç kalır), tercihler [TasksListPrefsStore]'da.
 final class TasksListControllerProvider
     extends $NotifierProvider<TasksListController, TasksListState> {
   /// Görevler listesi denetleyicisi. [view] ve [people] (virgülle ayrılmış kişi kimlikleri)
-  /// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: sayfa
-  /// (autoDispose; aynı rota sayfası yığında/sekmede durdukça durum korunur), tercihler
-  /// [TasksListPrefsStore]'da.
+  /// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: uygulama
+  /// (keepAlive; prototip `S_tasks` alt ekran durumu kalıcıdır: tablette modül gidiş-dönüşünde
+  /// arama ve süzgeç kalır), tercihler [TasksListPrefsStore]'da.
   TasksListControllerProvider._({
     required TasksListControllerFamily super.from,
     required (TaskView, String) super.argument,
   }) : super(
          retry: null,
          name: r'tasksListControllerProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -134,12 +134,12 @@ final class TasksListControllerProvider
 }
 
 String _$tasksListControllerHash() =>
-    r'97f044c6025f73db75d8cf4a3bc48e8048a5d3b4';
+    r'87de336bb64c12da3d79330c90baa5b02f45ac28';
 
 /// Görevler listesi denetleyicisi. [view] ve [people] (virgülle ayrılmış kişi kimlikleri)
-/// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: sayfa
-/// (autoDispose; aynı rota sayfası yığında/sekmede durdukça durum korunur), tercihler
-/// [TasksListPrefsStore]'da.
+/// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: uygulama
+/// (keepAlive; prototip `S_tasks` alt ekran durumu kalıcıdır: tablette modül gidiş-dönüşünde
+/// arama ve süzgeç kalır), tercihler [TasksListPrefsStore]'da.
 
 final class TasksListControllerFamily extends $Family
     with
@@ -156,13 +156,13 @@ final class TasksListControllerFamily extends $Family
         name: r'tasksListControllerProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   /// Görevler listesi denetleyicisi. [view] ve [people] (virgülle ayrılmış kişi kimlikleri)
-  /// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: sayfa
-  /// (autoDispose; aynı rota sayfası yığında/sekmede durdukça durum korunur), tercihler
-  /// [TasksListPrefsStore]'da.
+  /// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: uygulama
+  /// (keepAlive; prototip `S_tasks` alt ekran durumu kalıcıdır: tablette modül gidiş-dönüşünde
+  /// arama ve süzgeç kalır), tercihler [TasksListPrefsStore]'da.
 
   TasksListControllerProvider call(TaskView view, String people) =>
       TasksListControllerProvider._(argument: (view, people), from: this);
@@ -172,9 +172,9 @@ final class TasksListControllerFamily extends $Family
 }
 
 /// Görevler listesi denetleyicisi. [view] ve [people] (virgülle ayrılmış kişi kimlikleri)
-/// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: sayfa
-/// (autoDispose; aynı rota sayfası yığında/sekmede durdukça durum korunur), tercihler
-/// [TasksListPrefsStore]'da.
+/// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: uygulama
+/// (keepAlive; prototip `S_tasks` alt ekran durumu kalıcıdır: tablette modül gidiş-dönüşünde
+/// arama ve süzgeç kalır), tercihler [TasksListPrefsStore]'da.
 
 abstract class _$TasksListController extends $Notifier<TasksListState> {
   late final _$args = ref.$arg as (TaskView, String);

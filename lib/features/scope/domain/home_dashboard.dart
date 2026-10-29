@@ -16,6 +16,8 @@ final class HomeDashboard {
     this.lastActivity,
     this.greetingRole,
     this.greetingEmail,
+    this.demoProgramName,
+    this.demoProgramYear,
   });
 
   /// Karşılamadaki ad (oturumdaki kişinin görünen adı).
@@ -24,6 +26,11 @@ final class HomeDashboard {
   /// Oturumdaki kişinin rolü ve e-postası (çekmece başlığı "Admin · e-posta"); bilinmiyorsa null.
   final TeamRole? greetingRole;
   final String? greetingEmail;
+
+  /// Yalnız örnek/demo fikstüründe: kapsam (program) yüklenemezken çekmece sezon kartında
+  /// gösterilecek prototip program adı ve yılı. Gerçek kaynakta null; gerçek kapsam önceliklidir.
+  final String? demoProgramName;
+  final int? demoProgramYear;
   final TaskTotals tasks;
   final TeamTotals team;
   final LastActivity? lastActivity;
@@ -67,13 +74,17 @@ final class TeamTotals {
     required this.admins,
     required this.coordinators,
     required this.members,
+    this.userCount,
   });
 
   final int admins;
   final int coordinators;
   final int members;
 
-  int get users => admins + coordinators + members;
+  /// Toplam kullanıcı (sunucu ya da fikstür verdiyse); null → rol toplamı.
+  final int? userCount;
+
+  int get users => userCount ?? admins + coordinators + members;
 }
 
 /// Son işlem (işlem geçmişi giriş kartı).

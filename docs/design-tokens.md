@@ -15,7 +15,7 @@ rol eşlemesinin gerekçesini ve tasarım kaynaklarındaki çelişkileri kaydede
    Çözümleyici (`tool/gen/sources.dart` `resolveTokens`) bilinmeyen renk biçimini, tek temada
    tanımlı rengi, döngülü başvuruyu, eşlemede olmayan token'ı, em olmayan harf aralığını düşürür.
    CSS `#RRGGBBAA` → Flutter `0xAARRGGBB` (alfa başa taşınır); `rgba()` alfası ×255 yuvarlanır.
-4. **Hareket:** süre ve eğriler tasarım sisteminin `components/bundle.css` `:root` özel
+4. **Genel bileşen hareketi:** süre ve eğriler tasarım sisteminin `components/bundle.css` `:root` özel
    özelliklerinden (`--m-dur-*`, `--m-ease-*`) okunur; dosya `design/mobile-tokens.json`
    `motion.source` (yol + blob) ile aynı yöntemle sabittir (değişirse `make gen` düşer). Basma
    ölçekleri (`.96` düğme, `.985` kart) eşlemede `motion.pressScale` (kaynak seçiciler yorumda).
@@ -57,14 +57,25 @@ Satır yüksekliği px → oran, `TextLeadingDistribution.even` (CSS yarı-aral�
 
 | Dosya | Kaynak | sha256 (ilk 12) |
 |---|---|---|
-| Poppins-SemiBold.ttf (4.004) | github.com/google/fonts `ofl/poppins` | d3bf1bdaf055 |
+| Poppins-Medium/SemiBold.ttf (4.004) | github.com/google/fonts `ofl/poppins` | 90373e7d838d / d3bf1bdaf055 |
 | GeistMono-Regular/Medium.ttf (1.802) | github.com/vercel/geist-font release v1.8.2 | 2c01278ad859 / 8879bed58337 |
-| Inter-Regular/Medium/SemiBold.ttf (4.001) | mevcut (değişmedi) | — |
+| Inter-Regular/Medium/SemiBold/Bold.ttf (4.001) | fonts.gstatic.com `s/a/<sha256>.ttf` (google_fonts 8.2.1 beklenen hash'i) | 15b294b67f2f / 36a36ff7ac46 / 334bb2c51aeb / 76121a34a606 |
 
-Ağırlıklar tasarımın 19 stilinden türetilir (test: `nz_text_styles_test`); Inter 700 ve JetBrains
-Mono kaldırıldı. fontTools ile denetlendi: altı dosyada `İ ı Ş ş Ğ ğ Ç ç Ö ö Ü ü` mevcut, ad
-tablosu aile/ağırlık dosya adıyla uyumlu; Geist Mono rakamları eş genişlikte (600). HTML'deki gömülü
-web yazı tipleri alt kümeye bölünmüş olduğu için kullanılmadı.
+Kayıt pubspec `fonts:` ile yapılır: aile adı token'daki mantıksal ad (`Inter`, `Poppins`,
+`Geist Mono`), her dosya gerçek ağırlığıyla. `NzTextStyles` düz `TextStyle(fontFamily:)` üretir;
+`copyWith(fontWeight:)` Flutter'ın ağırlık eşlemesiyle doğru dosyayı seçer. (Önceki
+`GoogleFonts.getFont` aileyi `Inter_regular` gibi ağırlığa göre adlandırdığı için
+`bodyMd.copyWith(w600)` Regular dosyada kalıp motor tarafından sentetik kalınlaştırılıyordu.)
+Kayıtsız ağırlık en yakın gerçek dosyaya düşer; istenen ile seçilen arasında ≥ 200 fark varsa motor
+sentetik kalınlık ekler (ör. Geist Mono 600 → Medium, sentez yok; 700 → Medium + sentez).
+
+Ağırlık kümesi tablet tasarımının Google Fonts CSS'idir (`docs/design/tablet/12-Tablet.dc.html`:
+Inter 400–700, Poppins 500/600, Geist Mono 400/500); token stillerinin her aile+ağırlığı bu kümede
+olmalıdır. Test (`nz_text_styles_test`): kayıt = CSS kümesi, dosyanın `OS/2.usWeightClass` ve ad
+tablosu kayıtla uyumlu, fazla dosya yok, her ağırlık gerçek dosyayla piksel-aynı çizilir. JetBrains
+Mono kaldırıldı. fontTools ile denetlendi: sekiz dosyada `İ ı Ş ş Ğ ğ Ç ç Ö ö Ü ü` mevcut; Geist Mono
+rakamları eş genişlikte (600). HTML'deki gömülü web yazı tipleri alt kümeye bölünmüş olduğu için
+kullanılmadı.
 
 ## Kaynak karşılaştırması: çelişkiler
 
@@ -78,7 +89,7 @@ Prototip (`mobile.html`, 390×844, Chromium) hesaplanmış stilleriyle `tokens.j
   `labelLg` ağırlığı kullanır.
 - Açık temada kart gölgesi (`0 1px 2px …05, 0 6px 20px …06`) prototipte var, `tokens.json`'da yok.
 - `m-sh-knob` yalnız tek değer (açık tema karşılığı yok); iki modda aynı üretilir.
-- Hareket eğrileri/süreleri yalnız `components/bundle.css`'te (`--m-ease-*`, `--m-dur-*`); `tokens.json`'da yok.
+- Genel bileşen hareket eğrileri/süreleri yalnız `components/bundle.css`'te (`--m-ease-*`, `--m-dur-*`); `tokens.json`'da yok.
 - `m-kpi` Poppins ile `tabular-nums` ister; Poppins'te `tnum` özelliği yok → rakamlar orantılı kalır.
   Poppins'te `→` glifi yok (yedeğe düşer).
 
@@ -89,7 +100,7 @@ Prototip (`mobile.html`, 390×844, Chromium) hesaplanmış stilleriyle `tokens.j
 | Kart dolgusu 14 / 16 | KPI ve koordinatörlük kartı `m-row-pad` (14; README "KPI kutucuğu iç yatay boşluğu"), görev/giriş kartı `m-card-pad` (16). `NzCard` `padding` alır; ekran token verir. |
 | Düğme yüksekliği 52 / 44 | Görsel yükseklik prototip `--control-sm/md/lg` (36/44/52 → `NizamioSize.controlSm/Md/Lg`); dokunma alanı her boyutta ≥ 48 (`MaterialTapTargetSize.padded`, bölünmüş düğmede parça başına 48). |
 | Açık tema kart gölgesi | Eşlemede `shadows.card` (prototip `--shadow-card`, iki katman); koyu temada boş (prototip hesaplanmış stili yalnız iç ışık). Üretici çok katmanlı/`none` gölgeyi okur; ad tasarım gölgesiyle çakışırsa düşer. |
-| Hareket yalnız bundle.css | `motion.source` pini + üretim (yukarıda); `NzMotion.of` hareketi azaltta süreyi sıfırlar. |
+| Genel bileşen hareketi bundle.css | `motion.source` pini + üretim (yukarıda); `NzMotion.of` hareketi azaltta süreyi sıfırlar. |
 | Kontrast: `ink-faint` / `bg-raised` 4.34 | Filtre rayındaki sayaç (raydaki tek `ink-faint` metin) `textMuted`'a alındı (her iki temada ≥ 4.5); test listesi değişmedi. |
 | Kontrast: `gold` metin 4.25 (açık) | "Koordinatör atanmamış" prototipte gold metin; burada gold yalnız durum noktası, yazı `textMuted`. Bekleyen işler flyout'unda gold yalnız nokta. |
 | Poppins `tnum` yok | KPI rakamı tek değer (hizalama gerekmez) Poppins `m-kpi`; sütun hizası gereken sayılar (yüzde · görev, geciken, sayaçlar) Geist Mono (`kicker`/`monoSm`). |
@@ -142,3 +153,18 @@ basma ölçeği (.96), giriş etiketinin alan üstünde durması (prototip), alt
 yüzeyleri (`NizamioBlur`, `glass-*` rolleri `design/mobile-tokens.json`'a eklenerek). Komutlar:
 `make gen`, `make lint`, `flutter test test/core/ui test/app/dev`, ağır koşum
 `../program/araclar/verify-sirasi.sh "$PWD" verify`; Linux'ta `make golden-update` + görsel inceleme.
+
+## Sayfa açılış hareketi (2026-10-29)
+
+Sayfa içerik hareketi `lib/core/ui/theme/nz_motion.dart` içindeki `RpMotion` üzerinden
+10 dp / 320 ms / Cubic(0.2, 0.8, 0.2, 1.0) kullanır. Bu değerler genel bileşen hareket
+token'larından bağımsızdır. 2026-10-29 ürün sahibi düzeltmesiyle tüm sayfayı taşıyan veya
+soluklaştıran rota/kabuk geçişleri kaldırıldı; AppBar ve alt menü animasyona katılmaz.
+
+`NzPage` AppBar dışındaki içeriği `PageContentEntrance` ile sarar; sliver varyantı
+geometriyi değiştirmeden boyar ve tembel listeleri korur. `NzPage.bare` kullanan sohbet,
+yalnız mesaj listesini sarar; başlık ve composer hareket etmez. Korunan sayfa yeniden görünür olduğunda (TickerMode) içerik
+girişi yeniden oynar; sıradan yeniden çizimlerde oynamaz. Sekme panelleri kimlik
+anahtarıyla yeniden açılır; ilk panelin hareketi sayfanın hareketine katlanmaz.
+Hareketi azalt açıkken süre sıfır, ilk kare son haldir.
+Sheet, dialog, toast, drawer ve kısayol menüsü kendi hareketlerini korur.

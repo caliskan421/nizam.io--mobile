@@ -79,6 +79,8 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
               icon: Icons.apartment_rounded,
               value: coord?.name ?? l.uiTasksPick,
               valueSet: coord != null,
+              // Kaynak: seçilmemiş "Seç" `accent-text`, seçili `ink-muted`.
+              valueColor: coord == null ? c.accentText : c.textMuted,
               content: QuickPane(
                 child: Column(
                   children: [
@@ -101,6 +103,11 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
               icon: Icons.person_outline_rounded,
               value: assigneeValue,
               valueSet: f.assignees.isNotEmpty,
+              valueColor: f.assignees.isNotEmpty
+                  ? c.textMuted
+                  : coord == null
+                  ? c.textFaint
+                  : c.accentText,
               content: QuickPane(
                 child: coord == null || coord.team.isEmpty
                     ? Text(
@@ -129,6 +136,7 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
               icon: Icons.calendar_today_outlined,
               value: dateValue,
               valueSet: true,
+              valueColor: f.end.isBefore(f.start) ? c.danger : c.textMuted,
               content: QuickPane(
                 child: NzRangeCalendar(
                   month: f.month,

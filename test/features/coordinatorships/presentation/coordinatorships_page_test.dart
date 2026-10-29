@@ -56,10 +56,10 @@ void main() {
     expect(find.text('9/13 bitti'), findsOneWidget);
     expect(find.text('3 gecikmede'), findsWidgets);
     expect(
-      find.text('Deniz Aydemir, Kaan Erol · Kerem Özdal (üye)'),
+      find.text('Abdullah Ateş, Ali Avcı · Kadir Özbek (üye)'),
       findsOneWidget,
     );
-    expect(find.text('Koordinatör yok · Bengü Kılınç (üye)'), findsOneWidget);
+    expect(find.text('Koordinatör yok · Bahar Kılıç (üye)'), findsOneWidget);
     expect(_cardOrder(tester).take(3), ['ALT', 'EĞİ', 'ELE']);
     await tester.tap(find.text('Altyapı ve tesisat'));
     await settle(tester);

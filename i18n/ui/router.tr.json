@@ -19,6 +19,8 @@
     "ui.router.tab_tasks": "Görevler",
     "ui.router.tab_coordinatorships": "Koordinatörlükler",
     "ui.router.tab_archive": "Arşiv",
-    "ui.router.tab_messages": "Mesajlar"
+    "ui.router.tab_messages": "Mesajlar",
+    "ui.router.assistant_soon_tablet": "Asistan tablette sonraki adımda tasarlanacak",
+    "ui.router.all_modules": "Tüm modüller"
   }
 }

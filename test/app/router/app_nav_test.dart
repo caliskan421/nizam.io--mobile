@@ -94,10 +94,17 @@ void main() {
     await openMenu();
     await tester.tap(find.text(_l.uiHomeModuleCalendar));
     await settle(tester);
+    expect(locationOf(router), '/calendar');
+    router.go('/home');
+    await settle(tester);
+    await openMenu();
+    await tester.tap(find.text(_l.uiHomeModuleMemory));
+    await settle(tester);
     expect(
-      find.text('${_l.uiHomeModuleCalendar} ${_l.uiHomeSoonTail}'),
+      find.text('${_l.uiHomeModuleMemory} ${_l.uiHomeSoonTail}'),
       findsOneWidget,
     );
+    expect(locationOf(router), '/home');
     await openMenu();
     await tester.tap(find.text(_l.uiHomeModuleTasks));
     await settle(tester);

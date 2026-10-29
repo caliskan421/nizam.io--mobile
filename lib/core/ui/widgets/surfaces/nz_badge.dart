@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../nz_icon.dart';
 import '../nz_size.dart';
 
 enum _BadgeTone { neutral, info, success, warning, danger }
@@ -76,7 +77,7 @@ class NzBadge extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (leading != null) ...[
-                Icon(leading, size: style.iconSize, color: style.tone),
+                NzIcon(leading, size: style.iconSize, color: style.tone),
                 const Gap(NizamioSpacing.space1),
               ],
               Flexible(

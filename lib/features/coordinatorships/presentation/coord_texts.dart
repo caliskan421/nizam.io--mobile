@@ -30,13 +30,13 @@ extension CoordTexts on AppLocalizations {
   /// "3 gecikmede".
   String coordLate(CoordinatorshipStats c) => '${c.late} $uiCoordLateTail';
 
-  /// "Deniz Aydemir, Kaan Erol · Kerem Özdal (üye)" / "Koordinatör yok · Bengü Kılınç (üye)".
+  /// Liste kartı satırı (kaynak `S_coord` `D[5]`): koordinatörler virgülle ("Abdullah Ateş,
+  /// Ali Avcı, Kadir Özbek"); üyeler yalnız koordinatör yokken ("Koordinatör yok · Bahar Kılıç
+  /// (üye)").
   String coordPeople(CoordinatorshipStats c) {
-    final leads = c.hasLead
-        ? c.leads.map((p) => p.name).join(', ')
-        : uiCoordNoLead;
-    if (c.members.isEmpty) return leads;
-    return '$leads · ${c.members.map((p) => p.name).join(', ')} '
+    if (c.hasLead) return c.leads.map((p) => p.name).join(', ');
+    if (c.members.isEmpty) return uiCoordNoLead;
+    return '$uiCoordNoLead · ${c.members.map((p) => p.name).join(', ')} '
         '$uiCoordMemberSuffix';
   }
 
@@ -56,7 +56,7 @@ extension CoordTexts on AppLocalizations {
       '${d.stats.total} $uiCoordPctNoteOf ${d.stats.done} $uiCoordPctNoteDone'
       ' · $uiCoordSeasonAverage ${coordPercent(d.seasonRatio)}';
 
-  /// "ALT-5 · Kerem Özdal".
+  /// "ALT-5 · Kadir Özbek".
   String coordAttentionWho(AttentionItem a) =>
       [a.code, ?a.assignee].join(' · ');
 

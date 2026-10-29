@@ -13,7 +13,7 @@ void main() {
   test(
     'baş harfler: ilk iki sözcük, Türkçe büyük harf; tek sözcük tek harf',
     () {
-      expect(NzChatAvatar.initialsOf('Kerem Özdal'), 'KÖ');
+      expect(NzChatAvatar.initialsOf('Kadir Özbek'), 'KÖ');
       expect(NzChatAvatar.initialsOf('Hidrofor teslim ekibi'), 'HT');
       expect(NzChatAvatar.initialsOf('Genel'), 'G');
       expect(NzChatAvatar.initialsOf('ilk iş'), 'İİ');
@@ -29,7 +29,7 @@ void main() {
           name: 'Koordinatörler',
           initials: 'K',
           group: true,
-          preview: 'Rıza: trafo onayı',
+          preview: 'Reha: trafo onayı',
           time: '09:51',
           unread: 2,
           mention: true,
@@ -47,7 +47,7 @@ void main() {
     expect(
       t.getSemantics(find.byType(NzChatRow)),
       matchesSemantics(
-        label: 'Koordinatörler, Rıza: trafo onayı, 09:51, 2 okunmamış',
+        label: 'Koordinatörler, Reha: trafo onayı, 09:51, 2 okunmamış',
         isButton: true,
         hasTapAction: true,
       ),
@@ -61,7 +61,7 @@ void main() {
     await t.pumpWidget(
       testApp(
         NzChatRow(
-          name: 'Kerem Özdal',
+          name: 'Kadir Özbek',
           initials: 'KÖ',
           tone: 3,
           online: true,

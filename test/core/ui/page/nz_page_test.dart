@@ -296,4 +296,63 @@ void main() {
     final y = tester.getTopLeft(find.text('sekmeler')).dy;
     expect(y, closeTo(56, 1), reason: 'üst çubuğun hemen altında');
   });
+
+  // Geniş pencerede (1400) sayfaya yalnız 400 dp ayrılır (bölünmüş ekran / yan panel).
+  Widget narrow(Widget page) => Align(
+    alignment: Alignment.topLeft,
+    child: SizedBox(width: 400, child: page),
+  );
+
+  const pinnedKey = ValueKey('pinned');
+  const afterKey = ValueKey('after');
+  NzPage feed() => const NzPage.feed(
+    topBar: SliverAppBar(pinned: true, title: Text('üst')),
+    pinned: SizedBox(key: pinnedKey, height: 40),
+    after: [SizedBox(key: afterKey, height: 40)],
+    children: [SizedBox(key: _bodyKey, height: 40)],
+  );
+
+  testWidgets('standart: geniş pencerede dar alan → yerel 16 dolgu', (
+    tester,
+  ) async {
+    _size(tester, 1400);
+    await tester.pumpWidget(
+      _app(
+        narrow(
+          NzPage(
+            title: 't',
+            body: Container(key: _bodyKey),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    final r = tester.getRect(find.byKey(_bodyKey));
+    expect(r.left, NizamioSpacing.space4);
+    expect(r.right, 400 - NizamioSpacing.space4);
+  });
+
+  testWidgets('feed: geniş pencerede dar alan → children/pinned/after 16', (
+    tester,
+  ) async {
+    _size(tester, 1400);
+    await tester.pumpWidget(_app(narrow(feed())));
+    expect(tester.takeException(), isNull);
+    for (final key in [_bodyKey, pinnedKey, afterKey]) {
+      final r = tester.getRect(find.byKey(key));
+      expect(r.left, NizamioSpacing.space4, reason: '$key');
+      expect(r.right, 400 - NizamioSpacing.space4, reason: '$key');
+    }
+  });
+
+  testWidgets('feed: yeterli alanda azami 960 ve ortalı', (tester) async {
+    _size(tester, 1400);
+    await tester.pumpWidget(_app(feed()));
+    expect(tester.takeException(), isNull);
+    for (final key in [_bodyKey, pinnedKey, afterKey]) {
+      final r = tester.getRect(find.byKey(key));
+      expect(r.width, 960, reason: '$key');
+      expect(r.center.dx, 700, reason: '$key');
+    }
+  });
 }

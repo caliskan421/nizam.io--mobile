@@ -12,6 +12,7 @@ import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
 import '../application/archive_controller.dart';
@@ -311,7 +312,7 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
                         turns: view.tagsOpen ? 0.5 : 0,
                         duration: const Duration(milliseconds: 350),
                         curve: NizamioMotion.easeSpring,
-                        child: Icon(
+                        child: NzIcon(
                           Icons.keyboard_arrow_down_rounded,
                           size: 16,
                           color: c.textFaint,
@@ -459,7 +460,7 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
                                   color: on ? c.primary : c.surfaceOverlay,
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(
+                                child: NzIcon(
                                   Icons.add_rounded,
                                   size: 16,
                                   color: on ? c.onPrimary : c.textFaint,
@@ -565,7 +566,7 @@ class _Folders extends ConsumerWidget {
                       style: t.bodySm.copyWith(color: c.textMuted),
                     ),
                     const Gap(NizamioSpacing.space1),
-                    Icon(
+                    NzIcon(
                       Icons.swap_vert_rounded,
                       size: NizamioSize.iconSizeSm,
                       color: c.textMuted,

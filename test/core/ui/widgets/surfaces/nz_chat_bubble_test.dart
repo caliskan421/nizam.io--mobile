@@ -60,8 +60,8 @@ void main() {
             last: false,
             body: const Text('Vardiya taslağı arşivde'),
             time: '18:20',
-            semanticLabel: 'Yusuf Çevik',
-            senderName: 'Yusuf Çevik',
+            semanticLabel: 'Yunus Çiftçioğlu',
+            senderName: 'Yunus Çiftçioğlu',
             senderRole: 'Koordinatör',
             showAvatarSlot: true,
             avatar: const NzChatAvatar(initials: 'YÇ', extent: 30),
@@ -85,7 +85,7 @@ void main() {
         ),
       );
       expect(_decoration(t).color, NizamioColors.light.bubbleOther);
-      expect(find.textContaining('Yusuf Çevik'), findsOneWidget);
+      expect(find.textContaining('Yunus Çiftçioğlu'), findsOneWidget);
       // Dizinin son balonu değil: avatar gizli.
       expect(find.text('YÇ'), findsNothing);
       await t.tap(find.text('Sen'));
@@ -154,7 +154,7 @@ void main() {
               ),
               time: '09:40',
               semanticLabel: 'mesaj',
-              senderName: 'Bengü Kılınç',
+              senderName: 'Bahar Kılıç',
               senderRole: 'Üye',
               editedLabel: 'düzenlendi',
               showAvatarSlot: true,

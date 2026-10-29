@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../theme/generated/tokens.gen.dart';
 
@@ -36,29 +35,32 @@ class NzTextStyles extends ThemeExtension<NzTextStyles> {
     required this.list,
   });
 
-  /// Yazı tipi dosyaları uygulamayla gelir (assets/fonts); `GoogleFonts` ağdan indirmez
-  /// (bootstrap'te kapatılır). Aile adı token'dan `GoogleFonts.getFont`'a gider: bilinmeyen aile
-  /// ya da eksik ağırlık dosyası sessiz yedeğe düşmez (test: nz_text_styles_test).
+  /// Yazı tipi dosyaları uygulamayla gelir: pubspec `fonts:` her aileyi token'daki mantıksal adla
+  /// (`Inter`, `Poppins`, `Geist Mono`) ve gerçek ağırlık dosyalarıyla kaydeder. Stil yalnız aile
+  /// adını taşır; `copyWith(fontWeight:)` Flutter'ın ağırlık eşlemesiyle doğru dosyayı seçer
+  /// (`GoogleFonts.getFont` aileyi ağırlığa göre adlandırdığı için `bodyMd.copyWith(w600)`
+  /// Regular dosyada kalıyordu). Bilinmeyen aile sessiz yedeğe düşmez: burada hata; eksik
+  /// ağırlık kaydı testte yakalanır (nz_text_styles_test).
   factory NzTextStyles.fromColors(NizamioColors c) {
     const fallbacks = {
       NizamioTypography.familySans: NizamioTypography.familySansFallback,
       NizamioTypography.familyDisplay: NizamioTypography.familyDisplayFallback,
       NizamioTypography.familyMono: NizamioTypography.familyMonoFallback,
     };
-    TextStyle role(NizamioTypeSpec t, {bool tabular = false}) =>
-        GoogleFonts.getFont(
-          t.family,
-          fontSize: t.size,
-          fontWeight: t.weight,
-          // CSS satır yüksekliği px; Flutter oran ister. Boşluk CSS gibi üst/alta eşit dağılır.
-          height: t.lineHeight / t.size,
-          letterSpacing: t.letterSpacingEm * t.size,
-          color: c.text,
-        ).copyWith(
-          fontFamilyFallback: fallbacks[t.family],
-          leadingDistribution: TextLeadingDistribution.even,
-          fontFeatures: tabular ? const [FontFeature.tabularFigures()] : null,
-        );
+    TextStyle role(NizamioTypeSpec t, {bool tabular = false}) => TextStyle(
+      fontFamily: t.family,
+      fontFamilyFallback:
+          fallbacks[t.family] ??
+          (throw StateError('Yazı tipi ailesi kayıtlı değil: ${t.family}')),
+      fontSize: t.size,
+      fontWeight: t.weight,
+      // CSS satır yüksekliği px; Flutter oran ister. Boşluk CSS gibi üst/alta eşit dağılır.
+      height: t.lineHeight / t.size,
+      leadingDistribution: TextLeadingDistribution.even,
+      letterSpacing: t.letterSpacingEm * t.size,
+      color: c.text,
+      fontFeatures: tabular ? const [FontFeature.tabularFigures()] : null,
+    );
 
     return NzTextStyles(
       displayLg: role(NizamioTypography.greet),

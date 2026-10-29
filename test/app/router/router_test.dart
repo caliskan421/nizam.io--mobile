@@ -1,4 +1,4 @@
-// Prototip modu (yalnız dev flavor): oturumsuz ana sayfada açılır; kapı rotaları normal kalır.
+// Prototip modu (yalnız dev flavor): login ekranında açılır; kapı rotaları normal kalır.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/app_phase.dart';
@@ -28,14 +28,14 @@ void main() {
     },
   );
 
-  testWidgets('prototip modu: oturumsuz ana sayfada açılır, kabuğa girer', (
+  testWidgets('prototip modu: login ekranında açılır, kabuğa girer', (
     tester,
   ) async {
     final phase = ValueNotifier(AppPhase.unbound);
     addTearDown(phase.dispose);
     final router = await pumpRouter(tester, phase, devPrototype: true);
     await tester.pump(const Duration(seconds: 1));
-    expect(locationOf(router), '/home');
+    expect(locationOf(router), '/login');
     router.go('/tasks');
     await tester.pump();
     await tester.pump();
@@ -43,7 +43,7 @@ void main() {
     router.go('/login');
     await tester.pump();
     await tester.pump();
-    expect(locationOf(router), '/server');
+    expect(locationOf(router), '/login');
     await tester.pump(const Duration(seconds: 1));
   });
 }

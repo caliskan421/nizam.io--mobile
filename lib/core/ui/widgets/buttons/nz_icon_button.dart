@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_surfaces.dart';
+import '../nz_icon.dart';
 import '../nz_size.dart';
 import '../surfaces/nz_glass.dart';
 import 'nz_pressable.dart';
@@ -135,7 +136,7 @@ class NzIconButton extends StatelessWidget {
         onPressed: onPressed,
         iconSize: _iconExtent,
         style: _resolveStyle(context),
-        icon: dot == null ? Icon(icon) : _Dotted(icon: icon, dot: dot!),
+        icon: dot == null ? NzIcon(icon) : _Dotted(icon: icon, dot: dot!),
       ),
     },
   );
@@ -201,7 +202,7 @@ class _SolidCircle extends StatelessWidget {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Icon(icon, size: NizamioSize.iconSizeSm, color: ink),
+                      NzIcon(icon, size: NizamioSize.iconSizeSm, color: ink),
                       if (dot != null)
                         PositionedDirectional(
                           top: _dotInset,
@@ -239,7 +240,7 @@ class _Dotted extends StatelessWidget {
   Widget build(BuildContext context) => Stack(
     clipBehavior: Clip.none,
     children: [
-      Icon(icon),
+      NzIcon(icon),
       PositionedDirectional(
         top: 0,
         end: 0,
@@ -286,7 +287,7 @@ class _GlassCircle extends StatelessWidget {
               splashFactory: NoSplash.splashFactory,
               child: SizedBox.square(
                 dimension: NizamioSize.glassButton,
-                child: Icon(
+                child: NzIcon(
                   icon,
                   size: NizamioSize.iconSize,
                   color: c.glassInk,

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show OverflowBoxFit;
 import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../../layout/nz_pane.dart';
 import '../feedback/nz_progress_bar.dart';
 import 'nz_avatar.dart';
 import 'nz_avatar_stack.dart';
@@ -103,6 +105,7 @@ class NzTaskCard extends StatelessWidget {
         trailing.isNotEmpty;
 
     return NzCard.outlined(
+      // Tablet kenarlık payını NzCard.outlined ekler (border-box, çocuklar kenardan 17).
       padding: const EdgeInsets.all(NizamioSpacing.cardPad),
       onTap: onTap,
       semanticLabel: semanticLabel,
@@ -110,25 +113,31 @@ class NzTaskCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: NizamioSpacing.space3,
         children: [
-          Row(
-            children: [
-              Text(code, style: _mono12(context, c.textMuted)),
-              const Gap(NizamioSpacing.space2),
-              Expanded(
-                child: group == null
-                    ? const SizedBox.shrink()
-                    : Text(
-                        group,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: t.caption.copyWith(color: c.textMuted),
-                      ),
-              ),
-              const Gap(NizamioSpacing.space2),
-              Flexible(
-                child: NzStatusLabel(label: statusLabel, tone: statusTone),
-              ),
-            ],
+          ConstrainedBox(
+            // Tablet kaynağı: başlık satırı 20 (`rp-status` 12/20).
+            constraints: BoxConstraints(
+              minHeight: _tablet(context) ? _tabletDateLine : 0,
+            ),
+            child: Row(
+              children: [
+                Text(code, style: _mono12(context, c.textMuted)),
+                const Gap(NizamioSpacing.space2),
+                Expanded(
+                  child: group == null
+                      ? const SizedBox.shrink()
+                      : Text(
+                          group,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: t.caption.copyWith(color: c.textMuted),
+                        ),
+                ),
+                const Gap(NizamioSpacing.space2),
+                Flexible(
+                  child: NzStatusLabel(label: statusLabel, tone: statusTone),
+                ),
+              ],
+            ),
           ),
           Text(
             title,
@@ -213,7 +222,21 @@ class NzTaskCard extends StatelessWidget {
             Row(
               children: [
                 if (assignees.isNotEmpty) ...[
-                  NzAvatarStack(names: assignees, extent: NzAvatarSize.sm),
+                  if (_tablet(context))
+                    // Kaynak halka `box-shadow`tur, yerleşime girmez: satır avatar boyu (26).
+                    SizedBox(
+                      height: NzAvatarSize.sm.diameter,
+                      child: OverflowBox(
+                        fit: OverflowBoxFit.deferToChild,
+                        maxHeight: double.infinity,
+                        child: NzAvatarStack(
+                          names: assignees,
+                          extent: NzAvatarSize.sm,
+                        ),
+                      ),
+                    )
+                  else
+                    NzAvatarStack(names: assignees, extent: NzAvatarSize.sm),
                   const Gap(NizamioSpacing.gapMd),
                 ],
                 Expanded(
@@ -252,7 +275,18 @@ TextStyle _mono12(BuildContext context, Color color) =>
 TextStyle _caption(BuildContext context) => context.text.program.copyWith(
   color: context.colors.textMuted,
   fontWeight: FontWeight.w500,
+  // Tablet kaynağı (`.rp-kicker` 10 px, satır 16).
+  height: _tablet(context) ? _tabletCaptionLine / _captionSize : null,
 );
+
+/// Tablet kaynak tarih satırı: kicker 10/16, tarih mono 12/20 (satır 58 = 10 + 16 + 2 + 20 + 10).
+const _captionSize = 10.0;
+const _tabletCaptionLine = 16.0;
+const _tabletDateLine = 20.0;
+const _dateSize = 12.0;
+
+bool _tablet(BuildContext context) =>
+    NzTabletMetrics.tabletVisualAt(MediaQuery.sizeOf(context).width);
 
 class _DateCell extends StatelessWidget {
   const _DateCell({required this.date});
@@ -271,7 +305,9 @@ class _DateCell extends StatelessWidget {
           date.value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: _mono12(context, date.overdue ? c.danger : c.text),
+          style: _mono12(context, date.overdue ? c.danger : c.text).copyWith(
+            height: _tablet(context) ? _tabletDateLine / _dateSize : null,
+          ),
         ),
       ],
     );

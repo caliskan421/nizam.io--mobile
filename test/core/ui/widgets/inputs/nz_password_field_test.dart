@@ -43,12 +43,12 @@ void main() {
   testWidgets('varsayılan gizli; düğme göster/gizle yapar', (tester) async {
     await tester.pumpWidget(testApp(const NzPasswordField(label: 'Parola')));
     expect(_editable(tester).obscureText, isTrue);
-    expect(find.byTooltip('Parolayı göster'), findsOneWidget);
-    await tester.tap(find.byTooltip('Parolayı göster'));
+    expect(find.byTooltip('Şifreyi göster'), findsOneWidget);
+    await tester.tap(find.byTooltip('Şifreyi göster'));
     await tester.pump();
     expect(_editable(tester).obscureText, isFalse);
-    expect(find.byTooltip('Parolayı gizle'), findsOneWidget);
-    await tester.tap(find.byTooltip('Parolayı gizle'));
+    expect(find.byTooltip('Şifreyi gizle'), findsOneWidget);
+    await tester.tap(find.byTooltip('Şifreyi gizle'));
     await tester.pump();
     expect(_editable(tester).obscureText, isTrue);
   });

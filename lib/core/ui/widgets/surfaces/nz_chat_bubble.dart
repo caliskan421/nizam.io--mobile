@@ -6,8 +6,10 @@ import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../../layout/nz_bleed.dart';
 import '../../theme/nz_motion.dart';
 import '../lists/nz_chat_row.dart';
+import '../nz_icon.dart';
 
 /// Mesaj tepkisi (mesaj başına bir tane; emoji yok, ikon).
 enum NzReaction { like, heart, check, star }
@@ -200,7 +202,11 @@ class _NzChatBubbleState extends State<NzChatBubble> {
     final quote = w.quote;
     final extra = w.extra;
     final edited = w.editedLabel;
-    final meta = t.monoSm.copyWith(color: c.textFaint);
+    // Kaynak: saat satırı Geist 11/20 `ink-faint`, `margin-top: -2px`.
+    final meta = t.monoSm.copyWith(
+      color: c.textFaint,
+      height: _metaLine / _metaSize,
+    );
     final bubble = AnimatedScale(
       scale: _pressed ? 0.97 : 1,
       alignment: w.mine ? Alignment.centerRight : Alignment.centerLeft,
@@ -217,61 +223,88 @@ class _NzChatBubbleState extends State<NzChatBubble> {
               ? [BoxShadow(color: c.accentText, spreadRadius: 2)]
               : const [],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: NizamioSpacing.space1,
-          children: [
-            if (name != null)
-              Text.rich(
-                TextSpan(
+        // Balon içeriğinin doğal genişliğindedir (en çok satırın %80'i); satırlar o genişliğe
+        // yayılır, saat sağ altta (kaynak `justify-content: flex-end`). Ölçüm yalnız kurulan
+        // (görünen) balonlarda yapılır.
+        child: IntrinsicWidth(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (name != null) ...[
+                // Kaynak başlık: `align-items: baseline; gap: 6px`; ad 13/20 600, rol 11/20.
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
                   children: [
-                    TextSpan(
-                      text: name,
-                      style: t.caption.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: w.senderColor ?? c.text,
+                    Flexible(
+                      child: Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: t.labelMd.copyWith(
+                          height: _metaLine / _nameSize,
+                          color: w.senderColor ?? c.text,
+                        ),
                       ),
                     ),
                     if (w.senderRole case final role?)
-                      TextSpan(
-                        text: '  $role',
-                        style: t.monoSm.copyWith(color: c.textFaint),
+                      // Taban çizgisi satırında `Gap` kuru ölçümü desteklemez; boşluk dolgudadır.
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: _headerGap,
+                        ),
+                        child: Text(
+                          role,
+                          maxLines: 1,
+                          style: t.caption.copyWith(
+                            fontSize: _metaSize,
+                            height: _metaLine / _metaSize,
+                            color: c.textFaint,
+                          ),
+                        ),
                       ),
                   ],
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                const Gap(NizamioSpacing.space1),
+              ],
+              if (quote != null) ...[
+                _Quote(quote: quote),
+                const Gap(NizamioSpacing.space1),
+              ],
+              w.body,
+              if (extra != null) ...[const Gap(NizamioSpacing.space1), extra],
+              const Gap(NizamioSpacing.space1 - _metaPull),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: NizamioSpacing.space1,
+                  children: [
+                    if (edited != null) Text('$edited ·', style: meta),
+                    if (w.pinned)
+                      NzIcon(
+                        Icons.push_pin_outlined,
+                        size: 11,
+                        color: c.textFaint,
+                      ),
+                    Text(w.time, style: meta),
+                    if (w.tick != NzChatTick.none)
+                      NzIcon(
+                        w.tick == NzChatTick.sent
+                            ? Icons.done_rounded
+                            : Icons.done_all_rounded,
+                        size: 15,
+                        color: w.tick == NzChatTick.read
+                            ? c.accentText
+                            : c.textFaint,
+                      ),
+                  ],
+                ),
               ),
-            if (quote != null) _Quote(quote: quote),
-            w.body,
-            ?extra,
-            Align(
-              alignment: Alignment.centerRight,
-              widthFactor: 1,
-              child: Wrap(
-                alignment: WrapAlignment.end,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: NizamioSpacing.space1,
-                children: [
-                  if (edited != null) Text('$edited ·', style: meta),
-                  if (w.pinned)
-                    Icon(Icons.push_pin_outlined, size: 11, color: c.textFaint),
-                  Text(w.time, style: meta),
-                  if (w.tick != NzChatTick.none)
-                    Icon(
-                      w.tick == NzChatTick.sent
-                          ? Icons.done_rounded
-                          : Icons.done_all_rounded,
-                      size: 15,
-                      color: w.tick == NzChatTick.read
-                          ? c.accentText
-                          : c.textFaint,
-                    ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -419,7 +452,7 @@ class _ReactionChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: NizamioSpacing.space1,
             children: [
-              Icon(r.kind.icon(selected: r.mine), size: 13, color: ink),
+              NzIcon(r.kind.icon(selected: r.mine), size: 13, color: ink),
               Text('${r.count}', style: t.monoSm.copyWith(color: ink)),
             ],
           ),
@@ -452,9 +485,13 @@ class NzChatDayChip extends StatelessWidget {
                   horizontal: 12,
                   vertical: 3,
                 ),
+                // Kaynak: 12 px, akışın 20 px satır yüksekliği (hap 26).
                 child: Text(
                   label,
-                  style: context.text.caption.copyWith(color: c.textMuted),
+                  style: context.text.caption.copyWith(
+                    height: _metaLine / 12,
+                    color: c.textMuted,
+                  ),
                 ),
               ),
             ),
@@ -477,7 +514,8 @@ class NzChatNewDivider extends StatelessWidget {
     final line = Expanded(
       child: Container(height: 1, color: c.primary.withValues(alpha: 0.3)),
     );
-    return Container(
+    // Kaynak: `margin: 10px -12px 6px` (akış dolgusunu aşar), etiket mono 11 / satır 20.
+    final strip = Container(
       margin: const EdgeInsets.only(top: 10, bottom: 6),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       color: c.primary.withValues(alpha: 0.08),
@@ -485,11 +523,26 @@ class NzChatNewDivider extends StatelessWidget {
         children: [
           line,
           const Gap(NizamioSpacing.gapMd),
-          Text(label, style: context.text.monoSm.copyWith(color: c.accentText)),
+          Text(
+            label,
+            style: context.text.monoSm.copyWith(
+              height: _metaLine / _metaSize,
+              color: c.accentText,
+            ),
+          ),
           const Gap(NizamioSpacing.gapMd),
           line,
         ],
       ),
     );
+    return NzHorizontalBleed(bleed: _dividerBleed, child: strip);
   }
 }
+
+// Kaynak balon tipografisi (HTML 1180–1186).
+const _nameSize = 13.0;
+const _metaSize = 11.0;
+const _metaLine = 20.0;
+const _headerGap = 6.0;
+const _metaPull = 2.0;
+const _dividerBleed = 12.0;

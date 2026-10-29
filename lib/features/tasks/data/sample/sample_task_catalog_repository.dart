@@ -3,7 +3,7 @@ import '../../domain/task_catalog.dart';
 part 'sample_task_data.dart';
 
 /// GELİŞTİRME ÖRNEĞİ — gerçek servis değildir. Prototipteki görev kümesini döner; ağ isteği
-/// atmaz. Bütün kişi adları kurmacadır. Bileşim kökünde (`tasks_module.dart`) tek yerde
+/// atmaz. Kişi adları tasarım prototipinin örnek kişileri (12-Tablet `RP_PEOPLE`; gerçek hesap kaydı değildir). Bileşim kökünde (`tasks_module.dart`) tek yerde
 /// bağlanır; backend bağlanınca yalnız o kayıt değişir.
 final class SampleTaskCatalogRepository implements TaskCatalogRepository {
   @override

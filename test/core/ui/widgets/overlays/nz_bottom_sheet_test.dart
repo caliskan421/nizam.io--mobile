@@ -484,4 +484,109 @@ void main() {
       expect(navTaps, 0);
     },
   );
+
+  group('tablet merkezi modal (prototip [role=dialog])', () {
+    Future<Rect> open(WidgetTester tester, Size window) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = window;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        testApp(
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () => NzBottomSheet.show<void>(
+                context,
+                title: 'Yeni görev',
+                builder: (_) => const SizedBox(height: 2000, child: Text('g')),
+              ),
+              child: const Text('aç'),
+            ),
+          ),
+          dark: true,
+        ),
+      );
+      await tester.tap(find.text('aç'));
+      await tester.pumpAndSettle();
+      return tester.getRect(find.byType(NzBottomSheetContent));
+    }
+
+    for (final w in const [
+      Size(1180, 820),
+      Size(1376, 1032),
+      Size(840, 1000),
+    ]) {
+      testWidgets('$w: ortada min(560, W−48), en çok H−64', (tester) async {
+        final r = await open(tester, w);
+        expect(find.byType(Dialog), findsOneWidget);
+        expect(r.width, closeTo(w.width - 48 < 560 ? w.width - 48 : 560, 0.01));
+        expect(r.height, lessThanOrEqualTo(w.height - 64 + 0.01));
+        expect(r.center.dx, closeTo(w.width / 2, 0.5));
+        expect(r.center.dy, closeTo(w.height / 2, 0.5));
+        expect(tester.takeException(), isNull);
+      });
+    }
+
+    testWidgets(
+      'açılış modalın kendi boyu kadar kayar (.42 s); kapanış .24 s',
+      (tester) async {
+        final end = await open(tester, const Size(1180, 820));
+        Navigator.of(tester.element(find.byType(NzBottomSheetContent))).pop();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 239));
+        expect(find.byType(NzBottomSheetContent), findsOneWidget);
+        await tester.pump(const Duration(milliseconds: 2));
+        await tester.pump();
+        expect(find.byType(NzBottomSheetContent), findsNothing);
+        await tester.tap(find.text('aç'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 1));
+        final start = tester.getRect(find.byType(NzBottomSheetContent));
+        // Başlangıçta tam kendi yüksekliği kadar aşağıda (translateY(100%)), pencere boyu değil.
+        expect(start.top - end.top, closeTo(end.height, end.height * 0.01));
+        await tester.pumpAndSettle();
+        expect(tester.getRect(find.byType(NzBottomSheetContent)), end);
+      },
+    );
+
+    testWidgets('karartma .3 s\'de tam (sayfa .42 s sürerken)', (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(1180, 820);
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        testApp(
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () => NzBottomSheet.show<void>(
+                context,
+                title: 'Yeni görev',
+                builder: (_) => const Text('g'),
+              ),
+              child: const Text('aç'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('aç'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      final scrim = tester.widget<FadeTransition>(
+        find
+            .ancestor(
+              of: find.byType(ColoredBox),
+              matching: find.byType(FadeTransition),
+            )
+            .first,
+      );
+      expect(scrim.opacity.value, closeTo(1, 0.001));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('telefonda ve tek bölmede alttan sayfa kalır', (tester) async {
+      await open(tester, const Size(820, 1180));
+      expect(find.byType(Dialog), findsNothing);
+      final r = await open(tester, const Size(390, 844));
+      expect(find.byType(Dialog), findsNothing);
+      expect(r.bottom, 844);
+    });
+  });
 }

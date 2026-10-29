@@ -15,6 +15,7 @@ import '../../core/storage/preference_store.dart';
 import '../../core/storage/secure_store.dart';
 import '../../features/activity/activity_module.dart';
 import '../../features/archive/archive_module.dart';
+import '../../features/calendar/calendar_module.dart';
 import '../../features/coordinatorships/coordinatorships_module.dart';
 import '../../features/identity/identity_module.dart';
 import '../../features/messages/messages_module.dart';
@@ -61,6 +62,7 @@ class Composition {
     registerScopeModule(locator, apiDio: () => container.read(apiDioProvider));
     registerActivityModule(locator);
     registerArchiveModule(locator);
+    registerCalendarModule(locator);
     registerCoordinatorshipsModule(locator);
     registerMessagesModule(locator);
     registerTasksModule(locator);
@@ -92,6 +94,7 @@ class Composition {
         ...scopeOverrides(locator),
         ...activityOverrides(locator),
         ...archiveOverrides(locator),
+        ...calendarOverrides(locator),
         ...coordinatorshipsOverrides(locator),
         ...messagesOverrides(locator),
         ...tasksOverrides(locator),

@@ -121,9 +121,9 @@ void main() {
       of: find.byType(NzCheckbox),
       matching: find.text(label),
     );
-    await _tap(tester, box('Kerem Özdal'));
+    await _tap(tester, box('Kadir Özbek'));
     expect(find.text('4 ${_l.uiActivityApplyTail}'), findsOneWidget);
-    await _tap(tester, box('Kerem Özdal'));
+    await _tap(tester, box('Kadir Özbek'));
     await _tap(tester, box('Eğitim ve Arge'));
     final apply = find.textContaining(_l.uiActivityApplyTail);
     await _tap(tester, apply);
@@ -131,9 +131,9 @@ void main() {
     // Çip: koordinatörlük adı; yalnız EĞİ kişileri.
     expect(find.text('Eğitim ve Arge'), findsOneWidget);
     expect(find.text('Oturum açtı'), findsWidgets);
-    expect(find.textContaining('Kerem Özdal'), findsNothing);
+    expect(find.textContaining('Kadir Özbek'), findsNothing);
     await _tap(tester, find.text('Eğitim ve Arge'));
-    expect(find.textContaining('Kerem Özdal'), findsWidgets);
+    expect(find.textContaining('Kadir Özbek'), findsWidgets);
   });
 
   testWidgets('alt sayfa: "Temizle" başlık satırında; kişi satırında avatar', (
@@ -149,7 +149,7 @@ void main() {
       tester,
       find.descendant(
         of: find.byType(NzCheckbox),
-        matching: find.text('Kerem Özdal'),
+        matching: find.text('Kadir Özbek'),
       ),
     );
     expect(find.text('4 ${_l.uiActivityApplyTail}'), findsOneWidget);

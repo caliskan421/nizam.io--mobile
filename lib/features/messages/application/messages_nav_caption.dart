@@ -14,3 +14,9 @@ String? messagesNavCaption(Ref ref) {
   final l = lookupAppLocalizations(ref.watch(localeProvider));
   return '${inbox.unreadChats} ${l.uiMessagesUnreadLc}';
 }
+
+/// Tablet rayındaki Mesajlar rozeti: okunmamış ya da anılan sohbet sayısı (prototip
+/// `unread || mention`); veri yokken null.
+@riverpod
+int? messagesNavBadge(Ref ref) =>
+    ref.watch(chatsControllerProvider).value?.unreadChats;

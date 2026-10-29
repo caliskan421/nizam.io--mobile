@@ -170,7 +170,19 @@ final class CoordinatorshipDetail {
     final ref = catalog.coordinatorship(code);
     final profile = profiles.where((p) => p.code == code).firstOrNull;
     if (ref == null || profile == null) return null;
-    final stats = _stats(catalog, ref);
+    final computed = _stats(catalog, ref);
+    final report = profile.reported;
+    final stats = report == null
+        ? computed
+        : CoordinatorshipStats(
+            code: computed.code,
+            name: computed.name,
+            done: report.done,
+            total: report.total,
+            late: report.late,
+            leads: computed.leads,
+            members: computed.members,
+          );
     String unitOf(String? personId, int index) {
       final own = personId == null
           ? null
@@ -233,9 +245,12 @@ final class CoordinatorshipDetail {
             at: e.at,
           ),
       ],
-      seasonRatio: all.isEmpty
-          ? 0
-          : all.where((t) => t.status == TaskStatus.done).length / all.length,
+      seasonRatio:
+          report?.seasonRatio ??
+          (all.isEmpty
+              ? 0
+              : all.where((t) => t.status == TaskStatus.done).length /
+                    all.length),
       others: sortCoordinatorships(
         coordinatorshipStats(catalog),
         CoordinatorshipSort.name,

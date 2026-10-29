@@ -3,8 +3,10 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/layout/nz_pane.dart';
 import '../../../core/ui/theme/nz_motion.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 
 /// Görev ekranlarının küçük ortak parçaları (prototip `.rp-seg`, `.rp-chipbtn`,
@@ -35,17 +37,23 @@ class TaskSegmented extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final icons = this.icons;
+    // Tablet kaynak öncelik seçimi: `bg-overlay` hap, dolgu 2, kenarsız.
+    final pill = compact && _tablet(context);
     return Semantics(
       container: true,
       label: semanticLabel,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: c.surfaceRaised,
-          borderRadius: BorderRadius.circular(NizamioRadius.tile),
-          border: Border.all(color: c.border, width: NizamioSize.borderWidth),
+          color: pill ? c.surfaceOverlay : c.surfaceRaised,
+          borderRadius: BorderRadius.circular(
+            pill ? NizamioRadius.pill : NizamioRadius.tile,
+          ),
+          border: pill
+              ? null
+              : Border.all(color: c.border, width: NizamioSize.borderWidth),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(NizamioSpacing.space1 - 1),
+          padding: EdgeInsets.all(pill ? 2 : NizamioSpacing.space1 - 1),
           child: Row(
             mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
             children: [
@@ -59,6 +67,7 @@ class TaskSegmented extends StatelessWidget {
   }
 
   Widget _part(BuildContext context, int i, NizamioColors c, IconData? icon) {
+    final pill = compact && _tablet(context);
     final on = i == selected;
     final t = context.text;
     final child = Semantics(
@@ -72,17 +81,27 @@ class TaskSegmented extends StatelessWidget {
         child: AnimatedContainer(
           duration: NzMotion.of(context, NizamioMotion.durPress),
           constraints: BoxConstraints(
-            minHeight: compact
+            minHeight: pill
+                ? _pillButton
+                : compact
                 ? NizamioSize.controlSm - 4
                 : NizamioSize.tap - 4,
           ),
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? NizamioSpacing.space2 : NizamioSpacing.space3,
-          ),
+          padding:
+              EdgeInsets.symmetric(
+                horizontal: compact
+                    ? NizamioSpacing.space2
+                    : NizamioSpacing.space3,
+              ).copyWith(
+                left: pill ? NizamioSpacing.space3 : null,
+                right: pill ? NizamioSpacing.space3 : null,
+              ),
           decoration: BoxDecoration(
             color: on ? c.surface : c.surfaceRaised.withValues(alpha: 0),
             borderRadius: BorderRadius.circular(
-              NizamioRadius.tile - NizamioSpacing.space1 / 2,
+              pill
+                  ? NizamioRadius.pill
+                  : NizamioRadius.tile - NizamioSpacing.space1 / 2,
             ),
           ),
           alignment: Alignment.center,
@@ -90,7 +109,7 @@ class TaskSegmented extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[
-                Icon(
+                NzIcon(
                   icon,
                   size: NizamioSize.iconSizeSm,
                   color: on ? c.text : c.textMuted,
@@ -102,10 +121,20 @@ class TaskSegmented extends StatelessWidget {
                   labels[i],
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: (compact ? t.caption : t.labelMd).copyWith(
-                    color: on ? c.text : c.textMuted,
-                    fontWeight: on ? FontWeight.w600 : FontWeight.w500,
-                  ),
+                  style:
+                      (pill
+                              ? t.labelMd
+                              : compact
+                              ? t.caption
+                              : t.labelMd)
+                          .copyWith(
+                            color: on ? c.text : c.textMuted,
+                            fontWeight: on
+                                ? FontWeight.w600
+                                : pill
+                                ? FontWeight.w400
+                                : FontWeight.w500,
+                          ),
                 ),
               ),
             ],
@@ -113,7 +142,12 @@ class TaskSegmented extends StatelessWidget {
         ),
       ),
     );
-    return compact ? Flexible(child: child) : Expanded(child: child);
+    if (!compact) return Expanded(child: child);
+    // Tablette kompakt seçim doğal genişliktedir (kaynak); telefonda dar satıra sığmak için
+    // esner.
+    return NzTabletMetrics.tabletVisualAt(MediaQuery.sizeOf(context).width)
+        ? child
+        : Flexible(child: child);
   }
 }
 
@@ -295,7 +329,7 @@ class TaskCheckRow extends StatelessWidget {
                     ),
             ),
             child: selected
-                ? Icon(
+                ? NzIcon(
                     Icons.check_rounded,
                     size: NizamioSize.iconSizeSm,
                     color: c.onPrimary,
@@ -317,7 +351,7 @@ class TaskCheckRow extends StatelessWidget {
                     ),
             ),
             child: selected
-                ? Icon(
+                ? NzIcon(
                     Icons.check_rounded,
                     size: NizamioSize.iconSizeSm - 2,
                     color: c.onPrimary,
@@ -492,7 +526,7 @@ class TaskDateField extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Icon(
+                  NzIcon(
                     Icons.calendar_today_outlined,
                     size: NizamioSize.iconSizeSm,
                     color: c.textMuted,
@@ -525,3 +559,9 @@ List<Widget> sheetActions(
   else
     NzButton.primary(label: ok, expand: true, onPressed: onOk),
 ];
+
+/// Tablet kaynak öncelik düğmesi yüksekliği (30).
+const _pillButton = 30.0;
+
+bool _tablet(BuildContext context) =>
+    NzTabletMetrics.tabletVisualAt(MediaQuery.sizeOf(context).width);

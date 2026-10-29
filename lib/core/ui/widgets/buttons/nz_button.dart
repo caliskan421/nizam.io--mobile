@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_surfaces.dart';
+import '../nz_icon.dart';
 import '../nz_size.dart';
 import 'nz_pressable.dart';
 
@@ -218,7 +219,7 @@ class NzButton extends StatelessWidget {
         if (loading)
           _Spinner(extent: _iconExtent)
         else if (icon != null)
-          ExcludeSemantics(child: Icon(icon, size: _iconExtent)),
+          ExcludeSemantics(child: NzIcon(icon, size: _iconExtent)),
         if (loading || icon != null) const Gap(NizamioSpacing.space2),
         Flexible(child: Text(label, textAlign: TextAlign.center)),
       ],

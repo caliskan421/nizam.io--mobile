@@ -12,3 +12,24 @@ final timelineSampleRequests = ByTask<DateTime>([
 
 /// Başka göreve bağımlı görevler.
 const timelineSampleDependent = <String>{'ALT-5', 'ALT-8'};
+
+/// Yatay çizelgenin koordinatörlük sırası (tablet prototipi `S_hgantt` `CN` anahtar sırası;
+/// katalog sırasından farklıdır). Listede olmayan koordinatörlük katalog sırasıyla sona eklenir.
+const timelineSampleGanttOrder = <String>[
+  'ALT',
+  'MEK',
+  'ULA',
+  'ELE',
+  'İDA',
+  'EĞİ',
+  'OPE',
+  'SAT',
+  'MİM',
+  'FUA',
+  'SİS',
+];
+
+/// Teknofest günleri (prototip `fest`: 12 Kasım'dan 4 gün). Sezon takvimi sunucuya bağlanınca
+/// oradan gelir.
+final timelineSampleFestivalStart = DateTime(2026, 11, 12);
+const timelineSampleFestivalDays = 4;

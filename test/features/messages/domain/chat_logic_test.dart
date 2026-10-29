@@ -18,7 +18,7 @@ void main() {
       toks.where((t) => t.kind == ChatTokenKind.task).single.text,
       '#ALT-7',
     );
-    expect(tokenize('@Elif Nur trafo', names).first.text, '@Elif Nur');
+    expect(tokenize('@Muhammet Ali trafo', names).first.text, '@Muhammet Ali');
     expect(refsOf(m3, cat).map((r) => r.kind), [
       ChatRefKind.task,
       ChatRefKind.coordinatorship,
@@ -50,7 +50,7 @@ void main() {
   test('süzgeç ve arama; öneriler', () async {
     final cat = await SampleTaskCatalogRepository().load();
     final box = await const SampleChatRepository().load();
-    expect(visibleChats(box.chats, filter: ChatFilter.unread), hasLength(5));
+    expect(visibleChats(box.chats, filter: ChatFilter.unread), hasLength(4));
     expect(visibleChats(box.chats, filter: ChatFilter.people), hasLength(3));
     expect(visibleChats(box.chats, filter: ChatFilter.groups), hasLength(5));
     expect(visibleChats(box.chats, query: 'TRAFO').map((c) => c.id), [
@@ -60,8 +60,8 @@ void main() {
     final tasks = suggestions('Bak #alt', cat, box.people);
     expect(tasks, hasLength(6));
     expect(tasks.first.draft, 'Bak #${tasks.first.key} ');
-    final people = suggestions('@ker', cat, box.people);
-    expect(people.single.draft, '@Kerem Özdal ');
+    final people = suggestions('@kad', cat, box.people);
+    expect(people.single.draft, '@Kadir Özbek ');
     expect(suggestions('@', cat, box.people).first.label, 'herkes');
     expect(suggestions('düz metin', cat, box.people), isEmpty);
   });

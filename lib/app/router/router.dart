@@ -26,7 +26,8 @@ String routeForPhase(AppPhase phase) => switch (phase) {
 ///
 /// - Prototip modu (yalnız dev flavor, [devPrototype] true): oturum/kapsam olmadan
 ///   kabuk ve feature rotaları açılır (ekranlar geliştirme örnek verisiyle çalışır; backend
-///   isteği atan ekranlar hata görünümüne düşer). Kapı rotaları normal kalır. Prod'da yoktur.
+///   isteği atan ekranlar hata görünümüne düşer). Login prototip girişidir; diğer kapılar
+///   normal kalır. Prod'da yoktur.
 /// - `scoped` dışındaki her fazda yalnız faz hedefi açıktır: başka her yol (kabuk rotaları,
 ///   feature rotaları, bilinmeyen yol) faz hedefine gider. 404 kapıyı aşamaz.
 /// - `scoped` fazında kapı rotaları (hedef hariç) `/home`'a gider; kabuk/feature rotaları açıktır;
@@ -38,7 +39,8 @@ String? gateRedirect(
   bool devPrototype = false,
 }) {
   if (devPrototype &&
-      (location == routeForPhase(AppPhase.scoped) ||
+      (location == const LoginRoute().location ||
+          location == routeForPhase(AppPhase.scoped) ||
           !_gatePaths.contains(location))) {
     return null;
   }
@@ -60,14 +62,14 @@ final Set<String> _gatePaths = {
 /// Router hiçbir servisi çağırmaz; yalnız [phase]'i okur. [featureRoutes] feature rota
 /// kaydıdır (varsayılan: [registeredFeatureRoutes]).
 ///
-/// [devPrototype]: yalnız dev flavor'da true verilir; uygulama ana sayfada, örnek veriyle açılır.
+/// [devPrototype]: yalnız dev flavor'da true verilir; uygulama login ekranında açılır; boş giriş örnek ana sayfaya geçer.
 GoRouter createRouter(
   ValueNotifier<AppPhase> phase, {
   bool devPrototype = false,
   List<RouteBase>? featureRoutes,
 }) => GoRouter(
   initialLocation: devPrototype
-      ? routeForPhase(AppPhase.scoped)
+      ? const LoginRoute().location
       : routeForPhase(phase.value),
   refreshListenable: phase,
   redirect: (context, state) => gateRedirect(

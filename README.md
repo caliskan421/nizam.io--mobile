@@ -6,14 +6,22 @@ geliştirmesi program sonrası ayrı çalışmadadır (D-0174).
 
 ## Yığın
 
-Flutter **3.47.2** stable (Dart 3.13.2; pin `pubspec.yaml` `environment.flutter`, CI aynı
+Flutter **3.47.8** stable (Dart 3.13.7; pin `pubspec.yaml` `environment.flutter`, CI aynı
 alanı okur) · get_it 9 (bileşim kökü) · Riverpod 3 (kod üretimli; reaktif durum) · go_router · dio · freezed + json_serializable
 (OpenAPI'den üretim) · flutter_secure_storage · intl/ARB · shared_preferences (gizli olmayan
-tercihler) · google_fonts 8 (yazı tipleri uygulamayla gelir) · gap (boşluk standardı) · drift +
+tercihler) · yazı tipleri uygulamayla gelir (pubspec `fonts:`; google_fonts 8 yalnız çalışma anı indirmeyi kapatır) · gap (boşluk standardı) · drift +
 path_provider (yerel veri) · Firebase (core, messaging, analytics, crashlytics, remote_config;
 başlatılmamış) · flutter_native_splash + flutter_launcher_icons (yer tutucu marka). Paket
 kararları: `docs/architecture/adr-0002-paketler-tercih-yerel-veri-firebase.md`. Asgari platform:
-iOS 16+, Android 8.0 (API 26)+.
+iOS 16+, Android 8.0 (API 26)+. Responsive yerleşim ve yön: ADR-0003 karar 25,
+[docs/yurutme/responsive-altyapi.md](docs/yurutme/responsive-altyapi.md).
+
+SDK güncellemesi (2026-10-28): Flutter 3.47.8 / Dart 3.13.7; paket sürümleri korunmuştur.
+Yerel doğrulama: `make gen` sonrası üretilmiş dosya farkı yok; `make verify` başarılı
+(1.059 test ve kapsama eşikleri); `make integration` başarılı (9 test, `v0.1.0-api`).
+Android dev debug / prod release (`--obfuscate`) ve iOS simülatör debug derlemeleri,
+APK izolasyon denetimi ve öz-testi başarılı. Linux golden testleri macOS'ta atlandı;
+bu güncelleme için uzak CI çalıştırılmadı. Fiziksel cihaz çalıştırması bu doğrulamaya dahil değildir.
 
 ## Komutlar
 
@@ -46,6 +54,10 @@ asıl kapısı Dart katmanıdır (`lib/core/server/`); Android ağ güvenlik yap
 (`android/app/src/<flavor>/res/xml/network_security_config.xml`) ikinci savunmadır.
 iOS'ta ayrı Xcode şeması yoktur (iOS derlemesi bu fazın CI'ında değildir); flavor yine
 giriş noktasıyla seçilir.
+
+Dev prototipi login ekranında açılır. Alanlar boşken **Giriş yap** örnek verili ana sayfayı
+açar; kimlik doğrulama isteği göndermez ve oturum oluşturmaz. Prod giriş doğrulaması korunur.
+iOS simülatörü: `flutter run -d <simulator-id> -t lib/main_dev.dart` (ayrı flavor şeması yok).
 
 ## Uygulama kimliği ve imzalama
 

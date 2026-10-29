@@ -150,9 +150,9 @@ void main() {
       showHomeDrawer(
         ctx,
         current: HomeModule.home,
-        greetingName: 'Elif Nur Karaağaçlı',
+        greetingName: 'Muhammet Ali Çalışkan',
         greetingRole: TeamRole.admin,
-        greetingEmail: 'elif.karaagacli@ornek.test',
+        greetingEmail: 'macaliskan@gmail.com',
         programName: 'Örnek Sezon 2026',
         programYear: 2026,
         version: '0.1.0',
@@ -165,7 +165,7 @@ void main() {
     );
     await settle(tester);
     expect(
-      find.text('${_l.uiHomeRoleAdmin} · elif.karaagacli@ornek.test'),
+      find.text('${_l.uiHomeRoleAdmin} · macaliskan@gmail.com'),
       findsOneWidget,
     );
     expect(find.text('ÖS'), findsOneWidget);
@@ -178,7 +178,7 @@ void main() {
       showHomeDrawer(
         tester.element(find.byType(HomePage)),
         current: null,
-        greetingName: 'Elif Nur Karaağaçlı',
+        greetingName: 'Muhammet Ali Çalışkan',
         programName: null,
         version: '0.1.0',
         counts: null,

@@ -116,7 +116,7 @@ void main() {
       detail: '',
       target: target,
       actorId: 'ko',
-      actorName: 'Kerem Özdal',
+      actorName: 'Kadir Özbek',
     );
     expect(taskCodeOf(e('ALT-16 · Hidrofor montaj')), 'ALT-16');
     expect(taskCodeOf(e('İDA-9')), 'İDA-9');

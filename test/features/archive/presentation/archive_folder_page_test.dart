@@ -50,7 +50,7 @@ void main() {
     expect(find.text('${_l.uiArchiveTitle} / ALT'), findsOneWidget);
     expect(find.text('Altyapı ve tesisat'), findsOneWidget);
     expect(
-      find.text('Deniz Aydemir, Kaan Erol, Kerem Özdal · 15 dosya · 9,8 MB'),
+      find.text('Abdullah Ateş, Ali Avcı, Kadir Özbek · 15 dosya · 9,8 MB'),
       findsOneWidget,
     );
     expect(find.text(_l.uiArchiveTabTasks), findsOneWidget);

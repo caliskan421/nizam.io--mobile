@@ -15,14 +15,14 @@ void main() {
       ..listen(chatsControllerProvider, (_, _) {})
       ..listen(messagesNavCaptionProvider, (_, _) {});
     await c.read(chatsControllerProvider.future);
-    expect(c.read(messagesNavCaptionProvider), '5 okunmamış');
+    expect(c.read(messagesNavCaptionProvider), '4 okunmamış');
     final ctrl = c.read(chatsControllerProvider.notifier);
     ChatInbox box() => c.read(chatsControllerProvider).requireValue;
 
     ctrl.open('gen');
     expect(box().chat('gen')!.unreadMarker, 'm3');
     expect(box().chat('gen')!.unread, 0);
-    expect(c.read(messagesNavCaptionProvider), '4 okunmamış');
+    expect(c.read(messagesNavCaptionProvider), '3 okunmamış');
     ctrl.open('hid');
     expect(box().chat('hid')!.unreadMarker, 'h2');
 

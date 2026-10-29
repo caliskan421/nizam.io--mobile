@@ -22,15 +22,24 @@ class ChatsController extends _$ChatsController {
 
   void _chat(String id, Chat Function(Chat) f) => _set((v) => v.replace(id, f));
 
-  /// Sohbet açıldı: okunmamış ayırıcısı işaretlenir, sayaç ve bahsetme sıfırlanır.
-  void open(String id) => _chat(
-    id,
-    (c) => c.copyWith(
-      unreadMarker: () => unreadMarkerOf(c),
-      unread: 0,
-      mention: false,
-    ),
-  );
+  /// Bu oturumda açılmış sohbetler (ilk açılış ile yeniden seçim ayrımı).
+  final _opened = <String>{};
+
+  /// Sohbet açıldı: okunmamış ayırıcısı işaretlenir, sayaç ve bahsetme sıfırlanır. İlk
+  /// açılışta okunmamış yoksa kaynağın verdiği ayırıcı korunur (prototip kurucusu varsayılan
+  /// sohbeti baştan yükler); sonraki her açılış (`load`) ayırıcıyı yeniden hesaplar.
+  void open(String id) {
+    final first = _opened.add(id);
+    _chat(
+      id,
+      (c) => c.copyWith(
+        unreadMarker: () =>
+            first && c.unread <= 0 ? c.unreadMarker : unreadMarkerOf(c),
+        unread: 0,
+        mention: false,
+      ),
+    );
+  }
 
   /// Bütün sohbetleri okundu sayar.
   void markAllRead() =>

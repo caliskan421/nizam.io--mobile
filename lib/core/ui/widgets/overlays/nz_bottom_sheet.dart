@@ -1,11 +1,15 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../layout/nz_layout.dart';
+import '../../layout/nz_pane.dart';
 import '../../theme/nz_motion.dart';
 import '../../theme/nz_surfaces.dart';
+import '../nz_icon.dart';
 
 /// Alt sayfanın alt sabit eylem satırı kurucusu: sayfa bağlamıyla çağrılır (kapatmak için
 /// `Navigator.pop(sheetContext, değer)`).
@@ -44,7 +48,107 @@ abstract final class NzBottomSheet {
     Widget? headerAction,
     bool showHeader = true,
     bool compact = false,
+    bool actionsDivider = true,
   }) {
+    Widget content(BuildContext sheetContext, {required bool modal}) =>
+        PopScope(
+          canPop: dismissible,
+          child: NzBottomSheetContent(
+            title: title,
+            description: description,
+            dismissible: dismissible,
+            expandable: expandable,
+            expansion: expansion,
+            headerAction: headerAction,
+            showHeader: showHeader,
+            compact: compact,
+            modal: modal,
+            actionsDivider: actionsDivider,
+            actions: actions?.call(sheetContext),
+            child: Builder(builder: builder),
+          ),
+        );
+    // Tablet (çift bölme genişliği): prototip merkezi modal (`[role=dialog][aria-modal]:not(aside)`):
+    // ortada `min(560, pencere − 48)`, en çok `pencere − 64` yükseklik, 28 köşe, 1 px
+    // `border-strong`; açılış `rpSheetUp .42s`, karartma `rpFadeIn .3s`. Kök gezginde, rayın
+    // da üstünde. Klavye payını Dialog uygular.
+    if (NzTabletMetrics.tabletVisualAt(MediaQuery.sizeOf(context).width)) {
+      final c = context.colors;
+      final clear = c.surface.withValues(alpha: 0);
+      return Navigator.of(context, rootNavigator: true).push<T>(
+        PageRouteBuilder<T>(
+          opaque: false,
+          barrierDismissible: dismissible,
+          barrierLabel: MaterialLocalizations.of(context)
+              .modalBarrierDismissLabel,
+          // Karartma aşağıda ayrı eğriyle çizilir; bariyer yalnız dokunmayı karşılar.
+          barrierColor: clear,
+          // Kaynak: açılış `rpSheetUp .42s`, kapanış `rpSheetDown .24s`.
+          transitionDuration: NzMotion.of(context, NizamioMotion.durSheet),
+          reverseTransitionDuration: NzMotion.of(
+            context,
+            NizamioMotion.durExit,
+          ),
+          pageBuilder: (sheetContext, animation, _) => Stack(
+            children: [
+              // Kaynak karartma: açılış `rpFadeIn .3s ease`, kapanış `rpFadeOut .24s`.
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: FadeTransition(
+                    opacity: CurvedAnimation(
+                      parent: animation,
+                      curve: const Interval(
+                        0,
+                        _scrimIn / _sheetIn,
+                        curve: Curves.ease,
+                      ),
+                      reverseCurve: Curves.ease,
+                    ),
+                    child: ColoredBox(color: c.scrim),
+                  ),
+                ),
+              ),
+              Dialog(
+                insetPadding: const EdgeInsets.symmetric(
+                  horizontal: NzTabletMetrics.modalEdge,
+                  vertical: NzTabletMetrics.modalVerticalInset / 2,
+                ),
+                // Görünüm (zemin, köşe, kenar) içeriktedir; Dialog yalnız yerleşimdir, böylece
+                // kayma modalın kendi boyu kadardır (`translateY(100%)`), pencere boyu değil.
+                backgroundColor: clear,
+                surfaceTintColor: clear,
+                shadowColor: clear,
+                elevation: 0,
+                child: SizedBox(
+                  width: NzTabletMetrics.modalMaxWidth,
+                  child: SlideTransition(
+                    position: Tween(begin: const Offset(0, 1), end: Offset.zero)
+                        .animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: NizamioMotion.easeSheet,
+                            reverseCurve: NizamioMotion.easeExit,
+                          ),
+                        ),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(NizamioRadius.sheet),
+                      ),
+                      // Dialog semantiği çocukları birleştirmesin (tutamak, kapat ayrı düğmeler).
+                      child: Semantics(
+                        container: true,
+                        explicitChildNodes: true,
+                        child: content(sheetContext, modal: true),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return showModalBottomSheet<T>(
       context: context,
       useRootNavigator: true,
@@ -62,21 +166,7 @@ abstract final class NzBottomSheet {
         curve: NizamioMotion.easeSheet,
         reverseCurve: NizamioMotion.easeExit,
       ),
-      builder: (sheetContext) => PopScope(
-        canPop: dismissible,
-        child: NzBottomSheetContent(
-          title: title,
-          description: description,
-          dismissible: dismissible,
-          expandable: expandable,
-          expansion: expansion,
-          headerAction: headerAction,
-          showHeader: showHeader,
-          compact: compact,
-          actions: actions?.call(sheetContext),
-          child: Builder(builder: builder),
-        ),
-      ),
+      builder: (sheetContext) => content(sheetContext, modal: false),
     );
   }
 }
@@ -99,6 +189,8 @@ class NzBottomSheetContent extends StatefulWidget {
     this.headerAction,
     this.showHeader = true,
     this.compact = false,
+    this.modal = false,
+    this.actionsDivider = true,
   });
 
   final String title;
@@ -117,6 +209,13 @@ class NzBottomSheetContent extends StatefulWidget {
 
   /// Seçim listesi başlığı: küçük mono etiket, kapat düğmesi yok ([NzBottomSheet.show]).
   final bool compact;
+
+  /// Tablet merkezi modalı: dört köşe 28, çevresi 1 px `border-strong`; klavye ve alt güvenli
+  /// alan payını Dialog verir.
+  final bool modal;
+
+  /// Eylem satırının üstündeki 1 px `border-subtle` çizgi (kaynakta takvim önizlemesinde yok).
+  final bool actionsDivider;
 
   @override
   State<NzBottomSheetContent> createState() => _NzBottomSheetContentState();
@@ -174,9 +273,13 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
     final material = MaterialLocalizations.of(context);
     final description = widget.description;
     final actions = widget.actions;
-    final bottomInset =
-        MediaQuery.viewInsetsOf(context).bottom +
-        MediaQuery.paddingOf(context).bottom;
+    final bottomInset = widget.modal
+        ? 0.0
+        : MediaQuery.viewInsetsOf(context).bottom +
+              MediaQuery.paddingOf(context).bottom;
+    final radius = widget.modal
+        ? const BorderRadius.all(Radius.circular(NizamioRadius.sheet))
+        : _radius;
 
     final handle = SizedBox.fromSize(
       size: _grabSize,
@@ -274,7 +377,7 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
                       minWidth: NizamioSpacing.space12,
                       minHeight: NizamioSpacing.space12,
                     ),
-                    icon: const Icon(Icons.close_rounded),
+                    icon: const NzIcon(Icons.close_rounded),
                     onPressed: () => Navigator.of(context).maybePop(),
                   ),
               ],
@@ -296,10 +399,12 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
           DecoratedBox(
             decoration: BoxDecoration(
               border: Border(
-                top: BorderSide(
-                  color: c.border,
-                  width: NizamioSize.borderWidth,
-                ),
+                top: !widget.actionsDivider
+                    ? BorderSide.none
+                    : BorderSide(
+                        color: c.border,
+                        width: NizamioSize.borderWidth,
+                      ),
               ),
             ),
             child: Padding(
@@ -307,15 +412,21 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
                 NizamioSpacing.space4,
                 NizamioSpacing.space3,
                 NizamioSpacing.space4,
-                NizamioSpacing.space4 + bottomInset,
+                // Tablet modalı: `padding: 12px 16px 28px`.
+                widget.modal
+                    ? NzTabletMetrics.modalFooterBottom
+                    : NizamioSpacing.space4 + bottomInset,
               ),
               child: Row(
                 spacing: NizamioSpacing.space2,
                 children: [
                   for (var i = 0; i < actions.length; i++)
                     Expanded(
-                      // `.m-sheet__foot`: iki düğmede 1fr / 2fr.
-                      flex: actions.length == 2 && i == 1 ? 2 : 1,
+                      // `.m-sheet__foot`: iki düğmede 1fr / 2fr; tablet modalı eşit
+                      // (`repeat(2, minmax(0, 1fr))`).
+                      flex: !widget.modal && actions.length == 2 && i == 1
+                          ? 2
+                          : 1,
                       child: actions[i],
                     ),
                 ],
@@ -331,7 +442,18 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
               final full = constraints.maxHeight.isFinite
                   ? constraints.maxHeight
                   : MediaQuery.sizeOf(context).height;
-              final h = _expanded ? full : full * _collapsedFraction;
+              // Merkezi modal kaynak yüksekliklerini kullanır (600 / 800, `H − 64` sınırı);
+              // alttan sayfa ekran oranıyla.
+              final h = widget.modal
+                  ? math.min(
+                      full,
+                      _expanded
+                          ? NzTabletMetrics.sheetExpandedHeight
+                          : NzTabletMetrics.sheetHeight,
+                    )
+                  : _expanded
+                  ? full
+                  : full * _collapsedFraction;
               return AnimatedContainer(
                 duration: NzMotion.of(context, NizamioMotion.durSheet),
                 curve: NizamioMotion.easeSheet,
@@ -345,17 +467,27 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
     final sheet = DecoratedBox(
       decoration: BoxDecoration(
         color: c.surface,
-        borderRadius: _radius,
+        borderRadius: radius,
         boxShadow: context.shadows.sheet,
       ),
-      child: CustomPaint(
-        foregroundPainter: NzEdgeLightPainter(
-          color: c.borderStrong,
-          borderRadius: _radius,
-          inset: 0,
-        ),
-        child: sized,
-      ),
+      position: DecorationPosition.background,
+      child: widget.modal
+          ? DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(
+                borderRadius: radius,
+                border: Border.all(color: c.borderStrong),
+              ),
+              child: sized,
+            )
+          : CustomPaint(
+              foregroundPainter: NzEdgeLightPainter(
+                color: c.borderStrong,
+                borderRadius: radius,
+                inset: 0,
+              ),
+              child: sized,
+            ),
     );
     if (widget.showHeader) return sheet;
     return Semantics(
@@ -367,3 +499,7 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
     );
   }
 }
+
+// Karartma ve sayfa açılış süreleri (ms; kaynak `.3s` / `.42s`).
+const _scrimIn = 300.0;
+const _sheetIn = 420.0;

@@ -6,6 +6,7 @@ import '../../../errors/error_text.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
+import '../nz_icon.dart';
 
 enum NzToastTone { info, success, danger }
 
@@ -124,7 +125,11 @@ class NzToastBubble extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ExcludeSemantics(
-              child: Icon(icon, color: iconColor, size: NizamioSize.iconSizeSm),
+              child: NzIcon(
+                icon,
+                color: iconColor,
+                size: NizamioSize.iconSizeSm,
+              ),
             ),
             const Gap(NizamioSpacing.gapMd),
             Flexible(

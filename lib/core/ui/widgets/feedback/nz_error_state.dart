@@ -7,6 +7,7 @@ import '../../../errors/api_error.dart';
 import '../../../errors/error_text.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../nz_icon.dart';
 
 /// Hata görünümü. Metin yalnız `errorText(context.l10n, error)`.
 ///
@@ -162,7 +163,7 @@ class _InlineErrorBody extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ExcludeSemantics(
-                child: Icon(
+                child: NzIcon(
                   Icons.error_outline,
                   color: colors.danger,
                   size: NizamioSpacing.space6,
@@ -223,7 +224,7 @@ class _PageErrorBody extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ExcludeSemantics(
-                child: Icon(
+                child: NzIcon(
                   Icons.error_outline,
                   size: NizamioSpacing.space12,
                   color: colors.danger,

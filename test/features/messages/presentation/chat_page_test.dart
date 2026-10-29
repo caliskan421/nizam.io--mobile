@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_composer.dart';
 import 'package:nizamio/core/ui/widgets/surfaces/nz_chat_bubble.dart';
+import 'package:nizamio/features/messages/application/chat_controller.dart';
 import 'package:nizamio/features/messages/application/chats_controller.dart';
 import 'package:nizamio/features/messages/messages.dart';
 
@@ -73,25 +74,36 @@ void main() {
     (tester) async {
       final (h, _) = await _open(tester);
       expect(find.text('Genel'), findsOneWidget);
-      expect(find.text('Rıza ${_l.uiMessagesTyping}'), findsOneWidget);
+      expect(find.text('Reha ${_l.uiMessagesTyping}'), findsOneWidget);
       await tester.pump(const Duration(seconds: 4));
       expect(find.text('18 ${_l.uiMessagesMembersLc}'), findsOneWidget);
       expect(find.text('${_l.uiMessagesPinned} 1/2'), findsOneWidget);
       await _tap(tester, find.text('${_l.uiMessagesPinned} 1/2'));
       expect(find.text('${_l.uiMessagesPinned} 2/2'), findsOneWidget);
-      // Akış tembel ve ters: eski uç (dün) yukarı kaydırınca kurulur.
+      // Akış tembel, yukarıdan aşağı ve en altta açılır: eski uç (dün) yukarı kaydırınca kurulur.
       await tester.drag(find.byType(CustomScrollView), const Offset(0, 3000));
       await settle(tester);
       expect(find.text(_l.uiMessagesYesterday), findsOneWidget);
       await tester.drag(find.byType(CustomScrollView), const Offset(0, -3000));
       await settle(tester);
-      expect(find.text(_l.uiMessagesToday), findsOneWidget);
+      final list = find.byType(Scrollable).first;
+      await tester.scrollUntilVisible(
+        find.text(_l.uiMessagesNewMessages),
+        -200,
+        scrollable: list,
+      );
       expect(find.text(_l.uiMessagesNewMessages), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text(_l.uiMessagesToday),
+        -200,
+        scrollable: list,
+      );
+      expect(find.text(_l.uiMessagesToday), findsOneWidget);
       expect(
         find.text('Kapanış yemeği için hangi günler uygun?'),
         findsWidgets,
       );
-      expect(h.read(messagesNavCaptionProvider), '4 ${_l.uiMessagesUnreadLc}');
+      expect(h.read(messagesNavCaptionProvider), '3 ${_l.uiMessagesUnreadLc}');
     },
   );
 
@@ -137,12 +149,12 @@ void main() {
       ),
     );
     expect(field.controller!.text, 'Bak #ALT-1 ');
-    await _type(tester, '@ker');
+    await _type(tester, '@kad');
     await _tap(
       tester,
-      find.text('Kerem Özdal · ${_l.uiMessagesRoleCoordinator}'),
+      find.text('Kadir Özbek · ${_l.uiMessagesRoleCoordinator}'),
     );
-    expect(field.controller!.text, '@Kerem Özdal ');
+    expect(field.controller!.text, '@Kadir Özbek ');
     await _tap(tester, find.text('#ALT-7').last);
     expect(nav.calls, ['task:ALT-7']);
   });
@@ -151,7 +163,7 @@ void main() {
     'ek paneli: görev atfı hapı; cihaz fotoğrafı; gönderilince balonda',
     (tester) async {
       await _open(tester, id: 'sis');
-      await _tap(tester, find.byIcon(Icons.add_rounded).first);
+      await _tap(tester, find.byIcon(Icons.attach_file_rounded).first);
       expect(find.text(_l.uiMessagesPhotoVideo), findsOneWidget);
       await _tap(tester, find.text(_l.uiMessagesRefCoordinatorship));
       await _tap(tester, find.text('Altyapı ve tesisat').last);
@@ -180,7 +192,7 @@ void main() {
       expect(find.text(_l.uiMessagesMessageActions), findsNothing);
       expect(find.bySemanticsLabel(_l.uiMessagesMessageActions), findsWidgets);
       await _tap(tester, find.text(_l.uiMessagesReply));
-      expect(find.text('Kerem Özdal ${_l.uiMessagesReplyTo}'), findsOneWidget);
+      expect(find.text('Kadir Özbek ${_l.uiMessagesReplyTo}'), findsOneWidget);
       await _tap(tester, find.byTooltip(_l.uiMessagesCancel));
 
       await tester.longPress(_bubble('Hidrofor için yeni tarih'));
@@ -276,6 +288,58 @@ void main() {
     expect(after, lessThanOrEqualTo(844 - 300));
   });
 
+  testWidgets(
+    'yeniden boyut: klavye açıkken tablet dikey ↔ yatay; taslak ve yanıt bağlamı korunur',
+    (tester) async {
+      final (h, _) = await _open(tester, id: 'kadir');
+      await tester.longPress(_bubble('Hidrofor için yeni tarih'));
+      await settle(tester);
+      await _tap(tester, find.text(_l.uiMessagesReply));
+      await _type(tester, 'Yarın 10:00 uygun');
+      final reply = h.read(chatControllerProvider('kadir')).reply;
+      expect(reply, isNotNull);
+      final field = find
+          .descendant(
+            of: find.byType(NzComposer),
+            matching: find.byType(TextField),
+          )
+          .last;
+      final state = tester.state(find.byType(ChatPage));
+      final draft = tester.widget<TextField>(field).controller!;
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      addTearDown(tester.view.resetViewInsets);
+      for (final size in const [
+        Size(820, 1180),
+        Size(1180, 820),
+        Size(820, 1180),
+      ]) {
+        tester.view.physicalSize = size;
+        await settle(tester);
+        final why = 'boyut $size';
+        expect(tester.takeException(), isNull, reason: why);
+        expect(tester.state(find.byType(ChatPage)), same(state), reason: why);
+        expect(
+          tester.widget<TextField>(field).controller,
+          same(draft),
+          reason: why,
+        );
+        expect(draft.text, 'Yarın 10:00 uygun', reason: why);
+        expect(h.read(chatControllerProvider('kadir')).reply, reply);
+        expect(
+          find.text('Kadir Özbek ${_l.uiMessagesReplyTo}'),
+          findsOneWidget,
+          reason: why,
+        );
+        // Yazma alanı klavyenin üstünde kalır.
+        expect(
+          tester.getBottomLeft(field).dy,
+          lessThanOrEqualTo(size.height - 300),
+          reason: why,
+        );
+      }
+    },
+  );
+
   for (final (width, scale) in [(360.0, 1.0), (360.0, 2.0), (390.0, 2.0)]) {
     for (final dark in [false, true]) {
       testWidgets(
@@ -291,7 +355,7 @@ void main() {
             await tester.drag(scrollable, const Offset(0, 300));
             await tester.pump();
           }
-          await _tap(tester, find.byIcon(Icons.add_rounded).first);
+          await _tap(tester, find.byIcon(Icons.attach_file_rounded).first);
           await _type(tester, '#ALT');
           expect(tester.takeException(), isNull);
         },

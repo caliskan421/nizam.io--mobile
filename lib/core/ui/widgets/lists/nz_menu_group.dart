@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../nz_icon.dart';
 
 /// Gruplu menü (README: çekmece grupları `m-r-group`, satır 48): `bg-raised` kart içinde
 /// satırlar, aralarında 1 px `border-subtle`. Üstte isteğe bağlı mono grup adı.
@@ -110,7 +111,7 @@ class NzMenuRow extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(icon, size: NizamioSize.iconSizeSm, color: iconColor),
+                  NzIcon(icon, size: NizamioSize.iconSizeSm, color: iconColor),
                   const Gap(NizamioSpacing.space3),
                   Expanded(
                     child: ExcludeSemantics(

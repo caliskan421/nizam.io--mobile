@@ -91,15 +91,15 @@ void main() {
       find.textContaining('Teknik altyapı · 3 alt birim · 9 kişi · '),
       findsOneWidget,
     );
-    expect(find.text('%69'), findsOneWidget);
+    expect(find.text('%58'), findsOneWidget);
     expect(find.text(_l.uiCoordKpiOpen), findsOneWidget);
     expect(
-      find.text('13 görevden 9 tamamlandı · sezon ortalaması %51'),
+      find.text('12 görevden 7 tamamlandı · sezon ortalaması %41'),
       findsOneWidget,
     );
     expect(find.text(_l.uiCoordAttention), findsOneWidget);
     expect(find.text('98 gün gecikti'), findsOneWidget);
-    expect(find.text('ALT-5 · Kerem Özdal'), findsOneWidget);
+    expect(find.text('ALT-5 · Kadir Özbek'), findsOneWidget);
 
     await _tap(tester, find.text(_l.uiCoordMessageTeam));
     await _tap(tester, find.text('Su deposu temel betonunun yapılması'));
@@ -148,12 +148,12 @@ void main() {
 
     await _tap(tester, find.text(_l.uiCoordTabTeam));
     expect(find.text('ekip · 9'), findsOneWidget);
-    expect(find.text('Deniz Aydemir'), findsOneWidget);
+    expect(find.text('Abdullah Ateş'), findsOneWidget);
     expect(find.text(_l.uiCoordRoleLead), findsNWidgets(2));
     expect(find.text('7 üye daha'), findsOneWidget);
     await _tap(tester, find.text('7 üye daha'));
     expect(find.text(_l.uiCoordCollapse), findsOneWidget);
-    expect(find.text('Kerem Özdal'), findsOneWidget);
+    expect(find.text('Kadir Özbek'), findsOneWidget);
     await _tap(tester, find.text(_l.uiCoordCollapse));
     expect(find.text('7 üye daha'), findsOneWidget);
     await _tap(tester, find.text(_l.uiCoordAddMember));

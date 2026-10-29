@@ -135,7 +135,7 @@ void main() {
       testApp(
         StatefulBuilder(
           builder: (context, set) => NzCheckbox(
-            label: 'Kerem Özdal',
+            label: 'Kadir Özbek',
             value: v,
             onChanged: (x) => set(() => v = x),
             labelLeading: const Icon(Icons.person, key: ValueKey('lead')),
@@ -144,7 +144,7 @@ void main() {
       ),
     );
     final lead = tester.getRect(find.byKey(const ValueKey('lead')));
-    final label = tester.getRect(find.text('Kerem Özdal'));
+    final label = tester.getRect(find.text('Kadir Özbek'));
     expect(lead.right, lessThanOrEqualTo(label.left));
     await tester.tap(find.byKey(const ValueKey('lead')));
     await tester.pump();

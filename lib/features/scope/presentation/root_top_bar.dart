@@ -22,11 +22,7 @@ class RootTopBar extends ConsumerWidget {
     final program = ref.watch(
       currentProgramControllerProvider.select((p) => p.value?.name),
     );
-    final pending = ref.watch(
-      homeDashboardControllerProvider.select(
-        (d) => d.value?.pending ?? const [],
-      ),
-    );
+    final bell = watchNotificationBell(context, ref);
     return NzTopBar(
       leading: NzBrandMark(monogram: l.uiHomeAppName.characters.first),
       title: l.uiHomeAppName,
@@ -34,8 +30,8 @@ class RootTopBar extends ConsumerWidget {
       actions: [
         NzIconButton(
           icon: Icons.notifications_none_rounded,
-          semanticLabel: l.notificationsLabel(pending),
-          dot: pending.isNotEmpty ? context.colors.danger : null,
+          semanticLabel: bell.label,
+          dot: bell.dot ? context.colors.danger : null,
           onPressed: () => NzToast.show(context, l.soon(l.uiHomeNotifications)),
         ),
         NzIconButton.glass(
@@ -46,4 +42,19 @@ class RootTopBar extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// Bildirim zilinin okuyucu etiketi ("Bildirimler · 3 tarih talebi ve 3 onay…") ve bekleyen
+/// iş noktası; kök üst çubuk ve tablet rayı aynı kaynağı okur.
+({String label, bool dot}) watchNotificationBell(
+  BuildContext context,
+  WidgetRef ref,
+) {
+  final pending = ref.watch(
+    homeDashboardControllerProvider.select((d) => d.value?.pending ?? const []),
+  );
+  return (
+    label: context.l10n.notificationsLabel(pending),
+    dot: pending.isNotEmpty,
+  );
 }

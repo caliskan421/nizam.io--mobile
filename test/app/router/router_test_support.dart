@@ -33,12 +33,19 @@ Future<GoRouter> pumpRouter(
 }
 
 /// Hazır yönlendiriciyi uygulamaya bağlar (Riverpod kapsamı, TR yerelleştirme) ve ilk kareyi çizer.
-Future<void> pumpRouterWidget(WidgetTester tester, GoRouter router) async {
+/// [harness] verilirse onun bileşim kökü kullanılır (çağıran kapatır; ör. sayaçlı depo).
+Future<void> pumpRouterWidget(
+  WidgetTester tester,
+  GoRouter router, {
+  Harness? harness,
+}) async {
   // Kapı rotaları gerçek feature sayfalarıdır (sunucu, giriş, kapsam…): sayfalar gerçek bileşim
   // kökünün portlarını okur. Sahte ağ her isteğe 404 verir; faz ValueNotifier'ı testin
   // elindedir (sayfalar kendi hata durumunu çizer, faz makinesine dokunmaz).
-  final harness = Harness();
-  addTearDown(harness.dispose);
+  if (harness == null) {
+    harness = Harness();
+    addTearDown(harness.dispose);
+  }
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: harness.container,

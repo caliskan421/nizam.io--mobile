@@ -41,23 +41,25 @@ void main() {
     expect(c.read(coordinatorshipDetailProvider('ALT')).isLoading, isTrue);
     await _ready(c);
     final d = c.read(coordinatorshipDetailProvider('ALT')).requireValue!;
-    expect((d.stats.open, d.stats.late), (4, 3));
+    // Kaynak `D` kaydı: 7/12 tamamlandı, 3 geciken.
+    expect((d.stats.open, d.stats.late, d.stats.total), (5, 3, 12));
+    expect(d.seasonRatio, 0.41);
     expect(d.attention.map((a) => (a.code, a.overdueDays)), [
       ('ALT-5', 98),
       ('ALT-7', 41),
       ('ALT-10', 21),
     ]);
-    expect(d.attention.first.assignee, 'Kerem Özdal');
+    expect(d.attention.first.assignee, 'Kadir Özbek');
     expect(d.leads.map((m) => (m.name, m.unit)), [
-      ('Deniz Aydemir', 'Arıtma tesisi'),
-      ('Kaan Erol', 'Su ve atıksu hatları'),
+      ('Abdullah Ateş', 'Arıtma tesisi'),
+      ('Ali Avcı', 'Su ve atıksu hatları'),
     ]);
     // Katalog üyesi + 6 örnek üye.
     expect(d.members, hasLength(7));
-    expect(d.members.first.name, 'Kerem Özdal');
+    expect(d.members.first.name, 'Kadir Özbek');
     expect(d.members.first.unit, 'Depolama ve hidrofor');
     expect(d.people, 9);
-    expect(d.feed.first.who, 'Kerem Özdal');
+    expect(d.feed.first.who, 'Kadir Özbek');
     expect(d.others, hasLength(11));
     expect(d.profile.chatId, 'hid');
 
@@ -72,7 +74,7 @@ void main() {
     await _ready(c);
     final d = c.read(coordinatorshipDetailProvider('İDA')).requireValue!;
     expect(d.leads, isEmpty);
-    expect(d.members.map((m) => m.name), ['Bengü Kılınç']);
+    expect(d.members.map((m) => m.name), ['Bahar Kılıç']);
     expect(d.people, 1);
   });
 }

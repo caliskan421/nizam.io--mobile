@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../feedback/nz_progress_bar.dart';
+import '../nz_icon.dart';
 import 'nz_card.dart';
 import 'nz_icon_tile.dart';
 
@@ -66,7 +67,7 @@ class NzKpiTile extends StatelessWidget {
               ),
               if (onTap != null)
                 ExcludeSemantics(
-                  child: Icon(
+                  child: NzIcon(
                     Icons.north_east_rounded,
                     size: NizamioSize.iconSizeSm,
                     color: c.textFaint,

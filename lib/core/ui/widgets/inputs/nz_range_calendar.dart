@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
+import '../nz_icon.dart';
 
 /// Ay takvimi (tasarım `components/RangeCalendar`; prototip yeni görev "Tarih" ve toplantı
 /// "Tarih" satırları). Durumsuz: seçim kuralı ekranın denetleyicisindedir.
@@ -79,7 +80,11 @@ class NzRangeCalendar extends StatelessWidget {
                   color: c.surfaceOverlay,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: NizamioSize.iconSizeSm, color: c.text),
+                child: NzIcon(
+                  icon,
+                  size: NizamioSize.iconSizeSm,
+                  color: c.text,
+                ),
               ),
             ),
           ),

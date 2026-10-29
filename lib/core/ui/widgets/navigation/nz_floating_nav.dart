@@ -9,6 +9,7 @@ import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
 import '../../theme/nz_surfaces.dart';
 import '../buttons/nz_pressable.dart';
+import '../nz_icon.dart';
 import '../surfaces/nz_glass.dart';
 
 /// Alt menü öğesi: ikon, etiket ve etkinken görünen mono alt yazı.
@@ -292,7 +293,7 @@ class _NavButton extends StatelessWidget {
                     : MainAxisAlignment.center,
                 children: [
                   NzPressable(
-                    child: Icon(
+                    child: NzIcon(
                       item.icon,
                       size: NizamioSize.iconSize,
                       color: active ? c.glassInk : c.textMuted,
@@ -364,7 +365,7 @@ class _ActionCircle extends StatelessWidget {
           splashFactory: NoSplash.splashFactory,
           child: SizedBox.square(
             dimension: NizamioSize.nav,
-            child: Icon(
+            child: NzIcon(
               action.icon,
               size: _actionIcon,
               color: context.colors.accentText,

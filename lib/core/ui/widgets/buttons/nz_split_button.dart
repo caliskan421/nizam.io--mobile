@@ -4,6 +4,7 @@ import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
 import '../../theme/nz_surfaces.dart';
+import '../nz_icon.dart';
 import 'nz_pressable.dart';
 
 /// Bitişik iki ikincil düğme (prototip sıralama denetimi): solda metinli eylem, sağda dönen
@@ -63,7 +64,7 @@ class NzSplitButton extends StatelessWidget {
           turns: iconTurns,
           duration: NzMotion.of(context, NizamioMotion.durSheet),
           curve: NizamioMotion.easeSpring,
-          child: const Icon(
+          child: const NzIcon(
             Icons.keyboard_arrow_down_rounded,
             size: NizamioSize.iconSizeSm,
           ),

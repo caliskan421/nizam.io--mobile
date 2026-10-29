@@ -40,7 +40,7 @@ extension ActivityTexts on AppLocalizations {
   /// "38 kaydı göster".
   String activityApply(int n) => '$n $uiActivityApplyTail';
 
-  /// "Kerem Özdal filtresini kaldır".
+  /// "Kadir Özbek filtresini kaldır".
   String activityRemove(String what) => '$what $uiActivityRemoveTail';
 
   /// "Tür: Görev".

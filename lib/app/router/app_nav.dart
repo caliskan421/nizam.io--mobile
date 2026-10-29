@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/config/generated/app_version.gen.dart';
+import '../../core/config/display_brand.dart';
+import '../../core/providers.dart';
 import '../../core/ui/extensions/context_ext.dart';
 import '../../core/ui/page/nz_app_nav.dart';
 import '../../core/ui/widgets/feedback/nz_toast.dart';
@@ -40,6 +41,9 @@ class GoRouterAppNav implements NzAppNav {
   void openTask(String code) => _open(TaskDetailRoute(code: code).location);
 
   @override
+  void openCalendar() => _router.go(const CalendarRoute().location);
+
+  @override
   void openTimeline({String? coordinatorship}) =>
       _router.push(TimelineRoute(coord: coordinatorship).location);
 
@@ -71,12 +75,14 @@ class GoRouterAppNav implements NzAppNav {
   void openMenu(BuildContext context) {
     final dashboard = _ref.read(homeDashboardControllerProvider).value;
     final program = _ref.read(currentProgramControllerProvider).value;
+    final brand = displayBrand(_ref.read(flavorProvider));
     final l = context.l10n;
     final location = _location;
     final current = switch (moduleOf(location)) {
       ShellModule.coordinatorships => HomeModule.coordinatorships,
       ShellModule.archive => HomeModule.archive,
       ShellModule.messages => HomeModule.messages,
+      ShellModule.calendar => HomeModule.calendar,
       null =>
         // Zaman çizelgesi görevler modülünün parçasıdır (prototip `ON.tasks`).
         location.startsWith(const TasksRoute().location) ||
@@ -92,9 +98,10 @@ class GoRouterAppNav implements NzAppNav {
       greetingName: dashboard?.greetingName ?? '',
       greetingRole: dashboard?.greetingRole,
       greetingEmail: dashboard?.greetingEmail,
-      programName: program?.name,
-      programYear: program?.year,
-      version: appVersion,
+      programName: program?.name ?? dashboard?.demoProgramName,
+      programYear: program?.year ?? dashboard?.demoProgramYear,
+      version: brand.version,
+      productName: brand.name,
       counts: dashboard?.counts,
       onProfile: openProfile,
       onChangeScope: () =>
@@ -112,6 +119,8 @@ class GoRouterAppNav implements NzAppNav {
             openArchive();
           case HomeModule.messages:
             openMessages();
+          case HomeModule.calendar:
+            openCalendar();
           default:
             NzToast.show(
               context,

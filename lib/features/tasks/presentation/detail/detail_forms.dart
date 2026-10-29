@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../application/task_detail_controller.dart';
@@ -398,7 +399,7 @@ class _PickBox extends StatelessWidget {
         child: Column(
           spacing: NizamioSpacing.space1,
           children: [
-            Icon(Icons.upload_file_rounded, color: c.textMuted),
+            NzIcon(Icons.upload_file_rounded, color: c.textMuted),
             Text(title, textAlign: TextAlign.center, style: t.bodyMd),
             Text(
               message,

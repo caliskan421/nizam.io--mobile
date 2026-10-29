@@ -9,8 +9,10 @@ import 'package:nizamio/app/router/pages.dart';
 import 'package:nizamio/app/router/router.dart';
 import 'package:nizamio/app/router/shell.dart';
 import 'package:nizamio/core/app_phase.dart';
+import 'package:nizamio/core/ui/layout/nz_pane.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_floating_nav.dart';
+import 'package:nizamio/core/ui/widgets/navigation/nz_tablet_rail.dart';
 import 'package:nizamio/features/coordinatorships/coordinatorships.dart';
 import 'package:nizamio/features/messages/messages.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
@@ -39,6 +41,10 @@ const _tabIcons = [
   Icons.checklist_rounded,
   Icons.apartment_rounded,
 ];
+
+/// Tablet rayındaki modül öğesi (etiketiyle).
+Finder _railItem(String label) =>
+    find.descendant(of: find.byType(NzTabletRail), matching: find.text(label));
 
 BuildContext _ctx(WidgetTester tester) =>
     tester.element(find.byType(NzAdaptiveShell));
@@ -90,7 +96,7 @@ void main() {
     expect(gateRedirect(AppPhase.unbound, '/home', devPrototype: true), isNull);
     expect(
       gateRedirect(AppPhase.unbound, '/login', devPrototype: true),
-      '/server',
+      isNull,
     );
   });
 
@@ -245,24 +251,36 @@ void main() {
       }
     });
 
-    testWidgets('medium: NavigationRail (daralmış), alt çubuk yok', (
+    testWidgets('medium: tablet rayı (altı modül) + tek bölme, alt çubuk yok', (
       tester,
     ) async {
       await _scoped(tester, width: 700);
       expect(find.byType(NzFloatingNav), findsNothing);
       expect(
-        tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
-        isFalse,
+        tester.widget<NzTabletRail>(find.byType(NzTabletRail)).items,
+        hasLength(6),
+      );
+      // Bölme rolü yok (sağ yığının yalnız geri bağlamı olabilir).
+      expect(
+        find.byWidgetPredicate((w) => w is NzPaneScope && w.role != null),
+        findsNothing,
       );
     });
 
-    testWidgets('expanded: genişletilmiş ray', (tester) async {
+    testWidgets('expanded: tablet rayı + liste ve ayrıntı bölmesi', (
+      tester,
+    ) async {
       await _scoped(tester, width: 1100);
       expect(find.byType(NzFloatingNav), findsNothing);
+      expect(find.byType(NzTabletRail), findsOneWidget);
       expect(
-        tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
-        isTrue,
+        tester.getSize(find.byType(NzTabletRail)).width,
+        NzTabletMetrics.railWidth,
       );
+      final roles = tester
+          .widgetList<NzPaneScope>(find.byType(NzPaneScope))
+          .map((p) => p.role);
+      expect(roles, containsAll(NzPaneRole.values));
     });
 
     testWidgets('sekme sayısı dal sayısıyla aynıdır', (tester) async {
@@ -288,17 +306,21 @@ void main() {
       expect(locationOf(router), '/home/history');
     });
 
-    testWidgets('expanded rayda da sekme yığını korunur', (tester) async {
-      final router = await _scoped(tester, width: 1100);
-      const TaskDetailRoute(code: '9').go(_ctx(tester));
-      await settle(tester);
-      await tester.tap(find.text('Ana sayfa'));
-      await settle(tester);
-      expect(locationOf(router), '/home');
-      await tester.tap(find.text('Görevler'));
-      await settle(tester);
-      expect(locationOf(router), '/tasks/9');
-    });
+    testWidgets(
+      'expanded rayda modül değişimi modül varsayılanına döner (prototip tgo)',
+      (tester) async {
+        final router = await _scoped(tester, width: 1100);
+        const TaskDetailRoute(code: '9').go(_ctx(tester));
+        await settle(tester);
+        await tester.tap(_railItem('Ana sayfa'));
+        await settle(tester);
+        expect(locationOf(router), '/home');
+        await tester.tap(_railItem('Görevler'));
+        await settle(tester);
+        // Son açılan görev (prototip alt ekranı kalıcı), rotada kimlikle.
+        expect(locationOf(router), '/tasks/9');
+      },
+    );
   });
 
   group('yeniden bağlanma: gezinme yığını temizlenir', () {
@@ -343,7 +365,8 @@ void main() {
         expect(locationOf(router), '/home');
         expect(router.canPop(), isFalse);
         expect(find.byType(ChatPage), findsNothing);
-        await tester.tap(find.byIcon(_tabIcons[1]));
+        // 800 geniş: tablet rayı, tek bölme.
+        await tester.tap(_railItem('Görevler'));
         await settle(tester);
         expect(locationOf(router), '/tasks');
         expect(find.byType(TaskDetailPage), findsNothing);
@@ -392,14 +415,11 @@ void main() {
   });
 
   testWidgets(
-    'geçiş: tek yerde (solma + kayma); animasyonlar azaltılınca geçişsiz',
+    'sayfa kabuğu hareketi azalt ayarından bağımsız olarak geçişsiz',
     (tester) async {
       await _scoped(tester);
       int fades(Type page) => find
-          .ancestor(
-            of: find.byType(page),
-            matching: find.byType(FadeTransition),
-          )
+          .ancestor(of: find.byType(page), matching: find.byType(Opacity))
           .evaluate()
           .length;
 
@@ -414,7 +434,7 @@ void main() {
       );
       const CoordinatorshipRoute(code: 'DURAGAN').go(_ctx(tester));
       await settle(tester);
-      expect(fades(CoordinatorshipPage), withFade - 1);
+      expect(fades(CoordinatorshipPage), withFade);
     },
   );
 }

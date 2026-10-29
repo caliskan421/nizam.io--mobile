@@ -1,17 +1,25 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/layout/nz_pane.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
 import '../../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
 import 'home_sections.dart';
 import 'home_texts.dart';
+
+// Tablet çekmecesi iç dolgusu (kaynak `aside`): üst 52, alt 28.
+const _tabletTop = 52.0;
+const _tabletBottom = 28.0;
 
 /// Alt menüde "Ana sayfa"ya yeniden dokununca açılan kısayol menüsü.
 Future<void> showHomeShortcuts(
@@ -88,6 +96,7 @@ Future<void> showHomeDrawer(
   String? greetingEmail,
   int? programYear,
   String? version,
+  String? productName,
   required ValueChanged<HomeModule> onModule,
   required VoidCallback onProfile,
   required VoidCallback onChangeScope,
@@ -146,12 +155,21 @@ Future<void> showHomeDrawer(
         onTap: () => close(() => onModule(m)),
       );
 
+      // Tablet (kaynak `aside` `padding: 52px 14px 28px`; durum çubuğu payı dahil 52).
+      final tablet = NzTabletMetrics.tabletVisualAt(
+        MediaQuery.sizeOf(context).width,
+      );
       return ListView(
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           NizamioSpacing.rowPad,
-          NizamioSpacing.space4,
+          tablet
+              ? math.max(
+                  NizamioSpacing.space4,
+                  _tabletTop - MediaQuery.viewPaddingOf(context).top,
+                )
+              : NizamioSpacing.space4,
           NizamioSpacing.rowPad,
-          NizamioSpacing.space6,
+          tablet ? _tabletBottom : NizamioSpacing.space6,
         ),
         children: [
           Row(
@@ -169,7 +187,10 @@ Future<void> showHomeDrawer(
                       padding: const EdgeInsets.all(NizamioSpacing.space1),
                       child: Row(
                         children: [
-                          NzAvatar.initials(name: greetingName),
+                          if (tablet)
+                            _TabletAvatar(name: greetingName)
+                          else
+                            NzAvatar.initials(name: greetingName),
                           const Gap(NizamioSpacing.space3),
                           Expanded(
                             child: Column(
@@ -200,12 +221,18 @@ Future<void> showHomeDrawer(
                   ),
                 ),
               ),
-              NzIconButton(
-                icon: Icons.close_rounded,
-                semanticLabel: l.uiCommonClose,
-                size: NzSize.sm,
-                onPressed: () => Navigator.of(sheet).pop(),
-              ),
+              if (tablet)
+                _TabletClose(
+                  label: l.uiCommonClose,
+                  onTap: () => Navigator.of(sheet).pop(),
+                )
+              else
+                NzIconButton(
+                  icon: Icons.close_rounded,
+                  semanticLabel: l.uiCommonClose,
+                  size: NzSize.sm,
+                  onPressed: () => Navigator.of(sheet).pop(),
+                ),
             ],
           ),
           const Gap(NizamioSpacing.gapLg),
@@ -221,11 +248,13 @@ Future<void> showHomeDrawer(
             label: l.uiHomeGroupTracking,
             rows: [
               row(HomeModule.home, Icons.home_outlined, l.uiHomeModuleHome),
-              row(
-                HomeModule.tracking,
-                Icons.work_outline_rounded,
-                l.uiHomeModuleTracking,
-              ),
+              // Kaynak tablet çekmecesinde "takip" grubu: Ana sayfa · Görevler · Takvim.
+              if (!tablet)
+                row(
+                  HomeModule.tracking,
+                  Icons.work_outline_rounded,
+                  l.uiHomeModuleTracking,
+                ),
               row(
                 HomeModule.tasks,
                 Icons.checklist_rounded,
@@ -338,7 +367,7 @@ Future<void> showHomeDrawer(
           if (version != null) ...[
             const Gap(NizamioSpacing.gapLg),
             Text(
-              '${l.uiHomeAppName} ${l.uiHomeVersionPrefix}$version',
+              '${productName ?? l.uiHomeAppName} ${l.uiHomeVersionPrefix}$version',
               textAlign: TextAlign.center,
               style: sheet.text.monoSm.copyWith(color: c.textFaint),
             ),
@@ -421,12 +450,90 @@ class _SeasonCard extends StatelessWidget {
             ),
           ),
           const Gap(NizamioSpacing.space3),
-          Icon(
+          NzIcon(
             Icons.unfold_more_rounded,
             size: NizamioSize.iconSizeSm,
             color: c.textFaint,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Tablet çekmecesi hesap avatarı (kaynak `rp-av` 44 / 15: `bg-overlay` daire, `ink` baş harf).
+class _TabletAvatar extends StatelessWidget {
+  const _TabletAvatar({required this.name});
+
+  final String name;
+
+  static const _extent = 44.0;
+  static const _fontSize = 15.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
+    final initials = words.isEmpty
+        ? ''
+        : words.take(2).map((w) => w.characters.first).join().toUpperCase();
+    return ExcludeSemantics(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: c.surfaceOverlay,
+          shape: BoxShape.circle,
+        ),
+        child: SizedBox.square(
+          dimension: _extent,
+          child: Center(
+            child: Text(
+              initials,
+              style: context.text.labelLg.copyWith(
+                fontSize: _fontSize,
+                color: c.text,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tablet çekmecesi kapat düğmesi (kaynak 36 `bg-overlay` daire, 16 X).
+class _TabletClose extends StatelessWidget {
+  const _TabletClose({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: c.surfaceOverlay,
+            shape: BoxShape.circle,
+          ),
+          child: SizedBox.square(
+            dimension: NizamioSize.controlSm,
+            child: Center(
+              child: NzIcon(
+                Icons.close_rounded,
+                size: NizamioSize.iconSizeSm,
+                color: c.text,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

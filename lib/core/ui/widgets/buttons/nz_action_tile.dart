@@ -3,6 +3,8 @@ import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../../layout/nz_pane.dart';
+import '../nz_icon.dart';
 import 'nz_pressable.dart';
 
 /// Hızlı işlem kutucuğu (ana sayfa 4'lü ızgara): 40 px ikon kutusu + altında kısa etiket;
@@ -53,8 +55,15 @@ class NzActionTile extends StatelessWidget {
                 minWidth: double.infinity,
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: NizamioSpacing.space3,
+                // Tablet kaynağı: `padding: 12px 4px` + 1 px kenarlık (border-box).
+                padding: EdgeInsets.symmetric(
+                  vertical:
+                      NizamioSpacing.space3 +
+                      (NzTabletMetrics.tabletVisualAt(
+                            MediaQuery.sizeOf(context).width,
+                          )
+                          ? NizamioSize.borderWidth
+                          : 0),
                   horizontal: NizamioSpacing.space1,
                 ),
                 child: Column(
@@ -67,7 +76,7 @@ class NzActionTile extends StatelessWidget {
                       ),
                       child: SizedBox.square(
                         dimension: NizamioSize.iconTileLg,
-                        child: Icon(
+                        child: NzIcon(
                           icon,
                           size: NizamioSize.iconSizeSm,
                           color: primary ? c.onPrimary : c.text,

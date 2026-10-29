@@ -1966,6 +1966,414 @@ abstract class AppLocalizations {
   /// **'Meşgul'**
   String get uiButtonsBusy;
 
+  /// ui.calendar.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvim'**
+  String get uiCalendarTitle;
+
+  /// ui.calendar.today
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get uiCalendarToday;
+
+  /// ui.calendar.plan_meeting
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili güne toplantı planla'**
+  String get uiCalendarPlanMeeting;
+
+  /// ui.calendar.grid
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvim ızgarası'**
+  String get uiCalendarGrid;
+
+  /// ui.calendar.collapse
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftaya daralt'**
+  String get uiCalendarCollapse;
+
+  /// ui.calendar.expand
+  ///
+  /// In tr, this message translates to:
+  /// **'Aya genişlet'**
+  String get uiCalendarExpand;
+
+  /// ui.calendar.prev_month
+  ///
+  /// In tr, this message translates to:
+  /// **'Önceki ay'**
+  String get uiCalendarPrevMonth;
+
+  /// ui.calendar.next_month
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonraki ay'**
+  String get uiCalendarNextMonth;
+
+  /// ui.calendar.prev_week
+  ///
+  /// In tr, this message translates to:
+  /// **'Önceki hafta'**
+  String get uiCalendarPrevWeek;
+
+  /// ui.calendar.next_week
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonraki hafta'**
+  String get uiCalendarNextWeek;
+
+  /// ui.calendar.week_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'hafta'**
+  String get uiCalendarWeekLc;
+
+  /// ui.calendar.weekdays_short
+  ///
+  /// In tr, this message translates to:
+  /// **'Pt Sa Ça Pe Cu Ct Pz'**
+  String get uiCalendarWeekdaysShort;
+
+  /// ui.calendar.rel_today
+  ///
+  /// In tr, this message translates to:
+  /// **'bugün'**
+  String get uiCalendarRelToday;
+
+  /// ui.calendar.rel_tomorrow
+  ///
+  /// In tr, this message translates to:
+  /// **'yarın'**
+  String get uiCalendarRelTomorrow;
+
+  /// ui.calendar.rel_yesterday
+  ///
+  /// In tr, this message translates to:
+  /// **'dün'**
+  String get uiCalendarRelYesterday;
+
+  /// ui.calendar.rel_after
+  ///
+  /// In tr, this message translates to:
+  /// **'gün sonra'**
+  String get uiCalendarRelAfter;
+
+  /// ui.calendar.rel_before
+  ///
+  /// In tr, this message translates to:
+  /// **'gün önce'**
+  String get uiCalendarRelBefore;
+
+  /// ui.calendar.records_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'kayıt'**
+  String get uiCalendarRecordsLc;
+
+  /// ui.calendar.season_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'sezon'**
+  String get uiCalendarSeasonLc;
+
+  /// ui.calendar.group_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'toplantılar'**
+  String get uiCalendarGroupMeetings;
+
+  /// ui.calendar.group_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'görevler'**
+  String get uiCalendarGroupTasks;
+
+  /// ui.calendar.group_requests
+  ///
+  /// In tr, this message translates to:
+  /// **'talepler'**
+  String get uiCalendarGroupRequests;
+
+  /// ui.calendar.group_sheets
+  ///
+  /// In tr, this message translates to:
+  /// **'tablo kayıtları'**
+  String get uiCalendarGroupSheets;
+
+  /// ui.calendar.participants_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'katılımcı'**
+  String get uiCalendarParticipantsLc;
+
+  /// ui.calendar.agenda_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'gündem'**
+  String get uiCalendarAgendaLc;
+
+  /// ui.calendar.people_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi'**
+  String get uiCalendarPeopleLc;
+
+  /// ui.calendar.task_ends
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiyor'**
+  String get uiCalendarTaskEnds;
+
+  /// ui.calendar.task_starts
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlıyor'**
+  String get uiCalendarTaskStarts;
+
+  /// ui.calendar.late_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'gecikti'**
+  String get uiCalendarLateLc;
+
+  /// ui.calendar.done_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'yapıldı'**
+  String get uiCalendarDoneLc;
+
+  /// ui.calendar.req_purchase
+  ///
+  /// In tr, this message translates to:
+  /// **'Satın alma'**
+  String get uiCalendarReqPurchase;
+
+  /// ui.calendar.req_quote
+  ///
+  /// In tr, this message translates to:
+  /// **'Fiyat teklifi'**
+  String get uiCalendarReqQuote;
+
+  /// ui.calendar.req_expense
+  ///
+  /// In tr, this message translates to:
+  /// **'Masraf'**
+  String get uiCalendarReqExpense;
+
+  /// ui.calendar.req_budget
+  ///
+  /// In tr, this message translates to:
+  /// **'Ek bütçe'**
+  String get uiCalendarReqBudget;
+
+  /// ui.calendar.state_pending
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekliyor'**
+  String get uiCalendarStatePending;
+
+  /// ui.calendar.state_approved
+  ///
+  /// In tr, this message translates to:
+  /// **'Onaylandı'**
+  String get uiCalendarStateApproved;
+
+  /// ui.calendar.state_ordered
+  ///
+  /// In tr, this message translates to:
+  /// **'Sipariş verildi'**
+  String get uiCalendarStateOrdered;
+
+  /// ui.calendar.state_delivered
+  ///
+  /// In tr, this message translates to:
+  /// **'Teslim alındı'**
+  String get uiCalendarStateDelivered;
+
+  /// ui.calendar.empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu gün için planlanmış bir şey yok.'**
+  String get uiCalendarEmpty;
+
+  /// ui.calendar.plan
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı planla'**
+  String get uiCalendarPlan;
+
+  /// ui.calendar.all_coordinatorships
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm koordinatörlükler'**
+  String get uiCalendarAllCoordinatorships;
+
+  /// ui.calendar.preview
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt önizleme'**
+  String get uiCalendarPreview;
+
+  /// ui.calendar.kicker_meeting
+  ///
+  /// In tr, this message translates to:
+  /// **'toplantı'**
+  String get uiCalendarKickerMeeting;
+
+  /// ui.calendar.kicker_request
+  ///
+  /// In tr, this message translates to:
+  /// **'talep'**
+  String get uiCalendarKickerRequest;
+
+  /// ui.calendar.kicker_sheet
+  ///
+  /// In tr, this message translates to:
+  /// **'tablo kaydı'**
+  String get uiCalendarKickerSheet;
+
+  /// ui.calendar.fact_time
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman'**
+  String get uiCalendarFactTime;
+
+  /// ui.calendar.fact_place
+  ///
+  /// In tr, this message translates to:
+  /// **'Yer'**
+  String get uiCalendarFactPlace;
+
+  /// ui.calendar.fact_invited
+  ///
+  /// In tr, this message translates to:
+  /// **'Davetli'**
+  String get uiCalendarFactInvited;
+
+  /// ui.calendar.fact_type
+  ///
+  /// In tr, this message translates to:
+  /// **'Tür'**
+  String get uiCalendarFactType;
+
+  /// ui.calendar.fact_coordinatorship
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük'**
+  String get uiCalendarFactCoordinatorship;
+
+  /// ui.calendar.fact_amount
+  ///
+  /// In tr, this message translates to:
+  /// **'Tutar'**
+  String get uiCalendarFactAmount;
+
+  /// ui.calendar.fact_state
+  ///
+  /// In tr, this message translates to:
+  /// **'Durum'**
+  String get uiCalendarFactState;
+
+  /// ui.calendar.fact_need
+  ///
+  /// In tr, this message translates to:
+  /// **'İhtiyaç tarihi'**
+  String get uiCalendarFactNeed;
+
+  /// ui.calendar.fact_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlı görev'**
+  String get uiCalendarFactTask;
+
+  /// ui.calendar.fact_table
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo'**
+  String get uiCalendarFactTable;
+
+  /// ui.calendar.fact_date
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih'**
+  String get uiCalendarFactDate;
+
+  /// ui.calendar.fact_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi'**
+  String get uiCalendarFactPerson;
+
+  /// ui.calendar.quote_pending
+  ///
+  /// In tr, this message translates to:
+  /// **'Teklif bekleniyor'**
+  String get uiCalendarQuotePending;
+
+  /// ui.calendar.sheet_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapıldı'**
+  String get uiCalendarSheetDone;
+
+  /// ui.calendar.sheet_waiting
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekliyor'**
+  String get uiCalendarSheetWaiting;
+
+  /// ui.calendar.remind
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlat'**
+  String get uiCalendarRemind;
+
+  /// ui.calendar.reminded
+  ///
+  /// In tr, this message translates to:
+  /// **'Katılımcılara hatırlatma gönderildi'**
+  String get uiCalendarReminded;
+
+  /// ui.calendar.write_group
+  ///
+  /// In tr, this message translates to:
+  /// **'Gruba yaz'**
+  String get uiCalendarWriteGroup;
+
+  /// ui.calendar.close
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapat'**
+  String get uiCalendarClose;
+
+  /// ui.calendar.go_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlı göreve git'**
+  String get uiCalendarGoTask;
+
+  /// ui.calendar.go_coordinatorship
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlüğe git'**
+  String get uiCalendarGoCoordinatorship;
+
+  /// ui.calendar.pick_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir kayıt seç'**
+  String get uiCalendarPickTitle;
+
+  /// ui.calendar.pick_body
+  ///
+  /// In tr, this message translates to:
+  /// **'Soldaki listeden bir göreve dokun, ayrıntısı burada açılır. Toplantı ve talepler önizleme penceresinde açılır.'**
+  String get uiCalendarPickBody;
+
   /// ui.common.retry
   ///
   /// In tr, this message translates to:
@@ -2563,13 +2971,13 @@ abstract class AppLocalizations {
   /// ui.home.kpi_done_of
   ///
   /// In tr, this message translates to:
-  /// **'görevden'**
+  /// **'görevin'**
   String get uiHomeKpiDoneOf;
 
   /// ui.home.kpi_done_tail
   ///
   /// In tr, this message translates to:
-  /// **'tanesi bitti'**
+  /// **'bitti'**
   String get uiHomeKpiDoneTail;
 
   /// ui.home.kpi_doing_tail
@@ -2581,7 +2989,7 @@ abstract class AppLocalizations {
   /// ui.home.kpi_late_lead
   ///
   /// In tr, this message translates to:
-  /// **'Açık görevlerde'**
+  /// **'Açık görevlerin'**
   String get uiHomeKpiLateLead;
 
   /// ui.home.kpi_review_caption
@@ -3109,7 +3517,7 @@ abstract class AppLocalizations {
   /// ui.identity.login_password
   ///
   /// In tr, this message translates to:
-  /// **'Parola'**
+  /// **'Şifre'**
   String get uiIdentityLoginPassword;
 
   /// ui.identity.login_submit
@@ -3187,7 +3595,7 @@ abstract class AppLocalizations {
   /// ui.identity.login_intro
   ///
   /// In tr, this message translates to:
-  /// **'E-posta adresin ve parolanla devam et.'**
+  /// **'E-posta adresin ve şifrenle devam et.'**
   String get uiIdentityLoginIntro;
 
   /// ui.identity.login_submitting
@@ -3205,7 +3613,7 @@ abstract class AppLocalizations {
   /// ui.identity.login_password_hint
   ///
   /// In tr, this message translates to:
-  /// **'Parolan'**
+  /// **'Şifren'**
   String get uiIdentityLoginPasswordHint;
 
   /// ui.identity.login_version_prefix
@@ -3214,16 +3622,22 @@ abstract class AppLocalizations {
   /// **'v'**
   String get uiIdentityLoginVersionPrefix;
 
+  /// ui.identity.login_footer
+  ///
+  /// In tr, this message translates to:
+  /// **'Developed by KAYACAN, COSMAN, CALISKAN'**
+  String get uiIdentityLoginFooter;
+
   /// ui.inputs.password_show
   ///
   /// In tr, this message translates to:
-  /// **'Parolayı göster'**
+  /// **'Şifreyi göster'**
   String get uiInputsPasswordShow;
 
   /// ui.inputs.password_hide
   ///
   /// In tr, this message translates to:
-  /// **'Parolayı gizle'**
+  /// **'Şifreyi gizle'**
   String get uiInputsPasswordHide;
 
   /// ui.inputs.search
@@ -4011,6 +4425,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Mesajlar'**
   String get uiRouterTabMessages;
+
+  /// ui.router.assistant_soon_tablet
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistan tablette sonraki adımda tasarlanacak'**
+  String get uiRouterAssistantSoonTablet;
+
+  /// ui.router.all_modules
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm modüller'**
+  String get uiRouterAllModules;
 
   /// ui.scope.title
   ///
@@ -6285,6 +6711,114 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'aç'**
   String get uiTimelineOpen;
+
+  /// ui.timeline.gantt_back
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler'**
+  String get uiTimelineGanttBack;
+
+  /// ui.timeline.gantt_back_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri: Görevler'**
+  String get uiTimelineGanttBackLabel;
+
+  /// ui.timeline.gantt_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev filtresi'**
+  String get uiTimelineGanttFilter;
+
+  /// ui.timeline.gantt_scale_season
+  ///
+  /// In tr, this message translates to:
+  /// **'Sezon'**
+  String get uiTimelineGanttScaleSeason;
+
+  /// ui.timeline.gantt_all_coords
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm koordinatörlükler'**
+  String get uiTimelineGanttAllCoords;
+
+  /// ui.timeline.gantt_all_coords_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'tüm koordinatörlükler'**
+  String get uiTimelineGanttAllCoordsLc;
+
+  /// ui.timeline.gantt_label_head
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlük · görev'**
+  String get uiTimelineGanttLabelHead;
+
+  /// ui.timeline.gantt_late_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gecikme'**
+  String get uiTimelineGanttLateTail;
+
+  /// ui.timeline.gantt_today_pill
+  ///
+  /// In tr, this message translates to:
+  /// **'bugün'**
+  String get uiTimelineGanttTodayPill;
+
+  /// ui.timeline.gantt_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu filtreyle eşleşen görev yok.'**
+  String get uiTimelineGanttEmpty;
+
+  /// ui.timeline.gantt_legend_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikme'**
+  String get uiTimelineGanttLegendLate;
+
+  /// ui.timeline.gantt_legend_fest
+  ///
+  /// In tr, this message translates to:
+  /// **'Teknofest günleri'**
+  String get uiTimelineGanttLegendFest;
+
+  /// ui.timeline.gantt_card_status
+  ///
+  /// In tr, this message translates to:
+  /// **'durum'**
+  String get uiTimelineGanttCardStatus;
+
+  /// ui.timeline.gantt_card_date
+  ///
+  /// In tr, this message translates to:
+  /// **'tarih'**
+  String get uiTimelineGanttCardDate;
+
+  /// ui.timeline.gantt_card_assignee
+  ///
+  /// In tr, this message translates to:
+  /// **'atanan'**
+  String get uiTimelineGanttCardAssignee;
+
+  /// ui.timeline.gantt_unassigned
+  ///
+  /// In tr, this message translates to:
+  /// **'Atanmamış'**
+  String get uiTimelineGanttUnassigned;
+
+  /// ui.timeline.gantt_days_late
+  ///
+  /// In tr, this message translates to:
+  /// **'gün gecikti'**
+  String get uiTimelineGanttDaysLate;
+
+  /// ui.timeline.gantt_open_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev ayrıntısını aç'**
+  String get uiTimelineGanttOpenTask;
 }
 
 class _AppLocalizationsDelegate

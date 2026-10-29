@@ -1,5 +1,5 @@
 {
-  "$comment": "Dikey Gantt zaman çizelgesi metinleri (features/timeline). ELLE yazılır; make gen ARB'ye birleştirir. Yer tutucu ({ }) yasak: sayılı cümleler parça parça yazılıp sunumda birleştirilir.",
+  "$comment": "Zaman çizelgesi metinleri (features/timeline; dikey Gantt ve tablet yatay Gantt `gantt_*`). ELLE yazılır; make gen ARB'ye birleştirir. Yer tutucu ({ }) yasak: sayılı cümleler parça parça yazılıp sunumda birleştirilir.",
   "texts": {
     "ui.timeline.title": "Zaman çizelgesi",
     "ui.timeline.view": "Görünüm",
@@ -89,6 +89,24 @@
     "ui.timeline.tasks_lc": "görev",
     "ui.timeline.done_lc": "bitti",
     "ui.timeline.late_lc": "gecikmede",
-    "ui.timeline.open": "aç"
+    "ui.timeline.open": "aç",
+    "ui.timeline.gantt_back": "Görevler",
+    "ui.timeline.gantt_back_label": "Geri: Görevler",
+    "ui.timeline.gantt_filter": "Görev filtresi",
+    "ui.timeline.gantt_scale_season": "Sezon",
+    "ui.timeline.gantt_all_coords": "Tüm koordinatörlükler",
+    "ui.timeline.gantt_all_coords_lc": "tüm koordinatörlükler",
+    "ui.timeline.gantt_label_head": "koordinatörlük · görev",
+    "ui.timeline.gantt_late_tail": "gecikme",
+    "ui.timeline.gantt_today_pill": "bugün",
+    "ui.timeline.gantt_empty": "Bu filtreyle eşleşen görev yok.",
+    "ui.timeline.gantt_legend_late": "Gecikme",
+    "ui.timeline.gantt_legend_fest": "Teknofest günleri",
+    "ui.timeline.gantt_card_status": "durum",
+    "ui.timeline.gantt_card_date": "tarih",
+    "ui.timeline.gantt_card_assignee": "atanan",
+    "ui.timeline.gantt_unassigned": "Atanmamış",
+    "ui.timeline.gantt_days_late": "gün gecikti",
+    "ui.timeline.gantt_open_task": "Görev ayrıntısını aç"
   }
 }

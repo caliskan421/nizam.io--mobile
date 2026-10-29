@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/layout/nz_pane.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
@@ -12,6 +13,7 @@ import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
@@ -61,9 +63,15 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     final l = context.l10n;
     final view = ref.watch(activityViewProvider);
     return NzPage.feed(
+      // Tablet sağ bölmesi (işlem geçmişi: gap 20, açıklama -8).
+      paneLead: NizamioSpacing.space3,
       onRetry: _retry,
       topBar: NzTopBar.detail(
         title: l.uiActivityTitle,
+        // Kaynak tablet işlem geçmişi başlığı yapışkan değildir.
+        pinned: !NzTabletMetrics.tabletVisualAt(
+          MediaQuery.sizeOf(context).width,
+        ),
         actions: [
           NzIconButton(
             icon: Icons.download_rounded,
@@ -502,7 +510,7 @@ class _Chip extends StatelessWidget {
                       ),
                     ),
                     const Gap(NizamioSpacing.space1),
-                    Icon(
+                    NzIcon(
                       Icons.close_rounded,
                       size: NizamioSize.iconSizeSm,
                       color: c.textMuted,

@@ -1,22 +1,103 @@
-// NzTextStyles: tasarım stili eşlemesi, yerel yazı tipi dosyaları, copyWith ve tema geçişi.
+// NzTextStyles: tasarım stili eşlemesi, yerel yazı tipi kaydı (pubspec `fonts:`), ağırlık
+// eşlemesi (gerçek dosya çizimi), copyWith ve tema geçişi.
+import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
 import 'package:nizamio/core/ui/theme/nz_text_styles.dart';
 
-/// google_fonts varlık adı: `Geist Mono` + w500 → `GeistMono-Medium.ttf`.
-String _assetFile(String family, FontWeight w) {
-  const names = {400: 'Regular', 500: 'Medium', 600: 'SemiBold', 700: 'Bold'};
-  return 'assets/fonts/${family.replaceAll(' ', '')}-${names[w.value]}.ttf';
+import '../../../support/golden.dart';
+
+/// `FontManifest.json` (pubspec `fonts:`): aile → ağırlık → varlık yolu.
+Future<Map<String, Map<int, String>>> _manifest() async {
+  final raw = json.decode(
+    await rootBundle.loadString('FontManifest.json'),
+  ) as List<dynamic>;
+  return {
+    for (final e in raw.cast<Map<String, dynamic>>())
+      e['family'] as String: {
+        for (final f in (e['fonts'] as List).cast<Map<String, dynamic>>())
+          (f['weight'] as int? ?? 400): f['asset'] as String,
+      },
+  };
+}
+
+/// Tablet tasarımının Google Fonts CSS bağlantısındaki aile → ağırlık kümesi
+/// (`family=Inter:wght@400;500;600;700&family=…`).
+Map<String, Set<int>> _designWeights() {
+  final html = File('docs/design/tablet/12-Tablet.dc.html').readAsStringSync();
+  final href = RegExp(r'fonts\.googleapis\.com/css2\?([^"]+)')
+      .firstMatch(html)!
+      .group(1)!
+      .replaceAll('&amp;', '&');
+  return {
+    for (final m in RegExp(r'family=([^:&]+):wght@([\d;]+)').allMatches(href))
+      m.group(1)!.replaceAll('+', ' '): m
+          .group(2)!
+          .split(';')
+          .map(int.parse)
+          .toSet(),
+  };
+}
+
+/// TrueType tablo dizini → tablo başlangıcı.
+int _table(ByteData d, String tag) {
+  final n = d.getUint16(4);
+  for (var i = 0; i < n; i++) {
+    final r = 12 + 16 * i;
+    if (String.fromCharCodes(d.buffer.asUint8List(r, 4)) == tag) {
+      return d.getUint32(r + 8);
+    }
+  }
+  throw StateError('$tag tablosu yok');
+}
+
+/// Dosyanın kendi beyan ettiği ağırlık (`OS/2.usWeightClass`).
+int _weightClass(ByteData d) => d.getUint16(_table(d, 'OS/2') + 4);
+
+/// Ad tablosundaki tipografik (16) ya da aile (1) adı, Windows/Unicode kaydı.
+String _familyName(ByteData d) {
+  final t = _table(d, 'name');
+  final count = d.getUint16(t + 2);
+  final strings = t + d.getUint16(t + 4);
+  final byId = <int, String>{};
+  for (var i = 0; i < count; i++) {
+    final r = t + 6 + 12 * i;
+    if (d.getUint16(r) != 3 || d.getUint16(r + 2) != 1) continue;
+    final len = d.getUint16(r + 8);
+    final off = strings + d.getUint16(r + 10);
+    byId[d.getUint16(r + 6)] = String.fromCharCodes([
+      for (var j = 0; j < len; j += 2) d.getUint16(off + j),
+    ]);
+  }
+  return byId[16] ?? byId[1]!;
+}
+
+const _sample = 'Görev Şubat İğdır 0123456789 · Kaydet';
+
+/// Metni gerçek rasterle çizer; aynı piksel = aynı yazı tipi dosyası ve aynı sentez.
+Future<Uint8List> _raster(TextStyle style) async {
+  final p = TextPainter(
+    text: TextSpan(text: _sample, style: style),
+    textDirection: TextDirection.ltr,
+  )..layout();
+  final rec = ui.PictureRecorder();
+  p.paint(Canvas(rec), Offset.zero);
+  final img = await rec.endRecording().toImage(
+    p.width.ceil() + 2,
+    p.height.ceil() + 2,
+  );
+  final bytes = await img.toByteData(format: ui.ImageByteFormat.rawRgba);
+  img.dispose();
+  return bytes!.buffer.asUint8List();
 }
 
 void main() {
-  // Yazı tipleri gerçekten varlıktan yüklensin (binding yoksa google_fonts yükleyemez).
   TestWidgetsFlutterBinding.ensureInitialized();
-  setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
   final light = NzTextStyles.fromColors(NizamioColors.light);
   final dark = NzTextStyles.fromColors(NizamioColors.dark);
@@ -37,6 +118,10 @@ void main() {
     'kicker': (light.kicker, NizamioTypography.kicker),
     'monoSm': (light.monoSm, NizamioTypography.monoSm),
     'numeral': (light.numeral, NizamioTypography.kpi),
+    'brand': (light.brand, NizamioTypography.brand),
+    'program': (light.program, NizamioTypography.program),
+    'navLabel': (light.navLabel, NizamioTypography.navLabel),
+    'list': (light.list, NizamioTypography.list),
   };
 
   test('roller tasarım stilinin boyut/ağırlık/satır yüksekliği/harf aralığını taşır', () {
@@ -59,11 +144,8 @@ void main() {
         TextLeadingDistribution.even,
         reason: name,
       );
-      expect(
-        style.fontFamily,
-        startsWith(spec.family.replaceAll(' ', '')),
-        reason: name,
-      );
+      // Mantıksal aile adı (ağırlığa göre adlandırılmış google_fonts ailesi değil).
+      expect(style.fontFamily, spec.family, reason: name);
     }
   });
 
@@ -71,9 +153,9 @@ void main() {
     expect(NizamioTypography.familyDisplay, 'Poppins');
     expect(NizamioTypography.familySans, 'Inter');
     expect(NizamioTypography.familyMono, 'Geist Mono');
-    expect(light.titleLg.fontFamily, startsWith('Poppins'));
-    expect(light.bodyMd.fontFamily, startsWith('Inter'));
-    expect(light.mono.fontFamily, startsWith('GeistMono'));
+    expect(light.titleLg.fontFamily, 'Poppins');
+    expect(light.bodyMd.fontFamily, 'Inter');
+    expect(light.mono.fontFamily, 'Geist Mono');
     expect(
       light.bodyMd.fontFamilyFallback,
       NizamioTypography.familySansFallback,
@@ -92,47 +174,118 @@ void main() {
     expect(light.bodyMd.fontFeatures, isNull);
   });
 
-  test(
-    'her rolün aile+ağırlık dosyası yerel varlıkta var; fazla dosya yok',
-    () {
-      // Tasarımın bütün stilleri (henüz role bağlanmamışlar dahil: m-list/m-tab 500).
-      final needed = {
-        for (final spec in NizamioTypography.styles.values)
-          _assetFile(spec.family, spec.weight),
-      };
-      for (final f in needed) {
-        expect(
-          File(f).existsSync(),
-          isTrue,
-          reason: '$f eksik (sessiz yedek olur)',
+  test('kayıt: ağırlıklar tasarım CSS\'i ile aynı; her token stili kayıtlı; '
+      'dosya ad/ağırlık beyanı kayıtla uyumlu; fazla dosya yok', () async {
+    final manifest = await _manifest();
+    final fonts = {
+      for (final MapEntry(:key, :value) in manifest.entries)
+        if (key != 'MaterialIcons') key: value,
+    };
+
+    expect({
+      for (final e in fonts.entries) e.key: e.value.keys.toSet(),
+    }, _designWeights());
+
+    // Bilinmeyen aile ya da eksik ağırlık sessiz yedeğe (sistem yazı tipi / yakın ağırlık)
+    // düşer; token'daki her stil birebir kayıtlı olmalı.
+    for (final MapEntry(key: name, value: spec)
+        in NizamioTypography.styles.entries) {
+      expect(
+        fonts[spec.family]?.keys,
+        contains(spec.weight.value),
+        reason: '$name: ${spec.family} ${spec.weight.value} kayıtlı değil',
+      );
+    }
+
+    for (final MapEntry(key: family, value: byWeight) in fonts.entries) {
+      for (final MapEntry(key: weight, value: asset) in byWeight.entries) {
+        final d = ByteData.sublistView(File(asset).readAsBytesSync());
+        expect(_weightClass(d), weight, reason: asset);
+        expect(_familyName(d), startsWith(family), reason: asset);
+      }
+      expect(
+        File('assets/fonts/OFL-${family.replaceAll(' ', '')}.txt').existsSync(),
+        isTrue,
+      );
+    }
+
+    final shipped = Directory('assets/fonts')
+        .listSync()
+        .map((e) => e.path)
+        .where((p) => p.endsWith('.ttf'))
+        .toSet();
+    expect(shipped, {
+      for (final w in fonts.values) ...w.values,
+    }, reason: 'yalnız kayıtlı ağırlıklar dağıtılır');
+  });
+
+  testWidgets(
+    'copyWith(fontWeight:) gerçek ağırlık dosyasını çizer (piksel karşılaştırması)',
+    (tester) async {
+      await tester.runAsync(() async {
+        await loadAppFonts();
+        final manifest = await _manifest();
+        // Referans: her dosya tek başına ayrı bir ailede.
+        final probes = <String, String>{};
+        for (final byWeight in manifest.values) {
+          for (final asset in byWeight.values) {
+            final probe = 'probe:$asset';
+            await (FontLoader(probe)..addFont(rootBundle.load(asset))).load();
+            probes[asset] = probe;
+          }
+        }
+
+        final bases = {
+          NizamioTypography.familySans: light.bodyMd,
+          NizamioTypography.familyDisplay: light.titleLg,
+          NizamioTypography.familyMono: light.mono,
+        };
+        final testFont = await _raster(
+          light.bodyMd.copyWith(
+            fontFamily: 'FlutterTest',
+            fontFamilyFallback: [],
+          ),
         );
-      }
-      final shipped = Directory('assets/fonts')
-          .listSync()
-          .map((e) => e.path)
-          .where((p) => p.endsWith('.ttf'))
-          .toSet();
-      expect(shipped, needed, reason: 'yalnız gerekli ağırlıklar dağıtılır');
-      for (final family in ['Inter', 'Poppins', 'GeistMono']) {
-        expect(File('assets/fonts/OFL-$family.txt').existsSync(), isTrue);
-      }
+        for (final MapEntry(key: family, value: base) in bases.entries) {
+          final drawn = <Uint8List>[];
+          for (final MapEntry(key: weight, value: asset)
+              in manifest[family]!.entries) {
+            final w = FontWeight.values.firstWhere((f) => f.value == weight);
+            final actual = await _raster(base.copyWith(fontWeight: w));
+            final expected = await _raster(
+              base.copyWith(
+                fontFamily: probes[asset],
+                fontFamilyFallback: [],
+                fontWeight: w,
+              ),
+            );
+            expect(actual, expected, reason: '$family $weight → $asset');
+            drawn.add(actual);
+          }
+          // Ağırlıklar birbirinden ve test yazı tipinden (yüklenmemiş aile) ayrışır.
+          for (var i = 0; i < drawn.length; i++) {
+            expect(drawn[i], isNot(testFont), reason: family);
+            for (var j = i + 1; j < drawn.length; j++) {
+              expect(drawn[i], isNot(drawn[j]), reason: '$family $i/$j');
+            }
+          }
+        }
+
+        // Kayıtsız ağırlık en yakın gerçek dosyaya düşer (CSS eşlemesi: >500 → önce ağır,
+        // yoksa hafif). Geist Mono 600 tasarım CSS'inde yok → Medium (sentetik kalın yok).
+        expect(
+          await _raster(light.monoSm.copyWith(fontWeight: FontWeight.w600)),
+          await _raster(
+            light.monoSm.copyWith(
+              fontFamily: probes['assets/fonts/GeistMono-Medium.ttf'],
+              fontFamilyFallback: [],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        );
+      });
     },
   );
-
-  testWidgets('bütün roller ağ olmadan yerel varlıktan yüklenir', (
-    tester,
-  ) async {
-    NzTextStyles.fromColors(NizamioColors.dark);
-    Object? error;
-    await tester.runAsync(() async {
-      try {
-        await GoogleFonts.pendingFonts();
-      } on Object catch (e) {
-        error = e;
-      }
-    });
-    expect(error, isNull);
-  });
 
   test('renk varsayılanı moddaki text rengidir', () {
     for (final s in [

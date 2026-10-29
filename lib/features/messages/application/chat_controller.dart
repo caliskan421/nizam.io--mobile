@@ -61,6 +61,11 @@ class ChatController extends _$ChatController {
   @override
   ChatViewState build(String id) => const ChatViewState();
 
+  /// Sohbet açma olayı (kaynak `S_chat.load`): yanıt, düzenleme, atıflar, ek paneli ve sabit
+  /// sırası aynı kimlikte de koşulsuz sıfırlanır. Yalnız açma komutundan çağrılır; yeniden
+  /// boyutlandırma çağırmaz (durum korunur).
+  void open() => state = const ChatViewState();
+
   void reply(String msg) =>
       state = state.copyWith(reply: () => msg, edit: () => null);
 

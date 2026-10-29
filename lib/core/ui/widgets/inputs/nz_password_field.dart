@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../errors/api_error.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../nz_icon.dart';
 import '../nz_size.dart';
 import 'nz_field_errors.dart';
 import 'nz_text_field.dart' show NzFieldLabelAbove;
@@ -153,7 +154,7 @@ class _NzPasswordFieldState extends State<NzPasswordField>
         focusedBorder: widget.invalid ? errorTheme.focusedErrorBorder : null,
         suffixIcon: IconButton(
           tooltip: _visible ? l.uiInputsPasswordHide : l.uiInputsPasswordShow,
-          icon: Icon(_visible ? Icons.visibility_off : Icons.visibility),
+          icon: NzIcon(_visible ? Icons.visibility_off : Icons.visibility),
           onPressed: widget.enabled
               ? () => setState(() => _visible = !_visible)
               : null,

@@ -3,7 +3,9 @@ import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../../layout/nz_pane.dart';
 import '../../theme/nz_motion.dart';
+import '../nz_icon.dart';
 import '../surfaces/nz_reveal.dart';
 import 'nz_switch.dart';
 
@@ -24,6 +26,7 @@ class NzFormRow {
     this.leading,
     this.value,
     this.valueSet = false,
+    this.valueColor,
     this.content,
     this.onTap,
   }) : toggleValue = null,
@@ -41,6 +44,7 @@ class NzFormRow {
        onToggle = onChanged,
        value = null,
        valueSet = false,
+       valueColor = null,
        content = null,
        onTap = null,
        trailing = null,
@@ -55,6 +59,7 @@ class NzFormRow {
        onToggle = null,
        value = null,
        valueSet = false,
+       valueColor = null,
        content = null,
        onTap = null,
        _kind = _RowKind.custom;
@@ -68,6 +73,10 @@ class NzFormRow {
 
   /// Değer seçilmiş → `ink`; değilse `ink-muted` (prototip `data-set`).
   final bool valueSet;
+
+  /// Değer metninin rengi açıkça verilirse [valueSet] kuralının yerine (ör. kaynak "Seç" →
+  /// `accent-text`, bekleyen alan → `ink-faint`).
+  final Color? valueColor;
 
   /// Yerinde açılan içerik (açık/kapalı durumu [NzFormRows.expandedIndex]).
   final Widget? content;
@@ -153,7 +162,7 @@ class _RowView extends StatelessWidget {
         row.leading ??
         (icon == null
             ? null
-            : Icon(icon, size: NizamioSize.iconSizeSm, color: c.textMuted));
+            : NzIcon(icon, size: NizamioSize.iconSizeSm, color: c.textMuted));
     final label = Text(row.label, style: t.bodyMd);
 
     Widget line(List<Widget> trailing) => ConstrainedBox(
@@ -178,6 +187,9 @@ class _RowView extends StatelessWidget {
       ),
     );
 
+    final wide = NzTabletMetrics.tabletVisualAt(
+      MediaQuery.sizeOf(context).width,
+    );
     switch (row._kind) {
       case _RowKind.toggle:
         final onChanged = row.onToggle;
@@ -204,8 +216,17 @@ class _RowView extends StatelessWidget {
           child: line([
             Expanded(child: label),
             const Gap(NizamioSpacing.space3),
-            // Dar ekranda/büyük metinde denetim taşmasın: sığmazsa daralır.
-            Flexible(flex: 3, child: row.trailing!),
+            // Dar ekranda/büyük metinde denetim taşmasın: sığmazsa daralır. Tablette denetim
+            // doğal genişliğinde sağa yaslı (kaynak).
+            Flexible(
+              flex: 3,
+              child: wide
+                  ? Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: row.trailing,
+                    )
+                  : row.trailing!,
+            ),
           ]),
         );
       case _RowKind.value:
@@ -223,7 +244,12 @@ class _RowView extends StatelessWidget {
           child: InkWell(
             onTap: tap,
             child: line([
-              Flexible(flex: 3, child: label),
+              // Tablet genişliğinde değer sağa yaslanır (kaynak `label 1fr · değer`); telefonda
+              // önceki dağılım.
+              if (wide)
+                Expanded(flex: 3, child: label)
+              else
+                Flexible(flex: 3, child: label),
               const Gap(NizamioSpacing.gapMd),
               Expanded(
                 flex: 2,
@@ -235,7 +261,9 @@ class _RowView extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.end,
                         style: t.bodyMd.copyWith(
-                          color: row.valueSet ? c.text : c.textMuted,
+                          color:
+                              row.valueColor ??
+                              (row.valueSet ? c.text : c.textMuted),
                         ),
                       ),
               ),
@@ -245,7 +273,7 @@ class _RowView extends StatelessWidget {
                   turns: expanded ? 0.25 : 0,
                   duration: NzMotion.of(context, _chevDuration),
                   curve: NizamioMotion.easeSpring,
-                  child: Icon(
+                  child: NzIcon(
                     Icons.chevron_right_rounded,
                     size: NizamioSize.iconSizeSm,
                     color: c.textFaint,

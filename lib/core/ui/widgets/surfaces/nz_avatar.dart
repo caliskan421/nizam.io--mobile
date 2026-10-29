@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../nz_icon.dart';
 import '../nz_size.dart';
 
 /// Prototip avatar ölçüleri (`.rp-av--sm` 26 · `.rp-av` 32 · `--lg` 44 · `--xl` 52).
@@ -90,9 +91,8 @@ class NzAvatar extends StatelessWidget {
         .toList();
     if (words.isEmpty) return '';
     String first(String w) => _upperTr(String.fromCharCode(w.runes.first));
-    return words.length == 1
-        ? first(words.first)
-        : first(words.first) + first(words.last);
+    // Kaynak `ini`: ilk iki sözcüğün baş harfi ("Mevlüt Yunus Kayacan" → "MY").
+    return words.take(2).map(first).join();
   }
 
   static String _upperTr(String s) =>
@@ -109,7 +109,7 @@ class NzAvatar extends StatelessWidget {
             maxLines: 1,
             style: style.textStyle.copyWith(color: ink),
           )
-        : Icon(icon, size: style.iconSize, color: ink);
+        : NzIcon(icon, size: style.iconSize, color: ink);
     return Semantics(
       container: true,
       image: true,

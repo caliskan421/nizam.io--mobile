@@ -42,7 +42,10 @@ class TasksPage extends ConsumerStatefulWidget {
 }
 
 class _TasksPageState extends ConsumerState<TasksPage> {
-  final _search = TextEditingController();
+  // Alan denetleyici durumundan başlar (liste sayfası yeniden kurulsa da arama metni kalır).
+  late final _search = TextEditingController(
+    text: ref.read(_provider).filter.query,
+  );
   final _searchFocus = FocusNode();
 
   TasksListControllerProvider get _provider => tasksListControllerProvider(

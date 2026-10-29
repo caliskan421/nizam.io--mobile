@@ -6,6 +6,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
@@ -69,7 +70,7 @@ Future<ChatAction?> showMessageActions(
               padding: const EdgeInsets.fromLTRB(4, 12, 4, 10),
               child: Column(
                 children: [
-                  Icon(icon, size: NizamioSize.iconSizeSm, color: c.text),
+                  NzIcon(icon, size: NizamioSize.iconSizeSm, color: c.text),
                   const Gap(6),
                   Text(label, textAlign: TextAlign.center, style: t.caption),
                 ],
@@ -133,7 +134,7 @@ Future<ChatAction?> showMessageActions(
                           onTap: () => done(ChatActReact(r)),
                           child: SizedBox(
                             height: NizamioSize.tap,
-                            child: Icon(
+                            child: NzIcon(
                               nzReaction(r)
                                   .icon(selected: message.myReaction == r),
                               size: 22,
@@ -158,7 +159,7 @@ Future<ChatAction?> showMessageActions(
                   for (final r in refs)
                     ActionChip(
                       onPressed: () => done(ChatActOpenRef(r)),
-                      avatar: Icon(
+                      avatar: NzIcon(
                         r.kind == ChatRefKind.photo ||
                                 r.kind == ChatRefKind.document
                             ? Icons.download_rounded
@@ -231,7 +232,7 @@ Future<ChatAction?> showMessageActions(
                         ),
                         child: Row(
                           children: [
-                            Icon(
+                            NzIcon(
                               listRows[i].$1,
                               size: NizamioSize.iconSizeSm,
                               color: listRows[i].$4,
@@ -553,7 +554,7 @@ Future<ChatInfoAction?> showChatInfo(
                   ),
                   child: Column(
                     children: [
-                      Icon(icon, size: NizamioSize.iconSizeSm, color: color),
+                      NzIcon(icon, size: NizamioSize.iconSizeSm, color: color),
                       const Gap(6),
                       Text(
                         label,
@@ -638,7 +639,7 @@ Future<ChatInfoAction?> showChatInfo(
                           color: c.surfaceOverlay,
                           borderRadius: BorderRadius.circular(9),
                         ),
-                        child: Icon(
+                        child: NzIcon(
                           refIcon(r.kind),
                           size: 15,
                           color: c.accentText,
@@ -646,7 +647,7 @@ Future<ChatInfoAction?> showChatInfo(
                       ),
                       title: sharedLabel(r),
                       sub: sharedSub(r),
-                      trailing: Icon(
+                      trailing: NzIcon(
                         Icons.chevron_right_rounded,
                         size: 14,
                         color: c.textFaint,

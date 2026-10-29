@@ -6,6 +6,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/tasks_list_controller.dart';
@@ -113,7 +114,7 @@ class _FilterBody extends ConsumerWidget {
                       AnimatedRotation(
                         turns: open ? 0 : -0.25,
                         duration: NzMotion.of(context, NizamioMotion.durPress),
-                        child: Icon(
+                        child: NzIcon(
                           Icons.expand_more_rounded,
                           size: NizamioSize.iconSizeSm,
                           color: c.textFaint,

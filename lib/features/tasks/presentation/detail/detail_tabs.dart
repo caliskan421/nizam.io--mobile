@@ -8,6 +8,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/task_detail_controller.dart';
 import '../../domain/task_catalog.dart';
@@ -420,7 +421,7 @@ class _SubtaskBlock extends StatelessWidget {
                           child: SizedBox.square(
                             dimension: NizamioSize.iconSize,
                             child: u.done
-                                ? Icon(
+                                ? NzIcon(
                                     Icons.check_rounded,
                                     size: NizamioSize.iconSizeSm,
                                     color: c.onPrimary,

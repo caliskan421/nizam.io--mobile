@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
+import '../nz_icon.dart';
 
 /// Hap sekmenin bir öğesi: [label], isteğe bağlı [count] (mono sayaç) ve baştaki [icon]
 /// (ör. Görevler "Liste / Zaman çizelgesi" anahtarı).
@@ -148,7 +149,7 @@ class _Tab extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (icon != null) ...[
-                    Icon(icon, size: NizamioSize.iconSizeSm, color: color),
+                    NzIcon(icon, size: NizamioSize.iconSizeSm, color: color),
                     const Gap(NizamioSpacing.space1 + 1),
                   ],
                   Flexible(

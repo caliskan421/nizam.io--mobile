@@ -15,6 +15,9 @@ abstract interface class NzAppNav {
   void openTasks({NzTaskView? view, List<String> people});
   void openTask(String code);
 
+  /// Takvim modülü.
+  void openCalendar();
+
   /// Zaman çizelgesi; [coordinatorship] verilirse o koordinatörlük seçili açılır.
   void openTimeline({String? coordinatorship});
   void openCoordinatorships();

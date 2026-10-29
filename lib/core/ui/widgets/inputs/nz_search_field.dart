@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../nz_icon.dart';
 import '../nz_size.dart';
 
 /// Arama girdisi (bundle.css `.m-search`; prototip hap biçimi): `bg-surface` dolgu, 1 px
@@ -108,7 +109,7 @@ class _NzSearchFieldState extends State<NzSearchField> {
                 enabledBorder: pill(c.borderControl),
                 disabledBorder: pill(c.border),
                 focusedBorder: pill(c.focusRing, NizamioSize.focusRingWidth),
-                prefixIcon: Icon(
+                prefixIcon: NzIcon(
                   Icons.search,
                   size: NizamioSize.iconSizeSm,
                   color: c.textFaint,
@@ -121,7 +122,7 @@ class _NzSearchFieldState extends State<NzSearchField> {
                     ? null
                     : IconButton(
                         tooltip: l.uiInputsSearchClear,
-                        icon: const Icon(
+                        icon: const NzIcon(
                           Icons.close,
                           size: NizamioSize.iconSizeSm,
                         ),

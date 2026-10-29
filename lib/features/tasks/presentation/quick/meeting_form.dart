@@ -7,6 +7,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/quick_forms_controller.dart';
 import '../../application/task_catalog_controller.dart';
@@ -284,7 +285,7 @@ class _PeopleGroup extends StatelessWidget {
                   AnimatedRotation(
                     turns: open ? 0.5 : 0,
                     duration: NzMotion.of(context, NizamioMotion.durPress),
-                    child: Icon(
+                    child: NzIcon(
                       Icons.expand_more_rounded,
                       size: NizamioSize.iconSizeSm,
                       color: c.textMuted,

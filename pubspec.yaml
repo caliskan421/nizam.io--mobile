@@ -4,9 +4,9 @@ publish_to: 'none'
 version: 0.1.0+1
 
 environment:
-  sdk: ^3.13.2
+  sdk: ^3.13.7
   # Flutter stable pini (CI flutter-version-file bunu okur; yerel sürüm aynı olmalı).
-  flutter: 3.47.2
+  flutter: 3.47.8
 
 dependencies:
   connectivity_plus: ^7.3.2
@@ -32,6 +32,8 @@ dependencies:
   intl: ^0.20.3
   json_annotation: ^4.12.0
   meta: ^1.19.0
+  # Tasarım SVG ikon yolları (parseSvgPathData); flutter_svg değil (yalnız yol verisi).
+  path_drawing: ^1.0.1
   path_provider: ^2.1.6
   retrofit: ^4.10.0
   riverpod_annotation: ^4.0.7
@@ -39,6 +41,8 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
   flutter_lints: ^6.0.0
   build_runner: ^2.16.1
@@ -56,10 +60,35 @@ dev_dependencies:
   go_router_builder: ^4.5.0
 flutter:
   uses-material-design: true
-  # Yazı tipleri google_fonts adlandırmasıyla (Aile-Ağırlık.ttf) uygulamayla gelir; çalışma
-  # anında indirme kapalı (bootstrap). Lisanslar OFL-*.txt.
+  # Lisans metinleri (OFL-*.txt) bootstrap'te lisans sayfasına eklenir.
   assets:
     - assets/fonts/
+  # Yazı tipleri uygulamayla gelir; aile adı token'daki mantıksal ad (NizamioTypography.family*),
+  # her dosya gerçek ağırlığıyla (OS/2 usWeightClass). Ağırlık kümesi tablet tasarımının Google
+  # Fonts CSS'i (docs/design/tablet/12-Tablet.dc.html); test: nz_text_styles_test.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+    - family: Geist Mono
+      fonts:
+        - asset: assets/fonts/GeistMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/GeistMono-Medium.ttf
+          weight: 500
   # gen-l10n (l10n.yaml); çıktı lib/core/i18n/generated/ commit'lenir.
   generate: true
 

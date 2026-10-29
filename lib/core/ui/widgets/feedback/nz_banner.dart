@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../nz_icon.dart';
 
 enum _BannerTone { info, warning, danger, offline }
 
@@ -95,7 +96,7 @@ class NzBanner extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ExcludeSemantics(
-                  child: Icon(icon, color: tone, size: NizamioSpacing.space6),
+                  child: NzIcon(icon, color: tone, size: NizamioSpacing.space6),
                 ),
                 const Gap(NizamioSpacing.space3),
                 Flexible(

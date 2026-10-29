@@ -6,6 +6,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
 import 'home_texts.dart';
@@ -247,7 +248,7 @@ class HomeTeam extends StatelessWidget {
     Widget tile(TeamRole r, Color dot, int n, String role) => NzCard.outlined(
       padding: const EdgeInsets.all(NizamioSpacing.space3),
       onTap: () => onOpen(r),
-      semanticLabel: '$role: $n. ${l.uiHomeOpenList}',
+      semanticLabel: '$n $role. ${l.uiHomeOpenList}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: NizamioSpacing.space1,
@@ -342,7 +343,7 @@ class HomeHistoryCard extends StatelessWidget {
             ),
           ),
           const Gap(NizamioSpacing.space3),
-          Icon(
+          NzIcon(
             Icons.chevron_right_rounded,
             size: NizamioSize.iconSizeSm,
             color: c.textFaint,

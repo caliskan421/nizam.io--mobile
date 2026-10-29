@@ -4,10 +4,12 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/layout/nz_pane.dart';
 import '../../../../core/ui/theme/nz_surfaces.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
@@ -127,7 +129,7 @@ class ChatMessageBody extends StatelessWidget {
             alignment: PlaceholderAlignment.middle,
             child: Padding(
               padding: const EdgeInsets.only(right: 3),
-              child: Icon(refIcon(r.kind), size: 13, color: c.accentText),
+              child: NzIcon(refIcon(r.kind), size: 13, color: c.accentText),
             ),
           ),
         )
@@ -241,7 +243,7 @@ class _PollOption extends StatelessWidget {
                             : Border.all(color: c.borderControl, width: 1.5),
                       ),
                       child: on
-                          ? Icon(
+                          ? NzIcon(
                               Icons.check_rounded,
                               size: 12,
                               color: c.onPrimary,
@@ -303,6 +305,8 @@ class ChatHeader extends StatelessWidget {
     final pins = [for (final id in chat.pins) ?chat.message(id)];
     final pin = pins.isEmpty ? null : pins[pinIndex % pins.length];
     final person = chat.person;
+    // Tablet sağ bölmesinde yığın tek ekransa "Geri" gizli (`[data-canback="false"]`).
+    final showBack = NzPaneScope.showsBack(NzPaneScope.maybeOf(context));
     return MediaQuery.withClampedTextScaling(
       maxScaleFactor: 1.3,
       child: NzGlass(
@@ -315,86 +319,96 @@ class ChatHeader extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Kaynak üst çubuk satırı: `height: 56px; padding: 8px 8px 0` (+1 alt kenar).
               Padding(
                 padding: EdgeInsets.fromLTRB(
-                  NizamioSpacing.space1,
+                  showBack ? NizamioSpacing.space1 : NizamioSpacing.space2,
                   MediaQuery.paddingOf(context).top + NizamioSpacing.space2,
-                  NizamioSpacing.space1,
-                  NizamioSpacing.space1,
+                  NizamioSpacing.space2,
+                  0,
                 ),
-                child: Row(
-                  children: [
-                    NzIconButton(
-                      icon: Icons.arrow_back_ios_new_rounded,
-                      semanticLabel: MaterialLocalizations.of(context)
-                          .backButtonTooltip,
-                      size: NzSize.sm,
-                      onPressed: () => Navigator.maybePop(context),
-                    ),
-                    Expanded(
-                      child: Semantics(
-                        button: true,
-                        label:
-                            '${chat.name} ${chat.group ? l.uiMessagesGroupInfo : l.uiMessagesPersonInfo}',
-                        excludeSemantics: true,
-                        onTap: onInfo,
-                        child: InkWell(
+                child: ConstrainedBox(
+                  // En az 56; büyük metin ölçeğinde taşmadan büyür.
+                  constraints: const BoxConstraints(
+                    minHeight: NizamioSize.appbar,
+                  ),
+                  child: Row(
+                    children: [
+                      if (showBack)
+                        NzIconButton(
+                          icon: Icons.arrow_back_ios_new_rounded,
+                          semanticLabel: MaterialLocalizations.of(context)
+                              .backButtonTooltip,
+                          size: NzSize.sm,
+                          onPressed: () => NzPaneScope.back(context),
+                        ),
+                      Expanded(
+                        child: Semantics(
+                          button: true,
+                          label:
+                              '${chat.name} ${chat.group ? l.uiMessagesGroupInfo : l.uiMessagesPersonInfo}',
+                          excludeSemantics: true,
                           onTap: onInfo,
-                          borderRadius: BorderRadius.circular(
-                            NizamioRadius.tile,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 3),
-                            child: Row(
-                              children: [
-                                NzChatAvatar(
-                                  initials: chatInitials(chat.name),
-                                  group: chat.group,
-                                  tone: person == null
-                                      ? 0
-                                      : personTone(person, chat.name),
-                                  extent: 38,
-                                ),
-                                const Gap(NizamioSpacing.gapMd),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        chat.name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: t.list.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      if (sub.isNotEmpty)
+                          child: InkWell(
+                            onTap: onInfo,
+                            borderRadius: BorderRadius.circular(
+                              NizamioRadius.tile,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 3),
+                              child: Row(
+                                children: [
+                                  NzChatAvatar(
+                                    initials: chatInitials(chat.name),
+                                    group: chat.group,
+                                    tone: person == null
+                                        ? 0
+                                        : personTone(person, chat.name),
+                                    extent: 38,
+                                  ),
+                                  const Gap(NizamioSpacing.gapMd),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
                                         Text(
-                                          sub,
+                                          chat.name,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: t.caption.copyWith(
-                                            color: subAccent
-                                                ? c.accentText
-                                                : c.textMuted,
+                                          style: t.list.copyWith(
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
-                                    ],
+                                        if (sub.isNotEmpty)
+                                          Text(
+                                            sub,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: t.caption.copyWith(
+                                              height: 20 / 12,
+                                              color: subAccent
+                                                  ? c.accentText
+                                                  : c.textMuted,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    NzIconButton(
-                      icon: Icons.search_rounded,
-                      semanticLabel: l.uiMessagesSearchChat,
-                      onPressed: onSearch,
-                    ),
-                  ],
+                      NzIconButton(
+                        icon: Icons.search_rounded,
+                        semanticLabel: l.uiMessagesSearchChat,
+                        size: NzSize.sm,
+                        onPressed: onSearch,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               if (pin != null)
@@ -449,7 +463,7 @@ class ChatHeader extends StatelessWidget {
                               ),
                             ),
                             const Gap(NizamioSpacing.gapMd),
-                            Icon(
+                            NzIcon(
                               Icons.push_pin_outlined,
                               size: NizamioSize.iconSizeSm,
                               color: c.textFaint,
@@ -573,7 +587,7 @@ class ChatAttachPanel extends StatelessWidget {
                     color: tint.withValues(alpha: 0.22),
                     borderRadius: BorderRadius.circular(9),
                   ),
-                  child: Icon(icon, size: 16, color: tint),
+                  child: NzIcon(icon, size: 16, color: tint),
                 ),
                 const Gap(NizamioSpacing.gapMd),
                 Expanded(
@@ -686,7 +700,7 @@ class ChatAttachPanel extends StatelessWidget {
                                   color: c.surfaceOverlay,
                                   borderRadius: BorderRadius.circular(9),
                                 ),
-                                child: Icon(
+                                child: NzIcon(
                                   refIcon(ref.kind),
                                   size: 15,
                                   color: c.accentText,
@@ -715,7 +729,7 @@ class ChatAttachPanel extends StatelessWidget {
                                 ),
                               ),
                               if (view.refs.contains(ref))
-                                Icon(
+                                NzIcon(
                                   Icons.check_rounded,
                                   size: 16,
                                   color: c.accentText,

@@ -2,12 +2,16 @@ import '../../domain/home_dashboard.dart';
 import '../../domain/home_dashboard_repository.dart';
 
 /// GELİŞTİRME ÖRNEĞİ — gerçek servis değildir. Ana sayfa arayüzü backend özeti hazır olmadan
-/// kurulsun diye prototipteki yoğunlukta sabit veri döner; ağ isteği atmaz. Bütün kişi adları
-/// kurmacadır. Sayılar ve durumlar iş kuralı değildir (sunucu hesaplar). Bileşim kökünde
+/// kurulsun diye prototipteki yoğunlukta sabit veri döner; ağ isteği atmaz. Kişi adları ve e-posta
+/// tasarım prototipinin örnek kişileri (12-Tablet `RP_PEOPLE`; gerçek hesap kaydı değildir). Sayılar ve durumlar iş kuralı değildir (sunucu hesaplar). Bileşim kökünde
 /// (`scope_module.dart`) tek yerde bağlanır; backend bağlanınca yalnız o kayıt değişir.
 final class SampleHomeDashboardRepository implements HomeDashboardRepository {
+  /// [now] verilmezse prototip çapası (`RP_TODAY` 2026-10-21; görev kataloğu örneğiyle aynı
+  /// gün): "son işlem bugün 14:27" örnek kataloğun bugünüyle tutarlı kalır.
   SampleHomeDashboardRepository({DateTime Function()? now})
-    : _now = now ?? DateTime.now;
+    : _now = now ?? _prototypeToday;
+
+  static DateTime _prototypeToday() => DateTime(2026, 10, 21);
 
   final DateTime Function() _now;
 
@@ -16,9 +20,12 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
     final now = _now();
     final today = DateTime(now.year, now.month, now.day);
     return HomeDashboard(
-      greetingName: 'Elif Nur Karaağaçlı',
+      greetingName: 'Muhammet Ali Çalışkan',
       greetingRole: TeamRole.admin,
-      greetingEmail: 'elif.karaagacli@ornek.test',
+      greetingEmail: 'macaliskan@gmail.com',
+      // Prototip çekmece sezon kartı.
+      demoProgramName: 'Şanlıurfa Teknofest',
+      demoProgramYear: 2026,
       tasks: const TaskTotals(
         total: 79,
         done: 39,
@@ -27,10 +34,16 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
         late: 15,
         awaitingApproval: 3,
       ),
-      team: const TeamTotals(admins: 2, coordinators: 15, members: 3),
+      // Prototip ekip satırı "18 kullanıcı" (rol kutuları 2 · 15 · 3).
+      team: const TeamTotals(
+        admins: 2,
+        coordinators: 15,
+        members: 3,
+        userCount: 18,
+      ),
       lastActivity: LastActivity(
         at: today.add(const Duration(hours: 14, minutes: 27)),
-        actorName: 'Deniz Aydemir',
+        actorName: 'Abdullah Ateş',
       ),
       coordinatorships: const [
         CoordinatorshipSummary(
@@ -46,7 +59,7 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
         CoordinatorshipSummary(
           code: 'ALT',
           name: 'Altyapı ve tesisat',
-          leads: ['Deniz Aydemir', 'Kaan Erol'],
+          leads: ['Abdullah Ateş', 'Ali Avcı'],
           todo: 2,
           inProgress: 3,
           inReview: 0,
@@ -56,7 +69,7 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
         CoordinatorshipSummary(
           code: 'ULA',
           name: 'Ulaşım planlama',
-          leads: ['Selim Ergin'],
+          leads: ['Salih Özer'],
           todo: 0,
           inProgress: 3,
           inReview: 0,
@@ -66,7 +79,7 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
         CoordinatorshipSummary(
           code: 'EĞİ',
           name: 'Eğitim ve Arge',
-          leads: ['Melis Koçer'],
+          leads: ['Merve Koçoğlu'],
           todo: 3,
           inProgress: 2,
           inReview: 0,
@@ -76,7 +89,7 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
         CoordinatorshipSummary(
           code: 'ELE',
           name: 'Elektrik ve enerji',
-          leads: ['Rıza Karaca'],
+          leads: ['Reha Koçak'],
           todo: 2,
           inProgress: 0,
           inReview: 1,
@@ -86,7 +99,7 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
         CoordinatorshipSummary(
           code: 'FUA',
           name: 'Fuar',
-          leads: ['Sinan Sağır'],
+          leads: ['Salim Sağlık'],
           todo: 1,
           inProgress: 0,
           inReview: 1,
@@ -96,7 +109,7 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
         CoordinatorshipSummary(
           code: 'MEK',
           name: 'Mekanik sistemler',
-          leads: ['Mert Yavuz Kaynak', 'Okan Haspolat'],
+          leads: ['Mevlüt Yunus Kayacan', 'Osman Hansu'],
           todo: 0,
           inProgress: 1,
           inReview: 0,
@@ -106,7 +119,7 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
         CoordinatorshipSummary(
           code: 'OPE',
           name: 'Operasyon',
-          leads: ['Yusuf Çevik'],
+          leads: ['Yunus Çiftçioğlu'],
           todo: 2,
           inProgress: 2,
           inReview: 0,
@@ -116,7 +129,7 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
         CoordinatorshipSummary(
           code: 'SAT',
           name: 'Satış ve pazarlama',
-          leads: ['Ceren Çetinkaya'],
+          leads: ['Büşra Çiftçioğlu'],
           todo: 3,
           inProgress: 0,
           inReview: 0,
@@ -126,7 +139,7 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
         CoordinatorshipSummary(
           code: 'MİM',
           name: 'Mimari tasarım',
-          leads: ['Nazlı Özkan'],
+          leads: ['Esra Özkafa'],
           todo: 1,
           inProgress: 1,
           inReview: 0,
@@ -136,7 +149,7 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
         CoordinatorshipSummary(
           code: 'SİS',
           name: 'Sistem koordinatörlüğü',
-          leads: ['Elif Nur Karaağaçlı', 'Mert Yavuz Kaynak'],
+          leads: ['Muhammet Ali Çalışkan', 'Mevlüt Yunus Kayacan'],
           todo: 1,
           inProgress: 1,
           inReview: 0,

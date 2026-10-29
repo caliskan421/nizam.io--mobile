@@ -4,10 +4,12 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/layout/nz_pane.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/tasks_list_controller.dart';
 import '../../domain/task_catalog.dart';
@@ -46,6 +48,9 @@ List<Widget> tasksListChildren(
   final byCoord = state.sort == TaskSort.coordinatorship;
   final list = r.tasks;
   final chips = _chips(context, catalog, state, ctl);
+  final tablet = NzTabletMetrics.tabletVisualAt(
+    MediaQuery.sizeOf(context).width,
+  );
 
   final rows = <Widget>[];
   Widget item(Key key, Widget child) => Padding(
@@ -105,7 +110,8 @@ List<Widget> tasksListChildren(
         ],
       ),
     ],
-    const Gap(NizamioSpacing.space3),
+    // Tablet kaynağı: bölümler arası 20; başlık (44) sonrası `gap 20 − margin 8` = 12.
+    Gap(tablet ? NizamioSpacing.space5 : NizamioSpacing.space3),
     Row(
       children: [
         Expanded(
@@ -124,7 +130,7 @@ List<Widget> tasksListChildren(
         ),
       ],
     ),
-    const Gap(NizamioSpacing.space1),
+    Gap(tablet ? NizamioSpacing.space3 : NizamioSpacing.space1),
     ...rows,
     if (list.isEmpty)
       NzEmptyState(
@@ -206,14 +212,23 @@ class TaskViewGrid extends StatelessWidget {
       selected: v == selected,
       onTap: () => onSelected(v),
     );
-    Widget row(List<(TaskView, int)> items) => IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: NizamioSpacing.space2,
-        children: [
-          for (final (v, flex) in items) Expanded(flex: flex, child: tile(v)),
-        ],
-      ),
+    // Kaynak ızgarası `repeat(4, minmax(0, 1fr))` + `gap: 8px`; "Tümü" 2 sütun kaplar
+    // (genişlik 2 sütun + 1 boşluk; oranla paylaştırma değil).
+    const gap = NizamioSpacing.space2;
+    Widget row(List<(TaskView, int)> items) => LayoutBuilder(
+      builder: (context, box) {
+        final col = (box.maxWidth - 3 * gap) / 4;
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: gap,
+            children: [
+              for (final (v, span) in items)
+                SizedBox(width: span * col + (span - 1) * gap, child: tile(v)),
+            ],
+          ),
+        );
+      },
     );
     return Semantics(
       container: true,
@@ -238,6 +253,12 @@ class TaskViewGrid extends StatelessWidget {
   }
 }
 
+// Tablet kaynak görünüm kutucuğu: sayı `rp-num` 22/26, etiket 11/14.
+const _tileNum = 22.0;
+const _tileNumLine = 26.0;
+const _tileLabel = 11.0;
+const _tileLabelLine = 14.0;
+
 class _ViewTile extends StatelessWidget {
   const _ViewTile({
     required this.view,
@@ -253,6 +274,9 @@ class _ViewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tablet = NzTabletMetrics.tabletVisualAt(
+      MediaQuery.sizeOf(context).width,
+    );
     final c = context.colors;
     final t = context.text;
     final l = context.l10n;
@@ -287,12 +311,27 @@ class _ViewTile extends StatelessWidget {
               spacing: NizamioSpacing.space1,
               children: [
                 NzDot(color: viewDot(view, c)),
-                Text('$count', style: t.titleSm.copyWith(color: numColor)),
+                Text(
+                  '$count',
+                  style: tablet
+                      ? t.titleSm.copyWith(
+                          fontSize: _tileNum,
+                          height: _tileNumLine / _tileNum,
+                          color: numColor,
+                        )
+                      : t.titleSm.copyWith(color: numColor),
+                ),
                 Text(
                   l.viewLabel(view),
-                  maxLines: 2,
+                  maxLines: tablet ? 1 : 2,
                   overflow: TextOverflow.ellipsis,
-                  style: t.caption.copyWith(color: c.textMuted),
+                  style: tablet
+                      ? t.caption.copyWith(
+                          fontSize: _tileLabel,
+                          height: _tileLabelLine / _tileLabel,
+                          color: c.textMuted,
+                        )
+                      : t.caption.copyWith(color: c.textMuted),
                 ),
               ],
             ),
@@ -410,7 +449,7 @@ class TaskSortMenu extends StatelessWidget {
                 AnimatedRotation(
                   turns: controller.isOpen ? 0.5 : 0,
                   duration: NzMotion.of(context, NizamioMotion.durPress),
-                  child: Icon(
+                  child: NzIcon(
                     Icons.expand_more_rounded,
                     size: NizamioSize.iconSizeSm,
                     color: c.textMuted,
@@ -457,7 +496,7 @@ class TaskSortMenu extends StatelessWidget {
                             context,
                             NizamioMotion.durPress,
                           ),
-                          child: Icon(
+                          child: NzIcon(
                             Icons.arrow_upward_rounded,
                             size: NizamioSize.iconSizeSm,
                             color: c.accentText,
@@ -465,7 +504,7 @@ class TaskSortMenu extends StatelessWidget {
                         ),
                       ),
                     )
-                  : Icon(
+                  : NzIcon(
                       Icons.check_rounded,
                       size: NizamioSize.iconSizeSm,
                       color: c.accentText,
@@ -536,7 +575,7 @@ class _GroupHead extends StatelessWidget {
                 AnimatedRotation(
                   turns: open ? 0 : -0.25,
                   duration: NzMotion.of(context, NizamioMotion.durPress),
-                  child: Icon(
+                  child: NzIcon(
                     Icons.expand_more_rounded,
                     size: NizamioSize.iconSizeSm,
                     color: c.textMuted,
@@ -583,7 +622,7 @@ class TaskCardView extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: NizamioSize.iconSizeSm, color: c.textMuted),
+          NzIcon(icon, size: NizamioSize.iconSizeSm, color: c.textMuted),
           const Gap(NizamioSpacing.space1),
           Text('$n', style: t.caption.copyWith(color: c.textMuted)),
         ],

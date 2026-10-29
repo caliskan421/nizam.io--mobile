@@ -15,6 +15,8 @@ import 'package:nizamio/core/theme/generated/tokens.gen.dart';
 import 'package:nizamio/core/ui/extensions/context_ext.dart';
 import 'package:nizamio/core/ui/theme/app_theme.dart';
 
+import '../../../../support/golden.dart';
+
 const sheetKey = ValueKey('feedback-sheet');
 const sheetWidth = 1024.0;
 const compactWidth = 360.0;
@@ -34,8 +36,12 @@ final matrixCells = <SheetCell>[
       for (final scale in [1.0, 2.0]) SheetCell(dark, width, scale),
 ];
 
-void setUpFonts() =>
-    setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
+/// Uygulama yazı tiplerini (pubspec `fonts:`, gerçek ağırlık dosyaları) FontManifest'ten yükler;
+/// yoksa test motoru her aileyi `FlutterTest` yazı tipiyle çizer (ölçü/piksel kanıtı anlamsız).
+void setUpFonts() => setUpAll(() async {
+  GoogleFonts.config.allowRuntimeFetching = false;
+  await loadAppFonts();
+});
 
 // Tema yazı tipi ayarından sonra (setUpFonts) ilk kullanımda kurulur.
 ThemeData? _lightCache;

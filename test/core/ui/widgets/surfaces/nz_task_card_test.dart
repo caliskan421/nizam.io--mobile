@@ -136,7 +136,7 @@ void main() {
             title: 'Hidrofor',
             statusLabel: 'Devam ediyor',
             statusTone: NzTone.progress,
-            assigneeText: 'Kerem Özdal',
+            assigneeText: 'Kadir Özbek',
             badge: '41 gün gecikti',
             trailing: [
               NzStatusLabel.badge(

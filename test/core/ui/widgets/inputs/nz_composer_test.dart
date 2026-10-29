@@ -38,7 +38,7 @@ void main() {
     await t.pumpWidget(build());
     await t.tap(find.byIcon(Icons.arrow_upward_rounded));
     expect(sent, 1);
-    await t.tap(find.byIcon(Icons.add_rounded));
+    await t.tap(find.byIcon(Icons.attach_file_rounded));
     expect(attach, 1);
     // Klavye boşluğu: çubuk alt kenardan en az 300 yukarıda.
     final bottom = t.getBottomLeft(find.byType(TextField)).dy;
@@ -74,7 +74,7 @@ void main() {
               ),
               NzComposerContext(
                 icon: Icons.reply_rounded,
-                title: 'Kerem Özdal kişisine yanıt',
+                title: 'Kadir Özbek kişisine yanıt',
                 text: 'Pompalar sahada',
                 cancelLabel: 'Vazgeç',
                 onCancel: () => cancelled++,

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/ui/page/nz_app_nav.dart';
 import '../../features/activity/activity.dart';
 import '../../features/archive/archive.dart';
+import '../../features/calendar/calendar.dart';
 import '../../features/coordinatorships/coordinatorships.dart';
 import '../../features/identity/identity.dart';
 import '../../features/messages/messages.dart';
@@ -12,6 +13,7 @@ import '../../features/server/server.dart';
 import '../../features/tasks/tasks.dart';
 import '../../features/timeline/timeline.dart';
 import 'shell.dart';
+import 'split.dart';
 import 'transitions.dart';
 
 part 'routes.g.dart';
@@ -75,6 +77,12 @@ class ScopeRoute extends NzRouteData with $ScopeRoute {
 // (Koordinatörlükler, Arşiv, Mesajlar — üçü aynı dalda, dal yığını son konumu korur). Dal
 // kökleri sekme geçişiyle ([NzTabRouteData]), alt sayfalar itme geçişiyle açılır. Zaman
 // çizelgesi ve sohbet kabuk dışındadır: alt menü gizlenir.
+//
+// Tablet (split.dart): aynı ağaç; dal kökü çift bölmede sağ bölmenin tabanını kurar, liste
+// sayfası sol bölmededir. Kabuk rotaları modüller arası sağ yığını yalnız kimlik taşıyan
+// `trail` sorgusuyla taşır (`/coordinatorships/ALT?trail=folder:ALT`); her genişlikte en
+// üstteki kayıt çizilir, geri izi kısaltır ([PaneStack]). Sohbet tablette Mesajlar dalında
+// açılır (`/messages/:id`); telefonda kabuk dışı `/chat/:id` kalır. Takvim modül dalındadır.
 
 @TypedStatefulShellRoute<AppShellRoute>(
   branches: [
@@ -104,7 +112,11 @@ class ScopeRoute extends NzRouteData with $ScopeRoute {
           path: '/archive',
           routes: [TypedGoRoute<ArchiveFolderRoute>(path: ':code')],
         ),
-        TypedGoRoute<MessagesRoute>(path: '/messages'),
+        TypedGoRoute<MessagesRoute>(
+          path: '/messages',
+          routes: [TypedGoRoute<MessagesChatRoute>(path: ':id')],
+        ),
+        TypedGoRoute<CalendarRoute>(path: '/calendar'),
       ],
     ),
   ],
@@ -120,6 +132,7 @@ class AppShellRoute extends StatefulShellRouteData {
   ) => NzAdaptiveShell(
     navigationShell: navigationShell,
     location: state.uri.path,
+    query: state.uri.queryParametersAll,
   );
 }
 
@@ -136,22 +149,33 @@ class ModulesBranch extends StatefulShellBranchData {
 }
 
 class HomeRoute extends NzTabRouteData with $HomeRoute {
-  const HomeRoute();
+  const HomeRoute({this.trail = const []});
+
+  /// Sağ yığın izi (yalnız kimlik; split.dart).
+  final List<String> trail;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const HomePage();
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    base: SplitRoot(
+      master: (_) => homeMaster(),
+      detail: (_) => const ActivityPage(),
+    ),
+  );
 }
 
 class HistoryRoute extends NzRouteData with $HistoryRoute {
-  const HistoryRoute();
+  const HistoryRoute({this.trail = const []});
+
+  final List<String> trail;
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      const ActivityPage();
+      PaneStack(trail: trail, base: const ActivityPage());
 }
 
 class TasksRoute extends NzTabRouteData with $TasksRoute {
-  const TasksRoute({this.view, this.people = const []});
+  const TasksRoute({this.view, this.people = const [], this.trail = const []});
 
   /// Başlangıç görünümü (`NzTaskView.name`); yalnız ad taşınır.
   final String? view;
@@ -159,80 +183,167 @@ class TasksRoute extends NzTabRouteData with $TasksRoute {
   /// Başlangıç kişi süzgeci (kişi kimlikleri).
   final List<String> people;
 
+  final List<String> trail;
+
   @override
-  Widget build(BuildContext context, GoRouterState state) => TasksPage(
-    view: NzTaskView.values.where((v) => v.name == view).firstOrNull,
-    people: people,
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    base: SplitRoot(
+      master: (_) => tasksMaster(view: initialView, people: people),
+      detail: (c) => _keyedTaskDetailPage(splitBaseId(c, PaneKind.task)),
+    ),
   );
+
+  NzTaskView? get initialView =>
+      NzTaskView.values.where((v) => v.name == view).firstOrNull;
 }
 
 class TaskDetailRoute extends NzRouteData with $TaskDetailRoute {
-  const TaskDetailRoute({required this.code});
+  const TaskDetailRoute({required this.code, this.trail = const []});
 
   /// Görev kodu (`ALT-7`); veri controller'dan yüklenir.
   final String code;
 
+  final List<String> trail;
+
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      TaskDetailPage(code: code);
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    // Kimlik değişince yeni ekran (prototip `load(id)`); aynı kimlikte State kalır.
+    base: TaskDetailPage(key: ValueKey(code), code: code),
+  );
+}
+
+class CalendarRoute extends NzTabRouteData with $CalendarRoute {
+  const CalendarRoute({this.trail = const []});
+
+  final List<String> trail;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    base: SplitRoot(
+      master: (c) => calendarMaster((day) => showMeetingSheet(c, date: day)),
+      detail: (_) => const CalendarEmptyDetail(),
+    ),
+  );
 }
 
 class CoordinatorshipsRoute extends NzTabRouteData with $CoordinatorshipsRoute {
-  const CoordinatorshipsRoute();
+  const CoordinatorshipsRoute({this.trail = const []});
+
+  final List<String> trail;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const CoordinatorshipsPage();
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    base: SplitRoot(
+      master: (_) => coordinatorshipsMaster(),
+      detail: (c) => _keyedCoordinatorshipPage(splitBaseId(c, PaneKind.coord)),
+    ),
+  );
 }
 
 class CoordinatorshipRoute extends NzRouteData with $CoordinatorshipRoute {
-  const CoordinatorshipRoute({required this.code});
+  const CoordinatorshipRoute({required this.code, this.trail = const []});
 
   final String code;
 
+  final List<String> trail;
+
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      CoordinatorshipPage(code: code);
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    // Kimlik değişince yeni ekran (prototip `load(id)`); aynı kimlikte State kalır.
+    base: CoordinatorshipPage(key: ValueKey(code), code: code),
+  );
 }
 
 class ArchiveRoute extends NzTabRouteData with $ArchiveRoute {
-  const ArchiveRoute();
+  const ArchiveRoute({this.trail = const []});
+
+  final List<String> trail;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const ArchivePage();
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    base: SplitRoot(
+      master: (_) => archiveMaster(),
+      detail: (c) => _keyedArchiveFolderPage(splitBaseId(c, PaneKind.folder)),
+    ),
+  );
 }
 
 class ArchiveFolderRoute extends NzRouteData with $ArchiveFolderRoute {
-  const ArchiveFolderRoute({required this.code});
+  const ArchiveFolderRoute({required this.code, this.trail = const []});
 
   final String code;
 
+  final List<String> trail;
+
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      ArchiveFolderPage(code: code);
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    // Kimlik değişince yeni ekran (prototip `load(id)`); aynı kimlikte State kalır.
+    base: ArchiveFolderPage(key: ValueKey(code), code: code),
+  );
 }
 
 class MessagesRoute extends NzTabRouteData with $MessagesRoute {
-  const MessagesRoute();
+  const MessagesRoute({this.trail = const []});
+
+  final List<String> trail;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const MessagesPage();
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    base: SplitRoot(
+      master: (_) => messagesMaster(),
+      detail: (c) => _keyedChatPage(splitBaseId(c, PaneKind.chat)),
+    ),
+  );
+}
+
+/// Tablet sağ bölmesinde sohbet (prototip `messages` / `chat`). Telefonda sohbet kabuk dışı
+/// [ChatRoute] ile açılır; bu yola yalnız tabletten daralınca düşülür (alt menü gizli).
+class MessagesChatRoute extends NzRouteData with $MessagesChatRoute {
+  const MessagesChatRoute({required this.id, this.trail = const []});
+
+  final String id;
+
+  final List<String> trail;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    // Kimlik değişince yeni ekran (prototip `load(id)`); aynı kimlikte State kalır.
+    base: ChatPage(key: ValueKey(id), id: id),
+  );
 }
 
 // ---- Kabuk dışı (alt menü gizli) ----
 
+/// Zaman çizelgesi. Telefonda dikey çizelge (kabuk dışı tam ekran); ray genişliğinde yatay
+/// çizelge ray yanında tam genişlik (prototip `full='gantt'`: ray kalır, liste ve ayrıntı
+/// gizli). Geri tam ekranı kapatır (önceki modül ve sağ yığın döner); çizelgeden görev →
+/// Görevler modülü + görev ayrıntısı (geri çizelgeye dönmez).
 @TypedGoRoute<TimelineRoute>(path: '/timeline')
-class TimelineRoute extends NzRouteData with $TimelineRoute {
+class TimelineRoute extends NzTabRouteData with $TimelineRoute {
   const TimelineRoute({this.coord});
 
   /// Başlangıçta seçili koordinatörlük kodu.
   final String? coord;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      TimelinePage(coordinatorship: coord);
+  Widget build(BuildContext context, GoRouterState state) => TimelineHost(
+    phone: (_) => TimelinePage(coordinatorship: coord),
+    tablet: (c) => HorizontalTimelinePage(
+      coordinatorship: coord,
+      onBack: () => closeTimeline(c),
+      onOpenTask: (code) =>
+          GoRouter.of(c).go(TaskDetailRoute(code: code).location),
+    ),
+  );
 }
 
 @TypedGoRoute<ChatRoute>(path: '/chat/:id')
@@ -267,3 +378,12 @@ List<RouteBase> buildAppRoutes({List<RouteBase> featureRoutes = const []}) => [
   ...$appRoutes,
   ...featureRoutes,
 ];
+
+// Kök varsayılan ayrıntıları kimlikle anahtarlı (son açılan kimlik değişince yeni ekran).
+Widget _keyedTaskDetailPage(String code) =>
+    TaskDetailPage(key: ValueKey(code), code: code);
+Widget _keyedCoordinatorshipPage(String code) =>
+    CoordinatorshipPage(key: ValueKey(code), code: code);
+Widget _keyedArchiveFolderPage(String code) =>
+    ArchiveFolderPage(key: ValueKey(code), code: code);
+Widget _keyedChatPage(String id) => ChatPage(key: ValueKey(id), id: id);

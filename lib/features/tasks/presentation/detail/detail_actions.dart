@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/task_catalog_controller.dart';
@@ -116,7 +117,7 @@ class TaskDetailActions {
       builder: (sheet) => [
         _ListOption(
           label: l.uiTasksEditTask,
-          leading: const Icon(
+          leading: const NzIcon(
             Icons.edit_outlined,
             size: NizamioSize.iconSizeSm,
           ),
@@ -127,7 +128,10 @@ class TaskDetailActions {
         ),
         _ListOption(
           label: l.uiTasksCopy,
-          leading: const Icon(Icons.copy_rounded, size: NizamioSize.iconSizeSm),
+          leading: const NzIcon(
+            Icons.copy_rounded,
+            size: NizamioSize.iconSizeSm,
+          ),
           onTap: () {
             Navigator.of(sheet).pop();
             final newCode = _ctl.copy(l.uiTasksCopySuffix);
@@ -142,7 +146,7 @@ class TaskDetailActions {
         _ListOption(
           label: l.uiTasksDeleteTask,
           color: c.danger,
-          leading: Icon(
+          leading: NzIcon(
             Icons.delete_outline_rounded,
             size: NizamioSize.iconSizeSm,
             color: c.danger,
@@ -386,7 +390,7 @@ class _ListOption extends StatelessWidget {
                 ],
                 if (selected) ...[
                   const Gap(NizamioSpacing.space2),
-                  Icon(
+                  NzIcon(
                     Icons.check_rounded,
                     size: NizamioSize.iconSizeSm,
                     color: c.accentText,

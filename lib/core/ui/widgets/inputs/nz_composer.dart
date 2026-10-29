@@ -6,6 +6,7 @@ import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
 import '../../theme/nz_surfaces.dart';
+import '../nz_icon.dart';
 import '../surfaces/nz_glass.dart';
 
 /// Sohbetin altındaki yazma alanı (tasarım sistemi `components/Composer`, `.m-composer`):
@@ -109,7 +110,8 @@ class NzComposer extends StatelessWidget {
           children: [
             ...header,
             Padding(
-              padding: EdgeInsets.fromLTRB(8, 6, 8, 6 + bottomInset),
+              // Kaynak: `padding: 8px 10px 26px` (alt pay sayfadan [bottomInset]).
+              padding: EdgeInsets.fromLTRB(10, 8, 10, 6 + bottomInset),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -126,8 +128,9 @@ class NzComposer extends StatelessWidget {
                       child: _Circle(
                         fill: attachOpen ? c.surfaceOverlay : null,
                         onTap: onAttach,
-                        child: Icon(
-                          Icons.add_rounded,
+                        // Kaynak ek düğmesi ataçtır (`attach_file` yolu).
+                        child: NzIcon(
+                          Icons.attach_file_rounded,
                           color: attachOpen ? c.accentText : c.textMuted,
                         ),
                       ),
@@ -149,7 +152,7 @@ class NzComposer extends StatelessWidget {
                       child: _Circle(
                         fill: canSend ? c.primary : c.surfaceRaised,
                         onTap: canSend ? onSend : null,
-                        child: Icon(
+                        child: NzIcon(
                           Icons.arrow_upward_rounded,
                           size: NizamioSize.iconSizeSm + 2,
                           color: canSend ? c.onPrimary : c.textFaint,
@@ -227,7 +230,7 @@ class NzRefChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: c.accentText),
+          NzIcon(icon, size: 13, color: c.accentText),
           const Gap(6),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 180),
@@ -248,7 +251,11 @@ class NzRefChip extends StatelessWidget {
               radius: NizamioSpacing.space4,
               child: Padding(
                 padding: const EdgeInsets.all(6),
-                child: Icon(Icons.close_rounded, size: 12, color: c.textMuted),
+                child: NzIcon(
+                  Icons.close_rounded,
+                  size: 12,
+                  color: c.textMuted,
+                ),
               ),
             ),
           ),
@@ -287,7 +294,7 @@ class NzComposerContext extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Center(
-              child: Icon(
+              child: NzIcon(
                 icon,
                 size: NizamioSize.iconSizeSm,
                 color: c.accentText,
@@ -328,7 +335,7 @@ class NzComposerContext extends StatelessWidget {
             IconButton(
               tooltip: cancelLabel,
               onPressed: onCancel,
-              icon: Icon(
+              icon: NzIcon(
                 Icons.close_rounded,
                 size: NizamioSize.iconSizeSm,
                 color: c.textMuted,

@@ -10,6 +10,7 @@ import '../core/providers.dart';
 import '../core/security/privacy_mask.dart';
 import '../core/ui/page/nz_app_nav.dart';
 import '../core/ui/theme/app_theme.dart';
+import 'orientation_policy.dart';
 import 'router/app_nav.dart';
 import 'router/router.dart';
 
@@ -26,7 +27,7 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
   late final ValueNotifier<AppPhase> _phase = ValueNotifier(
     ref.read(appPhaseProvider),
   );
-  // Prototip modu yalnız dev flavor'da: oturumsuz, örnek veriyle ana sayfadan açılır.
+  // Prototip modu yalnız dev flavor'da: login ile açılır, boş giriş örnek ana sayfaya geçer.
   late final GoRouter _router = createRouter(
     _phase,
     devPrototype: ref.read(flavorProvider) == Flavor.dev,
@@ -62,11 +63,13 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       routerConfig: _router,
-      builder: (context, child) => NzAppNavScope(
-        nav: _nav,
-        child: PrivacyMask(
-          controller: _mask,
-          child: child ?? const SizedBox.shrink(),
+      builder: (context, child) => OrientationPolicyHost(
+        child: NzAppNavScope(
+          nav: _nav,
+          child: PrivacyMask(
+            controller: _mask,
+            child: child ?? const SizedBox.shrink(),
+          ),
         ),
       ),
     );

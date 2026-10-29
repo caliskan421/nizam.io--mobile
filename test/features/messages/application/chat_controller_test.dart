@@ -50,4 +50,30 @@ void main() {
     expect(c.read(p).reply, isNull);
     expect(c.read(p).refs, isEmpty);
   });
+
+  test(
+    'open: aynı kimlikte de yazma bağlamını koşulsuz sıfırlar (S_chat.load)',
+    () {
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final p = chatControllerProvider('gen');
+      c.listen(p, (_, _) {});
+      c.read(p.notifier)
+        ..reply('m1')
+        ..toggleRef(const ChatRef(ChatRefKind.task, 'ALT-7'))
+        ..toggleAttach()
+        ..setAttachQuery('hid')
+        ..nextPin()
+        ..addDevice(photo: true)
+        ..edit('m6')
+        ..open();
+      final v = c.read(p);
+      expect(
+        (v.reply, v.edit, v.attach, v.attachQuery),
+        (null, null, null, ''),
+      );
+      expect(v.refs, isEmpty);
+      expect((v.pin, v.devices), (0, 0));
+    },
+  );
 }

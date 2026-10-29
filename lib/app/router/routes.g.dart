@@ -214,6 +214,18 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
           path: '/messages',
           hasOverriddenOnExit: false,
           factory: $MessagesRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: ':id',
+              hasOverriddenOnExit: false,
+              factory: $MessagesChatRoute._fromState,
+            ),
+          ],
+        ),
+        GoRouteData.$route(
+          path: '/calendar',
+          hasOverriddenOnExit: false,
+          factory: $CalendarRoute._fromState,
         ),
       ],
     ),
@@ -225,10 +237,22 @@ extension $AppShellRouteExtension on AppShellRoute {
 }
 
 mixin $HomeRoute on GoRouteData {
-  static HomeRoute _fromState(GoRouterState state) => const HomeRoute();
+  static HomeRoute _fromState(GoRouterState state) => HomeRoute(
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
+
+  HomeRoute get _self => this as HomeRoute;
 
   @override
-  String get location => GoRouteData.$location('/home');
+  String get location => GoRouteData.$location(
+    '/home',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -245,10 +269,22 @@ mixin $HomeRoute on GoRouteData {
 }
 
 mixin $HistoryRoute on GoRouteData {
-  static HistoryRoute _fromState(GoRouterState state) => const HistoryRoute();
+  static HistoryRoute _fromState(GoRouterState state) => HistoryRoute(
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
+
+  HistoryRoute get _self => this as HistoryRoute;
 
   @override
-  String get location => GoRouteData.$location('/home/history');
+  String get location => GoRouteData.$location(
+    '/home/history',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -270,6 +306,9 @@ mixin $TasksRoute on GoRouteData {
     people:
         state.uri.queryParametersAll['people']?.map((e) => e).toList() ??
         const [],
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
   );
 
   TasksRoute get _self => this as TasksRoute;
@@ -281,6 +320,8 @@ mixin $TasksRoute on GoRouteData {
       if (_self.view != null) 'view': _self.view,
       if (!_$iterablesEqual(_self.people, const []))
         'people': _self.people.map((e) => e).toList(),
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
     },
   );
 
@@ -299,14 +340,23 @@ mixin $TasksRoute on GoRouteData {
 }
 
 mixin $TaskDetailRoute on GoRouteData {
-  static TaskDetailRoute _fromState(GoRouterState state) =>
-      TaskDetailRoute(code: state.pathParameters['code']!);
+  static TaskDetailRoute _fromState(GoRouterState state) => TaskDetailRoute(
+    code: state.pathParameters['code']!,
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
 
   TaskDetailRoute get _self => this as TaskDetailRoute;
 
   @override
-  String get location =>
-      GoRouteData.$location('/tasks/${Uri.encodeComponent(_self.code)}');
+  String get location => GoRouteData.$location(
+    '/tasks/${Uri.encodeComponent(_self.code)}',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -324,10 +374,22 @@ mixin $TaskDetailRoute on GoRouteData {
 
 mixin $CoordinatorshipsRoute on GoRouteData {
   static CoordinatorshipsRoute _fromState(GoRouterState state) =>
-      const CoordinatorshipsRoute();
+      CoordinatorshipsRoute(
+        trail:
+            state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+            const [],
+      );
+
+  CoordinatorshipsRoute get _self => this as CoordinatorshipsRoute;
 
   @override
-  String get location => GoRouteData.$location('/coordinatorships');
+  String get location => GoRouteData.$location(
+    '/coordinatorships',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -345,13 +407,22 @@ mixin $CoordinatorshipsRoute on GoRouteData {
 
 mixin $CoordinatorshipRoute on GoRouteData {
   static CoordinatorshipRoute _fromState(GoRouterState state) =>
-      CoordinatorshipRoute(code: state.pathParameters['code']!);
+      CoordinatorshipRoute(
+        code: state.pathParameters['code']!,
+        trail:
+            state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+            const [],
+      );
 
   CoordinatorshipRoute get _self => this as CoordinatorshipRoute;
 
   @override
   String get location => GoRouteData.$location(
     '/coordinatorships/${Uri.encodeComponent(_self.code)}',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
   );
 
   @override
@@ -369,10 +440,22 @@ mixin $CoordinatorshipRoute on GoRouteData {
 }
 
 mixin $ArchiveRoute on GoRouteData {
-  static ArchiveRoute _fromState(GoRouterState state) => const ArchiveRoute();
+  static ArchiveRoute _fromState(GoRouterState state) => ArchiveRoute(
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
+
+  ArchiveRoute get _self => this as ArchiveRoute;
 
   @override
-  String get location => GoRouteData.$location('/archive');
+  String get location => GoRouteData.$location(
+    '/archive',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -390,13 +473,23 @@ mixin $ArchiveRoute on GoRouteData {
 
 mixin $ArchiveFolderRoute on GoRouteData {
   static ArchiveFolderRoute _fromState(GoRouterState state) =>
-      ArchiveFolderRoute(code: state.pathParameters['code']!);
+      ArchiveFolderRoute(
+        code: state.pathParameters['code']!,
+        trail:
+            state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+            const [],
+      );
 
   ArchiveFolderRoute get _self => this as ArchiveFolderRoute;
 
   @override
-  String get location =>
-      GoRouteData.$location('/archive/${Uri.encodeComponent(_self.code)}');
+  String get location => GoRouteData.$location(
+    '/archive/${Uri.encodeComponent(_self.code)}',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -413,10 +506,87 @@ mixin $ArchiveFolderRoute on GoRouteData {
 }
 
 mixin $MessagesRoute on GoRouteData {
-  static MessagesRoute _fromState(GoRouterState state) => const MessagesRoute();
+  static MessagesRoute _fromState(GoRouterState state) => MessagesRoute(
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
+
+  MessagesRoute get _self => this as MessagesRoute;
 
   @override
-  String get location => GoRouteData.$location('/messages');
+  String get location => GoRouteData.$location(
+    '/messages',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $MessagesChatRoute on GoRouteData {
+  static MessagesChatRoute _fromState(GoRouterState state) => MessagesChatRoute(
+    id: state.pathParameters['id']!,
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
+
+  MessagesChatRoute get _self => this as MessagesChatRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/messages/${Uri.encodeComponent(_self.id)}',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $CalendarRoute on GoRouteData {
+  static CalendarRoute _fromState(GoRouterState state) => CalendarRoute(
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
+
+  CalendarRoute get _self => this as CalendarRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/calendar',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -1,4 +1,4 @@
-// Örnek görev verisi (prototip 76 görev; kişi adları kurmaca). Elle düzenlenebilir; üretim
+// Örnek görev verisi (prototip 76 görev; kişi adları prototip `RP_PEOPLE`). Elle düzenlenebilir; üretim
 // verisi değildir. Gecikme günleri örnek "bugün"e (2026-10-21) göre hesaplanmış sabittir.
 // ignore_for_file: lines_longer_than_80_chars
 part of 'sample_task_catalog_repository.dart';
@@ -6,30 +6,30 @@ part of 'sample_task_catalog_repository.dart';
 final _today = DateTime(2026, 10, 21);
 
 const _people = <Person>[
-  Person(id: 'ma', name: 'Elif Nur Karaağaçlı', role: PersonRole.admin),
-  Person(id: 'my', name: 'Mert Yavuz Kaynak', role: PersonRole.admin),
-  Person(id: 'aa', name: 'Deniz Aydemir', role: PersonRole.coordinator),
-  Person(id: 'av', name: 'Kaan Erol', role: PersonRole.coordinator),
-  Person(id: 'ko', name: 'Kerem Özdal', role: PersonRole.coordinator),
-  Person(id: 'oh', name: 'Okan Haspolat', role: PersonRole.coordinator),
-  Person(id: 'so', name: 'Selim Ergin', role: PersonRole.coordinator),
-  Person(id: 'mk', name: 'Melis Koçer', role: PersonRole.coordinator),
-  Person(id: 'rk', name: 'Rıza Karaca', role: PersonRole.coordinator),
-  Person(id: 'yc', name: 'Yusuf Çevik', role: PersonRole.coordinator),
-  Person(id: 'bc', name: 'Ceren Çetinkaya', role: PersonRole.coordinator),
-  Person(id: 'eo', name: 'Nazlı Özkan', role: PersonRole.coordinator),
-  Person(id: 'ss', name: 'Sinan Sağır', role: PersonRole.coordinator),
-  Person(id: 'bk', name: 'Bengü Kılınç', role: PersonRole.member),
-  Person(id: 'gn', name: 'Gamze Nur Uslu', role: PersonRole.member),
-  Person(id: 'mey', name: 'Meltem Yalın', role: PersonRole.member),
+  Person(id: 'ma', name: 'Muhammet Ali Çalışkan', role: PersonRole.admin),
+  Person(id: 'my', name: 'Mevlüt Yunus Kayacan', role: PersonRole.admin),
+  Person(id: 'aa', name: 'Abdullah Ateş', role: PersonRole.coordinator),
+  Person(id: 'av', name: 'Ali Avcı', role: PersonRole.coordinator),
+  Person(id: 'ko', name: 'Kadir Özbek', role: PersonRole.coordinator),
+  Person(id: 'oh', name: 'Osman Hansu', role: PersonRole.coordinator),
+  Person(id: 'so', name: 'Salih Özer', role: PersonRole.coordinator),
+  Person(id: 'mk', name: 'Merve Koçoğlu', role: PersonRole.coordinator),
+  Person(id: 'rk', name: 'Reha Koçak', role: PersonRole.coordinator),
+  Person(id: 'yc', name: 'Yunus Çiftçioğlu', role: PersonRole.coordinator),
+  Person(id: 'bc', name: 'Büşra Çiftçioğlu', role: PersonRole.coordinator),
+  Person(id: 'eo', name: 'Esra Özkafa', role: PersonRole.coordinator),
+  Person(id: 'ss', name: 'Salim Sağlık', role: PersonRole.coordinator),
+  Person(id: 'bk', name: 'Bahar Kılıç', role: PersonRole.member),
+  Person(id: 'gn', name: 'Gökçe Nur Usta', role: PersonRole.member),
+  Person(id: 'mey', name: 'Melek Yaşar', role: PersonRole.member),
 ];
 
 const _coordinatorships = <CoordinatorshipRef>[
   CoordinatorshipRef(
     code: 'ALT',
     name: 'Altyapı ve tesisat',
-    leads: ['aa', 'av'],
-    members: ['ko'],
+    leads: ['aa', 'av', 'ko'],
+    members: [],
   ),
   CoordinatorshipRef(
     code: 'MEK',

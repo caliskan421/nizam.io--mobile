@@ -365,13 +365,17 @@ class MeetingFormController extends _$MeetingFormController {
     ref.read(taskCatalogControllerProvider).value?.today ?? DateTime.now(),
   );
 
-  void prepare({String? coordinatorship}) {
+  /// [date] verilirse (takvimden "seçili güne toplantı planla") tarih ve ay o güne gelir.
+  void prepare({String? coordinatorship, DateTime? date}) {
     var f = state.copyWith(pane: () => null, error: () => null);
     if (coordinatorship != null) {
       f = f.copyWith(
         mode: MeetingMode.coordinatorships,
         coordinatorships: [coordinatorship],
       );
+    }
+    if (date != null) {
+      f = f.copyWith(date: _day(date), month: DateTime(date.year, date.month));
     }
     state = f;
   }

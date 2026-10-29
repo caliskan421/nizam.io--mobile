@@ -4,6 +4,8 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/layout/nz_pane.dart';
+import '../../../core/ui/motion/page_content_entrance.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
@@ -12,6 +14,7 @@ import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../application/task_catalog_controller.dart';
 import '../application/task_detail_controller.dart';
@@ -85,6 +88,8 @@ class TaskDetailPage extends ConsumerWidget {
     final data = catalog.value;
     final task = data?.task(code);
     return NzPage.feed(
+      // Tablet sağ bölmesi (görev ayrıntısı: gap 20, başlık -8).
+      paneLead: NizamioSpacing.space3,
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       topBar: NzTopBar.detail(
         code: code,
@@ -188,20 +193,23 @@ class _TabContent extends ConsumerWidget {
     );
     return Padding(
       padding: const EdgeInsets.only(top: NizamioSpacing.space2),
-      child: switch (tab) {
-        TaskDetailTab.summary => DetailSummary(task: task, catalog: catalog),
-        TaskDetailTab.subtasks => DetailSubtasks(
-          task: task,
-          catalog: catalog,
-          actions: actions,
-        ),
-        TaskDetailTab.files => DetailFiles(task: task, catalog: catalog),
-        TaskDetailTab.notes => DetailNotes(
-          task: task,
-          catalog: catalog,
-          actions: actions,
-        ),
-      },
+      child: PageContentEntrance(
+        key: ValueKey(tab),
+        child: switch (tab) {
+          TaskDetailTab.summary => DetailSummary(task: task, catalog: catalog),
+          TaskDetailTab.subtasks => DetailSubtasks(
+            task: task,
+            catalog: catalog,
+            actions: actions,
+          ),
+          TaskDetailTab.files => DetailFiles(task: task, catalog: catalog),
+          TaskDetailTab.notes => DetailNotes(
+            task: task,
+            catalog: catalog,
+            actions: actions,
+          ),
+        },
+      ),
     );
   }
 }
@@ -290,7 +298,12 @@ class _Body extends StatelessWidget {
             onApprove: actions.approveRequest,
           ),
         ],
-        const Gap(NizamioSpacing.space5),
+        // Sekme şeridi kaynakta `gap 20` + `margin-top: -6px` (tablet).
+        Gap(
+          NzTabletMetrics.tabletVisualAt(MediaQuery.sizeOf(context).width)
+              ? NizamioSpacing.space5 - _tabsPullUp
+              : NizamioSpacing.space5,
+        ),
       ],
     );
   }
@@ -350,7 +363,7 @@ class _Picker extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Icon(
+                  NzIcon(
                     Icons.expand_more_rounded,
                     size: NizamioSize.iconSizeSm,
                     color: c.textMuted,
@@ -493,3 +506,7 @@ class _RequestCard extends StatelessWidget {
     );
   }
 }
+
+/// Kaynak sekme şeridinin üst negatif payı (`margin: -6px …`) + hap şeridinin 48'lik dokunma
+/// kutusundaki 2 px dış payı (görünen hap kaynakla aynı yükseklikte başlar).
+const _tabsPullUp = 8.0;

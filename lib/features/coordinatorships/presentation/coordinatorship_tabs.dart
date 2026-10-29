@@ -6,6 +6,7 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/theme/nz_motion.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
 import '../domain/coordinatorship_overview.dart';
@@ -183,7 +184,7 @@ class CoordGeneralTab extends StatelessWidget {
                   onTap: onTap,
                   child: Row(
                     children: [
-                      Icon(
+                      NzIcon(
                         icon,
                         size: NizamioSize.iconSizeSm,
                         color: c.textMuted,
@@ -200,7 +201,7 @@ class CoordGeneralTab extends StatelessWidget {
                       const Gap(NizamioSpacing.space2),
                       Text(note, style: t.caption.copyWith(color: c.textMuted)),
                       const Gap(NizamioSpacing.space2),
-                      Icon(
+                      NzIcon(
                         Icons.chevron_right_rounded,
                         size: NizamioSize.iconSizeSm,
                         color: c.textFaint,
@@ -463,7 +464,7 @@ class CoordTeamTab extends StatelessWidget {
                       turns: membersOpen ? 0.5 : 0,
                       duration: NzMotion.of(context, NizamioMotion.durSheet),
                       curve: NizamioMotion.easeSpring,
-                      child: Icon(
+                      child: NzIcon(
                         Icons.keyboard_arrow_down_rounded,
                         size: NizamioSize.iconSizeSm,
                         color: c.textFaint,

@@ -71,7 +71,7 @@ void main() {
     ctl.toggleSearch();
     ctl.setQuery('hidrofor');
     expect(_q(c, container.read(p)).tasks.map((t) => t.code), ['ALT-7']);
-    ctl.setQuery('kerem özdal');
+    ctl.setQuery('kadir özbek');
     expect(_q(c, container.read(p)).tasks, isNotEmpty);
     ctl.toggleSearch();
     expect(container.read(p).filter.query, '');

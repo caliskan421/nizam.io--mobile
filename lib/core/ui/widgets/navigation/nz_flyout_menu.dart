@@ -5,6 +5,7 @@ import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
 import '../../theme/nz_surfaces.dart';
+import '../nz_icon.dart';
 import '../surfaces/nz_glass.dart';
 import 'nz_floating_nav.dart';
 
@@ -249,7 +250,7 @@ class _Row extends StatelessWidget {
                       width: NizamioSpacing.space6,
                       child: Center(
                         child: icon != null
-                            ? Icon(
+                            ? NzIcon(
                                 icon,
                                 size: NizamioSize.iconSizeSm,
                                 color: item.accent

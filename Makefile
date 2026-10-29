@@ -2,7 +2,7 @@
 # Ağır koşumlar (gerçek backend entegrasyonu) yerelde YALNIZ sıra kilidiyle başlatılır:
 #   ../program/araclar/verify-sirasi.sh "$PWD" integration
 
-DART_DIRS := lib test tool test_integration
+DART_DIRS := lib test tool test_integration integration_test
 
 .PHONY: integration integration-test gen gen-check deps format format-check analyze boundaries test coverage test-presence golden golden-update lint verify build-dev-apk build-prod-apk branding
 

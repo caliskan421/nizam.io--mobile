@@ -2,7 +2,7 @@ import '../../domain/chat.dart';
 
 /// GELİŞTİRME ÖRNEĞİ — gerçek servis değildir. Mesajlar ekranı backend hazır olmadan kurulsun
 /// diye prototipteki 8 sohbeti döner; ağ isteği atmaz. Kişi kimlikleri görev kataloğunun
-/// kurmaca kişileridir (`ma` = oturumdaki kişi); mesajlardaki adlar da kurmacadır. "Bugün"
+/// prototip kişileridir (`ma` = oturumdaki kişi); mesajlar prototip `RP_CHAT` içeriğidir. "Bugün"
 /// örnek kataloğun günüdür (2026-10-21).
 final class SampleChatRepository implements ChatRepository {
   const SampleChatRepository();
@@ -104,8 +104,11 @@ List<Chat> _chats() => [
     name: 'Koordinatörler',
     group: true,
     members: 15,
-    unread: 1,
-    mention: true,
+    // Prototip kurucusu varsayılan sağ sohbeti (`chat.load('koord')`) baştan yükler: 1 okunmamış
+    // mesaj okunmuş sayılır, anma kalkar, ayırıcı o mesajın önünde kalır (`_newBefore`); ray
+    // rozeti 4. Gerçek okuma komutu değişmez.
+    unread: 0,
+    unreadMarker: 'k2',
     messages: [
       ChatMessage(
         id: 'k1',
@@ -120,7 +123,7 @@ List<Chat> _chats() => [
         from: 'rk',
         at: _today(9, 51),
         text:
-            '@Elif Nur trafo onayı bugün bekleniyor, son durumu #ELE-4 '
+            '@Muhammet Ali trafo onayı bugün bekleniyor, son durumu #ELE-4 '
             'kartına yazdım.',
       ),
     ],
@@ -171,7 +174,7 @@ List<Chat> _chats() => [
   ),
   Chat(
     id: 'kadir',
-    name: 'Kerem Özdal',
+    name: 'Kadir Özbek',
     person: 'ko',
     online: true,
     messages: [
@@ -194,7 +197,7 @@ List<Chat> _chats() => [
   ),
   Chat(
     id: 'bahar',
-    name: 'Bengü Kılınç',
+    name: 'Bahar Kılıç',
     person: 'bk',
     unread: 1,
     lastSeen: _today(9, 41),
@@ -245,7 +248,7 @@ List<Chat> _chats() => [
   ),
   Chat(
     id: 'reha',
-    name: 'Rıza Karaca',
+    name: 'Reha Koçak',
     person: 'rk',
     lastSeen: _yesterday(18, 30),
     messages: [

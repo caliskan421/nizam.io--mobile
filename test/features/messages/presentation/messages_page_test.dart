@@ -62,19 +62,20 @@ void main() {
     );
     expect(
       find.text(
-        'Rıza: @Elif Nur trafo onayı bugün bekleniyor, son durumu #ELE-4 kartına yazdım.',
+        'Reha: @Muhammet Ali trafo onayı bugün bekleniyor, son durumu #ELE-4 kartına yazdım.',
       ),
       findsOneWidget,
     );
-    expect(find.text('@'), findsOneWidget);
+    // Kaynak başlangıcı: koord okunmuş (anma işareti yok).
+    expect(find.text('@'), findsNothing);
     await _tap(tester, find.text('Koordinatörler'));
     expect(nav.calls, ['chat:koord']);
   });
 
-  testWidgets('süzgeç: okunmamış 5, kişiler 3; arama', (tester) async {
+  testWidgets('süzgeç: okunmamış 4, kişiler 3; arama', (tester) async {
     await _open(tester);
     await _tap(tester, find.text(_l.uiMessagesFilterUnread));
-    expect(find.byType(NzChatRow), findsNWidgets(5));
+    expect(find.byType(NzChatRow), findsNWidgets(4));
     await _tap(tester, find.text(_l.uiMessagesFilterPeople));
     expect(find.byType(NzChatRow), findsNWidgets(3));
     await _tap(tester, find.text(_l.uiMessagesFilterAll));
@@ -115,7 +116,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.text(_l.uiMessagesUnreadOnly));
     await settle(tester);
-    expect(find.byType(NzChatRow), findsNWidgets(5));
+    expect(find.byType(NzChatRow), findsNWidgets(4));
     h.read(shellReselectEventsProvider.notifier).fire(MessagesPage.shellTab);
     await settle(tester);
     await tester.tap(find.text(_l.uiMessagesMarkAllRead));

@@ -1,8 +1,8 @@
 {
   "$comment": "Girdi kiti ve doğrulayıcı metinleri. ELLE yazılır; make gen ARB'ye birleştirir.",
   "texts": {
-    "ui.inputs.password_show": "Parolayı göster",
-    "ui.inputs.password_hide": "Parolayı gizle",
+    "ui.inputs.password_show": "Şifreyi göster",
+    "ui.inputs.password_hide": "Şifreyi gizle",
     "ui.inputs.search": "Ara",
     "ui.inputs.search_clear": "Aramayı temizle",
     "ui.inputs.select_placeholder": "Seçin",

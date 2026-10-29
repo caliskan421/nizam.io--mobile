@@ -80,7 +80,7 @@ void main() {
     expect(find.text(_l.uiTasksRequestTitle), findsOneWidget);
     expect(find.text('31.10.2026'), findsOneWidget);
     expect(find.text('+51 ${_l.uiTasksDaysLc}'), findsOneWidget);
-    expect(find.text('Deniz Aydemir'), findsOneWidget);
+    expect(find.text('Abdullah Ateş'), findsOneWidget);
     expect(find.text('10.06.2026'), findsOneWidget);
     expect(find.text('22.06 → 10.09.2026'), findsOneWidget);
     await tester.ensureVisible(find.text('41 ${_l.uiTasksEvLateTail}'));
@@ -149,7 +149,7 @@ void main() {
       findsOneWidget,
     );
     await _tap(tester, find.byIcon(Icons.notifications_none_rounded));
-    expect(find.text('${_l.uiTasksTReminded} · Kerem Özdal'), findsOneWidget);
+    expect(find.text('${_l.uiTasksTReminded} · Kadir Özbek'), findsOneWidget);
   });
 
   testWidgets('alt görev, kanıt yükleme ve not sekmeleri', (tester) async {

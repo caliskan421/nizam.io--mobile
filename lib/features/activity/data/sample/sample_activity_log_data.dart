@@ -1,4 +1,4 @@
-// Örnek işlem geçmişi (prototip `logic_history.js`, 38 kayıt; kişi adları kurmaca, kimlikler
+// Örnek işlem geçmişi (prototip `logic_history.js`, 38 kayıt; kişi adları prototip `RP_PEOPLE`, kimlikler
 // görev kataloğuyla aynı). Elle düzenlenebilir; üretim verisi değildir.
 // ignore_for_file: lines_longer_than_80_chars
 part of 'sample_activity_log_repository.dart';
@@ -31,7 +31,7 @@ final _entries = <ActivityEntry>[
     'Paket arıtma tesisi teslim takvimi',
     'Haftalık koordinasyon toplantısı',
     'aa',
-    'Deniz Aydemir',
+    'Abdullah Ateş',
   ),
   _e(
     DateTime(2026, 10, 21, 14, 25),
@@ -40,7 +40,7 @@ final _entries = <ActivityEntry>[
     'Jeneratör yakıt tankı için ikinci bir tedarikçiden teklif alalım. Mevcut teklif teslim süresini 3 hafta gösteriyor, fuar öncesine yetişmeyebilir.',
     'Haftalık koordinasyon toplantısı',
     'my',
-    'Mert Yavuz Kaynak',
+    'Mevlüt Yunus Kayacan',
   ),
   _e(
     DateTime(2026, 10, 21, 14, 22),
@@ -49,7 +49,7 @@ final _entries = <ActivityEntry>[
     'Trafo projesi için TEDAŞ onayı bekleniyor. Onay gelince saha pano montajı hemen başlayabilir.',
     'Haftalık koordinasyon toplantısı',
     'rk',
-    'Rıza Karaca',
+    'Reha Koçak',
   ),
   _e(
     DateTime(2026, 10, 21, 14, 20),
@@ -58,7 +58,7 @@ final _entries = <ActivityEntry>[
     'Trafo ve dağıtım projesi onay süreci',
     'Haftalık koordinasyon toplantısı',
     'rk',
-    'Rıza Karaca',
+    'Reha Koçak',
   ),
   _e(
     DateTime(2026, 10, 21, 14, 18),
@@ -67,7 +67,7 @@ final _entries = <ActivityEntry>[
     'İletim hattı test raporunun imzalı hâli arşive yüklenmeli, şu an yalnız taslak var.',
     'Haftalık koordinasyon toplantısı',
     'av',
-    'Kaan Erol',
+    'Ali Avcı',
   ),
   _e(
     DateTime(2026, 10, 21, 14, 15),
@@ -76,7 +76,7 @@ final _entries = <ActivityEntry>[
     'Hidrofor pompalarının teslimi 28 Ekim’e kaydı. Montaj ekibi 29–31 Ekim arasında sahada olacak; tarih talebi bu takvime göre güncellendi.',
     'Haftalık koordinasyon toplantısı',
     'ko',
-    'Kerem Özdal',
+    'Kadir Özbek',
   ),
   _e(
     DateTime(2026, 10, 21, 14, 15),
@@ -85,7 +85,7 @@ final _entries = <ActivityEntry>[
     'Haftalık koordinasyon toplantısı',
     'ALT-16 · Hidrofor montaj ekibinin saha planı',
     'ko',
-    'Kerem Özdal',
+    'Kadir Özbek',
   ),
   _e(
     DateTime(2026, 10, 21, 14, 12),
@@ -94,7 +94,7 @@ final _entries = <ActivityEntry>[
     'Hidrofor sistemi tarih talebi (ALT-7)',
     'Haftalık koordinasyon toplantısı',
     'ko',
-    'Kerem Özdal',
+    'Kadir Özbek',
   ),
   _e(
     DateTime(2026, 10, 21, 14, 4),
@@ -103,7 +103,7 @@ final _entries = <ActivityEntry>[
     'Geçen haftanın açık işleri ve gecikmeler',
     'Haftalık koordinasyon toplantısı',
     'ma',
-    'Elif Nur Karaağaçlı',
+    'Muhammet Ali Çalışkan',
   ),
   _e(
     DateTime(2026, 10, 21, 11, 49),
@@ -112,7 +112,7 @@ final _entries = <ActivityEntry>[
     'Chrome · Android · 85.105.17.20',
     'Hesap',
     'so',
-    'Selim Ergin',
+    'Salih Özer',
   ),
   _e(
     DateTime(2026, 10, 21, 11, 45),
@@ -121,7 +121,7 @@ final _entries = <ActivityEntry>[
     'Chrome · Android · 85.105.25.20',
     'Hesap',
     'ss',
-    'Sinan Sağır',
+    'Salim Sağlık',
   ),
   _e(
     DateTime(2026, 10, 21, 11, 21),
@@ -130,7 +130,7 @@ final _entries = <ActivityEntry>[
     'Chrome · Android · 85.105.13.20',
     'Hesap',
     'av',
-    'Kaan Erol',
+    'Ali Avcı',
   ),
   _e(
     DateTime(2026, 10, 21, 11, 17),
@@ -139,7 +139,7 @@ final _entries = <ActivityEntry>[
     'Chrome · Android · 85.105.21.20',
     'Hesap',
     'mey',
-    'Meltem Yalın',
+    'Melek Yaşar',
   ),
   _e(
     DateTime(2026, 10, 21, 10, 42),
@@ -148,7 +148,7 @@ final _entries = <ActivityEntry>[
     'Edge · Windows · 85.105.16.20',
     'Hesap',
     'oh',
-    'Okan Haspolat',
+    'Osman Hansu',
   ),
   _e(
     DateTime(2026, 10, 21, 10, 38),
@@ -157,7 +157,7 @@ final _entries = <ActivityEntry>[
     'Edge · Windows · 85.105.24.20',
     'Hesap',
     'rk',
-    'Rıza Karaca',
+    'Reha Koçak',
   ),
   _e(
     DateTime(2026, 10, 21, 10, 14),
@@ -166,7 +166,7 @@ final _entries = <ActivityEntry>[
     'Edge · Windows · 85.105.12.20',
     'Hesap',
     'aa',
-    'Deniz Aydemir',
+    'Abdullah Ateş',
   ),
   _e(
     DateTime(2026, 10, 21, 10, 10),
@@ -175,7 +175,7 @@ final _entries = <ActivityEntry>[
     'Edge',
     'Hesap',
     'gn',
-    'Gamze Nur Uslu',
+    'Gökçe Nur Usta',
   ),
   _e(
     DateTime(2026, 10, 21, 10, 2),
@@ -184,7 +184,7 @@ final _entries = <ActivityEntry>[
     '',
     'Genel',
     'ma',
-    'Elif Nur Karaağaçlı',
+    'Muhammet Ali Çalışkan',
   ),
   _e(
     DateTime(2026, 10, 21, 9, 59),
@@ -202,7 +202,7 @@ final _entries = <ActivityEntry>[
     '',
     'Koordinatörler',
     'rk',
-    'Rıza Karaca',
+    'Reha Koçak',
   ),
   _e(
     DateTime(2026, 10, 21, 9, 40),
@@ -211,7 +211,7 @@ final _entries = <ActivityEntry>[
     '',
     'Genel',
     'bk',
-    'Bengü Kılınç',
+    'Bahar Kılıç',
   ),
   _e(
     DateTime(2026, 10, 21, 9, 40),
@@ -220,7 +220,7 @@ final _entries = <ActivityEntry>[
     '',
     'İDA-9 · Konaklama',
     'bk',
-    'Bengü Kılınç',
+    'Bahar Kılıç',
   ),
   _e(
     DateTime(2026, 10, 21, 9, 38),
@@ -229,7 +229,7 @@ final _entries = <ActivityEntry>[
     '',
     'Genel',
     'bk',
-    'Bengü Kılınç',
+    'Bahar Kılıç',
   ),
   _e(
     DateTime(2026, 10, 21, 9, 35),
@@ -238,7 +238,7 @@ final _entries = <ActivityEntry>[
     'Safari',
     'Hesap',
     'my',
-    'Mert Yavuz Kaynak',
+    'Mevlüt Yunus Kayacan',
   ),
   _e(
     DateTime(2026, 10, 20, 18, 20),
@@ -247,7 +247,7 @@ final _entries = <ActivityEntry>[
     'Vardiya taslağı arşivde, herkes kendi saatini kontrol etsin.',
     'Genel',
     'yc',
-    'Yusuf Çevik',
+    'Yunus Çiftçioğlu',
   ),
   _e(
     DateTime(2026, 10, 20, 18, 5),
@@ -256,7 +256,7 @@ final _entries = <ActivityEntry>[
     '@herkes Fuar haftası çalışma saatleri: 27 Ekim–2 Kasım, 08:00–20:00. Vardiya çizelgesi #OPE-2 kartında.',
     'Genel',
     'ma',
-    'Elif Nur Karaağaçlı',
+    'Muhammet Ali Çalışkan',
   ),
   _e(
     DateTime(2026, 10, 20, 17, 30),
@@ -265,7 +265,7 @@ final _entries = <ActivityEntry>[
     'Otopark zemin etüdü sonuçları geldi, #ULA-1 için tarih talebi açtım.',
     'Koordinatörler',
     'so',
-    'Selim Ergin',
+    'Salih Özer',
   ),
   _e(
     DateTime(2026, 10, 20, 16, 40),
@@ -274,7 +274,7 @@ final _entries = <ActivityEntry>[
     'Konaklama listesini attım, Genel’e de koydum.',
     'Birebir konuşma',
     'bk',
-    'Bengü Kılınç',
+    'Bahar Kılıç',
   ),
   _e(
     DateTime(2026, 10, 20, 16, 10),
@@ -283,7 +283,7 @@ final _entries = <ActivityEntry>[
     'Portal eğitim videoları hazır, #SİS-1 kartına ekledim.',
     'Sistem koordinatörlüğü',
     'my',
-    'Mert Yavuz Kaynak',
+    'Mevlüt Yunus Kayacan',
   ),
   _e(
     DateTime(2026, 10, 20, 16, 5),
@@ -292,7 +292,7 @@ final _entries = <ActivityEntry>[
     'Otel blok rezervasyonu geç yapıldığı için gönüllülerin bir kısmı 25 km uzaktaki otelde kalacak; ek servis ihtiyacı doğdu.',
     'İDA-9',
     'bk',
-    'Bengü Kılınç',
+    'Bahar Kılıç',
   ),
   _e(
     DateTime(2026, 10, 20, 10, 31),
@@ -301,7 +301,7 @@ final _entries = <ActivityEntry>[
     'Materyal baskısı için matbaadan 3 gün süre istendi.',
     'Gönüllü eğitim programı son kontrol',
     'gn',
-    'Gamze Nur Uslu',
+    'Gökçe Nur Usta',
   ),
   _e(
     DateTime(2026, 10, 20, 10, 20),
@@ -310,7 +310,7 @@ final _entries = <ActivityEntry>[
     'Katılım formunu çevrim içi yapalım; kâğıt formların toplanması geçen sefer iki gün sürdü.',
     'Gönüllü eğitim programı son kontrol',
     'mey',
-    'Meltem Yalın',
+    'Melek Yaşar',
   ),
   _e(
     DateTime(2026, 10, 20, 10, 12),
@@ -319,7 +319,7 @@ final _entries = <ActivityEntry>[
     'Salon B projeksiyonu arızalı, yedek cihaz istemek gerekiyor.',
     'Gönüllü eğitim programı son kontrol',
     'gn',
-    'Gamze Nur Uslu',
+    'Gökçe Nur Usta',
   ),
   _e(
     DateTime(2026, 10, 20, 10, 5),
@@ -328,7 +328,7 @@ final _entries = <ActivityEntry>[
     'Eğitmen listesi',
     'Gönüllü eğitim programı son kontrol',
     'mk',
-    'Melis Koçer',
+    'Merve Koçoğlu',
   ),
   _e(
     DateTime(2026, 10, 19, 11, 20),
@@ -337,7 +337,7 @@ final _entries = <ActivityEntry>[
     'Teşekkürler, takipteyim.',
     'Birebir konuşma',
     'ma',
-    'Elif Nur Karaağaçlı',
+    'Muhammet Ali Çalışkan',
   ),
   _e(
     DateTime(2026, 10, 19, 11, 20),
@@ -346,7 +346,7 @@ final _entries = <ActivityEntry>[
     'Pompa tedarikçisi teslimi bir hafta erteledi. Yedek tedarikçi olmadığı için alternatifimiz yoktu.',
     'ALT-7',
     'ko',
-    'Kerem Özdal',
+    'Kadir Özbek',
   ),
   _e(
     DateTime(2026, 10, 19, 11, 5),
@@ -355,7 +355,7 @@ final _entries = <ActivityEntry>[
     'TEDAŞ yazısı arşivde, #ELE-4 kartında görebilirsin.',
     'Birebir konuşma',
     'rk',
-    'Rıza Karaca',
+    'Reha Koçak',
   ),
   _e(
     DateTime(2026, 10, 18, 9, 40),
@@ -364,7 +364,7 @@ final _entries = <ActivityEntry>[
     'Test için su tankerinin sabah 08:00’de sahada olması gerekiyor.',
     'Hidrofor ve su deposu teslim kontrolü',
     'aa',
-    'Deniz Aydemir',
+    'Abdullah Ateş',
   ),
 ];
 

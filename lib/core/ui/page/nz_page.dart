@@ -6,6 +6,7 @@ import '../../providers.dart';
 import '../../theme/generated/tokens.gen.dart';
 import '../extensions/context_ext.dart';
 import '../layout/layout.dart';
+import '../motion/page_content_entrance.dart';
 import '../theme/nz_surfaces.dart';
 import '../widgets/feedback/nz_banner.dart';
 import '../widgets/feedback/nz_loader.dart';
@@ -34,6 +35,8 @@ class NzPage extends ConsumerWidget {
        children = const [],
        pinned = null,
        after = const [],
+       afterKey = null,
+       paneLead = null,
        _fill = false,
        _bare = false;
 
@@ -52,6 +55,8 @@ class NzPage extends ConsumerWidget {
     this.onRetry,
     this.pinned,
     this.after = const [],
+    this.afterKey,
+    this.paneLead,
   }) : title = '',
        body = const SizedBox.shrink(),
        actions = const [],
@@ -78,6 +83,8 @@ class NzPage extends ConsumerWidget {
        floatingAction = null,
        loading = false,
        showTitleBar = false,
+       afterKey = null,
+       paneLead = null,
        _fill = true,
        _bare = false;
 
@@ -97,6 +104,8 @@ class NzPage extends ConsumerWidget {
       loading = false,
       onRetry = null,
       showTitleBar = false,
+      afterKey = null,
+      paneLead = null,
       _fill = false,
       _bare = true;
 
@@ -118,6 +127,13 @@ class NzPage extends ConsumerWidget {
 
   /// [NzPage.feed]: [pinned] şeridinden sonraki öğeler.
   final List<Widget> after;
+
+  /// Sekme kimliği değişince tembel panelin girişini yeniler.
+  final Key? afterKey;
+
+  /// Tablet sağ bölmesinde üst çubuk ile ilk öğe arası (kaynak ekranın `gap` + ilk öğenin
+  /// negatif `margin-top` toplamı, ör. görev ayrıntısı 12); null → `gap-xl`. Telefonda kullanılmaz.
+  final double? paneLead;
   final NzContentWidth width;
 
   /// AppBar eylemleri.
@@ -140,7 +156,6 @@ class NzPage extends ConsumerWidget {
         child: Scaffold(resizeToAvoidBottomInset: false, body: body),
       );
     }
-    final layout = context.layout;
     final topBar = this.topBar;
     if (topBar != null && _fill) {
       return NzTextScaleLimit(
@@ -151,60 +166,77 @@ class NzPage extends ConsumerWidget {
               topBar,
               if (offline)
                 SliverToBoxAdapter(child: NzBanner.offline(onAction: onRetry)),
-              SliverFillRemaining(hasScrollBody: true, child: body),
+              SliverFillRemaining(
+                hasScrollBody: true,
+                child: PageContentEntrance(child: body),
+              ),
             ],
           ),
         ),
       );
     }
     if (topBar != null) {
-      final side = layout.pagePadding;
-      final extra =
-          (MediaQuery.sizeOf(context).width -
-                  2 * side -
-                  layout.contentMaxWidth(width))
-              .clamp(0, double.infinity) /
-          2;
-      final bottom =
-          MediaQuery.paddingOf(context).bottom + NizamioSpacing.gapXl;
+      final safe = MediaQuery.paddingOf(context);
+      // Tablet bölmesi (`.tb-pane`): liste bölmesinde kök üst çubuk gizli, içerik üstten 18;
+      // iki bölmede de sayfa sonu 40 (telefondaki alt menü payı yok); sağ bölmede yan 28.
+      final pane = NzPaneScope.maybeOf(context)?.role;
+      final bottom = NzPaneScope.pageBottom(context);
+      final top = switch (pane) {
+        NzPaneRole.master => safe.top + NzTabletMetrics.paneTop,
+        NzPaneRole.detail => paneLead ?? NizamioSpacing.gapXl,
+        null => NizamioSpacing.gapXl,
+      };
+      // Pencere değil, gövdeye ayrılan alan (bölünmüş ekran / yan panel); kısıt sliver'ların
+      // üstündeki kutu sınırında okunur.
       return NzTextScaleLimit(
         child: Scaffold(
-          body: CustomScrollView(
-            slivers: [
-              topBar,
-              if (offline)
-                SliverToBoxAdapter(child: NzBanner.offline(onAction: onRetry)),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(
-                  side + extra,
-                  NizamioSpacing.gapXl,
-                  side + extra,
-                  pinned == null ? bottom : 0,
-                ),
-                sliver: SliverList.list(children: children),
-              ),
-              if (pinned case final pinned?) ...[
-                PinnedHeaderSliver(
-                  child: NzGlass(
-                    tone: NzGlassTone.bar,
-                    edge: false,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: side + extra),
-                      child: pinned,
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              final side = NzPaneScope.sideInset(context, constraints, width);
+              return CustomScrollView(
+                slivers: [
+                  if (pane != NzPaneRole.master) topBar,
+                  PageContentEntrance.sliver(
+                    child: SliverMainAxisGroup(
+                      slivers: [
+                        if (offline)
+                          SliverToBoxAdapter(
+                            child: NzBanner.offline(onAction: onRetry),
+                          ),
+                        SliverPadding(
+                          padding: EdgeInsets.fromLTRB(
+                            side,
+                            top,
+                            side,
+                            pinned == null ? bottom : 0,
+                          ),
+                          sliver: SliverList.list(children: children),
+                        ),
+                        if (pinned case final pinned?) ...[
+                          PinnedHeaderSliver(
+                            child: NzGlass(
+                              tone: NzGlassTone.bar,
+                              edge: false,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: side),
+                                child: pinned,
+                              ),
+                            ),
+                          ),
+                          SliverPadding(
+                            padding: EdgeInsets.fromLTRB(side, 0, side, bottom),
+                            sliver: PageContentEntrance.sliver(
+                              key: afterKey,
+                              child: SliverList.list(children: after),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                ),
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(
-                    side + extra,
-                    0,
-                    side + extra,
-                    bottom,
-                  ),
-                  sliver: SliverList.list(children: after),
-                ),
-              ],
-            ],
+                ],
+              );
+            },
           ),
         ),
       );
@@ -215,33 +247,41 @@ class NzPage extends ConsumerWidget {
             ? AppBar(title: Text(title), actions: actions)
             : null,
         floatingActionButton: floatingAction,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (offline) NzBanner.offline(onAction: onRetry),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: layout.pagePadding,
-                      ),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: layout.contentMaxWidth(width),
-                          ),
-                          child: body,
-                        ),
+        body: PageContentEntrance(
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (offline) NzBanner.offline(onAction: onRetry),
+                    Expanded(
+                      // Dolgu ve azami genişlik pencereye değil, gövdeye ayrılan alana göre.
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final local = NzLayout.fromConstraints(constraints);
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: local.pagePadding,
+                            ),
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: local.contentMaxWidth(width),
+                                ),
+                                child: body,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
-                  ),
-                ],
-              ),
-              if (loading) const Positioned.fill(child: _LoadingScrim()),
-            ],
+                  ],
+                ),
+                if (loading) const Positioned.fill(child: _LoadingScrim()),
+              ],
+            ),
           ),
         ),
       ),

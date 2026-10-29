@@ -1249,6 +1249,278 @@
   "@uiButtonsBusy": {
     "description": "ui.buttons.busy"
   },
+  "uiCalendarTitle": "Takvim",
+  "@uiCalendarTitle": {
+    "description": "ui.calendar.title"
+  },
+  "uiCalendarToday": "Bugün",
+  "@uiCalendarToday": {
+    "description": "ui.calendar.today"
+  },
+  "uiCalendarPlanMeeting": "Seçili güne toplantı planla",
+  "@uiCalendarPlanMeeting": {
+    "description": "ui.calendar.plan_meeting"
+  },
+  "uiCalendarGrid": "Takvim ızgarası",
+  "@uiCalendarGrid": {
+    "description": "ui.calendar.grid"
+  },
+  "uiCalendarCollapse": "Haftaya daralt",
+  "@uiCalendarCollapse": {
+    "description": "ui.calendar.collapse"
+  },
+  "uiCalendarExpand": "Aya genişlet",
+  "@uiCalendarExpand": {
+    "description": "ui.calendar.expand"
+  },
+  "uiCalendarPrevMonth": "Önceki ay",
+  "@uiCalendarPrevMonth": {
+    "description": "ui.calendar.prev_month"
+  },
+  "uiCalendarNextMonth": "Sonraki ay",
+  "@uiCalendarNextMonth": {
+    "description": "ui.calendar.next_month"
+  },
+  "uiCalendarPrevWeek": "Önceki hafta",
+  "@uiCalendarPrevWeek": {
+    "description": "ui.calendar.prev_week"
+  },
+  "uiCalendarNextWeek": "Sonraki hafta",
+  "@uiCalendarNextWeek": {
+    "description": "ui.calendar.next_week"
+  },
+  "uiCalendarWeekLc": "hafta",
+  "@uiCalendarWeekLc": {
+    "description": "ui.calendar.week_lc"
+  },
+  "uiCalendarWeekdaysShort": "Pt Sa Ça Pe Cu Ct Pz",
+  "@uiCalendarWeekdaysShort": {
+    "description": "ui.calendar.weekdays_short"
+  },
+  "uiCalendarRelToday": "bugün",
+  "@uiCalendarRelToday": {
+    "description": "ui.calendar.rel_today"
+  },
+  "uiCalendarRelTomorrow": "yarın",
+  "@uiCalendarRelTomorrow": {
+    "description": "ui.calendar.rel_tomorrow"
+  },
+  "uiCalendarRelYesterday": "dün",
+  "@uiCalendarRelYesterday": {
+    "description": "ui.calendar.rel_yesterday"
+  },
+  "uiCalendarRelAfter": "gün sonra",
+  "@uiCalendarRelAfter": {
+    "description": "ui.calendar.rel_after"
+  },
+  "uiCalendarRelBefore": "gün önce",
+  "@uiCalendarRelBefore": {
+    "description": "ui.calendar.rel_before"
+  },
+  "uiCalendarRecordsLc": "kayıt",
+  "@uiCalendarRecordsLc": {
+    "description": "ui.calendar.records_lc"
+  },
+  "uiCalendarSeasonLc": "sezon",
+  "@uiCalendarSeasonLc": {
+    "description": "ui.calendar.season_lc"
+  },
+  "uiCalendarGroupMeetings": "toplantılar",
+  "@uiCalendarGroupMeetings": {
+    "description": "ui.calendar.group_meetings"
+  },
+  "uiCalendarGroupTasks": "görevler",
+  "@uiCalendarGroupTasks": {
+    "description": "ui.calendar.group_tasks"
+  },
+  "uiCalendarGroupRequests": "talepler",
+  "@uiCalendarGroupRequests": {
+    "description": "ui.calendar.group_requests"
+  },
+  "uiCalendarGroupSheets": "tablo kayıtları",
+  "@uiCalendarGroupSheets": {
+    "description": "ui.calendar.group_sheets"
+  },
+  "uiCalendarParticipantsLc": "katılımcı",
+  "@uiCalendarParticipantsLc": {
+    "description": "ui.calendar.participants_lc"
+  },
+  "uiCalendarAgendaLc": "gündem",
+  "@uiCalendarAgendaLc": {
+    "description": "ui.calendar.agenda_lc"
+  },
+  "uiCalendarPeopleLc": "kişi",
+  "@uiCalendarPeopleLc": {
+    "description": "ui.calendar.people_lc"
+  },
+  "uiCalendarTaskEnds": "Bitiyor",
+  "@uiCalendarTaskEnds": {
+    "description": "ui.calendar.task_ends"
+  },
+  "uiCalendarTaskStarts": "Başlıyor",
+  "@uiCalendarTaskStarts": {
+    "description": "ui.calendar.task_starts"
+  },
+  "uiCalendarLateLc": "gecikti",
+  "@uiCalendarLateLc": {
+    "description": "ui.calendar.late_lc"
+  },
+  "uiCalendarDoneLc": "yapıldı",
+  "@uiCalendarDoneLc": {
+    "description": "ui.calendar.done_lc"
+  },
+  "uiCalendarReqPurchase": "Satın alma",
+  "@uiCalendarReqPurchase": {
+    "description": "ui.calendar.req_purchase"
+  },
+  "uiCalendarReqQuote": "Fiyat teklifi",
+  "@uiCalendarReqQuote": {
+    "description": "ui.calendar.req_quote"
+  },
+  "uiCalendarReqExpense": "Masraf",
+  "@uiCalendarReqExpense": {
+    "description": "ui.calendar.req_expense"
+  },
+  "uiCalendarReqBudget": "Ek bütçe",
+  "@uiCalendarReqBudget": {
+    "description": "ui.calendar.req_budget"
+  },
+  "uiCalendarStatePending": "Onay bekliyor",
+  "@uiCalendarStatePending": {
+    "description": "ui.calendar.state_pending"
+  },
+  "uiCalendarStateApproved": "Onaylandı",
+  "@uiCalendarStateApproved": {
+    "description": "ui.calendar.state_approved"
+  },
+  "uiCalendarStateOrdered": "Sipariş verildi",
+  "@uiCalendarStateOrdered": {
+    "description": "ui.calendar.state_ordered"
+  },
+  "uiCalendarStateDelivered": "Teslim alındı",
+  "@uiCalendarStateDelivered": {
+    "description": "ui.calendar.state_delivered"
+  },
+  "uiCalendarEmpty": "Bu gün için planlanmış bir şey yok.",
+  "@uiCalendarEmpty": {
+    "description": "ui.calendar.empty"
+  },
+  "uiCalendarPlan": "Toplantı planla",
+  "@uiCalendarPlan": {
+    "description": "ui.calendar.plan"
+  },
+  "uiCalendarAllCoordinatorships": "Tüm koordinatörlükler",
+  "@uiCalendarAllCoordinatorships": {
+    "description": "ui.calendar.all_coordinatorships"
+  },
+  "uiCalendarPreview": "Kayıt önizleme",
+  "@uiCalendarPreview": {
+    "description": "ui.calendar.preview"
+  },
+  "uiCalendarKickerMeeting": "toplantı",
+  "@uiCalendarKickerMeeting": {
+    "description": "ui.calendar.kicker_meeting"
+  },
+  "uiCalendarKickerRequest": "talep",
+  "@uiCalendarKickerRequest": {
+    "description": "ui.calendar.kicker_request"
+  },
+  "uiCalendarKickerSheet": "tablo kaydı",
+  "@uiCalendarKickerSheet": {
+    "description": "ui.calendar.kicker_sheet"
+  },
+  "uiCalendarFactTime": "Zaman",
+  "@uiCalendarFactTime": {
+    "description": "ui.calendar.fact_time"
+  },
+  "uiCalendarFactPlace": "Yer",
+  "@uiCalendarFactPlace": {
+    "description": "ui.calendar.fact_place"
+  },
+  "uiCalendarFactInvited": "Davetli",
+  "@uiCalendarFactInvited": {
+    "description": "ui.calendar.fact_invited"
+  },
+  "uiCalendarFactType": "Tür",
+  "@uiCalendarFactType": {
+    "description": "ui.calendar.fact_type"
+  },
+  "uiCalendarFactCoordinatorship": "Koordinatörlük",
+  "@uiCalendarFactCoordinatorship": {
+    "description": "ui.calendar.fact_coordinatorship"
+  },
+  "uiCalendarFactAmount": "Tutar",
+  "@uiCalendarFactAmount": {
+    "description": "ui.calendar.fact_amount"
+  },
+  "uiCalendarFactState": "Durum",
+  "@uiCalendarFactState": {
+    "description": "ui.calendar.fact_state"
+  },
+  "uiCalendarFactNeed": "İhtiyaç tarihi",
+  "@uiCalendarFactNeed": {
+    "description": "ui.calendar.fact_need"
+  },
+  "uiCalendarFactTask": "Bağlı görev",
+  "@uiCalendarFactTask": {
+    "description": "ui.calendar.fact_task"
+  },
+  "uiCalendarFactTable": "Tablo",
+  "@uiCalendarFactTable": {
+    "description": "ui.calendar.fact_table"
+  },
+  "uiCalendarFactDate": "Tarih",
+  "@uiCalendarFactDate": {
+    "description": "ui.calendar.fact_date"
+  },
+  "uiCalendarFactPerson": "Kişi",
+  "@uiCalendarFactPerson": {
+    "description": "ui.calendar.fact_person"
+  },
+  "uiCalendarQuotePending": "Teklif bekleniyor",
+  "@uiCalendarQuotePending": {
+    "description": "ui.calendar.quote_pending"
+  },
+  "uiCalendarSheetDone": "Yapıldı",
+  "@uiCalendarSheetDone": {
+    "description": "ui.calendar.sheet_done"
+  },
+  "uiCalendarSheetWaiting": "Bekliyor",
+  "@uiCalendarSheetWaiting": {
+    "description": "ui.calendar.sheet_waiting"
+  },
+  "uiCalendarRemind": "Hatırlat",
+  "@uiCalendarRemind": {
+    "description": "ui.calendar.remind"
+  },
+  "uiCalendarReminded": "Katılımcılara hatırlatma gönderildi",
+  "@uiCalendarReminded": {
+    "description": "ui.calendar.reminded"
+  },
+  "uiCalendarWriteGroup": "Gruba yaz",
+  "@uiCalendarWriteGroup": {
+    "description": "ui.calendar.write_group"
+  },
+  "uiCalendarClose": "Kapat",
+  "@uiCalendarClose": {
+    "description": "ui.calendar.close"
+  },
+  "uiCalendarGoTask": "Bağlı göreve git",
+  "@uiCalendarGoTask": {
+    "description": "ui.calendar.go_task"
+  },
+  "uiCalendarGoCoordinatorship": "Koordinatörlüğe git",
+  "@uiCalendarGoCoordinatorship": {
+    "description": "ui.calendar.go_coordinatorship"
+  },
+  "uiCalendarPickTitle": "Bir kayıt seç",
+  "@uiCalendarPickTitle": {
+    "description": "ui.calendar.pick_title"
+  },
+  "uiCalendarPickBody": "Soldaki listeden bir göreve dokun, ayrıntısı burada açılır. Toplantı ve talepler önizleme penceresinde açılır.",
+  "@uiCalendarPickBody": {
+    "description": "ui.calendar.pick_body"
+  },
   "uiCommonRetry": "Yeniden dene",
   "@uiCommonRetry": {
     "description": "ui.common.retry"
@@ -1645,11 +1917,11 @@
   "@uiHomeKpiReview": {
     "description": "ui.home.kpi_review"
   },
-  "uiHomeKpiDoneOf": "görevden",
+  "uiHomeKpiDoneOf": "görevin",
   "@uiHomeKpiDoneOf": {
     "description": "ui.home.kpi_done_of"
   },
-  "uiHomeKpiDoneTail": "tanesi bitti",
+  "uiHomeKpiDoneTail": "bitti",
   "@uiHomeKpiDoneTail": {
     "description": "ui.home.kpi_done_tail"
   },
@@ -1657,7 +1929,7 @@
   "@uiHomeKpiDoingTail": {
     "description": "ui.home.kpi_doing_tail"
   },
-  "uiHomeKpiLateLead": "Açık görevlerde",
+  "uiHomeKpiLateLead": "Açık görevlerin",
   "@uiHomeKpiLateLead": {
     "description": "ui.home.kpi_late_lead"
   },
@@ -2009,7 +2281,7 @@
   "@uiIdentityLoginEmail": {
     "description": "ui.identity.login_email"
   },
-  "uiIdentityLoginPassword": "Parola",
+  "uiIdentityLoginPassword": "Şifre",
   "@uiIdentityLoginPassword": {
     "description": "ui.identity.login_password"
   },
@@ -2061,7 +2333,7 @@
   "@uiIdentitySignOutConfirmMessage": {
     "description": "ui.identity.sign_out_confirm_message"
   },
-  "uiIdentityLoginIntro": "E-posta adresin ve parolanla devam et.",
+  "uiIdentityLoginIntro": "E-posta adresin ve şifrenle devam et.",
   "@uiIdentityLoginIntro": {
     "description": "ui.identity.login_intro"
   },
@@ -2073,7 +2345,7 @@
   "@uiIdentityLoginEmailHint": {
     "description": "ui.identity.login_email_hint"
   },
-  "uiIdentityLoginPasswordHint": "Parolan",
+  "uiIdentityLoginPasswordHint": "Şifren",
   "@uiIdentityLoginPasswordHint": {
     "description": "ui.identity.login_password_hint"
   },
@@ -2081,11 +2353,15 @@
   "@uiIdentityLoginVersionPrefix": {
     "description": "ui.identity.login_version_prefix"
   },
-  "uiInputsPasswordShow": "Parolayı göster",
+  "uiIdentityLoginFooter": "Developed by KAYACAN, COSMAN, CALISKAN",
+  "@uiIdentityLoginFooter": {
+    "description": "ui.identity.login_footer"
+  },
+  "uiInputsPasswordShow": "Şifreyi göster",
   "@uiInputsPasswordShow": {
     "description": "ui.inputs.password_show"
   },
-  "uiInputsPasswordHide": "Parolayı gizle",
+  "uiInputsPasswordHide": "Şifreyi gizle",
   "@uiInputsPasswordHide": {
     "description": "ui.inputs.password_hide"
   },
@@ -2612,6 +2888,14 @@
   "uiRouterTabMessages": "Mesajlar",
   "@uiRouterTabMessages": {
     "description": "ui.router.tab_messages"
+  },
+  "uiRouterAssistantSoonTablet": "Asistan tablette sonraki adımda tasarlanacak",
+  "@uiRouterAssistantSoonTablet": {
+    "description": "ui.router.assistant_soon_tablet"
+  },
+  "uiRouterAllModules": "Tüm modüller",
+  "@uiRouterAllModules": {
+    "description": "ui.router.all_modules"
   },
   "uiScopeTitle": "Program seçimi",
   "@uiScopeTitle": {
@@ -4128,5 +4412,77 @@
   "uiTimelineOpen": "aç",
   "@uiTimelineOpen": {
     "description": "ui.timeline.open"
+  },
+  "uiTimelineGanttBack": "Görevler",
+  "@uiTimelineGanttBack": {
+    "description": "ui.timeline.gantt_back"
+  },
+  "uiTimelineGanttBackLabel": "Geri: Görevler",
+  "@uiTimelineGanttBackLabel": {
+    "description": "ui.timeline.gantt_back_label"
+  },
+  "uiTimelineGanttFilter": "Görev filtresi",
+  "@uiTimelineGanttFilter": {
+    "description": "ui.timeline.gantt_filter"
+  },
+  "uiTimelineGanttScaleSeason": "Sezon",
+  "@uiTimelineGanttScaleSeason": {
+    "description": "ui.timeline.gantt_scale_season"
+  },
+  "uiTimelineGanttAllCoords": "Tüm koordinatörlükler",
+  "@uiTimelineGanttAllCoords": {
+    "description": "ui.timeline.gantt_all_coords"
+  },
+  "uiTimelineGanttAllCoordsLc": "tüm koordinatörlükler",
+  "@uiTimelineGanttAllCoordsLc": {
+    "description": "ui.timeline.gantt_all_coords_lc"
+  },
+  "uiTimelineGanttLabelHead": "koordinatörlük · görev",
+  "@uiTimelineGanttLabelHead": {
+    "description": "ui.timeline.gantt_label_head"
+  },
+  "uiTimelineGanttLateTail": "gecikme",
+  "@uiTimelineGanttLateTail": {
+    "description": "ui.timeline.gantt_late_tail"
+  },
+  "uiTimelineGanttTodayPill": "bugün",
+  "@uiTimelineGanttTodayPill": {
+    "description": "ui.timeline.gantt_today_pill"
+  },
+  "uiTimelineGanttEmpty": "Bu filtreyle eşleşen görev yok.",
+  "@uiTimelineGanttEmpty": {
+    "description": "ui.timeline.gantt_empty"
+  },
+  "uiTimelineGanttLegendLate": "Gecikme",
+  "@uiTimelineGanttLegendLate": {
+    "description": "ui.timeline.gantt_legend_late"
+  },
+  "uiTimelineGanttLegendFest": "Teknofest günleri",
+  "@uiTimelineGanttLegendFest": {
+    "description": "ui.timeline.gantt_legend_fest"
+  },
+  "uiTimelineGanttCardStatus": "durum",
+  "@uiTimelineGanttCardStatus": {
+    "description": "ui.timeline.gantt_card_status"
+  },
+  "uiTimelineGanttCardDate": "tarih",
+  "@uiTimelineGanttCardDate": {
+    "description": "ui.timeline.gantt_card_date"
+  },
+  "uiTimelineGanttCardAssignee": "atanan",
+  "@uiTimelineGanttCardAssignee": {
+    "description": "ui.timeline.gantt_card_assignee"
+  },
+  "uiTimelineGanttUnassigned": "Atanmamış",
+  "@uiTimelineGanttUnassigned": {
+    "description": "ui.timeline.gantt_unassigned"
+  },
+  "uiTimelineGanttDaysLate": "gün gecikti",
+  "@uiTimelineGanttDaysLate": {
+    "description": "ui.timeline.gantt_days_late"
+  },
+  "uiTimelineGanttOpenTask": "Görev ayrıntısını aç",
+  "@uiTimelineGanttOpenTask": {
+    "description": "ui.timeline.gantt_open_task"
   }
 }

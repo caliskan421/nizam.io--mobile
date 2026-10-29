@@ -41,10 +41,16 @@ class _QuickTitleFieldState extends State<QuickTitleField> {
     super.dispose();
   }
 
+  static const _titleSize = 20.0;
+  static const _titleLine = 28.0;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
+    final underline = UnderlineInputBorder(
+      borderSide: BorderSide(color: c.borderStrong),
+    );
     return Semantics(
       label: widget.label,
       textField: true,
@@ -53,17 +59,24 @@ class _QuickTitleFieldState extends State<QuickTitleField> {
         onChanged: widget.onChanged,
         maxLength: widget.maxLength,
         textCapitalization: TextCapitalization.sentences,
-        style: t.titleSm,
+        style: t.titleSm.copyWith(height: _titleLine / _titleSize),
         minLines: 1,
         maxLines: 3,
+        // Kaynak başlık alanı: Poppins 20/28 600, `padding: 4px 0 10px`, yalnız alt çizgi
+        // 1 px `border-strong` (odakta da aynı; kutu yok).
         decoration: InputDecoration(
           hintText: widget.hint,
-          hintStyle: t.titleSm.copyWith(color: c.textFaint),
-          border: InputBorder.none,
-          counterText: '',
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: NizamioSpacing.space2,
+          hintStyle: t.titleSm.copyWith(
+            height: _titleLine / _titleSize,
+            color: c.textFaint,
           ),
+          filled: false,
+          border: underline,
+          enabledBorder: underline,
+          focusedBorder: underline,
+          counterText: '',
+          isDense: true,
+          contentPadding: const EdgeInsets.only(top: 4, bottom: 10),
         ),
       ),
     );

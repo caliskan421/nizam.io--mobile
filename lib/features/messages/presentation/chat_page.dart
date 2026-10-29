@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/motion/page_content_entrance.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/theme/nz_motion.dart';
@@ -17,6 +18,7 @@ import '../../../core/ui/theme/nz_surfaces.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/lists/lists.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
 import '../application/chat_controller.dart';
@@ -76,7 +78,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           .setAttachQuery(_attachQuery.text),
     );
     _scroll.addListener(
-      () => _nearBottom.value = !_scroll.hasClients || _scroll.offset < 80,
+      () => _nearBottom.value = !_scroll.hasClients || _atEnd(_scroll.position),
     );
     unawaited(_open());
   }
@@ -129,7 +131,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   void _toBottom() {
     if (!_scroll.hasClients) return;
     _scroll.animateTo(
-      0,
+      _scroll.position.maxScrollExtent,
       duration: NzMotion.of(context, NizamioMotion.durSheet),
       curve: NizamioMotion.easeSheet,
     );
@@ -354,20 +356,22 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     return Stack(
       children: [
         Positioned.fill(
-          child: _MessageList(
-            chatId: widget.id,
-            catalog: catalog,
-            people: inbox.people,
-            scroll: _scroll,
-            keys: _keys,
-            order: _order,
-            flash: _flash,
-            headerH: _headerH,
-            composerH: _composerH,
-            onJump: (id) => unawaited(_jumpTo(id)),
-            onActions: (chat, m) => unawaited(_actions(chat, m, catalog)),
-            onReact: (m, r) => _chats.react(widget.id, m, r),
-            onVote: (m, i) => _chats.vote(widget.id, m, i),
+          child: PageContentEntrance(
+            child: _MessageList(
+              chatId: widget.id,
+              catalog: catalog,
+              people: inbox.people,
+              scroll: _scroll,
+              keys: _keys,
+              order: _order,
+              flash: _flash,
+              headerH: _headerH,
+              composerH: _composerH,
+              onJump: (id) => unawaited(_jumpTo(id)),
+              onActions: (chat, m) => unawaited(_actions(chat, m, catalog)),
+              onReact: (m, r) => _chats.react(widget.id, m, r),
+              onVote: (m, i) => _chats.vote(widget.id, m, i),
+            ),
           ),
         ),
         Positioned(
@@ -426,7 +430,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 tone: NzGlassTone.float,
                 child: SizedBox.square(
                   dimension: NizamioSize.glassButton,
-                  child: Icon(Icons.keyboard_arrow_down_rounded, color: c.text),
+                  child: NzIcon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: c.text,
+                  ),
                 ),
               ),
             ),
@@ -509,7 +516,8 @@ class _ComposerArea extends ConsumerWidget {
             },
             attachLabel: l.uiMessagesAttach,
             attachOpen: view.attach != null,
-            bottomInset: math.max(keyboard, math.max(safeBottom, 12)),
+            // Kaynak alt dolgu 26 (= 6 + 20); klavye/güvenli alan daha büyükse o.
+            bottomInset: math.max(keyboard, math.max(safeBottom, 20)),
             header: [
               if (sugs.isNotEmpty)
                 ChatSuggestions(
@@ -614,6 +622,43 @@ class _MessageList extends ConsumerStatefulWidget {
 }
 
 class _MessageListState extends ConsumerState<_MessageList> {
+  /// Akış en altta mı (kullanıcı kaydırmasıyla güncellenir). Yapışıkken içerik, klavye ya da
+  /// pencere ölçüsü değişince en alta dönülür; açılışta da en alttan başlanır.
+  var _pinned = true;
+  var _sticking = false;
+
+  bool _onScroll(ScrollNotification n) {
+    if (n is ScrollUpdateNotification && n.depth == 0) {
+      _pinned = _atEnd(n.metrics);
+    }
+    return false;
+  }
+
+  bool _onMetrics(ScrollMetricsNotification n) {
+    if (_pinned && !_atEndExact(n.metrics)) _stick();
+    return false;
+  }
+
+  /// Tembel listede uzunluk kuruldukça kesinleşir; birkaç karede en alta yerleşilir.
+  void _stick([int tries = 6]) {
+    if (_sticking) return;
+    _sticking = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _sticking = false;
+      if (!mounted || !widget.scroll.hasClients || !_pinned) return;
+      final p = widget.scroll.position;
+      if (_atEndExact(p)) return;
+      p.jumpTo(p.maxScrollExtent);
+      if (tries > 1) _stick(tries - 1);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _stick();
+  }
+
   Chat? _chat;
   List<ChatItem> _items = const [];
   List<Key> _itemKeys = const [];
@@ -624,7 +669,9 @@ class _MessageListState extends ConsumerState<_MessageList> {
   void _derive(Chat chat) {
     if (identical(chat, _chat)) return;
     _chat = chat;
-    _items = timeline(chat).reversed.toList(growable: false);
+    // Kaynak akışı yukarıdan aşağı (`flex-direction: column`): kısa sohbet üstte başlar, uzun
+    // sohbet en altta açılır ([_pinned]).
+    _items = timeline(chat).toList(growable: false);
     _itemKeys = [for (final x in _items) _keyOf(x)];
     _keyIndex.clear();
     widget.order.clear();
@@ -658,7 +705,7 @@ class _MessageListState extends ConsumerState<_MessageList> {
     final keyIndex = _keyIndex;
     final list = SliverList.builder(
       itemCount: items.length,
-      // Yeni mesaj 0. sıraya girince eski balonlar anahtarıyla yerini bulur.
+      // Liste değişince (yeni mesaj, ayırıcı) eski balonlar anahtarıyla yerini bulur.
       findChildIndexCallback: (key) => keyIndex[key],
       itemBuilder: (context, i) => KeyedSubtree(
         key: keys[i],
@@ -669,22 +716,27 @@ class _MessageListState extends ConsumerState<_MessageList> {
       valueListenable: widget.headerH,
       builder: (context, top, sliver) => ValueListenableBuilder<double>(
         valueListenable: widget.composerH,
-        builder: (context, bottom, sliver) => CustomScrollView(
-          controller: widget.scroll,
-          reverse: true,
-          slivers: [
-            SliverPadding(
-              // SliverPadding kenarları görseldir (ters akışta da üst = üst).
-              padding: EdgeInsets.fromLTRB(
-                12,
-                top + NizamioSpacing.space2,
-                12,
-                bottom + NizamioSpacing.space3,
+        builder: (context, bottom, sliver) =>
+            NotificationListener<ScrollNotification>(
+              onNotification: _onScroll,
+              child: NotificationListener<ScrollMetricsNotification>(
+                onNotification: _onMetrics,
+                child: CustomScrollView(
+                  controller: widget.scroll,
+                  slivers: [
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        12,
+                        top + NizamioSpacing.space2,
+                        12,
+                        bottom + NizamioSpacing.space3,
+                      ),
+                      sliver: sliver,
+                    ),
+                  ],
+                ),
               ),
-              sliver: sliver,
             ),
-          ],
-        ),
         child: sliver,
       ),
       child: list,
@@ -837,3 +889,8 @@ class _FlashState extends State<_Flash> {
   @override
   Widget build(BuildContext context) => widget.builder(_on);
 }
+
+/// En alta 80 px'ten yakın ("alta in" düğmesi gizli, yeni içerikte en altta kalınır).
+bool _atEnd(ScrollMetrics m) => m.maxScrollExtent - m.pixels < 80;
+
+bool _atEndExact(ScrollMetrics m) => m.maxScrollExtent - m.pixels < 0.5;

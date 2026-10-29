@@ -46,6 +46,23 @@ final class CoordinatorshipEvent {
 /// açıklama, alt birimler, katalog dışındaki ek üyeler, arşiv/toplantı sayıları, ekip sohbeti ve
 /// son etkinlik. Kimlik, ad, koordinatörler ve görevler kataloğun ([TaskCatalog]) verisidir.
 @immutable
+/// Kaynağın bildirdiği ayrıntı özeti (görev sayıları ve sezon ortalaması). Verilirse ayrıntı
+/// ekranı bunu gösterir; verilmezse özet görev kataloğundan hesaplanır.
+@immutable
+final class CoordinatorshipReport {
+  const CoordinatorshipReport({
+    required this.done,
+    required this.total,
+    required this.late,
+    required this.seasonRatio,
+  });
+
+  final int done;
+  final int total;
+  final int late;
+  final double seasonRatio;
+}
+
 final class CoordinatorshipProfile {
   CoordinatorshipProfile({
     required this.code,
@@ -58,6 +75,7 @@ final class CoordinatorshipProfile {
     required this.meetings,
     required this.chatId,
     required List<CoordinatorshipEvent> events,
+    this.reported,
   }) : units = List.unmodifiable(units),
        extraMembers = List.unmodifiable(extraMembers),
        events = List.unmodifiable(events);
@@ -76,6 +94,9 @@ final class CoordinatorshipProfile {
 
   /// Planlı toplantı sayısı.
   final int meetings;
+
+  /// Kaynak özeti (örnek fikstürde prototip `D` kaydı); null → katalogdan hesap.
+  final CoordinatorshipReport? reported;
 
   /// "Ekibe mesaj"ın açtığı sohbetin kimliği.
   final String chatId;

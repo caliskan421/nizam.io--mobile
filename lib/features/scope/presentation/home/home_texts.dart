@@ -20,14 +20,31 @@ extension HomeTexts on AppLocalizations {
   String dateKicker(DateTime day) =>
       DateFormat('d MMMM y, EEEE', 'tr').format(day).toLowerCase();
 
+  /// "79 görevin 39'u bitti".
   String kpiDoneCaption(TaskTotals t) =>
-      '${t.total} $uiHomeKpiDoneOf ${t.done} $uiHomeKpiDoneTail';
+      '${t.total} $uiHomeKpiDoneOf ${t.done}${possessive(t.done)} '
+      '$uiHomeKpiDoneTail';
 
   String kpiDoingCaption(TaskTotals t) =>
       '${t.inProgressOnTime} $uiHomeKpiDoingTail';
 
-  String kpiLateCaption(TaskTotals t) =>
-      '$uiHomeKpiLateLead ${percent(t.open == 0 ? 0 : t.late / t.open)}';
+  /// "Açık görevlerin %38'i".
+  String kpiLateCaption(TaskTotals t) {
+    final ratio = t.open == 0 ? 0.0 : t.late / t.open;
+    return '$uiHomeKpiLateLead ${percent(ratio)}'
+        '${possessive((ratio * 100).round())}';
+  }
+
+  /// Sayıdan sonra üçüncü tekil iyelik eki, okunuşa göre ("39'u", "%38'i", "2'si").
+  static String possessive(int n) {
+    const units = ['', "'i", "'si", "'ü", "'ü", "'i", "'sı", "'si", "'i", "'u"];
+    const tens = ['', "'u", "'si", "'u", "'ı", "'si", "'ı", "'i", "'i", "'ı"];
+    if (n == 0) return "'ı";
+    if (n % 10 != 0) return units[n % 10];
+    if (n % 100 != 0) return tens[(n ~/ 10) % 10];
+    if (n % 1000 != 0) return "'ü";
+    return "'i";
+  }
 
   /// "18 kullanıcı · 11 koordinatörlük".
   String teamSummary(HomeDashboard d) =>
@@ -40,7 +57,7 @@ extension HomeTexts on AppLocalizations {
       '${d.team.coordinators} $uiHomeRoleCoordinatorLc, '
       '${d.team.members} $uiHomeRoleMemberLc)';
 
-  /// "Son işlem bugün 14:27 · Deniz Aydemir" (bugün değilse tarih).
+  /// "Son işlem bugün 14:27 · Abdullah Ateş" (bugün değilse tarih).
   String lastActivity(LastActivity a, DateTime now) {
     final sameDay =
         a.at.year == now.year && a.at.month == now.month && a.at.day == now.day;

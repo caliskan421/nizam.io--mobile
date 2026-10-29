@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../nz_icon.dart';
 
 /// İkon çipi (prototip `.rp-ichip`): 36 px, `bg-raised` + 1 px `border-subtle`, köşe `m-r-tile`;
 /// 16 px ikon. Görseldir (anlam yanındaki metindedir).
@@ -25,7 +26,7 @@ class NzIconTile extends StatelessWidget {
         ),
         child: SizedBox.square(
           dimension: NizamioSize.iconTile,
-          child: Icon(
+          child: NzIcon(
             icon,
             size: NizamioSize.iconSizeSm,
             color: color ?? c.textMuted,

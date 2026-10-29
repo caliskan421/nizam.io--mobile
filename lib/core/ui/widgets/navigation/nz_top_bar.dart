@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../../layout/nz_pane.dart';
 import '../../theme/nz_surfaces.dart';
 import '../buttons/nz_icon_button.dart';
 import '../nz_size.dart';
@@ -22,7 +23,8 @@ class NzTopBar extends StatelessWidget {
     this.subtitle,
     this.leading,
     this.actions = const [],
-  }) : code = null,
+  }) : pinned = true,
+       code = null,
        onBack = null,
        backLabel = null,
        _detail = false;
@@ -39,6 +41,7 @@ class NzTopBar extends StatelessWidget {
     this.onBack,
     this.backLabel,
     this.actions = const [],
+    this.pinned = true,
   }) : assert(code == null || title == null, 'code ve title birlikte verilmez'),
        assert(actions.length <= 2, 'en çok iki eylem'),
        subtitle = null,
@@ -58,9 +61,13 @@ class NzTopBar extends StatelessWidget {
 
   static const maxTextScale = 1.3;
 
+  /// false → çubuk akışla birlikte kayar (kaynakta yapışkan olmayan başlık, ör. tablet işlem
+  /// geçmişi).
+  final bool pinned;
+
   @override
   Widget build(BuildContext context) => SliverPersistentHeader(
-    pinned: true,
+    pinned: pinned,
     delegate: _TopBarDelegate(
       top: MediaQuery.paddingOf(context).top,
       bar: this,
@@ -145,7 +152,17 @@ extension on _TopBarDelegate {
     final t = context.text;
     final code = bar.code;
     final title = bar.title;
-    final back = bar.onBack ?? () => Navigator.maybePop(context);
+    final back = bar.onBack ?? () => NzPaneScope.back(context);
+    // Tablet sağ bölmesi (`.tb-rpane`): çubuk yanları 20 (telefonda 8); yığında geri
+    // dönülecek ekran yoksa "Geri" gizli (`[data-canback="false"]`).
+    final pane = NzPaneScope.maybeOf(context);
+    final inDetail = pane?.role == NzPaneRole.detail;
+    final showBack = NzPaneScope.showsBack(pane);
+    final side = inDetail
+        ? NizamioSpacing.space1 +
+              NzTabletMetrics.detailHeaderSide -
+              NizamioSpacing.space2
+        : NizamioSpacing.space1;
     return NzGlass(
       tone: NzGlassTone.bar,
       edge: false,
@@ -156,20 +173,22 @@ extension on _TopBarDelegate {
             // Prototip `header`: 8 px üst ve yan dolgu; düğmeler 44 görsel / 48 dokunma.
             padding: EdgeInsets.only(
               top: top + NizamioSpacing.space2,
-              left: NizamioSpacing.space1,
-              right: NizamioSpacing.space1,
+              left: showBack ? side : NzTabletMetrics.detailHeaderSide,
+              right: side,
             ),
             child: Row(
               children: [
-                NzIconButton(
-                  icon: Icons.arrow_back_ios_new_rounded,
-                  semanticLabel:
-                      bar.backLabel ??
-                      MaterialLocalizations.of(context).backButtonTooltip,
-                  onPressed: back,
-                  size: NzSize.sm,
-                ),
-                const Gap(NizamioSpacing.space1),
+                if (showBack) ...[
+                  NzIconButton(
+                    icon: Icons.arrow_back_ios_new_rounded,
+                    semanticLabel:
+                        bar.backLabel ??
+                        MaterialLocalizations.of(context).backButtonTooltip,
+                    onPressed: back,
+                    size: NzSize.sm,
+                  ),
+                  const Gap(NizamioSpacing.space1),
+                ],
                 Expanded(
                   child: code != null
                       ? Text(

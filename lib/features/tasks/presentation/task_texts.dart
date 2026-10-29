@@ -161,7 +161,7 @@ int priorityLevel(TaskPriority p) => switch (p) {
   TaskPriority.high => 3,
 };
 
-/// Ad soyaddan iki harf ("Kerem Özdal" → "KÖ").
+/// Ad soyaddan iki harf ("Kadir Özbek" → "KÖ").
 String initialsOf(String name) => name
     .split(' ')
     .where((x) => x.isNotEmpty)

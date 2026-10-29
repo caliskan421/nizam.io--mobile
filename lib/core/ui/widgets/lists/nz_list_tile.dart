@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../nz_icon.dart';
 import '../nz_size.dart';
 
 enum _TileVariant { standard, navigation, danger }
@@ -66,7 +67,7 @@ class NzListTile extends StatelessWidget {
         trailing ??
         (_variant == _TileVariant.navigation
             ? ExcludeSemantics(
-                child: Icon(
+                child: NzIcon(
                   Icons.chevron_right,
                   color: context.colors.textMuted,
                 ),

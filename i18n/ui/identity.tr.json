@@ -4,7 +4,7 @@
     "ui.identity.login_title": "Giriş yap",
     "ui.identity.login_server": "Sunucu",
     "ui.identity.login_email": "E-posta",
-    "ui.identity.login_password": "Parola",
+    "ui.identity.login_password": "Şifre",
     "ui.identity.login_submit": "Giriş yap",
     "ui.identity.password_title": "Parola değiştir",
     "ui.identity.password_intro": "Devam etmek için parolanızı değiştirmeniz gerekiyor. Parola değişince diğer cihazlardaki oturumlarınız kapanır.",
@@ -17,10 +17,11 @@
     "ui.identity.sign_out": "Çıkış yap",
     "ui.identity.sign_out_confirm_title": "Çıkış yapılsın mı?",
     "ui.identity.sign_out_confirm_message": "Bu cihazdaki oturum kapatılır.",
-    "ui.identity.login_intro": "E-posta adresin ve parolanla devam et.",
+    "ui.identity.login_intro": "E-posta adresin ve şifrenle devam et.",
     "ui.identity.login_submitting": "Giriş yapılıyor…",
     "ui.identity.login_email_hint": "ad@alan.com",
-    "ui.identity.login_password_hint": "Parolan",
-    "ui.identity.login_version_prefix": "v"
+    "ui.identity.login_password_hint": "Şifren",
+    "ui.identity.login_version_prefix": "v",
+    "ui.identity.login_footer": "Developed by KAYACAN, COSMAN, CALISKAN"
   }
 }

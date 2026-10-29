@@ -1,5 +1,5 @@
 // HomeDashboardRepository: bugünkü tek gerçekleştirme geliştirme örneğidir; tutarlı sayılar,
-// kurmaca adlar, saate göre "bugün" tarihleri.
+// prototip adları, saate göre "bugün" tarihleri.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/features/scope/data/sample/sample_home_dashboard_repository.dart';
 import 'package:nizamio/features/scope/domain/home_dashboard.dart';
@@ -14,10 +14,9 @@ void main() {
       );
       final d = await repo.load();
       expect(d.tasks.open, d.tasks.total - d.tasks.done);
-      expect(
-        d.team.users,
-        d.team.admins + d.team.coordinators + d.team.members,
-      );
+      // Prototip fikstürü: ekip satırı 18 kullanıcı, rol kutuları 2 · 15 · 3.
+      expect(d.team.users, 18);
+      expect((d.team.admins, d.team.coordinators, d.team.members), (2, 15, 3));
       expect(d.coordinatorships.map((c) => c.code).toSet(), hasLength(11));
       expect(d.coordinatorships.where((c) => !c.hasLead), hasLength(1));
       expect(d.lastActivity!.at, DateTime(2026, 10, 21, 14, 27));

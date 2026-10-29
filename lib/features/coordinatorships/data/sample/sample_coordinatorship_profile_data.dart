@@ -1,4 +1,4 @@
-// Koordinatörlük ek bilgileri (prototip `logic_cdetail.js`; kişi adları kurmaca, kişi kimlikleri
+// Koordinatörlük ek bilgileri (prototip `logic_cdetail.js`; kişi adları prototip, kişi kimlikleri
 // görev kataloğuyla aynı). Elle düzenlenebilir; üretim verisi değildir.
 // ignore_for_file: lines_longer_than_80_chars
 part of 'sample_coordinatorship_profile_repository.dart';
@@ -6,6 +6,13 @@ part of 'sample_coordinatorship_profile_repository.dart';
 final _profiles = <CoordinatorshipProfile>[
   CoordinatorshipProfile(
     code: 'ALT',
+    // Prototip `D` kaydı: 7/12 tamamlandı, 3 geciken; sezon ortalaması %41.
+    reported: const CoordinatorshipReport(
+      done: 7,
+      total: 12,
+      late: 3,
+      seasonRatio: 0.41,
+    ),
     parent: 'Teknik altyapı',
     founded: DateTime(2026, 6, 10),
     about: 'Havalimanı yerleşkesinin temiz su, atıksu ve arıtma altyapısını kurar; depolama ve hidrofor sistemlerinin montajından ve devreye alınmasından sorumludur.',
@@ -69,6 +76,13 @@ final _profiles = <CoordinatorshipProfile>[
   ),
   CoordinatorshipProfile(
     code: 'MEK',
+    // Prototip `D` kaydı: 7/8 tamamlandı, 1 geciken; sezon ortalaması %41.
+    reported: const CoordinatorshipReport(
+      done: 7,
+      total: 8,
+      late: 1,
+      seasonRatio: 0.41,
+    ),
     parent: 'Teknik altyapı',
     founded: DateTime(2026, 6, 10),
     about: 'Mekanik sistemler koordinatörlüğünün sorumluluk alanı ve çalışma kapsamı burada yazar.',
@@ -107,6 +121,13 @@ final _profiles = <CoordinatorshipProfile>[
   ),
   CoordinatorshipProfile(
     code: 'ULA',
+    // Prototip `D` kaydı: 1/4 tamamlandı, 3 geciken; sezon ortalaması %41.
+    reported: const CoordinatorshipReport(
+      done: 1,
+      total: 4,
+      late: 3,
+      seasonRatio: 0.41,
+    ),
     parent: 'Teknik altyapı',
     founded: DateTime(2026, 6, 10),
     about: 'Ulaşım planlama koordinatörlüğünün sorumluluk alanı ve çalışma kapsamı burada yazar.',
@@ -139,6 +160,13 @@ final _profiles = <CoordinatorshipProfile>[
   ),
   CoordinatorshipProfile(
     code: 'ELE',
+    // Prototip `D` kaydı: 4/6 tamamlandı, 1 geciken; sezon ortalaması %41.
+    reported: const CoordinatorshipReport(
+      done: 4,
+      total: 6,
+      late: 1,
+      seasonRatio: 0.41,
+    ),
     parent: 'Teknik altyapı',
     founded: DateTime(2026, 6, 10),
     about: 'Elektrik ve enerji koordinatörlüğünün sorumluluk alanı ve çalışma kapsamı burada yazar.',
@@ -174,6 +202,13 @@ final _profiles = <CoordinatorshipProfile>[
   ),
   CoordinatorshipProfile(
     code: 'İDA',
+    // Prototip `D` kaydı: 1/11 tamamlandı, 4 geciken; sezon ortalaması %41.
+    reported: const CoordinatorshipReport(
+      done: 1,
+      total: 11,
+      late: 4,
+      seasonRatio: 0.41,
+    ),
     parent: 'Etkinlik ve operasyon',
     founded: DateTime(2026, 6, 10),
     about: 'İdari işler koordinatörlüğünün sorumluluk alanı ve çalışma kapsamı burada yazar.',
@@ -203,6 +238,13 @@ final _profiles = <CoordinatorshipProfile>[
   ),
   CoordinatorshipProfile(
     code: 'EĞİ',
+    // Prototip `D` kaydı: 2/6 tamamlandı, 2 geciken; sezon ortalaması %41.
+    reported: const CoordinatorshipReport(
+      done: 2,
+      total: 6,
+      late: 2,
+      seasonRatio: 0.41,
+    ),
     parent: 'Eğitim ve iletişim',
     founded: DateTime(2026, 6, 10),
     about: 'Eğitim ve Arge koordinatörlüğünün sorumluluk alanı ve çalışma kapsamı burada yazar.',
@@ -231,6 +273,13 @@ final _profiles = <CoordinatorshipProfile>[
   ),
   CoordinatorshipProfile(
     code: 'OPE',
+    // Prototip `D` kaydı: 4/8 tamamlandı, 0 geciken; sezon ortalaması %41.
+    reported: const CoordinatorshipReport(
+      done: 4,
+      total: 8,
+      late: 0,
+      seasonRatio: 0.41,
+    ),
     parent: 'Etkinlik ve operasyon',
     founded: DateTime(2026, 6, 10),
     about: 'Operasyon koordinatörlüğünün sorumluluk alanı ve çalışma kapsamı burada yazar.',
@@ -278,6 +327,13 @@ final _profiles = <CoordinatorshipProfile>[
   ),
   CoordinatorshipProfile(
     code: 'SAT',
+    // Prototip `D` kaydı: 4/7 tamamlandı, 0 geciken; sezon ortalaması %41.
+    reported: const CoordinatorshipReport(
+      done: 4,
+      total: 7,
+      late: 0,
+      seasonRatio: 0.41,
+    ),
     parent: 'Eğitim ve iletişim',
     founded: DateTime(2026, 6, 10),
     about: 'Satış ve pazarlama koordinatörlüğünün sorumluluk alanı ve çalışma kapsamı burada yazar.',
@@ -306,6 +362,13 @@ final _profiles = <CoordinatorshipProfile>[
   ),
   CoordinatorshipProfile(
     code: 'MİM',
+    // Prototip `D` kaydı: 3/5 tamamlandı, 0 geciken; sezon ortalaması %41.
+    reported: const CoordinatorshipReport(
+      done: 3,
+      total: 5,
+      late: 0,
+      seasonRatio: 0.41,
+    ),
     parent: 'Eğitim ve iletişim',
     founded: DateTime(2026, 6, 10),
     about: 'Mimari tasarım koordinatörlüğünün sorumluluk alanı ve çalışma kapsamı burada yazar.',
@@ -339,6 +402,13 @@ final _profiles = <CoordinatorshipProfile>[
   ),
   CoordinatorshipProfile(
     code: 'FUA',
+    // Prototip `D` kaydı: 2/4 tamamlandı, 1 geciken; sezon ortalaması %41.
+    reported: const CoordinatorshipReport(
+      done: 2,
+      total: 4,
+      late: 1,
+      seasonRatio: 0.41,
+    ),
     parent: 'Etkinlik ve operasyon',
     founded: DateTime(2026, 6, 10),
     about: 'Fuar koordinatörlüğünün sorumluluk alanı ve çalışma kapsamı burada yazar.',
@@ -371,6 +441,13 @@ final _profiles = <CoordinatorshipProfile>[
   ),
   CoordinatorshipProfile(
     code: 'SİS',
+    // Prototip `D` kaydı: 2/4 tamamlandı, 0 geciken; sezon ortalaması %41.
+    reported: const CoordinatorshipReport(
+      done: 2,
+      total: 4,
+      late: 0,
+      seasonRatio: 0.41,
+    ),
     parent: 'Yönetim',
     founded: DateTime(2026, 6, 10),
     about: 'Sistem koordinatörlüğü koordinatörlüğünün sorumluluk alanı ve çalışma kapsamı burada yazar.',

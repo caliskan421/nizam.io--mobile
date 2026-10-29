@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../nz_icon.dart';
 
 /// Boş liste/sonuç. Feature'a özgü isimli yapıcı core'da yoktur; feature kendi metniyle çağırır.
 class NzEmptyState extends StatelessWidget {
@@ -37,7 +38,7 @@ class NzEmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ExcludeSemantics(
-              child: Icon(
+              child: NzIcon(
                 icon ?? Icons.inbox_outlined,
                 size: NizamioSpacing.space12,
                 color: colors.textMuted,

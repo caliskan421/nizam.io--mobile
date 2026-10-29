@@ -1,4 +1,4 @@
-// SampleArchiveRepository: kurmaca koordinatörler, benzersiz kodlar.
+// SampleArchiveRepository: prototip koordinatörleri, benzersiz kodlar.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/features/archive/data/sample/sample_archive_repository.dart';
 

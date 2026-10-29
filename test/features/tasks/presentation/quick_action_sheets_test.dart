@@ -92,7 +92,7 @@ void main() {
     // Koordinatörlük seçilmeden Atanan → koordinatörlük satırı açılır.
     await _tap(tester, find.text(_l.uiTasksAssignee));
     await _tap(tester, find.text('Altyapı ve tesisat'));
-    await _tap(tester, find.text('Kerem Özdal'));
+    await _tap(tester, find.text('Kadir Özbek'));
     expect(find.text(_l.uiTasksRoleMemberLc), findsOneWidget);
 
     final sheet = find.byType(NzBottomSheetContent);
@@ -138,11 +138,11 @@ void main() {
       await _tap(tester, find.text('ana görev'));
       expect(find.text('Altyapı ve tesisat'), findsOneWidget);
       await _tap(tester, find.text(_l.uiTasksAssignee));
-      await _tap(tester, find.text('Deniz Aydemir'));
+      await _tap(tester, find.text('Abdullah Ateş'));
       await tester.tapAt(const Offset(20, 20));
       await settle(tester);
       await _tap(tester, find.text('ana görev'));
-      expect(find.text('Deniz Aydemir'), findsOneWidget);
+      expect(find.text('Abdullah Ateş'), findsOneWidget);
       await tester.tapAt(const Offset(20, 20));
       await settle(tester);
       // Görev listesinden: koordinatörlük seçilmemiş, atanan yok.

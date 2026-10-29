@@ -89,4 +89,55 @@ void main() {
     await tester.pumpWidget(app(base.copyWith(size: const Size(700, 800))));
     expect(builds, 2);
   });
+
+  test('horizontalInset: en az pagePadding, artan alan iki yana bölünür', () {
+    expect(NzLayout.fromWidth(400).horizontalInset(NzContentWidth.list), 16);
+    // 1400: (1400 - 2·32 - 960) / 2 = 188 → 32 + 188.
+    expect(NzLayout.fromWidth(1400).horizontalInset(NzContentWidth.list), 220);
+    // 700: (700 - 2·24 - 480) / 2 = 86 → 24 + 86.
+    expect(NzLayout.fromWidth(700).horizontalInset(NzContentWidth.form), 110);
+    expect(NzLayout.fromWidth(700).horizontalInset(NzContentWidth.list), 24);
+  });
+
+  test('sınırsız genişlik: fromConstraints ve horizontalInset assert eder', () {
+    expect(
+      () => NzLayout.fromConstraints(const BoxConstraints()),
+      throwsAssertionError,
+    );
+    expect(
+      () =>
+          NzLayout.fromWidth(double.infinity)
+              .horizontalInset(NzContentWidth.list),
+      throwsAssertionError,
+    );
+  });
+
+  testWidgets('fromConstraints yereldir: geniş pencerede dar alan compact', (
+    tester,
+  ) async {
+    late NzLayout window;
+    late NzLayout local;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(size: Size(1400, 800)),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 400,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                window = NzLayout.of(context);
+                local = NzLayout.fromConstraints(constraints);
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(window.resolvedClass, WindowClass.expanded);
+    expect(local.width, 400);
+    expect(local.resolvedClass, WindowClass.compact);
+    expect(local.pagePadding, NizamioSpacing.space4);
+  });
 }

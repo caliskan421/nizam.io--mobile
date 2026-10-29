@@ -12,6 +12,7 @@ import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
 import '../application/archive_folder_contents.dart';
@@ -97,6 +98,8 @@ class ArchiveFolderPage extends ConsumerWidget {
     if (contents == null) {
       // Yükleme / hata: kaynakların durumu (ikisi de hazırsa içerik yukarıda doludur).
       return NzPage.feed(
+        // Tablet sağ bölmesi (arşiv klasörü: gap 20, başlık -6).
+        paneLead: NizamioSpacing.rowPad,
         onRetry: retry,
         topBar: topBar,
         children: [
@@ -116,6 +119,8 @@ class ArchiveFolderPage extends ConsumerWidget {
     final ctrl = ref.read(archiveFolderControllerProvider(code).notifier);
     final present = view.present(contents.files);
     return NzPage.feed(
+      // Tablet sağ bölmesi (arşiv klasörü: gap 20, başlık -6).
+      paneLead: NizamioSpacing.rowPad,
       onRetry: retry,
       topBar: topBar,
       // Prototip: sekme hapları üst çubuğun altına yapışır (`position: sticky; top: 64px`).
@@ -137,6 +142,7 @@ class ArchiveFolderPage extends ConsumerWidget {
           onSelected: (i) => ctrl.setTab(ArchiveFolderTab.values[i]),
         ),
       ),
+      afterKey: ValueKey(view.tab),
       after: [
         const Gap(NizamioSpacing.space2),
         if (view.tab == ArchiveFolderTab.tasks)
@@ -385,7 +391,7 @@ class _TaskFilter extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
+          NzIcon(
             Icons.folder_outlined,
             size: NizamioSize.iconSizeSm,
             color: c.textMuted,
@@ -402,7 +408,7 @@ class _TaskFilter extends StatelessWidget {
           IconButton(
             tooltip: l.uiArchiveRemoveTaskFilter,
             onPressed: onClear,
-            icon: Icon(
+            icon: NzIcon(
               Icons.close_rounded,
               size: NizamioSize.iconSizeSm,
               color: c.textMuted,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../../layout/nz_pane.dart';
 import '../../theme/nz_surfaces.dart';
 import '../buttons/nz_pressable.dart';
 import '../nz_size.dart';
@@ -51,16 +52,23 @@ class NzCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final radius = BorderRadius.circular(NizamioRadius.card);
-    final content = Padding(
-      padding:
-          padding ??
-          EdgeInsets.all(
-            size.pick(
-              sm: NizamioSpacing.space3,
-              md: NizamioSpacing.space4,
-              lg: NizamioSpacing.space6,
-            ),
+    final pad =
+        padding ??
+        EdgeInsets.all(
+          size.pick(
+            sm: NizamioSpacing.space3,
+            md: NizamioSpacing.space4,
+            lg: NizamioSpacing.space6,
           ),
+        );
+    // Tablet kaynağı `t-card` border-box: 1 px kenarlık dolgunun dışındadır.
+    final borderBox =
+        _variant == _CardVariant.outlined &&
+        NzTabletMetrics.tabletVisualAt(MediaQuery.sizeOf(context).width);
+    final content = Padding(
+      padding: borderBox
+          ? pad.add(const EdgeInsets.all(NizamioSize.borderWidth))
+          : pad,
       child: child,
     );
     final decoration = switch (_variant) {

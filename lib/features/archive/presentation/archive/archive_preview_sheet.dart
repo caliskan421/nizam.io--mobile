@@ -6,6 +6,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/archive_folder_controller.dart';
@@ -110,7 +111,7 @@ class _PreviewState extends ConsumerState<_Preview> {
             color: c.surfaceOverlay,
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, size: NizamioSize.iconSizeSm, color: c.text),
+          child: NzIcon(icon, size: NizamioSize.iconSizeSm, color: c.text),
         ),
       ),
     );

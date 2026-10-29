@@ -33,8 +33,8 @@ void main() {
       ]);
       final alt = list.first;
       expect((alt.done, alt.total, alt.late), (9, 13, 3));
-      expect(alt.leads.map((p) => p.name), ['Deniz Aydemir', 'Kaan Erol']);
-      expect(alt.members.map((p) => p.name), ['Kerem Özdal']);
+      expect(alt.leads.map((p) => p.name), ['Abdullah Ateş', 'Ali Avcı']);
+      expect(alt.members.map((p) => p.name), ['Kadir Özbek']);
 
       c
           .read(coordinatorshipsControllerProvider.notifier)

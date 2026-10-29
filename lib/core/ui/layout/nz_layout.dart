@@ -9,6 +9,9 @@ import 'window_class.dart';
 // token eklendiğinde buradan okunur.
 enum NzContentWidth {
   form(480),
+
+  /// Tablet girişi (prototip ortada 420).
+  login(420),
   reading(720),
   list(960);
 
@@ -25,11 +28,24 @@ class NzLayout {
   /// [windowClass] verilmişse eşikler yerine bu sınıf kullanılır (testler/önizleme).
   const NzLayout.withClass(this.width, WindowClass this.windowClass);
 
+  /// Pencere düzeyi: genişlik pencerenindir, widget'a ayrılan alanın değil (bölünmüş ekran /
+  /// yan panelde daha geniş çıkabilir). Sayfa dolgusu ve içerik genişliği için
+  /// [NzLayout.fromConstraints] kullanılır.
   /// Yalnız `MediaQuery.sizeOf` dinler: klavye/inset değişimi yeniden çizim tetiklemez.
   factory NzLayout.of(BuildContext context) =>
       NzLayout.fromWidth(MediaQuery.sizeOf(context).width);
 
   factory NzLayout.fromWidth(double width) => NzLayout(width);
+
+  /// Yerel: üst kısıtın ([LayoutBuilder]) gerçek genişliği. Genişlik sınırlı olmalıdır
+  /// (yatay kaydırma içinde kullanılmaz).
+  factory NzLayout.fromConstraints(BoxConstraints constraints) {
+    assert(
+      constraints.hasBoundedWidth,
+      'NzLayout.fromConstraints sınırsız genişlik alamaz: $constraints',
+    );
+    return NzLayout(constraints.maxWidth);
+  }
 
   final double width;
   final WindowClass? windowClass;
@@ -51,6 +67,18 @@ class NzLayout {
   int get columns => pick(compact: 4, medium: 8, expanded: 12);
 
   double contentMaxWidth(NzContentWidth kind) => kind.maxWidth;
+
+  /// [kind] azami genişliğinde ortalanmış içeriğin bir yandaki yatay boşluğu: en az
+  /// [pagePadding]; [width] artanı iki yana eşit bölünür. Sınırsız genişlikte (yalnız
+  /// assert kapalıyken) ortalama yapılamaz, [pagePadding] döner.
+  /// [padding] verilirse [pagePadding] yerine en az bu boşluk (tablet sağ bölmesi 28).
+  double horizontalInset(NzContentWidth kind, {double? padding}) {
+    final min = padding ?? pagePadding;
+    assert(width.isFinite, 'horizontalInset sonlu genişlik ister: $width');
+    if (!width.isFinite) return min;
+    final extra = (width - 2 * min - contentMaxWidth(kind)) / 2;
+    return min + (extra > 0 ? extra : 0);
+  }
 
   /// Eksik sınıf bir küçüğüne düşer: `pick(compact: 1, expanded: 3)` medium'da 1.
   T pick<T>({required T compact, T? medium, T? expanded}) => AdaptiveValue<T>(

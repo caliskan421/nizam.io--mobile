@@ -95,17 +95,23 @@ class HomePage extends ConsumerWidget {
   };
 }
 
-class _Feed extends StatelessWidget {
+class _Feed extends ConsumerWidget {
   const _Feed({required this.dashboard, required this.onQuickAction});
 
   final HomeDashboard dashboard;
   final ValueChanged<HomeQuickAction> onQuickAction;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final d = dashboard;
     final nav = context.appNav;
-    final now = DateTime.now();
+    // Tarih satırı ve "son işlem" göreli zamanı görev kataloğunun "bugün"üdür (örnek veride
+    // prototip çapası 21 Ekim; gerçek kaynakta sunucu günü). Katalog yokken cihaz saati.
+    final now =
+        ref.watch(
+          taskCatalogControllerProvider.select((c) => c.value?.today),
+        ) ??
+        DateTime.now();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

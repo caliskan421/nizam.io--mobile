@@ -1,16 +1,20 @@
 // Uygulama kabuğu (W63): `localeProvider` MaterialApp'e bağlıdır; dev flavor prototip modunda
-// (oturumsuz ana sayfa) açılır, prod faz kapısında kalır.
+// (login → örnek ana sayfa) açılır, prod faz kapısında kalır.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/app/app.dart';
+import 'package:nizamio/app/orientation_policy.dart';
 import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/config/flavor.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/preferences/app_preferences.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/ui/widgets/buttons/nz_button.dart';
+import 'package:nizamio/features/identity/presentation/login_page.dart';
 import 'package:nizamio/features/scope/scope.dart';
 
 import '../features/pilot_support.dart';
@@ -105,14 +109,57 @@ void main() {
       expect(find.byIcon(Icons.widgets_outlined), findsNothing);
     });
 
-    testWidgets('dev flavor: bağ yokken ana sayfada açılır, faz değişmez', (
-      tester,
-    ) async {
-      final h = await _pump(tester, flavor: Flavor.dev);
-      expect(h.read(appPhaseProvider), AppPhase.unbound);
-      expect(find.text(_l.uiServerIntro), findsNothing);
-      expect(find.byIcon(Icons.widgets_outlined), findsNothing);
-      expect(find.byType(HomePage), findsOneWidget);
-    });
+    testWidgets(
+      'dev flavor: login ile açılır, boş giriş örnek ana sayfaya geçer',
+      (tester) async {
+        final h = await _pump(tester, flavor: Flavor.dev);
+        expect(h.read(appPhaseProvider), AppPhase.unbound);
+        expect(find.text(_l.uiServerIntro), findsNothing);
+        expect(find.byIcon(Icons.widgets_outlined), findsNothing);
+        expect(find.byType(LoginPage), findsOneWidget);
+        expect(find.byType(HomePage), findsNothing);
+        expect(
+          tester
+              .widgetList<TextFormField>(find.byType(TextFormField))
+              .every((field) => field.controller!.text.isEmpty),
+          isTrue,
+        );
+        await tester.tap(
+          find.widgetWithText(NzButton, _l.uiIdentityLoginSubmit),
+        );
+        await settle(tester);
+        expect(find.byType(HomePage), findsOneWidget);
+        expect(h.read(appPhaseProvider), AppPhase.unbound);
+      },
+    );
   });
+
+  testWidgets(
+    'yön politikası kabukta: Android telefon ekranı dikey kilitlenir',
+    (tester) async {
+      final calls = <Object?>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'SystemChrome.setPreferredOrientations') {
+            calls.add(call.arguments);
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      addTearDown(tester.view.display.reset);
+      tester.view.display.size = const Size(390, 844);
+      await _pump(tester);
+      expect(find.byType(OrientationPolicyHost), findsOneWidget);
+      expect(calls, [
+        ['DeviceOrientation.portraitUp'],
+      ]);
+    },
+  );
 }

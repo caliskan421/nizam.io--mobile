@@ -42,6 +42,7 @@ class NzPasswordField extends StatefulWidget {
     this.labelAbove = false,
     this.textInputAction = TextInputAction.done,
     this.focusNode,
+    this.invalid = false,
   }) : _kind = _PasswordKind.current;
 
   const NzPasswordField.newPassword({
@@ -60,6 +61,7 @@ class NzPasswordField extends StatefulWidget {
     this.labelAbove = false,
     this.textInputAction = TextInputAction.next,
     this.focusNode,
+    this.invalid = false,
   }) : _kind = _PasswordKind.newPassword;
 
   final String label;
@@ -78,6 +80,10 @@ class NzPasswordField extends StatefulWidget {
   final bool labelAbove;
   final TextInputAction textInputAction;
   final FocusNode? focusNode;
+
+  /// true → alan metinsiz hata görünümünde (tehlike kenarlığı); hata metni başka yerde
+  /// gösterildiğinde (ör. giriş formunun altındaki tek ileti, iki alan birden kırmızı).
+  final bool invalid;
   final _PasswordKind _kind;
 
   /// Değer ve denetleyici içermez.
@@ -107,6 +113,7 @@ class _NzPasswordFieldState extends State<NzPasswordField>
   Widget build(BuildContext context) {
     final l = context.l10n;
     final validator = widget.validator;
+    final errorTheme = Theme.of(context).inputDecorationTheme;
     final field = TextFormField(
       controller: widget.controller,
       focusNode: widget.focusNode,
@@ -142,6 +149,8 @@ class _NzPasswordFieldState extends State<NzPasswordField>
           ),
         ),
         constraints: const BoxConstraints(minHeight: NizamioSpacing.space12),
+        enabledBorder: widget.invalid ? errorTheme.errorBorder : null,
+        focusedBorder: widget.invalid ? errorTheme.focusedErrorBorder : null,
         suffixIcon: IconButton(
           tooltip: _visible ? l.uiInputsPasswordHide : l.uiInputsPasswordShow,
           icon: Icon(_visible ? Icons.visibility_off : Icons.visibility),

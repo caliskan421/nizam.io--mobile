@@ -46,7 +46,9 @@ class NzGlass extends StatelessWidget {
       decoration: ShapeDecoration(shape: shape, shadows: shadow),
       child: ClipPath(
         clipper: ShapeBorderClipper(shape: shape),
-        child: BackdropFilter(
+        // `grouped`: üstte bir BackdropGroup varsa (ör. alt menü kapsülü + asistan dairesi)
+        // arka plan bir kez okunur; yoksa sıradan BackdropFilter gibi davranır.
+        child: BackdropFilter.grouped(
           filter: tone.filter(),
           child: Material(color: tone.fill(c), shape: shape, child: child),
         ),

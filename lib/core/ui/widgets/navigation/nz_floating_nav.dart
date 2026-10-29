@@ -81,6 +81,9 @@ class NzFloatingNav extends StatelessWidget {
   static const _activeMaxWide = 174.0;
 
   /// Gövdenin altta ayırması gereken yükseklik (kapsül + alt boşluk + güvenli alan).
+  // Sabit anahtar: her kurulumda yeni anahtar BackdropGroup bağımlılarını yeniden kurdurur.
+  static final _backdropKey = BackdropKey();
+
   static double reservedHeight(BuildContext context) =>
       NizamioSize.nav +
       NizamioSpacing.gapXl +
@@ -115,19 +118,24 @@ class NzFloatingNav extends StatelessWidget {
                 _activeMin,
                 math.min(wide ? _activeMaxWide : _activeMax, room - fixed),
               );
-              return Row(
-                children: [
-                  _Capsule(
-                    items: items,
-                    current: currentIndex,
-                    activeWidth: active,
-                    itemWidth: itemW,
-                    onSelect: onSelect,
-                    semanticLabel: semanticLabel,
-                  ),
-                  const Spacer(),
-                  if (action != null) _ActionCircle(action: action),
-                ],
+              // Kapsül ve asistan dairesi örtüşmeyen iki cam: tek arka plan okumasını paylaşır
+              // (BackdropGroup; her karede iki ayrı bulanıklık girişi yerine bir).
+              return BackdropGroup(
+                backdropKey: _backdropKey,
+                child: Row(
+                  children: [
+                    _Capsule(
+                      items: items,
+                      current: currentIndex,
+                      activeWidth: active,
+                      itemWidth: itemW,
+                      onSelect: onSelect,
+                      semanticLabel: semanticLabel,
+                    ),
+                    const Spacer(),
+                    if (action != null) _ActionCircle(action: action),
+                  ],
+                ),
               );
             },
           ),

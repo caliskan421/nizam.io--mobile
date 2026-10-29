@@ -127,6 +127,30 @@ void main() {
     expect(find.byIcon(Icons.info_outline), findsOneWidget);
   });
 
+  testWidgets('labelLeading etiketin solunda; dokunuş satırı tersler', (
+    tester,
+  ) async {
+    var v = false;
+    await tester.pumpWidget(
+      testApp(
+        StatefulBuilder(
+          builder: (context, set) => NzCheckbox(
+            label: 'Kerem Özdal',
+            value: v,
+            onChanged: (x) => set(() => v = x),
+            labelLeading: const Icon(Icons.person, key: ValueKey('lead')),
+          ),
+        ),
+      ),
+    );
+    final lead = tester.getRect(find.byKey(const ValueKey('lead')));
+    final label = tester.getRect(find.text('Kerem Özdal'));
+    expect(lead.right, lessThanOrEqualTo(label.left));
+    await tester.tap(find.byKey(const ValueKey('lead')));
+    await tester.pump();
+    expect(v, isTrue);
+  });
+
   testWidgets('form: mustAccept işaretsizken submit engellenir, metin ARB', (
     tester,
   ) async {

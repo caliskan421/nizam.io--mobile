@@ -39,6 +39,7 @@ class NzTextField extends StatefulWidget {
     this.trailing,
     this.textInputAction = TextInputAction.next,
     this.focusNode,
+    this.invalid = false,
     this.maxLength,
     this.autofillHints,
   }) : _kind = _TextFieldKind.text;
@@ -64,6 +65,7 @@ class NzTextField extends StatefulWidget {
     this.trailing,
     this.textInputAction = TextInputAction.next,
     this.focusNode,
+    this.invalid = false,
     this.maxLength,
   }) : _kind = _TextFieldKind.email,
        autofillHints = const [AutofillHints.email];
@@ -87,6 +89,7 @@ class NzTextField extends StatefulWidget {
     this.leading,
     this.trailing,
     this.focusNode,
+    this.invalid = false,
     this.maxLength,
     this.autofillHints,
   }) : _kind = _TextFieldKind.multiline,
@@ -114,6 +117,7 @@ class NzTextField extends StatefulWidget {
     this.trailing,
     this.textInputAction = TextInputAction.next,
     this.focusNode,
+    this.invalid = false,
     this.maxLength,
   }) : _kind = _TextFieldKind.number,
        autofillHints = null;
@@ -147,6 +151,10 @@ class NzTextField extends StatefulWidget {
   final Widget? trailing;
   final TextInputAction textInputAction;
   final FocusNode? focusNode;
+
+  /// true → alan metinsiz hata görünümünde (tehlike kenarlığı); hata metni başka yerde
+  /// gösterildiğinde (ör. giriş formunun altındaki tek ileti, iki alan birden kırmızı).
+  final bool invalid;
   final int? maxLength;
   final Iterable<String>? autofillHints;
   final _TextFieldKind _kind;
@@ -170,6 +178,7 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
     final number = widget._kind == _TextFieldKind.number;
     final validator = widget.validator;
     final l = context.l10n;
+    final errorTheme = Theme.of(context).inputDecorationTheme;
     final field = TextFormField(
       controller: widget.controller,
       initialValue: widget.controller == null ? widget.initialValue : null,
@@ -208,6 +217,8 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
           vertical: style.vertical,
         ),
         constraints: const BoxConstraints(minHeight: NizamioSpacing.space12),
+        enabledBorder: widget.invalid ? errorTheme.errorBorder : null,
+        focusedBorder: widget.invalid ? errorTheme.focusedErrorBorder : null,
       ),
       forceErrorText: serverErrorText,
       validator: validator == null

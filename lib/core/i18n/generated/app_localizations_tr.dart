@@ -3019,6 +3019,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTimelineScaleMonth => 'Ay';
 
   @override
+  String get uiTimelineZoomIn => 'Yakınlaştır';
+
+  @override
+  String get uiTimelineZoomOut => 'Uzaklaştır';
+
+  @override
   String get uiTimelineOverview => 'Genel bakış';
 
   @override

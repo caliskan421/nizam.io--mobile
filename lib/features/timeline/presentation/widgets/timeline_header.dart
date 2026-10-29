@@ -10,7 +10,7 @@ import '../timeline_texts.dart';
 import 'timeline_controls.dart';
 
 /// Çizelgenin üstüne binen başlık çubuğu (44): koordinatörlük seçici ve Filtre düğmesi
-/// (etkin süzgeç sayısı rozeti). Sabit yükseklik: metin en çok 1.3×.
+/// (kişi/öncelik seçiliyken etkin süzgeç sayısı rozeti). Sabit yükseklik: metin en çok 1.3×.
 class TimelineHeader extends StatelessWidget {
   const TimelineHeader({
     super.key,
@@ -29,7 +29,9 @@ class TimelineHeader extends StatelessWidget {
     final t = context.text;
     final l = context.l10n;
     final open = view.state.coordMenuOpen;
+    // Prototip: rozet kişi/öncelik seçiliyken görünür; sayı durum süzgecini de sayar.
     final n = view.state.filterCount;
+    final badge = view.state.hasChips;
     final summary = l.coordSummary(view);
     return MediaQuery.withClampedTextScaling(
       maxScaleFactor: 1.3,
@@ -98,7 +100,7 @@ class TimelineHeader extends StatelessWidget {
                       ),
                       const Gap(6),
                       Text(l.uiTimelineFilter, style: t.labelMd),
-                      if (n > 0) ...[
+                      if (badge) ...[
                         const Gap(6),
                         DecoratedBox(
                           decoration: BoxDecoration(

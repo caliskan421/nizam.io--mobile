@@ -4,6 +4,10 @@ import 'package:meta/meta.dart';
 
 import '../../tasks/tasks.dart';
 
+/// Rota parametresinde "bütün koordinatörlükler" (prototip koordinatörlük listesi kısayolu
+/// "Tümünü zaman çizelgesinde gör": `coords` = hepsi).
+const timelineAllCoordinatorships = '*';
+
 /// Çizelge ölçeği (prototip `scale`: gün / hafta / ay). Gün başına düşen piksel görünüm
 /// geometrisidir (presentation); burada yalnız sıra ve ad.
 enum TimelineScale { day, week, month }
@@ -119,10 +123,15 @@ final class TimelineState {
     this.requests = const ByTask(),
     this.undo,
     this.coordMenuOpen = false,
+    this.startAll = false,
   });
 
-  /// Seçili koordinatörlük kodları; null → kataloğun ilk koordinatörlüğü.
+  /// Seçili koordinatörlük kodları; null → kataloğun ilk koordinatörlüğü (ya da [startAll]
+  /// ise hepsi).
   final List<String>? coordinatorships;
+
+  /// Açılışta bütün koordinatörlükler seçili (rota `coord=*`).
+  final bool startAll;
   final TimelineStatusFilter status;
   final TimelineScale scale;
 
@@ -149,6 +158,9 @@ final class TimelineState {
       priorities.length +
       (status == TimelineStatusFilter.all ? 0 : 1);
 
+  /// Rozet görünür mü (prototip `hasChips`: kişi ya da öncelik seçili; sayı [filterCount]).
+  bool get hasChips => people.isNotEmpty || priorities.isNotEmpty;
+
   TimelineState copyWith({
     List<String>? coordinatorships,
     TimelineStatusFilter? status,
@@ -163,6 +175,7 @@ final class TimelineState {
     TimelineUndo? Function()? undo,
     bool? coordMenuOpen,
   }) => TimelineState(
+    startAll: startAll,
     coordinatorships: coordinatorships ?? this.coordinatorships,
     status: status ?? this.status,
     scale: scale ?? this.scale,

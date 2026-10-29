@@ -19,6 +19,7 @@ import 'widgets/timeline_feedback.dart';
 import 'widgets/timeline_header.dart';
 import 'widgets/timeline_selection_card.dart';
 import 'widgets/timeline_sheets.dart';
+import 'widgets/timeline_zoom_controls.dart';
 
 /// Zaman çizelgesi (prototip `gantt`; kabuk dışı tam ekran, alt menü yok): kök üst çubuk,
 /// "Liste / Zaman çizelgesi" anahtarı, koordinatörlük seçici + Filtre, dikey Gantt (yapışkan
@@ -29,6 +30,9 @@ class TimelinePage extends ConsumerStatefulWidget {
   const TimelinePage({super.key, this.coordinatorship});
 
   final String? coordinatorship;
+
+  /// Rotada bütün koordinatörlükleri seçili açar (`openTimeline(coordinatorship: …)`).
+  static const allCoordinatorships = timelineAllCoordinatorships;
 
   @override
   ConsumerState<TimelinePage> createState() => _TimelinePageState();
@@ -201,6 +205,23 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                 onRemind: () => _say(
                   '${l.uiTimelineReminded} · ${sel.assignees.join(', ')}',
                 ),
+              ),
+            ),
+          if (sel == null && !v.state.coordMenuOpen)
+            Positioned(
+              right: NizamioSpacing.space3,
+              // Prototip `ctrlB`: 152, geri alma bildirimi varken 250.
+              bottom: (undo != null ? 250 : 152) + bottom,
+              child: TimelineZoomControls(
+                scale: v.state.scale,
+                overview: v.state.overview,
+                onZoomIn: ctrl.zoomIn,
+                onZoomOut: ctrl.zoomOut,
+                onOverview: () => ctrl.setOverview(!v.state.overview),
+                onLegend: () {
+                  ctrl.closeCoordMenu();
+                  showTimelineLegendSheet(context);
+                },
               ),
             ),
           if (undo != null && sel == null)

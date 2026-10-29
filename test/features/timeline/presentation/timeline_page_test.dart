@@ -189,7 +189,7 @@ void main() {
     expect(find.text(_l.uiTimelineEmptyNoCoord), findsOneWidget);
   });
 
-  testWidgets('filtre sayfası: durum, ölçek, genel bakış; lejant', (
+  testWidgets('filtre sayfası: durum, kişi; başlıkta Temizle; rozet', (
     tester,
   ) async {
     await _open(tester);
@@ -197,33 +197,102 @@ void main() {
     await settle(tester);
     expect(find.text(_l.uiTimelineFilters), findsWidgets);
     expect(find.text(_l.uiTimelinePerson), findsOneWidget);
+    expect(find.text(_l.uiTimelineCoordHint), findsOneWidget);
+    // Ölçek / genel bakış / lejant filtre sayfasında değil (çizelge kontrolleri).
+    expect(find.text(_l.uiTimelineScale), findsNothing);
+    expect(find.text(_l.uiTimelineLegendOpen), findsNothing);
     expect(find.text(_l.showTasks(13)), findsOneWidget);
     await tester.tap(find.text(_l.uiTimelineStatusLate));
     await settle(tester);
     expect(find.text(_l.showTasks(13)), findsNothing);
-    await tester.tap(find.text(_l.uiTimelineScaleDay));
-    await settle(tester);
     final apply = find.textContaining(_l.uiTimelineShowTasksTail);
     await tester.ensureVisible(apply);
     await tester.tap(apply);
     await settle(tester);
-    expect(_layout(tester).ppd, 30);
-    // Durum süzgeci rozeti.
-    expect(find.text('1'), findsWidgets);
+    // Yalnız durum süzgecinde rozet yok (prototip `hasChips`).
+    final badge = find.descendant(
+      of: find.bySemanticsLabel(_l.uiTimelineFilterLabel),
+      matching: find.text('1'),
+    );
+    expect(badge, findsNothing);
 
     await tester.tap(find.text(_l.uiTimelineFilter));
     await settle(tester);
-    await tester.tap(find.text(_l.uiTimelineOverview));
+    await tester.tap(find.text('Kaan Erol'));
     await settle(tester);
-    final legend = find.text(_l.uiTimelineLegendOpen);
-    await tester.ensureVisible(legend);
-    await tester.tap(legend);
+    await tester.tap(find.text(_l.uiTimelineClear));
     await settle(tester);
-    expect(find.text(_l.uiTimelineStDoneLate), findsOneWidget);
-    expect(find.text(_l.uiTimelineLegendStrip), findsOneWidget);
-    await tester.tapAt(const Offset(200, 20));
+    // Temizle kişiyi kaldırır, durumu korur: hâlâ 13'ten az görev.
+    expect(find.text(_l.showTasks(13)), findsNothing);
+    await tester.tap(find.text('Kaan Erol'));
     await settle(tester);
-    expect(_layout(tester).overview, hasLength(11));
+    await tester.ensureVisible(apply);
+    await tester.tap(apply);
+    await settle(tester);
+    expect(find.text('2'), findsWidgets);
+  });
+
+  testWidgets(
+    'çizelge kontrolleri: yakınlaştır/uzaklaştır, genel bakış, lejant',
+    (tester) async {
+      await _open(tester);
+      expect(_layout(tester).ppd, 7);
+      expect(find.text('hafta'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel(_l.uiTimelineZoomIn));
+      await settle(tester);
+      expect(_layout(tester).ppd, 30);
+      expect(find.text('gün'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel(_l.uiTimelineZoomOut));
+      await tester.tap(find.bySemanticsLabel(_l.uiTimelineZoomOut));
+      await settle(tester);
+      expect(_layout(tester).ppd, 2.4);
+
+      await tester.tap(find.bySemanticsLabel(_l.uiTimelineOverview));
+      await settle(tester);
+      expect(_layout(tester).overview, hasLength(11));
+      await tester.tap(find.bySemanticsLabel(_l.uiTimelineOverview));
+      await settle(tester);
+      expect(_layout(tester).overview, isEmpty);
+
+      await tester.tap(find.bySemanticsLabel(_l.uiTimelineLegendOpen));
+      await settle(tester);
+      expect(find.text(_l.uiTimelineStDoneLate), findsOneWidget);
+      expect(find.text(_l.uiTimelineLegendStrip), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'başarım: gövde iki katman; sayfa yeniden kurulumu yerleşimi korur',
+    (tester) async {
+      await _open(tester);
+      // Kaydırmadan bağımsız gövde ve kaydırmaya bağlı yapışkan katman ayrı sınırlarda.
+      for (final type in [TimelineChartPainter, TimelineStickyPainter]) {
+        final paint = find.byWidgetPredicate(
+          (w) => w is CustomPaint && w.painter.runtimeType == type,
+        );
+        expect(paint, findsOneWidget);
+        expect(
+          find.ancestor(of: paint, matching: find.byType(RepaintBoundary)),
+          findsWidgets,
+        );
+      }
+      await _tapBar(tester, 'ALT-10');
+      final before = _layout(tester);
+      // Bildirim yalnız sayfa durumunu değiştirir: yerleşim yeniden hesaplanmaz.
+      await tester.tap(find.bySemanticsLabel(_l.uiTimelineRemind));
+      await tester.pump();
+      expect(find.textContaining(_l.uiTimelineReminded), findsOneWidget);
+      expect(identical(_layout(tester), before), isTrue);
+    },
+  );
+
+  testWidgets('rota "*": bütün koordinatörlükler seçili açılır', (
+    tester,
+  ) async {
+    await _open(tester, coordinatorship: TimelinePage.allCoordinatorships);
+    expect(find.text(_l.uiTimelineCoordAll), findsOneWidget);
+    expect(_layout(tester).heads, hasLength(11));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('bugüne dön: uzağa kayınca düğme çıkar, dokununca bugüne döner', (

@@ -3,11 +3,14 @@ import 'dart:math' as math;
 import '../../tasks/tasks.dart';
 import 'timeline.dart';
 
-/// Kataloğun seçili koordinatörlükleri: durumdaki liste ya da (null) ilk koordinatörlük.
+/// Kataloğun seçili koordinatörlükleri: durumdaki liste ya da (null) ilk koordinatörlük
+/// ([TimelineState.startAll] ise hepsi).
 List<String> resolvedCoordinatorships(TaskCatalog catalog, TimelineState s) =>
     s.coordinatorships ??
     [
-      if (catalog.coordinatorships.isNotEmpty)
+      if (s.startAll)
+        for (final c in catalog.coordinatorships) c.code
+      else if (catalog.coordinatorships.isNotEmpty)
         catalog.coordinatorships.first.code,
     ];
 

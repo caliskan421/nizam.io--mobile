@@ -33,14 +33,21 @@ final class TimelineRequestSent extends TimelineRequestResult {
 
 /// Zaman çizelgesi ekranının durumu ve komutları (prototip `S_gantt`). Seçim, ölçek, süzgeçler,
 /// tarih taslağı, kayıt/geri alma ve tarih talepleri bellekte tutulur (sunucuya yazılmaz).
-/// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse kataloğun ilki.
+/// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse kataloğun ilki;
+/// [timelineAllCoordinatorships] ise hepsi.
 @riverpod
 class TimelineController extends _$TimelineController {
   @override
-  TimelineState build(String? coordinatorship) => TimelineState(
-    coordinatorships: coordinatorship == null ? null : [coordinatorship],
-    requests: timelineSampleRequests,
-  );
+  TimelineState build(String? coordinatorship) {
+    final all = coordinatorship == timelineAllCoordinatorships;
+    return TimelineState(
+      coordinatorships: coordinatorship == null || all
+          ? null
+          : [coordinatorship],
+      startAll: all,
+      requests: timelineSampleRequests,
+    );
+  }
 
   TaskCatalog? get _catalog => ref.read(taskCatalogControllerProvider).value;
 
@@ -97,6 +104,20 @@ class TimelineController extends _$TimelineController {
 
   void setScale(TimelineScale scale) => state = state.copyWith(scale: scale);
 
+  /// Yakınlaştır (ay → hafta → gün); en yakında etkisiz (prototip `zoomIn`).
+  void zoomIn() {
+    final i = state.scale.index;
+    if (i > 0) setScale(TimelineScale.values[i - 1]);
+  }
+
+  /// Uzaklaştır (gün → hafta → ay); en uzakta etkisiz (prototip `zoomOut`).
+  void zoomOut() {
+    final i = state.scale.index;
+    if (i < TimelineScale.values.length - 1) {
+      setScale(TimelineScale.values[i + 1]);
+    }
+  }
+
   void setOverview(bool on) => state = _cleared(state.copyWith(overview: on));
 
   void togglePerson(String id) =>
@@ -106,14 +127,9 @@ class TimelineController extends _$TimelineController {
     state.copyWith(priorities: _toggled(state.priorities, p)),
   );
 
-  /// "Temizle": kişi, öncelik ve durum süzgeci.
-  void clearFilters() => state = _cleared(
-    state.copyWith(
-      people: const [],
-      priorities: const [],
-      status: TimelineStatusFilter.all,
-    ),
-  );
+  /// "Temizle": kişi ve öncelik süzgeci (prototip `clearFilters`; durum korunur).
+  void clearFilters() =>
+      state = _cleared(state.copyWith(people: const [], priorities: const []));
 
   static List<T> _toggled<T>(List<T> list, T v) => list.contains(v)
       ? [

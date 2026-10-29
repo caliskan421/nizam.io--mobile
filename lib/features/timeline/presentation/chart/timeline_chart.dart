@@ -11,9 +11,15 @@ import '../timeline_texts.dart';
 import 'timeline_layout.dart';
 import 'timeline_painters.dart';
 
-/// Dikey Gantt gövdesi: yatay + dikey kaydırılan çizim alanı (tek `CustomPainter`,
-/// `RepaintBoundary`), yapışkan tarih sütunu, boş durum, alttaki sezon şeridi ve "bugüne dön".
-/// Durum taşımaz; dokunma/sürükleme geri çağrılarla controller'a gider.
+/// Dikey Gantt gövdesi: yatay + dikey kaydırılan çizim alanı, yapışkan tarih sütunu, boş durum,
+/// alttaki sezon şeridi ve "bugüne dön". Durum taşımaz; dokunma/sürükleme geri çağrılarla
+/// controller'a gider.
+///
+/// Başarım: gövde iki katmandır — kaydırmadan bağımsız [TimelineChartPainter] (ızgara, çubuklar;
+/// kendi `RepaintBoundary`'sinde bir kez kaydedilir, kaydırmada yalnız kayar) ve kaydırmaya
+/// bağlı ince [TimelineStickyPainter] (yapışkan etiketler, grup başlıkları). Yerleşim yalnız
+/// görünüm ya da genişlik değişince yeniden hesaplanır; "bugüne dön" düğmesi kaydırmanın her
+/// karesinde değil, görünürlüğü değişince yeniden kurulur.
 class TimelineChart extends StatefulWidget {
   const TimelineChart({
     super.key,
@@ -46,6 +52,37 @@ class _TimelineChartState extends State<TimelineChart> {
   final _h = ScrollController();
   double _viewportH = 0;
   TimelineLayout? _layout;
+
+  /// "Bugüne dön" konumu: -1 yukarıda, 1 aşağıda, 0 görünür (kaydırma dinleyicisi günceller).
+  final _todayDir = ValueNotifier<int>(0);
+
+  void _syncToday() {
+    final v = _v;
+    final l = _layout;
+    if (v == null || l == null) return;
+    final off = v.hasClients ? v.offset : v.initialScrollOffset;
+    final ty = l.todayY;
+    _todayDir.value = ty < off + TimelineGeometry.header + 10
+        ? -1
+        : ty > off + _viewportH - 20
+        ? 1
+        : 0;
+  }
+
+  /// Yerleşimi görünüm ya da genişlik değişince yeniden hesaplar (sayfa yeniden kurulumu,
+  /// ör. bildirim, aynı görünümle gelirse painter'lar yeniden çizilmez).
+  TimelineLayout _layoutFor(TimelineView view, double width) {
+    final cached = _layout;
+    if (cached != null &&
+        identical(cached.view, view) &&
+        _layoutWidth == width) {
+      return cached;
+    }
+    _layoutWidth = width;
+    return TimelineLayout.of(view, width);
+  }
+
+  double _layoutWidth = 0;
   String? _dragCode;
   double _dragStartY = 0;
 
@@ -149,6 +186,8 @@ class _TimelineChartState extends State<TimelineChart> {
 
   @override
   void dispose() {
+    _v?.removeListener(_syncToday);
+    _todayDir.dispose();
     _v?.dispose();
     _h.dispose();
     super.dispose();
@@ -172,12 +211,17 @@ class _TimelineChartState extends State<TimelineChart> {
     );
     return LayoutBuilder(
       builder: (context, box) {
-        final layout = TimelineLayout.of(widget.view, box.maxWidth);
+        final layout = _layoutFor(widget.view, box.maxWidth);
         _layout = layout;
         _viewportH = box.maxHeight;
         final v = _v ??= ScrollController(
           initialScrollOffset: math.max(0, layout.todayOffset),
-        );
+        )..addListener(_syncToday);
+        // Yerleşim/ölçek değişince düğme konumu kare sonunda tazelenir (kurulum sırasında
+        // dinleyicilere bildirim yapılmaz).
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _syncToday();
+        });
         final view = widget.view;
         final selection = view.state.selected != null;
         return Stack(
@@ -195,23 +239,41 @@ class _TimelineChartState extends State<TimelineChart> {
                     onLongPressStart: _longPressStart,
                     onLongPressMoveUpdate: _longPressMove,
                     onLongPressEnd: (_) => _dragCode = null,
-                    child: RepaintBoundary(
-                      child: SizedBox(
-                        width: layout.contentWidth,
-                        height: layout.bodyHeight,
-                        child: CustomPaint(
-                          painter: TimelineChartPainter(
-                            layout: layout,
-                            ink: ink,
-                            scroll: v,
-                            viewportHeight: box.maxHeight,
+                    child: SizedBox(
+                      width: layout.contentWidth,
+                      height: layout.bodyHeight,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: RepaintBoundary(
+                              child: CustomPaint(
+                                painter: TimelineChartPainter(
+                                  layout: layout,
+                                  ink: ink,
+                                ),
+                              ),
+                            ),
                           ),
-                          child: _BarSemantics(
-                            layout: layout,
-                            onSelect: widget.onSelect,
-                            onOverview: widget.onOverview,
+                          Positioned.fill(
+                            child: RepaintBoundary(
+                              child: CustomPaint(
+                                painter: TimelineStickyPainter(
+                                  layout: layout,
+                                  ink: ink,
+                                  scroll: v,
+                                  viewportHeight: box.maxHeight,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                          Positioned.fill(
+                            child: _BarSemantics(
+                              layout: layout,
+                              onSelect: widget.onSelect,
+                              onOverview: widget.onOverview,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -265,16 +327,13 @@ class _TimelineChartState extends State<TimelineChart> {
               ),
             if (!selection)
               Positioned.fill(
-                child: ListenableBuilder(
-                  listenable: v,
-                  builder: (context, _) {
-                    final off = v.hasClients ? v.offset : v.initialScrollOffset;
-                    final ty = layout.todayY;
-                    final above = ty < off + TimelineGeometry.header + 10;
-                    final below = ty > off + box.maxHeight - 20;
+                child: ValueListenableBuilder<int>(
+                  valueListenable: _todayDir,
+                  builder: (context, dir, _) {
+                    final above = dir < 0;
                     return Stack(
                       children: [
-                        if (above || below)
+                        if (dir != 0)
                           Positioned(
                             top: above ? TimelineGeometry.header + 10 : null,
                             bottom: above ? null : 70 + widget.bottomInset,

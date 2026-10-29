@@ -29,6 +29,8 @@
     "ui.timeline.scale_day": "Gün",
     "ui.timeline.scale_week": "Hafta",
     "ui.timeline.scale_month": "Ay",
+    "ui.timeline.zoom_in": "Yakınlaştır",
+    "ui.timeline.zoom_out": "Uzaklaştır",
     "ui.timeline.overview": "Genel bakış",
     "ui.timeline.overview_hint": "Her koordinatörlük bir sütun; sütuna dokununca o koordinatörlük açılır.",
     "ui.timeline.coord_hint": "Koordinatörlük, çizelgenin üstündeki menüden seçilir.",

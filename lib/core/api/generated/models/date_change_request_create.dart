@@ -4,7 +4,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../date_only.dart';
+import '../date_only.dart';
 
 part 'date_change_request_create.freezed.dart';
 part 'date_change_request_create.g.dart';

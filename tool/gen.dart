@@ -172,6 +172,7 @@ swagger_parser:
   // Gizli alanlı modellerde freezed `toString` üretmesin (parola/belirteç string'e düşmez);
   // gün alanları (`format: date`) `YYYY-MM-DD` yazılsın (tool/gen/wire_types.dart).
   final dateNames = dateOnlyPropertyNames(specText);
+  File(p.join(apiOut.path, 'date_only.dart')).writeAsStringSync(dateOnlySource);
   final modelsDir = Directory(p.join(apiOut.path, 'models'));
   if (modelsDir.existsSync()) {
     for (final f in modelsDir.listSync().whereType<File>().where(

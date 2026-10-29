@@ -1,3 +1,4 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND (tool/gen/wire_types.dart)
 import 'package:json_annotation/json_annotation.dart';
 
 /// Sözleşmedeki gün alanı (`type: string, format: date`) ↔ `DateTime`. Tel biçimi yalnız

@@ -4,7 +4,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../date_only.dart';
+import '../date_only.dart';
 
 import 'report_person.dart';
 import 'report_task_priority.dart';

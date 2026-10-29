@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nizamio/core/api/date_only.dart';
+import 'package:nizamio/core/api/generated/date_only.dart';
 import 'package:nizamio/core/api/generated/models/completion_request.dart';
 import 'package:nizamio/core/api/generated/models/update_work_item_request.dart';
 

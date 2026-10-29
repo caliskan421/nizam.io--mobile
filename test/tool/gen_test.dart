@@ -676,11 +676,11 @@ components:
     });
 
     test('Stream<String> → Future<HttpResponse<List<int>>> + bytes; liste dışı dokunulmaz', () {
-      const src = """
+      const src = '''
   @DioResponseType(ResponseType.stream)
   Stream<String> aPdf({
   @DioResponseType(ResponseType.stream)
-  Stream<String> events({""";
+  Stream<String> events({''';
       final done = <String>{};
       final out = rewriteBinaryResponses(src, {'aPdf'}, done);
       expect(out, contains('Future<HttpResponse<List<int>>> aPdf('));

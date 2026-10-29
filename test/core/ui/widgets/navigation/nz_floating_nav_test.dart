@@ -105,24 +105,40 @@ void main() {
     },
   );
 
-  testWidgets('ayrılan yükseklik: kapsül + alt boşluk + güvenli alan', (
-    t,
-  ) async {
+  testWidgets(
+    'ayrılan yükseklik: kapsül + güvenli alan + space2 (ev çubuğu üstü)',
+    (t) async {
+      late double reserved;
+      await t.pumpWidget(
+        MaterialAppWrap(
+          child: MediaQuery(
+            data: const MediaQueryData(padding: EdgeInsets.only(bottom: 34)),
+            child: Builder(
+              builder: (context) {
+                reserved = NzFloatingNav.reservedHeight(context);
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      );
+      expect(reserved, NizamioSize.nav + 34 + NizamioSpacing.space2);
+    },
+  );
+
+  testWidgets('güvenli alan yoksa kapsül kenardan gapXl içeride', (t) async {
     late double reserved;
     await t.pumpWidget(
       MaterialAppWrap(
-        child: MediaQuery(
-          data: const MediaQueryData(padding: EdgeInsets.only(bottom: 34)),
-          child: Builder(
-            builder: (context) {
-              reserved = NzFloatingNav.reservedHeight(context);
-              return const SizedBox();
-            },
-          ),
+        child: Builder(
+          builder: (context) {
+            reserved = NzFloatingNav.reservedHeight(context);
+            return const SizedBox();
+          },
         ),
       ),
     );
-    expect(reserved, NizamioSize.nav + NizamioSpacing.gapXl + 34);
+    expect(reserved, NizamioSize.nav + NizamioSpacing.gapXl);
   });
 }
 

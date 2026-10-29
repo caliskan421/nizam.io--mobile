@@ -44,8 +44,8 @@ class NzNavAction {
   final VoidCallback onPressed;
 }
 
-/// Yüzen cam alt menü (tasarım `BottomNav`): ekran kenarından `m-gutter`, alttan `m-gap-xl`
-/// içeride, `m-nav` (64) yüksekliğinde kapsül; etkin öğe genişler (etiket + alt yazı), vurgu
+/// Yüzen cam alt menü (tasarım `BottomNav`): ekran kenarından `m-gutter`, alttan ev çubuğunun
+/// `space2` üstünde (güvenli alan yoksa `m-gap-xl` içeride), `m-nav` (64) yüksekliğinde kapsül; etkin öğe genişler (etiket + alt yazı), vurgu
 /// `nav-highlight` ile `easeSpring` / `durNav` kayar. Etkin öğeye yeniden dokunmak da
 /// [onSelect]'i çağırır (kabuk kısayol menüsünü açar): parmak kalkınca değil, BASILDIĞI AN
 /// (menü basılı tutulurken açılır; bırakış ikinci kez tetiklemez). Diğer öğeler dokunuşta
@@ -88,9 +88,13 @@ class NzFloatingNav extends StatelessWidget {
   static final _backdropKey = BackdropKey();
 
   static double reservedHeight(BuildContext context) =>
-      NizamioSize.nav +
-      NizamioSpacing.gapXl +
-      MediaQuery.paddingOf(context).bottom;
+      NizamioSize.nav + _bottomGap(MediaQuery.paddingOf(context).bottom);
+
+  /// Kapsülün altındaki toplam boşluk: alt güvenli alan varsa (ev çubuğu) onun `space2`
+  /// üstünde, yoksa ekran kenarından `gapXl` içeride.
+  static double _bottomGap(double safeBottom) => safeBottom > 0
+      ? safeBottom + NizamioSpacing.space2
+      : NizamioSpacing.gapXl;
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +106,7 @@ class NzFloatingNav extends StatelessWidget {
           NizamioSpacing.gutter,
           0,
           NizamioSpacing.gutter,
-          NizamioSpacing.gapXl + bottom,
+          _bottomGap(bottom),
         ),
         child: SizedBox(
           height: NizamioSize.nav,

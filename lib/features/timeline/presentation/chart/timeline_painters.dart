@@ -71,28 +71,18 @@ Path dashed(Path source, {double dash = 4, double gap = 3}) {
 }
 
 /// Çizelge gövdesi (içerik koordinatı): ızgara, bugün çizgisi, genel bakış sütunları, ayırıcılar,
-/// görev çubukları, talep çerçeveleri, yapışkan dikey etiketler ve grup başlıkları. Dikey
-/// kaydırma [scroll] ile yeniden çizilir (yapışkan etiketler); yerleşim değişmez.
+/// görev çubukları ve talep çerçeveleri. Kaydırmadan bağımsızdır (dinleyici yok): kaydırırken
+/// yeniden kaydedilmez, yalnız kayar. Yapışkan etiketler [TimelineStickyPainter]'dadır.
 class TimelineChartPainter extends CustomPainter {
-  TimelineChartPainter({
-    required this.layout,
-    required this.ink,
-    required this.scroll,
-    required this.viewportHeight,
-  }) : super(repaint: scroll);
+  TimelineChartPainter({required this.layout, required this.ink});
 
   final TimelineLayout layout;
   final TimelineInk ink;
-  final ScrollController scroll;
-  final double viewportHeight;
-
-  double get _offset => scroll.hasClients ? scroll.offset : 0;
 
   @override
   void paint(Canvas canvas, Size size) {
     final c = ink.colors;
     final l = layout;
-    final off = _offset;
     final p = Paint();
 
     // Izgara zemini ve sol kenar.
@@ -152,46 +142,37 @@ class TimelineChartPainter extends CustomPainter {
       );
     }
 
-    // Çubuklar.
+    // Çubuklar: seçim varken diğerleri tek katmanda soluk (0.35; şeritler çakışmadığından
+    // çubuk başına `saveLayer` ile aynı görünüm), seçili çubuk en üstte (prototip z 4).
     final sel = l.view.state.selected;
-    final vTop = off + TimelineGeometry.header + 4;
-    final vBot = off + viewportHeight - 8;
+    TimelineBarGeom? selected;
+    final dimmed = <TimelineBarGeom>[];
     for (final b in l.bars) {
-      final dim = sel != null && sel != b.task.code;
-      final selected = sel == b.task.code;
-      if (dim) {
-        canvas.saveLayer(
-          b.rect.inflate(4).expandToInclude(b.request ?? b.rect),
-          Paint()..color = c.text.withValues(alpha: 0.35),
-        );
+      if (b.task.code == sel) {
+        selected = b;
+      } else if (sel != null) {
+        dimmed.add(b);
+      } else {
+        _bar(canvas, b, false);
       }
-      _bar(canvas, b, selected);
-      final label = b.task.item.title;
-      final visible = math.max(
-        0,
-        math.min(b.rect.bottom, vBot) - math.max(b.rect.top, vTop),
-      );
-      final maxLen = visible - 12;
-      if (maxLen > 12) {
-        final tp = ink.text(
-          label,
-          ink.label.copyWith(color: c.ganttInk),
-          maxWidth: maxLen.toDouble(),
-          ellipsis: true,
-        );
-        final top = math.max(b.rect.top, off + l.stickTop) + 6;
-        canvas
-          ..save()
-          ..clipRect(b.rect)
-          ..translate(b.rect.center.dx + tp.height / 2, top)
-          ..rotate(math.pi / 2);
-        tp.paint(canvas, Offset.zero);
-        canvas.restore();
-      }
-      if (dim) canvas.restore();
     }
-
-    _heads(canvas, size, off);
+    if (dimmed.isNotEmpty) {
+      var bounds = dimmed.first.rect;
+      for (final b in dimmed) {
+        bounds = bounds
+            .expandToInclude(b.rect)
+            .expandToInclude(b.request ?? b.rect);
+      }
+      canvas.saveLayer(
+        bounds.inflate(4),
+        Paint()..color = c.text.withValues(alpha: 0.35),
+      );
+      for (final b in dimmed) {
+        _bar(canvas, b, false);
+      }
+      canvas.restore();
+    }
+    if (selected != null) _bar(canvas, selected, true);
   }
 
   void _grid(Canvas canvas, Size size) {
@@ -371,6 +352,78 @@ class TimelineChartPainter extends CustomPainter {
     }
   }
 
+  @override
+  bool shouldRepaint(TimelineChartPainter old) =>
+      old.layout != layout || old.ink.colors != ink.colors;
+}
+
+/// Kaydırmaya bağlı ince katman (içerik koordinatı): çubukların yapışkan dikey etiketleri ve
+/// çoklu / genel bakışta yapışkan grup başlıkları. Yalnız bu katman kaydırmada yeniden çizilir;
+/// etiket metinleri örnek ömrünce önbellekte tutulur (görünür uzunluk değişmedikçe yeniden
+/// dizilmez).
+class TimelineStickyPainter extends CustomPainter {
+  TimelineStickyPainter({
+    required this.layout,
+    required this.ink,
+    required this.scroll,
+    required this.viewportHeight,
+  }) : super(repaint: scroll);
+
+  final TimelineLayout layout;
+  final TimelineInk ink;
+  final ScrollController scroll;
+  final double viewportHeight;
+
+  final _labels = <(bool, String), (int, TextPainter)>{};
+
+  double get _offset => scroll.hasClients ? scroll.offset : 0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = ink.colors;
+    final l = layout;
+    final off = _offset;
+    final sel = l.view.state.selected;
+    final vTop = off + TimelineGeometry.header + 4;
+    final vBot = off + viewportHeight - 8;
+    final style = ink.label.copyWith(color: c.ganttInk);
+    final dimStyle = ink.label.copyWith(
+      color: c.ganttInk.withValues(alpha: 0.35),
+    );
+    for (final b in l.bars) {
+      if (b.rect.bottom < vTop || b.rect.top > vBot) continue;
+      final visible =
+          math.min(b.rect.bottom, vBot) - math.max(b.rect.top, vTop);
+      final maxLen = (visible - 12).floor();
+      if (maxLen <= 12) continue;
+      final dim = sel != null && sel != b.task.code;
+      final key = (dim, b.task.code);
+      final cached = _labels[key];
+      final TextPainter tp;
+      if (cached != null && cached.$1 == maxLen) {
+        tp = cached.$2;
+      } else {
+        cached?.$2.dispose();
+        tp = ink.text(
+          b.task.item.title,
+          dim ? dimStyle : style,
+          maxWidth: maxLen.toDouble(),
+          ellipsis: true,
+        );
+        _labels[key] = (maxLen, tp);
+      }
+      final top = math.max(b.rect.top, off + l.stickTop) + 6;
+      canvas
+        ..save()
+        ..clipRect(b.rect)
+        ..translate(b.rect.center.dx + tp.height / 2, top)
+        ..rotate(math.pi / 2);
+      tp.paint(canvas, Offset.zero);
+      canvas.restore();
+    }
+    _heads(canvas, size, off);
+  }
+
   /// Çoklu / genel bakış: dikeyde yapışkan grup başlık satırı.
   void _heads(Canvas canvas, Size size, double off) {
     final l = layout;
@@ -429,7 +482,7 @@ class TimelineChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(TimelineChartPainter old) =>
+  bool shouldRepaint(TimelineStickyPainter old) =>
       old.layout != layout ||
       old.ink.colors != ink.colors ||
       old.viewportHeight != viewportHeight;
@@ -528,7 +581,16 @@ class TimelineDatePainter extends CustomPainter {
       }
     }
 
-    for (var d = 0; d < l.view.days; d++) {
+    // Yalnız görünür günler (kaydırmanın her karesinde 365 gün dolaşılmaz).
+    final d0 = math.max(
+      0,
+      ((visTop - TimelineGeometry.topPad) / l.ppd).floor() - 1,
+    );
+    final d1 = math.min(
+      l.view.days,
+      ((visBot - TimelineGeometry.topPad) / l.ppd).ceil() + 1,
+    );
+    for (var d = d0; d < d1; d++) {
       final date = seasonDate(d, year);
       final y = l.yOf(d);
       if (scale == TimelineScale.day) {

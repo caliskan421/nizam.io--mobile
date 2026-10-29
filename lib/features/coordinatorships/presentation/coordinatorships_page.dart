@@ -13,6 +13,7 @@ import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
+import '../../timeline/timeline.dart';
 import '../application/coordinatorships_controller.dart';
 import '../domain/coordinatorship_overview.dart';
 import 'coord_texts.dart';
@@ -185,7 +186,9 @@ Future<void> showCoordinatorshipsShortcuts(
       NzFlyoutItem(
         label: l.uiCoordFlyTimelineAll,
         icon: Icons.view_timeline_outlined,
-        onSelected: nav.openTimeline,
+        // Prototip: zaman çizelgesi bütün koordinatörlükler seçili açılır.
+        onSelected: () =>
+            nav.openTimeline(coordinatorship: TimelinePage.allCoordinatorships),
       ),
       NzFlyoutItem(
         label: l.uiCoordFlyAdd,

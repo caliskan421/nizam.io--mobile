@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
+import 'package:nizamio/features/coordinatorships/application/coordinatorships_controller.dart';
+import 'package:nizamio/features/coordinatorships/domain/coordinatorship_overview.dart';
 import 'package:nizamio/features/coordinatorships/presentation/coordinatorship_page.dart';
 
 import '../../../support/harness.dart';
@@ -32,9 +34,32 @@ Future<(Harness, RecordingAppNav)> _open(
   return (h, nav);
 }
 
+/// Sayfanın kendi kaydırmasıyla [f]'yi dokunulabilir yapar (`ensureVisible` dıştaki
+/// `NzPage.fill` görünümünü de kaydırdığından kullanılmaz); yapışkan sekmelerin altında
+/// kalan öğe için yukarı, ekran altındaki için aşağı sürükler.
+Future<void> _reveal(WidgetTester tester, Finder f) async {
+  for (var i = 0; i < 40; i++) {
+    if (f.hitTestable().evaluate().isNotEmpty) return;
+    final vp = tester.getRect(_pageScroll);
+    final above =
+        f.evaluate().isNotEmpty && tester.getCenter(f).dy < vp.top + 140;
+    await tester.drag(_pageScroll, Offset(0, above ? 120 : -120));
+    await tester.pump();
+  }
+}
+
 Future<void> _tap(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pump();
+  final inPage = find
+      .descendant(of: _pageScroll, matching: f)
+      .evaluate()
+      .isNotEmpty;
+  if (inPage) {
+    await _reveal(tester, f);
+  } else {
+    // Kısayol menüsü gibi katmanlar kendi kaydırmasında.
+    await tester.ensureVisible(f);
+    await tester.pump();
+  }
   await tester.tap(f);
   await settle(tester);
 }
@@ -45,6 +70,13 @@ Future<void> _dismissToast(WidgetTester tester) async {
       .removeCurrentSnackBar();
   await settle(tester);
 }
+
+/// Sayfanın kendi dikey kaydırması (dıştaki `NzPage.fill` kaydırmaz).
+final _pageScroll = find
+    .byWidgetPredicate(
+      (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+    )
+    .at(1);
 
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
@@ -78,8 +110,9 @@ void main() {
     expect(nav.calls, [
       'chat:hid',
       'task:ALT-5',
-      'tasks',
-      'tasks',
+      // Dikkat gerektirenler ve "geciken" KPI'ı gecikenler görünümüyle açar.
+      'tasks:late',
+      'tasks:late',
       'timeline:ALT',
       'folder:ALT',
     ]);
@@ -151,7 +184,12 @@ void main() {
   testWidgets('diğer işlemler alt sayfası: pasifleştir tostu', (tester) async {
     await _open(tester);
     await _tap(tester, find.byIcon(Icons.more_vert_rounded));
-    expect(find.text('Altyapı ve tesisat işlemleri'), findsOneWidget);
+    // Prototip: başlıksız sayfa; ad yalnız anlamsal etiket.
+    expect(find.text('Altyapı ve tesisat işlemleri'), findsNothing);
+    expect(
+      find.bySemanticsLabel('Altyapı ve tesisat işlemleri'),
+      findsOneWidget,
+    );
     expect(find.text(_l.uiCoordMenuMerge), findsOneWidget);
     await _tap(tester, find.text(_l.uiCoordMenuDeactivate));
     expect(
@@ -179,6 +217,35 @@ void main() {
     expect(nav.calls, ['coord:MEK', 'coordinatorships']);
   });
 
+  testWidgets('kısayol menüsü liste sıralamasını izler', (tester) async {
+    final (h, _) = await _open(tester);
+    h
+        .read(coordinatorshipsControllerProvider.notifier)
+        .sortBy(CoordinatorshipSort.late);
+    h
+        .read(shellReselectEventsProvider.notifier)
+        .fire(CoordinatorshipPage.shellTab);
+    await settle(tester);
+    // Gecikmeye göre: İdari işler (4) en üstte.
+    final idari = tester.getTopLeft(find.text('İdari işler').last).dy;
+    final alt = tester.getTopLeft(find.text('Altyapı ve tesisat').last).dy;
+    expect(idari, lessThan(alt));
+  });
+
+  testWidgets('sekmeler yapışkan: aşağı kayınca üstte kalır', (tester) async {
+    await _open(tester);
+    final tab = find.text(_l.uiCoordTabAbout);
+    final y0 = tester.getTopLeft(tab).dy;
+    await tester.drag(_pageScroll, const Offset(0, -600));
+    await settle(tester);
+    final y1 = tester.getTopLeft(tab).dy;
+    expect(y1, lessThan(y0));
+    expect(y1, greaterThan(0), reason: 'üst çubuğun altında kalır');
+    await tester.tap(tab);
+    await settle(tester);
+    expect(find.text(_l.uiCoordFeed), findsOneWidget);
+  });
+
   testWidgets('bilinmeyen kod: boş durum', (tester) async {
     await _open(tester, code: 'YOK');
     expect(find.text(_l.uiCoordNotFound), findsOneWidget);
@@ -199,7 +266,7 @@ void main() {
             );
             await _open(tester, dark: dark);
             Future<void> scroll() async {
-              final s = find.byType(Scrollable).first;
+              final s = _pageScroll;
               for (var i = 0; i < 8; i++) {
                 await tester.drag(s, const Offset(0, -300));
                 await tester.pump();

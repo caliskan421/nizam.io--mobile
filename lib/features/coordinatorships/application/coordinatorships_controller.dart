@@ -15,10 +15,12 @@ class CoordinatorshipsController extends _$CoordinatorshipsController {
   void sortBy(CoordinatorshipSort sort) => state = sort;
 }
 
-/// Görev kataloğundan türetilmiş, seçili ölçütle sıralı koordinatörlük listesi.
+/// Görev kataloğundan türetilmiş, seçili ölçütle sıralı koordinatörlük listesi. Eşzamanlı
+/// türetilir: katalog (keepAlive) hazırsa sayfanın ilk karesi doludur (yükleme titremesi yok).
 @riverpod
-Future<List<CoordinatorshipStats>> coordinatorshipList(Ref ref) async {
+AsyncValue<List<CoordinatorshipStats>> coordinatorshipList(Ref ref) {
   final sort = ref.watch(coordinatorshipsControllerProvider);
-  final catalog = await ref.watch(taskCatalogControllerProvider.future);
-  return sortCoordinatorships(coordinatorshipStats(catalog), sort);
+  return ref
+      .watch(taskCatalogControllerProvider)
+      .whenData((c) => sortCoordinatorships(coordinatorshipStats(c), sort));
 }

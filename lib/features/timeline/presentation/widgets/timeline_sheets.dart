@@ -15,22 +15,26 @@ import '../../domain/timeline.dart';
 import '../timeline_texts.dart';
 import 'timeline_controls.dart';
 
-/// Filtre alt sayfası (prototip `modal: 'filter'`): durum (sayılı), kişi, öncelik; ölçek ve genel
-/// bakış (prototip `scale` / `isAll`); "Temizle", lejant ve "N görevi göster".
+/// Filtre alt sayfası (prototip `modal: 'filter'`): başlık satırında "Temizle" (kişi + öncelik);
+/// durum (sayılı), kişi, öncelik; koordinatörlük ipucu ve "N görevi göster". Ölçek, genel bakış
+/// ve lejant çizelgenin üstündeki kontrollerdedir ([TimelineZoomControls]).
 Future<void> showTimelineFilterSheet(
   BuildContext context, {
   required String? coordinatorship,
-}) async {
-  final l = context.l10n;
-  final legend = await NzBottomSheet.show<bool>(
-    context,
-    title: l.uiTimelineFilters,
-    builder: (_) => _FilterBody(coordinatorship: coordinatorship),
-  );
-  if (legend == true && context.mounted) {
-    await showTimelineLegendSheet(context);
-  }
-}
+}) => NzBottomSheet.show<void>(
+  context,
+  title: context.l10n.uiTimelineFilters,
+  headerAction: Consumer(
+    builder: (context, ref, _) => NzButton.ghost(
+      label: context.l10n.uiTimelineClear,
+      size: NzSize.sm,
+      onPressed: ref
+          .read(timelineControllerProvider(coordinatorship).notifier)
+          .clearFilters,
+    ),
+  ),
+  builder: (_) => _FilterBody(coordinatorship: coordinatorship),
+);
 
 /// Lejant alt sayfası: durum renkleri, gecikme, talep çerçevesi ve kullanım ipuçları.
 Future<void> showTimelineLegendSheet(BuildContext context) =>
@@ -61,14 +65,6 @@ class _FilterBody extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: NzButton.ghost(
-            label: l.uiTimelineClear,
-            size: NzSize.sm,
-            onPressed: ctrl.clearFilters,
-          ),
-        ),
         label(l.uiTimelineStatus),
         NzFilterRail(
           semanticLabel: l.uiTimelineStatus,
@@ -117,37 +113,9 @@ class _FilterBody extends ConsumerWidget {
           ],
         ),
         const Gap(NizamioSpacing.space4),
-        label(l.uiTimelineScale),
-        NzPillTabs(
-          semanticLabel: l.uiTimelineScale,
-          selected: s.scale.index,
-          onSelected: (i) => ctrl.setScale(TimelineScale.values[i]),
-          tabs: [
-            for (final sc in TimelineScale.values)
-              NzPillTab(label: l.scaleLabel(sc)),
-          ],
-        ),
-        const Gap(NizamioSpacing.space3),
-        NzSwitch(
-          label: l.uiTimelineOverview,
-          description: l.uiTimelineOverviewHint,
-          value: s.overview,
-          onChanged: ctrl.setOverview,
-        ),
-        const Gap(NizamioSpacing.space3),
         Text(
           l.uiTimelineCoordHint,
           style: t.caption.copyWith(color: c.textMuted),
-        ),
-        const Gap(NizamioSpacing.space2),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: NzButton.ghost(
-            label: l.uiTimelineLegendOpen,
-            size: NzSize.sm,
-            icon: Icons.info_outline_rounded,
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
         ),
         const Gap(NizamioSpacing.space3),
         NzButton.primary(

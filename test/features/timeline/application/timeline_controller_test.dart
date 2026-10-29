@@ -105,10 +105,49 @@ void main() {
     ctrl.togglePriority(TaskPriority.medium);
     expect(view().shown.map((t) => t.code), ['ALT-11']);
     expect(view().state.filterCount, 2);
+    expect(view().state.hasChips, isTrue);
     ctrl.clearFilters();
     expect(view().shown, hasLength(13));
     expect(view().state.filterCount, 0);
+    expect(view().state.hasChips, isFalse);
+
+    // Prototip `clearFilters`: yalnız kişi + öncelik; durum korunur. Rozet yalnız
+    // kişi/öncelik seçiliyken görünür (sayı durumu da sayar).
+    ctrl
+      ..setStatus(TimelineStatusFilter.late)
+      ..togglePerson('av')
+      ..clearFilters();
+    expect(view().state.status, TimelineStatusFilter.late);
+    expect(view().state.filterCount, 1);
+    expect(view().state.hasChips, isFalse);
   });
+
+  test('yakınlaştır / uzaklaştır: gün ↔ hafta ↔ ay, uçlarda etkisiz', () async {
+    final (_, ctrl, view) = await _open();
+    ctrl.zoomIn();
+    expect(view().state.scale, TimelineScale.day);
+    ctrl.zoomIn();
+    expect(view().state.scale, TimelineScale.day);
+    ctrl
+      ..zoomOut()
+      ..zoomOut();
+    expect(view().state.scale, TimelineScale.month);
+    ctrl.zoomOut();
+    expect(view().state.scale, TimelineScale.month);
+  });
+
+  test(
+    'rota "*": bütün koordinatörlükler seçili; seçim değiştirilebilir',
+    () async {
+      final (_, ctrl, view) = await _open(timelineAllCoordinatorships);
+      expect(view().selectedCoordinatorships, hasLength(11));
+      expect(view().allSelected, isTrue);
+      expect(view().multi, isTrue);
+      ctrl.toggleCoordinatorship('ALT');
+      expect(view().selectedCoordinatorships, hasLength(10));
+      expect(view().selectedCoordinatorships, isNot(contains('ALT')));
+    },
+  );
 
   test(
     'ölçek ve genel bakış; sütuna dokunma tek koordinatörlük açar',

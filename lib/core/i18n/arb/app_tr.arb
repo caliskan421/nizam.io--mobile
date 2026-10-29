@@ -3885,6 +3885,14 @@
   "@uiTimelineScaleMonth": {
     "description": "ui.timeline.scale_month"
   },
+  "uiTimelineZoomIn": "Yakınlaştır",
+  "@uiTimelineZoomIn": {
+    "description": "ui.timeline.zoom_in"
+  },
+  "uiTimelineZoomOut": "Uzaklaştır",
+  "@uiTimelineZoomOut": {
+    "description": "ui.timeline.zoom_out"
+  },
   "uiTimelineOverview": "Genel bakış",
   "@uiTimelineOverview": {
     "description": "ui.timeline.overview"

@@ -52,12 +52,18 @@ class CoordinatorshipDetailController
 }
 
 /// [code] koordinatörlüğünün ayrıntısı (katalog + ek bilgiler); bilinmeyen kod → null.
+/// Eşzamanlı türetilir: iki kaynak (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
+/// biri yükleniyorsa yükleniyor.
 @riverpod
-Future<CoordinatorshipDetail?> coordinatorshipDetail(
-  Ref ref,
-  String code,
-) async {
-  final catalog = ref.watch(taskCatalogControllerProvider.future);
-  final profiles = ref.watch(coordinatorshipProfilesControllerProvider.future);
-  return CoordinatorshipDetail.from(await catalog, await profiles, code);
+AsyncValue<CoordinatorshipDetail?> coordinatorshipDetail(Ref ref, String code) {
+  final catalog = ref.watch(taskCatalogControllerProvider);
+  final profiles = ref.watch(coordinatorshipProfilesControllerProvider);
+  for (final v in [catalog, profiles]) {
+    if (v case AsyncError(:final error, :final stackTrace)) {
+      return AsyncError(error, stackTrace);
+    }
+  }
+  final (c, p) = (catalog.value, profiles.value);
+  if (c == null || p == null) return const AsyncLoading();
+  return AsyncData(CoordinatorshipDetail.from(c, p, code));
 }

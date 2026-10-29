@@ -102,7 +102,8 @@ void main() {
     await settle(tester);
     await tester.tap(find.text(_l.uiCoordFlyTimelineAll));
     await settle(tester);
-    expect(nav.calls, ['timeline']);
+    // Prototip: bütün koordinatörlükler seçili açılır.
+    expect(nav.calls, ['timeline:*']);
   });
 
   for (final width in [360.0, 390.0]) {

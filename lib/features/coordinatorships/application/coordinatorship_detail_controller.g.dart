@@ -131,23 +131,27 @@ abstract class _$CoordinatorshipDetailController
 }
 
 /// [code] koordinatörlüğünün ayrıntısı (katalog + ek bilgiler); bilinmeyen kod → null.
+/// Eşzamanlı türetilir: iki kaynak (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
+/// biri yükleniyorsa yükleniyor.
 
 @ProviderFor(coordinatorshipDetail)
 final coordinatorshipDetailProvider = CoordinatorshipDetailFamily._();
 
 /// [code] koordinatörlüğünün ayrıntısı (katalog + ek bilgiler); bilinmeyen kod → null.
+/// Eşzamanlı türetilir: iki kaynak (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
+/// biri yükleniyorsa yükleniyor.
 
 final class CoordinatorshipDetailProvider
     extends
         $FunctionalProvider<
           AsyncValue<CoordinatorshipDetail?>,
-          CoordinatorshipDetail?,
-          FutureOr<CoordinatorshipDetail?>
+          AsyncValue<CoordinatorshipDetail?>,
+          AsyncValue<CoordinatorshipDetail?>
         >
-    with
-        $FutureModifier<CoordinatorshipDetail?>,
-        $FutureProvider<CoordinatorshipDetail?> {
+    with $Provider<AsyncValue<CoordinatorshipDetail?>> {
   /// [code] koordinatörlüğünün ayrıntısı (katalog + ek bilgiler); bilinmeyen kod → null.
+  /// Eşzamanlı türetilir: iki kaynak (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
+  /// biri yükleniyorsa yükleniyor.
   CoordinatorshipDetailProvider._({
     required CoordinatorshipDetailFamily super.from,
     required String super.argument,
@@ -171,14 +175,24 @@ final class CoordinatorshipDetailProvider
 
   @$internal
   @override
-  $FutureProviderElement<CoordinatorshipDetail?> $createElement(
+  $ProviderElement<AsyncValue<CoordinatorshipDetail?>> $createElement(
     $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
+  ) => $ProviderElement(pointer);
 
   @override
-  FutureOr<CoordinatorshipDetail?> create(Ref ref) {
+  AsyncValue<CoordinatorshipDetail?> create(Ref ref) {
     final argument = this.argument as String;
     return coordinatorshipDetail(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<CoordinatorshipDetail?> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<CoordinatorshipDetail?>>(
+        value,
+      ),
+    );
   }
 
   @override
@@ -193,12 +207,14 @@ final class CoordinatorshipDetailProvider
 }
 
 String _$coordinatorshipDetailHash() =>
-    r'0da2d9ab9a0a8ab0d163cb95e5802a3ae90ec1e1';
+    r'e769aa5e70bf5ab0bd2b22bd84ad6d1dded5d328';
 
 /// [code] koordinatörlüğünün ayrıntısı (katalog + ek bilgiler); bilinmeyen kod → null.
+/// Eşzamanlı türetilir: iki kaynak (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
+/// biri yükleniyorsa yükleniyor.
 
 final class CoordinatorshipDetailFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<CoordinatorshipDetail?>, String> {
+    with $FunctionalFamilyOverride<AsyncValue<CoordinatorshipDetail?>, String> {
   CoordinatorshipDetailFamily._()
     : super(
         retry: null,
@@ -209,6 +225,8 @@ final class CoordinatorshipDetailFamily extends $Family
       );
 
   /// [code] koordinatörlüğünün ayrıntısı (katalog + ek bilgiler); bilinmeyen kod → null.
+  /// Eşzamanlı türetilir: iki kaynak (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
+  /// biri yükleniyorsa yükleniyor.
 
   CoordinatorshipDetailProvider call(String code) =>
       CoordinatorshipDetailProvider._(argument: code, from: this);

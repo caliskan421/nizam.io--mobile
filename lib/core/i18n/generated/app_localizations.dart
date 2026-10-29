@@ -5920,6 +5920,18 @@ abstract class AppLocalizations {
   /// **'Ay'**
   String get uiTimelineScaleMonth;
 
+  /// ui.timeline.zoom_in
+  ///
+  /// In tr, this message translates to:
+  /// **'Yakınlaştır'**
+  String get uiTimelineZoomIn;
+
+  /// ui.timeline.zoom_out
+  ///
+  /// In tr, this message translates to:
+  /// **'Uzaklaştır'**
+  String get uiTimelineZoomOut;
+
   /// ui.timeline.overview
   ///
   /// In tr, this message translates to:

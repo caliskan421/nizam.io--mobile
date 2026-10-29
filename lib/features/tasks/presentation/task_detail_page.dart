@@ -293,7 +293,7 @@ class _Body extends StatelessWidget {
           const Gap(NizamioSpacing.space5),
           _RequestCard(
             request: req,
-            by: catalog.person(req.by)?.name ?? req.by,
+            by: req.by == null ? '' : catalog.person(req.by!)?.name ?? req.by!,
             onReject: actions.rejectRequest,
             onApprove: actions.approveRequest,
           ),
@@ -435,7 +435,11 @@ class _RequestCard extends StatelessWidget {
                           style: t.bodyMd.copyWith(fontWeight: FontWeight.w600),
                         ),
                         Text(
-                          '$by · ${TaskDates.short(r.at)} ${TaskDates.time(r.at)}',
+                          [
+                            by,
+                            if (r.at case final at?)
+                              '${TaskDates.short(at)} ${TaskDates.time(at)}',
+                          ].where((s) => s.isNotEmpty).join(' · '),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: t.caption.copyWith(color: c.textMuted),

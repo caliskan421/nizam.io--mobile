@@ -13,6 +13,8 @@ extension TimelineTexts on AppLocalizations {
     TaskStatus.review => uiTimelineStReview,
     TaskStatus.returned => uiTimelineStBack,
     TaskStatus.done => uiTimelineStDone,
+    // Tanımsız sunucu durumu: ARB metni yok — entegrasyonda karar.
+    TaskStatus.unknown => uiTimelineStTodo,
   };
 
   String statusFilterLabel(TimelineStatusFilter f) => switch (f) {
@@ -29,9 +31,11 @@ extension TimelineTexts on AppLocalizations {
   };
 
   String priorityLabel(TaskPriority p) => switch (p) {
-    TaskPriority.high => uiTimelinePrioHigh,
+    // `acil`: ARB metni yok — entegrasyonda karar (şimdilik "yüksek" metni).
+    TaskPriority.high || TaskPriority.urgent => uiTimelinePrioHigh,
     TaskPriority.medium => uiTimelinePrioMid,
     TaskPriority.low => uiTimelinePrioLow,
+    TaskPriority.unknown => uiTimelinePrioMid,
   };
 
   /// Seçici özeti: "tümü" / tek ad / "3 seçili" / "seçilmedi".

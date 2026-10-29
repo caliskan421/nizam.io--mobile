@@ -32,6 +32,8 @@ final class TimelineInk {
     TaskStatus.review => colors.ganttReview,
     TaskStatus.returned => colors.ganttBack,
     TaskStatus.done => colors.ganttDone,
+    // Tanımsız sunucu durumu: nötr görünüm.
+    TaskStatus.unknown => colors.ganttTodo,
   };
 
   /// Prototip `SC`: çubuk kenarı / durum noktası.
@@ -41,6 +43,7 @@ final class TimelineInk {
     TaskStatus.review => colors.warning,
     TaskStatus.returned => colors.danger,
     TaskStatus.done => colors.accentText,
+    TaskStatus.unknown => colors.textFaint,
   };
 
   TextPainter text(

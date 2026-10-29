@@ -14,6 +14,8 @@ Color ganttStatusColor(NizamioColors c, TaskStatus s) => switch (s) {
   TaskStatus.review => c.ganttReview,
   TaskStatus.returned => c.ganttBack,
   TaskStatus.done => c.ganttDone,
+  // Tanımsız sunucu durumu: nötr görünüm.
+  TaskStatus.unknown => c.ganttTodo,
 };
 
 /// `repeating-linear-gradient(135deg, late 0 band, late %45 band 2·band)`: [rrect] içinde açık

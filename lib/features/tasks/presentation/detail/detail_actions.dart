@@ -47,7 +47,7 @@ class TaskDetailActions {
     _listSheet(
       title: l.uiTasksSheetStatus,
       builder: (sheet) => [
-        for (final s in TaskStatus.values)
+        for (final s in TaskStatus.known)
           _ListOption(
             label: l.statusLabel(s),
             leading: NzDot(color: statusTone(s).color(c)),
@@ -90,7 +90,7 @@ class TaskDetailActions {
     _listSheet(
       title: l.uiTasksSheetPriority,
       builder: (sheet) => [
-        for (final p in TaskPriority.values.reversed)
+        for (final p in TaskPriority.pickable.reversed)
           _ListOption(
             label: l.priorityLabel(p),
             leading: NzPriorityBars(level: priorityLevel(p)),
@@ -292,7 +292,9 @@ class TaskDetailActions {
     if (r == null) return;
     final l = context.l10n;
     _ctl.rejectRequest();
-    _say('${l.uiTasksTRejected} · ${_name(r.by)} ${l.uiTasksTInformed}');
+    _say(
+      '${l.uiTasksTRejected} · ${r.by == null ? '' : _name(r.by!)} ${l.uiTasksTInformed}',
+    );
   }
 
   void remind() {

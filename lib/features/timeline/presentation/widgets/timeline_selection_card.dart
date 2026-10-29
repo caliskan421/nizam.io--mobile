@@ -54,6 +54,7 @@ class TimelineSelectionCard extends StatelessWidget {
     TaskStatus.review => NzTone.waiting,
     TaskStatus.returned => NzTone.danger,
     TaskStatus.done => NzTone.done,
+    TaskStatus.unknown => NzTone.neutral,
   };
 
   @override

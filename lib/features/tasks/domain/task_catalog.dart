@@ -1,10 +1,36 @@
 import 'package:meta/meta.dart';
 
-/// Görev durumu (sunucu kavramı; istemci geçiş kuralı türetmez).
-enum TaskStatus { todo, inProgress, review, returned, done }
+/// Görev durumu (sunucu kavramı; istemci geçiş kuralı türetmez). Sunucu değerleri (`data`
+/// katmanında eşlenir): todo ↔ `baslanmadi`, inProgress ↔ `devam_ediyor`, review ↔
+/// `onaya_sunuldu`, returned ↔ `iade_edildi`, done ↔ `tamamlandi`. [unknown]: sunucunun yeni
+/// etiketteki tanımsız değeri (asla `throw` edilmez; UI güvenli varsayılana bağlar).
+enum TaskStatus {
+  todo,
+  inProgress,
+  review,
+  returned,
+  done,
+  unknown;
 
-/// Görev önceliği.
-enum TaskPriority { low, medium, high }
+  /// Seçicide gösterilen tanımlı durumlar ([unknown] hariç; sözleşme sırası).
+  static const known = [todo, inProgress, review, returned, done];
+}
+
+/// Görev önceliği. Sunucu değerleri: low ↔ `dusuk`, medium ↔ `orta`, high ↔ `yuksek`, urgent ↔
+/// `acil`. [unknown]: tanımsız sunucu değeri.
+enum TaskPriority {
+  low,
+  medium,
+  high,
+
+  /// Sunucuda var (`acil`); örnek veride ve ARB'de etiketi yok — entegrasyonda karar.
+  urgent,
+  unknown;
+
+  /// Formlarda seçtirilen öncelikler. [urgent] ARB etiketi eklenene kadar seçtirilmez
+  /// (sunucudan gelirse gösterilir); [unknown] hiç seçtirilmez.
+  static const pickable = [low, medium, high];
+}
 
 /// Kişi rolü (görünüm etiketi ve rol rengi için; yetki kararı sunucudadır).
 enum PersonRole { admin, coordinator, member }
@@ -95,36 +121,63 @@ final class Subtask {
   );
 }
 
-/// Tarih değişikliği talebinin durumu.
-enum DateRequestState { pending, approved, rejected }
+/// Tarih değişikliği talebinin durumu (sunucu `pending`/`approved`/`rejected`; [unknown]:
+/// tanımsız sunucu değeri).
+enum DateRequestState { pending, approved, rejected, unknown }
 
-/// Tarih değişikliği talebi: [oldDue] → [due] (yeni aralık [start]–[due]).
+/// Tarih talebi incelemesinin kararı (`POST /v1/date-change-requests/{id}/review`).
+enum DateRequestDecision { approve, reject }
+
+/// Tarih değişikliği talebi: [oldDue] → [due] (yeni aralık [start]–[due]). Sunucu şeması
+/// `DateChangeRequest` ile birleşik: `request_id` → [id], `work_item_id` → [workItemId],
+/// `old_start_on` → [oldStart], `old_end_on` → [oldDue], `new_start_on` → [start],
+/// `new_end_on` → [due], `status` → [state], `reason` → [reason] (sunucuda isteğe bağlı; yoksa
+/// boş dize).
 @immutable
 final class DateChangeRequest {
   const DateChangeRequest({
-    required this.by,
-    required this.at,
+    this.id,
+    this.workItemId,
+    this.by,
+    this.at,
+    this.oldStart,
     required this.oldDue,
     required this.start,
     required this.due,
-    required this.reason,
+    this.reason = '',
     this.state = DateRequestState.pending,
   });
 
-  /// Talep eden kişi kimliği.
-  final String by;
-  final DateTime at;
+  /// Talep kimliği (`request_id`; inceleme ve silme bununla yapılır). Örnek veride yok.
+  final String? id;
+
+  /// Talebin görevi (`work_item_id`). Örnek veride yok (görev zaten bağlam).
+  final String? workItemId;
+
+  /// Talep eden kişi kimliği. Sunucuda yok — entegrasyonda karar (backend adayı B-08).
+  final String? by;
+
+  /// Talep anı. Sunucuda yok — entegrasyonda karar (backend adayı B-08).
+  final DateTime? at;
+
+  /// Talep anındaki başlangıç (`old_start_on`). Örnek veride yok.
+  final DateTime? oldStart;
   final DateTime oldDue;
   final DateTime start;
   final DateTime due;
+
+  /// Gerekçe; sunucuda isteğe bağlı (yoksa boş).
   final String reason;
   final DateRequestState state;
 
   bool get isPending => state == DateRequestState.pending;
 
   DateChangeRequest withState(DateRequestState s) => DateChangeRequest(
+    id: id,
+    workItemId: workItemId,
     by: by,
     at: at,
+    oldStart: oldStart,
     oldDue: oldDue,
     start: start,
     due: due,
@@ -165,39 +218,150 @@ final class TaskFile {
   final String? subtask;
 }
 
-/// Görev notu.
+/// Görev notu. Sunucu şeması `WorkItemNote` ile birleşik: `note_id` → [id], `work_item_id` →
+/// [workItemId], `author_account_id` → [by], `created_at` → [at], `content` → [text],
+/// `updated_at` → [updatedAt].
 @immutable
 final class TaskNote {
   const TaskNote({
+    this.id,
+    this.workItemId,
     required this.by,
     required this.at,
     required this.text,
+    this.updatedAt,
     this.inMemory = false,
   });
 
+  /// Not kimliği (düzenleme/silme bununla). Örnek veride yok.
+  final String? id;
+
+  /// Notun görevi. Örnek veride yok.
+  final String? workItemId;
+
+  /// Yazar kişi kimliği.
   final String by;
   final DateTime at;
   final String text;
 
-  /// Kurumsal hafızaya deneyim olarak eklendi mi.
+  /// Son düzenleme anı. Örnek veride yok.
+  final DateTime? updatedAt;
+
+  /// Kurumsal hafızaya deneyim olarak eklendi mi. Sunucuda yok — entegrasyonda karar
+  /// (backend adayı B-17).
   final bool inMemory;
 }
 
+/// Sunucunun hesapladığı gecikme bayrakları (`WorkItem` düz alanları ve `GanttTask.lateness`;
+/// tek kaynak — WORK-K37). İstemci gecikme türetmez.
+@immutable
+final class TaskLateness {
+  const TaskLateness({
+    this.isOverdue = false,
+    this.daysOverdue = 0,
+    this.isCompletedLate = false,
+    this.daysLate = 0,
+    this.isCompletedEarly = false,
+    this.daysEarly = 0,
+  });
+
+  /// Bitmemiş ve bitiş günü geçmiş.
+  final bool isOverdue;
+  final int daysOverdue;
+
+  /// Planlanan bitişten (`planned_end_on`) sonra tamamlandı.
+  final bool isCompletedLate;
+  final int daysLate;
+
+  /// Planlanan bitişten önce tamamlandı.
+  final bool isCompletedEarly;
+  final int daysEarly;
+
+  @override
+  bool operator ==(Object other) =>
+      other is TaskLateness &&
+      other.isOverdue == isOverdue &&
+      other.daysOverdue == daysOverdue &&
+      other.isCompletedLate == isCompletedLate &&
+      other.daysLate == daysLate &&
+      other.isCompletedEarly == isCompletedEarly &&
+      other.daysEarly == daysEarly;
+
+  @override
+  int get hashCode => Object.hash(
+    isOverdue,
+    daysOverdue,
+    isCompletedLate,
+    daysLate,
+    isCompletedEarly,
+    daysEarly,
+  );
+}
+
+/// Görevler arası bağımlılık kenarı: [workItemId] (bağımlı) [dependsOnId]'nin (ön görev)
+/// bitmesini bekler. Sunucu `DependencyEdge` (`work_item_id`, `depends_on_work_item_id`) ve
+/// `GanttLink` (`target` = bağımlı, `source` = ön görev) ile birleşik.
+@immutable
+final class TaskDependency {
+  const TaskDependency({
+    required this.id,
+    required this.workItemId,
+    required this.dependsOnId,
+    this.crossDepartment,
+  });
+
+  /// Kenar kimliği (`dependency_id`); kaldırma bununla yapılır (ön görev kimliği değil).
+  final String id;
+
+  /// Bağımlı görev.
+  final String workItemId;
+
+  /// Ön görev.
+  final String dependsOnId;
+
+  /// İki görev farklı departmanda mı (yalnız Gantt bağlantısında dolu).
+  final bool? crossDepartment;
+
+  @override
+  bool operator ==(Object other) =>
+      other is TaskDependency &&
+      other.id == id &&
+      other.workItemId == workItemId &&
+      other.dependsOnId == dependsOnId &&
+      other.crossDepartment == crossDepartment;
+
+  @override
+  int get hashCode => Object.hash(id, workItemId, dependsOnId, crossDepartment);
+}
+
 /// Görev. Sayılar ve [overdueDays] sunucunun hesapladığı değerlerdir (örnek kaynakta sabittir).
+///
+/// Sunucu şeması `GanttTask` ile birleşik (tarih taşıyan tek görev yüzü): `work_item_id` →
+/// [id] (ve [code]), `department_id` → [departmentId] (ve [coordinatorship]), `program_id` →
+/// [programId], `start_on` → [start], `end_on` → [due], `planned_end_on` → [plannedEnd],
+/// `completed_on` → [completedAt] (gün), `assignee_account_ids` → [assignees], `lateness` →
+/// [lateness] (ve [overdueDays] ← `days_overdue`). Tarihsiz liste satırı için bkz.
+/// `TaskSummary` (`work_item.dart`).
 @immutable
 final class TaskItem {
   const TaskItem({
     required this.code,
+    String? id,
     required this.title,
     required this.coordinatorship,
+    this.departmentId,
+    this.programId,
     required this.status,
     required this.priority,
     required this.start,
     required this.due,
+    this.plannedEnd,
     required this.assignees,
-    required this.creator,
-    required this.createdAt,
+    this.creator,
+    this.createdAt,
     this.completedAt,
+    this.description,
+    this.lateness,
     this.files = 0,
     this.notes = 0,
     this.overdueDays = 0,
@@ -206,26 +370,52 @@ final class TaskItem {
     this.fileEntries = const [],
     this.noteEntries = const [],
     this.evidenceRequired = false,
-  });
+  }) : id = id ?? code;
 
-  /// Görev kodu (`ALT-7`); rota kimliği.
+  /// Görev kodu (`ALT-7`); rota kimliği. Sunucuda insan okunur görev anahtarı yok (backend
+  /// adayı B-03): sunucudan eşlenen görevde [id] ile aynıdır.
   final String code;
+
+  /// Sunucu kimliği (`work_item_id`); örnek veride verilmezse [code].
+  final String id;
   final String title;
 
-  /// Koordinatörlük kodu.
+  /// Koordinatörlük anahtarı: örnek veride kısa kod, sunucudan eşlenen görevde
+  /// `department_id` (bkz. [departmentId]).
   final String coordinatorship;
+
+  /// Departman kimliği (`department_id`). Örnek veride yok.
+  final String? departmentId;
+
+  /// Program kimliği (`program_id`). Örnek veride yok.
+  final String? programId;
   final TaskStatus status;
   final TaskPriority priority;
   final DateTime start;
   final DateTime due;
 
+  /// Planlanan bitiş (`planned_end_on`): onayda [due] tamamlanma gününe itilir, eski bitiş
+  /// buraya yazılır (WORK-K19). `null` → planlanan bitiş [due].
+  final DateTime? plannedEnd;
+
   /// Atanan kişi kimlikleri.
   final List<String> assignees;
 
-  /// Oluşturan kişi kimliği.
-  final String creator;
-  final DateTime createdAt;
+  /// Oluşturan kişi kimliği. Görev yüzlerinde (`WorkItem`, `GanttTask`) yok — yalnız ŞY
+  /// raporunda; entegrasyonda karar (backend adayı B-02).
+  final String? creator;
+
+  /// Oluşturma anı. Sunucu görev yüzlerinde yok — entegrasyonda karar (backend adayı B-02).
+  final DateTime? createdAt;
+
+  /// Tamamlanma günü (`completed_on`; sunucuda gün çözünürlüğü).
   final DateTime? completedAt;
+
+  /// Açıklama. Görev okuma yüzlerinde yok (yalnız oluşturma/güncelleme ve ŞY raporu).
+  final String? description;
+
+  /// Sunucunun gecikme bayrakları; örnek veride yok ([overdueDays] kullanılır).
+  final TaskLateness? lateness;
 
   /// Kanıt dosyası sayısı.
   final int files;
@@ -273,16 +463,22 @@ final class TaskItem {
     List<TaskNote>? noteEntries,
   }) => TaskItem(
     code: code ?? this.code,
+    id: code == null || id != this.code ? id : code,
     title: title ?? this.title,
     coordinatorship: coordinatorship ?? this.coordinatorship,
+    departmentId: departmentId,
+    programId: programId,
     status: status ?? this.status,
     priority: priority ?? this.priority,
     start: start ?? this.start,
     due: due ?? this.due,
+    plannedEnd: plannedEnd,
     assignees: assignees ?? this.assignees,
     creator: creator,
     createdAt: createdAt,
     completedAt: completedAt == null ? this.completedAt : completedAt(),
+    description: description,
+    lateness: lateness,
     files: fileEntries?.length ?? files,
     notes: noteEntries?.length ?? notes,
     overdueDays: overdueDays ?? this.overdueDays,

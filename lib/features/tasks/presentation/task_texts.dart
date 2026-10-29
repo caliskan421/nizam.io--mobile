@@ -16,12 +16,16 @@ extension TaskTexts on AppLocalizations {
     TaskStatus.review => uiTasksStatusReview,
     TaskStatus.returned => uiTasksStatusReturned,
     TaskStatus.done => uiTasksStatusDone,
+    // Tanımsız sunucu durumu: ARB metni yok — entegrasyonda karar.
+    TaskStatus.unknown => uiTasksStatusTodo,
   };
 
   String priorityLabel(TaskPriority p) => switch (p) {
-    TaskPriority.high => uiTasksPrioHigh,
+    // `acil`: ARB metni yok — entegrasyonda karar (şimdilik "yüksek" metni).
+    TaskPriority.high || TaskPriority.urgent => uiTasksPrioHigh,
     TaskPriority.medium => uiTasksPrioMedium,
     TaskPriority.low => uiTasksPrioLow,
+    TaskPriority.unknown => uiTasksPrioMedium,
   };
 
   String viewLabel(TaskView v) => switch (v) {
@@ -153,12 +157,14 @@ NzTone statusTone(TaskStatus s) => switch (s) {
   TaskStatus.review => NzTone.waiting,
   TaskStatus.returned => NzTone.danger,
   TaskStatus.done => NzTone.done,
+  TaskStatus.unknown => NzTone.neutral,
 };
 
 int priorityLevel(TaskPriority p) => switch (p) {
   TaskPriority.low => 1,
   TaskPriority.medium => 2,
-  TaskPriority.high => 3,
+  TaskPriority.high || TaskPriority.urgent => 3,
+  TaskPriority.unknown => 2,
 };
 
 /// Ad soyaddan iki harf ("Kadir Özbek" → "KÖ").

@@ -374,7 +374,7 @@ class GanttLegend extends StatelessWidget {
       ),
       child: Row(
         children: [
-          for (final s in TaskStatus.values) ...[
+          for (final s in TaskStatus.known) ...[
             item(solid(ganttStatusColor(c, s)), l.statusLabel(s)),
             const Gap(GanttGeometry.legendGap),
           ],

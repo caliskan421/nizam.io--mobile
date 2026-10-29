@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations.dart';
 import 'package:nizamio/core/security/privacy_mask.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
+import 'package:nizamio/core/ui/extensions/context_ext.dart';
 import 'package:nizamio/core/ui/widgets/overlays/nz_bottom_sheet.dart';
 
 import '../../../../support/golden.dart';
@@ -366,4 +367,39 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(NzBottomSheetContent)).height, h0);
   });
+
+  testWidgets(
+    'compact: küçük başlık (header), kapat düğmesi yok; dışarı kapatır',
+    (tester) async {
+      await tester.pumpWidget(
+        testApp(
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () => NzBottomSheet.show<void>(
+                context,
+                title: 'durum',
+                compact: true,
+                builder: (_) => const Text('Devam ediyor'),
+              ),
+              child: const Text('aç'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('aç'));
+      await tester.pumpAndSettle();
+      expect(find.text('durum'), findsOneWidget);
+      expect(find.byIcon(Icons.close_rounded), findsNothing);
+      final style = tester.widget<Text>(find.text('durum')).style;
+      final ctx = tester.element(find.text('Devam ediyor'));
+      expect(style?.fontSize, ctx.text.kicker.fontSize);
+      expect(
+        tester.getSemantics(find.text('durum')),
+        matchesSemantics(isHeader: true, label: 'durum'),
+      );
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      expect(find.text('Devam ediyor'), findsNothing);
+    },
+  );
 }

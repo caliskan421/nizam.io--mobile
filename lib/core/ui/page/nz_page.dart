@@ -6,8 +6,10 @@ import '../../providers.dart';
 import '../../theme/generated/tokens.gen.dart';
 import '../extensions/context_ext.dart';
 import '../layout/layout.dart';
+import '../theme/nz_surfaces.dart';
 import '../widgets/feedback/nz_banner.dart';
 import '../widgets/feedback/nz_loader.dart';
+import '../widgets/surfaces/nz_glass.dart';
 
 /// Her ekranın kabuğu (U6: features presentation'da Scaffold yasağının tek karşılığı).
 ///
@@ -30,6 +32,8 @@ class NzPage extends ConsumerWidget {
     this.showTitleBar = true,
   }) : topBar = null,
        children = const [],
+       sticky = null,
+       stickyChildren = const [],
        _fill = false,
        _bare = false;
 
@@ -37,12 +41,18 @@ class NzPage extends ConsumerWidget {
   /// tek kaydırma görünümünde alt alta dizilir. İçerik üst çubuğun ve (kabuk `extendBody` ile)
   /// yüzen alt menünün altından geçer; sonda alt güvenli alan + menü yüksekliği kadar boşluk
   /// kalır. Yatay boşluk ve azami genişlik standart sayfayla aynıdır.
+  ///
+  /// [sticky] verilirse [children]'dan sonra üst çubuğun altına yapışan cam şerittir
+  /// (prototip ayrıntı sekmeleri: `position: sticky; top: 64px`, 6/10 dikey dolgu, tam
+  /// genişlik cam zemin); [stickyChildren] şeridin altında akar.
   const NzPage.feed({
     super.key,
     required Widget this.topBar,
     required this.children,
     this.width = NzContentWidth.list,
     this.onRetry,
+    this.sticky,
+    this.stickyChildren = const [],
   }) : title = '',
        body = const SizedBox.shrink(),
        actions = const [],
@@ -62,6 +72,8 @@ class NzPage extends ConsumerWidget {
     this.onRetry,
   }) : title = '',
        children = const [],
+       sticky = null,
+       stickyChildren = const [],
        width = NzContentWidth.list,
        actions = const [],
        floatingAction = null,
@@ -78,6 +90,8 @@ class NzPage extends ConsumerWidget {
     : title = '',
       topBar = null,
       children = const [],
+      sticky = null,
+      stickyChildren = const [],
       width = NzContentWidth.list,
       actions = const [],
       floatingAction = null,
@@ -99,6 +113,10 @@ class NzPage extends ConsumerWidget {
 
   /// [NzPage.feed]: akış öğeleri (aralarındaki boşluğu çağıran `Gap` ile verir).
   final List<Widget> children;
+
+  /// [NzPage.feed]: üst çubuğa yapışan şerit (ör. sekmeler) ve altındaki akış.
+  final Widget? sticky;
+  final List<Widget> stickyChildren;
   final NzContentWidth width;
 
   /// AppBar eylemleri.
@@ -146,6 +164,8 @@ class NzPage extends ConsumerWidget {
                   layout.contentMaxWidth(width))
               .clamp(0, double.infinity) /
           2;
+      final bottom =
+          MediaQuery.paddingOf(context).bottom + NizamioSpacing.gapXl;
       return NzTextScaleLimit(
         child: Scaffold(
           body: CustomScrollView(
@@ -158,10 +178,36 @@ class NzPage extends ConsumerWidget {
                   side + extra,
                   NizamioSpacing.gapXl,
                   side + extra,
-                  MediaQuery.paddingOf(context).bottom + NizamioSpacing.gapXl,
+                  sticky == null ? bottom : 0,
                 ),
                 sliver: SliverList.list(children: children),
               ),
+              if (sticky case final bar?) ...[
+                PinnedHeaderSliver(
+                  child: NzGlass(
+                    tone: NzGlassTone.bar,
+                    edge: false,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        side + extra,
+                        NizamioSpacing.space1 + 2,
+                        side + extra,
+                        NizamioSpacing.gapMd,
+                      ),
+                      child: bar,
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    side + extra,
+                    NizamioSpacing.space1,
+                    side + extra,
+                    bottom,
+                  ),
+                  sliver: SliverList.list(children: stickyChildren),
+                ),
+              ],
             ],
           ),
         ),

@@ -267,4 +267,36 @@ void main() {
       expect(scaffold.resizeToAvoidBottomInset, isFalse);
     },
   );
+
+  testWidgets('feed sticky: şerit üst çubuğun altına yapışır, altı akar', (
+    tester,
+  ) async {
+    _size(tester, 390, 600);
+    await tester.pumpWidget(
+      _app(
+        NzPage.feed(
+          topBar: const SliverAppBar(
+            pinned: true,
+            toolbarHeight: 56,
+            title: Text('üst'),
+          ),
+          sticky: const SizedBox(height: 44, child: Text('sekmeler')),
+          stickyChildren: [
+            for (var i = 0; i < 40; i++)
+              SizedBox(height: 60, child: Text('satır $i')),
+          ],
+          children: const [SizedBox(height: 300, child: Text('baş'))],
+        ),
+      ),
+    );
+    final y0 = tester.getTopLeft(find.text('sekmeler')).dy;
+    expect(y0, greaterThan(300));
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -1500));
+    await tester.pump();
+    expect(find.text('baş'), findsNothing);
+    final y1 = tester.getTopLeft(find.text('sekmeler')).dy;
+    // Yapışık: üst çubuğun (56 + güvenli alan) hemen altında kalır.
+    expect(y1, lessThan(120));
+    expect(y1, greaterThanOrEqualTo(56));
+  });
 }

@@ -25,6 +25,9 @@ abstract final class NzBottomSheet {
   /// [expandable] tutamağı genişlet/daralt düğmesi yapar; [expansion] verilirse genişlik
   /// durumu dışarıdadır (ekran bir satırı açınca sayfayı kendisi büyütebilir).
   /// [headerAction] başlık satırında kapat düğmesinin solunda durur (ör. "Tümünü temizle").
+  /// [compact] seçim listesi sayfasıdır (prototip durum/öncelik/menü sayfası): başlık büyük
+  /// başlık yerine küçük mono etiket (`rp-kicker`), kapat düğmesi yok (dışarı dokunma,
+  /// sürükleme ve geri kapatır); [description] ve [headerAction] kullanılmaz.
   static Future<T?> show<T>(
     BuildContext context, {
     required String title,
@@ -35,6 +38,7 @@ abstract final class NzBottomSheet {
     bool expandable = false,
     ValueNotifier<bool>? expansion,
     Widget? headerAction,
+    bool compact = false,
   }) {
     return showModalBottomSheet<T>(
       context: context,
@@ -61,6 +65,7 @@ abstract final class NzBottomSheet {
           expandable: expandable,
           expansion: expansion,
           headerAction: headerAction,
+          compact: compact,
           actions: actions?.call(sheetContext),
           child: Builder(builder: builder),
         ),
@@ -85,6 +90,7 @@ class NzBottomSheetContent extends StatefulWidget {
     this.expandable = false,
     this.expansion,
     this.headerAction,
+    this.compact = false,
   });
 
   final String title;
@@ -97,6 +103,9 @@ class NzBottomSheetContent extends StatefulWidget {
   /// Dış genişlik durumu ([expandable] ile); null → iç durum.
   final ValueNotifier<bool>? expansion;
   final Widget? headerAction;
+
+  /// Seçim listesi başlığı: küçük mono etiket, kapat düğmesi yok ([NzBottomSheet.show]).
+  final bool compact;
 
   @override
   State<NzBottomSheetContent> createState() => _NzBottomSheetContentState();
@@ -194,52 +203,70 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
                 )
               : ExcludeSemantics(child: handle),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            NizamioSpacing.space4,
-            0,
-            NizamioSpacing.space2,
-            NizamioSpacing.space3,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: _titleTop),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Semantics(
-                        header: true,
-                        child: Text(widget.title, style: t.titleSm),
-                      ),
-                      if (description != null) ...[
-                        const Gap(NizamioSpacing.space1),
-                        Text(
-                          description,
-                          style: t.caption.copyWith(color: c.textMuted),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+        if (widget.compact)
+          Padding(
+            // `rp-kicker` satırı: sayfa 8, etiket 12 yatay; 8 dikey.
+            padding: const EdgeInsets.fromLTRB(
+              NizamioSpacing.space5,
+              NizamioSpacing.space2,
+              NizamioSpacing.space5,
+              NizamioSpacing.space2,
+            ),
+            child: Semantics(
+              header: true,
+              child: Text(
+                widget.title,
+                style: t.kicker.copyWith(color: c.textMuted),
               ),
-              ?widget.headerAction,
-              if (widget.dismissible)
-                IconButton(
-                  tooltip: l.uiCommonClose,
-                  constraints: const BoxConstraints(
-                    minWidth: NizamioSpacing.space12,
-                    minHeight: NizamioSpacing.space12,
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              NizamioSpacing.space4,
+              0,
+              NizamioSpacing.space2,
+              NizamioSpacing.space3,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: _titleTop),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Semantics(
+                          header: true,
+                          child: Text(widget.title, style: t.titleSm),
+                        ),
+                        if (description != null) ...[
+                          const Gap(NizamioSpacing.space1),
+                          Text(
+                            description,
+                            style: t.caption.copyWith(color: c.textMuted),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                  icon: const Icon(Icons.close_rounded),
-                  onPressed: () => Navigator.of(context).maybePop(),
                 ),
-            ],
+                ?widget.headerAction,
+                if (widget.dismissible)
+                  IconButton(
+                    tooltip: l.uiCommonClose,
+                    constraints: const BoxConstraints(
+                      minWidth: NizamioSpacing.space12,
+                      minHeight: NizamioSpacing.space12,
+                    ),
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+              ],
+            ),
           ),
-        ),
         Flexible(
           fit: widget.expandable ? FlexFit.tight : FlexFit.loose,
           child: SingleChildScrollView(

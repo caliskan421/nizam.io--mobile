@@ -1,4 +1,5 @@
 // CX-Ö-03: taze container açılışı — eski kurulumun belirteçleri yeni kuruluma taşınmaz.
+// Ürün sahibi 2026-10-29: her açılış girişle başlar (kayıtlı oturum sunucuda kapatılır).
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/app/bootstrap.dart';
 import 'package:nizamio/app/di/composition.dart';
@@ -69,107 +70,88 @@ void main() {
     expect(store.values.containsKey(TokenStore.key), isFalse);
   });
 
-  test('taze açılış + aynı kurulum → oturum geri yüklenir', () async {
+  test('taze açılış + aynı kurulum → oturum sunucuda kapatılır, giriş ekranı (her açılış girişle)', () async {
     final store = await seeded('inst-1');
+    final backend = FakeBackend(instance('inst-1'));
+    final comp = compose(store, backend);
+    addTearDown(comp.dispose);
+    final c = comp.container;
+    await startup(c);
+    expect(c.read(sessionStateProvider), isA<SessionNone>());
+    expect(c.read(appPhaseProvider), AppPhase.serverVerified);
+    expect(store.values.containsKey(TokenStore.key), isFalse);
+    expect(backend.count('POST', '/v1/auth/logout'), 1);
+  });
+
+  test(
+    'sunucu çıkışı başarısız: yerel belirteçler yine silinir, giriş ekranı',
+    () async {
+      final store = await seeded('inst-1');
+      final backend = FakeBackend(
+        (r) => r.path == '/v1/auth/logout'
+            ? envelope(503, 'organization.authority_unavailable')
+            : instance('inst-1')(r),
+      );
+      final comp = compose(store, backend);
+      addTearDown(comp.dispose);
+      final c = comp.container;
+      await startup(c);
+      expect(c.read(sessionStateProvider), isA<SessionNone>());
+      expect(c.read(appPhaseProvider), AppPhase.serverVerified);
+      expect(store.values.containsKey(TokenStore.key), isFalse);
+    },
+  );
+
+  test('kayıtlı kapsam açılışta uygulanmaz, silinir', () async {
+    final store = await seeded('inst-1');
+    await ScopeStore(store).save(
+      const ScopeOwner(accountId: 'acc-1', instanceId: 'inst-1'),
+      const ScopeSelection(programId: 'p-1', departmentId: 'd-1'),
+    );
     final comp = compose(store, FakeBackend(instance('inst-1')));
     addTearDown(comp.dispose);
     final c = comp.container;
     await startup(c);
-    expect(c.read(sessionStateProvider), isA<SessionActive>());
+    expect(c.read(scopeStateProvider).hasProgram, isFalse);
+    expect(c.read(appPhaseProvider), AppPhase.serverVerified);
+    expect(store.values.containsKey(ScopeStore.key), isFalse);
   });
 
-  group('son seçili kapsam (ADR-0003 karar 20)', () {
-    Future<MemorySecureStore> withScope(
-      String instanceId, {
-      String account = 'acc-1',
-      String scopeInstance = 'inst-1',
-    }) async {
-      final store = await seeded(instanceId);
-      await ScopeStore(store).save(
-        ScopeOwner(accountId: account, instanceId: scopeInstance),
-        const ScopeSelection(programId: 'p-1', departmentId: 'd-1'),
-      );
-      return store;
-    }
-
-    test('eşleşen kayıt: açılış doğrudan scoped fazına gider', () async {
-      final store = await withScope('inst-1');
-      final comp = compose(store, FakeBackend(instance('inst-1')));
-      addTearDown(comp.dispose);
-      final c = comp.container;
-      await startup(c);
-      expect(c.read(sessionStateProvider), isA<SessionActive>());
-      expect(c.read(scopeStateProvider).programId, 'p-1');
-      expect(c.read(scopeStateProvider).departmentId, 'd-1');
-      expect(c.read(appPhaseProvider), AppPhase.scoped);
-      expect(store.values.containsKey(ScopeStore.key), isTrue);
-    });
-
-    test('kayıt yok: açılış sessionOpen (kapsam seçimi)', () async {
+  test(
+    'yarım kalmış yenileme işareti: yeniden giriş, kapsam kaydı silinir',
+    () async {
       final store = await seeded('inst-1');
-      final comp = compose(store, FakeBackend(instance('inst-1')));
-      addTearDown(comp.dispose);
-      final c = comp.container;
-      await startup(c);
-      expect(c.read(appPhaseProvider), AppPhase.sessionOpen);
-      expect(c.read(scopeStateProvider).hasProgram, isFalse);
-    });
-
-    test('farklı hesaba ait kayıt: sessionOpen, kayıt silinir', () async {
-      final store = await withScope('inst-1', account: 'acc-2');
-      final comp = compose(store, FakeBackend(instance('inst-1')));
-      addTearDown(comp.dispose);
-      final c = comp.container;
-      await startup(c);
-      expect(c.read(appPhaseProvider), AppPhase.sessionOpen);
-      expect(store.values.containsKey(ScopeStore.key), isFalse);
-    });
-
-    test('farklı kuruluma ait kayıt: sessionOpen, kayıt silinir', () async {
-      final store = await withScope('inst-1', scopeInstance: 'inst-0');
-      final comp = compose(store, FakeBackend(instance('inst-1')));
-      addTearDown(comp.dispose);
-      final c = comp.container;
-      await startup(c);
-      expect(c.read(appPhaseProvider), AppPhase.sessionOpen);
-      expect(store.values.containsKey(ScopeStore.key), isFalse);
-    });
-
-    test('bozuk kayıt: sessionOpen, kayıt silinir', () async {
-      final store = await seeded('inst-1');
-      store.values[ScopeStore.key] = 'not json';
-      final comp = compose(store, FakeBackend(instance('inst-1')));
-      addTearDown(comp.dispose);
-      final c = comp.container;
-      await startup(c);
-      expect(c.read(appPhaseProvider), AppPhase.sessionOpen);
-      expect(store.values.containsKey(ScopeStore.key), isFalse);
-    });
-
-    test(
-      'sunucu kurulumu değişmiş: oturum yok, kapsam kaydı silinir',
-      () async {
-        final store = await withScope('inst-1');
-        final comp = compose(store, FakeBackend(instance('inst-2')));
-        addTearDown(comp.dispose);
-        final c = comp.container;
-        await startup(c);
-        expect(c.read(sessionStateProvider), isA<SessionNone>());
-        expect(c.read(scopeStateProvider).hasProgram, isFalse);
-        expect(store.values.containsKey(ScopeStore.key), isFalse);
-      },
-    );
-
-    test('yarım kalmış yenileme işareti (yeniden giriş gerekli): kapsam kaydı silinir', () async {
-      final store = await withScope('inst-1');
       await TokenStore(store).markRefreshInFlight();
       final comp = compose(store, FakeBackend(instance('inst-1')));
       addTearDown(comp.dispose);
       final c = comp.container;
       await startup(c);
       expect(c.read(sessionStateProvider), isA<SessionReauthRequired>());
+      expect(c.read(appPhaseProvider), AppPhase.reauthRequired);
       expect(c.read(scopeStateProvider).hasProgram, isFalse);
-      expect(store.values.containsKey(ScopeStore.key), isFalse);
+    },
+  );
+
+  group('dev sunucusu (NIZAMIO_SERVER)', () {
+    test('kayıtlı bağ yok: adres doğrulanır, giriş ekranı', () async {
+      final store = MemorySecureStore();
+      final comp = compose(store, FakeBackend(instance('inst-1')));
+      addTearDown(comp.dispose);
+      final c = comp.container;
+      await startup(c, devServer: 'https://nizam.example.test');
+      expect(c.read(bindingStateProvider), isA<BindingVerified>());
+      expect(c.read(appPhaseProvider), AppPhase.serverVerified);
+    });
+
+    test('adres verilmez: bağ yok, sunucu ekranı', () async {
+      final comp = compose(
+        MemorySecureStore(),
+        FakeBackend(instance('inst-1')),
+      );
+      addTearDown(comp.dispose);
+      final c = comp.container;
+      await startup(c);
+      expect(c.read(appPhaseProvider), AppPhase.unbound);
     });
   });
 }

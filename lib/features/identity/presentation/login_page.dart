@@ -11,7 +11,6 @@ import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/extensions/ref_ext.dart' show sessionEndedErrorCodes;
 import '../../../core/ui/layout/layout.dart';
-import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
@@ -45,14 +44,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  void _requestSubmit(BuildContext formContext) {
-    if (ref.read(prototypeModeProvider)) {
-      // Yerel prototip: doğrulama/oturum isteği olmadan örnek ekranlara geçilir.
-      context.appNav.openHome();
-      return;
-    }
-    NzForm.of(formContext).submit();
-  }
+  void _requestSubmit(BuildContext formContext) =>
+      NzForm.of(formContext).submit();
 
   void _submit() {
     final password = _password.text;

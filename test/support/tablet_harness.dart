@@ -7,7 +7,8 @@
 //    ayarlanmaz, gerçek yüzey çizilir ve ölçüler çalışma anında FlutterView'dan okunup yazılır.
 //
 // Uygulama gerçek `NizamioApp`, gerçek bileşim kökü ([Harness]: bellek depoları + sahte HTTP +
-// örnek veri depoları), `Flavor.dev` prototip modu: Giriş ekranı → boş "Giriş yap" → ana sayfa.
+// örnek veri depoları), sahte backend ([PilotBackend]): bağ doğrulanmış açılır → Giriş ekranı →
+// gerçek giriş akışı (sahte ağ) + program seçimi → ana sayfa. Kapıyı atlayan mod yoktur.
 // Gerçek backend'e çıkılmaz. Bugünün tarihi sahtelenmez (üretim kancası yok); Ana sayfa
 // `DateTime.now()` farkı bilinen açık madde.
 //
@@ -39,7 +40,7 @@ import 'package:nizamio/features/messages/messages.dart' show ChatPage;
 import 'package:nizamio/features/timeline/presentation/gantt/gantt_chart.dart'
     show GanttChart;
 
-import '../features/pilot_support.dart' show PilotBackend;
+import '../features/pilot_support.dart' show PilotBackend, real;
 import 'harness.dart';
 
 final _l = AppLocalizationsTr();
@@ -224,12 +225,9 @@ class TabletSession {
       tester.view.physicalSize = hostSize;
       addTearDown(tester.view.reset);
     }
-    final h = Harness(
-      flavor: Flavor.dev,
-      prototype: true,
-      handler: PilotBackend().handle,
-    );
+    final h = Harness(flavor: Flavor.dev, handler: PilotBackend().handle);
     addTearDown(h.dispose);
+    await real(tester, () => h.read(serverBindingProvider).verify(testUrl));
     h.read(themeModeControllerProvider).state.value = theme;
     final s = TabletSession._(tester, h, hostSize != null);
     await tester.pumpWidget(
@@ -249,14 +247,18 @@ class TabletSession {
     await settle();
   }
 
-  /// Boş "Giriş yap": dev prototip modunda doğrulamasız ana sayfaya geçer.
+  /// Giriş ekranından gerçek akış (sahte ağ): e-posta + parola → "Giriş yap" → program seçimi.
   Future<void> signIn() async {
     expect(
       find.byType(LoginPage),
       findsOneWidget,
       reason: 'açılış Giriş ekranı',
     );
+    await tester.enterText(find.byType(TextFormField).at(0), 'a@b.test');
+    await tester.enterText(find.byType(TextFormField).at(1), 'p');
     await tester.tap(find.widgetWithText(NzButton, _l.uiIdentityLoginSubmit));
+    await settle();
+    harness.read(scopeControllerProvider).selectProgram('prog-1');
     await settle();
   }
 

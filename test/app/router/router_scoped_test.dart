@@ -88,16 +88,18 @@ void main() {
     expect(gateRedirect(AppPhase.scoped, '/server'), '/home');
     expect(gateRedirect(AppPhase.unbound, '/tasks'), '/server');
     expect(gateRedirect(AppPhase.unbound, '/yok'), '/server');
-    // Prototip modu (yalnız dev flavor): kabuk/feature rotaları açık; kapı rotaları normal kalır.
-    expect(
-      gateRedirect(AppPhase.unbound, '/tasks', devPrototype: true),
-      isNull,
-    );
-    expect(gateRedirect(AppPhase.unbound, '/home', devPrototype: true), isNull);
-    expect(
-      gateRedirect(AppPhase.unbound, '/login', devPrototype: true),
-      isNull,
-    );
+    // Kapıyı atlayan mod yok: oturum/kapsam olmadan kabuk ve feature rotaları kapalı.
+    for (final phase in AppPhase.values.where((p) => p != AppPhase.scoped)) {
+      for (final path in ['/home', '/tasks', '/archive', '/yok']) {
+        expect(
+          gateRedirect(phase, path),
+          routeForPhase(phase),
+          reason: '$phase $path',
+        );
+      }
+    }
+    expect(gateRedirect(AppPhase.serverVerified, '/home'), '/login');
+    expect(gateRedirect(AppPhase.reauthRequired, '/tasks'), '/login');
   });
 
   group('faz × korunan rota matrisi (kabuk ve derin rotalar)', () {

@@ -30,11 +30,6 @@ Never _unbound(String name) =>
 @Riverpod(keepAlive: true)
 Flavor flavor(Ref ref) => _unbound('flavorProvider');
 
-/// Prototip modu (yalnız dev flavor ve açıkça istenince: `--dart-define=NIZAMIO_PROTOTYPE=true`):
-/// login gerçek sunucuya gitmeden örnek verili ana sayfaya geçer. Prod'da her zaman false.
-@Riverpod(keepAlive: true)
-bool prototypeMode(Ref ref) => _unbound('prototypeModeProvider');
-
 /// HTTP bağdaştırıcısı; null = dio varsayılanı (IOHttpClientAdapter, platform TLS).
 @Riverpod(keepAlive: true)
 HttpClientAdapter? httpAdapter(Ref ref) => _unbound('httpAdapterProvider');

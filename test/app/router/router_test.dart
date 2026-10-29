@@ -28,19 +28,22 @@ void main() {
     },
   );
 
-  testWidgets('prototip modu: login ekranında açılır, kabuğa girer', (
+  testWidgets('oturum kapanınca (çıkış) kabuktan girişe zorunlu dönülür', (
     tester,
   ) async {
-    final phase = ValueNotifier(AppPhase.unbound);
+    final phase = ValueNotifier(AppPhase.scoped);
     addTearDown(phase.dispose);
-    final router = await pumpRouter(tester, phase, devPrototype: true);
+    final router = await pumpRouter(tester, phase);
     await tester.pump(const Duration(seconds: 1));
-    expect(locationOf(router), '/login');
     router.go('/tasks');
     await tester.pump();
     await tester.pump();
     expect(locationOf(router), '/tasks');
-    router.go('/login');
+    phase.value = AppPhase.serverVerified;
+    await tester.pump();
+    await tester.pump();
+    expect(locationOf(router), '/login');
+    router.go('/tasks');
     await tester.pump();
     await tester.pump();
     expect(locationOf(router), '/login');

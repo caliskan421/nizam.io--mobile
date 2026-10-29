@@ -90,7 +90,6 @@ Future<MemorySecureStore> seeded(String id) async {
 /// kırılır), tablodaki her port da bileşim kökünde okunur.
 final portProviders = <String, ProviderBase<Object?>>{
   'flavorProvider': flavorProvider,
-  'prototypeModeProvider': prototypeModeProvider,
   'httpAdapterProvider': httpAdapterProvider,
   'scopeControllerProvider': scopeControllerProvider,
   'serverBindingProvider': serverBindingProvider,
@@ -572,22 +571,22 @@ void main() {
     expect(runs, 1, reason: 'üstel geri çekilmeyle otomatik deneme yok');
   });
 
-  test('taze açılış, aynı kurulum: bağ doğrulanır → oturum geri yüklenir → Bearer gider', () async {
+  test('taze açılış, aynı kurulum: bağ doğrulanır → eski oturum sunucuda kapatılır (Bearer) → giriş', () async {
     final h = Harness(handler: handler, store: await seeded('inst-1'));
     addTearDown(h.dispose);
     await startup(h.container);
     expect(h.read(bindingStateProvider), isA<BindingVerified>());
-    expect(h.read(sessionStateProvider), isA<SessionActive>());
-    await h.identity.me();
-    expect(
-      h.backend.requests.last.header('Authorization'),
-      'Bearer access-token-old',
+    expect(h.read(sessionStateProvider), isA<SessionNone>());
+    final logout = h.backend.requests.singleWhere(
+      (r) => r.path == '/v1/auth/logout',
     );
+    expect(logout.header('Authorization'), 'Bearer access-token-old');
     // Sıra: önce keşif + profil, sonra kimlikli istek.
     expect(h.backend.requests.map((r) => r.path).take(2), [
       '/.well-known/nizamio-instance',
       '/v1/instance/profile',
     ]);
+    expect(h.store.values.containsKey(TokenStore.key), isFalse);
   });
 
   test(

@@ -9,15 +9,16 @@ import '../core/network/connectivity_link.dart';
 import '../core/preferences/locale_controller.dart';
 import '../core/preferences/theme_mode_controller.dart';
 import '../core/providers.dart';
-import '../core/scope/scope_store.dart';
 import '../core/server/server_binding.dart';
 import '../core/session/session_state.dart';
+import '../features/identity/identity.dart';
 import 'app.dart';
 import 'di/composition.dart';
 
-/// Uygulamayı verilen flavor ile başlatır ([prototype]: yalnız dev, `prototypeModeProvider`). Composition root: somut bağlar burada ve
+/// Uygulamayı verilen flavor ile başlatır. [devServer]: yalnız dev — kayıtlı bağ yoksa açılışta
+/// bu adres doğrulanır (uygulama doğrudan giriş ekranında açılır). Composition root: somut bağlar burada ve
 /// `app/` altındadır; `core/` ve `features/` app'e bağımlı değildir.
-Future<void> bootstrap(Flavor flavor, {bool prototype = false}) async {
+Future<void> bootstrap(Flavor flavor, {String devServer = ''}) async {
   WidgetsFlutterBinding.ensureInitialized();
   // Yazı tipleri yalnız uygulama varlıklarından (assets/fonts); çalışma anında Google'a
   // istek yok (çevrimdışı açılış, gizlilik). OFL lisans metinleri lisans sayfasına eklenir.
@@ -25,7 +26,6 @@ Future<void> bootstrap(Flavor flavor, {bool prototype = false}) async {
   LicenseRegistry.addLicense(_fontLicenses);
   final composition = Composition.create(
     flavor: flavor,
-    prototype: prototype,
     connectivityLink: PlusConnectivityLink(),
   );
   // Tercihler runApp'ten önce (tema titreşimi yok). Güvenlik açılış sırası (startup) ayrıdır
@@ -42,7 +42,10 @@ Future<void> bootstrap(Flavor flavor, {bool prototype = false}) async {
       child: const NizamioApp(),
     ),
   );
-  await startup(composition.container);
+  await startup(
+    composition.container,
+    devServer: flavor == Flavor.dev ? devServer : '',
+  );
 }
 
 /// Tercihleri açılışa sınırlı süre bekletir: tamamlanmayan platform çağrısında [timeout]
@@ -68,25 +71,30 @@ Stream<LicenseEntry> _fontLicenses() async* {
 
 /// Açılış (CX-Ö-03): önce oturum denetleyicisi kurulur (yeniden bağlanma dinleyicisi bağ
 /// doğrulamasından ÖNCE kayıtlı olsun); sonra kayıtlı bağ yeniden doğrulanır (sürüm denetimi
-/// dahil; farklı kurulum → oturum temizliği); oturum yalnız doğrulanmış bağda ve yalnız
-/// belirteç kaydı AYNI kuruluma (instance_id) aitse geri yüklenir.
-Future<void> startup(ProviderContainer container) async {
+/// dahil; farklı kurulum → oturum temizliği). Kayıtlı bağ yoksa ve [devServer] verilmişse
+/// (yalnız dev) o adres doğrulanır.
+///
+/// Her açılış GİRİŞLE başlar (ürün sahibi 2026-10-29; ADR-0003 karar 20'nin "oturum ve son
+/// kapsam geri yüklenir" kısmının yerine): kayıtlı oturum varsa sunucuda kapatılır
+/// (`IdentityService.logout`; sunucu hatası olsa da yerel belirteçler silinir), kapsam kaydı
+/// silinir. Doğrulanmış bağda faz `serverVerified` → giriş ekranı.
+Future<void> startup(
+  ProviderContainer container, {
+  String devServer = '',
+}) async {
   final session = container.read(sessionControllerProvider);
-  final binding = await container.read(serverBindingProvider).restore();
+  final bindings = container.read(serverBindingProvider);
+  var binding = await bindings.restore();
+  if (binding is! BindingVerified && devServer.isNotEmpty) {
+    binding = await bindings.verify(devServer);
+  }
   if (binding is BindingVerified) {
     await session.restore(instanceId: binding.info.instanceId);
+    if (session.state.value is SessionActive) {
+      await container.read(identityServiceProvider).logout();
+    }
   }
-  // Son seçili kapsam (ADR-0003 karar 20): YALNIZ oturum etkin olarak geri yüklendiyse ve
-  // kayıt o anki hesap + kurulumla birebir eşleşirse uygulanır; aksi hâlde kayıt silinir ve
-  // seçim yapılmaz (örtük varsayılan kapsam yok, C-04).
   final scope = container.read(scopeControllerProvider);
-  final s = session.state.value;
-  if (binding is BindingVerified && s is SessionActive) {
-    await scope.restore(
-      ScopeOwner(accountId: s.accountId, instanceId: binding.info.instanceId),
-    );
-  } else {
-    scope.clear();
-  }
+  scope.clear();
   await scope.settled;
 }

@@ -11,7 +11,6 @@ import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/core/scope/scope_store.dart';
 import 'package:nizamio/core/session/session_state.dart';
 import 'package:nizamio/core/session/token_store.dart';
-import 'package:nizamio/features/identity/identity.dart';
 
 import '../../core/scope/gated_secure_store.dart';
 import '../../support/fake_backend.dart';
@@ -133,29 +132,21 @@ void main() {
     expect(h.read(scopeStateProvider).hasProgram, isFalse);
   });
 
-  test('seçim → kapat → aç: aynı hesap + kurulumda geri yüklenir; çıkıştan sonra yüklenmez', () async {
+  test('seçim → kapat → aç: her açılış girişle başlar; oturum ve kapsam geri yüklenmez', () async {
     final h = await loggedIn(store);
     scopeOf(h).selectProgram('p-1');
     await scopeOf(h).settled;
     await h.dispose();
 
-    Composition open() => Composition.create(
+    final c = Composition.create(
       flavor: Flavor.prod,
       secureStore: store,
       httpAdapter: FakeBackend(handler),
     );
-    final c1 = open();
-    await startup(c1.container);
-    expect(c1.container.read(scopeStateProvider).programId, 'p-1');
-    await c1.container.read(identityServiceProvider).logout();
-    await c1.container.read(scopeControllerProvider).settled;
-    await c1.dispose();
-
-    final c2 = open();
-    addTearDown(c2.dispose);
-    await startup(c2.container);
-    expect(c2.container.read(sessionStateProvider), isA<SessionNone>());
-    expect(c2.container.read(scopeStateProvider).hasProgram, isFalse);
+    addTearDown(c.dispose);
+    await startup(c.container);
+    expect(c.container.read(sessionStateProvider), isA<SessionNone>());
+    expect(c.container.read(scopeStateProvider).hasProgram, isFalse);
     expect(store.values.containsKey(ScopeStore.key), isFalse);
   });
 

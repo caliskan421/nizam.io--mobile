@@ -1,5 +1,5 @@
 // Gerçek cihaz (iPad Pro 13" M5 simülatörü, iPadOS 26.3; hedef ED5DCAAF-2A7E-480E-8316-E1B9A96DD9BC)
-// görsel + ölçü koşumu. Gerçek `NizamioApp`, gerçek bileşim kökü, `Flavor.dev` prototip modu,
+// görsel + ölçü koşumu. Gerçek `NizamioApp`, gerçek bileşim kökü, `Flavor.dev` (sahte backend ile gerçek giriş),
 // sahte HTTP; gerçek backend'e bağlanmaz. Görünüm boyutu AYARLANMAZ: gerçek yüzey çizilir,
 // ölçüler (fiziksel/mantıksal boyut, dpr, güvenli alan, ray/liste/sağ bölme dikdörtgenleri)
 // çalışma anında okunur ve `Directory.systemTemp/nizamio-tablet-shots/<sahne>.json` yazılır.

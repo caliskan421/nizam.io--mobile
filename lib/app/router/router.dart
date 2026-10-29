@@ -24,26 +24,14 @@ String routeForPhase(AppPhase phase) => switch (phase) {
 
 /// Faz kapısı: [location] için yönlendirme hedefi; null → konumda kalınır.
 ///
-/// - Prototip modu (yalnız dev flavor, [devPrototype] true): oturum/kapsam olmadan
-///   kabuk ve feature rotaları açılır (ekranlar geliştirme örnek verisiyle çalışır; backend
-///   isteği atan ekranlar hata görünümüne düşer). Login prototip girişidir; diğer kapılar
-///   normal kalır. Prod'da yoktur.
+/// - Kapıyı atlayan mod YOKTUR (ürün sahibi 2026-10-29: yetkisiz dolaşma kesin engellenir);
+///   oturum ve kapsam olmadan hiçbir kabuk/feature rotası açılmaz.
 /// - `scoped` dışındaki her fazda yalnız faz hedefi açıktır: başka her yol (kabuk rotaları,
 ///   feature rotaları, bilinmeyen yol) faz hedefine gider. 404 kapıyı aşamaz.
 /// - `scoped` fazında kapı rotaları (hedef hariç) `/home`'a gider; kabuk/feature rotaları açıktır;
 ///   bilinmeyen yol 404 sayfasına düşer.
 @visibleForTesting
-String? gateRedirect(
-  AppPhase phase,
-  String location, {
-  bool devPrototype = false,
-}) {
-  if (devPrototype &&
-      (location == const LoginRoute().location ||
-          location == routeForPhase(AppPhase.scoped) ||
-          !_gatePaths.contains(location))) {
-    return null;
-  }
+String? gateRedirect(AppPhase phase, String location) {
   final target = routeForPhase(phase);
   if (location == target) return null;
   if (phase == AppPhase.scoped && !_gatePaths.contains(location)) return null;
@@ -61,22 +49,14 @@ final Set<String> _gatePaths = {
 ///
 /// Router hiçbir servisi çağırmaz; yalnız [phase]'i okur. [featureRoutes] feature rota
 /// kaydıdır (varsayılan: [registeredFeatureRoutes]).
-///
-/// [devPrototype]: yalnız dev flavor'da true verilir; uygulama login ekranında açılır; boş giriş örnek ana sayfaya geçer.
 GoRouter createRouter(
   ValueNotifier<AppPhase> phase, {
-  bool devPrototype = false,
   List<RouteBase>? featureRoutes,
 }) => GoRouter(
-  initialLocation: devPrototype
-      ? const LoginRoute().location
-      : routeForPhase(phase.value),
+  initialLocation: routeForPhase(phase.value),
   refreshListenable: phase,
-  redirect: (context, state) => gateRedirect(
-    phase.value,
-    state.matchedLocation,
-    devPrototype: devPrototype,
-  ),
+  redirect: (context, state) =>
+      gateRedirect(phase.value, state.matchedLocation),
   errorPageBuilder: (context, state) =>
       nzTransitionPage<void>(state: state, child: const NotFoundPage()),
   routes: [

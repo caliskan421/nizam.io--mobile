@@ -155,4 +155,50 @@ void main() {
     expect(h.read(appPhaseProvider), AppPhase.sessionOpen);
     expect(find.text(_l.uiScopeIntro), findsOneWidget);
   }, sizes: pilotSizes);
+
+  testScreens(
+    'çekmeceden "Çıkış yap": sunucu çıkışı, girişe zorunlu dönüş, kabuk kapalı',
+    (tester, screen) async {
+      useScreen(tester, screen);
+      final h = Harness(handler: PilotBackend().handle);
+      addTearDown(h.dispose);
+      await real(tester, () async {
+        await h.read(serverBindingProvider).verify(testUrl);
+        await h.identity.login(email: 'a@b.test', password: 'p');
+      });
+      h.read(scopeControllerProvider).selectProgram('prog-1');
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: h.container,
+          child: const NizamioApp(),
+        ),
+      );
+      await settle(tester);
+      expect(h.read(appPhaseProvider), AppPhase.scoped);
+
+      await _openMenu(tester, screen);
+      // Küçük ekranda çekmecenin son satırı ilk karede kurulmamış olabilir: kaydırılır.
+      await tester.scrollUntilVisible(
+        find.text(_l.uiIdentitySignOut),
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.tap(find.text(_l.uiIdentitySignOut).last);
+      await settle(tester);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text(_l.uiIdentitySignOut),
+        ),
+      );
+      await settle(tester);
+      expect(h.backend.count('POST', '/v1/auth/logout'), 1);
+      expect(h.read(appPhaseProvider), AppPhase.serverVerified);
+      expect(h.read(sessionControllerProvider).accessToken, isNull);
+      expect(find.text(_l.uiIdentityLoginEmail), findsOneWidget);
+      expect(find.byType(NzFloatingNav), findsNothing);
+      expect(find.byType(NzTabletRail), findsNothing);
+    },
+    sizes: pilotSizes,
+  );
 }

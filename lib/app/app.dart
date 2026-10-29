@@ -26,11 +26,7 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
   late final ValueNotifier<AppPhase> _phase = ValueNotifier(
     ref.read(appPhaseProvider),
   );
-  // Prototip modu (yalnız dev, açıkça istenince): login ile açılır, giriş örnek ana sayfaya geçer.
-  late final GoRouter _router = createRouter(
-    _phase,
-    devPrototype: ref.read(prototypeModeProvider),
-  );
+  late final GoRouter _router = createRouter(_phase);
   late final NzAppNav _nav = GoRouterAppNav(_router, ref);
   final PrivacyMaskController _mask = PrivacyMaskController();
   final ThemeData _light = AppTheme.light();

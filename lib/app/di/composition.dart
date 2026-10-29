@@ -36,19 +36,13 @@ class Composition {
 
   /// [secureStore] / [httpAdapter] / [preferenceStore]: yalnız testler ve cihazsız
   /// entegrasyon.
-  ///
-  /// [prototype]: prototip modu (yalnız dev; `prototypeModeProvider`).
   factory Composition.create({
     required Flavor flavor,
-    bool prototype = false,
     SecureStore? secureStore,
     HttpClientAdapter? httpAdapter,
     PreferenceStore? preferenceStore,
     ConnectivityLink? connectivityLink,
   }) {
-    if (prototype && flavor != Flavor.dev) {
-      throw ArgumentError.value(prototype, 'prototype', 'yalnız dev flavor');
-    }
     final locator = GetIt.asNewInstance();
     configureDependencies(
       locator,
@@ -79,7 +73,6 @@ class Composition {
       retry: (_, _) => null,
       overrides: [
         flavorProvider.overrideWithValue(flavor),
-        prototypeModeProvider.overrideWithValue(prototype),
         httpAdapterProvider.overrideWithValue(registeredHttpAdapter(locator)),
         scopeControllerProvider.overrideWithValue(locator<ScopeController>()),
         localeControllerProvider.overrideWithValue(locator<LocaleController>()),

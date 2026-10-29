@@ -25,17 +25,12 @@ final _l = AppLocalizationsTr();
 Future<Harness> _pump(
   WidgetTester tester, {
   Flavor flavor = Flavor.prod,
-  bool prototype = false,
   List<Override> overrides = const [],
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = const Size(800, 1200);
   addTearDown(tester.view.reset);
-  final h = Harness(
-    flavor: flavor,
-    prototype: prototype,
-    handler: PilotBackend().handle,
-  );
+  final h = Harness(flavor: flavor, handler: PilotBackend().handle);
   addTearDown(h.dispose);
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -107,47 +102,44 @@ void main() {
     );
   });
 
-  group('prototip modu', () {
-    testWidgets('prod flavor: faz kapısında açılır', (tester) async {
-      await _pump(tester);
-      expect(find.text(_l.uiServerIntro), findsOneWidget);
-      expect(find.byIcon(Icons.widgets_outlined), findsNothing);
-    });
-
-    testWidgets(
-      'dev flavor (prototip kapalı): gerçek akış, faz kapısında açılır',
-      (tester) async {
-        await _pump(tester, flavor: Flavor.dev);
+  group('yetkisiz dolaşma yok', () {
+    for (final flavor in Flavor.values) {
+      testWidgets('$flavor: bağ yokken yalnız sunucu ekranı; kabuk açılmaz', (
+        tester,
+      ) async {
+        final h = await _pump(tester, flavor: flavor);
+        expect(h.read(appPhaseProvider), AppPhase.unbound);
         expect(find.text(_l.uiServerIntro), findsOneWidget);
         expect(find.byType(LoginPage), findsNothing);
-      },
-    );
-
-    test('prototip modu prod flavor ile kurulamaz', () {
-      expect(() => Harness(prototype: true), throwsArgumentError);
-    });
+        expect(find.byType(HomePage), findsNothing);
+      });
+    }
 
     testWidgets(
-      'dev + prototip: login ile açılır, boş giriş örnek ana sayfaya geçer',
+      'doğrulanmış bağ, oturum yok: giriş ekranı; boş gönderim kabuğa geçmez',
       (tester) async {
-        final h = await _pump(tester, flavor: Flavor.dev, prototype: true);
-        expect(h.read(appPhaseProvider), AppPhase.unbound);
-        expect(find.text(_l.uiServerIntro), findsNothing);
-        expect(find.byIcon(Icons.widgets_outlined), findsNothing);
-        expect(find.byType(LoginPage), findsOneWidget);
-        expect(find.byType(HomePage), findsNothing);
-        expect(
-          tester
-              .widgetList<TextFormField>(find.byType(TextFormField))
-              .every((field) => field.controller!.text.isEmpty),
-          isTrue,
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(800, 1200);
+        addTearDown(tester.view.reset);
+        final h = Harness(flavor: Flavor.dev, handler: PilotBackend().handle);
+        addTearDown(h.dispose);
+        await real(tester, () => h.read(serverBindingProvider).verify(testUrl));
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: h.container,
+            child: const NizamioApp(),
+          ),
         );
+        await settle(tester);
+        expect(find.byType(LoginPage), findsOneWidget);
         await tester.tap(
           find.widgetWithText(NzButton, _l.uiIdentityLoginSubmit),
         );
         await settle(tester);
-        expect(find.byType(HomePage), findsOneWidget);
-        expect(h.read(appPhaseProvider), AppPhase.unbound);
+        expect(find.byType(LoginPage), findsOneWidget);
+        expect(find.byType(HomePage), findsNothing);
+        expect(h.read(appPhaseProvider), AppPhase.serverVerified);
+        expect(h.backend.count('POST', '/v1/auth/login'), 0);
       },
     );
   });

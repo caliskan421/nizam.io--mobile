@@ -12,7 +12,8 @@ export 'application/scope_selection_controller.dart'
     show scopeSelectionControllerProvider;
 export 'application/scope_service.dart' show ScopeService;
 export 'domain/home_dashboard.dart' show HomeDashboard;
-export 'domain/program.dart' show Program;
+export 'domain/my_department.dart' show DepartmentRole, MyDepartment;
+export 'domain/program.dart' show Program, ProgramDepartmentLink;
 export 'presentation/home/home_menus.dart' show HomeModule, showHomeDrawer;
 export 'presentation/home_page.dart' show HomePage;
 export 'presentation/root_top_bar.dart' show RootTopBar, watchNotificationBell;

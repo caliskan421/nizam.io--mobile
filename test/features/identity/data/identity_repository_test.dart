@@ -7,6 +7,7 @@ import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/features/identity/data/identity_repository.dart';
 import 'package:nizamio/features/identity/domain/current_account.dart';
+import 'package:nizamio/features/identity/domain/download_ticket.dart';
 
 /// Tek yanıtlı sahte bağdaştırıcı.
 class _Adapter implements HttpClientAdapter {
@@ -122,6 +123,75 @@ void main() {
           ),
         ),
       );
+    });
+  });
+
+  group('issueDownloadTicket', () {
+    const ticketBody =
+        '{"ticket":"TKT-gizli","url":"/v1/downloads/TKT-gizli",'
+        '"expires_at":"2026-10-29T10:00:00Z"}';
+
+    test('GET hedefi: gövdede method/path, body yok', () async {
+      final adapter = _Recording(ticketBody);
+      final repo = IdentityRepository(
+        Dio(BaseOptions(baseUrl: 'https://api.test'))
+          ..httpClientAdapter = adapter,
+      );
+      final t = await repo.issueDownloadTicket('/v1/files/f1/download');
+      expect(adapter.path, '/v1/download-tickets');
+      expect(adapter.body, {'method': 'GET', 'path': '/v1/files/f1/download'});
+      expect(t.ticket, 'TKT-gizli');
+      expect(t.path, '/v1/downloads/TKT-gizli');
+      expect(t.expiresAt, DateTime.utc(2026, 10, 29, 10));
+      expect(t.toString(), isNot(contains('TKT')));
+    });
+
+    test('iş yükü PDF: POST hedefi, gövde üretilmiş DTO JSON\'u', () async {
+      final adapter = _Recording(ticketBody);
+      final repo = IdentityRepository(
+        Dio(BaseOptions(baseUrl: 'https://api.test'))
+          ..httpClientAdapter = adapter,
+      );
+      await repo.issueWorkloadPdfTicket(memberIds: ['a1']);
+      expect(adapter.body, {
+        'method': 'POST',
+        'path': '/v1/reports/workload',
+        'body': {
+          'member_ids': ['a1'],
+        },
+      });
+    });
+
+    test('hata → ApiError', () async {
+      await expectLater(
+        _repo(
+          '{"code":"identity.download_target_invalid","message":"x","request_id":"r"}',
+          status: 422,
+        ).issueDownloadTicket('/v1/x'),
+        throwsA(
+          isA<ApiError>().having(
+            (e) => e.code,
+            'code',
+            'identity.download_target_invalid',
+          ),
+        ),
+      );
+    });
+
+    test('downloadUri: taban + göreli yol (taban yolu korunur)', () {
+      final t = DownloadTicket(
+        ticket: 'T',
+        path: '/v1/downloads/T',
+        expiresAt: DateTime.utc(2026),
+      );
+      for (final (base, want) in [
+        ('https://api.test', 'https://api.test/v1/downloads/T'),
+        ('https://api.test/', 'https://api.test/v1/downloads/T'),
+        ('https://h.test/nz', 'https://h.test/nz/v1/downloads/T'),
+      ]) {
+        final repo = IdentityRepository(Dio(BaseOptions(baseUrl: base)));
+        expect(repo.downloadUri(t).toString(), want, reason: base);
+      }
     });
   });
 }

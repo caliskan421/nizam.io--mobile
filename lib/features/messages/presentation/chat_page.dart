@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,11 +49,16 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   final _scroll = ScrollController();
   final _keys = HashMap<String, GlobalKey>();
   final _timers = <Timer>[];
-  double _headerH = 0;
-  double _composerH = 0;
-  bool _nearBottom = true;
-  bool _typing = false;
-  String? _flash;
+  // Sık değişen görünüm durumu dar dinleyicilere bağlıdır (sayfa kökü yeniden kurulmaz):
+  // cam çubuk yükseklikleri, "alta in" düğmesi, yazıyor…, vurgulanan mesaj.
+  final _headerH = ValueNotifier<double>(0);
+  final _composerH = ValueNotifier<double>(0);
+  final _nearBottom = ValueNotifier<bool>(true);
+  final _typing = ValueNotifier<bool>(false);
+  final _flash = ValueNotifier<String?>(null);
+
+  /// Akıştaki sıra (ters: 0 = en yeni); görünmeyen mesaja atlamak için liste yazar.
+  final _order = <String, int>{};
   int _sentCount = 0;
 
   /// Gönderilmiş say (prototip: 500 ms), okundu say (1600 ms), yazıyor (3200 ms).
@@ -64,16 +70,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   @override
   void initState() {
     super.initState();
-    _draft.addListener(_onDraft);
     _attachQuery.addListener(
       () => ref
           .read(chatControllerProvider(widget.id).notifier)
           .setAttachQuery(_attachQuery.text),
     );
-    _scroll.addListener(() {
-      final near = !_scroll.hasClients || _scroll.offset < 80;
-      if (near != _nearBottom) setState(() => _nearBottom = near);
-    });
+    _scroll.addListener(
+      () => _nearBottom.value = !_scroll.hasClients || _scroll.offset < 80,
+    );
     unawaited(_open());
   }
 
@@ -85,8 +89,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (chat == null) return;
       ref.read(chatsControllerProvider.notifier).open(widget.id);
       if (chat.typing != null) {
-        setState(() => _typing = true);
-        _after(_typingFor, () => setState(() => _typing = false));
+        _typing.value = true;
+        _after(_typingFor, () => _typing.value = false);
       }
     } on Object {
       // Yükleme hatası ekranda NzErrorState ile gösterilir.
@@ -99,8 +103,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }),
   );
 
-  void _onDraft() => setState(() {});
-
   @override
   void dispose() {
     for (final t in _timers) {
@@ -110,6 +112,11 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     _focus.dispose();
     _attachQuery.dispose();
     _scroll.dispose();
+    _headerH.dispose();
+    _composerH.dispose();
+    _nearBottom.dispose();
+    _typing.dispose();
+    _flash.dispose();
     super.dispose();
   }
 
@@ -128,18 +135,37 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     );
   }
 
-  void _jumpTo(String id) {
+  /// Mesaja kaydırıp vurgular. Akış tembel kurulduğundan hedef ekran dışındaysa önce sırasına
+  /// göre tahmini konuma atlanır (kurulan öğelerle kaydırma boyu netleşir), sonra ortalanır.
+  Future<void> _jumpTo(String id) async {
+    _flash.value = id;
+    _after(_flashFor, () {
+      if (_flash.value == id) _flash.value = null;
+    });
+    final index = _order[id];
+    for (var i = 0; i < 4 && _keys[id]?.currentContext == null; i++) {
+      if (index == null || !_scroll.hasClients) return;
+      final pos = _scroll.position;
+      final n = _order.length;
+      _scroll.jumpTo(
+        (pos.maxScrollExtent * index / math.max(1, n - 1)).clamp(
+          pos.minScrollExtent,
+          pos.maxScrollExtent,
+        ),
+      );
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+    }
     final ctx = _keys[id]?.currentContext;
-    if (ctx != null) {
+    if (ctx == null || !ctx.mounted) return;
+    unawaited(
       Scrollable.ensureVisible(
         ctx,
         alignment: 0.5,
         duration: NzMotion.of(context, NizamioMotion.durSheet),
         curve: NizamioMotion.easeSheet,
-      );
-    }
-    setState(() => _flash = id);
-    _after(_flashFor, () => setState(() => _flash = null));
+      ),
+    );
   }
 
   void _send(Chat chat, TaskCatalog catalog) {
@@ -189,7 +215,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   Future<void> _actions(Chat chat, ChatMessage m, TaskCatalog catalog) async {
     final l = context.l10n;
-    setState(() => _flash = m.id);
+    _flash.value = m.id;
     final mine = m.from == catalog.me;
     final a = await showMessageActions(
       context,
@@ -199,7 +225,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       catalog: catalog,
     );
     if (!mounted) return;
-    setState(() => _flash = null);
+    if (_flash.value == m.id) _flash.value = null;
     switch (a) {
       case null:
         return;
@@ -317,111 +343,23 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   Widget _chatBody(Chat chat, ChatInbox inbox, TaskCatalog catalog) {
     final l = context.l10n;
     final c = context.colors;
-    final view = ref.watch(chatControllerProvider(widget.id));
-    final mentions = mentionNames(catalog, inbox.people);
-    final sugs = suggestions(_draft.text, catalog, inbox.people);
-    final ctxMsg = view.edit != null
-        ? chat.message(view.edit!)
-        : view.reply != null
-        ? chat.message(view.reply!)
-        : null;
-    final canSend = _draft.text.trim().isNotEmpty || view.refs.isNotEmpty;
-    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
-    final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final items = timeline(chat);
-    final composer = MediaQuery.withClampedTextScaling(
-      maxScaleFactor: 1.3,
-      child: NzComposer(
-        controller: _draft,
-        focusNode: _focus,
-        hint: l.uiMessagesMessageHint,
-        canSend: canSend,
-        onSend: () => _send(chat, catalog),
-        sendLabel: l.uiMessagesSend,
-        onAttach: () {
-          _attachQuery.clear();
-          _view.toggleAttach();
-        },
-        attachLabel: l.uiMessagesAttach,
-        attachOpen: view.attach != null,
-        bottomInset: math.max(keyboard, math.max(safeBottom, 12)),
-        header: [
-          if (sugs.isNotEmpty)
-            ChatSuggestions(
-              items: sugs,
-              onPick: (s) => _draft.value = TextEditingValue(
-                text: s.draft,
-                selection: TextSelection.collapsed(offset: s.draft.length),
-              ),
-            ),
-          if (view.attach != null)
-            ChatAttachPanel(
-              view: view,
-              catalog: catalog,
-              query: _attachQuery,
-              onTab: (t) {
-                _attachQuery.clear();
-                _view.setAttachTab(t);
-              },
-              onToggle: _view.toggleRef,
-              onPhoto: () => _view.addDevice(photo: true),
-              onFile: () => _view.addDevice(photo: false),
-            ),
-          if (view.refs.isNotEmpty)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-              child: Row(
-                spacing: 6,
-                children: [
-                  for (var i = 0; i < view.refs.length; i++)
-                    NzRefChip(
-                      label: refLabel(view.refs[i], catalog),
-                      icon: refIcon(view.refs[i].kind),
-                      removeLabel: l.uiMessagesRemove,
-                      onRemove: () => _view.removeRefAt(i),
-                    ),
-                ],
-              ),
-            ),
-          if (ctxMsg != null)
-            NzComposerContext(
-              icon: view.edit != null
-                  ? Icons.edit_outlined
-                  : Icons.reply_rounded,
-              title: view.edit != null
-                  ? l.uiMessagesEditMessage
-                  : ctxMsg.from == catalog.me
-                  ? l.uiMessagesReplySelf
-                  : '${catalog.person(ctxMsg.from)?.name ?? ''} ${l.uiMessagesReplyTo}',
-              text: ctxMsg.summary,
-              cancelLabel: l.uiMessagesCancel,
-              onCancel: () {
-                if (view.edit != null) _draft.clear();
-                _view.clearContext();
-              },
-            ),
-        ],
-      ),
-    );
     return Stack(
       children: [
         Positioned.fill(
-          child: SingleChildScrollView(
-            controller: _scroll,
-            reverse: true,
-            padding: EdgeInsets.fromLTRB(
-              12,
-              _headerH + NizamioSpacing.space2,
-              12,
-              _composerH + NizamioSpacing.space3,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (final item in items) _item(chat, item, catalog, mentions),
-              ],
-            ),
+          child: _MessageList(
+            chatId: widget.id,
+            catalog: catalog,
+            people: inbox.people,
+            scroll: _scroll,
+            keys: _keys,
+            order: _order,
+            flash: _flash,
+            headerH: _headerH,
+            composerH: _composerH,
+            onJump: (id) => unawaited(_jumpTo(id)),
+            onActions: (chat, m) => unawaited(_actions(chat, m, catalog)),
+            onReact: (m, r) => _chats.react(widget.id, m, r),
+            onVote: (m, i) => _chats.vote(widget.id, m, i),
           ),
         ),
         Positioned(
@@ -430,75 +368,330 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           right: 0,
           child: ChatMeasure(
             onSize: (s) {
-              if (mounted && s.height != _headerH) {
-                setState(() => _headerH = s.height);
-              }
+              if (mounted) _headerH.value = s.height;
             },
-            child: ChatHeader(
-              chat: chat,
-              catalog: catalog,
-              typing: _typing,
-              pinIndex: view.pin,
-              onInfo: () => unawaited(_info(chat, catalog)),
-              onSearch: () => _toast(l.uiMessagesSearchChatSoon),
-              onNextPin: () {
-                final pins = chat.pins;
-                if (pins.isEmpty) return;
-                _view.nextPin();
-                _jumpTo(pins[(view.pin + 1) % pins.length]);
+            child: Consumer(
+              builder: (context, ref, _) {
+                final pin = ref.watch(
+                  chatControllerProvider(widget.id).select((v) => v.pin),
+                );
+                return ValueListenableBuilder<bool>(
+                  valueListenable: _typing,
+                  builder: (context, typing, _) => ChatHeader(
+                    chat: chat,
+                    catalog: catalog,
+                    typing: typing,
+                    pinIndex: pin,
+                    onInfo: () => unawaited(_info(chat, catalog)),
+                    onSearch: () => _toast(l.uiMessagesSearchChatSoon),
+                    onNextPin: () {
+                      final pins = chat.pins;
+                      if (pins.isEmpty) return;
+                      _view.nextPin();
+                      unawaited(_jumpTo(pins[(pin + 1) % pins.length]));
+                    },
+                  ),
+                );
               },
             ),
           ),
         ),
-        if (!_nearBottom)
-          Positioned(
-            right: 14,
-            bottom: _composerH + 12,
-            child: Semantics(
-              button: true,
-              label: l.uiMessagesToBottom,
-              excludeSemantics: true,
+        ValueListenableBuilder<bool>(
+          valueListenable: _nearBottom,
+          builder: (context, near, child) => near
+              // Yığın boyunu belirlememesi için konumlu boş öğe.
+              ? const Positioned(right: 0, bottom: 0, child: SizedBox.shrink())
+              : ValueListenableBuilder<double>(
+                  valueListenable: _composerH,
+                  builder: (context, h, child) =>
+                      Positioned(right: 14, bottom: h + 12, child: child!),
+                  child: child,
+                ),
+          child: Semantics(
+            button: true,
+            label: l.uiMessagesToBottom,
+            excludeSemantics: true,
+            onTap: _toBottom,
+            child: GestureDetector(
               onTap: _toBottom,
-              child: GestureDetector(
-                onTap: _toBottom,
-                child: NzGlass.circle(
-                  tone: NzGlassTone.float,
-                  child: SizedBox.square(
-                    dimension: NizamioSize.glassButton,
-                    child: Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: c.text,
-                    ),
-                  ),
+              child: NzGlass.circle(
+                tone: NzGlassTone.float,
+                child: SizedBox.square(
+                  dimension: NizamioSize.glassButton,
+                  child: Icon(Icons.keyboard_arrow_down_rounded, color: c.text),
                 ),
               ),
             ),
           ),
+        ),
         Positioned(
           left: 0,
           right: 0,
           bottom: 0,
           child: ChatMeasure(
             onSize: (s) {
-              if (mounted && s.height != _composerH) {
-                setState(() => _composerH = s.height);
-              }
+              if (mounted) _composerH.value = s.height;
             },
-            child: composer,
+            child: _ComposerArea(
+              chat: chat,
+              inbox: inbox,
+              catalog: catalog,
+              draft: _draft,
+              focus: _focus,
+              attachQuery: _attachQuery,
+              onSend: () => _send(chat, catalog),
+            ),
           ),
         ),
       ],
     );
   }
+}
+
+/// Yazma alanı: taslağı ve yazma durumunu kendisi dinler; tuş vuruşu, öneri, ek paneli ve
+/// klavye kalkışı (her kare değişen `viewInsets`) yalnız bu alt ağacı yeniden kurar.
+class _ComposerArea extends ConsumerWidget {
+  const _ComposerArea({
+    required this.chat,
+    required this.inbox,
+    required this.catalog,
+    required this.draft,
+    required this.focus,
+    required this.attachQuery,
+    required this.onSend,
+  });
+
+  final Chat chat;
+  final ChatInbox inbox;
+  final TaskCatalog catalog;
+  final TextEditingController draft;
+  final FocusNode focus;
+  final TextEditingController attachQuery;
+  final VoidCallback onSend;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final view = ref.watch(chatControllerProvider(chat.id));
+    final ctrl = ref.read(chatControllerProvider(chat.id).notifier);
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
+    final ctxMsg = view.edit != null
+        ? chat.message(view.edit!)
+        : view.reply != null
+        ? chat.message(view.reply!)
+        : null;
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: draft,
+      builder: (context, value, _) {
+        final sugs = suggestions(value.text, catalog, inbox.people);
+        final canSend = value.text.trim().isNotEmpty || view.refs.isNotEmpty;
+        return MediaQuery.withClampedTextScaling(
+          maxScaleFactor: 1.3,
+          child: NzComposer(
+            controller: draft,
+            focusNode: focus,
+            hint: l.uiMessagesMessageHint,
+            canSend: canSend,
+            onSend: onSend,
+            sendLabel: l.uiMessagesSend,
+            onAttach: () {
+              attachQuery.clear();
+              ctrl.toggleAttach();
+            },
+            attachLabel: l.uiMessagesAttach,
+            attachOpen: view.attach != null,
+            bottomInset: math.max(keyboard, math.max(safeBottom, 12)),
+            header: [
+              if (sugs.isNotEmpty)
+                ChatSuggestions(
+                  items: sugs,
+                  onPick: (s) => draft.value = TextEditingValue(
+                    text: s.draft,
+                    selection: TextSelection.collapsed(offset: s.draft.length),
+                  ),
+                ),
+              if (view.attach != null)
+                ChatAttachPanel(
+                  view: view,
+                  catalog: catalog,
+                  query: attachQuery,
+                  onTab: (t) {
+                    attachQuery.clear();
+                    ctrl.setAttachTab(t);
+                  },
+                  onToggle: ctrl.toggleRef,
+                  onPhoto: () => ctrl.addDevice(photo: true),
+                  onFile: () => ctrl.addDevice(photo: false),
+                ),
+              if (view.refs.isNotEmpty)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                  child: Row(
+                    spacing: 6,
+                    children: [
+                      for (var i = 0; i < view.refs.length; i++)
+                        NzRefChip(
+                          label: refLabel(view.refs[i], catalog),
+                          icon: refIcon(view.refs[i].kind),
+                          removeLabel: l.uiMessagesRemove,
+                          onRemove: () => ctrl.removeRefAt(i),
+                        ),
+                    ],
+                  ),
+                ),
+              if (ctxMsg != null)
+                NzComposerContext(
+                  icon: view.edit != null
+                      ? Icons.edit_outlined
+                      : Icons.reply_rounded,
+                  title: view.edit != null
+                      ? l.uiMessagesEditMessage
+                      : ctxMsg.from == catalog.me
+                      ? l.uiMessagesReplySelf
+                      : '${catalog.person(ctxMsg.from)?.name ?? ''} ${l.uiMessagesReplyTo}',
+                  text: ctxMsg.summary,
+                  cancelLabel: l.uiMessagesCancel,
+                  onCancel: () {
+                    if (view.edit != null) draft.clear();
+                    ctrl.clearContext();
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Mesaj akışı: ters (0 = en yeni, alta yapışık) tembel liste. Yalnız görünen balonlar
+/// kurulur; akış öğeleri sohbet değişince bir kez türetilir; mesaj kimliğiyle anahtarlı
+/// öğeler yeni mesaj gelince yer değiştirir (yeniden kurulmaz). Cam çubuk yükseklikleri
+/// yalnız dolguyu günceller (liste sliver'ı aynı örnek kalır).
+class _MessageList extends ConsumerStatefulWidget {
+  const _MessageList({
+    required this.chatId,
+    required this.catalog,
+    required this.people,
+    required this.scroll,
+    required this.keys,
+    required this.order,
+    required this.flash,
+    required this.headerH,
+    required this.composerH,
+    required this.onJump,
+    required this.onActions,
+    required this.onReact,
+    required this.onVote,
+  });
+
+  final String chatId;
+  final TaskCatalog catalog;
+  final List<String> people;
+  final ScrollController scroll;
+  final Map<String, GlobalKey> keys;
+  final Map<String, int> order;
+  final ValueListenable<String?> flash;
+  final ValueListenable<double> headerH;
+  final ValueListenable<double> composerH;
+  final ValueChanged<String> onJump;
+  final void Function(Chat chat, ChatMessage m) onActions;
+  final void Function(String msg, ChatReaction r) onReact;
+  final void Function(String msg, int option) onVote;
+
+  @override
+  ConsumerState<_MessageList> createState() => _MessageListState();
+}
+
+class _MessageListState extends ConsumerState<_MessageList> {
+  Chat? _chat;
+  List<ChatItem> _items = const [];
+  List<Key> _itemKeys = const [];
+  final _keyIndex = HashMap<Key, int>();
+  List<String>? _mentions;
+
+  /// Öğeleri yalnız sohbet nesnesi değişince (yeni mesaj, tepki…) yeniden türetir.
+  void _derive(Chat chat) {
+    if (identical(chat, _chat)) return;
+    _chat = chat;
+    _items = timeline(chat).reversed.toList(growable: false);
+    _itemKeys = [for (final x in _items) _keyOf(x)];
+    _keyIndex.clear();
+    widget.order.clear();
+    for (var i = 0; i < _items.length; i++) {
+      _keyIndex[_itemKeys[i]] = i;
+      if (_items[i] case ChatMessageItem(:final message)) {
+        widget.order[message.id] = i;
+      }
+    }
+  }
+
+  Key _keyOf(ChatItem item) => switch (item) {
+    ChatDayItem(:final day) => ValueKey('day-${day.toIso8601String()}'),
+    ChatNewItem() => const ValueKey('new'),
+    ChatMessageItem(:final message) => widget.keys.putIfAbsent(
+      message.id,
+      GlobalKey.new,
+    ),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final chat = ref.watch(
+      chatsControllerProvider.select((v) => v.value?.chat(widget.chatId)),
+    );
+    if (chat == null) return const SizedBox.shrink();
+    _derive(chat);
+    final mentions = _mentions ??= mentionNames(widget.catalog, widget.people);
+    final items = _items;
+    final keys = _itemKeys;
+    final keyIndex = _keyIndex;
+    final list = SliverList.builder(
+      itemCount: items.length,
+      // Yeni mesaj 0. sıraya girince eski balonlar anahtarıyla yerini bulur.
+      findChildIndexCallback: (key) => keyIndex[key],
+      itemBuilder: (context, i) => KeyedSubtree(
+        key: keys[i],
+        child: _item(context, chat, items[i], mentions),
+      ),
+    );
+    return ValueListenableBuilder<double>(
+      valueListenable: widget.headerH,
+      builder: (context, top, sliver) => ValueListenableBuilder<double>(
+        valueListenable: widget.composerH,
+        builder: (context, bottom, sliver) => CustomScrollView(
+          controller: widget.scroll,
+          reverse: true,
+          slivers: [
+            SliverPadding(
+              // SliverPadding kenarları görseldir (ters akışta da üst = üst).
+              padding: EdgeInsets.fromLTRB(
+                12,
+                top + NizamioSpacing.space2,
+                12,
+                bottom + NizamioSpacing.space3,
+              ),
+              sliver: sliver,
+            ),
+          ],
+        ),
+        child: sliver,
+      ),
+      child: list,
+    );
+  }
 
   Widget _item(
+    BuildContext context,
     Chat chat,
     ChatItem item,
-    TaskCatalog catalog,
     List<String> mentions,
   ) {
     final l = context.l10n;
     final c = context.colors;
+    final catalog = widget.catalog;
     switch (item) {
       case ChatDayItem(:final day):
         return NzChatDayChip(l.dayLabel(day, catalog.today));
@@ -511,80 +704,128 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         final name = person?.name ?? m.from;
         final color = personColor(context, catalog, m.from);
         final reply = m.replyTo == null ? null : chat.message(m.replyTo!);
-        final key = _keys.putIfAbsent(m.id, GlobalKey.new);
         final poll = m.poll;
         return Padding(
-          key: key,
           padding: EdgeInsets.only(top: first ? 8 : 2),
-          child: NzChatBubble(
-            mine: mine,
-            last: last,
-            semanticLabel: [
-              if (mine) l.uiMessagesYou else name,
-              m.text,
-              ?poll?.question,
-              l.time(m.at),
-            ].where((s) => s.isNotEmpty).join(', '),
-            senderName: chat.group && !mine && first ? name : null,
-            senderColor: color,
-            senderRole: person == null ? null : l.role(person.role),
-            quote: reply == null
-                ? null
-                : NzChatQuote(
-                    who: reply.from == catalog.me
-                        ? l.uiMessagesYou
-                        : catalog.person(reply.from)?.name ?? reply.from,
-                    text: reply.summary,
-                    color: reply.from == catalog.me
-                        ? c.accentText
-                        : personColor(context, catalog, reply.from),
-                    semanticLabel: l.uiMessagesQuoteJump,
-                    onTap: () => _jumpTo(reply.id),
-                  ),
-            body: ChatMessageBody(
-              message: m,
-              catalog: catalog,
-              mentions: mentions,
-              onOpenTask: context.appNav.openTask,
+          child: _Flash(
+            id: m.id,
+            flash: widget.flash,
+            builder: (flash) => NzChatBubble(
+              mine: mine,
+              last: last,
+              semanticLabel: [
+                if (mine) l.uiMessagesYou else name,
+                m.text,
+                ?poll?.question,
+                l.time(m.at),
+              ].where((s) => s.isNotEmpty).join(', '),
+              senderName: chat.group && !mine && first ? name : null,
+              senderColor: color,
+              senderRole: person == null ? null : l.role(person.role),
+              quote: reply == null
+                  ? null
+                  : NzChatQuote(
+                      who: reply.from == catalog.me
+                          ? l.uiMessagesYou
+                          : catalog.person(reply.from)?.name ?? reply.from,
+                      text: reply.summary,
+                      color: reply.from == catalog.me
+                          ? c.accentText
+                          : personColor(context, catalog, reply.from),
+                      semanticLabel: l.uiMessagesQuoteJump,
+                      onTap: () => widget.onJump(reply.id),
+                    ),
+              body: ChatMessageBody(
+                message: m,
+                catalog: catalog,
+                mentions: mentions,
+                onOpenTask: context.appNav.openTask,
+              ),
+              extra: poll == null
+                  ? null
+                  : ChatPollView(
+                      poll: poll,
+                      onVote: (i) => widget.onVote(m.id, i),
+                    ),
+              editedLabel: m.edited ? l.uiMessagesEdited : null,
+              pinned: chat.pins.contains(m.id),
+              time: l.time(m.at),
+              tick: !mine
+                  ? NzChatTick.none
+                  : !m.sent
+                  ? NzChatTick.sent
+                  : m.read
+                  ? NzChatTick.read
+                  : NzChatTick.delivered,
+              flash: flash,
+              reactions: [
+                for (final r in ChatReaction.values)
+                  if ((m.reactions[r] ?? 0) > 0)
+                    NzChatReactionChip(
+                      kind: nzReaction(r),
+                      count: m.reactions[r]!,
+                      mine: m.myReaction == r,
+                      semanticLabel: l.reaction(r),
+                      onTap: () => widget.onReact(m.id, r),
+                    ),
+              ],
+              showAvatarSlot: chat.group && !mine,
+              avatar: NzChatAvatar(
+                initials: chatInitials(name),
+                tone: personTone(m.from, name),
+                extent: 30,
+              ),
+              longPressLabel: l.uiMessagesMessageActions,
+              onLongPress: () => widget.onActions(chat, m),
             ),
-            extra: poll == null
-                ? null
-                : ChatPollView(
-                    poll: poll,
-                    onVote: (i) => _chats.vote(widget.id, m.id, i),
-                  ),
-            editedLabel: m.edited ? l.uiMessagesEdited : null,
-            pinned: chat.pins.contains(m.id),
-            time: l.time(m.at),
-            tick: !mine
-                ? NzChatTick.none
-                : !m.sent
-                ? NzChatTick.sent
-                : m.read
-                ? NzChatTick.read
-                : NzChatTick.delivered,
-            flash: _flash == m.id,
-            reactions: [
-              for (final r in ChatReaction.values)
-                if ((m.reactions[r] ?? 0) > 0)
-                  NzChatReactionChip(
-                    kind: nzReaction(r),
-                    count: m.reactions[r]!,
-                    mine: m.myReaction == r,
-                    semanticLabel: l.reaction(r),
-                    onTap: () => _chats.react(widget.id, m.id, r),
-                  ),
-            ],
-            showAvatarSlot: chat.group && !mine,
-            avatar: NzChatAvatar(
-              initials: chatInitials(name),
-              tone: personTone(m.from, name),
-              extent: 30,
-            ),
-            longPressLabel: l.uiMessagesMessageActions,
-            onLongPress: () => unawaited(_actions(chat, m, catalog)),
           ),
         );
     }
   }
+}
+
+/// Vurgu dinleyicisi: yalnız kendi mesajının vurgusu değişince yeniden kurulur.
+class _Flash extends StatefulWidget {
+  const _Flash({required this.id, required this.flash, required this.builder});
+
+  final String id;
+  final ValueListenable<String?> flash;
+  final Widget Function(bool flash) builder;
+
+  @override
+  State<_Flash> createState() => _FlashState();
+}
+
+class _FlashState extends State<_Flash> {
+  late bool _on = widget.flash.value == widget.id;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.flash.addListener(_changed);
+  }
+
+  @override
+  void didUpdateWidget(_Flash old) {
+    super.didUpdateWidget(old);
+    if (old.flash != widget.flash) {
+      old.flash.removeListener(_changed);
+      widget.flash.addListener(_changed);
+    }
+    _on = widget.flash.value == widget.id;
+  }
+
+  @override
+  void dispose() {
+    widget.flash.removeListener(_changed);
+    super.dispose();
+  }
+
+  void _changed() {
+    final on = widget.flash.value == widget.id;
+    if (on != _on) setState(() => _on = on);
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(_on);
 }

@@ -51,6 +51,7 @@ Future<ChatAction?> showMessageActions(
   return NzBottomSheet.show<ChatAction>(
     context,
     title: l.uiMessagesMessageActions,
+    showHeader: false,
     builder: (sheet) {
       final c = sheet.colors;
       final t = sheet.text;
@@ -271,6 +272,7 @@ Future<void> showPollResults(
   return NzBottomSheet.show<void>(
     context,
     title: l.uiMessagesPollResults,
+    showHeader: false,
     builder: (_) =>
         _PollResults(chatId: chatId, messageId: messageId, onToast: onToast),
   );
@@ -340,6 +342,8 @@ class _PollResults extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: NizamioSpacing.space1,
           children: [
+            // Prototip: başlıksız sayfada mono "anket sonuçları" etiketi + soru.
+            NzKicker(l.uiMessagesPollResultsLc),
             Text(poll.question, style: t.titleSm),
             Text(
               '${poll.meta} · ${poll.ended ? l.uiMessagesConcluded : poll.deadline} · ${l.voters(poll.voters)}',
@@ -508,6 +512,7 @@ Future<ChatInfoAction?> showChatInfo(
   return NzBottomSheet.show<ChatInfoAction>(
     context,
     title: '${chat.name} ${l.uiMessagesInfo}',
+    showHeader: false,
     builder: (sheet) {
       final c = sheet.colors;
       final t = sheet.text;

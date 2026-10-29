@@ -2,11 +2,13 @@
 // gönderme (tik durumları), öneriler, ek paneli ve atıf hapı, basılı tutma işlemleri (yanıtla,
 // sabitle, sil), tepki ve anket, görev atfı gezinmesi, sohbet bilgisi, klavye, taşma.
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart' as widgets show debugOnRebuildDirtyWidget;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_composer.dart';
 import 'package:nizamio/core/ui/widgets/surfaces/nz_chat_bubble.dart';
+import 'package:nizamio/features/messages/application/chats_controller.dart';
 import 'package:nizamio/features/messages/messages.dart';
 
 import '../../../support/harness.dart';
@@ -77,7 +79,12 @@ void main() {
       expect(find.text('${_l.uiMessagesPinned} 1/2'), findsOneWidget);
       await _tap(tester, find.text('${_l.uiMessagesPinned} 1/2'));
       expect(find.text('${_l.uiMessagesPinned} 2/2'), findsOneWidget);
+      // Akış tembel ve ters: eski uç (dün) yukarı kaydırınca kurulur.
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 3000));
+      await settle(tester);
       expect(find.text(_l.uiMessagesYesterday), findsOneWidget);
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -3000));
+      await settle(tester);
       expect(find.text(_l.uiMessagesToday), findsOneWidget);
       expect(find.text(_l.uiMessagesNewMessages), findsOneWidget);
       expect(
@@ -169,7 +176,9 @@ void main() {
       await _open(tester, id: 'kadir');
       await tester.longPress(_bubble('Hidrofor için yeni tarih'));
       await settle(tester);
-      expect(find.text(_l.uiMessagesMessageActions), findsOneWidget);
+      // Prototip: işlem sayfası başlıksız; ad semantikte.
+      expect(find.text(_l.uiMessagesMessageActions), findsNothing);
+      expect(find.bySemanticsLabel(_l.uiMessagesMessageActions), findsWidgets);
       await _tap(tester, find.text(_l.uiMessagesReply));
       expect(find.text('Kerem Özdal ${_l.uiMessagesReplyTo}'), findsOneWidget);
       await _tap(tester, find.byTooltip(_l.uiMessagesCancel));
@@ -218,6 +227,7 @@ void main() {
     await settle(tester);
     await _tap(tester, find.text(_l.uiMessagesPollResults));
     expect(find.text('${_l.uiMessagesNotVoted} · 8'), findsOneWidget);
+    expect(find.text(_l.uiMessagesPollResultsLc), findsOneWidget);
     await _tap(tester, find.text(_l.uiMessagesEndPoll));
     expect(find.text(_l.uiMessagesPollConcluded), findsOneWidget);
     expect(find.textContaining(_l.uiMessagesConcluded), findsWidgets);
@@ -271,4 +281,74 @@ void main() {
       );
     }
   }
+
+  group('performans', () {
+    /// Ölçüm süresince yeniden kurulan [NzChatBubble] öğeleri.
+    Future<int> bubbleRebuilds(Future<void> Function() body) async {
+      var n = 0;
+      widgets.debugOnRebuildDirtyWidget = (e, builtOnce) {
+        if (builtOnce && e.widget is NzChatBubble) n++;
+      };
+      try {
+        await body();
+      } finally {
+        widgets.debugOnRebuildDirtyWidget = null;
+      }
+      return n;
+    }
+
+    testWidgets('yazarken balonlar yeniden kurulmaz', (tester) async {
+      await _open(tester);
+      expect(find.byType(NzChatBubble), findsWidgets);
+      final n = await bubbleRebuilds(() async {
+        await _type(tester, 'Merhaba');
+        await _type(tester, 'Merhaba #AL');
+      });
+      expect(n, 0, reason: 'tuş vuruşu yalnız yazma alanını kurar');
+    });
+
+    testWidgets(
+      'uzun akış tembel; yeni mesajda eski balonlar yeniden kurulmaz; sabite atlar',
+      (tester) async {
+        final (h, _) = await _open(tester);
+        final chats = h.read(chatsControllerProvider.notifier);
+        for (var i = 0; i < 80; i++) {
+          chats.send(
+            'gen',
+            from: 'ma',
+            at: DateTime(2026, 10, 21, 11, i % 60),
+            text: 'Uzun akış mesajı $i',
+          );
+        }
+        await settle(tester);
+        final built = find.byType(NzChatBubble).evaluate().length;
+        expect(built, lessThan(40), reason: '86 mesajın yalnız görünenleri');
+        expect(
+          find.textContaining('Uzun akış mesajı 79', findRichText: true),
+          findsOneWidget,
+          reason: 'akış en yenide (altta) açık',
+        );
+        final n = await bubbleRebuilds(() async {
+          chats.send(
+            'gen',
+            from: 'ma',
+            at: DateTime(2026, 10, 21, 12),
+            text: 'Bir tane daha',
+          );
+          await tester.pump();
+        });
+        expect(n, lessThan(4), reason: 'anahtarlı öğeler yer değiştirir');
+        // Sabit şerit en eski uçtaki sabit mesaja kaydırır (ekran dışında kurulmamıştı).
+        await _tap(tester, find.textContaining(_l.uiMessagesPinned));
+        await tester.pump(const Duration(seconds: 1));
+        await settle(tester);
+        expect(find.byType(NzChatBubble), findsWidgets);
+        expect(
+          find.textContaining('Uzun akış mesajı 79', findRichText: true),
+          findsNothing,
+          reason: 'akış eski uca kaydı',
+        );
+      },
+    );
+  });
 }

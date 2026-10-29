@@ -37,7 +37,22 @@ Future<(Harness, RecordingAppNav)> _open(
   return (h, nav);
 }
 
+/// Akış tembeldir (ekran dışı öğeler kurulmaz): [f] ağaçta yoksa başa dönüp bulunana dek
+/// aşağı kaydırır.
+Future<void> _reveal(WidgetTester tester, Finder f) async {
+  final s = find.byType(Scrollable).first;
+  if (f.evaluate().isEmpty) {
+    await tester.drag(s, const Offset(0, 6000));
+    await tester.pump();
+  }
+  for (var i = 0; i < 40 && f.evaluate().isEmpty; i++) {
+    await tester.drag(s, const Offset(0, -240));
+    await tester.pump();
+  }
+}
+
 Future<void> _tap(WidgetTester tester, Finder f) async {
+  await _reveal(tester, f);
   await tester.ensureVisible(f);
   await tester.pump();
   await tester.tap(f);
@@ -69,6 +84,39 @@ void main() {
     expect(find.text('10.06.2026'), findsOneWidget);
     expect(find.text('22.06 → 10.09.2026'), findsOneWidget);
     await tester.ensureVisible(find.text('41 ${_l.uiTasksEvLateTail}'));
+  });
+
+  testWidgets('sekmeler yapışkan; liste alt sayfaları küçük başlıklı', (
+    tester,
+  ) async {
+    // Kısa görünüm: içerik başlığı aşacak kadar kayar.
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 520);
+    addTearDown(tester.view.reset);
+    await _open(tester);
+    await _tap(tester, find.text(_l.uiTasksTabSubtasks));
+    final tabs = find.text(_l.uiTasksTabSubtasks);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -900));
+    await tester.pump();
+    // Başlık kaydı; sekme şeridi üst çubuğun altında kalır.
+    final kicker = find.text('Altyapı ve tesisat');
+    expect(
+      kicker.evaluate().isEmpty || tester.getTopLeft(kicker).dy < 0,
+      isTrue,
+    );
+    expect(tabs, findsOneWidget);
+    expect(tester.getTopLeft(tabs).dy, lessThan(140));
+    await _top(tester);
+    // Durum seçimi: prototip `rp-kicker` başlık, kapat düğmesi yok.
+    await _tap(tester, find.text(_l.uiTasksStatusDoing));
+    expect(find.text(_l.uiTasksSheetStatus), findsOneWidget);
+    expect(find.byIcon(Icons.close_rounded), findsNothing);
+  });
+
+  testWidgets('diğer işlemler başlığı Türkçe küçük harf', (tester) async {
+    await _open(tester, code: 'İDA-2');
+    await _tap(tester, find.byIcon(Icons.more_vert_rounded));
+    expect(find.text('ida-2'), findsOneWidget);
   });
 
   testWidgets('talep onayı ve durum kuralı bildirimleri', (tester) async {

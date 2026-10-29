@@ -38,7 +38,22 @@ Future<void> _top(WidgetTester tester) async {
   await settle(tester);
 }
 
+/// Akış tembeldir (ekran dışı öğeler kurulmaz): [f] ağaçta yoksa başa dönüp bulunana dek
+/// aşağı kaydırır.
+Future<void> _reveal(WidgetTester tester, Finder f) async {
+  final s = find.byType(Scrollable).first;
+  if (f.evaluate().isEmpty) {
+    await tester.drag(s, const Offset(0, 6000));
+    await tester.pump();
+  }
+  for (var i = 0; i < 40 && f.evaluate().isEmpty; i++) {
+    await tester.drag(s, const Offset(0, -240));
+    await tester.pump();
+  }
+}
+
 Future<void> _tap(WidgetTester tester, Finder f) async {
+  await _reveal(tester, f);
   await tester.ensureVisible(f);
   await tester.pump();
   await tester.tap(f);
@@ -59,8 +74,10 @@ void main() {
     expect(find.text('${_l.uiTasksListAll} · 76'), findsOneWidget);
     expect(find.text('Su deposu temel betonunun yapılması'), findsOneWidget);
     expect(find.text('98 ${_l.uiTasksLateTail}'), findsOneWidget);
+    await _reveal(tester, find.text('8 / 76 ${_l.uiTasksTasksLc}'));
     expect(find.text('8 / 76 ${_l.uiTasksTasksLc}'), findsOneWidget);
     await _tap(tester, find.text(_l.uiTasksShowMore));
+    await _reveal(tester, find.text('16 / 76 ${_l.uiTasksTasksLc}'));
     expect(find.text('16 / 76 ${_l.uiTasksTasksLc}'), findsOneWidget);
     await _tap(tester, find.text(_l.uiTasksViewLate));
     expect(find.text('${_l.uiTasksListLate} · 15'), findsOneWidget);
@@ -80,14 +97,19 @@ void main() {
     expect(find.text(_l.uiTasksSortCreatedShort), findsOneWidget);
     await _tap(tester, find.text(_l.uiTasksSortCoordShort));
     expect(find.text(_l.uiTasksSortCreatedShort), findsNothing);
-    expect(
-      find.text('76 ${_l.uiTasksTasksLc} · 11 ${_l.uiTasksCoordsLc}'),
-      findsOneWidget,
-    );
     expect(find.text('Altyapı ve tesisat'), findsOneWidget);
     expect(find.text('ALT-5'), findsOneWidget);
     await _tap(tester, find.text('Altyapı ve tesisat'));
     expect(find.text('ALT-5'), findsNothing);
+    // Gruplar kapalıyken liste kısalır; sayı satırı görünür.
+    await _reveal(
+      tester,
+      find.text('76 ${_l.uiTasksTasksLc} · 11 ${_l.uiTasksCoordsLc}'),
+    );
+    expect(
+      find.text('76 ${_l.uiTasksTasksLc} · 11 ${_l.uiTasksCoordsLc}'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('arama ve filtre alt sayfası; çipler ve temizle', (tester) async {

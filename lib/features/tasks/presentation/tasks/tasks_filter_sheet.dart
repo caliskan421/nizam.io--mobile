@@ -8,10 +8,8 @@ import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
-import '../../application/task_catalog_controller.dart';
 import '../../application/tasks_list_controller.dart';
 import '../../domain/task_catalog.dart';
-import '../../domain/task_query.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 
@@ -42,17 +40,7 @@ Future<void> showTasksFilterSheet(
       ),
       Consumer(
         builder: (context, ref, _) {
-          final s = ref.watch(provider);
-          final c = ref.watch(taskCatalogControllerProvider).value;
-          final n = c == null
-              ? 0
-              : queryTasks(
-                  c,
-                  view: s.view,
-                  sort: s.sort,
-                  descending: s.descending,
-                  filter: s.filter,
-                ).tasks.length;
+          final n = ref.watch(tasksListResultOf(provider))?.tasks.length ?? 0;
           return NzButton.primary(
             label: '$n ${l.uiTasksShowTasksTail}',
             expand: true,
@@ -77,17 +65,8 @@ class _FilterBody extends ConsumerWidget {
     final t = context.text;
     final s = ref.watch(provider);
     final ctl = ref.read(provider.notifier);
-    final catalog = ref.watch(taskCatalogControllerProvider).value;
-    if (catalog == null) return const SizedBox.shrink();
-    final tasks = catalog.tasks;
-    final who = [
-      for (final p in catalog.people)
-        (p, tasks.where((x) => x.assignees.contains(p.id)).length),
-    ].where((e) => e.$2 > 0).toList()..sort((a, b) => b.$2 - a.$2);
-    final coords = [
-      for (final co in catalog.coordinatorships)
-        (co, tasks.where((x) => x.coordinatorship == co.code).length),
-    ].where((e) => e.$2 > 0).toList();
+    final options = ref.watch(taskFilterOptionsProvider);
+    if (options == null) return const SizedBox.shrink();
 
     Widget group(
       TaskFilterGroup g,
@@ -165,7 +144,7 @@ class _FilterBody extends ConsumerWidget {
           l.uiTasksGroupPeople,
           s.filter.people.length,
           [
-            for (final (p, n) in who)
+            for (final (p, n) in options.people)
               TaskCheckRow(
                 label: p.name,
                 count: n,
@@ -184,7 +163,7 @@ class _FilterBody extends ConsumerWidget {
           l.uiTasksGroupCoord,
           s.filter.coordinatorships.length,
           [
-            for (final (co, n) in coords)
+            for (final (co, n) in options.coordinatorships)
               TaskCheckRow(
                 label: co.name,
                 count: n,
@@ -202,7 +181,7 @@ class _FilterBody extends ConsumerWidget {
             for (final p in TaskPriority.values.reversed)
               TaskCheckRow(
                 label: l.priorityLabel(p),
-                count: tasks.where((x) => x.priority == p).length,
+                count: options.priorities[p] ?? 0,
                 square: true,
                 selected: s.filter.priorities.contains(p),
                 leading: NzPriorityBars(level: priorityLevel(p)),

@@ -153,4 +153,42 @@ void main() {
     expect(find.text('1'), findsOneWidget);
     expect(t.takeException(), isNull);
   });
+
+  testWidgets('muted: başlık soluk (tamamlanmış görev)', (t) async {
+    Color? titleColor() => t.widget<Text>(find.text('Biten iş')).style?.color;
+
+    await t.pumpWidget(
+      testApp(
+        const Column(
+          children: [
+            NzTaskCard(
+              code: 'A-1',
+              title: 'Biten iş',
+              statusLabel: 'Tamamlandı',
+              statusTone: NzTone.done,
+            ),
+          ],
+        ),
+      ),
+    );
+    final normal = titleColor();
+    await t.pumpWidget(
+      testApp(
+        const Column(
+          children: [
+            NzTaskCard(
+              code: 'A-1',
+              title: 'Biten iş',
+              statusLabel: 'Tamamlandı',
+              statusTone: NzTone.done,
+              muted: true,
+            ),
+          ],
+        ),
+      ),
+    );
+    final muted = titleColor();
+    expect(muted, isNotNull);
+    expect(muted, isNot(normal));
+  });
 }

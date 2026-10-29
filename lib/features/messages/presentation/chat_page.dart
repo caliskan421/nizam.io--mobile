@@ -276,7 +276,15 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                     .where((r) => r.kind == ChatRefKind.file)
                     .firstOrNull
                     ?.coordinatorship;
-            unawaited(showNewTaskSheet(context, coordinatorship: coord));
+            // Prototip: mesaj metni (boşluklar tekleşir) başlığı doldurur; hedef sıfırlanır.
+            unawaited(
+              showNewTaskSheet(
+                context,
+                coordinatorship: coord,
+                resetTarget: true,
+                title: m.text.replaceAll(RegExp(r'\s+'), ' '),
+              ),
+            );
           case ChatSimpleAction.delete:
             _chats.delete(widget.id, m.id);
             _toast(l.uiMessagesDeleted);

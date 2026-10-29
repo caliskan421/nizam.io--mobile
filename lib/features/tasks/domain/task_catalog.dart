@@ -314,12 +314,18 @@ final class TaskCatalog {
   final List<TaskItem> tasks;
   final List<Person> people;
   final List<CoordinatorshipRef> coordinatorships;
-  Person? person(String id) => people.where((p) => p.id == id).firstOrNull;
 
-  CoordinatorshipRef? coordinatorship(String code) =>
-      coordinatorships.where((c) => c.code == code).firstOrNull;
+  // Kimlik → öğe dizinleri: kart/arama/filtre her satırda ad çözer; doğrusal arama yerine
+  // ilk kullanımda bir kez kurulur (katalog değişmez, `withTasks` yeni örnek üretir).
+  late final _people = {for (final p in people) p.id: p};
+  late final _coords = {for (final c in coordinatorships) c.code: c};
+  late final _tasks = {for (final t in tasks) t.code: t};
 
-  TaskItem? task(String code) => tasks.where((t) => t.code == code).firstOrNull;
+  Person? person(String id) => _people[id];
+
+  CoordinatorshipRef? coordinatorship(String code) => _coords[code];
+
+  TaskItem? task(String code) => _tasks[code];
 
   List<TaskItem> tasksOf(String coordinatorship) => [
     for (final t in tasks)

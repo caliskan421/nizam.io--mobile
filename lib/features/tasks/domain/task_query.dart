@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 
 import 'task_catalog.dart';
@@ -57,6 +59,27 @@ final class TaskFilter {
 
   bool get hasExtra =>
       people.isNotEmpty || coordinatorships.isNotEmpty || priorities.isNotEmpty;
+
+  // Değer eşitliği: sonuç sağlayıcısı süzgeci `select` ile izler; aynı süzgeç yeniden
+  // hesap tetiklemez.
+  @override
+  bool operator ==(Object other) =>
+      other is TaskFilter &&
+      other.query == query &&
+      _sameSet(other.people, people) &&
+      _sameSet(other.coordinatorships, coordinatorships) &&
+      _sameSet(other.priorities, priorities);
+
+  @override
+  int get hashCode => Object.hash(
+    query,
+    Object.hashAllUnordered(people),
+    Object.hashAllUnordered(coordinatorships),
+    Object.hashAllUnordered(priorities),
+  );
+
+  static bool _sameSet<T>(Set<T> a, Set<T> b) =>
+      identical(a, b) || (a.length == b.length && a.containsAll(b));
 
   bool matches(TaskItem t, TaskCatalog c) {
     if (coordinatorships.isNotEmpty &&
@@ -188,4 +211,47 @@ int trCompare(String a, String b) {
     return x.codeUnitAt(i) - y.codeUnitAt(i);
   }
   return x.length - y.length;
+}
+
+/// Filtre alt sayfasının seçenekleri ve sayıları (prototip `G`): tüm görevler üzerinden;
+/// kişiler görev sayısına göre azalan, görevi olmayan kişi/koordinatörlük düşer.
+@immutable
+final class TaskFilterOptions {
+  const TaskFilterOptions({
+    required this.people,
+    required this.coordinatorships,
+    required this.priorities,
+  });
+
+  final List<(Person, int)> people;
+  final List<(CoordinatorshipRef, int)> coordinatorships;
+  final Map<TaskPriority, int> priorities;
+}
+
+TaskFilterOptions filterOptions(TaskCatalog c) {
+  final byPerson = HashMap<String, int>();
+  final byCoord = HashMap<String, int>();
+  final byPrio = {for (final p in TaskPriority.values) p: 0};
+  for (final t in c.tasks) {
+    for (final a in t.assignees) {
+      byPerson[a] = (byPerson[a] ?? 0) + 1;
+    }
+    byCoord[t.coordinatorship] = (byCoord[t.coordinatorship] ?? 0) + 1;
+    byPrio[t.priority] = byPrio[t.priority]! + 1;
+  }
+  final people = [
+    for (final p in c.people)
+      if ((byPerson[p.id] ?? 0) > 0) (p, byPerson[p.id]!),
+  ];
+  // Kararlı sıralama: eşit sayıda katalog sırası korunur.
+  final indexed = [for (var i = 0; i < people.length; i++) (i, people[i])];
+  indexed.sort((x, y) => _or(y.$2.$2 - x.$2.$2, () => x.$1 - y.$1));
+  return TaskFilterOptions(
+    people: [for (final e in indexed) e.$2],
+    coordinatorships: [
+      for (final co in c.coordinatorships)
+        if ((byCoord[co.code] ?? 0) > 0) (co, byCoord[co.code]!),
+    ],
+    priorities: byPrio,
+  );
 }

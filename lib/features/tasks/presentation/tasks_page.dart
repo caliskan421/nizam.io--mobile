@@ -53,6 +53,18 @@ class _TasksPageState extends ConsumerState<TasksPage> {
   );
 
   @override
+  void didUpdateWidget(TasksPage old) {
+    super.didUpdateWidget(old);
+    // Başka başlangıç süzgeciyle açıldı (ör. ana sayfa KPI kartından `view=late`): yeni
+    // denetleyicinin araması kapalı ve boştur; alandaki eski metin de silinir.
+    if (old.view != widget.view ||
+        old.people.join(',') != widget.people.join(',')) {
+      _search.clear();
+      _searchFocus.unfocus();
+    }
+  }
+
+  @override
   void dispose() {
     _search.dispose();
     _searchFocus.dispose();
@@ -79,15 +91,11 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     final nav = context.appNav;
     ref.listen(shellReselectEventsProvider, (_, next) {
       final visible = ModalRoute.of(context)?.isCurrent ?? true;
-      final catalog = ref.read(taskCatalogControllerProvider).value;
-      if (next?.tab != TasksPage.shellTab || !visible || catalog == null) {
-        return;
-      }
+      if (next?.tab != TasksPage.shellTab || !visible) return;
       showTasksShortcuts(
         context,
-        catalog: catalog,
         provider: _provider,
-        onNewTask: () => showNewTaskSheet(context),
+        onNewTask: () => showNewTaskSheet(context, resetTarget: true),
         onTimeline: nav.openTimeline,
         onSearch: () {
           if (!ref.read(_provider).searchOpen) _toggleSearch();
@@ -97,6 +105,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     });
     final state = ref.watch(_provider);
     final catalog = ref.watch(taskCatalogControllerProvider);
+    final result = ref.watch(tasksListResultOf(_provider));
+    final data = catalog.value;
     return NzPage.feed(
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       topBar: const RootTopBar(),
@@ -118,7 +128,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
             NzIconButton.circleAccent(
               icon: Icons.add_rounded,
               semanticLabel: l.uiTasksNewTask,
-              onPressed: () => showNewTaskSheet(context),
+              onPressed: () => showNewTaskSheet(context, resetTarget: true),
             ),
           ],
         ),
@@ -147,20 +157,25 @@ class _TasksPageState extends ConsumerState<TasksPage> {
           ),
         ),
         const Gap(NizamioSpacing.space5),
-        NzAsyncView<TaskCatalog>(
-          value: catalog,
-          onRetry: () => ref.invalidate(taskCatalogControllerProvider),
-          data: (c) => TasksListBody(
-            catalog: c,
+        if (data != null && result != null)
+          ...tasksListChildren(
+            context,
+            catalog: data,
             state: state,
-            provider: _provider,
+            result: result,
+            ctl: ref.read(_provider.notifier),
             onClearAll: () {
               _search.clear();
               ref.read(_provider.notifier).clearAll();
             },
             onOpen: nav.openTask,
+          )
+        else
+          NzAsyncView<TaskCatalog>(
+            value: catalog,
+            onRetry: () => ref.invalidate(taskCatalogControllerProvider),
+            data: (_) => const SizedBox.shrink(),
           ),
-        ),
       ],
     );
   }

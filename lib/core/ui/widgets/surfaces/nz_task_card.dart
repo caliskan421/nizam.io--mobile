@@ -33,7 +33,8 @@ class NzTaskCardDate {
 /// İsteğe bağlı alt görev çubuğu ([subtaskProgress] 0–1 + [subtaskText] "2/3 alt görev").
 /// Alt satır: avatar yığını ([assignees]) + [assigneeText] + sağda rozet ([badge],
 /// [badgeTone]; ör. "98 gün gecikti"). Kart `NzCard.outlined`, iç boşluk `m-card-pad`, basınca
-/// `.985`. Okuyucu etiketi [semanticLabel] (verilmezse görünen metinler).
+/// `.985`. Okuyucu etiketi [semanticLabel] (verilmezse görünen metinler). [muted] başlığı
+/// soluk çizer (prototip: tamamlanmış görev `ink-muted`).
 class NzTaskCard extends StatelessWidget {
   const NzTaskCard({
     super.key,
@@ -56,6 +57,7 @@ class NzTaskCard extends StatelessWidget {
     this.onTap,
     this.semanticLabel,
     this.trailing = const [],
+    this.muted = false,
   });
 
   final String code;
@@ -78,6 +80,7 @@ class NzTaskCard extends StatelessWidget {
   final NzTone badgeTone;
   final VoidCallback? onTap;
   final String? semanticLabel;
+  final bool muted;
 
   /// Alt satırda rozetin ardından ek işaretler (ör. ikinci rozet, dosya/not sayaçları).
   final List<Widget> trailing;
@@ -131,7 +134,7 @@ class NzTaskCard extends StatelessWidget {
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: t.labelLg,
+            style: muted ? t.labelLg.copyWith(color: c.textMuted) : t.labelLg,
           ),
           if (hasTile)
             DecoratedBox(

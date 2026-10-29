@@ -95,12 +95,19 @@ class NewTaskFormController extends _$NewTaskFormController {
   @override
   NewTaskForm build() => _initial();
 
+  /// Boş taslak; prototip `tk` ilk durumu gibi ilk koordinatörlük (ALT) seçili açılır.
   NewTaskForm _initial() {
     final today = _today();
     return NewTaskForm(
       start: today,
       end: today.add(const Duration(days: 14)),
       month: DateTime(today.year, today.month),
+      coordinatorship: ref
+          .read(taskCatalogControllerProvider)
+          .value
+          ?.coordinatorships
+          .firstOrNull
+          ?.code,
     );
   }
 
@@ -108,14 +115,24 @@ class NewTaskFormController extends _$NewTaskFormController {
     ref.read(taskCatalogControllerProvider).value?.today ?? DateTime.now(),
   );
 
-  /// Açılış bağlamı: koordinatörlük (null → seçilmemiş), atanan yok, satırlar kapalı.
-  void prepare({String? coordinatorship}) =>
-      state = _cancelPick(state).copyWith(
-        coordinatorship: () => coordinatorship,
-        assignees: const [],
-        pane: () => null,
-        error: () => null,
-      );
+  /// Açılış bağlamı (prototip `openSheet(kind, key, patch)`): [reset] ile hedef
+  /// koordinatörlük [coordinatorship] olur (null → seçilmemiş) ve atananlar silinir (görev
+  /// listesi, koordinatörlük ayrıntısı, sohbet); [reset] olmadan taslak olduğu gibi kalır
+  /// (ana sayfa hızlı işlemi). Her iki durumda satırlar kapalı, hata yok, yarım takvim
+  /// seçimi geri alınır. [title] verilirse başlık onunla doldurulur (mesajı göreve
+  /// dönüştür: metnin ilk 120 karakteri).
+  void prepare({String? coordinatorship, bool reset = true, String? title}) {
+    var f = _cancelPick(state);
+    if (title != null) f = f.copyWith(title: title);
+    state = reset
+        ? f.copyWith(
+            coordinatorship: () => coordinatorship,
+            assignees: const [],
+            pane: () => null,
+            error: () => null,
+          )
+        : f.copyWith(pane: () => null, error: () => null);
+  }
 
   void setTitle(String v) =>
       state = state.copyWith(title: v, error: () => null);

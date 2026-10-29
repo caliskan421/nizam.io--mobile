@@ -203,6 +203,23 @@ void main() {
     },
   );
 
+  testWidgets('göreve dönüştür: mesaj metni yeni görev başlığını doldurur', (
+    tester,
+  ) async {
+    await _open(tester, id: 'kadir');
+    await tester.longPress(_bubble('Hidrofor için yeni tarih'));
+    await settle(tester);
+    await _tap(tester, find.text(_l.uiMessagesToTask));
+    final fields = tester
+        .widgetList<EditableText>(find.byType(EditableText))
+        .map((e) => e.controller.text);
+    expect(
+      fields.any((t) => t.contains('Hidrofor için yeni tarih')),
+      isTrue,
+      reason: 'başlık alanı mesajla dolu',
+    );
+  });
+
   testWidgets('düzenle: metin alana gelir, gönderince "düzenlendi"', (
     tester,
   ) async {

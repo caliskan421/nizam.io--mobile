@@ -79,8 +79,11 @@ class TaskDetailPage extends ConsumerWidget {
       );
     });
     final catalog = ref.watch(taskCatalogControllerProvider);
-    final state = ref.watch(provider);
-    final task = catalog.value?.task(code);
+    // Yalnız silinme bilgisi: sekme, alt görev açıklığı ve not taslağı kendi alt
+    // widget'larında izlenir (not yazarken sayfa kökü yeniden kurulmaz).
+    final deleted = ref.watch(provider.select((s) => s.deleted != null));
+    final data = catalog.value;
+    final task = data?.task(code);
     return NzPage.feed(
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       topBar: NzTopBar.detail(
@@ -100,53 +103,126 @@ class TaskDetailPage extends ConsumerWidget {
                 ),
               ],
       ),
+      // Sekmeler üst çubuğun altına yapışır (prototip `position: sticky; top: 64px`);
+      // sekme içeriği şeridin altında akar.
+      pinned: data == null || task == null
+          ? null
+          : Padding(
+              // Prototip şeridi: 6 üst / 10 alt dikey dolgu.
+              padding: const EdgeInsets.only(
+                top: NizamioSpacing.space1 + 2,
+                bottom: NizamioSpacing.gapMd,
+              ),
+              child: _Tabs(task: task),
+            ),
+      after: data == null || task == null
+          ? const []
+          : [
+              const Gap(NizamioSpacing.space1),
+              _TabContent(task: task, catalog: data, actions: actions),
+            ],
       children: [
-        NzAsyncView<TaskCatalog>(
-          value: catalog,
-          onRetry: () => ref.invalidate(taskCatalogControllerProvider),
-          data: (c) {
-            final t = c.task(code);
-            if (t == null) {
-              if (state.deleted != null) {
-                return NzEmptyState(
-                  icon: Icons.delete_outline_rounded,
-                  title: '$code ${l.uiTasksDeletedTail}',
-                  message: l.uiTasksDeletedFilesKept,
-                  actionLabel: l.uiTasksUndo,
-                  onAction: actions.undoDelete,
-                );
-              }
-              return NzEmptyState(title: l.uiTasksNotFound);
-            }
-            return _Body(task: t, catalog: c, state: state, actions: actions);
-          },
-        ),
+        if (data != null && task != null)
+          _Body(task: task, catalog: data, actions: actions)
+        else
+          NzAsyncView<TaskCatalog>(
+            value: catalog,
+            onRetry: () => ref.invalidate(taskCatalogControllerProvider),
+            data: (_) => deleted
+                ? NzEmptyState(
+                    icon: Icons.delete_outline_rounded,
+                    title: '$code ${l.uiTasksDeletedTail}',
+                    message: l.uiTasksDeletedFilesKept,
+                    actionLabel: l.uiTasksUndo,
+                    onAction: actions.undoDelete,
+                  )
+                : NzEmptyState(title: l.uiTasksNotFound),
+          ),
       ],
     );
   }
 }
 
-class _Body extends ConsumerWidget {
-  const _Body({
+/// Özet / Alt görev / Dosya / Not sekmeleri (yapışkan şerit).
+class _Tabs extends ConsumerWidget {
+  const _Tabs({required this.task});
+
+  final TaskItem task;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final p = taskDetailControllerProvider(task.code);
+    final tab = ref.watch(p.select((s) => s.tab));
+    const tabs = TaskDetailTab.values;
+    return NzPillTabs(
+      semanticLabel: l.uiTasksDetailTabs,
+      selected: tab.index,
+      onSelected: (i) => ref.read(p.notifier).selectTab(tabs[i]),
+      tabs: [
+        NzPillTab(label: l.uiTasksTabSummary),
+        NzPillTab(label: l.uiTasksTabSubtasks, count: task.subtasks.length),
+        NzPillTab(label: l.uiTasksTabFiles, count: task.fileEntries.length),
+        NzPillTab(label: l.uiTasksTabNotes, count: task.noteEntries.length),
+      ],
+    );
+  }
+}
+
+/// Seçili sekmenin içeriği.
+class _TabContent extends ConsumerWidget {
+  const _TabContent({
     required this.task,
     required this.catalog,
-    required this.state,
     required this.actions,
   });
 
   final TaskItem task;
   final TaskCatalog catalog;
-  final TaskDetailState state;
   final TaskDetailActions actions;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final tab = ref.watch(
+      taskDetailControllerProvider(task.code).select((s) => s.tab),
+    );
+    return Padding(
+      padding: const EdgeInsets.only(top: NizamioSpacing.space2),
+      child: switch (tab) {
+        TaskDetailTab.summary => DetailSummary(task: task, catalog: catalog),
+        TaskDetailTab.subtasks => DetailSubtasks(
+          task: task,
+          catalog: catalog,
+          actions: actions,
+        ),
+        TaskDetailTab.files => DetailFiles(task: task, catalog: catalog),
+        TaskDetailTab.notes => DetailNotes(
+          task: task,
+          catalog: catalog,
+          actions: actions,
+        ),
+      },
+    );
+  }
+}
+
+class _Body extends StatelessWidget {
+  const _Body({
+    required this.task,
+    required this.catalog,
+    required this.actions,
+  });
+
+  final TaskItem task;
+  final TaskCatalog catalog;
+  final TaskDetailActions actions;
+
+  @override
+  Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final ctl = ref.read(taskDetailControllerProvider(task.code).notifier);
     final req = task.dateRequest;
-    final tabs = TaskDetailTab.values;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -215,34 +291,6 @@ class _Body extends ConsumerWidget {
           ),
         ],
         const Gap(NizamioSpacing.space5),
-        NzPillTabs(
-          semanticLabel: l.uiTasksDetailTabs,
-          selected: state.tab.index,
-          onSelected: (i) => ctl.selectTab(tabs[i]),
-          tabs: [
-            NzPillTab(label: l.uiTasksTabSummary),
-            NzPillTab(label: l.uiTasksTabSubtasks, count: task.subtasks.length),
-            NzPillTab(label: l.uiTasksTabFiles, count: task.fileEntries.length),
-            NzPillTab(label: l.uiTasksTabNotes, count: task.noteEntries.length),
-          ],
-        ),
-        const Gap(NizamioSpacing.space5),
-        switch (state.tab) {
-          TaskDetailTab.summary => DetailSummary(task: task, catalog: catalog),
-          TaskDetailTab.subtasks => DetailSubtasks(
-            task: task,
-            catalog: catalog,
-            state: state,
-            actions: actions,
-          ),
-          TaskDetailTab.files => DetailFiles(task: task, catalog: catalog),
-          TaskDetailTab.notes => DetailNotes(
-            task: task,
-            catalog: catalog,
-            draft: state.noteDraft,
-            actions: actions,
-          ),
-        },
       ],
     );
   }

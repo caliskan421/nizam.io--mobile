@@ -28,6 +28,9 @@ abstract final class NzBottomSheet {
   /// [showHeader] false → prototipteki başlıksız sayfa: yalnız tutamak; başlık satırı ve kapat
   /// düğmesi çizilmez, [title] ekran okuyucuya sayfanın adı olarak bildirilir (kapatma dışarı
   /// dokunma, sürükleme ya da geri ile).
+  /// [compact] seçim listesi sayfasıdır (prototip durum/öncelik/menü sayfası): başlık büyük
+  /// başlık yerine küçük mono etiket (`rp-kicker`), kapat düğmesi yok (dışarı dokunma,
+  /// sürükleme ve geri kapatır); [description] ve [headerAction] kullanılmaz.
   static Future<T?> show<T>(
     BuildContext context, {
     required String title,
@@ -39,6 +42,7 @@ abstract final class NzBottomSheet {
     ValueNotifier<bool>? expansion,
     Widget? headerAction,
     bool showHeader = true,
+    bool compact = false,
   }) {
     return showModalBottomSheet<T>(
       context: context,
@@ -66,6 +70,7 @@ abstract final class NzBottomSheet {
           expansion: expansion,
           headerAction: headerAction,
           showHeader: showHeader,
+          compact: compact,
           actions: actions?.call(sheetContext),
           child: Builder(builder: builder),
         ),
@@ -91,6 +96,7 @@ class NzBottomSheetContent extends StatefulWidget {
     this.expansion,
     this.headerAction,
     this.showHeader = true,
+    this.compact = false,
   });
 
   final String title;
@@ -106,6 +112,9 @@ class NzBottomSheetContent extends StatefulWidget {
 
   /// false → başlık satırı (başlık, açıklama, kapat) çizilmez; [title] semantik addır.
   final bool showHeader;
+
+  /// Seçim listesi başlığı: küçük mono etiket, kapat düğmesi yok ([NzBottomSheet.show]).
+  final bool compact;
 
   @override
   State<NzBottomSheetContent> createState() => _NzBottomSheetContentState();
@@ -205,6 +214,23 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
         ),
         if (!widget.showHeader)
           const Gap(NizamioSpacing.space1)
+        else if (widget.compact)
+          Padding(
+            // `rp-kicker` satırı: sayfa 8, etiket 12 yatay; 8 dikey.
+            padding: const EdgeInsets.fromLTRB(
+              NizamioSpacing.space5,
+              NizamioSpacing.space2,
+              NizamioSpacing.space5,
+              NizamioSpacing.space2,
+            ),
+            child: Semantics(
+              header: true,
+              child: Text(
+                widget.title,
+                style: t.kicker.copyWith(color: c.textMuted),
+              ),
+            ),
+          )
         else
           Padding(
             padding: const EdgeInsets.fromLTRB(

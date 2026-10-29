@@ -10,6 +10,7 @@ import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../application/task_detail_controller.dart';
 import '../../domain/task_catalog.dart';
+import '../../domain/task_query.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 import 'detail_forms.dart';
@@ -110,7 +111,8 @@ class TaskDetailActions {
     final l = context.l10n;
     final c = context.colors;
     _listSheet(
-      title: code.toLowerCase(),
+      // Türkçe küçük harf (İDA-2 → ida-2; `toLowerCase` noktalı i üretir).
+      title: trLower(code),
       builder: (sheet) => [
         _ListOption(
           label: l.uiTasksEditTask,
@@ -160,6 +162,7 @@ class TaskDetailActions {
   }) => NzBottomSheet.show<void>(
     context,
     title: title,
+    compact: true,
     builder: (sheet) => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: builder(sheet),

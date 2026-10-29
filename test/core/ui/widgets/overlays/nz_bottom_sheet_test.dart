@@ -366,4 +366,30 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(NzBottomSheetContent)).height, h0);
   });
+
+  testWidgets('başlıksız: başlık satırı ve kapat yok, başlık anlamsal etiket', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      testApp(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => NzBottomSheet.show<void>(
+              context,
+              title: 'Altyapı işlemleri',
+              showHeader: false,
+              builder: (_) => const Text('içerik'),
+            ),
+            child: const Text('aç'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('aç'));
+    await tester.pumpAndSettle();
+    expect(find.text('içerik'), findsOneWidget);
+    expect(find.text('Altyapı işlemleri'), findsNothing);
+    expect(find.byIcon(Icons.close_rounded), findsNothing);
+    expect(find.bySemanticsLabel('Altyapı işlemleri'), findsOneWidget);
+  });
 }

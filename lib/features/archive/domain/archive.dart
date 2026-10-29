@@ -3,32 +3,44 @@ import 'package:meta/meta.dart';
 import '../../tasks/tasks.dart';
 
 /// Arşiv klasörü: bir koordinatörlüğün dosyaları (sayılar sunucunun hesapladığı değerlerdir).
+///
+/// Sunucu karşılığı `ArchiveFolder` (`GET /v1/records/archive/folders`): `folder_id` → [code],
+/// `name` → [name], `file_count` → [files], `is_virtual` → [isVirtual]. Diğer alanlar sunucuda
+/// yoktur (varsayılanlı; entegrasyonda karar).
 @immutable
 final class ArchiveFolder {
   const ArchiveFolder({
     required this.code,
     required this.name,
     required this.files,
-    required this.tasks,
-    required this.sizeMb,
-    required this.lastUploadDays,
-    required this.leads,
+    this.tasks = 0,
+    this.sizeMb = 0,
+    this.lastUploadDays,
+    this.leads = const [],
+    this.isVirtual = false,
   });
 
-  /// Koordinatörlük kodu (`ALT`); rota kimliği.
+  /// Rota kimliği. Örnek veride koordinatörlük kodu (`ALT`); sunucuda `folder_id`
+  /// (departman kimliği ya da üyenin sanal klasör kimliği — biçimi spec'te tanımsız).
   final String code;
   final String name;
   final int files;
 
-  /// Dosyası olan görev sayısı.
+  /// Dosyası olan görev sayısı. Sunucuda yok — entegrasyonda karar (`archiveTasks` ile türetilebilir).
   final int tasks;
+
+  /// Klasör boyutu. Sunucuda yok — entegrasyonda karar.
   final double sizeMb;
 
-  /// Son yüklemeden bu yana gün (null → hiç yükleme yok).
+  /// Son yüklemeden bu yana gün (null → hiç yükleme yok). Sunucuda yok — entegrasyonda karar.
   final int? lastUploadDays;
 
-  /// Koordinatör kişi kimlikleri (görev kataloğundaki kişiler).
+  /// Koordinatör kişi kimlikleri (görev kataloğundaki kişiler). Sunucuda yok — entegrasyonda
+  /// karar (koordinatörler organization uçlarından gelir).
   final List<String> leads;
+
+  /// Üyenin "Görevlerim" sanal klasörü (sunucu `is_virtual`; RECORDS-K18): koordinatörlük değildir.
+  final bool isVirtual;
 }
 
 /// Arşiv klasörlerinin kaynağı (domain portu; gerçekleştirmeler `data/`).
@@ -36,7 +48,8 @@ abstract interface class ArchiveRepository {
   Future<List<ArchiveFolder>> loadFolders();
 }
 
-/// Hazır dosya etiketleri; [share] örnek dağılımdaki payıdır.
+/// Hazır dosya etiketleri; [share] örnek dağılımdaki payıdır. Örnek veriden türedi; sunucunun
+/// kapalı etiket kümesi `RecordTag`'dir (`records.dart`) — örtüşmez, entegrasyonda karar.
 enum ArchiveTag {
   field(0.5),
   result(0.3),
@@ -64,7 +77,9 @@ final class ArchiveCustomTag {
   final ArchiveTagColor color;
 }
 
-/// Klasör sıralaması (prototip: Son yükleme → Ada göre → Boyuta göre).
+/// Klasör sıralaması (prototip: Son yükleme → Ada göre → Boyuta göre). Sunucuda aynı üç eksen
+/// arşiv DOSYA listesinin `sort` parametresidir (`ArchiveAttachmentFilter.sort`): [recent] →
+/// varsayılan (yükleme zamanı azalan), [name] → `name`, [size] → `size`.
 enum ArchiveSort { recent, name, size }
 
 /// Dosya türü.

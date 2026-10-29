@@ -56,6 +56,7 @@ Future<void> showArchivePreview(
   return NzBottomSheet.show<void>(
     context,
     title: l.uiArchivePreview,
+    showHeader: false,
     builder: (_) =>
         _Preview(code: code, all: all, initial: fileId, onToast: toast),
   );

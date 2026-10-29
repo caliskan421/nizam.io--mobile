@@ -53,11 +53,23 @@ final class ArchiveFolderViewState {
   ];
 }
 
-/// Klasör ayrıntısı komutları; klasör kodu başına ayrı durum (ekran kapanınca sıfırlanır).
+/// Silinen kayıtlara taşınan dosya kimlikleri (oturum boyunca; prototip `gone` klasör yeniden
+/// açılınca da korunur). Dosya kimlikleri klasörler arasında tektir.
+@Riverpod(keepAlive: true)
+class ArchiveRemovedFiles extends _$ArchiveRemovedFiles {
+  @override
+  Set<String> build() => const {};
+
+  void add(String fileId) => state = {...state, fileId};
+}
+
+/// Klasör ayrıntısı komutları; klasör kodu başına ayrı durum. Ekran kapanınca sekme ve
+/// süzgeçler sıfırlanır (prototip `openAFolder`), silinenler [ArchiveRemovedFiles]'ta kalır.
 @riverpod
 class ArchiveFolderController extends _$ArchiveFolderController {
   @override
-  ArchiveFolderViewState build(String code) => const ArchiveFolderViewState();
+  ArchiveFolderViewState build(String code) =>
+      ArchiveFolderViewState(removed: ref.read(archiveRemovedFilesProvider));
 
   void setTab(ArchiveFolderTab t) => state = state.copyWith(tab: t);
 
@@ -70,6 +82,8 @@ class ArchiveFolderController extends _$ArchiveFolderController {
   void clearTask() => state = state.copyWith(task: () => null);
 
   /// Dosyayı silinen kayıtlara taşır (yerel).
-  void remove(String fileId) =>
-      state = state.copyWith(removed: {...state.removed, fileId});
+  void remove(String fileId) {
+    ref.read(archiveRemovedFilesProvider.notifier).add(fileId);
+    state = state.copyWith(removed: {...state.removed, fileId});
+  }
 }

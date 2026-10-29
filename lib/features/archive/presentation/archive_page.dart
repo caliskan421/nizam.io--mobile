@@ -33,7 +33,10 @@ class ArchivePage extends ConsumerStatefulWidget {
 }
 
 class _ArchivePageState extends ConsumerState<ArchivePage> {
-  final _search = TextEditingController();
+  // Denetleyici durumu sayfadan uzun yaşar (keepAlive): geri dönüşte sorgu kutuda kalır.
+  late final _search = TextEditingController(
+    text: ref.read(archiveControllerProvider).query,
+  );
   final _searchFocus = FocusNode();
 
   @override
@@ -104,7 +107,11 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
       _shortcuts();
     });
     final l = context.l10n;
-    final view = ref.watch(archiveControllerProvider);
+    // Kök yalnız arama açıklığını izler; etiket paneli ve klasörler kendi dilimini izler
+    // (aramada her tuş vuruşu yalnız klasör ızgarasını yeniden kurar).
+    final searchOpen = ref.watch(
+      archiveControllerProvider.select((v) => v.searchOpen),
+    );
     final folders = ref.watch(archiveFoldersControllerProvider);
     return NzPage.feed(
       onRetry: () => ref.invalidate(archiveFoldersControllerProvider),
@@ -114,7 +121,7 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
           title: l.uiArchiveTitle,
           actions: [
             Semantics(
-              selected: view.searchOpen,
+              selected: searchOpen,
               child: NzIconButton.circle(
                 icon: Icons.search_rounded,
                 semanticLabel: l.uiArchiveSearch,
@@ -129,7 +136,7 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
           ],
         ),
         NzReveal(
-          open: view.searchOpen,
+          open: searchOpen,
           child: Padding(
             padding: const EdgeInsets.only(top: NizamioSpacing.space5),
             child: NzSearchField(
@@ -143,12 +150,12 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
           ),
         ),
         const Gap(NizamioSpacing.space3),
-        _TagsPanel(view: view, onToast: _toast),
+        _TagsPanel(onToast: _toast),
         const Gap(NizamioSpacing.space5),
         NzAsyncView<List<ArchiveFolder>>(
           value: folders,
           onRetry: () => ref.invalidate(archiveFoldersControllerProvider),
-          data: (all) => _Folders(all: all, view: view),
+          data: (all) => _Folders(all: all),
         ),
       ],
     );
@@ -156,9 +163,8 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
 }
 
 class _TagsPanel extends ConsumerStatefulWidget {
-  const _TagsPanel({required this.view, required this.onToast});
+  const _TagsPanel({required this.onToast});
 
-  final ArchiveViewState view;
   final ValueChanged<String> onToast;
 
   @override
@@ -167,12 +173,6 @@ class _TagsPanel extends ConsumerStatefulWidget {
 
 class _TagsPanelState extends ConsumerState<_TagsPanel> {
   final _draft = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _draft.addListener(() => setState(() {}));
-  }
 
   @override
   void dispose() {
@@ -195,7 +195,7 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final view = widget.view;
+    final view = ref.watch(archiveControllerProvider);
     final ctrl = ref.read(archiveControllerProvider.notifier);
     final total =
         ref
@@ -250,7 +250,6 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
         ),
       ),
     );
-    final canAdd = _draft.text.trim().isNotEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -280,20 +279,31 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      for (final d in dots)
-                        Container(
-                          width: 10,
-                          height: 10,
-                          margin: const EdgeInsets.only(right: 0),
-                          decoration: BoxDecoration(
-                            color: d,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: c.surfaceRaised,
-                              width: 1,
-                            ),
-                          ),
+                      // Prototip: 8 px noktalar, -2 px bindirme, 2 px zemin halkası.
+                      SizedBox(
+                        width: 12.0 + (dots.length - 1) * 8,
+                        height: 12,
+                        child: Stack(
+                          children: [
+                            for (var i = 0; i < dots.length; i++)
+                              Positioned(
+                                left: i * 8.0,
+                                child: Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: dots[i],
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: c.surfaceRaised,
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
+                      ),
                       const Gap(NizamioSpacing.space2),
                       Flexible(child: Text(pillLabel, style: t.bodySm)),
                       const Gap(NizamioSpacing.space1),
@@ -428,30 +438,36 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
                           ],
                         ),
                       ),
-                      Semantics(
-                        button: true,
-                        enabled: canAdd,
-                        label: l.uiArchiveAddTag,
-                        excludeSemantics: true,
-                        onTap: canAdd ? _add : null,
-                        child: InkResponse(
-                          onTap: canAdd ? _add : null,
-                          radius: 22,
-                          child: Container(
-                            width: 30,
-                            height: 30,
-                            margin: const EdgeInsets.all(7),
-                            decoration: BoxDecoration(
-                              color: canAdd ? c.primary : c.surfaceOverlay,
-                              shape: BoxShape.circle,
+                      ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _draft,
+                        builder: (context, v, _) {
+                          final on = v.text.trim().isNotEmpty;
+                          return Semantics(
+                            button: true,
+                            enabled: on,
+                            label: l.uiArchiveAddTag,
+                            excludeSemantics: true,
+                            onTap: on ? _add : null,
+                            child: InkResponse(
+                              onTap: on ? _add : null,
+                              radius: 22,
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                margin: const EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                  color: on ? c.primary : c.surfaceOverlay,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.add_rounded,
+                                  size: 16,
+                                  color: on ? c.onPrimary : c.textFaint,
+                                ),
+                              ),
                             ),
-                            child: Icon(
-                              Icons.add_rounded,
-                              size: 16,
-                              color: canAdd ? c.onPrimary : c.textFaint,
-                            ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -466,13 +482,17 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
 }
 
 class _Folders extends ConsumerWidget {
-  const _Folders({required this.all, required this.view});
+  const _Folders({required this.all});
 
   final List<ArchiveFolder> all;
-  final ArchiveViewState view;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final view = ref.watch(
+      archiveControllerProvider.select(
+        (v) => (sort: v.sort, query: v.query, tag: v.tag, custom: v.customTag),
+      ),
+    );
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
@@ -565,7 +585,12 @@ class _Folders extends ConsumerWidget {
                 if (i > 0) const Gap(NizamioSpacing.space3),
                 Expanded(
                   child: i < row.length
-                      ? _folder(context, row[i])
+                      ? _folder(
+                          context,
+                          row[i],
+                          tag: view.tag,
+                          customTag: view.custom != null,
+                        )
                       : const SizedBox.shrink(),
                 ),
               ],
@@ -588,13 +613,14 @@ class _Folders extends ConsumerWidget {
     );
   }
 
-  Widget _folder(BuildContext context, ArchiveFolder f) {
+  Widget _folder(
+    BuildContext context,
+    ArchiveFolder f, {
+    required ArchiveTag? tag,
+    required bool customTag,
+  }) {
     final l = context.l10n;
-    final n = folderFilesFor(
-      f,
-      tag: view.tag,
-      customTag: view.customTag != null,
-    );
+    final n = folderFilesFor(f, tag: tag, customTag: customTag);
     return NzFolder(
       name: f.name,
       caption: n > 0 ? l.files(n) : l.uiArchiveNoFiles,

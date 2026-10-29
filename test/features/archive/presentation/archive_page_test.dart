@@ -75,6 +75,19 @@ void main() {
     expect(find.text(_l.uiArchiveEmptySearch), findsOneWidget);
   });
 
+  testWidgets('geri dönüşte arama kutusu sorguyu korur', (tester) async {
+    final (h, _) = await _open(tester);
+    await _tap(tester, find.byIcon(Icons.search_rounded).first);
+    await tester.enterText(find.byType(TextField).first, 'fuar');
+    await settle(tester);
+    await pumpScreen(tester, h, const SizedBox.shrink());
+    await settle(tester);
+    await pumpScreen(tester, h, const ArchivePage());
+    await settle(tester);
+    expect(find.text('fuar'), findsOneWidget);
+    expect(find.text('koordinatörlükler · 1'), findsOneWidget);
+  });
+
   testWidgets(
     'etiket: seç → klasör sayıları süzülür; temizle; yeni etiket tostu',
     (tester) async {

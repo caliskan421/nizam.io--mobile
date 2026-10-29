@@ -14,6 +14,7 @@ import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
+import '../application/archive_folder_contents.dart';
 import '../application/archive_folder_controller.dart';
 import '../application/archive_folders_controller.dart';
 import '../domain/archive.dart';
@@ -43,9 +44,10 @@ class ArchiveFolderPage extends ConsumerWidget {
         for (final f in folders)
           NzFlyoutItem(
             label: f.name,
-            caption: l.files(f.files),
+            count: '${f.files}',
             icon: Icons.folder_outlined,
             accent: f.code == code,
+            selected: f.code == code,
             onSelected: () {
               if (f.code != code) nav.openArchiveFolder(f.code);
             },
@@ -70,67 +72,163 @@ class ArchiveFolderPage extends ConsumerWidget {
     final l = context.l10n;
     final folders = ref.watch(archiveFoldersControllerProvider);
     final catalog = ref.watch(taskCatalogControllerProvider);
-    final folder = folders.value?.where((f) => f.code == code).firstOrNull;
+    final contents = ref.watch(archiveFolderContentsProvider(code));
     void retry() {
       ref
         ..invalidate(archiveFoldersControllerProvider)
         ..invalidate(taskCatalogControllerProvider);
     }
 
-    return NzPage.feed(
-      onRetry: retry,
-      topBar: NzTopBar.detail(
-        code: '${l.uiArchiveTitle} / $code',
-        actions: [
-          NzIconButton(
-            icon: Icons.download_rounded,
-            semanticLabel: l.uiArchiveZip,
-            onPressed: folder == null
-                ? null
-                : () => NzToast.show(
-                    context,
-                    '${folder.name} ${l.uiArchiveZipToast}',
-                  ),
-          ),
-        ],
-      ),
-      children: [
-        NzAsyncView<List<ArchiveFolder>>(
-          value: folders,
-          onRetry: retry,
-          data: (all) => NzAsyncView<TaskCatalog>(
-            value: catalog,
-            onRetry: retry,
-            data: (cat) {
-              final f =
-                  all.where((x) => x.code == code).firstOrNull ?? all.first;
-              return _Body(folder: f, catalog: cat);
-            },
-          ),
+    final topBar = NzTopBar.detail(
+      code: '${l.uiArchiveTitle} / $code',
+      actions: [
+        NzIconButton(
+          icon: Icons.download_rounded,
+          semanticLabel: l.uiArchiveZip,
+          onPressed: contents == null
+              ? null
+              : () => NzToast.show(
+                  context,
+                  '${contents.folder.name} ${l.uiArchiveZipToast}',
+                ),
         ),
       ],
     );
+    if (contents == null) {
+      // Yükleme / hata: kaynakların durumu (ikisi de hazırsa içerik yukarıda doludur).
+      return NzPage.feed(
+        onRetry: retry,
+        topBar: topBar,
+        children: [
+          NzAsyncView<List<ArchiveFolder>>(
+            value: folders,
+            onRetry: retry,
+            data: (_) => NzAsyncView<TaskCatalog>(
+              value: catalog,
+              onRetry: retry,
+              data: (_) => const SizedBox.shrink(),
+            ),
+          ),
+        ],
+      );
+    }
+    final view = ref.watch(archiveFolderControllerProvider(code));
+    final ctrl = ref.read(archiveFolderControllerProvider(code).notifier);
+    final present = view.present(contents.files);
+    return NzPage.feed(
+      onRetry: retry,
+      topBar: topBar,
+      // Prototip: sekme hapları üst çubuğun altına yapışır (`position: sticky; top: 64px`).
+      pinned: Padding(
+        padding: const EdgeInsets.only(
+          top: NizamioSpacing.space2,
+          bottom: NizamioSpacing.gapMd,
+        ),
+        child: NzPillTabs(
+          semanticLabel: l.uiArchiveTabs,
+          tabs: [
+            NzPillTab(
+              label: l.uiArchiveTabTasks,
+              count: contents.groups.length,
+            ),
+            NzPillTab(label: l.uiArchiveTabFiles, count: present.length),
+          ],
+          selected: view.tab.index,
+          onSelected: (i) => ctrl.setTab(ArchiveFolderTab.values[i]),
+        ),
+      ),
+      after: [
+        const Gap(NizamioSpacing.space2),
+        if (view.tab == ArchiveFolderTab.tasks)
+          for (var i = 0; i < contents.groups.length; i += 3)
+            _TaskFolderRow(
+              key: ValueKey('g$i'),
+              groups: contents.groups.sublist(
+                i,
+                (i + 3).clamp(0, contents.groups.length),
+              ),
+              onOpen: ctrl.openTask,
+            )
+        else
+          ..._files(context, ref, contents, view),
+      ],
+      children: [
+        _Header(
+          folder: contents.folder,
+          catalog: catalog.requireValue,
+          fileCount: present.length,
+        ),
+        const Gap(NizamioSpacing.space2),
+      ],
+    );
   }
-}
 
-class _Body extends ConsumerWidget {
-  const _Body({required this.folder, required this.catalog});
-
-  final ArchiveFolder folder;
-  final TaskCatalog catalog;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  /// Dosyalar sekmesi: etiket rayı, görev süzgeci şeridi ve dosya satırları — satırlar ayrı
+  /// akış öğesidir (78 dosyalık klasörde yalnız görünenler kurulur).
+  List<Widget> _files(
+    BuildContext context,
+    WidgetRef ref,
+    ArchiveFolderContents contents,
+    ArchiveFolderViewState view,
+  ) {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final view = ref.watch(archiveFolderControllerProvider(folder.code));
-    final ctrl = ref.read(
-      archiveFolderControllerProvider(folder.code).notifier,
-    );
-    final groups = taskFolders(folder, catalog);
-    final all = folderFiles(folder, catalog);
-    final present = view.present(all);
+    final ctrl = ref.read(archiveFolderControllerProvider(code).notifier);
+    final list = view.visible(contents.files);
+    final task = view.task == null
+        ? null
+        : ref.read(taskCatalogControllerProvider).value?.task(view.task!);
+    return [
+      _TagRail(selected: view.tag, onSelected: ctrl.setTag),
+      const Gap(NizamioSpacing.space3),
+      if (task != null) ...[
+        _TaskFilter(title: task.title, onClear: ctrl.clearTask),
+        const Gap(NizamioSpacing.space3),
+      ],
+      if (list.isEmpty)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: NizamioSpacing.space6),
+          child: Text(
+            l.uiArchiveEmptyFiles,
+            textAlign: TextAlign.center,
+            style: t.caption.copyWith(color: c.textMuted),
+          ),
+        )
+      else
+        for (var i = 0; i < list.length; i++)
+          _FileRow(
+            key: ValueKey(list[i].id),
+            file: list[i],
+            first: i == 0,
+            last: i == list.length - 1,
+            onTap: () => showArchivePreview(
+              context,
+              code: code,
+              all: contents.files,
+              fileId: list[i].id,
+            ),
+          ),
+    ];
+  }
+}
+
+class _Header extends StatelessWidget {
+  const _Header({
+    required this.folder,
+    required this.catalog,
+    required this.fileCount,
+  });
+
+  final ArchiveFolder folder;
+  final TaskCatalog catalog;
+  final int fileCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final t = context.text;
     final leads = folder.leads.isEmpty
         ? l.uiArchiveNoLead
         : folder.leads.map((id) => catalog.person(id)?.name ?? id).join(', ');
@@ -140,7 +238,7 @@ class _Body extends ConsumerWidget {
         Semantics(header: true, child: Text(folder.name, style: t.titleMd)),
         const Gap(3),
         Text(
-          '$leads · ${l.files(present.length)} · ${l.size(folder.sizeMb, minKb: 12)}',
+          '$leads · ${l.files(fileCount)} · ${l.size(folder.sizeMb, minKb: 12)}',
           style: t.caption.copyWith(color: c.textMuted),
         ),
         const Gap(NizamioSpacing.space4),
@@ -166,28 +264,14 @@ class _Body extends ConsumerWidget {
             ),
           ],
         ),
-        const Gap(NizamioSpacing.space5),
-        NzPillTabs(
-          semanticLabel: l.uiArchiveTabs,
-          tabs: [
-            NzPillTab(label: l.uiArchiveTabTasks, count: groups.length),
-            NzPillTab(label: l.uiArchiveTabFiles, count: present.length),
-          ],
-          selected: view.tab.index,
-          onSelected: (i) => ctrl.setTab(ArchiveFolderTab.values[i]),
-        ),
-        const Gap(NizamioSpacing.space5),
-        if (view.tab == ArchiveFolderTab.tasks)
-          _TaskFolders(groups: groups, onOpen: ctrl.openTask)
-        else
-          _Files(folder: folder, catalog: catalog, all: all),
       ],
     );
   }
 }
 
-class _TaskFolders extends StatelessWidget {
-  const _TaskFolders({required this.groups, required this.onOpen});
+/// Görev klasörleri ızgarasının bir satırı (3 sütun, prototip `gap: 20px 10px`).
+class _TaskFolderRow extends StatelessWidget {
+  const _TaskFolderRow({super.key, required this.groups, required this.onOpen});
 
   final List<ArchiveTaskFolder> groups;
   final ValueChanged<String> onOpen;
@@ -195,67 +279,53 @@ class _TaskFolders extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    return Column(
-      children: [
-        for (var i = 0; i < groups.length; i += 3) ...[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (var j = i; j < i + 3; j++) ...[
-                if (j > i) const Gap(NizamioSpacing.gapMd),
-                Expanded(
-                  child: j < groups.length
-                      ? NzFolder(
-                          small: true,
-                          name: groups[j].task.title,
-                          caption: l.files(groups[j].files),
-                          onTap: () => onOpen(groups[j].task.code),
-                        )
-                      : const SizedBox.shrink(),
-                ),
-              ],
-            ],
-          ),
-          const Gap(NizamioSpacing.space5),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: NizamioSpacing.space5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var j = 0; j < 3; j++) ...[
+            if (j > 0) const Gap(NizamioSpacing.gapMd),
+            Expanded(
+              child: j < groups.length
+                  ? NzFolder(
+                      small: true,
+                      name: groups[j].task.title,
+                      caption: l.files(groups[j].files),
+                      onTap: () => onOpen(groups[j].task.code),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
 
-class _Files extends ConsumerWidget {
-  const _Files({
-    required this.folder,
-    required this.catalog,
-    required this.all,
-  });
+/// Etiket süzgeci: yatay kaydırılan haplar (prototip `.rp-wheel`, kenardan kenara).
+class _TagRail extends StatelessWidget {
+  const _TagRail({required this.selected, required this.onSelected});
 
-  final ArchiveFolder folder;
-  final TaskCatalog catalog;
-  final List<ArchiveFile> all;
+  final ArchiveTag? selected;
+  final ValueChanged<ArchiveTag?> onSelected;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final view = ref.watch(archiveFolderControllerProvider(folder.code));
-    final ctrl = ref.read(
-      archiveFolderControllerProvider(folder.code).notifier,
-    );
-    final list = view.visible(all);
-    final task = view.task == null ? null : catalog.task(view.task!);
-    Widget tagChip(ArchiveTag? tag) {
-      final on = view.tag == tag;
+    Widget chip(ArchiveTag? tag) {
+      final on = selected == tag;
       final label = tag == null ? l.uiArchiveFilterAll : l.tagShort(tag);
       return Semantics(
         button: true,
         selected: on,
         label: label,
         excludeSemantics: true,
-        onTap: () => ctrl.setTag(tag),
+        onTap: () => onSelected(tag),
         child: InkWell(
-          onTap: () => ctrl.setTag(tag),
+          onTap: () => onSelected(tag),
           borderRadius: BorderRadius.circular(NizamioRadius.pill),
           child: Container(
             constraints: const BoxConstraints(minHeight: 32),
@@ -280,106 +350,84 @@ class _Files extends ConsumerWidget {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Semantics(
-          label: l.uiArchiveTagFilter,
-          container: true,
-          child: Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              tagChip(null),
-              for (final x in ArchiveTag.values) tagChip(x),
-            ],
-          ),
+    return Semantics(
+      label: l.uiArchiveTagFilter,
+      container: true,
+      // Prototip `.rp-wheel`: haplar kenar boşluğunun dışına taşarak kayar.
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        child: Row(
+          spacing: 6,
+          children: [chip(null), for (final x in ArchiveTag.values) chip(x)],
         ),
-        const Gap(NizamioSpacing.space3),
-        if (task != null) ...[
-          Container(
-            padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
-            decoration: BoxDecoration(
-              color: c.surfaceRaised,
-              borderRadius: BorderRadius.circular(NizamioRadius.tile),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.folder_outlined,
-                  size: NizamioSize.iconSizeSm,
-                  color: c.textMuted,
-                ),
-                const Gap(NizamioSpacing.space2),
-                Expanded(
-                  child: Text(
-                    task.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: t.bodySm,
-                  ),
-                ),
-                IconButton(
-                  tooltip: l.uiArchiveRemoveTaskFilter,
-                  onPressed: ctrl.clearTask,
-                  icon: Icon(
-                    Icons.close_rounded,
-                    size: NizamioSize.iconSizeSm,
-                    color: c.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Gap(NizamioSpacing.space3),
-        ],
-        if (list.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: NizamioSpacing.space6,
-            ),
-            child: Text(
-              l.uiArchiveEmptyFiles,
-              textAlign: TextAlign.center,
-              style: t.caption.copyWith(color: c.textMuted),
-            ),
-          )
-        else
-          ClipRRect(
-            borderRadius: BorderRadius.circular(NizamioRadius.row),
-            child: ColoredBox(
-              color: c.surfaceRaised,
-              child: Column(
-                children: [
-                  for (var i = 0; i < list.length; i++)
-                    _FileRow(
-                      file: list[i],
-                      divider: i > 0,
-                      onTap: () => showArchivePreview(
-                        context,
-                        code: folder.code,
-                        all: all,
-                        fileId: list[i].id,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-      ],
+      ),
     );
   }
 }
 
+class _TaskFilter extends StatelessWidget {
+  const _TaskFilter({required this.title, required this.onClear});
+
+  final String title;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final t = context.text;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+      decoration: BoxDecoration(
+        color: c.surfaceRaised,
+        borderRadius: BorderRadius.circular(NizamioRadius.tile),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.folder_outlined,
+            size: NizamioSize.iconSizeSm,
+            color: c.textMuted,
+          ),
+          const Gap(NizamioSpacing.space2),
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: t.bodySm,
+            ),
+          ),
+          IconButton(
+            tooltip: l.uiArchiveRemoveTaskFilter,
+            onPressed: onClear,
+            icon: Icon(
+              Icons.close_rounded,
+              size: NizamioSize.iconSizeSm,
+              color: c.textMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dosya satırı; satırlar birlikte `bg-raised`, 18 köşeli tek kart gibi görünür (ilk/son satır
+/// köşeleri yuvarlanır, aradakiler üstte ince çizgiyle ayrılır).
 class _FileRow extends StatelessWidget {
   const _FileRow({
+    super.key,
     required this.file,
-    required this.divider,
+    required this.first,
+    required this.last,
     required this.onTap,
   });
 
   final ArchiveFile file;
-  final bool divider;
+  final bool first;
+  final bool last;
   final VoidCallback onTap;
 
   @override
@@ -389,46 +437,56 @@ class _FileRow extends StatelessWidget {
     final t = context.text;
     final sub =
         '${l.short(file.taskTitle)} · ${l.size(file.sizeMb, minKb: 12)}';
+    const r = Radius.circular(NizamioRadius.row);
+    final radius = BorderRadius.vertical(
+      top: first ? r : Radius.zero,
+      bottom: last ? r : Radius.zero,
+    );
     return Semantics(
       button: true,
       label: '${file.name}, $sub, ${l.tagLabel(file.tag)}',
       excludeSemantics: true,
       onTap: onTap,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 64),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            border: divider ? Border(top: BorderSide(color: c.border)) : null,
-          ),
-          child: Row(
-            children: [
-              ArchiveKindTile(kind: file.kind),
-              const Gap(NizamioSpacing.space3),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      file.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.mono.copyWith(fontSize: 12),
-                    ),
-                    const Gap(2),
-                    Text(
-                      sub,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.caption.copyWith(color: c.textMuted),
-                    ),
-                  ],
+      child: Material(
+        color: c.surfaceRaised,
+        borderRadius: radius,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 64),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              border: first ? null : Border(top: BorderSide(color: c.border)),
+            ),
+            child: Row(
+              children: [
+                ArchiveKindTile(kind: file.kind),
+                const Gap(NizamioSpacing.space3),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        file.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: t.mono.copyWith(fontSize: 12),
+                      ),
+                      const Gap(2),
+                      Text(
+                        sub,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: t.caption.copyWith(color: c.textMuted),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const Gap(NizamioSpacing.space3),
-              NzDot(color: c.tag(file.tag)),
-            ],
+                const Gap(NizamioSpacing.space3),
+                NzDot(color: c.tag(file.tag)),
+              ],
+            ),
           ),
         ),
       ),

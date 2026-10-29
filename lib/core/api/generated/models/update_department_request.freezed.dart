@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UpdateDepartmentRequest {
 
- String? get name; String? get kind; String? get code; String? get description;
+ String? get name;/// Gönderilmezse ya da boşsa tür değişmez.
+ UpdateDepartmentRequestKind? get kind; String? get code; String? get description;
 /// Create a copy of UpdateDepartmentRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +55,7 @@ abstract mixin class $UpdateDepartmentRequestCopyWith<$Res>  {
   factory $UpdateDepartmentRequestCopyWith(UpdateDepartmentRequest value, $Res Function(UpdateDepartmentRequest) _then) = _$UpdateDepartmentRequestCopyWithImpl;
 @useResult
 $Res call({
- String? name, String? kind, String? code, String? description
+ String? name, UpdateDepartmentRequestKind? kind, String? code, String? description
 });
 
 
@@ -75,7 +76,7 @@ class _$UpdateDepartmentRequestCopyWithImpl<$Res>
   return _then(UpdateDepartmentRequest(
 name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String?,kind: freezed == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
-as String?,code: freezed == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as UpdateDepartmentRequestKind?,code: freezed == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -162,7 +163,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? name,  String? kind,  String? code,  String? description)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? name,  UpdateDepartmentRequestKind? kind,  String? code,  String? description)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UpdateDepartmentRequest() when $default != null:
 return $default(_that.name,_that.kind,_that.code,_that.description);case _:
@@ -183,7 +184,7 @@ return $default(_that.name,_that.kind,_that.code,_that.description);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? name,  String? kind,  String? code,  String? description)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? name,  UpdateDepartmentRequestKind? kind,  String? code,  String? description)  $default,) {final _that = this;
 switch (_that) {
 case _UpdateDepartmentRequest():
 return $default(_that.name,_that.kind,_that.code,_that.description);case _:
@@ -203,7 +204,7 @@ return $default(_that.name,_that.kind,_that.code,_that.description);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? name,  String? kind,  String? code,  String? description)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? name,  UpdateDepartmentRequestKind? kind,  String? code,  String? description)?  $default,) {final _that = this;
 switch (_that) {
 case _UpdateDepartmentRequest() when $default != null:
 return $default(_that.name,_that.kind,_that.code,_that.description);case _:
@@ -222,7 +223,8 @@ class _UpdateDepartmentRequest implements UpdateDepartmentRequest {
   factory _UpdateDepartmentRequest.fromJson(Map<String, dynamic> json) => _$UpdateDepartmentRequestFromJson(json);
 
 @override final  String? name;
-@override final  String? kind;
+/// Gönderilmezse ya da boşsa tür değişmez.
+@override final  UpdateDepartmentRequestKind? kind;
 @override final  String? code;
 @override final  String? description;
 
@@ -261,7 +263,7 @@ abstract mixin class _$UpdateDepartmentRequestCopyWith<$Res> implements $UpdateD
   factory _$UpdateDepartmentRequestCopyWith(_UpdateDepartmentRequest value, $Res Function(_UpdateDepartmentRequest) _then) = __$UpdateDepartmentRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String? name, String? kind, String? code, String? description
+ String? name, UpdateDepartmentRequestKind? kind, String? code, String? description
 });
 
 
@@ -282,7 +284,7 @@ class __$UpdateDepartmentRequestCopyWithImpl<$Res>
   return _then(_UpdateDepartmentRequest(
 name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String?,kind: freezed == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
-as String?,code: freezed == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as UpdateDepartmentRequestKind?,code: freezed == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,
   ));

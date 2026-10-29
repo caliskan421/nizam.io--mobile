@@ -244,6 +244,18 @@ abstract class AppLocalizations {
   /// **'E-posta veya parola hatalı.'**
   String get errIdentityCredentialsInvalid;
 
+  /// identity.download_target_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İndirme isteği geçersiz.'**
+  String get errIdentityDownloadTargetInvalid;
+
+  /// identity.download_ticket_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İndirme bağlantısı geçersiz veya süresi dolmuş. Yeniden indirmeyi deneyin.'**
+  String get errIdentityDownloadTicketInvalid;
+
   /// identity.force_password_change_required
   ///
   /// In tr, this message translates to:
@@ -525,12 +537,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu hesap başka bir departmandan aktarılabilir.'**
   String get errOrganizationTransferAvailable;
-
-  /// organization.transfer_unavailable
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu hesap aktarılamaz.'**
-  String get errOrganizationTransferUnavailable;
 
   /// platform.body_invalid
   ///
@@ -831,6 +837,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu işlem için yetkiniz yok.'**
   String get errRecordsNotAuthorized;
+
+  /// records.tag_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya etiketi geçersiz.'**
+  String get errRecordsTagInvalid;
+
+  /// records.tag_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya için bir etiket seçilmeli.'**
+  String get errRecordsTagRequired;
 
   /// records.too_large
   ///

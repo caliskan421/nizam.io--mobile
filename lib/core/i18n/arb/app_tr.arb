@@ -1,6 +1,6 @@
 {
   "@@locale": "tr",
-  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit 54afb002428e09fdc2727565e226880c1a25bb8c src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.1.0-api (8c8c83b33e90aef4e8e3edd82713fc709c39c518)); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
+  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit 54afb002428e09fdc2727565e226880c1a25bb8c src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.2.0-api (e40413971893fe6a1c28df3927c8bb9dd0bf6784); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
   "errAuditEntryRejected": "İşlem kaydı yazılamadığı için istek tamamlanamadı.",
   "@errAuditEntryRejected": {
     "description": "audit.entry_rejected"
@@ -100,6 +100,14 @@
   "errIdentityCredentialsInvalid": "E-posta veya parola hatalı.",
   "@errIdentityCredentialsInvalid": {
     "description": "identity.credentials_invalid"
+  },
+  "errIdentityDownloadTargetInvalid": "İndirme isteği geçersiz.",
+  "@errIdentityDownloadTargetInvalid": {
+    "description": "identity.download_target_invalid"
+  },
+  "errIdentityDownloadTicketInvalid": "İndirme bağlantısı geçersiz veya süresi dolmuş. Yeniden indirmeyi deneyin.",
+  "@errIdentityDownloadTicketInvalid": {
+    "description": "identity.download_ticket_invalid"
   },
   "errIdentityForcePasswordChangeRequired": "Devam etmek için parolanızı değiştirmelisiniz.",
   "@errIdentityForcePasswordChangeRequired": {
@@ -288,10 +296,6 @@
   "errOrganizationTransferAvailable": "Bu hesap başka bir departmandan aktarılabilir.",
   "@errOrganizationTransferAvailable": {
     "description": "organization.transfer_available"
-  },
-  "errOrganizationTransferUnavailable": "Bu hesap aktarılamaz.",
-  "@errOrganizationTransferUnavailable": {
-    "description": "organization.transfer_unavailable"
   },
   "errPlatformBodyInvalid": "İstek içeriği geçersiz.",
   "@errPlatformBodyInvalid": {
@@ -492,6 +496,14 @@
   "errRecordsNotAuthorized": "Bu işlem için yetkiniz yok.",
   "@errRecordsNotAuthorized": {
     "description": "records.not_authorized"
+  },
+  "errRecordsTagInvalid": "Dosya etiketi geçersiz.",
+  "@errRecordsTagInvalid": {
+    "description": "records.tag_invalid"
+  },
+  "errRecordsTagRequired": "Dosya için bir etiket seçilmeli.",
+  "@errRecordsTagRequired": {
+    "description": "records.tag_required"
   },
   "errRecordsTooLarge": "Dosya çok büyük.",
   "@errRecordsTooLarge": {

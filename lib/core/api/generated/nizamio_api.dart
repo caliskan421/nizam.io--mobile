@@ -8,20 +8,36 @@ import 'clients/platform_client.dart';
 import 'clients/identity_client.dart';
 import 'clients/organization_client.dart';
 import 'clients/program_client.dart';
+import 'clients/collaboration_client.dart';
+import 'clients/work_client.dart';
+import 'clients/records_client.dart';
+import 'clients/notifications_client.dart';
+import 'clients/reporting_client.dart';
 
 /// NIZAM.IO API `vv1`.
 ///
-/// İlk dilim: kimlik, kurulum profili, sağlık/keşif, program, organizasyon ve.
-/// yönetici kullanıcı uçları (32 uç). Diğer uçlar istemci fazlarından önce ek.
-/// commit'le eklenir.
+/// Bütün rota tablosu: sağlık/keşif ve kurulum profili, kimlik, organizasyon ve.
+/// yönetici hesapları, program ve aktarım, görev (work), dosya ve arşiv.
+/// (records), mesaj ve toplantı (collaboration), bildirim (notifications) ve.
+/// rapor (reporting) uçları. Spec işlem kümesi rota tablosuyla iki yönlü eşittir.
 ///
 /// - Ana sürüm yol segmentindedir (`/v1`); `info.version` = `NIZAMIO_API_VERSION` varsayılanı.
 /// - Kapsam sınıfı her işlemde `x-nizamio-scope-class` (S0–S3) ile yazılır ve rota tablosuyla eşittir.
 /// - Her hata `ErrorEnvelope` döner; `x-nizamio-error-codes` o durumda dönebilecek kodlardır.
 ///   (katalog: `docs/api/error-codes.json`).
 /// - Tarih-saat alanları UTC'dir; birim belirtilmeyen tamsayı zaman damgaları Unix saniyesidir.
-/// - Yanıtlar `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` taşır;.
-///   açık origin https ise `Strict-Transport-Security` da gönderilir.
+/// - Yanıtlar `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` ve.
+///   `Cache-Control: no-store` taşır; açık origin https ise `Strict-Transport-Security` da gönderilir.
+/// - Gövdeyi platform (httpguard) çözücüsüyle çözen uçlarda: katı çözücü (bilinmeyen alan.
+///   reddi) bilinmeyen alanda ve bozuk JSON'da `platform.body_unknown_field` döner (iki.
+///   hatayı ayırmaz); gövde sınırının çözüm sırasında aşılması ve tek JSON belgesinden.
+///   sonra artakalan gövde katı çözücüde de `platform.body_invalid`'dir. Bilinmeyen alanı.
+///   yok sayan çözücüde her çözüm hatası `platform.body_invalid`'dir. Kendi çözücüsünü.
+///   kullanan uçlarda gövde hatası modül kodudur: collaboration uçlarında.
+///   `collaboration.input_invalid`, dosya yeniden adlandırmada `records.input_invalid`.
+/// - Uç başına `x-nizamio-error-codes` ortak kenar kodlarını da taşır; modüle özgü kodların.
+///   uç başına listesi ilgili modül README'sinin §4 tablosuyla aynıdır.
+/// - Olay türleri: `docs/api/events.md`.
 ///
 class NizamioApi {
   NizamioApi(Dio dio, {String? baseUrl}) : _dio = dio, _baseUrl = baseUrl;
@@ -35,6 +51,11 @@ class NizamioApi {
   IdentityClient? _identity;
   OrganizationClient? _organization;
   ProgramClient? _program;
+  CollaborationClient? _collaboration;
+  WorkClient? _work;
+  RecordsClient? _records;
+  NotificationsClient? _notifications;
+  ReportingClient? _reporting;
 
   PlatformClient get platform =>
       _platform ??= PlatformClient(_dio, baseUrl: _baseUrl);
@@ -47,4 +68,18 @@ class NizamioApi {
 
   ProgramClient get program =>
       _program ??= ProgramClient(_dio, baseUrl: _baseUrl);
+
+  CollaborationClient get collaboration =>
+      _collaboration ??= CollaborationClient(_dio, baseUrl: _baseUrl);
+
+  WorkClient get work => _work ??= WorkClient(_dio, baseUrl: _baseUrl);
+
+  RecordsClient get records =>
+      _records ??= RecordsClient(_dio, baseUrl: _baseUrl);
+
+  NotificationsClient get notifications =>
+      _notifications ??= NotificationsClient(_dio, baseUrl: _baseUrl);
+
+  ReportingClient get reporting =>
+      _reporting ??= ReportingClient(_dio, baseUrl: _baseUrl);
 }

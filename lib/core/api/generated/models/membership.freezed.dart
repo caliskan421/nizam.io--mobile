@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Membership {
 
-@JsonKey(name: 'membership_id') String get membershipId;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'account_id') String get accountId; String get role;
+@JsonKey(name: 'membership_id') String get membershipId;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'account_id') String get accountId;/// `koordinator` ya da `uye`.
+ String get role;
 /// Create a copy of Membership
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -224,6 +225,7 @@ class _Membership implements Membership {
 @override@JsonKey(name: 'membership_id') final  String membershipId;
 @override@JsonKey(name: 'department_id') final  String departmentId;
 @override@JsonKey(name: 'account_id') final  String accountId;
+/// `koordinator` ya da `uye`.
 @override final  String role;
 
 /// Create a copy of Membership

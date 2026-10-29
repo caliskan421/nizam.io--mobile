@@ -39,7 +39,7 @@ final class ChatsControllerProvider
   ChatsController create() => ChatsController();
 }
 
-String _$chatsControllerHash() => r'9803a07ccf0202f4e6c07c0e0f6346e2ebebd533';
+String _$chatsControllerHash() => r'4a02b31ff374b94139c101a1a627538e213b8763';
 
 /// Mesajlar kutusu ve sohbet komutları. Örnek kaynakta değişiklikler bellekte kalır (sunucuya
 /// yazılmaz); liste ve sohbet ekranı aynı durumu okur.

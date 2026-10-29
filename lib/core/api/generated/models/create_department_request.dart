@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'create_department_request_kind.dart';
+
 part 'create_department_request.freezed.dart';
 part 'create_department_request.g.dart';
 
@@ -11,7 +13,7 @@ part 'create_department_request.g.dart';
 abstract class CreateDepartmentRequest with _$CreateDepartmentRequest {
   const factory CreateDepartmentRequest({
     required String name,
-    required String kind,
+    required CreateDepartmentRequestKind kind,
     String? code,
     String? description,
   }) = _CreateDepartmentRequest;

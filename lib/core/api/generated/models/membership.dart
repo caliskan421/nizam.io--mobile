@@ -13,6 +13,8 @@ abstract class Membership with _$Membership {
     @JsonKey(name: 'membership_id') required String membershipId,
     @JsonKey(name: 'department_id') required String departmentId,
     @JsonKey(name: 'account_id') required String accountId,
+
+    /// `koordinator` ya da `uye`.
     required String role,
   }) = _Membership;
 

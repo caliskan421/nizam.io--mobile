@@ -92,6 +92,34 @@ void main() {
       final eksik = Map.of(web)..remove('identity.email_invalid');
       expect(() => buildTrMessages(catalog, eksik, {}), throwsFormatException);
     });
+    test('web metni eksik sunucu kodu ek dosyadan tamamlanır', () {
+      final eksik = Map.of(web)..remove('identity.email_invalid');
+      final ek = parseServerErrorSupplement(
+        '{"codes": {"identity.email_invalid": "Ek metin."}}',
+        catalog,
+        eksik,
+      );
+      final m = buildTrMessages(catalog, eksik, {}, supplement: ek);
+      expect(m['identity.email_invalid'], 'Ek metin.');
+    });
+    test('ek dosyada bayat (web metni olan) ya da katalog dışı kod düşer', () {
+      expect(
+        () => parseServerErrorSupplement(
+          '{"codes": {"identity.email_invalid": "Ek."}}',
+          catalog,
+          web,
+        ),
+        throwsFormatException,
+      );
+      expect(
+        () => parseServerErrorSupplement(
+          '{"codes": {"identity.yok": "Ek."}}',
+          catalog,
+          web,
+        ),
+        throwsFormatException,
+      );
+    });
     test('ICU özel karakteri düşer', () {
       expect(
         () => buildTrMessages(catalog, web, {'client.x': 'Değer {n}'}),
@@ -543,7 +571,7 @@ $op
       }
       expect(
         sensitive,
-        6,
+        9,
         reason: 'hassas model kümesi değişti: listeyi bilerek güncelleyin',
       );
     });

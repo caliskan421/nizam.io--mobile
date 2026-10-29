@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChangeRoleRequest {
 
- String get role; bool? get confirm;
+ ChangeRoleRequestRole get role; bool? get confirm;
 /// Create a copy of ChangeRoleRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $ChangeRoleRequestCopyWith<$Res>  {
   factory $ChangeRoleRequestCopyWith(ChangeRoleRequest value, $Res Function(ChangeRoleRequest) _then) = _$ChangeRoleRequestCopyWithImpl;
 @useResult
 $Res call({
- String role, bool? confirm
+ ChangeRoleRequestRole role, bool? confirm
 });
 
 
@@ -74,7 +74,7 @@ class _$ChangeRoleRequestCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? role = null,Object? confirm = freezed,}) {
   return _then(ChangeRoleRequest(
 role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as String,confirm: freezed == confirm ? _self.confirm : confirm // ignore: cast_nullable_to_non_nullable
+as ChangeRoleRequestRole,confirm: freezed == confirm ? _self.confirm : confirm // ignore: cast_nullable_to_non_nullable
 as bool?,
   ));
 }
@@ -160,7 +160,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String role,  bool? confirm)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ChangeRoleRequestRole role,  bool? confirm)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChangeRoleRequest() when $default != null:
 return $default(_that.role,_that.confirm);case _:
@@ -181,7 +181,7 @@ return $default(_that.role,_that.confirm);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String role,  bool? confirm)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ChangeRoleRequestRole role,  bool? confirm)  $default,) {final _that = this;
 switch (_that) {
 case _ChangeRoleRequest():
 return $default(_that.role,_that.confirm);case _:
@@ -201,7 +201,7 @@ return $default(_that.role,_that.confirm);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String role,  bool? confirm)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ChangeRoleRequestRole role,  bool? confirm)?  $default,) {final _that = this;
 switch (_that) {
 case _ChangeRoleRequest() when $default != null:
 return $default(_that.role,_that.confirm);case _:
@@ -219,7 +219,7 @@ class _ChangeRoleRequest implements ChangeRoleRequest {
   const _ChangeRoleRequest({required this.role, this.confirm});
   factory _ChangeRoleRequest.fromJson(Map<String, dynamic> json) => _$ChangeRoleRequestFromJson(json);
 
-@override final  String role;
+@override final  ChangeRoleRequestRole role;
 @override final  bool? confirm;
 
 /// Create a copy of ChangeRoleRequest
@@ -257,7 +257,7 @@ abstract mixin class _$ChangeRoleRequestCopyWith<$Res> implements $ChangeRoleReq
   factory _$ChangeRoleRequestCopyWith(_ChangeRoleRequest value, $Res Function(_ChangeRoleRequest) _then) = __$ChangeRoleRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String role, bool? confirm
+ ChangeRoleRequestRole role, bool? confirm
 });
 
 
@@ -277,7 +277,7 @@ class __$ChangeRoleRequestCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? role = null,Object? confirm = freezed,}) {
   return _then(_ChangeRoleRequest(
 role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as String,confirm: freezed == confirm ? _self.confirm : confirm // ignore: cast_nullable_to_non_nullable
+as ChangeRoleRequestRole,confirm: freezed == confirm ? _self.confirm : confirm // ignore: cast_nullable_to_non_nullable
 as bool?,
   ));
 }

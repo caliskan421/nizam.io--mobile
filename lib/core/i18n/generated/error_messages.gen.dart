@@ -30,6 +30,8 @@ const localizedErrorCodes = <String>{
   'identity.captcha_invalid',
   'identity.captcha_required',
   'identity.credentials_invalid',
+  'identity.download_target_invalid',
+  'identity.download_ticket_invalid',
   'identity.force_password_change_required',
   'identity.input_invalid',
   'identity.invalid_cursor',
@@ -77,7 +79,6 @@ const localizedErrorCodes = <String>{
   'organization.permanent_requires_deleted',
   'organization.task_title',
   'organization.transfer_available',
-  'organization.transfer_unavailable',
   'platform.body_invalid',
   'platform.body_too_large',
   'platform.body_unknown_field',
@@ -128,6 +129,8 @@ const localizedErrorCodes = <String>{
   'records.name_invalid',
   'records.name_taken',
   'records.not_authorized',
+  'records.tag_invalid',
+  'records.tag_required',
   'records.too_large',
   'records.too_many_files',
   'records.transfer_active',
@@ -250,6 +253,10 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errIdentityCaptchaRequired;
     case 'identity.credentials_invalid':
       return l.errIdentityCredentialsInvalid;
+    case 'identity.download_target_invalid':
+      return l.errIdentityDownloadTargetInvalid;
+    case 'identity.download_ticket_invalid':
+      return l.errIdentityDownloadTicketInvalid;
     case 'identity.force_password_change_required':
       return l.errIdentityForcePasswordChangeRequired;
     case 'identity.input_invalid':
@@ -344,8 +351,6 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errOrganizationTaskTitle;
     case 'organization.transfer_available':
       return l.errOrganizationTransferAvailable;
-    case 'organization.transfer_unavailable':
-      return l.errOrganizationTransferUnavailable;
     case 'platform.body_invalid':
       return l.errPlatformBodyInvalid;
     case 'platform.body_too_large':
@@ -446,6 +451,10 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errRecordsNameTaken;
     case 'records.not_authorized':
       return l.errRecordsNotAuthorized;
+    case 'records.tag_invalid':
+      return l.errRecordsTagInvalid;
+    case 'records.tag_required':
+      return l.errRecordsTagRequired;
     case 'records.too_large':
       return l.errRecordsTooLarge;
     case 'records.too_many_files':

@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket v0.1.0-api (8c8c83b33e90aef4e8e3edd82713fc709c39c518) — docs/api/error-codes.json
+// Kaynak: nizam.io--backend etiket v0.2.0-api (e40413971893fe6a1c28df3927c8bb9dd0bf6784) — docs/api/error-codes.json
 
 import '../api_meta.dart';
 
@@ -131,6 +131,16 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [401],
     fields: [],
     messageKey: 'errors.identity.credentials_invalid',
+  ),
+  'identity.download_target_invalid': ErrorCatalogEntry(
+    statuses: [422],
+    fields: [],
+    messageKey: 'errors.identity.download_target_invalid',
+  ),
+  'identity.download_ticket_invalid': ErrorCatalogEntry(
+    statuses: [404],
+    fields: [],
+    messageKey: 'errors.identity.download_ticket_invalid',
   ),
   'identity.force_password_change_required': ErrorCatalogEntry(
     statuses: [403],
@@ -320,11 +330,6 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [409],
     fields: [],
     messageKey: 'errors.organization.transfer_available',
-  ),
-  'organization.transfer_unavailable': ErrorCatalogEntry(
-    statuses: [409],
-    fields: [],
-    messageKey: 'errors.organization.transfer_unavailable',
   ),
   'platform.body_invalid': ErrorCatalogEntry(
     statuses: [422],
@@ -536,6 +541,16 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [403],
     fields: [],
     messageKey: 'errors.records.not_authorized',
+  ),
+  'records.tag_invalid': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['records.tag_invalid'],
+    messageKey: 'errors.records.tag_invalid',
+  ),
+  'records.tag_required': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['records.tag_required'],
+    messageKey: 'errors.records.tag_required',
   ),
   'records.too_large': ErrorCatalogEntry(
     statuses: [422],

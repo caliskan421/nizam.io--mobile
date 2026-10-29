@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'update_department_request_kind.dart';
+
 part 'update_department_request.freezed.dart';
 part 'update_department_request.g.dart';
 
@@ -11,7 +13,9 @@ part 'update_department_request.g.dart';
 abstract class UpdateDepartmentRequest with _$UpdateDepartmentRequest {
   const factory UpdateDepartmentRequest({
     String? name,
-    String? kind,
+
+    /// Gönderilmezse ya da boşsa tür değişmez.
+    UpdateDepartmentRequestKind? kind,
     String? code,
     String? description,
   }) = _UpdateDepartmentRequest;

@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'assign_membership_request_role.dart';
+
 part 'assign_membership_request.freezed.dart';
 part 'assign_membership_request.g.dart';
 
@@ -11,7 +13,7 @@ part 'assign_membership_request.g.dart';
 abstract class AssignMembershipRequest with _$AssignMembershipRequest {
   const factory AssignMembershipRequest({
     @JsonKey(name: 'account_id') required String accountId,
-    required String role,
+    required AssignMembershipRequestRole role,
   }) = _AssignMembershipRequest;
 
   factory AssignMembershipRequest.fromJson(Map<String, Object?> json) =>

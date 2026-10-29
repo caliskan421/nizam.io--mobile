@@ -5,7 +5,8 @@
 //              (dizin: NIZAMIO_BACKEND_DIR, yoksa ../nizam.io--backend; CI'da .backend/)
 //   web      : `git show <web.commit>:<yol>` — TR hata metinleri
 //              (dizin: NIZAMIO_FRONTEND_DIR, yoksa ../nizam.io--frontend; CI'da .frontend/)
-//   mobil    : i18n/client_errors.tr.json (istemci kodları), i18n/ui/*.tr.json (UI metinleri), pubspec.yaml version,
+//   mobil    : i18n/client_errors.tr.json (istemci kodları), i18n/server_errors_ek.tr.json (web'de
+//              henüz metni olmayan sunucu kodları; web eklenince silinir), i18n/ui/*.tr.json (UI metinleri), pubspec.yaml version,
 //              design/mobile-tokens.json (rol eşlemesi) + onun `source.path`'i (tasarım sistemi
 //              tokens.json; içerik `source.blob` = `git hash-object` ile sabit, ADR-0003 karar 24)
 //
@@ -216,10 +217,19 @@ swagger_parser:
   final clientText = File(p.join(root, 'i18n/client_errors.tr.json'))
       .readAsStringSync();
   final client = parseClientErrors(clientText);
+  final webTr = parseWebTrErrors(webTrText);
+  final supplementFile = File(p.join(root, 'i18n/server_errors_ek.tr.json'));
   final messages = buildTrMessages(
     catalog,
-    parseWebTrErrors(webTrText),
+    webTr,
     client,
+    supplement: supplementFile.existsSync()
+        ? parseServerErrorSupplement(
+            supplementFile.readAsStringSync(),
+            catalog,
+            webTr,
+          )
+        : const {},
   );
   final uiDir = Directory(p.join(root, 'i18n/ui'));
   final ui = parseUiTexts({
@@ -236,7 +246,7 @@ swagger_parser:
     buildArb(
       messages,
       'BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: $webSrc ${web['trErrorsPath']} '
-      '(katalog: $backendSrc); istemci kodları: i18n/client_errors.tr.json; '
+      '(katalog: $backendSrc; eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; '
       'UI metinleri: i18n/ui/*.tr.json',
       ui,
     ),

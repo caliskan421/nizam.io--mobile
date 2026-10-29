@@ -94,9 +94,9 @@ abstract class C {
     });
   });
 
-  group('üretilmiş istemciler (v0.1.0-api)', () {
+  group('üretilmiş istemciler (v0.2.0-api)', () {
     test(
-      'yalnız 6 operasyon HttpResponse döner; diğerlerinin imzası değişmez',
+      'yalnız 10 operasyon HttpResponse döner; diğerlerinin imzası değişmez',
       () {
         final wrapped = <String>{};
         final plain = <String>{};
@@ -113,11 +113,15 @@ abstract class C {
         // Yeni etiketle liste değişirse bu test kırılır; bilinçli güncellenir.
         expect(wrapped, {
           'listAssignable',
+          'listDeletedAccounts',
+          'listDeletedDepartments',
           'listDepartments',
           'listMembers',
           'listPrograms',
           'listUsers',
           'myDepartments',
+          'reportDashboardMeetings',
+          'reportDashboardTasks',
         });
         expect(plain, containsAll(['readProgram', 'login', 'refresh', 'me']));
       },

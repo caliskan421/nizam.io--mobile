@@ -224,13 +224,39 @@ void checkUiAgainstErrors(Map<String, String> ui, Iterable<String> errorCodes) {
   }
 }
 
-/// ARB'ye girecek TR metinleri: sunucu kodları (katalog ∪ fields) web metninden, istemci
-/// kodları mobil dosyasından. Eksik metin, fazla web metni değil — eksik metin üretimi düşürür.
-Map<String, String> buildTrMessages(
+/// Web pininde henüz metni olmayan sunucu kodlarının geçici TR metinleri
+/// (`i18n/server_errors_ek.tr.json`). Yalnız katalogdaki ve web'de OLMAYAN kodlar girer;
+/// web metni eklenince aynı kodun burada kalması üretimi düşürür (tek kaynak korunur).
+Map<String, String> parseServerErrorSupplement(
+  String text,
   Catalog catalog,
   Map<String, String> webTr,
-  Map<String, String> client,
 ) {
+  final root = jsonDecode(text) as Map<String, Object?>;
+  final codes = root['codes'] as Map<String, Object?>;
+  final out = <String, String>{};
+  for (final MapEntry(:key, :value) in codes.entries) {
+    if (!catalog.allCodes.contains(key)) {
+      throw FormatException('ek TR metni katalogda olmayan kod: $key');
+    }
+    if (webTr.containsKey(key)) {
+      throw FormatException('ek TR metni bayat (web metni var, sil): $key');
+    }
+    out[key] = value! as String;
+  }
+  return out;
+}
+
+/// ARB'ye girecek TR metinleri: sunucu kodları (katalog ∪ fields) web metninden (yoksa
+/// [supplement] ek dosyasından), istemci kodları mobil dosyasından. Eksik metin, fazla web
+/// metni değil — eksik metin üretimi düşürür.
+Map<String, String> buildTrMessages(
+  Catalog catalog,
+  Map<String, String> web,
+  Map<String, String> client, {
+  Map<String, String> supplement = const {},
+}) {
+  final webTr = {...web, ...supplement};
   final missing = catalog.allCodes.where((c) => !webTr.containsKey(c)).toList()
     ..sort();
   if (missing.isNotEmpty) {
@@ -305,6 +331,10 @@ class SpecSummary {
   final List<OperationMeta> operations;
 }
 
+/// Sözleşmenin belgeli "yazma ↔ CSRF" istisnaları (backend `docs/api/README.md` §5 Yükleme:
+/// akışlı multipart yükleme `X-Requested-With` istemez, taşıyıcı yalnız Bearer).
+const _csrfsizYazma = {'attachFile'};
+
 SpecSummary summarizeSpec(String specText) {
   final spec = loadYaml(specText) as YamlMap;
   final version = (spec['info'] as YamlMap)['version'] as String;
@@ -358,7 +388,8 @@ SpecSummary summarizeSpec(String specText) {
         'spec: ${o.operationId} S3/departman başlığı tutarsız',
       );
     }
-    if ((o.method != 'GET') != o.csrf) {
+    if ((o.method != 'GET') != o.csrf &&
+        !_csrfsizYazma.contains(o.operationId)) {
       throw FormatException(
         'spec: ${o.operationId} yazma/CSRF başlığı tutarsız',
       );

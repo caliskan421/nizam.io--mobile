@@ -5,6 +5,8 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../models/account_lifecycle_result.dart';
+import '../models/account_result.dart';
 import '../models/assign_membership_request.dart';
 import '../models/assignable_list.dart';
 import '../models/change_role_request.dart';
@@ -14,13 +16,19 @@ import '../models/coordinator_result.dart';
 import '../models/create_department_request.dart';
 import '../models/create_user_request.dart';
 import '../models/delete_department_result.dart';
+import '../models/deleted_account_list.dart';
+import '../models/deleted_department_list.dart';
 import '../models/department.dart';
+import '../models/department_lifecycle_result.dart';
 import '../models/department_list.dart';
+import '../models/lockout_reset_result.dart';
 import '../models/membership.dart';
 import '../models/membership_change.dart';
 import '../models/my_department_list.dart';
+import '../models/open_account_request.dart';
 import '../models/roster_list.dart';
 import '../models/task_summary.dart';
+import '../models/update_account_request.dart';
 import '../models/update_department_request.dart';
 import '../models/update_user_request.dart';
 import '../models/user_list.dart';
@@ -164,6 +172,94 @@ abstract class OrganizationClient {
       'externalDocsUrl': null,
     },
   };
+  static const Map<String, dynamic> openAccountOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "openAccount",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> updateAccountOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "updateAccount",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> deleteAccountOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "deleteAccount",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> unlockAccountOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "unlockAccount",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> resetLockoutsOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "resetLockouts",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> listDeletedDepartmentsOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "listDeletedDepartments",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> restoreDepartmentOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "restoreDepartment",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> permanentDeleteDepartmentOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "permanentDeleteDepartment",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> listDeletedAccountsOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "listDeletedAccounts",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> restoreAccountOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "restoreAccount",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> permanentDeleteAccountOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "permanentDeleteAccount",
+          'externalDocsUrl': null,
+        },
+      };
 
   /// Hesabın departmanları ve rolleri.
   @GET('/v1/me/departments')
@@ -292,6 +388,8 @@ abstract class OrganizationClient {
 
   /// Bilinen kullanıcı listesi (imleçli).
   ///
+  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
+  ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/admin/users')
   Future<HttpResponse<UserList>> listUsers({
@@ -328,5 +426,113 @@ abstract class OrganizationClient {
     @Path('id') required String id,
     @Extras()
     Map<String, dynamic>? extras = OrganizationClient.deleteUserOpenapiExtras,
+  });
+
+  /// Yönetici hesap açma (parola çağıran verir).
+  @POST('/v1/admin/accounts')
+  Future<AccountResult> openAccount({
+    @Body() required OpenAccountRequest body,
+    @Extras()
+    Map<String, dynamic>? extras = OrganizationClient.openAccountOpenapiExtras,
+  });
+
+  /// Yönetici hesap güncelleme; parola atanırsa hedefin oturumları düşer.
+  @PATCH('/v1/admin/accounts/{id}')
+  Future<AccountResult> updateAccount({
+    @Path('id') required String id,
+    @Body() required UpdateAccountRequest body,
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.updateAccountOpenapiExtras,
+  });
+
+  /// Yönetici hesap silme (yumuşak); oturumlar düşer.
+  @DELETE('/v1/admin/accounts/{id}')
+  Future<AccountResult> deleteAccount({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.deleteAccountOpenapiExtras,
+  });
+
+  /// Kilitli hesabın kilidini açar.
+  @POST('/v1/admin/accounts/{id}/unlock')
+  Future<AccountResult> unlockAccount({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.unlockAccountOpenapiExtras,
+  });
+
+  /// Bütün giriş kilitlerini ve başarısız deneme kayıtlarını sıfırlar.
+  @POST('/v1/admin/security/reset-lockouts')
+  Future<LockoutResetResult> resetLockouts({
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.resetLockoutsOpenapiExtras,
+  });
+
+  /// Silinmiş departmanlar (imleçli).
+  ///
+  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
+  ///
+  /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
+  @GET('/v1/admin/deleted/departments')
+  Future<HttpResponse<DeletedDepartmentList>> listDeletedDepartments({
+    @Query('limit') int? limit,
+    @Query('cursor') String? cursor,
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.listDeletedDepartmentsOpenapiExtras,
+  });
+
+  /// Silinmiş departmanı geri yükler.
+  @PATCH('/v1/admin/restore/departments/{id}')
+  Future<DepartmentLifecycleResult> restoreDepartment({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.restoreDepartmentOpenapiExtras,
+  });
+
+  /// Silinmiş departmanı kalıcı siler.
+  @DELETE('/v1/admin/permanent/departments/{id}')
+  Future<DepartmentLifecycleResult> permanentDeleteDepartment({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.permanentDeleteDepartmentOpenapiExtras,
+  });
+
+  /// Silinmiş hesaplar (imleçli).
+  ///
+  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
+  ///
+  /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
+  @GET('/v1/admin/deleted/accounts')
+  Future<HttpResponse<DeletedAccountList>> listDeletedAccounts({
+    @Query('limit') int? limit,
+    @Query('cursor') String? cursor,
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.listDeletedAccountsOpenapiExtras,
+  });
+
+  /// Silinmiş hesabı geri yükler.
+  @PATCH('/v1/admin/restore/accounts/{id}')
+  Future<AccountLifecycleResult> restoreAccount({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.restoreAccountOpenapiExtras,
+  });
+
+  /// Silinmiş hesabı kalıcı siler.
+  @DELETE('/v1/admin/permanent/accounts/{id}')
+  Future<AccountLifecycleResult> permanentDeleteAccount({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.permanentDeleteAccountOpenapiExtras,
   });
 }

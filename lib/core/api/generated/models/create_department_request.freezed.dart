@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CreateDepartmentRequest {
 
- String get name; String get kind; String? get code; String? get description;
+ String get name; CreateDepartmentRequestKind get kind; String? get code; String? get description;
 /// Create a copy of CreateDepartmentRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $CreateDepartmentRequestCopyWith<$Res>  {
   factory $CreateDepartmentRequestCopyWith(CreateDepartmentRequest value, $Res Function(CreateDepartmentRequest) _then) = _$CreateDepartmentRequestCopyWithImpl;
 @useResult
 $Res call({
- String name, String kind, String? code, String? description
+ String name, CreateDepartmentRequestKind kind, String? code, String? description
 });
 
 
@@ -75,7 +75,7 @@ class _$CreateDepartmentRequestCopyWithImpl<$Res>
   return _then(CreateDepartmentRequest(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
-as String,code: freezed == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as CreateDepartmentRequestKind,code: freezed == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -162,7 +162,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String kind,  String? code,  String? description)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  CreateDepartmentRequestKind kind,  String? code,  String? description)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreateDepartmentRequest() when $default != null:
 return $default(_that.name,_that.kind,_that.code,_that.description);case _:
@@ -183,7 +183,7 @@ return $default(_that.name,_that.kind,_that.code,_that.description);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String kind,  String? code,  String? description)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  CreateDepartmentRequestKind kind,  String? code,  String? description)  $default,) {final _that = this;
 switch (_that) {
 case _CreateDepartmentRequest():
 return $default(_that.name,_that.kind,_that.code,_that.description);case _:
@@ -203,7 +203,7 @@ return $default(_that.name,_that.kind,_that.code,_that.description);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String kind,  String? code,  String? description)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  CreateDepartmentRequestKind kind,  String? code,  String? description)?  $default,) {final _that = this;
 switch (_that) {
 case _CreateDepartmentRequest() when $default != null:
 return $default(_that.name,_that.kind,_that.code,_that.description);case _:
@@ -222,7 +222,7 @@ class _CreateDepartmentRequest implements CreateDepartmentRequest {
   factory _CreateDepartmentRequest.fromJson(Map<String, dynamic> json) => _$CreateDepartmentRequestFromJson(json);
 
 @override final  String name;
-@override final  String kind;
+@override final  CreateDepartmentRequestKind kind;
 @override final  String? code;
 @override final  String? description;
 
@@ -261,7 +261,7 @@ abstract mixin class _$CreateDepartmentRequestCopyWith<$Res> implements $CreateD
   factory _$CreateDepartmentRequestCopyWith(_CreateDepartmentRequest value, $Res Function(_CreateDepartmentRequest) _then) = __$CreateDepartmentRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String name, String kind, String? code, String? description
+ String name, CreateDepartmentRequestKind kind, String? code, String? description
 });
 
 
@@ -282,7 +282,7 @@ class __$CreateDepartmentRequestCopyWithImpl<$Res>
   return _then(_CreateDepartmentRequest(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
-as String,code: freezed == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as CreateDepartmentRequestKind,code: freezed == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,
   ));

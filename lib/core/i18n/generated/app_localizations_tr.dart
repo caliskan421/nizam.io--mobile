@@ -94,6 +94,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errIdentityCredentialsInvalid => 'E-posta veya parola hatalı.';
 
   @override
+  String get errIdentityDownloadTargetInvalid => 'İndirme isteği geçersiz.';
+
+  @override
+  String get errIdentityDownloadTicketInvalid =>
+      'İndirme bağlantısı geçersiz veya süresi dolmuş. Yeniden indirmeyi deneyin.';
+
+  @override
   String get errIdentityForcePasswordChangeRequired =>
       'Devam etmek için parolanızı değiştirmelisiniz.';
 
@@ -255,9 +262,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get errOrganizationTransferAvailable =>
       'Bu hesap başka bir departmandan aktarılabilir.';
-
-  @override
-  String get errOrganizationTransferUnavailable => 'Bu hesap aktarılamaz.';
 
   @override
   String get errPlatformBodyInvalid => 'İstek içeriği geçersiz.';
@@ -426,6 +430,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errRecordsNotAuthorized => 'Bu işlem için yetkiniz yok.';
+
+  @override
+  String get errRecordsTagInvalid => 'Dosya etiketi geçersiz.';
+
+  @override
+  String get errRecordsTagRequired => 'Dosya için bir etiket seçilmeli.';
 
   @override
   String get errRecordsTooLarge => 'Dosya çok büyük.';

@@ -61,7 +61,7 @@ final class ChatControllerProvider
   }
 }
 
-String _$chatControllerHash() => r'18f815873c6c23c5467d6a8806b8924468c2a098';
+String _$chatControllerHash() => r'579e63a43374dbdf5e9de25f661cf1063e119242';
 
 /// Sohbet başına yazma durumu (ekran kapanınca sıfırlanır).
 

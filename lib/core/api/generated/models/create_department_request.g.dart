@@ -10,7 +10,7 @@ _CreateDepartmentRequest _$CreateDepartmentRequestFromJson(
   Map<String, dynamic> json,
 ) => _CreateDepartmentRequest(
   name: json['name'] as String,
-  kind: json['kind'] as String,
+  kind: CreateDepartmentRequestKind.fromJson(json['kind'] as String),
   code: json['code'] as String?,
   description: json['description'] as String?,
 );
@@ -19,7 +19,13 @@ Map<String, dynamic> _$CreateDepartmentRequestToJson(
   _CreateDepartmentRequest instance,
 ) => <String, dynamic>{
   'name': instance.name,
-  'kind': instance.kind,
+  'kind': _$CreateDepartmentRequestKindEnumMap[instance.kind]!,
   'code': ?instance.code,
   'description': ?instance.description,
+};
+
+const _$CreateDepartmentRequestKindEnumMap = {
+  CreateDepartmentRequestKind.koordinatorluk: 'koordinatorluk',
+  CreateDepartmentRequestKind.calismaGrubu: 'calisma_grubu',
+  CreateDepartmentRequestKind.$unknown: r'$unknown',
 };

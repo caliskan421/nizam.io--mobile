@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AssignMembershipRequest {
 
-@JsonKey(name: 'account_id') String get accountId; String get role;
+@JsonKey(name: 'account_id') String get accountId; AssignMembershipRequestRole get role;
 /// Create a copy of AssignMembershipRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $AssignMembershipRequestCopyWith<$Res>  {
   factory $AssignMembershipRequestCopyWith(AssignMembershipRequest value, $Res Function(AssignMembershipRequest) _then) = _$AssignMembershipRequestCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'account_id') String accountId, String role
+@JsonKey(name: 'account_id') String accountId, AssignMembershipRequestRole role
 });
 
 
@@ -75,7 +75,7 @@ class _$AssignMembershipRequestCopyWithImpl<$Res>
   return _then(AssignMembershipRequest(
 accountId: null == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as String,
+as AssignMembershipRequestRole,
   ));
 }
 
@@ -160,7 +160,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId,  String role)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId,  AssignMembershipRequestRole role)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AssignMembershipRequest() when $default != null:
 return $default(_that.accountId,_that.role);case _:
@@ -181,7 +181,7 @@ return $default(_that.accountId,_that.role);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId,  String role)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId,  AssignMembershipRequestRole role)  $default,) {final _that = this;
 switch (_that) {
 case _AssignMembershipRequest():
 return $default(_that.accountId,_that.role);case _:
@@ -201,7 +201,7 @@ return $default(_that.accountId,_that.role);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'account_id')  String accountId,  String role)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'account_id')  String accountId,  AssignMembershipRequestRole role)?  $default,) {final _that = this;
 switch (_that) {
 case _AssignMembershipRequest() when $default != null:
 return $default(_that.accountId,_that.role);case _:
@@ -220,7 +220,7 @@ class _AssignMembershipRequest implements AssignMembershipRequest {
   factory _AssignMembershipRequest.fromJson(Map<String, dynamic> json) => _$AssignMembershipRequestFromJson(json);
 
 @override@JsonKey(name: 'account_id') final  String accountId;
-@override final  String role;
+@override final  AssignMembershipRequestRole role;
 
 /// Create a copy of AssignMembershipRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -257,7 +257,7 @@ abstract mixin class _$AssignMembershipRequestCopyWith<$Res> implements $AssignM
   factory _$AssignMembershipRequestCopyWith(_AssignMembershipRequest value, $Res Function(_AssignMembershipRequest) _then) = __$AssignMembershipRequestCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'account_id') String accountId, String role
+@JsonKey(name: 'account_id') String accountId, AssignMembershipRequestRole role
 });
 
 
@@ -278,7 +278,7 @@ class __$AssignMembershipRequestCopyWithImpl<$Res>
   return _then(_AssignMembershipRequest(
 accountId: null == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as String,
+as AssignMembershipRequestRole,
   ));
 }
 

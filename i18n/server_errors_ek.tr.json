@@ -1,0 +1,9 @@
+{
+  "$comment": "Web pininde (api-pin.json web.commit) HENÜZ metni olmayan SUNUCU kodlarının geçici TR metinleri. ELLE yazılır. Yalnız katalogdaki ve web'de olmayan kodlar girer; web metni eklenip pin ilerleyince make gen aynı kodun burada kalmasını hata sayar (satır silinir). Anlamlar: backend identity README K50/K52, records README K07.",
+  "codes": {
+    "identity.download_target_invalid": "İndirme isteği geçersiz.",
+    "identity.download_ticket_invalid": "İndirme bağlantısı geçersiz veya süresi dolmuş. Yeniden indirmeyi deneyin.",
+    "records.tag_invalid": "Dosya etiketi geçersiz.",
+    "records.tag_required": "Dosya için bir etiket seçilmeli."
+  }
+}

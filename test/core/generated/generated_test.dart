@@ -69,8 +69,8 @@ void main() {
   });
 
   group('operasyon → kapsam sınıfı haritası (spec\'ten)', () {
-    test('ilk dilim: 32 işlem; API sürümü v1', () {
-      expect(apiOperations, hasLength(32));
+    test('v0.2.0-api: 140 işlem; API sürümü v1', () {
+      expect(apiOperations, hasLength(140));
       expect(apiVersion, 'v1');
     });
 
@@ -86,7 +86,10 @@ void main() {
           op.scope == ScopeClass.s3,
           reason: op.operationId,
         );
-        expect(op.csrf, op.method != 'GET', reason: op.operationId);
+        // Belgeli istisna: akışlı multipart yükleme CSRF istemez (tool/gen/sources.dart).
+        if (op.operationId != 'attachFile') {
+          expect(op.csrf, op.method != 'GET', reason: op.operationId);
+        }
         expect(op.auth, op.scope != ScopeClass.s0, reason: op.operationId);
       }
     });

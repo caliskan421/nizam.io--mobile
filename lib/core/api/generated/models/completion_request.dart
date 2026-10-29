@@ -4,13 +4,17 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../date_only.dart';
+
 part 'completion_request.freezed.dart';
 part 'completion_request.g.dart';
 
 @Freezed()
 abstract class CompletionRequest with _$CompletionRequest {
   const factory CompletionRequest({
-    @JsonKey(name: 'completed_on') required DateTime completedOn,
+    @DateOnlyConverter()
+    @JsonKey(name: 'completed_on')
+    required DateTime completedOn,
   }) = _CompletionRequest;
 
   factory CompletionRequest.fromJson(Map<String, Object?> json) =>

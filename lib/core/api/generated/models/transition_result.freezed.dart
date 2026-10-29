@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TransitionResult {
 
-@JsonKey(name: 'work_item_id') String get workItemId; String get from; String get to; TransitionResultActor get actor;@JsonKey(name: 'end_on') DateTime? get endOn;
+@JsonKey(name: 'work_item_id') String get workItemId; String get from; String get to; TransitionResultActor get actor;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? get endOn;
 /// Create a copy of TransitionResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $TransitionResultCopyWith<$Res>  {
   factory $TransitionResultCopyWith(TransitionResult value, $Res Function(TransitionResult) _then) = _$TransitionResultCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'work_item_id') String workItemId, String from, String to, TransitionResultActor actor,@JsonKey(name: 'end_on') DateTime? endOn
+@JsonKey(name: 'work_item_id') String workItemId, String from, String to, TransitionResultActor actor,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn
 });
 
 
@@ -163,7 +163,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String from,  String to,  TransitionResultActor actor, @JsonKey(name: 'end_on')  DateTime? endOn)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String from,  String to,  TransitionResultActor actor, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TransitionResult() when $default != null:
 return $default(_that.workItemId,_that.from,_that.to,_that.actor,_that.endOn);case _:
@@ -184,7 +184,7 @@ return $default(_that.workItemId,_that.from,_that.to,_that.actor,_that.endOn);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String from,  String to,  TransitionResultActor actor, @JsonKey(name: 'end_on')  DateTime? endOn)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String from,  String to,  TransitionResultActor actor, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn)  $default,) {final _that = this;
 switch (_that) {
 case _TransitionResult():
 return $default(_that.workItemId,_that.from,_that.to,_that.actor,_that.endOn);case _:
@@ -204,7 +204,7 @@ return $default(_that.workItemId,_that.from,_that.to,_that.actor,_that.endOn);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'work_item_id')  String workItemId,  String from,  String to,  TransitionResultActor actor, @JsonKey(name: 'end_on')  DateTime? endOn)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'work_item_id')  String workItemId,  String from,  String to,  TransitionResultActor actor, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn)?  $default,) {final _that = this;
 switch (_that) {
 case _TransitionResult() when $default != null:
 return $default(_that.workItemId,_that.from,_that.to,_that.actor,_that.endOn);case _:
@@ -219,14 +219,14 @@ return $default(_that.workItemId,_that.from,_that.to,_that.actor,_that.endOn);ca
 @JsonSerializable()
 
 class _TransitionResult implements TransitionResult {
-  const _TransitionResult({@JsonKey(name: 'work_item_id') required this.workItemId, required this.from, required this.to, required this.actor, @JsonKey(name: 'end_on') this.endOn});
+  const _TransitionResult({@JsonKey(name: 'work_item_id') required this.workItemId, required this.from, required this.to, required this.actor, @DateOnlyConverter()@JsonKey(name: 'end_on') this.endOn});
   factory _TransitionResult.fromJson(Map<String, dynamic> json) => _$TransitionResultFromJson(json);
 
 @override@JsonKey(name: 'work_item_id') final  String workItemId;
 @override final  String from;
 @override final  String to;
 @override final  TransitionResultActor actor;
-@override@JsonKey(name: 'end_on') final  DateTime? endOn;
+@override@DateOnlyConverter()@JsonKey(name: 'end_on') final  DateTime? endOn;
 
 /// Create a copy of TransitionResult
 /// with the given fields replaced by the non-null parameter values.
@@ -263,7 +263,7 @@ abstract mixin class _$TransitionResultCopyWith<$Res> implements $TransitionResu
   factory _$TransitionResultCopyWith(_TransitionResult value, $Res Function(_TransitionResult) _then) = __$TransitionResultCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'work_item_id') String workItemId, String from, String to, TransitionResultActor actor,@JsonKey(name: 'end_on') DateTime? endOn
+@JsonKey(name: 'work_item_id') String workItemId, String from, String to, TransitionResultActor actor,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn
 });
 
 

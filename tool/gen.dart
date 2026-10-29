@@ -30,6 +30,7 @@ import 'gen/emit.dart';
 import 'gen/response_headers.dart';
 import 'gen/sensitive.dart';
 import 'gen/sources.dart';
+import 'gen/wire_types.dart';
 
 Future<void> main(List<String> args) async {
   final root = Directory.current.path;
@@ -168,14 +169,16 @@ swagger_parser:
     - nizamio_web_refresh
 ''');
   await _run('dart', ['run', 'swagger_parser', '-f', config.path], root);
-  // Gizli alanlı modellerde freezed `toString` üretmesin (parola/belirteç string'e düşmez).
+  // Gizli alanlı modellerde freezed `toString` üretmesin (parola/belirteç string'e düşmez);
+  // gün alanları (`format: date`) `YYYY-MM-DD` yazılsın (tool/gen/wire_types.dart).
+  final dateNames = dateOnlyPropertyNames(specText);
   final modelsDir = Directory(p.join(apiOut.path, 'models'));
   if (modelsDir.existsSync()) {
     for (final f in modelsDir.listSync().whereType<File>().where(
       (f) => f.path.endsWith('.dart'),
     )) {
       final src = f.readAsStringSync();
-      final masked = maskSensitiveModels(src);
+      final masked = annotateDateOnly(maskSensitiveModels(src), dateNames);
       if (masked != src) f.writeAsStringSync(masked);
     }
   }
@@ -195,8 +198,18 @@ swagger_parser:
     clientFiles,
     operationsDeclaringHeader(specText),
   );
+  // İkili yanıtlar (PDF/ZIP/dosya) bayt olarak okunur (tool/gen/wire_types.dart).
+  final binaryOps = operationsWithBinaryResponse(specText);
+  final rewritten = <String>{};
   for (final e in wrapped.entries) {
-    if (e.value != clientFiles[e.key]) File(e.key).writeAsStringSync(e.value);
+    final out = rewriteBinaryResponses(e.value, binaryOps, rewritten);
+    if (out != clientFiles[e.key]) File(e.key).writeAsStringSync(out);
+  }
+  final missingBinary = binaryOps.difference(rewritten);
+  if (missingBinary.isNotEmpty) {
+    fail(
+      'ikili yanıt imzası bulunamadı: ${(missingBinary.toList()..sort()).join(', ')}',
+    );
   }
 
   // 2) operasyon ve hata kataloğu haritaları.

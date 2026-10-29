@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WorkloadTask {
 
-@JsonKey(name: 'work_item_id') String get workItemId; String get title; String get status; WorkloadTaskPriority get priority;@JsonKey(name: 'start_on') DateTime get startOn;@JsonKey(name: 'end_on') DateTime get endOn;@JsonKey(name: 'completed_on') DateTime? get completedOn;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'department_name') String get departmentName;@JsonKey(name: 'is_overdue') bool get isOverdue;@JsonKey(name: 'days_overdue') int get daysOverdue;@JsonKey(name: 'attachment_count') int get attachmentCount;@JsonKey(name: 'has_attachment') bool get hasAttachment;/// Görevin son notu; not yoksa alan gönderilmez.
+@JsonKey(name: 'work_item_id') String get workItemId; String get title; String get status; WorkloadTaskPriority get priority;@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime get startOn;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime get endOn;@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime? get completedOn;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'department_name') String get departmentName;@JsonKey(name: 'is_overdue') bool get isOverdue;@JsonKey(name: 'days_overdue') int get daysOverdue;@JsonKey(name: 'attachment_count') int get attachmentCount;@JsonKey(name: 'has_attachment') bool get hasAttachment;/// Görevin son notu; not yoksa alan gönderilmez.
 @JsonKey(name: 'latest_note') String? get latestNote;
 /// Create a copy of WorkloadTask
 /// with the given fields replaced by the non-null parameter values.
@@ -55,7 +55,7 @@ abstract mixin class $WorkloadTaskCopyWith<$Res>  {
   factory $WorkloadTaskCopyWith(WorkloadTask value, $Res Function(WorkloadTask) _then) = _$WorkloadTaskCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'work_item_id') String workItemId, String title, String status, WorkloadTaskPriority priority,@JsonKey(name: 'start_on') DateTime startOn,@JsonKey(name: 'end_on') DateTime endOn,@JsonKey(name: 'completed_on') DateTime? completedOn,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'department_name') String departmentName,@JsonKey(name: 'is_overdue') bool isOverdue,@JsonKey(name: 'days_overdue') int daysOverdue,@JsonKey(name: 'attachment_count') int attachmentCount,@JsonKey(name: 'has_attachment') bool hasAttachment,@JsonKey(name: 'latest_note') String? latestNote
+@JsonKey(name: 'work_item_id') String workItemId, String title, String status, WorkloadTaskPriority priority,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime endOn,@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime? completedOn,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'department_name') String departmentName,@JsonKey(name: 'is_overdue') bool isOverdue,@JsonKey(name: 'days_overdue') int daysOverdue,@JsonKey(name: 'attachment_count') int attachmentCount,@JsonKey(name: 'has_attachment') bool hasAttachment,@JsonKey(name: 'latest_note') String? latestNote
 });
 
 
@@ -173,7 +173,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title,  String status,  WorkloadTaskPriority priority, @JsonKey(name: 'start_on')  DateTime startOn, @JsonKey(name: 'end_on')  DateTime endOn, @JsonKey(name: 'completed_on')  DateTime? completedOn, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName, @JsonKey(name: 'is_overdue')  bool isOverdue, @JsonKey(name: 'days_overdue')  int daysOverdue, @JsonKey(name: 'attachment_count')  int attachmentCount, @JsonKey(name: 'has_attachment')  bool hasAttachment, @JsonKey(name: 'latest_note')  String? latestNote)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title,  String status,  WorkloadTaskPriority priority, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn, @DateOnlyConverter()@JsonKey(name: 'completed_on')  DateTime? completedOn, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName, @JsonKey(name: 'is_overdue')  bool isOverdue, @JsonKey(name: 'days_overdue')  int daysOverdue, @JsonKey(name: 'attachment_count')  int attachmentCount, @JsonKey(name: 'has_attachment')  bool hasAttachment, @JsonKey(name: 'latest_note')  String? latestNote)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WorkloadTask() when $default != null:
 return $default(_that.workItemId,_that.title,_that.status,_that.priority,_that.startOn,_that.endOn,_that.completedOn,_that.departmentId,_that.departmentName,_that.isOverdue,_that.daysOverdue,_that.attachmentCount,_that.hasAttachment,_that.latestNote);case _:
@@ -194,7 +194,7 @@ return $default(_that.workItemId,_that.title,_that.status,_that.priority,_that.s
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title,  String status,  WorkloadTaskPriority priority, @JsonKey(name: 'start_on')  DateTime startOn, @JsonKey(name: 'end_on')  DateTime endOn, @JsonKey(name: 'completed_on')  DateTime? completedOn, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName, @JsonKey(name: 'is_overdue')  bool isOverdue, @JsonKey(name: 'days_overdue')  int daysOverdue, @JsonKey(name: 'attachment_count')  int attachmentCount, @JsonKey(name: 'has_attachment')  bool hasAttachment, @JsonKey(name: 'latest_note')  String? latestNote)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title,  String status,  WorkloadTaskPriority priority, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn, @DateOnlyConverter()@JsonKey(name: 'completed_on')  DateTime? completedOn, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName, @JsonKey(name: 'is_overdue')  bool isOverdue, @JsonKey(name: 'days_overdue')  int daysOverdue, @JsonKey(name: 'attachment_count')  int attachmentCount, @JsonKey(name: 'has_attachment')  bool hasAttachment, @JsonKey(name: 'latest_note')  String? latestNote)  $default,) {final _that = this;
 switch (_that) {
 case _WorkloadTask():
 return $default(_that.workItemId,_that.title,_that.status,_that.priority,_that.startOn,_that.endOn,_that.completedOn,_that.departmentId,_that.departmentName,_that.isOverdue,_that.daysOverdue,_that.attachmentCount,_that.hasAttachment,_that.latestNote);case _:
@@ -214,7 +214,7 @@ return $default(_that.workItemId,_that.title,_that.status,_that.priority,_that.s
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title,  String status,  WorkloadTaskPriority priority, @JsonKey(name: 'start_on')  DateTime startOn, @JsonKey(name: 'end_on')  DateTime endOn, @JsonKey(name: 'completed_on')  DateTime? completedOn, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName, @JsonKey(name: 'is_overdue')  bool isOverdue, @JsonKey(name: 'days_overdue')  int daysOverdue, @JsonKey(name: 'attachment_count')  int attachmentCount, @JsonKey(name: 'has_attachment')  bool hasAttachment, @JsonKey(name: 'latest_note')  String? latestNote)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title,  String status,  WorkloadTaskPriority priority, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn, @DateOnlyConverter()@JsonKey(name: 'completed_on')  DateTime? completedOn, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName, @JsonKey(name: 'is_overdue')  bool isOverdue, @JsonKey(name: 'days_overdue')  int daysOverdue, @JsonKey(name: 'attachment_count')  int attachmentCount, @JsonKey(name: 'has_attachment')  bool hasAttachment, @JsonKey(name: 'latest_note')  String? latestNote)?  $default,) {final _that = this;
 switch (_that) {
 case _WorkloadTask() when $default != null:
 return $default(_that.workItemId,_that.title,_that.status,_that.priority,_that.startOn,_that.endOn,_that.completedOn,_that.departmentId,_that.departmentName,_that.isOverdue,_that.daysOverdue,_that.attachmentCount,_that.hasAttachment,_that.latestNote);case _:
@@ -229,16 +229,16 @@ return $default(_that.workItemId,_that.title,_that.status,_that.priority,_that.s
 @JsonSerializable()
 
 class _WorkloadTask implements WorkloadTask {
-  const _WorkloadTask({@JsonKey(name: 'work_item_id') required this.workItemId, required this.title, required this.status, required this.priority, @JsonKey(name: 'start_on') required this.startOn, @JsonKey(name: 'end_on') required this.endOn, @JsonKey(name: 'completed_on') required this.completedOn, @JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'department_name') required this.departmentName, @JsonKey(name: 'is_overdue') required this.isOverdue, @JsonKey(name: 'days_overdue') required this.daysOverdue, @JsonKey(name: 'attachment_count') required this.attachmentCount, @JsonKey(name: 'has_attachment') required this.hasAttachment, @JsonKey(name: 'latest_note') this.latestNote});
+  const _WorkloadTask({@JsonKey(name: 'work_item_id') required this.workItemId, required this.title, required this.status, required this.priority, @DateOnlyConverter()@JsonKey(name: 'start_on') required this.startOn, @DateOnlyConverter()@JsonKey(name: 'end_on') required this.endOn, @DateOnlyConverter()@JsonKey(name: 'completed_on') required this.completedOn, @JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'department_name') required this.departmentName, @JsonKey(name: 'is_overdue') required this.isOverdue, @JsonKey(name: 'days_overdue') required this.daysOverdue, @JsonKey(name: 'attachment_count') required this.attachmentCount, @JsonKey(name: 'has_attachment') required this.hasAttachment, @JsonKey(name: 'latest_note') this.latestNote});
   factory _WorkloadTask.fromJson(Map<String, dynamic> json) => _$WorkloadTaskFromJson(json);
 
 @override@JsonKey(name: 'work_item_id') final  String workItemId;
 @override final  String title;
 @override final  String status;
 @override final  WorkloadTaskPriority priority;
-@override@JsonKey(name: 'start_on') final  DateTime startOn;
-@override@JsonKey(name: 'end_on') final  DateTime endOn;
-@override@JsonKey(name: 'completed_on') final  DateTime? completedOn;
+@override@DateOnlyConverter()@JsonKey(name: 'start_on') final  DateTime startOn;
+@override@DateOnlyConverter()@JsonKey(name: 'end_on') final  DateTime endOn;
+@override@DateOnlyConverter()@JsonKey(name: 'completed_on') final  DateTime? completedOn;
 @override@JsonKey(name: 'department_id') final  String departmentId;
 @override@JsonKey(name: 'department_name') final  String departmentName;
 @override@JsonKey(name: 'is_overdue') final  bool isOverdue;
@@ -283,7 +283,7 @@ abstract mixin class _$WorkloadTaskCopyWith<$Res> implements $WorkloadTaskCopyWi
   factory _$WorkloadTaskCopyWith(_WorkloadTask value, $Res Function(_WorkloadTask) _then) = __$WorkloadTaskCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'work_item_id') String workItemId, String title, String status, WorkloadTaskPriority priority,@JsonKey(name: 'start_on') DateTime startOn,@JsonKey(name: 'end_on') DateTime endOn,@JsonKey(name: 'completed_on') DateTime? completedOn,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'department_name') String departmentName,@JsonKey(name: 'is_overdue') bool isOverdue,@JsonKey(name: 'days_overdue') int daysOverdue,@JsonKey(name: 'attachment_count') int attachmentCount,@JsonKey(name: 'has_attachment') bool hasAttachment,@JsonKey(name: 'latest_note') String? latestNote
+@JsonKey(name: 'work_item_id') String workItemId, String title, String status, WorkloadTaskPriority priority,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime endOn,@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime? completedOn,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'department_name') String departmentName,@JsonKey(name: 'is_overdue') bool isOverdue,@JsonKey(name: 'days_overdue') int daysOverdue,@JsonKey(name: 'attachment_count') int attachmentCount,@JsonKey(name: 'has_attachment') bool hasAttachment,@JsonKey(name: 'latest_note') String? latestNote
 });
 
 

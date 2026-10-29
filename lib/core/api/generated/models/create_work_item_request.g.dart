@@ -10,8 +10,8 @@ _CreateWorkItemRequest _$CreateWorkItemRequestFromJson(
   Map<String, dynamic> json,
 ) => _CreateWorkItemRequest(
   title: json['title'] as String,
-  startOn: DateTime.parse(json['start_on'] as String),
-  endOn: DateTime.parse(json['end_on'] as String),
+  startOn: const DateOnlyConverter().fromJson(json['start_on'] as String),
+  endOn: const DateOnlyConverter().fromJson(json['end_on'] as String),
   description: json['description'] as String?,
   priority: json['priority'] == null
       ? null
@@ -23,8 +23,8 @@ Map<String, dynamic> _$CreateWorkItemRequestToJson(
   _CreateWorkItemRequest instance,
 ) => <String, dynamic>{
   'title': instance.title,
-  'start_on': instance.startOn.toIso8601String(),
-  'end_on': instance.endOn.toIso8601String(),
+  'start_on': const DateOnlyConverter().toJson(instance.startOn),
+  'end_on': const DateOnlyConverter().toJson(instance.endOn),
   'description': ?instance.description,
   'priority': ?_$CreateWorkItemRequestPriorityEnumMap[instance.priority],
   'assignee_account_id': ?instance.assigneeAccountId,

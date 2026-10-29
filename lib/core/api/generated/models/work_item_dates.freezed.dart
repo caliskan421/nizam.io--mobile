@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WorkItemDates {
 
-@JsonKey(name: 'start_on') DateTime get startOn;@JsonKey(name: 'end_on') DateTime get endOn;@JsonKey(name: 'planned_end_on') DateTime? get plannedEndOn;@JsonKey(name: 'completed_on') DateTime? get completedOn;@JsonKey(name: 'original_completed_on') DateTime? get originalCompletedOn;@JsonKey(name: 'submitted_on') DateTime? get submittedOn;
+@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime get startOn;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime get endOn;@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? get plannedEndOn;@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime? get completedOn;@DateOnlyConverter()@JsonKey(name: 'original_completed_on') DateTime? get originalCompletedOn;@DateOnlyConverter()@JsonKey(name: 'submitted_on') DateTime? get submittedOn;
 /// Create a copy of WorkItemDates
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $WorkItemDatesCopyWith<$Res>  {
   factory $WorkItemDatesCopyWith(WorkItemDates value, $Res Function(WorkItemDates) _then) = _$WorkItemDatesCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'start_on') DateTime startOn,@JsonKey(name: 'end_on') DateTime endOn,@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@JsonKey(name: 'completed_on') DateTime? completedOn,@JsonKey(name: 'original_completed_on') DateTime? originalCompletedOn,@JsonKey(name: 'submitted_on') DateTime? submittedOn
+@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime endOn,@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime? completedOn,@DateOnlyConverter()@JsonKey(name: 'original_completed_on') DateTime? originalCompletedOn,@DateOnlyConverter()@JsonKey(name: 'submitted_on') DateTime? submittedOn
 });
 
 
@@ -164,7 +164,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'start_on')  DateTime startOn, @JsonKey(name: 'end_on')  DateTime endOn, @JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completed_on')  DateTime? completedOn, @JsonKey(name: 'original_completed_on')  DateTime? originalCompletedOn, @JsonKey(name: 'submitted_on')  DateTime? submittedOn)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @DateOnlyConverter()@JsonKey(name: 'completed_on')  DateTime? completedOn, @DateOnlyConverter()@JsonKey(name: 'original_completed_on')  DateTime? originalCompletedOn, @DateOnlyConverter()@JsonKey(name: 'submitted_on')  DateTime? submittedOn)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WorkItemDates() when $default != null:
 return $default(_that.startOn,_that.endOn,_that.plannedEndOn,_that.completedOn,_that.originalCompletedOn,_that.submittedOn);case _:
@@ -185,7 +185,7 @@ return $default(_that.startOn,_that.endOn,_that.plannedEndOn,_that.completedOn,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'start_on')  DateTime startOn, @JsonKey(name: 'end_on')  DateTime endOn, @JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completed_on')  DateTime? completedOn, @JsonKey(name: 'original_completed_on')  DateTime? originalCompletedOn, @JsonKey(name: 'submitted_on')  DateTime? submittedOn)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @DateOnlyConverter()@JsonKey(name: 'completed_on')  DateTime? completedOn, @DateOnlyConverter()@JsonKey(name: 'original_completed_on')  DateTime? originalCompletedOn, @DateOnlyConverter()@JsonKey(name: 'submitted_on')  DateTime? submittedOn)  $default,) {final _that = this;
 switch (_that) {
 case _WorkItemDates():
 return $default(_that.startOn,_that.endOn,_that.plannedEndOn,_that.completedOn,_that.originalCompletedOn,_that.submittedOn);case _:
@@ -205,7 +205,7 @@ return $default(_that.startOn,_that.endOn,_that.plannedEndOn,_that.completedOn,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'start_on')  DateTime startOn, @JsonKey(name: 'end_on')  DateTime endOn, @JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completed_on')  DateTime? completedOn, @JsonKey(name: 'original_completed_on')  DateTime? originalCompletedOn, @JsonKey(name: 'submitted_on')  DateTime? submittedOn)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @DateOnlyConverter()@JsonKey(name: 'completed_on')  DateTime? completedOn, @DateOnlyConverter()@JsonKey(name: 'original_completed_on')  DateTime? originalCompletedOn, @DateOnlyConverter()@JsonKey(name: 'submitted_on')  DateTime? submittedOn)?  $default,) {final _that = this;
 switch (_that) {
 case _WorkItemDates() when $default != null:
 return $default(_that.startOn,_that.endOn,_that.plannedEndOn,_that.completedOn,_that.originalCompletedOn,_that.submittedOn);case _:
@@ -220,15 +220,15 @@ return $default(_that.startOn,_that.endOn,_that.plannedEndOn,_that.completedOn,_
 @JsonSerializable()
 
 class _WorkItemDates implements WorkItemDates {
-  const _WorkItemDates({@JsonKey(name: 'start_on') required this.startOn, @JsonKey(name: 'end_on') required this.endOn, @JsonKey(name: 'planned_end_on') this.plannedEndOn, @JsonKey(name: 'completed_on') this.completedOn, @JsonKey(name: 'original_completed_on') this.originalCompletedOn, @JsonKey(name: 'submitted_on') this.submittedOn});
+  const _WorkItemDates({@DateOnlyConverter()@JsonKey(name: 'start_on') required this.startOn, @DateOnlyConverter()@JsonKey(name: 'end_on') required this.endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on') this.plannedEndOn, @DateOnlyConverter()@JsonKey(name: 'completed_on') this.completedOn, @DateOnlyConverter()@JsonKey(name: 'original_completed_on') this.originalCompletedOn, @DateOnlyConverter()@JsonKey(name: 'submitted_on') this.submittedOn});
   factory _WorkItemDates.fromJson(Map<String, dynamic> json) => _$WorkItemDatesFromJson(json);
 
-@override@JsonKey(name: 'start_on') final  DateTime startOn;
-@override@JsonKey(name: 'end_on') final  DateTime endOn;
-@override@JsonKey(name: 'planned_end_on') final  DateTime? plannedEndOn;
-@override@JsonKey(name: 'completed_on') final  DateTime? completedOn;
-@override@JsonKey(name: 'original_completed_on') final  DateTime? originalCompletedOn;
-@override@JsonKey(name: 'submitted_on') final  DateTime? submittedOn;
+@override@DateOnlyConverter()@JsonKey(name: 'start_on') final  DateTime startOn;
+@override@DateOnlyConverter()@JsonKey(name: 'end_on') final  DateTime endOn;
+@override@DateOnlyConverter()@JsonKey(name: 'planned_end_on') final  DateTime? plannedEndOn;
+@override@DateOnlyConverter()@JsonKey(name: 'completed_on') final  DateTime? completedOn;
+@override@DateOnlyConverter()@JsonKey(name: 'original_completed_on') final  DateTime? originalCompletedOn;
+@override@DateOnlyConverter()@JsonKey(name: 'submitted_on') final  DateTime? submittedOn;
 
 /// Create a copy of WorkItemDates
 /// with the given fields replaced by the non-null parameter values.
@@ -265,7 +265,7 @@ abstract mixin class _$WorkItemDatesCopyWith<$Res> implements $WorkItemDatesCopy
   factory _$WorkItemDatesCopyWith(_WorkItemDates value, $Res Function(_WorkItemDates) _then) = __$WorkItemDatesCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'start_on') DateTime startOn,@JsonKey(name: 'end_on') DateTime endOn,@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@JsonKey(name: 'completed_on') DateTime? completedOn,@JsonKey(name: 'original_completed_on') DateTime? originalCompletedOn,@JsonKey(name: 'submitted_on') DateTime? submittedOn
+@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime endOn,@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime? completedOn,@DateOnlyConverter()@JsonKey(name: 'original_completed_on') DateTime? originalCompletedOn,@DateOnlyConverter()@JsonKey(name: 'submitted_on') DateTime? submittedOn
 });
 
 

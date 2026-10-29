@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../date_only.dart';
+
 import 'report_person.dart';
 
 part 'overdue_task.freezed.dart';
@@ -17,7 +19,7 @@ abstract class OverdueTask with _$OverdueTask {
     @JsonKey(name: 'department_id') required String departmentId,
     @JsonKey(name: 'department_name') required String departmentName,
     required List<ReportPerson> assignees,
-    @JsonKey(name: 'due_on') required DateTime dueOn,
+    @DateOnlyConverter() @JsonKey(name: 'due_on') required DateTime dueOn,
     @JsonKey(name: 'days_overdue') required int daysOverdue,
   }) = _OverdueTask;
 

@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../date_only.dart';
+
 part 'extend_result.freezed.dart';
 part 'extend_result.g.dart';
 
@@ -11,7 +13,9 @@ part 'extend_result.g.dart';
 abstract class ExtendResult with _$ExtendResult {
   const factory ExtendResult({
     @JsonKey(name: 'cascade_count') required int cascadeCount,
-    @JsonKey(name: 'new_end_on') required DateTime newEndOn,
+    @DateOnlyConverter()
+    @JsonKey(name: 'new_end_on')
+    required DateTime newEndOn,
   }) = _ExtendResult;
 
   factory ExtendResult.fromJson(Map<String, Object?> json) =>

@@ -17,7 +17,7 @@ T _$identity<T>(T value) => value;
 mixin _$CreateWorkItemRequest {
 
  String get title;/// Şirket yöneticisi dışındaki çağıranda en çok 40 gün geçmişte olabilir (aksi 422 `work.input_invalid`).
-@JsonKey(name: 'start_on') DateTime get startOn;@JsonKey(name: 'end_on') DateTime get endOn; String? get description;/// Gönderilmezse `orta`; boş dizge de `orta` sayılır.
+@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime get startOn;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime get endOn; String? get description;/// Gönderilmezse `orta`; boş dizge de `orta` sayılır.
  CreateWorkItemRequestPriority? get priority;/// Boşsa atamasız açılır.
 @JsonKey(name: 'assignee_account_id') String? get assigneeAccountId;
 /// Create a copy of CreateWorkItemRequest
@@ -57,7 +57,7 @@ abstract mixin class $CreateWorkItemRequestCopyWith<$Res>  {
   factory $CreateWorkItemRequestCopyWith(CreateWorkItemRequest value, $Res Function(CreateWorkItemRequest) _then) = _$CreateWorkItemRequestCopyWithImpl;
 @useResult
 $Res call({
- String title,@JsonKey(name: 'start_on') DateTime startOn,@JsonKey(name: 'end_on') DateTime endOn, String? description, CreateWorkItemRequestPriority? priority,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId
+ String title,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime endOn, String? description, CreateWorkItemRequestPriority? priority,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId
 });
 
 
@@ -167,7 +167,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title, @JsonKey(name: 'start_on')  DateTime startOn, @JsonKey(name: 'end_on')  DateTime endOn,  String? description,  CreateWorkItemRequestPriority? priority, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn,  String? description,  CreateWorkItemRequestPriority? priority, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreateWorkItemRequest() when $default != null:
 return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.priority,_that.assigneeAccountId);case _:
@@ -188,7 +188,7 @@ return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.pr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title, @JsonKey(name: 'start_on')  DateTime startOn, @JsonKey(name: 'end_on')  DateTime endOn,  String? description,  CreateWorkItemRequestPriority? priority, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn,  String? description,  CreateWorkItemRequestPriority? priority, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId)  $default,) {final _that = this;
 switch (_that) {
 case _CreateWorkItemRequest():
 return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.priority,_that.assigneeAccountId);case _:
@@ -208,7 +208,7 @@ return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.pr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title, @JsonKey(name: 'start_on')  DateTime startOn, @JsonKey(name: 'end_on')  DateTime endOn,  String? description,  CreateWorkItemRequestPriority? priority, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn,  String? description,  CreateWorkItemRequestPriority? priority, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId)?  $default,) {final _that = this;
 switch (_that) {
 case _CreateWorkItemRequest() when $default != null:
 return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.priority,_that.assigneeAccountId);case _:
@@ -223,13 +223,13 @@ return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.pr
 @JsonSerializable()
 
 class _CreateWorkItemRequest implements CreateWorkItemRequest {
-  const _CreateWorkItemRequest({required this.title, @JsonKey(name: 'start_on') required this.startOn, @JsonKey(name: 'end_on') required this.endOn, this.description, this.priority, @JsonKey(name: 'assignee_account_id') this.assigneeAccountId});
+  const _CreateWorkItemRequest({required this.title, @DateOnlyConverter()@JsonKey(name: 'start_on') required this.startOn, @DateOnlyConverter()@JsonKey(name: 'end_on') required this.endOn, this.description, this.priority, @JsonKey(name: 'assignee_account_id') this.assigneeAccountId});
   factory _CreateWorkItemRequest.fromJson(Map<String, dynamic> json) => _$CreateWorkItemRequestFromJson(json);
 
 @override final  String title;
 /// Şirket yöneticisi dışındaki çağıranda en çok 40 gün geçmişte olabilir (aksi 422 `work.input_invalid`).
-@override@JsonKey(name: 'start_on') final  DateTime startOn;
-@override@JsonKey(name: 'end_on') final  DateTime endOn;
+@override@DateOnlyConverter()@JsonKey(name: 'start_on') final  DateTime startOn;
+@override@DateOnlyConverter()@JsonKey(name: 'end_on') final  DateTime endOn;
 @override final  String? description;
 /// Gönderilmezse `orta`; boş dizge de `orta` sayılır.
 @override final  CreateWorkItemRequestPriority? priority;
@@ -271,7 +271,7 @@ abstract mixin class _$CreateWorkItemRequestCopyWith<$Res> implements $CreateWor
   factory _$CreateWorkItemRequestCopyWith(_CreateWorkItemRequest value, $Res Function(_CreateWorkItemRequest) _then) = __$CreateWorkItemRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String title,@JsonKey(name: 'start_on') DateTime startOn,@JsonKey(name: 'end_on') DateTime endOn, String? description, CreateWorkItemRequestPriority? priority,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId
+ String title,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime endOn, String? description, CreateWorkItemRequestPriority? priority,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId
 });
 
 

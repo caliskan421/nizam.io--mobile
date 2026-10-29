@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UpdateWorkItemRequest {
 
- String? get title; String? get description; UpdateWorkItemRequestPriority? get priority;@JsonKey(name: 'start_on') DateTime? get startOn;@JsonKey(name: 'end_on') DateTime? get endOn;@JsonKey(name: 'planned_end_on') DateTime? get plannedEndOn;/// Korumalı alan; dolu gönderilirse 422 work.input_invalid.
+ String? get title; String? get description; UpdateWorkItemRequestPriority? get priority;@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? get startOn;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? get endOn;@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? get plannedEndOn;/// Korumalı alan; dolu gönderilirse 422 work.input_invalid.
 @JsonKey(name: 'completed_on') String? get completedOn;/// Korumalı alan; dolu gönderilirse 422 work.input_invalid.
 @JsonKey(name: 'submitted_on') String? get submittedOn;
 /// Create a copy of UpdateWorkItemRequest
@@ -56,7 +56,7 @@ abstract mixin class $UpdateWorkItemRequestCopyWith<$Res>  {
   factory $UpdateWorkItemRequestCopyWith(UpdateWorkItemRequest value, $Res Function(UpdateWorkItemRequest) _then) = _$UpdateWorkItemRequestCopyWithImpl;
 @useResult
 $Res call({
- String? title, String? description, UpdateWorkItemRequestPriority? priority,@JsonKey(name: 'start_on') DateTime? startOn,@JsonKey(name: 'end_on') DateTime? endOn,@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@JsonKey(name: 'completed_on') String? completedOn,@JsonKey(name: 'submitted_on') String? submittedOn
+ String? title, String? description, UpdateWorkItemRequestPriority? priority,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn,@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@JsonKey(name: 'completed_on') String? completedOn,@JsonKey(name: 'submitted_on') String? submittedOn
 });
 
 
@@ -168,7 +168,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? title,  String? description,  UpdateWorkItemRequestPriority? priority, @JsonKey(name: 'start_on')  DateTime? startOn, @JsonKey(name: 'end_on')  DateTime? endOn, @JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completed_on')  String? completedOn, @JsonKey(name: 'submitted_on')  String? submittedOn)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? title,  String? description,  UpdateWorkItemRequestPriority? priority, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completed_on')  String? completedOn, @JsonKey(name: 'submitted_on')  String? submittedOn)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UpdateWorkItemRequest() when $default != null:
 return $default(_that.title,_that.description,_that.priority,_that.startOn,_that.endOn,_that.plannedEndOn,_that.completedOn,_that.submittedOn);case _:
@@ -189,7 +189,7 @@ return $default(_that.title,_that.description,_that.priority,_that.startOn,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? title,  String? description,  UpdateWorkItemRequestPriority? priority, @JsonKey(name: 'start_on')  DateTime? startOn, @JsonKey(name: 'end_on')  DateTime? endOn, @JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completed_on')  String? completedOn, @JsonKey(name: 'submitted_on')  String? submittedOn)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? title,  String? description,  UpdateWorkItemRequestPriority? priority, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completed_on')  String? completedOn, @JsonKey(name: 'submitted_on')  String? submittedOn)  $default,) {final _that = this;
 switch (_that) {
 case _UpdateWorkItemRequest():
 return $default(_that.title,_that.description,_that.priority,_that.startOn,_that.endOn,_that.plannedEndOn,_that.completedOn,_that.submittedOn);case _:
@@ -209,7 +209,7 @@ return $default(_that.title,_that.description,_that.priority,_that.startOn,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? title,  String? description,  UpdateWorkItemRequestPriority? priority, @JsonKey(name: 'start_on')  DateTime? startOn, @JsonKey(name: 'end_on')  DateTime? endOn, @JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completed_on')  String? completedOn, @JsonKey(name: 'submitted_on')  String? submittedOn)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? title,  String? description,  UpdateWorkItemRequestPriority? priority, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completed_on')  String? completedOn, @JsonKey(name: 'submitted_on')  String? submittedOn)?  $default,) {final _that = this;
 switch (_that) {
 case _UpdateWorkItemRequest() when $default != null:
 return $default(_that.title,_that.description,_that.priority,_that.startOn,_that.endOn,_that.plannedEndOn,_that.completedOn,_that.submittedOn);case _:
@@ -224,15 +224,15 @@ return $default(_that.title,_that.description,_that.priority,_that.startOn,_that
 @JsonSerializable()
 
 class _UpdateWorkItemRequest implements UpdateWorkItemRequest {
-  const _UpdateWorkItemRequest({this.title, this.description, this.priority, @JsonKey(name: 'start_on') this.startOn, @JsonKey(name: 'end_on') this.endOn, @JsonKey(name: 'planned_end_on') this.plannedEndOn, @JsonKey(name: 'completed_on') this.completedOn, @JsonKey(name: 'submitted_on') this.submittedOn});
+  const _UpdateWorkItemRequest({this.title, this.description, this.priority, @DateOnlyConverter()@JsonKey(name: 'start_on') this.startOn, @DateOnlyConverter()@JsonKey(name: 'end_on') this.endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on') this.plannedEndOn, @JsonKey(name: 'completed_on') this.completedOn, @JsonKey(name: 'submitted_on') this.submittedOn});
   factory _UpdateWorkItemRequest.fromJson(Map<String, dynamic> json) => _$UpdateWorkItemRequestFromJson(json);
 
 @override final  String? title;
 @override final  String? description;
 @override final  UpdateWorkItemRequestPriority? priority;
-@override@JsonKey(name: 'start_on') final  DateTime? startOn;
-@override@JsonKey(name: 'end_on') final  DateTime? endOn;
-@override@JsonKey(name: 'planned_end_on') final  DateTime? plannedEndOn;
+@override@DateOnlyConverter()@JsonKey(name: 'start_on') final  DateTime? startOn;
+@override@DateOnlyConverter()@JsonKey(name: 'end_on') final  DateTime? endOn;
+@override@DateOnlyConverter()@JsonKey(name: 'planned_end_on') final  DateTime? plannedEndOn;
 /// Korumalı alan; dolu gönderilirse 422 work.input_invalid.
 @override@JsonKey(name: 'completed_on') final  String? completedOn;
 /// Korumalı alan; dolu gönderilirse 422 work.input_invalid.
@@ -273,7 +273,7 @@ abstract mixin class _$UpdateWorkItemRequestCopyWith<$Res> implements $UpdateWor
   factory _$UpdateWorkItemRequestCopyWith(_UpdateWorkItemRequest value, $Res Function(_UpdateWorkItemRequest) _then) = __$UpdateWorkItemRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String? title, String? description, UpdateWorkItemRequestPriority? priority,@JsonKey(name: 'start_on') DateTime? startOn,@JsonKey(name: 'end_on') DateTime? endOn,@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@JsonKey(name: 'completed_on') String? completedOn,@JsonKey(name: 'submitted_on') String? submittedOn
+ String? title, String? description, UpdateWorkItemRequestPriority? priority,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn,@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@JsonKey(name: 'completed_on') String? completedOn,@JsonKey(name: 'submitted_on') String? submittedOn
 });
 
 

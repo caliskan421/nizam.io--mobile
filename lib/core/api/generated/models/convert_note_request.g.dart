@@ -8,8 +8,10 @@ part of 'convert_note_request.dart';
 
 _ConvertNoteRequest _$ConvertNoteRequestFromJson(Map<String, dynamic> json) =>
     _ConvertNoteRequest(
-      startDate: DateTime.parse(json['start_date'] as String),
-      endDate: DateTime.parse(json['end_date'] as String),
+      startDate: const DateOnlyConverter().fromJson(
+        json['start_date'] as String,
+      ),
+      endDate: const DateOnlyConverter().fromJson(json['end_date'] as String),
       title: json['title'] as String?,
       priority: json['priority'] == null
           ? null
@@ -22,8 +24,8 @@ _ConvertNoteRequest _$ConvertNoteRequestFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$ConvertNoteRequestToJson(_ConvertNoteRequest instance) =>
     <String, dynamic>{
-      'start_date': instance.startDate.toIso8601String(),
-      'end_date': instance.endDate.toIso8601String(),
+      'start_date': const DateOnlyConverter().toJson(instance.startDate),
+      'end_date': const DateOnlyConverter().toJson(instance.endDate),
       'title': ?instance.title,
       'priority': ?_$ConvertNoteRequestPriorityEnumMap[instance.priority],
       'department_id': ?instance.departmentId,

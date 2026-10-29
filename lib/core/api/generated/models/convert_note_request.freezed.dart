@@ -17,8 +17,8 @@ T _$identity<T>(T value) => value;
 mixin _$ConvertNoteRequest {
 
 /// Zorunlu; bitişten sonra olamaz ve bugünden önce olamaz.
-@JsonKey(name: 'start_date') DateTime get startDate;/// Zorunlu; başlangıçtan önce olamaz.
-@JsonKey(name: 'end_date') DateTime get endDate;/// Boşsa notun ilk 100 karakteri.
+@DateOnlyConverter()@JsonKey(name: 'start_date') DateTime get startDate;/// Zorunlu; başlangıçtan önce olamaz.
+@DateOnlyConverter()@JsonKey(name: 'end_date') DateTime get endDate;/// Boşsa notun ilk 100 karakteri.
  String? get title;/// Gönderilmezse `orta`; boş dizge de `orta` sayılır.
  ConvertNoteRequestPriority? get priority;@JsonKey(name: 'department_id') String? get departmentId;@JsonKey(name: 'assignee_account_ids') List<String>? get assigneeAccountIds;
 /// Create a copy of ConvertNoteRequest
@@ -58,7 +58,7 @@ abstract mixin class $ConvertNoteRequestCopyWith<$Res>  {
   factory $ConvertNoteRequestCopyWith(ConvertNoteRequest value, $Res Function(ConvertNoteRequest) _then) = _$ConvertNoteRequestCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'start_date') DateTime startDate,@JsonKey(name: 'end_date') DateTime endDate, String? title, ConvertNoteRequestPriority? priority,@JsonKey(name: 'department_id') String? departmentId,@JsonKey(name: 'assignee_account_ids') List<String>? assigneeAccountIds
+@DateOnlyConverter()@JsonKey(name: 'start_date') DateTime startDate,@DateOnlyConverter()@JsonKey(name: 'end_date') DateTime endDate, String? title, ConvertNoteRequestPriority? priority,@JsonKey(name: 'department_id') String? departmentId,@JsonKey(name: 'assignee_account_ids') List<String>? assigneeAccountIds
 });
 
 
@@ -168,7 +168,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'start_date')  DateTime startDate, @JsonKey(name: 'end_date')  DateTime endDate,  String? title,  ConvertNoteRequestPriority? priority, @JsonKey(name: 'department_id')  String? departmentId, @JsonKey(name: 'assignee_account_ids')  List<String>? assigneeAccountIds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@DateOnlyConverter()@JsonKey(name: 'start_date')  DateTime startDate, @DateOnlyConverter()@JsonKey(name: 'end_date')  DateTime endDate,  String? title,  ConvertNoteRequestPriority? priority, @JsonKey(name: 'department_id')  String? departmentId, @JsonKey(name: 'assignee_account_ids')  List<String>? assigneeAccountIds)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ConvertNoteRequest() when $default != null:
 return $default(_that.startDate,_that.endDate,_that.title,_that.priority,_that.departmentId,_that.assigneeAccountIds);case _:
@@ -189,7 +189,7 @@ return $default(_that.startDate,_that.endDate,_that.title,_that.priority,_that.d
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'start_date')  DateTime startDate, @JsonKey(name: 'end_date')  DateTime endDate,  String? title,  ConvertNoteRequestPriority? priority, @JsonKey(name: 'department_id')  String? departmentId, @JsonKey(name: 'assignee_account_ids')  List<String>? assigneeAccountIds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@DateOnlyConverter()@JsonKey(name: 'start_date')  DateTime startDate, @DateOnlyConverter()@JsonKey(name: 'end_date')  DateTime endDate,  String? title,  ConvertNoteRequestPriority? priority, @JsonKey(name: 'department_id')  String? departmentId, @JsonKey(name: 'assignee_account_ids')  List<String>? assigneeAccountIds)  $default,) {final _that = this;
 switch (_that) {
 case _ConvertNoteRequest():
 return $default(_that.startDate,_that.endDate,_that.title,_that.priority,_that.departmentId,_that.assigneeAccountIds);case _:
@@ -209,7 +209,7 @@ return $default(_that.startDate,_that.endDate,_that.title,_that.priority,_that.d
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'start_date')  DateTime startDate, @JsonKey(name: 'end_date')  DateTime endDate,  String? title,  ConvertNoteRequestPriority? priority, @JsonKey(name: 'department_id')  String? departmentId, @JsonKey(name: 'assignee_account_ids')  List<String>? assigneeAccountIds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@DateOnlyConverter()@JsonKey(name: 'start_date')  DateTime startDate, @DateOnlyConverter()@JsonKey(name: 'end_date')  DateTime endDate,  String? title,  ConvertNoteRequestPriority? priority, @JsonKey(name: 'department_id')  String? departmentId, @JsonKey(name: 'assignee_account_ids')  List<String>? assigneeAccountIds)?  $default,) {final _that = this;
 switch (_that) {
 case _ConvertNoteRequest() when $default != null:
 return $default(_that.startDate,_that.endDate,_that.title,_that.priority,_that.departmentId,_that.assigneeAccountIds);case _:
@@ -224,13 +224,13 @@ return $default(_that.startDate,_that.endDate,_that.title,_that.priority,_that.d
 @JsonSerializable()
 
 class _ConvertNoteRequest implements ConvertNoteRequest {
-  const _ConvertNoteRequest({@JsonKey(name: 'start_date') required this.startDate, @JsonKey(name: 'end_date') required this.endDate, this.title, this.priority, @JsonKey(name: 'department_id') this.departmentId, @JsonKey(name: 'assignee_account_ids')  List<String>? assigneeAccountIds}): _assigneeAccountIds = assigneeAccountIds;
+  const _ConvertNoteRequest({@DateOnlyConverter()@JsonKey(name: 'start_date') required this.startDate, @DateOnlyConverter()@JsonKey(name: 'end_date') required this.endDate, this.title, this.priority, @JsonKey(name: 'department_id') this.departmentId, @JsonKey(name: 'assignee_account_ids')  List<String>? assigneeAccountIds}): _assigneeAccountIds = assigneeAccountIds;
   factory _ConvertNoteRequest.fromJson(Map<String, dynamic> json) => _$ConvertNoteRequestFromJson(json);
 
 /// Zorunlu; bitişten sonra olamaz ve bugünden önce olamaz.
-@override@JsonKey(name: 'start_date') final  DateTime startDate;
+@override@DateOnlyConverter()@JsonKey(name: 'start_date') final  DateTime startDate;
 /// Zorunlu; başlangıçtan önce olamaz.
-@override@JsonKey(name: 'end_date') final  DateTime endDate;
+@override@DateOnlyConverter()@JsonKey(name: 'end_date') final  DateTime endDate;
 /// Boşsa notun ilk 100 karakteri.
 @override final  String? title;
 /// Gönderilmezse `orta`; boş dizge de `orta` sayılır.
@@ -281,7 +281,7 @@ abstract mixin class _$ConvertNoteRequestCopyWith<$Res> implements $ConvertNoteR
   factory _$ConvertNoteRequestCopyWith(_ConvertNoteRequest value, $Res Function(_ConvertNoteRequest) _then) = __$ConvertNoteRequestCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'start_date') DateTime startDate,@JsonKey(name: 'end_date') DateTime endDate, String? title, ConvertNoteRequestPriority? priority,@JsonKey(name: 'department_id') String? departmentId,@JsonKey(name: 'assignee_account_ids') List<String>? assigneeAccountIds
+@DateOnlyConverter()@JsonKey(name: 'start_date') DateTime startDate,@DateOnlyConverter()@JsonKey(name: 'end_date') DateTime endDate, String? title, ConvertNoteRequestPriority? priority,@JsonKey(name: 'department_id') String? departmentId,@JsonKey(name: 'assignee_account_ids') List<String>? assigneeAccountIds
 });
 
 

@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../date_only.dart';
+
 import 'transition_result_actor.dart';
 
 part 'transition_result.freezed.dart';
@@ -16,7 +18,7 @@ abstract class TransitionResult with _$TransitionResult {
     required String from,
     required String to,
     required TransitionResultActor actor,
-    @JsonKey(name: 'end_on') DateTime? endOn,
+    @DateOnlyConverter() @JsonKey(name: 'end_on') DateTime? endOn,
   }) = _TransitionResult;
 
   factory TransitionResult.fromJson(Map<String, Object?> json) =>

@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../date_only.dart';
+
 import 'workload_task_priority.dart';
 
 part 'workload_task.freezed.dart';
@@ -16,9 +18,11 @@ abstract class WorkloadTask with _$WorkloadTask {
     required String title,
     required String status,
     required WorkloadTaskPriority priority,
-    @JsonKey(name: 'start_on') required DateTime startOn,
-    @JsonKey(name: 'end_on') required DateTime endOn,
-    @JsonKey(name: 'completed_on') required DateTime? completedOn,
+    @DateOnlyConverter() @JsonKey(name: 'start_on') required DateTime startOn,
+    @DateOnlyConverter() @JsonKey(name: 'end_on') required DateTime endOn,
+    @DateOnlyConverter()
+    @JsonKey(name: 'completed_on')
+    required DateTime? completedOn,
     @JsonKey(name: 'department_id') required String departmentId,
     @JsonKey(name: 'department_name') required String departmentName,
     @JsonKey(name: 'is_overdue') required bool isOverdue,

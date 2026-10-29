@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../date_only.dart';
+
 import 'report_person.dart';
 import 'report_task_priority.dart';
 
@@ -19,10 +21,14 @@ abstract class ReportTask with _$ReportTask {
     @JsonKey(name: 'department_name') required String departmentName,
     required String status,
     required ReportTaskPriority priority,
-    @JsonKey(name: 'start_on') required DateTime startOn,
-    @JsonKey(name: 'end_on') required DateTime endOn,
-    @JsonKey(name: 'planned_end_on') required DateTime? plannedEndOn,
-    @JsonKey(name: 'completed_on') required DateTime? completedOn,
+    @DateOnlyConverter() @JsonKey(name: 'start_on') required DateTime startOn,
+    @DateOnlyConverter() @JsonKey(name: 'end_on') required DateTime endOn,
+    @DateOnlyConverter()
+    @JsonKey(name: 'planned_end_on')
+    required DateTime? plannedEndOn,
+    @DateOnlyConverter()
+    @JsonKey(name: 'completed_on')
+    required DateTime? completedOn,
     @JsonKey(name: 'created_by') required ReportPerson createdBy,
     required List<ReportPerson> assignees,
     @JsonKey(name: 'is_overdue') required bool isOverdue,

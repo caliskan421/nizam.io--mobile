@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DateChangeRequest {
 
-@JsonKey(name: 'request_id') String get requestId;@JsonKey(name: 'work_item_id') String get workItemId; DateChangeRequestStatus get status;@JsonKey(name: 'old_start_on') DateTime get oldStartOn;@JsonKey(name: 'new_start_on') DateTime get newStartOn;@JsonKey(name: 'old_end_on') DateTime get oldEndOn;@JsonKey(name: 'new_end_on') DateTime get newEndOn; String? get reason;
+@JsonKey(name: 'request_id') String get requestId;@JsonKey(name: 'work_item_id') String get workItemId; DateChangeRequestStatus get status;@DateOnlyConverter()@JsonKey(name: 'old_start_on') DateTime get oldStartOn;@DateOnlyConverter()@JsonKey(name: 'new_start_on') DateTime get newStartOn;@DateOnlyConverter()@JsonKey(name: 'old_end_on') DateTime get oldEndOn;@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime get newEndOn; String? get reason;
 /// Create a copy of DateChangeRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $DateChangeRequestCopyWith<$Res>  {
   factory $DateChangeRequestCopyWith(DateChangeRequest value, $Res Function(DateChangeRequest) _then) = _$DateChangeRequestCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'request_id') String requestId,@JsonKey(name: 'work_item_id') String workItemId, DateChangeRequestStatus status,@JsonKey(name: 'old_start_on') DateTime oldStartOn,@JsonKey(name: 'new_start_on') DateTime newStartOn,@JsonKey(name: 'old_end_on') DateTime oldEndOn,@JsonKey(name: 'new_end_on') DateTime newEndOn, String? reason
+@JsonKey(name: 'request_id') String requestId,@JsonKey(name: 'work_item_id') String workItemId, DateChangeRequestStatus status,@DateOnlyConverter()@JsonKey(name: 'old_start_on') DateTime oldStartOn,@DateOnlyConverter()@JsonKey(name: 'new_start_on') DateTime newStartOn,@DateOnlyConverter()@JsonKey(name: 'old_end_on') DateTime oldEndOn,@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime newEndOn, String? reason
 });
 
 
@@ -166,7 +166,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'request_id')  String requestId, @JsonKey(name: 'work_item_id')  String workItemId,  DateChangeRequestStatus status, @JsonKey(name: 'old_start_on')  DateTime oldStartOn, @JsonKey(name: 'new_start_on')  DateTime newStartOn, @JsonKey(name: 'old_end_on')  DateTime oldEndOn, @JsonKey(name: 'new_end_on')  DateTime newEndOn,  String? reason)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'request_id')  String requestId, @JsonKey(name: 'work_item_id')  String workItemId,  DateChangeRequestStatus status, @DateOnlyConverter()@JsonKey(name: 'old_start_on')  DateTime oldStartOn, @DateOnlyConverter()@JsonKey(name: 'new_start_on')  DateTime newStartOn, @DateOnlyConverter()@JsonKey(name: 'old_end_on')  DateTime oldEndOn, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn,  String? reason)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DateChangeRequest() when $default != null:
 return $default(_that.requestId,_that.workItemId,_that.status,_that.oldStartOn,_that.newStartOn,_that.oldEndOn,_that.newEndOn,_that.reason);case _:
@@ -187,7 +187,7 @@ return $default(_that.requestId,_that.workItemId,_that.status,_that.oldStartOn,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'request_id')  String requestId, @JsonKey(name: 'work_item_id')  String workItemId,  DateChangeRequestStatus status, @JsonKey(name: 'old_start_on')  DateTime oldStartOn, @JsonKey(name: 'new_start_on')  DateTime newStartOn, @JsonKey(name: 'old_end_on')  DateTime oldEndOn, @JsonKey(name: 'new_end_on')  DateTime newEndOn,  String? reason)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'request_id')  String requestId, @JsonKey(name: 'work_item_id')  String workItemId,  DateChangeRequestStatus status, @DateOnlyConverter()@JsonKey(name: 'old_start_on')  DateTime oldStartOn, @DateOnlyConverter()@JsonKey(name: 'new_start_on')  DateTime newStartOn, @DateOnlyConverter()@JsonKey(name: 'old_end_on')  DateTime oldEndOn, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn,  String? reason)  $default,) {final _that = this;
 switch (_that) {
 case _DateChangeRequest():
 return $default(_that.requestId,_that.workItemId,_that.status,_that.oldStartOn,_that.newStartOn,_that.oldEndOn,_that.newEndOn,_that.reason);case _:
@@ -207,7 +207,7 @@ return $default(_that.requestId,_that.workItemId,_that.status,_that.oldStartOn,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'request_id')  String requestId, @JsonKey(name: 'work_item_id')  String workItemId,  DateChangeRequestStatus status, @JsonKey(name: 'old_start_on')  DateTime oldStartOn, @JsonKey(name: 'new_start_on')  DateTime newStartOn, @JsonKey(name: 'old_end_on')  DateTime oldEndOn, @JsonKey(name: 'new_end_on')  DateTime newEndOn,  String? reason)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'request_id')  String requestId, @JsonKey(name: 'work_item_id')  String workItemId,  DateChangeRequestStatus status, @DateOnlyConverter()@JsonKey(name: 'old_start_on')  DateTime oldStartOn, @DateOnlyConverter()@JsonKey(name: 'new_start_on')  DateTime newStartOn, @DateOnlyConverter()@JsonKey(name: 'old_end_on')  DateTime oldEndOn, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn,  String? reason)?  $default,) {final _that = this;
 switch (_that) {
 case _DateChangeRequest() when $default != null:
 return $default(_that.requestId,_that.workItemId,_that.status,_that.oldStartOn,_that.newStartOn,_that.oldEndOn,_that.newEndOn,_that.reason);case _:
@@ -222,16 +222,16 @@ return $default(_that.requestId,_that.workItemId,_that.status,_that.oldStartOn,_
 @JsonSerializable()
 
 class _DateChangeRequest implements DateChangeRequest {
-  const _DateChangeRequest({@JsonKey(name: 'request_id') required this.requestId, @JsonKey(name: 'work_item_id') required this.workItemId, required this.status, @JsonKey(name: 'old_start_on') required this.oldStartOn, @JsonKey(name: 'new_start_on') required this.newStartOn, @JsonKey(name: 'old_end_on') required this.oldEndOn, @JsonKey(name: 'new_end_on') required this.newEndOn, this.reason});
+  const _DateChangeRequest({@JsonKey(name: 'request_id') required this.requestId, @JsonKey(name: 'work_item_id') required this.workItemId, required this.status, @DateOnlyConverter()@JsonKey(name: 'old_start_on') required this.oldStartOn, @DateOnlyConverter()@JsonKey(name: 'new_start_on') required this.newStartOn, @DateOnlyConverter()@JsonKey(name: 'old_end_on') required this.oldEndOn, @DateOnlyConverter()@JsonKey(name: 'new_end_on') required this.newEndOn, this.reason});
   factory _DateChangeRequest.fromJson(Map<String, dynamic> json) => _$DateChangeRequestFromJson(json);
 
 @override@JsonKey(name: 'request_id') final  String requestId;
 @override@JsonKey(name: 'work_item_id') final  String workItemId;
 @override final  DateChangeRequestStatus status;
-@override@JsonKey(name: 'old_start_on') final  DateTime oldStartOn;
-@override@JsonKey(name: 'new_start_on') final  DateTime newStartOn;
-@override@JsonKey(name: 'old_end_on') final  DateTime oldEndOn;
-@override@JsonKey(name: 'new_end_on') final  DateTime newEndOn;
+@override@DateOnlyConverter()@JsonKey(name: 'old_start_on') final  DateTime oldStartOn;
+@override@DateOnlyConverter()@JsonKey(name: 'new_start_on') final  DateTime newStartOn;
+@override@DateOnlyConverter()@JsonKey(name: 'old_end_on') final  DateTime oldEndOn;
+@override@DateOnlyConverter()@JsonKey(name: 'new_end_on') final  DateTime newEndOn;
 @override final  String? reason;
 
 /// Create a copy of DateChangeRequest
@@ -269,7 +269,7 @@ abstract mixin class _$DateChangeRequestCopyWith<$Res> implements $DateChangeReq
   factory _$DateChangeRequestCopyWith(_DateChangeRequest value, $Res Function(_DateChangeRequest) _then) = __$DateChangeRequestCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'request_id') String requestId,@JsonKey(name: 'work_item_id') String workItemId, DateChangeRequestStatus status,@JsonKey(name: 'old_start_on') DateTime oldStartOn,@JsonKey(name: 'new_start_on') DateTime newStartOn,@JsonKey(name: 'old_end_on') DateTime oldEndOn,@JsonKey(name: 'new_end_on') DateTime newEndOn, String? reason
+@JsonKey(name: 'request_id') String requestId,@JsonKey(name: 'work_item_id') String workItemId, DateChangeRequestStatus status,@DateOnlyConverter()@JsonKey(name: 'old_start_on') DateTime oldStartOn,@DateOnlyConverter()@JsonKey(name: 'new_start_on') DateTime newStartOn,@DateOnlyConverter()@JsonKey(name: 'old_end_on') DateTime oldEndOn,@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime newEndOn, String? reason
 });
 
 

@@ -101,22 +101,22 @@ class _RecordsClient implements RecordsClient {
   }
 
   @override
-  Stream<String> downloadFile({
+  Future<HttpResponse<List<int>>> downloadFile({
     required String id,
     Map<String, dynamic>? extras = RecordsClient.downloadFileOpenapiExtras,
-  }) async* {
+  }) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<String>(
+    final _options = _setStreamType<HttpResponse<List<int>>>(
       Options(
             method: 'GET',
             headers: _headers,
             extra: _extra,
-            responseType: ResponseType.stream,
+            responseType: ResponseType.bytes,
           )
           .compose(
             _dio.options,
@@ -126,11 +126,16 @@ class _RecordsClient implements RecordsClient {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = _dio.fetch<ResponseBody>(_options);
-    final _value = _result.asStream().asyncExpand(
-      (response) => utf8.decoder.bind(response.data!.stream),
-    );
-    yield* _value;
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<int> _value;
+    try {
+      _value = _result.data!.cast<int>();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
@@ -338,22 +343,22 @@ class _RecordsClient implements RecordsClient {
   }
 
   @override
-  Stream<String> archiveFolderZip({
+  Future<HttpResponse<List<int>>> archiveFolderZip({
     required String id,
     Map<String, dynamic>? extras = RecordsClient.archiveFolderZipOpenapiExtras,
-  }) async* {
+  }) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<String>(
+    final _options = _setStreamType<HttpResponse<List<int>>>(
       Options(
             method: 'GET',
             headers: _headers,
             extra: _extra,
-            responseType: ResponseType.stream,
+            responseType: ResponseType.bytes,
           )
           .compose(
             _dio.options,
@@ -363,31 +368,36 @@ class _RecordsClient implements RecordsClient {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = _dio.fetch<ResponseBody>(_options);
-    final _value = _result.asStream().asyncExpand(
-      (response) => utf8.decoder.bind(response.data!.stream),
-    );
-    yield* _value;
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<int> _value;
+    try {
+      _value = _result.data!.cast<int>();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
-  Stream<String> archiveSelectionZip({
+  Future<HttpResponse<List<int>>> archiveSelectionZip({
     required String fileIds,
     Map<String, dynamic>? extras =
         RecordsClient.archiveSelectionZipOpenapiExtras,
-  }) async* {
+  }) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{r'file_ids': fileIds};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<String>(
+    final _options = _setStreamType<HttpResponse<List<int>>>(
       Options(
             method: 'GET',
             headers: _headers,
             extra: _extra,
-            responseType: ResponseType.stream,
+            responseType: ResponseType.bytes,
           )
           .compose(
             _dio.options,
@@ -397,29 +407,34 @@ class _RecordsClient implements RecordsClient {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = _dio.fetch<ResponseBody>(_options);
-    final _value = _result.asStream().asyncExpand(
-      (response) => utf8.decoder.bind(response.data!.stream),
-    );
-    yield* _value;
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<int> _value;
+    try {
+      _value = _result.data!.cast<int>();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
-  Stream<String> archiveFullZip({
+  Future<HttpResponse<List<int>>> archiveFullZip({
     Map<String, dynamic>? extras = RecordsClient.archiveFullZipOpenapiExtras,
-  }) async* {
+  }) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<String>(
+    final _options = _setStreamType<HttpResponse<List<int>>>(
       Options(
             method: 'GET',
             headers: _headers,
             extra: _extra,
-            responseType: ResponseType.stream,
+            responseType: ResponseType.bytes,
           )
           .compose(
             _dio.options,
@@ -429,11 +444,16 @@ class _RecordsClient implements RecordsClient {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = _dio.fetch<ResponseBody>(_options);
-    final _value = _result.asStream().asyncExpand(
-      (response) => utf8.decoder.bind(response.data!.stream),
-    );
-    yield* _value;
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<int> _value;
+    try {
+      _value = _result.data!.cast<int>();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

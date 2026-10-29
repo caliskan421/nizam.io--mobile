@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../date_only.dart';
+
 import 'work_item_priority.dart';
 import 'work_item_status.dart';
 
@@ -27,8 +29,10 @@ abstract class WorkItem with _$WorkItem {
     @JsonKey(name: 'days_late') required int daysLate,
     @JsonKey(name: 'is_completed_early') required bool isCompletedEarly,
     @JsonKey(name: 'days_early') required int daysEarly,
-    @JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,
-    @JsonKey(name: 'completed_on') DateTime? completedOn,
+    @DateOnlyConverter()
+    @JsonKey(name: 'planned_end_on')
+    DateTime? plannedEndOn,
+    @DateOnlyConverter() @JsonKey(name: 'completed_on') DateTime? completedOn,
   }) = _WorkItem;
 
   factory WorkItem.fromJson(Map<String, Object?> json) =>

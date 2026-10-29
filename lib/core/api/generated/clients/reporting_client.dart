@@ -180,8 +180,8 @@ abstract class ReportingClient {
 
   /// Seçili üyelerin iş yükü PDF'i (boş liste bütün üyeler; dışa aktarım kotası).
   @POST('/v1/reports/workload')
-  @DioResponseType(ResponseType.stream)
-  Stream<String> reportWorkloadPdf({
+  @DioResponseType(ResponseType.bytes)
+  Future<HttpResponse<List<int>>> reportWorkloadPdf({
     @Body() required WorkloadPdfRequest body,
     @Extras()
     Map<String, dynamic>? extras =
@@ -190,8 +190,8 @@ abstract class ReportingClient {
 
   /// Görev PDF raporu (dışa aktarım kotası).
   @GET('/v1/reports/tasks/{id}/pdf')
-  @DioResponseType(ResponseType.stream)
-  Stream<String> reportTaskPdf({
+  @DioResponseType(ResponseType.bytes)
+  Future<HttpResponse<List<int>>> reportTaskPdf({
     @Path('id') required String id,
     @Extras()
     Map<String, dynamic>? extras = ReportingClient.reportTaskPdfOpenapiExtras,
@@ -199,8 +199,8 @@ abstract class ReportingClient {
 
   /// Toplantı PDF raporu (dışa aktarım kotası).
   @GET('/v1/reports/meetings/{id}/pdf')
-  @DioResponseType(ResponseType.stream)
-  Stream<String> reportMeetingPdf({
+  @DioResponseType(ResponseType.bytes)
+  Future<HttpResponse<List<int>>> reportMeetingPdf({
     @Path('id') required String id,
     @Extras()
     Map<String, dynamic>? extras =
@@ -216,8 +216,8 @@ abstract class ReportingClient {
 
   /// Dönem raporu PDF'i (dışa aktarım kotası).
   @GET('/v1/reports/season/pdf')
-  @DioResponseType(ResponseType.stream)
-  Stream<String> reportSeasonPdf({
+  @DioResponseType(ResponseType.bytes)
+  Future<HttpResponse<List<int>>> reportSeasonPdf({
     @Extras()
     Map<String, dynamic>? extras = ReportingClient.reportSeasonPdfOpenapiExtras,
   });

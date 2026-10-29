@@ -9,11 +9,13 @@ part of 'extend_result.dart';
 _ExtendResult _$ExtendResultFromJson(Map<String, dynamic> json) =>
     _ExtendResult(
       cascadeCount: (json['cascade_count'] as num).toInt(),
-      newEndOn: DateTime.parse(json['new_end_on'] as String),
+      newEndOn: const DateOnlyConverter().fromJson(
+        json['new_end_on'] as String,
+      ),
     );
 
 Map<String, dynamic> _$ExtendResultToJson(_ExtendResult instance) =>
     <String, dynamic>{
       'cascade_count': instance.cascadeCount,
-      'new_end_on': instance.newEndOn.toIso8601String(),
+      'new_end_on': const DateOnlyConverter().toJson(instance.newEndOn),
     };

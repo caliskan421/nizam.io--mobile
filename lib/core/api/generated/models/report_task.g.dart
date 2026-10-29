@@ -13,14 +13,16 @@ _ReportTask _$ReportTaskFromJson(Map<String, dynamic> json) => _ReportTask(
   departmentName: json['department_name'] as String,
   status: json['status'] as String,
   priority: ReportTaskPriority.fromJson(json['priority'] as String),
-  startOn: DateTime.parse(json['start_on'] as String),
-  endOn: DateTime.parse(json['end_on'] as String),
-  plannedEndOn: json['planned_end_on'] == null
-      ? null
-      : DateTime.parse(json['planned_end_on'] as String),
-  completedOn: json['completed_on'] == null
-      ? null
-      : DateTime.parse(json['completed_on'] as String),
+  startOn: const DateOnlyConverter().fromJson(json['start_on'] as String),
+  endOn: const DateOnlyConverter().fromJson(json['end_on'] as String),
+  plannedEndOn: _$JsonConverterFromJson<String, DateTime>(
+    json['planned_end_on'],
+    const DateOnlyConverter().fromJson,
+  ),
+  completedOn: _$JsonConverterFromJson<String, DateTime>(
+    json['completed_on'],
+    const DateOnlyConverter().fromJson,
+  ),
   createdBy: ReportPerson.fromJson(json['created_by'] as Map<String, dynamic>),
   assignees: (json['assignees'] as List<dynamic>)
       .map((e) => ReportPerson.fromJson(e as Map<String, dynamic>))
@@ -45,10 +47,16 @@ Map<String, dynamic> _$ReportTaskToJson(_ReportTask instance) =>
       'department_name': instance.departmentName,
       'status': instance.status,
       'priority': _$ReportTaskPriorityEnumMap[instance.priority]!,
-      'start_on': instance.startOn.toIso8601String(),
-      'end_on': instance.endOn.toIso8601String(),
-      'planned_end_on': ?instance.plannedEndOn?.toIso8601String(),
-      'completed_on': ?instance.completedOn?.toIso8601String(),
+      'start_on': const DateOnlyConverter().toJson(instance.startOn),
+      'end_on': const DateOnlyConverter().toJson(instance.endOn),
+      'planned_end_on': ?_$JsonConverterToJson<String, DateTime>(
+        instance.plannedEndOn,
+        const DateOnlyConverter().toJson,
+      ),
+      'completed_on': ?_$JsonConverterToJson<String, DateTime>(
+        instance.completedOn,
+        const DateOnlyConverter().toJson,
+      ),
       'created_by': instance.createdBy.toJson(),
       'assignees': instance.assignees.map((e) => e.toJson()).toList(),
       'is_overdue': instance.isOverdue,
@@ -63,6 +71,11 @@ Map<String, dynamic> _$ReportTaskToJson(_ReportTask instance) =>
       'created_at': instance.createdAt.toIso8601String(),
     };
 
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
 const _$ReportTaskPriorityEnumMap = {
   ReportTaskPriority.dusuk: 'dusuk',
   ReportTaskPriority.orta: 'orta',
@@ -70,3 +83,8 @@ const _$ReportTaskPriorityEnumMap = {
   ReportTaskPriority.acil: 'acil',
   ReportTaskPriority.$unknown: r'$unknown',
 };
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

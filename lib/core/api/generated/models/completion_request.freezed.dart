@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CompletionRequest {
 
-@JsonKey(name: 'completed_on') DateTime get completedOn;
+@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime get completedOn;
 /// Create a copy of CompletionRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $CompletionRequestCopyWith<$Res>  {
   factory $CompletionRequestCopyWith(CompletionRequest value, $Res Function(CompletionRequest) _then) = _$CompletionRequestCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'completed_on') DateTime completedOn
+@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime completedOn
 });
 
 
@@ -159,7 +159,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'completed_on')  DateTime completedOn)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@DateOnlyConverter()@JsonKey(name: 'completed_on')  DateTime completedOn)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CompletionRequest() when $default != null:
 return $default(_that.completedOn);case _:
@@ -180,7 +180,7 @@ return $default(_that.completedOn);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'completed_on')  DateTime completedOn)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@DateOnlyConverter()@JsonKey(name: 'completed_on')  DateTime completedOn)  $default,) {final _that = this;
 switch (_that) {
 case _CompletionRequest():
 return $default(_that.completedOn);case _:
@@ -200,7 +200,7 @@ return $default(_that.completedOn);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'completed_on')  DateTime completedOn)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@DateOnlyConverter()@JsonKey(name: 'completed_on')  DateTime completedOn)?  $default,) {final _that = this;
 switch (_that) {
 case _CompletionRequest() when $default != null:
 return $default(_that.completedOn);case _:
@@ -215,10 +215,10 @@ return $default(_that.completedOn);case _:
 @JsonSerializable()
 
 class _CompletionRequest implements CompletionRequest {
-  const _CompletionRequest({@JsonKey(name: 'completed_on') required this.completedOn});
+  const _CompletionRequest({@DateOnlyConverter()@JsonKey(name: 'completed_on') required this.completedOn});
   factory _CompletionRequest.fromJson(Map<String, dynamic> json) => _$CompletionRequestFromJson(json);
 
-@override@JsonKey(name: 'completed_on') final  DateTime completedOn;
+@override@DateOnlyConverter()@JsonKey(name: 'completed_on') final  DateTime completedOn;
 
 /// Create a copy of CompletionRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -255,7 +255,7 @@ abstract mixin class _$CompletionRequestCopyWith<$Res> implements $CompletionReq
   factory _$CompletionRequestCopyWith(_CompletionRequest value, $Res Function(_CompletionRequest) _then) = __$CompletionRequestCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'completed_on') DateTime completedOn
+@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime completedOn
 });
 
 

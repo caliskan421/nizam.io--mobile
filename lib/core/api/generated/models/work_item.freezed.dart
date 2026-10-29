@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WorkItem {
 
-@JsonKey(name: 'work_item_id') String get workItemId;@JsonKey(name: 'program_id') String get programId;@JsonKey(name: 'department_id') String get departmentId; String get title; WorkItemPriority get priority; WorkItemStatus get status;@JsonKey(name: 'assignee_account_ids') List<String> get assigneeAccountIds;@JsonKey(name: 'is_overdue') bool get isOverdue;@JsonKey(name: 'days_overdue') int get daysOverdue;@JsonKey(name: 'is_completed_late') bool get isCompletedLate;@JsonKey(name: 'days_late') int get daysLate;@JsonKey(name: 'is_completed_early') bool get isCompletedEarly;@JsonKey(name: 'days_early') int get daysEarly;@JsonKey(name: 'planned_end_on') DateTime? get plannedEndOn;@JsonKey(name: 'completed_on') DateTime? get completedOn;
+@JsonKey(name: 'work_item_id') String get workItemId;@JsonKey(name: 'program_id') String get programId;@JsonKey(name: 'department_id') String get departmentId; String get title; WorkItemPriority get priority; WorkItemStatus get status;@JsonKey(name: 'assignee_account_ids') List<String> get assigneeAccountIds;@JsonKey(name: 'is_overdue') bool get isOverdue;@JsonKey(name: 'days_overdue') int get daysOverdue;@JsonKey(name: 'is_completed_late') bool get isCompletedLate;@JsonKey(name: 'days_late') int get daysLate;@JsonKey(name: 'is_completed_early') bool get isCompletedEarly;@JsonKey(name: 'days_early') int get daysEarly;@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? get plannedEndOn;@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime? get completedOn;
 /// Create a copy of WorkItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $WorkItemCopyWith<$Res>  {
   factory $WorkItemCopyWith(WorkItem value, $Res Function(WorkItem) _then) = _$WorkItemCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'program_id') String programId,@JsonKey(name: 'department_id') String departmentId, String title, WorkItemPriority priority, WorkItemStatus status,@JsonKey(name: 'assignee_account_ids') List<String> assigneeAccountIds,@JsonKey(name: 'is_overdue') bool isOverdue,@JsonKey(name: 'days_overdue') int daysOverdue,@JsonKey(name: 'is_completed_late') bool isCompletedLate,@JsonKey(name: 'days_late') int daysLate,@JsonKey(name: 'is_completed_early') bool isCompletedEarly,@JsonKey(name: 'days_early') int daysEarly,@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@JsonKey(name: 'completed_on') DateTime? completedOn
+@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'program_id') String programId,@JsonKey(name: 'department_id') String departmentId, String title, WorkItemPriority priority, WorkItemStatus status,@JsonKey(name: 'assignee_account_ids') List<String> assigneeAccountIds,@JsonKey(name: 'is_overdue') bool isOverdue,@JsonKey(name: 'days_overdue') int daysOverdue,@JsonKey(name: 'is_completed_late') bool isCompletedLate,@JsonKey(name: 'days_late') int daysLate,@JsonKey(name: 'is_completed_early') bool isCompletedEarly,@JsonKey(name: 'days_early') int daysEarly,@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime? completedOn
 });
 
 
@@ -173,7 +173,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'department_id')  String departmentId,  String title,  WorkItemPriority priority,  WorkItemStatus status, @JsonKey(name: 'assignee_account_ids')  List<String> assigneeAccountIds, @JsonKey(name: 'is_overdue')  bool isOverdue, @JsonKey(name: 'days_overdue')  int daysOverdue, @JsonKey(name: 'is_completed_late')  bool isCompletedLate, @JsonKey(name: 'days_late')  int daysLate, @JsonKey(name: 'is_completed_early')  bool isCompletedEarly, @JsonKey(name: 'days_early')  int daysEarly, @JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completed_on')  DateTime? completedOn)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'department_id')  String departmentId,  String title,  WorkItemPriority priority,  WorkItemStatus status, @JsonKey(name: 'assignee_account_ids')  List<String> assigneeAccountIds, @JsonKey(name: 'is_overdue')  bool isOverdue, @JsonKey(name: 'days_overdue')  int daysOverdue, @JsonKey(name: 'is_completed_late')  bool isCompletedLate, @JsonKey(name: 'days_late')  int daysLate, @JsonKey(name: 'is_completed_early')  bool isCompletedEarly, @JsonKey(name: 'days_early')  int daysEarly, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @DateOnlyConverter()@JsonKey(name: 'completed_on')  DateTime? completedOn)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WorkItem() when $default != null:
 return $default(_that.workItemId,_that.programId,_that.departmentId,_that.title,_that.priority,_that.status,_that.assigneeAccountIds,_that.isOverdue,_that.daysOverdue,_that.isCompletedLate,_that.daysLate,_that.isCompletedEarly,_that.daysEarly,_that.plannedEndOn,_that.completedOn);case _:
@@ -194,7 +194,7 @@ return $default(_that.workItemId,_that.programId,_that.departmentId,_that.title,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'department_id')  String departmentId,  String title,  WorkItemPriority priority,  WorkItemStatus status, @JsonKey(name: 'assignee_account_ids')  List<String> assigneeAccountIds, @JsonKey(name: 'is_overdue')  bool isOverdue, @JsonKey(name: 'days_overdue')  int daysOverdue, @JsonKey(name: 'is_completed_late')  bool isCompletedLate, @JsonKey(name: 'days_late')  int daysLate, @JsonKey(name: 'is_completed_early')  bool isCompletedEarly, @JsonKey(name: 'days_early')  int daysEarly, @JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completed_on')  DateTime? completedOn)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'department_id')  String departmentId,  String title,  WorkItemPriority priority,  WorkItemStatus status, @JsonKey(name: 'assignee_account_ids')  List<String> assigneeAccountIds, @JsonKey(name: 'is_overdue')  bool isOverdue, @JsonKey(name: 'days_overdue')  int daysOverdue, @JsonKey(name: 'is_completed_late')  bool isCompletedLate, @JsonKey(name: 'days_late')  int daysLate, @JsonKey(name: 'is_completed_early')  bool isCompletedEarly, @JsonKey(name: 'days_early')  int daysEarly, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @DateOnlyConverter()@JsonKey(name: 'completed_on')  DateTime? completedOn)  $default,) {final _that = this;
 switch (_that) {
 case _WorkItem():
 return $default(_that.workItemId,_that.programId,_that.departmentId,_that.title,_that.priority,_that.status,_that.assigneeAccountIds,_that.isOverdue,_that.daysOverdue,_that.isCompletedLate,_that.daysLate,_that.isCompletedEarly,_that.daysEarly,_that.plannedEndOn,_that.completedOn);case _:
@@ -214,7 +214,7 @@ return $default(_that.workItemId,_that.programId,_that.departmentId,_that.title,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'department_id')  String departmentId,  String title,  WorkItemPriority priority,  WorkItemStatus status, @JsonKey(name: 'assignee_account_ids')  List<String> assigneeAccountIds, @JsonKey(name: 'is_overdue')  bool isOverdue, @JsonKey(name: 'days_overdue')  int daysOverdue, @JsonKey(name: 'is_completed_late')  bool isCompletedLate, @JsonKey(name: 'days_late')  int daysLate, @JsonKey(name: 'is_completed_early')  bool isCompletedEarly, @JsonKey(name: 'days_early')  int daysEarly, @JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completed_on')  DateTime? completedOn)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'department_id')  String departmentId,  String title,  WorkItemPriority priority,  WorkItemStatus status, @JsonKey(name: 'assignee_account_ids')  List<String> assigneeAccountIds, @JsonKey(name: 'is_overdue')  bool isOverdue, @JsonKey(name: 'days_overdue')  int daysOverdue, @JsonKey(name: 'is_completed_late')  bool isCompletedLate, @JsonKey(name: 'days_late')  int daysLate, @JsonKey(name: 'is_completed_early')  bool isCompletedEarly, @JsonKey(name: 'days_early')  int daysEarly, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @DateOnlyConverter()@JsonKey(name: 'completed_on')  DateTime? completedOn)?  $default,) {final _that = this;
 switch (_that) {
 case _WorkItem() when $default != null:
 return $default(_that.workItemId,_that.programId,_that.departmentId,_that.title,_that.priority,_that.status,_that.assigneeAccountIds,_that.isOverdue,_that.daysOverdue,_that.isCompletedLate,_that.daysLate,_that.isCompletedEarly,_that.daysEarly,_that.plannedEndOn,_that.completedOn);case _:
@@ -229,7 +229,7 @@ return $default(_that.workItemId,_that.programId,_that.departmentId,_that.title,
 @JsonSerializable()
 
 class _WorkItem implements WorkItem {
-  const _WorkItem({@JsonKey(name: 'work_item_id') required this.workItemId, @JsonKey(name: 'program_id') required this.programId, @JsonKey(name: 'department_id') required this.departmentId, required this.title, required this.priority, required this.status, @JsonKey(name: 'assignee_account_ids') required  List<String> assigneeAccountIds, @JsonKey(name: 'is_overdue') required this.isOverdue, @JsonKey(name: 'days_overdue') required this.daysOverdue, @JsonKey(name: 'is_completed_late') required this.isCompletedLate, @JsonKey(name: 'days_late') required this.daysLate, @JsonKey(name: 'is_completed_early') required this.isCompletedEarly, @JsonKey(name: 'days_early') required this.daysEarly, @JsonKey(name: 'planned_end_on') this.plannedEndOn, @JsonKey(name: 'completed_on') this.completedOn}): _assigneeAccountIds = assigneeAccountIds;
+  const _WorkItem({@JsonKey(name: 'work_item_id') required this.workItemId, @JsonKey(name: 'program_id') required this.programId, @JsonKey(name: 'department_id') required this.departmentId, required this.title, required this.priority, required this.status, @JsonKey(name: 'assignee_account_ids') required  List<String> assigneeAccountIds, @JsonKey(name: 'is_overdue') required this.isOverdue, @JsonKey(name: 'days_overdue') required this.daysOverdue, @JsonKey(name: 'is_completed_late') required this.isCompletedLate, @JsonKey(name: 'days_late') required this.daysLate, @JsonKey(name: 'is_completed_early') required this.isCompletedEarly, @JsonKey(name: 'days_early') required this.daysEarly, @DateOnlyConverter()@JsonKey(name: 'planned_end_on') this.plannedEndOn, @DateOnlyConverter()@JsonKey(name: 'completed_on') this.completedOn}): _assigneeAccountIds = assigneeAccountIds;
   factory _WorkItem.fromJson(Map<String, dynamic> json) => _$WorkItemFromJson(json);
 
 @override@JsonKey(name: 'work_item_id') final  String workItemId;
@@ -251,8 +251,8 @@ class _WorkItem implements WorkItem {
 @override@JsonKey(name: 'days_late') final  int daysLate;
 @override@JsonKey(name: 'is_completed_early') final  bool isCompletedEarly;
 @override@JsonKey(name: 'days_early') final  int daysEarly;
-@override@JsonKey(name: 'planned_end_on') final  DateTime? plannedEndOn;
-@override@JsonKey(name: 'completed_on') final  DateTime? completedOn;
+@override@DateOnlyConverter()@JsonKey(name: 'planned_end_on') final  DateTime? plannedEndOn;
+@override@DateOnlyConverter()@JsonKey(name: 'completed_on') final  DateTime? completedOn;
 
 /// Create a copy of WorkItem
 /// with the given fields replaced by the non-null parameter values.
@@ -289,7 +289,7 @@ abstract mixin class _$WorkItemCopyWith<$Res> implements $WorkItemCopyWith<$Res>
   factory _$WorkItemCopyWith(_WorkItem value, $Res Function(_WorkItem) _then) = __$WorkItemCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'program_id') String programId,@JsonKey(name: 'department_id') String departmentId, String title, WorkItemPriority priority, WorkItemStatus status,@JsonKey(name: 'assignee_account_ids') List<String> assigneeAccountIds,@JsonKey(name: 'is_overdue') bool isOverdue,@JsonKey(name: 'days_overdue') int daysOverdue,@JsonKey(name: 'is_completed_late') bool isCompletedLate,@JsonKey(name: 'days_late') int daysLate,@JsonKey(name: 'is_completed_early') bool isCompletedEarly,@JsonKey(name: 'days_early') int daysEarly,@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@JsonKey(name: 'completed_on') DateTime? completedOn
+@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'program_id') String programId,@JsonKey(name: 'department_id') String departmentId, String title, WorkItemPriority priority, WorkItemStatus status,@JsonKey(name: 'assignee_account_ids') List<String> assigneeAccountIds,@JsonKey(name: 'is_overdue') bool isOverdue,@JsonKey(name: 'days_overdue') int daysOverdue,@JsonKey(name: 'is_completed_late') bool isCompletedLate,@JsonKey(name: 'days_late') int daysLate,@JsonKey(name: 'is_completed_early') bool isCompletedEarly,@JsonKey(name: 'days_early') int daysEarly,@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime? completedOn
 });
 
 

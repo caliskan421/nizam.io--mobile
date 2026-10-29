@@ -22,12 +22,14 @@ _WorkItem _$WorkItemFromJson(Map<String, dynamic> json) => _WorkItem(
   daysLate: (json['days_late'] as num).toInt(),
   isCompletedEarly: json['is_completed_early'] as bool,
   daysEarly: (json['days_early'] as num).toInt(),
-  plannedEndOn: json['planned_end_on'] == null
-      ? null
-      : DateTime.parse(json['planned_end_on'] as String),
-  completedOn: json['completed_on'] == null
-      ? null
-      : DateTime.parse(json['completed_on'] as String),
+  plannedEndOn: _$JsonConverterFromJson<String, DateTime>(
+    json['planned_end_on'],
+    const DateOnlyConverter().fromJson,
+  ),
+  completedOn: _$JsonConverterFromJson<String, DateTime>(
+    json['completed_on'],
+    const DateOnlyConverter().fromJson,
+  ),
 );
 
 Map<String, dynamic> _$WorkItemToJson(_WorkItem instance) => <String, dynamic>{
@@ -44,9 +46,20 @@ Map<String, dynamic> _$WorkItemToJson(_WorkItem instance) => <String, dynamic>{
   'days_late': instance.daysLate,
   'is_completed_early': instance.isCompletedEarly,
   'days_early': instance.daysEarly,
-  'planned_end_on': ?instance.plannedEndOn?.toIso8601String(),
-  'completed_on': ?instance.completedOn?.toIso8601String(),
+  'planned_end_on': ?_$JsonConverterToJson<String, DateTime>(
+    instance.plannedEndOn,
+    const DateOnlyConverter().toJson,
+  ),
+  'completed_on': ?_$JsonConverterToJson<String, DateTime>(
+    instance.completedOn,
+    const DateOnlyConverter().toJson,
+  ),
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
 
 const _$WorkItemPriorityEnumMap = {
   WorkItemPriority.dusuk: 'dusuk',
@@ -64,3 +77,8 @@ const _$WorkItemStatusEnumMap = {
   WorkItemStatus.tamamlandi: 'tamamlandi',
   WorkItemStatus.$unknown: r'$unknown',
 };
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

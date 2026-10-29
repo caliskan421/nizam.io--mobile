@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../date_only.dart';
+
 import 'update_work_item_request_priority.dart';
 
 part 'update_work_item_request.freezed.dart';
@@ -15,9 +17,11 @@ abstract class UpdateWorkItemRequest with _$UpdateWorkItemRequest {
     String? title,
     String? description,
     UpdateWorkItemRequestPriority? priority,
-    @JsonKey(name: 'start_on') DateTime? startOn,
-    @JsonKey(name: 'end_on') DateTime? endOn,
-    @JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,
+    @DateOnlyConverter() @JsonKey(name: 'start_on') DateTime? startOn,
+    @DateOnlyConverter() @JsonKey(name: 'end_on') DateTime? endOn,
+    @DateOnlyConverter()
+    @JsonKey(name: 'planned_end_on')
+    DateTime? plannedEndOn,
 
     /// Korumalı alan; dolu gönderilirse 422 work.input_invalid.
     @JsonKey(name: 'completed_on') String? completedOn,

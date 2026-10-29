@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$OverdueTask {
 
-@JsonKey(name: 'work_item_id') String get workItemId; String get title;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'department_name') String get departmentName; List<ReportPerson> get assignees;@JsonKey(name: 'due_on') DateTime get dueOn;@JsonKey(name: 'days_overdue') int get daysOverdue;
+@JsonKey(name: 'work_item_id') String get workItemId; String get title;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'department_name') String get departmentName; List<ReportPerson> get assignees;@DateOnlyConverter()@JsonKey(name: 'due_on') DateTime get dueOn;@JsonKey(name: 'days_overdue') int get daysOverdue;
 /// Create a copy of OverdueTask
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $OverdueTaskCopyWith<$Res>  {
   factory $OverdueTaskCopyWith(OverdueTask value, $Res Function(OverdueTask) _then) = _$OverdueTaskCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'work_item_id') String workItemId, String title,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'department_name') String departmentName, List<ReportPerson> assignees,@JsonKey(name: 'due_on') DateTime dueOn,@JsonKey(name: 'days_overdue') int daysOverdue
+@JsonKey(name: 'work_item_id') String workItemId, String title,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'department_name') String departmentName, List<ReportPerson> assignees,@DateOnlyConverter()@JsonKey(name: 'due_on') DateTime dueOn,@JsonKey(name: 'days_overdue') int daysOverdue
 });
 
 
@@ -165,7 +165,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName,  List<ReportPerson> assignees, @JsonKey(name: 'due_on')  DateTime dueOn, @JsonKey(name: 'days_overdue')  int daysOverdue)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName,  List<ReportPerson> assignees, @DateOnlyConverter()@JsonKey(name: 'due_on')  DateTime dueOn, @JsonKey(name: 'days_overdue')  int daysOverdue)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OverdueTask() when $default != null:
 return $default(_that.workItemId,_that.title,_that.departmentId,_that.departmentName,_that.assignees,_that.dueOn,_that.daysOverdue);case _:
@@ -186,7 +186,7 @@ return $default(_that.workItemId,_that.title,_that.departmentId,_that.department
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName,  List<ReportPerson> assignees, @JsonKey(name: 'due_on')  DateTime dueOn, @JsonKey(name: 'days_overdue')  int daysOverdue)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName,  List<ReportPerson> assignees, @DateOnlyConverter()@JsonKey(name: 'due_on')  DateTime dueOn, @JsonKey(name: 'days_overdue')  int daysOverdue)  $default,) {final _that = this;
 switch (_that) {
 case _OverdueTask():
 return $default(_that.workItemId,_that.title,_that.departmentId,_that.departmentName,_that.assignees,_that.dueOn,_that.daysOverdue);case _:
@@ -206,7 +206,7 @@ return $default(_that.workItemId,_that.title,_that.departmentId,_that.department
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName,  List<ReportPerson> assignees, @JsonKey(name: 'due_on')  DateTime dueOn, @JsonKey(name: 'days_overdue')  int daysOverdue)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName,  List<ReportPerson> assignees, @DateOnlyConverter()@JsonKey(name: 'due_on')  DateTime dueOn, @JsonKey(name: 'days_overdue')  int daysOverdue)?  $default,) {final _that = this;
 switch (_that) {
 case _OverdueTask() when $default != null:
 return $default(_that.workItemId,_that.title,_that.departmentId,_that.departmentName,_that.assignees,_that.dueOn,_that.daysOverdue);case _:
@@ -221,7 +221,7 @@ return $default(_that.workItemId,_that.title,_that.departmentId,_that.department
 @JsonSerializable()
 
 class _OverdueTask implements OverdueTask {
-  const _OverdueTask({@JsonKey(name: 'work_item_id') required this.workItemId, required this.title, @JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'department_name') required this.departmentName, required  List<ReportPerson> assignees, @JsonKey(name: 'due_on') required this.dueOn, @JsonKey(name: 'days_overdue') required this.daysOverdue}): _assignees = assignees;
+  const _OverdueTask({@JsonKey(name: 'work_item_id') required this.workItemId, required this.title, @JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'department_name') required this.departmentName, required  List<ReportPerson> assignees, @DateOnlyConverter()@JsonKey(name: 'due_on') required this.dueOn, @JsonKey(name: 'days_overdue') required this.daysOverdue}): _assignees = assignees;
   factory _OverdueTask.fromJson(Map<String, dynamic> json) => _$OverdueTaskFromJson(json);
 
 @override@JsonKey(name: 'work_item_id') final  String workItemId;
@@ -235,7 +235,7 @@ class _OverdueTask implements OverdueTask {
   return EqualUnmodifiableListView(_assignees);
 }
 
-@override@JsonKey(name: 'due_on') final  DateTime dueOn;
+@override@DateOnlyConverter()@JsonKey(name: 'due_on') final  DateTime dueOn;
 @override@JsonKey(name: 'days_overdue') final  int daysOverdue;
 
 /// Create a copy of OverdueTask
@@ -273,7 +273,7 @@ abstract mixin class _$OverdueTaskCopyWith<$Res> implements $OverdueTaskCopyWith
   factory _$OverdueTaskCopyWith(_OverdueTask value, $Res Function(_OverdueTask) _then) = __$OverdueTaskCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'work_item_id') String workItemId, String title,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'department_name') String departmentName, List<ReportPerson> assignees,@JsonKey(name: 'due_on') DateTime dueOn,@JsonKey(name: 'days_overdue') int daysOverdue
+@JsonKey(name: 'work_item_id') String workItemId, String title,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'department_name') String departmentName, List<ReportPerson> assignees,@DateOnlyConverter()@JsonKey(name: 'due_on') DateTime dueOn,@JsonKey(name: 'days_overdue') int daysOverdue
 });
 
 

@@ -142,8 +142,8 @@ abstract class RecordsClient {
 
   /// Tek dosyayı indirir (yetkisiz çağıran da bulunamadı alır).
   @GET('/v1/files/{id}/download')
-  @DioResponseType(ResponseType.stream)
-  Stream<String> downloadFile({
+  @DioResponseType(ResponseType.bytes)
+  Future<HttpResponse<List<int>>> downloadFile({
     @Path('id') required String id,
     @Extras()
     Map<String, dynamic>? extras = RecordsClient.downloadFileOpenapiExtras,
@@ -227,8 +227,8 @@ abstract class RecordsClient {
 
   /// Klasörü ZIP olarak akıtır (kullanıcı başına dışa aktarım kotası).
   @GET('/v1/records/archive/folders/{id}/download-zip')
-  @DioResponseType(ResponseType.stream)
-  Stream<String> archiveFolderZip({
+  @DioResponseType(ResponseType.bytes)
+  Future<HttpResponse<List<int>>> archiveFolderZip({
     @Path('id') required String id,
     @Extras()
     Map<String, dynamic>? extras = RecordsClient.archiveFolderZipOpenapiExtras,
@@ -238,8 +238,8 @@ abstract class RecordsClient {
   ///
   /// [fileIds] - Virgülle ayrılmış dosya kimlikleri (1–100).
   @GET('/v1/records/archive/files/download-zip')
-  @DioResponseType(ResponseType.stream)
-  Stream<String> archiveSelectionZip({
+  @DioResponseType(ResponseType.bytes)
+  Future<HttpResponse<List<int>>> archiveSelectionZip({
     @Query('file_ids') required String fileIds,
     @Extras()
     Map<String, dynamic>? extras =
@@ -248,8 +248,8 @@ abstract class RecordsClient {
 
   /// Dönemin tam arşivini ZIP olarak akıtır (yalnız şirket yöneticisi; dışa aktarım kotası).
   @GET('/v1/records/archive/period/download-zip')
-  @DioResponseType(ResponseType.stream)
-  Stream<String> archiveFullZip({
+  @DioResponseType(ResponseType.bytes)
+  Future<HttpResponse<List<int>>> archiveFullZip({
     @Extras()
     Map<String, dynamic>? extras = RecordsClient.archiveFullZipOpenapiExtras,
   });

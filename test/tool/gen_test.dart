@@ -12,6 +12,7 @@ import 'package:nizamio/core/api/generated/models/refresh_response.dart';
 
 import '../../tool/gen/sensitive.dart';
 import '../../tool/gen/sources.dart';
+import '../../tool/gen/wire_types.dart';
 
 const _catalogJson = '''
 {"catalog_version": 1, "codes": {
@@ -635,5 +636,97 @@ $body
       final once = maskSensitiveModels(model('required String password,'));
       expect(maskSensitiveModels(once), once);
     });
+  });
+
+  group('wire_types (tool/gen/wire_types.dart)', () {
+    const spec = """
+paths:
+  /v1/a/pdf:
+    get:
+      operationId: aPdf
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema: {type: string, format: binary}
+  /v1/a:
+    get:
+      operationId: aJson
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {type: object}
+components:
+  schemas:
+    A:
+      type: object
+      properties:
+        start_on: {type: string, format: date}
+        label: {type: string}
+    B:
+      type: object
+      properties:
+        start_on: {type: string}
+        at: {type: string, format: date-time}
+""";
+
+    test('ikili yanıt operasyonları spec\'ten', () {
+      expect(operationsWithBinaryResponse(spec), {'aPdf'});
+    });
+
+    test('Stream<String> → Future<HttpResponse<List<int>>> + bytes; liste dışı dokunulmaz', () {
+      const src = """
+  @DioResponseType(ResponseType.stream)
+  Stream<String> aPdf({
+  @DioResponseType(ResponseType.stream)
+  Stream<String> events({""";
+      final done = <String>{};
+      final out = rewriteBinaryResponses(src, {'aPdf'}, done);
+      expect(out, contains('Future<HttpResponse<List<int>>> aPdf('));
+      expect(out, contains('ResponseType.bytes'));
+      expect(out, contains('Stream<String> events('));
+      expect(done, {'aPdf'});
+    });
+
+    test('gün alanı adları; biçimsiz aynı ad sorun değil, date-time çakışması düşer', () {
+      expect(dateOnlyPropertyNames(spec), {'start_on'});
+      expect(
+        () => dateOnlyPropertyNames(
+          '{components: {schemas: {A: {properties: {x: {type: string, format: date}}}, '
+          'B: {properties: {x: {type: string, format: date-time}}}}}}',
+        ),
+        throwsFormatException,
+      );
+    });
+
+    test(
+      'DateTime alanına dönüştürücü + içe aktarım; String alana eklenmez',
+      () {
+        const src =
+            """import 'package:freezed_annotation/freezed_annotation.dart';
+    @JsonKey(name: 'start_on') required DateTime startOn,
+    @JsonKey(name: 'end_on') DateTime? endOn,
+    @JsonKey(name: 'other_on') String? otherOn,""";
+        final out = annotateDateOnly(src, {'start_on', 'end_on', 'other_on'});
+        expect(
+          out,
+          contains(
+            "@DateOnlyConverter() @JsonKey(name: 'start_on') required DateTime",
+          ),
+        );
+        expect(
+          out,
+          contains("@DateOnlyConverter() @JsonKey(name: 'end_on') DateTime?"),
+        );
+        expect(out, contains("@JsonKey(name: 'other_on') String?"));
+        expect(
+          out,
+          isNot(contains("@DateOnlyConverter() @JsonKey(name: 'other_on')")),
+        );
+        expect(out, contains(dateOnlyImport));
+        expect(annotateDateOnly(src, {}), src);
+      },
+    );
   });
 }

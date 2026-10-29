@@ -249,11 +249,11 @@ class _ReportingClient implements ReportingClient {
   }
 
   @override
-  Stream<String> reportWorkloadPdf({
+  Future<HttpResponse<List<int>>> reportWorkloadPdf({
     required WorkloadPdfRequest body,
     Map<String, dynamic>? extras =
         ReportingClient.reportWorkloadPdfOpenapiExtras,
-  }) async* {
+  }) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
@@ -261,12 +261,12 @@ class _ReportingClient implements ReportingClient {
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _options = _setStreamType<String>(
+    final _options = _setStreamType<HttpResponse<List<int>>>(
       Options(
             method: 'POST',
             headers: _headers,
             extra: _extra,
-            responseType: ResponseType.stream,
+            responseType: ResponseType.bytes,
           )
           .compose(
             _dio.options,
@@ -276,30 +276,35 @@ class _ReportingClient implements ReportingClient {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = _dio.fetch<ResponseBody>(_options);
-    final _value = _result.asStream().asyncExpand(
-      (response) => utf8.decoder.bind(response.data!.stream),
-    );
-    yield* _value;
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<int> _value;
+    try {
+      _value = _result.data!.cast<int>();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
-  Stream<String> reportTaskPdf({
+  Future<HttpResponse<List<int>>> reportTaskPdf({
     required String id,
     Map<String, dynamic>? extras = ReportingClient.reportTaskPdfOpenapiExtras,
-  }) async* {
+  }) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<String>(
+    final _options = _setStreamType<HttpResponse<List<int>>>(
       Options(
             method: 'GET',
             headers: _headers,
             extra: _extra,
-            responseType: ResponseType.stream,
+            responseType: ResponseType.bytes,
           )
           .compose(
             _dio.options,
@@ -309,31 +314,36 @@ class _ReportingClient implements ReportingClient {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = _dio.fetch<ResponseBody>(_options);
-    final _value = _result.asStream().asyncExpand(
-      (response) => utf8.decoder.bind(response.data!.stream),
-    );
-    yield* _value;
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<int> _value;
+    try {
+      _value = _result.data!.cast<int>();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
-  Stream<String> reportMeetingPdf({
+  Future<HttpResponse<List<int>>> reportMeetingPdf({
     required String id,
     Map<String, dynamic>? extras =
         ReportingClient.reportMeetingPdfOpenapiExtras,
-  }) async* {
+  }) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<String>(
+    final _options = _setStreamType<HttpResponse<List<int>>>(
       Options(
             method: 'GET',
             headers: _headers,
             extra: _extra,
-            responseType: ResponseType.stream,
+            responseType: ResponseType.bytes,
           )
           .compose(
             _dio.options,
@@ -343,11 +353,16 @@ class _ReportingClient implements ReportingClient {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = _dio.fetch<ResponseBody>(_options);
-    final _value = _result.asStream().asyncExpand(
-      (response) => utf8.decoder.bind(response.data!.stream),
-    );
-    yield* _value;
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<int> _value;
+    try {
+      _value = _result.data!.cast<int>();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
@@ -382,21 +397,21 @@ class _ReportingClient implements ReportingClient {
   }
 
   @override
-  Stream<String> reportSeasonPdf({
+  Future<HttpResponse<List<int>>> reportSeasonPdf({
     Map<String, dynamic>? extras = ReportingClient.reportSeasonPdfOpenapiExtras,
-  }) async* {
+  }) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<String>(
+    final _options = _setStreamType<HttpResponse<List<int>>>(
       Options(
             method: 'GET',
             headers: _headers,
             extra: _extra,
-            responseType: ResponseType.stream,
+            responseType: ResponseType.bytes,
           )
           .compose(
             _dio.options,
@@ -406,11 +421,16 @@ class _ReportingClient implements ReportingClient {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = _dio.fetch<ResponseBody>(_options);
-    final _value = _result.asStream().asyncExpand(
-      (response) => utf8.decoder.bind(response.data!.stream),
-    );
-    yield* _value;
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<int> _value;
+    try {
+      _value = _result.data!.cast<int>();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

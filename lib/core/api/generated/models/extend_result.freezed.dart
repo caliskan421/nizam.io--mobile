@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ExtendResult {
 
-@JsonKey(name: 'cascade_count') int get cascadeCount;@JsonKey(name: 'new_end_on') DateTime get newEndOn;
+@JsonKey(name: 'cascade_count') int get cascadeCount;@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime get newEndOn;
 /// Create a copy of ExtendResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $ExtendResultCopyWith<$Res>  {
   factory $ExtendResultCopyWith(ExtendResult value, $Res Function(ExtendResult) _then) = _$ExtendResultCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'cascade_count') int cascadeCount,@JsonKey(name: 'new_end_on') DateTime newEndOn
+@JsonKey(name: 'cascade_count') int cascadeCount,@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime newEndOn
 });
 
 
@@ -160,7 +160,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'cascade_count')  int cascadeCount, @JsonKey(name: 'new_end_on')  DateTime newEndOn)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'cascade_count')  int cascadeCount, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ExtendResult() when $default != null:
 return $default(_that.cascadeCount,_that.newEndOn);case _:
@@ -181,7 +181,7 @@ return $default(_that.cascadeCount,_that.newEndOn);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'cascade_count')  int cascadeCount, @JsonKey(name: 'new_end_on')  DateTime newEndOn)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'cascade_count')  int cascadeCount, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn)  $default,) {final _that = this;
 switch (_that) {
 case _ExtendResult():
 return $default(_that.cascadeCount,_that.newEndOn);case _:
@@ -201,7 +201,7 @@ return $default(_that.cascadeCount,_that.newEndOn);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'cascade_count')  int cascadeCount, @JsonKey(name: 'new_end_on')  DateTime newEndOn)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'cascade_count')  int cascadeCount, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn)?  $default,) {final _that = this;
 switch (_that) {
 case _ExtendResult() when $default != null:
 return $default(_that.cascadeCount,_that.newEndOn);case _:
@@ -216,11 +216,11 @@ return $default(_that.cascadeCount,_that.newEndOn);case _:
 @JsonSerializable()
 
 class _ExtendResult implements ExtendResult {
-  const _ExtendResult({@JsonKey(name: 'cascade_count') required this.cascadeCount, @JsonKey(name: 'new_end_on') required this.newEndOn});
+  const _ExtendResult({@JsonKey(name: 'cascade_count') required this.cascadeCount, @DateOnlyConverter()@JsonKey(name: 'new_end_on') required this.newEndOn});
   factory _ExtendResult.fromJson(Map<String, dynamic> json) => _$ExtendResultFromJson(json);
 
 @override@JsonKey(name: 'cascade_count') final  int cascadeCount;
-@override@JsonKey(name: 'new_end_on') final  DateTime newEndOn;
+@override@DateOnlyConverter()@JsonKey(name: 'new_end_on') final  DateTime newEndOn;
 
 /// Create a copy of ExtendResult
 /// with the given fields replaced by the non-null parameter values.
@@ -257,7 +257,7 @@ abstract mixin class _$ExtendResultCopyWith<$Res> implements $ExtendResultCopyWi
   factory _$ExtendResultCopyWith(_ExtendResult value, $Res Function(_ExtendResult) _then) = __$ExtendResultCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'cascade_count') int cascadeCount,@JsonKey(name: 'new_end_on') DateTime newEndOn
+@JsonKey(name: 'cascade_count') int cascadeCount,@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime newEndOn
 });
 
 

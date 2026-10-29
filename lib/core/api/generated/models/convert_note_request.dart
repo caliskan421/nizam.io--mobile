@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../date_only.dart';
+
 import 'convert_note_request_priority.dart';
 
 part 'convert_note_request.freezed.dart';
@@ -13,10 +15,12 @@ part 'convert_note_request.g.dart';
 abstract class ConvertNoteRequest with _$ConvertNoteRequest {
   const factory ConvertNoteRequest({
     /// Zorunlu; bitişten sonra olamaz ve bugünden önce olamaz.
-    @JsonKey(name: 'start_date') required DateTime startDate,
+    @DateOnlyConverter()
+    @JsonKey(name: 'start_date')
+    required DateTime startDate,
 
     /// Zorunlu; başlangıçtan önce olamaz.
-    @JsonKey(name: 'end_date') required DateTime endDate,
+    @DateOnlyConverter() @JsonKey(name: 'end_date') required DateTime endDate,
 
     /// Boşsa notun ilk 100 karakteri.
     String? title,

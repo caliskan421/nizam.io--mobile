@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../date_only.dart';
+
 part 'date_change_request_create.freezed.dart';
 part 'date_change_request_create.g.dart';
 
@@ -11,8 +13,12 @@ part 'date_change_request_create.g.dart';
 abstract class DateChangeRequestCreate with _$DateChangeRequestCreate {
   const factory DateChangeRequestCreate({
     @JsonKey(name: 'work_item_id') required String workItemId,
-    @JsonKey(name: 'new_start_on') required DateTime newStartOn,
-    @JsonKey(name: 'new_end_on') required DateTime newEndOn,
+    @DateOnlyConverter()
+    @JsonKey(name: 'new_start_on')
+    required DateTime newStartOn,
+    @DateOnlyConverter()
+    @JsonKey(name: 'new_end_on')
+    required DateTime newEndOn,
     String? reason,
   }) = _DateChangeRequestCreate;
 

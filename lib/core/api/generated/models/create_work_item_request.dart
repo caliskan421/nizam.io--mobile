@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../date_only.dart';
+
 import 'create_work_item_request_priority.dart';
 
 part 'create_work_item_request.freezed.dart';
@@ -15,8 +17,8 @@ abstract class CreateWorkItemRequest with _$CreateWorkItemRequest {
     required String title,
 
     /// Şirket yöneticisi dışındaki çağıranda en çok 40 gün geçmişte olabilir (aksi 422 `work.input_invalid`).
-    @JsonKey(name: 'start_on') required DateTime startOn,
-    @JsonKey(name: 'end_on') required DateTime endOn,
+    @DateOnlyConverter() @JsonKey(name: 'start_on') required DateTime startOn,
+    @DateOnlyConverter() @JsonKey(name: 'end_on') required DateTime endOn,
     String? description,
 
     /// Gönderilmezse `orta`; boş dizge de `orta` sayılır.

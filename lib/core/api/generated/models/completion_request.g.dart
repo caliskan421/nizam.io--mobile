@@ -8,8 +8,12 @@ part of 'completion_request.dart';
 
 _CompletionRequest _$CompletionRequestFromJson(Map<String, dynamic> json) =>
     _CompletionRequest(
-      completedOn: DateTime.parse(json['completed_on'] as String),
+      completedOn: const DateOnlyConverter().fromJson(
+        json['completed_on'] as String,
+      ),
     );
 
 Map<String, dynamic> _$CompletionRequestToJson(_CompletionRequest instance) =>
-    <String, dynamic>{'completed_on': instance.completedOn.toIso8601String()};
+    <String, dynamic>{
+      'completed_on': const DateOnlyConverter().toJson(instance.completedOn),
+    };

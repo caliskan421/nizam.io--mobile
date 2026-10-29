@@ -433,4 +433,55 @@ void main() {
       expect(find.text('Devam ediyor'), findsNothing);
     },
   );
+
+  testWidgets(
+    'kök Navigator: iç gezgindeki sayfadan açılınca alt menüyü örter',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(390, 844);
+      addTearDown(tester.view.reset);
+      var navTaps = 0;
+      await tester.pumpWidget(
+        testApp(
+          Stack(
+            children: [
+              // Kabuk benzeri: sekme içeriği iç Navigator'da, alt menü onun üstünde.
+              Navigator(
+                onGenerateRoute: (_) => MaterialPageRoute<void>(
+                  builder: (context) => Center(
+                    child: TextButton(
+                      onPressed: () => NzBottomSheet.show<void>(
+                        context,
+                        title: 'Filtreler',
+                        builder: (_) => const Text('içerik'),
+                      ),
+                      child: const Text('aç'),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: 64,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => navTaps++,
+                  child: const Text('alt menü'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.tap(find.text('aç'));
+      await tester.pumpAndSettle();
+      expect(find.text('içerik'), findsOneWidget);
+      // Sayfa alt menünün üstünde: alt kenardaki dokunuş menüye ulaşmaz.
+      await tester.tapAt(const Offset(195, 830));
+      await tester.pump();
+      expect(navTaps, 0);
+    },
+  );
 }

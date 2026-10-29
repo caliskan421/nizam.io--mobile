@@ -13,8 +13,9 @@ typedef NzSheetActionsBuilder = List<Widget> Function(
   BuildContext sheetContext,
 );
 
-/// Alt sayfa servisi (durumsuz). Uygulamanın Navigator'ında açılır (`showModalBottomSheet`
-/// varsayılanı); `MaterialApp.builder` içindeki PrivacyMask altında kalır, ayrı Overlay yoktur.
+/// Alt sayfa servisi (durumsuz). Uygulamanın KÖK Navigator'ında açılır: kabuktaki yüzen alt
+/// menü sayfanın ve karartmanın altında kalır (prototip: sayfa z 8, alt menü z 6).
+/// `MaterialApp.builder` içindeki PrivacyMask altında kalır, ayrı Overlay yoktur.
 /// Açılış `easeSheet` / `durSheet`, kapanış `easeExit` / `durExit` (hareketi azalt → anlık).
 abstract final class NzBottomSheet {
   /// [title] başlıktır ve ekran okuyucuya başlık olarak bildirilir; [description] başlığın
@@ -46,6 +47,7 @@ abstract final class NzBottomSheet {
   }) {
     return showModalBottomSheet<T>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       isDismissible: dismissible,

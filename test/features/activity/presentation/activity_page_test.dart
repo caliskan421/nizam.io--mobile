@@ -16,10 +16,18 @@ import '../../pilot_support.dart';
 
 final _l = AppLocalizationsTr();
 
+/// [tall]: liste tembel kurulduğundan (yalnız görünen satırlar) içerik denetimi yapan testler
+/// bütün kayıtları tek ekrana sığdıran uzun bir yüzeyde açar.
 Future<(Harness, RecordingAppNav)> _open(
   WidgetTester tester, {
   bool dark = false,
+  bool tall = false,
 }) async {
+  if (tall) {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(800, 4200);
+    addTearDown(tester.view.reset);
+  }
   final h = await real(tester, () => pilotHarness(PilotBackend()));
   final nav = RecordingAppNav();
   await pumpScreen(tester, h, const ActivityPage(), nav: nav, dark: dark);
@@ -49,7 +57,7 @@ void main() {
   testWidgets('bölümler: başlık, açıklama, tür rayı, gün başlığı, sayaç', (
     tester,
   ) async {
-    await _open(tester);
+    await _open(tester, tall: true);
     expect(find.text(_l.uiActivityTitle), findsOneWidget);
     expect(find.text(_l.uiActivityIntro), findsOneWidget);
     expect(find.text(_l.uiActivityTypeAll), findsOneWidget);
@@ -72,7 +80,7 @@ void main() {
   testWidgets('tür süzgeci çip gösterir; çip ve tümünü temizle kaldırır', (
     tester,
   ) async {
-    await _open(tester);
+    await _open(tester, tall: true);
     await _tap(tester, _rail(_l.uiActivityTypeFile));
     final chip = '${_l.uiActivityChipType} ${_l.uiActivityTypeFile}';
     expect(find.text(chip), findsOneWidget);
@@ -128,8 +136,60 @@ void main() {
     expect(find.textContaining('Kerem Özdal'), findsWidgets);
   });
 
+  testWidgets('alt sayfa: "Temizle" başlık satırında; kişi satırında avatar', (
+    tester,
+  ) async {
+    await _open(tester);
+    await _tap(tester, find.byIcon(Icons.tune_rounded));
+    expect(find.text('KÖ'), findsOneWidget);
+    final title = tester.getRect(find.text(_l.uiActivityFilters));
+    final clear = tester.getRect(find.text(_l.uiActivityClear));
+    expect((clear.center.dy - title.center.dy).abs(), lessThan(8));
+    await _tap(
+      tester,
+      find.descendant(
+        of: find.byType(NzCheckbox),
+        matching: find.text('Kerem Özdal'),
+      ),
+    );
+    expect(find.text('4 ${_l.uiActivityApplyTail}'), findsOneWidget);
+    await _tap(tester, find.text(_l.uiActivityClear));
+    expect(find.text('38 ${_l.uiActivityApplyTail}'), findsOneWidget);
+  });
+
+  testWidgets('kayıt satırları tembel kurulur (yalnız görünen bölge)', (
+    tester,
+  ) async {
+    await _open(tester);
+    final rows = find.byWidgetPredicate(
+      (w) => w.runtimeType.toString() == '_EntryRow',
+    );
+    // 30 kayıt gösterilir; ilk karede yalnız ekrana (+ önbellek bölgesine) düşenler kurulur.
+    expect(rows.evaluate().length, inExclusiveRange(1, 30));
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -3000));
+    await tester.pump();
+    expect(find.text('30 / 38 ${_l.uiActivityShownTail}'), findsOneWidget);
+  });
+
+  testWidgets('geri dönüşte süzgeç korunur (prototip: alt durum kalıcı)', (
+    tester,
+  ) async {
+    final h = await real(tester, () => pilotHarness(PilotBackend()));
+    await pumpScreen(tester, h, const ActivityPage());
+    await settle(tester);
+    await _tap(tester, _rail(_l.uiActivityTypeFile));
+    await pumpScreen(tester, h, const SizedBox.shrink());
+    await settle(tester);
+    await pumpScreen(tester, h, const ActivityPage());
+    await settle(tester);
+    expect(
+      find.text('${_l.uiActivityChipType} ${_l.uiActivityTypeFile}'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('görev hedefli kayıt görevi açar', (tester) async {
-    final (_, nav) = await _open(tester);
+    final (_, nav) = await _open(tester, tall: true);
     await _tap(tester, find.text('Toplantı notundan oluşturuldu'));
     expect(nav.calls, ['task:ALT-16']);
   });

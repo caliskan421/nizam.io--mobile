@@ -61,14 +61,15 @@ List<NzShellTab> shellTabsFor(
   required WidgetRef ref,
 }) {
   final inHistory = location.startsWith(const HistoryRoute().location);
+  // Her zaman izlenir: işlem geçmişi kayıtları kabukla birlikte yüklenir (keepAlive), sayfaya
+  // ilk girişte liste ilk karede dolu gelir (yükleniyor karesi/titreme yok).
+  final historyCaption = ref.watch(activityNavCaptionProvider);
   return [
     NzShellTab(
       icon: Icons.home_outlined,
       selectedIcon: Icons.home_rounded,
       label: inHistory ? l.uiRouterTabHistory : l.uiRouterTabHome,
-      caption: inHistory
-          ? ref.watch(activityNavCaptionProvider)
-          : l.uiRouterTabHomeCaption,
+      caption: inHistory ? historyCaption : l.uiRouterTabHomeCaption,
     ),
     NzShellTab(
       icon: Icons.checklist_rounded,

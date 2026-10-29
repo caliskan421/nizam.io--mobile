@@ -9,24 +9,27 @@ part of 'activity_query_controller.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// İşlem geçmişi süzgeci ve komutları (tür, arama, kişi, koordinatörlük, daha fazla göster).
-/// Süzgeç değişince gösterilen sınır ilk sayfaya döner.
+/// Süzgeç değişince gösterilen sınır ilk sayfaya döner. Ömrü uygulama boyudur: prototipte
+/// geçmişten ana sayfaya dönüp yeniden girince tür/kişi/koordinatörlük süzgeci korunur.
 
 @ProviderFor(ActivityQueryController)
 final activityQueryControllerProvider = ActivityQueryControllerProvider._();
 
 /// İşlem geçmişi süzgeci ve komutları (tür, arama, kişi, koordinatörlük, daha fazla göster).
-/// Süzgeç değişince gösterilen sınır ilk sayfaya döner.
+/// Süzgeç değişince gösterilen sınır ilk sayfaya döner. Ömrü uygulama boyudur: prototipte
+/// geçmişten ana sayfaya dönüp yeniden girince tür/kişi/koordinatörlük süzgeci korunur.
 final class ActivityQueryControllerProvider
     extends $NotifierProvider<ActivityQueryController, ActivityQuery> {
   /// İşlem geçmişi süzgeci ve komutları (tür, arama, kişi, koordinatörlük, daha fazla göster).
-  /// Süzgeç değişince gösterilen sınır ilk sayfaya döner.
+  /// Süzgeç değişince gösterilen sınır ilk sayfaya döner. Ömrü uygulama boyudur: prototipte
+  /// geçmişten ana sayfaya dönüp yeniden girince tür/kişi/koordinatörlük süzgeci korunur.
   ActivityQueryControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'activityQueryControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -48,10 +51,11 @@ final class ActivityQueryControllerProvider
 }
 
 String _$activityQueryControllerHash() =>
-    r'72329657aa01ee284a5505162cd552cc85866e91';
+    r'520813f439487347603ff12c83b71def240cbfeb';
 
 /// İşlem geçmişi süzgeci ve komutları (tür, arama, kişi, koordinatörlük, daha fazla göster).
-/// Süzgeç değişince gösterilen sınır ilk sayfaya döner.
+/// Süzgeç değişince gösterilen sınır ilk sayfaya döner. Ömrü uygulama boyudur: prototipte
+/// geçmişten ana sayfaya dönüp yeniden girince tür/kişi/koordinatörlük süzgeci korunur.
 
 abstract class _$ActivityQueryController extends $Notifier<ActivityQuery> {
   ActivityQuery build();
@@ -72,21 +76,27 @@ abstract class _$ActivityQueryController extends $Notifier<ActivityQuery> {
 }
 
 /// Süzgecin uygulanmış görünümü (kayıtlar + görev kataloğu kişi/koordinatörlük eşlemesi).
+/// Eşzamanlıdır: iki kaynak yüklüyse ilk karede veri döner (sayfa açılışında ve her süzgeç
+/// değişiminde yükleniyor karesi yok); biri yüklenirken / hatadaysa o durum taşınır.
 
 @ProviderFor(activityView)
 final activityViewProvider = ActivityViewProvider._();
 
 /// Süzgecin uygulanmış görünümü (kayıtlar + görev kataloğu kişi/koordinatörlük eşlemesi).
+/// Eşzamanlıdır: iki kaynak yüklüyse ilk karede veri döner (sayfa açılışında ve her süzgeç
+/// değişiminde yükleniyor karesi yok); biri yüklenirken / hatadaysa o durum taşınır.
 
 final class ActivityViewProvider
     extends
         $FunctionalProvider<
           AsyncValue<ActivityView>,
-          ActivityView,
-          FutureOr<ActivityView>
+          AsyncValue<ActivityView>,
+          AsyncValue<ActivityView>
         >
-    with $FutureModifier<ActivityView>, $FutureProvider<ActivityView> {
+    with $Provider<AsyncValue<ActivityView>> {
   /// Süzgecin uygulanmış görünümü (kayıtlar + görev kataloğu kişi/koordinatörlük eşlemesi).
+  /// Eşzamanlıdır: iki kaynak yüklüyse ilk karede veri döner (sayfa açılışında ve her süzgeç
+  /// değişiminde yükleniyor karesi yok); biri yüklenirken / hatadaysa o durum taşınır.
   ActivityViewProvider._()
     : super(
         from: null,
@@ -103,14 +113,22 @@ final class ActivityViewProvider
 
   @$internal
   @override
-  $FutureProviderElement<ActivityView> $createElement(
+  $ProviderElement<AsyncValue<ActivityView>> $createElement(
     $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
+  ) => $ProviderElement(pointer);
 
   @override
-  FutureOr<ActivityView> create(Ref ref) {
+  AsyncValue<ActivityView> create(Ref ref) {
     return activityView(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<ActivityView> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<ActivityView>>(value),
+    );
   }
 }
 
-String _$activityViewHash() => r'80e857e25d7963f1da974185b794fbe35147969e';
+String _$activityViewHash() => r'a6a8df23006fc7b2d57d22d1b04c063f81e05583';

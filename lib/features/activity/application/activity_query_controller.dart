@@ -8,8 +8,9 @@ import 'activity_log_controller.dart';
 part 'activity_query_controller.g.dart';
 
 /// İşlem geçmişi süzgeci ve komutları (tür, arama, kişi, koordinatörlük, daha fazla göster).
-/// Süzgeç değişince gösterilen sınır ilk sayfaya döner.
-@riverpod
+/// Süzgeç değişince gösterilen sınır ilk sayfaya döner. Ömrü uygulama boyudur: prototipte
+/// geçmişten ana sayfaya dönüp yeniden girince tür/kişi/koordinatörlük süzgeci korunur.
+@Riverpod(keepAlive: true)
 class ActivityQueryController extends _$ActivityQueryController {
   @override
   ActivityQuery build() => const ActivityQuery();
@@ -50,10 +51,22 @@ class ActivityQueryController extends _$ActivityQueryController {
 }
 
 /// Süzgecin uygulanmış görünümü (kayıtlar + görev kataloğu kişi/koordinatörlük eşlemesi).
+/// Eşzamanlıdır: iki kaynak yüklüyse ilk karede veri döner (sayfa açılışında ve her süzgeç
+/// değişiminde yükleniyor karesi yok); biri yüklenirken / hatadaysa o durum taşınır.
 @riverpod
-Future<ActivityView> activityView(Ref ref) async {
+AsyncValue<ActivityView> activityView(Ref ref) {
   final query = ref.watch(activityQueryControllerProvider);
-  final log = ref.watch(activityLogControllerProvider.future);
-  final catalog = ref.watch(taskCatalogControllerProvider.future);
-  return applyActivityQuery(await log, await catalog, query);
+  final log = ref.watch(activityLogControllerProvider);
+  final catalog = ref.watch(taskCatalogControllerProvider);
+  return switch ((log, catalog)) {
+    (AsyncValue(value: final l?), AsyncValue(value: final c?)) => AsyncData(
+      applyActivityQuery(l, c, query),
+    ),
+    (AsyncError(:final error, :final stackTrace), _) ||
+    (
+      _,
+      AsyncError(:final error, :final stackTrace),
+    ) => AsyncError(error, stackTrace),
+    _ => const AsyncLoading(),
+  };
 }

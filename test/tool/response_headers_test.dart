@@ -108,9 +108,9 @@ abstract class C {
                 .where((f) => f.path.endsWith('_client.dart'))) {
           for (final m in method.allMatches(f.readAsStringSync())) {
             // İkili yanıtlar da HttpResponse döner (tool/gen/wire_types.dart); burada yalnız
-          // kesilme başlığı sarması sayılır.
-          if (m[1] == 'HttpResponse<List<int>>') continue;
-          (m[1]!.startsWith('HttpResponse<') ? wrapped : plain).add(m[2]!);
+            // kesilme başlığı sarması sayılır.
+            if (m[1] == 'HttpResponse<List<int>>') continue;
+            (m[1]!.startsWith('HttpResponse<') ? wrapped : plain).add(m[2]!);
           }
         }
         // Yeni etiketle liste değişirse bu test kırılır; bilinçli güncellenir.

@@ -40,7 +40,7 @@ Arayüz `MeetingsRepository` (`domain/meetings_repository.dart`), uygulama `ApiM
 | adminListDeletedMeetings | GET `/v1/admin/deleted/meetings` | S2 | `MeetingsRepository.adminListDeletedMeetings([PageRequest])` | `PageSlice<Meeting>` | Aynı use-case, yönetici yaşam döngüsü yolu. |
 | restoreMeeting | PATCH `/v1/admin/restore/meetings/{id}` | S2 | `MeetingsRepository.restoreMeeting(id)` | `MeetingLifecycleResult` | `status` bilinmeyen → `unknown`. |
 | permanentDeleteMeeting | DELETE `/v1/admin/permanent/meetings/{id}` | S2 | `MeetingsRepository.permanentDeleteMeeting(id)` | `MeetingLifecycleResult` | |
-| getMeeting | GET `/v1/meetings/{id}` | S2 | `MeetingsRepository.getMeeting(id)` | `MeetingDetail` | Katılımcı, gündem, notların ilk sayfası (`PageSlice<MeetingNote>`). `viewer_role` sunucudan. `conference_available` v0.2'de yok. |
+| getMeeting | GET `/v1/meetings/{id}` | S2 | `MeetingsRepository.getMeeting(id)` | `MeetingDetail` | Katılımcı, gündem, notların ilk sayfası (`PageSlice<MeetingNote>`). `viewer_role` sunucudan. `conference` + `conference_available` v0.3'te eklendi ([envanter-v030](envanter-v030.md)). |
 | updateMeeting | PATCH `/v1/meetings/{id}` | S2 | `MeetingsRepository.updateMeeting(id, MeetingChanges)` | `MeetingRevised` | `null` alan gönderilmez. Departman seti yalnız yönetici yolunda. |
 | deleteMeeting | DELETE `/v1/meetings/{id}` | S2 | `MeetingsRepository.deleteMeeting(id)` | — | Yumuşak silme. |
 | addMeetingParticipant | POST `/v1/meetings/{id}/participants` | S2 | `MeetingsRepository.addParticipant(meetingId, userId)` | — | Yanıt (`ParticipantResult`) yalnız girdiyi yansıtır; dönülmez. |
@@ -57,7 +57,9 @@ Arayüz `MeetingsRepository` (`domain/meetings_repository.dart`), uygulama `ApiM
 
 ### Konferans
 
-`v0.2.0-api`'de konferans uçları yok (main'de 3 uç + `MeetingDetail.conference_available`). **v0.3.0-api ile gelecek**; o pinde bu repository'ye eklenir.
+`v0.2.0-api`'de konferans uçları yoktu. **`v0.3.0-api` ile geldi:** 3 uç (`startConference`, `endConference`,
+`joinConference`) ve `MeetingDetail.conference` / `conference_available` bu repository'ye eklendi; ayrıntı
+[envanter-v030.md](envanter-v030.md).
 
 ### Takvim örtüşmesi (`lib/features/calendar/domain/calendar.dart` `MeetingEntry`) — takvim entegrasyonunda kullanılacak
 

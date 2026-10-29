@@ -1,6 +1,6 @@
 # Servis katmanı — backend işlemleri ↔ Flutter karşılığı
 
-Durum: 2026-10-29 · dal `servis/katman` · pin `v0.2.0-api` (140 işlem). Ekran entegrasyonu **başlamadı**:
+Durum: 2026-10-29 · dal `servis/katman` · pin `v0.3.0-api` (147 işlem). Ekran entegrasyonu **başlamadı**:
 `Api*Repository` sınıfları yazıldı ve testli, ama `<f>_module.dart` bağlamaları hâlâ örnek (`Sample*`) repository'lerde.
 Entegrasyon ürün sahibi onayıyla ekran ekran yapılır.
 
@@ -13,13 +13,16 @@ Entegrasyon ürün sahibi onayıyla ekran ekran yapılır.
 | [records-meetings](envanter-records-meetings.md) | records + collaboration (toplantı) | 12 + 20 | 32 | `archive`, yeni `meetings` |
 | [messaging-notifications](envanter-messaging-notifications.md) | collaboration (mesaj) + notifications | 6 + 7 | 13 | `messages`, yeni `notifications` |
 | [reporting](envanter-reporting.md) | reporting | 12 | 12 | `scope` (ana sayfa), `coordinatorships`, yeni `reports` |
-| **Toplam** | | **140** | **138** | |
+| [v030 — konferans](envanter-v030.md) | collaboration (konferans) | 3 | 3 | `meetings` |
+| [v030 — asistan](envanter-v030.md) | assistant | 4 | 4 | yeni `assistant` |
+| **Toplam** | | **147** | **145** | |
 
 Karşılıksız 2 işlem: `healthLive`, `healthReady` (core'da sağlık denetimi yok; istemci için gerekli değil).
 Core'da zaten olanlar: `refresh` → `SessionController`; `systemInfo`, `instanceProfile` → `ServerBindingController`.
 
-`v0.3.0-api` ile gelecekler (pin yükselince eklenir, yalnız ekleme): `/v1/me` `full_name` + `company_admin`,
-3 konferans ucu, `/v1/assistant/*`.
+`v0.3.0-api` ile geldi (yalnız ekleme): `/v1/me` `full_name` + `company_admin` (`CurrentAccount`), 3 konferans ucu
+(`meetings`), 4 `/v1/assistant/*` ucu (yeni `assistant`; sohbet SSE akışı ham Dio + `core/http/sse.dart`, nedeni ve
+akış isteğinde 401 yenilemesinin tetiklenmemesi sınırı [envanter-v030](envanter-v030.md)'da).
 
 ## Ortak kurallar (uygulanan)
 
@@ -51,6 +54,8 @@ Core'da zaten olanlar: `refresh` → `SessionController`; `systemInfo`, `instanc
 - `X-Result-Truncated` başlık okuyucusu (3 repository'de kopya) → `core/domain`.
 - Boş `next_cursor` → `null` dönüşümü (birkaç repository'de) → `PageSlice` yardımcısı.
 - Görev durumu/öncelik tel eşlemesi (tasks, timeline, reports, meetings'te kopya) ve `DepartmentRole`/`DepartmentKind`.
+- Akış isteğinde (`ResponseType.stream`) 2xx dışı gövdeyi hata halkalarından önce okuyan ara katman: şu an
+  asistan sohbetinde 401 yenileme tetiklenmiyor ([envanter-v030](envanter-v030.md) "Bilinen sınır").
 - Sayfasız liste + sunucu `total`'i (`CountedList`), testlerdeki sahte HTTP bağdaştırıcısı → `test/support/`.
 
 ## Kapılar (`servis/katman` @ birleşme sonrası)

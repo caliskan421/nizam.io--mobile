@@ -224,7 +224,11 @@ class TabletSession {
       tester.view.physicalSize = hostSize;
       addTearDown(tester.view.reset);
     }
-    final h = Harness(flavor: Flavor.dev, handler: PilotBackend().handle);
+    final h = Harness(
+      flavor: Flavor.dev,
+      prototype: true,
+      handler: PilotBackend().handle,
+    );
     addTearDown(h.dispose);
     h.read(themeModeControllerProvider).state.value = theme;
     final s = TabletSession._(tester, h, hostSize != null);

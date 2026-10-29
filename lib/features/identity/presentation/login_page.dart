@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/config/display_brand.dart';
-import '../../../core/config/flavor.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/errors/error_text.dart';
 import '../../../core/providers.dart';
@@ -47,7 +46,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   void _requestSubmit(BuildContext formContext) {
-    if (ref.read(flavorProvider) == Flavor.dev) {
+    if (ref.read(prototypeModeProvider)) {
       // Yerel prototip: doğrulama/oturum isteği olmadan örnek ekranlara geçilir.
       context.appNav.openHome();
       return;

@@ -12,6 +12,7 @@ import 'fake_backend.dart';
 class Harness {
   Harness({
     Flavor flavor = Flavor.prod,
+    bool prototype = false,
     FakeHandler? handler,
     MemorySecureStore? store,
   }) : backend = FakeBackend(handler ?? discoveryHandler),
@@ -20,6 +21,7 @@ class Harness {
     // bağdaştırıcısı sahte.
     composition = Composition.create(
       flavor: flavor,
+      prototype: prototype,
       secureStore: this.store,
       httpAdapter: backend,
       preferenceStore: prefs,

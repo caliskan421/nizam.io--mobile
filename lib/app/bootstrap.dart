@@ -15,9 +15,9 @@ import '../core/session/session_state.dart';
 import 'app.dart';
 import 'di/composition.dart';
 
-/// Uygulamayı verilen flavor ile başlatır. Composition root: somut bağlar burada ve
+/// Uygulamayı verilen flavor ile başlatır ([prototype]: yalnız dev, `prototypeModeProvider`). Composition root: somut bağlar burada ve
 /// `app/` altındadır; `core/` ve `features/` app'e bağımlı değildir.
-Future<void> bootstrap(Flavor flavor) async {
+Future<void> bootstrap(Flavor flavor, {bool prototype = false}) async {
   WidgetsFlutterBinding.ensureInitialized();
   // Yazı tipleri yalnız uygulama varlıklarından (assets/fonts); çalışma anında Google'a
   // istek yok (çevrimdışı açılış, gizlilik). OFL lisans metinleri lisans sayfasına eklenir.
@@ -25,6 +25,7 @@ Future<void> bootstrap(Flavor flavor) async {
   LicenseRegistry.addLicense(_fontLicenses);
   final composition = Composition.create(
     flavor: flavor,
+    prototype: prototype,
     connectivityLink: PlusConnectivityLink(),
   );
   // Tercihler runApp'ten önce (tema titreşimi yok). Güvenlik açılış sırası (startup) ayrıdır

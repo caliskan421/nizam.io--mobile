@@ -25,12 +25,17 @@ final _l = AppLocalizationsTr();
 Future<Harness> _pump(
   WidgetTester tester, {
   Flavor flavor = Flavor.prod,
+  bool prototype = false,
   List<Override> overrides = const [],
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = const Size(800, 1200);
   addTearDown(tester.view.reset);
-  final h = Harness(flavor: flavor, handler: PilotBackend().handle);
+  final h = Harness(
+    flavor: flavor,
+    prototype: prototype,
+    handler: PilotBackend().handle,
+  );
   addTearDown(h.dispose);
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -110,9 +115,22 @@ void main() {
     });
 
     testWidgets(
-      'dev flavor: login ile açılır, boş giriş örnek ana sayfaya geçer',
+      'dev flavor (prototip kapalı): gerçek akış, faz kapısında açılır',
       (tester) async {
-        final h = await _pump(tester, flavor: Flavor.dev);
+        await _pump(tester, flavor: Flavor.dev);
+        expect(find.text(_l.uiServerIntro), findsOneWidget);
+        expect(find.byType(LoginPage), findsNothing);
+      },
+    );
+
+    test('prototip modu prod flavor ile kurulamaz', () {
+      expect(() => Harness(prototype: true), throwsArgumentError);
+    });
+
+    testWidgets(
+      'dev + prototip: login ile açılır, boş giriş örnek ana sayfaya geçer',
+      (tester) async {
+        final h = await _pump(tester, flavor: Flavor.dev, prototype: true);
         expect(h.read(appPhaseProvider), AppPhase.unbound);
         expect(find.text(_l.uiServerIntro), findsNothing);
         expect(find.byIcon(Icons.widgets_outlined), findsNothing);

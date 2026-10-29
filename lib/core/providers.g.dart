@@ -53,6 +53,54 @@ final class FlavorProvider extends $FunctionalProvider<Flavor, Flavor, Flavor>
 
 String _$flavorHash() => r'76df7b3631e4559e6b8cf95f241d8591916d8b48';
 
+/// Prototip modu (yalnız dev flavor ve açıkça istenince: `--dart-define=NIZAMIO_PROTOTYPE=true`):
+/// login gerçek sunucuya gitmeden örnek verili ana sayfaya geçer. Prod'da her zaman false.
+
+@ProviderFor(prototypeMode)
+final prototypeModeProvider = PrototypeModeProvider._();
+
+/// Prototip modu (yalnız dev flavor ve açıkça istenince: `--dart-define=NIZAMIO_PROTOTYPE=true`):
+/// login gerçek sunucuya gitmeden örnek verili ana sayfaya geçer. Prod'da her zaman false.
+
+final class PrototypeModeProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Prototip modu (yalnız dev flavor ve açıkça istenince: `--dart-define=NIZAMIO_PROTOTYPE=true`):
+  /// login gerçek sunucuya gitmeden örnek verili ana sayfaya geçer. Prod'da her zaman false.
+  PrototypeModeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'prototypeModeProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$prototypeModeHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return prototypeMode(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$prototypeModeHash() => r'12b1df38d3fecce3313b4694d1ca07481a781955';
+
 /// HTTP bağdaştırıcısı; null = dio varsayılanı (IOHttpClientAdapter, platform TLS).
 
 @ProviderFor(httpAdapter)

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/app_phase.dart';
-import '../core/config/flavor.dart';
 import '../core/i18n/generated/app_localizations.dart';
 import '../core/providers.dart';
 import '../core/security/privacy_mask.dart';
@@ -27,10 +26,10 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
   late final ValueNotifier<AppPhase> _phase = ValueNotifier(
     ref.read(appPhaseProvider),
   );
-  // Prototip modu yalnız dev flavor'da: login ile açılır, boş giriş örnek ana sayfaya geçer.
+  // Prototip modu (yalnız dev, açıkça istenince): login ile açılır, giriş örnek ana sayfaya geçer.
   late final GoRouter _router = createRouter(
     _phase,
-    devPrototype: ref.read(flavorProvider) == Flavor.dev,
+    devPrototype: ref.read(prototypeModeProvider),
   );
   late final NzAppNav _nav = GoRouterAppNav(_router, ref);
   final PrivacyMaskController _mask = PrivacyMaskController();

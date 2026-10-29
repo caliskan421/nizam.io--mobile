@@ -40,7 +40,9 @@ bu güncelleme için uzak CI çalıştırılmadı. Fiziksel cihaz çalıştırma
 | `make build-dev-apk` | `flutter build apk --debug --flavor dev -t lib/main_dev.dart` |
 | `make build-prod-apk` | `flutter build apk --release --flavor prod -t lib/main_prod.dart --obfuscate --split-debug-info=build/symbols` |
 
-Geliştirme: `flutter run --flavor dev -t lib/main_dev.dart`.
+Geliştirme: `flutter run --flavor dev -t lib/main_dev.dart` — gerçek akış (sunucu adresi → giriş → kapsam;
+yerel backend `http://localhost:<port>` dev'de serbest). Sunucusuz örnek ekranlar için prototip modu:
+`--dart-define=NIZAMIO_PROTOTYPE=true` (login isteksiz örnek ana sayfaya geçer; yalnız dev, prod'da kurulamaz).
 
 ## Flavor'lar
 

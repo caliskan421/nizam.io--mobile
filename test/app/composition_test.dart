@@ -90,6 +90,7 @@ Future<MemorySecureStore> seeded(String id) async {
 /// kırılır), tablodaki her port da bileşim kökünde okunur.
 final portProviders = <String, ProviderBase<Object?>>{
   'flavorProvider': flavorProvider,
+  'prototypeModeProvider': prototypeModeProvider,
   'httpAdapterProvider': httpAdapterProvider,
   'scopeControllerProvider': scopeControllerProvider,
   'serverBindingProvider': serverBindingProvider,

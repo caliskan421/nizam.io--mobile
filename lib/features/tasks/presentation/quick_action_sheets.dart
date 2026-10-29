@@ -16,11 +16,28 @@ import 'task_widgets.dart';
 /// çağırır. Taslak sayfa kapanınca korunur; başarılı gönderimde sayfa kapanır ve sonuç
 /// bildirimi çıkar. Sayfa tutamakla büyür/küçülür; tarih, davetli, gündem ve koordinatörlük
 /// satırı açılınca kendiliğinden büyür.
-Future<void> showNewTaskSheet(BuildContext context, {String? coordinatorship}) {
+///
+/// Yeni görev: [coordinatorship] verilirse ya da [resetTarget] true ise hedef sıfırlanır
+/// (koordinatörlük o kod / seçilmemiş, atanan yok; görev listesi ve kısayolu
+/// `resetTarget: true` ile açar). İkisi de yoksa (ana sayfa hızlı işlemi) taslak
+/// koordinatörlük ve atananlarıyla korunur. [title] başlık alanını önceden doldurur
+/// (sohbette "Göreve dönüştür": mesaj metninin ilk 120 karakteri; kırpma burada yapılır).
+Future<void> showNewTaskSheet(
+  BuildContext context, {
+  String? coordinatorship,
+  bool resetTarget = false,
+  String? title,
+}) {
   final container = ProviderScope.containerOf(context, listen: false);
   container
       .read(newTaskFormControllerProvider.notifier)
-      .prepare(coordinatorship: coordinatorship);
+      .prepare(
+        coordinatorship: coordinatorship,
+        reset: resetTarget || coordinatorship != null,
+        title: title == null
+            ? null
+            : String.fromCharCodes(title.trim().runes.take(120)),
+      );
   final l = context.l10n;
   return _show(
     context,
@@ -120,6 +137,7 @@ Future<void> _show(
   );
   final msg = toast;
   if (msg != null && context.mounted) {
-    NzToast.show(context, msg);
+    // Prototip sonuç tostu onay işaretlidir (ayrıntı tostları bilgi işaretli).
+    NzToast.show(context, msg, tone: NzToastTone.success);
   }
 }

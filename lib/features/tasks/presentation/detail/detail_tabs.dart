@@ -514,16 +514,26 @@ class _SubtaskBlock extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         spacing: NizamioSpacing.space2,
                         children: [
-                          TaskDateField(
-                            label: l.uiTasksStart,
-                            value: u.start,
-                            onChanged: onStart,
-                          ),
-                          TaskDateField(
-                            label: l.uiTasksDue,
-                            value: u.end,
-                            firstDate: u.start,
-                            onChanged: onEnd,
+                          // Prototip: başlangıç ve bitiş yan yana (1fr 1fr).
+                          Row(
+                            spacing: NizamioSpacing.space2,
+                            children: [
+                              Expanded(
+                                child: TaskDateField(
+                                  label: l.uiTasksStart,
+                                  value: u.start,
+                                  onChanged: onStart,
+                                ),
+                              ),
+                              Expanded(
+                                child: TaskDateField(
+                                  label: l.uiTasksDue,
+                                  value: u.end,
+                                  firstDate: u.start,
+                                  onChanged: onEnd,
+                                ),
+                              ),
+                            ],
                           ),
                           if (u.start != null || u.end != null)
                             Align(

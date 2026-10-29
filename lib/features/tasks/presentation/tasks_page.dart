@@ -95,7 +95,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
       showTasksShortcuts(
         context,
         provider: _provider,
-        onNewTask: () => showNewTaskSheet(context),
+        onNewTask: () => showNewTaskSheet(context, resetTarget: true),
         onTimeline: nav.openTimeline,
         onSearch: () {
           if (!ref.read(_provider).searchOpen) _toggleSearch();
@@ -128,7 +128,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
             NzIconButton.circleAccent(
               icon: Icons.add_rounded,
               semanticLabel: l.uiTasksNewTask,
-              onPressed: () => showNewTaskSheet(context),
+              onPressed: () => showNewTaskSheet(context, resetTarget: true),
             ),
           ],
         ),

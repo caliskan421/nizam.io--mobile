@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../../core/domain/page_slice.dart';
 
-// Toplantı domain varlıkları (collaboration modülünün toplantı uçları, `v0.2.0-api`).
+// Toplantı domain varlıkları (collaboration modülünün toplantı ve konferans uçları, `v0.3.0-api`).
 //
 // Takvimdeki `MeetingEntry` (calendar/domain/calendar.dart) aynı kavramın örnek veriden türeyen
 // görünümüdür; örtüşen alanlar (başlık, tarih, departmanlar, gündem, katılımcı) takvim
@@ -18,6 +18,53 @@ enum MeetingLifecycleStatus { restored, purged, unknown }
 
 /// Nottan açılan görevin önceliği (istekte: `dusuk`, `orta`, `yuksek`, `acil`).
 enum MeetingTaskPriority { low, medium, high, urgent }
+
+/// Konferans durumu: `starting` sağlayıcı onayı bekleniyor; `live` sürüyor; `ending` kapatıldı,
+/// oda henüz kapanmadı.
+enum ConferenceStatus { starting, live, ending, unknown }
+
+/// Konferanstaki rol: `host` (yönetici ve toplantıya bağlı departmanın koordinatörü),
+/// `speaker` (toplantıyı gören üye).
+enum ConferenceRole { host, speaker, unknown }
+
+/// Toplantıya bağlı görüntülü konferans (sunucu `Conference`; dış oda adı taşınmaz).
+@immutable
+final class MeetingConference {
+  const MeetingConference({
+    required this.id,
+    required this.status,
+    required this.startedAt,
+    required this.startedByAccountId,
+  });
+
+  final String id;
+  final ConferenceStatus status;
+  final DateTime startedAt;
+  final String startedByAccountId;
+}
+
+/// Konferansa katılım token'ı (`joinConference`). [token] SIRDIR: log'a, hata metnine ve
+/// kalıcı depoya yazılmaz; [toString] token'ı içermez. Kısa ömürlüdür ([expiresAt]); katılmadan
+/// hemen önce alınır.
+@immutable
+final class ConferenceJoinToken {
+  const ConferenceJoinToken({
+    required this.token,
+    required this.url,
+    required this.expiresAt,
+    required this.role,
+  });
+
+  final String token;
+
+  /// İstemcinin bağlanacağı genel adres (wss).
+  final String url;
+  final DateTime expiresAt;
+  final ConferenceRole role;
+
+  @override
+  String toString() => 'ConferenceJoinToken(…)';
+}
 
 /// Toplantıya bağlı departman; ad bağ kurulduğu andaki kopyadır.
 @immutable
@@ -144,6 +191,8 @@ final class MeetingDetail {
     required this.participants,
     required this.agenda,
     required this.notes,
+    this.conference,
+    this.conferenceAvailable = false,
   });
 
   final Meeting meeting;
@@ -155,6 +204,13 @@ final class MeetingDetail {
 
   /// Notların ilk sayfası; devamı `MeetingsRepository.listNotes` ile.
   final PageSlice<MeetingNote> notes;
+
+  /// Aktif ya da kapanmakta olan konferans; yoksa `null`.
+  final MeetingConference? conference;
+
+  /// Bağlı video sağlayıcısı oda açabiliyor mu (sağlayıcı `none` iken `false`). Başlat
+  /// düğmesi buna göre gösterilir.
+  final bool conferenceAvailable;
 }
 
 /// İşlem sonrası en iyi çabalı yan etkiler (arıza işlemi geri almaz).

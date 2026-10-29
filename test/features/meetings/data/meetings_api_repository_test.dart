@@ -109,6 +109,13 @@ Map<String, Object?> _note({Object? role = 'member'}) => {
   'updated_at': _t,
 };
 
+Map<String, Object?> _conference({String status = 'live'}) => {
+  'id': 'c1',
+  'status': status,
+  'started_at': _t,
+  'started_by_account_id': 'a1',
+};
+
 const _effects = {'failed_messages': 2, 'event_failed': true};
 
 void main() {
@@ -321,6 +328,28 @@ void main() {
       expect(n.authorRole, MeetingRole.unknown);
       expect(n.authorAccountId, isNull);
       expect(d.notes.nextCursor, 'n2');
+      expect(d.conference, isNull);
+      expect(d.conferenceAvailable, isFalse);
+    });
+
+    test('ayrıntı: konferans ve conference_available eşleme', () async {
+      final (repo, _) = _repo(
+        (_) => _json({
+          ..._meeting(),
+          'viewer_role': 'admin',
+          'participants': <Object?>[],
+          'agenda': <Object?>[],
+          'notes': {'items': <Object?>[], 'next_cursor': ''},
+          'conference': _conference(status: 'yeni_durum'),
+          'conference_available': true,
+        }),
+      );
+      final d = await repo.getMeeting('m1');
+      final c = d.conference!;
+      expect((c.id, c.startedByAccountId), ('c1', 'a1'));
+      expect(c.status, ConferenceStatus.unknown);
+      expect(c.startedAt, DateTime.utc(2026, 11, 3, 7));
+      expect(d.conferenceAvailable, isTrue);
     });
 
     test('404 → ApiError; bozuk gövde → invalid_response', () async {
@@ -491,5 +520,130 @@ void main() {
     expect(body.containsKey('title'), isFalse);
     expect(r.workItemId, 'w7');
     expect(r.note.convertedToWorkItemId, 'w7');
+  });
+
+  group('konferans', () {
+    test('startConference: POST, gövdesiz, MeetingConference', () async {
+      final (repo, a) = _repo(
+        (_) => _json({'conference': _conference(status: 'starting')}, 201),
+      );
+      final c = await repo.startConference('m1');
+      final o = a.seen.single;
+      expect((o.method, o.uri.path), ('POST', '/v1/meetings/m1/conference'));
+      expect(a.bodies.single, isNull);
+      expect((c.id, c.status), ('c1', ConferenceStatus.starting));
+    });
+
+    test('startConference: live ve ending eşlenir', () async {
+      for (final (wire, status) in [
+        ('live', ConferenceStatus.live),
+        ('ending', ConferenceStatus.ending),
+      ]) {
+        final (repo, _) = _repo(
+          (_) => _json({'conference': _conference(status: wire)}),
+        );
+        expect((await repo.startConference('m1')).status, status);
+      }
+    });
+
+    test('startConference: kapalı sağlayıcı → ApiError', () async {
+      final (repo, _) = _repo(
+        (_) => _err(409, 'collaboration.conference_disabled'),
+      );
+      await expectLater(
+        repo.startConference('m1'),
+        throwsA(
+          isA<ApiError>()
+              .having(
+                (e) => e.code,
+                'code',
+                'collaboration.conference_disabled',
+              )
+              .having((e) => e.status, 'status', 409),
+        ),
+      );
+    });
+
+    test('endConference: DELETE 204', () async {
+      final (repo, a) = _repo((_) => _empty());
+      await repo.endConference('m1');
+      final o = a.seen.single;
+      expect((o.method, o.uri.path), ('DELETE', '/v1/meetings/m1/conference'));
+    });
+
+    test('endConference: hata → ApiError', () async {
+      final (repo, _) = _repo(
+        (_) => _err(404, 'collaboration.meeting_not_found'),
+      );
+      await expectLater(repo.endConference('m1'), throwsA(isA<ApiError>()));
+    });
+
+    test('joinConference: token eşleme; toString token içermez', () async {
+      final (repo, a) = _repo(
+        (_) => _json({
+          'token': 'gizli-jwt-123',
+          'url': 'wss://video.test',
+          'expires_at': _t,
+          'role': 'speaker',
+        }),
+      );
+      final t = await repo.joinConference('m1');
+      final o = a.seen.single;
+      expect(
+        (o.method, o.uri.path),
+        ('POST', '/v1/meetings/m1/conference/token'),
+      );
+      expect(
+        (t.token, t.url, t.role),
+        ('gizli-jwt-123', 'wss://video.test', ConferenceRole.speaker),
+      );
+      expect(t.expiresAt, DateTime.utc(2026, 11, 3, 7));
+      expect(t.toString(), isNot(contains('gizli-jwt-123')));
+    });
+
+    test('joinConference: host ve bilinmeyen rol', () async {
+      for (final (wire, role) in [
+        ('host', ConferenceRole.host),
+        ('gozlemci', ConferenceRole.unknown),
+      ]) {
+        final (repo, _) = _repo(
+          (_) => _json({
+            'token': 't',
+            'url': 'wss://video.test',
+            'expires_at': _t,
+            'role': wire,
+          }),
+        );
+        expect((await repo.joinConference('m1')).role, role);
+      }
+    });
+
+    test(
+      'joinConference: 429 → ApiError; bozuk gövde → invalid_response',
+      () async {
+        final (repo, _) = _repo((_) => _err(429, 'platform.rate_limited'));
+        await expectLater(
+          repo.joinConference('m1'),
+          throwsA(
+            isA<ApiError>().having(
+              (e) => e.code,
+              'code',
+              'platform.rate_limited',
+            ),
+          ),
+        );
+        final (repo2, _) = _repo((_) => _json({'url': 'wss://x'}));
+        await expectLater(
+          repo2.joinConference('m1'),
+          throwsA(
+            isA<ApiError>().having(
+              (e) => e.code,
+              'code',
+              ClientErrorCode.invalidResponse,
+            ),
+          ),
+        );
+      },
+    );
   });
 }

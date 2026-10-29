@@ -96,6 +96,15 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining(serverMessage), findsNothing);
+      // Prototip hata durumu: iki alan birden tehlike kenarlı.
+      expect(
+        tester.widgetList<NzTextField>(find.byType(NzTextField)).single.invalid,
+        isTrue,
+      );
+      expect(
+        tester.widget<NzPasswordField>(find.byType(NzPasswordField)).invalid,
+        isTrue,
+      );
       expect(_passwordText(tester), isEmpty);
       expect(
         tester.widget<TextFormField>(_email).controller!.text,

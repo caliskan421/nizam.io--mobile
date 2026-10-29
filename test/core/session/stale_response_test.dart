@@ -61,7 +61,12 @@ class Gated {
             r.header('Authorization') != 'Bearer access-token-r') {
           return envelope(401, 'platform.unauthenticated');
         }
-        return jsonResponse(200, {'account_id': 'acc-1', 'email': 'a@b.test'});
+        return jsonResponse(200, {
+          'account_id': 'acc-1',
+          'email': 'a@b.test',
+          'full_name': 'Ayşe Yılmaz',
+          'company_admin': true,
+        });
     }
     return discoveryHandler(r);
   }

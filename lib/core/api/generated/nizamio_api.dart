@@ -13,13 +13,15 @@ import 'clients/work_client.dart';
 import 'clients/records_client.dart';
 import 'clients/notifications_client.dart';
 import 'clients/reporting_client.dart';
+import 'clients/assistant_client.dart';
 
 /// NIZAM.IO API `vv1`.
 ///
 /// Bütün rota tablosu: sağlık/keşif ve kurulum profili, kimlik, organizasyon ve.
 /// yönetici hesapları, program ve aktarım, görev (work), dosya ve arşiv.
 /// (records), mesaj ve toplantı (collaboration), bildirim (notifications) ve.
-/// rapor (reporting) uçları. Spec işlem kümesi rota tablosuyla iki yönlü eşittir.
+/// rapor (reporting) ve YZ asistanı (assistant; yalnız özellik bayrağı açıkken kayıtlı) uçları.
+/// Spec işlem kümesi rota tablosuyla iki yönlü eşittir.
 ///
 /// - Ana sürüm yol segmentindedir (`/v1`); `info.version` = `NIZAMIO_API_VERSION` varsayılanı.
 /// - Kapsam sınıfı her işlemde `x-nizamio-scope-class` (S0–S3) ile yazılır ve rota tablosuyla eşittir.
@@ -56,6 +58,7 @@ class NizamioApi {
   RecordsClient? _records;
   NotificationsClient? _notifications;
   ReportingClient? _reporting;
+  AssistantClient? _assistant;
 
   PlatformClient get platform =>
       _platform ??= PlatformClient(_dio, baseUrl: _baseUrl);
@@ -82,4 +85,7 @@ class NizamioApi {
 
   ReportingClient get reporting =>
       _reporting ??= ReportingClient(_dio, baseUrl: _baseUrl);
+
+  AssistantClient get assistant =>
+      _assistant ??= AssistantClient(_dio, baseUrl: _baseUrl);
 }

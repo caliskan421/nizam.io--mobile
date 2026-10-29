@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket v0.2.0-api (e40413971893fe6a1c28df3927c8bb9dd0bf6784) — docs/api/error-codes.json
+// Kaynak: nizam.io--backend etiket v0.3.0-api (b846d75f8b7f43bb886cef8f76dfcdf63f898662) — docs/api/error-codes.json
 
 import '../api_meta.dart';
 
@@ -7,6 +7,51 @@ const errorCatalogVersion = 1;
 
 /// Sunucu hata kodu → HTTP durum(lar)ı, alan kodları, mesaj anahtarı.
 const errorCatalog = <String, ErrorCatalogEntry>{
+  'assistant.busy': ErrorCatalogEntry(
+    statuses: [429],
+    fields: [],
+    messageKey: 'errors.assistant.busy',
+  ),
+  'assistant.capacity_full': ErrorCatalogEntry(
+    statuses: [503],
+    fields: [],
+    messageKey: 'errors.assistant.capacity_full',
+  ),
+  'assistant.input_invalid': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['assistant.input_invalid'],
+    messageKey: 'errors.assistant.input_invalid',
+  ),
+  'assistant.limit_exceeded': ErrorCatalogEntry(
+    statuses: [503],
+    fields: [],
+    messageKey: 'errors.assistant.limit_exceeded',
+  ),
+  'assistant.not_authorized': ErrorCatalogEntry(
+    statuses: [403],
+    fields: [],
+    messageKey: 'errors.assistant.not_authorized',
+  ),
+  'assistant.not_found': ErrorCatalogEntry(
+    statuses: [404],
+    fields: [],
+    messageKey: 'errors.assistant.not_found',
+  ),
+  'assistant.provider_unavailable': ErrorCatalogEntry(
+    statuses: [503],
+    fields: [],
+    messageKey: 'errors.assistant.provider_unavailable',
+  ),
+  'assistant.quota_exceeded': ErrorCatalogEntry(
+    statuses: [429],
+    fields: [],
+    messageKey: 'errors.assistant.quota_exceeded',
+  ),
+  'assistant.refused': ErrorCatalogEntry(
+    statuses: [422],
+    fields: [],
+    messageKey: 'errors.assistant.refused',
+  ),
   'audit.entry_rejected': ErrorCatalogEntry(
     statuses: [500],
     fields: [],
@@ -21,6 +66,31 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [422],
     fields: [],
     messageKey: 'errors.collaboration.agenda_limit_reached',
+  ),
+  'collaboration.conference_disabled': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.collaboration.conference_disabled',
+  ),
+  'collaboration.conference_not_active': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.collaboration.conference_not_active',
+  ),
+  'collaboration.conference_provider_unavailable': ErrorCatalogEntry(
+    statuses: [503],
+    fields: [],
+    messageKey: 'errors.collaboration.conference_provider_unavailable',
+  ),
+  'collaboration.conference_webhook_invalid': ErrorCatalogEntry(
+    statuses: [400],
+    fields: [],
+    messageKey: 'errors.collaboration.conference_webhook_invalid',
+  ),
+  'collaboration.conference_webhook_unauthorized': ErrorCatalogEntry(
+    statuses: [401],
+    fields: [],
+    messageKey: 'errors.collaboration.conference_webhook_unauthorized',
   ),
   'collaboration.input_invalid': ErrorCatalogEntry(
     statuses: [422],
@@ -117,6 +187,11 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     fields: [],
     messageKey: 'errors.identity.account_referenced',
   ),
+  'identity.capacity_full': ErrorCatalogEntry(
+    statuses: [503],
+    fields: [],
+    messageKey: 'errors.identity.capacity_full',
+  ),
   'identity.captcha_invalid': ErrorCatalogEntry(
     statuses: [422],
     fields: ['identity.captcha_invalid'],
@@ -189,6 +264,11 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [401],
     fields: [],
     messageKey: 'errors.identity.session_invalid',
+  ),
+  'identity.unavailable': ErrorCatalogEntry(
+    statuses: [503],
+    fields: [],
+    messageKey: 'errors.identity.unavailable',
   ),
   'notifications.input_invalid': ErrorCatalogEntry(
     statuses: [422],

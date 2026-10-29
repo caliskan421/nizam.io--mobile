@@ -1,0 +1,42 @@
+// coverage:ignore-file
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, unused_import, invalid_annotation_target, unnecessary_import
+
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+@JsonEnum()
+enum AssistantEventToolArac {
+  @JsonValue('bugun')
+  bugun('bugun'),
+  @JsonValue('kapsamim')
+  kapsamim('kapsamim'),
+  @JsonValue('gorev_dagilimi')
+  gorevDagilimi('gorev_dagilimi'),
+  @JsonValue('gorev_listesi')
+  gorevListesi('gorev_listesi'),
+  @JsonValue('is_yuku')
+  isYuku('is_yuku'),
+  @JsonValue('toplanti_ozeti')
+  toplantiOzeti('toplanti_ozeti'),
+  @JsonValue('sezon_ozeti')
+  sezonOzeti('sezon_ozeti'),
+  @JsonValue('goster')
+  goster('goster'),
+
+  /// Default value for all unparsed values, allows backward compatibility when adding new values on the backend.
+  $unknown(null);
+
+  const AssistantEventToolArac(this.json);
+
+  factory AssistantEventToolArac.fromJson(String json) =>
+      values.firstWhere((e) => e.json == json, orElse: () => $unknown);
+
+  final String? json;
+
+  @override
+  String toString() => json?.toString() ?? super.toString();
+
+  /// Returns all defined enum values excluding the $unknown value.
+  static List<AssistantEventToolArac> get $valuesDefined =>
+      values.where((value) => value != $unknown).toList();
+}

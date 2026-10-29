@@ -94,9 +94,9 @@ abstract class C {
     });
   });
 
-  group('üretilmiş istemciler (v0.2.0-api)', () {
+  group('üretilmiş istemciler (v0.3.0-api)', () {
     test(
-      'yalnız 10 operasyon HttpResponse döner; diğerlerinin imzası değişmez',
+      'yalnız 11 operasyon HttpResponse döner; diğerlerinin imzası değişmez',
       () {
         final wrapped = <String>{};
         final plain = <String>{};
@@ -115,6 +115,7 @@ abstract class C {
         }
         // Yeni etiketle liste değişirse bu test kırılır; bilinçli güncellenir.
         expect(wrapped, {
+          'assistantConversations',
           'listAssignable',
           'listDeletedAccounts',
           'listDeletedDepartments',

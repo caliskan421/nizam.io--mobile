@@ -17,7 +17,8 @@ T _$identity<T>(T value) => value;
 mixin _$SystemInfo {
 
 @JsonKey(name: 'product_id') String get productId;/// Aktivasyon tamamlanmadıysa boş.
-@JsonKey(name: 'instance_id') String get instanceId;@JsonKey(name: 'company_display_name') String get companyDisplayName;@JsonKey(name: 'server_version') String get serverVersion;@JsonKey(name: 'api_version') String get apiVersion;@JsonKey(name: 'minimum_mobile_version') String get minimumMobileVersion; List<String>? get capabilities;
+@JsonKey(name: 'instance_id') String get instanceId;@JsonKey(name: 'company_display_name') String get companyDisplayName;@JsonKey(name: 'server_version') String get serverVersion;@JsonKey(name: 'api_version') String get apiVersion;@JsonKey(name: 'minimum_mobile_version') String get minimumMobileVersion;/// Bu sunucu sürümünün sunduğu yetenek adları; bu sürümde [work, program, records, notifications]. Adlar tablo/aile adı değildir.
+ List<String>? get capabilities;
 /// Create a copy of SystemInfo
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -232,7 +233,9 @@ class _SystemInfo implements SystemInfo {
 @override@JsonKey(name: 'server_version') final  String serverVersion;
 @override@JsonKey(name: 'api_version') final  String apiVersion;
 @override@JsonKey(name: 'minimum_mobile_version') final  String minimumMobileVersion;
+/// Bu sunucu sürümünün sunduğu yetenek adları; bu sürümde [work, program, records, notifications]. Adlar tablo/aile adı değildir.
  final  List<String>? _capabilities;
+/// Bu sunucu sürümünün sunduğu yetenek adları; bu sürümde [work, program, records, notifications]. Adlar tablo/aile adı değildir.
 @override List<String>? get capabilities {
   final value = _capabilities;
   if (value == null) return null;

@@ -23,6 +23,10 @@ _MeetingDetail _$MeetingDetailFromJson(Map<String, dynamic> json) =>
       departments: (json['departments'] as List<dynamic>)
           .map((e) => MeetingDepartment.fromJson(e as Map<String, dynamic>))
           .toList(),
+      conference: json['conference'] == null
+          ? null
+          : Conference.fromJson(json['conference'] as Map<String, dynamic>),
+      conferenceAvailable: json['conference_available'] as bool,
       viewerRole: MeetingDetailViewerRole.fromJson(
         json['viewer_role'] as String,
       ),
@@ -51,6 +55,8 @@ Map<String, dynamic> _$MeetingDetailToJson(_MeetingDetail instance) =>
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
       'departments': instance.departments.map((e) => e.toJson()).toList(),
+      'conference': ?instance.conference?.toJson(),
+      'conference_available': instance.conferenceAvailable,
       'viewer_role': _$MeetingDetailViewerRoleEnumMap[instance.viewerRole]!,
       'participants': instance.participants.map((e) => e.toJson()).toList(),
       'agenda': instance.agenda.map((e) => e.toJson()).toList(),

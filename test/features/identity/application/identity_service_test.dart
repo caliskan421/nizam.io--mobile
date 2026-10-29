@@ -25,7 +25,12 @@ Future<ResponseBody> _ok(Seen r) async {
     case 'POST /v1/auth/logout':
       return ResponseBody.fromString('', 204);
     case 'GET /v1/me':
-      return jsonResponse(200, {'account_id': 'acc-1', 'email': 'a@b.test'});
+      return jsonResponse(200, {
+        'account_id': 'acc-1',
+        'email': 'a@b.test',
+        'full_name': 'Ayşe Yılmaz',
+        'company_admin': true,
+      });
   }
   return discoveryHandler(r);
 }
@@ -180,7 +185,12 @@ void main() {
       await h.identity.login(email: 'a@b.test', password: 'p');
       expect(
         await h.identity.me(),
-        const CurrentAccount(accountId: 'acc-1', email: 'a@b.test'),
+        const CurrentAccount(
+          accountId: 'acc-1',
+          email: 'a@b.test',
+          fullName: 'Ayşe Yılmaz',
+          companyAdmin: true,
+        ),
       );
     });
 

@@ -1,6 +1,42 @@
 {
   "@@locale": "tr",
-  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit 54afb002428e09fdc2727565e226880c1a25bb8c src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.2.0-api (e40413971893fe6a1c28df3927c8bb9dd0bf6784); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
+  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit 54afb002428e09fdc2727565e226880c1a25bb8c src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.3.0-api (b846d75f8b7f43bb886cef8f76dfcdf63f898662); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
+  "errAssistantBusy": "Asistan şu an yoğun. Biraz sonra yeniden deneyin.",
+  "@errAssistantBusy": {
+    "description": "assistant.busy"
+  },
+  "errAssistantCapacityFull": "Asistan kapasitesi dolu. Biraz sonra yeniden deneyin.",
+  "@errAssistantCapacityFull": {
+    "description": "assistant.capacity_full"
+  },
+  "errAssistantInputInvalid": "Soru geçersiz. Kontrol edip yeniden deneyin.",
+  "@errAssistantInputInvalid": {
+    "description": "assistant.input_invalid"
+  },
+  "errAssistantLimitExceeded": "Asistanın günlük kullanım sınırına ulaşıldı.",
+  "@errAssistantLimitExceeded": {
+    "description": "assistant.limit_exceeded"
+  },
+  "errAssistantNotAuthorized": "Asistanı kullanma yetkiniz yok.",
+  "@errAssistantNotAuthorized": {
+    "description": "assistant.not_authorized"
+  },
+  "errAssistantNotFound": "Sohbet bulunamadı.",
+  "@errAssistantNotFound": {
+    "description": "assistant.not_found"
+  },
+  "errAssistantProviderUnavailable": "Asistan şu an kullanılamıyor. Biraz sonra yeniden deneyin.",
+  "@errAssistantProviderUnavailable": {
+    "description": "assistant.provider_unavailable"
+  },
+  "errAssistantQuotaExceeded": "Bugünkü soru hakkınız doldu.",
+  "@errAssistantQuotaExceeded": {
+    "description": "assistant.quota_exceeded"
+  },
+  "errAssistantRefused": "Asistan bu soruyu yanıtlayamıyor.",
+  "@errAssistantRefused": {
+    "description": "assistant.refused"
+  },
   "errAuditEntryRejected": "İşlem kaydı yazılamadığı için istek tamamlanamadı.",
   "@errAuditEntryRejected": {
     "description": "audit.entry_rejected"
@@ -12,6 +48,26 @@
   "errCollaborationAgendaLimitReached": "Gündem madde sınırına ulaşıldı.",
   "@errCollaborationAgendaLimitReached": {
     "description": "collaboration.agenda_limit_reached"
+  },
+  "errCollaborationConferenceDisabled": "Görüntülü görüşme bu sunucuda kapalı.",
+  "@errCollaborationConferenceDisabled": {
+    "description": "collaboration.conference_disabled"
+  },
+  "errCollaborationConferenceNotActive": "Görüntülü görüşme başlamadı.",
+  "@errCollaborationConferenceNotActive": {
+    "description": "collaboration.conference_not_active"
+  },
+  "errCollaborationConferenceProviderUnavailable": "Görüntülü görüşme hizmetine şu an ulaşılamıyor.",
+  "@errCollaborationConferenceProviderUnavailable": {
+    "description": "collaboration.conference_provider_unavailable"
+  },
+  "errCollaborationConferenceWebhookInvalid": "Görüntülü görüşme bildirimi geçersiz.",
+  "@errCollaborationConferenceWebhookInvalid": {
+    "description": "collaboration.conference_webhook_invalid"
+  },
+  "errCollaborationConferenceWebhookUnauthorized": "Görüntülü görüşme bildirimi doğrulanamadı.",
+  "@errCollaborationConferenceWebhookUnauthorized": {
+    "description": "collaboration.conference_webhook_unauthorized"
   },
   "errCollaborationInputInvalid": "Girilen bilgiler geçersiz.",
   "@errCollaborationInputInvalid": {
@@ -89,6 +145,10 @@
   "@errIdentityAccountReferenced": {
     "description": "identity.account_referenced"
   },
+  "errIdentityCapacityFull": "Sunucu şu an yoğun. Biraz sonra yeniden deneyin.",
+  "@errIdentityCapacityFull": {
+    "description": "identity.capacity_full"
+  },
   "errIdentityCaptchaInvalid": "Güvenlik doğrulaması başarısız; yeniden deneyin.",
   "@errIdentityCaptchaInvalid": {
     "description": "identity.captcha_invalid"
@@ -164,6 +224,10 @@
   "errIdentitySessionInvalid": "Oturumunuz geçersiz veya süresi dolmuş; yeniden giriş yapın.",
   "@errIdentitySessionInvalid": {
     "description": "identity.session_invalid"
+  },
+  "errIdentityUnavailable": "Kimlik doğrulama hizmetine şu an ulaşılamıyor. Biraz sonra yeniden deneyin.",
+  "@errIdentityUnavailable": {
+    "description": "identity.unavailable"
   },
   "errIdentityWeakPassword": "Parola yeterince güçlü değil.",
   "@errIdentityWeakPassword": {

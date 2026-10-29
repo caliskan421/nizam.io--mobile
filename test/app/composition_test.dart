@@ -57,7 +57,12 @@ Future<ResponseBody> handler(Seen r) async {
     case 'POST /v1/auth/logout':
       return ResponseBody.fromString('', 204);
     case 'GET /v1/me':
-      return jsonResponse(200, {'account_id': 'acc-1', 'email': 'a@b.test'});
+      return jsonResponse(200, {
+        'account_id': 'acc-1',
+        'email': 'a@b.test',
+        'full_name': 'Ayşe Yılmaz',
+        'company_admin': true,
+      });
   }
   return discoveryHandler(r);
 }

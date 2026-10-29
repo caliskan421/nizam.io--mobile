@@ -8,6 +8,9 @@ import 'package:retrofit/retrofit.dart';
 import '../models/agenda_item.dart';
 import '../models/agenda_item_request.dart';
 import '../models/agenda_list.dart';
+import '../models/conference_empty_request.dart';
+import '../models/conference_result.dart';
+import '../models/conference_token.dart';
 import '../models/convert_note_request.dart';
 import '../models/count_result.dart';
 import '../models/create_meeting_request.dart';
@@ -169,6 +172,30 @@ abstract class CollaborationClient {
         'openapi': <String, dynamic>{
           'tags': <String>["collaboration"],
           'operationId': "removeMeetingParticipant",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> startConferenceOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["collaboration"],
+          'operationId': "startConference",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> endConferenceOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["collaboration"],
+          'operationId': "endConference",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> joinConferenceOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["collaboration"],
+          'operationId': "joinConference",
           'externalDocsUrl': null,
         },
       };
@@ -417,6 +444,35 @@ abstract class CollaborationClient {
     @Extras()
     Map<String, dynamic>? extras =
         CollaborationClient.removeMeetingParticipantOpenapiExtras,
+  });
+
+  /// Toplantıya bağlı görüntülü konferansı başlatır (yönetici ve bağlı departmanın koordinatörü). Aktif konferans varsa yeni satır açılmaz ve 200 döner.
+  @POST('/v1/meetings/{id}/conference')
+  Future<ConferenceResult> startConference({
+    @Path('id') required String id,
+    @Body() ConferenceEmptyRequest? body,
+    @Extras()
+    Map<String, dynamic>? extras =
+        CollaborationClient.startConferenceOpenapiExtras,
+  });
+
+  /// Konferansı bitirir. Aktif konferans yoksa ya da sağlayıcı odayı kapatamazsa da 204 döner.
+  @DELETE('/v1/meetings/{id}/conference')
+  Future<void> endConference({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras =
+        CollaborationClient.endConferenceOpenapiExtras,
+  });
+
+  /// Konferansa katılım token'ı üretir (toplantıyı gören her rol; hesap başına dakikada 30). Yazma izninden geçmez.
+  @POST('/v1/meetings/{id}/conference/token')
+  Future<ConferenceToken> joinConference({
+    @Path('id') required String id,
+    @Body() ConferenceEmptyRequest? body,
+    @Extras()
+    Map<String, dynamic>? extras =
+        CollaborationClient.joinConferenceOpenapiExtras,
   });
 
   /// Gündem maddesi ekler (en çok 50).

@@ -94,6 +94,60 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('tr')];
 
+  /// assistant.busy
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistan şu an yoğun. Biraz sonra yeniden deneyin.'**
+  String get errAssistantBusy;
+
+  /// assistant.capacity_full
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistan kapasitesi dolu. Biraz sonra yeniden deneyin.'**
+  String get errAssistantCapacityFull;
+
+  /// assistant.input_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Soru geçersiz. Kontrol edip yeniden deneyin.'**
+  String get errAssistantInputInvalid;
+
+  /// assistant.limit_exceeded
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistanın günlük kullanım sınırına ulaşıldı.'**
+  String get errAssistantLimitExceeded;
+
+  /// assistant.not_authorized
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistanı kullanma yetkiniz yok.'**
+  String get errAssistantNotAuthorized;
+
+  /// assistant.not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Sohbet bulunamadı.'**
+  String get errAssistantNotFound;
+
+  /// assistant.provider_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistan şu an kullanılamıyor. Biraz sonra yeniden deneyin.'**
+  String get errAssistantProviderUnavailable;
+
+  /// assistant.quota_exceeded
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugünkü soru hakkınız doldu.'**
+  String get errAssistantQuotaExceeded;
+
+  /// assistant.refused
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistan bu soruyu yanıtlayamıyor.'**
+  String get errAssistantRefused;
+
   /// audit.entry_rejected
   ///
   /// In tr, this message translates to:
@@ -111,6 +165,36 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Gündem madde sınırına ulaşıldı.'**
   String get errCollaborationAgendaLimitReached;
+
+  /// collaboration.conference_disabled
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüntülü görüşme bu sunucuda kapalı.'**
+  String get errCollaborationConferenceDisabled;
+
+  /// collaboration.conference_not_active
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüntülü görüşme başlamadı.'**
+  String get errCollaborationConferenceNotActive;
+
+  /// collaboration.conference_provider_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüntülü görüşme hizmetine şu an ulaşılamıyor.'**
+  String get errCollaborationConferenceProviderUnavailable;
+
+  /// collaboration.conference_webhook_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüntülü görüşme bildirimi geçersiz.'**
+  String get errCollaborationConferenceWebhookInvalid;
+
+  /// collaboration.conference_webhook_unauthorized
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüntülü görüşme bildirimi doğrulanamadı.'**
+  String get errCollaborationConferenceWebhookUnauthorized;
 
   /// collaboration.input_invalid
   ///
@@ -226,6 +310,12 @@ abstract class AppLocalizations {
   /// **'Hesap başka kayıtlarda kullanıldığı için kalıcı silinemez.'**
   String get errIdentityAccountReferenced;
 
+  /// identity.capacity_full
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucu şu an yoğun. Biraz sonra yeniden deneyin.'**
+  String get errIdentityCapacityFull;
+
   /// identity.captcha_invalid
   ///
   /// In tr, this message translates to:
@@ -339,6 +429,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Oturumunuz geçersiz veya süresi dolmuş; yeniden giriş yapın.'**
   String get errIdentitySessionInvalid;
+
+  /// identity.unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Kimlik doğrulama hizmetine şu an ulaşılamıyor. Biraz sonra yeniden deneyin.'**
+  String get errIdentityUnavailable;
 
   /// identity.weak_password
   ///

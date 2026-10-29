@@ -121,6 +121,10 @@ class IdentityRepository {
     forcePasswordChange: r.forcePasswordChange,
   );
 
-  static CurrentAccount _account(MeResponse r) =>
-      CurrentAccount(accountId: r.accountId, email: r.email);
+  static CurrentAccount _account(MeResponse r) => CurrentAccount(
+    accountId: r.accountId,
+    email: r.email,
+    fullName: r.fullName,
+    companyAdmin: r.companyAdmin,
+  );
 }

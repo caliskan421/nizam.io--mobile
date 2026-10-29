@@ -5,6 +5,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'agenda_item.dart';
+import 'conference.dart';
 import 'meeting_created_by_role.dart';
 import 'meeting_department.dart';
 import 'meeting_detail_viewer_role.dart';
@@ -29,6 +30,12 @@ abstract class MeetingDetail with _$MeetingDetail {
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'updated_at') required DateTime updatedAt,
     required List<MeetingDepartment> departments,
+
+    /// Aktif ya da kapanmakta olan konferans; yoksa null. Dış oda adı taşınmaz.
+    required Conference? conference,
+
+    /// Bağlı video sağlayıcısı oda açabiliyor mu (`none` iken false). İstemci başlat düğmesini buna göre gösterir.
+    @JsonKey(name: 'conference_available') required bool conferenceAvailable,
     @JsonKey(name: 'viewer_role') required MeetingDetailViewerRole viewerRole,
     required List<Participant> participants,
     required List<AgendaItem> agenda,

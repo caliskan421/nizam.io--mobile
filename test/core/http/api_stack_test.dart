@@ -53,7 +53,12 @@ void main() {
             meStatus == 401) {
           return envelope(401, 'platform.unauthenticated');
         }
-        return jsonResponse(200, {'account_id': 'acc-1', 'email': 'a@b.test'});
+        return jsonResponse(200, {
+          'account_id': 'acc-1',
+          'email': 'a@b.test',
+          'full_name': 'Ayşe Yılmaz',
+          'company_admin': true,
+        });
       case 'GET /v1/program':
         return jsonResponse(200, {
           'program_id': r.header('X-Nizamio-Program'),

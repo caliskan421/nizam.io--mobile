@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MeResponse {
 
-@JsonKey(name: 'account_id') String get accountId; String get email;
+@JsonKey(name: 'account_id') String get accountId; String get email;/// Görünen ad
+@JsonKey(name: 'full_name') String get fullName;/// Hesap şirket yöneticisi mi; kaynak organization yetkisi, üyelikten bağımsız
+@JsonKey(name: 'company_admin') bool get companyAdmin;
 /// Create a copy of MeResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +32,20 @@ $MeResponseCopyWith<MeResponse> get copyWith => _$MeResponseCopyWithImpl<MeRespo
 @override
 bool operator ==(Object other) {
   final _this = this as MeResponse;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MeResponse&&(identical(other.accountId, _this.accountId) || other.accountId == _this.accountId)&&(identical(other.email, _this.email) || other.email == _this.email));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MeResponse&&(identical(other.accountId, _this.accountId) || other.accountId == _this.accountId)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.fullName, _this.fullName) || other.fullName == _this.fullName)&&(identical(other.companyAdmin, _this.companyAdmin) || other.companyAdmin == _this.companyAdmin));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MeResponse;
-  return Object.hash(runtimeType,_this.accountId,_this.email);
+  return Object.hash(runtimeType,_this.accountId,_this.email,_this.fullName,_this.companyAdmin);
 }
 
 @override
 String toString() {
   final _this = this as MeResponse;
-  return 'MeResponse(accountId: ${_this.accountId}, email: ${_this.email})';
+  return 'MeResponse(accountId: ${_this.accountId}, email: ${_this.email}, fullName: ${_this.fullName}, companyAdmin: ${_this.companyAdmin})';
 }
 
 
@@ -54,7 +56,7 @@ abstract mixin class $MeResponseCopyWith<$Res>  {
   factory $MeResponseCopyWith(MeResponse value, $Res Function(MeResponse) _then) = _$MeResponseCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'account_id') String accountId, String email
+@JsonKey(name: 'account_id') String accountId, String email,@JsonKey(name: 'full_name') String fullName,@JsonKey(name: 'company_admin') bool companyAdmin
 });
 
 
@@ -71,11 +73,13 @@ class _$MeResponseCopyWithImpl<$Res>
 
 /// Create a copy of MeResponse
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? accountId = null,Object? email = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? accountId = null,Object? email = null,Object? fullName = null,Object? companyAdmin = null,}) {
   return _then(MeResponse(
 accountId: null == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String,
+as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
+as String,companyAdmin: null == companyAdmin ? _self.companyAdmin : companyAdmin // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -160,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId,  String email)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId,  String email, @JsonKey(name: 'full_name')  String fullName, @JsonKey(name: 'company_admin')  bool companyAdmin)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MeResponse() when $default != null:
-return $default(_that.accountId,_that.email);case _:
+return $default(_that.accountId,_that.email,_that.fullName,_that.companyAdmin);case _:
   return orElse();
 
 }
@@ -181,10 +185,10 @@ return $default(_that.accountId,_that.email);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId,  String email)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId,  String email, @JsonKey(name: 'full_name')  String fullName, @JsonKey(name: 'company_admin')  bool companyAdmin)  $default,) {final _that = this;
 switch (_that) {
 case _MeResponse():
-return $default(_that.accountId,_that.email);case _:
+return $default(_that.accountId,_that.email,_that.fullName,_that.companyAdmin);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +205,10 @@ return $default(_that.accountId,_that.email);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'account_id')  String accountId,  String email)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'account_id')  String accountId,  String email, @JsonKey(name: 'full_name')  String fullName, @JsonKey(name: 'company_admin')  bool companyAdmin)?  $default,) {final _that = this;
 switch (_that) {
 case _MeResponse() when $default != null:
-return $default(_that.accountId,_that.email);case _:
+return $default(_that.accountId,_that.email,_that.fullName,_that.companyAdmin);case _:
   return null;
 
 }
@@ -216,11 +220,15 @@ return $default(_that.accountId,_that.email);case _:
 @JsonSerializable()
 
 class _MeResponse implements MeResponse {
-  const _MeResponse({@JsonKey(name: 'account_id') required this.accountId, required this.email});
+  const _MeResponse({@JsonKey(name: 'account_id') required this.accountId, required this.email, @JsonKey(name: 'full_name') required this.fullName, @JsonKey(name: 'company_admin') required this.companyAdmin});
   factory _MeResponse.fromJson(Map<String, dynamic> json) => _$MeResponseFromJson(json);
 
 @override@JsonKey(name: 'account_id') final  String accountId;
 @override final  String email;
+/// Görünen ad
+@override@JsonKey(name: 'full_name') final  String fullName;
+/// Hesap şirket yöneticisi mi; kaynak organization yetkisi, üyelikten bağımsız
+@override@JsonKey(name: 'company_admin') final  bool companyAdmin;
 
 /// Create a copy of MeResponse
 /// with the given fields replaced by the non-null parameter values.
@@ -235,18 +243,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MeResponse&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.email, email) || other.email == email));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MeResponse&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.email, email) || other.email == email)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.companyAdmin, companyAdmin) || other.companyAdmin == companyAdmin));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,accountId,email);
+    return Object.hash(runtimeType,accountId,email,fullName,companyAdmin);
 }
 
 @override
 String toString() {
-    return 'MeResponse(accountId: $accountId, email: $email)';
+    return 'MeResponse(accountId: $accountId, email: $email, fullName: $fullName, companyAdmin: $companyAdmin)';
 }
 
 
@@ -257,7 +265,7 @@ abstract mixin class _$MeResponseCopyWith<$Res> implements $MeResponseCopyWith<$
   factory _$MeResponseCopyWith(_MeResponse value, $Res Function(_MeResponse) _then) = __$MeResponseCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'account_id') String accountId, String email
+@JsonKey(name: 'account_id') String accountId, String email,@JsonKey(name: 'full_name') String fullName,@JsonKey(name: 'company_admin') bool companyAdmin
 });
 
 
@@ -274,11 +282,13 @@ class __$MeResponseCopyWithImpl<$Res>
 
 /// Create a copy of MeResponse
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? accountId = null,Object? email = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? accountId = null,Object? email = null,Object? fullName = null,Object? companyAdmin = null,}) {
   return _then(_MeResponse(
 accountId: null == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String,
+as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
+as String,companyAdmin: null == companyAdmin ? _self.companyAdmin : companyAdmin // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

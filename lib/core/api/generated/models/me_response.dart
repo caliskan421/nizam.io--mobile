@@ -12,6 +12,12 @@ abstract class MeResponse with _$MeResponse {
   const factory MeResponse({
     @JsonKey(name: 'account_id') required String accountId,
     required String email,
+
+    /// Görünen ad
+    @JsonKey(name: 'full_name') required String fullName,
+
+    /// Hesap şirket yöneticisi mi; kaynak organization yetkisi, üyelikten bağımsız
+    @JsonKey(name: 'company_admin') required bool companyAdmin,
   }) = _MeResponse;
 
   factory MeResponse.fromJson(Map<String, Object?> json) =>

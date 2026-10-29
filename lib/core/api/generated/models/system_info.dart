@@ -19,6 +19,8 @@ abstract class SystemInfo with _$SystemInfo {
     @JsonKey(name: 'api_version') required String apiVersion,
     @JsonKey(name: 'minimum_mobile_version')
     required String minimumMobileVersion,
+
+    /// Bu sunucu sürümünün sunduğu yetenek adları; bu sürümde [work, program, records, notifications]. Adlar tablo/aile adı değildir.
     required List<String>? capabilities,
   }) = _SystemInfo;
 

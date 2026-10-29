@@ -183,7 +183,7 @@ abstract class ProgramClient {
 
   /// Programlar arası görev aktarımı ya da ters aktarım (hep ya da hiç; hız sınırlı). Aynı anahtar + aynı gövde ilk sonucu 200 ile tekrarlar.
   ///
-  /// [idempotencyKey] - İstemcinin ürettiği tekrar anahtarı; aynı anahtar + aynı gövde ilk sonucu döndürür, farklı gövde 409 program.idempotency_key_reused.
+  /// [idempotencyKey] - İstemcinin ürettiği opak tekrar anahtarı (en az 128 bit; ör. base64url 22 karakter). Uzunluk baştaki/sondaki boşluk kırpıldıktan sonra bayt olarak 22–200'dür; eksik ya da sınır dışı anahtar 422 program.transfer_input_invalid (alan idempotency_key). Aynı anahtar + aynı gövde ilk sonucu döndürür, farklı gövde 409 program.idempotency_key_reused.
   @POST('/v1/program-transfers')
   Future<TransferResult> transferWorkItems({
     @Header('Idempotency-Key') required String idempotencyKey,

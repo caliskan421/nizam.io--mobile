@@ -10,6 +10,38 @@ class AppLocalizationsTr extends AppLocalizations {
   AppLocalizationsTr([String locale = 'tr']) : super(locale);
 
   @override
+  String get errAssistantBusy =>
+      'Asistan şu an yoğun. Biraz sonra yeniden deneyin.';
+
+  @override
+  String get errAssistantCapacityFull =>
+      'Asistan kapasitesi dolu. Biraz sonra yeniden deneyin.';
+
+  @override
+  String get errAssistantInputInvalid =>
+      'Soru geçersiz. Kontrol edip yeniden deneyin.';
+
+  @override
+  String get errAssistantLimitExceeded =>
+      'Asistanın günlük kullanım sınırına ulaşıldı.';
+
+  @override
+  String get errAssistantNotAuthorized => 'Asistanı kullanma yetkiniz yok.';
+
+  @override
+  String get errAssistantNotFound => 'Sohbet bulunamadı.';
+
+  @override
+  String get errAssistantProviderUnavailable =>
+      'Asistan şu an kullanılamıyor. Biraz sonra yeniden deneyin.';
+
+  @override
+  String get errAssistantQuotaExceeded => 'Bugünkü soru hakkınız doldu.';
+
+  @override
+  String get errAssistantRefused => 'Asistan bu soruyu yanıtlayamıyor.';
+
+  @override
   String get errAuditEntryRejected =>
       'İşlem kaydı yazılamadığı için istek tamamlanamadı.';
 
@@ -19,6 +51,26 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get errCollaborationAgendaLimitReached =>
       'Gündem madde sınırına ulaşıldı.';
+
+  @override
+  String get errCollaborationConferenceDisabled =>
+      'Görüntülü görüşme bu sunucuda kapalı.';
+
+  @override
+  String get errCollaborationConferenceNotActive =>
+      'Görüntülü görüşme başlamadı.';
+
+  @override
+  String get errCollaborationConferenceProviderUnavailable =>
+      'Görüntülü görüşme hizmetine şu an ulaşılamıyor.';
+
+  @override
+  String get errCollaborationConferenceWebhookInvalid =>
+      'Görüntülü görüşme bildirimi geçersiz.';
+
+  @override
+  String get errCollaborationConferenceWebhookUnauthorized =>
+      'Görüntülü görüşme bildirimi doğrulanamadı.';
 
   @override
   String get errCollaborationInputInvalid => 'Girilen bilgiler geçersiz.';
@@ -82,6 +134,10 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get errIdentityAccountReferenced =>
       'Hesap başka kayıtlarda kullanıldığı için kalıcı silinemez.';
+
+  @override
+  String get errIdentityCapacityFull =>
+      'Sunucu şu an yoğun. Biraz sonra yeniden deneyin.';
 
   @override
   String get errIdentityCaptchaInvalid =>
@@ -150,6 +206,10 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get errIdentitySessionInvalid =>
       'Oturumunuz geçersiz veya süresi dolmuş; yeniden giriş yapın.';
+
+  @override
+  String get errIdentityUnavailable =>
+      'Kimlik doğrulama hizmetine şu an ulaşılamıyor. Biraz sonra yeniden deneyin.';
 
   @override
   String get errIdentityWeakPassword => 'Parola yeterince güçlü değil.';

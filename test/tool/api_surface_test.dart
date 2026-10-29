@@ -21,13 +21,13 @@ final _cases = <String, (String, String, Set<String>)>{
   ),
   'çıkarımlı genel değişken (CX-a-Ö-02)': (
     '$_data/zz_inferred.dart',
-    "${_me}final MeResponse _dto = const MeResponse(accountId: 'a', email: 'b');\n"
+    "${_me}final MeResponse _dto = const MeResponse(accountId: 'a', email: 'b', fullName: 'c', companyAdmin: false);\n"
         'final exposed = _dto;',
     {'A2'},
   ),
   'çıkarımlı genel alan': (
     '$_data/zz_field.dart',
-    "${_me}class R { final _d = const MeResponse(accountId: 'a', email: 'b'); "
+    "${_me}class R { final _d = const MeResponse(accountId: 'a', email: 'b', fullName: 'c', companyAdmin: false); "
         'late final exposed = _d; }',
     {'A2'},
   ),
@@ -84,7 +84,7 @@ final _cases = <String, (String, String, Set<String>)>{
   'gövde ve özel bildirimler serbest': (
     '$_data/zz_private.dart',
     '${_me}class R {\n'
-        "  final MeResponse _c = const MeResponse(accountId: 'a', email: 'b');\n"
+        "  final MeResponse _c = const MeResponse(accountId: 'a', email: 'b', fullName: 'c', companyAdmin: false);\n"
         '  String me() { final m = _c; return m.email; }\n'
         '  static String _map(MeResponse r) => r.email;\n'
         '  String other() => _map(_c);\n'
@@ -101,7 +101,7 @@ final _cases = <String, (String, String, Set<String>)>{
   '.g.dart kökünün parçası (sahibi tarandı)': (
     '$_data/zz_root_part.dart',
     "part of 'zz_root.g.dart';\n"
-        "final exposed = const MeResponse(accountId: 'a', email: 'b');",
+        "final exposed = const MeResponse(accountId: 'a', email: 'b', fullName: 'c', companyAdmin: false);",
     <String>{},
   ),
   'sahibi olmayan part → A0 (CX-a-Ö-05)': (

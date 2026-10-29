@@ -301,6 +301,8 @@ void main() {
             'items': [_note(role: null)],
             'next_cursor': 'n2',
           },
+          'conference': null,
+          'conference_available': false,
         }),
       );
       final d = await repo.getMeeting('m1');

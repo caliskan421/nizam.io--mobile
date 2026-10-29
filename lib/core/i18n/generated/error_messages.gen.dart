@@ -5,9 +5,23 @@ import 'app_localizations.dart';
 
 /// Metni olan bütün hata kodları (sunucu kataloğu ∪ alan kodları ∪ istemci kodları).
 const localizedErrorCodes = <String>{
+  'assistant.busy',
+  'assistant.capacity_full',
+  'assistant.input_invalid',
+  'assistant.limit_exceeded',
+  'assistant.not_authorized',
+  'assistant.not_found',
+  'assistant.provider_unavailable',
+  'assistant.quota_exceeded',
+  'assistant.refused',
   'audit.entry_rejected',
   'collaboration.agenda_item_not_found',
   'collaboration.agenda_limit_reached',
+  'collaboration.conference_disabled',
+  'collaboration.conference_not_active',
+  'collaboration.conference_provider_unavailable',
+  'collaboration.conference_webhook_invalid',
+  'collaboration.conference_webhook_unauthorized',
   'collaboration.input_invalid',
   'collaboration.invalid_cursor',
   'collaboration.meeting_not_found',
@@ -27,6 +41,7 @@ const localizedErrorCodes = <String>{
   'identity.account_not_found',
   'identity.account_not_locked',
   'identity.account_referenced',
+  'identity.capacity_full',
   'identity.captcha_invalid',
   'identity.captcha_required',
   'identity.credentials_invalid',
@@ -46,6 +61,7 @@ const localizedErrorCodes = <String>{
   'identity.password_too_short',
   'identity.permanent_requires_deleted',
   'identity.session_invalid',
+  'identity.unavailable',
   'identity.weak_password',
   'notifications.input_invalid',
   'notifications.invalid_cursor',
@@ -203,12 +219,40 @@ const localizedErrorCodes = <String>{
 /// Hata kodu → yerelleştirilmiş metin; bilinmeyen kod `null`.
 String? localizedErrorText(AppLocalizations l, String code) {
   switch (code) {
+    case 'assistant.busy':
+      return l.errAssistantBusy;
+    case 'assistant.capacity_full':
+      return l.errAssistantCapacityFull;
+    case 'assistant.input_invalid':
+      return l.errAssistantInputInvalid;
+    case 'assistant.limit_exceeded':
+      return l.errAssistantLimitExceeded;
+    case 'assistant.not_authorized':
+      return l.errAssistantNotAuthorized;
+    case 'assistant.not_found':
+      return l.errAssistantNotFound;
+    case 'assistant.provider_unavailable':
+      return l.errAssistantProviderUnavailable;
+    case 'assistant.quota_exceeded':
+      return l.errAssistantQuotaExceeded;
+    case 'assistant.refused':
+      return l.errAssistantRefused;
     case 'audit.entry_rejected':
       return l.errAuditEntryRejected;
     case 'collaboration.agenda_item_not_found':
       return l.errCollaborationAgendaItemNotFound;
     case 'collaboration.agenda_limit_reached':
       return l.errCollaborationAgendaLimitReached;
+    case 'collaboration.conference_disabled':
+      return l.errCollaborationConferenceDisabled;
+    case 'collaboration.conference_not_active':
+      return l.errCollaborationConferenceNotActive;
+    case 'collaboration.conference_provider_unavailable':
+      return l.errCollaborationConferenceProviderUnavailable;
+    case 'collaboration.conference_webhook_invalid':
+      return l.errCollaborationConferenceWebhookInvalid;
+    case 'collaboration.conference_webhook_unauthorized':
+      return l.errCollaborationConferenceWebhookUnauthorized;
     case 'collaboration.input_invalid':
       return l.errCollaborationInputInvalid;
     case 'collaboration.invalid_cursor':
@@ -247,6 +291,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errIdentityAccountNotLocked;
     case 'identity.account_referenced':
       return l.errIdentityAccountReferenced;
+    case 'identity.capacity_full':
+      return l.errIdentityCapacityFull;
     case 'identity.captcha_invalid':
       return l.errIdentityCaptchaInvalid;
     case 'identity.captcha_required':
@@ -285,6 +331,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errIdentityPermanentRequiresDeleted;
     case 'identity.session_invalid':
       return l.errIdentitySessionInvalid;
+    case 'identity.unavailable':
+      return l.errIdentityUnavailable;
     case 'identity.weak_password':
       return l.errIdentityWeakPassword;
     case 'notifications.input_invalid':

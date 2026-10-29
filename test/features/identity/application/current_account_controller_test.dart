@@ -16,7 +16,12 @@ void main() {
     );
     expect(
       account,
-      const CurrentAccount(accountId: 'acc-1', email: 'a@b.test'),
+      const CurrentAccount(
+        accountId: 'acc-1',
+        email: 'a@b.test',
+        fullName: 'Ayşe Yılmaz',
+        companyAdmin: true,
+      ),
     );
   });
 

@@ -40,8 +40,19 @@ IdentityRepository _repo(String body, {int status = 200}) => IdentityRepository(
 
 void main() {
   test('me → CurrentAccount', () async {
-    final me = await _repo('{"account_id":"acc-1","email":"a@b.c"}').me();
-    expect(me, const CurrentAccount(accountId: 'acc-1', email: 'a@b.c'));
+    final me = await _repo(
+      '{"account_id":"acc-1","email":"a@b.c","full_name":"Ayşe Yılmaz",'
+      '"company_admin":true}',
+    ).me();
+    expect(
+      me,
+      const CurrentAccount(
+        accountId: 'acc-1',
+        email: 'a@b.c',
+        fullName: 'Ayşe Yılmaz',
+        companyAdmin: true,
+      ),
+    );
   });
 
   test('login (mobil) → LoginGrant; toString alan içermez', () async {

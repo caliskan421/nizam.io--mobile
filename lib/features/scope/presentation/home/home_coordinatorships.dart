@@ -7,6 +7,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/coordinatorship_query_controller.dart';
 import '../../domain/home_dashboard.dart';
@@ -57,7 +58,7 @@ class HomeCoordinatorships extends ConsumerWidget {
               label: sortLabel,
               semanticLabel: '${l.uiHomeSortChange}: $sortLabel',
               onPressed: commands.cycleSort,
-              icon: Icons.keyboard_arrow_down_rounded,
+              icon: NzIcons.chevronDown,
               iconTurns: query.descending ? 0 : 0.5,
               iconSemanticLabel: '${l.uiHomeSortFlip}: $direction',
               onIconPressed: commands.flipDirection,

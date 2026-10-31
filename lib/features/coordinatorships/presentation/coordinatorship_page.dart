@@ -16,6 +16,7 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/lists/lists.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../tasks/tasks.dart';
 import '../application/coordinatorship_detail_controller.dart';
@@ -58,7 +59,7 @@ class CoordinatorshipPage extends ConsumerWidget {
         code: code,
         actions: [
           NzIconButton(
-            icon: Icons.more_vert_rounded,
+            icon: NzIcons.more,
             semanticLabel: l.uiCoordMoreActions,
             onPressed: d == null ? null : () => _showMoreActions(context, d),
           ),
@@ -100,7 +101,7 @@ class CoordinatorshipPage extends ConsumerWidget {
           ),
         NzFlyoutItem(
           label: l.uiCoordFlyAllList,
-          icon: Icons.list_rounded,
+          icon: NzIcons.list,
           onSelected: nav.openCoordinatorships,
         ),
       ],
@@ -140,17 +141,17 @@ class CoordinatorshipPage extends ConsumerWidget {
             NzMenuGroup(
               rows: [
                 row(
-                  Icons.edit_outlined,
+                  NzIcons.edit,
                   l.uiCoordMenuEdit,
                   () => toast('$name ${l.uiCoordToastEditTail}'),
                 ),
                 row(
-                  Icons.event_outlined,
+                  NzIcons.event,
                   l.uiCoordMenuMeeting,
                   () => showMeetingSheet(context, coordinatorship: code),
                 ),
                 row(
-                  Icons.account_tree_outlined,
+                  NzIcons.hierarchy,
                   l.uiCoordMenuParent,
                   () => toast(l.uiCoordToastParent),
                 ),
@@ -160,12 +161,12 @@ class CoordinatorshipPage extends ConsumerWidget {
             NzMenuGroup(
               rows: [
                 row(
-                  Icons.merge_rounded,
+                  NzIcons.merge,
                   l.uiCoordMenuMerge,
                   () => toast(l.uiCoordToastMerge),
                 ),
                 row(
-                  Icons.remove_circle_outline_rounded,
+                  NzIcons.removeCircle,
                   l.uiCoordMenuDeactivate,
                   () => toast('$name ${l.uiCoordToastDeactivatedTail}'),
                   danger: true,
@@ -245,7 +246,7 @@ class _Body extends ConsumerWidget {
                       Expanded(
                         child: NzButton.secondary(
                           label: l.uiCoordMessageTeam,
-                          icon: Icons.chat_bubble_outline_rounded,
+                          icon: NzIcons.messages,
                           expand: true,
                           onPressed: () =>
                               context.appNav.openChat(d.profile.chatId),
@@ -254,7 +255,7 @@ class _Body extends ConsumerWidget {
                       Expanded(
                         child: NzButton.primary(
                           label: l.uiCoordAssignTask,
-                          icon: Icons.add_rounded,
+                          icon: NzIcons.add,
                           expand: true,
                           onPressed: () =>
                               showNewTaskSheet(context, coordinatorship: code),

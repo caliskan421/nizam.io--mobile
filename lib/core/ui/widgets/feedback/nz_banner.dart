@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../nz_icon.dart';
+import '../nz_icons.dart';
 
 enum _BannerTone { info, warning, danger, offline }
 
@@ -64,10 +65,10 @@ class NzBanner extends StatelessWidget {
     final colors = context.colors;
     final l = context.l10n;
     final (tone, icon) = switch (_tone) {
-      _BannerTone.info => (colors.info, Icons.info_outline),
-      _BannerTone.warning => (colors.warning, Icons.warning_amber_rounded),
-      _BannerTone.danger => (colors.danger, Icons.error_outline),
-      _BannerTone.offline => (colors.warning, Icons.cloud_off_outlined),
+      _BannerTone.info => (colors.info, NzIcons.info),
+      _BannerTone.warning => (colors.warning, NzIcons.warning),
+      _BannerTone.danger => (colors.danger, NzIcons.error),
+      _BannerTone.offline => (colors.warning, NzIcons.offline),
     };
     final shownMessage = message ?? l.uiFeedbackOffline;
     final shownAction =

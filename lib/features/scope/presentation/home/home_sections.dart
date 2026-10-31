@@ -7,6 +7,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
 import 'home_texts.dart';
@@ -132,7 +133,7 @@ class HomeKpiGrid extends StatelessWidget {
         children: [
           tile(
             view: NzTaskView.done,
-            icon: Icons.check_rounded,
+            icon: NzIcons.check,
             tone: c.accentText,
             label: l.uiHomeKpiDone,
             value: l.percent(ratio(t.done, t.total)),
@@ -141,7 +142,7 @@ class HomeKpiGrid extends StatelessWidget {
           ),
           tile(
             view: NzTaskView.inProgress,
-            icon: Icons.bolt_rounded,
+            icon: NzIcons.bolt,
             tone: c.inProgress,
             label: l.uiHomeKpiDoing,
             value: '${t.inProgress}',
@@ -150,7 +151,7 @@ class HomeKpiGrid extends StatelessWidget {
           ),
           tile(
             view: NzTaskView.late,
-            icon: Icons.warning_amber_rounded,
+            icon: NzIcons.warning,
             tone: c.danger,
             label: l.uiHomeKpiLate,
             value: '${t.late}',
@@ -160,7 +161,7 @@ class HomeKpiGrid extends StatelessWidget {
           ),
           tile(
             view: NzTaskView.review,
-            icon: Icons.schedule_rounded,
+            icon: NzIcons.clock,
             tone: c.warning,
             label: l.uiHomeKpiReview,
             value: '${t.awaitingApproval}',
@@ -209,10 +210,10 @@ class HomeQuickActions extends StatelessWidget {
 }
 
 IconData quickActionIcon(HomeQuickAction a) => switch (a) {
-  HomeQuickAction.task => Icons.add_rounded,
-  HomeQuickAction.meeting => Icons.videocam_outlined,
-  HomeQuickAction.invite => Icons.person_add_alt_outlined,
-  HomeQuickAction.report => Icons.description_outlined,
+  HomeQuickAction.task => NzIcons.add,
+  HomeQuickAction.meeting => NzIcons.video,
+  HomeQuickAction.invite => NzIcons.personAdd,
+  HomeQuickAction.report => NzIcons.document,
 };
 
 String quickActionLabel(AppLocalizations l, HomeQuickAction a) => switch (a) {
@@ -319,7 +320,7 @@ class HomeHistoryCard extends StatelessWidget {
       semanticLabel: l.uiHomeHistoryOpen,
       child: Row(
         children: [
-          const NzIconTile(icon: Icons.history_rounded),
+          const NzIconTile(icon: NzIcons.history),
           const Gap(NizamioSpacing.space3),
           Expanded(
             child: Column(
@@ -344,7 +345,7 @@ class HomeHistoryCard extends StatelessWidget {
           ),
           const Gap(NizamioSpacing.space3),
           NzIcon(
-            Icons.chevron_right_rounded,
+            NzIcons.chevronRight,
             size: NizamioSize.iconSizeSm,
             color: c.textFaint,
           ),

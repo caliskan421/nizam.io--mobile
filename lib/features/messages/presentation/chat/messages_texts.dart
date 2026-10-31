@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/i18n/generated/app_localizations.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
 import '../../domain/chat.dart';
@@ -70,11 +71,11 @@ int personTone(String id, String name) => switch (id) {
 
 /// Atfın ikonu.
 IconData refIcon(ChatRefKind k) => switch (k) {
-  ChatRefKind.task => Icons.checklist_rounded,
-  ChatRefKind.coordinatorship => Icons.apartment_rounded,
-  ChatRefKind.file => Icons.insert_drive_file_outlined,
-  ChatRefKind.photo => Icons.image_outlined,
-  ChatRefKind.document => Icons.description_outlined,
+  ChatRefKind.task => NzIcons.tasks,
+  ChatRefKind.coordinatorship => NzIcons.coordinatorships,
+  ChatRefKind.file => NzIcons.file,
+  ChatRefKind.photo => NzIcons.image,
+  ChatRefKind.document => NzIcons.document,
 };
 
 /// Atıf etiketi: "#ALT-7", koordinatörlük adı, "Belge_1.pdf · 320 KB".

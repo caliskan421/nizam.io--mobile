@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/extensions/ref_ext.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../application/logout_controller.dart';
 
@@ -21,7 +22,7 @@ class SignOutButton extends ConsumerWidget {
     final busy = ref.watch(logoutControllerProvider).isLoading;
     return NzButton.ghost(
       label: l.uiIdentitySignOut,
-      icon: Icons.logout,
+      icon: NzIcons.logout,
       loading: busy,
       expand: true,
       onPressed: () => confirmSignOut(context, ref),

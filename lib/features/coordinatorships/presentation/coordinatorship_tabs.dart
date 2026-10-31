@@ -7,6 +7,7 @@ import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/theme/nz_motion.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
 import '../domain/coordinatorship_overview.dart';
@@ -47,25 +48,25 @@ class CoordGeneralTab extends StatelessWidget {
     ];
     final links = [
       (
-        Icons.view_timeline_outlined,
+        NzIcons.timeline,
         l.uiCoordLinkTimeline,
         '${s.total} ${l.uiCoordTasksTail}',
         () => nav.openTimeline(coordinatorship: s.code),
       ),
       (
-        Icons.folder_outlined,
+        NzIcons.folder,
         l.uiCoordLinkArchive,
         l.coordFiles(d.profile.archiveFiles),
         () => nav.openArchiveFolder(s.code),
       ),
       (
-        Icons.event_outlined,
+        NzIcons.event,
         l.uiCoordLinkMeetings,
         l.coordMeetings(d.profile.meetings),
         () => _toast(context, '$name ${l.uiCoordToastMeetingsTail}'),
       ),
       (
-        Icons.download_rounded,
+        NzIcons.download,
         l.uiCoordLinkReport,
         l.uiCoordReportFormat,
         () => _toast(context, '$name ${l.uiCoordToastReportTail}'),
@@ -202,7 +203,7 @@ class CoordGeneralTab extends StatelessWidget {
                       Text(note, style: t.caption.copyWith(color: c.textMuted)),
                       const Gap(NizamioSpacing.space2),
                       NzIcon(
-                        Icons.chevron_right_rounded,
+                        NzIcons.chevronRight,
                         size: NizamioSize.iconSizeSm,
                         color: c.textFaint,
                       ),
@@ -414,7 +415,7 @@ class CoordTeamTab extends StatelessWidget {
                     _toast(context, '$name ${l.uiCoordToastPickLeadTail}'),
                 child: _PersonLine(
                   avatar: const NzAvatar.icon(
-                    icon: Icons.add_rounded,
+                    icon: NzIcons.add,
                     tone: NzAvatar.neutralTone,
                     extent: NzAvatarSize.md,
                   ),
@@ -465,7 +466,7 @@ class CoordTeamTab extends StatelessWidget {
                       duration: NzMotion.of(context, NizamioMotion.durSheet),
                       curve: NizamioMotion.easeSpring,
                       child: NzIcon(
-                        Icons.keyboard_arrow_down_rounded,
+                        NzIcons.chevronDown,
                         size: NizamioSize.iconSizeSm,
                         color: c.textFaint,
                       ),

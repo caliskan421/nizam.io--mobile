@@ -5,19 +5,12 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
-import '../../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/calendar_controller.dart';
 import '../../domain/calendar.dart';
 import 'calendar_texts.dart';
-
-/// Prototip `.t-icon` yolları (24×24).
-abstract final class CalendarIcons {
-  static const chevronDown = 'M6 9l6 6 6-6';
-  static const chevronLeft = 'M15 6l-6 6 6 6';
-  static const chevronRight = 'M9 6l6 6-6 6';
-  static const close = 'M6 6l12 12M18 6 6 18';
-}
 
 /// Kayıt türünün nokta rengi (prototip `CC`).
 extension CalendarKindColor on NizamioColors {
@@ -54,7 +47,7 @@ class CalendarGrid extends ConsumerWidget {
     final weeks = monthWeeks(month);
     final selWeek = weekIndexOf(selected, month);
     final title = week ? l.weekTitle(selected, selWeek) : l.monthTitle(month);
-    Widget arrow(String path, String label, int delta) => Semantics(
+    Widget arrow(IconData icon, String label, int delta) => Semantics(
       button: true,
       label: label,
       excludeSemantics: true,
@@ -65,11 +58,7 @@ class CalendarGrid extends ConsumerWidget {
         child: SizedBox.square(
           dimension: NizamioSize.tap,
           child: Center(
-            child: NzPathIcon(
-              path,
-              size: NizamioSize.iconSizeSm,
-              color: c.text,
-            ),
+            child: NzIcon(icon, size: NizamioSize.iconSizeSm, color: c.text),
           ),
         ),
       ),
@@ -110,8 +99,8 @@ class CalendarGrid extends ConsumerWidget {
                             turns: week ? 0 : 0.5,
                             duration: const Duration(milliseconds: 400),
                             curve: NizamioMotion.easeSpring,
-                            child: NzPathIcon(
-                              CalendarIcons.chevronDown,
+                            child: NzIcon(
+                              NzIcons.chevronDown,
                               size: NizamioSize.iconSizeSm,
                               color: c.textFaint,
                             ),
@@ -129,12 +118,12 @@ class CalendarGrid extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     arrow(
-                      CalendarIcons.chevronLeft,
+                      NzIcons.chevronLeft,
                       week ? l.uiCalendarPrevWeek : l.uiCalendarPrevMonth,
                       -1,
                     ),
                     arrow(
-                      CalendarIcons.chevronRight,
+                      NzIcons.chevronRight,
                       week ? l.uiCalendarNextWeek : l.uiCalendarNextMonth,
                       1,
                     ),

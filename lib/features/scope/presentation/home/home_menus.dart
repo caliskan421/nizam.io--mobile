@@ -10,6 +10,7 @@ import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
 import '../../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
@@ -56,7 +57,7 @@ Future<void> showHomeShortcuts(
       NzFlyoutSection(l.uiHomeGo),
       NzFlyoutItem(
         label: l.uiHomeHistoryTitle,
-        icon: Icons.history_rounded,
+        icon: NzIcons.history,
         onSelected: onOpenHistory,
       ),
     ],
@@ -228,7 +229,7 @@ Future<void> showHomeDrawer(
                 )
               else
                 NzIconButton(
-                  icon: Icons.close_rounded,
+                  icon: NzIcons.close,
                   semanticLabel: l.uiCommonClose,
                   size: NzSize.sm,
                   onPressed: () => Navigator.of(sheet).pop(),
@@ -247,15 +248,15 @@ Future<void> showHomeDrawer(
           NzMenuGroup(
             label: l.uiHomeGroupTracking,
             rows: [
-              row(HomeModule.home, Icons.home_outlined, l.uiHomeModuleHome),
+              row(HomeModule.home, NzIcons.home, l.uiHomeModuleHome),
               row(
                 HomeModule.tracking,
-                Icons.work_outline_rounded,
+                NzIcons.tracking,
                 l.uiHomeModuleTracking,
               ),
               row(
                 HomeModule.tasks,
-                Icons.checklist_rounded,
+                NzIcons.tasks,
                 l.uiHomeModuleTasks,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -268,7 +269,7 @@ Future<void> showHomeDrawer(
               ),
               row(
                 HomeModule.calendar,
-                Icons.calendar_month_outlined,
+                NzIcons.calendarMonth,
                 l.uiHomeModuleCalendar,
               ),
             ],
@@ -277,32 +278,16 @@ Future<void> showHomeDrawer(
           NzMenuGroup(
             label: l.uiHomeGroupContent,
             rows: [
-              row(
-                HomeModule.memory,
-                Icons.lightbulb_outline_rounded,
-                l.uiHomeModuleMemory,
-              ),
-              row(
-                HomeModule.archive,
-                Icons.folder_outlined,
-                l.uiHomeModuleArchive,
-              ),
-              row(
-                HomeModule.meetings,
-                Icons.videocam_outlined,
-                l.uiHomeModuleMeetings,
-              ),
+              row(HomeModule.memory, NzIcons.idea, l.uiHomeModuleMemory),
+              row(HomeModule.archive, NzIcons.folder, l.uiHomeModuleArchive),
+              row(HomeModule.meetings, NzIcons.video, l.uiHomeModuleMeetings),
               row(
                 HomeModule.messages,
-                Icons.mail_outline_rounded,
+                NzIcons.mail,
                 l.uiHomeModuleMessages,
                 trailing: count(counts?.unreadMessages),
               ),
-              row(
-                HomeModule.sheets,
-                Icons.table_chart_outlined,
-                l.uiHomeModuleSheets,
-              ),
+              row(HomeModule.sheets, NzIcons.sheets, l.uiHomeModuleSheets),
             ],
           ),
           const Gap(NizamioSpacing.space4),
@@ -311,7 +296,7 @@ Future<void> showHomeDrawer(
             rows: [
               row(
                 HomeModule.requests,
-                Icons.assignment_turned_in_outlined,
+                NzIcons.assignmentDone,
                 l.uiHomeModuleRequests,
                 trailing: count(
                   counts?.pendingRequests,
@@ -319,18 +304,14 @@ Future<void> showHomeDrawer(
                   ink: c.onWarning,
                 ),
               ),
-              row(
-                HomeModule.budget,
-                Icons.account_balance_wallet_outlined,
-                l.uiHomeModuleBudget,
-              ),
-              row(HomeModule.users, Icons.group_outlined, l.uiHomeModuleUsers),
+              row(HomeModule.budget, NzIcons.budget, l.uiHomeModuleBudget),
+              row(HomeModule.users, NzIcons.group, l.uiHomeModuleUsers),
               row(
                 HomeModule.coordinatorships,
-                Icons.apartment_rounded,
+                NzIcons.coordinatorships,
                 l.uiHomeCoordinatorships,
               ),
-              row(HomeModule.season, Icons.flag_outlined, l.uiHomeModuleSeason),
+              row(HomeModule.season, NzIcons.flag, l.uiHomeModuleSeason),
             ],
           ),
           const Gap(NizamioSpacing.space4),
@@ -339,7 +320,7 @@ Future<void> showHomeDrawer(
             rows: [
               row(
                 HomeModule.simulation,
-                Icons.science_outlined,
+                NzIcons.science,
                 l.uiHomeModuleSimulation,
                 trailing: NzBadge.neutral(label: l.uiHomeBeta, size: NzSize.sm),
               ),
@@ -348,14 +329,10 @@ Future<void> showHomeDrawer(
           const Gap(NizamioSpacing.gapLg),
           NzMenuGroup(
             rows: [
-              row(
-                HomeModule.deleted,
-                Icons.delete_outline_rounded,
-                l.uiHomeDeletedRecords,
-              ),
-              row(HomeModule.help, Icons.help_outline_rounded, l.uiHomeHelp),
+              row(HomeModule.deleted, NzIcons.delete, l.uiHomeDeletedRecords),
+              row(HomeModule.help, NzIcons.help, l.uiHomeHelp),
               NzMenuRow(
-                icon: Icons.logout_rounded,
+                icon: NzIcons.logout,
                 label: l.uiIdentitySignOut,
                 danger: true,
                 onTap: () => close(onSignOut),
@@ -449,7 +426,7 @@ class _SeasonCard extends StatelessWidget {
           ),
           const Gap(NizamioSpacing.space3),
           NzIcon(
-            Icons.unfold_more_rounded,
+            NzIcons.unfold,
             size: NizamioSize.iconSizeSm,
             color: c.textFaint,
           ),
@@ -525,7 +502,7 @@ class _TabletClose extends StatelessWidget {
             dimension: NizamioSize.controlSm,
             child: Center(
               child: NzIcon(
-                Icons.close_rounded,
+                NzIcons.close,
                 size: NizamioSize.iconSizeSm,
                 color: c.text,
               ),

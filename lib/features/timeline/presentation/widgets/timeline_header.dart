@@ -4,6 +4,8 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../domain/timeline.dart';
 import '../chart/timeline_layout.dart';
 import '../timeline_texts.dart';
@@ -76,8 +78,8 @@ class TimelineHeader extends StatelessWidget {
                             context,
                             NizamioMotion.durPress,
                           ),
-                          child: Icon(
-                            Icons.expand_more_rounded,
+                          child: NzIcon(
+                            NzIcons.chevronDown,
                             size: NizamioSize.iconSizeSm,
                             color: c.text,
                           ),
@@ -93,8 +95,8 @@ class TimelineHeader extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.filter_list_rounded,
+                      NzIcon(
+                        NzIcons.filter,
                         size: NizamioSize.iconSizeSm,
                         color: c.text,
                       ),
@@ -290,11 +292,7 @@ class _CoordRow extends StatelessWidget {
                   child: SizedBox.square(
                     dimension: 24,
                     child: on
-                        ? Icon(
-                            Icons.check_rounded,
-                            size: 14,
-                            color: c.onPrimary,
-                          )
+                        ? NzIcon(NzIcons.check, size: 14, color: c.onPrimary)
                         : null,
                   ),
                 ),

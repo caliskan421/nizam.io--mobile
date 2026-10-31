@@ -6,7 +6,8 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
-import '../../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../domain/horizontal_timeline.dart';
 import 'gantt_geometry.dart';
 import 'gantt_painters.dart';
@@ -539,8 +540,8 @@ class _GroupLabel extends StatelessWidget {
                   turns: head.open ? 0.25 : 0,
                   duration: NzMotion.of(context, GanttGeometry.chevronDuration),
                   curve: NizamioMotion.easeSpring,
-                  child: NzPathIcon(
-                    GanttGeometry.chevronRight,
+                  child: NzIcon(
+                    NzIcons.chevronRight,
                     size: NizamioSize.iconSizeSm,
                     color: c.textFaint,
                   ),

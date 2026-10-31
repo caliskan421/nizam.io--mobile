@@ -11,6 +11,7 @@ import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
 import '../application/task_catalog_controller.dart';
@@ -118,18 +119,18 @@ class _TasksPageState extends ConsumerState<TasksPage> {
           title: l.uiTasksTitle,
           actions: [
             NzIconButton.circle(
-              icon: Icons.search_rounded,
+              icon: NzIcons.search,
               semanticLabel: l.uiTasksSearch,
               onPressed: _toggleSearch,
             ),
             NzIconButton.circle(
-              icon: Icons.filter_list_rounded,
+              icon: NzIcons.filter,
               semanticLabel: l.uiTasksFiltersButton,
               dot: state.filter.hasExtra ? context.colors.accentText : null,
               onPressed: _openFilters,
             ),
             NzIconButton.circleAccent(
-              icon: Icons.add_rounded,
+              icon: NzIcons.add,
               semanticLabel: l.uiTasksNewTask,
               onPressed: () => showNewTaskSheet(context, resetTarget: true),
             ),
@@ -139,7 +140,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
         TaskSegmented(
           semanticLabel: l.uiTasksMode,
           labels: [l.uiTasksModeList, l.uiTasksModeTimeline],
-          icons: const [Icons.view_list_rounded, Icons.view_timeline_outlined],
+          icons: const [NzIcons.viewList, NzIcons.timeline],
           selected: 0,
           onSelected: (i) {
             if (i == 1) nav.openTimeline();

@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../nz_icon.dart';
+import '../nz_icons.dart';
 
 /// Boş liste/sonuç. Feature'a özgü isimli yapıcı core'da yoktur; feature kendi metniyle çağırır.
 class NzEmptyState extends StatelessWidget {
@@ -39,7 +40,7 @@ class NzEmptyState extends StatelessWidget {
           children: [
             ExcludeSemantics(
               child: NzIcon(
-                icon ?? Icons.inbox_outlined,
+                icon ?? NzIcons.inbox,
                 size: NizamioSpacing.space12,
                 color: colors.textMuted,
               ),

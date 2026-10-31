@@ -10,6 +10,7 @@ import '../../layout/nz_pane.dart';
 import '../../theme/nz_motion.dart';
 import '../../theme/nz_surfaces.dart';
 import '../nz_icon.dart';
+import '../nz_icons.dart';
 
 /// Alt sayfanın alt sabit eylem satırı kurucusu: sayfa bağlamıyla çağrılır (kapatmak için
 /// `Navigator.pop(sheetContext, değer)`).
@@ -377,7 +378,7 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
                       minWidth: NizamioSpacing.space12,
                       minHeight: NizamioSpacing.space12,
                     ),
-                    icon: const NzIcon(Icons.close_rounded),
+                    icon: const NzIcon(NzIcons.close),
                     onPressed: () => Navigator.of(context).maybePop(),
                   ),
               ],

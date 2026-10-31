@@ -19,6 +19,7 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/lists/lists.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
 import '../application/chat_controller.dart';
@@ -430,10 +431,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 tone: NzGlassTone.float,
                 child: SizedBox.square(
                   dimension: NizamioSize.glassButton,
-                  child: NzIcon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: c.text,
-                  ),
+                  child: NzIcon(NzIcons.chevronDown, color: c.text),
                 ),
               ),
             ),
@@ -559,9 +557,7 @@ class _ComposerArea extends ConsumerWidget {
                 ),
               if (ctxMsg != null)
                 NzComposerContext(
-                  icon: view.edit != null
-                      ? Icons.edit_outlined
-                      : Icons.reply_rounded,
+                  icon: view.edit != null ? NzIcons.edit : NzIcons.reply,
                   title: view.edit != null
                       ? l.uiMessagesEditMessage
                       : ctxMsg.from == catalog.me

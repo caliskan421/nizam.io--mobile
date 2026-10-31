@@ -7,6 +7,7 @@ import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
 import '../../theme/nz_surfaces.dart';
 import '../nz_icon.dart';
+import '../nz_icons.dart';
 import '../surfaces/nz_glass.dart';
 
 /// Sohbetin altındaki yazma alanı (tasarım sistemi `components/Composer`, `.m-composer`):
@@ -130,7 +131,7 @@ class NzComposer extends StatelessWidget {
                         onTap: onAttach,
                         // Kaynak ek düğmesi ataçtır (`attach_file` yolu).
                         child: NzIcon(
-                          Icons.attach_file_rounded,
+                          NzIcons.attach,
                           color: attachOpen ? c.accentText : c.textMuted,
                         ),
                       ),
@@ -153,7 +154,7 @@ class NzComposer extends StatelessWidget {
                         fill: canSend ? c.primary : c.surfaceRaised,
                         onTap: canSend ? onSend : null,
                         child: NzIcon(
-                          Icons.arrow_upward_rounded,
+                          NzIcons.arrowUp,
                           size: NizamioSize.iconSizeSm + 2,
                           color: canSend ? c.onPrimary : c.textFaint,
                         ),
@@ -251,11 +252,7 @@ class NzRefChip extends StatelessWidget {
               radius: NizamioSpacing.space4,
               child: Padding(
                 padding: const EdgeInsets.all(6),
-                child: NzIcon(
-                  Icons.close_rounded,
-                  size: 12,
-                  color: c.textMuted,
-                ),
+                child: NzIcon(NzIcons.close, size: 12, color: c.textMuted),
               ),
             ),
           ),
@@ -336,7 +333,7 @@ class NzComposerContext extends StatelessWidget {
               tooltip: cancelLabel,
               onPressed: onCancel,
               icon: NzIcon(
-                Icons.close_rounded,
+                NzIcons.close,
                 size: NizamioSize.iconSizeSm,
                 color: c.textMuted,
               ),

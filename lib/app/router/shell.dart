@@ -11,9 +11,9 @@ import '../../core/ui/page/nz_app_nav.dart';
 import '../../core/ui/page/nz_shell_events.dart';
 import '../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../core/ui/widgets/navigation/nz_floating_nav.dart';
-import '../../core/ui/widgets/navigation/nz_path_icon.dart';
 import '../../core/ui/widgets/navigation/nz_tablet_rail.dart';
 import '../../core/ui/widgets/navigation/nz_top_bar.dart';
+import '../../core/ui/widgets/nz_icons.dart';
 import '../../features/activity/activity.dart';
 import '../../features/archive/archive.dart';
 import '../../features/coordinatorships/coordinatorships.dart';
@@ -22,9 +22,6 @@ import '../../features/scope/scope.dart';
 import '../../features/tasks/tasks.dart';
 import 'routes.dart';
 import 'split.dart';
-
-/// Asistan ikonu: telefon alt menüsü ve tablet rayı aynı ikonu çizer.
-const _assistantIcon = Icons.smart_toy_outlined;
 
 /// Alt menünün üçüncü öğesi: son girilen modül (README "Gezinme"). Üçü aynı kabuk dalındadır.
 enum ShellModule { coordinatorships, archive, messages, calendar }
@@ -80,40 +77,40 @@ List<NzShellTab> shellTabsFor(
   final historyCaption = ref.watch(activityNavCaptionProvider);
   return [
     NzShellTab(
-      icon: Icons.home_outlined,
-      selectedIcon: Icons.home_rounded,
+      icon: NzIcons.home,
+      selectedIcon: NzIcons.homeFilled,
       label: inHistory ? l.uiRouterTabHistory : l.uiRouterTabHome,
       caption: inHistory ? historyCaption : l.uiRouterTabHomeCaption,
     ),
     NzShellTab(
-      icon: Icons.checklist_rounded,
-      selectedIcon: Icons.checklist_rounded,
+      icon: NzIcons.tasks,
+      selectedIcon: NzIcons.tasks,
       label: l.uiRouterTabTasks,
       caption: ref.watch(tasksNavCaptionProvider),
     ),
     switch (module) {
       ShellModule.coordinatorships => NzShellTab(
-        icon: Icons.apartment_rounded,
-        selectedIcon: Icons.apartment_rounded,
+        icon: NzIcons.coordinatorships,
+        selectedIcon: NzIcons.coordinatorships,
         label: l.uiRouterTabCoordinatorships,
         caption: ref.watch(coordinatorshipsNavCaptionProvider),
         wide: true,
       ),
       ShellModule.archive => NzShellTab(
-        icon: Icons.folder_outlined,
-        selectedIcon: Icons.folder_rounded,
+        icon: NzIcons.folder,
+        selectedIcon: NzIcons.folderFilled,
         label: l.uiRouterTabArchive,
         caption: ref.watch(archiveNavCaptionProvider),
       ),
       ShellModule.messages => NzShellTab(
-        icon: Icons.chat_bubble_outline_rounded,
-        selectedIcon: Icons.chat_bubble_rounded,
+        icon: NzIcons.messages,
+        selectedIcon: NzIcons.messagesFilled,
         label: l.uiRouterTabMessages,
         caption: ref.watch(messagesNavCaptionProvider),
       ),
       ShellModule.calendar => NzShellTab(
-        icon: Icons.calendar_today_outlined,
-        selectedIcon: Icons.calendar_today_rounded,
+        icon: NzIcons.calendar,
+        selectedIcon: NzIcons.calendarFilled,
         label: l.uiHomeModuleCalendar,
       ),
     },
@@ -292,7 +289,7 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
                   ),
               ],
               action: NzNavAction(
-                icon: _assistantIcon,
+                icon: NzIcons.assistant,
                 semanticLabel: context.l10n.uiRouterAssistant,
                 onPressed: () =>
                     NzToast.show(context, context.l10n.uiRouterAssistantSoon),
@@ -403,19 +400,29 @@ class AppTabletRail extends ConsumerWidget {
         extent: NzTabletMetrics.railBrand,
       ),
       items: [
-        NzRailItem(iconPath: NzIconPaths.home, label: l.uiRouterTabHome),
-        NzRailItem(iconPath: NzIconPaths.tasks, label: l.uiRouterTabTasks),
         NzRailItem(
-          iconPath: NzIconPaths.calendar,
+          icon: NzIcons.home,
+          selectedIcon: NzIcons.homeFilled,
+          label: l.uiRouterTabHome,
+        ),
+        NzRailItem(icon: NzIcons.tasks, label: l.uiRouterTabTasks),
+        NzRailItem(
+          icon: NzIcons.calendar,
+          selectedIcon: NzIcons.calendarFilled,
           label: l.uiHomeModuleCalendar,
         ),
         NzRailItem(
-          iconPath: NzIconPaths.coordinatorships,
+          icon: NzIcons.coordinatorships,
           label: l.uiRouterTabCoordinatorships,
         ),
-        NzRailItem(iconPath: NzIconPaths.archive, label: l.uiRouterTabArchive),
         NzRailItem(
-          iconPath: NzIconPaths.messages,
+          icon: NzIcons.folder,
+          selectedIcon: NzIcons.folderFilled,
+          label: l.uiRouterTabArchive,
+        ),
+        NzRailItem(
+          icon: NzIcons.messages,
+          selectedIcon: NzIcons.messagesFilled,
           label: l.uiRouterTabMessages,
           badge: unread,
         ),
@@ -427,7 +434,6 @@ class AppTabletRail extends ConsumerWidget {
       menuLabel: l.uiRouterAllModules,
       onMenu: () => context.appNav.openMenu(context),
       assistantLabel: l.uiRouterAssistant,
-      assistantIcon: _assistantIcon,
       onBell: () => showNotificationsSoon(context),
       onAssistant: () => NzToast.show(context, l.uiRouterAssistantSoon),
     );

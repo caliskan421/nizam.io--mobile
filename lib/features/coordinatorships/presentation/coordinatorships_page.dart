@@ -10,6 +10,7 @@ import '../../../core/ui/page/nz_shell_events.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
@@ -185,14 +186,14 @@ Future<void> showCoordinatorshipsShortcuts(
       NzFlyoutSection(l.uiCoordFlySectionList),
       NzFlyoutItem(
         label: l.uiCoordFlyTimelineAll,
-        icon: Icons.view_timeline_outlined,
+        icon: NzIcons.timeline,
         // Prototip: zaman çizelgesi bütün koordinatörlükler seçili açılır.
         onSelected: () =>
             nav.openTimeline(coordinatorship: TimelinePage.allCoordinatorships),
       ),
       NzFlyoutItem(
         label: l.uiCoordFlyAdd,
-        icon: Icons.add_rounded,
+        icon: NzIcons.add,
         onSelected: () {
           if (messenger.mounted) {
             NzToast.show(messenger, l.uiCoordToastAddForm);
@@ -201,9 +202,9 @@ Future<void> showCoordinatorshipsShortcuts(
       ),
       NzFlyoutSection(l.uiCoordFlySectionSort),
       for (final (s, icon) in const [
-        (CoordinatorshipSort.name, Icons.sort_by_alpha_rounded),
-        (CoordinatorshipSort.late, Icons.warning_amber_rounded),
-        (CoordinatorshipSort.progress, Icons.show_chart_rounded),
+        (CoordinatorshipSort.name, NzIcons.sortAlpha),
+        (CoordinatorshipSort.late, NzIcons.warning),
+        (CoordinatorshipSort.progress, NzIcons.lineChart),
       ])
         NzFlyoutItem(
           label: l.coordSortLabel(s),

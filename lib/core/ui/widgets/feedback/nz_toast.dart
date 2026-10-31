@@ -7,6 +7,7 @@ import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
 import '../nz_icon.dart';
+import '../nz_icons.dart';
 
 enum NzToastTone { info, success, danger }
 
@@ -107,9 +108,9 @@ class NzToastBubble extends StatelessWidget {
     final inverse = dark ? NizamioColors.light : NizamioColors.dark;
     final foreground = c.background;
     final (icon, iconColor) = switch (tone) {
-      NzToastTone.info => (Icons.info_outline_rounded, foreground),
-      NzToastTone.success => (Icons.check_rounded, inverse.accentText),
-      NzToastTone.danger => (Icons.error_outline_rounded, inverse.danger),
+      NzToastTone.info => (NzIcons.info, foreground),
+      NzToastTone.success => (NzIcons.check, inverse.accentText),
+      NzToastTone.danger => (NzIcons.error, inverse.danger),
     };
     final style = context.text.labelMd.copyWith(color: foreground);
     final label = actionLabel;

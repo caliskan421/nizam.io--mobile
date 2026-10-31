@@ -6,22 +6,31 @@ import '../../extensions/context_ext.dart';
 import '../../layout/nz_pane.dart';
 import '../../theme/nz_motion.dart';
 import '../buttons/nz_pressable.dart';
-import 'nz_path_icon.dart';
+import '../nz_icon.dart';
+import '../nz_icons.dart';
 
-/// Ray öğesi: kaynak SVG yolu, etiket ve isteğe bağlı sayı rozeti.
+/// Ray öğesi: ikon (telefon alt menüsüyle aynı [NzIcons] çifti), etiket ve isteğe bağlı sayı
+/// rozeti.
 @immutable
 class NzRailItem {
-  const NzRailItem({required this.iconPath, required this.label, this.badge});
+  const NzRailItem({
+    required this.icon,
+    IconData? selectedIcon,
+    required this.label,
+    this.badge,
+  }) : selectedIcon = selectedIcon ?? icon;
 
-  /// [NzIconPaths] yolu.
-  final String iconPath;
+  final IconData icon;
+
+  /// Etkinken çizilen ikon (dolu varyant); verilmezse [icon].
+  final IconData selectedIcon;
   final String label;
 
   /// Sayı rozeti (`t-badge--count`, accent); null ya da 0 → yok.
   final int? badge;
 }
 
-/// Tablet gezinme rayı (prototip `nav[aria-label="Ana menü"]`): 100 genişlik, `bg-base`,
+/// Tablet gezinme rayı (prototip `nav[aria-label="Ana menü"]`; ikonlar telefonla aynı [NzIcons]): 100 genişlik, `bg-base`,
 /// sağda 1 px `border-subtle`; üstte 36 px ürün işareti ([brand]), altında modül öğeleri
 /// (60×34 kapsül, etkinken `nav-highlight` dolgu ve `accent-text` ikon; 10.5/13 etiket),
 /// boşluk, en altta bildirim zili (44), tüm modüller menüsü (44 cam daire) ve asistan
@@ -39,7 +48,6 @@ class NzTabletRail extends StatelessWidget {
     required this.menuLabel,
     required this.onMenu,
     required this.assistantLabel,
-    required this.assistantIcon,
     required this.onAssistant,
     this.bellDot = false,
   });
@@ -64,9 +72,6 @@ class NzTabletRail extends StatelessWidget {
   final String menuLabel;
   final VoidCallback onMenu;
   final String assistantLabel;
-
-  /// Asistan ikonu; telefon alt menüsüyle aynı ikon verilir.
-  final IconData assistantIcon;
   final VoidCallback onAssistant;
 
   /// Etiket en çok bu kadar büyür (sabit 100 px ray; tam ad okuyucu etiketindedir).
@@ -95,8 +100,8 @@ class NzTabletRail extends StatelessWidget {
         _GlassButton(
           label: menuLabel,
           extent: NzTabletMetrics.railButton,
-          icon: NzPathIcon(
-            NzIconPaths.menu,
+          icon: NzIcon(
+            NzIcons.menu,
             size: NizamioSize.iconSize,
             color: c.glassInk,
           ),
@@ -106,8 +111,8 @@ class NzTabletRail extends StatelessWidget {
         _GlassButton(
           label: assistantLabel,
           extent: NzTabletMetrics.railAssistant,
-          icon: Icon(
-            assistantIcon,
+          icon: NzIcon(
+            NzIcons.assistant,
             size: NizamioSpacing.space6,
             color: c.accentText,
           ),
@@ -209,8 +214,9 @@ class _RailButton extends StatelessWidget {
                             NizamioRadius.pill,
                           ),
                         ),
-                        child: NzPathIcon(
-                          item.iconPath,
+                        child: NzIcon(
+                          selected ? item.selectedIcon : item.icon,
+                          size: NizamioSize.iconSize,
                           color: selected ? c.accentText : ink,
                         ),
                       ),
@@ -336,7 +342,7 @@ class _BellButton extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              NzPathIcon(NzIconPaths.bell, color: c.text),
+              NzIcon(NzIcons.bell, size: NizamioSize.iconSize, color: c.text),
               if (dot)
                 Positioned(
                   top: NzTabletMetrics.bellDotTop,

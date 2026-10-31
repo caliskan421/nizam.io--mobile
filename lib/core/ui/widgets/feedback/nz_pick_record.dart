@@ -3,7 +3,8 @@ import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
-import '../navigation/nz_path_icon.dart';
+import '../nz_icon.dart';
+import '../nz_icons.dart';
 
 /// Tablet sağ bölmesinde kayıt seçilmemişken gösterilen yer tutucu (prototip
 /// `TB_DEF.calendar = 'empty'`): ikon karosu, başlık ve açıklama. Metni çağıran verir.
@@ -34,7 +35,11 @@ class NzPickRecord extends StatelessWidget {
                 color: c.surfaceRaised,
                 borderRadius: BorderRadius.circular(NizamioRadius.row),
               ),
-              child: NzPathIcon(NzIconPaths.pickRecord, color: c.textMuted),
+              child: NzIcon(
+                NzIcons.eventAvailable,
+                size: NizamioSize.iconSize,
+                color: c.textMuted,
+              ),
             ),
             const Gap(NizamioSpacing.space3),
             Semantics(

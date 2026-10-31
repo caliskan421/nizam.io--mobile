@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../nz_icon.dart';
+import '../nz_icons.dart';
 import '../nz_size.dart';
 
 /// Prototip avatar ölçüleri (`.rp-av--sm` 26 · `.rp-av` 32 · `--lg` 44 · `--xl` 52).
@@ -36,7 +37,7 @@ class NzAvatar extends StatelessWidget {
   /// Simge avatarı; [semanticLabel] verilmezse okuyucudan gizlenir.
   const NzAvatar.icon({
     super.key,
-    this.icon = Icons.person_outline,
+    this.icon = NzIcons.person,
     this.semanticLabel,
     this.size = NzSize.md,
     this.tone,

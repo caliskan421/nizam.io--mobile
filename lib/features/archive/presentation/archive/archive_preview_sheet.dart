@@ -7,6 +7,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/archive_folder_controller.dart';
@@ -133,8 +134,8 @@ class _PreviewState extends ConsumerState<_Preview> {
                 style: t.monoSm.copyWith(color: c.textFaint),
               ),
             ),
-            round(Icons.chevron_left_rounded, l.uiArchivePrev, () => go(-1)),
-            round(Icons.chevron_right_rounded, l.uiArchiveNext, () => go(1)),
+            round(NzIcons.chevronLeft, l.uiArchivePrev, () => go(-1)),
+            round(NzIcons.chevronRight, l.uiArchiveNext, () => go(1)),
           ],
         ),
         const Gap(NizamioSpacing.space3),
@@ -236,7 +237,7 @@ class _PreviewState extends ConsumerState<_Preview> {
             Expanded(
               child: NzButton.primary(
                 label: l.uiArchiveDownload,
-                icon: Icons.download_rounded,
+                icon: NzIcons.download,
                 expand: true,
                 onPressed: () =>
                     widget.onToast('${f.name} ${l.uiArchiveDownloading}'),
@@ -244,17 +245,17 @@ class _PreviewState extends ConsumerState<_Preview> {
             ),
             const Gap(NizamioSpacing.space1),
             NzIconButton.circle(
-              icon: Icons.sell_outlined,
+              icon: NzIcons.tag,
               semanticLabel: l.uiArchiveRetag,
               onPressed: () => widget.onToast(l.uiArchiveRetagSoon),
             ),
             NzIconButton.circle(
-              icon: Icons.drive_file_move_outline,
+              icon: NzIcons.folderMove,
               semanticLabel: l.uiArchiveMove,
               onPressed: () => widget.onToast(l.uiArchiveMoveSoon),
             ),
             NzIconButton.circle(
-              icon: Icons.delete_outline_rounded,
+              icon: NzIcons.delete,
               semanticLabel: l.uiArchiveDelete,
               onPressed: () {
                 ref

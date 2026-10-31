@@ -6,6 +6,7 @@ import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../application/current_program_controller.dart';
 import '../application/home_dashboard_controller.dart';
 import 'home/home_texts.dart';
@@ -29,13 +30,13 @@ class RootTopBar extends ConsumerWidget {
       subtitle: program,
       actions: [
         NzIconButton(
-          icon: Icons.notifications_none_rounded,
+          icon: NzIcons.bell,
           semanticLabel: bell.label,
           dot: bell.dot ? context.colors.danger : null,
           onPressed: () => showNotificationsSoon(context),
         ),
         NzIconButton.glass(
-          icon: Icons.menu_rounded,
+          icon: NzIcons.menu,
           semanticLabel: l.uiHomeMenu,
           onPressed: () => context.appNav.openMenu(context),
         ),

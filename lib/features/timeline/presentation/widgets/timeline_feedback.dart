@@ -5,6 +5,8 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 
 /// Belirli süre görünen, süresi dolunca [onDone] çağıran sayfa içi bildirim (prototip `toast`,
 /// 2.6 sn). Kabuk dışı tam ekranda kartın/şeridin üstünde kalması için sayfa katmanındadır.
@@ -124,8 +126,8 @@ class _TimelineUndoSnackState extends State<TimelineUndoSnack>
                 padding: const EdgeInsets.fromLTRB(14, 10, 6, 12),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.redo_rounded,
+                    NzIcon(
+                      NzIcons.redo,
                       size: NizamioSize.iconSizeSm,
                       color: fg,
                     ),

@@ -7,6 +7,7 @@ import '../../../core/ui/layout/nz_pane.dart';
 import '../../../core/ui/theme/nz_motion.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 
 /// Görev ekranlarının küçük ortak parçaları (prototip `.rp-seg`, `.rp-chipbtn`,
@@ -330,7 +331,7 @@ class TaskCheckRow extends StatelessWidget {
             ),
             child: selected
                 ? NzIcon(
-                    Icons.check_rounded,
+                    NzIcons.check,
                     size: NizamioSize.iconSizeSm,
                     color: c.onPrimary,
                   )
@@ -352,7 +353,7 @@ class TaskCheckRow extends StatelessWidget {
             ),
             child: selected
                 ? NzIcon(
-                    Icons.check_rounded,
+                    NzIcons.check,
                     size: NizamioSize.iconSizeSm - 2,
                     color: c.onPrimary,
                   )
@@ -527,7 +528,7 @@ class TaskDateField extends StatelessWidget {
                     ),
                   ),
                   NzIcon(
-                    Icons.calendar_today_outlined,
+                    NzIcons.calendar,
                     size: NizamioSize.iconSizeSm,
                     color: c.textMuted,
                   ),

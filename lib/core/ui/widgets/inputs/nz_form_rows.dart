@@ -6,6 +6,7 @@ import '../../extensions/context_ext.dart';
 import '../../layout/nz_pane.dart';
 import '../../theme/nz_motion.dart';
 import '../nz_icon.dart';
+import '../nz_icons.dart';
 import '../surfaces/nz_reveal.dart';
 import 'nz_switch.dart';
 
@@ -274,7 +275,7 @@ class _RowView extends StatelessWidget {
                   duration: NzMotion.of(context, _chevDuration),
                   curve: NizamioMotion.easeSpring,
                   child: NzIcon(
-                    Icons.chevron_right_rounded,
+                    NzIcons.chevronRight,
                     size: NizamioSize.iconSizeSm,
                     color: c.textFaint,
                   ),

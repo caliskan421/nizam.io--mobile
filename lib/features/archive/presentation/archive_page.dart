@@ -13,6 +13,7 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
 import '../application/archive_controller.dart';
@@ -71,29 +72,29 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
         NzFlyoutSection(l.uiArchiveSectionArchive),
         NzFlyoutItem(
           label: l.uiArchiveUpload,
-          icon: Icons.upload_rounded,
+          icon: NzIcons.upload,
           accent: true,
           onSelected: () => _toast(l.uiArchiveUploadSoon),
         ),
         NzFlyoutItem(
           label: l.uiArchiveDownloadAll,
-          icon: Icons.download_rounded,
+          icon: NzIcons.download,
           onSelected: () => _toast(l.uiArchiveDownloadAllToast),
         ),
         NzFlyoutItem(
           label: l.uiArchiveSearch,
-          icon: Icons.search_rounded,
+          icon: NzIcons.search,
           onSelected: _toggleSearch,
         ),
         NzFlyoutItem(
           label: l.uiArchiveCreateFolder,
-          icon: Icons.create_new_folder_outlined,
+          icon: NzIcons.folderNew,
           onSelected: () => _toast(l.uiArchiveCreateFolderSoon),
         ),
         NzFlyoutSection(l.uiArchiveSectionGo),
         NzFlyoutItem(
           label: l.uiArchiveGoCoordinatorships,
-          icon: Icons.apartment_rounded,
+          icon: NzIcons.coordinatorships,
           onSelected: context.appNav.openCoordinatorships,
         ),
       ],
@@ -124,13 +125,13 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
             Semantics(
               selected: searchOpen,
               child: NzIconButton.circle(
-                icon: Icons.search_rounded,
+                icon: NzIcons.search,
                 semanticLabel: l.uiArchiveSearch,
                 onPressed: _toggleSearch,
               ),
             ),
             NzIconButton.circleAccent(
-              icon: Icons.arrow_upward_rounded,
+              icon: NzIcons.arrowUp,
               semanticLabel: l.uiArchiveUpload,
               onPressed: () => _toast(l.uiArchiveUploadSoon),
             ),
@@ -313,7 +314,7 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
                         duration: const Duration(milliseconds: 350),
                         curve: NizamioMotion.easeSpring,
                         child: NzIcon(
-                          Icons.keyboard_arrow_down_rounded,
+                          NzIcons.chevronDown,
                           size: 16,
                           color: c.textFaint,
                         ),
@@ -461,7 +462,7 @@ class _TagsPanelState extends ConsumerState<_TagsPanel> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: NzIcon(
-                                  Icons.add_rounded,
+                                  NzIcons.add,
                                   size: 16,
                                   color: on ? c.onPrimary : c.textFaint,
                                 ),
@@ -567,7 +568,7 @@ class _Folders extends ConsumerWidget {
                     ),
                     const Gap(NizamioSpacing.space1),
                     NzIcon(
-                      Icons.swap_vert_rounded,
+                      NzIcons.swapVertical,
                       size: NizamioSize.iconSizeSm,
                       color: c.textMuted,
                     ),

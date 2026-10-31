@@ -87,7 +87,7 @@ abstract final class NzTabletMetrics {
   static bool splitsAt(double windowWidth) =>
       WindowClass.fromWidth(windowWidth).isExpanded;
 
-  /// Kaynağın tablet görsel kuralları (SVG ikonlar, merkezi modal, ortada giriş) çift bölme
+  /// Kaynağın tablet görsel kuralları (merkezi modal, ortada giriş) çift bölme
   /// genişliğinde uygulanır; 600–839 (kaynakta tanımsız) telefon görselindedir.
   static bool tabletVisualAt(double windowWidth) => splitsAt(windowWidth);
 

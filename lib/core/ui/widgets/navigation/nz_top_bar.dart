@@ -6,6 +6,7 @@ import '../../extensions/context_ext.dart';
 import '../../layout/nz_pane.dart';
 import '../../theme/nz_surfaces.dart';
 import '../buttons/nz_icon_button.dart';
+import '../nz_icons.dart';
 import '../nz_size.dart';
 import '../surfaces/nz_glass.dart';
 
@@ -180,7 +181,7 @@ extension on _TopBarDelegate {
               children: [
                 if (showBack) ...[
                   NzIconButton(
-                    icon: Icons.arrow_back_ios_new_rounded,
+                    icon: NzIcons.back,
                     semanticLabel:
                         bar.backLabel ??
                         MaterialLocalizations.of(context).backButtonTooltip,

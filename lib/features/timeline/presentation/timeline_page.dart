@@ -9,6 +9,7 @@ import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
 import '../application/timeline_controller.dart';
@@ -124,14 +125,8 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                     if (i == 0) _toList();
                   },
                   tabs: [
-                    NzPillTab(
-                      label: l.uiTimelineList,
-                      icon: Icons.list_rounded,
-                    ),
-                    NzPillTab(
-                      label: l.uiTimelineTitle,
-                      icon: Icons.view_timeline_outlined,
-                    ),
+                    NzPillTab(label: l.uiTimelineList, icon: NzIcons.list),
+                    NzPillTab(label: l.uiTimelineTitle, icon: NzIcons.timeline),
                   ],
                 ),
               ),

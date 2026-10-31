@@ -7,7 +7,8 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
-import '../../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../domain/horizontal_timeline.dart';
 import '../timeline_texts.dart';
 import 'gantt_geometry.dart';
@@ -269,8 +270,8 @@ class GanttSelectionCard extends StatelessWidget {
                             behavior: HitTestBehavior.opaque,
                             onTap: onClose,
                             child: Center(
-                              child: NzPathIcon(
-                                GanttGeometry.close,
+                              child: NzIcon(
+                                NzIcons.close,
                                 size: NizamioSize.iconSizeSm,
                                 color: c.textMuted,
                               ),

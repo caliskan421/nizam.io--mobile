@@ -10,6 +10,7 @@ import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/tasks_list_controller.dart';
 import '../../domain/task_catalog.dart';
@@ -379,7 +380,7 @@ class _FilterChip extends StatelessWidget {
               ),
             ),
             NzIconButton(
-              icon: Icons.close_rounded,
+              icon: NzIcons.close,
               semanticLabel: removeLabel,
               onPressed: onRemove,
             ),
@@ -450,7 +451,7 @@ class TaskSortMenu extends StatelessWidget {
                   turns: controller.isOpen ? 0.5 : 0,
                   duration: NzMotion.of(context, NizamioMotion.durPress),
                   child: NzIcon(
-                    Icons.expand_more_rounded,
+                    NzIcons.chevronDown,
                     size: NizamioSize.iconSizeSm,
                     color: c.textMuted,
                   ),
@@ -497,7 +498,7 @@ class TaskSortMenu extends StatelessWidget {
                             NizamioMotion.durPress,
                           ),
                           child: NzIcon(
-                            Icons.arrow_upward_rounded,
+                            NzIcons.arrowUp,
                             size: NizamioSize.iconSizeSm,
                             color: c.accentText,
                           ),
@@ -505,7 +506,7 @@ class TaskSortMenu extends StatelessWidget {
                       ),
                     )
                   : NzIcon(
-                      Icons.check_rounded,
+                      NzIcons.check,
                       size: NizamioSize.iconSizeSm,
                       color: c.accentText,
                     )
@@ -576,7 +577,7 @@ class _GroupHead extends StatelessWidget {
                   turns: open ? 0 : -0.25,
                   duration: NzMotion.of(context, NizamioMotion.durPress),
                   child: NzIcon(
-                    Icons.expand_more_rounded,
+                    NzIcons.chevronDown,
                     size: NizamioSize.iconSizeSm,
                     color: c.textMuted,
                   ),
@@ -668,13 +669,9 @@ class TaskCardView extends StatelessWidget {
             tone: NzTone.waiting,
           ),
         if (task.files > 0)
-          counter(Icons.description_outlined, task.files, l.uiTasksFilesTail),
+          counter(NzIcons.document, task.files, l.uiTasksFilesTail),
         if (task.notes > 0)
-          counter(
-            Icons.chat_bubble_outline_rounded,
-            task.notes,
-            l.uiTasksNotesTail,
-          ),
+          counter(NzIcons.messages, task.notes, l.uiTasksNotesTail),
       ],
       onTap: onTap,
       semanticLabel: [
@@ -721,31 +718,31 @@ Future<void> showTasksShortcuts(
       for (final s in TaskSort.values)
         NzFlyoutItem(
           label: l.sortShort(s),
-          icon: Icons.swap_vert_rounded,
+          icon: NzIcons.swapVertical,
           selected: s == state.sort,
           onSelected: () => ctl.selectSort(s),
         ),
       NzFlyoutSection(l.uiTasksFlyTasks),
       NzFlyoutItem(
         label: l.uiTasksNewTask,
-        icon: Icons.add_rounded,
+        icon: NzIcons.add,
         accent: true,
         onSelected: onNewTask,
       ),
       NzFlyoutItem(
         label: l.uiTasksModeTimeline,
         caption: l.uiTasksFlyTimelineCaption,
-        icon: Icons.view_timeline_outlined,
+        icon: NzIcons.timeline,
         onSelected: onTimeline,
       ),
       NzFlyoutItem(
         label: l.uiTasksFlySearch,
-        icon: Icons.search_rounded,
+        icon: NzIcons.search,
         onSelected: onSearch,
       ),
       NzFlyoutItem(
         label: l.uiTasksFlyFilter,
-        icon: Icons.filter_list_rounded,
+        icon: NzIcons.filter,
         onSelected: onFilters,
       ),
     ],

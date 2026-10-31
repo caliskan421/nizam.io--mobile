@@ -3,6 +3,8 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../domain/timeline.dart';
 import '../timeline_texts.dart';
 import 'timeline_controls.dart';
@@ -58,7 +60,7 @@ class TimelineZoomControls extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _Square(
-                    icon: Icons.add_rounded,
+                    icon: NzIcons.add,
                     label: l.uiTimelineZoomIn,
                     onTap: canIn ? onZoomIn : null,
                   ),
@@ -79,7 +81,7 @@ class TimelineZoomControls extends StatelessWidget {
                     ),
                   ),
                   _Square(
-                    icon: Icons.remove_rounded,
+                    icon: NzIcons.remove,
                     label: l.uiTimelineZoomOut,
                     onTap: canOut ? onZoomOut : null,
                   ),
@@ -96,7 +98,7 @@ class TimelineZoomControls extends StatelessWidget {
                 color: overview ? c.text : decoration.color,
               ),
               child: _Square(
-                icon: Icons.view_week_outlined,
+                icon: NzIcons.viewWeek,
                 label: l.uiTimelineOverview,
                 color: overview ? c.background : c.text,
                 onTap: onOverview,
@@ -107,7 +109,7 @@ class TimelineZoomControls extends StatelessWidget {
           DecoratedBox(
             decoration: decoration,
             child: _Square(
-              icon: Icons.info_outline_rounded,
+              icon: NzIcons.info,
               label: l.uiTimelineLegendOpen,
               onTap: onLegend,
             ),
@@ -142,7 +144,7 @@ class _Square extends StatelessWidget {
       radius: NizamioRadius.pill,
       child: SizedBox.square(
         dimension: TimelineZoomControls.extent,
-        child: Icon(
+        child: NzIcon(
           icon,
           size: NizamioSize.iconSizeSm,
           color: onTap == null ? fg.withValues(alpha: 0.35) : fg,

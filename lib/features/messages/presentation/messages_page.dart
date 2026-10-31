@@ -15,6 +15,7 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/lists/lists.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
@@ -81,23 +82,23 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
         NzFlyoutSection(l.uiMessagesSectionMessages),
         NzFlyoutItem(
           label: l.uiMessagesNewMessage,
-          icon: Icons.edit_outlined,
+          icon: NzIcons.edit,
           accent: true,
           onSelected: _newChat,
         ),
         NzFlyoutItem(
           label: l.uiMessagesSearch,
-          icon: Icons.search_rounded,
+          icon: NzIcons.search,
           onSelected: _toggleSearch,
         ),
         NzFlyoutItem(
           label: l.uiMessagesUnreadOnly,
-          icon: Icons.schedule_rounded,
+          icon: NzIcons.clock,
           onSelected: () => _ctrl.setFilter(ChatFilter.unread),
         ),
         NzFlyoutItem(
           label: l.uiMessagesMarkAllRead,
-          icon: Icons.done_rounded,
+          icon: NzIcons.check,
           onSelected: () {
             ref.read(chatsControllerProvider.notifier).markAllRead();
             _ctrl.setFilter(ChatFilter.all);
@@ -139,13 +140,13 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
             Semantics(
               selected: view.searchOpen,
               child: NzIconButton.circle(
-                icon: Icons.search_rounded,
+                icon: NzIcons.search,
                 semanticLabel: l.uiMessagesSearch,
                 onPressed: _toggleSearch,
               ),
             ),
             NzIconButton.circleAccent(
-              icon: Icons.edit_outlined,
+              icon: NzIcons.edit,
               semanticLabel: l.uiMessagesNewMessage,
               onPressed: _newChat,
             ),

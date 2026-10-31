@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/quick_forms_controller.dart';
 import '../../application/task_catalog_controller.dart';
@@ -76,7 +77,7 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
           rows: [
             NzFormRow(
               label: l.uiTasksFieldCoord,
-              icon: Icons.apartment_rounded,
+              icon: NzIcons.coordinatorships,
               value: coord?.name ?? l.uiTasksPick,
               valueSet: coord != null,
               // Kaynak: seçilmemiş "Seç" `accent-text`, seçili `ink-muted`.
@@ -100,7 +101,7 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
             ),
             NzFormRow(
               label: l.uiTasksAssignee,
-              icon: Icons.person_outline_rounded,
+              icon: NzIcons.person,
               value: assigneeValue,
               valueSet: f.assignees.isNotEmpty,
               valueColor: f.assignees.isNotEmpty
@@ -133,7 +134,7 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
             ),
             NzFormRow(
               label: l.uiTasksRowDate,
-              icon: Icons.calendar_today_outlined,
+              icon: NzIcons.calendar,
               value: dateValue,
               valueSet: true,
               valueColor: f.end.isBefore(f.start) ? c.danger : c.textMuted,
@@ -163,7 +164,7 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
             ),
             NzFormRow.toggle(
               label: l.uiTasksEvidenceRequired,
-              icon: Icons.attach_file_rounded,
+              icon: NzIcons.attach,
               value: f.evidenceRequired,
               onChanged: (v) => ctl.setEvidenceRequired(value: v),
             ),

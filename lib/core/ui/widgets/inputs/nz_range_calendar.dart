@@ -6,6 +6,7 @@ import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
 import '../nz_icon.dart';
+import '../nz_icons.dart';
 
 /// Ay takvimi (tasarım `components/RangeCalendar`; prototip yeni görev "Tarih" ve toplantı
 /// "Tarih" satırları). Durumsuz: seçim kuralı ekranın denetleyicisindedir.
@@ -101,11 +102,7 @@ class NzRangeCalendar extends StatelessWidget {
         children: [
           Row(
             children: [
-              nav(
-                Icons.chevron_left_rounded,
-                material.previousMonthTooltip,
-                -1,
-              ),
+              nav(NzIcons.chevronLeft, material.previousMonthTooltip, -1),
               Expanded(
                 child: Text(
                   DateFormat.yMMMM(locale).format(first),
@@ -113,7 +110,7 @@ class NzRangeCalendar extends StatelessWidget {
                   style: t.labelLg,
                 ),
               ),
-              nav(Icons.chevron_right_rounded, material.nextMonthTooltip, 1),
+              nav(NzIcons.chevronRight, material.nextMonthTooltip, 1),
             ],
           ),
           const Gap(NizamioSpacing.space1),

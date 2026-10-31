@@ -10,6 +10,7 @@ import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/lists/lists.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../identity/identity.dart';
 import '../application/program_list_controller.dart';
 import '../application/scope_selection_controller.dart';
@@ -44,7 +45,7 @@ class ScopePage extends ConsumerWidget {
               empty: NzEmptyState(
                 title: l.uiScopeEmptyTitle,
                 message: l.uiScopeEmptyMessage,
-                icon: Icons.folder_off_outlined,
+                icon: NzIcons.folderOff,
                 actionLabel: l.uiScopeContinueWithSample,
                 onAction: () => ref
                     .read(scopeSelectionControllerProvider.notifier)

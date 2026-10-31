@@ -5,6 +5,7 @@ import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../buttons/nz_pressable.dart';
 import '../nz_icon.dart';
+import '../nz_icons.dart';
 import '../surfaces/nz_avatar.dart';
 
 /// Son mesajın okundu durumu (yalnız kendi son mesajında çift tik).
@@ -240,8 +241,8 @@ class NzChatRow extends StatelessWidget {
                               if (tick != NzChatTick.none) ...[
                                 NzIcon(
                                   tick == NzChatTick.sent
-                                      ? Icons.done_rounded
-                                      : Icons.done_all_rounded,
+                                      ? NzIcons.check
+                                      : NzIcons.checkAll,
                                   size: NizamioSize.iconSizeSm,
                                   color: tick == NzChatTick.read
                                       ? c.accentText

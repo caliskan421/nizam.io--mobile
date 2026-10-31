@@ -6,7 +6,8 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
-import '../../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/calendar_controller.dart';
 import '../../domain/calendar.dart';
@@ -336,8 +337,8 @@ class _EntryRow extends StatelessWidget {
                         ),
                       ),
                       const Gap(NizamioSpacing.gapMd),
-                      NzPathIcon(
-                        CalendarIcons.chevronRight,
+                      NzIcon(
+                        NzIcons.chevronRight,
                         size: NizamioSize.iconSizeSm,
                         color: c.textFaint,
                       ),

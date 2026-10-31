@@ -157,11 +157,6 @@ abstract final class GanttGeometry {
   static const double cardRise = 14;
   static const double cardRiseScale = 0.98;
 
-  /// Kaynak SVG yolları (`t-icon`, 24 × 24): geri, grup oku, kapat.
-  static const chevronLeft = 'M15 5l-7 7 7 7';
-  static const chevronRight = 'M9 6l6 6-6 6';
-  static const close = 'M6 6l12 12M18 6 6 18';
-
   /// Gün başına piksel (`ppd`).
   static double ppd(GanttZoom z) => switch (z) {
     GanttZoom.week => 28,

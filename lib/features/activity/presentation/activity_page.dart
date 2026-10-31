@@ -14,6 +14,7 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
@@ -74,7 +75,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
         ),
         actions: [
           NzIconButton(
-            icon: Icons.download_rounded,
+            icon: NzIcons.download,
             semanticLabel: l.uiActivityCsv,
             onPressed: () =>
                 NzToast.show(context, l.activitySoon(l.uiActivityCsvExport)),
@@ -172,7 +173,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
         NzFlyoutSection(l.uiActivitySectionType),
         NzFlyoutItem(
           label: l.uiActivityTypeAll,
-          icon: Icons.list_rounded,
+          icon: NzIcons.list,
           count: '${view.allCount}',
           selected: query.kind == null,
           onSelected: () => commands.selectKind(null),
@@ -188,14 +189,14 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
         NzFlyoutSection(l.uiActivitySectionHistory),
         NzFlyoutItem(
           label: l.uiActivityFlyFilter,
-          icon: Icons.tune_rounded,
+          icon: NzIcons.tune,
           onSelected: () {
             if (mounted) showActivityFilters(context);
           },
         ),
         NzFlyoutItem(
           label: l.uiActivityFlyHome,
-          icon: Icons.arrow_back_rounded,
+          icon: NzIcons.back,
           onSelected: () {
             if (mounted) Navigator.of(context).maybePop();
           },
@@ -261,7 +262,7 @@ class _Controls extends ConsumerWidget {
             ),
             const Gap(NizamioSpacing.space2),
             NzIconButton.circle(
-              icon: Icons.tune_rounded,
+              icon: NzIcons.tune,
               semanticLabel: l.uiActivityFiltersLabel,
               dot: query.hasExtra ? c.accentText : null,
               onPressed: onOpenFilters,
@@ -511,7 +512,7 @@ class _Chip extends StatelessWidget {
                     ),
                     const Gap(NizamioSpacing.space1),
                     NzIcon(
-                      Icons.close_rounded,
+                      NzIcons.close,
                       size: NizamioSize.iconSizeSm,
                       color: c.textMuted,
                     ),

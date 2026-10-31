@@ -10,6 +10,7 @@ import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
@@ -243,11 +244,7 @@ class _PollOption extends StatelessWidget {
                             : Border.all(color: c.borderControl, width: 1.5),
                       ),
                       child: on
-                          ? NzIcon(
-                              Icons.check_rounded,
-                              size: 12,
-                              color: c.onPrimary,
-                            )
+                          ? NzIcon(NzIcons.check, size: 12, color: c.onPrimary)
                           : null,
                     ),
                     const Gap(NizamioSpacing.space2),
@@ -336,7 +333,7 @@ class ChatHeader extends StatelessWidget {
                     children: [
                       if (showBack)
                         NzIconButton(
-                          icon: Icons.arrow_back_ios_new_rounded,
+                          icon: NzIcons.back,
                           semanticLabel: MaterialLocalizations.of(context)
                               .backButtonTooltip,
                           size: NzSize.sm,
@@ -402,7 +399,7 @@ class ChatHeader extends StatelessWidget {
                         ),
                       ),
                       NzIconButton(
-                        icon: Icons.search_rounded,
+                        icon: NzIcons.search,
                         semanticLabel: l.uiMessagesSearchChat,
                         size: NzSize.sm,
                         onPressed: onSearch,
@@ -464,7 +461,7 @@ class ChatHeader extends StatelessWidget {
                             ),
                             const Gap(NizamioSpacing.gapMd),
                             NzIcon(
-                              Icons.push_pin_outlined,
+                              NzIcons.pin,
                               size: NizamioSize.iconSizeSm,
                               color: c.textFaint,
                             ),
@@ -618,18 +615,13 @@ class ChatAttachPanel extends StatelessWidget {
             Row(
               children: [
                 device(
-                  Icons.image_outlined,
+                  NzIcons.image,
                   c.inProgress,
                   l.uiMessagesPhotoVideo,
                   onPhoto,
                 ),
                 const Gap(NizamioSpacing.space2),
-                device(
-                  Icons.insert_drive_file_outlined,
-                  c.warning,
-                  l.uiMessagesFile,
-                  onFile,
-                ),
+                device(NzIcons.file, c.warning, l.uiMessagesFile, onFile),
               ],
             ),
             Padding(
@@ -641,18 +633,12 @@ class ChatAttachPanel extends StatelessWidget {
             ),
             NzPillTabs(
               tabs: [
-                NzPillTab(
-                  label: l.uiMessagesRefTask,
-                  icon: Icons.checklist_rounded,
-                ),
+                NzPillTab(label: l.uiMessagesRefTask, icon: NzIcons.tasks),
                 NzPillTab(
                   label: l.uiMessagesRefCoordinatorship,
-                  icon: Icons.apartment_rounded,
+                  icon: NzIcons.coordinatorships,
                 ),
-                NzPillTab(
-                  label: l.uiMessagesRefArchive,
-                  icon: Icons.insert_drive_file_outlined,
-                ),
+                NzPillTab(label: l.uiMessagesRefArchive, icon: NzIcons.file),
               ],
               selected: tab.index,
               onSelected: (i) => onTab(ChatAttachTab.values[i]),
@@ -730,7 +716,7 @@ class ChatAttachPanel extends StatelessWidget {
                               ),
                               if (view.refs.contains(ref))
                                 NzIcon(
-                                  Icons.check_rounded,
+                                  NzIcons.check,
                                   size: 16,
                                   color: c.accentText,
                                 ),

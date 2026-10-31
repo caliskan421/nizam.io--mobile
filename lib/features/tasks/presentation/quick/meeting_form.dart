@@ -8,6 +8,7 @@ import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/quick_forms_controller.dart';
 import '../../application/task_catalog_controller.dart';
@@ -99,7 +100,7 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
           rows: [
             NzFormRow(
               label: l.uiTasksRowDate,
-              icon: Icons.calendar_today_outlined,
+              icon: NzIcons.calendar,
               value: '${TaskDates.short(f.date)} ${TaskDates.weekday(f.date)}',
               valueSet: true,
               content: QuickPane(
@@ -115,7 +116,7 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
             ),
             NzFormRow(
               label: l.uiTasksRowTime,
-              icon: Icons.schedule_rounded,
+              icon: NzIcons.clock,
               value: time,
               valueSet: true,
               content: QuickPane(
@@ -128,7 +129,7 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
             ),
             NzFormRow(
               label: l.uiTasksRowInvitees,
-              icon: Icons.group_outlined,
+              icon: NzIcons.group,
               value: who ?? l.uiTasksPick,
               valueSet: who != null,
               content: QuickPane(
@@ -172,7 +173,7 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
             ),
             NzFormRow(
               label: l.uiTasksRowAgenda,
-              icon: Icons.format_list_bulleted_rounded,
+              icon: NzIcons.listBulleted,
               value: f.agenda.isEmpty
                   ? l.uiTasksAddItem
                   : '${f.agenda.length} ${l.uiTasksItemsLc}',
@@ -208,7 +209,7 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
                           ),
                         ),
                         NzIconButton.circleAccent(
-                          icon: Icons.add_rounded,
+                          icon: NzIcons.add,
                           semanticLabel: l.uiTasksAddItemLabel,
                           onPressed: f.agendaDraft.trim().isEmpty
                               ? null
@@ -286,7 +287,7 @@ class _PeopleGroup extends StatelessWidget {
                     turns: open ? 0.5 : 0,
                     duration: NzMotion.of(context, NizamioMotion.durPress),
                     child: NzIcon(
-                      Icons.expand_more_rounded,
+                      NzIcons.chevronDown,
                       size: NizamioSize.iconSizeSm,
                       color: c.textMuted,
                     ),
@@ -387,7 +388,7 @@ class _AgendaItemState extends State<_AgendaItem> {
           ),
         ),
         NzIconButton(
-          icon: Icons.close_rounded,
+          icon: NzIcons.close,
           semanticLabel: '$n${l.uiTasksRemoveItemTail}',
           onPressed: widget.onRemove,
         ),

@@ -7,7 +7,8 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
-import '../../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/calendar.dart';
@@ -239,7 +240,11 @@ class _PreviewBody extends StatelessWidget {
                   child: SizedBox.square(
                     dimension: NizamioSize.tap,
                     child: Center(
-                      child: NzPathIcon(CalendarIcons.close, color: c.text),
+                      child: NzIcon(
+                        NzIcons.close,
+                        size: NizamioSize.iconSize,
+                        color: c.text,
+                      ),
                     ),
                   ),
                 ),
@@ -337,8 +342,8 @@ class _FactRow extends StatelessWidget {
                       ),
                     ),
                     const Gap(6),
-                    NzPathIcon(
-                      CalendarIcons.chevronRight,
+                    NzIcon(
+                      NzIcons.chevronRight,
                       size: NizamioSize.iconSizeSm,
                       color: c.accentText,
                     ),

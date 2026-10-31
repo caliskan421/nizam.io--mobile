@@ -15,6 +15,7 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../application/task_catalog_controller.dart';
 import '../application/task_detail_controller.dart';
@@ -52,30 +53,30 @@ class TaskDetailPage extends ConsumerWidget {
             NzFlyoutItem(
               label: l.uiTasksFlyStatus,
               caption: l.statusLabel(task.status),
-              icon: Icons.check_circle_outline_rounded,
+              icon: NzIcons.checkCircle,
               onSelected: actions.openStatus,
             ),
             NzFlyoutItem(
               label: l.uiTasksRemind,
-              icon: Icons.notifications_none_rounded,
+              icon: NzIcons.bell,
               onSelected: actions.remind,
             ),
             NzFlyoutItem(
               label: l.uiTasksEditTask,
-              icon: Icons.edit_outlined,
+              icon: NzIcons.edit,
               onSelected: actions.openEdit,
             ),
             NzFlyoutSection(l.uiTasksFlyGo),
             NzFlyoutItem(
               label: l.uiTasksFlyTimeline,
-              icon: Icons.view_timeline_outlined,
+              icon: NzIcons.timeline,
               onSelected: () =>
                   nav.openTimeline(coordinatorship: task.coordinatorship),
             ),
           ],
           NzFlyoutItem(
             label: l.uiTasksTaskList,
-            icon: Icons.view_list_rounded,
+            icon: NzIcons.viewList,
             onSelected: nav.openTasks,
           ),
         ],
@@ -97,12 +98,12 @@ class TaskDetailPage extends ConsumerWidget {
             ? const []
             : [
                 NzIconButton(
-                  icon: Icons.edit_outlined,
+                  icon: NzIcons.edit,
                   semanticLabel: l.uiTasksEditTask,
                   onPressed: actions.openEdit,
                 ),
                 NzIconButton(
-                  icon: Icons.more_vert_rounded,
+                  icon: NzIcons.more,
                   semanticLabel: l.uiTasksMoreActions,
                   onPressed: actions.openMenu,
                 ),
@@ -135,7 +136,7 @@ class TaskDetailPage extends ConsumerWidget {
             onRetry: () => ref.invalidate(taskCatalogControllerProvider),
             data: (_) => deleted
                 ? NzEmptyState(
-                    icon: Icons.delete_outline_rounded,
+                    icon: NzIcons.delete,
                     title: '$code ${l.uiTasksDeletedTail}',
                     message: l.uiTasksDeletedFilesKept,
                     actionLabel: l.uiTasksUndo,
@@ -268,13 +269,13 @@ class _Body extends StatelessWidget {
         Row(
           children: [
             NzIconButton.circle(
-              icon: Icons.event_outlined,
+              icon: NzIcons.event,
               semanticLabel: l.uiTasksRequestDate,
               onPressed: actions.openDateRequest,
             ),
             const Gap(NizamioSpacing.space2),
             NzIconButton.circle(
-              icon: Icons.notifications_none_rounded,
+              icon: NzIcons.bell,
               semanticLabel: l.uiTasksRemind,
               onPressed: actions.remind,
             ),
@@ -282,7 +283,7 @@ class _Body extends StatelessWidget {
             Expanded(
               child: NzButton.primary(
                 label: l.uiTasksUpload,
-                icon: Icons.upload_file_rounded,
+                icon: NzIcons.uploadFile,
                 expand: true,
                 onPressed: actions.openUpload,
               ),
@@ -364,7 +365,7 @@ class _Picker extends StatelessWidget {
                     ),
                   ),
                   NzIcon(
-                    Icons.expand_more_rounded,
+                    NzIcons.chevronDown,
                     size: NizamioSize.iconSizeSm,
                     color: c.textMuted,
                   ),
@@ -421,10 +422,7 @@ class _RequestCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  NzIconTile(
-                    icon: Icons.event_repeat_rounded,
-                    color: c.warning,
-                  ),
+                  NzIconTile(icon: NzIcons.eventRepeat, color: c.warning),
                   const Gap(NizamioSpacing.gapMd),
                   Expanded(
                     child: Column(

@@ -9,6 +9,8 @@ import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/theme/nz_motion.dart';
 import '../../../core/ui/widgets/feedback/nz_pick_record.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
 import '../application/calendar_controller.dart';
@@ -73,7 +75,6 @@ class _Header extends ConsumerWidget {
 
   final VoidCallback onPlan;
 
-  static const _plus = 'M12 5v14M5 12h14';
   static const _fade = Duration(milliseconds: 250);
 
   @override
@@ -148,8 +149,8 @@ class _Header extends ConsumerWidget {
                   child: SizedBox.square(
                     dimension: NizamioSize.tap,
                     child: Center(
-                      child: NzPathIcon(
-                        _plus,
+                      child: NzIcon(
+                        NzIcons.add,
                         size: NizamioSize.iconSizeSm,
                         color: c.onPrimary,
                       ),

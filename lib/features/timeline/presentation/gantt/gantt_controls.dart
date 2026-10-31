@@ -4,7 +4,8 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
-import '../../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../tasks/tasks.dart';
 import '../../domain/horizontal_timeline.dart';
 import '../timeline_texts.dart';
@@ -61,7 +62,11 @@ class GanttTopBar extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        NzPathIcon(GanttGeometry.chevronLeft, color: c.text),
+                        NzIcon(
+                          NzIcons.back,
+                          size: NizamioSize.iconSize,
+                          color: c.text,
+                        ),
                         const Gap(NizamioSpacing.space1),
                         Text(
                           l.uiTimelineGanttBack,

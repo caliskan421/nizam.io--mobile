@@ -13,6 +13,7 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
 import '../application/archive_folder_contents.dart';
@@ -46,7 +47,7 @@ class ArchiveFolderPage extends ConsumerWidget {
           NzFlyoutItem(
             label: f.name,
             count: '${f.files}',
-            icon: Icons.folder_outlined,
+            icon: NzIcons.folder,
             accent: f.code == code,
             selected: f.code == code,
             onSelected: () {
@@ -55,7 +56,7 @@ class ArchiveFolderPage extends ConsumerWidget {
           ),
         NzFlyoutItem(
           label: l.uiArchiveAllArchive,
-          icon: Icons.menu_rounded,
+          icon: NzIcons.menu,
           onSelected: nav.openArchive,
         ),
       ],
@@ -84,7 +85,7 @@ class ArchiveFolderPage extends ConsumerWidget {
       code: '${l.uiArchiveTitle} / $code',
       actions: [
         NzIconButton(
-          icon: Icons.download_rounded,
+          icon: NzIcons.download,
           semanticLabel: l.uiArchiveZip,
           onPressed: contents == null
               ? null
@@ -253,7 +254,7 @@ class _Header extends StatelessWidget {
             Expanded(
               child: NzButton.secondary(
                 label: l.uiArchiveCoordinatorship,
-                icon: Icons.apartment_rounded,
+                icon: NzIcons.coordinatorships,
                 expand: true,
                 onPressed: () =>
                     context.appNav.openCoordinatorship(folder.code),
@@ -263,7 +264,7 @@ class _Header extends StatelessWidget {
             Expanded(
               child: NzButton.primary(
                 label: l.uiArchiveUploadShort,
-                icon: Icons.arrow_upward_rounded,
+                icon: NzIcons.arrowUp,
                 expand: true,
                 onPressed: () => NzToast.show(context, l.uiArchiveUploadSoon),
               ),
@@ -392,7 +393,7 @@ class _TaskFilter extends StatelessWidget {
       child: Row(
         children: [
           NzIcon(
-            Icons.folder_outlined,
+            NzIcons.folder,
             size: NizamioSize.iconSizeSm,
             color: c.textMuted,
           ),
@@ -409,7 +410,7 @@ class _TaskFilter extends StatelessWidget {
             tooltip: l.uiArchiveRemoveTaskFilter,
             onPressed: onClear,
             icon: NzIcon(
-              Icons.close_rounded,
+              NzIcons.close,
               size: NizamioSize.iconSizeSm,
               color: c.textMuted,
             ),

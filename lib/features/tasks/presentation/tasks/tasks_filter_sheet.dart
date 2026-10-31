@@ -7,6 +7,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/tasks_list_controller.dart';
@@ -115,7 +116,7 @@ class _FilterBody extends ConsumerWidget {
                         turns: open ? 0 : -0.25,
                         duration: NzMotion.of(context, NizamioMotion.durPress),
                         child: NzIcon(
-                          Icons.expand_more_rounded,
+                          NzIcons.chevronDown,
                           size: NizamioSize.iconSizeSm,
                           color: c.textFaint,
                         ),

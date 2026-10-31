@@ -7,6 +7,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
@@ -82,21 +83,21 @@ Future<ChatAction?> showMessageActions(
       final listRows = <(IconData, String, ChatSimpleAction, Color)>[
         if (message.poll != null)
           (
-            Icons.bar_chart_rounded,
+            NzIcons.barChart,
             l.uiMessagesPollResults,
             ChatSimpleAction.pollResults,
             c.accentText,
           ),
         if (message.poll == null)
           (
-            Icons.add_rounded,
+            NzIcons.add,
             l.uiMessagesToTask,
             ChatSimpleAction.toTask,
             c.accentText,
           ),
         if (ownText)
           (
-            Icons.delete_outline_rounded,
+            NzIcons.delete,
             l.uiMessagesDelete,
             ChatSimpleAction.delete,
             c.danger,
@@ -162,7 +163,7 @@ Future<ChatAction?> showMessageActions(
                       avatar: NzIcon(
                         r.kind == ChatRefKind.photo ||
                                 r.kind == ChatRefKind.document
-                            ? Icons.download_rounded
+                            ? NzIcons.download
                             : refIcon(r.kind),
                         size: 14,
                         color: c.accentText,
@@ -190,27 +191,15 @@ Future<ChatAction?> showMessageActions(
             spacing: NizamioSpacing.space2,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              quick(NzIcons.reply, l.uiMessagesReply, ChatSimpleAction.reply),
+              quick(NzIcons.copy, l.uiMessagesCopy, ChatSimpleAction.copy),
               quick(
-                Icons.reply_rounded,
-                l.uiMessagesReply,
-                ChatSimpleAction.reply,
-              ),
-              quick(
-                Icons.content_copy_rounded,
-                l.uiMessagesCopy,
-                ChatSimpleAction.copy,
-              ),
-              quick(
-                Icons.push_pin_outlined,
+                NzIcons.pin,
                 pinned ? l.uiMessagesUnpin : l.uiMessagesPin,
                 ChatSimpleAction.pin,
               ),
               if (ownText)
-                quick(
-                  Icons.edit_outlined,
-                  l.uiMessagesEdit,
-                  ChatSimpleAction.edit,
-                ),
+                quick(NzIcons.edit, l.uiMessagesEdit, ChatSimpleAction.edit),
             ],
           ),
           ClipRRect(
@@ -605,19 +594,14 @@ Future<ChatInfoAction?> showChatInfo(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               act(
-                Icons.search_rounded,
+                NzIcons.search,
                 l.uiMessagesSearchChat,
                 c.text,
                 const ChatInfoSearch(),
               ),
+              act(NzIcons.mute, l.uiMessagesMute, c.text, const ChatInfoMute()),
               act(
-                Icons.volume_off_outlined,
-                l.uiMessagesMute,
-                c.text,
-                const ChatInfoMute(),
-              ),
-              act(
-                Icons.logout_rounded,
+                NzIcons.logout,
                 chat.group ? l.uiMessagesLeaveGroup : l.uiMessagesBlock,
                 c.danger,
                 const ChatInfoLeave(),
@@ -648,7 +632,7 @@ Future<ChatInfoAction?> showChatInfo(
                       title: sharedLabel(r),
                       sub: sharedSub(r),
                       trailing: NzIcon(
-                        Icons.chevron_right_rounded,
+                        NzIcons.chevronRight,
                         size: 14,
                         color: c.textFaint,
                       ),

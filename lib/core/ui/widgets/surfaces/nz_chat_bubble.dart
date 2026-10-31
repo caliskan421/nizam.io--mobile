@@ -10,6 +10,7 @@ import '../../layout/nz_bleed.dart';
 import '../../theme/nz_motion.dart';
 import '../lists/nz_chat_row.dart';
 import '../nz_icon.dart';
+import '../nz_icons.dart';
 
 /// Mesaj tepkisi (mesaj başına bir tane; emoji yok, ikon).
 enum NzReaction { like, heart, check, star }
@@ -17,12 +18,10 @@ enum NzReaction { like, heart, check, star }
 extension NzReactionIcon on NzReaction {
   /// [selected] kalp ve yıldızda dolu ikon.
   IconData icon({bool selected = false}) => switch (this) {
-    NzReaction.like => Icons.thumb_up_outlined,
-    NzReaction.heart =>
-      selected ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-    NzReaction.check => Icons.check_rounded,
-    NzReaction.star =>
-      selected ? Icons.star_rounded : Icons.star_border_rounded,
+    NzReaction.like => NzIcons.thumbUp,
+    NzReaction.heart => selected ? NzIcons.favoriteFilled : NzIcons.favorite,
+    NzReaction.check => NzIcons.check,
+    NzReaction.star => selected ? NzIcons.starFilled : NzIcons.star,
   };
 }
 
@@ -284,17 +283,13 @@ class _NzChatBubbleState extends State<NzChatBubble> {
                   children: [
                     if (edited != null) Text('$edited ·', style: meta),
                     if (w.pinned)
-                      NzIcon(
-                        Icons.push_pin_outlined,
-                        size: 11,
-                        color: c.textFaint,
-                      ),
+                      NzIcon(NzIcons.pin, size: 11, color: c.textFaint),
                     Text(w.time, style: meta),
                     if (w.tick != NzChatTick.none)
                       NzIcon(
                         w.tick == NzChatTick.sent
-                            ? Icons.done_rounded
-                            : Icons.done_all_rounded,
+                            ? NzIcons.check
+                            : NzIcons.checkAll,
                         size: 15,
                         color: w.tick == NzChatTick.read
                             ? c.accentText

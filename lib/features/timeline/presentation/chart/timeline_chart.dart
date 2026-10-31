@@ -6,6 +6,8 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../domain/timeline.dart';
 import '../timeline_texts.dart';
 import 'timeline_layout.dart';
@@ -501,10 +503,8 @@ class _TodayButton extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          up
-                              ? Icons.arrow_upward_rounded
-                              : Icons.arrow_downward_rounded,
+                        NzIcon(
+                          up ? NzIcons.arrowUp : NzIcons.arrowDown,
                           size: NizamioSize.iconSizeSm,
                           color: c.text,
                         ),

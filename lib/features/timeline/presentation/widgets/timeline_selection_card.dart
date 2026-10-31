@@ -4,6 +4,8 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
@@ -134,13 +136,13 @@ class TimelineSelectionCard extends StatelessWidget {
                       ),
                     ),
                     NzIconButton(
-                      icon: Icons.open_in_new_rounded,
+                      icon: NzIcons.openExternal,
                       semanticLabel: l.uiTimelineOpenTask,
                       onPressed: onOpen,
                       size: NzSize.sm,
                     ),
                     NzIconButton(
-                      icon: Icons.close_rounded,
+                      icon: NzIcons.close,
                       semanticLabel: l.uiCommonClose,
                       onPressed: onClose,
                       size: NzSize.sm,
@@ -241,13 +243,13 @@ class TimelineSelectionCard extends StatelessWidget {
                     ),
                     const Gap(NizamioSpacing.space2),
                     _SquareAction(
-                      icon: Icons.event_available_rounded,
+                      icon: NzIcons.eventAvailable,
                       label: l.uiTimelineSendRequest,
                       onTap: onRequest,
                     ),
                     const Gap(NizamioSpacing.space2),
                     _SquareAction(
-                      icon: Icons.notifications_none_rounded,
+                      icon: NzIcons.bell,
                       label: l.uiTimelineRemind,
                       onTap: onRemind,
                     ),
@@ -310,7 +312,7 @@ class _DateField extends StatelessWidget {
           child: Row(
             children: [
               _Step(
-                icon: Icons.remove_rounded,
+                icon: NzIcons.remove,
                 label: '$label ${l.uiTimelineDayBack}',
                 onTap: onMinus,
               ),
@@ -337,7 +339,7 @@ class _DateField extends StatelessWidget {
                 ),
               ),
               _Step(
-                icon: Icons.add_rounded,
+                icon: NzIcons.add,
                 label: '$label ${l.uiTimelineDayForward}',
                 onTap: onPlus,
               ),
@@ -364,7 +366,7 @@ class _Step extends StatelessWidget {
     child: SizedBox(
       width: 36,
       height: NizamioSize.tap,
-      child: Icon(
+      child: NzIcon(
         icon,
         size: NizamioSize.iconSizeSm,
         color: context.colors.text,
@@ -403,7 +405,7 @@ class _SquareAction extends StatelessWidget {
           child: SizedBox(
             width: 48,
             height: NizamioSize.controlLg,
-            child: Icon(icon, size: NizamioSize.iconSizeSm, color: c.text),
+            child: NzIcon(icon, size: NizamioSize.iconSizeSm, color: c.text),
           ),
         ),
       ),

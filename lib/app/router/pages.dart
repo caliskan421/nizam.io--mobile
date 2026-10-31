@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/ui/extensions/context_ext.dart';
 import '../../core/ui/page/nz_page.dart';
 import '../../core/ui/widgets/feedback/feedback.dart';
+import '../../core/ui/widgets/nz_icons.dart';
 import 'routes.dart';
 
 /// Bilinmeyen rota (404). Yalnız `scoped` fazında görünür; diğer fazlarda bilinmeyen yol faz
@@ -16,7 +17,7 @@ class NotFoundPage extends StatelessWidget {
     body: NzEmptyState(
       title: context.l10n.uiRouterNotFoundTitle,
       message: context.l10n.uiRouterNotFoundMessage,
-      icon: Icons.search_off_outlined,
+      icon: NzIcons.searchOff,
       actionLabel: context.l10n.uiRouterNotFoundAction,
       onAction: () => const HomeRoute().go(context),
     ),

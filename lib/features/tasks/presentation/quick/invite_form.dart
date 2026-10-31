@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../application/quick_forms_controller.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../domain/task_catalog.dart';
@@ -98,7 +99,7 @@ class _InviteFormBodyState extends ConsumerState<InviteFormBody> {
             ),
             NzFormRow(
               label: l.uiTasksFieldCoord,
-              icon: Icons.apartment_rounded,
+              icon: NzIcons.coordinatorships,
               value: value,
               valueSet: !admin && f.coordinatorships.isNotEmpty,
               content: admin

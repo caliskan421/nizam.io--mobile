@@ -52,14 +52,17 @@ class _Adapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-ApiTaskCatalogRepository _repo(_Adapter adapter, {String? department}) =>
-    ApiTaskCatalogRepository(
-      Dio(BaseOptions(baseUrl: 'https://api.test'))
-        ..httpClientAdapter = adapter,
-      programId: () => 'p1',
-      departmentId: () => department,
-      now: () => DateTime(2026, 11, 1, 15, 30),
-    );
+ApiTaskCatalogRepository _repo(
+  _Adapter adapter, {
+  String? department,
+  List<String>? corrected,
+}) => ApiTaskCatalogRepository(
+  Dio(BaseOptions(baseUrl: 'https://api.test'))..httpClientAdapter = adapter,
+  programId: () => 'p1',
+  departmentId: () => department,
+  correctDepartment: (id) => corrected?.add(id),
+  now: () => DateTime(2026, 11, 1, 15, 30),
+);
 
 Map<String, Object?> _item(
   String id,
@@ -299,4 +302,73 @@ void main() {
       );
     },
   );
+
+  test('sayfa tavanında kesilme sessiz değil: truncated', () async {
+    final adapter = _Adapter({
+      '/v1/me': _me(),
+      '/v1/me/departments': _seats([('p1', 'd1', 'uye')]),
+      '/v1/work-items@d1': {
+        'items': [_item('w1', 'd1')],
+        'next_cursor': 'c',
+      },
+      '/v1/work-items@d1?cursor=c': {
+        'items': [_item('w2', 'd1')],
+        'next_cursor': 'c',
+      },
+    });
+    final c = await _repo(adapter).load();
+    final lists = adapter.seen.where((o) => o.uri.path == '/v1/work-items');
+    expect(lists, hasLength(ApiTaskCatalogRepository.maxPages));
+    expect(c.truncated, isTrue);
+    expect(c.tasks, hasLength(ApiTaskCatalogRepository.maxPages));
+
+    final whole = await _repo(
+      _Adapter({
+        '/v1/me': _me(),
+        '/v1/me/departments': _seats([('p1', 'd1', 'uye')]),
+        '/v1/work-items@d1': {
+          'items': [_item('w1', 'd1')],
+        },
+      }),
+    ).load();
+    expect(whole.truncated, isFalse);
+  });
+
+  test('eskimiş seçili departman (ekip satırında yok, yönetici değil): ilk satıra düşer, seçim düzeltilir', () async {
+    final corrected = <String>[];
+    final adapter = _Adapter({
+      '/v1/me': _me(),
+      '/v1/me/departments': _seats([('p1', 'd1', 'uye')]),
+      '/v1/work-items@d1': {
+        'items': [_item('w1', 'd1')],
+      },
+    });
+    final c = await _repo(
+      adapter,
+      department: 'eski',
+      corrected: corrected,
+    ).load();
+    expect(c.departmentId, 'd1');
+    expect(corrected, ['d1']);
+    expect(
+      adapter.seen
+          .where((o) => o.uri.path == '/v1/work-items')
+          .map((o) => o.extra[_dept]),
+      ['d1'],
+    );
+
+    // Yönetici seçimi ekip satırı gerektirmez: düzeltilmez.
+    final adminCorrected = <String>[];
+    final admin = await _repo(
+      _Adapter({
+        '/v1/me': _me(admin: true),
+        '/v1/me/departments': _seats([('p1', 'd1', 'uye')]),
+        '/v1/work-items@d7': {'items': <Object>[]},
+      }),
+      department: 'd7',
+      corrected: adminCorrected,
+    ).load();
+    expect(admin.departmentId, 'd7');
+    expect(adminCorrected, isEmpty);
+  });
 }

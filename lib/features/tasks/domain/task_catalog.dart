@@ -541,6 +541,7 @@ final class TaskCatalog {
     required List<CoordinatorshipRef> coordinatorships,
     this.access,
     this.departmentId,
+    this.truncated = false,
   }) : tasks = List.unmodifiable(tasks),
        people = List.unmodifiable(people),
        coordinatorships = List.unmodifiable(coordinatorships);
@@ -558,6 +559,9 @@ final class TaskCatalog {
 
   /// Listenin tek departman bağlamı (sunucu kaynağı); örnek kaynakta null.
   final String? departmentId;
+
+  /// Liste sayfa tavanında kesildi (sunucuda daha fazla görev var); arayüz uyarı gösterir.
+  final bool truncated;
 
   /// Sunucu kataloğunda departman bağlamı yok → liste "departman seç" durumundadır (istek
   /// gönderilmedi). Örnek kaynakta false.
@@ -589,6 +593,7 @@ final class TaskCatalog {
     coordinatorships: coordinatorships,
     access: access,
     departmentId: departmentId,
+    truncated: truncated,
   );
 
   /// Koordinatörlükte sıradaki görev kodu (`ALT-14` → `ALT-15`).

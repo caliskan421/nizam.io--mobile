@@ -34,20 +34,27 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
     Dio dio, {
     required this.programId,
     String? Function()? departmentId,
+    void Function(String departmentId)? correctDepartment,
     DateTime Function()? now,
   }) : _identity = IdentityClient(dio),
        _work = WorkClient(dio),
        _organization = OrganizationClient(dio),
        departmentId = departmentId ?? _none,
+       correctDepartment = correctDepartment ?? _ignore,
        _now = now ?? DateTime.now;
 
   static String? _none() => null;
+  static void _ignore(String _) {}
 
   /// Seçili programın kimliği (istek anında okunur).
   final String? Function() programId;
 
   /// Kapsamda seçili departman (yoksa null; istek anında okunur).
   final String? Function() departmentId;
+
+  /// Kapsamdaki kalıcı departman seçimi hesabın ekip satırlarında yoksa (yönetici değil)
+  /// liste ilk satıra düşer ve seçim bununla düzeltilir (`ScopeController.selectDepartment`).
+  final void Function(String departmentId) correctDepartment;
   final IdentityClient _identity;
   final WorkClient _work;
   final OrganizationClient _organization;
@@ -76,18 +83,17 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
     final today = _now();
     final day = DateTime(today.year, today.month, today.day);
     final department = _department(access, program);
-    final tasks = department == null
-        ? const <TaskItem>[]
-        : [
-            for (final w in await _items(department.$1))
-              _task(w, department.$2, day),
-          ];
+    final (items, truncated) = department == null
+        ? (const <WorkItem>[], false)
+        : await _items(department.$1);
+    final tasks = [for (final w in items) _task(w, department!.$2, day)];
 
     return TaskCatalog(
       today: day,
       me: access.accountId,
       access: access,
       departmentId: department?.$1,
+      truncated: truncated,
       tasks: tasks,
       people: [
         Person(
@@ -109,21 +115,26 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
   }
 
   /// Listenin TEK departmanı (kimlik, ad): kapsamda seçili departman; yoksa hesabın bu
-  /// programdaki ilk ekip satırı. Yoksa null → "departman seç" (istek gönderilmez). Şirket
-  /// yöneticisinin programdaki departman listesi P1b'de (`listProgramDepartments`, v0.6.0).
+  /// programdaki ilk ekip satırı. Seçili departman ekip satırlarında yoksa yönetici değilse
+  /// ilk satıra düşülür ve seçim [correctDepartment] ile düzeltilir (eskimiş kalıcı seçim).
+  /// Departman yoksa null → "departman seç" (istek gönderilmez). Şirket yöneticisinin
+  /// programdaki departman listesi P1b'de (`listProgramDepartments`, v0.6.0).
   (String, String)? _department(TaskAccess access, String program) {
     final seats = access.seatsIn(program);
+    final first = seats.firstOrNull;
     final selected = departmentId();
     if (selected != null && selected.isNotEmpty) {
       final seat = seats.where((s) => s.departmentId == selected).firstOrNull;
-      return (selected, seat?.departmentName ?? selected);
+      if (seat != null) return (selected, seat.departmentName);
+      if (access.companyAdmin) return (selected, selected);
+      if (first != null) correctDepartment(first.departmentId);
     }
-    final first = seats.firstOrNull;
     return first == null ? null : (first.departmentId, first.departmentName);
   }
 
-  /// Departmanın bütün sayfaları (tek akış, imleçle).
-  Future<List<WorkItem>> _items(String department) async {
+  /// Departmanın sayfaları (tek akış, imleçle); [maxPages] dolduğunda imleç hâlâ varsa
+  /// ikinci değer `true` (liste kesildi — sessiz kesilme yok).
+  Future<(List<WorkItem>, bool)> _items(String department) async {
     final all = <WorkItem>[];
     String? cursor;
     for (var page = 0; page < maxPages; page++) {
@@ -139,9 +150,9 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
       );
       all.addAll(r.items);
       cursor = r.nextCursor;
-      if (cursor == null || cursor.isEmpty) break;
+      if (cursor == null || cursor.isEmpty) return (all, false);
     }
-    return all;
+    return (all, true);
   }
 
   static TeamSeat _seat(api.MyDepartment d) => TeamSeat(

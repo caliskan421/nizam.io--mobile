@@ -150,6 +150,14 @@ List<Widget> tasksListChildren(
         onPressed: ctl.showMore,
       ),
     ],
+    if (catalog.truncated) ...[
+      const Gap(NizamioSpacing.space3),
+      Text(
+        l.uiListsTruncated,
+        textAlign: TextAlign.center,
+        style: t.bodySm.copyWith(color: c.textMuted),
+      ),
+    ],
     const Gap(NizamioSpacing.space3),
     Text(
       byCoord

@@ -247,7 +247,7 @@ void main() {
   group('assignMembership', () {
     test('POST memberships: gövde ve eşleme', () async {
       final (repo, a) = _repo(
-        '{"membership_id":"m1","department_id":"d1","account_id":"a1","role":"uye"}',
+        '{"membership_id":"m1","program_id":"p1","department_id":"d1","account_id":"a1","role":"uye"}',
       );
       final m = await repo.assignMembership(
         'd1',

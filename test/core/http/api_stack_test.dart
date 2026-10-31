@@ -258,6 +258,8 @@ void main() {
 
     test('yol parametreli şablon eşleşir; fazladan segment eşleşmez', () async {
       h.backend.handler = (r) => jsonResponse(200, {'members': null});
+      // listMembers v0.4.0-api'den beri S2: program kapsamı gerekir.
+      h.read(scopeControllerProvider).selectProgram('prog-7');
       final client = OrganizationClient(h.read(apiDioProvider)!);
       await apiCall(() => client.listMembers(id: 'dep-1'));
       expect(h.backend.requests.last.path, '/v1/departments/dep-1/members');

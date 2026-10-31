@@ -28,6 +28,8 @@ Map<String, Object?> _item({
   'is_completed_early': false,
   'days_early': 0,
   'planned_end_on': '2026-11-10',
+  'completion_evidence_required': false,
+  'subtask_counts': {'total': 0, 'done': 0},
 };
 
 final _dates = {

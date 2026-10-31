@@ -200,8 +200,8 @@ void main() {
   group('myDepartments', () {
     test('GET /v1/me/departments → MyDepartment; rol eşlemesi', () async {
       final (repo, adapter) = _repo(
-        '{"departments":[{"department_id":"d1","name":"Altyapı","role":"koordinator"},'
-        '{"department_id":"d2","name":"Basın","role":"uye"}]}',
+        '{"departments":[{"program_id":"p1","program_name":"P","department_id":"d1","display_name":"Altyapı","role":"koordinator"},'
+        '{"program_id":"p1","program_name":"P","department_id":"d2","display_name":"Basın","role":"uye"}]}',
       );
       final slice = await repo.myDepartments();
       expect(slice.items, const [
@@ -219,7 +219,7 @@ void main() {
 
     test('tanımsız rol → unknown (hata yok)', () async {
       final (repo, _) = _repo(
-        '{"departments":[{"department_id":"d1","name":"A","role":"yonetici"}]}',
+        '{"departments":[{"program_id":"p1","program_name":"P","department_id":"d1","display_name":"A","role":"yonetici"}]}',
       );
       expect(
         (await repo.myDepartments()).items.single.role,
@@ -259,7 +259,9 @@ void main() {
 
   group('linkDepartment', () {
     test('POST /v1/program/departments: gövde ve eşleme', () async {
-      final (repo, adapter) = _repo('{"program_id":"p1","department_id":"d1"}');
+      final (repo, adapter) = _repo(
+        '{"program_id":"p1","department_id":"d1","display_name":"Altyapı","copied_member_count":0}',
+      );
       final link = await repo.linkDepartment('d1');
       expect(
         link,

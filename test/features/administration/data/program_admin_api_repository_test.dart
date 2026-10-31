@@ -63,12 +63,13 @@ const _result =
     '{"transfer_id":"t1","moved_work_item_ids":["w1"],"moved_file_count":2,'
     '"cut_dependency_count":1,"restored_dependency_count":0,'
     '"granted_links":["g"],"revoked_links":[],"retained_links":["k"],'
-    '"replayed":false}';
+    '"granted_memberships":[],"replayed":false}';
 
 const _record =
     '{"transfer_id":"t1","source_program_id":"p1","target_program_id":"p2",'
     '"department_id":"d1","work_item_ids":["w1","w2"],"moved_item_count":2,'
     '"moved_file_count":3,"cut_dependency_count":1,"restored_dependency_count":0,'
+    '"granted_memberships":[],'
     '"created_at":"2026-10-20T12:00:00Z","reverses_transfer_id":"t0"}';
 
 void main() {
@@ -181,7 +182,7 @@ void main() {
         '"preserved_dependency_count":1,"missing_access":true,'
         '"blockers":[],"warnings":["program.transfer_cut_dependency"],'
         '"can_execute":true,"preview_fingerprint":"fp",'
-        '"cut_dependency_ids":["dep1"]}',
+        '"cut_dependency_ids":["dep1"],"granted_memberships":[]}',
       );
       final p = await repo.previewTransfer(
         sourceProgramId: 'p1',
@@ -216,7 +217,7 @@ void main() {
         '{"resolved_work_item_ids":null,"file_count":0,"file_total_bytes":0,'
         '"preserved_dependency_count":0,"missing_access":false,'
         '"blockers":["x"],"warnings":[],"can_execute":false,'
-        '"preview_fingerprint":"fp"}',
+        '"preview_fingerprint":"fp","granted_memberships":[]}',
       );
       final p = await repo.previewTransfer(
         sourceProgramId: 'p1',

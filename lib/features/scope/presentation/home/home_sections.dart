@@ -232,11 +232,18 @@ String quickActionLongLabel(AppLocalizations l, HomeQuickAction a) =>
       HomeQuickAction.report => l.uiHomeQaReportLong,
     };
 
-/// Ekip: rol başına sayı kutusu (rol rengi yalnız işarettir).
+/// Ekip: rol başına sayı kutusu (rol rengi yalnız işarettir). Yalnız [team] bilinirken
+/// (yönetici özeti) kurulur.
 class HomeTeam extends StatelessWidget {
-  const HomeTeam({super.key, required this.dashboard, required this.onOpen});
+  const HomeTeam({
+    super.key,
+    required this.dashboard,
+    required this.team,
+    required this.onOpen,
+  });
 
   final HomeDashboard dashboard;
+  final TeamTotals team;
 
   /// Kutuya dokunma → görev listesi o ekip rolündeki kişilerle süzülmüş (koordinatör/üye).
   /// Yönetici kutusu yalnız sayıdır: yöneticilik ekip rolü değildir, süzgeç açmaz (F57).
@@ -246,7 +253,6 @@ class HomeTeam extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    final team = dashboard.team;
     Widget tile(TeamRole r, Color dot, int n, String role) => NzCard.outlined(
       padding: const EdgeInsets.all(NizamioSpacing.space3),
       onTap: r == TeamRole.admin ? null : () => onOpen(r),
@@ -274,7 +280,7 @@ class HomeTeam extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        NzKicker(l.uiHomeTeam, trailing: l.teamSummary(dashboard)),
+        NzKicker(l.uiHomeTeam, trailing: l.teamSummary(dashboard, team)),
         const Gap(NizamioSpacing.gapMd),
         HomeGrid(
           columns: 3,

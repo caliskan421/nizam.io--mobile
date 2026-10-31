@@ -48,15 +48,19 @@ extension HomeTexts on AppLocalizations {
   }
 
   /// "18 kullanıcı · 11 koordinatörlük".
-  String teamSummary(HomeDashboard d) =>
-      '${d.team.users} $uiHomeUsers · ${d.coordinatorships.length} $uiHomeCoordinatorshipsLc';
+  String teamSummary(HomeDashboard d, TeamTotals team) =>
+      '${team.users} $uiHomeUsers · ${d.coordinatorships.length} $uiHomeCoordinatorshipsLc';
 
   /// "11 koordinatörlük · 18 kullanıcı (2 admin, 15 koordinatör, 3 üye)".
-  String footerSummary(HomeDashboard d) =>
+  /// Ekip sayıları bilinmiyorsa (yönetici olmayan hesap) yalnız koordinatörlük sayısı.
+  String footerSummary(HomeDashboard d) => switch (d.team) {
+    null => '${d.coordinatorships.length} $uiHomeCoordinatorshipsLc',
+    final t =>
       '${d.coordinatorships.length} $uiHomeCoordinatorshipsLc · '
-      '${d.team.users} $uiHomeUsers (${d.team.admins} $uiHomeRoleAdminLc, '
-      '${d.team.coordinators} $uiHomeRoleCoordinatorLc, '
-      '${d.team.members} $uiHomeRoleMemberLc)';
+          '${t.users} $uiHomeUsers (${t.admins} $uiHomeRoleAdminLc, '
+          '${t.coordinators} $uiHomeRoleCoordinatorLc, '
+          '${t.members} $uiHomeRoleMemberLc)',
+  };
 
   /// "Son işlem bugün 14:27 · Abdullah Ateş" (bugün değilse tarih).
   String lastActivity(LastActivity a, DateTime now) {

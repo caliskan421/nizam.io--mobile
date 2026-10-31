@@ -15,8 +15,11 @@ void main() {
       final d = await repo.load();
       expect(d.tasks.open, d.tasks.total - d.tasks.done);
       // Prototip fikstürü: ekip satırı 18 kullanıcı, rol kutuları 2 · 15 · 3.
-      expect(d.team.users, 18);
-      expect((d.team.admins, d.team.coordinators, d.team.members), (2, 15, 3));
+      expect(d.team!.users, 18);
+      expect(
+        (d.team!.admins, d.team!.coordinators, d.team!.members),
+        (2, 15, 3),
+      );
       expect(d.coordinatorships.map((c) => c.code).toSet(), hasLength(11));
       expect(d.coordinatorships.where((c) => !c.hasLead), hasLength(1));
       expect(d.lastActivity!.at, DateTime(2026, 10, 21, 14, 27));

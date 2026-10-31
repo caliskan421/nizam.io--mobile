@@ -35,6 +35,12 @@ class _Server implements HomeDashboardRepository {
       ),
     );
   }
+
+  @override
+  Future<TeamDashboardExtras> loadTeamExtras({
+    required String? departmentId,
+    required bool coordinator,
+  }) async => const TeamDashboardExtras(unreadMessages: 0);
 }
 
 void main() {

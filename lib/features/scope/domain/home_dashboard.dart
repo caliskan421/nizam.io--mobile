@@ -9,10 +9,10 @@ final class HomeDashboard {
   const HomeDashboard({
     required this.greetingName,
     required this.tasks,
-    required this.team,
     required this.coordinatorships,
     required this.pending,
     required this.counts,
+    this.team,
     this.lastActivity,
     this.greetingRole,
     this.greetingEmail,
@@ -32,7 +32,9 @@ final class HomeDashboard {
   final String? demoProgramName;
   final int? demoProgramYear;
   final TaskTotals tasks;
-  final TeamTotals team;
+
+  /// Ekip sayıları; yönetici olmayan hesapta bilinmez (null → ekip kutusu gizlenir).
+  final TeamTotals? team;
   final LastActivity? lastActivity;
   final List<CoordinatorshipSummary> coordinatorships;
 
@@ -221,4 +223,33 @@ final class ModuleCounts {
   final int tasksAwaitingApproval;
   final int unreadMessages;
   final int pendingRequests;
+}
+
+/// Yönetici olmayan hesabın özetinde görev listesinden sayılamayan parçalar
+/// ([HomeDashboardRepository.loadTeamExtras]).
+@immutable
+final class TeamDashboardExtras {
+  const TeamDashboardExtras({
+    required this.unreadMessages,
+    this.pendingDateRequests = const [],
+  });
+
+  final int unreadMessages;
+
+  /// Çağıranın bekleyen tarih talepleri (yalnız koordinatörde dolu).
+  final List<PendingDateRequest> pendingDateRequests;
+}
+
+/// Bekleyen tarih talebi (görev, eski ve yeni bitiş).
+@immutable
+final class PendingDateRequest {
+  const PendingDateRequest({
+    required this.workItemId,
+    required this.oldEnd,
+    required this.newEnd,
+  });
+
+  final String workItemId;
+  final DateTime oldEnd;
+  final DateTime newEnd;
 }

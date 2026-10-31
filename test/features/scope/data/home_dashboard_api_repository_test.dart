@@ -198,7 +198,7 @@ void main() {
     expect(d.tasks.inProgressOnTime, 2, reason: 'devam eden ve gecikmemiş');
     expect(d.tasks.late, 2);
     expect(d.tasks.awaitingApproval, 1);
-    expect(d.team.users, 9);
+    expect(d.team!.users, 9);
     expect(d.coordinatorships.single.code, 'd1');
     expect(d.coordinatorships.single.leads, ['Ayşe Kaya']);
     expect(d.counts.unreadMessages, 7);
@@ -267,5 +267,59 @@ void main() {
         ),
       ),
     );
+  });
+
+  group('loadTeamExtras (yönetici olmayan)', () {
+    Map<String, Object> request(String id, String status) => {
+      'request_id': 'r$id',
+      'work_item_id': id,
+      'status': status,
+      'old_start_on': '2026-10-01',
+      'new_start_on': '2026-10-01',
+      'old_end_on': '2026-11-10',
+      'new_end_on': '2026-11-14',
+    };
+    Map<String, Object> bodies() => {
+      '/v1/messages/unread-count': {'count': 2},
+      '/v1/date-change-requests/mine': {
+        'requests': [request('w1', 'pending'), request('w2', 'approved')],
+        'total': 2,
+      },
+    };
+    const reportPaths = [
+      '/v1/me',
+      '/v1/reports/dashboard',
+      '/v1/reports/dashboard/tasks',
+      '/v1/date-change-requests',
+    ];
+
+    test('koordinatör: okunmamış + kendi talepleri (departmanla), yalnız bekleyenler', () async {
+      final adapter = _Adapter(bodies());
+      final x = await _repo(adapter)
+          .loadTeamExtras(departmentId: 'd1', coordinator: true);
+      expect(x.unreadMessages, 2);
+      expect(x.pendingDateRequests.map((d) => d.workItemId), ['w1']);
+      expect(x.pendingDateRequests.single.newEnd, DateTime(2026, 11, 14));
+      final mine = adapter.seen.singleWhere(
+        (o) => o.uri.path == '/v1/date-change-requests/mine',
+      );
+      expect(mine.extra.values, contains('d1'));
+      for (final p in reportPaths) {
+        expect(adapter.seen.map((o) => o.uri.path), isNot(contains(p)));
+      }
+    });
+
+    test('üye ya da departmansız: yalnız okunmamış sayısı', () async {
+      for (final (dept, coordinator) in [('d1', false), (null, true)]) {
+        final adapter = _Adapter(bodies());
+        final x = await _repo(adapter)
+            .loadTeamExtras(departmentId: dept, coordinator: coordinator);
+        expect(x.unreadMessages, 2);
+        expect(x.pendingDateRequests, isEmpty);
+        expect(adapter.seen.map((o) => o.uri.path), [
+          '/v1/messages/unread-count',
+        ]);
+      }
+    });
   });
 }

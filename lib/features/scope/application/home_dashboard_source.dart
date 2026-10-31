@@ -27,4 +27,17 @@ final class HomeDashboardSource implements HomeDashboardRepository {
     if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
     return s.load();
   }
+
+  @override
+  Future<TeamDashboardExtras> loadTeamExtras({
+    required String? departmentId,
+    required bool coordinator,
+  }) async {
+    final s = server();
+    if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
+    return s.loadTeamExtras(
+      departmentId: departmentId,
+      coordinator: coordinator,
+    );
+  }
 }

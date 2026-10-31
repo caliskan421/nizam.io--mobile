@@ -270,10 +270,10 @@ Map<String, Object> dashboardWire(HomeDashboard d) {
         'tamamlandi': t.done,
       },
       'priority_distribution': {'orta': t.total},
-      'total_users': d.team.users,
-      'total_admins': d.team.admins,
-      'total_coordinators': d.team.coordinators,
-      'total_members': d.team.members,
+      'total_users': d.team!.users,
+      'total_admins': d.team!.admins,
+      'total_coordinators': d.team!.coordinators,
+      'total_members': d.team!.members,
       'deleted_records': 0,
       'coordinatorship_stats': [
         for (final c in d.coordinatorships)

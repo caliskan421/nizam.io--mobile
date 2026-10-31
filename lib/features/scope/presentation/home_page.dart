@@ -125,17 +125,21 @@ class _Feed extends ConsumerWidget {
         HomeQuickActions(onAction: onQuickAction),
         const Gap(NizamioSpacing.gapXl),
         // Kişi kümeleri ortak katalogdan; yalnız bu bölüm izler (katalog değişimi akışı kurmaz).
-        Consumer(
-          builder: (context, ref, _) {
-            final people = ref.watch(homeTeamPeopleProvider);
-            return HomeTeam(
-              dashboard: d,
-              onOpen: (role) =>
-                  nav.openTasks(people: people?.of(role) ?? const []),
-            );
-          },
-        ),
-        const Gap(NizamioSpacing.gapXl),
+        // Ekip sayıları yalnız yönetici özetinde bilinir; yoksa kutu gizlenir.
+        if (d.team case final team?) ...[
+          Consumer(
+            builder: (context, ref, _) {
+              final people = ref.watch(homeTeamPeopleProvider);
+              return HomeTeam(
+                dashboard: d,
+                team: team,
+                onOpen: (role) =>
+                    nav.openTasks(people: people?.of(role) ?? const []),
+              );
+            },
+          ),
+          const Gap(NizamioSpacing.gapXl),
+        ],
         HomeHistoryCard(
           activity: d.lastActivity,
           now: now,

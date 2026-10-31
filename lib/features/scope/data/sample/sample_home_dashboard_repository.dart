@@ -201,4 +201,11 @@ final class SampleHomeDashboardRepository implements HomeDashboardRepository {
       ),
     );
   }
+
+  /// Örnek kapsamda rol yoktur; yönetici olmayan yol kullanılmaz.
+  @override
+  Future<TeamDashboardExtras> loadTeamExtras({
+    required String? departmentId,
+    required bool coordinator,
+  }) async => const TeamDashboardExtras(unreadMessages: 0);
 }

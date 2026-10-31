@@ -10,16 +10,40 @@ part of 'home_dashboard_controller.dart';
 // ignore_for_file: type=lint, type=warning
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).
+///
+/// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
+/// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
+///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
+///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
+/// Katalog okunamazsa rol bilinmez; özet yönetici yolundan denenir (sunucu yetkiyi reddeder,
+/// hata gösterilir — rol tahmini yapılmaz).
 
 @ProviderFor(HomeDashboardController)
 final homeDashboardControllerProvider = HomeDashboardControllerProvider._();
 
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).
+///
+/// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
+/// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
+///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
+///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
+/// Katalog okunamazsa rol bilinmez; özet yönetici yolundan denenir (sunucu yetkiyi reddeder,
+/// hata gösterilir — rol tahmini yapılmaz).
 final class HomeDashboardControllerProvider
     extends $AsyncNotifierProvider<HomeDashboardController, HomeDashboard> {
   /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
   /// dokunuşuyla (`ref.invalidate`).
+  ///
+  /// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
+  /// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+  /// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
+  ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
+  ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
+  /// Katalog okunamazsa rol bilinmez; özet yönetici yolundan denenir (sunucu yetkiyi reddeder,
+  /// hata gösterilir — rol tahmini yapılmaz).
   HomeDashboardControllerProvider._()
     : super(
         from: null,
@@ -40,10 +64,18 @@ final class HomeDashboardControllerProvider
 }
 
 String _$homeDashboardControllerHash() =>
-    r'bc48d741db0b40efb6e4291c1cfd8e3869ab1d4b';
+    r'78aca7e303ea73c1b5b6bfdf49d79bb156d08d9f';
 
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).
+///
+/// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
+/// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
+///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
+///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
+/// Katalog okunamazsa rol bilinmez; özet yönetici yolundan denenir (sunucu yetkiyi reddeder,
+/// hata gösterilir — rol tahmini yapılmaz).
 
 abstract class _$HomeDashboardController extends $AsyncNotifier<HomeDashboard> {
   FutureOr<HomeDashboard> build();

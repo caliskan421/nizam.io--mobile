@@ -12,6 +12,7 @@ import '../../../core/api/generated/models/me_response.dart';
 import '../../../core/api/generated/models/report_task.dart';
 import '../../../core/api/generated/models/report_task_list.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/http/interceptors.dart';
 import '../domain/home_dashboard.dart';
 import '../domain/home_dashboard_report.dart';
 import '../domain/home_dashboard_report_repository.dart';
@@ -27,9 +28,12 @@ import 'dashboard_report_api_repository.dart';
 /// - `GET /v1/date-change-requests?status=pending` → bekleyen tarih talepleri;
 /// - `GET /v1/messages/unread-count` → okunmamış mesaj rozeti.
 ///
-/// Pano uçları yalnız şirket yöneticisine açıktır; diğer roller `reporting.not_authorized`
-/// alır ve hata olduğu gibi fırlar (istemci rol kuralı türetmez). Uçlardan biri hata verirse
-/// özet kurulmaz. İşlem geçmişi ucu sunucuda yok: [HomeDashboard.lastActivity] null.
+/// [load] yalnız şirket yöneticisi içindir (pano uçları yöneticiye açık); rol seçimi
+/// application katmanında (`HomeDashboardController`, `TaskAccess`). Uçlardan biri hata
+/// verirse özet kurulmaz. İşlem geçmişi ucu sunucuda yok: [HomeDashboard.lastActivity] null.
+///
+/// [loadTeamExtras] yönetici olmayan hesap içindir: yalnız okunmamış sayısı ve (koordinatörde)
+/// `GET /v1/date-change-requests/mine` (S3, açık departman); rapor uçları çağrılmaz.
 class ApiHomeDashboardRepository implements HomeDashboardRepository {
   ApiHomeDashboardRepository(Dio dio)
     : _report = ApiDashboardReportRepository(dio),
@@ -104,6 +108,39 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
         unreadMessages: unread,
         pendingRequests: report.pendingDateChanges,
       ),
+    );
+  }
+
+  @override
+  Future<TeamDashboardExtras> loadTeamExtras({
+    required String? departmentId,
+    required bool coordinator,
+  }) async {
+    final mine = coordinator && departmentId != null;
+    final r = await Future.wait<Object>([
+      apiCall(_messages.countUnreadMessages),
+      if (mine)
+        apiCall(
+          () => _work.myDateChangeRequests(
+            extras: withDepartment(
+              WorkClient.myDateChangeRequestsOpenapiExtras,
+              departmentId,
+            ),
+          ),
+        ),
+    ], eagerError: true);
+    return TeamDashboardExtras(
+      unreadMessages: (r[0] as CountResult).count,
+      pendingDateRequests: [
+        if (mine)
+          for (final d in (r[1] as DateChangeRequestList).requests)
+            if (d.status.json == 'pending')
+              PendingDateRequest(
+                workItemId: d.workItemId,
+                oldEnd: d.oldEndOn,
+                newEnd: d.newEndOn,
+              ),
+      ],
     );
   }
 

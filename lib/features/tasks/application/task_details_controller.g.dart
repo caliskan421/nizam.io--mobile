@@ -10,21 +10,24 @@ part of 'task_details_controller.dart';
 // ignore_for_file: type=lint, type=warning
 /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
-/// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz.
+/// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
+/// katalogdaki [TaskCatalog.access]'ten.
 
 @ProviderFor(taskDetails)
 final taskDetailsProvider = TaskDetailsFamily._();
 
 /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
-/// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz.
+/// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
+/// katalogdaki [TaskCatalog.access]'ten.
 
 final class TaskDetailsProvider
     extends $FunctionalProvider<AsyncValue<void>, void, FutureOr<void>>
     with $FutureModifier<void>, $FutureProvider<void> {
   /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
   /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
-  /// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz.
+  /// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
+  /// katalogdaki [TaskCatalog.access]'ten.
   TaskDetailsProvider._({
     required TaskDetailsFamily super.from,
     required String super.argument,
@@ -68,11 +71,12 @@ final class TaskDetailsProvider
   }
 }
 
-String _$taskDetailsHash() => r'fc1ff8a01f79d507e4ec4e1f24ed79afcfb8662b';
+String _$taskDetailsHash() => r'f9402617a3fc7b528a884d413d99bb77e2f99e62';
 
 /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
-/// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz.
+/// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
+/// katalogdaki [TaskCatalog.access]'ten.
 
 final class TaskDetailsFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<void>, String> {
@@ -87,7 +91,8 @@ final class TaskDetailsFamily extends $Family
 
   /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
   /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
-  /// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz.
+  /// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
+  /// katalogdaki [TaskCatalog.access]'ten.
 
   TaskDetailsProvider call(String code) =>
       TaskDetailsProvider._(argument: code, from: this);

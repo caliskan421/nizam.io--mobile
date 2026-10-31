@@ -65,7 +65,7 @@ final class TaskDetailControllerProvider
 }
 
 String _$taskDetailControllerHash() =>
-    r'6bd394c0c687cc93b3e13397dff7a28053d07d09';
+    r'27047ef73c7b590f8fcb310e400deec950d43d44';
 
 /// Görev ayrıntısı denetleyicisi (prototip `S_detail`). Görev değişiklikleri katalog
 /// denetleyicisine yazılır (oturum boyunca listede de görünür).

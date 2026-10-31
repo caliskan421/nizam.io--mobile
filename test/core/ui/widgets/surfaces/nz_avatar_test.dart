@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
+import 'package:nizamio/core/ui/widgets/nz_icons.dart';
 import 'package:nizamio/core/ui/widgets/nz_size.dart';
 import 'package:nizamio/core/ui/widgets/surfaces/nz_avatar.dart';
 
@@ -48,7 +49,7 @@ void main() {
 
   testWidgets('icon: simgeyi gösterir', (tester) async {
     await tester.pumpWidget(testApp(const NzAvatar.icon()));
-    expect(find.byIcon(Icons.person_outline), findsOneWidget);
+    expect(find.byIcon(NzIcons.person), findsOneWidget);
   });
 
   testWidgets('çap boyuta göre; daire primary zemin', (tester) async {

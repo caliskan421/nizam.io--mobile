@@ -160,6 +160,10 @@ SplitMove splitMove(
   final module = railModuleOf(uri.path);
   if (module == null) return SplitGo(baseLocation(RailModule.tasks, target));
   final base = baseEntryOf(uri, lastId);
+  if (base == null && target.kind == baseKindOf(module)) {
+    // Taban boş ("Bir kayıt seç"): modülün kendi kaydı tabana oturur (iz düşer).
+    return SplitGo(baseLocation(module, target));
+  }
   final trail = parseTrail(uri.queryParametersAll['trail'] ?? const []);
   final stack = [?base, ...trail];
   final i = stack.lastIndexWhere((e) => e.kind == target.kind);

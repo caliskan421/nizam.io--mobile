@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nizamio/core/ui/widgets/navigation/nz_path_icon.dart';
 import 'package:nizamio/core/ui/widgets/nz_icon.dart';
+import 'package:nizamio/core/ui/widgets/nz_icons.dart';
 
 import 'feedback/feedback_test_support.dart';
 
@@ -15,44 +15,30 @@ Future<void> _pump(WidgetTester tester, double width, Widget child) async {
 void main() {
   setUpFonts();
 
-  testWidgets('telefonda Material Icon (değişmez)', (tester) async {
-    await _pump(tester, 390, const NzIcon(Icons.search_rounded, size: 20));
-    expect(find.byIcon(Icons.search_rounded), findsOneWidget);
-    expect(find.byType(NzPathIcon), findsNothing);
-  });
-
-  testWidgets('tablette eşlenen ikon kaynak SVG yolu; boyut ve renk korunur', (
-    tester,
-  ) async {
-    await _pump(
+  for (final (device, width) in [('telefon', 390.0), ('tablet', 1180.0)]) {
+    testWidgets('$device: Material Icon; boyut, renk ve anlam korunur', (
       tester,
-      1180,
-      const NzIcon(
-        Icons.search_rounded,
-        size: 16,
-        color: Color(0xFFFF0000),
-        semanticLabel: 'Ara',
-      ),
-    );
-    final drawn = tester.widget<NzPathIcon>(find.byType(NzPathIcon));
-    expect(drawn.data, NzIconPaths.search);
-    expect(drawn.size, 16);
-    expect(drawn.color, const Color(0xFFFF0000));
-    expect(find.bySemanticsLabel('Ara'), findsOneWidget);
-  });
+    ) async {
+      await _pump(
+        tester,
+        width,
+        const NzIcon(
+          NzIcons.search,
+          size: 16,
+          color: Color(0xFFFF0000),
+          semanticLabel: 'Ara',
+        ),
+      );
+      final icon = tester.widget<Icon>(find.byIcon(NzIcons.search));
+      expect(icon.size, 16);
+      expect(icon.color, const Color(0xFFFF0000));
+      expect(find.bySemanticsLabel('Ara'), findsOneWidget);
+    });
+  }
 
-  testWidgets('tablette eşlemesi olmayan ikon Material kalır', (tester) async {
-    await _pump(tester, 1180, const NzIcon(Icons.star_rounded));
-    expect(find.byIcon(Icons.star_rounded), findsOneWidget);
-  });
-
-  test('eşleme tablosu: geri, kapat, ekle, filtre kaynakla aynı', () {
-    expect(
-      NzIconPaths.material[Icons.arrow_back_ios_new_rounded],
-      'M15 5l-7 7 7 7',
-    );
-    expect(NzIconPaths.material[Icons.close_rounded], 'M6 6l12 12M18 6L6 18');
-    expect(NzIconPaths.material[Icons.add_rounded], 'M12 5v14M5 12h14');
-    expect(NzIconPaths.material[Icons.tune_rounded], 'M4 6h16M7 12h10M10 18h4');
+  test('aynı anlam tek ada iner (telefon tasarımı)', () {
+    expect(NzIcons.back, Icons.arrow_back_ios_new_rounded);
+    expect(NzIcons.close, Icons.close_rounded);
+    expect(NzIcons.add, Icons.add_rounded);
   });
 }

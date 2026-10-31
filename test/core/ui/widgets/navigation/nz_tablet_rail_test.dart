@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/ui/layout/nz_pane.dart';
-import 'package:nizamio/core/ui/widgets/navigation/nz_path_icon.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_tablet_rail.dart';
+import 'package:nizamio/core/ui/widgets/nz_icons.dart';
 
 import '../feedback/feedback_test_support.dart';
 
@@ -30,7 +30,8 @@ Widget _rail({
       items: [
         for (final (i, l) in _labels.indexed)
           NzRailItem(
-            iconPath: NzIconPaths.home,
+            icon: NzIcons.home,
+            selectedIcon: NzIcons.homeFilled,
             label: l,
             badge: i == 5 ? badge : null,
           ),
@@ -45,7 +46,6 @@ Widget _rail({
       menuLabel: 'Tüm modüller',
       onMenu: onMenu ?? () {},
       assistantLabel: 'Asistana sor',
-      assistantIcon: Icons.smart_toy_outlined,
       onAssistant: onAssistant ?? () {},
     ),
   ),

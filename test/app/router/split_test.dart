@@ -20,11 +20,8 @@ void main() {
     expect(const PaneEntry(PaneKind.folder, 'İDA').code, 'folder:İDA');
   });
 
-  test('modül kökünde taban TB_DEF; son açılan kimlik önce gelir', () {
-    expect(
-      baseEntryOf(Uri.parse('/tasks'), _none),
-      const PaneEntry(PaneKind.task, SplitDefaults.task),
-    );
+  test('modül kökünde taban son açılan kimlik; hiç açılmamışsa yok', () {
+    expect(baseEntryOf(Uri.parse('/tasks'), _none), isNull);
     expect(
       baseEntryOf(Uri.parse('/tasks'), (k) => 'ALT-9'),
       const PaneEntry(PaneKind.task, 'ALT-9'),
@@ -33,6 +30,31 @@ void main() {
     expect(
       baseEntryOf(Uri.parse('/home'), _none),
       const PaneEntry(PaneKind.history),
+    );
+  });
+
+  test('taban boşken modülün kendi kaydı tabana oturur, iz düşer', () {
+    expect(
+      (_move(
+        '/tasks',
+        const PaneEntry(PaneKind.task, 'ALT-7'),
+      ) as SplitGo).location,
+      '/tasks/ALT-7',
+    );
+    expect(
+      (_move(
+        '/messages?trail=task%3AALT-1',
+        const PaneEntry(PaneKind.chat, 'gen'),
+      ) as SplitGo).location,
+      '/messages/gen',
+    );
+    // Takvimin taban türü yok: kayıt itilir.
+    expect(
+      (_move(
+        '/calendar',
+        const PaneEntry(PaneKind.task, 'ALT-5'),
+      ) as SplitGo).location,
+      '/calendar?trail=task%3AALT-5',
     );
   });
 

@@ -11,10 +11,12 @@ import 'package:nizamio/app/router/split.dart';
 import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/ui/layout/nz_pane.dart';
 import 'package:nizamio/core/ui/page/nz_app_nav.dart';
+import 'package:nizamio/core/ui/widgets/feedback/nz_pick_record.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_composer.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_floating_nav.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_tablet_rail.dart';
 import 'package:nizamio/core/ui/widgets/nz_icon.dart';
+import 'package:nizamio/core/ui/widgets/nz_icons.dart';
 import 'package:nizamio/features/archive/archive.dart';
 import 'package:nizamio/features/calendar/calendar.dart';
 import 'package:nizamio/features/coordinatorships/coordinatorships.dart';
@@ -30,9 +32,9 @@ import 'router_test_support.dart';
 Finder _rail(String label) =>
     find.descendant(of: find.byType(NzTabletRail), matching: find.text(label));
 
-/// Üst çubuk "Geri" ikonu (tablette kaynak SVG'si çizilir; bileşen [NzIcon]).
+/// Üst çubuk "Geri" ikonu.
 final _backIcon = find.byWidgetPredicate(
-  (w) => w is NzIcon && w.icon == Icons.arrow_back_ios_new_rounded,
+  (w) => w is NzIcon && w.icon == NzIcons.back,
 );
 
 Finder _inPane(NzPaneRole role, Finder f) => find.descendant(
@@ -57,7 +59,7 @@ void main() {
   setUpFonts();
 
   testWidgets(
-    '1180×820: ray 100 + liste 390 (+1 kenar) + ayrıntı 689; varsayılan kayıt',
+    '1180×820: ray 100 + liste 390 (+1 kenar) + ayrıntı 689; kayıt yoksa "Bir kayıt seç"',
     (tester) async {
       final router = await _pump(tester, const Size(1180, 820));
       router.go('/tasks');
@@ -79,13 +81,14 @@ void main() {
         _inPane(NzPaneRole.master, find.byType(TasksPage)),
         findsOneWidget,
       );
+      // Prod'da örnek kimlik açılmaz: kayıt hiç açılmamışsa sağda "Bir kayıt seç".
       expect(
-        tester
-            .widget<TaskDetailPage>(
-              _inPane(NzPaneRole.detail, find.byType(TaskDetailPage)),
-            )
-            .code,
-        SplitDefaults.task,
+        _inPane(NzPaneRole.detail, find.byType(NzPickRecord)),
+        findsOneWidget,
+      );
+      expect(
+        _inPane(NzPaneRole.detail, find.byType(TaskDetailPage)),
+        findsNothing,
       );
       // Tek ekranlık sağ yığında "Geri" yok.
       expect(tester.widget<NzPaneScope>(detail).canBack, isFalse);
@@ -122,50 +125,63 @@ void main() {
     },
   );
 
-  testWidgets('modül değişimi varsayılana döner; sohbet sağ bölmede açılır', (
-    tester,
-  ) async {
-    final router = await _pump(tester, const Size(1180, 820));
-    router.go('/tasks/ALT-7');
-    await settle(tester);
-    await tester.tap(_rail('Mesajlar'));
-    await settle(tester);
-    // Modüle giriş tabanın kaydıyla: daralınca aynı sohbet sayfası görünür.
-    expect(locationOf(router), '/messages/${SplitDefaults.chat}');
-    expect(
-      _inPane(NzPaneRole.master, find.byType(MessagesPage)),
-      findsOneWidget,
-    );
-    final chat = _inPane(NzPaneRole.detail, find.byType(ChatPage));
-    expect(tester.widget<ChatPage>(chat).id, SplitDefaults.chat);
-    final list = tester.state(find.byType(MessagesPage));
+  testWidgets(
+    'modül değişimi son açılan kayda döner; sohbet sağ bölmede açılır',
+    (tester) async {
+      final router = await _pump(tester, const Size(1180, 820));
+      router.go('/tasks/ALT-7');
+      await settle(tester);
+      await tester.tap(_rail('Mesajlar'));
+      await settle(tester);
+      // Sohbet hiç açılmamış: modül kökü, sağda "Bir kayıt seç".
+      expect(locationOf(router), '/messages');
+      expect(
+        _inPane(NzPaneRole.master, find.byType(MessagesPage)),
+        findsOneWidget,
+      );
+      expect(
+        _inPane(NzPaneRole.detail, find.byType(NzPickRecord)),
+        findsOneWidget,
+      );
+      final list = tester.state(find.byType(MessagesPage));
 
-    tester.element(find.byType(MessagesPage)).appNav.openChat('gen');
-    await settle(tester);
-    expect(locationOf(router), '/messages/gen');
-    expect(tester.state(find.byType(MessagesPage)), same(list));
-    expect(
-      tester.widget<ChatPage>(find.byType(ChatPage).hitTestable().first).id,
-      'gen',
-    );
-    expect(find.byType(NzFloatingNav), findsNothing);
+      tester.element(find.byType(MessagesPage)).appNav.openChat('gen');
+      await settle(tester);
+      expect(locationOf(router), '/messages/gen');
+      expect(tester.state(find.byType(MessagesPage)), same(list));
+      expect(
+        tester.widget<ChatPage>(find.byType(ChatPage).hitTestable().first).id,
+        'gen',
+      );
+      expect(find.byType(NzFloatingNav), findsNothing);
 
-    await tester.tap(_rail('Arşiv'));
-    await settle(tester);
-    expect(locationOf(router), '/archive/${SplitDefaults.archiveFolder}');
-    expect(
-      _inPane(NzPaneRole.master, find.byType(ArchivePage)),
-      findsOneWidget,
-    );
-    expect(
-      tester
-          .widget<ArchiveFolderPage>(
-            _inPane(NzPaneRole.detail, find.byType(ArchiveFolderPage)),
-          )
-          .code,
-      SplitDefaults.archiveFolder,
-    );
-  });
+      await tester.tap(_rail('Arşiv'));
+      await settle(tester);
+      expect(locationOf(router), '/archive');
+      expect(
+        _inPane(NzPaneRole.master, find.byType(ArchivePage)),
+        findsOneWidget,
+      );
+      expect(
+        _inPane(NzPaneRole.detail, find.byType(NzPickRecord)),
+        findsOneWidget,
+      );
+      expect(
+        _inPane(NzPaneRole.detail, find.byType(ArchiveFolderPage)),
+        findsNothing,
+      );
+
+      // Modüle giriş tabanın son kaydıyla: daralınca aynı kayıt sayfası görünür.
+      await tester.tap(_rail('Mesajlar'));
+      await settle(tester);
+      expect(locationOf(router), '/messages/gen');
+      final chat = _inPane(NzPaneRole.detail, find.byType(ChatPage));
+      expect(tester.widget<ChatPage>(chat).id, 'gen');
+      await tester.tap(_rail('Görevler'));
+      await settle(tester);
+      expect(locationOf(router), '/tasks/ALT-7');
+    },
+  );
 
   testWidgets('takvim: liste solda, sağda "Bir kayıt seç"; görev sağa itilir', (
     tester,
@@ -205,12 +221,14 @@ void main() {
       await settle(tester);
       final list = tester.state(find.byType(CoordinatorshipsPage));
       final nav = tester.element(find.byType(CoordinatorshipsPage)).appNav;
-      // Varsayılan ALT zaten sağda: aynı kayıt yenilenir, konum değişmez (prototip `rHide`).
+      // Taban boş ("Bir kayıt seç"): listeden seçilen kayıt tabana oturur.
       nav.openCoordinatorship('ALT');
       await settle(tester);
-      expect(locationOf(router), '/coordinatorships');
-      router.go('/coordinatorships/ALT');
+      expect(locationOf(router), '/coordinatorships/ALT');
+      // Aynı kayıt en üstte: yenilenir, konum değişmez (prototip `rHide`).
+      nav.openCoordinatorship('ALT');
       await settle(tester);
+      expect(locationOf(router), '/coordinatorships/ALT');
       final cdetail = tester.state(
         find.byWidgetPredicate(
           (w) => w is CoordinatorshipPage && w.code == 'ALT',

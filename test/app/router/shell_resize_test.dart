@@ -8,6 +8,7 @@ import 'package:nizamio/app/router/router.dart';
 import 'package:nizamio/app/router/shell.dart';
 import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
+import 'package:nizamio/core/ui/widgets/feedback/nz_pick_record.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_search_field.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_floating_nav.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_tablet_rail.dart';
@@ -155,12 +156,13 @@ void main() {
           size.width < 600 ? findsNothing : findsOneWidget,
           reason: why,
         );
-        // ≥ 840: arşiv listesi sol bölmede, sağda modül varsayılanı (klasör).
+        // ≥ 840: arşiv listesi sol bölmede, sağda "Bir kayıt seç" (klasör açılmadı).
         expect(
-          find.byType(ArchiveFolderPage),
+          find.byType(NzPickRecord),
           size.width >= 840 ? findsOneWidget : findsNothing,
           reason: why,
         );
+        expect(find.byType(ArchiveFolderPage), findsNothing, reason: why);
         expect(locationOf(router), '/archive', reason: why);
         expect(tester.state(find.byType(NzAdaptiveShell)), same(shell));
         expect(tester.state(page), same(state), reason: why);

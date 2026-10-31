@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_search_field.dart';
+import 'package:nizamio/core/ui/widgets/nz_icons.dart';
 import 'package:nizamio/core/ui/widgets/nz_size.dart';
 
 import '../../../../support/golden.dart';
@@ -26,7 +27,7 @@ void main() {
   testWidgets('etiket varsayılanı ARB\'den; simge çizilir', (tester) async {
     await tester.pumpWidget(testApp(const NzSearchField()));
     expect(find.text('Ara'), findsOneWidget);
-    expect(find.byIcon(Icons.search), findsOneWidget);
+    expect(find.byIcon(NzIcons.search), findsOneWidget);
   });
 
   testWidgets('verilen etiket kullanılır', (tester) async {

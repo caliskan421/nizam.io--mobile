@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_composer.dart';
+import 'package:nizamio/core/ui/widgets/nz_icons.dart';
 import 'package:nizamio/core/ui/widgets/surfaces/nz_chat_bubble.dart';
 import 'package:nizamio/features/messages/application/chat_controller.dart';
 import 'package:nizamio/features/messages/application/chats_controller.dart';
@@ -103,7 +104,7 @@ void main() {
         find.text('Kapanış yemeği için hangi günler uygun?'),
         findsWidgets,
       );
-      expect(h.read(messagesNavCaptionProvider), '3 ${_l.uiMessagesUnreadLc}');
+      expect(h.read(messagesNavCaptionProvider), '4 ${_l.uiMessagesUnreadLc}');
     },
   );
 
@@ -121,7 +122,7 @@ void main() {
     );
     final bubble = _bubble('Toplantı saat 15:00');
     expect(
-      find.descendant(of: bubble, matching: find.byIcon(Icons.done_rounded)),
+      find.descendant(of: bubble, matching: find.byIcon(NzIcons.check)),
       findsOneWidget,
     );
     await tester.pump(const Duration(milliseconds: 600));

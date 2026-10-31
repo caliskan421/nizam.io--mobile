@@ -50,7 +50,7 @@ void main() {
   test('süzgeç ve arama; öneriler', () async {
     final cat = await SampleTaskCatalogRepository().load();
     final box = await const SampleChatRepository().load();
-    expect(visibleChats(box.chats, filter: ChatFilter.unread), hasLength(4));
+    expect(visibleChats(box.chats, filter: ChatFilter.unread), hasLength(5));
     expect(visibleChats(box.chats, filter: ChatFilter.people), hasLength(3));
     expect(visibleChats(box.chats, filter: ChatFilter.groups), hasLength(5));
     expect(visibleChats(box.chats, query: 'TRAFO').map((c) => c.id), [

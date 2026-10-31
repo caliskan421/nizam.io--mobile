@@ -66,16 +66,16 @@ void main() {
       ),
       findsOneWidget,
     );
-    // Kaynak başlangıcı: koord okunmuş (anma işareti yok).
-    expect(find.text('@'), findsNothing);
+    // Kaynak başlangıcı: koord 1 okunmamış + anma.
+    expect(find.text('@'), findsOneWidget);
     await _tap(tester, find.text('Koordinatörler'));
     expect(nav.calls, ['chat:koord']);
   });
 
-  testWidgets('süzgeç: okunmamış 4, kişiler 3; arama', (tester) async {
+  testWidgets('süzgeç: okunmamış 5, kişiler 3; arama', (tester) async {
     await _open(tester);
     await _tap(tester, find.text(_l.uiMessagesFilterUnread));
-    expect(find.byType(NzChatRow), findsNWidgets(4));
+    expect(find.byType(NzChatRow), findsNWidgets(5));
     await _tap(tester, find.text(_l.uiMessagesFilterPeople));
     expect(find.byType(NzChatRow), findsNWidgets(3));
     await _tap(tester, find.text(_l.uiMessagesFilterAll));
@@ -116,7 +116,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.text(_l.uiMessagesUnreadOnly));
     await settle(tester);
-    expect(find.byType(NzChatRow), findsNWidgets(4));
+    expect(find.byType(NzChatRow), findsNWidgets(5));
     h.read(shellReselectEventsProvider.notifier).fire(MessagesPage.shellTab);
     await settle(tester);
     await tester.tap(find.text(_l.uiMessagesMarkAllRead));

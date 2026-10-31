@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
 import 'package:nizamio/core/ui/widgets/lists/nz_list_tile.dart';
+import 'package:nizamio/core/ui/widgets/nz_icons.dart';
 import 'package:nizamio/core/ui/widgets/nz_size.dart';
 
 import '../../../../support/golden.dart';
@@ -77,7 +78,7 @@ void main() {
       await tester.pumpWidget(
         testApp(NzListTile.navigation(title: 'A', onTap: () {})),
       );
-      expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+      expect(find.byIcon(NzIcons.chevronRight), findsOneWidget);
       await tester.pumpWidget(
         testApp(
           NzListTile.navigation(
@@ -87,7 +88,7 @@ void main() {
           ),
         ),
       );
-      expect(find.byIcon(Icons.chevron_right), findsNothing);
+      expect(find.byIcon(NzIcons.chevronRight), findsNothing);
       expect(find.byIcon(Icons.add), findsOneWidget);
     });
 

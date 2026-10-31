@@ -1,7 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/ui/extensions/context_ext.dart';
 import '../../core/ui/page/nz_app_nav.dart';
+import '../../core/ui/widgets/feedback/nz_pick_record.dart';
 import '../../features/activity/activity.dart';
 import '../../features/archive/archive.dart';
 import '../../features/calendar/calendar.dart';
@@ -190,7 +192,7 @@ class TasksRoute extends NzTabRouteData with $TasksRoute {
     trail: trail,
     base: SplitRoot(
       master: (_) => tasksMaster(view: initialView, people: people),
-      detail: (c) => _keyedTaskDetailPage(splitBaseId(c, PaneKind.task)),
+      detail: (c) => _splitBase(c, PaneKind.task, _keyedTaskDetailPage),
     ),
   );
 
@@ -239,7 +241,7 @@ class CoordinatorshipsRoute extends NzTabRouteData with $CoordinatorshipsRoute {
     trail: trail,
     base: SplitRoot(
       master: (_) => coordinatorshipsMaster(),
-      detail: (c) => _keyedCoordinatorshipPage(splitBaseId(c, PaneKind.coord)),
+      detail: (c) => _splitBase(c, PaneKind.coord, _keyedCoordinatorshipPage),
     ),
   );
 }
@@ -269,7 +271,7 @@ class ArchiveRoute extends NzTabRouteData with $ArchiveRoute {
     trail: trail,
     base: SplitRoot(
       master: (_) => archiveMaster(),
-      detail: (c) => _keyedArchiveFolderPage(splitBaseId(c, PaneKind.folder)),
+      detail: (c) => _splitBase(c, PaneKind.folder, _keyedArchiveFolderPage),
     ),
   );
 }
@@ -299,7 +301,7 @@ class MessagesRoute extends NzTabRouteData with $MessagesRoute {
     trail: trail,
     base: SplitRoot(
       master: (_) => messagesMaster(),
-      detail: (c) => _keyedChatPage(splitBaseId(c, PaneKind.chat)),
+      detail: (c) => _splitBase(c, PaneKind.chat, _keyedChatPage),
     ),
   );
 }
@@ -378,6 +380,19 @@ List<RouteBase> buildAppRoutes({List<RouteBase> featureRoutes = const []}) => [
   ...$appRoutes,
   ...featureRoutes,
 ];
+
+/// Çift bölmede modül kökünün sağ bölmesi: son açılan kayıt, yoksa "Bir kayıt seç".
+Widget _splitBase(
+  BuildContext context,
+  PaneKind kind,
+  Widget Function(String id) page,
+) => switch (splitBaseId(context, kind)) {
+  final id? => page(id),
+  null => NzPickRecord(
+    title: context.l10n.uiRouterPickTitle,
+    message: context.l10n.uiRouterPickBody,
+  ),
+};
 
 // Kök varsayılan ayrıntıları kimlikle anahtarlı (son açılan kimlik değişince yeni ekran).
 Widget _keyedTaskDetailPage(String code) =>

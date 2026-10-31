@@ -32,7 +32,7 @@ class RootTopBar extends ConsumerWidget {
           icon: Icons.notifications_none_rounded,
           semanticLabel: bell.label,
           dot: bell.dot ? context.colors.danger : null,
-          onPressed: () => NzToast.show(context, l.soon(l.uiHomeNotifications)),
+          onPressed: () => showNotificationsSoon(context),
         ),
         NzIconButton.glass(
           icon: Icons.menu_rounded,
@@ -42,6 +42,13 @@ class RootTopBar extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// Zile dokunuş (bildirim listesi henüz yok); kök üst çubuk ve tablet rayı aynı bildirimi
+/// gösterir.
+void showNotificationsSoon(BuildContext context) {
+  final l = context.l10n;
+  NzToast.show(context, l.soon(l.uiHomeNotifications));
 }
 
 /// Bildirim zilinin okuyucu etiketi ("Bildirimler · 3 tarih talebi ve 3 onay…") ve bekleyen

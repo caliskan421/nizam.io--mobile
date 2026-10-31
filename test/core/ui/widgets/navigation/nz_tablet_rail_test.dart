@@ -45,6 +45,7 @@ Widget _rail({
       menuLabel: 'Tüm modüller',
       onMenu: onMenu ?? () {},
       assistantLabel: 'Asistana sor',
+      assistantIcon: Icons.smart_toy_outlined,
       onAssistant: onAssistant ?? () {},
     ),
   ),

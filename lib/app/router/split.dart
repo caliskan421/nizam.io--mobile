@@ -18,22 +18,13 @@ import 'routes.dart';
 //
 // - Sol modül YOLDAN türer (`/coordinatorships/...` → Koordinatörlükler listesi).
 // - Sağ yığın = taban + iz. Taban yolun kaydıdır (`/tasks/ALT-7` → görev ALT-7; modül kökü →
-//   modülün son açılan kaydı, ilk açılışta `TB_DEF`). İz, modüller arası itilen kayıtlardır ve
+//   modülün son açılan kaydı; hiç açılmamışsa "Bir kayıt seç"). İz, modüller arası itilen kayıtlardır ve
 //   yalnız KİMLİK taşıyan `trail` sorgusudur (`?trail=folder:ALT&trail=task:ALT-5`).
 // - Dal kökü genişliğe göre kurulur ([SplitRoot]): tek bölmede liste, çift bölmede taban.
 //   Liste sayfası iki yer arasında aynı [GlobalKey] ile taşınır (State korunur).
 // - İz her genişlikte aynı çizilir ([PaneStack]); geri izi kısaltır. Böylece daralıp
 //   genişlemede aynı görev/sohbet State'i ve iz korunur.
 // İkinci veri yolu yoktur: iki bölme aynı controller'ları okur.
-
-/// Prototip `TB_DEF`: modüle ilk girildiğinde sağ bölmede açılan kayıt (örnek veri kimlikleri).
-/// Ana sayfa → işlem geçmişi; takvim → "Bir kayıt seç".
-abstract final class SplitDefaults {
-  static const task = 'ALT-5';
-  static const coordinatorship = 'ALT';
-  static const archiveFolder = 'ALT';
-  static const chat = 'koord';
-}
 
 /// Tablet rayının modülleri (prototip `RAIL`, sıra birebir).
 enum RailModule { home, tasks, calendar, coordinatorships, archive, messages }
@@ -112,7 +103,7 @@ PaneKind? baseKindOf(RailModule m) => switch (m) {
   RailModule.messages => PaneKind.chat,
 };
 
-/// Konumdaki taban kaydı (modül kökünde [lastId] ya da `TB_DEF`).
+/// Konumdaki taban kaydı (modül kökünde [lastId]; hiç açılmamışsa null).
 PaneEntry? baseEntryOf(Uri uri, String? Function(PaneKind) lastId) {
   final module = railModuleOf(uri.path);
   if (module == null) return null;
@@ -120,18 +111,9 @@ PaneEntry? baseEntryOf(Uri uri, String? Function(PaneKind) lastId) {
   if (kind == null) return null;
   if (kind == PaneKind.history) return const PaneEntry(PaneKind.history);
   final parts = uri.pathSegments;
-  final id = parts.length > 1 ? parts[1] : lastId(kind) ?? splitDefaultId(kind);
-  return PaneEntry(kind, id);
+  final id = parts.length > 1 ? parts[1] : lastId(kind);
+  return id == null ? null : PaneEntry(kind, id);
 }
-
-/// `TB_DEF` kimliği.
-String? splitDefaultId(PaneKind kind) => switch (kind) {
-  PaneKind.task => SplitDefaults.task,
-  PaneKind.coord => SplitDefaults.coordinatorship,
-  PaneKind.folder => SplitDefaults.archiveFolder,
-  PaneKind.chat => SplitDefaults.chat,
-  PaneKind.history => null,
-};
 
 /// [uri]'nin izi [trail] olan hâli (diğer sorgu parametreleri korunur).
 String withTrail(Uri uri, List<PaneEntry> trail) {
@@ -298,9 +280,9 @@ class SplitRoot extends StatelessWidget {
   }
 }
 
-/// Modül kökünün taban kaydı (son açılan ya da `TB_DEF`).
-String splitBaseId(BuildContext context, PaneKind kind) =>
-    SplitMemory.maybeOf(context)?.lastIds[kind] ?? splitDefaultId(kind)!;
+/// Modül kökünün taban kaydı: son açılan; hiç açılmamışsa null ("Bir kayıt seç").
+String? splitBaseId(BuildContext context, PaneKind kind) =>
+    SplitMemory.maybeOf(context)?.lastIds[kind];
 
 /// Sağ yığın: [base] (rotanın kendi ekranı) + iz kayıtları; yalnız en üstteki görünür, alttakiler
 /// State'iyle bekler (prototip alt ekranlar kalıcıdır). Geri (üst çubuk, sistem) izi kısaltır.

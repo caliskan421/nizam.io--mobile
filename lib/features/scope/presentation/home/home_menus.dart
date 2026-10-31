@@ -248,13 +248,11 @@ Future<void> showHomeDrawer(
             label: l.uiHomeGroupTracking,
             rows: [
               row(HomeModule.home, Icons.home_outlined, l.uiHomeModuleHome),
-              // Kaynak tablet çekmecesinde "takip" grubu: Ana sayfa · Görevler · Takvim.
-              if (!tablet)
-                row(
-                  HomeModule.tracking,
-                  Icons.work_outline_rounded,
-                  l.uiHomeModuleTracking,
-                ),
+              row(
+                HomeModule.tracking,
+                Icons.work_outline_rounded,
+                l.uiHomeModuleTracking,
+              ),
               row(
                 HomeModule.tasks,
                 Icons.checklist_rounded,

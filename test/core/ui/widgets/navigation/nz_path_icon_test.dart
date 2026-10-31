@@ -30,7 +30,6 @@ void main() {
       NzIconPaths.messages,
       NzIconPaths.bell,
       NzIconPaths.menu,
-      NzIconPaths.assistant,
       NzIconPaths.pickRecord,
     ]) {
       final b = _drawn(NzPathIcon.pathOf(d));

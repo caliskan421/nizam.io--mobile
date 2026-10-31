@@ -102,8 +102,6 @@ abstract final class NzIconPaths {
   static const bell =
       'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0';
   static const menu = 'M4 7h16M4 12h16M10 17h10';
-  static const assistant =
-      'M12 2.5v3M8 6h8a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3zM9.5 11.5v1M14.5 11.5v1M9.5 16h5M2.5 11v4M21.5 11v4';
   static const pickRecord = 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M9 15l2 2 4-4';
 
   // Kaynak `t-icon` yolları (prototip satır içi SVG'ler).
@@ -223,7 +221,6 @@ abstract final class NzIconPaths {
     Icons.mail_outline_rounded: mail,
     Icons.notifications_none_rounded: bell,
     Icons.menu_rounded: menu,
-    Icons.smart_toy_outlined: assistant,
     Icons.home_outlined: home,
     Icons.checklist_rounded: tasks,
     Icons.calendar_today_outlined: calendar,

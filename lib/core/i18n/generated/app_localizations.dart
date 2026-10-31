@@ -4567,7 +4567,7 @@ abstract class AppLocalizations {
   /// ui.router.assistant_soon
   ///
   /// In tr, this message translates to:
-  /// **'Asistan mobilde sonraki adımda eklenecek'**
+  /// **'Asistan sonraki adımda eklenecek'**
   String get uiRouterAssistantSoon;
 
   /// ui.router.tab_history
@@ -4600,11 +4600,17 @@ abstract class AppLocalizations {
   /// **'Mesajlar'**
   String get uiRouterTabMessages;
 
-  /// ui.router.assistant_soon_tablet
+  /// ui.router.pick_title
   ///
   /// In tr, this message translates to:
-  /// **'Asistan tablette sonraki adımda tasarlanacak'**
-  String get uiRouterAssistantSoonTablet;
+  /// **'Bir kayıt seç'**
+  String get uiRouterPickTitle;
+
+  /// ui.router.pick_body
+  ///
+  /// In tr, this message translates to:
+  /// **'Soldaki listeden bir kayıt seç, ayrıntısı burada açılır.'**
+  String get uiRouterPickBody;
 
   /// ui.router.all_modules
   ///

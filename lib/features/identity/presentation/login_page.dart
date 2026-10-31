@@ -86,7 +86,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ? toApiError(login.error!)
         : null;
     // Tablet (prototip `isLogin`): ray yok; ortada 420, iç dolgu 96 / 24 / 40, bloklar arası
-    // 40, logo gerçek marka SVG'si, giriş metni 15/22, en altta geliştirici satırı.
+    // 40, giriş metni 15/22, en altta geliştirici satırı. Ürün işareti telefonla aynıdır.
     final brand = displayBrand(ref.watch(flavorProvider));
     final tablet = NzTabletMetrics.tabletVisualAt(
       MediaQuery.sizeOf(context).width,
@@ -101,13 +101,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             MergeSemantics(
               child: Row(
                 children: [
-                  if (tablet)
-                    const NzLogo(extent: NizamioSize.controlMd)
-                  else
-                    NzBrandMark(
-                      monogram: l.uiHomeAppName.characters.first,
-                      extent: NizamioSize.controlMd,
-                    ),
+                  NzBrandMark(
+                    monogram: l.uiHomeAppName.characters.first,
+                    extent: NizamioSize.controlMd,
+                  ),
                   const Gap(NizamioSpacing.space3),
                   Expanded(
                     child: Column(

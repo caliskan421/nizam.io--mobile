@@ -2357,8 +2357,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiRouterAssistant => 'Asistana sor';
 
   @override
-  String get uiRouterAssistantSoon =>
-      'Asistan mobilde sonraki adımda eklenecek';
+  String get uiRouterAssistantSoon => 'Asistan sonraki adımda eklenecek';
 
   @override
   String get uiRouterTabHistory => 'Geçmiş';
@@ -2376,8 +2375,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiRouterTabMessages => 'Mesajlar';
 
   @override
-  String get uiRouterAssistantSoonTablet =>
-      'Asistan tablette sonraki adımda tasarlanacak';
+  String get uiRouterPickTitle => 'Bir kayıt seç';
+
+  @override
+  String get uiRouterPickBody =>
+      'Soldaki listeden bir kayıt seç, ayrıntısı burada açılır.';
 
   @override
   String get uiRouterAllModules => 'Tüm modüller';

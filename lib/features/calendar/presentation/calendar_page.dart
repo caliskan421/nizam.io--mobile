@@ -7,6 +7,7 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/theme/nz_motion.dart';
+import '../../../core/ui/widgets/feedback/nz_pick_record.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
@@ -164,60 +165,13 @@ class _Header extends ConsumerWidget {
   }
 }
 
-/// Tablet sağ bölmesinde takvimin varsayılanı (prototip `TB_DEF.calendar = 'empty'`): "Bir
-/// kayıt seç" ve açıklaması.
+/// Tablet sağ bölmesinde takvimin varsayılanı (prototip `TB_DEF.calendar = 'empty'`).
 class CalendarEmptyDetail extends StatelessWidget {
   const CalendarEmptyDetail({super.key});
 
-  static const _tile = 56.0;
-  static const _textWidth = 300.0;
-
   @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final t = context.text;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: NizamioSpacing.space12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: _tile,
-              height: _tile,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: c.surfaceRaised,
-                borderRadius: BorderRadius.circular(NizamioRadius.row),
-              ),
-              child: NzPathIcon(NzIconPaths.pickRecord, color: c.textMuted),
-            ),
-            const Gap(NizamioSpacing.space3),
-            Semantics(
-              header: true,
-              child: Text(
-                l.uiCalendarPickTitle,
-                textAlign: TextAlign.center,
-                style: t.labelLg,
-              ),
-            ),
-            const Gap(NizamioSpacing.space3),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: _textWidth),
-              child: Text(
-                l.uiCalendarPickBody,
-                textAlign: TextAlign.center,
-                style: t.bodySm.copyWith(
-                  fontSize: 13,
-                  height: 18 / 13,
-                  color: c.textMuted,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => NzPickRecord(
+    title: context.l10n.uiCalendarPickTitle,
+    message: context.l10n.uiCalendarPickBody,
+  );
 }

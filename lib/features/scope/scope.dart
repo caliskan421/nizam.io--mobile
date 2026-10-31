@@ -16,5 +16,6 @@ export 'domain/my_department.dart' show DepartmentRole, MyDepartment;
 export 'domain/program.dart' show Program, ProgramDepartmentLink;
 export 'presentation/home/home_menus.dart' show HomeModule, showHomeDrawer;
 export 'presentation/home_page.dart' show HomePage;
-export 'presentation/root_top_bar.dart' show RootTopBar, watchNotificationBell;
+export 'presentation/root_top_bar.dart'
+    show RootTopBar, showNotificationsSoon, watchNotificationBell;
 export 'presentation/scope_page.dart' show ScopePage;

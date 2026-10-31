@@ -104,10 +104,8 @@ List<Chat> _chats() => [
     name: 'Koordinatörler',
     group: true,
     members: 15,
-    // Prototip kurucusu varsayılan sağ sohbeti (`chat.load('koord')`) baştan yükler: 1 okunmamış
-    // mesaj okunmuş sayılır, anma kalkar, ayırıcı o mesajın önünde kalır (`_newBefore`); ray
-    // rozeti 4. Gerçek okuma komutu değişmez.
-    unread: 0,
+    unread: 1,
+    mention: true,
     unreadMarker: 'k2',
     messages: [
       ChatMessage(

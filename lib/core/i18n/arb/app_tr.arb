@@ -2981,7 +2981,7 @@
   "@uiRouterAssistant": {
     "description": "ui.router.assistant"
   },
-  "uiRouterAssistantSoon": "Asistan mobilde sonraki adımda eklenecek",
+  "uiRouterAssistantSoon": "Asistan sonraki adımda eklenecek",
   "@uiRouterAssistantSoon": {
     "description": "ui.router.assistant_soon"
   },
@@ -3005,9 +3005,13 @@
   "@uiRouterTabMessages": {
     "description": "ui.router.tab_messages"
   },
-  "uiRouterAssistantSoonTablet": "Asistan tablette sonraki adımda tasarlanacak",
-  "@uiRouterAssistantSoonTablet": {
-    "description": "ui.router.assistant_soon_tablet"
+  "uiRouterPickTitle": "Bir kayıt seç",
+  "@uiRouterPickTitle": {
+    "description": "ui.router.pick_title"
+  },
+  "uiRouterPickBody": "Soldaki listeden bir kayıt seç, ayrıntısı burada açılır.",
+  "@uiRouterPickBody": {
+    "description": "ui.router.pick_body"
   },
   "uiRouterAllModules": "Tüm modüller",
   "@uiRouterAllModules": {

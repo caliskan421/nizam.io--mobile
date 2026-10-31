@@ -4,7 +4,6 @@ import 'package:gap/gap.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../layout/nz_pane.dart';
-import '../../theme/nz_fixed_colors.dart';
 import '../../theme/nz_motion.dart';
 import '../buttons/nz_pressable.dart';
 import 'nz_path_icon.dart';
@@ -40,6 +39,7 @@ class NzTabletRail extends StatelessWidget {
     required this.menuLabel,
     required this.onMenu,
     required this.assistantLabel,
+    required this.assistantIcon,
     required this.onAssistant,
     this.bellDot = false,
   });
@@ -59,11 +59,14 @@ class NzTabletRail extends StatelessWidget {
   final String bellLabel;
   final bool bellDot;
 
-  /// Prototipte zilin dokunma işleyicisi yoktur; null → yalnız etiketli düğme.
+  /// null → yalnız etiketli düğme.
   final VoidCallback? onBell;
   final String menuLabel;
   final VoidCallback onMenu;
   final String assistantLabel;
+
+  /// Asistan ikonu; telefon alt menüsüyle aynı ikon verilir.
+  final IconData assistantIcon;
   final VoidCallback onAssistant;
 
   /// Etiket en çok bu kadar büyür (sabit 100 px ray; tam ad okuyucu etiketindedir).
@@ -91,19 +94,23 @@ class NzTabletRail extends StatelessWidget {
         const Gap(NzTabletMetrics.railGap),
         _GlassButton(
           label: menuLabel,
-          iconPath: NzIconPaths.menu,
           extent: NzTabletMetrics.railButton,
-          iconSize: NizamioSize.iconSize,
-          color: NzFixedColors.glassInk,
+          icon: NzPathIcon(
+            NzIconPaths.menu,
+            size: NizamioSize.iconSize,
+            color: c.glassInk,
+          ),
           onTap: onMenu,
         ),
         const Gap(NzTabletMetrics.railGap + NzTabletMetrics.railAssistantGap),
         _GlassButton(
           label: assistantLabel,
-          iconPath: NzIconPaths.assistant,
           extent: NzTabletMetrics.railAssistant,
-          iconSize: NizamioSpacing.space6,
-          color: NzFixedColors.assistantInk,
+          icon: Icon(
+            assistantIcon,
+            size: NizamioSpacing.space6,
+            color: c.accentText,
+          ),
           onTap: onAssistant,
         ),
       ],
@@ -196,10 +203,8 @@ class _RailButton extends StatelessWidget {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: selected
-                              ? NzFixedColors.railHighlight
-                              : NzFixedColors.railHighlight.withValues(
-                                  alpha: 0,
-                                ),
+                              ? c.navHighlight
+                              : c.navHighlight.withValues(alpha: 0),
                           borderRadius: BorderRadius.circular(
                             NizamioRadius.pill,
                           ),
@@ -364,22 +369,19 @@ class _BellButton extends StatelessWidget {
 class _GlassButton extends StatelessWidget {
   const _GlassButton({
     required this.label,
-    required this.iconPath,
+    required this.icon,
     required this.extent,
-    required this.iconSize,
-    required this.color,
     required this.onTap,
   });
 
   final String label;
-  final String iconPath;
+  final Widget icon;
   final double extent;
-  final double iconSize;
-  final Color color;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Semantics(
       button: true,
       label: label,
@@ -391,15 +393,13 @@ class _GlassButton extends StatelessWidget {
           onTap: onTap,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: NzFixedColors.glassFill,
+              color: c.glassFloat,
               shape: BoxShape.circle,
-              border: Border.all(color: NzFixedColors.glassEdge),
+              border: Border.all(color: c.glassEdge),
             ),
             child: SizedBox.square(
               dimension: extent,
-              child: Center(
-                child: NzPathIcon(iconPath, size: iconSize, color: color),
-              ),
+              child: Center(child: icon),
             ),
           ),
         ),

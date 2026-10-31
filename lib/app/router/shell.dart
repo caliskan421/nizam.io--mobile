@@ -11,9 +11,9 @@ import '../../core/ui/page/nz_app_nav.dart';
 import '../../core/ui/page/nz_shell_events.dart';
 import '../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../core/ui/widgets/navigation/nz_floating_nav.dart';
-import '../../core/ui/widgets/navigation/nz_logo.dart';
 import '../../core/ui/widgets/navigation/nz_path_icon.dart';
 import '../../core/ui/widgets/navigation/nz_tablet_rail.dart';
+import '../../core/ui/widgets/navigation/nz_top_bar.dart';
 import '../../features/activity/activity.dart';
 import '../../features/archive/archive.dart';
 import '../../features/coordinatorships/coordinatorships.dart';
@@ -22,6 +22,9 @@ import '../../features/scope/scope.dart';
 import '../../features/tasks/tasks.dart';
 import 'routes.dart';
 import 'split.dart';
+
+/// Asistan ikonu: telefon alt menüsü ve tablet rayı aynı ikonu çizer.
+const _assistantIcon = Icons.smart_toy_outlined;
 
 /// Alt menünün üçüncü öğesi: son girilen modül (README "Gezinme"). Üçü aynı kabuk dalındadır.
 enum ShellModule { coordinatorships, archive, messages, calendar }
@@ -227,13 +230,15 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
     router.go(split ? _moduleEntry(target) : railModuleRoot(target));
   }
 
-  /// Çift bölmede modüle giriş: modülün taban kaydı rotada kimlikle durur (`/messages/koord`,
-  /// son açılan ya da `TB_DEF`); tek bölmeye daralınca aynı kayıt sayfası (aynı State) görünür,
-  /// geri listeye döner. Ana sayfa (geçmiş) ve takvim (boş) kökte açılır.
+  /// Çift bölmede modüle giriş: son açılan kayıt rotada kimlikle durur (`/messages/koord`);
+  /// tek bölmeye daralınca aynı kayıt sayfası (aynı State) görünür, geri listeye döner. Kayıt
+  /// hiç açılmamışsa, ana sayfa (geçmiş) ve takvimde modül kökü açılır.
   String _moduleEntry(RailModule m) {
     final kind = baseKindOf(m);
-    if (kind == null || kind == PaneKind.history) return railModuleRoot(m);
-    final id = _lastIds[kind] ?? splitDefaultId(kind)!;
+    final id = kind == null ? null : _lastIds[kind];
+    if (kind == null || kind == PaneKind.history || id == null) {
+      return railModuleRoot(m);
+    }
     return baseLocation(m, PaneEntry(kind, id));
   }
 
@@ -287,7 +292,7 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
                   ),
               ],
               action: NzNavAction(
-                icon: Icons.smart_toy_outlined,
+                icon: _assistantIcon,
                 semanticLabel: context.l10n.uiRouterAssistant,
                 onPressed: () =>
                     NzToast.show(context, context.l10n.uiRouterAssistantSoon),
@@ -393,7 +398,10 @@ class AppTabletRail extends ConsumerWidget {
     final unread = ref.watch(messagesNavBadgeProvider);
     return NzTabletRail(
       semanticLabel: l.uiRouterNavLabel,
-      brand: const NzLogo(extent: NzTabletMetrics.railBrand),
+      brand: NzBrandMark(
+        monogram: l.uiHomeAppName.characters.first,
+        extent: NzTabletMetrics.railBrand,
+      ),
       items: [
         NzRailItem(iconPath: NzIconPaths.home, label: l.uiRouterTabHome),
         NzRailItem(iconPath: NzIconPaths.tasks, label: l.uiRouterTabTasks),
@@ -419,7 +427,9 @@ class AppTabletRail extends ConsumerWidget {
       menuLabel: l.uiRouterAllModules,
       onMenu: () => context.appNav.openMenu(context),
       assistantLabel: l.uiRouterAssistant,
-      onAssistant: () => NzToast.show(context, l.uiRouterAssistantSoonTablet),
+      assistantIcon: _assistantIcon,
+      onBell: () => showNotificationsSoon(context),
+      onAssistant: () => NzToast.show(context, l.uiRouterAssistantSoon),
     );
   }
 }

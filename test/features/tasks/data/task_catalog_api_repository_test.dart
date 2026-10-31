@@ -1,8 +1,8 @@
-// tasks sunucu kataloğu: herkes için `GET /v1/work-items` departman başına (açık departman,
-// imleçle); departmanlar seçili kapsamdan ya da ekip satırlarından, yöneticide ek olarak şirket
-// listesinden (programa bağlı olmayan atlanır); rol /v1/me + /v1/me/departments'tan; WorkItem →
-// TaskItem (kanıt bayrağı, alt görev sayıları, gecikme); yönetici rapor/kullanıcı/Gantt uçları
-// çağrılmaz; hata ApiError.
+// tasks sunucu kataloğu: görev listesi her zaman TEK departman için tek `GET /v1/work-items`
+// akışı (açık departman, imleçle). Departman: kapsamda seçili, yoksa bu programdaki ilk ekip
+// satırı; departman yoksa (ekip satırı olmayan yönetici) liste isteği yok, "departman seç".
+// Departmanlar arası tarama ve yönetici rapor/kullanıcı/Gantt/şirket departman uçları yok; rol
+// /v1/me + /v1/me/departments'tan; WorkItem → TaskItem; hata ApiError.
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
@@ -120,12 +120,13 @@ const _adminOnly = [
 ];
 
 void main() {
-  test('üye: yalnız bu programdaki ekip satırının departmanı; imleçle tüm sayfalar', () async {
+  test('üye: bu programdaki İLK ekip satırının departmanı tek akış; imleçle sayfalar', () async {
     final adapter = _Adapter({
       '/v1/me': _me(),
       '/v1/me/departments': _seats([
-        ('p1', 'd1', 'uye'),
         ('p2', 'd9', 'koordinator'),
+        ('p1', 'd1', 'uye'),
+        ('p1', 'd2', 'koordinator'),
       ]),
       '/v1/work-items@d1': {
         'items': [_item('w1', 'd1', evidence: true, total: 3, done: 1)],
@@ -140,7 +141,10 @@ void main() {
 
     expect(c.tasks.map((t) => t.id), ['w1', 'w2']);
     final lists = adapter.seen.where((o) => o.uri.path == '/v1/work-items');
-    expect(lists.map((o) => o.extra[_dept]), ['d1', 'd1']);
+    expect(lists.map((o) => o.extra[_dept]), [
+      'd1',
+      'd1',
+    ], reason: 'd2 taranmaz: tek departman');
     expect(lists.map((o) => o.uri.queryParameters['limit']), ['200', '200']);
     expect(adapter.seen.map((o) => o.uri.path).toSet(), {
       '/v1/me',
@@ -149,9 +153,16 @@ void main() {
     }, reason: 'yönetici uçları ve şirket departman listesi çağrılmaz');
     expect(c.access!.companyAdmin, isFalse);
     expect(c.access!.roleIn('p1', 'd1'), SeatRole.member);
-    expect(c.people.single.role, PersonRole.member);
+    expect(
+      c.people.single.role,
+      PersonRole.coordinator,
+      reason: 'programda d2 koordinatörlüğü var',
+    );
     expect(c.coordinatorships.single.code, 'd1');
     expect(c.coordinatorships.single.name, 'Ad d1');
+    expect(c.departmentId, 'd1');
+    expect(c.departmentRequired, isFalse);
+    expect(c.tasks.first.displayCode, 'Ad d1');
   });
 
   test('WorkItem → TaskItem eşlemesi', () async {
@@ -213,57 +224,37 @@ void main() {
     );
   });
 
-  test('yönetici: ekip satırları + şirket departmanları; programda olmayan atlanır', () async {
-    final adapter = _Adapter(
-      {
-        '/v1/me': _me(admin: true),
-        '/v1/me/departments': _seats([('p1', 'd1', 'koordinator')]),
-        '/v1/departments': {
-          'departments': [
-            {
-              'department_id': 'd1',
-              'name': 'Altyapı',
-              'kind': 'x',
-              'code': 'ALT',
-            },
-            {
-              'department_id': 'd2',
-              'name': 'Yazılım',
-              'kind': 'x',
-              'code': 'YZL',
-            },
-            {'department_id': 'd3', 'name': 'Dış', 'kind': 'x'},
-          ],
-        },
-        '/v1/work-items@d1': {
-          'items': [_item('w1', 'd1')],
-        },
-        '/v1/work-items@d2': {
-          'items': [_item('w2', 'd2')],
-        },
-        '/v1/work-items@d3': {
-          'code': 'work.program_scope_invalid',
-          'message': 'x',
-          'request_id': 'q',
-        },
-        for (final p in _adminOnly) p: _forbidden,
-      },
-      statuses: {'/v1/work-items@d3': 404},
-    );
+  test('yönetici, departman seçili değil ve ekip satırı yok: liste isteği yok, "departman seç"', () async {
+    final adapter = _Adapter({
+      '/v1/me': _me(admin: true),
+      '/v1/me/departments': _seats([('p2', 'd9', 'koordinator')]),
+      for (final p in [..._adminOnly, '/v1/departments']) p: _forbidden,
+    });
     final c = await _repo(adapter).load();
-    expect(c.tasks.map((t) => (t.id, t.displayCode)), [
-      ('w1', 'ALT'),
-      ('w2', 'YZL'),
-    ]);
-    expect(c.coordinatorships.map((d) => (d.code, d.name)), [
-      ('d1', 'Ad d1'),
-      ('d2', 'Yazılım'),
-    ], reason: 'programda olmayan departman koordinatörlük olarak görünmez');
+    expect(c.tasks, isEmpty);
+    expect(c.departmentRequired, isTrue);
+    expect(c.coordinatorships, isEmpty);
     expect(c.people.single.role, PersonRole.admin);
-    expect(c.access!.seesAllIn('p1', 'd2'), isTrue);
-    for (final p in _adminOnly) {
-      expect(adapter.seen.map((o) => o.uri.path), isNot(contains(p)));
-    }
+    expect(
+      adapter.seen.map((o) => o.uri.path),
+      ['/v1/me', '/v1/me/departments'],
+      reason: 'fan-out yok: şirket departman listesi ve görev listesi istenmez',
+    );
+  });
+
+  test('yönetici, departman seçili: tek departman, tek akış', () async {
+    final adapter = _Adapter({
+      '/v1/me': _me(admin: true),
+      '/v1/me/departments': {'departments': null},
+      '/v1/work-items@d5': {
+        'items': [_item('w5', 'd5')],
+      },
+    });
+    final c = await _repo(adapter, department: 'd5').load();
+    expect(c.tasks.map((t) => t.id), ['w5']);
+    expect(adapter.seen, hasLength(3), reason: 'me + me/departments + 1 liste');
+    expect(c.access!.seesAllIn('p1', 'd5'), isTrue);
+    expect(c.departmentRequired, isFalse);
   });
 
   test('ekip satırının liste hatası atlanmaz: ApiError fırlar', () async {
@@ -291,17 +282,21 @@ void main() {
     );
   });
 
-  test('ekip satırı yoksa (yönetici değil) liste boş, istek yok', () async {
-    final adapter = _Adapter({
-      '/v1/me': _me(),
-      '/v1/me/departments': {'departments': null},
-    });
-    final c = await _repo(adapter).load();
-    expect(c.tasks, isEmpty);
-    expect(c.coordinatorships, isEmpty);
-    expect(
-      adapter.seen.map((o) => o.uri.path),
-      isNot(contains('/v1/work-items')),
-    );
-  });
+  test(
+    'ekip satırı yoksa (yönetici değil) liste boş, istek yok, departman seç',
+    () async {
+      final adapter = _Adapter({
+        '/v1/me': _me(),
+        '/v1/me/departments': {'departments': null},
+      });
+      final c = await _repo(adapter).load();
+      expect(c.tasks, isEmpty);
+      expect(c.coordinatorships, isEmpty);
+      expect(c.departmentRequired, isTrue);
+      expect(
+        adapter.seen.map((o) => o.uri.path),
+        isNot(contains('/v1/work-items')),
+      );
+    },
+  );
 }

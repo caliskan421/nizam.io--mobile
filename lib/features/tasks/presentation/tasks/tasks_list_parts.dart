@@ -133,7 +133,10 @@ List<Widget> tasksListChildren(
     ),
     Gap(tablet ? NizamioSpacing.space3 : NizamioSpacing.space1),
     ...rows,
-    if (list.isEmpty)
+    if (list.isEmpty && catalog.departmentRequired)
+      // Departman bağlamı yok (ör. ekip satırı olmayan yönetici): liste istenmedi.
+      NzEmptyState(title: l.errClientScopeMissing)
+    else if (list.isEmpty)
       NzEmptyState(
         title: l.uiTasksEmpty,
         actionLabel: l.uiTasksClearFilters,

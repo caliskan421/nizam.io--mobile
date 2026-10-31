@@ -19,12 +19,12 @@ import 'work_item_mapping.dart';
 /// Görünürlük sunucudadır: koordinatör ve şirket yöneticisi departmanın tümünü, üye yalnız
 /// kendine atananları alır.
 ///
-/// Departman bağlamı (istemci akışları, F56 M-5):
-/// - kapsamda departman seçiliyse ([departmentId]) yalnız o departman;
-/// - değilse hesabın bu programdaki ekip satırları (`GET /v1/me/departments`);
-/// - şirket yöneticisinde ek olarak şirketin departmanları (`GET /v1/departments`, yönetim
-///   yüzü); programa bağlı olmayan departman `work.program_scope_invalid` (404) döner ve
-///   atlanır (programın departman listesini veren okuma ucu yok — P1b/backend adayı).
+/// Departman bağlamı TEKTİR (ürün kısıtı: departmanlar arası tarama yok — F57 koordinatör
+/// düzeltmesi): kapsamda seçili departman ([departmentId]; değiştirme kancası
+/// `ScopeController.selectDepartment`), yoksa hesabın bu programdaki ilk ekip satırı
+/// (`GET /v1/me/departments`). Departman yoksa (ör. ekip satırı olmayan şirket yöneticisi)
+/// liste isteği gönderilmez; katalog [TaskCatalog.departmentRequired] ile "departman seç"
+/// durumunu taşır. Görünen kısa anahtar departmanın programdaki adıdır (kod P1b).
 ///
 /// Rol `/v1/me` + `/v1/me/departments`'tan [TaskAccess]'te türetilir ve katalogla taşınır
 /// (ayrıntı ekranı tarih talebi yüzünü buradan seçer). Yönetici rapor/kullanıcı uçları ve
@@ -57,9 +57,6 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
   static const pageSize = 200;
   static const maxPages = 20;
 
-  /// Programa bağlı olmayan departmanın liste hatası (yöneticinin şirket listesinde atlanır).
-  static const _notInProgram = 'work.program_scope_invalid';
-
   @override
   Future<TaskCatalog> load() async {
     final program = programId() ?? '';
@@ -78,18 +75,19 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
 
     final today = _now();
     final day = DateTime(today.year, today.month, today.day);
-    final departments = await _departments(access, program);
-    final tasks = <TaskItem>[];
-    for (final d in departments) {
-      final items = await _items(d.id, optional: d.optional);
-      if (items == null) continue;
-      tasks.addAll(items.map((w) => _task(w, d.shortCode, day)));
-    }
+    final department = _department(access, program);
+    final tasks = department == null
+        ? const <TaskItem>[]
+        : [
+            for (final w in await _items(department.$1))
+              _task(w, department.$2, day),
+          ];
 
     return TaskCatalog(
       today: day,
       me: access.accountId,
       access: access,
+      departmentId: department?.$1,
       tasks: tasks,
       people: [
         Person(
@@ -99,84 +97,48 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
         ),
       ],
       coordinatorships: [
-        for (final d in departments)
-          if (!d.optional || tasks.any((t) => t.departmentId == d.id))
-            CoordinatorshipRef(
-              code: d.id,
-              name: d.name,
-              leads: const [],
-              members: const [],
-            ),
+        if (department case (final id, final name))
+          CoordinatorshipRef(
+            code: id,
+            name: name,
+            leads: const [],
+            members: const [],
+          ),
       ],
     );
   }
 
-  /// Listesi okunacak departmanlar (sıra: seçili ya da ekip satırları, sonra yönetici ekleri).
-  Future<List<_Department>> _departments(
-    TaskAccess access,
-    String program,
-  ) async {
+  /// Listenin TEK departmanı (kimlik, ad): kapsamda seçili departman; yoksa hesabın bu
+  /// programdaki ilk ekip satırı. Yoksa null → "departman seç" (istek gönderilmez). Şirket
+  /// yöneticisinin programdaki departman listesi P1b'de (`listProgramDepartments`, v0.6.0).
+  (String, String)? _department(TaskAccess access, String program) {
     final seats = access.seatsIn(program);
     final selected = departmentId();
     if (selected != null && selected.isNotEmpty) {
       final seat = seats.where((s) => s.departmentId == selected).firstOrNull;
-      return [
-        _Department(
-          selected,
-          seat?.departmentName ?? selected,
-          optional: false,
-        ),
-      ];
+      return (selected, seat?.departmentName ?? selected);
     }
-    final out = [
-      for (final s in seats)
-        _Department(s.departmentId, s.departmentName, optional: false),
-    ];
-    if (!access.companyAdmin) return out;
-    final known = {for (final d in out) d.id};
-    final all = await apiCall(_organization.listDepartments);
-    final codes = {
-      for (final d in all.data.departments)
-        if (d.code case final c? when c.isNotEmpty) d.departmentId: c,
-    };
-    return [
-      for (final d in out) d.withCode(codes[d.id]),
-      for (final d in all.data.departments)
-        if (!known.contains(d.departmentId))
-          _Department(
-            d.departmentId,
-            d.name,
-            optional: true,
-            shortCode: codes[d.departmentId],
-          ),
-    ];
+    final first = seats.firstOrNull;
+    return first == null ? null : (first.departmentId, first.departmentName);
   }
 
-  /// Departmanın bütün sayfaları; [optional] departman programda değilse null.
-  Future<List<WorkItem>?> _items(
-    String department, {
-    bool optional = false,
-  }) async {
+  /// Departmanın bütün sayfaları (tek akış, imleçle).
+  Future<List<WorkItem>> _items(String department) async {
     final all = <WorkItem>[];
     String? cursor;
     for (var page = 0; page < maxPages; page++) {
-      try {
-        final r = await apiCall(
-          () => _work.listWorkItems(
-            limit: pageSize,
-            cursor: cursor,
-            extras: withDepartment(
-              WorkClient.listWorkItemsOpenapiExtras,
-              department,
-            ),
+      final r = await apiCall(
+        () => _work.listWorkItems(
+          limit: pageSize,
+          cursor: cursor,
+          extras: withDepartment(
+            WorkClient.listWorkItemsOpenapiExtras,
+            department,
           ),
-        );
-        all.addAll(r.items);
-        cursor = r.nextCursor;
-      } on ApiError catch (e) {
-        if (optional && page == 0 && e.code == _notInProgram) return null;
-        rethrow;
-      }
+        ),
+      );
+      all.addAll(r.items);
+      cursor = r.nextCursor;
       if (cursor == null || cursor.isEmpty) break;
     }
     return all;
@@ -225,23 +187,4 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
       subtaskCounts: (total: w.subtaskCounts.total, done: w.subtaskCounts.done),
     );
   }
-}
-
-/// Listesi okunacak departman: kimlik, ad, kısa kod; [optional] → yöneticinin şirket
-/// listesinden (programa bağlı olmayabilir).
-final class _Department {
-  const _Department(
-    this.id,
-    this.name, {
-    required this.optional,
-    this.shortCode,
-  });
-
-  final String id;
-  final String name;
-  final bool optional;
-  final String? shortCode;
-
-  _Department withCode(String? code) =>
-      _Department(id, name, optional: optional, shortCode: code ?? shortCode);
 }

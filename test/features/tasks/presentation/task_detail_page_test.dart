@@ -177,7 +177,11 @@ void main() {
     'sunucu programı: görünen kod departman kodu; ayrıntı görevin departmanıyla yüklenir',
     (tester) async {
       final h = await _openServer(tester);
-      expect(find.text('ALT'), findsWidgets);
+      expect(
+        find.text('Altyapı'),
+        findsWidgets,
+        reason: 'görünen anahtar departmanın programdaki adı (kod P1b)',
+      );
       expect(
         find.text('w1'),
         findsNothing,

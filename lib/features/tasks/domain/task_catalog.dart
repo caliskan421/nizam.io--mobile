@@ -540,6 +540,7 @@ final class TaskCatalog {
     required List<Person> people,
     required List<CoordinatorshipRef> coordinatorships,
     this.access,
+    this.departmentId,
   }) : tasks = List.unmodifiable(tasks),
        people = List.unmodifiable(people),
        coordinatorships = List.unmodifiable(coordinatorships);
@@ -554,6 +555,13 @@ final class TaskCatalog {
 
   /// Oturumdaki hesabın görev erişimi (rol türetme); örnek kaynakta null.
   final TaskAccess? access;
+
+  /// Listenin tek departman bağlamı (sunucu kaynağı); örnek kaynakta null.
+  final String? departmentId;
+
+  /// Sunucu kataloğunda departman bağlamı yok → liste "departman seç" durumundadır (istek
+  /// gönderilmedi). Örnek kaynakta false.
+  bool get departmentRequired => access != null && departmentId == null;
 
   // Kimlik → öğe dizinleri: kart/arama/filtre her satırda ad çözer; doğrusal arama yerine
   // ilk kullanımda bir kez kurulur (katalog değişmez, `withTasks` yeni örnek üretir).
@@ -580,6 +588,7 @@ final class TaskCatalog {
     people: people,
     coordinatorships: coordinatorships,
     access: access,
+    departmentId: departmentId,
   );
 
   /// Koordinatörlükte sıradaki görev kodu (`ALT-14` → `ALT-15`).

@@ -56,6 +56,15 @@ Spec her zaman bir **backend etiketinden** okunur (ilk pin: `v0.1.0-api`). Etike
 - Eski mobil kod veya sahte kontrol düzlemi geri getirilmez.
 - Backend veya yönetim deposuna bu depodan yazılmaz.
 
+## Test kapsamı
+
+Test; veri, güvenlik ve karar mantığı içindir (sunucu bağı, belirteç, kapsam, hata zarfı,
+DTO → domain, controller mantığı, birkaç uçtan uca akış). Şunlara test **yazılmaz**:
+görsel sabitler (ikon eşlemesi, renk, boşluk), piksel ölçüleri ve yerleşim (yalnız taşma
+kontrolü kalır), örnek veri içeriği ve sayıları, Flutter'ın kendi davranışı olan basit widget
+varsayılanları, üretilmiş kod, tasarım oturana kadar golden testleri. Ortak bileşenin
+durumları (boş, hata, yükleniyor) bileşende bir kez test edilir, her ekranda tekrarlanmaz.
+
 ## Teslim
 
 Her değişiklik PR ile gelir; şablon `.github/pull_request_template.md`. "Bitti" yalnız

@@ -28,12 +28,14 @@ Future<(Harness, RecordingAppNav)> _open(
   WidgetTester tester, {
   PilotBackend? backend,
   String program = 'prog-2',
+  bool sample = false,
 }) async {
   final h = await real(
     tester,
     () => pilotHarness(backend ?? PilotBackend(), signedIn: true),
   );
-  h.read(scopeControllerProvider).selectProgram(program);
+  final scope = h.read(scopeControllerProvider);
+  sample ? scope.selectSample() : scope.selectProgram(program);
   final nav = RecordingAppNav();
   await pumpScreen(tester, h, const HomePage(), nav: nav);
   await settle(tester);
@@ -107,7 +109,9 @@ void main() {
   testWidgets(
     'her KPI kendi görünümüyle, ekip kutuları rol kişileriyle görevleri açar',
     (tester) async {
-      final (_, nav) = await _open(tester);
+      // Örnek kapsam: rol kutuları kataloğun yönetici kişilerini ister; sunucu kullanıcı
+      // listesi yönetici bayrağı taşımaz (yalnız oturumdaki kişi bilinir).
+      final (_, nav) = await _open(tester, sample: true);
       for (final label in [
         _l.uiHomeKpiDone,
         _l.uiHomeKpiDoing,

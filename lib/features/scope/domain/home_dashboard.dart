@@ -185,12 +185,17 @@ final class PendingItem {
     required this.taskCode,
     required this.title,
     required this.kind,
+    this.label,
     this.requestedDate,
     this.requestedShiftDays,
   });
 
-  /// Görev kodu (`ALT-7`); rota kimliği.
+  /// Rota kimliği: örnekte görev kodu (`ALT-7`), sunucu kaynağında `work_item_id`.
   final String taskCode;
+
+  /// Satır altyazısının başı; null → [taskCode]. Sunucu kaynağında departman adı (kimlik
+  /// kullanıcıya gösterilmez).
+  final String? label;
   final String title;
   final PendingKind kind;
 

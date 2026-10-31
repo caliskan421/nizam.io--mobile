@@ -48,6 +48,7 @@ void main() {
   ) async {
     useScreen(tester, screen);
     final backend = PilotBackend()..force = true;
+    await backend.useSampleDashboard();
     final h = Harness(handler: backend.handle);
     addTearDown(h.dispose);
     await tester.pumpWidget(

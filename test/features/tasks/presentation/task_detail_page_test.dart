@@ -9,6 +9,7 @@ import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
+import '../../../support/fake_backend.dart';
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
 import '../../pilot_support.dart';
@@ -24,7 +25,7 @@ Future<(Harness, RecordingAppNav)> _open(
     tester,
     () => pilotHarness(PilotBackend(), signedIn: true),
   );
-  h.read(scopeControllerProvider).selectProgram('prog-1');
+  h.read(scopeControllerProvider).selectSample();
   final nav = RecordingAppNav();
   await pumpScreen(
     tester,
@@ -64,8 +65,171 @@ Future<void> _top(WidgetTester tester) async {
   await settle(tester);
 }
 
+/// Sunucu programında görev kataloğu ve ayrıntı uçları (tek görev `w1`, departman `d1`).
+Map<String, Object> _serverBodies() => {
+  '/v1/work-items/gantt/admin': {
+    'tasks': [
+      {
+        'work_item_id': 'w1',
+        'title': 'Hidrofor kurulumu',
+        'program_id': 'prog-1',
+        'department_id': 'd1',
+        'priority': 'orta',
+        'status': 'devam_ediyor',
+        'start_on': '2026-10-01',
+        'end_on': '2026-12-01',
+        'planned_end_on': '',
+        'completed_on': '',
+        'assignee_account_ids': ['acc-1'],
+        'lateness': {
+          'is_overdue': false,
+          'days_overdue': 0,
+          'is_completed_late': false,
+          'days_late': 0,
+          'is_completed_early': false,
+          'days_early': 0,
+        },
+      },
+    ],
+    'links': <Object>[],
+  },
+  '/v1/reports/dashboard/tasks': {'tasks': <Object>[], 'total': 0},
+  '/v1/reports/dashboard/coordinatorships': {'coordinatorships': <Object>[]},
+  '/v1/departments': {
+    'departments': [
+      {
+        'department_id': 'd1',
+        'name': 'Altyapı',
+        'kind': 'koordinatorluk',
+        'code': 'ALT',
+      },
+    ],
+  },
+  '/v1/admin/users': {
+    'users': [
+      {
+        'account_id': 'acc-1',
+        'full_name': 'Ayşe Yılmaz',
+        'memberships': ['prog-1:d1:koordinator'],
+      },
+    ],
+  },
+  '/v1/work-items/w1/subtasks': {
+    'subtasks': [
+      {
+        'subtask_id': 's1',
+        'work_item_id': 'w1',
+        'title': 'Pompa grubunun indirilmesi',
+        'done': true,
+        'created_by_account_id': 'acc-1',
+        'created_at': '2026-10-02T08:00:00Z',
+        'updated_at': '2026-10-02T08:00:00Z',
+      },
+    ],
+    'total': 1,
+  },
+  '/v1/work-items/w1/notes': {
+    'notes': [
+      {
+        'note_id': 'n1',
+        'work_item_id': 'w1',
+        'author_account_id': 'acc-1',
+        'content': 'Pompa sahaya indi',
+        'created_at': '2026-10-03T09:00:00Z',
+        'updated_at': '2026-10-03T09:00:00Z',
+      },
+    ],
+    'total': 1,
+  },
+  '/v1/work-items/w1/files': {
+    'files': [
+      {
+        'file_id': 'f1',
+        'work_item_id': 'w1',
+        'display_name': 'Tutanak.pdf',
+        'content_type': 'application/pdf',
+        'size_bytes': 2048,
+        'tag': 'cikti',
+        'uploaded_by_account_id': 'acc-1',
+      },
+    ],
+  },
+  '/v1/date-change-requests': {'requests': <Object>[], 'total': 0},
+};
+
+/// Sunucu programıyla ayrıntıyı açar; [failing] yoldan 403 döner (sonra düzelir).
+Future<Harness> _openServer(WidgetTester tester, {String? failing}) async {
+  final backend = PilotBackend();
+  final bodies = _serverBodies();
+  final h = await real(tester, () => pilotHarness(backend, signedIn: true));
+  h.backend.handler = (r) {
+    if (r.method == 'GET' && r.path == failing) {
+      return errorBody(403, 'work.not_assigned');
+    }
+    final body = r.method == 'GET' ? bodies[r.path] : null;
+    return body != null ? jsonResponse(200, body) : backend.handle(r);
+  };
+  h.read(scopeControllerProvider).selectProgram('prog-1');
+  await pumpScreen(tester, h, const TaskDetailPage(code: 'w1'));
+  await settle(tester);
+  return h;
+}
+
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
+
+  testWidgets(
+    'sunucu programı: görünen kod departman kodu; ayrıntı görevin departmanıyla yüklenir',
+    (tester) async {
+      final h = await _openServer(tester);
+      expect(find.text('ALT'), findsWidgets);
+      expect(
+        find.text('w1'),
+        findsNothing,
+        reason: 'sunucu kimliği gösterilmez',
+      );
+      expect(find.text('Hidrofor kurulumu'), findsOneWidget);
+      for (final p in ['subtasks', 'notes', 'files']) {
+        final r = h.backend.requests.lastWhere(
+          (r) => r.path == '/v1/work-items/w1/$p',
+        );
+        expect(r.header('X-Nizamio-Department'), 'd1', reason: p);
+        expect(r.header('X-Nizamio-Program'), 'prog-1', reason: p);
+      }
+      await _tap(tester, find.text(_l.uiTasksTabSubtasks));
+      expect(find.text('Pompa grubunun indirilmesi'), findsOneWidget);
+      await _tap(tester, find.text(_l.uiTasksTabFiles));
+      expect(find.text('Tutanak.pdf'), findsOneWidget);
+      await _tap(tester, find.text(_l.uiTasksTabNotes));
+      expect(find.text('Pompa sahaya indi'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'sunucu programı: ayrıntı hatası şeritte; yeniden dene dokunuşla',
+    (tester) async {
+      final h = await _openServer(tester, failing: '/v1/work-items/w1/notes');
+      expect(find.text('Hidrofor kurulumu'), findsOneWidget);
+      expect(find.text(_l.uiCommonRetry), findsOneWidget);
+      final before = h.backend.requests.length;
+      await tester.pump(const Duration(seconds: 5));
+      expect(
+        h.backend.requests.length,
+        before,
+        reason: 'kendiliğinden yeniden deneme yok',
+      );
+      h.backend.handler = (r) {
+        final body = r.method == 'GET' ? _serverBodies()[r.path] : null;
+        return body != null
+            ? jsonResponse(200, body)
+            : PilotBackend().handle(r);
+      };
+      await _tap(tester, find.text(_l.uiCommonRetry));
+      expect(find.text(_l.uiCommonRetry), findsNothing);
+      await _tap(tester, find.text(_l.uiTasksTabNotes));
+      expect(find.text('Pompa sahaya indi'), findsOneWidget);
+    },
+  );
 
   testWidgets('başlık, talep kartı, özet ve ilerleme', (tester) async {
     await _open(tester);

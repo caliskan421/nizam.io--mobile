@@ -179,6 +179,86 @@ void main() {
         }
         expect(h.backend.requests.last.header('X-Nizamio-Program'), 'p');
         expect(h.backend.requests.last.header('X-Nizamio-Department'), 'd');
+        // İstek başına açık departman seçili departmanı ezer; program kapsamdan gelir.
+        try {
+          await dio.get<Object?>(
+            '/v1/x',
+            options: Options(
+              extra: withDepartment({
+                'openapi': {'operationId': 's3op'},
+              }, 'd2'),
+            ),
+          );
+        } on DioException {
+          // 404; yalnız başlıklar denetlenir.
+        }
+        expect(h.backend.requests.last.header('X-Nizamio-Program'), 'p');
+        expect(h.backend.requests.last.header('X-Nizamio-Department'), 'd2');
+      },
+    );
+
+    test(
+      'açık departman: S2 işlemde başlık eklenmez, boş kimlik reddedilir',
+      () async {
+        h.read(scopeControllerProvider).selectProgram('prog-7');
+        final client = ProgramClient(h.read(apiDioProvider)!);
+        await apiCall(
+          () => client.readProgram(
+            extras: withDepartment(ProgramClient.readProgramOpenapiExtras, 'd'),
+          ),
+        );
+        expect(h.backend.requests.last.header('X-Nizamio-Department'), isNull);
+
+        final scope = ScopeController()..selectProgram('p');
+        final dio = Dio(BaseOptions(baseUrl: testUrl))
+          ..httpClientAdapter = h.backend
+          ..interceptors.add(
+            ApiGuardInterceptor(
+              server: ServerAddress.parse(testUrl, Flavor.prod),
+              flavor: Flavor.prod,
+              scope: scope,
+              operations: const {
+                's3op': ApiOperation(
+                  operationId: 's3op',
+                  method: 'GET',
+                  path: '/v1/x',
+                  scope: ScopeClass.s3,
+                  csrf: false,
+                  programHeader: true,
+                  departmentHeader: true,
+                  auth: false,
+                ),
+              },
+            ),
+          );
+        final before = h.backend.requests.length;
+        await expectLater(
+          dio.get<Object?>(
+            '/v1/x',
+            options: Options(
+              extra: withDepartment({
+                'openapi': {'operationId': 's3op'},
+              }, ''),
+            ),
+          ),
+          apiError(ClientErrorCode.scopeMissing),
+        );
+        expect(h.backend.requests.length, before);
+
+        // Seçili departman varken de boş açık departman ona düşmez; istek ağa çıkmaz.
+        scope.selectDepartment('d');
+        await expectLater(
+          dio.get<Object?>(
+            '/v1/x',
+            options: Options(
+              extra: withDepartment({
+                'openapi': {'operationId': 's3op'},
+              }, ''),
+            ),
+          ),
+          apiError(ClientErrorCode.scopeMissing),
+        );
+        expect(h.backend.requests.length, before);
       },
     );
   });

@@ -308,6 +308,7 @@ class UploadForm extends ConsumerWidget {
       EvidenceTag.site => c.inProgress,
       EvidenceTag.result => c.accentText,
       EvidenceTag.status => c.textFaint,
+      _ => c.textFaint,
     };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -316,7 +317,7 @@ class UploadForm extends ConsumerWidget {
         const Gap(NizamioSpacing.space1),
         Text(
           '${catalog?.coordinatorship(task.coordinatorship)?.name ?? task.coordinatorship}'
-          ' / $code · ${task.title}',
+          ' / ${task.displayCode} · ${task.title}',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: t.bodyMd,
@@ -349,7 +350,7 @@ class UploadForm extends ConsumerWidget {
           spacing: NizamioSpacing.space2,
           runSpacing: NizamioSpacing.space2,
           children: [
-            for (final tag in EvidenceTag.values)
+            for (final tag in EvidenceTag.prototype)
               TaskChip(
                 label: l.tagLabel(tag),
                 dot: tagColor(tag),

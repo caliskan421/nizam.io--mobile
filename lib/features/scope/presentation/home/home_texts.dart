@@ -25,8 +25,9 @@ extension HomeTexts on AppLocalizations {
       '${t.total} $uiHomeKpiDoneOf ${t.done}${possessive(t.done)} '
       '$uiHomeKpiDoneTail';
 
+  /// "25 tanesi zamanında"; sayı bilinmiyorsa (kesik görev listesi) "–".
   String kpiDoingCaption(TaskTotals t) =>
-      '${t.inProgressOnTime} $uiHomeKpiDoingTail';
+      '${t.inProgressOnTime ?? '–'} $uiHomeKpiDoingTail';
 
   /// "Açık görevlerin %38'i".
   String kpiLateCaption(TaskTotals t) {
@@ -98,9 +99,10 @@ extension HomeTexts on AppLocalizations {
         : date == null
         ? ''
         : ' · ${DateFormat('d MMM', 'tr').format(date)}';
+    final label = p.label ?? p.taskCode;
     return switch (p.kind) {
-      PendingKind.dateChange => '${p.taskCode} · $uiHomeDateRequest$when',
-      PendingKind.approval => '${p.taskCode} · $uiHomeAwaitingApproval',
+      PendingKind.dateChange => '$label · $uiHomeDateRequest$when',
+      PendingKind.approval => '$label · $uiHomeAwaitingApproval',
     };
   }
 

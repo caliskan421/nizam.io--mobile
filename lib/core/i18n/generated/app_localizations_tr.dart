@@ -2998,6 +2998,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksTagStatus => 'Güncel durum verisi';
 
   @override
+  String get uiTasksTagRequirement => 'İster';
+
+  @override
+  String get uiTasksTagPlan => 'Plan';
+
+  @override
+  String get uiTasksTagInput => 'Girdi';
+
+  @override
+  String get uiTasksTagAnalysis => 'Analiz';
+
+  @override
+  String get uiTasksTagOutput => 'Çıktı';
+
+  @override
+  String get uiTasksTagOutcome => 'Sonuç';
+
+  @override
+  String get uiTasksTagUnknown => 'Diğer';
+
+  @override
   String get uiTasksFileName => 'Dosya adı';
 
   @override

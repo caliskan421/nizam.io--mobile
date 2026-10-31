@@ -35,7 +35,7 @@ Future<RecordingAppNav> _open(
     tester,
     () => pilotHarness(PilotBackend(), signedIn: true),
   );
-  h.read(scopeControllerProvider).selectProgram('prog-1');
+  h.read(scopeControllerProvider).selectSample();
   final nav = RecordingAppNav();
   await pumpScreen(
     tester,

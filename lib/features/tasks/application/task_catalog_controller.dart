@@ -1,19 +1,26 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/providers.dart';
 import '../domain/task_catalog.dart';
+import '../domain/task_details.dart';
 import 'tasks_providers.dart';
 
 part 'task_catalog_controller.g.dart';
 
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
-/// koordinatörlük ve arşiv ekranları bunu okur; yeniden yükleme yalnız dokunuşla.
+/// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
+/// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
 /// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (oturum boyunca;
-/// kalıcılık backend bağlanınca kaynaktan gelir). Katalog henüz yüklenmediyse yok sayılır.
+/// sunucuya yazılmaz — yazma komutları ayrı adımda bağlanır). Katalog henüz yüklenmediyse
+/// yok sayılır.
 @Riverpod(keepAlive: true)
 class TaskCatalogController extends _$TaskCatalogController {
   @override
-  Future<TaskCatalog> build() => ref.read(taskCatalogRepositoryProvider).load();
+  Future<TaskCatalog> build() {
+    ref.watch(scopeStateProvider);
+    return ref.read(taskCatalogRepositoryProvider).load();
+  }
 
   TaskCatalog? get _catalog => state.value;
 
@@ -36,6 +43,26 @@ class TaskCatalogController extends _$TaskCatalogController {
     );
     state = AsyncData(
       c.withTasks([for (final t in c.tasks) t.code == task.code ? fixed : t]),
+    );
+  }
+
+  /// [code] görevine sunucudan okunan ayrıntıyı ekler (alt görev, not, dosya, tarih talebi).
+  /// Gecikme sunucu değeridir; yeniden hesaplanmaz.
+  void applyDetails(String code, TaskDetails d) {
+    final c = _catalog;
+    if (c == null) return;
+    state = AsyncData(
+      c.withTasks([
+        for (final t in c.tasks)
+          t.code == code
+              ? t.copyWith(
+                  subtasks: d.subtasks,
+                  noteEntries: d.notes,
+                  fileEntries: d.files,
+                  dateRequest: () => d.dateRequest,
+                )
+              : t,
+      ]),
     );
   }
 

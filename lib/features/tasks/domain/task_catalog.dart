@@ -189,8 +189,25 @@ final class DateChangeRequest {
 /// Kanıt dosyasının türü (ikon çipi).
 enum TaskFileKind { image, pdf, doc }
 
-/// Kanıt dosyasının etiketi.
-enum EvidenceTag { site, result, status }
+/// Kanıt dosyasının etiketi. [site]/[result]/[status] prototip etiketleridir (yerel yükleme
+/// formu); diğerleri sunucu etiketleridir (`FileRecord.tag`): requirement ↔ `ister`, plan ↔
+/// `plan`, input ↔ `girdi`, analysis ↔ `analiz`, output ↔ `cikti`, outcome ↔ `sonuc`.
+/// [unknown]: tanımsız sunucu değeri.
+enum EvidenceTag {
+  site,
+  result,
+  status,
+  requirement,
+  plan,
+  input,
+  analysis,
+  output,
+  outcome,
+  unknown;
+
+  /// Yerel yükleme formunda seçtirilen prototip etiketleri.
+  static const prototype = [site, result, status];
+}
 
 /// Görevin kanıt dosyası (arşivde görev klasörüne kaydedilir).
 @immutable
@@ -347,6 +364,7 @@ final class TaskItem {
   const TaskItem({
     required this.code,
     String? id,
+    this.shortCode,
     required this.title,
     required this.coordinatorship,
     this.departmentId,
@@ -378,6 +396,13 @@ final class TaskItem {
 
   /// Sunucu kimliği (`work_item_id`); örnek veride verilmezse [code].
   final String id;
+
+  /// Ekranda gösterilen kısa anahtar; null → [code]. Sunucu kaynağında departman kodu
+  /// (`ALT`): sunucu kimliği kullanıcıya gösterilmez.
+  final String? shortCode;
+
+  /// Ekranda gösterilen görev anahtarı (örnekte `ALT-7`, sunucuda departman kodu).
+  String get displayCode => shortCode ?? code;
   final String title;
 
   /// Koordinatörlük anahtarı: örnek veride kısa kod, sunucudan eşlenen görevde
@@ -464,6 +489,7 @@ final class TaskItem {
   }) => TaskItem(
     code: code ?? this.code,
     id: code == null || id != this.code ? id : code,
+    shortCode: shortCode,
     title: title ?? this.title,
     coordinatorship: coordinatorship ?? this.coordinatorship,
     departmentId: departmentId,

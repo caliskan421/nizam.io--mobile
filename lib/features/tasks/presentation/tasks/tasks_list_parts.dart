@@ -180,7 +180,9 @@ List<Widget> _chips(
     for (final code in f.coordinatorships)
       _FilterChip(
         label: catalog.coordinatorship(code)?.name ?? code,
-        removeLabel: '$code ${l.uiTasksRemoveFilterTail}',
+        removeLabel:
+            '${catalog.coordinatorship(code)?.name ?? code} '
+            '${l.uiTasksRemoveFilterTail}',
         onRemove: () => ctl.toggleCoordinatorship(code),
       ),
     for (final p in f.priorities)
@@ -675,7 +677,7 @@ class TaskCardView extends StatelessWidget {
       ],
       onTap: onTap,
       semanticLabel: [
-        task.code,
+        task.displayCode,
         task.title,
         l.statusLabel(task.status),
         if (late) l.lateBadge(task.overdueDays),

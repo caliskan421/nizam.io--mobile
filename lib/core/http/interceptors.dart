@@ -13,6 +13,23 @@ import '../session/session_controller.dart';
 /// `options.extra` anahtarları.
 const _opKey = 'nizamio.operation';
 const _stateKey = 'nizamio.request_state';
+const _departmentKey = 'nizamio.department';
+
+/// Üretilmiş istemcinin [extras]'ına istek başına açık departman ekler: S3 isteği seçili
+/// kapsamın departmanı yerine [departmentId] ile gider (ör. görev ayrıntısı görevin kendi
+/// departmanında okunur). Program yine seçili kapsamdan gelir; S3 dışı işlemde yok sayılır.
+/// Boş kimlik seçili departmana DÜŞMEZ: kapı `client.scope_missing` ile reddeder (fail-closed).
+Map<String, dynamic> withDepartment(
+  Map<String, dynamic>? extras,
+  String departmentId,
+) => {...?extras, _departmentKey: departmentId};
+
+/// Açık departman verilmediyse null; verildiyse değeri (geçersiz/boşsa '' — reddedilir).
+String? _requestedDepartment(RequestOptions o) {
+  if (!o.extra.containsKey(_departmentKey)) return null;
+  final v = o.extra[_departmentKey];
+  return v is String ? v : '';
+}
 
 /// İsteğin başladığı andaki bağlam (CX-r2-Ö-01). Özel sınıf: çağıran `extra` ile taklit
 /// edemez. Tekrar edilen istek DAİMA başladığı oturum neslinde ve başladığı kapsamla gider.
@@ -52,7 +69,8 @@ DioException _reject(RequestOptions o, String code) => DioException(
 
 /// 1. halka — sözleşme kapısı. Spec'te olmayan, yanlış yönteme/adrese giden ya da kapsamı
 /// eksik istek ağa ÇIKMAZ. Başlıklar: `X-Nizamio-Client: mobile` (her istek),
-/// `X-Requested-With` (her yazma), `X-Nizamio-Program` / `X-Nizamio-Department` (S2/S3).
+/// `X-Requested-With` (her yazma), `X-Nizamio-Program` / `X-Nizamio-Department` (S2/S3;
+/// departman istek başına [withDepartment] ile açıkça verilebilir).
 class ApiGuardInterceptor extends Interceptor {
   ApiGuardInterceptor({
     required this.server,
@@ -120,9 +138,9 @@ class ApiGuardInterceptor extends Interceptor {
           ..programId = (sel != null && sel.hasServerProgram)
               ? sel.programId
               : null
-          ..departmentId = (sel != null && sel.hasDepartment)
-              ? sel.departmentId
-              : null;
+          ..departmentId =
+              _requestedDepartment(options) ??
+              ((sel != null && sel.hasDepartment) ? sel.departmentId : null);
       }
       final program = st.programId;
       if (program == null) {
@@ -131,7 +149,7 @@ class ApiGuardInterceptor extends Interceptor {
       headers['X-Nizamio-Program'] = program;
       if (op.scope == ScopeClass.s3) {
         final department = st.departmentId;
-        if (department == null) {
+        if (department == null || department.isEmpty) {
           return handler.reject(_reject(options, ClientErrorCode.scopeMissing));
         }
         headers['X-Nizamio-Department'] = department;

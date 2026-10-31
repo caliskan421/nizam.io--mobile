@@ -5,8 +5,10 @@ import 'package:get_it/get_it.dart';
 import '../../core/scope/scope_controller.dart';
 import '../../core/server/server_binding.dart';
 import '../../core/session/session_controller.dart';
+import 'application/home_dashboard_source.dart';
 import 'application/scope_providers.dart';
 import 'application/scope_service.dart';
+import 'data/home_dashboard_api_repository.dart';
 import 'data/program_repository.dart';
 import 'data/sample/sample_home_dashboard_repository.dart';
 import 'domain/home_dashboard_repository.dart';
@@ -28,10 +30,16 @@ void registerScopeModule(GetIt locator, {required Dio? Function() apiDio}) {
       },
     ),
   );
-  // GEÇİCİ: ana sayfa özeti backend'de hazır olana kadar geliştirme örneği. Gerçek kaynak
-  // geldiğinde yalnız bu kayıt değişir (sunum ve controller aynı kalır).
+  // Sunucu programı seçiliyse sunucu özeti; örnek kapsamda geliştirme örneği.
   locator.registerLazySingleton<HomeDashboardRepository>(
-    SampleHomeDashboardRepository.new,
+    () => HomeDashboardSource(
+      scope: locator<ScopeController>(),
+      server: () {
+        final dio = apiDio();
+        return dio == null ? null : ApiHomeDashboardRepository(dio);
+      },
+      sample: SampleHomeDashboardRepository(),
+    ),
   );
 }
 

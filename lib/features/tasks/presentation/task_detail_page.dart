@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/errors/api_error.dart';
+import '../../../core/errors/error_text.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_pane.dart';
@@ -19,6 +21,7 @@ import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../application/task_catalog_controller.dart';
 import '../application/task_detail_controller.dart';
+import '../application/task_details_controller.dart';
 import '../domain/task_catalog.dart';
 import 'detail/detail_actions.dart';
 import 'detail/detail_tabs.dart';
@@ -44,11 +47,12 @@ class TaskDetailPage extends ConsumerWidget {
       final visible = ModalRoute.of(context)?.isCurrent ?? true;
       if (next?.tab != 1 || !visible) return;
       final task = ref.read(taskCatalogControllerProvider).value?.task(code);
+      final key = task?.displayCode ?? code;
       NzFlyoutMenu.show(
         context,
-        semanticLabel: '$code · ${l.uiTasksFlyThisTask}',
+        semanticLabel: '$key · ${l.uiTasksFlyThisTask}',
         entries: [
-          NzFlyoutSection('$code · ${l.uiTasksFlyThisTask}'),
+          NzFlyoutSection('$key · ${l.uiTasksFlyThisTask}'),
           if (task != null) ...[
             NzFlyoutItem(
               label: l.uiTasksFlyStatus,
@@ -88,12 +92,14 @@ class TaskDetailPage extends ConsumerWidget {
     final deleted = ref.watch(provider.select((s) => s.deleted != null));
     final data = catalog.value;
     final task = data?.task(code);
+    // Alt görev, not, dosya ve tarih talebi ayrıntıda okunur (örnek kaynakta işlem yok).
+    final details = ref.watch(taskDetailsProvider(code));
     return NzPage.feed(
       // Tablet sağ bölmesi (görev ayrıntısı: gap 20, başlık -8).
       paneLead: NizamioSpacing.space3,
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       topBar: NzTopBar.detail(
-        code: code,
+        code: task?.displayCode ?? code,
         actions: task == null
             ? const []
             : [
@@ -128,9 +134,21 @@ class TaskDetailPage extends ConsumerWidget {
               _TabContent(task: task, catalog: data, actions: actions),
             ],
       children: [
-        if (data != null && task != null)
-          _Body(task: task, catalog: data, actions: actions)
-        else
+        if (data != null && task != null) ...[
+          if (details.hasError && !details.isLoading) ...[
+            NzBanner.danger(
+              message: errorText(l, toApiError(details.error!)),
+              actionLabel: l.uiCommonRetry,
+              onAction: () => ref.invalidate(taskDetailsProvider(code)),
+            ),
+            const Gap(NizamioSpacing.space3),
+          ],
+          _Body(task: task, catalog: data, actions: actions),
+          if (details.isLoading) ...[
+            const Gap(NizamioSpacing.space3),
+            const NzLoader(),
+          ],
+        ] else
           NzAsyncView<TaskCatalog>(
             value: catalog,
             onRetry: () => ref.invalidate(taskCatalogControllerProvider),

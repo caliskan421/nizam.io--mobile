@@ -5830,6 +5830,48 @@ abstract class AppLocalizations {
   /// **'Güncel durum verisi'**
   String get uiTasksTagStatus;
 
+  /// ui.tasks.tag_requirement
+  ///
+  /// In tr, this message translates to:
+  /// **'İster'**
+  String get uiTasksTagRequirement;
+
+  /// ui.tasks.tag_plan
+  ///
+  /// In tr, this message translates to:
+  /// **'Plan'**
+  String get uiTasksTagPlan;
+
+  /// ui.tasks.tag_input
+  ///
+  /// In tr, this message translates to:
+  /// **'Girdi'**
+  String get uiTasksTagInput;
+
+  /// ui.tasks.tag_analysis
+  ///
+  /// In tr, this message translates to:
+  /// **'Analiz'**
+  String get uiTasksTagAnalysis;
+
+  /// ui.tasks.tag_output
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıktı'**
+  String get uiTasksTagOutput;
+
+  /// ui.tasks.tag_outcome
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonuç'**
+  String get uiTasksTagOutcome;
+
+  /// ui.tasks.tag_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer'**
+  String get uiTasksTagUnknown;
+
   /// ui.tasks.file_name
   ///
   /// In tr, this message translates to:

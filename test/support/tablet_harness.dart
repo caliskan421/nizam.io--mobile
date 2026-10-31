@@ -258,7 +258,7 @@ class TabletSession {
     await tester.enterText(find.byType(TextFormField).at(1), 'p');
     await tester.tap(find.widgetWithText(NzButton, _l.uiIdentityLoginSubmit));
     await settle();
-    harness.read(scopeControllerProvider).selectProgram('prog-1');
+    harness.read(scopeControllerProvider).selectSample();
     await settle();
   }
 

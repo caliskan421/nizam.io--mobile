@@ -3825,6 +3825,34 @@
   "@uiTasksTagStatus": {
     "description": "ui.tasks.tag_status"
   },
+  "uiTasksTagRequirement": "İster",
+  "@uiTasksTagRequirement": {
+    "description": "ui.tasks.tag_requirement"
+  },
+  "uiTasksTagPlan": "Plan",
+  "@uiTasksTagPlan": {
+    "description": "ui.tasks.tag_plan"
+  },
+  "uiTasksTagInput": "Girdi",
+  "@uiTasksTagInput": {
+    "description": "ui.tasks.tag_input"
+  },
+  "uiTasksTagAnalysis": "Analiz",
+  "@uiTasksTagAnalysis": {
+    "description": "ui.tasks.tag_analysis"
+  },
+  "uiTasksTagOutput": "Çıktı",
+  "@uiTasksTagOutput": {
+    "description": "ui.tasks.tag_output"
+  },
+  "uiTasksTagOutcome": "Sonuç",
+  "@uiTasksTagOutcome": {
+    "description": "ui.tasks.tag_outcome"
+  },
+  "uiTasksTagUnknown": "Diğer",
+  "@uiTasksTagUnknown": {
+    "description": "ui.tasks.tag_unknown"
+  },
   "uiTasksFileName": "Dosya adı",
   "@uiTasksFileName": {
     "description": "ui.tasks.file_name"

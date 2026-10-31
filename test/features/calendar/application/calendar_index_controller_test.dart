@@ -2,6 +2,8 @@
 // komutları takvime yansır, kaynak bir kez yüklenir.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/features/calendar/application/calendar_index_controller.dart';
 import 'package:nizamio/features/calendar/application/calendar_providers.dart';
 import 'package:nizamio/features/calendar/data/sample/sample_calendar_repository.dart';
@@ -30,6 +32,8 @@ void main() {
         taskCatalogRepositoryProvider.overrideWithValue(
           SampleTaskCatalogRepository(),
         ),
+        // Katalog kapsamı izler (kapsam değişince yeniden okunur).
+        scopeStateProvider.overrideWith((ref) => const ScopeSelection()),
       ],
     );
   });

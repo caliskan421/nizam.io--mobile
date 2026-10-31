@@ -67,7 +67,7 @@ class Composition {
     registerCalendarModule(locator);
     registerCoordinatorshipsModule(locator);
     registerMessagesModule(locator);
-    registerTasksModule(locator);
+    registerTasksModule(locator, apiDio: () => container.read(apiDioProvider));
     registerTimelineModule(locator);
     container = ProviderContainer(
       // Otomatik yeniden deneme YOK (A3 / CLAUDE.md): Riverpod 3 varsayılanı hata veren

@@ -1,21 +1,54 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../core/scope/scope_controller.dart';
+import 'application/task_sources.dart';
 import 'application/tasks_providers.dart';
 import 'data/sample/sample_task_catalog_repository.dart';
+import 'data/task_catalog_api_repository.dart';
+import 'data/task_details_api_repository.dart';
 import 'domain/task_catalog.dart';
+import 'domain/task_details.dart';
 
 /// tasks modülünün kayıt fonksiyonu (ADR-0001). YALNIZ bileşim kökünden çağrılır (G2).
-void registerTasksModule(GetIt locator) {
-  // GEÇİCİ: görev kataloğu backend'de hazır olana kadar geliştirme örneği.
-  locator.registerLazySingleton<TaskCatalogRepository>(
-    SampleTaskCatalogRepository.new,
-  );
+///
+/// [apiDio]: doğrulanmış bağın güncel API istemcisi (Riverpod `apiDioProvider`); bağ yoksa null.
+void registerTasksModule(GetIt locator, {required Dio? Function() apiDio}) {
+  // Sunucu programı seçiliyse sunucu kataloğu; örnek kapsamda geliştirme örneği.
+  locator
+    ..registerLazySingleton<TaskCatalogRepository>(
+      () => TaskCatalogSource(
+        scope: locator<ScopeController>(),
+        server: () {
+          final dio = apiDio();
+          return dio == null
+              ? null
+              : ApiTaskCatalogRepository(
+                  dio,
+                  programId: () => locator<ScopeController>().current.programId,
+                );
+        },
+        sample: SampleTaskCatalogRepository(),
+      ),
+    )
+    ..registerLazySingleton<TaskDetailsRepository>(
+      () => TaskDetailsSource(
+        scope: locator<ScopeController>(),
+        server: () {
+          final dio = apiDio();
+          return dio == null ? null : ApiTaskDetailsRepository(dio);
+        },
+      ),
+    );
 }
 
 /// tasks'in Riverpod portlarını get_it örnekleriyle bağlar.
 List<Override> tasksOverrides(GetIt locator) => [
   taskCatalogRepositoryProvider.overrideWith(
     (ref) => locator<TaskCatalogRepository>(),
+  ),
+  taskDetailsRepositoryProvider.overrideWith(
+    (ref) => locator<TaskDetailsRepository>(),
   ),
 ];

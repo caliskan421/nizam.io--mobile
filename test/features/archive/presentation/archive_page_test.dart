@@ -22,7 +22,7 @@ Future<(Harness, RecordingAppNav)> _open(
     tester,
     () => pilotHarness(PilotBackend(), signedIn: true),
   );
-  h.read(scopeControllerProvider).selectProgram('prog-2');
+  h.read(scopeControllerProvider).selectSample();
   final nav = RecordingAppNav();
   await pumpScreen(tester, h, const ArchivePage(), nav: nav, dark: dark);
   await settle(tester);

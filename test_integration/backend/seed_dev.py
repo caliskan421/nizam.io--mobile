@@ -316,7 +316,7 @@ def main():
         creator = t['creator'] if role.get((code, t['creator'])) == 'koordinator' else 'ma'
         s = sessions[creator]
         worker = t['assignees'][0] if t['assignees'] else creator
-        # Şirket yöneticisi koordinatör olsa da dosya yükleyemez (records.not_authorized): dosyayı
+        # Şirket yöneticisi dosya yükleyemez (RECORDS-K01; records.not_authorized): dosyayı
         # departmanın yönetici olmayan koordinatörü yükler; yoksa görevin dosyası basılmaz.
         uploader = worker if worker not in ADMINS else next(
             (p for (c, p), r in role.items() if c == code and r == 'koordinator' and p not in ADMINS),
@@ -330,7 +330,7 @@ def main():
             body['assignee_account_id'] = acc[t['assignees'][0]]
         try:
             w = s.call('POST', '/v1/work-items', body, program=prog, dept=D)
-        except ApiError as e:  # koordinatör geçmiş başlangıçlı görev açamaz; yönetici açar
+        except ApiError as e:  # koordinatör başlangıcı en çok 40 gün geriye koyar (WORK-K06); yönetici muaf
             if e.status != 422 or creator == 'ma':
                 raise
             s = admin
@@ -343,7 +343,7 @@ def main():
                 (sessions[lead] if lead else s).call(
                     'POST', f'/v1/work-items/{wid}/assignments',
                     {'account_ids': [acc[p] for p in t['assignees'][1:]]}, program=prog, dept=D)
-            if t['status'] != 'baslanmadi':  # dosya yalnız başlamış göreve yüklenir
+            if t['status'] != 'baslanmadi':
                 move(worker, wid, prog, D, 'devam_ediyor')
             for i in range(files):
                 raw, ctype = multipart(FILE_NAMES[i % len(FILE_NAMES)])

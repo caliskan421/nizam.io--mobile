@@ -60,7 +60,7 @@ Future<Harness> _open(WidgetTester tester, {bool dark = false}) async {
     tester,
     () => pilotHarness(PilotBackend(), signedIn: true),
   );
-  h.read(scopeControllerProvider).selectProgram('prog-1');
+  h.read(scopeControllerProvider).selectSample();
   await pumpScreen(tester, h, const _Host(), dark: dark);
   await settle(tester);
   await h.container.read(taskCatalogControllerProvider.future);

@@ -9,26 +9,32 @@ part of 'task_catalog_controller.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
-/// koordinatörlük ve arşiv ekranları bunu okur; yeniden yükleme yalnız dokunuşla.
+/// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
+/// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
 /// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (oturum boyunca;
-/// kalıcılık backend bağlanınca kaynaktan gelir). Katalog henüz yüklenmediyse yok sayılır.
+/// sunucuya yazılmaz — yazma komutları ayrı adımda bağlanır). Katalog henüz yüklenmediyse
+/// yok sayılır.
 
 @ProviderFor(TaskCatalogController)
 final taskCatalogControllerProvider = TaskCatalogControllerProvider._();
 
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
-/// koordinatörlük ve arşiv ekranları bunu okur; yeniden yükleme yalnız dokunuşla.
+/// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
+/// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
 /// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (oturum boyunca;
-/// kalıcılık backend bağlanınca kaynaktan gelir). Katalog henüz yüklenmediyse yok sayılır.
+/// sunucuya yazılmaz — yazma komutları ayrı adımda bağlanır). Katalog henüz yüklenmediyse
+/// yok sayılır.
 final class TaskCatalogControllerProvider
     extends $AsyncNotifierProvider<TaskCatalogController, TaskCatalog> {
   /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
-  /// koordinatörlük ve arşiv ekranları bunu okur; yeniden yükleme yalnız dokunuşla.
+  /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
+  /// aksi hâlde yeniden yükleme yalnız dokunuşla.
   ///
   /// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (oturum boyunca;
-  /// kalıcılık backend bağlanınca kaynaktan gelir). Katalog henüz yüklenmediyse yok sayılır.
+  /// sunucuya yazılmaz — yazma komutları ayrı adımda bağlanır). Katalog henüz yüklenmediyse
+  /// yok sayılır.
   TaskCatalogControllerProvider._()
     : super(
         from: null,
@@ -49,13 +55,15 @@ final class TaskCatalogControllerProvider
 }
 
 String _$taskCatalogControllerHash() =>
-    r'af3df38dbd64b1c8e852bd874e391a1854bcdcaa';
+    r'e5d3d4bf67f9d2feaf272fa98412fc2fe36b636d';
 
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
-/// koordinatörlük ve arşiv ekranları bunu okur; yeniden yükleme yalnız dokunuşla.
+/// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
+/// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
 /// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (oturum boyunca;
-/// kalıcılık backend bağlanınca kaynaktan gelir). Katalog henüz yüklenmediyse yok sayılır.
+/// sunucuya yazılmaz — yazma komutları ayrı adımda bağlanır). Katalog henüz yüklenmediyse
+/// yok sayılır.
 
 abstract class _$TaskCatalogController extends $AsyncNotifier<TaskCatalog> {
   FutureOr<TaskCatalog> build();

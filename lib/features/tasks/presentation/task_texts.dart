@@ -77,6 +77,13 @@ extension TaskTexts on AppLocalizations {
     EvidenceTag.site => uiTasksTagSite,
     EvidenceTag.result => uiTasksTagResult,
     EvidenceTag.status => uiTasksTagStatus,
+    EvidenceTag.requirement => uiTasksTagRequirement,
+    EvidenceTag.plan => uiTasksTagPlan,
+    EvidenceTag.input => uiTasksTagInput,
+    EvidenceTag.analysis => uiTasksTagAnalysis,
+    EvidenceTag.output => uiTasksTagOutput,
+    EvidenceTag.outcome => uiTasksTagOutcome,
+    EvidenceTag.unknown => uiTasksTagUnknown,
   };
 
   String roleLabel(InviteRole r) => switch (r) {

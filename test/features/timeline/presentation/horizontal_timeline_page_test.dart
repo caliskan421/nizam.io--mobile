@@ -52,7 +52,7 @@ Future<(_Calls, RecordingAppNav)> _open(
     tester,
     () => pilotHarness(PilotBackend(), signedIn: true),
   );
-  h.read(scopeControllerProvider).selectProgram('prog-1');
+  h.read(scopeControllerProvider).selectSample();
   final calls = _Calls();
   final nav = RecordingAppNav();
   await pumpScreen(

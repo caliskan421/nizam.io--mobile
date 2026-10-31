@@ -40,6 +40,14 @@ import 'clients/assistant_client.dart';
 /// - Uç başına `x-nizamio-error-codes` ortak kenar kodlarını da taşır; modüle özgü kodların.
 ///   uç başına listesi ilgili modül README'sinin §4 tablosuyla aynıdır.
 /// - Olay türleri: `docs/api/events.md`.
+/// - **Ekip programa göredir** (ADR-0023; bu revizyon `v0.4.0-api` etiketiyle yayımlanır,.
+///   önceki etiketle kırıcıdır): departman programdan bağımsız bir katalog kaydıdır; ekip.
+///   satırı (üyelik) ve rolü `(program, departman, hesap)` üçlüsüne aittir. Her rol, görev,.
+///   dosya, toplantı, mesaj, rapor ve bildirim yetkisi seçili programdaki ekip satırından.
+///   hesaplanır; bir programdaki koordinatörlük ya da üyelik başka programda yetki vermez.
+///   Ekip uçları (`/v1/departments/{id}/memberships…`, `/coordinator…`, `/members`,.
+///   `/assignable`, `/task-summary`) S2'dir. Departmanın her programda ayrı adı vardır.
+///   (`display_name`; katalog adı bağ kurulurken kopyalanır).
 ///
 class NizamioApi {
   NizamioApi(Dio dio, {String? baseUrl}) : _dio = dio, _baseUrl = baseUrl;

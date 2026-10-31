@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'granted_membership.dart';
+
 part 'transfer_history_item.freezed.dart';
 part 'transfer_history_item.g.dart';
 
@@ -20,6 +22,10 @@ abstract class TransferHistoryItem with _$TransferHistoryItem {
     @JsonKey(name: 'cut_dependency_count') required int cutDependencyCount,
     @JsonKey(name: 'restored_dependency_count')
     required int restoredDependencyCount,
+
+    /// Aktarımın hedef programın departman ekibine `uye` olarak eklediği (ön izlemede ekleyeceği) atanan kişiler (ADR-0023 kural 12).
+    @JsonKey(name: 'granted_memberships')
+    required List<GrantedMembership> grantedMemberships,
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'skipped_work_item_ids') List<String>? skippedWorkItemIds,
     @JsonKey(name: 'reverses_transfer_id') String? reversesTransferId,

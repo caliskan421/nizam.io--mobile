@@ -26,6 +26,10 @@ abstract class CreateWorkItemRequest with _$CreateWorkItemRequest {
 
     /// Boşsa atamasız açılır.
     @JsonKey(name: 'assignee_account_id') String? assigneeAccountId,
+
+    /// Gönderilmezse `true` (ADR-0024).
+    @JsonKey(name: 'completion_evidence_required')
+    bool? completionEvidenceRequired,
   }) = _CreateWorkItemRequest;
 
   factory CreateWorkItemRequest.fromJson(Map<String, Object?> json) =>

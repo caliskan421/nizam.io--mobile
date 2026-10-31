@@ -25,11 +25,15 @@ class _RecordsClient implements RecordsClient {
     required String id,
     required Tag tag,
     required File file,
+    String? subtaskId,
     Map<String, dynamic>? extras = RecordsClient.attachFileOpenapiExtras,
   }) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
-    final queryParameters = <String, dynamic>{r'tag': tag};
+    final queryParameters = <String, dynamic>{
+      r'tag': tag,
+      r'subtask_id': subtaskId,
+    };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     final _data = FormData();

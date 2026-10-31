@@ -12,6 +12,8 @@ abstract class KnownUser with _$KnownUser {
   const factory KnownUser({
     @JsonKey(name: 'account_id') required String accountId,
     @JsonKey(name: 'full_name') required String fullName,
+
+    /// Ekip satırı etiketleri, `program:departman:rol` biçiminde.
     required List<String>? memberships,
   }) = _KnownUser;
 

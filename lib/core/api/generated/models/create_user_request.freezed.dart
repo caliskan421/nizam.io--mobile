@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CreateUserRequest {
 
- String get email;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'full_name') String? get fullName; String? get role;@JsonKey(name: 'transfer_account_id') String? get transferAccountId;@JsonKey(name: 'company_admin') bool? get companyAdmin;
+ String get email;/// İlk ekip satırının programı; departman bu programa bağlı olmalıdır (ADR-0023).
+@JsonKey(name: 'program_id') String get programId;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'full_name') String? get fullName; String? get role;@JsonKey(name: 'transfer_account_id') String? get transferAccountId;@JsonKey(name: 'company_admin') bool? get companyAdmin;
 /// Create a copy of CreateUserRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $CreateUserRequestCopyWith<CreateUserRequest> get copyWith => _$CreateUserReques
 @override
 bool operator ==(Object other) {
   final _this = this as CreateUserRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateUserRequest&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.fullName, _this.fullName) || other.fullName == _this.fullName)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.transferAccountId, _this.transferAccountId) || other.transferAccountId == _this.transferAccountId)&&(identical(other.companyAdmin, _this.companyAdmin) || other.companyAdmin == _this.companyAdmin));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateUserRequest&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.programId, _this.programId) || other.programId == _this.programId)&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.fullName, _this.fullName) || other.fullName == _this.fullName)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.transferAccountId, _this.transferAccountId) || other.transferAccountId == _this.transferAccountId)&&(identical(other.companyAdmin, _this.companyAdmin) || other.companyAdmin == _this.companyAdmin));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CreateUserRequest;
-  return Object.hash(runtimeType,_this.email,_this.departmentId,_this.fullName,_this.role,_this.transferAccountId,_this.companyAdmin);
+  return Object.hash(runtimeType,_this.email,_this.programId,_this.departmentId,_this.fullName,_this.role,_this.transferAccountId,_this.companyAdmin);
 }
 
 @override
 String toString() {
   final _this = this as CreateUserRequest;
-  return 'CreateUserRequest(email: ${_this.email}, departmentId: ${_this.departmentId}, fullName: ${_this.fullName}, role: ${_this.role}, transferAccountId: ${_this.transferAccountId}, companyAdmin: ${_this.companyAdmin})';
+  return 'CreateUserRequest(email: ${_this.email}, programId: ${_this.programId}, departmentId: ${_this.departmentId}, fullName: ${_this.fullName}, role: ${_this.role}, transferAccountId: ${_this.transferAccountId}, companyAdmin: ${_this.companyAdmin})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $CreateUserRequestCopyWith<$Res>  {
   factory $CreateUserRequestCopyWith(CreateUserRequest value, $Res Function(CreateUserRequest) _then) = _$CreateUserRequestCopyWithImpl;
 @useResult
 $Res call({
- String email,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'full_name') String? fullName, String? role,@JsonKey(name: 'transfer_account_id') String? transferAccountId,@JsonKey(name: 'company_admin') bool? companyAdmin
+ String email,@JsonKey(name: 'program_id') String programId,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'full_name') String? fullName, String? role,@JsonKey(name: 'transfer_account_id') String? transferAccountId,@JsonKey(name: 'company_admin') bool? companyAdmin
 });
 
 
@@ -71,9 +72,10 @@ class _$CreateUserRequestCopyWithImpl<$Res>
 
 /// Create a copy of CreateUserRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? email = null,Object? departmentId = null,Object? fullName = freezed,Object? role = freezed,Object? transferAccountId = freezed,Object? companyAdmin = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? email = null,Object? programId = null,Object? departmentId = null,Object? fullName = freezed,Object? role = freezed,Object? transferAccountId = freezed,Object? companyAdmin = freezed,}) {
   return _then(CreateUserRequest(
 email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,programId: null == programId ? _self.programId : programId // ignore: cast_nullable_to_non_nullable
 as String,departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
 as String,fullName: freezed == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
 as String?,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
@@ -164,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String email, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'full_name')  String? fullName,  String? role, @JsonKey(name: 'transfer_account_id')  String? transferAccountId, @JsonKey(name: 'company_admin')  bool? companyAdmin)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String email, @JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'full_name')  String? fullName,  String? role, @JsonKey(name: 'transfer_account_id')  String? transferAccountId, @JsonKey(name: 'company_admin')  bool? companyAdmin)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreateUserRequest() when $default != null:
-return $default(_that.email,_that.departmentId,_that.fullName,_that.role,_that.transferAccountId,_that.companyAdmin);case _:
+return $default(_that.email,_that.programId,_that.departmentId,_that.fullName,_that.role,_that.transferAccountId,_that.companyAdmin);case _:
   return orElse();
 
 }
@@ -185,10 +187,10 @@ return $default(_that.email,_that.departmentId,_that.fullName,_that.role,_that.t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String email, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'full_name')  String? fullName,  String? role, @JsonKey(name: 'transfer_account_id')  String? transferAccountId, @JsonKey(name: 'company_admin')  bool? companyAdmin)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String email, @JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'full_name')  String? fullName,  String? role, @JsonKey(name: 'transfer_account_id')  String? transferAccountId, @JsonKey(name: 'company_admin')  bool? companyAdmin)  $default,) {final _that = this;
 switch (_that) {
 case _CreateUserRequest():
-return $default(_that.email,_that.departmentId,_that.fullName,_that.role,_that.transferAccountId,_that.companyAdmin);case _:
+return $default(_that.email,_that.programId,_that.departmentId,_that.fullName,_that.role,_that.transferAccountId,_that.companyAdmin);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +207,10 @@ return $default(_that.email,_that.departmentId,_that.fullName,_that.role,_that.t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String email, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'full_name')  String? fullName,  String? role, @JsonKey(name: 'transfer_account_id')  String? transferAccountId, @JsonKey(name: 'company_admin')  bool? companyAdmin)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String email, @JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'full_name')  String? fullName,  String? role, @JsonKey(name: 'transfer_account_id')  String? transferAccountId, @JsonKey(name: 'company_admin')  bool? companyAdmin)?  $default,) {final _that = this;
 switch (_that) {
 case _CreateUserRequest() when $default != null:
-return $default(_that.email,_that.departmentId,_that.fullName,_that.role,_that.transferAccountId,_that.companyAdmin);case _:
+return $default(_that.email,_that.programId,_that.departmentId,_that.fullName,_that.role,_that.transferAccountId,_that.companyAdmin);case _:
   return null;
 
 }
@@ -220,10 +222,12 @@ return $default(_that.email,_that.departmentId,_that.fullName,_that.role,_that.t
 @JsonSerializable()
 
 class _CreateUserRequest implements CreateUserRequest {
-  const _CreateUserRequest({required this.email, @JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'full_name') this.fullName, this.role, @JsonKey(name: 'transfer_account_id') this.transferAccountId, @JsonKey(name: 'company_admin') this.companyAdmin});
+  const _CreateUserRequest({required this.email, @JsonKey(name: 'program_id') required this.programId, @JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'full_name') this.fullName, this.role, @JsonKey(name: 'transfer_account_id') this.transferAccountId, @JsonKey(name: 'company_admin') this.companyAdmin});
   factory _CreateUserRequest.fromJson(Map<String, dynamic> json) => _$CreateUserRequestFromJson(json);
 
 @override final  String email;
+/// İlk ekip satırının programı; departman bu programa bağlı olmalıdır (ADR-0023).
+@override@JsonKey(name: 'program_id') final  String programId;
 @override@JsonKey(name: 'department_id') final  String departmentId;
 @override@JsonKey(name: 'full_name') final  String? fullName;
 @override final  String? role;
@@ -243,18 +247,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateUserRequest&&(identical(other.email, email) || other.email == email)&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.role, role) || other.role == role)&&(identical(other.transferAccountId, transferAccountId) || other.transferAccountId == transferAccountId)&&(identical(other.companyAdmin, companyAdmin) || other.companyAdmin == companyAdmin));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateUserRequest&&(identical(other.email, email) || other.email == email)&&(identical(other.programId, programId) || other.programId == programId)&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.role, role) || other.role == role)&&(identical(other.transferAccountId, transferAccountId) || other.transferAccountId == transferAccountId)&&(identical(other.companyAdmin, companyAdmin) || other.companyAdmin == companyAdmin));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,email,departmentId,fullName,role,transferAccountId,companyAdmin);
+    return Object.hash(runtimeType,email,programId,departmentId,fullName,role,transferAccountId,companyAdmin);
 }
 
 @override
 String toString() {
-    return 'CreateUserRequest(email: $email, departmentId: $departmentId, fullName: $fullName, role: $role, transferAccountId: $transferAccountId, companyAdmin: $companyAdmin)';
+    return 'CreateUserRequest(email: $email, programId: $programId, departmentId: $departmentId, fullName: $fullName, role: $role, transferAccountId: $transferAccountId, companyAdmin: $companyAdmin)';
 }
 
 
@@ -265,7 +269,7 @@ abstract mixin class _$CreateUserRequestCopyWith<$Res> implements $CreateUserReq
   factory _$CreateUserRequestCopyWith(_CreateUserRequest value, $Res Function(_CreateUserRequest) _then) = __$CreateUserRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String email,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'full_name') String? fullName, String? role,@JsonKey(name: 'transfer_account_id') String? transferAccountId,@JsonKey(name: 'company_admin') bool? companyAdmin
+ String email,@JsonKey(name: 'program_id') String programId,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'full_name') String? fullName, String? role,@JsonKey(name: 'transfer_account_id') String? transferAccountId,@JsonKey(name: 'company_admin') bool? companyAdmin
 });
 
 
@@ -282,9 +286,10 @@ class __$CreateUserRequestCopyWithImpl<$Res>
 
 /// Create a copy of CreateUserRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? email = null,Object? departmentId = null,Object? fullName = freezed,Object? role = freezed,Object? transferAccountId = freezed,Object? companyAdmin = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? email = null,Object? programId = null,Object? departmentId = null,Object? fullName = freezed,Object? role = freezed,Object? transferAccountId = freezed,Object? companyAdmin = freezed,}) {
   return _then(_CreateUserRequest(
 email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,programId: null == programId ? _self.programId : programId // ignore: cast_nullable_to_non_nullable
 as String,departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
 as String,fullName: freezed == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
 as String?,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable

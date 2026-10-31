@@ -88,7 +88,7 @@ class ProgramRepository {
 
   static MyDepartment _myDepartment(api.MyDepartment r) => MyDepartment(
     id: r.departmentId,
-    name: r.name,
+    name: r.displayName,
     role: DepartmentRole.fromWire(r.role),
   );
 }

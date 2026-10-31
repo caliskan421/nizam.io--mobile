@@ -20,6 +20,9 @@ _TransferHistoryItem _$TransferHistoryItemFromJson(Map<String, dynamic> json) =>
       cutDependencyCount: (json['cut_dependency_count'] as num).toInt(),
       restoredDependencyCount: (json['restored_dependency_count'] as num)
           .toInt(),
+      grantedMemberships: (json['granted_memberships'] as List<dynamic>)
+          .map((e) => GrantedMembership.fromJson(e as Map<String, dynamic>))
+          .toList(),
       createdAt: DateTime.parse(json['created_at'] as String),
       skippedWorkItemIds: (json['skipped_work_item_ids'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -39,6 +42,9 @@ Map<String, dynamic> _$TransferHistoryItemToJson(
   'moved_file_count': instance.movedFileCount,
   'cut_dependency_count': instance.cutDependencyCount,
   'restored_dependency_count': instance.restoredDependencyCount,
+  'granted_memberships': instance.grantedMemberships
+      .map((e) => e.toJson())
+      .toList(),
   'created_at': instance.createdAt.toIso8601String(),
   'skipped_work_item_ids': ?instance.skippedWorkItemIds,
   'reverses_transfer_id': ?instance.reversesTransferId,

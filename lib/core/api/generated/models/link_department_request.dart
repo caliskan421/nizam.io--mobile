@@ -11,6 +11,13 @@ part 'link_department_request.g.dart';
 abstract class LinkDepartmentRequest with _$LinkDepartmentRequest {
   const factory LinkDepartmentRequest({
     @JsonKey(name: 'department_id') required String departmentId,
+
+    /// Departmanın bu programdaki adı; verilmezse katalog adı kopyalanır.
+    @JsonKey(name: 'display_name') String? displayName,
+
+    /// Verilirse bu programdaki aynı departmanın ekibi rolleriyle kopyalanır.
+    @JsonKey(name: 'copy_members_from_program_id')
+    String? copyMembersFromProgramId,
   }) = _LinkDepartmentRequest;
 
   factory LinkDepartmentRequest.fromJson(Map<String, Object?> json) =>

@@ -15,6 +15,7 @@ _FileListItem _$FileListItemFromJson(Map<String, dynamic> json) =>
       sizeBytes: (json['size_bytes'] as num).toInt(),
       tag: json['tag'] as String,
       uploadedByAccountId: json['uploaded_by_account_id'] as String,
+      subtaskId: json['subtask_id'] as String?,
     );
 
 Map<String, dynamic> _$FileListItemToJson(_FileListItem instance) =>
@@ -26,4 +27,5 @@ Map<String, dynamic> _$FileListItemToJson(_FileListItem instance) =>
       'size_bytes': instance.sizeBytes,
       'tag': instance.tag,
       'uploaded_by_account_id': instance.uploadedByAccountId,
+      'subtask_id': ?instance.subtaskId,
     };

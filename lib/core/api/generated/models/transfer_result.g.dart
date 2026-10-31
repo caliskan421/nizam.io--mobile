@@ -25,6 +25,9 @@ _TransferResult _$TransferResultFromJson(Map<String, dynamic> json) =>
       retainedLinks: (json['retained_links'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
+      grantedMemberships: (json['granted_memberships'] as List<dynamic>)
+          .map((e) => GrantedMembership.fromJson(e as Map<String, dynamic>))
+          .toList(),
       replayed: json['replayed'] as bool,
       skippedWorkItemIds: (json['skipped_work_item_ids'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -41,6 +44,9 @@ Map<String, dynamic> _$TransferResultToJson(_TransferResult instance) =>
       'granted_links': instance.grantedLinks,
       'revoked_links': instance.revokedLinks,
       'retained_links': instance.retainedLinks,
+      'granted_memberships': instance.grantedMemberships
+          .map((e) => e.toJson())
+          .toList(),
       'replayed': instance.replayed,
       'skipped_work_item_ids': ?instance.skippedWorkItemIds,
     };

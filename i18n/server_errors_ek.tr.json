@@ -1,25 +1,4 @@
 {
   "$comment": "Web pininde (api-pin.json web.commit) HENÜZ metni olmayan SUNUCU kodlarının geçici TR metinleri. ELLE yazılır. Yalnız katalogdaki ve web'de olmayan kodlar girer; web metni eklenip pin ilerleyince make gen aynı kodun burada kalmasını hata sayar (satır silinir). Anlamlar: backend modül README'leri (identity K50/K52/K56, records K07, assistant, collaboration konferans) ve docs/api/README.",
-  "codes": {
-    "assistant.busy": "Asistan şu an yoğun. Biraz sonra yeniden deneyin.",
-    "assistant.capacity_full": "Asistan kapasitesi dolu. Biraz sonra yeniden deneyin.",
-    "assistant.input_invalid": "Soru geçersiz. Kontrol edip yeniden deneyin.",
-    "assistant.limit_exceeded": "Asistanın günlük kullanım sınırına ulaşıldı.",
-    "assistant.not_authorized": "Asistanı kullanma yetkiniz yok.",
-    "assistant.not_found": "Sohbet bulunamadı.",
-    "assistant.provider_unavailable": "Asistan şu an kullanılamıyor. Biraz sonra yeniden deneyin.",
-    "assistant.quota_exceeded": "Bugünkü soru hakkınız doldu.",
-    "assistant.refused": "Asistan bu soruyu yanıtlayamıyor.",
-    "collaboration.conference_disabled": "Görüntülü görüşme bu sunucuda kapalı.",
-    "collaboration.conference_not_active": "Görüntülü görüşme başlamadı.",
-    "collaboration.conference_provider_unavailable": "Görüntülü görüşme hizmetine şu an ulaşılamıyor.",
-    "collaboration.conference_webhook_invalid": "Görüntülü görüşme bildirimi geçersiz.",
-    "collaboration.conference_webhook_unauthorized": "Görüntülü görüşme bildirimi doğrulanamadı.",
-    "identity.capacity_full": "Sunucu şu an yoğun. Biraz sonra yeniden deneyin.",
-    "identity.download_target_invalid": "İndirme isteği geçersiz.",
-    "identity.download_ticket_invalid": "İndirme bağlantısı geçersiz veya süresi dolmuş. Yeniden indirmeyi deneyin.",
-    "identity.unavailable": "Kimlik doğrulama hizmetine şu an ulaşılamıyor. Biraz sonra yeniden deneyin.",
-    "records.tag_invalid": "Dosya etiketi geçersiz.",
-    "records.tag_required": "Dosya için bir etiket seçilmeli."
-  }
+  "codes": {}
 }

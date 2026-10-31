@@ -1,6 +1,6 @@
 # Servis katmanı — backend işlemleri ↔ Flutter karşılığı
 
-Durum: 2026-10-29 · dal `servis/katman` · pin `v0.3.0-api` (147 işlem). Ekran entegrasyonu **başlamadı**:
+Durum: 2026-10-29 · dal `servis/katman` · pin `v0.5.0-api` (153 işlem). Ekran entegrasyonu **başlamadı**:
 `Api*Repository` sınıfları yazıldı ve testli, ama `<f>_module.dart` bağlamaları hâlâ örnek (`Sample*`) repository'lerde.
 Entegrasyon ürün sahibi onayıyla ekran ekran yapılır.
 

@@ -18,6 +18,9 @@ abstract class TransitionRequest with _$TransitionRequest {
     /// Geri alma geçişlerinde zorunlu gerekçe.
     String? reason,
     @JsonKey(name: 'pull_end_date') bool? pullEndDate,
+
+    /// Yalnız `tamamlandi` hedefinde: açık alt görevleri aynı işlemde kapatır (ADR-0024); başka hedefte 422 `work.input_invalid`. Verilmezse açık alt görev 409 `work.subtasks_open` üretir.
+    @JsonKey(name: 'close_subtasks') bool? closeSubtasks,
   }) = _TransitionRequest;
 
   factory TransitionRequest.fromJson(Map<String, Object?> json) =>

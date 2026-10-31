@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FileRecord {
 
-@JsonKey(name: 'file_id') String get fileId;@JsonKey(name: 'work_item_id') String get workItemId;@JsonKey(name: 'display_name') String get displayName;@JsonKey(name: 'content_type') String get contentType;@JsonKey(name: 'size_bytes') int get sizeBytes; FileRecordTag get tag;
+@JsonKey(name: 'file_id') String get fileId;@JsonKey(name: 'work_item_id') String get workItemId;@JsonKey(name: 'display_name') String get displayName;@JsonKey(name: 'content_type') String get contentType;@JsonKey(name: 'size_bytes') int get sizeBytes; FileRecordTag get tag;/// Dosyanın bağlı olduğu alt görev (ADR-0024); yoksa alan yoktur.
+@JsonKey(name: 'subtask_id') String? get subtaskId;
 /// Create a copy of FileRecord
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $FileRecordCopyWith<FileRecord> get copyWith => _$FileRecordCopyWithImpl<FileRec
 @override
 bool operator ==(Object other) {
   final _this = this as FileRecord;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FileRecord&&(identical(other.fileId, _this.fileId) || other.fileId == _this.fileId)&&(identical(other.workItemId, _this.workItemId) || other.workItemId == _this.workItemId)&&(identical(other.displayName, _this.displayName) || other.displayName == _this.displayName)&&(identical(other.contentType, _this.contentType) || other.contentType == _this.contentType)&&(identical(other.sizeBytes, _this.sizeBytes) || other.sizeBytes == _this.sizeBytes)&&(identical(other.tag, _this.tag) || other.tag == _this.tag));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FileRecord&&(identical(other.fileId, _this.fileId) || other.fileId == _this.fileId)&&(identical(other.workItemId, _this.workItemId) || other.workItemId == _this.workItemId)&&(identical(other.displayName, _this.displayName) || other.displayName == _this.displayName)&&(identical(other.contentType, _this.contentType) || other.contentType == _this.contentType)&&(identical(other.sizeBytes, _this.sizeBytes) || other.sizeBytes == _this.sizeBytes)&&(identical(other.tag, _this.tag) || other.tag == _this.tag)&&(identical(other.subtaskId, _this.subtaskId) || other.subtaskId == _this.subtaskId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as FileRecord;
-  return Object.hash(runtimeType,_this.fileId,_this.workItemId,_this.displayName,_this.contentType,_this.sizeBytes,_this.tag);
+  return Object.hash(runtimeType,_this.fileId,_this.workItemId,_this.displayName,_this.contentType,_this.sizeBytes,_this.tag,_this.subtaskId);
 }
 
 @override
 String toString() {
   final _this = this as FileRecord;
-  return 'FileRecord(fileId: ${_this.fileId}, workItemId: ${_this.workItemId}, displayName: ${_this.displayName}, contentType: ${_this.contentType}, sizeBytes: ${_this.sizeBytes}, tag: ${_this.tag})';
+  return 'FileRecord(fileId: ${_this.fileId}, workItemId: ${_this.workItemId}, displayName: ${_this.displayName}, contentType: ${_this.contentType}, sizeBytes: ${_this.sizeBytes}, tag: ${_this.tag}, subtaskId: ${_this.subtaskId})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $FileRecordCopyWith<$Res>  {
   factory $FileRecordCopyWith(FileRecord value, $Res Function(FileRecord) _then) = _$FileRecordCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'file_id') String fileId,@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'content_type') String contentType,@JsonKey(name: 'size_bytes') int sizeBytes, FileRecordTag tag
+@JsonKey(name: 'file_id') String fileId,@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'content_type') String contentType,@JsonKey(name: 'size_bytes') int sizeBytes, FileRecordTag tag,@JsonKey(name: 'subtask_id') String? subtaskId
 });
 
 
@@ -71,7 +72,7 @@ class _$FileRecordCopyWithImpl<$Res>
 
 /// Create a copy of FileRecord
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? fileId = null,Object? workItemId = null,Object? displayName = null,Object? contentType = null,Object? sizeBytes = null,Object? tag = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? fileId = null,Object? workItemId = null,Object? displayName = null,Object? contentType = null,Object? sizeBytes = null,Object? tag = null,Object? subtaskId = freezed,}) {
   return _then(FileRecord(
 fileId: null == fileId ? _self.fileId : fileId // ignore: cast_nullable_to_non_nullable
 as String,workItemId: null == workItemId ? _self.workItemId : workItemId // ignore: cast_nullable_to_non_nullable
@@ -79,7 +80,8 @@ as String,displayName: null == displayName ? _self.displayName : displayName // 
 as String,contentType: null == contentType ? _self.contentType : contentType // ignore: cast_nullable_to_non_nullable
 as String,sizeBytes: null == sizeBytes ? _self.sizeBytes : sizeBytes // ignore: cast_nullable_to_non_nullable
 as int,tag: null == tag ? _self.tag : tag // ignore: cast_nullable_to_non_nullable
-as FileRecordTag,
+as FileRecordTag,subtaskId: freezed == subtaskId ? _self.subtaskId : subtaskId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -164,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'file_id')  String fileId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'size_bytes')  int sizeBytes,  FileRecordTag tag)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'file_id')  String fileId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'size_bytes')  int sizeBytes,  FileRecordTag tag, @JsonKey(name: 'subtask_id')  String? subtaskId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FileRecord() when $default != null:
-return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentType,_that.sizeBytes,_that.tag);case _:
+return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentType,_that.sizeBytes,_that.tag,_that.subtaskId);case _:
   return orElse();
 
 }
@@ -185,10 +187,10 @@ return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentTyp
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'file_id')  String fileId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'size_bytes')  int sizeBytes,  FileRecordTag tag)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'file_id')  String fileId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'size_bytes')  int sizeBytes,  FileRecordTag tag, @JsonKey(name: 'subtask_id')  String? subtaskId)  $default,) {final _that = this;
 switch (_that) {
 case _FileRecord():
-return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentType,_that.sizeBytes,_that.tag);case _:
+return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentType,_that.sizeBytes,_that.tag,_that.subtaskId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +207,10 @@ return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentTyp
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'file_id')  String fileId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'size_bytes')  int sizeBytes,  FileRecordTag tag)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'file_id')  String fileId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'size_bytes')  int sizeBytes,  FileRecordTag tag, @JsonKey(name: 'subtask_id')  String? subtaskId)?  $default,) {final _that = this;
 switch (_that) {
 case _FileRecord() when $default != null:
-return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentType,_that.sizeBytes,_that.tag);case _:
+return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentType,_that.sizeBytes,_that.tag,_that.subtaskId);case _:
   return null;
 
 }
@@ -220,7 +222,7 @@ return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentTyp
 @JsonSerializable()
 
 class _FileRecord implements FileRecord {
-  const _FileRecord({@JsonKey(name: 'file_id') required this.fileId, @JsonKey(name: 'work_item_id') required this.workItemId, @JsonKey(name: 'display_name') required this.displayName, @JsonKey(name: 'content_type') required this.contentType, @JsonKey(name: 'size_bytes') required this.sizeBytes, required this.tag});
+  const _FileRecord({@JsonKey(name: 'file_id') required this.fileId, @JsonKey(name: 'work_item_id') required this.workItemId, @JsonKey(name: 'display_name') required this.displayName, @JsonKey(name: 'content_type') required this.contentType, @JsonKey(name: 'size_bytes') required this.sizeBytes, required this.tag, @JsonKey(name: 'subtask_id') this.subtaskId});
   factory _FileRecord.fromJson(Map<String, dynamic> json) => _$FileRecordFromJson(json);
 
 @override@JsonKey(name: 'file_id') final  String fileId;
@@ -229,6 +231,8 @@ class _FileRecord implements FileRecord {
 @override@JsonKey(name: 'content_type') final  String contentType;
 @override@JsonKey(name: 'size_bytes') final  int sizeBytes;
 @override final  FileRecordTag tag;
+/// Dosyanın bağlı olduğu alt görev (ADR-0024); yoksa alan yoktur.
+@override@JsonKey(name: 'subtask_id') final  String? subtaskId;
 
 /// Create a copy of FileRecord
 /// with the given fields replaced by the non-null parameter values.
@@ -243,18 +247,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FileRecord&&(identical(other.fileId, fileId) || other.fileId == fileId)&&(identical(other.workItemId, workItemId) || other.workItemId == workItemId)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.contentType, contentType) || other.contentType == contentType)&&(identical(other.sizeBytes, sizeBytes) || other.sizeBytes == sizeBytes)&&(identical(other.tag, tag) || other.tag == tag));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FileRecord&&(identical(other.fileId, fileId) || other.fileId == fileId)&&(identical(other.workItemId, workItemId) || other.workItemId == workItemId)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.contentType, contentType) || other.contentType == contentType)&&(identical(other.sizeBytes, sizeBytes) || other.sizeBytes == sizeBytes)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.subtaskId, subtaskId) || other.subtaskId == subtaskId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,fileId,workItemId,displayName,contentType,sizeBytes,tag);
+    return Object.hash(runtimeType,fileId,workItemId,displayName,contentType,sizeBytes,tag,subtaskId);
 }
 
 @override
 String toString() {
-    return 'FileRecord(fileId: $fileId, workItemId: $workItemId, displayName: $displayName, contentType: $contentType, sizeBytes: $sizeBytes, tag: $tag)';
+    return 'FileRecord(fileId: $fileId, workItemId: $workItemId, displayName: $displayName, contentType: $contentType, sizeBytes: $sizeBytes, tag: $tag, subtaskId: $subtaskId)';
 }
 
 
@@ -265,7 +269,7 @@ abstract mixin class _$FileRecordCopyWith<$Res> implements $FileRecordCopyWith<$
   factory _$FileRecordCopyWith(_FileRecord value, $Res Function(_FileRecord) _then) = __$FileRecordCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'file_id') String fileId,@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'content_type') String contentType,@JsonKey(name: 'size_bytes') int sizeBytes, FileRecordTag tag
+@JsonKey(name: 'file_id') String fileId,@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'content_type') String contentType,@JsonKey(name: 'size_bytes') int sizeBytes, FileRecordTag tag,@JsonKey(name: 'subtask_id') String? subtaskId
 });
 
 
@@ -282,7 +286,7 @@ class __$FileRecordCopyWithImpl<$Res>
 
 /// Create a copy of FileRecord
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? fileId = null,Object? workItemId = null,Object? displayName = null,Object? contentType = null,Object? sizeBytes = null,Object? tag = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? fileId = null,Object? workItemId = null,Object? displayName = null,Object? contentType = null,Object? sizeBytes = null,Object? tag = null,Object? subtaskId = freezed,}) {
   return _then(_FileRecord(
 fileId: null == fileId ? _self.fileId : fileId // ignore: cast_nullable_to_non_nullable
 as String,workItemId: null == workItemId ? _self.workItemId : workItemId // ignore: cast_nullable_to_non_nullable
@@ -290,7 +294,8 @@ as String,displayName: null == displayName ? _self.displayName : displayName // 
 as String,contentType: null == contentType ? _self.contentType : contentType // ignore: cast_nullable_to_non_nullable
 as String,sizeBytes: null == sizeBytes ? _self.sizeBytes : sizeBytes // ignore: cast_nullable_to_non_nullable
 as int,tag: null == tag ? _self.tag : tag // ignore: cast_nullable_to_non_nullable
-as FileRecordTag,
+as FileRecordTag,subtaskId: freezed == subtaskId ? _self.subtaskId : subtaskId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

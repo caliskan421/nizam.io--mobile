@@ -12,6 +12,7 @@ import '../models/program.dart';
 import '../models/program_department_link.dart';
 import '../models/program_list.dart';
 import '../models/program_reset_result.dart';
+import '../models/rename_department_link_request.dart';
 import '../models/reset_program_request.dart';
 import '../models/transfer_history.dart';
 import '../models/transfer_history_item.dart';
@@ -75,6 +76,22 @@ abstract class ProgramClient {
           'externalDocsUrl': null,
         },
       };
+  static const Map<String, dynamic> renameDepartmentLinkOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["program"],
+          'operationId': "renameDepartmentLink",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> unlinkDepartmentOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["program"],
+          'operationId': "unlinkDepartment",
+          'externalDocsUrl': null,
+        },
+      };
   static const Map<String, dynamic> resetProgramOpenapiExtras =
       <String, dynamic>{
         'openapi': <String, dynamic>{
@@ -117,6 +134,11 @@ abstract class ProgramClient {
       };
 
   /// Program (dönem) listesi.
+  ///
+  /// Şirket yöneticisi bütün programları görür; diğer kullanıcı yalnız.
+  /// ekip satırı olan programları görür (görünürlük doğrudan ekip.
+  /// satırlarından okunur, departman bağı zincirinden değil — ADR-0023.
+  /// kural 2).
   @GET('/v1/programs')
   Future<HttpResponse<ProgramList>> listPrograms({
     @Extras()
@@ -150,18 +172,52 @@ abstract class ProgramClient {
   });
 
   /// Kapsamdaki program.
+  ///
+  /// Görünürlük `GET /v1/programs` ile aynıdır: çağıranın bu programda.
+  /// ekip satırı yoksa (ve şirket yöneticisi değilse) `404 program.not_found`.
   @GET('/v1/program')
   Future<Program> readProgram({
     @Extras()
     Map<String, dynamic>? extras = ProgramClient.readProgramOpenapiExtras,
   });
 
-  /// Departmanı kapsamdaki programa bağlar.
+  /// Departmanı kapsamdaki programa bağlar (isteğe bağlı ad ve ekip kopyasıyla).
+  ///
+  /// Ad verilmezse katalog adı kopyalanır. `copy_members_from_program_id`.
+  /// verilirse kaynak programdaki aynı departmanın ekibi rolleriyle.
+  /// kopyalanır (silinmiş hesaplar hariç). Bağ zaten varsa 201 ve var olan.
+  /// bağ döner; ekip yeniden kopyalanmaz (ADR-0023).
   @POST('/v1/program/departments')
   Future<ProgramDepartmentLink> linkDepartment({
     @Body() required LinkDepartmentRequest body,
     @Extras()
     Map<String, dynamic>? extras = ProgramClient.linkDepartmentOpenapiExtras,
+  });
+
+  /// Departmanın kapsamdaki programdaki adını değiştirir.
+  ///
+  /// Yalnız bu bağın adı değişir; aynı departmanın başka programlardaki adı ve.
+  /// katalog adı etkilenmez. Ad tekilliği program içinde ve büyük/küçük harfe.
+  /// duyarsızdır (ADR-0023 kural 4).
+  @PATCH('/v1/program/departments/{departmentId}')
+  Future<ProgramDepartmentLink> renameDepartmentLink({
+    @Path('departmentId') required String departmentId,
+    @Body() required RenameDepartmentLinkRequest body,
+    @Extras()
+    Map<String, dynamic>? extras =
+        ProgramClient.renameDepartmentLinkOpenapiExtras,
+  });
+
+  /// Departmanın kapsamdaki programla bağını kaldırır.
+  ///
+  /// Kapsamda canlı (silinmemiş) görev varsa bağ korunur ve 409.
+  /// `program.department_link_in_use` döner. Yoksa bağ ve bu programdaki.
+  /// departman ekibi aynı transaction'da silinir (ADR-0023 kural 9).
+  @DELETE('/v1/program/departments/{departmentId}')
+  Future<void> unlinkDepartment({
+    @Path('departmentId') required String departmentId,
+    @Extras()
+    Map<String, dynamic>? extras = ProgramClient.unlinkDepartmentOpenapiExtras,
   });
 
   /// Dönem sıfırlama: program ve katılım bağları kalır, dönem içeriği silinir (parola yeniden doğrulanır).
@@ -174,6 +230,13 @@ abstract class ProgramClient {
   });
 
   /// Aktarım ön izlemesi (salt okunur; hız sınırlı).
+  ///
+  /// `granted_memberships`, hedef programın departman ekibine `uye` olarak.
+  /// eklenecek atanan kişilerdir (bilgi; engel değildir ve parmak izine.
+  /// girmez). Ön izleme, kurulacak bağın katalog adının hedef programdaki.
+  /// başka bir bağın adıyla çakışmasını göstermez; yürütme bu durumda.
+  /// `409 program.department_link_name_exists` döner.
+  /// (GAP-193).
   @POST('/v1/program-transfers/preview')
   Future<TransferPreview> previewTransfer({
     @Body() required TransferPreviewRequest body,
@@ -182,6 +245,14 @@ abstract class ProgramClient {
   });
 
   /// Programlar arası görev aktarımı ya da ters aktarım (hep ya da hiç; hız sınırlı). Aynı anahtar + aynı gövde ilk sonucu 200 ile tekrarlar.
+  ///
+  /// Atanan kişi hedef programın aynı departman ekibinde yoksa `uye` olarak.
+  /// eklenir ve `granted_memberships`'e yazılır; ters aktarım yalnız bu.
+  /// aktarımın eklediği ve kişinin o çiftte başka aktif ataması olmayan ekip.
+  /// satırlarını kaldırır. Hedefte bağ kurulacaksa adı katalog adıdır; bu ad.
+  /// hedef programda başka bir bağda varsa `409.
+  /// program.department_link_name_exists` (hiçbir şey yazılmaz; ADR-0023.
+  /// kural 12).
   ///
   /// [idempotencyKey] - İstemcinin ürettiği opak tekrar anahtarı (en az 128 bit; ör. base64url 22 karakter). Uzunluk baştaki/sondaki boşluk kırpıldıktan sonra bayt olarak 22–200'dür; eksik ya da sınır dışı anahtar 422 program.transfer_input_invalid (alan idempotency_key). Aynı anahtar + aynı gövde ilk sonucu döndürür, farklı gövde 409 program.idempotency_key_reused.
   @POST('/v1/program-transfers')

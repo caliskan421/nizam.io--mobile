@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket v0.3.0-api (b846d75f8b7f43bb886cef8f76dfcdf63f898662) — docs/api/error-codes.json
+// Kaynak: nizam.io--backend etiket v0.5.0-api (e273d99b6a118ec6600387b0fc8392ba294ba61b) — docs/api/error-codes.json
 
 import '../api_meta.dart';
 
@@ -355,6 +355,11 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     fields: [],
     messageKey: 'errors.organization.department_not_found',
   ),
+  'organization.department_not_linked': ErrorCatalogEntry(
+    statuses: [422],
+    fields: [],
+    messageKey: 'errors.organization.department_not_linked',
+  ),
   'organization.input_invalid': ErrorCatalogEntry(
     statuses: [422],
     fields: [
@@ -363,6 +368,7 @@ const errorCatalog = <String, ErrorCatalogEntry>{
       'organization.invalid_name',
       'organization.invalid_role',
       'organization.invalid_sort',
+      'organization.program_required',
     ],
     messageKey: 'errors.organization.input_invalid',
   ),
@@ -481,6 +487,21 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     fields: [],
     messageKey: 'errors.program.already_exists',
   ),
+  'program.copy_source_not_linked': ErrorCatalogEntry(
+    statuses: [422],
+    fields: [],
+    messageKey: 'errors.program.copy_source_not_linked',
+  ),
+  'program.department_link_in_use': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.program.department_link_in_use',
+  ),
+  'program.department_link_name_exists': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.program.department_link_name_exists',
+  ),
   'program.department_not_found': ErrorCatalogEntry(
     statuses: [404],
     fields: [],
@@ -494,6 +515,7 @@ const errorCatalog = <String, ErrorCatalogEntry>{
   'program.input_invalid': ErrorCatalogEntry(
     statuses: [422],
     fields: [
+      'program.invalid_copy_source',
       'program.invalid_description',
       'program.invalid_limit',
       'program.invalid_name',
@@ -845,6 +867,26 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [409],
     fields: [],
     messageKey: 'errors.work.stale_transition',
+  ),
+  'work.subtask_assignee_not_assigned': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['work.subtask_assignee_not_assigned'],
+    messageKey: 'errors.work.subtask_assignee_not_assigned',
+  ),
+  'work.subtask_limit_reached': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.work.subtask_limit_reached',
+  ),
+  'work.subtask_not_found': ErrorCatalogEntry(
+    statuses: [404],
+    fields: [],
+    messageKey: 'errors.work.subtask_not_found',
+  ),
+  'work.subtasks_open': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.work.subtasks_open',
   ),
   'work.transfer_active': ErrorCatalogEntry(
     statuses: [409],

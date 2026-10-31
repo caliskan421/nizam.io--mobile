@@ -80,6 +80,7 @@ const localizedErrorCodes = <String>{
   'organization.department_exists',
   'organization.department_in_use',
   'organization.department_not_found',
+  'organization.department_not_linked',
   'organization.input_invalid',
   'organization.invalid_code',
   'organization.invalid_kind',
@@ -93,6 +94,7 @@ const localizedErrorCodes = <String>{
   'organization.not_authorized',
   'organization.not_deleted',
   'organization.permanent_requires_deleted',
+  'organization.program_required',
   'organization.task_title',
   'organization.transfer_available',
   'platform.body_invalid',
@@ -109,10 +111,14 @@ const localizedErrorCodes = <String>{
   'platform.scope_missing',
   'platform.unauthenticated',
   'program.already_exists',
+  'program.copy_source_not_linked',
+  'program.department_link_in_use',
+  'program.department_link_name_exists',
   'program.department_not_found',
   'program.duplicate_transfer_item',
   'program.idempotency_key_reused',
   'program.input_invalid',
+  'program.invalid_copy_source',
   'program.invalid_cursor',
   'program.invalid_description',
   'program.invalid_limit',
@@ -196,6 +202,10 @@ const localizedErrorCodes = <String>{
   'work.revert_reason_required',
   'work.stale_completion',
   'work.stale_transition',
+  'work.subtask_assignee_not_assigned',
+  'work.subtask_limit_reached',
+  'work.subtask_not_found',
+  'work.subtasks_open',
   'work.transfer_active',
   'work.transition_not_allowed',
   'client.insecure_server',
@@ -369,6 +379,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errOrganizationDepartmentInUse;
     case 'organization.department_not_found':
       return l.errOrganizationDepartmentNotFound;
+    case 'organization.department_not_linked':
+      return l.errOrganizationDepartmentNotLinked;
     case 'organization.input_invalid':
       return l.errOrganizationInputInvalid;
     case 'organization.invalid_code':
@@ -395,6 +407,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errOrganizationNotDeleted;
     case 'organization.permanent_requires_deleted':
       return l.errOrganizationPermanentRequiresDeleted;
+    case 'organization.program_required':
+      return l.errOrganizationProgramRequired;
     case 'organization.task_title':
       return l.errOrganizationTaskTitle;
     case 'organization.transfer_available':
@@ -427,6 +441,12 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errPlatformUnauthenticated;
     case 'program.already_exists':
       return l.errProgramAlreadyExists;
+    case 'program.copy_source_not_linked':
+      return l.errProgramCopySourceNotLinked;
+    case 'program.department_link_in_use':
+      return l.errProgramDepartmentLinkInUse;
+    case 'program.department_link_name_exists':
+      return l.errProgramDepartmentLinkNameExists;
     case 'program.department_not_found':
       return l.errProgramDepartmentNotFound;
     case 'program.duplicate_transfer_item':
@@ -435,6 +455,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errProgramIdempotencyKeyReused;
     case 'program.input_invalid':
       return l.errProgramInputInvalid;
+    case 'program.invalid_copy_source':
+      return l.errProgramInvalidCopySource;
     case 'program.invalid_cursor':
       return l.errProgramInvalidCursor;
     case 'program.invalid_description':
@@ -601,6 +623,14 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errWorkStaleCompletion;
     case 'work.stale_transition':
       return l.errWorkStaleTransition;
+    case 'work.subtask_assignee_not_assigned':
+      return l.errWorkSubtaskAssigneeNotAssigned;
+    case 'work.subtask_limit_reached':
+      return l.errWorkSubtaskLimitReached;
+    case 'work.subtask_not_found':
+      return l.errWorkSubtaskNotFound;
+    case 'work.subtasks_open':
+      return l.errWorkSubtasksOpen;
     case 'work.transfer_active':
       return l.errWorkTransferActive;
     case 'work.transition_not_allowed':

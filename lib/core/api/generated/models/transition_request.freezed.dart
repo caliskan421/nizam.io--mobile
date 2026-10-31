@@ -18,7 +18,8 @@ mixin _$TransitionRequest {
 
 /// Hedef durum.
  TransitionRequestTo get to;/// Geri alma geçişlerinde zorunlu gerekçe.
- String? get reason;@JsonKey(name: 'pull_end_date') bool? get pullEndDate;
+ String? get reason;@JsonKey(name: 'pull_end_date') bool? get pullEndDate;/// Yalnız `tamamlandi` hedefinde: açık alt görevleri aynı işlemde kapatır (ADR-0024); başka hedefte 422 `work.input_invalid`. Verilmezse açık alt görev 409 `work.subtasks_open` üretir.
+@JsonKey(name: 'close_subtasks') bool? get closeSubtasks;
 /// Create a copy of TransitionRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -32,20 +33,20 @@ $TransitionRequestCopyWith<TransitionRequest> get copyWith => _$TransitionReques
 @override
 bool operator ==(Object other) {
   final _this = this as TransitionRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransitionRequest&&(identical(other.to, _this.to) || other.to == _this.to)&&(identical(other.reason, _this.reason) || other.reason == _this.reason)&&(identical(other.pullEndDate, _this.pullEndDate) || other.pullEndDate == _this.pullEndDate));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransitionRequest&&(identical(other.to, _this.to) || other.to == _this.to)&&(identical(other.reason, _this.reason) || other.reason == _this.reason)&&(identical(other.pullEndDate, _this.pullEndDate) || other.pullEndDate == _this.pullEndDate)&&(identical(other.closeSubtasks, _this.closeSubtasks) || other.closeSubtasks == _this.closeSubtasks));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as TransitionRequest;
-  return Object.hash(runtimeType,_this.to,_this.reason,_this.pullEndDate);
+  return Object.hash(runtimeType,_this.to,_this.reason,_this.pullEndDate,_this.closeSubtasks);
 }
 
 @override
 String toString() {
   final _this = this as TransitionRequest;
-  return 'TransitionRequest(to: ${_this.to}, reason: ${_this.reason}, pullEndDate: ${_this.pullEndDate})';
+  return 'TransitionRequest(to: ${_this.to}, reason: ${_this.reason}, pullEndDate: ${_this.pullEndDate}, closeSubtasks: ${_this.closeSubtasks})';
 }
 
 
@@ -56,7 +57,7 @@ abstract mixin class $TransitionRequestCopyWith<$Res>  {
   factory $TransitionRequestCopyWith(TransitionRequest value, $Res Function(TransitionRequest) _then) = _$TransitionRequestCopyWithImpl;
 @useResult
 $Res call({
- TransitionRequestTo to, String? reason,@JsonKey(name: 'pull_end_date') bool? pullEndDate
+ TransitionRequestTo to, String? reason,@JsonKey(name: 'pull_end_date') bool? pullEndDate,@JsonKey(name: 'close_subtasks') bool? closeSubtasks
 });
 
 
@@ -73,11 +74,12 @@ class _$TransitionRequestCopyWithImpl<$Res>
 
 /// Create a copy of TransitionRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? to = null,Object? reason = freezed,Object? pullEndDate = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? to = null,Object? reason = freezed,Object? pullEndDate = freezed,Object? closeSubtasks = freezed,}) {
   return _then(TransitionRequest(
 to: null == to ? _self.to : to // ignore: cast_nullable_to_non_nullable
 as TransitionRequestTo,reason: freezed == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
 as String?,pullEndDate: freezed == pullEndDate ? _self.pullEndDate : pullEndDate // ignore: cast_nullable_to_non_nullable
+as bool?,closeSubtasks: freezed == closeSubtasks ? _self.closeSubtasks : closeSubtasks // ignore: cast_nullable_to_non_nullable
 as bool?,
   ));
 }
@@ -163,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( TransitionRequestTo to,  String? reason, @JsonKey(name: 'pull_end_date')  bool? pullEndDate)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( TransitionRequestTo to,  String? reason, @JsonKey(name: 'pull_end_date')  bool? pullEndDate, @JsonKey(name: 'close_subtasks')  bool? closeSubtasks)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TransitionRequest() when $default != null:
-return $default(_that.to,_that.reason,_that.pullEndDate);case _:
+return $default(_that.to,_that.reason,_that.pullEndDate,_that.closeSubtasks);case _:
   return orElse();
 
 }
@@ -184,10 +186,10 @@ return $default(_that.to,_that.reason,_that.pullEndDate);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( TransitionRequestTo to,  String? reason, @JsonKey(name: 'pull_end_date')  bool? pullEndDate)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( TransitionRequestTo to,  String? reason, @JsonKey(name: 'pull_end_date')  bool? pullEndDate, @JsonKey(name: 'close_subtasks')  bool? closeSubtasks)  $default,) {final _that = this;
 switch (_that) {
 case _TransitionRequest():
-return $default(_that.to,_that.reason,_that.pullEndDate);case _:
+return $default(_that.to,_that.reason,_that.pullEndDate,_that.closeSubtasks);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +206,10 @@ return $default(_that.to,_that.reason,_that.pullEndDate);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( TransitionRequestTo to,  String? reason, @JsonKey(name: 'pull_end_date')  bool? pullEndDate)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( TransitionRequestTo to,  String? reason, @JsonKey(name: 'pull_end_date')  bool? pullEndDate, @JsonKey(name: 'close_subtasks')  bool? closeSubtasks)?  $default,) {final _that = this;
 switch (_that) {
 case _TransitionRequest() when $default != null:
-return $default(_that.to,_that.reason,_that.pullEndDate);case _:
+return $default(_that.to,_that.reason,_that.pullEndDate,_that.closeSubtasks);case _:
   return null;
 
 }
@@ -219,7 +221,7 @@ return $default(_that.to,_that.reason,_that.pullEndDate);case _:
 @JsonSerializable()
 
 class _TransitionRequest implements TransitionRequest {
-  const _TransitionRequest({required this.to, this.reason, @JsonKey(name: 'pull_end_date') this.pullEndDate});
+  const _TransitionRequest({required this.to, this.reason, @JsonKey(name: 'pull_end_date') this.pullEndDate, @JsonKey(name: 'close_subtasks') this.closeSubtasks});
   factory _TransitionRequest.fromJson(Map<String, dynamic> json) => _$TransitionRequestFromJson(json);
 
 /// Hedef durum.
@@ -227,6 +229,8 @@ class _TransitionRequest implements TransitionRequest {
 /// Geri alma geçişlerinde zorunlu gerekçe.
 @override final  String? reason;
 @override@JsonKey(name: 'pull_end_date') final  bool? pullEndDate;
+/// Yalnız `tamamlandi` hedefinde: açık alt görevleri aynı işlemde kapatır (ADR-0024); başka hedefte 422 `work.input_invalid`. Verilmezse açık alt görev 409 `work.subtasks_open` üretir.
+@override@JsonKey(name: 'close_subtasks') final  bool? closeSubtasks;
 
 /// Create a copy of TransitionRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -241,18 +245,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransitionRequest&&(identical(other.to, to) || other.to == to)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.pullEndDate, pullEndDate) || other.pullEndDate == pullEndDate));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransitionRequest&&(identical(other.to, to) || other.to == to)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.pullEndDate, pullEndDate) || other.pullEndDate == pullEndDate)&&(identical(other.closeSubtasks, closeSubtasks) || other.closeSubtasks == closeSubtasks));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,to,reason,pullEndDate);
+    return Object.hash(runtimeType,to,reason,pullEndDate,closeSubtasks);
 }
 
 @override
 String toString() {
-    return 'TransitionRequest(to: $to, reason: $reason, pullEndDate: $pullEndDate)';
+    return 'TransitionRequest(to: $to, reason: $reason, pullEndDate: $pullEndDate, closeSubtasks: $closeSubtasks)';
 }
 
 
@@ -263,7 +267,7 @@ abstract mixin class _$TransitionRequestCopyWith<$Res> implements $TransitionReq
   factory _$TransitionRequestCopyWith(_TransitionRequest value, $Res Function(_TransitionRequest) _then) = __$TransitionRequestCopyWithImpl;
 @override @useResult
 $Res call({
- TransitionRequestTo to, String? reason,@JsonKey(name: 'pull_end_date') bool? pullEndDate
+ TransitionRequestTo to, String? reason,@JsonKey(name: 'pull_end_date') bool? pullEndDate,@JsonKey(name: 'close_subtasks') bool? closeSubtasks
 });
 
 
@@ -280,11 +284,12 @@ class __$TransitionRequestCopyWithImpl<$Res>
 
 /// Create a copy of TransitionRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? to = null,Object? reason = freezed,Object? pullEndDate = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? to = null,Object? reason = freezed,Object? pullEndDate = freezed,Object? closeSubtasks = freezed,}) {
   return _then(_TransitionRequest(
 to: null == to ? _self.to : to // ignore: cast_nullable_to_non_nullable
 as TransitionRequestTo,reason: freezed == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
 as String?,pullEndDate: freezed == pullEndDate ? _self.pullEndDate : pullEndDate // ignore: cast_nullable_to_non_nullable
+as bool?,closeSubtasks: freezed == closeSubtasks ? _self.closeSubtasks : closeSubtasks // ignore: cast_nullable_to_non_nullable
 as bool?,
   ));
 }

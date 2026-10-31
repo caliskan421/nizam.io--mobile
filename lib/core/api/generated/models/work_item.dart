@@ -6,6 +6,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../date_only.dart';
 
+import 'subtask_counts.dart';
 import 'work_item_priority.dart';
 import 'work_item_status.dart';
 
@@ -29,6 +30,11 @@ abstract class WorkItem with _$WorkItem {
     @JsonKey(name: 'days_late') required int daysLate,
     @JsonKey(name: 'is_completed_early') required bool isCompletedEarly,
     @JsonKey(name: 'days_early') required int daysEarly,
+
+    /// Tamamlanma kanıtı bayrağı (ADR-0024): açıkken onaya sunma, doğrudan tamamlama ve onay en az bir ek dosya ister.
+    @JsonKey(name: 'completion_evidence_required')
+    required bool completionEvidenceRequired,
+    @JsonKey(name: 'subtask_counts') required SubtaskCounts subtaskCounts,
     @DateOnlyConverter()
     @JsonKey(name: 'planned_end_on')
     DateTime? plannedEndOn,

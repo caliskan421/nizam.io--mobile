@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TransferHistoryItem {
 
-@JsonKey(name: 'transfer_id') String get transferId;@JsonKey(name: 'source_program_id') String get sourceProgramId;@JsonKey(name: 'target_program_id') String get targetProgramId;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'work_item_ids') List<String>? get workItemIds;@JsonKey(name: 'moved_item_count') int get movedItemCount;@JsonKey(name: 'moved_file_count') int get movedFileCount;@JsonKey(name: 'cut_dependency_count') int get cutDependencyCount;@JsonKey(name: 'restored_dependency_count') int get restoredDependencyCount;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'skipped_work_item_ids') List<String>? get skippedWorkItemIds;@JsonKey(name: 'reverses_transfer_id') String? get reversesTransferId;
+@JsonKey(name: 'transfer_id') String get transferId;@JsonKey(name: 'source_program_id') String get sourceProgramId;@JsonKey(name: 'target_program_id') String get targetProgramId;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'work_item_ids') List<String>? get workItemIds;@JsonKey(name: 'moved_item_count') int get movedItemCount;@JsonKey(name: 'moved_file_count') int get movedFileCount;@JsonKey(name: 'cut_dependency_count') int get cutDependencyCount;@JsonKey(name: 'restored_dependency_count') int get restoredDependencyCount;/// Aktarımın hedef programın departman ekibine `uye` olarak eklediği (ön izlemede ekleyeceği) atanan kişiler (ADR-0023 kural 12).
+@JsonKey(name: 'granted_memberships') List<GrantedMembership> get grantedMemberships;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'skipped_work_item_ids') List<String>? get skippedWorkItemIds;@JsonKey(name: 'reverses_transfer_id') String? get reversesTransferId;
 /// Create a copy of TransferHistoryItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $TransferHistoryItemCopyWith<TransferHistoryItem> get copyWith => _$TransferHist
 @override
 bool operator ==(Object other) {
   final _this = this as TransferHistoryItem;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransferHistoryItem&&(identical(other.transferId, _this.transferId) || other.transferId == _this.transferId)&&(identical(other.sourceProgramId, _this.sourceProgramId) || other.sourceProgramId == _this.sourceProgramId)&&(identical(other.targetProgramId, _this.targetProgramId) || other.targetProgramId == _this.targetProgramId)&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&const DeepCollectionEquality().equals(other.workItemIds, _this.workItemIds)&&(identical(other.movedItemCount, _this.movedItemCount) || other.movedItemCount == _this.movedItemCount)&&(identical(other.movedFileCount, _this.movedFileCount) || other.movedFileCount == _this.movedFileCount)&&(identical(other.cutDependencyCount, _this.cutDependencyCount) || other.cutDependencyCount == _this.cutDependencyCount)&&(identical(other.restoredDependencyCount, _this.restoredDependencyCount) || other.restoredDependencyCount == _this.restoredDependencyCount)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&const DeepCollectionEquality().equals(other.skippedWorkItemIds, _this.skippedWorkItemIds)&&(identical(other.reversesTransferId, _this.reversesTransferId) || other.reversesTransferId == _this.reversesTransferId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransferHistoryItem&&(identical(other.transferId, _this.transferId) || other.transferId == _this.transferId)&&(identical(other.sourceProgramId, _this.sourceProgramId) || other.sourceProgramId == _this.sourceProgramId)&&(identical(other.targetProgramId, _this.targetProgramId) || other.targetProgramId == _this.targetProgramId)&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&const DeepCollectionEquality().equals(other.workItemIds, _this.workItemIds)&&(identical(other.movedItemCount, _this.movedItemCount) || other.movedItemCount == _this.movedItemCount)&&(identical(other.movedFileCount, _this.movedFileCount) || other.movedFileCount == _this.movedFileCount)&&(identical(other.cutDependencyCount, _this.cutDependencyCount) || other.cutDependencyCount == _this.cutDependencyCount)&&(identical(other.restoredDependencyCount, _this.restoredDependencyCount) || other.restoredDependencyCount == _this.restoredDependencyCount)&&const DeepCollectionEquality().equals(other.grantedMemberships, _this.grantedMemberships)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&const DeepCollectionEquality().equals(other.skippedWorkItemIds, _this.skippedWorkItemIds)&&(identical(other.reversesTransferId, _this.reversesTransferId) || other.reversesTransferId == _this.reversesTransferId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as TransferHistoryItem;
-  return Object.hash(runtimeType,_this.transferId,_this.sourceProgramId,_this.targetProgramId,_this.departmentId,const DeepCollectionEquality().hash(_this.workItemIds),_this.movedItemCount,_this.movedFileCount,_this.cutDependencyCount,_this.restoredDependencyCount,_this.createdAt,const DeepCollectionEquality().hash(_this.skippedWorkItemIds),_this.reversesTransferId);
+  return Object.hash(runtimeType,_this.transferId,_this.sourceProgramId,_this.targetProgramId,_this.departmentId,const DeepCollectionEquality().hash(_this.workItemIds),_this.movedItemCount,_this.movedFileCount,_this.cutDependencyCount,_this.restoredDependencyCount,const DeepCollectionEquality().hash(_this.grantedMemberships),_this.createdAt,const DeepCollectionEquality().hash(_this.skippedWorkItemIds),_this.reversesTransferId);
 }
 
 @override
 String toString() {
   final _this = this as TransferHistoryItem;
-  return 'TransferHistoryItem(transferId: ${_this.transferId}, sourceProgramId: ${_this.sourceProgramId}, targetProgramId: ${_this.targetProgramId}, departmentId: ${_this.departmentId}, workItemIds: ${_this.workItemIds}, movedItemCount: ${_this.movedItemCount}, movedFileCount: ${_this.movedFileCount}, cutDependencyCount: ${_this.cutDependencyCount}, restoredDependencyCount: ${_this.restoredDependencyCount}, createdAt: ${_this.createdAt}, skippedWorkItemIds: ${_this.skippedWorkItemIds}, reversesTransferId: ${_this.reversesTransferId})';
+  return 'TransferHistoryItem(transferId: ${_this.transferId}, sourceProgramId: ${_this.sourceProgramId}, targetProgramId: ${_this.targetProgramId}, departmentId: ${_this.departmentId}, workItemIds: ${_this.workItemIds}, movedItemCount: ${_this.movedItemCount}, movedFileCount: ${_this.movedFileCount}, cutDependencyCount: ${_this.cutDependencyCount}, restoredDependencyCount: ${_this.restoredDependencyCount}, grantedMemberships: ${_this.grantedMemberships}, createdAt: ${_this.createdAt}, skippedWorkItemIds: ${_this.skippedWorkItemIds}, reversesTransferId: ${_this.reversesTransferId})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $TransferHistoryItemCopyWith<$Res>  {
   factory $TransferHistoryItemCopyWith(TransferHistoryItem value, $Res Function(TransferHistoryItem) _then) = _$TransferHistoryItemCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'transfer_id') String transferId,@JsonKey(name: 'source_program_id') String sourceProgramId,@JsonKey(name: 'target_program_id') String targetProgramId,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'work_item_ids') List<String>? workItemIds,@JsonKey(name: 'moved_item_count') int movedItemCount,@JsonKey(name: 'moved_file_count') int movedFileCount,@JsonKey(name: 'cut_dependency_count') int cutDependencyCount,@JsonKey(name: 'restored_dependency_count') int restoredDependencyCount,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'skipped_work_item_ids') List<String>? skippedWorkItemIds,@JsonKey(name: 'reverses_transfer_id') String? reversesTransferId
+@JsonKey(name: 'transfer_id') String transferId,@JsonKey(name: 'source_program_id') String sourceProgramId,@JsonKey(name: 'target_program_id') String targetProgramId,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'work_item_ids') List<String>? workItemIds,@JsonKey(name: 'moved_item_count') int movedItemCount,@JsonKey(name: 'moved_file_count') int movedFileCount,@JsonKey(name: 'cut_dependency_count') int cutDependencyCount,@JsonKey(name: 'restored_dependency_count') int restoredDependencyCount,@JsonKey(name: 'granted_memberships') List<GrantedMembership> grantedMemberships,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'skipped_work_item_ids') List<String>? skippedWorkItemIds,@JsonKey(name: 'reverses_transfer_id') String? reversesTransferId
 });
 
 
@@ -71,7 +72,7 @@ class _$TransferHistoryItemCopyWithImpl<$Res>
 
 /// Create a copy of TransferHistoryItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? transferId = null,Object? sourceProgramId = null,Object? targetProgramId = null,Object? departmentId = null,Object? workItemIds = freezed,Object? movedItemCount = null,Object? movedFileCount = null,Object? cutDependencyCount = null,Object? restoredDependencyCount = null,Object? createdAt = null,Object? skippedWorkItemIds = freezed,Object? reversesTransferId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? transferId = null,Object? sourceProgramId = null,Object? targetProgramId = null,Object? departmentId = null,Object? workItemIds = freezed,Object? movedItemCount = null,Object? movedFileCount = null,Object? cutDependencyCount = null,Object? restoredDependencyCount = null,Object? grantedMemberships = null,Object? createdAt = null,Object? skippedWorkItemIds = freezed,Object? reversesTransferId = freezed,}) {
   return _then(TransferHistoryItem(
 transferId: null == transferId ? _self.transferId : transferId // ignore: cast_nullable_to_non_nullable
 as String,sourceProgramId: null == sourceProgramId ? _self.sourceProgramId : sourceProgramId // ignore: cast_nullable_to_non_nullable
@@ -82,7 +83,8 @@ as List<String>?,movedItemCount: null == movedItemCount ? _self.movedItemCount :
 as int,movedFileCount: null == movedFileCount ? _self.movedFileCount : movedFileCount // ignore: cast_nullable_to_non_nullable
 as int,cutDependencyCount: null == cutDependencyCount ? _self.cutDependencyCount : cutDependencyCount // ignore: cast_nullable_to_non_nullable
 as int,restoredDependencyCount: null == restoredDependencyCount ? _self.restoredDependencyCount : restoredDependencyCount // ignore: cast_nullable_to_non_nullable
-as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as int,grantedMemberships: null == grantedMemberships ? _self.grantedMemberships : grantedMemberships // ignore: cast_nullable_to_non_nullable
+as List<GrantedMembership>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,skippedWorkItemIds: freezed == skippedWorkItemIds ? _self.skippedWorkItemIds : skippedWorkItemIds // ignore: cast_nullable_to_non_nullable
 as List<String>?,reversesTransferId: freezed == reversesTransferId ? _self.reversesTransferId : reversesTransferId // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -170,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'transfer_id')  String transferId, @JsonKey(name: 'source_program_id')  String sourceProgramId, @JsonKey(name: 'target_program_id')  String targetProgramId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'work_item_ids')  List<String>? workItemIds, @JsonKey(name: 'moved_item_count')  int movedItemCount, @JsonKey(name: 'moved_file_count')  int movedFileCount, @JsonKey(name: 'cut_dependency_count')  int cutDependencyCount, @JsonKey(name: 'restored_dependency_count')  int restoredDependencyCount, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'skipped_work_item_ids')  List<String>? skippedWorkItemIds, @JsonKey(name: 'reverses_transfer_id')  String? reversesTransferId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'transfer_id')  String transferId, @JsonKey(name: 'source_program_id')  String sourceProgramId, @JsonKey(name: 'target_program_id')  String targetProgramId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'work_item_ids')  List<String>? workItemIds, @JsonKey(name: 'moved_item_count')  int movedItemCount, @JsonKey(name: 'moved_file_count')  int movedFileCount, @JsonKey(name: 'cut_dependency_count')  int cutDependencyCount, @JsonKey(name: 'restored_dependency_count')  int restoredDependencyCount, @JsonKey(name: 'granted_memberships')  List<GrantedMembership> grantedMemberships, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'skipped_work_item_ids')  List<String>? skippedWorkItemIds, @JsonKey(name: 'reverses_transfer_id')  String? reversesTransferId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TransferHistoryItem() when $default != null:
-return $default(_that.transferId,_that.sourceProgramId,_that.targetProgramId,_that.departmentId,_that.workItemIds,_that.movedItemCount,_that.movedFileCount,_that.cutDependencyCount,_that.restoredDependencyCount,_that.createdAt,_that.skippedWorkItemIds,_that.reversesTransferId);case _:
+return $default(_that.transferId,_that.sourceProgramId,_that.targetProgramId,_that.departmentId,_that.workItemIds,_that.movedItemCount,_that.movedFileCount,_that.cutDependencyCount,_that.restoredDependencyCount,_that.grantedMemberships,_that.createdAt,_that.skippedWorkItemIds,_that.reversesTransferId);case _:
   return orElse();
 
 }
@@ -191,10 +193,10 @@ return $default(_that.transferId,_that.sourceProgramId,_that.targetProgramId,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'transfer_id')  String transferId, @JsonKey(name: 'source_program_id')  String sourceProgramId, @JsonKey(name: 'target_program_id')  String targetProgramId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'work_item_ids')  List<String>? workItemIds, @JsonKey(name: 'moved_item_count')  int movedItemCount, @JsonKey(name: 'moved_file_count')  int movedFileCount, @JsonKey(name: 'cut_dependency_count')  int cutDependencyCount, @JsonKey(name: 'restored_dependency_count')  int restoredDependencyCount, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'skipped_work_item_ids')  List<String>? skippedWorkItemIds, @JsonKey(name: 'reverses_transfer_id')  String? reversesTransferId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'transfer_id')  String transferId, @JsonKey(name: 'source_program_id')  String sourceProgramId, @JsonKey(name: 'target_program_id')  String targetProgramId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'work_item_ids')  List<String>? workItemIds, @JsonKey(name: 'moved_item_count')  int movedItemCount, @JsonKey(name: 'moved_file_count')  int movedFileCount, @JsonKey(name: 'cut_dependency_count')  int cutDependencyCount, @JsonKey(name: 'restored_dependency_count')  int restoredDependencyCount, @JsonKey(name: 'granted_memberships')  List<GrantedMembership> grantedMemberships, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'skipped_work_item_ids')  List<String>? skippedWorkItemIds, @JsonKey(name: 'reverses_transfer_id')  String? reversesTransferId)  $default,) {final _that = this;
 switch (_that) {
 case _TransferHistoryItem():
-return $default(_that.transferId,_that.sourceProgramId,_that.targetProgramId,_that.departmentId,_that.workItemIds,_that.movedItemCount,_that.movedFileCount,_that.cutDependencyCount,_that.restoredDependencyCount,_that.createdAt,_that.skippedWorkItemIds,_that.reversesTransferId);case _:
+return $default(_that.transferId,_that.sourceProgramId,_that.targetProgramId,_that.departmentId,_that.workItemIds,_that.movedItemCount,_that.movedFileCount,_that.cutDependencyCount,_that.restoredDependencyCount,_that.grantedMemberships,_that.createdAt,_that.skippedWorkItemIds,_that.reversesTransferId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -211,10 +213,10 @@ return $default(_that.transferId,_that.sourceProgramId,_that.targetProgramId,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'transfer_id')  String transferId, @JsonKey(name: 'source_program_id')  String sourceProgramId, @JsonKey(name: 'target_program_id')  String targetProgramId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'work_item_ids')  List<String>? workItemIds, @JsonKey(name: 'moved_item_count')  int movedItemCount, @JsonKey(name: 'moved_file_count')  int movedFileCount, @JsonKey(name: 'cut_dependency_count')  int cutDependencyCount, @JsonKey(name: 'restored_dependency_count')  int restoredDependencyCount, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'skipped_work_item_ids')  List<String>? skippedWorkItemIds, @JsonKey(name: 'reverses_transfer_id')  String? reversesTransferId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'transfer_id')  String transferId, @JsonKey(name: 'source_program_id')  String sourceProgramId, @JsonKey(name: 'target_program_id')  String targetProgramId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'work_item_ids')  List<String>? workItemIds, @JsonKey(name: 'moved_item_count')  int movedItemCount, @JsonKey(name: 'moved_file_count')  int movedFileCount, @JsonKey(name: 'cut_dependency_count')  int cutDependencyCount, @JsonKey(name: 'restored_dependency_count')  int restoredDependencyCount, @JsonKey(name: 'granted_memberships')  List<GrantedMembership> grantedMemberships, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'skipped_work_item_ids')  List<String>? skippedWorkItemIds, @JsonKey(name: 'reverses_transfer_id')  String? reversesTransferId)?  $default,) {final _that = this;
 switch (_that) {
 case _TransferHistoryItem() when $default != null:
-return $default(_that.transferId,_that.sourceProgramId,_that.targetProgramId,_that.departmentId,_that.workItemIds,_that.movedItemCount,_that.movedFileCount,_that.cutDependencyCount,_that.restoredDependencyCount,_that.createdAt,_that.skippedWorkItemIds,_that.reversesTransferId);case _:
+return $default(_that.transferId,_that.sourceProgramId,_that.targetProgramId,_that.departmentId,_that.workItemIds,_that.movedItemCount,_that.movedFileCount,_that.cutDependencyCount,_that.restoredDependencyCount,_that.grantedMemberships,_that.createdAt,_that.skippedWorkItemIds,_that.reversesTransferId);case _:
   return null;
 
 }
@@ -226,7 +228,7 @@ return $default(_that.transferId,_that.sourceProgramId,_that.targetProgramId,_th
 @JsonSerializable()
 
 class _TransferHistoryItem implements TransferHistoryItem {
-  const _TransferHistoryItem({@JsonKey(name: 'transfer_id') required this.transferId, @JsonKey(name: 'source_program_id') required this.sourceProgramId, @JsonKey(name: 'target_program_id') required this.targetProgramId, @JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'work_item_ids') required  List<String>? workItemIds, @JsonKey(name: 'moved_item_count') required this.movedItemCount, @JsonKey(name: 'moved_file_count') required this.movedFileCount, @JsonKey(name: 'cut_dependency_count') required this.cutDependencyCount, @JsonKey(name: 'restored_dependency_count') required this.restoredDependencyCount, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'skipped_work_item_ids')  List<String>? skippedWorkItemIds, @JsonKey(name: 'reverses_transfer_id') this.reversesTransferId}): _workItemIds = workItemIds,_skippedWorkItemIds = skippedWorkItemIds;
+  const _TransferHistoryItem({@JsonKey(name: 'transfer_id') required this.transferId, @JsonKey(name: 'source_program_id') required this.sourceProgramId, @JsonKey(name: 'target_program_id') required this.targetProgramId, @JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'work_item_ids') required  List<String>? workItemIds, @JsonKey(name: 'moved_item_count') required this.movedItemCount, @JsonKey(name: 'moved_file_count') required this.movedFileCount, @JsonKey(name: 'cut_dependency_count') required this.cutDependencyCount, @JsonKey(name: 'restored_dependency_count') required this.restoredDependencyCount, @JsonKey(name: 'granted_memberships') required  List<GrantedMembership> grantedMemberships, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'skipped_work_item_ids')  List<String>? skippedWorkItemIds, @JsonKey(name: 'reverses_transfer_id') this.reversesTransferId}): _workItemIds = workItemIds,_grantedMemberships = grantedMemberships,_skippedWorkItemIds = skippedWorkItemIds;
   factory _TransferHistoryItem.fromJson(Map<String, dynamic> json) => _$TransferHistoryItemFromJson(json);
 
 @override@JsonKey(name: 'transfer_id') final  String transferId;
@@ -246,6 +248,15 @@ class _TransferHistoryItem implements TransferHistoryItem {
 @override@JsonKey(name: 'moved_file_count') final  int movedFileCount;
 @override@JsonKey(name: 'cut_dependency_count') final  int cutDependencyCount;
 @override@JsonKey(name: 'restored_dependency_count') final  int restoredDependencyCount;
+/// Aktarımın hedef programın departman ekibine `uye` olarak eklediği (ön izlemede ekleyeceği) atanan kişiler (ADR-0023 kural 12).
+ final  List<GrantedMembership> _grantedMemberships;
+/// Aktarımın hedef programın departman ekibine `uye` olarak eklediği (ön izlemede ekleyeceği) atanan kişiler (ADR-0023 kural 12).
+@override@JsonKey(name: 'granted_memberships') List<GrantedMembership> get grantedMemberships {
+  if (_grantedMemberships is EqualUnmodifiableListView) return _grantedMemberships;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_grantedMemberships);
+}
+
 @override@JsonKey(name: 'created_at') final  DateTime createdAt;
  final  List<String>? _skippedWorkItemIds;
 @override@JsonKey(name: 'skipped_work_item_ids') List<String>? get skippedWorkItemIds {
@@ -271,18 +282,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransferHistoryItem&&(identical(other.transferId, transferId) || other.transferId == transferId)&&(identical(other.sourceProgramId, sourceProgramId) || other.sourceProgramId == sourceProgramId)&&(identical(other.targetProgramId, targetProgramId) || other.targetProgramId == targetProgramId)&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&const DeepCollectionEquality().equals(other.workItemIds, _workItemIds)&&(identical(other.movedItemCount, movedItemCount) || other.movedItemCount == movedItemCount)&&(identical(other.movedFileCount, movedFileCount) || other.movedFileCount == movedFileCount)&&(identical(other.cutDependencyCount, cutDependencyCount) || other.cutDependencyCount == cutDependencyCount)&&(identical(other.restoredDependencyCount, restoredDependencyCount) || other.restoredDependencyCount == restoredDependencyCount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other.skippedWorkItemIds, _skippedWorkItemIds)&&(identical(other.reversesTransferId, reversesTransferId) || other.reversesTransferId == reversesTransferId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransferHistoryItem&&(identical(other.transferId, transferId) || other.transferId == transferId)&&(identical(other.sourceProgramId, sourceProgramId) || other.sourceProgramId == sourceProgramId)&&(identical(other.targetProgramId, targetProgramId) || other.targetProgramId == targetProgramId)&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&const DeepCollectionEquality().equals(other.workItemIds, _workItemIds)&&(identical(other.movedItemCount, movedItemCount) || other.movedItemCount == movedItemCount)&&(identical(other.movedFileCount, movedFileCount) || other.movedFileCount == movedFileCount)&&(identical(other.cutDependencyCount, cutDependencyCount) || other.cutDependencyCount == cutDependencyCount)&&(identical(other.restoredDependencyCount, restoredDependencyCount) || other.restoredDependencyCount == restoredDependencyCount)&&const DeepCollectionEquality().equals(other.grantedMemberships, _grantedMemberships)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other.skippedWorkItemIds, _skippedWorkItemIds)&&(identical(other.reversesTransferId, reversesTransferId) || other.reversesTransferId == reversesTransferId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,transferId,sourceProgramId,targetProgramId,departmentId,const DeepCollectionEquality().hash(_workItemIds),movedItemCount,movedFileCount,cutDependencyCount,restoredDependencyCount,createdAt,const DeepCollectionEquality().hash(_skippedWorkItemIds),reversesTransferId);
+    return Object.hash(runtimeType,transferId,sourceProgramId,targetProgramId,departmentId,const DeepCollectionEquality().hash(_workItemIds),movedItemCount,movedFileCount,cutDependencyCount,restoredDependencyCount,const DeepCollectionEquality().hash(_grantedMemberships),createdAt,const DeepCollectionEquality().hash(_skippedWorkItemIds),reversesTransferId);
 }
 
 @override
 String toString() {
-    return 'TransferHistoryItem(transferId: $transferId, sourceProgramId: $sourceProgramId, targetProgramId: $targetProgramId, departmentId: $departmentId, workItemIds: $workItemIds, movedItemCount: $movedItemCount, movedFileCount: $movedFileCount, cutDependencyCount: $cutDependencyCount, restoredDependencyCount: $restoredDependencyCount, createdAt: $createdAt, skippedWorkItemIds: $skippedWorkItemIds, reversesTransferId: $reversesTransferId)';
+    return 'TransferHistoryItem(transferId: $transferId, sourceProgramId: $sourceProgramId, targetProgramId: $targetProgramId, departmentId: $departmentId, workItemIds: $workItemIds, movedItemCount: $movedItemCount, movedFileCount: $movedFileCount, cutDependencyCount: $cutDependencyCount, restoredDependencyCount: $restoredDependencyCount, grantedMemberships: $grantedMemberships, createdAt: $createdAt, skippedWorkItemIds: $skippedWorkItemIds, reversesTransferId: $reversesTransferId)';
 }
 
 
@@ -293,7 +304,7 @@ abstract mixin class _$TransferHistoryItemCopyWith<$Res> implements $TransferHis
   factory _$TransferHistoryItemCopyWith(_TransferHistoryItem value, $Res Function(_TransferHistoryItem) _then) = __$TransferHistoryItemCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'transfer_id') String transferId,@JsonKey(name: 'source_program_id') String sourceProgramId,@JsonKey(name: 'target_program_id') String targetProgramId,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'work_item_ids') List<String>? workItemIds,@JsonKey(name: 'moved_item_count') int movedItemCount,@JsonKey(name: 'moved_file_count') int movedFileCount,@JsonKey(name: 'cut_dependency_count') int cutDependencyCount,@JsonKey(name: 'restored_dependency_count') int restoredDependencyCount,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'skipped_work_item_ids') List<String>? skippedWorkItemIds,@JsonKey(name: 'reverses_transfer_id') String? reversesTransferId
+@JsonKey(name: 'transfer_id') String transferId,@JsonKey(name: 'source_program_id') String sourceProgramId,@JsonKey(name: 'target_program_id') String targetProgramId,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'work_item_ids') List<String>? workItemIds,@JsonKey(name: 'moved_item_count') int movedItemCount,@JsonKey(name: 'moved_file_count') int movedFileCount,@JsonKey(name: 'cut_dependency_count') int cutDependencyCount,@JsonKey(name: 'restored_dependency_count') int restoredDependencyCount,@JsonKey(name: 'granted_memberships') List<GrantedMembership> grantedMemberships,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'skipped_work_item_ids') List<String>? skippedWorkItemIds,@JsonKey(name: 'reverses_transfer_id') String? reversesTransferId
 });
 
 
@@ -310,7 +321,7 @@ class __$TransferHistoryItemCopyWithImpl<$Res>
 
 /// Create a copy of TransferHistoryItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? transferId = null,Object? sourceProgramId = null,Object? targetProgramId = null,Object? departmentId = null,Object? workItemIds = freezed,Object? movedItemCount = null,Object? movedFileCount = null,Object? cutDependencyCount = null,Object? restoredDependencyCount = null,Object? createdAt = null,Object? skippedWorkItemIds = freezed,Object? reversesTransferId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? transferId = null,Object? sourceProgramId = null,Object? targetProgramId = null,Object? departmentId = null,Object? workItemIds = freezed,Object? movedItemCount = null,Object? movedFileCount = null,Object? cutDependencyCount = null,Object? restoredDependencyCount = null,Object? grantedMemberships = null,Object? createdAt = null,Object? skippedWorkItemIds = freezed,Object? reversesTransferId = freezed,}) {
   return _then(_TransferHistoryItem(
 transferId: null == transferId ? _self.transferId : transferId // ignore: cast_nullable_to_non_nullable
 as String,sourceProgramId: null == sourceProgramId ? _self.sourceProgramId : sourceProgramId // ignore: cast_nullable_to_non_nullable
@@ -321,7 +332,8 @@ as List<String>?,movedItemCount: null == movedItemCount ? _self.movedItemCount :
 as int,movedFileCount: null == movedFileCount ? _self.movedFileCount : movedFileCount // ignore: cast_nullable_to_non_nullable
 as int,cutDependencyCount: null == cutDependencyCount ? _self.cutDependencyCount : cutDependencyCount // ignore: cast_nullable_to_non_nullable
 as int,restoredDependencyCount: null == restoredDependencyCount ? _self.restoredDependencyCount : restoredDependencyCount // ignore: cast_nullable_to_non_nullable
-as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as int,grantedMemberships: null == grantedMemberships ? _self._grantedMemberships : grantedMemberships // ignore: cast_nullable_to_non_nullable
+as List<GrantedMembership>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,skippedWorkItemIds: freezed == skippedWorkItemIds ? _self._skippedWorkItemIds : skippedWorkItemIds // ignore: cast_nullable_to_non_nullable
 as List<String>?,reversesTransferId: freezed == reversesTransferId ? _self.reversesTransferId : reversesTransferId // ignore: cast_nullable_to_non_nullable
 as String?,

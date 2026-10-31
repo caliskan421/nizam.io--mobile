@@ -13,6 +13,7 @@ _FileRecord _$FileRecordFromJson(Map<String, dynamic> json) => _FileRecord(
   contentType: json['content_type'] as String,
   sizeBytes: (json['size_bytes'] as num).toInt(),
   tag: FileRecordTag.fromJson(json['tag'] as String),
+  subtaskId: json['subtask_id'] as String?,
 );
 
 Map<String, dynamic> _$FileRecordToJson(_FileRecord instance) =>
@@ -23,6 +24,7 @@ Map<String, dynamic> _$FileRecordToJson(_FileRecord instance) =>
       'content_type': instance.contentType,
       'size_bytes': instance.sizeBytes,
       'tag': _$FileRecordTagEnumMap[instance.tag]!,
+      'subtask_id': ?instance.subtaskId,
     };
 
 const _$FileRecordTagEnumMap = {

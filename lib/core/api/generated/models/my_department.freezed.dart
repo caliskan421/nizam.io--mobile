@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MyDepartment {
 
-@JsonKey(name: 'department_id') String get departmentId; String get name; String get role;
+@JsonKey(name: 'program_id') String get programId;@JsonKey(name: 'program_name') String get programName;@JsonKey(name: 'department_id') String get departmentId;/// Departmanın bu programdaki adı.
+@JsonKey(name: 'display_name') String get displayName; String get role;
 /// Create a copy of MyDepartment
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $MyDepartmentCopyWith<MyDepartment> get copyWith => _$MyDepartmentCopyWithImpl<M
 @override
 bool operator ==(Object other) {
   final _this = this as MyDepartment;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MyDepartment&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.role, _this.role) || other.role == _this.role));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MyDepartment&&(identical(other.programId, _this.programId) || other.programId == _this.programId)&&(identical(other.programName, _this.programName) || other.programName == _this.programName)&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.displayName, _this.displayName) || other.displayName == _this.displayName)&&(identical(other.role, _this.role) || other.role == _this.role));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MyDepartment;
-  return Object.hash(runtimeType,_this.departmentId,_this.name,_this.role);
+  return Object.hash(runtimeType,_this.programId,_this.programName,_this.departmentId,_this.displayName,_this.role);
 }
 
 @override
 String toString() {
   final _this = this as MyDepartment;
-  return 'MyDepartment(departmentId: ${_this.departmentId}, name: ${_this.name}, role: ${_this.role})';
+  return 'MyDepartment(programId: ${_this.programId}, programName: ${_this.programName}, departmentId: ${_this.departmentId}, displayName: ${_this.displayName}, role: ${_this.role})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $MyDepartmentCopyWith<$Res>  {
   factory $MyDepartmentCopyWith(MyDepartment value, $Res Function(MyDepartment) _then) = _$MyDepartmentCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'department_id') String departmentId, String name, String role
+@JsonKey(name: 'program_id') String programId,@JsonKey(name: 'program_name') String programName,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'display_name') String displayName, String role
 });
 
 
@@ -71,10 +72,12 @@ class _$MyDepartmentCopyWithImpl<$Res>
 
 /// Create a copy of MyDepartment
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? departmentId = null,Object? name = null,Object? role = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? programId = null,Object? programName = null,Object? departmentId = null,Object? displayName = null,Object? role = null,}) {
   return _then(MyDepartment(
-departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
-as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+programId: null == programId ? _self.programId : programId // ignore: cast_nullable_to_non_nullable
+as String,programName: null == programName ? _self.programName : programName // ignore: cast_nullable_to_non_nullable
+as String,departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
+as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as String,
   ));
@@ -161,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId,  String name,  String role)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'program_name')  String programName, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'display_name')  String displayName,  String role)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MyDepartment() when $default != null:
-return $default(_that.departmentId,_that.name,_that.role);case _:
+return $default(_that.programId,_that.programName,_that.departmentId,_that.displayName,_that.role);case _:
   return orElse();
 
 }
@@ -182,10 +185,10 @@ return $default(_that.departmentId,_that.name,_that.role);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId,  String name,  String role)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'program_name')  String programName, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'display_name')  String displayName,  String role)  $default,) {final _that = this;
 switch (_that) {
 case _MyDepartment():
-return $default(_that.departmentId,_that.name,_that.role);case _:
+return $default(_that.programId,_that.programName,_that.departmentId,_that.displayName,_that.role);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +205,10 @@ return $default(_that.departmentId,_that.name,_that.role);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'department_id')  String departmentId,  String name,  String role)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'program_name')  String programName, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'display_name')  String displayName,  String role)?  $default,) {final _that = this;
 switch (_that) {
 case _MyDepartment() when $default != null:
-return $default(_that.departmentId,_that.name,_that.role);case _:
+return $default(_that.programId,_that.programName,_that.departmentId,_that.displayName,_that.role);case _:
   return null;
 
 }
@@ -217,11 +220,14 @@ return $default(_that.departmentId,_that.name,_that.role);case _:
 @JsonSerializable()
 
 class _MyDepartment implements MyDepartment {
-  const _MyDepartment({@JsonKey(name: 'department_id') required this.departmentId, required this.name, required this.role});
+  const _MyDepartment({@JsonKey(name: 'program_id') required this.programId, @JsonKey(name: 'program_name') required this.programName, @JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'display_name') required this.displayName, required this.role});
   factory _MyDepartment.fromJson(Map<String, dynamic> json) => _$MyDepartmentFromJson(json);
 
+@override@JsonKey(name: 'program_id') final  String programId;
+@override@JsonKey(name: 'program_name') final  String programName;
 @override@JsonKey(name: 'department_id') final  String departmentId;
-@override final  String name;
+/// Departmanın bu programdaki adı.
+@override@JsonKey(name: 'display_name') final  String displayName;
 @override final  String role;
 
 /// Create a copy of MyDepartment
@@ -237,18 +243,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MyDepartment&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.name, name) || other.name == name)&&(identical(other.role, role) || other.role == role));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MyDepartment&&(identical(other.programId, programId) || other.programId == programId)&&(identical(other.programName, programName) || other.programName == programName)&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.role, role) || other.role == role));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,departmentId,name,role);
+    return Object.hash(runtimeType,programId,programName,departmentId,displayName,role);
 }
 
 @override
 String toString() {
-    return 'MyDepartment(departmentId: $departmentId, name: $name, role: $role)';
+    return 'MyDepartment(programId: $programId, programName: $programName, departmentId: $departmentId, displayName: $displayName, role: $role)';
 }
 
 
@@ -259,7 +265,7 @@ abstract mixin class _$MyDepartmentCopyWith<$Res> implements $MyDepartmentCopyWi
   factory _$MyDepartmentCopyWith(_MyDepartment value, $Res Function(_MyDepartment) _then) = __$MyDepartmentCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'department_id') String departmentId, String name, String role
+@JsonKey(name: 'program_id') String programId,@JsonKey(name: 'program_name') String programName,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'display_name') String displayName, String role
 });
 
 
@@ -276,10 +282,12 @@ class __$MyDepartmentCopyWithImpl<$Res>
 
 /// Create a copy of MyDepartment
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? departmentId = null,Object? name = null,Object? role = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? programId = null,Object? programName = null,Object? departmentId = null,Object? displayName = null,Object? role = null,}) {
   return _then(_MyDepartment(
-departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
-as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+programId: null == programId ? _self.programId : programId // ignore: cast_nullable_to_non_nullable
+as String,programName: null == programName ? _self.programName : programName // ignore: cast_nullable_to_non_nullable
+as String,departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
+as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as String,
   ));

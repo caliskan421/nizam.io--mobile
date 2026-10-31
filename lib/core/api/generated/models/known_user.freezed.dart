@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$KnownUser {
 
-@JsonKey(name: 'account_id') String get accountId;@JsonKey(name: 'full_name') String get fullName; List<String>? get memberships;
+@JsonKey(name: 'account_id') String get accountId;@JsonKey(name: 'full_name') String get fullName;/// Ekip satırı etiketleri, `program:departman:rol` biçiminde.
+ List<String>? get memberships;
 /// Create a copy of KnownUser
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -222,7 +223,9 @@ class _KnownUser implements KnownUser {
 
 @override@JsonKey(name: 'account_id') final  String accountId;
 @override@JsonKey(name: 'full_name') final  String fullName;
+/// Ekip satırı etiketleri, `program:departman:rol` biçiminde.
  final  List<String>? _memberships;
+/// Ekip satırı etiketleri, `program:departman:rol` biçiminde.
 @override List<String>? get memberships {
   final value = _memberships;
   if (value == null) return null;

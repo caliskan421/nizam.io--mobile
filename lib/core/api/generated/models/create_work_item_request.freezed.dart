@@ -19,7 +19,8 @@ mixin _$CreateWorkItemRequest {
  String get title;/// Şirket yöneticisi dışındaki çağıranda en çok 40 gün geçmişte olabilir (aksi 422 `work.input_invalid`).
 @DateOnlyConverter()@JsonKey(name: 'start_on') DateTime get startOn;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime get endOn; String? get description;/// Gönderilmezse `orta`; boş dizge de `orta` sayılır.
  CreateWorkItemRequestPriority? get priority;/// Boşsa atamasız açılır.
-@JsonKey(name: 'assignee_account_id') String? get assigneeAccountId;
+@JsonKey(name: 'assignee_account_id') String? get assigneeAccountId;/// Gönderilmezse `true` (ADR-0024).
+@JsonKey(name: 'completion_evidence_required') bool? get completionEvidenceRequired;
 /// Create a copy of CreateWorkItemRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -33,20 +34,20 @@ $CreateWorkItemRequestCopyWith<CreateWorkItemRequest> get copyWith => _$CreateWo
 @override
 bool operator ==(Object other) {
   final _this = this as CreateWorkItemRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateWorkItemRequest&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.startOn, _this.startOn) || other.startOn == _this.startOn)&&(identical(other.endOn, _this.endOn) || other.endOn == _this.endOn)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.priority, _this.priority) || other.priority == _this.priority)&&(identical(other.assigneeAccountId, _this.assigneeAccountId) || other.assigneeAccountId == _this.assigneeAccountId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateWorkItemRequest&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.startOn, _this.startOn) || other.startOn == _this.startOn)&&(identical(other.endOn, _this.endOn) || other.endOn == _this.endOn)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.priority, _this.priority) || other.priority == _this.priority)&&(identical(other.assigneeAccountId, _this.assigneeAccountId) || other.assigneeAccountId == _this.assigneeAccountId)&&(identical(other.completionEvidenceRequired, _this.completionEvidenceRequired) || other.completionEvidenceRequired == _this.completionEvidenceRequired));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CreateWorkItemRequest;
-  return Object.hash(runtimeType,_this.title,_this.startOn,_this.endOn,_this.description,_this.priority,_this.assigneeAccountId);
+  return Object.hash(runtimeType,_this.title,_this.startOn,_this.endOn,_this.description,_this.priority,_this.assigneeAccountId,_this.completionEvidenceRequired);
 }
 
 @override
 String toString() {
   final _this = this as CreateWorkItemRequest;
-  return 'CreateWorkItemRequest(title: ${_this.title}, startOn: ${_this.startOn}, endOn: ${_this.endOn}, description: ${_this.description}, priority: ${_this.priority}, assigneeAccountId: ${_this.assigneeAccountId})';
+  return 'CreateWorkItemRequest(title: ${_this.title}, startOn: ${_this.startOn}, endOn: ${_this.endOn}, description: ${_this.description}, priority: ${_this.priority}, assigneeAccountId: ${_this.assigneeAccountId}, completionEvidenceRequired: ${_this.completionEvidenceRequired})';
 }
 
 
@@ -57,7 +58,7 @@ abstract mixin class $CreateWorkItemRequestCopyWith<$Res>  {
   factory $CreateWorkItemRequestCopyWith(CreateWorkItemRequest value, $Res Function(CreateWorkItemRequest) _then) = _$CreateWorkItemRequestCopyWithImpl;
 @useResult
 $Res call({
- String title,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime endOn, String? description, CreateWorkItemRequestPriority? priority,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId
+ String title,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime endOn, String? description, CreateWorkItemRequestPriority? priority,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@JsonKey(name: 'completion_evidence_required') bool? completionEvidenceRequired
 });
 
 
@@ -74,7 +75,7 @@ class _$CreateWorkItemRequestCopyWithImpl<$Res>
 
 /// Create a copy of CreateWorkItemRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? title = null,Object? startOn = null,Object? endOn = null,Object? description = freezed,Object? priority = freezed,Object? assigneeAccountId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? title = null,Object? startOn = null,Object? endOn = null,Object? description = freezed,Object? priority = freezed,Object? assigneeAccountId = freezed,Object? completionEvidenceRequired = freezed,}) {
   return _then(CreateWorkItemRequest(
 title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,startOn: null == startOn ? _self.startOn : startOn // ignore: cast_nullable_to_non_nullable
@@ -82,7 +83,8 @@ as DateTime,endOn: null == endOn ? _self.endOn : endOn // ignore: cast_nullable_
 as DateTime,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,priority: freezed == priority ? _self.priority : priority // ignore: cast_nullable_to_non_nullable
 as CreateWorkItemRequestPriority?,assigneeAccountId: freezed == assigneeAccountId ? _self.assigneeAccountId : assigneeAccountId // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,completionEvidenceRequired: freezed == completionEvidenceRequired ? _self.completionEvidenceRequired : completionEvidenceRequired // ignore: cast_nullable_to_non_nullable
+as bool?,
   ));
 }
 
@@ -167,10 +169,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn,  String? description,  CreateWorkItemRequestPriority? priority, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn,  String? description,  CreateWorkItemRequestPriority? priority, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @JsonKey(name: 'completion_evidence_required')  bool? completionEvidenceRequired)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreateWorkItemRequest() when $default != null:
-return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.priority,_that.assigneeAccountId);case _:
+return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.priority,_that.assigneeAccountId,_that.completionEvidenceRequired);case _:
   return orElse();
 
 }
@@ -188,10 +190,10 @@ return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.pr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn,  String? description,  CreateWorkItemRequestPriority? priority, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn,  String? description,  CreateWorkItemRequestPriority? priority, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @JsonKey(name: 'completion_evidence_required')  bool? completionEvidenceRequired)  $default,) {final _that = this;
 switch (_that) {
 case _CreateWorkItemRequest():
-return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.priority,_that.assigneeAccountId);case _:
+return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.priority,_that.assigneeAccountId,_that.completionEvidenceRequired);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -208,10 +210,10 @@ return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.pr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn,  String? description,  CreateWorkItemRequestPriority? priority, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime endOn,  String? description,  CreateWorkItemRequestPriority? priority, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @JsonKey(name: 'completion_evidence_required')  bool? completionEvidenceRequired)?  $default,) {final _that = this;
 switch (_that) {
 case _CreateWorkItemRequest() when $default != null:
-return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.priority,_that.assigneeAccountId);case _:
+return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.priority,_that.assigneeAccountId,_that.completionEvidenceRequired);case _:
   return null;
 
 }
@@ -223,7 +225,7 @@ return $default(_that.title,_that.startOn,_that.endOn,_that.description,_that.pr
 @JsonSerializable()
 
 class _CreateWorkItemRequest implements CreateWorkItemRequest {
-  const _CreateWorkItemRequest({required this.title, @DateOnlyConverter()@JsonKey(name: 'start_on') required this.startOn, @DateOnlyConverter()@JsonKey(name: 'end_on') required this.endOn, this.description, this.priority, @JsonKey(name: 'assignee_account_id') this.assigneeAccountId});
+  const _CreateWorkItemRequest({required this.title, @DateOnlyConverter()@JsonKey(name: 'start_on') required this.startOn, @DateOnlyConverter()@JsonKey(name: 'end_on') required this.endOn, this.description, this.priority, @JsonKey(name: 'assignee_account_id') this.assigneeAccountId, @JsonKey(name: 'completion_evidence_required') this.completionEvidenceRequired});
   factory _CreateWorkItemRequest.fromJson(Map<String, dynamic> json) => _$CreateWorkItemRequestFromJson(json);
 
 @override final  String title;
@@ -235,6 +237,8 @@ class _CreateWorkItemRequest implements CreateWorkItemRequest {
 @override final  CreateWorkItemRequestPriority? priority;
 /// Boşsa atamasız açılır.
 @override@JsonKey(name: 'assignee_account_id') final  String? assigneeAccountId;
+/// Gönderilmezse `true` (ADR-0024).
+@override@JsonKey(name: 'completion_evidence_required') final  bool? completionEvidenceRequired;
 
 /// Create a copy of CreateWorkItemRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -249,18 +253,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateWorkItemRequest&&(identical(other.title, title) || other.title == title)&&(identical(other.startOn, startOn) || other.startOn == startOn)&&(identical(other.endOn, endOn) || other.endOn == endOn)&&(identical(other.description, description) || other.description == description)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.assigneeAccountId, assigneeAccountId) || other.assigneeAccountId == assigneeAccountId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateWorkItemRequest&&(identical(other.title, title) || other.title == title)&&(identical(other.startOn, startOn) || other.startOn == startOn)&&(identical(other.endOn, endOn) || other.endOn == endOn)&&(identical(other.description, description) || other.description == description)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.assigneeAccountId, assigneeAccountId) || other.assigneeAccountId == assigneeAccountId)&&(identical(other.completionEvidenceRequired, completionEvidenceRequired) || other.completionEvidenceRequired == completionEvidenceRequired));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,title,startOn,endOn,description,priority,assigneeAccountId);
+    return Object.hash(runtimeType,title,startOn,endOn,description,priority,assigneeAccountId,completionEvidenceRequired);
 }
 
 @override
 String toString() {
-    return 'CreateWorkItemRequest(title: $title, startOn: $startOn, endOn: $endOn, description: $description, priority: $priority, assigneeAccountId: $assigneeAccountId)';
+    return 'CreateWorkItemRequest(title: $title, startOn: $startOn, endOn: $endOn, description: $description, priority: $priority, assigneeAccountId: $assigneeAccountId, completionEvidenceRequired: $completionEvidenceRequired)';
 }
 
 
@@ -271,7 +275,7 @@ abstract mixin class _$CreateWorkItemRequestCopyWith<$Res> implements $CreateWor
   factory _$CreateWorkItemRequestCopyWith(_CreateWorkItemRequest value, $Res Function(_CreateWorkItemRequest) _then) = __$CreateWorkItemRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String title,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime endOn, String? description, CreateWorkItemRequestPriority? priority,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId
+ String title,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime endOn, String? description, CreateWorkItemRequestPriority? priority,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@JsonKey(name: 'completion_evidence_required') bool? completionEvidenceRequired
 });
 
 
@@ -288,7 +292,7 @@ class __$CreateWorkItemRequestCopyWithImpl<$Res>
 
 /// Create a copy of CreateWorkItemRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? title = null,Object? startOn = null,Object? endOn = null,Object? description = freezed,Object? priority = freezed,Object? assigneeAccountId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? title = null,Object? startOn = null,Object? endOn = null,Object? description = freezed,Object? priority = freezed,Object? assigneeAccountId = freezed,Object? completionEvidenceRequired = freezed,}) {
   return _then(_CreateWorkItemRequest(
 title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,startOn: null == startOn ? _self.startOn : startOn // ignore: cast_nullable_to_non_nullable
@@ -296,7 +300,8 @@ as DateTime,endOn: null == endOn ? _self.endOn : endOn // ignore: cast_nullable_
 as DateTime,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,priority: freezed == priority ? _self.priority : priority // ignore: cast_nullable_to_non_nullable
 as CreateWorkItemRequestPriority?,assigneeAccountId: freezed == assigneeAccountId ? _self.assigneeAccountId : assigneeAccountId // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,completionEvidenceRequired: freezed == completionEvidenceRequired ? _self.completionEvidenceRequired : completionEvidenceRequired // ignore: cast_nullable_to_non_nullable
+as bool?,
   ));
 }
 

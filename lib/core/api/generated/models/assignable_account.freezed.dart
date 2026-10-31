@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AssignableAccount {
 
-@JsonKey(name: 'account_id') String get accountId;@JsonKey(name: 'full_name') String get fullName;/// Hesabın hedef departman dışındaki rol bağları ("departman:rol").
+@JsonKey(name: 'account_id') String get accountId;@JsonKey(name: 'full_name') String get fullName;/// Hesabın seçili programda hedef departman dışındaki rol bağları ("departman:rol"); başka programların rolleri yazılmaz.
  List<String>? get roles;
 /// Create a copy of AssignableAccount
 /// with the given fields replaced by the non-null parameter values.
@@ -223,9 +223,9 @@ class _AssignableAccount implements AssignableAccount {
 
 @override@JsonKey(name: 'account_id') final  String accountId;
 @override@JsonKey(name: 'full_name') final  String fullName;
-/// Hesabın hedef departman dışındaki rol bağları ("departman:rol").
+/// Hesabın seçili programda hedef departman dışındaki rol bağları ("departman:rol"); başka programların rolleri yazılmaz.
  final  List<String>? _roles;
-/// Hesabın hedef departman dışındaki rol bağları ("departman:rol").
+/// Hesabın seçili programda hedef departman dışındaki rol bağları ("departman:rol"); başka programların rolleri yazılmaz.
 @override List<String>? get roles {
   final value = _roles;
   if (value == null) return null;

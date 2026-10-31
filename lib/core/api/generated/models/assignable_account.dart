@@ -13,7 +13,7 @@ abstract class AssignableAccount with _$AssignableAccount {
     @JsonKey(name: 'account_id') required String accountId,
     @JsonKey(name: 'full_name') required String fullName,
 
-    /// Hesabın hedef departman dışındaki rol bağları ("departman:rol").
+    /// Hesabın seçili programda hedef departman dışındaki rol bağları ("departman:rol"); başka programların rolleri yazılmaz.
     required List<String>? roles,
   }) = _AssignableAccount;
 

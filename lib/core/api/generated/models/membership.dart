@@ -11,6 +11,9 @@ part 'membership.g.dart';
 abstract class Membership with _$Membership {
   const factory Membership({
     @JsonKey(name: 'membership_id') required String membershipId,
+
+    /// Ekip satırının programı (istek kapsamı).
+    @JsonKey(name: 'program_id') required String programId,
     @JsonKey(name: 'department_id') required String departmentId,
     @JsonKey(name: 'account_id') required String accountId,
 

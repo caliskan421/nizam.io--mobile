@@ -122,12 +122,15 @@ abstract class RecordsClient {
   /// Göreve dosya yükler (multipart `file` parçası; akışla). CSRF başlığı istenmez (taşıyıcı yalnız Bearer).
   ///
   /// [tag] - Kapalı etiket kümesinden biri. Eksikse 422 `records.tag_required`, küme dışıysa 422 `records.tag_invalid`.
+  ///
+  /// [subtaskId] - İsteğe bağlı alt görev (ADR-0024). Görevin alt görevi değilse 422 `records.input_invalid` (alan `subtask_id`). Dosya ana görevin tavanına ve tamamlanma kanıtına sayılır.
   @MultiPart()
   @POST('/v1/work-items/{id}/files')
   Future<FileRecord> attachFile({
     @Path('id') required String id,
     @Query('tag') required Tag tag,
     @Part(name: 'file') required File file,
+    @Query('subtask_id') String? subtaskId,
     @Extras()
     Map<String, dynamic>? extras = RecordsClient.attachFileOpenapiExtras,
   });
@@ -149,7 +152,7 @@ abstract class RecordsClient {
     Map<String, dynamic>? extras = RecordsClient.downloadFileOpenapiExtras,
   });
 
-  /// Görünen adı değiştirir (uzantı verilirse dosyanın türüyle uyumlu olmalı; uzantısız ad olduğu gibi yazılır; depolama nesnesine dokunmaz).
+  /// Görünen adı değiştirir (uzantı verilirse dosyanın türüyle uyumlu olmalı; uzantısız ad olduğu gibi yazılır; depolama nesnesine dokunmaz). Yönetici, ekibin koordinatörü ya da dosyanın `(program, departman)` ekibinde satırı olan yükleyen; aksi 403 `records.not_authorized`.
   @PATCH('/v1/files/{id}/name')
   Future<FileRecord> renameFile({
     @Path('id') required String id,
@@ -158,7 +161,7 @@ abstract class RecordsClient {
     Map<String, dynamic>? extras = RecordsClient.renameFileOpenapiExtras,
   });
 
-  /// Dosyayı siler (metadata + nesne). Yalnız yükleyen siler; ikinci silme 404 `records.file_not_found` alır.
+  /// Dosyayı siler (metadata + nesne). Yalnız dosyanın `(program, departman)` ekibinde satırı olan yükleyen siler (aksi 403 `records.not_authorized`); ikinci silme 404 `records.file_not_found` alır.
   @DELETE('/v1/files/{id}')
   Future<void> deleteFile({
     @Path('id') required String id,

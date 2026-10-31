@@ -17,6 +17,7 @@ _CreateWorkItemRequest _$CreateWorkItemRequestFromJson(
       ? null
       : CreateWorkItemRequestPriority.fromJson(json['priority'] as String),
   assigneeAccountId: json['assignee_account_id'] as String?,
+  completionEvidenceRequired: json['completion_evidence_required'] as bool?,
 );
 
 Map<String, dynamic> _$CreateWorkItemRequestToJson(
@@ -28,6 +29,7 @@ Map<String, dynamic> _$CreateWorkItemRequestToJson(
   'description': ?instance.description,
   'priority': ?_$CreateWorkItemRequestPriorityEnumMap[instance.priority],
   'assignee_account_id': ?instance.assigneeAccountId,
+  'completion_evidence_required': ?instance.completionEvidenceRequired,
 };
 
 const _$CreateWorkItemRequestPriorityEnumMap = {

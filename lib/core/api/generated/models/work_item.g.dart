@@ -22,6 +22,10 @@ _WorkItem _$WorkItemFromJson(Map<String, dynamic> json) => _WorkItem(
   daysLate: (json['days_late'] as num).toInt(),
   isCompletedEarly: json['is_completed_early'] as bool,
   daysEarly: (json['days_early'] as num).toInt(),
+  completionEvidenceRequired: json['completion_evidence_required'] as bool,
+  subtaskCounts: SubtaskCounts.fromJson(
+    json['subtask_counts'] as Map<String, dynamic>,
+  ),
   plannedEndOn: _$JsonConverterFromJson<String, DateTime>(
     json['planned_end_on'],
     const DateOnlyConverter().fromJson,
@@ -46,6 +50,8 @@ Map<String, dynamic> _$WorkItemToJson(_WorkItem instance) => <String, dynamic>{
   'days_late': instance.daysLate,
   'is_completed_early': instance.isCompletedEarly,
   'days_early': instance.daysEarly,
+  'completion_evidence_required': instance.completionEvidenceRequired,
+  'subtask_counts': instance.subtaskCounts.toJson(),
   'planned_end_on': ?_$JsonConverterToJson<String, DateTime>(
     instance.plannedEndOn,
     const DateOnlyConverter().toJson,

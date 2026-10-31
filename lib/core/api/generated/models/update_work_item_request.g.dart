@@ -26,6 +26,7 @@ _UpdateWorkItemRequest _$UpdateWorkItemRequestFromJson(
     json['planned_end_on'],
     const DateOnlyConverter().fromJson,
   ),
+  completionEvidenceRequired: json['completion_evidence_required'] as bool?,
   completedOn: json['completed_on'] as String?,
   submittedOn: json['submitted_on'] as String?,
 );
@@ -48,6 +49,7 @@ Map<String, dynamic> _$UpdateWorkItemRequestToJson(
     instance.plannedEndOn,
     const DateOnlyConverter().toJson,
   ),
+  'completion_evidence_required': ?instance.completionEvidenceRequired,
   'completed_on': ?instance.completedOn,
   'submitted_on': ?instance.submittedOn,
 };

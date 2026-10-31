@@ -18,6 +18,9 @@ abstract class FileRecord with _$FileRecord {
     @JsonKey(name: 'content_type') required String contentType,
     @JsonKey(name: 'size_bytes') required int sizeBytes,
     required FileRecordTag tag,
+
+    /// Dosyanın bağlı olduğu alt görev (ADR-0024); yoksa alan yoktur.
+    @JsonKey(name: 'subtask_id') String? subtaskId,
   }) = _FileRecord;
 
   factory FileRecord.fromJson(Map<String, Object?> json) =>

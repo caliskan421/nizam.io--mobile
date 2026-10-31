@@ -11,6 +11,8 @@ _ProgramDepartmentLink _$ProgramDepartmentLinkFromJson(
 ) => _ProgramDepartmentLink(
   programId: json['program_id'] as String,
   departmentId: json['department_id'] as String,
+  displayName: json['display_name'] as String,
+  copiedMemberCount: (json['copied_member_count'] as num).toInt(),
 );
 
 Map<String, dynamic> _$ProgramDepartmentLinkToJson(
@@ -18,4 +20,6 @@ Map<String, dynamic> _$ProgramDepartmentLinkToJson(
 ) => <String, dynamic>{
   'program_id': instance.programId,
   'department_id': instance.departmentId,
+  'display_name': instance.displayName,
+  'copied_member_count': instance.copiedMemberCount,
 };

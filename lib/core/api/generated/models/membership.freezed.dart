@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Membership {
 
-@JsonKey(name: 'membership_id') String get membershipId;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'account_id') String get accountId;/// `koordinator` ya da `uye`.
+@JsonKey(name: 'membership_id') String get membershipId;/// Ekip satırının programı (istek kapsamı).
+@JsonKey(name: 'program_id') String get programId;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'account_id') String get accountId;/// `koordinator` ya da `uye`.
  String get role;
 /// Create a copy of Membership
 /// with the given fields replaced by the non-null parameter values.
@@ -31,20 +32,20 @@ $MembershipCopyWith<Membership> get copyWith => _$MembershipCopyWithImpl<Members
 @override
 bool operator ==(Object other) {
   final _this = this as Membership;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Membership&&(identical(other.membershipId, _this.membershipId) || other.membershipId == _this.membershipId)&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.accountId, _this.accountId) || other.accountId == _this.accountId)&&(identical(other.role, _this.role) || other.role == _this.role));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Membership&&(identical(other.membershipId, _this.membershipId) || other.membershipId == _this.membershipId)&&(identical(other.programId, _this.programId) || other.programId == _this.programId)&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.accountId, _this.accountId) || other.accountId == _this.accountId)&&(identical(other.role, _this.role) || other.role == _this.role));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Membership;
-  return Object.hash(runtimeType,_this.membershipId,_this.departmentId,_this.accountId,_this.role);
+  return Object.hash(runtimeType,_this.membershipId,_this.programId,_this.departmentId,_this.accountId,_this.role);
 }
 
 @override
 String toString() {
   final _this = this as Membership;
-  return 'Membership(membershipId: ${_this.membershipId}, departmentId: ${_this.departmentId}, accountId: ${_this.accountId}, role: ${_this.role})';
+  return 'Membership(membershipId: ${_this.membershipId}, programId: ${_this.programId}, departmentId: ${_this.departmentId}, accountId: ${_this.accountId}, role: ${_this.role})';
 }
 
 
@@ -55,7 +56,7 @@ abstract mixin class $MembershipCopyWith<$Res>  {
   factory $MembershipCopyWith(Membership value, $Res Function(Membership) _then) = _$MembershipCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'membership_id') String membershipId,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'account_id') String accountId, String role
+@JsonKey(name: 'membership_id') String membershipId,@JsonKey(name: 'program_id') String programId,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'account_id') String accountId, String role
 });
 
 
@@ -72,9 +73,10 @@ class _$MembershipCopyWithImpl<$Res>
 
 /// Create a copy of Membership
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? membershipId = null,Object? departmentId = null,Object? accountId = null,Object? role = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? membershipId = null,Object? programId = null,Object? departmentId = null,Object? accountId = null,Object? role = null,}) {
   return _then(Membership(
 membershipId: null == membershipId ? _self.membershipId : membershipId // ignore: cast_nullable_to_non_nullable
+as String,programId: null == programId ? _self.programId : programId // ignore: cast_nullable_to_non_nullable
 as String,departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
 as String,accountId: null == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
@@ -163,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'membership_id')  String membershipId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'account_id')  String accountId,  String role)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'membership_id')  String membershipId, @JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'account_id')  String accountId,  String role)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Membership() when $default != null:
-return $default(_that.membershipId,_that.departmentId,_that.accountId,_that.role);case _:
+return $default(_that.membershipId,_that.programId,_that.departmentId,_that.accountId,_that.role);case _:
   return orElse();
 
 }
@@ -184,10 +186,10 @@ return $default(_that.membershipId,_that.departmentId,_that.accountId,_that.role
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'membership_id')  String membershipId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'account_id')  String accountId,  String role)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'membership_id')  String membershipId, @JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'account_id')  String accountId,  String role)  $default,) {final _that = this;
 switch (_that) {
 case _Membership():
-return $default(_that.membershipId,_that.departmentId,_that.accountId,_that.role);case _:
+return $default(_that.membershipId,_that.programId,_that.departmentId,_that.accountId,_that.role);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +206,10 @@ return $default(_that.membershipId,_that.departmentId,_that.accountId,_that.role
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'membership_id')  String membershipId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'account_id')  String accountId,  String role)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'membership_id')  String membershipId, @JsonKey(name: 'program_id')  String programId, @JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'account_id')  String accountId,  String role)?  $default,) {final _that = this;
 switch (_that) {
 case _Membership() when $default != null:
-return $default(_that.membershipId,_that.departmentId,_that.accountId,_that.role);case _:
+return $default(_that.membershipId,_that.programId,_that.departmentId,_that.accountId,_that.role);case _:
   return null;
 
 }
@@ -219,10 +221,12 @@ return $default(_that.membershipId,_that.departmentId,_that.accountId,_that.role
 @JsonSerializable()
 
 class _Membership implements Membership {
-  const _Membership({@JsonKey(name: 'membership_id') required this.membershipId, @JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'account_id') required this.accountId, required this.role});
+  const _Membership({@JsonKey(name: 'membership_id') required this.membershipId, @JsonKey(name: 'program_id') required this.programId, @JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'account_id') required this.accountId, required this.role});
   factory _Membership.fromJson(Map<String, dynamic> json) => _$MembershipFromJson(json);
 
 @override@JsonKey(name: 'membership_id') final  String membershipId;
+/// Ekip satırının programı (istek kapsamı).
+@override@JsonKey(name: 'program_id') final  String programId;
 @override@JsonKey(name: 'department_id') final  String departmentId;
 @override@JsonKey(name: 'account_id') final  String accountId;
 /// `koordinator` ya da `uye`.
@@ -241,18 +245,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Membership&&(identical(other.membershipId, membershipId) || other.membershipId == membershipId)&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.role, role) || other.role == role));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Membership&&(identical(other.membershipId, membershipId) || other.membershipId == membershipId)&&(identical(other.programId, programId) || other.programId == programId)&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.role, role) || other.role == role));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,membershipId,departmentId,accountId,role);
+    return Object.hash(runtimeType,membershipId,programId,departmentId,accountId,role);
 }
 
 @override
 String toString() {
-    return 'Membership(membershipId: $membershipId, departmentId: $departmentId, accountId: $accountId, role: $role)';
+    return 'Membership(membershipId: $membershipId, programId: $programId, departmentId: $departmentId, accountId: $accountId, role: $role)';
 }
 
 
@@ -263,7 +267,7 @@ abstract mixin class _$MembershipCopyWith<$Res> implements $MembershipCopyWith<$
   factory _$MembershipCopyWith(_Membership value, $Res Function(_Membership) _then) = __$MembershipCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'membership_id') String membershipId,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'account_id') String accountId, String role
+@JsonKey(name: 'membership_id') String membershipId,@JsonKey(name: 'program_id') String programId,@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'account_id') String accountId, String role
 });
 
 
@@ -280,9 +284,10 @@ class __$MembershipCopyWithImpl<$Res>
 
 /// Create a copy of Membership
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? membershipId = null,Object? departmentId = null,Object? accountId = null,Object? role = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? membershipId = null,Object? programId = null,Object? departmentId = null,Object? accountId = null,Object? role = null,}) {
   return _then(_Membership(
 membershipId: null == membershipId ? _self.membershipId : membershipId // ignore: cast_nullable_to_non_nullable
+as String,programId: null == programId ? _self.programId : programId // ignore: cast_nullable_to_non_nullable
 as String,departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
 as String,accountId: null == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable

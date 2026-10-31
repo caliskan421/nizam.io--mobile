@@ -66,6 +66,7 @@ class ApiOrganizationAdminRepository implements OrganizationAdminRepository {
   @override
   Future<UserChange> createUser({
     required String email,
+    required String programId,
     required String departmentId,
     String? fullName,
     DepartmentRole? role,
@@ -78,6 +79,7 @@ class ApiOrganizationAdminRepository implements OrganizationAdminRepository {
         () => _client.createUser(
           body: CreateUserRequest(
             email: email,
+            programId: programId,
             departmentId: departmentId,
             fullName: fullName,
             role: wireRole,

@@ -9,6 +9,7 @@ part of 'create_user_request.dart';
 _CreateUserRequest _$CreateUserRequestFromJson(Map<String, dynamic> json) =>
     _CreateUserRequest(
       email: json['email'] as String,
+      programId: json['program_id'] as String,
       departmentId: json['department_id'] as String,
       fullName: json['full_name'] as String?,
       role: json['role'] as String?,
@@ -19,6 +20,7 @@ _CreateUserRequest _$CreateUserRequestFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$CreateUserRequestToJson(_CreateUserRequest instance) =>
     <String, dynamic>{
       'email': instance.email,
+      'program_id': instance.programId,
       'department_id': instance.departmentId,
       'full_name': ?instance.fullName,
       'role': ?instance.role,

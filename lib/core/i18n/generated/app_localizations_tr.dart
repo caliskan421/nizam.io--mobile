@@ -11,35 +11,33 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errAssistantBusy =>
-      'Asistan şu an yoğun. Biraz sonra yeniden deneyin.';
+      'Asistan şu anda meşgul; biraz sonra yeniden deneyin.';
 
   @override
   String get errAssistantCapacityFull =>
-      'Asistan kapasitesi dolu. Biraz sonra yeniden deneyin.';
+      'Asistan kapasitesi dolu; biraz sonra yeniden deneyin.';
 
   @override
-  String get errAssistantInputInvalid =>
-      'Soru geçersiz. Kontrol edip yeniden deneyin.';
+  String get errAssistantInputInvalid => 'Girilen bilgiler geçersiz.';
 
   @override
-  String get errAssistantLimitExceeded =>
-      'Asistanın günlük kullanım sınırına ulaşıldı.';
+  String get errAssistantLimitExceeded => 'Asistan kullanım sınırına ulaşıldı.';
 
   @override
-  String get errAssistantNotAuthorized => 'Asistanı kullanma yetkiniz yok.';
+  String get errAssistantNotAuthorized => 'Bu işlem için yetkiniz yok.';
 
   @override
-  String get errAssistantNotFound => 'Sohbet bulunamadı.';
+  String get errAssistantNotFound => 'Asistan kaydı bulunamadı.';
 
   @override
   String get errAssistantProviderUnavailable =>
-      'Asistan şu an kullanılamıyor. Biraz sonra yeniden deneyin.';
+      'Asistan hizmeti şu anda kullanılamıyor.';
 
   @override
-  String get errAssistantQuotaExceeded => 'Bugünkü soru hakkınız doldu.';
+  String get errAssistantQuotaExceeded => 'Asistan kullanım kotası doldu.';
 
   @override
-  String get errAssistantRefused => 'Asistan bu soruyu yanıtlayamıyor.';
+  String get errAssistantRefused => 'Asistan bu isteği yanıtlayamadı.';
 
   @override
   String get errAuditEntryRejected =>
@@ -54,23 +52,22 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errCollaborationConferenceDisabled =>
-      'Görüntülü görüşme bu sunucuda kapalı.';
+      'Görüntülü görüşme bu kurulumda kapalı.';
 
   @override
-  String get errCollaborationConferenceNotActive =>
-      'Görüntülü görüşme başlamadı.';
+  String get errCollaborationConferenceNotActive => 'Görüşme etkin değil.';
 
   @override
   String get errCollaborationConferenceProviderUnavailable =>
-      'Görüntülü görüşme hizmetine şu an ulaşılamıyor.';
+      'Görüşme hizmeti şu anda kullanılamıyor.';
 
   @override
   String get errCollaborationConferenceWebhookInvalid =>
-      'Görüntülü görüşme bildirimi geçersiz.';
+      'Görüşme bildirimi geçersiz.';
 
   @override
   String get errCollaborationConferenceWebhookUnauthorized =>
-      'Görüntülü görüşme bildirimi doğrulanamadı.';
+      'Görüşme bildirimi doğrulanamadı.';
 
   @override
   String get errCollaborationInputInvalid => 'Girilen bilgiler geçersiz.';
@@ -137,7 +134,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errIdentityCapacityFull =>
-      'Sunucu şu an yoğun. Biraz sonra yeniden deneyin.';
+      'Sistem şu anda yoğun; biraz sonra yeniden deneyin.';
 
   @override
   String get errIdentityCaptchaInvalid =>
@@ -150,11 +147,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errIdentityCredentialsInvalid => 'E-posta veya parola hatalı.';
 
   @override
-  String get errIdentityDownloadTargetInvalid => 'İndirme isteği geçersiz.';
+  String get errIdentityDownloadTargetInvalid => 'İndirme hedefi geçersiz.';
 
   @override
   String get errIdentityDownloadTicketInvalid =>
-      'İndirme bağlantısı geçersiz veya süresi dolmuş. Yeniden indirmeyi deneyin.';
+      'İndirme bağlantısı geçersiz veya süresi dolmuş.';
 
   @override
   String get errIdentityForcePasswordChangeRequired =>
@@ -209,7 +206,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errIdentityUnavailable =>
-      'Kimlik doğrulama hizmetine şu an ulaşılamıyor. Biraz sonra yeniden deneyin.';
+      'Kimlik hizmeti şu anda kullanılamıyor; yeniden deneyin.';
 
   @override
   String get errIdentityWeakPassword => 'Parola yeterince güçlü değil.';
@@ -275,6 +272,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errOrganizationDepartmentNotFound => 'Departman bulunamadı.';
 
   @override
+  String get errOrganizationDepartmentNotLinked =>
+      'Departman bu programa bağlı değil.';
+
+  @override
   String get errOrganizationInputInvalid => 'Girilen bilgiler geçersiz.';
 
   @override
@@ -315,6 +316,9 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get errOrganizationPermanentRequiresDeleted =>
       'Kalıcı silme için kayıt önce silinmiş olmalı.';
+
+  @override
+  String get errOrganizationProgramRequired => 'Program seçimi gerekli.';
 
   @override
   String get errOrganizationTaskTitle => 'Etkilenen görev.';
@@ -372,6 +376,18 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errProgramAlreadyExists => 'Bu program zaten var.';
 
   @override
+  String get errProgramCopySourceNotLinked =>
+      'Ekip kopyalanacak programda bu departman bağlı değil.';
+
+  @override
+  String get errProgramDepartmentLinkInUse =>
+      'Departmanın programda canlı görevleri olduğu için bağı kaldırılamaz.';
+
+  @override
+  String get errProgramDepartmentLinkNameExists =>
+      'Bu programda aynı adla bir departman zaten var.';
+
+  @override
   String get errProgramDepartmentNotFound =>
       'Departman bu programda bulunamadı.';
 
@@ -385,6 +401,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errProgramInputInvalid => 'Girilen bilgiler geçersiz.';
+
+  @override
+  String get errProgramInvalidCopySource =>
+      'Ekip kopyası için kaynak program geçersiz.';
 
   @override
   String get errProgramInvalidCursor =>
@@ -495,7 +515,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errRecordsTagInvalid => 'Dosya etiketi geçersiz.';
 
   @override
-  String get errRecordsTagRequired => 'Dosya için bir etiket seçilmeli.';
+  String get errRecordsTagRequired => 'Dosya etiketi gerekli.';
 
   @override
   String get errRecordsTooLarge => 'Dosya çok büyük.';
@@ -662,6 +682,20 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get errWorkStaleTransition =>
       'Görev durumu değişti; yenileyip yeniden deneyin.';
+
+  @override
+  String get errWorkSubtaskAssigneeNotAssigned =>
+      'Alt görevin sorumlusu görevin atanmış kişilerinden biri olmalı.';
+
+  @override
+  String get errWorkSubtaskLimitReached => 'Alt görev sınırına ulaşıldı.';
+
+  @override
+  String get errWorkSubtaskNotFound => 'Alt görev bulunamadı.';
+
+  @override
+  String get errWorkSubtasksOpen =>
+      'Açık alt görevler var; önce bunları tamamlayın ya da kapatın.';
 
   @override
   String get errWorkTransferActive =>

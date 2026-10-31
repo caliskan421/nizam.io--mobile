@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$LinkDepartmentRequest {
 
-@JsonKey(name: 'department_id') String get departmentId;
+@JsonKey(name: 'department_id') String get departmentId;/// Departmanın bu programdaki adı; verilmezse katalog adı kopyalanır.
+@JsonKey(name: 'display_name') String? get displayName;/// Verilirse bu programdaki aynı departmanın ekibi rolleriyle kopyalanır.
+@JsonKey(name: 'copy_members_from_program_id') String? get copyMembersFromProgramId;
 /// Create a copy of LinkDepartmentRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +32,20 @@ $LinkDepartmentRequestCopyWith<LinkDepartmentRequest> get copyWith => _$LinkDepa
 @override
 bool operator ==(Object other) {
   final _this = this as LinkDepartmentRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LinkDepartmentRequest&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LinkDepartmentRequest&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.displayName, _this.displayName) || other.displayName == _this.displayName)&&(identical(other.copyMembersFromProgramId, _this.copyMembersFromProgramId) || other.copyMembersFromProgramId == _this.copyMembersFromProgramId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as LinkDepartmentRequest;
-  return Object.hash(runtimeType,_this.departmentId);
+  return Object.hash(runtimeType,_this.departmentId,_this.displayName,_this.copyMembersFromProgramId);
 }
 
 @override
 String toString() {
   final _this = this as LinkDepartmentRequest;
-  return 'LinkDepartmentRequest(departmentId: ${_this.departmentId})';
+  return 'LinkDepartmentRequest(departmentId: ${_this.departmentId}, displayName: ${_this.displayName}, copyMembersFromProgramId: ${_this.copyMembersFromProgramId})';
 }
 
 
@@ -54,7 +56,7 @@ abstract mixin class $LinkDepartmentRequestCopyWith<$Res>  {
   factory $LinkDepartmentRequestCopyWith(LinkDepartmentRequest value, $Res Function(LinkDepartmentRequest) _then) = _$LinkDepartmentRequestCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'department_id') String departmentId
+@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'display_name') String? displayName,@JsonKey(name: 'copy_members_from_program_id') String? copyMembersFromProgramId
 });
 
 
@@ -71,10 +73,12 @@ class _$LinkDepartmentRequestCopyWithImpl<$Res>
 
 /// Create a copy of LinkDepartmentRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? departmentId = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? departmentId = null,Object? displayName = freezed,Object? copyMembersFromProgramId = freezed,}) {
   return _then(LinkDepartmentRequest(
 departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
-as String,
+as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
+as String?,copyMembersFromProgramId: freezed == copyMembersFromProgramId ? _self.copyMembersFromProgramId : copyMembersFromProgramId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -159,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'display_name')  String? displayName, @JsonKey(name: 'copy_members_from_program_id')  String? copyMembersFromProgramId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LinkDepartmentRequest() when $default != null:
-return $default(_that.departmentId);case _:
+return $default(_that.departmentId,_that.displayName,_that.copyMembersFromProgramId);case _:
   return orElse();
 
 }
@@ -180,10 +184,10 @@ return $default(_that.departmentId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'display_name')  String? displayName, @JsonKey(name: 'copy_members_from_program_id')  String? copyMembersFromProgramId)  $default,) {final _that = this;
 switch (_that) {
 case _LinkDepartmentRequest():
-return $default(_that.departmentId);case _:
+return $default(_that.departmentId,_that.displayName,_that.copyMembersFromProgramId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +204,10 @@ return $default(_that.departmentId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'department_id')  String departmentId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'display_name')  String? displayName, @JsonKey(name: 'copy_members_from_program_id')  String? copyMembersFromProgramId)?  $default,) {final _that = this;
 switch (_that) {
 case _LinkDepartmentRequest() when $default != null:
-return $default(_that.departmentId);case _:
+return $default(_that.departmentId,_that.displayName,_that.copyMembersFromProgramId);case _:
   return null;
 
 }
@@ -215,10 +219,14 @@ return $default(_that.departmentId);case _:
 @JsonSerializable()
 
 class _LinkDepartmentRequest implements LinkDepartmentRequest {
-  const _LinkDepartmentRequest({@JsonKey(name: 'department_id') required this.departmentId});
+  const _LinkDepartmentRequest({@JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'display_name') this.displayName, @JsonKey(name: 'copy_members_from_program_id') this.copyMembersFromProgramId});
   factory _LinkDepartmentRequest.fromJson(Map<String, dynamic> json) => _$LinkDepartmentRequestFromJson(json);
 
 @override@JsonKey(name: 'department_id') final  String departmentId;
+/// Departmanın bu programdaki adı; verilmezse katalog adı kopyalanır.
+@override@JsonKey(name: 'display_name') final  String? displayName;
+/// Verilirse bu programdaki aynı departmanın ekibi rolleriyle kopyalanır.
+@override@JsonKey(name: 'copy_members_from_program_id') final  String? copyMembersFromProgramId;
 
 /// Create a copy of LinkDepartmentRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -233,18 +241,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LinkDepartmentRequest&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LinkDepartmentRequest&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.copyMembersFromProgramId, copyMembersFromProgramId) || other.copyMembersFromProgramId == copyMembersFromProgramId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,departmentId);
+    return Object.hash(runtimeType,departmentId,displayName,copyMembersFromProgramId);
 }
 
 @override
 String toString() {
-    return 'LinkDepartmentRequest(departmentId: $departmentId)';
+    return 'LinkDepartmentRequest(departmentId: $departmentId, displayName: $displayName, copyMembersFromProgramId: $copyMembersFromProgramId)';
 }
 
 
@@ -255,7 +263,7 @@ abstract mixin class _$LinkDepartmentRequestCopyWith<$Res> implements $LinkDepar
   factory _$LinkDepartmentRequestCopyWith(_LinkDepartmentRequest value, $Res Function(_LinkDepartmentRequest) _then) = __$LinkDepartmentRequestCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'department_id') String departmentId
+@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'display_name') String? displayName,@JsonKey(name: 'copy_members_from_program_id') String? copyMembersFromProgramId
 });
 
 
@@ -272,10 +280,12 @@ class __$LinkDepartmentRequestCopyWithImpl<$Res>
 
 /// Create a copy of LinkDepartmentRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? departmentId = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? departmentId = null,Object? displayName = freezed,Object? copyMembersFromProgramId = freezed,}) {
   return _then(_LinkDepartmentRequest(
 departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
-as String,
+as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
+as String?,copyMembersFromProgramId: freezed == copyMembersFromProgramId ? _self.copyMembersFromProgramId : copyMembersFromProgramId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

@@ -11,6 +11,7 @@ _TransitionRequest _$TransitionRequestFromJson(Map<String, dynamic> json) =>
       to: TransitionRequestTo.fromJson(json['to'] as String),
       reason: json['reason'] as String?,
       pullEndDate: json['pull_end_date'] as bool?,
+      closeSubtasks: json['close_subtasks'] as bool?,
     );
 
 Map<String, dynamic> _$TransitionRequestToJson(_TransitionRequest instance) =>
@@ -18,6 +19,7 @@ Map<String, dynamic> _$TransitionRequestToJson(_TransitionRequest instance) =>
       'to': _$TransitionRequestToEnumMap[instance.to]!,
       'reason': ?instance.reason,
       'pull_end_date': ?instance.pullEndDate,
+      'close_subtasks': ?instance.closeSubtasks,
     };
 
 const _$TransitionRequestToEnumMap = {

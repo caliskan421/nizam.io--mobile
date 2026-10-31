@@ -97,55 +97,55 @@ abstract class AppLocalizations {
   /// assistant.busy
   ///
   /// In tr, this message translates to:
-  /// **'Asistan şu an yoğun. Biraz sonra yeniden deneyin.'**
+  /// **'Asistan şu anda meşgul; biraz sonra yeniden deneyin.'**
   String get errAssistantBusy;
 
   /// assistant.capacity_full
   ///
   /// In tr, this message translates to:
-  /// **'Asistan kapasitesi dolu. Biraz sonra yeniden deneyin.'**
+  /// **'Asistan kapasitesi dolu; biraz sonra yeniden deneyin.'**
   String get errAssistantCapacityFull;
 
   /// assistant.input_invalid
   ///
   /// In tr, this message translates to:
-  /// **'Soru geçersiz. Kontrol edip yeniden deneyin.'**
+  /// **'Girilen bilgiler geçersiz.'**
   String get errAssistantInputInvalid;
 
   /// assistant.limit_exceeded
   ///
   /// In tr, this message translates to:
-  /// **'Asistanın günlük kullanım sınırına ulaşıldı.'**
+  /// **'Asistan kullanım sınırına ulaşıldı.'**
   String get errAssistantLimitExceeded;
 
   /// assistant.not_authorized
   ///
   /// In tr, this message translates to:
-  /// **'Asistanı kullanma yetkiniz yok.'**
+  /// **'Bu işlem için yetkiniz yok.'**
   String get errAssistantNotAuthorized;
 
   /// assistant.not_found
   ///
   /// In tr, this message translates to:
-  /// **'Sohbet bulunamadı.'**
+  /// **'Asistan kaydı bulunamadı.'**
   String get errAssistantNotFound;
 
   /// assistant.provider_unavailable
   ///
   /// In tr, this message translates to:
-  /// **'Asistan şu an kullanılamıyor. Biraz sonra yeniden deneyin.'**
+  /// **'Asistan hizmeti şu anda kullanılamıyor.'**
   String get errAssistantProviderUnavailable;
 
   /// assistant.quota_exceeded
   ///
   /// In tr, this message translates to:
-  /// **'Bugünkü soru hakkınız doldu.'**
+  /// **'Asistan kullanım kotası doldu.'**
   String get errAssistantQuotaExceeded;
 
   /// assistant.refused
   ///
   /// In tr, this message translates to:
-  /// **'Asistan bu soruyu yanıtlayamıyor.'**
+  /// **'Asistan bu isteği yanıtlayamadı.'**
   String get errAssistantRefused;
 
   /// audit.entry_rejected
@@ -169,31 +169,31 @@ abstract class AppLocalizations {
   /// collaboration.conference_disabled
   ///
   /// In tr, this message translates to:
-  /// **'Görüntülü görüşme bu sunucuda kapalı.'**
+  /// **'Görüntülü görüşme bu kurulumda kapalı.'**
   String get errCollaborationConferenceDisabled;
 
   /// collaboration.conference_not_active
   ///
   /// In tr, this message translates to:
-  /// **'Görüntülü görüşme başlamadı.'**
+  /// **'Görüşme etkin değil.'**
   String get errCollaborationConferenceNotActive;
 
   /// collaboration.conference_provider_unavailable
   ///
   /// In tr, this message translates to:
-  /// **'Görüntülü görüşme hizmetine şu an ulaşılamıyor.'**
+  /// **'Görüşme hizmeti şu anda kullanılamıyor.'**
   String get errCollaborationConferenceProviderUnavailable;
 
   /// collaboration.conference_webhook_invalid
   ///
   /// In tr, this message translates to:
-  /// **'Görüntülü görüşme bildirimi geçersiz.'**
+  /// **'Görüşme bildirimi geçersiz.'**
   String get errCollaborationConferenceWebhookInvalid;
 
   /// collaboration.conference_webhook_unauthorized
   ///
   /// In tr, this message translates to:
-  /// **'Görüntülü görüşme bildirimi doğrulanamadı.'**
+  /// **'Görüşme bildirimi doğrulanamadı.'**
   String get errCollaborationConferenceWebhookUnauthorized;
 
   /// collaboration.input_invalid
@@ -313,7 +313,7 @@ abstract class AppLocalizations {
   /// identity.capacity_full
   ///
   /// In tr, this message translates to:
-  /// **'Sunucu şu an yoğun. Biraz sonra yeniden deneyin.'**
+  /// **'Sistem şu anda yoğun; biraz sonra yeniden deneyin.'**
   String get errIdentityCapacityFull;
 
   /// identity.captcha_invalid
@@ -337,13 +337,13 @@ abstract class AppLocalizations {
   /// identity.download_target_invalid
   ///
   /// In tr, this message translates to:
-  /// **'İndirme isteği geçersiz.'**
+  /// **'İndirme hedefi geçersiz.'**
   String get errIdentityDownloadTargetInvalid;
 
   /// identity.download_ticket_invalid
   ///
   /// In tr, this message translates to:
-  /// **'İndirme bağlantısı geçersiz veya süresi dolmuş. Yeniden indirmeyi deneyin.'**
+  /// **'İndirme bağlantısı geçersiz veya süresi dolmuş.'**
   String get errIdentityDownloadTicketInvalid;
 
   /// identity.force_password_change_required
@@ -433,7 +433,7 @@ abstract class AppLocalizations {
   /// identity.unavailable
   ///
   /// In tr, this message translates to:
-  /// **'Kimlik doğrulama hizmetine şu an ulaşılamıyor. Biraz sonra yeniden deneyin.'**
+  /// **'Kimlik hizmeti şu anda kullanılamıyor; yeniden deneyin.'**
   String get errIdentityUnavailable;
 
   /// identity.weak_password
@@ -544,6 +544,12 @@ abstract class AppLocalizations {
   /// **'Departman bulunamadı.'**
   String get errOrganizationDepartmentNotFound;
 
+  /// organization.department_not_linked
+  ///
+  /// In tr, this message translates to:
+  /// **'Departman bu programa bağlı değil.'**
+  String get errOrganizationDepartmentNotLinked;
+
   /// organization.input_invalid
   ///
   /// In tr, this message translates to:
@@ -621,6 +627,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kalıcı silme için kayıt önce silinmiş olmalı.'**
   String get errOrganizationPermanentRequiresDeleted;
+
+  /// organization.program_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Program seçimi gerekli.'**
+  String get errOrganizationProgramRequired;
 
   /// organization.task_title
   ///
@@ -718,6 +730,24 @@ abstract class AppLocalizations {
   /// **'Bu program zaten var.'**
   String get errProgramAlreadyExists;
 
+  /// program.copy_source_not_linked
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekip kopyalanacak programda bu departman bağlı değil.'**
+  String get errProgramCopySourceNotLinked;
+
+  /// program.department_link_in_use
+  ///
+  /// In tr, this message translates to:
+  /// **'Departmanın programda canlı görevleri olduğu için bağı kaldırılamaz.'**
+  String get errProgramDepartmentLinkInUse;
+
+  /// program.department_link_name_exists
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu programda aynı adla bir departman zaten var.'**
+  String get errProgramDepartmentLinkNameExists;
+
   /// program.department_not_found
   ///
   /// In tr, this message translates to:
@@ -741,6 +771,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Girilen bilgiler geçersiz.'**
   String get errProgramInputInvalid;
+
+  /// program.invalid_copy_source
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekip kopyası için kaynak program geçersiz.'**
+  String get errProgramInvalidCopySource;
 
   /// program.invalid_cursor
   ///
@@ -943,7 +979,7 @@ abstract class AppLocalizations {
   /// records.tag_required
   ///
   /// In tr, this message translates to:
-  /// **'Dosya için bir etiket seçilmeli.'**
+  /// **'Dosya etiketi gerekli.'**
   String get errRecordsTagRequired;
 
   /// records.too_large
@@ -1239,6 +1275,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Görev durumu değişti; yenileyip yeniden deneyin.'**
   String get errWorkStaleTransition;
+
+  /// work.subtask_assignee_not_assigned
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görevin sorumlusu görevin atanmış kişilerinden biri olmalı.'**
+  String get errWorkSubtaskAssigneeNotAssigned;
+
+  /// work.subtask_limit_reached
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görev sınırına ulaşıldı.'**
+  String get errWorkSubtaskLimitReached;
+
+  /// work.subtask_not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görev bulunamadı.'**
+  String get errWorkSubtaskNotFound;
+
+  /// work.subtasks_open
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık alt görevler var; önce bunları tamamlayın ya da kapatın.'**
+  String get errWorkSubtasksOpen;
 
   /// work.transfer_active
   ///

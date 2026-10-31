@@ -131,6 +131,7 @@ void main() {
       final (repo, a) = _repo('{"account_id":"a1","created":true}');
       final r = await repo.createUser(
         email: 'a@b.c',
+        programId: 'p1',
         departmentId: 'd1',
         fullName: 'Ayşe',
         role: DepartmentRole.member,
@@ -139,6 +140,7 @@ void main() {
       expect(a.seen!.method, 'POST');
       expect(a.sent, {
         'email': 'a@b.c',
+        'program_id': 'p1',
         'department_id': 'd1',
         'full_name': 'Ayşe',
         'role': 'uye',
@@ -158,11 +160,13 @@ void main() {
       );
       final r = await repo.createUser(
         email: 'a@b.c',
+        programId: 'p1',
         departmentId: 'd1',
         transferAccountId: 'a1',
       );
       expect(a.sent, {
         'email': 'a@b.c',
+        'program_id': 'p1',
         'department_id': 'd1',
         'transfer_account_id': 'a1',
       });
@@ -175,6 +179,7 @@ void main() {
       await expectLater(
         repo.createUser(
           email: 'a@b.c',
+          programId: 'p1',
           departmentId: 'd1',
           role: DepartmentRole.unknown,
         ),
@@ -186,7 +191,7 @@ void main() {
     test('hata → ApiError', () async {
       final (repo, _) = _repo(_err('identity.account_exists'), status: 409);
       await expectLater(
-        repo.createUser(email: 'a@b.c', departmentId: 'd1'),
+        repo.createUser(email: 'a@b.c', programId: 'p1', departmentId: 'd1'),
         _apiError('identity.account_exists'),
       );
     });

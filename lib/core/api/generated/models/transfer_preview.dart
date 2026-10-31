@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'granted_membership.dart';
+
 part 'transfer_preview.freezed.dart';
 part 'transfer_preview.g.dart';
 
@@ -17,6 +19,10 @@ abstract class TransferPreview with _$TransferPreview {
     @JsonKey(name: 'preserved_dependency_count')
     required int preservedDependencyCount,
     @JsonKey(name: 'missing_access') required bool missingAccess,
+
+    /// Aktarımın hedef programın departman ekibine `uye` olarak eklediği (ön izlemede ekleyeceği) atanan kişiler (ADR-0023 kural 12).
+    @JsonKey(name: 'granted_memberships')
+    required List<GrantedMembership> grantedMemberships,
     required List<String> blockers,
     required List<String> warnings,
     @JsonKey(name: 'can_execute') required bool canExecute,

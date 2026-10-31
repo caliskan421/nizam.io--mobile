@@ -8,6 +8,7 @@ import 'package:retrofit/retrofit.dart';
 import '../models/added_count.dart';
 import '../models/assignments_request.dart';
 import '../models/completion_request.dart';
+import '../models/create_subtask_request.dart';
 import '../models/create_work_item_request.dart';
 import '../models/date_change_request.dart';
 import '../models/date_change_request_create.dart';
@@ -26,6 +27,7 @@ import '../models/review_result.dart';
 import '../models/status_result.dart';
 import '../models/transition_request.dart';
 import '../models/transition_result.dart';
+import '../models/update_subtask_request.dart';
 import '../models/update_work_item_request.dart';
 import '../models/work_item.dart';
 import '../models/work_item_dates.dart';
@@ -34,6 +36,8 @@ import '../models/work_item_list.dart';
 import '../models/work_item_note.dart';
 import '../models/work_item_note_list.dart';
 import '../models/work_item_purge_result.dart';
+import '../models/work_item_subtask.dart';
+import '../models/work_item_subtask_list.dart';
 import '../models/work_note_request.dart';
 
 part 'work_client.g.dart';
@@ -158,6 +162,38 @@ abstract class WorkClient {
         'openapi': <String, dynamic>{
           'tags': <String>["work"],
           'operationId': "deleteWorkItemNote",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> listWorkItemSubtasksOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["work"],
+          'operationId': "listWorkItemSubtasks",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> createWorkItemSubtaskOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["work"],
+          'operationId': "createWorkItemSubtask",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> updateWorkItemSubtaskOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["work"],
+          'operationId': "updateWorkItemSubtask",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> deleteWorkItemSubtaskOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["work"],
+          'operationId': "deleteWorkItemSubtask",
           'externalDocsUrl': null,
         },
       };
@@ -437,6 +473,45 @@ abstract class WorkClient {
     Map<String, dynamic>? extras = WorkClient.deleteWorkItemNoteOpenapiExtras,
   });
 
+  /// Görevin alt görevleri (ADR-0024).
+  @GET('/v1/work-items/{id}/subtasks')
+  Future<WorkItemSubtaskList> listWorkItemSubtasks({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras = WorkClient.listWorkItemSubtasksOpenapiExtras,
+  });
+
+  /// Göreve alt görev ekler (koordinatör, şirket yöneticisi; görev başına en çok 50).
+  @POST('/v1/work-items/{id}/subtasks')
+  Future<WorkItemSubtask> createWorkItemSubtask({
+    @Path('id') required String id,
+    @Body() required CreateSubtaskRequest body,
+    @Extras()
+    Map<String, dynamic>? extras =
+        WorkClient.createWorkItemSubtaskOpenapiExtras,
+  });
+
+  /// Alt görevi değiştirir: başlık/atama/tarih (koordinatör, şirket yöneticisi), `done` (atanan ya da koordinatör).
+  @PATCH('/v1/work-items/{id}/subtasks/{subtaskId}')
+  Future<WorkItemSubtask> updateWorkItemSubtask({
+    @Path('id') required String id,
+    @Path('subtaskId') required String subtaskId,
+    @Body() required UpdateSubtaskRequest body,
+    @Extras()
+    Map<String, dynamic>? extras =
+        WorkClient.updateWorkItemSubtaskOpenapiExtras,
+  });
+
+  /// Alt görevi siler (koordinatör, şirket yöneticisi); dosyaları ana görevde kalır, `subtask_id` referansları boşaltılır.
+  @DELETE('/v1/work-items/{id}/subtasks/{subtaskId}')
+  Future<StatusResult> deleteWorkItemSubtask({
+    @Path('id') required String id,
+    @Path('subtaskId') required String subtaskId,
+    @Extras()
+    Map<String, dynamic>? extras =
+        WorkClient.deleteWorkItemSubtaskOpenapiExtras,
+  });
+
   /// Ön görev bağımlılığı ekler (döngü reddedilir).
   @POST('/v1/work-items/{id}/dependencies')
   Future<DependencyEdge> addDependency({
@@ -488,7 +563,7 @@ abstract class WorkClient {
     Map<String, dynamic>? extras = WorkClient.extendWorkItemOpenapiExtras,
   });
 
-  /// Tamamlanma tarihini geri çeker.
+  /// Tamamlanma tarihini geri çeker (koordinatör ya da görevin `(program, departman)` ekibinde satırı olan atanmış üye; aksi 403 `work.not_authorized`).
   @POST('/v1/work-items/{id}/pull-completion')
   Future<WorkItemDates> pullCompletion({
     @Path('id') required String id,

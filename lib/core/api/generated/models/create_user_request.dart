@@ -11,6 +11,9 @@ part 'create_user_request.g.dart';
 abstract class CreateUserRequest with _$CreateUserRequest {
   const factory CreateUserRequest({
     required String email,
+
+    /// İlk ekip satırının programı; departman bu programa bağlı olmalıdır (ADR-0023).
+    @JsonKey(name: 'program_id') required String programId,
     @JsonKey(name: 'department_id') required String departmentId,
     @JsonKey(name: 'full_name') String? fullName,
     String? role,

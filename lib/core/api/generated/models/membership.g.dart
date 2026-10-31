@@ -8,6 +8,7 @@ part of 'membership.dart';
 
 _Membership _$MembershipFromJson(Map<String, dynamic> json) => _Membership(
   membershipId: json['membership_id'] as String,
+  programId: json['program_id'] as String,
   departmentId: json['department_id'] as String,
   accountId: json['account_id'] as String,
   role: json['role'] as String,
@@ -16,6 +17,7 @@ _Membership _$MembershipFromJson(Map<String, dynamic> json) => _Membership(
 Map<String, dynamic> _$MembershipToJson(_Membership instance) =>
     <String, dynamic>{
       'membership_id': instance.membershipId,
+      'program_id': instance.programId,
       'department_id': instance.departmentId,
       'account_id': instance.accountId,
       'role': instance.role,

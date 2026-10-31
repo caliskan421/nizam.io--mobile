@@ -16,6 +16,9 @@ _TransferPreview _$TransferPreviewFromJson(
   fileTotalBytes: (json['file_total_bytes'] as num).toInt(),
   preservedDependencyCount: (json['preserved_dependency_count'] as num).toInt(),
   missingAccess: json['missing_access'] as bool,
+  grantedMemberships: (json['granted_memberships'] as List<dynamic>)
+      .map((e) => GrantedMembership.fromJson(e as Map<String, dynamic>))
+      .toList(),
   blockers: (json['blockers'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),
@@ -45,6 +48,9 @@ Map<String, dynamic> _$TransferPreviewToJson(_TransferPreview instance) =>
       'file_total_bytes': instance.fileTotalBytes,
       'preserved_dependency_count': instance.preservedDependencyCount,
       'missing_access': instance.missingAccess,
+      'granted_memberships': instance.grantedMemberships
+          .map((e) => e.toJson())
+          .toList(),
       'blockers': instance.blockers,
       'warnings': instance.warnings,
       'can_execute': instance.canExecute,

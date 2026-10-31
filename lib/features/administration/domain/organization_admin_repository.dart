@@ -18,9 +18,10 @@ abstract interface class OrganizationAdminRepository {
   });
 
   /// `POST /v1/admin/users`: kullanıcı oluşturur ya da [transferAccountId] verilirse mevcut
-  /// hesabı [departmentId]'ye aktarır.
+  /// hesabı [departmentId]'ye aktarır; [programId] ilk ekip satırının programıdır (v0.4.0-api).
   Future<UserChange> createUser({
     required String email,
+    required String programId,
     required String departmentId,
     String? fullName,
     DepartmentRole? role,

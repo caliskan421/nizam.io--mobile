@@ -1,11 +1,11 @@
 {
   "$comment": "Üretim kaynaklarının TEK pini. tool/gen.dart spec'i yalnız backend ETİKETİNDEN (git show refs/tags/<tag>:<yol>), web kaynağını (TR hata metinleri) yalnız sabit web COMMIT'inden okur; tasarım token'ları web'den değil design/mobile-tokens.json'dan (ADR-0003 karar 24). Etiketsiz main'den üretim yoktur. Değiştirmek = yeni etiket/commit + make gen + PR.",
-  "backendTag": "v0.3.0-api",
+  "backendTag": "v0.5.0-api",
   "specPath": "docs/api/openapi.yaml",
   "errorCatalogPath": "docs/api/error-codes.json",
   "web": {
     "repository": "caliskan421/nizam.io--frontend",
-    "commit": "54afb002428e09fdc2727565e226880c1a25bb8c",
+    "commit": "9fa47f4fe6369cc48f4caf58c6729f1ec1cd8b7c",
     "trErrorsPath": "src/shared/i18n/tr/errors.ts"
   }
 }

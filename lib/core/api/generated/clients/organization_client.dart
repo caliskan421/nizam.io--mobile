@@ -262,6 +262,12 @@ abstract class OrganizationClient {
       };
 
   /// Hesabın departmanları ve rolleri.
+  ///
+  /// Çağıranın bütün programlardaki ekip satırları: her öğe bir.
+  /// `(program, departman)` çiftidir (`program_id`, `program_name`,.
+  /// `department_id`, programdaki ad `display_name`, `role`). Aynı departman.
+  /// iki programda ekipteyse iki ayrı öğe döner; rol öğenin programına.
+  /// göredir. Kapsam başlığı gerekmez (S1).
   @GET('/v1/me/departments')
   Future<HttpResponse<MyDepartmentList>> myDepartments({
     @Extras()
@@ -306,6 +312,13 @@ abstract class OrganizationClient {
   });
 
   /// Departman üye listesi (yönetim yüzü).
+  ///
+  /// Ekip programa göredir (ADR-0023): liste birebir `X-Nizamio-Program`.
+  /// programındaki bu departmanın ekibidir; roller bu programa göredir.
+  /// Şirket yöneticisine ve bu programda bu departmanın koordinatörüne.
+  /// açıktır; başka programdaki koordinatörlük yetki vermez. Departman.
+  /// programa bağlı değilse (program yoksa da) 422.
+  /// `organization.department_not_linked`.
   @GET('/v1/departments/{id}/members')
   Future<HttpResponse<RosterList>> listMembers({
     @Path('id') required String id,
@@ -314,6 +327,15 @@ abstract class OrganizationClient {
   });
 
   /// Hesabı departmana rolle bağlar.
+  ///
+  /// Ekip programa göredir (ADR-0023): hesap yalnız `X-Nizamio-Program`.
+  /// programındaki bu departmanın ekibine eklenir; aynı hesap başka.
+  /// programlarda ayrı satırlarla bulunabilir ve onlar etkilenmez. Departman.
+  /// bu programa bağlı değilse `422 organization.department_not_linked`.
+  /// Şirket yöneticisi ya da bu programda bu departmanın koordinatörü.
+  /// çağırır; koordinatörün atadığı rol `uye`'ye zorlanır ve koordinatör.
+  /// şirket yöneticisini ya da herhangi bir programda `uye` dışında ekip.
+  /// satırı olan hesabı ekleyemez (403).
   @POST('/v1/departments/{id}/memberships')
   Future<Membership> assignMembership({
     @Path('id') required String id,
@@ -324,6 +346,11 @@ abstract class OrganizationClient {
   });
 
   /// Üyelik rolünü değiştirir; görev etkisi varsa onay ister.
+  ///
+  /// Ekip programa göredir (ADR-0023): yalnız `X-Nizamio-Program` programındaki.
+  /// ekip satırının rolü değişir. Onay kapısı ve devir yalnız bu programın bu.
+  /// departmanındaki aktif görev atamalarını sayar; diğer programların.
+  /// atamalarına dokunulmaz. Yalnız şirket yöneticisi.
   @PATCH('/v1/departments/{id}/memberships/{accountId}')
   Future<MembershipChange> updateMembershipRole({
     @Path('id') required String id,
@@ -336,6 +363,12 @@ abstract class OrganizationClient {
 
   /// Üyeyi departmandan çıkarır; görev etkisi varsa onay ister.
   ///
+  /// Ekip programa göredir (ADR-0023): yalnız `X-Nizamio-Program` programındaki ekip.
+  /// satırı silinir; hesabın başka programlardaki ekip satırları kalır. Onay.
+  /// kapısı (`?confirm=true`) ve devir yalnız bu programın bu departmanındaki.
+  /// aktif atamalar içindir. Şirket yöneticisi ya da bu programda bu.
+  /// departmanın koordinatörü çağırır.
+  ///
   /// [confirm] - `true` ise görev etkisi onaylanmış sayılır (aksi hâlde 409 organization.confirmation_required).
   @DELETE('/v1/departments/{id}/memberships/{accountId}')
   Future<MembershipChange> removeMember({
@@ -347,6 +380,11 @@ abstract class OrganizationClient {
   });
 
   /// Departmana atanabilir hesap havuzu.
+  ///
+  /// Bu programda bu departmanın koordinatörüne açıktır. Havuz =.
+  /// herhangi bir programda ekip satırı olan canlı hesaplar − bu.
+  /// `(program, departman)` ekibi; `roles` etiketleri yalnız seçili programdaki.
+  /// diğer departman rolleridir (ADR-0023 kural 17).
   @GET('/v1/departments/{id}/assignable')
   Future<HttpResponse<AssignableList>> listAssignable({
     @Path('id') required String id,
@@ -356,6 +394,11 @@ abstract class OrganizationClient {
   });
 
   /// Departman koordinatörünü atar.
+  ///
+  /// Ekip programa göredir (ADR-0023): koordinatörlük yalnız.
+  /// `X-Nizamio-Program` programındaki bu departman için yazılır; başka.
+  /// programda koordinatörlük vermez. Departman bu programa bağlı değilse.
+  /// `422 organization.department_not_linked`. Yalnız şirket yöneticisi.
   @POST('/v1/departments/{id}/coordinator')
   Future<CoordinatorResult> assignCoordinator({
     @Path('id') required String id,
@@ -366,6 +409,10 @@ abstract class OrganizationClient {
   });
 
   /// Koordinatörlüğü kaldırır; görev etkisi varsa onay ister.
+  ///
+  /// Ekip programa göredir (ADR-0023): yalnız `X-Nizamio-Program` programındaki.
+  /// koordinatörlük kaldırılır. Onay kapısı ve devir bu programın bu.
+  /// departmanındaki aktif atamalarla sınırlıdır. Yalnız şirket yöneticisi.
   ///
   /// [confirm] - `true` ise görev etkisi onaylanmış sayılır (aksi hâlde 409 organization.confirmation_required).
   @DELETE('/v1/departments/{id}/coordinator/{accountId}')
@@ -378,7 +425,13 @@ abstract class OrganizationClient {
         OrganizationClient.removeCoordinatorOpenapiExtras,
   });
 
-  /// Departmanın görev özeti.
+  /// Departmanın seçili programdaki görev özeti.
+  ///
+  /// Sayım `(program, departman)` kapsamlıdır: yalnız `X-Nizamio-Program`.
+  /// programının kalemleri sayılır. Departman programa bağlı değilse.
+  /// (program yoksa da) 422 `organization.department_not_linked`.
+  /// Kalıcı departman silme engeli bu uçtan.
+  /// bağımsız, bütün programları sayan katalog geneli sayımdır.
   @GET('/v1/departments/{id}/task-summary')
   Future<TaskSummary> taskSummary({
     @Path('id') required String id,
@@ -387,6 +440,10 @@ abstract class OrganizationClient {
   });
 
   /// Bilinen kullanıcı listesi (imleçli).
+  ///
+  /// `memberships` her ekip satırını `program:departman:rol` etiketiyle.
+  /// taşır. `role` süzgeci "herhangi bir programda bu rol" demektir.
+  /// (ADR-0023 kural 18).
   ///
   /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
   ///
@@ -404,6 +461,12 @@ abstract class OrganizationClient {
   });
 
   /// Kullanıcı oluşturur veya mevcut hesabı aktarır.
+  ///
+  /// Hesap açar (ya da `transfer_account_id` ile var olan hesabı aktarır).
+  /// ve `program_id` programındaki departman ekibine ekler; `program_id`.
+  /// zorunludur ve departman bu programa bağlı olmalıdır.
+  /// (`422 organization.department_not_linked`). Koordinatör yalnız bu.
+  /// programda koordine ettiği departmana `uye` ekler (ADR-0023 kural 18).
   @POST('/v1/admin/users')
   Future<UserResult> createUser({
     @Body() required CreateUserRequest body,
@@ -412,6 +475,11 @@ abstract class OrganizationClient {
   });
 
   /// Kullanıcı günceller.
+  ///
+  /// Koordinatör yalnız silebileceği hesabı günceller: hedef şirket.
+  /// yöneticisi değildir ve hedefin her ekip satırı (her programda),.
+  /// çağıranın koordinatör olduğu bir `(program, departman)` içinde `uye`.
+  /// rolündedir (ADR-0023 kural 8).
   @PATCH('/v1/admin/users/{id}')
   Future<UserResult> updateUser({
     @Path('id') required String id,
@@ -421,6 +489,12 @@ abstract class OrganizationClient {
   });
 
   /// Kullanıcıyı siler (geri alınabilir silme).
+  ///
+  /// Koordinatörün silme kapsamı güncellemeyle aynıdır: hedefin her ekip.
+  /// satırı, çağıranın koordinatör olduğu bir `(program, departman)` içinde.
+  /// `uye` rolündedir. Silinen hesabın aktif atamaları her `(program,.
+  /// departman)` için silmeyi yapana devredilir; ekip satırları yetki vermez.
+  /// (ADR-0023 kural 7, 8).
   @DELETE('/v1/admin/users/{id}')
   Future<UserResult> deleteUser({
     @Path('id') required String id,
@@ -447,6 +521,10 @@ abstract class OrganizationClient {
   });
 
   /// Yönetici hesap silme (yumuşak); oturumlar düşer.
+  ///
+  /// Silinen hesabın aktif atamaları her `(program, departman)` için.
+  /// silmeyi yapana devredilir; tamamlanmış atamalar kalır, ekip satırları.
+  /// yetki vermez (ADR-0023 kural 7).
   @DELETE('/v1/admin/accounts/{id}')
   Future<AccountResult> deleteAccount({
     @Path('id') required String id,

@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FileListItem {
 
-@JsonKey(name: 'file_id') String get fileId;@JsonKey(name: 'work_item_id') String get workItemId;@JsonKey(name: 'display_name') String get displayName;@JsonKey(name: 'content_type') String get contentType;@JsonKey(name: 'size_bytes') int get sizeBytes; String get tag;@JsonKey(name: 'uploaded_by_account_id') String get uploadedByAccountId;
+@JsonKey(name: 'file_id') String get fileId;@JsonKey(name: 'work_item_id') String get workItemId;@JsonKey(name: 'display_name') String get displayName;@JsonKey(name: 'content_type') String get contentType;@JsonKey(name: 'size_bytes') int get sizeBytes; String get tag;@JsonKey(name: 'uploaded_by_account_id') String get uploadedByAccountId;/// Dosyanın bağlı olduğu alt görev (ADR-0024); yoksa alan yoktur. Alt görev silinince boşalır.
+@JsonKey(name: 'subtask_id') String? get subtaskId;
 /// Create a copy of FileListItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $FileListItemCopyWith<FileListItem> get copyWith => _$FileListItemCopyWithImpl<F
 @override
 bool operator ==(Object other) {
   final _this = this as FileListItem;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FileListItem&&(identical(other.fileId, _this.fileId) || other.fileId == _this.fileId)&&(identical(other.workItemId, _this.workItemId) || other.workItemId == _this.workItemId)&&(identical(other.displayName, _this.displayName) || other.displayName == _this.displayName)&&(identical(other.contentType, _this.contentType) || other.contentType == _this.contentType)&&(identical(other.sizeBytes, _this.sizeBytes) || other.sizeBytes == _this.sizeBytes)&&(identical(other.tag, _this.tag) || other.tag == _this.tag)&&(identical(other.uploadedByAccountId, _this.uploadedByAccountId) || other.uploadedByAccountId == _this.uploadedByAccountId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FileListItem&&(identical(other.fileId, _this.fileId) || other.fileId == _this.fileId)&&(identical(other.workItemId, _this.workItemId) || other.workItemId == _this.workItemId)&&(identical(other.displayName, _this.displayName) || other.displayName == _this.displayName)&&(identical(other.contentType, _this.contentType) || other.contentType == _this.contentType)&&(identical(other.sizeBytes, _this.sizeBytes) || other.sizeBytes == _this.sizeBytes)&&(identical(other.tag, _this.tag) || other.tag == _this.tag)&&(identical(other.uploadedByAccountId, _this.uploadedByAccountId) || other.uploadedByAccountId == _this.uploadedByAccountId)&&(identical(other.subtaskId, _this.subtaskId) || other.subtaskId == _this.subtaskId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as FileListItem;
-  return Object.hash(runtimeType,_this.fileId,_this.workItemId,_this.displayName,_this.contentType,_this.sizeBytes,_this.tag,_this.uploadedByAccountId);
+  return Object.hash(runtimeType,_this.fileId,_this.workItemId,_this.displayName,_this.contentType,_this.sizeBytes,_this.tag,_this.uploadedByAccountId,_this.subtaskId);
 }
 
 @override
 String toString() {
   final _this = this as FileListItem;
-  return 'FileListItem(fileId: ${_this.fileId}, workItemId: ${_this.workItemId}, displayName: ${_this.displayName}, contentType: ${_this.contentType}, sizeBytes: ${_this.sizeBytes}, tag: ${_this.tag}, uploadedByAccountId: ${_this.uploadedByAccountId})';
+  return 'FileListItem(fileId: ${_this.fileId}, workItemId: ${_this.workItemId}, displayName: ${_this.displayName}, contentType: ${_this.contentType}, sizeBytes: ${_this.sizeBytes}, tag: ${_this.tag}, uploadedByAccountId: ${_this.uploadedByAccountId}, subtaskId: ${_this.subtaskId})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $FileListItemCopyWith<$Res>  {
   factory $FileListItemCopyWith(FileListItem value, $Res Function(FileListItem) _then) = _$FileListItemCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'file_id') String fileId,@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'content_type') String contentType,@JsonKey(name: 'size_bytes') int sizeBytes, String tag,@JsonKey(name: 'uploaded_by_account_id') String uploadedByAccountId
+@JsonKey(name: 'file_id') String fileId,@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'content_type') String contentType,@JsonKey(name: 'size_bytes') int sizeBytes, String tag,@JsonKey(name: 'uploaded_by_account_id') String uploadedByAccountId,@JsonKey(name: 'subtask_id') String? subtaskId
 });
 
 
@@ -71,7 +72,7 @@ class _$FileListItemCopyWithImpl<$Res>
 
 /// Create a copy of FileListItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? fileId = null,Object? workItemId = null,Object? displayName = null,Object? contentType = null,Object? sizeBytes = null,Object? tag = null,Object? uploadedByAccountId = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? fileId = null,Object? workItemId = null,Object? displayName = null,Object? contentType = null,Object? sizeBytes = null,Object? tag = null,Object? uploadedByAccountId = null,Object? subtaskId = freezed,}) {
   return _then(FileListItem(
 fileId: null == fileId ? _self.fileId : fileId // ignore: cast_nullable_to_non_nullable
 as String,workItemId: null == workItemId ? _self.workItemId : workItemId // ignore: cast_nullable_to_non_nullable
@@ -80,7 +81,8 @@ as String,contentType: null == contentType ? _self.contentType : contentType // 
 as String,sizeBytes: null == sizeBytes ? _self.sizeBytes : sizeBytes // ignore: cast_nullable_to_non_nullable
 as int,tag: null == tag ? _self.tag : tag // ignore: cast_nullable_to_non_nullable
 as String,uploadedByAccountId: null == uploadedByAccountId ? _self.uploadedByAccountId : uploadedByAccountId // ignore: cast_nullable_to_non_nullable
-as String,
+as String,subtaskId: freezed == subtaskId ? _self.subtaskId : subtaskId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -165,10 +167,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'file_id')  String fileId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'size_bytes')  int sizeBytes,  String tag, @JsonKey(name: 'uploaded_by_account_id')  String uploadedByAccountId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'file_id')  String fileId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'size_bytes')  int sizeBytes,  String tag, @JsonKey(name: 'uploaded_by_account_id')  String uploadedByAccountId, @JsonKey(name: 'subtask_id')  String? subtaskId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FileListItem() when $default != null:
-return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentType,_that.sizeBytes,_that.tag,_that.uploadedByAccountId);case _:
+return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentType,_that.sizeBytes,_that.tag,_that.uploadedByAccountId,_that.subtaskId);case _:
   return orElse();
 
 }
@@ -186,10 +188,10 @@ return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentTyp
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'file_id')  String fileId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'size_bytes')  int sizeBytes,  String tag, @JsonKey(name: 'uploaded_by_account_id')  String uploadedByAccountId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'file_id')  String fileId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'size_bytes')  int sizeBytes,  String tag, @JsonKey(name: 'uploaded_by_account_id')  String uploadedByAccountId, @JsonKey(name: 'subtask_id')  String? subtaskId)  $default,) {final _that = this;
 switch (_that) {
 case _FileListItem():
-return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentType,_that.sizeBytes,_that.tag,_that.uploadedByAccountId);case _:
+return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentType,_that.sizeBytes,_that.tag,_that.uploadedByAccountId,_that.subtaskId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +208,10 @@ return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentTyp
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'file_id')  String fileId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'size_bytes')  int sizeBytes,  String tag, @JsonKey(name: 'uploaded_by_account_id')  String uploadedByAccountId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'file_id')  String fileId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'size_bytes')  int sizeBytes,  String tag, @JsonKey(name: 'uploaded_by_account_id')  String uploadedByAccountId, @JsonKey(name: 'subtask_id')  String? subtaskId)?  $default,) {final _that = this;
 switch (_that) {
 case _FileListItem() when $default != null:
-return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentType,_that.sizeBytes,_that.tag,_that.uploadedByAccountId);case _:
+return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentType,_that.sizeBytes,_that.tag,_that.uploadedByAccountId,_that.subtaskId);case _:
   return null;
 
 }
@@ -221,7 +223,7 @@ return $default(_that.fileId,_that.workItemId,_that.displayName,_that.contentTyp
 @JsonSerializable()
 
 class _FileListItem implements FileListItem {
-  const _FileListItem({@JsonKey(name: 'file_id') required this.fileId, @JsonKey(name: 'work_item_id') required this.workItemId, @JsonKey(name: 'display_name') required this.displayName, @JsonKey(name: 'content_type') required this.contentType, @JsonKey(name: 'size_bytes') required this.sizeBytes, required this.tag, @JsonKey(name: 'uploaded_by_account_id') required this.uploadedByAccountId});
+  const _FileListItem({@JsonKey(name: 'file_id') required this.fileId, @JsonKey(name: 'work_item_id') required this.workItemId, @JsonKey(name: 'display_name') required this.displayName, @JsonKey(name: 'content_type') required this.contentType, @JsonKey(name: 'size_bytes') required this.sizeBytes, required this.tag, @JsonKey(name: 'uploaded_by_account_id') required this.uploadedByAccountId, @JsonKey(name: 'subtask_id') this.subtaskId});
   factory _FileListItem.fromJson(Map<String, dynamic> json) => _$FileListItemFromJson(json);
 
 @override@JsonKey(name: 'file_id') final  String fileId;
@@ -231,6 +233,8 @@ class _FileListItem implements FileListItem {
 @override@JsonKey(name: 'size_bytes') final  int sizeBytes;
 @override final  String tag;
 @override@JsonKey(name: 'uploaded_by_account_id') final  String uploadedByAccountId;
+/// Dosyanın bağlı olduğu alt görev (ADR-0024); yoksa alan yoktur. Alt görev silinince boşalır.
+@override@JsonKey(name: 'subtask_id') final  String? subtaskId;
 
 /// Create a copy of FileListItem
 /// with the given fields replaced by the non-null parameter values.
@@ -245,18 +249,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FileListItem&&(identical(other.fileId, fileId) || other.fileId == fileId)&&(identical(other.workItemId, workItemId) || other.workItemId == workItemId)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.contentType, contentType) || other.contentType == contentType)&&(identical(other.sizeBytes, sizeBytes) || other.sizeBytes == sizeBytes)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.uploadedByAccountId, uploadedByAccountId) || other.uploadedByAccountId == uploadedByAccountId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FileListItem&&(identical(other.fileId, fileId) || other.fileId == fileId)&&(identical(other.workItemId, workItemId) || other.workItemId == workItemId)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.contentType, contentType) || other.contentType == contentType)&&(identical(other.sizeBytes, sizeBytes) || other.sizeBytes == sizeBytes)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.uploadedByAccountId, uploadedByAccountId) || other.uploadedByAccountId == uploadedByAccountId)&&(identical(other.subtaskId, subtaskId) || other.subtaskId == subtaskId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,fileId,workItemId,displayName,contentType,sizeBytes,tag,uploadedByAccountId);
+    return Object.hash(runtimeType,fileId,workItemId,displayName,contentType,sizeBytes,tag,uploadedByAccountId,subtaskId);
 }
 
 @override
 String toString() {
-    return 'FileListItem(fileId: $fileId, workItemId: $workItemId, displayName: $displayName, contentType: $contentType, sizeBytes: $sizeBytes, tag: $tag, uploadedByAccountId: $uploadedByAccountId)';
+    return 'FileListItem(fileId: $fileId, workItemId: $workItemId, displayName: $displayName, contentType: $contentType, sizeBytes: $sizeBytes, tag: $tag, uploadedByAccountId: $uploadedByAccountId, subtaskId: $subtaskId)';
 }
 
 
@@ -267,7 +271,7 @@ abstract mixin class _$FileListItemCopyWith<$Res> implements $FileListItemCopyWi
   factory _$FileListItemCopyWith(_FileListItem value, $Res Function(_FileListItem) _then) = __$FileListItemCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'file_id') String fileId,@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'content_type') String contentType,@JsonKey(name: 'size_bytes') int sizeBytes, String tag,@JsonKey(name: 'uploaded_by_account_id') String uploadedByAccountId
+@JsonKey(name: 'file_id') String fileId,@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'content_type') String contentType,@JsonKey(name: 'size_bytes') int sizeBytes, String tag,@JsonKey(name: 'uploaded_by_account_id') String uploadedByAccountId,@JsonKey(name: 'subtask_id') String? subtaskId
 });
 
 
@@ -284,7 +288,7 @@ class __$FileListItemCopyWithImpl<$Res>
 
 /// Create a copy of FileListItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? fileId = null,Object? workItemId = null,Object? displayName = null,Object? contentType = null,Object? sizeBytes = null,Object? tag = null,Object? uploadedByAccountId = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? fileId = null,Object? workItemId = null,Object? displayName = null,Object? contentType = null,Object? sizeBytes = null,Object? tag = null,Object? uploadedByAccountId = null,Object? subtaskId = freezed,}) {
   return _then(_FileListItem(
 fileId: null == fileId ? _self.fileId : fileId // ignore: cast_nullable_to_non_nullable
 as String,workItemId: null == workItemId ? _self.workItemId : workItemId // ignore: cast_nullable_to_non_nullable
@@ -293,7 +297,8 @@ as String,contentType: null == contentType ? _self.contentType : contentType // 
 as String,sizeBytes: null == sizeBytes ? _self.sizeBytes : sizeBytes // ignore: cast_nullable_to_non_nullable
 as int,tag: null == tag ? _self.tag : tag // ignore: cast_nullable_to_non_nullable
 as String,uploadedByAccountId: null == uploadedByAccountId ? _self.uploadedByAccountId : uploadedByAccountId // ignore: cast_nullable_to_non_nullable
-as String,
+as String,subtaskId: freezed == subtaskId ? _self.subtaskId : subtaskId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

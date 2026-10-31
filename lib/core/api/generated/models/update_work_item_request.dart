@@ -23,6 +23,10 @@ abstract class UpdateWorkItemRequest with _$UpdateWorkItemRequest {
     @JsonKey(name: 'planned_end_on')
     DateTime? plannedEndOn,
 
+    /// Tamamlanma kanıtı bayrağı (ADR-0024); verilmezse değişmez. Değişim audit ve olay yazar.
+    @JsonKey(name: 'completion_evidence_required')
+    bool? completionEvidenceRequired,
+
     /// Korumalı alan; dolu gönderilirse 422 work.input_invalid.
     @JsonKey(name: 'completed_on') String? completedOn,
 

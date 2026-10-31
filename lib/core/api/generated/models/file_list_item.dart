@@ -18,6 +18,9 @@ abstract class FileListItem with _$FileListItem {
     required String tag,
     @JsonKey(name: 'uploaded_by_account_id')
     required String uploadedByAccountId,
+
+    /// Dosyanın bağlı olduğu alt görev (ADR-0024); yoksa alan yoktur. Alt görev silinince boşalır.
+    @JsonKey(name: 'subtask_id') String? subtaskId,
   }) = _FileListItem;
 
   factory FileListItem.fromJson(Map<String, Object?> json) =>

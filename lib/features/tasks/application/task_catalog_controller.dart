@@ -33,14 +33,17 @@ class TaskCatalogController extends _$TaskCatalogController {
     state = AsyncData(c.withTasks(list));
   }
 
-  /// Aynı kodlu görevi [task] ile değiştirir; gecikme günü yeni bitiş/duruma göre yeniden
-  /// hesaplanır (örnek kaynak; gerçek değer sunucudan gelir).
+  /// Aynı kodlu görevi [task] ile değiştirir. Örnek görevde gecikme günü yeni bitiş/duruma
+  /// göre yeniden hesaplanır; sunucu görevinde ([TaskItem.lateness] dolu) sunucu değeri
+  /// korunur (istemci gecikme türetmez — WORK-K37; tarih alanı P1b'ye kadar geçicidir).
   void replace(TaskItem task) {
     final c = _catalog;
     if (c == null) return;
-    final fixed = task.copyWith(
-      overdueDays: c.overdueDaysFor(task.due, done: task.isDone),
-    );
+    final fixed = task.lateness != null
+        ? task
+        : task.copyWith(
+            overdueDays: c.overdueDaysFor(task.due, done: task.isDone),
+          );
     state = AsyncData(
       c.withTasks([for (final t in c.tasks) t.code == task.code ? fixed : t]),
     );

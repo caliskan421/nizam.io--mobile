@@ -10,9 +10,17 @@ part 'task_details_controller.g.dart';
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
 /// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
 /// katalogdaki [TaskCatalog.access]'ten.
+///
+/// Katalog yeniden kurulunca (invalidate, kapsam değişimi) ayrıntı katalogla birlikte gider;
+/// bu yüzden katalog YÜKLEMEYE geçtiğinde ayrıntı da kendini geçersiz kılar ve yeni katalog
+/// gelince yeniden okunur. [TaskCatalogController.applyDetails] yükleme üretmez → döngü yok.
 @riverpod
 Future<void> taskDetails(Ref ref, String code) async {
-  ref.watch(scopeStateProvider);
+  ref
+    ..watch(scopeStateProvider)
+    ..listen(taskCatalogControllerProvider, (prev, next) {
+      if (next.isLoading && !(prev?.isLoading ?? false)) ref.invalidateSelf();
+    });
   final catalog = await ref.read(taskCatalogControllerProvider.future);
   final task = catalog.task(code);
   if (task == null) return;

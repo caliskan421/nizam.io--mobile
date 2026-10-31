@@ -115,6 +115,27 @@ void main() {
     },
   );
 
+  test('katalog yeniden kurulunca ayrıntı yeniden okunur ve yeni kataloğa eklenir (döngü yok)', () async {
+    final details = _Details(_details);
+    final c = _container(details);
+    c.listen(taskDetailsProvider('w1'), (_, _) {});
+    await c.read(taskDetailsProvider('w1').future);
+    expect(details.asked, ['w1']);
+
+    c.invalidate(taskCatalogControllerProvider);
+    await c.read(taskCatalogControllerProvider.future);
+    await c.read(taskDetailsProvider('w1').future);
+    final t = c.read(taskCatalogControllerProvider).value!.task('w1')!;
+    expect(t.subtasks.single.title, 'Pompa', reason: 'ayrıntı kaybolmaz');
+    expect(t.fileEntries, hasLength(1));
+    expect(details.asked, ['w1', 'w1']);
+
+    // applyDetails yükleme üretmez: kendiliğinden ek okuma yok.
+    await Future<void>.delayed(Duration.zero);
+    await c.read(taskDetailsProvider('w1').future);
+    expect(details.asked, ['w1', 'w1']);
+  });
+
   test('kaynak null dönerse katalog değişmez', () async {
     final c = _container(_Details(null));
     c.listen(taskDetailsProvider('w1'), (_, _) {});

@@ -12,6 +12,10 @@ part of 'task_details_controller.dart';
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
 /// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
 /// katalogdaki [TaskCatalog.access]'ten.
+///
+/// Katalog yeniden kurulunca (invalidate, kapsam değişimi) ayrıntı katalogla birlikte gider;
+/// bu yüzden katalog YÜKLEMEYE geçtiğinde ayrıntı da kendini geçersiz kılar ve yeni katalog
+/// gelince yeniden okunur. [TaskCatalogController.applyDetails] yükleme üretmez → döngü yok.
 
 @ProviderFor(taskDetails)
 final taskDetailsProvider = TaskDetailsFamily._();
@@ -20,6 +24,10 @@ final taskDetailsProvider = TaskDetailsFamily._();
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
 /// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
 /// katalogdaki [TaskCatalog.access]'ten.
+///
+/// Katalog yeniden kurulunca (invalidate, kapsam değişimi) ayrıntı katalogla birlikte gider;
+/// bu yüzden katalog YÜKLEMEYE geçtiğinde ayrıntı da kendini geçersiz kılar ve yeni katalog
+/// gelince yeniden okunur. [TaskCatalogController.applyDetails] yükleme üretmez → döngü yok.
 
 final class TaskDetailsProvider
     extends $FunctionalProvider<AsyncValue<void>, void, FutureOr<void>>
@@ -28,6 +36,10 @@ final class TaskDetailsProvider
   /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
   /// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
   /// katalogdaki [TaskCatalog.access]'ten.
+  ///
+  /// Katalog yeniden kurulunca (invalidate, kapsam değişimi) ayrıntı katalogla birlikte gider;
+  /// bu yüzden katalog YÜKLEMEYE geçtiğinde ayrıntı da kendini geçersiz kılar ve yeni katalog
+  /// gelince yeniden okunur. [TaskCatalogController.applyDetails] yükleme üretmez → döngü yok.
   TaskDetailsProvider._({
     required TaskDetailsFamily super.from,
     required String super.argument,
@@ -71,12 +83,16 @@ final class TaskDetailsProvider
   }
 }
 
-String _$taskDetailsHash() => r'f9402617a3fc7b528a884d413d99bb77e2f99e62';
+String _$taskDetailsHash() => r'ed9befda853d1c0ec6b6ae285f2c2893da9ab5ba';
 
 /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
 /// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
 /// katalogdaki [TaskCatalog.access]'ten.
+///
+/// Katalog yeniden kurulunca (invalidate, kapsam değişimi) ayrıntı katalogla birlikte gider;
+/// bu yüzden katalog YÜKLEMEYE geçtiğinde ayrıntı da kendini geçersiz kılar ve yeni katalog
+/// gelince yeniden okunur. [TaskCatalogController.applyDetails] yükleme üretmez → döngü yok.
 
 final class TaskDetailsFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<void>, String> {
@@ -93,6 +109,10 @@ final class TaskDetailsFamily extends $Family
   /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
   /// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
   /// katalogdaki [TaskCatalog.access]'ten.
+  ///
+  /// Katalog yeniden kurulunca (invalidate, kapsam değişimi) ayrıntı katalogla birlikte gider;
+  /// bu yüzden katalog YÜKLEMEYE geçtiğinde ayrıntı da kendini geçersiz kılar ve yeni katalog
+  /// gelince yeniden okunur. [TaskCatalogController.applyDetails] yükleme üretmez → döngü yok.
 
   TaskDetailsProvider call(String code) =>
       TaskDetailsProvider._(argument: code, from: this);

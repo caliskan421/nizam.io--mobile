@@ -238,7 +238,8 @@ class HomeTeam extends StatelessWidget {
 
   final HomeDashboard dashboard;
 
-  /// Kutuya dokunma → görev listesi o roldeki kişilerle süzülmüş (prototip `go.admin/koord/uye`).
+  /// Kutuya dokunma → görev listesi o ekip rolündeki kişilerle süzülmüş (koordinatör/üye).
+  /// Yönetici kutusu yalnız sayıdır: yöneticilik ekip rolü değildir, süzgeç açmaz (F57).
   final ValueChanged<TeamRole> onOpen;
 
   @override
@@ -248,8 +249,10 @@ class HomeTeam extends StatelessWidget {
     final team = dashboard.team;
     Widget tile(TeamRole r, Color dot, int n, String role) => NzCard.outlined(
       padding: const EdgeInsets.all(NizamioSpacing.space3),
-      onTap: () => onOpen(r),
-      semanticLabel: '$n $role. ${l.uiHomeOpenList}',
+      onTap: r == TeamRole.admin ? null : () => onOpen(r),
+      semanticLabel: r == TeamRole.admin
+          ? '$n $role'
+          : '$n $role. ${l.uiHomeOpenList}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: NizamioSpacing.space1,

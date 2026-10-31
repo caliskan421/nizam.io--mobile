@@ -337,8 +337,7 @@ class UploadForm extends ConsumerWidget {
               (u) => !u.done && u.title.isNotEmpty,
             ))
               TaskChip(
-                label:
-                    '${u.title}${u.evidenceRequired && u.evidence == null ? ' *' : ''}',
+                label: u.title,
                 selected: d.subtask == u.id,
                 onTap: () => ctl.updateUpload(d.copyWith(subtask: () => u.id)),
               ),

@@ -29,16 +29,16 @@ void main() {
     expect(ctl.setPriority(TaskPriority.low), isTrue);
     expect(ctl.setPriority(TaskPriority.low), isFalse);
 
-    // Kanıtı zorunlu alt görev kanıtsız bitirilemez; kanıt yükleyince bitirilir.
-    expect(ctl.toggleSubtask('s3'), isFalse);
+    // Alt görevde kanıt bayrağı yok (ADR-0024): yükleme alt görev önseçmez; alt görevler
+    // kanıtsız bitirilir.
     ctl.openUpload();
-    expect(c.read(p).upload!.subtask, 's3');
+    expect(c.read(p).upload!.subtask, isNull);
     expect(ctl.submitUpload(), isTrue);
     expect(c.read(p).tab, TaskDetailTab.files);
     expect(task().fileEntries, hasLength(2));
-    expect(task().files, 2);
-    expect(ctl.toggleSubtask('s3'), isTrue);
-    expect(ctl.toggleSubtask('s2'), isTrue);
+    ctl
+      ..toggleSubtask('s3')
+      ..toggleSubtask('s2');
     expect(ctl.setStatus(TaskStatus.done), StatusChange.changed);
     expect(task().overdueDays, 0);
     expect(

@@ -344,13 +344,11 @@ class TaskDetailController extends _$TaskDetailController {
 
   // ---- kanıt yükle ----------------------------------------------------------------------
 
+  /// Yükleme formunu açar; alt görev önseçilmez (alt görevde kanıt bayrağı yok, ADR-0024).
   void openUpload() {
-    final t = _task;
-    if (t == null) return;
-    final firstMissing = t.subtasks.where((u) => u.missingEvidence).firstOrNull;
+    if (_task == null) return;
     state = state.copyWith(
-      upload: () => UploadDraft(
-        subtask: firstMissing?.id,
+      upload: () => const UploadDraft(
         tag: EvidenceTag.result,
         name: 'Saha_fotografi_20261021.jpg',
       ),
@@ -461,14 +459,10 @@ class TaskDetailController extends _$TaskDetailController {
     );
   }
 
-  /// İşaretler/kaldırır; kanıtı zorunlu ve eksikse false.
-  bool toggleSubtask(String id) {
-    final u = _task?.subtasks.where((s) => s.id == id).firstOrNull;
-    if (u == null) return true;
-    if (!u.done && u.missingEvidence) return false;
-    _updateSub(id, (s) => s.copyWith(done: !s.done));
-    return true;
-  }
+  /// İşaretler/kaldırır. Alt görevde kanıt bayrağı yok (ADR-0024): kanıt kapısı görev
+  /// seviyesindedir ([TaskItem.evidenceRequired]).
+  void toggleSubtask(String id) =>
+      _updateSub(id, (s) => s.copyWith(done: !s.done));
 
   void toggleSubtaskOpen(String id) {
     final s = {...state.openSubtasks};
@@ -529,9 +523,6 @@ class TaskDetailController extends _$TaskDetailController {
 
   void clearSubtaskDates(String id) =>
       _updateSub(id, (s) => s.copyWith(start: () => null, end: () => null));
-
-  void setSubtaskEvidenceRequired(String id, {required bool required}) =>
-      _updateSub(id, (s) => s.copyWith(evidenceRequired: required));
 
   /// Alt görevi kaldırır; kaldırılanı döner (bildirim metni için).
   Subtask? removeSubtask(String id) {

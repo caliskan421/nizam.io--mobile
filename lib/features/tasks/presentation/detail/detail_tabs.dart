@@ -289,8 +289,6 @@ class DetailSubtasks extends ConsumerWidget {
             onStart: (v) => ctl.setSubtaskStart(u.id, v),
             onEnd: (v) => ctl.setSubtaskEnd(u.id, v),
             onClearDates: () => ctl.clearSubtaskDates(u.id),
-            onEvidenceRequired: (v) =>
-                ctl.setSubtaskEvidenceRequired(u.id, required: v),
             onDelete: () => actions.removeSubtask(u.id),
           ),
           const Gap(NizamioSpacing.space2),
@@ -321,7 +319,6 @@ class _SubtaskBlock extends StatelessWidget {
     required this.onStart,
     required this.onEnd,
     required this.onClearDates,
-    required this.onEvidenceRequired,
     required this.onDelete,
   });
 
@@ -338,7 +335,6 @@ class _SubtaskBlock extends StatelessWidget {
   final ValueChanged<DateTime?> onStart;
   final ValueChanged<DateTime?> onEnd;
   final VoidCallback onClearDates;
-  final ValueChanged<bool> onEvidenceRequired;
   final VoidCallback onDelete;
 
   @override
@@ -359,9 +355,8 @@ class _SubtaskBlock extends StatelessWidget {
       if (dates.isNotEmpty) dates,
       if (u.evidence != null) l.uiTasksOneEvidence,
       if (u.missingAssignee) l.uiTasksNeedsPerson,
-      if (u.missingEvidence) l.uiTasksEvidenceRequiredLc,
     ];
-    final missing = u.missingAssignee || u.missingEvidence;
+    final missing = u.missingAssignee;
 
     Widget field(String label, Widget child) => Padding(
       padding: const EdgeInsets.only(top: NizamioSpacing.space3),
@@ -548,19 +543,6 @@ class _SubtaskBlock extends StatelessWidget {
                               ),
                             ),
                         ],
-                      ),
-                    ),
-                    field(
-                      l.uiTasksSubEvidence,
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TaskSegmented(
-                          compact: true,
-                          semanticLabel: l.uiTasksEvidenceFile,
-                          labels: [l.uiTasksRequired, l.uiTasksOptional],
-                          selected: u.evidenceRequired ? 0 : 1,
-                          onSelected: (i) => onEvidenceRequired(i == 0),
-                        ),
                       ),
                     ),
                     if (u.evidence case final f?)

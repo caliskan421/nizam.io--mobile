@@ -27,6 +27,8 @@ void registerTasksModule(GetIt locator, {required Dio? Function() apiDio}) {
               : ApiTaskCatalogRepository(
                   dio,
                   programId: () => locator<ScopeController>().current.programId,
+                  departmentId: () =>
+                      locator<ScopeController>().current.departmentId,
                 );
         },
         sample: SampleTaskCatalogRepository(),

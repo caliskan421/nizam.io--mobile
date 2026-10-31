@@ -618,7 +618,8 @@ class TaskCardView extends StatelessWidget {
     ];
     final late = !task.isDone && task.isOverdue;
     final req = task.dateRequest;
-    final subs = task.subtasks;
+    final subTotal = task.subtaskTotal;
+    final subDone = task.subtaskDoneTotal;
     Widget counter(IconData icon, int n, String label) => Semantics(
       label: '$n $label',
       excludeSemantics: true,
@@ -653,10 +654,8 @@ class TaskCardView extends StatelessWidget {
       priorityCaption: l.uiTasksCardPriority,
       priority: l.priorityLabel(task.priority),
       priorityLevel: priorityLevel(task.priority),
-      subtaskProgress: subs.isEmpty ? null : task.subtasksDone / subs.length,
-      subtaskText: subs.isEmpty
-          ? null
-          : l.subtaskLine(task.subtasksDone, subs.length),
+      subtaskProgress: subTotal == 0 ? null : subDone / subTotal,
+      subtaskText: subTotal == 0 ? null : l.subtaskLine(subDone, subTotal),
       assignees: names.take(3).toList(),
       assigneeText: names.isEmpty
           ? null
@@ -670,8 +669,6 @@ class TaskCardView extends StatelessWidget {
             label: '${l.uiTasksRequestBadge} · ${TaskDates.short(req.due)}',
             tone: NzTone.waiting,
           ),
-        if (task.files > 0)
-          counter(NzIcons.document, task.files, l.uiTasksFilesTail),
         if (task.notes > 0)
           counter(NzIcons.messages, task.notes, l.uiTasksNotesTail),
       ],

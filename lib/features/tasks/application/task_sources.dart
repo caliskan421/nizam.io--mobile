@@ -1,6 +1,7 @@
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/scope/scope_controller.dart';
+import '../domain/task_access.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_details.dart';
 
@@ -38,10 +39,10 @@ final class TaskDetailsSource implements TaskDetailsRepository {
   final TaskDetailsRepository? Function() server;
 
   @override
-  Future<TaskDetails?> load(TaskItem task) async {
+  Future<TaskDetails?> load(TaskItem task, {TaskAccess? access}) async {
     if (!scope.current.hasServerProgram) return null;
     final s = server();
     if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
-    return s.load(task);
+    return s.load(task, access: access);
   }
 }

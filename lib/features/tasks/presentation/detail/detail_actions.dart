@@ -308,9 +308,7 @@ class TaskDetailActions {
 
   // ---- alt görev, not ---------------------------------------------------------------------
 
-  void toggleSubtask(String id) {
-    if (!_ctl.toggleSubtask(id)) _say(context.l10n.uiTasksTSubEvidence);
-  }
+  void toggleSubtask(String id) => _ctl.toggleSubtask(id);
 
   void removeSubtask(String id) {
     final l = context.l10n;

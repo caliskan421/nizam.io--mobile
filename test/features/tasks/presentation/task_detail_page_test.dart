@@ -67,8 +67,19 @@ Future<void> _top(WidgetTester tester) async {
 
 /// Sunucu programında görev kataloğu ve ayrıntı uçları (tek görev `w1`, departman `d1`).
 Map<String, Object> _serverBodies() => {
-  '/v1/work-items/gantt/admin': {
-    'tasks': [
+  '/v1/me/departments': {
+    'departments': [
+      {
+        'program_id': 'prog-1',
+        'program_name': 'Program Bir',
+        'department_id': 'd1',
+        'display_name': 'Altyapı',
+        'role': 'koordinator',
+      },
+    ],
+  },
+  '/v1/work-items': {
+    'items': [
       {
         'work_item_id': 'w1',
         'title': 'Hidrofor kurulumu',
@@ -76,25 +87,18 @@ Map<String, Object> _serverBodies() => {
         'department_id': 'd1',
         'priority': 'orta',
         'status': 'devam_ediyor',
-        'start_on': '2026-10-01',
-        'end_on': '2026-12-01',
-        'planned_end_on': '',
-        'completed_on': '',
         'assignee_account_ids': ['acc-1'],
-        'lateness': {
-          'is_overdue': false,
-          'days_overdue': 0,
-          'is_completed_late': false,
-          'days_late': 0,
-          'is_completed_early': false,
-          'days_early': 0,
-        },
+        'is_overdue': false,
+        'days_overdue': 0,
+        'is_completed_late': false,
+        'days_late': 0,
+        'is_completed_early': false,
+        'days_early': 0,
+        'completion_evidence_required': false,
+        'subtask_counts': {'total': 1, 'done': 1},
       },
     ],
-    'links': <Object>[],
   },
-  '/v1/reports/dashboard/tasks': {'tasks': <Object>[], 'total': 0},
-  '/v1/reports/dashboard/coordinatorships': {'coordinatorships': <Object>[]},
   '/v1/departments': {
     'departments': [
       {
@@ -102,15 +106,6 @@ Map<String, Object> _serverBodies() => {
         'name': 'Altyapı',
         'kind': 'koordinatorluk',
         'code': 'ALT',
-      },
-    ],
-  },
-  '/v1/admin/users': {
-    'users': [
-      {
-        'account_id': 'acc-1',
-        'full_name': 'Ayşe Yılmaz',
-        'memberships': ['prog-1:d1:koordinator'],
       },
     ],
   },
@@ -330,7 +325,8 @@ void main() {
             w.properties.label == 'Basınç testi ${_l.uiTasksDoneLc}',
       ),
     );
-    expect(find.text(_l.uiTasksTSubEvidence), findsOneWidget);
+    // Alt görevde kanıt bayrağı yok (ADR-0024): kanıtsız işaretlenir.
+    expect(find.text(_l.uiTasksTSubEvidence), findsNothing);
 
     await _top(tester);
     await _tap(tester, find.text(_l.uiTasksUpload));

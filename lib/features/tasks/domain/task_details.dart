@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import 'task_access.dart';
 import 'task_catalog.dart';
 
 /// Görev ayrıntısının listede gelmeyen parçaları: alt görevler, notlar, kanıt dosyaları ve
@@ -25,7 +26,7 @@ final class TaskDetails {
 
 /// Görev ayrıntısının kaynağı (domain portu; gerçekleştirmeler `data/`). Ayrıntı görevin
 /// kendi departmanında okunur (S3). null → kaynak ayrıntı taşımaz (örnek katalog görevi zaten
-/// içerir).
+/// içerir). [access]: oturumun rolü (tarih talebi yüzünü seçer; null → tarih talebi okunmaz).
 abstract interface class TaskDetailsRepository {
-  Future<TaskDetails?> load(TaskItem task);
+  Future<TaskDetails?> load(TaskItem task, {TaskAccess? access});
 }

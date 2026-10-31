@@ -44,7 +44,7 @@ TaskItem _withDetails(TaskItem t) {
           title: 'Montaj ekibini planla',
           assigneeRequired: true,
         ),
-        Subtask(id: 's3', title: 'Basınç testi', evidenceRequired: true),
+        Subtask(id: 's3', title: 'Basınç testi'),
       ],
       dateRequest: () => DateChangeRequest(
         by: 'ko',

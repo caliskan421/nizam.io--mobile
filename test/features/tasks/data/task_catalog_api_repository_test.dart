@@ -1,15 +1,21 @@
-// tasks sunucu kataloğu: uçlar paralel okunur ve TaskCatalog'a eşlenir — görev kodu sunucu
-// kimliği, görünen kod departman kodu; not sayısı/oluşturan rapor listesinden; kişi rolleri ve
-// koordinatörlük ekibi bu programın üyelik etiketlerinden; kullanıcılar imleçle; hata ApiError.
+// tasks sunucu kataloğu: herkes için `GET /v1/work-items` departman başına (açık departman,
+// imleçle); departmanlar seçili kapsamdan ya da ekip satırlarından, yöneticide ek olarak şirket
+// listesinden (programa bağlı olmayan atlanır); rol /v1/me + /v1/me/departments'tan; WorkItem →
+// TaskItem (kanıt bayrağı, alt görev sayıları, gecikme); yönetici rapor/kullanıcı/Gantt uçları
+// çağrılmaz; hata ApiError.
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/features/tasks/data/task_catalog_api_repository.dart';
+import 'package:nizamio/features/tasks/domain/task_access.dart';
 import 'package:nizamio/features/tasks/domain/task_catalog.dart';
 
-/// Yola (ve imlece) göre yanıt veren sahte uç.
+const _dept = 'nizamio.department';
+
+/// Yol + açık departman + imlece göre yanıt veren sahte uç. Anahtar: `yol`,
+/// `yol@departman`, `yol@departman?cursor=…` (en özelden genele aranır).
 class _Adapter implements HttpClientAdapter {
   _Adapter(this.bodies, {this.statuses = const {}});
 
@@ -24,12 +30,18 @@ class _Adapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     seen.add(options);
-    final cursor = options.uri.queryParameters['cursor'];
     final path = options.uri.path;
-    final key = cursor == null ? path : '$path?cursor=$cursor';
+    final dept = options.extra[_dept];
+    final cursor = options.uri.queryParameters['cursor'];
+    final keys = [
+      if (dept != null && cursor != null) '$path@$dept?cursor=$cursor',
+      if (dept != null) '$path@$dept',
+      path,
+    ];
+    final key = keys.firstWhere(bodies.containsKey, orElse: () => path);
     return ResponseBody.fromString(
       jsonEncode(bodies[key]),
-      statuses[path] ?? 200,
+      statuses[key] ?? 200,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
       },
@@ -40,236 +52,256 @@ class _Adapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-ApiTaskCatalogRepository _repo(_Adapter adapter) => ApiTaskCatalogRepository(
-  Dio(BaseOptions(baseUrl: 'https://api.test'))..httpClientAdapter = adapter,
-  programId: () => 'p1',
-  now: () => DateTime(2026, 11, 1, 15, 30),
-);
+ApiTaskCatalogRepository _repo(_Adapter adapter, {String? department}) =>
+    ApiTaskCatalogRepository(
+      Dio(BaseOptions(baseUrl: 'https://api.test'))
+        ..httpClientAdapter = adapter,
+      programId: () => 'p1',
+      departmentId: () => department,
+      now: () => DateTime(2026, 11, 1, 15, 30),
+    );
 
-const _lateness = {
+Map<String, Object?> _item(
+  String id,
+  String dept, {
+  bool evidence = false,
+  int total = 0,
+  int done = 0,
+}) => {
+  'work_item_id': id,
+  'program_id': 'p1',
+  'department_id': dept,
+  'title': 'Görev $id',
+  'priority': 'yuksek',
+  'status': 'devam_ediyor',
+  'assignee_account_ids': ['u2'],
   'is_overdue': true,
   'days_overdue': 4,
   'is_completed_late': false,
   'days_late': 0,
   'is_completed_early': false,
   'days_early': 0,
+  'completion_evidence_required': evidence,
+  'subtask_counts': {'total': total, 'done': done},
+  'planned_end_on': '2026-10-20',
 };
 
-Map<String, Object> _bodies() => {
-  '/v1/me': {
-    'account_id': 'me',
-    'email': 'a@b.test',
-    'full_name': 'Ayşe Kaya',
-    'company_admin': true,
-  },
-  '/v1/work-items/gantt/admin': {
-    'tasks': [
-      {
-        'work_item_id': 'w1',
-        'title': 'Kablo',
-        'program_id': 'p1',
-        'department_id': 'd1',
-        'priority': 'yuksek',
-        'status': 'devam_ediyor',
-        'start_on': '2026-10-01',
-        'end_on': '2026-10-28',
-        'planned_end_on': '',
-        'completed_on': '',
-        'assignee_account_ids': ['u2'],
-        'lateness': _lateness,
-      },
-      {
-        'work_item_id': 'w2',
-        'title': 'Boru',
-        'program_id': 'p1',
-        'department_id': 'd2',
-        'priority': 'orta',
-        'status': 'tamamlandi',
-        'start_on': '2026-09-01',
-        'end_on': '2026-09-10',
-        'planned_end_on': '2026-09-08',
-        'completed_on': '2026-09-10',
-        'assignee_account_ids': <String>[],
-        'lateness': {..._lateness, 'is_overdue': false, 'days_overdue': 0},
-      },
-    ],
-    'links': <Object>[],
-  },
-  '/v1/reports/dashboard/tasks': {
-    'tasks': [
-      {
-        'work_item_id': 'w1',
-        'title': 'Kablo',
-        'department_id': 'd1',
-        'department_name': 'Altyapı',
-        'status': 'devam_ediyor',
-        'priority': 'yuksek',
-        'start_on': '2026-10-01',
-        'end_on': '2026-10-28',
-        'planned_end_on': null,
-        'completed_on': null,
-        'created_by': {'account_id': 'me', 'full_name': 'Ayşe Kaya'},
-        'assignees': <Object>[],
-        'is_overdue': true,
-        'days_overdue': 4,
-        'is_completed_late': false,
-        'days_late': 0,
-        'is_completed_early': false,
-        'days_early': 0,
-        'has_pending_dependency': false,
-        'dependency_count': 0,
-        'note_count': 3,
-        'created_at': '2026-09-20T08:00:00Z',
-      },
-    ],
-    'total': 1,
-  },
-  '/v1/reports/dashboard/coordinatorships': {
-    'coordinatorships': [
-      for (final (id, name, lead) in [
-        ('d1', 'Altyapı', 'u1'),
-        ('d2', 'Fuar', null),
-      ])
-        {
-          'department_id': id,
-          'name': name,
-          'kind': 'koordinatorluk',
-          'coordinators': [
-            if (lead != null) {'account_id': lead, 'full_name': 'Ali Avcı'},
-          ],
-          'total_tasks': 1,
-          'completed_tasks': 0,
-          'in_progress_tasks': 1,
-          'not_started_tasks': 0,
-          'overdue_tasks': 0,
-          'completion_rate': 0.0,
-          'member_count': 1,
-          'meeting_count': 0,
-          'last_activity_at': null,
-        },
-    ],
-  },
-  '/v1/departments': {
-    'departments': [
-      {
-        'department_id': 'd1',
-        'name': 'Altyapı',
-        'kind': 'koordinatorluk',
-        'code': 'ALT',
-      },
-      {'department_id': 'd2', 'name': 'Fuar', 'kind': 'koordinatorluk'},
-    ],
-  },
-  '/v1/admin/users': {
-    'users': [
-      {
-        'account_id': 'me',
-        'full_name': 'Ayşe Kaya',
-        'memberships': ['p1:d1:uye'],
-      },
-      {
-        'account_id': 'u1',
-        'full_name': 'Ali Avcı',
-        'memberships': ['p1:d1:koordinator', 'p1:d2:koordinator'],
-      },
-    ],
-    'next_cursor': 'c2',
-  },
-  '/v1/admin/users?cursor=c2': {
-    'users': [
-      {
-        'account_id': 'u2',
-        'full_name': 'Veli Can',
-        // Başka programdaki koordinatörlük bu programda rol vermez.
-        'memberships': ['p1:d1:uye', 'p9:d9:koordinator', 'bozuk'],
-      },
-    ],
-  },
+Map<String, Object> _me({bool admin = false}) => {
+  'account_id': 'me',
+  'email': 'a@b.test',
+  'full_name': 'Ayşe Kaya',
+  'company_admin': admin,
 };
+
+Map<String, Object> _seats(List<(String, String, String)> rows) => {
+  'departments': [
+    for (final (program, dept, role) in rows)
+      {
+        'program_id': program,
+        'program_name': 'Program',
+        'department_id': dept,
+        'display_name': 'Ad $dept',
+        'role': role,
+      },
+  ],
+};
+
+const _forbidden = {
+  'code': 'work.not_authorized',
+  'message': 'x',
+  'request_id': 'q',
+};
+
+const _adminOnly = [
+  '/v1/work-items/gantt/admin',
+  '/v1/reports/dashboard/tasks',
+  '/v1/reports/dashboard/coordinatorships',
+  '/v1/admin/users',
+];
 
 void main() {
-  test('uçlar okunur; kullanıcılar imleç bitene kadar', () async {
-    final adapter = _Adapter(_bodies());
-    await _repo(adapter).load();
-    final paths = adapter.seen.map((o) => o.uri.path).toList();
-    expect(paths.where((p) => p == '/v1/admin/users'), hasLength(2));
+  test('üye: yalnız bu programdaki ekip satırının departmanı; imleçle tüm sayfalar', () async {
+    final adapter = _Adapter({
+      '/v1/me': _me(),
+      '/v1/me/departments': _seats([
+        ('p1', 'd1', 'uye'),
+        ('p2', 'd9', 'koordinator'),
+      ]),
+      '/v1/work-items@d1': {
+        'items': [_item('w1', 'd1', evidence: true, total: 3, done: 1)],
+        'next_cursor': 'c2',
+      },
+      '/v1/work-items@d1?cursor=c2': {
+        'items': [_item('w2', 'd1')],
+      },
+      for (final p in [..._adminOnly, '/v1/departments']) p: _forbidden,
+    });
+    final c = await _repo(adapter).load();
+
+    expect(c.tasks.map((t) => t.id), ['w1', 'w2']);
+    final lists = adapter.seen.where((o) => o.uri.path == '/v1/work-items');
+    expect(lists.map((o) => o.extra[_dept]), ['d1', 'd1']);
+    expect(lists.map((o) => o.uri.queryParameters['limit']), ['200', '200']);
+    expect(adapter.seen.map((o) => o.uri.path).toSet(), {
+      '/v1/me',
+      '/v1/me/departments',
+      '/v1/work-items',
+    }, reason: 'yönetici uçları ve şirket departman listesi çağrılmaz');
+    expect(c.access!.companyAdmin, isFalse);
+    expect(c.access!.roleIn('p1', 'd1'), SeatRole.member);
+    expect(c.people.single.role, PersonRole.member);
+    expect(c.coordinatorships.single.code, 'd1');
+    expect(c.coordinatorships.single.name, 'Ad d1');
+  });
+
+  test('WorkItem → TaskItem eşlemesi', () async {
+    final c = await _repo(
+      _Adapter({
+        '/v1/me': _me(),
+        '/v1/me/departments': _seats([('p1', 'd1', 'koordinator')]),
+        '/v1/work-items@d1': {
+          'items': [_item('w1', 'd1', evidence: true, total: 3, done: 1)],
+        },
+      }),
+    ).load();
+    final t = c.tasks.single;
+    expect(t.id, 'w1');
+    expect(t.code, 'w1');
+    expect(t.departmentId, 'd1');
+    expect(t.coordinatorship, 'd1');
+    expect(t.programId, 'p1');
+    expect(t.status, TaskStatus.inProgress);
+    expect(t.priority, TaskPriority.high);
+    expect(t.assignees, ['u2']);
+    expect(t.evidenceRequired, isTrue);
+    expect(t.subtaskCounts, (total: 3, done: 1));
+    expect(t.subtaskTotal, 3);
+    expect(t.subtaskDoneTotal, 1);
+    expect(t.overdueDays, 4);
+    expect(t.lateness!.isOverdue, isTrue);
+    expect(t.plannedEnd, DateTime(2026, 10, 20));
+    expect(t.files, 0, reason: 'liste dosya sayısı taşımaz');
+    expect(c.today, DateTime(2026, 11));
+    expect(c.me, 'me');
+    expect(c.people.single.name, 'Ayşe Kaya');
+    expect(c.people.single.role, PersonRole.coordinator);
+  });
+
+  test('kapsamda departman seçiliyse yalnız o departman okunur', () async {
+    final adapter = _Adapter({
+      '/v1/me': _me(admin: true),
+      '/v1/me/departments': _seats([
+        ('p1', 'd1', 'koordinator'),
+        ('p1', 'd2', 'uye'),
+      ]),
+      '/v1/work-items@d2': {
+        'items': [_item('w9', 'd2')],
+      },
+      '/v1/departments': _forbidden,
+    });
+    final c = await _repo(adapter, department: 'd2').load();
+    expect(c.tasks.map((t) => t.id), ['w9']);
     expect(
-      paths.toSet(),
-      _bodies().keys.where((k) => !k.contains('?')).toSet(),
+      adapter.seen
+          .where((o) => o.uri.path == '/v1/work-items')
+          .map((o) => o.extra[_dept]),
+      ['d2'],
+    );
+    expect(
+      adapter.seen.map((o) => o.uri.path),
+      isNot(contains('/v1/departments')),
     );
   });
 
-  test(
-    'görev: kimlik kod, departman kodu görünen kod, rapor alanları',
-    () async {
-      final c = await _repo(_Adapter(_bodies())).load();
-      expect(c.today, DateTime(2026, 11));
-      expect(c.me, 'me');
-      final w1 = c.task('w1')!;
-      expect(w1.id, 'w1');
-      expect(w1.displayCode, 'ALT');
-      expect(w1.coordinatorship, 'd1');
-      expect(w1.departmentId, 'd1');
-      expect(w1.programId, 'p1');
-      expect(w1.title, 'Kablo');
-      expect(w1.status, TaskStatus.inProgress);
-      expect(w1.priority, TaskPriority.high);
-      expect(w1.start, DateTime(2026, 10));
-      expect(w1.due, DateTime(2026, 10, 28));
-      expect(w1.plannedEnd, isNull);
-      expect(w1.completedAt, isNull);
-      expect(w1.assignees, ['u2']);
-      expect(w1.overdueDays, 4);
-      expect(w1.lateness!.isOverdue, isTrue);
-      expect(w1.notes, 3);
-      expect(w1.creator, 'me');
-      expect(w1.createdAt, DateTime.utc(2026, 9, 20, 8));
-
-      final w2 = c.task('w2')!;
-      expect(w2.displayCode, 'w2', reason: 'departman kodu yoksa kimlik');
-      expect(w2.status, TaskStatus.done);
-      expect(w2.plannedEnd, DateTime(2026, 9, 8));
-      expect(w2.completedAt, DateTime(2026, 9, 10));
-      expect(w2.notes, 0, reason: 'rapor listesinde yok');
-      expect(w2.creator, isNull);
-    },
-  );
-
-  test('kişiler ve roller; koordinatörlük ekibi bu programdan', () async {
-    final c = await _repo(_Adapter(_bodies())).load();
-    expect(c.people.map((p) => p.id), ['me', 'u1', 'u2']);
-    expect(c.person('me')!.role, PersonRole.admin);
-    expect(c.person('u1')!.role, PersonRole.coordinator);
-    expect(c.person('u2')!.role, PersonRole.member);
-    expect(c.person('u2')!.name, 'Veli Can');
-
-    expect(c.coordinatorships.map((k) => k.code), ['d1', 'd2']);
-    final alt = c.coordinatorship('d1')!;
-    expect(alt.name, 'Altyapı');
-    expect(alt.leads, ['u1']);
-    expect(alt.members, ['me', 'u2']);
-    final fuar = c.coordinatorship('d2')!;
-    expect(fuar.leads, ['u1'], reason: 'raporda olmayan koordinatör üyelikten');
-    expect(fuar.members, isEmpty);
-  });
-
-  test('yetki yoksa sunucu hatası fırlar', () async {
+  test('yönetici: ekip satırları + şirket departmanları; programda olmayan atlanır', () async {
     final adapter = _Adapter(
       {
-        ..._bodies(),
-        '/v1/work-items/gantt/admin': {
-          'code': 'work.not_authorized',
-          'message': 'work.not_authorized',
-          'request_id': 'q1',
+        '/v1/me': _me(admin: true),
+        '/v1/me/departments': _seats([('p1', 'd1', 'koordinator')]),
+        '/v1/departments': {
+          'departments': [
+            {
+              'department_id': 'd1',
+              'name': 'Altyapı',
+              'kind': 'x',
+              'code': 'ALT',
+            },
+            {
+              'department_id': 'd2',
+              'name': 'Yazılım',
+              'kind': 'x',
+              'code': 'YZL',
+            },
+            {'department_id': 'd3', 'name': 'Dış', 'kind': 'x'},
+          ],
+        },
+        '/v1/work-items@d1': {
+          'items': [_item('w1', 'd1')],
+        },
+        '/v1/work-items@d2': {
+          'items': [_item('w2', 'd2')],
+        },
+        '/v1/work-items@d3': {
+          'code': 'work.program_scope_invalid',
+          'message': 'x',
+          'request_id': 'q',
+        },
+        for (final p in _adminOnly) p: _forbidden,
+      },
+      statuses: {'/v1/work-items@d3': 404},
+    );
+    final c = await _repo(adapter).load();
+    expect(c.tasks.map((t) => (t.id, t.displayCode)), [
+      ('w1', 'ALT'),
+      ('w2', 'YZL'),
+    ]);
+    expect(c.coordinatorships.map((d) => (d.code, d.name)), [
+      ('d1', 'Ad d1'),
+      ('d2', 'Yazılım'),
+    ], reason: 'programda olmayan departman koordinatörlük olarak görünmez');
+    expect(c.people.single.role, PersonRole.admin);
+    expect(c.access!.seesAllIn('p1', 'd2'), isTrue);
+    for (final p in _adminOnly) {
+      expect(adapter.seen.map((o) => o.uri.path), isNot(contains(p)));
+    }
+  });
+
+  test('ekip satırının liste hatası atlanmaz: ApiError fırlar', () async {
+    final adapter = _Adapter(
+      {
+        '/v1/me': _me(),
+        '/v1/me/departments': _seats([('p1', 'd1', 'uye')]),
+        '/v1/work-items@d1': {
+          'code': 'work.program_scope_invalid',
+          'message': 'x',
+          'request_id': 'q',
         },
       },
-      statuses: {'/v1/work-items/gantt/admin': 403},
+      statuses: {'/v1/work-items@d1': 404},
     );
     await expectLater(
       _repo(adapter).load(),
       throwsA(
-        isA<ApiError>().having((e) => e.code, 'code', 'work.not_authorized'),
+        isA<ApiError>().having(
+          (e) => e.code,
+          'code',
+          'work.program_scope_invalid',
+        ),
       ),
+    );
+  });
+
+  test('ekip satırı yoksa (yönetici değil) liste boş, istek yok', () async {
+    final adapter = _Adapter({
+      '/v1/me': _me(),
+      '/v1/me/departments': {'departments': null},
+    });
+    final c = await _repo(adapter).load();
+    expect(c.tasks, isEmpty);
+    expect(c.coordinatorships, isEmpty);
+    expect(
+      adapter.seen.map((o) => o.uri.path),
+      isNot(contains('/v1/work-items')),
     );
   });
 }

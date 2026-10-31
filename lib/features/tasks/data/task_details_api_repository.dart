@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/api/generated/clients/records_client.dart';
 import '../../../core/api/generated/clients/work_client.dart';
-import '../../../core/api/generated/models/date_change_request_list.dart';
+import '../../../core/api/generated/models/date_change_request.dart' as api;
 import '../../../core/api/generated/models/file_list_item.dart';
 import '../../../core/api/generated/models/file_record_list.dart';
 import '../../../core/api/generated/models/work_item_note_list.dart';
@@ -10,14 +10,18 @@ import '../../../core/api/generated/models/work_item_subtask.dart';
 import '../../../core/api/generated/models/work_item_subtask_list.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/http/interceptors.dart';
+import '../domain/task_access.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_details.dart';
 import 'work_item_mapping.dart';
 
 /// Görev ayrıntısının sunucu kaynağı. Alt görevler, notlar ve dosyalar S3'tür: görevin KENDİ
-/// departmanıyla okunur (seçili kapsamın departmanı değil; [withDepartment]). Bekleyen tarih
-/// talebi ŞY inceleme yüzünden (`GET /v1/date-change-requests?status=pending`, S1) göreve göre
-/// süzülür. Uçlardan biri hata verirse ayrıntı kurulmaz.
+/// departmanıyla okunur (seçili kapsamın departmanı değil; [withDepartment]). Tarih talebi role
+/// göre ([TaskAccess.dateRequestFeed]): şirket yöneticisi inceleme kuyruğu
+/// (`GET /v1/date-change-requests?status=pending`, S1), kapsamda koordinatör kendi talepleri
+/// (`GET /v1/date-change-requests/mine`, S3, görevin departmanı), üye/rolsüz çağrı yok (yetkisiz
+/// uç çağrılıp ayrıntı düşürülmez). Erişim bilinmiyorsa ([access] null) çağrı yok. Okunan
+/// uçlardan biri hata verirse ayrıntı kurulmaz.
 class ApiTaskDetailsRepository implements TaskDetailsRepository {
   ApiTaskDetailsRepository(Dio dio)
     : _work = WorkClient(dio),
@@ -27,7 +31,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
   final RecordsClient _records;
 
   @override
-  Future<TaskDetails?> load(TaskItem task) async {
+  Future<TaskDetails?> load(TaskItem task, {TaskAccess? access}) async {
     // Departmanı olmayan görev kapıda reddedilir (seçili departmana düşülmez).
     final department = task.departmentId ?? '';
     final id = task.id;
@@ -60,14 +64,28 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
           ),
         ),
       ),
-      apiCall(() => _work.listDateChangeRequests(status: 'pending')),
+      _dateRequests(
+        access?.dateRequestFeed(task.programId, task.departmentId) ??
+            DateRequestFeed.none,
+        department,
+      ),
     ], eagerError: true);
     final subtasks = (r[0] as WorkItemSubtaskList).subtasks;
     final notes = (r[1] as WorkItemNoteList).notes;
     final files = (r[2] as FileRecordList).files;
-    final requests = (r[3] as DateChangeRequestList).requests;
-
-    final request = requests.where((d) => d.workItemId == id).firstOrNull;
+    final requests = [
+      for (final d in r[3] as List<api.DateChangeRequest>)
+        if (d.workItemId == id) d,
+    ];
+    // Bekleyen önce; yoksa son sonuçlanmış (koordinatörün kendi talepleri tüm durumları taşır).
+    final request =
+        requests
+            .where(
+              (d) =>
+                  dateRequestState(d.status.json) == DateRequestState.pending,
+            )
+            .firstOrNull ??
+        requests.lastOrNull;
     return TaskDetails(
       subtasks: [for (final s in subtasks) _subtask(s, files)],
       notes: [
@@ -108,7 +126,26 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
     );
   }
 
-  /// Alt görevin kanıtı: ona bağlı ilk dosyanın adı.
+  /// Role göre tarih talebi yüzü; [DateRequestFeed.none] → istek yok, boş liste.
+  Future<List<api.DateChangeRequest>> _dateRequests(
+    DateRequestFeed feed,
+    String department,
+  ) async => switch (feed) {
+    DateRequestFeed.reviewQueue => (await apiCall(
+      () => _work.listDateChangeRequests(status: 'pending'),
+    )).requests,
+    DateRequestFeed.mine => (await apiCall(
+      () => _work.myDateChangeRequests(
+        extras: withDepartment(
+          WorkClient.myDateChangeRequestsOpenapiExtras,
+          department,
+        ),
+      ),
+    )).requests,
+    DateRequestFeed.none => const [],
+  };
+
+  /// Alt görevin bağlı dosyası: ona bağlı ilk dosyanın adı (bilgi; kanıt bayrağı yok).
   static Subtask _subtask(WorkItemSubtask s, List<FileListItem> files) =>
       Subtask(
         id: s.subtaskId,

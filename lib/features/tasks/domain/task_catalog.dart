@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import 'task_access.dart';
+
 /// Görev durumu (sunucu kavramı; istemci geçiş kuralı türetmez). Sunucu değerleri (`data`
 /// katmanında eşlenir): todo ↔ `baslanmadi`, inProgress ↔ `devam_ediyor`, review ↔
 /// `onaya_sunuldu`, returned ↔ `iade_edildi`, done ↔ `tamamlandi`. [unknown]: sunucunun yeni
@@ -69,8 +71,8 @@ final class CoordinatorshipRef {
   List<String> get team => [...leads, ...members];
 }
 
-/// Alt görev. Kişi ve tarih isteğe bağlıdır; [evidenceRequired] ise kanıt ([evidence])
-/// yüklenmeden bitirilemez.
+/// Alt görev. Kişi ve tarih isteğe bağlıdır. Alt görevde kanıt bayrağı yoktur (ADR-0024: kanıt
+/// görev seviyesinde, [TaskItem.evidenceRequired]); [evidence] yalnız bağlı dosyanın adıdır.
 @immutable
 final class Subtask {
   const Subtask({
@@ -82,7 +84,6 @@ final class Subtask {
     this.end,
     this.evidence,
     this.assigneeRequired = false,
-    this.evidenceRequired = false,
   });
 
   final String id;
@@ -95,9 +96,7 @@ final class Subtask {
   /// Bu alt göreve bağlı kanıt dosyasının adı.
   final String? evidence;
   final bool assigneeRequired;
-  final bool evidenceRequired;
 
-  bool get missingEvidence => !done && evidenceRequired && evidence == null;
   bool get missingAssignee => !done && assigneeRequired && assignee == null;
 
   Subtask copyWith({
@@ -107,7 +106,6 @@ final class Subtask {
     DateTime? Function()? start,
     DateTime? Function()? end,
     String? evidence,
-    bool? evidenceRequired,
   }) => Subtask(
     id: id,
     title: title ?? this.title,
@@ -117,7 +115,6 @@ final class Subtask {
     end: end == null ? this.end : end(),
     evidence: evidence ?? this.evidence,
     assigneeRequired: assigneeRequired,
-    evidenceRequired: evidenceRequired ?? this.evidenceRequired,
   );
 }
 
@@ -353,12 +350,13 @@ final class TaskDependency {
 
 /// Görev. Sayılar ve [overdueDays] sunucunun hesapladığı değerlerdir (örnek kaynakta sabittir).
 ///
-/// Sunucu şeması `GanttTask` ile birleşik (tarih taşıyan tek görev yüzü): `work_item_id` →
+/// Görev kataloğunda sunucu kaynağı `WorkItem`'dır (`GET /v1/work-items`): `work_item_id` →
 /// [id] (ve [code]), `department_id` → [departmentId] (ve [coordinatorship]), `program_id` →
-/// [programId], `start_on` → [start], `end_on` → [due], `planned_end_on` → [plannedEnd],
-/// `completed_on` → [completedAt] (gün), `assignee_account_ids` → [assignees], `lateness` →
-/// [lateness] (ve [overdueDays] ← `days_overdue`). Tarihsiz liste satırı için bkz.
-/// `TaskSummary` (`work_item.dart`).
+/// [programId], `planned_end_on` → [plannedEnd], `completed_on` → [completedAt] (gün),
+/// `assignee_account_ids` → [assignees], gecikme düz alanları → [lateness] (ve [overdueDays] ←
+/// `days_overdue`), `completion_evidence_required` → [evidenceRequired], `subtask_counts` →
+/// [subtaskCounts]. [start]/[due]: v0.6.0 `start_on`/`end_on` gelene kadar GEÇİCİ olarak
+/// katalog günü (F57 P1b). Zaman çizelgesi aynı alan adlarıyla `GanttTask`'tan eşler.
 @immutable
 final class TaskItem {
   const TaskItem({
@@ -388,6 +386,7 @@ final class TaskItem {
     this.fileEntries = const [],
     this.noteEntries = const [],
     this.evidenceRequired = false,
+    this.subtaskCounts,
   }) : id = id ?? code;
 
   /// Görev kodu (`ALT-7`); rota kimliği. Sunucuda insan okunur görev anahtarı yok (backend
@@ -442,7 +441,8 @@ final class TaskItem {
   /// Sunucunun gecikme bayrakları; örnek veride yok ([overdueDays] kullanılır).
   final TaskLateness? lateness;
 
-  /// Kanıt dosyası sayısı.
+  /// Kanıt dosyası sayısı — YALNIZ örnek kaynağın dosya üreticisi. Sunucu listesi dosya
+  /// sayısı taşımaz (F56 M-4) ve listede gösterilmez; ayrıntıda [fileEntries] uzunluğu.
   final int files;
 
   /// Not sayısı.
@@ -463,13 +463,26 @@ final class TaskItem {
   /// Notlar (ayrıntı ekranı).
   final List<TaskNote> noteEntries;
 
-  /// Tamamlamak için kanıt dosyası zorunlu mu.
+  /// Tamamlamak için kanıt dosyası zorunlu mu (`WorkItem.completion_evidence_required`,
+  /// ADR-0024; görev seviyesinde). "Dosya var" göstergesi DEĞİLDİR.
   final bool evidenceRequired;
+
+  /// Sunucunun alt görev sayıları (`subtask_counts`: toplam, biten); ayrıntı yüklenmeden
+  /// listede ilerleme için. null → kaynak taşımaz (örnek veri; [subtasks] sayılır).
+  final ({int total, int done})? subtaskCounts;
 
   bool get isOverdue => overdueDays > 0;
   bool get isDone => status == TaskStatus.done;
   bool get hasPendingRequest => dateRequest?.isPending ?? false;
   int get subtasksDone => subtasks.where((s) => s.done).length;
+
+  /// Listede gösterilen alt görev toplamı: ayrıntı yüklendiyse [subtasks], yoksa sunucu sayısı.
+  int get subtaskTotal =>
+      subtasks.isNotEmpty ? subtasks.length : subtaskCounts?.total ?? 0;
+
+  /// Listede gösterilen biten alt görev sayısı ([subtaskTotal] ile aynı kaynaktan).
+  int get subtaskDoneTotal =>
+      subtasks.isNotEmpty ? subtasksDone : subtaskCounts?.done ?? 0;
 
   TaskItem copyWith({
     String? code,
@@ -513,6 +526,7 @@ final class TaskItem {
     fileEntries: fileEntries ?? this.fileEntries,
     noteEntries: noteEntries ?? this.noteEntries,
     evidenceRequired: evidenceRequired,
+    subtaskCounts: subtaskCounts,
   );
 }
 
@@ -525,6 +539,7 @@ final class TaskCatalog {
     required List<TaskItem> tasks,
     required List<Person> people,
     required List<CoordinatorshipRef> coordinatorships,
+    this.access,
   }) : tasks = List.unmodifiable(tasks),
        people = List.unmodifiable(people),
        coordinatorships = List.unmodifiable(coordinatorships);
@@ -536,6 +551,9 @@ final class TaskCatalog {
   final List<TaskItem> tasks;
   final List<Person> people;
   final List<CoordinatorshipRef> coordinatorships;
+
+  /// Oturumdaki hesabın görev erişimi (rol türetme); örnek kaynakta null.
+  final TaskAccess? access;
 
   // Kimlik → öğe dizinleri: kart/arama/filtre her satırda ad çözer; doğrusal arama yerine
   // ilk kullanımda bir kez kurulur (katalog değişmez, `withTasks` yeni örnek üretir).
@@ -561,6 +579,7 @@ final class TaskCatalog {
     tasks: tasks,
     people: people,
     coordinatorships: coordinatorships,
+    access: access,
   );
 
   /// Koordinatörlükte sıradaki görev kodu (`ALT-14` → `ALT-15`).

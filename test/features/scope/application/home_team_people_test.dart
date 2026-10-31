@@ -9,31 +9,28 @@ import 'package:nizamio/features/tasks/tasks.dart';
 import '../../pilot_support.dart';
 
 void main() {
-  test(
-    'örnek katalog: prototip kümeleri (admin 2, koordinatör 13, üye 3)',
-    () async {
-      final catalog = await SampleTaskCatalogRepository().load();
-      final p = HomeTeamPeople.fromCatalog(catalog);
-      expect(p.of(TeamRole.admin), ['ma', 'my']);
-      expect(p.of(TeamRole.member), ['bk', 'gn', 'mey']);
-      // Koordinatör rolündekiler + koordinatörlük yürüten adminler (prototipteki 13 kişi).
-      expect(p.of(TeamRole.coordinator).toSet(), {
-        'aa',
-        'av',
-        'ko',
-        'my',
-        'oh',
-        'so',
-        'rk',
-        'mk',
-        'yc',
-        'bc',
-        'eo',
-        'ss',
-        'ma',
-      });
-    },
-  );
+  test('ekip rolüne göre kümeler; yönetici süzgeci yok (boş)', () async {
+    final catalog = await SampleTaskCatalogRepository().load();
+    final p = HomeTeamPeople.fromCatalog(catalog);
+    expect(p.of(TeamRole.admin), isEmpty);
+    expect(p.of(TeamRole.member), ['bk', 'gn', 'mey']);
+    // Koordinatör rolündekiler + koordinatörlük yürüten adminler (prototipteki 13 kişi).
+    expect(p.of(TeamRole.coordinator).toSet(), {
+      'aa',
+      'av',
+      'ko',
+      'my',
+      'oh',
+      'so',
+      'rk',
+      'mk',
+      'yc',
+      'bc',
+      'eo',
+      'ss',
+      'ma',
+    });
+  });
 
   test('sağlayıcı katalog yüklenince dolar', () async {
     final h = await pilotHarness(PilotBackend());
@@ -41,6 +38,6 @@ void main() {
     c.listen(homeTeamPeopleProvider, (_, _) {});
     expect(c.read(homeTeamPeopleProvider), isNull);
     await c.read(taskCatalogControllerProvider.future);
-    expect(c.read(homeTeamPeopleProvider)?.admins, ['ma', 'my']);
+    expect(c.read(homeTeamPeopleProvider)?.members, ['bk', 'gn', 'mey']);
   });
 }

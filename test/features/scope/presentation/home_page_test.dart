@@ -107,10 +107,9 @@ void main() {
   });
 
   testWidgets(
-    'her KPI kendi görünümüyle, ekip kutuları rol kişileriyle görevleri açar',
+    'her KPI kendi görünümüyle, ekip kutuları ekip rolüyle açar; yönetici kutusu açmaz',
     (tester) async {
-      // Örnek kapsam: rol kutuları kataloğun yönetici kişilerini ister; sunucu kullanıcı
-      // listesi yönetici bayrağı taşımaz (yalnız oturumdaki kişi bilinir).
+      // Yönetici süzgeci yok (F57): yöneticilik ekip rolü değildir; kutu yalnız sayıdır.
       final (_, nav) = await _open(tester, sample: true);
       for (final label in [
         _l.uiHomeKpiDone,
@@ -125,7 +124,6 @@ void main() {
         'tasks:done',
         'tasks:inProgress',
         'tasks:review',
-        'tasks:ma,my',
         'tasks:bk,gn,mey',
       ]);
     },

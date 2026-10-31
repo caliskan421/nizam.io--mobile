@@ -11,6 +11,7 @@ import 'package:nizamio/features/tasks/application/task_catalog_controller.dart'
 import 'package:nizamio/features/tasks/application/task_details_controller.dart';
 import 'package:nizamio/features/tasks/application/task_sources.dart';
 import 'package:nizamio/features/tasks/application/tasks_providers.dart';
+import 'package:nizamio/features/tasks/domain/task_access.dart';
 import 'package:nizamio/features/tasks/domain/task_catalog.dart';
 import 'package:nizamio/features/tasks/domain/task_details.dart';
 
@@ -34,18 +35,27 @@ class _Catalog implements TaskCatalogRepository {
     tasks: [_task],
     people: const [],
     coordinatorships: const [],
+    access: _access,
   );
 }
+
+final _access = TaskAccess(
+  accountId: 'me',
+  companyAdmin: false,
+  seats: const [],
+);
 
 class _Details implements TaskDetailsRepository {
   _Details(this.result);
 
   final TaskDetails? result;
   final asked = <String>[];
+  final accesses = <TaskAccess?>[];
 
   @override
-  Future<TaskDetails?> load(TaskItem task) async {
+  Future<TaskDetails?> load(TaskItem task, {TaskAccess? access}) async {
     asked.add(task.code);
+    accesses.add(access);
     return result;
   }
 }
@@ -85,21 +95,25 @@ ProviderContainer _container(_Details details) {
 }
 
 void main() {
-  test('ayrıntı katalogdaki göreve eklenir; gecikme korunur', () async {
-    final details = _Details(_details);
-    final c = _container(details);
-    c.listen(taskDetailsProvider('w1'), (_, _) {});
-    await c.read(taskDetailsProvider('w1').future);
-    expect(details.asked, ['w1']);
-    final t = c.read(taskCatalogControllerProvider).value!.task('w1')!;
-    expect(t.subtasks.single.title, 'Pompa');
-    expect(t.noteEntries.single.text, 'Not');
-    expect(t.notes, 1);
-    expect(t.fileEntries.single.name, 'Tutanak.pdf');
-    expect(t.files, 1);
-    expect(t.dateRequest!.due, DateTime(2026, 11, 10));
-    expect(t.overdueDays, 42);
-  });
+  test(
+    'ayrıntı katalogdaki göreve eklenir; gecikme korunur; rol katalogdan',
+    () async {
+      final details = _Details(_details);
+      final c = _container(details);
+      c.listen(taskDetailsProvider('w1'), (_, _) {});
+      await c.read(taskDetailsProvider('w1').future);
+      expect(details.asked, ['w1']);
+      expect(details.accesses.single, same(_access));
+      final t = c.read(taskCatalogControllerProvider).value!.task('w1')!;
+      expect(t.subtasks.single.title, 'Pompa');
+      expect(t.noteEntries.single.text, 'Not');
+      expect(t.notes, 1);
+      expect(t.fileEntries.single.name, 'Tutanak.pdf');
+      expect(t.files, 1);
+      expect(t.dateRequest!.due, DateTime(2026, 11, 10));
+      expect(t.overdueDays, 42);
+    },
+  );
 
   test('kaynak null dönerse katalog değişmez', () async {
     final c = _container(_Details(null));

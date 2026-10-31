@@ -1,12 +1,14 @@
 // tasks ayrıntısı (sunucu): alt görev, not ve dosya görevin KENDİ departmanıyla (açık
-// departman) okunur; bekleyen tarih talebi göreve göre süzülür; dosya türü/etiketi ve alt
-// görev kanıtı eşlenir; hata ApiError.
+// departman) okunur; tarih talebi role göre (yönetici inceleme kuyruğu, koordinatör kendi
+// talepleri, üye çağrı yok) ve göreve göre süzülür; dosya türü/etiketi ve alt görevin bağlı
+// dosyası eşlenir; hata ApiError.
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/features/tasks/data/task_details_api_repository.dart';
+import 'package:nizamio/features/tasks/domain/task_access.dart';
 import 'package:nizamio/features/tasks/domain/task_catalog.dart';
 
 class _Adapter implements HttpClientAdapter {
@@ -46,12 +48,46 @@ final _task = TaskItem(
   title: 'Hidrofor',
   coordinatorship: 'd1',
   departmentId: 'd1',
+  programId: 'p1',
   status: TaskStatus.inProgress,
   priority: TaskPriority.medium,
   start: DateTime(2026, 7, 2),
   due: DateTime(2026, 9, 20),
   assignees: const [],
 );
+
+TaskAccess _access({bool admin = false, SeatRole? role}) => TaskAccess(
+  accountId: 'me',
+  companyAdmin: admin,
+  seats: [
+    if (role != null)
+      TeamSeat(
+        programId: 'p1',
+        departmentId: 'd1',
+        departmentName: 'Altyapı',
+        role: role,
+      ),
+  ],
+);
+
+final _admin = _access(admin: true);
+
+Map<String, Object> _request(String id, String item, String status) => {
+  'request_id': id,
+  'work_item_id': item,
+  'status': status,
+  'old_start_on': '2026-07-02',
+  'new_start_on': '2026-07-02',
+  'old_end_on': '2026-09-20',
+  'new_end_on': '2026-11-10',
+};
+
+/// Yetkisiz uç: çağrılırsa 403 (rol seçiminin yanlış uca gitmediğinin kanıtı).
+const _forbidden = {
+  'code': 'work.not_authorized',
+  'message': 'x',
+  'request_id': 'q',
+};
 
 Map<String, Object> _file(
   String id,
@@ -144,32 +180,26 @@ Map<String, Object> _bodies() => {
 };
 
 void main() {
-  test(
-    'S3 uçlar görevin departmanıyla; tarih talebi yalnız bekleyenler',
-    () async {
-      final adapter = _Adapter(_bodies());
-      await _repo(adapter).load(_task);
+  test('yönetici: S3 uçlar görevin departmanıyla; tarih talebi inceleme kuyruğundan (bekleyen)', () async {
+    final adapter = _Adapter(_bodies());
+    await _repo(adapter).load(_task, access: _admin);
+    expect(adapter.seen.map((o) => o.uri.path).toSet(), _bodies().keys.toSet());
+    for (final o in adapter.seen) {
+      final s3 = o.uri.path.startsWith('/v1/work-items/');
       expect(
-        adapter.seen.map((o) => o.uri.path).toSet(),
-        _bodies().keys.toSet(),
+        o.extra.values.contains('d1'),
+        s3,
+        reason: '${o.uri.path}: açık departman yalnız S3 uçlarda',
       );
-      for (final o in adapter.seen) {
-        final s3 = o.uri.path.startsWith('/v1/work-items/');
-        expect(
-          o.extra.values.contains('d1'),
-          s3,
-          reason: '${o.uri.path}: açık departman yalnız S3 uçlarda',
-        );
-      }
-      final dcr = adapter.seen.singleWhere(
-        (o) => o.uri.path == '/v1/date-change-requests',
-      );
-      expect(dcr.uri.queryParameters['status'], 'pending');
-    },
-  );
+    }
+    final dcr = adapter.seen.singleWhere(
+      (o) => o.uri.path == '/v1/date-change-requests',
+    );
+    expect(dcr.uri.queryParameters['status'], 'pending');
+  });
 
   test('alt görevler, notlar, dosyalar ve talep eşlenir', () async {
-    final d = (await _repo(_Adapter(_bodies())).load(_task))!;
+    final d = (await _repo(_Adapter(_bodies())).load(_task, access: _admin))!;
     final [pompa, test] = d.subtasks;
     expect(pompa.id, 's1');
     expect(pompa.title, 'Pompa');
@@ -213,9 +243,77 @@ void main() {
         ..._bodies(),
         '/v1/date-change-requests': {'requests': <Object>[], 'total': 0},
       }),
-    ).load(_task);
+    ).load(_task, access: _admin);
     expect(d!.dateRequest, isNull);
   });
+
+  test('koordinatör: kendi talepleri görevin departmanıyla; bekleyen önce, yoksa son', () async {
+    final adapter = _Adapter(
+      {
+        ..._bodies(),
+        '/v1/date-change-requests': _forbidden,
+        '/v1/date-change-requests/mine': {
+          'requests': [
+            _request('r0', 'baska', 'pending'),
+            _request('r1', 'w1', 'rejected'),
+            _request('r2', 'w1', 'pending'),
+          ],
+          'total': 3,
+        },
+      },
+      statuses: {'/v1/date-change-requests': 403},
+    );
+    final d = await _repo(adapter)
+        .load(_task, access: _access(role: SeatRole.coordinator));
+    expect(d!.dateRequest!.id, 'r2');
+    final mine = adapter.seen.singleWhere(
+      (o) => o.uri.path == '/v1/date-change-requests/mine',
+    );
+    expect(mine.extra.values, contains('d1'));
+    expect(
+      adapter.seen.map((o) => o.uri.path),
+      isNot(contains('/v1/date-change-requests')),
+    );
+
+    final settled = await _repo(
+      _Adapter({
+        ..._bodies(),
+        '/v1/date-change-requests/mine': {
+          'requests': [_request('r1', 'w1', 'rejected')],
+          'total': 1,
+        },
+      }),
+    ).load(_task, access: _access(role: SeatRole.coordinator));
+    expect(settled!.dateRequest!.state, DateRequestState.rejected);
+  });
+
+  test(
+    'üye ve erişimi bilinmeyen: tarih talebi çağrılmaz, ayrıntı yine kurulur',
+    () async {
+      for (final access in [_access(role: SeatRole.member), null]) {
+        final adapter = _Adapter(
+          {
+            ..._bodies(),
+            '/v1/date-change-requests': _forbidden,
+            '/v1/date-change-requests/mine': _forbidden,
+          },
+          statuses: {
+            '/v1/date-change-requests': 403,
+            '/v1/date-change-requests/mine': 403,
+          },
+        );
+        final d = await _repo(adapter).load(_task, access: access);
+        expect(d!.subtasks, hasLength(2));
+        expect(d.dateRequest, isNull);
+        expect(
+          adapter.seen.where(
+            (o) => o.uri.path.startsWith('/v1/date-change-requests'),
+          ),
+          isEmpty,
+        );
+      }
+    },
+  );
 
   test('uç hatası ApiError olarak fırlar', () async {
     final adapter = _Adapter(
@@ -230,7 +328,7 @@ void main() {
       statuses: {'/v1/work-items/w1/notes': 403},
     );
     await expectLater(
-      _repo(adapter).load(_task),
+      _repo(adapter).load(_task, access: _admin),
       throwsA(
         isA<ApiError>().having((e) => e.code, 'code', 'work.not_assigned'),
       ),

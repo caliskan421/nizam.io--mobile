@@ -6,16 +6,13 @@ import '../domain/home_dashboard.dart';
 
 part 'home_team_people.g.dart';
 
-/// Ekip kutularının açtığı görev listesi süzgeci: rol başına kişi kimlikleri (prototip
-/// `go.admin/koord/uye`). Koordinatör kümesi koordinatör rolündekiler ile herhangi bir
-/// koordinatörlüğün koordinatörü olanların birleşimidir (adminler de koordinatörlük yürütebilir).
+/// Ekip kutularının açtığı görev listesi süzgeci: EKİP rolü (koordinator/uye) başına kişi
+/// kimlikleri. Koordinatör kümesi koordinatör rolündekiler ile herhangi bir koordinatörlüğün
+/// koordinatörü olanların birleşimidir. Yönetici süzgeci yoktur (F57): şirket yöneticiliği
+/// ekip rolü değildir; yönetici yalnız ekip satırı varsa o rolle görünür.
 @immutable
 final class HomeTeamPeople {
-  const HomeTeamPeople({
-    required this.admins,
-    required this.coordinators,
-    required this.members,
-  });
+  const HomeTeamPeople({required this.coordinators, required this.members});
 
   factory HomeTeamPeople.fromCatalog(TaskCatalog catalog) {
     final leads = {for (final c in catalog.coordinatorships) ...c.leads};
@@ -24,7 +21,6 @@ final class HomeTeamPeople {
         if (test(p)) p.id,
     ];
     return HomeTeamPeople(
-      admins: where((p) => p.role == PersonRole.admin),
       coordinators: where(
         (p) => p.role == PersonRole.coordinator || leads.contains(p.id),
       ),
@@ -32,12 +28,12 @@ final class HomeTeamPeople {
     );
   }
 
-  final List<String> admins;
   final List<String> coordinators;
   final List<String> members;
 
+  /// Rolün kişileri; yönetici için boş (süzgeç yok).
   List<String> of(TeamRole role) => switch (role) {
-    TeamRole.admin => admins,
+    TeamRole.admin => const [],
     TeamRole.coordinator => coordinators,
     TeamRole.member => members,
   };

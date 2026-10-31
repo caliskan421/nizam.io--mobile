@@ -45,6 +45,13 @@ Geliştirme: `flutter run --flavor dev -t lib/main_dev.dart --dart-define=NIZAMI
 Her açılış girişle başlar (kayıtlı oturum sunucuda kapatılır); çıkış girişe döndürür. Kapıyı atlayan
 (prototip) mod yoktur.
 
+Yerel geliştirme backend'i (örnek verili): `../program/araclar/agir-is.sh "mobil dev backend" -- test_integration/backend/dev-up.sh`
+— `up.sh` (pin etiketi, `127.0.0.1:18140`) ve ardından `seed_dev.py`: prototip kataloğu (16 kişi, 11 koordinatörlük,
+76 görev, dosya/not/alt görev, mesaj, toplantı) yalnız API ile basılır; tarihler bugüne kaydırılır. Giriş
+`admin@nizam.local` (dev ön dolgusu), diğerleri `<ad.soyad>@nizam.local`, aynı parola. Baştan kurmak: `down.sh`
+sonra yeniden `dev-up.sh`. `make integration` boş kurulum bekler: önce `down.sh` + `up.sh`. Android emülatöründen
+adres `http://10.0.2.2:18140`.
+
 ## Flavor'lar
 
 | Flavor | Giriş noktası | Android kimliği | Ağ |

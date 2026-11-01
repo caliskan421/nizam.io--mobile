@@ -155,7 +155,8 @@ class TaskDetailActions {
     }
   }
 
-  /// Yazma sonucunun ortak bildirimi: hata → hata kodunun metni; başarı → [done] (varsa).
+  /// Yazma sonucunun ortak bildirimi: hata → hata kodunun metni; başarı → [done] (varsa);
+  /// [WriteKind.invalid] → kısa "yapılamıyor" iletisi.
   void _report(WriteOutcome r, {String? done}) {
     if (!context.mounted) return;
     switch (r.kind) {
@@ -164,6 +165,9 @@ class TaskDetailActions {
         if (e != null) _say(errorText(context.l10n, e));
       case WriteKind.done:
         if (done != null) _say(done);
+      case WriteKind.invalid:
+        // İstek gönderilmedi (eylem açık değil / girdi geçersiz): sessiz kalınmaz.
+        _say(context.l10n.uiTasksTUnavailable);
       case _:
         break;
     }

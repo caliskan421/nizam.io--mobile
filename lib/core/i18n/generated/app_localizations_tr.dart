@@ -3738,4 +3738,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksUnassigned => 'Atanmamış';
+
+  @override
+  String get uiTasksTUnavailable => 'Bu işlem bu görevde şu an yapılamıyor.';
 }

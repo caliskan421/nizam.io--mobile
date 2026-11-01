@@ -4780,5 +4780,9 @@
   "uiTasksUnassigned": "Atanmamış",
   "@uiTasksUnassigned": {
     "description": "ui.tasks.unassigned"
+  },
+  "uiTasksTUnavailable": "Bu işlem bu görevde şu an yapılamıyor.",
+  "@uiTasksTUnavailable": {
+    "description": "ui.tasks.t_unavailable"
   }
 }

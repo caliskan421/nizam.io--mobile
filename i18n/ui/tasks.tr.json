@@ -315,6 +315,7 @@
     "ui.tasks.err_pick_file": "Yüklemek için bir dosya seç",
     "ui.tasks.upload_types": "PDF, PNG, JPG, CSV, Word, Excel, PowerPoint, Pages · 90 MB altı",
     "ui.tasks.team_empty": "Bu departmanda atanabilir kişi yok",
-    "ui.tasks.unassigned": "Atanmamış"
+    "ui.tasks.unassigned": "Atanmamış",
+    "ui.tasks.t_unavailable": "Bu işlem bu görevde şu an yapılamıyor."
   }
 }

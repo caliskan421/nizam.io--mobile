@@ -7263,6 +7263,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Atanmamış'**
   String get uiTasksUnassigned;
+
+  /// ui.tasks.t_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem bu görevde şu an yapılamıyor.'**
+  String get uiTasksTUnavailable;
 }
 
 class _AppLocalizationsDelegate

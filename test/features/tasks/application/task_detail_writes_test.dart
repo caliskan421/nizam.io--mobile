@@ -314,6 +314,23 @@ void main() {
       },
     );
 
+    for (final code in ['work.not_authorized', 'work.not_assigned']) {
+      test(
+        '403 $code → yeniden oku, hata döner, otomatik tekrar yok',
+        () async {
+          final s = _Server();
+          final (h, _, ctl) = await _open(s);
+          s.writes['POST /v1/work-items/w1/transitions'] = () =>
+              envelope(403, code);
+          final r = await ctl.setStatus(TaskStatus.todo);
+          expect(r.kind, WriteKind.failed);
+          expect(r.error!.code, code);
+          expect(h.backend.count('POST', '/v1/work-items/w1/transitions'), 1);
+          expect(_log(h), containsAll(['GET /v1/work-items', ..._detailReads]));
+        },
+      );
+    }
+
     test(
       '422 attachment_required → hata; 409 olmadığından yeniden okuma yok',
       () async {

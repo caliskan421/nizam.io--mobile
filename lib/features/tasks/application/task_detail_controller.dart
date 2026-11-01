@@ -77,6 +77,15 @@ bool _isConflict(ApiError e) =>
       'work.date_request_already_reviewed',
     }.contains(e.code);
 
+/// Sunucu 403 (`work.not_authorized` / `work.not_assigned`): yetki ya da atama değişmiş
+/// olabilir → 409 gibi görev yeniden okunur (görünürlük olguları tazelenir); otomatik tekrar yok.
+bool _isForbidden(ApiError e) =>
+    e.status == 403 ||
+    const {'work.not_authorized', 'work.not_assigned'}.contains(e.code);
+
+/// Hata sonrası yeniden okuma gerekir mi (çakışma ya da yetki reddi).
+bool _rereadAfter(ApiError e) => _isConflict(e) || _isForbidden(e);
+
 /// Yerel ön denetimin hatası: istek gönderilmez, metin yine koddan (sunucu kataloğundaki kod).
 WriteOutcome _rejected(String code) =>
     WriteOutcome(WriteKind.failed, ApiError(code));
@@ -290,7 +299,7 @@ class TaskDetailController extends _$TaskDetailController {
 
   // ---- sunucu yazması --------------------------------------------------------------------
 
-  /// Tek yazma kapısı: kilit → istek → (başarı ya da 409) yeniden okuma → kilit açılır.
+  /// Tek yazma kapısı: kilit → istek → (başarı, 409 ya da 403) yeniden okuma → kilit açılır.
   /// [list]: yazma listeyi de etkiler (durum, alt görev sayıları) → katalog yeniden okunur;
   /// değilse yalnız ayrıntı.
   Future<WriteOutcome> _write(
@@ -308,8 +317,8 @@ class TaskDetailController extends _$TaskDetailController {
       } on Object catch (e) {
         final err = toApiError(e);
         // Çok adımlı yazmada (düzenle + atama) ilk adımlar yazılmış olabilir: her hatada
-        // yeniden okunur; tek adımlıda yalnız 409'da.
-        if (rereadOnError || _isConflict(err)) {
+        // yeniden okunur; tek adımlıda 409 ve 403'te.
+        if (rereadOnError || _rereadAfter(err)) {
           await _reread(store, list: list);
         }
         return WriteOutcome(

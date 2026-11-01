@@ -143,7 +143,10 @@ final class _Peek {
           facts: [
             f(l.uiCalendarFactTable, e.table),
             f(l.uiCalendarFactDate, l.dayText(e.date)),
-            f(l.uiCalendarFactPerson, ix.personName(e.person)),
+            f(
+              l.uiCalendarFactPerson,
+              ix.personName(e.person) ?? l.uiTasksUnknownPerson,
+            ),
             f(
               l.uiCalendarFactCoordinatorship,
               ix.coordinatorshipName(e.coordinatorship),

@@ -59,7 +59,7 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
     final ctl = ref.read(meetingFormControllerProvider.notifier);
     final catalog = ref.watch(taskCatalogControllerProvider).value;
     final coords = catalog?.coordinatorships ?? const <CoordinatorshipRef>[];
-    String name(String id) => catalog?.person(id)?.name ?? id;
+    String name(String id) => catalog?.nameOf(id) ?? l.uiTasksUnknownPerson;
     final String? who;
     if (f.mode == MeetingMode.coordinatorships) {
       who = f.coordinatorships.isEmpty

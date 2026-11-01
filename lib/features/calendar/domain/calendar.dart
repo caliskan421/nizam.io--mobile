@@ -255,8 +255,8 @@ final class CalendarIndex {
   final TaskCatalog _catalog;
   final Map<DateTime, List<CalendarEntry>> _byDay;
 
-  /// Kişi adı (bilinmeyen kimlik olduğu gibi).
-  String personName(String id) => _catalog.person(id)?.name ?? id;
+  /// Kişi adı (sunucunun verdiği ad dahil); bilinmiyorsa null (arayüz nötr etiket gösterir).
+  String? personName(String id) => _catalog.nameOf(id);
 
   /// Koordinatörlük adı (bilinmeyen kod olduğu gibi).
   String coordinatorshipName(String code) =>

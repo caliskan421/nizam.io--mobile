@@ -10,6 +10,7 @@ import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/quick_forms_controller.dart';
 import '../../application/task_catalog_controller.dart';
+import '../../application/tasks_providers.dart';
 import '../../domain/task_catalog.dart';
 import '../detail/detail_forms.dart';
 import '../task_texts.dart';
@@ -48,7 +49,15 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
         : catalog?.coordinatorship(f.coordinatorship!);
     // Sunucu katalogu: koordinatörlük = departman; adaylar departman ekibinden (tek atanan).
     final server = catalog?.access != null;
-    String name(String id) => catalog?.person(id)?.name ?? id;
+    // Seçili atananın adı: sunucuda departman ekibinden (`listMembers`, seçicinin kaynağı),
+    // yoksa katalogdaki addan; bilinmiyorsa nötr etiket.
+    final team = server && coord != null
+        ? ref.watch(taskTeamProvider(coord.code)).value
+        : null;
+    String name(String id) =>
+        team?.where((m) => m.accountId == id).firstOrNull?.name ??
+        catalog?.nameOf(id) ??
+        l.uiTasksUnknownPerson;
     final assigneeValue = f.assignees.isEmpty
         ? (coord == null ? l.uiTasksCoordFirst : l.uiTasksPickPerson)
         : f.assignees.length == 1

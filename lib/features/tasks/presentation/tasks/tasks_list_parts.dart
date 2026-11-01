@@ -8,6 +8,7 @@ import '../../../../core/ui/layout/nz_pane.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
+import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
@@ -41,6 +42,7 @@ List<Widget> tasksListChildren(
   required TasksListController ctl,
   required VoidCallback onClearAll,
   required ValueChanged<String> onOpen,
+  ValueChanged<String>? onSelectDepartment,
 }) {
   final l = context.l10n;
   final c = context.colors;
@@ -93,7 +95,40 @@ List<Widget> tasksListChildren(
     list.take(state.limit).forEach(card);
   }
 
+  // Liste tek departman bağlamındadır (istemci akışları §2): seçilebilir birden çoksa ya da
+  // liste kesikse seçici gösterilir; seçim kapsamı değiştirir, katalog yeniden okunur.
+  final departments = catalog.departments;
+  final pickDepartment =
+      onSelectDepartment != null &&
+      (departments.length > 1 || catalog.departmentsTruncated);
+  final selectedDepartment = catalog.departmentId;
+
   return [
+    if (pickDepartment) ...[
+      NzSelect<String>(
+        label: l.uiTasksDepartment,
+        items: [
+          for (final d in departments)
+            NzSelectItem(
+              value: d.id,
+              label: d.code == null || d.code!.isEmpty
+                  ? d.name
+                  : '${d.code} · ${d.name}',
+            ),
+        ],
+        value: departments.any((d) => d.id == selectedDepartment)
+            ? selectedDepartment
+            : null,
+        onChanged: (id) {
+          if (id != null) onSelectDepartment(id);
+        },
+      ),
+      if (catalog.departmentsTruncated) ...[
+        const Gap(NizamioSpacing.space1),
+        Text(l.uiListsTruncated, style: t.caption.copyWith(color: c.textMuted)),
+      ],
+      const Gap(NizamioSpacing.space3),
+    ],
     TaskViewGrid(
       counts: r.counts,
       selected: state.view,
@@ -183,9 +218,10 @@ List<Widget> _chips(
   return [
     for (final p in f.people)
       _FilterChip(
-        label: catalog.person(p)?.name ?? p,
+        label: catalog.nameOf(p) ?? l.uiTasksUnknownPerson,
         removeLabel:
-            '${catalog.person(p)?.name ?? p} ${l.uiTasksRemoveFilterTail}',
+            '${catalog.nameOf(p) ?? l.uiTasksUnknownPerson} '
+            '${l.uiTasksRemoveFilterTail}',
         onRemove: () => ctl.togglePerson(p),
       ),
     for (final code in f.coordinatorships)
@@ -625,7 +661,8 @@ class TaskCardView extends StatelessWidget {
     final c = context.colors;
     final t = context.text;
     final names = [
-      for (final a in task.assignees) catalog.person(a)?.name ?? a,
+      for (final a in task.assignees)
+        catalog.nameOf(a) ?? l.uiTasksUnknownPerson,
     ];
     final late = !task.isDone && task.isOverdue;
     final req = task.dateRequest;
@@ -644,7 +681,7 @@ class TaskCardView extends StatelessWidget {
       ),
     );
     return NzTaskCard(
-      code: task.code,
+      code: task.displayCode,
       group: showGroup
           ? catalog.coordinatorship(task.coordinatorship)?.name ??
                 task.coordinatorship

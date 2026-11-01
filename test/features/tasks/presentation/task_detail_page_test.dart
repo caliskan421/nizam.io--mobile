@@ -65,8 +65,41 @@ Future<void> _top(WidgetTester tester) async {
   await settle(tester);
 }
 
+const _serverItems = {
+  'items': [
+    {
+      'work_item_id': 'w1',
+      'title': 'Hidrofor kurulumu',
+      'program_id': 'prog-1',
+      'department_id': 'd1',
+      'priority': 'orta',
+      'status': 'devam_ediyor',
+      'assignee_account_ids': ['acc-1'],
+      'assignees': [
+        {'account_id': 'acc-1', 'full_name': 'Ayşe Yılmaz'},
+      ],
+      'start_on': '2026-11-01',
+      'end_on': '2026-11-10',
+      'is_overdue': false,
+      'days_overdue': 0,
+      'is_completed_late': false,
+      'days_late': 0,
+      'is_completed_early': false,
+      'days_early': 0,
+      'completion_evidence_required': false,
+      'subtask_counts': {'total': 1, 'done': 1},
+    },
+  ],
+};
+
 /// Sunucu programında görev kataloğu ve ayrıntı uçları (tek görev `w1`, departman `d1`).
 Map<String, Object> _serverBodies() => {
+  // Oturum hesabı şirket yöneticisi: departman kaynağı programın bağlı departmanları.
+  '/v1/program/departments': {
+    'departments': [
+      {'department_id': 'd1', 'display_name': 'Altyapı', 'code': 'ALT'},
+    ],
+  },
   '/v1/me/departments': {
     'departments': [
       {
@@ -78,27 +111,7 @@ Map<String, Object> _serverBodies() => {
       },
     ],
   },
-  '/v1/work-items': {
-    'items': [
-      {
-        'work_item_id': 'w1',
-        'title': 'Hidrofor kurulumu',
-        'program_id': 'prog-1',
-        'department_id': 'd1',
-        'priority': 'orta',
-        'status': 'devam_ediyor',
-        'assignee_account_ids': ['acc-1'],
-        'is_overdue': false,
-        'days_overdue': 0,
-        'is_completed_late': false,
-        'days_late': 0,
-        'is_completed_early': false,
-        'days_early': 0,
-        'completion_evidence_required': false,
-        'subtask_counts': {'total': 1, 'done': 1},
-      },
-    ],
-  },
+  '/v1/work-items': _serverItems,
   '/v1/departments': {
     'departments': [
       {
@@ -108,6 +121,10 @@ Map<String, Object> _serverBodies() => {
         'code': 'ALT',
       },
     ],
+  },
+  '/v1/work-items/w1': {
+    ...((_serverItems['items']! as List).single as Map<String, Object?>),
+    'description': 'Pompa odası',
   },
   '/v1/work-items/w1/subtasks': {
     'subtasks': [
@@ -178,10 +195,11 @@ void main() {
     (tester) async {
       final h = await _openServer(tester);
       expect(
-        find.text('Altyapı'),
+        find.text('ALT'),
         findsWidgets,
-        reason: 'görünen anahtar departmanın programdaki adı (kod P1b)',
+        reason: 'görünen anahtar departman kodu (listProgramDepartments)',
       );
+      expect(find.text('Pompa odası'), findsOneWidget, reason: 'açıklama');
       expect(
         find.text('w1'),
         findsNothing,

@@ -60,7 +60,8 @@ class _EditTaskFormState extends ConsumerState<EditTaskForm> {
     final co = catalog.coordinatorship(d.coordinatorship);
     final leads = co?.leads ?? const <String>[];
     final members = co?.members ?? const <String>[];
-    String name(String id) => catalog.person(id)?.name ?? id;
+    String name(String id) =>
+        catalog.nameOf(id) ?? context.l10n.uiTasksUnknownPerson;
     final memSel = [
       for (final m in members)
         if (d.assignees.contains(m)) name(m).split(' ').first,

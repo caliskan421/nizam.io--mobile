@@ -6628,6 +6628,24 @@ abstract class AppLocalizations {
   /// **'Bu işlem bu görevde şu an yapılamıyor.'**
   String get uiTasksTUnavailable;
 
+  /// ui.tasks.unknown_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilinmeyen kişi'**
+  String get uiTasksUnknownPerson;
+
+  /// ui.tasks.description
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıklama'**
+  String get uiTasksDescription;
+
+  /// ui.tasks.department
+  ///
+  /// In tr, this message translates to:
+  /// **'Departman'**
+  String get uiTasksDepartment;
+
   /// ui.timeline.title
   ///
   /// In tr, this message translates to:

@@ -204,7 +204,7 @@ class _EntryRow extends StatelessWidget {
         e.code,
         e.title,
         '${e.edge == TaskEdge.end ? l.uiCalendarTaskEnds : l.uiCalendarTaskStarts}'
-            ' · ${e.assignees.map(index.personName).join(', ')}',
+            ' · ${e.assignees.map((a) => index.personName(a) ?? l.uiTasksUnknownPerson).join(', ')}',
         e.late ? l.uiCalendarLateLc : null,
         c.danger,
         c.danger.withValues(alpha: 0.16),
@@ -221,7 +221,7 @@ class _EntryRow extends StatelessWidget {
       SheetEntry() => (
         e.coordinatorship,
         e.label,
-        '${e.table} · ${index.personName(e.person)}',
+        '${e.table} · ${index.personName(e.person) ?? l.uiTasksUnknownPerson}',
         e.done ? l.uiCalendarDoneLc : null,
         c.accentText,
         c.surfaceOverlay,

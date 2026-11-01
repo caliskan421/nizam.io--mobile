@@ -96,7 +96,7 @@ final class TaskFilter {
       [
         t.title,
         t.code,
-        for (final a in t.assignees) c.person(a)?.name ?? a,
+        for (final a in t.assignees) c.nameOf(a) ?? '',
       ].join(' '),
     );
     return hay.contains(q);

@@ -3414,6 +3414,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksTUnavailable => 'Bu işlem bu görevde şu an yapılamıyor.';
 
   @override
+  String get uiTasksUnknownPerson => 'Bilinmeyen kişi';
+
+  @override
+  String get uiTasksDescription => 'Açıklama';
+
+  @override
+  String get uiTasksDepartment => 'Departman';
+
+  @override
   String get uiTimelineTitle => 'Zaman çizelgesi';
 
   @override

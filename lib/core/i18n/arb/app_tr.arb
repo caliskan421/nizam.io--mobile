@@ -4357,6 +4357,18 @@
   "@uiTasksTUnavailable": {
     "description": "ui.tasks.t_unavailable"
   },
+  "uiTasksUnknownPerson": "Bilinmeyen kişi",
+  "@uiTasksUnknownPerson": {
+    "description": "ui.tasks.unknown_person"
+  },
+  "uiTasksDescription": "Açıklama",
+  "@uiTasksDescription": {
+    "description": "ui.tasks.description"
+  },
+  "uiTasksDepartment": "Departman",
+  "@uiTasksDepartment": {
+    "description": "ui.tasks.department"
+  },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {
     "description": "ui.timeline.title"

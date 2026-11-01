@@ -29,10 +29,14 @@ class DetailSummary extends StatelessWidget {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    String name(String id) => catalog.person(id)?.name ?? id;
+    String name(String id) => catalog.nameOf(id) ?? l.uiTasksUnknownPerson;
     final names = task.assignees.map(name).toList();
     final today = catalog.today;
-    final late = catalog.overdueDaysFor(task.due, done: task.isDone);
+    // Sunucu görevinde gecikme sunucu değeridir (WORK-K37); örnekte bugüne göre.
+    final late = task.lateness != null
+        ? (task.isDone ? 0 : task.overdueDays)
+        : catalog.overdueDaysFor(task.due, done: task.isDone);
+    final description = task.description?.trim() ?? '';
     final started = !task.start.isAfter(today);
     final done = task.completedAt;
 
@@ -128,6 +132,12 @@ class DetailSummary extends StatelessWidget {
             mono: true,
           ),
         ),
+        if (description.isNotEmpty) ...[
+          const Gap(NizamioSpacing.space5),
+          NzKicker(l.uiTasksDescription),
+          const Gap(NizamioSpacing.space2),
+          Text(description, style: t.bodyMd.copyWith(color: c.text)),
+        ],
         const Gap(NizamioSpacing.space5),
         NzKicker(l.uiTasksProgress),
         const Gap(NizamioSpacing.space2),
@@ -363,7 +373,7 @@ class _SubtaskBlock extends StatelessWidget {
     final c = context.colors;
     final t = context.text;
     final u = sub;
-    String name(String id) => catalog.person(id)?.name ?? id;
+    String name(String id) => catalog.nameOf(id) ?? l.uiTasksUnknownPerson;
     final title = u.title.isEmpty ? l.uiTasksSubUntitled : u.title;
     final dates = u.start != null && u.end != null
         ? '${TaskDates.dayMonth(u.start!)} – ${TaskDates.dayMonth(u.end!)}'
@@ -757,7 +767,7 @@ class DetailFiles extends StatelessWidget {
       if (f.subtask != null)
         '${ll.uiTasksSubtaskPrefix} ${sub?.title ?? ll.uiTasksDeletedLc}',
       ll.tagLabel(f.tag),
-      catalog.person(f.by)?.name ?? f.by,
+      catalog.nameOf(f.by) ?? ll.uiTasksUnknownPerson,
       '${f.sizeKb} ${ll.uiTasksKb}',
     ].join(' · ');
   }
@@ -823,7 +833,9 @@ class _DetailNotesState extends ConsumerState<DetailNotes> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               NzAvatar.initials(
-                name: widget.catalog.person(notes[i].by)?.name ?? notes[i].by,
+                name:
+                    widget.catalog.nameOf(notes[i].by) ??
+                    l.uiTasksUnknownPerson,
                 extent: NzAvatarSize.sm,
               ),
               const Gap(NizamioSpacing.space3),
@@ -836,8 +848,8 @@ class _DetailNotesState extends ConsumerState<DetailNotes> {
                         children: [
                           TextSpan(
                             text:
-                                widget.catalog.person(notes[i].by)?.name ??
-                                notes[i].by,
+                                widget.catalog.nameOf(notes[i].by) ??
+                                l.uiTasksUnknownPerson,
                             style: t.caption.copyWith(
                               fontWeight: FontWeight.w600,
                               color: c.text,

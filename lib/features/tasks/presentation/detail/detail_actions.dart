@@ -36,7 +36,8 @@ class TaskDetailActions {
   TaskCatalog? get _catalog => ref.read(taskCatalogControllerProvider).value;
   TaskItem? get _task => _catalog?.task(code);
 
-  String _name(String id) => _catalog?.person(id)?.name ?? id;
+  String _name(String id) =>
+      _catalog?.nameOf(id) ?? context.l10n.uiTasksUnknownPerson;
 
   void _say(String msg) {
     if (context.mounted) NzToast.show(context, msg);

@@ -167,7 +167,7 @@ TimelineView buildTimelineView(
           catalog.coordinatorship(selTask.item.coordinatorship)?.name ??
           selTask.item.coordinatorship,
       assignees: [
-        for (final id in selTask.item.assignees) catalog.person(id)?.name ?? id,
+        for (final id in selTask.item.assignees) catalog.nameOf(id) ?? id,
       ],
       current: cur,
       draft: s.draft ?? cur,

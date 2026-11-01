@@ -173,6 +173,9 @@ class _TasksPageState extends ConsumerState<TasksPage> {
               ref.read(_provider.notifier).clearAll();
             },
             onOpen: nav.openTask,
+            onSelectDepartment: ref
+                .read(taskCatalogControllerProvider.notifier)
+                .selectDepartment,
           )
         else
           NzAsyncView<TaskCatalog>(

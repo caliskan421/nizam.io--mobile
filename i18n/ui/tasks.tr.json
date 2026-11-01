@@ -316,6 +316,9 @@
     "ui.tasks.upload_types": "PDF, PNG, JPG, CSV, Word, Excel, PowerPoint, Pages · 90 MB altı",
     "ui.tasks.team_empty": "Bu departmanda atanabilir kişi yok",
     "ui.tasks.unassigned": "Atanmamış",
-    "ui.tasks.t_unavailable": "Bu işlem bu görevde şu an yapılamıyor."
+    "ui.tasks.t_unavailable": "Bu işlem bu görevde şu an yapılamıyor.",
+    "ui.tasks.unknown_person": "Bilinmeyen kişi",
+    "ui.tasks.description": "Açıklama",
+    "ui.tasks.department": "Departman"
   }
 }

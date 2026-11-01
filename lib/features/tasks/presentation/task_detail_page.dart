@@ -325,7 +325,9 @@ class _Body extends StatelessWidget {
           const Gap(NizamioSpacing.space5),
           _RequestCard(
             request: req,
-            by: req.by == null ? '' : catalog.person(req.by!)?.name ?? req.by!,
+            by: req.by == null
+                ? ''
+                : catalog.nameOf(req.by!) ?? l.uiTasksUnknownPerson,
             onReject: actions.canReviewDate ? actions.rejectRequest : null,
             onApprove: actions.canReviewDate ? actions.approveRequest : null,
           ),

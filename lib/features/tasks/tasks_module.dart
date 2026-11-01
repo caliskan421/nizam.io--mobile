@@ -8,8 +8,10 @@ import 'application/tasks_providers.dart';
 import 'data/sample/sample_task_catalog_repository.dart';
 import 'data/task_catalog_api_repository.dart';
 import 'data/task_details_api_repository.dart';
+import 'data/task_write_api_repository.dart';
 import 'domain/task_catalog.dart';
 import 'domain/task_details.dart';
+import 'domain/task_writes.dart';
 
 /// tasks modülünün kayıt fonksiyonu (ADR-0001). YALNIZ bileşim kökünden çağrılır (G2).
 ///
@@ -44,6 +46,14 @@ void registerTasksModule(GetIt locator, {required Dio? Function() apiDio}) {
           return dio == null ? null : ApiTaskDetailsRepository(dio);
         },
       ),
+    )
+    ..registerLazySingleton<TaskWriteRepository>(
+      () => TaskWriteSource(
+        server: () {
+          final dio = apiDio();
+          return dio == null ? null : ApiTaskWriteRepository(dio);
+        },
+      ),
     );
 }
 
@@ -54,5 +64,8 @@ List<Override> tasksOverrides(GetIt locator) => [
   ),
   taskDetailsRepositoryProvider.overrideWith(
     (ref) => locator<TaskDetailsRepository>(),
+  ),
+  taskWriteRepositoryProvider.overrideWith(
+    (ref) => locator<TaskWriteRepository>(),
   ),
 ];

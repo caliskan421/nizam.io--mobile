@@ -113,3 +113,56 @@ final class TaskDetailsRepositoryProvider
 
 String _$taskDetailsRepositoryHash() =>
     r'b978f27c0a256d8c8b40088a981c52a6d63892d1';
+
+/// PORT: görev yazmalarının kaynağı (`tasks_module.dart`'ta bağlanır; yalnız sunucu).
+
+@ProviderFor(taskWriteRepository)
+final taskWriteRepositoryProvider = TaskWriteRepositoryProvider._();
+
+/// PORT: görev yazmalarının kaynağı (`tasks_module.dart`'ta bağlanır; yalnız sunucu).
+
+final class TaskWriteRepositoryProvider
+    extends
+        $FunctionalProvider<
+          TaskWriteRepository,
+          TaskWriteRepository,
+          TaskWriteRepository
+        >
+    with $Provider<TaskWriteRepository> {
+  /// PORT: görev yazmalarının kaynağı (`tasks_module.dart`'ta bağlanır; yalnız sunucu).
+  TaskWriteRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'taskWriteRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$taskWriteRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<TaskWriteRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  TaskWriteRepository create(Ref ref) {
+    return taskWriteRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TaskWriteRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TaskWriteRepository>(value),
+    );
+  }
+}
+
+String _$taskWriteRepositoryHash() =>
+    r'adf7d8aff2050fb745c92eab5ac61b72372a4574';

@@ -836,5 +836,51 @@ void main() {
         expect(h.backend.count('POST', '/v1/work-items/w1/assignments'), 0);
       },
     );
+
+    // Codex 6: oluşturma 409/403 → kapsam kataloğu ve yetki olguları yeniden okunur.
+    for (final (status, code) in [
+      (403, 'work.not_authorized'),
+      (409, 'platform.conflict_retry'),
+    ]) {
+      test(
+        'yeni görev $status → katalog + rol olguları okunur, tekrar yok',
+        () async {
+          final s = _Server();
+          final (h, c, _) = await _open(s);
+          s.writes['POST /v1/work-items'] = () => envelope(status, code);
+          if (status == 403) s.role = 'uye';
+          final ctl = c.read(newTaskFormControllerProvider.notifier)
+            ..prepare(coordinatorship: 'd1')
+            ..setTitle('X');
+          expect(await ctl.submit(), isNull);
+          final f = c.read(newTaskFormControllerProvider);
+          expect(f.failure!.code, code);
+          expect(f.title, 'X', reason: 'taslak korunur');
+          expect(h.backend.count('POST', '/v1/work-items'), 1);
+          final log = _log(h);
+          expect(
+            log.indexOf('GET /v1/me'),
+            greaterThan(log.indexOf('POST /v1/work-items')),
+          );
+          expect(
+            log,
+            containsAll(['GET /v1/me/departments', 'GET /v1/work-items']),
+          );
+          expect(c.read(canCreateTaskProvider), status != 403);
+        },
+      );
+    }
+
+    test('yeni görev 422 → yeniden okuma yok', () async {
+      final s = _Server();
+      final (h, c, _) = await _open(s);
+      s.writes['POST /v1/work-items'] = () =>
+          envelope(422, 'work.assignee_not_member');
+      final ctl = c.read(newTaskFormControllerProvider.notifier)
+        ..prepare(coordinatorship: 'd1')
+        ..setTitle('X');
+      expect(await ctl.submit(), isNull);
+      expect(_log(h), ['POST /v1/work-items']);
+    });
   });
 }

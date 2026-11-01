@@ -309,12 +309,22 @@ class NewTaskFormController extends _$NewTaskFormController {
       state = _initial();
       return (code: key, notified: f.assignees.length);
     } on Object catch (e) {
+      final err = toApiError(e);
+      // 409 (kapsam/çakışma) ya da 403 (yetki değişmiş): kapsam kataloğu ve rol olguları
+      // (`/v1/me`, `/v1/me/departments`, departmanlar, liste) yeniden okunur; otomatik
+      // gönderim YOK — karar kullanıcıda (taslak korunur).
+      if (_rereadAfterCreate(err)) await store.reload();
       if (ref.mounted) {
-        state = state.copyWith(busy: false, failure: () => toApiError(e));
+        state = state.copyWith(busy: false, failure: () => err);
       }
       return null;
     }
   }
+
+  static bool _rereadAfterCreate(ApiError e) =>
+      e.status == 409 ||
+      e.status == 403 ||
+      const {'work.not_authorized', 'platform.conflict_retry'}.contains(e.code);
 
   CreatedTask? _submitLocal() {
     final f = _cancelPick(state);

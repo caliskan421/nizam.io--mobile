@@ -8,6 +8,7 @@ export 'application/tasks_nav_caption.dart' show tasksNavCaptionProvider;
 export 'application/tasks_providers.dart'
     show
         taskCatalogRepositoryProvider,
+        taskListRepositoryProvider,
         taskDetailsRepositoryProvider,
         taskWriteRepositoryProvider,
         downloadSinkProvider,

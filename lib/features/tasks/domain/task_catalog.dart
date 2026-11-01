@@ -623,13 +623,13 @@ final class TaskCatalog {
   /// Oturumdaki hesabın görev erişimi (rol türetme); örnek kaynakta null.
   final TaskAccess? access;
 
-  /// Listenin sunucu departman süzgeci (`listProgramWorkItems` `department_id`); null → süzgeç
-  /// yok, programın görünür bütün görevleri. Örnek kaynakta null.
+  /// Görevler ekranı görünümünün sunucu departman süzgeci (`department_id`; [filtered]).
+  /// Paylaşılan katalogda (`TaskCatalogController`) her zaman null: program listesi süzgeçsiz.
   final String? departmentId;
 
-  /// İstenen departman süzgeci geçersizdi (sunucu 404 `work.program_scope_invalid`: departman
-  /// silinmiş ya da programa bağlı değil; ya da artık seçenekler arasında yok) ve temizlendi:
-  /// liste süzgeçsiz okundu, arayüz kısa bilgi gösterir.
+  /// Görevler ekranında istenen süzgeç geçersizdi (404 `work.program_scope_invalid`: departman
+  /// silinmiş ya da programa bağlı değil; ya da artık seçenekler arasında yok) ve temizlendi;
+  /// arayüz kısa bilgi gösterir. Paylaşılan katalogda false.
   final bool departmentFilterCleared;
 
   /// Liste sayfa tavanında kesildi (sunucuda daha fazla görev var); arayüz uyarı gösterir.
@@ -685,6 +685,31 @@ final class TaskCatalog {
     names: names,
   );
 
+  /// Görevler ekranı görünümü: aynı kişi/departman/rol kümesi, görev listesi [page]
+  /// (süzgeç [departmentId]); katalogda bulunan görev katalogdaki hâliyle (yerel ayrıntı
+  /// güncellemeleri korunur), yoksa sayfadaki hâliyle. [page] null → süzgeçsiz katalog;
+  /// [cleared] süzgecin temizlendiği bilgisi.
+  TaskCatalog filtered({
+    String? departmentId,
+    TaskListPage? page,
+    bool cleared = false,
+  }) => TaskCatalog(
+    today: today,
+    me: me,
+    tasks: page == null
+        ? tasks
+        : [for (final t in page.tasks) task(t.code) ?? t],
+    people: people,
+    coordinatorships: coordinatorships,
+    access: access,
+    departmentId: page == null ? null : departmentId,
+    departmentFilterCleared: cleared,
+    truncated: page == null ? truncated : page.truncated,
+    departments: departments,
+    departmentsTruncated: departmentsTruncated,
+    names: page == null ? names : [...names, ...page.names],
+  );
+
   /// [more] adlarını ekleyerek (aynı kimlikte yeni ad geçerli) yeni katalog.
   TaskCatalog withNames(List<PersonName> more) => more.isEmpty
       ? this
@@ -728,7 +753,32 @@ final class TaskCatalog {
 
 /// Görev kataloğunun kaynağı (domain portu; gerçekleştirmeler `data/`).
 abstract interface class TaskCatalogRepository {
-  /// Kataloğu okur. [departmentId]: görev listesinin sunucu departman süzgeci (null → yok);
-  /// örnek kaynak yok sayar.
-  Future<TaskCatalog> load({String? departmentId});
+  Future<TaskCatalog> load();
+}
+
+/// Departman süzgeçli görev sayfalarının sonucu (`listProgramWorkItems` `department_id`).
+@immutable
+final class TaskListPage {
+  TaskListPage({
+    required List<TaskItem> tasks,
+    List<PersonName> names = const [],
+    this.truncated = false,
+  }) : tasks = List.unmodifiable(tasks),
+       names = List.unmodifiable(names);
+
+  final List<TaskItem> tasks;
+  final List<PersonName> names;
+
+  /// Sayfalar kesildi (imleç tekrarı ya da sayfa tavanı).
+  final bool truncated;
+}
+
+/// Görevler ekranının sunucu departman süzgecinin kaynağı (domain portu). Yalnız görev
+/// sayfalarını okur (kimlik, ekip satırı ve departman seçenekleri yeniden okunmaz).
+/// [isCurrent] false dönerse sayfa döngüsü durur (`client.scope_changed`).
+abstract interface class TaskListRepository {
+  Future<TaskListPage> loadTasks(
+    String departmentId, {
+    bool Function()? isCurrent,
+  });
 }

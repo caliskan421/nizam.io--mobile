@@ -192,7 +192,7 @@ void main() {
       expect(repo.extras, isEmpty);
     });
 
-    test('yönetici dışı + liste süzgeci yok: özet programdaki ekip satırının departmanı', () async {
+    test('yönetici dışı: özet departmanı programdaki ekip satırından (süzgeçten bağımsız)', () async {
       final repo = _Counting();
       final c = containerOf(
         repo,
@@ -282,7 +282,7 @@ void main() {
 
 class _Failing implements TaskCatalogRepository {
   @override
-  Future<TaskCatalog> load({String? departmentId}) async =>
+  Future<TaskCatalog> load() async =>
       throw ApiError(ClientErrorCode.networkError);
 }
 
@@ -292,5 +292,5 @@ class _Fixed implements TaskCatalogRepository {
   final TaskCatalog catalog;
 
   @override
-  Future<TaskCatalog> load({String? departmentId}) async => catalog;
+  Future<TaskCatalog> load() async => catalog;
 }

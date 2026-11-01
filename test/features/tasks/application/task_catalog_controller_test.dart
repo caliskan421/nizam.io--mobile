@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
+import 'package:nizamio/features/tasks/application/task_list_filter.dart';
 import 'package:nizamio/features/tasks/domain/task_details.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
@@ -105,54 +106,37 @@ void main() {
     );
   });
 
-  test('selectDepartment: sunucu süzgeci (kapsam değişmez), katalog yeniden okunur; aynı '
-      'süzgeç no-op; null → süzgeç yok', () async {
+  test('paylaşılan katalog süzgeçsiz: görevler ekranının departman süzgeci ve kapsam '
+      'departmanı kataloğu yeniden okutmaz', () async {
     final scope = ScopeController()..selectProgram('p1');
-    final asked = <String?>[];
+    var loads = 0;
     final c = ProviderContainer(
       overrides: [
         scopeControllerProvider.overrideWithValue(scope),
         taskCatalogRepositoryProvider.overrideWithValue(
-          _Counting(() {}, () => null, asked: asked),
+          _Counting(() => loads++, () => null),
         ),
       ],
     );
     addTearDown(c.dispose);
     c.listen(taskCatalogControllerProvider, (_, _) {});
     await c.read(taskCatalogControllerProvider.future);
-    expect(asked, [null], reason: 'ilk okuma süzgeçsiz (program bağlamı)');
-    final ctl = c.read(taskCatalogControllerProvider.notifier)
-      ..selectDepartment(null);
+    c.read(taskListFilterProvider.notifier).select('d2');
+    await Future<void>.delayed(Duration.zero);
     await c.read(taskCatalogControllerProvider.future);
-    expect(asked, [null], reason: 'zaten süzgeçsiz: no-op');
-    ctl.selectDepartment('d2');
-    final next = await c.read(taskCatalogControllerProvider.future);
-    expect(asked, [null, 'd2']);
-    expect(next.departmentId, 'd2');
-    expect(scope.current.departmentId, isNull, reason: 'kapsam değişmez');
-    ctl.selectDepartment('d2');
-    await c.read(taskCatalogControllerProvider.future);
-    expect(asked, [null, 'd2'], reason: 'aynı süzgeç: no-op');
-    ctl.selectDepartment('');
-    final all = await c.read(taskCatalogControllerProvider.future);
-    expect(asked, [null, 'd2', null], reason: 'boş → süzgeç yok');
-    expect(all.departmentId, isNull);
+    expect(loads, 1);
   });
 }
 
 class _Counting implements TaskCatalogRepository {
-  _Counting(this.onLoad, this.department, {this.asked});
+  _Counting(this.onLoad, this.department);
 
   final void Function() onLoad;
   final String? Function() department;
 
-  /// İstenen sunucu süzgeçleri (sırayla).
-  final List<String?>? asked;
-
   @override
-  Future<TaskCatalog> load({String? departmentId}) async {
+  Future<TaskCatalog> load() async {
     onLoad();
-    asked?.add(departmentId);
     return TaskCatalog(
       today: DateTime(2026, 11),
       me: 'me',
@@ -160,7 +144,7 @@ class _Counting implements TaskCatalogRepository {
       people: const [],
       coordinatorships: const [],
       access: TaskAccess(accountId: 'me', companyAdmin: true, seats: const []),
-      departmentId: departmentId ?? department(),
+      departmentId: department() ?? 'd1',
       departments: const [
         TaskDepartment(id: 'd1', name: 'Altyapı', code: 'ALT'),
         TaskDepartment(id: 'd2', name: 'Bilişim'),
@@ -171,7 +155,7 @@ class _Counting implements TaskCatalogRepository {
 
 class _Server implements TaskCatalogRepository {
   @override
-  Future<TaskCatalog> load({String? departmentId}) async => TaskCatalog(
+  Future<TaskCatalog> load() async => TaskCatalog(
     today: DateTime(2026, 11),
     me: 'me',
     tasks: [

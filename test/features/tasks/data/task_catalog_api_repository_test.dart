@@ -68,9 +68,13 @@ class _Adapter implements HttpClientAdapter {
 
 /// Gerçek sözleşme kapısı (ApiGuardInterceptor) ile: kapsamda bir departman SEÇİLİ olsa da
 /// liste isteği departman başlığı taşımamalı.
-ApiTaskCatalogRepository _repo(_Adapter adapter) {
+ApiTaskCatalogRepository _repo(
+  _Adapter adapter, {
+  String selected = 'p1',
+  String? Function()? program,
+}) {
   final scope = ScopeController()
-    ..selectProgram('p1')
+    ..selectProgram(selected)
     ..selectDepartment('dKapsam');
   final dio = Dio(BaseOptions(baseUrl: _url))
     ..httpClientAdapter = adapter
@@ -83,9 +87,31 @@ ApiTaskCatalogRepository _repo(_Adapter adapter) {
     );
   return ApiTaskCatalogRepository(
     dio,
-    programId: () => 'p1',
+    programId: program ?? () => 'p1',
     now: () => DateTime(2026, 11, 1, 15, 30),
   );
+}
+
+/// Her sayfada yeni imleç veren uç (sonsuz sayfa; `maxPages` tavanı).
+class _CountingCursor extends _Adapter {
+  _CountingCursor() : super(const {});
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<List<int>>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    seen.add(options);
+    final n = seen.length;
+    return ResponseBody.fromString(
+      jsonEncode(_page([_item('w$n', 'd1')], 'c$n')),
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
 }
 
 Map<String, Object> _page(List<Object> items, [String? next]) => {
@@ -246,39 +272,39 @@ void main() {
     expect(c.people.single.name, 'Ayşe Kaya');
   });
 
-  test('departman süzgeci sunucuya department_id olarak gider (her sayfada); süzme '
-      'telefonda yapılmaz', () async {
+  test('loadTasks: department_id her sayfada; yalnız görev sayfaları (kimlik/ekip/seçenek '
+      'uçları yok); departman başlığı yok; telefonda süzme yok', () async {
     final adapter = _Adapter({
-      '/v1/me': _me(),
-      '/v1/me/departments': _seats([
-        ('p1', 'd1', 'koordinator'),
-        ('p1', 'd2', 'uye'),
-      ]),
       '$_list?department_id=d2': _page([_item('w9', 'd2')], 'k'),
       // Sunucu ne dönerse o: başka departmanın satırı istemcide elenmez.
       '$_list?department_id=d2&cursor=k': _page([_item('w10', 'd1')]),
     });
-    final c = await _repo(adapter).load(departmentId: 'd2');
-    expect(c.tasks.map((t) => t.id), ['w9', 'w10']);
+    final page = await _repo(adapter).loadTasks('d2');
+    expect(page.tasks.map((t) => t.id), ['w9', 'w10']);
+    expect(page.names.map((n) => n.name), ['Ali Veli', 'Ali Veli']);
+    expect(page.truncated, isFalse);
+    expect(adapter.seen.map((o) => o.uri.path).toSet(), {_list});
     expect(adapter.lists.map((o) => o.uri.queryParameters['department_id']), [
       'd2',
       'd2',
+    ]);
+    expect(adapter.lists.map((o) => o.uri.queryParameters['limit']), [
+      '200',
+      '200',
     ]);
     expect(adapter.lists.map((o) => o.headers['X-Nizamio-Department']), [
       null,
       null,
     ]);
-    expect(c.departmentId, 'd2');
-    expect(c.departmentFilterCleared, isFalse);
   });
 
-  test('boş süzgeç → süzgeç yok', () async {
+  test('load (paylaşılan katalog) süzgeç göndermez', () async {
     final adapter = _Adapter({
       '/v1/me': _me(),
       '/v1/me/departments': _seats([('p1', 'd1', 'uye')]),
       _list: _page([]),
     });
-    final c = await _repo(adapter).load(departmentId: '');
+    final c = await _repo(adapter).load();
     expect(
       adapter.lists.single.uri.queryParameters.containsKey('department_id'),
       isFalse,
@@ -287,48 +313,88 @@ void main() {
     expect(c.departmentFilterCleared, isFalse);
   });
 
-  test('404 work.program_scope_invalid (süzgeç departmanı silinmiş/bağsız) → süzgeç '
-      'temizlenir, liste süzgeçsiz okunur, bilgi bayrağı', () async {
+  test('loadTasks: 404 work.program_scope_invalid fırlar (süzgeci çağıran temizler), '
+      'süzgeçsiz yeniden okuma yok', () async {
     final adapter = _Adapter(
       {
-        '/v1/me': _me(admin: true),
-        '/v1/me/departments': {'departments': null},
-        '/v1/program/departments': _programDepartments([
-          ('d1', 'Altyapı', 'ALT'),
-          ('d5', 'Bilişim', null),
-        ]),
         '$_list?department_id=d5': {
           'code': 'work.program_scope_invalid',
           'message': 'x',
           'request_id': 'q',
         },
-        _list: _page([_item('w1', 'd1')]),
       },
       statuses: {'$_list?department_id=d5': 404},
     );
-    final c = await _repo(adapter).load(departmentId: 'd5');
-    expect(adapter.lists.map((o) => o.uri.queryParameters['department_id']), [
-      'd5',
-      null,
-    ]);
-    expect(c.departmentId, isNull);
-    expect(c.departmentFilterCleared, isTrue);
-    expect(c.tasks.single.id, 'w1');
+    await expectLater(
+      _repo(adapter).loadTasks('d5'),
+      throwsA(
+        isA<ApiError>().having(
+          (e) => e.code,
+          'code',
+          'work.program_scope_invalid',
+        ),
+      ),
+    );
+    expect(adapter.lists, hasLength(1));
   });
 
-  test('süzgeç seçenekler arasında değil (kesik olmayan liste) → gönderilmez, temizlenir', () async {
+  test(
+    'loadTasks: okuma eskirse (isCurrent false) sayfa döngüsü durur',
+    () async {
+      final adapter = _Adapter({
+        '$_list?department_id=d1': _page([_item('w1', 'd1')], 'k'),
+        '$_list?department_id=d1&cursor=k': _page([_item('w2', 'd1')]),
+      });
+      var current = true;
+      final repo = _repo(adapter);
+      final f = repo.loadTasks('d1', isCurrent: () => current);
+      current = false;
+      await expectLater(
+        f,
+        throwsA(
+          isA<ApiError>().having((e) => e.code, 'code', 'client.scope_changed'),
+        ),
+      );
+      expect(adapter.lists, hasLength(1), reason: 'ikinci sayfa istenmez');
+    },
+  );
+
+  test('withProgram: seçili kapsam p2 iken istek okumanın başındaki programla (p1) '
+      'sabitlenir; program değişirse sayfa döngüsü durur', () async {
     final adapter = _Adapter({
       '/v1/me': _me(),
       '/v1/me/departments': _seats([('p1', 'd1', 'uye')]),
       _list: _page([_item('w1', 'd1')]),
     });
-    final c = await _repo(adapter).load(departmentId: 'eski');
-    expect(
-      adapter.lists.single.uri.queryParameters.containsKey('department_id'),
-      isFalse,
+    await _repo(adapter, selected: 'p2').load();
+    expect(adapter.lists.single.headers['X-Nizamio-Program'], 'p1');
+
+    var program = 'p1';
+    final paging = _Adapter({
+      _list: _page([_item('w1', 'd1')], 'k'),
+      '$_list?cursor=k': _page([_item('w2', 'd1')]),
+      '/v1/me': _me(),
+      '/v1/me/departments': _seats([('p1', 'd1', 'uye')]),
+    });
+    final repo = _repo(paging, program: () => program);
+    final f = repo.load();
+    // İlk sayfa yanıtlanmadan program değişir: ikinci sayfa istenmez.
+    program = 'p2';
+    await expectLater(
+      f,
+      throwsA(
+        isA<ApiError>().having((e) => e.code, 'code', 'client.scope_changed'),
+      ),
     );
-    expect(c.departmentId, isNull);
-    expect(c.departmentFilterCleared, isTrue);
+    expect(paging.lists, hasLength(1));
+  });
+
+  test('maxPages tavanı: imleç her sayfada yeni olsa da en çok maxPages sayfa, kesik', () async {
+    final adapter = _CountingCursor();
+    final page = await _repo(adapter).loadTasks('d1');
+    expect(adapter.lists, hasLength(ApiTaskCatalogRepository.maxPages));
+    expect(page.truncated, isTrue);
+    expect(page.tasks, hasLength(ApiTaskCatalogRepository.maxPages));
   });
 
   test('süzgeçsiz 404 (programda ekip satırı yok) ve 403 atlanmaz: ApiError fırlar', () async {
@@ -383,8 +449,7 @@ void main() {
     expect(c.people.single.role, PersonRole.admin);
   });
 
-  test('yönetici: X-Result-Truncated → kesik bayrağı; kesik listede görünmeyen süzgeç '
-      'sunucuya gider', () async {
+  test('yönetici: X-Result-Truncated → kesik bayrağı', () async {
     final adapter = _Adapter(
       {
         '/v1/me': _me(admin: true),
@@ -392,7 +457,7 @@ void main() {
         '/v1/program/departments': _programDepartments([
           ('d1', 'Altyapı', 'ALT'),
         ]),
-        '$_list?department_id=d900': _page([_item('w9', 'd900')]),
+        _list: _page([_item('w9', 'd900')]),
       },
       headers: {
         '/v1/program/departments': {
@@ -400,10 +465,8 @@ void main() {
         },
       },
     );
-    final c = await _repo(adapter).load(departmentId: 'd900');
+    final c = await _repo(adapter).load();
     expect(c.departmentsTruncated, isTrue);
-    expect(c.departmentId, 'd900');
-    expect(c.departmentFilterCleared, isFalse);
     expect(
       c.tasks.single.displayCode,
       'd900',

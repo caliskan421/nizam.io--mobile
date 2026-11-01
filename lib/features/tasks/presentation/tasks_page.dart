@@ -15,6 +15,7 @@ import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
 import '../application/task_catalog_controller.dart';
+import '../application/task_list_filter.dart';
 import '../application/tasks_list_controller.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_query.dart';
@@ -110,7 +111,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
       );
     });
     final state = ref.watch(_provider);
-    final catalog = ref.watch(taskCatalogControllerProvider);
+    // Görünüm: paylaşılan katalog + bu ekranın departman süzgeci (task_list_filter.dart).
+    final catalog = ref.watch(taskListCatalogProvider);
     final result = ref.watch(tasksListResultOf(_provider));
     final data = catalog.value;
     // Yeni görev yalnız seçili kapsamda görev açabilene (yönetici/koordinatör) görünür.
@@ -179,8 +181,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
             },
             onOpen: nav.openTask,
             onSelectDepartment: ref
-                .read(taskCatalogControllerProvider.notifier)
-                .selectDepartment,
+                .read(taskListFilterProvider.notifier)
+                .select,
           )
         else
           NzAsyncView<TaskCatalog>(

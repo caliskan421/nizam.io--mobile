@@ -8,6 +8,64 @@ part of 'quick_forms_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Yeni görev formunun koordinatörlük seçenekleri: örnek katalogda hepsi; sunucu kataloğunda
+/// yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
+/// departmanları, karma rolde yalnız koordinatörlükler; üyelik departmanı listelenmez).
+
+@ProviderFor(newTaskCoordinatorships)
+final newTaskCoordinatorshipsProvider = NewTaskCoordinatorshipsProvider._();
+
+/// Yeni görev formunun koordinatörlük seçenekleri: örnek katalogda hepsi; sunucu kataloğunda
+/// yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
+/// departmanları, karma rolde yalnız koordinatörlükler; üyelik departmanı listelenmez).
+
+final class NewTaskCoordinatorshipsProvider
+    extends
+        $FunctionalProvider<
+          List<CoordinatorshipRef>,
+          List<CoordinatorshipRef>,
+          List<CoordinatorshipRef>
+        >
+    with $Provider<List<CoordinatorshipRef>> {
+  /// Yeni görev formunun koordinatörlük seçenekleri: örnek katalogda hepsi; sunucu kataloğunda
+  /// yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
+  /// departmanları, karma rolde yalnız koordinatörlükler; üyelik departmanı listelenmez).
+  NewTaskCoordinatorshipsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'newTaskCoordinatorshipsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$newTaskCoordinatorshipsHash();
+
+  @$internal
+  @override
+  $ProviderElement<List<CoordinatorshipRef>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  List<CoordinatorshipRef> create(Ref ref) {
+    return newTaskCoordinatorships(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<CoordinatorshipRef> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<CoordinatorshipRef>>(value),
+    );
+  }
+}
+
+String _$newTaskCoordinatorshipsHash() =>
+    r'13b15bc62f307fc2353df2d0bd0b1465008ebb57';
 
 @ProviderFor(NewTaskFormController)
 final newTaskFormControllerProvider = NewTaskFormControllerProvider._();
@@ -42,7 +100,7 @@ final class NewTaskFormControllerProvider
 }
 
 String _$newTaskFormControllerHash() =>
-    r'297065b63995c704d90d7e6d84177019d7f7d2f9';
+    r'0ffc096fababfc0adcedcbc084bb9aaf069d539a';
 
 abstract class _$NewTaskFormController extends $Notifier<NewTaskForm> {
   NewTaskForm build();

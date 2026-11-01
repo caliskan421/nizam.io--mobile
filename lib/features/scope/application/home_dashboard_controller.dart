@@ -19,10 +19,11 @@ part 'home_dashboard_controller.g.dart';
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
 /// Katalog okunamazsa rol bilinmez: yönetici rapor uçlarına düşülmez, katalog hatası özetin
-/// hatası olarak gösterilir (yeniden dene dokunuşla). Yönetici olmayan hesapta özetin
-/// departmanı görev listesinin süzgecidir; süzgeç yoksa programdaki ilk koordinatörlük, o da
-/// yoksa ilk ekip satırı ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet
-/// `client.scope_missing` hatasıdır — ek istek gönderilmez.
+/// hatası olarak gösterilir (yeniden dene dokunuşla). Katalog süzgeçsiz program listesidir
+/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan hesapta özetin
+/// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
+/// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
+/// ek istek gönderilmez.
 @riverpod
 class HomeDashboardController extends _$HomeDashboardController {
   @override
@@ -52,8 +53,9 @@ class HomeDashboardController extends _$HomeDashboardController {
     if (access == null || access.companyAdmin) return repo.load();
 
     followCatalog();
-    // Özetin departmanı: liste süzgeci, yoksa programdaki ilk koordinatörlük ya da ekip satırı.
-    final dept = catalog.departmentId ?? access.primaryDepartmentIn(program);
+    // Özetin departmanı (görevler ekranının süzgecinden bağımsız): programdaki ilk
+    // koordinatörlük, yoksa ilk ekip satırı.
+    final dept = access.primaryDepartmentIn(program);
     if (dept == null) throw ApiError(ClientErrorCode.scopeMissing);
     final coordinator = access.coordinatesIn(program, dept);
     final extras = await repo.loadTeamExtras(

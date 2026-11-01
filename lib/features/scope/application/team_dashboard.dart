@@ -2,7 +2,7 @@ import '../../tasks/tasks.dart';
 import '../domain/home_dashboard.dart';
 
 /// Yönetici OLMAYAN hesabın ana sayfa özeti: zaten yüklenmiş görev kataloğundan (program
-/// bağlamı, `listProgramWorkItems`; liste süzgeci varsa o departman) istemcide sayılır — ek
+/// bağlamı, `listProgramWorkItems`; görevler ekranının süzgecinden bağımsız) istemcide sayılır — ek
 /// sunucu toplamı/istek yok (ürün kısıtı). Koordinatör koordinatörü olduğu departmanların tüm
 /// görevlerini, üye yalnız kendine atananları görür (sunucu süzer); toplamlar bu görünürlüğün
 /// sayımıdır. Koordinatörlük kutusu [departmentId] departmanının görevlerinden sayılır. Ekip sayıları bilinmez ([HomeDashboard.team] null →

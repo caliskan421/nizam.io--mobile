@@ -16,10 +16,6 @@ part of 'task_catalog_controller.dart';
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
 /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
 /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
-///
-/// Departman süzgeci ([selectDepartment]) sunucu süzgecidir (`department_id`): seçim kataloğu
-/// yeniden okur; süzgeç bu denetleyicide bellekte tutulur, program değişince temizlenir.
-/// Kaynak süzgeci temizlediyse (404 `work.program_scope_invalid`) bellekteki seçim de düşer.
 
 @ProviderFor(TaskCatalogController)
 final taskCatalogControllerProvider = TaskCatalogControllerProvider._();
@@ -32,10 +28,6 @@ final taskCatalogControllerProvider = TaskCatalogControllerProvider._();
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
 /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
 /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
-///
-/// Departman süzgeci ([selectDepartment]) sunucu süzgecidir (`department_id`): seçim kataloğu
-/// yeniden okur; süzgeç bu denetleyicide bellekte tutulur, program değişince temizlenir.
-/// Kaynak süzgeci temizlediyse (404 `work.program_scope_invalid`) bellekteki seçim de düşer.
 final class TaskCatalogControllerProvider
     extends $AsyncNotifierProvider<TaskCatalogController, TaskCatalog> {
   /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
@@ -46,10 +38,6 @@ final class TaskCatalogControllerProvider
   /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
   /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
   /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
-  ///
-  /// Departman süzgeci ([selectDepartment]) sunucu süzgecidir (`department_id`): seçim kataloğu
-  /// yeniden okur; süzgeç bu denetleyicide bellekte tutulur, program değişince temizlenir.
-  /// Kaynak süzgeci temizlediyse (404 `work.program_scope_invalid`) bellekteki seçim de düşer.
   TaskCatalogControllerProvider._()
     : super(
         from: null,
@@ -70,7 +58,7 @@ final class TaskCatalogControllerProvider
 }
 
 String _$taskCatalogControllerHash() =>
-    r'a2217169ad716c2e35aa02fc049d00563a2f7dbc';
+    r'f01cb1301e0c603fb21070e3295eefca66f09870';
 
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
@@ -80,10 +68,6 @@ String _$taskCatalogControllerHash() =>
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
 /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
 /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
-///
-/// Departman süzgeci ([selectDepartment]) sunucu süzgecidir (`department_id`): seçim kataloğu
-/// yeniden okur; süzgeç bu denetleyicide bellekte tutulur, program değişince temizlenir.
-/// Kaynak süzgeci temizlediyse (404 `work.program_scope_invalid`) bellekteki seçim de düşer.
 
 abstract class _$TaskCatalogController extends $AsyncNotifier<TaskCatalog> {
   FutureOr<TaskCatalog> build();
@@ -104,24 +88,24 @@ abstract class _$TaskCatalogController extends $AsyncNotifier<TaskCatalog> {
 }
 
 /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da koordinatör
-/// ([TaskAccess.canCreateIn]; üye hayır — WORK-K05): departman süzgeci varsa o departmanda,
-/// yoksa programdaki herhangi bir departmanda. Katalog ya da program yokken hayır (fail-closed).
+/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da programda en az bir
+/// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
+/// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
 
 @ProviderFor(canCreateTask)
 final canCreateTaskProvider = CanCreateTaskProvider._();
 
 /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da koordinatör
-/// ([TaskAccess.canCreateIn]; üye hayır — WORK-K05): departman süzgeci varsa o departmanda,
-/// yoksa programdaki herhangi bir departmanda. Katalog ya da program yokken hayır (fail-closed).
+/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da programda en az bir
+/// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
+/// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
 
 final class CanCreateTaskProvider extends $FunctionalProvider<bool, bool, bool>
     with $Provider<bool> {
   /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-  /// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da koordinatör
-  /// ([TaskAccess.canCreateIn]; üye hayır — WORK-K05): departman süzgeci varsa o departmanda,
-  /// yoksa programdaki herhangi bir departmanda. Katalog ya da program yokken hayır (fail-closed).
+  /// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da programda en az bir
+  /// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
+  /// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
   CanCreateTaskProvider._()
     : super(
         from: null,
@@ -155,4 +139,4 @@ final class CanCreateTaskProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$canCreateTaskHash() => r'0a88e9ca733cf8a0512e583b726b55f8f332f1e2';
+String _$canCreateTaskHash() => r'f19c7dee84b9733bf1b077ca4f02749290afd81e';

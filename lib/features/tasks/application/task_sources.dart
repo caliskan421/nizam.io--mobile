@@ -24,11 +24,33 @@ final class TaskCatalogSource implements TaskCatalogRepository {
   final TaskCatalogRepository sample;
 
   @override
-  Future<TaskCatalog> load({String? departmentId}) async {
+  Future<TaskCatalog> load() async {
     if (!scope.current.hasServerProgram) return sample.load();
     final s = server();
     if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
-    return s.load(departmentId: departmentId);
+    return s.load();
+  }
+}
+
+/// Departman süzgeçli okumanın kaynağı: yalnız sunucu programında (örnek katalogda süzgeç
+/// seçeneği yoktur; çağrılırsa `client.scope_missing`).
+final class TaskListSource implements TaskListRepository {
+  TaskListSource({required this.scope, required this.server});
+
+  final ScopeController scope;
+  final TaskListRepository? Function() server;
+
+  @override
+  Future<TaskListPage> loadTasks(
+    String departmentId, {
+    bool Function()? isCurrent,
+  }) async {
+    if (!scope.current.hasServerProgram) {
+      throw ApiError(ClientErrorCode.scopeMissing);
+    }
+    final s = server();
+    if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
+    return s.loadTasks(departmentId, isCurrent: isCurrent);
   }
 }
 

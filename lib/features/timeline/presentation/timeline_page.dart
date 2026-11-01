@@ -131,6 +131,25 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                 ),
               ),
               const Gap(NizamioSpacing.space3),
+              // Kesik katalog (sayfa tavanı/imleç tekrarı): çizelge eksik olabilir.
+              if (ref.watch(
+                taskCatalogControllerProvider.select(
+                  (c) => c.value?.truncated ?? false,
+                ),
+              )) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: NizamioSpacing.gutter,
+                  ),
+                  child: Text(
+                    l.uiListsTruncated,
+                    style: context.text.caption.copyWith(
+                      color: context.colors.textMuted,
+                    ),
+                  ),
+                ),
+                const Gap(NizamioSpacing.space2),
+              ],
               Expanded(
                 child: Semantics(
                   container: true,

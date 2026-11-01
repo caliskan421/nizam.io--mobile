@@ -9,6 +9,7 @@ import '../logging/log.dart';
 import '../scope/scope_controller.dart';
 import '../server/server_address.dart';
 import '../session/session_controller.dart';
+import 'sse.dart';
 
 /// `options.extra` anahtarları.
 const _opKey = 'nizamio.operation';
@@ -222,6 +223,14 @@ class AuthInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
+    // Akışlı OKUMA isteğinin (`ResponseType.stream` GET: dosya indirme) 401 gövdesi okunmamış
+    // akıştır: zarf kodu görülsün diye çözülür (yenileme yalnız `platform.unauthenticated`'de;
+    // GET tekrarı güvenli). Akışlı yazma (SSE `assistantChat` POST) bilinen sınır olarak
+    // dokunulmadan kalır: yenileme tetiklemez.
+    if (err.response?.statusCode == 401 &&
+        err.requestOptions.method.toUpperCase() == 'GET') {
+      err = await materializeStreamError(err);
+    }
     final o = err.requestOptions;
     final op = operationOf(o);
     final st = _stateOf(o);

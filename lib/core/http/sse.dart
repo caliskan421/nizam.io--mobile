@@ -88,9 +88,16 @@ Map<String, Object?> sseJsonObject(String data) {
 /// Gövdesi akış olmayan hata (kapı reddi, ağ, TLS, zaman aşımı) [toApiError]'a gider.
 Future<ApiError> streamApiError(Object error) async {
   if (error is! DioException) return toApiError(error);
+  return toApiError(await materializeStreamError(error));
+}
+
+/// Akış isteğinin hatasında okunmamış [ResponseBody] gövdeyi JSON'a çözer ve gövdesi çözülmüş
+/// bir `badResponse` hatası döner (hata halkaları ve [toApiError] zarfı okuyabilsin; ör. kimlik
+/// halkası 401 `platform.unauthenticated` kodunu görür). Gövdesi akış olmayan hata aynen döner.
+Future<DioException> materializeStreamError(DioException error) async {
   final response = error.response;
   final body = response?.data;
-  if (response == null || body is! ResponseBody) return toApiError(error);
+  if (response == null || body is! ResponseBody) return error;
   Object? decoded;
   try {
     final text = await utf8.decodeStream(body.stream);
@@ -98,16 +105,14 @@ Future<ApiError> streamApiError(Object error) async {
   } on Object {
     decoded = null;
   }
-  return toApiError(
-    DioException(
+  return DioException(
+    requestOptions: error.requestOptions,
+    type: DioExceptionType.badResponse,
+    response: Response<Object?>(
       requestOptions: error.requestOptions,
-      type: DioExceptionType.badResponse,
-      response: Response<Object?>(
-        requestOptions: error.requestOptions,
-        statusCode: response.statusCode,
-        headers: response.headers,
-        data: decoded,
-      ),
+      statusCode: response.statusCode,
+      headers: response.headers,
+      data: decoded,
     ),
   );
 }

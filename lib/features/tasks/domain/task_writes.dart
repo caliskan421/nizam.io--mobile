@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:meta/meta.dart';
 
 import '../../../core/domain/upload_types.dart';
@@ -182,9 +180,11 @@ final class UnavailableUploadPicker implements UploadPicker {
   Future<UploadSource?> pick() async => null;
 }
 
-/// İndirilen dosyanın yazıldığı yer (portu; gerçekleştirme `data/`). Kaydedilen yolu döner.
+/// İndirilen dosyanın yazıldığı yer (portu; gerçekleştirme `data/`). [bytes] akışı parça
+/// parça diske yazılır (dosya belleğe toplanmaz); kaydedilen yolu döner. Akış hatasında yarım
+/// dosya bırakılmaz, hata fırlar.
 abstract interface class DownloadSink {
-  Future<String> save(String name, Uint8List bytes);
+  Future<String> save(String name, Stream<List<int>> bytes);
 }
 
 /// Görev ayrıntısının sunucu yazmaları (domain portu; gerçekleştirme `data/`). Görev
@@ -274,6 +274,6 @@ abstract interface class TaskWriteRepository {
 
   Future<void> deleteFile(TaskItem task, String fileId);
 
-  /// Dosya içeriği (Bearer'lı doğrudan indirme).
-  Future<Uint8List> downloadFile(TaskItem task, String fileId);
+  /// Dosya içeriği akış olarak (Bearer'lı doğrudan indirme; belleğe toplanmaz).
+  Future<Stream<List<int>>> downloadFile(TaskItem task, String fileId);
 }

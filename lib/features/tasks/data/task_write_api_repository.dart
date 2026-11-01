@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
 
 import '../../../core/api/generated/clients/organization_client.dart';
@@ -22,6 +20,7 @@ import '../../../core/api/generated/models/update_work_item_request.dart';
 import '../../../core/api/generated/models/update_work_item_request_priority.dart';
 import '../../../core/api/generated/models/work_note_request.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/http/file_download.dart';
 import '../../../core/http/file_upload.dart';
 import '../../../core/http/interceptors.dart';
 import '../domain/task_catalog.dart';
@@ -417,20 +416,18 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     ),
   );
 
+  /// Akışlı indirme ([getFileStream]; `ResponseType.stream`, aynı sözleşme kapısı).
   @override
-  Future<Uint8List> downloadFile(TaskItem task, String fileId) async {
-    final r = await apiCall(
-      () => _records.downloadFile(
-        id: fileId,
+  Future<Stream<List<int>>> downloadFile(TaskItem task, String fileId) =>
+      getFileStream(
+        _dio,
+        fileId: fileId,
         extras: withScope(
           RecordsClient.downloadFileOpenapiExtras,
           _program(task),
           _dept(task),
         ),
-      ),
-    );
-    return Uint8List.fromList(r.data);
-  }
+      );
 
   /// Görevin KENDİ kapsamı (program, departman); eksik değer '' → kapı
   /// `client.scope_missing` ile reddeder (seçili kapsama düşülmez).

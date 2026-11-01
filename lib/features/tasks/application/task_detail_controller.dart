@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -867,7 +865,7 @@ class TaskDetailController extends _$TaskDetailController {
     return _write(() => _writes.deleteFile(t, file.id), list: false);
   }
 
-  /// Dosyayı indirir ve kaydeder; kaydedilen yol döner. Okumadır: yeniden okuma yok, kilit
+  /// Dosyayı akışla indirir ve parça parça kaydeder (belleğe toplanmaz); kaydedilen yol döner. Okumadır: yeniden okuma yok, kilit
   /// var (çift dokunma = tek istek).
   Future<(WriteOutcome, String?)> downloadFile(TaskFile file) async {
     final t = _task;
@@ -878,7 +876,7 @@ class TaskDetailController extends _$TaskDetailController {
     state = state.copyWith(busy: true);
     final sink = ref.read(downloadSinkProvider);
     try {
-      final Uint8List bytes = await _writes.downloadFile(t, file.id);
+      final bytes = await _writes.downloadFile(t, file.id);
       return (WriteOutcome.done, await sink.save(file.name, bytes));
     } on Object catch (e) {
       return (WriteOutcome(WriteKind.failed, toApiError(e)), null);

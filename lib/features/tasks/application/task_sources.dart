@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/scope/scope_controller.dart';
@@ -178,6 +176,6 @@ final class TaskWriteSource implements TaskWriteRepository {
       _s.deleteFile(task, fileId);
 
   @override
-  Future<Uint8List> downloadFile(TaskItem task, String fileId) async =>
+  Future<Stream<List<int>>> downloadFile(TaskItem task, String fileId) async =>
       _s.downloadFile(task, fileId);
 }

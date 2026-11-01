@@ -5,7 +5,6 @@
 // yeniden okuma ve otomatik tekrar yok, uçuş kilidi, yerel ön denetim (tür/boyut/tavan → kod).
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -202,11 +201,11 @@ Map<String, Object?> _request() => {
 };
 
 class _Sink implements DownloadSink {
-  final saved = <String, Uint8List>{};
+  final saved = <String, List<int>>{};
 
   @override
-  Future<String> save(String name, Uint8List bytes) async {
-    saved[name] = bytes;
+  Future<String> save(String name, Stream<List<int>> bytes) async {
+    saved[name] = [await for (final chunk in bytes) ...chunk];
     return '/indirilenler/$name';
   }
 }
@@ -603,6 +602,9 @@ void main() {
       expect(path, '/indirilenler/rapor.pdf');
       expect(sink.saved['rapor.pdf'], [1, 2, 3]);
       expect(_log(h), ['GET /v1/files/f1/download']);
+      final get = _only(h, 'GET', '/v1/files/f1/download');
+      expect(get.header('X-Nizamio-Program'), 'prog-1');
+      expect(get.header('X-Nizamio-Department'), 'd1');
     });
 
     test('uçuş kilidi: çift dokunma tek istek', () async {

@@ -56,8 +56,16 @@ class HomePage extends ConsumerWidget {
       });
     final programState = ref.watch(currentProgramControllerProvider);
     final dashboard = ref.watch(homeDashboardControllerProvider);
+    // Özet hatası katalog hatası olabilir (yönetici olmayan hesap); katalog da yeniden okunur.
+    void retry() {
+      if (ref.read(taskCatalogControllerProvider).hasError) {
+        ref.invalidate(taskCatalogControllerProvider);
+      }
+      ref.invalidate(homeDashboardControllerProvider);
+    }
+
     return NzPage.feed(
-      onRetry: () => ref.invalidate(homeDashboardControllerProvider),
+      onRetry: retry,
       topBar: const RootTopBar(),
       children: [
         // S2 (seçili program) hatası: üst çubukta program satırı yerine görünür hata + yeniden
@@ -71,7 +79,7 @@ class HomePage extends ConsumerWidget {
         ],
         NzAsyncView<HomeDashboard>(
           value: dashboard,
-          onRetry: () => ref.invalidate(homeDashboardControllerProvider),
+          onRetry: retry,
           data: (d) => _Feed(
             dashboard: d,
             onQuickAction: (a) => _quickAction(context, a),
@@ -121,6 +129,17 @@ class _Feed extends ConsumerWidget {
           tasks: d.tasks,
           onOpen: (view) => nav.openTasks(view: view),
         ),
+        // Kesik katalogdan sayıldı: liste ekranıyla aynı uyarı.
+        if (d.truncated) ...[
+          const Gap(NizamioSpacing.space3),
+          Text(
+            context.l10n.uiListsTruncated,
+            textAlign: TextAlign.center,
+            style: context.text.bodySm.copyWith(
+              color: context.colors.textMuted,
+            ),
+          ),
+        ],
         const Gap(NizamioSpacing.gapXl),
         HomeQuickActions(onAction: onQuickAction),
         const Gap(NizamioSpacing.gapXl),

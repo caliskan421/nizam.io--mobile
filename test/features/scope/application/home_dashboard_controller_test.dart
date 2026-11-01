@@ -3,6 +3,8 @@
 // özet görev kataloğundan sayılır + loadTeamExtras (koordinatör bayrağı, departman).
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/features/scope/application/home_dashboard_controller.dart';
@@ -61,6 +63,18 @@ void main() {
     final c = ProviderContainer(
       overrides: [
         homeDashboardRepositoryProvider.overrideWithValue(repo),
+        // Rol bilgisi taşımayan katalog → pano yolu.
+        taskCatalogRepositoryProvider.overrideWithValue(
+          _Fixed(
+            TaskCatalog(
+              today: DateTime(2026, 11),
+              me: 'me',
+              tasks: const [],
+              people: const [],
+              coordinatorships: const [],
+            ),
+          ),
+        ),
         scopeStateProvider.overrideWith(
           (ref) => ScopeSelection(programId: 'p${program++}'),
         ),
@@ -91,48 +105,51 @@ void main() {
           overdueDays: late ? 3 : 0,
         );
 
-    Future<(HomeDashboard, _Counting)> run({
+    TaskCatalog catalogOf({
       bool admin = false,
       SeatRole role = SeatRole.member,
-    }) async {
-      final repo = _Counting();
-      final catalog = TaskCatalog(
-        today: DateTime(2026, 11),
-        me: 'me',
-        departmentId: 'd1',
-        access: TaskAccess(
-          accountId: 'me',
-          companyAdmin: admin,
-          seats: [
-            TeamSeat(
-              programId: 'p1',
-              departmentId: 'd1',
-              departmentName: 'Altyapı',
-              role: role,
-            ),
-          ],
-        ),
-        tasks: [
-          task('w1', TaskStatus.inProgress),
-          task('w2', TaskStatus.inProgress, late: true),
-          task('w3', TaskStatus.review),
-          task('w4', TaskStatus.done),
-          task('w5', TaskStatus.todo),
-        ],
-        people: const [Person(id: 'me', name: 'Ayşe', role: PersonRole.member)],
-        coordinatorships: const [
-          CoordinatorshipRef(
-            code: 'd1',
-            name: 'Altyapı',
-            leads: [],
-            members: [],
+      String? department = 'd1',
+      bool truncated = false,
+    }) => TaskCatalog(
+      today: DateTime(2026, 11),
+      me: 'me',
+      departmentId: department,
+      truncated: truncated,
+      access: TaskAccess(
+        accountId: 'me',
+        companyAdmin: admin,
+        seats: [
+          TeamSeat(
+            programId: 'p1',
+            departmentId: 'd1',
+            departmentName: 'Altyapı',
+            role: role,
           ),
         ],
-      );
+      ),
+      tasks: [
+        task('w1', TaskStatus.inProgress),
+        task('w2', TaskStatus.inProgress, late: true),
+        task('w3', TaskStatus.review),
+        task('w4', TaskStatus.done),
+        task('w5', TaskStatus.todo),
+      ],
+      people: const [Person(id: 'me', name: 'Ayşe', role: PersonRole.member)],
+      coordinatorships: const [
+        CoordinatorshipRef(code: 'd1', name: 'Altyapı', leads: [], members: []),
+      ],
+    );
+
+    ProviderContainer containerOf(
+      _Counting repo,
+      TaskCatalogRepository catalogs,
+    ) {
       final c = ProviderContainer(
+        // Uygulamadaki gibi otomatik yeniden deneme yok (composition.dart).
+        retry: (_, _) => null,
         overrides: [
           homeDashboardRepositoryProvider.overrideWithValue(repo),
-          taskCatalogRepositoryProvider.overrideWithValue(_Fixed(catalog)),
+          taskCatalogRepositoryProvider.overrideWithValue(catalogs),
           scopeStateProvider.overrideWith(
             (ref) => const ScopeSelection(programId: 'p1'),
           ),
@@ -140,8 +157,64 @@ void main() {
       );
       addTearDown(c.dispose);
       c.listen(homeDashboardControllerProvider, (_, _) {});
+      return c;
+    }
+
+    Future<(HomeDashboard, _Counting)> run({
+      bool admin = false,
+      SeatRole role = SeatRole.member,
+      bool truncated = false,
+    }) async {
+      final repo = _Counting();
+      final c = containerOf(
+        repo,
+        _Fixed(catalogOf(admin: admin, role: role, truncated: truncated)),
+      );
       return (await c.read(homeDashboardControllerProvider.future), repo);
     }
+
+    test('katalog okunamazsa yönetici rapor uçlarına düşülmez; katalog hatası gösterilir', () async {
+      final repo = _Counting();
+      final c = containerOf(repo, _Failing());
+      await expectLater(
+        c.read(homeDashboardControllerProvider.future),
+        throwsA(
+          isA<ApiError>().having(
+            (e) => e.code,
+            'code',
+            ClientErrorCode.networkError,
+          ),
+        ),
+      );
+      expect(repo.loads, 0, reason: 'rapor uçlarına istek 0');
+      expect(repo.extras, isEmpty);
+    });
+
+    test(
+      'yönetici dışı + departman yok: scope_missing, rapor/ekip isteği yok',
+      () async {
+        final repo = _Counting();
+        final c = containerOf(repo, _Fixed(catalogOf(department: null)));
+        await expectLater(
+          c.read(homeDashboardControllerProvider.future),
+          throwsA(
+            isA<ApiError>().having(
+              (e) => e.code,
+              'code',
+              ClientErrorCode.scopeMissing,
+            ),
+          ),
+        );
+        expect(repo.loads, 0);
+        expect(repo.extras, isEmpty);
+      },
+    );
+
+    test('kesik katalog: özet uyarı bayrağını taşır', () async {
+      final (d, _) = await run(truncated: true);
+      expect(d.truncated, isTrue);
+      expect(d.tasks.inProgressOnTime, isNull);
+    });
 
     test('yönetici: pano yolu; ekip yolu yok', () async {
       final (_, repo) = await run(admin: true, role: SeatRole.coordinator);
@@ -164,7 +237,9 @@ void main() {
       expect(d.tasks.awaitingApproval, 1);
       expect(d.pending, isEmpty);
       expect(d.counts.unreadMessages, 4);
-      expect(d.counts.tasksAwaitingApproval, 0);
+      // Tek kaynak: KPI ile kısayol rozeti aynı sayı.
+      expect(d.counts.tasksAwaitingApproval, d.tasks.awaitingApproval);
+      expect(d.truncated, isFalse);
       final dept = d.coordinatorships.single;
       expect(
         (dept.code, dept.todo, dept.inProgress, dept.inReview, dept.done),
@@ -189,6 +264,12 @@ void main() {
       },
     );
   });
+}
+
+class _Failing implements TaskCatalogRepository {
+  @override
+  Future<TaskCatalog> load() async =>
+      throw ApiError(ClientErrorCode.networkError);
 }
 
 class _Fixed implements TaskCatalogRepository {

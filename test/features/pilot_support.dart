@@ -104,6 +104,9 @@ class PilotBackend {
           'full_name': 'Ayşe Yılmaz',
           'company_admin': true,
         });
+      case 'GET /v1/me/departments':
+        // Ekip satırı yok (şirket yöneticisi): görev kataloğu rolü türetir, liste istenmez.
+        return jsonResponse(200, {'departments': <Object>[]});
       case 'POST /v1/auth/password':
         final err = passwordError;
         if (err != null) {

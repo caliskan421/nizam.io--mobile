@@ -6,7 +6,9 @@ import '../domain/home_dashboard.dart';
 /// Koordinatör kapsamın tüm görevlerini, üye yalnız kendine atananları görür (sunucu süzer);
 /// sayılar bu görünürlüğün sayımıdır. Ekip sayıları bilinmez ([HomeDashboard.team] null →
 /// kutu gizli). Bekleyen işler: koordinatörde onaya sunulanlar ve kendi bekleyen tarih
-/// talepleri; üyede yok. Gecikme sunucu bayrağıdır ([TaskItem.lateness]).
+/// talepleri; üyede yok. Gecikme sunucu bayrağıdır ([TaskItem.lateness]). Onay bekleyen sayısı
+/// tek kaynaktır (görünen `review` görevleri) — KPI ve kısayol rozeti aynı sayıyı gösterir.
+/// Kesik katalogda ([TaskCatalog.truncated]) özet uyarı bayrağını taşır.
 HomeDashboard teamDashboard(
   TaskCatalog catalog,
   TeamDashboardExtras extras, {
@@ -82,9 +84,10 @@ HomeDashboard teamDashboard(
             ),
       ],
     ],
+    truncated: catalog.truncated,
     counts: ModuleCounts(
       lateTasks: lateCount,
-      tasksAwaitingApproval: coordinator ? review : 0,
+      tasksAwaitingApproval: review,
       unreadMessages: extras.unreadMessages,
       pendingRequests: extras.pendingDateRequests.length,
     ),

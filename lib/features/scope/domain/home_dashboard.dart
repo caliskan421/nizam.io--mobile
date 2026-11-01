@@ -18,6 +18,7 @@ final class HomeDashboard {
     this.greetingEmail,
     this.demoProgramName,
     this.demoProgramYear,
+    this.truncated = false,
   });
 
   /// Karşılamadaki ad (oturumdaki kişinin görünen adı).
@@ -41,6 +42,10 @@ final class HomeDashboard {
   /// Kişiyi bekleyen işler (tarih talebi, onay).
   final List<PendingItem> pending;
   final ModuleCounts counts;
+
+  /// Sayımların kaynağı (yönetici olmayan hesapta görev kataloğu) sayfa tavanında kesildi;
+  /// sayılar eksik olabilir → arayüz liste ekranıyla aynı uyarıyı gösterir.
+  final bool truncated;
 }
 
 /// Görev sayıları. Sunucu karşılığı `DashboardReport` (`GET /v1/reports/dashboard`):

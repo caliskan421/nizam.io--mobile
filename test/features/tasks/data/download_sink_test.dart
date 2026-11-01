@@ -32,6 +32,20 @@ void main() {
     expect(d, '${root.path}/indirilenler/dosya');
   });
 
+  // Fable B4: `.` / `..` / boş ad klasörün kendisine ya da üstüne yazdıramaz.
+  test('`.`, `..`, boş ve ayırıcıyla biten ad → dosya', () async {
+    for (final n in ['.', '..', '', '  ', 'a/..', r'b\.', 'c/']) {
+      expect(FileDownloadSink.safeName(n), 'dosya', reason: n);
+    }
+    expect(FileDownloadSink.safeName('a/..b'), '..b');
+    final sink = FileDownloadSink(root: () async => root);
+    for (final n in ['.', '..']) {
+      final p = await sink.save(n, _bytes());
+      expect(p, '${root.path}/indirilenler/dosya');
+      expect(File(p).readAsBytesSync(), [1, 2, 3]);
+    }
+  });
+
   test('akış parça parça yazılır: tüm gövde beklenmeden diske gider', () async {
     final sink = FileDownloadSink(root: () async => root);
     final ctl = StreamController<List<int>>();

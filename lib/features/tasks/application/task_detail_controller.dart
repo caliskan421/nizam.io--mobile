@@ -711,7 +711,9 @@ class TaskDetailController extends _$TaskDetailController {
           await step(() => _writes.removeAssignment(t, a));
         }
       },
-      list: false,
+      // Tarih değişikliği bağımlı görevleri aynı işlemde öteleyebilir (WORK-K28): liste de
+      // yeniden okunur; diğer alanlarda yalnız kalem.
+      list: patch.start != null || patch.end != null,
       rereadOnError: true,
     );
     if (r.ok && ref.mounted) {

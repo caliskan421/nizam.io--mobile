@@ -882,5 +882,26 @@ void main() {
       expect(await ctl.submit(), isNull);
       expect(_log(h), ['POST /v1/work-items']);
     });
+
+    // Fable B2: bitiş/başlangıç değişince bağımlılar ötelenebilir → liste de okunur.
+    test(
+      'düzenle: tarih değişti → PATCH sonrası liste de yeniden okunur',
+      () async {
+        final s = _Server();
+        final (h, c, ctl) = await _open(s);
+        await ctl.openEdit();
+        h.backend.requests.clear();
+        final d = c.read(taskDetailControllerProvider('w1')).edit!;
+        ctl.updateEdit(d.copyWith(due: d.due.add(const Duration(days: 5))));
+        expect((await ctl.submitEdit()).ok, isTrue);
+        final log = _log(h);
+        expect(log.first, 'PATCH /v1/work-items/w1');
+        expect((_only(h, 'PATCH', '/v1/work-items/w1').body! as Map).keys, [
+          'end_on',
+        ]);
+        expect(log, contains('GET /v1/work-items'));
+        expect(log, contains('GET /v1/work-items/w1'));
+      },
+    );
   });
 }

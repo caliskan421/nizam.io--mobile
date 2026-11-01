@@ -61,3 +61,14 @@ DateRequestState dateRequestState(String? wire) => switch (wire) {
   'rejected' => DateRequestState.rejected,
   _ => DateRequestState.unknown,
 };
+
+/// Kanıt etiketi → sunucu değeri; sunucu kümesinde olmayan (prototip/tanımsız) → null.
+String? evidenceTagToWire(EvidenceTag t) => switch (t) {
+  EvidenceTag.requirement => 'ister',
+  EvidenceTag.plan => 'plan',
+  EvidenceTag.input => 'girdi',
+  EvidenceTag.analysis => 'analiz',
+  EvidenceTag.output => 'cikti',
+  EvidenceTag.outcome => 'sonuc',
+  _ => null,
+};

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/scope/scope_controller.dart';
@@ -103,4 +105,71 @@ final class TaskWriteSource implements TaskWriteRepository {
   @override
   Future<void> deleteSubtask(TaskItem task, String subtaskId) async =>
       _s.deleteSubtask(task, subtaskId);
+
+  @override
+  Future<String> createWorkItem(WorkItemDraft draft) async =>
+      _s.createWorkItem(draft);
+
+  @override
+  Future<void> updateWorkItem(TaskItem task, WorkItemPatch patch) async =>
+      _s.updateWorkItem(task, patch);
+
+  @override
+  Future<void> deleteWorkItem(TaskItem task) async => _s.deleteWorkItem(task);
+
+  @override
+  Future<void> addAssignments(TaskItem task, List<String> accountIds) async =>
+      _s.addAssignments(task, accountIds);
+
+  @override
+  Future<void> removeAssignment(TaskItem task, String accountId) async =>
+      _s.removeAssignment(task, accountId);
+
+  @override
+  Future<void> claim(TaskItem task) async => _s.claim(task);
+
+  @override
+  Future<void> unclaim(TaskItem task) async => _s.unclaim(task);
+
+  @override
+  Future<List<TeamMember>> listTeam(String departmentId) async =>
+      _s.listTeam(departmentId);
+
+  @override
+  Future<void> requestDateChange(
+    TaskItem task,
+    DateTime start,
+    DateTime end, {
+    String? reason,
+  }) async => _s.requestDateChange(task, start, end, reason: reason);
+
+  @override
+  Future<void> reviewDateChange(
+    String requestId, {
+    required bool approve,
+  }) async => _s.reviewDateChange(requestId, approve: approve);
+
+  @override
+  Future<void> deleteDateChange(String requestId) async =>
+      _s.deleteDateChange(requestId);
+
+  @override
+  Future<void> attachFile(
+    TaskItem task,
+    UploadSource file,
+    EvidenceTag tag, {
+    String? subtaskId,
+  }) async => _s.attachFile(task, file, tag, subtaskId: subtaskId);
+
+  @override
+  Future<void> renameFile(TaskItem task, String fileId, String name) async =>
+      _s.renameFile(task, fileId, name);
+
+  @override
+  Future<void> deleteFile(TaskItem task, String fileId) async =>
+      _s.deleteFile(task, fileId);
+
+  @override
+  Future<Uint8List> downloadFile(TaskItem task, String fileId) async =>
+      _s.downloadFile(task, fileId);
 }

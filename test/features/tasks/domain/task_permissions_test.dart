@@ -234,4 +234,114 @@ void main() {
     expect(p.statusTargets(TaskStatus.inProgress), hasLength(4));
     expect(p.canAddNote && p.canManageSubtasks, isTrue);
   });
+
+  group('P3: görev, atama, tarih talebi, dosya (olgu → eylem)', () {
+    TaskFile file(String by) => TaskFile(
+      id: 'f1',
+      kind: TaskFileKind.pdf,
+      name: 'a.pdf',
+      tag: EvidenceTag.outcome,
+      by: by,
+      sizeKb: 1,
+    );
+    final pending = DateChangeRequest(id: 'r1', oldDue: _d, start: _d, due: _d);
+    final reviewed = pending.withState(DateRequestState.approved);
+
+    test('yönetici (ekip satırı yok)', () {
+      final p = _p(_access(admin: true));
+      expect(p.canManageTask, isTrue);
+      expect(p.canAssign, isFalse);
+      expect(p.canClaim(_task()), isFalse);
+      expect(p.canUpload, isFalse);
+      expect(p.canRenameFile(file('u2')), isTrue);
+      expect(p.canDeleteFile(file('me')), isFalse);
+      expect(p.canRequestDate, isFalse);
+      expect(p.canReviewDate, isTrue);
+      expect(p.canDeleteDateRequest(pending), isFalse);
+      expect(p.canDeleteDateRequest(reviewed), isTrue);
+      expect(p.canDownloadFile, isTrue);
+    });
+
+    test(
+      'yönetici + koordinatör: yükleme yine reddedilir (yöneticilik baskın)',
+      () {
+        final p = _p(_access(admin: true, role: SeatRole.coordinator));
+        expect(p.canUpload, isFalse);
+        expect(p.canAssign, isTrue);
+        expect(p.canRequestDate, isTrue);
+        expect(p.canReviewDate, isTrue);
+      },
+    );
+
+    test('koordinatör', () {
+      final p = _p(_access(role: SeatRole.coordinator));
+      expect(p.canManageTask, isTrue);
+      expect(p.canAssign, isTrue);
+      expect(p.canUpload, isTrue);
+      expect(p.canRenameFile(file('u2')), isTrue);
+      expect(p.canDeleteFile(file('u2')), isFalse);
+      expect(p.canDeleteFile(file('me')), isTrue);
+      expect(p.canRequestDate, isTrue);
+      expect(p.canReviewDate, isFalse);
+      expect(p.canClaim(_task()), isTrue);
+      final own = TaskPermissions.of(
+        _access(role: SeatRole.coordinator),
+        _task(assignees: ['me']),
+      );
+      expect(own.canClaim(_task(assignees: ['me'])), isFalse);
+      expect(own.canUnclaim(_task(assignees: ['me'])), isTrue);
+      expect(
+        own.canUnclaim(_task(assignees: ['me'], status: TaskStatus.done)),
+        isFalse,
+      );
+      expect(p.canUnclaim(_task(assignees: ['u2'])), isFalse);
+    });
+
+    test(
+      'atanmış üye: yükler, kendi dosyasını siler; görev/atama/tarih yok',
+      () {
+        final p = _p(_access(role: SeatRole.member), assigned: true);
+        expect(p.canUpload, isTrue);
+        expect(p.canManageTask, isFalse);
+        expect(p.canAssign, isFalse);
+        expect(p.canClaim(_task()), isFalse);
+        expect(p.canRequestDate, isFalse);
+        expect(p.canReviewDate, isFalse);
+        expect(p.canRenameFile(file('me')), isTrue);
+        expect(p.canRenameFile(file('u2')), isFalse);
+        expect(p.canDeleteFile(file('me')), isTrue);
+      },
+    );
+
+    test('atanmamış üye ve başka departmandaki koordinatör: hiçbiri', () {
+      for (final p in [
+        _p(_access(role: SeatRole.member)),
+        _p(_access(role: SeatRole.coordinator, department: 'd2')),
+      ]) {
+        expect(p.canUpload, isFalse);
+        expect(p.canManageTask, isFalse);
+        expect(p.canAssign, isFalse);
+        expect(p.canRequestDate, isFalse);
+      }
+      // Yükleyen hakkı kapsamdaki ekip satırına bağlıdır: başka departmandaki satır vermez.
+      final other = _p(_access(role: SeatRole.coordinator, department: 'd2'));
+      expect(other.canDeleteFile(file('me')), isFalse);
+      expect(other.canRenameFile(file('me')), isFalse);
+    });
+
+    test('görev açma kapsamda: yönetici ya da koordinatör', () {
+      expect(_access(admin: true).canCreateIn('p1', 'd1'), isTrue);
+      expect(
+        _access(role: SeatRole.coordinator).canCreateIn('p1', 'd1'),
+        isTrue,
+      );
+      expect(_access(role: SeatRole.member).canCreateIn('p1', 'd1'), isFalse);
+      expect(
+        _access(role: SeatRole.coordinator).canCreateIn('p1', 'd2'),
+        isFalse,
+      );
+    });
+  });
 }
+
+final _d = DateTime(2026, 10);

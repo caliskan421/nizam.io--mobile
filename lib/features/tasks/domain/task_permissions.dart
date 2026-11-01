@@ -178,4 +178,45 @@ final class TaskPermissions {
   /// Alt göreve atanabilecek kişiler: ana görevin atananları (sunucu 422
   /// `work.subtask_assignee_not_assigned`).
   List<String> subtaskAssignees(TaskItem task) => task.assignees;
+
+  // ---- P3: görev, atama, tarih talebi, dosya (istemci akışları §4) ---------------------
+
+  /// Görevi düzenle (kanıt bayrağı, öncelik, tarihler dahil), kopyala, sil: yönetici ya da
+  /// koordinatör (WORK-K27).
+  bool get canManageTask => local || admin || coordinator;
+
+  /// Atama ekle/kaldır: YALNIZ kapsam koordinatörü (WORK-K10; yönetici tek başına hayır).
+  bool get canAssign => local || coordinator;
+
+  /// Üstlen: koordinatör, atamasız görevde (WORK-K29; atamalı görevde 409).
+  bool canClaim(TaskItem task) =>
+      !local && coordinator && task.assignees.isEmpty;
+
+  /// Bırak: koordinatörün kendi aktif ataması; tamamlanmış görevde hayır (WORK-K31).
+  bool canUnclaim(TaskItem task) =>
+      !local && coordinator && assigned && task.status != TaskStatus.done;
+
+  /// Dosya yükle: koordinatör ya da atanmış üye; yöneticilik baskındır (reddeder).
+  bool get canUpload =>
+      local || (!admin && (coordinator || (member && assigned)));
+
+  /// Dosya adını değiştir: yönetici, koordinatör ya da kapsamda ekip satırı olan yükleyen.
+  bool canRenameFile(TaskFile file) =>
+      local || admin || coordinator || (file.by == accountId && _seat);
+
+  /// Dosya sil: YALNIZ yükleyen, kapsamda ekip satırı varken (yönetici/koordinatör hayır).
+  bool canDeleteFile(TaskFile file) => local || (file.by == accountId && _seat);
+
+  /// Dosya indir: görevi okuyabilen (yönetici, koordinatör, atanmış üye); örnekte dosya yok.
+  bool get canDownloadFile => !local && (admin || coordinator || assigned);
+
+  /// Tarih talebi aç: YALNIZ kapsam koordinatörü (yönetici + koordinatör açar; üye hayır).
+  bool get canRequestDate => local || coordinator;
+
+  /// Tarih talebini onayla/reddet: YALNIZ şirket yöneticisi.
+  bool get canReviewDate => local || admin;
+
+  /// İncelenmiş tarih talebini sil: şirket yöneticisi (bekleyen silinemez).
+  bool canDeleteDateRequest(DateChangeRequest r) =>
+      !local && admin && r.id != null && !r.isPending;
 }

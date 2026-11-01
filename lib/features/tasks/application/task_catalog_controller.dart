@@ -15,12 +15,27 @@ part 'task_catalog_controller.g.dart';
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
 /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
 /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+///
+/// Departman süzgeci ([selectDepartment]) sunucu süzgecidir (`department_id`): seçim kataloğu
+/// yeniden okur; süzgeç bu denetleyicide bellekte tutulur, program değişince temizlenir.
+/// Kaynak süzgeci temizlediyse (404 `work.program_scope_invalid`) bellekteki seçim de düşer.
 @Riverpod(keepAlive: true)
 class TaskCatalogController extends _$TaskCatalogController {
+  String? _department;
+  String? _departmentProgram;
+
   @override
-  Future<TaskCatalog> build() {
-    ref.watch(scopeStateProvider);
-    return ref.read(taskCatalogRepositoryProvider).load();
+  Future<TaskCatalog> build() async {
+    final program = ref.watch(scopeStateProvider).programId;
+    if (program != _departmentProgram) {
+      _departmentProgram = program;
+      _department = null;
+    }
+    final catalog = await ref
+        .read(taskCatalogRepositoryProvider)
+        .load(departmentId: _department);
+    _department = catalog.departmentId;
+    return catalog;
   }
 
   TaskCatalog? get _catalog => state.value;
@@ -107,11 +122,15 @@ class TaskCatalogController extends _$TaskCatalogController {
     );
   }
 
-  /// Görev listesinin departmanını seçer (kapsam değişir → katalog yeniden okunur).
-  /// Seçilebilirler [TaskCatalog.departments]; aynı departman yeniden seçilmez.
-  void selectDepartment(String departmentId) {
-    if (_catalog?.departmentId == departmentId) return;
-    ref.read(scopeControllerProvider).selectDepartment(departmentId);
+  /// Görev listesinin sunucu departman süzgecini seçer (null ya da boş → süzgeç yok) ve
+  /// kataloğu yeniden okur. Seçenekler [TaskCatalog.departments]; aynı süzgeç yeniden okunmaz.
+  void selectDepartment(String? departmentId) {
+    final id = departmentId == null || departmentId.isEmpty
+        ? null
+        : departmentId;
+    if (_department == id && _catalog?.departmentId == id) return;
+    _department = id;
+    ref.invalidateSelf();
   }
 
   /// Görevi kaldırır; eski sırasını döner (geri almak için `add(at:)`), yoksa -1.
@@ -126,9 +145,9 @@ class TaskCatalogController extends _$TaskCatalogController {
 }
 
 /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yalnız seçili (program, departman)
-/// kapsamında yönetici ya da koordinatör ([TaskAccess.canCreateIn]; üye hayır — WORK-K05).
-/// Katalog yokken ya da departman seçilmemişken hayır (fail-closed).
+/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da koordinatör
+/// ([TaskAccess.canCreateIn]; üye hayır — WORK-K05): departman süzgeci varsa o departmanda,
+/// yoksa programdaki herhangi bir departmanda. Katalog ya da program yokken hayır (fail-closed).
 @riverpod
 bool canCreateTask(Ref ref) {
   final catalog = ref.watch(taskCatalogControllerProvider).value;
@@ -136,8 +155,9 @@ bool canCreateTask(Ref ref) {
   final access = catalog.access;
   if (access == null) return true;
   final program = ref.watch(scopeStateProvider).programId;
+  if (program == null) return false;
   final department = catalog.departmentId;
-  return program != null &&
-      department != null &&
-      access.canCreateIn(program, department);
+  return department != null
+      ? access.canCreateIn(program, department)
+      : access.canCreateAnyIn(program);
 }

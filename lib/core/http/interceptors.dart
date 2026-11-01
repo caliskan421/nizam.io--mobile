@@ -36,6 +36,14 @@ Map<String, dynamic> withScope(
   String departmentId,
 ) => {...?extras, _programKey: programId, _departmentKey: departmentId};
 
+/// İstek başına açık PROGRAM (S2 program bağlamı; ör. `listProgramWorkItems`): istek seçili
+/// kapsamın programı yerine [programId] ile gider; departman başlığı eklenmez. Boş değer seçili
+/// programa DÜŞMEZ: kapı `client.scope_missing` ile reddeder (fail-closed).
+Map<String, dynamic> withProgram(
+  Map<String, dynamic>? extras,
+  String programId,
+) => {...?extras, _programKey: programId};
+
 /// Açık değer verilmediyse null; verildiyse değeri (geçersiz/boşsa '' — reddedilir).
 String? _requested(RequestOptions o, String key) {
   if (!o.extra.containsKey(key)) return null;

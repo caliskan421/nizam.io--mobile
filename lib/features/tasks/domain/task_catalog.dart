@@ -562,7 +562,7 @@ final class PersonName {
   int get hashCode => Object.hash(id, name);
 }
 
-/// Görev listesinde seçilebilir departman: kimlik, programdaki ad ve (varsa) katalog kodu.
+/// Görev listesinin departman süzgeci seçeneği: kimlik, programdaki ad ve (varsa) katalog kodu.
 @immutable
 final class TaskDepartment {
   const TaskDepartment({required this.id, required this.name, this.code});
@@ -601,6 +601,7 @@ final class TaskCatalog {
     required List<CoordinatorshipRef> coordinatorships,
     this.access,
     this.departmentId,
+    this.departmentFilterCleared = false,
     this.truncated = false,
     List<TaskDepartment> departments = const [],
     this.departmentsTruncated = false,
@@ -622,14 +623,21 @@ final class TaskCatalog {
   /// Oturumdaki hesabın görev erişimi (rol türetme); örnek kaynakta null.
   final TaskAccess? access;
 
-  /// Listenin tek departman bağlamı (sunucu kaynağı); örnek kaynakta null.
+  /// Listenin sunucu departman süzgeci (`listProgramWorkItems` `department_id`); null → süzgeç
+  /// yok, programın görünür bütün görevleri. Örnek kaynakta null.
   final String? departmentId;
+
+  /// İstenen departman süzgeci geçersizdi (sunucu 404 `work.program_scope_invalid`: departman
+  /// silinmiş ya da programa bağlı değil; ya da artık seçenekler arasında yok) ve temizlendi:
+  /// liste süzgeçsiz okundu, arayüz kısa bilgi gösterir.
+  final bool departmentFilterCleared;
 
   /// Liste sayfa tavanında kesildi (sunucuda daha fazla görev var); arayüz uyarı gösterir.
   final bool truncated;
 
-  /// Görev listesinin seçilebilir departmanları (sunucu kaynağı; örnekte boş). Şirket
-  /// yöneticisinde `listProgramDepartments`, diğerlerinde bu programdaki ekip satırları.
+  /// Departman süzgecinin seçenekleri (sunucu kaynağı; örnekte boş). Şirket yöneticisinde
+  /// `listProgramDepartments`, diğerlerinde `/v1/me/departments`'ın bu programdaki satırları
+  /// (istemci akışları §2).
   final List<TaskDepartment> departments;
 
   /// Departman listesi sunucu tavanında kesildi (`X-Result-Truncated: true`).
@@ -642,10 +650,6 @@ final class TaskCatalog {
   /// Kişinin görünen adı: kişi listesinden, yoksa sunucunun verdiği addan; bilinmiyorsa null
   /// (arayüz nötr "Bilinmeyen kişi" gösterir; rol tahmini yok).
   String? nameOf(String id) => person(id)?.name ?? _names[id];
-
-  /// Sunucu kataloğunda departman bağlamı yok → liste "departman seç" durumundadır (istek
-  /// gönderilmedi). Örnek kaynakta false.
-  bool get departmentRequired => access != null && departmentId == null;
 
   // Kimlik → öğe dizinleri: kart/arama/filtre her satırda ad çözer; doğrusal arama yerine
   // ilk kullanımda bir kez kurulur (katalog değişmez, `withTasks` yeni örnek üretir).
@@ -674,6 +678,7 @@ final class TaskCatalog {
     coordinatorships: coordinatorships,
     access: access,
     departmentId: departmentId,
+    departmentFilterCleared: departmentFilterCleared,
     truncated: truncated,
     departments: departments,
     departmentsTruncated: departmentsTruncated,
@@ -691,6 +696,7 @@ final class TaskCatalog {
           coordinatorships: coordinatorships,
           access: access,
           departmentId: departmentId,
+          departmentFilterCleared: departmentFilterCleared,
           truncated: truncated,
           departments: departments,
           departmentsTruncated: departmentsTruncated,
@@ -722,5 +728,7 @@ final class TaskCatalog {
 
 /// Görev kataloğunun kaynağı (domain portu; gerçekleştirmeler `data/`).
 abstract interface class TaskCatalogRepository {
-  Future<TaskCatalog> load();
+  /// Kataloğu okur. [departmentId]: görev listesinin sunucu departman süzgeci (null → yok);
+  /// örnek kaynak yok sayar.
+  Future<TaskCatalog> load({String? departmentId});
 }

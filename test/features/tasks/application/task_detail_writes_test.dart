@@ -101,7 +101,7 @@ class _Server {
             },
           ],
         });
-      case 'GET /v1/work-items':
+      case 'GET /v1/program/work-items':
         return jsonResponse(200, {
           'items': [_w1()],
         });
@@ -222,7 +222,7 @@ void main() {
         unorderedEquals([..._detailReads, 'GET /v1/date-change-requests/mine']),
         reason: 'koordinatör: ayrıntıyla kendi tarih talepleri',
       );
-      expect(log, isNot(contains('GET /v1/work-items')));
+      expect(log, isNot(contains('GET /v1/program/work-items')));
       expect(
         log.where((l) => l == 'GET /v1/work-items/w1'),
         hasLength(1),
@@ -395,7 +395,7 @@ void main() {
       expect(_log(h), contains('GET /v1/work-items/w1/notes'));
       expect(
         _log(h),
-        isNot(contains('GET /v1/work-items')),
+        isNot(contains('GET /v1/program/work-items')),
         reason: 'liste etkilenmez',
       );
       expect(c.read(taskDetailControllerProvider('w1')).noteDraft, '');
@@ -443,7 +443,7 @@ void main() {
           'title': 'Vana',
         });
         expect(_log(h), containsAll(_detailReads));
-        expect(_log(h), isNot(contains('GET /v1/work-items')));
+        expect(_log(h), isNot(contains('GET /v1/program/work-items')));
 
         h.backend.requests.clear();
         expect((await ctl.toggleSubtask('s1')).kind, WriteKind.done);

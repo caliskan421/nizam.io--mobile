@@ -160,21 +160,23 @@ class _FilterBody extends ConsumerWidget {
               ),
           ],
         ),
-        group(
-          TaskFilterGroup.coordinatorship,
-          l.uiTasksGroupCoord,
-          s.filter.coordinatorships.length,
-          [
-            for (final (co, n) in options.coordinatorships)
-              TaskCheckRow(
-                label: co.name,
-                count: n,
-                square: true,
-                selected: s.filter.coordinatorships.contains(co.code),
-                onTap: () => ctl.toggleCoordinatorship(co.code),
-              ),
-          ],
-        ),
+        // Sunucu kataloğunda seçenek yok (departman süzgeci sunucudadır).
+        if (options.coordinatorships.isNotEmpty)
+          group(
+            TaskFilterGroup.coordinatorship,
+            l.uiTasksGroupCoord,
+            s.filter.coordinatorships.length,
+            [
+              for (final (co, n) in options.coordinatorships)
+                TaskCheckRow(
+                  label: co.name,
+                  count: n,
+                  square: true,
+                  selected: s.filter.coordinatorships.contains(co.code),
+                  onTap: () => ctl.toggleCoordinatorship(co.code),
+                ),
+            ],
+          ),
         group(
           TaskFilterGroup.priority,
           l.uiTasksPriority,

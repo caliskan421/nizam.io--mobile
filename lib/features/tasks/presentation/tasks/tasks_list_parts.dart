@@ -42,7 +42,7 @@ List<Widget> tasksListChildren(
   required TasksListController ctl,
   required VoidCallback onClearAll,
   required ValueChanged<String> onOpen,
-  ValueChanged<String>? onSelectDepartment,
+  ValueChanged<String?>? onSelectDepartment,
 }) {
   final l = context.l10n;
   final c = context.colors;
@@ -95,19 +95,21 @@ List<Widget> tasksListChildren(
     list.take(state.limit).forEach(card);
   }
 
-  // Liste tek departman bağlamındadır (istemci akışları §2): seçilebilir birden çoksa ya da
-  // liste kesikse seçici gösterilir; seçim kapsamı değiştirir, katalog yeniden okunur.
+  // Liste program bağlamındadır (istemci akışları §2); departman süzgeci sunucudadır
+  // (`department_id`): seçenek birden çoksa ya da liste kesikse gösterilir, seçim kataloğu
+  // yeniden okur. '' → süzgeç yok (tüm departmanlar).
   final departments = catalog.departments;
   final pickDepartment =
       onSelectDepartment != null &&
       (departments.length > 1 || catalog.departmentsTruncated);
-  final selectedDepartment = catalog.departmentId;
+  final selectedDepartment = catalog.departmentId ?? '';
 
   return [
     if (pickDepartment) ...[
       NzSelect<String>(
         label: l.uiTasksDepartment,
         items: [
+          NzSelectItem(value: '', label: l.uiTasksDepartmentAll),
           for (final d in departments)
             NzSelectItem(
               value: d.id,
@@ -116,17 +118,26 @@ List<Widget> tasksListChildren(
                   : '${d.code} · ${d.name}',
             ),
         ],
-        value: departments.any((d) => d.id == selectedDepartment)
+        value:
+            selectedDepartment.isEmpty ||
+                departments.any((d) => d.id == selectedDepartment)
             ? selectedDepartment
             : null,
         onChanged: (id) {
-          if (id != null) onSelectDepartment(id);
+          if (id != null) onSelectDepartment(id.isEmpty ? null : id);
         },
       ),
       if (catalog.departmentsTruncated) ...[
         const Gap(NizamioSpacing.space1),
         Text(l.uiListsTruncated, style: t.caption.copyWith(color: c.textMuted)),
       ],
+      const Gap(NizamioSpacing.space3),
+    ],
+    if (catalog.departmentFilterCleared) ...[
+      Text(
+        l.uiTasksDepartmentFilterCleared,
+        style: t.caption.copyWith(color: c.textMuted),
+      ),
       const Gap(NizamioSpacing.space3),
     ],
     TaskViewGrid(
@@ -168,10 +179,7 @@ List<Widget> tasksListChildren(
     ),
     Gap(tablet ? NizamioSpacing.space3 : NizamioSpacing.space1),
     ...rows,
-    if (list.isEmpty && catalog.departmentRequired)
-      // Departman bağlamı yok (ör. ekip satırı olmayan yönetici): liste istenmedi.
-      NzEmptyState(title: l.errClientScopeMissing)
-    else if (list.isEmpty)
+    if (list.isEmpty)
       NzEmptyState(
         title: l.uiTasksEmpty,
         actionLabel: l.uiTasksClearFilters,

@@ -120,13 +120,27 @@ class NewTaskFormController extends _$NewTaskFormController {
       month: DateTime(today.year, today.month),
       // Sunucu varsayılanı açık (WORK-K75); örnek prototipte kapalı.
       evidenceRequired: _server,
-      coordinatorship: ref
-          .read(taskCatalogControllerProvider)
-          .value
-          ?.coordinatorships
-          .firstOrNull
-          ?.code,
+      coordinatorship: _defaultCoordinatorship(),
     );
+  }
+
+  /// Varsayılan koordinatörlük: örnek katalogda ilk; sunucu kataloğunda görev açılabilen
+  /// departmanlardan ([TaskAccess.canCreateIn]) önce liste süzgeci, yoksa ilki (liste program
+  /// bağlamında birden çok departman taşır; üyelik departmanı varsayılan olmaz).
+  String? _defaultCoordinatorship() {
+    final catalog = ref.read(taskCatalogControllerProvider).value;
+    if (catalog == null) return null;
+    final access = catalog.access;
+    final program = ref.read(scopeStateProvider).programId;
+    if (access == null) return catalog.coordinatorships.firstOrNull?.code;
+    if (program == null) return null;
+    bool creatable(String id) => access.canCreateIn(program, id);
+    final filter = catalog.departmentId;
+    if (filter != null && creatable(filter)) return filter;
+    return catalog.coordinatorships
+        .where((c) => creatable(c.code))
+        .firstOrNull
+        ?.code;
   }
 
   bool get _server =>

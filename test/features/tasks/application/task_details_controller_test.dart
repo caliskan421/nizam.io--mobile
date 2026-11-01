@@ -29,7 +29,7 @@ final _task = TaskItem(
 
 class _Catalog implements TaskCatalogRepository {
   @override
-  Future<TaskCatalog> load() async => TaskCatalog(
+  Future<TaskCatalog> load({String? departmentId}) async => TaskCatalog(
     today: DateTime(2026, 11),
     me: 'me',
     tasks: [_task],
@@ -221,5 +221,5 @@ class _Fixed implements TaskCatalogRepository {
   final TaskCatalog catalog;
 
   @override
-  Future<TaskCatalog> load() async => catalog;
+  Future<TaskCatalog> load({String? departmentId}) async => catalog;
 }

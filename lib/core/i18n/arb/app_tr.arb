@@ -4377,6 +4377,14 @@
   "@uiTasksDepartment": {
     "description": "ui.tasks.department"
   },
+  "uiTasksDepartmentAll": "Tüm departmanlar",
+  "@uiTasksDepartmentAll": {
+    "description": "ui.tasks.department_all"
+  },
+  "uiTasksDepartmentFilterCleared": "Seçili departman artık bu programda yok; süzgeç temizlendi.",
+  "@uiTasksDepartmentFilterCleared": {
+    "description": "ui.tasks.department_filter_cleared"
+  },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {
     "description": "ui.timeline.title"

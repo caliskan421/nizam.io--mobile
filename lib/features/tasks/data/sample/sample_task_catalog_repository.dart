@@ -7,7 +7,7 @@ part 'sample_task_data.dart';
 /// bağlanır; backend bağlanınca yalnız o kayıt değişir.
 final class SampleTaskCatalogRepository implements TaskCatalogRepository {
   @override
-  Future<TaskCatalog> load() async => TaskCatalog(
+  Future<TaskCatalog> load({String? departmentId}) async => TaskCatalog(
     today: _today,
     me: 'ma',
     tasks: [for (final t in _tasks) _withDetails(t)],

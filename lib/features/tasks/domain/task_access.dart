@@ -91,6 +91,22 @@ final class TaskAccess {
   bool canCreateIn(String programId, String departmentId) =>
       companyAdmin || coordinatesIn(programId, departmentId);
 
+  /// Programda herhangi bir departmanda görev açabilir mi (yönetici ya da bir koordinatörlük).
+  bool canCreateAnyIn(String programId) =>
+      companyAdmin ||
+      seats.any(
+        (s) => s.programId == programId && s.role == SeatRole.coordinator,
+      );
+
+  /// Programdaki birincil departman (ana sayfa özeti): ilk koordinatörlük, yoksa ilk ekip
+  /// satırı; satır yoksa null.
+  String? primaryDepartmentIn(String programId) {
+    final seats = seatsIn(programId);
+    return (seats.where((s) => s.role == SeatRole.coordinator).firstOrNull ??
+            seats.firstOrNull)
+        ?.departmentId;
+  }
+
   /// Departman ekibini (`listMembers`, görev ataması adayları) okuyabilir mi: yönetici ya da
   /// o departmanın koordinatörü; üye 403 alır → çağrılmaz.
   bool canReadTeamIn(String programId, String departmentId) =>

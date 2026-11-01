@@ -24,11 +24,11 @@ final class TaskCatalogSource implements TaskCatalogRepository {
   final TaskCatalogRepository sample;
 
   @override
-  Future<TaskCatalog> load() async {
+  Future<TaskCatalog> load({String? departmentId}) async {
     if (!scope.current.hasServerProgram) return sample.load();
     final s = server();
     if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
-    return s.load();
+    return s.load(departmentId: departmentId);
   }
 }
 

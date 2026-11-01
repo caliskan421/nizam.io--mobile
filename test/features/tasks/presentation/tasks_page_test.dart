@@ -180,7 +180,9 @@ void main() {
             },
           ],
         }),
-        'GET /v1/work-items' => jsonResponse(200, {'items': <Object>[]}),
+        'GET /v1/program/work-items' => jsonResponse(200, {
+          'items': <Object>[],
+        }),
         _ => pilot.handle(r),
       };
       h.read(scopeControllerProvider).selectProgram('prog-1');

@@ -44,13 +44,18 @@ final class TaskListSource implements TaskListRepository {
   Future<TaskListPage> loadTasks(
     String departmentId, {
     bool Function()? isCurrent,
+    List<TaskDepartment> departments = const [],
   }) async {
     if (!scope.current.hasServerProgram) {
       throw ApiError(ClientErrorCode.scopeMissing);
     }
     final s = server();
     if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
-    return s.loadTasks(departmentId, isCurrent: isCurrent);
+    return s.loadTasks(
+      departmentId,
+      isCurrent: isCurrent,
+      departments: departments,
+    );
   }
 }
 

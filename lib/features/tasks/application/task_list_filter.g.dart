@@ -67,33 +67,45 @@ abstract class _$TaskListFilter extends $Notifier<TaskListFilterState> {
 }
 
 /// Süzgeç seçiliyken görev sayfaları (`loadTasks`, `department_id`); süzgeç yokken null ve
-/// istek YOK (görünüm katalogdan). Katalog yeniden okununca (yazma sonrası `reload`, yenileme)
-/// bu okuma da yenilenir. Okuma eskirse (süzgeç/program değişti) sayfa döngüsü durur ve
-/// sonucu hiçbir duruma yazılmaz. Geçersiz süzgeç (seçeneklerde yok ya da 404
-/// `work.program_scope_invalid`) temizlenir.
+/// istek YOK (görünüm katalogdan). Tek depo kuralı: okunan satırlar paylaşılan kataloğa
+/// işlenir ([TaskCatalogController.upsert]; taze alanlar katalogda güncellenir, katalogda
+/// olmayan görev eklenir — ayrıntısı açılabilir; okuma sürerken yerelde güncellenen satır
+/// ezilmez), sonuç yalnız kimlik listesidir. Katalog yeniden okununca (yazma sonrası `reload`,
+/// yenileme) bu okuma da yenilenir. Okuma eskirse (süzgeç/program değişti) sayfa döngüsü durur
+/// ve sonucu hiçbir duruma yazılmaz. Geçersiz süzgeç (seçeneklerde yok ya da 404
+/// `work.program_scope_invalid`) temizlenir; 404'te paylaşılan katalog BİR KEZ yeniden okunur
+/// (silinmiş departmanın satırları/seçenekleri kalmasın; süzgeç artık null → döngü yok).
 
 @ProviderFor(taskListPage)
 final taskListPageProvider = TaskListPageProvider._();
 
 /// Süzgeç seçiliyken görev sayfaları (`loadTasks`, `department_id`); süzgeç yokken null ve
-/// istek YOK (görünüm katalogdan). Katalog yeniden okununca (yazma sonrası `reload`, yenileme)
-/// bu okuma da yenilenir. Okuma eskirse (süzgeç/program değişti) sayfa döngüsü durur ve
-/// sonucu hiçbir duruma yazılmaz. Geçersiz süzgeç (seçeneklerde yok ya da 404
-/// `work.program_scope_invalid`) temizlenir.
+/// istek YOK (görünüm katalogdan). Tek depo kuralı: okunan satırlar paylaşılan kataloğa
+/// işlenir ([TaskCatalogController.upsert]; taze alanlar katalogda güncellenir, katalogda
+/// olmayan görev eklenir — ayrıntısı açılabilir; okuma sürerken yerelde güncellenen satır
+/// ezilmez), sonuç yalnız kimlik listesidir. Katalog yeniden okununca (yazma sonrası `reload`,
+/// yenileme) bu okuma da yenilenir. Okuma eskirse (süzgeç/program değişti) sayfa döngüsü durur
+/// ve sonucu hiçbir duruma yazılmaz. Geçersiz süzgeç (seçeneklerde yok ya da 404
+/// `work.program_scope_invalid`) temizlenir; 404'te paylaşılan katalog BİR KEZ yeniden okunur
+/// (silinmiş departmanın satırları/seçenekleri kalmasın; süzgeç artık null → döngü yok).
 
 final class TaskListPageProvider
     extends
         $FunctionalProvider<
-          AsyncValue<TaskListPage?>,
-          TaskListPage?,
-          FutureOr<TaskListPage?>
+          AsyncValue<TaskListIds?>,
+          TaskListIds?,
+          FutureOr<TaskListIds?>
         >
-    with $FutureModifier<TaskListPage?>, $FutureProvider<TaskListPage?> {
+    with $FutureModifier<TaskListIds?>, $FutureProvider<TaskListIds?> {
   /// Süzgeç seçiliyken görev sayfaları (`loadTasks`, `department_id`); süzgeç yokken null ve
-  /// istek YOK (görünüm katalogdan). Katalog yeniden okununca (yazma sonrası `reload`, yenileme)
-  /// bu okuma da yenilenir. Okuma eskirse (süzgeç/program değişti) sayfa döngüsü durur ve
-  /// sonucu hiçbir duruma yazılmaz. Geçersiz süzgeç (seçeneklerde yok ya da 404
-  /// `work.program_scope_invalid`) temizlenir.
+  /// istek YOK (görünüm katalogdan). Tek depo kuralı: okunan satırlar paylaşılan kataloğa
+  /// işlenir ([TaskCatalogController.upsert]; taze alanlar katalogda güncellenir, katalogda
+  /// olmayan görev eklenir — ayrıntısı açılabilir; okuma sürerken yerelde güncellenen satır
+  /// ezilmez), sonuç yalnız kimlik listesidir. Katalog yeniden okununca (yazma sonrası `reload`,
+  /// yenileme) bu okuma da yenilenir. Okuma eskirse (süzgeç/program değişti) sayfa döngüsü durur
+  /// ve sonucu hiçbir duruma yazılmaz. Geçersiz süzgeç (seçeneklerde yok ya da 404
+  /// `work.program_scope_invalid`) temizlenir; 404'te paylaşılan katalog BİR KEZ yeniden okunur
+  /// (silinmiş departmanın satırları/seçenekleri kalmasın; süzgeç artık null → döngü yok).
   TaskListPageProvider._()
     : super(
         from: null,
@@ -110,28 +122,28 @@ final class TaskListPageProvider
 
   @$internal
   @override
-  $FutureProviderElement<TaskListPage?> $createElement(
+  $FutureProviderElement<TaskListIds?> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<TaskListPage?> create(Ref ref) {
+  FutureOr<TaskListIds?> create(Ref ref) {
     return taskListPage(ref);
   }
 }
 
-String _$taskListPageHash() => r'fee92d412f1b2777c1cc0aaa3671ebe22afd58d6';
+String _$taskListPageHash() => r'988bc37fa2b66c14cae4982709f8573a92a22305';
 
 /// Görevler ekranının görünümü: süzgeç yoksa paylaşılan katalog (ek istek yok); süzgeç
-/// varsa katalogun kişi/rol/departman kümesi + süzgeçli görev sayfaları
-/// ([TaskCatalog.filtered]). Katalog yerel güncellemeleri (ayrıntı, yazma) görünüme yansır.
+/// varsa katalogun satırları süzgeçli okumanın kimlik sırasıyla ([TaskCatalog.filtered]).
+/// Katalog güncellemeleri (ayrıntı, yazma, upsert) görünüme yansır.
 
 @ProviderFor(taskListCatalog)
 final taskListCatalogProvider = TaskListCatalogProvider._();
 
 /// Görevler ekranının görünümü: süzgeç yoksa paylaşılan katalog (ek istek yok); süzgeç
-/// varsa katalogun kişi/rol/departman kümesi + süzgeçli görev sayfaları
-/// ([TaskCatalog.filtered]). Katalog yerel güncellemeleri (ayrıntı, yazma) görünüme yansır.
+/// varsa katalogun satırları süzgeçli okumanın kimlik sırasıyla ([TaskCatalog.filtered]).
+/// Katalog güncellemeleri (ayrıntı, yazma, upsert) görünüme yansır.
 
 final class TaskListCatalogProvider
     extends
@@ -142,8 +154,8 @@ final class TaskListCatalogProvider
         >
     with $Provider<AsyncValue<TaskCatalog>> {
   /// Görevler ekranının görünümü: süzgeç yoksa paylaşılan katalog (ek istek yok); süzgeç
-  /// varsa katalogun kişi/rol/departman kümesi + süzgeçli görev sayfaları
-  /// ([TaskCatalog.filtered]). Katalog yerel güncellemeleri (ayrıntı, yazma) görünüme yansır.
+  /// varsa katalogun satırları süzgeçli okumanın kimlik sırasıyla ([TaskCatalog.filtered]).
+  /// Katalog güncellemeleri (ayrıntı, yazma, upsert) görünüme yansır.
   TaskListCatalogProvider._()
     : super(
         from: null,
@@ -178,4 +190,4 @@ final class TaskListCatalogProvider
   }
 }
 
-String _$taskListCatalogHash() => r'1ba1981de933dc0ab0709ecde820c9768d96f07a';
+String _$taskListCatalogHash() => r'0e838a622358e1cf63483ae03df257f3831625f9';

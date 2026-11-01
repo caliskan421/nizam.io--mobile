@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers.dart';
@@ -25,6 +27,49 @@ class TaskCatalogController extends _$TaskCatalogController {
 
   TaskCatalog? get _catalog => state.value;
 
+  // Yerel güncelleme nesli: [replace] / [applyDetails] / [applyItem] görevi işaretler; [upsert]
+  // okuma başladıktan SONRA yerelde güncellenmiş görevi eski okumayla ezmez.
+  int _generation = 0;
+  final _touched = HashMap<String, int>();
+
+  void _touch(String code) => _touched[code] = ++_generation;
+
+  /// Okuma başlangıcının nesli ([upsert] `since`).
+  int get generation => _generation;
+
+  /// Tek depo kuralı: süzgeçli okumanın ([since] neslinde başlayan) satırları katalogda
+  /// güncellenir ya da eklenir (sunucunun görünür saydığı görev). Aynı kimlikli satırın alanları
+  /// sunucu değeriyle değişir, ayrıntı parçaları (alt görev, not, dosya, tarih talebi) korunur;
+  /// okuma başladıktan sonra yerelde güncellenmiş satır olduğu gibi kalır. Adlar katılır.
+  /// Katalog yokken yok sayılır.
+  void upsert(
+    List<TaskItem> items, {
+    required int since,
+    List<PersonName> names = const [],
+  }) {
+    final c = _catalog;
+    if (c == null || items.isEmpty) return;
+    final fresh = {
+      for (final i in items)
+        if ((_touched[i.code] ?? 0) <= since) i.code: i,
+    };
+    final merged = [
+      for (final t in c.tasks)
+        if (fresh.remove(t.code) case final i?)
+          i.copyWith(
+            subtasks: t.subtasks,
+            noteEntries: t.noteEntries,
+            fileEntries: t.fileEntries,
+            dateRequest: () => t.dateRequest,
+          )
+        else
+          t,
+      // Katalogda olmayanlar (ör. katalog sonrası açılan ya da kesik katalog) sona eklenir.
+      ...fresh.values,
+    ];
+    state = AsyncData(c.withTasks(merged).withNames(names));
+  }
+
   /// Kaynaktan yeniden okur ve yeni kataloğu bekler (yazma sonrası). Okuma hatası fırlatılmaz:
   /// hata katalog durumunda kalır (ekran gösterir). Açık ayrıntı ekranları katalog yüklemeye
   /// geçince kendini yeniden okur ([taskDetailsProvider]).
@@ -50,6 +95,7 @@ class TaskCatalogController extends _$TaskCatalogController {
   /// göre yeniden hesaplanır; sunucu görevinde ([TaskItem.lateness] dolu) sunucu değeri
   /// korunur (istemci gecikme türetmez — WORK-K37).
   void replace(TaskItem task) {
+    _touch(task.code);
     final c = _catalog;
     if (c == null) return;
     final fixed = task.lateness != null
@@ -68,6 +114,7 @@ class TaskCatalogController extends _$TaskCatalogController {
   /// "kalemi yeniden oku" budur (tüm liste okunmaz). Gecikme sunucu değeridir; yeniden
   /// hesaplanmaz.
   void applyDetails(String code, TaskDetails d) {
+    _touch(code);
     final c = _catalog;
     if (c == null) return;
     state = AsyncData(
@@ -90,6 +137,7 @@ class TaskCatalogController extends _$TaskCatalogController {
   /// [code] görevini taze tekil okumayla ([item]; açıklama, tarih, atananlar) değiştirir;
   /// ayrıntı parçaları (alt görev, not, dosya, tarih talebi) korunur. Gecikme sunucu değeri.
   void applyItem(String code, TaskItem item) {
+    _touch(code);
     final c = _catalog;
     if (c == null) return;
     state = AsyncData(

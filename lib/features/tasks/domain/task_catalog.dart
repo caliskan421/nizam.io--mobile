@@ -685,29 +685,28 @@ final class TaskCatalog {
     names: names,
   );
 
-  /// Görevler ekranı görünümü: aynı kişi/departman/rol kümesi, görev listesi [page]
-  /// (süzgeç [departmentId]); katalogda bulunan görev katalogdaki hâliyle (yerel ayrıntı
-  /// güncellemeleri korunur), yoksa sayfadaki hâliyle. [page] null → süzgeçsiz katalog;
-  /// [cleared] süzgecin temizlendiği bilgisi.
+  /// Görevler ekranı görünümü: aynı kişi/departman/rol kümesi; [codes] verilirse görev listesi
+  /// o kimlikler, o sırayla, katalogdaki satırlardan (tek depo: süzgeçli okuma satırları önce
+  /// kataloğa işlenir, görünüm ayrı satır tutmaz; katalogda olmayan kimlik atlanır). [codes]
+  /// null → süzgeçsiz katalog. [cleared] süzgecin temizlendiği bilgisi.
   TaskCatalog filtered({
     String? departmentId,
-    TaskListPage? page,
+    List<String>? codes,
+    bool truncated = false,
     bool cleared = false,
   }) => TaskCatalog(
     today: today,
     me: me,
-    tasks: page == null
-        ? tasks
-        : [for (final t in page.tasks) task(t.code) ?? t],
+    tasks: codes == null ? tasks : [for (final code in codes) ?task(code)],
     people: people,
     coordinatorships: coordinatorships,
     access: access,
-    departmentId: page == null ? null : departmentId,
+    departmentId: codes == null ? null : departmentId,
     departmentFilterCleared: cleared,
-    truncated: page == null ? truncated : page.truncated,
+    truncated: codes == null ? this.truncated : truncated,
     departments: departments,
     departmentsTruncated: departmentsTruncated,
-    names: page == null ? names : [...names, ...page.names],
+    names: names,
   );
 
   /// [more] adlarını ekleyerek (aynı kimlikte yeni ad geçerli) yeni katalog.
@@ -777,8 +776,10 @@ final class TaskListPage {
 /// sayfalarını okur (kimlik, ekip satırı ve departman seçenekleri yeniden okunmaz).
 /// [isCurrent] false dönerse sayfa döngüsü durur (`client.scope_changed`).
 abstract interface class TaskListRepository {
+  /// [departments]: görünen kısa anahtarın kaynağı (katalogdaki [TaskDepartment.label]).
   Future<TaskListPage> loadTasks(
     String departmentId, {
     bool Function()? isCurrent,
+    List<TaskDepartment> departments = const [],
   });
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -64,13 +66,28 @@ class TaskListFilter extends _$TaskListFilter {
   }
 }
 
+/// Süzgeçli okumanın sonucu: YALNIZ sunucunun döndürdüğü görev kimlikleri ve sırası (satırlar
+/// paylaşılan katalogdadır — tek depo kuralı).
+@immutable
+final class TaskListIds {
+  TaskListIds(List<String> codes, {this.truncated = false})
+    : codes = List.unmodifiable(codes);
+
+  final List<String> codes;
+  final bool truncated;
+}
+
 /// Süzgeç seçiliyken görev sayfaları (`loadTasks`, `department_id`); süzgeç yokken null ve
-/// istek YOK (görünüm katalogdan). Katalog yeniden okununca (yazma sonrası `reload`, yenileme)
-/// bu okuma da yenilenir. Okuma eskirse (süzgeç/program değişti) sayfa döngüsü durur ve
-/// sonucu hiçbir duruma yazılmaz. Geçersiz süzgeç (seçeneklerde yok ya da 404
-/// `work.program_scope_invalid`) temizlenir.
+/// istek YOK (görünüm katalogdan). Tek depo kuralı: okunan satırlar paylaşılan kataloğa
+/// işlenir ([TaskCatalogController.upsert]; taze alanlar katalogda güncellenir, katalogda
+/// olmayan görev eklenir — ayrıntısı açılabilir; okuma sürerken yerelde güncellenen satır
+/// ezilmez), sonuç yalnız kimlik listesidir. Katalog yeniden okununca (yazma sonrası `reload`,
+/// yenileme) bu okuma da yenilenir. Okuma eskirse (süzgeç/program değişti) sayfa döngüsü durur
+/// ve sonucu hiçbir duruma yazılmaz. Geçersiz süzgeç (seçeneklerde yok ya da 404
+/// `work.program_scope_invalid`) temizlenir; 404'te paylaşılan katalog BİR KEZ yeniden okunur
+/// (silinmiş departmanın satırları/seçenekleri kalmasın; süzgeç artık null → döngü yok).
 @riverpod
-Future<TaskListPage?> taskListPage(Ref ref) async {
+Future<TaskListIds?> taskListPage(Ref ref) async {
   final filter = ref.watch(taskListFilterProvider);
   final department = filter.departmentId;
   if (department == null) return null;
@@ -80,13 +97,13 @@ Future<TaskListPage?> taskListPage(Ref ref) async {
     ..listen(taskCatalogControllerProvider, (prev, next) {
       if (next.isLoading && !(prev?.isLoading ?? false)) ref.invalidateSelf();
     });
+  final store = ref.read(taskCatalogControllerProvider.notifier);
+  final filters = ref.read(taskListFilterProvider.notifier);
   bool stillCurrent() => current && ref.read(taskListFilterProvider) == filter;
-  void drop() {
-    if (stillCurrent()) {
-      ref
-          .read(taskListFilterProvider.notifier)
-          .dropInvalid(department, filter.program);
-    }
+  bool drop() {
+    if (!stillCurrent()) return false;
+    filters.dropInvalid(department, filter.program);
+    return true;
   }
 
   final base = await ref.read(taskCatalogControllerProvider.future);
@@ -96,20 +113,30 @@ Future<TaskListPage?> taskListPage(Ref ref) async {
     drop();
     return null;
   }
+  final since = store.generation;
   try {
-    return await ref
+    final page = await ref
         .read(taskListRepositoryProvider)
-        .loadTasks(department, isCurrent: stillCurrent);
+        .loadTasks(
+          department,
+          isCurrent: stillCurrent,
+          departments: base.departments,
+        );
+    if (!stillCurrent()) return null;
+    store.upsert(page.tasks, since: since, names: page.names);
+    return TaskListIds([
+      for (final t in page.tasks) t.code,
+    ], truncated: page.truncated);
   } on ApiError catch (e) {
     if (e.code != 'work.program_scope_invalid') rethrow;
-    drop();
+    if (drop()) unawaited(store.reload());
     return null;
   }
 }
 
 /// Görevler ekranının görünümü: süzgeç yoksa paylaşılan katalog (ek istek yok); süzgeç
-/// varsa katalogun kişi/rol/departman kümesi + süzgeçli görev sayfaları
-/// ([TaskCatalog.filtered]). Katalog yerel güncellemeleri (ayrıntı, yazma) görünüme yansır.
+/// varsa katalogun satırları süzgeçli okumanın kimlik sırasıyla ([TaskCatalog.filtered]).
+/// Katalog güncellemeleri (ayrıntı, yazma, upsert) görünüme yansır.
 @riverpod
 AsyncValue<TaskCatalog> taskListCatalog(Ref ref) {
   final base = ref.watch(taskCatalogControllerProvider);
@@ -128,10 +155,14 @@ AsyncValue<TaskCatalog> taskListCatalog(Ref ref) {
     return AsyncError(page.error!, page.stackTrace ?? StackTrace.current);
   }
   if (!page.hasValue) return const AsyncLoading();
-  final value = page.value;
+  final ids = page.value;
   return AsyncData(
-    value == null
+    ids == null
         ? catalog.filtered(cleared: filter.cleared)
-        : catalog.filtered(departmentId: department, page: value),
+        : catalog.filtered(
+            departmentId: department,
+            codes: ids.codes,
+            truncated: ids.truncated,
+          ),
   );
 }

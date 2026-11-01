@@ -16,7 +16,9 @@ import 'package:nizamio/features/scope/application/scope_providers.dart';
 import 'package:nizamio/features/scope/domain/home_dashboard.dart';
 import 'package:nizamio/features/scope/domain/home_dashboard_repository.dart';
 import 'package:nizamio/features/tasks/application/quick_forms_controller.dart';
+import 'package:nizamio/features/tasks/application/task_details_controller.dart';
 import 'package:nizamio/features/tasks/application/task_list_filter.dart';
+import 'package:nizamio/features/tasks/domain/task_details.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 import 'package:nizamio/features/timeline/application/timeline_controller.dart';
 
@@ -90,6 +92,7 @@ class _Pages implements TaskListRepository {
   Future<TaskListPage> loadTasks(
     String departmentId, {
     bool Function()? isCurrent,
+    List<TaskDepartment> departments = const [],
   }) {
     final c = Completer<TaskListPage>();
     calls.add((departmentId, c));
@@ -101,6 +104,20 @@ class _Pages implements TaskListRepository {
 
   void invalid(int i) =>
       calls[i].$2.completeError(ApiError('work.program_scope_invalid'));
+}
+
+/// Ayrıntı kaynağı: istenen görevleri kaydeder (ayrıntı yok → null).
+class _Details implements TaskDetailsRepository {
+  final List<String> loaded = [];
+
+  @override
+  Future<TaskDetails?> load(TaskItem task, {TaskAccess? access}) async {
+    loaded.add(task.code);
+    return null;
+  }
+
+  @override
+  Future<TaskItem?> loadItem(TaskItem task) async => null;
 }
 
 class _Home implements HomeDashboardRepository {
@@ -125,7 +142,7 @@ void main() {
   late _Catalog catalog;
   late _Pages pages;
 
-  ProviderContainer harness(TaskAccess access) {
+  ProviderContainer harness(TaskAccess access, {_Details? details}) {
     scope = ScopeController()..selectProgram('p1');
     catalog = _Catalog(access);
     pages = _Pages();
@@ -136,6 +153,7 @@ void main() {
         taskCatalogRepositoryProvider.overrideWithValue(catalog),
         taskListRepositoryProvider.overrideWithValue(pages),
         homeDashboardRepositoryProvider.overrideWithValue(_Home()),
+        taskDetailsRepositoryProvider.overrideWithValue(details ?? _Details()),
       ],
     );
     addTearDown(c.dispose);
@@ -188,8 +206,12 @@ void main() {
         reason: '/v1/me, ekip satırları, seçenekler yeniden yok',
       );
       final sharedAfter = c.read(taskCatalogControllerProvider).value!;
-      expect(identical(sharedAfter, shared), isTrue);
-      expect(sharedAfter.tasks, hasLength(3));
+      expect(
+        sharedAfter.tasks.map((t) => (t.id, t.status, t.due)),
+        shared.tasks.map((t) => (t.id, t.status, t.due)),
+        reason:
+            'süzgeç paylaşılan kataloğu süzmez (aynı satırlar upsert edilir)',
+      );
       final homeAfter = await c.read(homeDashboardControllerProvider.future);
       expect(homeAfter.tasks.total, 3);
       expect(homeAfter.greetingRole, TeamRole.coordinator);
@@ -199,33 +221,106 @@ void main() {
     },
   );
 
-  test('katalog yeniden okununca (yazma sonrası reload) süzgeçli liste de yenilenir', () async {
+  test(
+    'tek depo: süzgeçli okumanın taze alanları (durum/tarih/atanan) görünür ve '
+    'katalogda güncellenir; yalnız süzgeçli sayfadaki w9 kataloğa eklenir; katalog '
+    'reload olunca süzgeçli okuma yenilenir',
+    () async {
+      final c = harness(_admin);
+      await c.read(taskCatalogControllerProvider.future);
+      filter(c).select('d2');
+      await _settle();
+      pages.ok(0, [_task('w2', 'd2')]);
+      await _settle();
+      final reload = c.read(taskCatalogControllerProvider.notifier).reload();
+      await _settle();
+      expect(pages.asked, ['d2', 'd2']);
+      final fresh = _task('w2', 'd2').copyWith(
+        status: TaskStatus.done,
+        due: DateTime(2026, 12, 5),
+        assignees: ['u7'],
+      );
+      pages.ok(1, [fresh, _task('w9', 'd2')]);
+      await reload;
+      await _settle();
+
+      final w2 = view(c).task('w2')!;
+      expect(view(c).tasks.map((t) => t.id), ['w2', 'w9']);
+      expect(
+        (w2.status, w2.due, w2.assignees.join(',')),
+        (TaskStatus.done, DateTime(2026, 12, 5), 'u7'),
+        reason: 'bayat katalog satırı taze alanları ezmez',
+      );
+      final shared = c.read(taskCatalogControllerProvider).value!;
+      final s2 = shared.task('w2')!;
+      expect(
+        (s2.status, s2.due, s2.assignees.join(',')),
+        (TaskStatus.done, DateTime(2026, 12, 5), 'u7'),
+        reason: 'paylaşılan katalog da güncellenir',
+      );
+      expect(
+        shared.task('w9'),
+        isNotNull,
+        reason: 'katalogda olmayan görev eklenir',
+      );
+      expect(shared.tasks, hasLength(4));
+    },
+  );
+
+  test(
+    'yalnız süzgeçli sayfada gelen w9: ayrıntısı açılır (ayrıntı isteği gider)',
+    () async {
+      final details = _Details();
+      final c = harness(_admin, details: details);
+      await c.read(taskCatalogControllerProvider.future);
+      filter(c).select('d2');
+      await _settle();
+      pages.ok(0, [_task('w9', 'd2')]);
+      await _settle();
+      expect(view(c).tasks.map((t) => t.id), ['w9']);
+      c.listen(taskDetailsProvider('w9'), (_, _) {});
+      await c.read(taskDetailsProvider('w9').future);
+      expect(details.loaded, ['w9']);
+    },
+  );
+
+  test('okuma sürerken yerelde uygulanan ayrıntı eski okumayla ezilmez; okumadan ÖNCE '
+      'uygulanan ise sunucu değeriyle güncellenir', () async {
     final c = harness(_admin);
     await c.read(taskCatalogControllerProvider.future);
+    final store = c.read(taskCatalogControllerProvider.notifier)
+      ..applyItem('w3', _task('w3', 'd2').copyWith(title: 'Önceki yerel'));
     filter(c).select('d2');
     await _settle();
-    pages.ok(0, [_task('w2', 'd2')]);
+    store.applyItem('w2', _task('w2', 'd2').copyWith(title: 'Yerel (yeni)'));
+    pages.ok(0, [
+      _task('w2', 'd2').copyWith(title: 'Sunucu (eski okuma)'),
+      _task('w3', 'd2').copyWith(title: 'Sunucu'),
+    ]);
     await _settle();
-    final reload = c.read(taskCatalogControllerProvider.notifier).reload();
-    await _settle();
-    expect(pages.asked, ['d2', 'd2']);
-    pages.ok(1, [_task('w2', 'd2'), _task('w9', 'd2')]);
-    await reload;
-    await _settle();
-    expect(view(c).tasks.map((t) => t.id), ['w2', 'w9']);
+    final shared = c.read(taskCatalogControllerProvider).value!;
+    expect(shared.task('w2')!.title, 'Yerel (yeni)');
+    expect(view(c).task('w2')!.title, 'Yerel (yeni)');
+    expect(shared.task('w3')!.title, 'Sunucu');
   });
 
-  test('404 work.program_scope_invalid → süzgeç temizlenir, bilgi bayrağı; sonraki '
-      'okumada süzgeçli istek yok', () async {
+  test('404 work.program_scope_invalid → süzgeç temizlenir, bilgi bayrağı; paylaşılan '
+      'katalog BİR KEZ yeniden okunur (döngü yok); sonraki okumada süzgeçli istek yok', () async {
     final c = harness(_admin);
     await c.read(taskCatalogControllerProvider.future);
+    expect(catalog.loads, 1);
     filter(c).select('d3');
     await _settle();
     pages.invalid(0);
     await _settle();
+    await c.read(taskCatalogControllerProvider.future);
+    await _settle();
+    expect(catalog.loads, 2, reason: 'tek yeniden okuma');
     expect(c.read(taskListFilterProvider).departmentId, isNull);
     expect(view(c).departmentFilterCleared, isTrue);
     expect(view(c).tasks, hasLength(3));
+    await _settle();
+    expect(catalog.loads, 2, reason: 'döngü yok');
     await c.read(taskCatalogControllerProvider.notifier).reload();
     await _settle();
     expect(pages.asked, ['d3']);

@@ -130,12 +130,12 @@ class ApiTaskCatalogRepository
   /// Görevler ekranının departman süzgeci: yalnız görev sayfaları (`department_id` her
   /// sayfada; departman başlığı yok). Kimlik/ekip/departman seçenekleri yeniden okunmaz;
   /// geçersiz süzgeç (404 `work.program_scope_invalid`) dahil hata fırlar (süzgeci çağıran
-  /// temizler). Kısa anahtar bu okumada departman kimliğidir; görünüm katalogdaki hâli
-  /// kullanır ([TaskCatalog.filtered]).
+  /// temizler). Kısa anahtar [departments]'tan (katalogdaki departman etiketi), yoksa kimlik.
   @override
   Future<TaskListPage> loadTasks(
     String departmentId, {
     bool Function()? isCurrent,
+    List<TaskDepartment> departments = const [],
   }) async {
     final program = programId() ?? '';
     final (items, truncated) = await _items(
@@ -143,8 +143,12 @@ class ApiTaskCatalogRepository
       departmentId,
       isCurrent: isCurrent,
     );
+    final labels = {for (final d in departments) d.id: d.label};
     return TaskListPage(
-      tasks: [for (final w in items) _task(w, w.departmentId)],
+      tasks: [
+        for (final w in items)
+          _task(w, labels[w.departmentId] ?? w.departmentId),
+      ],
       names: _names(items),
       truncated: truncated,
     );

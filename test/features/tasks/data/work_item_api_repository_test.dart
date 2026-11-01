@@ -21,6 +21,12 @@ Map<String, Object?> _item({
   'priority': priority,
   'status': status,
   'assignee_account_ids': ['a1', 'a2'],
+  'assignees': [
+    {'account_id': 'a1', 'full_name': 'Ali'},
+    {'account_id': 'a2', 'full_name': null},
+  ],
+  'start_on': '2026-11-01',
+  'end_on': '2026-11-20',
   'is_overdue': true,
   'days_overdue': 3,
   'is_completed_late': false,

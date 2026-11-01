@@ -10,6 +10,8 @@ import '../../../core/api/generated/models/file_list_item.dart' as api;
 import '../../../core/api/generated/models/file_record.dart' as api;
 import '../../../core/api/generated/models/rename_file_request.dart';
 import '../../../core/api/generated/models/tag.dart';
+import '../../../core/api/generated/models/work_item_file_list_item.dart'
+    as api;
 import '../../../core/domain/enum_parse.dart';
 import '../../../core/domain/page_slice.dart';
 import '../../../core/domain/upload_types.dart';
@@ -64,7 +66,7 @@ class ApiRecordsRepository implements RecordsRepository {
   @override
   Future<List<RecordFile>> listWorkItemFiles(String workItemId) async {
     final r = await apiCall(() => _client.listWorkItemFiles(id: workItemId));
-    return r.files.map(_item).toList(growable: false);
+    return r.files.map(_taskFile).toList(growable: false);
   }
 
   @override
@@ -185,6 +187,18 @@ class ApiRecordsRepository implements RecordsRepository {
   );
 
   static RecordFile _item(api.FileListItem r) => RecordFile(
+    id: r.fileId,
+    workItemId: r.workItemId,
+    displayName: r.displayName,
+    contentType: r.contentType,
+    sizeBytes: r.sizeBytes,
+    tag: _tagIn(r.tag),
+    uploaderId: r.uploadedByAccountId,
+  );
+
+  /// Görev dosya listesi satırı (v0.6.0: `WorkItemFileListItem`, yükleyen adı dahil; ad bu
+  /// domain tipinde taşınmaz).
+  static RecordFile _taskFile(api.WorkItemFileListItem r) => RecordFile(
     id: r.fileId,
     workItemId: r.workItemId,
     displayName: r.displayName,

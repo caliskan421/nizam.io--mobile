@@ -69,8 +69,8 @@ void main() {
   });
 
   group('operasyon → kapsam sınıfı haritası (spec\'ten)', () {
-    test('v0.5.0-api: 153 işlem; API sürümü v1', () {
-      expect(apiOperations, hasLength(153));
+    test('v0.6.0-api: 155 işlem; API sürümü v1', () {
+      expect(apiOperations, hasLength(155));
       expect(apiVersion, 'v1');
     });
 

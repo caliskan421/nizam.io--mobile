@@ -94,9 +94,9 @@ abstract class C {
     });
   });
 
-  group('üretilmiş istemciler (v0.5.0-api)', () {
+  group('üretilmiş istemciler (v0.6.0-api)', () {
     test(
-      'yalnız 11 operasyon HttpResponse döner; diğerlerinin imzası değişmez',
+      'yalnız 12 operasyon HttpResponse döner; diğerlerinin imzası değişmez',
       () {
         final wrapped = <String>{};
         final plain = <String>{};
@@ -121,6 +121,7 @@ abstract class C {
           'listDeletedDepartments',
           'listDepartments',
           'listMembers',
+          'listProgramDepartments',
           'listPrograms',
           'listUsers',
           'myDepartments',

@@ -35,6 +35,11 @@ const _item = {
   'priority': 'acil',
   'status': 'baslanmadi',
   'assignee_account_ids': ['u2'],
+  'assignees': [
+    {'account_id': 'u2', 'full_name': 'Ali Veli'},
+  ],
+  'start_on': '2026-11-01',
+  'end_on': '2026-11-10',
   'is_overdue': false,
   'days_overdue': 0,
   'is_completed_late': false,

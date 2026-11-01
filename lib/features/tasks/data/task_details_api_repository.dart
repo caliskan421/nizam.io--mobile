@@ -3,8 +3,9 @@ import 'package:dio/dio.dart';
 import '../../../core/api/generated/clients/records_client.dart';
 import '../../../core/api/generated/clients/work_client.dart';
 import '../../../core/api/generated/models/date_change_request.dart' as api;
-import '../../../core/api/generated/models/file_list_item.dart';
 import '../../../core/api/generated/models/file_record_list.dart';
+import '../../../core/api/generated/models/work_item_detail.dart';
+import '../../../core/api/generated/models/work_item_file_list_item.dart';
 import '../../../core/api/generated/models/work_item_note_list.dart';
 import '../../../core/api/generated/models/work_item_subtask.dart';
 import '../../../core/api/generated/models/work_item_subtask_list.dart';
@@ -15,8 +16,12 @@ import '../domain/task_catalog.dart';
 import '../domain/task_details.dart';
 import 'work_item_mapping.dart';
 
-/// Görev ayrıntısının sunucu kaynağı. Alt görevler, notlar ve dosyalar S3'tür: görevin KENDİ
-/// departmanıyla okunur (seçili kapsamın departmanı değil; [withDepartment]). Tarih talebi role
+/// Görev ayrıntısının sunucu kaynağı (istemci akışları §3): `getWorkItem` (açıklama ve
+/// tarihlerle görevin kendisi) + alt görevler + notlar + dosyalar. Hepsi S3'tür: görevin KENDİ
+/// departmanıyla okunur (seçili kapsamın departmanı değil; [withDepartment]). Kişi adları
+/// (`assignees[].full_name`, not `author_full_name`, alt görev `assignee_full_name` /
+/// `done_by_full_name` / `created_by_full_name`, dosya `uploaded_by_full_name`) null değilse
+/// [TaskDetails.names]'e girer; null ad hata değildir (arayüz nötr etiket gösterir). Tarih talebi role
 /// göre ([TaskAccess.dateRequestFeed]): şirket yöneticisi inceleme kuyruğu
 /// (`GET /v1/date-change-requests?status=pending`, S1), kapsamda koordinatör kendi talepleri
 /// (`GET /v1/date-change-requests/mine`, S3, görevin departmanı), üye/rolsüz çağrı yok (yetkisiz
@@ -37,6 +42,15 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
     final id = task.id;
     // eagerError: ilk hata fırlar, diğerleri yutulur (işlenmemiş hata kalmaz).
     final r = await Future.wait<Object>([
+      apiCall(
+        () => _work.getWorkItem(
+          id: id,
+          extras: withDepartment(
+            WorkClient.getWorkItemOpenapiExtras,
+            department,
+          ),
+        ),
+      ),
       apiCall(
         () => _work.listWorkItemSubtasks(
           id: id,
@@ -70,11 +84,12 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
         department,
       ),
     ], eagerError: true);
-    final subtasks = (r[0] as WorkItemSubtaskList).subtasks;
-    final notes = (r[1] as WorkItemNoteList).notes;
-    final files = (r[2] as FileRecordList).files;
+    final item = r[0] as WorkItemDetail;
+    final subtasks = (r[1] as WorkItemSubtaskList).subtasks;
+    final notes = (r[2] as WorkItemNoteList).notes;
+    final files = (r[3] as FileRecordList).files;
     final requests = [
-      for (final d in r[3] as List<api.DateChangeRequest>)
+      for (final d in r[4] as List<api.DateChangeRequest>)
         if (d.workItemId == id) d,
     ];
     // Bekleyen önce; yoksa son sonuçlanmış (koordinatörün kendi talepleri tüm durumları taşır).
@@ -87,6 +102,18 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
             .firstOrNull ??
         requests.lastOrNull;
     return TaskDetails(
+      item: _item(item, task.shortCode),
+      names: [
+        for (final a in item.assignees) ?_name(a.accountId, a.fullName),
+        for (final n in notes) ?_name(n.authorAccountId, n.authorFullName),
+        for (final s in subtasks) ...[
+          ?_name(s.createdByAccountId, s.createdByFullName),
+          ?_name(s.assigneeAccountId, s.assigneeFullName),
+          ?_name(s.doneByAccountId, s.doneByFullName),
+        ],
+        for (final f in files)
+          ?_name(f.uploadedByAccountId, f.uploadedByFullName),
+      ],
       subtasks: [for (final s in subtasks) _subtask(s, files)],
       notes: [
         for (final n in notes)
@@ -146,19 +173,61 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
   };
 
   /// Alt görevin bağlı dosyası: ona bağlı ilk dosyanın adı (bilgi; kanıt bayrağı yok).
-  static Subtask _subtask(WorkItemSubtask s, List<FileListItem> files) =>
-      Subtask(
-        id: s.subtaskId,
-        title: s.title,
-        done: s.done,
-        assignee: s.assigneeAccountId,
-        start: s.startOn,
-        end: s.endOn,
-        evidence: files
-            .where((f) => f.subtaskId == s.subtaskId)
-            .firstOrNull
-            ?.displayName,
-      );
+  static Subtask _subtask(
+    WorkItemSubtask s,
+    List<WorkItemFileListItem> files,
+  ) => Subtask(
+    id: s.subtaskId,
+    title: s.title,
+    done: s.done,
+    assignee: s.assigneeAccountId,
+    doneBy: s.doneByAccountId,
+    createdBy: s.createdByAccountId,
+    start: s.startOn,
+    end: s.endOn,
+    evidence: files
+        .where((f) => f.subtaskId == s.subtaskId)
+        .firstOrNull
+        ?.displayName,
+  );
+
+  /// Kimlik ve ad birlikte varsa ad kaydı; null ad (çözülemedi) kayıt üretmez.
+  static PersonName? _name(String? id, String? name) =>
+      id == null || name == null ? null : PersonName(id, name);
+
+  /// Tekil okuma → [TaskItem] (açıklama, `start_on`/`end_on`, sunucu gecikmesi). Kısa anahtar
+  /// katalogdaki görevden (departman kodu ya da adı) korunur.
+  static TaskItem _item(WorkItemDetail w, String? shortCode) {
+    final lateness = TaskLateness(
+      isOverdue: w.isOverdue,
+      daysOverdue: w.daysOverdue,
+      isCompletedLate: w.isCompletedLate,
+      daysLate: w.daysLate,
+      isCompletedEarly: w.isCompletedEarly,
+      daysEarly: w.daysEarly,
+    );
+    return TaskItem(
+      code: w.workItemId,
+      id: w.workItemId,
+      shortCode: shortCode,
+      title: w.title,
+      coordinatorship: w.departmentId,
+      departmentId: w.departmentId,
+      programId: w.programId,
+      status: taskStatusFromWire(w.status.json),
+      priority: taskPriorityFromWire(w.priority.json),
+      start: day(w.startOn),
+      due: day(w.endOn),
+      plannedEnd: w.plannedEndOn,
+      completedAt: w.completedOn,
+      assignees: List.unmodifiable(w.assigneeAccountIds),
+      description: w.description,
+      lateness: lateness,
+      overdueDays: lateness.daysOverdue,
+      evidenceRequired: w.completionEvidenceRequired,
+      subtaskCounts: (total: w.subtaskCounts.total, done: w.subtaskCounts.done),
+    );
+  }
 
   static TaskFileKind _kind(String contentType) =>
       contentType.startsWith('image/')

@@ -84,12 +84,20 @@ final class Subtask {
     this.end,
     this.evidence,
     this.assigneeRequired = false,
+    this.doneBy,
+    this.createdBy,
   });
 
   final String id;
   final String title;
   final bool done;
   final String? assignee;
+
+  /// Kapatan kişi kimliği (`done_by_account_id`); açıkta ya da örnek veride null.
+  final String? doneBy;
+
+  /// Oluşturan kişi kimliği (`created_by_account_id`); örnek veride null.
+  final String? createdBy;
   final DateTime? start;
   final DateTime? end;
 
@@ -115,6 +123,8 @@ final class Subtask {
     end: end == null ? this.end : end(),
     evidence: evidence ?? this.evidence,
     assigneeRequired: assigneeRequired,
+    doneBy: doneBy,
+    createdBy: createdBy,
   );
 }
 
@@ -353,10 +363,11 @@ final class TaskDependency {
 /// Görev kataloğunda sunucu kaynağı `WorkItem`'dır (`GET /v1/work-items`): `work_item_id` →
 /// [id] (ve [code]), `department_id` → [departmentId] (ve [coordinatorship]), `program_id` →
 /// [programId], `planned_end_on` → [plannedEnd], `completed_on` → [completedAt] (gün),
-/// `assignee_account_ids` → [assignees], gecikme düz alanları → [lateness] (ve [overdueDays] ←
+/// `assignee_account_ids` → [assignees] (adlar `assignees[].full_name` → [TaskCatalog.nameOf]),
+/// `start_on` → [start], `end_on` → [due], gecikme düz alanları → [lateness] (ve [overdueDays] ←
 /// `days_overdue`), `completion_evidence_required` → [evidenceRequired], `subtask_counts` →
-/// [subtaskCounts]. [start]/[due]: v0.6.0 `start_on`/`end_on` gelene kadar GEÇİCİ olarak
-/// katalog günü (F57 P1b). Zaman çizelgesi aynı alan adlarıyla `GanttTask`'tan eşler.
+/// [subtaskCounts]. [description] yalnız tekil uçtan (`getWorkItem`). Zaman çizelgesi aynı alan
+/// adlarıyla `GanttTask`'tan eşler.
 @immutable
 final class TaskItem {
   const TaskItem({
@@ -397,7 +408,8 @@ final class TaskItem {
   final String id;
 
   /// Ekranda gösterilen kısa anahtar; null → [code]. Sunucu kaynağında departman kodu
-  /// (`ALT`): sunucu kimliği kullanıcıya gösterilmez.
+  /// (`listProgramDepartments` `code`), kod yoksa departmanın programdaki adı: sunucu kimliği
+  /// kullanıcıya gösterilmez.
   final String? shortCode;
 
   /// Ekranda gösterilen görev anahtarı (örnekte `ALT-7`, sunucuda departman kodu).
@@ -435,7 +447,8 @@ final class TaskItem {
   /// Tamamlanma günü (`completed_on`; sunucuda gün çözünürlüğü).
   final DateTime? completedAt;
 
-  /// Açıklama. Görev okuma yüzlerinde yok (yalnız oluşturma/güncelleme ve ŞY raporu).
+  /// Açıklama. Listede yok; tekil okumada (`getWorkItem` → `WorkItemDetail.description`)
+  /// dolar. null → okunmadı (örnek veride ya da ayrıntı yüklenmeden).
   final String? description;
 
   /// Sunucunun gecikme bayrakları; örnek veride yok ([overdueDays] kullanılır).
@@ -531,6 +544,52 @@ final class TaskItem {
   );
 }
 
+/// Sunucunun bir kayıtla verdiği kişi adı (`full_name`; null ad bu tipe girmez). Ayrı ekip
+/// dizini ucu yoktur: ad yalnız görünen kaydın aktörü içindir.
+@immutable
+final class PersonName {
+  const PersonName(this.id, this.name);
+
+  /// Hesap kimliği.
+  final String id;
+  final String name;
+
+  @override
+  bool operator ==(Object other) =>
+      other is PersonName && other.id == id && other.name == name;
+
+  @override
+  int get hashCode => Object.hash(id, name);
+}
+
+/// Görev listesinde seçilebilir departman: kimlik, programdaki ad ve (varsa) katalog kodu.
+@immutable
+final class TaskDepartment {
+  const TaskDepartment({required this.id, required this.name, this.code});
+
+  final String id;
+  final String name;
+
+  /// Katalog kodu (`listProgramDepartments` `code`); verilmemişse null.
+  final String? code;
+
+  /// Kartlardaki kısa etiket: kod, yoksa ad.
+  String get label {
+    final c = code;
+    return c == null || c.isEmpty ? name : c;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is TaskDepartment &&
+      other.id == id &&
+      other.name == name &&
+      other.code == code;
+
+  @override
+  int get hashCode => Object.hash(id, name, code);
+}
+
 /// Görev kataloğu: görevler, kişiler, koordinatörlükler ve verinin "bugün"ü (sunucu saati).
 @immutable
 final class TaskCatalog {
@@ -543,9 +602,14 @@ final class TaskCatalog {
     this.access,
     this.departmentId,
     this.truncated = false,
+    List<TaskDepartment> departments = const [],
+    this.departmentsTruncated = false,
+    List<PersonName> names = const [],
   }) : tasks = List.unmodifiable(tasks),
        people = List.unmodifiable(people),
-       coordinatorships = List.unmodifiable(coordinatorships);
+       coordinatorships = List.unmodifiable(coordinatorships),
+       departments = List.unmodifiable(departments),
+       names = List.unmodifiable(names);
 
   final DateTime today;
 
@@ -564,6 +628,21 @@ final class TaskCatalog {
   /// Liste sayfa tavanında kesildi (sunucuda daha fazla görev var); arayüz uyarı gösterir.
   final bool truncated;
 
+  /// Görev listesinin seçilebilir departmanları (sunucu kaynağı; örnekte boş). Şirket
+  /// yöneticisinde `listProgramDepartments`, diğerlerinde bu programdaki ekip satırları.
+  final List<TaskDepartment> departments;
+
+  /// Departman listesi sunucu tavanında kesildi (`X-Result-Truncated: true`).
+  final bool departmentsTruncated;
+
+  /// Sunucunun verdiği kişi adları: liste atananları (`assignees[].full_name`) ve okunmuş
+  /// ayrıntıların adları. Null ad girmez; aynı kimlikte sonraki geçerlidir.
+  final List<PersonName> names;
+
+  /// Kişinin görünen adı: kişi listesinden, yoksa sunucunun verdiği addan; bilinmiyorsa null
+  /// (arayüz nötr "Bilinmeyen kişi" gösterir; rol tahmini yok).
+  String? nameOf(String id) => person(id)?.name ?? _names[id];
+
   /// Sunucu kataloğunda departman bağlamı yok → liste "departman seç" durumundadır (istek
   /// gönderilmedi). Örnek kaynakta false.
   bool get departmentRequired => access != null && departmentId == null;
@@ -573,6 +652,7 @@ final class TaskCatalog {
   late final _people = {for (final p in people) p.id: p};
   late final _coords = {for (final c in coordinatorships) c.code: c};
   late final _tasks = {for (final t in tasks) t.code: t};
+  late final _names = {for (final n in names) n.id: n.name};
 
   Person? person(String id) => _people[id];
 
@@ -595,7 +675,27 @@ final class TaskCatalog {
     access: access,
     departmentId: departmentId,
     truncated: truncated,
+    departments: departments,
+    departmentsTruncated: departmentsTruncated,
+    names: names,
   );
+
+  /// [more] adlarını ekleyerek (aynı kimlikte yeni ad geçerli) yeni katalog.
+  TaskCatalog withNames(List<PersonName> more) => more.isEmpty
+      ? this
+      : TaskCatalog(
+          today: today,
+          me: me,
+          tasks: tasks,
+          people: people,
+          coordinatorships: coordinatorships,
+          access: access,
+          departmentId: departmentId,
+          truncated: truncated,
+          departments: departments,
+          departmentsTruncated: departmentsTruncated,
+          names: [...names, ...more],
+        );
 
   /// Koordinatörlükte sıradaki görev kodu (`ALT-14` → `ALT-15`).
   String nextCode(String coordinatorship) {

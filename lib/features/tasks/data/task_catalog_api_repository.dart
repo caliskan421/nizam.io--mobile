@@ -3,6 +3,7 @@ import 'package:retrofit/retrofit.dart';
 
 import '../../../core/api/generated/clients/identity_client.dart';
 import '../../../core/api/generated/clients/organization_client.dart';
+import '../../../core/api/generated/clients/program_client.dart';
 import '../../../core/api/generated/clients/work_client.dart';
 import '../../../core/api/generated/models/me_response.dart';
 import '../../../core/api/generated/models/my_department.dart' as api;
@@ -19,16 +20,18 @@ import 'work_item_mapping.dart';
 /// Görünürlük sunucudadır: koordinatör ve şirket yöneticisi departmanın tümünü, üye yalnız
 /// kendine atananları alır.
 ///
-/// Departman bağlamı TEKTİR (ürün kısıtı: departmanlar arası tarama yok — F57 koordinatör
-/// düzeltmesi): kapsamda seçili departman ([departmentId]; değiştirme kancası
-/// `ScopeController.selectDepartment`), yoksa hesabın bu programdaki ilk ekip satırı
-/// (`GET /v1/me/departments`). Departman yoksa (ör. ekip satırı olmayan şirket yöneticisi)
-/// liste isteği gönderilmez; katalog [TaskCatalog.departmentRequired] ile "departman seç"
-/// durumunu taşır. Görünen kısa anahtar departmanın programdaki adıdır (kod P1b).
+/// Departman bağlamı TEKTİR (istemci akışları §2; departmanlar arası tarama yok). Seçilebilir
+/// departmanlar ([TaskCatalog.departments]): şirket yöneticisinde `listProgramDepartments`
+/// (`GET /v1/program/departments`, S2; `X-Result-Truncated` → [TaskCatalog.departmentsTruncated]),
+/// diğerlerinde `GET /v1/me/departments`'ın bu programdaki satırları. Liste departmanı: kapsamda
+/// seçili ([departmentId]; değiştirme `ScopeController.selectDepartment`) seçilebilirler
+/// arasındaysa o, değilse ilk seçilebilir (eskimiş seçim [correctDepartment] ile düzeltilir).
+/// Departman yoksa liste isteği gönderilmez ([TaskCatalog.departmentRequired]). Görünen kısa
+/// anahtar departman kodu, kod yoksa programdaki ad ([TaskDepartment.label]).
 ///
-/// Rol `/v1/me` + `/v1/me/departments`'tan [TaskAccess]'te türetilir ve katalogla taşınır
-/// (ayrıntı ekranı tarih talebi yüzünü buradan seçer). Yönetici rapor/kullanıcı uçları ve
-/// `adminGantt` kullanılmaz. Liste dosya sayısı, not sayısı, açıklama ve adlar taşımaz.
+/// Rol `/v1/me` + `/v1/me/departments`'tan [TaskAccess]'te türetilir ve katalogla taşınır.
+/// Yönetici rapor/kullanıcı uçları ve `adminGantt` kullanılmaz. Liste dosya sayısı, not sayısı
+/// ve açıklama taşımaz; atanan adları `assignees[].full_name`'den [TaskCatalog.names]'e girer.
 class ApiTaskCatalogRepository implements TaskCatalogRepository {
   ApiTaskCatalogRepository(
     Dio dio, {
@@ -39,6 +42,7 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
   }) : _identity = IdentityClient(dio),
        _work = WorkClient(dio),
        _organization = OrganizationClient(dio),
+       _program = ProgramClient(dio),
        departmentId = departmentId ?? _none,
        correctDepartment = correctDepartment ?? _ignore,
        _now = now ?? DateTime.now;
@@ -46,18 +50,22 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
   static String? _none() => null;
   static void _ignore(String _) {}
 
+  /// Kesilme başlığı (`listProgramDepartments`, openapi `ResultTruncated`).
+  static const truncationHeader = 'X-Result-Truncated';
+
   /// Seçili programın kimliği (istek anında okunur).
   final String? Function() programId;
 
   /// Kapsamda seçili departman (yoksa null; istek anında okunur).
   final String? Function() departmentId;
 
-  /// Kapsamdaki kalıcı departman seçimi hesabın ekip satırlarında yoksa (yönetici değil)
-  /// liste ilk satıra düşer ve seçim bununla düzeltilir (`ScopeController.selectDepartment`).
+  /// Kapsamdaki kalıcı departman seçimi seçilebilirler arasında yoksa liste ilk seçilebilire
+  /// düşer ve seçim bununla düzeltilir (`ScopeController.selectDepartment`).
   final void Function(String departmentId) correctDepartment;
   final IdentityClient _identity;
   final WorkClient _work;
   final OrganizationClient _organization;
+  final ProgramClient _program;
   final DateTime Function() _now;
 
   /// Liste sayfa boyu (sunucu tavanı) ve departman başına en çok sayfa (döngü koruması).
@@ -80,20 +88,35 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
       seats: [for (final d in rows ?? const <api.MyDepartment>[]) _seat(d)],
     );
 
-    final today = _now();
-    final day = DateTime(today.year, today.month, today.day);
-    final department = _department(access, program);
+    final (departments, departmentsTruncated) = access.companyAdmin
+        ? await _programDepartments()
+        : (
+            [
+              for (final s in access.seatsIn(program))
+                TaskDepartment(id: s.departmentId, name: s.departmentName),
+            ],
+            false,
+          );
+    final department = _department(departments, departmentsTruncated);
     final (items, truncated) = department == null
         ? (const <WorkItem>[], false)
-        : await _items(department.$1);
-    final tasks = [for (final w in items) _task(w, department!.$2, day)];
+        : await _items(department.id);
+    final tasks = [for (final w in items) _task(w, department!.label)];
 
+    final today = _now();
     return TaskCatalog(
-      today: day,
+      today: DateTime(today.year, today.month, today.day),
       me: access.accountId,
       access: access,
-      departmentId: department?.$1,
+      departmentId: department?.id,
       truncated: truncated,
+      departments: departments,
+      departmentsTruncated: departmentsTruncated,
+      names: [
+        for (final w in items)
+          for (final a in w.assignees)
+            if (a.fullName case final name?) PersonName(a.accountId, name),
+      ],
       tasks: tasks,
       people: [
         Person(
@@ -103,10 +126,10 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
         ),
       ],
       coordinatorships: [
-        if (department case (final id, final name))
+        if (department != null)
           CoordinatorshipRef(
-            code: id,
-            name: name,
+            code: department.id,
+            name: department.name,
             leads: const [],
             members: const [],
           ),
@@ -114,22 +137,34 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
     );
   }
 
-  /// Listenin TEK departmanı (kimlik, ad): kapsamda seçili departman; yoksa hesabın bu
-  /// programdaki ilk ekip satırı. Seçili departman ekip satırlarında yoksa yönetici değilse
-  /// ilk satıra düşülür ve seçim [correctDepartment] ile düzeltilir (eskimiş kalıcı seçim).
-  /// Departman yoksa null → "departman seç" (istek gönderilmez). Şirket yöneticisinin
-  /// programdaki departman listesi P1b'de (`listProgramDepartments`, v0.6.0).
-  (String, String)? _department(TaskAccess access, String program) {
-    final seats = access.seatsIn(program);
-    final first = seats.firstOrNull;
+  /// Şirket yöneticisinin seçilebilir departmanları (programa bağlı canlı departmanlar, ada
+  /// göre sıralı) ve kesilme bayrağı.
+  Future<(List<TaskDepartment>, bool)> _programDepartments() async {
+    final r = await apiCall(_program.listProgramDepartments);
+    final values = r.response.headers[truncationHeader];
+    return (
+      [
+        for (final d in r.data.departments)
+          TaskDepartment(id: d.departmentId, name: d.displayName, code: d.code),
+      ],
+      values != null && values.length == 1 && values[0] == 'true',
+    );
+  }
+
+  /// Listenin TEK departmanı: kapsamda seçili departman seçilebilirler arasındaysa o; değilse
+  /// ilk seçilebilir ve eskimiş seçim [correctDepartment] ile düzeltilir. Kesik listede
+  /// (yönetici) listede görünmeyen seçim korunur (ilk 200'ün dışında olabilir; ad = kimlik).
+  /// Seçilebilir yoksa null → "departman seç" (istek gönderilmez).
+  TaskDepartment? _department(List<TaskDepartment> options, bool truncated) {
+    final first = options.firstOrNull;
     final selected = departmentId();
     if (selected != null && selected.isNotEmpty) {
-      final seat = seats.where((s) => s.departmentId == selected).firstOrNull;
-      if (seat != null) return (selected, seat.departmentName);
-      if (access.companyAdmin) return (selected, selected);
-      if (first != null) correctDepartment(first.departmentId);
+      final match = options.where((d) => d.id == selected).firstOrNull;
+      if (match != null) return match;
+      if (truncated) return TaskDepartment(id: selected, name: selected);
+      if (first != null) correctDepartment(first.id);
     }
-    return first == null ? null : (first.departmentId, first.departmentName);
+    return first;
   }
 
   /// Departmanın sayfaları (tek akış, imleçle); [maxPages] dolduğunda imleç hâlâ varsa
@@ -166,9 +201,8 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
     },
   );
 
-  /// [day]: GEÇİCİ (P1b) — v0.5.0 `WorkItem` başlangıç/bitiş taşımaz; görev tarihleri katalog
-  /// günüyle doldurulur. v0.6.0 pin'inde `start_on`/`end_on` burada eşlenir.
-  static TaskItem _task(WorkItem w, String? shortCode, DateTime day) {
+  /// `WorkItem` → [TaskItem]; tarihler `start_on`/`end_on`, gecikme sunucu değerleri.
+  static TaskItem _task(WorkItem w, String shortCode) {
     final lateness = TaskLateness(
       isOverdue: w.isOverdue,
       daysOverdue: w.daysOverdue,
@@ -187,8 +221,8 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
       programId: w.programId,
       status: taskStatusFromWire(w.status.json),
       priority: taskPriorityFromWire(w.priority.json),
-      start: day,
-      due: day,
+      start: day(w.startOn),
+      due: day(w.endOn),
       plannedEnd: w.plannedEndOn,
       completedAt: w.completedOn,
       assignees: List.unmodifiable(w.assigneeAccountIds),

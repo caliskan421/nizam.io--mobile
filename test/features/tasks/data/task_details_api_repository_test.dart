@@ -1,5 +1,6 @@
-// tasks ayrıntısı (sunucu): alt görev, not ve dosya görevin KENDİ departmanıyla (açık
-// departman) okunur; tarih talebi role göre (yönetici inceleme kuyruğu, koordinatör kendi
+// tasks ayrıntısı (sunucu): tekil görev (getWorkItem: açıklama, tarihler, adlar), alt görev,
+// not ve dosya görevin KENDİ departmanıyla (açık departman) okunur; kişi adları (null → girmez)
+// ad dizinine; tarih talebi role göre (yönetici inceleme kuyruğu, koordinatör kendi
 // talepleri, üye çağrı yok) ve göreve göre süzülür; dosya türü/etiketi ve alt görevin bağlı
 // dosyası eşlenir; hata ApiError.
 import 'dart:convert';
@@ -45,6 +46,7 @@ ApiTaskDetailsRepository _repo(_Adapter adapter) => ApiTaskDetailsRepository(
 
 final _task = TaskItem(
   code: 'w1',
+  shortCode: 'ALT',
   title: 'Hidrofor',
   coordinatorship: 'd1',
   departmentId: 'd1',
@@ -103,10 +105,37 @@ Map<String, Object> _file(
   'size_bytes': 1500,
   'tag': tag,
   'uploaded_by_account_id': 'u1',
+  'uploaded_by_full_name': 'Ufuk Bir',
   'subtask_id': ?subtask,
 };
 
+Map<String, Object?> _detail() => {
+  'work_item_id': 'w1',
+  'program_id': 'p1',
+  'department_id': 'd1',
+  'title': 'Hidrofor (güncel)',
+  'priority': 'acil',
+  'status': 'onaya_sunuldu',
+  'assignee_account_ids': ['u2', 'u3'],
+  'assignees': [
+    {'account_id': 'u2', 'full_name': 'Ali Veli'},
+    {'account_id': 'u3', 'full_name': null},
+  ],
+  'start_on': '2026-07-04',
+  'end_on': '2026-09-25',
+  'is_overdue': true,
+  'days_overdue': 6,
+  'is_completed_late': false,
+  'days_late': 0,
+  'is_completed_early': false,
+  'days_early': 0,
+  'completion_evidence_required': true,
+  'subtask_counts': {'total': 2, 'done': 1},
+  'description': 'Pompa odasının kurulumu',
+};
+
 Map<String, Object> _bodies() => {
+  '/v1/work-items/w1': _detail(),
   '/v1/work-items/w1/subtasks': {
     'subtasks': [
       {
@@ -120,6 +149,10 @@ Map<String, Object> _bodies() => {
         'assignee_account_id': 'u2',
         'start_on': '2026-07-02',
         'end_on': '2026-07-10',
+        'done_by_account_id': 'u4',
+        'done_by_full_name': 'Deniz Kapatan',
+        'created_by_full_name': 'Ufuk Bir',
+        'assignee_full_name': 'Ali Veli',
       },
       {
         'subtask_id': 's2',
@@ -138,7 +171,8 @@ Map<String, Object> _bodies() => {
       {
         'note_id': 'n1',
         'work_item_id': 'w1',
-        'author_account_id': 'u2',
+        'author_account_id': 'u5',
+        'author_full_name': null,
         'content': 'Pompa geldi',
         'created_at': '2026-07-05T09:00:00Z',
         'updated_at': '2026-07-05T09:00:00Z',
@@ -214,7 +248,7 @@ void main() {
 
     final note = d.notes.single;
     expect(note.id, 'n1');
-    expect(note.by, 'u2');
+    expect(note.by, 'u5');
     expect(note.text, 'Pompa geldi');
     expect(note.at, DateTime.utc(2026, 7, 5, 9));
 
@@ -235,6 +269,41 @@ void main() {
     expect(r.due, DateTime(2026, 11, 10));
     expect(r.reason, 'Gecikme');
     expect(r.isPending, isTrue);
+  });
+
+  test('getWorkItem: görevin kendisi (tarih, açıklama, durum, sunucu gecikmesi) ve kişi adları; '
+      'null ad dizine girmez', () async {
+    final adapter = _Adapter(_bodies());
+    final d = (await _repo(adapter).load(_task, access: _admin))!;
+    final get = adapter.seen.singleWhere(
+      (o) => o.uri.path == '/v1/work-items/w1',
+    );
+    expect(get.method, 'GET');
+    expect(get.extra.values, contains('d1'), reason: 'görevin departmanı');
+
+    final item = d.item!;
+    expect(item.id, 'w1');
+    expect(item.shortCode, 'ALT', reason: 'kısa anahtar katalogdaki görevden');
+    expect(item.title, 'Hidrofor (güncel)');
+    expect(item.status, TaskStatus.review);
+    expect(item.priority, TaskPriority.urgent);
+    expect(item.start, DateTime(2026, 7, 4));
+    expect(item.due, DateTime(2026, 9, 25));
+    expect(item.description, 'Pompa odasının kurulumu');
+    expect(item.assignees, ['u2', 'u3']);
+    expect(item.overdueDays, 6, reason: 'gecikme sunucudan');
+    expect(item.evidenceRequired, isTrue);
+    expect(item.subtaskCounts, (total: 2, done: 1));
+
+    expect(d.subtasks.first.doneBy, 'u4');
+    expect(d.subtasks.first.createdBy, 'u1');
+    final names = {for (final n in d.names) n.id: n.name};
+    expect(names, {'u2': 'Ali Veli', 'u4': 'Deniz Kapatan', 'u1': 'Ufuk Bir'});
+    expect(
+      names.containsKey('u3') || names.containsKey('u5'),
+      isFalse,
+      reason: 'null atanan / not yazarı adı dizine girmez',
+    );
   });
 
   test('bekleyen talep yoksa null', () async {

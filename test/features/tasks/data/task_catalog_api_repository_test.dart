@@ -1,8 +1,9 @@
 // tasks sunucu kataloğu: görev listesi her zaman TEK departman için tek `GET /v1/work-items`
-// akışı (açık departman, imleçle). Departman: kapsamda seçili, yoksa bu programdaki ilk ekip
-// satırı; departman yoksa (ekip satırı olmayan yönetici) liste isteği yok, "departman seç".
+// akışı (açık departman, imleçle). Seçilebilir departmanlar: yöneticide
+// `GET /v1/program/departments` (kesilme başlığı → bayrak), diğerlerinde bu programdaki ekip
+// satırları; liste departmanı kapsamda seçili (seçilebilirse), yoksa ilk seçilebilir.
 // Departmanlar arası tarama ve yönetici rapor/kullanıcı/Gantt/şirket departman uçları yok; rol
-// /v1/me + /v1/me/departments'tan; WorkItem → TaskItem; hata ApiError.
+// /v1/me + /v1/me/departments'tan; WorkItem → TaskItem (tarihler, adlar); hata ApiError.
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
@@ -17,10 +18,11 @@ const _dept = 'nizamio.department';
 /// Yol + açık departman + imlece göre yanıt veren sahte uç. Anahtar: `yol`,
 /// `yol@departman`, `yol@departman?cursor=…` (en özelden genele aranır).
 class _Adapter implements HttpClientAdapter {
-  _Adapter(this.bodies, {this.statuses = const {}});
+  _Adapter(this.bodies, {this.statuses = const {}, this.headers = const {}});
 
   final Map<String, Object> bodies;
   final Map<String, int> statuses;
+  final Map<String, Map<String, List<String>>> headers;
   final List<RequestOptions> seen = [];
 
   @override
@@ -44,6 +46,7 @@ class _Adapter implements HttpClientAdapter {
       statuses[key] ?? 200,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
+        ...?headers[key],
       },
     );
   }
@@ -70,6 +73,7 @@ Map<String, Object?> _item(
   bool evidence = false,
   int total = 0,
   int done = 0,
+  String? name = 'Ali Veli',
 }) => {
   'work_item_id': id,
   'program_id': 'p1',
@@ -78,6 +82,11 @@ Map<String, Object?> _item(
   'priority': 'yuksek',
   'status': 'devam_ediyor',
   'assignee_account_ids': ['u2'],
+  'assignees': [
+    {'account_id': 'u2', 'full_name': name},
+  ],
+  'start_on': '2026-10-05',
+  'end_on': '2026-10-18',
   'is_overdue': true,
   'days_overdue': 4,
   'is_completed_late': false,
@@ -95,6 +104,14 @@ Map<String, Object> _me({bool admin = false}) => {
   'full_name': 'Ayşe Kaya',
   'company_admin': admin,
 };
+
+Map<String, Object> _programDepartments(List<(String, String, String?)> rows) =>
+    {
+      'departments': [
+        for (final (id, name, code) in rows)
+          {'department_id': id, 'display_name': name, 'code': ?code},
+      ],
+    };
 
 Map<String, Object> _seats(List<(String, String, String)> rows) => {
   'departments': [
@@ -194,6 +211,19 @@ void main() {
     expect(t.overdueDays, 4);
     expect(t.lateness!.isOverdue, isTrue);
     expect(t.plannedEnd, DateTime(2026, 10, 20));
+    expect(
+      t.start,
+      DateTime(2026, 10, 5),
+      reason: 'start_on (katalog günü değil)',
+    );
+    expect(t.due, DateTime(2026, 10, 18), reason: 'end_on');
+    expect(
+      t.overdueDays,
+      4,
+      reason: 'gecikme sunucudan; tarihten yeniden hesaplanmaz',
+    );
+    expect(t.description, isNull, reason: 'açıklama yalnız tekil okumada');
+    expect(c.nameOf('u2'), 'Ali Veli', reason: 'assignees[].full_name');
     expect(t.files, 0, reason: 'liste dosya sayısı taşımaz');
     expect(c.today, DateTime(2026, 11));
     expect(c.me, 'me');
@@ -203,7 +233,7 @@ void main() {
 
   test('kapsamda departman seçiliyse yalnız o departman okunur', () async {
     final adapter = _Adapter({
-      '/v1/me': _me(admin: true),
+      '/v1/me': _me(),
       '/v1/me/departments': _seats([
         ('p1', 'd1', 'koordinator'),
         ('p1', 'd2', 'uye'),
@@ -227,37 +257,147 @@ void main() {
     );
   });
 
-  test('yönetici, departman seçili değil ve ekip satırı yok: liste isteği yok, "departman seç"', () async {
+  test('yönetici: programda bağlı departman yok → liste isteği yok, "departman seç"', () async {
     final adapter = _Adapter({
       '/v1/me': _me(admin: true),
       '/v1/me/departments': _seats([('p2', 'd9', 'koordinator')]),
+      '/v1/program/departments': _programDepartments([]),
       for (final p in [..._adminOnly, '/v1/departments']) p: _forbidden,
     });
     final c = await _repo(adapter).load();
     expect(c.tasks, isEmpty);
     expect(c.departmentRequired, isTrue);
+    expect(c.departments, isEmpty);
     expect(c.coordinatorships, isEmpty);
     expect(c.people.single.role, PersonRole.admin);
     expect(
       adapter.seen.map((o) => o.uri.path),
-      ['/v1/me', '/v1/me/departments'],
+      ['/v1/me', '/v1/me/departments', '/v1/program/departments'],
       reason: 'fan-out yok: şirket departman listesi ve görev listesi istenmez',
     );
   });
 
-  test('yönetici, departman seçili: tek departman, tek akış', () async {
+  test('yönetici: departman kaynağı listProgramDepartments; varsayılan ilk bağlı departman, '
+      'kısa anahtar kod (yoksa ad); tek liste akışı, fan-out yok', () async {
+    final adapter = _Adapter({
+      '/v1/me': _me(admin: true),
+      '/v1/me/departments': _seats([('p1', 'd2', 'koordinator')]),
+      '/v1/program/departments': _programDepartments([
+        ('d5', 'Altyapı', 'ALT'),
+        ('d2', 'Bilişim', null),
+        ('d7', 'Saha', 'SAH'),
+      ]),
+      '/v1/work-items@d5': {
+        'items': [_item('w5', 'd5')],
+      },
+    });
+    final c = await _repo(adapter).load();
+    expect(
+      adapter.seen.map((o) => o.uri.path),
+      [
+        '/v1/me',
+        '/v1/me/departments',
+        '/v1/program/departments',
+        '/v1/work-items',
+      ],
+      reason: 'yönetici ekip satırı (d2) varken de departmanlar programdan; tek liste',
+    );
+    expect(
+      adapter.seen.last.extra[_dept],
+      'd5',
+      reason: 'varsayılan ilk bağlı departman (ekip satırı d2 değil)',
+    );
+    expect(c.departmentId, 'd5');
+    expect(c.departments.map((d) => d.label), ['ALT', 'Bilişim', 'SAH']);
+    expect(c.departmentsTruncated, isFalse);
+    expect(c.tasks.single.displayCode, 'ALT', reason: 'kısa anahtar kod');
+    expect(c.coordinatorships.single.name, 'Altyapı');
+    expect(c.access!.seesAllIn('p1', 'd5'), isTrue);
+  });
+
+  test('yönetici, departman seçili: seçilen bağlı departman, tek akış; kodsuz → ad', () async {
     final adapter = _Adapter({
       '/v1/me': _me(admin: true),
       '/v1/me/departments': {'departments': null},
+      '/v1/program/departments': _programDepartments([
+        ('d1', 'Altyapı', 'ALT'),
+        ('d5', 'Bilişim', null),
+      ]),
       '/v1/work-items@d5': {
         'items': [_item('w5', 'd5')],
       },
     });
     final c = await _repo(adapter, department: 'd5').load();
     expect(c.tasks.map((t) => t.id), ['w5']);
-    expect(adapter.seen, hasLength(3), reason: 'me + me/departments + 1 liste');
-    expect(c.access!.seesAllIn('p1', 'd5'), isTrue);
+    expect(
+      adapter.seen,
+      hasLength(4),
+      reason: 'me + me/departments + program/departments + 1 liste',
+    );
     expect(c.departmentRequired, isFalse);
+    expect(c.tasks.single.displayCode, 'Bilişim');
+  });
+
+  test('yönetici: X-Result-Truncated → departman listesi kesik bayrağı; kesik listede '
+      'görünmeyen seçim korunur', () async {
+    final corrected = <String>[];
+    final adapter = _Adapter(
+      {
+        '/v1/me': _me(admin: true),
+        '/v1/me/departments': {'departments': null},
+        '/v1/program/departments': _programDepartments([
+          ('d1', 'Altyapı', 'ALT'),
+        ]),
+        '/v1/work-items@d900': {'items': <Object>[]},
+      },
+      headers: {
+        '/v1/program/departments': {
+          'X-Result-Truncated': ['true'],
+        },
+      },
+    );
+    final c = await _repo(
+      adapter,
+      department: 'd900',
+      corrected: corrected,
+    ).load();
+    expect(c.departmentsTruncated, isTrue);
+    expect(c.departmentId, 'd900');
+    expect(corrected, isEmpty);
+  });
+
+  test('üye/koordinatör listProgramDepartments çağırmaz; seçilebilirler ekip satırları', () async {
+    final adapter = _Adapter({
+      '/v1/me': _me(),
+      '/v1/me/departments': _seats([
+        ('p1', 'd1', 'koordinator'),
+        ('p1', 'd2', 'uye'),
+        ('p2', 'd9', 'uye'),
+      ]),
+      '/v1/work-items@d1': {'items': <Object>[]},
+    });
+    final c = await _repo(adapter).load();
+    expect(
+      adapter.seen.map((o) => o.uri.path),
+      isNot(contains('/v1/program/departments')),
+    );
+    expect(c.departments.map((d) => d.id), ['d1', 'd2']);
+    expect(c.departments.map((d) => d.label), ['Ad d1', 'Ad d2']);
+  });
+
+  test('atanan adı null → ad dizinine girmez (arayüz nötr etiket)', () async {
+    final c = await _repo(
+      _Adapter({
+        '/v1/me': _me(),
+        '/v1/me/departments': _seats([('p1', 'd1', 'koordinator')]),
+        '/v1/work-items@d1': {
+          'items': [_item('w1', 'd1', name: null)],
+        },
+      }),
+    ).load();
+    expect(c.tasks.single.assignees, ['u2']);
+    expect(c.nameOf('u2'), isNull);
+    expect(c.nameOf('me'), 'Ayşe Kaya');
   });
 
   test('ekip satırının liste hatası atlanmaz: ApiError fırlar', () async {
@@ -357,18 +497,21 @@ void main() {
       ['d1'],
     );
 
-    // Yönetici seçimi ekip satırı gerektirmez: düzeltilmez.
+    // Yönetici: seçim programın bağlı departmanlarında yoksa (kesik değil) ilk bağlıya düşer.
     final adminCorrected = <String>[];
     final admin = await _repo(
       _Adapter({
         '/v1/me': _me(admin: true),
         '/v1/me/departments': _seats([('p1', 'd1', 'uye')]),
-        '/v1/work-items@d7': {'items': <Object>[]},
+        '/v1/program/departments': _programDepartments([
+          ('d3', 'Altyapı', null),
+        ]),
+        '/v1/work-items@d3': {'items': <Object>[]},
       }),
       department: 'd7',
       corrected: adminCorrected,
     ).load();
-    expect(admin.departmentId, 'd7');
-    expect(adminCorrected, isEmpty);
+    expect(admin.departmentId, 'd3');
+    expect(adminCorrected, ['d3']);
   });
 }

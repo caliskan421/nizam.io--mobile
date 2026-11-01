@@ -3,8 +3,9 @@ import 'package:meta/meta.dart';
 import 'task_access.dart';
 import 'task_catalog.dart';
 
-/// Görev ayrıntısının listede gelmeyen parçaları: alt görevler, notlar, kanıt dosyaları ve
-/// bekleyen tarih değişikliği talebi. Katalogdaki göreve eklenir ([TaskItem.copyWith]).
+/// Görev ayrıntısı: tekil okumadaki görevin kendisi ([item]; açıklama ve tarihler dahil) ve
+/// listede gelmeyen parçalar — alt görevler, notlar, kanıt dosyaları, bekleyen tarih talebi,
+/// kişi adları. Katalogdaki görevin yerine geçer ([item] varsa) ve ona eklenir.
 @immutable
 final class TaskDetails {
   TaskDetails({
@@ -12,9 +13,19 @@ final class TaskDetails {
     required List<TaskNote> notes,
     required List<TaskFile> files,
     this.dateRequest,
+    this.item,
+    List<PersonName> names = const [],
   }) : subtasks = List.unmodifiable(subtasks),
        notes = List.unmodifiable(notes),
-       files = List.unmodifiable(files);
+       files = List.unmodifiable(files),
+       names = List.unmodifiable(names);
+
+  /// Tekil okumadaki görev (`getWorkItem`); null → kaynak tekil okuma yapmadı.
+  final TaskItem? item;
+
+  /// Ayrıntıdaki kişi adları (null ad girmez): atananlar, not yazarları, alt görev
+  /// atanan/kapatan/oluşturan, dosya yükleyenleri.
+  final List<PersonName> names;
 
   final List<Subtask> subtasks;
   final List<TaskNote> notes;

@@ -58,6 +58,8 @@ void main() {
     expect(FileDownloadSink.safeName('a/..b'), '..b');
     // Geçici alanın adı kullanıcı dosyasına verilemez.
     expect(FileDownloadSink.safeName('x/.tmp'), '_.tmp');
+    expect(FileDownloadSink.safeName('.TMP'), '_.TMP');
+    expect(FileDownloadSink.safeName(r'y\.Tmp'), '_.Tmp');
     final sink = FileDownloadSink(root: () async => root);
     for (final n in ['.', '..']) {
       final p = await sink.save(n, _bytes());
@@ -134,7 +136,7 @@ void main() {
   });
 
   test('taşıma hatası: geçici dosya kalmaz, hata fırlar', () async {
-    // Hedef adda bir klasör var → rename da kopya da başarısız.
+    // Hedef adda bir klasör var → rename başarısız; kopyalama yedeği yok, hata iletilir.
     Directory('${root.path}/indirilenler/engel').createSync(recursive: true);
     final sink = FileDownloadSink(root: () async => root);
     await expectLater(
@@ -148,5 +150,27 @@ void main() {
       isEmpty,
     );
     expect(Directory('${root.path}/indirilenler/engel').existsSync(), isTrue);
+  });
+
+  // Codex kapı 3 / 1: rename hatasında hedefteki (ör. başka indirmenin yayımladığı) dosya korunur.
+  test('rename hatası: hedef dosya korunur, geçici alan boş', () async {
+    final dir = Directory('${root.path}/indirilenler')..createSync();
+    final target = File('${dir.path}/rapor.pdf')..writeAsBytesSync([7, 7]);
+    var calls = 0;
+    final sink = FileDownloadSink(
+      root: () async => root,
+      rename: (from, to) async {
+        calls++;
+        throw FileSystemException('rename başarısız', to);
+      },
+    );
+    await expectLater(
+      sink.save('rapor.pdf', _bytes()),
+      throwsA(isA<FileSystemException>()),
+    );
+    expect(calls, 1);
+    expect(target.readAsBytesSync(), [7, 7]);
+    expect(_tmpFiles(root), isEmpty);
+    expect(_visible(root), ['rapor.pdf']);
   });
 }

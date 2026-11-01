@@ -16,7 +16,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WorkItemSubtask {
 
-@JsonKey(name: 'subtask_id') String get subtaskId;@JsonKey(name: 'work_item_id') String get workItemId; String get title; bool get done;@JsonKey(name: 'created_by_account_id') String get createdByAccountId;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'updated_at') DateTime get updatedAt;@JsonKey(name: 'assignee_account_id') String? get assigneeAccountId;@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? get startOn;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? get endOn;@JsonKey(name: 'done_at') DateTime? get doneAt;@JsonKey(name: 'done_by_account_id') String? get doneByAccountId;
+@JsonKey(name: 'subtask_id') String get subtaskId;@JsonKey(name: 'work_item_id') String get workItemId; String get title; bool get done;@JsonKey(name: 'created_by_account_id') String get createdByAccountId;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'updated_at') DateTime get updatedAt;/// Atananın görünen adı; atanan yoksa ya da ad çözülemezse (geçici okuma hatası dahil) `null`.
+@JsonKey(name: 'assignee_full_name') String? get assigneeFullName;/// Kapatanın görünen adı; açık alt görevde ya da ad çözülemezse (geçici okuma hatası dahil) `null`.
+@JsonKey(name: 'done_by_full_name') String? get doneByFullName;/// Oluşturanın görünen adı; ad çözülemezse (geçici okuma hatası dahil) `null`.
+@JsonKey(name: 'created_by_full_name') String? get createdByFullName;@JsonKey(name: 'assignee_account_id') String? get assigneeAccountId;@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? get startOn;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? get endOn;@JsonKey(name: 'done_at') DateTime? get doneAt;@JsonKey(name: 'done_by_account_id') String? get doneByAccountId;
 /// Create a copy of WorkItemSubtask
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +33,20 @@ $WorkItemSubtaskCopyWith<WorkItemSubtask> get copyWith => _$WorkItemSubtaskCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as WorkItemSubtask;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is WorkItemSubtask&&(identical(other.subtaskId, _this.subtaskId) || other.subtaskId == _this.subtaskId)&&(identical(other.workItemId, _this.workItemId) || other.workItemId == _this.workItemId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.done, _this.done) || other.done == _this.done)&&(identical(other.createdByAccountId, _this.createdByAccountId) || other.createdByAccountId == _this.createdByAccountId)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.assigneeAccountId, _this.assigneeAccountId) || other.assigneeAccountId == _this.assigneeAccountId)&&(identical(other.startOn, _this.startOn) || other.startOn == _this.startOn)&&(identical(other.endOn, _this.endOn) || other.endOn == _this.endOn)&&(identical(other.doneAt, _this.doneAt) || other.doneAt == _this.doneAt)&&(identical(other.doneByAccountId, _this.doneByAccountId) || other.doneByAccountId == _this.doneByAccountId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is WorkItemSubtask&&(identical(other.subtaskId, _this.subtaskId) || other.subtaskId == _this.subtaskId)&&(identical(other.workItemId, _this.workItemId) || other.workItemId == _this.workItemId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.done, _this.done) || other.done == _this.done)&&(identical(other.createdByAccountId, _this.createdByAccountId) || other.createdByAccountId == _this.createdByAccountId)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.assigneeFullName, _this.assigneeFullName) || other.assigneeFullName == _this.assigneeFullName)&&(identical(other.doneByFullName, _this.doneByFullName) || other.doneByFullName == _this.doneByFullName)&&(identical(other.createdByFullName, _this.createdByFullName) || other.createdByFullName == _this.createdByFullName)&&(identical(other.assigneeAccountId, _this.assigneeAccountId) || other.assigneeAccountId == _this.assigneeAccountId)&&(identical(other.startOn, _this.startOn) || other.startOn == _this.startOn)&&(identical(other.endOn, _this.endOn) || other.endOn == _this.endOn)&&(identical(other.doneAt, _this.doneAt) || other.doneAt == _this.doneAt)&&(identical(other.doneByAccountId, _this.doneByAccountId) || other.doneByAccountId == _this.doneByAccountId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as WorkItemSubtask;
-  return Object.hash(runtimeType,_this.subtaskId,_this.workItemId,_this.title,_this.done,_this.createdByAccountId,_this.createdAt,_this.updatedAt,_this.assigneeAccountId,_this.startOn,_this.endOn,_this.doneAt,_this.doneByAccountId);
+  return Object.hash(runtimeType,_this.subtaskId,_this.workItemId,_this.title,_this.done,_this.createdByAccountId,_this.createdAt,_this.updatedAt,_this.assigneeFullName,_this.doneByFullName,_this.createdByFullName,_this.assigneeAccountId,_this.startOn,_this.endOn,_this.doneAt,_this.doneByAccountId);
 }
 
 @override
 String toString() {
   final _this = this as WorkItemSubtask;
-  return 'WorkItemSubtask(subtaskId: ${_this.subtaskId}, workItemId: ${_this.workItemId}, title: ${_this.title}, done: ${_this.done}, createdByAccountId: ${_this.createdByAccountId}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, assigneeAccountId: ${_this.assigneeAccountId}, startOn: ${_this.startOn}, endOn: ${_this.endOn}, doneAt: ${_this.doneAt}, doneByAccountId: ${_this.doneByAccountId})';
+  return 'WorkItemSubtask(subtaskId: ${_this.subtaskId}, workItemId: ${_this.workItemId}, title: ${_this.title}, done: ${_this.done}, createdByAccountId: ${_this.createdByAccountId}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, assigneeFullName: ${_this.assigneeFullName}, doneByFullName: ${_this.doneByFullName}, createdByFullName: ${_this.createdByFullName}, assigneeAccountId: ${_this.assigneeAccountId}, startOn: ${_this.startOn}, endOn: ${_this.endOn}, doneAt: ${_this.doneAt}, doneByAccountId: ${_this.doneByAccountId})';
 }
 
 
@@ -54,7 +57,7 @@ abstract mixin class $WorkItemSubtaskCopyWith<$Res>  {
   factory $WorkItemSubtaskCopyWith(WorkItemSubtask value, $Res Function(WorkItemSubtask) _then) = _$WorkItemSubtaskCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'subtask_id') String subtaskId,@JsonKey(name: 'work_item_id') String workItemId, String title, bool done,@JsonKey(name: 'created_by_account_id') String createdByAccountId,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn,@JsonKey(name: 'done_at') DateTime? doneAt,@JsonKey(name: 'done_by_account_id') String? doneByAccountId
+@JsonKey(name: 'subtask_id') String subtaskId,@JsonKey(name: 'work_item_id') String workItemId, String title, bool done,@JsonKey(name: 'created_by_account_id') String createdByAccountId,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt,@JsonKey(name: 'assignee_full_name') String? assigneeFullName,@JsonKey(name: 'done_by_full_name') String? doneByFullName,@JsonKey(name: 'created_by_full_name') String? createdByFullName,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn,@JsonKey(name: 'done_at') DateTime? doneAt,@JsonKey(name: 'done_by_account_id') String? doneByAccountId
 });
 
 
@@ -71,7 +74,7 @@ class _$WorkItemSubtaskCopyWithImpl<$Res>
 
 /// Create a copy of WorkItemSubtask
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? subtaskId = null,Object? workItemId = null,Object? title = null,Object? done = null,Object? createdByAccountId = null,Object? createdAt = null,Object? updatedAt = null,Object? assigneeAccountId = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? doneAt = freezed,Object? doneByAccountId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? subtaskId = null,Object? workItemId = null,Object? title = null,Object? done = null,Object? createdByAccountId = null,Object? createdAt = null,Object? updatedAt = null,Object? assigneeFullName = freezed,Object? doneByFullName = freezed,Object? createdByFullName = freezed,Object? assigneeAccountId = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? doneAt = freezed,Object? doneByAccountId = freezed,}) {
   return _then(WorkItemSubtask(
 subtaskId: null == subtaskId ? _self.subtaskId : subtaskId // ignore: cast_nullable_to_non_nullable
 as String,workItemId: null == workItemId ? _self.workItemId : workItemId // ignore: cast_nullable_to_non_nullable
@@ -80,7 +83,10 @@ as String,done: null == done ? _self.done : done // ignore: cast_nullable_to_non
 as bool,createdByAccountId: null == createdByAccountId ? _self.createdByAccountId : createdByAccountId // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,assigneeAccountId: freezed == assigneeAccountId ? _self.assigneeAccountId : assigneeAccountId // ignore: cast_nullable_to_non_nullable
+as DateTime,assigneeFullName: freezed == assigneeFullName ? _self.assigneeFullName : assigneeFullName // ignore: cast_nullable_to_non_nullable
+as String?,doneByFullName: freezed == doneByFullName ? _self.doneByFullName : doneByFullName // ignore: cast_nullable_to_non_nullable
+as String?,createdByFullName: freezed == createdByFullName ? _self.createdByFullName : createdByFullName // ignore: cast_nullable_to_non_nullable
+as String?,assigneeAccountId: freezed == assigneeAccountId ? _self.assigneeAccountId : assigneeAccountId // ignore: cast_nullable_to_non_nullable
 as String?,startOn: freezed == startOn ? _self.startOn : startOn // ignore: cast_nullable_to_non_nullable
 as DateTime?,endOn: freezed == endOn ? _self.endOn : endOn // ignore: cast_nullable_to_non_nullable
 as DateTime?,doneAt: freezed == doneAt ? _self.doneAt : doneAt // ignore: cast_nullable_to_non_nullable
@@ -170,10 +176,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'subtask_id')  String subtaskId, @JsonKey(name: 'work_item_id')  String workItemId,  String title,  bool done, @JsonKey(name: 'created_by_account_id')  String createdByAccountId, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @JsonKey(name: 'done_at')  DateTime? doneAt, @JsonKey(name: 'done_by_account_id')  String? doneByAccountId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'subtask_id')  String subtaskId, @JsonKey(name: 'work_item_id')  String workItemId,  String title,  bool done, @JsonKey(name: 'created_by_account_id')  String createdByAccountId, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt, @JsonKey(name: 'assignee_full_name')  String? assigneeFullName, @JsonKey(name: 'done_by_full_name')  String? doneByFullName, @JsonKey(name: 'created_by_full_name')  String? createdByFullName, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @JsonKey(name: 'done_at')  DateTime? doneAt, @JsonKey(name: 'done_by_account_id')  String? doneByAccountId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WorkItemSubtask() when $default != null:
-return $default(_that.subtaskId,_that.workItemId,_that.title,_that.done,_that.createdByAccountId,_that.createdAt,_that.updatedAt,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.doneAt,_that.doneByAccountId);case _:
+return $default(_that.subtaskId,_that.workItemId,_that.title,_that.done,_that.createdByAccountId,_that.createdAt,_that.updatedAt,_that.assigneeFullName,_that.doneByFullName,_that.createdByFullName,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.doneAt,_that.doneByAccountId);case _:
   return orElse();
 
 }
@@ -191,10 +197,10 @@ return $default(_that.subtaskId,_that.workItemId,_that.title,_that.done,_that.cr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'subtask_id')  String subtaskId, @JsonKey(name: 'work_item_id')  String workItemId,  String title,  bool done, @JsonKey(name: 'created_by_account_id')  String createdByAccountId, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @JsonKey(name: 'done_at')  DateTime? doneAt, @JsonKey(name: 'done_by_account_id')  String? doneByAccountId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'subtask_id')  String subtaskId, @JsonKey(name: 'work_item_id')  String workItemId,  String title,  bool done, @JsonKey(name: 'created_by_account_id')  String createdByAccountId, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt, @JsonKey(name: 'assignee_full_name')  String? assigneeFullName, @JsonKey(name: 'done_by_full_name')  String? doneByFullName, @JsonKey(name: 'created_by_full_name')  String? createdByFullName, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @JsonKey(name: 'done_at')  DateTime? doneAt, @JsonKey(name: 'done_by_account_id')  String? doneByAccountId)  $default,) {final _that = this;
 switch (_that) {
 case _WorkItemSubtask():
-return $default(_that.subtaskId,_that.workItemId,_that.title,_that.done,_that.createdByAccountId,_that.createdAt,_that.updatedAt,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.doneAt,_that.doneByAccountId);case _:
+return $default(_that.subtaskId,_that.workItemId,_that.title,_that.done,_that.createdByAccountId,_that.createdAt,_that.updatedAt,_that.assigneeFullName,_that.doneByFullName,_that.createdByFullName,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.doneAt,_that.doneByAccountId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -211,10 +217,10 @@ return $default(_that.subtaskId,_that.workItemId,_that.title,_that.done,_that.cr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'subtask_id')  String subtaskId, @JsonKey(name: 'work_item_id')  String workItemId,  String title,  bool done, @JsonKey(name: 'created_by_account_id')  String createdByAccountId, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @JsonKey(name: 'done_at')  DateTime? doneAt, @JsonKey(name: 'done_by_account_id')  String? doneByAccountId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'subtask_id')  String subtaskId, @JsonKey(name: 'work_item_id')  String workItemId,  String title,  bool done, @JsonKey(name: 'created_by_account_id')  String createdByAccountId, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt, @JsonKey(name: 'assignee_full_name')  String? assigneeFullName, @JsonKey(name: 'done_by_full_name')  String? doneByFullName, @JsonKey(name: 'created_by_full_name')  String? createdByFullName, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @JsonKey(name: 'done_at')  DateTime? doneAt, @JsonKey(name: 'done_by_account_id')  String? doneByAccountId)?  $default,) {final _that = this;
 switch (_that) {
 case _WorkItemSubtask() when $default != null:
-return $default(_that.subtaskId,_that.workItemId,_that.title,_that.done,_that.createdByAccountId,_that.createdAt,_that.updatedAt,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.doneAt,_that.doneByAccountId);case _:
+return $default(_that.subtaskId,_that.workItemId,_that.title,_that.done,_that.createdByAccountId,_that.createdAt,_that.updatedAt,_that.assigneeFullName,_that.doneByFullName,_that.createdByFullName,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.doneAt,_that.doneByAccountId);case _:
   return null;
 
 }
@@ -226,7 +232,7 @@ return $default(_that.subtaskId,_that.workItemId,_that.title,_that.done,_that.cr
 @JsonSerializable()
 
 class _WorkItemSubtask implements WorkItemSubtask {
-  const _WorkItemSubtask({@JsonKey(name: 'subtask_id') required this.subtaskId, @JsonKey(name: 'work_item_id') required this.workItemId, required this.title, required this.done, @JsonKey(name: 'created_by_account_id') required this.createdByAccountId, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'updated_at') required this.updatedAt, @JsonKey(name: 'assignee_account_id') this.assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on') this.startOn, @DateOnlyConverter()@JsonKey(name: 'end_on') this.endOn, @JsonKey(name: 'done_at') this.doneAt, @JsonKey(name: 'done_by_account_id') this.doneByAccountId});
+  const _WorkItemSubtask({@JsonKey(name: 'subtask_id') required this.subtaskId, @JsonKey(name: 'work_item_id') required this.workItemId, required this.title, required this.done, @JsonKey(name: 'created_by_account_id') required this.createdByAccountId, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'updated_at') required this.updatedAt, @JsonKey(name: 'assignee_full_name') required this.assigneeFullName, @JsonKey(name: 'done_by_full_name') required this.doneByFullName, @JsonKey(name: 'created_by_full_name') required this.createdByFullName, @JsonKey(name: 'assignee_account_id') this.assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on') this.startOn, @DateOnlyConverter()@JsonKey(name: 'end_on') this.endOn, @JsonKey(name: 'done_at') this.doneAt, @JsonKey(name: 'done_by_account_id') this.doneByAccountId});
   factory _WorkItemSubtask.fromJson(Map<String, dynamic> json) => _$WorkItemSubtaskFromJson(json);
 
 @override@JsonKey(name: 'subtask_id') final  String subtaskId;
@@ -236,6 +242,12 @@ class _WorkItemSubtask implements WorkItemSubtask {
 @override@JsonKey(name: 'created_by_account_id') final  String createdByAccountId;
 @override@JsonKey(name: 'created_at') final  DateTime createdAt;
 @override@JsonKey(name: 'updated_at') final  DateTime updatedAt;
+/// Atananın görünen adı; atanan yoksa ya da ad çözülemezse (geçici okuma hatası dahil) `null`.
+@override@JsonKey(name: 'assignee_full_name') final  String? assigneeFullName;
+/// Kapatanın görünen adı; açık alt görevde ya da ad çözülemezse (geçici okuma hatası dahil) `null`.
+@override@JsonKey(name: 'done_by_full_name') final  String? doneByFullName;
+/// Oluşturanın görünen adı; ad çözülemezse (geçici okuma hatası dahil) `null`.
+@override@JsonKey(name: 'created_by_full_name') final  String? createdByFullName;
 @override@JsonKey(name: 'assignee_account_id') final  String? assigneeAccountId;
 @override@DateOnlyConverter()@JsonKey(name: 'start_on') final  DateTime? startOn;
 @override@DateOnlyConverter()@JsonKey(name: 'end_on') final  DateTime? endOn;
@@ -255,18 +267,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _WorkItemSubtask&&(identical(other.subtaskId, subtaskId) || other.subtaskId == subtaskId)&&(identical(other.workItemId, workItemId) || other.workItemId == workItemId)&&(identical(other.title, title) || other.title == title)&&(identical(other.done, done) || other.done == done)&&(identical(other.createdByAccountId, createdByAccountId) || other.createdByAccountId == createdByAccountId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.assigneeAccountId, assigneeAccountId) || other.assigneeAccountId == assigneeAccountId)&&(identical(other.startOn, startOn) || other.startOn == startOn)&&(identical(other.endOn, endOn) || other.endOn == endOn)&&(identical(other.doneAt, doneAt) || other.doneAt == doneAt)&&(identical(other.doneByAccountId, doneByAccountId) || other.doneByAccountId == doneByAccountId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _WorkItemSubtask&&(identical(other.subtaskId, subtaskId) || other.subtaskId == subtaskId)&&(identical(other.workItemId, workItemId) || other.workItemId == workItemId)&&(identical(other.title, title) || other.title == title)&&(identical(other.done, done) || other.done == done)&&(identical(other.createdByAccountId, createdByAccountId) || other.createdByAccountId == createdByAccountId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.assigneeFullName, assigneeFullName) || other.assigneeFullName == assigneeFullName)&&(identical(other.doneByFullName, doneByFullName) || other.doneByFullName == doneByFullName)&&(identical(other.createdByFullName, createdByFullName) || other.createdByFullName == createdByFullName)&&(identical(other.assigneeAccountId, assigneeAccountId) || other.assigneeAccountId == assigneeAccountId)&&(identical(other.startOn, startOn) || other.startOn == startOn)&&(identical(other.endOn, endOn) || other.endOn == endOn)&&(identical(other.doneAt, doneAt) || other.doneAt == doneAt)&&(identical(other.doneByAccountId, doneByAccountId) || other.doneByAccountId == doneByAccountId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,subtaskId,workItemId,title,done,createdByAccountId,createdAt,updatedAt,assigneeAccountId,startOn,endOn,doneAt,doneByAccountId);
+    return Object.hash(runtimeType,subtaskId,workItemId,title,done,createdByAccountId,createdAt,updatedAt,assigneeFullName,doneByFullName,createdByFullName,assigneeAccountId,startOn,endOn,doneAt,doneByAccountId);
 }
 
 @override
 String toString() {
-    return 'WorkItemSubtask(subtaskId: $subtaskId, workItemId: $workItemId, title: $title, done: $done, createdByAccountId: $createdByAccountId, createdAt: $createdAt, updatedAt: $updatedAt, assigneeAccountId: $assigneeAccountId, startOn: $startOn, endOn: $endOn, doneAt: $doneAt, doneByAccountId: $doneByAccountId)';
+    return 'WorkItemSubtask(subtaskId: $subtaskId, workItemId: $workItemId, title: $title, done: $done, createdByAccountId: $createdByAccountId, createdAt: $createdAt, updatedAt: $updatedAt, assigneeFullName: $assigneeFullName, doneByFullName: $doneByFullName, createdByFullName: $createdByFullName, assigneeAccountId: $assigneeAccountId, startOn: $startOn, endOn: $endOn, doneAt: $doneAt, doneByAccountId: $doneByAccountId)';
 }
 
 
@@ -277,7 +289,7 @@ abstract mixin class _$WorkItemSubtaskCopyWith<$Res> implements $WorkItemSubtask
   factory _$WorkItemSubtaskCopyWith(_WorkItemSubtask value, $Res Function(_WorkItemSubtask) _then) = __$WorkItemSubtaskCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'subtask_id') String subtaskId,@JsonKey(name: 'work_item_id') String workItemId, String title, bool done,@JsonKey(name: 'created_by_account_id') String createdByAccountId,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn,@JsonKey(name: 'done_at') DateTime? doneAt,@JsonKey(name: 'done_by_account_id') String? doneByAccountId
+@JsonKey(name: 'subtask_id') String subtaskId,@JsonKey(name: 'work_item_id') String workItemId, String title, bool done,@JsonKey(name: 'created_by_account_id') String createdByAccountId,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt,@JsonKey(name: 'assignee_full_name') String? assigneeFullName,@JsonKey(name: 'done_by_full_name') String? doneByFullName,@JsonKey(name: 'created_by_full_name') String? createdByFullName,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn,@JsonKey(name: 'done_at') DateTime? doneAt,@JsonKey(name: 'done_by_account_id') String? doneByAccountId
 });
 
 
@@ -294,7 +306,7 @@ class __$WorkItemSubtaskCopyWithImpl<$Res>
 
 /// Create a copy of WorkItemSubtask
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? subtaskId = null,Object? workItemId = null,Object? title = null,Object? done = null,Object? createdByAccountId = null,Object? createdAt = null,Object? updatedAt = null,Object? assigneeAccountId = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? doneAt = freezed,Object? doneByAccountId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? subtaskId = null,Object? workItemId = null,Object? title = null,Object? done = null,Object? createdByAccountId = null,Object? createdAt = null,Object? updatedAt = null,Object? assigneeFullName = freezed,Object? doneByFullName = freezed,Object? createdByFullName = freezed,Object? assigneeAccountId = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? doneAt = freezed,Object? doneByAccountId = freezed,}) {
   return _then(_WorkItemSubtask(
 subtaskId: null == subtaskId ? _self.subtaskId : subtaskId // ignore: cast_nullable_to_non_nullable
 as String,workItemId: null == workItemId ? _self.workItemId : workItemId // ignore: cast_nullable_to_non_nullable
@@ -303,7 +315,10 @@ as String,done: null == done ? _self.done : done // ignore: cast_nullable_to_non
 as bool,createdByAccountId: null == createdByAccountId ? _self.createdByAccountId : createdByAccountId // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,assigneeAccountId: freezed == assigneeAccountId ? _self.assigneeAccountId : assigneeAccountId // ignore: cast_nullable_to_non_nullable
+as DateTime,assigneeFullName: freezed == assigneeFullName ? _self.assigneeFullName : assigneeFullName // ignore: cast_nullable_to_non_nullable
+as String?,doneByFullName: freezed == doneByFullName ? _self.doneByFullName : doneByFullName // ignore: cast_nullable_to_non_nullable
+as String?,createdByFullName: freezed == createdByFullName ? _self.createdByFullName : createdByFullName // ignore: cast_nullable_to_non_nullable
+as String?,assigneeAccountId: freezed == assigneeAccountId ? _self.assigneeAccountId : assigneeAccountId // ignore: cast_nullable_to_non_nullable
 as String?,startOn: freezed == startOn ? _self.startOn : startOn // ignore: cast_nullable_to_non_nullable
 as DateTime?,endOn: freezed == endOn ? _self.endOn : endOn // ignore: cast_nullable_to_non_nullable
 as DateTime?,doneAt: freezed == doneAt ? _self.doneAt : doneAt // ignore: cast_nullable_to_non_nullable

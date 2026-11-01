@@ -9,7 +9,7 @@ part of 'file_record_list.dart';
 _FileRecordList _$FileRecordListFromJson(Map<String, dynamic> json) =>
     _FileRecordList(
       files: (json['files'] as List<dynamic>)
-          .map((e) => FileListItem.fromJson(e as Map<String, dynamic>))
+          .map((e) => WorkItemFileListItem.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

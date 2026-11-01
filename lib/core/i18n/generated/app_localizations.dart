@@ -6508,6 +6508,126 @@ abstract class AppLocalizations {
   /// **'Sayfayı küçült'**
   String get uiTasksCollapseSheet;
 
+  /// ui.tasks.claim
+  ///
+  /// In tr, this message translates to:
+  /// **'Üstlen'**
+  String get uiTasksClaim;
+
+  /// ui.tasks.unclaim
+  ///
+  /// In tr, this message translates to:
+  /// **'Üstlenmeyi bırak'**
+  String get uiTasksUnclaim;
+
+  /// ui.tasks.t_claimed
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevi üstlendin'**
+  String get uiTasksTClaimed;
+
+  /// ui.tasks.t_unclaimed
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevi bıraktın'**
+  String get uiTasksTUnclaimed;
+
+  /// ui.tasks.file_download
+  ///
+  /// In tr, this message translates to:
+  /// **'İndir'**
+  String get uiTasksFileDownload;
+
+  /// ui.tasks.file_rename
+  ///
+  /// In tr, this message translates to:
+  /// **'Adı değiştir'**
+  String get uiTasksFileRename;
+
+  /// ui.tasks.file_delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosyayı sil'**
+  String get uiTasksFileDelete;
+
+  /// ui.tasks.file_delete_q
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya silinsin mi?'**
+  String get uiTasksFileDeleteQ;
+
+  /// ui.tasks.file_delete_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinen dosya geri alınamaz'**
+  String get uiTasksFileDeleteDesc;
+
+  /// ui.tasks.file_name_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya adı'**
+  String get uiTasksFileNameLabel;
+
+  /// ui.tasks.t_file_saved
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya kaydedildi'**
+  String get uiTasksTFileSaved;
+
+  /// ui.tasks.t_file_renamed
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya adı güncellendi'**
+  String get uiTasksTFileRenamed;
+
+  /// ui.tasks.t_file_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya silindi'**
+  String get uiTasksTFileDeleted;
+
+  /// ui.tasks.pick_file_action
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya seç'**
+  String get uiTasksPickFileAction;
+
+  /// ui.tasks.picker_missing
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sürümde dosya seçici yok'**
+  String get uiTasksPickerMissing;
+
+  /// ui.tasks.err_pick_file
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüklemek için bir dosya seç'**
+  String get uiTasksErrPickFile;
+
+  /// ui.tasks.upload_types
+  ///
+  /// In tr, this message translates to:
+  /// **'PDF, PNG, JPG, CSV, Word, Excel, PowerPoint, Pages · 90 MB altı'**
+  String get uiTasksUploadTypes;
+
+  /// ui.tasks.team_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu departmanda atanabilir kişi yok'**
+  String get uiTasksTeamEmpty;
+
+  /// ui.tasks.unassigned
+  ///
+  /// In tr, this message translates to:
+  /// **'Atanmamış'**
+  String get uiTasksUnassigned;
+
+  /// ui.tasks.t_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem bu görevde şu an yapılamıyor.'**
+  String get uiTasksTUnavailable;
+
   /// ui.timeline.title
   ///
   /// In tr, this message translates to:
@@ -7149,126 +7269,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Görev ayrıntısını aç'**
   String get uiTimelineGanttOpenTask;
-
-  /// ui.tasks.claim
-  ///
-  /// In tr, this message translates to:
-  /// **'Üstlen'**
-  String get uiTasksClaim;
-
-  /// ui.tasks.unclaim
-  ///
-  /// In tr, this message translates to:
-  /// **'Üstlenmeyi bırak'**
-  String get uiTasksUnclaim;
-
-  /// ui.tasks.t_claimed
-  ///
-  /// In tr, this message translates to:
-  /// **'Görevi üstlendin'**
-  String get uiTasksTClaimed;
-
-  /// ui.tasks.t_unclaimed
-  ///
-  /// In tr, this message translates to:
-  /// **'Görevi bıraktın'**
-  String get uiTasksTUnclaimed;
-
-  /// ui.tasks.file_download
-  ///
-  /// In tr, this message translates to:
-  /// **'İndir'**
-  String get uiTasksFileDownload;
-
-  /// ui.tasks.file_rename
-  ///
-  /// In tr, this message translates to:
-  /// **'Adı değiştir'**
-  String get uiTasksFileRename;
-
-  /// ui.tasks.file_delete
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosyayı sil'**
-  String get uiTasksFileDelete;
-
-  /// ui.tasks.file_delete_q
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya silinsin mi?'**
-  String get uiTasksFileDeleteQ;
-
-  /// ui.tasks.file_delete_desc
-  ///
-  /// In tr, this message translates to:
-  /// **'Silinen dosya geri alınamaz'**
-  String get uiTasksFileDeleteDesc;
-
-  /// ui.tasks.file_name_label
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya adı'**
-  String get uiTasksFileNameLabel;
-
-  /// ui.tasks.t_file_saved
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya kaydedildi'**
-  String get uiTasksTFileSaved;
-
-  /// ui.tasks.t_file_renamed
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya adı güncellendi'**
-  String get uiTasksTFileRenamed;
-
-  /// ui.tasks.t_file_deleted
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya silindi'**
-  String get uiTasksTFileDeleted;
-
-  /// ui.tasks.pick_file_action
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya seç'**
-  String get uiTasksPickFileAction;
-
-  /// ui.tasks.picker_missing
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu sürümde dosya seçici yok'**
-  String get uiTasksPickerMissing;
-
-  /// ui.tasks.err_pick_file
-  ///
-  /// In tr, this message translates to:
-  /// **'Yüklemek için bir dosya seç'**
-  String get uiTasksErrPickFile;
-
-  /// ui.tasks.upload_types
-  ///
-  /// In tr, this message translates to:
-  /// **'PDF, PNG, JPG, CSV, Word, Excel, PowerPoint, Pages · 90 MB altı'**
-  String get uiTasksUploadTypes;
-
-  /// ui.tasks.team_empty
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu departmanda atanabilir kişi yok'**
-  String get uiTasksTeamEmpty;
-
-  /// ui.tasks.unassigned
-  ///
-  /// In tr, this message translates to:
-  /// **'Atanmamış'**
-  String get uiTasksUnassigned;
-
-  /// ui.tasks.t_unavailable
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu işlem bu görevde şu an yapılamıyor.'**
-  String get uiTasksTUnavailable;
 }
 
 class _AppLocalizationsDelegate

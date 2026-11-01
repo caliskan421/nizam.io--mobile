@@ -3353,6 +3353,67 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksCollapseSheet => 'Sayfayı küçült';
 
   @override
+  String get uiTasksClaim => 'Üstlen';
+
+  @override
+  String get uiTasksUnclaim => 'Üstlenmeyi bırak';
+
+  @override
+  String get uiTasksTClaimed => 'Görevi üstlendin';
+
+  @override
+  String get uiTasksTUnclaimed => 'Görevi bıraktın';
+
+  @override
+  String get uiTasksFileDownload => 'İndir';
+
+  @override
+  String get uiTasksFileRename => 'Adı değiştir';
+
+  @override
+  String get uiTasksFileDelete => 'Dosyayı sil';
+
+  @override
+  String get uiTasksFileDeleteQ => 'Dosya silinsin mi?';
+
+  @override
+  String get uiTasksFileDeleteDesc => 'Silinen dosya geri alınamaz';
+
+  @override
+  String get uiTasksFileNameLabel => 'Dosya adı';
+
+  @override
+  String get uiTasksTFileSaved => 'Dosya kaydedildi';
+
+  @override
+  String get uiTasksTFileRenamed => 'Dosya adı güncellendi';
+
+  @override
+  String get uiTasksTFileDeleted => 'Dosya silindi';
+
+  @override
+  String get uiTasksPickFileAction => 'Dosya seç';
+
+  @override
+  String get uiTasksPickerMissing => 'Bu sürümde dosya seçici yok';
+
+  @override
+  String get uiTasksErrPickFile => 'Yüklemek için bir dosya seç';
+
+  @override
+  String get uiTasksUploadTypes =>
+      'PDF, PNG, JPG, CSV, Word, Excel, PowerPoint, Pages · 90 MB altı';
+
+  @override
+  String get uiTasksTeamEmpty => 'Bu departmanda atanabilir kişi yok';
+
+  @override
+  String get uiTasksUnassigned => 'Atanmamış';
+
+  @override
+  String get uiTasksTUnavailable => 'Bu işlem bu görevde şu an yapılamıyor.';
+
+  @override
   String get uiTimelineTitle => 'Zaman çizelgesi';
 
   @override
@@ -3680,65 +3741,4 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTimelineGanttOpenTask => 'Görev ayrıntısını aç';
-
-  @override
-  String get uiTasksClaim => 'Üstlen';
-
-  @override
-  String get uiTasksUnclaim => 'Üstlenmeyi bırak';
-
-  @override
-  String get uiTasksTClaimed => 'Görevi üstlendin';
-
-  @override
-  String get uiTasksTUnclaimed => 'Görevi bıraktın';
-
-  @override
-  String get uiTasksFileDownload => 'İndir';
-
-  @override
-  String get uiTasksFileRename => 'Adı değiştir';
-
-  @override
-  String get uiTasksFileDelete => 'Dosyayı sil';
-
-  @override
-  String get uiTasksFileDeleteQ => 'Dosya silinsin mi?';
-
-  @override
-  String get uiTasksFileDeleteDesc => 'Silinen dosya geri alınamaz';
-
-  @override
-  String get uiTasksFileNameLabel => 'Dosya adı';
-
-  @override
-  String get uiTasksTFileSaved => 'Dosya kaydedildi';
-
-  @override
-  String get uiTasksTFileRenamed => 'Dosya adı güncellendi';
-
-  @override
-  String get uiTasksTFileDeleted => 'Dosya silindi';
-
-  @override
-  String get uiTasksPickFileAction => 'Dosya seç';
-
-  @override
-  String get uiTasksPickerMissing => 'Bu sürümde dosya seçici yok';
-
-  @override
-  String get uiTasksErrPickFile => 'Yüklemek için bir dosya seç';
-
-  @override
-  String get uiTasksUploadTypes =>
-      'PDF, PNG, JPG, CSV, Word, Excel, PowerPoint, Pages · 90 MB altı';
-
-  @override
-  String get uiTasksTeamEmpty => 'Bu departmanda atanabilir kişi yok';
-
-  @override
-  String get uiTasksUnassigned => 'Atanmamış';
-
-  @override
-  String get uiTasksTUnavailable => 'Bu işlem bu görevde şu an yapılamıyor.';
 }

@@ -13,6 +13,9 @@ abstract class WorkItemNote with _$WorkItemNote {
     @JsonKey(name: 'note_id') required String noteId,
     @JsonKey(name: 'work_item_id') required String workItemId,
     @JsonKey(name: 'author_account_id') required String authorAccountId,
+
+    /// Yazarın görünen adı; ad çözülemezse (geçici okuma hatası dahil) `null`.
+    @JsonKey(name: 'author_full_name') required String? authorFullName,
     required String content,
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'updated_at') required DateTime updatedAt,

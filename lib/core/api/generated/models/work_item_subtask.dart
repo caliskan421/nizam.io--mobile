@@ -19,6 +19,15 @@ abstract class WorkItemSubtask with _$WorkItemSubtask {
     @JsonKey(name: 'created_by_account_id') required String createdByAccountId,
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'updated_at') required DateTime updatedAt,
+
+    /// Atananın görünen adı; atanan yoksa ya da ad çözülemezse (geçici okuma hatası dahil) `null`.
+    @JsonKey(name: 'assignee_full_name') required String? assigneeFullName,
+
+    /// Kapatanın görünen adı; açık alt görevde ya da ad çözülemezse (geçici okuma hatası dahil) `null`.
+    @JsonKey(name: 'done_by_full_name') required String? doneByFullName,
+
+    /// Oluşturanın görünen adı; ad çözülemezse (geçici okuma hatası dahil) `null`.
+    @JsonKey(name: 'created_by_full_name') required String? createdByFullName,
     @JsonKey(name: 'assignee_account_id') String? assigneeAccountId,
     @DateOnlyConverter() @JsonKey(name: 'start_on') DateTime? startOn,
     @DateOnlyConverter() @JsonKey(name: 'end_on') DateTime? endOn,

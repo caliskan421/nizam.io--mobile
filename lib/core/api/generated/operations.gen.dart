@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket v0.5.0-api (e273d99b6a118ec6600387b0fc8392ba294ba61b) — docs/api/openapi.yaml
+// Kaynak: nizam.io--backend etiket v0.6.0-api (e518c1a97712a951e60843cd4f427f7a9c7806df) — docs/api/openapi.yaml
 
 import '../api_meta.dart';
 
@@ -958,6 +958,16 @@ const apiOperations = <String, ApiOperation>{
     departmentHeader: false,
     auth: true,
   ),
+  'listProgramDepartments': ApiOperation(
+    operationId: 'listProgramDepartments',
+    method: 'GET',
+    path: '/v1/program/departments',
+    scope: ScopeClass.s2,
+    csrf: false,
+    programHeader: true,
+    departmentHeader: false,
+    auth: true,
+  ),
   'linkDepartment': ApiOperation(
     operationId: 'linkDepartment',
     method: 'POST',
@@ -1282,6 +1292,16 @@ const apiOperations = <String, ApiOperation>{
     operationId: 'myTasks',
     method: 'GET',
     path: '/v1/work-items/my-tasks',
+    scope: ScopeClass.s3,
+    csrf: false,
+    programHeader: true,
+    departmentHeader: true,
+    auth: true,
+  ),
+  'getWorkItem': ApiOperation(
+    operationId: 'getWorkItem',
+    method: 'GET',
+    path: '/v1/work-items/{id}',
     scope: ScopeClass.s3,
     csrf: false,
     programHeader: true,

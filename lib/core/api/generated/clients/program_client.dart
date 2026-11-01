@@ -10,6 +10,7 @@ import '../models/delete_program_request.dart';
 import '../models/link_department_request.dart';
 import '../models/program.dart';
 import '../models/program_department_link.dart';
+import '../models/program_department_list.dart';
 import '../models/program_list.dart';
 import '../models/program_reset_result.dart';
 import '../models/rename_department_link_request.dart';
@@ -65,6 +66,14 @@ abstract class ProgramClient {
         'openapi': <String, dynamic>{
           'tags': <String>["program"],
           'operationId': "readProgram",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> listProgramDepartmentsOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["program"],
+          'operationId': "listProgramDepartments",
           'externalDocsUrl': null,
         },
       };
@@ -179,6 +188,26 @@ abstract class ProgramClient {
   Future<Program> readProgram({
     @Extras()
     Map<String, dynamic>? extras = ProgramClient.readProgramOpenapiExtras,
+  });
+
+  /// Kapsamdaki programa bağlı (canlı) departmanlar; programdaki adla.
+  ///
+  /// Görünürlük `readProgram` ile aynıdır: şirket yöneticisi ya da bu programda ekip.
+  /// satırı olan hesap; aksi `404 program.not_found`. Yumuşak silinmiş ya da bağı.
+  /// kaldırılmış departman listede yoktur. Liste programdaki ada (eşitlikte.
+  /// departman kimliğine) göre bayt sırasıyla sıralıdır;.
+  /// sayaç ya da toplam taşımaz. Sayfasızdır: 200'den fazla canlı bağ varsa.
+  /// departman kimliği sırasıyla ilk 200 canlı bağ, ada göre sıralı döner ve.
+  /// `X-Result-Truncated: true` konur. Görev ekranında şirket yöneticisinin departman.
+  /// seçimi bu listeden yapılır (istemci departmanlar arası tarama yapmaz).
+  /// Programda herhangi bir departmanda ekip satırı olan hesap programın bütün.
+  /// bağlı departmanlarının adını görür (yapısal bilgi, yetki değil); üye ve.
+  /// koordinatör departman seçimi için `/v1/me/departments` kullanır.
+  @GET('/v1/program/departments')
+  Future<HttpResponse<ProgramDepartmentList>> listProgramDepartments({
+    @Extras()
+    Map<String, dynamic>? extras =
+        ProgramClient.listProgramDepartmentsOpenapiExtras,
   });
 
   /// Departmanı kapsamdaki programa bağlar (isteğe bağlı ad ve ekip kopyasıyla).

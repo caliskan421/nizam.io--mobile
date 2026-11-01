@@ -31,6 +31,7 @@ import '../models/update_subtask_request.dart';
 import '../models/update_work_item_request.dart';
 import '../models/work_item.dart';
 import '../models/work_item_dates.dart';
+import '../models/work_item_detail.dart';
 import '../models/work_item_lifecycle_result.dart';
 import '../models/work_item_list.dart';
 import '../models/work_item_note.dart';
@@ -75,6 +76,14 @@ abstract class WorkClient {
         'openapi': <String, dynamic>{
           'tags': <String>["work"],
           'operationId': "ownStatusWorkItem",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> getWorkItemOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["work"],
+          'operationId': "getWorkItem",
           'externalDocsUrl': null,
         },
       };
@@ -378,6 +387,21 @@ abstract class WorkClient {
     @Body() required TransitionRequest body,
     @Extras()
     Map<String, dynamic>? extras = WorkClient.ownStatusWorkItemOpenapiExtras,
+  });
+
+  /// Tek görevi açıklamasıyla okur (liste ile aynı rol kümesi, seçili programdaki rol).
+  ///
+  /// Şirket yöneticisi ve görevin departmanının koordinatörü kapsamdaki her görevi,.
+  /// atanmış üye yalnız kendi görevini okur. Rol, görevin kendi `(program, departman)`.
+  /// kapsamından okunur. Kapsam başlığı görevin kapsamıyla uyuşmuyorsa ya da görev.
+  /// yok/silinmişse 404 `work.item_not_found`. Atanmamış üye 403 `work.not_assigned`.
+  /// alır: bu uç (notlar ve alt görev uçları gibi) görevin varlığını kapsam içindeki.
+  /// ekip üyesinden gizlemez.
+  @GET('/v1/work-items/{id}')
+  Future<WorkItemDetail> getWorkItem({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras = WorkClient.getWorkItemOpenapiExtras,
   });
 
   /// Görevi günceller; tamamlanma/teslim alanları korumalıdır.

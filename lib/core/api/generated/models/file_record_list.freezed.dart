@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FileRecordList {
 
- List<FileListItem> get files;
+ List<WorkItemFileListItem> get files;
 /// Create a copy of FileRecordList
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $FileRecordListCopyWith<$Res>  {
   factory $FileRecordListCopyWith(FileRecordList value, $Res Function(FileRecordList) _then) = _$FileRecordListCopyWithImpl;
 @useResult
 $Res call({
- List<FileListItem> files
+ List<WorkItemFileListItem> files
 });
 
 
@@ -74,7 +74,7 @@ class _$FileRecordListCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? files = null,}) {
   return _then(FileRecordList(
 files: null == files ? _self.files : files // ignore: cast_nullable_to_non_nullable
-as List<FileListItem>,
+as List<WorkItemFileListItem>,
   ));
 }
 
@@ -159,7 +159,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<FileListItem> files)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<WorkItemFileListItem> files)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FileRecordList() when $default != null:
 return $default(_that.files);case _:
@@ -180,7 +180,7 @@ return $default(_that.files);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<FileListItem> files)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<WorkItemFileListItem> files)  $default,) {final _that = this;
 switch (_that) {
 case _FileRecordList():
 return $default(_that.files);case _:
@@ -200,7 +200,7 @@ return $default(_that.files);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<FileListItem> files)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<WorkItemFileListItem> files)?  $default,) {final _that = this;
 switch (_that) {
 case _FileRecordList() when $default != null:
 return $default(_that.files);case _:
@@ -215,11 +215,11 @@ return $default(_that.files);case _:
 @JsonSerializable()
 
 class _FileRecordList implements FileRecordList {
-  const _FileRecordList({required  List<FileListItem> files}): _files = files;
+  const _FileRecordList({required  List<WorkItemFileListItem> files}): _files = files;
   factory _FileRecordList.fromJson(Map<String, dynamic> json) => _$FileRecordListFromJson(json);
 
- final  List<FileListItem> _files;
-@override List<FileListItem> get files {
+ final  List<WorkItemFileListItem> _files;
+@override List<WorkItemFileListItem> get files {
   if (_files is EqualUnmodifiableListView) return _files;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_files);
@@ -261,7 +261,7 @@ abstract mixin class _$FileRecordListCopyWith<$Res> implements $FileRecordListCo
   factory _$FileRecordListCopyWith(_FileRecordList value, $Res Function(_FileRecordList) _then) = __$FileRecordListCopyWithImpl;
 @override @useResult
 $Res call({
- List<FileListItem> files
+ List<WorkItemFileListItem> files
 });
 
 
@@ -281,7 +281,7 @@ class __$FileRecordListCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? files = null,}) {
   return _then(_FileRecordList(
 files: null == files ? _self._files : files // ignore: cast_nullable_to_non_nullable
-as List<FileListItem>,
+as List<WorkItemFileListItem>,
   ));
 }
 

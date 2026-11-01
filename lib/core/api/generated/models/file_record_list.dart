@@ -4,14 +4,14 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'file_list_item.dart';
+import 'work_item_file_list_item.dart';
 
 part 'file_record_list.freezed.dart';
 part 'file_record_list.g.dart';
 
 @Freezed()
 abstract class FileRecordList with _$FileRecordList {
-  const factory FileRecordList({required List<FileListItem> files}) =
+  const factory FileRecordList({required List<WorkItemFileListItem> files}) =
       _FileRecordList;
 
   factory FileRecordList.fromJson(Map<String, Object?> json) =>

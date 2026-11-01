@@ -16,6 +16,11 @@ _WorkItem _$WorkItemFromJson(Map<String, dynamic> json) => _WorkItem(
   assigneeAccountIds: (json['assignee_account_ids'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),
+  assignees: (json['assignees'] as List<dynamic>)
+      .map((e) => WorkItemAssignee.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  startOn: const DateOnlyConverter().fromJson(json['start_on'] as String),
+  endOn: const DateOnlyConverter().fromJson(json['end_on'] as String),
   isOverdue: json['is_overdue'] as bool,
   daysOverdue: (json['days_overdue'] as num).toInt(),
   isCompletedLate: json['is_completed_late'] as bool,
@@ -44,6 +49,9 @@ Map<String, dynamic> _$WorkItemToJson(_WorkItem instance) => <String, dynamic>{
   'priority': _$WorkItemPriorityEnumMap[instance.priority]!,
   'status': _$WorkItemStatusEnumMap[instance.status]!,
   'assignee_account_ids': instance.assigneeAccountIds,
+  'assignees': instance.assignees.map((e) => e.toJson()).toList(),
+  'start_on': const DateOnlyConverter().toJson(instance.startOn),
+  'end_on': const DateOnlyConverter().toJson(instance.endOn),
   'is_overdue': instance.isOverdue,
   'days_overdue': instance.daysOverdue,
   'is_completed_late': instance.isCompletedLate,

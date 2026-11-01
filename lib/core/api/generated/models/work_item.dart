@@ -7,6 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../date_only.dart';
 
 import 'subtask_counts.dart';
+import 'work_item_assignee.dart';
 import 'work_item_priority.dart';
 import 'work_item_status.dart';
 
@@ -24,6 +25,15 @@ abstract class WorkItem with _$WorkItem {
     required WorkItemStatus status,
     @JsonKey(name: 'assignee_account_ids')
     required List<String> assigneeAccountIds,
+
+    /// Atananlar görünen adlarıyla; sıra `assignee_account_ids` ile aynıdır. `assignee_account_ids` geriye uyum için korunur.
+    required List<WorkItemAssignee> assignees,
+
+    /// Planlanan başlangıç günü (tarih kaydından; liste, oluşturma, güncelleme ve tekil uçta dolu).
+    @DateOnlyConverter() @JsonKey(name: 'start_on') required DateTime startOn,
+
+    /// Bitiş günü (tarih kaydından). Geç tamamlamada tamamlanma gününe itilmiş olabilir; özgün plan `planned_end_on`dadır.
+    @DateOnlyConverter() @JsonKey(name: 'end_on') required DateTime endOn,
     @JsonKey(name: 'is_overdue') required bool isOverdue,
     @JsonKey(name: 'days_overdue') required int daysOverdue,
     @JsonKey(name: 'is_completed_late') required bool isCompletedLate,

@@ -95,7 +95,7 @@ final class TaskDetailControllerProvider
 }
 
 String _$taskDetailControllerHash() =>
-    r'648f7a80d0083a0272cfdf96f448693eb5590a84';
+    r'ac301a7b4180fa1690a1ceba4cbaf777ee12e23e';
 
 /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
 ///

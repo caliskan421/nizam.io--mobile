@@ -753,5 +753,40 @@ void main() {
         expect(_log(h), ['GET /v1/work-items/w1']);
       },
     );
+
+    // Codex 3: 403 sonrası rol olguları da yenilenir (TaskAccess yeniden hesaplanır).
+    test(
+      '403: koordinatörlüğü kaldırılmış hesapta yönetim eylemleri gizlenir',
+      () async {
+        final s = _Server()..assignees = ['acc-1'];
+        final (h, c, ctl) = await _open(s);
+        expect(ctl.permissions.canManageTask, isTrue);
+        expect(ctl.permissions.canAssign, isTrue);
+        // Sunucuda koordinatörlük kaldırıldı; hesap atanmış üye olarak kaldı.
+        s
+          ..role = 'uye'
+          ..writes['PATCH /v1/work-items/w1'] = () =>
+              envelope(403, 'work.not_authorized');
+        final r = await ctl.setPriority(TaskPriority.high);
+        expect(r.kind, WriteKind.failed);
+        expect(r.error!.code, 'work.not_authorized');
+        expect(
+          h.backend.count('PATCH', '/v1/work-items/w1'),
+          1,
+          reason: 'tekrar yok',
+        );
+        expect(_log(h), containsAll(['GET /v1/me', 'GET /v1/me/departments']));
+        await c.read(taskDetailsProvider('w1').future);
+        expect(ctl.permissions.canManageTask, isFalse);
+        expect(ctl.permissions.canAssign, isFalse);
+        expect(ctl.permissions.canManageSubtasks, isFalse);
+        expect(c.read(canCreateTaskProvider), isFalse);
+        expect(
+          (await ctl.setPriority(TaskPriority.urgent)).kind,
+          WriteKind.invalid,
+        );
+        expect(h.backend.count('PATCH', '/v1/work-items/w1'), 1);
+      },
+    );
   });
 }

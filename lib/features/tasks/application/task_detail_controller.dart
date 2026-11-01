@@ -78,7 +78,8 @@ bool _isConflict(ApiError e) =>
     }.contains(e.code);
 
 /// Sunucu 403 (`work.not_authorized` / `work.not_assigned`): yetki ya da atama değişmiş
-/// olabilir → 409 gibi görev yeniden okunur (görünürlük olguları tazelenir); otomatik tekrar yok.
+/// olabilir → görev VE rol olguları (katalog: `/v1/me`, `/v1/me/departments`) yeniden okunur;
+/// otomatik tekrar yok.
 bool _isForbidden(ApiError e) =>
     e.status == 403 ||
     const {'work.not_authorized', 'work.not_assigned'}.contains(e.code);
@@ -318,9 +319,12 @@ class TaskDetailController extends _$TaskDetailController {
       } on Object catch (e) {
         final err = toApiError(e);
         // Çok adımlı yazmada (düzenle + atama) ilk adımlar yazılmış olabilir: her hatada
-        // yeniden okunur; tek adımlıda 409 ve 403'te.
+        // yeniden okunur; tek adımlıda 409 ve 403'te. 403'te rol olguları da bayat olabilir
+        // (koordinatörlük kaldırılmış): katalog yeniden kurulur → `/v1/me` +
+        // `/v1/me/departments` yeniden okunur, [TaskAccess] ve eylem yetkileri yeniden
+        // hesaplanır. Otomatik tekrar yok.
         if (rereadOnError || _rereadAfter(err)) {
-          await _reread(store, list: list);
+          await _reread(store, list: list || _isForbidden(err));
         }
         return WriteOutcome(
           err.code == 'work.subtasks_open'

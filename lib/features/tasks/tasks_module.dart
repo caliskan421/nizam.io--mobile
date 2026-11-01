@@ -6,6 +6,7 @@ import '../../core/scope/scope_controller.dart';
 import 'application/task_sources.dart';
 import 'application/tasks_providers.dart';
 import 'data/download_sink.dart';
+import 'data/file_upload_picker.dart';
 import 'data/sample/sample_task_catalog_repository.dart';
 import 'data/task_catalog_api_repository.dart';
 import 'data/task_details_api_repository.dart';
@@ -56,7 +57,8 @@ void registerTasksModule(GetIt locator, {required Dio? Function() apiDio}) {
         },
       ),
     )
-    ..registerLazySingleton<DownloadSink>(FileDownloadSink.new);
+    ..registerLazySingleton<DownloadSink>(FileDownloadSink.new)
+    ..registerLazySingleton<UploadPicker>(() => const FileUploadPicker());
 }
 
 /// tasks'in Riverpod portlarını get_it örnekleriyle bağlar.
@@ -71,4 +73,5 @@ List<Override> tasksOverrides(GetIt locator) => [
     (ref) => locator<TaskWriteRepository>(),
   ),
   downloadSinkProvider.overrideWith((ref) => locator<DownloadSink>()),
+  uploadPickerProvider.overrideWith((ref) => locator<UploadPicker>()),
 ];

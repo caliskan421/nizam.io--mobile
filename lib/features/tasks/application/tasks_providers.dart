@@ -26,8 +26,8 @@ TaskWriteRepository taskWriteRepository(Ref ref) => throw UnimplementedError(
   'taskWriteRepositoryProvider bileşim kökünde (lib/app/di) bağlanır',
 );
 
-/// PORT: sistem dosya seçicisi. Seçici paketi bağlanana dek (ADR-0002 kararı) "yok"
-/// gerçekleştirmesi: yükleme formu dosya seçtiremez, istek gönderilmez.
+/// PORT: sistem dosya seçicisi (`tasks_module.dart`'ta `FileUploadPicker` bağlanır).
+/// Bağlanmamışsa (testler) "yok" gerçekleştirmesi: form dosya seçtiremez, istek gönderilmez.
 @Riverpod(keepAlive: true)
 UploadPicker uploadPicker(Ref ref) => const UnavailableUploadPicker();
 

@@ -635,6 +635,23 @@ void main() {
     });
   });
 
+  group('F1 dosya seçici yalıtımı', () {
+    const fp = "import 'package:file_picker/file_picker.dart';";
+    test('yalnız UploadPicker gerçekleştirmesi; dışa verilemez', () {
+      expect(rules('features/tasks/data/file_upload_picker.dart', fp), isEmpty);
+      expect(rules('features/tasks/data/a.dart', fp), ['F1']);
+      expect(rules('features/tasks/presentation/a.dart', fp), ['F1']);
+      expect(rules('core/http/a.dart', fp), ['F1']);
+      expect(
+        rules(
+          'features/tasks/data/file_upload_picker.dart',
+          "export 'package:file_picker/file_picker.dart';",
+        ),
+        ['F1'],
+      );
+    });
+  });
+
   group('S7 ham tercih deposu ve SDK export', () {
     const raw = "import 'package:nizamio/core/storage/preference_store.dart';";
     test('ham port yalnız AppPreferences, core/storage ve app/di', () {

@@ -191,6 +191,7 @@ class _Sink implements DownloadSink {
 Future<(Harness, ProviderContainer, TaskDetailController)> _open(
   _Server server, {
   DownloadSink? sink,
+  UploadPicker? picker,
 }) async {
   final h = await pilotHarness(PilotBackend(), signedIn: true);
   h.backend.handler = server.handle;
@@ -198,6 +199,11 @@ Future<(Harness, ProviderContainer, TaskDetailController)> _open(
     h.composition.locator
       ..unregister<DownloadSink>()
       ..registerSingleton<DownloadSink>(sink);
+  }
+  if (picker != null) {
+    h.composition.locator
+      ..unregister<UploadPicker>()
+      ..registerSingleton<UploadPicker>(picker);
   }
   final c = h.container;
   h.read(scopeControllerProvider)
@@ -508,8 +514,16 @@ void main() {
       expect(h.backend.requests, isEmpty);
     });
 
-    test('seçici bağlı değil: pickUploadFile false, istek yok', () async {
-      final (h, _, ctl) = await _open(_Server());
+    test('bileşim kökü sistem seçicisini bağlar', () async {
+      final (_, c, _) = await _open(_Server());
+      expect(c.read(uploadPickerProvider).available, isTrue);
+    });
+
+    test('seçici yok: pickUploadFile false, istek yok', () async {
+      final (h, _, ctl) = await _open(
+        _Server(),
+        picker: const UnavailableUploadPicker(),
+      );
       ctl.openUpload();
       expect(await ctl.pickUploadFile(), isFalse);
       expect(h.backend.requests, isEmpty);

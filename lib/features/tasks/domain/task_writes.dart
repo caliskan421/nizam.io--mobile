@@ -144,6 +144,21 @@ String? uploadContentType(String extension) => switch (extension) {
   _ => null,
 };
 
+/// [uploadContentType] kümesinin uzantıları (sistem seçicisinin süzgeci; küme ile aynı sıra).
+const uploadExtensions = [
+  'pdf',
+  'png',
+  'jpg',
+  'csv',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'ppt',
+  'pptx',
+  'pages',
+];
+
 /// Tek dosya sınırı: bu boyuta ULAŞAN dosya 422 `records.too_large` (RECORDS-K05, 90 MiB).
 const uploadMaxBytes = 90 * 1024 * 1024;
 
@@ -183,7 +198,8 @@ abstract interface class UploadPicker {
   Future<UploadSource?> pick();
 }
 
-/// Seçici paketi bağlı değilken kullanılan gerçekleştirme (ADR-0002 paket kararı bekler).
+/// Seçici bağlı olmayan kurulumda (testler, örnek) kullanılan gerçekleştirme; gerçek seçici
+/// `data/file_upload_picker.dart` (ADR-0002).
 final class UnavailableUploadPicker implements UploadPicker {
   const UnavailableUploadPicker();
 

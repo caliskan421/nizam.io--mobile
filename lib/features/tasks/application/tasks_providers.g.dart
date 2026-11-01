@@ -167,20 +167,20 @@ final class TaskWriteRepositoryProvider
 String _$taskWriteRepositoryHash() =>
     r'adf7d8aff2050fb745c92eab5ac61b72372a4574';
 
-/// PORT: sistem dosya seçicisi. Seçici paketi bağlanana dek (ADR-0002 kararı) "yok"
-/// gerçekleştirmesi: yükleme formu dosya seçtiremez, istek gönderilmez.
+/// PORT: sistem dosya seçicisi (`tasks_module.dart`'ta `FileUploadPicker` bağlanır).
+/// Bağlanmamışsa (testler) "yok" gerçekleştirmesi: form dosya seçtiremez, istek gönderilmez.
 
 @ProviderFor(uploadPicker)
 final uploadPickerProvider = UploadPickerProvider._();
 
-/// PORT: sistem dosya seçicisi. Seçici paketi bağlanana dek (ADR-0002 kararı) "yok"
-/// gerçekleştirmesi: yükleme formu dosya seçtiremez, istek gönderilmez.
+/// PORT: sistem dosya seçicisi (`tasks_module.dart`'ta `FileUploadPicker` bağlanır).
+/// Bağlanmamışsa (testler) "yok" gerçekleştirmesi: form dosya seçtiremez, istek gönderilmez.
 
 final class UploadPickerProvider
     extends $FunctionalProvider<UploadPicker, UploadPicker, UploadPicker>
     with $Provider<UploadPicker> {
-  /// PORT: sistem dosya seçicisi. Seçici paketi bağlanana dek (ADR-0002 kararı) "yok"
-  /// gerçekleştirmesi: yükleme formu dosya seçtiremez, istek gönderilmez.
+  /// PORT: sistem dosya seçicisi (`tasks_module.dart`'ta `FileUploadPicker` bağlanır).
+  /// Bağlanmamışsa (testler) "yok" gerçekleştirmesi: form dosya seçtiremez, istek gönderilmez.
   UploadPickerProvider._()
     : super(
         from: null,

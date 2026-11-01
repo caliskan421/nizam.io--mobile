@@ -28,6 +28,9 @@
 //       (kesin dosya; aynı dizinde ikinci bir bağdaştırıcı yok — gizli veri SecureStore'a, S1).
 //   S6  firebase_* yalnız `lib/app/**` ve `lib/core/telemetry/telemetry.dart` içinde (kesin
 //       dosya; başlatma ve telemetri tek yerden).
+//   F1  file_picker YALNIZ `lib/features/tasks/data/file_upload_picker.dart` içinde (kesin
+//       dosya; `UploadPicker` portunun gerçekleştirmesi — ADR-0002, F57) ve dışa verilemez:
+//       seçici ağ/günlük yolu açmaz, başka katman paketi doğrudan görmez.
 //   S7  Ham tercih deposu (`core/storage/preference_store.dart`,
 //       `shared_preference_store.dart`) yalnız bu iki dosya,
 //       `core/preferences/app_preferences.dart` ve `lib/app/di/**` tarafından import edilir
@@ -96,6 +99,9 @@ import 'package:path/path.dart' as p;
 
 /// Paket adı (pubspec `name`).
 const packageName = 'nizamio';
+
+/// F1: file_picker'ın tek izinli dosyası (lib göreli).
+const filePickerHome = 'features/tasks/data/file_upload_picker.dart';
 
 /// Üretilmiş API kodu (DTO yalnız burada).
 const generatedApiDir = 'core/api/generated/';
@@ -434,6 +440,13 @@ void _checkUri(
     add(
       'S6',
       'firebase yalnız lib/app/** ve lib/core/telemetry/telemetry.dart içinde',
+    );
+  }
+  if (uri.startsWith('package:file_picker/') &&
+      (here.path != filePickerHome || isExport)) {
+    add(
+      'F1',
+      'file_picker yalnız lib/$filePickerHome içinde import edilir ve dışa verilemez',
     );
   }
   if (uri == 'dart:developer' && !here.path.startsWith('core/logging/')) {

@@ -36,6 +36,11 @@ Map<String, Object?> _item(
   'priority': priority,
   'status': status,
   'assignee_account_ids': assignees,
+  'assignees': [
+    for (final a in assignees) {'account_id': a, 'full_name': 'Ad $a'},
+  ],
+  'start_on': '2026-11-01',
+  'end_on': '2026-11-10',
   'is_overdue': false,
   'days_overdue': 0,
   'is_completed_late': false,
@@ -63,6 +68,7 @@ class _Server {
   String role = 'koordinator';
   List<String> assignees = ['u2'];
   String status = 'devam_ediyor';
+  String priority = 'orta';
   List<Map<String, Object?>> files = [_file('f1', 'acc-1'), _file('f2', 'u2')];
   List<Map<String, Object?>> extraItems = [];
   Map<String, Object?>? pendingRequest;
@@ -93,6 +99,12 @@ class _Server {
           'full_name': 'Ayşe Yılmaz',
           'company_admin': admin,
         });
+      case 'GET /v1/program/departments':
+        return jsonResponse(200, {
+          'departments': [
+            {'department_id': 'd1', 'display_name': 'Altyapı', 'code': 'ALT'},
+          ],
+        });
       case 'GET /v1/me/departments':
         return jsonResponse(200, {
           'departments': [
@@ -112,6 +124,16 @@ class _Server {
             _item('w1', assignees: assignees, status: status),
             ...extraItems,
           ],
+        });
+      case 'GET /v1/work-items/w1':
+        return jsonResponse(200, {
+          ..._item(
+            'w1',
+            assignees: assignees,
+            status: status,
+            priority: priority,
+          ),
+          'description': 'Pompa odası',
         });
       case 'GET /v1/work-items/w1/subtasks':
         return jsonResponse(200, {'subtasks': <Object>[], 'total': 0});
@@ -261,8 +283,13 @@ void main() {
       expect(_only(h, 'POST', '/v1/work-items/w1/assignments').body, {
         'account_ids': ['u3'],
       });
-      expect(log.indexOf('GET /v1/work-items'), greaterThan(2));
+      expect(
+        log.indexOf('GET /v1/work-items/w1'),
+        greaterThan(2),
+        reason: 'yazmalardan sonra kalem tekil okunur',
+      );
       expect(log, contains('GET /v1/work-items/w1/files'));
+      expect(log, isNot(contains('GET /v1/work-items')), reason: 'liste yok');
       expect(c.read(taskDetailControllerProvider('w1')).edit, isNull);
     });
 
@@ -307,7 +334,7 @@ void main() {
       final r = await ctl.submitEdit();
       expect(r.kind, WriteKind.failed);
       expect(r.error!.code, 'work.assignee_not_member');
-      expect(_log(h), contains('GET /v1/work-items'));
+      expect(_log(h), contains('GET /v1/work-items/w1'));
       expect(c.read(taskDetailControllerProvider('w1')).edit, isNotNull);
     });
 
@@ -327,13 +354,24 @@ void main() {
       expect(h.backend.requests, isEmpty);
     });
 
-    test('öncelik: PATCH yalnız priority; liste yeniden okunur', () async {
-      final (h, _, ctl) = await _open(_Server());
+    test('öncelik: PATCH yalnız priority; yalnız kalem yeniden okunur ve katalogda değişir', () async {
+      final s = _Server();
+      final (h, c, ctl) = await _open(s);
+      s.priority = 'yuksek';
       expect((await ctl.setPriority(TaskPriority.high)).ok, isTrue);
       expect(_only(h, 'PATCH', '/v1/work-items/w1').body, {
         'priority': 'yuksek',
       });
-      expect(_log(h), contains('GET /v1/work-items'));
+      expect(_log(h).where((l) => l == 'GET /v1/work-items/w1'), hasLength(1));
+      expect(_log(h), isNot(contains('GET /v1/work-items')));
+      final t = c.read(taskCatalogControllerProvider).value!.task('w1')!;
+      expect(t.priority, TaskPriority.high, reason: 'tekil okumadan');
+      expect(t.description, 'Pompa odası', reason: 'açıklama getWorkItem\'dan');
+      expect(
+        t.shortCode,
+        'Altyapı',
+        reason: 'kısa anahtar korunur (koordinatör: ekip satırı adı, kod yok)',
+      );
     });
 
     test('sil: DELETE + katalog; geri alma sunucuda yok', () async {

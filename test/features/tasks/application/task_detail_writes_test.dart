@@ -44,6 +44,29 @@ class _Server {
 
   final _pilot = PilotBackend();
 
+  Map<String, Object?> _w1() => {
+    'work_item_id': 'w1',
+    'title': 'Hidrofor kurulumu',
+    'program_id': 'prog-1',
+    'department_id': 'd1',
+    'priority': 'orta',
+    'status': status,
+    'assignee_account_ids': assignees,
+    'assignees': [
+      for (final a in assignees) {'account_id': a, 'full_name': null},
+    ],
+    'start_on': '2026-11-01',
+    'end_on': '2026-11-10',
+    'is_overdue': false,
+    'days_overdue': 0,
+    'is_completed_late': false,
+    'days_late': 0,
+    'is_completed_early': false,
+    'days_early': 0,
+    'completion_evidence_required': false,
+    'subtask_counts': {'total': subtasks.length, 'done': 0},
+  };
+
   FutureOr<ResponseBody> handle(Seen r) async {
     final key = '${r.method} ${r.path}';
     if (r.method != 'GET' && r.path.startsWith('/v1/work-items/')) {
@@ -60,6 +83,12 @@ class _Server {
           'full_name': 'Ayşe Yılmaz',
           'company_admin': admin,
         });
+      case 'GET /v1/program/departments':
+        return jsonResponse(200, {
+          'departments': [
+            {'department_id': 'd1', 'display_name': 'Altyapı', 'code': 'ALT'},
+          ],
+        });
       case 'GET /v1/me/departments':
         return jsonResponse(200, {
           'departments': [
@@ -74,26 +103,10 @@ class _Server {
         });
       case 'GET /v1/work-items':
         return jsonResponse(200, {
-          'items': [
-            {
-              'work_item_id': 'w1',
-              'title': 'Hidrofor kurulumu',
-              'program_id': 'prog-1',
-              'department_id': 'd1',
-              'priority': 'orta',
-              'status': status,
-              'assignee_account_ids': assignees,
-              'is_overdue': false,
-              'days_overdue': 0,
-              'is_completed_late': false,
-              'days_late': 0,
-              'is_completed_early': false,
-              'days_early': 0,
-              'completion_evidence_required': false,
-              'subtask_counts': {'total': subtasks.length, 'done': 0},
-            },
-          ],
+          'items': [_w1()],
         });
+      case 'GET /v1/work-items/w1':
+        return jsonResponse(200, {..._w1(), 'description': 'Pompa odası'});
       case 'GET /v1/work-items/w1/subtasks':
         return jsonResponse(200, {
           'subtasks': subtasks,
@@ -180,7 +193,9 @@ Seen _only(Harness h, String method, String path) => h.backend.requests
     .where((r) => r.method == method && r.path == path)
     .single;
 
+/// Kalemin yeniden okunması: tekil görev (getWorkItem) + ayrıntı parçaları.
 const _detailReads = [
+  'GET /v1/work-items/w1',
   'GET /v1/work-items/w1/subtasks',
   'GET /v1/work-items/w1/notes',
   'GET /v1/work-items/w1/files',
@@ -188,7 +203,8 @@ const _detailReads = [
 
 void main() {
   group('durum geçişi', () {
-    test('koordinatör → POST transitions (görevin departmanı); sonra katalog + ayrıntı yeniden okunur', () async {
+    test('koordinatör → POST transitions (görevin departmanı); sonra YALNIZ kalem getWorkItem ile '
+        'yeniden okunur (tüm liste yok)', () async {
       final s = _Server();
       final (h, c, ctl) = await _open(s);
       s.status = 'tamamlandi';
@@ -200,12 +216,18 @@ void main() {
       expect(post.header('X-Nizamio-Department'), 'd1');
       expect(post.header('X-Nizamio-Program'), 'prog-1');
       expect(post.body, {'to': 'tamamlandi'});
-      // Yeniden okuma yazmadan SONRA: liste, ardından ayrıntı.
-      final list = log.indexOf('GET /v1/work-items');
-      expect(list, greaterThan(0));
-      for (final d in _detailReads) {
-        expect(log.indexOf(d), greaterThan(list), reason: d);
-      }
+      // Yeniden okuma yazmadan SONRA ve yalnız kalem: tekil okuma + ayrıntı; liste yok.
+      expect(
+        log.skip(1),
+        unorderedEquals([..._detailReads, 'GET /v1/date-change-requests/mine']),
+        reason: 'koordinatör: ayrıntıyla kendi tarih talepleri',
+      );
+      expect(log, isNot(contains('GET /v1/work-items')));
+      expect(
+        log.where((l) => l == 'GET /v1/work-items/w1'),
+        hasLength(1),
+        reason: 'kalem bir kez okunur',
+      );
       expect(
         c.read(taskCatalogControllerProvider).value!.task('w1')!.status,
         TaskStatus.done,
@@ -283,8 +305,8 @@ void main() {
       );
       expect(
         _log(h),
-        contains('GET /v1/work-items'),
-        reason: '409 → yeniden okuma',
+        containsAll(_detailReads),
+        reason: '409 → kalem yeniden okunur',
       );
 
       s.writes.clear();
@@ -310,7 +332,7 @@ void main() {
         expect(r.kind, WriteKind.failed);
         expect(r.error!.code, 'work.stale_transition');
         expect(h.backend.count('POST', '/v1/work-items/w1/transitions'), 1);
-        expect(_log(h), containsAll(['GET /v1/work-items', ..._detailReads]));
+        expect(_log(h), containsAll(_detailReads));
       },
     );
 
@@ -326,7 +348,7 @@ void main() {
           expect(r.kind, WriteKind.failed);
           expect(r.error!.code, code);
           expect(h.backend.count('POST', '/v1/work-items/w1/transitions'), 1);
-          expect(_log(h), containsAll(['GET /v1/work-items', ..._detailReads]));
+          expect(_log(h), containsAll(_detailReads));
         },
       );
     }
@@ -411,26 +433,30 @@ void main() {
   });
 
   group('alt görevler', () {
-    test('oluştur/işaretle/sil → istek + katalog yeniden okuma', () async {
-      final s = _Server();
-      final (h, _, ctl) = await _open(s);
-      expect((await ctl.createSubtask('  Vana ')).kind, WriteKind.done);
-      expect(_only(h, 'POST', '/v1/work-items/w1/subtasks').body, {
-        'title': 'Vana',
-      });
-      expect(_log(h), contains('GET /v1/work-items'));
+    test(
+      'oluştur/işaretle/sil → istek + kalem yeniden okuma (liste yok)',
+      () async {
+        final s = _Server();
+        final (h, _, ctl) = await _open(s);
+        expect((await ctl.createSubtask('  Vana ')).kind, WriteKind.done);
+        expect(_only(h, 'POST', '/v1/work-items/w1/subtasks').body, {
+          'title': 'Vana',
+        });
+        expect(_log(h), containsAll(_detailReads));
+        expect(_log(h), isNot(contains('GET /v1/work-items')));
 
-      h.backend.requests.clear();
-      expect((await ctl.toggleSubtask('s1')).kind, WriteKind.done);
-      final patch = _only(h, 'PATCH', '/v1/work-items/w1/subtasks/s1');
-      expect(patch.body, {'done': true});
-      expect(patch.header('X-Nizamio-Department'), 'd1');
-      expect(_log(h).indexOf('GET /v1/work-items'), greaterThan(0));
+        h.backend.requests.clear();
+        expect((await ctl.toggleSubtask('s1')).kind, WriteKind.done);
+        final patch = _only(h, 'PATCH', '/v1/work-items/w1/subtasks/s1');
+        expect(patch.body, {'done': true});
+        expect(patch.header('X-Nizamio-Department'), 'd1');
+        expect(_log(h).indexOf('GET /v1/work-items/w1'), greaterThan(0));
 
-      h.backend.requests.clear();
-      expect((await ctl.removeSubtask('s2')).$1.kind, WriteKind.done);
-      expect(h.backend.count('DELETE', '/v1/work-items/w1/subtasks/s2'), 1);
-    });
+        h.backend.requests.clear();
+        expect((await ctl.removeSubtask('s2')).$1.kind, WriteKind.done);
+        expect(h.backend.count('DELETE', '/v1/work-items/w1/subtasks/s2'), 1);
+      },
+    );
 
     test('kişi ve tarih: atama kaldırma boş dize; tarihler birlikte gider', () async {
       final s = _Server()..assignees = ['u2', 'acc-1'];
@@ -479,7 +505,7 @@ void main() {
             envelope(409, 'work.item_completed');
         final r = await ctl.createSubtask('Yeni');
         expect(r.error!.code, 'work.item_completed');
-        expect(_log(h), contains('GET /v1/work-items'));
+        expect(_log(h), contains('GET /v1/work-items/w1'));
       },
     );
   });

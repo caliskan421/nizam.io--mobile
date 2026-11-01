@@ -300,8 +300,9 @@ class TaskDetailController extends _$TaskDetailController {
   // ---- sunucu yazması --------------------------------------------------------------------
 
   /// Tek yazma kapısı: kilit → istek → (başarı, 409 ya da 403) yeniden okuma → kilit açılır.
-  /// [list]: yazma listeyi de etkiler (durum, alt görev sayıları) → katalog yeniden okunur;
-  /// değilse yalnız ayrıntı.
+  /// Yeniden okuma varsayılan olarak YALNIZ kalemdir: ayrıntı (`getWorkItem` + alt görev / not /
+  /// dosya) okunur ve katalogdaki kalemin yerine geçer ([TaskCatalogController.applyDetails]).
+  /// [list]: görev kümesi değişti (oluşturma, silme, zincirli tarih onayı) → liste de okunur.
   Future<WriteOutcome> _write(
     Future<void> Function() call, {
     required bool list,
@@ -340,7 +341,8 @@ class TaskDetailController extends _$TaskDetailController {
     TaskCatalogController store, {
     required bool list,
   }) async {
-    // Katalog yüklemeye geçince açık ayrıntı kendini geçersiz kılar (taskDetailsProvider).
+    // Liste: katalog yüklemeye geçince açık ayrıntı kendini geçersiz kılar
+    // (taskDetailsProvider). Kalem: yalnız ayrıntı (tekil okuma) yeniden okunur.
     if (list) await store.reload();
     if (!ref.mounted) return;
     if (!list) ref.invalidate(taskDetailsProvider(code));
@@ -385,7 +387,7 @@ class TaskDetailController extends _$TaskDetailController {
         reason: needsReason ? why : null,
         closeSubtasks: closeSubtasks && s == TaskStatus.done,
       ),
-      list: true,
+      list: false,
     );
   }
 
@@ -416,14 +418,14 @@ class TaskDetailController extends _$TaskDetailController {
     if (!permissions.canManageTask) return WriteOutcome.invalid;
     return _write(
       () => _writes.updateWorkItem(t, WorkItemPatch(priority: p)),
-      list: true,
+      list: false,
     );
   }
 
   // ---- tarih talebi ---------------------------------------------------------------------
 
   /// Bekleyen talebi onaylar (yalnız şirket yöneticisi). Onay bağımlı görevleri zincirle
-  /// öteleyebilir → katalog da yeniden okunur.
+  /// öteleyebilir → liste de yeniden okunur; ret yalnız kalemi etkiler.
   Future<WriteOutcome> approveRequest() => _review(approve: true);
 
   Future<WriteOutcome> rejectRequest() => _review(approve: false);
@@ -450,7 +452,7 @@ class TaskDetailController extends _$TaskDetailController {
     if (id == null || !permissions.canReviewDate) return WriteOutcome.invalid;
     return _write(
       () => _writes.reviewDateChange(id, approve: approve),
-      list: true,
+      list: approve,
     );
   }
 
@@ -580,7 +582,7 @@ class TaskDetailController extends _$TaskDetailController {
   /// Sunucuda: `PATCH` YALNIZ değişen alanlarla (başlık, öncelik, tarihler, kanıt bayrağı;
   /// yönetici ya da koordinatör), ardından atama farkı (eklenenler tek `addAssignments`,
   /// çıkarılanlar tek tek `removeAssignment`; YALNIZ koordinatör). Departman (koordinatörlük)
-  /// bu formdan değişmez. Atamasız görev sunucuda geçerlidir. Sonuçta katalog + ayrıntı
+  /// bu formdan değişmez. Atamasız görev sunucuda geçerlidir. Sonuçta kalem (tekil okuma)
   /// yeniden okunur (hata olsa da: önceki adımlar yazılmış olabilir).
   Future<WriteOutcome> submitEdit() async {
     final t = _task;
@@ -640,7 +642,7 @@ class TaskDetailController extends _$TaskDetailController {
           await _writes.removeAssignment(t, a);
         }
       },
-      list: true,
+      list: false,
       rereadOnError: true,
     );
     if (r.ok && ref.mounted) {
@@ -655,7 +657,7 @@ class TaskDetailController extends _$TaskDetailController {
     if (t == null || !_server || !permissions.canClaim(t)) {
       return WriteOutcome.invalid;
     }
-    return _write(() => _writes.claim(t), list: true);
+    return _write(() => _writes.claim(t), list: false);
   }
 
   /// Kendi atamasını bırakır (koordinatör; tamamlanmış görevde değil).
@@ -664,7 +666,7 @@ class TaskDetailController extends _$TaskDetailController {
     if (t == null || !_server || !permissions.canUnclaim(t)) {
       return WriteOutcome.invalid;
     }
-    return _write(() => _writes.unclaim(t), list: true);
+    return _write(() => _writes.unclaim(t), list: false);
   }
 
   // ---- kanıt yükle ----------------------------------------------------------------------
@@ -910,15 +912,11 @@ class TaskDetailController extends _$TaskDetailController {
   Subtask? _sub(String id) =>
       _task?.subtasks.where((s) => s.id == id).firstOrNull;
 
-  /// Sunucu alt görev değişikliği; alt görev sayıları listede de görünür → [list].
-  Future<WriteOutcome> _patchSub(
-    String id,
-    SubtaskPatch patch, {
-    bool list = false,
-  }) {
+  /// Sunucu alt görev değişikliği; alt görev sayıları tekil okumayla kalemde yenilenir.
+  Future<WriteOutcome> _patchSub(String id, SubtaskPatch patch) {
     final t = _task;
     if (t == null) return Future.value(WriteOutcome.invalid);
-    return _write(() => _writes.updateSubtask(t, id, patch), list: list);
+    return _write(() => _writes.updateSubtask(t, id, patch), list: false);
   }
 
   /// İşaretler/kaldırır. Alt görevde kanıt bayrağı yok (ADR-0024): kanıt kapısı görev
@@ -932,7 +930,7 @@ class TaskDetailController extends _$TaskDetailController {
       return WriteOutcome.done;
     }
     if (!permissions.canToggleSubtask(u)) return WriteOutcome.invalid;
-    return _patchSub(id, SubtaskPatch(done: !u.done), list: true);
+    return _patchSub(id, SubtaskPatch(done: !u.done));
   }
 
   void toggleSubtaskOpen(String id) {
@@ -982,7 +980,7 @@ class TaskDetailController extends _$TaskDetailController {
       return WriteOutcome.done;
     }
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
-    return _write(() => _writes.createSubtask(t, name), list: true);
+    return _write(() => _writes.createSubtask(t, name), list: false);
   }
 
   /// Örnek katalogda satır içi ad düzenlemesi (yazdıkça).
@@ -1083,7 +1081,7 @@ class TaskDetailController extends _$TaskDetailController {
       return (WriteOutcome.done, u);
     }
     if (!permissions.canManageSubtasks) return (WriteOutcome.invalid, u);
-    return (await _write(() => _writes.deleteSubtask(t, id), list: true), u);
+    return (await _write(() => _writes.deleteSubtask(t, id), list: false), u);
   }
 
   // ---- notlar ---------------------------------------------------------------------------

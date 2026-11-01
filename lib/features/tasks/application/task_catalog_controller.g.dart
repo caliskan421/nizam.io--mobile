@@ -12,9 +12,10 @@ part of 'task_catalog_controller.dart';
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
 /// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
-/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog ve
-/// henüz sunucuya bağlanmamış P3 yazmaları). Sunucu yazmasından sonra [reload] ile kaynaktan
-/// yeniden okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog).
+/// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
+/// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
+/// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
 
 @ProviderFor(TaskCatalogController)
 final taskCatalogControllerProvider = TaskCatalogControllerProvider._();
@@ -23,18 +24,20 @@ final taskCatalogControllerProvider = TaskCatalogControllerProvider._();
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
 /// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
-/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog ve
-/// henüz sunucuya bağlanmamış P3 yazmaları). Sunucu yazmasından sonra [reload] ile kaynaktan
-/// yeniden okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog).
+/// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
+/// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
+/// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
 final class TaskCatalogControllerProvider
     extends $AsyncNotifierProvider<TaskCatalogController, TaskCatalog> {
   /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
   /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
   /// aksi hâlde yeniden yükleme yalnız dokunuşla.
   ///
-  /// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog ve
-  /// henüz sunucuya bağlanmamış P3 yazmaları). Sunucu yazmasından sonra [reload] ile kaynaktan
-  /// yeniden okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+  /// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog).
+  /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
+  /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
+  /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
   TaskCatalogControllerProvider._()
     : super(
         from: null,
@@ -55,15 +58,16 @@ final class TaskCatalogControllerProvider
 }
 
 String _$taskCatalogControllerHash() =>
-    r'2fad237ed4b8599f5826a041e7035f5ebd5dd5a3';
+    r'c77f47e627794b11a6c15a1ae41b04e02e6722ae';
 
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
 /// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
-/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog ve
-/// henüz sunucuya bağlanmamış P3 yazmaları). Sunucu yazmasından sonra [reload] ile kaynaktan
-/// yeniden okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog).
+/// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
+/// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
+/// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
 
 abstract class _$TaskCatalogController extends $AsyncNotifier<TaskCatalog> {
   FutureOr<TaskCatalog> build();

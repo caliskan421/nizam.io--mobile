@@ -11,9 +11,10 @@ part 'task_catalog_controller.g.dart';
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
 /// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
-/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog ve
-/// henüz sunucuya bağlanmamış P3 yazmaları). Sunucu yazmasından sonra [reload] ile kaynaktan
-/// yeniden okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog).
+/// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
+/// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
+/// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
 @Riverpod(keepAlive: true)
 class TaskCatalogController extends _$TaskCatalogController {
   @override
@@ -47,7 +48,7 @@ class TaskCatalogController extends _$TaskCatalogController {
 
   /// Aynı kodlu görevi [task] ile değiştirir. Örnek görevde gecikme günü yeni bitiş/duruma
   /// göre yeniden hesaplanır; sunucu görevinde ([TaskItem.lateness] dolu) sunucu değeri
-  /// korunur (istemci gecikme türetmez — WORK-K37; tarih alanı P1b'ye kadar geçicidir).
+  /// korunur (istemci gecikme türetmez — WORK-K37).
   void replace(TaskItem task) {
     final c = _catalog;
     if (c == null) return;
@@ -61,24 +62,36 @@ class TaskCatalogController extends _$TaskCatalogController {
     );
   }
 
-  /// [code] görevine sunucudan okunan ayrıntıyı ekler (alt görev, not, dosya, tarih talebi).
-  /// Gecikme sunucu değeridir; yeniden hesaplanmaz.
+  /// [code] görevine sunucudan okunan ayrıntıyı uygular: tekil okuma ([TaskDetails.item];
+  /// tarih, açıklama, durum, atananlar, sayılar) katalogdaki görevin YERİNE geçer, alt görev /
+  /// not / dosya / tarih talebi eklenir, adlar [TaskCatalog.names]'e katılır. Yazma sonrası
+  /// "kalemi yeniden oku" budur (tüm liste okunmaz). Gecikme sunucu değeridir; yeniden
+  /// hesaplanmaz.
   void applyDetails(String code, TaskDetails d) {
     final c = _catalog;
     if (c == null) return;
     state = AsyncData(
-      c.withTasks([
-        for (final t in c.tasks)
-          t.code == code
-              ? t.copyWith(
-                  subtasks: d.subtasks,
-                  noteEntries: d.notes,
-                  fileEntries: d.files,
-                  dateRequest: () => d.dateRequest,
-                )
-              : t,
-      ]),
+      c
+          .withTasks([
+            for (final t in c.tasks)
+              t.code == code
+                  ? (d.item ?? t).copyWith(
+                      subtasks: d.subtasks,
+                      noteEntries: d.notes,
+                      fileEntries: d.files,
+                      dateRequest: () => d.dateRequest,
+                    )
+                  : t,
+          ])
+          .withNames(d.names),
     );
+  }
+
+  /// Görev listesinin departmanını seçer (kapsam değişir → katalog yeniden okunur).
+  /// Seçilebilirler [TaskCatalog.departments]; aynı departman yeniden seçilmez.
+  void selectDepartment(String departmentId) {
+    if (_catalog?.departmentId == departmentId) return;
+    ref.read(scopeControllerProvider).selectDepartment(departmentId);
   }
 
   /// Görevi kaldırır; eski sırasını döner (geri almak için `add(at:)`), yoksa -1.

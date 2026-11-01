@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -13,7 +12,9 @@ import '../../../core/api/generated/models/rename_file_request.dart';
 import '../../../core/api/generated/models/tag.dart';
 import '../../../core/domain/enum_parse.dart';
 import '../../../core/domain/page_slice.dart';
+import '../../../core/domain/upload_types.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/http/file_upload.dart';
 import '../domain/archive.dart';
 import '../domain/records.dart';
 
@@ -24,8 +25,9 @@ import '../domain/records.dart';
 /// (`tool/gen/wire_types.dart`).
 class ApiRecordsRepository implements RecordsRepository {
   /// [dio]: doğrulanmış bağın API istemcisi (kapsam başlıklarını ara katman ekler).
-  ApiRecordsRepository(Dio dio) : _client = RecordsClient(dio);
+  ApiRecordsRepository(Dio dio) : _dio = dio, _client = RecordsClient(dio);
 
+  final Dio _dio;
   final RecordsClient _client;
 
   @override
@@ -35,10 +37,26 @@ class ApiRecordsRepository implements RecordsRepository {
     required String filePath,
   }) async {
     final wire = _tagOut(tag);
+    final name = filePath.split(RegExp(r'[/\\]')).last;
+    final dot = name.lastIndexOf('.');
+    final type = uploadContentType(
+      dot < 0 ? '' : name.substring(dot + 1).toLowerCase(),
+    );
+    // Küme dışı tür sunucuda 422 olurdu: istek gönderilmez, metin yine koddan.
+    if (type == null) throw ApiError('records.content_rejected');
     return _record(
       await apiCall(
-        () =>
-            _client.attachFile(id: workItemId, tag: wire, file: File(filePath)),
+        () async => decodeJsonObject(
+          await postWorkItemFile(
+            _dio,
+            workItemId: workItemId,
+            tag: wire.json!,
+            filePath: filePath,
+            filename: name,
+            contentType: type,
+          ),
+          api.FileRecord.fromJson,
+        ),
       ),
     );
   }

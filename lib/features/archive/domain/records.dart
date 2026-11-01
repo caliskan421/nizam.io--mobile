@@ -163,7 +163,7 @@ abstract final class RecordsDownloadTargets {
 /// Klasör listesi [ArchiveRepository.loadFolders] ile aynı uçtur (`archiveFolders`).
 abstract interface class RecordsRepository implements ArchiveRepository {
   /// Göreve dosya yükler (multipart; [filePath] yerel dosya yolu). [tag] [RecordTag.unknown]
-  /// olamaz.
+  /// olamaz. Uzantı izinli kümede değilse istek gönderilmez (`records.content_rejected`).
   Future<RecordFile> attachFile({
     required String workItemId,
     required RecordTag tag,

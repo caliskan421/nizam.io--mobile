@@ -22,6 +22,7 @@ import '../../../core/api/generated/models/update_work_item_request.dart';
 import '../../../core/api/generated/models/update_work_item_request_priority.dart';
 import '../../../core/api/generated/models/work_note_request.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/http/file_upload.dart';
 import '../../../core/http/interceptors.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_permissions.dart';
@@ -34,10 +35,8 @@ import 'work_item_mapping.dart';
 /// okunmaz (yalnız yeni görevin kimliği): çağıran başarıdan sonra kaynağı yeniden okur
 /// (istemci akışları §8).
 ///
-/// Dosya yükleme üretilmiş `attachFile` ile DEĞİL elle kurulan multipart ile gider: üretilmiş
-/// istemci parçayı `application/octet-stream` bildirir, sunucu ise türü parçanın
-/// `Content-Type`'ından okur ve küme dışı türü reddeder (RECORDS-K03). Yol, yöntem ve
-/// operationId aynıdır (sözleşme kapısı ve kapsam başlıkları aynen uygulanır).
+/// Dosya yükleme üretilmiş `attachFile` ile DEĞİL ortak elle multipart yardımcısıyla gider
+/// ([postWorkItemFile]; arşiv yüklemesiyle aynı yol — parça türü bildirilir).
 class ApiTaskWriteRepository implements TaskWriteRepository {
   ApiTaskWriteRepository(Dio dio)
     : _dio = dio,
@@ -359,32 +358,18 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     if (type == null || wire == null) {
       throw ArgumentError.value(file.name, 'file', 'izinli tür/etiket değil');
     }
-    final form = FormData()
-      ..files.add(
-        MapEntry(
-          'file',
-          await MultipartFile.fromFile(
-            file.path,
-            filename: file.name,
-            contentType: DioMediaType.parse(type),
-          ),
-        ),
-      );
-    // Sorgu dizesi elle (D2: features içinde dize anahtarlı Map yok); değerler kodlanır.
-    final query = StringBuffer('tag=${Uri.encodeQueryComponent(wire)}');
-    if (subtaskId != null) {
-      query.write('&subtask_id=${Uri.encodeQueryComponent(subtaskId)}');
-    }
     await apiCall(
-      () => _dio.post<Object?>(
-        '/v1/work-items/${Uri.encodeComponent(task.id)}/files?$query',
-        data: form,
-        options: Options(
-          contentType: 'multipart/form-data',
-          extra: withDepartment(
-            RecordsClient.attachFileOpenapiExtras,
-            _dept(task),
-          ),
+      () => postWorkItemFile(
+        _dio,
+        workItemId: task.id,
+        tag: wire,
+        filePath: file.path,
+        filename: file.name,
+        contentType: type,
+        subtaskId: subtaskId,
+        extras: withDepartment(
+          RecordsClient.attachFileOpenapiExtras,
+          _dept(task),
         ),
       ),
     );

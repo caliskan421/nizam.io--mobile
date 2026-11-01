@@ -2,8 +2,13 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import '../../../core/domain/upload_types.dart';
+
 import 'task_catalog.dart';
 import 'task_permissions.dart';
+
+export '../../../core/domain/upload_types.dart'
+    show uploadContentType, uploadExtensions;
 
 /// Alt görev değişikliği (`PATCH …/subtasks/{id}`). null alan değişmez. [assignee] verilirse
 /// `id` null → atamayı kaldır; [dates] verilirse ikisi birlikte gider (ikisi null → kaldır).
@@ -123,41 +128,6 @@ final class UploadSource {
   /// Sunucu sınırına ulaşıyor mu (tam sınır da reddedilir).
   bool get tooLarge => sizeBytes >= uploadMaxBytes;
 }
-
-/// İzinli uzantı → bildirilen tür (backend `records/domain/content.go`, elle yazılır); küme
-/// dışı → null. Sunucu türü multipart parçasının `Content-Type`'ından okur; `jpeg` uzantısı
-/// kümede yoktur (tek kanonik uzantı `jpg`).
-String? uploadContentType(String extension) => switch (extension) {
-  'pdf' => 'application/pdf',
-  'png' => 'image/png',
-  'jpg' => 'image/jpeg',
-  'csv' => 'text/csv',
-  'doc' => 'application/msword',
-  'docx' =>
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'xls' => 'application/vnd.ms-excel',
-  'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'ppt' => 'application/vnd.ms-powerpoint',
-  'pptx' =>
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'pages' => 'application/x-iwork-pages-sffpages',
-  _ => null,
-};
-
-/// [uploadContentType] kümesinin uzantıları (sistem seçicisinin süzgeci; küme ile aynı sıra).
-const uploadExtensions = [
-  'pdf',
-  'png',
-  'jpg',
-  'csv',
-  'doc',
-  'docx',
-  'xls',
-  'xlsx',
-  'ppt',
-  'pptx',
-  'pages',
-];
 
 /// Tek dosya sınırı: bu boyuta ULAŞAN dosya 422 `records.too_large` (RECORDS-K05, 90 MiB).
 const uploadMaxBytes = 90 * 1024 * 1024;

@@ -93,7 +93,7 @@ void main() {
     late String path;
     setUp(() {
       dir = Directory.systemTemp.createTempSync('records_test');
-      path = '${dir.path}/kanit.txt';
+      path = '${dir.path}/kanit.pdf';
       File(path).writeAsStringSync('icerik');
     });
     tearDown(() => dir.deleteSync(recursive: true));
@@ -112,7 +112,10 @@ void main() {
       expect(o.contentType, startsWith('multipart/form-data'));
       final body = latin1.decode(a.bodies.single);
       expect(body, contains('name="file"'));
-      expect(body, contains('filename="kanit.txt"'));
+      expect(body, contains('filename="kanit.pdf"'));
+      // Parça türü bildirilir (sunucu türü buradan okur; octet-stream değil).
+      expect(body, contains('content-type: application/pdf'));
+      expect(body, isNot(contains('application/octet-stream')));
       expect(body, contains('icerik'));
       expect(f.id, 'f1');
       expect(f.workItemId, 'w1');
@@ -121,6 +124,40 @@ void main() {
       expect(f.uploaderId, isNull);
       expect(f.kind, ArchiveFileKind.pdf);
       expect(f.sizeMb, 2.0);
+    });
+
+    test(
+      'izinli küme dışı uzantı: istek yok, records.content_rejected',
+      () async {
+        final (repo, a) = _repo((_) => _json(_record()));
+        final txt = '${dir.path}/not.txt';
+        File(txt).writeAsStringSync('x');
+        await expectLater(
+          repo.attachFile(workItemId: 'w1', tag: RecordTag.plan, filePath: txt),
+          throwsA(
+            isA<ApiError>().having(
+              (e) => e.code,
+              'code',
+              'records.content_rejected',
+            ),
+          ),
+        );
+        expect(a.seen, isEmpty);
+      },
+    );
+
+    test('nesne olmayan gövde → client.invalid_response', () async {
+      final (repo, _) = _repo((_) => _json(<Object>[]));
+      await expectLater(
+        repo.attachFile(workItemId: 'w1', tag: RecordTag.plan, filePath: path),
+        throwsA(
+          isA<ApiError>().having(
+            (e) => e.code,
+            'code',
+            ClientErrorCode.invalidResponse,
+          ),
+        ),
+      );
     });
 
     test('unknown etiket gönderilemez (istek yok)', () async {

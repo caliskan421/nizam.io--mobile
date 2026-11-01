@@ -87,6 +87,26 @@ class TaskCatalogController extends _$TaskCatalogController {
     );
   }
 
+  /// [code] görevini taze tekil okumayla ([item]; açıklama, tarih, atananlar) değiştirir;
+  /// ayrıntı parçaları (alt görev, not, dosya, tarih talebi) korunur. Gecikme sunucu değeri.
+  void applyItem(String code, TaskItem item) {
+    final c = _catalog;
+    if (c == null) return;
+    state = AsyncData(
+      c.withTasks([
+        for (final t in c.tasks)
+          t.code == code
+              ? item.copyWith(
+                  subtasks: t.subtasks,
+                  noteEntries: t.noteEntries,
+                  fileEntries: t.fileEntries,
+                  dateRequest: () => t.dateRequest,
+                )
+              : t,
+      ]),
+    );
+  }
+
   /// Görev listesinin departmanını seçer (kapsam değişir → katalog yeniden okunur).
   /// Seçilebilirler [TaskCatalog.departments]; aynı departman yeniden seçilmez.
   void selectDepartment(String departmentId) {

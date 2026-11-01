@@ -259,7 +259,11 @@ void main() {
     test('düzenle: PATCH yalnız değişen alanlar, ardından atama farkı; katalog + ayrıntı okunur', () async {
       final s = _Server();
       final (h, c, ctl) = await _open(s);
-      ctl.openEdit();
+      expect((await ctl.openEdit()).ok, isTrue);
+      expect(_log(h), [
+        'GET /v1/work-items/w1',
+      ], reason: 'form taze okumayla açılır');
+      h.backend.requests.clear();
       final d = c.read(taskDetailControllerProvider('w1')).edit!;
       ctl
         ..updateEdit(
@@ -296,7 +300,8 @@ void main() {
 
     test('düzenle: değişiklik yoksa istek yok', () async {
       final (h, _, ctl) = await _open(_Server());
-      ctl.openEdit();
+      await ctl.openEdit();
+      h.backend.requests.clear();
       expect((await ctl.submitEdit()).kind, WriteKind.unchanged);
       expect(h.backend.requests, isEmpty);
     });
@@ -309,7 +314,7 @@ void main() {
           ..role = 'yok';
         final (h, c, ctl) = await _open(s);
         expect(ctl.permissions.canAssign, isFalse);
-        ctl.openEdit();
+        await ctl.openEdit();
         final d = c.read(taskDetailControllerProvider('w1')).edit!;
         ctl
           ..updateEdit(d.copyWith(title: 'Yeni ad'))
@@ -327,7 +332,7 @@ void main() {
       final (h, c, ctl) = await _open(s);
       s.writes['POST /v1/work-items/w1/assignments'] = () =>
           envelope(422, 'work.assignee_not_member');
-      ctl.openEdit();
+      await ctl.openEdit();
       final d = c.read(taskDetailControllerProvider('w1')).edit!;
       ctl
         ..updateEdit(d.copyWith(title: 'Yeni ad'))
@@ -350,7 +355,7 @@ void main() {
       );
       expect((await ctl.delete()).kind, WriteKind.invalid);
       expect((await ctl.copy('(kopya)')).$1.kind, WriteKind.invalid);
-      ctl.openEdit();
+      await ctl.openEdit();
       expect((await ctl.submitEdit()).kind, WriteKind.invalid);
       expect(h.backend.requests, isEmpty);
     });
@@ -708,5 +713,45 @@ void main() {
       );
       expect(a.read(canCreateTaskProvider), isTrue);
     });
+
+    // Codex 2: düzenleme formu açılmadan görev taze okunur; taslak okunan değerden kurulur.
+    test('düzenle: form taze getWorkItem okumasından sonra açılır', () async {
+      final s = _Server();
+      final (h, c, ctl) = await _open(s);
+      s.priority = 'acil'; // başka biri değiştirdi
+      final r = await ctl.openEdit();
+      expect(r.ok, isTrue);
+      expect(_log(h), ['GET /v1/work-items/w1']);
+      final edit = c.read(taskDetailControllerProvider('w1')).edit!;
+      expect(
+        edit.priority,
+        TaskPriority.urgent,
+        reason: 'taslak taze okumadan',
+      );
+      expect(_task(c).priority, TaskPriority.urgent);
+      expect(
+        _task(c).fileEntries,
+        hasLength(2),
+        reason: 'ayrıntı parçaları korunur',
+      );
+    });
+
+    test(
+      'düzenle: taze okuma hatası → form açılmaz, hata kodu döner',
+      () async {
+        final s = _Server();
+        final (h, c, ctl) = await _open(s);
+        final old = h.backend.handler;
+        h.backend.handler = (r) => r.path == '/v1/work-items/w1'
+            ? envelope(404, 'work.item_not_found')
+            : old(r);
+        final r = await ctl.openEdit();
+        expect(r.kind, WriteKind.failed);
+        expect(r.error!.code, 'work.item_not_found');
+        expect(c.read(taskDetailControllerProvider('w1')).edit, isNull);
+        expect(c.read(taskDetailControllerProvider('w1')).busy, isFalse);
+        expect(_log(h), ['GET /v1/work-items/w1']);
+      },
+    );
   });
 }

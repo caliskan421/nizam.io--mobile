@@ -527,9 +527,39 @@ class TaskDetailController extends _$TaskDetailController {
 
   // ---- düzenle --------------------------------------------------------------------------
 
-  void openEdit() {
+  /// Düzenleme formunu açar. Sunucuda form açılmadan görev `getWorkItem` ile TAZE okunur
+  /// (istemci akışları §8: `updateWorkItem` sürüm taşımaz, son yazan kazanır) ve taslak
+  /// okunan değerden kurulur; okuma hatasında form AÇILMAZ ([WriteKind.failed] + hata kodu).
+  /// Eylem bu hesaba açık değilse [WriteKind.invalid]; uçuştaki istekte [WriteKind.busy].
+  Future<WriteOutcome> openEdit() async {
     final t = _task;
-    if (t == null) return;
+    if (t == null) return WriteOutcome.invalid;
+    if (!_server) {
+      _openEditFrom(t);
+      return WriteOutcome.done;
+    }
+    if (!permissions.canManageTask) return WriteOutcome.invalid;
+    if (state.busy) return WriteOutcome.busy;
+    state = state.copyWith(busy: true);
+    final store = _store;
+    try {
+      final fresh = await ref.read(taskDetailsRepositoryProvider).loadItem(t);
+      if (fresh == null) return WriteOutcome.invalid;
+      store.applyItem(code, fresh);
+      final now = ref.mounted ? _task : null;
+      if (now == null || !permissions.canManageTask) {
+        return WriteOutcome.invalid;
+      }
+      _openEditFrom(now);
+      return WriteOutcome.done;
+    } on Object catch (e) {
+      return WriteOutcome(WriteKind.failed, toApiError(e));
+    } finally {
+      if (ref.mounted) state = state.copyWith(busy: false);
+    }
+  }
+
+  void _openEditFrom(TaskItem t) {
     state = state.copyWith(
       edit: () => TaskEditDraft(
         title: t.title,

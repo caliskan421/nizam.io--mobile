@@ -407,11 +407,18 @@ class TaskDetailActions {
     if (m != null) _say(m);
   }
 
-  void openEdit() {
+  /// Sunucu görevinde form, görev taze okunduktan sonra açılır; okuma hatası → form açılmaz,
+  /// hata iletisi gösterilir.
+  Future<void> openEdit() async {
     if (_task == null || !canManageTask) return;
+    final r = await _ctl.openEdit();
+    if (!context.mounted) return;
+    if (!r.ok) {
+      _report(r);
+      return;
+    }
     final l = context.l10n;
-    _ctl.openEdit();
-    _form(
+    await _form(
       title: l.uiTasksEditTask,
       description: '${_task?.displayCode ?? code} · ${l.uiTasksEditDescTail}',
       ok: l.uiTasksSave,

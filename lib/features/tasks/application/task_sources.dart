@@ -49,6 +49,14 @@ final class TaskDetailsSource implements TaskDetailsRepository {
     if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
     return s.load(task, access: access);
   }
+
+  @override
+  Future<TaskItem?> loadItem(TaskItem task) async {
+    if (!scope.current.hasServerProgram) return null;
+    final s = server();
+    if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
+    return s.loadItem(task);
+  }
 }
 
 /// Görev yazmalarının kaynağı: yalnız doğrulanmış bağın sunucusu. Örnek katalogda yazma

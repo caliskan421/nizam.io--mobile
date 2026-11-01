@@ -153,6 +153,20 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
     );
   }
 
+  @override
+  Future<TaskItem?> loadItem(TaskItem task) async {
+    final item = await apiCall(
+      () => _work.getWorkItem(
+        id: task.id,
+        extras: withDepartment(
+          WorkClient.getWorkItemOpenapiExtras,
+          task.departmentId ?? '',
+        ),
+      ),
+    );
+    return _item(item, task.shortCode);
+  }
+
   /// Role göre tarih talebi yüzü; [DateRequestFeed.none] → istek yok, boş liste.
   Future<List<api.DateChangeRequest>> _dateRequests(
     DateRequestFeed feed,

@@ -58,6 +58,9 @@ class _Details implements TaskDetailsRepository {
     accesses.add(access);
     return result;
   }
+
+  @override
+  Future<TaskItem?> loadItem(TaskItem task) async => null;
 }
 
 final _details = TaskDetails(

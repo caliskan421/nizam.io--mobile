@@ -40,4 +40,9 @@ final class TaskDetails {
 /// içerir). [access]: oturumun rolü (tarih talebi yüzünü seçer; null → tarih talebi okunmaz).
 abstract interface class TaskDetailsRepository {
   Future<TaskDetails?> load(TaskItem task, {TaskAccess? access});
+
+  /// Görevin YALNIZ kendisini taze okur (`getWorkItem`; alt görev/not/dosya yok) — düzenleme
+  /// formu açılmadan önce (istemci akışları §8, kayıp güncelleme sınırı). null → kaynak tekil
+  /// okuma taşımaz (örnek katalog).
+  Future<TaskItem?> loadItem(TaskItem task);
 }

@@ -73,7 +73,7 @@ void main() {
     await ctl.rejectRequest();
     expect(task().dateRequest!.state, DateRequestState.rejected);
 
-    ctl.openEdit();
+    await ctl.openEdit();
     ctl.updateEdit(c.read(p).edit!.copyWith(title: '  '));
     expect((await ctl.submitEdit()).kind, WriteKind.invalid);
     expect(c.read(p).showErrors, isTrue);

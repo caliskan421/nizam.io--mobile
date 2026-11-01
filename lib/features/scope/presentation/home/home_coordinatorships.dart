@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/motion/page_content_entrance.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
@@ -36,6 +37,10 @@ class HomeCoordinatorships extends ConsumerWidget {
     final filtered = query.filtered(items);
     final visible = query.visible(items);
     const filters = CoordinatorshipFilter.values;
+    // Süzgeç/sıralama değişince kartlar yeniden girer; "tümünü göster"de yalnız yeni gelenler
+    // (kimlik aynı kalan kart hareket etmez). Kademe satır satırdır.
+    final order = (query.filter, query.sort, query.descending);
+    const columns = 2;
     final sortLabel = l.sortLabel(query.sort);
     final direction = query.descending
         ? l.uiHomeSortDescending
@@ -82,25 +87,32 @@ class HomeCoordinatorships extends ConsumerWidget {
         ),
         const Gap(NizamioSpacing.space3),
         if (visible.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: NizamioSpacing.space4,
-            ),
-            child: Text(
-              l.uiHomeFilterEmpty,
-              textAlign: TextAlign.center,
-              style: context.text.bodyMd.copyWith(
-                color: context.colors.textMuted,
+          NzEntrance(
+            replay: order,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: NizamioSpacing.space4,
+              ),
+              child: Text(
+                l.uiHomeFilterEmpty,
+                textAlign: TextAlign.center,
+                style: context.text.bodyMd.copyWith(
+                  color: context.colors.textMuted,
+                ),
               ),
             ),
           )
         else
           HomeGrid(
-            columns: 2,
+            columns: columns,
             gap: NizamioSpacing.gapMd,
             children: [
-              for (final c in visible)
-                _CoordCard(c: c, onTap: () => onOpen(c.code)),
+              for (final (i, c) in visible.indexed)
+                NzEntrance(
+                  replay: (order, c.code),
+                  index: i ~/ columns,
+                  child: _CoordCard(c: c, onTap: () => onOpen(c.code)),
+                ),
             ],
           ),
         if (filtered.length > CoordinatorshipQuery.collapsedCount) ...[

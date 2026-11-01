@@ -797,3 +797,68 @@ Future<void> showTasksShortcuts(
     ],
   );
 }
+
+/// Görev listesinin ilk yükleme iskeleti (liste gövdesinin yerinde; başlık, anahtar ve arama
+/// veriden bağımsız olduğundan gerçek hâlleriyle kalır): görünüm kutucukları ("Tümü" 2 sütun
+/// + 2, ardından 4), liste başlığı + sıralama, görev kartları. Tek [NzShimmer] kapsamında
+/// parlar; ölçüler yaklaşıktır.
+class TasksListSkeleton extends StatelessWidget {
+  const TasksListSkeleton({super.key, this.cards = 4});
+
+  /// Kart yeri sayısı.
+  final int cards;
+
+  static const _tileHeight = 64.0;
+  static const _cardHeight = 112.0;
+  static const _titleWidth = 0.45;
+  static const _sortWidth = 80.0;
+
+  @override
+  Widget build(BuildContext context) {
+    const gap = NizamioSpacing.space2;
+    Widget tile({int flex = 1}) => Expanded(
+      flex: flex,
+      child: const NzSkeleton.block(height: _tileHeight),
+    );
+    Widget bar(double f) => FractionallySizedBox(
+      alignment: AlignmentDirectional.centerStart,
+      widthFactor: f,
+      child: const NzSkeleton.block(
+        height: NizamioSpacing.space3,
+        radius: NizamioRadius.pill,
+      ),
+    );
+    return NzShimmer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // "Tümü" 2 sütun + 1 boşluk kaplar: flex 2 + 1 + 1 yaklaşık eşler.
+          Row(spacing: gap, children: [tile(flex: 2), tile(), tile()]),
+          const Gap(gap),
+          Row(spacing: gap, children: [tile(), tile(), tile(), tile()]),
+          const Gap(NizamioSpacing.space5),
+          Row(
+            children: [
+              Expanded(child: bar(_titleWidth)),
+              const Gap(NizamioSpacing.space3),
+              const SizedBox(
+                width: _sortWidth,
+                child: NzSkeleton.block(
+                  height: NizamioSpacing.space3,
+                  radius: NizamioRadius.pill,
+                ),
+              ),
+            ],
+          ),
+          for (var i = 0; i < cards; i++) ...[
+            const Gap(NizamioSpacing.gapMd),
+            const NzSkeleton.block(
+              height: _cardHeight,
+              radius: NizamioRadius.card,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 
 import '../../../../core/errors/error_text.dart';
-import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
@@ -72,134 +70,119 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
               '${l.duration(f.days)}';
     final error = f.error;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+    return QuickFormLayout(
+      fields: [
         QuickTitleField(
           label: l.uiTasksFieldTitle,
           hint: l.uiTasksNtTitleHint,
           value: f.title,
           onChanged: ctl.setTitle,
         ),
-        const Gap(NizamioSpacing.space3),
-        NzFormRows(
-          expandedIndex: switch (f.pane) {
-            NewTaskPane.coordinatorship => 0,
-            NewTaskPane.assignees => 1,
-            NewTaskPane.dates => 2,
-            null => null,
-          },
-          onToggle: (i) => ctl.togglePane(NewTaskPane.values[i]),
-          rows: [
-            NzFormRow(
-              label: l.uiTasksFieldCoord,
-              icon: NzIcons.coordinatorships,
-              value: coord?.name ?? l.uiTasksPick,
-              valueSet: coord != null,
-              // Kaynak: seçilmemiş "Seç" `accent-text`, seçili `ink-muted`.
-              valueColor: coord == null ? c.accentText : c.textMuted,
-              content: QuickPane(
-                child: Column(
-                  children: [
-                    for (final co
-                        in catalog?.coordinatorships ??
-                            const <CoordinatorshipRef>[])
-                      TaskCheckRow(
-                        label: co.name,
-                        caption: l.peopleCount(co.team.length),
-                        radio: true,
-                        selected: co.code == f.coordinatorship,
-                        onTap: () => ctl.pickCoordinatorship(co.code),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            NzFormRow(
-              label: l.uiTasksAssignee,
-              icon: NzIcons.person,
-              value: assigneeValue,
-              valueSet: f.assignees.isNotEmpty,
-              valueColor: f.assignees.isNotEmpty
-                  ? c.textMuted
-                  : coord == null
-                  ? c.textFaint
-                  : c.accentText,
-              content: QuickPane(
-                child: teamOpen
-                    ? TeamPicker(
-                        departmentId: coord.code,
-                        selected: f.assignees,
-                        onToggle: ctl.toggleAssignee,
-                      )
-                    : coord == null || coord.team.isEmpty
-                    ? Text(
-                        l.uiTasksNobodyHere,
-                        style: context.text.caption.copyWith(
-                          color: c.textMuted,
-                        ),
-                      )
-                    : Column(
-                        children: [
-                          for (final id in coord.team)
-                            TaskCheckRow(
-                              label: name(id),
-                              caption: coord.leads.contains(id)
-                                  ? l.uiTasksRoleCoordinatorLc
-                                  : l.uiTasksRoleMemberLc,
-                              selected: f.assignees.contains(id),
-                              onTap: () => ctl.toggleAssignee(id),
-                            ),
-                        ],
-                      ),
-              ),
-            ),
-            NzFormRow(
-              label: l.uiTasksRowDate,
-              icon: NzIcons.calendar,
-              value: dateValue,
-              valueSet: true,
-              valueColor: f.end.isBefore(f.start) ? c.danger : c.textMuted,
-              content: QuickPane(
-                child: NzRangeCalendar(
-                  month: f.month,
-                  start: f.start,
-                  end: f.picking ? null : f.end,
-                  today: catalog?.today,
-                  onMonthStep: ctl.stepMonth,
-                  onDayTap: ctl.pickDay,
-                ),
-              ),
-            ),
-            NzFormRow.custom(
-              label: l.uiTasksPriority,
-              leading: NzPriorityBars(level: priorityLevel(f.priority)),
-              trailing: TaskSegmented(
-                compact: true,
-                semanticLabel: l.uiTasksPriority,
-                labels: [
-                  for (final p in TaskPriority.pickable) l.priorityLabel(p),
+      ],
+      rows: NzFormRows(
+        expandedIndex: switch (f.pane) {
+          NewTaskPane.coordinatorship => 0,
+          NewTaskPane.assignees => 1,
+          NewTaskPane.dates => 2,
+          null => null,
+        },
+        onToggle: (i) => ctl.togglePane(NewTaskPane.values[i]),
+        rows: [
+          NzFormRow(
+            label: l.uiTasksFieldCoord,
+            icon: NzIcons.coordinatorships,
+            value: coord?.name ?? l.uiTasksPick,
+            valueSet: coord != null,
+            content: QuickPane(
+              child: Column(
+                children: [
+                  for (final co
+                      in catalog?.coordinatorships ??
+                          const <CoordinatorshipRef>[])
+                    TaskCheckRow(
+                      label: co.name,
+                      caption: l.peopleCount(co.team.length),
+                      radio: true,
+                      selected: co.code == f.coordinatorship,
+                      onTap: () => ctl.pickCoordinatorship(co.code),
+                    ),
                 ],
-                selected: TaskPriority.pickable.indexOf(f.priority),
-                onSelected: (i) => ctl.setPriority(TaskPriority.pickable[i]),
               ),
             ),
-            NzFormRow.toggle(
-              label: l.uiTasksEvidenceRequired,
-              icon: NzIcons.attach,
-              value: f.evidenceRequired,
-              onChanged: (v) => ctl.setEvidenceRequired(value: v),
+          ),
+          NzFormRow(
+            label: l.uiTasksAssignee,
+            icon: NzIcons.person,
+            value: assigneeValue,
+            valueSet: f.assignees.isNotEmpty,
+            content: QuickPane(
+              child: teamOpen
+                  ? TeamPicker(
+                      departmentId: coord.code,
+                      selected: f.assignees,
+                      onToggle: ctl.toggleAssignee,
+                    )
+                  : coord == null || coord.team.isEmpty
+                  ? Text(
+                      l.uiTasksNobodyHere,
+                      style: context.text.caption.copyWith(color: c.textMuted),
+                    )
+                  : Column(
+                      children: [
+                        for (final id in coord.team)
+                          TaskCheckRow(
+                            label: name(id),
+                            caption: coord.leads.contains(id)
+                                ? l.uiTasksRoleCoordinatorLc
+                                : l.uiTasksRoleMemberLc,
+                            selected: f.assignees.contains(id),
+                            onTap: () => ctl.toggleAssignee(id),
+                          ),
+                      ],
+                    ),
             ),
-          ],
-        ),
-        if (error != null) ...[
-          const Gap(NizamioSpacing.space3),
-          TaskFormError(l.newTaskError(error)),
+          ),
+          NzFormRow(
+            label: l.uiTasksRowDate,
+            icon: NzIcons.calendar,
+            value: dateValue,
+            valueSet: true,
+            valueColor: f.end.isBefore(f.start) ? c.danger : null,
+            content: QuickPane(
+              child: NzRangeCalendar(
+                month: f.month,
+                start: f.start,
+                end: f.picking ? null : f.end,
+                today: catalog?.today,
+                onMonthStep: ctl.stepMonth,
+                onDayTap: ctl.pickDay,
+              ),
+            ),
+          ),
+          NzFormRow.custom(
+            label: l.uiTasksPriority,
+            leading: NzPriorityBars(level: priorityLevel(f.priority)),
+            trailing: TaskSegmented(
+              compact: true,
+              semanticLabel: l.uiTasksPriority,
+              labels: [
+                for (final p in TaskPriority.pickable) l.priorityLabel(p),
+              ],
+              selected: TaskPriority.pickable.indexOf(f.priority),
+              onSelected: (i) => ctl.setPriority(TaskPriority.pickable[i]),
+            ),
+          ),
+          NzFormRow.toggle(
+            label: l.uiTasksEvidenceRequired,
+            icon: NzIcons.attach,
+            value: f.evidenceRequired,
+            onChanged: (v) => ctl.setEvidenceRequired(value: v),
+          ),
         ],
-        if (f.failure case final failure?) ...[
-          const Gap(NizamioSpacing.space3),
-          TaskFormError(errorText(l, failure)),
-        ],
+      ),
+      footer: [
+        if (error != null) TaskFormError(l.newTaskError(error)),
+        if (f.failure case final failure?) TaskFormError(errorText(l, failure)),
       ],
     );
   }

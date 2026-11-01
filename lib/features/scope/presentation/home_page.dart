@@ -6,6 +6,7 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/extensions/ref_ext.dart';
+import '../../../core/ui/layout/nz_pane.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
@@ -21,6 +22,7 @@ import '../domain/home_dashboard.dart';
 import 'home/home_coordinatorships.dart';
 import 'home/home_menus.dart';
 import 'home/home_sections.dart';
+import 'home/home_skeleton.dart';
 import 'home/home_texts.dart';
 import 'root_top_bar.dart';
 
@@ -66,8 +68,16 @@ class HomePage extends ConsumerWidget {
 
     return NzPage.feed(
       onRetry: retry,
+      // Aşağı çekme: özet (ve rol kaynağı katalog) yeniden okunur; eski özet yerinde kalır.
+      onRefresh: () =>
+          ref.read(homeDashboardControllerProvider.notifier).refresh(),
+      onRevisit: () =>
+          ref.read(homeDashboardControllerProvider.notifier).refreshIfStale(),
       topBar: const RootTopBar(),
       children: [
+        // Tablet liste bölmesi: kök üst çubuk gizli, seçili program adı akışın başında.
+        if (NzPaneScope.maybeOf(context)?.role == NzPaneRole.master)
+          const RootProgramLine(bottom: NizamioSpacing.space3),
         // S2 (seçili program) hatası: üst çubukta program satırı yerine görünür hata + yeniden
         // dene (yalnız dokunuşla).
         if (programState.hasError && !programState.isLoading) ...[
@@ -80,6 +90,8 @@ class HomePage extends ConsumerWidget {
         NzAsyncView<HomeDashboard>(
           value: dashboard,
           onRetry: retry,
+          loading: const HomeSkeleton(),
+          skeletonOnReload: true,
           data: (d) => _Feed(
             dashboard: d,
             onQuickAction: (a) => _quickAction(context, a),

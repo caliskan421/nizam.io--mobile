@@ -5,15 +5,27 @@ import '../theme/nz_motion.dart';
 
 /// İçerik oluşturulunca ve korunan sayfa yeniden görünür olunca açılır.
 /// Sıradan yeniden çizimler animasyonu başlatmaz; mesafe sabit mantıksal pikseldir.
-/// Sekme paneline kimliğinden ValueKey vererek yeni giriş başlatılabilir.
+/// Sekme paneline kimliğinden ValueKey vererek yeni giriş başlatılabilir; liste/ızgara
+/// öğeleri için hazır sarmalayıcı [NzEntrance]'tır.
 class PageContentEntrance extends StatefulWidget {
-  const PageContentEntrance({super.key, required this.child}) : _sliver = false;
+  const PageContentEntrance({
+    super.key,
+    required this.child,
+    this.delay = Duration.zero,
+  }) : _sliver = false;
 
   /// Sliver geometrisini ve tembel liste kurulumunu koruyan aynı hareket.
-  const PageContentEntrance.sliver({super.key, required this.child})
-    : _sliver = true;
+  const PageContentEntrance.sliver({
+    super.key,
+    required this.child,
+    this.delay = Duration.zero,
+  }) : _sliver = true;
 
   final Widget child;
+
+  /// Hareketin başlamadan önce beklediği süre (kademeli giriş; bkz. [RpMotion.stagger]).
+  /// Yalnız ilk kurulumda okunur; süre boyunca içerik saydam ve aşağıda bekler.
+  final Duration delay;
   final bool _sliver;
 
   @override
@@ -28,16 +40,19 @@ class _PageContentEntranceState extends State<PageContentEntrance>
   bool? _active;
   Animation<double>? _parentAnimation;
 
+  /// Gecikme + giriş; gecikme eğrinin başındaki düz [Interval] bölümüdür (zamanlayıcı yok).
+  Duration get _total => RpMotion.enterDuration + widget.delay;
+
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: RpMotion.enterDuration,
-    )..forward();
+    _controller = AnimationController(vsync: this, duration: _total)..forward();
+    final start = widget.delay.inMicroseconds / _total.inMicroseconds;
     _animation = CurvedAnimation(
       parent: _controller,
-      curve: RpMotion.enterCurve,
+      curve: start == 0
+          ? RpMotion.enterCurve
+          : Interval(start, 1, curve: RpMotion.enterCurve),
     );
   }
 
@@ -67,7 +82,7 @@ class _PageContentEntranceState extends State<PageContentEntrance>
       // oynar; alt paneller onun hareketine katılır ve mesafeyi ikiye katlamaz.
       // Üst hareket şu an oynuyorsa (tablet bölme geçişi) ona katılınır.
       _coveredByParent = _parentAnimation?.isAnimating ?? false;
-      _controller.duration = RpMotion.enterDuration;
+      _controller.duration = _total;
       if (!_coveredByParent!) _controller.forward(from: 0);
     }
     if (_coveredByParent!) {
@@ -105,6 +120,50 @@ class _PageContentEntranceState extends State<PageContentEntrance>
       },
     ),
   );
+}
+
+/// Değişen içeriğin girişi (görev ayrıntısı sekme paneliyle aynı hareket: opaklık 0 → 1,
+/// [RpMotion.enterOffset] aşağıdan yükseliş). [replay] değişince giriş yeniden oynar
+/// (ör. süzgeç/sıralama değişti); aynı kalırsa sıradan yeniden çizim hareket başlatmaz.
+/// [index] verilirse kademeli başlar ([RpMotion.stagger]; üst sınırlı, uzun listede gecikme
+/// birikmez). Sayfa girişi sürerken ilk kurulumda sayfa hareketine katılır (çift hareket yok);
+/// hareketi azalt → anlık.
+///
+/// Izgara/liste için öneri: [replay] olarak süzgeç durumu + öğe kimliği verilir; böylece
+/// süzgeç değişince tüm öğeler, "tümünü göster" ile yalnız yeni gelen öğeler girer.
+class NzEntrance extends StatelessWidget {
+  const NzEntrance({
+    super.key,
+    required this.replay,
+    required this.child,
+    this.index = 0,
+  }) : _sliver = false;
+
+  /// Sliver biçimi (geometri değişmez; bkz. [PageContentEntrance.sliver]).
+  const NzEntrance.sliver({
+    super.key,
+    required this.replay,
+    required Widget sliver,
+    this.index = 0,
+  }) : child = sliver,
+       _sliver = true;
+
+  /// Değişince giriş yeniden oynar (eşitlik `==` ile).
+  final Object? replay;
+
+  /// Kademeli giriş sırası (0 → gecikmesiz).
+  final int index;
+  final Widget child;
+  final bool _sliver;
+
+  @override
+  Widget build(BuildContext context) {
+    final key = ValueKey(replay);
+    final delay = RpMotion.stagger(index);
+    return _sliver
+        ? PageContentEntrance.sliver(key: key, delay: delay, child: child)
+        : PageContentEntrance(key: key, delay: delay, child: child);
+  }
 }
 
 /// Tablet bölme geçişinin türü (prototip `A`): [fade] `rpFadeIn .3s ease` (modül değişimi,

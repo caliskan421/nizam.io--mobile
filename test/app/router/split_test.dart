@@ -27,8 +27,10 @@ void main() {
       const PaneEntry(PaneKind.task, 'ALT-9'),
     );
     expect(baseEntryOf(Uri.parse('/calendar'), _none), isNull);
+    // Ana sayfada geçmiş varsayılan açık değildir: kök boş, yalnız `/home/history` tabandır.
+    expect(baseEntryOf(Uri.parse('/home'), _none), isNull);
     expect(
-      baseEntryOf(Uri.parse('/home'), _none),
+      baseEntryOf(Uri.parse('/home/history'), _none),
       const PaneEntry(PaneKind.history),
     );
   });
@@ -90,9 +92,22 @@ void main() {
     expect((m as SplitGo).location, '/home?trail=task%3AA&trail=folder%3AZ');
   });
 
-  test('ana sayfada geçmiş tabandır; takvimde taban yoktur', () {
+  test('ana sayfada geçmiş dokunuşla tabana oturur; takvimde taban yoktur', () {
+    expect(
+      (_move('/home', const PaneEntry(PaneKind.history)) as SplitGo).location,
+      '/home/history',
+    );
     final m = _move('/home?trail=task%3AA', const PaneEntry(PaneKind.history));
     expect((m as SplitGo).location, '/home/history');
+    // Açıkken yeniden dokunma yalnız yeniler; başka kayıt geçmişin üstüne itilir.
+    expect(
+      _move('/home/history', const PaneEntry(PaneKind.history)),
+      isA<SplitRefresh>(),
+    );
+    expect(
+      (_move('/home', const PaneEntry(PaneKind.task, 'A')) as SplitGo).location,
+      '/home?trail=task%3AA',
+    );
     final c = _move('/calendar', const PaneEntry(PaneKind.task, 'A'));
     expect((c as SplitGo).location, '/calendar?trail=task%3AA');
   });

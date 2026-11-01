@@ -55,9 +55,8 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
   void _toggleSearch() {
     final opening = !ref.read(archiveControllerProvider).searchOpen;
     _ctrl.toggleSearch();
-    if (opening) {
-      _searchFocus.requestFocus();
-    } else {
+    // Odak (klavye) açılış hareketi bitince NzReveal.onOpened ile gelir.
+    if (!opening) {
       _search.clear();
       _searchFocus.unfocus();
     }
@@ -139,6 +138,7 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
         ),
         NzReveal(
           open: searchOpen,
+          onOpened: _searchFocus.requestFocus,
           child: Padding(
             padding: const EdgeInsets.only(top: NizamioSpacing.space5),
             child: NzSearchField(

@@ -45,6 +45,33 @@ class RootTopBar extends ConsumerWidget {
   }
 }
 
+/// Tablet liste bölmesinde kök üst çubuk gizlidir (`.tb-pane`); seçili program adı (S2) orada
+/// Ana sayfanın başında, telefondaki üst çubuk alt satırıyla aynı `m-program` biçiminde
+/// (`text-faint`) durur. Program yokken (yükleniyor/hata) hiçbir şey çizmez; [bottom] yalnız ad
+/// varken eklenir.
+class RootProgramLine extends ConsumerWidget {
+  const RootProgramLine({super.key, this.bottom = 0});
+
+  final double bottom;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final program = ref.watch(
+      currentProgramControllerProvider.select((p) => p.value?.name),
+    );
+    if (program == null || program.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottom),
+      child: Text(
+        program,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.text.program.copyWith(color: context.colors.textFaint),
+      ),
+    );
+  }
+}
+
 /// Zile dokunuş (bildirim listesi henüz yok); kök üst çubuk ve tablet rayı aynı bildirimi
 /// gösterir.
 void showNotificationsSoon(BuildContext context) {

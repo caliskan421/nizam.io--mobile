@@ -112,4 +112,36 @@ void main() {
     expect(tester.getSize(find.byKey(itemKey)), before);
     expect(tester.getTopLeft(find.byKey(headerKey)).dy, 0);
   });
+
+  testWidgets('NzEntrance: replay aynıyken oynamaz, değişince kademeli oynar', (
+    tester,
+  ) async {
+    Widget grid(Object replay) => app(
+      Column(
+        children: [
+          for (var i = 0; i < 2; i++)
+            NzEntrance(
+              replay: (replay, i),
+              index: i,
+              child: const SizedBox(height: 10),
+            ),
+        ],
+      ),
+    );
+    double opacity(int i) =>
+        tester.widgetList<Opacity>(find.byType(Opacity)).elementAt(i).opacity;
+    await tester.pumpWidget(grid('a'));
+    await tester.pump(RpMotion.enterDuration + RpMotion.stagger(1));
+    expect(opacity(1), 1);
+    await tester.pumpWidget(grid('a'));
+    expect(opacity(0), 1);
+    await tester.pumpWidget(grid('b'));
+    await tester.pump(RpMotion.staggerStep * 0.5);
+    // İlk öğe yükselmeye başladı, ikincisi gecikmesini bekliyor.
+    expect(opacity(0), greaterThan(0));
+    expect(opacity(1), 0);
+    await tester.pump(RpMotion.enterDuration + RpMotion.stagger(1));
+    expect(opacity(0), 1);
+    expect(opacity(1), 1);
+  });
 }

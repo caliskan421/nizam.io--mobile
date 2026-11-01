@@ -15,12 +15,27 @@ part 'task_catalog_controller.g.dart';
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
 /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
 /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+///
+/// Önbellek: sağlayıcı uygulama ömrünce yaşar; ekranlar ilk yüklemeden sonra eski kataloğu
+/// hemen gösterir. [refresh] / [refreshIfStale] / [reload] yeniden okurken önceki katalog
+/// durumda kalır (Riverpod `invalidateSelf` → `isRefreshing`, `value` korunur); yenileme
+/// hatasında da (`AsyncError` önceki değeri taşır) görünür veri silinmez.
 @Riverpod(keepAlive: true)
 class TaskCatalogController extends _$TaskCatalogController {
+  /// Yeniden ziyarette ([refreshIfStale]) kataloğun taze sayıldığı süre.
+  static const staleAfter = Duration(seconds: 30);
+
+  /// Son başarılı okumadan beri geçen süre (notifier yeniden kurulumlarda korunur).
+  final _age = Stopwatch();
+
   @override
-  Future<TaskCatalog> build() {
+  Future<TaskCatalog> build() async {
     ref.watch(scopeStateProvider);
-    return ref.read(taskCatalogRepositoryProvider).load();
+    final catalog = await ref.read(taskCatalogRepositoryProvider).load();
+    _age
+      ..reset()
+      ..start();
+    return catalog;
   }
 
   TaskCatalog? get _catalog => state.value;
@@ -29,11 +44,31 @@ class TaskCatalogController extends _$TaskCatalogController {
   /// hata katalog durumunda kalır (ekran gösterir). Açık ayrıntı ekranları katalog yüklemeye
   /// geçince kendini yeniden okur ([taskDetailsProvider]).
   Future<void> reload() async {
-    ref.invalidateSelf();
     try {
-      await future;
+      await refresh();
     } on Object {
       // Hata durumda; çağıran yazmanın sonucunu bildirir.
+    }
+  }
+
+  /// Kullanıcı yenilemesi (aşağı çekerek): kaynaktan yeniden okur ve bitmesini bekler; okuma
+  /// hatası FIRLATILIR (çağıran bildirir), önceki katalog durumda kalır.
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
+
+  /// Yeniden ziyaret (sekmeye dönüş): son başarılı okuma [maxAge]'den eskiyse arka planda
+  /// yeniden okur; eski katalog görünür kalır. Hiç yüklenmemişse (ilk yükleme hatası yalnız
+  /// dokunuşla yeniden denenir) ya da zaten yükleniyorsa bir şey yapmaz. Hata yutulur
+  /// (durumda kalır).
+  Future<void> refreshIfStale({Duration maxAge = staleAfter}) async {
+    if (state.isLoading || !state.hasValue) return;
+    if (_age.isRunning && _age.elapsed < maxAge) return;
+    try {
+      await refresh();
+    } on Object {
+      // Arka plan yenilemesi: hata durumda, veri yerinde.
     }
   }
 

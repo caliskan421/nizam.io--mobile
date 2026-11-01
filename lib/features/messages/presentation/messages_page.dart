@@ -65,9 +65,8 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
   void _toggleSearch() {
     final opening = !ref.read(messagesControllerProvider).searchOpen;
     _ctrl.toggleSearch();
-    if (opening) {
-      _focus.requestFocus();
-    } else {
+    // Odak (klavye) açılış hareketi bitince NzReveal.onOpened ile gelir.
+    if (!opening) {
       _search.clear();
       _focus.unfocus();
     }
@@ -154,6 +153,7 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
         ),
         NzReveal(
           open: view.searchOpen,
+          onOpened: _focus.requestFocus,
           child: Padding(
             padding: const EdgeInsets.only(top: NizamioSpacing.space4),
             child: NzSearchField(

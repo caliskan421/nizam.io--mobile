@@ -83,9 +83,8 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
     final time =
         '${f.hour.toString().padLeft(2, '0')}:${f.minute.toString().padLeft(2, '0')}';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+    return QuickFormLayout(
+      fields: [
         QuickTitleField(
           label: l.uiTasksFieldTitle,
           hint: l.uiTasksMtTitleHint,
@@ -93,141 +92,137 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
           maxLength: 255,
           onChanged: ctl.setTitle,
         ),
-        const Gap(NizamioSpacing.space3),
-        NzFormRows(
-          expandedIndex: f.pane?.index,
-          onToggle: (i) => ctl.togglePane(MeetingPane.values[i]),
-          rows: [
-            NzFormRow(
-              label: l.uiTasksRowDate,
-              icon: NzIcons.calendar,
-              value: '${TaskDates.short(f.date)} ${TaskDates.weekday(f.date)}',
-              valueSet: true,
-              content: QuickPane(
-                child: NzRangeCalendar(
-                  month: f.month,
-                  start: f.date,
-                  today: ctl.today,
-                  firstDate: ctl.today,
-                  onMonthStep: ctl.stepMonth,
-                  onDayTap: ctl.pickDate,
-                ),
+      ],
+      rows: NzFormRows(
+        expandedIndex: f.pane?.index,
+        onToggle: (i) => ctl.togglePane(MeetingPane.values[i]),
+        rows: [
+          NzFormRow(
+            label: l.uiTasksRowDate,
+            icon: NzIcons.calendar,
+            value: '${TaskDates.short(f.date)} ${TaskDates.weekday(f.date)}',
+            valueSet: true,
+            content: QuickPane(
+              child: NzRangeCalendar(
+                month: f.month,
+                start: f.date,
+                today: ctl.today,
+                firstDate: ctl.today,
+                onMonthStep: ctl.stepMonth,
+                onDayTap: ctl.pickDate,
               ),
             ),
-            NzFormRow(
-              label: l.uiTasksRowTime,
-              icon: NzIcons.clock,
-              value: time,
-              valueSet: true,
-              content: QuickPane(
-                child: NzTimeWheel(
-                  hour: f.hour,
-                  minute: f.minute,
-                  onChanged: ctl.setTime,
-                ),
+          ),
+          NzFormRow(
+            label: l.uiTasksRowTime,
+            icon: NzIcons.clock,
+            value: time,
+            valueSet: true,
+            content: QuickPane(
+              child: NzTimeWheel(
+                hour: f.hour,
+                minute: f.minute,
+                onChanged: ctl.setTime,
               ),
             ),
-            NzFormRow(
-              label: l.uiTasksRowInvitees,
-              icon: NzIcons.group,
-              value: who ?? l.uiTasksPick,
-              valueSet: who != null,
-              content: QuickPane(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TaskSegmented(
-                      labels: [l.uiTasksGroupCoord, l.uiTasksModePeople],
-                      selected: f.mode.index,
-                      onSelected: (i) => ctl.setMode(MeetingMode.values[i]),
+          ),
+          NzFormRow(
+            label: l.uiTasksRowInvitees,
+            icon: NzIcons.group,
+            value: who ?? l.uiTasksPick,
+            valueSet: who != null,
+            content: QuickPane(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TaskSegmented(
+                    labels: [l.uiTasksGroupCoord, l.uiTasksModePeople],
+                    selected: f.mode.index,
+                    onSelected: (i) => ctl.setMode(MeetingMode.values[i]),
+                  ),
+                  const Gap(NizamioSpacing.space2),
+                  if (f.mode == MeetingMode.coordinatorships) ...[
+                    for (final co in coords)
+                      TaskCheckRow(
+                        label: co.name,
+                        caption: f.allMembers
+                            ? l.peopleCount(co.team.length)
+                            : '${co.leads.length} ${l.uiTasksCoordAbbr}',
+                        selected: f.coordinatorships.contains(co.code),
+                        onTap: () => ctl.toggleCoordinatorship(co.code),
+                      ),
+                    NzSwitch(
+                      label: l.uiTasksInviteMembers,
+                      value: f.allMembers,
+                      onChanged: (_) => ctl.toggleAllMembers(),
                     ),
-                    const Gap(NizamioSpacing.space2),
-                    if (f.mode == MeetingMode.coordinatorships) ...[
-                      for (final co in coords)
-                        TaskCheckRow(
-                          label: co.name,
-                          caption: f.allMembers
-                              ? l.peopleCount(co.team.length)
-                              : '${co.leads.length} ${l.uiTasksCoordAbbr}',
-                          selected: f.coordinatorships.contains(co.code),
-                          onTap: () => ctl.toggleCoordinatorship(co.code),
-                        ),
-                      NzSwitch(
-                        label: l.uiTasksInviteMembers,
-                        value: f.allMembers,
-                        onChanged: (_) => ctl.toggleAllMembers(),
+                  ] else
+                    for (final co in coords.where((x) => x.team.isNotEmpty))
+                      _PeopleGroup(
+                        coord: co,
+                        name: name,
+                        open: f.openGroups.contains(co.code),
+                        selected: f.people,
+                        onToggle: () => ctl.toggleGroup(co.code),
+                        onPick: ctl.togglePerson,
                       ),
-                    ] else
-                      for (final co in coords.where((x) => x.team.isNotEmpty))
-                        _PeopleGroup(
-                          coord: co,
-                          name: name,
-                          open: f.openGroups.contains(co.code),
-                          selected: f.people,
-                          onToggle: () => ctl.toggleGroup(co.code),
-                          onPick: ctl.togglePerson,
-                        ),
-                  ],
-                ),
+                ],
               ),
             ),
-            NzFormRow(
-              label: l.uiTasksRowAgenda,
-              icon: NzIcons.listBulleted,
-              value: f.agenda.isEmpty
-                  ? l.uiTasksAddItem
-                  : '${f.agenda.length} ${l.uiTasksItemsLc}',
-              valueSet: f.agenda.isNotEmpty,
-              content: QuickPane(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (var i = 0; i < f.agenda.length; i++)
-                      _AgendaItem(
-                        key: ValueKey('ag-$i-${f.agenda.length}'),
-                        index: i,
-                        text: f.agenda[i],
-                        onChanged: (v) => ctl.setAgendaItem(i, v),
-                        onDone: () => ctl.finishAgendaItem(i),
-                        onRemove: () => ctl.removeAgenda(i),
-                      ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _draft,
-                            maxLength: 160,
-                            onChanged: ctl.setAgendaDraft,
-                            onSubmitted: (_) => ctl.addAgenda(),
-                            style: t.bodyMd,
-                            decoration: InputDecoration(
-                              labelText: l.uiTasksAgendaItem,
-                              hintText: l.uiTasksAddItem,
-                              counterText: '',
-                              border: InputBorder.none,
-                            ),
+          ),
+          NzFormRow(
+            label: l.uiTasksRowAgenda,
+            icon: NzIcons.listBulleted,
+            value: f.agenda.isEmpty
+                ? l.uiTasksAddItem
+                : '${f.agenda.length} ${l.uiTasksItemsLc}',
+            valueSet: f.agenda.isNotEmpty,
+            content: QuickPane(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < f.agenda.length; i++)
+                    _AgendaItem(
+                      key: ValueKey('ag-$i-${f.agenda.length}'),
+                      index: i,
+                      text: f.agenda[i],
+                      onChanged: (v) => ctl.setAgendaItem(i, v),
+                      onDone: () => ctl.finishAgendaItem(i),
+                      onRemove: () => ctl.removeAgenda(i),
+                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _draft,
+                          maxLength: 160,
+                          onChanged: ctl.setAgendaDraft,
+                          onSubmitted: (_) => ctl.addAgenda(),
+                          style: t.bodyMd,
+                          decoration: InputDecoration(
+                            labelText: l.uiTasksAgendaItem,
+                            hintText: l.uiTasksAddItem,
+                            counterText: '',
+                            border: InputBorder.none,
                           ),
                         ),
-                        NzIconButton.circleAccent(
-                          icon: NzIcons.add,
-                          semanticLabel: l.uiTasksAddItemLabel,
-                          onPressed: f.agendaDraft.trim().isEmpty
-                              ? null
-                              : ctl.addAgenda,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      NzIconButton.circleAccent(
+                        icon: NzIcons.add,
+                        semanticLabel: l.uiTasksAddItemLabel,
+                        onPressed: f.agendaDraft.trim().isEmpty
+                            ? null
+                            : ctl.addAgenda,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-        if (error != null) ...[
-          const Gap(NizamioSpacing.space3),
-          TaskFormError(l.meetingError(error)),
+          ),
         ],
-      ],
+      ),
+      footer: [if (error != null) TaskFormError(l.meetingError(error))],
     );
   }
 }

@@ -94,6 +94,8 @@ List<PaneEntry> parseTrail(Iterable<String> trail) => [
 ];
 
 /// Modülün sağ bölme tabanının türü (prototip `TB_DEF`); takvimde taban "Bir kayıt seç"tir.
+/// Ana sayfada işlem geçmişi yalnız açıldığında tabandır (`/home/history`); kökte sağ bölme
+/// "Bir kayıt seç"tir ve son açılan hatırlanmaz (geçmiş kimliksizdir).
 PaneKind? baseKindOf(RailModule m) => switch (m) {
   RailModule.home => PaneKind.history,
   RailModule.tasks => PaneKind.task,
@@ -103,14 +105,17 @@ PaneKind? baseKindOf(RailModule m) => switch (m) {
   RailModule.messages => PaneKind.chat,
 };
 
-/// Konumdaki taban kaydı (modül kökünde [lastId]; hiç açılmamışsa null).
+/// Konumdaki taban kaydı (modül kökünde [lastId]; hiç açılmamışsa null). Ana sayfada yalnız
+/// `/home/history` geçmiş tabanıdır; `/home` boştur.
 PaneEntry? baseEntryOf(Uri uri, String? Function(PaneKind) lastId) {
   final module = railModuleOf(uri.path);
   if (module == null) return null;
   final kind = baseKindOf(module);
   if (kind == null) return null;
-  if (kind == PaneKind.history) return const PaneEntry(PaneKind.history);
   final parts = uri.pathSegments;
+  if (kind == PaneKind.history) {
+    return parts.length > 1 ? const PaneEntry(PaneKind.history) : null;
+  }
   final id = parts.length > 1 ? parts[1] : lastId(kind);
   return id == null ? null : PaneEntry(kind, id);
 }

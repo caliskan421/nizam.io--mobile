@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 
-import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
@@ -26,16 +24,12 @@ class InviteFormBody extends ConsumerStatefulWidget {
 
 class _InviteFormBodyState extends ConsumerState<InviteFormBody> {
   late final _auto = AutoExpand(widget.expansion);
-  late final _name = TextEditingController(
-    text: ref.read(inviteFormControllerProvider).name,
-  );
   late final _email = TextEditingController(
     text: ref.read(inviteFormControllerProvider).email,
   );
 
   @override
   void dispose() {
-    _name.dispose();
     _email.dispose();
     super.dispose();
   }
@@ -65,70 +59,69 @@ class _InviteFormBodyState extends ConsumerState<InviteFormBody> {
         : '${f.coordinatorships.length} ${l.uiTasksCoordsLc}';
     final error = f.error;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        NzTextField(
+    // Ortak standart: yazı alanları (ad soyad, e-posta) çerçeveli metin alanı; rol ve
+    // koordinatörlük satır kartında (etiket solda, değer sağda).
+    return QuickFormLayout(
+      fields: [
+        QuickTitleField(
           label: l.uiTasksIvName,
           hint: l.uiTasksIvNameHint,
-          controller: _name,
+          value: f.name,
           autofillHints: const [AutofillHints.name],
           onChanged: ctl.setName,
         ),
-        const Gap(NizamioSpacing.space3),
         NzTextField.email(
           label: l.uiTasksIvEmail,
           hint: l.uiTasksIvEmailHint,
           controller: _email,
           onChanged: ctl.setEmail,
         ),
-        const Gap(NizamioSpacing.space4),
-        NzFormRows(
-          expandedIndex: f.paneOpen && !admin ? 1 : null,
-          onToggle: (_) => ctl.togglePane(),
-          rows: [
-            NzFormRow.custom(
-              label: l.uiTasksIvRole,
-              trailing: TaskSegmented(
-                compact: true,
-                semanticLabel: l.uiTasksIvRole,
-                labels: [for (final r in InviteRole.values) l.roleLabel(r)],
-                selected: f.role.index,
-                onSelected: (i) => ctl.setRole(InviteRole.values[i]),
-              ),
+      ],
+      rows: NzFormRows(
+        // Açılır satır indeksi: rol 0, koordinatörlük 1.
+        expandedIndex: f.paneOpen && !admin ? 1 : null,
+        onToggle: (_) => ctl.togglePane(),
+        rows: [
+          NzFormRow.custom(
+            label: l.uiTasksIvRole,
+            icon: NzIcons.person,
+            trailing: TaskSegmented(
+              compact: true,
+              semanticLabel: l.uiTasksIvRole,
+              labels: [for (final r in InviteRole.values) l.roleLabel(r)],
+              selected: f.role.index,
+              onSelected: (i) => ctl.setRole(InviteRole.values[i]),
             ),
-            NzFormRow(
-              label: l.uiTasksFieldCoord,
-              icon: NzIcons.coordinatorships,
-              value: value,
-              valueSet: !admin && f.coordinatorships.isNotEmpty,
-              content: admin
-                  ? null
-                  : QuickPane(
-                      child: Column(
-                        children: [
-                          for (final co in coords)
-                            TaskCheckRow(
-                              label: co.name,
-                              caption: l.peopleCount(co.team.length),
-                              selected: f.coordinatorships.contains(co.code),
-                              onTap: () => ctl.toggleCoordinatorship(co.code),
-                            ),
-                        ],
-                      ),
+          ),
+          NzFormRow(
+            label: l.uiTasksFieldCoord,
+            icon: NzIcons.coordinatorships,
+            value: value,
+            valueSet: !admin && f.coordinatorships.isNotEmpty,
+            content: admin
+                ? null
+                : QuickPane(
+                    child: Column(
+                      children: [
+                        for (final co in coords)
+                          TaskCheckRow(
+                            label: co.name,
+                            caption: l.peopleCount(co.team.length),
+                            selected: f.coordinatorships.contains(co.code),
+                            onTap: () => ctl.toggleCoordinatorship(co.code),
+                          ),
+                      ],
                     ),
-            ),
-          ],
-        ),
-        const Gap(NizamioSpacing.space3),
+                  ),
+          ),
+        ],
+      ),
+      footer: [
         Text(
           l.roleDescription(f.role),
           style: context.text.caption.copyWith(color: c.textMuted),
         ),
-        if (error != null) ...[
-          const Gap(NizamioSpacing.space3),
-          TaskFormError(l.inviteError(error)),
-        ],
+        if (error != null) TaskFormError(l.inviteError(error)),
       ],
     );
   }

@@ -33,8 +33,9 @@ class NzRailItem {
 /// Tablet gezinme rayı (prototip `nav[aria-label="Ana menü"]`; ikonlar telefonla aynı [NzIcons]): 100 genişlik, `bg-base`,
 /// sağda 1 px `border-subtle`; üstte 36 px ürün işareti ([brand]), altında modül öğeleri
 /// (60×34 kapsül, etkinken `nav-highlight` dolgu ve `accent-text` ikon; 10.5/13 etiket),
-/// boşluk, en altta bildirim zili (44), tüm modüller menüsü (44 cam daire) ve asistan
-/// (56 cam daire, `accent` ikon). Renk geçişleri prototipteki gibi .3 s / .35 s; basınca .96.
+/// boşluk, en altta bildirim zili, tüm modüller menüsü (cam daire) ve asistan (cam daire,
+/// `accent` ikon) — üçü aynı 44 ölçüde. Renk geçişleri prototipteki gibi .3 s / .35 s; alt
+/// düğmelerde basınca .96 ve telefon ikon düğmeleriyle aynı daire vurgu.
 class NzTabletRail extends StatelessWidget {
   const NzTabletRail({
     super.key,
@@ -108,12 +109,13 @@ class NzTabletRail extends StatelessWidget {
           onTap: onMenu,
         ),
         const Gap(NzTabletMetrics.railGap + NzTabletMetrics.railAssistantGap),
+        // Asistan, zil ve menüyle aynı 44 daire (tek ölçü; vurgu yalnız `accent` ikonda).
         _GlassButton(
           label: assistantLabel,
-          extent: NzTabletMetrics.railAssistant,
+          extent: NzTabletMetrics.railButton,
           icon: NzIcon(
             NzIcons.assistant,
-            size: NizamioSpacing.space6,
+            size: NizamioSize.iconSize,
             color: c.accentText,
           ),
           onTap: onAssistant,
@@ -334,36 +336,39 @@ class _BellButton extends StatelessWidget {
       label: label,
       excludeSemantics: true,
       onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: SizedBox.square(
-          dimension: NzTabletMetrics.railButton,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              NzIcon(NzIcons.bell, size: NizamioSize.iconSize, color: c.text),
-              if (dot)
-                Positioned(
-                  top: NzTabletMetrics.bellDotTop,
-                  right: NzTabletMetrics.bellDotRight,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: c.danger,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: c.background,
-                          spreadRadius: NzTabletMetrics.dotRing,
-                        ),
-                      ],
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(NizamioSize.statusDot / 2),
+      child: NzPressable(
+        enabled: onTap != null,
+        child: _CircleInk(
+          ink: c.text,
+          onTap: onTap,
+          child: SizedBox.square(
+            dimension: NzTabletMetrics.railButton,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                NzIcon(NzIcons.bell, size: NizamioSize.iconSize, color: c.text),
+                if (dot)
+                  Positioned(
+                    top: NzTabletMetrics.bellDotTop,
+                    right: NzTabletMetrics.bellDotRight,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: c.danger,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: c.background,
+                            spreadRadius: NzTabletMetrics.dotRing,
+                          ),
+                        ],
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(NizamioSize.statusDot / 2),
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -394,21 +399,63 @@ class _GlassButton extends StatelessWidget {
       excludeSemantics: true,
       onTap: onTap,
       child: NzPressable(
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
+        child: _CircleInk(
+          ink: c.glassInk,
+          fill: c.glassFloat,
+          edge: c.glassEdge,
           onTap: onTap,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: c.glassFloat,
-              shape: BoxShape.circle,
-              border: Border.all(color: c.glassEdge),
-            ),
-            child: SizedBox.square(
-              dimension: extent,
-              child: Center(child: icon),
-            ),
+          child: SizedBox.square(
+            dimension: extent,
+            child: Center(child: icon),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Ray alt düğmelerinin daire basma/odak vurgusu (telefon `NzIconButton` ile aynı: daire, `.12`
+/// mürekkep örtüsü). Rayın opak zemini kabuğun Material'ını örttüğünden vurgu kendi
+/// Material'ında çizilir; [fill] / [edge] verilirse daire dolgusu ve 1 px kenarı da odur.
+class _CircleInk extends StatelessWidget {
+  const _CircleInk({
+    required this.ink,
+    required this.onTap,
+    required this.child,
+    this.fill,
+    this.edge,
+  });
+
+  final Color ink;
+  final Color? fill;
+  final Color? edge;
+  final VoidCallback? onTap;
+  final Widget child;
+
+  static const _overlayAlpha = 0.12;
+
+  @override
+  Widget build(BuildContext context) {
+    final edge = this.edge;
+    return Material(
+      type: fill == null ? MaterialType.transparency : MaterialType.canvas,
+      color: fill,
+      shape: CircleBorder(
+        side: edge == null ? BorderSide.none : BorderSide(color: edge),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        overlayColor: WidgetStateProperty.resolveWith(
+          (s) =>
+              s.contains(WidgetState.pressed) ||
+                  s.contains(WidgetState.hovered) ||
+                  s.contains(WidgetState.focused)
+              ? ink.withValues(alpha: _overlayAlpha)
+              : null,
+        ),
+        child: child,
       ),
     );
   }

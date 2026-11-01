@@ -1,9 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
-import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/widgets/inputs/inputs.dart';
 
-/// Hızlı işlem formlarının büyük başlık girişi (prototip `#tk-title`: çerçevesiz, 20 px).
+/// Hızlı işlem formlarının ortak iskeleti (Yeni görev, Toplantı, Davet tek tasarım standardı):
+/// üstte yazı yazılan alanlar ([fields]: projenin çerçeveli metin alanı `NzTextField`), altında
+/// seçim satırı kartı (`NzFormRows`: etiket solda, değer sağda), en altta notlar/hatalar.
+/// Boşluk tek yerden gelir; formlar kendi aralığını yazmaz.
+class QuickFormLayout extends StatelessWidget {
+  const QuickFormLayout({
+    super.key,
+    required this.fields,
+    required this.rows,
+    this.footer = const [],
+  });
+
+  /// Metin alanları (ad, e-posta…; çoğunlukla [QuickTitleField] / `NzTextField`).
+  final List<Widget> fields;
+
+  /// Satır kartı (çoğunlukla `NzFormRows`).
+  final Widget rows;
+
+  /// Kartın altındaki öğeler (açıklama, hata); her birinin üstünde aynı boşluk.
+  final List<Widget> footer;
+
+  static const _gap = Gap(NizamioSpacing.space3);
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      for (final w in fields) ...[w, _gap],
+      rows,
+      for (final w in footer) ...[_gap, w],
+    ],
+  );
+}
+
+/// Hızlı işlem formlarının ad/başlık girişi: projenin çerçeveli metin alanı ([NzTextField]).
 /// Taslak denetleyicide durur; alan açılışta taslaktan doldurulur.
 class QuickTitleField extends StatefulWidget {
   const QuickTitleField({
@@ -13,6 +48,7 @@ class QuickTitleField extends StatefulWidget {
     required this.value,
     required this.onChanged,
     this.maxLength,
+    this.autofillHints,
   });
 
   final String label;
@@ -20,6 +56,7 @@ class QuickTitleField extends StatefulWidget {
   final String value;
   final ValueChanged<String> onChanged;
   final int? maxLength;
+  final Iterable<String>? autofillHints;
 
   @override
   State<QuickTitleField> createState() => _QuickTitleFieldState();
@@ -41,46 +78,15 @@ class _QuickTitleFieldState extends State<QuickTitleField> {
     super.dispose();
   }
 
-  static const _titleSize = 20.0;
-  static const _titleLine = 28.0;
-
   @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    final underline = UnderlineInputBorder(
-      borderSide: BorderSide(color: c.borderStrong),
-    );
-    return Semantics(
-      label: widget.label,
-      textField: true,
-      child: TextField(
-        controller: _controller,
-        onChanged: widget.onChanged,
-        maxLength: widget.maxLength,
-        textCapitalization: TextCapitalization.sentences,
-        style: t.titleSm.copyWith(height: _titleLine / _titleSize),
-        minLines: 1,
-        maxLines: 3,
-        // Kaynak başlık alanı: Poppins 20/28 600, `padding: 4px 0 10px`, yalnız alt çizgi
-        // 1 px `border-strong` (odakta da aynı; kutu yok).
-        decoration: InputDecoration(
-          hintText: widget.hint,
-          hintStyle: t.titleSm.copyWith(
-            height: _titleLine / _titleSize,
-            color: c.textFaint,
-          ),
-          filled: false,
-          border: underline,
-          enabledBorder: underline,
-          focusedBorder: underline,
-          counterText: '',
-          isDense: true,
-          contentPadding: const EdgeInsets.only(top: 4, bottom: 10),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => NzTextField(
+    label: widget.label,
+    hint: widget.hint,
+    controller: _controller,
+    onChanged: widget.onChanged,
+    maxLength: widget.maxLength,
+    autofillHints: widget.autofillHints,
+  );
 }
 
 /// Yerinde açılan satır içeriğinin iç boşluğu (prototip `padding: 0 10px 10px`).

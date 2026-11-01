@@ -1,10 +1,15 @@
 // NzPage: kabuk düzeni, çevrimdışı şerit, yükleme örtüsü, metin ölçeği, PrivacyMask altında.
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart' show CupertinoSliverRefreshControl;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations.dart';
+import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/network/connectivity_monitor.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/security/privacy_mask.dart';
@@ -355,4 +360,117 @@ void main() {
       expect(r.center.dx, 700, reason: '$key');
     }
   });
+
+  group('feed onRefresh (aşağı çekerek yenileme)', () {
+    NzPage page(Future<void> Function() onRefresh) => NzPage.feed(
+      topBar: const SliverAppBar(pinned: true, title: Text('üst')),
+      onRefresh: onRefresh,
+      // Kısa içerik: kaydırılamasa da çekilebilmeli.
+      children: const [SizedBox(height: 40, child: Text('baş'))],
+    );
+
+    testWidgets('verilmezse gösterge yok', (tester) async {
+      await tester.pumpWidget(_app(feed()));
+      expect(find.byType(RefreshIndicator), findsNothing);
+      expect(
+        find.byType(CupertinoSliverRefreshControl, skipOffstage: false),
+        findsNothing,
+      );
+    });
+
+    testWidgets(
+      'Android: Material RefreshIndicator; çekince çağrılır ve beklenir',
+      (tester) async {
+        final done = Completer<void>();
+        var calls = 0;
+        await tester.pumpWidget(
+          _app(
+            page(() {
+              calls++;
+              return done.future;
+            }),
+          ),
+        );
+        expect(find.byType(RefreshIndicator), findsOneWidget);
+        expect(
+          find.byType(CupertinoSliverRefreshControl, skipOffstage: false),
+          findsNothing,
+        );
+        await tester.fling(find.text('baş'), const Offset(0, 300), 1000);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        expect(calls, 1);
+        expect(find.byType(RefreshProgressIndicator), findsOneWidget);
+        done.complete();
+        await tester.pumpAndSettle();
+        expect(find.byType(RefreshProgressIndicator), findsNothing);
+      },
+    );
+
+    testWidgets('iOS: CupertinoSliverRefreshControl + esneyen kaydırma', (
+      tester,
+    ) async {
+      var calls = 0;
+      await tester.pumpWidget(
+        _app(
+          page(() async {
+            calls++;
+          }),
+        ),
+      );
+      expect(
+        find.byType(CupertinoSliverRefreshControl, skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(find.byType(RefreshIndicator), findsNothing);
+      final scroll = tester.widget<CustomScrollView>(
+        find.byType(CustomScrollView),
+      );
+      expect(scroll.physics, isA<BouncingScrollPhysics>());
+      await tester.drag(find.text('baş'), const Offset(0, 300));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expect(calls, 1);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+    testWidgets('hata: gösterge kapanır, içerik kalır, hata toast ile', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(page(() => Future.error(ApiError(ClientErrorCode.networkError)))),
+      );
+      await tester.fling(find.text('baş'), const Offset(0, 300), 1000);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('baş'), findsOneWidget);
+      expect(find.byType(SnackBar), findsOneWidget);
+    });
+  });
+
+  testWidgets(
+    'feed onRevisit: gizli sayfa yeniden görünür olunca, ilk açılışta değil',
+    (tester) async {
+      var revisits = 0;
+      Widget host(bool visible) => _app(
+        TickerMode(
+          enabled: visible,
+          child: NzPage.feed(
+            topBar: const SliverAppBar(pinned: true, title: Text('üst')),
+            onRevisit: () => revisits++,
+            children: const [SizedBox(height: 40)],
+          ),
+        ),
+      );
+      await tester.pumpWidget(host(true));
+      await tester.pump();
+      expect(revisits, 0);
+      await tester.pumpWidget(host(false));
+      await tester.pump();
+      expect(revisits, 0);
+      await tester.pumpWidget(host(true));
+      await tester.pump();
+      expect(revisits, 1);
+    },
+  );
 }

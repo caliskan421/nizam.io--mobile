@@ -12,17 +12,36 @@ import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/ui/state/nz_async_view.dart';
 import 'package:nizamio/core/ui/theme/app_theme.dart';
 import 'package:nizamio/core/ui/widgets/feedback/nz_error_state.dart';
-import 'package:nizamio/core/ui/widgets/feedback/nz_loader.dart';
+import 'package:nizamio/core/ui/widgets/feedback/nz_skeleton.dart';
 
 late Future<int> Function() _factory;
-final _p = FutureProvider<int>((ref) => _factory());
+final _p = FutureProvider<int>((ref) {
+  ref.watch(_seed); // bağımlılık değişimi → isReloading
+  return _factory();
+});
+
+class _Seed extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void bump() => state++;
+}
+
+final _seed = NotifierProvider<_Seed, int>(_Seed.new);
 
 class _View extends ConsumerWidget {
-  const _View({this.isEmpty, this.empty, this.loading, this.onRetry});
+  const _View({
+    this.isEmpty,
+    this.empty,
+    this.loading,
+    this.onRetry,
+    this.skeletonOnReload = false,
+  });
   final bool Function(int)? isEmpty;
   final Widget? empty;
   final Widget? loading;
   final VoidCallback? onRetry;
+  final bool skeletonOnReload;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => NzAsyncView<int>(
@@ -32,6 +51,7 @@ class _View extends ConsumerWidget {
     empty: empty,
     loading: loading,
     onRetry: onRetry,
+    skeletonOnReload: skeletonOnReload,
   );
 }
 
@@ -64,15 +84,17 @@ ApiError _shown(WidgetTester tester) =>
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets('ilk yükleme: varsayılan NzLoader', (tester) async {
+  testWidgets('ilk yükleme: varsayılan parıltılı iskelet (NzSkeleton.page)', (
+    tester,
+  ) async {
     final c = Completer<int>();
     _factory = () => c.future;
     await _pump(tester, const _View());
-    expect(find.byType(NzLoader), findsOneWidget);
+    expect(find.byType(NzSkeleton), findsOneWidget);
     c.complete(1);
     await tester.pump();
     expect(find.text('veri 1'), findsOneWidget);
-    expect(find.byType(NzLoader), findsNothing);
+    expect(find.byType(NzSkeleton), findsNothing);
   });
 
   testWidgets('ilk yükleme: loading verilirse o çizilir', (tester) async {
@@ -80,7 +102,7 @@ void main() {
     _factory = () => c.future;
     await _pump(tester, const _View(loading: Text('iskelet')));
     expect(find.text('iskelet'), findsOneWidget);
-    expect(find.byType(NzLoader), findsNothing);
+    expect(find.byType(NzSkeleton), findsNothing);
     c.complete(1);
   });
 
@@ -142,7 +164,7 @@ void main() {
     await tester.pump();
     expect(container.read(_p).isLoading, isTrue);
     expect(find.text('veri 1'), findsOneWidget);
-    expect(find.byType(NzLoader), findsNothing);
+    expect(find.byType(NzSkeleton), findsNothing);
     c.complete(2);
     await tester.pump();
     await tester.pump();
@@ -179,7 +201,7 @@ void main() {
     await tester.pump();
     expect(container.read(_p).isLoading, isTrue);
     expect(container.read(_p).hasError, isTrue, reason: 'önceki hata taşınır');
-    expect(find.byType(NzLoader), findsOneWidget);
+    expect(find.byType(NzSkeleton), findsOneWidget);
     expect(find.byType(NzErrorState), findsNothing);
 
     c.complete(3);
@@ -187,4 +209,28 @@ void main() {
     await tester.pump();
     expect(find.text('veri 3'), findsOneWidget);
   });
+
+  for (final onReload in [false, true]) {
+    testWidgets('bağımlılık değişimi (isReloading): '
+        '${onReload ? 'skeletonOnReload → iskelet' : 'varsayılan eski veri'}', (
+      tester,
+    ) async {
+      _factory = () async => 1;
+      final container = await _pump(tester, _View(skeletonOnReload: onReload));
+      await tester.pump();
+      expect(find.text('veri 1'), findsOneWidget);
+
+      final c = Completer<int>();
+      _factory = () => c.future;
+      container.read(_seed.notifier).bump();
+      await tester.pump();
+      expect(container.read(_p).isReloading, isTrue);
+      expect(find.text('veri 1'), onReload ? findsNothing : findsOneWidget);
+      expect(find.byType(NzSkeleton), onReload ? findsOneWidget : findsNothing);
+      c.complete(2);
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('veri 2'), findsOneWidget);
+    });
+  }
 }

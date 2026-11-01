@@ -63,6 +63,10 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     });
     final l = context.l10n;
     final view = ref.watch(activityViewProvider);
+    // Tablet sağ bölmesi: geçmiş yalnız açıldığında görünür; daire "Kapat" bölmeyi boş hâline
+    // ("Bir kayıt seç") döndürür (yığında geri varsa bir adım geri). Telefonda geri yeter.
+    final pane = NzPaneScope.maybeOf(context);
+    final inDetail = pane?.role == NzPaneRole.detail;
     return NzPage.feed(
       // Tablet sağ bölmesi (işlem geçmişi: gap 20, açıklama -8).
       paneLead: NizamioSpacing.space3,
@@ -80,6 +84,14 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
             onPressed: () =>
                 NzToast.show(context, l.activitySoon(l.uiActivityCsvExport)),
           ),
+          if (inDetail)
+            NzIconButton.circle(
+              icon: NzIcons.close,
+              semanticLabel: l.uiCommonClose,
+              onPressed: () => pane!.canBack
+                  ? NzPaneScope.back(context)
+                  : context.appNav.openHome(),
+            ),
         ],
       ),
       // Kayıt satırları akışın doğrudan öğeleridir: liste tembel kurulur (yalnız görünen

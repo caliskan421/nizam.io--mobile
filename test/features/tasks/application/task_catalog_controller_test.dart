@@ -129,6 +129,50 @@ void main() {
     expect(loads, 2);
     expect(next.departmentId, 'd2');
   });
+
+  test('refresh: eski katalog yenilenirken ve hatada durumda kalır; hata fırlatılır, reload yutar', () async {
+    var loads = 0;
+    var fail = false;
+    final c = ProviderContainer(
+      retry: (_, _) => null,
+      overrides: [
+        scopeStateProvider.overrideWith(
+          (ref) => const ScopeSelection(programId: 'p1'),
+        ),
+        taskCatalogRepositoryProvider.overrideWithValue(
+          _Counting(() {
+            loads++;
+            if (fail) throw StateError('ağ');
+          }, () => null),
+        ),
+      ],
+    );
+    addTearDown(c.dispose);
+    c.listen(taskCatalogControllerProvider, (_, _) {});
+    final first = await c.read(taskCatalogControllerProvider.future);
+    final ctl = c.read(taskCatalogControllerProvider.notifier);
+
+    final pending = ctl.refresh();
+    expect(c.read(taskCatalogControllerProvider).isRefreshing, isTrue);
+    expect(c.read(taskCatalogControllerProvider).value, same(first));
+    await pending;
+    expect(loads, 2);
+
+    fail = true;
+    await expectLater(ctl.refresh(), throwsA(isA<StateError>()));
+    final failed = c.read(taskCatalogControllerProvider);
+    expect(failed.hasError, isTrue);
+    expect(failed.hasValue, isTrue, reason: 'görünür veri silinmez');
+    await ctl.reload(); // hata yutulur
+    expect(loads, 4);
+
+    // Yeniden ziyaret: taze değilse (maxAge 0) okur; zaten taze ise okumaz.
+    fail = false;
+    await ctl.refreshIfStale(maxAge: Duration.zero);
+    expect(loads, 5);
+    await ctl.refreshIfStale();
+    expect(loads, 5);
+  });
 }
 
 class _Counting implements TaskCatalogRepository {

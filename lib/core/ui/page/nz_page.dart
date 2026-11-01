@@ -1,15 +1,20 @@
+import 'package:flutter/cupertino.dart' show CupertinoSliverRefreshControl;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../errors/api_error.dart';
 
 import '../../network/connectivity_monitor.dart';
 import '../../providers.dart';
 import '../../theme/generated/tokens.gen.dart';
 import '../extensions/context_ext.dart';
+import '../extensions/ref_ext.dart';
 import '../layout/layout.dart';
 import '../motion/page_content_entrance.dart';
 import '../theme/nz_surfaces.dart';
 import '../widgets/feedback/nz_banner.dart';
 import '../widgets/feedback/nz_loader.dart';
+import '../widgets/feedback/nz_toast.dart';
 import '../widgets/surfaces/nz_glass.dart';
 
 /// Her ekranın kabuğu (U6: features presentation'da Scaffold yasağının tek karşılığı).
@@ -32,6 +37,8 @@ class NzPage extends ConsumerWidget {
     this.onRetry,
     this.showTitleBar = true,
   }) : topBar = null,
+       onRefresh = null,
+       onRevisit = null,
        children = const [],
        pinned = null,
        after = const [],
@@ -47,6 +54,9 @@ class NzPage extends ConsumerWidget {
   /// [pinned] verilirse [children]'dan sonra üst çubuğun altına yapışan cam şerittir (prototip
   /// `position: sticky` sekme hapları); ardından [after] öğeleri gelir. Öğeler tembel kurulur
   /// (uzun listeleri tek `Column` yerine ayrı öğe olarak verin).
+  ///
+  /// [onRefresh] verilirse aşağı çekerek yenileme açılır (bkz. alan belgesi); [onRevisit]
+  /// sayfa yeniden görünür olunca (sekme dönüşü, üstteki sayfa kapanınca) çağrılır.
   const NzPage.feed({
     super.key,
     required Widget this.topBar,
@@ -57,6 +67,8 @@ class NzPage extends ConsumerWidget {
     this.after = const [],
     this.afterKey,
     this.paneLead,
+    this.onRefresh,
+    this.onRevisit,
   }) : title = '',
        body = const SizedBox.shrink(),
        actions = const [],
@@ -75,6 +87,8 @@ class NzPage extends ConsumerWidget {
     required this.body,
     this.onRetry,
   }) : title = '',
+       onRefresh = null,
+       onRevisit = null,
        children = const [],
        pinned = null,
        after = const [],
@@ -94,6 +108,8 @@ class NzPage extends ConsumerWidget {
   /// Metin ölçeği sınırı ve toast kabuğu (Scaffold) standart sayfayla aynıdır.
   const NzPage.bare({super.key, required this.body})
     : title = '',
+      onRefresh = null,
+      onRevisit = null,
       topBar = null,
       children = const [],
       pinned = null,
@@ -143,6 +159,21 @@ class NzPage extends ConsumerWidget {
 
   /// Çevrimdışı şeridindeki "yeniden dene".
   final VoidCallback? onRetry;
+
+  /// [NzPage.feed]: aşağı çekerek yenileme (liste en üstteyken daha aşağı çekilince).
+  /// Gösterge platforma uyar: iOS/macOS'ta esneyen kaydırma + `CupertinoSliverRefreshControl`
+  /// (üst çubuğun altında), diğerlerinde Material `RefreshIndicator` (üst çubuğun altından
+  /// iner). Gösterge Future bitene kadar döner; ekran verisi bu sırada yerinde kalır
+  /// (controller önceki değeri korur). Future hata ile biterse veri silinmez, hata
+  /// `NzToast.error` ile bildirilir (oturum sonu kodları hariç — yönlendirme zaten yapılır).
+  /// Yenileme yalnız kullanıcı hareketiyle başlar (otomatik yeniden deneme değildir).
+  final Future<void> Function()? onRefresh;
+
+  /// [NzPage.feed]: sayfa gizliyken yeniden görünür olunca (kabuk sekmesine dönüş, üstüne
+  /// itilen sayfanın kapanması; `TickerMode` kapalı → açık). İlk açılışta çağrılmaz.
+  /// Arka planda bayat veriyi tazelemek içindir (ör. `refreshIfStale`); gösterge çizilmez,
+  /// eski veri görünür kalır.
+  final VoidCallback? onRevisit;
   final bool _fill;
 
   final bool _bare;
@@ -188,14 +219,28 @@ class NzPage extends ConsumerWidget {
       };
       // Pencere değil, gövdeye ayrılan alan (bölünmüş ekran / yan panel); kısıt sliver'ların
       // üstündeki kutu sınırında okunur.
-      return NzTextScaleLimit(
+      final refresh = onRefresh == null
+          ? null
+          : () => _guardedRefresh(context, onRefresh!);
+      final cupertino = refresh != null && _cupertinoRefresh(context);
+      Widget page = NzTextScaleLimit(
         child: Scaffold(
           body: LayoutBuilder(
             builder: (context, constraints) {
               final side = NzPaneScope.sideInset(context, constraints, width);
-              return CustomScrollView(
+              final scroll = CustomScrollView(
+                // Kısa içerikte de çekilebilsin; iOS'ta esneyen kaydırma.
+                physics: refresh == null
+                    ? null
+                    : cupertino
+                    ? const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      )
+                    : const AlwaysScrollableScrollPhysics(),
                 slivers: [
                   if (pane != NzPaneRole.master) topBar,
+                  if (cupertino)
+                    CupertinoSliverRefreshControl(onRefresh: refresh),
                   PageContentEntrance.sliver(
                     child: SliverMainAxisGroup(
                       slivers: [
@@ -236,10 +281,26 @@ class NzPage extends ConsumerWidget {
                   ),
                 ],
               );
+              if (refresh == null || cupertino) return scroll;
+              // Material gösterge cam üst çubuğun altından iner (çubuk kaydırma görünümünün
+              // içindedir; yüksekliği NzTopBar ile aynı: güvenli alan + space2 + appbar).
+              return RefreshIndicator(
+                onRefresh: refresh,
+                edgeOffset: pane == NzPaneRole.master
+                    ? safe.top
+                    : safe.top + NizamioSpacing.space2 + NizamioSize.appbar,
+                color: context.colors.accentText,
+                backgroundColor: context.colors.surfaceRaised,
+                child: scroll,
+              );
             },
           ),
         ),
       );
+      if (onRevisit case final revisit?) {
+        page = _RevisitWatch(onRevisit: revisit, child: page);
+      }
+      return page;
     }
     return NzTextScaleLimit(
       child: Scaffold(
@@ -287,6 +348,59 @@ class NzPage extends ConsumerWidget {
       ),
     );
   }
+}
+
+bool _cupertinoRefresh(BuildContext context) =>
+    switch (Theme.of(context).platform) {
+      TargetPlatform.iOS || TargetPlatform.macOS => true,
+      _ => false,
+    };
+
+/// Yenilemeyi bekler; hata yutulur ve (oturum sonu kodları dışında) toast ile bildirilir —
+/// gösterge kapanır, ekrandaki veri kalır.
+Future<void> _guardedRefresh(
+  BuildContext context,
+  Future<void> Function() onRefresh,
+) async {
+  try {
+    await onRefresh();
+  } on Object catch (e) {
+    final error = toApiError(e);
+    if (sessionEndedErrorCodes.contains(error.code) || !context.mounted) return;
+    NzToast.error(context, error);
+  }
+}
+
+/// `TickerMode` kapalı → açık geçişinde (gizli sayfa yeniden görünür) [onRevisit].
+class _RevisitWatch extends StatefulWidget {
+  const _RevisitWatch({required this.onRevisit, required this.child});
+
+  final VoidCallback onRevisit;
+  final Widget child;
+
+  @override
+  State<_RevisitWatch> createState() => _RevisitWatchState();
+}
+
+class _RevisitWatchState extends State<_RevisitWatch> {
+  bool? _active;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final active = TickerMode.valuesOf(context).enabled;
+    final returning = _active == false && active;
+    _active = active;
+    // Bağımlılık değişimi sırasında sağlayıcı yazımı yapılmaz: kare sonrasına bırakılır.
+    if (returning) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onRevisit();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// Dokunmayı keser; gövdeyi yarı saydam örter, ortada [NzLoader.page].

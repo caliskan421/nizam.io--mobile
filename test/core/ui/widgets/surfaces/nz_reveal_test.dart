@@ -41,4 +41,27 @@ void main() {
     await t.pump();
     expect(t.getSize(find.byType(NzReveal)).height, 100);
   });
+
+  testWidgets('onOpened yalnız açılış bitince; yarıda kapanırsa çağrılmaz', (
+    t,
+  ) async {
+    var opened = 0;
+    Widget host(bool open) => testApp(
+      NzReveal(
+        open: open,
+        onOpened: () => opened++,
+        child: const SizedBox(height: 100),
+      ),
+    );
+    await t.pumpWidget(host(false));
+    await t.pumpWidget(host(true));
+    await t.pump(const Duration(milliseconds: 50));
+    expect(opened, 0);
+    await t.pumpWidget(host(false));
+    await t.pumpAndSettle();
+    expect(opened, 0);
+    await t.pumpWidget(host(true));
+    await t.pumpAndSettle();
+    expect(opened, 1);
+  });
 }

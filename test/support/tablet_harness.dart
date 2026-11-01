@@ -99,7 +99,10 @@ abstract final class TabletContract {
 }
 
 enum TabletModule {
-  home('Ana sayfa', 'İşlem geçmişi'), // TB_DEF.home = history
+  home(
+    'Ana sayfa',
+    'Bir kayıt seç',
+  ), // geçmiş yalnız dokunuşla açılır (ürün sahibi)
   tasks('Görevler', 'Su deposu temel betonunun yapılması'), // detail = ALT-5
   calendar('Takvim', 'Bir kayıt seç'), // empty
   coordinatorships('Koordinatörlükler', 'Altyapı ve tesisat'), // cdetail = ALT

@@ -79,9 +79,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     final ctl = ref.read(_provider.notifier);
     final opening = !ref.read(_provider).searchOpen;
     ctl.toggleSearch();
-    if (opening) {
-      _searchFocus.requestFocus();
-    } else {
+    // Odak (klavye) açılış hareketi bitince NzReveal.onOpened ile gelir.
+    if (!opening) {
       _search.clear();
       _searchFocus.unfocus();
     }
@@ -112,11 +111,17 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     final state = ref.watch(_provider);
     final catalog = ref.watch(taskCatalogControllerProvider);
     final result = ref.watch(tasksListResultOf(_provider));
-    final data = catalog.value;
+    // Önceki katalog yenilemede (aşağı çekme, sekmeye dönüş) yerinde kalır; kapsam/departman
+    // değişiminde (bağımlılık yeniden kurulumu) başka kümeye aittir → iskelet.
+    final data = catalog.isReloading ? null : catalog.value;
     // Yeni görev yalnız seçili kapsamda görev açabilene (yönetici/koordinatör) görünür.
     final canCreate = ref.watch(canCreateTaskProvider);
     return NzPage.feed(
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
+      onRefresh: () =>
+          ref.read(taskCatalogControllerProvider.notifier).refresh(),
+      onRevisit: () =>
+          ref.read(taskCatalogControllerProvider.notifier).refreshIfStale(),
       topBar: const RootTopBar(),
       children: [
         NzPageHeader(
@@ -153,6 +158,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
         ),
         NzReveal(
           open: state.searchOpen,
+          onOpened: _searchFocus.requestFocus,
           child: Padding(
             padding: const EdgeInsets.only(top: NizamioSpacing.space5),
             child: NzSearchField(
@@ -186,6 +192,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
           NzAsyncView<TaskCatalog>(
             value: catalog,
             onRetry: () => ref.invalidate(taskCatalogControllerProvider),
+            loading: const TasksListSkeleton(),
+            skeletonOnReload: true,
             data: (_) => const SizedBox.shrink(),
           ),
       ],

@@ -19,4 +19,12 @@ abstract final class RpMotion {
   static const pushOffset = 36.0;
   static const pushDuration = Duration(milliseconds: 380);
   static const tabFadeDuration = Duration(milliseconds: 300);
+
+  /// Kademeli girişte öğeler arası adım ve gecikmenin üst sınırı (ince; uzun listede birikmez).
+  static const staggerStep = Duration(milliseconds: 40);
+  static const staggerMaxSteps = 5;
+
+  /// [index]. öğenin giriş gecikmesi (`index * staggerStep`, en çok [staggerMaxSteps] adım).
+  static Duration stagger(int index) =>
+      staggerStep * index.clamp(0, staggerMaxSteps);
 }

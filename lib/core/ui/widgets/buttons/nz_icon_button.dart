@@ -9,7 +9,8 @@ import '../surfaces/nz_glass.dart';
 import 'nz_pressable.dart';
 
 /// Yalnız ikonlu düğme. [semanticLabel] zorunludur (görünmez erişilebilirlik etiketi).
-/// Dokunma alanı her boyutta >= 48; [onPressed] null → devre dışı. [dot] verilirse ikonun sağ
+/// Görünür kabı olmayan varsayılan biçimde basma/odak vurgusu dairedir (standart; tablet
+/// raylarındaki kapsız ikonlar da bunu izler). Dokunma alanı her boyutta >= 48; [onPressed] null → devre dışı. [dot] verilirse ikonun sağ
 /// üstünde dikkat noktası (ör. bildirim; anlamı [semanticLabel] taşır).
 class NzIconButton extends StatelessWidget {
   const NzIconButton({
@@ -89,11 +90,9 @@ class NzIconButton extends StatelessWidget {
       fixedSize: WidgetStatePropertyAll(Size.square(_extent)),
       padding: const WidgetStatePropertyAll(EdgeInsets.zero),
       tapTargetSize: MaterialTapTargetSize.padded,
-      shape: WidgetStatePropertyAll(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(NizamioRadius.group),
-        ),
-      ),
+      // Kapsayıcısız ikon: basma/odak vurgusu dairedir (dörtgen gri vurgu ikonla uyuşmaz).
+      // Dokunma alanı aynı kalır; daire bu kare kutuya oturur.
+      shape: const WidgetStatePropertyAll(CircleBorder()),
       foregroundColor: WidgetStateProperty.resolveWith(
         (s) => s.contains(WidgetState.disabled)
             ? c.text.withValues(alpha: _disabledContentAlpha)

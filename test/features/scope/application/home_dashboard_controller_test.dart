@@ -263,7 +263,102 @@ void main() {
         expect(d.counts.tasksAwaitingApproval, 1);
       },
     );
+
+    group('yenileme (aşağı çekme / yeniden ziyaret)', () {
+      test('üye: katalog + ekip ekleri birer kez yeniden okunur; eski özet yerinde', () async {
+        final repo = _Counting();
+        final catalogs = _Scripted([catalogOf(), catalogOf()]);
+        final c = containerOf(repo, catalogs);
+        final first = await c.read(homeDashboardControllerProvider.future);
+
+        final pending = c
+            .read(homeDashboardControllerProvider.notifier)
+            .refresh();
+        final during = c.read(homeDashboardControllerProvider);
+        expect(during.isLoading, isTrue);
+        expect(during.value, same(first), reason: 'yenilenirken eski özet');
+        await pending;
+
+        expect(catalogs.loads, 2);
+        expect(repo.extras, hasLength(2), reason: 'çift geçersizleme yok');
+        expect(repo.loads, 0);
+        expect(c.read(homeDashboardControllerProvider).hasValue, isTrue);
+      });
+
+      test('yönetici: pano yeniden okunur, ekip yolu yok', () async {
+        final repo = _Counting();
+        final catalogs = _Scripted([catalogOf(admin: true)]);
+        final c = containerOf(repo, catalogs);
+        await c.read(homeDashboardControllerProvider.future);
+        await c.read(homeDashboardControllerProvider.notifier).refresh();
+        expect(repo.loads, 2);
+        expect(catalogs.loads, 2);
+        expect(repo.extras, isEmpty);
+      });
+
+      test('hata: fırlatılır, önceki özet durumda kalır', () async {
+        final repo = _Counting();
+        final catalogs = _Scripted([catalogOf(), null]);
+        final c = containerOf(repo, catalogs);
+        final first = await c.read(homeDashboardControllerProvider.future);
+        await expectLater(
+          c.read(homeDashboardControllerProvider.notifier).refresh(),
+          throwsA(isA<ApiError>()),
+        );
+        final s = c.read(homeDashboardControllerProvider);
+        expect(s.hasError, isTrue);
+        expect(s.value, same(first));
+      });
+
+      test(
+        'refreshIfStale: tazeyse istek yok; bayatsa arka planda yenilenir',
+        () async {
+          final repo = _Counting();
+          final catalogs = _Scripted([catalogOf()]);
+          final c = containerOf(repo, catalogs);
+          await c.read(homeDashboardControllerProvider.future);
+          final ctl = c.read(homeDashboardControllerProvider.notifier);
+          await ctl.refreshIfStale();
+          expect(catalogs.loads, 1, reason: 'staleAfter içinde');
+          await ctl.refreshIfStale(maxAge: Duration.zero);
+          expect(catalogs.loads, 2);
+          expect(repo.extras, hasLength(2));
+        },
+      );
+
+      test(
+        'refreshIfStale: ilk yükleme hatasında kendiliğinden yeniden denemez',
+        () async {
+          final repo = _Counting();
+          final catalogs = _Scripted([null]);
+          final c = containerOf(repo, catalogs);
+          await expectLater(
+            c.read(homeDashboardControllerProvider.future),
+            throwsA(isA<ApiError>()),
+          );
+          await c
+              .read(homeDashboardControllerProvider.notifier)
+              .refreshIfStale(maxAge: Duration.zero);
+          expect(catalogs.loads, 1);
+        },
+      );
+    });
   });
+}
+
+/// Sıradaki kataloğu döner (null → ağ hatası); liste bitince son öğe tekrarlanır.
+class _Scripted implements TaskCatalogRepository {
+  _Scripted(this.script);
+
+  final List<TaskCatalog?> script;
+  var loads = 0;
+
+  @override
+  Future<TaskCatalog> load() async {
+    final next = script[(loads++).clamp(0, script.length - 1)];
+    if (next == null) throw ApiError(ClientErrorCode.networkError);
+    return next;
+  }
 }
 
 class _Failing implements TaskCatalogRepository {

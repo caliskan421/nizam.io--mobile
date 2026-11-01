@@ -159,9 +159,14 @@ class HomeRoute extends NzTabRouteData with $HomeRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) => PaneStack(
     trail: trail,
+    // Çift bölmede işlem geçmişi varsayılan açık değildir: kart/kısayol `/home/history`
+    // tabanını açar, kapatınca buraya ("Bir kayıt seç") dönülür.
     base: SplitRoot(
       master: (_) => homeMaster(),
-      detail: (_) => const ActivityPage(),
+      detail: (c) => NzPickRecord(
+        title: c.l10n.uiRouterPickTitle,
+        message: c.l10n.uiRouterPickBody,
+      ),
     ),
   );
 }

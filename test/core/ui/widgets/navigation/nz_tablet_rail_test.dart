@@ -54,7 +54,7 @@ Widget _rail({
 void main() {
   setUpFonts();
 
-  testWidgets('ölçüler: 100 genişlik, 96 öğe, 60×34 kapsül, 44/56 düğmeler', (
+  testWidgets('ölçüler: 100 genişlik, 96 öğe, 60×34 kapsül, 44 alt düğmeler', (
     tester,
   ) async {
     tester.view.devicePixelRatio = 1;
@@ -85,9 +85,13 @@ void main() {
     for (final semantics in ['Bildirimler', 'Tüm modüller', 'Asistana sor']) {
       expect(find.bySemanticsLabel(semantics), findsOneWidget);
     }
-    // Asistan en altta (alt 20 boşluk), 56; menü 44.
+    // Asistan en altta (alt 20 boşluk); zil, menü ve asistan aynı 44.
     final assistant = tester.getRect(find.bySemanticsLabel('Asistana sor'));
-    expect(assistant.size, const Size(56, 56));
+    expect(assistant.size, const Size(44, 44));
+    expect(
+      tester.getSize(find.bySemanticsLabel(RegExp('^Bildirimler'))),
+      const Size(44, 44),
+    );
     expect(assistant.bottom, 820 - 20);
     final menu = tester.getRect(find.bySemanticsLabel('Tüm modüller'));
     expect(menu.size, const Size(44, 44));

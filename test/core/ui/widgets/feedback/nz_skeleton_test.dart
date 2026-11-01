@@ -19,16 +19,6 @@ Widget _variants(BuildContext context) => const Column(
   ],
 );
 
-double _opacity(WidgetTester tester) => tester
-    .widget<FadeTransition>(
-      find.descendant(
-        of: find.byType(NzSkeleton),
-        matching: find.byType(FadeTransition),
-      ),
-    )
-    .opacity
-    .value;
-
 void main() {
   setUpFonts();
 
@@ -65,23 +55,56 @@ void main() {
     expect(find.byType(Row), findsNWidgets(4));
   });
 
-  testWidgets('animasyon: soluklaşır; hareketi azalt açıkken durağan', (
+  testWidgets('parıltı: bant kayar; hareketi azalt açıkken durağan', (
     tester,
   ) async {
     await tester.pumpWidget(testApp(const NzSkeleton.text()));
-    final first = _opacity(tester);
+    expect(find.byType(ShaderMask), findsOneWidget);
+    final controller = tester
+        .widget<AnimatedBuilder>(
+          find
+              .ancestor(
+                of: find.byType(ShaderMask),
+                matching: find.byType(AnimatedBuilder),
+              )
+              .first,
+        )
+        .animation;
+    final first = (controller as Animation<double>).value;
     await tester.pump(const Duration(milliseconds: 600));
-    expect(_opacity(tester), lessThan(first));
+    expect(controller.value, greaterThan(first));
+    expect(tester.hasRunningAnimations, isTrue);
 
     tester.platformDispatcher.accessibilityFeaturesTestValue =
         const FakeAccessibilityFeatures(disableAnimations: true);
     addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
     await tester.pumpWidget(testApp(const NzSkeleton.text(lines: 2)));
     await tester.pump(const Duration(milliseconds: 600));
-    expect(_opacity(tester), 1);
-    await tester.pump(const Duration(milliseconds: 600));
-    expect(_opacity(tester), 1);
+    expect(find.byType(ShaderMask), findsNothing);
     expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  testWidgets('NzShimmer içindeki iskeletler tek bant ve tek etiket paylaşır', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      testApp(
+        const NzShimmer(
+          child: Column(
+            children: [
+              NzSkeleton.text(lines: 2),
+              NzSkeleton.circle(size: 40),
+              NzSkeleton.block(height: 80, width: 120),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(ShaderMask), findsOneWidget);
+    expect(find.bySemanticsLabel('Yükleniyor'), findsOneWidget);
+    expect(tester.getSize(find.byType(NzSkeleton).last), const Size(120, 80));
+    handle.dispose();
   });
 
   testWidgets('anlamsal etiket yükleniyor', (tester) async {

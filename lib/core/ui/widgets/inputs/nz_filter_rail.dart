@@ -52,19 +52,26 @@ class NzFilterRail extends StatelessWidget {
           border: Border.all(color: c.border, width: NizamioSize.borderWidth),
           borderRadius: BorderRadius.circular(NizamioRadius.group),
         ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
+        // İç boşluk kaymaz; kayan bölge rayın iç köşesine kırpılır (seçili parça kayarken
+        // ray çerçevesinin üstüne/dışına taşmaz).
+        child: Padding(
           padding: const EdgeInsets.all(_pad),
-          child: Row(
-            spacing: NizamioSpacing.space1 / 2,
-            children: [
-              for (var i = 0; i < options.length; i++)
-                _RailItem(
-                  option: options[i],
-                  selected: i == selected,
-                  onTap: () => onSelected(i),
-                ),
-            ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(NizamioRadius.tile),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                spacing: NizamioSpacing.space1 / 2,
+                children: [
+                  for (var i = 0; i < options.length; i++)
+                    _RailItem(
+                      option: options[i],
+                      selected: i == selected,
+                      onTap: () => onSelected(i),
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

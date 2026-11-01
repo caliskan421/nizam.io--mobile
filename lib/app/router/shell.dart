@@ -229,7 +229,7 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
 
   /// Çift bölmede modüle giriş: son açılan kayıt rotada kimlikle durur (`/messages/koord`);
   /// tek bölmeye daralınca aynı kayıt sayfası (aynı State) görünür, geri listeye döner. Kayıt
-  /// hiç açılmamışsa, ana sayfa (geçmiş) ve takvimde modül kökü açılır.
+  /// hiç açılmamışsa, ana sayfada (geçmiş yalnız dokunuşla açılır) ve takvimde modül kökü açılır.
   String _moduleEntry(RailModule m) {
     final kind = baseKindOf(m);
     final id = kind == null ? null : _lastIds[kind];

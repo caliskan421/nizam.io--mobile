@@ -17,6 +17,7 @@ import 'package:nizamio/core/ui/widgets/navigation/nz_floating_nav.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_tablet_rail.dart';
 import 'package:nizamio/core/ui/widgets/nz_icon.dart';
 import 'package:nizamio/core/ui/widgets/nz_icons.dart';
+import 'package:nizamio/features/activity/activity.dart';
 import 'package:nizamio/features/archive/archive.dart';
 import 'package:nizamio/features/calendar/calendar.dart';
 import 'package:nizamio/features/coordinatorships/coordinatorships.dart';
@@ -180,6 +181,38 @@ void main() {
       await tester.tap(_rail('Görevler'));
       await settle(tester);
       expect(locationOf(router), '/tasks/ALT-7');
+    },
+  );
+
+  testWidgets(
+    'ana sayfa: geçmiş varsayılan kapalı; kartla açılır, daire "Kapat" boşa döndürür',
+    (tester) async {
+      final router = await _pump(tester, const Size(1180, 820));
+      router.go('/home');
+      await settle(tester);
+      expect(_inPane(NzPaneRole.detail, find.byType(NzPickRecord)), findsOne);
+      expect(find.byType(ActivityPage), findsNothing);
+
+      tester.element(find.byType(NzTabletRail)).appNav.openHistory();
+      await settle(tester);
+      expect(locationOf(router), '/home/history');
+      expect(find.byType(ActivityPage).hitTestable(), findsOneWidget);
+
+      await tester.tap(find.bySemanticsLabel('Kapat').hitTestable());
+      await settle(tester);
+      expect(locationOf(router), '/home');
+      expect(find.byType(ActivityPage), findsNothing);
+      expect(_inPane(NzPaneRole.detail, find.byType(NzPickRecord)), findsOne);
+
+      // Modüle geri giriş geçmişi hatırlamaz (kimliksiz; yalnız dokunuşla açılır).
+      tester.element(find.byType(NzTabletRail)).appNav.openHistory();
+      await settle(tester);
+      await tester.tap(_rail('Görevler'));
+      await settle(tester);
+      await tester.tap(_rail('Ana sayfa'));
+      await settle(tester);
+      expect(locationOf(router), '/home');
+      expect(find.byType(ActivityPage), findsNothing);
     },
   );
 

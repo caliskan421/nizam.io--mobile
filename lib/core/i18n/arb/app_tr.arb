@@ -1,6 +1,6 @@
 {
   "@@locale": "tr",
-  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit 9fa47f4fe6369cc48f4caf58c6729f1ec1cd8b7c src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.6.0-api (e518c1a97712a951e60843cd4f427f7a9c7806df); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
+  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit 9fa47f4fe6369cc48f4caf58c6729f1ec1cd8b7c src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.7.0-api (d648a8aec45113be1f2ab0871426a9338b45a5c6); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
   "errAssistantBusy": "Asistan şu anda meşgul; biraz sonra yeniden deneyin.",
   "@errAssistantBusy": {
     "description": "assistant.busy"
@@ -4376,6 +4376,14 @@
   "uiTasksDepartment": "Departman",
   "@uiTasksDepartment": {
     "description": "ui.tasks.department"
+  },
+  "uiTasksDepartmentAll": "Tüm departmanlar",
+  "@uiTasksDepartmentAll": {
+    "description": "ui.tasks.department_all"
+  },
+  "uiTasksDepartmentFilterCleared": "Seçili departman artık bu programda yok; süzgeç temizlendi.",
+  "@uiTasksDepartmentFilterCleared": {
+    "description": "ui.tasks.department_filter_cleared"
   },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {

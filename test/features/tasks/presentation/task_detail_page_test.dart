@@ -111,7 +111,7 @@ Map<String, Object> _serverBodies() => {
       },
     ],
   },
-  '/v1/work-items': _serverItems,
+  '/v1/program/work-items': _serverItems,
   '/v1/departments': {
     'departments': [
       {

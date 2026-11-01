@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers.dart';
@@ -39,6 +41,64 @@ class TaskCatalogController extends _$TaskCatalogController {
   }
 
   TaskCatalog? get _catalog => state.value;
+
+  // Yerel güncelleme nesli: [replace] / [applyDetails] / [applyItem] görevi işaretler; [upsert]
+  // okuma başladıktan SONRA yerelde güncellenmiş görevi eski okumayla ezmez.
+  int _generation = 0;
+  final _touched = HashMap<String, int>();
+
+  void _touch(String code) => _touched[code] = ++_generation;
+
+  // Ad nesli: [applyDetails] yeni adlar getirdiğinde işaretlenir; [upsert] okuma başladıktan
+  // sonra adlar güncellendiyse eski yanıtın adlarıyla var olan adları ezmez (yalnız eksikleri
+  // tamamlar).
+  int _namesAt = 0;
+
+  /// Okuma başlangıcının nesli ([upsert] `since`).
+  int get generation => _generation;
+
+  /// Tek depo kuralı: süzgeçli okumanın ([since] neslinde başlayan) satırları katalogda
+  /// güncellenir ya da eklenir (sunucunun görünür saydığı görev). Aynı kimlikli satırın alanları
+  /// sunucu değeriyle değişir, ayrıntı parçaları (alt görev, not, dosya, tarih talebi) korunur;
+  /// okuma başladıktan sonra yerelde güncellenmiş satır olduğu gibi kalır. Açıklama listede
+  /// yoksa katalogdaki korunur. Adlar katılır; okuma başladıktan sonra yerelde ad güncellendiyse
+  /// yalnız eksik adlar eklenir.
+  /// Katalog yokken yok sayılır.
+  void upsert(
+    List<TaskItem> items, {
+    required int since,
+    List<PersonName> names = const [],
+  }) {
+    final c = _catalog;
+    if (c == null || items.isEmpty) return;
+    final fresh = {
+      for (final i in items)
+        if ((_touched[i.code] ?? 0) <= since) i.code: i,
+    };
+    final merged = [
+      for (final t in c.tasks)
+        if (fresh.remove(t.code) case final i?)
+          i.copyWith(
+            subtasks: t.subtasks,
+            noteEntries: t.noteEntries,
+            fileEntries: t.fileEntries,
+            dateRequest: () => t.dateRequest,
+            // Liste satırı açıklama taşımaz: ayrıntıda okunmuş açıklama korunur.
+            description: () => i.description ?? t.description,
+          )
+        else
+          t,
+      // Katalogda olmayanlar (ör. katalog sonrası açılan ya da kesik katalog) sona eklenir.
+      ...fresh.values,
+    ];
+    final newNames = _namesAt > since
+        ? [
+            for (final n in names)
+              if (c.nameOf(n.id) == null) n,
+          ]
+        : names;
+    state = AsyncData(c.withTasks(merged).withNames(newNames));
+  }
 
   /// Kaynaktan yeniden okur ve yeni kataloğu bekler (yazma sonrası). Okuma hatası fırlatılmaz:
   /// hata katalog durumunda kalır (ekran gösterir). Açık ayrıntı ekranları katalog yüklemeye
@@ -85,6 +145,7 @@ class TaskCatalogController extends _$TaskCatalogController {
   /// göre yeniden hesaplanır; sunucu görevinde ([TaskItem.lateness] dolu) sunucu değeri
   /// korunur (istemci gecikme türetmez — WORK-K37).
   void replace(TaskItem task) {
+    _touch(task.code);
     final c = _catalog;
     if (c == null) return;
     final fixed = task.lateness != null
@@ -103,6 +164,8 @@ class TaskCatalogController extends _$TaskCatalogController {
   /// "kalemi yeniden oku" budur (tüm liste okunmaz). Gecikme sunucu değeridir; yeniden
   /// hesaplanmaz.
   void applyDetails(String code, TaskDetails d) {
+    _touch(code);
+    if (d.names.isNotEmpty) _namesAt = _generation;
     final c = _catalog;
     if (c == null) return;
     state = AsyncData(
@@ -125,6 +188,7 @@ class TaskCatalogController extends _$TaskCatalogController {
   /// [code] görevini taze tekil okumayla ([item]; açıklama, tarih, atananlar) değiştirir;
   /// ayrıntı parçaları (alt görev, not, dosya, tarih talebi) korunur. Gecikme sunucu değeri.
   void applyItem(String code, TaskItem item) {
+    _touch(code);
     final c = _catalog;
     if (c == null) return;
     state = AsyncData(
@@ -142,13 +206,6 @@ class TaskCatalogController extends _$TaskCatalogController {
     );
   }
 
-  /// Görev listesinin departmanını seçer (kapsam değişir → katalog yeniden okunur).
-  /// Seçilebilirler [TaskCatalog.departments]; aynı departman yeniden seçilmez.
-  void selectDepartment(String departmentId) {
-    if (_catalog?.departmentId == departmentId) return;
-    ref.read(scopeControllerProvider).selectDepartment(departmentId);
-  }
-
   /// Görevi kaldırır; eski sırasını döner (geri almak için `add(at:)`), yoksa -1.
   int remove(String code) {
     final c = _catalog;
@@ -161,9 +218,9 @@ class TaskCatalogController extends _$TaskCatalogController {
 }
 
 /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yalnız seçili (program, departman)
-/// kapsamında yönetici ya da koordinatör ([TaskAccess.canCreateIn]; üye hayır — WORK-K05).
-/// Katalog yokken ya da departman seçilmemişken hayır (fail-closed).
+/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da programda en az bir
+/// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
+/// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
 @riverpod
 bool canCreateTask(Ref ref) {
   final catalog = ref.watch(taskCatalogControllerProvider).value;
@@ -171,8 +228,5 @@ bool canCreateTask(Ref ref) {
   final access = catalog.access;
   if (access == null) return true;
   final program = ref.watch(scopeStateProvider).programId;
-  final department = catalog.departmentId;
-  return program != null &&
-      department != null &&
-      access.canCreateIn(program, department);
+  return program != null && access.canCreateAnyIn(program);
 }

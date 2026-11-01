@@ -110,6 +110,7 @@ void main() {
       SeatRole role = SeatRole.member,
       String? department = 'd1',
       bool truncated = false,
+      bool seated = true,
     }) => TaskCatalog(
       today: DateTime(2026, 11),
       me: 'me',
@@ -119,12 +120,13 @@ void main() {
         accountId: 'me',
         companyAdmin: admin,
         seats: [
-          TeamSeat(
-            programId: 'p1',
-            departmentId: 'd1',
-            departmentName: 'Altyapı',
-            role: role,
-          ),
+          if (seated)
+            TeamSeat(
+              programId: 'p1',
+              departmentId: 'd1',
+              departmentName: 'Altyapı',
+              role: role,
+            ),
         ],
       ),
       tasks: [
@@ -190,25 +192,37 @@ void main() {
       expect(repo.extras, isEmpty);
     });
 
-    test(
-      'yönetici dışı + departman yok: scope_missing, rapor/ekip isteği yok',
-      () async {
-        final repo = _Counting();
-        final c = containerOf(repo, _Fixed(catalogOf(department: null)));
-        await expectLater(
-          c.read(homeDashboardControllerProvider.future),
-          throwsA(
-            isA<ApiError>().having(
-              (e) => e.code,
-              'code',
-              ClientErrorCode.scopeMissing,
-            ),
+    test('yönetici dışı: özet departmanı programdaki ekip satırından (süzgeçten bağımsız)', () async {
+      final repo = _Counting();
+      final c = containerOf(
+        repo,
+        _Fixed(catalogOf(department: null, role: SeatRole.coordinator)),
+      );
+      final d = await c.read(homeDashboardControllerProvider.future);
+      expect(d.coordinatorships.single.code, 'd1');
+      expect(d.greetingRole, TeamRole.coordinator);
+      expect(repo.loads, 0, reason: 'yönetici rapor uçları yok');
+    });
+
+    test('yönetici dışı + programda ekip satırı yok: scope_missing, rapor/ekip isteği yok', () async {
+      final repo = _Counting();
+      final c = containerOf(
+        repo,
+        _Fixed(catalogOf(department: null, seated: false)),
+      );
+      await expectLater(
+        c.read(homeDashboardControllerProvider.future),
+        throwsA(
+          isA<ApiError>().having(
+            (e) => e.code,
+            'code',
+            ClientErrorCode.scopeMissing,
           ),
-        );
-        expect(repo.loads, 0);
-        expect(repo.extras, isEmpty);
-      },
-    );
+        ),
+      );
+      expect(repo.loads, 0);
+      expect(repo.extras, isEmpty);
+    });
 
     test('kesik katalog: özet uyarı bayrağını taşır', () async {
       final (d, _) = await run(truncated: true);

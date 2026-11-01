@@ -32,6 +32,33 @@ final class TaskCatalogSource implements TaskCatalogRepository {
   }
 }
 
+/// Departman süzgeçli okumanın kaynağı: yalnız sunucu programında (örnek katalogda süzgeç
+/// seçeneği yoktur; çağrılırsa `client.scope_missing`).
+final class TaskListSource implements TaskListRepository {
+  TaskListSource({required this.scope, required this.server});
+
+  final ScopeController scope;
+  final TaskListRepository? Function() server;
+
+  @override
+  Future<TaskListPage> loadTasks(
+    String departmentId, {
+    bool Function()? isCurrent,
+    List<TaskDepartment> departments = const [],
+  }) async {
+    if (!scope.current.hasServerProgram) {
+      throw ApiError(ClientErrorCode.scopeMissing);
+    }
+    final s = server();
+    if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
+    return s.loadTasks(
+      departmentId,
+      isCurrent: isCurrent,
+      departments: departments,
+    );
+  }
+}
+
 /// Görev ayrıntısının kaynak seçimi: örnek kapsamda ayrıntı yüklenmez (örnek görev zaten
 /// taşır, null döner); sunucu programında sunucudan okunur.
 final class TaskDetailsSource implements TaskDetailsRepository {

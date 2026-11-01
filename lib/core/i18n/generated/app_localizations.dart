@@ -6658,6 +6658,18 @@ abstract class AppLocalizations {
   /// **'Departman'**
   String get uiTasksDepartment;
 
+  /// ui.tasks.department_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm departmanlar'**
+  String get uiTasksDepartmentAll;
+
+  /// ui.tasks.department_filter_cleared
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili departman artık bu programda yok; süzgeç temizlendi.'**
+  String get uiTasksDepartmentFilterCleared;
+
   /// ui.timeline.title
   ///
   /// In tr, this message translates to:

@@ -513,6 +513,7 @@ final class TaskItem {
     List<TaskFile>? fileEntries,
     List<TaskNote>? noteEntries,
     bool? evidenceRequired,
+    String? Function()? description,
   }) => TaskItem(
     code: code ?? this.code,
     id: code == null || id != this.code ? id : code,
@@ -530,7 +531,7 @@ final class TaskItem {
     creator: creator,
     createdAt: createdAt,
     completedAt: completedAt == null ? this.completedAt : completedAt(),
-    description: description,
+    description: description == null ? this.description : description(),
     lateness: lateness,
     files: fileEntries?.length ?? files,
     notes: noteEntries?.length ?? notes,
@@ -562,7 +563,7 @@ final class PersonName {
   int get hashCode => Object.hash(id, name);
 }
 
-/// Görev listesinde seçilebilir departman: kimlik, programdaki ad ve (varsa) katalog kodu.
+/// Görev listesinin departman süzgeci seçeneği: kimlik, programdaki ad ve (varsa) katalog kodu.
 @immutable
 final class TaskDepartment {
   const TaskDepartment({required this.id, required this.name, this.code});
@@ -601,6 +602,7 @@ final class TaskCatalog {
     required List<CoordinatorshipRef> coordinatorships,
     this.access,
     this.departmentId,
+    this.departmentFilterCleared = false,
     this.truncated = false,
     List<TaskDepartment> departments = const [],
     this.departmentsTruncated = false,
@@ -622,14 +624,21 @@ final class TaskCatalog {
   /// Oturumdaki hesabın görev erişimi (rol türetme); örnek kaynakta null.
   final TaskAccess? access;
 
-  /// Listenin tek departman bağlamı (sunucu kaynağı); örnek kaynakta null.
+  /// Görevler ekranı görünümünün sunucu departman süzgeci (`department_id`; [filtered]).
+  /// Paylaşılan katalogda (`TaskCatalogController`) her zaman null: program listesi süzgeçsiz.
   final String? departmentId;
+
+  /// Görevler ekranında istenen süzgeç geçersizdi (404 `work.program_scope_invalid`: departman
+  /// silinmiş ya da programa bağlı değil; ya da artık seçenekler arasında yok) ve temizlendi;
+  /// arayüz kısa bilgi gösterir. Paylaşılan katalogda false.
+  final bool departmentFilterCleared;
 
   /// Liste sayfa tavanında kesildi (sunucuda daha fazla görev var); arayüz uyarı gösterir.
   final bool truncated;
 
-  /// Görev listesinin seçilebilir departmanları (sunucu kaynağı; örnekte boş). Şirket
-  /// yöneticisinde `listProgramDepartments`, diğerlerinde bu programdaki ekip satırları.
+  /// Departman süzgecinin seçenekleri (sunucu kaynağı; örnekte boş). Şirket yöneticisinde
+  /// `listProgramDepartments`, diğerlerinde `/v1/me/departments`'ın bu programdaki satırları
+  /// (istemci akışları §2).
   final List<TaskDepartment> departments;
 
   /// Departman listesi sunucu tavanında kesildi (`X-Result-Truncated: true`).
@@ -642,10 +651,6 @@ final class TaskCatalog {
   /// Kişinin görünen adı: kişi listesinden, yoksa sunucunun verdiği addan; bilinmiyorsa null
   /// (arayüz nötr "Bilinmeyen kişi" gösterir; rol tahmini yok).
   String? nameOf(String id) => person(id)?.name ?? _names[id];
-
-  /// Sunucu kataloğunda departman bağlamı yok → liste "departman seç" durumundadır (istek
-  /// gönderilmedi). Örnek kaynakta false.
-  bool get departmentRequired => access != null && departmentId == null;
 
   // Kimlik → öğe dizinleri: kart/arama/filtre her satırda ad çözer; doğrusal arama yerine
   // ilk kullanımda bir kez kurulur (katalog değişmez, `withTasks` yeni örnek üretir).
@@ -674,7 +679,32 @@ final class TaskCatalog {
     coordinatorships: coordinatorships,
     access: access,
     departmentId: departmentId,
+    departmentFilterCleared: departmentFilterCleared,
     truncated: truncated,
+    departments: departments,
+    departmentsTruncated: departmentsTruncated,
+    names: names,
+  );
+
+  /// Görevler ekranı görünümü: aynı kişi/departman/rol kümesi; [codes] verilirse görev listesi
+  /// o kimlikler, o sırayla, katalogdaki satırlardan (tek depo: süzgeçli okuma satırları önce
+  /// kataloğa işlenir, görünüm ayrı satır tutmaz; katalogda olmayan kimlik atlanır). [codes]
+  /// null → süzgeçsiz katalog. [cleared] süzgecin temizlendiği bilgisi.
+  TaskCatalog filtered({
+    String? departmentId,
+    List<String>? codes,
+    bool truncated = false,
+    bool cleared = false,
+  }) => TaskCatalog(
+    today: today,
+    me: me,
+    tasks: codes == null ? tasks : [for (final code in codes) ?task(code)],
+    people: people,
+    coordinatorships: coordinatorships,
+    access: access,
+    departmentId: codes == null ? null : departmentId,
+    departmentFilterCleared: cleared,
+    truncated: codes == null ? this.truncated : truncated,
     departments: departments,
     departmentsTruncated: departmentsTruncated,
     names: names,
@@ -691,6 +721,7 @@ final class TaskCatalog {
           coordinatorships: coordinatorships,
           access: access,
           departmentId: departmentId,
+          departmentFilterCleared: departmentFilterCleared,
           truncated: truncated,
           departments: departments,
           departmentsTruncated: departmentsTruncated,
@@ -723,4 +754,33 @@ final class TaskCatalog {
 /// Görev kataloğunun kaynağı (domain portu; gerçekleştirmeler `data/`).
 abstract interface class TaskCatalogRepository {
   Future<TaskCatalog> load();
+}
+
+/// Departman süzgeçli görev sayfalarının sonucu (`listProgramWorkItems` `department_id`).
+@immutable
+final class TaskListPage {
+  TaskListPage({
+    required List<TaskItem> tasks,
+    List<PersonName> names = const [],
+    this.truncated = false,
+  }) : tasks = List.unmodifiable(tasks),
+       names = List.unmodifiable(names);
+
+  final List<TaskItem> tasks;
+  final List<PersonName> names;
+
+  /// Sayfalar kesildi (imleç tekrarı ya da sayfa tavanı).
+  final bool truncated;
+}
+
+/// Görevler ekranının sunucu departman süzgecinin kaynağı (domain portu). Yalnız görev
+/// sayfalarını okur (kimlik, ekip satırı ve departman seçenekleri yeniden okunmaz).
+/// [isCurrent] false dönerse sayfa döngüsü durur (`client.scope_changed`).
+abstract interface class TaskListRepository {
+  /// [departments]: görünen kısa anahtarın kaynağı (katalogdaki [TaskDepartment.label]).
+  Future<TaskListPage> loadTasks(
+    String departmentId, {
+    bool Function()? isCurrent,
+    List<TaskDepartment> departments = const [],
+  });
 }

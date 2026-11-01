@@ -118,7 +118,7 @@ class _Server {
               },
           ],
         });
-      case 'GET /v1/work-items':
+      case 'GET /v1/program/work-items':
         return jsonResponse(200, {
           'items': [
             _item('w1', assignees: assignees, status: status),
@@ -230,7 +230,7 @@ Future<(Harness, ProviderContainer, TaskDetailController)> _open(
   final c = h.container;
   h.read(scopeControllerProvider)
     ..selectProgram('prog-1')
-    // Ekip satırı olmayan yöneticinin departmanı seçimle gelir (liste tek departman).
+    // Kapsam departmanı listeyi etkilemez (program bağlamı); yazma bağlamı denetimi için.
     ..selectDepartment('d1');
   c
     ..listen(taskCatalogControllerProvider, (_, _) {})
@@ -293,7 +293,11 @@ void main() {
         reason: 'yazmalardan sonra kalem tekil okunur',
       );
       expect(log, contains('GET /v1/work-items/w1/files'));
-      expect(log, isNot(contains('GET /v1/work-items')), reason: 'liste yok');
+      expect(
+        log,
+        isNot(contains('GET /v1/program/work-items')),
+        reason: 'liste yok',
+      );
       expect(c.read(taskDetailControllerProvider('w1')).edit, isNull);
     });
 
@@ -368,7 +372,7 @@ void main() {
         'priority': 'yuksek',
       });
       expect(_log(h).where((l) => l == 'GET /v1/work-items/w1'), hasLength(1));
-      expect(_log(h), isNot(contains('GET /v1/work-items')));
+      expect(_log(h), isNot(contains('GET /v1/program/work-items')));
       final t = c.read(taskCatalogControllerProvider).value!.task('w1')!;
       expect(t.priority, TaskPriority.high, reason: 'tekil okumadan');
       expect(t.description, 'Pompa odası', reason: 'açıklama getWorkItem\'dan');
@@ -383,7 +387,7 @@ void main() {
       final (h, c, ctl) = await _open(_Server());
       expect((await ctl.delete()).ok, isTrue);
       expect(_log(h).first, 'DELETE /v1/work-items/w1');
-      expect(_log(h), contains('GET /v1/work-items'));
+      expect(_log(h), contains('GET /v1/program/work-items'));
       expect(c.read(taskDetailControllerProvider('w1')).deleted, isNotNull);
       ctl.undoDelete();
       expect(c.read(taskDetailControllerProvider('w1')).deleted, isNotNull);
@@ -443,7 +447,7 @@ void main() {
       expect(post.header('X-Nizamio-Department'), 'd1');
       expect((post.body! as Map)['work_item_id'], 'w1');
       expect((post.body! as Map)['reason'], 'Tedarik');
-      expect(_log(h), isNot(contains('GET /v1/work-items')));
+      expect(_log(h), isNot(contains('GET /v1/program/work-items')));
       expect(_log(h), contains('GET /v1/date-change-requests/mine'));
       expect(c.read(taskDetailControllerProvider('w1')).dateDraft, isNull);
     });
@@ -489,7 +493,7 @@ void main() {
       final post = _only(h, 'POST', '/v1/date-change-requests/r1/review');
       expect(post.body, {'decision': 'approved'});
       expect(post.header('X-Nizamio-Department'), isNull);
-      expect(_log(h), contains('GET /v1/work-items'));
+      expect(_log(h), contains('GET /v1/program/work-items'));
 
       final k = _Server()..pendingRequest = _request();
       final (h2, _, ctl2) = await _open(k);
@@ -523,7 +527,7 @@ void main() {
       final body = post.body! as String;
       expect(body, contains('name="file"; filename="rapor.pdf"'));
       expect(body, contains('content-type: application/pdf'));
-      expect(_log(h), isNot(contains('GET /v1/work-items')));
+      expect(_log(h), isNot(contains('GET /v1/program/work-items')));
       expect(_log(h), contains('GET /v1/work-items/w1/files'));
       final st = c.read(taskDetailControllerProvider('w1'));
       expect(st.upload, isNull);
@@ -644,7 +648,7 @@ void main() {
       expect(body['priority'], 'orta');
       expect(body.keys, containsAll(['start_on', 'end_on']));
       expect(_log(h).last, isNot('POST /v1/work-items'));
-      expect(_log(h), contains('GET /v1/work-items'));
+      expect(_log(h), contains('GET /v1/program/work-items'));
     });
 
     test('üye: istek yok, yetki hatası koddan', () async {
@@ -866,7 +870,10 @@ void main() {
           );
           expect(
             log,
-            containsAll(['GET /v1/me/departments', 'GET /v1/work-items']),
+            containsAll([
+              'GET /v1/me/departments',
+              'GET /v1/program/work-items',
+            ]),
           );
           expect(c.read(canCreateTaskProvider), status != 403);
         },
@@ -901,7 +908,7 @@ void main() {
         expect((_only(h, 'PATCH', '/v1/work-items/w1').body! as Map).keys, [
           'end_on',
         ]);
-        expect(log, contains('GET /v1/work-items'));
+        expect(log, contains('GET /v1/program/work-items'));
         expect(log, contains('GET /v1/work-items/w1'));
       },
     );

@@ -105,11 +105,14 @@ class PilotBackend {
           'company_admin': true,
         });
       case 'GET /v1/me/departments':
-        // Ekip satırı yok (şirket yöneticisi): görev kataloğu rolü türetir, liste istenmez.
+        // Ekip satırı yok (şirket yöneticisi): görev kataloğu rolü türetir.
         return jsonResponse(200, {'departments': <Object>[]});
       case 'GET /v1/program/departments':
-        // Programa bağlı departman yok: yöneticinin departman kaynağı boş → liste istenmez.
+        // Programa bağlı departman yok: yöneticinin süzgeç seçenekleri boş.
         return jsonResponse(200, {'departments': <Object>[]});
+      case 'GET /v1/program/work-items':
+        // Görev listesi program bağlamında (S2): yönetici programın görevlerini görür; boş.
+        return jsonResponse(200, {'items': <Object>[]});
       case 'POST /v1/auth/password':
         final err = passwordError;
         if (err != null) {

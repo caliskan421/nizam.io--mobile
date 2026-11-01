@@ -19,9 +19,11 @@ part 'home_dashboard_controller.g.dart';
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
 /// Katalog okunamazsa rol bilinmez: yönetici rapor uçlarına düşülmez, katalog hatası özetin
-/// hatası olarak gösterilir (yeniden dene dokunuşla). Yönetici olmayan hesapta departman
-/// bağlamı yoksa ([TaskCatalog.departmentRequired]) özet `client.scope_missing` hatasıdır
-/// ("departman seç"; görev listesiyle aynı metin) — ek istek gönderilmez.
+/// hatası olarak gösterilir (yeniden dene dokunuşla). Katalog süzgeçsiz program listesidir
+/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan hesapta özetin
+/// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
+/// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
+/// ek istek gönderilmez.
 ///
 /// Önbellek / yenileme: özet ekranda açık kaldıkça (kabuk dalı korunur) bellekte kalır;
 /// [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye dönüş) önceki özeti durumda tutarak
@@ -108,15 +110,20 @@ class HomeDashboardController extends _$HomeDashboardController {
     if (access == null || access.companyAdmin) return repo.load();
 
     followCatalog();
-    if (catalog.departmentRequired) {
-      throw ApiError(ClientErrorCode.scopeMissing);
-    }
-    final dept = catalog.departmentId;
-    final coordinator = dept != null && access.coordinatesIn(program, dept);
+    // Özetin departmanı (görevler ekranının süzgecinden bağımsız): programdaki ilk
+    // koordinatörlük, yoksa ilk ekip satırı.
+    final dept = access.primaryDepartmentIn(program);
+    if (dept == null) throw ApiError(ClientErrorCode.scopeMissing);
+    final coordinator = access.coordinatesIn(program, dept);
     final extras = await repo.loadTeamExtras(
       departmentId: dept,
       coordinator: coordinator,
     );
-    return teamDashboard(catalog, extras, coordinator: coordinator);
+    return teamDashboard(
+      catalog,
+      extras,
+      coordinator: coordinator,
+      departmentId: dept,
+    );
   }
 }

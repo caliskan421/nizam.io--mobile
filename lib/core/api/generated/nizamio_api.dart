@@ -8,8 +8,8 @@ import 'clients/platform_client.dart';
 import 'clients/identity_client.dart';
 import 'clients/organization_client.dart';
 import 'clients/program_client.dart';
-import 'clients/collaboration_client.dart';
 import 'clients/work_client.dart';
+import 'clients/collaboration_client.dart';
 import 'clients/records_client.dart';
 import 'clients/notifications_client.dart';
 import 'clients/reporting_client.dart';
@@ -61,8 +61,8 @@ class NizamioApi {
   IdentityClient? _identity;
   OrganizationClient? _organization;
   ProgramClient? _program;
-  CollaborationClient? _collaboration;
   WorkClient? _work;
+  CollaborationClient? _collaboration;
   RecordsClient? _records;
   NotificationsClient? _notifications;
   ReportingClient? _reporting;
@@ -80,10 +80,10 @@ class NizamioApi {
   ProgramClient get program =>
       _program ??= ProgramClient(_dio, baseUrl: _baseUrl);
 
+  WorkClient get work => _work ??= WorkClient(_dio, baseUrl: _baseUrl);
+
   CollaborationClient get collaboration =>
       _collaboration ??= CollaborationClient(_dio, baseUrl: _baseUrl);
-
-  WorkClient get work => _work ??= WorkClient(_dio, baseUrl: _baseUrl);
 
   RecordsClient get records =>
       _records ??= RecordsClient(_dio, baseUrl: _baseUrl);

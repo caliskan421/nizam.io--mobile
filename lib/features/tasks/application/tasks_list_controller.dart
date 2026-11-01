@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../domain/task_catalog.dart';
 import '../domain/task_query.dart';
-import 'task_catalog_controller.dart';
+import 'task_list_filter.dart';
 
 part 'tasks_list_controller.g.dart';
 
@@ -220,7 +220,7 @@ class TasksListController extends _$TasksListController {
 /// (arama alanını açmak, sayfalamak, grup açmak hesaplamaz). Katalog yokken null.
 @riverpod
 TaskQueryResult? tasksListResult(Ref ref, TaskView view, String people) {
-  final catalog = ref.watch(taskCatalogControllerProvider).value;
+  final catalog = ref.watch(taskListCatalogProvider).value;
   final q = ref.watch(
     tasksListControllerProvider(
       view,
@@ -246,6 +246,6 @@ TasksListResultProvider tasksListResultOf(TasksListControllerProvider list) {
 /// Filtre alt sayfasının seçenek sayıları; katalog değişince bir kez hesaplanır.
 @riverpod
 TaskFilterOptions? taskFilterOptions(Ref ref) {
-  final catalog = ref.watch(taskCatalogControllerProvider).value;
+  final catalog = ref.watch(taskListCatalogProvider).value;
   return catalog == null ? null : filterOptions(catalog);
 }

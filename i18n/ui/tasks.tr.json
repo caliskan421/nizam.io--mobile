@@ -319,6 +319,8 @@
     "ui.tasks.t_unavailable": "Bu işlem bu görevde şu an yapılamıyor.",
     "ui.tasks.unknown_person": "Bilinmeyen kişi",
     "ui.tasks.description": "Açıklama",
-    "ui.tasks.department": "Departman"
+    "ui.tasks.department": "Departman",
+    "ui.tasks.department_all": "Tüm departmanlar",
+    "ui.tasks.department_filter_cleared": "Seçili departman artık bu programda yok; süzgeç temizlendi."
   }
 }

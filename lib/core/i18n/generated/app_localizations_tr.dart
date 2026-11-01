@@ -3431,6 +3431,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksDepartment => 'Departman';
 
   @override
+  String get uiTasksDepartmentAll => 'Tüm departmanlar';
+
+  @override
+  String get uiTasksDepartmentFilterCleared =>
+      'Seçili departman artık bu programda yok; süzgeç temizlendi.';
+
+  @override
   String get uiTimelineTitle => 'Zaman çizelgesi';
 
   @override

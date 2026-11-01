@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
+import 'package:nizamio/features/tasks/application/task_list_filter.dart';
 import 'package:nizamio/features/tasks/domain/task_details.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
@@ -105,29 +106,25 @@ void main() {
     );
   });
 
-  test('selectDepartment: kapsamı değiştirir, katalog yeniden okunur; aynı departman no-op', () async {
+  test('paylaşılan katalog süzgeçsiz: görevler ekranının departman süzgeci ve kapsam '
+      'departmanı kataloğu yeniden okutmaz', () async {
     final scope = ScopeController()..selectProgram('p1');
     var loads = 0;
     final c = ProviderContainer(
       overrides: [
         scopeControllerProvider.overrideWithValue(scope),
         taskCatalogRepositoryProvider.overrideWithValue(
-          _Counting(() => loads++, () => scope.current.departmentId),
+          _Counting(() => loads++, () => null),
         ),
       ],
     );
     addTearDown(c.dispose);
     c.listen(taskCatalogControllerProvider, (_, _) {});
     await c.read(taskCatalogControllerProvider.future);
+    c.read(taskListFilterProvider.notifier).select('d2');
+    await Future<void>.delayed(Duration.zero);
+    await c.read(taskCatalogControllerProvider.future);
     expect(loads, 1);
-    c.read(taskCatalogControllerProvider.notifier).selectDepartment('d1');
-    expect(scope.current.departmentId, isNull, reason: 'zaten seçili: no-op');
-    c.read(taskCatalogControllerProvider.notifier).selectDepartment('d2');
-    expect(scope.current.departmentId, 'd2');
-    expect(scope.current.programId, 'p1');
-    final next = await c.read(taskCatalogControllerProvider.future);
-    expect(loads, 2);
-    expect(next.departmentId, 'd2');
   });
 
   test('refresh: eski katalog yenilenirken ve hatada durumda kalır; hata fırlatılır, reload yutar', () async {

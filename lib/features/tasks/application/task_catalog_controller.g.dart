@@ -58,7 +58,7 @@ final class TaskCatalogControllerProvider
 }
 
 String _$taskCatalogControllerHash() =>
-    r'3646ca0df773813ccb313cd75467358a932a7992';
+    r'f9fe21c5695e9376fa4e89505b1ba5705d012aec';
 
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
@@ -88,24 +88,24 @@ abstract class _$TaskCatalogController extends $AsyncNotifier<TaskCatalog> {
 }
 
 /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yalnız seçili (program, departman)
-/// kapsamında yönetici ya da koordinatör ([TaskAccess.canCreateIn]; üye hayır — WORK-K05).
-/// Katalog yokken ya da departman seçilmemişken hayır (fail-closed).
+/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da programda en az bir
+/// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
+/// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
 
 @ProviderFor(canCreateTask)
 final canCreateTaskProvider = CanCreateTaskProvider._();
 
 /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yalnız seçili (program, departman)
-/// kapsamında yönetici ya da koordinatör ([TaskAccess.canCreateIn]; üye hayır — WORK-K05).
-/// Katalog yokken ya da departman seçilmemişken hayır (fail-closed).
+/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da programda en az bir
+/// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
+/// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
 
 final class CanCreateTaskProvider extends $FunctionalProvider<bool, bool, bool>
     with $Provider<bool> {
   /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-  /// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yalnız seçili (program, departman)
-  /// kapsamında yönetici ya da koordinatör ([TaskAccess.canCreateIn]; üye hayır — WORK-K05).
-  /// Katalog yokken ya da departman seçilmemişken hayır (fail-closed).
+  /// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da programda en az bir
+  /// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
+  /// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
   CanCreateTaskProvider._()
     : super(
         from: null,
@@ -139,4 +139,4 @@ final class CanCreateTaskProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$canCreateTaskHash() => r'5ece2c3a095caac4e0df642ab2d37af24ab62c78';
+String _$canCreateTaskHash() => r'f19c7dee84b9733bf1b077ca4f02749290afd81e';

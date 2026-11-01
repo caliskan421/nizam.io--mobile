@@ -96,9 +96,7 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
             content: QuickPane(
               child: Column(
                 children: [
-                  for (final co
-                      in catalog?.coordinatorships ??
-                          const <CoordinatorshipRef>[])
+                  for (final co in ref.watch(newTaskCoordinatorshipsProvider))
                     TaskCheckRow(
                       label: co.name,
                       caption: l.peopleCount(co.team.length),

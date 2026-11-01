@@ -15,6 +15,7 @@ import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
 import '../application/task_catalog_controller.dart';
+import '../application/task_list_filter.dart';
 import '../application/tasks_list_controller.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_query.dart';
@@ -109,7 +110,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
       );
     });
     final state = ref.watch(_provider);
-    final catalog = ref.watch(taskCatalogControllerProvider);
+    // Görünüm: paylaşılan katalog + bu ekranın departman süzgeci (task_list_filter.dart).
+    final catalog = ref.watch(taskListCatalogProvider);
     final result = ref.watch(tasksListResultOf(_provider));
     // Önceki katalog yenilemede (aşağı çekme, sekmeye dönüş) yerinde kalır; kapsam/departman
     // değişiminde (bağımlılık yeniden kurulumu) başka kümeye aittir → iskelet.
@@ -185,8 +187,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
             },
             onOpen: nav.openTask,
             onSelectDepartment: ref
-                .read(taskCatalogControllerProvider.notifier)
-                .selectDepartment,
+                .read(taskListFilterProvider.notifier)
+                .select,
           )
         else
           NzAsyncView<TaskCatalog>(

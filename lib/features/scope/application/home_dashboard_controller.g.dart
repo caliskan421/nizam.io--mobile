@@ -17,9 +17,11 @@ part of 'home_dashboard_controller.dart';
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
 /// Katalog okunamazsa rol bilinmez: yönetici rapor uçlarına düşülmez, katalog hatası özetin
-/// hatası olarak gösterilir (yeniden dene dokunuşla). Yönetici olmayan hesapta departman
-/// bağlamı yoksa ([TaskCatalog.departmentRequired]) özet `client.scope_missing` hatasıdır
-/// ("departman seç"; görev listesiyle aynı metin) — ek istek gönderilmez.
+/// hatası olarak gösterilir (yeniden dene dokunuşla). Katalog süzgeçsiz program listesidir
+/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan hesapta özetin
+/// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
+/// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
+/// ek istek gönderilmez.
 
 @ProviderFor(HomeDashboardController)
 final homeDashboardControllerProvider = HomeDashboardControllerProvider._();
@@ -33,9 +35,11 @@ final homeDashboardControllerProvider = HomeDashboardControllerProvider._();
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
 /// Katalog okunamazsa rol bilinmez: yönetici rapor uçlarına düşülmez, katalog hatası özetin
-/// hatası olarak gösterilir (yeniden dene dokunuşla). Yönetici olmayan hesapta departman
-/// bağlamı yoksa ([TaskCatalog.departmentRequired]) özet `client.scope_missing` hatasıdır
-/// ("departman seç"; görev listesiyle aynı metin) — ek istek gönderilmez.
+/// hatası olarak gösterilir (yeniden dene dokunuşla). Katalog süzgeçsiz program listesidir
+/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan hesapta özetin
+/// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
+/// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
+/// ek istek gönderilmez.
 final class HomeDashboardControllerProvider
     extends $AsyncNotifierProvider<HomeDashboardController, HomeDashboard> {
   /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
@@ -47,9 +51,11 @@ final class HomeDashboardControllerProvider
   ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
   ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
   /// Katalog okunamazsa rol bilinmez: yönetici rapor uçlarına düşülmez, katalog hatası özetin
-  /// hatası olarak gösterilir (yeniden dene dokunuşla). Yönetici olmayan hesapta departman
-  /// bağlamı yoksa ([TaskCatalog.departmentRequired]) özet `client.scope_missing` hatasıdır
-  /// ("departman seç"; görev listesiyle aynı metin) — ek istek gönderilmez.
+  /// hatası olarak gösterilir (yeniden dene dokunuşla). Katalog süzgeçsiz program listesidir
+  /// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan hesapta özetin
+  /// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
+  /// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
+  /// ek istek gönderilmez.
   HomeDashboardControllerProvider._()
     : super(
         from: null,
@@ -70,7 +76,7 @@ final class HomeDashboardControllerProvider
 }
 
 String _$homeDashboardControllerHash() =>
-    r'54c4cb97985667d9e1ad409a73e1ae8b3f10dc01';
+    r'21d817493533eadbe92e0be36d590eaf6f10b51f';
 
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).
@@ -81,9 +87,11 @@ String _$homeDashboardControllerHash() =>
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
 /// Katalog okunamazsa rol bilinmez: yönetici rapor uçlarına düşülmez, katalog hatası özetin
-/// hatası olarak gösterilir (yeniden dene dokunuşla). Yönetici olmayan hesapta departman
-/// bağlamı yoksa ([TaskCatalog.departmentRequired]) özet `client.scope_missing` hatasıdır
-/// ("departman seç"; görev listesiyle aynı metin) — ek istek gönderilmez.
+/// hatası olarak gösterilir (yeniden dene dokunuşla). Katalog süzgeçsiz program listesidir
+/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan hesapta özetin
+/// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
+/// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
+/// ek istek gönderilmez.
 
 abstract class _$HomeDashboardController extends $AsyncNotifier<HomeDashboard> {
   FutureOr<HomeDashboard> build();

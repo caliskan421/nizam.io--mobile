@@ -47,6 +47,14 @@ part 'work_client.g.dart';
 abstract class WorkClient {
   factory WorkClient(Dio dio, {String? baseUrl}) = _WorkClient;
 
+  static const Map<String, dynamic> listProgramWorkItemsOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["work"],
+          'operationId': "listProgramWorkItems",
+          'externalDocsUrl': null,
+        },
+      };
   static const Map<String, dynamic> createWorkItemOpenapiExtras =
       <String, dynamic>{
         'openapi': <String, dynamic>{
@@ -349,6 +357,46 @@ abstract class WorkClient {
           'externalDocsUrl': null,
         },
       };
+
+  /// Seçili programın görünür görevleri (imleçli; departman başlığı yok).
+  ///
+  /// Görev listesinin program bağlamındaki ucudur (WORK-K81). Satır biçimi.
+  /// `listWorkItems` ile aynıdır (`WorkItemList`: tarihler, adlı atananlar, gecikme.
+  /// etiketleri, `subtask_counts`); toplam ya da sayaç eklenmez.
+  ///
+  /// Görünürlük çağıranın **bu programdaki** ekip satırlarından sunucuda, tek sorguda.
+  /// hesaplanır: şirket yöneticisi programın bütün görevlerini, koordinatör koordinatörü.
+  /// olduğu departmanların bütün görevlerini, üye üyesi olduğu departmanlarda yalnız.
+  /// kendisine atanan görevleri görür; birden çok rolü olan hesap birleşimi görür (aynı.
+  /// görev bir kez döner). Silinmiş görev ve silinmiş departmanın satırı yetki vermez.
+  ///
+  /// `department_id` verilirse görünürlükle **kesişir**, yetkiyi genişletmez: koordinatör.
+  /// olunmayan departman süzülürse yalnız o departmanda kendisine atanan görevler döner.
+  /// (ekip satırı yoksa boş liste). Programa bağlı olmayan ya da yumuşak silinmiş.
+  /// (bağı duran) departman `404 work.program_scope_invalid`. Boş ya da yalnız.
+  /// boşluktan oluşan `department_id` süzgeç verilmemiş sayılır (`limit` ve `cursor`.
+  /// boş değerleriyle aynı gelenek).
+  ///
+  /// Hiçbir programda ekip satırı olmayan ve yönetici olmayan hesap `403.
+  /// organization.membership_required`; bu programda ekip satırı olmayan ve yönetici.
+  /// olmayan hesap, var olmayan programla aynı `404 work.program_scope_invalid` alır.
+  /// (programın varlığı sızmaz). Sıra `(created_at, id)`; imleç opak; `limit`.
+  /// varsayılanı 50, 200 üstü 200'e çekilir. Tek görev istekleri yine görevin kendi.
+  /// `program_id` ve `department_id` başlıklarıyla gider.
+  ///
+  /// [departmentId] - İsteğe bağlı departman süzgeci; görünürlükle kesişir. Boş ya da yalnız boşluk değer süzgeç yok sayılır.
+  ///
+  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
+  ///
+  /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
+  @GET('/v1/program/work-items')
+  Future<WorkItemList> listProgramWorkItems({
+    @Query('department_id') String? departmentId,
+    @Query('limit') int? limit,
+    @Query('cursor') String? cursor,
+    @Extras()
+    Map<String, dynamic>? extras = WorkClient.listProgramWorkItemsOpenapiExtras,
+  });
 
   /// Görev açar (tarihler `YYYY-MM-DD`).
   @POST('/v1/work-items')

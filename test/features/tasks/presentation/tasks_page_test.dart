@@ -180,7 +180,9 @@ void main() {
             },
           ],
         }),
-        'GET /v1/work-items' => jsonResponse(200, {'items': <Object>[]}),
+        'GET /v1/program/work-items' => jsonResponse(200, {
+          'items': <Object>[],
+        }),
         _ => pilot.handle(r),
       };
       h.read(scopeControllerProvider).selectProgram('prog-1');
@@ -201,6 +203,61 @@ void main() {
       );
     });
   }
+
+  // Tur 2 (Codex 3): gerçek "Yeni görev" düğmesinden açılış — karma rolde (d1 üye, d2
+  // koordinatör) varsayılan hedef hesaplanan açılabilir departman (d2), seçici yalnız
+  // açılabilen departmanları listeler (d1 üyeliği yok).
+  testWidgets(
+    'sunucu kataloğu, karma rol: yeni görev varsayılanı ve seçenekleri',
+    (tester) async {
+      final pilot = PilotBackend();
+      final h = await real(tester, () => pilotHarness(pilot, signedIn: true));
+      h.backend.handler = (r) => switch ('${r.method} ${r.path}') {
+        'GET /v1/me' => jsonResponse(200, {
+          'account_id': 'acc-1',
+          'email': 'a@b.test',
+          'full_name': 'Ayşe Yılmaz',
+          'company_admin': false,
+        }),
+        'GET /v1/me/departments' => jsonResponse(200, {
+          'departments': [
+            for (final (id, name, role) in [
+              ('d1', 'Üyelik Birimi', 'uye'),
+              ('d2', 'Koordinasyon Birimi', 'koordinator'),
+            ])
+              {
+                'program_id': 'prog-1',
+                'program_name': 'Program Bir',
+                'department_id': id,
+                'display_name': name,
+                'role': role,
+              },
+          ],
+        }),
+        'GET /v1/program/work-items' => jsonResponse(200, {
+          'items': <Object>[],
+        }),
+        'GET /v1/departments/d2/members' => jsonResponse(200, {
+          'members': <Object>[],
+        }),
+        _ => pilot.handle(r),
+      };
+      h.read(scopeControllerProvider).selectProgram('prog-1');
+      await pumpScreen(tester, h, const TasksPage());
+      await settle(tester);
+      await _tap(tester, find.byIcon(Icons.add_rounded).first);
+      expect(find.text(_l.uiTasksNtDesc), findsOneWidget);
+      expect(find.text('Koordinasyon Birimi'), findsOneWidget);
+      await _tap(tester, find.text(_l.uiTasksFieldCoord));
+      expect(find.text('Koordinasyon Birimi'), findsWidgets);
+      expect(
+        find.text('Üyelik Birimi'),
+        findsNothing,
+        reason: 'üyelik departmanında görev açılamaz: seçenek değil',
+      );
+      expect(h.backend.requests.where((r) => r.path.contains('/d1/')), isEmpty);
+    },
+  );
 
   testWidgets('başlangıç süzgeci (ana sayfa kutusu) ve boş görünüm', (
     tester,

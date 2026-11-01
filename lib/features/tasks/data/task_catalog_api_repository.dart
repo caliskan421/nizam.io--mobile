@@ -11,66 +11,59 @@ import '../../../core/api/generated/models/my_department_list.dart';
 import '../../../core/api/generated/models/work_item.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/http/interceptors.dart';
+import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../domain/task_access.dart';
 import '../domain/task_catalog.dart';
 import 'work_item_mapping.dart';
 
 /// Görev kataloğunun sunucu kaynağı (seçili program). Herkes için aynı liste ucu:
-/// `GET /v1/work-items` (S3, `listWorkItems`) departman başına, imleçle (`next_cursor`).
-/// Görünürlük sunucudadır: koordinatör ve şirket yöneticisi departmanın tümünü, üye yalnız
-/// kendine atananları alır.
+/// `GET /v1/program/work-items` (S2, `listProgramWorkItems`) — yalnız `X-Nizamio-Program`,
+/// departman başlığı GÖNDERİLMEZ (istemci akışları §2, `v0.7.0-api`). Görünürlük sunucudadır:
+/// şirket yöneticisi programın tümünü, koordinatör koordinatörü olduğu departmanların tümünü,
+/// üye yalnız kendisine atananları alır; birden çok rolde birleşim (aynı görev bir kez).
+/// Departmanlar arası tarama (fan-out) yoktur: program görünümü tek akışın sayfalamasıdır
+/// (imleç `next_cursor`, sayfa başına [pageSize]; imleç tekrarında durulur).
 ///
-/// Departman bağlamı TEKTİR (istemci akışları §2; departmanlar arası tarama yok). Seçilebilir
-/// departmanlar ([TaskCatalog.departments]): şirket yöneticisinde `listProgramDepartments`
+/// [load] paylaşılan kataloğu HER ZAMAN süzgeçsiz okur (ana sayfa, zaman çizelgesi, sayımlar).
+/// Görevler ekranının departman süzgeci ayrı okumadır ([loadTasks]): `department_id` sorgu
+/// parametresi (görünürlükle kesişir, yetki genişlemez); telefonda süzme yapılmaz. Süzgeç
+/// seçenekleri ([TaskCatalog.departments]): şirket yöneticisinde `listProgramDepartments`
 /// (`GET /v1/program/departments`, S2; `X-Result-Truncated` → [TaskCatalog.departmentsTruncated]),
-/// diğerlerinde `GET /v1/me/departments`'ın bu programdaki satırları. Liste departmanı: kapsamda
-/// seçili ([departmentId]; değiştirme `ScopeController.selectDepartment`) seçilebilirler
-/// arasındaysa o, değilse ilk seçilebilir (eskimiş seçim [correctDepartment] ile düzeltilir).
-/// Departman yoksa liste isteği gönderilmez ([TaskCatalog.departmentRequired]). Görünen kısa
-/// anahtar departman kodu, kod yoksa programdaki ad ([TaskDepartment.label]).
+/// koordinatör/üyede `GET /v1/me/departments`'ın bu programdaki satırları. Görünen kısa anahtar
+/// departman kodu, kod yoksa programdaki ad ([TaskDepartment.label]). Program okuma sırasında
+/// değişirse sayfa döngüsü durur (`client.scope_changed`).
 ///
 /// Rol `/v1/me` + `/v1/me/departments`'tan [TaskAccess]'te türetilir ve katalogla taşınır.
 /// Yönetici rapor/kullanıcı uçları ve `adminGantt` kullanılmaz. Liste dosya sayısı, not sayısı
 /// ve açıklama taşımaz; atanan adları `assignees[].full_name`'den [TaskCatalog.names]'e girer.
-class ApiTaskCatalogRepository implements TaskCatalogRepository {
+/// Tek göreve ait istekler satırın kendi `program_id` + `department_id` değeriyle (`withScope`)
+/// gider; bu sınıf yalnız listeyi okur.
+class ApiTaskCatalogRepository
+    implements TaskCatalogRepository, TaskListRepository {
   ApiTaskCatalogRepository(
     Dio dio, {
     required this.programId,
-    String? Function()? departmentId,
-    void Function(String departmentId)? correctDepartment,
     DateTime Function()? now,
   }) : _identity = IdentityClient(dio),
        _work = WorkClient(dio),
        _organization = OrganizationClient(dio),
        _program = ProgramClient(dio),
-       departmentId = departmentId ?? _none,
-       correctDepartment = correctDepartment ?? _ignore,
        _now = now ?? DateTime.now;
-
-  static String? _none() => null;
-  static void _ignore(String _) {}
 
   /// Kesilme başlığı (`listProgramDepartments`, openapi `ResultTruncated`).
   static const truncationHeader = 'X-Result-Truncated';
 
   /// Seçili programın kimliği (istek anında okunur).
   final String? Function() programId;
-
-  /// Kapsamda seçili departman (yoksa null; istek anında okunur).
-  final String? Function() departmentId;
-
-  /// Kapsamdaki kalıcı departman seçimi seçilebilirler arasında yoksa liste ilk seçilebilire
-  /// düşer ve seçim bununla düzeltilir (`ScopeController.selectDepartment`).
-  final void Function(String departmentId) correctDepartment;
   final IdentityClient _identity;
   final WorkClient _work;
   final OrganizationClient _organization;
   final ProgramClient _program;
   final DateTime Function() _now;
 
-  /// Liste sayfa boyu (sunucu tavanı) ve departman başına en çok sayfa (döngü koruması).
+  /// Liste sayfa boyu (sunucu tavanı) ve en çok sayfa (imleç tekrarına ek döngü tavanı).
   static const pageSize = 200;
-  static const maxPages = 20;
+  static const maxPages = 100;
 
   @override
   Future<TaskCatalog> load() async {
@@ -97,26 +90,23 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
             ],
             false,
           );
-    final department = _department(departments, departmentsTruncated);
-    final (items, truncated) = department == null
-        ? (const <WorkItem>[], false)
-        : await _items(program, department.id);
-    final tasks = [for (final w in items) _task(w, department!.label)];
+
+    final (items, truncated) = await _items(program, null);
+
+    final labels = {for (final d in departments) d.id: d.label};
+    final tasks = [
+      for (final w in items) _task(w, labels[w.departmentId] ?? w.departmentId),
+    ];
 
     final today = _now();
     return TaskCatalog(
       today: DateTime(today.year, today.month, today.day),
       me: access.accountId,
       access: access,
-      departmentId: department?.id,
       truncated: truncated,
       departments: departments,
       departmentsTruncated: departmentsTruncated,
-      names: [
-        for (final w in items)
-          for (final a in w.assignees)
-            if (a.fullName case final name?) PersonName(a.accountId, name),
-      ],
+      names: _names(items),
       tasks: tasks,
       people: [
         Person(
@@ -126,10 +116,10 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
         ),
       ],
       coordinatorships: [
-        if (department != null)
+        for (final d in departments)
           CoordinatorshipRef(
-            code: department.id,
-            name: department.name,
+            code: d.id,
+            name: d.name,
             leads: const [],
             members: const [],
           ),
@@ -137,8 +127,41 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
     );
   }
 
-  /// Şirket yöneticisinin seçilebilir departmanları (programa bağlı canlı departmanlar, ada
-  /// göre sıralı) ve kesilme bayrağı.
+  /// Görevler ekranının departman süzgeci: yalnız görev sayfaları (`department_id` her
+  /// sayfada; departman başlığı yok). Kimlik/ekip/departman seçenekleri yeniden okunmaz;
+  /// geçersiz süzgeç (404 `work.program_scope_invalid`) dahil hata fırlar (süzgeci çağıran
+  /// temizler). Kısa anahtar [departments]'tan (katalogdaki departman etiketi), yoksa kimlik.
+  @override
+  Future<TaskListPage> loadTasks(
+    String departmentId, {
+    bool Function()? isCurrent,
+    List<TaskDepartment> departments = const [],
+  }) async {
+    final program = programId() ?? '';
+    final (items, truncated) = await _items(
+      program,
+      departmentId,
+      isCurrent: isCurrent,
+    );
+    final labels = {for (final d in departments) d.id: d.label};
+    return TaskListPage(
+      tasks: [
+        for (final w in items)
+          _task(w, labels[w.departmentId] ?? w.departmentId),
+      ],
+      names: _names(items),
+      truncated: truncated,
+    );
+  }
+
+  static List<PersonName> _names(List<WorkItem> items) => [
+    for (final w in items)
+      for (final a in w.assignees)
+        if (a.fullName case final name?) PersonName(a.accountId, name),
+  ];
+
+  /// Şirket yöneticisinin süzgeç seçenekleri (programa bağlı canlı departmanlar, ada göre
+  /// sıralı) ve kesilme bayrağı.
   Future<(List<TaskDepartment>, bool)> _programDepartments() async {
     final r = await apiCall(_program.listProgramDepartments);
     final values = r.response.headers[truncationHeader];
@@ -151,45 +174,38 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
     );
   }
 
-  /// Listenin TEK departmanı: kapsamda seçili departman seçilebilirler arasındaysa o; değilse
-  /// ilk seçilebilir ve eskimiş seçim [correctDepartment] ile düzeltilir. Kesik listede
-  /// (yönetici) listede görünmeyen seçim korunur (ilk 200'ün dışında olabilir; ad = kimlik).
-  /// Seçilebilir yoksa null → "departman seç" (istek gönderilmez).
-  TaskDepartment? _department(List<TaskDepartment> options, bool truncated) {
-    final first = options.firstOrNull;
-    final selected = departmentId();
-    if (selected != null && selected.isNotEmpty) {
-      final match = options.where((d) => d.id == selected).firstOrNull;
-      if (match != null) return match;
-      if (truncated) return TaskDepartment(id: selected, name: selected);
-      if (first != null) correctDepartment(first.id);
-    }
-    return first;
-  }
-
-  /// Departmanın sayfaları (tek akış, imleçle); [maxPages] dolduğunda imleç hâlâ varsa
+  /// Programın görünür görevleri: tek akış, imleçle bütün sayfalar. Program her sayfada
+  /// açıkça sabitlenir ([withProgram]); departman başlığı yok (S2). İmleç tekrar ederse ya da [maxPages] dolarsa durulur ve
   /// ikinci değer `true` (liste kesildi — sessiz kesilme yok).
   Future<(List<WorkItem>, bool)> _items(
     String program,
-    String department,
-  ) async {
+    String? department, {
+    bool Function()? isCurrent,
+  }) async {
     final all = <WorkItem>[];
+    final seen = <String>{};
     String? cursor;
     for (var page = 0; page < maxPages; page++) {
+      // Sayfa aralarında: okuma eskidiyse (süzgeç/program değişti) döngü durur.
+      if (page > 0 &&
+          (programId() != program || !(isCurrent?.call() ?? true))) {
+        throw ApiError(ClientErrorCode.scopeChanged);
+      }
       final r = await apiCall(
-        () => _work.listWorkItems(
+        () => _work.listProgramWorkItems(
+          departmentId: department,
           limit: pageSize,
           cursor: cursor,
-          extras: withScope(
-            WorkClient.listWorkItemsOpenapiExtras,
+          extras: withProgram(
+            WorkClient.listProgramWorkItemsOpenapiExtras,
             program,
-            department,
           ),
         ),
       );
       all.addAll(r.items);
       cursor = r.nextCursor;
       if (cursor == null || cursor.isEmpty) return (all, false);
+      if (!seen.add(cursor)) return (all, true);
     }
     return (all, true);
   }

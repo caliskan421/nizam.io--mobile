@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
@@ -132,13 +133,13 @@ class _HorizontalTimelinePageState
         child: NzAsyncView<TaskCatalog>(
           value: catalog,
           onRetry: () => ref.invalidate(taskCatalogControllerProvider),
-          data: (c) => _body(context, _layoutOf(c, state)),
+          data: (c) => _body(context, _layoutOf(c, state), c.truncated),
         ),
       ),
     );
   }
 
-  Widget _body(BuildContext context, GanttLayout layout) {
+  Widget _body(BuildContext context, GanttLayout layout, bool truncated) {
     final c = context.colors;
     final v = layout.view;
     final sel = v.selection;
@@ -164,6 +165,18 @@ class _HorizontalTimelinePageState
                 onAll: ctrl.clearCoords,
                 onToggle: ctrl.toggleCoord,
               ),
+              // Kesik katalog (sayfa tavanı/imleç tekrarı): çizelge eksik olabilir.
+              if (truncated)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: NizamioSpacing.gutter,
+                    vertical: NizamioSpacing.space1,
+                  ),
+                  child: Text(
+                    context.l10n.uiListsTruncated,
+                    style: context.text.caption.copyWith(color: c.textMuted),
+                  ),
+                ),
               Expanded(
                 child: DecoratedBox(
                   position: DecorationPosition.foreground,

@@ -103,6 +103,23 @@ final class NewTaskForm {
   );
 }
 
+/// Yeni görev formunun koordinatörlük seçenekleri: örnek katalogda hepsi; sunucu kataloğunda
+/// yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
+/// departmanları, karma rolde yalnız koordinatörlükler; üyelik departmanı listelenmez).
+@riverpod
+List<CoordinatorshipRef> newTaskCoordinatorships(Ref ref) {
+  final catalog = ref.watch(taskCatalogControllerProvider).value;
+  if (catalog == null) return const [];
+  final access = catalog.access;
+  if (access == null) return catalog.coordinatorships;
+  final program = ref.watch(scopeStateProvider).programId;
+  if (program == null) return const [];
+  return [
+    for (final c in catalog.coordinatorships)
+      if (access.canCreateIn(program, c.code)) c,
+  ];
+}
+
 /// Oluşturulan görevin özeti (sonuç bildirimi).
 typedef CreatedTask = ({String code, int notified});
 
@@ -120,14 +137,14 @@ class NewTaskFormController extends _$NewTaskFormController {
       month: DateTime(today.year, today.month),
       // Sunucu varsayılanı açık (WORK-K75); örnek prototipte kapalı.
       evidenceRequired: _server,
-      coordinatorship: ref
-          .read(taskCatalogControllerProvider)
-          .value
-          ?.coordinatorships
-          .firstOrNull
-          ?.code,
+      coordinatorship: _defaultCoordinatorship(),
     );
   }
+
+  /// Varsayılan koordinatörlük: formun seçeneklerinin ilki ([newTaskCoordinatorships]; sunucu
+  /// kataloğunda yalnız görev açılabilen departmanlar — üyelik departmanı varsayılan olmaz).
+  String? _defaultCoordinatorship() =>
+      ref.read(newTaskCoordinatorshipsProvider).firstOrNull?.code;
 
   bool get _server =>
       ref.read(taskCatalogControllerProvider).value?.access != null;
@@ -145,9 +162,13 @@ class NewTaskFormController extends _$NewTaskFormController {
   void prepare({String? coordinatorship, bool reset = true, String? title}) {
     var f = _cancelPick(state);
     if (title != null) f = f.copyWith(title: title);
+    // Sunucu kataloğunda hedefsiz sıfırlama (görev listesi) hesaplanan açılabilir
+    // varsayılana düşer; örnek katalogda seçilmemiş kalır (prototip).
+    final target =
+        coordinatorship ?? (_server ? _defaultCoordinatorship() : null);
     state = reset
         ? f.copyWith(
-            coordinatorship: () => coordinatorship,
+            coordinatorship: () => target,
             assignees: const [],
             pane: () => null,
             error: () => null,

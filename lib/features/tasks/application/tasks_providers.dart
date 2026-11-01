@@ -16,6 +16,12 @@ TaskCatalogRepository taskCatalogRepository(Ref ref) =>
       'taskCatalogRepositoryProvider bileşim kökünde (lib/app/di) bağlanır',
     );
 
+/// PORT: görevler ekranının departman süzgeçli okuması (`tasks_module.dart`'ta bağlanır).
+@Riverpod(keepAlive: true)
+TaskListRepository taskListRepository(Ref ref) => throw UnimplementedError(
+  'taskListRepositoryProvider bileşim kökünde (lib/app/di) bağlanır',
+);
+
 /// PORT: görev ayrıntısının kaynağı (`tasks_module.dart`'ta bağlanır).
 @Riverpod(keepAlive: true)
 TaskDetailsRepository taskDetailsRepository(Ref ref) =>

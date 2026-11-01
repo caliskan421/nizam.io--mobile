@@ -221,7 +221,9 @@ int trCompare(String a, String b) {
 }
 
 /// Filtre alt sayfasının seçenekleri ve sayıları (prototip `G`): tüm görevler üzerinden;
-/// kişiler görev sayısına göre azalan, görevi olmayan kişi/koordinatörlük düşer.
+/// kişiler görev sayısına göre azalan, görevi olmayan kişi/koordinatörlük düşer. Sunucu
+/// kataloğunda koordinatörlük seçeneği yoktur: departman süzgeci sunucudadır
+/// (`department_id`, liste üstündeki seçici); telefonda departman süzmesi yapılmaz.
 @immutable
 final class TaskFilterOptions {
   const TaskFilterOptions({
@@ -256,8 +258,9 @@ TaskFilterOptions filterOptions(TaskCatalog c) {
   return TaskFilterOptions(
     people: [for (final e in indexed) e.$2],
     coordinatorships: [
-      for (final co in c.coordinatorships)
-        if ((byCoord[co.code] ?? 0) > 0) (co, byCoord[co.code]!),
+      if (c.access == null)
+        for (final co in c.coordinatorships)
+          if ((byCoord[co.code] ?? 0) > 0) (co, byCoord[co.code]!),
     ],
     priorities: byPrio,
   );

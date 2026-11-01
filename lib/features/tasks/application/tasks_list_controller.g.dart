@@ -271,7 +271,7 @@ final class TasksListResultProvider
   }
 }
 
-String _$tasksListResultHash() => r'8b48d56b88a7b7a7b3b7be490752a50523c9946a';
+String _$tasksListResultHash() => r'd90b00ec30e7f8abed89a0f281d873eb4c818fdd';
 
 /// Seçili görünümün süzülmüş/sıralı listesi ve görünüm sayıları; yalnız sorguyu etkileyen
 /// alanlar (görünüm, sıralama, yön, süzgeç) ya da katalog değişince yeniden hesaplanır
@@ -349,4 +349,4 @@ final class TaskFilterOptionsProvider
   }
 }
 
-String _$taskFilterOptionsHash() => r'9a85029098fd6a951db89078a8743abcc59aa23c';
+String _$taskFilterOptionsHash() => r'2730e7463fb1e0322614e5e6194f0b14f3d44c2e';

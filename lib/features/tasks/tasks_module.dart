@@ -31,13 +31,23 @@ void registerTasksModule(GetIt locator, {required Dio? Function() apiDio}) {
               : ApiTaskCatalogRepository(
                   dio,
                   programId: () => locator<ScopeController>().current.programId,
-                  departmentId: () =>
-                      locator<ScopeController>().current.departmentId,
-                  correctDepartment: (id) =>
-                      locator<ScopeController>().selectDepartment(id),
                 );
         },
         sample: SampleTaskCatalogRepository(),
+      ),
+    )
+    ..registerLazySingleton<TaskListRepository>(
+      () => TaskListSource(
+        scope: locator<ScopeController>(),
+        server: () {
+          final dio = apiDio();
+          return dio == null
+              ? null
+              : ApiTaskCatalogRepository(
+                  dio,
+                  programId: () => locator<ScopeController>().current.programId,
+                );
+        },
       ),
     )
     ..registerLazySingleton<TaskDetailsRepository>(
@@ -65,6 +75,9 @@ void registerTasksModule(GetIt locator, {required Dio? Function() apiDio}) {
 List<Override> tasksOverrides(GetIt locator) => [
   taskCatalogRepositoryProvider.overrideWith(
     (ref) => locator<TaskCatalogRepository>(),
+  ),
+  taskListRepositoryProvider.overrideWith(
+    (ref) => locator<TaskListRepository>(),
   ),
   taskDetailsRepositoryProvider.overrideWith(
     (ref) => locator<TaskDetailsRepository>(),

@@ -1,6 +1,6 @@
 {
   "$comment": "Üretim kaynaklarının TEK pini. tool/gen.dart spec'i yalnız backend ETİKETİNDEN (git show refs/tags/<tag>:<yol>), web kaynağını (TR hata metinleri) yalnız sabit web COMMIT'inden okur; tasarım token'ları web'den değil design/mobile-tokens.json'dan (ADR-0003 karar 24). Etiketsiz main'den üretim yoktur. Değiştirmek = yeni etiket/commit + make gen + PR.",
-  "backendTag": "v0.6.0-api",
+  "backendTag": "v0.7.0-api",
   "specPath": "docs/api/openapi.yaml",
   "errorCatalogPath": "docs/api/error-codes.json",
   "web": {

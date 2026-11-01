@@ -21,6 +21,44 @@ class _WorkClient implements WorkClient {
   final ParseErrorLogger? errorLogger;
 
   @override
+  Future<WorkItemList> listProgramWorkItems({
+    String? departmentId,
+    int? limit,
+    String? cursor,
+    Map<String, dynamic>? extras = WorkClient.listProgramWorkItemsOpenapiExtras,
+  }) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras ?? <String, dynamic>{});
+    final queryParameters = <String, dynamic>{
+      r'department_id': departmentId,
+      r'limit': limit,
+      r'cursor': cursor,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<WorkItemList>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/v1/program/work-items',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late WorkItemList _value;
+    try {
+      _value = WorkItemList.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<WorkItem> createWorkItem({
     required CreateWorkItemRequest body,
     Map<String, dynamic>? extras = WorkClient.createWorkItemOpenapiExtras,

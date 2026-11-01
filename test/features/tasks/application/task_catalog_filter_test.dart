@@ -99,8 +99,8 @@ class _Pages implements TaskListRepository {
     return c.future;
   }
 
-  void ok(int i, List<TaskItem> tasks) =>
-      calls[i].$2.complete(TaskListPage(tasks: tasks));
+  void ok(int i, List<TaskItem> tasks, {List<PersonName> names = const []}) =>
+      calls[i].$2.complete(TaskListPage(tasks: tasks, names: names));
 
   void invalid(int i) =>
       calls[i].$2.completeError(ApiError('work.program_scope_invalid'));
@@ -386,6 +386,125 @@ void main() {
       expect(c.read(taskListFilterProvider).departmentId, 'd2');
     },
   );
+
+  // Tur 4 (Codex 3).
+  TaskDetails detailsOf({TaskItem? item, List<PersonName> names = const []}) =>
+      TaskDetails(
+        subtasks: const [],
+        notes: const [],
+        files: const [],
+        item: item,
+        names: names,
+      );
+
+  test('upsert ayrıntıda okunmuş açıklamayı korur (liste satırı açıklama taşımaz); diğer '
+      'alanlar sunucu değeri', () async {
+    final c = harness(_admin);
+    await c.read(taskCatalogControllerProvider.future);
+    c
+        .read(taskCatalogControllerProvider.notifier)
+        .applyDetails(
+          'w2',
+          detailsOf(
+            item: _task('w2', 'd2').copyWith(description: () => 'Pompa odası'),
+          ),
+        );
+    filter(c).select('d2');
+    await _settle();
+    pages.ok(0, [_task('w2', 'd2').copyWith(status: TaskStatus.done)]);
+    await _settle();
+    final w2 = c.read(taskCatalogControllerProvider).value!.task('w2')!;
+    expect(w2.description, 'Pompa odası');
+    expect(w2.status, TaskStatus.done);
+    expect(view(c).task('w2')!.description, 'Pompa odası');
+  });
+
+  test(
+    'reload sırasında uçuşta kalan eski süzgeçli yanıt kataloğa yazılmaz',
+    () async {
+      final c = harness(_admin);
+      await c.read(taskCatalogControllerProvider.future);
+      filter(c).select('d2');
+      await _settle();
+      final reload = c.read(taskCatalogControllerProvider.notifier).reload();
+      await reload;
+      await _settle();
+      expect(pages.asked, ['d2', 'd2']);
+      pages.ok(0, [_task('w2', 'd2').copyWith(title: 'Eski yanıt')]);
+      await _settle();
+      expect(
+        c.read(taskCatalogControllerProvider).value!.task('w2')!.title,
+        'Görev w2',
+        reason: 'eski okuma upsert edilmez',
+      );
+      pages.ok(1, [_task('w2', 'd2').copyWith(title: 'Yeni yanıt')]);
+      await _settle();
+      expect(
+        c.read(taskCatalogControllerProvider).value!.task('w2')!.title,
+        'Yeni yanıt',
+      );
+    },
+  );
+
+  test('w9 (yalnız süzgeçli sayfada): ayrıntı açıkken reload → katalogda yok → süzgeçli '
+      'upsert getirir → ayrıntı BİR KEZ yeniden okunur; ilgisiz katalog değişimi okutmaz', () async {
+    final details = _Details();
+    final c = harness(_admin, details: details);
+    await c.read(taskCatalogControllerProvider.future);
+    filter(c).select('d2');
+    await _settle();
+    pages.ok(0, [_task('w9', 'd2')]);
+    await _settle();
+    c.listen(taskDetailsProvider('w9'), (_, _) {});
+    await c.read(taskDetailsProvider('w9').future);
+    expect(details.loaded, ['w9']);
+
+    final store = c.read(taskCatalogControllerProvider.notifier);
+    await store.reload();
+    await _settle();
+    expect(
+      c.read(taskCatalogControllerProvider).value!.task('w9'),
+      isNull,
+      reason: 'süzgeçsiz katalogda yok (henüz upsert yok)',
+    );
+    expect(details.loaded, ['w9'], reason: 'görev yokken ayrıntı isteği yok');
+    pages.ok(1, [_task('w9', 'd2')]);
+    await _settle();
+    await c.read(taskDetailsProvider('w9').future);
+    expect(details.loaded, ['w9', 'w9'], reason: 'varlığa geçişte bir kez');
+
+    // İlgisiz değişimler (başka görev, aynı görevin yeniden upsert'i) ayrıntıyı okutmaz.
+    store
+      ..applyItem('w1', _task('w1', 'd1').copyWith(title: 'x'))
+      ..upsert([
+        _task('w9', 'd2').copyWith(title: 'y'),
+      ], since: store.generation);
+    await _settle();
+    expect(details.loaded, ['w9', 'w9']);
+  });
+
+  test('ad yarışı: okuma başladıktan sonra yerelde güncellenen ad eski yanıtla ezilmez; '
+      'eksik adlar eklenir', () async {
+    final c = harness(_admin);
+    await c.read(taskCatalogControllerProvider.future);
+    filter(c).select('d2');
+    await _settle();
+    c
+        .read(taskCatalogControllerProvider.notifier)
+        .applyDetails(
+          'w1',
+          detailsOf(names: const [PersonName('u2', 'Yeni Ad')]),
+        );
+    pages.ok(
+      0,
+      [_task('w2', 'd2')],
+      names: const [PersonName('u2', 'Eski Ad'), PersonName('u5', 'Beşinci')],
+    );
+    await _settle();
+    final shared = c.read(taskCatalogControllerProvider).value!;
+    expect(shared.nameOf('u2'), 'Yeni Ad');
+    expect(shared.nameOf('u5'), 'Beşinci');
+  });
 
   test('canCreateTask: yönetici ya da programda bir koordinatörlük; yalnız üye hayır', () async {
     final c = harness(_mixed)..listen(canCreateTaskProvider, (_, _) {});

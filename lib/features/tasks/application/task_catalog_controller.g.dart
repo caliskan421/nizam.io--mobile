@@ -58,7 +58,7 @@ final class TaskCatalogControllerProvider
 }
 
 String _$taskCatalogControllerHash() =>
-    r'969c65ae9dfc0a13798ace4461450188aef4d38a';
+    r'f9fe21c5695e9376fa4e89505b1ba5705d012aec';
 
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,

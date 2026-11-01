@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers.dart';
@@ -18,6 +19,18 @@ part 'task_details_controller.g.dart';
 Future<void> taskDetails(Ref ref, String code) async {
   ref
     ..watch(scopeStateProvider)
+    // Yalnız görevin katalogdaki VARLIĞI izlenir (her katalog değişiminde yeniden okuma yok):
+    // yüklü katalogda yokken (ör. kesik katalog reload'u) süzgeçli okuma görevi kataloğa
+    // getirince (yok → var) ayrıntı bir kez okunur. Katalog yokken (null) varlık bilinmez;
+    // ilk yükleme ayrıca yeniden okutmaz.
+    ..listen(
+      taskCatalogControllerProvider.select(
+        (c) => c.value == null ? null : c.value!.task(code) != null,
+      ),
+      (prev, next) {
+        if (prev == false && next == true) ref.invalidateSelf();
+      },
+    )
     ..listen(taskCatalogControllerProvider, (prev, next) {
       if (next.isLoading && !(prev?.isLoading ?? false)) ref.invalidateSelf();
     });

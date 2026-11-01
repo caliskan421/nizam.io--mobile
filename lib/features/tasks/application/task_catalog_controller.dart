@@ -34,13 +34,20 @@ class TaskCatalogController extends _$TaskCatalogController {
 
   void _touch(String code) => _touched[code] = ++_generation;
 
+  // Ad nesli: [applyDetails] yeni adlar getirdiğinde işaretlenir; [upsert] okuma başladıktan
+  // sonra adlar güncellendiyse eski yanıtın adlarıyla var olan adları ezmez (yalnız eksikleri
+  // tamamlar).
+  int _namesAt = 0;
+
   /// Okuma başlangıcının nesli ([upsert] `since`).
   int get generation => _generation;
 
   /// Tek depo kuralı: süzgeçli okumanın ([since] neslinde başlayan) satırları katalogda
   /// güncellenir ya da eklenir (sunucunun görünür saydığı görev). Aynı kimlikli satırın alanları
   /// sunucu değeriyle değişir, ayrıntı parçaları (alt görev, not, dosya, tarih talebi) korunur;
-  /// okuma başladıktan sonra yerelde güncellenmiş satır olduğu gibi kalır. Adlar katılır.
+  /// okuma başladıktan sonra yerelde güncellenmiş satır olduğu gibi kalır. Açıklama listede
+  /// yoksa katalogdaki korunur. Adlar katılır; okuma başladıktan sonra yerelde ad güncellendiyse
+  /// yalnız eksik adlar eklenir.
   /// Katalog yokken yok sayılır.
   void upsert(
     List<TaskItem> items, {
@@ -61,13 +68,21 @@ class TaskCatalogController extends _$TaskCatalogController {
             noteEntries: t.noteEntries,
             fileEntries: t.fileEntries,
             dateRequest: () => t.dateRequest,
+            // Liste satırı açıklama taşımaz: ayrıntıda okunmuş açıklama korunur.
+            description: () => i.description ?? t.description,
           )
         else
           t,
       // Katalogda olmayanlar (ör. katalog sonrası açılan ya da kesik katalog) sona eklenir.
       ...fresh.values,
     ];
-    state = AsyncData(c.withTasks(merged).withNames(names));
+    final newNames = _namesAt > since
+        ? [
+            for (final n in names)
+              if (c.nameOf(n.id) == null) n,
+          ]
+        : names;
+    state = AsyncData(c.withTasks(merged).withNames(newNames));
   }
 
   /// Kaynaktan yeniden okur ve yeni kataloğu bekler (yazma sonrası). Okuma hatası fırlatılmaz:
@@ -115,6 +130,7 @@ class TaskCatalogController extends _$TaskCatalogController {
   /// hesaplanmaz.
   void applyDetails(String code, TaskDetails d) {
     _touch(code);
+    if (d.names.isNotEmpty) _namesAt = _generation;
     final c = _catalog;
     if (c == null) return;
     state = AsyncData(

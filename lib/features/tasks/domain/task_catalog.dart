@@ -513,6 +513,7 @@ final class TaskItem {
     List<TaskFile>? fileEntries,
     List<TaskNote>? noteEntries,
     bool? evidenceRequired,
+    String? Function()? description,
   }) => TaskItem(
     code: code ?? this.code,
     id: code == null || id != this.code ? id : code,
@@ -530,7 +531,7 @@ final class TaskItem {
     creator: creator,
     createdAt: createdAt,
     completedAt: completedAt == null ? this.completedAt : completedAt(),
-    description: description,
+    description: description == null ? this.description : description(),
     lateness: lateness,
     files: fileEntries?.length ?? files,
     notes: noteEntries?.length ?? notes,

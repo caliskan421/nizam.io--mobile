@@ -1,14 +1,18 @@
 // HTTP ara katmanı (F14 kapsam 6) + kimlik servisi + log redaksiyonu: gerçek provider bağları,
 // sahte bağdaştırıcı.
 
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/api/api_meta.dart';
 import 'package:nizamio/core/api/generated/clients/identity_client.dart';
 import 'package:nizamio/core/api/generated/clients/organization_client.dart';
 import 'package:nizamio/core/api/generated/clients/program_client.dart';
+import 'package:nizamio/core/api/generated/clients/records_client.dart';
 import 'package:nizamio/core/config/flavor.dart';
 import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/core/http/file_upload.dart';
 import 'package:nizamio/core/http/interceptors.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/logging/log.dart';
@@ -418,6 +422,41 @@ void main() {
         expect(
           h.store.values[TokenStore.key],
           isNot(contains('refresh-token-1')),
+        );
+      },
+    );
+
+    // Codex 4: FormData ilk gönderimde sonlandırılır; yeniden gönderilemez (dio StateError).
+    test(
+      'multipart yükleme 401 → yenileme 1, tekrar 0, client.session_refreshed',
+      () async {
+        final dir = Directory.systemTemp.createTempSync('nz_up_');
+        addTearDown(() => dir.deleteSync(recursive: true));
+        final file = File('${dir.path}/rapor.pdf')..writeAsBytesSync([1, 2, 3]);
+        h.backend.handler = (r) =>
+            r.method == 'POST' && r.path == '/v1/work-items/w1/files'
+            ? envelope(401, 'platform.unauthenticated')
+            : handler(r);
+        h.read(scopeControllerProvider).selectProgram('prog-1');
+        await expectLater(
+          postWorkItemFile(
+            h.read(apiDioProvider)!,
+            workItemId: 'w1',
+            tag: 'sonuc',
+            filePath: file.path,
+            filename: 'rapor.pdf',
+            contentType: 'application/pdf',
+            extras: withDepartment(RecordsClient.attachFileOpenapiExtras, 'd1'),
+          ),
+          apiError(ClientErrorCode.sessionRefreshed),
+        );
+        expect(h.backend.count('POST', '/v1/auth/refresh'), 1);
+        expect(h.backend.count('POST', '/v1/work-items/w1/files'), 1);
+        // Oturum yenilendi: sonraki (JSON) istek yeni belirteçle gider.
+        await h.identity.me();
+        expect(
+          h.backend.requests.last.header('Authorization'),
+          'Bearer access-token-2',
         );
       },
     );

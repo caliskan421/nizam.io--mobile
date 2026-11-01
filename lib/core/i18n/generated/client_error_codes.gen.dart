@@ -14,6 +14,7 @@ abstract final class ClientErrorCode {
   static const serverNotVerified = 'client.server_not_verified';
   static const serverUnrecognized = 'client.server_unrecognized';
   static const sessionEnded = 'client.session_ended';
+  static const sessionRefreshed = 'client.session_refreshed';
   static const timeout = 'client.timeout';
   static const tlsError = 'client.tls_error';
   static const unknownOperation = 'client.unknown_operation';
@@ -32,6 +33,7 @@ abstract final class ClientErrorCode {
     serverNotVerified,
     serverUnrecognized,
     sessionEnded,
+    sessionRefreshed,
     timeout,
     tlsError,
     unknownOperation,

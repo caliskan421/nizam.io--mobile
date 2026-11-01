@@ -746,6 +746,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errClientSessionEnded => 'Oturum sona erdi. Yeniden giriş yapın.';
 
   @override
+  String get errClientSessionRefreshed =>
+      'Oturum yenilendi; dosya gönderilmedi. Yüklemeyi yeniden deneyin.';
+
+  @override
   String get errClientTimeout =>
       'Sunucu zamanında yanıt vermedi. Biraz sonra yeniden deneyin.';
 

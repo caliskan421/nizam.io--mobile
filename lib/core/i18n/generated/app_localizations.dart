@@ -1378,6 +1378,12 @@ abstract class AppLocalizations {
   /// **'Oturum sona erdi. Yeniden giriş yapın.'**
   String get errClientSessionEnded;
 
+  /// client.session_refreshed
+  ///
+  /// In tr, this message translates to:
+  /// **'Oturum yenilendi; dosya gönderilmedi. Yüklemeyi yeniden deneyin.'**
+  String get errClientSessionRefreshed;
+
   /// client.timeout
   ///
   /// In tr, this message translates to:

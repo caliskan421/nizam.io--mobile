@@ -161,7 +161,8 @@ class ApiGuardInterceptor extends Interceptor {
 }
 
 /// 2. halka — kimlik. Bearer erişim belirteci; 401 → tek uçuş yenileme → istek YALNIZ BİR KEZ
-/// tekrarlanır. Giriş/yenileme (S0) ve çıkışın 401'i yenileme tetiklemez.
+/// tekrarlanır. Giriş/yenileme (S0) ve çıkışın 401'i yenileme tetiklemez. Multipart (FormData)
+/// istek yenilemeden sonra tekrarlanmaz: `client.session_refreshed` ile döner.
 class AuthInterceptor extends Interceptor {
   AuthInterceptor({
     required this.session,
@@ -237,6 +238,18 @@ class AuthInterceptor extends Interceptor {
       );
     }
     if (st.generation != session.generation) return handler.next(ended());
+    // Multipart (FormData) gövde ilk gönderimde sonlandırılmıştır; aynı nesne yeniden
+    // gönderilemez (dio `StateError`). Yenileme yapıldı, istek TEKRARLANMAZ: kullanıcı
+    // yüklemeyi yeni gövdeyle yeniden başlatır (`client.session_refreshed`).
+    if (o.data is FormData) {
+      return handler.next(
+        DioException(
+          requestOptions: o,
+          response: err.response,
+          error: ApiError(ClientErrorCode.sessionRefreshed),
+        ),
+      );
+    }
     try {
       st.retried = true;
       final response = await dio().fetch<Object?>(o);

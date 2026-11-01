@@ -857,6 +857,10 @@
   "@errClientSessionEnded": {
     "description": "client.session_ended"
   },
+  "errClientSessionRefreshed": "Oturum yenilendi; dosya gönderilmedi. Yüklemeyi yeniden deneyin.",
+  "@errClientSessionRefreshed": {
+    "description": "client.session_refreshed"
+  },
   "errClientTimeout": "Sunucu zamanında yanıt vermedi. Biraz sonra yeniden deneyin.",
   "@errClientTimeout": {
     "description": "client.timeout"

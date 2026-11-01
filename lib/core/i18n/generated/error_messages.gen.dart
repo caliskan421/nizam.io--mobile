@@ -219,6 +219,7 @@ const localizedErrorCodes = <String>{
   'client.server_not_verified',
   'client.server_unrecognized',
   'client.session_ended',
+  'client.session_refreshed',
   'client.timeout',
   'client.tls_error',
   'client.unknown_operation',
@@ -657,6 +658,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errClientServerUnrecognized;
     case 'client.session_ended':
       return l.errClientSessionEnded;
+    case 'client.session_refreshed':
+      return l.errClientSessionRefreshed;
     case 'client.timeout':
       return l.errClientTimeout;
     case 'client.tls_error':

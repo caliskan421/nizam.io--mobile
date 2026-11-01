@@ -9,6 +9,7 @@
     "client.not_signed_in": "Bu işlem için giriş yapılmalı.",
     "client.reauth_required": "Oturum doğrulanamadı. Güvenliğiniz için yeniden giriş yapın.",
     "client.session_ended": "Oturum sona erdi. Yeniden giriş yapın.",
+    "client.session_refreshed": "Oturum yenilendi; dosya gönderilmedi. Yüklemeyi yeniden deneyin.",
     "client.server_not_verified": "Önce sunucu adresi doğrulanmalı.",
     "client.invalid_server_address": "Sunucu adresi geçersiz.",
     "client.insecure_server": "Sunucu adresi https ile başlamalı; güvenli olmayan bağlantı kurulmaz.",

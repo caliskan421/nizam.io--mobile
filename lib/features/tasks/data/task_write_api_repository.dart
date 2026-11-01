@@ -30,8 +30,8 @@ import '../domain/task_writes.dart';
 import 'work_item_mapping.dart';
 
 /// [TaskWriteRepository]'nin üretilmiş `WorkClient` ile gerçekleştirmesi. Her istek görevin
-/// KENDİ departmanıyla gider ([withDepartment]; seçili kapsamın departmanı değil). Departmanı
-/// olmayan görev kapıda reddedilir (boş kimlik seçili departmana düşmez). Yanıt gövdeleri
+/// KENDİ programı ve departmanıyla gider ([withScope]; seçili kapsam değil). Programı ya da
+/// departmanı olmayan görev kapıda reddedilir (boş kimlik seçili kapsama düşmez). Yanıt gövdeleri
 /// okunmaz (yalnız yeni görevin kimliği): çağıran başarıdan sonra kaynağı yeniden okur
 /// (istemci akışları §8).
 ///
@@ -67,16 +67,18 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
         StatusEndpoint.transition => _client.transitionWorkItem(
           id: task.id,
           body: body,
-          extras: withDepartment(
+          extras: withScope(
             WorkClient.transitionWorkItemOpenapiExtras,
+            _program(task),
             _dept(task),
           ),
         ),
         StatusEndpoint.ownStatus => _client.ownStatusWorkItem(
           id: task.id,
           body: body,
-          extras: withDepartment(
+          extras: withScope(
             WorkClient.ownStatusWorkItemOpenapiExtras,
+            _program(task),
             _dept(task),
           ),
         ),
@@ -89,8 +91,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     () => _client.addWorkItemNote(
       id: task.id,
       body: WorkNoteRequest(content: text),
-      extras: withDepartment(
+      extras: withScope(
         WorkClient.addWorkItemNoteOpenapiExtras,
+        _program(task),
         _dept(task),
       ),
     ),
@@ -102,8 +105,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
       id: task.id,
       noteId: noteId,
       body: WorkNoteRequest(content: text),
-      extras: withDepartment(
+      extras: withScope(
         WorkClient.updateWorkItemNoteOpenapiExtras,
+        _program(task),
         _dept(task),
       ),
     ),
@@ -114,8 +118,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     () => _client.deleteWorkItemNote(
       id: task.id,
       noteId: noteId,
-      extras: withDepartment(
+      extras: withScope(
         WorkClient.deleteWorkItemNoteOpenapiExtras,
+        _program(task),
         _dept(task),
       ),
     ),
@@ -126,8 +131,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     () => _client.createWorkItemSubtask(
       id: task.id,
       body: CreateSubtaskRequest(title: title),
-      extras: withDepartment(
+      extras: withScope(
         WorkClient.createWorkItemSubtaskOpenapiExtras,
+        _program(task),
         _dept(task),
       ),
     ),
@@ -155,8 +161,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
         id: task.id,
         subtaskId: subtaskId,
         body: body,
-        extras: withDepartment(
+        extras: withScope(
           WorkClient.updateWorkItemSubtaskOpenapiExtras,
+          _program(task),
           _dept(task),
         ),
       ),
@@ -168,8 +175,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     () => _client.deleteWorkItemSubtask(
       id: task.id,
       subtaskId: subtaskId,
-      extras: withDepartment(
+      extras: withScope(
         WorkClient.deleteWorkItemSubtaskOpenapiExtras,
+        _program(task),
         _dept(task),
       ),
     ),
@@ -193,8 +201,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
           assigneeAccountId: draft.assignee,
           completionEvidenceRequired: draft.evidenceRequired,
         ),
-        extras: withDepartment(
+        extras: withScope(
           WorkClient.createWorkItemOpenapiExtras,
+          draft.programId,
           draft.departmentId,
         ),
       ),
@@ -219,8 +228,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
           endOn: end == null ? null : day(end),
           completionEvidenceRequired: patch.evidenceRequired,
         ),
-        extras: withDepartment(
+        extras: withScope(
           WorkClient.updateWorkItemOpenapiExtras,
+          _program(task),
           _dept(task),
         ),
       ),
@@ -231,8 +241,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
   Future<void> deleteWorkItem(TaskItem task) => apiCall(
     () => _client.deleteWorkItem(
       id: task.id,
-      extras: withDepartment(
+      extras: withScope(
         WorkClient.deleteWorkItemOpenapiExtras,
+        _program(task),
         _dept(task),
       ),
     ),
@@ -246,8 +257,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
         () => _client.addAssignments(
           id: task.id,
           body: AssignmentsRequest(accountIds: accountIds),
-          extras: withDepartment(
+          extras: withScope(
             WorkClient.addAssignmentsOpenapiExtras,
+            _program(task),
             _dept(task),
           ),
         ),
@@ -258,8 +270,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     () => _client.removeAssignment(
       id: task.id,
       accountId: accountId,
-      extras: withDepartment(
+      extras: withScope(
         WorkClient.removeAssignmentOpenapiExtras,
+        _program(task),
         _dept(task),
       ),
     ),
@@ -269,8 +282,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
   Future<void> claim(TaskItem task) => apiCall(
     () => _client.claimWorkItem(
       id: task.id,
-      extras: withDepartment(
+      extras: withScope(
         WorkClient.claimWorkItemOpenapiExtras,
+        _program(task),
         _dept(task),
       ),
     ),
@@ -280,8 +294,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
   Future<void> unclaim(TaskItem task) => apiCall(
     () => _client.unclaimWorkItem(
       id: task.id,
-      extras: withDepartment(
+      extras: withScope(
         WorkClient.unclaimWorkItemOpenapiExtras,
+        _program(task),
         _dept(task),
       ),
     ),
@@ -320,8 +335,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
         newEndOn: day(end),
         reason: reason,
       ),
-      extras: withDepartment(
+      extras: withScope(
         WorkClient.requestDateChangeOpenapiExtras,
+        _program(task),
         _dept(task),
       ),
     ),
@@ -367,8 +383,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
         filename: file.name,
         contentType: type,
         subtaskId: subtaskId,
-        extras: withDepartment(
+        extras: withScope(
           RecordsClient.attachFileOpenapiExtras,
+          _program(task),
           _dept(task),
         ),
       ),
@@ -380,8 +397,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     () => _records.renameFile(
       id: fileId,
       body: RenameFileRequest(displayName: name),
-      extras: withDepartment(
+      extras: withScope(
         RecordsClient.renameFileOpenapiExtras,
+        _program(task),
         _dept(task),
       ),
     ),
@@ -391,8 +409,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
   Future<void> deleteFile(TaskItem task, String fileId) => apiCall(
     () => _records.deleteFile(
       id: fileId,
-      extras: withDepartment(
+      extras: withScope(
         RecordsClient.deleteFileOpenapiExtras,
+        _program(task),
         _dept(task),
       ),
     ),
@@ -403,8 +422,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     final r = await apiCall(
       () => _records.downloadFile(
         id: fileId,
-        extras: withDepartment(
+        extras: withScope(
           RecordsClient.downloadFileOpenapiExtras,
+          _program(task),
           _dept(task),
         ),
       ),
@@ -412,7 +432,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     return Uint8List.fromList(r.data);
   }
 
-  /// Görevin departmanı; yoksa '' (kapı `client.scope_missing` ile reddeder).
+  /// Görevin KENDİ kapsamı (program, departman); eksik değer '' → kapı
+  /// `client.scope_missing` ile reddeder (seçili kapsama düşülmez).
+  static String _program(TaskItem task) => task.programId ?? '';
   static String _dept(TaskItem task) => task.departmentId ?? '';
 
   /// `YYYY-AA-GG`; null → '' (kaldır).

@@ -287,6 +287,7 @@ class NewTaskFormController extends _$NewTaskFormController {
           .read(taskWriteRepositoryProvider)
           .createWorkItem(
             WorkItemDraft(
+              programId: program,
               departmentId: dept,
               title: f.title.trim(),
               start: f.start,

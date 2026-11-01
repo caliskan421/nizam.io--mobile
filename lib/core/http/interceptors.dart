@@ -14,20 +14,31 @@ import '../session/session_controller.dart';
 const _opKey = 'nizamio.operation';
 const _stateKey = 'nizamio.request_state';
 const _departmentKey = 'nizamio.department';
+const _programKey = 'nizamio.program';
 
 /// Üretilmiş istemcinin [extras]'ına istek başına açık departman ekler: S3 isteği seçili
-/// kapsamın departmanı yerine [departmentId] ile gider (ör. görev ayrıntısı görevin kendi
-/// departmanında okunur). Program yine seçili kapsamdan gelir; S3 dışı işlemde yok sayılır.
-/// Boş kimlik seçili departmana DÜŞMEZ: kapı `client.scope_missing` ile reddeder (fail-closed).
+/// kapsamın departmanı yerine [departmentId] ile gider. Program seçili kapsamdan gelir; S3
+/// dışı işlemde yok sayılır. Boş kimlik seçili departmana DÜŞMEZ: kapı `client.scope_missing`
+/// ile reddeder (fail-closed). Tek kaleme ait istekte [withScope] kullanılır.
 Map<String, dynamic> withDepartment(
   Map<String, dynamic>? extras,
   String departmentId,
 ) => {...?extras, _departmentKey: departmentId};
 
-/// Açık departman verilmediyse null; verildiyse değeri (geçersiz/boşsa '' — reddedilir).
-String? _requestedDepartment(RequestOptions o) {
-  if (!o.extra.containsKey(_departmentKey)) return null;
-  final v = o.extra[_departmentKey];
+/// İstek başına açık KAPSAM: program VE departman birlikte sabitlenir (istemci akışları §2 —
+/// tek göreve ait her istek görevin kendi `program_id` + `department_id` değeriyle). S2
+/// işlemde yalnız program kullanılır (departman yok sayılır). Boş değer seçili kapsama
+/// DÜŞMEZ: kapı `client.scope_missing` ile reddeder (fail-closed).
+Map<String, dynamic> withScope(
+  Map<String, dynamic>? extras,
+  String programId,
+  String departmentId,
+) => {...?extras, _programKey: programId, _departmentKey: departmentId};
+
+/// Açık değer verilmediyse null; verildiyse değeri (geçersiz/boşsa '' — reddedilir).
+String? _requested(RequestOptions o, String key) {
+  if (!o.extra.containsKey(key)) return null;
+  final v = o.extra[key];
   return v is String ? v : '';
 }
 
@@ -70,7 +81,7 @@ DioException _reject(RequestOptions o, String code) => DioException(
 /// 1. halka — sözleşme kapısı. Spec'te olmayan, yanlış yönteme/adrese giden ya da kapsamı
 /// eksik istek ağa ÇIKMAZ. Başlıklar: `X-Nizamio-Client: mobile` (her istek),
 /// `X-Requested-With` (her yazma), `X-Nizamio-Program` / `X-Nizamio-Department` (S2/S3;
-/// departman istek başına [withDepartment] ile açıkça verilebilir).
+/// kapsam istek başına [withScope] / [withDepartment] ile açıkça verilebilir).
 class ApiGuardInterceptor extends Interceptor {
   ApiGuardInterceptor({
     required this.server,
@@ -133,17 +144,18 @@ class ApiGuardInterceptor extends Interceptor {
       final st = _stateOf(options);
       if (!st.retried) {
         // İlk gönderim: güncel kapsam yakalanır; tekrar aynı kapsamla gider.
+        // Açık değer önce; seçili kapsama YALNIZ açık değer yoksa düşülür.
         final sel = scope?.current;
         st
-          ..programId = (sel != null && sel.hasServerProgram)
-              ? sel.programId
-              : null
+          ..programId =
+              _requested(options, _programKey) ??
+              ((sel != null && sel.hasServerProgram) ? sel.programId : null)
           ..departmentId =
-              _requestedDepartment(options) ??
+              _requested(options, _departmentKey) ??
               ((sel != null && sel.hasDepartment) ? sel.departmentId : null);
       }
       final program = st.programId;
-      if (program == null) {
+      if (program == null || program.isEmpty) {
         return handler.reject(_reject(options, ClientErrorCode.scopeMissing));
       }
       headers['X-Nizamio-Program'] = program;

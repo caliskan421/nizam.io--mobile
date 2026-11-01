@@ -728,6 +728,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Oturum doğrulanamadı. Güvenliğiniz için yeniden giriş yapın.';
 
   @override
+  String get errClientScopeChanged =>
+      'Seçili program veya departman işlem sırasında değişti; kalan adımlar gönderilmedi. Görevi yeniden açıp deneyin.';
+
+  @override
   String get errClientScopeMissing =>
       'Bu işlem için önce program veya departman seçilmeli.';
 

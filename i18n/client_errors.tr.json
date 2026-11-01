@@ -5,6 +5,7 @@
     "client.timeout": "Sunucu zamanında yanıt vermedi. Biraz sonra yeniden deneyin.",
     "client.invalid_response": "Sunucudan beklenmeyen bir yanıt geldi.",
     "client.scope_missing": "Bu işlem için önce program veya departman seçilmeli.",
+    "client.scope_changed": "Seçili program veya departman işlem sırasında değişti; kalan adımlar gönderilmedi. Görevi yeniden açıp deneyin.",
     "client.unknown_operation": "Bu işlem uygulamanın bu sürümünde tanımlı değil.",
     "client.not_signed_in": "Bu işlem için giriş yapılmalı.",
     "client.reauth_required": "Oturum doğrulanamadı. Güvenliğiniz için yeniden giriş yapın.",

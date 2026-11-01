@@ -788,5 +788,53 @@ void main() {
         expect(h.backend.count('PATCH', '/v1/work-items/w1'), 1);
       },
     );
+
+    // Codex 5: çok adımlı yazmada adımlar arasında kapsam değişirse kalan adımlar gitmez.
+    test(
+      'düzenle: PATCH sonrası kapsam değişti → atama adımı gönderilmez',
+      () async {
+        final s = _Server();
+        final (h, c, ctl) = await _open(s);
+        await ctl.openEdit();
+        s.writes['PATCH /v1/work-items/w1'] = () {
+          h.read(scopeControllerProvider).selectDepartment('d2');
+          return jsonResponse(200, _item('w1'));
+        };
+        h.backend.requests.clear();
+        final d = c.read(taskDetailControllerProvider('w1')).edit!;
+        ctl
+          ..updateEdit(d.copyWith(title: 'Yeni ad'))
+          ..editToggleAssignee('u3');
+        final r = await ctl.submitEdit();
+        expect(r.kind, WriteKind.failed);
+        expect(r.error!.code, 'client.scope_changed');
+        expect(h.backend.count('PATCH', '/v1/work-items/w1'), 1);
+        expect(h.backend.count('POST', '/v1/work-items/w1/assignments'), 0);
+        final patch = _only(h, 'PATCH', '/v1/work-items/w1');
+        expect(patch.header('X-Nizamio-Program'), 'prog-1');
+        expect(patch.header('X-Nizamio-Department'), 'd1');
+      },
+    );
+
+    test(
+      'düzenle: adımlar arasında oturum değişti → kalan adımlar gitmez',
+      () async {
+        final s = _Server();
+        final (h, c, ctl) = await _open(s);
+        await ctl.openEdit();
+        s.writes['PATCH /v1/work-items/w1'] = () {
+          unawaited(h.read(sessionControllerProvider).clear());
+          return jsonResponse(200, _item('w1'));
+        };
+        h.backend.requests.clear();
+        final d = c.read(taskDetailControllerProvider('w1')).edit!;
+        ctl
+          ..updateEdit(d.copyWith(title: 'Yeni ad'))
+          ..editToggleAssignee('u3');
+        final r = await ctl.submitEdit();
+        expect(r.kind, WriteKind.failed);
+        expect(h.backend.count('POST', '/v1/work-items/w1/assignments'), 0);
+      },
+    );
   });
 }

@@ -55,6 +55,7 @@ void main() {
     final (dio, a) = fakeDio(_item, status: 201);
     final id = await ApiTaskWriteRepository(dio).createWorkItem(
       WorkItemDraft(
+        programId: 'p1',
         departmentId: 'd9',
         title: 'Yeni',
         start: DateTime(2026, 11, 2, 15),
@@ -80,6 +81,7 @@ void main() {
     final (dio, a) = fakeDio(_item, status: 201);
     await ApiTaskWriteRepository(dio).createWorkItem(
       WorkItemDraft(
+        programId: 'p1',
         departmentId: 'd9',
         title: 'Yeni',
         start: DateTime(2026, 11, 2),

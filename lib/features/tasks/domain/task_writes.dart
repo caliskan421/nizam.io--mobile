@@ -22,12 +22,13 @@ final class SubtaskPatch {
   final bool? done;
 }
 
-/// Yeni görev (`POST /v1/work-items`). Kapsam gövdede değil başlıktadır: [departmentId]
-/// isteğin açık departmanı olur (S3). Sunucu tek atanan alır (`assignee_account_id`); null →
+/// Yeni görev (`POST /v1/work-items`). Kapsam gövdede değil başlıktadır: [programId] +
+/// [departmentId] isteğin açık kapsamı olur (S3). Sunucu tek atanan alır (`assignee_account_id`); null →
 /// atamasız görev. [evidenceRequired] varsayılan açık (WORK-K75).
 @immutable
 final class WorkItemDraft {
   const WorkItemDraft({
+    required this.programId,
     required this.departmentId,
     required this.title,
     required this.start,
@@ -38,6 +39,7 @@ final class WorkItemDraft {
     this.evidenceRequired = true,
   });
 
+  final String programId;
   final String departmentId;
   final String title;
   final DateTime start;

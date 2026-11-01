@@ -100,7 +100,7 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
     final department = _department(departments, departmentsTruncated);
     final (items, truncated) = department == null
         ? (const <WorkItem>[], false)
-        : await _items(department.id);
+        : await _items(program, department.id);
     final tasks = [for (final w in items) _task(w, department!.label)];
 
     final today = _now();
@@ -169,7 +169,10 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
 
   /// Departmanın sayfaları (tek akış, imleçle); [maxPages] dolduğunda imleç hâlâ varsa
   /// ikinci değer `true` (liste kesildi — sessiz kesilme yok).
-  Future<(List<WorkItem>, bool)> _items(String department) async {
+  Future<(List<WorkItem>, bool)> _items(
+    String program,
+    String department,
+  ) async {
     final all = <WorkItem>[];
     String? cursor;
     for (var page = 0; page < maxPages; page++) {
@@ -177,8 +180,9 @@ class ApiTaskCatalogRepository implements TaskCatalogRepository {
         () => _work.listWorkItems(
           limit: pageSize,
           cursor: cursor,
-          extras: withDepartment(
+          extras: withScope(
             WorkClient.listWorkItemsOpenapiExtras,
+            program,
             department,
           ),
         ),

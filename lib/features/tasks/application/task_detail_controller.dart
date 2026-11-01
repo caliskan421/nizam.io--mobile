@@ -4,6 +4,8 @@ import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/api_error.dart';
+import '../../../core/i18n/generated/client_error_codes.gen.dart';
+import '../../../core/providers.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_permissions.dart';
 import '../domain/task_writes.dart';
@@ -340,6 +342,26 @@ class TaskDetailController extends _$TaskDetailController {
     }
   }
 
+  /// Çok adımlı yazmanın başladığı bağlam: oturum nesli + seçili kapsam (program, departman).
+  ({int session, String? program, String? department}) _writeContext() {
+    final sel = ref.read(scopeStateProvider);
+    return (
+      session: ref.read(sessionControllerProvider).generation,
+      program: sel.programId,
+      department: sel.departmentId,
+    );
+  }
+
+  /// Bağlam değiştiyse sonraki adım gönderilmez: oturum değiştiyse `client.session_ended`,
+  /// kapsam değiştiyse `client.scope_changed` (yazılmış adımlar yeniden okumayla görünür).
+  void _ensureContext(({int session, String? program, String? department}) c) {
+    final now = _writeContext();
+    if (now.session != c.session) {
+      throw ApiError(ClientErrorCode.sessionEnded);
+    }
+    if (now != c) throw ApiError(ClientErrorCode.scopeChanged);
+  }
+
   /// Yazma sonrası yeniden okuma; okuma hatası ekranda (katalog/ayrıntı durumu) gösterilir.
   Future<void> _reread(
     TaskCatalogController store, {
@@ -617,7 +639,9 @@ class TaskDetailController extends _$TaskDetailController {
   /// yönetici ya da koordinatör), ardından atama farkı (eklenenler tek `addAssignments`,
   /// çıkarılanlar tek tek `removeAssignment`; YALNIZ koordinatör). Departman (koordinatörlük)
   /// bu formdan değişmez. Atamasız görev sunucuda geçerlidir. Sonuçta kalem (tekil okuma)
-  /// yeniden okunur (hata olsa da: önceki adımlar yazılmış olabilir).
+  /// yeniden okunur (hata olsa da: önceki adımlar yazılmış olabilir). Adımlar arasında oturum
+  /// nesli ya da seçili kapsam değişirse kalan adımlar gönderilmez (`client.session_ended` /
+  /// `client.scope_changed`).
   Future<WriteOutcome> submitEdit() async {
     final t = _task;
     final d = state.edit;
@@ -668,12 +692,23 @@ class TaskDetailController extends _$TaskDetailController {
       state = state.copyWith(edit: () => null, showErrors: false);
       return WriteOutcome.unchanged;
     }
+    // Adımlar arasında oturum nesli ya da seçili kapsam değişirse kalan adımlar gitmez.
+    final ctx = _writeContext();
+    var first = true;
+    Future<void> step(Future<void> Function() call) async {
+      if (!first) _ensureContext(ctx);
+      first = false;
+      await call();
+    }
+
     final r = await _write(
       () async {
-        if (!patch.isEmpty) await _writes.updateWorkItem(t, patch);
-        if (added.isNotEmpty) await _writes.addAssignments(t, added);
+        if (!patch.isEmpty) await step(() => _writes.updateWorkItem(t, patch));
+        if (added.isNotEmpty) {
+          await step(() => _writes.addAssignments(t, added));
+        }
         for (final a in removed) {
-          await _writes.removeAssignment(t, a);
+          await step(() => _writes.removeAssignment(t, a));
         }
       },
       list: false,
@@ -912,13 +947,15 @@ class TaskDetailController extends _$TaskDetailController {
       return (WriteOutcome.done, newCode);
     }
     final dept = t.departmentId;
-    if (dept == null || !permissions.canManageTask) {
+    final program = t.programId;
+    if (dept == null || program == null || !permissions.canManageTask) {
       return (WriteOutcome.invalid, null);
     }
     String? id;
     final r = await _write(
       () async => id = await _writes.createWorkItem(
         WorkItemDraft(
+          programId: program,
           departmentId: dept,
           title: '${t.title} $suffix',
           start: t.start,

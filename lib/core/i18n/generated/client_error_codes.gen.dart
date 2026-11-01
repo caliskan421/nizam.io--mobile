@@ -9,6 +9,7 @@ abstract final class ClientErrorCode {
   static const networkError = 'client.network_error';
   static const notSignedIn = 'client.not_signed_in';
   static const reauthRequired = 'client.reauth_required';
+  static const scopeChanged = 'client.scope_changed';
   static const scopeMissing = 'client.scope_missing';
   static const secureStorageError = 'client.secure_storage_error';
   static const serverNotVerified = 'client.server_not_verified';
@@ -28,6 +29,7 @@ abstract final class ClientErrorCode {
     networkError,
     notSignedIn,
     reauthRequired,
+    scopeChanged,
     scopeMissing,
     secureStorageError,
     serverNotVerified,

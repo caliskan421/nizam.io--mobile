@@ -18,7 +18,7 @@ import 'work_item_mapping.dart';
 
 /// Görev ayrıntısının sunucu kaynağı (istemci akışları §3): `getWorkItem` (açıklama ve
 /// tarihlerle görevin kendisi) + alt görevler + notlar + dosyalar. Hepsi S3'tür: görevin KENDİ
-/// departmanıyla okunur (seçili kapsamın departmanı değil; [withDepartment]). Kişi adları
+/// programı ve departmanıyla okunur (seçili kapsam değil; [withScope]). Kişi adları
 /// (`assignees[].full_name`, not `author_full_name`, alt görev `assignee_full_name` /
 /// `done_by_full_name` / `created_by_full_name`, dosya `uploaded_by_full_name`) null değilse
 /// [TaskDetails.names]'e girer; null ad hata değildir (arayüz nötr etiket gösterir). Tarih talebi role
@@ -37,7 +37,8 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
 
   @override
   Future<TaskDetails?> load(TaskItem task, {TaskAccess? access}) async {
-    // Departmanı olmayan görev kapıda reddedilir (seçili departmana düşülmez).
+    // Programı/departmanı olmayan görev kapıda reddedilir (seçili kapsama düşülmez).
+    final program = task.programId ?? '';
     final department = task.departmentId ?? '';
     final id = task.id;
     // eagerError: ilk hata fırlar, diğerleri yutulur (işlenmemiş hata kalmaz).
@@ -45,8 +46,9 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
       apiCall(
         () => _work.getWorkItem(
           id: id,
-          extras: withDepartment(
+          extras: withScope(
             WorkClient.getWorkItemOpenapiExtras,
+            program,
             department,
           ),
         ),
@@ -54,8 +56,9 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
       apiCall(
         () => _work.listWorkItemSubtasks(
           id: id,
-          extras: withDepartment(
+          extras: withScope(
             WorkClient.listWorkItemSubtasksOpenapiExtras,
+            program,
             department,
           ),
         ),
@@ -63,8 +66,9 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
       apiCall(
         () => _work.listWorkItemNotes(
           id: id,
-          extras: withDepartment(
+          extras: withScope(
             WorkClient.listWorkItemNotesOpenapiExtras,
+            program,
             department,
           ),
         ),
@@ -72,8 +76,9 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
       apiCall(
         () => _records.listWorkItemFiles(
           id: id,
-          extras: withDepartment(
+          extras: withScope(
             RecordsClient.listWorkItemFilesOpenapiExtras,
+            program,
             department,
           ),
         ),
@@ -81,6 +86,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
       _dateRequests(
         access?.dateRequestFeed(task.programId, task.departmentId) ??
             DateRequestFeed.none,
+        program,
         department,
       ),
     ], eagerError: true);
@@ -158,8 +164,9 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
     final item = await apiCall(
       () => _work.getWorkItem(
         id: task.id,
-        extras: withDepartment(
+        extras: withScope(
           WorkClient.getWorkItemOpenapiExtras,
+          task.programId ?? '',
           task.departmentId ?? '',
         ),
       ),
@@ -170,6 +177,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
   /// Role göre tarih talebi yüzü; [DateRequestFeed.none] → istek yok, boş liste.
   Future<List<api.DateChangeRequest>> _dateRequests(
     DateRequestFeed feed,
+    String program,
     String department,
   ) async => switch (feed) {
     DateRequestFeed.reviewQueue => (await apiCall(
@@ -177,8 +185,9 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
     )).requests,
     DateRequestFeed.mine => (await apiCall(
       () => _work.myDateChangeRequests(
-        extras: withDepartment(
+        extras: withScope(
           WorkClient.myDateChangeRequestsOpenapiExtras,
+          program,
           department,
         ),
       ),

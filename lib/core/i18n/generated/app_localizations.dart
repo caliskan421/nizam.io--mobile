@@ -1348,6 +1348,12 @@ abstract class AppLocalizations {
   /// **'Oturum doğrulanamadı. Güvenliğiniz için yeniden giriş yapın.'**
   String get errClientReauthRequired;
 
+  /// client.scope_changed
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili program veya departman işlem sırasında değişti; kalan adımlar gönderilmedi. Görevi yeniden açıp deneyin.'**
+  String get errClientScopeChanged;
+
   /// client.scope_missing
   ///
   /// In tr, this message translates to:

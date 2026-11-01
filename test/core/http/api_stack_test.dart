@@ -405,6 +405,88 @@ void main() {
     });
   });
 
+  // Codex 5: tek kaleme ait istekte program da kalemden sabitlenir (withScope).
+  group('açık kapsam (withScope)', () {
+    Dio s3Dio(ScopeController scope) => Dio(BaseOptions(baseUrl: testUrl))
+      ..httpClientAdapter = h.backend
+      ..interceptors.add(
+        ApiGuardInterceptor(
+          server: ServerAddress.parse(testUrl, Flavor.prod),
+          flavor: Flavor.prod,
+          scope: scope,
+          operations: const {
+            's3op': ApiOperation(
+              operationId: 's3op',
+              method: 'GET',
+              path: '/v1/x',
+              scope: ScopeClass.s3,
+              csrf: false,
+              programHeader: true,
+              departmentHeader: true,
+              auth: false,
+            ),
+          },
+        ),
+      );
+    Options opts(String program, String department) => Options(
+      extra: withScope(
+        {
+          'openapi': {'operationId': 's3op'},
+        },
+        program,
+        department,
+      ),
+    );
+
+    test('S3: açık program ve departman seçili kapsamı ezer', () async {
+      final scope = ScopeController()
+        ..selectProgram('p')
+        ..selectDepartment('d');
+      try {
+        await s3Dio(scope).get<Object?>('/v1/x', options: opts('p9', 'd9'));
+      } on DioException {
+        // 404; yalnız başlıklar denetlenir.
+      }
+      expect(h.backend.requests.last.header('X-Nizamio-Program'), 'p9');
+      expect(h.backend.requests.last.header('X-Nizamio-Department'), 'd9');
+    });
+
+    test(
+      'boş açık program seçili programa düşmez: istek gönderilmez',
+      () async {
+        final scope = ScopeController()
+          ..selectProgram('p')
+          ..selectDepartment('d');
+        final before = h.backend.requests.length;
+        await expectLater(
+          s3Dio(scope).get<Object?>('/v1/x', options: opts('', 'd9')),
+          apiError(ClientErrorCode.scopeMissing),
+        );
+        await expectLater(
+          s3Dio(scope).get<Object?>('/v1/x', options: opts('p9', '')),
+          apiError(ClientErrorCode.scopeMissing),
+        );
+        expect(h.backend.requests.length, before);
+      },
+    );
+
+    test('S2: açık program kullanılır, departman yok sayılır', () async {
+      h.read(scopeControllerProvider).selectProgram('prog-7');
+      final p = await apiCall(
+        () => ProgramClient(h.read(apiDioProvider)!).readProgram(
+          extras: withScope(
+            ProgramClient.readProgramOpenapiExtras,
+            'prog-9',
+            'd1',
+          ),
+        ),
+      );
+      expect(p.programId, 'prog-9');
+      expect(h.backend.requests.last.header('X-Nizamio-Program'), 'prog-9');
+      expect(h.backend.requests.last.header('X-Nizamio-Department'), isNull);
+    });
+  });
+
   group('401 → tek yenileme → bir kez tekrar', () {
     test(
       'erişim belirteci düşünce yenilenir ve istek bir kez tekrarlanır',

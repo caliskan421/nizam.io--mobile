@@ -214,6 +214,7 @@ const localizedErrorCodes = <String>{
   'client.network_error',
   'client.not_signed_in',
   'client.reauth_required',
+  'client.scope_changed',
   'client.scope_missing',
   'client.secure_storage_error',
   'client.server_not_verified',
@@ -648,6 +649,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errClientNotSignedIn;
     case 'client.reauth_required':
       return l.errClientReauthRequired;
+    case 'client.scope_changed':
+      return l.errClientScopeChanged;
     case 'client.scope_missing':
       return l.errClientScopeMissing;
     case 'client.secure_storage_error':

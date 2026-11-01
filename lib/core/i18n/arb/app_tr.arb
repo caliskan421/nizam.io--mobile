@@ -837,6 +837,10 @@
   "@errClientReauthRequired": {
     "description": "client.reauth_required"
   },
+  "errClientScopeChanged": "Seçili program veya departman işlem sırasında değişti; kalan adımlar gönderilmedi. Görevi yeniden açıp deneyin.",
+  "@errClientScopeChanged": {
+    "description": "client.scope_changed"
+  },
   "errClientScopeMissing": "Bu işlem için önce program veya departman seçilmeli.",
   "@errClientScopeMissing": {
     "description": "client.scope_missing"

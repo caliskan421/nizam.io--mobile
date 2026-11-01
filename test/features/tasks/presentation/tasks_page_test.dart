@@ -10,6 +10,7 @@ import 'package:nizamio/core/ui/page/nz_app_nav.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
+import '../../../support/fake_backend.dart';
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
 import '../../pilot_support.dart';
@@ -152,6 +153,54 @@ void main() {
     await _tap(tester, find.byIcon(Icons.add_rounded).first);
     expect(find.text(_l.uiTasksNtDesc), findsOneWidget);
   });
+
+  // F57 D2 (Codex 1): "Yeni görev" yalnız seçili kapsamda görev açabilene; üye ekranı ve
+  // kısayol menüsü girişi göstermez, departman ekibi (`listMembers`) hiç istenmez.
+  for (final role in ['uye', 'koordinator']) {
+    testWidgets('sunucu kataloğu, $role: yeni görev girişi ve ekip isteği', (
+      tester,
+    ) async {
+      final pilot = PilotBackend();
+      final h = await real(tester, () => pilotHarness(pilot, signedIn: true));
+      h.backend.handler = (r) => switch ('${r.method} ${r.path}') {
+        'GET /v1/me' => jsonResponse(200, {
+          'account_id': 'acc-1',
+          'email': 'a@b.test',
+          'full_name': 'Ayşe Yılmaz',
+          'company_admin': false,
+        }),
+        'GET /v1/me/departments' => jsonResponse(200, {
+          'departments': [
+            {
+              'program_id': 'prog-1',
+              'program_name': 'Program Bir',
+              'department_id': 'd1',
+              'display_name': 'Altyapı',
+              'role': role,
+            },
+          ],
+        }),
+        'GET /v1/work-items' => jsonResponse(200, {'items': <Object>[]}),
+        _ => pilot.handle(r),
+      };
+      h.read(scopeControllerProvider).selectProgram('prog-1');
+      await pumpScreen(tester, h, const TasksPage());
+      await settle(tester);
+      final add = find.byIcon(Icons.add_rounded);
+      expect(add, role == 'uye' ? findsNothing : findsWidgets);
+      h.read(shellReselectEventsProvider.notifier).fire(TasksPage.shellTab);
+      await settle(tester);
+      expect(find.text(_l.uiTasksFlyView), findsOneWidget);
+      expect(
+        find.text(_l.uiTasksNewTask),
+        role == 'uye' ? findsNothing : findsOneWidget,
+      );
+      expect(
+        h.backend.requests.where((r) => r.path.endsWith('/members')),
+        isEmpty,
+      );
+    });
+  }
 
   testWidgets('başlangıç süzgeci (ana sayfa kutusu) ve boş görünüm', (
     tester,

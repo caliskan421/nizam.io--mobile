@@ -99,7 +99,9 @@ class _TasksPageState extends ConsumerState<TasksPage> {
       showTasksShortcuts(
         context,
         provider: _provider,
-        onNewTask: () => showNewTaskSheet(context, resetTarget: true),
+        onNewTask: ref.read(canCreateTaskProvider)
+            ? () => showNewTaskSheet(context, resetTarget: true)
+            : null,
         onTimeline: nav.openTimeline,
         onSearch: () {
           if (!ref.read(_provider).searchOpen) _toggleSearch();
@@ -111,6 +113,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     final catalog = ref.watch(taskCatalogControllerProvider);
     final result = ref.watch(tasksListResultOf(_provider));
     final data = catalog.value;
+    // Yeni görev yalnız seçili kapsamda görev açabilene (yönetici/koordinatör) görünür.
+    final canCreate = ref.watch(canCreateTaskProvider);
     return NzPage.feed(
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       topBar: const RootTopBar(),
@@ -129,11 +133,12 @@ class _TasksPageState extends ConsumerState<TasksPage> {
               dot: state.filter.hasExtra ? context.colors.accentText : null,
               onPressed: _openFilters,
             ),
-            NzIconButton.circleAccent(
-              icon: NzIcons.add,
-              semanticLabel: l.uiTasksNewTask,
-              onPressed: () => showNewTaskSheet(context, resetTarget: true),
-            ),
+            if (canCreate)
+              NzIconButton.circleAccent(
+                icon: NzIcons.add,
+                semanticLabel: l.uiTasksNewTask,
+                onPressed: () => showNewTaskSheet(context, resetTarget: true),
+              ),
           ],
         ),
         const Gap(NizamioSpacing.space3),

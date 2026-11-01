@@ -732,11 +732,12 @@ class TaskCardView extends StatelessWidget {
 }
 
 /// Alt menüde "Görevler"e yeniden dokununca açılan kısayol menüsü (prototip `buildNav`
-/// `cur === 'tasks'`): görünümler + sayıları, sıralama, görev eylemleri.
+/// `cur === 'tasks'`): görünümler + sayıları, sıralama, görev eylemleri. [onNewTask] null →
+/// "Yeni görev" satırı yok (seçili kapsamda görev açma yetkisi yok).
 Future<void> showTasksShortcuts(
   BuildContext context, {
   required TasksListControllerProvider provider,
-  required VoidCallback onNewTask,
+  required VoidCallback? onNewTask,
   required VoidCallback onTimeline,
   required VoidCallback onSearch,
   required VoidCallback onFilters,
@@ -770,12 +771,13 @@ Future<void> showTasksShortcuts(
           onSelected: () => ctl.selectSort(s),
         ),
       NzFlyoutSection(l.uiTasksFlyTasks),
-      NzFlyoutItem(
-        label: l.uiTasksNewTask,
-        icon: NzIcons.add,
-        accent: true,
-        onSelected: onNewTask,
-      ),
+      if (onNewTask != null)
+        NzFlyoutItem(
+          label: l.uiTasksNewTask,
+          icon: NzIcons.add,
+          accent: true,
+          onSelected: onNewTask,
+        ),
       NzFlyoutItem(
         label: l.uiTasksModeTimeline,
         caption: l.uiTasksFlyTimelineCaption,

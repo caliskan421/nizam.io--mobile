@@ -104,3 +104,20 @@ class TaskCatalogController extends _$TaskCatalogController {
     return i;
   }
 }
+
+/// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
+/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yalnız seçili (program, departman)
+/// kapsamında yönetici ya da koordinatör ([TaskAccess.canCreateIn]; üye hayır — WORK-K05).
+/// Katalog yokken ya da departman seçilmemişken hayır (fail-closed).
+@riverpod
+bool canCreateTask(Ref ref) {
+  final catalog = ref.watch(taskCatalogControllerProvider).value;
+  if (catalog == null) return false;
+  final access = catalog.access;
+  if (access == null) return true;
+  final program = ref.watch(scopeStateProvider).programId;
+  final department = catalog.departmentId;
+  return program != null &&
+      department != null &&
+      access.canCreateIn(program, department);
+}

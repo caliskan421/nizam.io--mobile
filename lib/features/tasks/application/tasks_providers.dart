@@ -1,8 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/errors/api_error.dart';
+import '../../../core/providers.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_details.dart';
 import '../domain/task_writes.dart';
+import 'task_catalog_controller.dart';
 
 part 'tasks_providers.g.dart';
 
@@ -38,7 +41,17 @@ DownloadSink downloadSink(Ref ref) => throw UnimplementedError(
 );
 
 /// Departman ekibi ([departmentId]; görev ataması adayları). Yalnız yönetici ya da o
-/// departmanın koordinatörü izler (üye 403 alır; çağrılmaz).
+/// departmanın koordinatörü okur ([TaskAccess.canReadTeamIn]); sunucu kataloğunda yetkisiz
+/// hesapta `listMembers` ÇAĞRILMAZ, `work.not_authorized` döner (üye 403 alırdı).
 @riverpod
-Future<List<TeamMember>> taskTeam(Ref ref, String departmentId) =>
-    ref.read(taskWriteRepositoryProvider).listTeam(departmentId);
+Future<List<TeamMember>> taskTeam(Ref ref, String departmentId) async {
+  final catalog = await ref.read(taskCatalogControllerProvider.future);
+  final access = catalog.access;
+  if (access != null) {
+    final program = ref.read(scopeStateProvider).programId;
+    if (program == null || !access.canReadTeamIn(program, departmentId)) {
+      throw ApiError('work.not_authorized');
+    }
+  }
+  return ref.read(taskWriteRepositoryProvider).listTeam(departmentId);
+}

@@ -7,6 +7,7 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../application/quick_forms_controller.dart';
+import '../application/task_catalog_controller.dart';
 import 'quick/invite_form.dart';
 import 'quick/meeting_form.dart';
 import 'quick/new_task_form.dart';
@@ -24,6 +25,7 @@ import 'task_widgets.dart';
 /// `resetTarget: true` ile açar). İkisi de yoksa (ana sayfa hızlı işlemi) taslak
 /// koordinatörlük ve atananlarıyla korunur. [title] başlık alanını önceden doldurur
 /// (sohbette "Göreve dönüştür": mesaj metninin ilk 120 karakteri; kırpma burada yapılır).
+/// Seçili kapsamda görev açma yetkisi yoksa ([canCreateTaskProvider]) sayfa açılmaz.
 Future<void> showNewTaskSheet(
   BuildContext context, {
   String? coordinatorship,
@@ -31,6 +33,7 @@ Future<void> showNewTaskSheet(
   String? title,
 }) {
   final container = ProviderScope.containerOf(context, listen: false);
+  if (!container.read(canCreateTaskProvider)) return Future.value();
   container
       .read(newTaskFormControllerProvider.notifier)
       .prepare(

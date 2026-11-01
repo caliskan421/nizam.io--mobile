@@ -263,13 +263,15 @@ final class DownloadSinkProvider
 String _$downloadSinkHash() => r'24a2dcc97c064f09d64a4ecc2e5f31b9973f3c7f';
 
 /// Departman ekibi ([departmentId]; görev ataması adayları). Yalnız yönetici ya da o
-/// departmanın koordinatörü izler (üye 403 alır; çağrılmaz).
+/// departmanın koordinatörü okur ([TaskAccess.canReadTeamIn]); sunucu kataloğunda yetkisiz
+/// hesapta `listMembers` ÇAĞRILMAZ, `work.not_authorized` döner (üye 403 alırdı).
 
 @ProviderFor(taskTeam)
 final taskTeamProvider = TaskTeamFamily._();
 
 /// Departman ekibi ([departmentId]; görev ataması adayları). Yalnız yönetici ya da o
-/// departmanın koordinatörü izler (üye 403 alır; çağrılmaz).
+/// departmanın koordinatörü okur ([TaskAccess.canReadTeamIn]); sunucu kataloğunda yetkisiz
+/// hesapta `listMembers` ÇAĞRILMAZ, `work.not_authorized` döner (üye 403 alırdı).
 
 final class TaskTeamProvider
     extends
@@ -280,7 +282,8 @@ final class TaskTeamProvider
         >
     with $FutureModifier<List<TeamMember>>, $FutureProvider<List<TeamMember>> {
   /// Departman ekibi ([departmentId]; görev ataması adayları). Yalnız yönetici ya da o
-  /// departmanın koordinatörü izler (üye 403 alır; çağrılmaz).
+  /// departmanın koordinatörü okur ([TaskAccess.canReadTeamIn]); sunucu kataloğunda yetkisiz
+  /// hesapta `listMembers` ÇAĞRILMAZ, `work.not_authorized` döner (üye 403 alırdı).
   TaskTeamProvider._({
     required TaskTeamFamily super.from,
     required String super.argument,
@@ -325,10 +328,11 @@ final class TaskTeamProvider
   }
 }
 
-String _$taskTeamHash() => r'505eb1e05b36a9ab5eecd3557bed566dd6e65746';
+String _$taskTeamHash() => r'8d61f7dc9268a9f719dbd641d0071b571f0a333b';
 
 /// Departman ekibi ([departmentId]; görev ataması adayları). Yalnız yönetici ya da o
-/// departmanın koordinatörü izler (üye 403 alır; çağrılmaz).
+/// departmanın koordinatörü okur ([TaskAccess.canReadTeamIn]); sunucu kataloğunda yetkisiz
+/// hesapta `listMembers` ÇAĞRILMAZ, `work.not_authorized` döner (üye 403 alırdı).
 
 final class TaskTeamFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<TeamMember>>, String> {
@@ -342,7 +346,8 @@ final class TaskTeamFamily extends $Family
       );
 
   /// Departman ekibi ([departmentId]; görev ataması adayları). Yalnız yönetici ya da o
-  /// departmanın koordinatörü izler (üye 403 alır; çağrılmaz).
+  /// departmanın koordinatörü okur ([TaskAccess.canReadTeamIn]); sunucu kataloğunda yetkisiz
+  /// hesapta `listMembers` ÇAĞRILMAZ, `work.not_authorized` döner (üye 403 alırdı).
 
   TaskTeamProvider call(String departmentId) =>
       TaskTeamProvider._(argument: departmentId, from: this);

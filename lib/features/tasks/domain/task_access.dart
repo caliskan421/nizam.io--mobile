@@ -91,6 +91,11 @@ final class TaskAccess {
   bool canCreateIn(String programId, String departmentId) =>
       companyAdmin || coordinatesIn(programId, departmentId);
 
+  /// Departman ekibini (`listMembers`, görev ataması adayları) okuyabilir mi: yönetici ya da
+  /// o departmanın koordinatörü; üye 403 alır → çağrılmaz.
+  bool canReadTeamIn(String programId, String departmentId) =>
+      companyAdmin || coordinatesIn(programId, departmentId);
+
   /// Görevin ([programId], [departmentId]) bekleyen tarih talebi hangi yüzden okunur.
   /// Yönetici inceleme kuyruğu bütün bekleyenleri kapsar; birleşik rolde o seçilir.
   DateRequestFeed dateRequestFeed(String? programId, String? departmentId) {

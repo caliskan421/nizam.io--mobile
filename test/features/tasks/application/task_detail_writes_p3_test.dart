@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/tasks/application/quick_forms_controller.dart';
 import 'package:nizamio/features/tasks/application/task_detail_controller.dart';
@@ -678,5 +679,34 @@ void main() {
     expect(team.single.name, 'Ali Kaya');
     final get = _only(h, 'GET', '/v1/departments/d1/members');
     expect(get.header('X-Nizamio-Program'), 'prog-1');
+  });
+
+  group('F57 D2', () {
+    // Codex 1 / Fable B1: üye için yeni görev girişi kapalı; ekip (`listMembers`) istenmez.
+    test('üye: yeni görev kapalı, ekip okunmaz (listMembers 0)', () async {
+      final s = _Server()
+        ..role = 'uye'
+        ..assignees = ['acc-1'];
+      final (h, c, _) = await _open(s);
+      expect(c.read(canCreateTaskProvider), isFalse);
+      await expectLater(
+        c.read(taskTeamProvider('d1').future),
+        throwsA(
+          isA<ApiError>().having((e) => e.code, 'code', 'work.not_authorized'),
+        ),
+      );
+      expect(h.backend.count('GET', '/v1/departments/d1/members'), 0);
+    });
+
+    test('koordinatör ve yönetici: yeni görev açık', () async {
+      final (_, c, _) = await _open(_Server());
+      expect(c.read(canCreateTaskProvider), isTrue);
+      final (_, a, _) = await _open(
+        _Server()
+          ..admin = true
+          ..role = 'yok',
+      );
+      expect(a.read(canCreateTaskProvider), isTrue);
+    });
   });
 }

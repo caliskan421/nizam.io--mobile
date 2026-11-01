@@ -179,9 +179,16 @@ enum HomeQuickAction { task, meeting, invite, report }
 
 /// Dört hızlı işlem kutucuğu.
 class HomeQuickActions extends StatelessWidget {
-  const HomeQuickActions({super.key, required this.onAction});
+  const HomeQuickActions({
+    super.key,
+    required this.onAction,
+    this.canCreateTask = true,
+  });
 
   final ValueChanged<HomeQuickAction> onAction;
+
+  /// "Yeni görev" kutusu görünsün mü (seçili kapsamda görev açma yetkisi).
+  final bool canCreateTask;
 
   @override
   Widget build(BuildContext context) {
@@ -196,12 +203,13 @@ class HomeQuickActions extends StatelessWidget {
           gap: NizamioSpacing.space2,
           children: [
             for (final a in HomeQuickAction.values)
-              NzActionTile(
-                icon: quickActionIcon(a),
-                label: quickActionLabel(l, a),
-                primary: a == HomeQuickAction.task,
-                onPressed: () => onAction(a),
-              ),
+              if (a != HomeQuickAction.task || canCreateTask)
+                NzActionTile(
+                  icon: quickActionIcon(a),
+                  label: quickActionLabel(l, a),
+                  primary: a == HomeQuickAction.task,
+                  onPressed: () => onAction(a),
+                ),
           ],
         ),
       ],

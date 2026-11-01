@@ -141,7 +141,10 @@ class _Feed extends ConsumerWidget {
           ),
         ],
         const Gap(NizamioSpacing.gapXl),
-        HomeQuickActions(onAction: onQuickAction),
+        HomeQuickActions(
+          onAction: onQuickAction,
+          canCreateTask: ref.watch(canCreateTaskProvider),
+        ),
         const Gap(NizamioSpacing.gapXl),
         // Kişi kümeleri ortak katalogdan; yalnız bu bölüm izler (katalog değişimi akışı kurmaz).
         // Ekip sayıları yalnız yönetici özetinde bilinir; yoksa kutu gizlenir.

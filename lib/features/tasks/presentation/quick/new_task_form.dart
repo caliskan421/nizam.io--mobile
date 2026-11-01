@@ -49,9 +49,12 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
         : catalog?.coordinatorship(f.coordinatorship!);
     // Sunucu katalogu: koordinatörlük = departman; adaylar departman ekibinden (tek atanan).
     final server = catalog?.access != null;
+    // Ekip (`listMembers`) yalnız görev açabilen hesapta okunur: yetkisizde istek yok.
+    final teamOpen =
+        server && coord != null && ref.watch(canCreateTaskProvider);
     // Seçili atananın adı: sunucuda departman ekibinden (`listMembers`, seçicinin kaynağı),
     // yoksa katalogdaki addan; bilinmiyorsa nötr etiket.
-    final team = server && coord != null
+    final team = teamOpen
         ? ref.watch(taskTeamProvider(coord.code)).value
         : null;
     String name(String id) =>
@@ -123,7 +126,7 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
                   ? c.textFaint
                   : c.accentText,
               content: QuickPane(
-                child: server && coord != null
+                child: teamOpen
                     ? TeamPicker(
                         departmentId: coord.code,
                         selected: f.assignees,

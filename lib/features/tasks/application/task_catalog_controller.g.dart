@@ -86,3 +86,57 @@ abstract class _$TaskCatalogController extends $AsyncNotifier<TaskCatalog> {
     return element.handleCreate(ref, build);
   }
 }
+
+/// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
+/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yalnız seçili (program, departman)
+/// kapsamında yönetici ya da koordinatör ([TaskAccess.canCreateIn]; üye hayır — WORK-K05).
+/// Katalog yokken ya da departman seçilmemişken hayır (fail-closed).
+
+@ProviderFor(canCreateTask)
+final canCreateTaskProvider = CanCreateTaskProvider._();
+
+/// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
+/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yalnız seçili (program, departman)
+/// kapsamında yönetici ya da koordinatör ([TaskAccess.canCreateIn]; üye hayır — WORK-K05).
+/// Katalog yokken ya da departman seçilmemişken hayır (fail-closed).
+
+final class CanCreateTaskProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
+  /// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yalnız seçili (program, departman)
+  /// kapsamında yönetici ya da koordinatör ([TaskAccess.canCreateIn]; üye hayır — WORK-K05).
+  /// Katalog yokken ya da departman seçilmemişken hayır (fail-closed).
+  CanCreateTaskProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'canCreateTaskProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$canCreateTaskHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return canCreateTask(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$canCreateTaskHash() => r'5ece2c3a095caac4e0df642ab2d37af24ab62c78';

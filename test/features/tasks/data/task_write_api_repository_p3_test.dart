@@ -250,8 +250,8 @@ void main() {
         subtaskId: 's1',
       );
       final o = a.last;
-      expect('${o.method} ${o.path}', 'POST /v1/work-items/w1/files');
-      expect(o.queryParameters, {'tag': 'sonuc', 'subtask_id': 's1'});
+      expect('${o.method} ${o.uri.path}', 'POST /v1/work-items/w1/files');
+      expect(o.uri.queryParameters, {'tag': 'sonuc', 'subtask_id': 's1'});
       expect(o.extra.values, contains('d9'));
       expect((o.extra['openapi'] as Map)['operationId'], 'attachFile');
       final form = o.data as FormData;
@@ -276,7 +276,7 @@ void main() {
         UploadSource(path: file.path, name: 'rapor.pdf', sizeBytes: 4),
         EvidenceTag.requirement,
       );
-      expect(a.last.queryParameters, {'tag': 'ister'});
+      expect(a.last.uri.queryParameters, {'tag': 'ister'});
     });
 
     test('yeniden adlandır / sil / indir: görevin departmanı', () async {

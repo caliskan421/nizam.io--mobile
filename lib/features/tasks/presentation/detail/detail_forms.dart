@@ -2,20 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/errors/api_error.dart';
+import '../../../../core/errors/error_text.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../application/task_detail_controller.dart';
+import '../../application/tasks_providers.dart';
 import '../../domain/task_catalog.dart';
+import '../../domain/task_writes.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 
 /// "Görevi düzenle" formu: başlık, koordinatörlük, atanan (koordinatörler + açılır üyeler),
-/// öncelik, başlangıç/bitiş.
+/// öncelik, başlangıç/bitiş, kanıt zorunluluğu. Sunucu görevinde departman değişmez
+/// (koordinatörlük seçimi yok); atanan bölümü yalnız kapsam koordinatörüne, adaylar
+/// departman ekibinden ([taskTeamProvider]).
 class EditTaskForm extends ConsumerStatefulWidget {
   const EditTaskForm({super.key, required this.code});
 
@@ -47,6 +55,8 @@ class _EditTaskFormState extends ConsumerState<EditTaskForm> {
     final d = s.edit;
     final catalog = ref.watch(taskCatalogControllerProvider).value;
     if (d == null || catalog == null) return const SizedBox.shrink();
+    final perms = ctl.permissions;
+    if (!perms.local) return _ServerEditBody(code: widget.code, title: _title);
     final co = catalog.coordinatorship(d.coordinatorship);
     final leads = co?.leads ?? const <String>[];
     final members = co?.members ?? const <String>[];
@@ -169,8 +179,149 @@ class _EditTaskFormState extends ConsumerState<EditTaskForm> {
           const Gap(NizamioSpacing.space1),
           TaskFormError(l.uiTasksErrDates),
         ],
+        const Gap(NizamioSpacing.space3),
+        TaskCheckRow(
+          label: l.uiTasksEvidenceRequired,
+          square: true,
+          selected: d.evidenceRequired,
+          onTap: () =>
+              ctl.updateEdit(d.copyWith(evidenceRequired: !d.evidenceRequired)),
+        ),
       ],
     );
+  }
+}
+
+/// Sunucu görevinin düzenleme gövdesi: başlık, atanan (yalnız koordinatör; ekipten),
+/// öncelik, tarihler, kanıt zorunluluğu.
+class _ServerEditBody extends ConsumerWidget {
+  const _ServerEditBody({required this.code, required this.title});
+
+  final String code;
+  final TextEditingController title;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final c = context.colors;
+    final t = context.text;
+    final p = taskDetailControllerProvider(code);
+    final s = ref.watch(p);
+    final ctl = ref.read(p.notifier);
+    final d = s.edit;
+    final task = ref.watch(taskCatalogControllerProvider).value?.task(code);
+    if (d == null || task == null) return const SizedBox.shrink();
+    final dept = task.departmentId;
+    final assign = ctl.permissions.canAssign && dept != null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        NzTextField(
+          label: l.uiTasksFieldTitle,
+          hint: l.uiTasksFieldTitleHint,
+          controller: title,
+          onChanged: (v) => ctl.updateEdit(d.copyWith(title: v)),
+        ),
+        if (s.showErrors && d.titleMissing) ...[
+          const Gap(NizamioSpacing.space1),
+          TaskFormError(l.uiTasksErrTitleEmpty),
+        ],
+        if (assign) ...[
+          const Gap(NizamioSpacing.space4),
+          TaskFieldLabel(
+            l.uiTasksAssignee,
+            trailing: Text(
+              '${d.assignees.length}',
+              style: t.monoSm.copyWith(color: c.textMuted),
+            ),
+          ),
+          TeamPicker(
+            departmentId: dept,
+            selected: d.assignees,
+            onToggle: ctl.editToggleAssignee,
+          ),
+        ],
+        const Gap(NizamioSpacing.space4),
+        TaskFieldLabel(l.uiTasksPriority),
+        TaskSegmented(
+          semanticLabel: l.uiTasksPriority,
+          labels: [
+            for (final p in TaskPriority.pickable.reversed) l.priorityLabel(p),
+          ],
+          selected: TaskPriority.pickable.reversed.toList().indexOf(d.priority),
+          onSelected: (i) => ctl.updateEdit(
+            d.copyWith(priority: TaskPriority.pickable.reversed.toList()[i]),
+          ),
+        ),
+        const Gap(NizamioSpacing.space4),
+        _DatePair(
+          startLabel: l.uiTasksStart,
+          endLabel: l.uiTasksDue,
+          start: d.start,
+          end: d.due,
+          onStart: (v) => ctl.updateEdit(d.copyWith(start: v)),
+          onEnd: (v) => ctl.updateEdit(d.copyWith(due: v)),
+        ),
+        if (d.datesInvalid) ...[
+          const Gap(NizamioSpacing.space1),
+          TaskFormError(l.uiTasksErrDates),
+        ],
+        const Gap(NizamioSpacing.space3),
+        TaskCheckRow(
+          label: l.uiTasksEvidenceRequired,
+          square: true,
+          selected: d.evidenceRequired,
+          onTap: () =>
+              ctl.updateEdit(d.copyWith(evidenceRequired: !d.evidenceRequired)),
+        ),
+      ],
+    );
+  }
+}
+
+/// Departman ekibinden kişi seçimi (görev ataması adayları; `listMembers`). [single]: tek
+/// seçim (görev açarken sunucu tek atanan alır).
+class TeamPicker extends ConsumerWidget {
+  const TeamPicker({
+    super.key,
+    required this.departmentId,
+    required this.selected,
+    required this.onToggle,
+  });
+
+  final String departmentId;
+  final List<String> selected;
+  final ValueChanged<String> onToggle;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final c = context.colors;
+    final team = ref.watch(taskTeamProvider(departmentId));
+    return switch (team) {
+      AsyncData(:final value) when value.isEmpty => Text(
+        l.uiTasksTeamEmpty,
+        style: context.text.caption.copyWith(color: c.textMuted),
+      ),
+      AsyncData(:final value) => Wrap(
+        spacing: NizamioSpacing.space2,
+        runSpacing: NizamioSpacing.space2,
+        children: [
+          for (final m in value)
+            TaskChip(
+              label: m.name,
+              selected: selected.contains(m.accountId),
+              onTap: () => onToggle(m.accountId),
+            ),
+        ],
+      ),
+      AsyncError(:final error) => NzBanner.danger(
+        message: errorText(l, toApiError(error)),
+        actionLabel: l.uiCommonRetry,
+        onAction: () => ref.invalidate(taskTeamProvider(departmentId)),
+      ),
+      _ => const NzLoader(),
+    };
   }
 }
 
@@ -286,11 +437,14 @@ class DateRequestForm extends ConsumerWidget {
   }
 }
 
-/// "Kanıt dosyası yükle" formu: görev klasörü, alt görev, etiket, dosya adı.
+/// "Kanıt dosyası yükle" formu: görev klasörü, alt görev, etiket, dosya adı. Sunucu
+/// görevinde etiketler sunucunun kapalı kümesi, ad yerine sistem seçicisinden dosya
+/// ([onPick]); izinli türler ve sınır bilgisi gösterilir.
 class UploadForm extends ConsumerWidget {
-  const UploadForm({super.key, required this.code});
+  const UploadForm({super.key, required this.code, this.onPick});
 
   final String code;
+  final VoidCallback? onPick;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -304,6 +458,7 @@ class UploadForm extends ConsumerWidget {
     final catalog = ref.watch(taskCatalogControllerProvider).value;
     final task = catalog?.task(code);
     if (d == null || task == null) return const SizedBox.shrink();
+    final server = !ctl.permissions.local;
     Color tagColor(EvidenceTag tag) => switch (tag) {
       EvidenceTag.site => c.inProgress,
       EvidenceTag.result => c.accentText,
@@ -349,7 +504,7 @@ class UploadForm extends ConsumerWidget {
           spacing: NizamioSpacing.space2,
           runSpacing: NizamioSpacing.space2,
           children: [
-            for (final tag in EvidenceTag.prototype)
+            for (final tag in server ? uploadTags : EvidenceTag.prototype)
               TaskChip(
                 label: l.tagLabel(tag),
                 dot: tagColor(tag),
@@ -359,17 +514,35 @@ class UploadForm extends ConsumerWidget {
           ],
         ),
         const Gap(NizamioSpacing.space4),
-        NzTextField(
-          label: l.uiTasksFileName,
-          initialValue: d.name,
-          onChanged: (v) => ctl.updateUpload(d.copyWith(name: v)),
-        ),
-        if (s.showErrors && d.name.trim().isEmpty) ...[
+        if (server) ...[
+          NzButton.secondary(
+            label: d.file?.name ?? l.uiTasksPickFileAction,
+            icon: NzIcons.uploadFile,
+            expand: true,
+            onPressed: onPick,
+          ),
           const Gap(NizamioSpacing.space1),
-          TaskFormError(l.uiTasksErrFileName),
+          Text(
+            l.uiTasksUploadTypes,
+            style: t.caption.copyWith(color: c.textMuted),
+          ),
+          if (s.showErrors && d.file == null) ...[
+            const Gap(NizamioSpacing.space1),
+            TaskFormError(l.uiTasksErrPickFile),
+          ],
+        ] else ...[
+          NzTextField(
+            label: l.uiTasksFileName,
+            initialValue: d.name,
+            onChanged: (v) => ctl.updateUpload(d.copyWith(name: v)),
+          ),
+          if (s.showErrors && d.name.trim().isEmpty) ...[
+            const Gap(NizamioSpacing.space1),
+            TaskFormError(l.uiTasksErrFileName),
+          ],
+          const Gap(NizamioSpacing.space4),
+          _PickBox(title: l.uiTasksPickFile, message: l.uiTasksProtoOnly),
         ],
-        const Gap(NizamioSpacing.space4),
-        _PickBox(title: l.uiTasksPickFile, message: l.uiTasksProtoOnly),
       ],
     );
   }

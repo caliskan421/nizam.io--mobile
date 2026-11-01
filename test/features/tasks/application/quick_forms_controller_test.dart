@@ -25,14 +25,14 @@ void main() {
     // Koordinatörlük yokken Atanan → koordinatörlük satırı açılır.
     ctl.togglePane(NewTaskPane.assignees);
     expect(f().pane, NewTaskPane.coordinatorship);
-    expect(ctl.submit(), isNull);
+    expect(await ctl.submit(), isNull);
     expect(f().error, NewTaskError.title);
     ctl.setTitle('Basınç testi raporu');
-    expect(ctl.submit(), isNull);
+    expect(await ctl.submit(), isNull);
     expect(f().error, NewTaskError.coordinatorship);
     ctl.pickCoordinatorship('ALT');
     expect(f().pane, NewTaskPane.assignees);
-    expect(ctl.submit(), isNull);
+    expect(await ctl.submit(), isNull);
     expect(f().error, NewTaskError.assignees);
     ctl.toggleAssignee('ko');
 
@@ -58,7 +58,7 @@ void main() {
     ctl
       ..setPriority(TaskPriority.high)
       ..setEvidenceRequired(value: true);
-    final r = ctl.submit()!;
+    final r = (await ctl.submit())!;
     expect(r.notified, 1);
     final task = c.read(taskCatalogControllerProvider).value!.task(r.code)!;
     expect(task.title, 'Basınç testi raporu');

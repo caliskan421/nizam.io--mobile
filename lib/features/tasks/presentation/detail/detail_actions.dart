@@ -13,6 +13,7 @@ import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../application/task_detail_controller.dart';
+import '../../application/tasks_providers.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_permissions.dart';
 import '../../domain/task_query.dart';
@@ -42,6 +43,23 @@ class TaskDetailActions {
   }
 
   // ---- durum / öncelik / menü -------------------------------------------------------------
+
+  TaskPermissions get _perms => _ctl.permissions;
+
+  /// Görev düzenle/öncelik/kopyala/sil (yönetici ya da koordinatör).
+  bool get canManageTask => _perms.canManageTask;
+
+  /// Tarih talebi aç (yalnız kapsam koordinatörü).
+  bool get canRequestDate => _perms.canRequestDate;
+
+  /// Tarih talebi kararı (yalnız şirket yöneticisi).
+  bool get canReviewDate => _perms.canReviewDate;
+
+  /// Kanıt yükle (koordinatör ya da atanmış üye; yöneticilik reddeder).
+  bool get canUpload => _perms.canUpload;
+
+  /// Silmeyi geri al yalnız örnekte.
+  bool get canUndoDelete => _perms.local;
 
   /// Durum seçicisi açılabilir mi (aktörün geçerli durumdan en az bir hedefi var).
   bool get canChangeStatus {
@@ -236,11 +254,12 @@ class TaskDetailActions {
             label: l.priorityLabel(p),
             leading: NzPriorityBars(level: priorityLevel(p)),
             selected: p == t.priority,
-            onTap: () {
+            onTap: () async {
               Navigator.of(sheet).pop();
-              if (_ctl.setPriority(p)) {
-                _say('${l.uiTasksPriority}: ${l.priorityLabel(p)}');
-              }
+              _report(
+                await _ctl.setPriority(p),
+                done: '${l.uiTasksPriority}: ${l.priorityLabel(p)}',
+              );
             },
           ),
       ],
@@ -252,45 +271,69 @@ class TaskDetailActions {
     if (t == null) return;
     final l = context.l10n;
     final c = context.colors;
+    final p = _perms;
     _listSheet(
       // Türkçe küçük harf (İDA-2 → ida-2; `toLowerCase` noktalı i üretir).
       title: trLower(code),
       builder: (sheet) => [
-        _ListOption(
-          label: l.uiTasksEditTask,
-          leading: const NzIcon(NzIcons.edit, size: NizamioSize.iconSizeSm),
-          onTap: () {
-            Navigator.of(sheet).pop();
-            openEdit();
-          },
-        ),
-        _ListOption(
-          label: l.uiTasksCopy,
-          leading: const NzIcon(NzIcons.copy, size: NizamioSize.iconSizeSm),
-          onTap: () {
-            Navigator.of(sheet).pop();
-            final newCode = _ctl.copy(l.uiTasksCopySuffix);
-            if (newCode != null) {
-              _say(
-                '$newCode ${l.uiTasksTCreatedTail} · ${t.title} '
-                '${l.uiTasksCopySuffix}',
-              );
-            }
-          },
-        ),
-        _ListOption(
-          label: l.uiTasksDeleteTask,
-          color: c.danger,
-          leading: NzIcon(
-            NzIcons.delete,
-            size: NizamioSize.iconSizeSm,
-            color: c.danger,
+        if (p.canClaim(t))
+          _ListOption(
+            label: l.uiTasksClaim,
+            leading: const NzIcon(NzIcons.person, size: NizamioSize.iconSizeSm),
+            onTap: () async {
+              Navigator.of(sheet).pop();
+              _report(await _ctl.claim(), done: l.uiTasksTClaimed);
+            },
           ),
-          onTap: () {
-            Navigator.of(sheet).pop();
-            openDelete();
-          },
-        ),
+        if (p.canUnclaim(t))
+          _ListOption(
+            label: l.uiTasksUnclaim,
+            leading: const NzIcon(NzIcons.person, size: NizamioSize.iconSizeSm),
+            onTap: () async {
+              Navigator.of(sheet).pop();
+              _report(await _ctl.unclaim(), done: l.uiTasksTUnclaimed);
+            },
+          ),
+        if (p.canManageTask) ...[
+          _ListOption(
+            label: l.uiTasksEditTask,
+            leading: const NzIcon(NzIcons.edit, size: NizamioSize.iconSizeSm),
+            onTap: () {
+              Navigator.of(sheet).pop();
+              openEdit();
+            },
+          ),
+          _ListOption(
+            label: l.uiTasksCopy,
+            leading: const NzIcon(NzIcons.copy, size: NizamioSize.iconSizeSm),
+            onTap: () async {
+              Navigator.of(sheet).pop();
+              final (r, newCode) = await _ctl.copy(l.uiTasksCopySuffix);
+              final key = newCode == null
+                  ? ''
+                  : _catalog?.task(newCode)?.displayCode ?? newCode;
+              _report(
+                r,
+                done:
+                    '$key ${l.uiTasksTCreatedTail} · ${t.title} '
+                    '${l.uiTasksCopySuffix}',
+              );
+            },
+          ),
+          _ListOption(
+            label: l.uiTasksDeleteTask,
+            color: c.danger,
+            leading: NzIcon(
+              NzIcons.delete,
+              size: NizamioSize.iconSizeSm,
+              color: c.danger,
+            ),
+            onTap: () {
+              Navigator.of(sheet).pop();
+              openDelete();
+            },
+          ),
+        ],
       ],
     );
   }
@@ -310,11 +353,15 @@ class TaskDetailActions {
 
   // ---- formlar ----------------------------------------------------------------------------
 
+  /// Form alt sayfası: [submit] başarıda ([WriteKind.done]/[WriteKind.unchanged]) sayfayı
+  /// kapatır ve [success] bildirilir; doğrulama hatasında sayfa açık kalır (hatalar formda);
+  /// sunucu hatasında metin hata kodundan, sayfa açık kalır (karar kullanıcının; 409'da görev
+  /// zaten yeniden okunmuştur). Uçuştaki istekte ikinci dokunuş istek göndermez.
   Future<void> _form({
     required String title,
     required String description,
     required String ok,
-    required bool Function() submit,
+    required Future<WriteOutcome> Function() submit,
     required String Function() success,
     required Widget body,
     bool danger = false,
@@ -330,11 +377,21 @@ class TaskDetailActions {
         cancel: l.uiTasksCancel,
         ok: ok,
         danger: danger,
-        onOk: () {
+        onOk: () async {
           final text = success();
-          if (!submit()) return;
-          msg = text;
-          Navigator.of(sheet).pop();
+          final r = await submit();
+          switch (r.kind) {
+            case WriteKind.done || WriteKind.unchanged:
+              if (r.ok) msg = text;
+              if (sheet.mounted) Navigator.of(sheet).pop();
+            case WriteKind.failed:
+              final e = r.error;
+              if (e != null && context.mounted) {
+                _say(errorText(context.l10n, e));
+              }
+            case _:
+              break;
+          }
         },
       ),
       builder: (_) => body,
@@ -346,15 +403,15 @@ class TaskDetailActions {
   }
 
   void openEdit() {
-    if (_task == null) return;
+    if (_task == null || !canManageTask) return;
     final l = context.l10n;
     _ctl.openEdit();
     _form(
       title: l.uiTasksEditTask,
-      description: '$code · ${l.uiTasksEditDescTail}',
+      description: '${_task?.displayCode ?? code} · ${l.uiTasksEditDescTail}',
       ok: l.uiTasksSave,
       submit: _ctl.submitEdit,
-      success: () => '$code ${l.uiTasksTUpdatedTail}',
+      success: () => '${_task?.displayCode ?? code} ${l.uiTasksTUpdatedTail}',
       body: EditTaskForm(code: code),
     );
   }
@@ -378,30 +435,37 @@ class TaskDetailActions {
   void openUpload() {
     if (_task == null) return;
     final l = context.l10n;
-    _ctl.openUpload();
+    if (!_ctl.openUpload()) return;
     _form(
       title: l.uiTasksUploadTitle,
       description: l.uiTasksUploadDesc,
       ok: l.uiTasksUploadOk,
       submit: _ctl.submitUpload,
       success: () => l.uiTasksTUploaded,
-      body: UploadForm(code: code),
+      body: UploadForm(code: code, onPick: pickUploadFile),
     );
+  }
+
+  /// Sistem seçicisinden dosya (sunucu yükleme formu); seçici yoksa bildirilir.
+  Future<void> pickUploadFile() async {
+    if (!ref.read(uploadPickerProvider).available) {
+      _say(context.l10n.uiTasksPickerMissing);
+      return;
+    }
+    await _ctl.pickUploadFile();
   }
 
   void openDelete() {
     final t = _task;
     if (t == null) return;
     final l = context.l10n;
+    final key = t.displayCode;
     _form(
-      title: '$code ${l.uiTasksDeleteQTail}',
+      title: '$key ${l.uiTasksDeleteQTail}',
       description: l.uiTasksDeleteDesc,
       ok: l.uiTasksDeleteOk,
       danger: true,
-      submit: () {
-        _ctl.delete();
-        return true;
-      },
+      submit: _ctl.delete,
       success: () => l.uiTasksTDeleted,
       body: Text(
         '“${t.title}” ${l.uiTasksDeleteBodyTail}',
@@ -410,25 +474,107 @@ class TaskDetailActions {
     );
   }
 
-  // ---- talep, hatırlatma, silme ------------------------------------------------------------
+  // ---- dosya ------------------------------------------------------------------------------
 
-  void approveRequest() {
-    final r = _task?.dateRequest;
-    if (r == null) return;
+  /// Dosya satırının işlemleri (yetkiye göre): indir, adı değiştir, sil.
+  void openFile(TaskFile f) {
     final l = context.l10n;
-    _ctl.approveRequest();
-    _say(
-      '${l.uiTasksTApproved} · $code ${l.uiTasksTNewDue} ${TaskDates.full(r.due)}',
+    final c = context.colors;
+    final p = _perms;
+    if (!p.canDownloadFile && !p.canRenameFile(f) && !p.canDeleteFile(f)) {
+      return;
+    }
+    _listSheet(
+      title: f.name,
+      builder: (sheet) => [
+        if (p.canDownloadFile)
+          _ListOption(
+            label: l.uiTasksFileDownload,
+            leading: const NzIcon(
+              NzIcons.uploadFile,
+              size: NizamioSize.iconSizeSm,
+            ),
+            onTap: () async {
+              Navigator.of(sheet).pop();
+              final (r, _) = await _ctl.downloadFile(f);
+              _report(r, done: '${l.uiTasksTFileSaved} · ${f.name}');
+            },
+          ),
+        if (p.canRenameFile(f))
+          _ListOption(
+            label: l.uiTasksFileRename,
+            leading: const NzIcon(NzIcons.edit, size: NizamioSize.iconSizeSm),
+            onTap: () {
+              Navigator.of(sheet).pop();
+              _renameFile(f);
+            },
+          ),
+        if (p.canDeleteFile(f))
+          _ListOption(
+            label: l.uiTasksFileDelete,
+            color: c.danger,
+            leading: NzIcon(
+              NzIcons.delete,
+              size: NizamioSize.iconSizeSm,
+              color: c.danger,
+            ),
+            onTap: () {
+              Navigator.of(sheet).pop();
+              _deleteFile(f);
+            },
+          ),
+      ],
     );
   }
 
-  void rejectRequest() {
+  Future<void> _renameFile(TaskFile f) async {
+    final l = context.l10n;
+    final name = await _askText(
+      title: l.uiTasksFileRename,
+      description: f.name,
+      label: l.uiTasksFileNameLabel,
+      ok: l.uiTasksSave,
+      initial: f.name,
+    );
+    if (name == null || !context.mounted) return;
+    _report(await _ctl.renameFile(f, name), done: l.uiTasksTFileRenamed);
+  }
+
+  Future<void> _deleteFile(TaskFile f) async {
+    final l = context.l10n;
+    final yes = await _confirm(
+      title: l.uiTasksFileDeleteQ,
+      description: l.uiTasksFileDeleteDesc,
+      ok: l.uiTasksDeleteOk,
+      danger: true,
+    );
+    if (!yes || !context.mounted) return;
+    _report(await _ctl.deleteFile(f), done: l.uiTasksTFileDeleted);
+  }
+
+  // ---- talep, hatırlatma, silme ------------------------------------------------------------
+
+  Future<void> approveRequest() async {
     final r = _task?.dateRequest;
     if (r == null) return;
     final l = context.l10n;
-    _ctl.rejectRequest();
-    _say(
-      '${l.uiTasksTRejected} · ${r.by == null ? '' : _name(r.by!)} ${l.uiTasksTInformed}',
+    _report(
+      await _ctl.approveRequest(),
+      done:
+          '${l.uiTasksTApproved} · ${_task?.displayCode ?? code} '
+          '${l.uiTasksTNewDue} ${TaskDates.full(r.due)}',
+    );
+  }
+
+  Future<void> rejectRequest() async {
+    final r = _task?.dateRequest;
+    if (r == null) return;
+    final l = context.l10n;
+    _report(
+      await _ctl.rejectRequest(),
+      done:
+          '${l.uiTasksTRejected} · '
+          '${r.by == null ? '' : _name(r.by!)} ${l.uiTasksTInformed}',
     );
   }
 

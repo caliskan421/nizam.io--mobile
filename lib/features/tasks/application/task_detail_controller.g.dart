@@ -17,7 +17,8 @@ part of 'task_detail_controller.dart';
 /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
 /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
 ///
-/// Örnek katalogda (ve sunucuya henüz bağlanmamış P3 yazmalarında) değişiklik katalog
+/// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
+/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
 /// denetleyicisinde bellekte kalır.
 
 @ProviderFor(TaskDetailController)
@@ -32,7 +33,8 @@ final taskDetailControllerProvider = TaskDetailControllerFamily._();
 /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
 /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
 ///
-/// Örnek katalogda (ve sunucuya henüz bağlanmamış P3 yazmalarında) değişiklik katalog
+/// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
+/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
 /// denetleyicisinde bellekte kalır.
 final class TaskDetailControllerProvider
     extends $NotifierProvider<TaskDetailController, TaskDetailState> {
@@ -45,7 +47,8 @@ final class TaskDetailControllerProvider
   /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
   /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
   ///
-  /// Örnek katalogda (ve sunucuya henüz bağlanmamış P3 yazmalarında) değişiklik katalog
+  /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
+  /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
   /// denetleyicisinde bellekte kalır.
   TaskDetailControllerProvider._({
     required TaskDetailControllerFamily super.from,
@@ -92,7 +95,7 @@ final class TaskDetailControllerProvider
 }
 
 String _$taskDetailControllerHash() =>
-    r'b39d0607160488baf97d236240ba350acdffbce3';
+    r'b4865b2a745634a2d55fa45a05bc8aa8c6b312ff';
 
 /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
 ///
@@ -103,7 +106,8 @@ String _$taskDetailControllerHash() =>
 /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
 /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
 ///
-/// Örnek katalogda (ve sunucuya henüz bağlanmamış P3 yazmalarında) değişiklik katalog
+/// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
+/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
 /// denetleyicisinde bellekte kalır.
 
 final class TaskDetailControllerFamily extends $Family
@@ -133,7 +137,8 @@ final class TaskDetailControllerFamily extends $Family
   /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
   /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
   ///
-  /// Örnek katalogda (ve sunucuya henüz bağlanmamış P3 yazmalarında) değişiklik katalog
+  /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
+  /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
   /// denetleyicisinde bellekte kalır.
 
   TaskDetailControllerProvider call(String code) =>
@@ -152,7 +157,8 @@ final class TaskDetailControllerFamily extends $Family
 /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
 /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
 ///
-/// Örnek katalogda (ve sunucuya henüz bağlanmamış P3 yazmalarında) değişiklik katalog
+/// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
+/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
 /// denetleyicisinde bellekte kalır.
 
 abstract class _$TaskDetailController extends $Notifier<TaskDetailState> {

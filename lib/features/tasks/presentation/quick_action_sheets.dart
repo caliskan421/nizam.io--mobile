@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,8 +46,10 @@ Future<void> showNewTaskSheet(
     title: l.uiTasksNewTask,
     description: l.uiTasksNtDesc,
     ok: l.uiTasksCreate,
-    onOk: (sheet) {
-      final r = container.read(newTaskFormControllerProvider.notifier).submit();
+    onOk: (sheet) async {
+      final r = await container
+          .read(newTaskFormControllerProvider.notifier)
+          .submit();
       if (r == null) return null;
       return '${r.code} ${l.uiTasksTCreatedTail} · '
           '${r.notified} ${l.uiTasksTNotifiedTail}';
@@ -108,13 +112,13 @@ Future<void> showInviteSheet(BuildContext context, {String? coordinatorship}) {
 }
 
 /// Ortak alt sayfa: [onOk] başarıda bildirim metnini döner (sayfa kapanır, bildirim çıkar),
-/// doğrulama hatasında null (hata formda görünür).
+/// doğrulama ya da sunucu hatasında null (hata formda görünür). Sunucu yazması beklenir.
 Future<void> _show(
   BuildContext context, {
   required String title,
   required String description,
   required String ok,
-  required String? Function(BuildContext sheet) onOk,
+  required FutureOr<String?> Function(BuildContext sheet) onOk,
   required Widget Function(ValueNotifier<bool> expansion) body,
 }) async {
   // Sayfa içeriği kapanış canlandırması bitince bırakır; burada elle kapatılmaz.
@@ -130,9 +134,9 @@ Future<void> _show(
       sheet,
       cancel: context.l10n.uiTasksCancel,
       ok: ok,
-      onOk: () {
-        final msg = onOk(sheet);
-        if (msg == null) return;
+      onOk: () async {
+        final msg = await onOk(sheet);
+        if (msg == null || !sheet.mounted) return;
         toast = msg;
         Navigator.of(sheet).pop();
       },

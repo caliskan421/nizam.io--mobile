@@ -359,18 +359,26 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     if (type == null || wire == null) {
       throw ArgumentError.value(file.name, 'file', 'izinli tür/etiket değil');
     }
-    final form = FormData.fromMap({
-      'file': await MultipartFile.fromFile(
-        file.path,
-        filename: file.name,
-        contentType: DioMediaType.parse(type),
-      ),
-    });
+    final form = FormData()
+      ..files.add(
+        MapEntry(
+          'file',
+          await MultipartFile.fromFile(
+            file.path,
+            filename: file.name,
+            contentType: DioMediaType.parse(type),
+          ),
+        ),
+      );
+    // Sorgu dizesi elle (D2: features içinde dize anahtarlı Map yok); değerler kodlanır.
+    final query = StringBuffer('tag=${Uri.encodeQueryComponent(wire)}');
+    if (subtaskId != null) {
+      query.write('&subtask_id=${Uri.encodeQueryComponent(subtaskId)}');
+    }
     await apiCall(
       () => _dio.post<Object?>(
-        '/v1/work-items/${Uri.encodeComponent(task.id)}/files',
+        '/v1/work-items/${Uri.encodeComponent(task.id)}/files?$query',
         data: form,
-        queryParameters: {'tag': wire, 'subtask_id': ?subtaskId},
         options: Options(
           contentType: 'multipart/form-data',
           extra: withDepartment(

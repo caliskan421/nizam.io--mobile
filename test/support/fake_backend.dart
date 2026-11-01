@@ -7,9 +7,19 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 
 class Seen {
-  Seen(this.method, this.path, this.headers, this.body, {this.host = ''});
+  Seen(
+    this.method,
+    this.path,
+    this.headers,
+    this.body, {
+    this.host = '',
+    this.query = const {},
+  });
   final String method;
   final String host;
+
+  /// Sorgu parametreleri.
+  final Map<String, String> query;
   final String path;
   final Map<String, Object?> headers;
   final Object? body;
@@ -65,8 +75,14 @@ class FakeBackend implements HttpClientAdapter {
     Object? body;
     if (requestStream != null) {
       final bytes = await requestStream.expand((c) => c).toList();
-      final text = utf8.decode(bytes);
-      body = text.isEmpty ? null : jsonDecode(text);
+      final text = utf8.decode(bytes, allowMalformed: true);
+      // JSON dışı gövde (multipart) ham metin olarak kaydedilir.
+      final multipart = options.contentType?.startsWith('multipart/') ?? false;
+      body = text.isEmpty
+          ? null
+          : multipart
+          ? text
+          : jsonDecode(text);
     }
     final seen = Seen(
       options.method,
@@ -74,6 +90,7 @@ class FakeBackend implements HttpClientAdapter {
       Map.of(options.headers),
       body,
       host: options.uri.host,
+      query: options.uri.queryParameters,
     );
     requests.add(seen);
     return handler(seen);

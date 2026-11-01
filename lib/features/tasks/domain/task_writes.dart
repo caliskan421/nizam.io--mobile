@@ -118,28 +118,30 @@ final class UploadSource {
   }
 
   /// Bildirilecek tür (RECORDS-K03); izinli kümede yoksa null (istek gönderilmez).
-  String? get contentType => uploadContentTypes[extension];
+  String? get contentType => uploadContentType(extension);
 
   /// Sunucu sınırına ulaşıyor mu (tam sınır da reddedilir).
   bool get tooLarge => sizeBytes >= uploadMaxBytes;
 }
 
-/// İzinli uzantı → bildirilen tür (backend `records/domain/content.go`, elle yazılır). Sunucu
-/// türü multipart parçasının `Content-Type`'ından okur; `jpeg` uzantısı kümede yoktur (tek
-/// kanonik uzantı `jpg`).
-const uploadContentTypes = <String, String>{
-  'pdf': 'application/pdf',
-  'png': 'image/png',
-  'jpg': 'image/jpeg',
-  'csv': 'text/csv',
-  'doc': 'application/msword',
-  'docx':
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'xls': 'application/vnd.ms-excel',
-  'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'ppt': 'application/vnd.ms-powerpoint',
-  'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'pages': 'application/x-iwork-pages-sffpages',
+/// İzinli uzantı → bildirilen tür (backend `records/domain/content.go`, elle yazılır); küme
+/// dışı → null. Sunucu türü multipart parçasının `Content-Type`'ından okur; `jpeg` uzantısı
+/// kümede yoktur (tek kanonik uzantı `jpg`).
+String? uploadContentType(String extension) => switch (extension) {
+  'pdf' => 'application/pdf',
+  'png' => 'image/png',
+  'jpg' => 'image/jpeg',
+  'csv' => 'text/csv',
+  'doc' => 'application/msword',
+  'docx' =>
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'xls' => 'application/vnd.ms-excel',
+  'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'ppt' => 'application/vnd.ms-powerpoint',
+  'pptx' =>
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'pages' => 'application/x-iwork-pages-sffpages',
+  _ => null,
 };
 
 /// Tek dosya sınırı: bu boyuta ULAŞAN dosya 422 `records.too_large` (RECORDS-K05, 90 MiB).
@@ -190,6 +192,11 @@ final class UnavailableUploadPicker implements UploadPicker {
 
   @override
   Future<UploadSource?> pick() async => null;
+}
+
+/// İndirilen dosyanın yazıldığı yer (portu; gerçekleştirme `data/`). Kaydedilen yolu döner.
+abstract interface class DownloadSink {
+  Future<String> save(String name, Uint8List bytes);
 }
 
 /// Görev ayrıntısının sunucu yazmaları (domain portu; gerçekleştirme `data/`). Görev

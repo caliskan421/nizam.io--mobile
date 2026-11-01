@@ -663,12 +663,19 @@ class _TitleInputState extends State<_TitleInput> {
   );
 }
 
-/// Dosya sekmesi.
+/// Dosya sekmesi. Sunucu dosyasına dokunmak yetkiye göre indir / adı değiştir / sil
+/// işlemlerini açar ([TaskDetailActions.openFile]).
 class DetailFiles extends StatelessWidget {
-  const DetailFiles({super.key, required this.task, required this.catalog});
+  const DetailFiles({
+    super.key,
+    required this.task,
+    required this.catalog,
+    required this.actions,
+  });
 
   final TaskItem task;
   final TaskCatalog catalog;
+  final TaskDetailActions actions;
 
   @override
   Widget build(BuildContext context) {
@@ -682,55 +689,59 @@ class DetailFiles extends StatelessWidget {
       spacing: NizamioSpacing.space2,
       children: [
         for (final f in task.fileEntries)
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: c.surface,
-              borderRadius: BorderRadius.circular(NizamioRadius.group),
-              border: Border.all(
-                color: c.border,
-                width: NizamioSize.borderWidth,
+          InkWell(
+            borderRadius: BorderRadius.circular(NizamioRadius.group),
+            onTap: () => actions.openFile(f),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: c.surface,
+                borderRadius: BorderRadius.circular(NizamioRadius.group),
+                border: Border.all(
+                  color: c.border,
+                  width: NizamioSize.borderWidth,
+                ),
               ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(NizamioSpacing.space3),
-              child: Row(
-                children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: c.surfaceOverlay,
-                      borderRadius: BorderRadius.circular(NizamioRadius.tile),
-                    ),
-                    child: SizedBox.square(
-                      dimension: NizamioSize.iconTileLg,
-                      child: Center(
-                        child: Text(
-                          fileKindLabel(f.kind),
-                          style: t.monoSm.copyWith(color: c.textMuted),
+              child: Padding(
+                padding: const EdgeInsets.all(NizamioSpacing.space3),
+                child: Row(
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: c.surfaceOverlay,
+                        borderRadius: BorderRadius.circular(NizamioRadius.tile),
+                      ),
+                      child: SizedBox.square(
+                        dimension: NizamioSize.iconTileLg,
+                        child: Center(
+                          child: Text(
+                            fileKindLabel(f.kind),
+                            style: t.monoSm.copyWith(color: c.textMuted),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const Gap(NizamioSpacing.space3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          f.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: t.mono,
-                        ),
-                        Text(
-                          _meta(l, f),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: t.caption.copyWith(color: c.textMuted),
-                        ),
-                      ],
+                    const Gap(NizamioSpacing.space3),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            f.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: t.mono,
+                          ),
+                          Text(
+                            _meta(l, f),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: t.caption.copyWith(color: c.textMuted),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

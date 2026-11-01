@@ -1,8 +1,12 @@
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/errors/api_error.dart';
+import '../../../core/providers.dart';
 import '../domain/task_catalog.dart';
+import '../domain/task_writes.dart';
 import 'task_catalog_controller.dart';
+import 'tasks_providers.dart';
 
 part 'quick_forms_controller.g.dart';
 
@@ -33,6 +37,8 @@ final class NewTaskForm {
     this.picking = false,
     this.previous,
     this.error,
+    this.failure,
+    this.busy = false,
   });
 
   final String title;
@@ -54,6 +60,12 @@ final class NewTaskForm {
   final (DateTime, DateTime)? previous;
   final NewTaskError? error;
 
+  /// Sunucu (ya da yerel ön denetim) hatası; metin koddan.
+  final ApiError? failure;
+
+  /// Oluşturma isteği uçuşta (ikinci dokunuş istek göndermez).
+  final bool busy;
+
   int get days => end.difference(start).inDays;
 
   NewTaskForm copyWith({
@@ -69,6 +81,8 @@ final class NewTaskForm {
     bool? picking,
     (DateTime, DateTime)? Function()? previous,
     NewTaskError? Function()? error,
+    ApiError? Function()? failure,
+    bool? busy,
   }) => NewTaskForm(
     title: title ?? this.title,
     coordinatorship: coordinatorship == null
@@ -84,6 +98,8 @@ final class NewTaskForm {
     picking: picking ?? this.picking,
     previous: previous == null ? this.previous : previous(),
     error: error == null ? this.error : error(),
+    failure: failure == null ? this.failure : failure(),
+    busy: busy ?? this.busy,
   );
 }
 
@@ -102,6 +118,8 @@ class NewTaskFormController extends _$NewTaskFormController {
       start: today,
       end: today.add(const Duration(days: 14)),
       month: DateTime(today.year, today.month),
+      // Sunucu varsayılanı açık (WORK-K75); örnek prototipte kapalı.
+      evidenceRequired: _server,
       coordinatorship: ref
           .read(taskCatalogControllerProvider)
           .value
@@ -110,6 +128,9 @@ class NewTaskFormController extends _$NewTaskFormController {
           ?.code,
     );
   }
+
+  bool get _server =>
+      ref.read(taskCatalogControllerProvider).value?.access != null;
 
   DateTime _today() => _day(
     ref.read(taskCatalogControllerProvider).value?.today ?? DateTime.now(),
@@ -167,12 +188,15 @@ class NewTaskFormController extends _$NewTaskFormController {
     error: () => null,
   );
 
+  /// Atanan seçimi; sunucuda TEK atanan (`assignee_account_id`): seçim yer değiştirir.
   void toggleAssignee(String id) => state = state.copyWith(
     assignees: state.assignees.contains(id)
         ? [
             for (final a in state.assignees)
               if (a != id) a,
           ]
+        : _server
+        ? [id]
         : [...state.assignees, id],
     error: () => null,
   );
@@ -214,8 +238,84 @@ class NewTaskFormController extends _$NewTaskFormController {
     }
   }
 
-  /// Doğrular ve görevi kataloğa ekler; hata varsa [NewTaskForm.error] ile null döner.
-  CreatedTask? submit() {
+  /// Doğrular ve görevi oluşturur; hata varsa [NewTaskForm.error] / [NewTaskForm.failure]
+  /// ile null döner.
+  ///
+  /// Sunucuda `createWorkItem`: koordinatörlük = departman (isteğin açık departmanı), tek
+  /// atanan (boş → atamasız görev), tarihler, öncelik, kanıt bayrağı. Kod yerelde üretilmez;
+  /// sunucunun verdiği kimlik kullanılır ve katalog yeniden okunur (iyimser ekleme yok).
+  /// Yetki: kapsamda yönetici ya da koordinatör ([TaskAccess.canCreateIn]); değilse istek
+  /// gönderilmez (`work.not_authorized`). Uçuştaki istekte ikinci çağrı null döner.
+  Future<CreatedTask?> submit() async {
+    if (_server) return _submitServer();
+    return _submitLocal();
+  }
+
+  NewTaskError? _validate(NewTaskForm f, {required bool server}) =>
+      f.title.trim().isEmpty
+      ? NewTaskError.title
+      : f.coordinatorship == null
+      ? NewTaskError.coordinatorship
+      : !server && f.assignees.isEmpty
+      ? NewTaskError.assignees
+      : f.end.isBefore(f.start)
+      ? NewTaskError.dates
+      : null;
+
+  Future<CreatedTask?> _submitServer() async {
+    if (state.busy) return null;
+    final f = _cancelPick(state);
+    final err = _validate(f, server: true);
+    if (err != null) {
+      state = state.copyWith(error: () => err, failure: () => null);
+      return null;
+    }
+    final catalog = ref.read(taskCatalogControllerProvider).value;
+    final access = catalog?.access;
+    final program = ref.read(scopeStateProvider).programId;
+    final dept = f.coordinatorship!;
+    if (access == null ||
+        program == null ||
+        !access.canCreateIn(program, dept)) {
+      state = state.copyWith(failure: () => ApiError('work.not_authorized'));
+      return null;
+    }
+    state = state.copyWith(busy: true, failure: () => null, error: () => null);
+    final store = ref.read(taskCatalogControllerProvider.notifier);
+    try {
+      final id = await ref
+          .read(taskWriteRepositoryProvider)
+          .createWorkItem(
+            WorkItemDraft(
+              departmentId: dept,
+              title: f.title.trim(),
+              start: f.start,
+              end: f.end,
+              priority: f.priority,
+              assignee: f.assignees.firstOrNull,
+              evidenceRequired: f.evidenceRequired,
+            ),
+          );
+      await store.reload();
+      if (!ref.mounted) return null;
+      final key =
+          ref
+              .read(taskCatalogControllerProvider)
+              .value
+              ?.task(id)
+              ?.displayCode ??
+          id;
+      state = _initial();
+      return (code: key, notified: f.assignees.length);
+    } on Object catch (e) {
+      if (ref.mounted) {
+        state = state.copyWith(busy: false, failure: () => toApiError(e));
+      }
+      return null;
+    }
+  }
+
+  CreatedTask? _submitLocal() {
     final f = _cancelPick(state);
     final err = f.title.trim().isEmpty
         ? NewTaskError.title

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/errors/error_text.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
@@ -10,6 +11,7 @@ import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/quick_forms_controller.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../domain/task_catalog.dart';
+import '../detail/detail_forms.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 import 'quick_parts.dart';
@@ -44,6 +46,8 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
     final coord = f.coordinatorship == null
         ? null
         : catalog?.coordinatorship(f.coordinatorship!);
+    // Sunucu katalogu: koordinatörlük = departman; adaylar departman ekibinden (tek atanan).
+    final server = catalog?.access != null;
     String name(String id) => catalog?.person(id)?.name ?? id;
     final assigneeValue = f.assignees.isEmpty
         ? (coord == null ? l.uiTasksCoordFirst : l.uiTasksPickPerson)
@@ -110,7 +114,13 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
                   ? c.textFaint
                   : c.accentText,
               content: QuickPane(
-                child: coord == null || coord.team.isEmpty
+                child: server && coord != null
+                    ? TeamPicker(
+                        departmentId: coord.code,
+                        selected: f.assignees,
+                        onToggle: ctl.toggleAssignee,
+                      )
+                    : coord == null || coord.team.isEmpty
                     ? Text(
                         l.uiTasksNobodyHere,
                         style: context.text.caption.copyWith(
@@ -173,6 +183,10 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
         if (error != null) ...[
           const Gap(NizamioSpacing.space3),
           TaskFormError(l.newTaskError(error)),
+        ],
+        if (f.failure case final failure?) ...[
+          const Gap(NizamioSpacing.space3),
+          TaskFormError(errorText(l, failure)),
         ],
       ],
     );

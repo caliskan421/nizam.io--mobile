@@ -25,3 +25,20 @@ TaskDetailsRepository taskDetailsRepository(Ref ref) =>
 TaskWriteRepository taskWriteRepository(Ref ref) => throw UnimplementedError(
   'taskWriteRepositoryProvider bileşim kökünde (lib/app/di) bağlanır',
 );
+
+/// PORT: sistem dosya seçicisi. Seçici paketi bağlanana dek (ADR-0002 kararı) "yok"
+/// gerçekleştirmesi: yükleme formu dosya seçtiremez, istek gönderilmez.
+@Riverpod(keepAlive: true)
+UploadPicker uploadPicker(Ref ref) => const UnavailableUploadPicker();
+
+/// PORT: indirilen dosyanın kaydı (`tasks_module.dart`'ta bağlanır).
+@Riverpod(keepAlive: true)
+DownloadSink downloadSink(Ref ref) => throw UnimplementedError(
+  'downloadSinkProvider bileşim kökünde (lib/app/di) bağlanır',
+);
+
+/// Departman ekibi ([departmentId]; görev ataması adayları). Yalnız yönetici ya da o
+/// departmanın koordinatörü izler (üye 403 alır; çağrılmaz).
+@riverpod
+Future<List<TeamMember>> taskTeam(Ref ref, String departmentId) =>
+    ref.read(taskWriteRepositoryProvider).listTeam(departmentId);

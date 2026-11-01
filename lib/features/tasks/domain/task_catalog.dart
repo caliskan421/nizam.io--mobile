@@ -499,6 +499,7 @@ final class TaskItem {
     DateChangeRequest? Function()? dateRequest,
     List<TaskFile>? fileEntries,
     List<TaskNote>? noteEntries,
+    bool? evidenceRequired,
   }) => TaskItem(
     code: code ?? this.code,
     id: code == null || id != this.code ? id : code,
@@ -525,7 +526,7 @@ final class TaskItem {
     dateRequest: dateRequest == null ? this.dateRequest : dateRequest(),
     fileEntries: fileEntries ?? this.fileEntries,
     noteEntries: noteEntries ?? this.noteEntries,
-    evidenceRequired: evidenceRequired,
+    evidenceRequired: evidenceRequired ?? this.evidenceRequired,
     subtaskCounts: subtaskCounts,
   );
 }

@@ -296,6 +296,25 @@
     "ui.tasks.err_iv_coord": "Koordinatör için en az bir koordinatörlük seç.",
     "ui.tasks.t_invited": "Davet gönderildi:",
     "ui.tasks.expand_sheet": "Sayfayı büyüt",
-    "ui.tasks.collapse_sheet": "Sayfayı küçült"
+    "ui.tasks.collapse_sheet": "Sayfayı küçült",
+    "ui.tasks.claim": "Üstlen",
+    "ui.tasks.unclaim": "Üstlenmeyi bırak",
+    "ui.tasks.t_claimed": "Görevi üstlendin",
+    "ui.tasks.t_unclaimed": "Görevi bıraktın",
+    "ui.tasks.file_download": "İndir",
+    "ui.tasks.file_rename": "Adı değiştir",
+    "ui.tasks.file_delete": "Dosyayı sil",
+    "ui.tasks.file_delete_q": "Dosya silinsin mi?",
+    "ui.tasks.file_delete_desc": "Silinen dosya geri alınamaz",
+    "ui.tasks.file_name_label": "Dosya adı",
+    "ui.tasks.t_file_saved": "Dosya kaydedildi",
+    "ui.tasks.t_file_renamed": "Dosya adı güncellendi",
+    "ui.tasks.t_file_deleted": "Dosya silindi",
+    "ui.tasks.pick_file_action": "Dosya seç",
+    "ui.tasks.picker_missing": "Bu sürümde dosya seçici yok",
+    "ui.tasks.err_pick_file": "Yüklemek için bir dosya seç",
+    "ui.tasks.upload_types": "PDF, PNG, JPG, CSV, Word, Excel, PowerPoint, Pages · 90 MB altı",
+    "ui.tasks.team_empty": "Bu departmanda atanabilir kişi yok",
+    "ui.tasks.unassigned": "Atanmamış"
   }
 }

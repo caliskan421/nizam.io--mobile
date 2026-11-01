@@ -9,7 +9,9 @@ export 'application/tasks_providers.dart'
     show
         taskCatalogRepositoryProvider,
         taskDetailsRepositoryProvider,
-        taskWriteRepositoryProvider;
+        taskWriteRepositoryProvider,
+        downloadSinkProvider,
+        uploadPickerProvider;
 export 'domain/task_access.dart';
 export 'domain/task_catalog.dart';
 export 'presentation/quick_action_sheets.dart'

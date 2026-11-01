@@ -4704,5 +4704,81 @@
   "uiTimelineGanttOpenTask": "Görev ayrıntısını aç",
   "@uiTimelineGanttOpenTask": {
     "description": "ui.timeline.gantt_open_task"
+  },
+  "uiTasksClaim": "Üstlen",
+  "@uiTasksClaim": {
+    "description": "ui.tasks.claim"
+  },
+  "uiTasksUnclaim": "Üstlenmeyi bırak",
+  "@uiTasksUnclaim": {
+    "description": "ui.tasks.unclaim"
+  },
+  "uiTasksTClaimed": "Görevi üstlendin",
+  "@uiTasksTClaimed": {
+    "description": "ui.tasks.t_claimed"
+  },
+  "uiTasksTUnclaimed": "Görevi bıraktın",
+  "@uiTasksTUnclaimed": {
+    "description": "ui.tasks.t_unclaimed"
+  },
+  "uiTasksFileDownload": "İndir",
+  "@uiTasksFileDownload": {
+    "description": "ui.tasks.file_download"
+  },
+  "uiTasksFileRename": "Adı değiştir",
+  "@uiTasksFileRename": {
+    "description": "ui.tasks.file_rename"
+  },
+  "uiTasksFileDelete": "Dosyayı sil",
+  "@uiTasksFileDelete": {
+    "description": "ui.tasks.file_delete"
+  },
+  "uiTasksFileDeleteQ": "Dosya silinsin mi?",
+  "@uiTasksFileDeleteQ": {
+    "description": "ui.tasks.file_delete_q"
+  },
+  "uiTasksFileDeleteDesc": "Silinen dosya geri alınamaz",
+  "@uiTasksFileDeleteDesc": {
+    "description": "ui.tasks.file_delete_desc"
+  },
+  "uiTasksFileNameLabel": "Dosya adı",
+  "@uiTasksFileNameLabel": {
+    "description": "ui.tasks.file_name_label"
+  },
+  "uiTasksTFileSaved": "Dosya kaydedildi",
+  "@uiTasksTFileSaved": {
+    "description": "ui.tasks.t_file_saved"
+  },
+  "uiTasksTFileRenamed": "Dosya adı güncellendi",
+  "@uiTasksTFileRenamed": {
+    "description": "ui.tasks.t_file_renamed"
+  },
+  "uiTasksTFileDeleted": "Dosya silindi",
+  "@uiTasksTFileDeleted": {
+    "description": "ui.tasks.t_file_deleted"
+  },
+  "uiTasksPickFileAction": "Dosya seç",
+  "@uiTasksPickFileAction": {
+    "description": "ui.tasks.pick_file_action"
+  },
+  "uiTasksPickerMissing": "Bu sürümde dosya seçici yok",
+  "@uiTasksPickerMissing": {
+    "description": "ui.tasks.picker_missing"
+  },
+  "uiTasksErrPickFile": "Yüklemek için bir dosya seç",
+  "@uiTasksErrPickFile": {
+    "description": "ui.tasks.err_pick_file"
+  },
+  "uiTasksUploadTypes": "PDF, PNG, JPG, CSV, Word, Excel, PowerPoint, Pages · 90 MB altı",
+  "@uiTasksUploadTypes": {
+    "description": "ui.tasks.upload_types"
+  },
+  "uiTasksTeamEmpty": "Bu departmanda atanabilir kişi yok",
+  "@uiTasksTeamEmpty": {
+    "description": "ui.tasks.team_empty"
+  },
+  "uiTasksUnassigned": "Atanmamış",
+  "@uiTasksUnassigned": {
+    "description": "ui.tasks.unassigned"
   }
 }

@@ -66,11 +66,12 @@ class TaskDetailPage extends ConsumerWidget {
               icon: NzIcons.bell,
               onSelected: actions.remind,
             ),
-            NzFlyoutItem(
-              label: l.uiTasksEditTask,
-              icon: NzIcons.edit,
-              onSelected: actions.openEdit,
-            ),
+            if (actions.canManageTask)
+              NzFlyoutItem(
+                label: l.uiTasksEditTask,
+                icon: NzIcons.edit,
+                onSelected: actions.openEdit,
+              ),
             NzFlyoutSection(l.uiTasksFlyGo),
             NzFlyoutItem(
               label: l.uiTasksFlyTimeline,
@@ -104,11 +105,12 @@ class TaskDetailPage extends ConsumerWidget {
         actions: task == null
             ? const []
             : [
-                NzIconButton(
-                  icon: NzIcons.edit,
-                  semanticLabel: l.uiTasksEditTask,
-                  onPressed: actions.openEdit,
-                ),
+                if (actions.canManageTask)
+                  NzIconButton(
+                    icon: NzIcons.edit,
+                    semanticLabel: l.uiTasksEditTask,
+                    onPressed: actions.openEdit,
+                  ),
                 NzIconButton(
                   icon: NzIcons.more,
                   semanticLabel: l.uiTasksMoreActions,
@@ -158,8 +160,9 @@ class TaskDetailPage extends ConsumerWidget {
                     icon: NzIcons.delete,
                     title: '$code ${l.uiTasksDeletedTail}',
                     message: l.uiTasksDeletedFilesKept,
-                    actionLabel: l.uiTasksUndo,
-                    onAction: actions.undoDelete,
+                    // Geri alma yalnız örnekte (sunucuda silinenler yönetici yüzünde).
+                    actionLabel: actions.canUndoDelete ? l.uiTasksUndo : null,
+                    onAction: actions.canUndoDelete ? actions.undoDelete : null,
                   )
                 : NzEmptyState(title: l.uiTasksNotFound),
           ),
@@ -222,7 +225,11 @@ class _TabContent extends ConsumerWidget {
             catalog: catalog,
             actions: actions,
           ),
-          TaskDetailTab.files => DetailFiles(task: task, catalog: catalog),
+          TaskDetailTab.files => DetailFiles(
+            task: task,
+            catalog: catalog,
+            actions: actions,
+          ),
           TaskDetailTab.notes => DetailNotes(
             task: task,
             catalog: catalog,
@@ -280,7 +287,7 @@ class _Body extends StatelessWidget {
                 semanticLabel:
                     '${l.uiTasksPriority}: ${l.priorityLabel(task.priority)}',
                 leading: NzPriorityBars(level: priorityLevel(task.priority)),
-                onTap: actions.openPriority,
+                onTap: actions.canManageTask ? actions.openPriority : null,
               ),
             ),
           ],
@@ -288,12 +295,15 @@ class _Body extends StatelessWidget {
         const Gap(NizamioSpacing.space3),
         Row(
           children: [
-            NzIconButton.circle(
-              icon: NzIcons.event,
-              semanticLabel: l.uiTasksRequestDate,
-              onPressed: actions.openDateRequest,
-            ),
-            const Gap(NizamioSpacing.space2),
+            // Tarih talebi yalnız kapsam koordinatörüne (üye ve tek başına yönetici hayır).
+            if (actions.canRequestDate) ...[
+              NzIconButton.circle(
+                icon: NzIcons.event,
+                semanticLabel: l.uiTasksRequestDate,
+                onPressed: actions.openDateRequest,
+              ),
+              const Gap(NizamioSpacing.space2),
+            ],
             NzIconButton.circle(
               icon: NzIcons.bell,
               semanticLabel: l.uiTasksRemind,
@@ -305,7 +315,8 @@ class _Body extends StatelessWidget {
                 label: l.uiTasksUpload,
                 icon: NzIcons.uploadFile,
                 expand: true,
-                onPressed: actions.openUpload,
+                // Yükleme: koordinatör ya da atanmış üye; yöneticilik reddeder.
+                onPressed: actions.canUpload ? actions.openUpload : null,
               ),
             ),
           ],
@@ -315,8 +326,8 @@ class _Body extends StatelessWidget {
           _RequestCard(
             request: req,
             by: req.by == null ? '' : catalog.person(req.by!)?.name ?? req.by!,
-            onReject: actions.rejectRequest,
-            onApprove: actions.approveRequest,
+            onReject: actions.canReviewDate ? actions.rejectRequest : null,
+            onApprove: actions.canReviewDate ? actions.approveRequest : null,
           ),
         ],
         // Sekme şeridi kaynakta `gap 20` + `margin-top: -6px` (tablet).
@@ -413,8 +424,10 @@ class _RequestCard extends StatelessWidget {
 
   final DateChangeRequest request;
   final String by;
-  final VoidCallback onReject;
-  final VoidCallback onApprove;
+
+  /// null → karar düğmeleri yok (yalnız şirket yöneticisi karar verir).
+  final VoidCallback? onReject;
+  final VoidCallback? onApprove;
 
   @override
   Widget build(BuildContext context) {
@@ -505,25 +518,26 @@ class _RequestCard extends StatelessWidget {
                 '“${r.reason.isEmpty ? l.uiTasksNoReason : r.reason}”',
                 style: t.caption.copyWith(color: c.textMuted),
               ),
-              Row(
-                spacing: NizamioSpacing.space2,
-                children: [
-                  Expanded(
-                    child: NzButton.secondary(
-                      label: l.uiTasksReject,
-                      expand: true,
-                      onPressed: onReject,
+              if (onReject != null && onApprove != null)
+                Row(
+                  spacing: NizamioSpacing.space2,
+                  children: [
+                    Expanded(
+                      child: NzButton.secondary(
+                        label: l.uiTasksReject,
+                        expand: true,
+                        onPressed: onReject,
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: NzButton.primary(
-                      label: l.uiTasksApprove,
-                      expand: true,
-                      onPressed: onApprove,
+                    Expanded(
+                      child: NzButton.primary(
+                        label: l.uiTasksApprove,
+                        expand: true,
+                        onPressed: onApprove,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
         ),

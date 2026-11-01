@@ -28,14 +28,14 @@ void main() {
     expect(await status(TaskStatus.done), WriteKind.blockedBySubtasks);
     expect(await status(TaskStatus.review), WriteKind.done);
     expect(task().status, TaskStatus.review);
-    expect(ctl.setPriority(TaskPriority.low), isTrue);
-    expect(ctl.setPriority(TaskPriority.low), isFalse);
+    expect((await ctl.setPriority(TaskPriority.low)).ok, isTrue);
+    expect((await ctl.setPriority(TaskPriority.low)).kind, WriteKind.unchanged);
 
     // Alt görevde kanıt bayrağı yok (ADR-0024): yükleme alt görev önseçmez; alt görevler
     // kanıtsız bitirilir.
     ctl.openUpload();
     expect(c.read(p).upload!.subtask, isNull);
-    expect(ctl.submitUpload(), isTrue);
+    expect((await ctl.submitUpload()).ok, isTrue);
     expect(c.read(p).tab, TaskDetailTab.files);
     expect(task().fileEntries, hasLength(2));
     await ctl.toggleSubtask('s3');
@@ -62,27 +62,27 @@ void main() {
     TaskItem task() =>
         c.read(taskCatalogControllerProvider).value!.task('ALT-7')!;
     expect(ctl.openDateRequest(), isFalse); // bekleyen talep var
-    ctl.approveRequest();
+    await ctl.approveRequest();
     expect(task().due, DateTime(2026, 10, 31));
     expect(task().hasPendingRequest, isFalse);
     expect(task().overdueDays, 0);
     expect(ctl.openDateRequest(), isTrue);
     expect(c.read(p).dateDraft!.due, DateTime(2026, 11, 14));
-    expect(ctl.submitDateRequest(), isTrue);
+    expect((await ctl.submitDateRequest()).ok, isTrue);
     expect(task().hasPendingRequest, isTrue);
-    ctl.rejectRequest();
+    await ctl.rejectRequest();
     expect(task().dateRequest!.state, DateRequestState.rejected);
 
     ctl.openEdit();
     ctl.updateEdit(c.read(p).edit!.copyWith(title: '  '));
-    expect(ctl.submitEdit(), isFalse);
+    expect((await ctl.submitEdit()).kind, WriteKind.invalid);
     expect(c.read(p).showErrors, isTrue);
     ctl
       ..updateEdit(c.read(p).edit!.copyWith(title: 'Yeni başlık'))
       ..editCoordinatorship('MEK');
     expect(c.read(p).edit!.assignees, isEmpty);
     ctl.editToggleAssignee('my');
-    expect(ctl.submitEdit(), isTrue);
+    expect((await ctl.submitEdit()).ok, isTrue);
     expect(task().title, 'Yeni başlık');
     expect(task().coordinatorship, 'MEK');
   });
@@ -94,13 +94,13 @@ void main() {
     final ctl = c.read(p.notifier);
     TaskCatalog cat() => c.read(taskCatalogControllerProvider).value!;
     final index = cat().tasks.indexWhere((t) => t.code == 'ALT-7');
-    ctl.delete();
+    await ctl.delete();
     expect(cat().task('ALT-7'), isNull);
     expect(c.read(p).deleted, isNotNull);
     ctl.undoDelete();
     expect(cat().tasks.indexWhere((t) => t.code == 'ALT-7'), index);
 
-    final copy = ctl.copy('(kopya)');
+    final (_, copy) = await ctl.copy('(kopya)');
     expect(copy, startsWith('ALT-'));
     expect(cat().task(copy!)!.title, endsWith('(kopya)'));
     expect(cat().tasks, hasLength(77));

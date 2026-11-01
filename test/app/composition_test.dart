@@ -108,6 +108,7 @@ final portProviders = <String, ProviderBase<Object?>>{
   'taskCatalogRepositoryProvider': taskCatalogRepositoryProvider,
   'taskDetailsRepositoryProvider': taskDetailsRepositoryProvider,
   'taskWriteRepositoryProvider': taskWriteRepositoryProvider,
+  'downloadSinkProvider': downloadSinkProvider,
   'coordinatorshipProfileRepositoryProvider':
       coordinatorshipProfileRepositoryProvider,
   'activityLogRepositoryProvider': activityLogRepositoryProvider,

@@ -1,4 +1,4 @@
-// TaskDetailController: durum kuralları (alt görev/kanıt), talep onay/ret, düzenle doğrulama,
+// TaskDetailController (örnek katalog — yerel yazma): durum kuralları (alt görev/kanıt), talep onay/ret, düzenle doğrulama,
 // kanıt yükleme, sil/geri al, kopyala, alt görev ve not komutları; değişiklik katalogda kalır.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,9 +22,11 @@ void main() {
     final ctl = c.read(p.notifier);
     TaskItem task() =>
         c.read(taskCatalogControllerProvider).value!.task('ALT-7')!;
-    expect(ctl.setStatus(TaskStatus.inProgress), StatusChange.unchanged);
-    expect(ctl.setStatus(TaskStatus.done), StatusChange.blockedBySubtasks);
-    expect(ctl.setStatus(TaskStatus.review), StatusChange.changed);
+    Future<WriteKind> status(TaskStatus s) async =>
+        (await ctl.setStatus(s)).kind;
+    expect(await status(TaskStatus.inProgress), WriteKind.unchanged);
+    expect(await status(TaskStatus.done), WriteKind.blockedBySubtasks);
+    expect(await status(TaskStatus.review), WriteKind.done);
     expect(task().status, TaskStatus.review);
     expect(ctl.setPriority(TaskPriority.low), isTrue);
     expect(ctl.setPriority(TaskPriority.low), isFalse);
@@ -36,10 +38,9 @@ void main() {
     expect(ctl.submitUpload(), isTrue);
     expect(c.read(p).tab, TaskDetailTab.files);
     expect(task().fileEntries, hasLength(2));
-    ctl
-      ..toggleSubtask('s3')
-      ..toggleSubtask('s2');
-    expect(ctl.setStatus(TaskStatus.done), StatusChange.changed);
+    await ctl.toggleSubtask('s3');
+    await ctl.toggleSubtask('s2');
+    expect(await status(TaskStatus.done), WriteKind.done);
     expect(task().overdueDays, 0);
     expect(
       c
@@ -110,19 +111,20 @@ void main() {
     ctl.finishSubtaskEdit(); // boş ad → atılır
     expect(cat().task('ALT-7')!.subtasks, hasLength(3));
     expect(cat().task('ALT-7')!.subtasks.any((s) => s.id == id), isFalse);
-    ctl
-      ..setSubtaskAssignee('s2', 'ko')
-      ..setSubtaskStart('s2', DateTime(2026, 10, 25))
-      ..setSubtaskEnd('s2', DateTime(2026, 10, 20))
-      ..setSubtaskStart('s2', DateTime(2026, 10, 26));
+    await ctl.setSubtaskAssignee('s2', 'ko');
+    await ctl.setSubtaskStart('s2', DateTime(2026, 10, 25));
+    await ctl.setSubtaskEnd('s2', DateTime(2026, 10, 20));
+    await ctl.setSubtaskStart('s2', DateTime(2026, 10, 26));
     final s2 = cat().task('ALT-7')!.subtasks.firstWhere((s) => s.id == 's2');
     expect(s2.assignee, 'ko');
     expect(s2.end, DateTime(2026, 10, 26));
-    expect(ctl.removeSubtask('s1')?.title, 'Pompa tedarikçisinden teyit al');
+    expect(
+      (await ctl.removeSubtask('s1')).$2?.title,
+      'Pompa tedarikçisinden teyit al',
+    );
 
-    ctl
-      ..setNoteDraft('  Saha kontrol edildi ')
-      ..sendNote();
+    ctl.setNoteDraft('  Saha kontrol edildi ');
+    expect((await ctl.sendNote()).kind, WriteKind.done);
     final notes = cat().task('ALT-7')!.noteEntries;
     expect(notes.last.text, 'Saha kontrol edildi');
     expect(c.read(p).noteDraft, '');

@@ -205,6 +205,53 @@ void main() {
   );
 
   testWidgets(
+    'sunucu programı (yönetici + koordinatör): durum sayfası matris hedefleri; 409 '
+    'subtasks_open → onayla close_subtasks; not yazma alanı yok',
+    (tester) async {
+      final h = await _openServer(tester);
+      final base = h.backend.handler;
+      var transitions = 0;
+      h.backend.handler = (r) {
+        if (r.method == 'POST' && r.path == '/v1/work-items/w1/transitions') {
+          transitions++;
+          if (transitions == 1) return errorBody(409, 'work.subtasks_open');
+          return jsonResponse(200, {
+            'work_item_id': 'w1',
+            'from': 'devam_ediyor',
+            'to': 'tamamlandi',
+            'actor': 'koordinator_kendi_gorevi',
+          });
+        }
+        return base(r);
+      };
+      await _tap(tester, find.text(_l.uiTasksStatusDoing));
+      // Koordinatör kendi görevi (devam ediyor): başlanmadı, onaya sun, tamamla; iade yok.
+      expect(find.text(_l.uiTasksStatusTodo), findsOneWidget);
+      expect(find.text(_l.uiTasksStatusReview), findsOneWidget);
+      expect(find.text(_l.uiTasksStatusReturned), findsNothing);
+      await _tap(tester, find.text(_l.uiTasksStatusDone).last);
+      expect(find.text(_l.uiTasksCloseSubsTitle), findsOneWidget);
+      expect(transitions, 1, reason: 'otomatik tekrar yok');
+      await _tap(tester, find.text(_l.uiTasksCloseSubsOk));
+      expect(transitions, 2);
+      final last = h.backend.requests.lastWhere(
+        (r) => r.path == '/v1/work-items/w1/transitions',
+      );
+      expect(last.body, {'to': 'tamamlandi', 'close_subtasks': true});
+      expect(last.header('X-Nizamio-Department'), 'd1');
+
+      await _tap(tester, find.text(_l.uiTasksTabNotes));
+      expect(find.text('Pompa sahaya indi'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(_l.uiTasksSend),
+        findsNothing,
+        reason: 'yönetici not yazamaz',
+      );
+      expect(find.text(_l.uiTasksToMemory), findsNothing);
+    },
+  );
+
+  testWidgets(
     'sunucu programı: ayrıntı hatası şeritte; yeniden dene dokunuşla',
     (tester) async {
       final h = await _openServer(tester, failing: '/v1/work-items/w1/notes');

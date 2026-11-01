@@ -54,12 +54,13 @@ class TaskDetailPage extends ConsumerWidget {
         entries: [
           NzFlyoutSection('$key · ${l.uiTasksFlyThisTask}'),
           if (task != null) ...[
-            NzFlyoutItem(
-              label: l.uiTasksFlyStatus,
-              caption: l.statusLabel(task.status),
-              icon: NzIcons.checkCircle,
-              onSelected: actions.openStatus,
-            ),
+            if (actions.canChangeStatus)
+              NzFlyoutItem(
+                label: l.uiTasksFlyStatus,
+                caption: l.statusLabel(task.status),
+                icon: NzIcons.checkCircle,
+                onSelected: actions.openStatus,
+              ),
             NzFlyoutItem(
               label: l.uiTasksRemind,
               icon: NzIcons.bell,
@@ -269,7 +270,8 @@ class _Body extends StatelessWidget {
                 semanticLabel:
                     '${l.uiTasksFlyStatus}: ${l.statusLabel(task.status)}',
                 leading: NzDot(color: statusTone(task.status).color(c)),
-                onTap: actions.openStatus,
+                // Aktörün matriste hedefi yoksa (ör. tek başına yönetici) seçici kapalı.
+                onTap: actions.canChangeStatus ? actions.openStatus : null,
               ),
             ),
             Expanded(
@@ -340,13 +342,16 @@ class _Picker extends StatelessWidget {
   final String label;
   final String semanticLabel;
   final Widget leading;
-  final VoidCallback onTap;
+
+  /// null → kapalı (dokunulmaz).
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     return Semantics(
       button: true,
+      enabled: onTap != null,
       label: semanticLabel,
       excludeSemantics: true,
       child: InkWell(

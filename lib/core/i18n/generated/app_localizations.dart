@@ -6040,6 +6040,108 @@ abstract class AppLocalizations {
   /// **'Not kurumsal hafızaya deneyim olarak eklendi'**
   String get uiTasksTNoteMemory;
 
+  /// ui.tasks.revert_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanmış görevi yeniden aç'**
+  String get uiTasksRevertTitle;
+
+  /// ui.tasks.revert_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Gerekçe işlem geçmişine yazılır'**
+  String get uiTasksRevertDesc;
+
+  /// ui.tasks.revert_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Neden yeniden açılıyor?'**
+  String get uiTasksRevertHint;
+
+  /// ui.tasks.revert_min
+  ///
+  /// In tr, this message translates to:
+  /// **'En az 3 karakter'**
+  String get uiTasksRevertMin;
+
+  /// ui.tasks.revert_ok
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeniden aç'**
+  String get uiTasksRevertOk;
+
+  /// ui.tasks.close_subs_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık alt görevler var'**
+  String get uiTasksCloseSubsTitle;
+
+  /// ui.tasks.close_subs_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev tamamlanırken açık alt görevler de senin adına kapatılır.'**
+  String get uiTasksCloseSubsDesc;
+
+  /// ui.tasks.close_subs_ok
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görevleri de kapat'**
+  String get uiTasksCloseSubsOk;
+
+  /// ui.tasks.note_edit
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenle'**
+  String get uiTasksNoteEdit;
+
+  /// ui.tasks.note_delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Sil'**
+  String get uiTasksNoteDelete;
+
+  /// ui.tasks.note_edit_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Notu düzenle'**
+  String get uiTasksNoteEditTitle;
+
+  /// ui.tasks.note_delete_q
+  ///
+  /// In tr, this message translates to:
+  /// **'Not silinsin mi?'**
+  String get uiTasksNoteDeleteQ;
+
+  /// ui.tasks.note_delete_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinen not geri alınamaz'**
+  String get uiTasksNoteDeleteDesc;
+
+  /// ui.tasks.t_note_saved
+  ///
+  /// In tr, this message translates to:
+  /// **'Not güncellendi'**
+  String get uiTasksTNoteSaved;
+
+  /// ui.tasks.t_note_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Not silindi'**
+  String get uiTasksTNoteDeleted;
+
+  /// ui.tasks.sub_rename
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlığı düzenle'**
+  String get uiTasksSubRename;
+
+  /// ui.tasks.t_sub_added
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görev eklendi'**
+  String get uiTasksTSubAdded;
+
   /// ui.tasks.t_notified_tail
   ///
   /// In tr, this message translates to:

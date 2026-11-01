@@ -3110,6 +3110,58 @@ class AppLocalizationsTr extends AppLocalizations {
       'Not kurumsal hafızaya deneyim olarak eklendi';
 
   @override
+  String get uiTasksRevertTitle => 'Tamamlanmış görevi yeniden aç';
+
+  @override
+  String get uiTasksRevertDesc => 'Gerekçe işlem geçmişine yazılır';
+
+  @override
+  String get uiTasksRevertHint => 'Neden yeniden açılıyor?';
+
+  @override
+  String get uiTasksRevertMin => 'En az 3 karakter';
+
+  @override
+  String get uiTasksRevertOk => 'Yeniden aç';
+
+  @override
+  String get uiTasksCloseSubsTitle => 'Açık alt görevler var';
+
+  @override
+  String get uiTasksCloseSubsDesc =>
+      'Görev tamamlanırken açık alt görevler de senin adına kapatılır.';
+
+  @override
+  String get uiTasksCloseSubsOk => 'Alt görevleri de kapat';
+
+  @override
+  String get uiTasksNoteEdit => 'Düzenle';
+
+  @override
+  String get uiTasksNoteDelete => 'Sil';
+
+  @override
+  String get uiTasksNoteEditTitle => 'Notu düzenle';
+
+  @override
+  String get uiTasksNoteDeleteQ => 'Not silinsin mi?';
+
+  @override
+  String get uiTasksNoteDeleteDesc => 'Silinen not geri alınamaz';
+
+  @override
+  String get uiTasksTNoteSaved => 'Not güncellendi';
+
+  @override
+  String get uiTasksTNoteDeleted => 'Not silindi';
+
+  @override
+  String get uiTasksSubRename => 'Başlığı düzenle';
+
+  @override
+  String get uiTasksTSubAdded => 'Alt görev eklendi';
+
+  @override
   String get uiTasksTNotifiedTail => 'kişiye bildirim gitti';
 
   @override

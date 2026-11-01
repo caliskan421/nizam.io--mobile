@@ -247,8 +247,13 @@ class DetailSubtasks extends ConsumerWidget {
     );
     final subs = task.subtasks;
     final done = task.subtasksDone;
-    final team =
-        catalog.coordinatorship(task.coordinatorship)?.team ?? const [];
+    final perms = ctl.permissions;
+    final manage = perms.canManageSubtasks;
+    // Sunucuda alt görev adayı ana görevin atananlarıdır; örnekte koordinatörlük ekibi.
+    final team = perms.local
+        ? catalog.coordinatorship(task.coordinatorship)?.team ??
+              const <String>[]
+        : perms.subtaskAssignees(task);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -281,24 +286,29 @@ class DetailSubtasks extends ConsumerWidget {
             team: team,
             open: openSubs.contains(u.id),
             editing: editing == u.id,
-            onCheck: () => actions.toggleSubtask(u.id),
+            manage: manage,
+            onCheck: perms.canToggleSubtask(u)
+                ? () => actions.toggleSubtask(u.id)
+                : null,
             onOpen: () => ctl.toggleSubtaskOpen(u.id),
             onTitle: (v) => ctl.setSubtaskTitle(u.id, v),
             onTitleDone: ctl.finishSubtaskEdit,
-            onAssignee: (v) => ctl.setSubtaskAssignee(u.id, v),
-            onStart: (v) => ctl.setSubtaskStart(u.id, v),
-            onEnd: (v) => ctl.setSubtaskEnd(u.id, v),
-            onClearDates: () => ctl.clearSubtaskDates(u.id),
+            onRename: perms.local ? null : () => actions.renameSubtask(u),
+            onAssignee: (v) => actions.setSubtaskAssignee(u.id, v),
+            onStart: (v) => actions.setSubtaskStart(u.id, v),
+            onEnd: (v) => actions.setSubtaskEnd(u.id, v),
+            onClearDates: () => actions.clearSubtaskDates(u.id),
             onDelete: () => actions.removeSubtask(u.id),
           ),
           const Gap(NizamioSpacing.space2),
         ],
-        NzButton.secondary(
-          label: l.uiTasksSubAdd,
-          icon: NzIcons.add,
-          expand: true,
-          onPressed: ctl.addSubtask,
-        ),
+        if (manage)
+          NzButton.secondary(
+            label: l.uiTasksSubAdd,
+            icon: NzIcons.add,
+            expand: true,
+            onPressed: actions.addSubtask,
+          ),
       ],
     );
   }
@@ -311,10 +321,12 @@ class _SubtaskBlock extends StatelessWidget {
     required this.team,
     required this.open,
     required this.editing,
+    required this.manage,
     required this.onCheck,
     required this.onOpen,
     required this.onTitle,
     required this.onTitleDone,
+    required this.onRename,
     required this.onAssignee,
     required this.onStart,
     required this.onEnd,
@@ -327,10 +339,18 @@ class _SubtaskBlock extends StatelessWidget {
   final List<String> team;
   final bool open;
   final bool editing;
-  final VoidCallback onCheck;
+
+  /// Başlık/kişi/tarih düzenleme ve silme açık mı (yönetici ya da koordinatör).
+  final bool manage;
+
+  /// null → işaretleme bu hesaba kapalı.
+  final VoidCallback? onCheck;
   final VoidCallback onOpen;
   final ValueChanged<String> onTitle;
   final VoidCallback onTitleDone;
+
+  /// Sunucu alt görevinde başlık düzenleme alt sayfası; null → yok (örnekte satır içi).
+  final VoidCallback? onRename;
   final ValueChanged<String?> onAssignee;
   final ValueChanged<DateTime?> onStart;
   final ValueChanged<DateTime?> onEnd;
@@ -396,6 +416,7 @@ class _SubtaskBlock extends StatelessWidget {
                   checked: u.done,
                   label: '$title ${l.uiTasksDoneLc}',
                   button: true,
+                  enabled: onCheck != null,
                   excludeSemantics: true,
                   child: InkResponse(
                     onTap: onCheck,
@@ -488,63 +509,65 @@ class _SubtaskBlock extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    field(
-                      l.uiTasksSubPerson,
-                      NzSelect<String>(
-                        label: l.uiTasksSubPerson,
-                        value: u.assignee ?? '',
-                        items: [
-                          NzSelectItem(
-                            value: '',
-                            label: u.assigneeRequired
-                                ? l.uiTasksPickPerson
-                                : l.uiTasksNoPerson,
-                          ),
-                          for (final id in team)
-                            NzSelectItem(value: id, label: name(id)),
-                        ],
-                        onChanged: (v) =>
-                            onAssignee(v == null || v.isEmpty ? null : v),
-                      ),
-                    ),
-                    field(
-                      l.uiTasksSubDate,
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        spacing: NizamioSpacing.space2,
-                        children: [
-                          // Prototip: başlangıç ve bitiş yan yana (1fr 1fr).
-                          Row(
-                            spacing: NizamioSpacing.space2,
-                            children: [
-                              Expanded(
-                                child: TaskDateField(
-                                  label: l.uiTasksStart,
-                                  value: u.start,
-                                  onChanged: onStart,
-                                ),
-                              ),
-                              Expanded(
-                                child: TaskDateField(
-                                  label: l.uiTasksDue,
-                                  value: u.end,
-                                  firstDate: u.start,
-                                  onChanged: onEnd,
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (u.start != null || u.end != null)
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: TaskLink(
-                                label: l.uiTasksClearDate,
-                                onTap: onClearDates,
-                              ),
+                    if (manage) ...[
+                      field(
+                        l.uiTasksSubPerson,
+                        NzSelect<String>(
+                          label: l.uiTasksSubPerson,
+                          value: u.assignee ?? '',
+                          items: [
+                            NzSelectItem(
+                              value: '',
+                              label: u.assigneeRequired
+                                  ? l.uiTasksPickPerson
+                                  : l.uiTasksNoPerson,
                             ),
-                        ],
+                            for (final id in {...team, ?u.assignee})
+                              NzSelectItem(value: id, label: name(id)),
+                          ],
+                          onChanged: (v) =>
+                              onAssignee(v == null || v.isEmpty ? null : v),
+                        ),
                       ),
-                    ),
+                      field(
+                        l.uiTasksSubDate,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          spacing: NizamioSpacing.space2,
+                          children: [
+                            // Prototip: başlangıç ve bitiş yan yana (1fr 1fr).
+                            Row(
+                              spacing: NizamioSpacing.space2,
+                              children: [
+                                Expanded(
+                                  child: TaskDateField(
+                                    label: l.uiTasksStart,
+                                    value: u.start,
+                                    onChanged: onStart,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: TaskDateField(
+                                    label: l.uiTasksDue,
+                                    value: u.end,
+                                    firstDate: u.start,
+                                    onChanged: onEnd,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (u.start != null || u.end != null)
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: TaskLink(
+                                  label: l.uiTasksClearDate,
+                                  onTap: onClearDates,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                     if (u.evidence case final f?)
                       field(
                         l.uiTasksSubFile,
@@ -560,14 +583,20 @@ class _SubtaskBlock extends StatelessWidget {
                           ),
                         ),
                       ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TaskLink(
-                        label: l.uiTasksSubDelete,
-                        color: c.danger,
-                        onTap: onDelete,
+                    if (manage)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        spacing: NizamioSpacing.space3,
+                        children: [
+                          if (onRename case final rename?)
+                            TaskLink(label: l.uiTasksSubRename, onTap: rename),
+                          TaskLink(
+                            label: l.uiTasksSubDelete,
+                            color: c.danger,
+                            onTap: onDelete,
+                          ),
+                        ],
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -744,7 +773,14 @@ class _DetailNotesState extends ConsumerState<DetailNotes> {
   TaskDetailControllerProvider get _p =>
       taskDetailControllerProvider(widget.task.code);
 
-  late final _controller = TextEditingController(text: ref.read(_p).noteDraft);
+  // initState'te kurulur: yazma alanı gizliyken (yönetici) dispose'ta ref'e gidilmez.
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: ref.read(_p).noteDraft);
+  }
 
   @override
   void dispose() {
@@ -764,6 +800,8 @@ class _DetailNotesState extends ConsumerState<DetailNotes> {
       if (next != _controller.text) _controller.text = next;
     });
     final notes = widget.task.noteEntries;
+    final perms = ctl.permissions;
+    final actions = widget.actions;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -805,13 +843,31 @@ class _DetailNotesState extends ConsumerState<DetailNotes> {
                     ),
                     const Gap(NizamioSpacing.space1),
                     Text(notes[i].text, style: t.bodyMd),
-                    TaskLink(
-                      label: notes[i].inMemory
-                          ? l.uiTasksInMemory
-                          : l.uiTasksToMemory,
-                      color: notes[i].inMemory ? c.accentText : c.textMuted,
-                      onTap: () => widget.actions.addNoteToMemory(i),
-                    ),
+                    // Hafıza yalnız örnekte (sunucuda karşılığı yok, B-17).
+                    if (perms.local)
+                      TaskLink(
+                        label: notes[i].inMemory
+                            ? l.uiTasksInMemory
+                            : l.uiTasksToMemory,
+                        color: notes[i].inMemory ? c.accentText : c.textMuted,
+                        onTap: () => actions.addNoteToMemory(i),
+                      )
+                    else if (perms.canEditNote(notes[i]))
+                      Row(
+                        spacing: NizamioSpacing.space3,
+                        children: [
+                          TaskLink(
+                            label: l.uiTasksNoteEdit,
+                            color: c.textMuted,
+                            onTap: () => actions.editNote(notes[i]),
+                          ),
+                          TaskLink(
+                            label: l.uiTasksNoteDelete,
+                            color: c.danger,
+                            onTap: () => actions.deleteNote(notes[i]),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),
@@ -819,26 +875,29 @@ class _DetailNotesState extends ConsumerState<DetailNotes> {
           ),
           const Gap(NizamioSpacing.space2),
         ],
-        const Gap(NizamioSpacing.space2),
-        Row(
-          children: [
-            Expanded(
-              child: NzTextField(
-                label: l.uiTasksNoteHint,
-                hint: l.uiTasksNoteHint,
-                controller: _controller,
-                onChanged: ctl.setNoteDraft,
-                onSubmitted: (_) => ctl.sendNote(),
+        // Not yazma: koordinatör ya da atanmış üye; yönetici yazamaz (salt okur).
+        if (perms.canAddNote) ...[
+          const Gap(NizamioSpacing.space2),
+          Row(
+            children: [
+              Expanded(
+                child: NzTextField(
+                  label: l.uiTasksNoteHint,
+                  hint: l.uiTasksNoteHint,
+                  controller: _controller,
+                  onChanged: ctl.setNoteDraft,
+                  onSubmitted: (_) => actions.sendNote(),
+                ),
               ),
-            ),
-            const Gap(NizamioSpacing.space2),
-            NzIconButton.circleAccent(
-              icon: NzIcons.arrowUp,
-              semanticLabel: l.uiTasksSend,
-              onPressed: ctl.sendNote,
-            ),
-          ],
-        ),
+              const Gap(NizamioSpacing.space2),
+              NzIconButton.circleAccent(
+                icon: NzIcons.arrowUp,
+                semanticLabel: l.uiTasksSend,
+                onPressed: actions.sendNote,
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }

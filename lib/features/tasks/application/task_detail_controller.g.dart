@@ -8,18 +8,45 @@ part of 'task_detail_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Görev ayrıntısı denetleyicisi (prototip `S_detail`). Görev değişiklikleri katalog
-/// denetleyicisine yazılır (oturum boyunca listede de görünür).
+/// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
+///
+/// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+/// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
+/// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
+/// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
+/// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
+/// görünürlüğü [permissions]'tan (işlem bazlı olgular).
+///
+/// Örnek katalogda (ve sunucuya henüz bağlanmamış P3 yazmalarında) değişiklik katalog
+/// denetleyicisinde bellekte kalır.
 
 @ProviderFor(TaskDetailController)
 final taskDetailControllerProvider = TaskDetailControllerFamily._();
 
-/// Görev ayrıntısı denetleyicisi (prototip `S_detail`). Görev değişiklikleri katalog
-/// denetleyicisine yazılır (oturum boyunca listede de görünür).
+/// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
+///
+/// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+/// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
+/// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
+/// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
+/// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
+/// görünürlüğü [permissions]'tan (işlem bazlı olgular).
+///
+/// Örnek katalogda (ve sunucuya henüz bağlanmamış P3 yazmalarında) değişiklik katalog
+/// denetleyicisinde bellekte kalır.
 final class TaskDetailControllerProvider
     extends $NotifierProvider<TaskDetailController, TaskDetailState> {
-  /// Görev ayrıntısı denetleyicisi (prototip `S_detail`). Görev değişiklikleri katalog
-  /// denetleyicisine yazılır (oturum boyunca listede de görünür).
+  /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
+  ///
+  /// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+  /// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
+  /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
+  /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
+  /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
+  /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
+  ///
+  /// Örnek katalogda (ve sunucuya henüz bağlanmamış P3 yazmalarında) değişiklik katalog
+  /// denetleyicisinde bellekte kalır.
   TaskDetailControllerProvider._({
     required TaskDetailControllerFamily super.from,
     required String super.argument,
@@ -65,10 +92,19 @@ final class TaskDetailControllerProvider
 }
 
 String _$taskDetailControllerHash() =>
-    r'27047ef73c7b590f8fcb310e400deec950d43d44';
+    r'b39d0607160488baf97d236240ba350acdffbce3';
 
-/// Görev ayrıntısı denetleyicisi (prototip `S_detail`). Görev değişiklikleri katalog
-/// denetleyicisine yazılır (oturum boyunca listede de görünür).
+/// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
+///
+/// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+/// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
+/// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
+/// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
+/// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
+/// görünürlüğü [permissions]'tan (işlem bazlı olgular).
+///
+/// Örnek katalogda (ve sunucuya henüz bağlanmamış P3 yazmalarında) değişiklik katalog
+/// denetleyicisinde bellekte kalır.
 
 final class TaskDetailControllerFamily extends $Family
     with
@@ -88,8 +124,17 @@ final class TaskDetailControllerFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Görev ayrıntısı denetleyicisi (prototip `S_detail`). Görev değişiklikleri katalog
-  /// denetleyicisine yazılır (oturum boyunca listede de görünür).
+  /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
+  ///
+  /// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+  /// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
+  /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
+  /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
+  /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
+  /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
+  ///
+  /// Örnek katalogda (ve sunucuya henüz bağlanmamış P3 yazmalarında) değişiklik katalog
+  /// denetleyicisinde bellekte kalır.
 
   TaskDetailControllerProvider call(String code) =>
       TaskDetailControllerProvider._(argument: code, from: this);
@@ -98,8 +143,17 @@ final class TaskDetailControllerFamily extends $Family
   String toString() => r'taskDetailControllerProvider';
 }
 
-/// Görev ayrıntısı denetleyicisi (prototip `S_detail`). Görev değişiklikleri katalog
-/// denetleyicisine yazılır (oturum boyunca listede de görünür).
+/// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
+///
+/// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+/// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
+/// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
+/// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
+/// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
+/// görünürlüğü [permissions]'tan (işlem bazlı olgular).
+///
+/// Örnek katalogda (ve sunucuya henüz bağlanmamış P3 yazmalarında) değişiklik katalog
+/// denetleyicisinde bellekte kalır.
 
 abstract class _$TaskDetailController extends $Notifier<TaskDetailState> {
   late final _$args = ref.$arg as String;

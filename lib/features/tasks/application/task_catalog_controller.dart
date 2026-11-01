@@ -11,9 +11,9 @@ part 'task_catalog_controller.g.dart';
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
 /// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
-/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (oturum boyunca;
-/// sunucuya yazılmaz — yazma komutları ayrı adımda bağlanır). Katalog henüz yüklenmediyse
-/// yok sayılır.
+/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog ve
+/// henüz sunucuya bağlanmamış P3 yazmaları). Sunucu yazmasından sonra [reload] ile kaynaktan
+/// yeniden okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
 @Riverpod(keepAlive: true)
 class TaskCatalogController extends _$TaskCatalogController {
   @override
@@ -23,6 +23,18 @@ class TaskCatalogController extends _$TaskCatalogController {
   }
 
   TaskCatalog? get _catalog => state.value;
+
+  /// Kaynaktan yeniden okur ve yeni kataloğu bekler (yazma sonrası). Okuma hatası fırlatılmaz:
+  /// hata katalog durumunda kalır (ekran gösterir). Açık ayrıntı ekranları katalog yüklemeye
+  /// geçince kendini yeniden okur ([taskDetailsProvider]).
+  Future<void> reload() async {
+    ref.invalidateSelf();
+    try {
+      await future;
+    } on Object {
+      // Hata durumda; çağıran yazmanın sonucunu bildirir.
+    }
+  }
 
   /// Görevi ekler ([at] verilirse o sıraya, yoksa başa).
   void add(TaskItem task, {int? at}) {

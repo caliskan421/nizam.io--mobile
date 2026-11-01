@@ -3965,6 +3965,74 @@
   "@uiTasksTNoteMemory": {
     "description": "ui.tasks.t_note_memory"
   },
+  "uiTasksRevertTitle": "Tamamlanmış görevi yeniden aç",
+  "@uiTasksRevertTitle": {
+    "description": "ui.tasks.revert_title"
+  },
+  "uiTasksRevertDesc": "Gerekçe işlem geçmişine yazılır",
+  "@uiTasksRevertDesc": {
+    "description": "ui.tasks.revert_desc"
+  },
+  "uiTasksRevertHint": "Neden yeniden açılıyor?",
+  "@uiTasksRevertHint": {
+    "description": "ui.tasks.revert_hint"
+  },
+  "uiTasksRevertMin": "En az 3 karakter",
+  "@uiTasksRevertMin": {
+    "description": "ui.tasks.revert_min"
+  },
+  "uiTasksRevertOk": "Yeniden aç",
+  "@uiTasksRevertOk": {
+    "description": "ui.tasks.revert_ok"
+  },
+  "uiTasksCloseSubsTitle": "Açık alt görevler var",
+  "@uiTasksCloseSubsTitle": {
+    "description": "ui.tasks.close_subs_title"
+  },
+  "uiTasksCloseSubsDesc": "Görev tamamlanırken açık alt görevler de senin adına kapatılır.",
+  "@uiTasksCloseSubsDesc": {
+    "description": "ui.tasks.close_subs_desc"
+  },
+  "uiTasksCloseSubsOk": "Alt görevleri de kapat",
+  "@uiTasksCloseSubsOk": {
+    "description": "ui.tasks.close_subs_ok"
+  },
+  "uiTasksNoteEdit": "Düzenle",
+  "@uiTasksNoteEdit": {
+    "description": "ui.tasks.note_edit"
+  },
+  "uiTasksNoteDelete": "Sil",
+  "@uiTasksNoteDelete": {
+    "description": "ui.tasks.note_delete"
+  },
+  "uiTasksNoteEditTitle": "Notu düzenle",
+  "@uiTasksNoteEditTitle": {
+    "description": "ui.tasks.note_edit_title"
+  },
+  "uiTasksNoteDeleteQ": "Not silinsin mi?",
+  "@uiTasksNoteDeleteQ": {
+    "description": "ui.tasks.note_delete_q"
+  },
+  "uiTasksNoteDeleteDesc": "Silinen not geri alınamaz",
+  "@uiTasksNoteDeleteDesc": {
+    "description": "ui.tasks.note_delete_desc"
+  },
+  "uiTasksTNoteSaved": "Not güncellendi",
+  "@uiTasksTNoteSaved": {
+    "description": "ui.tasks.t_note_saved"
+  },
+  "uiTasksTNoteDeleted": "Not silindi",
+  "@uiTasksTNoteDeleted": {
+    "description": "ui.tasks.t_note_deleted"
+  },
+  "uiTasksSubRename": "Başlığı düzenle",
+  "@uiTasksSubRename": {
+    "description": "ui.tasks.sub_rename"
+  },
+  "uiTasksTSubAdded": "Alt görev eklendi",
+  "@uiTasksTSubAdded": {
+    "description": "ui.tasks.t_sub_added"
+  },
   "uiTasksTNotifiedTail": "kişiye bildirim gitti",
   "@uiTasksTNotifiedTail": {
     "description": "ui.tasks.t_notified_tail"

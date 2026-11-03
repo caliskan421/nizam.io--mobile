@@ -37,8 +37,8 @@ Ayrıntılar: [DI kararı](docs/architecture/adr-0001-di-get-it.md),
 4. Bu depodaki `README.md` (komutlar, flavor'lar, dizin düzeni), `lib/CLAUDE.md` ve
    `lib/core/api/CLAUDE.md` (kaynak haritaları) ve açık PR'lar.
 
-Spec her zaman bir **backend etiketinden** okunur (güncel pin `api-pin.json`). Etiketsiz
-`main` spec'inden kod üretilmez.
+Pin kuralı tek yerde: kök [`../README.md`](../README.md) (tek cümle) ve backend
+`docs/api/README.md` §8; güncel pin `api-pin.json`.
 
 ## Kurallar
 

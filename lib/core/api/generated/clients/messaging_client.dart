@@ -504,7 +504,8 @@ abstract class MessagingClient {
   /// Mesaj gönderir ya da yanıtlar (201 yeni, 200 aynı istemci kimliğinin tekrarı).
   ///
   /// Tekrar yetkiyi atlamaz: erişimini kaybetmiş çağıran 404 alır. Aynı istemci.
-  /// kimliğiyle gönderilmiş mesaj silinmişse 409 `messaging.message_deleted`.
+  /// kimliğiyle gönderilmiş mesaj silinmişse 409 `messaging.message_deleted`; aynı istemci.
+  /// kimliğiyle farklı gönderim (gövde, yanıtlanan mesaj, bahsetme, referans ya da anket) 409 `messaging.idempotency_key_reused`.
   /// Yanıtlanan mesaj yoksa 404 `messaging.message_not_found`. Tekrar çocuk.
   /// yazmaz; ilk mesajın bahsetme ve referanslarını döndürür. Yeni olay yoktur:.
   /// bahsetme ve referans `message.created` ile duyurulur.
@@ -696,6 +697,8 @@ abstract class MessagingClient {
   /// İzinli 11 tür (records ile aynı: pdf, png, jpg, csv, doc/docx, xls/xlsx, ppt/pptx, pages); tavan.
   /// `NIZAMIO_MESSAGING_ATTACHMENT_MAX_BYTES` (varsayılan 25 MB). Açıklama isteğe bağlıdır; ek mesajında.
   /// `body` boş olabilir. Tek istek tek dosyadır.
+  /// Aynı `client_message_id` ile farklı gönderim (açıklama, yanıtlanan mesaj ya da ekin adı, MIME.
+  /// türü veya boyutu) 409 `messaging.idempotency_key_reused` alır; aynı gönderimin tekrarı 200 döner.
   ///
   /// [body] - İsteğe bağlı açıklama; dosya parçasından ÖNCE gönderilir.
   @MultiPart()

@@ -3,4 +3,4 @@
 
 /// Uygulama sürümü (MAJOR.MINOR.PATCH); sunucunun `minimum_mobile_version` değeriyle
 /// karşılaştırılır (K-11).
-const appVersion = '0.1.0';
+const appVersion = '0.2.0';

@@ -161,7 +161,7 @@ class TaskDetailActions {
   void _report(WriteOutcome r, {String? done}) {
     if (!context.mounted) return;
     switch (r.kind) {
-      case WriteKind.failed || WriteKind.subtasksOpen:
+      case WriteKind.failed || WriteKind.subtasksOpen || WriteKind.conflict:
         final e = r.error;
         if (e != null) _say(errorText(context.l10n, e));
       case WriteKind.done:
@@ -179,6 +179,7 @@ class TaskDetailActions {
     required String title,
     required String description,
     required String ok,
+    String? cancel,
     bool danger = false,
   }) async {
     final l = context.l10n;
@@ -189,7 +190,7 @@ class TaskDetailActions {
       description: description,
       actions: (sheet) => sheetActions(
         sheet,
-        cancel: l.uiTasksCancel,
+        cancel: cancel ?? l.uiTasksCancel,
         ok: ok,
         danger: danger,
         onOk: () {
@@ -393,6 +394,16 @@ class TaskDetailActions {
               final e = r.error;
               if (e != null && context.mounted) {
                 _say(errorText(context.l10n, e));
+              }
+            // V3: sayfa açık kalır; çakışan alanlar formda seçime sunulur.
+            case WriteKind.conflict:
+              final e = r.error;
+              if (context.mounted) {
+                _say(
+                  e != null
+                      ? errorText(context.l10n, e)
+                      : context.l10n.uiTasksConflictPending,
+                );
               }
             case _:
               break;
@@ -626,6 +637,8 @@ class TaskDetailActions {
     _report(await _ctl.createSubtask(title), done: l.uiTasksTSubAdded);
   }
 
+  /// Alt görev adı: gönderilemeyen ad state'te kalır ve diyalog onunla açılır (S12); 409
+  /// `work.edit_conflict`'te sunucudaki ad ile sizinki arasında seçim (V3).
   Future<void> renameSubtask(Subtask u) async {
     final l = context.l10n;
     final title = await _askText(
@@ -633,10 +646,34 @@ class TaskDetailActions {
       description: l.uiTasksSubName,
       label: l.uiTasksSubName,
       ok: l.uiTasksSave,
-      initial: u.title,
+      initial: _ctl.subtaskRenameDraft(u.id) ?? u.title,
     );
     if (title == null || !context.mounted) return;
-    _report(await _ctl.renameSubtask(u.id, title));
+    final r = await _ctl.renameSubtask(u.id, title);
+    if (!context.mounted) return;
+    if (r.kind != WriteKind.conflict) return _report(r);
+    final mine = await _pickText(server: r.serverText, mine: title);
+    if (!context.mounted) return;
+    if (mine) {
+      _report(await _ctl.renameSubtask(u.id, title));
+    } else {
+      _ctl.discardTextDraft((TextTarget.subtask, u.id));
+    }
+  }
+
+  /// İki seçenekli metin çakışması (V3): true → sizinki yeniden gönderilir (yeni sürümle),
+  /// false → sunucudaki kalır.
+  Future<bool> _pickText({required String? server, required String mine}) {
+    final l = context.l10n;
+    return _confirm(
+      title: l.uiTasksTextConflictTitle,
+      description:
+          '${l.uiTasksTextConflictDesc}\n'
+          '${l.uiTasksConflictServer}: ${server ?? l.uiTasksEmptyValue}\n'
+          '${l.uiTasksConflictMine}: $mine',
+      ok: l.uiTasksConflictKeepMine,
+      cancel: l.uiTasksConflictTakeServer,
+    );
   }
 
   Future<void> setSubtaskAssignee(String id, String? person) async =>
@@ -680,11 +717,23 @@ class TaskDetailActions {
           : note.text,
       label: l.uiTasksNoteHint,
       ok: l.uiTasksSave,
-      initial: note.text,
+      // S12: gönderilemeyen düzenleme metni kaybolmaz.
+      initial: _ctl.noteEditDraft(note) ?? note.text,
     );
     if (text == null || !context.mounted) return;
     final r = await _ctl.editNote(note, text);
-    if (context.mounted) _report(r, done: l.uiTasksTNoteSaved);
+    if (!context.mounted) return;
+    if (r.kind != WriteKind.conflict) {
+      return _report(r, done: l.uiTasksTNoteSaved);
+    }
+    final mine = await _pickText(server: r.serverText, mine: text);
+    if (!context.mounted) return;
+    final fresh = _task?.noteEntries.where((n) => n.id == note.id).firstOrNull;
+    if (mine && fresh != null) {
+      _report(await _ctl.editNote(fresh, text), done: l.uiTasksTNoteSaved);
+    } else {
+      _ctl.discardTextDraft((TextTarget.note, note.id ?? ''));
+    }
   }
 
   Future<void> deleteNote(TaskNote note) async {

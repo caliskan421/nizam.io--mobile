@@ -3580,6 +3580,54 @@ class AppLocalizationsTr extends AppLocalizations {
       'Seçili departman artık bu programda yok; süzgeç temizlendi.';
 
   @override
+  String get uiTasksConflictTitle => 'Görev siz düzenlerken değişti';
+
+  @override
+  String get uiTasksConflictDesc =>
+      'Aynı alanı başkası da değiştirdi. Her alan için hangi değerin kalacağını seçin; diğer alanlar korunur.';
+
+  @override
+  String get uiTasksConflictBase => 'Açtığınızda';
+
+  @override
+  String get uiTasksConflictMine => 'Sizin değeriniz';
+
+  @override
+  String get uiTasksConflictServer => 'Sunucudaki değer';
+
+  @override
+  String get uiTasksConflictKeepMine => 'Benimkini tut';
+
+  @override
+  String get uiTasksConflictTakeServer => 'Sunucudakini al';
+
+  @override
+  String get uiTasksConflictPending =>
+      'Kaydetmeden önce işaretli alanlar için seçim yapın';
+
+  @override
+  String get uiTasksTextConflictTitle => 'Metin siz düzenlerken değişti';
+
+  @override
+  String get uiTasksTextConflictDesc =>
+      'Sunucudaki metin sizinkinden farklı. Hangisi kalsın?';
+
+  @override
+  String get uiTasksRetryAfterHead => 'Yeniden denemek için';
+
+  @override
+  String get uiTasksRetryAfterTail => 'sn bekleyin';
+
+  @override
+  String get uiTasksEmptyValue => '—';
+
+  @override
+  String get uiTasksConflictOn => 'Açık';
+
+  @override
+  String get uiTasksConflictOff => 'Kapalı';
+
+  @override
   String get uiTimelineTitle => 'Zaman çizelgesi';
 
   @override

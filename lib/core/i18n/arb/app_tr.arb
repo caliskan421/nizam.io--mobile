@@ -4545,6 +4545,66 @@
   "@uiTasksDepartmentFilterCleared": {
     "description": "ui.tasks.department_filter_cleared"
   },
+  "uiTasksConflictTitle": "Görev siz düzenlerken değişti",
+  "@uiTasksConflictTitle": {
+    "description": "ui.tasks.conflict_title"
+  },
+  "uiTasksConflictDesc": "Aynı alanı başkası da değiştirdi. Her alan için hangi değerin kalacağını seçin; diğer alanlar korunur.",
+  "@uiTasksConflictDesc": {
+    "description": "ui.tasks.conflict_desc"
+  },
+  "uiTasksConflictBase": "Açtığınızda",
+  "@uiTasksConflictBase": {
+    "description": "ui.tasks.conflict_base"
+  },
+  "uiTasksConflictMine": "Sizin değeriniz",
+  "@uiTasksConflictMine": {
+    "description": "ui.tasks.conflict_mine"
+  },
+  "uiTasksConflictServer": "Sunucudaki değer",
+  "@uiTasksConflictServer": {
+    "description": "ui.tasks.conflict_server"
+  },
+  "uiTasksConflictKeepMine": "Benimkini tut",
+  "@uiTasksConflictKeepMine": {
+    "description": "ui.tasks.conflict_keep_mine"
+  },
+  "uiTasksConflictTakeServer": "Sunucudakini al",
+  "@uiTasksConflictTakeServer": {
+    "description": "ui.tasks.conflict_take_server"
+  },
+  "uiTasksConflictPending": "Kaydetmeden önce işaretli alanlar için seçim yapın",
+  "@uiTasksConflictPending": {
+    "description": "ui.tasks.conflict_pending"
+  },
+  "uiTasksTextConflictTitle": "Metin siz düzenlerken değişti",
+  "@uiTasksTextConflictTitle": {
+    "description": "ui.tasks.text_conflict_title"
+  },
+  "uiTasksTextConflictDesc": "Sunucudaki metin sizinkinden farklı. Hangisi kalsın?",
+  "@uiTasksTextConflictDesc": {
+    "description": "ui.tasks.text_conflict_desc"
+  },
+  "uiTasksRetryAfterHead": "Yeniden denemek için",
+  "@uiTasksRetryAfterHead": {
+    "description": "ui.tasks.retry_after_head"
+  },
+  "uiTasksRetryAfterTail": "sn bekleyin",
+  "@uiTasksRetryAfterTail": {
+    "description": "ui.tasks.retry_after_tail"
+  },
+  "uiTasksEmptyValue": "—",
+  "@uiTasksEmptyValue": {
+    "description": "ui.tasks.empty_value"
+  },
+  "uiTasksConflictOn": "Açık",
+  "@uiTasksConflictOn": {
+    "description": "ui.tasks.conflict_on"
+  },
+  "uiTasksConflictOff": "Kapalı",
+  "@uiTasksConflictOff": {
+    "description": "ui.tasks.conflict_off"
+  },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {
     "description": "ui.timeline.title"

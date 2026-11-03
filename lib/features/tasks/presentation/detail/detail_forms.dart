@@ -50,6 +50,10 @@ class _EditTaskFormState extends ConsumerState<EditTaskForm> {
     final c = context.colors;
     final t = context.text;
     final p = taskDetailControllerProvider(widget.code);
+    // Çakışma birleştirmesi ya da seçimi başlığı değiştirirse alan da güncellenir.
+    ref.listen(p.select((s) => s.edit?.title), (_, next) {
+      if (next != null && next != _title.text) _title.text = next;
+    });
     final s = ref.watch(p);
     final ctl = ref.read(p.notifier);
     final d = s.edit;
@@ -217,6 +221,13 @@ class _ServerEditBody extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (d.conflicts.isNotEmpty) ...[
+          EditConflictPanel(
+            conflicts: d.conflicts,
+            onPick: ctl.resolveConflict,
+          ),
+          const Gap(NizamioSpacing.space4),
+        ],
         NzTextField(
           label: l.uiTasksFieldTitle,
           hint: l.uiTasksFieldTitleHint,
@@ -584,6 +595,85 @@ class _PickBox extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// V3 çakışma görünümü: aynı alanı başkası da değiştirdiyse alan başına üç görüntü (açtığınızda,
+/// sizin değeriniz, sunucudaki değer) ve iki seçim. Seçim yapılmadan kaydedilmez.
+class EditConflictPanel extends StatelessWidget {
+  const EditConflictPanel({
+    super.key,
+    required this.conflicts,
+    required this.onPick,
+  });
+
+  final Map<EditField, EditConflict> conflicts;
+  final void Function(EditField f, {required bool useServer}) onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final t = context.text;
+    final c = context.colors;
+    String label(EditField f) => switch (f) {
+      EditField.title => l.uiTasksFieldTitle,
+      EditField.priority => l.uiTasksPriority,
+      EditField.start => l.uiTasksStart,
+      EditField.due => l.uiTasksDue,
+      EditField.evidenceRequired => l.uiTasksEvidenceRequired,
+    };
+    String value(Object v) => switch (v) {
+      final String s => s.isEmpty ? l.uiTasksEmptyValue : s,
+      final TaskPriority p => l.priorityLabel(p),
+      final DateTime d => MaterialLocalizations.of(
+        context,
+      ).formatCompactDate(d),
+      final bool b => b ? l.uiTasksConflictOn : l.uiTasksConflictOff,
+      _ => '$v',
+    };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        NzBanner.warning(
+          message: '${l.uiTasksConflictTitle}. ${l.uiTasksConflictDesc}',
+        ),
+        for (final MapEntry(key: f, value: x) in conflicts.entries) ...[
+          const Gap(NizamioSpacing.space3),
+          TaskFieldLabel(label(f)),
+          Text(
+            '${l.uiTasksConflictBase}: ${value(x.base)}',
+            style: t.caption.copyWith(color: c.textMuted),
+          ),
+          Text('${l.uiTasksConflictMine}: ${value(x.local)}', style: t.bodyMd),
+          Text(
+            '${l.uiTasksConflictServer}: ${value(x.server)}',
+            style: t.bodyMd,
+          ),
+          const Gap(NizamioSpacing.space2),
+          Row(
+            spacing: NizamioSpacing.space2,
+            children: [
+              Expanded(
+                child: NzButton.secondary(
+                  label: l.uiTasksConflictKeepMine,
+                  expand: true,
+                  onPressed: () => onPick(f, useServer: false),
+                ),
+              ),
+              Expanded(
+                child: NzButton.secondary(
+                  label: l.uiTasksConflictTakeServer,
+                  expand: true,
+                  onPressed: () => onPick(f, useServer: true),
+                ),
+              ),
+            ],
+          ),
+        ],
+        const Gap(NizamioSpacing.space2),
+        TaskFormError(l.uiTasksConflictPending),
+      ],
     );
   }
 }

@@ -6910,6 +6910,96 @@ abstract class AppLocalizations {
   /// **'Seçili departman artık bu programda yok; süzgeç temizlendi.'**
   String get uiTasksDepartmentFilterCleared;
 
+  /// ui.tasks.conflict_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev siz düzenlerken değişti'**
+  String get uiTasksConflictTitle;
+
+  /// ui.tasks.conflict_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı alanı başkası da değiştirdi. Her alan için hangi değerin kalacağını seçin; diğer alanlar korunur.'**
+  String get uiTasksConflictDesc;
+
+  /// ui.tasks.conflict_base
+  ///
+  /// In tr, this message translates to:
+  /// **'Açtığınızda'**
+  String get uiTasksConflictBase;
+
+  /// ui.tasks.conflict_mine
+  ///
+  /// In tr, this message translates to:
+  /// **'Sizin değeriniz'**
+  String get uiTasksConflictMine;
+
+  /// ui.tasks.conflict_server
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucudaki değer'**
+  String get uiTasksConflictServer;
+
+  /// ui.tasks.conflict_keep_mine
+  ///
+  /// In tr, this message translates to:
+  /// **'Benimkini tut'**
+  String get uiTasksConflictKeepMine;
+
+  /// ui.tasks.conflict_take_server
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucudakini al'**
+  String get uiTasksConflictTakeServer;
+
+  /// ui.tasks.conflict_pending
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydetmeden önce işaretli alanlar için seçim yapın'**
+  String get uiTasksConflictPending;
+
+  /// ui.tasks.text_conflict_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Metin siz düzenlerken değişti'**
+  String get uiTasksTextConflictTitle;
+
+  /// ui.tasks.text_conflict_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucudaki metin sizinkinden farklı. Hangisi kalsın?'**
+  String get uiTasksTextConflictDesc;
+
+  /// ui.tasks.retry_after_head
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeniden denemek için'**
+  String get uiTasksRetryAfterHead;
+
+  /// ui.tasks.retry_after_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'sn bekleyin'**
+  String get uiTasksRetryAfterTail;
+
+  /// ui.tasks.empty_value
+  ///
+  /// In tr, this message translates to:
+  /// **'—'**
+  String get uiTasksEmptyValue;
+
+  /// ui.tasks.conflict_on
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık'**
+  String get uiTasksConflictOn;
+
+  /// ui.tasks.conflict_off
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapalı'**
+  String get uiTasksConflictOff;
+
   /// ui.timeline.title
   ///
   /// In tr, this message translates to:

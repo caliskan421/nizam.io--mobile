@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/errors/error_text.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
@@ -161,9 +160,12 @@ class TaskDetailActions {
   void _report(WriteOutcome r, {String? done}) {
     if (!context.mounted) return;
     switch (r.kind) {
-      case WriteKind.failed || WriteKind.subtasksOpen || WriteKind.conflict:
+      case WriteKind.failed ||
+          WriteKind.subtasksOpen ||
+          WriteKind.conflict ||
+          WriteKind.unknown:
         final e = r.error;
-        if (e != null) _say(errorText(context.l10n, e));
+        if (e != null) _say(context.l10n.writeErrorText(e));
       case WriteKind.done:
         if (done != null) _say(done);
       case WriteKind.invalid:
@@ -390,10 +392,11 @@ class TaskDetailActions {
             case WriteKind.done || WriteKind.unchanged:
               if (r.ok) msg = text;
               if (sheet.mounted) Navigator.of(sheet).pop();
-            case WriteKind.failed:
+            // Sonuç bilinmiyorsa da sayfa açık kalır: aynı düğme aynı anahtarla yeniden gönderir.
+            case WriteKind.failed || WriteKind.unknown:
               final e = r.error;
               if (e != null && context.mounted) {
-                _say(errorText(context.l10n, e));
+                _say(context.l10n.writeErrorText(e));
               }
             // V3: sayfa açık kalır; çakışan alanlar formda seçime sunulur.
             case WriteKind.conflict:
@@ -401,7 +404,7 @@ class TaskDetailActions {
               if (context.mounted) {
                 _say(
                   e != null
-                      ? errorText(context.l10n, e)
+                      ? context.l10n.writeErrorText(e)
                       : context.l10n.uiTasksConflictPending,
                 );
               }
@@ -632,6 +635,8 @@ class TaskDetailActions {
       description: l.uiTasksSubsHint,
       label: l.uiTasksSubName,
       ok: l.uiTasksCreate,
+      // S12: sonucu bilinmeyen/başarısız eklemenin adı geri gelir (aynı ad → aynı anahtar).
+      initial: _ctl.pendingSubtaskTitle ?? '',
     );
     if (title == null || !context.mounted) return;
     _report(await _ctl.createSubtask(title), done: l.uiTasksTSubAdded);

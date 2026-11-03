@@ -42,6 +42,11 @@ enum WriteKind {
   /// Sunucu hatası ([WriteOutcome.error]; metin hata kodundan).
   failed,
 
+  /// Sonuç bilinmiyor (zaman aşımı, ağ kopması, 5xx; S12): istek işlenmiş olabilir. Taslak ve
+  /// işlem anahtarı korunur; kullanıcı aynı isteği yeniden gönderir (aynı anahtar → ikinci
+  /// kayıt oluşmaz). "Başarısız, yeniden oluştur" denmez (`client.outcome_unknown`).
+  unknown,
+
   /// Sunucu 409 `work.edit_conflict` (V3): kayıt formu açtıktan sonra değişti. Görev yeniden
   /// okundu; taslak korunur. Görev formunda çakışan alanlar [TaskEditDraft.conflicts]'ta,
   /// not/alt görev metninde sunucudaki metin [WriteOutcome.serverText]'te: seçim kullanıcının;
@@ -474,8 +479,20 @@ class TaskDetailController extends _$TaskDetailController {
         // (koordinatörlük kaldırılmış): katalog yeniden kurulur → `/v1/me` +
         // `/v1/me/departments` yeniden okunur, [TaskAccess] ve eylem yetkileri yeniden
         // hesaplanır. Otomatik tekrar yok.
+        if (isOutcomeUnknown(err)) {
+          return WriteOutcome(
+            WriteKind.unknown,
+            ApiError(ClientErrorCode.outcomeUnknown, status: err.status),
+          );
+        }
         if (rereadOnError || _rereadAfter(err)) {
           await _reread(store, list: list || _isForbidden(err));
+        }
+        if (isKeyReused(err)) {
+          return WriteOutcome(
+            WriteKind.failed,
+            ApiError(ClientErrorCode.requestNotResent, status: err.status),
+          );
         }
         return WriteOutcome(
           err.code == 'work.subtasks_open'
@@ -498,18 +515,37 @@ class TaskDetailController extends _$TaskDetailController {
       serverSupportsVersionedWrites(ref.read(bindingStateProvider)) &&
       _task?.editRevision != null;
 
-  /// [action] eyleminin [body] gövdesi için işlem anahtarı: aynı eylem ve gövdenin yeniden
-  /// gönderimi AYNI anahtarı alır; gövde değişirse yeni anahtar (yeni eylem).
-  String _keyFor(String action, String body) {
+  /// Oluşturma eylemi (işlem anahtarlı, ADR-0027): [action] + [body] için anahtar alınır —
+  /// aynı eylem ve gövdenin yeniden gönderimi (sonucu bilinmeyen isteğin tekrarı) AYNI anahtarı,
+  /// değişen gövde yeni anahtarı alır. 409 `platform.conflict_retry` aynı anahtarla bir kez
+  /// otomatik yeniden denenir. Anahtar başarıda ve "anahtar başka istekle kullanılmış"
+  /// yanıtında düşer (sonraki gönderim yeni eylem); diğer hatalarda korunur.
+  Future<WriteOutcome> _writeKeyed(
+    String action,
+    String body,
+    Future<void> Function(String key) call, {
+    required bool list,
+  }) async {
+    if (state.busy) return WriteOutcome.busy;
     final (keys, key) = state.keys.keyFor(action, body);
     state = state.copyWith(keys: keys);
-    return key;
+    final r = await _write(() async {
+      try {
+        await call(key);
+      } on ApiError catch (e) {
+        if (e.code != conflictRetryCode) rethrow;
+        await call(key);
+      }
+    }, list: list);
+    if (ref.mounted &&
+        (r.ok || r.error?.code == ClientErrorCode.requestNotResent)) {
+      state = state.copyWith(keys: state.keys.clear(action));
+    }
+    return r;
   }
 
-  /// Eylem tamamlandı: anahtarı düşer (sonraki eylem yeni anahtar alır).
-  void _keyDone(String action) {
-    if (ref.mounted) state = state.copyWith(keys: state.keys.clear(action));
-  }
+  /// Gönderilemeyen yeni alt görevin adı (sonuç bilinmiyor / hata; diyalog bununla açılır).
+  String? get pendingSubtaskTitle => state.keys.pendingBody(_subtask);
 
   /// Çok adımlı yazmanın başladığı bağlam: oturum nesli + seçili kapsam (program, departman).
   ({int session, String? program, String? department}) _writeContext() {
@@ -1036,12 +1072,10 @@ class TaskDetailController extends _$TaskDetailController {
     if (t.fileEntries.length >= uploadMaxFilesPerTask) {
       return _rejected('records.too_many_files');
     }
-    final key = _keyFor(
+    final r = await _writeKeyed(
       _upload,
       '${f.path}|${f.name}|${f.sizeBytes}|${d.tag.name}|${d.subtask}',
-    );
-    final r = await _write(
-      () => _writes.attachFile(
+      (key) => _writes.attachFile(
         t,
         f,
         d.tag,
@@ -1050,7 +1084,6 @@ class TaskDetailController extends _$TaskDetailController {
       ),
       list: false,
     );
-    if (r.ok) _keyDone(_upload);
     if (r.ok && ref.mounted) {
       state = state.copyWith(
         upload: () => null,
@@ -1176,12 +1209,12 @@ class TaskDetailController extends _$TaskDetailController {
       assignee: t.assignees.firstOrNull,
       evidenceRequired: t.evidenceRequired,
     );
-    final key = _keyFor(_copy, draft.signature);
-    final r = await _write(
-      () async => id = await _writes.createWorkItem(draft, requestKey: key),
+    final r = await _writeKeyed(
+      _copy,
+      draft.signature,
+      (key) async => id = await _writes.createWorkItem(draft, requestKey: key),
       list: true,
     );
-    if (r.ok) _keyDone(_copy);
     return (r, r.ok ? id : null);
   }
 
@@ -1282,13 +1315,12 @@ class TaskDetailController extends _$TaskDetailController {
       return WriteOutcome.done;
     }
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
-    final key = _keyFor(_subtask, name);
-    final r = await _write(
-      () => _writes.createSubtask(t, name, requestKey: key),
+    return _writeKeyed(
+      _subtask,
+      name,
+      (key) => _writes.createSubtask(t, name, requestKey: key),
       list: false,
     );
-    if (r.ok) _keyDone(_subtask);
-    return r;
   }
 
   /// Örnek katalogda satır içi ad düzenlemesi (yazdıkça).
@@ -1444,12 +1476,12 @@ class TaskDetailController extends _$TaskDetailController {
       return WriteOutcome.done;
     }
     if (!permissions.canAddNote) return WriteOutcome.invalid;
-    final key = _keyFor(_note, text);
-    final r = await _write(
-      () => _writes.addNote(t, text, requestKey: key),
+    final r = await _writeKeyed(
+      _note,
+      text,
+      (key) => _writes.addNote(t, text, requestKey: key),
       list: false,
     );
-    if (r.ok) _keyDone(_note);
     if (r.ok && ref.mounted) state = state.copyWith(noteDraft: '');
     return r;
   }

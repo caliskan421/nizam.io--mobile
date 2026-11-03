@@ -14,7 +14,9 @@ import 'tasks_providers.dart';
 part 'quick_forms_controller.g.dart';
 
 // Hızlı işlem formları (prototip `S_home.state.tk/mt/iv`). Taslaklar sayfa kapanınca korunur
-// (keepAlive); yalnız başarılı gönderimde sıfırlanır. Açılışta `prepare` bağlamı uygular.
+// (keepAlive); başarılı gönderimde sıfırlanır. Yeni görev taslağı oturum nesli değişince de
+// (çıkış, başka hesapla giriş, yeniden bağlanma) sıfırlanır: önceki hesabın taslağı ve işlem
+// anahtarı yeni oturuma taşınmaz (S12). Açılışta `prepare` bağlamı uygular.
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -139,7 +141,19 @@ const _create = 'create';
 @Riverpod(keepAlive: true)
 class NewTaskFormController extends _$NewTaskFormController {
   @override
-  NewTaskForm build() => _initial();
+  NewTaskForm build() {
+    final session = ref.read(sessionControllerProvider);
+    _session = session.generation;
+    ref.listen(sessionStateProvider, (_, _) {
+      if (session.generation == _session) return;
+      _session = session.generation;
+      state = _initial();
+    });
+    return _initial();
+  }
+
+  /// Taslağın ait olduğu oturum nesli.
+  int _session = 0;
 
   /// Boş taslak; prototip `tk` ilk durumu gibi ilk koordinatörlük (ALT) seçili açılır.
   NewTaskForm _initial() {
@@ -339,10 +353,16 @@ class NewTaskFormController extends _$NewTaskFormController {
       keys: keys,
     );
     final store = ref.read(taskCatalogControllerProvider.notifier);
+    final writes = ref.read(taskWriteRepositoryProvider);
     try {
-      final id = await ref
-          .read(taskWriteRepositoryProvider)
-          .createWorkItem(draft, requestKey: requestKey);
+      String id;
+      try {
+        id = await writes.createWorkItem(draft, requestKey: requestKey);
+      } on ApiError catch (e) {
+        // Nadir yarış: aynı anahtarla bir kez yeniden (200 ya da 201).
+        if (e.code != conflictRetryCode) rethrow;
+        id = await writes.createWorkItem(draft, requestKey: requestKey);
+      }
       await store.reload();
       if (!ref.mounted) return null;
       final key =
@@ -356,12 +376,32 @@ class NewTaskFormController extends _$NewTaskFormController {
       return (code: key, notified: f.assignees.length);
     } on Object catch (e) {
       final err = toApiError(e);
+      // Sonuç bilinmiyor (zaman aşımı, ağ, 5xx): görev açılmış olabilir. Taslak ve anahtar
+      // korunur; "Oluştur" aynı anahtarla yeniden gönderir (ikinci görev açılmaz).
+      if (isOutcomeUnknown(err)) {
+        if (ref.mounted) {
+          state = state.copyWith(
+            busy: false,
+            failure: () =>
+                ApiError(ClientErrorCode.outcomeUnknown, status: err.status),
+          );
+        }
+        return null;
+      }
       // 409 (kapsam/çakışma) ya da 403 (yetki değişmiş): kapsam kataloğu ve rol olguları
       // (`/v1/me`, `/v1/me/departments`, departmanlar, liste) yeniden okunur; otomatik
       // gönderim YOK — karar kullanıcıda (taslak korunur).
       if (_rereadAfterCreate(err)) await store.reload();
       if (ref.mounted) {
-        state = state.copyWith(busy: false, failure: () => err);
+        // Anahtar başka istekle kullanılmış: tekrar gönderilemedi; sonraki gönderim yeni eylem.
+        final reused = isKeyReused(err);
+        state = state.copyWith(
+          busy: false,
+          failure: () => reused
+              ? ApiError(ClientErrorCode.requestNotResent, status: err.status)
+              : err,
+          keys: reused ? state.keys.clear(_create) : null,
+        );
       }
       return null;
     }

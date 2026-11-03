@@ -12,10 +12,14 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/features/tasks/application/quick_forms_controller.dart';
 import 'package:nizamio/features/tasks/application/task_detail_controller.dart';
 import 'package:nizamio/features/tasks/application/task_details_controller.dart';
+import 'package:nizamio/features/tasks/presentation/task_texts.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../../support/fake_backend.dart';
@@ -35,7 +39,8 @@ class _Server {
   int subRev = 1;
   String serverVersion = '0.11.0';
 
-  /// 'METOT yol' → sıradaki yanıtlar (boşalınca varsayılan).
+  /// 'METOT yol' → sıradaki yanıtlar (boşalınca varsayılan). İşlev fırlatırsa (ör. zaman
+  /// aşımı) istemci yanıt görmez.
   final Map<String, List<ResponseBody Function()>> queued = {};
   final _pilot = PilotBackend();
 
@@ -152,6 +157,8 @@ class _Server {
         return jsonResponse(200, _w1());
       case 'PATCH /v1/work-items/w1/notes/n1':
         return jsonResponse(200, {'status': 'updated', 'edit_revision': 2});
+      case 'POST /v1/work-items':
+        return jsonResponse(201, {..._w1(), 'work_item_id': 'w-new'});
       case 'POST /v1/work-items/w1/notes':
         return jsonResponse(201, {
           'note_id': 'n9',
@@ -366,6 +373,137 @@ void main() {
       ctl.discardTextDraft((TextTarget.subtask, 's1'));
       expect(ctl.subtaskRenameDraft('s1'), isNull);
     });
+  });
+
+  group('S12 işlem anahtarı ve sonuç bilinmiyor', () {
+    String? key(Harness h, String path) =>
+        _last(h, 'POST', path).header('Idempotency-Key');
+
+    test('503: sonuç bilinmiyor; taslak korunur; tekrar AYNI anahtar; başarıda '
+        'temizlenir; yeni eylem yeni anahtar', () async {
+      final s = _Server();
+      final (h, c, ctl) = await _open(s);
+      const path = '/v1/work-items/w1/notes';
+      s.queued['POST $path'] = [() => envelope(503, 'platform.unavailable')];
+      ctl.setNoteDraft('Kontrol yapıldı');
+      final r = await ctl.sendNote();
+      expect(r.kind, WriteKind.unknown);
+      expect(r.error?.code, ClientErrorCode.outcomeUnknown);
+      expect(
+        c.read(taskDetailControllerProvider('w1')).noteDraft,
+        'Kontrol yapıldı',
+      );
+      final first = key(h, path);
+      expect(first, matches(RegExp(r'^[A-Za-z0-9_-]{22}$')));
+      expect((await ctl.sendNote()).ok, isTrue);
+      expect(key(h, path), first, reason: 'aynı eylemin tekrarı aynı anahtar');
+      expect(c.read(taskDetailControllerProvider('w1')).noteDraft, '');
+      ctl.setNoteDraft('Kontrol yapıldı');
+      await ctl.sendNote();
+      expect(key(h, path), isNot(first), reason: 'yeni eylem yeni anahtar');
+    });
+
+    test('zaman aşımı ve ağ kopması da sonuç bilinmiyor', () async {
+      final s = _Server();
+      final (h, _, ctl) = await _open(s);
+      s.queued['POST /v1/work-items/w1/subtasks'] = [() => timeout(null)];
+      final r = await ctl.createSubtask('Vana');
+      expect(r.kind, WriteKind.unknown);
+      expect(ctl.pendingSubtaskTitle, 'Vana', reason: 'diyalog adla açılır');
+      expect(h.backend.count('POST', '/v1/work-items/w1/subtasks'), 1);
+    });
+
+    test('409 conflict_retry: aynı anahtarla tek otomatik tekrar', () async {
+      final s = _Server();
+      final (h, _, ctl) = await _open(s);
+      const path = '/v1/work-items/w1/notes';
+      s.queued['POST $path'] = [() => envelope(409, 'platform.conflict_retry')];
+      ctl.setNoteDraft('Yarış');
+      expect((await ctl.sendNote()).ok, isTrue);
+      final posts = h.backend.requests
+          .where((r) => r.method == 'POST' && r.path == path)
+          .toList();
+      expect(posts, hasLength(2));
+      expect(
+        posts.map((r) => r.header('Idempotency-Key')).toSet(),
+        hasLength(1),
+      );
+    });
+
+    test(
+      'idempotency_key_reused: "tekrar gönderilemedi"; sonraki gönderim yeni '
+      'anahtar',
+      () async {
+        final s = _Server();
+        final (h, _, ctl) = await _open(s);
+        const path = '/v1/work-items/w1/notes';
+        s.queued['POST $path'] = [
+          () => envelope(409, 'work.idempotency_key_reused'),
+        ];
+        ctl.setNoteDraft('Not');
+        final r = await ctl.sendNote();
+        expect(r.kind, WriteKind.failed);
+        expect(r.error?.code, ClientErrorCode.requestNotResent);
+        final first = key(h, path);
+        expect((await ctl.sendNote()).ok, isTrue);
+        expect(key(h, path), isNot(first));
+        expect(h.backend.count('POST', path), 2, reason: 'otomatik tekrar yok');
+      },
+    );
+
+    test('429: Retry-After metinde, otomatik tekrar yok', () async {
+      final s = _Server();
+      final (h, _, ctl) = await _open(s);
+      const path = '/v1/work-items/w1/notes';
+      s.queued['POST $path'] = [
+        () => envelope(
+          429,
+          'platform.rate_limited',
+          headers: {
+            'retry-after': ['30'],
+          },
+        ),
+      ];
+      ctl.setNoteDraft('Not');
+      final r = await ctl.sendNote();
+      expect(r.kind, WriteKind.failed);
+      expect(r.error?.retryAfter, const Duration(seconds: 30));
+      expect(h.backend.count('POST', path), 1);
+      final text = AppLocalizationsTr().writeErrorText(r.error!);
+      expect(text, contains('30'));
+      expect(
+        AppLocalizationsTr().writeErrorText(ApiError('platform.rate_limited')),
+        isNot(contains('sn')),
+      );
+    });
+
+    test(
+      'yeni görev: sonuç bilinmiyor → taslak ve anahtar korunur; tekrar aynı '
+      'anahtar; oturum nesli değişince taslak sıfırlanır',
+      () async {
+        final s = _Server();
+        final (h, c, _) = await _open(s);
+        c.listen(newTaskFormControllerProvider, (_, _) {});
+        final form = c.read(newTaskFormControllerProvider.notifier)
+          ..prepare(coordinatorship: 'd1')
+          ..setTitle('Pano montajı');
+        s.queued['POST /v1/work-items'] = [() => timeout(null)];
+        expect(await form.submit(), isNull);
+        var f = c.read(newTaskFormControllerProvider);
+        expect(f.failure?.code, ClientErrorCode.outcomeUnknown);
+        expect(f.title, 'Pano montajı');
+        final first = key(h, '/v1/work-items');
+        expect(await form.submit(), isNotNull);
+        expect(key(h, '/v1/work-items'), first);
+
+        form
+          ..prepare(coordinatorship: 'd1')
+          ..setTitle('Yarım kalan');
+        await h.identity.logout();
+        f = c.read(newTaskFormControllerProvider);
+        expect(f.title, '', reason: 'önceki oturumun taslağı taşınmaz');
+      },
+    );
   });
 
   group('sunucu uyum kapısı (CX-P0K-04)', () {

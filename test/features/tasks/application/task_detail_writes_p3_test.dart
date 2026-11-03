@@ -855,6 +855,8 @@ void main() {
       (403, 'work.not_authorized'),
       (409, 'platform.conflict_retry'),
     ]) {
+      // conflict_retry (F60, ADR-0027): aynı anahtarla tek otomatik tekrar; sonra tekrar yok.
+      final sends = code == 'platform.conflict_retry' ? 2 : 1;
       test(
         'yeni görev $status → katalog + rol olguları okunur, tekrar yok',
         () async {
@@ -869,7 +871,7 @@ void main() {
           final f = c.read(newTaskFormControllerProvider);
           expect(f.failure!.code, code);
           expect(f.title, 'X', reason: 'taslak korunur');
-          expect(h.backend.count('POST', '/v1/work-items'), 1);
+          expect(h.backend.count('POST', '/v1/work-items'), sends);
           final log = _log(h);
           expect(
             log.indexOf('GET /v1/me'),

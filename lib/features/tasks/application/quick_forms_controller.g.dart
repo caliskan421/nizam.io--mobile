@@ -100,7 +100,7 @@ final class NewTaskFormControllerProvider
 }
 
 String _$newTaskFormControllerHash() =>
-    r'c54a19a8a1ea7caec9b459ba10a76a90a07b36de';
+    r'dffca6516bc4caeb330b509ba9547c243d01d801';
 
 abstract class _$NewTaskFormController extends $Notifier<NewTaskForm> {
   NewTaskForm build();

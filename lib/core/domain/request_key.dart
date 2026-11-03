@@ -32,6 +32,9 @@ final class RequestKeys {
   /// [action] için bekleyen anahtar (yoksa null).
   String? pending(String action) => _pending[action]?.key;
 
+  /// [action] için bekleyen gövde imzası (yoksa null).
+  String? pendingBody(String action) => _pending[action]?.body;
+
   RequestKeys clear(String action) => _pending.containsKey(action)
       ? RequestKeys({..._pending}..remove(action))
       : this;

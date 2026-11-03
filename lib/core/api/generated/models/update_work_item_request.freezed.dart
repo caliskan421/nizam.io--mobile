@@ -19,7 +19,9 @@ mixin _$UpdateWorkItemRequest {
  String? get title; String? get description; UpdateWorkItemRequestPriority? get priority;@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? get startOn;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? get endOn;@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? get plannedEndOn;/// Tamamlanma kanıtı bayrağı (ADR-0024); verilmezse değişmez. Değişim audit ve olay yazar.
 @JsonKey(name: 'completion_evidence_required') bool? get completionEvidenceRequired;/// Korumalı alan; dolu gönderilirse 422 work.input_invalid.
 @JsonKey(name: 'completed_on') String? get completedOn;/// Korumalı alan; dolu gönderilirse 422 work.input_invalid.
-@JsonKey(name: 'submitted_on') String? get submittedOn;
+@JsonKey(name: 'submitted_on') String? get submittedOn;/// İstemcinin gördüğü `edit_revision` (ADR-0027). Gövdede title, description, priority ya da completion_evidence_required varsa zorunludur: yoksa 422 `work.input_invalid` + alan kodu `work.revision_required`, pozitif değilse `work.revision_invalid`; bayatsa ve istenen değerler güncelden farklıysa 409 `work.edit_conflict` (alan `expected_revision`). Değerler zaten günceldeyse 200 ve değişiklik yok. Tamsayı olmayan değer 422 `platform.body_invalid` alır (alan bilgisi yok).
+@JsonKey(name: 'expected_revision') int? get expectedRevision;/// İstemcinin gördüğü `dates_revision` (ADR-0027). Gövdede start_on, end_on ya da planned_end_on varsa zorunludur; kodlar `expected_revision` ile aynıdır, 409 zarfının alanı `expected_dates_revision`dır. İki grup tek transaction içindedir: biri çatışırsa hiçbiri yazılmaz.
+@JsonKey(name: 'expected_dates_revision') int? get expectedDatesRevision;
 /// Create a copy of UpdateWorkItemRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -33,20 +35,20 @@ $UpdateWorkItemRequestCopyWith<UpdateWorkItemRequest> get copyWith => _$UpdateWo
 @override
 bool operator ==(Object other) {
   final _this = this as UpdateWorkItemRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateWorkItemRequest&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.priority, _this.priority) || other.priority == _this.priority)&&(identical(other.startOn, _this.startOn) || other.startOn == _this.startOn)&&(identical(other.endOn, _this.endOn) || other.endOn == _this.endOn)&&(identical(other.plannedEndOn, _this.plannedEndOn) || other.plannedEndOn == _this.plannedEndOn)&&(identical(other.completionEvidenceRequired, _this.completionEvidenceRequired) || other.completionEvidenceRequired == _this.completionEvidenceRequired)&&(identical(other.completedOn, _this.completedOn) || other.completedOn == _this.completedOn)&&(identical(other.submittedOn, _this.submittedOn) || other.submittedOn == _this.submittedOn));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateWorkItemRequest&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.priority, _this.priority) || other.priority == _this.priority)&&(identical(other.startOn, _this.startOn) || other.startOn == _this.startOn)&&(identical(other.endOn, _this.endOn) || other.endOn == _this.endOn)&&(identical(other.plannedEndOn, _this.plannedEndOn) || other.plannedEndOn == _this.plannedEndOn)&&(identical(other.completionEvidenceRequired, _this.completionEvidenceRequired) || other.completionEvidenceRequired == _this.completionEvidenceRequired)&&(identical(other.completedOn, _this.completedOn) || other.completedOn == _this.completedOn)&&(identical(other.submittedOn, _this.submittedOn) || other.submittedOn == _this.submittedOn)&&(identical(other.expectedRevision, _this.expectedRevision) || other.expectedRevision == _this.expectedRevision)&&(identical(other.expectedDatesRevision, _this.expectedDatesRevision) || other.expectedDatesRevision == _this.expectedDatesRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as UpdateWorkItemRequest;
-  return Object.hash(runtimeType,_this.title,_this.description,_this.priority,_this.startOn,_this.endOn,_this.plannedEndOn,_this.completionEvidenceRequired,_this.completedOn,_this.submittedOn);
+  return Object.hash(runtimeType,_this.title,_this.description,_this.priority,_this.startOn,_this.endOn,_this.plannedEndOn,_this.completionEvidenceRequired,_this.completedOn,_this.submittedOn,_this.expectedRevision,_this.expectedDatesRevision);
 }
 
 @override
 String toString() {
   final _this = this as UpdateWorkItemRequest;
-  return 'UpdateWorkItemRequest(title: ${_this.title}, description: ${_this.description}, priority: ${_this.priority}, startOn: ${_this.startOn}, endOn: ${_this.endOn}, plannedEndOn: ${_this.plannedEndOn}, completionEvidenceRequired: ${_this.completionEvidenceRequired}, completedOn: ${_this.completedOn}, submittedOn: ${_this.submittedOn})';
+  return 'UpdateWorkItemRequest(title: ${_this.title}, description: ${_this.description}, priority: ${_this.priority}, startOn: ${_this.startOn}, endOn: ${_this.endOn}, plannedEndOn: ${_this.plannedEndOn}, completionEvidenceRequired: ${_this.completionEvidenceRequired}, completedOn: ${_this.completedOn}, submittedOn: ${_this.submittedOn}, expectedRevision: ${_this.expectedRevision}, expectedDatesRevision: ${_this.expectedDatesRevision})';
 }
 
 
@@ -57,7 +59,7 @@ abstract mixin class $UpdateWorkItemRequestCopyWith<$Res>  {
   factory $UpdateWorkItemRequestCopyWith(UpdateWorkItemRequest value, $Res Function(UpdateWorkItemRequest) _then) = _$UpdateWorkItemRequestCopyWithImpl;
 @useResult
 $Res call({
- String? title, String? description, UpdateWorkItemRequestPriority? priority,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn,@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@JsonKey(name: 'completion_evidence_required') bool? completionEvidenceRequired,@JsonKey(name: 'completed_on') String? completedOn,@JsonKey(name: 'submitted_on') String? submittedOn
+ String? title, String? description, UpdateWorkItemRequestPriority? priority,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn,@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@JsonKey(name: 'completion_evidence_required') bool? completionEvidenceRequired,@JsonKey(name: 'completed_on') String? completedOn,@JsonKey(name: 'submitted_on') String? submittedOn,@JsonKey(name: 'expected_revision') int? expectedRevision,@JsonKey(name: 'expected_dates_revision') int? expectedDatesRevision
 });
 
 
@@ -74,7 +76,7 @@ class _$UpdateWorkItemRequestCopyWithImpl<$Res>
 
 /// Create a copy of UpdateWorkItemRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? title = freezed,Object? description = freezed,Object? priority = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? plannedEndOn = freezed,Object? completionEvidenceRequired = freezed,Object? completedOn = freezed,Object? submittedOn = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? title = freezed,Object? description = freezed,Object? priority = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? plannedEndOn = freezed,Object? completionEvidenceRequired = freezed,Object? completedOn = freezed,Object? submittedOn = freezed,Object? expectedRevision = freezed,Object? expectedDatesRevision = freezed,}) {
   return _then(UpdateWorkItemRequest(
 title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -85,7 +87,9 @@ as DateTime?,plannedEndOn: freezed == plannedEndOn ? _self.plannedEndOn : planne
 as DateTime?,completionEvidenceRequired: freezed == completionEvidenceRequired ? _self.completionEvidenceRequired : completionEvidenceRequired // ignore: cast_nullable_to_non_nullable
 as bool?,completedOn: freezed == completedOn ? _self.completedOn : completedOn // ignore: cast_nullable_to_non_nullable
 as String?,submittedOn: freezed == submittedOn ? _self.submittedOn : submittedOn // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,expectedRevision: freezed == expectedRevision ? _self.expectedRevision : expectedRevision // ignore: cast_nullable_to_non_nullable
+as int?,expectedDatesRevision: freezed == expectedDatesRevision ? _self.expectedDatesRevision : expectedDatesRevision // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -170,10 +174,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? title,  String? description,  UpdateWorkItemRequestPriority? priority, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completion_evidence_required')  bool? completionEvidenceRequired, @JsonKey(name: 'completed_on')  String? completedOn, @JsonKey(name: 'submitted_on')  String? submittedOn)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? title,  String? description,  UpdateWorkItemRequestPriority? priority, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completion_evidence_required')  bool? completionEvidenceRequired, @JsonKey(name: 'completed_on')  String? completedOn, @JsonKey(name: 'submitted_on')  String? submittedOn, @JsonKey(name: 'expected_revision')  int? expectedRevision, @JsonKey(name: 'expected_dates_revision')  int? expectedDatesRevision)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UpdateWorkItemRequest() when $default != null:
-return $default(_that.title,_that.description,_that.priority,_that.startOn,_that.endOn,_that.plannedEndOn,_that.completionEvidenceRequired,_that.completedOn,_that.submittedOn);case _:
+return $default(_that.title,_that.description,_that.priority,_that.startOn,_that.endOn,_that.plannedEndOn,_that.completionEvidenceRequired,_that.completedOn,_that.submittedOn,_that.expectedRevision,_that.expectedDatesRevision);case _:
   return orElse();
 
 }
@@ -191,10 +195,10 @@ return $default(_that.title,_that.description,_that.priority,_that.startOn,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? title,  String? description,  UpdateWorkItemRequestPriority? priority, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completion_evidence_required')  bool? completionEvidenceRequired, @JsonKey(name: 'completed_on')  String? completedOn, @JsonKey(name: 'submitted_on')  String? submittedOn)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? title,  String? description,  UpdateWorkItemRequestPriority? priority, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completion_evidence_required')  bool? completionEvidenceRequired, @JsonKey(name: 'completed_on')  String? completedOn, @JsonKey(name: 'submitted_on')  String? submittedOn, @JsonKey(name: 'expected_revision')  int? expectedRevision, @JsonKey(name: 'expected_dates_revision')  int? expectedDatesRevision)  $default,) {final _that = this;
 switch (_that) {
 case _UpdateWorkItemRequest():
-return $default(_that.title,_that.description,_that.priority,_that.startOn,_that.endOn,_that.plannedEndOn,_that.completionEvidenceRequired,_that.completedOn,_that.submittedOn);case _:
+return $default(_that.title,_that.description,_that.priority,_that.startOn,_that.endOn,_that.plannedEndOn,_that.completionEvidenceRequired,_that.completedOn,_that.submittedOn,_that.expectedRevision,_that.expectedDatesRevision);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -211,10 +215,10 @@ return $default(_that.title,_that.description,_that.priority,_that.startOn,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? title,  String? description,  UpdateWorkItemRequestPriority? priority, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completion_evidence_required')  bool? completionEvidenceRequired, @JsonKey(name: 'completed_on')  String? completedOn, @JsonKey(name: 'submitted_on')  String? submittedOn)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? title,  String? description,  UpdateWorkItemRequestPriority? priority, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on')  DateTime? plannedEndOn, @JsonKey(name: 'completion_evidence_required')  bool? completionEvidenceRequired, @JsonKey(name: 'completed_on')  String? completedOn, @JsonKey(name: 'submitted_on')  String? submittedOn, @JsonKey(name: 'expected_revision')  int? expectedRevision, @JsonKey(name: 'expected_dates_revision')  int? expectedDatesRevision)?  $default,) {final _that = this;
 switch (_that) {
 case _UpdateWorkItemRequest() when $default != null:
-return $default(_that.title,_that.description,_that.priority,_that.startOn,_that.endOn,_that.plannedEndOn,_that.completionEvidenceRequired,_that.completedOn,_that.submittedOn);case _:
+return $default(_that.title,_that.description,_that.priority,_that.startOn,_that.endOn,_that.plannedEndOn,_that.completionEvidenceRequired,_that.completedOn,_that.submittedOn,_that.expectedRevision,_that.expectedDatesRevision);case _:
   return null;
 
 }
@@ -226,7 +230,7 @@ return $default(_that.title,_that.description,_that.priority,_that.startOn,_that
 @JsonSerializable()
 
 class _UpdateWorkItemRequest implements UpdateWorkItemRequest {
-  const _UpdateWorkItemRequest({this.title, this.description, this.priority, @DateOnlyConverter()@JsonKey(name: 'start_on') this.startOn, @DateOnlyConverter()@JsonKey(name: 'end_on') this.endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on') this.plannedEndOn, @JsonKey(name: 'completion_evidence_required') this.completionEvidenceRequired, @JsonKey(name: 'completed_on') this.completedOn, @JsonKey(name: 'submitted_on') this.submittedOn});
+  const _UpdateWorkItemRequest({this.title, this.description, this.priority, @DateOnlyConverter()@JsonKey(name: 'start_on') this.startOn, @DateOnlyConverter()@JsonKey(name: 'end_on') this.endOn, @DateOnlyConverter()@JsonKey(name: 'planned_end_on') this.plannedEndOn, @JsonKey(name: 'completion_evidence_required') this.completionEvidenceRequired, @JsonKey(name: 'completed_on') this.completedOn, @JsonKey(name: 'submitted_on') this.submittedOn, @JsonKey(name: 'expected_revision') this.expectedRevision, @JsonKey(name: 'expected_dates_revision') this.expectedDatesRevision});
   factory _UpdateWorkItemRequest.fromJson(Map<String, dynamic> json) => _$UpdateWorkItemRequestFromJson(json);
 
 @override final  String? title;
@@ -241,6 +245,10 @@ class _UpdateWorkItemRequest implements UpdateWorkItemRequest {
 @override@JsonKey(name: 'completed_on') final  String? completedOn;
 /// Korumalı alan; dolu gönderilirse 422 work.input_invalid.
 @override@JsonKey(name: 'submitted_on') final  String? submittedOn;
+/// İstemcinin gördüğü `edit_revision` (ADR-0027). Gövdede title, description, priority ya da completion_evidence_required varsa zorunludur: yoksa 422 `work.input_invalid` + alan kodu `work.revision_required`, pozitif değilse `work.revision_invalid`; bayatsa ve istenen değerler güncelden farklıysa 409 `work.edit_conflict` (alan `expected_revision`). Değerler zaten günceldeyse 200 ve değişiklik yok. Tamsayı olmayan değer 422 `platform.body_invalid` alır (alan bilgisi yok).
+@override@JsonKey(name: 'expected_revision') final  int? expectedRevision;
+/// İstemcinin gördüğü `dates_revision` (ADR-0027). Gövdede start_on, end_on ya da planned_end_on varsa zorunludur; kodlar `expected_revision` ile aynıdır, 409 zarfının alanı `expected_dates_revision`dır. İki grup tek transaction içindedir: biri çatışırsa hiçbiri yazılmaz.
+@override@JsonKey(name: 'expected_dates_revision') final  int? expectedDatesRevision;
 
 /// Create a copy of UpdateWorkItemRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -255,18 +263,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateWorkItemRequest&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.startOn, startOn) || other.startOn == startOn)&&(identical(other.endOn, endOn) || other.endOn == endOn)&&(identical(other.plannedEndOn, plannedEndOn) || other.plannedEndOn == plannedEndOn)&&(identical(other.completionEvidenceRequired, completionEvidenceRequired) || other.completionEvidenceRequired == completionEvidenceRequired)&&(identical(other.completedOn, completedOn) || other.completedOn == completedOn)&&(identical(other.submittedOn, submittedOn) || other.submittedOn == submittedOn));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateWorkItemRequest&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.startOn, startOn) || other.startOn == startOn)&&(identical(other.endOn, endOn) || other.endOn == endOn)&&(identical(other.plannedEndOn, plannedEndOn) || other.plannedEndOn == plannedEndOn)&&(identical(other.completionEvidenceRequired, completionEvidenceRequired) || other.completionEvidenceRequired == completionEvidenceRequired)&&(identical(other.completedOn, completedOn) || other.completedOn == completedOn)&&(identical(other.submittedOn, submittedOn) || other.submittedOn == submittedOn)&&(identical(other.expectedRevision, expectedRevision) || other.expectedRevision == expectedRevision)&&(identical(other.expectedDatesRevision, expectedDatesRevision) || other.expectedDatesRevision == expectedDatesRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,title,description,priority,startOn,endOn,plannedEndOn,completionEvidenceRequired,completedOn,submittedOn);
+    return Object.hash(runtimeType,title,description,priority,startOn,endOn,plannedEndOn,completionEvidenceRequired,completedOn,submittedOn,expectedRevision,expectedDatesRevision);
 }
 
 @override
 String toString() {
-    return 'UpdateWorkItemRequest(title: $title, description: $description, priority: $priority, startOn: $startOn, endOn: $endOn, plannedEndOn: $plannedEndOn, completionEvidenceRequired: $completionEvidenceRequired, completedOn: $completedOn, submittedOn: $submittedOn)';
+    return 'UpdateWorkItemRequest(title: $title, description: $description, priority: $priority, startOn: $startOn, endOn: $endOn, plannedEndOn: $plannedEndOn, completionEvidenceRequired: $completionEvidenceRequired, completedOn: $completedOn, submittedOn: $submittedOn, expectedRevision: $expectedRevision, expectedDatesRevision: $expectedDatesRevision)';
 }
 
 
@@ -277,7 +285,7 @@ abstract mixin class _$UpdateWorkItemRequestCopyWith<$Res> implements $UpdateWor
   factory _$UpdateWorkItemRequestCopyWith(_UpdateWorkItemRequest value, $Res Function(_UpdateWorkItemRequest) _then) = __$UpdateWorkItemRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String? title, String? description, UpdateWorkItemRequestPriority? priority,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn,@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@JsonKey(name: 'completion_evidence_required') bool? completionEvidenceRequired,@JsonKey(name: 'completed_on') String? completedOn,@JsonKey(name: 'submitted_on') String? submittedOn
+ String? title, String? description, UpdateWorkItemRequestPriority? priority,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn,@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? plannedEndOn,@JsonKey(name: 'completion_evidence_required') bool? completionEvidenceRequired,@JsonKey(name: 'completed_on') String? completedOn,@JsonKey(name: 'submitted_on') String? submittedOn,@JsonKey(name: 'expected_revision') int? expectedRevision,@JsonKey(name: 'expected_dates_revision') int? expectedDatesRevision
 });
 
 
@@ -294,7 +302,7 @@ class __$UpdateWorkItemRequestCopyWithImpl<$Res>
 
 /// Create a copy of UpdateWorkItemRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? title = freezed,Object? description = freezed,Object? priority = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? plannedEndOn = freezed,Object? completionEvidenceRequired = freezed,Object? completedOn = freezed,Object? submittedOn = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? title = freezed,Object? description = freezed,Object? priority = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? plannedEndOn = freezed,Object? completionEvidenceRequired = freezed,Object? completedOn = freezed,Object? submittedOn = freezed,Object? expectedRevision = freezed,Object? expectedDatesRevision = freezed,}) {
   return _then(_UpdateWorkItemRequest(
 title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -305,7 +313,9 @@ as DateTime?,plannedEndOn: freezed == plannedEndOn ? _self.plannedEndOn : planne
 as DateTime?,completionEvidenceRequired: freezed == completionEvidenceRequired ? _self.completionEvidenceRequired : completionEvidenceRequired // ignore: cast_nullable_to_non_nullable
 as bool?,completedOn: freezed == completedOn ? _self.completedOn : completedOn // ignore: cast_nullable_to_non_nullable
 as String?,submittedOn: freezed == submittedOn ? _self.submittedOn : submittedOn // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,expectedRevision: freezed == expectedRevision ? _self.expectedRevision : expectedRevision // ignore: cast_nullable_to_non_nullable
+as int?,expectedDatesRevision: freezed == expectedDatesRevision ? _self.expectedDatesRevision : expectedDatesRevision // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

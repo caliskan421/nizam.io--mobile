@@ -107,6 +107,7 @@ Map<String, Object?> _note({Object? role = 'member'}) => {
   'converted_to_work_item_id': null,
   'created_at': _t,
   'updated_at': _t,
+  'edit_revision': 1,
 };
 
 Map<String, Object?> _conference({String status = 'live'}) => {
@@ -455,9 +456,13 @@ void main() {
         }
         return _json(_note(role: 'coordinator'));
       });
-      final n = await repo.addNote('m1', 'Not');
+      final n = await repo.addNote(
+        'm1',
+        'Not',
+        requestKey: 'k-0123456789abcdefghij',
+      );
       final s = await repo.listNotes('m1', const PageRequest(limit: 2));
-      final u = await repo.updateNote('n1', 'Düzeltme');
+      final u = await repo.updateNote('n1', 'Düzeltme', expectedRevision: 3);
       await repo.deleteNote('n1');
       expect(a.seen.map((o) => (o.method, o.uri.path)), [
         ('POST', '/v1/meetings/m1/notes'),
@@ -467,7 +472,8 @@ void main() {
       ]);
       expect(a.seen[1].uri.queryParameters, {'limit': '2'});
       expect(a.bodies[0], {'content': 'Not'});
-      expect(a.bodies[2], {'content': 'Düzeltme'});
+      expect(a.bodies[2], {'content': 'Düzeltme', 'expected_revision': 3});
+      expect(a.seen[0].headers['Idempotency-Key'], 'k-0123456789abcdefghij');
       expect(n.authorRole, MeetingRole.coordinator);
       expect(s.items.map((x) => x.authorRole), [
         MeetingRole.member,
@@ -480,7 +486,7 @@ void main() {
     test('429 hız sınırı → ApiError', () async {
       final (repo, _) = _repo((_) => _err(429, 'platform.rate_limited'));
       await expectLater(
-        repo.addNote('m1', 'x'),
+        repo.addNote('m1', 'x', requestKey: 'k-0123456789abcdefghij'),
         throwsA(isA<ApiError>().having((e) => e.status, 'status', 429)),
       );
     });

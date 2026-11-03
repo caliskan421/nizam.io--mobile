@@ -24,6 +24,9 @@ abstract class MeetingNote with _$MeetingNote {
     required String? convertedToWorkItemId,
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'updated_at') required DateTime updatedAt,
+
+    /// Not içeriğinin düzenleme sürümü (ADR-0027); dönüşüm işareti ve silme artırmaz.
+    @JsonKey(name: 'edit_revision') required int editRevision,
   }) = _MeetingNote;
 
   factory MeetingNote.fromJson(Map<String, Object?> json) =>

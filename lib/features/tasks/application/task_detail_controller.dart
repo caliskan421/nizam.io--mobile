@@ -1,9 +1,11 @@
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
+import '../../../core/server/write_compat.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_permissions.dart';
 import '../domain/task_writes.dart';
@@ -40,6 +42,17 @@ enum WriteKind {
   /// Sunucu hatası ([WriteOutcome.error]; metin hata kodundan).
   failed,
 
+  /// Sonuç bilinmiyor (zaman aşımı, ağ kopması, 5xx; S12): istek işlenmiş olabilir. Taslak ve
+  /// işlem anahtarı korunur; kullanıcı aynı isteği yeniden gönderir (aynı anahtar → ikinci
+  /// kayıt oluşmaz). "Başarısız, yeniden oluştur" denmez (`client.outcome_unknown`).
+  unknown,
+
+  /// Sunucu 409 `work.edit_conflict` (V3): kayıt formu açtıktan sonra değişti. Görev yeniden
+  /// okundu; taslak korunur. Görev formunda çakışan alanlar [TaskEditDraft.conflicts]'ta,
+  /// not/alt görev metninde sunucudaki metin [WriteOutcome.serverText]'te: seçim kullanıcının;
+  /// otomatik tekrar yok.
+  conflict,
+
   /// Örnek katalog kuralları: açık alt görev / kanıt dosyası yok.
   blockedBySubtasks,
   blockedByEvidence,
@@ -48,7 +61,7 @@ enum WriteKind {
 /// Yazma komutunun sonucu.
 @immutable
 final class WriteOutcome {
-  const WriteOutcome(this.kind, [this.error]);
+  const WriteOutcome(this.kind, [this.error, this.serverText]);
 
   static const done = WriteOutcome(WriteKind.done);
   static const unchanged = WriteOutcome(WriteKind.unchanged);
@@ -57,6 +70,10 @@ final class WriteOutcome {
 
   final WriteKind kind;
   final ApiError? error;
+
+  /// [WriteKind.conflict]'te not/alt görev metninin sunucudaki güncel hâli (iki seçenekli
+  /// karar için); yoksa null.
+  final String? serverText;
 
   bool get ok => kind == WriteKind.done;
 }
@@ -87,11 +104,47 @@ bool _isForbidden(ApiError e) =>
 /// Hata sonrası yeniden okuma gerekir mi (çakışma ya da yetki reddi).
 bool _rereadAfter(ApiError e) => _isConflict(e) || _isForbidden(e);
 
+// İşlem anahtarı eylem adları ([TaskDetailState.keys]).
+const _note = 'note';
+const _subtask = 'subtask';
+const _upload = 'upload';
+const _copy = 'copy';
+
+/// Bayat düzenleme sürümü (ADR-0027).
+const _editConflict = 'work.edit_conflict';
+
 /// Yerel ön denetimin hatası: istek gönderilmez, metin yine koddan (sunucu kataloğundaki kod).
 WriteOutcome _rejected(String code) =>
     WriteOutcome(WriteKind.failed, ApiError(code));
 
-/// "Görevi düzenle" taslağı.
+/// Metin taslağının hedefi (not içeriği, alt görev adı).
+enum TextTarget { note, subtask }
+
+/// Metin taslağı anahtarı: (hedef, kayıt kimliği).
+typedef TextDraftKey = (TextTarget, String);
+
+/// Görev formunun sürümlü alanları (V3 çakışma görünümü).
+enum EditField { title, priority, start, due, evidenceRequired }
+
+/// Aynı alanın üç görüntüsü: formun açıldığı taban, kullanıcının değeri, sunucunun yeni
+/// değeri (V3). Değerler alanın kendi tipindedir.
+@immutable
+final class EditConflict {
+  const EditConflict({
+    required this.base,
+    required this.local,
+    required this.server,
+  });
+
+  final Object base;
+  final Object local;
+  final Object server;
+}
+
+/// "Görevi düzenle" taslağı. [base]: formun açıldığı andaki görev (sunucuda taze okuma);
+/// fark ve gönderilen sürümler ONDAN hesaplanır (açıkken katalog tazelense de kullanıcının
+/// dokunmadığı alan eski değerle geri yazılmaz). [conflicts]: 409 `work.edit_conflict` sonrası
+/// kullanıcı seçimi bekleyen alanlar.
 @immutable
 final class TaskEditDraft {
   const TaskEditDraft({
@@ -103,7 +156,13 @@ final class TaskEditDraft {
     required this.due,
     this.evidenceRequired = false,
     this.membersOpen = false,
+    this.base,
+    this.conflicts = const {},
   });
+
+  /// Formun açıldığı taban (örnek katalogda da tutulur).
+  final TaskItem? base;
+  final Map<EditField, EditConflict> conflicts;
 
   final String title;
   final String coordinatorship;
@@ -127,6 +186,8 @@ final class TaskEditDraft {
     DateTime? due,
     bool? evidenceRequired,
     bool? membersOpen,
+    TaskItem? base,
+    Map<EditField, EditConflict>? conflicts,
   }) => TaskEditDraft(
     title: title ?? this.title,
     coordinatorship: coordinatorship ?? this.coordinatorship,
@@ -136,8 +197,88 @@ final class TaskEditDraft {
     due: due ?? this.due,
     evidenceRequired: evidenceRequired ?? this.evidenceRequired,
     membersOpen: membersOpen ?? this.membersOpen,
+    base: base ?? this.base,
+    conflicts: conflicts ?? this.conflicts,
+  );
+
+  /// Alanın taslaktaki değeri.
+  Object valueOf(EditField f) => switch (f) {
+    EditField.title => title.trim(),
+    EditField.priority => priority,
+    EditField.start => _d(start),
+    EditField.due => _d(due),
+    EditField.evidenceRequired => evidenceRequired,
+  };
+
+  /// Alana [v] yazılmış taslak.
+  TaskEditDraft withValue(EditField f, Object v) => switch (f) {
+    EditField.title => copyWith(title: v as String),
+    EditField.priority => copyWith(priority: v as TaskPriority),
+    EditField.start => copyWith(start: v as DateTime),
+    EditField.due => copyWith(due: v as DateTime),
+    EditField.evidenceRequired => copyWith(evidenceRequired: v as bool),
+  };
+}
+
+DateTime _d(DateTime d) => DateTime(d.year, d.month, d.day);
+
+/// Görev kaleminde alanın değeri (taslakla aynı biçimde; tarihler gün).
+Object editValueOf(TaskItem t, EditField f) => switch (f) {
+  EditField.title => t.title,
+  EditField.priority => t.priority,
+  EditField.start => _d(t.start),
+  EditField.due => _d(t.due),
+  EditField.evidenceRequired => t.evidenceRequired,
+};
+
+/// 409 `work.edit_conflict` zarfının bayat grubu (`fields[].field`): `expected_revision` →
+/// alanlar, `expected_dates_revision` → tarihler; alan bilgisi yoksa ikisi.
+Set<EditField> _staleFields(ApiError e) {
+  final names = {for (final f in e.fields) f.field};
+  const fields = {
+    EditField.title,
+    EditField.priority,
+    EditField.evidenceRequired,
+  };
+  const dates = {EditField.start, EditField.due};
+  final out = <EditField>{
+    if (names.contains('expected_revision')) ...fields,
+    if (names.contains('expected_dates_revision')) ...dates,
+  };
+  return out.isEmpty ? {...fields, ...dates} : out;
+}
+
+/// Üç görüntülü birleştirme (V3): dokunulmamış alan sunucu değerini alır, yalnız yerelde
+/// değişen korunur, iki tarafta farklı değişen [EditConflict] olur. Yeni taban [server];
+/// atananlar sürümsüzdür (dokunulmamışsa sunucudaki).
+TaskEditDraft mergeEditDraft(
+  TaskEditDraft d,
+  TaskItem server, {
+  Set<EditField> stale = const {...EditField.values},
+}) {
+  final base = d.base ?? server;
+  var out = d;
+  final conflicts = <EditField, EditConflict>{...d.conflicts};
+  for (final f in EditField.values) {
+    final b = editValueOf(base, f);
+    final l = d.valueOf(f);
+    final s = editValueOf(server, f);
+    if (l == b) {
+      out = out.withValue(f, s);
+    } else if (s != b && s != l && stale.contains(f)) {
+      conflicts[f] = EditConflict(base: b, local: l, server: s);
+    }
+  }
+  final assigneesTouched = !_sameSet(d.assignees, base.assignees);
+  return out.copyWith(
+    base: server,
+    conflicts: conflicts,
+    assignees: assigneesTouched ? null : [...server.assignees],
   );
 }
+
+bool _sameSet(List<String> a, List<String> b) =>
+    a.length == b.length && a.toSet().containsAll(b);
 
 /// "Tarih değişikliği iste" taslağı.
 @immutable
@@ -208,6 +349,8 @@ final class TaskDetailState {
     this.showErrors = false,
     this.seq = 1,
     this.busy = false,
+    this.keys = const RequestKeys(),
+    this.textDrafts = const {},
   });
 
   final TaskDetailTab tab;
@@ -229,6 +372,14 @@ final class TaskDetailState {
   /// Sunucu yazması uçuşta: yeni yazma komutu istek göndermez ([WriteKind.busy]).
   final bool busy;
 
+  /// Bekleyen oluşturma eylemlerinin işlem anahtarları (ADR-0027; bellek içi, ekran ömrü).
+  final RequestKeys keys;
+
+  /// Gönderilemeyen metin düzenlemeleri ((tür, kimlik) → metin; S12): hata, çakışma
+  /// ya da bilinmeyen sonuçta kullanıcının yazdığı kaybolmaz, diyalog bununla yeniden açılır.
+  /// Başarıda ya da kullanıcı sunucudakini seçince düşer.
+  final Map<TextDraftKey, String> textDrafts;
+
   TaskDetailState copyWith({
     TaskDetailTab? tab,
     Set<String>? openSubtasks,
@@ -242,6 +393,8 @@ final class TaskDetailState {
     bool? showErrors,
     int? seq,
     bool? busy,
+    RequestKeys? keys,
+    Map<TextDraftKey, String>? textDrafts,
   }) => TaskDetailState(
     tab: tab ?? this.tab,
     openSubtasks: openSubtasks ?? this.openSubtasks,
@@ -257,6 +410,8 @@ final class TaskDetailState {
     showErrors: showErrors ?? this.showErrors,
     seq: seq ?? this.seq,
     busy: busy ?? this.busy,
+    keys: keys ?? this.keys,
+    textDrafts: textDrafts ?? this.textDrafts,
   );
 }
 
@@ -310,6 +465,7 @@ class TaskDetailController extends _$TaskDetailController {
     bool rereadOnError = false,
   }) async {
     if (state.busy) return WriteOutcome.busy;
+    if (!_versionedServer) return _rejected(ClientErrorCode.serverOutdated);
     state = state.copyWith(busy: true);
     // Denetleyici istek sırasında kapanabilir (ekrandan çıkış): katalog yine yenilenir.
     final store = _store;
@@ -323,8 +479,20 @@ class TaskDetailController extends _$TaskDetailController {
         // (koordinatörlük kaldırılmış): katalog yeniden kurulur → `/v1/me` +
         // `/v1/me/departments` yeniden okunur, [TaskAccess] ve eylem yetkileri yeniden
         // hesaplanır. Otomatik tekrar yok.
+        if (isOutcomeUnknown(err)) {
+          return WriteOutcome(
+            WriteKind.unknown,
+            ApiError(ClientErrorCode.outcomeUnknown, status: err.status),
+          );
+        }
         if (rereadOnError || _rereadAfter(err)) {
           await _reread(store, list: list || _isForbidden(err));
+        }
+        if (isKeyReused(err)) {
+          return WriteOutcome(
+            WriteKind.failed,
+            ApiError(ClientErrorCode.requestNotResent, status: err.status),
+          );
         }
         return WriteOutcome(
           err.code == 'work.subtasks_open'
@@ -339,6 +507,45 @@ class TaskDetailController extends _$TaskDetailController {
       if (ref.mounted) state = state.copyWith(busy: false);
     }
   }
+
+  /// Sunucu uyum kapısı (CX-P0K-04, ADR-0027): bağlı sunucunun sürümü sürümlü yazmayı
+  /// desteklemiyorsa ya da kalem `edit_revision` taşımıyorsa (eski backend) yazma gönderilmez
+  /// (`client.server_outdated`): eski sunucu sürümü ve işlem anahtarını sessizce yok sayar.
+  bool get _versionedServer =>
+      serverSupportsVersionedWrites(ref.read(bindingStateProvider)) &&
+      _task?.editRevision != null;
+
+  /// Oluşturma eylemi (işlem anahtarlı, ADR-0027): [action] + [body] için anahtar alınır —
+  /// aynı eylem ve gövdenin yeniden gönderimi (sonucu bilinmeyen isteğin tekrarı) AYNI anahtarı,
+  /// değişen gövde yeni anahtarı alır. 409 `platform.conflict_retry` aynı anahtarla bir kez
+  /// otomatik yeniden denenir. Anahtar başarıda ve "anahtar başka istekle kullanılmış"
+  /// yanıtında düşer (sonraki gönderim yeni eylem); diğer hatalarda korunur.
+  Future<WriteOutcome> _writeKeyed(
+    String action,
+    String body,
+    Future<void> Function(String key) call, {
+    required bool list,
+  }) async {
+    if (state.busy) return WriteOutcome.busy;
+    final (keys, key) = state.keys.keyFor(action, body);
+    state = state.copyWith(keys: keys);
+    final r = await _write(() async {
+      try {
+        await call(key);
+      } on ApiError catch (e) {
+        if (e.code != conflictRetryCode) rethrow;
+        await call(key);
+      }
+    }, list: list);
+    if (ref.mounted &&
+        (r.ok || r.error?.code == ClientErrorCode.requestNotResent)) {
+      state = state.copyWith(keys: state.keys.clear(action));
+    }
+    return r;
+  }
+
+  /// Gönderilemeyen yeni alt görevin adı (sonuç bilinmiyor / hata; diyalog bununla açılır).
+  String? get pendingSubtaskTitle => state.keys.pendingBody(_subtask);
 
   /// Çok adımlı yazmanın başladığı bağlam: oturum nesli + seçili kapsam (program, departman).
   ({int session, String? program, String? department}) _writeContext() {
@@ -441,7 +648,7 @@ class TaskDetailController extends _$TaskDetailController {
     }
     if (!permissions.canManageTask) return WriteOutcome.invalid;
     return _write(
-      () => _writes.updateWorkItem(t, WorkItemPatch(priority: p)),
+      () => _writes.updateWorkItem(t, WorkItemPatch.diff(t, priority: p)),
       list: false,
     );
   }
@@ -593,12 +800,26 @@ class TaskDetailController extends _$TaskDetailController {
         start: t.start,
         due: t.due,
         evidenceRequired: t.evidenceRequired,
+        base: t,
       ),
       showErrors: false,
     );
   }
 
   void updateEdit(TaskEditDraft d) => state = state.copyWith(edit: () => d);
+
+  /// Çakışan alan için kullanıcı seçimi (V3): [useServer] → sunucudaki değer, değilse
+  /// kullanıcının değeri kalır. Seçimden sonra gönderim yeni tabanın sürümüyle gider.
+  void resolveConflict(EditField f, {required bool useServer}) {
+    final d = state.edit;
+    final c = d?.conflicts[f];
+    if (d == null || c == null) return;
+    updateEdit(
+      d
+          .withValue(f, useServer ? c.server : c.local)
+          .copyWith(conflicts: {...d.conflicts}..remove(f)),
+    );
+  }
 
   /// Koordinatörlük değişince yalnız yeni ekipte olan atananlar kalır.
   void editCoordinatorship(String code) {
@@ -666,24 +887,33 @@ class TaskDetailController extends _$TaskDetailController {
     }
     final perms = permissions;
     if (!perms.canManageTask) return WriteOutcome.invalid;
+    // Seçilmemiş çakışma varken gönderilmez (karar kullanıcının).
+    if (d.conflicts.isNotEmpty) {
+      state = state.copyWith(showErrors: true);
+      return const WriteOutcome(WriteKind.conflict);
+    }
+    // Fark ve sürümler formun AÇILIŞ tabanından (canlı katalog değil): açıkken tazelenen
+    // katalogdaki yeni sunucu değeri, kullanıcının dokunmadığı alanda geri yazılmaz.
+    final base = d.base ?? t;
     final patch = WorkItemPatch.diff(
-      t,
+      base,
       title: d.title.trim(),
       priority: d.priority,
       start: d.start,
       end: d.due,
       evidenceRequired: d.evidenceRequired,
     );
+    // Atama farkı da tabana göre: başkasının bu arada eklediği atanan kaldırılmaz.
     final added = perms.canAssign
         ? [
             for (final a in d.assignees)
-              if (!t.assignees.contains(a)) a,
+              if (!base.assignees.contains(a) && !t.assignees.contains(a)) a,
           ]
         : const <String>[];
     final removed = perms.canAssign
         ? [
-            for (final a in t.assignees)
-              if (!d.assignees.contains(a)) a,
+            for (final a in base.assignees)
+              if (!d.assignees.contains(a) && t.assignees.contains(a)) a,
           ]
         : const <String>[];
     if (patch.isEmpty && added.isEmpty && removed.isEmpty) {
@@ -716,6 +946,15 @@ class TaskDetailController extends _$TaskDetailController {
     );
     if (r.ok && ref.mounted) {
       state = state.copyWith(edit: () => null, showErrors: false);
+    }
+    if (r.error?.code == _editConflict && ref.mounted) {
+      // Görev yeniden okundu: taban / yerel / sunucu ayrılır, aynı alandaki fark seçime kalır.
+      final fresh = _task;
+      final now = state.edit;
+      if (fresh != null && now != null) {
+        updateEdit(mergeEditDraft(now, fresh, stale: _staleFields(r.error!)));
+      }
+      return WriteOutcome(WriteKind.conflict, r.error);
     }
     return r;
   }
@@ -833,8 +1072,16 @@ class TaskDetailController extends _$TaskDetailController {
     if (t.fileEntries.length >= uploadMaxFilesPerTask) {
       return _rejected('records.too_many_files');
     }
-    final r = await _write(
-      () => _writes.attachFile(t, f, d.tag, subtaskId: d.subtask),
+    final r = await _writeKeyed(
+      _upload,
+      '${f.path}|${f.name}|${f.sizeBytes}|${d.tag.name}|${d.subtask}',
+      (key) => _writes.attachFile(
+        t,
+        f,
+        d.tag,
+        subtaskId: d.subtask,
+        requestKey: key,
+      ),
       list: false,
     );
     if (r.ok && ref.mounted) {
@@ -952,19 +1199,20 @@ class TaskDetailController extends _$TaskDetailController {
       return (WriteOutcome.invalid, null);
     }
     String? id;
-    final r = await _write(
-      () async => id = await _writes.createWorkItem(
-        WorkItemDraft(
-          programId: program,
-          departmentId: dept,
-          title: '${t.title} $suffix',
-          start: t.start,
-          end: t.due,
-          priority: t.priority == TaskPriority.unknown ? null : t.priority,
-          assignee: t.assignees.firstOrNull,
-          evidenceRequired: t.evidenceRequired,
-        ),
-      ),
+    final draft = WorkItemDraft(
+      programId: program,
+      departmentId: dept,
+      title: '${t.title} $suffix',
+      start: t.start,
+      end: t.due,
+      priority: t.priority == TaskPriority.unknown ? null : t.priority,
+      assignee: t.assignees.firstOrNull,
+      evidenceRequired: t.evidenceRequired,
+    );
+    final r = await _writeKeyed(
+      _copy,
+      draft.signature,
+      (key) async => id = await _writes.createWorkItem(draft, requestKey: key),
       list: true,
     );
     return (r, r.ok ? id : null);
@@ -984,10 +1232,26 @@ class TaskDetailController extends _$TaskDetailController {
       _task?.subtasks.where((s) => s.id == id).firstOrNull;
 
   /// Sunucu alt görev değişikliği; alt görev sayıları tekil okumayla kalemde yenilenir.
+  /// Başlık/atanan/tarih değişikliği alt görevin okunan sürümünü taşır (ADR-0027); yalnız
+  /// işaretleme ([SubtaskPatch.done]) sürüm istemez.
   Future<WriteOutcome> _patchSub(String id, SubtaskPatch patch) {
     final t = _task;
-    if (t == null) return Future.value(WriteOutcome.invalid);
-    return _write(() => _writes.updateSubtask(t, id, patch), list: false);
+    final u = _sub(id);
+    if (t == null || u == null) return Future.value(WriteOutcome.invalid);
+    final versioned =
+        patch.title != null || patch.assignee != null || patch.dates != null;
+    final rev = u.editRevision;
+    if (versioned && rev == null) {
+      return Future.value(_rejected(ClientErrorCode.serverOutdated));
+    }
+    final body = SubtaskPatch(
+      title: patch.title,
+      assignee: patch.assignee,
+      dates: patch.dates,
+      done: patch.done,
+      expectedRevision: versioned ? rev : null,
+    );
+    return _write(() => _writes.updateSubtask(t, id, body), list: false);
   }
 
   /// İşaretler/kaldırır. Alt görevde kanıt bayrağı yok (ADR-0024): kanıt kapısı görev
@@ -1051,7 +1315,12 @@ class TaskDetailController extends _$TaskDetailController {
       return WriteOutcome.done;
     }
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
-    return _write(() => _writes.createSubtask(t, name), list: false);
+    return _writeKeyed(
+      _subtask,
+      name,
+      (key) => _writes.createSubtask(t, name, requestKey: key),
+      list: false,
+    );
   }
 
   /// Örnek katalogda satır içi ad düzenlemesi (yazdıkça).
@@ -1071,7 +1340,31 @@ class TaskDetailController extends _$TaskDetailController {
       return WriteOutcome.done;
     }
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
-    return _patchSub(id, SubtaskPatch(title: name));
+    return _writeText(
+      (TextTarget.subtask, id),
+      name,
+      () => _patchSub(id, SubtaskPatch(title: name)),
+      serverText: () => _sub(id)?.title,
+    );
+  }
+
+  /// Tek metinli düzenleme (not içeriği, alt görev adı): metin [key] altında state'te tutulur;
+  /// başarıda düşer. 409 `work.edit_conflict`'te kayıt yeniden okunmuştur: sunucudaki metin
+  /// [WriteOutcome.serverText] ile döner, iki seçenekli karar sunumdadır.
+  Future<WriteOutcome> _writeText(
+    TextDraftKey key,
+    String text,
+    Future<WriteOutcome> Function() write, {
+    required String? Function() serverText,
+  }) async {
+    state = state.copyWith(textDrafts: {...state.textDrafts, key: text});
+    final r = await write();
+    if (!ref.mounted) return r;
+    if (r.ok) discardTextDraft(key);
+    if (r.error?.code == _editConflict) {
+      return WriteOutcome(WriteKind.conflict, r.error, serverText());
+    }
+    return r;
   }
 
   /// Ad düzenlemesini bitirir; ad boşsa alt görevi atar (örnek katalog).
@@ -1183,7 +1476,12 @@ class TaskDetailController extends _$TaskDetailController {
       return WriteOutcome.done;
     }
     if (!permissions.canAddNote) return WriteOutcome.invalid;
-    final r = await _write(() => _writes.addNote(t, text), list: false);
+    final r = await _writeKeyed(
+      _note,
+      text,
+      (key) => _writes.addNote(t, text, requestKey: key),
+      list: false,
+    );
     if (r.ok && ref.mounted) state = state.copyWith(noteDraft: '');
     return r;
   }
@@ -1198,8 +1496,31 @@ class TaskDetailController extends _$TaskDetailController {
     }
     if (v == note.text) return WriteOutcome.unchanged;
     if (!permissions.canEditNote(note)) return WriteOutcome.invalid;
-    return _write(() => _writes.updateNote(t, id, v), list: false);
+    final rev = note.editRevision;
+    if (rev == null) return _rejected(ClientErrorCode.serverOutdated);
+    return _writeText(
+      (TextTarget.note, id),
+      v,
+      () => _write(
+        () => _writes.updateNote(t, id, v, expectedRevision: rev),
+        list: false,
+      ),
+      serverText: () =>
+          _task?.noteEntries.where((n) => n.id == id).firstOrNull?.text,
+    );
   }
+
+  /// Notun gönderilemeyen düzenleme metni (yoksa null).
+  String? noteEditDraft(TaskNote note) =>
+      state.textDrafts[(TextTarget.note, note.id ?? '')];
+
+  /// Alt görevin gönderilemeyen yeni adı (yoksa null).
+  String? subtaskRenameDraft(String id) =>
+      state.textDrafts[(TextTarget.subtask, id)];
+
+  /// Metin taslağını bırakır (kullanıcı sunucudaki metni seçti ya da vazgeçti).
+  void discardTextDraft(TextDraftKey key) =>
+      state = state.copyWith(textDrafts: {...state.textDrafts}..remove(key));
 
   /// Notu siler (yalnız yazarı; yalnız sunucu notu).
   Future<WriteOutcome> deleteNote(TaskNote note) async {

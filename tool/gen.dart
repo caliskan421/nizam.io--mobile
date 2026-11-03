@@ -27,6 +27,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import 'gen/emit.dart';
+import 'gen/inline_names.dart';
 import 'gen/response_headers.dart';
 import 'gen/sensitive.dart';
 import 'gen/sources.dart';
@@ -138,8 +139,12 @@ Future<void> main(List<String> args) async {
   // 1) swagger_parser — freezed modeller + retrofit istemciler.
   final work = Directory(p.join(root, '.dart_tool', 'nizamio_gen'))
     ..createSync(recursive: true);
+  final (parserSpec, hoisted) = hoistCollidingInlineObjects(specText);
+  for (final h in hoisted) {
+    stdout.writeln('gen: satır içi nesne bileşene taşındı (ad çakışması): $h');
+  }
   final specFile = File(p.join(work.path, 'openapi.yaml'))
-    ..writeAsStringSync(specText);
+    ..writeAsStringSync(parserSpec);
   final apiOut = Directory(p.join(root, 'lib/core/api/generated'));
   if (apiOut.existsSync()) apiOut.deleteSync(recursive: true);
   final config = File(p.join(work.path, 'swagger_parser.yaml'))

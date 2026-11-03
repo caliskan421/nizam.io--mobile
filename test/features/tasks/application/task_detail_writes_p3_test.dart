@@ -49,6 +49,10 @@ Map<String, Object?> _item(
   'days_early': 0,
   'completion_evidence_required': evidence,
   'subtask_counts': {'total': 0, 'done': 0},
+  'edit_revision': 1,
+  'dates_revision': 1,
+  'created_at': '2026-10-01T08:00:00Z',
+  'created_by_account_id': 'acc-1',
 };
 
 Map<String, Object?> _file(String id, String by) => {
@@ -282,6 +286,7 @@ void main() {
       expect(patch.body, {
         'priority': 'acil',
         'completion_evidence_required': false,
+        'expected_revision': 1,
       });
       expect(patch.header('X-Nizamio-Department'), 'd1');
       expect(_only(h, 'POST', '/v1/work-items/w1/assignments').body, {
@@ -325,6 +330,7 @@ void main() {
         expect((await ctl.submitEdit()).kind, WriteKind.done);
         expect(_only(h, 'PATCH', '/v1/work-items/w1').body, {
           'title': 'Yeni ad',
+          'expected_revision': 1,
         });
         expect(_log(h).where((l) => l.contains('assignments')), isEmpty);
       },
@@ -370,6 +376,7 @@ void main() {
       expect((await ctl.setPriority(TaskPriority.high)).ok, isTrue);
       expect(_only(h, 'PATCH', '/v1/work-items/w1').body, {
         'priority': 'yuksek',
+        'expected_revision': 1,
       });
       expect(_log(h).where((l) => l == 'GET /v1/work-items/w1'), hasLength(1));
       expect(_log(h), isNot(contains('GET /v1/program/work-items')));
@@ -848,6 +855,8 @@ void main() {
       (403, 'work.not_authorized'),
       (409, 'platform.conflict_retry'),
     ]) {
+      // conflict_retry (F60, ADR-0027): aynı anahtarla tek otomatik tekrar; sonra tekrar yok.
+      final sends = code == 'platform.conflict_retry' ? 2 : 1;
       test(
         'yeni görev $status → katalog + rol olguları okunur, tekrar yok',
         () async {
@@ -862,7 +871,7 @@ void main() {
           final f = c.read(newTaskFormControllerProvider);
           expect(f.failure!.code, code);
           expect(f.title, 'X', reason: 'taslak korunur');
-          expect(h.backend.count('POST', '/v1/work-items'), 1);
+          expect(h.backend.count('POST', '/v1/work-items'), sends);
           final log = _log(h);
           expect(
             log.indexOf('GET /v1/me'),
@@ -907,6 +916,7 @@ void main() {
         expect(log.first, 'PATCH /v1/work-items/w1');
         expect((_only(h, 'PATCH', '/v1/work-items/w1').body! as Map).keys, [
           'end_on',
+          'expected_dates_revision',
         ]);
         expect(log, contains('GET /v1/program/work-items'));
         expect(log, contains('GET /v1/work-items/w1'));

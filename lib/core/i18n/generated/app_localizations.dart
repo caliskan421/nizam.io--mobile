@@ -196,6 +196,18 @@ abstract class AppLocalizations {
   /// **'Görüşme bildirimi doğrulanamadı.'**
   String get errCollaborationConferenceWebhookUnauthorized;
 
+  /// collaboration.edit_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Not siz düzenlerken başkası tarafından değiştirildi; güncel hâlini görüp yeniden deneyin.'**
+  String get errCollaborationEditConflict;
+
+  /// collaboration.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu istek anahtarı farklı bir istekle kullanılmış.'**
+  String get errCollaborationIdempotencyKeyReused;
+
   /// collaboration.input_invalid
   ///
   /// In tr, this message translates to:
@@ -214,18 +226,6 @@ abstract class AppLocalizations {
   /// **'Toplantı bulunamadı.'**
   String get errCollaborationMeetingNotFound;
 
-  /// collaboration.message_not_found
-  ///
-  /// In tr, this message translates to:
-  /// **'Mesaj bulunamadı.'**
-  String get errCollaborationMessageNotFound;
-
-  /// collaboration.message_unread
-  ///
-  /// In tr, this message translates to:
-  /// **'Mesaj henüz okunmadı.'**
-  String get errCollaborationMessageUnread;
-
   /// collaboration.not_authorized
   ///
   /// In tr, this message translates to:
@@ -243,6 +243,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Not zaten göreve dönüştürüldü.'**
   String get errCollaborationNoteConverted;
+
+  /// collaboration.note_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Not silinmiş; işlem yapılamaz.'**
+  String get errCollaborationNoteDeleted;
 
   /// collaboration.note_immutable
   ///
@@ -267,6 +273,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kalıcı silme için kayıt önce silinmiş olmalı.'**
   String get errCollaborationPermanentRequiresDeleted;
+
+  /// collaboration.request_key_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı geçersiz.'**
+  String get errCollaborationRequestKeyInvalid;
+
+  /// collaboration.request_key_required
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı gerekli.'**
+  String get errCollaborationRequestKeyRequired;
+
+  /// collaboration.revision_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme sürümü geçersiz; kaydı yenileyip yeniden deneyin.'**
+  String get errCollaborationRevisionInvalid;
+
+  /// collaboration.revision_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme sürümü gerekli; uygulamayı güncelleyin.'**
+  String get errCollaborationRevisionRequired;
 
   /// collaboration.scope_invalid
   ///
@@ -441,6 +471,132 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Parola yeterince güçlü değil.'**
   String get errIdentityWeakPassword;
+
+  /// messaging.chat_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Sohbet silinmiş; işlem yapılamaz.'**
+  String get errMessagingChatDeleted;
+
+  /// messaging.chat_not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Sohbet bulunamadı.'**
+  String get errMessagingChatNotFound;
+
+  /// messaging.edit_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj siz düzenlerken değiştirildi; güncel hâlini görüp yeniden deneyin.'**
+  String get errMessagingEditConflict;
+
+  /// messaging.file_rejected
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya kabul edilmedi.'**
+  String get errMessagingFileRejected;
+
+  /// messaging.file_too_large
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya çok büyük.'**
+  String get errMessagingFileTooLarge;
+
+  /// messaging.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu istek anahtarı farklı bir istekle kullanılmış.'**
+  String get errMessagingIdempotencyKeyReused;
+
+  /// messaging.input_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Girilen bilgiler geçersiz.'**
+  String get errMessagingInputInvalid;
+
+  /// messaging.invalid_cursor
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste konumu geçersiz; listeyi yenileyin.'**
+  String get errMessagingInvalidCursor;
+
+  /// messaging.member_not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye bulunamadı.'**
+  String get errMessagingMemberNotFound;
+
+  /// messaging.member_source_managed
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu üye grubun kaynağından gelir; elle çıkarılamaz.'**
+  String get errMessagingMemberSourceManaged;
+
+  /// messaging.message_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj silinmiş; işlem yapılamaz.'**
+  String get errMessagingMessageDeleted;
+
+  /// messaging.message_not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj bulunamadı.'**
+  String get errMessagingMessageNotFound;
+
+  /// messaging.not_authorized
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem için yetkiniz yok.'**
+  String get errMessagingNotAuthorized;
+
+  /// messaging.poll_closed
+  ///
+  /// In tr, this message translates to:
+  /// **'Anket kapandı.'**
+  String get errMessagingPollClosed;
+
+  /// messaging.ref_not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu öğe artık yok ya da erişiminiz yok.'**
+  String get errMessagingRefNotFound;
+
+  /// messaging.request_key_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı geçersiz.'**
+  String get errMessagingRequestKeyInvalid;
+
+  /// messaging.request_key_required
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı gerekli.'**
+  String get errMessagingRequestKeyRequired;
+
+  /// messaging.revision_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme sürümü geçersiz; mesajı yenileyip yeniden deneyin.'**
+  String get errMessagingRevisionInvalid;
+
+  /// messaging.revision_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme sürümü gerekli; uygulamayı güncelleyin.'**
+  String get errMessagingRevisionRequired;
+
+  /// messaging.scope_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili kapsam bu işlem için geçersiz.'**
+  String get errMessagingScopeInvalid;
+
+  /// messaging.task_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev silinmiş; işlem yapılamaz.'**
+  String get errMessagingTaskDeleted;
 
   /// notifications.input_invalid
   ///
@@ -928,6 +1084,12 @@ abstract class AppLocalizations {
   /// **'Dosya bulunamadı.'**
   String get errRecordsFileNotFound;
 
+  /// records.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu istek anahtarı farklı bir istekle kullanılmış.'**
+  String get errRecordsIdempotencyKeyReused;
+
   /// records.input_invalid
   ///
   /// In tr, this message translates to:
@@ -969,6 +1131,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu işlem için yetkiniz yok.'**
   String get errRecordsNotAuthorized;
+
+  /// records.request_key_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı geçersiz.'**
+  String get errRecordsRequestKeyInvalid;
+
+  /// records.request_key_required
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı gerekli.'**
+  String get errRecordsRequestKeyRequired;
 
   /// records.tag_invalid
   ///
@@ -1168,11 +1342,23 @@ abstract class AppLocalizations {
   /// **'Bağımlı olunan görev henüz tamamlanmadı.'**
   String get errWorkDependencyNotCompleted;
 
+  /// work.edit_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev siz düzenlerken başkası tarafından değiştirildi; güncel hâlini görüp yeniden deneyin.'**
+  String get errWorkEditConflict;
+
   /// work.extend_days_out_of_range
   ///
   /// In tr, this message translates to:
   /// **'Uzatma gün sayısı izin verilen aralıkta değil.'**
   String get errWorkExtendDaysOutOfRange;
+
+  /// work.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu istek anahtarı farklı bir istekle kullanılmış.'**
+  String get errWorkIdempotencyKeyReused;
 
   /// work.input_invalid
   ///
@@ -1191,6 +1377,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Görev zaten tamamlandı.'**
   String get errWorkItemCompleted;
+
+  /// work.item_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev silinmiş; işlem yapılamaz.'**
+  String get errWorkItemDeleted;
 
   /// work.item_not_completed
   ///
@@ -1258,11 +1450,35 @@ abstract class AppLocalizations {
   /// **'Bu alan değiştirilemez.'**
   String get errWorkProtectedField;
 
+  /// work.request_key_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı geçersiz.'**
+  String get errWorkRequestKeyInvalid;
+
+  /// work.request_key_required
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı gerekli.'**
+  String get errWorkRequestKeyRequired;
+
   /// work.revert_reason_required
   ///
   /// In tr, this message translates to:
   /// **'Geri alma için gerekçe gerekli.'**
   String get errWorkRevertReasonRequired;
+
+  /// work.revision_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme sürümü geçersiz; görevi yenileyip yeniden deneyin.'**
+  String get errWorkRevisionInvalid;
+
+  /// work.revision_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme sürümü gerekli; uygulamayı güncelleyin.'**
+  String get errWorkRevisionRequired;
 
   /// work.stale_completion
   ///
@@ -1342,11 +1558,23 @@ abstract class AppLocalizations {
   /// **'Bu işlem için giriş yapılmalı.'**
   String get errClientNotSignedIn;
 
+  /// client.outcome_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Gönderildi mi bilinmiyor. Aynı isteği yeniden deneyin; kayıt iki kez oluşmaz.'**
+  String get errClientOutcomeUnknown;
+
   /// client.reauth_required
   ///
   /// In tr, this message translates to:
   /// **'Oturum doğrulanamadı. Güvenliğiniz için yeniden giriş yapın.'**
   String get errClientReauthRequired;
+
+  /// client.request_not_resent
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek tekrar gönderilemedi; işlemi yeniden başlatın.'**
+  String get errClientRequestNotResent;
 
   /// client.scope_changed
   ///
@@ -1371,6 +1599,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Önce sunucu adresi doğrulanmalı.'**
   String get errClientServerNotVerified;
+
+  /// client.server_outdated
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucu bu uygulama sürümü için güncellenmeli; değişiklik gönderilmedi.'**
+  String get errClientServerOutdated;
 
   /// client.server_unrecognized
   ///
@@ -4579,7 +4813,7 @@ abstract class AppLocalizations {
   /// ui.router.assistant_soon
   ///
   /// In tr, this message translates to:
-  /// **'Asistan sonraki adımda eklenecek'**
+  /// **'Asistan mobilde sonraki adımda eklenecek'**
   String get uiRouterAssistantSoon;
 
   /// ui.router.tab_history
@@ -4612,6 +4846,18 @@ abstract class AppLocalizations {
   /// **'Mesajlar'**
   String get uiRouterTabMessages;
 
+  /// ui.router.assistant_soon_tablet
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistan tablette sonraki adımda tasarlanacak'**
+  String get uiRouterAssistantSoonTablet;
+
+  /// ui.router.all_modules
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm modüller'**
+  String get uiRouterAllModules;
+
   /// ui.router.pick_title
   ///
   /// In tr, this message translates to:
@@ -4623,12 +4869,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Soldaki listeden bir kayıt seç, ayrıntısı burada açılır.'**
   String get uiRouterPickBody;
-
-  /// ui.router.all_modules
-  ///
-  /// In tr, this message translates to:
-  /// **'Tüm modüller'**
-  String get uiRouterAllModules;
 
   /// ui.scope.title
   ///
@@ -6669,6 +6909,96 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Seçili departman artık bu programda yok; süzgeç temizlendi.'**
   String get uiTasksDepartmentFilterCleared;
+
+  /// ui.tasks.conflict_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev siz düzenlerken değişti'**
+  String get uiTasksConflictTitle;
+
+  /// ui.tasks.conflict_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı alanı başkası da değiştirdi. Her alan için hangi değerin kalacağını seçin; diğer alanlar korunur.'**
+  String get uiTasksConflictDesc;
+
+  /// ui.tasks.conflict_base
+  ///
+  /// In tr, this message translates to:
+  /// **'Açtığınızda'**
+  String get uiTasksConflictBase;
+
+  /// ui.tasks.conflict_mine
+  ///
+  /// In tr, this message translates to:
+  /// **'Sizin değeriniz'**
+  String get uiTasksConflictMine;
+
+  /// ui.tasks.conflict_server
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucudaki değer'**
+  String get uiTasksConflictServer;
+
+  /// ui.tasks.conflict_keep_mine
+  ///
+  /// In tr, this message translates to:
+  /// **'Benimkini tut'**
+  String get uiTasksConflictKeepMine;
+
+  /// ui.tasks.conflict_take_server
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucudakini al'**
+  String get uiTasksConflictTakeServer;
+
+  /// ui.tasks.conflict_pending
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydetmeden önce işaretli alanlar için seçim yapın'**
+  String get uiTasksConflictPending;
+
+  /// ui.tasks.text_conflict_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Metin siz düzenlerken değişti'**
+  String get uiTasksTextConflictTitle;
+
+  /// ui.tasks.text_conflict_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucudaki metin sizinkinden farklı. Hangisi kalsın?'**
+  String get uiTasksTextConflictDesc;
+
+  /// ui.tasks.retry_after_head
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeniden denemek için'**
+  String get uiTasksRetryAfterHead;
+
+  /// ui.tasks.retry_after_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'sn bekleyin'**
+  String get uiTasksRetryAfterTail;
+
+  /// ui.tasks.empty_value
+  ///
+  /// In tr, this message translates to:
+  /// **'—'**
+  String get uiTasksEmptyValue;
+
+  /// ui.tasks.conflict_on
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık'**
+  String get uiTasksConflictOn;
+
+  /// ui.tasks.conflict_off
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapalı'**
+  String get uiTasksConflictOff;
 
   /// ui.timeline.title
   ///

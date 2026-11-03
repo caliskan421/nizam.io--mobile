@@ -86,10 +86,15 @@ final class Subtask {
     this.assigneeRequired = false,
     this.doneBy,
     this.createdBy,
+    this.editRevision,
   });
 
   final String id;
   final String title;
+
+  /// Düzenleme sürümü (`edit_revision`, ADR-0027): başlık/atanan/tarih değişikliği bunu
+  /// `expected_revision` olarak geri gönderir. Örnek veride null.
+  final int? editRevision;
   final bool done;
   final String? assignee;
 
@@ -125,6 +130,7 @@ final class Subtask {
     assigneeRequired: assigneeRequired,
     doneBy: doneBy,
     createdBy: createdBy,
+    editRevision: editRevision,
   );
 }
 
@@ -255,10 +261,15 @@ final class TaskNote {
     required this.text,
     this.updatedAt,
     this.inMemory = false,
+    this.editRevision,
   });
 
   /// Not kimliği (düzenleme/silme bununla). Örnek veride yok.
   final String? id;
+
+  /// İçeriğin düzenleme sürümü (`edit_revision`, ADR-0027); düzenleme `expected_revision`
+  /// olarak geri gönderir. Örnek veride null.
+  final int? editRevision;
 
   /// Notun görevi. Örnek veride yok.
   final String? workItemId;
@@ -398,6 +409,8 @@ final class TaskItem {
     this.noteEntries = const [],
     this.evidenceRequired = false,
     this.subtaskCounts,
+    this.editRevision,
+    this.datesRevision,
   }) : id = id ?? code;
 
   /// Görev kodu (`ALT-7`); rota kimliği. Sunucuda insan okunur görev anahtarı yok (backend
@@ -484,6 +497,14 @@ final class TaskItem {
   /// listede ilerleme için. null → kaynak taşımaz (örnek veri; [subtasks] sayılır).
   final ({int total, int done})? subtaskCounts;
 
+  /// Alan grubunun (başlık, açıklama, öncelik, kanıt bayrağı) düzenleme sürümü (`edit_revision`,
+  /// ADR-0027). Örnek veride null; sunucu kaleminde null ise sunucu sürümlü yazmayı
+  /// desteklemiyordur (eski backend) ve yazma gönderilmez.
+  final int? editRevision;
+
+  /// Tarih grubunun (başlangıç, bitiş, planlanan bitiş) düzenleme sürümü (`dates_revision`).
+  final int? datesRevision;
+
   bool get isOverdue => overdueDays > 0;
   bool get isDone => status == TaskStatus.done;
   bool get hasPendingRequest => dateRequest?.isPending ?? false;
@@ -542,6 +563,8 @@ final class TaskItem {
     noteEntries: noteEntries ?? this.noteEntries,
     evidenceRequired: evidenceRequired ?? this.evidenceRequired,
     subtaskCounts: subtaskCounts,
+    editRevision: editRevision,
+    datesRevision: datesRevision,
   );
 }
 

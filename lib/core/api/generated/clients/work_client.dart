@@ -29,6 +29,7 @@ import '../models/transition_request.dart';
 import '../models/transition_result.dart';
 import '../models/update_subtask_request.dart';
 import '../models/update_work_item_request.dart';
+import '../models/update_work_note_request.dart';
 import '../models/work_item.dart';
 import '../models/work_item_dates.dart';
 import '../models/work_item_detail.dart';
@@ -40,6 +41,7 @@ import '../models/work_item_purge_result.dart';
 import '../models/work_item_subtask.dart';
 import '../models/work_item_subtask_list.dart';
 import '../models/work_note_request.dart';
+import '../models/work_note_updated.dart';
 
 part 'work_client.g.dart';
 
@@ -362,7 +364,11 @@ abstract class WorkClient {
   ///
   /// Görev listesinin program bağlamındaki ucudur (WORK-K81). Satır biçimi.
   /// `listWorkItems` ile aynıdır (`WorkItemList`: tarihler, adlı atananlar, gecikme.
-  /// etiketleri, `subtask_counts`); toplam ya da sayaç eklenmez.
+  /// etiketleri, `subtask_counts`, `pending_date_request`); toplam ya da sayaç eklenmez.
+  /// Bekleyen tarih talebi satır başına yetkiyle dolar (yönetici her satırda,.
+  /// koordinatör kendi departmanının satırında; üye satırında `null`; kural tekil.
+  /// görev uçlarıyla aynıdır) ve listeyle aynı sorguda okunur; departman başına ek.
+  /// istek gerekmez.
   ///
   /// Görünürlük çağıranın **bu programdaki** ekip satırlarından sunucuda, tek sorguda.
   /// hesaplanır: şirket yöneticisi programın bütün görevlerini, koordinatör koordinatörü.
@@ -386,7 +392,7 @@ abstract class WorkClient {
   ///
   /// [departmentId] - İsteğe bağlı departman süzgeci; görünürlükle kesişir. Boş ya da yalnız boşluk değer süzgeç yok sayılır.
   ///
-  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
+  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration ve messaging 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` / `messaging.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
   ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/program/work-items')
@@ -399,8 +405,11 @@ abstract class WorkClient {
   });
 
   /// Görev açar (tarihler `YYYY-MM-DD`).
+  ///
+  /// [idempotencyKey] - İstemcinin ürettiği opak işlem anahtarı (en az 128 bit; ör. base64url 22 karakter; ADR-0027). Uzunluk baştaki/sondaki boşluk kırpıldıktan sonra bayt olarak 22–200'dür. Eksik ya da sınır dışı anahtar 422; program aktarımında `program.transfer_input_invalid`, oluşturma uçlarında modülün `<mod>.input_invalid` zarfı (alan `idempotency_key`, kod `<mod>.request_key_required` / `<mod>.request_key_invalid`). Aynı anahtar + aynı istek ilk sonucu döndürür (oluşturmada 200 + kaynağın bugünkü temsili, güncel görme yetkisiyle); farklı istek 409 `<mod>.idempotency_key_reused`. Anahtar aktör + uç tablosu kapsamındadır; sunucu kaynağı yaşadıkça tutar (kalıcı silinen kaynakta anahtar da gider).
   @POST('/v1/work-items')
   Future<WorkItem> createWorkItem({
+    @Header('Idempotency-Key') required String idempotencyKey,
     @Body() required CreateWorkItemRequest body,
     @Extras()
     Map<String, dynamic>? extras = WorkClient.createWorkItemOpenapiExtras,
@@ -408,7 +417,10 @@ abstract class WorkClient {
 
   /// Kapsamdaki görevler (imleçli).
   ///
-  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
+  /// Satırdaki `pending_date_request` yöneticiye ve bu departmanın koordinatörüne.
+  /// dolar; üyede her satırda `null` (WORK-K82; tekil görev uçlarıyla aynı kural).
+  ///
+  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration ve messaging 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` / `messaging.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
   ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/work-items')
@@ -510,9 +522,12 @@ abstract class WorkClient {
   });
 
   /// Göreve not ekler (hesap başına hız sınırı).
+  ///
+  /// [idempotencyKey] - İstemcinin ürettiği opak işlem anahtarı (en az 128 bit; ör. base64url 22 karakter; ADR-0027). Uzunluk baştaki/sondaki boşluk kırpıldıktan sonra bayt olarak 22–200'dür. Eksik ya da sınır dışı anahtar 422; program aktarımında `program.transfer_input_invalid`, oluşturma uçlarında modülün `<mod>.input_invalid` zarfı (alan `idempotency_key`, kod `<mod>.request_key_required` / `<mod>.request_key_invalid`). Aynı anahtar + aynı istek ilk sonucu döndürür (oluşturmada 200 + kaynağın bugünkü temsili, güncel görme yetkisiyle); farklı istek 409 `<mod>.idempotency_key_reused`. Anahtar aktör + uç tablosu kapsamındadır; sunucu kaynağı yaşadıkça tutar (kalıcı silinen kaynakta anahtar da gider).
   @POST('/v1/work-items/{id}/notes')
   Future<WorkItemNote> addWorkItemNote({
     @Path('id') required String id,
+    @Header('Idempotency-Key') required String idempotencyKey,
     @Body() required WorkNoteRequest body,
     @Extras()
     Map<String, dynamic>? extras = WorkClient.addWorkItemNoteOpenapiExtras,
@@ -528,10 +543,10 @@ abstract class WorkClient {
 
   /// Kendi notunu günceller.
   @PATCH('/v1/work-items/{id}/notes/{noteId}')
-  Future<StatusResult> updateWorkItemNote({
+  Future<WorkNoteUpdated> updateWorkItemNote({
     @Path('id') required String id,
     @Path('noteId') required String noteId,
-    @Body() required WorkNoteRequest body,
+    @Body() required UpdateWorkNoteRequest body,
     @Extras()
     Map<String, dynamic>? extras = WorkClient.updateWorkItemNoteOpenapiExtras,
   });
@@ -554,9 +569,12 @@ abstract class WorkClient {
   });
 
   /// Göreve alt görev ekler (koordinatör, şirket yöneticisi; görev başına en çok 50).
+  ///
+  /// [idempotencyKey] - İstemcinin ürettiği opak işlem anahtarı (en az 128 bit; ör. base64url 22 karakter; ADR-0027). Uzunluk baştaki/sondaki boşluk kırpıldıktan sonra bayt olarak 22–200'dür. Eksik ya da sınır dışı anahtar 422; program aktarımında `program.transfer_input_invalid`, oluşturma uçlarında modülün `<mod>.input_invalid` zarfı (alan `idempotency_key`, kod `<mod>.request_key_required` / `<mod>.request_key_invalid`). Aynı anahtar + aynı istek ilk sonucu döndürür (oluşturmada 200 + kaynağın bugünkü temsili, güncel görme yetkisiyle); farklı istek 409 `<mod>.idempotency_key_reused`. Anahtar aktör + uç tablosu kapsamındadır; sunucu kaynağı yaşadıkça tutar (kalıcı silinen kaynakta anahtar da gider).
   @POST('/v1/work-items/{id}/subtasks')
   Future<WorkItemSubtask> createWorkItemSubtask({
     @Path('id') required String id,
+    @Header('Idempotency-Key') required String idempotencyKey,
     @Body() required CreateSubtaskRequest body,
     @Extras()
     Map<String, dynamic>? extras =
@@ -717,7 +735,7 @@ abstract class WorkClient {
 
   /// Silinmiş görevler (imleçli; korunan ek sayısıyla).
   ///
-  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
+  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration ve messaging 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` / `messaging.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
   ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/admin/deleted/work-items')

@@ -37,6 +37,7 @@ class ApiRecordsRepository implements RecordsRepository {
     required String workItemId,
     required RecordTag tag,
     required String filePath,
+    required String requestKey,
   }) async {
     final wire = _tagOut(tag);
     final name = filePath.split(RegExp(r'[/\\]')).last;
@@ -56,6 +57,7 @@ class ApiRecordsRepository implements RecordsRepository {
             filePath: filePath,
             filename: name,
             contentType: type,
+            requestKey: requestKey,
           ),
           api.FileRecord.fromJson,
         ),

@@ -57,6 +57,21 @@ class ApiError implements Exception {
       'ApiError($code${status == null ? '' : ', $status'}${requestId == null ? '' : ', request_id=$requestId'})';
 }
 
+/// Yazma isteğinin sonucu bilinmiyor mu (istemci akışları §8 "sonuç bilinmiyor"): zaman aşımı,
+/// ağ kopması ya da 5xx — istek sunucuda işlenmiş olabilir. Çağıran "başarısız, yeniden oluştur"
+/// demez; aynı isteği AYNI işlem anahtarıyla yeniden dener (kullanıcı eylemiyle).
+bool isOutcomeUnknown(ApiError e) =>
+    e.code == ClientErrorCode.timeout ||
+    e.code == ClientErrorCode.networkError ||
+    (e.status ?? 0) >= 500;
+
+/// Aynı işlem anahtarı başka gövdeyle kullanılmış (`<mod>.idempotency_key_reused`, 409):
+/// istemci hatasıdır; otomatik tekrar edilmez, sonraki gönderim yeni eylemdir.
+bool isKeyReused(ApiError e) => e.code.endsWith('.idempotency_key_reused');
+
+/// Nadir yarış (`platform.conflict_retry`): aynı anahtarla bir kez yeniden denenir.
+const conflictRetryCode = 'platform.conflict_retry';
+
 /// Dio hatasını [ApiError]'a çevirir. TLS hatası AYRI koddur ve asla ağ hatasına
 /// indirgenmez/yutulmaz (ADR-0008, K-11).
 ApiError toApiError(Object error) {

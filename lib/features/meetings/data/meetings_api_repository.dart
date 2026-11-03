@@ -16,6 +16,7 @@ import '../../../core/api/generated/models/meeting_side_effects.dart' as api;
 import '../../../core/api/generated/models/note_request.dart';
 import '../../../core/api/generated/models/participant.dart' as api;
 import '../../../core/api/generated/models/participant_request.dart';
+import '../../../core/api/generated/models/revise_meeting_note_request.dart';
 import '../../../core/api/generated/models/update_agenda_item_request.dart';
 import '../../../core/api/generated/models/update_meeting_request.dart';
 import '../../../core/domain/enum_parse.dart';
@@ -225,10 +226,15 @@ class ApiMeetingsRepository implements MeetingsRepository {
       apiCall(() => _client.deleteAgendaItem(itemId: itemId));
 
   @override
-  Future<MeetingNote> addNote(String meetingId, String content) async => _note(
+  Future<MeetingNote> addNote(
+    String meetingId,
+    String content, {
+    required String requestKey,
+  }) async => _note(
     await apiCall(
       () => _client.addMeetingNote(
         id: meetingId,
+        idempotencyKey: requestKey,
         body: NoteRequest(content: content),
       ),
     ),
@@ -249,11 +255,18 @@ class ApiMeetingsRepository implements MeetingsRepository {
   );
 
   @override
-  Future<MeetingNote> updateNote(String noteId, String content) async => _note(
+  Future<MeetingNote> updateNote(
+    String noteId,
+    String content, {
+    required int expectedRevision,
+  }) async => _note(
     await apiCall(
       () => _client.updateMeetingNote(
         noteId: noteId,
-        body: NoteRequest(content: content),
+        body: ReviseMeetingNoteRequest(
+          content: content,
+          expectedRevision: expectedRevision,
+        ),
       ),
     ),
   );
@@ -413,6 +426,7 @@ class ApiMeetingsRepository implements MeetingsRepository {
     convertedToWorkItemId: r.convertedToWorkItemId,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
+    editRevision: r.editRevision,
   );
 
   static MeetingSideEffects _effects(api.MeetingSideEffects r) =>

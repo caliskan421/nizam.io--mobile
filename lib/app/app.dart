@@ -9,12 +9,14 @@ import '../core/providers.dart';
 import '../core/security/privacy_mask.dart';
 import '../core/ui/page/nz_app_nav.dart';
 import '../core/ui/theme/app_theme.dart';
+import 'foreground_refresh.dart';
 import 'orientation_policy.dart';
 import 'router/app_nav.dart';
 import 'router/router.dart';
 
-/// Minimal kabuk: tema token'ları, TR yerelleştirme, durum makinesinden türetilen router ve
-/// arka plan maskesi. Ekran yoktur (D-0174).
+/// Minimal kabuk: tema token'ları, TR yerelleştirme, durum makinesinden türetilen router,
+/// arka plan maskesi ve ön plana dönüşte görev verisi tazelemesi (F60 V10). Ekran yoktur
+/// (D-0174).
 class NizamioApp extends ConsumerStatefulWidget {
   const NizamioApp({super.key});
 
@@ -61,9 +63,11 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
       builder: (context, child) => OrientationPolicyHost(
         child: NzAppNavScope(
           nav: _nav,
-          child: PrivacyMask(
-            controller: _mask,
-            child: child ?? const SizedBox.shrink(),
+          child: ForegroundRefresh(
+            child: PrivacyMask(
+              controller: _mask,
+              child: child ?? const SizedBox.shrink(),
+            ),
           ),
         ),
       ),

@@ -113,20 +113,31 @@ final class TaskWriteSource implements TaskWriteRepository {
   );
 
   @override
-  Future<void> addNote(TaskItem task, String text) async =>
-      _s.addNote(task, text);
+  Future<void> addNote(
+    TaskItem task,
+    String text, {
+    required String requestKey,
+  }) async => _s.addNote(task, text, requestKey: requestKey);
 
   @override
-  Future<void> updateNote(TaskItem task, String noteId, String text) async =>
-      _s.updateNote(task, noteId, text);
+  Future<void> updateNote(
+    TaskItem task,
+    String noteId,
+    String text, {
+    required int expectedRevision,
+  }) async =>
+      _s.updateNote(task, noteId, text, expectedRevision: expectedRevision);
 
   @override
   Future<void> deleteNote(TaskItem task, String noteId) async =>
       _s.deleteNote(task, noteId);
 
   @override
-  Future<void> createSubtask(TaskItem task, String title) async =>
-      _s.createSubtask(task, title);
+  Future<void> createSubtask(
+    TaskItem task,
+    String title, {
+    required String requestKey,
+  }) async => _s.createSubtask(task, title, requestKey: requestKey);
 
   @override
   Future<void> updateSubtask(
@@ -140,8 +151,10 @@ final class TaskWriteSource implements TaskWriteRepository {
       _s.deleteSubtask(task, subtaskId);
 
   @override
-  Future<String> createWorkItem(WorkItemDraft draft) async =>
-      _s.createWorkItem(draft);
+  Future<String> createWorkItem(
+    WorkItemDraft draft, {
+    required String requestKey,
+  }) async => _s.createWorkItem(draft, requestKey: requestKey);
 
   @override
   Future<void> updateWorkItem(TaskItem task, WorkItemPatch patch) async =>
@@ -192,7 +205,14 @@ final class TaskWriteSource implements TaskWriteRepository {
     UploadSource file,
     EvidenceTag tag, {
     String? subtaskId,
-  }) async => _s.attachFile(task, file, tag, subtaskId: subtaskId);
+    required String requestKey,
+  }) async => _s.attachFile(
+    task,
+    file,
+    tag,
+    subtaskId: subtaskId,
+    requestKey: requestKey,
+  );
 
   @override
   Future<void> renameFile(TaskItem task, String fileId, String name) async =>

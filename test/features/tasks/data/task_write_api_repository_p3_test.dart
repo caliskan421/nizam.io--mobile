@@ -25,6 +25,8 @@ TaskItem _task() => TaskItem(
   due: DateTime(2026, 9, 20),
   assignees: const ['u2'],
   evidenceRequired: true,
+  editRevision: 4,
+  datesRevision: 7,
 );
 
 const _item = {
@@ -48,6 +50,10 @@ const _item = {
   'days_early': 0,
   'completion_evidence_required': true,
   'subtask_counts': {'total': 0, 'done': 0},
+  'edit_revision': 1,
+  'dates_revision': 1,
+  'created_at': '2026-10-01T08:00:00Z',
+  'created_by_account_id': 'acc-1',
 };
 
 void main() {
@@ -63,8 +69,10 @@ void main() {
         priority: TaskPriority.urgent,
         assignee: 'u2',
       ),
+      requestKey: 'k-0123456789abcdefghij',
     );
     expect(id, 'w-new');
+    expect(a.last.headers['Idempotency-Key'], 'k-0123456789abcdefghij');
     expect('${a.last.method} ${a.last.path}', 'POST /v1/work-items');
     expect(a.sentJson, {
       'title': 'Yeni',
@@ -88,6 +96,7 @@ void main() {
         end: DateTime(2026, 11, 2),
         evidenceRequired: false,
       ),
+      requestKey: 'k-0123456789abcdefghij',
     );
     expect(a.sentJson, {
       'title': 'Yeni',
@@ -110,10 +119,13 @@ void main() {
     final (dio, a) = fakeDio(_item);
     await ApiTaskWriteRepository(dio).updateWorkItem(t, patch);
     expect('${a.last.method} ${a.last.path}', 'PATCH /v1/work-items/w1');
+    // Alan grubu sürümü expected_revision, tarih grubu expected_dates_revision (ADR-0027).
     expect(a.sentJson, {
       'priority': 'yuksek',
       'end_on': '2026-09-25',
       'completion_evidence_required': false,
+      'expected_revision': 4,
+      'expected_dates_revision': 7,
     });
     expect(a.last.extra.values, contains('d9'));
     expect(
@@ -255,10 +267,12 @@ void main() {
         UploadSource(path: file.path, name: 'rapor.pdf', sizeBytes: 4),
         EvidenceTag.outcome,
         subtaskId: 's1',
+        requestKey: 'k-0123456789abcdefghij',
       );
       final o = a.last;
       expect('${o.method} ${o.uri.path}', 'POST /v1/work-items/w1/files');
       expect(o.uri.queryParameters, {'tag': 'sonuc', 'subtask_id': 's1'});
+      expect(o.headers['Idempotency-Key'], 'k-0123456789abcdefghij');
       expect(o.extra.values, contains('d9'));
       expect((o.extra['openapi'] as Map)['operationId'], 'attachFile');
       final form = o.data as FormData;
@@ -282,6 +296,7 @@ void main() {
         _task(),
         UploadSource(path: file.path, name: 'rapor.pdf', sizeBytes: 4),
         EvidenceTag.requirement,
+        requestKey: 'k-0123456789abcdefghij',
       );
       expect(a.last.uri.queryParameters, {'tag': 'ister'});
     });
@@ -313,6 +328,7 @@ void main() {
           _task(),
           UploadSource(path: file.path, name: 'rapor.pdf', sizeBytes: 4),
           EvidenceTag.outcome,
+          requestKey: 'k-0123456789abcdefghij',
         ),
         throwsApiError('records.too_large'),
       );

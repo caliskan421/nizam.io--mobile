@@ -112,7 +112,7 @@ ResponseBody discoveryHandler(
         'product_id': 'nizamio',
         'instance_id': 'inst-1',
         'company_display_name': 'Test',
-        'server_version': '0.0.0-test',
+        'server_version': '0.11.0-test',
         'api_version': api,
         'minimum_mobile_version': '0.0.0',
         'capabilities': null,

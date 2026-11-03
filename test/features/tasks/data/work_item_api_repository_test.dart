@@ -36,6 +36,10 @@ Map<String, Object?> _item({
   'planned_end_on': '2026-11-10',
   'completion_evidence_required': false,
   'subtask_counts': {'total': 0, 'done': 0},
+  'edit_revision': 1,
+  'dates_revision': 1,
+  'created_at': '2026-10-01T08:00:00Z',
+  'created_by_account_id': 'acc-1',
 };
 
 final _dates = {
@@ -145,6 +149,7 @@ void main() {
         priority: TaskPriority.high,
         assignee: 'a1',
       ),
+      requestKey: 'k-0123456789abcdefghij',
     );
     expect(a.last.method, 'POST');
     expect(a.last.uri.path, '/v1/work-items');
@@ -170,6 +175,7 @@ void main() {
           due: DateTime(2026),
           priority: TaskPriority.unknown,
         ),
+        requestKey: 'k-0123456789abcdefghij',
       ),
       throwsArgumentError,
     );

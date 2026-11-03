@@ -63,8 +63,12 @@ abstract interface class MeetingsRepository {
   /// `deleteAgendaItem`.
   Future<void> deleteAgendaItem(String itemId);
 
-  /// `addMeetingNote`.
-  Future<MeetingNote> addNote(String meetingId, String content);
+  /// `addMeetingNote`; [requestKey] işlem anahtarı (`Idempotency-Key`, ADR-0027).
+  Future<MeetingNote> addNote(
+    String meetingId,
+    String content, {
+    required String requestKey,
+  });
 
   /// `listMeetingNotes` (imleçli).
   Future<PageSlice<MeetingNote>> listNotes(
@@ -72,8 +76,12 @@ abstract interface class MeetingsRepository {
     PageRequest page = const PageRequest(),
   ]);
 
-  /// `updateMeetingNote`.
-  Future<MeetingNote> updateNote(String noteId, String content);
+  /// `updateMeetingNote`; [expectedRevision] notun okunan `edit_revision`'ı (ADR-0027).
+  Future<MeetingNote> updateNote(
+    String noteId,
+    String content, {
+    required int expectedRevision,
+  });
 
   /// `deleteMeetingNote` (yumuşak silme).
   Future<void> deleteNote(String noteId);

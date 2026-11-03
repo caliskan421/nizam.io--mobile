@@ -65,6 +65,10 @@ class _Server {
     'days_early': 0,
     'completion_evidence_required': false,
     'subtask_counts': {'total': subtasks.length, 'done': 0},
+    'edit_revision': 1,
+    'dates_revision': 1,
+    'created_at': '2026-10-01T08:00:00Z',
+    'created_by_account_id': 'acc-1',
   };
 
   FutureOr<ResponseBody> handle(Seen r) async {
@@ -142,6 +146,9 @@ class _Server {
     if (r.path.contains('/subtasks/') && r.method == 'PATCH') {
       return _sub('s1', done: true);
     }
+    if (r.path.contains('/notes/') && r.method == 'PATCH') {
+      return {'status': 'updated', 'edit_revision': 2};
+    }
     return {'status': 'ok'};
   }
 }
@@ -155,6 +162,7 @@ Map<String, Object?> _sub(String id, {required bool done, String? assignee}) =>
       'created_by_account_id': 'acc-1',
       'created_at': '2026-10-02T08:00:00Z',
       'updated_at': '2026-10-02T08:00:00Z',
+      'edit_revision': 1,
       'assignee_account_id': ?assignee,
     };
 
@@ -165,6 +173,7 @@ Map<String, Object?> _note(String id, String by, String text) => {
   'content': text,
   'created_at': '2026-10-03T09:00:00Z',
   'updated_at': '2026-10-03T09:00:00Z',
+  'edit_revision': 1,
 };
 
 /// Oturum açık, sunucu programı seçili; katalog ve ayrıntı okunmuş.
@@ -426,6 +435,7 @@ void main() {
       expect((await ctl.editNote(mine, 'Düzeltildi')).kind, WriteKind.done);
       expect(_only(h, 'PATCH', '/v1/work-items/w1/notes/n1').body, {
         'content': 'Düzeltildi',
+        'expected_revision': 1,
       });
       expect((await ctl.deleteNote(mine)).kind, WriteKind.done);
       expect(h.backend.count('DELETE', '/v1/work-items/w1/notes/n1'), 1);
@@ -472,9 +482,13 @@ void main() {
       expect(
         bodies,
         [
-          {'assignee_account_id': 'u2'},
-          {'assignee_account_id': ''},
-          {'start_on': '2026-10-25', 'end_on': '2026-10-25'},
+          {'assignee_account_id': 'u2', 'expected_revision': 1},
+          {'assignee_account_id': '', 'expected_revision': 1},
+          {
+            'start_on': '2026-10-25',
+            'end_on': '2026-10-25',
+            'expected_revision': 1,
+          },
         ],
         reason:
             'tarihsiz alt görevde tarih kaldırma değişiklik değil (istek yok)',

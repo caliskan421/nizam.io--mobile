@@ -342,6 +342,15 @@ Map<String, Object> dashboardWire(HomeDashboard d) {
       ],
       'total': dateChanges.length,
     },
-    '/v1/messages/unread-count': {'count': d.counts.unreadMessages},
+    '/v1/me/chat-unread': {
+      'items': [
+        {
+          'program_id': 'prog-1',
+          'program_name': 'P',
+          'unread_chats': d.counts.unreadMessages,
+          'mentioned': false,
+        },
+      ],
+    },
   };
 }

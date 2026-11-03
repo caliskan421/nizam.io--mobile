@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket v0.7.0-api (d648a8aec45113be1f2ab0871426a9338b45a5c6) — docs/api/error-codes.json
+// Kaynak: nizam.io--backend etiket v0.11.0-api (4d0bbd0605ade5adfc0599e9586944ed8dab7bcb) — docs/api/error-codes.json
 
 import '../api_meta.dart';
 
@@ -92,9 +92,25 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     fields: [],
     messageKey: 'errors.collaboration.conference_webhook_unauthorized',
   ),
+  'collaboration.edit_conflict': ErrorCatalogEntry(
+    statuses: [409],
+    fields: ['collaboration.edit_conflict'],
+    messageKey: 'errors.collaboration.edit_conflict',
+  ),
+  'collaboration.idempotency_key_reused': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.collaboration.idempotency_key_reused',
+  ),
   'collaboration.input_invalid': ErrorCatalogEntry(
     statuses: [422],
-    fields: ['collaboration.input_invalid'],
+    fields: [
+      'collaboration.input_invalid',
+      'collaboration.request_key_invalid',
+      'collaboration.request_key_required',
+      'collaboration.revision_invalid',
+      'collaboration.revision_required',
+    ],
     messageKey: 'errors.collaboration.input_invalid',
   ),
   'collaboration.invalid_cursor': ErrorCatalogEntry(
@@ -106,16 +122,6 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [404],
     fields: [],
     messageKey: 'errors.collaboration.meeting_not_found',
-  ),
-  'collaboration.message_not_found': ErrorCatalogEntry(
-    statuses: [404],
-    fields: [],
-    messageKey: 'errors.collaboration.message_not_found',
-  ),
-  'collaboration.message_unread': ErrorCatalogEntry(
-    statuses: [409],
-    fields: [],
-    messageKey: 'errors.collaboration.message_unread',
   ),
   'collaboration.not_authorized': ErrorCatalogEntry(
     statuses: [403],
@@ -131,6 +137,11 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [409],
     fields: [],
     messageKey: 'errors.collaboration.note_converted',
+  ),
+  'collaboration.note_deleted': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.collaboration.note_deleted',
   ),
   'collaboration.note_immutable': ErrorCatalogEntry(
     statuses: [409],
@@ -269,6 +280,97 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [503],
     fields: [],
     messageKey: 'errors.identity.unavailable',
+  ),
+  'messaging.chat_deleted': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.messaging.chat_deleted',
+  ),
+  'messaging.chat_not_found': ErrorCatalogEntry(
+    statuses: [404],
+    fields: [],
+    messageKey: 'errors.messaging.chat_not_found',
+  ),
+  'messaging.edit_conflict': ErrorCatalogEntry(
+    statuses: [409],
+    fields: ['messaging.edit_conflict'],
+    messageKey: 'errors.messaging.edit_conflict',
+  ),
+  'messaging.file_rejected': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['messaging.file_rejected'],
+    messageKey: 'errors.messaging.file_rejected',
+  ),
+  'messaging.file_too_large': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['messaging.file_too_large'],
+    messageKey: 'errors.messaging.file_too_large',
+  ),
+  'messaging.idempotency_key_reused': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.messaging.idempotency_key_reused',
+  ),
+  'messaging.input_invalid': ErrorCatalogEntry(
+    statuses: [422],
+    fields: [
+      'messaging.input_invalid',
+      'messaging.request_key_invalid',
+      'messaging.request_key_required',
+      'messaging.revision_invalid',
+      'messaging.revision_required',
+    ],
+    messageKey: 'errors.messaging.input_invalid',
+  ),
+  'messaging.invalid_cursor': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['messaging.invalid_cursor'],
+    messageKey: 'errors.messaging.invalid_cursor',
+  ),
+  'messaging.member_not_found': ErrorCatalogEntry(
+    statuses: [404],
+    fields: [],
+    messageKey: 'errors.messaging.member_not_found',
+  ),
+  'messaging.member_source_managed': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.messaging.member_source_managed',
+  ),
+  'messaging.message_deleted': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.messaging.message_deleted',
+  ),
+  'messaging.message_not_found': ErrorCatalogEntry(
+    statuses: [404],
+    fields: [],
+    messageKey: 'errors.messaging.message_not_found',
+  ),
+  'messaging.not_authorized': ErrorCatalogEntry(
+    statuses: [403],
+    fields: [],
+    messageKey: 'errors.messaging.not_authorized',
+  ),
+  'messaging.poll_closed': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.messaging.poll_closed',
+  ),
+  'messaging.ref_not_found': ErrorCatalogEntry(
+    statuses: [404],
+    fields: [],
+    messageKey: 'errors.messaging.ref_not_found',
+  ),
+  'messaging.scope_invalid': ErrorCatalogEntry(
+    statuses: [422],
+    fields: [],
+    messageKey: 'errors.messaging.scope_invalid',
+  ),
+  'messaging.task_deleted': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.messaging.task_deleted',
   ),
   'notifications.input_invalid': ErrorCatalogEntry(
     statuses: [422],
@@ -614,9 +716,18 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     fields: [],
     messageKey: 'errors.records.file_not_found',
   ),
+  'records.idempotency_key_reused': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.records.idempotency_key_reused',
+  ),
   'records.input_invalid': ErrorCatalogEntry(
     statuses: [422],
-    fields: ['records.invalid_file'],
+    fields: [
+      'records.invalid_file',
+      'records.request_key_invalid',
+      'records.request_key_required',
+    ],
     messageKey: 'errors.records.input_invalid',
   ),
   'records.invalid_cursor': ErrorCatalogEntry(
@@ -784,6 +895,16 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     fields: [],
     messageKey: 'errors.work.dependency_not_completed',
   ),
+  'work.edit_conflict': ErrorCatalogEntry(
+    statuses: [409],
+    fields: ['work.edit_conflict'],
+    messageKey: 'errors.work.edit_conflict',
+  ),
+  'work.idempotency_key_reused': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.work.idempotency_key_reused',
+  ),
   'work.input_invalid': ErrorCatalogEntry(
     statuses: [422],
     fields: [
@@ -795,6 +916,10 @@ const errorCatalog = <String, ErrorCatalogEntry>{
       'work.extend_days_out_of_range',
       'work.invalid_input',
       'work.protected_field',
+      'work.request_key_invalid',
+      'work.request_key_required',
+      'work.revision_invalid',
+      'work.revision_required',
     ],
     messageKey: 'errors.work.input_invalid',
   ),
@@ -802,6 +927,11 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [409],
     fields: [],
     messageKey: 'errors.work.item_completed',
+  ),
+  'work.item_deleted': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.work.item_deleted',
   ),
   'work.item_not_completed': ErrorCatalogEntry(
     statuses: [409],

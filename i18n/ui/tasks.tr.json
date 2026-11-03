@@ -321,6 +321,21 @@
     "ui.tasks.description": "Açıklama",
     "ui.tasks.department": "Departman",
     "ui.tasks.department_all": "Tüm departmanlar",
-    "ui.tasks.department_filter_cleared": "Seçili departman artık bu programda yok; süzgeç temizlendi."
+    "ui.tasks.department_filter_cleared": "Seçili departman artık bu programda yok; süzgeç temizlendi.",
+    "ui.tasks.conflict_title": "Görev siz düzenlerken değişti",
+    "ui.tasks.conflict_desc": "Aynı alanı başkası da değiştirdi. Her alan için hangi değerin kalacağını seçin; diğer alanlar korunur.",
+    "ui.tasks.conflict_base": "Açtığınızda",
+    "ui.tasks.conflict_mine": "Sizin değeriniz",
+    "ui.tasks.conflict_server": "Sunucudaki değer",
+    "ui.tasks.conflict_keep_mine": "Benimkini tut",
+    "ui.tasks.conflict_take_server": "Sunucudakini al",
+    "ui.tasks.conflict_pending": "Kaydetmeden önce işaretli alanlar için seçim yapın",
+    "ui.tasks.text_conflict_title": "Metin siz düzenlerken değişti",
+    "ui.tasks.text_conflict_desc": "Sunucudaki metin sizinkinden farklı. Hangisi kalsın?",
+    "ui.tasks.retry_after_head": "Yeniden denemek için",
+    "ui.tasks.retry_after_tail": "sn bekleyin",
+    "ui.tasks.empty_value": "—",
+    "ui.tasks.conflict_on": "Açık",
+    "ui.tasks.conflict_off": "Kapalı"
   }
 }

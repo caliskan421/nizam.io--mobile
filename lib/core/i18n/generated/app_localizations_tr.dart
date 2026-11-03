@@ -70,6 +70,14 @@ class AppLocalizationsTr extends AppLocalizations {
       'Görüşme bildirimi doğrulanamadı.';
 
   @override
+  String get errCollaborationEditConflict =>
+      'Not siz düzenlerken başkası tarafından değiştirildi; güncel hâlini görüp yeniden deneyin.';
+
+  @override
+  String get errCollaborationIdempotencyKeyReused =>
+      'Bu istek anahtarı farklı bir istekle kullanılmış.';
+
+  @override
   String get errCollaborationInputInvalid => 'Girilen bilgiler geçersiz.';
 
   @override
@@ -80,12 +88,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errCollaborationMeetingNotFound => 'Toplantı bulunamadı.';
 
   @override
-  String get errCollaborationMessageNotFound => 'Mesaj bulunamadı.';
-
-  @override
-  String get errCollaborationMessageUnread => 'Mesaj henüz okunmadı.';
-
-  @override
   String get errCollaborationNotAuthorized => 'Bu işlem için yetkiniz yok.';
 
   @override
@@ -93,6 +95,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errCollaborationNoteConverted => 'Not zaten göreve dönüştürüldü.';
+
+  @override
+  String get errCollaborationNoteDeleted => 'Not silinmiş; işlem yapılamaz.';
 
   @override
   String get errCollaborationNoteImmutable => 'Bu not artık değiştirilemez.';
@@ -106,6 +111,20 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get errCollaborationPermanentRequiresDeleted =>
       'Kalıcı silme için kayıt önce silinmiş olmalı.';
+
+  @override
+  String get errCollaborationRequestKeyInvalid => 'İstek anahtarı geçersiz.';
+
+  @override
+  String get errCollaborationRequestKeyRequired => 'İstek anahtarı gerekli.';
+
+  @override
+  String get errCollaborationRevisionInvalid =>
+      'Düzenleme sürümü geçersiz; kaydı yenileyip yeniden deneyin.';
+
+  @override
+  String get errCollaborationRevisionRequired =>
+      'Düzenleme sürümü gerekli; uygulamayı güncelleyin.';
 
   @override
   String get errCollaborationScopeInvalid =>
@@ -210,6 +229,77 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errIdentityWeakPassword => 'Parola yeterince güçlü değil.';
+
+  @override
+  String get errMessagingChatDeleted => 'Sohbet silinmiş; işlem yapılamaz.';
+
+  @override
+  String get errMessagingChatNotFound => 'Sohbet bulunamadı.';
+
+  @override
+  String get errMessagingEditConflict =>
+      'Mesaj siz düzenlerken değiştirildi; güncel hâlini görüp yeniden deneyin.';
+
+  @override
+  String get errMessagingFileRejected => 'Dosya kabul edilmedi.';
+
+  @override
+  String get errMessagingFileTooLarge => 'Dosya çok büyük.';
+
+  @override
+  String get errMessagingIdempotencyKeyReused =>
+      'Bu istek anahtarı farklı bir istekle kullanılmış.';
+
+  @override
+  String get errMessagingInputInvalid => 'Girilen bilgiler geçersiz.';
+
+  @override
+  String get errMessagingInvalidCursor =>
+      'Liste konumu geçersiz; listeyi yenileyin.';
+
+  @override
+  String get errMessagingMemberNotFound => 'Üye bulunamadı.';
+
+  @override
+  String get errMessagingMemberSourceManaged =>
+      'Bu üye grubun kaynağından gelir; elle çıkarılamaz.';
+
+  @override
+  String get errMessagingMessageDeleted => 'Mesaj silinmiş; işlem yapılamaz.';
+
+  @override
+  String get errMessagingMessageNotFound => 'Mesaj bulunamadı.';
+
+  @override
+  String get errMessagingNotAuthorized => 'Bu işlem için yetkiniz yok.';
+
+  @override
+  String get errMessagingPollClosed => 'Anket kapandı.';
+
+  @override
+  String get errMessagingRefNotFound =>
+      'Bu öğe artık yok ya da erişiminiz yok.';
+
+  @override
+  String get errMessagingRequestKeyInvalid => 'İstek anahtarı geçersiz.';
+
+  @override
+  String get errMessagingRequestKeyRequired => 'İstek anahtarı gerekli.';
+
+  @override
+  String get errMessagingRevisionInvalid =>
+      'Düzenleme sürümü geçersiz; mesajı yenileyip yeniden deneyin.';
+
+  @override
+  String get errMessagingRevisionRequired =>
+      'Düzenleme sürümü gerekli; uygulamayı güncelleyin.';
+
+  @override
+  String get errMessagingScopeInvalid =>
+      'Seçili kapsam bu işlem için geçersiz.';
+
+  @override
+  String get errMessagingTaskDeleted => 'Görev silinmiş; işlem yapılamaz.';
 
   @override
   String get errNotificationsInputInvalid => 'Girilen bilgiler geçersiz.';
@@ -490,6 +580,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errRecordsFileNotFound => 'Dosya bulunamadı.';
 
   @override
+  String get errRecordsIdempotencyKeyReused =>
+      'Bu istek anahtarı farklı bir istekle kullanılmış.';
+
+  @override
   String get errRecordsInputInvalid => 'Girilen bilgiler geçersiz.';
 
   @override
@@ -510,6 +604,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errRecordsNotAuthorized => 'Bu işlem için yetkiniz yok.';
+
+  @override
+  String get errRecordsRequestKeyInvalid => 'İstek anahtarı geçersiz.';
+
+  @override
+  String get errRecordsRequestKeyRequired => 'İstek anahtarı gerekli.';
 
   @override
   String get errRecordsTagInvalid => 'Dosya etiketi geçersiz.';
@@ -625,8 +725,16 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bağımlı olunan görev henüz tamamlanmadı.';
 
   @override
+  String get errWorkEditConflict =>
+      'Görev siz düzenlerken başkası tarafından değiştirildi; güncel hâlini görüp yeniden deneyin.';
+
+  @override
   String get errWorkExtendDaysOutOfRange =>
       'Uzatma gün sayısı izin verilen aralıkta değil.';
+
+  @override
+  String get errWorkIdempotencyKeyReused =>
+      'Bu istek anahtarı farklı bir istekle kullanılmış.';
 
   @override
   String get errWorkInputInvalid => 'Girilen bilgiler geçersiz.';
@@ -636,6 +744,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errWorkItemCompleted => 'Görev zaten tamamlandı.';
+
+  @override
+  String get errWorkItemDeleted => 'Görev silinmiş; işlem yapılamaz.';
 
   @override
   String get errWorkItemNotCompleted => 'Görev henüz tamamlanmadı.';
@@ -673,7 +784,21 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errWorkProtectedField => 'Bu alan değiştirilemez.';
 
   @override
+  String get errWorkRequestKeyInvalid => 'İstek anahtarı geçersiz.';
+
+  @override
+  String get errWorkRequestKeyRequired => 'İstek anahtarı gerekli.';
+
+  @override
   String get errWorkRevertReasonRequired => 'Geri alma için gerekçe gerekli.';
+
+  @override
+  String get errWorkRevisionInvalid =>
+      'Düzenleme sürümü geçersiz; görevi yenileyip yeniden deneyin.';
+
+  @override
+  String get errWorkRevisionRequired =>
+      'Düzenleme sürümü gerekli; uygulamayı güncelleyin.';
 
   @override
   String get errWorkStaleCompletion =>
@@ -724,8 +849,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errClientNotSignedIn => 'Bu işlem için giriş yapılmalı.';
 
   @override
+  String get errClientOutcomeUnknown =>
+      'Gönderildi mi bilinmiyor. Aynı isteği yeniden deneyin; kayıt iki kez oluşmaz.';
+
+  @override
   String get errClientReauthRequired =>
       'Oturum doğrulanamadı. Güvenliğiniz için yeniden giriş yapın.';
+
+  @override
+  String get errClientRequestNotResent =>
+      'İstek tekrar gönderilemedi; işlemi yeniden başlatın.';
 
   @override
   String get errClientScopeChanged =>
@@ -741,6 +874,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errClientServerNotVerified => 'Önce sunucu adresi doğrulanmalı.';
+
+  @override
+  String get errClientServerOutdated =>
+      'Sunucu bu uygulama sürümü için güncellenmeli; değişiklik gönderilmedi.';
 
   @override
   String get errClientServerUnrecognized =>
@@ -2365,7 +2502,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiRouterAssistant => 'Asistana sor';
 
   @override
-  String get uiRouterAssistantSoon => 'Asistan sonraki adımda eklenecek';
+  String get uiRouterAssistantSoon =>
+      'Asistan mobilde sonraki adımda eklenecek';
 
   @override
   String get uiRouterTabHistory => 'Geçmiş';
@@ -2383,14 +2521,18 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiRouterTabMessages => 'Mesajlar';
 
   @override
+  String get uiRouterAssistantSoonTablet =>
+      'Asistan tablette sonraki adımda tasarlanacak';
+
+  @override
+  String get uiRouterAllModules => 'Tüm modüller';
+
+  @override
   String get uiRouterPickTitle => 'Bir kayıt seç';
 
   @override
   String get uiRouterPickBody =>
       'Soldaki listeden bir kayıt seç, ayrıntısı burada açılır.';
-
-  @override
-  String get uiRouterAllModules => 'Tüm modüller';
 
   @override
   String get uiScopeTitle => 'Program seçimi';
@@ -3436,6 +3578,54 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiTasksDepartmentFilterCleared =>
       'Seçili departman artık bu programda yok; süzgeç temizlendi.';
+
+  @override
+  String get uiTasksConflictTitle => 'Görev siz düzenlerken değişti';
+
+  @override
+  String get uiTasksConflictDesc =>
+      'Aynı alanı başkası da değiştirdi. Her alan için hangi değerin kalacağını seçin; diğer alanlar korunur.';
+
+  @override
+  String get uiTasksConflictBase => 'Açtığınızda';
+
+  @override
+  String get uiTasksConflictMine => 'Sizin değeriniz';
+
+  @override
+  String get uiTasksConflictServer => 'Sunucudaki değer';
+
+  @override
+  String get uiTasksConflictKeepMine => 'Benimkini tut';
+
+  @override
+  String get uiTasksConflictTakeServer => 'Sunucudakini al';
+
+  @override
+  String get uiTasksConflictPending =>
+      'Kaydetmeden önce işaretli alanlar için seçim yapın';
+
+  @override
+  String get uiTasksTextConflictTitle => 'Metin siz düzenlerken değişti';
+
+  @override
+  String get uiTasksTextConflictDesc =>
+      'Sunucudaki metin sizinkinden farklı. Hangisi kalsın?';
+
+  @override
+  String get uiTasksRetryAfterHead => 'Yeniden denemek için';
+
+  @override
+  String get uiTasksRetryAfterTail => 'sn bekleyin';
+
+  @override
+  String get uiTasksEmptyValue => '—';
+
+  @override
+  String get uiTasksConflictOn => 'Açık';
+
+  @override
+  String get uiTasksConflictOff => 'Kapalı';
 
   @override
   String get uiTimelineTitle => 'Zaman çizelgesi';

@@ -10,10 +10,19 @@ export '../../../core/domain/upload_types.dart'
 
 /// Alt görev değişikliği (`PATCH …/subtasks/{id}`). null alan değişmez. [assignee] verilirse
 /// `id` null → atamayı kaldır; [dates] verilirse ikisi birlikte gider (ikisi null → kaldır).
+/// [expectedRevision]: okunan alt görev `edit_revision`'ı; başlık, atanan ya da tarih
+/// verilince zorunlu, yalnız [done]'da gerekmez (ADR-0027).
 @immutable
 final class SubtaskPatch {
-  const SubtaskPatch({this.title, this.assignee, this.dates, this.done});
+  const SubtaskPatch({
+    this.title,
+    this.assignee,
+    this.dates,
+    this.done,
+    this.expectedRevision,
+  });
 
+  final int? expectedRevision;
   final String? title;
   final ({String? id})? assignee;
   final ({DateTime? start, DateTime? end})? dates;
@@ -46,11 +55,26 @@ final class WorkItemDraft {
   final TaskPriority? priority;
   final String? assignee;
   final bool evidenceRequired;
+
+  /// Gövde imzası: işlem anahtarı defterinde aynı gövdenin tekrarını tanır (aynı imza → aynı
+  /// anahtar; değişen alan → yeni eylem).
+  String get signature => [
+    programId,
+    departmentId,
+    title,
+    start.toIso8601String(),
+    end.toIso8601String(),
+    description,
+    priority?.name,
+    assignee,
+    evidenceRequired,
+  ].join('|');
 }
 
-/// Görev değişikliği (`PATCH /v1/work-items/{id}`): YALNIZ değişen alanlar (null → gönderilmez).
-/// Sunucu sürüm/ETag taşımaz; son yazan kazanır (istemci akışları §8 kayıp güncelleme). Bu
-/// yüzden değişmeyen alan gönderilip başkasının eşzamanlı yazması ezilmez.
+/// Görev değişikliği (`PATCH /v1/work-items/{id}`): YALNIZ değişen alanlar (null → gönderilmez)
+/// ve değişen grubun okunan sürümü (ADR-0027): alanlar (başlık, öncelik, kanıt bayrağı) →
+/// [expectedRevision], tarihler → [expectedDatesRevision]. Sürüm bayatsa sunucu 409
+/// `work.edit_conflict` döner (sessiz ezme yok); değişmeyen alan gönderilmez.
 @immutable
 final class WorkItemPatch {
   const WorkItemPatch({
@@ -59,9 +83,13 @@ final class WorkItemPatch {
     this.start,
     this.end,
     this.evidenceRequired,
+    this.expectedRevision,
+    this.expectedDatesRevision,
   });
 
-  /// [before] ile karşılaştırıp yalnız farkı taşıyan yama (tarihler gün çözünürlüğünde).
+  /// [before] ile (formun AÇILIŞ tabanı; canlı katalog değil) karşılaştırıp yalnız farkı
+  /// taşıyan yama (tarihler gün çözünürlüğünde); sürümler [before]'dan, yalnız grubunda alan
+  /// varsa.
   factory WorkItemPatch.diff(
     TaskItem before, {
     String? title,
@@ -72,18 +100,24 @@ final class WorkItemPatch {
   }) {
     bool sameDay(DateTime a, DateTime b) =>
         a.year == b.year && a.month == b.month && a.day == b.day;
+    final t = title == null || title == before.title ? null : title;
+    final p = priority == null || priority == before.priority ? null : priority;
+    final s = start == null || sameDay(start, before.start) ? null : start;
+    final e = end == null || sameDay(end, before.due) ? null : end;
+    final ev =
+        evidenceRequired == null || evidenceRequired == before.evidenceRequired
+        ? null
+        : evidenceRequired;
+    final fields = t != null || p != null || ev != null;
+    final dates = s != null || e != null;
     return WorkItemPatch(
-      title: title == null || title == before.title ? null : title,
-      priority: priority == null || priority == before.priority
-          ? null
-          : priority,
-      start: start == null || sameDay(start, before.start) ? null : start,
-      end: end == null || sameDay(end, before.due) ? null : end,
-      evidenceRequired:
-          evidenceRequired == null ||
-              evidenceRequired == before.evidenceRequired
-          ? null
-          : evidenceRequired,
+      title: t,
+      priority: p,
+      start: s,
+      end: e,
+      evidenceRequired: ev,
+      expectedRevision: fields ? before.editRevision : null,
+      expectedDatesRevision: dates ? before.datesRevision : null,
     );
   }
 
@@ -92,6 +126,8 @@ final class WorkItemPatch {
   final DateTime? start;
   final DateTime? end;
   final bool? evidenceRequired;
+  final int? expectedRevision;
+  final int? expectedDatesRevision;
 
   bool get isEmpty =>
       title == null &&
@@ -201,13 +237,29 @@ abstract interface class TaskWriteRepository {
     bool closeSubtasks = false,
   });
 
-  Future<void> addNote(TaskItem task, String text);
+  /// [requestKey]: işlem anahtarı (`Idempotency-Key`, ADR-0027); aynı eylemin tekrarı aynı
+  /// anahtarla gider.
+  Future<void> addNote(
+    TaskItem task,
+    String text, {
+    required String requestKey,
+  });
 
-  Future<void> updateNote(TaskItem task, String noteId, String text);
+  /// [expectedRevision]: notun okunan `edit_revision`'ı; bayatsa 409 `work.edit_conflict`.
+  Future<void> updateNote(
+    TaskItem task,
+    String noteId,
+    String text, {
+    required int expectedRevision,
+  });
 
   Future<void> deleteNote(TaskItem task, String noteId);
 
-  Future<void> createSubtask(TaskItem task, String title);
+  Future<void> createSubtask(
+    TaskItem task,
+    String title, {
+    required String requestKey,
+  });
 
   Future<void> updateSubtask(
     TaskItem task,
@@ -219,8 +271,12 @@ abstract interface class TaskWriteRepository {
 
   // ---- görev ---------------------------------------------------------------------------
 
-  /// Görevi açar; sunucunun verdiği görev kimliği döner (yerel kod üretilmez).
-  Future<String> createWorkItem(WorkItemDraft draft);
+  /// Görevi açar; sunucunun verdiği görev kimliği döner (yerel kod üretilmez). Aynı
+  /// [requestKey] ile tekrar ilk görevi döner (200), ikinci görev açılmaz.
+  Future<String> createWorkItem(
+    WorkItemDraft draft, {
+    required String requestKey,
+  });
 
   /// Yalnız [patch]'teki alanlar gönderilir.
   Future<void> updateWorkItem(TaskItem task, WorkItemPatch patch);
@@ -268,6 +324,7 @@ abstract interface class TaskWriteRepository {
     UploadSource file,
     EvidenceTag tag, {
     String? subtaskId,
+    required String requestKey,
   });
 
   Future<void> renameFile(TaskItem task, String fileId, String name);

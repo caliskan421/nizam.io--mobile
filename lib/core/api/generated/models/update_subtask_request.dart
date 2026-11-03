@@ -18,6 +18,9 @@ abstract class UpdateSubtaskRequest with _$UpdateSubtaskRequest {
 
     /// true kapatır, false yeniden açar (tamamlanmış görevde 409 `work.item_completed`).
     bool? done,
+
+    /// İstemcinin gördüğü `edit_revision` (ADR-0027). title, assignee_account_id, start_on ya da end_on varsa zorunludur (422 `work.input_invalid` + `work.revision_required` / `work.revision_invalid`); yalnız `done` gönderildiğinde gerekmez. Bayat sürüm ve farklı değer 409 `work.edit_conflict`.
+    @JsonKey(name: 'expected_revision') int? expectedRevision,
   }) = _UpdateSubtaskRequest;
 
   factory UpdateSubtaskRequest.fromJson(Map<String, Object?> json) =>

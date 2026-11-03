@@ -1,9 +1,11 @@
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
+import '../../../core/server/write_compat.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_permissions.dart';
 import '../domain/task_writes.dart';
@@ -86,6 +88,12 @@ bool _isForbidden(ApiError e) =>
 
 /// Hata sonrası yeniden okuma gerekir mi (çakışma ya da yetki reddi).
 bool _rereadAfter(ApiError e) => _isConflict(e) || _isForbidden(e);
+
+// İşlem anahtarı eylem adları ([TaskDetailState.keys]).
+const _note = 'note';
+const _subtask = 'subtask';
+const _upload = 'upload';
+const _copy = 'copy';
 
 /// Yerel ön denetimin hatası: istek gönderilmez, metin yine koddan (sunucu kataloğundaki kod).
 WriteOutcome _rejected(String code) =>
@@ -208,6 +216,7 @@ final class TaskDetailState {
     this.showErrors = false,
     this.seq = 1,
     this.busy = false,
+    this.keys = const RequestKeys(),
   });
 
   final TaskDetailTab tab;
@@ -229,6 +238,9 @@ final class TaskDetailState {
   /// Sunucu yazması uçuşta: yeni yazma komutu istek göndermez ([WriteKind.busy]).
   final bool busy;
 
+  /// Bekleyen oluşturma eylemlerinin işlem anahtarları (ADR-0027; bellek içi, ekran ömrü).
+  final RequestKeys keys;
+
   TaskDetailState copyWith({
     TaskDetailTab? tab,
     Set<String>? openSubtasks,
@@ -242,6 +254,7 @@ final class TaskDetailState {
     bool? showErrors,
     int? seq,
     bool? busy,
+    RequestKeys? keys,
   }) => TaskDetailState(
     tab: tab ?? this.tab,
     openSubtasks: openSubtasks ?? this.openSubtasks,
@@ -257,6 +270,7 @@ final class TaskDetailState {
     showErrors: showErrors ?? this.showErrors,
     seq: seq ?? this.seq,
     busy: busy ?? this.busy,
+    keys: keys ?? this.keys,
   );
 }
 
@@ -310,6 +324,7 @@ class TaskDetailController extends _$TaskDetailController {
     bool rereadOnError = false,
   }) async {
     if (state.busy) return WriteOutcome.busy;
+    if (!_versionedServer) return _rejected(ClientErrorCode.serverOutdated);
     state = state.copyWith(busy: true);
     // Denetleyici istek sırasında kapanabilir (ekrandan çıkış): katalog yine yenilenir.
     final store = _store;
@@ -338,6 +353,26 @@ class TaskDetailController extends _$TaskDetailController {
     } finally {
       if (ref.mounted) state = state.copyWith(busy: false);
     }
+  }
+
+  /// Sunucu uyum kapısı (CX-P0K-04, ADR-0027): bağlı sunucunun sürümü sürümlü yazmayı
+  /// desteklemiyorsa ya da kalem `edit_revision` taşımıyorsa (eski backend) yazma gönderilmez
+  /// (`client.server_outdated`): eski sunucu sürümü ve işlem anahtarını sessizce yok sayar.
+  bool get _versionedServer =>
+      serverSupportsVersionedWrites(ref.read(bindingStateProvider)) &&
+      _task?.editRevision != null;
+
+  /// [action] eyleminin [body] gövdesi için işlem anahtarı: aynı eylem ve gövdenin yeniden
+  /// gönderimi AYNI anahtarı alır; gövde değişirse yeni anahtar (yeni eylem).
+  String _keyFor(String action, String body) {
+    final (keys, key) = state.keys.keyFor(action, body);
+    state = state.copyWith(keys: keys);
+    return key;
+  }
+
+  /// Eylem tamamlandı: anahtarı düşer (sonraki eylem yeni anahtar alır).
+  void _keyDone(String action) {
+    if (ref.mounted) state = state.copyWith(keys: state.keys.clear(action));
   }
 
   /// Çok adımlı yazmanın başladığı bağlam: oturum nesli + seçili kapsam (program, departman).
@@ -441,7 +476,7 @@ class TaskDetailController extends _$TaskDetailController {
     }
     if (!permissions.canManageTask) return WriteOutcome.invalid;
     return _write(
-      () => _writes.updateWorkItem(t, WorkItemPatch(priority: p)),
+      () => _writes.updateWorkItem(t, WorkItemPatch.diff(t, priority: p)),
       list: false,
     );
   }
@@ -833,10 +868,21 @@ class TaskDetailController extends _$TaskDetailController {
     if (t.fileEntries.length >= uploadMaxFilesPerTask) {
       return _rejected('records.too_many_files');
     }
+    final key = _keyFor(
+      _upload,
+      '${f.path}|${f.name}|${f.sizeBytes}|${d.tag.name}|${d.subtask}',
+    );
     final r = await _write(
-      () => _writes.attachFile(t, f, d.tag, subtaskId: d.subtask),
+      () => _writes.attachFile(
+        t,
+        f,
+        d.tag,
+        subtaskId: d.subtask,
+        requestKey: key,
+      ),
       list: false,
     );
+    if (r.ok) _keyDone(_upload);
     if (r.ok && ref.mounted) {
       state = state.copyWith(
         upload: () => null,
@@ -952,21 +998,22 @@ class TaskDetailController extends _$TaskDetailController {
       return (WriteOutcome.invalid, null);
     }
     String? id;
+    final draft = WorkItemDraft(
+      programId: program,
+      departmentId: dept,
+      title: '${t.title} $suffix',
+      start: t.start,
+      end: t.due,
+      priority: t.priority == TaskPriority.unknown ? null : t.priority,
+      assignee: t.assignees.firstOrNull,
+      evidenceRequired: t.evidenceRequired,
+    );
+    final key = _keyFor(_copy, draft.signature);
     final r = await _write(
-      () async => id = await _writes.createWorkItem(
-        WorkItemDraft(
-          programId: program,
-          departmentId: dept,
-          title: '${t.title} $suffix',
-          start: t.start,
-          end: t.due,
-          priority: t.priority == TaskPriority.unknown ? null : t.priority,
-          assignee: t.assignees.firstOrNull,
-          evidenceRequired: t.evidenceRequired,
-        ),
-      ),
+      () async => id = await _writes.createWorkItem(draft, requestKey: key),
       list: true,
     );
+    if (r.ok) _keyDone(_copy);
     return (r, r.ok ? id : null);
   }
 
@@ -984,10 +1031,26 @@ class TaskDetailController extends _$TaskDetailController {
       _task?.subtasks.where((s) => s.id == id).firstOrNull;
 
   /// Sunucu alt görev değişikliği; alt görev sayıları tekil okumayla kalemde yenilenir.
+  /// Başlık/atanan/tarih değişikliği alt görevin okunan sürümünü taşır (ADR-0027); yalnız
+  /// işaretleme ([SubtaskPatch.done]) sürüm istemez.
   Future<WriteOutcome> _patchSub(String id, SubtaskPatch patch) {
     final t = _task;
-    if (t == null) return Future.value(WriteOutcome.invalid);
-    return _write(() => _writes.updateSubtask(t, id, patch), list: false);
+    final u = _sub(id);
+    if (t == null || u == null) return Future.value(WriteOutcome.invalid);
+    final versioned =
+        patch.title != null || patch.assignee != null || patch.dates != null;
+    final rev = u.editRevision;
+    if (versioned && rev == null) {
+      return Future.value(_rejected(ClientErrorCode.serverOutdated));
+    }
+    final body = SubtaskPatch(
+      title: patch.title,
+      assignee: patch.assignee,
+      dates: patch.dates,
+      done: patch.done,
+      expectedRevision: versioned ? rev : null,
+    );
+    return _write(() => _writes.updateSubtask(t, id, body), list: false);
   }
 
   /// İşaretler/kaldırır. Alt görevde kanıt bayrağı yok (ADR-0024): kanıt kapısı görev
@@ -1051,7 +1114,13 @@ class TaskDetailController extends _$TaskDetailController {
       return WriteOutcome.done;
     }
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
-    return _write(() => _writes.createSubtask(t, name), list: false);
+    final key = _keyFor(_subtask, name);
+    final r = await _write(
+      () => _writes.createSubtask(t, name, requestKey: key),
+      list: false,
+    );
+    if (r.ok) _keyDone(_subtask);
+    return r;
   }
 
   /// Örnek katalogda satır içi ad düzenlemesi (yazdıkça).
@@ -1183,7 +1252,12 @@ class TaskDetailController extends _$TaskDetailController {
       return WriteOutcome.done;
     }
     if (!permissions.canAddNote) return WriteOutcome.invalid;
-    final r = await _write(() => _writes.addNote(t, text), list: false);
+    final key = _keyFor(_note, text);
+    final r = await _write(
+      () => _writes.addNote(t, text, requestKey: key),
+      list: false,
+    );
+    if (r.ok) _keyDone(_note);
     if (r.ok && ref.mounted) state = state.copyWith(noteDraft: '');
     return r;
   }
@@ -1198,7 +1272,12 @@ class TaskDetailController extends _$TaskDetailController {
     }
     if (v == note.text) return WriteOutcome.unchanged;
     if (!permissions.canEditNote(note)) return WriteOutcome.invalid;
-    return _write(() => _writes.updateNote(t, id, v), list: false);
+    final rev = note.editRevision;
+    if (rev == null) return _rejected(ClientErrorCode.serverOutdated);
+    return _write(
+      () => _writes.updateNote(t, id, v, expectedRevision: rev),
+      list: false,
+    );
   }
 
   /// Notu siler (yalnız yazarı; yalnız sunucu notu).

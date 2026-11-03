@@ -528,6 +528,7 @@ void main() {
             filePath: file.path,
             filename: 'rapor.pdf',
             contentType: 'application/pdf',
+            requestKey: 'k-0123456789abcdefghij',
             extras: withDepartment(RecordsClient.attachFileOpenapiExtras, 'd1'),
           ),
           apiError(ClientErrorCode.sessionRefreshed),

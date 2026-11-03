@@ -18,6 +18,7 @@ _MeetingNote _$MeetingNoteFromJson(Map<String, dynamic> json) => _MeetingNote(
   convertedToWorkItemId: json['converted_to_work_item_id'] as String?,
   createdAt: DateTime.parse(json['created_at'] as String),
   updatedAt: DateTime.parse(json['updated_at'] as String),
+  editRevision: (json['edit_revision'] as num).toInt(),
 );
 
 Map<String, dynamic> _$MeetingNoteToJson(_MeetingNote instance) =>
@@ -31,6 +32,7 @@ Map<String, dynamic> _$MeetingNoteToJson(_MeetingNote instance) =>
       'converted_to_work_item_id': ?instance.convertedToWorkItemId,
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
+      'edit_revision': instance.editRevision,
     };
 
 const _$MeetingNoteAuthorRoleEnumMap = {

@@ -163,10 +163,15 @@ final class MeetingNote {
     required this.updatedAt,
     this.authorAccountId,
     this.convertedToWorkItemId,
+    required this.editRevision,
   });
 
   final String id;
   final String meetingId;
+
+  /// İçeriğin düzenleme sürümü (`edit_revision`, ADR-0027); düzenleme `expected_revision`
+  /// olarak geri gönderir.
+  final int editRevision;
 
   /// Yazar hesabı silinmişse `null`.
   final String? authorAccountId;

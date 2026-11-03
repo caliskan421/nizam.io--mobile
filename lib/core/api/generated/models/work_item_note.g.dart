@@ -15,6 +15,7 @@ _WorkItemNote _$WorkItemNoteFromJson(Map<String, dynamic> json) =>
       content: json['content'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      editRevision: (json['edit_revision'] as num).toInt(),
     );
 
 Map<String, dynamic> _$WorkItemNoteToJson(_WorkItemNote instance) =>
@@ -26,4 +27,5 @@ Map<String, dynamic> _$WorkItemNoteToJson(_WorkItemNote instance) =>
       'content': instance.content,
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
+      'edit_revision': instance.editRevision,
     };

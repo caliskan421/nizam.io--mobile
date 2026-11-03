@@ -1,8 +1,11 @@
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
+import '../../../core/server/write_compat.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_writes.dart';
 import 'task_catalog_controller.dart';
@@ -39,6 +42,7 @@ final class NewTaskForm {
     this.error,
     this.failure,
     this.busy = false,
+    this.keys = const RequestKeys(),
   });
 
   final String title;
@@ -66,6 +70,10 @@ final class NewTaskForm {
   /// Oluşturma isteği uçuşta (ikinci dokunuş istek göndermez).
   final bool busy;
 
+  /// Bekleyen oluşturmanın işlem anahtarı (ADR-0027): aynı gövdenin yeniden gönderimi aynı
+  /// anahtarla gider; gövde değişince yeni anahtar. Bellek içi (form ömrü).
+  final RequestKeys keys;
+
   int get days => end.difference(start).inDays;
 
   NewTaskForm copyWith({
@@ -83,6 +91,7 @@ final class NewTaskForm {
     NewTaskError? Function()? error,
     ApiError? Function()? failure,
     bool? busy,
+    RequestKeys? keys,
   }) => NewTaskForm(
     title: title ?? this.title,
     coordinatorship: coordinatorship == null
@@ -100,6 +109,7 @@ final class NewTaskForm {
     error: error == null ? this.error : error(),
     failure: failure == null ? this.failure : failure(),
     busy: busy ?? this.busy,
+    keys: keys ?? this.keys,
   );
 }
 
@@ -122,6 +132,9 @@ List<CoordinatorshipRef> newTaskCoordinatorships(Ref ref) {
 
 /// Oluşturulan görevin özeti (sonuç bildirimi).
 typedef CreatedTask = ({String code, int notified});
+
+/// İşlem anahtarı defterinde yeni görev eylemi.
+const _create = 'create';
 
 @Riverpod(keepAlive: true)
 class NewTaskFormController extends _$NewTaskFormController {
@@ -301,23 +314,35 @@ class NewTaskFormController extends _$NewTaskFormController {
       state = state.copyWith(failure: () => ApiError('work.not_authorized'));
       return null;
     }
-    state = state.copyWith(busy: true, failure: () => null, error: () => null);
+    // Sunucu uyum kapısı (CX-P0K-04): eski sunucu işlem anahtarını yok sayar → gönderilmez.
+    if (!serverSupportsVersionedWrites(ref.read(bindingStateProvider))) {
+      state = state.copyWith(
+        failure: () => ApiError(ClientErrorCode.serverOutdated),
+      );
+      return null;
+    }
+    final draft = WorkItemDraft(
+      programId: program,
+      departmentId: dept,
+      title: f.title.trim(),
+      start: f.start,
+      end: f.end,
+      priority: f.priority,
+      assignee: f.assignees.firstOrNull,
+      evidenceRequired: f.evidenceRequired,
+    );
+    final (keys, requestKey) = state.keys.keyFor(_create, draft.signature);
+    state = state.copyWith(
+      busy: true,
+      failure: () => null,
+      error: () => null,
+      keys: keys,
+    );
     final store = ref.read(taskCatalogControllerProvider.notifier);
     try {
       final id = await ref
           .read(taskWriteRepositoryProvider)
-          .createWorkItem(
-            WorkItemDraft(
-              programId: program,
-              departmentId: dept,
-              title: f.title.trim(),
-              start: f.start,
-              end: f.end,
-              priority: f.priority,
-              assignee: f.assignees.firstOrNull,
-              evidenceRequired: f.evidenceRequired,
-            ),
-          );
+          .createWorkItem(draft, requestKey: requestKey);
       await store.reload();
       if (!ref.mounted) return null;
       final key =

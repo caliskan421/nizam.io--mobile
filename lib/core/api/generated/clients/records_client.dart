@@ -121,6 +121,8 @@ abstract class RecordsClient {
 
   /// Göreve dosya yükler (multipart `file` parçası; akışla). CSRF başlığı istenmez (taşıyıcı yalnız Bearer).
   ///
+  /// [idempotencyKey] - İstemcinin ürettiği opak işlem anahtarı (en az 128 bit; ör. base64url 22 karakter; ADR-0027). Uzunluk baştaki/sondaki boşluk kırpıldıktan sonra bayt olarak 22–200'dür. Eksik ya da sınır dışı anahtar 422; program aktarımında `program.transfer_input_invalid`, oluşturma uçlarında modülün `<mod>.input_invalid` zarfı (alan `idempotency_key`, kod `<mod>.request_key_required` / `<mod>.request_key_invalid`). Aynı anahtar + aynı istek ilk sonucu döndürür (oluşturmada 200 + kaynağın bugünkü temsili, güncel görme yetkisiyle); farklı istek 409 `<mod>.idempotency_key_reused`. Anahtar aktör + uç tablosu kapsamındadır; sunucu kaynağı yaşadıkça tutar (kalıcı silinen kaynakta anahtar da gider).
+  ///
   /// [tag] - Kapalı etiket kümesinden biri. Eksikse 422 `records.tag_required`, küme dışıysa 422 `records.tag_invalid`.
   ///
   /// [subtaskId] - İsteğe bağlı alt görev (ADR-0024). Görevin alt görevi değilse 422 `records.input_invalid` (alan `subtask_id`). Dosya ana görevin tavanına ve tamamlanma kanıtına sayılır.
@@ -128,6 +130,7 @@ abstract class RecordsClient {
   @POST('/v1/work-items/{id}/files')
   Future<FileRecord> attachFile({
     @Path('id') required String id,
+    @Header('Idempotency-Key') required String idempotencyKey,
     @Query('tag') required Tag tag,
     @Part(name: 'file') required File file,
     @Query('subtask_id') String? subtaskId,

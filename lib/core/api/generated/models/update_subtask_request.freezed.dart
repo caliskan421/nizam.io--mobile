@@ -17,7 +17,8 @@ T _$identity<T>(T value) => value;
 mixin _$UpdateSubtaskRequest {
 
  String? get title;@JsonKey(name: 'assignee_account_id') String? get assigneeAccountId;@JsonKey(name: 'start_on') String? get startOn;@JsonKey(name: 'end_on') String? get endOn;/// true kapatır, false yeniden açar (tamamlanmış görevde 409 `work.item_completed`).
- bool? get done;
+ bool? get done;/// İstemcinin gördüğü `edit_revision` (ADR-0027). title, assignee_account_id, start_on ya da end_on varsa zorunludur (422 `work.input_invalid` + `work.revision_required` / `work.revision_invalid`); yalnız `done` gönderildiğinde gerekmez. Bayat sürüm ve farklı değer 409 `work.edit_conflict`.
+@JsonKey(name: 'expected_revision') int? get expectedRevision;
 /// Create a copy of UpdateSubtaskRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,20 +32,20 @@ $UpdateSubtaskRequestCopyWith<UpdateSubtaskRequest> get copyWith => _$UpdateSubt
 @override
 bool operator ==(Object other) {
   final _this = this as UpdateSubtaskRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateSubtaskRequest&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.assigneeAccountId, _this.assigneeAccountId) || other.assigneeAccountId == _this.assigneeAccountId)&&(identical(other.startOn, _this.startOn) || other.startOn == _this.startOn)&&(identical(other.endOn, _this.endOn) || other.endOn == _this.endOn)&&(identical(other.done, _this.done) || other.done == _this.done));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateSubtaskRequest&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.assigneeAccountId, _this.assigneeAccountId) || other.assigneeAccountId == _this.assigneeAccountId)&&(identical(other.startOn, _this.startOn) || other.startOn == _this.startOn)&&(identical(other.endOn, _this.endOn) || other.endOn == _this.endOn)&&(identical(other.done, _this.done) || other.done == _this.done)&&(identical(other.expectedRevision, _this.expectedRevision) || other.expectedRevision == _this.expectedRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as UpdateSubtaskRequest;
-  return Object.hash(runtimeType,_this.title,_this.assigneeAccountId,_this.startOn,_this.endOn,_this.done);
+  return Object.hash(runtimeType,_this.title,_this.assigneeAccountId,_this.startOn,_this.endOn,_this.done,_this.expectedRevision);
 }
 
 @override
 String toString() {
   final _this = this as UpdateSubtaskRequest;
-  return 'UpdateSubtaskRequest(title: ${_this.title}, assigneeAccountId: ${_this.assigneeAccountId}, startOn: ${_this.startOn}, endOn: ${_this.endOn}, done: ${_this.done})';
+  return 'UpdateSubtaskRequest(title: ${_this.title}, assigneeAccountId: ${_this.assigneeAccountId}, startOn: ${_this.startOn}, endOn: ${_this.endOn}, done: ${_this.done}, expectedRevision: ${_this.expectedRevision})';
 }
 
 
@@ -55,7 +56,7 @@ abstract mixin class $UpdateSubtaskRequestCopyWith<$Res>  {
   factory $UpdateSubtaskRequestCopyWith(UpdateSubtaskRequest value, $Res Function(UpdateSubtaskRequest) _then) = _$UpdateSubtaskRequestCopyWithImpl;
 @useResult
 $Res call({
- String? title,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@JsonKey(name: 'start_on') String? startOn,@JsonKey(name: 'end_on') String? endOn, bool? done
+ String? title,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@JsonKey(name: 'start_on') String? startOn,@JsonKey(name: 'end_on') String? endOn, bool? done,@JsonKey(name: 'expected_revision') int? expectedRevision
 });
 
 
@@ -72,14 +73,15 @@ class _$UpdateSubtaskRequestCopyWithImpl<$Res>
 
 /// Create a copy of UpdateSubtaskRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? title = freezed,Object? assigneeAccountId = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? done = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? title = freezed,Object? assigneeAccountId = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? done = freezed,Object? expectedRevision = freezed,}) {
   return _then(UpdateSubtaskRequest(
 title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,assigneeAccountId: freezed == assigneeAccountId ? _self.assigneeAccountId : assigneeAccountId // ignore: cast_nullable_to_non_nullable
 as String?,startOn: freezed == startOn ? _self.startOn : startOn // ignore: cast_nullable_to_non_nullable
 as String?,endOn: freezed == endOn ? _self.endOn : endOn // ignore: cast_nullable_to_non_nullable
 as String?,done: freezed == done ? _self.done : done // ignore: cast_nullable_to_non_nullable
-as bool?,
+as bool?,expectedRevision: freezed == expectedRevision ? _self.expectedRevision : expectedRevision // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -164,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? title, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @JsonKey(name: 'start_on')  String? startOn, @JsonKey(name: 'end_on')  String? endOn,  bool? done)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? title, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @JsonKey(name: 'start_on')  String? startOn, @JsonKey(name: 'end_on')  String? endOn,  bool? done, @JsonKey(name: 'expected_revision')  int? expectedRevision)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UpdateSubtaskRequest() when $default != null:
-return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.done);case _:
+return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.done,_that.expectedRevision);case _:
   return orElse();
 
 }
@@ -185,10 +187,10 @@ return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? title, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @JsonKey(name: 'start_on')  String? startOn, @JsonKey(name: 'end_on')  String? endOn,  bool? done)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? title, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @JsonKey(name: 'start_on')  String? startOn, @JsonKey(name: 'end_on')  String? endOn,  bool? done, @JsonKey(name: 'expected_revision')  int? expectedRevision)  $default,) {final _that = this;
 switch (_that) {
 case _UpdateSubtaskRequest():
-return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.done);case _:
+return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.done,_that.expectedRevision);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +207,10 @@ return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? title, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @JsonKey(name: 'start_on')  String? startOn, @JsonKey(name: 'end_on')  String? endOn,  bool? done)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? title, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @JsonKey(name: 'start_on')  String? startOn, @JsonKey(name: 'end_on')  String? endOn,  bool? done, @JsonKey(name: 'expected_revision')  int? expectedRevision)?  $default,) {final _that = this;
 switch (_that) {
 case _UpdateSubtaskRequest() when $default != null:
-return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.done);case _:
+return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.done,_that.expectedRevision);case _:
   return null;
 
 }
@@ -220,7 +222,7 @@ return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn,_t
 @JsonSerializable()
 
 class _UpdateSubtaskRequest implements UpdateSubtaskRequest {
-  const _UpdateSubtaskRequest({this.title, @JsonKey(name: 'assignee_account_id') this.assigneeAccountId, @JsonKey(name: 'start_on') this.startOn, @JsonKey(name: 'end_on') this.endOn, this.done});
+  const _UpdateSubtaskRequest({this.title, @JsonKey(name: 'assignee_account_id') this.assigneeAccountId, @JsonKey(name: 'start_on') this.startOn, @JsonKey(name: 'end_on') this.endOn, this.done, @JsonKey(name: 'expected_revision') this.expectedRevision});
   factory _UpdateSubtaskRequest.fromJson(Map<String, dynamic> json) => _$UpdateSubtaskRequestFromJson(json);
 
 @override final  String? title;
@@ -229,6 +231,8 @@ class _UpdateSubtaskRequest implements UpdateSubtaskRequest {
 @override@JsonKey(name: 'end_on') final  String? endOn;
 /// true kapatır, false yeniden açar (tamamlanmış görevde 409 `work.item_completed`).
 @override final  bool? done;
+/// İstemcinin gördüğü `edit_revision` (ADR-0027). title, assignee_account_id, start_on ya da end_on varsa zorunludur (422 `work.input_invalid` + `work.revision_required` / `work.revision_invalid`); yalnız `done` gönderildiğinde gerekmez. Bayat sürüm ve farklı değer 409 `work.edit_conflict`.
+@override@JsonKey(name: 'expected_revision') final  int? expectedRevision;
 
 /// Create a copy of UpdateSubtaskRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -243,18 +247,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateSubtaskRequest&&(identical(other.title, title) || other.title == title)&&(identical(other.assigneeAccountId, assigneeAccountId) || other.assigneeAccountId == assigneeAccountId)&&(identical(other.startOn, startOn) || other.startOn == startOn)&&(identical(other.endOn, endOn) || other.endOn == endOn)&&(identical(other.done, done) || other.done == done));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateSubtaskRequest&&(identical(other.title, title) || other.title == title)&&(identical(other.assigneeAccountId, assigneeAccountId) || other.assigneeAccountId == assigneeAccountId)&&(identical(other.startOn, startOn) || other.startOn == startOn)&&(identical(other.endOn, endOn) || other.endOn == endOn)&&(identical(other.done, done) || other.done == done)&&(identical(other.expectedRevision, expectedRevision) || other.expectedRevision == expectedRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,title,assigneeAccountId,startOn,endOn,done);
+    return Object.hash(runtimeType,title,assigneeAccountId,startOn,endOn,done,expectedRevision);
 }
 
 @override
 String toString() {
-    return 'UpdateSubtaskRequest(title: $title, assigneeAccountId: $assigneeAccountId, startOn: $startOn, endOn: $endOn, done: $done)';
+    return 'UpdateSubtaskRequest(title: $title, assigneeAccountId: $assigneeAccountId, startOn: $startOn, endOn: $endOn, done: $done, expectedRevision: $expectedRevision)';
 }
 
 
@@ -265,7 +269,7 @@ abstract mixin class _$UpdateSubtaskRequestCopyWith<$Res> implements $UpdateSubt
   factory _$UpdateSubtaskRequestCopyWith(_UpdateSubtaskRequest value, $Res Function(_UpdateSubtaskRequest) _then) = __$UpdateSubtaskRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String? title,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@JsonKey(name: 'start_on') String? startOn,@JsonKey(name: 'end_on') String? endOn, bool? done
+ String? title,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@JsonKey(name: 'start_on') String? startOn,@JsonKey(name: 'end_on') String? endOn, bool? done,@JsonKey(name: 'expected_revision') int? expectedRevision
 });
 
 
@@ -282,14 +286,15 @@ class __$UpdateSubtaskRequestCopyWithImpl<$Res>
 
 /// Create a copy of UpdateSubtaskRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? title = freezed,Object? assigneeAccountId = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? done = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? title = freezed,Object? assigneeAccountId = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? done = freezed,Object? expectedRevision = freezed,}) {
   return _then(_UpdateSubtaskRequest(
 title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,assigneeAccountId: freezed == assigneeAccountId ? _self.assigneeAccountId : assigneeAccountId // ignore: cast_nullable_to_non_nullable
 as String?,startOn: freezed == startOn ? _self.startOn : startOn // ignore: cast_nullable_to_non_nullable
 as String?,endOn: freezed == endOn ? _self.endOn : endOn // ignore: cast_nullable_to_non_nullable
 as String?,done: freezed == done ? _self.done : done // ignore: cast_nullable_to_non_nullable
-as bool?,
+as bool?,expectedRevision: freezed == expectedRevision ? _self.expectedRevision : expectedRevision // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

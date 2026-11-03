@@ -47,7 +47,7 @@ class ApiWorkItemRepository implements WorkItemRepository {
   });
 
   @override
-  Future<TaskSummary> create(TaskDraft draft) {
+  Future<TaskSummary> create(TaskDraft draft, {required String requestKey}) {
     final body = CreateWorkItemRequest(
       title: draft.title,
       startOn: day(draft.start),
@@ -57,7 +57,9 @@ class ApiWorkItemRepository implements WorkItemRepository {
       assigneeAccountId: draft.assignee,
     );
     return apiCall(
-      () async => _taskSummary(await _client.createWorkItem(body: body)),
+      () async => _taskSummary(
+        await _client.createWorkItem(idempotencyKey: requestKey, body: body),
+      ),
     );
   }
 
@@ -70,6 +72,8 @@ class ApiWorkItemRepository implements WorkItemRepository {
       startOn: patch.start == null ? null : day(patch.start!),
       endOn: patch.due == null ? null : day(patch.due!),
       plannedEndOn: patch.plannedEnd == null ? null : day(patch.plannedEnd!),
+      expectedRevision: patch.expectedRevision,
+      expectedDatesRevision: patch.expectedDatesRevision,
     );
     return apiCall(
       () async =>

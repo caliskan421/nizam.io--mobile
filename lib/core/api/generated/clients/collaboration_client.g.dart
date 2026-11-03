@@ -21,192 +21,6 @@ class _CollaborationClient implements CollaborationClient {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<SentMessage> sendMessage({
-    required SendMessageRequest body,
-    Map<String, dynamic>? extras = CollaborationClient.sendMessageOpenapiExtras,
-  }) async {
-    final _extra = <String, dynamic>{};
-    _extra.addAll(extras ?? <String, dynamic>{});
-    final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(body.toJson());
-    final _options = _setStreamType<SentMessage>(
-      Options(method: 'POST', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/v1/messages',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<Map<String, Object?>>(_options);
-    late SentMessage _value;
-    try {
-      _value = SentMessage.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<MessageList> listMessages({
-    Filter? filter,
-    int? limit,
-    String? cursor,
-    Map<String, dynamic>? extras =
-        CollaborationClient.listMessagesOpenapiExtras,
-  }) async {
-    final _extra = <String, dynamic>{};
-    _extra.addAll(extras ?? <String, dynamic>{});
-    final queryParameters = <String, dynamic>{
-      r'filter': filter,
-      r'limit': limit,
-      r'cursor': cursor,
-    };
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<MessageList>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/v1/messages',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<Map<String, Object?>>(_options);
-    late MessageList _value;
-    try {
-      _value = MessageList.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<CountResult> countUnreadMessages({
-    Map<String, dynamic>? extras =
-        CollaborationClient.countUnreadMessagesOpenapiExtras,
-  }) async {
-    final _extra = <String, dynamic>{};
-    _extra.addAll(extras ?? <String, dynamic>{});
-    final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<CountResult>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/v1/messages/unread-count',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<Map<String, Object?>>(_options);
-    late CountResult _value;
-    try {
-      _value = CountResult.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<RecipientGroups> listMessageRecipients({
-    Map<String, dynamic>? extras =
-        CollaborationClient.listMessageRecipientsOpenapiExtras,
-  }) async {
-    final _extra = <String, dynamic>{};
-    _extra.addAll(extras ?? <String, dynamic>{});
-    final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<RecipientGroups>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/v1/messages/recipients',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<Map<String, Object?>>(_options);
-    late RecipientGroups _value;
-    try {
-      _value = RecipientGroups.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<void> markMessageRead({
-    required String id,
-    Map<String, dynamic>? extras =
-        CollaborationClient.markMessageReadOpenapiExtras,
-  }) async {
-    final _extra = <String, dynamic>{};
-    _extra.addAll(extras ?? <String, dynamic>{});
-    final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<void>(
-      Options(method: 'POST', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/v1/messages/${id}/read',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    await _dio.fetch<void>(_options);
-  }
-
-  @override
-  Future<void> deleteMessage({
-    required String id,
-    Map<String, dynamic>? extras =
-        CollaborationClient.deleteMessageOpenapiExtras,
-  }) async {
-    final _extra = <String, dynamic>{};
-    _extra.addAll(extras ?? <String, dynamic>{});
-    final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<void>(
-      Options(method: 'DELETE', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/v1/messages/${id}',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    await _dio.fetch<void>(_options);
-  }
-
-  @override
   Future<MeetingCreated> createMeeting({
     required CreateMeetingRequest body,
     Map<String, dynamic>? extras =
@@ -793,6 +607,7 @@ class _CollaborationClient implements CollaborationClient {
   @override
   Future<MeetingNote> addMeetingNote({
     required String id,
+    required String idempotencyKey,
     required NoteRequest body,
     Map<String, dynamic>? extras =
         CollaborationClient.addMeetingNoteOpenapiExtras,
@@ -801,7 +616,8 @@ class _CollaborationClient implements CollaborationClient {
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Idempotency-Key': idempotencyKey};
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _options = _setStreamType<MeetingNote>(
@@ -866,7 +682,7 @@ class _CollaborationClient implements CollaborationClient {
   @override
   Future<MeetingNote> updateMeetingNote({
     required String noteId,
-    required NoteRequest body,
+    required ReviseMeetingNoteRequest body,
     Map<String, dynamic>? extras =
         CollaborationClient.updateMeetingNoteOpenapiExtras,
   }) async {

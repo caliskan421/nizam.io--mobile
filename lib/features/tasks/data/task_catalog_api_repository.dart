@@ -250,6 +250,8 @@ class ApiTaskCatalogRepository
       overdueDays: lateness.daysOverdue,
       evidenceRequired: w.completionEvidenceRequired,
       subtaskCounts: (total: w.subtaskCounts.total, done: w.subtaskCounts.done),
+      editRevision: w.editRevision,
+      datesRevision: w.datesRevision,
     );
   }
 }

@@ -9,6 +9,7 @@ import 'clients/identity_client.dart';
 import 'clients/organization_client.dart';
 import 'clients/program_client.dart';
 import 'clients/work_client.dart';
+import 'clients/messaging_client.dart';
 import 'clients/collaboration_client.dart';
 import 'clients/records_client.dart';
 import 'clients/notifications_client.dart';
@@ -19,7 +20,7 @@ import 'clients/assistant_client.dart';
 ///
 /// Bütün rota tablosu: sağlık/keşif ve kurulum profili, kimlik, organizasyon ve.
 /// yönetici hesapları, program ve aktarım, görev (work), dosya ve arşiv.
-/// (records), mesaj ve toplantı (collaboration), bildirim (notifications) ve.
+/// (records), sohbet (messaging), toplantı (collaboration), bildirim (notifications) ve.
 /// rapor (reporting) ve YZ asistanı (assistant; yalnız özellik bayrağı açıkken kayıtlı) uçları.
 /// Spec işlem kümesi rota tablosuyla iki yönlü eşittir.
 ///
@@ -36,7 +37,7 @@ import 'clients/assistant_client.dart';
 ///   sonra artakalan gövde katı çözücüde de `platform.body_invalid`'dir. Bilinmeyen alanı.
 ///   yok sayan çözücüde her çözüm hatası `platform.body_invalid`'dir. Kendi çözücüsünü.
 ///   kullanan uçlarda gövde hatası modül kodudur: collaboration uçlarında.
-///   `collaboration.input_invalid`, dosya yeniden adlandırmada `records.input_invalid`.
+///   `collaboration.input_invalid`, sohbet uçlarında `messaging.input_invalid`, dosya yeniden adlandırmada `records.input_invalid`.
 /// - Uç başına `x-nizamio-error-codes` ortak kenar kodlarını da taşır; modüle özgü kodların.
 ///   uç başına listesi ilgili modül README'sinin §4 tablosuyla aynıdır.
 /// - Olay türleri: `docs/api/events.md`.
@@ -62,6 +63,7 @@ class NizamioApi {
   OrganizationClient? _organization;
   ProgramClient? _program;
   WorkClient? _work;
+  MessagingClient? _messaging;
   CollaborationClient? _collaboration;
   RecordsClient? _records;
   NotificationsClient? _notifications;
@@ -81,6 +83,9 @@ class NizamioApi {
       _program ??= ProgramClient(_dio, baseUrl: _baseUrl);
 
   WorkClient get work => _work ??= WorkClient(_dio, baseUrl: _baseUrl);
+
+  MessagingClient get messaging =>
+      _messaging ??= MessagingClient(_dio, baseUrl: _baseUrl);
 
   CollaborationClient get collaboration =>
       _collaboration ??= CollaborationClient(_dio, baseUrl: _baseUrl);

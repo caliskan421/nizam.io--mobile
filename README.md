@@ -1,7 +1,7 @@
 # NIZAM.IO — Mobil istemci
 
 NIZAM.IO'nun iOS/Android istemcisi. Durum: **MOB-0 altyapı iskeleti** (program F14,
-`../program/fazlar/F14-mob-1-kimlik-kabuk-can.md`). Ekran yoktur: ekran tasarımı ve UI
+`../program/arsiv/v1-teslim/fazlar/F14-mob-1-kimlik-kabuk-can.md`). Ekran yoktur: ekran tasarımı ve UI
 geliştirmesi program sonrası ayrı çalışmadadır (D-0174).
 
 ## Yığın

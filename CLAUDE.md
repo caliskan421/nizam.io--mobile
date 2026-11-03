@@ -28,15 +28,16 @@ Ayrıntılar: [DI kararı](docs/architecture/adr-0001-di-get-it.md),
 
 ## Okuma sırası (oturum başı)
 
-1. `../program/DURUM.md` — aktif faz ve sıradaki tek iş (yönetim deposu `NIZAM.IO/program/`).
-2. `../program/fazlar/FNN-*.md` — aktif mobil fazının amacı, kapsamı, kabul ölçütü.
+1. `../program/DURUM.md` — aktif iş ve sıradaki tek adım (yönetim deposu `NIZAM.IO/program/`).
+2. `../program/isler/FNN-*.md` — aktif mobil işinin amacı, kapsamı, kabul ölçütü.
 3. Backend API sözleşmesi (tek kaynak): `../nizam.io--backend/docs/api/`
    - `openapi.yaml` — uçlar, şemalar, kapsam başlıkları, hata yanıtları
    - `error-codes.json` — hata kodu → HTTP durumu → `fields[]` → mesaj anahtarı
    - `README.md` — sürüm ve etiket ilkesi
-4. Bu depodaki `README.md` (komutlar, flavor'lar, dizin düzeni) ve açık PR'lar.
+4. Bu depodaki `README.md` (komutlar, flavor'lar, dizin düzeni), `lib/CLAUDE.md` ve
+   `lib/core/api/CLAUDE.md` (kaynak haritaları) ve açık PR'lar.
 
-Spec her zaman bir **backend etiketinden** okunur (ilk pin: `v0.1.0-api`). Etiketsiz
+Spec her zaman bir **backend etiketinden** okunur (güncel pin `api-pin.json`). Etiketsiz
 `main` spec'inden kod üretilmez.
 
 ## Kurallar
@@ -50,8 +51,8 @@ Spec her zaman bir **backend etiketinden** okunur (ilk pin: `v0.1.0-api`). Etike
 - **Belirteçler:** erişim + yenileme gövdede, yalnız `flutter_secure_storage`'da; yeni
   belirteç kaydedilmeden eski silinmez; log'a belirteç yazılmaz. Yenileme belirsiz
   düşerse (zaman aşımı/ağ) aynı belirteçle tekrar denenmez → yeniden giriş.
-- **Kapsam açık taşınır:** S2'de `X-Nizamio-Program`, S3'te ek `X-Nizamio-Department`.
-- **Hata zarfı:** `{code, message, request_id, fields[]}`; metin `code`'dan ARB anahtarıyla.
+- Sözleşme ayrıntıları (kapsam başlıkları, hata zarfı, sayfalama, sürüm):
+  `../nizam.io--backend/docs/api/README.md`.
 - v1'de push yok (uygulama içi çan + ön planda yoklama); pinning ve biyometrik yok.
 - Eski mobil kod veya sahte kontrol düzlemi geri getirilmez.
 - Backend veya yönetim deposuna bu depodan yazılmaz.
@@ -70,5 +71,4 @@ durumları (boş, hata, yükleniyor) bileşende bir kez test edilir, her ekranda
 Her değişiklik PR ile gelir; şablon `.github/pull_request_template.md`. "Bitti" yalnız
 CI yeşil + kabul ölçütü kanıtıyla söylenir. Faz sonunda Codex tek koşum (salt okunur)
 hükmü `docs/reviews/` altına yazılır; faz kapanışı `../program/DURUM.md`'ye işlenir.
-Ürün sahibine oturum içinde soru sorulmaz; kırmızı karar (ör. mobil yenileme ömrü,
-uygulama kimliği/imzalama) faz dosyasındaki varsayılanla ilerler ve DURUM.md'ye yazılır.
+Oturum protokolü ve kırmızı karar kuralı: `../program/README.md`.

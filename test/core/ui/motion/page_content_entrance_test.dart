@@ -210,4 +210,87 @@ void main() {
     expect(opacity(0), 1);
     expect(opacity(1), 1);
   });
+
+  group('onRevisit', () {
+    var revisits = 0;
+    setUp(() => revisits = 0);
+    Widget host(bool visible, {bool reduced = false}) => app(
+      TickerMode(
+        enabled: visible,
+        child: PageContentEntrance(
+          onRevisit: () => revisits++,
+          child: const SizedBox(),
+        ),
+      ),
+      reduced: reduced,
+    );
+
+    testWidgets('dönüş hareketi bitmeden çağrılmaz, bitince bir kez', (
+      tester,
+    ) async {
+      await tester.pumpWidget(host(true));
+      await tester.pump(RpMotion.enterDuration);
+      expect(revisits, 0);
+      await tester.pumpWidget(host(false));
+      await tester.pumpWidget(host(true));
+      await tester.pump(
+        RpMotion.enterDuration - const Duration(milliseconds: 1),
+      );
+      expect(revisits, 0);
+      await tester.pump(const Duration(milliseconds: 2));
+      expect(revisits, 1);
+      await tester.pump(RpMotion.enterDuration);
+      expect(revisits, 1);
+    });
+
+    testWidgets('hareket bitmeden yeniden gizlenirse çağrılmaz', (
+      tester,
+    ) async {
+      await tester.pumpWidget(host(true));
+      await tester.pump(RpMotion.enterDuration);
+      await tester.pumpWidget(host(false));
+      await tester.pumpWidget(host(true));
+      await tester.pump(RpMotion.enterDuration ~/ 2);
+      await tester.pumpWidget(host(false));
+      await tester.pump(RpMotion.enterDuration * 2);
+      expect(revisits, 0);
+    });
+
+    testWidgets('hareketi azalt: dönüşte kare sonunda', (tester) async {
+      await tester.pumpWidget(host(true, reduced: true));
+      await tester.pumpWidget(host(false, reduced: true));
+      await tester.pumpWidget(host(true, reduced: true));
+      expect(revisits, 1);
+      await tester.pump(RpMotion.enterDuration);
+      expect(revisits, 1);
+    });
+
+    testWidgets('bölme geçişine katılan giriş, bölme hareketi bitince', (
+      tester,
+    ) async {
+      Widget pane(bool visible, Object play) => app(
+        TickerMode(
+          enabled: visible,
+          child: NzPaneTransition(
+            motion: NzPaneMotion.pop,
+            play: play,
+            child: PageContentEntrance(
+              onRevisit: () => revisits++,
+              child: const SizedBox(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpWidget(pane(true, 0));
+      await tester.pump(RpMotion.pushDuration);
+      await tester.pumpWidget(pane(false, 0));
+      await tester.pumpWidget(pane(true, 1));
+      await tester.pump(RpMotion.enterDuration);
+      // Giriş süresi geçti ama bölme hareketi sürüyor: iç giriş ona katılır, onu bekler.
+      expect(tester.hasRunningAnimations, isTrue);
+      expect(revisits, 0);
+      await tester.pumpAndSettle();
+      expect(revisits, 1);
+    });
+  });
 }

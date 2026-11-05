@@ -183,7 +183,8 @@ class NzPage extends ConsumerWidget {
   final Future<void> Function()? onRefresh;
 
   /// [NzPage.feed]: sayfa gizliyken yeniden görünür olunca (kabuk sekmesine dönüş, üstüne
-  /// itilen sayfanın kapanması; `TickerMode` kapalı → açık). İlk açılışta çağrılmaz.
+  /// itilen sayfanın kapanması; `TickerMode` kapalı → açık). İlk açılışta çağrılmaz;
+  /// içerik giriş hareketi bitince çalışır ([PageContentEntrance.onRevisit]).
   /// Arka planda bayat veriyi tazelemek içindir (ör. `refreshIfStale`); gösterge çizilmez,
   /// eski veri görünür kalır.
   final VoidCallback? onRevisit;
@@ -240,7 +241,7 @@ class NzPage extends ConsumerWidget {
           ? null
           : () => _guardedRefresh(context, onRefresh!);
       final cupertino = refresh != null && _cupertinoRefresh(context);
-      Widget page = NzTextScaleLimit(
+      return NzTextScaleLimit(
         child: Scaffold(
           body: LayoutBuilder(
             builder: (context, constraints) {
@@ -263,6 +264,7 @@ class NzPage extends ConsumerWidget {
                   PageContentEntrance.sliver(
                     enabled: animateContent,
                     fade: fadeContent && pinned == null,
+                    onRevisit: onRevisit,
                     child: SliverMainAxisGroup(
                       slivers: [
                         PageContentEntrance.sliver(
@@ -327,10 +329,6 @@ class NzPage extends ConsumerWidget {
           ),
         ),
       );
-      if (onRevisit case final revisit?) {
-        page = _RevisitWatch(onRevisit: revisit, child: page);
-      }
-      return page;
     }
     return NzTextScaleLimit(
       child: Scaffold(
@@ -399,38 +397,6 @@ Future<void> _guardedRefresh(
     if (sessionEndedErrorCodes.contains(error.code) || !context.mounted) return;
     NzToast.error(context, error);
   }
-}
-
-/// `TickerMode` kapalı → açık geçişinde (gizli sayfa yeniden görünür) [onRevisit].
-class _RevisitWatch extends StatefulWidget {
-  const _RevisitWatch({required this.onRevisit, required this.child});
-
-  final VoidCallback onRevisit;
-  final Widget child;
-
-  @override
-  State<_RevisitWatch> createState() => _RevisitWatchState();
-}
-
-class _RevisitWatchState extends State<_RevisitWatch> {
-  bool? _active;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final active = TickerMode.valuesOf(context).enabled;
-    final returning = _active == false && active;
-    _active = active;
-    // Bağımlılık değişimi sırasında sağlayıcı yazımı yapılmaz: kare sonrasına bırakılır.
-    if (returning) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) widget.onRevisit();
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
 }
 
 /// Dokunmayı keser; gövdeyi yarı saydam örter, ortada [NzLoader.page].

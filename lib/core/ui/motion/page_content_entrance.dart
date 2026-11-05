@@ -19,6 +19,7 @@ class PageContentEntrance extends StatefulWidget {
     this.delay = Duration.zero,
     this.enabled = true,
     this.fade = true,
+    this.onRevisit,
   }) : _sliver = false;
 
   /// Sliver geometrisini ve tembel liste kurulumunu koruyan aynı hareket.
@@ -28,6 +29,7 @@ class PageContentEntrance extends StatefulWidget {
     this.delay = Duration.zero,
     this.enabled = true,
     this.fade = true,
+    this.onRevisit,
   }) : _sliver = true;
 
   final Widget child;
@@ -35,6 +37,13 @@ class PageContentEntrance extends StatefulWidget {
 
   /// false → opaklık animasyonu yok, yalnız öteleme (alt ağaçta cam var; bkz. sınıf belgesi).
   final bool fade;
+
+  /// Gizli içerik yeniden görünür olunca (`TickerMode` kapalı → açık; ilk açılışta değil)
+  /// giriş hareketi BİTİNCE bir kez çağrılır: bu girişin ya da katıldığı üst hareketin
+  /// (tablet bölme geçişi). Hareket yoksa (hareketi azalt, [enabled] false) kare sonunda.
+  /// Bayat veri tazelemesi içindir (ör. `refreshIfStale`): istek ve yeniden kurulum hareketle
+  /// aynı karelere düşmez. Hareket bitmeden yeniden gizlenirse çağrılmaz.
+  final VoidCallback? onRevisit;
 
   /// Hareketin başlamadan önce beklediği süre (kademeli giriş; bkz. [RpMotion.stagger]).
   /// Yalnız ilk kurulumda okunur; süre boyunca içerik saydam ve aşağıda bekler.
@@ -52,6 +61,9 @@ class _PageContentEntranceState extends State<PageContentEntrance>
   bool? _coveredByParent;
   bool? _active;
   Animation<double>? _parentAnimation;
+
+  /// [PageContentEntrance.onRevisit] için bitişi beklenen hareket.
+  Animation<double>? _revisitAfter;
 
   /// Gecikme + giriş; gecikme eğrinin başındaki düz [Interval] bölümüdür (zamanlayıcı yok).
   Duration get _total => RpMotion.enterDuration + widget.delay;
@@ -81,16 +93,14 @@ class _PageContentEntranceState extends State<PageContentEntrance>
     final active = TickerMode.valuesOf(context).enabled;
     final returning = _active == false && active;
     _active = active;
-    if (NzMotion.reduced(context)) {
+    if (!active) _cancelRevisit();
+    if (NzMotion.reduced(context) || !widget.enabled) {
       _controller.duration = Duration.zero;
       _controller.value = 1;
-      return;
-    }
-    if (!active) {
+    } else if (!active) {
       _controller.stop();
       return;
-    }
-    if (returning) {
+    } else if (returning) {
       // go_router korunan dalları TickerMode ile gizler. Yalnız dış içerik yeniden
       // oynar; alt paneller onun hareketine katılır ve mesafeyi ikiye katlamaz.
       // Üst hareket şu an oynuyorsa (tablet bölme geçişi) ona katılınır.
@@ -102,10 +112,38 @@ class _PageContentEntranceState extends State<PageContentEntrance>
       _controller.duration = Duration.zero;
       _controller.value = 1;
     }
+    if (returning) _scheduleRevisit();
+  }
+
+  void _scheduleRevisit() {
+    if (widget.onRevisit == null) return;
+    final motion = _coveredByParent! ? _parentAnimation! : _controller;
+    if (motion.isAnimating) {
+      _revisitAfter = motion..addStatusListener(_onMotionStatus);
+    } else {
+      // Bağımlılık değişimi sırasında sağlayıcı yazımı yapılmaz: kare sonrasına bırakılır.
+      WidgetsBinding.instance.addPostFrameCallback((_) => _revisit());
+    }
+  }
+
+  void _onMotionStatus(AnimationStatus status) {
+    if (status.isAnimating) return;
+    _cancelRevisit();
+    _revisit();
+  }
+
+  void _revisit() {
+    if (mounted && _active == true) widget.onRevisit?.call();
+  }
+
+  void _cancelRevisit() {
+    _revisitAfter?.removeStatusListener(_onMotionStatus);
+    _revisitAfter = null;
   }
 
   @override
   void dispose() {
+    _cancelRevisit();
     _animation.dispose();
     _controller.dispose();
     super.dispose();

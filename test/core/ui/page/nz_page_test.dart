@@ -17,6 +17,7 @@ import 'package:nizamio/core/theme/generated/tokens.gen.dart';
 import 'package:nizamio/core/ui/layout/layout.dart';
 import 'package:nizamio/core/ui/page/nz_page.dart';
 import 'package:nizamio/core/ui/theme/app_theme.dart';
+import 'package:nizamio/core/ui/theme/nz_motion.dart';
 import 'package:nizamio/core/ui/widgets/feedback/nz_banner.dart';
 import 'package:nizamio/core/ui/widgets/feedback/nz_loader.dart';
 
@@ -449,7 +450,7 @@ void main() {
   });
 
   testWidgets(
-    'feed onRevisit: gizli sayfa yeniden görünür olunca, ilk açılışta değil',
+    'feed onRevisit: yeniden görünür olunca giriş bitince bir kez, ilk açılışta değil',
     (tester) async {
       var revisits = 0;
       Widget host(bool visible) => _app(
@@ -470,6 +471,13 @@ void main() {
       expect(revisits, 0);
       await tester.pumpWidget(host(true));
       await tester.pump();
+      // Tazeleme giriş hareketiyle aynı karelere düşmez.
+      expect(revisits, 0);
+      await tester.pump(RpMotion.enterDuration ~/ 2);
+      expect(revisits, 0);
+      await tester.pump(RpMotion.enterDuration);
+      expect(revisits, 1);
+      await tester.pump(RpMotion.enterDuration);
       expect(revisits, 1);
     },
   );

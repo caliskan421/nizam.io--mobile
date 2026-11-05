@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
-import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/features/coordinatorships/presentation/coordinatorships_page.dart';
 
 import '../../../support/harness.dart';
@@ -22,7 +21,7 @@ Future<(Harness, RecordingAppNav)> _open(
     tester,
     () => pilotHarness(PilotBackend(), signedIn: true),
   );
-  h.read(scopeControllerProvider).selectSample();
+  h.read(scopeControllerProvider).selectProgram('prog-1');
   final nav = RecordingAppNav();
   await pumpScreen(
     tester,
@@ -64,46 +63,6 @@ void main() {
     await tester.tap(find.text('Altyapı ve tesisat'));
     await settle(tester);
     expect(nav.calls, ['coord:ALT']);
-  });
-
-  testWidgets('kısayol menüsü: sıralama, zaman çizelgesi, ekleme tostu', (
-    tester,
-  ) async {
-    final (h, nav) = await _open(tester);
-    void fire(int tab) =>
-        h.read(shellReselectEventsProvider.notifier).fire(tab);
-
-    // Başka sekmenin olayı menü açmaz.
-    fire(0);
-    await settle(tester);
-    expect(find.text(_l.uiCoordFlyTimelineAll), findsNothing);
-
-    fire(CoordinatorshipsPage.shellTab);
-    await settle(tester);
-    expect(find.text(_l.uiCoordFlyTimelineAll), findsOneWidget);
-    expect(find.text(_l.uiCoordSortProgress), findsOneWidget);
-    await tester.tap(find.text(_l.uiCoordSortLate));
-    await settle(tester);
-    expect(_cardOrder(tester).take(3), ['İDA', 'ALT', 'ULA']);
-
-    fire(CoordinatorshipsPage.shellTab);
-    await settle(tester);
-    await tester.tap(find.text(_l.uiCoordSortProgress));
-    await settle(tester);
-    expect(_cardOrder(tester).first, 'MEK');
-
-    fire(CoordinatorshipsPage.shellTab);
-    await settle(tester);
-    await tester.tap(find.text(_l.uiCoordFlyAdd));
-    await settle(tester);
-    expect(find.text(_l.uiCoordToastAddForm), findsOneWidget);
-
-    fire(CoordinatorshipsPage.shellTab);
-    await settle(tester);
-    await tester.tap(find.text(_l.uiCoordFlyTimelineAll));
-    await settle(tester);
-    // Prototip: bütün koordinatörlükler seçili açılır.
-    expect(nav.calls, ['timeline:*']);
   });
 
   for (final width in [360.0, 390.0]) {

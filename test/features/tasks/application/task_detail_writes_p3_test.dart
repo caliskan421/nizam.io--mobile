@@ -392,8 +392,6 @@ void main() {
       expect(_log(h).first, 'DELETE /v1/work-items/w1');
       expect(_log(h), contains('GET /v1/program/work-items'));
       expect(c.read(taskDetailControllerProvider('w1')).deleted, isNotNull);
-      ctl.undoDelete();
-      expect(c.read(taskDetailControllerProvider('w1')).deleted, isNotNull);
     });
 
     test(

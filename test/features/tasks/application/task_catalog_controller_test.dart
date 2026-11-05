@@ -7,52 +7,8 @@ import 'package:nizamio/features/tasks/application/task_list_filter.dart';
 import 'package:nizamio/features/tasks/domain/task_details.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
-import '../../pilot_support.dart';
 
 void main() {
-  test(
-    'örnek katalog: 76 görev, 11 koordinatörlük, prototip kişileri',
-    () async {
-      final h = await pilotHarness(PilotBackend());
-      h.container.listen(taskCatalogControllerProvider, (_, _) {});
-      final c = await h.container.read(taskCatalogControllerProvider.future);
-      expect(c.tasks, hasLength(76));
-      expect(c.coordinatorships, hasLength(11));
-      expect(c.person(c.me)?.name, 'Muhammet Ali Çalışkan');
-      expect(c.task('ALT-7')?.coordinatorship, 'ALT');
-      expect(c.coordinatorship('ALT')?.leads, ['aa', 'av']);
-      expect(c.tasksOf('ALT'), hasLength(13));
-      expect(c.tasks.where((t) => t.isOverdue), isNotEmpty);
-      expect(c.task('YOK'), isNull);
-    },
-  );
-
-  test('replace: sunucu görevinde gecikme sunucu değeri korunur; örnekte yeniden hesaplanır', () async {
-    final c = ProviderContainer(
-      overrides: [
-        taskCatalogRepositoryProvider.overrideWithValue(_Server()),
-        scopeStateProvider.overrideWith(
-          (ref) => const ScopeSelection(programId: 'p1'),
-        ),
-      ],
-    );
-    addTearDown(c.dispose);
-    c.listen(taskCatalogControllerProvider, (_, _) {});
-    final catalog = await c.read(taskCatalogControllerProvider.future);
-    final ctl = c.read(taskCatalogControllerProvider.notifier)
-      ..replace(catalog.task('w1')!.copyWith(title: 'Yeni ad'))
-      ..replace(catalog.task('ornek')!.copyWith(due: DateTime(2026, 10, 25)));
-    final after = c.read(taskCatalogControllerProvider).value!;
-    expect(after.task('w1')!.title, 'Yeni ad');
-    expect(
-      after.task('w1')!.overdueDays,
-      9,
-      reason: 'sunucu gecikmesi tarihten yeniden hesaplanmaz',
-    );
-    expect(after.task('ornek')!.overdueDays, 7);
-    expect(ctl, isNotNull);
-  });
-
   test('applyDetails: tekil okuma kalemin yerine geçer (yalnız o kalem), adlar dizine katılır', () async {
     final c = ProviderContainer(
       overrides: [

@@ -1,8 +1,7 @@
-// Arşiv kuralları: sıralama/arama, etiket payı, görev klasörleri ve örnek dosya üretimi.
+// Arşiv kuralları: sıralama/arama, etiket payı.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/features/archive/data/sample/sample_archive_repository.dart';
 import 'package:nizamio/features/archive/domain/archive.dart';
-import 'package:nizamio/features/tasks/data/sample/sample_task_catalog_repository.dart';
 
 void main() {
   test('sıralama: son yükleme, Türkçe ada göre, boyuta göre; arama', () async {
@@ -24,19 +23,4 @@ void main() {
     expect(folderFilesFor(f.first, tag: ArchiveTag.data), 16);
     expect(folderFilesFor(f.first, customTag: true), 0);
   });
-
-  test(
-    'görev klasörleri klasör toplamına tamamlanır; dosyalar üretilir',
-    () async {
-      final folders = await const SampleArchiveRepository().loadFolders();
-      final catalog = await SampleTaskCatalogRepository().load();
-      final alt = folders.firstWhere((x) => x.code == 'ALT');
-      final groups = taskFolders(alt, catalog);
-      expect(groups.fold<int>(0, (t, g) => t + g.files), alt.files);
-      final files = folderFiles(alt, catalog);
-      expect(files, hasLength(alt.files));
-      expect(files.first.name, startsWith('WhatsApp Image 2026-'));
-      expect(files.map((x) => x.id).toSet(), hasLength(files.length));
-    },
-  );
 }

@@ -236,7 +236,7 @@ void main() {
   });
 
   test('alt görevler, notlar, dosyalar ve talep eşlenir', () async {
-    final d = (await _repo(_Adapter(_bodies())).load(_task, access: _admin))!;
+    final d = (await _repo(_Adapter(_bodies())).load(_task, access: _admin));
     final [pompa, test] = d.subtasks;
     expect(pompa.id, 's1');
     expect(pompa.title, 'Pompa');
@@ -277,7 +277,7 @@ void main() {
   test('getWorkItem: görevin kendisi (tarih, açıklama, durum, sunucu gecikmesi) ve kişi adları; '
       'null ad dizine girmez', () async {
     final adapter = _Adapter(_bodies());
-    final d = (await _repo(adapter).load(_task, access: _admin))!;
+    final d = (await _repo(adapter).load(_task, access: _admin));
     final get = adapter.seen.singleWhere(
       (o) => o.uri.path == '/v1/work-items/w1',
     );
@@ -321,7 +321,7 @@ void main() {
         '/v1/date-change-requests': {'requests': <Object>[], 'total': 0},
       }),
     ).load(_task, access: _admin);
-    expect(d!.dateRequest, isNull);
+    expect(d.dateRequest, isNull);
   });
 
   test('koordinatör: kendi talepleri görevin departmanıyla; bekleyen önce, yoksa son', () async {
@@ -342,7 +342,7 @@ void main() {
     );
     final d = await _repo(adapter)
         .load(_task, access: _access(role: SeatRole.coordinator));
-    expect(d!.dateRequest!.id, 'r2');
+    expect(d.dateRequest!.id, 'r2');
     final mine = adapter.seen.singleWhere(
       (o) => o.uri.path == '/v1/date-change-requests/mine',
     );
@@ -361,7 +361,7 @@ void main() {
         },
       }),
     ).load(_task, access: _access(role: SeatRole.coordinator));
-    expect(settled!.dateRequest!.state, DateRequestState.rejected);
+    expect(settled.dateRequest!.state, DateRequestState.rejected);
   });
 
   test(
@@ -380,7 +380,7 @@ void main() {
           },
         );
         final d = await _repo(adapter).load(_task, access: access);
-        expect(d!.subtasks, hasLength(2));
+        expect(d.subtasks, hasLength(2));
         expect(d.dateRequest, isNull);
         expect(
           adapter.seen.where(

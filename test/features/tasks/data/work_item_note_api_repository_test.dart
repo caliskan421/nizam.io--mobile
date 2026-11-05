@@ -40,7 +40,6 @@ void main() {
     expect(n.text, 'metin n1');
     expect(n.at, DateTime.utc(2026, 11, 1, 10));
     expect(n.updatedAt, DateTime.utc(2026, 11, 2, 11));
-    expect(n.inMemory, isFalse);
   });
 
   test('list: total yok → client.invalid_response', () async {

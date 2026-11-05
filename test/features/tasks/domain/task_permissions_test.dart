@@ -228,11 +228,11 @@ void main() {
     });
   });
 
-  test('örnek katalog (erişim yok): yerel, her eylem açık', () {
+  test('erişim bilinmiyor: hiçbir eylem açık değil (fail-closed)', () {
     final p = TaskPermissions.of(null, _task());
-    expect(p.local, isTrue);
-    expect(p.statusTargets(TaskStatus.inProgress), hasLength(4));
-    expect(p.canAddNote && p.canManageSubtasks, isTrue);
+    expect(p.statusTargets(TaskStatus.inProgress), isEmpty);
+    expect(p.canAddNote || p.canManageSubtasks || p.canManageTask, isFalse);
+    expect(p.canUpload || p.canRequestDate || p.canReviewDate, isFalse);
   });
 
   group('P3: görev, atama, tarih talebi, dosya (olgu → eylem)', () {

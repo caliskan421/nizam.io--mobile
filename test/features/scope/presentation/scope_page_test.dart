@@ -7,7 +7,6 @@ import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/errors/error_text.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
-import 'package:nizamio/core/scope/scope_store.dart';
 import 'package:nizamio/core/ui/widgets/feedback/nz_empty_state.dart';
 import 'package:nizamio/core/ui/widgets/feedback/nz_error_state.dart';
 import 'package:nizamio/core/ui/widgets/lists/nz_list_tile.dart';
@@ -67,30 +66,6 @@ void main() {
     expect(find.text(_l.uiScopeEmptyTitle), findsOneWidget);
     expect(find.byType(NzListTile), findsNothing);
   }, sizes: pilotSizes);
-
-  testScreens(
-    'program yok → "örnek verilerle devam et": scoped, program kimliği yok, depoya yazılmaz',
-    (tester, screen) async {
-      useScreen(tester, screen);
-      final backend = PilotBackend()..programs = [];
-      final h = await real(tester, () => pilotHarness(backend, signedIn: true));
-      await pumpScreen(tester, h, const ScopePage());
-      await settle(tester);
-      await tester.tap(find.text(_l.uiScopeContinueWithSample));
-      await settle(tester);
-      final sel = h.read(scopeStateProvider);
-      expect(sel.sample, isTrue);
-      expect(sel.programId, isNull);
-      expect(sel.hasServerProgram, isFalse);
-      expect(h.read(appPhaseProvider), AppPhase.scoped);
-      expect(h.store.values.containsKey(ScopeStore.key), isFalse);
-      expect(
-        h.backend.requests.where((r) => r.header('X-Nizamio-Program') != null),
-        isEmpty,
-      );
-    },
-    sizes: pilotSizes,
-  );
 
   testScreens(
     'program.not_authorized → NzErrorState, errorText; sunucu iletisi yok',

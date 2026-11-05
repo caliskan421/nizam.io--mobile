@@ -106,18 +106,18 @@ class _Pages implements TaskListRepository {
       calls[i].$2.completeError(ApiError('work.program_scope_invalid'));
 }
 
-/// Ayrıntı kaynağı: istenen görevleri kaydeder (ayrıntı yok → null).
+/// Ayrıntı kaynağı: istenen görevleri kaydeder (boş ayrıntı).
 class _Details implements TaskDetailsRepository {
   final List<String> loaded = [];
 
   @override
-  Future<TaskDetails?> load(TaskItem task, {TaskAccess? access}) async {
+  Future<TaskDetails> load(TaskItem task, {TaskAccess? access}) async {
     loaded.add(task.code);
-    return null;
+    return TaskDetails(subtasks: const [], notes: const [], files: const []);
   }
 
   @override
-  Future<TaskItem?> loadItem(TaskItem task) async => null;
+  Future<TaskItem> loadItem(TaskItem task) async => task;
 }
 
 class _Home implements HomeDashboardRepository {

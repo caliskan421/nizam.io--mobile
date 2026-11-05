@@ -66,15 +66,4 @@ void main() {
     c.listen(coordinatorshipDetailProvider('YOK'), (_, _) {});
     expect(c.read(coordinatorshipDetailProvider('YOK')).requireValue, isNull);
   });
-
-  test('koordinatörsüz: lider yok, üye katalogdan', () async {
-    final h = await pilotHarness(PilotBackend());
-    final c = h.container;
-    c.listen(coordinatorshipDetailProvider('İDA'), (_, _) {});
-    await _ready(c);
-    final d = c.read(coordinatorshipDetailProvider('İDA')).requireValue!;
-    expect(d.leads, isEmpty);
-    expect(d.members.map((m) => m.name), ['Bahar Kılıç']);
-    expect(d.people, 1);
-  });
 }

@@ -242,8 +242,14 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
 
   void _goModule(RailModule m) => GoRouter.of(context).go(_moduleEntry(m));
 
-  /// Görev ayrıntısını kapatır: Görevler köküne (süzgeç korunur) döner, liste tam genişler.
-  void _closeTask() => GoRouter.of(context).go(_tasksRoot.location);
+  /// Kaydı kapatır (Görevler, Koordinatörlükler): modül köküne döner (görev süzgeci korunur),
+  /// liste tam genişler.
+  void _closeRecord() {
+    final m = railModuleOf(_location);
+    if (m == null) return;
+    GoRouter.of(context)
+        .go(m == RailModule.tasks ? _tasksRoot.location : railModuleRoot(m));
+  }
 
   /// Çift bölmede modül dışı hedef (prototip `tgo`): sol liste kalır, sağ yığın değişir.
   void _paneGo(PaneEntry target) {
@@ -332,10 +338,10 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
       RailModule.messages => messagesMaster(),
       null => const SizedBox.shrink(),
     };
-    // Görevler kökünde açık kayıt yoksa liste sağ bölmenin yerini de alır; kayıt açılınca 390'a
+    // Görevler/Koordinatörlükler kökünde açık kayıt yoksa liste sağ bölmenin yerini de alır; kayıt açılınca 390'a
     // daralır. Ağaç iki durumda aynıdır (yalnız genişlik değişir): kabuk ve liste State'i kalır.
-    final full = current == RailModule.tasks && splitListFull(_uri);
-    final tasks = current == RailModule.tasks;
+    final full = splitListFull(_uri);
+    final closes = listGoesFull(current);
     return NzAppNavScope(
       nav: _SplitAppNav(NzAppNavScope.of(context), _paneGo, _goModule),
       child: Scaffold(
@@ -381,9 +387,9 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
                   enabled: !full,
                   child: NzPaneScope(
                     role: NzPaneRole.detail,
-                    // Görev ayrıntısının "Geri"si ayrıntıyı kapatır (liste genişler).
-                    canBack: tasks,
-                    onBack: tasks ? _closeTask : null,
+                    // Bu modüllerde kaydın "Geri"si kaydı kapatır (liste genişler).
+                    canBack: closes,
+                    onBack: closes ? _closeRecord : null,
                     child: SplitMemory(
                       lastIds: _lastIds,
                       refresh: _refresh,

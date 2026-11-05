@@ -18,8 +18,8 @@ import 'routes.dart';
 //
 // - Sol modül YOLDAN türer (`/coordinatorships/...` → Koordinatörlükler listesi).
 // - Sağ yığın = taban + iz. Taban yolun kaydıdır (`/tasks/ALT-7` → görev ALT-7; modül kökü →
-//   modülün son açılan kaydı; hiç açılmamışsa "Bir kayıt seç"). Görevler kökü istisnadır: sağ
-//   yığın boşken liste tam genişliktir (kart ızgarası), görev açılınca 390'a daralır. İz, modüller arası itilen kayıtlardır ve
+//   modülün son açılan kaydı; hiç açılmamışsa "Bir kayıt seç"). Görevler ve Koordinatörlükler
+//   kökü istisnadır: sağ yığın boşken liste tam genişliktir, kayıt açılınca 390'a daralır. İz, modüller arası itilen kayıtlardır ve
 //   yalnız KİMLİK taşıyan `trail` sorgusudur (`?trail=folder:ALT&trail=task:ALT-5`).
 // - Dal kökü genişliğe göre kurulur ([SplitRoot]): tek bölmede liste, çift bölmede taban.
 //   Liste sayfası iki yer arasında aynı [GlobalKey] ile taşınır (State korunur).
@@ -125,16 +125,25 @@ PaneEntry? baseEntryOf(Uri uri, String? Function(PaneKind) lastId) {
   return id == null ? null : PaneEntry(kind, id);
 }
 
-/// Modül kökünde sağ bölme son açılan kaydı mı gösterir. Görevlerde hayır: kökte liste tam
-/// genişliktir ([splitListFull]); görev yalnız dokunuşla açılır, kapanınca liste genişler.
-/// İşlem geçmişi kimliksizdir, yalnız `/home/history` ile açılır.
-bool restoresLastRecord(PaneKind kind) =>
-    kind != PaneKind.task && kind != PaneKind.history;
+/// Modül kökünde sağ bölme son açılan kaydı mı gösterir. Görevler ve Koordinatörlüklerde hayır:
+/// kökte liste tam genişliktir ([splitListFull]); kayıt yalnız dokunuşla açılır, kapanınca liste
+/// genişler. İşlem geçmişi kimliksizdir, yalnız `/home/history` ile açılır.
+bool restoresLastRecord(PaneKind kind) => switch (kind) {
+  PaneKind.task || PaneKind.coord || PaneKind.history => false,
+  PaneKind.folder || PaneKind.chat => true,
+};
 
-/// Çift bölmede sol liste tam genişlik mi: Görevler kökü, sağ yığın boş (açık kayıt yok).
-bool splitListFull(Uri uri) =>
-    uri.path == const TasksRoute().location &&
-    parseTrail(uri.queryParametersAll['trail'] ?? const []).isEmpty;
+/// Açık kayıt yokken listesi tam genişlik olan modüller (sağ bölme gizli).
+bool listGoesFull(RailModule? m) =>
+    m == RailModule.tasks || m == RailModule.coordinatorships;
+
+/// Çift bölmede sol liste tam genişlik mi: [listGoesFull] modülünün kökü, sağ yığın boş.
+bool splitListFull(Uri uri) {
+  final module = railModuleOf(uri.path);
+  return listGoesFull(module) &&
+      uri.path == railModuleRoot(module!) &&
+      parseTrail(uri.queryParametersAll['trail'] ?? const []).isEmpty;
+}
 
 /// [uri]'nin izi [trail] olan hâli (diğer sorgu parametreleri korunur).
 String withTrail(Uri uri, List<PaneEntry> trail) {

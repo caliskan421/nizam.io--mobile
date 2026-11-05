@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/layout/nz_layout.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
@@ -37,7 +38,9 @@ class CoordinatorshipsPage extends ConsumerWidget {
     });
     final list = ref.watch(coordinatorshipListProvider);
     final nav = context.appNav;
+    // Tablette açık kayıt yokken liste tam genişliktir; kartlar yatayda uzar.
     return NzPage.feed(
+      width: NzContentWidth.wide,
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       topBar: const RootTopBar(),
       children: [

@@ -15,7 +15,7 @@ enum NzContentWidth {
   reading(720),
   list(960),
 
-  /// Tablette tam genişlik liste (Görevler kart ızgarası, 3 sütun).
+  /// Tablette tam genişlik liste (Görevler kart ızgarası, Koordinatörlükler).
   wide(1280);
 
   const NzContentWidth(this.maxWidth);

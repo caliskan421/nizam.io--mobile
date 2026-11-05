@@ -59,7 +59,7 @@ void main() {
     '1180×820: ray 100 + liste 390 (+1 kenar) + ayrıntı 689; kayıt yoksa "Bir kayıt seç"',
     (tester) async {
       final router = await _pump(tester, const Size(1180, 820));
-      router.go('/coordinatorships');
+      router.go('/archive');
       await settle(tester);
       expect(find.byType(NzFloatingNav), findsNothing);
       expect(tester.getSize(find.byType(NzTabletRail)).width, 100);
@@ -75,7 +75,7 @@ void main() {
       expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 390, 820));
       expect(tester.getRect(detail), const Rect.fromLTWH(491, 0, 689, 820));
       expect(
-        _inPane(NzPaneRole.master, find.byType(CoordinatorshipsPage)),
+        _inPane(NzPaneRole.master, find.byType(ArchivePage)),
         findsOneWidget,
       );
       // Kayıt hiç açılmamışsa sağda "Bir kayıt seç".
@@ -84,7 +84,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        _inPane(NzPaneRole.detail, find.byType(CoordinatorshipPage)),
+        _inPane(NzPaneRole.detail, find.byType(ArchiveFolderPage)),
         findsNothing,
       );
       // Tek ekranlık sağ yığında "Geri" yok.
@@ -92,7 +92,7 @@ void main() {
       expect(_inPane(NzPaneRole.detail, _backIcon), findsNothing);
       expect(
         tester.widget<NzTabletRail>(find.byType(NzTabletRail)).currentIndex,
-        RailModule.coordinatorships.index,
+        RailModule.archive.index,
       );
     },
   );
@@ -124,6 +124,39 @@ void main() {
       expect(locationOf(router), '/tasks?view=late');
       expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
       expect(tester.state(find.byType(TasksPage)), same(list));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'Koordinatörlükler: kökte liste tam genişlik; kayıt açılınca 390, Geri kapatır',
+    (tester) async {
+      final router = await _pump(tester, const Size(1180, 820));
+      router.go('/coordinatorships');
+      await settle(tester);
+      final master = find.byWidgetPredicate(
+        (w) => w is NzPaneScope && w.role == NzPaneRole.master,
+      );
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
+
+      tester
+          .element(find.byType(CoordinatorshipsPage))
+          .appNav
+          .openCoordinatorship('ALT');
+      await settle(tester);
+      expect(locationOf(router), '/coordinatorships/ALT');
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 390, 820));
+
+      await tester.tap(_inPane(NzPaneRole.detail, _backIcon).hitTestable());
+      await settle(tester);
+      expect(locationOf(router), '/coordinatorships');
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
+      // Modüle dönüş son kaydı geri getirmez.
+      await tester.tap(_rail('Arşiv'));
+      await settle(tester);
+      await tester.tap(_rail('Koordinatörlükler'));
+      await settle(tester);
+      expect(locationOf(router), '/coordinatorships');
       expect(tester.takeException(), isNull);
     },
   );
@@ -378,17 +411,17 @@ void main() {
     tester,
   ) async {
     final router = await _pump(tester, const Size(1180, 820));
-    router.go('/coordinatorships/ALT');
+    router.go('/archive/ALT');
+    await settle(tester);
+    await tester.tap(_rail('Takvim'));
     await settle(tester);
     await tester.tap(_rail('Arşiv'));
     await settle(tester);
-    await tester.tap(_rail('Koordinatörlükler'));
-    await settle(tester);
-    expect(locationOf(router), '/coordinatorships/ALT');
+    expect(locationOf(router), '/archive/ALT');
     expect(
       tester
-          .widget<CoordinatorshipPage>(
-            _inPane(NzPaneRole.detail, find.byType(CoordinatorshipPage)),
+          .widget<ArchiveFolderPage>(
+            _inPane(NzPaneRole.detail, find.byType(ArchiveFolderPage)),
           )
           .code,
       'ALT',

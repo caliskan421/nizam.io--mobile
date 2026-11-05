@@ -1,7 +1,10 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ViewportOffset;
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart' show SemanticsProperties;
 import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
@@ -63,7 +66,10 @@ class GanttChart extends StatefulWidget {
   static const todayKey = ValueKey('gantt-today');
   static const labelsKey = ValueKey('gantt-labels');
 
-  /// Görev çubuğunun anahtarı.
+  /// Görev çubuklarının tek ressamı (dokunma algılayıcısının çocuğu).
+  static const barsKey = ValueKey('gantt-bars');
+
+  /// Görev çubuğunun okuyucu düğümü anahtarı.
   static ValueKey<String> barKey(String code) => ValueKey('gantt-bar-$code');
 
   @override
@@ -169,6 +175,9 @@ class _GanttChartState extends State<GanttChart> {
                             child: _Body(
                               layout: l,
                               height: height,
+                              viewport: Size(box.maxWidth, viewport),
+                              h: _h,
+                              v: _v,
                               onPick: widget.onPick,
                             ),
                           ),
@@ -191,26 +200,12 @@ class _GanttChartState extends State<GanttChart> {
                               ? box.maxWidth
                               : GanttGeometry.labelWidth,
                           child: _sticky(
-                            _scrolled(
-                              offset,
-                              SizedBox(
-                                height: height,
-                                child: Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    Positioned(
-                                      left: 0,
-                                      top: 0,
-                                      right: 0,
-                                      child: _Labels(
-                                        layout: l,
-                                        onToggleGroup: widget.onToggleGroup,
-                                        onPick: widget.onPick,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                            _Labels(
+                              layout: l,
+                              offset: offset,
+                              height: height,
+                              onToggleGroup: widget.onToggleGroup,
+                              onPick: widget.onPick,
                             ),
                           ),
                         ),
@@ -352,39 +347,37 @@ class _DateHeader extends StatelessWidget {
   }
 }
 
-/// [child]'ı dikey kaydırma ofsetiyle gösteren görünüm. Gövde ve etiket sütunu aynı ofseti
-/// paylaşır; ikisi de aynı içerik boyunu ([_GanttChartState] `height`) bildirir.
+/// Gövdeyi dikey kaydırma ofsetiyle gösteren görünüm. Etiket sütunu ([_Labels]) aynı ofseti
+/// kendi görünümünde paylaşır; ikisi de aynı kaydırma sınırını bildirir (içerik boyu
+/// [_GanttChartState] `height`; satırlar görünür alandan kısaysa ikisinde de sınır 0).
 Widget _scrolled(ViewportOffset offset, Widget child) => Viewport(
   offset: offset,
   slivers: [SliverToBoxAdapter(child: child)],
 );
 
-/// Gövde: zemin ressamı, çubuklar, dış başlıklar, bugün çizgisi.
+/// Gövde: zemin ressamı, çubuklar ([_Bars]), bugün çizgisi.
 class _Body extends StatelessWidget {
   const _Body({
     required this.layout,
     required this.height,
+    required this.viewport,
+    required this.h,
+    required this.v,
     required this.onPick,
   });
 
   final GanttLayout layout;
   final double height;
+
+  /// Görünür alan: yatay kaydırma genişliği × dikey kaydırma yüksekliği.
+  final Size viewport;
+  final ScrollController h;
+  final ScrollController v;
   final ValueChanged<String> onPick;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final t = context.text;
-    final l = context.l10n;
-    final year = layout.view.year;
-    final outside = t.bodySm.copyWith(
-      color: c.textMuted,
-      height: GanttGeometry.outsideLine / t.bodySm.fontSize!,
-    );
-    final tasks = [
-      for (final b in layout.rows)
-        if (b.row case final GanttTaskRow r) (b, r),
-    ];
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -405,41 +398,12 @@ class _Body extends StatelessWidget {
           top: 0,
           width: layout.width,
           height: height,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              for (final (b, r) in tasks)
-                Positioned.fromRect(
-                  rect: b.bar!,
-                  child: _Bar(
-                    key: GanttChart.barKey(r.task.code),
-                    task: r.task,
-                    selected: r.selected,
-                    inside: b.inside,
-                    label: l.ganttBarLabel(r, year),
-                    onTap: () => onPick(r.task.code),
-                  ),
-                ),
-              for (final (b, GanttTaskRow(:task)) in tasks)
-                if (!b.inside)
-                  Positioned(
-                    left: b.outsideX,
-                    top: b.top + GanttGeometry.outsideTop,
-                    child: IgnorePointer(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxWidth: GanttGeometry.outsideMax,
-                        ),
-                        child: Text(
-                          task.item.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: outside,
-                        ),
-                      ),
-                    ),
-                  ),
-            ],
+          child: _Bars(
+            layout: layout,
+            viewport: viewport,
+            h: h,
+            v: v,
+            onPick: onPick,
           ),
         ),
         Positioned(
@@ -458,114 +422,256 @@ class _Body extends StatelessWidget {
   }
 }
 
-/// Yapışkan sol etiket sütunu (saydam zemin; camı altındaki sabit panel verir) ya da boş
-/// durum metni.
-class _Labels extends StatelessWidget {
-  const _Labels({
+/// Görev çubukları (prototip `button[aria-label]`): tek ressam yalnız görünür alanla kesişen
+/// çubukları çizer ([GanttLayout.visibleBars]); okuyucu düğümü (etiket, seçili, dokunma eylemi)
+/// de yalnız onlar içindir. Dokunma tek algılayıcıdan, konum yerleşimde aranır
+/// ([GanttLayout.barAt]). Görünür küme kaydırmayla değişince yeniden kurulur; seçili halka
+/// [GanttGeometry.ringDuration] içinde geçer.
+class _Bars extends StatefulWidget {
+  const _Bars({
     required this.layout,
-    required this.onToggleGroup,
+    required this.viewport,
+    required this.h,
+    required this.v,
     required this.onPick,
   });
 
   final GanttLayout layout;
-  final ValueChanged<String> onToggleGroup;
+  final Size viewport;
+  final ScrollController h;
+  final ScrollController v;
   final ValueChanged<String> onPick;
 
   @override
-  Widget build(BuildContext context) {
-    if (layout.view.empty) {
-      final c = context.colors;
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: GanttGeometry.emptyPad),
-        child: Text(
-          context.l10n.uiTimelineGanttEmpty,
-          textAlign: TextAlign.center,
-          style: context.text.bodyMd.copyWith(color: c.textMuted),
-        ),
-      );
-    }
-    return Column(
-      key: GanttChart.labelsKey,
-      children: [
-        for (final b in layout.rows)
-          SizedBox(
-            height: GanttGeometry.row,
-            child: switch (b.row) {
-              final GanttHeadRow h => _GroupLabel(
-                head: h,
-                onTap: () => onToggleGroup(h.code),
-              ),
-              final GanttTaskRow r => _TaskLabel(
-                row: r,
-                onTap: () => onPick(r.task.code),
-              ),
-            },
-          ),
-      ],
-    );
-  }
+  State<_Bars> createState() => _BarsState();
 }
 
-/// Görev çubuğu (prototip `button[aria-label]`): durum rengi, seçiliyken 2 px halka, sığarsa
-/// başlık.
-class _Bar extends StatelessWidget {
-  const _Bar({
-    super.key,
-    required this.task,
-    required this.selected,
-    required this.inside,
-    required this.label,
-    required this.onTap,
-  });
+class _BarsState extends State<_Bars> with SingleTickerProviderStateMixin {
+  late final _ring = AnimationController(vsync: this, value: 1);
+  String? _previous;
+  double _fromIn = 1;
+  double _fromOut = 0;
+  List<int> _visible = const [];
 
-  final GanttTask task;
-  final bool selected;
-  final bool inside;
-  final String label;
-  final VoidCallback onTap;
+  @override
+  void initState() {
+    super.initState();
+    widget.h.addListener(_sync);
+    widget.v.addListener(_sync);
+    _visible = _window();
+  }
+
+  @override
+  void didUpdateWidget(_Bars old) {
+    super.didUpdateWidget(old);
+    if (old.h != widget.h) {
+      old.h.removeListener(_sync);
+      widget.h.addListener(_sync);
+    }
+    if (old.v != widget.v) {
+      old.v.removeListener(_sync);
+      widget.v.addListener(_sync);
+    }
+    final was = old.layout.view.state.selected;
+    final now = widget.layout.view.state.selected;
+    if (was != now) {
+      final before = _ringOf(was);
+      _fromOut = was == null ? 0 : before.alphaOf(was);
+      _fromIn = now == null ? 1 : before.alphaOf(now);
+      _previous = was;
+      _ring
+        ..duration = NzMotion.of(context, GanttGeometry.ringDuration)
+        ..forward(from: 0);
+    }
+    _visible = _window();
+    // Yerleşim kaydırma sınırını düzeltebilir (bildirim olmadan); kare sonunda yeniden bakılır.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
+  }
+
+  @override
+  void dispose() {
+    widget.h.removeListener(_sync);
+    widget.v.removeListener(_sync);
+    _ring.dispose();
+    super.dispose();
+  }
+
+  GanttRing _ringOf(String? selected) => GanttRing(
+    t: _ring,
+    selected: selected,
+    previous: _previous,
+    fromIn: _fromIn,
+    fromOut: _fromOut,
+  );
+
+  static double _offsetOf(ScrollController c) =>
+      c.hasClients && c.position.hasPixels ? c.offset : 0;
+
+  /// Görünür alan (tarih alanı koordinatı; etiket sütununun altı dahil, cam altından görünür).
+  List<int> _window() => widget.layout.visibleBars(
+    Rect.fromLTWH(
+      _offsetOf(widget.h) - GanttGeometry.labelWidth,
+      _offsetOf(widget.v),
+      widget.viewport.width,
+      widget.viewport.height,
+    ),
+  );
+
+  void _sync() {
+    if (!mounted) return;
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      // Kurulum/yerleşim sırasında gelen ofset bildirimi: kare sonunda.
+      SchedulerBinding.instance.addPostFrameCallback((_) => _sync());
+      return;
+    }
+    final next = _window();
+    if (!listEquals(next, _visible)) setState(() => _visible = next);
+  }
+
+  void _tap(TapUpDetails d) {
+    if (widget.layout.barAt(d.localPosition) case final code?) {
+      widget.onPick(code);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: label,
-      excludeSemantics: true,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: NzMotion.of(context, GanttGeometry.ringDuration),
-          padding: const EdgeInsets.symmetric(horizontal: GanttGeometry.barPad),
-          alignment: Alignment.centerLeft,
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-            color: ganttStatusColor(c, task.status),
-            borderRadius: BorderRadius.circular(GanttGeometry.barRadius),
-            boxShadow: [
-              BoxShadow(
-                color: selected ? c.text : c.text.withValues(alpha: 0),
-                spreadRadius: GanttGeometry.ring,
+    final l = context.l10n;
+    final layout = widget.layout;
+    final year = layout.view.year;
+    final base = DefaultTextStyle.of(context).style;
+    final bold = MediaQuery.boldTextOf(context);
+    TextStyle effective(TextStyle s) {
+      final merged = base.merge(s);
+      return bold ? merged.copyWith(fontWeight: FontWeight.bold) : merged;
+    }
+
+    final direction = Directionality.of(context);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapUp: _tap,
+      child: RepaintBoundary(
+        child: CustomPaint(
+          key: GanttChart.barsKey,
+          painter: GanttBarsPainter(
+            layout: layout,
+            visible: _visible,
+            colors: c,
+            barStyle: effective(
+              t.labelMd.copyWith(
+                fontSize: GanttGeometry.barFontSize,
+                color: c.ganttInk,
               ),
+            ),
+            outsideStyle: effective(
+              t.bodySm.copyWith(
+                color: c.textMuted,
+                height: GanttGeometry.outsideLine / t.bodySm.fontSize!,
+              ),
+            ),
+            textScaler: MediaQuery.textScalerOf(context),
+            ring: _ringOf(layout.view.state.selected),
+            semantics: [
+              for (final i in _visible)
+                if (layout.rows[i] case GanttRowBox(
+                  :final bar?,
+                  row: final GanttTaskRow r,
+                ))
+                  CustomPainterSemantics(
+                    key: GanttChart.barKey(r.task.code),
+                    rect: bar,
+                    properties: SemanticsProperties(
+                      button: true,
+                      selected: r.selected,
+                      label: l.ganttBarLabel(r, year),
+                      textDirection: direction,
+                      onTap: () => widget.onPick(r.task.code),
+                    ),
+                  ),
             ],
           ),
-          child: inside
-              ? Text(
-                  task.item.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: false,
-                  style: t.labelMd.copyWith(
-                    fontSize: GanttGeometry.barFontSize,
-                    color: c.ganttInk,
-                  ),
-                )
-              : null,
         ),
       ),
+    );
+  }
+}
+
+/// Yapışkan sol etiket sütunu (saydam zemin; camı altındaki sabit panel verir) ya da boş
+/// durum metni. Sabit satır yüksekliğiyle yalnız görünür (ve önbellek payındaki) satırlar
+/// kurulur; dikey ofset gövdeyle aynıdır.
+class _Labels extends StatelessWidget {
+  const _Labels({
+    required this.layout,
+    required this.offset,
+    required this.height,
+    required this.onToggleGroup,
+    required this.onPick,
+  });
+
+  final GanttLayout layout;
+  final ViewportOffset offset;
+
+  /// Gövdeyle aynı içerik boyu (boş durumda).
+  final double height;
+  final ValueChanged<String> onToggleGroup;
+  final ValueChanged<String> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = layout.rows;
+    return Viewport(
+      key: GanttChart.labelsKey,
+      offset: offset,
+      slivers: [
+        if (layout.view.empty)
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: height,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    right: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: GanttGeometry.emptyPad,
+                      ),
+                      child: Text(
+                        context.l10n.uiTimelineGanttEmpty,
+                        textAlign: TextAlign.center,
+                        style: context.text.bodyMd.copyWith(
+                          color: context.colors.textMuted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          SliverFixedExtentList(
+            itemExtent: GanttGeometry.row,
+            delegate: SliverChildBuilderDelegate(
+              (context, i) => switch (rows[i].row) {
+                final GanttHeadRow h => _GroupLabel(
+                  head: h,
+                  onTap: () => onToggleGroup(h.code),
+                ),
+                final GanttTaskRow r => _TaskLabel(
+                  row: r,
+                  onTap: () => onPick(r.task.code),
+                ),
+              },
+              childCount: rows.length,
+            ),
+          ),
+      ],
     );
   }
 }

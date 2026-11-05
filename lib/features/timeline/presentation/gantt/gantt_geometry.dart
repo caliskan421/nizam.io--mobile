@@ -359,4 +359,48 @@ final class GanttLayout {
 
   /// Görev çubuğu (tarih alanı koordinatı).
   Rect? barOf(String code) => boxOf(code)?.bar;
+
+  /// [p] noktasındaki (tarih alanı koordinatı) görev çubuğunun kodu: satır `dy / satır`,
+  /// isabet satırın çubuk dikdörtgeninden. Çubuk dışı (boşluk, grup satırı) → null.
+  String? barAt(Offset p) {
+    if (p.dy < 0) return null;
+    final i = p.dy ~/ GanttGeometry.row;
+    if (i >= rows.length) return null;
+    final b = rows[i];
+    return switch (b.row) {
+      GanttTaskRow(:final task) when b.bar!.contains(p) => task.code,
+      _ => null,
+    };
+  }
+
+  /// [window] (tarih alanı koordinatı) ile kesişen görev satırlarının sırası (artan). Çizilen
+  /// alan çubuk + seçim halkası ve sığmayan başlığın kutusudur; yalnız pencerenin kapsadığı
+  /// satırlar taranır.
+  List<int> visibleBars(Rect window) {
+    if (window.isEmpty || rows.isEmpty) return const [];
+    final first = math.max(0, window.top ~/ GanttGeometry.row);
+    final last = math.min(
+      rows.length - 1,
+      (window.bottom / GanttGeometry.row).ceil() - 1,
+    );
+    return [
+      for (var i = first; i <= last; i++)
+        if (rows[i] case GanttRowBox(:final bar?) && final b
+            when _paintedOf(b, bar).overlaps(window))
+          i,
+    ];
+  }
+
+  static Rect _paintedOf(GanttRowBox b, Rect bar) {
+    final ring = bar.inflate(GanttGeometry.ring);
+    if (b.inside) return ring;
+    return ring.expandToInclude(
+      Rect.fromLTWH(
+        b.outsideX,
+        b.top + GanttGeometry.outsideTop,
+        GanttGeometry.outsideMax,
+        GanttGeometry.outsideLine,
+      ),
+    );
+  }
 }

@@ -762,42 +762,55 @@ Future<List<int>> hostPng(WidgetTester tester) async {
 Finder paneBack(TabletSession s) =>
     s.inPane(NzPaneRole.detail, find.bySemanticsLabel(RegExp(r'^Geri')));
 
-/// Gerçek BAR tıklaması. Çubuk anlamsal sarmalayıcısının merkezi yapışkan etiket sütununun
-/// ARKASINA düşebilir (`warnIfMissed` uyarısı bunun kanıtıydı); kullanıcı çubuğun gerçekten
-/// GÖRÜNEN kısmına basar. Burada: gerekirse görünür yap, çubuk ∩ görünüm penceresi −
-/// yapışkan etiket sütunu (`labelsKey` sağ kenarı) kesişimini ölç, pozitif alanın merkezine
-/// dokun ve dokunuşun yol listesinde ÇUBUĞUN render nesnesi olduğunu kanıtla.
+/// Gerçek BAR tıklaması. Çubuklar tek ressamdadır (`barsKey`); çubuğun yeri çizelgenin
+/// yerleşiminden okunur. Çubuk yapışkan etiket sütununun ARKASINA düşebilir; kullanıcı çubuğun
+/// gerçekten GÖRÜNEN kısmına basar. Burada: gerekirse kullanıcı gibi kaydır, çubuk ∩ görünüm
+/// penceresi − yapışkan etiket sütunu (`labelsKey` sağ kenarı) kesişimini ölç, pozitif alanın
+/// merkezine dokun; dokunuşun çubuk ressamına ulaştığını ve yerleşim aramasının aynı görevi
+/// bulduğunu kanıtla.
 Future<void> tapGanttBar(TabletSession s, String code) async {
   final t = s.tester;
-  final bar = find.byKey(GanttChart.barKey(code));
-  expect(bar, findsOneWidget, reason: 'Gantt çubuğu $code');
+  final chart = find.byType(GanttChart);
+  final bars = find.byKey(GanttChart.barsKey);
+  expect(bars, findsOneWidget, reason: 'Gantt çubukları');
+  final local = t.widget<GanttChart>(chart).layout.barOf(code);
+  expect(local, isNotNull, reason: 'Gantt çubuğu $code');
+  Rect bar() => local!.shift(t.getTopLeft(bars));
+  Rect view() => t
+      .getRect(find.byKey(GanttChart.horizontalKey))
+      .intersect(t.getRect(find.byKey(GanttChart.verticalKey)));
   Rect visible() {
-    final b = t.getRect(bar);
-    final view = t
-        .getRect(find.byKey(GanttChart.horizontalKey))
-        .intersect(t.getRect(find.byKey(GanttChart.verticalKey)));
+    final b = bar();
     final labelsRight = t.getRect(find.byKey(GanttChart.labelsKey)).right;
     return Rect.fromLTRB(
       b.left > labelsRight ? b.left : labelsRight,
       b.top,
       b.right,
       b.bottom,
-    ).intersect(view);
+    ).intersect(view());
   }
 
   var v = visible();
   if (v.isEmpty || v.width < 2 || v.height < 2) {
     // Kullanıcı gibi kaydır: önce dikeyde görünür yap, sonra çubuğu yatay sürüklemeyle
-    // yapışkan etiket sütununun SAĞINA getir (ensureVisible çubuğu sütunun altına bırakır).
-    await t.ensureVisible(bar);
-    await t.pump();
+    // yapışkan etiket sütununun SAĞINA getir.
     for (var i = 0; i < 8; i++) {
       v = visible();
       if (!(v.isEmpty || v.width < 24 || v.height < 2)) break;
-      final b = t.getRect(bar);
+      final b = bar();
+      final w = view();
       final labelsRight = t.getRect(find.byKey(GanttChart.labelsKey)).right;
-      final dx = (labelsRight + 32) - b.left;
-      await t.drag(find.byKey(GanttChart.horizontalKey), Offset(dx, 0));
+      final dy = b.top < w.top || b.bottom > w.bottom
+          ? w.center.dy - b.center.dy
+          : 0.0;
+      if (dy != 0) {
+        await t.drag(find.byKey(GanttChart.verticalKey), Offset(0, dy));
+      } else {
+        await t.drag(
+          find.byKey(GanttChart.horizontalKey),
+          Offset((labelsRight + 32) - b.left, 0),
+        );
+      }
       await t.pump(const Duration(milliseconds: 100));
     }
     await s.settle();
@@ -811,12 +824,16 @@ Future<void> tapGanttBar(TabletSession s, String code) async {
   );
   final point = v.center;
   final hit = t.hitTestOnBinding(point);
-  final target = t.renderObject(bar);
+  final target = t.renderObject(bars);
   expect(
     hit.path.any((e) => identical(e.target, target)),
     isTrue,
-    reason:
-        '$code: $point noktasına dokunuş çubuğun render nesnesine ulaşmıyor',
+    reason: '$code: $point noktasına dokunuş çubuk ressamına ulaşmıyor',
+  );
+  expect(
+    t.widget<GanttChart>(chart).layout.barAt(point - t.getTopLeft(bars)),
+    code,
+    reason: '$code: dokunuş konumu yerleşimde bu çubuğa düşmüyor',
   );
   await t.tapAt(point);
   await s.settle();

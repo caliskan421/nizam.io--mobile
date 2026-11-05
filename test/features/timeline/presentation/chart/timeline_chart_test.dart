@@ -132,6 +132,28 @@ void main() {
       expect(hasNode('T0'), isFalse);
       handle.dispose();
     });
+
+    // İçerik daralınca kaydırma konumu bildirimsiz düzeltilir; pencere yerleşimden sonra eşitlenir.
+    testWidgets('içerik daralınca görünür çubukların düğümü var', (
+      tester,
+    ) async {
+      phone(tester);
+      final handle = tester.ensureSemantics();
+      final wide = timelineCatalog(groups: 8);
+      await tester.pumpWidget(chart(timelineViewOf(wide)));
+      await tester.dragFrom(const Offset(200, 400), const Offset(-3000, 0));
+      await tester.pumpAndSettle();
+      expect(hasNode('T0'), isFalse, reason: 'ilk grup görünür alanın solunda');
+
+      await tester.pumpWidget(
+        chart(
+          timelineViewOf(wide, const TimelineState(coordinatorships: ['A'])),
+        ),
+      );
+      await tester.pump();
+      expect(hasNode('T0'), isTrue);
+      handle.dispose();
+    });
   });
 
   group('yerleşim önbelleği', () {

@@ -418,6 +418,9 @@ class _BarSemanticsState extends State<_BarSemantics> {
       old.horizontal.removeListener(_sync);
       widget.horizontal.addListener(_sync);
     }
+    // Yeni yerleşim kaydırma konumunu bildirimsiz düzeltebilir (içerik/genişlik daralması);
+    // pencere kare sonunda yeniden hesaplanır.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
   }
 
   @override
@@ -451,6 +454,7 @@ class _BarSemanticsState extends State<_BarSemantics> {
   }
 
   void _sync() {
+    if (!mounted) return;
     final w = _compute();
     if (w != _window) setState(() => _window = w);
   }

@@ -99,6 +99,9 @@ class PerfBackend {
         'is_completed_early': done && i % 3 == 0,
         'days_early': done && i % 3 == 0 ? 2 : 0,
         'completion_evidence_required': i % 7 == 0,
+        'created_at': '2026-10-01T08:00:00Z',
+        'created_by_account_id': 'acc-1',
+        'created_by_full_name': 'Ayşe Yılmaz',
         'subtask_counts': {'total': i % 4, 'done': i % 4 == 0 ? 0 : i % 2},
         if (i % 9 == 0)
           'planned_end_on': _day(end.subtract(const Duration(days: 4))),

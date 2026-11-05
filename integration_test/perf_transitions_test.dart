@@ -93,25 +93,44 @@ Future<void> _openTasksPhone(TabletSession s) async {
   await s.settle();
 }
 
-Finder _back() => find.bySemanticsLabel(RegExp('^Geri'));
+/// Zaman çizelgesinden listeye dönüş: başlıktaki Liste/Zaman çizelgesi anahtarının "Liste" yarısı
+/// (anahtar yalnız simge; etiket anlamsal ağaçta).
+Finder _back() => find.bySemanticsLabel(RegExp(r'^Liste$'));
 
 Future<void> _tapBack(TabletSession s) async {
+  await _semFlush(s);
   expect(
     _back(),
     findsWidgets,
-    reason: 'Geri düğmesi (zaman çizelgesi açık değil?)',
+    reason: '"Liste" anahtarı (zaman çizelgesi açık değil?)',
   );
   _tap(s.tester, s.tester.getCenter(_back().first));
   await s.settle();
 }
 
+/// Anlamsal ağaç yeniden açıldıktan sonra güncellenene kadar birkaç kare (bkz. `ensureSemantics`).
+Future<void> _semFlush(TabletSession s) async {
+  for (var i = 0; i < 100; i++) {
+    await s.tester.pump(const Duration(milliseconds: 50));
+    if (i >= 7 &&
+        s.tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode !=
+            null) {
+      break;
+    }
+  }
+}
+
 Future<void> _tapPill(TabletSession s, Finder pill) async {
+  await _semFlush(s);
   _tap(s.tester, s.tester.getCenter(pill.first));
   await s.settle();
 }
 
 Finder _modePill({required bool tablet}) {
-  final f = find.text(_l.uiTasksModeTimeline);
+  // Anahtar yalnız simge (`iconsOnly`): etiket anlamsal ağaçtadır, metin olarak çizilmez.
+  final f = find.bySemanticsLabel(
+    RegExp('^${RegExp.escape(_l.uiTasksModeTimeline)}\$'),
+  );
   return tablet ? _inMaster(f) : f;
 }
 
@@ -156,7 +175,12 @@ final _scenarios = <_Scenario>[
       await _openTasksPhone(s);
     },
     (s) async => s.tester.getCenter(_modePill(tablet: false).first),
-    (s) => _tapPill(s, find.text(_l.uiTimelineList)),
+    // Telefonda çizelge tam ekran açılır (başlık/anahtar kapalı): listeye sistem geri hareketiyle dönülür.
+    (s) async {
+      final nav = s.tester.state<NavigatorState>(find.byType(Navigator).last);
+      await nav.maybePop();
+      await s.settle();
+    },
   ),
   _Scenario(
     'S4',
@@ -350,6 +374,7 @@ void main() {
       }
       final runs = <List<_Frame>>[];
       for (var i = 0; i <= _reps; i++) {
+        await _semFlush(s);
         final at = await sc.target(s);
         sem.dispose();
         final frames = await measure(tester, at);

@@ -250,3 +250,17 @@ Senaryolar (`test_integration/backend_test.dart`):
 
 Faz sırası ve durum: `../program/DURUM.md`. Her değişiklik PR + CI; faz sonunda
 Codex tek koşum. Bu depoda `project-control` kaydı tutulmaz.
+
+### Dal adı
+
+Biçim `<önek>/<kısa-açıklama>`: küçük harf, ASCII, kelimeler `-` ile; faz varsa başa
+(`ozellik/f62-tarih-talebi`). CI (`verify` işinin ilk adımı) PR dal adını bu kurala göre
+denetler. Bir dal tek türde iş taşır; karışırsa ayrı dala bölünür.
+
+| Önek | Ne zaman |
+|---|---|
+| `ozellik/` | yeni davranış, ekran, uç ya da sözleşme (pin) yükseltmesi |
+| `duzeltme/` | hatalı davranışın düzeltilmesi |
+| `arayuz/` | yalnız görünüm: yerleşim, bileşen, animasyon, tablet/telefon uyumu; veri ve iş mantığı değişmez |
+| `belge/` | yalnız belge (`*.md`, ADR, yorum) |
+| `bakim/` | yeniden düzenleme, bağımlılık, CI, araç, üretilmiş kod yenilemesi |

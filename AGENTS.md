@@ -68,7 +68,8 @@ durumları (boş, hata, yükleniyor) bileşende bir kez test edilir, her ekranda
 
 ## Teslim
 
-Her değişiklik PR ile gelir; şablon `.github/pull_request_template.md`. "Bitti" yalnız
+Her değişiklik PR ile gelir; şablon `.github/pull_request_template.md`. Dal adı
+`ozellik|duzeltme|arayuz|belge|bakim/<kısa-açıklama>` (tablo: `README.md` §Süreç; CI denetler). "Bitti" yalnız
 CI yeşil + kabul ölçütü kanıtıyla söylenir. Faz sonunda Codex tek koşum (salt okunur)
 hükmü `docs/reviews/` altına yazılır; faz kapanışı `../program/DURUM.md`'ye işlenir.
 Oturum protokolü ve kırmızı karar kuralı: `../program/README.md`.

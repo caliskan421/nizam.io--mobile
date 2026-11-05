@@ -55,11 +55,22 @@ final class CoordinatorshipRef {
     required this.name,
     required this.leads,
     required this.members,
+    this.shortCode,
   });
 
-  /// Kısa kod (`ALT`).
+  /// Anahtar: örnek veride kısa kod (`ALT`), sunucuda `department_id` (kullanıcıya gösterilmez).
   final String code;
   final String name;
+
+  /// Departman kodu (`listProgramDepartments` `code`); verilmemişse null.
+  final String? shortCode;
+
+  /// Ekranda gösterilen kısa etiket: departman kodu, yoksa ad ([TaskDepartment.label] ile aynı
+  /// kural). Örnek veride kısa kod anahtarın kendisidir.
+  String get label {
+    final c = shortCode;
+    return c == null || c.isEmpty ? name : c;
+  }
 
   /// Koordinatör kişi kimlikleri (boş → atanmamış).
   final List<String> leads;

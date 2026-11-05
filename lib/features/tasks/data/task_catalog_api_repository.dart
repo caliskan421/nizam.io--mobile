@@ -120,6 +120,7 @@ class ApiTaskCatalogRepository
           CoordinatorshipRef(
             code: d.id,
             name: d.name,
+            shortCode: d.code,
             leads: const [],
             members: const [],
           ),

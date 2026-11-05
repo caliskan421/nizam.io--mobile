@@ -62,7 +62,9 @@ abstract final class GanttGeometry {
   static const double groupPadLeft = 10;
   static const double groupPadRight = 12;
   static const double taskPadLeft = 34;
-  static const double idColumn = 56;
+
+  /// Görev anahtarının (etiket + numara) en geniş hâli; uzun etiket soluklaşır.
+  static const double keyMaxWidth = 110;
   static const double groupNameSize = 13.5;
   static const double countMinWidth = 22;
 

@@ -275,7 +275,7 @@ class GanttCoordChips extends StatelessWidget {
           for (final c in view.chips) ...[
             const Gap(GanttGeometry.chipGap),
             _Chip(
-              label: c.code,
+              label: c.label,
               tooltip: c.name,
               selected: c.selected,
               onTap: () => onToggle(c.code),

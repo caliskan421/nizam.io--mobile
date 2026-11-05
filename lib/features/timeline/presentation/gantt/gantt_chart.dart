@@ -6,12 +6,23 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
+import '../../../../core/ui/theme/nz_surfaces.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../domain/horizontal_timeline.dart';
 import 'gantt_geometry.dart';
 import 'gantt_painters.dart';
 import 'gantt_texts.dart';
+
+/// Yapışkan sol sütunun camı: üst çubukla (`NzGlassTone.bar`) aynı bulanıklık; dolguyu
+/// satırlar verir (görev satırı `glassBar`, grup satırı aynı saydamlıkta `surface`). Altından
+/// kayan çubuklar bulanık görünür.
+Widget _labelGlass(Widget child) => ClipRect(
+  child: BackdropFilter(filter: NzGlassTone.bar.filter(), child: child),
+);
+
+/// Grup satırının cam dolgusu: `surface`, üst çubuk camıyla aynı saydamlıkta.
+Color _groupGlass(NizamioColors c) => c.surface.withValues(alpha: c.glassBar.a);
 
 /// Bugüne ortalama isteği: [serial] değişince çizelge bugünü ortalar ([smooth] → kayarak).
 @immutable
@@ -259,25 +270,28 @@ class _DateHeader extends StatelessWidget {
             width: GanttGeometry.labelWidth,
             height: GanttGeometry.stickyHeader,
             child: sticky(
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: c.background,
-                  border: Border(right: side, bottom: side),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    GanttGeometry.labelHeadPad,
-                    0,
-                    GanttGeometry.labelHeadPad,
-                    GanttGeometry.labelHeadBottom,
+              _labelGlass(
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: c.glassBar,
+                    border: Border(right: side, bottom: side),
                   ),
-                  child: Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text(
-                      l.uiTimelineGanttLabelHead,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.kicker,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      GanttGeometry.labelHeadPad,
+                      0,
+                      GanttGeometry.labelHeadPad,
+                      GanttGeometry.labelHeadBottom,
+                    ),
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        l.uiTimelineGanttLabelHead,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.fade,
+                        style: t.kicker,
+                      ),
                     ),
                   ),
                 ),
@@ -322,8 +336,7 @@ class _Body extends StatelessWidget {
     );
     final tasks = [
       for (final b in layout.rows)
-        if (b.row case GanttTaskRow(:final task, :final selected))
-          (b, task, selected),
+        if (b.row case final GanttTaskRow r) (b, r),
     ];
     return Stack(
       clipBehavior: Clip.none,
@@ -348,19 +361,19 @@ class _Body extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              for (final (b, task, selected) in tasks)
+              for (final (b, r) in tasks)
                 Positioned.fromRect(
                   rect: b.bar!,
                   child: _Bar(
-                    key: GanttChart.barKey(task.code),
-                    task: task,
-                    selected: selected,
+                    key: GanttChart.barKey(r.task.code),
+                    task: r.task,
+                    selected: r.selected,
                     inside: b.inside,
-                    label: l.ganttBarLabel(task, year),
-                    onTap: () => onPick(task.code),
+                    label: l.ganttBarLabel(r, year),
+                    onTap: () => onPick(r.task.code),
                   ),
                 ),
-              for (final (b, task, _) in tasks)
+              for (final (b, GanttTaskRow(:task)) in tasks)
                 if (!b.inside)
                   Positioned(
                     left: b.outsideX,
@@ -409,26 +422,26 @@ class _Body extends StatelessWidget {
                       style: t.bodyMd.copyWith(color: c.textMuted),
                     ),
                   )
-                : Column(
-                    key: GanttChart.labelsKey,
-                    children: [
-                      for (final b in layout.rows)
-                        SizedBox(
-                          height: GanttGeometry.row,
-                          child: switch (b.row) {
-                            final GanttHeadRow h => _GroupLabel(
-                              head: h,
-                              onTap: () => onToggleGroup(h.code),
-                            ),
-                            GanttTaskRow(:final task, :final selected) =>
-                              _TaskLabel(
-                                task: task,
-                                selected: selected,
-                                onTap: () => onPick(task.code),
+                : _labelGlass(
+                    Column(
+                      key: GanttChart.labelsKey,
+                      children: [
+                        for (final b in layout.rows)
+                          SizedBox(
+                            height: GanttGeometry.row,
+                            child: switch (b.row) {
+                              final GanttHeadRow h => _GroupLabel(
+                                head: h,
+                                onTap: () => onToggleGroup(h.code),
                               ),
-                          },
-                        ),
-                    ],
+                              final GanttTaskRow r => _TaskLabel(
+                                row: r,
+                                onTap: () => onPick(r.task.code),
+                              ),
+                            },
+                          ),
+                      ],
+                    ),
                   ),
           ),
         ),
@@ -518,7 +531,12 @@ class _GroupLabel extends StatelessWidget {
     return Semantics(
       button: true,
       expanded: head.open,
-      label: [head.code, head.name, ?late, '${head.count}'].join(' '),
+      label: [
+        if (head.label != head.name) head.label,
+        head.name,
+        ?late,
+        '${head.count}',
+      ].join(' '),
       excludeSemantics: true,
       onTap: onTap,
       child: GestureDetector(
@@ -526,7 +544,7 @@ class _GroupLabel extends StatelessWidget {
         onTap: onTap,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: c.surface,
+            color: _groupGlass(c),
             border: Border(top: side, right: side),
           ),
           child: Padding(
@@ -547,16 +565,32 @@ class _GroupLabel extends StatelessWidget {
                   ),
                 ),
                 const Gap(NizamioSpacing.space2),
-                Text(head.code, style: t.monoSm.copyWith(color: c.textFaint)),
-                const Gap(NizamioSpacing.space2),
+                // Etiket ve ad tek satır: sığmazsa sonu soluklaşır (satır dışına taşmaz).
+                // Departman kodu yoksa etiket addır; o zaman yalnız ad yazılır.
                 Expanded(
-                  child: Text(
-                    head.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: t.labelMd.copyWith(
-                      fontSize: GanttGeometry.groupNameSize,
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        if (head.label != head.name) ...[
+                          TextSpan(
+                            text: head.label,
+                            style: t.monoSm.copyWith(color: c.textFaint),
+                          ),
+                          const TextSpan(text: '  '),
+                        ],
+                        if (head.name.isNotEmpty) ...[
+                          TextSpan(
+                            text: head.name,
+                            style: t.labelMd.copyWith(
+                              fontSize: GanttGeometry.groupNameSize,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
                   ),
                 ),
                 if (late != null) ...[
@@ -589,27 +623,28 @@ class _GroupLabel extends StatelessWidget {
   }
 }
 
-/// Görev satırının sol etiketi (prototip `button[aria-pressed]`): kod (gecikmede kırmızı) ve
-/// başlık; dokununca seçer.
+/// Görev satırının sol etiketi (prototip `button[aria-pressed]`): gri anahtar (koordinatörlük
+/// etiketi + sıra; gecikmede kırmızı) ve beyaz, kalın başlık; dokununca seçer. Uzun etiket ve
+/// başlık sonda soluklaşır, numara görünür kalır.
 class _TaskLabel extends StatelessWidget {
-  const _TaskLabel({
-    required this.task,
-    required this.selected,
-    required this.onTap,
-  });
+  const _TaskLabel({required this.row, required this.onTap});
 
-  final GanttTask task;
-  final bool selected;
+  final GanttTaskRow row;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
+    final task = row.task;
+    final number = row.number;
+    final keyStyle = t.monoSm.copyWith(
+      color: task.late ? c.danger : c.textFaint,
+    );
     return Semantics(
       button: true,
-      selected: selected,
-      label: context.l10n.ganttRowLabel(task),
+      selected: row.selected,
+      label: context.l10n.ganttRowLabel(row),
       excludeSemantics: true,
       onTap: onTap,
       child: GestureDetector(
@@ -617,7 +652,7 @@ class _TaskLabel extends StatelessWidget {
         onTap: onTap,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: c.background,
+            color: c.glassBar,
             border: Border(right: BorderSide(color: c.border)),
           ),
           child: Padding(
@@ -627,14 +662,24 @@ class _TaskLabel extends StatelessWidget {
             ),
             child: Row(
               children: [
-                SizedBox(
-                  width: GanttGeometry.idColumn,
-                  child: Text(
-                    task.code,
-                    maxLines: 1,
-                    style: t.monoSm.copyWith(
-                      color: task.late ? c.danger : c.textFaint,
-                    ),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: GanttGeometry.keyMaxWidth,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          row.label,
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.fade,
+                          style: keyStyle,
+                        ),
+                      ),
+                      if (number != null) Text(' $number', style: keyStyle),
+                    ],
                   ),
                 ),
                 const Gap(NizamioSpacing.space2),
@@ -642,9 +687,12 @@ class _TaskLabel extends StatelessWidget {
                   child: Text(
                     task.item.title,
                     maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
                     style: t.bodyMd.copyWith(
                       fontSize: GanttGeometry.rowTitleSize,
+                      fontWeight: FontWeight.w600,
+                      color: c.text,
                     ),
                   ),
                 ),

@@ -158,6 +158,7 @@ sealed class GanttRow {
 final class GanttHeadRow extends GanttRow {
   const GanttHeadRow({
     required this.code,
+    required this.label,
     required this.name,
     required this.count,
     required this.late,
@@ -166,7 +167,11 @@ final class GanttHeadRow extends GanttRow {
     required this.end,
   });
 
+  /// Anahtar (sunucuda `department_id`; ekranda gösterilmez).
   final String code;
+
+  /// Ekrandaki kısa etiket ([CoordinatorshipRef.label]: departman kodu, yoksa ad).
+  final String label;
   final String name;
 
   /// Görünen (süzgeçten geçen) görev sayısı.
@@ -183,10 +188,25 @@ final class GanttHeadRow extends GanttRow {
 
 /// Görev satırı (prototip `isRow`).
 final class GanttTaskRow extends GanttRow {
-  const GanttTaskRow({required this.task, required this.selected});
+  const GanttTaskRow({
+    required this.task,
+    required this.selected,
+    required this.label,
+    required this.number,
+  });
 
   final GanttTask task;
   final bool selected;
+
+  /// Koordinatörlük etiketi (grup başlığıyla aynı); örnek veride görev kodu (`ALT-7`).
+  final String label;
+
+  /// Koordinatörlük içindeki sıra (1'den; oluşturma sırası, süzgeçten bağımsız); örnek veride
+  /// kod numarayı zaten taşıdığı için null.
+  final int? number;
+
+  /// Ekrandaki görev anahtarı: "ALT 3" (örnekte "ALT-7").
+  String get key => number == null ? label : '$label $number';
 }
 
 /// Koordinatörlük çipi.
@@ -194,11 +214,15 @@ final class GanttTaskRow extends GanttRow {
 final class GanttCoordChip {
   const GanttCoordChip({
     required this.code,
+    required this.label,
     required this.name,
     required this.selected,
   });
 
   final String code;
+
+  /// Ekrandaki kısa etiket ([CoordinatorshipRef.label]).
+  final String label;
   final String name;
   final bool selected;
 }
@@ -267,6 +291,33 @@ final class GanttView {
       .firstOrNull;
 }
 
+/// Görev → koordinatörlük içindeki sıra numarası (1'den). Sunucuda insan okunur görev anahtarı
+/// yoktur; numara yalnız gösterimdir ve kalıcı değildir (görev silinir ya da taşınırsa kayar).
+/// Sıra oluşturma zamanıdır (`created_at`; zamansız görevler sonda), eşitlikte katalog sırası;
+/// süzgeç numarayı değiştirmez (tüm katalog görevleri sayılır).
+Map<String, int> taskNumbers(List<TaskItem> tasks) {
+  final groups = <String, List<(int, TaskItem)>>{};
+  for (final (i, t) in tasks.indexed) {
+    (groups[t.coordinatorship] ??= []).add((i, t));
+  }
+  final numbers = <String, int>{};
+  for (final group in groups.values) {
+    group.sort((a, b) {
+      final x = a.$2.createdAt;
+      final y = b.$2.createdAt;
+      // Zamanı olan önce; ikisi de varsa zamana, yoksa katalog sırasına göre.
+      final byTime = x == null
+          ? (y == null ? 0 : 1)
+          : (y == null ? -1 : x.compareTo(y));
+      return byTime != 0 ? byTime : a.$1 - b.$1;
+    });
+    for (final (n, (_, t)) in group.indexed) {
+      numbers[t.code] = n + 1;
+    }
+  }
+  return numbers;
+}
+
 /// Koordinatörlüklerin görünüm sırası: [order]'dakiler o sırayla, kalanlar katalog sırasıyla.
 List<CoordinatorshipRef> orderedCoordinatorships(
   TaskCatalog catalog,
@@ -324,6 +375,7 @@ GanttView buildGanttView(
   ];
 
   final coords = orderedCoordinatorships(catalog, order);
+  final numbers = taskNumbers(catalog.tasks);
   final rows = <GanttRow>[];
   for (final c in coords) {
     final indexed = [
@@ -341,6 +393,7 @@ GanttView buildGanttView(
     rows.add(
       GanttHeadRow(
         code: c.code,
+        label: c.label,
         name: c.name,
         count: group.length,
         late: group.where((t) => t.late).length,
@@ -351,7 +404,15 @@ GanttView buildGanttView(
     );
     if (open) {
       for (final t in group) {
-        rows.add(GanttTaskRow(task: t, selected: s.selected == t.code));
+        final shortCode = t.item.shortCode;
+        rows.add(
+          GanttTaskRow(
+            task: t,
+            selected: s.selected == t.code,
+            label: shortCode == null ? t.item.displayCode : c.label,
+            number: shortCode == null ? null : numbers[t.code],
+          ),
+        );
       }
     }
   }
@@ -385,6 +446,7 @@ GanttView buildGanttView(
       for (final c in coords)
         GanttCoordChip(
           code: c.code,
+          label: c.label,
           name: c.name,
           selected: s.coords.contains(c.code),
         ),

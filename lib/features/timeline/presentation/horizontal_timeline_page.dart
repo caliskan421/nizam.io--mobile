@@ -64,6 +64,10 @@ class _HorizontalTimelinePageState
   final _searchFocus = FocusNode();
   bool _searchOpen = false;
 
+  // Açılış karesi bölünür: ilk karede iskelet (üst çubuk, araç satırı, lejant), Gantt
+  // gövdesi bir sonraki karede kurulur; toplam iş aynı, tek kare kısalır.
+  bool _chartReady = false;
+
   @override
   void dispose() {
     _search.dispose();
@@ -89,6 +93,9 @@ class _HorizontalTimelinePageState
     _search.text = ref.read(horizontalTimelineControllerProvider).query;
     _searchOpen = _search.text.isNotEmpty;
     _applyIntent(widget.coordinatorship);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _chartReady = true);
+    });
   }
 
   @override
@@ -237,13 +244,15 @@ class _HorizontalTimelinePageState
                               border: Border(top: BorderSide(color: c.border)),
                             ),
                             child: ClipRect(
-                              child: GanttChart(
-                                key: HorizontalTimelinePage.chartKey,
-                                layout: layout,
-                                center: _center,
-                                onToggleGroup: ctrl.toggleGroup,
-                                onPick: ctrl.pick,
-                              ),
+                              child: _chartReady
+                                  ? GanttChart(
+                                      key: HorizontalTimelinePage.chartKey,
+                                      layout: layout,
+                                      center: _center,
+                                      onToggleGroup: ctrl.toggleGroup,
+                                      onPick: ctrl.pick,
+                                    )
+                                  : const SizedBox.expand(),
                             ),
                           ),
                         ),

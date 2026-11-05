@@ -74,6 +74,7 @@ List<Widget> tasksListChildren(
       catalog: catalog,
       showGroup: !byCoord,
       onTap: () => onOpen(task.code),
+      fill: columns > 1,
     );
     final key = ValueKey('task:${task.code}');
     final child = stagger == null
@@ -386,12 +387,16 @@ class TaskCardView extends StatelessWidget {
     required this.catalog,
     required this.onTap,
     this.showGroup = true,
+    this.fill = false,
   });
 
   final TaskItem task;
   final TaskCatalog catalog;
   final VoidCallback onTap;
   final bool showGroup;
+
+  /// Izgara satırında satır boyuna uzar ([NzTaskCard.fill]).
+  final bool fill;
 
   @override
   Widget build(BuildContext context) {
@@ -419,6 +424,7 @@ class TaskCardView extends StatelessWidget {
       ),
     );
     return NzTaskCard(
+      fill: fill,
       code: task.displayCode,
       group: showGroup
           ? catalog.coordinatorship(task.coordinatorship)?.name ??

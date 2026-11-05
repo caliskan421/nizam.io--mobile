@@ -17,7 +17,8 @@ abstract final class TaskCardGrid {
       ((width + gap) / (minCardWidth + gap)).floor().clamp(1, maxColumns);
 }
 
-/// Izgaranın bir satırı: kartlar üste yaslanır (yükseklikleri farklıdır), eksik sütun boş kalır.
+/// Izgaranın bir satırı: kartlar satırın en uzun kartı boyundadır (eşit yükseklik; kart
+/// `fill` ile uzar), eksik sütun boş kalır.
 class TaskCardRow extends StatelessWidget {
   const TaskCardRow({super.key, required this.cards, required this.columns});
 
@@ -25,12 +26,14 @@ class TaskCardRow extends StatelessWidget {
   final int columns;
 
   @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    spacing: TaskCardGrid.gap,
-    children: [
-      for (var i = 0; i < columns; i++)
-        i < cards.length ? Expanded(child: cards[i]) : const Spacer(),
-    ],
+  Widget build(BuildContext context) => IntrinsicHeight(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: TaskCardGrid.gap,
+      children: [
+        for (var i = 0; i < columns; i++)
+          i < cards.length ? Expanded(child: cards[i]) : const Spacer(),
+      ],
+    ),
   );
 }

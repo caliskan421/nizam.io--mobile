@@ -259,8 +259,8 @@ denetler. Bir dal tek türde iş taşır; karışırsa ayrı dala bölünür.
 
 | Önek | Ne zaman |
 |---|---|
-| `ozellik/` | yeni davranış, ekran, uç ya da sözleşme (pin) yükseltmesi |
-| `duzeltme/` | hatalı davranışın düzeltilmesi |
+| `ozellik/` | olmayan bir şeyin eklenmesi: yeni ekran, akış, uç ya da sözleşme (pin) yükseltmesi |
+| `duzeltme/` | var olan davranışın düzeltilmesi ya da değiştirilmesi: hata, kural, akış, varsayılan |
 | `arayuz/` | yalnız görünüm: yerleşim, bileşen, animasyon, tablet/telefon uyumu; veri ve iş mantığı değişmez |
-| `belge/` | yalnız belge (`*.md`, ADR, yorum) |
+| `belge/` | her türlü belge ekleme/düzeltme: README, CLAUDE/AGENTS, ADR, `docs/`, yönetim deposu `program/` |
 | `bakim/` | yeniden düzenleme, bağımlılık, CI, araç, üretilmiş kod yenilemesi |

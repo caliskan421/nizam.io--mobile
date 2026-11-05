@@ -59,7 +59,7 @@ void main() {
     '1180×820: ray 100 + liste 390 (+1 kenar) + ayrıntı 689; kayıt yoksa "Bir kayıt seç"',
     (tester) async {
       final router = await _pump(tester, const Size(1180, 820));
-      router.go('/tasks');
+      router.go('/coordinatorships');
       await settle(tester);
       expect(find.byType(NzFloatingNav), findsNothing);
       expect(tester.getSize(find.byType(NzTabletRail)).width, 100);
@@ -75,16 +75,16 @@ void main() {
       expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 390, 820));
       expect(tester.getRect(detail), const Rect.fromLTWH(491, 0, 689, 820));
       expect(
-        _inPane(NzPaneRole.master, find.byType(TasksPage)),
+        _inPane(NzPaneRole.master, find.byType(CoordinatorshipsPage)),
         findsOneWidget,
       );
-      // Prod'da örnek kimlik açılmaz: kayıt hiç açılmamışsa sağda "Bir kayıt seç".
+      // Kayıt hiç açılmamışsa sağda "Bir kayıt seç".
       expect(
         _inPane(NzPaneRole.detail, find.byType(NzPickRecord)),
         findsOneWidget,
       );
       expect(
-        _inPane(NzPaneRole.detail, find.byType(TaskDetailPage)),
+        _inPane(NzPaneRole.detail, find.byType(CoordinatorshipPage)),
         findsNothing,
       );
       // Tek ekranlık sağ yığında "Geri" yok.
@@ -92,8 +92,39 @@ void main() {
       expect(_inPane(NzPaneRole.detail, _backIcon), findsNothing);
       expect(
         tester.widget<NzTabletRail>(find.byType(NzTabletRail)).currentIndex,
-        RailModule.tasks.index,
+        RailModule.coordinatorships.index,
       );
+    },
+  );
+
+  testWidgets(
+    'Görevler: kökte liste tam genişlik; görev açılınca 390, Geri kapatır',
+    (tester) async {
+      final router = await _pump(tester, const Size(1180, 820));
+      router.go('/tasks?view=late');
+      await settle(tester);
+      final master = find.byWidgetPredicate(
+        (w) => w is NzPaneScope && w.role == NzPaneRole.master,
+      );
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
+      expect(find.byType(NzPickRecord).hitTestable(), findsNothing);
+      final list = tester.state(find.byType(TasksPage));
+
+      tester.element(find.byType(TasksPage)).appNav.openTask('ALT-7');
+      await settle(tester);
+      expect(locationOf(router), '/tasks/ALT-7');
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 390, 820));
+      expect(tester.state(find.byType(TasksPage)), same(list));
+      final back = _inPane(NzPaneRole.detail, _backIcon).hitTestable();
+      expect(back, findsOneWidget);
+
+      await tester.tap(back);
+      await settle(tester);
+      // Süzgeç korunur; liste yeniden tam genişlik, aynı State.
+      expect(locationOf(router), '/tasks?view=late');
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
+      expect(tester.state(find.byType(TasksPage)), same(list));
+      expect(tester.takeException(), isNull);
     },
   );
 
@@ -174,9 +205,10 @@ void main() {
       expect(locationOf(router), '/messages/gen');
       final chat = _inPane(NzPaneRole.detail, find.byType(ChatPage));
       expect(tester.widget<ChatPage>(chat).id, 'gen');
+      // Görevler son görevi geri getirmez: kök, liste tam genişlik.
       await tester.tap(_rail('Görevler'));
       await settle(tester);
-      expect(locationOf(router), '/tasks/ALT-7');
+      expect(locationOf(router), '/tasks');
     },
   );
 
@@ -346,20 +378,20 @@ void main() {
     tester,
   ) async {
     final router = await _pump(tester, const Size(1180, 820));
-    router.go('/tasks/ALT-7');
+    router.go('/coordinatorships/ALT');
     await settle(tester);
     await tester.tap(_rail('Arşiv'));
     await settle(tester);
-    await tester.tap(_rail('Görevler'));
+    await tester.tap(_rail('Koordinatörlükler'));
     await settle(tester);
-    expect(locationOf(router), '/tasks/ALT-7');
+    expect(locationOf(router), '/coordinatorships/ALT');
     expect(
       tester
-          .widget<TaskDetailPage>(
-            _inPane(NzPaneRole.detail, find.byType(TaskDetailPage)),
+          .widget<CoordinatorshipPage>(
+            _inPane(NzPaneRole.detail, find.byType(CoordinatorshipPage)),
           )
           .code,
-      'ALT-7',
+      'ALT',
     );
   });
 

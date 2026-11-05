@@ -18,7 +18,8 @@ import 'routes.dart';
 //
 // - Sol modül YOLDAN türer (`/coordinatorships/...` → Koordinatörlükler listesi).
 // - Sağ yığın = taban + iz. Taban yolun kaydıdır (`/tasks/ALT-7` → görev ALT-7; modül kökü →
-//   modülün son açılan kaydı; hiç açılmamışsa "Bir kayıt seç"). İz, modüller arası itilen kayıtlardır ve
+//   modülün son açılan kaydı; hiç açılmamışsa "Bir kayıt seç"). Görevler kökü istisnadır: sağ
+//   yığın boşken liste tam genişliktir (kart ızgarası), görev açılınca 390'a daralır. İz, modüller arası itilen kayıtlardır ve
 //   yalnız KİMLİK taşıyan `trail` sorgusudur (`?trail=folder:ALT&trail=task:ALT-5`).
 // - Dal kökü genişliğe göre kurulur ([SplitRoot]): tek bölmede liste, çift bölmede taban.
 //   Liste sayfası iki yer arasında aynı [GlobalKey] ile taşınır (State korunur).
@@ -116,9 +117,24 @@ PaneEntry? baseEntryOf(Uri uri, String? Function(PaneKind) lastId) {
   if (kind == PaneKind.history) {
     return parts.length > 1 ? const PaneEntry(PaneKind.history) : null;
   }
-  final id = parts.length > 1 ? parts[1] : lastId(kind);
+  final id = parts.length > 1
+      ? parts[1]
+      : restoresLastRecord(kind)
+      ? lastId(kind)
+      : null;
   return id == null ? null : PaneEntry(kind, id);
 }
+
+/// Modül kökünde sağ bölme son açılan kaydı mı gösterir. Görevlerde hayır: kökte liste tam
+/// genişliktir ([splitListFull]); görev yalnız dokunuşla açılır, kapanınca liste genişler.
+/// İşlem geçmişi kimliksizdir, yalnız `/home/history` ile açılır.
+bool restoresLastRecord(PaneKind kind) =>
+    kind != PaneKind.task && kind != PaneKind.history;
+
+/// Çift bölmede sol liste tam genişlik mi: Görevler kökü, sağ yığın boş (açık kayıt yok).
+bool splitListFull(Uri uri) =>
+    uri.path == const TasksRoute().location &&
+    parseTrail(uri.queryParametersAll['trail'] ?? const []).isEmpty;
 
 /// [uri]'nin izi [trail] olan hâli (diğer sorgu parametreleri korunur).
 String withTrail(Uri uri, List<PaneEntry> trail) {
@@ -289,9 +305,12 @@ class SplitRoot extends StatelessWidget {
   }
 }
 
-/// Modül kökünün taban kaydı: son açılan; hiç açılmamışsa null ("Bir kayıt seç").
+/// Modül kökünün taban kaydı: son açılan; hiç açılmamışsa ya da tür son kaydı geri getirmiyorsa
+/// ([restoresLastRecord]) null ("Bir kayıt seç").
 String? splitBaseId(BuildContext context, PaneKind kind) =>
-    SplitMemory.maybeOf(context)?.lastIds[kind];
+    restoresLastRecord(kind)
+    ? SplitMemory.maybeOf(context)?.lastIds[kind]
+    : null;
 
 /// Sağ yığın: [base] (rotanın kendi ekranı) + iz kayıtları; yalnız en üstteki görünür, alttakiler
 /// State'iyle bekler (prototip alt ekranlar kalıcıdır). Geri (üst çubuk, sistem) izi kısaltır.

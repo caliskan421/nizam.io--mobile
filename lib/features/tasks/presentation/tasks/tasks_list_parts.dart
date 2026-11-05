@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
@@ -9,7 +8,6 @@ import '../../../../core/ui/motion/page_content_entrance.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
-import '../../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../../core/ui/widgets/nz_alert_icon.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
@@ -19,22 +17,15 @@ import '../../domain/task_catalog.dart';
 import '../../domain/task_query.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
-
-/// Görünüm noktası rengi (prototip `VD`).
-Color viewDot(TaskView v, NizamioColors c) => switch (v) {
-  TaskView.all => c.textMuted,
-  TaskView.late => c.danger,
-  TaskView.inProgress => c.inProgress,
-  TaskView.review || TaskView.dateRequest => c.warning,
-  TaskView.notStarted => c.textFaint,
-  TaskView.done => c.accentText,
-};
+import 'task_card_grid.dart';
+import 'task_view_grid.dart';
 
 /// Liste gövdesi (görünüm kutucukları, çipler, başlık + sıralama, kartlar, sayfalama) akışın
 /// öğeleri olarak: sayfa bunları `NzPage.feed` tembel listesine doğrudan koyar; ekran dışı
 /// kartlar kurulmaz/yerleştirilmez (tek `Column` içinde 76 kart yerine), her öğe kendi
 /// boyama sınırında. Kartlar görev koduyla anahtarlıdır (sıralama/süzgeç değişince öğe
-/// eşleşmesi korunur).
+/// eşleşmesi korunur). [columns] > 1 (tablette tam genişlik liste) kartlar satırlara dizilir
+/// ([TaskCardRow]); her satır ayrı öğedir.
 List<Widget> tasksListChildren(
   BuildContext context, {
   required TaskCatalog catalog,
@@ -43,6 +34,7 @@ List<Widget> tasksListChildren(
   required TasksListController ctl,
   required VoidCallback onClearAll,
   required ValueChanged<String> onOpen,
+  int columns = 1,
 }) {
   final l = context.l10n;
   final c = context.colors;
@@ -58,9 +50,22 @@ List<Widget> tasksListChildren(
   final rows = <Widget>[];
   Widget item(Key key, Widget child) => Padding(
     key: key,
-    padding: EdgeInsets.only(top: rows.isEmpty ? 0 : NizamioSpacing.gapMd),
+    padding: EdgeInsets.only(top: rows.isEmpty ? 0 : TaskCardGrid.gap),
     child: child,
   );
+  // Satırı dolmayı bekleyen kartlar (çok sütunda); grup başlığından önce ve sonda boşaltılır.
+  final pending = <Widget>[];
+  void flush() {
+    if (pending.isEmpty) return;
+    rows.add(
+      item(
+        ValueKey('row:${pending.first.key}'),
+        TaskCardRow(cards: [...pending], columns: columns),
+      ),
+    );
+    pending.clear();
+  }
+
   // Grup açılınca kartlar ana sayfadaki koordinatörlük kartlarıyla aynı girişle, kademeli
   // gelir ([NzEntrance]; yeni eklenen kart oynar, açık kalan grup yeniden oynamaz).
   void card(TaskItem task, {int? stagger}) {
@@ -70,20 +75,23 @@ List<Widget> tasksListChildren(
       showGroup: !byCoord,
       onTap: () => onOpen(task.code),
     );
-    rows.add(
-      item(
-        ValueKey('task:${task.code}'),
-        stagger == null
-            ? view
-            : NzEntrance(replay: task.code, index: stagger, child: view),
-      ),
-    );
+    final key = ValueKey('task:${task.code}');
+    final child = stagger == null
+        ? view
+        : NzEntrance(replay: task.code, index: stagger, child: view);
+    if (columns == 1) {
+      rows.add(item(key, child));
+      return;
+    }
+    pending.add(KeyedSubtree(key: key, child: child));
+    if (pending.length == columns) flush();
   }
 
   if (byCoord) {
     for (var gi = 0; gi < r.groups.length; gi++) {
       final g = r.groups[gi];
       final open = state.isGroupOpen(g.coordinatorship, first: gi == 0);
+      flush();
       rows.add(
         item(
           ValueKey('group:${g.coordinatorship}'),
@@ -107,6 +115,18 @@ List<Widget> tasksListChildren(
   } else {
     list.take(state.limit).forEach(card);
   }
+  flush();
+
+  final sort = NzSplitButton(
+    label: l.sortLabel(state.sort),
+    semanticLabel: '${l.uiHomeSortChange}: ${l.sortLabel(state.sort)}',
+    onPressed: ctl.cycleSort,
+    icon: NzIcons.chevronDown,
+    iconTurns: state.descending ? 0 : 0.5,
+    iconSemanticLabel:
+        '${l.uiHomeSortFlip}: ${state.descending ? l.uiHomeSortDescending : l.uiHomeSortAscending}',
+    onIconPressed: ctl.flipDirection,
+  );
 
   return [
     TaskViewGrid(
@@ -129,20 +149,16 @@ List<Widget> tasksListChildren(
     // Tablet kaynağı: bölümler arası 20; başlık (44) sonrası `gap 20 − margin 8` = 12.
     Gap(tablet ? NizamioSpacing.space5 : NizamioSpacing.space3),
     // Ana sayfadaki koordinatörlük sıralamasıyla aynı bileşen: etiket ölçütü değiştirir, ok
-    // yönü çevirir (koordinatörlük ölçütü yönsüzdür).
-    Align(
-      alignment: Alignment.centerRight,
-      child: NzSplitButton(
-        label: l.sortLabel(state.sort),
-        semanticLabel: '${l.uiHomeSortChange}: ${l.sortLabel(state.sort)}',
-        onPressed: ctl.cycleSort,
-        icon: NzIcons.chevronDown,
-        iconTurns: state.descending ? 0 : 0.5,
-        iconSemanticLabel:
-            '${l.uiHomeSortFlip}: ${state.descending ? l.uiHomeSortDescending : l.uiHomeSortAscending}',
-        onIconPressed: ctl.flipDirection,
-      ),
-    ),
+    // yönü çevirir (koordinatörlük ölçütü yönsüzdür). Tablette solda liste başlığı
+    // (`tüm görevler · 76`, kaynak `L.listTitle`).
+    if (tablet)
+      NzKicker(
+        '${l.viewListTitle(state.view)} · ${list.length}',
+        emphasis: true,
+        action: sort,
+      )
+    else
+      Align(alignment: Alignment.centerRight, child: sort),
     Gap(tablet ? NizamioSpacing.space3 : NizamioSpacing.space1),
     ...rows,
     if (list.isEmpty)
@@ -213,157 +229,6 @@ List<Widget> _chips(
         onRemove: () => ctl.togglePriority(p),
       ),
   ];
-}
-
-/// 4×2 görünüm kutucukları; "Tümü" iki sütun.
-class TaskViewGrid extends StatelessWidget {
-  const TaskViewGrid({
-    super.key,
-    required this.counts,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final Map<TaskView, int> counts;
-  final TaskView selected;
-  final ValueChanged<TaskView> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget tile(TaskView v) => _ViewTile(
-      view: v,
-      count: counts[v] ?? 0,
-      selected: v == selected,
-      onTap: () => onSelected(v),
-    );
-    // Kaynak ızgarası `repeat(4, minmax(0, 1fr))` + `gap: 8px`; "Tümü" 2 sütun kaplar
-    // (genişlik 2 sütun + 1 boşluk; oranla paylaştırma değil).
-    const gap = NizamioSpacing.space2;
-    Widget row(List<(TaskView, int)> items) => LayoutBuilder(
-      builder: (context, box) {
-        final col = (box.maxWidth - 3 * gap) / 4;
-        return IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: gap,
-            children: [
-              for (final (v, span) in items)
-                SizedBox(width: span * col + (span - 1) * gap, child: tile(v)),
-            ],
-          ),
-        );
-      },
-    );
-    return Semantics(
-      container: true,
-      label: context.l10n.uiTasksViews,
-      child: Column(
-        spacing: NizamioSpacing.space2,
-        children: [
-          row([
-            (TaskView.all, 2),
-            (TaskView.late, 1),
-            (TaskView.inProgress, 1),
-          ]),
-          row([
-            (TaskView.review, 1),
-            (TaskView.dateRequest, 1),
-            (TaskView.notStarted, 1),
-            (TaskView.done, 1),
-          ]),
-        ],
-      ),
-    );
-  }
-}
-
-// Tablet kaynak görünüm kutucuğu: sayı `rp-num` 22/26, etiket 11/14.
-const _tileNum = 22.0;
-const _tileNumLine = 26.0;
-const _tileLabel = 11.0;
-const _tileLabelLine = 14.0;
-
-class _ViewTile extends StatelessWidget {
-  const _ViewTile({
-    required this.view,
-    required this.count,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final TaskView view;
-  final int count;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final tablet = NzTabletMetrics.tabletVisualAt(
-      MediaQuery.sizeOf(context).width,
-    );
-    final c = context.colors;
-    final t = context.text;
-    final l = context.l10n;
-    final numColor = switch (view) {
-      TaskView.late => c.danger,
-      TaskView.dateRequest => c.warning,
-      _ => c.text,
-    };
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: '${l.viewLabel(view)}, $count',
-      excludeSemantics: true,
-      child: NzPressable.card(
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(NizamioRadius.group),
-          child: AnimatedContainer(
-            duration: NzMotion.of(context, NizamioMotion.durPress),
-            constraints: const BoxConstraints(minHeight: 76),
-            padding: const EdgeInsets.all(NizamioSpacing.gapMd),
-            decoration: BoxDecoration(
-              color: selected ? c.surfaceOverlay : c.surface,
-              borderRadius: BorderRadius.circular(NizamioRadius.group),
-              border: Border.all(
-                color: selected ? c.accentText : c.border,
-                width: NizamioSize.borderWidth,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: NizamioSpacing.space1,
-              children: [
-                NzDot(color: viewDot(view, c)),
-                Text(
-                  '$count',
-                  style: tablet
-                      ? t.titleSm.copyWith(
-                          fontSize: _tileNum,
-                          height: _tileNumLine / _tileNum,
-                          color: numColor,
-                        )
-                      : t.titleSm.copyWith(color: numColor),
-                ),
-                Text(
-                  l.viewLabel(view),
-                  maxLines: tablet ? 1 : 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: tablet
-                      ? t.caption.copyWith(
-                          fontSize: _tileLabel,
-                          height: _tileLabelLine / _tileLabel,
-                          color: c.textMuted,
-                        )
-                      : t.caption.copyWith(color: c.textMuted),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _FilterChip extends StatelessWidget {
@@ -617,73 +482,6 @@ class TaskCardView extends StatelessWidget {
       ].join(', '),
     );
   }
-}
-
-/// Alt menüde "Görevler"e yeniden dokununca açılan kısayol menüsü (prototip `buildNav`
-/// `cur === 'tasks'`): görünümler + sayıları, sıralama, görev eylemleri. [onNewTask] null →
-/// "Yeni görev" satırı yok (seçili kapsamda görev açma yetkisi yok).
-Future<void> showTasksShortcuts(
-  BuildContext context, {
-  required TasksListControllerProvider provider,
-  required VoidCallback? onNewTask,
-  required VoidCallback onTimeline,
-  required VoidCallback onSearch,
-  required VoidCallback onFilters,
-}) {
-  final l = context.l10n;
-  final c = context.colors;
-  final container = ProviderScope.containerOf(context, listen: false);
-  final state = container.read(provider);
-  final ctl = container.read(provider.notifier);
-  final r = container.read(tasksListResultOf(provider));
-  if (r == null) return Future.value();
-  return NzFlyoutMenu.show(
-    context,
-    semanticLabel: l.uiTasksShortcuts,
-    entries: [
-      NzFlyoutSection(l.uiTasksFlyView),
-      for (final v in TaskView.values)
-        NzFlyoutItem(
-          label: l.viewLabel(v),
-          dot: viewDot(v, c),
-          count: '${r.counts[v] ?? 0}',
-          selected: v == state.view,
-          onSelected: () => ctl.selectView(v),
-        ),
-      NzFlyoutSection(l.uiTasksFlySort),
-      for (final s in TaskSort.values)
-        NzFlyoutItem(
-          label: l.sortShort(s),
-          icon: NzIcons.swapVertical,
-          selected: s == state.sort,
-          onSelected: () => ctl.selectSort(s),
-        ),
-      NzFlyoutSection(l.uiTasksFlyTasks),
-      if (onNewTask != null)
-        NzFlyoutItem(
-          label: l.uiTasksNewTask,
-          icon: NzIcons.add,
-          accent: true,
-          onSelected: onNewTask,
-        ),
-      NzFlyoutItem(
-        label: l.uiTasksModeTimeline,
-        caption: l.uiTasksFlyTimelineCaption,
-        icon: NzIcons.timeline,
-        onSelected: onTimeline,
-      ),
-      NzFlyoutItem(
-        label: l.uiTasksFlySearch,
-        icon: NzIcons.search,
-        onSelected: onSearch,
-      ),
-      NzFlyoutItem(
-        label: l.uiTasksFlyFilter,
-        icon: NzIcons.filter,
-        onSelected: onFilters,
-      ),
-    ],
-  );
 }
 
 /// Görev listesinin ilk yükleme iskeleti (liste gövdesinin yerinde; başlık, anahtar ve arama

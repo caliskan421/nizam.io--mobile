@@ -319,8 +319,8 @@ void main() {
         expect(locationOf(router), '/home');
         await tester.tap(_railItem('Görevler'));
         await settle(tester);
-        // Son açılan görev (prototip alt ekranı kalıcı), rotada kimlikle.
-        expect(locationOf(router), '/tasks/9');
+        // Görevler son açılan görevi geri getirmez: kök, liste tam genişlik.
+        expect(locationOf(router), '/tasks');
       },
     );
   });

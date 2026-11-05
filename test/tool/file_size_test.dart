@@ -33,7 +33,6 @@ const _legacy = <String, int>{
   'test/core/http/api_stack_test.dart': 766,
   'lib/features/tasks/domain/task_catalog.dart': 765,
   'lib/features/tasks/presentation/detail/detail_actions.dart': 757,
-  'lib/features/tasks/presentation/tasks/tasks_list_parts.dart': 752,
   'lib/features/timeline/presentation/chart/timeline_painters.dart': 746,
   'test/tool/gen_test.dart': 732,
   'lib/features/coordinatorships/presentation/coordinatorship_tabs.dart': 694,

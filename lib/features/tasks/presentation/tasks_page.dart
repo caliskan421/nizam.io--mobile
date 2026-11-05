@@ -4,6 +4,8 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/layout/nz_layout.dart';
+import '../../../core/ui/layout/nz_pane.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
@@ -21,8 +23,10 @@ import '../domain/task_catalog.dart';
 import '../domain/task_query.dart';
 
 import 'quick_action_sheets.dart';
+import 'tasks/task_card_grid.dart';
 import 'tasks/tasks_filter_sheet.dart';
 import 'tasks/tasks_list_parts.dart';
+import 'tasks/tasks_shortcuts.dart';
 import 'tasks_mode_toggle.dart';
 
 /// Görevler listesi (prototip `tasks`): cam üst çubuk, başlık + ikonlu görünüm/ara/yeni görev
@@ -46,9 +50,16 @@ class TasksPage extends ConsumerStatefulWidget {
 
 class _TasksPageState extends ConsumerState<TasksPage> {
   // Alan denetleyici durumundan başlar (liste sayfası yeniden kurulsa da arama metni kalır).
-  late final _search = TextEditingController(
-    text: ref.read(_provider).filter.query,
-  );
+  // initState'te kurulur: gövde LayoutBuilder içinde olduğundan alan ilk kez dispose'da
+  // okunabilir (o anda ref kullanılamaz).
+  late final TextEditingController _search;
+
+  @override
+  void initState() {
+    super.initState();
+    _search = TextEditingController(text: ref.read(_provider).filter.query);
+  }
+
   final _searchFocus = FocusNode();
   void _toTimeline() {
     context.appNav.openTimeline();
@@ -95,7 +106,6 @@ class _TasksPageState extends ConsumerState<TasksPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l = context.l10n;
     final nav = context.appNav;
     ref.listen(shellReselectEventsProvider, (_, next) {
       final visible = ModalRoute.of(context)?.isCurrent ?? true;
@@ -122,7 +132,37 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     final data = catalog.isReloading ? null : catalog.value;
     // Yeni görev yalnız seçili kapsamda görev açabilene (yönetici/koordinatör) görünür.
     final canCreate = ref.watch(canCreateTaskProvider);
+    // Tablette tam genişlik listede (açık görev yok) kartlar 2–3 sütun; liste bölmesinde ve
+    // telefonda tek sütun.
+    return LayoutBuilder(
+      builder: (context, box) => _page(
+        context,
+        state: state,
+        data: data,
+        result: result,
+        catalog: catalog,
+        canCreate: canCreate,
+        columns: TaskCardGrid.columnsFor(
+          box.maxWidth -
+              2 * NzPaneScope.sideInset(context, box, NzContentWidth.wide),
+        ),
+      ),
+    );
+  }
+
+  Widget _page(
+    BuildContext context, {
+    required TasksListState state,
+    required TaskCatalog? data,
+    required TaskQueryResult? result,
+    required AsyncValue<TaskCatalog> catalog,
+    required bool canCreate,
+    required int columns,
+  }) {
+    final l = context.l10n;
+    final nav = context.appNav;
     return NzPage.feed(
+      width: NzContentWidth.wide,
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       onRefresh: () =>
           ref.read(taskCatalogControllerProvider.notifier).refresh(),
@@ -196,6 +236,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
               ref.read(_provider.notifier).clearAll();
             },
             onOpen: nav.openTask,
+            columns: columns,
           )
         else
           NzAsyncView<TaskCatalog>(

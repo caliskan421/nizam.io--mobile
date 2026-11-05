@@ -229,17 +229,21 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
 
   /// Çift bölmede modüle giriş: son açılan kayıt rotada kimlikle durur (`/messages/koord`);
   /// tek bölmeye daralınca aynı kayıt sayfası (aynı State) görünür, geri listeye döner. Kayıt
-  /// hiç açılmamışsa, ana sayfada (geçmiş yalnız dokunuşla açılır) ve takvimde modül kökü açılır.
+  /// hiç açılmamışsa, ana sayfada (geçmiş yalnız dokunuşla açılır), takvimde ve görevlerde (liste
+  /// tam genişlik açılır, [restoresLastRecord]) modül kökü açılır.
   String _moduleEntry(RailModule m) {
     final kind = baseKindOf(m);
     final id = kind == null ? null : _lastIds[kind];
-    if (kind == null || kind == PaneKind.history || id == null) {
+    if (kind == null || !restoresLastRecord(kind) || id == null) {
       return railModuleRoot(m);
     }
     return baseLocation(m, PaneEntry(kind, id));
   }
 
   void _goModule(RailModule m) => GoRouter.of(context).go(_moduleEntry(m));
+
+  /// Görev ayrıntısını kapatır: Görevler köküne (süzgeç korunur) döner, liste tam genişler.
+  void _closeTask() => GoRouter.of(context).go(_tasksRoot.location);
 
   /// Çift bölmede modül dışı hedef (prototip `tgo`): sol liste kalır, sağ yığın değişir.
   void _paneGo(PaneEntry target) {
@@ -328,6 +332,10 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
       RailModule.messages => messagesMaster(),
       null => const SizedBox.shrink(),
     };
+    // Görevler kökünde açık kayıt yoksa liste sağ bölmenin yerini de alır; kayıt açılınca 390'a
+    // daralır. Ağaç iki durumda aynıdır (yalnız genişlik değişir): kabuk ve liste State'i kalır.
+    final full = current == RailModule.tasks && splitListFull(_uri);
+    final tasks = current == RailModule.tasks;
     return NzAppNavScope(
       nav: _SplitAppNav(NzAppNavScope.of(context), _paneGo, _goModule),
       child: Scaffold(
@@ -337,18 +345,26 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
             DecoratedBox(
               key: const ValueKey('master'),
               decoration: BoxDecoration(
-                border: Border(right: BorderSide(color: c.border)),
+                border: full
+                    ? const Border()
+                    : Border(right: BorderSide(color: c.border)),
               ),
               // Prototip bölmesi `box-sizing` içermez: 390 içerik + 1 px kenar (sağ 689).
               child: Padding(
-                padding: const EdgeInsets.only(right: NizamioSize.borderWidth),
+                padding: EdgeInsets.only(
+                  right: full ? 0 : NizamioSize.borderWidth,
+                ),
                 child: SizedBox(
-                  width: NzTabletMetrics.masterWidth,
+                  width: full
+                      ? MediaQuery.sizeOf(context).width -
+                            NzTabletMetrics.railWidth
+                      : NzTabletMetrics.masterWidth,
                   child: NzPaneScope(
                     role: NzPaneRole.master,
-                    // Modül değişiminde liste telefondaki sayfa girişiyle aynı yükselir.
+                    // Modül değişiminde ve liste genişleyip daralınca telefondaki sayfa
+                    // girişiyle aynı yükselir.
                     child: NzPaneTransition(
-                      key: ValueKey(current),
+                      key: ValueKey((current, full)),
                       motion: NzPaneMotion.rise,
                       child: master,
                     ),
@@ -358,13 +374,23 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
             ),
             Expanded(
               key: const ValueKey('detail'),
-              child: NzPaneScope(
-                role: NzPaneRole.detail,
-                child: SplitMemory(
-                  lastIds: _lastIds,
-                  refresh: _refresh,
-                  refreshReloads: _refreshReloads,
-                  child: _shell,
+              // Tam genişlikte sağ bölme sıfır genişlikte bekler (çizilmez, saati durur).
+              child: Offstage(
+                offstage: full,
+                child: TickerMode(
+                  enabled: !full,
+                  child: NzPaneScope(
+                    role: NzPaneRole.detail,
+                    // Görev ayrıntısının "Geri"si ayrıntıyı kapatır (liste genişler).
+                    canBack: tasks,
+                    onBack: tasks ? _closeTask : null,
+                    child: SplitMemory(
+                      lastIds: _lastIds,
+                      refresh: _refresh,
+                      refreshReloads: _refreshReloads,
+                      child: _shell,
+                    ),
+                  ),
                 ),
               ),
             ),

@@ -21,11 +21,17 @@ void main() {
   });
 
   test('modül kökünde taban son açılan kimlik; hiç açılmamışsa yok', () {
-    expect(baseEntryOf(Uri.parse('/tasks'), _none), isNull);
+    expect(baseEntryOf(Uri.parse('/coordinatorships'), _none), isNull);
     expect(
-      baseEntryOf(Uri.parse('/tasks'), (k) => 'ALT-9'),
-      const PaneEntry(PaneKind.task, 'ALT-9'),
+      baseEntryOf(Uri.parse('/coordinatorships'), (k) => 'ALT'),
+      const PaneEntry(PaneKind.coord, 'ALT'),
     );
+    // Görevler kökü son görevi geri getirmez: liste tam genişlik, sağ yığın boş.
+    expect(baseEntryOf(Uri.parse('/tasks'), (k) => 'ALT-9'), isNull);
+    expect(splitListFull(Uri.parse('/tasks')), isTrue);
+    expect(splitListFull(Uri.parse('/tasks?view=late')), isTrue);
+    expect(splitListFull(Uri.parse('/tasks/ALT-9')), isFalse);
+    expect(splitListFull(Uri.parse('/tasks?trail=coord%3AALT')), isFalse);
     expect(baseEntryOf(Uri.parse('/calendar'), _none), isNull);
     // Ana sayfada geçmiş varsayılan açık değildir: kök boş, yalnız `/home/history` tabandır.
     expect(baseEntryOf(Uri.parse('/home'), _none), isNull);

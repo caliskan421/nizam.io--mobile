@@ -11,11 +11,11 @@ import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../../tasks/tasks.dart';
 import '../application/horizontal_timeline_controller.dart';
-import '../application/horizontal_timeline_view.dart';
 import '../domain/horizontal_timeline.dart';
 import 'gantt/gantt_chart.dart';
 import 'gantt/gantt_controls.dart';
 import 'gantt/gantt_geometry.dart';
+import 'gantt/gantt_layout_provider.dart';
 import 'gantt/gantt_selection_card.dart';
 import 'gantt/gantt_sheets.dart';
 
@@ -80,11 +80,6 @@ class _HorizontalTimelinePageState
     }
   }
 
-  // Görünüm ve yerleşim yalnız katalog ya da durum değişince kurulur (kaydırma kurmaz).
-  TaskCatalog? _catalog;
-  GanttState? _builtFor;
-  GanttLayout? _layout;
-
   HorizontalTimelineController get _ctrl =>
       ref.read(horizontalTimelineControllerProvider.notifier);
 
@@ -111,16 +106,6 @@ class _HorizontalTimelinePageState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _ctrl.open(coordinatorship);
     });
-  }
-
-  GanttLayout _layoutOf(TaskCatalog catalog, GanttState state) {
-    final cached = _layout;
-    if (cached != null && identical(_catalog, catalog) && _builtFor == state) {
-      return cached;
-    }
-    _catalog = catalog;
-    _builtFor = state;
-    return _layout = GanttLayout.of(horizontalTimelineView(catalog, state));
   }
 
   void _zoom(GanttZoom z) {
@@ -156,7 +141,9 @@ class _HorizontalTimelinePageState
   @override
   Widget build(BuildContext context) {
     final catalog = ref.watch(taskCatalogControllerProvider);
-    final state = ref.watch(horizontalTimelineControllerProvider);
+    // Yerleşim önbellekten: katalog ya da ekran durumu değişmedikçe aynı örnek (kaydırma ve
+    // sayfanın yeniden açılması kurmaz). Veri varken katalogla birlikte hazırdır.
+    final layout = ref.watch(ganttLayoutProvider);
     // Sayfa girişi yok: başlık liste bölmesindeki yerinde kalır, eylemler kayar
     // ([TasksHeaderSlide]), araç satırı ve çizelge soldan yumuşakça girer.
     return NzPage.bare(
@@ -165,7 +152,7 @@ class _HorizontalTimelinePageState
         child: NzAsyncView<TaskCatalog>(
           value: catalog,
           onRetry: () => ref.invalidate(taskCatalogControllerProvider),
-          data: (c) => _body(context, _layoutOf(c, state), c.truncated),
+          data: (c) => _body(context, layout!, c.truncated),
         ),
       ),
     );

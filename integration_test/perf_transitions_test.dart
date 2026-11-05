@@ -15,6 +15,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RendererBinding;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -113,7 +114,11 @@ Future<void> _semFlush(TabletSession s) async {
   for (var i = 0; i < 100; i++) {
     await s.tester.pump(const Duration(milliseconds: 50));
     if (i >= 7 &&
-        s.tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode !=
+        RendererBinding
+                .instance
+                .rootPipelineOwner
+                .semanticsOwner
+                ?.rootSemanticsNode !=
             null) {
       break;
     }

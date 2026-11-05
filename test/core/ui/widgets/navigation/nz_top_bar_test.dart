@@ -19,6 +19,11 @@ Widget _bar() => CustomScrollView(
   ],
 );
 
+/// Ayrıntı çubuğunun opak zemini (NzTopBar altındaki ilk Material).
+final _surface = find
+    .descendant(of: find.byType(NzTopBar), matching: find.byType(Material))
+    .first;
+
 void main() {
   setUpFonts();
 
@@ -83,9 +88,12 @@ void main() {
     ) async {
       var back = 0;
       await t.pumpWidget(testApp(detail(code: 'ALT-7', onBack: () => back++)));
-      expect(find.byType(NzGlass), findsOneWidget);
       expect(
-        t.getSize(find.byType(NzGlass)).height,
+        t.widget<Material>(_surface).color,
+        NizamioColors.light.background,
+      );
+      expect(
+        t.getSize(_surface).height,
         NizamioSpacing.space2 + NizamioSize.appbar,
       );
       final code = t.widget<Text>(find.text('ALT-7'));

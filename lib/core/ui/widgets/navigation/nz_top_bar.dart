@@ -31,7 +31,7 @@ class NzTopBar extends StatelessWidget {
        _detail = false;
 
   /// Ayrıntı sayfası çubuğu (görev ayrıntısı, işlem geçmişi, koordinatörlük ayrıntısı): aynı
-  /// yapışkan `glass-bar` cam; solda geri düğmesi (48 dokunma), yanında ya soluk mono [code]
+  /// yapışkan opak zemin; solda geri düğmesi (48 dokunma), yanında ya soluk mono [code]
   /// (`m-code`, `ink-muted`; ör. `ALT-7`) ya da [title] (17/24 600 → `labelLg`); sağda en çok
   /// iki ikon eylem ([actions], ör. `NzIconButton`). [onBack] null → `Navigator.maybePop`.
   /// [backLabel] null → Material yerel "Geri" metni.
@@ -164,9 +164,8 @@ extension on _TopBarDelegate {
               NzTabletMetrics.detailHeaderSide -
               NizamioSpacing.space2
         : NizamioSpacing.space1;
-    return NzGlass(
-      tone: NzGlassTone.bar,
-      edge: false,
+    return Material(
+      color: c.background,
       child: MediaQuery.withClampedTextScaling(
         maxScaleFactor: NzTopBar.maxTextScale,
         child: SizedBox.expand(

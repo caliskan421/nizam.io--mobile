@@ -183,7 +183,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               if (_phone)
                 _collapse(
                   ColoredBox(
-                    color: Colors.black,
+                    color: context.colors.background,
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(
                         NizamioSpacing.gutter,
@@ -297,14 +297,18 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                     explicitChildNodes: true,
                     child: Stack(
                       children: [
+                        // Tarih sütunu etiketleri görünür alanın 40 px üstüne de
+                        // çizilir; kırpılmazsa "Görevler" satırının üstüne taşar.
                         Positioned.fill(
-                          child: TimelineChart(
-                            view: v,
-                            onBlankTap: _toggleFull,
-                            bottomInset: bottom,
-                            onSelect: ctrl.select,
-                            onOverview: ctrl.openOverviewColumn,
-                            onDrag: ctrl.dragTo,
+                          child: ClipRect(
+                            child: TimelineChart(
+                              view: v,
+                              onBlankTap: _toggleFull,
+                              bottomInset: bottom,
+                              onSelect: ctrl.select,
+                              onOverview: ctrl.openOverviewColumn,
+                              onDrag: ctrl.dragTo,
+                            ),
                           ),
                         ),
                         if (!_phone)

@@ -310,6 +310,7 @@ void main() {
   /// bu boş kareler yüzdelikleri sulandırmasın diye dokunuştan önceki 300 ms'lik boşta kare
   /// örneğinden eşik çıkarılır (p90 x 1,5 + 0,2 ms, UI ve raster ayrı) ve pencerenin sonundaki
   /// eşik altı kare serisi atılır; son "etkin" kareye kadarki kareler geçiştir.
+  List<_Frame> lastUntrimmed = const [];
   Future<List<_Frame>> measure(WidgetTester tester, Offset at) async {
     final got = <FrameTiming>[];
     void cb(List<FrameTiming> t) => got.addAll(t);
@@ -345,6 +346,7 @@ void main() {
             start(t),
           ),
     ]..sort((a, b) => a.startUs.compareTo(b.startUs));
+    lastUntrimmed = List.of(frames);
     while (frames.isNotEmpty &&
         frames.last.uiUs <= uiLimit &&
         frames.last.rasterUs <= raLimit) {
@@ -378,6 +380,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 16));
       }
       final runs = <List<_Frame>>[];
+      final untrimmedRuns = <List<_Frame>>[];
       for (var i = 0; i <= _reps; i++) {
         await _semFlush(s);
         final at = await sc.target(s);
@@ -387,7 +390,16 @@ void main() {
         sem = tester.ensureSemantics();
         await s.settle();
         // i == 0: ısınma turu (JIT/gölgelendirici/ilk yükleme), sayılmaz.
-        if (i > 0) runs.add(frames);
+        if (i > 0) {
+          // Kırpma sonrası küme boşsa ölçüm anlamsızdır; sessiz geçmesin.
+          expect(
+            frames,
+            isNotEmpty,
+            reason: '${sc.id} rep=$i: ölçülen kare yok',
+          );
+          runs.add(frames);
+          untrimmedRuns.add(lastUntrimmed);
+        }
         await sc.reset(s);
         await Future<void>.delayed(const Duration(milliseconds: 500));
       }
@@ -408,6 +420,14 @@ void main() {
         ...summary,
         'rawFrames': [
           for (final r in runs)
+            [
+              for (final f in r) [f.uiUs, f.rasterUs],
+            ],
+        ],
+        // Kırpmasız sabit pencere (ek alan; birincil sonuç yukarıdaki kırpılmış kümedir).
+        'untrimmed': _summary(untrimmedRuns),
+        'untrimmedRawFrames': [
+          for (final r in untrimmedRuns)
             [
               for (final f in r) [f.uiUs, f.rasterUs],
             ],

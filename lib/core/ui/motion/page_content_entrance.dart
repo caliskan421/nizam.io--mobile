@@ -7,12 +7,18 @@ import '../theme/nz_motion.dart';
 /// Sıradan yeniden çizimler animasyonu başlatmaz; mesafe sabit mantıksal pikseldir.
 /// Sekme paneline kimliğinden ValueKey vererek yeni giriş başlatılabilir; liste/ızgara
 /// öğeleri için hazır sarmalayıcı [NzEntrance]'tır.
+///
+/// Alt ağacında cam (`NzGlass` / `BackdropFilter`) olan girişe [fade] false verilir: hareket
+/// yalnız ötelemedir. Saydamlık katmanı altındaki bulanıklık her karede saveLayer ve yeniden
+/// bulanıklaştırma ister. İçteki camsız giriş, üst hareketin solmasını kendi katmanında yapar
+/// (kapsayan hareketle aynı eğri; mesafe ikiye katlanmaz).
 class PageContentEntrance extends StatefulWidget {
   const PageContentEntrance({
     super.key,
     required this.child,
     this.delay = Duration.zero,
     this.enabled = true,
+    this.fade = true,
   }) : _sliver = false;
 
   /// Sliver geometrisini ve tembel liste kurulumunu koruyan aynı hareket.
@@ -21,10 +27,14 @@ class PageContentEntrance extends StatefulWidget {
     required this.child,
     this.delay = Duration.zero,
     this.enabled = true,
+    this.fade = true,
   }) : _sliver = true;
 
   final Widget child;
   final bool enabled;
+
+  /// false → opaklık animasyonu yok, yalnız öteleme (alt ağaçta cam var; bkz. sınıf belgesi).
+  final bool fade;
 
   /// Hareketin başlamadan önce beklediği süre (kademeli giriş; bkz. [RpMotion.stagger]).
   /// Yalnız ilk kurulumda okunur; süre boyunca içerik saydam ve aşağıda bekler.
@@ -102,30 +112,41 @@ class _PageContentEntranceState extends State<PageContentEntrance>
   }
 
   @override
-  Widget build(BuildContext context) => !widget.enabled
-      ? widget.child
-      : _EntranceScope(
-          animation: _coveredByParent! ? _parentAnimation! : _animation,
-          // Kare başına build yok: öteleme ve opaklık animasyonu render nesnesinde dinlenir.
-          // Öteleme dışta, opaklık içte: opaklık katmanı yeniden boyanmadan kaydırılır.
-          child: widget._sliver
-              ? _SliverTranslate(
-                  animation: _animation,
-                  dy: RpMotion.enterOffset,
-                  child: SliverFadeTransition(
-                    opacity: _animation,
-                    sliver: widget.child,
-                  ),
-                )
-              : _Translate(
-                  animation: _animation,
-                  from: const Offset(0, RpMotion.enterOffset),
-                  child: FadeTransition(
-                    opacity: _animation,
-                    child: widget.child,
-                  ),
-                ),
-        );
+  Widget build(BuildContext context) {
+    if (!widget.enabled) return widget.child;
+    final covered = _coveredByParent!;
+    // Üst hareket solmuyorsa (cam taşıyan kapsayıcı) bu katman onun solmasını üstlenir.
+    final parentFaded =
+        covered &&
+        (context.getInheritedWidgetOfExactType<_EntranceScope>()?.faded ??
+            false);
+    final Animation<double> opacity = !widget.fade || parentFaded
+        ? kAlwaysCompleteAnimation
+        : covered
+        ? _parentAnimation!
+        : _animation;
+    return _EntranceScope(
+      animation: covered ? _parentAnimation! : _animation,
+      faded: widget.fade || parentFaded,
+      // Kare başına build yok: öteleme ve opaklık animasyonu render nesnesinde dinlenir.
+      // Öteleme dışta, opaklık içte: opaklık katmanı yeniden boyanmadan kaydırılır.
+      // Ağaç yapısı [fade]'den bağımsızdır (değişince alt ağacın State'i korunur).
+      child: widget._sliver
+          ? _SliverTranslate(
+              animation: _animation,
+              dy: RpMotion.enterOffset,
+              child: SliverFadeTransition(
+                opacity: opacity,
+                sliver: widget.child,
+              ),
+            )
+          : _Translate(
+              animation: _animation,
+              from: const Offset(0, RpMotion.enterOffset),
+              child: FadeTransition(opacity: opacity, child: widget.child),
+            ),
+    );
+  }
 }
 
 /// Değişen içeriğin girişi (görev ayrıntısı sekme paneliyle aynı hareket: opaklık 0 → 1,
@@ -172,8 +193,8 @@ class NzEntrance extends StatelessWidget {
   }
 }
 
-/// Tablet bölme geçişinin türü: [rise] telefondaki sayfa girişinin birebir aynısı
-/// ([PageContentEntrance]: opaklık 0 → 1, [RpMotion.enterOffset] aşağıdan yükseliş,
+/// Tablet bölme geçişinin türü: [rise] telefondaki sayfa girişinin yükselişi
+/// ([PageContentEntrance]: [RpMotion.enterOffset] aşağıdan yükseliş,
 /// [RpMotion.enterDuration], [RpMotion.enterCurve]; modül değişimi, aynı türde kayıt seçimi,
 /// aynı kaydı yeniden seçme), [push] `rpPush .38s` (36 px sağdan), [pop] `rpPop .38s` (36 px
 /// soldan), eğri `cubic(.2,.8,.2,1)`.
@@ -184,6 +205,10 @@ enum NzPaneMotion { rise, push, pop }
 /// [PageContentEntrance] kendi yükselişini oynatır. [enabled] iken oluşunca ve [play] her
 /// değiştiğinde (null hariç) [motion] oynar; içteki [PageContentEntrance] bunu üst hareket
 /// sayar (çift animasyon yok). Hareketi azalt → anlık.
+///
+/// Yalnız ötelemedir: bölmedeki ekranlar cam taşır (üst çubuk, yapışkan şerit, sohbet hapı,
+/// çizelge sütunu); opaklık 0 → 1 içteki camsız [PageContentEntrance] katmanında bu hareketin
+/// eğrisiyle oynar.
 class NzPaneTransition extends StatefulWidget {
   const NzPaneTransition({
     super.key,
@@ -262,6 +287,7 @@ class _NzPaneTransitionState extends State<NzPaneTransition>
   @override
   Widget build(BuildContext context) => _EntranceScope(
     animation: _animation,
+    faded: false,
     child: _Translate(
       animation: _animation,
       from: switch (_motion) {
@@ -269,19 +295,26 @@ class _NzPaneTransitionState extends State<NzPaneTransition>
         NzPaneMotion.push => const Offset(RpMotion.pushOffset, 0),
         NzPaneMotion.pop => const Offset(-RpMotion.pushOffset, 0),
       },
-      child: FadeTransition(opacity: _animation, child: widget.child),
+      child: widget.child,
     ),
   );
 }
 
 class _EntranceScope extends InheritedWidget {
-  const _EntranceScope({required this.animation, required super.child});
+  const _EntranceScope({
+    required this.animation,
+    required this.faded,
+    required super.child,
+  });
 
   final Animation<double> animation;
 
+  /// Bu kapsamın içeriği zaten soluyor mu (içteki giriş opaklığı ikiye katlamaz).
+  final bool faded;
+
   @override
   bool updateShouldNotify(_EntranceScope oldWidget) =>
-      animation != oldWidget.animation;
+      animation != oldWidget.animation || faded != oldWidget.faded;
 }
 
 /// [animation] değerine göre çocuğu boyamada öteler: t = 0 → [from], t = 1 → yerinde.

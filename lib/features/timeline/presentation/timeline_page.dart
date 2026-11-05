@@ -188,6 +188,8 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     final view = ref.watch(timelineViewProvider(widget.coordinatorship));
     return NzPage.fill(
       animateContent: !_phone,
+      // Telefon dışında gövdede cam süzgeç düğmeleri (TimelineHeader) var.
+      fadeContent: false,
       topBar: _phone
           ? SliverToBoxAdapter(
               child: _collapse(
@@ -335,6 +337,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               ],
               Expanded(
                 child: PageContentEntrance(
+                  fade: _phone,
                   child: Semantics(
                     container: true,
                     label: l.uiTimelineTitle,

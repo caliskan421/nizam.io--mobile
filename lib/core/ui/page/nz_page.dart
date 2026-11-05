@@ -37,7 +37,8 @@ class NzPage extends ConsumerWidget {
     this.loading = false,
     this.onRetry,
     this.showTitleBar = true,
-  }) : topBar = null,
+  }) : fadeContent = true,
+       topBar = null,
        onRefresh = null,
        onRevisit = null,
        children = const [],
@@ -71,6 +72,7 @@ class NzPage extends ConsumerWidget {
     this.paneLead,
     this.onRefresh,
     this.onRevisit,
+    this.fadeContent = true,
   }) : title = '',
        body = const SizedBox.shrink(),
        actions = const [],
@@ -89,6 +91,7 @@ class NzPage extends ConsumerWidget {
     required Widget this.topBar,
     required this.body,
     this.onRetry,
+    this.fadeContent = true,
   }) : title = '',
        onRefresh = null,
        onRevisit = null,
@@ -110,7 +113,8 @@ class NzPage extends ConsumerWidget {
   /// (`MediaQuery.paddingOf` / `viewInsetsOf`; Scaffold gövdeyi klavye için küçültmez).
   /// Metin ölçeği sınırı ve toast kabuğu (Scaffold) standart sayfayla aynıdır.
   const NzPage.bare({super.key, required this.body, this.animateContent = true})
-    : title = '',
+    : fadeContent = true,
+      title = '',
       onRefresh = null,
       onRevisit = null,
       topBar = null,
@@ -130,6 +134,11 @@ class NzPage extends ConsumerWidget {
 
   /// AppBar başlığı (ARB'den).
   final bool animateContent;
+
+  /// [NzPage.feed] / [NzPage.fill]: false → içerik girişi solmaz, yalnız yükselir (gövdede
+  /// cam / `BackdropFilter` var; bkz. [PageContentEntrance.fade]). Feed'de camlı yapışkan
+  /// şerit ([pinned]) kendiliğinden solmaz; solma şeridin dışındaki katmanlarda oynar.
+  final bool fadeContent;
   final String title;
 
   /// false → üst AppBar çizilmez (giriş gibi başlığını gövdede taşıyan tam ekranlar).
@@ -205,6 +214,7 @@ class NzPage extends ConsumerWidget {
                 hasScrollBody: true,
                 child: PageContentEntrance(
                   enabled: animateContent,
+                  fade: fadeContent,
                   child: body,
                 ),
               ),
@@ -248,22 +258,33 @@ class NzPage extends ConsumerWidget {
                   if (pane != NzPaneRole.master) topBar,
                   if (cupertino)
                     CupertinoSliverRefreshControl(onRefresh: refresh),
+                  // Camlı yapışkan şerit varsa grup yalnız yükselir; solma şeridin
+                  // üstündeki ve altındaki camsız katmanlarda grubun eğrisiyle oynar.
                   PageContentEntrance.sliver(
                     enabled: animateContent,
+                    fade: fadeContent && pinned == null,
                     child: SliverMainAxisGroup(
                       slivers: [
-                        if (offline)
-                          SliverToBoxAdapter(
-                            child: NzBanner.offline(onAction: onRetry),
+                        PageContentEntrance.sliver(
+                          enabled: animateContent,
+                          fade: fadeContent,
+                          child: SliverMainAxisGroup(
+                            slivers: [
+                              if (offline)
+                                SliverToBoxAdapter(
+                                  child: NzBanner.offline(onAction: onRetry),
+                                ),
+                              SliverPadding(
+                                padding: EdgeInsets.fromLTRB(
+                                  side,
+                                  top,
+                                  side,
+                                  pinned == null ? bottom : 0,
+                                ),
+                                sliver: SliverList.list(children: children),
+                              ),
+                            ],
                           ),
-                        SliverPadding(
-                          padding: EdgeInsets.fromLTRB(
-                            side,
-                            top,
-                            side,
-                            pinned == null ? bottom : 0,
-                          ),
-                          sliver: SliverList.list(children: children),
                         ),
                         if (pinned case final pinned?) ...[
                           PinnedHeaderSliver(
@@ -280,6 +301,7 @@ class NzPage extends ConsumerWidget {
                             padding: EdgeInsets.fromLTRB(side, 0, side, bottom),
                             sliver: PageContentEntrance.sliver(
                               key: afterKey,
+                              fade: fadeContent,
                               child: SliverList.list(children: after),
                             ),
                           ),

@@ -100,6 +100,46 @@ void main() {
     await tester.pump(RpMotion.enterDuration);
   });
 
+  testWidgets(
+    'camlı kapsayıcı yalnız öteler; içteki camsız giriş onun eğrisiyle solar',
+    (tester) async {
+      const inner = ValueKey('inner');
+      await tester.pumpWidget(
+        app(
+          const Align(
+            alignment: Alignment.topLeft,
+            child: NzPaneTransition(
+              motion: NzPaneMotion.rise,
+              child: PageContentEntrance(
+                fade: false,
+                child: PageContentEntrance(
+                  child: SizedBox(key: inner, width: 10, height: 10),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      List<double> opacities() => tester
+          .widgetList<FadeTransition>(find.byType(FadeTransition))
+          .map((w) => w.opacity.value)
+          .toList();
+      // Bölme geçişinde opaklık katmanı yok; cam taşıyan giriş 1, camsız iç katman 0.
+      expect(opacities(), [1, 0]);
+      await tester.pump(const Duration(milliseconds: 160));
+      final t = RpMotion.enterCurve.transform(0.5);
+      expect(opacities(), [1, closeTo(t, 0.001)]);
+      // Mesafe yalnız bölme hareketinden gelir (iç girişler katılır).
+      expect(
+        tester.getTopLeft(find.byKey(inner)).dy,
+        closeTo(RpMotion.enterOffset * (1 - t), 0.001),
+      );
+      await tester.pump(RpMotion.enterDuration);
+      expect(opacities(), [1, 1]);
+      expect(tester.getTopLeft(find.byKey(inner)).dy, 0);
+    },
+  );
+
   testWidgets('sliver geometrisi sabit, içerik tek blok; liste tembel kalır', (
     tester,
   ) async {

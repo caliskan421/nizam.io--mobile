@@ -7,7 +7,7 @@ import '../../domain/timeline.dart';
 /// ölçüleri burada yorumlu sabittir; renk/yazı painter'da temadan gelir.
 abstract final class TimelineGeometry {
   /// Çizelgenin üstüne binen başlık çubuğu (koordinatörlük + filtre) yüksekliği (`HH`).
-  static const header = 44.0;
+  static const header = 0.0;
 
   /// İçeriğin ilk günü başlığın 12 px altında başlar (`PADT`).
   static const topPad = header + 12;

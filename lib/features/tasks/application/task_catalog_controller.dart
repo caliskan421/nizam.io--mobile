@@ -186,7 +186,10 @@ class TaskCatalogController extends _$TaskCatalogController {
   }
 
   /// [code] görevini taze tekil okumayla ([item]; açıklama, tarih, atananlar) değiştirir;
-  /// ayrıntı parçaları (alt görev, not, dosya, tarih talebi) korunur. Gecikme sunucu değeri.
+  /// ayrıntı parçaları (alt görev, not, dosya) korunur. Gecikme sunucu değeri. Tarih talebi:
+  /// tekil okuma bekleyen talebi taşır (WORK-K82); aynı talep zaten ayrıntıdan okunmuşsa
+  /// (gerekçe, talep eden) o korunur; bekleyen talep kalmadıysa eldeki bekleyen talep düşer,
+  /// incelenmiş talep (ayrıntı geçmişi) kalır.
   void applyItem(String code, TaskItem item) {
     _touch(code);
     final c = _catalog;
@@ -199,11 +202,20 @@ class TaskCatalogController extends _$TaskCatalogController {
                   subtasks: t.subtasks,
                   noteEntries: t.noteEntries,
                   fileEntries: t.fileEntries,
-                  dateRequest: () => t.dateRequest,
+                  dateRequest: () =>
+                      _mergeRequest(t.dateRequest, item.dateRequest),
                 )
               : t,
       ]),
     );
+  }
+
+  static DateChangeRequest? _mergeRequest(
+    DateChangeRequest? held,
+    DateChangeRequest? fresh,
+  ) {
+    if (fresh == null) return held != null && held.isPending ? null : held;
+    return held != null && held.id == fresh.id ? held : fresh;
   }
 
   /// Görevi kaldırır; eski sırasını döner (geri almak için `add(at:)`), yoksa -1.

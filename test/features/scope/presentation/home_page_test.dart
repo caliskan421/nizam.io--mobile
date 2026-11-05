@@ -263,27 +263,20 @@ void main() {
   );
 
   testWidgets(
-    'kabukta yeniden dokunma kısayol menüsünü açar; satır görev açar',
+    'kabukta yeniden dokunma kısayol menüsünü açar: yalnız hızlı işlemler',
     (tester) async {
-      final (h, nav) = await _open(tester);
+      final (h, _) = await _open(tester);
       h.read(shellReselectEventsProvider.notifier).fire(HomePage.shellTab);
       await settle(tester);
-      expect(find.text(_l.uiHomeWaitingForYou), findsOneWidget);
-      // Prototip: ALT-7 kaydırma olarak ("+51 gün"), diğer tarih talepleri tarih olarak.
-      expect(
-        find.text(
-          'ALT-7 · ${_l.uiHomeDateRequest} · +51 ${_l.uiHomeShiftDaysTail}',
-        ),
-        findsOneWidget,
-      );
-      await tester.tap(find.text('Hidrofor sistemi kurulumu'));
-      await settle(tester);
+      expect(find.text(_l.uiHomeQuickActions), findsWidgets);
       expect(find.text(_l.uiHomeWaitingForYou), findsNothing);
-      expect(nav.calls, ['task:ALT-7']);
+      expect(find.text(_l.uiHomeGo), findsNothing);
       // Başka sekmenin olayı bu sayfada menü açmaz.
+      await tester.tapAt(const Offset(4, 4));
+      await settle(tester);
       h.read(shellReselectEventsProvider.notifier).fire(1);
       await settle(tester);
-      expect(find.text(_l.uiHomeWaitingForYou), findsNothing);
+      expect(find.text(_l.uiHomeGo), findsNothing);
     },
   );
 

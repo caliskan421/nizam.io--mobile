@@ -16,6 +16,11 @@ part of 'task_catalog_controller.dart';
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
 /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
 /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+///
+/// Önbellek: sağlayıcı uygulama ömrünce yaşar; ekranlar ilk yüklemeden sonra eski kataloğu
+/// hemen gösterir. [refresh] / [refreshIfStale] / [reload] yeniden okurken önceki katalog
+/// durumda kalır (Riverpod `invalidateSelf` → `isRefreshing`, `value` korunur); yenileme
+/// hatasında da (`AsyncError` önceki değeri taşır) görünür veri silinmez.
 
 @ProviderFor(TaskCatalogController)
 final taskCatalogControllerProvider = TaskCatalogControllerProvider._();
@@ -28,6 +33,11 @@ final taskCatalogControllerProvider = TaskCatalogControllerProvider._();
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
 /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
 /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+///
+/// Önbellek: sağlayıcı uygulama ömrünce yaşar; ekranlar ilk yüklemeden sonra eski kataloğu
+/// hemen gösterir. [refresh] / [refreshIfStale] / [reload] yeniden okurken önceki katalog
+/// durumda kalır (Riverpod `invalidateSelf` → `isRefreshing`, `value` korunur); yenileme
+/// hatasında da (`AsyncError` önceki değeri taşır) görünür veri silinmez.
 final class TaskCatalogControllerProvider
     extends $AsyncNotifierProvider<TaskCatalogController, TaskCatalog> {
   /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
@@ -38,6 +48,11 @@ final class TaskCatalogControllerProvider
   /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
   /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
   /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+  ///
+  /// Önbellek: sağlayıcı uygulama ömrünce yaşar; ekranlar ilk yüklemeden sonra eski kataloğu
+  /// hemen gösterir. [refresh] / [refreshIfStale] / [reload] yeniden okurken önceki katalog
+  /// durumda kalır (Riverpod `invalidateSelf` → `isRefreshing`, `value` korunur); yenileme
+  /// hatasında da (`AsyncError` önceki değeri taşır) görünür veri silinmez.
   TaskCatalogControllerProvider._()
     : super(
         from: null,
@@ -58,7 +73,7 @@ final class TaskCatalogControllerProvider
 }
 
 String _$taskCatalogControllerHash() =>
-    r'f9fe21c5695e9376fa4e89505b1ba5705d012aec';
+    r'b7792db79f0e3ead09ce6ecb875ca53d830f9635';
 
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
@@ -68,6 +83,11 @@ String _$taskCatalogControllerHash() =>
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
 /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
 /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+///
+/// Önbellek: sağlayıcı uygulama ömrünce yaşar; ekranlar ilk yüklemeden sonra eski kataloğu
+/// hemen gösterir. [refresh] / [refreshIfStale] / [reload] yeniden okurken önceki katalog
+/// durumda kalır (Riverpod `invalidateSelf` → `isRefreshing`, `value` korunur); yenileme
+/// hatasında da (`AsyncError` önceki değeri taşır) görünür veri silinmez.
 
 abstract class _$TaskCatalogController extends $AsyncNotifier<TaskCatalog> {
   FutureOr<TaskCatalog> build();

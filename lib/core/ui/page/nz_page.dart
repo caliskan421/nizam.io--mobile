@@ -28,6 +28,7 @@ import '../widgets/surfaces/nz_glass.dart';
 class NzPage extends ConsumerWidget {
   const NzPage({
     super.key,
+    this.animateContent = true,
     required this.title,
     required this.body,
     this.width = NzContentWidth.list,
@@ -59,6 +60,7 @@ class NzPage extends ConsumerWidget {
   /// sayfa yeniden görünür olunca (sekme dönüşü, üstteki sayfa kapanınca) çağrılır.
   const NzPage.feed({
     super.key,
+    this.animateContent = true,
     required Widget this.topBar,
     required this.children,
     this.width = NzContentWidth.list,
@@ -83,6 +85,7 @@ class NzPage extends ConsumerWidget {
   /// kaymaz). Yatay boşluk ve alt güvenli alan [body]'nindir.
   const NzPage.fill({
     super.key,
+    this.animateContent = true,
     required Widget this.topBar,
     required this.body,
     this.onRetry,
@@ -106,7 +109,7 @@ class NzPage extends ConsumerWidget {
   /// güvenli alan yoktur; [body] bütün alanı alır ve güvenli alanı/klavyeyi kendisi yönetir
   /// (`MediaQuery.paddingOf` / `viewInsetsOf`; Scaffold gövdeyi klavye için küçültmez).
   /// Metin ölçeği sınırı ve toast kabuğu (Scaffold) standart sayfayla aynıdır.
-  const NzPage.bare({super.key, required this.body})
+  const NzPage.bare({super.key, required this.body, this.animateContent = true})
     : title = '',
       onRefresh = null,
       onRevisit = null,
@@ -126,6 +129,7 @@ class NzPage extends ConsumerWidget {
       _bare = true;
 
   /// AppBar başlığı (ARB'den).
+  final bool animateContent;
   final String title;
 
   /// false → üst AppBar çizilmez (giriş gibi başlığını gövdede taşıyan tam ekranlar).
@@ -199,7 +203,10 @@ class NzPage extends ConsumerWidget {
                 SliverToBoxAdapter(child: NzBanner.offline(onAction: onRetry)),
               SliverFillRemaining(
                 hasScrollBody: true,
-                child: PageContentEntrance(child: body),
+                child: PageContentEntrance(
+                  enabled: animateContent,
+                  child: body,
+                ),
               ),
             ],
           ),
@@ -242,6 +249,7 @@ class NzPage extends ConsumerWidget {
                   if (cupertino)
                     CupertinoSliverRefreshControl(onRefresh: refresh),
                   PageContentEntrance.sliver(
+                    enabled: animateContent,
                     child: SliverMainAxisGroup(
                       slivers: [
                         if (offline)

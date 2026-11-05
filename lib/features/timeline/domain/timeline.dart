@@ -112,6 +112,7 @@ final class TimelineUndo {
 final class TimelineState {
   const TimelineState({
     this.coordinatorships,
+    this.query = '',
     this.status = TimelineStatusFilter.all,
     this.scale = TimelineScale.week,
     this.overview = false,
@@ -132,6 +133,7 @@ final class TimelineState {
 
   /// Açılışta bütün koordinatörlükler seçili (rota `coord=*`).
   final bool startAll;
+  final String query;
   final TimelineStatusFilter status;
   final TimelineScale scale;
 
@@ -163,6 +165,7 @@ final class TimelineState {
 
   TimelineState copyWith({
     List<String>? coordinatorships,
+    String? query,
     TimelineStatusFilter? status,
     TimelineScale? scale,
     bool? overview,
@@ -177,6 +180,7 @@ final class TimelineState {
   }) => TimelineState(
     startAll: startAll,
     coordinatorships: coordinatorships ?? this.coordinatorships,
+    query: query ?? this.query,
     status: status ?? this.status,
     scale: scale ?? this.scale,
     overview: overview ?? this.overview,

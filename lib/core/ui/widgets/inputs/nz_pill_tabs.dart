@@ -30,8 +30,10 @@ class NzPillTabs extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     this.semanticLabel,
+    this.iconsOnly = false,
   }) : assert(tabs.length >= 2, 'en az iki sekme');
 
+  final bool iconsOnly;
   final List<NzPillTab> tabs;
   final int selected;
   final ValueChanged<int> onSelected;
@@ -73,19 +75,25 @@ class NzPillTabs extends StatelessWidget {
                   ),
                 ),
               ),
-              AnimatedPositioned(
+              // Yaylı eğri hedefi hafifçe aşar (kaynak `--m-ease-spring`); ilk/son sekmede
+              // başparmak rayın dışına taşmasın diye konum ray sınırına kırpılır.
+              TweenAnimationBuilder<double>(
+                tween: Tween(end: _inset + selected.clamp(0, n - 1) * w),
                 duration: NzMotion.of(context, NizamioMotion.durSheet),
                 curve: NizamioMotion.easeSpring,
-                top: _outer + _inset,
-                bottom: _outer + _inset,
-                left: _inset + selected.clamp(0, n - 1) * w,
-                width: w,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: c.surfaceOverlay,
                     borderRadius: railRadius,
                     boxShadow: context.shadows.thumb,
                   ),
+                ),
+                builder: (context, left, thumb) => Positioned(
+                  top: _outer + _inset,
+                  bottom: _outer + _inset,
+                  left: left.clamp(_inset, _inset + (n - 1) * w),
+                  width: w,
+                  child: thumb!,
                 ),
               ),
               Padding(
@@ -96,6 +104,7 @@ class NzPillTabs extends StatelessWidget {
                       Expanded(
                         child: _Tab(
                           tab: tabs[i],
+                          iconsOnly: iconsOnly,
                           selected: i == selected,
                           onTap: () => onSelected(i),
                         ),
@@ -112,8 +121,14 @@ class NzPillTabs extends StatelessWidget {
 }
 
 class _Tab extends StatelessWidget {
-  const _Tab({required this.tab, required this.selected, required this.onTap});
+  const _Tab({
+    required this.tab,
+    required this.selected,
+    required this.onTap,
+    required this.iconsOnly,
+  });
 
+  final bool iconsOnly;
   final NzPillTab tab;
   final bool selected;
   final VoidCallback onTap;
@@ -150,21 +165,22 @@ class _Tab extends StatelessWidget {
                 children: [
                   if (icon != null) ...[
                     NzIcon(icon, size: NizamioSize.iconSizeSm, color: color),
-                    const Gap(NizamioSpacing.space1 + 1),
+                    if (!iconsOnly) const Gap(NizamioSpacing.space1 + 1),
                   ],
-                  Flexible(
-                    child: Text(
-                      tab.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.labelMd.copyWith(
-                        color: color,
-                        fontWeight: selected
-                            ? FontWeight.w600
-                            : FontWeight.w500,
+                  if (!iconsOnly)
+                    Flexible(
+                      child: Text(
+                        tab.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: t.labelMd.copyWith(
+                          color: color,
+                          fontWeight: selected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
                   if (count != null) ...[
                     const Gap(NizamioSpacing.space1 + 1),
                     Text(

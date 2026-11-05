@@ -34,7 +34,7 @@ void main() {
   ) async {
     final picks = <int>[];
     await t.pumpWidget(testApp(_host(onPick: picks.add)));
-    Rect thumb() => t.getRect(find.byType(AnimatedPositioned));
+    Rect thumb() => t.getRect(find.byType(TweenAnimationBuilder<double>));
     final before = thumb();
     await t.tap(find.text('Devam'));
     await t.pumpAndSettle();
@@ -44,6 +44,27 @@ void main() {
     final tab = t.getRect(find.text('Devam'));
     expect(after.left, lessThanOrEqualTo(tab.left));
     expect(after.right, greaterThanOrEqualTo(tab.right));
+  });
+
+  testWidgets('yaylı geçişte başparmak ilk/son sekmede raydan taşmaz', (
+    t,
+  ) async {
+    await t.pumpWidget(testApp(_host()));
+    Rect thumb() => t.getRect(find.byType(TweenAnimationBuilder<double>));
+    final rail = t.getRect(find.byType(NzPillTabs));
+    final first = thumb();
+    // Son sekmeye ve geri ilk sekmeye: her karede başparmak ray içinde, uçta tam yerinde.
+    for (final (label, edge) in [('Devam', 2), ('Tümü', 0)]) {
+      await t.tap(find.text(label));
+      for (var i = 0; i < 40; i++) {
+        await t.pump(const Duration(milliseconds: 16));
+        final r = thumb();
+        expect(r.left, greaterThanOrEqualTo(first.left - 0.01));
+        expect(r.right, lessThanOrEqualTo(rail.right));
+      }
+      await t.pumpAndSettle();
+      if (edge == 0) expect(thumb().left, closeTo(first.left, 0.01));
+    }
   });
 
   testWidgets('seçili 600 ink, diğerleri 500 ink-muted; sayaç ink-muted', (

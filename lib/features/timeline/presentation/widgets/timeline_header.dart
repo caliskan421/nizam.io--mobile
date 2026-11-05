@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -166,86 +168,98 @@ class TimelineCoordMenu extends StatelessWidget {
           ),
         ),
         Positioned(
-          top: 50,
-          left: NizamioSpacing.space3,
+          top: MediaQuery.sizeOf(context).width < 600 ? null : 50,
+          bottom: MediaQuery.sizeOf(context).width < 600
+              ? 190 + MediaQuery.paddingOf(context).bottom
+              : null,
+          left: MediaQuery.sizeOf(context).width < 600
+              ? 72
+              : NizamioSpacing.space3,
           right: NizamioSpacing.space3,
-          child: LayoutBuilder(
-            builder: (context, _) => Semantics(
-              container: true,
-              label: l.uiTimelineCoord,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: c.surfaceRaised,
-                  borderRadius: BorderRadius.circular(NizamioRadius.card),
-                  border: Border.all(color: c.borderStrong),
-                  boxShadow: context.shadows.sheet,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(NizamioSpacing.space2),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 470),
-                          child: ListView(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.zero,
-                            children: [
-                              for (final o in view.coordOptions)
-                                _CoordRow(
-                                  option: o,
-                                  onTap: () => onToggle(o.code),
-                                ),
-                            ],
+          child: _CoordMenuEntrance(
+            child: LayoutBuilder(
+              builder: (context, _) => Semantics(
+                container: true,
+                label: l.uiTimelineCoord,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: c.surfaceRaised,
+                    borderRadius: BorderRadius.circular(NizamioRadius.card),
+                    border: Border.all(color: c.borderStrong),
+                    boxShadow: context.shadows.sheet,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(NizamioSpacing.space2),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight:
+                                  MediaQuery.sizeOf(context).height * .42,
+                            ),
+                            child: ListView(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              children: [
+                                for (final o in view.coordOptions)
+                                  _CoordRow(
+                                    option: o,
+                                    onTap: () => onToggle(o.code),
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      const Gap(6),
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border(top: BorderSide(color: c.border)),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 4, 4, 0),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  l.coordFoot(view),
-                                  style: t.caption.copyWith(color: c.textMuted),
-                                ),
-                              ),
-                              TimelineTap(
-                                onTap: onAll,
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    minHeight: NizamioSize.tap,
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: NizamioSpacing.space2,
+                        const Gap(6),
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            border: Border(top: BorderSide(color: c.border)),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(8, 4, 4, 0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    l.coordFoot(view),
+                                    style: t.caption.copyWith(
+                                      color: c.textMuted,
                                     ),
-                                    child: Center(
-                                      widthFactor: 1,
-                                      child: Text(
-                                        view.noneSelected
-                                            ? l.uiTimelineCoordSelectAll
-                                            : l.uiTimelineCoordClear,
-                                        style: t.labelMd.copyWith(
-                                          color: c.textMuted,
-                                          fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                TimelineTap(
+                                  onTap: onAll,
+                                  child: ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      minHeight: NizamioSize.tap,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: NizamioSpacing.space2,
+                                      ),
+                                      child: Center(
+                                        widthFactor: 1,
+                                        child: Text(
+                                          view.noneSelected
+                                              ? l.uiTimelineCoordSelectAll
+                                              : l.uiTimelineCoordClear,
+                                          style: t.labelMd.copyWith(
+                                            color: c.textMuted,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -315,4 +329,118 @@ class _CoordRow extends StatelessWidget {
       ),
     );
   }
+}
+
+class TimelineFloatingFilters extends StatelessWidget {
+  const TimelineFloatingFilters({
+    super.key,
+    required this.view,
+    required this.onCoord,
+    required this.onFilter,
+  });
+  final TimelineView view;
+  final VoidCallback onCoord, onFilter;
+  @override
+  Widget build(BuildContext context) {
+    Widget button(
+      IconData icon,
+      String label,
+      VoidCallback onTap,
+      int count,
+      bool lime,
+    ) => Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Semantics(
+          button: true,
+          label: '$label · $count',
+          child: ClipOval(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+              child: Material(
+                color: context.colors.surfaceRaised.withValues(alpha: .82),
+                shape: CircleBorder(
+                  side: BorderSide(color: context.colors.border),
+                ),
+                child: InkWell(
+                  onTap: onTap,
+                  customBorder: const CircleBorder(),
+                  child: SizedBox.square(
+                    dimension: 50,
+                    child: Center(
+                      child: NzIcon(icon, size: 23, color: context.colors.text),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (count > 0)
+          Positioned(
+            right: -2,
+            top: -3,
+            child: IgnorePointer(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                constraints: const BoxConstraints(minWidth: 18),
+                decoration: BoxDecoration(
+                  color: lime ? context.colors.primary : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '$count',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        button(
+          Icons.business_outlined,
+          'Koordinatörlük seçimi',
+          onCoord,
+          view.coordOptions.where((o) => o.selected).length,
+          false,
+        ),
+        const Gap(10),
+        button(
+          NzIcons.filter,
+          'Filtreler',
+          onFilter,
+          view.state.filterCount,
+          true,
+        ),
+      ],
+    );
+  }
+}
+
+class _CoordMenuEntrance extends StatelessWidget {
+  const _CoordMenuEntrance({required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+    tween: Tween(begin: 0, end: 1),
+    duration: const Duration(milliseconds: 240),
+    curve: Curves.easeOutCubic,
+    child: child,
+    builder: (context, value, child) => Opacity(
+      opacity: value,
+      child: Transform.scale(
+        scale: .88 + .12 * value,
+        alignment: Alignment.bottomRight,
+        child: child,
+      ),
+    ),
+  );
 }

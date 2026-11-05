@@ -10,7 +10,7 @@ import 'package:nizamio/features/timeline/domain/timeline_view_builder.dart';
 import '../../pilot_support.dart';
 
 Future<(ProviderContainer, TimelineController, TimelineView Function())> _open([
-  String? coord,
+  String? coord = 'ALT',
 ]) async {
   final h = await pilotHarness(PilotBackend());
   final c = h.container;
@@ -24,6 +24,41 @@ Future<(ProviderContainer, TimelineController, TimelineView Function())> _open([
 }
 
 void main() {
+  test('varsayılan açılışta tüm koordinatörlükler seçilidir', () async {
+    final (_, _, view) = await _open(null);
+    expect(view().allSelected, isTrue);
+    expect(view().selectedCoordinatorships, hasLength(11));
+    expect(view().shown, hasLength(76));
+  });
+
+  test('arama kod, başlık ve atanan kişi adına göre süzer; temizleme geri getirir', () async {
+    final (container, ctrl, view) = await _open();
+    final catalog = container.read(taskCatalogControllerProvider).requireValue;
+    final initial = view().shown;
+    final task = initial.first.item;
+    for (final query in [
+      task.displayCode,
+      task.title,
+      catalog.nameOf(task.assignees.first)!,
+    ]) {
+      ctrl.setQuery(query);
+      expect(view().shown.map((t) => t.code), contains(task.code));
+      expect(
+        view().shown.every(
+          (t) =>
+              '${t.item.displayCode} ${t.item.title} ${t.item.assignees.map(catalog.nameOf).join(' ')}'
+                  .toLowerCase()
+                  .contains(query.toLowerCase()),
+        ),
+        isTrue,
+      );
+    }
+    ctrl.setQuery('eşleşmeyen-görev-xyz');
+    expect(view().shown, isEmpty);
+    ctrl.setQuery('');
+    expect(view().shown.length, initial.length);
+  });
+
   test('açılış: ilk koordinatörlük, hafta ölçeği, bugün 2026-10-21', () async {
     final (_, _, view) = await _open();
     final v = view();

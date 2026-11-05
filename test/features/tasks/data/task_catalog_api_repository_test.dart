@@ -126,6 +126,7 @@ Map<String, Object?> _item(
   int total = 0,
   int done = 0,
   String? name = 'Ali Veli',
+  Map<String, Object?>? pending,
 }) => {
   'work_item_id': id,
   'program_id': 'p1',
@@ -147,7 +148,11 @@ Map<String, Object?> _item(
   'days_early': 0,
   'completion_evidence_required': evidence,
   'subtask_counts': {'total': total, 'done': done},
+  'created_at': '2026-10-01T09:00:00Z',
+  'created_by_account_id': 'u-creator',
+  'created_by_full_name': 'Oluşturan Kişi',
   'planned_end_on': '2026-10-20',
+  'pending_date_request': pending,
 };
 
 Map<String, Object> _me({bool admin = false}) => {
@@ -270,6 +275,49 @@ void main() {
     expect(c.today, DateTime(2026, 11));
     expect(c.me, 'me');
     expect(c.people.single.name, 'Ayşe Kaya');
+    expect(t.creator, 'u-creator', reason: 'created_by_account_id');
+    expect(
+      t.createdAt,
+      DateTime.utc(2026, 10, 1, 9).toLocal(),
+      reason: 'created_at',
+    );
+    expect(
+      c.nameOf('u-creator'),
+      'Oluşturan Kişi',
+      reason: 'created_by_full_name',
+    );
+    expect(
+      t.dateRequest,
+      isNull,
+      reason: 'pending_date_request null → talep yok',
+    );
+  });
+
+  test('pending_date_request → bekleyen tarih talebi (WORK-K82; eski tarih görevinki)', () async {
+    final c = await _repo(
+      _Adapter({
+        '/v1/me': _me(),
+        '/v1/me/departments': _seats([('p1', 'd1', 'koordinator')]),
+        _list: _page([
+          _item(
+            'w1',
+            'd1',
+            pending: {
+              'request_id': 'r1',
+              'new_start_on': '2026-10-05',
+              'new_end_on': '2026-10-25',
+            },
+          ),
+        ]),
+      }),
+    ).load();
+    final r = c.tasks.single.dateRequest!;
+    expect(r.id, 'r1');
+    expect(r.workItemId, 'w1');
+    expect(r.isPending, isTrue);
+    expect(r.oldDue, DateTime(2026, 10, 18));
+    expect(r.start, DateTime(2026, 10, 5));
+    expect(r.due, DateTime(2026, 10, 25));
   });
 
   test('loadTasks: department_id her sayfada; yalnız görev sayfaları (kimlik/ekip/seçenek '
@@ -281,7 +329,13 @@ void main() {
     });
     final page = await _repo(adapter).loadTasks('d2');
     expect(page.tasks.map((t) => t.id), ['w9', 'w10']);
-    expect(page.names.map((n) => n.name), ['Ali Veli', 'Ali Veli']);
+    // Atanan ve oluşturan adları (WORK-K83) satır başına.
+    expect(page.names.map((n) => n.name), [
+      'Ali Veli',
+      'Oluşturan Kişi',
+      'Ali Veli',
+      'Oluşturan Kişi',
+    ]);
     expect(page.truncated, isFalse);
     expect(adapter.seen.map((o) => o.uri.path).toSet(), {_list});
     expect(adapter.lists.map((o) => o.uri.queryParameters['department_id']), [

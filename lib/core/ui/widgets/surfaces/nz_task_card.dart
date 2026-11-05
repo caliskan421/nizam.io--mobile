@@ -134,7 +134,12 @@ class NzTaskCard extends StatelessWidget {
                 ),
                 const Gap(NizamioSpacing.space2),
                 Flexible(
-                  child: NzStatusLabel(label: statusLabel, tone: statusTone),
+                  // Pay içinde sağa yaslı; satır yüksekliği değişmez.
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    heightFactor: 1,
+                    child: NzStatusLabel(label: statusLabel, tone: statusTone),
+                  ),
                 ),
               ],
             ),
@@ -170,33 +175,38 @@ class NzTaskCard extends StatelessWidget {
                     if (priority != null)
                       Flexible(
                         flex: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            if (priorityCaption case final pc?)
-                              Text(pc, style: _caption(context)),
-                            const Gap(NizamioSpacing.space1 / 2),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                NzPriorityBars(level: priorityLevel),
-                                const Gap(
-                                  NizamioSpacing.space1 +
-                                      NizamioSpacing.space1 / 2,
-                                ),
-                                Flexible(
-                                  child: Text(
-                                    priority,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: t.caption.copyWith(
-                                      color: c.textMuted,
+                        // Pay içinde sağa yaslı; satır yüksekliği değişmez.
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          heightFactor: 1,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              if (priorityCaption case final pc?)
+                                Text(pc, style: _caption(context)),
+                              const Gap(NizamioSpacing.space1 / 2),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  NzPriorityBars(level: priorityLevel),
+                                  const Gap(
+                                    NizamioSpacing.space1 +
+                                        NizamioSpacing.space1 / 2,
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      priority,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: t.caption.copyWith(
+                                        color: c.textMuted,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                   ],
@@ -249,15 +259,32 @@ class NzTaskCard extends StatelessWidget {
                           style: t.caption.copyWith(color: c.textMuted),
                         ),
                 ),
-                if (badge != null) ...[
+                if (badge != null || trailing.isNotEmpty) ...[
                   const Gap(NizamioSpacing.space2),
+                  // Rozetler tek blokta, pay içinde sağa yaslı; satır yüksekliği değişmez.
                   Flexible(
-                    child: NzStatusLabel.badge(label: badge, tone: badgeTone),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      heightFactor: 1,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (badge != null)
+                            Flexible(
+                              child: NzStatusLabel.badge(
+                                label: badge,
+                                tone: badgeTone,
+                              ),
+                            ),
+                          for (final (i, w) in trailing.indexed) ...[
+                            if (badge != null || i > 0)
+                              const Gap(NizamioSpacing.space2),
+                            Flexible(child: w),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
-                ],
-                for (final w in trailing) ...[
-                  const Gap(NizamioSpacing.space2),
-                  Flexible(child: w),
                 ],
               ],
             ),

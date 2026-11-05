@@ -19,12 +19,13 @@ import '../application/task_list_filter.dart';
 import '../application/tasks_list_controller.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_query.dart';
+
 import 'quick_action_sheets.dart';
-import 'task_widgets.dart';
 import 'tasks/tasks_filter_sheet.dart';
 import 'tasks/tasks_list_parts.dart';
+import 'tasks_mode_toggle.dart';
 
-/// Görevler listesi (prototip `tasks`): cam üst çubuk, başlık + ara/filtre/yeni görev
+/// Görevler listesi (prototip `tasks`): cam üst çubuk, başlık + ikonlu görünüm/ara/yeni görev
 /// daireleri, Liste / Zaman çizelgesi anahtarı, yerinde açılan arama, 4×2 görünüm
 /// kutucukları, etkin filtre çipleri, sıralama menülü liste başlığı, görev kartları (8'er
 /// sayfalı; koordinatörlüğe göre sıralamada açılır gruplar), filtre alt sayfası. [view] ve
@@ -49,6 +50,9 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     text: ref.read(_provider).filter.query,
   );
   final _searchFocus = FocusNode();
+  void _toTimeline() {
+    context.appNav.openTimeline();
+  }
 
   TasksListControllerProvider get _provider => tasksListControllerProvider(
     widget.view == null
@@ -122,42 +126,37 @@ class _TasksPageState extends ConsumerState<TasksPage> {
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       onRefresh: () =>
           ref.read(taskCatalogControllerProvider.notifier).refresh(),
-      onRevisit: () =>
-          ref.read(taskCatalogControllerProvider.notifier).refreshIfStale(),
+      onRevisit: () {
+        ref.read(taskCatalogControllerProvider.notifier).refreshIfStale();
+      },
       topBar: const RootTopBar(),
       children: [
-        NzPageHeader(
-          title: l.uiTasksTitle,
-          actions: [
-            NzIconButton.circle(
-              icon: NzIcons.search,
-              semanticLabel: l.uiTasksSearch,
-              onPressed: _toggleSearch,
-            ),
-            NzIconButton.circle(
-              icon: NzIcons.filter,
-              semanticLabel: l.uiTasksFiltersButton,
-              dot: state.filter.hasExtra ? context.colors.accentText : null,
-              onPressed: _openFilters,
-            ),
-            if (canCreate)
-              NzIconButton.circleAccent(
-                icon: NzIcons.add,
-                semanticLabel: l.uiTasksNewTask,
-                onPressed: () => showNewTaskSheet(context, resetTarget: true),
+        ColoredBox(
+          color: context.colors.background,
+          child: NzPageHeader(
+            title: l.uiTasksTitle,
+            actions: [
+              TasksModeToggle(
+                selected: 0,
+                onSelected: (i) {
+                  if (i == 1) _toTimeline();
+                },
               ),
-          ],
+              NzIconButton.circle(
+                icon: NzIcons.search,
+                semanticLabel: l.uiTasksSearch,
+                onPressed: _toggleSearch,
+              ),
+              if (canCreate)
+                NzIconButton.circleAccent(
+                  icon: NzIcons.add,
+                  semanticLabel: l.uiTasksNewTask,
+                  onPressed: () => showNewTaskSheet(context, resetTarget: true),
+                ),
+            ],
+          ),
         ),
         const Gap(NizamioSpacing.space3),
-        TaskSegmented(
-          semanticLabel: l.uiTasksMode,
-          labels: [l.uiTasksModeList, l.uiTasksModeTimeline],
-          icons: const [NzIcons.viewList, NzIcons.timeline],
-          selected: 0,
-          onSelected: (i) {
-            if (i == 1) nav.openTimeline();
-          },
-        ),
         NzReveal(
           open: state.searchOpen,
           onOpened: _searchFocus.requestFocus,
@@ -186,9 +185,6 @@ class _TasksPageState extends ConsumerState<TasksPage> {
               ref.read(_provider.notifier).clearAll();
             },
             onOpen: nav.openTask,
-            onSelectDepartment: ref
-                .read(taskListFilterProvider.notifier)
-                .select,
           )
         else
           NzAsyncView<TaskCatalog>(

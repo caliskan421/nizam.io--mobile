@@ -155,9 +155,12 @@ class ApiTaskCatalogRepository
   }
 
   static List<PersonName> _names(List<WorkItem> items) => [
-    for (final w in items)
+    for (final w in items) ...[
       for (final a in w.assignees)
         if (a.fullName case final name?) PersonName(a.accountId, name),
+      if (w.createdByFullName case final name?)
+        PersonName(w.createdByAccountId, name),
+    ],
   ];
 
   /// Şirket yöneticisinin süzgeç seçenekleri (programa bağlı canlı departmanlar, ada göre
@@ -250,6 +253,16 @@ class ApiTaskCatalogRepository
       overdueDays: lateness.daysOverdue,
       evidenceRequired: w.completionEvidenceRequired,
       subtaskCounts: (total: w.subtaskCounts.total, done: w.subtaskCounts.done),
+      creator: w.createdByAccountId,
+      createdAt: w.createdAt.toLocal(),
+      dateRequest: pendingDateRequest(
+        requestId: w.pendingDateRequest?.requestId,
+        newStart: w.pendingDateRequest?.newStartOn,
+        newEnd: w.pendingDateRequest?.newEndOn,
+        workItemId: w.workItemId,
+        start: w.startOn,
+        end: w.endOn,
+      ),
     );
   }
 }

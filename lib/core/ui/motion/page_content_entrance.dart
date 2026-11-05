@@ -12,6 +12,7 @@ class PageContentEntrance extends StatefulWidget {
     super.key,
     required this.child,
     this.delay = Duration.zero,
+    this.enabled = true,
   }) : _sliver = false;
 
   /// Sliver geometrisini ve tembel liste kurulumunu koruyan aynı hareket.
@@ -19,9 +20,11 @@ class PageContentEntrance extends StatefulWidget {
     super.key,
     required this.child,
     this.delay = Duration.zero,
+    this.enabled = true,
   }) : _sliver = true;
 
   final Widget child;
+  final bool enabled;
 
   /// Hareketin başlamadan önce beklediği süre (kademeli giriş; bkz. [RpMotion.stagger]).
   /// Yalnız ilk kurulumda okunur; süre boyunca içerik saydam ve aşağıda bekler.
@@ -99,27 +102,29 @@ class _PageContentEntranceState extends State<PageContentEntrance>
   }
 
   @override
-  Widget build(BuildContext context) => _EntranceScope(
-    animation: _coveredByParent! ? _parentAnimation! : _animation,
-    child: AnimatedBuilder(
-      animation: _animation,
-      child: widget.child,
-      builder: (context, child) {
-        final t = _animation.value;
-        final dy = RpMotion.enterOffset * (1 - t);
-        if (widget._sliver) {
-          return SliverOpacity(
-            opacity: t,
-            sliver: _SliverTranslate(dy: dy, child: child!),
-          );
-        }
-        return Opacity(
-          opacity: t,
-          child: Transform.translate(offset: Offset(0, dy), child: child),
+  Widget build(BuildContext context) => !widget.enabled
+      ? widget.child
+      : _EntranceScope(
+          animation: _coveredByParent! ? _parentAnimation! : _animation,
+          child: AnimatedBuilder(
+            animation: _animation,
+            child: widget.child,
+            builder: (context, child) {
+              final t = _animation.value;
+              final dy = RpMotion.enterOffset * (1 - t);
+              if (widget._sliver) {
+                return SliverOpacity(
+                  opacity: t,
+                  sliver: _SliverTranslate(dy: dy, child: child!),
+                );
+              }
+              return Opacity(
+                opacity: t,
+                child: Transform.translate(offset: Offset(0, dy), child: child),
+              );
+            },
+          ),
         );
-      },
-    ),
-  );
 }
 
 /// Değişen içeriğin girişi (görev ayrıntısı sekme paneliyle aynı hareket: opaklık 0 → 1,

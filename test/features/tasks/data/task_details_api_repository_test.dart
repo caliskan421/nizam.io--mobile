@@ -131,6 +131,9 @@ Map<String, Object?> _detail() => {
   'days_early': 0,
   'completion_evidence_required': true,
   'subtask_counts': {'total': 2, 'done': 1},
+  'created_at': '2026-10-01T09:00:00Z',
+  'created_by_account_id': 'u-creator',
+  'created_by_full_name': 'Oluşturan Kişi',
   'description': 'Pompa odasının kurulumu',
 };
 
@@ -298,7 +301,12 @@ void main() {
     expect(d.subtasks.first.doneBy, 'u4');
     expect(d.subtasks.first.createdBy, 'u1');
     final names = {for (final n in d.names) n.id: n.name};
-    expect(names, {'u2': 'Ali Veli', 'u4': 'Deniz Kapatan', 'u1': 'Ufuk Bir'});
+    expect(names, {
+      'u2': 'Ali Veli',
+      'u-creator': 'Oluşturan Kişi',
+      'u4': 'Deniz Kapatan',
+      'u1': 'Ufuk Bir',
+    });
     expect(
       names.containsKey('u3') || names.containsKey('u5'),
       isFalse,

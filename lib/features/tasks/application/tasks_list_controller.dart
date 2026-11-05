@@ -127,6 +127,15 @@ class TasksListController extends _$TasksListController {
   void selectView(TaskView v) =>
       state = state.copyWith(view: v, limit: TasksListState.pageSize);
 
+  /// Sıralama düğmesinin etiketi: sıradaki ölçüte geçer (varsayılan yön).
+  void cycleSort() {
+    const all = TaskSort.values;
+    selectSort(all[(all.indexOf(state.sort) + 1) % all.length]);
+  }
+
+  /// Sıralama düğmesinin oku: tarihli ölçütte yönü çevirir; koordinatörlük yönsüzdür.
+  void flipDirection() => selectSort(state.sort);
+
   /// Seçili olmayan ölçüt → seçer (varsayılan yön); seçili tarihli ölçüt → yönü çevirir.
   void selectSort(TaskSort s) {
     if (s == state.sort) {

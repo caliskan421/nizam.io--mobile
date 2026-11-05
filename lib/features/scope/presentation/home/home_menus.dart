@@ -22,30 +22,17 @@ import 'home_texts.dart';
 const _tabletTop = 52.0;
 const _tabletBottom = 28.0;
 
-/// Alt menüde "Ana sayfa"ya yeniden dokununca açılan kısayol menüsü.
+/// Alt menüde "Ana sayfa"ya yeniden dokununca açılan kısayol menüsü: yalnız hızlı işlemler
+/// (bekleyen işler ana sayfada, geçmiş kartla açılır).
 Future<void> showHomeShortcuts(
   BuildContext context, {
-  required HomeDashboard dashboard,
-  required ValueChanged<String> onOpenTask,
   required ValueChanged<HomeQuickAction> onQuickAction,
-  required VoidCallback onOpenHistory,
 }) {
   final l = context.l10n;
-  final c = context.colors;
   return NzFlyoutMenu.show(
     context,
     semanticLabel: l.uiHomeShortcuts,
     entries: [
-      if (dashboard.pending.isNotEmpty) ...[
-        NzFlyoutSection(l.uiHomeWaitingForYou),
-        for (final p in dashboard.pending)
-          NzFlyoutItem(
-            label: p.title,
-            caption: l.pendingCaption(p),
-            dot: p.kind == PendingKind.dateChange ? c.warning : c.inProgress,
-            onSelected: () => onOpenTask(p.taskCode),
-          ),
-      ],
       NzFlyoutSection(l.uiHomeQuickActions),
       for (final a in HomeQuickAction.values)
         NzFlyoutItem(
@@ -54,12 +41,6 @@ Future<void> showHomeShortcuts(
           accent: a == HomeQuickAction.task,
           onSelected: () => onQuickAction(a),
         ),
-      NzFlyoutSection(l.uiHomeGo),
-      NzFlyoutItem(
-        label: l.uiHomeHistoryTitle,
-        icon: NzIcons.history,
-        onSelected: onOpenHistory,
-      ),
     ],
   );
 }

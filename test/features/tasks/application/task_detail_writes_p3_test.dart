@@ -49,6 +49,9 @@ Map<String, Object?> _item(
   'days_early': 0,
   'completion_evidence_required': evidence,
   'subtask_counts': {'total': 0, 'done': 0},
+  'created_at': '2026-10-01T09:00:00Z',
+  'created_by_account_id': 'u-creator',
+  'created_by_full_name': 'Oluşturan Kişi',
 };
 
 Map<String, Object?> _file(String id, String by) => {

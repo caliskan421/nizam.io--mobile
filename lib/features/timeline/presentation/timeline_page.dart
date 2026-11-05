@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -5,15 +7,20 @@ import 'package:gap/gap.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/motion/page_content_entrance.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
+import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
+import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
 import '../application/timeline_controller.dart';
 import '../domain/timeline.dart';
+
 import 'chart/timeline_chart.dart';
 import 'timeline_texts.dart';
 import 'widgets/timeline_feedback.dart';
@@ -40,6 +47,49 @@ class TimelinePage extends ConsumerStatefulWidget {
 }
 
 class _TimelinePageState extends ConsumerState<TimelinePage> {
+  bool _full = false;
+  bool _searchOpen = false;
+  bool _hint = false;
+  Timer? _hintTimer;
+  final _search = TextEditingController();
+  final _focus = FocusNode();
+  bool get _phone => MediaQuery.sizeOf(context).width < 600;
+  void _toggleFull() {
+    if (!_phone) return;
+    setState(() {
+      _full = !_full;
+      _hint = _full;
+    });
+    _focus.unfocus();
+    _hintTimer?.cancel();
+    if (_full) {
+      _hintTimer = Timer(const Duration(milliseconds: 2400), () {
+        if (mounted) setState(() => _hint = false);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _hintTimer?.cancel();
+    _search.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  Widget _collapse(Widget child) => TweenAnimationBuilder<double>(
+    tween: Tween(end: _full ? 0 : 1),
+    duration: const Duration(milliseconds: 210),
+    curve: Curves.easeInOutCubic,
+    builder: (context, value, child) => ClipRect(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        heightFactor: value,
+        child: Opacity(opacity: value, child: child),
+      ),
+    ),
+    child: child,
+  );
   String? _toast;
   var _toastSerial = 0;
 
@@ -93,7 +143,23 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     final l = context.l10n;
     final view = ref.watch(timelineViewProvider(widget.coordinatorship));
     return NzPage.fill(
-      topBar: const RootTopBar(),
+      animateContent: !_phone,
+      topBar: _phone
+          ? SliverToBoxAdapter(
+              child: _collapse(
+                SizedBox(
+                  height:
+                      MediaQuery.paddingOf(context).top +
+                      NizamioSize.appbar +
+                      NizamioSpacing.space2,
+                  child: const CustomScrollView(
+                    physics: NeverScrollableScrollPhysics(),
+                    slivers: [RootTopBar()],
+                  ),
+                ),
+              ),
+            )
+          : const RootTopBar(),
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       body: NzAsyncView<TimelineView>(
         value: view,
@@ -114,23 +180,96 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: NizamioSpacing.gutter,
+              if (_phone)
+                _collapse(
+                  ColoredBox(
+                    color: Colors.black,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        NizamioSpacing.gutter,
+                        NizamioSpacing.gapXl,
+                        NizamioSpacing.gutter,
+                        NizamioSpacing.space3,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          NzPageHeader(
+                            title: l.uiTasksTitle,
+                            actions: [
+                              TasksModeToggle(
+                                selected: 1,
+                                onSelected: (i) {
+                                  if (i == 0) _toList();
+                                },
+                              ),
+                              NzIconButton.circle(
+                                icon: NzIcons.search,
+                                semanticLabel: l.uiTasksSearch,
+                                onPressed: () {
+                                  setState(() => _searchOpen = !_searchOpen);
+                                  if (!_searchOpen) {
+                                    _search.clear();
+                                    _focus.unfocus();
+                                    ctrl.setQuery('');
+                                  }
+                                },
+                              ),
+                              if (ref.watch(canCreateTaskProvider))
+                                NzIconButton.circleAccent(
+                                  icon: NzIcons.add,
+                                  semanticLabel: l.uiTasksNewTask,
+                                  onPressed: () => showNewTaskSheet(
+                                    context,
+                                    resetTarget: true,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          NzReveal(
+                            open: _searchOpen,
+                            onOpened: _focus.requestFocus,
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                top: NizamioSpacing.space5,
+                              ),
+                              child: NzSearchField(
+                                controller: _search,
+                                focusNode: _focus,
+                                label: l.uiTasksSearchHint,
+                                hint: l.uiTasksSearchHint,
+                                onChanged: ctrl.setQuery,
+                                onClear: () => ctrl.setQuery(''),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              else ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: NizamioSpacing.gutter,
+                  ),
+                  child: NzPillTabs(
+                    semanticLabel: l.uiTimelineView,
+                    selected: 1,
+                    onSelected: (i) {
+                      if (i == 0) _toList();
+                    },
+                    tabs: [
+                      NzPillTab(label: l.uiTimelineList, icon: NzIcons.list),
+                      NzPillTab(
+                        label: l.uiTimelineTitle,
+                        icon: NzIcons.timeline,
+                      ),
+                    ],
+                  ),
                 ),
-                child: NzPillTabs(
-                  semanticLabel: l.uiTimelineView,
-                  selected: 1,
-                  onSelected: (i) {
-                    if (i == 0) _toList();
-                  },
-                  tabs: [
-                    NzPillTab(label: l.uiTimelineList, icon: NzIcons.list),
-                    NzPillTab(label: l.uiTimelineTitle, icon: NzIcons.timeline),
-                  ],
-                ),
-              ),
-              const Gap(NizamioSpacing.space3),
+                const Gap(NizamioSpacing.space3),
+              ],
               // Kesik katalog (sayfa tavanı/imleç tekrarı): çizelge eksik olabilir.
               if (ref.watch(
                 taskCatalogControllerProvider.select(
@@ -151,52 +290,92 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                 const Gap(NizamioSpacing.space2),
               ],
               Expanded(
-                child: Semantics(
-                  container: true,
-                  label: l.uiTimelineTitle,
-                  explicitChildNodes: true,
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: TimelineChart(
-                          view: v,
-                          bottomInset: bottom,
-                          onSelect: ctrl.select,
-                          onOverview: ctrl.openOverviewColumn,
-                          onDrag: ctrl.dragTo,
-                        ),
-                      ),
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        top: 0,
-                        child: TimelineHeader(
-                          view: v,
-                          onCoord: ctrl.toggleCoordMenu,
-                          onFilter: () {
-                            ctrl.closeCoordMenu();
-                            showTimelineFilterSheet(
-                              context,
-                              coordinatorship: widget.coordinatorship,
-                            );
-                          },
-                        ),
-                      ),
-                      if (v.state.coordMenuOpen)
+                child: PageContentEntrance(
+                  child: Semantics(
+                    container: true,
+                    label: l.uiTimelineTitle,
+                    explicitChildNodes: true,
+                    child: Stack(
+                      children: [
                         Positioned.fill(
-                          child: TimelineCoordMenu(
+                          child: TimelineChart(
                             view: v,
-                            onToggle: ctrl.toggleCoordinatorship,
-                            onAll: ctrl.toggleAllCoordinatorships,
-                            onClose: ctrl.closeCoordMenu,
+                            onBlankTap: _toggleFull,
+                            bottomInset: bottom,
+                            onSelect: ctrl.select,
+                            onOverview: ctrl.openOverviewColumn,
+                            onDrag: ctrl.dragTo,
                           ),
                         ),
-                    ],
+                        if (!_phone)
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            child: TimelineHeader(
+                              view: v,
+                              onCoord: ctrl.toggleCoordMenu,
+                              onFilter: () {
+                                ctrl.closeCoordMenu();
+                                showTimelineFilterSheet(
+                                  context,
+                                  coordinatorship: widget.coordinatorship,
+                                );
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ],
           ),
+          if (_phone && sel == null)
+            Positioned(
+              right: 12,
+              bottom: 74 + bottom,
+              child: TimelineFloatingFilters(
+                view: v,
+                onCoord: ctrl.toggleCoordMenu,
+                onFilter: () {
+                  ctrl.closeCoordMenu();
+                  showTimelineFilterSheet(
+                    context,
+                    coordinatorship: widget.coordinatorship,
+                  );
+                },
+              ),
+            ),
+          if (v.state.coordMenuOpen)
+            Positioned.fill(
+              child: TimelineCoordMenu(
+                view: v,
+                onToggle: ctrl.toggleCoordinatorship,
+                onAll: ctrl.toggleAllCoordinatorships,
+                onClose: ctrl.closeCoordMenu,
+              ),
+            ),
+          if (_hint)
+            Positioned(
+              left: 72,
+              right: 12,
+              bottom: 66 + bottom,
+              child: IgnorePointer(
+                child: Material(
+                  color: context.colors.surfaceRaised,
+                  borderRadius: BorderRadius.circular(20),
+                  child: const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Text(
+                      'Tam ekran · çıkmak için boş alana dokun',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if (sel != null)
             Positioned(
               left: 0,
@@ -221,7 +400,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                 ),
               ),
             ),
-          if (sel == null && !v.state.coordMenuOpen)
+          if (!_phone && sel == null && !v.state.coordMenuOpen)
             Positioned(
               right: NizamioSpacing.space3,
               // Prototip `ctrlB`: 152, geri alma bildirimi varken 250.

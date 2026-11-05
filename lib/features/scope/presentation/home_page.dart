@@ -50,10 +50,7 @@ class HomePage extends ConsumerWidget {
         if (next?.tab != shellTab || dashboard == null || !visible) return;
         showHomeShortcuts(
           context,
-          dashboard: dashboard,
-          onOpenTask: context.appNav.openTask,
           onQuickAction: (a) => _quickAction(context, a),
-          onOpenHistory: context.appNav.openHistory,
         );
       });
     final programState = ref.watch(currentProgramControllerProvider);

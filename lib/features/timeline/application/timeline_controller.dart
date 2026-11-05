@@ -33,13 +33,15 @@ final class TimelineRequestSent extends TimelineRequestResult {
 
 /// Zaman çizelgesi ekranının durumu ve komutları (prototip `S_gantt`). Seçim, ölçek, süzgeçler,
 /// tarih taslağı, kayıt/geri alma ve tarih talepleri bellekte tutulur (sunucuya yazılmaz).
-/// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse kataloğun ilki;
+/// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse tüm koordinatörlükler;
 /// [timelineAllCoordinatorships] ise hepsi.
 @riverpod
 class TimelineController extends _$TimelineController {
   @override
   TimelineState build(String? coordinatorship) {
-    final all = coordinatorship == timelineAllCoordinatorships;
+    final all =
+        coordinatorship == null ||
+        coordinatorship == timelineAllCoordinatorships;
     return TimelineState(
       coordinatorships: coordinatorship == null || all
           ? null
@@ -65,6 +67,8 @@ class TimelineController extends _$TimelineController {
 
   void toggleCoordMenu() =>
       state = state.copyWith(coordMenuOpen: !state.coordMenuOpen);
+
+  void setQuery(String query) => state = _cleared(state.copyWith(query: query));
 
   void closeCoordMenu() => state = state.copyWith(coordMenuOpen: false);
 

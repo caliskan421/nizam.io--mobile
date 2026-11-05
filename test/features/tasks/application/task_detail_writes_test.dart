@@ -65,6 +65,9 @@ class _Server {
     'days_early': 0,
     'completion_evidence_required': false,
     'subtask_counts': {'total': subtasks.length, 'done': 0},
+    'created_at': '2026-10-01T09:00:00Z',
+    'created_by_account_id': 'u-creator',
+    'created_by_full_name': 'Oluşturan Kişi',
   };
 
   FutureOr<ResponseBody> handle(Seen r) async {

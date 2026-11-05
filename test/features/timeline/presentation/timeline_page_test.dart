@@ -23,7 +23,7 @@ Future<RecordingAppNav> _open(
   Size size = const Size(390, 844),
   double textScale = 1,
   bool dark = false,
-  String? coordinatorship,
+  String? coordinatorship = 'ALT',
 }) async {
   tester.view
     ..devicePixelRatio = 1
@@ -89,11 +89,13 @@ void main() {
         testWidgets('bölümler; taşma yok [${size.width.toInt()} × $scale × '
             '${dark ? 'koyu' : 'açık'}]', (tester) async {
           await _open(tester, size: size, textScale: scale, dark: dark);
-          expect(find.text(_l.uiTimelineList), findsOneWidget);
-          expect(find.text(_l.uiTimelineTitle), findsOneWidget);
-          expect(find.text(_l.uiTimelineCoord), findsOneWidget);
-          expect(find.text('Altyapı ve tesisat'), findsOneWidget);
-          expect(find.text(_l.uiTimelineFilter), findsOneWidget);
+          expect(find.bySemanticsLabel('Liste'), findsOneWidget);
+          expect(find.bySemanticsLabel('Zaman çizelgesi'), findsNWidgets(2));
+          expect(
+            find.bySemanticsLabel(RegExp('Koordinatörlük seçimi')),
+            findsOneWidget,
+          );
+          expect(find.bySemanticsLabel(RegExp('Filtreler ·')), findsOneWidget);
           expect(find.byKey(TimelineChart.canvasKey), findsOneWidget);
           expect(find.byKey(const ValueKey('timeline-strip')), findsOneWidget);
           expect(_layout(tester).bars, hasLength(13));
@@ -170,17 +172,17 @@ void main() {
     tester,
   ) async {
     await _open(tester);
-    await tester.tap(find.text(_l.uiTimelineCoord));
+    await tester.tap(find.bySemanticsLabel(RegExp('Koordinatörlük seçimi')));
     await settle(tester);
     expect(find.text('Mekanik sistemler'), findsOneWidget);
     expect(find.text('1 / 11 ${_l.uiTimelineCoordOpenTail}'), findsOneWidget);
     await tester.tap(find.text('Mekanik sistemler'));
     await settle(tester);
-    expect(find.text('2 ${_l.uiTimelineCoordSelected}'), findsOneWidget);
+    expect(find.bySemanticsLabel('Koordinatörlük seçimi · 2'), findsOneWidget);
     expect(_layout(tester).heads, hasLength(2));
     await tester.tap(find.text(_l.uiTimelineCoordClear));
     await settle(tester);
-    expect(find.text(_l.uiTimelineCoordNone), findsOneWidget);
+    expect(find.bySemanticsLabel('Koordinatörlük seçimi · 0'), findsOneWidget);
     expect(find.text(_l.uiTimelineCoordSelectAll), findsOneWidget);
     // Kapatma alanı menüyü kapatır.
     await tester.tapAt(const Offset(200, 780));
@@ -193,7 +195,7 @@ void main() {
     tester,
   ) async {
     await _open(tester);
-    await tester.tap(find.text(_l.uiTimelineFilter));
+    await tester.tap(find.bySemanticsLabel(RegExp('Filtreler ·')));
     await settle(tester);
     expect(find.text(_l.uiTimelineFilters), findsWidgets);
     expect(find.text(_l.uiTimelinePerson), findsOneWidget);
@@ -209,14 +211,9 @@ void main() {
     await tester.ensureVisible(apply);
     await tester.tap(apply);
     await settle(tester);
-    // Yalnız durum süzgecinde rozet yok (prototip `hasChips`).
-    final badge = find.descendant(
-      of: find.bySemanticsLabel(_l.uiTimelineFilterLabel),
-      matching: find.text('1'),
-    );
-    expect(badge, findsNothing);
+    expect(find.bySemanticsLabel('Filtreler · 1'), findsOneWidget);
 
-    await tester.tap(find.text(_l.uiTimelineFilter));
+    await tester.tap(find.bySemanticsLabel(RegExp('Filtreler ·')));
     await settle(tester);
     await tester.tap(find.text('Ali Avcı'));
     await settle(tester);
@@ -232,34 +229,21 @@ void main() {
     expect(find.text('2'), findsWidgets);
   });
 
-  testWidgets(
-    'çizelge kontrolleri: yakınlaştır/uzaklaştır, genel bakış, lejant',
-    (tester) async {
-      await _open(tester);
-      expect(_layout(tester).ppd, 7);
-      expect(find.text('hafta'), findsOneWidget);
-      await tester.tap(find.bySemanticsLabel(_l.uiTimelineZoomIn));
-      await settle(tester);
-      expect(_layout(tester).ppd, 30);
-      expect(find.text('gün'), findsOneWidget);
-      await tester.tap(find.bySemanticsLabel(_l.uiTimelineZoomOut));
-      await tester.tap(find.bySemanticsLabel(_l.uiTimelineZoomOut));
-      await settle(tester);
-      expect(_layout(tester).ppd, 2.4);
-
-      await tester.tap(find.bySemanticsLabel(_l.uiTimelineOverview));
-      await settle(tester);
-      expect(_layout(tester).overview, hasLength(11));
-      await tester.tap(find.bySemanticsLabel(_l.uiTimelineOverview));
-      await settle(tester);
-      expect(_layout(tester).overview, isEmpty);
-
-      await tester.tap(find.bySemanticsLabel(_l.uiTimelineLegendOpen));
-      await settle(tester);
-      expect(find.text(_l.uiTimelineStDoneLate), findsOneWidget);
-      expect(find.text(_l.uiTimelineLegendStrip), findsOneWidget);
-    },
-  );
+  testWidgets('boş alana dokunma tam ekranı açar ve kapatır', (tester) async {
+    await _open(tester);
+    final chart = tester.getRect(find.byType(TimelineChart));
+    await tester.tapAt(Offset(chart.right - 8, chart.top + 100));
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byType(TimelineChart)).top, lessThan(chart.top));
+    expect(
+      find.text('Tam ekran · çıkmak için boş alana dokun'),
+      findsOneWidget,
+    );
+    final full = tester.getRect(find.byType(TimelineChart));
+    await tester.tapAt(Offset(full.right - 8, full.top + 100));
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byType(TimelineChart)).top, chart.top);
+  });
 
   testWidgets(
     'başarım: gövde iki katman; sayfa yeniden kurulumu yerleşimi korur',
@@ -286,11 +270,11 @@ void main() {
     },
   );
 
-  testWidgets('rota "*": bütün koordinatörlükler seçili açılır', (
+  testWidgets('varsayılan açılış: bütün koordinatörlükler seçili açılır', (
     tester,
   ) async {
-    await _open(tester, coordinatorship: TimelinePage.allCoordinatorships);
-    expect(find.text(_l.uiTimelineCoordAll), findsOneWidget);
+    await _open(tester, coordinatorship: null);
+    expect(find.bySemanticsLabel('Koordinatörlük seçimi · 11'), findsOneWidget);
     expect(_layout(tester).heads, hasLength(11));
     expect(tester.takeException(), isNull);
   });
@@ -313,13 +297,13 @@ void main() {
 
   testWidgets('Liste: yığın yoksa görev listesine gider', (tester) async {
     final nav = await _open(tester);
-    await tester.tap(find.text(_l.uiTimelineList));
+    await tester.tap(find.bySemanticsLabel('Liste'));
     await settle(tester);
     expect(nav.calls, ['tasks']);
   });
 
   testWidgets('rota koordinatörlüğü seçili açılır', (tester) async {
     await _open(tester, coordinatorship: 'İDA');
-    expect(find.text('İdari işler'), findsOneWidget);
+    expect(_layout(tester).view.selectedCoordinatorships, ['İDA']);
   });
 }

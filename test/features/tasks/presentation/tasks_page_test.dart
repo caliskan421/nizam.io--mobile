@@ -8,6 +8,9 @@ import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_app_nav.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
+import 'package:nizamio/core/ui/widgets/nz_alert_icon.dart';
+import 'package:nizamio/core/ui/widgets/nz_icons.dart';
+import 'package:nizamio/core/ui/widgets/surfaces/nz_task_card.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../../support/fake_backend.dart';
@@ -72,59 +75,66 @@ void main() {
     for (final n in ['76', '15', '20', '3', '14', '39']) {
       expect(find.text(n), findsWidgets);
     }
-    expect(find.text('${_l.uiTasksListAll} · 76'), findsOneWidget);
+    // Liste başlığı yazısı yok; sayılar görünüm kutularında.
     expect(find.text('Su deposu temel betonunun yapılması'), findsOneWidget);
-    expect(find.text('98 ${_l.uiTasksLateTail}'), findsOneWidget);
+    // Gecikme rozeti yok (bitiş tarihi kırmızı).
+    expect(find.text('98 ${_l.uiTasksLateTail}'), findsNothing);
     await _reveal(tester, find.text('8 / 76 ${_l.uiTasksTasksLc}'));
     expect(find.text('8 / 76 ${_l.uiTasksTasksLc}'), findsOneWidget);
     await _tap(tester, find.text(_l.uiTasksShowMore));
     await _reveal(tester, find.text('16 / 76 ${_l.uiTasksTasksLc}'));
     expect(find.text('16 / 76 ${_l.uiTasksTasksLc}'), findsOneWidget);
     await _tap(tester, find.text(_l.uiTasksViewLate));
-    expect(find.text('${_l.uiTasksListLate} · 15'), findsOneWidget);
+    expect(find.text('Su deposu temel betonunun yapılması'), findsOneWidget);
     await _tap(tester, find.text(_l.uiTasksViewRequest));
-    expect(find.text('${_l.uiTasksListRequest} · 3'), findsOneWidget);
-    expect(find.textContaining(_l.uiTasksRequestBadge), findsNWidgets(3));
+    // Bekleyen tarih talebi metin rozeti değil ünlem ikonu.
+    expect(find.textContaining(_l.uiTasksRequestBadge), findsNothing);
+    expect(find.byType(NzAlertIcon), findsNWidgets(3));
   });
 
-  testWidgets('sıralama menüsü: yön ve koordinatörlüğe göre gruplar', (
-    tester,
-  ) async {
-    await _open(tester);
-    await _tap(tester, find.text(_l.uiTasksSortDue));
-    expect(find.text(_l.uiTasksSortCreatedShort), findsOneWidget);
-    // Seçili tarihli ölçüte dokunmak yönü çevirir, menü açık kalır.
-    await _tap(tester, find.text(_l.uiTasksSortDueShort));
-    expect(find.text(_l.uiTasksSortCreatedShort), findsOneWidget);
-    await _tap(tester, find.text(_l.uiTasksSortCoordShort));
-    expect(find.text(_l.uiTasksSortCreatedShort), findsNothing);
-    expect(find.text('Altyapı ve tesisat'), findsOneWidget);
-    expect(find.text('ALT-5'), findsOneWidget);
-    await _tap(tester, find.text('Altyapı ve tesisat'));
-    expect(find.text('ALT-5'), findsNothing);
-    // Gruplar kapalıyken liste kısalır; sayı satırı görünür.
-    await _reveal(
-      tester,
-      find.text('76 ${_l.uiTasksTasksLc} · 11 ${_l.uiTasksCoordsLc}'),
-    );
-    expect(
-      find.text('76 ${_l.uiTasksTasksLc} · 11 ${_l.uiTasksCoordsLc}'),
-      findsOneWidget,
-    );
-  });
+  testWidgets(
+    'sıralama düğmesi: ölçüt döngüsü, yön ve koordinatörlüğe göre gruplar',
+    (tester) async {
+      await _open(tester);
+      // Etiket ölçütü sırayla değiştirir (bitiş → başlangıç → koordinatörlük); ok yönü çevirir.
+      expect(find.text(_l.uiTasksSortDue), findsOneWidget);
+      await _tap(tester, find.byIcon(NzIcons.chevronDown).first);
+      expect(find.text(_l.uiTasksSortDue), findsOneWidget);
+      await _tap(tester, find.text(_l.uiTasksSortDue));
+      expect(find.text(_l.uiTasksSortStart), findsOneWidget);
+      await _tap(tester, find.text(_l.uiTasksSortStart));
+      expect(find.text(_l.uiTasksSortCoord), findsOneWidget);
+      expect(find.text('Altyapı ve tesisat'), findsOneWidget);
+      expect(find.text('ALT-5'), findsOneWidget);
+      await _tap(tester, find.text('Altyapı ve tesisat'));
+      expect(find.text('ALT-5'), findsNothing);
+      // Gruplar kapalıyken liste kısalır; sayı satırı görünür.
+      await _reveal(
+        tester,
+        find.text('76 ${_l.uiTasksTasksLc} · 11 ${_l.uiTasksCoordsLc}'),
+      );
+      expect(
+        find.text('76 ${_l.uiTasksTasksLc} · 11 ${_l.uiTasksCoordsLc}'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('arama ve filtre alt sayfası; çipler ve temizle', (tester) async {
-    await _open(tester);
+    final (h, _) = await _open(tester);
     await _tap(tester, find.byIcon(Icons.search_rounded).first);
     await tester.enterText(find.byType(EditableText), 'hidrofor');
     await settle(tester);
-    expect(find.text('${_l.uiTasksListAll} · 1'), findsOneWidget);
+    expect(find.byType(NzTaskCard), findsOneWidget);
     expect(find.text('ALT-7'), findsOneWidget);
     await _tap(tester, find.byIcon(Icons.search_rounded).first);
-    expect(find.text('${_l.uiTasksListAll} · 76'), findsOneWidget);
+    expect(find.byType(NzTaskCard), findsWidgets);
+    expect(find.text('Su deposu temel betonunun yapılması'), findsOneWidget);
 
     await _top(tester);
-    await _tap(tester, find.byIcon(Icons.filter_list_rounded).first);
+    h.read(shellReselectEventsProvider.notifier).fire(TasksPage.shellTab);
+    await settle(tester);
+    await _tap(tester, find.text(_l.uiTasksFlyFilter));
     expect(find.text(_l.uiTasksFilters), findsOneWidget);
     await _tap(tester, find.text('Kadir Özbek').last);
     final show = find.textContaining(_l.uiTasksShowTasksTail);
@@ -138,7 +148,7 @@ void main() {
     expect(find.text(_l.uiTasksFilters), findsNothing);
     expect(find.text('Kadir Özbek'), findsWidgets);
     await _tap(tester, find.text(_l.uiTasksClear));
-    expect(find.text('${_l.uiTasksListAll} · 76'), findsOneWidget);
+    expect(find.text('Su deposu temel betonunun yapılması'), findsOneWidget);
   });
 
   testWidgets('gezinme: kart, zaman çizelgesi; yeni görev alt sayfası', (
@@ -147,7 +157,7 @@ void main() {
     final (_, nav) = await _open(tester);
     await _tap(tester, find.text('Su deposu temel betonunun yapılması'));
     await _top(tester);
-    await _tap(tester, find.text(_l.uiTasksModeTimeline));
+    await _tap(tester, find.bySemanticsLabel('Zaman çizelgesi'));
     expect(nav.calls, ['task:ALT-5', 'timeline']);
     await _top(tester);
     await _tap(tester, find.byIcon(Icons.add_rounded).first);
@@ -266,10 +276,11 @@ void main() {
       tester,
       page: const TasksPage(view: NzTaskView.review, people: ['ko']),
     );
-    expect(find.text('${_l.uiTasksListReview} · 0'), findsOneWidget);
+    // Liste başlığı yazısı yok (sayı görünüm kutusunda); süzgeçli boş görünüm, temizleyince liste.
     expect(find.text(_l.uiTasksEmpty), findsOneWidget);
     await _tap(tester, find.text(_l.uiTasksClearFilters));
-    expect(find.text('${_l.uiTasksListAll} · 76'), findsOneWidget);
+    expect(find.text(_l.uiTasksEmpty), findsNothing);
+    expect(find.byType(NzTaskCard), findsWidgets);
   });
 
   testWidgets('kabukta yeniden dokunma kısayol menüsünü açar', (tester) async {
@@ -278,7 +289,9 @@ void main() {
     await settle(tester);
     expect(find.text(_l.uiTasksFlyView), findsOneWidget);
     await _tap(tester, find.text(_l.uiTasksViewDone).last);
-    expect(find.text('${_l.uiTasksListDone} · 39'), findsOneWidget);
+    // Tamamlananlar görünümü: geciken (açık) görev listede yok.
+    expect(find.text('Su deposu temel betonunun yapılması'), findsNothing);
+    expect(find.byType(NzTaskCard), findsWidgets);
     h.read(shellReselectEventsProvider.notifier).fire(TasksPage.shellTab);
     await settle(tester);
     await _tap(tester, find.text(_l.uiTasksModeTimeline).last);
@@ -289,7 +302,13 @@ void main() {
     expect(find.text(_l.uiTasksFlyView), findsNothing);
   });
 
-  for (final (width, scale) in [(360.0, 1.0), (360.0, 2.0), (390.0, 2.0)]) {
+  for (final (width, scale) in [
+    (360.0, 1.0),
+    (360.0, 2.0),
+    (390.0, 2.0),
+    (834.0, 1.0),
+    (1024.0, 2.0),
+  ]) {
     for (final dark in [false, true]) {
       testWidgets(
         'taşma yok: ${width.toInt()} geniş, ${scale}x, ${dark ? 'koyu' : 'açık'}',
@@ -306,8 +325,8 @@ void main() {
             await tester.pump();
           }
           await _top(tester);
-          await _tap(tester, find.byIcon(Icons.filter_list_rounded).first);
-          await _tap(tester, find.text(_l.uiTasksGroupCoord));
+          expect(find.bySemanticsLabel('Liste'), findsOneWidget);
+          expect(find.byIcon(Icons.filter_list_rounded), findsNothing);
           expect(tester.takeException(), isNull);
         },
       );

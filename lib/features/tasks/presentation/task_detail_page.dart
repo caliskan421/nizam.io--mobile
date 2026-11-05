@@ -133,6 +133,8 @@ class TaskDetailPage extends ConsumerWidget {
       after: data == null || task == null
           ? const []
           : [
+              // Ayrıntı okunurken ayrı gösterge yok (kısa okumada anlık parlıyordu); sekme
+              // içeriği katalogdaki satırla çizilir, ayrıntı gelince güncellenir.
               const Gap(NizamioSpacing.space1),
               _TabContent(task: task, catalog: data, actions: actions),
             ],
@@ -147,10 +149,6 @@ class TaskDetailPage extends ConsumerWidget {
             const Gap(NizamioSpacing.space3),
           ],
           _Body(task: task, catalog: data, actions: actions),
-          if (details.isLoading) ...[
-            const Gap(NizamioSpacing.space3),
-            const NzLoader(),
-          ],
         ] else
           NzAsyncView<TaskCatalog>(
             value: catalog,

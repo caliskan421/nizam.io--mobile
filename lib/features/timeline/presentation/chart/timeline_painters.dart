@@ -228,7 +228,9 @@ class TimelineChartPainter extends CustomPainter {
               : c.border.withValues(alpha: 0.45),
         );
       } else if (scale == TimelineScale.week &&
-          date.weekday == DateTime.monday) {
+          date.weekday == DateTime.monday &&
+          date.day > 2 &&
+          DateTime(date.year, date.month + 1).difference(date).inDays >= 2) {
         _hLine(canvas, TimelineGeometry.dateColumn + 1, w, y, c.border);
       }
     }

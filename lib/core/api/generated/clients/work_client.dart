@@ -362,7 +362,11 @@ abstract class WorkClient {
   ///
   /// Görev listesinin program bağlamındaki ucudur (WORK-K81). Satır biçimi.
   /// `listWorkItems` ile aynıdır (`WorkItemList`: tarihler, adlı atananlar, gecikme.
-  /// etiketleri, `subtask_counts`); toplam ya da sayaç eklenmez.
+  /// etiketleri, `subtask_counts`, `pending_date_request`); toplam ya da sayaç eklenmez.
+  /// Bekleyen tarih talebi satır başına yetkiyle dolar (yönetici her satırda,.
+  /// koordinatör kendi departmanının satırında; üye satırında `null`; kural tekil.
+  /// görev uçlarıyla aynıdır) ve listeyle aynı sorguda okunur; departman başına ek.
+  /// istek gerekmez.
   ///
   /// Görünürlük çağıranın **bu programdaki** ekip satırlarından sunucuda, tek sorguda.
   /// hesaplanır: şirket yöneticisi programın bütün görevlerini, koordinatör koordinatörü.
@@ -407,6 +411,9 @@ abstract class WorkClient {
   });
 
   /// Kapsamdaki görevler (imleçli).
+  ///
+  /// Satırdaki `pending_date_request` yöneticiye ve bu departmanın koordinatörüne.
+  /// dolar; üyede her satırda `null` (WORK-K82; tekil görev uçlarıyla aynı kural).
   ///
   /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
   ///

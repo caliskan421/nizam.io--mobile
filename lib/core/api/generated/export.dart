@@ -211,6 +211,7 @@ export 'models/assistant_conversation.dart';
 export 'models/assistant_conversation_list.dart';
 export 'models/assistant_message.dart';
 export 'models/assistant_conversation_detail.dart';
+export 'models/pending_date_request.dart';
 export 'models/keys.dart';
 export 'models/stats.dart';
 export 'models/meeting_stats.dart';

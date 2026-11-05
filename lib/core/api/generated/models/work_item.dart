@@ -6,6 +6,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../date_only.dart';
 
+import 'pending_date_request.dart';
 import 'subtask_counts.dart';
 import 'work_item_assignee.dart';
 import 'work_item_priority.dart';
@@ -45,6 +46,30 @@ abstract class WorkItem with _$WorkItem {
     @JsonKey(name: 'completion_evidence_required')
     required bool completionEvidenceRequired,
     @JsonKey(name: 'subtask_counts') required SubtaskCounts subtaskCounts,
+
+    /// Görevin bekleyen tarih talebi (WORK-K82). Her cevapta bulunur; `null` "bekleyen talep.
+    /// yok ya da çağıran görmeye yetkili değil" demektir ve her uçta aynı anlamı taşır.
+    /// Görev listeleri (`listProgramWorkItems`, `listWorkItems`), `getWorkItem`, oluşturma.
+    /// ve güncelleme cevapları aynı kuralla doldurur: şirket yöneticisine her görevde,.
+    /// koordinatöre yalnız **bu programda** koordinatörü olduğu departmanın görevinde.
+    /// Üyeye (birleşik rolde yalnız üye olduğu departmanın görevinde de) `null`.
+    /// Onaylanmış ya da reddedilmiş talep görünmez. Yeni oluşturulan görevin bekleyen.
+    /// talebi olamayacağından oluşturma cevabında her zaman `null`'dır.
+    ///
+    @JsonKey(name: 'pending_date_request')
+    required PendingDateRequest? pendingDateRequest,
+
+    /// Görevin oluşturulma zamanı (UTC, RFC 3339; WORK-K83). Görev listeleri, `getWorkItem`,.
+    /// oluşturma ve güncelleme cevaplarında aynı değerdir; güncelleme değiştirmez. İstemci.
+    /// "tanımlanma tarihine göre" sıralamayı bu alanla yapar.
+    ///
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+
+    /// Görevi oluşturan hesabın kimliği (WORK-K83). Satırı görebilen herkes görür.
+    @JsonKey(name: 'created_by_account_id') required String createdByAccountId,
+
+    /// Oluşturanın görünen adı (WORK-K83); `WorkItemAssignee.full_name` ile aynı kural: hesabın satırı yoksa ya da ad okuması o an başarısızsa `null` (yanıt yine başarılıdır); silinmiş (geri yüklenebilir) hesabın adı döner.
+    @JsonKey(name: 'created_by_full_name') required String? createdByFullName,
     @DateOnlyConverter()
     @JsonKey(name: 'planned_end_on')
     DateTime? plannedEndOn,

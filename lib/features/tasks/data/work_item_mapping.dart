@@ -55,6 +55,29 @@ String taskPriorityToWire(TaskPriority p) => switch (p) {
 /// Gün değeri: saat bileşeni atılır (sunucu alanları gün çözünürlüğündedir).
 DateTime day(DateTime d) => DateTime(d.year, d.month, d.day);
 
+/// Görev satırındaki bekleyen tarih talebi (`pending_date_request`, WORK-K82) → domain. Satır
+/// yalnız yeni tarihleri taşır; eski tarihler görevin bugünkü tarihleridir (talep bekledikçe
+/// görev tarihi değişmez). Gerekçe ve talep eden ayrıntıda okunur. [requestId] null → talep
+/// yok ya da çağıran görmeye yetkili değil. Üretilmiş tip imzaya girmez (A2): çağıran alanları
+/// açar.
+DateChangeRequest? pendingDateRequest({
+  required String? requestId,
+  required DateTime? newStart,
+  required DateTime? newEnd,
+  required String workItemId,
+  required DateTime start,
+  required DateTime end,
+}) => requestId == null || newStart == null || newEnd == null
+    ? null
+    : DateChangeRequest(
+        id: requestId,
+        workItemId: workItemId,
+        oldStart: day(start),
+        oldDue: day(end),
+        start: day(newStart),
+        due: day(newEnd),
+      );
+
 DateRequestState dateRequestState(String? wire) => switch (wire) {
   'pending' => DateRequestState.pending,
   'approved' => DateRequestState.approved,

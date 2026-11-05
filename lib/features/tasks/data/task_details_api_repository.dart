@@ -111,6 +111,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
       item: _item(item, task.shortCode),
       names: [
         for (final a in item.assignees) ?_name(a.accountId, a.fullName),
+        ?_name(item.createdByAccountId, item.createdByFullName),
         for (final n in notes) ?_name(n.authorAccountId, n.authorFullName),
         for (final s in subtasks) ...[
           ?_name(s.createdByAccountId, s.createdByFullName),
@@ -249,6 +250,16 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
       overdueDays: lateness.daysOverdue,
       evidenceRequired: w.completionEvidenceRequired,
       subtaskCounts: (total: w.subtaskCounts.total, done: w.subtaskCounts.done),
+      creator: w.createdByAccountId,
+      createdAt: w.createdAt.toLocal(),
+      dateRequest: pendingDateRequest(
+        requestId: w.pendingDateRequest?.requestId,
+        newStart: w.pendingDateRequest?.newStartOn,
+        newEnd: w.pendingDateRequest?.newEndOn,
+        workItemId: w.workItemId,
+        start: w.startOn,
+        end: w.endOn,
+      ),
     );
   }
 

@@ -30,8 +30,10 @@ class TimelineChart extends StatefulWidget {
     required this.onOverview,
     required this.onDrag,
     required this.bottomInset,
+    this.onBlankTap,
   });
 
+  final VoidCallback? onBlankTap;
   final TimelineView view;
   final ValueChanged<String> onSelect;
   final ValueChanged<String> onOverview;
@@ -169,7 +171,11 @@ class _TimelineChartState extends State<TimelineChart> {
       return;
     }
     final b = l.barAt(p);
-    if (b != null) widget.onSelect(b.task.code);
+    if (b != null) {
+      widget.onSelect(b.task.code);
+    } else {
+      widget.onBlankTap?.call();
+    }
   }
 
   void _longPressStart(LongPressStartDetails d) {
@@ -316,7 +322,7 @@ class _TimelineChartState extends State<TimelineChart> {
               ),
             if (!selection)
               Positioned(
-                left: NizamioSpacing.gutter,
+                left: TimelineGeometry.dateColumn + 10,
                 right: NizamioSpacing.gutter,
                 bottom: NizamioSpacing.gutter + widget.bottomInset,
                 child: _SeasonStrip(
@@ -339,7 +345,7 @@ class _TimelineChartState extends State<TimelineChart> {
                           Positioned(
                             top: above ? TimelineGeometry.header + 10 : null,
                             bottom: above ? null : 70 + widget.bottomInset,
-                            left: 0,
+                            left: TimelineGeometry.dateColumn,
                             right: 0,
                             child: Center(
                               child: _TodayButton(

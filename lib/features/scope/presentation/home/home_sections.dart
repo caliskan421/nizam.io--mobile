@@ -10,9 +10,11 @@ import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
+import 'home_grid_layout.dart';
 import 'home_texts.dart';
 
-/// İki ya da daha çok eşit sütun; satırdaki öğeler aynı yüksekliğe uzar (prototip `grid`).
+/// İki ya da daha çok eşit sütun (prototip `grid`); bütün öğeler en uzun öğenin yüksekliğinde
+/// (koordinatörlük kartları: adı iki satıra kayan kart diğerlerinden uzun durmaz).
 class HomeGrid extends StatelessWidget {
   const HomeGrid({
     super.key,
@@ -26,26 +28,8 @@ class HomeGrid extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) => Column(
-    spacing: gap,
-    children: [
-      for (var r = 0; r < children.length; r += columns)
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: gap,
-            children: [
-              for (var i = r; i < r + columns; i++)
-                Expanded(
-                  child: i < children.length
-                      ? children[i]
-                      : const SizedBox.shrink(),
-                ),
-            ],
-          ),
-        ),
-    ],
-  );
+  Widget build(BuildContext context) =>
+      UniformGrid(columns: columns, gap: gap, children: children);
 }
 
 /// Karşılama: tarih + "Merhaba" ve ad (ad tek satırda kesilir; tam ad okuyucuda).

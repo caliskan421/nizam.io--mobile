@@ -77,7 +77,7 @@ class CoordinatorshipsPage extends ConsumerWidget {
 }
 
 /// Liste kartı (prototip `.t-card`): kod + ad, kişiler; sağda "9/13 bitti" ve gecikme rozeti;
-/// altta ilerleme çubuğu.
+/// altta ilerleme çubuğu. Kartlar eşit yüksekliktedir (rozet yokken yeri boş kalır).
 class CoordinatorshipCard extends StatelessWidget {
   const CoordinatorshipCard({
     super.key,
@@ -151,11 +151,14 @@ class CoordinatorshipCard extends StatelessWidget {
                 spacing: NizamioSpacing.space1,
                 children: [
                   Text(l.coordDone(s), style: t.mono),
-                  if (s.late > 0)
-                    NzStatusLabel.badge(
+                  // Gecikme yokken rozet yeri korunur: bütün kartlar aynı yükseklikte.
+                  Visibility.maintain(
+                    visible: s.late > 0,
+                    child: NzStatusLabel.badge(
                       label: l.coordLate(s),
                       tone: NzTone.danger,
                     ),
+                  ),
                 ],
               ),
             ],

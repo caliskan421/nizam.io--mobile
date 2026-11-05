@@ -120,6 +120,8 @@ negatif matrisler `test/tool/boundaries_test.dart` ve `test/tool/api_surface_tes
   geri çağrı veremez (A5) ve `dynamic` üzerinde çağrı lint ile yasak (`avoid_dynamic_calls`).
 - `flutter_secure_storage` yalnız `lib/core/storage/`; `badCertificateCallback` /
   `HttpOverrides` hiçbir yerde; `debugPrint`/`dart:developer` yalnız `lib/core/logging/`.
+- El yazımı Dart dosyası ≤ 600 satır (üretilmiş dosyalar hariç); `test/tool/file_size_test.dart`
+  (`make test`, CI). Eski aşan dosyalar orada tavanlı listede, liste yalnız küçülür.
 
 ## Üretim (`make gen`, `tool/gen.dart`)
 

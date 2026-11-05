@@ -55,6 +55,12 @@ Spec her zaman bir **backend etiketinden** okunur (ilk pin: `v0.1.0-api`). Etike
 - v1'de push yok (uygulama içi çan + ön planda yoklama); pinning ve biyometrik yok.
 - Eski mobil kod veya sahte kontrol düzlemi geri getirilmez.
 - Backend veya yönetim deposuna bu depodan yazılmaz.
+- **Dosya boyutu:** el yazımı Dart dosyası (lib, test, tool) en çok **600 satır**; 600'e
+  yaklaşan dosya anlamlı parçalara bölünür (sekme, sayfa parçası, ressam, sayfa ayrı dosya).
+  Üretilmiş dosyalar (`generated/`, `*.g.dart`, `*.freezed.dart`, `*.gen.dart`, ARB) ölçüt
+  dışıdır. Denetim `test/tool/file_size_test.dart`; sınırı aşan eski dosyalar oradaki
+  listede bugünkü boylarıyla tavanlıdır, büyüyemez ve yeni giriş eklenmez. Bir dosya 600'ün
+  altına inince listeden çıkarılır.
 
 ## Test kapsamı
 

@@ -346,10 +346,10 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
                   width: NzTabletMetrics.masterWidth,
                   child: NzPaneScope(
                     role: NzPaneRole.master,
-                    // Modül değişiminde liste prototip `rpFadeIn .3s` ile girer.
+                    // Modül değişiminde liste telefondaki sayfa girişiyle aynı yükselir.
                     child: NzPaneTransition(
                       key: ValueKey(current),
-                      motion: NzPaneMotion.fade,
+                      motion: NzPaneMotion.rise,
                       child: master,
                     ),
                   ),

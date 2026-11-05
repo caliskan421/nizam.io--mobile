@@ -309,7 +309,7 @@ class PaneStack extends StatefulWidget {
 
 class _PaneStackState extends State<PaneStack> {
   late List<PaneEntry> _entries = parseTrail(widget.trail);
-  var _motion = NzPaneMotion.fade;
+  var _motion = NzPaneMotion.rise;
 
   /// En üst ekran her değiştiğinde artar (hareket yeniden oynar).
   var _play = 0;
@@ -344,7 +344,7 @@ class _PaneStackState extends State<PaneStack> {
           (_) => _scrollTopToStart(),
         );
       }
-      _motion = NzPaneMotion.fade;
+      _motion = NzPaneMotion.rise;
       _play++;
     }
     _refresh = refresh ?? _refresh;
@@ -363,7 +363,7 @@ class _PaneStackState extends State<PaneStack> {
           ? NzPaneMotion.push
           : shrank
           ? NzPaneMotion.pop
-          : NzPaneMotion.fade;
+          : NzPaneMotion.rise;
       _play++;
     }
   }

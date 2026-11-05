@@ -18,7 +18,6 @@ abstract final class RpMotion {
   static const enterCurve = Cubic(0.2, 0.8, 0.2, 1.0);
   static const pushOffset = 36.0;
   static const pushDuration = Duration(milliseconds: 380);
-  static const tabFadeDuration = Duration(milliseconds: 300);
 
   /// Kademeli girişte öğeler arası adım ve gecikmenin üst sınırı (ince; uzun listede birikmez).
   static const staggerStep = Duration(milliseconds: 40);

@@ -171,10 +171,12 @@ class NzEntrance extends StatelessWidget {
   }
 }
 
-/// Tablet bölme geçişinin türü (prototip `A`): [fade] `rpFadeIn .3s ease` (modül değişimi,
-/// aynı türde kayıt seçimi, aynı kaydı yeniden seçme), [push] `rpPush .38s` (36 px sağdan),
-/// [pop] `rpPop .38s` (36 px soldan), eğri `cubic(.2,.8,.2,1)`.
-enum NzPaneMotion { fade, push, pop }
+/// Tablet bölme geçişinin türü: [rise] telefondaki sayfa girişinin birebir aynısı
+/// ([PageContentEntrance]: opaklık 0 → 1, [RpMotion.enterOffset] aşağıdan yükseliş,
+/// [RpMotion.enterDuration], [RpMotion.enterCurve]; modül değişimi, aynı türde kayıt seçimi,
+/// aynı kaydı yeniden seçme), [push] `rpPush .38s` (36 px sağdan), [pop] `rpPop .38s` (36 px
+/// soldan), eğri `cubic(.2,.8,.2,1)`.
+enum NzPaneMotion { rise, push, pop }
 
 /// Tablet bölmesine giren ekranın hareketi. Ağaç yapısı her zaman aynıdır (çocuğun State'i
 /// korunur); [enabled] false iken (telefon, tek bölme) hareket yoktur ve içteki
@@ -224,11 +226,9 @@ class _NzPaneTransitionState extends State<NzPaneTransition>
 
   void _start(NzPaneMotion motion) {
     _motion = motion;
-    final fade = motion == NzPaneMotion.fade;
-    _controller.duration = fade
-        ? RpMotion.tabFadeDuration
+    _controller.duration = motion == NzPaneMotion.rise
+        ? RpMotion.enterDuration
         : RpMotion.pushDuration;
-    _animation.curve = fade ? Curves.ease : RpMotion.enterCurve;
     _controller.forward(from: 0);
   }
 
@@ -268,12 +268,12 @@ class _NzPaneTransitionState extends State<NzPaneTransition>
         child: widget.child,
         builder: (context, child) {
           final t = _controller.isCompleted ? 1.0 : _animation.value;
-          final dx = switch (_motion) {
-            NzPaneMotion.fade => 0.0,
-            NzPaneMotion.push => RpMotion.pushOffset * (1 - t),
-            NzPaneMotion.pop => -RpMotion.pushOffset * (1 - t),
+          final offset = switch (_motion) {
+            NzPaneMotion.rise => Offset(0, RpMotion.enterOffset * (1 - t)),
+            NzPaneMotion.push => Offset(RpMotion.pushOffset * (1 - t), 0),
+            NzPaneMotion.pop => Offset(-RpMotion.pushOffset * (1 - t), 0),
           };
-          return Transform.translate(offset: Offset(dx, 0), child: child);
+          return Transform.translate(offset: offset, child: child);
         },
       ),
     ),

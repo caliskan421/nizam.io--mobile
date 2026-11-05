@@ -10,26 +10,32 @@ part of 'current_program_controller.dart';
 // ignore_for_file: type=lint, type=warning
 /// Kapsamdaki program (`GET /v1/program`, S2): ana sayfada seçili programın adı BU yanıttan
 /// gelir — kapsam başlığının isteğe girdiğinin kanıtı. Seçim yoksa (`null`) istek atılmaz;
-/// seçim değişince yeniden okunur. Yeniden yükleme yalnız kullanıcı dokunuşuyla.
+/// seçim değişince yeniden okunur. Yeniden yükleme yalnız kullanıcı dokunuşuyla. Kalıcıdır:
+/// tablette tek izleyen Ana sayfa bölmesidir; modül değişiminde bırakılsaydı dönüşte yeniden
+/// istenir, ad gelene dek program satırı yok olur ve akış sonradan aşağı kayardı.
 
 @ProviderFor(CurrentProgramController)
 final currentProgramControllerProvider = CurrentProgramControllerProvider._();
 
 /// Kapsamdaki program (`GET /v1/program`, S2): ana sayfada seçili programın adı BU yanıttan
 /// gelir — kapsam başlığının isteğe girdiğinin kanıtı. Seçim yoksa (`null`) istek atılmaz;
-/// seçim değişince yeniden okunur. Yeniden yükleme yalnız kullanıcı dokunuşuyla.
+/// seçim değişince yeniden okunur. Yeniden yükleme yalnız kullanıcı dokunuşuyla. Kalıcıdır:
+/// tablette tek izleyen Ana sayfa bölmesidir; modül değişiminde bırakılsaydı dönüşte yeniden
+/// istenir, ad gelene dek program satırı yok olur ve akış sonradan aşağı kayardı.
 final class CurrentProgramControllerProvider
     extends $AsyncNotifierProvider<CurrentProgramController, Program?> {
   /// Kapsamdaki program (`GET /v1/program`, S2): ana sayfada seçili programın adı BU yanıttan
   /// gelir — kapsam başlığının isteğe girdiğinin kanıtı. Seçim yoksa (`null`) istek atılmaz;
-  /// seçim değişince yeniden okunur. Yeniden yükleme yalnız kullanıcı dokunuşuyla.
+  /// seçim değişince yeniden okunur. Yeniden yükleme yalnız kullanıcı dokunuşuyla. Kalıcıdır:
+  /// tablette tek izleyen Ana sayfa bölmesidir; modül değişiminde bırakılsaydı dönüşte yeniden
+  /// istenir, ad gelene dek program satırı yok olur ve akış sonradan aşağı kayardı.
   CurrentProgramControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'currentProgramControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -43,11 +49,13 @@ final class CurrentProgramControllerProvider
 }
 
 String _$currentProgramControllerHash() =>
-    r'057a4498191854265f168f72b90b71eb966d3825';
+    r'dd6a600364a85bdbea46841a0aba5042339c643a';
 
 /// Kapsamdaki program (`GET /v1/program`, S2): ana sayfada seçili programın adı BU yanıttan
 /// gelir — kapsam başlığının isteğe girdiğinin kanıtı. Seçim yoksa (`null`) istek atılmaz;
-/// seçim değişince yeniden okunur. Yeniden yükleme yalnız kullanıcı dokunuşuyla.
+/// seçim değişince yeniden okunur. Yeniden yükleme yalnız kullanıcı dokunuşuyla. Kalıcıdır:
+/// tablette tek izleyen Ana sayfa bölmesidir; modül değişiminde bırakılsaydı dönüşte yeniden
+/// istenir, ad gelene dek program satırı yok olur ve akış sonradan aşağı kayardı.
 
 abstract class _$CurrentProgramController extends $AsyncNotifier<Program?> {
   FutureOr<Program?> build();

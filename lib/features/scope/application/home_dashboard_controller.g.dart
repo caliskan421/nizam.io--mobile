@@ -12,7 +12,7 @@ part of 'home_dashboard_controller.dart';
 /// dokunuşuyla (`ref.invalidate`).
 ///
 /// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-/// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
 /// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
@@ -35,7 +35,7 @@ final homeDashboardControllerProvider = HomeDashboardControllerProvider._();
 /// dokunuşuyla (`ref.invalidate`).
 ///
 /// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-/// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
 /// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
@@ -56,7 +56,7 @@ final class HomeDashboardControllerProvider
   /// dokunuşuyla (`ref.invalidate`).
   ///
   /// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-  /// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+  /// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
   /// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
   ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
   ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
@@ -91,13 +91,13 @@ final class HomeDashboardControllerProvider
 }
 
 String _$homeDashboardControllerHash() =>
-    r'7591b16d2b1f2fded0c7a7b001d68489b86f24a2';
+    r'a7cdfe4f86bddea3d1064bbefc3502ad5f899c3e';
 
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).
 ///
 /// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-/// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
 /// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.

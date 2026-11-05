@@ -66,8 +66,7 @@ class RootProgramLine extends ConsumerWidget {
       ),
     );
     final reserve =
-        pending &&
-        ref.watch(scopeStateProvider.select((s) => s.hasServerProgram));
+        pending && ref.watch(scopeStateProvider.select((s) => s.hasProgram));
     if ((program == null || program.isEmpty) && !reserve) {
       return const SizedBox.shrink();
     }

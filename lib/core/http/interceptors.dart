@@ -158,7 +158,7 @@ class ApiGuardInterceptor extends Interceptor {
         st
           ..programId =
               _requested(options, _programKey) ??
-              ((sel != null && sel.hasServerProgram) ? sel.programId : null)
+              ((sel != null && sel.hasProgram) ? sel.programId : null)
           ..departmentId =
               _requested(options, _departmentKey) ??
               ((sel != null && sel.hasDepartment) ? sel.departmentId : null);

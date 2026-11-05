@@ -36,7 +36,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
   final RecordsClient _records;
 
   @override
-  Future<TaskDetails?> load(TaskItem task, {TaskAccess? access}) async {
+  Future<TaskDetails> load(TaskItem task, {TaskAccess? access}) async {
     // Programı/departmanı olmayan görev kapıda reddedilir (seçili kapsama düşülmez).
     final program = task.programId ?? '';
     final department = task.departmentId ?? '';
@@ -161,7 +161,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
   }
 
   @override
-  Future<TaskItem?> loadItem(TaskItem task) async {
+  Future<TaskItem> loadItem(TaskItem task) async {
     final item = await apiCall(
       () => _work.getWorkItem(
         id: task.id,

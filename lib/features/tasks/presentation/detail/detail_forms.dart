@@ -9,9 +9,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
-import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
-import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../application/task_detail_controller.dart';
 import '../../application/tasks_providers.dart';
@@ -46,150 +44,10 @@ class _EditTaskFormState extends ConsumerState<EditTaskForm> {
 
   @override
   Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final t = context.text;
-    final p = taskDetailControllerProvider(widget.code);
-    final s = ref.watch(p);
-    final ctl = ref.read(p.notifier);
-    final d = s.edit;
+    final d = ref.watch(taskDetailControllerProvider(widget.code)).edit;
     final catalog = ref.watch(taskCatalogControllerProvider).value;
     if (d == null || catalog == null) return const SizedBox.shrink();
-    final perms = ctl.permissions;
-    if (!perms.local) return _ServerEditBody(code: widget.code, title: _title);
-    final co = catalog.coordinatorship(d.coordinatorship);
-    final leads = co?.leads ?? const <String>[];
-    final members = co?.members ?? const <String>[];
-    String name(String id) =>
-        catalog.nameOf(id) ?? context.l10n.uiTasksUnknownPerson;
-    final memSel = [
-      for (final m in members)
-        if (d.assignees.contains(m)) name(m).split(' ').first,
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        NzTextField(
-          label: l.uiTasksFieldTitle,
-          hint: l.uiTasksFieldTitleHint,
-          controller: _title,
-          onChanged: (v) => ctl.updateEdit(d.copyWith(title: v)),
-        ),
-        if (s.showErrors && d.titleMissing) ...[
-          const Gap(NizamioSpacing.space1),
-          TaskFormError(l.uiTasksErrTitleEmpty),
-        ],
-        const Gap(NizamioSpacing.space4),
-        TaskFieldLabel(l.uiTasksFieldCoord),
-        Wrap(
-          spacing: NizamioSpacing.space2,
-          runSpacing: NizamioSpacing.space2,
-          children: [
-            for (final x in catalog.coordinatorships)
-              TaskChip(
-                label: x.name,
-                selected: x.code == d.coordinatorship,
-                onTap: () => ctl.editCoordinatorship(x.code),
-              ),
-          ],
-        ),
-        const Gap(NizamioSpacing.space4),
-        TaskFieldLabel(
-          l.uiTasksAssignee,
-          trailing: Text(
-            '${d.assignees.length}',
-            style: t.monoSm.copyWith(color: c.textMuted),
-          ),
-        ),
-        Text(
-          l.uiTasksCoordinatorsLc,
-          style: t.kicker.copyWith(color: c.accentText),
-        ),
-        const Gap(NizamioSpacing.space2),
-        if (leads.isEmpty)
-          Text(
-            l.uiTasksNoCoordinators,
-            style: t.caption.copyWith(color: c.textMuted),
-          )
-        else
-          Wrap(
-            spacing: NizamioSpacing.space2,
-            runSpacing: NizamioSpacing.space2,
-            children: [
-              for (final id in leads)
-                TaskChip(
-                  label: name(id),
-                  selected: d.assignees.contains(id),
-                  onTap: () => ctl.editToggleAssignee(id),
-                ),
-            ],
-          ),
-        TaskLink(
-          label:
-              '${l.uiTasksMembersLc} (${members.length})'
-              '${memSel.isEmpty ? '' : ' · ${memSel.join(', ')}'}',
-          onTap: () => ctl.updateEdit(d.copyWith(membersOpen: !d.membersOpen)),
-        ),
-        NzReveal(
-          open: d.membersOpen,
-          child: members.isEmpty
-              ? Text(
-                  l.uiTasksNoMembers,
-                  style: t.caption.copyWith(color: c.textMuted),
-                )
-              : Wrap(
-                  spacing: NizamioSpacing.space2,
-                  runSpacing: NizamioSpacing.space2,
-                  children: [
-                    for (final id in members)
-                      TaskChip(
-                        label: name(id),
-                        selected: d.assignees.contains(id),
-                        onTap: () => ctl.editToggleAssignee(id),
-                      ),
-                  ],
-                ),
-        ),
-        if (s.showErrors && d.assigneesMissing) ...[
-          const Gap(NizamioSpacing.space1),
-          TaskFormError(l.uiTasksErrAssignOne),
-        ],
-        const Gap(NizamioSpacing.space4),
-        TaskFieldLabel(l.uiTasksPriority),
-        TaskSegmented(
-          semanticLabel: l.uiTasksPriority,
-          labels: [
-            for (final p in TaskPriority.pickable.reversed) l.priorityLabel(p),
-          ],
-          selected: TaskPriority.pickable.reversed.toList().indexOf(d.priority),
-          onSelected: (i) => ctl.updateEdit(
-            d.copyWith(priority: TaskPriority.pickable.reversed.toList()[i]),
-          ),
-        ),
-        const Gap(NizamioSpacing.space4),
-        _DatePair(
-          startLabel: l.uiTasksStart,
-          endLabel: l.uiTasksDue,
-          start: d.start,
-          end: d.due,
-          onStart: (v) => ctl.updateEdit(d.copyWith(start: v)),
-          onEnd: (v) => ctl.updateEdit(d.copyWith(due: v)),
-        ),
-        if (d.datesInvalid) ...[
-          const Gap(NizamioSpacing.space1),
-          TaskFormError(l.uiTasksErrDates),
-        ],
-        const Gap(NizamioSpacing.space3),
-        TaskCheckRow(
-          label: l.uiTasksEvidenceRequired,
-          square: true,
-          selected: d.evidenceRequired,
-          onTap: () =>
-              ctl.updateEdit(d.copyWith(evidenceRequired: !d.evidenceRequired)),
-        ),
-      ],
-    );
+    return _ServerEditBody(code: widget.code, title: _title);
   }
 }
 
@@ -459,7 +317,6 @@ class UploadForm extends ConsumerWidget {
     final catalog = ref.watch(taskCatalogControllerProvider).value;
     final task = catalog?.task(code);
     if (d == null || task == null) return const SizedBox.shrink();
-    final server = !ctl.permissions.local;
     Color tagColor(EvidenceTag tag) => switch (tag) {
       EvidenceTag.site => c.inProgress,
       EvidenceTag.result => c.accentText,
@@ -505,7 +362,7 @@ class UploadForm extends ConsumerWidget {
           spacing: NizamioSpacing.space2,
           runSpacing: NizamioSpacing.space2,
           children: [
-            for (final tag in server ? uploadTags : EvidenceTag.prototype)
+            for (final tag in uploadTags)
               TaskChip(
                 label: l.tagLabel(tag),
                 dot: tagColor(tag),
@@ -515,75 +372,22 @@ class UploadForm extends ConsumerWidget {
           ],
         ),
         const Gap(NizamioSpacing.space4),
-        if (server) ...[
-          NzButton.secondary(
-            label: d.file?.name ?? l.uiTasksPickFileAction,
-            icon: NzIcons.uploadFile,
-            expand: true,
-            onPressed: onPick,
-          ),
+        NzButton.secondary(
+          label: d.file?.name ?? l.uiTasksPickFileAction,
+          icon: NzIcons.uploadFile,
+          expand: true,
+          onPressed: onPick,
+        ),
+        const Gap(NizamioSpacing.space1),
+        Text(
+          l.uiTasksUploadTypes,
+          style: t.caption.copyWith(color: c.textMuted),
+        ),
+        if (s.showErrors && d.file == null) ...[
           const Gap(NizamioSpacing.space1),
-          Text(
-            l.uiTasksUploadTypes,
-            style: t.caption.copyWith(color: c.textMuted),
-          ),
-          if (s.showErrors && d.file == null) ...[
-            const Gap(NizamioSpacing.space1),
-            TaskFormError(l.uiTasksErrPickFile),
-          ],
-        ] else ...[
-          NzTextField(
-            label: l.uiTasksFileName,
-            initialValue: d.name,
-            onChanged: (v) => ctl.updateUpload(d.copyWith(name: v)),
-          ),
-          if (s.showErrors && d.name.trim().isEmpty) ...[
-            const Gap(NizamioSpacing.space1),
-            TaskFormError(l.uiTasksErrFileName),
-          ],
-          const Gap(NizamioSpacing.space4),
-          _PickBox(title: l.uiTasksPickFile, message: l.uiTasksProtoOnly),
+          TaskFormError(l.uiTasksErrPickFile),
         ],
       ],
-    );
-  }
-}
-
-/// Dosya seçim alanı bilgi kutusu (prototip `.rp-empty` dosya seçim alanı).
-class _PickBox extends StatelessWidget {
-  const _PickBox({required this.title, required this.message});
-
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: c.surfaceRaised,
-        borderRadius: BorderRadius.circular(NizamioRadius.group),
-        border: Border.all(
-          color: c.borderStrong,
-          width: NizamioSize.borderWidth,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(NizamioSpacing.space5),
-        child: Column(
-          spacing: NizamioSpacing.space1,
-          children: [
-            NzIcon(NzIcons.uploadFile, color: c.textMuted),
-            Text(title, textAlign: TextAlign.center, style: t.bodyMd),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: t.caption.copyWith(color: c.textMuted),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

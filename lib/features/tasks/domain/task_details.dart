@@ -36,13 +36,12 @@ final class TaskDetails {
 }
 
 /// Görev ayrıntısının kaynağı (domain portu; gerçekleştirmeler `data/`). Ayrıntı görevin
-/// kendi departmanında okunur (S3). null → kaynak ayrıntı taşımaz (örnek katalog görevi zaten
-/// içerir). [access]: oturumun rolü (tarih talebi yüzünü seçer; null → tarih talebi okunmaz).
+/// kendi departmanında okunur (S3). [access]: oturumun rolü (tarih talebi yüzünü seçer; null →
+/// tarih talebi okunmaz).
 abstract interface class TaskDetailsRepository {
-  Future<TaskDetails?> load(TaskItem task, {TaskAccess? access});
+  Future<TaskDetails> load(TaskItem task, {TaskAccess? access});
 
   /// Görevin YALNIZ kendisini taze okur (`getWorkItem`; alt görev/not/dosya yok) — düzenleme
-  /// formu açılmadan önce (istemci akışları §8, kayıp güncelleme sınırı). null → kaynak tekil
-  /// okuma taşımaz (örnek katalog).
-  Future<TaskItem?> loadItem(TaskItem task);
+  /// formu açılmadan önce (istemci akışları §8, kayıp güncelleme sınırı).
+  Future<TaskItem> loadItem(TaskItem task);
 }

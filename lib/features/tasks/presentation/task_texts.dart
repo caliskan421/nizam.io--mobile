@@ -101,7 +101,6 @@ extension TaskTexts on AppLocalizations {
   String newTaskError(NewTaskError e) => switch (e) {
     NewTaskError.title => uiTasksErrTitle,
     NewTaskError.coordinatorship => uiTasksErrCoord,
-    NewTaskError.assignees => uiTasksErrAssignee,
     NewTaskError.dates => uiTasksErrDatesFull,
   };
 

@@ -94,7 +94,7 @@ class TaskDetailPage extends ConsumerWidget {
     final deleted = ref.watch(provider.select((s) => s.deleted != null));
     final data = catalog.value;
     final task = data?.task(code);
-    // Alt görev, not, dosya ve tarih talebi ayrıntıda okunur (örnek kaynakta işlem yok).
+    // Alt görev, not, dosya ve tarih talebi ayrıntıda okunur.
     final details = ref.watch(taskDetailsProvider(code));
     return NzPage.feed(
       // Tablet sağ bölmesi (görev ayrıntısı: gap 20, başlık -8).
@@ -158,9 +158,6 @@ class TaskDetailPage extends ConsumerWidget {
                     icon: NzIcons.delete,
                     title: '$code ${l.uiTasksDeletedTail}',
                     message: l.uiTasksDeletedFilesKept,
-                    // Geri alma yalnız örnekte (sunucuda silinenler yönetici yüzünde).
-                    actionLabel: actions.canUndoDelete ? l.uiTasksUndo : null,
-                    onAction: actions.canUndoDelete ? actions.undoDelete : null,
                   )
                 : NzEmptyState(title: l.uiTasksNotFound),
           ),

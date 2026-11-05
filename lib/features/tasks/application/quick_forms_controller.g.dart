@@ -8,15 +8,13 @@ part of 'quick_forms_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Yeni görev formunun koordinatörlük seçenekleri: örnek katalogda hepsi; sunucu kataloğunda
-/// yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
+/// Yeni görev formunun koordinatörlük seçenekleri: yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
 /// departmanları, karma rolde yalnız koordinatörlükler; üyelik departmanı listelenmez).
 
 @ProviderFor(newTaskCoordinatorships)
 final newTaskCoordinatorshipsProvider = NewTaskCoordinatorshipsProvider._();
 
-/// Yeni görev formunun koordinatörlük seçenekleri: örnek katalogda hepsi; sunucu kataloğunda
-/// yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
+/// Yeni görev formunun koordinatörlük seçenekleri: yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
 /// departmanları, karma rolde yalnız koordinatörlükler; üyelik departmanı listelenmez).
 
 final class NewTaskCoordinatorshipsProvider
@@ -27,8 +25,7 @@ final class NewTaskCoordinatorshipsProvider
           List<CoordinatorshipRef>
         >
     with $Provider<List<CoordinatorshipRef>> {
-  /// Yeni görev formunun koordinatörlük seçenekleri: örnek katalogda hepsi; sunucu kataloğunda
-  /// yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
+  /// Yeni görev formunun koordinatörlük seçenekleri: yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
   /// departmanları, karma rolde yalnız koordinatörlükler; üyelik departmanı listelenmez).
   NewTaskCoordinatorshipsProvider._()
     : super(
@@ -65,7 +62,7 @@ final class NewTaskCoordinatorshipsProvider
 }
 
 String _$newTaskCoordinatorshipsHash() =>
-    r'13b15bc62f307fc2353df2d0bd0b1465008ebb57';
+    r'5719067f7b2e63e902a48f6db2c7d369376affbf';
 
 @ProviderFor(NewTaskFormController)
 final newTaskFormControllerProvider = NewTaskFormControllerProvider._();
@@ -100,7 +97,7 @@ final class NewTaskFormControllerProvider
 }
 
 String _$newTaskFormControllerHash() =>
-    r'0ffc096fababfc0adcedcbc084bb9aaf069d539a';
+    r'5c6c745a01b367fd1846c1290e7e25ab40179ecc';
 
 abstract class _$NewTaskFormController extends $Notifier<NewTaskForm> {
   NewTaskForm build();

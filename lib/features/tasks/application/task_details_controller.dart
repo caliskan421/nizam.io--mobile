@@ -40,6 +40,5 @@ Future<void> taskDetails(Ref ref, String code) async {
   final details = await ref
       .read(taskDetailsRepositoryProvider)
       .load(task, access: catalog.access);
-  if (details == null) return;
   ref.read(taskCatalogControllerProvider.notifier).applyDetails(code, details);
 }

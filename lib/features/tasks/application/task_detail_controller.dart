@@ -39,10 +39,6 @@ enum WriteKind {
 
   /// Sunucu hatası ([WriteOutcome.error]; metin hata kodundan).
   failed,
-
-  /// Örnek katalog kuralları: açık alt görev / kanıt dosyası yok.
-  blockedBySubtasks,
-  blockedByEvidence,
 }
 
 /// Yazma komutunun sonucu.
@@ -102,7 +98,6 @@ final class TaskEditDraft {
     required this.start,
     required this.due,
     this.evidenceRequired = false,
-    this.membersOpen = false,
   });
 
   final String title;
@@ -112,10 +107,8 @@ final class TaskEditDraft {
   final DateTime start;
   final DateTime due;
   final bool evidenceRequired;
-  final bool membersOpen;
 
   bool get titleMissing => title.trim().isEmpty;
-  bool get assigneesMissing => assignees.isEmpty;
   bool get datesInvalid => due.isBefore(start);
 
   TaskEditDraft copyWith({
@@ -126,7 +119,6 @@ final class TaskEditDraft {
     DateTime? start,
     DateTime? due,
     bool? evidenceRequired,
-    bool? membersOpen,
   }) => TaskEditDraft(
     title: title ?? this.title,
     coordinatorship: coordinatorship ?? this.coordinatorship,
@@ -135,7 +127,6 @@ final class TaskEditDraft {
     start: start ?? this.start,
     due: due ?? this.due,
     evidenceRequired: evidenceRequired ?? this.evidenceRequired,
-    membersOpen: membersOpen ?? this.membersOpen,
   );
 }
 
@@ -176,7 +167,7 @@ final class UploadDraft {
   final EvidenceTag tag;
   final String name;
 
-  /// Sunucuda seçilen yerel dosya (örnekte yok; ad elle yazılır).
+  /// Sistem seçicisinden seçilen dosya.
   final UploadSource? file;
 
   UploadDraft copyWith({
@@ -198,25 +189,20 @@ final class TaskDetailState {
   const TaskDetailState({
     this.tab = TaskDetailTab.summary,
     this.openSubtasks = const {},
-    this.editingSubtask,
     this.deleted,
-    this.deletedIndex = -1,
     this.noteDraft = '',
     this.edit,
     this.dateDraft,
     this.upload,
     this.showErrors = false,
-    this.seq = 1,
     this.busy = false,
   });
 
   final TaskDetailTab tab;
   final Set<String> openSubtasks;
-  final String? editingSubtask;
 
-  /// Silinen görev (geri almak için) ve katalogdaki eski sırası.
+  /// Silinen görev (ekran "silindi" durumunu gösterir).
   final TaskItem? deleted;
-  final int deletedIndex;
   final String noteDraft;
   final TaskEditDraft? edit;
   final DateRequestDraft? dateDraft;
@@ -224,7 +210,6 @@ final class TaskDetailState {
 
   /// Açık formda doğrulama hataları gösterilsin mi (ilk gönderme denemesinden sonra).
   final bool showErrors;
-  final int seq;
 
   /// Sunucu yazması uçuşta: yeni yazma komutu istek göndermez ([WriteKind.busy]).
   final bool busy;
@@ -232,37 +217,29 @@ final class TaskDetailState {
   TaskDetailState copyWith({
     TaskDetailTab? tab,
     Set<String>? openSubtasks,
-    String? Function()? editingSubtask,
     TaskItem? Function()? deleted,
-    int? deletedIndex,
     String? noteDraft,
     TaskEditDraft? Function()? edit,
     DateRequestDraft? Function()? dateDraft,
     UploadDraft? Function()? upload,
     bool? showErrors,
-    int? seq,
     bool? busy,
   }) => TaskDetailState(
     tab: tab ?? this.tab,
     openSubtasks: openSubtasks ?? this.openSubtasks,
-    editingSubtask: editingSubtask == null
-        ? this.editingSubtask
-        : editingSubtask(),
     deleted: deleted == null ? this.deleted : deleted(),
-    deletedIndex: deletedIndex ?? this.deletedIndex,
     noteDraft: noteDraft ?? this.noteDraft,
     edit: edit == null ? this.edit : edit(),
     dateDraft: dateDraft == null ? this.dateDraft : dateDraft(),
     upload: upload == null ? this.upload : upload(),
     showErrors: showErrors ?? this.showErrors,
-    seq: seq ?? this.seq,
     busy: busy ?? this.busy,
   );
 }
 
 /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
 ///
-/// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+/// Yazmalar (P2: durum, not, alt görev) [TaskWriteRepository]'ye gider:
 /// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
 /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
 /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
@@ -270,8 +247,7 @@ final class TaskDetailState {
 /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
 ///
 /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
-/// denetleyicisinde bellekte kalır.
+/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
 @riverpod
 class TaskDetailController extends _$TaskDetailController {
   @override
@@ -283,16 +259,12 @@ class TaskDetailController extends _$TaskDetailController {
       ref.read(taskCatalogControllerProvider.notifier);
   TaskWriteRepository get _writes => ref.read(taskWriteRepositoryProvider);
 
-  /// Katalog sunucudan mı (yazmalar sunucuya gider).
-  bool get _server => _catalog?.access != null;
-
-  void _save(TaskItem t) => _store.replace(t);
-
-  /// Görevdeki işlem bazlı yetkiler (sunum düğme görünürlüğünü buradan okur).
+  /// Görevdeki işlem bazlı yetkiler (sunum düğme görünürlüğünü buradan okur). Görev ya da
+  /// erişim bilinmiyorsa hiçbir eylem açık değil.
   TaskPermissions get permissions {
     final t = _task;
     return t == null
-        ? const TaskPermissions.local()
+        ? const TaskPermissions.none()
         : TaskPermissions.of(_catalog?.access, t);
   }
 
@@ -392,7 +364,6 @@ class TaskDetailController extends _$TaskDetailController {
   }) async {
     final t = _task;
     if (t == null || s == t.status) return WriteOutcome.unchanged;
-    if (!_server) return _setStatusLocal(t, s);
     final perms = permissions;
     final via = perms.statusEndpoint;
     if (via == null || !perms.statusTargets(t.status).contains(s)) {
@@ -415,30 +386,10 @@ class TaskDetailController extends _$TaskDetailController {
     );
   }
 
-  WriteOutcome _setStatusLocal(TaskItem t, TaskStatus s) {
-    if (s == TaskStatus.done && t.subtasks.any((u) => !u.done)) {
-      return const WriteOutcome(WriteKind.blockedBySubtasks);
-    }
-    if (s == TaskStatus.done && t.fileEntries.isEmpty) {
-      return const WriteOutcome(WriteKind.blockedByEvidence);
-    }
-    _save(
-      t.copyWith(
-        status: s,
-        completedAt: () => s == TaskStatus.done ? _catalog!.today : null,
-      ),
-    );
-    return WriteOutcome.done;
-  }
-
   /// Önceliği değiştirir (sunucuda `PATCH` yalnız `priority`; yönetici ya da koordinatör).
   Future<WriteOutcome> setPriority(TaskPriority p) async {
     final t = _task;
     if (t == null || t.priority == p) return WriteOutcome.unchanged;
-    if (!_server) {
-      _save(t.copyWith(priority: p));
-      return WriteOutcome.done;
-    }
     if (!permissions.canManageTask) return WriteOutcome.invalid;
     return _write(
       () => _writes.updateWorkItem(t, WorkItemPatch(priority: p)),
@@ -458,20 +409,6 @@ class TaskDetailController extends _$TaskDetailController {
     final t = _task;
     final r = t?.dateRequest;
     if (t == null || r == null || !r.isPending) return WriteOutcome.invalid;
-    if (!_server) {
-      _save(
-        approve
-            ? t.copyWith(
-                start: r.start,
-                due: r.due,
-                dateRequest: () => r.withState(DateRequestState.approved),
-              )
-            : t.copyWith(
-                dateRequest: () => r.withState(DateRequestState.rejected),
-              ),
-      );
-      return WriteOutcome.done;
-    }
     final id = r.id;
     if (id == null || !permissions.canReviewDate) return WriteOutcome.invalid;
     return _write(
@@ -484,7 +421,7 @@ class TaskDetailController extends _$TaskDetailController {
   Future<WriteOutcome> deleteDateRequest() async {
     final t = _task;
     final r = t?.dateRequest;
-    if (t == null || r == null || !_server) return WriteOutcome.invalid;
+    if (t == null || r == null) return WriteOutcome.invalid;
     final id = r.id;
     if (id == null || !permissions.canDeleteDateRequest(r)) {
       return WriteOutcome.invalid;
@@ -497,7 +434,7 @@ class TaskDetailController extends _$TaskDetailController {
   bool openDateRequest() {
     final t = _task;
     if (t == null || t.hasPendingRequest) return false;
-    if (_server && !permissions.canRequestDate) return false;
+    if (!permissions.canRequestDate) return false;
     state = state.copyWith(
       dateDraft: () => DateRequestDraft(
         start: t.start,
@@ -517,23 +454,6 @@ class TaskDetailController extends _$TaskDetailController {
     final t = _task;
     final d = state.dateDraft;
     if (t == null || d == null || d.datesInvalid) return WriteOutcome.invalid;
-    if (!_server) {
-      final today = _catalog!.today;
-      _save(
-        t.copyWith(
-          dateRequest: () => DateChangeRequest(
-            by: _catalog!.me,
-            at: DateTime(today.year, today.month, today.day, 14, 5),
-            oldDue: t.due,
-            start: d.start,
-            due: d.due,
-            reason: d.reason.trim(),
-          ),
-        ),
-      );
-      state = state.copyWith(dateDraft: () => null);
-      return WriteOutcome.done;
-    }
     if (!permissions.canRequestDate) return WriteOutcome.invalid;
     final reason = d.reason.trim();
     final r = await _write(
@@ -558,17 +478,12 @@ class TaskDetailController extends _$TaskDetailController {
   Future<WriteOutcome> openEdit() async {
     final t = _task;
     if (t == null) return WriteOutcome.invalid;
-    if (!_server) {
-      _openEditFrom(t);
-      return WriteOutcome.done;
-    }
     if (!permissions.canManageTask) return WriteOutcome.invalid;
     if (state.busy) return WriteOutcome.busy;
     state = state.copyWith(busy: true);
     final store = _store;
     try {
       final fresh = await ref.read(taskDetailsRepositoryProvider).loadItem(t);
-      if (fresh == null) return WriteOutcome.invalid;
       store.applyItem(code, fresh);
       final now = ref.mounted ? _task : null;
       if (now == null || !permissions.canManageTask) {
@@ -600,22 +515,6 @@ class TaskDetailController extends _$TaskDetailController {
 
   void updateEdit(TaskEditDraft d) => state = state.copyWith(edit: () => d);
 
-  /// Koordinatörlük değişince yalnız yeni ekipte olan atananlar kalır.
-  void editCoordinatorship(String code) {
-    final d = state.edit;
-    final team = _catalog?.coordinatorship(code)?.team ?? const <String>[];
-    if (d == null) return;
-    updateEdit(
-      d.copyWith(
-        coordinatorship: code,
-        assignees: [
-          for (final a in d.assignees)
-            if (team.contains(a)) a,
-        ],
-      ),
-    );
-  }
-
   void editToggleAssignee(String id) {
     final d = state.edit;
     if (d == null) return;
@@ -644,25 +543,9 @@ class TaskDetailController extends _$TaskDetailController {
     final t = _task;
     final d = state.edit;
     if (t == null || d == null) return WriteOutcome.invalid;
-    final missingAssignee = !_server && d.assigneesMissing;
-    if (d.titleMissing || missingAssignee || d.datesInvalid) {
+    if (d.titleMissing || d.datesInvalid) {
       state = state.copyWith(showErrors: true);
       return WriteOutcome.invalid;
-    }
-    if (!_server) {
-      _save(
-        t.copyWith(
-          title: d.title.trim(),
-          coordinatorship: d.coordinatorship,
-          assignees: d.assignees,
-          priority: d.priority,
-          start: d.start,
-          due: d.due,
-          evidenceRequired: d.evidenceRequired,
-        ),
-      );
-      state = state.copyWith(edit: () => null, showErrors: false);
-      return WriteOutcome.done;
     }
     final perms = permissions;
     if (!perms.canManageTask) return WriteOutcome.invalid;
@@ -723,7 +606,7 @@ class TaskDetailController extends _$TaskDetailController {
   /// Atamasız görevi üstlenir (yalnız kapsam koordinatörü).
   Future<WriteOutcome> claim() async {
     final t = _task;
-    if (t == null || !_server || !permissions.canClaim(t)) {
+    if (t == null || !permissions.canClaim(t)) {
       return WriteOutcome.invalid;
     }
     return _write(() => _writes.claim(t), list: false);
@@ -732,7 +615,7 @@ class TaskDetailController extends _$TaskDetailController {
   /// Kendi atamasını bırakır (koordinatör; tamamlanmış görevde değil).
   Future<WriteOutcome> unclaim() async {
     final t = _task;
-    if (t == null || !_server || !permissions.canUnclaim(t)) {
+    if (t == null || !permissions.canUnclaim(t)) {
       return WriteOutcome.invalid;
     }
     return _write(() => _writes.unclaim(t), list: false);
@@ -743,15 +626,9 @@ class TaskDetailController extends _$TaskDetailController {
   /// Yükleme formunu açar; alt görev önseçilmez (alt görevde kanıt bayrağı yok, ADR-0024).
   /// Sunucuda yalnız yükleme yetkisi varsa (koordinatör ya da atanmış üye; yönetici hayır).
   bool openUpload() {
-    if (_task == null) return false;
-    if (_server && !permissions.canUpload) return false;
+    if (_task == null || !permissions.canUpload) return false;
     state = state.copyWith(
-      upload: () => _server
-          ? const UploadDraft(tag: EvidenceTag.outcome, name: '')
-          : const UploadDraft(
-              tag: EvidenceTag.result,
-              name: 'Saha_fotografi_20261021.jpg',
-            ),
+      upload: () => const UploadDraft(tag: EvidenceTag.outcome, name: ''),
       showErrors: false,
     );
     return true;
@@ -759,7 +636,7 @@ class TaskDetailController extends _$TaskDetailController {
 
   void updateUpload(UploadDraft d) => state = state.copyWith(upload: () => d);
 
-  /// Sistem seçicisinden dosya seçer (sunucu). Seçici yoksa ya da vazgeçilirse false.
+  /// Sistem seçicisinden dosya seçer. Seçici yoksa ya da vazgeçilirse false.
   Future<bool> pickUploadFile() async {
     final picker = ref.read(uploadPickerProvider);
     if (!picker.available) return false;
@@ -772,7 +649,7 @@ class TaskDetailController extends _$TaskDetailController {
     return true;
   }
 
-  /// Dosyayı yükler ve Dosya sekmesine geçer. Sunucuda istek öncesi yerel denetim (istek
+  /// Dosyayı yükler ve Dosya sekmesine geçer. İstek öncesi yerel denetim (istek
   /// gönderilmez, metin yine koddan): dosya seçilmemiş → [WriteKind.invalid]; izinli tür
   /// dışı → `records.content_rejected`; 90 MiB → `records.too_large`; görevde 30 dosya →
   /// `records.too_many_files`. Başarıda yalnız ayrıntı yeniden okunur (liste dosya taşımaz).
@@ -780,47 +657,6 @@ class TaskDetailController extends _$TaskDetailController {
     final t = _task;
     final d = state.upload;
     if (t == null || d == null) return WriteOutcome.invalid;
-    if (_server) return _submitUploadServer(t, d);
-    final name = d.name.trim();
-    if (name.isEmpty) {
-      state = state.copyWith(showErrors: true);
-      return WriteOutcome.invalid;
-    }
-    final lower = name.toLowerCase();
-    final kind = lower.endsWith('.pdf')
-        ? TaskFileKind.pdf
-        : RegExp(r'\.(docx?|xlsx?)$').hasMatch(lower)
-        ? TaskFileKind.doc
-        : TaskFileKind.image;
-    final seq = state.seq + 1;
-    final file = TaskFile(
-      id: 'f$seq',
-      kind: kind,
-      name: name,
-      tag: d.tag,
-      by: _catalog!.me,
-      sizeKb: 120 + (seq * 53) % 700,
-      subtask: d.subtask,
-    );
-    _save(
-      t.copyWith(
-        fileEntries: [file, ...t.fileEntries],
-        subtasks: [
-          for (final u in t.subtasks)
-            u.id == d.subtask ? u.copyWith(evidence: name) : u,
-        ],
-      ),
-    );
-    state = state.copyWith(
-      upload: () => null,
-      showErrors: false,
-      seq: seq,
-      tab: TaskDetailTab.files,
-    );
-    return WriteOutcome.done;
-  }
-
-  Future<WriteOutcome> _submitUploadServer(TaskItem t, UploadDraft d) async {
     if (!permissions.canUpload) return WriteOutcome.invalid;
     final f = d.file;
     if (f == null) {
@@ -851,7 +687,7 @@ class TaskDetailController extends _$TaskDetailController {
   Future<WriteOutcome> renameFile(TaskFile file, String name) async {
     final t = _task;
     final v = name.trim();
-    if (t == null || v.isEmpty || !_server) return WriteOutcome.invalid;
+    if (t == null || v.isEmpty) return WriteOutcome.invalid;
     if (v == file.name) return WriteOutcome.unchanged;
     if (!permissions.canRenameFile(file)) return WriteOutcome.invalid;
     return _write(() => _writes.renameFile(t, file.id, v), list: false);
@@ -860,7 +696,7 @@ class TaskDetailController extends _$TaskDetailController {
   /// Dosyayı siler (yalnız yükleyen, ekip satırı varken).
   Future<WriteOutcome> deleteFile(TaskFile file) async {
     final t = _task;
-    if (t == null || !_server) return WriteOutcome.invalid;
+    if (t == null) return WriteOutcome.invalid;
     if (!permissions.canDeleteFile(file)) return WriteOutcome.invalid;
     return _write(() => _writes.deleteFile(t, file.id), list: false);
   }
@@ -869,7 +705,7 @@ class TaskDetailController extends _$TaskDetailController {
   /// var (çift dokunma = tek istek).
   Future<(WriteOutcome, String?)> downloadFile(TaskFile file) async {
     final t = _task;
-    if (t == null || !_server || !permissions.canDownloadFile) {
+    if (t == null || !permissions.canDownloadFile) {
       return (WriteOutcome.invalid, null);
     }
     if (state.busy) return (WriteOutcome.busy, null);
@@ -894,58 +730,22 @@ class TaskDetailController extends _$TaskDetailController {
 
   // ---- sil, kopyala ---------------------------------------------------------------------
 
-  /// Görevi siler. Sunucuda yumuşak silme (yönetici ya da koordinatör) + katalog yeniden
-  /// okunur; geri alma sunucuda yok (silinen görevler yönetici yüzündedir).
+  /// Görevi siler: yumuşak silme (yönetici ya da koordinatör) + katalog yeniden okunur; geri
+  /// alma yok (silinen görevler yönetici yüzündedir).
   Future<WriteOutcome> delete() async {
     final t = _task;
-    if (t == null) return WriteOutcome.invalid;
-    if (!_server) {
-      final i = _store.remove(code);
-      state = state.copyWith(deleted: () => t, deletedIndex: i);
-      return WriteOutcome.done;
-    }
-    if (!permissions.canManageTask) return WriteOutcome.invalid;
+    if (t == null || !permissions.canManageTask) return WriteOutcome.invalid;
     final r = await _write(() => _writes.deleteWorkItem(t), list: true);
-    if (r.ok && ref.mounted) {
-      state = state.copyWith(deleted: () => t, deletedIndex: -1);
-    }
+    if (r.ok && ref.mounted) state = state.copyWith(deleted: () => t);
     return r;
   }
 
-  /// Örnek katalogda silmeyi geri alır (sunucuda yok).
-  void undoDelete() {
-    final t = state.deleted;
-    if (t == null || _server) return;
-    _store.add(t, at: state.deletedIndex);
-    state = state.copyWith(deleted: () => null, deletedIndex: -1);
-  }
-
-  /// Görevin kopyasını oluşturur; yeni görevin kodunu (sunucuda sunucu kimliği) döner.
-  /// Sunucuda `createWorkItem`: aynı departman, başlık + [suffix], tarihler, öncelik, kanıt
+  /// Görevin kopyasını oluşturur; yeni görevin sunucu kimliğini döner. `createWorkItem`: aynı departman, başlık + [suffix], tarihler, öncelik, kanıt
   /// bayrağı; sunucu tek atanan aldığından ilk atanan (yoksa atamasız). Katalog yeniden okunur.
   Future<(WriteOutcome, String?)> copy(String suffix) async {
     final t = _task;
     final c = _catalog;
     if (t == null || c == null) return (WriteOutcome.invalid, null);
-    if (!_server) {
-      final newCode = c.nextCode(t.coordinatorship);
-      _store.add(
-        TaskItem(
-          code: newCode,
-          title: '${t.title} $suffix',
-          coordinatorship: t.coordinatorship,
-          status: TaskStatus.todo,
-          priority: t.priority,
-          start: t.start,
-          due: t.due,
-          assignees: t.assignees,
-          creator: c.me,
-          createdAt: c.today,
-          overdueDays: c.overdueDaysFor(t.due, done: false),
-        ),
-      );
-      return (WriteOutcome.done, newCode);
-    }
     final dept = t.departmentId;
     final program = t.programId;
     if (dept == null || program == null || !permissions.canManageTask) {
@@ -972,14 +772,6 @@ class TaskDetailController extends _$TaskDetailController {
 
   // ---- alt görevler ---------------------------------------------------------------------
 
-  void _updateSub(String id, Subtask Function(Subtask) f) {
-    final t = _task;
-    if (t == null) return;
-    _save(
-      t.copyWith(subtasks: [for (final u in t.subtasks) u.id == id ? f(u) : u]),
-    );
-  }
-
   Subtask? _sub(String id) =>
       _task?.subtasks.where((s) => s.id == id).firstOrNull;
 
@@ -991,15 +783,10 @@ class TaskDetailController extends _$TaskDetailController {
   }
 
   /// İşaretler/kaldırır. Alt görevde kanıt bayrağı yok (ADR-0024): kanıt kapısı görev
-  /// seviyesindedir ([TaskItem.evidenceRequired]). Sunucuda yetki
-  /// [TaskPermissions.canToggleSubtask].
+  /// seviyesindedir ([TaskItem.evidenceRequired]). Yetki [TaskPermissions.canToggleSubtask].
   Future<WriteOutcome> toggleSubtask(String id) async {
     final u = _sub(id);
     if (u == null) return WriteOutcome.invalid;
-    if (!_server) {
-      _updateSub(id, (s) => s.copyWith(done: !s.done));
-      return WriteOutcome.done;
-    }
     if (!permissions.canToggleSubtask(u)) return WriteOutcome.invalid;
     return _patchSub(id, SubtaskPatch(done: !u.done));
   }
@@ -1010,54 +797,14 @@ class TaskDetailController extends _$TaskDetailController {
     state = state.copyWith(openSubtasks: s);
   }
 
-  /// Örnek katalog: boş alt görev ekler (ilk bitmiş alt görevin önüne), açık ve ad
-  /// düzenlemede. Sunucuda alt görev [createSubtask] ile başlığıyla açılır.
-  void addSubtask() {
-    final t = _task;
-    if (t == null || _server || state.editingSubtask != null) return;
-    final id = 'n${state.seq + 1}';
-    final list = [...t.subtasks];
-    final firstDone = list.indexWhere((u) => u.done);
-    final item = Subtask(id: id, title: '');
-    if (firstDone < 0) {
-      list.add(item);
-    } else {
-      list.insert(firstDone, item);
-    }
-    _save(t.copyWith(subtasks: list));
-    state = state.copyWith(
-      seq: state.seq + 1,
-      openSubtasks: {...state.openSubtasks, id},
-      editingSubtask: () => id,
-    );
-  }
-
-  /// Sunucuda [title] başlıklı alt görev açar (yönetici ya da koordinatör; tamamlanmış
+  /// [title] başlıklı alt görev açar (yönetici ya da koordinatör; tamamlanmış
   /// görevde 409 `work.item_completed`, tavan 50 → 409 `work.subtask_limit_reached`).
   Future<WriteOutcome> createSubtask(String title) async {
     final t = _task;
     final name = title.trim();
     if (t == null || name.isEmpty) return WriteOutcome.invalid;
-    if (!_server) {
-      _save(
-        t.copyWith(
-          subtasks: [
-            ...t.subtasks,
-            Subtask(id: 'n${state.seq + 1}', title: name),
-          ],
-        ),
-      );
-      state = state.copyWith(seq: state.seq + 1);
-      return WriteOutcome.done;
-    }
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
     return _write(() => _writes.createSubtask(t, name), list: false);
-  }
-
-  /// Örnek katalogda satır içi ad düzenlemesi (yazdıkça).
-  void setSubtaskTitle(String id, String title) {
-    if (_server) return;
-    _updateSub(id, (s) => s.copyWith(title: title));
   }
 
   /// Başlığı değiştirir (yönetici ya da koordinatör).
@@ -1066,35 +813,15 @@ class TaskDetailController extends _$TaskDetailController {
     final name = title.trim();
     if (u == null || name.isEmpty) return WriteOutcome.invalid;
     if (name == u.title) return WriteOutcome.unchanged;
-    if (!_server) {
-      _updateSub(id, (s) => s.copyWith(title: name));
-      return WriteOutcome.done;
-    }
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
     return _patchSub(id, SubtaskPatch(title: name));
   }
 
-  /// Ad düzenlemesini bitirir; ad boşsa alt görevi atar (örnek katalog).
-  void finishSubtaskEdit() {
-    final id = state.editingSubtask;
-    if (id == null) return;
-    final t = _task;
-    final u = _sub(id);
-    if (t != null && u != null && u.title.trim().isEmpty) {
-      _save(t.copyWith(subtasks: [...t.subtasks]..remove(u)));
-    }
-    state = state.copyWith(editingSubtask: () => null);
-  }
-
-  /// Atananı değiştirir; null → kaldır. Sunucuda aday yalnız ana görevin atananları.
+  /// Atananı değiştirir; null → kaldır. Aday yalnız ana görevin atananları.
   Future<WriteOutcome> setSubtaskAssignee(String id, String? person) async {
     final u = _sub(id);
     if (u == null) return WriteOutcome.invalid;
     if (u.assignee == person) return WriteOutcome.unchanged;
-    if (!_server) {
-      _updateSub(id, (s) => s.copyWith(assignee: () => person));
-      return WriteOutcome.done;
-    }
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
     return _patchSub(id, SubtaskPatch(assignee: (id: person)));
   }
@@ -1109,32 +836,25 @@ class TaskDetailController extends _$TaskDetailController {
     final u = _sub(id);
     if (u == null) return WriteOutcome.invalid;
     if (u.start == start && u.end == end) return WriteOutcome.unchanged;
-    if (!_server) {
-      _updateSub(id, (s) => s.copyWith(start: () => start, end: () => end));
-      return WriteOutcome.done;
-    }
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
     return _patchSub(id, SubtaskPatch(dates: (start: start, end: end)));
   }
 
-  /// Başlangıç; sonrasındaki bitiş başlangıçtan önceyse başlangıca çekilir. Sunucuda bitiş
-  /// yoksa başlangıç gününe eşitlenir (iki gün birlikte gider).
+  /// Başlangıç; sonrasındaki bitiş başlangıçtan önceyse başlangıca çekilir. Bitiş yoksa
+  /// başlangıç gününe eşitlenir (iki gün birlikte gider).
   Future<WriteOutcome> setSubtaskStart(String id, DateTime? d) {
     final u = _sub(id);
     if (u == null) return Future.value(WriteOutcome.invalid);
     if (d == null) return clearSubtaskDates(id);
-    final end = u.end != null && !u.end!.isBefore(d)
-        ? u.end
-        : (_server || u.end != null ? d : null);
+    final end = u.end != null && !u.end!.isBefore(d) ? u.end : d;
     return _setSubtaskDates(id, d, end);
   }
 
-  /// Bitiş; sunucuda başlangıç yoksa (ya da sonraysa) bitiş gününe eşitlenir.
+  /// Bitiş; başlangıç yoksa (ya da sonraysa) bitiş gününe eşitlenir.
   Future<WriteOutcome> setSubtaskEnd(String id, DateTime? d) {
     final u = _sub(id);
     if (u == null) return Future.value(WriteOutcome.invalid);
     if (d == null) return clearSubtaskDates(id);
-    if (!_server) return _setSubtaskDates(id, u.start, d);
     final start = u.start != null && !u.start!.isAfter(d) ? u.start : d;
     return _setSubtaskDates(id, start, d);
   }
@@ -1147,10 +867,6 @@ class TaskDetailController extends _$TaskDetailController {
     final t = _task;
     final u = _sub(id);
     if (t == null || u == null) return (WriteOutcome.invalid, null);
-    if (!_server) {
-      _save(t.copyWith(subtasks: [...t.subtasks]..remove(u)));
-      return (WriteOutcome.done, u);
-    }
     if (!permissions.canManageSubtasks) return (WriteOutcome.invalid, u);
     return (await _write(() => _writes.deleteSubtask(t, id), list: false), u);
   }
@@ -1165,67 +881,29 @@ class TaskDetailController extends _$TaskDetailController {
     final t = _task;
     final text = state.noteDraft.trim();
     if (t == null || text.isEmpty) return WriteOutcome.invalid;
-    if (!_server) {
-      final today = _catalog!.today;
-      _save(
-        t.copyWith(
-          noteEntries: [
-            ...t.noteEntries,
-            TaskNote(
-              by: _catalog!.me,
-              at: DateTime(today.year, today.month, today.day, 14, 5),
-              text: text,
-            ),
-          ],
-        ),
-      );
-      state = state.copyWith(noteDraft: '');
-      return WriteOutcome.done;
-    }
     if (!permissions.canAddNote) return WriteOutcome.invalid;
     final r = await _write(() => _writes.addNote(t, text), list: false);
     if (r.ok && ref.mounted) state = state.copyWith(noteDraft: '');
     return r;
   }
 
-  /// Notu [text] ile değiştirir (yalnız yazarı; yalnız sunucu notu — örnekte not kimliksiz).
+  /// Notu [text] ile değiştirir (yalnız yazarı).
   Future<WriteOutcome> editNote(TaskNote note, String text) async {
     final t = _task;
     final v = text.trim();
     final id = note.id;
-    if (t == null || v.isEmpty || id == null || !_server) {
-      return WriteOutcome.invalid;
-    }
+    if (t == null || v.isEmpty || id == null) return WriteOutcome.invalid;
     if (v == note.text) return WriteOutcome.unchanged;
     if (!permissions.canEditNote(note)) return WriteOutcome.invalid;
     return _write(() => _writes.updateNote(t, id, v), list: false);
   }
 
-  /// Notu siler (yalnız yazarı; yalnız sunucu notu).
+  /// Notu siler (yalnız yazarı).
   Future<WriteOutcome> deleteNote(TaskNote note) async {
     final t = _task;
     final id = note.id;
-    if (t == null || id == null || !_server) return WriteOutcome.invalid;
+    if (t == null || id == null) return WriteOutcome.invalid;
     if (!permissions.canEditNote(note)) return WriteOutcome.invalid;
     return _write(() => _writes.deleteNote(t, id), list: false);
-  }
-
-  /// Sunucuda karşılığı yok (backend adayı B-17): sunucu notunda yerel sahte yazma yapılmaz.
-  bool addNoteToMemory(int index) {
-    final t = _task;
-    if (t == null || _server || index >= t.noteEntries.length) return false;
-    final n = t.noteEntries[index];
-    if (n.inMemory) return false;
-    _save(
-      t.copyWith(
-        noteEntries: [
-          for (var i = 0; i < t.noteEntries.length; i++)
-            i == index
-                ? TaskNote(by: n.by, at: n.at, text: n.text, inMemory: true)
-                : t.noteEntries[i],
-        ],
-      ),
-    );
-    return true;
   }
 }

@@ -45,12 +45,10 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
     final coord = f.coordinatorship == null
         ? null
         : catalog?.coordinatorship(f.coordinatorship!);
-    // Sunucu katalogu: koordinatörlük = departman; adaylar departman ekibinden (tek atanan).
-    final server = catalog?.access != null;
-    // Ekip (`listMembers`) yalnız görev açabilen hesapta okunur: yetkisizde istek yok.
-    final teamOpen =
-        server && coord != null && ref.watch(canCreateTaskProvider);
-    // Seçili atananın adı: sunucuda departman ekibinden (`listMembers`, seçicinin kaynağı),
+    // Koordinatörlük = departman; adaylar departman ekibinden (tek atanan). Ekip
+    // (`listMembers`) yalnız görev açabilen hesapta okunur: yetkisizde istek yok.
+    final teamOpen = coord != null && ref.watch(canCreateTaskProvider);
+    // Seçili atananın adı: departman ekibinden (`listMembers`, seçicinin kaynağı),
     // yoksa katalogdaki addan; bilinmiyorsa nötr etiket.
     final team = teamOpen
         ? ref.watch(taskTeamProvider(coord.code)).value

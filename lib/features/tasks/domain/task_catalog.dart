@@ -25,7 +25,7 @@ enum TaskPriority {
   medium,
   high,
 
-  /// Sunucuda var (`acil`); örnek veride ve ARB'de etiketi yok — entegrasyonda karar.
+  /// Sunucuda var (`acil`); ARB'de etiketi yok — entegrasyonda karar.
   urgent,
   unknown;
 
@@ -58,7 +58,7 @@ final class CoordinatorshipRef {
     this.shortCode,
   });
 
-  /// Anahtar: örnek veride kısa kod (`ALT`), sunucuda `department_id` (kullanıcıya gösterilmez).
+  /// Anahtar: `department_id` (kullanıcıya gösterilmez; ekranda [label]).
   final String code;
   final String name;
 
@@ -66,7 +66,7 @@ final class CoordinatorshipRef {
   final String? shortCode;
 
   /// Ekranda gösterilen kısa etiket: departman kodu, yoksa ad ([TaskDepartment.label] ile aynı
-  /// kural). Örnek veride kısa kod anahtarın kendisidir.
+  /// kural).
   String get label {
     final c = shortCode;
     return c == null || c.isEmpty ? name : c;
@@ -104,10 +104,10 @@ final class Subtask {
   final bool done;
   final String? assignee;
 
-  /// Kapatan kişi kimliği (`done_by_account_id`); açıkta ya da örnek veride null.
+  /// Kapatan kişi kimliği (`done_by_account_id`); açıkta null.
   final String? doneBy;
 
-  /// Oluşturan kişi kimliği (`created_by_account_id`); örnek veride null.
+  /// Oluşturan kişi kimliği (`created_by_account_id`).
   final String? createdBy;
   final DateTime? start;
   final DateTime? end;
@@ -166,10 +166,10 @@ final class DateChangeRequest {
     this.state = DateRequestState.pending,
   });
 
-  /// Talep kimliği (`request_id`; inceleme ve silme bununla yapılır). Örnek veride yok.
+  /// Talep kimliği (`request_id`; inceleme ve silme bununla yapılır).
   final String? id;
 
-  /// Talebin görevi (`work_item_id`). Örnek veride yok (görev zaten bağlam).
+  /// Talebin görevi (`work_item_id`).
   final String? workItemId;
 
   /// Talep eden kişi kimliği. Sunucuda yok — entegrasyonda karar (backend adayı B-08).
@@ -178,7 +178,7 @@ final class DateChangeRequest {
   /// Talep anı. Sunucuda yok — entegrasyonda karar (backend adayı B-08).
   final DateTime? at;
 
-  /// Talep anındaki başlangıç (`old_start_on`). Örnek veride yok.
+  /// Talep anındaki başlangıç (`old_start_on`).
   final DateTime? oldStart;
   final DateTime oldDue;
   final DateTime start;
@@ -222,9 +222,6 @@ enum EvidenceTag {
   output,
   outcome,
   unknown;
-
-  /// Yerel yükleme formunda seçtirilen prototip etiketleri.
-  static const prototype = [site, result, status];
 }
 
 /// Görevin kanıt dosyası (arşivde görev klasörüne kaydedilir).
@@ -265,13 +262,12 @@ final class TaskNote {
     required this.at,
     required this.text,
     this.updatedAt,
-    this.inMemory = false,
   });
 
-  /// Not kimliği (düzenleme/silme bununla). Örnek veride yok.
+  /// Not kimliği (düzenleme/silme bununla).
   final String? id;
 
-  /// Notun görevi. Örnek veride yok.
+  /// Notun görevi.
   final String? workItemId;
 
   /// Yazar kişi kimliği.
@@ -279,12 +275,8 @@ final class TaskNote {
   final DateTime at;
   final String text;
 
-  /// Son düzenleme anı. Örnek veride yok.
+  /// Son düzenleme anı.
   final DateTime? updatedAt;
-
-  /// Kurumsal hafızaya deneyim olarak eklendi mi. Sunucuda yok — entegrasyonda karar
-  /// (backend adayı B-17).
-  final bool inMemory;
 }
 
 /// Sunucunun hesapladığı gecikme bayrakları (`WorkItem` düz alanları ve `GanttTask.lateness`;
@@ -369,7 +361,7 @@ final class TaskDependency {
   int get hashCode => Object.hash(id, workItemId, dependsOnId, crossDepartment);
 }
 
-/// Görev. Sayılar ve [overdueDays] sunucunun hesapladığı değerlerdir (örnek kaynakta sabittir).
+/// Görev. Sayılar ve [overdueDays] sunucunun hesapladığı değerlerdir.
 ///
 /// Görev kataloğunda sunucu kaynağı `WorkItem`'dır (`GET /v1/work-items`): `work_item_id` →
 /// [id] (ve [code]), `department_id` → [departmentId] (ve [coordinatorship]), `program_id` →
@@ -411,30 +403,28 @@ final class TaskItem {
     this.subtaskCounts,
   }) : id = id ?? code;
 
-  /// Görev kodu (`ALT-7`); rota kimliği. Sunucuda insan okunur görev anahtarı yok (backend
-  /// adayı B-03): sunucudan eşlenen görevde [id] ile aynıdır.
+  /// Rota kimliği. Sunucuda insan okunur görev anahtarı yok (backend adayı B-03): [id]
+  /// (`work_item_id`) ile aynıdır; kullanıcıya [displayCode] gösterilir.
   final String code;
 
-  /// Sunucu kimliği (`work_item_id`); örnek veride verilmezse [code].
+  /// Sunucu kimliği (`work_item_id`); verilmezse [code].
   final String id;
 
-  /// Ekranda gösterilen kısa anahtar; null → [code]. Sunucu kaynağında departman kodu
-  /// (`listProgramDepartments` `code`), kod yoksa departmanın programdaki adı: sunucu kimliği
-  /// kullanıcıya gösterilmez.
+  /// Ekranda gösterilen kısa anahtar: departman kodu (`listProgramDepartments` `code`), kod
+  /// yoksa departmanın programdaki adı; sunucu kimliği kullanıcıya gösterilmez. null → [code].
   final String? shortCode;
 
-  /// Ekranda gösterilen görev anahtarı (örnekte `ALT-7`, sunucuda departman kodu).
+  /// Ekranda gösterilen görev anahtarı (departman etiketi; yoksa [code]).
   String get displayCode => shortCode ?? code;
   final String title;
 
-  /// Koordinatörlük anahtarı: örnek veride kısa kod, sunucudan eşlenen görevde
-  /// `department_id` (bkz. [departmentId]).
+  /// Koordinatörlük anahtarı: `department_id` (bkz. [departmentId]).
   final String coordinatorship;
 
-  /// Departman kimliği (`department_id`). Örnek veride yok.
+  /// Departman kimliği (`department_id`).
   final String? departmentId;
 
-  /// Program kimliği (`program_id`). Örnek veride yok.
+  /// Program kimliği (`program_id`).
   final String? programId;
   final TaskStatus status;
   final TaskPriority priority;
@@ -459,14 +449,14 @@ final class TaskItem {
   final DateTime? completedAt;
 
   /// Açıklama. Listede yok; tekil okumada (`getWorkItem` → `WorkItemDetail.description`)
-  /// dolar. null → okunmadı (örnek veride ya da ayrıntı yüklenmeden).
+  /// dolar. null → ayrıntı henüz okunmadı.
   final String? description;
 
-  /// Sunucunun gecikme bayrakları; örnek veride yok ([overdueDays] kullanılır).
+  /// Sunucunun gecikme bayrakları.
   final TaskLateness? lateness;
 
-  /// Kanıt dosyası sayısı — YALNIZ örnek kaynağın dosya üreticisi. Sunucu listesi dosya
-  /// sayısı taşımaz (F56 M-4) ve listede gösterilmez; ayrıntıda [fileEntries] uzunluğu.
+  /// Kanıt dosyası sayısı. Sunucu listesi dosya sayısı taşımaz (F56 M-4) ve listede
+  /// gösterilmez; ayrıntıda [fileEntries] uzunluğu.
   final int files;
 
   /// Not sayısı.
@@ -492,7 +482,7 @@ final class TaskItem {
   final bool evidenceRequired;
 
   /// Sunucunun alt görev sayıları (`subtask_counts`: toplam, biten); ayrıntı yüklenmeden
-  /// listede ilerleme için. null → kaynak taşımaz (örnek veri; [subtasks] sayılır).
+  /// listede ilerleme için. null → kaynak taşımaz ([subtasks] sayılır).
   final ({int total, int done})? subtaskCounts;
 
   bool get isOverdue => overdueDays > 0;
@@ -632,7 +622,7 @@ final class TaskCatalog {
   final List<Person> people;
   final List<CoordinatorshipRef> coordinatorships;
 
-  /// Oturumdaki hesabın görev erişimi (rol türetme); örnek kaynakta null.
+  /// Oturumdaki hesabın görev erişimi (rol türetme); null → hiçbir eylem açık değil.
   final TaskAccess? access;
 
   /// Görevler ekranı görünümünün sunucu departman süzgeci (`department_id`; [filtered]).
@@ -647,7 +637,7 @@ final class TaskCatalog {
   /// Liste sayfa tavanında kesildi (sunucuda daha fazla görev var); arayüz uyarı gösterir.
   final bool truncated;
 
-  /// Departman süzgecinin seçenekleri (sunucu kaynağı; örnekte boş). Şirket yöneticisinde
+  /// Departman süzgecinin seçenekleri. Şirket yöneticisinde
   /// `listProgramDepartments`, diğerlerinde `/v1/me/departments`'ın bu programdaki satırları
   /// (istemci akışları §2).
   final List<TaskDepartment> departments;
@@ -738,28 +728,6 @@ final class TaskCatalog {
           departmentsTruncated: departmentsTruncated,
           names: [...names, ...more],
         );
-
-  /// Koordinatörlükte sıradaki görev kodu (`ALT-14` → `ALT-15`).
-  String nextCode(String coordinatorship) {
-    var max = 0;
-    for (final t in tasks) {
-      if (t.coordinatorship != coordinatorship) continue;
-      final n = int.tryParse(t.code.split('-').last) ?? 0;
-      if (n > max) max = n;
-    }
-    return '$coordinatorship-${max + 1}';
-  }
-
-  /// [due]'nin bugüne göre gecikme günü (tamamlanmış görevde 0).
-  int overdueDaysFor(DateTime due, {required bool done}) {
-    if (done) return 0;
-    final d = DateTime.utc(
-      today.year,
-      today.month,
-      today.day,
-    ).difference(DateTime.utc(due.year, due.month, due.day)).inDays;
-    return d > 0 ? d : 0;
-  }
 }
 
 /// Görev kataloğunun kaynağı (domain portu; gerçekleştirmeler `data/`).

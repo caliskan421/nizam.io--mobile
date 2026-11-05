@@ -417,7 +417,7 @@ class _FilterChip extends StatelessWidget {
 /// Liste başlığındaki sıralama menüsü (prototip `.rp-pop`): seçili tarihli ölçüte yeniden
 /// dokunmak yönü çevirir (menü açık kalır); başka ölçüt seçmek menüyü kapatır.
 /// Grup başlığının kısa kodu: sunucu kataloğunda grup anahtarı departman kimliğidir, gösterilen
-/// departmanın kodudur (yoksa adı, [TaskDepartment.label]); örnek katalogda anahtar zaten koddur.
+/// departmanın kodudur (yoksa adı, [TaskDepartment.label]).
 String _groupCode(TaskCatalog catalog, String key) {
   for (final d in catalog.departments) {
     if (d.id == key) return d.label;

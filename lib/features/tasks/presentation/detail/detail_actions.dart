@@ -59,16 +59,13 @@ class TaskDetailActions {
   /// Kanıt yükle (koordinatör ya da atanmış üye; yöneticilik reddeder).
   bool get canUpload => _perms.canUpload;
 
-  /// Silmeyi geri al yalnız örnekte.
-  bool get canUndoDelete => _perms.local;
-
   /// Durum seçicisi açılabilir mi (aktörün geçerli durumdan en az bir hedefi var).
   bool get canChangeStatus {
     final t = _task;
     return t != null && _ctl.permissions.statusTargets(t.status).isNotEmpty;
   }
 
-  /// Durum seçici: geçerli durum + aktörün matristeki hedefleri (örnekte her durum).
+  /// Durum seçici: geçerli durum + aktörün matristeki hedefleri.
   void openStatus() {
     final t = _task;
     if (t == null) return;
@@ -125,13 +122,6 @@ class TaskDetailActions {
         if (yes && context.mounted) {
           await _setStatus(s, reason: reason, closeSubtasks: true);
         }
-      case WriteKind.blockedBySubtasks:
-        _say(
-          '${l.uiTasksTSubsBlock} · ${t.subtasksDone}/${t.subtasks.length} '
-          '${l.uiTasksTFinishedLc}',
-        );
-      case WriteKind.blockedByEvidence:
-        _say(l.uiTasksTEvidenceBlock);
       case WriteKind.done:
         _say('$key · ${l.statusLabel(s)}');
       case _:
@@ -599,22 +589,13 @@ class TaskDetailActions {
     );
   }
 
-  void undoDelete() {
-    _ctl.undoDelete();
-    _say('$code ${context.l10n.uiTasksTRestoredTail}');
-  }
-
   // ---- alt görev, not ---------------------------------------------------------------------
 
   Future<void> toggleSubtask(String id) async =>
       _report(await _ctl.toggleSubtask(id));
 
-  /// Alt görev ekle: örnek katalogda satır içi; sunucuda başlık alt sayfası → oluştur.
+  /// Alt görev ekle: başlık alt sayfası → oluştur.
   Future<void> addSubtask() async {
-    if (_ctl.permissions.local) {
-      _ctl.addSubtask();
-      return;
-    }
     final l = context.l10n;
     final title = await _askText(
       title: l.uiTasksSubAdd,
@@ -698,10 +679,6 @@ class TaskDetailActions {
     if (!yes || !context.mounted) return;
     final r = await _ctl.deleteNote(note);
     if (context.mounted) _report(r, done: l.uiTasksTNoteDeleted);
-  }
-
-  void addNoteToMemory(int i) {
-    if (_ctl.addNoteToMemory(i)) _say(context.l10n.uiTasksTNoteMemory);
   }
 }
 

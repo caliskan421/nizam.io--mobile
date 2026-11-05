@@ -20,7 +20,7 @@ DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 /// Yeni görev formunda yerinde açık satır.
 enum NewTaskPane { coordinatorship, assignees, dates }
 
-enum NewTaskError { title, coordinatorship, assignees, dates }
+enum NewTaskError { title, coordinatorship, dates }
 
 @immutable
 final class NewTaskForm {
@@ -103,17 +103,15 @@ final class NewTaskForm {
   );
 }
 
-/// Yeni görev formunun koordinatörlük seçenekleri: örnek katalogda hepsi; sunucu kataloğunda
-/// yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
+/// Yeni görev formunun koordinatörlük seçenekleri: yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
 /// departmanları, karma rolde yalnız koordinatörlükler; üyelik departmanı listelenmez).
 @riverpod
 List<CoordinatorshipRef> newTaskCoordinatorships(Ref ref) {
   final catalog = ref.watch(taskCatalogControllerProvider).value;
   if (catalog == null) return const [];
   final access = catalog.access;
-  if (access == null) return catalog.coordinatorships;
   final program = ref.watch(scopeStateProvider).programId;
-  if (program == null) return const [];
+  if (access == null || program == null) return const [];
   return [
     for (final c in catalog.coordinatorships)
       if (access.canCreateIn(program, c.code)) c,
@@ -128,15 +126,15 @@ class NewTaskFormController extends _$NewTaskFormController {
   @override
   NewTaskForm build() => _initial();
 
-  /// Boş taslak; prototip `tk` ilk durumu gibi ilk koordinatörlük (ALT) seçili açılır.
+  /// Boş taslak; açılabilir ilk koordinatörlük seçili açılır.
   NewTaskForm _initial() {
     final today = _today();
     return NewTaskForm(
       start: today,
       end: today.add(const Duration(days: 14)),
       month: DateTime(today.year, today.month),
-      // Sunucu varsayılanı açık (WORK-K75); örnek prototipte kapalı.
-      evidenceRequired: _server,
+      // Sunucu varsayılanı açık (WORK-K75).
+      evidenceRequired: true,
       coordinatorship: _defaultCoordinatorship(),
     );
   }
@@ -145,9 +143,6 @@ class NewTaskFormController extends _$NewTaskFormController {
   /// kataloğunda yalnız görev açılabilen departmanlar — üyelik departmanı varsayılan olmaz).
   String? _defaultCoordinatorship() =>
       ref.read(newTaskCoordinatorshipsProvider).firstOrNull?.code;
-
-  bool get _server =>
-      ref.read(taskCatalogControllerProvider).value?.access != null;
 
   DateTime _today() => _day(
     ref.read(taskCatalogControllerProvider).value?.today ?? DateTime.now(),
@@ -162,10 +157,8 @@ class NewTaskFormController extends _$NewTaskFormController {
   void prepare({String? coordinatorship, bool reset = true, String? title}) {
     var f = _cancelPick(state);
     if (title != null) f = f.copyWith(title: title);
-    // Sunucu kataloğunda hedefsiz sıfırlama (görev listesi) hesaplanan açılabilir
-    // varsayılana düşer; örnek katalogda seçilmemiş kalır (prototip).
-    final target =
-        coordinatorship ?? (_server ? _defaultCoordinatorship() : null);
+    // Hedefsiz sıfırlama (görev listesi) hesaplanan açılabilir varsayılana düşer.
+    final target = coordinatorship ?? _defaultCoordinatorship();
     state = reset
         ? f.copyWith(
             coordinatorship: () => target,
@@ -209,16 +202,14 @@ class NewTaskFormController extends _$NewTaskFormController {
     error: () => null,
   );
 
-  /// Atanan seçimi; sunucuda TEK atanan (`assignee_account_id`): seçim yer değiştirir.
+  /// Atanan seçimi; TEK atanan (`assignee_account_id`): seçim yer değiştirir.
   void toggleAssignee(String id) => state = state.copyWith(
     assignees: state.assignees.contains(id)
         ? [
             for (final a in state.assignees)
               if (a != id) a,
           ]
-        : _server
-        ? [id]
-        : [...state.assignees, id],
+        : [id],
     error: () => null,
   );
 
@@ -262,31 +253,15 @@ class NewTaskFormController extends _$NewTaskFormController {
   /// Doğrular ve görevi oluşturur; hata varsa [NewTaskForm.error] / [NewTaskForm.failure]
   /// ile null döner.
   ///
-  /// Sunucuda `createWorkItem`: koordinatörlük = departman (isteğin açık departmanı), tek
+  /// `createWorkItem`: koordinatörlük = departman (isteğin açık departmanı), tek
   /// atanan (boş → atamasız görev), tarihler, öncelik, kanıt bayrağı. Kod yerelde üretilmez;
   /// sunucunun verdiği kimlik kullanılır ve katalog yeniden okunur (iyimser ekleme yok).
   /// Yetki: kapsamda yönetici ya da koordinatör ([TaskAccess.canCreateIn]); değilse istek
   /// gönderilmez (`work.not_authorized`). Uçuştaki istekte ikinci çağrı null döner.
   Future<CreatedTask?> submit() async {
-    if (_server) return _submitServer();
-    return _submitLocal();
-  }
-
-  NewTaskError? _validate(NewTaskForm f, {required bool server}) =>
-      f.title.trim().isEmpty
-      ? NewTaskError.title
-      : f.coordinatorship == null
-      ? NewTaskError.coordinatorship
-      : !server && f.assignees.isEmpty
-      ? NewTaskError.assignees
-      : f.end.isBefore(f.start)
-      ? NewTaskError.dates
-      : null;
-
-  Future<CreatedTask?> _submitServer() async {
     if (state.busy) return null;
     final f = _cancelPick(state);
-    final err = _validate(f, server: true);
+    final err = _validate(f);
     if (err != null) {
       state = state.copyWith(error: () => err, failure: () => null);
       return null;
@@ -342,50 +317,18 @@ class NewTaskFormController extends _$NewTaskFormController {
     }
   }
 
+  NewTaskError? _validate(NewTaskForm f) => f.title.trim().isEmpty
+      ? NewTaskError.title
+      : f.coordinatorship == null
+      ? NewTaskError.coordinatorship
+      : f.end.isBefore(f.start)
+      ? NewTaskError.dates
+      : null;
+
   static bool _rereadAfterCreate(ApiError e) =>
       e.status == 409 ||
       e.status == 403 ||
       const {'work.not_authorized', 'platform.conflict_retry'}.contains(e.code);
-
-  CreatedTask? _submitLocal() {
-    final f = _cancelPick(state);
-    final err = f.title.trim().isEmpty
-        ? NewTaskError.title
-        : f.coordinatorship == null
-        ? NewTaskError.coordinatorship
-        : f.assignees.isEmpty
-        ? NewTaskError.assignees
-        : f.end.isBefore(f.start)
-        ? NewTaskError.dates
-        : null;
-    if (err != null) {
-      state = state.copyWith(error: () => err);
-      return null;
-    }
-    final c = ref.read(taskCatalogControllerProvider).value;
-    final coord = f.coordinatorship!;
-    final code = c?.nextCode(coord) ?? '$coord-1';
-    ref
-        .read(taskCatalogControllerProvider.notifier)
-        .add(
-          TaskItem(
-            code: code,
-            title: f.title.trim(),
-            coordinatorship: coord,
-            status: TaskStatus.todo,
-            priority: f.priority,
-            start: f.start,
-            due: f.end,
-            assignees: f.assignees,
-            creator: c?.me ?? '',
-            createdAt: _today(),
-            overdueDays: c?.overdueDaysFor(f.end, done: false) ?? 0,
-            evidenceRequired: f.evidenceRequired,
-          ),
-        );
-    state = _initial();
-    return (code: code, notified: f.assignees.length);
-  }
 }
 
 // ================================================================================= toplantı

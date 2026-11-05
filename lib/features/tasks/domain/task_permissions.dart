@@ -60,9 +60,8 @@ bool requiresRevertReason(TaskStatus from, TaskStatus to) =>
 /// etiketinden değil, ayrı olgulardan türetilir: şirket yöneticisi mi ([admin]), görevin
 /// (program, departman) kapsamında koordinatör mü ([coordinator]) / üye satırı var mı
 /// ([member]), göreve atanmış mı ([assigned]). Yazar olgusu ([canEditNote]) nota göre okunur.
-/// Gizleme güvenlik değildir: sunucu her istekte yetkiyi yeniden denetler.
-///
-/// Örnek (yerel) katalogda [TaskPermissions.local]: prototip davranışı, her eylem açık.
+/// Gizleme güvenlik değildir: sunucu her istekte yetkiyi yeniden denetler. Erişim bilinmiyorsa
+/// ([TaskPermissions.none]) hiçbir eylem açık değildir (fail-closed).
 @immutable
 final class TaskPermissions {
   const TaskPermissions._({
@@ -71,23 +70,21 @@ final class TaskPermissions {
     required this.coordinator,
     required this.member,
     required this.assigned,
-    required this.local,
   });
 
-  /// Örnek katalog: bütün eylemler yerel, kısıt yok.
-  const TaskPermissions.local()
+  /// Erişim bilinmiyor (katalog/görev yok): hiçbir eylem açık değil.
+  const TaskPermissions.none()
     : this._(
         accountId: '',
         admin: false,
         coordinator: false,
         member: false,
         assigned: false,
-        local: true,
       );
 
-  /// [access] (sunucu katalogu) ve [task] olgularından; [access] null → [TaskPermissions.local].
+  /// [access] (sunucu katalogu) ve [task] olgularından; [access] null → [TaskPermissions.none].
   factory TaskPermissions.of(TaskAccess? access, TaskItem task) {
-    if (access == null) return const TaskPermissions.local();
+    if (access == null) return const TaskPermissions.none();
     final program = task.programId;
     final department = task.departmentId;
     final role = program == null || department == null || department.isEmpty
@@ -99,7 +96,6 @@ final class TaskPermissions {
       coordinator: role == SeatRole.coordinator,
       member: role == SeatRole.member,
       assigned: task.assignees.contains(access.accountId),
-      local: false,
     );
   }
 
@@ -116,9 +112,6 @@ final class TaskPermissions {
 
   /// Göreve atanmış.
   final bool assigned;
-
-  /// Örnek katalog (sunucuya yazılmaz).
-  final bool local;
 
   /// Kapsamda herhangi bir ekip satırı.
   bool get _seat => coordinator || member;
@@ -140,37 +133,29 @@ final class TaskPermissions {
       ? StatusEndpoint.ownStatus
       : null;
 
-  /// [from] durumundan gösterilecek hedefler (matristen; örnekte her tanımlı durum).
+  /// [from] durumundan gösterilecek hedefler (matristen).
   List<TaskStatus> statusTargets(TaskStatus from) {
-    if (local) {
-      return [
-        for (final s in TaskStatus.known)
-          if (s != from) s,
-      ];
-    }
     final a = actor;
     return a == null ? const [] : statusMatrix[a]?[from] ?? const [];
   }
 
   /// Not okuma: yönetici, koordinatör ya da atanmış üye.
-  bool get canReadNotes =>
-      local || admin || coordinator || (member && assigned);
+  bool get canReadNotes => admin || coordinator || (member && assigned);
 
   /// Not yazma: koordinatör ya da atanmış üye; yöneticilik baskındır (reddeder).
-  bool get canAddNote =>
-      local || (!admin && (coordinator || (member && assigned)));
+  bool get canAddNote => (!admin && (coordinator || (member && assigned)));
 
   /// Notu düzenleme/silme: yalnız yazarı, kapsamda ekip satırı varken.
   bool canEditNote(TaskNote note) =>
-      local || (note.id != null && note.by == accountId && _seat);
+      (note.id != null && note.by == accountId && _seat);
 
   /// Alt görev oluştur/sil, başlık/atanan/tarih düzenle: yönetici ya da koordinatör.
-  bool get canManageSubtasks => local || admin || coordinator;
+  bool get canManageSubtasks => admin || coordinator;
 
   /// Alt görevi kapat/aç: koordinatör her alt görevde; ana göreve atanmış üye alt görev
   /// atamasızsa ya da kendisine atanmışsa. Yönetici tek başına işaretleyemez.
   bool canToggleSubtask(Subtask sub) {
-    if (local || coordinator) return true;
+    if (coordinator) return true;
     if (!member || !assigned) return false;
     return sub.assignee == null || sub.assignee == accountId;
   }
@@ -183,40 +168,38 @@ final class TaskPermissions {
 
   /// Görevi düzenle (kanıt bayrağı, öncelik, tarihler dahil), kopyala, sil: yönetici ya da
   /// koordinatör (WORK-K27).
-  bool get canManageTask => local || admin || coordinator;
+  bool get canManageTask => admin || coordinator;
 
   /// Atama ekle/kaldır: YALNIZ kapsam koordinatörü (WORK-K10; yönetici tek başına hayır).
-  bool get canAssign => local || coordinator;
+  bool get canAssign => coordinator;
 
   /// Üstlen: koordinatör, atamasız görevde (WORK-K29; atamalı görevde 409).
-  bool canClaim(TaskItem task) =>
-      !local && coordinator && task.assignees.isEmpty;
+  bool canClaim(TaskItem task) => coordinator && task.assignees.isEmpty;
 
   /// Bırak: koordinatörün kendi aktif ataması; tamamlanmış görevde hayır (WORK-K31).
   bool canUnclaim(TaskItem task) =>
-      !local && coordinator && assigned && task.status != TaskStatus.done;
+      coordinator && assigned && task.status != TaskStatus.done;
 
   /// Dosya yükle: koordinatör ya da atanmış üye; yöneticilik baskındır (reddeder).
-  bool get canUpload =>
-      local || (!admin && (coordinator || (member && assigned)));
+  bool get canUpload => (!admin && (coordinator || (member && assigned)));
 
   /// Dosya adını değiştir: yönetici, koordinatör ya da kapsamda ekip satırı olan yükleyen.
   bool canRenameFile(TaskFile file) =>
-      local || admin || coordinator || (file.by == accountId && _seat);
+      admin || coordinator || (file.by == accountId && _seat);
 
   /// Dosya sil: YALNIZ yükleyen, kapsamda ekip satırı varken (yönetici/koordinatör hayır).
-  bool canDeleteFile(TaskFile file) => local || (file.by == accountId && _seat);
+  bool canDeleteFile(TaskFile file) => (file.by == accountId && _seat);
 
-  /// Dosya indir: görevi okuyabilen (yönetici, koordinatör, atanmış üye); örnekte dosya yok.
-  bool get canDownloadFile => !local && (admin || coordinator || assigned);
+  /// Dosya indir: görevi okuyabilen (yönetici, koordinatör, atanmış üye).
+  bool get canDownloadFile => (admin || coordinator || assigned);
 
   /// Tarih talebi aç: YALNIZ kapsam koordinatörü (yönetici + koordinatör açar; üye hayır).
-  bool get canRequestDate => local || coordinator;
+  bool get canRequestDate => coordinator;
 
   /// Tarih talebini onayla/reddet: YALNIZ şirket yöneticisi.
-  bool get canReviewDate => local || admin;
+  bool get canReviewDate => admin;
 
   /// İncelenmiş tarih talebini sil: şirket yöneticisi (bekleyen silinemez).
   bool canDeleteDateRequest(DateChangeRequest r) =>
-      !local && admin && r.id != null && !r.isPending;
+      admin && r.id != null && !r.isPending;
 }

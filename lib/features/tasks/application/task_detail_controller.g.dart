@@ -10,7 +10,7 @@ part of 'task_detail_controller.dart';
 // ignore_for_file: type=lint, type=warning
 /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
 ///
-/// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+/// Yazmalar (P2: durum, not, alt görev) [TaskWriteRepository]'ye gider:
 /// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
 /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
 /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
@@ -18,15 +18,14 @@ part of 'task_detail_controller.dart';
 /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
 ///
 /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
-/// denetleyicisinde bellekte kalır.
+/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
 
 @ProviderFor(TaskDetailController)
 final taskDetailControllerProvider = TaskDetailControllerFamily._();
 
 /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
 ///
-/// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+/// Yazmalar (P2: durum, not, alt görev) [TaskWriteRepository]'ye gider:
 /// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
 /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
 /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
@@ -34,13 +33,12 @@ final taskDetailControllerProvider = TaskDetailControllerFamily._();
 /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
 ///
 /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
-/// denetleyicisinde bellekte kalır.
+/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
 final class TaskDetailControllerProvider
     extends $NotifierProvider<TaskDetailController, TaskDetailState> {
   /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
   ///
-  /// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+  /// Yazmalar (P2: durum, not, alt görev) [TaskWriteRepository]'ye gider:
   /// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
   /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
   /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
@@ -48,8 +46,7 @@ final class TaskDetailControllerProvider
   /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
   ///
   /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-  /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
-  /// denetleyicisinde bellekte kalır.
+  /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
   TaskDetailControllerProvider._({
     required TaskDetailControllerFamily super.from,
     required String super.argument,
@@ -95,11 +92,11 @@ final class TaskDetailControllerProvider
 }
 
 String _$taskDetailControllerHash() =>
-    r'62d0fb8ae2082c9daf60c750f66fc22894fcc2cf';
+    r'783857b4f5a3d850282c013b70676d3c6d93cfef';
 
 /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
 ///
-/// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+/// Yazmalar (P2: durum, not, alt görev) [TaskWriteRepository]'ye gider:
 /// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
 /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
 /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
@@ -107,8 +104,7 @@ String _$taskDetailControllerHash() =>
 /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
 ///
 /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
-/// denetleyicisinde bellekte kalır.
+/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
 
 final class TaskDetailControllerFamily extends $Family
     with
@@ -130,7 +126,7 @@ final class TaskDetailControllerFamily extends $Family
 
   /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
   ///
-  /// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+  /// Yazmalar (P2: durum, not, alt görev) [TaskWriteRepository]'ye gider:
   /// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
   /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
   /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
@@ -138,8 +134,7 @@ final class TaskDetailControllerFamily extends $Family
   /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
   ///
   /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-  /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
-  /// denetleyicisinde bellekte kalır.
+  /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
 
   TaskDetailControllerProvider call(String code) =>
       TaskDetailControllerProvider._(argument: code, from: this);
@@ -150,7 +145,7 @@ final class TaskDetailControllerFamily extends $Family
 
 /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
 ///
-/// Sunucu kataloğunda (P2: durum, not, alt görev) yazma [TaskWriteRepository]'ye gider:
+/// Yazmalar (P2: durum, not, alt görev) [TaskWriteRepository]'ye gider:
 /// iyimser güncelleme YOK; başarıdan sonra ilgili kaynak yeniden okunur (liste etkileniyorsa
 /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
 /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
@@ -158,8 +153,7 @@ final class TaskDetailControllerFamily extends $Family
 /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
 ///
 /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider. Örnek katalogda değişiklik katalog
-/// denetleyicisinde bellekte kalır.
+/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
 
 abstract class _$TaskDetailController extends $Notifier<TaskDetailState> {
   late final _$args = ref.$arg as String;

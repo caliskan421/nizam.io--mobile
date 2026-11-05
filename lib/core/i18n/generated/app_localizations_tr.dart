@@ -2406,9 +2406,6 @@ class AppLocalizationsTr extends AppLocalizations {
       'Hesabınıza atanmış bir program bulunmuyor. Yöneticinizle görüşün.';
 
   @override
-  String get uiScopeContinueWithSample => 'Örnek verilerle devam et';
-
-  @override
   String get uiScopeTruncated =>
       'Liste en çok 200 programı gösterir; bazı programlar görünmüyor olabilir.';
 
@@ -2726,9 +2723,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksDeletedFilesKept => 'Kanıt dosyaları arşivde kaldı.';
 
   @override
-  String get uiTasksUndo => 'Geri al';
-
-  @override
   String get uiTasksRequestDate => 'Tarih değişikliği iste';
 
   @override
@@ -2898,12 +2892,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksSend => 'Gönder';
 
   @override
-  String get uiTasksInMemory => '✓ Hafızada';
-
-  @override
-  String get uiTasksToMemory => 'Hafızaya ekle';
-
-  @override
   String get uiTasksSheetStatus => 'durum';
 
   @override
@@ -2935,21 +2923,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksFieldCoord => 'Koordinatörlük';
-
-  @override
-  String get uiTasksCoordinatorsLc => 'koordinatörler';
-
-  @override
-  String get uiTasksMembersLc => 'üyeler';
-
-  @override
-  String get uiTasksNoCoordinators => 'Bu koordinatörlükte koordinatör yok.';
-
-  @override
-  String get uiTasksNoMembers => 'Bu koordinatörlükte üye yok.';
-
-  @override
-  String get uiTasksErrAssignOne => 'En az bir kişi ata';
 
   @override
   String get uiTasksErrDates => 'Bitiş, başlangıçtan önce olamaz';
@@ -3027,18 +3000,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksTagUnknown => 'Diğer';
 
   @override
-  String get uiTasksFileName => 'Dosya adı';
-
-  @override
-  String get uiTasksErrFileName => 'Dosya adı gerekli';
-
-  @override
-  String get uiTasksPickFile => 'Fotoğraf çek ya da dosya seç';
-
-  @override
-  String get uiTasksProtoOnly => 'Prototipte yalnızca kayıt oluşturulur.';
-
-  @override
   String get uiTasksUploadOk => 'Yükle';
 
   @override
@@ -3055,23 +3016,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksDeleteOk => 'Sil';
 
   @override
-  String get uiTasksTSubsBlock => 'Alt görevler bitmeden görev tamamlanamaz';
-
-  @override
-  String get uiTasksTFinishedLc => 'bitti';
-
-  @override
-  String get uiTasksTEvidenceBlock =>
-      'Kanıt dosyası olmadan görev tamamlanamaz';
-
-  @override
   String get uiTasksTCreatedTail => 'oluşturuldu';
 
   @override
   String get uiTasksTDeleted => 'Görev silinen kayıtlara taşındı';
-
-  @override
-  String get uiTasksTRestoredTail => 'geri alındı';
 
   @override
   String get uiTasksTUpdatedTail => 'güncellendi';
@@ -3112,10 +3060,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksTSubFileKept => 'kanıt dosyası arşivde kaldı';
-
-  @override
-  String get uiTasksTNoteMemory =>
-      'Not kurumsal hafızaya deneyim olarak eklendi';
 
   @override
   String get uiTasksRevertTitle => 'Tamamlanmış görevi yeniden aç';
@@ -3217,9 +3161,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksErrCoord => 'Koordinatörlük seç.';
-
-  @override
-  String get uiTasksErrAssignee => 'En az bir kişi ata.';
 
   @override
   String get uiTasksErrDatesFull => 'Bitiş, başlangıçtan önce olamaz.';
@@ -3744,9 +3685,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTimelineGanttLegendLate => 'Gecikme';
-
-  @override
-  String get uiTimelineGanttLegendFest => 'Teknofest günleri';
 
   @override
   String get uiTimelineGanttCardStatus => 'durum';

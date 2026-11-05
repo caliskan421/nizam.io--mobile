@@ -3041,10 +3041,6 @@
   "@uiScopeEmptyMessage": {
     "description": "ui.scope.empty_message"
   },
-  "uiScopeContinueWithSample": "Örnek verilerle devam et",
-  "@uiScopeContinueWithSample": {
-    "description": "ui.scope.continue_with_sample"
-  },
   "uiScopeTruncated": "Liste en çok 200 programı gösterir; bazı programlar görünmüyor olabilir.",
   "@uiScopeTruncated": {
     "description": "ui.scope.truncated"
@@ -3461,10 +3457,6 @@
   "@uiTasksDeletedFilesKept": {
     "description": "ui.tasks.deleted_files_kept"
   },
-  "uiTasksUndo": "Geri al",
-  "@uiTasksUndo": {
-    "description": "ui.tasks.undo"
-  },
   "uiTasksRequestDate": "Tarih değişikliği iste",
   "@uiTasksRequestDate": {
     "description": "ui.tasks.request_date"
@@ -3689,14 +3681,6 @@
   "@uiTasksSend": {
     "description": "ui.tasks.send"
   },
-  "uiTasksInMemory": "✓ Hafızada",
-  "@uiTasksInMemory": {
-    "description": "ui.tasks.in_memory"
-  },
-  "uiTasksToMemory": "Hafızaya ekle",
-  "@uiTasksToMemory": {
-    "description": "ui.tasks.to_memory"
-  },
   "uiTasksSheetStatus": "durum",
   "@uiTasksSheetStatus": {
     "description": "ui.tasks.sheet_status"
@@ -3740,26 +3724,6 @@
   "uiTasksFieldCoord": "Koordinatörlük",
   "@uiTasksFieldCoord": {
     "description": "ui.tasks.field_coord"
-  },
-  "uiTasksCoordinatorsLc": "koordinatörler",
-  "@uiTasksCoordinatorsLc": {
-    "description": "ui.tasks.coordinators_lc"
-  },
-  "uiTasksMembersLc": "üyeler",
-  "@uiTasksMembersLc": {
-    "description": "ui.tasks.members_lc"
-  },
-  "uiTasksNoCoordinators": "Bu koordinatörlükte koordinatör yok.",
-  "@uiTasksNoCoordinators": {
-    "description": "ui.tasks.no_coordinators"
-  },
-  "uiTasksNoMembers": "Bu koordinatörlükte üye yok.",
-  "@uiTasksNoMembers": {
-    "description": "ui.tasks.no_members"
-  },
-  "uiTasksErrAssignOne": "En az bir kişi ata",
-  "@uiTasksErrAssignOne": {
-    "description": "ui.tasks.err_assign_one"
   },
   "uiTasksErrDates": "Bitiş, başlangıçtan önce olamaz",
   "@uiTasksErrDates": {
@@ -3861,22 +3825,6 @@
   "@uiTasksTagUnknown": {
     "description": "ui.tasks.tag_unknown"
   },
-  "uiTasksFileName": "Dosya adı",
-  "@uiTasksFileName": {
-    "description": "ui.tasks.file_name"
-  },
-  "uiTasksErrFileName": "Dosya adı gerekli",
-  "@uiTasksErrFileName": {
-    "description": "ui.tasks.err_file_name"
-  },
-  "uiTasksPickFile": "Fotoğraf çek ya da dosya seç",
-  "@uiTasksPickFile": {
-    "description": "ui.tasks.pick_file"
-  },
-  "uiTasksProtoOnly": "Prototipte yalnızca kayıt oluşturulur.",
-  "@uiTasksProtoOnly": {
-    "description": "ui.tasks.proto_only"
-  },
   "uiTasksUploadOk": "Yükle",
   "@uiTasksUploadOk": {
     "description": "ui.tasks.upload_ok"
@@ -3897,18 +3845,6 @@
   "@uiTasksDeleteOk": {
     "description": "ui.tasks.delete_ok"
   },
-  "uiTasksTSubsBlock": "Alt görevler bitmeden görev tamamlanamaz",
-  "@uiTasksTSubsBlock": {
-    "description": "ui.tasks.t_subs_block"
-  },
-  "uiTasksTFinishedLc": "bitti",
-  "@uiTasksTFinishedLc": {
-    "description": "ui.tasks.t_finished_lc"
-  },
-  "uiTasksTEvidenceBlock": "Kanıt dosyası olmadan görev tamamlanamaz",
-  "@uiTasksTEvidenceBlock": {
-    "description": "ui.tasks.t_evidence_block"
-  },
   "uiTasksTCreatedTail": "oluşturuldu",
   "@uiTasksTCreatedTail": {
     "description": "ui.tasks.t_created_tail"
@@ -3916,10 +3852,6 @@
   "uiTasksTDeleted": "Görev silinen kayıtlara taşındı",
   "@uiTasksTDeleted": {
     "description": "ui.tasks.t_deleted"
-  },
-  "uiTasksTRestoredTail": "geri alındı",
-  "@uiTasksTRestoredTail": {
-    "description": "ui.tasks.t_restored_tail"
   },
   "uiTasksTUpdatedTail": "güncellendi",
   "@uiTasksTUpdatedTail": {
@@ -3968,10 +3900,6 @@
   "uiTasksTSubFileKept": "kanıt dosyası arşivde kaldı",
   "@uiTasksTSubFileKept": {
     "description": "ui.tasks.t_sub_file_kept"
-  },
-  "uiTasksTNoteMemory": "Not kurumsal hafızaya deneyim olarak eklendi",
-  "@uiTasksTNoteMemory": {
-    "description": "ui.tasks.t_note_memory"
   },
   "uiTasksRevertTitle": "Tamamlanmış görevi yeniden aç",
   "@uiTasksRevertTitle": {
@@ -4104,10 +4032,6 @@
   "uiTasksErrCoord": "Koordinatörlük seç.",
   "@uiTasksErrCoord": {
     "description": "ui.tasks.err_coord"
-  },
-  "uiTasksErrAssignee": "En az bir kişi ata.",
-  "@uiTasksErrAssignee": {
-    "description": "ui.tasks.err_assignee"
   },
   "uiTasksErrDatesFull": "Bitiş, başlangıçtan önce olamaz.",
   "@uiTasksErrDatesFull": {
@@ -4784,10 +4708,6 @@
   "uiTimelineGanttLegendLate": "Gecikme",
   "@uiTimelineGanttLegendLate": {
     "description": "ui.timeline.gantt_legend_late"
-  },
-  "uiTimelineGanttLegendFest": "Teknofest günleri",
-  "@uiTimelineGanttLegendFest": {
-    "description": "ui.timeline.gantt_legend_fest"
   },
   "uiTimelineGanttCardStatus": "durum",
   "@uiTimelineGanttCardStatus": {

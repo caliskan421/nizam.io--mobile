@@ -32,10 +32,8 @@ class DetailSummary extends StatelessWidget {
     String name(String id) => catalog.nameOf(id) ?? l.uiTasksUnknownPerson;
     final names = task.assignees.map(name).toList();
     final today = catalog.today;
-    // Sunucu görevinde gecikme sunucu değeridir (WORK-K37); örnekte bugüne göre.
-    final late = task.lateness != null
-        ? (task.isDone ? 0 : task.overdueDays)
-        : catalog.overdueDaysFor(task.due, done: task.isDone);
+    // Gecikme sunucu değeridir (WORK-K37).
+    final late = task.isDone ? 0 : task.overdueDays;
     final description = task.description?.trim() ?? '';
     final started = !task.start.isAfter(today);
     final done = task.completedAt;
@@ -252,18 +250,13 @@ class DetailSubtasks extends ConsumerWidget {
     final t = context.text;
     final p = taskDetailControllerProvider(task.code);
     final ctl = ref.read(p.notifier);
-    final (openSubs, editing) = ref.watch(
-      p.select((s) => (s.openSubtasks, s.editingSubtask)),
-    );
+    final openSubs = ref.watch(p.select((s) => s.openSubtasks));
     final subs = task.subtasks;
     final done = task.subtasksDone;
     final perms = ctl.permissions;
     final manage = perms.canManageSubtasks;
-    // Sunucuda alt görev adayı ana görevin atananlarıdır; örnekte koordinatörlük ekibi.
-    final team = perms.local
-        ? catalog.coordinatorship(task.coordinatorship)?.team ??
-              const <String>[]
-        : perms.subtaskAssignees(task);
+    // Alt görev adayı ana görevin atananlarıdır.
+    final team = perms.subtaskAssignees(task);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -295,15 +288,12 @@ class DetailSubtasks extends ConsumerWidget {
             catalog: catalog,
             team: team,
             open: openSubs.contains(u.id),
-            editing: editing == u.id,
             manage: manage,
             onCheck: perms.canToggleSubtask(u)
                 ? () => actions.toggleSubtask(u.id)
                 : null,
             onOpen: () => ctl.toggleSubtaskOpen(u.id),
-            onTitle: (v) => ctl.setSubtaskTitle(u.id, v),
-            onTitleDone: ctl.finishSubtaskEdit,
-            onRename: perms.local ? null : () => actions.renameSubtask(u),
+            onRename: () => actions.renameSubtask(u),
             onAssignee: (v) => actions.setSubtaskAssignee(u.id, v),
             onStart: (v) => actions.setSubtaskStart(u.id, v),
             onEnd: (v) => actions.setSubtaskEnd(u.id, v),
@@ -330,12 +320,9 @@ class _SubtaskBlock extends StatelessWidget {
     required this.catalog,
     required this.team,
     required this.open,
-    required this.editing,
     required this.manage,
     required this.onCheck,
     required this.onOpen,
-    required this.onTitle,
-    required this.onTitleDone,
     required this.onRename,
     required this.onAssignee,
     required this.onStart,
@@ -348,7 +335,6 @@ class _SubtaskBlock extends StatelessWidget {
   final TaskCatalog catalog;
   final List<String> team;
   final bool open;
-  final bool editing;
 
   /// Başlık/kişi/tarih düzenleme ve silme açık mı (yönetici ya da koordinatör).
   final bool manage;
@@ -356,11 +342,9 @@ class _SubtaskBlock extends StatelessWidget {
   /// null → işaretleme bu hesaba kapalı.
   final VoidCallback? onCheck;
   final VoidCallback onOpen;
-  final ValueChanged<String> onTitle;
-  final VoidCallback onTitleDone;
 
-  /// Sunucu alt görevinde başlık düzenleme alt sayfası; null → yok (örnekte satır içi).
-  final VoidCallback? onRename;
+  /// Başlık düzenleme alt sayfası.
+  final VoidCallback onRename;
   final ValueChanged<String?> onAssignee;
   final ValueChanged<DateTime?> onStart;
   final ValueChanged<DateTime?> onEnd;
@@ -464,51 +448,42 @@ class _SubtaskBlock extends StatelessWidget {
                 ),
                 const Gap(NizamioSpacing.space1),
                 Expanded(
-                  child: editing
-                      ? _TitleInput(
-                          value: u.title,
-                          label: l.uiTasksSubName,
-                          onChanged: onTitle,
-                          onDone: onTitleDone,
-                        )
-                      : Semantics(
-                          button: true,
-                          expanded: open,
-                          label: [title, ...bits].join(', '),
-                          excludeSemantics: true,
-                          child: InkWell(
-                            onTap: onOpen,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: NizamioSpacing.space2,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    title,
-                                    style: t.bodyMd.copyWith(
-                                      color: u.done ? c.textMuted : c.text,
-                                      decoration: u.done
-                                          ? TextDecoration.lineThrough
-                                          : null,
-                                      decorationColor: c.textMuted,
-                                    ),
-                                  ),
-                                  if (bits.isNotEmpty)
-                                    Text(
-                                      bits.join(' · '),
-                                      style: t.caption.copyWith(
-                                        color: missing
-                                            ? c.warning
-                                            : c.textMuted,
-                                      ),
-                                    ),
-                                ],
+                  child: Semantics(
+                    button: true,
+                    expanded: open,
+                    label: [title, ...bits].join(', '),
+                    excludeSemantics: true,
+                    child: InkWell(
+                      onTap: onOpen,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: NizamioSpacing.space2,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: t.bodyMd.copyWith(
+                                color: u.done ? c.textMuted : c.text,
+                                decoration: u.done
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                                decorationColor: c.textMuted,
                               ),
                             ),
-                          ),
+                            if (bits.isNotEmpty)
+                              Text(
+                                bits.join(' · '),
+                                style: t.caption.copyWith(
+                                  color: missing ? c.warning : c.textMuted,
+                                ),
+                              ),
+                          ],
                         ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -598,8 +573,7 @@ class _SubtaskBlock extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.end,
                         spacing: NizamioSpacing.space3,
                         children: [
-                          if (onRename case final rename?)
-                            TaskLink(label: l.uiTasksSubRename, onTap: rename),
+                          TaskLink(label: l.uiTasksSubRename, onTap: onRename),
                           TaskLink(
                             label: l.uiTasksSubDelete,
                             color: c.danger,
@@ -866,16 +840,7 @@ class _DetailNotesState extends ConsumerState<DetailNotes> {
                     ),
                     const Gap(NizamioSpacing.space1),
                     Text(notes[i].text, style: t.bodyMd),
-                    // Hafıza yalnız örnekte (sunucuda karşılığı yok, B-17).
-                    if (perms.local)
-                      TaskLink(
-                        label: notes[i].inMemory
-                            ? l.uiTasksInMemory
-                            : l.uiTasksToMemory,
-                        color: notes[i].inMemory ? c.accentText : c.textMuted,
-                        onTap: () => actions.addNoteToMemory(i),
-                      )
-                    else if (perms.canEditNote(notes[i]))
+                    if (perms.canEditNote(notes[i]))
                       Row(
                         spacing: NizamioSpacing.space3,
                         children: [

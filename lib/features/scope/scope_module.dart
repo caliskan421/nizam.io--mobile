@@ -10,7 +10,6 @@ import 'application/scope_providers.dart';
 import 'application/scope_service.dart';
 import 'data/home_dashboard_api_repository.dart';
 import 'data/program_repository.dart';
-import 'data/sample/sample_home_dashboard_repository.dart';
 import 'domain/home_dashboard_repository.dart';
 
 /// scope modülünün kayıt fonksiyonu (ADR-0001, D-0182). YALNIZ bileşim kökünden
@@ -30,15 +29,13 @@ void registerScopeModule(GetIt locator, {required Dio? Function() apiDio}) {
       },
     ),
   );
-  // Sunucu programı seçiliyse sunucu özeti; örnek kapsamda geliştirme örneği.
+  // Seçili programın sunucu özeti.
   locator.registerLazySingleton<HomeDashboardRepository>(
     () => HomeDashboardSource(
-      scope: locator<ScopeController>(),
       server: () {
         final dio = apiDio();
         return dio == null ? null : ApiHomeDashboardRepository(dio);
       },
-      sample: SampleHomeDashboardRepository(),
     ),
   );
 }

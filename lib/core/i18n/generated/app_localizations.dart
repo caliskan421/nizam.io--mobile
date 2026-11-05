@@ -4654,12 +4654,6 @@ abstract class AppLocalizations {
   /// **'Hesabınıza atanmış bir program bulunmuyor. Yöneticinizle görüşün.'**
   String get uiScopeEmptyMessage;
 
-  /// ui.scope.continue_with_sample
-  ///
-  /// In tr, this message translates to:
-  /// **'Örnek verilerle devam et'**
-  String get uiScopeContinueWithSample;
-
   /// ui.scope.truncated
   ///
   /// In tr, this message translates to:
@@ -5284,12 +5278,6 @@ abstract class AppLocalizations {
   /// **'Kanıt dosyaları arşivde kaldı.'**
   String get uiTasksDeletedFilesKept;
 
-  /// ui.tasks.undo
-  ///
-  /// In tr, this message translates to:
-  /// **'Geri al'**
-  String get uiTasksUndo;
-
   /// ui.tasks.request_date
   ///
   /// In tr, this message translates to:
@@ -5626,18 +5614,6 @@ abstract class AppLocalizations {
   /// **'Gönder'**
   String get uiTasksSend;
 
-  /// ui.tasks.in_memory
-  ///
-  /// In tr, this message translates to:
-  /// **'✓ Hafızada'**
-  String get uiTasksInMemory;
-
-  /// ui.tasks.to_memory
-  ///
-  /// In tr, this message translates to:
-  /// **'Hafızaya ekle'**
-  String get uiTasksToMemory;
-
   /// ui.tasks.sheet_status
   ///
   /// In tr, this message translates to:
@@ -5703,36 +5679,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Koordinatörlük'**
   String get uiTasksFieldCoord;
-
-  /// ui.tasks.coordinators_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'koordinatörler'**
-  String get uiTasksCoordinatorsLc;
-
-  /// ui.tasks.members_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'üyeler'**
-  String get uiTasksMembersLc;
-
-  /// ui.tasks.no_coordinators
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu koordinatörlükte koordinatör yok.'**
-  String get uiTasksNoCoordinators;
-
-  /// ui.tasks.no_members
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu koordinatörlükte üye yok.'**
-  String get uiTasksNoMembers;
-
-  /// ui.tasks.err_assign_one
-  ///
-  /// In tr, this message translates to:
-  /// **'En az bir kişi ata'**
-  String get uiTasksErrAssignOne;
 
   /// ui.tasks.err_dates
   ///
@@ -5884,30 +5830,6 @@ abstract class AppLocalizations {
   /// **'Diğer'**
   String get uiTasksTagUnknown;
 
-  /// ui.tasks.file_name
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya adı'**
-  String get uiTasksFileName;
-
-  /// ui.tasks.err_file_name
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya adı gerekli'**
-  String get uiTasksErrFileName;
-
-  /// ui.tasks.pick_file
-  ///
-  /// In tr, this message translates to:
-  /// **'Fotoğraf çek ya da dosya seç'**
-  String get uiTasksPickFile;
-
-  /// ui.tasks.proto_only
-  ///
-  /// In tr, this message translates to:
-  /// **'Prototipte yalnızca kayıt oluşturulur.'**
-  String get uiTasksProtoOnly;
-
   /// ui.tasks.upload_ok
   ///
   /// In tr, this message translates to:
@@ -5938,24 +5860,6 @@ abstract class AppLocalizations {
   /// **'Sil'**
   String get uiTasksDeleteOk;
 
-  /// ui.tasks.t_subs_block
-  ///
-  /// In tr, this message translates to:
-  /// **'Alt görevler bitmeden görev tamamlanamaz'**
-  String get uiTasksTSubsBlock;
-
-  /// ui.tasks.t_finished_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'bitti'**
-  String get uiTasksTFinishedLc;
-
-  /// ui.tasks.t_evidence_block
-  ///
-  /// In tr, this message translates to:
-  /// **'Kanıt dosyası olmadan görev tamamlanamaz'**
-  String get uiTasksTEvidenceBlock;
-
   /// ui.tasks.t_created_tail
   ///
   /// In tr, this message translates to:
@@ -5967,12 +5871,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Görev silinen kayıtlara taşındı'**
   String get uiTasksTDeleted;
-
-  /// ui.tasks.t_restored_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'geri alındı'**
-  String get uiTasksTRestoredTail;
 
   /// ui.tasks.t_updated_tail
   ///
@@ -6045,12 +5943,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'kanıt dosyası arşivde kaldı'**
   String get uiTasksTSubFileKept;
-
-  /// ui.tasks.t_note_memory
-  ///
-  /// In tr, this message translates to:
-  /// **'Not kurumsal hafızaya deneyim olarak eklendi'**
-  String get uiTasksTNoteMemory;
 
   /// ui.tasks.revert_title
   ///
@@ -6249,12 +6141,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Koordinatörlük seç.'**
   String get uiTasksErrCoord;
-
-  /// ui.tasks.err_assignee
-  ///
-  /// In tr, this message translates to:
-  /// **'En az bir kişi ata.'**
-  String get uiTasksErrAssignee;
 
   /// ui.tasks.err_dates_full
   ///
@@ -7269,12 +7155,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Gecikme'**
   String get uiTimelineGanttLegendLate;
-
-  /// ui.timeline.gantt_legend_fest
-  ///
-  /// In tr, this message translates to:
-  /// **'Teknofest günleri'**
-  String get uiTimelineGanttLegendFest;
 
   /// ui.timeline.gantt_card_status
   ///

@@ -52,9 +52,6 @@ class ScopeService {
     scope.selectProgram(programId);
   }
 
-  /// Örnek kapsam (program yokken statik verilerle kabuk); faz `scoped` olur.
-  void selectSample() => scope.selectSample();
-
   /// Seçimi kaldırır; faz `sessionOpen`'a döner.
   void clearSelection() => scope.clear();
 

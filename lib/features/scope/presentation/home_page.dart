@@ -122,8 +122,8 @@ class _Feed extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final d = dashboard;
     final nav = context.appNav;
-    // Tarih satırı ve "son işlem" göreli zamanı görev kataloğunun "bugün"üdür (örnek veride
-    // prototip çapası 21 Ekim; gerçek kaynakta sunucu günü). Katalog yokken cihaz saati.
+    // Tarih satırı ve "son işlem" göreli zamanı görev kataloğunun "bugün"üdür. Katalog yokken
+    // cihaz saati.
     final now =
         ref.watch(
           taskCatalogControllerProvider.select((c) => c.value?.today),

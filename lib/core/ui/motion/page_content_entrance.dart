@@ -106,24 +106,25 @@ class _PageContentEntranceState extends State<PageContentEntrance>
       ? widget.child
       : _EntranceScope(
           animation: _coveredByParent! ? _parentAnimation! : _animation,
-          child: AnimatedBuilder(
-            animation: _animation,
-            child: widget.child,
-            builder: (context, child) {
-              final t = _animation.value;
-              final dy = RpMotion.enterOffset * (1 - t);
-              if (widget._sliver) {
-                return SliverOpacity(
-                  opacity: t,
-                  sliver: _SliverTranslate(dy: dy, child: child!),
-                );
-              }
-              return Opacity(
-                opacity: t,
-                child: Transform.translate(offset: Offset(0, dy), child: child),
-              );
-            },
-          ),
+          // Kare başına build yok: öteleme ve opaklık animasyonu render nesnesinde dinlenir.
+          // Öteleme dışta, opaklık içte: opaklık katmanı yeniden boyanmadan kaydırılır.
+          child: widget._sliver
+              ? _SliverTranslate(
+                  animation: _animation,
+                  dy: RpMotion.enterOffset,
+                  child: SliverFadeTransition(
+                    opacity: _animation,
+                    sliver: widget.child,
+                  ),
+                )
+              : _Translate(
+                  animation: _animation,
+                  from: const Offset(0, RpMotion.enterOffset),
+                  child: FadeTransition(
+                    opacity: _animation,
+                    child: widget.child,
+                  ),
+                ),
         );
 }
 
@@ -261,21 +262,14 @@ class _NzPaneTransitionState extends State<NzPaneTransition>
   @override
   Widget build(BuildContext context) => _EntranceScope(
     animation: _animation,
-    child: FadeTransition(
-      opacity: _animation,
-      child: AnimatedBuilder(
-        animation: _animation,
-        child: widget.child,
-        builder: (context, child) {
-          final t = _controller.isCompleted ? 1.0 : _animation.value;
-          final offset = switch (_motion) {
-            NzPaneMotion.rise => Offset(0, RpMotion.enterOffset * (1 - t)),
-            NzPaneMotion.push => Offset(RpMotion.pushOffset * (1 - t), 0),
-            NzPaneMotion.pop => Offset(-RpMotion.pushOffset * (1 - t), 0),
-          };
-          return Transform.translate(offset: offset, child: child);
-        },
-      ),
+    child: _Translate(
+      animation: _animation,
+      from: switch (_motion) {
+        NzPaneMotion.rise => const Offset(0, RpMotion.enterOffset),
+        NzPaneMotion.push => const Offset(RpMotion.pushOffset, 0),
+        NzPaneMotion.pop => const Offset(-RpMotion.pushOffset, 0),
+      },
+      child: FadeTransition(opacity: _animation, child: widget.child),
     ),
   );
 }
@@ -290,33 +284,158 @@ class _EntranceScope extends InheritedWidget {
       animation != oldWidget.animation;
 }
 
-/// Yalnız boyama dönüşür; scrollExtent, layoutExtent ve sabit başlık hesabı değişmez.
-class _SliverTranslate extends SingleChildRenderObjectWidget {
-  const _SliverTranslate({required this.dy, required super.child});
+/// [animation] değerine göre çocuğu boyamada öteler: t = 0 → [from], t = 1 → yerinde.
+/// Yerleşim değişmez; değer değişince yalnız boyama geçersizlenir (build yok).
+class _Translate extends SingleChildRenderObjectWidget {
+  const _Translate({
+    required this.animation,
+    required this.from,
+    required super.child,
+  });
 
+  final Animation<double> animation;
+  final Offset from;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderTranslate(animation, from);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderTranslate renderObject,
+  ) => renderObject
+    ..animation = animation
+    ..from = from;
+}
+
+class _RenderTranslate extends RenderProxyBox {
+  _RenderTranslate(this._animation, this._from);
+
+  Animation<double> _animation;
+  Offset _from;
+  Offset _offset = Offset.zero;
+
+  set animation(Animation<double> value) {
+    if (_animation == value) return;
+    if (attached) _animation.removeListener(_update);
+    _animation = value;
+    if (attached) _animation.addListener(_update);
+    _update();
+  }
+
+  set from(Offset value) {
+    if (_from == value) return;
+    _from = value;
+    _update();
+  }
+
+  void _update() {
+    final next = _from * (1 - _animation.value);
+    if (next == _offset) return;
+    _offset = next;
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _animation.addListener(_update);
+    _update();
+  }
+
+  @override
+  void detach() {
+    _animation.removeListener(_update);
+    super.detach();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) context.paintChild(child!, offset + _offset);
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.translateByDouble(_offset.dx, _offset.dy, 0, 1);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      result.addWithPaintOffset(
+        offset: _offset,
+        position: position,
+        hitTest: (result, position) =>
+            super.hitTestChildren(result, position: position),
+      );
+}
+
+/// Sliver öteleme ([_Translate] gibi animasyonu dinler): yalnız boyama dönüşür;
+/// scrollExtent, layoutExtent ve sabit başlık hesabı değişmez. t = 0 → [dy] aşağıda.
+class _SliverTranslate extends SingleChildRenderObjectWidget {
+  const _SliverTranslate({
+    required this.animation,
+    required this.dy,
+    required super.child,
+  });
+
+  final Animation<double> animation;
   final double dy;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      _RenderSliverTranslate(dy);
+      _RenderSliverTranslate(animation, dy);
 
   @override
   void updateRenderObject(
     BuildContext context,
     _RenderSliverTranslate renderObject,
-  ) => renderObject.dy = dy;
+  ) => renderObject
+    ..animation = animation
+    ..dy = dy;
 }
 
 class _RenderSliverTranslate extends RenderProxySliver {
-  _RenderSliverTranslate(this._dy);
+  _RenderSliverTranslate(this._animation, this._from);
 
-  double _dy;
+  Animation<double> _animation;
+  double _from;
+  double _dy = 0;
+
+  set animation(Animation<double> value) {
+    if (_animation == value) return;
+    if (attached) _animation.removeListener(_update);
+    _animation = value;
+    if (attached) _animation.addListener(_update);
+    _update();
+  }
 
   set dy(double value) {
-    if (_dy == value) return;
-    _dy = value;
+    if (_from == value) return;
+    _from = value;
+    _update();
+  }
+
+  void _update() {
+    final next = _from * (1 - _animation.value);
+    if (next == _dy) return;
+    _dy = next;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _animation.addListener(_update);
+    _update();
+  }
+
+  @override
+  void detach() {
+    _animation.removeListener(_update);
+    super.detach();
   }
 
   @override

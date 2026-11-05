@@ -421,7 +421,10 @@ void main() {
     (tester) async {
       await _scoped(tester);
       int fades(Type page) => find
-          .ancestor(of: find.byType(page), matching: find.byType(Opacity))
+          .ancestor(
+            of: find.byType(page),
+            matching: find.byType(FadeTransition),
+          )
           .evaluate()
           .length;
 

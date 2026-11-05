@@ -28,11 +28,17 @@ void main() {
     const TasksRoute().go(context);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 150));
-    final fades = find.ancestor(
-      of: find.byType(TasksPage),
-      matching: find.byType(Opacity),
-    );
-    expect(fades, findsNothing);
+    // Kabuk sarmalayıcıları (telefonda kapalı bölme geçişi) solma oynatmaz.
+    Iterable<double> fades() => tester
+        .widgetList<FadeTransition>(
+          find.ancestor(
+            of: find.byType(TasksPage),
+            matching: find.byType(FadeTransition),
+          ),
+        )
+        .map((f) => f.opacity.value)
+        .where((v) => v < 1);
+    expect(fades(), isEmpty);
     final entrance = find
         .descendant(
           of: find.byType(TasksPage),
@@ -40,10 +46,10 @@ void main() {
         )
         .first;
     final opacity = find
-        .descendant(of: entrance, matching: find.byType(SliverOpacity))
+        .descendant(of: entrance, matching: find.byType(SliverFadeTransition))
         .first;
     expect(
-      tester.widget<SliverOpacity>(opacity).opacity,
+      tester.widget<SliverFadeTransition>(opacity).opacity.value,
       closeTo(RpMotion.enterCurve.transform(150 / 320), 0.001),
     );
     final appbar = find.descendant(
@@ -61,9 +67,9 @@ void main() {
     const TasksRoute().go(tester.element(find.byType(NzAdaptiveShell)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 150));
-    expect(fades, findsNothing);
+    expect(fades(), isEmpty);
     expect(
-      tester.widget<SliverOpacity>(opacity).opacity,
+      tester.widget<SliverFadeTransition>(opacity).opacity.value,
       closeTo(RpMotion.enterCurve.transform(150 / 320), 0.001),
     );
     await settle(tester);

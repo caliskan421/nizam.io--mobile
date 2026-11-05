@@ -28,19 +28,22 @@ void main() {
         ),
       ),
     );
-    final opacity = find.byType(Opacity);
+    final opacity = find.byType(FadeTransition);
     final box = find.byType(SizedBox);
-    expect(tester.widget<Opacity>(opacity).opacity, 0);
+    expect(tester.widget<FadeTransition>(opacity).opacity.value, 0);
     expect(tester.getTopLeft(box).dy, 10);
     await tester.pump(const Duration(milliseconds: 160));
     final t = RpMotion.enterCurve.transform(0.5);
-    expect(tester.widget<Opacity>(opacity).opacity, closeTo(t, 0.001));
+    expect(
+      tester.widget<FadeTransition>(opacity).opacity.value,
+      closeTo(t, 0.001),
+    );
     expect(tester.getTopLeft(box).dy, closeTo(10 * (1 - t), 0.001));
     await tester.pump(const Duration(milliseconds: 160));
     expect(tester.getTopLeft(box).dy, 0);
     rebuild(() {});
     await tester.pump();
-    expect(tester.widget<Opacity>(opacity).opacity, 1);
+    expect(tester.widget<FadeTransition>(opacity).opacity.value, 1);
   });
 
   testWidgets(
@@ -51,12 +54,30 @@ void main() {
         reduced: reduced,
       );
       await tester.pumpWidget(panel(0, reduced: true));
-      expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 1);
+      expect(
+        tester
+            .widget<FadeTransition>(find.byType(FadeTransition))
+            .opacity
+            .value,
+        1,
+      );
       expect(tester.hasRunningAnimations, isFalse);
       await tester.pumpWidget(panel(1));
-      expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 0);
+      expect(
+        tester
+            .widget<FadeTransition>(find.byType(FadeTransition))
+            .opacity
+            .value,
+        0,
+      );
       await tester.pump(RpMotion.enterDuration);
-      expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 1);
+      expect(
+        tester
+            .widget<FadeTransition>(find.byType(FadeTransition))
+            .opacity
+            .value,
+        1,
+      );
     },
   );
 
@@ -71,7 +92,9 @@ void main() {
       ),
     );
     expect(
-      tester.widgetList<Opacity>(find.byType(Opacity)).map((w) => w.opacity),
+      tester
+          .widgetList<FadeTransition>(find.byType(FadeTransition))
+          .map((w) => w.opacity.value),
       [0, 1, 1],
     );
     await tester.pump(RpMotion.enterDuration);
@@ -128,8 +151,11 @@ void main() {
         ],
       ),
     );
-    double opacity(int i) =>
-        tester.widgetList<Opacity>(find.byType(Opacity)).elementAt(i).opacity;
+    double opacity(int i) => tester
+        .widgetList<FadeTransition>(find.byType(FadeTransition))
+        .elementAt(i)
+        .opacity
+        .value;
     await tester.pumpWidget(grid('a'));
     await tester.pump(RpMotion.enterDuration + RpMotion.stagger(1));
     expect(opacity(1), 1);

@@ -126,8 +126,10 @@ class _PageContentEntranceState extends State<PageContentEntrance>
     }
   }
 
+  /// Yalnız tamamlanma sayılır: hareket `forward(from: 0)` ile baştan başlarsa (dismissed)
+  /// ya da durdurulursa bekleme sürer; yeniden gizlenme [_cancelRevisit] ile bırakır.
   void _onMotionStatus(AnimationStatus status) {
-    if (status.isAnimating) return;
+    if (!status.isCompleted) return;
     _cancelRevisit();
     _revisit();
   }

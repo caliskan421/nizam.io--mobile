@@ -292,5 +292,37 @@ void main() {
       await tester.pumpAndSettle();
       expect(revisits, 1);
     });
+
+    testWidgets(
+      'beklenen hareket yeniden başlatılırsa tamamlanmadan çağrılmaz, tamamlanınca bir kez',
+      (tester) async {
+        Widget pane(Object play) => app(
+          NzPaneTransition(
+            motion: NzPaneMotion.pop,
+            play: play,
+            child: TickerMode(
+              enabled: play != 0,
+              child: PageContentEntrance(
+                onRevisit: () => revisits++,
+                child: const SizedBox(),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpWidget(pane(-1));
+        await tester.pumpAndSettle();
+        await tester.pumpWidget(pane(0));
+        await tester.pumpWidget(pane(1));
+        await tester.pump(RpMotion.pushDuration ~/ 2);
+        // Bölme hareketi baştan başlar (dismissed): tazeleme hâlâ bitişi bekler.
+        await tester.pumpWidget(pane(2));
+        await tester.pump();
+        expect(revisits, 0);
+        await tester.pump(RpMotion.pushDuration ~/ 2);
+        expect(revisits, 0);
+        await tester.pumpAndSettle();
+        expect(revisits, 1);
+      },
+    );
   });
 }

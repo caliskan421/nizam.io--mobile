@@ -2365,7 +2365,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiRouterAssistant => 'Asistana sor';
 
   @override
-  String get uiRouterAssistantSoon => 'Asistan sonraki adımda eklenecek';
+  String get uiRouterAssistantSoon =>
+      'Asistan mobilde sonraki adımda eklenecek';
 
   @override
   String get uiRouterTabHistory => 'Geçmiş';
@@ -2381,6 +2382,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiRouterTabMessages => 'Mesajlar';
+
+  @override
+  String get uiRouterAssistantSoonTablet =>
+      'Asistan tablette sonraki adımda tasarlanacak';
 
   @override
   String get uiRouterPickTitle => 'Bir kayıt seç';
@@ -3713,16 +3718,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTimelineOpen => 'aç';
 
   @override
-  String get uiTimelineGanttBack => 'Görevler';
-
-  @override
-  String get uiTimelineGanttBackLabel => 'Geri: Görevler';
-
-  @override
   String get uiTimelineGanttFilter => 'Görev filtresi';
 
   @override
-  String get uiTimelineGanttScaleSeason => 'Sezon';
+  String get uiTimelineGanttZoomDaily => 'Günlük';
+
+  @override
+  String get uiTimelineGanttZoomWeekly => 'Haftalık';
 
   @override
   String get uiTimelineGanttAllCoords => 'Tüm koordinatörlükler';

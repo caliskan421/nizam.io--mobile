@@ -1,6 +1,6 @@
 {
   "@@locale": "tr",
-  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit 9fa47f4fe6369cc48f4caf58c6729f1ec1cd8b7c src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.7.0-api (d648a8aec45113be1f2ab0871426a9338b45a5c6); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
+  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit 9fa47f4fe6369cc48f4caf58c6729f1ec1cd8b7c src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.9.0-api (250dd78b8a3bfbf84f3d0c6ddd13dc554f267127); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
   "errAssistantBusy": "Asistan şu anda meşgul; biraz sonra yeniden deneyin.",
   "@errAssistantBusy": {
     "description": "assistant.busy"
@@ -2989,7 +2989,7 @@
   "@uiRouterAssistant": {
     "description": "ui.router.assistant"
   },
-  "uiRouterAssistantSoon": "Asistan sonraki adımda eklenecek",
+  "uiRouterAssistantSoon": "Asistan mobilde sonraki adımda eklenecek",
   "@uiRouterAssistantSoon": {
     "description": "ui.router.assistant_soon"
   },
@@ -3012,6 +3012,10 @@
   "uiRouterTabMessages": "Mesajlar",
   "@uiRouterTabMessages": {
     "description": "ui.router.tab_messages"
+  },
+  "uiRouterAssistantSoonTablet": "Asistan tablette sonraki adımda tasarlanacak",
+  "@uiRouterAssistantSoonTablet": {
+    "description": "ui.router.assistant_soon_tablet"
   },
   "uiRouterPickTitle": "Bir kayıt seç",
   "@uiRouterPickTitle": {
@@ -4741,21 +4745,17 @@
   "@uiTimelineOpen": {
     "description": "ui.timeline.open"
   },
-  "uiTimelineGanttBack": "Görevler",
-  "@uiTimelineGanttBack": {
-    "description": "ui.timeline.gantt_back"
-  },
-  "uiTimelineGanttBackLabel": "Geri: Görevler",
-  "@uiTimelineGanttBackLabel": {
-    "description": "ui.timeline.gantt_back_label"
-  },
   "uiTimelineGanttFilter": "Görev filtresi",
   "@uiTimelineGanttFilter": {
     "description": "ui.timeline.gantt_filter"
   },
-  "uiTimelineGanttScaleSeason": "Sezon",
-  "@uiTimelineGanttScaleSeason": {
-    "description": "ui.timeline.gantt_scale_season"
+  "uiTimelineGanttZoomDaily": "Günlük",
+  "@uiTimelineGanttZoomDaily": {
+    "description": "ui.timeline.gantt_zoom_daily"
+  },
+  "uiTimelineGanttZoomWeekly": "Haftalık",
+  "@uiTimelineGanttZoomWeekly": {
+    "description": "ui.timeline.gantt_zoom_weekly"
   },
   "uiTimelineGanttAllCoords": "Tüm koordinatörlükler",
   "@uiTimelineGanttAllCoords": {

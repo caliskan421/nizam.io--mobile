@@ -191,7 +191,6 @@ class _DateHeader extends StatelessWidget {
     final t = context.text;
     final l = context.l10n;
     final v = layout.view;
-    final short = v.state.zoom == GanttZoom.season;
     final side = BorderSide(color: c.border);
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -213,8 +212,7 @@ class _DateHeader extends StatelessWidget {
                   painter: GanttHeaderPainter(
                     layout: layout,
                     monthLabels: [
-                      for (var m = 1; m <= 12; m++)
-                        l.ganttMonth(m, v.year, short: short),
+                      for (var m = 1; m <= 12; m++) l.ganttMonth(m, v.year),
                     ],
                     colors: c,
                     // Ağırlık rolün kendisinden (600); `copyWith(fontWeight:)`

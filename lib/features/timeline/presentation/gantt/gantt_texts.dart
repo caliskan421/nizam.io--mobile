@@ -8,9 +8,8 @@ import '../timeline_texts.dart';
 /// Yatay çizelgenin birleşik cümleleri (parçalar ARB'den; tarih biçimi `tr`).
 extension GanttTexts on AppLocalizations {
   String ganttZoomLabel(GanttZoom z) => switch (z) {
-    GanttZoom.week => uiTimelineScaleWeek,
-    GanttZoom.month => uiTimelineScaleMonth,
-    GanttZoom.season => uiTimelineGanttScaleSeason,
+    GanttZoom.week => uiTimelineGanttZoomDaily,
+    GanttZoom.month => uiTimelineGanttZoomWeekly,
   };
 
   /// "Tümü" / "Açık" / "Geciken · 15".
@@ -28,9 +27,9 @@ extension GanttTexts on AppLocalizations {
   String ganttRange(GanttTask t, int year) =>
       '${ganttDay(t.start, year)} – ${ganttDay(t.end - 1, year)}';
 
-  /// Ay başlığı: "Ocak" (sezon ölçeğinde "Oca").
-  String ganttMonth(int month, int year, {required bool short}) =>
-      DateFormat(short ? 'MMM' : 'MMMM', 'tr').format(DateTime(year, month));
+  /// Ay başlığı: "Ocak".
+  String ganttMonth(int month, int year) =>
+      DateFormat('MMMM', 'tr').format(DateTime(year, month));
 
   /// "76 görev · tüm koordinatörlükler" / "13 görev · ALT, MEK".
   String ganttCountLine(GanttView v) =>

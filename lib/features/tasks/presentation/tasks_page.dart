@@ -136,23 +136,34 @@ class _TasksPageState extends ConsumerState<TasksPage> {
           child: NzPageHeader(
             title: l.uiTasksTitle,
             actions: [
-              TasksModeToggle(
-                selected: 0,
-                onSelected: (i) {
-                  if (i == 1) _toTimeline();
-                },
-              ),
-              NzIconButton.circle(
-                icon: NzIcons.search,
-                semanticLabel: l.uiTasksSearch,
-                onPressed: _toggleSearch,
-              ),
-              if (canCreate)
-                NzIconButton.circleAccent(
-                  icon: NzIcons.add,
-                  semanticLabel: l.uiTasksNewTask,
-                  onPressed: () => showNewTaskSheet(context, resetTarget: true),
+              TasksHeaderSlide(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TasksModeToggle(
+                      selected: 0,
+                      onSelected: (i) {
+                        if (i == 1) _toTimeline();
+                      },
+                    ),
+                    const Gap(NizamioSpacing.space1),
+                    NzIconButton.circle(
+                      icon: NzIcons.search,
+                      semanticLabel: l.uiTasksSearch,
+                      onPressed: _toggleSearch,
+                    ),
+                    if (canCreate) ...[
+                      const Gap(NizamioSpacing.space1),
+                      NzIconButton.circleAccent(
+                        icon: NzIcons.add,
+                        semanticLabel: l.uiTasksNewTask,
+                        onPressed: () =>
+                            showNewTaskSheet(context, resetTarget: true),
+                      ),
+                    ],
+                  ],
                 ),
+              ),
             ],
           ),
         ),

@@ -41,6 +41,7 @@ import 'package:nizamio/features/timeline/presentation/gantt/gantt_chart.dart'
     show GanttChart;
 
 import '../features/pilot_support.dart' show PilotBackend, real;
+import 'fake_backend.dart' show FakeHandler;
 import 'harness.dart';
 
 final _l = AppLocalizationsTr();
@@ -222,13 +223,17 @@ class TabletSession {
     WidgetTester tester, {
     Size? hostSize,
     ThemeMode theme = ThemeMode.dark,
+    FakeHandler? handler,
   }) async {
     if (hostSize != null) {
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = hostSize;
       addTearDown(tester.view.reset);
     }
-    final h = Harness(flavor: Flavor.dev, handler: PilotBackend().handle);
+    final h = Harness(
+      flavor: Flavor.dev,
+      handler: handler ?? PilotBackend().handle,
+    );
     addTearDown(h.dispose);
     await real(tester, () => h.read(serverBindingProvider).verify(testUrl));
     h.read(themeModeControllerProvider).state.value = theme;
@@ -251,7 +256,10 @@ class TabletSession {
   }
 
   /// Giriş ekranından gerçek akış (sahte ağ): e-posta + parola → "Giriş yap" → program seçimi.
-  Future<void> signIn() async {
+  ///
+  /// [programId] verilirse varsayılan `prog-1` yerine bu sunucu programı seçilir (ölçüm düzeneği:
+  /// görev verisi sunucu sözleşmesi biçiminde sahte HTTP'den gelir).
+  Future<void> signIn({String? programId}) async {
     expect(
       find.byType(LoginPage),
       findsOneWidget,
@@ -261,7 +269,7 @@ class TabletSession {
     await tester.enterText(find.byType(TextFormField).at(1), 'p');
     await tester.tap(find.widgetWithText(NzButton, _l.uiIdentityLoginSubmit));
     await settle();
-    harness.read(scopeControllerProvider).selectProgram('prog-1');
+    harness.read(scopeControllerProvider).selectProgram(programId ?? 'prog-1');
     await settle();
   }
 

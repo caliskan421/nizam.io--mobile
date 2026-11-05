@@ -33,3 +33,14 @@
 - “İlk kare” UI+raster toplamıdır; dokunuştan ekranda sunuma kadar gecikme değildir. P2d için dolu çizelgenin görünme zamanı ayrıca gerekir.
 - Belgede S1 iyileşmesi ve S2 kötüleşme eğilimi sayılarla uyumlu; P2b’nin ek kazancı kanıtlanmıyor. “Tamamı P2a’dan” ifadesi mevcut tekrar sayısına göre fazla kesin.
 - Ölçüm sırasında semantics kapalı: P2e’nin ekran okuyucu açıkken maliyeti ölçülmüş değil. P2d sonrası veri ve bu çalışma için yeşil CI kanıtı olmadan nihai performans kabulü verilemez.
+## Düzeltme durumu (koordinatör; Codex yeniden koşulmadı)
+
+| # | Durum | Nasıl |
+|---|---|---|
+| 1 | düzeltildi | Dikey çizelge okuyucu penceresi yerleşimden sonra `mounted` korumalı eşitlenir; içerik daralması testi. |
+| 2 | düzeltildi | `ganttLayoutProvider` kapsamı izler, autoDispose (canlı tutmanın ölçülü kazancı yoktu); program değişimi/çıkış testleri. |
+| 3 | düzeltildi | `onRevisit` yalnız `completed` durumunda; yeniden başlatma testi. |
+| 4 | düzeltildi | `docs/perf` P2d sütunu: uygulanan yol (gövde ikinci karede), ikinci kare ve dolu çizelgeye ulaşma süresi. |
+| 5 | kısmen | Boş ölçüm kümesi başarısız; kırpmasız sonuç JSON'da ek alan. Önceki sütunlar kırpılmış değerle kalır (kıyas sürekliliği). |
+| 6 | kabul | Gantt durum rengi animasyonsuz değişir; ek yapı kurulmadı. |
+| 7 | düzeltildi | P1a testindeki iki kesin konum iddiası kaldırıldı; davranış iddiaları duruyor. |

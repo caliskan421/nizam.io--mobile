@@ -7,6 +7,7 @@ import '../../../core/ui/motion/page_content_entrance.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
+import '../../../core/ui/widgets/feedback/nz_skeleton.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../../tasks/tasks.dart';
@@ -149,7 +150,7 @@ class _HorizontalTimelinePageState
   Widget build(BuildContext context) {
     final catalog = ref.watch(taskCatalogControllerProvider);
     // Yerleşim önbellekten: katalog ya da ekran durumu değişmedikçe aynı örnek (kaydırma ve
-    // sayfanın yeniden açılması kurmaz). Veri varken katalogla birlikte hazırdır.
+    // yeniden kurulum hesaplatmaz). Kapsam değişiminde yeni katalog gelene kadar null.
     final layout = ref.watch(ganttLayoutProvider);
     // Sayfa girişi yok: başlık liste bölmesindeki yerinde kalır, eylemler kayar
     // ([TasksHeaderSlide]), araç satırı ve çizelge soldan yumuşakça girer.
@@ -159,7 +160,11 @@ class _HorizontalTimelinePageState
         child: NzAsyncView<TaskCatalog>(
           value: catalog,
           onRetry: () => ref.invalidate(taskCatalogControllerProvider),
-          data: (c) => _body(context, layout!, c.truncated),
+          // Yerleşim yoksa (kapsam değişti, yeni programın kataloğu yolda; ya da çıkış)
+          // önceki programın çizelgesi çizilmez.
+          data: (c) => layout == null
+              ? const NzSkeleton.page()
+              : _body(context, layout, c.truncated),
         ),
       ),
     );

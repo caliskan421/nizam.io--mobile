@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations.dart';
 import 'package:nizamio/core/network/connectivity_monitor.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/core/ui/theme/app_theme.dart';
 import 'package:nizamio/features/tasks/application/task_catalog_controller.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
@@ -55,13 +56,16 @@ void main() {
     addTearDown(t.view.reset);
     final c = ProviderContainer(
       overrides: [
+        scopeStateProvider.overrideWithValue(
+          const ScopeSelection(programId: 'p1'),
+        ),
         taskCatalogControllerProvider.overrideWith(() => _Catalog(_catalog())),
         canCreateTaskProvider.overrideWithValue(false),
         connectivityStateProvider.overrideWithValue(ConnectivityState.online),
       ],
     );
     addTearDown(c.dispose);
-    // Katalog hazır (yeniden açılış: veri ve yerleşim önbellekte).
+    // Katalog hazır (yeniden açılış: veri önbellekte).
     await c.read(taskCatalogControllerProvider.future);
 
     await t.pumpWidget(

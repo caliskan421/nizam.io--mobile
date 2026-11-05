@@ -1,9 +1,12 @@
 // Yatay çizelge yerleşim önbelleği: aynı girdi → aynı örnek; katalog ya da ekran durumu
-// değişince yeniden; dinleyici kapanıp açılınca (sayfa yeniden açılışı) hazır.
+// değişince yeniden; ömür kapsama bağlı (program değişimi ve çıkışta atılır, aynı kapsamda
+// yenilemede kalır); dinleyici kapanınca bırakılır.
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/features/tasks/application/task_catalog_controller.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 import 'package:nizamio/features/timeline/application/horizontal_timeline_controller.dart';
@@ -36,31 +39,43 @@ TaskCatalog _catalog() => TaskCatalog(
   ],
 );
 
-/// Katalog sağlayıcısının yerine: sunucuya gitmeden verilen kataloğu taşır.
+/// Katalog sağlayıcısının yerine: gerçek denetleyici gibi kapsamı izler, sunucuya gitmeden
+/// [load]'un verdiği kataloğu taşır.
 class _Catalog extends TaskCatalogController {
-  _Catalog(this.initial);
+  _Catalog(this.load);
 
-  final Future<TaskCatalog> initial;
+  final Future<TaskCatalog> Function() load;
 
   @override
-  Future<TaskCatalog> build() => initial;
+  Future<TaskCatalog> build() {
+    ref.watch(scopeStateProvider);
+    return load();
+  }
 
   void put(TaskCatalog v) => state = AsyncData(v);
 }
 
 void main() {
   late ProviderContainer c;
+  late ScopeController scope;
   late TaskCatalog first;
+  late Future<TaskCatalog> Function() next;
+  late ProviderSubscription<GanttLayout?> page;
   setUp(() async {
     first = _catalog();
+    next = () => Future.value(first);
+    scope = ScopeController()..selectProgram('p1');
     c = ProviderContainer(
       overrides: [
+        scopeControllerProvider.overrideWithValue(scope),
         taskCatalogControllerProvider.overrideWith(
-          () => _Catalog(Future.value(first)),
+          () => _Catalog(() => next()),
         ),
       ],
     );
     await c.read(taskCatalogControllerProvider.future);
+    // Açık sayfa: yerleşimi izler (autoDispose).
+    page = c.listen(ganttLayoutProvider, (_, _) {});
   });
   tearDown(() => c.dispose());
 
@@ -107,21 +122,68 @@ void main() {
     expect(b.view.rows.length, a.view.rows.length);
   });
 
-  test('sayfa yeniden açılışı: dinleyici kapanınca yerleşim kalır', () async {
-    final sub = c.listen(ganttLayoutProvider, (_, _) {});
-    final a = sub.read()!;
-    sub.close();
+  test(
+    'aynı kapsamda yenileme: önceki yerleşim kalır, yeni katalogla yeniden',
+    () async {
+      final a = layout();
+      final pending = Completer<TaskCatalog>();
+      next = () => pending.future;
+      c.invalidate(taskCatalogControllerProvider);
+      expect(c.read(taskCatalogControllerProvider).isRefreshing, isTrue);
+      expect(layout(), same(a));
+      pending.complete(_catalog());
+      await c.read(taskCatalogControllerProvider.future);
+      expect(layout(), isNot(same(a)));
+    },
+  );
+
+  test(
+    'program değişince atılır; yeni programın kataloğu gelene kadar yok',
+    () async {
+      final a = layout();
+      final pending = Completer<TaskCatalog>();
+      next = () => pending.future;
+      scope.selectProgram('p2');
+      expect(c.read(taskCatalogControllerProvider).isReloading, isTrue);
+      expect(c.read(ganttLayoutProvider), isNull);
+      pending.complete(_catalog());
+      await c.read(taskCatalogControllerProvider.future);
+      expect(layout(), isNot(same(a)));
+    },
+  );
+
+  test(
+    'çıkış: kapsam temizlenince atılır (katalog önceki değeri taşısa da)',
+    () async {
+      layout();
+      next = () => Future.error(StateError('kapsam yok'));
+      scope.clear();
+      await expectLater(
+        c.read(taskCatalogControllerProvider.future),
+        throwsStateError,
+      );
+      expect(c.read(taskCatalogControllerProvider).value, same(first));
+      expect(c.read(ganttLayoutProvider), isNull);
+    },
+  );
+
+  test('sayfa kapanınca bırakılır; yeniden açılışta yeniden kurulur', () async {
+    final a = page.read()!;
+    page.close();
     await Future<void>.delayed(Duration.zero);
     final again = c.listen(ganttLayoutProvider, (_, _) {});
-    expect(again.read(), same(a));
+    expect(again.read(), isNot(same(a)));
     again.close();
   });
 
   test('katalog yokken null', () {
     final loading = ProviderContainer(
       overrides: [
+        scopeControllerProvider.overrideWithValue(
+          ScopeController()..selectProgram('p1'),
+        ),
         taskCatalogControllerProvider.overrideWith(
-          () => _Catalog(Completer<TaskCatalog>().future),
+          () => _Catalog(() => Completer<TaskCatalog>().future),
         ),
       ],
     );

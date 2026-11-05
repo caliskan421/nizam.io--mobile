@@ -3,9 +3,9 @@ import 'package:meta/meta.dart';
 import '../../tasks/tasks.dart';
 import 'timeline.dart';
 
-/// Yatay çizelgenin ölçeği (tablet prototipi `S_hgantt` `zoom`: hafta / ay / sezon). Gün başına
-/// piksel görünüm geometrisidir (presentation).
-enum GanttZoom { week, month, season }
+/// Yatay çizelgenin ölçeği: [week] gün gün ("Günlük"), [month] hafta hafta ("Haftalık"). Gün
+/// başına piksel görünüm geometrisidir (presentation).
+enum GanttZoom { week, month }
 
 /// Yatay çizelgenin durum süzgeci (prototip `filt`: tümü / açık / geciken).
 enum GanttFilter { all, open, late }
@@ -20,6 +20,7 @@ final class GanttState {
     this.coords = const [],
     this.closed = const {},
     this.selected,
+    this.query = '',
   });
 
   final GanttZoom zoom;
@@ -34,19 +35,27 @@ final class GanttState {
   /// Seçili görev kodu.
   final String? selected;
 
+  /// Arama metni (görev başlığı, koordinatörlük etiketi/adı ya da atanan kişi adı içinde);
+  /// boş → süzgeç yok.
+  final String query;
+
   GanttState _copy({
     GanttZoom? zoom,
     GanttFilter? filter,
     List<String>? coords,
     Set<String>? closed,
     String? Function()? selected,
+    String? query,
   }) => GanttState(
     zoom: zoom ?? this.zoom,
     filter: filter ?? this.filter,
     coords: coords ?? this.coords,
     closed: closed ?? this.closed,
     selected: selected == null ? this.selected : selected(),
+    query: query ?? this.query,
   );
+
+  GanttState withQuery(String q) => _copy(query: q);
 
   GanttState withZoom(GanttZoom z) => _copy(zoom: z);
 
@@ -93,7 +102,8 @@ final class GanttState {
       _sameList(other.coords, coords) &&
       other.closed.length == closed.length &&
       other.closed.containsAll(closed) &&
-      other.selected == selected;
+      other.selected == selected &&
+      other.query == query;
 
   @override
   int get hashCode => Object.hash(
@@ -102,6 +112,7 @@ final class GanttState {
     Object.hashAll(coords),
     Object.hashAllUnordered(closed),
     selected,
+    query,
   );
 
   static bool _sameList(List<String> a, List<String> b) {
@@ -350,9 +361,20 @@ GanttView buildGanttView(TaskCatalog catalog, GanttState s) {
   };
   bool coordOk(GanttTask t) =>
       s.coords.isEmpty || s.coords.contains(t.item.coordinatorship);
+  final q = s.query.trim().toLowerCase();
+  bool queryOk(GanttTask t) {
+    if (q.isEmpty) return true;
+    bool has(String? s) => s != null && s.toLowerCase().contains(q);
+    final c = catalog.coordinatorship(t.item.coordinatorship);
+    return has(t.item.title) ||
+        has(c?.label) ||
+        has(c?.name) ||
+        t.item.assignees.any((id) => has(catalog.nameOf(id)));
+  }
+
   final visible = [
     for (final t in tasks)
-      if (statusOk(t) && coordOk(t)) t,
+      if (statusOk(t) && coordOk(t) && queryOk(t)) t,
   ];
 
   final coords = catalog.coordinatorships;

@@ -8,16 +8,12 @@ import '../../domain/horizontal_timeline.dart';
 /// Yatay çizelgenin ölçüleri (tablet prototipi `12-Tablet.dc.html` "Yatay zaman çizelgesi · tam
 /// genişlik" ve `S_hgantt`). Değerler kaynak CSS'tendir; çizelgeye özgü olduğu için token değildir.
 abstract final class GanttGeometry {
-  /// Üst başlık (geri, başlık, süzgeç, ölçek, Bugün): 72; yan dolgu sol 12, sağ 20.
-  static const double header = 72;
-  static const double headerPadLeft = 12;
+  /// Başlık ve araç satırının yan dolgusu: 20.
   static const double headerPadRight = 20;
 
-  /// Koordinatörlük çipleri: 32 yükseklik, 12 yatay dolgu, 6 aralık; şerit yanları 20, altı 12.
-  static const double chip = 32;
-  static const double chipPad = 12;
+  /// Kapsül düğmeleri arası 6; araç satırı düğmesindeki sayı rozeti 18.
   static const double chipGap = 6;
-  static const double chipFontSize = 12.5;
+  static const double badge = 18;
 
   /// Süzgeç / ölçek kapsülü: 3 iç dolgu, 34 düğme, 14 yan dolgu. Bugün düğmesi 40, 16 yan.
   static const double segPad = 3;
@@ -26,17 +22,7 @@ abstract final class GanttGeometry {
   static const double todayButton = 40;
   static const double todayButtonPad = 16;
 
-  /// Geri düğmesi 44, dolgu sol 6 sağ 12, ikon–metin 4.
-  static const double backHeight = 44;
-  static const double backPadLeft = 6;
-  static const double backPadRight = 12;
-
-  /// Başlık yazısı 22/28.
-  static const double titleSize = 22;
-  static const double titleLine = 28;
-
-  /// Geri düğmesi yazısı 14; ay adı 12.
-  static const double backFontSize = 14;
+  /// Ay adı 12.
   static const double monthFontSize = 12;
 
   /// Yapışkan tarih başlığı 52: ay adları üstten 6 (12/16, sol çizgi + 8 dolgu), gün işaretleri
@@ -151,7 +137,6 @@ abstract final class GanttGeometry {
   static const centerDuration = Duration(milliseconds: 420);
   static const chevronDuration = Duration(milliseconds: 350);
   static const segDuration = Duration(milliseconds: 250);
-  static const chipDuration = Duration(milliseconds: 220);
   static const ringDuration = Duration(milliseconds: 200);
   static const cardDuration = Duration(milliseconds: 320);
   static const double cardRise = 14;
@@ -161,7 +146,6 @@ abstract final class GanttGeometry {
   static double ppd(GanttZoom z) => switch (z) {
     GanttZoom.week => 28,
     GanttZoom.month => 10,
-    GanttZoom.season => 3.4,
   };
 
   /// Prototip `center`: `max(0, TD × ppd − (clientWidth − LW) × 0.4)`; kaydırma sınırında kesilir.
@@ -325,7 +309,6 @@ final class GanttLayout {
           ),
       ],
       ticks: switch (v.state.zoom) {
-        GanttZoom.season => const [],
         final z => [
           for (var d = 0; d < v.days; d++)
             if (z == GanttZoom.week ||

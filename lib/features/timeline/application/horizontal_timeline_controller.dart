@@ -36,6 +36,8 @@ class HorizontalTimelineController extends _$HorizontalTimelineController {
 
   void setFilter(GanttFilter filter) => state = state.withFilter(filter);
 
+  void setQuery(String query) => state = state.withQuery(query);
+
   void toggleCoord(String code) => state = state.toggleCoord(code);
 
   void clearCoords() => state = state.clearCoords();

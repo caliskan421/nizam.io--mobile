@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/motion/page_content_entrance.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
+import '../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../../tasks/tasks.dart';
 import '../application/horizontal_timeline_controller.dart';
 import '../application/horizontal_timeline_view.dart';
@@ -14,11 +17,13 @@ import 'gantt/gantt_chart.dart';
 import 'gantt/gantt_controls.dart';
 import 'gantt/gantt_geometry.dart';
 import 'gantt/gantt_selection_card.dart';
+import 'gantt/gantt_sheets.dart';
 
 /// Tablet yatay zaman çizelgesi (prototip `S_hgantt`, "Yatay zaman çizelgesi · tam genişlik"):
-/// üst başlık (geri, başlık + sayı satırı, durum süzgeci, ölçek, Bugün), koordinatörlük
-/// çipleri, yatay zaman eksenli Gantt (yapışkan tarih başlığı ve etiket sütunu, gruplar, çubuklar,
-/// gecikme şeritleri, bugün çizgisi), lejant ve seçili görev kartı.
+/// "Görevler" başlığı (sayı satırı, Liste / Zaman çizelgesi anahtarı, ara, yeni görev), araç
+/// satırı (koordinatörlük ve filtre düğmeleri, ölçek, Bugün), yatay zaman eksenli Gantt
+/// (yapışkan tarih başlığı ve etiket sütunu, gruplar, çubuklar, gecikme şeritleri, bugün
+/// çizgisi), lejant ve seçili görev kartı.
 ///
 /// Gezinme rayını çizmez (uygulama kabuğunun); güvenli alanı bir kez uygular (dışarıda
 /// uygulanmışsa etkisizdir). Veri ortak görev kataloğundan (`taskCatalogControllerProvider`);
@@ -53,6 +58,28 @@ class _HorizontalTimelinePageState
     extends ConsumerState<HorizontalTimelinePage> {
   var _center = const GanttCenterRequest(0);
 
+  // Arama alanı başlığın altında yerinde açılır; metin denetleyici durumundan başlar
+  // (initState'te; `late` başlatma dispose'a kalırsa ref artık kullanılamaz).
+  final _search = TextEditingController();
+  final _searchFocus = FocusNode();
+  bool _searchOpen = false;
+
+  @override
+  void dispose() {
+    _search.dispose();
+    _searchFocus.dispose();
+    super.dispose();
+  }
+
+  void _toggleSearch() {
+    setState(() => _searchOpen = !_searchOpen);
+    if (!_searchOpen) {
+      _search.clear();
+      _searchFocus.unfocus();
+      _ctrl.setQuery('');
+    }
+  }
+
   // Görünüm ve yerleşim yalnız katalog ya da durum değişince kurulur (kaydırma kurmaz).
   TaskCatalog? _catalog;
   GanttState? _builtFor;
@@ -64,6 +91,8 @@ class _HorizontalTimelinePageState
   @override
   void initState() {
     super.initState();
+    _search.text = ref.read(horizontalTimelineControllerProvider).query;
+    _searchOpen = _search.text.isNotEmpty;
     _applyIntent(widget.coordinatorship);
   }
 
@@ -128,7 +157,10 @@ class _HorizontalTimelinePageState
   Widget build(BuildContext context) {
     final catalog = ref.watch(taskCatalogControllerProvider);
     final state = ref.watch(horizontalTimelineControllerProvider);
+    // Sayfa girişi yok: başlık liste bölmesindeki yerinde kalır, eylemler kayar
+    // ([TasksHeaderSlide]), araç satırı ve çizelge soldan yumuşakça girer.
     return NzPage.bare(
+      animateContent: false,
       body: SafeArea(
         child: NzAsyncView<TaskCatalog>(
           value: catalog,
@@ -155,46 +187,85 @@ class _HorizontalTimelinePageState
             children: [
               GanttTopBar(
                 view: v,
-                onBack: _back,
-                onFilter: ctrl.setFilter,
-                onZoom: _zoom,
-                onToday: _today,
+                onList: _back,
+                onSearch: _toggleSearch,
+                onNewTask: ref.watch(canCreateTaskProvider)
+                    ? () => showNewTaskSheet(context, resetTarget: true)
+                    : null,
               ),
-              GanttCoordChips(
-                view: v,
-                onAll: ctrl.clearCoords,
-                onToggle: ctrl.toggleCoord,
-              ),
-              // Kesik katalog (sayfa tavanı/imleç tekrarı): çizelge eksik olabilir.
-              if (truncated)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: NizamioSpacing.gutter,
-                    vertical: NizamioSpacing.space1,
+              NzReveal(
+                open: _searchOpen,
+                onOpened: _searchFocus.requestFocus,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    GanttGeometry.headerPadRight,
+                    0,
+                    GanttGeometry.headerPadRight,
+                    NizamioSpacing.space3,
                   ),
-                  child: Text(
-                    context.l10n.uiListsTruncated,
-                    style: context.text.caption.copyWith(color: c.textMuted),
+                  child: NzSearchField(
+                    controller: _search,
+                    focusNode: _searchFocus,
+                    label: context.l10n.uiTasksSearchHint,
+                    hint: context.l10n.uiTasksSearchHint,
+                    onChanged: ctrl.setQuery,
+                    onClear: () => ctrl.setQuery(''),
                   ),
                 ),
+              ),
+              // Araç satırı ve çizelge soldan sağa yumuşakça girer (tablet bölme `pop`
+              // hareketi); sayfa sınırına kırpılır (ray üstüne taşmaz).
               Expanded(
-                child: DecoratedBox(
-                  position: DecorationPosition.foreground,
-                  decoration: BoxDecoration(
-                    border: Border(top: BorderSide(color: c.border)),
-                  ),
-                  child: ClipRect(
-                    child: GanttChart(
-                      key: HorizontalTimelinePage.chartKey,
-                      layout: layout,
-                      center: _center,
-                      onToggleGroup: ctrl.toggleGroup,
-                      onPick: ctrl.pick,
+                child: ClipRect(
+                  child: NzPaneTransition(
+                    motion: NzPaneMotion.pop,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        GanttToolbar(
+                          view: v,
+                          onCoord: () => showGanttCoordSheet(context),
+                          onFilter: () => showGanttFilterSheet(context),
+                          onZoom: _zoom,
+                          onToday: _today,
+                        ),
+                        // Kesik katalog (sayfa tavanı/imleç tekrarı): çizelge eksik olabilir.
+                        if (truncated)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: NizamioSpacing.gutter,
+                              vertical: NizamioSpacing.space1,
+                            ),
+                            child: Text(
+                              context.l10n.uiListsTruncated,
+                              style: context.text.caption.copyWith(
+                                color: c.textMuted,
+                              ),
+                            ),
+                          ),
+                        Expanded(
+                          child: DecoratedBox(
+                            position: DecorationPosition.foreground,
+                            decoration: BoxDecoration(
+                              border: Border(top: BorderSide(color: c.border)),
+                            ),
+                            child: ClipRect(
+                              child: GanttChart(
+                                key: HorizontalTimelinePage.chartKey,
+                                layout: layout,
+                                center: _center,
+                                onToggleGroup: ctrl.toggleGroup,
+                                onPick: ctrl.pick,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const GanttLegend(),
+                      ],
                     ),
                   ),
                 ),
               ),
-              const GanttLegend(),
             ],
           ),
           if (sel != null)

@@ -4579,7 +4579,7 @@ abstract class AppLocalizations {
   /// ui.router.assistant_soon
   ///
   /// In tr, this message translates to:
-  /// **'Asistan sonraki adımda eklenecek'**
+  /// **'Asistan mobilde sonraki adımda eklenecek'**
   String get uiRouterAssistantSoon;
 
   /// ui.router.tab_history
@@ -4611,6 +4611,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Mesajlar'**
   String get uiRouterTabMessages;
+
+  /// ui.router.assistant_soon_tablet
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistan tablette sonraki adımda tasarlanacak'**
+  String get uiRouterAssistantSoonTablet;
 
   /// ui.router.pick_title
   ///
@@ -7090,29 +7096,23 @@ abstract class AppLocalizations {
   /// **'aç'**
   String get uiTimelineOpen;
 
-  /// ui.timeline.gantt_back
-  ///
-  /// In tr, this message translates to:
-  /// **'Görevler'**
-  String get uiTimelineGanttBack;
-
-  /// ui.timeline.gantt_back_label
-  ///
-  /// In tr, this message translates to:
-  /// **'Geri: Görevler'**
-  String get uiTimelineGanttBackLabel;
-
   /// ui.timeline.gantt_filter
   ///
   /// In tr, this message translates to:
   /// **'Görev filtresi'**
   String get uiTimelineGanttFilter;
 
-  /// ui.timeline.gantt_scale_season
+  /// ui.timeline.gantt_zoom_daily
   ///
   /// In tr, this message translates to:
-  /// **'Sezon'**
-  String get uiTimelineGanttScaleSeason;
+  /// **'Günlük'**
+  String get uiTimelineGanttZoomDaily;
+
+  /// ui.timeline.gantt_zoom_weekly
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftalık'**
+  String get uiTimelineGanttZoomWeekly;
 
   /// ui.timeline.gantt_all_coords
   ///

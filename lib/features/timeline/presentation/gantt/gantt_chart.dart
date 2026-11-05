@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ViewportOffset;
 import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
@@ -16,7 +17,8 @@ import 'gantt_texts.dart';
 
 /// Yapışkan sol sütunun camı: üst çubukla (`NzGlassTone.bar`) aynı bulanıklık; dolguyu
 /// satırlar verir (görev satırı `glassBar`, grup satırı aynı saydamlıkta `surface`). Altından
-/// kayan çubuklar bulanık görünür.
+/// kayan çubuklar bulanık görünür. Gövdede cam, dikey kaydırmanın dışında görünür alan
+/// boyunda tek sabit paneldir; etiketler üstünde kayar.
 Widget _labelGlass(Widget child) => ClipRect(
   child: BackdropFilter(filter: NzGlassTone.bar.filter(), child: child),
 );
@@ -150,21 +152,69 @@ class _GanttChartState extends State<GanttChart> {
                   height: GanttGeometry.stickyHeader,
                   child: _DateHeader(layout: l, sticky: _sticky),
                 ),
+                // Tek dikey kaydırma: gövde ve etiket sütunu aynı ofseti paylaşan iki
+                // görünümde kayar; aralarındaki cam panel kaymaz, görünür alan boyundadır
+                // (tüm satır boyunda bulanıklık katmanı kurulmaz). Sürükleme her yerde kaydırır.
                 Expanded(
-                  child: SingleChildScrollView(
+                  child: Scrollable(
                     key: GanttChart.verticalKey,
                     controller: _v,
-                    child: SizedBox(
-                      width: l.totalWidth,
-                      height: height,
-                      child: _Body(
-                        layout: l,
-                        height: height,
-                        emptyWidth: box.maxWidth,
-                        sticky: _sticky,
-                        onToggleGroup: widget.onToggleGroup,
-                        onPick: widget.onPick,
-                      ),
+                    viewportBuilder: (context, offset) => Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        _scrolled(
+                          offset,
+                          SizedBox(
+                            height: height,
+                            child: _Body(
+                              layout: l,
+                              height: height,
+                              onPick: widget.onPick,
+                            ),
+                          ),
+                        ),
+                        if (!l.view.empty)
+                          Positioned(
+                            left: 0,
+                            top: 0,
+                            width: GanttGeometry.labelWidth,
+                            height: math.min(viewport, l.rowsHeight),
+                            child: _sticky(
+                              _labelGlass(const SizedBox.expand()),
+                            ),
+                          ),
+                        Positioned(
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: l.view.empty
+                              ? box.maxWidth
+                              : GanttGeometry.labelWidth,
+                          child: _sticky(
+                            _scrolled(
+                              offset,
+                              SizedBox(
+                                height: height,
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Positioned(
+                                      left: 0,
+                                      top: 0,
+                                      right: 0,
+                                      child: _Labels(
+                                        layout: l,
+                                        onToggleGroup: widget.onToggleGroup,
+                                        onPick: widget.onPick,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -302,24 +352,23 @@ class _DateHeader extends StatelessWidget {
   }
 }
 
-/// Gövde: zemin ressamı, çubuklar, dış başlıklar, bugün çizgisi, yapışkan etiket sütunu.
+/// [child]'ı dikey kaydırma ofsetiyle gösteren görünüm. Gövde ve etiket sütunu aynı ofseti
+/// paylaşır; ikisi de aynı içerik boyunu ([_GanttChartState] `height`) bildirir.
+Widget _scrolled(ViewportOffset offset, Widget child) => Viewport(
+  offset: offset,
+  slivers: [SliverToBoxAdapter(child: child)],
+);
+
+/// Gövde: zemin ressamı, çubuklar, dış başlıklar, bugün çizgisi.
 class _Body extends StatelessWidget {
   const _Body({
     required this.layout,
     required this.height,
-    required this.emptyWidth,
-    required this.sticky,
-    required this.onToggleGroup,
     required this.onPick,
   });
 
   final GanttLayout layout;
   final double height;
-
-  /// Boş durum metninin genişliği (görünür alan).
-  final double emptyWidth;
-  final Widget Function(Widget) sticky;
-  final ValueChanged<String> onToggleGroup;
   final ValueChanged<String> onPick;
 
   @override
@@ -404,45 +453,54 @@ class _Body extends StatelessWidget {
           height: height,
           child: IgnorePointer(child: ColoredBox(color: c.ganttLateLine)),
         ),
-        Positioned(
-          left: 0,
-          top: 0,
-          width: layout.view.empty ? emptyWidth : GanttGeometry.labelWidth,
-          child: sticky(
-            layout.view.empty
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: GanttGeometry.emptyPad,
-                    ),
-                    child: Text(
-                      l.uiTimelineGanttEmpty,
-                      textAlign: TextAlign.center,
-                      style: t.bodyMd.copyWith(color: c.textMuted),
-                    ),
-                  )
-                : _labelGlass(
-                    Column(
-                      key: GanttChart.labelsKey,
-                      children: [
-                        for (final b in layout.rows)
-                          SizedBox(
-                            height: GanttGeometry.row,
-                            child: switch (b.row) {
-                              final GanttHeadRow h => _GroupLabel(
-                                head: h,
-                                onTap: () => onToggleGroup(h.code),
-                              ),
-                              final GanttTaskRow r => _TaskLabel(
-                                row: r,
-                                onTap: () => onPick(r.task.code),
-                              ),
-                            },
-                          ),
-                      ],
-                    ),
-                  ),
-          ),
+      ],
+    );
+  }
+}
+
+/// Yapışkan sol etiket sütunu (saydam zemin; camı altındaki sabit panel verir) ya da boş
+/// durum metni.
+class _Labels extends StatelessWidget {
+  const _Labels({
+    required this.layout,
+    required this.onToggleGroup,
+    required this.onPick,
+  });
+
+  final GanttLayout layout;
+  final ValueChanged<String> onToggleGroup;
+  final ValueChanged<String> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    if (layout.view.empty) {
+      final c = context.colors;
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: GanttGeometry.emptyPad),
+        child: Text(
+          context.l10n.uiTimelineGanttEmpty,
+          textAlign: TextAlign.center,
+          style: context.text.bodyMd.copyWith(color: c.textMuted),
         ),
+      );
+    }
+    return Column(
+      key: GanttChart.labelsKey,
+      children: [
+        for (final b in layout.rows)
+          SizedBox(
+            height: GanttGeometry.row,
+            child: switch (b.row) {
+              final GanttHeadRow h => _GroupLabel(
+                head: h,
+                onTap: () => onToggleGroup(h.code),
+              ),
+              final GanttTaskRow r => _TaskLabel(
+                row: r,
+                onTap: () => onPick(r.task.code),
+              ),
+            },
+          ),
       ],
     );
   }

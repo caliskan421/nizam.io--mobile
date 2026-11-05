@@ -45,3 +45,9 @@ Gerçek `NizamioApp` + gerçek bileşim kökü + `Flavor.dev` + sahte HTTP ile g
 ham `FrameTiming` listesi `SchedulerBinding.addTimingsCallback` ile toplanır, anlamsal ağaç pencerede kapalıdır.
 Yüzdelikler tekrarların birleşik karelerinden (en yakın sıra); "ilk kare" dokunuştan sonraki ilk karenin UI+raster
 toplamı (tekrar medyanı).
+
+Geri dönüş ve bulucular güncel arayüze göredir: Liste/Zaman çizelgesi anahtarı yalnız simgedir, anlamsal etiketle
+("Liste", "Zaman çizelgesi") bulunur; tablette çizelgeden "Liste" anahtarıyla, telefonda (çizelge tam ekran açılır)
+sistem geri hareketiyle dönülür. Anlamsal ağaç yeniden açılınca birkaç kare beklenir. Telefon simülatöründe görünüm
+`native` kullanılır (`phone` görünümünde raster 0 görünebilir). Nokta kıyası: her noktada bu düzenek `git cherry-pick -n`
+ile o commit'in üstüne bindirilir.

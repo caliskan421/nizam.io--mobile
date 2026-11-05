@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
@@ -47,13 +48,59 @@ class TimelinePage extends ConsumerStatefulWidget {
 }
 
 class _TimelinePageState extends ConsumerState<TimelinePage> {
-  bool _full = false;
+  /// Telefonda ekran tam ekran başlar (üst çubuk, başlık satırı ve arama kapalı; yalnız
+  /// çizelge); boş alana dokunmak açar/kapatır. Tablette kullanılmaz.
+  bool _full = true;
+  bool _started = false;
   bool _searchOpen = false;
   bool _hint = false;
   Timer? _hintTimer;
   final _search = TextEditingController();
   final _focus = FocusNode();
   bool get _phone => MediaQuery.sizeOf(context).width < 600;
+
+  /// Telefonda bu ekran görünürken sistem durum çubuğu (saat, ağ, pil) gizlidir; alt sistem
+  /// çubuğu (iOS ana ekran çizgisi, Android gezinme) kalır. Üstüne sayfa açılınca (örtülü rota
+  /// TickerMode kapalı), tablete geçince ya da ekran kapanınca geri gelir.
+  bool _statusHidden = false;
+
+  void _syncStatusBar() {
+    final hide = _phone && TickerMode.valuesOf(context).enabled;
+    if (hide == _statusHidden) return;
+    _statusHidden = hide;
+    _applyStatusBar(hidden: hide);
+  }
+
+  static void _applyStatusBar({required bool hidden}) {
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: hidden
+          ? const [SystemUiOverlay.bottom]
+          : SystemUiOverlay.values,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncStatusBar();
+    // İlk açılışta "çıkmak için boş alana dokun" ipucu bir kez görünür (yalnız telefonda).
+    if (!_started) {
+      _started = true;
+      if (_phone) {
+        _hint = true;
+        _hideHintLater();
+      }
+    }
+  }
+
+  void _hideHintLater() {
+    _hintTimer?.cancel();
+    _hintTimer = Timer(const Duration(milliseconds: 2400), () {
+      if (mounted) setState(() => _hint = false);
+    });
+  }
+
   void _toggleFull() {
     if (!_phone) return;
     setState(() {
@@ -62,15 +109,12 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     });
     _focus.unfocus();
     _hintTimer?.cancel();
-    if (_full) {
-      _hintTimer = Timer(const Duration(milliseconds: 2400), () {
-        if (mounted) setState(() => _hint = false);
-      });
-    }
+    if (_full) _hideHintLater();
   }
 
   @override
   void dispose() {
+    if (_statusHidden) _applyStatusBar(hidden: false);
     _hintTimer?.cancel();
     _search.dispose();
     _focus.dispose();

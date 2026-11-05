@@ -18,7 +18,7 @@ import 'gantt/gantt_selection_card.dart';
 /// Tablet yatay zaman çizelgesi (prototip `S_hgantt`, "Yatay zaman çizelgesi · tam genişlik"):
 /// üst başlık (geri, başlık + sayı satırı, durum süzgeci, ölçek, Bugün), koordinatörlük
 /// çipleri, yatay zaman eksenli Gantt (yapışkan tarih başlığı ve etiket sütunu, gruplar, çubuklar,
-/// gecikme şeritleri, Teknofest günleri, bugün çizgisi), lejant ve seçili görev kartı.
+/// gecikme şeritleri, bugün çizgisi), lejant ve seçili görev kartı.
 ///
 /// Gezinme rayını çizmez (uygulama kabuğunun); güvenli alanı bir kez uygular (dışarıda
 /// uygulanmışsa etkisizdir). Veri ortak görev kataloğundan (`taskCatalogControllerProvider`);

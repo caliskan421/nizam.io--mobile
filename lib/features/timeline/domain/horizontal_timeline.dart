@@ -198,15 +198,14 @@ final class GanttTaskRow extends GanttRow {
   final GanttTask task;
   final bool selected;
 
-  /// Koordinatörlük etiketi (grup başlığıyla aynı); örnek veride görev kodu (`ALT-7`).
+  /// Koordinatörlük etiketi (grup başlığıyla aynı).
   final String label;
 
-  /// Koordinatörlük içindeki sıra (1'den; oluşturma sırası, süzgeçten bağımsız); örnek veride
-  /// kod numarayı zaten taşıdığı için null.
-  final int? number;
+  /// Koordinatörlük içindeki sıra (1'den; oluşturma sırası, süzgeçten bağımsız).
+  final int number;
 
-  /// Ekrandaki görev anahtarı: "ALT 3" (örnekte "ALT-7").
-  String get key => number == null ? label : '$label $number';
+  /// Ekrandaki görev anahtarı: "ALT 3".
+  String get key => '$label $number';
 }
 
 /// Koordinatörlük çipi.
@@ -255,7 +254,6 @@ final class GanttView {
     required this.visible,
     required this.lateAll,
     required this.chips,
-    required this.festival,
     required this.selection,
   });
 
@@ -278,8 +276,6 @@ final class GanttView {
   /// "Tüm koordinatörlükler" dışındaki çipler (prototip sırası).
   final List<GanttCoordChip> chips;
 
-  /// Teknofest günleri (başlangıç dahil, bitiş hariç).
-  final DayRange festival;
   final GanttSelection? selection;
 
   bool get empty => rows.isEmpty;
@@ -318,25 +314,10 @@ Map<String, int> taskNumbers(List<TaskItem> tasks) {
   return numbers;
 }
 
-/// Koordinatörlüklerin görünüm sırası: [order]'dakiler o sırayla, kalanlar katalog sırasıyla.
-List<CoordinatorshipRef> orderedCoordinatorships(
-  TaskCatalog catalog,
-  List<String> order,
-) => [
-  for (final code in order) ?catalog.coordinatorship(code),
-  for (final c in catalog.coordinatorships)
-    if (!order.contains(c.code)) c,
-];
-
 /// Prototip `S_hgantt.renderVals` mantığı: süzgeç, gruplama (başlangıca göre kararlı sıra),
 /// kapalı gruplar, sayılar, çipler ve seçili kart. Katalog görevlerinin hepsi kullanılır (ikinci
 /// veri kaynağı yok).
-GanttView buildGanttView(
-  TaskCatalog catalog,
-  GanttState s, {
-  required List<String> order,
-  required DayRange festival,
-}) {
+GanttView buildGanttView(TaskCatalog catalog, GanttState s) {
   final year = catalog.today.year;
   final today = seasonDay(catalog.today, year);
   final days = DateTime.utc(year + 1).difference(DateTime.utc(year)).inDays;
@@ -374,7 +355,7 @@ GanttView buildGanttView(
       if (statusOk(t) && coordOk(t)) t,
   ];
 
-  final coords = orderedCoordinatorships(catalog, order);
+  final coords = catalog.coordinatorships;
   final numbers = taskNumbers(catalog.tasks);
   final rows = <GanttRow>[];
   for (final c in coords) {
@@ -404,13 +385,12 @@ GanttView buildGanttView(
     );
     if (open) {
       for (final t in group) {
-        final shortCode = t.item.shortCode;
         rows.add(
           GanttTaskRow(
             task: t,
             selected: s.selected == t.code,
-            label: shortCode == null ? t.item.displayCode : c.label,
-            number: shortCode == null ? null : numbers[t.code],
+            label: c.label,
+            number: numbers[t.code]!,
           ),
         );
       }
@@ -451,7 +431,6 @@ GanttView buildGanttView(
           selected: s.coords.contains(c.code),
         ),
     ],
-    festival: festival,
     selection: selection,
   );
 }

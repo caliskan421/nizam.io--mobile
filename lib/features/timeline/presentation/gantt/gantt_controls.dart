@@ -341,7 +341,7 @@ class _Chip extends StatelessWidget {
   }
 }
 
-/// Lejant (40): beş durum, gecikme deseni; sağda Teknofest günleri.
+/// Lejant (40): beş durum, gecikme deseni.
 class GanttLegend extends StatelessWidget {
   const GanttLegend({super.key});
 
@@ -386,11 +386,6 @@ class GanttLegend extends StatelessWidget {
           item(
             CustomPaint(painter: GanttHatchSwatchPainter(c.ganttLate)),
             l.uiTimelineGanttLegendLate,
-          ),
-          const Spacer(),
-          item(
-            solid(c.danger.withValues(alpha: GanttGeometry.festLegendAlpha)),
-            l.uiTimelineGanttLegendFest,
           ),
         ],
       ),

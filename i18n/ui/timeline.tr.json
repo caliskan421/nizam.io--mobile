@@ -101,7 +101,6 @@
     "ui.timeline.gantt_today_pill": "bugün",
     "ui.timeline.gantt_empty": "Bu filtreyle eşleşen görev yok.",
     "ui.timeline.gantt_legend_late": "Gecikme",
-    "ui.timeline.gantt_legend_fest": "Teknofest günleri",
     "ui.timeline.gantt_card_status": "durum",
     "ui.timeline.gantt_card_date": "tarih",
     "ui.timeline.gantt_card_assignee": "atanan",

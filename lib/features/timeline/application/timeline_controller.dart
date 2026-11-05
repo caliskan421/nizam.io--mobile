@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../tasks/tasks.dart';
-import '../data/sample/timeline_sample.dart';
 import '../domain/timeline.dart';
 import '../domain/timeline_view_builder.dart';
 
@@ -47,7 +46,6 @@ class TimelineController extends _$TimelineController {
           ? null
           : [coordinatorship],
       startAll: all,
-      requests: timelineSampleRequests,
     );
   }
 
@@ -274,7 +272,5 @@ AsyncValue<TimelineView> timelineView(Ref ref, String? coordinatorship) {
   final state = ref.watch(timelineControllerProvider(coordinatorship));
   return ref
       .watch(taskCatalogControllerProvider)
-      .whenData(
-        (c) => buildTimelineView(c, state, dependent: timelineSampleDependent),
-      );
+      .whenData((c) => buildTimelineView(c, state));
 }

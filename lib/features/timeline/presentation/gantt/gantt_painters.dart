@@ -43,7 +43,7 @@ void paintGanttHatch(Canvas canvas, RRect rrect, Color color, double band) {
   canvas.restore();
 }
 
-/// Tarih alanı zemini (tarih alanı koordinatı): Teknofest gölgesi, grup satırı zemini ve özet
+/// Tarih alanı zemini (tarih alanı koordinatı): grup satırı zemini ve özet
 /// çizgisi, seçili satır zemini, haftalık ızgara, gecikme şeritleri. Kaydırmadan bağımsızdır;
 /// yalnız yerleşim ya da renkler değişince yeniden çizilir.
 class GanttBodyPainter extends CustomPainter {
@@ -56,10 +56,6 @@ class GanttBodyPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final c = colors;
     final p = Paint();
-    canvas.drawRect(
-      layout.festival(size.height),
-      p..color = c.danger.withValues(alpha: GanttGeometry.festAlpha),
-    );
     final grid = layout.gridLines.toList();
     for (final b in layout.rows) {
       final row = Rect.fromLTWH(0, b.top, size.width, GanttGeometry.row);

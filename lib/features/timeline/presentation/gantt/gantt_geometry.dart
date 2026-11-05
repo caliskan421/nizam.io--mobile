@@ -102,10 +102,8 @@ abstract final class GanttGeometry {
   static const double summaryHeight = 4;
   static const double minSummary = 4;
 
-  /// Bugün çizgisi 2; Teknofest gölgesi danger %9, lejant örneği %30; seçili satır %6.
+  /// Bugün çizgisi 2; seçili satır %6.
   static const double todayLine = 2;
-  static const double festAlpha = 0.09;
-  static const double festLegendAlpha = 0.30;
   static const double selectedRowAlpha = 0.06;
 
   /// Lejant: 40 yükseklik, yan 20, öğeler arası 18; örnek 14 × 8, köşe 3, çizgi deseni 3 + 3.
@@ -361,14 +359,6 @@ final class GanttLayout {
 
   /// Bugün çizgisinin tarih alanındaki x'i (`TD × ppd`).
   double get todayX => view.today * ppd;
-
-  /// Teknofest gölgesi.
-  Rect festival(double height) => Rect.fromLTWH(
-    view.festival.start * ppd,
-    0,
-    view.festival.length * ppd,
-    height,
-  );
 
   /// Haftalık ızgara çizgilerinin x'leri (`background-size 7·ppd`, `position 4·ppd`: pazartesi).
   Iterable<double> get gridLines sync* {

@@ -34,7 +34,7 @@ final class GanttCenterRequest {
 }
 
 /// Yatay Gantt gövdesi (prototip `chartRef` kabı): yatay + dikey kaydırma, yapışkan tarih
-/// başlığı (52) ve yapışkan sol etiket sütunu (300), Teknofest gölgesi, bugün çizgisi, grup
+/// başlığı (52) ve yapışkan sol etiket sütunu (300), bugün çizgisi, grup
 /// başlıkları (aç/kapat) ve görev çubukları (gerçek dokunma alanı ve okuyucu etiketi).
 ///
 /// Dış görünüm yatay kayar; başlık ve gövde birlikte kayar, sol sütun ve başlığın sol hücresi
@@ -678,7 +678,7 @@ class _TaskLabel extends StatelessWidget {
                           style: keyStyle,
                         ),
                       ),
-                      if (number != null) Text(' $number', style: keyStyle),
+                      Text(' $number', style: keyStyle),
                     ],
                   ),
                 ),

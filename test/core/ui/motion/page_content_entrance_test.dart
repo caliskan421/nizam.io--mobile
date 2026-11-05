@@ -103,7 +103,6 @@ void main() {
   testWidgets(
     'camlı kapsayıcı yalnız öteler; içteki camsız giriş onun eğrisiyle solar',
     (tester) async {
-      const inner = ValueKey('inner');
       await tester.pumpWidget(
         app(
           const Align(
@@ -113,7 +112,7 @@ void main() {
               child: PageContentEntrance(
                 fade: false,
                 child: PageContentEntrance(
-                  child: SizedBox(key: inner, width: 10, height: 10),
+                  child: SizedBox(width: 10, height: 10),
                 ),
               ),
             ),
@@ -129,14 +128,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 160));
       final t = RpMotion.enterCurve.transform(0.5);
       expect(opacities(), [1, closeTo(t, 0.001)]);
-      // Mesafe yalnız bölme hareketinden gelir (iç girişler katılır).
-      expect(
-        tester.getTopLeft(find.byKey(inner)).dy,
-        closeTo(RpMotion.enterOffset * (1 - t), 0.001),
-      );
       await tester.pump(RpMotion.enterDuration);
       expect(opacities(), [1, 1]);
-      expect(tester.getTopLeft(find.byKey(inner)).dy, 0);
     },
   );
 

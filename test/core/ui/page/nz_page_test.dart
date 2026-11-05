@@ -303,6 +303,40 @@ void main() {
     expect(y, closeTo(56, 1), reason: 'üst çubuğun hemen altında');
   });
 
+  // Görev listesi kartları `children` öğesidir (tasks_list_parts): uzun listede yalnız
+  // görünür alan + önbellek payı kurulur; zaman çizelgesinden dönüşte maliyet öğe sayısıyla
+  // büyümez.
+  testWidgets(
+    'feed: 150 öğede ilk karede az öğe kurulur; kaydırınca sıradaki kurulur',
+    (tester) async {
+      _size(tester, 390, 844);
+      final built = <int>{};
+      await tester.pumpWidget(
+        _app(
+          NzPage.feed(
+            topBar: const SliverAppBar(pinned: true, title: Text('üst')),
+            onRefresh: () async {},
+            children: [
+              for (var i = 0; i < 150; i++)
+                _CountedRow(key: ValueKey('row:$i'), index: i, built: built),
+            ],
+          ),
+        ),
+      );
+      final first = built.length;
+      expect(first, lessThan(30), reason: 'tembel kurulum: $first / 150');
+      expect(built, isNot(contains(first + 20)));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -2000));
+      await tester.pumpAndSettle();
+      expect(
+        built,
+        contains(first + 20),
+        reason: 'kaydırınca sıradaki öğe kurulur',
+      );
+      expect(built.length, lessThan(150));
+    },
+  );
+
   // Geniş pencerede (1400) sayfaya yalnız 400 dp ayrılır (bölünmüş ekran / yan panel).
   Widget narrow(Widget page) => Align(
     alignment: Alignment.topLeft,
@@ -481,4 +515,17 @@ void main() {
       expect(revisits, 1);
     },
   );
+}
+
+class _CountedRow extends StatelessWidget {
+  const _CountedRow({super.key, required this.index, required this.built});
+
+  final int index;
+  final Set<int> built;
+
+  @override
+  Widget build(BuildContext context) {
+    built.add(index);
+    return SizedBox(height: 80, child: Text('satır $index'));
+  }
 }

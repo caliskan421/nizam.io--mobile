@@ -1,0 +1,243 @@
+// ChatPage: üst çubuk (yazıyor → üye sayısı), sabit şerit, gün hapları, okunmamış ayırıcısı,
+// gönderme (tik durumları), öneriler, ek paneli ve atıf hapı, basılı tutma işlemleri (yanıtla,
+// sabitle, sil), tepki ve anket, görev atfı gezinmesi, sohbet bilgisi, klavye, taşma.
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart' as widgets show debugOnRebuildDirtyWidget;
+import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
+import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/ui/widgets/inputs/nz_composer.dart';
+import 'package:nizamio/core/ui/widgets/nz_icons.dart';
+import 'package:nizamio/core/ui/widgets/surfaces/nz_chat_bubble.dart';
+import 'package:nizamio/features/messages/application/chats_controller.dart';
+import 'package:nizamio/features/messages/messages.dart';
+
+import '../../../support/harness.dart';
+import '../../../support/recording_app_nav.dart';
+import '../../pilot_support.dart';
+
+final _l = AppLocalizationsTr();
+
+Future<(Harness, RecordingAppNav)> _open(
+  WidgetTester tester, {
+  String id = 'gen',
+  bool dark = false,
+}) async {
+  tester.view.devicePixelRatio = 1;
+  if (tester.view.physicalSize.width > 500) {
+    tester.view.physicalSize = const Size(390, 844);
+  }
+  addTearDown(tester.view.reset);
+  final h = await real(
+    tester,
+    () => pilotHarness(PilotBackend(), signedIn: true),
+  );
+  h.read(scopeControllerProvider).selectProgram('prog-1');
+  final nav = RecordingAppNav();
+  await pumpScreen(
+    tester,
+    h,
+    ChatPage(id: id),
+    nav: nav,
+    dark: dark,
+  );
+  await settle(tester);
+  return (h, nav);
+}
+
+Future<void> _tap(WidgetTester tester, Finder f) async {
+  await tester.ensureVisible(f);
+  await tester.pump();
+  await tester.tap(f);
+  await settle(tester);
+}
+
+Future<void> _type(WidgetTester tester, String text) async {
+  await tester.enterText(
+    find
+        .descendant(
+          of: find.byType(NzComposer),
+          matching: find.byType(TextField),
+        )
+        .last,
+    text,
+  );
+  await settle(tester);
+}
+
+Finder _bubble(String text) => find.ancestor(
+  of: find.textContaining(text, findRichText: true),
+  matching: find.byType(NzChatBubble),
+);
+
+void main() {
+  setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
+
+  testWidgets('gönder: yazınca etkin; tek tik → çift tik → okundu', (
+    tester,
+  ) async {
+    await _open(tester, id: 'sis');
+    await _type(tester, 'Toplantı saat 15:00');
+    await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      find.textContaining('Toplantı saat 15:00', findRichText: true),
+      findsOneWidget,
+    );
+    final bubble = _bubble('Toplantı saat 15:00');
+    expect(
+      find.descendant(of: bubble, matching: find.byIcon(NzIcons.check)),
+      findsOneWidget,
+    );
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(
+      find.descendant(
+        of: bubble,
+        matching: find.byIcon(Icons.done_all_rounded),
+      ),
+      findsOneWidget,
+    );
+    await tester.pump(const Duration(seconds: 2));
+    await settle(tester);
+  });
+
+  testWidgets('göreve dönüştür: mesaj metni yeni görev başlığını doldurur', (
+    tester,
+  ) async {
+    await _open(tester, id: 'kadir');
+    await tester.longPress(_bubble('Hidrofor için yeni tarih'));
+    await settle(tester);
+    await _tap(tester, find.text(_l.uiMessagesToTask));
+    final fields = tester
+        .widgetList<EditableText>(find.byType(EditableText))
+        .map((e) => e.controller.text);
+    expect(
+      fields.any((t) => t.contains('Hidrofor için yeni tarih')),
+      isTrue,
+      reason: 'başlık alanı mesajla dolu',
+    );
+  });
+
+  testWidgets('anket: oy ver; sonuçlar sayfası ve anketi bitir', (
+    tester,
+  ) async {
+    await _open(tester);
+    await tester.tap(find.text('31 Ekim Cumartesi'));
+    await settle(tester);
+    expect(find.text('10 ${_l.uiMessagesVotedTail}'), findsOneWidget);
+    await tester.longPress(_bubble('Kapanış yemeği için gün seçelim').first);
+    await settle(tester);
+    await _tap(tester, find.text(_l.uiMessagesPollResults));
+    expect(find.text('${_l.uiMessagesNotVoted} · 8'), findsOneWidget);
+    expect(find.text(_l.uiMessagesPollResultsLc), findsOneWidget);
+    await _tap(tester, find.text(_l.uiMessagesEndPoll));
+    expect(find.text(_l.uiMessagesPollConcluded), findsOneWidget);
+    expect(find.textContaining(_l.uiMessagesConcluded), findsWidgets);
+  });
+
+  testWidgets('klavye: yazma alanı klavyenin üstüne kalkar', (tester) async {
+    await _open(tester, id: 'sis');
+    final before = tester.getBottomLeft(find.byType(TextField).last).dy;
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(tester.view.resetViewInsets);
+    await settle(tester);
+    final after = tester.getBottomLeft(find.byType(TextField).last).dy;
+    expect(before - after, greaterThan(250));
+    expect(after, lessThanOrEqualTo(844 - 300));
+  });
+
+  for (final (width, scale) in [(360.0, 1.0), (360.0, 2.0), (390.0, 2.0)]) {
+    for (final dark in [false, true]) {
+      testWidgets(
+        'taşma yok: ${width.toInt()} geniş, ${scale}x, ${dark ? 'koyu' : 'açık'}',
+        (tester) async {
+          tester.view.devicePixelRatio = 1;
+          tester.view.physicalSize = Size(width, 844);
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+          await _open(tester, dark: dark);
+          final scrollable = find.byType(Scrollable).first;
+          for (var i = 0; i < 6; i++) {
+            await tester.drag(scrollable, const Offset(0, 300));
+            await tester.pump();
+          }
+          await _tap(tester, find.byIcon(Icons.attach_file_rounded).first);
+          await _type(tester, '#ALT');
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
+  group('performans', () {
+    /// Ölçüm süresince yeniden kurulan [NzChatBubble] öğeleri.
+    Future<int> bubbleRebuilds(Future<void> Function() body) async {
+      var n = 0;
+      widgets.debugOnRebuildDirtyWidget = (e, builtOnce) {
+        if (builtOnce && e.widget is NzChatBubble) n++;
+      };
+      try {
+        await body();
+      } finally {
+        widgets.debugOnRebuildDirtyWidget = null;
+      }
+      return n;
+    }
+
+    testWidgets('yazarken balonlar yeniden kurulmaz', (tester) async {
+      await _open(tester);
+      expect(find.byType(NzChatBubble), findsWidgets);
+      final n = await bubbleRebuilds(() async {
+        await _type(tester, 'Merhaba');
+        await _type(tester, 'Merhaba #AL');
+      });
+      expect(n, 0, reason: 'tuş vuruşu yalnız yazma alanını kurar');
+    });
+
+    testWidgets(
+      'uzun akış tembel; yeni mesajda eski balonlar yeniden kurulmaz; sabite atlar',
+      (tester) async {
+        final (h, _) = await _open(tester);
+        final chats = h.read(chatsControllerProvider.notifier);
+        for (var i = 0; i < 80; i++) {
+          chats.send(
+            'gen',
+            from: 'ma',
+            at: DateTime(2026, 10, 21, 11, i % 60),
+            text: 'Uzun akış mesajı $i',
+          );
+        }
+        await settle(tester);
+        final built = find.byType(NzChatBubble).evaluate().length;
+        expect(built, lessThan(40), reason: '86 mesajın yalnız görünenleri');
+        expect(
+          find.textContaining('Uzun akış mesajı 79', findRichText: true),
+          findsOneWidget,
+          reason: 'akış en yenide (altta) açık',
+        );
+        final n = await bubbleRebuilds(() async {
+          chats.send(
+            'gen',
+            from: 'ma',
+            at: DateTime(2026, 10, 21, 12),
+            text: 'Bir tane daha',
+          );
+          await tester.pump();
+        });
+        expect(n, lessThan(4), reason: 'anahtarlı öğeler yer değiştirir');
+        // Sabit şerit en eski uçtaki sabit mesaja kaydırır (ekran dışında kurulmamıştı).
+        await _tap(tester, find.textContaining(_l.uiMessagesPinned));
+        await tester.pump(const Duration(seconds: 1));
+        await settle(tester);
+        expect(find.byType(NzChatBubble), findsWidgets);
+        expect(
+          find.textContaining('Uzun akış mesajı 79', findRichText: true),
+          findsNothing,
+          reason: 'akış eski uca kaydı',
+        );
+      },
+    );
+  });
+}

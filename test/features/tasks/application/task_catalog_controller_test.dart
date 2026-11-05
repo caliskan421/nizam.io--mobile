@@ -7,7 +7,6 @@ import 'package:nizamio/features/tasks/application/task_list_filter.dart';
 import 'package:nizamio/features/tasks/domain/task_details.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
-
 void main() {
   test('applyDetails: tekil okuma kalemin yerine geçer (yalnız o kalem), adlar dizine katılır', () async {
     final c = ProviderContainer(

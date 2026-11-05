@@ -1,0 +1,79 @@
+// ActivityQueryController + activityView: tür, arama, kişi, koordinatörlük süzgeçleri; gün
+// grupları ve sayaçlar; "daha fazla göster"; temizleme.
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/features/activity/application/activity_log_controller.dart';
+import 'package:nizamio/features/activity/application/activity_query_controller.dart';
+import 'package:nizamio/features/activity/domain/activity_log.dart';
+import 'package:nizamio/features/activity/domain/activity_query.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
+
+import '../../pilot_support.dart';
+
+Future<(ProviderContainer, ActivityQueryController)> _open() async {
+  final h = await pilotHarness(PilotBackend(), signedIn: true);
+  h.read(scopeControllerProvider).selectProgram('prog-1');
+  final c = h.container;
+  c.listen(activityViewProvider, (_, _) {});
+  return (c, c.read(activityQueryControllerProvider.notifier));
+}
+
+/// Kaynaklar yüklenince görünüm eşzamanlı hazırdır (yükleniyor karesi yok).
+Future<ActivityView> _view(ProviderContainer c) async {
+  await c.read(activityLogControllerProvider.future);
+  await c.read(taskCatalogControllerProvider.future);
+  return c.read(activityViewProvider).requireValue;
+}
+
+void main() {
+  test('kaynaklar yüklüyken görünüm ilk okumada dolu (AsyncData)', () async {
+    final (c, _) = await _open();
+    await _view(c);
+    expect(c.read(activityViewProvider), isA<AsyncData<ActivityView>>());
+  });
+
+  test('süzgeç ömrü uygulama boyu: dinleyici kalmasa da korunur', () async {
+    final (c, q) = await _open();
+    q.selectKind(ActivityKind.file);
+    await Future<void>.delayed(Duration.zero);
+    expect(c.read(activityQueryControllerProvider).kind, ActivityKind.file);
+  });
+
+  test(
+    'başlangıç: 30 gösterilir, 38 toplam, gün grupları, tür sayıları',
+    () async {
+      final (c, q) = await _open();
+      var v = await _view(c);
+      expect((v.shown, v.total, v.allCount), (30, 38, 38));
+      expect(v.canShowMore, isTrue);
+      expect(v.days.first.day, DateTime(2026, 10, 21));
+      expect(v.days.first.count, 24);
+      expect(
+        v.days.map((d) => d.entries.length).fold<int>(0, (a, b) => a + b),
+        30,
+      );
+      expect(v.kindCounts[ActivityKind.meeting], greaterThan(0));
+      expect(v.kindCounts.values.fold<int>(0, (a, b) => a + b), 38);
+      q.showMore();
+      v = await _view(c);
+      expect((v.shown, v.canShowMore), (38, false));
+      expect(v.days, hasLength(4));
+    },
+  );
+
+  test('görev hedefli kayıt kodu çözülür', () {
+    ActivityEntry e(String target) => ActivityEntry(
+      at: DateTime(2026),
+      kind: ActivityKind.task,
+      action: '',
+      detail: '',
+      target: target,
+      actorId: 'ko',
+      actorName: 'Kadir Özbek',
+    );
+    expect(taskCodeOf(e('ALT-16 · Hidrofor montaj')), 'ALT-16');
+    expect(taskCodeOf(e('İDA-9')), 'İDA-9');
+    expect(taskCodeOf(e('Haftalık koordinasyon toplantısı')), isNull);
+  });
+}

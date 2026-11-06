@@ -8,6 +8,8 @@ import '../../../core/api/generated/clients/work_client.dart';
 import '../../../core/api/generated/models/me_response.dart';
 import '../../../core/api/generated/models/my_department.dart' as api;
 import '../../../core/api/generated/models/my_department_list.dart';
+import '../../../core/api/generated/models/roster_member.dart';
+import '../../../core/api/generated/models/roster_member_status.dart';
 import '../../../core/api/generated/models/work_item.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/http/interceptors.dart';
@@ -91,7 +93,10 @@ class ApiTaskCatalogRepository
             false,
           );
 
+    // Ekipler görev sayfalarıyla eşzamanlı okunur (koordinatörlük kartı/ayrıntısı kişileri).
+    final teamsF = _teams(program, access, departments);
     final (items, truncated) = await _items(program, null);
+    final teams = await teamsF;
 
     final labels = {for (final d in departments) d.id: d.label};
     final tasks = [
@@ -108,21 +113,28 @@ class ApiTaskCatalogRepository
       departmentsTruncated: departmentsTruncated,
       names: _names(items),
       tasks: tasks,
-      people: [
+      people: _people(
         Person(
           id: access.accountId,
           name: me.fullName,
           role: access.personRoleIn(program),
         ),
-      ],
+        teams.values,
+      ),
       coordinatorships: [
         for (final d in departments)
           CoordinatorshipRef(
             code: d.id,
             name: d.name,
             shortCode: d.code,
-            leads: const [],
-            members: const [],
+            leads: [
+              for (final m in teams[d.id] ?? const <RosterMember>[])
+                if (m.role == 'koordinator') m.accountId,
+            ],
+            members: [
+              for (final m in teams[d.id] ?? const <RosterMember>[])
+                if (m.role != 'koordinator') m.accountId,
+            ],
           ),
       ],
     );
@@ -153,6 +165,61 @@ class ApiTaskCatalogRepository
       names: _names(items),
       truncated: truncated,
     );
+  }
+
+  /// Okunabilen departmanların etkin ekibi (`listMembers`, S2; program açıkça sabitlenir).
+  /// Yalnız yönetici ya da o departmanın koordinatörü okur ([TaskAccess.canReadTeamIn]);
+  /// üyede çağrı yoktur. Ekip ek bilgidir: bir departmanın okuması düşerse o koordinatörlük
+  /// kişisiz görünür, katalog düşmez.
+  Future<Map<String, List<RosterMember>>> _teams(
+    String program,
+    TaskAccess access,
+    List<TaskDepartment> departments,
+  ) async {
+    final readable = [
+      for (final d in departments)
+        if (access.canReadTeamIn(program, d.id)) d.id,
+    ];
+    final rows = await Future.wait([
+      for (final id in readable)
+        apiCall(
+              () => _organization.listMembers(
+                id: id,
+                extras: withProgram(
+                  OrganizationClient.listMembersOpenapiExtras,
+                  program,
+                ),
+              ),
+            )
+            .then(
+              (r) => [
+                for (final m in r.data.members ?? const <RosterMember>[])
+                  if (m.status == RosterMemberStatus.active) m,
+              ],
+            )
+            .catchError((Object _) => const <RosterMember>[]),
+    ]);
+    return {for (var i = 0; i < readable.length; i++) readable[i]: rows[i]};
+  }
+
+  /// Katalog kişileri: oturum sahibi (rolü erişimden) + ekiplerdeki herkes (bir yerde
+  /// koordinatörse koordinatör).
+  static List<Person> _people(Person me, Iterable<List<RosterMember>> teams) {
+    final byId = <String, Person>{me.id: me};
+    for (final m in teams.expand((t) => t)) {
+      if (m.accountId == me.id) continue;
+      final lead = m.role == 'koordinator';
+      final prev = byId[m.accountId];
+      if (prev != null && (prev.role == PersonRole.coordinator || !lead)) {
+        continue;
+      }
+      byId[m.accountId] = Person(
+        id: m.accountId,
+        name: m.fullName,
+        role: lead ? PersonRole.coordinator : PersonRole.member,
+      );
+    }
+    return [...byId.values];
   }
 
   static List<PersonName> _names(List<WorkItem> items) => [

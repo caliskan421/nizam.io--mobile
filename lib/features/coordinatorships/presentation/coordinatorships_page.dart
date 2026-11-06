@@ -102,7 +102,7 @@ class CoordinatorshipCard extends StatelessWidget {
       padding: const EdgeInsets.all(NizamioSpacing.cardPad),
       onTap: onTap,
       semanticLabel: [
-        s.code,
+        ?s.shortCode,
         s.name,
         people,
         l.coordDone(s),
@@ -122,11 +122,13 @@ class CoordinatorshipCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       textBaseline: TextBaseline.alphabetic,
                       children: [
-                        Text(
-                          s.code,
-                          style: t.monoSm.copyWith(color: c.textMuted),
-                        ),
-                        const Gap(NizamioSpacing.space2),
+                        if (s.shortCode case final tag?) ...[
+                          Text(
+                            tag,
+                            style: t.monoSm.copyWith(color: c.textMuted),
+                          ),
+                          const Gap(NizamioSpacing.space2),
+                        ],
                         Expanded(
                           child: Text(
                             s.name,

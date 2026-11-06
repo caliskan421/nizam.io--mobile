@@ -67,7 +67,7 @@ final class CoordinatorshipProfile {
   CoordinatorshipProfile({
     required this.code,
     required this.parent,
-    required this.founded,
+    this.founded,
     required this.about,
     required List<CoordinatorshipUnit> units,
     required List<String> extraMembers,
@@ -84,7 +84,9 @@ final class CoordinatorshipProfile {
 
   /// Üst birim (tür), ör. "Teknik altyapı".
   final String parent;
-  final DateTime founded;
+
+  /// Kuruluş tarihi; bilinmiyorsa null (gösterilmez).
+  final DateTime? founded;
   final String about;
   final List<CoordinatorshipUnit> units;
 
@@ -104,6 +106,21 @@ final class CoordinatorshipProfile {
   /// Yeniden eskiye son etkinlik.
   final List<CoordinatorshipEvent> events;
 }
+
+/// Sunucuda ek bilgisi olmayan koordinatörlüğün boş profili: ayrıntı ekranı açılır, yalnız
+/// görev kataloğunun verisi (ad, ekip, görevler) görünür.
+CoordinatorshipProfile emptyCoordinatorshipProfile(String code) =>
+    CoordinatorshipProfile(
+      code: code,
+      parent: '',
+      about: '',
+      units: const [],
+      extraMembers: const [],
+      archiveFiles: 0,
+      meetings: 0,
+      chatId: '',
+      events: const [],
+    );
 
 /// Koordinatörlük ek bilgilerinin kaynağı (domain portu; gerçekleştirmeler `data/`).
 abstract interface class CoordinatorshipProfileRepository {

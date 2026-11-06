@@ -21,10 +21,15 @@ final class CoordinatorshipStats {
     required this.late,
     required this.leads,
     required this.members,
+    this.shortCode,
   });
 
+  /// Anahtar: `department_id` (kullanıcıya gösterilmez; ekranda [shortCode]).
   final String code;
   final String name;
+
+  /// Ekrandaki kısa etiket: departman kodu ("ALT"); sunucu vermediyse null (gösterilmez).
+  final String? shortCode;
   final int done;
   final int total;
 
@@ -50,6 +55,7 @@ CoordinatorshipStats _stats(TaskCatalog catalog, CoordinatorshipRef c) {
   return CoordinatorshipStats(
     code: c.code,
     name: c.name,
+    shortCode: c.shortCode,
     done: tasks.where((t) => t.status == TaskStatus.done).length,
     total: tasks.length,
     late: tasks.where((t) => t.isOverdue).length,
@@ -90,9 +96,14 @@ final class AttentionItem {
     required this.title,
     required this.assignee,
     required this.overdueDays,
-  });
+    String? label,
+  }) : label = label ?? code;
 
+  /// Anahtar (görev kimliği; gezinme).
   final String code;
+
+  /// Ekrandaki kısa anahtar ([TaskItem.displayCode]; kimlik gösterilmez).
+  final String label;
   final String title;
 
   /// İlk atananın adı (yoksa null).
@@ -183,8 +194,11 @@ final class CoordinatorshipDetail {
     String code,
   ) {
     final ref = catalog.coordinatorship(code);
-    final profile = profiles.where((p) => p.code == code).firstOrNull;
-    if (ref == null || profile == null) return null;
+    if (ref == null) return null;
+    // Örnek ek bilgi yalnız kimliği tutan kayda uyar; sunucu kaydında boş profil.
+    final profile =
+        profiles.where((p) => p.code == code).firstOrNull ??
+        emptyCoordinatorshipProfile(code);
     final computed = _stats(catalog, ref);
     final report = profile.reported;
     final stats = report == null
@@ -192,6 +206,7 @@ final class CoordinatorshipDetail {
         : CoordinatorshipStats(
             code: computed.code,
             name: computed.name,
+            shortCode: computed.shortCode,
             done: report.done,
             total: report.total,
             late: report.late,
@@ -219,6 +234,7 @@ final class CoordinatorshipDetail {
         for (final t in overdue)
           AttentionItem(
             code: t.code,
+            label: t.displayCode,
             title: t.title,
             assignee: t.assignees
                 .map(catalog.person)

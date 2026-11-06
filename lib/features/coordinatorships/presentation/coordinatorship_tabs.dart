@@ -548,12 +548,12 @@ class CoordAboutTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final c = context.colors;
     final t = context.text;
-    final d = detail;
+    final muted = t.bodyMd.copyWith(color: context.colors.textMuted);
+    final CoordinatorshipDetail(:profile, :feed) = detail;
     final facts = [
-      (l.uiCoordFactParent, d.profile.parent),
-      (l.uiCoordFactFounded, l.coordDate(d.profile.founded)),
+      if (profile.parent.isNotEmpty) (l.uiCoordFactParent, profile.parent),
+      if (profile.founded case final f?) (l.uiCoordFactFounded, l.coordDate(f)),
       (l.uiCoordFactVisibility, l.uiCoordVisibilityAll),
     ];
     return Column(
@@ -563,13 +563,11 @@ class CoordAboutTab extends StatelessWidget {
         const Gap(NizamioSpacing.space2),
         CoordGroup(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(NizamioSpacing.rowPad),
-              child: Text(
-                d.profile.about,
-                style: t.bodyMd.copyWith(color: c.textMuted),
+            if (profile.about case final about when about.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(NizamioSpacing.rowPad),
+                child: Text(about, style: muted),
               ),
-            ),
             for (final (k, v) in facts)
               ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 46),
@@ -581,7 +579,7 @@ class CoordAboutTab extends StatelessWidget {
                   child: MergeSemantics(
                     child: Row(
                       children: [
-                        Text(k, style: t.bodyMd.copyWith(color: c.textMuted)),
+                        Text(k, style: muted),
                         const Gap(NizamioSpacing.space3),
                         Expanded(
                           child: Text(
@@ -599,11 +597,13 @@ class CoordAboutTab extends StatelessWidget {
               ),
           ],
         ),
-        const Gap(NizamioSpacing.gapXl),
-        NzKicker(l.uiCoordFeed),
-        const Gap(NizamioSpacing.gapMd),
-        for (final (i, f) in d.feed.indexed)
-          _FeedRow(item: f, last: i == d.feed.length - 1),
+        if (feed.isNotEmpty) ...[
+          const Gap(NizamioSpacing.gapXl),
+          NzKicker(l.uiCoordFeed),
+          const Gap(NizamioSpacing.gapMd),
+        ],
+        for (final (i, f) in feed.indexed)
+          _FeedRow(item: f, last: i == feed.length - 1),
       ],
     );
   }

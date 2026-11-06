@@ -76,13 +76,6 @@ extension HomeTexts on AppLocalizations {
     CoordinatorshipSort.name => uiHomeSortName,
   };
 
-  String filterLabel(CoordinatorshipFilter f) => switch (f) {
-    CoordinatorshipFilter.all => uiHomeFilterAll,
-    CoordinatorshipFilter.late => uiHomeFilterLate,
-    CoordinatorshipFilter.onTrack => uiHomeFilterOnTrack,
-    CoordinatorshipFilter.unassigned => uiHomeFilterUnassigned,
-  };
-
   /// "ALT-7 · Tarih talebi · +51 gün" / "ULA-1 · Tarih talebi · 15 Kas" / "İDA-2 · Onay
   /// bekliyor".
   String pendingCaption(PendingItem p) {

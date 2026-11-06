@@ -1762,22 +1762,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeSortAscending => 'küçükten büyüğe';
 
   @override
-  String get uiHomeFilterLabel => 'Koordinatörlük durumu';
-
-  @override
-  String get uiHomeFilterAll => 'Tümü';
-
-  @override
-  String get uiHomeFilterLate => 'Gecikmesi olan';
-
-  @override
-  String get uiHomeFilterOnTrack => 'Yolunda';
-
-  @override
-  String get uiHomeFilterUnassigned => 'Koordinatörsüz';
-
-  @override
-  String get uiHomeFilterEmpty => 'Bu filtreye uyan koordinatörlük yok.';
+  String get uiHomeCoordinatorshipsEmpty => 'Bu programda koordinatörlük yok.';
 
   @override
   String get uiHomeUnassigned => 'Koordinatör atanmamış';

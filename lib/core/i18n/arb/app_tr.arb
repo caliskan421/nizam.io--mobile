@@ -2193,29 +2193,9 @@
   "@uiHomeSortAscending": {
     "description": "ui.home.sort_ascending"
   },
-  "uiHomeFilterLabel": "Koordinatörlük durumu",
-  "@uiHomeFilterLabel": {
-    "description": "ui.home.filter_label"
-  },
-  "uiHomeFilterAll": "Tümü",
-  "@uiHomeFilterAll": {
-    "description": "ui.home.filter_all"
-  },
-  "uiHomeFilterLate": "Gecikmesi olan",
-  "@uiHomeFilterLate": {
-    "description": "ui.home.filter_late"
-  },
-  "uiHomeFilterOnTrack": "Yolunda",
-  "@uiHomeFilterOnTrack": {
-    "description": "ui.home.filter_on_track"
-  },
-  "uiHomeFilterUnassigned": "Koordinatörsüz",
-  "@uiHomeFilterUnassigned": {
-    "description": "ui.home.filter_unassigned"
-  },
-  "uiHomeFilterEmpty": "Bu filtreye uyan koordinatörlük yok.",
-  "@uiHomeFilterEmpty": {
-    "description": "ui.home.filter_empty"
+  "uiHomeCoordinatorshipsEmpty": "Bu programda koordinatörlük yok.",
+  "@uiHomeCoordinatorshipsEmpty": {
+    "description": "ui.home.coordinatorships_empty"
   },
   "uiHomeUnassigned": "Koordinatör atanmamış",
   "@uiHomeUnassigned": {

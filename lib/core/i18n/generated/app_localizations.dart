@@ -3382,41 +3382,11 @@ abstract class AppLocalizations {
   /// **'küçükten büyüğe'**
   String get uiHomeSortAscending;
 
-  /// ui.home.filter_label
+  /// ui.home.coordinatorships_empty
   ///
   /// In tr, this message translates to:
-  /// **'Koordinatörlük durumu'**
-  String get uiHomeFilterLabel;
-
-  /// ui.home.filter_all
-  ///
-  /// In tr, this message translates to:
-  /// **'Tümü'**
-  String get uiHomeFilterAll;
-
-  /// ui.home.filter_late
-  ///
-  /// In tr, this message translates to:
-  /// **'Gecikmesi olan'**
-  String get uiHomeFilterLate;
-
-  /// ui.home.filter_on_track
-  ///
-  /// In tr, this message translates to:
-  /// **'Yolunda'**
-  String get uiHomeFilterOnTrack;
-
-  /// ui.home.filter_unassigned
-  ///
-  /// In tr, this message translates to:
-  /// **'Koordinatörsüz'**
-  String get uiHomeFilterUnassigned;
-
-  /// ui.home.filter_empty
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu filtreye uyan koordinatörlük yok.'**
-  String get uiHomeFilterEmpty;
+  /// **'Bu programda koordinatörlük yok.'**
+  String get uiHomeCoordinatorshipsEmpty;
 
   /// ui.home.unassigned
   ///

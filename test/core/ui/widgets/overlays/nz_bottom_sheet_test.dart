@@ -527,13 +527,18 @@ void main() {
     }
 
     testWidgets(
-      'açılış modalın kendi boyu kadar kayar (.42 s); kapanış .24 s',
+      'açılış/kapanış pencere boyu kadar kayar (.42 s / .24 s); kapanışta ekrandan tam çıkar',
       (tester) async {
         final end = await open(tester, const Size(1180, 820));
         Navigator.of(tester.element(find.byType(NzBottomSheetContent))).pop();
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 239));
         expect(find.byType(NzBottomSheetContent), findsOneWidget);
+        // Rota kalkmadan önce modal pencerenin altında: yarı yolda birden kaybolmaz.
+        expect(
+          tester.getRect(find.byType(NzBottomSheetContent)).top,
+          greaterThan(820 - 1),
+        );
         await tester.pump(const Duration(milliseconds: 2));
         await tester.pump();
         expect(find.byType(NzBottomSheetContent), findsNothing);
@@ -541,8 +546,9 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 1));
         final start = tester.getRect(find.byType(NzBottomSheetContent));
-        // Başlangıçta tam kendi yüksekliği kadar aşağıda (translateY(100%)), pencere boyu değil.
-        expect(start.top - end.top, closeTo(end.height, end.height * 0.01));
+        // Başlangıçta pencere boyu kadar aşağıda (ekranın dışında).
+        expect(start.top - end.top, closeTo(820, 820 * 0.01));
+        expect(start.top, greaterThan(820));
         await tester.pumpAndSettle();
         expect(tester.getRect(find.byType(NzBottomSheetContent)), end);
       },

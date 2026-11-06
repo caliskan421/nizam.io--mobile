@@ -109,28 +109,31 @@ abstract final class NzBottomSheet {
                   ),
                 ),
               ),
-              Dialog(
-                insetPadding: const EdgeInsets.symmetric(
-                  horizontal: NzTabletMetrics.modalEdge,
-                  vertical: NzTabletMetrics.modalVerticalInset / 2,
-                ),
-                // Görünüm (zemin, köşe, kenar) içeriktedir; Dialog yalnız yerleşimdir, böylece
-                // kayma modalın kendi boyu kadardır (`translateY(100%)`), pencere boyu değil.
-                backgroundColor: clear,
-                surfaceTintColor: clear,
-                shadowColor: clear,
-                elevation: 0,
-                child: SizedBox(
-                  width: NzTabletMetrics.modalMaxWidth,
-                  child: SlideTransition(
-                    position: Tween(begin: const Offset(0, 1), end: Offset.zero)
-                        .animate(
-                          CurvedAnimation(
-                            parent: animation,
-                            curve: NizamioMotion.easeSheet,
-                            reverseCurve: NizamioMotion.easeExit,
-                          ),
-                        ),
+              // Kayma pencere boyu kadardır (Dialog pencereyi kaplar): ortadaki modal kapanırken
+              // ekranın altından tamamen çıkar, açılışta dışarıdan gelir. Kaynak `translateY(100%)`
+              // modalın kendi boyudur; ortada duran modal bu mesafede ekranda kalır ve rota
+              // bitince yarı yolda birden kaybolurdu.
+              SlideTransition(
+                position: Tween(begin: const Offset(0, 1), end: Offset.zero)
+                    .animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: NizamioMotion.easeSheet,
+                        reverseCurve: NizamioMotion.easeExit,
+                      ),
+                    ),
+                child: Dialog(
+                  insetPadding: const EdgeInsets.symmetric(
+                    horizontal: NzTabletMetrics.modalEdge,
+                    vertical: NzTabletMetrics.modalVerticalInset / 2,
+                  ),
+                  // Görünüm (zemin, köşe, kenar) içeriktedir; Dialog yalnız yerleşimdir.
+                  backgroundColor: clear,
+                  surfaceTintColor: clear,
+                  shadowColor: clear,
+                  elevation: 0,
+                  child: SizedBox(
+                    width: NzTabletMetrics.modalMaxWidth,
                     child: ClipRRect(
                       borderRadius: const BorderRadius.all(
                         Radius.circular(NizamioRadius.sheet),

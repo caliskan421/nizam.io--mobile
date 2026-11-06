@@ -15,16 +15,25 @@ import '../../domain/home_dashboard.dart';
 import 'home_sections.dart';
 import 'home_texts.dart';
 
-/// Koordinatörlükler bölümü: başlık + sıralama denetimi, durum filtresi, 2'li kart ızgarası,
-/// "Tümünü göster / Daralt". Durum ve komutlar [CoordinatorshipQueryController]'da.
+/// Koordinatörlükler bölümü: başlık + sıralama denetimi, durum filtresi ([NzPillTabs]), 2'li
+/// kart ızgarası, "Tümünü göster / Daralt". Durum ve komutlar [CoordinatorshipQueryController]'da.
+/// [wide] (tablette tam genişlik ana sayfa): başlık, filtre ve sıralama tek satırda; 4'lü ızgara,
+/// daraltılmışken iki satır.
 class HomeCoordinatorships extends ConsumerWidget {
   const HomeCoordinatorships({
     super.key,
     required this.items,
     required this.onOpen,
+    this.wide = false,
   });
 
   final List<CoordinatorshipSummary> items;
+  final bool wide;
+
+  static const _wideColumns = 4;
+
+  /// Geniş satırda filtre rayının en çok genişliği (sekmeler eşit sütun).
+  static const _wideFilterMax = 640.0;
 
   /// Karta dokunma → koordinatörlük ayrıntısı (kod).
   final ValueChanged<String> onOpen;
@@ -35,56 +44,81 @@ class HomeCoordinatorships extends ConsumerWidget {
     final query = ref.watch(coordinatorshipQueryControllerProvider);
     final commands = ref.read(coordinatorshipQueryControllerProvider.notifier);
     final filtered = query.filtered(items);
-    final visible = query.visible(items);
+    final columns = wide ? _wideColumns : 2;
+    final collapsed = wide
+        ? 2 * _wideColumns
+        : CoordinatorshipQuery.collapsedCount;
+    final visible = query.visible(items, collapsed: collapsed);
     const filters = CoordinatorshipFilter.values;
     // Süzgeç/sıralama değişince kartlar yeniden girer; "tümünü göster"de yalnız yeni gelenler
     // (kimlik aynı kalan kart hareket etmez). Kademe satır satırdır.
     final order = (query.filter, query.sort, query.descending);
-    const columns = 2;
     final sortLabel = l.sortLabel(query.sort);
     final direction = query.descending
         ? l.uiHomeSortDescending
         : l.uiHomeSortAscending;
+    final title = Semantics(
+      header: true,
+      child: Text(
+        l.uiHomeCoordinatorships,
+        style: wide ? context.text.titleLg : context.text.labelLg,
+      ),
+    );
+    final sort = NzSplitButton(
+      label: sortLabel,
+      semanticLabel: '${l.uiHomeSortChange}: $sortLabel',
+      onPressed: commands.cycleSort,
+      icon: NzIcons.chevronDown,
+      iconTurns: query.descending ? 0 : 0.5,
+      iconSemanticLabel: '${l.uiHomeSortFlip}: $direction',
+      onIconPressed: commands.flipDirection,
+    );
+    final filter = NzPillTabs(
+      semanticLabel: l.uiHomeFilterLabel,
+      selected: filters.indexOf(query.filter),
+      onSelected: (i) => commands.selectFilter(filters[i]),
+      tabs: [
+        for (final f in filters)
+          NzPillTab(
+            label: l.filterLabel(f),
+            count: items
+                .where((c) => CoordinatorshipQuery.matches(f, c))
+                .length,
+          ),
+      ],
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Semantics(
-                header: true,
-                child: Text(
-                  l.uiHomeCoordinatorships,
-                  style: context.text.labelLg,
+        if (wide)
+          Row(
+            children: [
+              title,
+              const Gap(NizamioSpacing.space4),
+              // Süzgeç sıralamanın yanında, sağa yaslı; dar kalırsa daralır.
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: _wideFilterMax),
+                    child: filter,
+                  ),
                 ),
               ),
-            ),
-            NzSplitButton(
-              label: sortLabel,
-              semanticLabel: '${l.uiHomeSortChange}: $sortLabel',
-              onPressed: commands.cycleSort,
-              icon: NzIcons.chevronDown,
-              iconTurns: query.descending ? 0 : 0.5,
-              iconSemanticLabel: '${l.uiHomeSortFlip}: $direction',
-              onIconPressed: commands.flipDirection,
-            ),
-          ],
-        ),
-        const Gap(NizamioSpacing.space3),
-        NzFilterRail(
-          semanticLabel: l.uiHomeFilterLabel,
-          selected: filters.indexOf(query.filter),
-          onSelected: (i) => commands.selectFilter(filters[i]),
-          options: [
-            for (final f in filters)
-              NzFilterOption(
-                label: l.filterLabel(f),
-                count: items
-                    .where((c) => CoordinatorshipQuery.matches(f, c))
-                    .length,
-              ),
-          ],
-        ),
+              const Gap(NizamioSpacing.space3),
+              sort,
+            ],
+          )
+        else ...[
+          Row(
+            children: [
+              Expanded(child: title),
+              sort,
+            ],
+          ),
+          const Gap(NizamioSpacing.space3),
+          filter,
+        ],
         const Gap(NizamioSpacing.space3),
         if (visible.isEmpty)
           NzEntrance(
@@ -115,7 +149,7 @@ class HomeCoordinatorships extends ConsumerWidget {
                 ),
             ],
           ),
-        if (filtered.length > CoordinatorshipQuery.collapsedCount) ...[
+        if (filtered.length > collapsed) ...[
           const Gap(NizamioSpacing.space3),
           NzButton.secondary(
             label: query.expanded

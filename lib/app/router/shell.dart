@@ -242,7 +242,7 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
 
   void _goModule(RailModule m) => GoRouter.of(context).go(_moduleEntry(m));
 
-  /// Kaydı kapatır (Görevler, Koordinatörlükler): modül köküne döner (görev süzgeci korunur),
+  /// Kaydı kapatır (Ana sayfa, Görevler, Koordinatörlükler): modül köküne döner (görev süzgeci korunur),
   /// liste tam genişler.
   void _closeRecord() {
     final m = railModuleOf(_location);
@@ -338,7 +338,7 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
       RailModule.messages => messagesMaster(),
       null => const SizedBox.shrink(),
     };
-    // Görevler/Koordinatörlükler kökünde açık kayıt yoksa liste sağ bölmenin yerini de alır; kayıt açılınca 390'a
+    // Ana sayfa/Görevler/Koordinatörlükler kökünde açık kayıt yoksa liste sağ bölmenin yerini de alır; kayıt açılınca 390'a
     // daralır. Ağaç iki durumda aynıdır (yalnız genişlik değişir): kabuk ve liste State'i kalır.
     final full = splitListFull(_uri);
     final closes = listGoesFull(current);

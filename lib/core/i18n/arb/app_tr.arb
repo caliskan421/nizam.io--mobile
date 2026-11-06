@@ -2117,6 +2117,10 @@
   "@uiHomeCoordinatorshipsLc": {
     "description": "ui.home.coordinatorships_lc"
   },
+  "uiHomeTeamTotal": "Toplam üye",
+  "@uiHomeTeamTotal": {
+    "description": "ui.home.team_total"
+  },
   "uiHomeRoleAdmin": "Admin",
   "@uiHomeRoleAdmin": {
     "description": "ui.home.role_admin"

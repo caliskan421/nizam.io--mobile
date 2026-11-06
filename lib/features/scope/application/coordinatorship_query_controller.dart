@@ -65,10 +65,13 @@ final class CoordinatorshipQuery {
     return [for (final (_, c) in indexed) c];
   }
 
-  /// Ekranda görünen kartlar (daraltılmışken ilk [collapsedCount]).
-  List<CoordinatorshipSummary> visible(List<CoordinatorshipSummary> all) {
+  /// Ekranda görünen kartlar (daraltılmışken ilk [collapsed]; geniş ana sayfada iki satır).
+  List<CoordinatorshipSummary> visible(
+    List<CoordinatorshipSummary> all, {
+    int collapsed = collapsedCount,
+  }) {
     final list = filtered(all);
-    return expanded ? list : list.take(collapsedCount).toList();
+    return expanded ? list : list.take(collapsed).toList();
   }
 
   CoordinatorshipQuery copyWith({

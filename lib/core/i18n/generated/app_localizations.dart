@@ -3268,6 +3268,12 @@ abstract class AppLocalizations {
   /// **'koordinatörlük'**
   String get uiHomeCoordinatorshipsLc;
 
+  /// ui.home.team_total
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplam üye'**
+  String get uiHomeTeamTotal;
+
   /// ui.home.role_admin
   ///
   /// In tr, this message translates to:

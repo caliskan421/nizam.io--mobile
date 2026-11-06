@@ -160,6 +160,8 @@ void main() {
         (tester) async {
           final s = await TabletSession.launch(tester, hostSize: c.size);
           await s.signIn();
+          // Ana sayfa kökü tam genişliktir; bölme geometrisi her zaman bölmeli Takvim'de.
+          if (c.rail) await s.tapRail(TabletModule.calendar);
           expectLayoutForSize(s, split: c.split, rail: c.rail);
         },
       );
@@ -173,6 +175,7 @@ void main() {
         hostSize: tabletReferenceSize,
       );
       await s.signIn();
+      await s.tapRail(TabletModule.calendar);
       expectLayoutForSize(s, split: true, rail: true);
       tester.view.physicalSize = const Size(820, 1180);
       await s.settle();

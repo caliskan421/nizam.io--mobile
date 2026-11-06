@@ -6,12 +6,14 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/extensions/ref_ext.dart';
+import '../../../core/ui/layout/nz_layout.dart';
 import '../../../core/ui/layout/nz_pane.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
+import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../identity/identity.dart';
 import '../../tasks/tasks.dart';
 import '../application/current_program_controller.dart';
@@ -24,10 +26,12 @@ import 'home/home_menus.dart';
 import 'home/home_sections.dart';
 import 'home/home_skeleton.dart';
 import 'home/home_texts.dart';
+import 'home/home_wide.dart';
 import 'root_top_bar.dart';
 
 /// Ana sayfa (prototip `home`): cam üst çubuk (ürün, seçili program, bildirim, menü), karşılama,
-/// özet kutuları, hızlı işlemler, ekip, işlem geçmişi, koordinatörlükler. Program adı S2
+/// özet kutuları, hızlı işlemler (işlem geçmişi dahil), ekip, koordinatörlükler. Tablette tam genişlikte
+/// geniş düzen (`home/home_wide.dart`). Program adı S2
 /// `GET /v1/program` yanıtından gelir (kapsam başlığının kanıtı); özet [HomeDashboardController]
 /// (bugün geliştirme örneği). Alt menüde "Ana sayfa"ya yeniden dokunmak kısayol menüsünü açar.
 /// Gezinme [NzAppNav] ile (rota tanımları app'te); ekranı olmayan hedefler açık yer tutucu
@@ -64,6 +68,8 @@ class HomePage extends ConsumerWidget {
     }
 
     return NzPage.feed(
+      // Tablette açık kayıt yokken sayfa tam genişliktir ([homeWideMinWidth] üstü geniş düzen).
+      width: NzContentWidth.wide,
       onRetry: retry,
       // Aşağı çekme: özet (ve rol kaynağı katalog) yeniden okunur; eski özet yerinde kalır.
       onRefresh: () =>
@@ -102,7 +108,7 @@ class HomePage extends ConsumerWidget {
       NzToast.show(context, context.l10n.soon(what));
 
   void _quickAction(BuildContext context, HomeQuickAction a) => switch (a) {
-    HomeQuickAction.task => showNewTaskSheet(context),
+    HomeQuickAction.history => context.appNav.openHistory(),
     HomeQuickAction.meeting => showMeetingSheet(context),
     HomeQuickAction.invite => showInviteSheet(context),
     HomeQuickAction.report => _soon(
@@ -122,72 +128,130 @@ class _Feed extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final d = dashboard;
     final nav = context.appNav;
-    // Tarih satırı ve "son işlem" göreli zamanı görev kataloğunun "bugün"üdür. Katalog yokken
-    // cihaz saati.
+    // Tarih satırı görev kataloğunun "bugün"üdür. Katalog yokken cihaz saati.
     final now =
         ref.watch(
           taskCatalogControllerProvider.select((c) => c.value?.today),
         ) ??
         DateTime.now();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        HomeGreeting(name: d.greetingName, today: now),
-        const Gap(NizamioSpacing.gapXl),
-        HomeKpiGrid(
-          tasks: d.tasks,
-          onOpen: (view) => nav.openTasks(view: view),
-        ),
-        // Kesik katalogdan sayıldı: liste ekranıyla aynı uyarı.
-        if (d.truncated) ...[
-          const Gap(NizamioSpacing.space3),
-          Text(
-            context.l10n.uiListsTruncated,
-            textAlign: TextAlign.center,
-            style: context.text.bodySm.copyWith(
-              color: context.colors.textMuted,
-            ),
-          ),
-        ],
-        const Gap(NizamioSpacing.gapXl),
-        HomeQuickActions(
-          onAction: onQuickAction,
-          canCreateTask: ref.watch(canCreateTaskProvider),
-        ),
-        const Gap(NizamioSpacing.gapXl),
-        // Kişi kümeleri ortak katalogdan; yalnız bu bölüm izler (katalog değişimi akışı kurmaz).
-        // Ekip sayıları yalnız yönetici özetinde bilinir; yoksa kutu gizlenir.
-        if (d.team case final team?) ...[
-          Consumer(
-            builder: (context, ref, _) {
-              final people = ref.watch(homeTeamPeopleProvider);
-              return HomeTeam(
-                dashboard: d,
-                team: team,
-                onOpen: (role) =>
-                    nav.openTasks(people: people?.of(role) ?? const []),
-              );
-            },
-          ),
-          const Gap(NizamioSpacing.gapXl),
-        ],
-        HomeHistoryCard(
-          activity: d.lastActivity,
-          now: now,
-          onOpen: nav.openHistory,
-        ),
-        const Gap(NizamioSpacing.gapXl),
-        HomeCoordinatorships(
-          items: d.coordinatorships,
-          onOpen: nav.openCoordinatorship,
-        ),
-        const Gap(NizamioSpacing.gapXl),
+    final greeting = HomeGreeting(name: d.greetingName, today: now);
+    // Kesik katalogdan sayıldı: liste ekranıyla aynı uyarı.
+    final truncated = [
+      if (d.truncated) ...[
+        const Gap(NizamioSpacing.space3),
         Text(
-          context.l10n.footerSummary(d),
+          context.l10n.uiListsTruncated,
           textAlign: TextAlign.center,
-          style: context.text.caption.copyWith(color: context.colors.textMuted),
+          style: context.text.bodySm.copyWith(color: context.colors.textMuted),
         ),
       ],
+    ];
+    // Kişi kümeleri ortak katalogdan; yalnız ekip bölümü izler (katalog değişimi akışı kurmaz).
+    // Ekip sayıları yalnız yönetici özetinde bilinir; yoksa kutu gizlenir.
+    Widget? team({required bool wide}) => switch (d.team) {
+      null => null,
+      final team => Consumer(
+        builder: (context, ref, _) {
+          final people = ref.watch(homeTeamPeopleProvider);
+          void open(TeamRole role) =>
+              nav.openTasks(people: people?.of(role) ?? const []);
+          return wide
+              ? HomeWideTeam(team: team, onOpen: open)
+              : HomeTeam(dashboard: d, team: team, onOpen: open);
+        },
+      ),
+    };
+    final footer = Text(
+      context.l10n.footerSummary(d),
+      textAlign: TextAlign.center,
+      style: context.text.caption.copyWith(color: context.colors.textMuted),
+    );
+    return LayoutBuilder(
+      builder: (context, box) {
+        final wide = box.maxWidth >= homeWideMinWidth;
+        final kpis = HomeKpiGrid(
+          tasks: d.tasks,
+          columns: wide ? 4 : 2,
+          onOpen: (view) => nav.openTasks(view: view),
+        );
+        final coords = HomeCoordinatorships(
+          items: d.coordinatorships,
+          wide: wide,
+          onOpen: nav.openCoordinatorship,
+        );
+        if (!wide) {
+          final narrowTeam = team(wide: false);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              greeting,
+              const Gap(NizamioSpacing.gapXl),
+              kpis,
+              ...truncated,
+              const Gap(NizamioSpacing.gapXl),
+              HomeQuickActions(onAction: onQuickAction),
+              const Gap(NizamioSpacing.gapXl),
+              if (narrowTeam != null) ...[
+                narrowTeam,
+                const Gap(NizamioSpacing.gapXl),
+              ],
+              coords,
+              const Gap(NizamioSpacing.gapXl),
+              footer,
+            ],
+          );
+        }
+        final wideTeam = team(wide: true);
+        final actions = HomeQuickActionsBar(onAction: onQuickAction);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            greeting,
+            const Gap(NizamioSpacing.gapXl),
+            kpis,
+            ...truncated,
+            const Gap(NizamioSpacing.gapXl),
+            Row(
+              children: [
+                Expanded(child: NzKicker(context.l10n.uiHomeQuickActions)),
+                if (d.team case final t?) ...[
+                  const Gap(homeWideGap),
+                  Expanded(
+                    child: NzKicker(
+                      context.l10n.uiHomeTeam,
+                      trailing: context.l10n.teamSummary(d, t),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const Gap(NizamioSpacing.gapMd),
+            // Hızlı işlemler ile ekip aynı boyda (kısa olan uzar).
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(child: actions),
+                  if (wideTeam != null) ...[
+                    const Gap(homeWideGap),
+                    Expanded(child: wideTeam),
+                  ],
+                ],
+              ),
+            ),
+            const Gap(NizamioSpacing.gapXl),
+            Divider(
+              height: NizamioSize.borderWidth,
+              thickness: NizamioSize.borderWidth,
+              color: context.colors.border,
+            ),
+            const Gap(NizamioSpacing.gapXl),
+            coords,
+            const Gap(NizamioSpacing.gapXl),
+            footer,
+          ],
+        );
+      },
     );
   }
 }

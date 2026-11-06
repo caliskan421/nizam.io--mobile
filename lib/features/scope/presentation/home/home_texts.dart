@@ -62,16 +62,6 @@ extension HomeTexts on AppLocalizations {
           '${t.members} $uiHomeRoleMemberLc)',
   };
 
-  /// "Son işlem bugün 14:27 · Abdullah Ateş" (bugün değilse tarih).
-  String lastActivity(LastActivity a, DateTime now) {
-    final sameDay =
-        a.at.year == now.year && a.at.month == now.month && a.at.day == now.day;
-    final when = sameDay
-        ? '$uiHomeHistoryToday ${DateFormat.Hm('tr').format(a.at)}'
-        : DateFormat('d MMM HH:mm', 'tr').format(a.at);
-    return '$uiHomeHistoryLast $when · ${a.actorName}';
-  }
-
   /// "%9 · 11 görev".
   String coordProgress(CoordinatorshipSummary c) =>
       '${percent(c.donePercent / 100)} · ${c.total} $uiHomeTasksLc';

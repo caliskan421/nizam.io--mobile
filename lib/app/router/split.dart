@@ -133,9 +133,12 @@ bool restoresLastRecord(PaneKind kind) => switch (kind) {
   PaneKind.folder || PaneKind.chat => true,
 };
 
-/// Açık kayıt yokken listesi tam genişlik olan modüller (sağ bölme gizli).
+/// Açık kayıt yokken listesi tam genişlik olan modüller (sağ bölme gizli). Ana sayfada
+/// işlem geçmişi ya da iz kaydı açılınca sayfa 390'a daralır.
 bool listGoesFull(RailModule? m) =>
-    m == RailModule.tasks || m == RailModule.coordinatorships;
+    m == RailModule.home ||
+    m == RailModule.tasks ||
+    m == RailModule.coordinatorships;
 
 /// Çift bölmede sol liste tam genişlik mi: [listGoesFull] modülünün kökü, sağ yığın boş.
 bool splitListFull(Uri uri) {

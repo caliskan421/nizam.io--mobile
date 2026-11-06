@@ -246,24 +246,33 @@ void main() {
   );
 
   testWidgets(
-    'ana sayfa: geçmiş varsayılan kapalı; kartla açılır, daire "Kapat" boşa döndürür',
+    'ana sayfa: kökte tam genişlik (geçmiş kapalı); geçmiş açılınca 390, "Kapat" genişletir',
     (tester) async {
       final router = await _pump(tester, const Size(1180, 820));
       router.go('/home');
       await settle(tester);
-      expect(_inPane(NzPaneRole.detail, find.byType(NzPickRecord)), findsOne);
+      final master = find.byWidgetPredicate(
+        (w) => w is NzPaneScope && w.role == NzPaneRole.master,
+      );
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
+      expect(
+        find.byType(NzPickRecord),
+        findsNothing,
+        reason: 'sağ bölme gizli',
+      );
       expect(find.byType(ActivityPage), findsNothing);
 
       tester.element(find.byType(NzTabletRail)).appNav.openHistory();
       await settle(tester);
       expect(locationOf(router), '/home/history');
       expect(find.byType(ActivityPage).hitTestable(), findsOneWidget);
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 390, 820));
 
       await tester.tap(find.bySemanticsLabel('Kapat').hitTestable());
       await settle(tester);
       expect(locationOf(router), '/home');
       expect(find.byType(ActivityPage), findsNothing);
-      expect(_inPane(NzPaneRole.detail, find.byType(NzPickRecord)), findsOne);
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
 
       // Modüle geri giriş geçmişi hatırlamaz (kimliksiz; yalnız dokunuşla açılır).
       tester.element(find.byType(NzTabletRail)).appNav.openHistory();

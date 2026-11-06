@@ -1705,6 +1705,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeCoordinatorshipsLc => 'koordinatörlük';
 
   @override
+  String get uiHomeTeamTotal => 'Toplam üye';
+
+  @override
   String get uiHomeRoleAdmin => 'Admin';
 
   @override

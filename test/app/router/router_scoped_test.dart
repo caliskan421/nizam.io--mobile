@@ -279,8 +279,11 @@ void main() {
         tester.getSize(find.byType(NzTabletRail)).width,
         NzTabletMetrics.railWidth,
       );
+      // Ana sayfa kökünde sağ bölme gizli bekler (liste tam genişlik); ağaçta durur.
       final roles = tester
-          .widgetList<NzPaneScope>(find.byType(NzPaneScope))
+          .widgetList<NzPaneScope>(
+            find.byType(NzPaneScope, skipOffstage: false),
+          )
           .map((p) => p.role);
       expect(roles, containsAll(NzPaneRole.values));
     });

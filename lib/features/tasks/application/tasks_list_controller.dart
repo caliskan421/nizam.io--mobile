@@ -26,8 +26,9 @@ final class TasksListState {
     this.openFilterGroups = const {TaskFilterGroup.people},
   });
 
-  /// "Daha fazla göster" adımı.
-  static const pageSize = 8;
+  /// İlk açılışta görünen ve "Daha fazla göster" ile eklenen görev sayısı (tablette 3 sütunlu
+  /// ızgaranın 4 tam satırı).
+  static const pageSize = 12;
 
   final TaskView view;
   final TaskSort sort;

@@ -66,9 +66,22 @@ List<Widget> tasksListChildren(
     pending.clear();
   }
 
-  // Grup açılınca kartlar ana sayfadaki koordinatörlük kartlarıyla aynı girişle, kademeli
-  // gelir ([NzEntrance]; yeni eklenen kart oynar, açık kalan grup yeniden oynamaz).
-  void card(TaskItem task, {int? stagger}) {
+  // Kartlar ana sayfadaki koordinatörlük kartlarıyla aynı girişle, satır satır kademeli gelir
+  // ([NzEntrance]): görünüm, sıralama ya da süzgeç değişince hepsi; "daha fazla göster" ve
+  // açılan grupta yalnız yeni gelenler. Arama metni anahtara girmez: yazarken kalan kartlar
+  // yerinde durur.
+  final f = state.filter;
+  final order = (
+    state.view,
+    state.sort,
+    state.descending,
+    TaskFilter(
+      people: f.people,
+      coordinatorships: f.coordinatorships,
+      priorities: f.priorities,
+    ),
+  );
+  void card(TaskItem task, int index) {
     final view = TaskCardView(
       task: task,
       catalog: catalog,
@@ -77,9 +90,11 @@ List<Widget> tasksListChildren(
       fill: columns > 1,
     );
     final key = ValueKey('task:${task.code}');
-    final child = stagger == null
-        ? view
-        : NzEntrance(replay: task.code, index: stagger, child: view);
+    final child = NzEntrance(
+      replay: (order, task.code),
+      index: index ~/ columns,
+      child: view,
+    );
     if (columns == 1) {
       rows.add(item(key, child));
       return;
@@ -109,12 +124,15 @@ List<Widget> tasksListChildren(
       );
       if (open) {
         for (final (i, t) in g.tasks.indexed) {
-          card(t, stagger: i);
+          card(t, i);
         }
       }
     }
   } else {
-    list.take(state.limit).forEach(card);
+    // "Daha fazla göster"de yeni gelen adım kendi başından kademelenir.
+    for (final (i, t) in list.take(state.limit).indexed) {
+      card(t, i % TasksListState.pageSize);
+    }
   }
   flush();
 

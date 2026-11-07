@@ -221,7 +221,7 @@ enum EvidenceTag {
   analysis,
   output,
   outcome,
-  unknown;
+  unknown,
 }
 
 /// Görevin kanıt dosyası (arşivde görev klasörüne kaydedilir).

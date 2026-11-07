@@ -87,12 +87,10 @@ Future<MemorySecureStore> seeded(String id) async {
   return store;
 }
 
-/// Q3 — kayıt denetimi (ADR-0003 karar 13). Port listesi KODDAN toplanır: `lib/` altında
-/// `_unbound('<ad>')` (core) ya da `throw UnimplementedError('<ad> …')` (feature) ile
-/// bileşim kökünde bağlanmayı bekleyen her sağlayıcı bir porttur. Dart'ta ada göre sağlayıcı
-/// nesnesi çözülemediğinden nesne eşlemesi aşağıdaki [portProviders] tablosundadır; tablo
-/// koddan toplanan listeyle birebir olmak ZORUNDA (yeni port eklenip tabloya yazılmazsa test
-/// kırılır), tablodaki her port da bileşim kökünde okunur.
+/// Q3 — kayıt denetimi (ADR-0003 karar 13). Port listesi KODDAN toplanır: `_unbound('<ad>')`
+/// (core) ya da `throw UnimplementedError('<ad> …')` (feature) ile bileşim kökünde bağlanmayı
+/// bekleyen her sağlayıcı porttur. Ada göre nesne çözülemediğinden eşleme [portProviders]
+/// tablosundadır; tablo koddan toplanan listeyle birebir (yeni port yazılmazsa test kırılır).
 final portProviders = <String, ProviderBase<Object?>>{
   'flavorProvider': flavorProvider,
   'httpAdapterProvider': httpAdapterProvider,
@@ -112,6 +110,8 @@ final portProviders = <String, ProviderBase<Object?>>{
   'downloadSinkProvider': downloadSinkProvider,
   'coordinatorshipProfileRepositoryProvider':
       coordinatorshipProfileRepositoryProvider,
+  'coordinatorshipActivityRepositoryProvider':
+      coordinatorshipActivityRepositoryProvider,
   'activityLogRepositoryProvider': activityLogRepositoryProvider,
   'archiveRepositoryProvider': archiveRepositoryProvider,
   'calendarRepositoryProvider': calendarRepositoryProvider,

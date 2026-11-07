@@ -1,9 +1,10 @@
-// CoordinatorshipDetailController: sekme ve üye listesi durumu (kod başına); ayrıntı türetimi
+// CoordinatorshipDetailController: bölüm ve görev süzgeci durumu (kod başına); ayrıntı türetimi
 // (katalog + ek bilgiler), bilinmeyen kod null.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorship_detail_controller.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorship_profiles_controller.dart';
+import 'package:nizamio/features/coordinatorships/domain/coordinatorship_board.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../pilot_support.dart';
@@ -15,24 +16,38 @@ Future<void> _ready(ProviderContainer c) async {
 }
 
 void main() {
-  test('sekme ve üye listesi kod başına; varsayılan Genel, kapalı', () async {
-    final h = await pilotHarness(PilotBackend());
-    final c = h.container;
-    final alt = coordinatorshipDetailControllerProvider('ALT');
-    c.listen(alt, (_, _) {});
-    expect(c.read(alt).tab, CoordinatorshipTab.general);
-    c.read(alt.notifier)
-      ..selectTab(CoordinatorshipTab.team)
-      ..toggleMembers();
-    expect(c.read(alt).tab, CoordinatorshipTab.team);
-    expect(c.read(alt).membersOpen, isTrue);
-    c.read(alt.notifier).selectTab(CoordinatorshipTab.about);
-    expect(c.read(alt).membersOpen, isTrue, reason: 'sekme değişimi korur');
-    expect(
-      c.read(coordinatorshipDetailControllerProvider('MEK')).tab,
-      CoordinatorshipTab.general,
-    );
-  });
+  test(
+    'bölüm ve görev süzgeci kod başına; ilerleme satırı Görevler bölümünü açar',
+    () async {
+      final h = await pilotHarness(PilotBackend());
+      final c = h.container;
+      final alt = coordinatorshipDetailControllerProvider('ALT');
+      c.listen(alt, (_, _) {});
+      expect(c.read(alt).tab, CoordinatorshipTab.general);
+      expect(c.read(alt).filtered, isFalse);
+      c.read(alt.notifier)
+        ..togglePulse()
+        ..showTasks(CoordTaskFilter.late, person: 'ko');
+      expect(c.read(alt).tab, CoordinatorshipTab.tasks);
+      expect(
+        (c.read(alt).filter, c.read(alt).person),
+        (CoordTaskFilter.late, 'ko'),
+      );
+      expect(c.read(alt).pulseOpen, isFalse, reason: 'geçişte kart kapanır');
+      c.read(alt.notifier).selectTab(CoordinatorshipTab.members);
+      expect(
+        c.read(alt).filter,
+        CoordTaskFilter.late,
+        reason: 'bölüm değişimi korur',
+      );
+      c.read(alt.notifier).clearFilter();
+      expect(c.read(alt).filtered, isFalse);
+      expect(
+        c.read(coordinatorshipDetailControllerProvider('MEK')).tab,
+        CoordinatorshipTab.general,
+      );
+    },
+  );
 
   test('ayrıntı: özet, dikkat gerektirenler, ekip, etkinlik', () async {
     final h = await pilotHarness(PilotBackend());

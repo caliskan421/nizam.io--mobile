@@ -56,6 +56,9 @@ class CoordRow extends StatelessWidget {
   /// Açılır satır (aria-expanded) için durum; null → düz düğme.
   final bool? expanded;
 
+  /// Üzerine gelme / odak katmanı (basmada efekt yok: dalga ve vurgu kapalı, NzCard gibi).
+  static const _overlayAlpha = 0.12;
+
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
@@ -67,6 +70,16 @@ class CoordRow extends StatelessWidget {
       type: MaterialType.transparency,
       child: InkWell(
         onTap: onTap,
+        splashFactory: NoSplash.splashFactory,
+        overlayColor: WidgetStateProperty.resolveWith(
+          (s) => context.colors.text.withValues(
+            alpha:
+                s.contains(WidgetState.hovered) ||
+                    s.contains(WidgetState.focused)
+                ? _overlayAlpha
+                : 0,
+          ),
+        ),
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: minHeight),
           child: Padding(

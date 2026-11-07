@@ -1614,6 +1614,205 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordNotFound => 'Bu koordinatörlük bulunamadı.';
 
   @override
+  String get uiCoordAllInArchive => 'Arşivde tümünü gör';
+
+  @override
+  String get uiCoordClear => 'Temizle';
+
+  @override
+  String get uiCoordDateRequestsTail => 'tarih talebi';
+
+  @override
+  String get uiCoordDaysLaterTail => 'gün sonra';
+
+  @override
+  String get uiCoordDepartmentsTail => 'birim';
+
+  @override
+  String get uiCoordEveryone => 'Herkes';
+
+  @override
+  String get uiCoordFactCode => 'Kod';
+
+  @override
+  String get uiCoordFactKind => 'Tür';
+
+  @override
+  String get uiCoordFacts => 'bilgiler';
+
+  @override
+  String get uiCoordFilter => 'Görevleri süz';
+
+  @override
+  String get uiCoordFilterPerson => 'atanan kişi';
+
+  @override
+  String get uiCoordFilterStatus => 'durum';
+
+  @override
+  String get uiCoordGroupLeads => 'koordinatörler';
+
+  @override
+  String get uiCoordGroupMembers => 'üyeler';
+
+  @override
+  String get uiCoordInvited => 'Davetli';
+
+  @override
+  String get uiCoordKindCoord => 'Koordinatörlük';
+
+  @override
+  String get uiCoordKindDoc => 'Belge';
+
+  @override
+  String get uiCoordKindImage => 'Görsel';
+
+  @override
+  String get uiCoordKindPdf => 'PDF';
+
+  @override
+  String get uiCoordLater => 'sonra';
+
+  @override
+  String get uiCoordLateTasksTail => 'görev gecikmede';
+
+  @override
+  String get uiCoordLeadRole => 'Koordinatör';
+
+  @override
+  String get uiCoordLeads => 'sorumlular';
+
+  @override
+  String get uiCoordLeadsTail => 'koordinatör';
+
+  @override
+  String get uiCoordLess => 'Daha az';
+
+  @override
+  String get uiCoordMemberRole => 'Üye';
+
+  @override
+  String get uiCoordMembersTail => 'üye';
+
+  @override
+  String get uiCoordMessage => 'Mesaj';
+
+  @override
+  String get uiCoordMore => 'Devamı';
+
+  @override
+  String get uiCoordNext => 'Sıradaki';
+
+  @override
+  String get uiCoordNoFiles => 'Bu birimin arşivinde dosya yok.';
+
+  @override
+  String get uiCoordNoLate => 'gecikme yok';
+
+  @override
+  String get uiCoordNoMeetings =>
+      'Bu birimin toplantısı yok. Sağ üstten planlayabilirsin.';
+
+  @override
+  String get uiCoordNoMeetingsPlanned => 'planlı toplantı yok';
+
+  @override
+  String get uiCoordNoMembers => 'Bu birimde henüz kimse yok.';
+
+  @override
+  String get uiCoordNoOpen => 'açık görevi yok';
+
+  @override
+  String get uiCoordNoTasks => 'Bu süzgeçte görev yok.';
+
+  @override
+  String get uiCoordOpenInTasks => 'Görevler sayfasında aç';
+
+  @override
+  String get uiCoordOpenTail => 'açık';
+
+  @override
+  String get uiCoordOpenTasksTail => 'açık görev';
+
+  @override
+  String get uiCoordOvTeam => 'Ekip';
+
+  @override
+  String get uiCoordOwner => 'Sahip';
+
+  @override
+  String get uiCoordPastMeetings => 'Geçmiş toplantılar';
+
+  @override
+  String get uiCoordPastTail => 'geçmiş';
+
+  @override
+  String get uiCoordPersonLateTail => 'görevi gecikmede';
+
+  @override
+  String get uiCoordPersonMessage => 'Mesaj gönder';
+
+  @override
+  String get uiCoordPersonTasks => 'Görevlerini gör';
+
+  @override
+  String get uiCoordRecentFiles => 'son yüklenenler';
+
+  @override
+  String get uiCoordStAll => 'Tümü';
+
+  @override
+  String get uiCoordStDoing => 'Devam ediyor';
+
+  @override
+  String get uiCoordStDone => 'Tamamlandı';
+
+  @override
+  String get uiCoordStLate => 'Gecikmede';
+
+  @override
+  String get uiCoordStOpen => 'Açık';
+
+  @override
+  String get uiCoordStRequest => 'Tarih talebi';
+
+  @override
+  String get uiCoordStReview => 'Onay bekleyen';
+
+  @override
+  String get uiCoordStTodo => 'Başlamadı';
+
+  @override
+  String get uiCoordTabArchive => 'Arşiv';
+
+  @override
+  String get uiCoordTabMeetings => 'Toplantı';
+
+  @override
+  String get uiCoordTabMembers => 'Üyeler';
+
+  @override
+  String get uiCoordTabTasks => 'Görevler';
+
+  @override
+  String get uiCoordToastUpload => 'Dosya yükleme görev ayrıntısından yapılır';
+
+  @override
+  String get uiCoordToday => 'bugün';
+
+  @override
+  String get uiCoordTomorrow => 'yarın';
+
+  @override
+  String get uiCoordUnassignedPick => 'Üyeler arasından seçebilirsin';
+
+  @override
+  String get uiCoordUpcomingTail => 'yaklaşan';
+
+  @override
+  String get uiCoordUpload => 'Dosya yükle';
+
+  @override
   String get uiFeedbackLoading => 'Yükleniyor';
 
   @override

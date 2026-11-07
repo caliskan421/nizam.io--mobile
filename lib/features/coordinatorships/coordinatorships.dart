@@ -5,7 +5,9 @@ library;
 export 'application/coordinatorships_nav_caption.dart'
     show coordinatorshipsNavCaptionProvider;
 export 'application/coordinatorships_providers.dart'
-    show coordinatorshipProfileRepositoryProvider;
+    show
+        coordinatorshipActivityRepositoryProvider,
+        coordinatorshipProfileRepositoryProvider;
 export 'domain/department.dart'
     show
         AssignableAccount,

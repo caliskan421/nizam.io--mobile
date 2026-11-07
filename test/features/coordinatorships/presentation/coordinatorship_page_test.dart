@@ -1,11 +1,15 @@
-// CoordinatorshipPage: kimlik + eylemler, sekmeler (Genel / Birimler / Ekip / Hakkında), gezinme
-// hedefleri, tostlar, diğer işlemler alt sayfası, kısayol menüsü (diğer koordinatörlükler),
+// CoordinatorshipPage: segmentli bölümler (Genel / Görevler / Üyeler / Arşiv / Toplantı),
 // bilinmeyen kod, taşma matrisi.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/ui/widgets/inputs/inputs.dart';
+import 'package:nizamio/features/coordinatorships/presentation/coord_archive_meetings_tabs.dart';
+import 'package:nizamio/features/coordinatorships/presentation/coord_general_tab.dart';
+import 'package:nizamio/features/coordinatorships/presentation/coord_people_sheet.dart';
+import 'package:nizamio/features/coordinatorships/presentation/coord_tasks_tab.dart';
 import 'package:nizamio/features/coordinatorships/presentation/coordinatorship_page.dart';
 
 import '../../../support/harness.dart';
@@ -66,58 +70,35 @@ Future<void> _tap(WidgetTester tester, Finder f) async {
   await settle(tester);
 }
 
-/// Tostu kaldırır (alttaki satırların üstünü örtmesin).
-Future<void> _dismissToast(WidgetTester tester) async {
-  ScaffoldMessenger.of(tester.element(find.byType(CoordinatorshipPage)))
-      .removeCurrentSnackBar();
-  await settle(tester);
-}
-
-/// Sayfanın kendi dikey kaydırması (dıştaki `NzPage.fill` kaydırmaz).
+/// Sayfanın dikey kaydırması.
 final _pageScroll = find
     .byWidgetPredicate(
       (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
     )
-    .at(1);
+    .first;
+
+/// Bölüm hapı (pinli sekme şeridi; Genel'deki özet kartlarında aynı ad geçer).
+Finder _tab(String label) =>
+    find.descendant(of: find.byType(NzPillTabs), matching: find.text(label));
+
+List<(String, Type)> get _tabs => [
+  (_l.uiCoordTabTasks, CoordTasksTab),
+  (_l.uiCoordTabMembers, CoordMembersTab),
+  (_l.uiCoordTabArchive, CoordArchiveTab),
+  (_l.uiCoordTabMeetings, CoordMeetingsTab),
+  (_l.uiCoordTabGeneral, CoordGeneralTab),
+];
 
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets('sekmeler: Birimler, Ekip (açılır üyeler), Hakkında', (
-    tester,
-  ) async {
+  testWidgets('bölümler: her hap kendi bölümünü açar', (tester) async {
     await _open(tester);
-    await _tap(tester, find.text(_l.uiCoordTabUnits));
-    expect(find.text(_l.uiCoordUnits), findsOneWidget);
-    expect(find.text('Depolama ve hidrofor'), findsOneWidget);
-    expect(find.text('1/5'), findsOneWidget);
-    await _tap(tester, find.text('Arıtma tesisi'));
-    expect(
-      find.text('Arıtma tesisi ${_l.uiCoordToastUnitTail}'),
-      findsOneWidget,
-    );
-    await _dismissToast(tester);
-
-    await _tap(tester, find.text(_l.uiCoordTabTeam));
-    expect(find.text('ekip · 9'), findsOneWidget);
-    expect(find.text('Abdullah Ateş'), findsOneWidget);
-    expect(find.text(_l.uiCoordRoleLead), findsNWidgets(2));
-    expect(find.text('7 üye daha'), findsOneWidget);
-    await _tap(tester, find.text('7 üye daha'));
-    expect(find.text(_l.uiCoordCollapse), findsOneWidget);
-    expect(find.text('Kadir Özbek'), findsOneWidget);
-    await _tap(tester, find.text(_l.uiCoordCollapse));
-    expect(find.text('7 üye daha'), findsOneWidget);
-    await _tap(tester, find.text(_l.uiCoordAddMember));
-    expect(find.text(_l.uiHomeQaInviteLong), findsOneWidget);
-    await tester.tapAt(const Offset(10, 10));
-    await settle(tester);
-
-    await _tap(tester, find.text(_l.uiCoordTabAbout));
-    expect(find.textContaining('Havalimanı yerleşkesinin'), findsOneWidget);
-    expect(find.text('10.06.2026'), findsOneWidget);
-    expect(find.text(_l.uiCoordFeed), findsOneWidget);
-    expect(find.text('19.10'), findsOneWidget);
+    expect(find.byType(CoordGeneralTab), findsOneWidget);
+    for (final (label, type) in _tabs) {
+      await _tap(tester, _tab(label));
+      expect(find.byType(type), findsOneWidget, reason: label);
+    }
   });
 
   testWidgets('bilinmeyen kod: boş durum', (tester) async {
@@ -152,15 +133,8 @@ void main() {
             }
 
             await scroll();
-            for (final tab in [
-              _l.uiCoordTabUnits,
-              _l.uiCoordTabTeam,
-              _l.uiCoordTabAbout,
-            ]) {
-              await _tap(tester, find.text(tab).first);
-              if (tab == _l.uiCoordTabTeam) {
-                await _tap(tester, find.text('7 üye daha'));
-              }
+            for (final (label, _) in _tabs) {
+              await _tap(tester, _tab(label));
               await scroll();
             }
             expect(tester.takeException(), isNull);

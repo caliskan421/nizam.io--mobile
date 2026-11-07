@@ -18,6 +18,8 @@ export 'domain/task_catalog.dart';
 export 'presentation/quick_action_sheets.dart'
     show showInviteSheet, showMeetingSheet, showNewTaskSheet;
 export 'presentation/task_detail_page.dart' show TaskDetailPage;
+export 'presentation/tasks/task_card_grid.dart' show TaskCardRow;
+export 'presentation/tasks/tasks_list_parts.dart' show TaskCardView;
 export 'presentation/tasks_mode_toggle.dart'
     show TasksHeaderSlide, TasksModeToggle;
 export 'presentation/tasks_page.dart' show TasksPage;

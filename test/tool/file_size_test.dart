@@ -35,7 +35,6 @@ const _legacy = <String, int>{
   'lib/features/tasks/presentation/detail/detail_actions.dart': 757,
   'lib/features/timeline/presentation/chart/timeline_painters.dart': 746,
   'test/tool/gen_test.dart': 732,
-  'lib/features/coordinatorships/presentation/coordinatorship_tabs.dart': 694,
   'lib/features/timeline/presentation/chart/timeline_chart.dart': 666,
   'lib/features/activity/presentation/activity_page.dart': 656,
   'test/features/meetings/data/meetings_api_repository_test.dart': 649,

@@ -119,7 +119,7 @@ class ApiTaskCatalogRepository
           name: me.fullName,
           role: access.personRoleIn(program),
         ),
-        teams.values,
+        [for (final (_, rows) in teams) rows],
       ),
       coordinatorships: [
         for (final d in departments)
@@ -128,11 +128,11 @@ class ApiTaskCatalogRepository
             name: d.name,
             shortCode: d.code,
             leads: [
-              for (final m in teams[d.id] ?? const <RosterMember>[])
+              for (final m in _teamOf(teams, d.id))
                 if (m.role == 'koordinator') m.accountId,
             ],
             members: [
-              for (final m in teams[d.id] ?? const <RosterMember>[])
+              for (final m in _teamOf(teams, d.id))
                 if (m.role != 'koordinator') m.accountId,
             ],
           ),
@@ -171,7 +171,7 @@ class ApiTaskCatalogRepository
   /// Yalnız yönetici ya da o departmanın koordinatörü okur ([TaskAccess.canReadTeamIn]);
   /// üyede çağrı yoktur. Ekip ek bilgidir: bir departmanın okuması düşerse o koordinatörlük
   /// kişisiz görünür, katalog düşmez.
-  Future<Map<String, List<RosterMember>>> _teams(
+  Future<List<(String, List<RosterMember>)>> _teams(
     String program,
     TaskAccess access,
     List<TaskDepartment> departments,
@@ -199,27 +199,40 @@ class ApiTaskCatalogRepository
             )
             .catchError((Object _) => const <RosterMember>[]),
     ]);
-    return {for (var i = 0; i < readable.length; i++) readable[i]: rows[i]};
+    return [for (var i = 0; i < readable.length; i++) (readable[i], rows[i])];
   }
+
+  static List<RosterMember> _teamOf(
+    List<(String, List<RosterMember>)> teams,
+    String departmentId,
+  ) => [
+    for (final (id, rows) in teams)
+      if (id == departmentId) ...rows,
+  ];
 
   /// Katalog kişileri: oturum sahibi (rolü erişimden) + ekiplerdeki herkes (bir yerde
   /// koordinatörse koordinatör).
   static List<Person> _people(Person me, Iterable<List<RosterMember>> teams) {
-    final byId = <String, Person>{me.id: me};
+    final out = [me];
     for (final m in teams.expand((t) => t)) {
-      if (m.accountId == me.id) continue;
       final lead = m.role == 'koordinator';
-      final prev = byId[m.accountId];
-      if (prev != null && (prev.role == PersonRole.coordinator || !lead)) {
+      final i = out.indexWhere((p) => p.id == m.accountId);
+      if (i == 0 ||
+          (i > 0 && (out[i].role == PersonRole.coordinator || !lead))) {
         continue;
       }
-      byId[m.accountId] = Person(
+      final person = Person(
         id: m.accountId,
         name: m.fullName,
         role: lead ? PersonRole.coordinator : PersonRole.member,
       );
+      if (i > 0) {
+        out[i] = person;
+      } else {
+        out.add(person);
+      }
     }
-    return [...byId.values];
+    return out;
   }
 
   static List<PersonName> _names(List<WorkItem> items) => [

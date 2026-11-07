@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/layout/nz_layout.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
@@ -19,14 +20,20 @@ import '../../tasks/tasks.dart';
 import '../application/coordinatorship_detail_controller.dart';
 import '../application/coordinatorship_profiles_controller.dart';
 import '../application/coordinatorships_controller.dart';
+import '../domain/coordinatorship_board.dart';
 import '../domain/coordinatorship_overview.dart';
+import 'coord_archive_meetings_tabs.dart';
+import 'coord_detail_texts.dart';
+import 'coord_general_tab.dart';
+import 'coord_hero.dart';
+import 'coord_people_sheet.dart';
+import 'coord_tasks_tab.dart';
 import 'coord_texts.dart';
-import 'coordinatorship_tabs.dart';
 
-/// Koordinatörlük ayrıntısı (prototip `cdetail`): kısa kodlu cam üst çubuk + "diğer işlemler",
-/// ad, kimlik satırı, "Ekibe mesaj" / "Görev ata", yapışkan hap sekmeler (Genel, Birimler,
-/// Ekip, Hakkında; prototip `position: sticky; top: 64px`). Alt menüde modül sekmesine yeniden
-/// dokunmak diğer koordinatörlükleri listede seçili sıralamayla listeler.
+/// Koordinatörlük ayrıntısı (prototip `cdetail`, telefon ve tablet sağ panel): kısa kodlu cam
+/// üst çubuk + "diğer işlemler", kimlik ve nabız ([CoordHero]), yapışkan segmentli bölümler
+/// (Genel, Görevler, Üyeler, Arşiv, Toplantı). Alt menüde modül sekmesine yeniden dokunmak diğer
+/// koordinatörlükleri listede seçili sıralamayla listeler.
 class CoordinatorshipPage extends ConsumerWidget {
   const CoordinatorshipPage({super.key, required this.code});
 
@@ -50,10 +57,20 @@ class CoordinatorshipPage extends ConsumerWidget {
     });
     final l = context.l10n;
     final d = detail.value;
-    final view = ref.watch(coordinatorshipDetailControllerProvider(code));
-    // Diğer ayrıntı sayfaları gibi: cam üst çubuk, içerik altından akar; sekmeler çubuğun
-    // altına yapışan cam şerit (prototip `position: sticky; top: 64px`).
+    final catalog = ref.watch(taskCatalogControllerProvider).value;
+    final tab = ref.watch(
+      coordinatorshipDetailControllerProvider(code).select((v) => v.tab),
+    );
+    final ready = d != null && catalog != null;
+    final tasks = ready ? catalog.tasksOf(code) : const <TaskItem>[];
+    final pulse = CoordPulse.of(tasks);
+    final people = ready
+        ? coordPeople(d.stats.leads, d.stats.members, tasks)
+        : const <CoordPerson>[];
+    // Diğer ayrıntı sayfaları gibi: cam üst çubuk, içerik altından akar; bölümler çubuğun
+    // altına yapışan cam şerit (prototip `.cd-tabwrap`, `position: sticky; top: 56px`).
     return NzPage.feed(
+      width: NzContentWidth.wide,
       // Tablet sağ bölmesi: kaynak gap 22, kimlik -6 → 16.
       paneLead: NizamioSpacing.space4,
       onRetry: () => _retry(ref),
@@ -68,37 +85,55 @@ class CoordinatorshipPage extends ConsumerWidget {
           ),
         ],
       ),
-      pinned: d == null
+      pinned: !ready
           ? null
           : Padding(
-              padding: const EdgeInsets.only(
-                top: NizamioSpacing.space4,
-                bottom: NizamioSpacing.space3,
+              padding: const EdgeInsets.only(top: 6, bottom: 8),
+              child: NzPillTabs(
+                semanticLabel: l.uiCoordTabsLabel,
+                selected: tab.index,
+                onSelected: (i) => ref
+                    .read(
+                      coordinatorshipDetailControllerProvider(code).notifier,
+                    )
+                    .selectTab(CoordinatorshipTab.values[i]),
+                tabs: [
+                  for (final t in CoordinatorshipTab.values)
+                    NzPillTab(label: l.coordTabLabel(t)),
+                ],
               ),
-              child: _Tabs(detail: d),
             ),
-      afterKey: ValueKey(view.tab),
-      after: d == null
+      afterKey: ValueKey(tab),
+      after: !ready
           ? const []
           : [
-              switch (view.tab) {
-                CoordinatorshipTab.general => CoordGeneralTab(detail: d),
-                CoordinatorshipTab.units => CoordUnitsTab(detail: d),
-                CoordinatorshipTab.team => CoordTeamTab(
+              const Gap(NizamioSpacing.space3),
+              switch (tab) {
+                CoordinatorshipTab.general => CoordGeneralTab(
                   detail: d,
-                  membersOpen: view.membersOpen,
-                  onToggleMembers: ref
-                      .read(
-                        coordinatorshipDetailControllerProvider(code).notifier,
-                      )
-                      .toggleMembers,
+                  pulse: pulse,
+                  people: people,
                 ),
-                CoordinatorshipTab.about => CoordAboutTab(detail: d),
+                CoordinatorshipTab.tasks => CoordTasksTab(
+                  code: code,
+                  catalog: catalog,
+                  people: people,
+                ),
+                CoordinatorshipTab.members => CoordMembersTab(
+                  code: code,
+                  people: people,
+                ),
+                CoordinatorshipTab.archive => CoordArchiveTab(
+                  code: code,
+                  folder: d.stats.shortCode ?? code,
+                  catalog: catalog,
+                ),
+                CoordinatorshipTab.meetings => CoordMeetingsTab(code: code),
               },
             ],
       children: [
-        if (d != null)
-          _Header(detail: d)
+        if (ready)
+          CoordHero(detail: d, pulse: pulse)
         else
           NzAsyncView<CoordinatorshipDetail?>(
             value: detail,
@@ -212,93 +247,6 @@ class CoordinatorshipPage extends ConsumerWidget {
           ],
         );
       },
-    );
-  }
-}
-
-/// Ad, kimlik satırı ve "Ekibe mesaj" / "Görev ata" düğmeleri.
-class _Header extends StatelessWidget {
-  const _Header({required this.detail});
-
-  final CoordinatorshipDetail detail;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final t = context.text;
-    final d = detail;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Semantics(header: true, child: Text(d.stats.name, style: t.titleMd)),
-        const Gap(NizamioSpacing.space1),
-        Text.rich(
-          TextSpan(
-            text: l.coordIdentityLine(d),
-            children: [
-              TextSpan(
-                text: l.uiCoordStateActive,
-                style: t.caption.copyWith(
-                  color: c.accentText,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          style: t.caption.copyWith(color: c.textMuted),
-        ),
-        const Gap(NizamioSpacing.space4),
-        Row(
-          spacing: NizamioSpacing.space2,
-          children: [
-            Expanded(
-              child: NzButton.secondary(
-                label: l.uiCoordMessageTeam,
-                icon: NzIcons.messages,
-                expand: true,
-                onPressed: () => context.appNav.openChat(d.profile.chatId),
-              ),
-            ),
-            Expanded(
-              child: NzButton.primary(
-                label: l.uiCoordAssignTask,
-                icon: NzIcons.add,
-                expand: true,
-                onPressed: () =>
-                    showNewTaskSheet(context, coordinatorship: d.stats.code),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-/// Genel / Birimler / Ekip / Hakkında sekmeleri (yapışkan şerit).
-class _Tabs extends ConsumerWidget {
-  const _Tabs({required this.detail});
-
-  final CoordinatorshipDetail detail;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final d = detail;
-    final p = coordinatorshipDetailControllerProvider(d.stats.code);
-    final tab = ref.watch(p.select((s) => s.tab));
-    const tabs = CoordinatorshipTab.values;
-    return NzPillTabs(
-      semanticLabel: l.uiCoordTabsLabel,
-      selected: tabs.indexOf(tab),
-      onSelected: (i) => ref.read(p.notifier).selectTab(tabs[i]),
-      tabs: [
-        NzPillTab(label: l.uiCoordTabGeneral),
-        NzPillTab(label: l.uiCoordTabUnits, count: d.profile.units.length),
-        NzPillTab(label: l.uiCoordTabTeam, count: d.people),
-        NzPillTab(label: l.uiCoordTabAbout),
-      ],
     );
   }
 }

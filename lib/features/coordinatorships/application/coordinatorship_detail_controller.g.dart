@@ -9,14 +9,14 @@ part of 'coordinatorship_detail_controller.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Koordinatörlük ayrıntısının görünüm durumu ([code] başına; başka koordinatörlüğe geçince
-/// Genel sekmesinden başlar).
+/// Genel bölümünden başlar).
 
 @ProviderFor(CoordinatorshipDetailController)
 final coordinatorshipDetailControllerProvider =
     CoordinatorshipDetailControllerFamily._();
 
 /// Koordinatörlük ayrıntısının görünüm durumu ([code] başına; başka koordinatörlüğe geçince
-/// Genel sekmesinden başlar).
+/// Genel bölümünden başlar).
 final class CoordinatorshipDetailControllerProvider
     extends
         $NotifierProvider<
@@ -24,7 +24,7 @@ final class CoordinatorshipDetailControllerProvider
           CoordinatorshipDetailView
         > {
   /// Koordinatörlük ayrıntısının görünüm durumu ([code] başına; başka koordinatörlüğe geçince
-  /// Genel sekmesinden başlar).
+  /// Genel bölümünden başlar).
   CoordinatorshipDetailControllerProvider._({
     required CoordinatorshipDetailControllerFamily super.from,
     required String super.argument,
@@ -71,10 +71,10 @@ final class CoordinatorshipDetailControllerProvider
 }
 
 String _$coordinatorshipDetailControllerHash() =>
-    r'30f7620cda8683e56ac3fb75e4019ef8bd403e47';
+    r'25929ff558576ace3e0628240a3f393f440bf93e';
 
 /// Koordinatörlük ayrıntısının görünüm durumu ([code] başına; başka koordinatörlüğe geçince
-/// Genel sekmesinden başlar).
+/// Genel bölümünden başlar).
 
 final class CoordinatorshipDetailControllerFamily extends $Family
     with
@@ -95,7 +95,7 @@ final class CoordinatorshipDetailControllerFamily extends $Family
       );
 
   /// Koordinatörlük ayrıntısının görünüm durumu ([code] başına; başka koordinatörlüğe geçince
-  /// Genel sekmesinden başlar).
+  /// Genel bölümünden başlar).
 
   CoordinatorshipDetailControllerProvider call(String code) =>
       CoordinatorshipDetailControllerProvider._(argument: code, from: this);
@@ -105,7 +105,7 @@ final class CoordinatorshipDetailControllerFamily extends $Family
 }
 
 /// Koordinatörlük ayrıntısının görünüm durumu ([code] başına; başka koordinatörlüğe geçince
-/// Genel sekmesinden başlar).
+/// Genel bölümünden başlar).
 
 abstract class _$CoordinatorshipDetailController
     extends $Notifier<CoordinatorshipDetailView> {
@@ -233,4 +233,177 @@ final class CoordinatorshipDetailFamily extends $Family
 
   @override
   String toString() => r'coordinatorshipDetailProvider';
+}
+
+/// Koordinatörlüğün ([code] = `department_id`) toplantıları, tarihe göre.
+
+@ProviderFor(coordinatorshipMeetings)
+final coordinatorshipMeetingsProvider = CoordinatorshipMeetingsFamily._();
+
+/// Koordinatörlüğün ([code] = `department_id`) toplantıları, tarihe göre.
+
+final class CoordinatorshipMeetingsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<CoordMeeting>>,
+          List<CoordMeeting>,
+          FutureOr<List<CoordMeeting>>
+        >
+    with
+        $FutureModifier<List<CoordMeeting>>,
+        $FutureProvider<List<CoordMeeting>> {
+  /// Koordinatörlüğün ([code] = `department_id`) toplantıları, tarihe göre.
+  CoordinatorshipMeetingsProvider._({
+    required CoordinatorshipMeetingsFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'coordinatorshipMeetingsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$coordinatorshipMeetingsHash();
+
+  @override
+  String toString() {
+    return r'coordinatorshipMeetingsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<CoordMeeting>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<CoordMeeting>> create(Ref ref) {
+    final argument = this.argument as String;
+    return coordinatorshipMeetings(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CoordinatorshipMeetingsProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$coordinatorshipMeetingsHash() =>
+    r'89ae7cc27bac0cfa17323246ef77c353d20d0f1c';
+
+/// Koordinatörlüğün ([code] = `department_id`) toplantıları, tarihe göre.
+
+final class CoordinatorshipMeetingsFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<CoordMeeting>>, String> {
+  CoordinatorshipMeetingsFamily._()
+    : super(
+        retry: null,
+        name: r'coordinatorshipMeetingsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Koordinatörlüğün ([code] = `department_id`) toplantıları, tarihe göre.
+
+  CoordinatorshipMeetingsProvider call(String code) =>
+      CoordinatorshipMeetingsProvider._(argument: code, from: this);
+
+  @override
+  String toString() => r'coordinatorshipMeetingsProvider';
+}
+
+/// Koordinatörlüğün arşiv dosyaları (görevleri katalogdan; yeni önce).
+
+@ProviderFor(coordinatorshipFiles)
+final coordinatorshipFilesProvider = CoordinatorshipFilesFamily._();
+
+/// Koordinatörlüğün arşiv dosyaları (görevleri katalogdan; yeni önce).
+
+final class CoordinatorshipFilesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<CoordFile>>,
+          List<CoordFile>,
+          FutureOr<List<CoordFile>>
+        >
+    with $FutureModifier<List<CoordFile>>, $FutureProvider<List<CoordFile>> {
+  /// Koordinatörlüğün arşiv dosyaları (görevleri katalogdan; yeni önce).
+  CoordinatorshipFilesProvider._({
+    required CoordinatorshipFilesFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'coordinatorshipFilesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$coordinatorshipFilesHash();
+
+  @override
+  String toString() {
+    return r'coordinatorshipFilesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<CoordFile>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<CoordFile>> create(Ref ref) {
+    final argument = this.argument as String;
+    return coordinatorshipFiles(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CoordinatorshipFilesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$coordinatorshipFilesHash() =>
+    r'61a74645bae9d42d22ae5cc4291509fc8023a540';
+
+/// Koordinatörlüğün arşiv dosyaları (görevleri katalogdan; yeni önce).
+
+final class CoordinatorshipFilesFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<CoordFile>>, String> {
+  CoordinatorshipFilesFamily._()
+    : super(
+        retry: null,
+        name: r'coordinatorshipFilesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Koordinatörlüğün arşiv dosyaları (görevleri katalogdan; yeni önce).
+
+  CoordinatorshipFilesProvider call(String code) =>
+      CoordinatorshipFilesProvider._(argument: code, from: this);
+
+  @override
+  String toString() => r'coordinatorshipFilesProvider';
 }

@@ -65,7 +65,10 @@ class Composition {
     registerActivityModule(locator);
     registerArchiveModule(locator);
     registerCalendarModule(locator);
-    registerCoordinatorshipsModule(locator);
+    registerCoordinatorshipsModule(
+      locator,
+      apiDio: () => container.read(apiDioProvider),
+    );
     registerMessagesModule(locator);
     registerTasksModule(locator, apiDio: () => container.read(apiDioProvider));
     registerTimelineModule(locator);

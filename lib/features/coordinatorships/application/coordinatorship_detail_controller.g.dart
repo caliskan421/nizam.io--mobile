@@ -71,7 +71,7 @@ final class CoordinatorshipDetailControllerProvider
 }
 
 String _$coordinatorshipDetailControllerHash() =>
-    r'25929ff558576ace3e0628240a3f393f440bf93e';
+    r'2121e75016b61f5fd1521010104d91611042bd87';
 
 /// Koordinatörlük ayrıntısının görünüm durumu ([code] başına; başka koordinatörlüğe geçince
 /// Genel bölümünden başlar).

@@ -1436,6 +1436,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordAssignTask => 'Görev ata';
 
   @override
+  String get uiCoordMessage => 'Mesaj';
+
+  @override
   String get uiCoordTabsLabel => 'Koordinatörlük bölümleri';
 
   @override
@@ -1538,9 +1541,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordRoleMember => 'üye';
 
   @override
-  String get uiCoordUnassigned => 'Koordinatör atanmamış';
-
-  @override
   String get uiCoordUnassignedHint => 'Görev atanabilmesi için bir sorumlu seç';
 
   @override
@@ -1557,21 +1557,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordCollapse => 'Daralt';
-
-  @override
-  String get uiCoordAbout => 'hakkında';
-
-  @override
-  String get uiCoordFactParent => 'Üst birim';
-
-  @override
-  String get uiCoordFactFounded => 'Kuruluş';
-
-  @override
-  String get uiCoordFactVisibility => 'Görünürlük';
-
-  @override
-  String get uiCoordVisibilityAll => 'Tüm koordinatörler';
 
   @override
   String get uiCoordFeed => 'son etkinlik';
@@ -1620,9 +1605,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordClear => 'Temizle';
 
   @override
-  String get uiCoordDateRequestsTail => 'tarih talebi';
-
-  @override
   String get uiCoordDaysLaterTail => 'gün sonra';
 
   @override
@@ -1630,15 +1612,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordEveryone => 'Herkes';
-
-  @override
-  String get uiCoordFactCode => 'Kod';
-
-  @override
-  String get uiCoordFactKind => 'Tür';
-
-  @override
-  String get uiCoordFacts => 'bilgiler';
 
   @override
   String get uiCoordFilter => 'Görevleri süz';
@@ -1659,9 +1632,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordInvited => 'Davetli';
 
   @override
-  String get uiCoordKindCoord => 'Koordinatörlük';
-
-  @override
   String get uiCoordKindDoc => 'Belge';
 
   @override
@@ -1674,19 +1644,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordLater => 'sonra';
 
   @override
-  String get uiCoordLateTasksTail => 'görev gecikmede';
-
-  @override
   String get uiCoordLeadRole => 'Koordinatör';
 
   @override
-  String get uiCoordLeads => 'sorumlular';
-
-  @override
   String get uiCoordLeadsTail => 'koordinatör';
-
-  @override
-  String get uiCoordLess => 'Daha az';
 
   @override
   String get uiCoordMemberRole => 'Üye';
@@ -1695,19 +1656,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordMembersTail => 'üye';
 
   @override
-  String get uiCoordMessage => 'Mesaj';
-
-  @override
-  String get uiCoordMore => 'Devamı';
-
-  @override
   String get uiCoordNext => 'Sıradaki';
 
   @override
   String get uiCoordNoFiles => 'Bu birimin arşivinde dosya yok.';
-
-  @override
-  String get uiCoordNoLate => 'gecikme yok';
 
   @override
   String get uiCoordNoMeetings =>
@@ -1762,9 +1714,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordStAll => 'Tümü';
 
   @override
-  String get uiCoordStDoing => 'Devam ediyor';
-
-  @override
   String get uiCoordStDone => 'Tamamlandı';
 
   @override
@@ -1804,13 +1753,61 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordTomorrow => 'yarın';
 
   @override
-  String get uiCoordUnassignedPick => 'Üyeler arasından seçebilirsin';
-
-  @override
   String get uiCoordUpcomingTail => 'yaklaşan';
 
   @override
   String get uiCoordUpload => 'Dosya yükle';
+
+  @override
+  String get uiCoordFlow => 'Akış';
+
+  @override
+  String get uiCoordFlowSub => 'teslimler ve toplantılar';
+
+  @override
+  String get uiCoordTodayPill => 'Bugün';
+
+  @override
+  String get uiCoordDaysAgoTail => 'gün geçti';
+
+  @override
+  String get uiCoordDaysTail => 'gün';
+
+  @override
+  String get uiCoordMeetingTag => 'toplantı';
+
+  @override
+  String get uiCoordDeadlineTag => 'teslim';
+
+  @override
+  String get uiCoordNobody => 'atanmamış';
+
+  @override
+  String get uiCoordLoad => 'İş yükü';
+
+  @override
+  String get uiCoordLoadDone => 'biten';
+
+  @override
+  String get uiCoordLateTasksTail => 'görev gecikmede';
+
+  @override
+  String get uiCoordOnTime => 'zamanında';
+
+  @override
+  String get uiCoordFinishedTail => 'görev bitirdi';
+
+  @override
+  String get uiCoordNoLoad => 'Bu birimde atanmış görev yok.';
+
+  @override
+  String get uiCoordAllTeam => 'Tüm ekip';
+
+  @override
+  String get uiCoordActivity => 'Son hareketler';
+
+  @override
+  String get uiCoordNoActivity => 'Henüz hareket yok.';
 
   @override
   String get uiFeedbackLoading => 'Yükleniyor';

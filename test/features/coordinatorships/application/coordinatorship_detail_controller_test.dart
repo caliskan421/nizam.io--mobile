@@ -17,7 +17,7 @@ Future<void> _ready(ProviderContainer c) async {
 
 void main() {
   test(
-    'bölüm ve görev süzgeci kod başına; ilerleme satırı Görevler bölümünü açar',
+    'bölüm ve görev süzgeci kod başına; kişi süzgeci Görevler bölümünü açar',
     () async {
       final h = await pilotHarness(PilotBackend());
       final c = h.container;
@@ -25,15 +25,12 @@ void main() {
       c.listen(alt, (_, _) {});
       expect(c.read(alt).tab, CoordinatorshipTab.general);
       expect(c.read(alt).filtered, isFalse);
-      c.read(alt.notifier)
-        ..togglePulse()
-        ..showTasks(CoordTaskFilter.late, person: 'ko');
+      c.read(alt.notifier).showTasks(CoordTaskFilter.late, person: 'ko');
       expect(c.read(alt).tab, CoordinatorshipTab.tasks);
       expect(
         (c.read(alt).filter, c.read(alt).person),
         (CoordTaskFilter.late, 'ko'),
       );
-      expect(c.read(alt).pulseOpen, isFalse, reason: 'geçişte kart kapanır');
       c.read(alt.notifier).selectTab(CoordinatorshipTab.members);
       expect(
         c.read(alt).filter,

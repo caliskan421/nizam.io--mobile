@@ -1761,6 +1761,10 @@
   "@uiCoordAssignTask": {
     "description": "ui.coord.assign_task"
   },
+  "uiCoordMessage": "Mesaj",
+  "@uiCoordMessage": {
+    "description": "ui.coord.message"
+  },
   "uiCoordTabsLabel": "Koordinatörlük bölümleri",
   "@uiCoordTabsLabel": {
     "description": "ui.coord.tabs_label"
@@ -1897,10 +1901,6 @@
   "@uiCoordRoleMember": {
     "description": "ui.coord.role_member"
   },
-  "uiCoordUnassigned": "Koordinatör atanmamış",
-  "@uiCoordUnassigned": {
-    "description": "ui.coord.unassigned"
-  },
   "uiCoordUnassignedHint": "Görev atanabilmesi için bir sorumlu seç",
   "@uiCoordUnassignedHint": {
     "description": "ui.coord.unassigned_hint"
@@ -1924,26 +1924,6 @@
   "uiCoordCollapse": "Daralt",
   "@uiCoordCollapse": {
     "description": "ui.coord.collapse"
-  },
-  "uiCoordAbout": "hakkında",
-  "@uiCoordAbout": {
-    "description": "ui.coord.about"
-  },
-  "uiCoordFactParent": "Üst birim",
-  "@uiCoordFactParent": {
-    "description": "ui.coord.fact_parent"
-  },
-  "uiCoordFactFounded": "Kuruluş",
-  "@uiCoordFactFounded": {
-    "description": "ui.coord.fact_founded"
-  },
-  "uiCoordFactVisibility": "Görünürlük",
-  "@uiCoordFactVisibility": {
-    "description": "ui.coord.fact_visibility"
-  },
-  "uiCoordVisibilityAll": "Tüm koordinatörler",
-  "@uiCoordVisibilityAll": {
-    "description": "ui.coord.visibility_all"
   },
   "uiCoordFeed": "son etkinlik",
   "@uiCoordFeed": {
@@ -2005,10 +1985,6 @@
   "@uiCoordClear": {
     "description": "ui.coord.clear"
   },
-  "uiCoordDateRequestsTail": "tarih talebi",
-  "@uiCoordDateRequestsTail": {
-    "description": "ui.coord.date_requests_tail"
-  },
   "uiCoordDaysLaterTail": "gün sonra",
   "@uiCoordDaysLaterTail": {
     "description": "ui.coord.days_later_tail"
@@ -2020,18 +1996,6 @@
   "uiCoordEveryone": "Herkes",
   "@uiCoordEveryone": {
     "description": "ui.coord.everyone"
-  },
-  "uiCoordFactCode": "Kod",
-  "@uiCoordFactCode": {
-    "description": "ui.coord.fact_code"
-  },
-  "uiCoordFactKind": "Tür",
-  "@uiCoordFactKind": {
-    "description": "ui.coord.fact_kind"
-  },
-  "uiCoordFacts": "bilgiler",
-  "@uiCoordFacts": {
-    "description": "ui.coord.facts"
   },
   "uiCoordFilter": "Görevleri süz",
   "@uiCoordFilter": {
@@ -2057,10 +2021,6 @@
   "@uiCoordInvited": {
     "description": "ui.coord.invited"
   },
-  "uiCoordKindCoord": "Koordinatörlük",
-  "@uiCoordKindCoord": {
-    "description": "ui.coord.kind_coord"
-  },
   "uiCoordKindDoc": "Belge",
   "@uiCoordKindDoc": {
     "description": "ui.coord.kind_doc"
@@ -2077,25 +2037,13 @@
   "@uiCoordLater": {
     "description": "ui.coord.later"
   },
-  "uiCoordLateTasksTail": "görev gecikmede",
-  "@uiCoordLateTasksTail": {
-    "description": "ui.coord.late_tasks_tail"
-  },
   "uiCoordLeadRole": "Koordinatör",
   "@uiCoordLeadRole": {
     "description": "ui.coord.lead_role"
   },
-  "uiCoordLeads": "sorumlular",
-  "@uiCoordLeads": {
-    "description": "ui.coord.leads"
-  },
   "uiCoordLeadsTail": "koordinatör",
   "@uiCoordLeadsTail": {
     "description": "ui.coord.leads_tail"
-  },
-  "uiCoordLess": "Daha az",
-  "@uiCoordLess": {
-    "description": "ui.coord.less"
   },
   "uiCoordMemberRole": "Üye",
   "@uiCoordMemberRole": {
@@ -2105,14 +2053,6 @@
   "@uiCoordMembersTail": {
     "description": "ui.coord.members_tail"
   },
-  "uiCoordMessage": "Mesaj",
-  "@uiCoordMessage": {
-    "description": "ui.coord.message"
-  },
-  "uiCoordMore": "Devamı",
-  "@uiCoordMore": {
-    "description": "ui.coord.more"
-  },
   "uiCoordNext": "Sıradaki",
   "@uiCoordNext": {
     "description": "ui.coord.next"
@@ -2120,10 +2060,6 @@
   "uiCoordNoFiles": "Bu birimin arşivinde dosya yok.",
   "@uiCoordNoFiles": {
     "description": "ui.coord.no_files"
-  },
-  "uiCoordNoLate": "gecikme yok",
-  "@uiCoordNoLate": {
-    "description": "ui.coord.no_late"
   },
   "uiCoordNoMeetings": "Bu birimin toplantısı yok. Sağ üstten planlayabilirsin.",
   "@uiCoordNoMeetings": {
@@ -2193,10 +2129,6 @@
   "@uiCoordStAll": {
     "description": "ui.coord.st_all"
   },
-  "uiCoordStDoing": "Devam ediyor",
-  "@uiCoordStDoing": {
-    "description": "ui.coord.st_doing"
-  },
   "uiCoordStDone": "Tamamlandı",
   "@uiCoordStDone": {
     "description": "ui.coord.st_done"
@@ -2249,10 +2181,6 @@
   "@uiCoordTomorrow": {
     "description": "ui.coord.tomorrow"
   },
-  "uiCoordUnassignedPick": "Üyeler arasından seçebilirsin",
-  "@uiCoordUnassignedPick": {
-    "description": "ui.coord.unassigned_pick"
-  },
   "uiCoordUpcomingTail": "yaklaşan",
   "@uiCoordUpcomingTail": {
     "description": "ui.coord.upcoming_tail"
@@ -2260,6 +2188,74 @@
   "uiCoordUpload": "Dosya yükle",
   "@uiCoordUpload": {
     "description": "ui.coord.upload"
+  },
+  "uiCoordFlow": "Akış",
+  "@uiCoordFlow": {
+    "description": "ui.coord.flow"
+  },
+  "uiCoordFlowSub": "teslimler ve toplantılar",
+  "@uiCoordFlowSub": {
+    "description": "ui.coord.flow_sub"
+  },
+  "uiCoordTodayPill": "Bugün",
+  "@uiCoordTodayPill": {
+    "description": "ui.coord.today_pill"
+  },
+  "uiCoordDaysAgoTail": "gün geçti",
+  "@uiCoordDaysAgoTail": {
+    "description": "ui.coord.days_ago_tail"
+  },
+  "uiCoordDaysTail": "gün",
+  "@uiCoordDaysTail": {
+    "description": "ui.coord.days_tail"
+  },
+  "uiCoordMeetingTag": "toplantı",
+  "@uiCoordMeetingTag": {
+    "description": "ui.coord.meeting_tag"
+  },
+  "uiCoordDeadlineTag": "teslim",
+  "@uiCoordDeadlineTag": {
+    "description": "ui.coord.deadline_tag"
+  },
+  "uiCoordNobody": "atanmamış",
+  "@uiCoordNobody": {
+    "description": "ui.coord.nobody"
+  },
+  "uiCoordLoad": "İş yükü",
+  "@uiCoordLoad": {
+    "description": "ui.coord.load"
+  },
+  "uiCoordLoadDone": "biten",
+  "@uiCoordLoadDone": {
+    "description": "ui.coord.load_done"
+  },
+  "uiCoordLateTasksTail": "görev gecikmede",
+  "@uiCoordLateTasksTail": {
+    "description": "ui.coord.late_tasks_tail"
+  },
+  "uiCoordOnTime": "zamanında",
+  "@uiCoordOnTime": {
+    "description": "ui.coord.on_time"
+  },
+  "uiCoordFinishedTail": "görev bitirdi",
+  "@uiCoordFinishedTail": {
+    "description": "ui.coord.finished_tail"
+  },
+  "uiCoordNoLoad": "Bu birimde atanmış görev yok.",
+  "@uiCoordNoLoad": {
+    "description": "ui.coord.no_load"
+  },
+  "uiCoordAllTeam": "Tüm ekip",
+  "@uiCoordAllTeam": {
+    "description": "ui.coord.all_team"
+  },
+  "uiCoordActivity": "Son hareketler",
+  "@uiCoordActivity": {
+    "description": "ui.coord.activity"
+  },
+  "uiCoordNoActivity": "Henüz hareket yok.",
+  "@uiCoordNoActivity": {
+    "description": "ui.coord.no_activity"
   },
   "uiFeedbackLoading": "Yükleniyor",
   "@uiFeedbackLoading": {

@@ -23,7 +23,7 @@ enum CoordTaskFilter {
   };
 }
 
-/// İlerleme kartının dağılımı: biten, süren (gecikmesiz, başlamış), geciken, başlamadı.
+/// Görev dağılımı (Genel bölümündeki Görevler kartı): biten, süren (gecikmesiz, başlamış), geciken, başlamadı.
 @immutable
 final class CoordPulse {
   const CoordPulse({
@@ -31,13 +31,11 @@ final class CoordPulse {
     required this.doing,
     required this.late,
     required this.todo,
-    required this.requests,
   });
 
   factory CoordPulse.of(List<TaskItem> tasks) {
-    var done = 0, doing = 0, late = 0, todo = 0, requests = 0;
+    var done = 0, doing = 0, late = 0, todo = 0;
     for (final t in tasks) {
-      if (t.hasPendingRequest) requests++;
       if (t.isDone) {
         done++;
       } else if (t.isOverdue) {
@@ -48,13 +46,7 @@ final class CoordPulse {
         doing++;
       }
     }
-    return CoordPulse(
-      done: done,
-      doing: doing,
-      late: late,
-      todo: todo,
-      requests: requests,
-    );
+    return CoordPulse(done: done, doing: doing, late: late, todo: todo);
   }
 
   final int done;
@@ -62,12 +54,8 @@ final class CoordPulse {
   final int late;
   final int todo;
 
-  /// Bekleyen tarih talebi olan görev sayısı.
-  final int requests;
-
   int get total => done + doing + late + todo;
   int get open => total - done;
-  double get ratio => total == 0 ? 0 : done / total;
 }
 
 /// Ekip satırı: koordinatörlükteki açık/geciken görev sayısıyla.
@@ -140,6 +128,98 @@ final class CoordMeeting {
 
   /// Katılan birim sayısı.
   final int departments;
+}
+
+/// Genel "Akış" öğesi: gecikmesiz açık görevin teslimi ya da toplantı.
+sealed class CoordFlowItem {
+  const CoordFlowItem();
+
+  DateTime get at;
+}
+
+final class CoordFlowTask extends CoordFlowItem {
+  const CoordFlowTask(this.task);
+
+  final TaskItem task;
+
+  @override
+  DateTime get at => task.due;
+}
+
+final class CoordFlowMeeting extends CoordFlowItem {
+  const CoordFlowMeeting(this.meeting);
+
+  final CoordMeeting meeting;
+
+  @override
+  DateTime get at => meeting.at;
+}
+
+/// Genel "Akış" (prototip `flow`): bugünden önce en son teslimi geçmiş üç geciken görev
+/// (eskiden yeniye), bugünden sonra ilk dört öğe (en çok üç yaklaşan toplantı ve gecikmesiz
+/// açık teslimler, tarihe göre).
+({List<TaskItem> late, List<CoordFlowItem> upcoming}) coordFlow(
+  List<TaskItem> tasks,
+  List<CoordMeeting> meetings,
+  DateTime now,
+) {
+  final late = [
+    for (final t in tasks)
+      if (!t.isDone && t.isOverdue) t,
+  ]..sort((a, b) => a.due.compareTo(b.due));
+  final soon = [...meetings.where((m) => !m.at.isBefore(now))]
+    ..sort((a, b) => a.at.compareTo(b.at));
+  final upcoming = <CoordFlowItem>[
+    for (final m in soon.take(3)) CoordFlowMeeting(m),
+    for (final t in tasks)
+      if (!t.isDone && !t.isOverdue) CoordFlowTask(t),
+  ]..sort((a, b) => a.at.compareTo(b.at));
+  return (
+    late: late.sublist(late.length > 3 ? late.length - 3 : 0),
+    upcoming: upcoming.take(4).toList(),
+  );
+}
+
+/// Genel "İş yükü" satırı: atanan kişinin bu birimdeki geciken, gecikmesiz açık ve biten
+/// görev sayısı.
+@immutable
+final class CoordLoad {
+  const CoordLoad({
+    required this.id,
+    required this.late,
+    required this.open,
+    required this.done,
+  });
+
+  final String id;
+  final int late;
+  final int open;
+  final int done;
+
+  int get total => late + open + done;
+}
+
+/// [tasks] atananları iş yüküne göre (önce geciken, sonra açık, sonra toplam); en çok beş.
+List<CoordLoad> coordLoad(List<TaskItem> tasks) {
+  final ids = <String>{for (final t in tasks) ...t.assignees};
+  final rows =
+      [
+        for (final id in ids)
+          () {
+            final mine = tasks.where((t) => t.assignees.contains(id));
+            return CoordLoad(
+              id: id,
+              late: mine.where((t) => !t.isDone && t.isOverdue).length,
+              open: mine.where((t) => !t.isDone && !t.isOverdue).length,
+              done: mine.where((t) => t.isDone).length,
+            );
+          }(),
+      ]..sort((a, b) {
+        if (a.late != b.late) return b.late.compareTo(a.late);
+        if (a.open != b.open) return b.open.compareTo(a.open);
+        return b.total.compareTo(a.total);
+      });
+  return rows.take(5).toList();
 }
 
 /// Arşiv dosyası türü (prototip `IMG` / `DOC` / `PDF`).

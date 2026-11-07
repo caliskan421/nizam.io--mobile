@@ -24,18 +24,6 @@ extension CoordDetailTexts on AppLocalizations {
     CoordTaskFilter.all => uiCoordStAll,
   };
 
-  /// "13 görevden 9 tamamlandı".
-  String coordPulseCaption(CoordPulse p) =>
-      '${p.total} $uiCoordPctNoteOf ${p.done} $uiCoordPctNoteDone';
-
-  /// "3 görev gecikmede · 1 tarih talebi" / "gecikme yok".
-  String coordPulseFlag(CoordPulse p) => p.late == 0
-      ? uiCoordNoLate
-      : [
-          '${p.late} $uiCoordLateTasksTail',
-          if (p.requests > 0) '${p.requests} $uiCoordDateRequestsTail',
-        ].join(' · ');
-
   /// "8 açık · 3 gecikmede".
   String coordOpenLate(CoordPulse p) =>
       '${p.open} $uiCoordOpenTail · ${p.late} $uiCoordLateTail';
@@ -120,4 +108,38 @@ extension CoordDetailTexts on AppLocalizations {
   String coordNextMeeting(CoordMeeting? m) => m == null
       ? uiCoordNoMeetingsPlanned
       : '$uiCoordNext ${DateFormat('d MMM · HH:mm', 'tr').format(m.at)}';
+
+  /// "7 kas" (Akış'taki bugün çizgisi).
+  String coordDayMonth(DateTime d) =>
+      DateFormat('d MMM', 'tr').format(d).toLowerCase();
+
+  /// "3 gün geçti".
+  String coordDaysAgo(int n) => '$n $uiCoordDaysAgoTail';
+
+  /// [at] gününe kalan: "bugün" ya da "5 gün".
+  String coordDaysLeft(DateTime at, DateTime today) {
+    final d = DateTime(
+      at.year,
+      at.month,
+      at.day,
+    ).difference(DateTime(today.year, today.month, today.day)).inDays;
+    return d <= 0 ? uiCoordToday : '$d $uiCoordDaysTail';
+  }
+
+  /// Akış toplantı satırı: "10:00 · sahip · toplantı".
+  String coordFlowMeetingMeta(CoordMeeting m) => [
+    DateFormat('HH:mm', 'tr').format(m.at),
+    (m.owner ? uiCoordOwner : uiCoordInvited).toLowerCase(),
+    uiCoordMeetingTag,
+  ].join(' · ');
+
+  /// İş yükü satırının alt metni: geciken varsa sayısı, yoksa "zamanında" ya da bitenler.
+  String coordLoadSub(CoordLoad r) => r.late > 0
+      ? '${r.late} $uiCoordLateTasksTail'
+      : r.open > 0
+      ? uiCoordOnTime
+      : '${r.done} $uiCoordFinishedTail';
+
+  /// "Tüm ekip · 9 kişi".
+  String coordAllTeam(int n) => '$uiCoordAllTeam · ${coordPeopleCount(n)}';
 }

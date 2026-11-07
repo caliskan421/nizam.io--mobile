@@ -2734,6 +2734,12 @@ abstract class AppLocalizations {
   /// **'Görev ata'**
   String get uiCoordAssignTask;
 
+  /// ui.coord.message
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj'**
+  String get uiCoordMessage;
+
   /// ui.coord.tabs_label
   ///
   /// In tr, this message translates to:
@@ -2938,12 +2944,6 @@ abstract class AppLocalizations {
   /// **'üye'**
   String get uiCoordRoleMember;
 
-  /// ui.coord.unassigned
-  ///
-  /// In tr, this message translates to:
-  /// **'Koordinatör atanmamış'**
-  String get uiCoordUnassigned;
-
   /// ui.coord.unassigned_hint
   ///
   /// In tr, this message translates to:
@@ -2979,36 +2979,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Daralt'**
   String get uiCoordCollapse;
-
-  /// ui.coord.about
-  ///
-  /// In tr, this message translates to:
-  /// **'hakkında'**
-  String get uiCoordAbout;
-
-  /// ui.coord.fact_parent
-  ///
-  /// In tr, this message translates to:
-  /// **'Üst birim'**
-  String get uiCoordFactParent;
-
-  /// ui.coord.fact_founded
-  ///
-  /// In tr, this message translates to:
-  /// **'Kuruluş'**
-  String get uiCoordFactFounded;
-
-  /// ui.coord.fact_visibility
-  ///
-  /// In tr, this message translates to:
-  /// **'Görünürlük'**
-  String get uiCoordFactVisibility;
-
-  /// ui.coord.visibility_all
-  ///
-  /// In tr, this message translates to:
-  /// **'Tüm koordinatörler'**
-  String get uiCoordVisibilityAll;
 
   /// ui.coord.feed
   ///
@@ -3100,12 +3070,6 @@ abstract class AppLocalizations {
   /// **'Temizle'**
   String get uiCoordClear;
 
-  /// ui.coord.date_requests_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'tarih talebi'**
-  String get uiCoordDateRequestsTail;
-
   /// ui.coord.days_later_tail
   ///
   /// In tr, this message translates to:
@@ -3123,24 +3087,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Herkes'**
   String get uiCoordEveryone;
-
-  /// ui.coord.fact_code
-  ///
-  /// In tr, this message translates to:
-  /// **'Kod'**
-  String get uiCoordFactCode;
-
-  /// ui.coord.fact_kind
-  ///
-  /// In tr, this message translates to:
-  /// **'Tür'**
-  String get uiCoordFactKind;
-
-  /// ui.coord.facts
-  ///
-  /// In tr, this message translates to:
-  /// **'bilgiler'**
-  String get uiCoordFacts;
 
   /// ui.coord.filter
   ///
@@ -3178,12 +3124,6 @@ abstract class AppLocalizations {
   /// **'Davetli'**
   String get uiCoordInvited;
 
-  /// ui.coord.kind_coord
-  ///
-  /// In tr, this message translates to:
-  /// **'Koordinatörlük'**
-  String get uiCoordKindCoord;
-
   /// ui.coord.kind_doc
   ///
   /// In tr, this message translates to:
@@ -3208,35 +3148,17 @@ abstract class AppLocalizations {
   /// **'sonra'**
   String get uiCoordLater;
 
-  /// ui.coord.late_tasks_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'görev gecikmede'**
-  String get uiCoordLateTasksTail;
-
   /// ui.coord.lead_role
   ///
   /// In tr, this message translates to:
   /// **'Koordinatör'**
   String get uiCoordLeadRole;
 
-  /// ui.coord.leads
-  ///
-  /// In tr, this message translates to:
-  /// **'sorumlular'**
-  String get uiCoordLeads;
-
   /// ui.coord.leads_tail
   ///
   /// In tr, this message translates to:
   /// **'koordinatör'**
   String get uiCoordLeadsTail;
-
-  /// ui.coord.less
-  ///
-  /// In tr, this message translates to:
-  /// **'Daha az'**
-  String get uiCoordLess;
 
   /// ui.coord.member_role
   ///
@@ -3250,18 +3172,6 @@ abstract class AppLocalizations {
   /// **'üye'**
   String get uiCoordMembersTail;
 
-  /// ui.coord.message
-  ///
-  /// In tr, this message translates to:
-  /// **'Mesaj'**
-  String get uiCoordMessage;
-
-  /// ui.coord.more
-  ///
-  /// In tr, this message translates to:
-  /// **'Devamı'**
-  String get uiCoordMore;
-
   /// ui.coord.next
   ///
   /// In tr, this message translates to:
@@ -3273,12 +3183,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu birimin arşivinde dosya yok.'**
   String get uiCoordNoFiles;
-
-  /// ui.coord.no_late
-  ///
-  /// In tr, this message translates to:
-  /// **'gecikme yok'**
-  String get uiCoordNoLate;
 
   /// ui.coord.no_meetings
   ///
@@ -3382,12 +3286,6 @@ abstract class AppLocalizations {
   /// **'Tümü'**
   String get uiCoordStAll;
 
-  /// ui.coord.st_doing
-  ///
-  /// In tr, this message translates to:
-  /// **'Devam ediyor'**
-  String get uiCoordStDoing;
-
   /// ui.coord.st_done
   ///
   /// In tr, this message translates to:
@@ -3466,12 +3364,6 @@ abstract class AppLocalizations {
   /// **'yarın'**
   String get uiCoordTomorrow;
 
-  /// ui.coord.unassigned_pick
-  ///
-  /// In tr, this message translates to:
-  /// **'Üyeler arasından seçebilirsin'**
-  String get uiCoordUnassignedPick;
-
   /// ui.coord.upcoming_tail
   ///
   /// In tr, this message translates to:
@@ -3483,6 +3375,108 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Dosya yükle'**
   String get uiCoordUpload;
+
+  /// ui.coord.flow
+  ///
+  /// In tr, this message translates to:
+  /// **'Akış'**
+  String get uiCoordFlow;
+
+  /// ui.coord.flow_sub
+  ///
+  /// In tr, this message translates to:
+  /// **'teslimler ve toplantılar'**
+  String get uiCoordFlowSub;
+
+  /// ui.coord.today_pill
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get uiCoordTodayPill;
+
+  /// ui.coord.days_ago_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gün geçti'**
+  String get uiCoordDaysAgoTail;
+
+  /// ui.coord.days_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gün'**
+  String get uiCoordDaysTail;
+
+  /// ui.coord.meeting_tag
+  ///
+  /// In tr, this message translates to:
+  /// **'toplantı'**
+  String get uiCoordMeetingTag;
+
+  /// ui.coord.deadline_tag
+  ///
+  /// In tr, this message translates to:
+  /// **'teslim'**
+  String get uiCoordDeadlineTag;
+
+  /// ui.coord.nobody
+  ///
+  /// In tr, this message translates to:
+  /// **'atanmamış'**
+  String get uiCoordNobody;
+
+  /// ui.coord.load
+  ///
+  /// In tr, this message translates to:
+  /// **'İş yükü'**
+  String get uiCoordLoad;
+
+  /// ui.coord.load_done
+  ///
+  /// In tr, this message translates to:
+  /// **'biten'**
+  String get uiCoordLoadDone;
+
+  /// ui.coord.late_tasks_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görev gecikmede'**
+  String get uiCoordLateTasksTail;
+
+  /// ui.coord.on_time
+  ///
+  /// In tr, this message translates to:
+  /// **'zamanında'**
+  String get uiCoordOnTime;
+
+  /// ui.coord.finished_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görev bitirdi'**
+  String get uiCoordFinishedTail;
+
+  /// ui.coord.no_load
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu birimde atanmış görev yok.'**
+  String get uiCoordNoLoad;
+
+  /// ui.coord.all_team
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm ekip'**
+  String get uiCoordAllTeam;
+
+  /// ui.coord.activity
+  ///
+  /// In tr, this message translates to:
+  /// **'Son hareketler'**
+  String get uiCoordActivity;
+
+  /// ui.coord.no_activity
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz hareket yok.'**
+  String get uiCoordNoActivity;
 
   /// ui.feedback.loading
   ///

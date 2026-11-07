@@ -1,5 +1,5 @@
 // Koordinatörlük ayrıntısı karar mantığı: görev süzgeci, ilerleme dağılımı, ekip satırları,
-// dosya türü.
+// akış, iş yükü, dosya türü.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/features/coordinatorships/domain/coordinatorship_board.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
@@ -9,6 +9,7 @@ TaskItem _t(
   TaskStatus status, {
   int overdue = 0,
   List<String> who = const [],
+  DateTime? due,
 }) => TaskItem(
   code: code,
   title: code,
@@ -16,7 +17,7 @@ TaskItem _t(
   status: status,
   priority: TaskPriority.medium,
   start: DateTime(2026, 10),
-  due: DateTime(2026, 11),
+  due: due ?? DateTime(2026, 11),
   assignees: who,
   overdueDays: overdue,
 );
@@ -48,8 +49,7 @@ void main() {
     () {
       final p = CoordPulse.of(tasks);
       expect((p.done, p.doing, p.late, p.todo), (1, 2, 1, 1));
-      expect((p.total, p.open, p.ratio), (5, 4, .2));
-      expect(CoordPulse.of(const []).ratio, 0);
+      expect((p.total, p.open), (5, 4));
     },
   );
 
@@ -62,6 +62,55 @@ void main() {
     expect((rows[0].lead, rows[0].open, rows[0].late), (true, 2, 1));
     expect((rows[1].open, rows[1].late), (1, 0));
     expect(rows[2].open, 0);
+  });
+
+  test('akış: son üç geciken eskiden yeniye; yaklaşan en çok üç toplantı, ilk dört öğe', () {
+    final now = DateTime(2026, 10, 21, 12);
+    CoordMeeting m(String id, DateTime at) =>
+        CoordMeeting(id: id, title: id, at: at, owner: true, departments: 1);
+    final flow = coordFlow(
+      [
+        for (final (i, d) in [5, 9, 2, 7].indexed)
+          _t(
+            'l$i',
+            TaskStatus.inProgress,
+            overdue: d,
+            due: DateTime(2026, 10, 20 - d),
+          ),
+        _t('done', TaskStatus.done, due: DateTime(2026, 10, 25)),
+        _t('soon', TaskStatus.todo, due: DateTime(2026, 10, 23)),
+        _t('far', TaskStatus.inProgress, due: DateTime(2026, 12)),
+      ],
+      [
+        m('past', DateTime(2026, 10, 20)),
+        m('m1', DateTime(2026, 10, 22)),
+        m('m2', DateTime(2026, 10, 24)),
+        m('m3', DateTime(2026, 10, 26)),
+        m('m4', DateTime(2026, 10, 27)),
+      ],
+      now,
+    );
+    expect(flow.late.map((t) => t.code), ['l3', 'l0', 'l2']);
+    expect(
+      flow.upcoming.map(
+        (e) => switch (e) {
+          CoordFlowTask(:final task) => task.code,
+          CoordFlowMeeting(:final meeting) => meeting.id,
+        },
+      ),
+      ['m1', 'soon', 'm2', 'm3'],
+    );
+  });
+
+  test('iş yükü: önce geciken, sonra açık, sonra toplam; atanmamış yok', () {
+    final rows = coordLoad([
+      ...tasks,
+      _t('f', TaskStatus.done, who: ['p2', 'p3']),
+    ]);
+    expect(rows.map((r) => r.id), ['p1', 'p2', 'p3']);
+    expect((rows[0].late, rows[0].open, rows[0].done), (1, 1, 1));
+    expect((rows[1].late, rows[1].open, rows[1].done), (0, 1, 1));
+    expect(rows[2].total, 1);
   });
 
   test('dosya türü içerik türünden', () {

@@ -31,7 +31,7 @@ import 'coord_tasks_tab.dart';
 import 'coord_texts.dart';
 
 /// Koordinatörlük ayrıntısı (prototip `cdetail`, telefon ve tablet sağ panel): kısa kodlu cam
-/// üst çubuk + "diğer işlemler", kimlik ve nabız ([CoordHero]), yapışkan segmentli bölümler
+/// üst çubuk + "diğer işlemler", kimlik ([CoordHero]), yapışkan segmentli bölümler
 /// (Genel, Görevler, Üyeler, Arşiv, Toplantı). Alt menüde modül sekmesine yeniden dokunmak diğer
 /// koordinatörlükleri listede seçili sıralamayla listeler.
 class CoordinatorshipPage extends ConsumerWidget {
@@ -113,6 +113,7 @@ class CoordinatorshipPage extends ConsumerWidget {
                   detail: d,
                   pulse: pulse,
                   people: people,
+                  catalog: catalog,
                 ),
                 CoordinatorshipTab.tasks => CoordTasksTab(
                   code: code,
@@ -133,7 +134,7 @@ class CoordinatorshipPage extends ConsumerWidget {
             ],
       children: [
         if (ready)
-          CoordHero(detail: d, pulse: pulse)
+          CoordHero(detail: d)
         else
           NzAsyncView<CoordinatorshipDetail?>(
             value: detail,

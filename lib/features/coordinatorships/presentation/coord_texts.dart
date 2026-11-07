@@ -89,7 +89,4 @@ extension CoordTexts on AppLocalizations {
 
   /// "19.10".
   String coordShortDate(DateTime d) => DateFormat('dd.MM', 'tr').format(d);
-
-  /// "10.06.2026".
-  String coordDate(DateTime d) => DateFormat('dd.MM.y', 'tr').format(d);
 }

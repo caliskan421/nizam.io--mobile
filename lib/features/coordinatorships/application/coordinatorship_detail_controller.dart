@@ -19,8 +19,6 @@ final class CoordinatorshipDetailView {
     this.tab = CoordinatorshipTab.general,
     this.filter = CoordTaskFilter.open,
     this.person,
-    this.pulseOpen = false,
-    this.aboutOpen = false,
     this.pastOpen = false,
   });
 
@@ -29,8 +27,6 @@ final class CoordinatorshipDetailView {
 
   /// Görev süzgecindeki kişi kimliği (null → herkes).
   final String? person;
-  final bool pulseOpen;
-  final bool aboutOpen;
   final bool pastOpen;
 
   /// Varsayılandan farklı süzgeç (süz düğmesinin noktası).
@@ -40,15 +36,11 @@ final class CoordinatorshipDetailView {
     CoordinatorshipTab? tab,
     CoordTaskFilter? filter,
     String? Function()? person,
-    bool? pulseOpen,
-    bool? aboutOpen,
     bool? pastOpen,
   }) => CoordinatorshipDetailView(
     tab: tab ?? this.tab,
     filter: filter ?? this.filter,
     person: person == null ? this.person : person(),
-    pulseOpen: pulseOpen ?? this.pulseOpen,
-    aboutOpen: aboutOpen ?? this.aboutOpen,
     pastOpen: pastOpen ?? this.pastOpen,
   );
 
@@ -58,13 +50,10 @@ final class CoordinatorshipDetailView {
       other.tab == tab &&
       other.filter == filter &&
       other.person == person &&
-      other.pulseOpen == pulseOpen &&
-      other.aboutOpen == aboutOpen &&
       other.pastOpen == pastOpen;
 
   @override
-  int get hashCode =>
-      Object.hash(tab, filter, person, pulseOpen, aboutOpen, pastOpen);
+  int get hashCode => Object.hash(tab, filter, person, pastOpen);
 }
 
 /// Koordinatörlük ayrıntısının görünüm durumu ([code] başına; başka koordinatörlüğe geçince
@@ -78,13 +67,12 @@ class CoordinatorshipDetailController
 
   void selectTab(CoordinatorshipTab tab) => state = state.copyWith(tab: tab);
 
-  /// Görevler bölümünü [filter] süzgeciyle açar (ilerleme kartı satırları).
+  /// Görevler bölümünü [filter] süzgeciyle açar (kişi sayfası).
   void showTasks(CoordTaskFilter filter, {String? person}) =>
       state = state.copyWith(
         tab: CoordinatorshipTab.tasks,
         filter: filter,
         person: () => person,
-        pulseOpen: false,
       );
 
   void setFilter(CoordTaskFilter filter) =>
@@ -95,10 +83,6 @@ class CoordinatorshipDetailController
 
   void clearFilter() =>
       state = state.copyWith(filter: CoordTaskFilter.open, person: () => null);
-
-  void togglePulse() => state = state.copyWith(pulseOpen: !state.pulseOpen);
-
-  void toggleAbout() => state = state.copyWith(aboutOpen: !state.aboutOpen);
 
   void togglePast() => state = state.copyWith(pastOpen: !state.pastOpen);
 }

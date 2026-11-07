@@ -11,10 +11,13 @@ import '../../features/identity/identity.dart';
 import '../../features/scope/scope.dart';
 import 'routes.dart';
 import 'shell.dart' show ShellModule, moduleOf;
+import 'split.dart';
 
-/// [NzAppNav]'ın GoRouter gerçeklemesi (uygulama kökü sağlar). Kabuk içi hedefler `go`
-/// (iç içe rota yığını); kabuk dışı tam ekranlar (zaman çizelgesi, sohbet, profil) itilir —
-/// geri, açıldıkları sayfaya döner.
+/// [NzAppNav]'ın GoRouter gerçeklemesi (uygulama kökü sağlar). Modül hedefleri `go`; kayıt
+/// açan niyetler (görev, koordinatörlük, arşiv klasörü) çift bölmedeki yığın kuralıyla
+/// ([splitMove]): başka modülün kaydı bulunulan konumun izine itilir, geri izi kısaltıp açıldığı
+/// sayfaya döner (koordinatörlüğün Görevler bölümünden açılan görev → geri o bölüm). Kabuk
+/// dışı tam ekranlar (zaman çizelgesi, sohbet, profil) itilir.
 class GoRouterAppNav implements NzAppNav {
   GoRouterAppNav(this._router, this._ref);
 
@@ -27,6 +30,17 @@ class GoRouterAppNav implements NzAppNav {
   /// (dal kökü + alt sayfa) kurulur ve geri dal köküne döner; başka dala geçişte o dalın yığını.
   void _open(String target) => _router.go(target);
 
+  /// Kayıt açılışı (prototip `tgo`): modülün kendi kaydı tabana oturur, başka modülün kaydı
+  /// ize itilir, yığında geride varsa oraya dönülür. Tek bölmede son açılan kayıt hatırlanmaz.
+  void _record(PaneEntry target) {
+    final move = splitMove(
+      _router.routeInformationProvider.value.uri,
+      target,
+      (_) => null,
+    );
+    if (move case SplitGo(:final location)) _router.go(location);
+  }
+
   @override
   void openHome() => _router.go(const HomeRoute().location);
 
@@ -38,7 +52,7 @@ class GoRouterAppNav implements NzAppNav {
       _router.go(TasksRoute(view: view?.name, people: people).location);
 
   @override
-  void openTask(String code) => _open(TaskDetailRoute(code: code).location);
+  void openTask(String code) => _record(PaneEntry(PaneKind.task, code));
 
   @override
   void openCalendar() => _router.go(const CalendarRoute().location);
@@ -53,14 +67,14 @@ class GoRouterAppNav implements NzAppNav {
 
   @override
   void openCoordinatorship(String code) =>
-      _open(CoordinatorshipRoute(code: code).location);
+      _record(PaneEntry(PaneKind.coord, code));
 
   @override
   void openArchive() => _router.go(const ArchiveRoute().location);
 
   @override
   void openArchiveFolder(String code) =>
-      _open(ArchiveFolderRoute(code: code).location);
+      _record(PaneEntry(PaneKind.folder, code));
 
   @override
   void openMessages() => _router.go(const MessagesRoute().location);

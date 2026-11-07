@@ -6,9 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:nizamio/app/router/shell.dart';
 import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
+import 'package:nizamio/core/ui/layout/nz_pane.dart';
 import 'package:nizamio/core/ui/page/nz_app_nav.dart';
 import 'package:nizamio/features/identity/identity.dart';
 import 'package:nizamio/features/messages/messages.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
 import 'package:nizamio/features/timeline/timeline.dart';
 
 import '../../core/ui/widgets/feedback/feedback_test_support.dart';
@@ -34,9 +36,10 @@ void main() {
     expect(locationOf(router), '/home/history');
     expect(router.canPop(), isTrue);
 
+    // Başka modülün kaydı bulunulan konumun izine itilir (geri açıldığı sayfaya döner).
     nav.openTask('ALT-7');
     await settle(tester);
-    expect(locationOf(router), '/tasks/ALT-7');
+    expect(locationOf(router), '/home/history?trail=task%3AALT-7');
 
     // İtilen tam ekranlar konumda değil sayfa olarak görünür (go_router push yapılandırmayı
     // değiştirmez); geri açıldıkları sayfaya döner.
@@ -49,7 +52,7 @@ void main() {
     router.pop();
     await settle(tester);
     expect(find.byType(TimelinePage), findsNothing);
-    expect(locationOf(router), '/tasks/ALT-7');
+    expect(locationOf(router), '/home/history?trail=task%3AALT-7');
 
     nav.openTasks(view: NzTaskView.late, people: const ['p1']);
     await settle(tester);
@@ -78,6 +81,14 @@ void main() {
     nav.openCoordinatorships();
     await settle(tester);
     nav.openCoordinatorship('ALT');
+    await settle(tester);
+    expect(locationOf(router), '/coordinatorships/ALT');
+
+    // Koordinatörlükten açılan görev izde; geri koordinatörlüğe döner, Görevler'e değil.
+    nav.openTask('ALT-7');
+    await settle(tester);
+    expect(locationOf(router), '/coordinatorships/ALT?trail=task%3AALT-7');
+    NzPaneScope.back(tester.element(find.byType(TaskDetailPage)));
     await settle(tester);
     expect(locationOf(router), '/coordinatorships/ALT');
   });

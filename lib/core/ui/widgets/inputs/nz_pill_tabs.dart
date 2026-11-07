@@ -58,7 +58,7 @@ class NzPillTabs extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final inner = constraints.maxWidth - 2 * _inset;
-          final w = inner / n;
+          final w = inner <= 0 ? 0.0 : inner / n;
           return Stack(
             children: [
               Positioned.fill(

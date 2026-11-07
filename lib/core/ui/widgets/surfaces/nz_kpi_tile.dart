@@ -11,7 +11,8 @@ import 'nz_icon_tile.dart';
 
 /// KPI kutucuğu (tasarım `KpiTile`): üst satırda anlam renginde ikon çipi, etiket ve çapraz ok;
 /// büyük rakam (`m-kpi`), 4 px çubuk ve açıklama. İç boşluk `m-row-pad` (14). Dokununca
-/// [onTap] (ilgili liste); ok yalnız dokunulabilirken çizilir.
+/// [onTap] (ilgili liste); ok yalnız dokunulabilirken çizilir. Çubuk tek değerli ([progress]),
+/// parçalı ([segments]) ya da yerine serbest görsel ([footer], ör. avatar yığını) olur.
 class NzKpiTile extends StatelessWidget {
   const NzKpiTile({
     super.key,
@@ -19,7 +20,9 @@ class NzKpiTile extends StatelessWidget {
     required this.tone,
     required this.label,
     required this.value,
-    required this.progress,
+    this.progress,
+    this.segments = const [],
+    this.footer,
     required this.caption,
     this.valueColor,
     this.onTap,
@@ -34,8 +37,14 @@ class NzKpiTile extends StatelessWidget {
   final String label;
   final String value;
 
-  /// 0–1.
-  final double progress;
+  /// 0–1 (tek değerli çubuk, [tone] renginde).
+  final double? progress;
+
+  /// Parçalı çubuk ([progress] yerine).
+  final List<NzBarSegment> segments;
+
+  /// Çubuk yerine görsel (ör. avatar yığını).
+  final Widget? footer;
   final String caption;
 
   /// null → `text` (gecikmede `danger`).
@@ -83,7 +92,12 @@ class NzKpiTile extends StatelessWidget {
             style: t.numeral.copyWith(color: valueColor ?? c.text),
           ),
           const Gap(NizamioSpacing.gapMd),
-          NzProgressBar(value: progress, color: tone),
+          if (footer case final f?)
+            f
+          else if (segments.isNotEmpty)
+            NzProgressBar.segments(segments: segments)
+          else
+            NzProgressBar(value: progress ?? 0, color: tone),
           const Gap(NizamioSpacing.gapMd),
           Text(
             caption,

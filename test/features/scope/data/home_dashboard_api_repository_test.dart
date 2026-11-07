@@ -202,7 +202,6 @@ void main() {
     expect(d.coordinatorships.single.code, 'd1');
     expect(d.coordinatorships.single.leads, ['Ayşe Kaya']);
     expect(d.counts.unreadMessages, 7);
-    expect(d.counts.pendingRequests, 2);
     expect(d.counts.lateTasks, 2);
     expect(d.counts.tasksAwaitingApproval, 1);
   });

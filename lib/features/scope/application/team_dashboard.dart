@@ -98,7 +98,6 @@ HomeDashboard teamDashboard(
       lateTasks: lateCount,
       tasksAwaitingApproval: review,
       unreadMessages: extras.unreadMessages,
-      pendingRequests: extras.pendingDateRequests.length,
     ),
   );
 }

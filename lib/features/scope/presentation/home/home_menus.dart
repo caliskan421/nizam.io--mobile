@@ -47,7 +47,6 @@ Future<void> showHomeShortcuts(
 /// Çekmece satırının hedefi (ekranı olmayanlar yer tutucuya düşer).
 enum HomeModule {
   home,
-  tracking,
   tasks,
   calendar,
   memory,
@@ -55,8 +54,6 @@ enum HomeModule {
   meetings,
   messages,
   sheets,
-  requests,
-  budget,
   users,
   coordinatorships,
   season,
@@ -230,11 +227,6 @@ Future<void> showHomeDrawer(
             rows: [
               row(HomeModule.home, NzIcons.home, l.uiHomeModuleHome),
               row(
-                HomeModule.tracking,
-                NzIcons.tracking,
-                l.uiHomeModuleTracking,
-              ),
-              row(
                 HomeModule.tasks,
                 NzIcons.tasks,
                 l.uiHomeModuleTasks,
@@ -274,17 +266,6 @@ Future<void> showHomeDrawer(
           NzMenuGroup(
             label: l.uiHomeGroupAdmin,
             rows: [
-              row(
-                HomeModule.requests,
-                NzIcons.assignmentDone,
-                l.uiHomeModuleRequests,
-                trailing: count(
-                  counts?.pendingRequests,
-                  fill: c.warning,
-                  ink: c.onWarning,
-                ),
-              ),
-              row(HomeModule.budget, NzIcons.budget, l.uiHomeModuleBudget),
               row(HomeModule.users, NzIcons.group, l.uiHomeModuleUsers),
               row(
                 HomeModule.coordinatorships,

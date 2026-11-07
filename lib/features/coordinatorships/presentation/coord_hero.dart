@@ -11,7 +11,7 @@ import '../domain/coordinatorship_overview.dart';
 import 'coord_detail_texts.dart';
 import 'coord_parts.dart';
 
-/// Kimlik (prototip `.cd-hero`): kod kutucuğu, ad, alt satır (üst birim · kişi · durum) ve
+/// Kimlik (prototip `.cd-hero`): kod kutucuğu, ad, alt satır (üst birim · kişi) ve
 /// "Görev ata" / "Mesaj". Genişte düğmeler sol yarıda (prototip iki sütunlu kimlik).
 class CoordHero extends StatelessWidget {
   const CoordHero({super.key, required this.detail});
@@ -74,41 +74,11 @@ class CoordHero extends StatelessWidget {
                       style: t.titleLg.copyWith(fontSize: 24, height: 29 / 24),
                     ),
                   ),
-                  Text.rich(
-                    TextSpan(
-                      text: [
-                        if (parent.isNotEmpty) parent,
-                        l.coordPeopleCount(d.people),
-                        '',
-                      ].join(' · '),
-                      children: [
-                        // Haleli durum noktası (prototip `.cd-sdot`).
-                        WidgetSpan(
-                          alignment: PlaceholderAlignment.middle,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 3, right: 5),
-                            child: Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: c.accentText,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: c.accentText.withValues(alpha: .18),
-                                    spreadRadius: 3,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        TextSpan(
-                          text: l.uiCoordStateActive,
-                          style: t.caption.copyWith(color: c.accentText),
-                        ),
-                      ],
-                    ),
+                  Text(
+                    [
+                      if (parent.isNotEmpty) parent,
+                      l.coordPeopleCount(d.people),
+                    ].join(' · '),
                     style: t.caption.copyWith(color: c.textMuted),
                   ),
                 ],

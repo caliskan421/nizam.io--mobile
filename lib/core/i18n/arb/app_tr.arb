@@ -1749,10 +1749,6 @@
   "@uiCoordPeopleTail": {
     "description": "ui.coord.people_tail"
   },
-  "uiCoordStateActive": "Aktif",
-  "@uiCoordStateActive": {
-    "description": "ui.coord.state_active"
-  },
   "uiCoordMessageTeam": "Ekibe mesaj",
   "@uiCoordMessageTeam": {
     "description": "ui.coord.message_team"
@@ -2533,10 +2529,6 @@
   "@uiHomeModuleHome": {
     "description": "ui.home.module_home"
   },
-  "uiHomeModuleTracking": "İş takibi",
-  "@uiHomeModuleTracking": {
-    "description": "ui.home.module_tracking"
-  },
   "uiHomeModuleTasks": "Görevler",
   "@uiHomeModuleTasks": {
     "description": "ui.home.module_tasks"
@@ -2564,14 +2556,6 @@
   "uiHomeModuleSheets": "Tablolar",
   "@uiHomeModuleSheets": {
     "description": "ui.home.module_sheets"
-  },
-  "uiHomeModuleRequests": "Talepler",
-  "@uiHomeModuleRequests": {
-    "description": "ui.home.module_requests"
-  },
-  "uiHomeModuleBudget": "Bütçe",
-  "@uiHomeModuleBudget": {
-    "description": "ui.home.module_budget"
   },
   "uiHomeModuleUsers": "Kullanıcılar",
   "@uiHomeModuleUsers": {

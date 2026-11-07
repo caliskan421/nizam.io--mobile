@@ -221,13 +221,11 @@ final class ModuleCounts {
     required this.lateTasks,
     required this.tasksAwaitingApproval,
     required this.unreadMessages,
-    required this.pendingRequests,
   });
 
   final int lateTasks;
   final int tasksAwaitingApproval;
   final int unreadMessages;
-  final int pendingRequests;
 }
 
 /// Yönetici olmayan hesabın özetinde görev listesinden sayılamayan parçalar

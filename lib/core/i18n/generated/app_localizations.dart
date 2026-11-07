@@ -2716,12 +2716,6 @@ abstract class AppLocalizations {
   /// **'kişi'**
   String get uiCoordPeopleTail;
 
-  /// ui.coord.state_active
-  ///
-  /// In tr, this message translates to:
-  /// **'Aktif'**
-  String get uiCoordStateActive;
-
   /// ui.coord.message_team
   ///
   /// In tr, this message translates to:
@@ -3892,12 +3886,6 @@ abstract class AppLocalizations {
   /// **'Ana sayfa'**
   String get uiHomeModuleHome;
 
-  /// ui.home.module_tracking
-  ///
-  /// In tr, this message translates to:
-  /// **'İş takibi'**
-  String get uiHomeModuleTracking;
-
   /// ui.home.module_tasks
   ///
   /// In tr, this message translates to:
@@ -3939,18 +3927,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Tablolar'**
   String get uiHomeModuleSheets;
-
-  /// ui.home.module_requests
-  ///
-  /// In tr, this message translates to:
-  /// **'Talepler'**
-  String get uiHomeModuleRequests;
-
-  /// ui.home.module_budget
-  ///
-  /// In tr, this message translates to:
-  /// **'Bütçe'**
-  String get uiHomeModuleBudget;
 
   /// ui.home.module_users
   ///

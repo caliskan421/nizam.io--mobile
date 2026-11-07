@@ -34,7 +34,6 @@ class _Counting implements HomeDashboardRepository {
         lateTasks: 0,
         tasksAwaitingApproval: 0,
         unreadMessages: 0,
-        pendingRequests: 0,
       ),
     );
   }
@@ -281,7 +280,6 @@ void main() {
           ('w3', PendingKind.approval),
         ]);
         expect(d.pending.first.requestedShiftDays, 3);
-        expect(d.counts.pendingRequests, 1);
         expect(d.counts.tasksAwaitingApproval, 1);
       },
     );

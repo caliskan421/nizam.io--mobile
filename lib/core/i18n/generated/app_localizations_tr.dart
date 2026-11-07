@@ -1427,9 +1427,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordPeopleTail => 'kişi';
 
   @override
-  String get uiCoordStateActive => 'Aktif';
-
-  @override
   String get uiCoordMessageTeam => 'Ekibe mesaj';
 
   @override
@@ -2018,9 +2015,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeModuleHome => 'Ana sayfa';
 
   @override
-  String get uiHomeModuleTracking => 'İş takibi';
-
-  @override
   String get uiHomeModuleTasks => 'Görevler';
 
   @override
@@ -2040,12 +2034,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiHomeModuleSheets => 'Tablolar';
-
-  @override
-  String get uiHomeModuleRequests => 'Talepler';
-
-  @override
-  String get uiHomeModuleBudget => 'Bütçe';
 
   @override
   String get uiHomeModuleUsers => 'Kullanıcılar';

@@ -106,7 +106,6 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
         lateTasks: t.late,
         tasksAwaitingApproval: t.awaitingApproval,
         unreadMessages: unread,
-        pendingRequests: report.pendingDateChanges,
       ),
     );
   }

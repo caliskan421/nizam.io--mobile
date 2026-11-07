@@ -149,7 +149,6 @@ class GoRouterAppNav implements NzAppNav {
     final l = context.l10n;
     return switch (m) {
       HomeModule.home => l.uiHomeModuleHome,
-      HomeModule.tracking => l.uiHomeModuleTracking,
       HomeModule.tasks => l.uiHomeModuleTasks,
       HomeModule.calendar => l.uiHomeModuleCalendar,
       HomeModule.memory => l.uiHomeModuleMemory,
@@ -157,8 +156,6 @@ class GoRouterAppNav implements NzAppNav {
       HomeModule.meetings => l.uiHomeModuleMeetings,
       HomeModule.messages => l.uiHomeModuleMessages,
       HomeModule.sheets => l.uiHomeModuleSheets,
-      HomeModule.requests => l.uiHomeModuleRequests,
-      HomeModule.budget => l.uiHomeModuleBudget,
       HomeModule.users => l.uiHomeModuleUsers,
       HomeModule.coordinatorships => l.uiHomeCoordinatorships,
       HomeModule.season => l.uiHomeModuleSeason,

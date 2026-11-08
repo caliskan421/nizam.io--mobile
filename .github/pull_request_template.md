@@ -1,6 +1,7 @@
 ## Ne değişti
 
 - Faz / dilim: <!-- ör. F14 MOB-0 -->
+- Tür (dal öneki): <!-- ozellik | duzeltme | arayuz | belge | bakim — README §Süreç -->
 - Değişen modül(ler):
 
 ## Backend sözleşmesi

@@ -33,6 +33,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      # Dal adı standardı (README §Süreç). Kurulumdan önce: yanlış adda kota harcanmaz.
+      - name: Dal adı (ozellik|duzeltme|arayuz|belge|bakim/…)
+        if: github.event_name == 'pull_request'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if ! printf '%s' "$HEAD_REF" | grep -Eq '^(ozellik|duzeltme|arayuz|belge|bakim)/[a-z0-9][a-z0-9-]*$'; then
+            echo "::error::Dal adı '$HEAD_REF' standarda uymuyor: <ozellik|duzeltme|arayuz|belge|bakim>/<kucuk-harf-aciklama> (README §Süreç)"
+            exit 1
+          fi
+
       - name: Kaynak kodu al
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 

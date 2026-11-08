@@ -21,8 +21,9 @@ import 'meetings_texts.dart';
 /// ayrı sütunda.
 const _wideCard = 620.0;
 
-/// Toplantı kartı (prototip `.rp-mcard`): tarih kutusu (durumlu), başlık, koordinatörlük
-/// çipleri, sahip satırı ve sayaçlar (gündem, not, kişi). Liste ucu sayaç ve konferans
+/// Toplantı kartı (prototip `.rp-mcard`): tarih kutusu (durumlu), tek satır başlık, tek satır
+/// koordinatörlük şeridi (en çok 4, kalanı "+N"), sahip satırı ve sayaçlar (gündem, not, kişi);
+/// yükseklik koordinatörlük sayısından ve başlık uzunluğundan bağımsızdır. Liste ucu sayaç ve konferans
 /// taşımadığından (COLLABORATION-K51) sayaçlar ve canlı/bekliyor durumu kart başına ayrıntıdan
 /// gelir ([meetingSummaryControllerProvider]); gelene kadar iskelet. Silinmiş toplantıda altta
 /// "Sildi: … · tarih", geri yükle ve kalıcı sil ([onRestore], [onPurge]; yalnız yönetici).
@@ -103,9 +104,10 @@ class MeetingCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: NizamioSpacing.space2,
           children: [
+            // Kart yüksekliği sabit: başlık tek satır (tamamı ayrıntıda ve okuyucu etiketinde).
             Text(
               m.title,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: t.labelLg.copyWith(
                 fontSize: 15.5,
@@ -113,13 +115,27 @@ class MeetingCard extends ConsumerWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            // Izgara yarım genişlikte hücreler kurar: geniş kartta 420'de sınırlanır.
+            // Tek satır çip şeridi; geniş kartta 420'de sınırlanır.
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
               child: chips,
             ),
             ownerText,
-            if (!wide && showStats) ...[const Gap(2), stats],
+            // Sayaç yeri yüklenirken ve okunamadığında da tutulur (yükseklik sabit).
+            if (!wide && deletedAt == null) ...[
+              const Gap(2),
+              // Tek satır: büyük metin ölçeğinde sarmak yerine küçülür.
+              SizedBox(
+                height: 20,
+                child: showStats
+                    ? FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: stats,
+                      )
+                    : null,
+              ),
+            ],
           ],
         );
         final row = Padding(

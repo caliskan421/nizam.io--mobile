@@ -6,6 +6,7 @@ import '../../../core/errors/error_text.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
+import '../../../core/ui/motion/page_content_entrance.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
@@ -200,24 +201,40 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 18,
           children: [
-            for (final g in groups)
+            // Sekme değişince gruplar ve kartlar kademeli girer (görev listesiyle aynı hareket);
+            // aynı sekmede yenileme ya da arama yalnız yeni beliren öğeyi oynatır.
+            for (final (gi, g) in groups.indexed)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: NizamioSpacing.space2,
                 children: [
-                  NzKicker(l.meetingGroupLabel(g)),
-                  for (final m in g.items)
-                    MeetingCard(
+                  NzEntrance(
+                    replay: (tab, l.meetingGroupLabel(g)),
+                    index:
+                        gi +
+                        groups.take(gi).fold(0, (a, x) => a + x.items.length),
+                    child: NzKicker(l.meetingGroupLabel(g)),
+                  ),
+                  for (final (i, m) in g.items.indexed)
+                    NzEntrance(
                       key: ValueKey(m.id),
-                      meeting: m,
-                      catalog: catalog,
-                      onTap: () => nav.openMeeting(m.id),
-                      onRestore: tab == MeetingsTab.deleted
-                          ? () => _restore(m)
-                          : null,
-                      onPurge: tab == MeetingsTab.deleted
-                          ? () => _purge(m)
-                          : null,
+                      replay: (tab, m.id),
+                      index:
+                          gi +
+                          1 +
+                          i +
+                          groups.take(gi).fold(0, (a, x) => a + x.items.length),
+                      child: MeetingCard(
+                        meeting: m,
+                        catalog: catalog,
+                        onTap: () => nav.openMeeting(m.id),
+                        onRestore: tab == MeetingsTab.deleted
+                            ? () => _restore(m)
+                            : null,
+                        onPurge: tab == MeetingsTab.deleted
+                            ? () => _purge(m)
+                            : null,
+                      ),
                     ),
                 ],
               ),

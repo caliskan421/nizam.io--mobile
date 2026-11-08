@@ -11,10 +11,31 @@ import '../domain/meeting.dart';
 import '../domain/meeting_status.dart';
 import 'meetings_texts.dart';
 
-/// Davetli koordinatörlük çipleri (sahip önde), iki sütunlu ızgarada: her çip satırın yarısını
-/// kaplar, uzun ad üç noktayla kısalır. [solid]: liste kartı (sahip `ink` dolgulu, diğerleri
-/// `bg-raised`; en çok iki satır, 4'ten fazlası 3 + "+N"); değilse ayrıntı kimliği (kenarlı;
-/// sahip kalın, hepsi). [trailing] ızgaranın altında (ayrıntıda görünürlük hapı).
+/// Tek satırda gösterilecek çip sayısı: [widths] (sahip önde) sırayla, en çok [max] tanesi,
+/// [avail] genişliğe sığdığı kadar; kalan varsa sona "+N" çipi ([plus], kalan sayısına göre
+/// genişlik) de sığmalıdır. En az 1 (sahip; sığmıyorsa çağıran kısaltır).
+int chipsThatFit(
+  List<double> widths, {
+  required double avail,
+  required double gap,
+  required double Function(int rest) plus,
+  int max = 4,
+}) {
+  for (var k = widths.length < max ? widths.length : max; k > 1; k--) {
+    final rest = widths.length - k;
+    var need = widths.take(k).fold(0.0, (a, w) => a + w) + gap * (k - 1);
+    if (rest > 0) need += gap + plus(rest);
+    if (need <= avail) return k;
+  }
+  return 1;
+}
+
+/// Davetli koordinatörlük çipleri (sahip önde); çip içeriğe göre genişler (yatay boşluk dikeyin
+/// 4 katı), uzun ad üç noktayla kısalır.
+/// - [solid] (liste kartı): TEK satır, kart yüksekliği koordinatörlük sayısından bağımsız; sahip
+///   `ink` dolgulu, diğerleri `bg-raised`; sığdığı kadar, en çok 4 çip, kalanlar "+N".
+/// - değilse (ayrıntı kimliği): hepsi yan yana, sığmayan alt satıra akar; kenarlı, sahip kalın.
+/// [trailing] çiplerin altında (ayrıntıda görünürlük hapı).
 class MeetingCodeChips extends StatelessWidget {
   const MeetingCodeChips({
     super.key,
@@ -33,62 +54,128 @@ class MeetingCodeChips extends StatelessWidget {
 
   static const _gap = 6.0;
 
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    final depts = ownerFirst(meeting);
-    final cut = solid && depts.length > 4;
-    final shown = cut ? depts.take(3) : depts;
-    Widget chip(String text, {required bool owner, bool more = false}) {
-      final style = t.monoSm.copyWith(
-        fontSize: solid ? 11.5 : 11,
-        fontWeight: solid || owner ? FontWeight.w600 : FontWeight.w500,
-        color: solid
-            ? (owner ? c.background : (more ? c.textMuted : c.text))
-            : (owner ? c.text : c.textMuted),
-      );
-      return Container(
-        height: 24,
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
-          color: solid ? (owner ? c.text : c.surfaceRaised) : null,
-          borderRadius: BorderRadius.circular(8),
-          border: solid
-              ? null
-              : Border.all(color: owner ? c.borderControl : c.border),
-        ),
-        child: Text(
-          text,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: style,
-        ),
-      );
-    }
+  /// Çip iç boşluğu: dikey [_padV], yatay 4 katı.
+  static const _padV = 4.0;
+  static const _padH = _padV * 4;
 
-    final chips = [
-      for (final d in shown)
-        chip(label(d), owner: d.id == meeting.ownerDepartmentId),
-      if (cut) chip('+${depts.length - 3}', owner: false, more: true),
-    ];
-    final grid = LayoutBuilder(
-      builder: (context, box) {
-        final cell = (box.maxWidth - _gap) / 2;
-        return Wrap(
+  TextStyle _style(
+    BuildContext context, {
+    required bool owner,
+    bool more = false,
+  }) {
+    final c = context.colors;
+    return context.text.monoSm.copyWith(
+      fontSize: solid ? 11.5 : 11,
+      fontWeight: solid || owner ? FontWeight.w600 : FontWeight.w500,
+      color: solid
+          ? (owner ? c.background : (more ? c.textMuted : c.text))
+          : (owner ? c.text : c.textMuted),
+    );
+  }
+
+  Widget _chip(
+    BuildContext context,
+    String text, {
+    required bool owner,
+    bool more = false,
+  }) {
+    final c = context.colors;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: _padH, vertical: _padV),
+      decoration: BoxDecoration(
+        color: solid ? (owner ? c.text : c.surfaceRaised) : null,
+        borderRadius: BorderRadius.circular(8),
+        border: solid
+            ? null
+            : Border.all(color: owner ? c.borderControl : c.border),
+      ),
+      child: Text(
+        text,
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
+        style: _style(context, owner: owner, more: more),
+      ),
+    );
+  }
+
+  /// Çipin doğal genişliği (yazı + iç boşluk).
+  double _width(BuildContext context, String text, TextStyle style) {
+    final tp = TextPainter(
+      text: TextSpan(text: text, style: style),
+      maxLines: 1,
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final w = tp.width.ceilToDouble() + _padH * 2;
+    tp.dispose();
+    return w;
+  }
+
+  Widget _strip(
+    BuildContext context,
+    List<MeetingDepartment> depts,
+  ) => LayoutBuilder(
+    builder: (context, box) {
+      final owner = meeting.ownerDepartmentId;
+      final widths = [
+        for (final d in depts)
+          _width(context, label(d), _style(context, owner: d.id == owner)),
+      ];
+      double plus(int rest) =>
+          _width(context, '+$rest', _style(context, owner: false, more: true));
+      final k = chipsThatFit(
+        widths,
+        avail: box.maxWidth,
+        gap: _gap,
+        plus: plus,
+      );
+      final rest = depts.length - k;
+      return Row(
+        spacing: _gap,
+        children: [
+          for (final (i, d) in depts.take(k).indexed)
+            // Tek çip sığmıyorsa (çok uzun ad) kısalır; "+N" her zaman tam görünür.
+            if (i == 0)
+              Flexible(child: _chip(context, label(d), owner: d.id == owner))
+            else
+              _chip(context, label(d), owner: d.id == owner),
+          if (rest > 0) _chip(context, '+$rest', owner: false, more: true),
+        ],
+      );
+    },
+  );
+
+  /// Ayrıntı: hepsi yan yana, sığmayan alt satıra akar; çok uzun ad satır genişliğinde kısalır.
+  Widget _flow(BuildContext context, List<MeetingDepartment> depts) =>
+      LayoutBuilder(
+        builder: (context, box) => Wrap(
           spacing: _gap,
           runSpacing: _gap,
-          children: [for (final x in chips) SizedBox(width: cell, child: x)],
-        );
-      },
-    );
+          children: [
+            for (final d in depts)
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: box.maxWidth),
+                child: _chip(
+                  context,
+                  label(d),
+                  owner: d.id == meeting.ownerDepartmentId,
+                ),
+              ),
+          ],
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final depts = ownerFirst(meeting);
+    final chips = solid ? _strip(context, depts) : _flow(context, depts);
     final tail = trailing;
-    if (tail == null) return grid;
+    if (tail == null) return chips;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
-      children: [grid, tail],
+      children: [chips, tail],
     );
   }
 }

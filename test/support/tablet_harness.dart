@@ -6,9 +6,10 @@
 //  - `integration_test/tablet_visual_test.dart`: gerçek iPad simülatörü; görünüm boyutu ASLA
 //    ayarlanmaz, gerçek yüzey çizilir ve ölçüler çalışma anında FlutterView'dan okunup yazılır.
 //
-// Uygulama gerçek `NizamioApp`, gerçek bileşim kökü ([Harness]: bellek depoları + sahte HTTP +
-// örnek veri depoları), sahte backend ([PilotBackend]): bağ doğrulanmış açılır → Giriş ekranı →
-// gerçek giriş akışı (sahte ağ) + program seçimi → ana sayfa. Kapıyı atlayan mod yoktur.
+// Uygulama gerçek `NizamioApp`, gerçek bileşim kökü ([Harness]: bellek depoları + sahte HTTP),
+// sunucu biçimli sahte backend ([TabletBackend]: görevler, koordinatörlükler, Gantt): bağ
+// doğrulanmış açılır → Giriş ekranı → gerçek giriş akışı (sahte ağ) + program seçimi → ana
+// sayfa. Kapıyı atlayan mod yoktur. Değişmez sahneleri `tablet_invariants.dart`'tadır.
 // Gerçek backend'e çıkılmaz. Bugünün tarihi sahtelenmez (üretim kancası yok); Ana sayfa
 // `DateTime.now()` farkı bilinen açık madde.
 //
@@ -40,9 +41,12 @@ import 'package:nizamio/features/messages/messages.dart' show ChatPage;
 import 'package:nizamio/features/timeline/presentation/gantt/gantt_chart.dart'
     show GanttChart;
 
-import '../features/pilot_support.dart' show PilotBackend, real;
+import '../features/pilot_support.dart' show real;
 import 'fake_backend.dart' show FakeHandler;
 import 'harness.dart';
+import 'tablet_backend.dart';
+
+export 'tablet_invariants.dart';
 
 final _l = AppLocalizationsTr();
 
@@ -232,7 +236,7 @@ class TabletSession {
     }
     final h = Harness(
       flavor: Flavor.dev,
-      handler: handler ?? PilotBackend().handle,
+      handler: handler ?? TabletBackend().handle,
     );
     addTearDown(h.dispose);
     await real(tester, () => h.read(serverBindingProvider).verify(testUrl));
@@ -847,11 +851,15 @@ Future<void> tapGanttBar(TabletSession s, String code) async {
   await s.settle();
 }
 
-/// Görevler listesinden "Zaman çizelgesi" hapı. Liste tembeldir ve seçim kartı görünür yapmak
-/// için kaydırmış olabilir; kaynak akışında kullanıcı başa döner, burada da öyle: hap kurulu
-/// değilse dikey liste yukarı kaydırılır (üretim listesi tembel kalır).
+/// Görevler listesi başlığındaki "Zaman çizelgesi" anahtarı (yalnız simge; erişilebilirlik
+/// etiketiyle bulunur). Liste tembeldir ve seçim kartı görünür yapmak için kaydırmış olabilir;
+/// kaynak akışında kullanıcı başa döner, burada da öyle: anahtar kurulu değilse dikey liste
+/// yukarı kaydırılır (üretim listesi tembel kalır).
 Future<void> openTimelineFromTasks(TabletSession s) async {
-  final pill = s.inPane(NzPaneRole.master, find.text(_l.uiTasksModeTimeline));
+  final pill = s.inPane(
+    NzPaneRole.master,
+    find.bySemanticsLabel(_l.uiTasksModeTimeline),
+  );
   if (pill.evaluate().isEmpty) {
     final scrollable = s.inPane(
       NzPaneRole.master,
@@ -1177,202 +1185,3 @@ void expectTasksSourceGeometry(TabletSession s) {
     'Geciken',
   );
 }
-
-Finder _composerField() => find.descendant(
-  of: find.byType(NzComposer),
-  matching: find.byType(TextField),
-);
-
-/// Takvim hücresi (kaynak aria: "22 Ekim, Perşembe[, bugün][, n kayıt]").
-Finder calendarCell(String dayTitle) => find.bySemanticsLabel(
-  RegExp('^${RegExp.escape(dayTitle)}(, bugün)?(, \\d+ kayıt)?\$'),
-);
-
-final tabletInvariantScenes = <TabletScene>[
-  // --- Çapraz özellik açma: yalnız sağ yığın değişir, sol modül korunur (HTML 3517–3522, 3823–3830)
-  // --- Aynı modüle ray basışı: derin yığın tabana döner (HTML 3819)
-  // --- Modül değişimi: sağ TÜR varsayılana döner, ALT içerik son yüklenen kalır (HTML 3820, 2401)
-  TabletScene('nav-module-roundtrip-keeps-last-loaded-record', (s) async {
-    await s.tapRail(TabletModule.coordinatorships);
-    await s.tapText(
-      s.inPane(NzPaneRole.master, find.text('Mekanik sistemler')),
-    );
-    await s.tapRail(TabletModule.archive);
-    await _expectDefaultDetail(s, TabletModule.archive);
-    await s.tapRail(TabletModule.coordinatorships);
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Mekanik sistemler')),
-      findsWidgets,
-      reason: 'sub ekran durumu kalıcıdır: son yüklenen koordinatörlük (ALT\'ye sıfırlanmaz)',
-    );
-    expect(paneBack(s), findsNothing, reason: 'rs=[TB_DEF] tek giriş');
-  }),
-  // --- Liste (master) alt durumu modül gidiş-dönüşünde kalır; yalnız kaydırma sıfırlanır
-  TabletScene('master-search-survives-module-roundtrip', (s) async {
-    await _openTasks(s);
-    await s.tapText(find.bySemanticsLabel(_l.uiTasksSearch));
-    final field = s.inPane(NzPaneRole.master, find.byType(TextField));
-    await s.tester.enterText(field.first, 'asfalt');
-    await s.settle();
-    expect(
-      s.inPane(NzPaneRole.master, find.text('Faz3 asfalt işlemi')),
-      findsWidgets,
-    );
-    await s.tapRail(TabletModule.archive);
-    await s.tapRail(TabletModule.tasks);
-    // Kaynakta S_tasks.q kalıcıdır: süzgeç ve alan metni tutarlı biçimde korunur.
-    final texts = s
-        .inPane(NzPaneRole.master, find.byType(EditableText))
-        .evaluate()
-        .map((e) => (e.widget as EditableText).controller.text)
-        .toList();
-    expect(
-      texts,
-      contains('asfalt'),
-      reason: 'arama metni modül dönüşünde kalır',
-    );
-    expect(
-      s.inPane(NzPaneRole.master, find.text('Faz3 asfalt işlemi')),
-      findsWidgets,
-      reason: 'liste hâlâ süzülü',
-    );
-    expect(
-      s.inPane(NzPaneRole.master, find.text('ULA-1')),
-      findsNothing,
-      reason: 'süzgeç uygulanır',
-    );
-  }),
-  // --- Sohbet DEĞİŞİMİ sıfırlar (S_chat.load, HTML 3212–3216): A→B→A taslak yok
-  TabletScene('chat-switch-resets-draft', (s) async {
-    await s.tapRail(TabletModule.messages);
-    await _expectDefaultDetail(s, TabletModule.messages);
-    await s.tester.enterText(_composerField().last, 'Sohbete özel taslak');
-    await s.settle();
-    expect(
-      s.tester.widget<TextField>(_composerField().last).controller!.text,
-      'Sohbete özel taslak',
-    );
-    await s.tapText(s.inPane(NzPaneRole.master, find.text('Genel')));
-    expect(
-      s.tester.widget<TextField>(_composerField().last).controller!.text,
-      isEmpty,
-      reason: 'sohbet değişince taslak temizlenir',
-    );
-    await s.tapText(s.inPane(NzPaneRole.master, find.text('Koordinatörler')));
-    expect(
-      s.tester.widget<TextField>(_composerField().last).controller!.text,
-      isEmpty,
-      reason:
-          'ilk sohbete dönünce de boş (prototipte sohbet başına taslak yok)',
-    );
-    expect(find.textContaining(_l.uiMessagesReplyTo), findsNothing);
-  }),
-  // --- AYNI sohbet yeniden seçimi: KAYNAK `S_chat.load` koşulsuz sıfırlar (HTML 3212–3216) ve
-  // `openChat` her seçimde onu çağırır (3517, 3204): taslak/yanıt temizlenir, mesajlar kalır,
-  // yığın büyümez. (Yeniden BOYUT ise ayrı kuraldır: taslak korunur, host testinde.)
-  TabletScene('chat-same-reselect-follows-source', (s) async {
-    await s.tapRail(TabletModule.messages);
-    await _expectDefaultDetail(s, TabletModule.messages);
-    expectUnreadDivider(s, present: true);
-    // Kaynak `S_chat.load`: draft, reply, edit, refs, info, pin, atQ… hepsi sıfırlanır.
-    await startReplyToK2(s);
-    await s.tester.enterText(_composerField().last, 'Aynı sohbet taslağı');
-    await s.settle();
-    expectReplyChip(present: true);
-    await s.tapText(s.inPane(NzPaneRole.master, find.text('Koordinatörler')));
-    // Sıra: önce işaretçi ve taslak, en sonda yanıt çipi (hepsi aynı `load` sıfırlamasıdır;
-    // tek kırmızıda hangisinin kaldığı görünsün diye yanıt çipi sona bırakıldı).
-    expectUnreadDivider(s, present: false);
-    expect(
-      s.tester.widget<TextField>(_composerField().last).controller!.text,
-      isEmpty,
-      reason: 'kaynak: aynı sohbet seçimi de load ile taslağı sıfırlar',
-    );
-    expectReplyChip(present: false);
-    expect(
-      inChat(find.textContaining('trafo onayı')),
-      findsWidgets,
-      reason: 'sohbet içeriği (mesajlar) kalır',
-    );
-    expect(paneBack(s), findsNothing, reason: 'yığın büyümez');
-    s.expectSplitGeometry();
-  }),
-  // --- Etiket sütunundan seçim (kaynak: etiket tıklaması da `pick`): BAR seçiminden ayrı sözleşme.
-  TabletScene('gantt-label-selects-task', (s) async {
-    await _openTasks(s);
-    await openTimelineFromTasks(s);
-    await s.tapText(
-      find.descendant(
-        of: find.byKey(GanttChart.labelsKey),
-        matching: find.textContaining('Faz3 asfalt işlemi'),
-      ),
-      reason: 'Gantt etiket sütunu satırı',
-    );
-    expect(find.bySemanticsLabel('Seçili görev'), findsWidgets);
-    expect(find.text('Görev ayrıntısını aç'), findsWidgets);
-  }),
-  // --- Gantt kapat: mod/rs aynı (HTML 3807); ray aynı modüle basış kapatır (3817–3819)
-  TabletScene('gantt-close-keeps-module-and-selection', (s) async {
-    await _openTasks(s);
-    await s.tapText(
-      s.inPane(NzPaneRole.master, find.text('Faz3 asfalt işlemi')),
-    );
-    await openTimelineFromTasks(s);
-    expect(
-      s.pane(NzPaneRole.master),
-      findsNothing,
-      reason: 'Gantt tam genişlik',
-    );
-    expect(s.railRect, isNotNull, reason: 'ray görünür');
-    await s.tapText(find.bySemanticsLabel('Geri: Görevler'));
-    expect(
-      s.pane(NzPaneRole.master),
-      findsOneWidget,
-      reason: 'Görevler listesi geri geldi',
-    );
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Faz3 asfalt işlemi')),
-      findsWidgets,
-      reason: 'closeGantt sağ yığını değiştirmez',
-    );
-    s.expectSplitGeometry();
-  }),
-  TabletScene('gantt-rail-same-module-closes-other-module-leaves', (s) async {
-    await _openTasks(s);
-    await openTimelineFromTasks(s);
-    await s.tapRail(TabletModule.tasks);
-    expect(
-      s.pane(NzPaneRole.master),
-      findsOneWidget,
-      reason: 'aynı modüle basış Gantt\'ı kapatır',
-    );
-    await openTimelineFromTasks(s);
-    await s.tapRail(TabletModule.archive);
-    expect(
-      find.bySemanticsLabel('Geri: Görevler'),
-      findsNothing,
-      reason: 'başka modül Gantt\'ı bırakır',
-    );
-    await _expectDefaultDetail(s, TabletModule.archive);
-  }),
-  // --- openTaskFromGantt: kaynak istisnası (HTML 3776, 3808): Görevler modülü + tek detail, geri yok
-  TabletScene('gantt-open-task-resets-stack-to-tasks', (s) async {
-    await s.tapRail(TabletModule.coordinatorships);
-    await s.tapText(
-      s.inPane(NzPaneRole.detail, find.text(_l.uiCoordLinkArchive)),
-    );
-    await s.tapRail(TabletModule.tasks);
-    await openTimelineFromTasks(s);
-    await tapGanttBar(s, 'MEK-6');
-    await s.tapText(find.text('Görev ayrıntısını aç'));
-    expect(s.pane(NzPaneRole.master), findsOneWidget);
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Faz3 asfalt işlemi')),
-      findsWidgets,
-      reason: 'seçilen görev sağda; Görevler modülü',
-    );
-    expect(paneBack(s), findsNothing, reason: 'rs=[detail] tek giriş');
-    expect(find.bySemanticsLabel('Geri: Görevler'), findsNothing);
-  }),
-  // --- Takvim (HTML S_cal 3401–3500): bugün, ay/hafta, adım, seçili gün kalıcılığı
-];

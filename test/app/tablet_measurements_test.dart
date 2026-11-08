@@ -80,7 +80,7 @@ void main() {
           hostSize: tabletReferenceSize,
         );
         await s.signIn();
-        await s.tapRail(TabletModule.messages);
+        await openTabletChat(s);
         expectUnreadDivider(s, present: true);
         final field = find.descendant(
           of: find.byType(NzComposer),

@@ -77,6 +77,12 @@ class GoRouterAppNav implements NzAppNav {
       _record(PaneEntry(PaneKind.folder, code));
 
   @override
+  void openMeetings() => _router.go(const MeetingsRoute().location);
+
+  @override
+  void openMeeting(String id) => _record(PaneEntry(PaneKind.meeting, id));
+
+  @override
   void openMessages() => _router.go(const MessagesRoute().location);
 
   @override
@@ -97,6 +103,7 @@ class GoRouterAppNav implements NzAppNav {
       ShellModule.archive => HomeModule.archive,
       ShellModule.messages => HomeModule.messages,
       ShellModule.calendar => HomeModule.calendar,
+      ShellModule.meetings => HomeModule.meetings,
       null =>
         // Zaman çizelgesi görevler modülünün parçasıdır (prototip `ON.tasks`).
         location.startsWith(const TasksRoute().location) ||
@@ -135,6 +142,8 @@ class GoRouterAppNav implements NzAppNav {
             openMessages();
           case HomeModule.calendar:
             openCalendar();
+          case HomeModule.meetings:
+            openMeetings();
           default:
             NzToast.show(
               context,

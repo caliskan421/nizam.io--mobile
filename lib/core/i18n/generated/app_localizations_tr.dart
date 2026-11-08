@@ -2199,6 +2199,440 @@ class AppLocalizationsTr extends AppLocalizations {
       'Liste kısaltıldı; yalnız ilk kayıtlar gösteriliyor.';
 
   @override
+  String get uiMeetingsTitle => 'Toplantılar';
+
+  @override
+  String get uiMeetingsSearch => 'Ara';
+
+  @override
+  String get uiMeetingsSearchLabel => 'Toplantılarda ara';
+
+  @override
+  String get uiMeetingsSearchHint => 'Başlık ya da koordinatörlük kodu';
+
+  @override
+  String get uiMeetingsNew => 'Yeni toplantı';
+
+  @override
+  String get uiMeetingsListLabel => 'Toplantı listesi';
+
+  @override
+  String get uiMeetingsTabUpcoming => 'Yaklaşan';
+
+  @override
+  String get uiMeetingsTabPast => 'Geçmiş';
+
+  @override
+  String get uiMeetingsTabDeleted => 'Silinenler';
+
+  @override
+  String get uiMeetingsGroupToday => 'Bugün';
+
+  @override
+  String get uiMeetingsGroupTomorrow => 'Yarın';
+
+  @override
+  String get uiMeetingsGroupThisWeek => 'Bu hafta';
+
+  @override
+  String get uiMeetingsGroupNextWeek => 'Gelecek hafta';
+
+  @override
+  String get uiMeetingsGroupLater => 'Daha sonra';
+
+  @override
+  String get uiMeetingsYesterday => 'Dün';
+
+  @override
+  String get uiMeetingsEmptyUpcoming =>
+      'Yaklaşan toplantı yok. Yeni bir toplantı açabilirsin.';
+
+  @override
+  String get uiMeetingsEmptyPast => 'Geçmiş toplantı yok.';
+
+  @override
+  String get uiMeetingsEmptyDeleted => 'Silinmiş toplantı yok.';
+
+  @override
+  String get uiMeetingsEmptyFilter => 'Bu filtreyle eşleşen toplantı yok.';
+
+  @override
+  String get uiMeetingsPastNote =>
+      'Geçmiş tarihe toplantı açılamaz; tarih yalnız ileri alınabilir.';
+
+  @override
+  String get uiMeetingsTruncated =>
+      'Liste sınırına ulaşıldı; daha eski toplantılar gösterilmiyor.';
+
+  @override
+  String get uiMeetingsOwnerPrefix => 'Sahip:';
+
+  @override
+  String get uiMeetingsInvitedTail => 'koordinatörlük davetli';
+
+  @override
+  String get uiMeetingsDeletedPrefix => 'Silindi';
+
+  @override
+  String get uiMeetingsRestore => 'Geri yükle';
+
+  @override
+  String get uiMeetingsPurge => 'Kalıcı olarak sil';
+
+  @override
+  String get uiMeetingsPurgeQ => 'Toplantı kalıcı olarak silinsin mi?';
+
+  @override
+  String get uiMeetingsPurgeDesc =>
+      'Notlar, gündem ve koordinatörlük bağları da silinir. Bu işlem geri alınamaz.';
+
+  @override
+  String get uiMeetingsTRestored =>
+      'Toplantı geri yüklendi · konferans kayıtları geri gelmez';
+
+  @override
+  String get uiMeetingsTPurged => 'Toplantı kalıcı olarak silindi';
+
+  @override
+  String get uiMeetingsMore => 'Diğer işlemler';
+
+  @override
+  String get uiMeetingsNotFound => 'Toplantı bulunamadı.';
+
+  @override
+  String get uiMeetingsVisMembers => 'Üyeler dahil';
+
+  @override
+  String get uiMeetingsVisLeads => 'Yalnız koordinatörler';
+
+  @override
+  String get uiMeetingsConfLabel => 'Konferans';
+
+  @override
+  String get uiMeetingsConfLive => 'Canlı';
+
+  @override
+  String get uiMeetingsConfSince => 'Başladı';
+
+  @override
+  String get uiMeetingsConfStarting => 'Başlatılıyor';
+
+  @override
+  String get uiMeetingsConfStartingSub =>
+      'Oda açılıyor; birazdan katılabilirsin.';
+
+  @override
+  String get uiMeetingsConfEnding => 'Kapanıyor';
+
+  @override
+  String get uiMeetingsConfEndingSub => 'Konferans bitirildi, oda kapanıyor.';
+
+  @override
+  String get uiMeetingsConfNone => 'Henüz başlamadı';
+
+  @override
+  String get uiMeetingsConfNoneSub =>
+      'Konferans toplantı saatinde başlatılabilir · en çok 25 kişi.';
+
+  @override
+  String get uiMeetingsConfLateSub =>
+      'Toplantı saati geçti, konferans başlatılmadı.';
+
+  @override
+  String get uiMeetingsConfOff => 'Görüntülü konferans bu sunucuda kapalı.';
+
+  @override
+  String get uiMeetingsConfStart => 'Toplantıyı başlat';
+
+  @override
+  String get uiMeetingsConfEnd => 'Konferansı bitir';
+
+  @override
+  String get uiMeetingsConfJoin => 'Katıl';
+
+  @override
+  String get uiMeetingsConfJoinSoon => 'Görüntülü görüşme ekranı yakında';
+
+  @override
+  String get uiMeetingsTConfStarted => 'Konferans başlatıldı';
+
+  @override
+  String get uiMeetingsTConfEnded => 'Konferans herkes için bitirildi';
+
+  @override
+  String get uiMeetingsTabsLabel => 'Toplantı ayrıntısı';
+
+  @override
+  String get uiMeetingsTabAgenda => 'Gündem';
+
+  @override
+  String get uiMeetingsTabNotes => 'Notlar';
+
+  @override
+  String get uiMeetingsTabPeople => 'Kişiler';
+
+  @override
+  String get uiMeetingsTabInfo => 'Bilgi';
+
+  @override
+  String get uiMeetingsAgendaTitle => 'Gündem';
+
+  @override
+  String get uiMeetingsAgendaAdd => 'Gündem maddesi ekle';
+
+  @override
+  String get uiMeetingsAdd => 'Ekle';
+
+  @override
+  String get uiMeetingsAgendaOfTail => 'maddeden';
+
+  @override
+  String get uiMeetingsAgendaDoneTail => 'tamamlandı';
+
+  @override
+  String get uiMeetingsAgendaDeleteTail => 'maddesini sil';
+
+  @override
+  String get uiMeetingsAgendaEmpty => 'Gündem maddesi yok.';
+
+  @override
+  String get uiMeetingsAgendaLimit => '50 madde sınırına ulaşıldı';
+
+  @override
+  String get uiMeetingsTAgendaDeleted => 'Gündem maddesi silindi';
+
+  @override
+  String get uiMeetingsNfLabel => 'Not süzgeci';
+
+  @override
+  String get uiMeetingsNfAll => 'Tümü';
+
+  @override
+  String get uiMeetingsNfConverted => 'Göreve dönüşen';
+
+  @override
+  String get uiMeetingsNfMine => 'Benim';
+
+  @override
+  String get uiMeetingsNoteLabel => 'Not ekle';
+
+  @override
+  String get uiMeetingsNoteHint => 'Toplantıda konuşulanı not al…';
+
+  @override
+  String get uiMeetingsNoteFooter => 'Katılan herkes not ekleyebilir';
+
+  @override
+  String get uiMeetingsNoteEdit => 'Notu düzenle';
+
+  @override
+  String get uiMeetingsNoteDelete => 'Notu sil';
+
+  @override
+  String get uiMeetingsNoteDeleteQ => 'Not silinsin mi?';
+
+  @override
+  String get uiMeetingsCancel => 'Vazgeç';
+
+  @override
+  String get uiMeetingsSave => 'Kaydet';
+
+  @override
+  String get uiMeetingsDelete => 'Sil';
+
+  @override
+  String get uiMeetingsEdited => 'düzenlendi';
+
+  @override
+  String get uiMeetingsToTask => 'Göreve dönüştür';
+
+  @override
+  String get uiMeetingsConverted => 'Göreve dönüştü';
+
+  @override
+  String get uiMeetingsNotesEmpty =>
+      'Henüz not yok. Toplantıda konuşulanları buraya yaz.';
+
+  @override
+  String get uiMeetingsNotesEmptyFilter => 'Bu filtrede not yok.';
+
+  @override
+  String get uiMeetingsTNoteDeleted => 'Not silindi';
+
+  @override
+  String get uiMeetingsRoleAdmin => 'Admin';
+
+  @override
+  String get uiMeetingsRoleCoordinator => 'Koordinatör';
+
+  @override
+  String get uiMeetingsRoleMember => 'Üye';
+
+  @override
+  String get uiMeetingsUnknownPerson => 'Bilinmeyen kişi';
+
+  @override
+  String get uiMeetingsPeopleTail => 'katılımcı';
+
+  @override
+  String get uiMeetingsRemovePerson => 'Toplantıdan çıkar';
+
+  @override
+  String get uiMeetingsTRemovedTail => 'toplantıdan çıkarıldı';
+
+  @override
+  String get uiMeetingsMembersTail => 'üye';
+
+  @override
+  String get uiMeetingsOtherGroup => 'Diğer';
+
+  @override
+  String get uiMeetingsPeopleEmpty => 'Henüz katılımcı eklenmedi.';
+
+  @override
+  String get uiMeetingsAddPeopleTitle => 'Katılımcı ekle';
+
+  @override
+  String get uiMeetingsAddPeopleDesc =>
+      'Toplantıya bağlı koordinatörlüklerin ekibinden seç.';
+
+  @override
+  String get uiMeetingsNoCandidates => 'Eklenecek kişi kalmadı.';
+
+  @override
+  String get uiMeetingsTAddedTail => 'kişi eklendi';
+
+  @override
+  String get uiMeetingsTFailedTail => 'kişi eklenemedi';
+
+  @override
+  String get uiMeetingsInfoOwner => 'Sahip';
+
+  @override
+  String get uiMeetingsInfoCreator => 'Açan';
+
+  @override
+  String get uiMeetingsInfoInvite => 'Davet türü';
+
+  @override
+  String get uiMeetingsInfoCreated => 'Oluşturulma';
+
+  @override
+  String get uiMeetingsInfoVisibility => 'Kimler görür';
+
+  @override
+  String get uiMeetingsInfoConference => 'Konferans';
+
+  @override
+  String get uiMeetingsInfoRole => 'Senin rolün';
+
+  @override
+  String get uiMeetingsInviteCoord => 'Koordinatörlük';
+
+  @override
+  String get uiMeetingsUnitTail => 'birim';
+
+  @override
+  String get uiMeetingsVisAllLong => 'Davetli birimlerin tüm üyeleri';
+
+  @override
+  String get uiMeetingsVisLeadsLong => 'Yalnız koordinatörler ve katılımcılar';
+
+  @override
+  String get uiMeetingsConfInfo => 'Görüntülü · en çok 25 kişi';
+
+  @override
+  String get uiMeetingsConfInfoOff => 'Kapalı';
+
+  @override
+  String get uiMeetingsCoordsKicker => 'koordinatörlükler';
+
+  @override
+  String get uiMeetingsOwnerBadge => 'Sahip';
+
+  @override
+  String get uiMeetingsCoordNote =>
+      'İlk koordinatörlük sahiptir. Kümeyi yalnız admin değiştirebilir.';
+
+  @override
+  String get uiMeetingsMenuEdit => 'Toplantıyı düzenle';
+
+  @override
+  String get uiMeetingsMenuDelete => 'Toplantıyı sil';
+
+  @override
+  String get uiMeetingsDeleteQ => 'Toplantı silinsin mi?';
+
+  @override
+  String get uiMeetingsDeleteDesc =>
+      'Toplantı listeden kalkar ve artık değiştirilemez. Admin geri yükleyebilir; konferans kayıtları geri gelmez.';
+
+  @override
+  String get uiMeetingsDeleteLive =>
+      'Konferans canlı: bağlı herkesin bağlantısı kesilir.';
+
+  @override
+  String get uiMeetingsTDeleted => 'Toplantı silindi';
+
+  @override
+  String get uiMeetingsNavUpcomingTail => 'yaklaşan';
+
+  @override
+  String get uiMeetingsStLive => 'CANLI';
+
+  @override
+  String get uiMeetingsStWaiting => 'BEKLİYOR';
+
+  @override
+  String get uiMeetingsStNotHeld => 'YAPILMADI';
+
+  @override
+  String get uiMeetingsStDone => 'BİTTİ';
+
+  @override
+  String get uiMeetingsStatusWaiting => 'Bekliyor';
+
+  @override
+  String get uiMeetingsStatusNotHeld => 'Yapılmadı';
+
+  @override
+  String get uiMeetingsStatusDone => 'Bitti';
+
+  @override
+  String get uiMeetingsMinTail => 'dk';
+
+  @override
+  String get uiMeetingsNoteTail => 'not';
+
+  @override
+  String get uiMeetingsNoNotes => 'not yok';
+
+  @override
+  String get uiMeetingsPersonTail => 'kişi';
+
+  @override
+  String get uiMeetingsAgendaStat => 'gündem';
+
+  @override
+  String get uiMeetingsConnectedTail => 'kişi bağlı';
+
+  @override
+  String get uiMeetingsSinceTail => 'beri';
+
+  @override
+  String get uiMeetingsDeletedBy => 'Sildi:';
+
+  @override
+  String get uiMeetingsChat => 'Toplantı sohbeti';
+
+  @override
+  String get uiMeetingsConfRestart => 'Yeni konferans başlat';
+
+  @override
+  String get uiMeetingsAgendaCheckBlocked =>
+      'Gündemi yönetici ve toplantıya bağlı koordinatörler işaretler.';
+
+  @override
   String get uiMessagesTitle => 'Mesajlar';
 
   @override
@@ -3554,6 +3988,33 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiTasksDepartmentFilterCleared =>
       'Seçili departman artık bu programda yok; süzgeç temizlendi.';
+
+  @override
+  String get uiTasksNoteTaskTitle => 'Notu göreve dönüştür';
+
+  @override
+  String get uiTasksNoteTaskDesc =>
+      'Görev bu nottan açılır ve nota bağlanır. Atanan kişiye bildirim gider.';
+
+  @override
+  String get uiTasksMtEditTitle => 'Toplantıyı düzenle';
+
+  @override
+  String get uiTasksMtEditDesc =>
+      'Katılımcılar ve gündem toplantı ayrıntısında yönetilir.';
+
+  @override
+  String get uiTasksTMeetingSaved => 'Toplantı güncellendi';
+
+  @override
+  String get uiTasksErrMtOwner => 'Sahip koordinatörlüğü seç.';
+
+  @override
+  String get uiTasksRowOwner => 'Sahip koordinatörlük';
+
+  @override
+  String get uiTasksSubCheckBlocked =>
+      'Alt görevi atanan kişi ya da departman koordinatörü işaretler; yönetici ekip satırı olmadan işaretleyemez.';
 
   @override
   String get uiTimelineTitle => 'Zaman çizelgesi';

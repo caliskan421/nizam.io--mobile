@@ -2769,6 +2769,566 @@
   "@uiListsTruncated": {
     "description": "ui.lists.truncated"
   },
+  "uiMeetingsTitle": "Toplantılar",
+  "@uiMeetingsTitle": {
+    "description": "ui.meetings.title"
+  },
+  "uiMeetingsSearch": "Ara",
+  "@uiMeetingsSearch": {
+    "description": "ui.meetings.search"
+  },
+  "uiMeetingsSearchLabel": "Toplantılarda ara",
+  "@uiMeetingsSearchLabel": {
+    "description": "ui.meetings.search_label"
+  },
+  "uiMeetingsSearchHint": "Başlık ya da koordinatörlük kodu",
+  "@uiMeetingsSearchHint": {
+    "description": "ui.meetings.search_hint"
+  },
+  "uiMeetingsNew": "Yeni toplantı",
+  "@uiMeetingsNew": {
+    "description": "ui.meetings.new"
+  },
+  "uiMeetingsListLabel": "Toplantı listesi",
+  "@uiMeetingsListLabel": {
+    "description": "ui.meetings.list_label"
+  },
+  "uiMeetingsTabUpcoming": "Yaklaşan",
+  "@uiMeetingsTabUpcoming": {
+    "description": "ui.meetings.tab_upcoming"
+  },
+  "uiMeetingsTabPast": "Geçmiş",
+  "@uiMeetingsTabPast": {
+    "description": "ui.meetings.tab_past"
+  },
+  "uiMeetingsTabDeleted": "Silinenler",
+  "@uiMeetingsTabDeleted": {
+    "description": "ui.meetings.tab_deleted"
+  },
+  "uiMeetingsGroupToday": "Bugün",
+  "@uiMeetingsGroupToday": {
+    "description": "ui.meetings.group_today"
+  },
+  "uiMeetingsGroupTomorrow": "Yarın",
+  "@uiMeetingsGroupTomorrow": {
+    "description": "ui.meetings.group_tomorrow"
+  },
+  "uiMeetingsGroupThisWeek": "Bu hafta",
+  "@uiMeetingsGroupThisWeek": {
+    "description": "ui.meetings.group_this_week"
+  },
+  "uiMeetingsGroupNextWeek": "Gelecek hafta",
+  "@uiMeetingsGroupNextWeek": {
+    "description": "ui.meetings.group_next_week"
+  },
+  "uiMeetingsGroupLater": "Daha sonra",
+  "@uiMeetingsGroupLater": {
+    "description": "ui.meetings.group_later"
+  },
+  "uiMeetingsYesterday": "Dün",
+  "@uiMeetingsYesterday": {
+    "description": "ui.meetings.yesterday"
+  },
+  "uiMeetingsEmptyUpcoming": "Yaklaşan toplantı yok. Yeni bir toplantı açabilirsin.",
+  "@uiMeetingsEmptyUpcoming": {
+    "description": "ui.meetings.empty_upcoming"
+  },
+  "uiMeetingsEmptyPast": "Geçmiş toplantı yok.",
+  "@uiMeetingsEmptyPast": {
+    "description": "ui.meetings.empty_past"
+  },
+  "uiMeetingsEmptyDeleted": "Silinmiş toplantı yok.",
+  "@uiMeetingsEmptyDeleted": {
+    "description": "ui.meetings.empty_deleted"
+  },
+  "uiMeetingsEmptyFilter": "Bu filtreyle eşleşen toplantı yok.",
+  "@uiMeetingsEmptyFilter": {
+    "description": "ui.meetings.empty_filter"
+  },
+  "uiMeetingsPastNote": "Geçmiş tarihe toplantı açılamaz; tarih yalnız ileri alınabilir.",
+  "@uiMeetingsPastNote": {
+    "description": "ui.meetings.past_note"
+  },
+  "uiMeetingsTruncated": "Liste sınırına ulaşıldı; daha eski toplantılar gösterilmiyor.",
+  "@uiMeetingsTruncated": {
+    "description": "ui.meetings.truncated"
+  },
+  "uiMeetingsOwnerPrefix": "Sahip:",
+  "@uiMeetingsOwnerPrefix": {
+    "description": "ui.meetings.owner_prefix"
+  },
+  "uiMeetingsInvitedTail": "koordinatörlük davetli",
+  "@uiMeetingsInvitedTail": {
+    "description": "ui.meetings.invited_tail"
+  },
+  "uiMeetingsDeletedPrefix": "Silindi",
+  "@uiMeetingsDeletedPrefix": {
+    "description": "ui.meetings.deleted_prefix"
+  },
+  "uiMeetingsRestore": "Geri yükle",
+  "@uiMeetingsRestore": {
+    "description": "ui.meetings.restore"
+  },
+  "uiMeetingsPurge": "Kalıcı olarak sil",
+  "@uiMeetingsPurge": {
+    "description": "ui.meetings.purge"
+  },
+  "uiMeetingsPurgeQ": "Toplantı kalıcı olarak silinsin mi?",
+  "@uiMeetingsPurgeQ": {
+    "description": "ui.meetings.purge_q"
+  },
+  "uiMeetingsPurgeDesc": "Notlar, gündem ve koordinatörlük bağları da silinir. Bu işlem geri alınamaz.",
+  "@uiMeetingsPurgeDesc": {
+    "description": "ui.meetings.purge_desc"
+  },
+  "uiMeetingsTRestored": "Toplantı geri yüklendi · konferans kayıtları geri gelmez",
+  "@uiMeetingsTRestored": {
+    "description": "ui.meetings.t_restored"
+  },
+  "uiMeetingsTPurged": "Toplantı kalıcı olarak silindi",
+  "@uiMeetingsTPurged": {
+    "description": "ui.meetings.t_purged"
+  },
+  "uiMeetingsMore": "Diğer işlemler",
+  "@uiMeetingsMore": {
+    "description": "ui.meetings.more"
+  },
+  "uiMeetingsNotFound": "Toplantı bulunamadı.",
+  "@uiMeetingsNotFound": {
+    "description": "ui.meetings.not_found"
+  },
+  "uiMeetingsVisMembers": "Üyeler dahil",
+  "@uiMeetingsVisMembers": {
+    "description": "ui.meetings.vis_members"
+  },
+  "uiMeetingsVisLeads": "Yalnız koordinatörler",
+  "@uiMeetingsVisLeads": {
+    "description": "ui.meetings.vis_leads"
+  },
+  "uiMeetingsConfLabel": "Konferans",
+  "@uiMeetingsConfLabel": {
+    "description": "ui.meetings.conf_label"
+  },
+  "uiMeetingsConfLive": "Canlı",
+  "@uiMeetingsConfLive": {
+    "description": "ui.meetings.conf_live"
+  },
+  "uiMeetingsConfSince": "Başladı",
+  "@uiMeetingsConfSince": {
+    "description": "ui.meetings.conf_since"
+  },
+  "uiMeetingsConfStarting": "Başlatılıyor",
+  "@uiMeetingsConfStarting": {
+    "description": "ui.meetings.conf_starting"
+  },
+  "uiMeetingsConfStartingSub": "Oda açılıyor; birazdan katılabilirsin.",
+  "@uiMeetingsConfStartingSub": {
+    "description": "ui.meetings.conf_starting_sub"
+  },
+  "uiMeetingsConfEnding": "Kapanıyor",
+  "@uiMeetingsConfEnding": {
+    "description": "ui.meetings.conf_ending"
+  },
+  "uiMeetingsConfEndingSub": "Konferans bitirildi, oda kapanıyor.",
+  "@uiMeetingsConfEndingSub": {
+    "description": "ui.meetings.conf_ending_sub"
+  },
+  "uiMeetingsConfNone": "Henüz başlamadı",
+  "@uiMeetingsConfNone": {
+    "description": "ui.meetings.conf_none"
+  },
+  "uiMeetingsConfNoneSub": "Konferans toplantı saatinde başlatılabilir · en çok 25 kişi.",
+  "@uiMeetingsConfNoneSub": {
+    "description": "ui.meetings.conf_none_sub"
+  },
+  "uiMeetingsConfLateSub": "Toplantı saati geçti, konferans başlatılmadı.",
+  "@uiMeetingsConfLateSub": {
+    "description": "ui.meetings.conf_late_sub"
+  },
+  "uiMeetingsConfOff": "Görüntülü konferans bu sunucuda kapalı.",
+  "@uiMeetingsConfOff": {
+    "description": "ui.meetings.conf_off"
+  },
+  "uiMeetingsConfStart": "Toplantıyı başlat",
+  "@uiMeetingsConfStart": {
+    "description": "ui.meetings.conf_start"
+  },
+  "uiMeetingsConfEnd": "Konferansı bitir",
+  "@uiMeetingsConfEnd": {
+    "description": "ui.meetings.conf_end"
+  },
+  "uiMeetingsConfJoin": "Katıl",
+  "@uiMeetingsConfJoin": {
+    "description": "ui.meetings.conf_join"
+  },
+  "uiMeetingsConfJoinSoon": "Görüntülü görüşme ekranı yakında",
+  "@uiMeetingsConfJoinSoon": {
+    "description": "ui.meetings.conf_join_soon"
+  },
+  "uiMeetingsTConfStarted": "Konferans başlatıldı",
+  "@uiMeetingsTConfStarted": {
+    "description": "ui.meetings.t_conf_started"
+  },
+  "uiMeetingsTConfEnded": "Konferans herkes için bitirildi",
+  "@uiMeetingsTConfEnded": {
+    "description": "ui.meetings.t_conf_ended"
+  },
+  "uiMeetingsTabsLabel": "Toplantı ayrıntısı",
+  "@uiMeetingsTabsLabel": {
+    "description": "ui.meetings.tabs_label"
+  },
+  "uiMeetingsTabAgenda": "Gündem",
+  "@uiMeetingsTabAgenda": {
+    "description": "ui.meetings.tab_agenda"
+  },
+  "uiMeetingsTabNotes": "Notlar",
+  "@uiMeetingsTabNotes": {
+    "description": "ui.meetings.tab_notes"
+  },
+  "uiMeetingsTabPeople": "Kişiler",
+  "@uiMeetingsTabPeople": {
+    "description": "ui.meetings.tab_people"
+  },
+  "uiMeetingsTabInfo": "Bilgi",
+  "@uiMeetingsTabInfo": {
+    "description": "ui.meetings.tab_info"
+  },
+  "uiMeetingsAgendaTitle": "Gündem",
+  "@uiMeetingsAgendaTitle": {
+    "description": "ui.meetings.agenda_title"
+  },
+  "uiMeetingsAgendaAdd": "Gündem maddesi ekle",
+  "@uiMeetingsAgendaAdd": {
+    "description": "ui.meetings.agenda_add"
+  },
+  "uiMeetingsAdd": "Ekle",
+  "@uiMeetingsAdd": {
+    "description": "ui.meetings.add"
+  },
+  "uiMeetingsAgendaOfTail": "maddeden",
+  "@uiMeetingsAgendaOfTail": {
+    "description": "ui.meetings.agenda_of_tail"
+  },
+  "uiMeetingsAgendaDoneTail": "tamamlandı",
+  "@uiMeetingsAgendaDoneTail": {
+    "description": "ui.meetings.agenda_done_tail"
+  },
+  "uiMeetingsAgendaDeleteTail": "maddesini sil",
+  "@uiMeetingsAgendaDeleteTail": {
+    "description": "ui.meetings.agenda_delete_tail"
+  },
+  "uiMeetingsAgendaEmpty": "Gündem maddesi yok.",
+  "@uiMeetingsAgendaEmpty": {
+    "description": "ui.meetings.agenda_empty"
+  },
+  "uiMeetingsAgendaLimit": "50 madde sınırına ulaşıldı",
+  "@uiMeetingsAgendaLimit": {
+    "description": "ui.meetings.agenda_limit"
+  },
+  "uiMeetingsTAgendaDeleted": "Gündem maddesi silindi",
+  "@uiMeetingsTAgendaDeleted": {
+    "description": "ui.meetings.t_agenda_deleted"
+  },
+  "uiMeetingsNfLabel": "Not süzgeci",
+  "@uiMeetingsNfLabel": {
+    "description": "ui.meetings.nf_label"
+  },
+  "uiMeetingsNfAll": "Tümü",
+  "@uiMeetingsNfAll": {
+    "description": "ui.meetings.nf_all"
+  },
+  "uiMeetingsNfConverted": "Göreve dönüşen",
+  "@uiMeetingsNfConverted": {
+    "description": "ui.meetings.nf_converted"
+  },
+  "uiMeetingsNfMine": "Benim",
+  "@uiMeetingsNfMine": {
+    "description": "ui.meetings.nf_mine"
+  },
+  "uiMeetingsNoteLabel": "Not ekle",
+  "@uiMeetingsNoteLabel": {
+    "description": "ui.meetings.note_label"
+  },
+  "uiMeetingsNoteHint": "Toplantıda konuşulanı not al…",
+  "@uiMeetingsNoteHint": {
+    "description": "ui.meetings.note_hint"
+  },
+  "uiMeetingsNoteFooter": "Katılan herkes not ekleyebilir",
+  "@uiMeetingsNoteFooter": {
+    "description": "ui.meetings.note_footer"
+  },
+  "uiMeetingsNoteEdit": "Notu düzenle",
+  "@uiMeetingsNoteEdit": {
+    "description": "ui.meetings.note_edit"
+  },
+  "uiMeetingsNoteDelete": "Notu sil",
+  "@uiMeetingsNoteDelete": {
+    "description": "ui.meetings.note_delete"
+  },
+  "uiMeetingsNoteDeleteQ": "Not silinsin mi?",
+  "@uiMeetingsNoteDeleteQ": {
+    "description": "ui.meetings.note_delete_q"
+  },
+  "uiMeetingsCancel": "Vazgeç",
+  "@uiMeetingsCancel": {
+    "description": "ui.meetings.cancel"
+  },
+  "uiMeetingsSave": "Kaydet",
+  "@uiMeetingsSave": {
+    "description": "ui.meetings.save"
+  },
+  "uiMeetingsDelete": "Sil",
+  "@uiMeetingsDelete": {
+    "description": "ui.meetings.delete"
+  },
+  "uiMeetingsEdited": "düzenlendi",
+  "@uiMeetingsEdited": {
+    "description": "ui.meetings.edited"
+  },
+  "uiMeetingsToTask": "Göreve dönüştür",
+  "@uiMeetingsToTask": {
+    "description": "ui.meetings.to_task"
+  },
+  "uiMeetingsConverted": "Göreve dönüştü",
+  "@uiMeetingsConverted": {
+    "description": "ui.meetings.converted"
+  },
+  "uiMeetingsNotesEmpty": "Henüz not yok. Toplantıda konuşulanları buraya yaz.",
+  "@uiMeetingsNotesEmpty": {
+    "description": "ui.meetings.notes_empty"
+  },
+  "uiMeetingsNotesEmptyFilter": "Bu filtrede not yok.",
+  "@uiMeetingsNotesEmptyFilter": {
+    "description": "ui.meetings.notes_empty_filter"
+  },
+  "uiMeetingsTNoteDeleted": "Not silindi",
+  "@uiMeetingsTNoteDeleted": {
+    "description": "ui.meetings.t_note_deleted"
+  },
+  "uiMeetingsRoleAdmin": "Admin",
+  "@uiMeetingsRoleAdmin": {
+    "description": "ui.meetings.role_admin"
+  },
+  "uiMeetingsRoleCoordinator": "Koordinatör",
+  "@uiMeetingsRoleCoordinator": {
+    "description": "ui.meetings.role_coordinator"
+  },
+  "uiMeetingsRoleMember": "Üye",
+  "@uiMeetingsRoleMember": {
+    "description": "ui.meetings.role_member"
+  },
+  "uiMeetingsUnknownPerson": "Bilinmeyen kişi",
+  "@uiMeetingsUnknownPerson": {
+    "description": "ui.meetings.unknown_person"
+  },
+  "uiMeetingsPeopleTail": "katılımcı",
+  "@uiMeetingsPeopleTail": {
+    "description": "ui.meetings.people_tail"
+  },
+  "uiMeetingsRemovePerson": "Toplantıdan çıkar",
+  "@uiMeetingsRemovePerson": {
+    "description": "ui.meetings.remove_person"
+  },
+  "uiMeetingsTRemovedTail": "toplantıdan çıkarıldı",
+  "@uiMeetingsTRemovedTail": {
+    "description": "ui.meetings.t_removed_tail"
+  },
+  "uiMeetingsMembersTail": "üye",
+  "@uiMeetingsMembersTail": {
+    "description": "ui.meetings.members_tail"
+  },
+  "uiMeetingsOtherGroup": "Diğer",
+  "@uiMeetingsOtherGroup": {
+    "description": "ui.meetings.other_group"
+  },
+  "uiMeetingsPeopleEmpty": "Henüz katılımcı eklenmedi.",
+  "@uiMeetingsPeopleEmpty": {
+    "description": "ui.meetings.people_empty"
+  },
+  "uiMeetingsAddPeopleTitle": "Katılımcı ekle",
+  "@uiMeetingsAddPeopleTitle": {
+    "description": "ui.meetings.add_people_title"
+  },
+  "uiMeetingsAddPeopleDesc": "Toplantıya bağlı koordinatörlüklerin ekibinden seç.",
+  "@uiMeetingsAddPeopleDesc": {
+    "description": "ui.meetings.add_people_desc"
+  },
+  "uiMeetingsNoCandidates": "Eklenecek kişi kalmadı.",
+  "@uiMeetingsNoCandidates": {
+    "description": "ui.meetings.no_candidates"
+  },
+  "uiMeetingsTAddedTail": "kişi eklendi",
+  "@uiMeetingsTAddedTail": {
+    "description": "ui.meetings.t_added_tail"
+  },
+  "uiMeetingsTFailedTail": "kişi eklenemedi",
+  "@uiMeetingsTFailedTail": {
+    "description": "ui.meetings.t_failed_tail"
+  },
+  "uiMeetingsInfoOwner": "Sahip",
+  "@uiMeetingsInfoOwner": {
+    "description": "ui.meetings.info_owner"
+  },
+  "uiMeetingsInfoCreator": "Açan",
+  "@uiMeetingsInfoCreator": {
+    "description": "ui.meetings.info_creator"
+  },
+  "uiMeetingsInfoInvite": "Davet türü",
+  "@uiMeetingsInfoInvite": {
+    "description": "ui.meetings.info_invite"
+  },
+  "uiMeetingsInfoCreated": "Oluşturulma",
+  "@uiMeetingsInfoCreated": {
+    "description": "ui.meetings.info_created"
+  },
+  "uiMeetingsInfoVisibility": "Kimler görür",
+  "@uiMeetingsInfoVisibility": {
+    "description": "ui.meetings.info_visibility"
+  },
+  "uiMeetingsInfoConference": "Konferans",
+  "@uiMeetingsInfoConference": {
+    "description": "ui.meetings.info_conference"
+  },
+  "uiMeetingsInfoRole": "Senin rolün",
+  "@uiMeetingsInfoRole": {
+    "description": "ui.meetings.info_role"
+  },
+  "uiMeetingsInviteCoord": "Koordinatörlük",
+  "@uiMeetingsInviteCoord": {
+    "description": "ui.meetings.invite_coord"
+  },
+  "uiMeetingsUnitTail": "birim",
+  "@uiMeetingsUnitTail": {
+    "description": "ui.meetings.unit_tail"
+  },
+  "uiMeetingsVisAllLong": "Davetli birimlerin tüm üyeleri",
+  "@uiMeetingsVisAllLong": {
+    "description": "ui.meetings.vis_all_long"
+  },
+  "uiMeetingsVisLeadsLong": "Yalnız koordinatörler ve katılımcılar",
+  "@uiMeetingsVisLeadsLong": {
+    "description": "ui.meetings.vis_leads_long"
+  },
+  "uiMeetingsConfInfo": "Görüntülü · en çok 25 kişi",
+  "@uiMeetingsConfInfo": {
+    "description": "ui.meetings.conf_info"
+  },
+  "uiMeetingsConfInfoOff": "Kapalı",
+  "@uiMeetingsConfInfoOff": {
+    "description": "ui.meetings.conf_info_off"
+  },
+  "uiMeetingsCoordsKicker": "koordinatörlükler",
+  "@uiMeetingsCoordsKicker": {
+    "description": "ui.meetings.coords_kicker"
+  },
+  "uiMeetingsOwnerBadge": "Sahip",
+  "@uiMeetingsOwnerBadge": {
+    "description": "ui.meetings.owner_badge"
+  },
+  "uiMeetingsCoordNote": "İlk koordinatörlük sahiptir. Kümeyi yalnız admin değiştirebilir.",
+  "@uiMeetingsCoordNote": {
+    "description": "ui.meetings.coord_note"
+  },
+  "uiMeetingsMenuEdit": "Toplantıyı düzenle",
+  "@uiMeetingsMenuEdit": {
+    "description": "ui.meetings.menu_edit"
+  },
+  "uiMeetingsMenuDelete": "Toplantıyı sil",
+  "@uiMeetingsMenuDelete": {
+    "description": "ui.meetings.menu_delete"
+  },
+  "uiMeetingsDeleteQ": "Toplantı silinsin mi?",
+  "@uiMeetingsDeleteQ": {
+    "description": "ui.meetings.delete_q"
+  },
+  "uiMeetingsDeleteDesc": "Toplantı listeden kalkar ve artık değiştirilemez. Admin geri yükleyebilir; konferans kayıtları geri gelmez.",
+  "@uiMeetingsDeleteDesc": {
+    "description": "ui.meetings.delete_desc"
+  },
+  "uiMeetingsDeleteLive": "Konferans canlı: bağlı herkesin bağlantısı kesilir.",
+  "@uiMeetingsDeleteLive": {
+    "description": "ui.meetings.delete_live"
+  },
+  "uiMeetingsTDeleted": "Toplantı silindi",
+  "@uiMeetingsTDeleted": {
+    "description": "ui.meetings.t_deleted"
+  },
+  "uiMeetingsNavUpcomingTail": "yaklaşan",
+  "@uiMeetingsNavUpcomingTail": {
+    "description": "ui.meetings.nav_upcoming_tail"
+  },
+  "uiMeetingsStLive": "CANLI",
+  "@uiMeetingsStLive": {
+    "description": "ui.meetings.st_live"
+  },
+  "uiMeetingsStWaiting": "BEKLİYOR",
+  "@uiMeetingsStWaiting": {
+    "description": "ui.meetings.st_waiting"
+  },
+  "uiMeetingsStNotHeld": "YAPILMADI",
+  "@uiMeetingsStNotHeld": {
+    "description": "ui.meetings.st_not_held"
+  },
+  "uiMeetingsStDone": "BİTTİ",
+  "@uiMeetingsStDone": {
+    "description": "ui.meetings.st_done"
+  },
+  "uiMeetingsStatusWaiting": "Bekliyor",
+  "@uiMeetingsStatusWaiting": {
+    "description": "ui.meetings.status_waiting"
+  },
+  "uiMeetingsStatusNotHeld": "Yapılmadı",
+  "@uiMeetingsStatusNotHeld": {
+    "description": "ui.meetings.status_not_held"
+  },
+  "uiMeetingsStatusDone": "Bitti",
+  "@uiMeetingsStatusDone": {
+    "description": "ui.meetings.status_done"
+  },
+  "uiMeetingsMinTail": "dk",
+  "@uiMeetingsMinTail": {
+    "description": "ui.meetings.min_tail"
+  },
+  "uiMeetingsNoteTail": "not",
+  "@uiMeetingsNoteTail": {
+    "description": "ui.meetings.note_tail"
+  },
+  "uiMeetingsNoNotes": "not yok",
+  "@uiMeetingsNoNotes": {
+    "description": "ui.meetings.no_notes"
+  },
+  "uiMeetingsPersonTail": "kişi",
+  "@uiMeetingsPersonTail": {
+    "description": "ui.meetings.person_tail"
+  },
+  "uiMeetingsAgendaStat": "gündem",
+  "@uiMeetingsAgendaStat": {
+    "description": "ui.meetings.agenda_stat"
+  },
+  "uiMeetingsConnectedTail": "kişi bağlı",
+  "@uiMeetingsConnectedTail": {
+    "description": "ui.meetings.connected_tail"
+  },
+  "uiMeetingsSinceTail": "beri",
+  "@uiMeetingsSinceTail": {
+    "description": "ui.meetings.since_tail"
+  },
+  "uiMeetingsDeletedBy": "Sildi:",
+  "@uiMeetingsDeletedBy": {
+    "description": "ui.meetings.deleted_by"
+  },
+  "uiMeetingsChat": "Toplantı sohbeti",
+  "@uiMeetingsChat": {
+    "description": "ui.meetings.chat"
+  },
+  "uiMeetingsConfRestart": "Yeni konferans başlat",
+  "@uiMeetingsConfRestart": {
+    "description": "ui.meetings.conf_restart"
+  },
+  "uiMeetingsAgendaCheckBlocked": "Gündemi yönetici ve toplantıya bağlı koordinatörler işaretler.",
+  "@uiMeetingsAgendaCheckBlocked": {
+    "description": "ui.meetings.agenda_check_blocked"
+  },
   "uiMessagesTitle": "Mesajlar",
   "@uiMessagesTitle": {
     "description": "ui.messages.title"
@@ -4540,6 +5100,38 @@
   "uiTasksDepartmentFilterCleared": "Seçili departman artık bu programda yok; süzgeç temizlendi.",
   "@uiTasksDepartmentFilterCleared": {
     "description": "ui.tasks.department_filter_cleared"
+  },
+  "uiTasksNoteTaskTitle": "Notu göreve dönüştür",
+  "@uiTasksNoteTaskTitle": {
+    "description": "ui.tasks.note_task_title"
+  },
+  "uiTasksNoteTaskDesc": "Görev bu nottan açılır ve nota bağlanır. Atanan kişiye bildirim gider.",
+  "@uiTasksNoteTaskDesc": {
+    "description": "ui.tasks.note_task_desc"
+  },
+  "uiTasksMtEditTitle": "Toplantıyı düzenle",
+  "@uiTasksMtEditTitle": {
+    "description": "ui.tasks.mt_edit_title"
+  },
+  "uiTasksMtEditDesc": "Katılımcılar ve gündem toplantı ayrıntısında yönetilir.",
+  "@uiTasksMtEditDesc": {
+    "description": "ui.tasks.mt_edit_desc"
+  },
+  "uiTasksTMeetingSaved": "Toplantı güncellendi",
+  "@uiTasksTMeetingSaved": {
+    "description": "ui.tasks.t_meeting_saved"
+  },
+  "uiTasksErrMtOwner": "Sahip koordinatörlüğü seç.",
+  "@uiTasksErrMtOwner": {
+    "description": "ui.tasks.err_mt_owner"
+  },
+  "uiTasksRowOwner": "Sahip koordinatörlük",
+  "@uiTasksRowOwner": {
+    "description": "ui.tasks.row_owner"
+  },
+  "uiTasksSubCheckBlocked": "Alt görevi atanan kişi ya da departman koordinatörü işaretler; yönetici ekip satırı olmadan işaretleyemez.",
+  "@uiTasksSubCheckBlocked": {
+    "description": "ui.tasks.sub_check_blocked"
   },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {

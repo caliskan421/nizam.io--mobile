@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../application/meeting_form_controller.dart';
 import '../application/quick_forms_controller.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_query.dart';
@@ -109,6 +110,7 @@ extension TaskTexts on AppLocalizations {
     MeetingError.past => uiTasksErrPast,
     MeetingError.coordinatorships => uiTasksErrMtCoords,
     MeetingError.people => uiTasksErrMtPeople,
+    MeetingError.owner => uiTasksErrMtOwner,
   };
 
   String inviteError(InviteError e) => switch (e) {

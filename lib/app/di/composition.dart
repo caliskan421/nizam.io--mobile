@@ -19,6 +19,7 @@ import '../../features/calendar/calendar_module.dart';
 import '../../features/coordinatorships/coordinatorships_module.dart';
 import '../../features/identity/identity.dart' show LoginPrefill;
 import '../../features/identity/identity_module.dart';
+import '../../features/meetings/meetings_module.dart';
 import '../../features/messages/messages_module.dart';
 import '../../features/scope/scope_module.dart';
 import '../../features/tasks/tasks_module.dart';
@@ -69,6 +70,11 @@ class Composition {
       locator,
       apiDio: () => container.read(apiDioProvider),
     );
+    registerMeetingsModule(
+      locator,
+      apiDio: () => container.read(apiDioProvider),
+      flavor: flavor,
+    );
     registerMessagesModule(locator);
     registerTasksModule(locator, apiDio: () => container.read(apiDioProvider));
     registerTimelineModule(locator);
@@ -101,6 +107,7 @@ class Composition {
         ...archiveOverrides(locator),
         ...calendarOverrides(locator),
         ...coordinatorshipsOverrides(locator),
+        ...meetingsOverrides(locator),
         ...messagesOverrides(locator),
         ...tasksOverrides(locator),
         ...timelineOverrides(locator),

@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../domain/meeting_planner.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_details.dart';
 import '../domain/task_writes.dart';
@@ -33,6 +34,13 @@ TaskDetailsRepository taskDetailsRepository(Ref ref) =>
 @Riverpod(keepAlive: true)
 TaskWriteRepository taskWriteRepository(Ref ref) => throw UnimplementedError(
   'taskWriteRepositoryProvider bileşim kökünde (lib/app/di) bağlanır',
+);
+
+/// PORT: toplantı yazmaları (hızlı toplantı formu, nottan görev). Gerçekleştirme meetings
+/// feature'ındadır; bileşim kökünde bağlanır.
+@Riverpod(keepAlive: true)
+MeetingPlanner meetingPlanner(Ref ref) => throw UnimplementedError(
+  'meetingPlannerProvider bileşim kökünde (lib/app/di) bağlanır',
 );
 
 /// PORT: sistem dosya seçicisi (`tasks_module.dart`'ta `FileUploadPicker` bağlanır).

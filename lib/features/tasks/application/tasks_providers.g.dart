@@ -220,6 +220,55 @@ final class TaskWriteRepositoryProvider
 String _$taskWriteRepositoryHash() =>
     r'adf7d8aff2050fb745c92eab5ac61b72372a4574';
 
+/// PORT: toplantı yazmaları (hızlı toplantı formu, nottan görev). Gerçekleştirme meetings
+/// feature'ındadır; bileşim kökünde bağlanır.
+
+@ProviderFor(meetingPlanner)
+final meetingPlannerProvider = MeetingPlannerProvider._();
+
+/// PORT: toplantı yazmaları (hızlı toplantı formu, nottan görev). Gerçekleştirme meetings
+/// feature'ındadır; bileşim kökünde bağlanır.
+
+final class MeetingPlannerProvider
+    extends $FunctionalProvider<MeetingPlanner, MeetingPlanner, MeetingPlanner>
+    with $Provider<MeetingPlanner> {
+  /// PORT: toplantı yazmaları (hızlı toplantı formu, nottan görev). Gerçekleştirme meetings
+  /// feature'ındadır; bileşim kökünde bağlanır.
+  MeetingPlannerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'meetingPlannerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$meetingPlannerHash();
+
+  @$internal
+  @override
+  $ProviderElement<MeetingPlanner> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  MeetingPlanner create(Ref ref) {
+    return meetingPlanner(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MeetingPlanner value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MeetingPlanner>(value),
+    );
+  }
+}
+
+String _$meetingPlannerHash() => r'aad57cfc5c031795fe4b62aca040e00aa964c892';
+
 /// PORT: sistem dosya seçicisi (`tasks_module.dart`'ta `FileUploadPicker` bağlanır).
 /// Bağlanmamışsa (testler) "yok" gerçekleştirmesi: form dosya seçtiremez, istek gönderilmez.
 

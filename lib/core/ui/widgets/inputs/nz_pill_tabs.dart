@@ -6,14 +6,16 @@ import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
 import '../nz_icon.dart';
 
-/// Hap sekmenin bir öğesi: [label], isteğe bağlı [count] (mono sayaç) ve baştaki [icon]
-/// (ör. Görevler "Liste / Zaman çizelgesi" anahtarı).
+/// Hap sekmenin bir öğesi: [label], isteğe bağlı [count] (mono sayaç; sayı dışı sayaç, ör.
+/// gündem "2/3", [countText]) ve baştaki [icon] (ör. Görevler "Liste / Zaman çizelgesi").
 @immutable
 class NzPillTab {
-  const NzPillTab({required this.label, this.count, this.icon});
+  const NzPillTab({required this.label, this.count, this.countText, this.icon})
+    : assert(count == null || countText == null, 'count ya da countText');
 
   final String label;
   final int? count;
+  final String? countText;
   final IconData? icon;
 }
 
@@ -138,7 +140,7 @@ class _Tab extends StatelessWidget {
     final c = context.colors;
     final t = context.text;
     final color = selected ? c.text : c.textMuted;
-    final count = tab.count;
+    final count = tab.countText ?? tab.count?.toString();
     final icon = tab.icon;
     return Semantics(
       button: true,
@@ -184,7 +186,7 @@ class _Tab extends StatelessWidget {
                   if (count != null) ...[
                     const Gap(NizamioSpacing.space1 + 1),
                     Text(
-                      '$count',
+                      count,
                       maxLines: 1,
                       style: t.monoSm.copyWith(color: c.textMuted),
                     ),

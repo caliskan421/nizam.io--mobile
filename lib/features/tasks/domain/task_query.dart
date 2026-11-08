@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:meta/meta.dart';
 
+import '../../../core/domain/turkish_collation.dart';
 import 'task_catalog.dart';
 
 /// Görev listesinin görünümleri (prototip `views`): sayılar katalogdan.
@@ -198,10 +199,6 @@ List<T> _stableSort<T>(List<T> list, int Function(T, T) cmp) {
   indexed.sort((x, y) => _or(cmp(x.$2, y.$2), () => x.$1 - y.$1));
   return [for (final e in indexed) e.$2];
 }
-
-/// Türkçe küçük harf (`I` → `ı`, `İ` → `i`).
-String trLower(String s) =>
-    s.replaceAll('I', 'ı').replaceAll('İ', 'i').toLowerCase();
 
 const _trAlphabet = 'abcçdefgğhıijklmnoöprsştuüvwxyz';
 

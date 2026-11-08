@@ -55,13 +55,9 @@ ResponseBody _err(int status, String code) =>
   ResponseBody Function(RequestOptions o) respond,
 ) {
   final adapter = _Adapter(respond);
-  return (
-    ApiMeetingsRepository(
-      Dio(BaseOptions(baseUrl: 'https://api.test'))
-        ..httpClientAdapter = adapter,
-    ),
-    adapter,
-  );
+  final dio = Dio(BaseOptions(baseUrl: 'https://api.test'))
+    ..httpClientAdapter = adapter;
+  return (ApiMeetingsRepository(() => dio), adapter);
 }
 
 const _t = '2026-11-03T07:00:00Z';

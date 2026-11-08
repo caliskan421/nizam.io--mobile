@@ -12,19 +12,19 @@ import '../../core/ui/page/nz_shell_events.dart';
 import '../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../core/ui/widgets/navigation/nz_floating_nav.dart';
 import '../../core/ui/widgets/navigation/nz_tablet_rail.dart';
-import '../../core/ui/widgets/navigation/nz_top_bar.dart';
 import '../../core/ui/widgets/nz_icons.dart';
 import '../../features/activity/activity.dart';
 import '../../features/archive/archive.dart';
 import '../../features/coordinatorships/coordinatorships.dart';
+import '../../features/meetings/meetings.dart';
 import '../../features/messages/messages.dart';
-import '../../features/scope/scope.dart';
 import '../../features/tasks/tasks.dart';
+import 'app_tablet_rail.dart';
 import 'routes.dart';
 import 'split.dart';
 
 /// Alt menünün üçüncü öğesi: son girilen modül (README "Gezinme"). Üçü aynı kabuk dalındadır.
-enum ShellModule { coordinatorships, archive, messages, calendar }
+enum ShellModule { coordinatorships, archive, messages, calendar, meetings }
 
 /// Alt menü öğesinin görünümü (simge, etiket, etkinken alt yazı).
 @immutable
@@ -59,6 +59,9 @@ ShellModule? moduleOf(String location) {
   }
   if (location.startsWith(const CalendarRoute().location)) {
     return ShellModule.calendar;
+  }
+  if (location.startsWith(const MeetingsRoute().location)) {
+    return ShellModule.meetings;
   }
   return null;
 }
@@ -112,6 +115,12 @@ List<NzShellTab> shellTabsFor(
         icon: NzIcons.calendar,
         selectedIcon: NzIcons.calendarFilled,
         label: l.uiHomeModuleCalendar,
+      ),
+      ShellModule.meetings => NzShellTab(
+        icon: NzIcons.event,
+        selectedIcon: NzIcons.event,
+        label: l.uiHomeModuleMeetings,
+        caption: ref.watch(meetingsNavCaptionProvider),
       ),
     },
   ];
@@ -336,6 +345,7 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
       RailModule.coordinatorships => coordinatorshipsMaster(),
       RailModule.archive => archiveMaster(),
       RailModule.messages => messagesMaster(),
+      RailModule.meetings => meetingsMaster(),
       null => const SizedBox.shrink(),
     };
     // Ana sayfa/Görevler/Koordinatörlükler kökünde açık kayıt yoksa liste sağ bölmenin yerini de alır; kayıt açılınca 390'a
@@ -403,71 +413,6 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Uygulamanın tablet rayı: modüller, Mesajlar rozeti, bildirim zili, tüm modüller menüsü,
-/// asistan. Kabuk ve tam ekran zaman çizelgesi aynı rayı kullanır.
-class AppTabletRail extends ConsumerWidget {
-  const AppTabletRail({
-    super.key,
-    required this.current,
-    required this.onSelect,
-  });
-
-  /// Etkin modül (null → yok).
-  final RailModule? current;
-  final ValueChanged<RailModule> onSelect;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final bell = watchNotificationBell(context, ref);
-    final unread = ref.watch(messagesNavBadgeProvider);
-    return NzTabletRail(
-      semanticLabel: l.uiRouterNavLabel,
-      brand: NzBrandMark(
-        monogram: l.uiHomeAppName.characters.first,
-        extent: NzTabletMetrics.railBrand,
-      ),
-      items: [
-        NzRailItem(
-          icon: NzIcons.home,
-          selectedIcon: NzIcons.homeFilled,
-          label: l.uiRouterTabHome,
-        ),
-        NzRailItem(icon: NzIcons.tasks, label: l.uiRouterTabTasks),
-        NzRailItem(
-          icon: NzIcons.calendar,
-          selectedIcon: NzIcons.calendarFilled,
-          label: l.uiHomeModuleCalendar,
-        ),
-        NzRailItem(
-          icon: NzIcons.coordinatorships,
-          label: l.uiRouterTabCoordinatorships,
-        ),
-        NzRailItem(
-          icon: NzIcons.folder,
-          selectedIcon: NzIcons.folderFilled,
-          label: l.uiRouterTabArchive,
-        ),
-        NzRailItem(
-          icon: NzIcons.messages,
-          selectedIcon: NzIcons.messagesFilled,
-          label: l.uiRouterTabMessages,
-          badge: unread,
-        ),
-      ],
-      currentIndex: current?.index,
-      onSelect: (i) => onSelect(RailModule.values[i]),
-      bellLabel: bell.label,
-      bellDot: bell.dot,
-      menuLabel: l.uiRouterAllModules,
-      onMenu: () => context.appNav.openMenu(context),
-      assistantLabel: l.uiRouterAssistant,
-      onBell: () => showNotificationsSoon(context),
-      onAssistant: () => NzToast.show(context, l.uiRouterAssistantSoon),
     );
   }
 }
@@ -555,6 +500,12 @@ class _SplitAppNav implements NzAppNav {
 
   @override
   void openChat(String id) => _pane(PaneEntry(PaneKind.chat, id));
+
+  @override
+  void openMeeting(String id) => _pane(PaneEntry(PaneKind.meeting, id));
+
+  @override
+  void openMeetings() => _module(RailModule.meetings);
 
   @override
   void openHome() => _module(RailModule.home);

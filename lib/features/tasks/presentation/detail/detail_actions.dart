@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/domain/turkish_collation.dart';
 import '../../../../core/errors/error_text.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
@@ -16,7 +17,6 @@ import '../../application/task_detail_controller.dart';
 import '../../application/tasks_providers.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_permissions.dart';
-import '../../domain/task_query.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 import 'detail_forms.dart';
@@ -177,7 +177,7 @@ class TaskDetailActions {
       context,
       title: title,
       description: description,
-      actions: (sheet) => sheetActions(
+      actions: (sheet) => nzSheetActions(
         sheet,
         cancel: l.uiTasksCancel,
         ok: ok,
@@ -207,33 +207,33 @@ class TaskDetailActions {
     final l = context.l10n;
     final controller = TextEditingController(text: initial);
     String? result;
-    try {
-      await NzBottomSheet.show<void>(
-        context,
-        title: title,
-        description: description,
-        actions: (sheet) => sheetActions(
-          sheet,
-          cancel: l.uiTasksCancel,
-          ok: ok,
-          onOk: () {
-            final v = controller.text.trim();
-            if (v.isEmpty || !(valid?.call(v) ?? true)) return;
-            result = v;
-            Navigator.of(sheet).pop();
-          },
-        ),
-        builder: (_) => NzTextField(
+    // Denetleyiciyi sayfa kalkınca sil: kapanış hareketinde alan yeniden çizilir.
+    await NzBottomSheet.show<void>(
+      context,
+      title: title,
+      description: description,
+      actions: (sheet) => nzSheetActions(
+        sheet,
+        cancel: l.uiTasksCancel,
+        ok: ok,
+        onOk: () {
+          final v = controller.text.trim();
+          if (v.isEmpty || !(valid?.call(v) ?? true)) return;
+          result = v;
+          Navigator.of(sheet).pop();
+        },
+      ),
+      builder: (_) => DisposeWith(
+        controller,
+        child: NzTextField(
           label: label,
           hint: hint,
           helper: helper,
           controller: controller,
           textInputAction: TextInputAction.done,
         ),
-      );
-    } finally {
-      controller.dispose();
-    }
+      ),
+    );
     return result;
   }
 
@@ -367,7 +367,7 @@ class TaskDetailActions {
       context,
       title: title,
       description: description,
-      actions: (sheet) => sheetActions(
+      actions: (sheet) => nzSheetActions(
         sheet,
         cancel: l.uiTasksCancel,
         ok: ok,

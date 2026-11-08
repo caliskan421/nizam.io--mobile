@@ -8,6 +8,7 @@ import '../../features/activity/activity.dart';
 import '../../features/archive/archive.dart';
 import '../../features/calendar/calendar.dart';
 import '../../features/coordinatorships/coordinatorships.dart';
+import '../../features/meetings/meetings.dart';
 import '../../features/messages/messages.dart';
 import '../../features/scope/scope.dart';
 import '../../features/tasks/tasks.dart';
@@ -27,8 +28,20 @@ import 'routes.dart';
 //   genişlemede aynı görev/sohbet State'i ve iz korunur.
 // İkinci veri yolu yoktur: iki bölme aynı controller'ları okur.
 
-/// Tablet rayının modülleri (prototip `RAIL`, sıra birebir).
-enum RailModule { home, tasks, calendar, coordinatorships, archive, messages }
+/// Tablet rayının modülleri (prototip `RAIL`, sıra birebir). [meetings] rayda çizilmez (çekmeceden
+/// girilir; prototip rayında yok) ama çift bölme kuralları için modüldür; hep sonda kalır.
+enum RailModule {
+  home,
+  tasks,
+  calendar,
+  coordinatorships,
+  archive,
+  messages,
+  meetings;
+
+  /// Raydaki sırası; rayda yoksa null.
+  int? get railIndex => this == meetings ? null : index;
+}
 
 /// Konumdan ray modülü (kabuk dışı konumda null).
 RailModule? railModuleOf(String location) {
@@ -41,6 +54,7 @@ RailModule? railModuleOf(String location) {
   }
   if (under(const ArchiveRoute().location)) return RailModule.archive;
   if (under(const MessagesRoute().location)) return RailModule.messages;
+  if (under(const MeetingsRoute().location)) return RailModule.meetings;
   return null;
 }
 
@@ -52,10 +66,12 @@ String railModuleRoot(RailModule m) => switch (m) {
   RailModule.coordinatorships => const CoordinatorshipsRoute().location,
   RailModule.archive => const ArchiveRoute().location,
   RailModule.messages => const MessagesRoute().location,
+  RailModule.meetings => const MeetingsRoute().location,
 };
 
-/// Sağ bölme ekranının türü (prototip `history`, `detail`, `cdetail`, `afolder`, `chat`).
-enum PaneKind { history, task, coord, folder, chat }
+/// Sağ bölme ekranının türü (prototip `history`, `detail`, `cdetail`, `afolder`, `chat`,
+/// `mdetail`).
+enum PaneKind { history, task, coord, folder, chat, meeting }
 
 /// Sağ yığının bir kaydı: tür + kimlik (yalnız kimlik; nesne taşınmaz, N1).
 @immutable
@@ -104,6 +120,7 @@ PaneKind? baseKindOf(RailModule m) => switch (m) {
   RailModule.coordinatorships => PaneKind.coord,
   RailModule.archive => PaneKind.folder,
   RailModule.messages => PaneKind.chat,
+  RailModule.meetings => PaneKind.meeting,
 };
 
 /// Konumdaki taban kaydı (modül kökünde [lastId]; hiç açılmamışsa null). Ana sayfada yalnız
@@ -129,7 +146,10 @@ PaneEntry? baseEntryOf(Uri uri, String? Function(PaneKind) lastId) {
 /// kökte liste tam genişliktir ([splitListFull]); kayıt yalnız dokunuşla açılır, kapanınca liste
 /// genişler. İşlem geçmişi kimliksizdir, yalnız `/home/history` ile açılır.
 bool restoresLastRecord(PaneKind kind) => switch (kind) {
-  PaneKind.task || PaneKind.coord || PaneKind.history => false,
+  PaneKind.task ||
+  PaneKind.coord ||
+  PaneKind.meeting ||
+  PaneKind.history => false,
   PaneKind.folder || PaneKind.chat => true,
 };
 
@@ -138,7 +158,8 @@ bool restoresLastRecord(PaneKind kind) => switch (kind) {
 bool listGoesFull(RailModule? m) =>
     m == RailModule.home ||
     m == RailModule.tasks ||
-    m == RailModule.coordinatorships;
+    m == RailModule.coordinatorships ||
+    m == RailModule.meetings;
 
 /// Çift bölmede sol liste tam genişlik mi: [listGoesFull] modülünün kökü, sağ yığın boş.
 bool splitListFull(Uri uri) {
@@ -163,6 +184,7 @@ String baseLocation(RailModule module, PaneEntry entry) => switch (entry.kind) {
   PaneKind.coord => CoordinatorshipRoute(code: entry.id!).location,
   PaneKind.folder => ArchiveFolderRoute(code: entry.id!).location,
   PaneKind.chat => MessagesChatRoute(id: entry.id!).location,
+  PaneKind.meeting => MeetingRoute(id: entry.id!).location,
 };
 
 /// Prototip `tgo` sonucu.
@@ -230,6 +252,7 @@ abstract final class MasterKeys {
   );
   static final archive = GlobalKey(debugLabel: 'master.archive');
   static final messages = GlobalKey(debugLabel: 'master.messages');
+  static final meetings = GlobalKey(debugLabel: 'master.meetings');
 }
 
 Widget homeMaster() => HomePage(key: MasterKeys.home);
@@ -247,6 +270,8 @@ Widget archiveMaster() => ArchivePage(key: MasterKeys.archive);
 
 Widget messagesMaster() => MessagesPage(key: MasterKeys.messages);
 
+Widget meetingsMaster() => MeetingsPage(key: MasterKeys.meetings);
+
 /// Sağ yığın kaydının ekranı (kayıt kimliğinden; veri controller'dan yüklenir).
 Widget paneEntryPage(PaneEntry e) => switch (e.kind) {
   PaneKind.history => const ActivityPage(),
@@ -254,6 +279,7 @@ Widget paneEntryPage(PaneEntry e) => switch (e.kind) {
   PaneKind.coord => CoordinatorshipPage(key: ValueKey(e.id), code: e.id!),
   PaneKind.folder => ArchiveFolderPage(key: ValueKey(e.id), code: e.id!),
   PaneKind.chat => ChatPage(key: ValueKey(e.id), id: e.id!),
+  PaneKind.meeting => MeetingPage(key: ValueKey(e.id), id: e.id!),
 };
 
 /// Kabuğun çift bölmede verdiği sağ bölme belleği: türlerin son açılan kimliği (prototipte
@@ -292,7 +318,10 @@ class SplitMemory extends InheritedWidget {
 /// → evet; görev ayrıntısı (`S_detail.load` aynı kimlikte döner) ve işlem geçmişi (yükleyici
 /// yok) → hayır. Genişlik/yön değişimi hiçbirini yeniden yüklemez.
 bool paneReselectReloads(PaneKind kind) => switch (kind) {
-  PaneKind.chat || PaneKind.coord || PaneKind.folder => true,
+  PaneKind.chat ||
+  PaneKind.coord ||
+  PaneKind.folder ||
+  PaneKind.meeting => true,
   PaneKind.task || PaneKind.history => false,
 };
 

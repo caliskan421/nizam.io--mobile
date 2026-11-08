@@ -6,11 +6,13 @@ import '../../extensions/context_ext.dart';
 import '../nz_icon.dart';
 
 /// Gruplu menü (README: çekmece grupları `m-r-group`, satır 48): `bg-raised` kart içinde
-/// satırlar, aralarında 1 px `border-subtle`. Üstte isteğe bağlı mono grup adı.
+/// satırlar, aralarında 1 px `border-subtle`. Üstte isteğe bağlı mono grup adı. Satırlar
+/// genellikle [NzMenuRow]'dur; aynı yüzeyi paylaşan bilgi/kişi satırları da verilebilir
+/// (prototip `bg-raised` satır grubu: toplantı Bilgi ve Kişiler bölümleri).
 class NzMenuGroup extends StatelessWidget {
   const NzMenuGroup({super.key, required this.rows, this.label});
 
-  final List<NzMenuRow> rows;
+  final List<Widget> rows;
   final String? label;
 
   @override

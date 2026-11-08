@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/domain/turkish_collation.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/layout/nz_pane.dart';
@@ -508,10 +509,9 @@ class ChatAttachPanel extends StatelessWidget {
     String query,
     String archive,
   ) {
-    final q = lowerTr(query.trim());
-    bool hit(String s) => q.isEmpty || lowerTr(s).contains(q);
-    String coordName(String code) =>
-        catalog.coordinatorship(code)?.name ?? code;
+    final q = trLower(query.trim());
+    bool hit(String s) => q.isEmpty || trLower(s).contains(q);
+    String coordName(String c) => catalog.coordinatorship(c)?.name ?? c;
     switch (tab) {
       case ChatAttachTab.task:
         return [

@@ -25,10 +25,9 @@ const _legacy = <String, int>{
   'lib/features/tasks/application/task_detail_controller.dart': 909,
   'tool/gen/sources.dart': 900,
   'lib/features/messages/presentation/chat_page.dart': 894,
-  'lib/features/tasks/presentation/detail/detail_tabs.dart': 892,
   'lib/features/timeline/presentation/gantt/gantt_chart.dart': 868,
   'lib/features/messages/presentation/chat/chat_parts.dart': 795,
-  'test/app/composition_test.dart': 781,
+  'test/app/composition_test.dart': 744,
   'lib/features/messages/presentation/chat/chat_sheets.dart': 773,
   'test/core/http/api_stack_test.dart': 766,
   'lib/features/tasks/domain/task_catalog.dart': 765,
@@ -37,9 +36,8 @@ const _legacy = <String, int>{
   'test/tool/gen_test.dart': 732,
   'lib/features/timeline/presentation/chart/timeline_chart.dart': 666,
   'lib/features/activity/presentation/activity_page.dart': 656,
-  'test/features/meetings/data/meetings_api_repository_test.dart': 649,
+  'test/features/meetings/data/meetings_api_repository_test.dart': 645,
   'test/tool/api_surface_test.dart': 644,
-  'lib/features/tasks/application/quick_forms_controller.dart': 642,
   'lib/features/archive/presentation/archive_page.dart': 634,
 };
 

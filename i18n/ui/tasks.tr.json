@@ -303,6 +303,14 @@
     "ui.tasks.description": "Açıklama",
     "ui.tasks.department": "Departman",
     "ui.tasks.department_all": "Tüm departmanlar",
-    "ui.tasks.department_filter_cleared": "Seçili departman artık bu programda yok; süzgeç temizlendi."
+    "ui.tasks.department_filter_cleared": "Seçili departman artık bu programda yok; süzgeç temizlendi.",
+    "ui.tasks.note_task_title": "Notu göreve dönüştür",
+    "ui.tasks.note_task_desc": "Görev bu nottan açılır ve nota bağlanır. Atanan kişiye bildirim gider.",
+    "ui.tasks.mt_edit_title": "Toplantıyı düzenle",
+    "ui.tasks.mt_edit_desc": "Katılımcılar ve gündem toplantı ayrıntısında yönetilir.",
+    "ui.tasks.t_meeting_saved": "Toplantı güncellendi",
+    "ui.tasks.err_mt_owner": "Sahip koordinatörlüğü seç.",
+    "ui.tasks.row_owner": "Sahip koordinatörlük",
+    "ui.tasks.sub_check_blocked": "Alt görevi atanan kişi ya da departman koordinatörü işaretler; yönetici ekip satırı olmadan işaretleyemez."
   }
 }

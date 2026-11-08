@@ -1,0 +1,102 @@
+// Toplantı listesi ve ayrıntısı: dar ekran × 2.0 metin taşma yok (bütün sekme ve bölümler),
+// kart dokunuşu ayrıntıyı kimlikle açar, yönetici olmayana Silinenler sekmesi çıkmaz.
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
+import 'package:nizamio/features/meetings/meetings.dart';
+
+import '../../../support/recording_app_nav.dart';
+import '../../pilot_support.dart';
+import '../meetings_server.dart';
+
+final _l = AppLocalizationsTr();
+
+Future<void> _tap(WidgetTester tester, Finder finder) async {
+  final f = finder.first;
+  await tester.ensureVisible(f);
+  await tester.pump();
+  await tester.tap(f);
+  await settle(tester);
+}
+
+void _screen(WidgetTester tester, double width, double scale) {
+  tester.view.devicePixelRatio = 1;
+  tester.view.physicalSize = Size(width, 844);
+  tester.platformDispatcher.textScaleFactorTestValue = scale;
+  addTearDown(tester.view.reset);
+  addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+}
+
+MeetingsServer _server() => MeetingsServer()
+  ..pages = [
+    [
+      meetingWire(
+        id: 'm1',
+        title: 'Haftalık koordinasyon toplantısı ve saha keşfi bulguları',
+        departments: const ['d1', 'd2', 'd3', 'd4', 'd5', 'd6'],
+      ),
+      meetingWire(id: 'm2', date: '2020-03-01T08:00:00Z'),
+    ],
+  ]
+  ..deleted = [meetingWire(id: 'mx', deletedAt: '2026-10-18T09:00:00Z')]
+  ..notes = [
+    noteWire('n1', content: 'Saha teslim listesi cuma akşamına kadar.'),
+    noteWire('n2', author: 'acc-2', role: 'member', task: 'w9'),
+  ];
+
+void main() {
+  setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
+
+  for (final (width, scale) in [(360.0, 2.0), (390.0, 1.0)]) {
+    testWidgets('liste: taşma yok ${width.toInt()} × $scale; kart → ayrıntı', (
+      tester,
+    ) async {
+      _screen(tester, width, scale);
+      final (h, _) = await real(tester, () => openMeetings(_server()));
+      final nav = RecordingAppNav();
+      await pumpScreen(tester, h, const MeetingsPage(), nav: nav);
+      await settle(tester);
+      await _tap(tester, find.bySemanticsLabel(_l.uiMeetingsSearch));
+      await _tap(tester, find.textContaining(_l.uiMeetingsTabPast));
+      await _tap(tester, find.textContaining(_l.uiMeetingsTabDeleted));
+      expect(find.text(_l.uiMeetingsRestore), findsOneWidget);
+      await _tap(tester, find.textContaining(_l.uiMeetingsTabUpcoming));
+      await _tap(tester, find.textContaining('Haftalık koordinasyon'));
+      expect(nav.calls, ['meeting:m1']);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+      'ayrıntı: taşma yok ${width.toInt()} × $scale; bütün bölümler',
+      (tester) async {
+        _screen(tester, width, scale);
+        final (h, _) = await real(tester, () => openMeetings(_server()));
+        await pumpScreen(tester, h, const MeetingPage(id: 'm1'));
+        await settle(tester);
+        expect(find.text(_l.uiMeetingsConfStart), findsOneWidget);
+        for (final s in [
+          _l.uiMeetingsTabNotes,
+          _l.uiMeetingsTabPeople,
+          _l.uiMeetingsTabInfo,
+          _l.uiMeetingsTabAgenda,
+        ]) {
+          await _tap(tester, find.textContaining(s));
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('yönetici olmayana Silinenler sekmesi yok', (tester) async {
+    _screen(tester, 390, 1);
+    final (h, _) = await real(
+      tester,
+      () => openMeetings(MeetingsServer(admin: false, seat: 'koordinator')),
+    );
+    await pumpScreen(tester, h, const MeetingsPage());
+    await settle(tester);
+    expect(find.textContaining(_l.uiMeetingsTabUpcoming), findsOneWidget);
+    expect(find.textContaining(_l.uiMeetingsTabDeleted), findsNothing);
+  });
+}

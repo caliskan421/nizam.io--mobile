@@ -9,6 +9,7 @@ import '../../features/archive/archive.dart';
 import '../../features/calendar/calendar.dart';
 import '../../features/coordinatorships/coordinatorships.dart';
 import '../../features/identity/identity.dart';
+import '../../features/meetings/meetings.dart';
 import '../../features/messages/messages.dart';
 import '../../features/scope/scope.dart';
 import '../../features/server/server.dart';
@@ -113,6 +114,10 @@ class ScopeRoute extends NzRouteData with $ScopeRoute {
         TypedGoRoute<ArchiveRoute>(
           path: '/archive',
           routes: [TypedGoRoute<ArchiveFolderRoute>(path: ':code')],
+        ),
+        TypedGoRoute<MeetingsRoute>(
+          path: '/meetings',
+          routes: [TypedGoRoute<MeetingRoute>(path: ':id')],
         ),
         TypedGoRoute<MessagesRoute>(
           path: '/messages',
@@ -296,6 +301,39 @@ class ArchiveFolderRoute extends NzRouteData with $ArchiveFolderRoute {
   );
 }
 
+/// Toplantılar (çekmeceden girilir; rayda öğesi yok). Tablette Koordinatörlükler gibi: kayıt
+/// yokken liste tam genişlik, toplantı açılınca 390'a daralır.
+class MeetingsRoute extends NzTabRouteData with $MeetingsRoute {
+  const MeetingsRoute({this.trail = const []});
+
+  final List<String> trail;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    base: SplitRoot(
+      master: (_) => meetingsMaster(),
+      detail: (c) => _splitBase(c, PaneKind.meeting, _keyedMeetingPage),
+    ),
+  );
+}
+
+class MeetingRoute extends NzRouteData with $MeetingRoute {
+  const MeetingRoute({required this.id, this.trail = const []});
+
+  /// `meeting_id`; veri controller'dan yüklenir.
+  final String id;
+
+  final List<String> trail;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    // Kimlik değişince yeni ekran (prototip `load(id)`); aynı kimlikte State kalır.
+    base: MeetingPage(key: ValueKey(id), id: id),
+  );
+}
+
 class MessagesRoute extends NzTabRouteData with $MessagesRoute {
   const MessagesRoute({this.trail = const []});
 
@@ -407,3 +445,4 @@ Widget _keyedCoordinatorshipPage(String code) =>
 Widget _keyedArchiveFolderPage(String code) =>
     ArchiveFolderPage(key: ValueKey(code), code: code);
 Widget _keyedChatPage(String id) => ChatPage(key: ValueKey(id), id: id);
+Widget _keyedMeetingPage(String id) => MeetingPage(key: ValueKey(id), id: id);

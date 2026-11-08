@@ -189,7 +189,7 @@ class CoordMeetingsTab extends ConsumerWidget {
           titleColor: faded ? c.textMuted : null,
           subtitle: l.coordMeetMeta(m),
           chevron: !faded,
-          onTap: nav.openCalendar,
+          onTap: () => nav.openMeeting(m.id),
         );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -311,7 +311,7 @@ class _NextMeeting extends StatelessWidget {
             ),
           ),
           child: InkWell(
-            onTap: context.appNav.openCalendar,
+            onTap: () => context.appNav.openMeeting(meeting.id),
             child: Padding(
               padding: const EdgeInsets.all(NizamioSpacing.space4),
               child: Column(

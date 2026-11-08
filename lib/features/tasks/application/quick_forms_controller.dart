@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../domain/meeting_planner.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_writes.dart';
 import 'task_catalog_controller.dart';
@@ -39,6 +40,7 @@ final class NewTaskForm {
     this.error,
     this.failure,
     this.busy = false,
+    this.note,
   });
 
   final String title;
@@ -66,6 +68,10 @@ final class NewTaskForm {
   /// Oluşturma isteği uçuşta (ikinci dokunuş istek göndermez).
   final bool busy;
 
+  /// Kaynak toplantı notu: verilmişse görev `convertNoteToTask` ile açılır ve not göreve
+  /// bağlanır (kanıt bayrağı yoktur); null → bağımsız yeni görev.
+  final String? note;
+
   int get days => end.difference(start).inDays;
 
   NewTaskForm copyWith({
@@ -83,6 +89,7 @@ final class NewTaskForm {
     NewTaskError? Function()? error,
     ApiError? Function()? failure,
     bool? busy,
+    String? Function()? note,
   }) => NewTaskForm(
     title: title ?? this.title,
     coordinatorship: coordinatorship == null
@@ -100,6 +107,7 @@ final class NewTaskForm {
     error: error == null ? this.error : error(),
     failure: failure == null ? this.failure : failure(),
     busy: busy ?? this.busy,
+    note: note == null ? this.note : note(),
   );
 }
 
@@ -153,9 +161,18 @@ class NewTaskFormController extends _$NewTaskFormController {
   /// listesi, koordinatörlük ayrıntısı, sohbet); [reset] olmadan taslak olduğu gibi kalır
   /// (ana sayfa hızlı işlemi). Her iki durumda satırlar kapalı, hata yok, yarım takvim
   /// seçimi geri alınır. [title] verilirse başlık onunla doldurulur (mesajı göreve
-  /// dönüştür: metnin ilk 120 karakteri).
-  void prepare({String? coordinatorship, bool reset = true, String? title}) {
+  /// dönüştür: metnin ilk 120 karakteri). [note] toplantı notundan görev açar (bkz.
+  /// [NewTaskForm.note]); nottan açılmış taslağa nottan olmayan açılış boş taslakla başlar.
+  void prepare({
+    String? coordinatorship,
+    bool reset = true,
+    String? title,
+    String? note,
+  }) {
     var f = _cancelPick(state);
+    if (note != null || f.note != null) {
+      f = _initial().copyWith(note: () => note);
+    }
     if (title != null) f = f.copyWith(title: title);
     // Hedefsiz sıfırlama (görev listesi) hesaplanan açılabilir varsayılana düşer.
     final target = coordinatorship ?? _defaultCoordinatorship();
@@ -278,21 +295,36 @@ class NewTaskFormController extends _$NewTaskFormController {
     }
     state = state.copyWith(busy: true, failure: () => null, error: () => null);
     final store = ref.read(taskCatalogControllerProvider.notifier);
+    final note = f.note;
     try {
-      final id = await ref
-          .read(taskWriteRepositoryProvider)
-          .createWorkItem(
-            WorkItemDraft(
-              programId: program,
-              departmentId: dept,
-              title: f.title.trim(),
-              start: f.start,
-              end: f.end,
-              priority: f.priority,
-              assignee: f.assignees.firstOrNull,
-              evidenceRequired: f.evidenceRequired,
-            ),
-          );
+      final id = note != null
+          ? await ref
+                .read(meetingPlannerProvider)
+                .convertNote(
+                  note,
+                  NoteTaskPlan(
+                    title: f.title.trim(),
+                    start: f.start,
+                    end: f.end,
+                    priority: f.priority,
+                    departmentId: dept,
+                    assigneeIds: f.assignees,
+                  ),
+                )
+          : await ref
+                .read(taskWriteRepositoryProvider)
+                .createWorkItem(
+                  WorkItemDraft(
+                    programId: program,
+                    departmentId: dept,
+                    title: f.title.trim(),
+                    start: f.start,
+                    end: f.end,
+                    priority: f.priority,
+                    assignee: f.assignees.firstOrNull,
+                    evidenceRequired: f.evidenceRequired,
+                  ),
+                );
       await store.reload();
       if (!ref.mounted) return null;
       final key =
@@ -331,213 +363,13 @@ class NewTaskFormController extends _$NewTaskFormController {
       const {'work.not_authorized', 'platform.conflict_retry'}.contains(e.code);
 }
 
-// ================================================================================= toplantı
-
-enum MeetingPane { date, time, invitees, agenda }
-
-enum MeetingMode { coordinatorships, people }
-
-enum MeetingError { title, past, coordinatorships, people }
-
-@immutable
-final class MeetingForm {
-  const MeetingForm({
-    required this.date,
-    required this.month,
-    this.title = '',
-    this.hour = 10,
-    this.minute = 0,
-    this.mode = MeetingMode.coordinatorships,
-    this.coordinatorships = const [],
-    this.people = const [],
-    this.allMembers = false,
-    this.pane,
-    this.agenda = const [],
-    this.agendaDraft = '',
-    this.openGroups = const {'ALT'},
-    this.error,
-  });
-
-  final String title;
-  final DateTime date;
-  final DateTime month;
-  final int hour;
-  final int minute;
-  final MeetingMode mode;
-  final List<String> coordinatorships;
-  final List<String> people;
-  final bool allMembers;
-  final MeetingPane? pane;
-  final List<String> agenda;
-  final String agendaDraft;
-
-  /// Kişiler kipinde açık koordinatörlük grupları.
-  final Set<String> openGroups;
-  final MeetingError? error;
-
-  MeetingForm copyWith({
-    String? title,
-    DateTime? date,
-    DateTime? month,
-    int? hour,
-    int? minute,
-    MeetingMode? mode,
-    List<String>? coordinatorships,
-    List<String>? people,
-    bool? allMembers,
-    MeetingPane? Function()? pane,
-    List<String>? agenda,
-    String? agendaDraft,
-    Set<String>? openGroups,
-    MeetingError? Function()? error,
-  }) => MeetingForm(
-    title: title ?? this.title,
-    date: date ?? this.date,
-    month: month ?? this.month,
-    hour: hour ?? this.hour,
-    minute: minute ?? this.minute,
-    mode: mode ?? this.mode,
-    coordinatorships: coordinatorships ?? this.coordinatorships,
-    people: people ?? this.people,
-    allMembers: allMembers ?? this.allMembers,
-    pane: pane == null ? this.pane : pane(),
-    agenda: agenda ?? this.agenda,
-    agendaDraft: agendaDraft ?? this.agendaDraft,
-    openGroups: openGroups ?? this.openGroups,
-    error: error == null ? this.error : error(),
-  );
-}
-
-List<T> _toggled<T>(List<T> list, T x) => list.contains(x)
+/// [list]'te [x] varsa çıkarılmış, yoksa eklenmiş kopya (çoklu seçim satırları).
+List<T> toggled<T>(List<T> list, T x) => list.contains(x)
     ? [
         for (final y in list)
           if (y != x) y,
       ]
     : [...list, x];
-
-@Riverpod(keepAlive: true)
-class MeetingFormController extends _$MeetingFormController {
-  @override
-  MeetingForm build() => _initial(
-    agenda: const [
-      'Saha kurulum takvimi',
-      'Güvenlik ve tahliye planının fuar alanına uyarlanması',
-    ],
-  );
-
-  MeetingForm _initial({List<String> agenda = const []}) {
-    final t = today;
-    final d = t.add(const Duration(days: 1));
-    return MeetingForm(
-      date: d,
-      month: DateTime(t.year, t.month),
-      agenda: agenda,
-    );
-  }
-
-  /// Verinin bugünü (geçmiş günler seçilemez).
-  DateTime get today => _day(
-    ref.read(taskCatalogControllerProvider).value?.today ?? DateTime.now(),
-  );
-
-  /// [date] verilirse (takvimden "seçili güne toplantı planla") tarih ve ay o güne gelir.
-  void prepare({String? coordinatorship, DateTime? date}) {
-    var f = state.copyWith(pane: () => null, error: () => null);
-    if (coordinatorship != null) {
-      f = f.copyWith(
-        mode: MeetingMode.coordinatorships,
-        coordinatorships: [coordinatorship],
-      );
-    }
-    if (date != null) {
-      f = f.copyWith(date: _day(date), month: DateTime(date.year, date.month));
-    }
-    state = f;
-  }
-
-  void _set(MeetingForm f) => state = f.copyWith(error: () => null);
-
-  void setTitle(String v) => _set(state.copyWith(title: v));
-
-  void togglePane(MeetingPane p) =>
-      _set(state.copyWith(pane: () => state.pane == p ? null : p));
-
-  void pickDate(DateTime d) => _set(state.copyWith(date: _day(d)));
-
-  void stepMonth(int delta) => _set(
-    state.copyWith(
-      month: DateTime(state.month.year, state.month.month + delta),
-    ),
-  );
-
-  void setTime(int hour, int minute) =>
-      _set(state.copyWith(hour: hour, minute: minute));
-
-  void setMode(MeetingMode m) => _set(state.copyWith(mode: m));
-
-  void toggleCoordinatorship(String code) => _set(
-    state.copyWith(coordinatorships: _toggled(state.coordinatorships, code)),
-  );
-
-  void togglePerson(String id) =>
-      _set(state.copyWith(people: _toggled(state.people, id)));
-
-  void toggleAllMembers() =>
-      _set(state.copyWith(allMembers: !state.allMembers));
-
-  void toggleGroup(String code) {
-    final g = {...state.openGroups};
-    if (!g.remove(code)) g.add(code);
-    _set(state.copyWith(openGroups: g));
-  }
-
-  void setAgendaDraft(String v) => _set(state.copyWith(agendaDraft: v));
-
-  void addAgenda() {
-    final d = state.agendaDraft.trim();
-    if (d.isEmpty) return;
-    _set(state.copyWith(agenda: [...state.agenda, d], agendaDraft: ''));
-  }
-
-  void setAgendaItem(int i, String v) => _set(
-    state.copyWith(
-      agenda: [
-        for (var j = 0; j < state.agenda.length; j++)
-          j == i ? v : state.agenda[j],
-      ],
-    ),
-  );
-
-  /// Düzenleme bitince boş kalan madde atılır.
-  void finishAgendaItem(int i) {
-    if (i < state.agenda.length && state.agenda[i].trim().isEmpty) {
-      removeAgenda(i);
-    }
-  }
-
-  void removeAgenda(int i) =>
-      _set(state.copyWith(agenda: [...state.agenda]..removeAt(i)));
-
-  /// Doğrular; geçerliyse gönderilen formu döner ve taslağı sıfırlar.
-  MeetingForm? submit() {
-    final f = state;
-    final err = f.title.trim().isEmpty
-        ? MeetingError.title
-        : f.date.isBefore(today)
-        ? MeetingError.past
-        : f.mode == MeetingMode.coordinatorships && f.coordinatorships.isEmpty
-        ? MeetingError.coordinatorships
-        : f.mode == MeetingMode.people && f.people.isEmpty
-        ? MeetingError.people
-        : null;
-    if (err != null) {
-      state = f.copyWith(error: () => err);
-      return null;
-    }
-    state = _initial();
-    return f;
-  }
-}
 
 // ==================================================================================== davet
 
@@ -619,7 +451,7 @@ class InviteFormController extends _$InviteFormController {
   }
 
   void toggleCoordinatorship(String code) => _set(
-    state.copyWith(coordinatorships: _toggled(state.coordinatorships, code)),
+    state.copyWith(coordinatorships: toggled(state.coordinatorships, code)),
   );
 
   /// Doğrular; geçerliyse gönderilen formu döner ve taslağı sıfırlar.

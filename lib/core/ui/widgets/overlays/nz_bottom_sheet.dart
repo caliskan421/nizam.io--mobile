@@ -9,6 +9,7 @@ import '../../layout/nz_layout.dart';
 import '../../layout/nz_pane.dart';
 import '../../theme/nz_motion.dart';
 import '../../theme/nz_surfaces.dart';
+import '../buttons/nz_button.dart';
 import '../nz_icon.dart';
 import '../nz_icons.dart';
 
@@ -17,6 +18,26 @@ import '../nz_icons.dart';
 typedef NzSheetActionsBuilder = List<Widget> Function(
   BuildContext sheetContext,
 );
+
+/// Alt sayfa "Vazgeç / ana eylem" düğme çifti ([NzBottomSheet.show] `actions`): vazgeç sayfayı
+/// kapatır; [danger] ana eylemi kırmızı yapar.
+List<Widget> nzSheetActions(
+  BuildContext sheet, {
+  required String cancel,
+  required String ok,
+  required VoidCallback? onOk,
+  bool danger = false,
+}) => [
+  NzButton.secondary(
+    label: cancel,
+    expand: true,
+    onPressed: () => Navigator.of(sheet).maybePop(),
+  ),
+  if (danger)
+    NzButton.danger(label: ok, expand: true, onPressed: onOk)
+  else
+    NzButton.primary(label: ok, expand: true, onPressed: onOk),
+];
 
 /// Alt sayfa servisi (durumsuz). Uygulamanın KÖK Navigator'ında açılır: kabuktaki yüzen alt
 /// menü sayfanın ve karartmanın altında kalır (prototip: sayfa z 8, alt menü z 6).

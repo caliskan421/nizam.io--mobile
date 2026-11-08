@@ -24,6 +24,7 @@ import '../application/task_detail_controller.dart';
 import '../application/task_details_controller.dart';
 import '../domain/task_catalog.dart';
 import 'detail/detail_actions.dart';
+import 'detail/detail_subtasks.dart';
 import 'detail/detail_tabs.dart';
 import 'task_texts.dart';
 

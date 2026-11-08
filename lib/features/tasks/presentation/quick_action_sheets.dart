@@ -6,13 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
+import '../application/meeting_form_controller.dart';
 import '../application/quick_forms_controller.dart';
 import '../application/task_catalog_controller.dart';
 import 'quick/invite_form.dart';
 import 'quick/meeting_form.dart';
 import 'quick/new_task_form.dart';
 import 'task_texts.dart';
-import 'task_widgets.dart';
 
 /// Hızlı işlem alt sayfaları (prototip `markup_shared_overlays` "Yeni görev", "Toplantı
 /// oluştur", "Kullanıcı davet et"). Ana sayfa, kısayol menüleri ve koordinatörlük ayrıntısı
@@ -25,29 +25,33 @@ import 'task_widgets.dart';
 /// `resetTarget: true` ile açar). İkisi de yoksa (ana sayfa hızlı işlemi) taslak
 /// koordinatörlük ve atananlarıyla korunur. [title] başlık alanını önceden doldurur
 /// (sohbette "Göreve dönüştür": mesaj metninin ilk 120 karakteri; kırpma burada yapılır).
-/// Seçili kapsamda görev açma yetkisi yoksa ([canCreateTaskProvider]) sayfa açılmaz.
-Future<void> showNewTaskSheet(
+/// [note] verilirse görev o toplantı notundan açılır (`convertNoteToTask`; not göreve bağlanır,
+/// kanıt satırı yoktur). Seçili kapsamda görev açma yetkisi yoksa ([canCreateTaskProvider])
+/// sayfa açılmaz. Görev açıldıysa true döner.
+Future<bool> showNewTaskSheet(
   BuildContext context, {
   String? coordinatorship,
   bool resetTarget = false,
   String? title,
-}) {
+  String? note,
+}) async {
   final container = ProviderScope.containerOf(context, listen: false);
-  if (!container.read(canCreateTaskProvider)) return Future.value();
+  if (!container.read(canCreateTaskProvider)) return false;
   container
       .read(newTaskFormControllerProvider.notifier)
       .prepare(
         coordinatorship: coordinatorship,
-        reset: resetTarget || coordinatorship != null,
+        reset: resetTarget || coordinatorship != null || note != null,
         title: title == null
             ? null
             : String.fromCharCodes(title.trim().runes.take(120)),
+        note: note,
       );
   final l = context.l10n;
   return _show(
     context,
-    title: l.uiTasksNewTask,
-    description: l.uiTasksNtDesc,
+    title: note == null ? l.uiTasksNewTask : l.uiTasksNoteTaskTitle,
+    description: note == null ? l.uiTasksNtDesc : l.uiTasksNoteTaskDesc,
     ok: l.uiTasksCreate,
     onOk: (sheet) async {
       final r = await container
@@ -61,24 +65,31 @@ Future<void> showNewTaskSheet(
   );
 }
 
-Future<void> showMeetingSheet(
+/// Toplantı oluştur; [edit] verilirse o toplantıyı düzenler (gündem ve kip seçimi yok).
+/// Toplantı yazıldıysa true döner.
+Future<bool> showMeetingSheet(
   BuildContext context, {
   String? coordinatorship,
   DateTime? date,
+  MeetingSeed? edit,
 }) {
   final container = ProviderScope.containerOf(context, listen: false);
-  container
-      .read(meetingFormControllerProvider.notifier)
-      .prepare(coordinatorship: coordinatorship, date: date);
+  final form = container.read(meetingFormControllerProvider.notifier);
+  if (edit != null) {
+    form.prepareEdit(edit);
+  } else {
+    form.prepare(coordinatorship: coordinatorship, date: date);
+  }
   final l = context.l10n;
   return _show(
     context,
-    title: l.uiTasksMtTitle,
-    description: l.uiTasksMtDesc,
-    ok: l.uiTasksCreate,
-    onOk: (sheet) {
-      final f = container.read(meetingFormControllerProvider.notifier).submit();
+    title: edit == null ? l.uiTasksMtTitle : l.uiTasksMtEditTitle,
+    description: edit == null ? l.uiTasksMtDesc : l.uiTasksMtEditDesc,
+    ok: edit == null ? l.uiTasksCreate : l.uiTasksSave,
+    onOk: (sheet) async {
+      final f = await form.submit();
       if (f == null) return null;
+      if (f.editing != null) return l.uiTasksTMeetingSaved;
       final when =
           '${TaskDates.short(f.date)} '
           '${f.hour.toString().padLeft(2, '0')}:'
@@ -116,7 +127,8 @@ Future<void> showInviteSheet(BuildContext context, {String? coordinatorship}) {
 
 /// Ortak alt sayfa: [onOk] başarıda bildirim metnini döner (sayfa kapanır, bildirim çıkar),
 /// doğrulama ya da sunucu hatasında null (hata formda görünür). Sunucu yazması beklenir.
-Future<void> _show(
+/// Başarıyla kapandıysa true döner.
+Future<bool> _show(
   BuildContext context, {
   required String title,
   required String description,
@@ -133,7 +145,7 @@ Future<void> _show(
     description: description,
     expandable: true,
     expansion: expansion,
-    actions: (sheet) => sheetActions(
+    actions: (sheet) => nzSheetActions(
       sheet,
       cancel: context.l10n.uiTasksCancel,
       ok: ok,
@@ -151,4 +163,5 @@ Future<void> _show(
     // Prototip sonuç tostu onay işaretlidir (ayrıntı tostları bilgi işaretli).
     NzToast.show(context, msg, tone: NzToastTone.success);
   }
+  return msg != null;
 }

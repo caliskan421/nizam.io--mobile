@@ -168,12 +168,14 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
               onSelected: (i) => ctl.setPriority(TaskPriority.pickable[i]),
             ),
           ),
-          NzFormRow.toggle(
-            label: l.uiTasksEvidenceRequired,
-            icon: NzIcons.attach,
-            value: f.evidenceRequired,
-            onChanged: (v) => ctl.setEvidenceRequired(value: v),
-          ),
+          // Nottan görevde kanıt bayrağı yoktur (`convertNoteToTask` gövdesi).
+          if (f.note == null)
+            NzFormRow.toggle(
+              label: l.uiTasksEvidenceRequired,
+              icon: NzIcons.attach,
+              value: f.evidenceRequired,
+              onChanged: (v) => ctl.setEvidenceRequired(value: v),
+            ),
         ],
       ),
       footer: [

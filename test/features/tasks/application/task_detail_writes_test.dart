@@ -6,7 +6,6 @@
 // otomatik tekrar yok, yetkisiz eylemde istek yok, hata kodu → ileti.
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/errors/api_error.dart';
@@ -20,159 +19,11 @@ import 'package:nizamio/features/tasks/tasks.dart';
 import '../../../support/fake_backend.dart';
 import '../../../support/harness.dart';
 import '../../pilot_support.dart';
-
-/// Ayarlanabilir sahte sunucu (görev `w1`, departman `d1`, oturum hesabı `acc-1`).
-class _Server {
-  bool admin = false;
-  String role = 'koordinator';
-  List<String> assignees = ['u2'];
-  String status = 'devam_ediyor';
-  List<Map<String, Object?>> subtasks = [
-    _sub('s1', done: false),
-    _sub('s2', done: false, assignee: 'u2'),
-  ];
-  List<Map<String, Object?>> notes = [
-    _note('n1', 'acc-1', 'Benim notum'),
-    _note('n2', 'u2', 'Başkasının notu'),
-  ];
-
-  /// 'METOT yol' → yanıt; verilmeyen yazma için geçerli varsayılan gövde.
-  final Map<String, ResponseBody Function()> writes = {};
-
-  /// Doluysa yazma yanıtı bu tamamlanana dek bekler (uçuştaki istek).
-  Completer<void>? hold;
-
-  final _pilot = PilotBackend();
-
-  Map<String, Object?> _w1() => {
-    'work_item_id': 'w1',
-    'title': 'Hidrofor kurulumu',
-    'program_id': 'prog-1',
-    'department_id': 'd1',
-    'priority': 'orta',
-    'status': status,
-    'assignee_account_ids': assignees,
-    'assignees': [
-      for (final a in assignees) {'account_id': a, 'full_name': null},
-    ],
-    'start_on': '2026-11-01',
-    'end_on': '2026-11-10',
-    'is_overdue': false,
-    'days_overdue': 0,
-    'is_completed_late': false,
-    'days_late': 0,
-    'is_completed_early': false,
-    'days_early': 0,
-    'completion_evidence_required': false,
-    'subtask_counts': {'total': subtasks.length, 'done': 0},
-    'created_at': '2026-10-01T09:00:00Z',
-    'created_by_account_id': 'u-creator',
-    'created_by_full_name': 'Oluşturan Kişi',
-  };
-
-  FutureOr<ResponseBody> handle(Seen r) async {
-    final key = '${r.method} ${r.path}';
-    if (r.method != 'GET' && r.path.startsWith('/v1/work-items/')) {
-      await hold?.future;
-      final custom = writes[key];
-      if (custom != null) return custom();
-      return jsonResponse(r.method == 'POST' ? 201 : 200, _writeBody(r));
-    }
-    switch (key) {
-      case 'GET /v1/me':
-        return jsonResponse(200, {
-          'account_id': 'acc-1',
-          'email': 'a@b.test',
-          'full_name': 'Ayşe Yılmaz',
-          'company_admin': admin,
-        });
-      case 'GET /v1/program/departments':
-        return jsonResponse(200, {
-          'departments': [
-            {'department_id': 'd1', 'display_name': 'Altyapı', 'code': 'ALT'},
-          ],
-        });
-      case 'GET /v1/me/departments':
-        return jsonResponse(200, {
-          'departments': [
-            {
-              'program_id': 'prog-1',
-              'program_name': 'Program Bir',
-              'department_id': 'd1',
-              'display_name': 'Altyapı',
-              'role': role,
-            },
-          ],
-        });
-      case 'GET /v1/program/work-items':
-        return jsonResponse(200, {
-          'items': [_w1()],
-        });
-      case 'GET /v1/work-items/w1':
-        return jsonResponse(200, {..._w1(), 'description': 'Pompa odası'});
-      case 'GET /v1/work-items/w1/subtasks':
-        return jsonResponse(200, {
-          'subtasks': subtasks,
-          'total': subtasks.length,
-        });
-      case 'GET /v1/work-items/w1/notes':
-        return jsonResponse(200, {'notes': notes, 'total': notes.length});
-      case 'GET /v1/work-items/w1/files':
-        return jsonResponse(200, {'files': <Object>[]});
-      case 'GET /v1/date-change-requests' ||
-          'GET /v1/date-change-requests/mine':
-        return jsonResponse(200, {'requests': <Object>[], 'total': 0});
-    }
-    return _pilot.handle(r);
-  }
-
-  Object _writeBody(Seen r) {
-    if (r.path.endsWith('/transitions') || r.path.endsWith('/own-status')) {
-      final to = (r.body! as Map)['to'];
-      return {
-        'work_item_id': 'w1',
-        'from': status,
-        'to': to,
-        'actor': 'koordinator',
-      };
-    }
-    if (r.path.endsWith('/notes') && r.method == 'POST') {
-      return _note('n9', 'acc-1', 'yeni');
-    }
-    if (r.path.endsWith('/subtasks') && r.method == 'POST') {
-      return _sub('s9', done: false);
-    }
-    if (r.path.contains('/subtasks/') && r.method == 'PATCH') {
-      return _sub('s1', done: true);
-    }
-    return {'status': 'ok'};
-  }
-}
-
-Map<String, Object?> _sub(String id, {required bool done, String? assignee}) =>
-    {
-      'subtask_id': id,
-      'work_item_id': 'w1',
-      'title': 'Alt $id',
-      'done': done,
-      'created_by_account_id': 'acc-1',
-      'created_at': '2026-10-02T08:00:00Z',
-      'updated_at': '2026-10-02T08:00:00Z',
-      'assignee_account_id': ?assignee,
-    };
-
-Map<String, Object?> _note(String id, String by, String text) => {
-  'note_id': id,
-  'work_item_id': 'w1',
-  'author_account_id': by,
-  'content': text,
-  'created_at': '2026-10-03T09:00:00Z',
-  'updated_at': '2026-10-03T09:00:00Z',
-};
+import '../task_detail_server.dart';
 
 /// Oturum açık, sunucu programı seçili; katalog ve ayrıntı okunmuş.
 Future<(Harness, ProviderContainer, TaskDetailController)> _open(
-  _Server server,
+  TaskDetailServer server,
 ) async {
   final h = await pilotHarness(PilotBackend(), signedIn: true);
   h.backend.handler = server.handle;
@@ -208,7 +59,7 @@ void main() {
   group('durum geçişi', () {
     test('koordinatör → POST transitions (görevin departmanı); sonra YALNIZ kalem getWorkItem ile '
         'yeniden okunur (tüm liste yok)', () async {
-      final s = _Server();
+      final s = TaskDetailServer();
       final (h, c, ctl) = await _open(s);
       s.status = 'tamamlandi';
       final r = await ctl.setStatus(TaskStatus.done);
@@ -240,7 +91,7 @@ void main() {
     });
 
     test('yalnız atanmış üye → PATCH own-status', () async {
-      final s = _Server()
+      final s = TaskDetailServer()
         ..role = 'uye'
         ..assignees = ['acc-1'];
       final (h, _, ctl) = await _open(s);
@@ -251,14 +102,14 @@ void main() {
     });
 
     test('matris dışı hedef ve aktörsüz yönetici: istek yok', () async {
-      final s = _Server()
+      final s = TaskDetailServer()
         ..role = 'uye'
         ..assignees = ['acc-1'];
       final (h, _, ctl) = await _open(s);
       expect((await ctl.setStatus(TaskStatus.done)).kind, WriteKind.invalid);
       expect(h.backend.requests, isEmpty);
 
-      final a = _Server()..admin = true;
+      final a = TaskDetailServer()..admin = true;
       final (h2, _, ctl2) = await _open(a..role = 'yok');
       expect(ctl2.permissions.statusTargets(TaskStatus.inProgress), isEmpty);
       expect((await ctl2.setStatus(TaskStatus.done)).kind, WriteKind.invalid);
@@ -268,7 +119,7 @@ void main() {
     test(
       'tamamlandı çıkışı ≥3 karakter gerekçe ister; gerekçe gövdede',
       () async {
-        final s = _Server()..status = 'tamamlandi';
+        final s = TaskDetailServer()..status = 'tamamlandi';
         final (h, _, ctl) = await _open(s);
         expect(
           (await ctl.setStatus(TaskStatus.inProgress)).kind,
@@ -294,7 +145,7 @@ void main() {
     );
 
     test('409 subtasks_open → yeniden oku + soru; kullanıcı onaylarsa close_subtasks ile tek yeni istek', () async {
-      final s = _Server();
+      final s = TaskDetailServer();
       final (h, _, ctl) = await _open(s);
       s.writes['POST /v1/work-items/w1/transitions'] = () =>
           envelope(409, 'work.subtasks_open');
@@ -327,7 +178,7 @@ void main() {
     test(
       '409 stale_transition → yeniden oku, hata döner, otomatik tekrar yok',
       () async {
-        final s = _Server();
+        final s = TaskDetailServer();
         final (h, _, ctl) = await _open(s);
         s.writes['POST /v1/work-items/w1/transitions'] = () =>
             envelope(409, 'work.stale_transition');
@@ -343,7 +194,7 @@ void main() {
       test(
         '403 $code → yeniden oku, hata döner, otomatik tekrar yok',
         () async {
-          final s = _Server();
+          final s = TaskDetailServer();
           final (h, _, ctl) = await _open(s);
           s.writes['POST /v1/work-items/w1/transitions'] = () =>
               envelope(403, code);
@@ -359,7 +210,7 @@ void main() {
     test(
       '422 attachment_required → hata; 409 olmadığından yeniden okuma yok',
       () async {
-        final s = _Server();
+        final s = TaskDetailServer();
         final (h, _, ctl) = await _open(s);
         s.writes['POST /v1/work-items/w1/transitions'] = () =>
             envelope(422, 'work.attachment_required');
@@ -370,7 +221,7 @@ void main() {
     );
 
     test('uçuştaki istek kilidi: çift dokunma tek istek', () async {
-      final s = _Server();
+      final s = TaskDetailServer();
       final (h, c, ctl) = await _open(s);
       s.hold = Completer<void>();
       final first = ctl.setStatus(TaskStatus.done);
@@ -388,7 +239,7 @@ void main() {
 
   group('notlar', () {
     test('ekle → POST (departman başlığı); yalnız ayrıntı yeniden okunur; taslak temizlenir', () async {
-      final s = _Server();
+      final s = TaskDetailServer();
       final (h, c, ctl) = await _open(s);
       ctl.setNoteDraft('  Saha kontrol edildi ');
       expect((await ctl.sendNote()).kind, WriteKind.done);
@@ -405,7 +256,7 @@ void main() {
     });
 
     test('yönetici (koordinatör de olsa) not yazamaz: istek yok', () async {
-      final s = _Server()..admin = true;
+      final s = TaskDetailServer()..admin = true;
       final (h, _, ctl) = await _open(s);
       ctl.setNoteDraft('Yönetici notu');
       expect((await ctl.sendNote()).kind, WriteKind.invalid);
@@ -413,7 +264,7 @@ void main() {
     });
 
     test('düzenle/sil yalnız yazar', () async {
-      final s = _Server();
+      final s = TaskDetailServer();
       final (h, c, ctl) = await _open(s);
       final notes = c
           .read(taskCatalogControllerProvider)
@@ -439,7 +290,7 @@ void main() {
     test(
       'oluştur/işaretle/sil → istek + kalem yeniden okuma (liste yok)',
       () async {
-        final s = _Server();
+        final s = TaskDetailServer();
         final (h, _, ctl) = await _open(s);
         expect((await ctl.createSubtask('  Vana ')).kind, WriteKind.done);
         expect(_only(h, 'POST', '/v1/work-items/w1/subtasks').body, {
@@ -462,7 +313,7 @@ void main() {
     );
 
     test('kişi ve tarih: atama kaldırma boş dize; tarihler birlikte gider', () async {
-      final s = _Server()..assignees = ['u2', 'acc-1'];
+      final s = TaskDetailServer()..assignees = ['u2', 'acc-1'];
       final (h, _, ctl) = await _open(s);
       await ctl.setSubtaskAssignee('s1', 'u2');
       await ctl.setSubtaskAssignee('s2', null);
@@ -487,7 +338,7 @@ void main() {
     test(
       'atanmış üye: yönetemez; başkasına atanmış alt görevi işaretleyemez',
       () async {
-        final s = _Server()
+        final s = TaskDetailServer()
           ..role = 'uye'
           ..assignees = ['acc-1'];
         final (h, _, ctl) = await _open(s);
@@ -502,7 +353,7 @@ void main() {
     test(
       'tamamlanmış görevde 409 item_completed → yeniden oku + hata',
       () async {
-        final s = _Server();
+        final s = TaskDetailServer();
         final (h, _, ctl) = await _open(s);
         s.writes['POST /v1/work-items/w1/subtasks'] = () =>
             envelope(409, 'work.item_completed');

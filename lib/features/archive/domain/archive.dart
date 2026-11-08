@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../../core/domain/turkish_collation.dart';
 import '../../tasks/tasks.dart';
 
 /// Arşiv klasörü: bir koordinatörlüğün dosyaları (sayılar sunucunun hesapladığı değerlerdir).
@@ -130,20 +131,16 @@ String _trKey(String s) {
   );
 }
 
-/// Türkçe küçük harf (arama).
-String lowerTr(String s) =>
-    s.replaceAll('I', 'ı').replaceAll('İ', 'i').toLowerCase();
-
 /// Arama ([query]) ve sıralama uygulanmış klasör listesi.
 List<ArchiveFolder> visibleFolders(
   List<ArchiveFolder> folders, {
   required ArchiveSort sort,
   String query = '',
 }) {
-  final q = lowerTr(query.trim());
+  final q = trLower(query.trim());
   final list = [
     for (final f in folders)
-      if (q.isEmpty || lowerTr(f.name).contains(q)) f,
+      if (q.isEmpty || trLower(f.name).contains(q)) f,
   ];
   int days(ArchiveFolder f) => f.lastUploadDays ?? 1 << 30;
   switch (sort) {

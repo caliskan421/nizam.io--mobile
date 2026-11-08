@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../core/api/generated/clients/work_client.dart';
+import '../../../core/api/generated/models/update_work_note_request.dart';
 import '../../../core/api/generated/models/work_item_note.dart';
 import '../../../core/api/generated/models/work_note_request.dart';
 import '../../../core/errors/api_error.dart';
@@ -21,21 +22,34 @@ class ApiWorkItemNoteRepository implements WorkItemNoteRepository {
   });
 
   @override
-  Future<TaskNote> add(String workItemId, String text) => apiCall(
+  Future<TaskNote> add(
+    String workItemId,
+    String text, {
+    required String requestKey,
+  }) => apiCall(
     () async => _taskNote(
       await _client.addWorkItemNote(
         id: workItemId,
+        idempotencyKey: requestKey,
         body: WorkNoteRequest(content: text),
       ),
     ),
   );
 
   @override
-  Future<void> update(String workItemId, String noteId, String text) => apiCall(
+  Future<void> update(
+    String workItemId,
+    String noteId,
+    String text, {
+    required int expectedRevision,
+  }) => apiCall(
     () => _client.updateWorkItemNote(
       id: workItemId,
       noteId: noteId,
-      body: WorkNoteRequest(content: text),
+      body: UpdateWorkNoteRequest(
+        content: text,
+        expectedRevision: expectedRevision,
+      ),
     ),
   );
 
@@ -51,4 +65,5 @@ TaskNote _taskNote(WorkItemNote r) => TaskNote(
   at: r.createdAt,
   text: r.content,
   updatedAt: r.updatedAt,
+  editRevision: r.editRevision,
 );

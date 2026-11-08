@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/domain/page_slice.dart';
+import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
 import '../../tasks/tasks.dart';
@@ -110,6 +111,9 @@ class MeetingRoomController extends _$MeetingRoomController {
   static const notesMaxPages = 10;
 
   MeetingsRepository get _repo => ref.read(meetingsRepositoryProvider);
+
+  /// Bekleyen not ekleme anahtarı (ADR-0027): aynı metnin yeniden gönderimi aynı anahtarla.
+  RequestKeys _keys = const RequestKeys();
 
   @override
   Future<MeetingRoom> build(String id) async {
@@ -255,13 +259,18 @@ class MeetingRoomController extends _$MeetingRoomController {
   Future<ApiError?> addNote(String content) async {
     final t = content.trim();
     if (t.isEmpty || _room == null) return null;
+    final (keys, key) = _keys.keyFor('note', t);
+    _keys = keys;
     try {
-      final note = await _repo.addNote(id, t);
+      final note = await _repo.addNote(id, t, requestKey: key);
+      _keys = _keys.clear('note');
       final cur = _room;
       if (cur != null) _notes([note, ...cur.notes]);
       return null;
     } on Object catch (e) {
-      return toApiError(e);
+      final err = toApiError(e);
+      if (isKeyReused(err)) _keys = _keys.clear('note');
+      return err;
     }
   }
 
@@ -269,7 +278,11 @@ class MeetingRoomController extends _$MeetingRoomController {
     final t = content.trim();
     if (t.isEmpty || t == n.content) return null;
     try {
-      final saved = await _repo.updateNote(n.id, t);
+      final saved = await _repo.updateNote(
+        n.id,
+        t,
+        expectedRevision: n.editRevision,
+      );
       final cur = _room;
       if (cur != null) _notes(_replace(cur.notes, n, saved));
       return null;

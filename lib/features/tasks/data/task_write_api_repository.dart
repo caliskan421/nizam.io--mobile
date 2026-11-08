@@ -18,6 +18,7 @@ import '../../../core/api/generated/models/transition_request_to.dart';
 import '../../../core/api/generated/models/update_subtask_request.dart';
 import '../../../core/api/generated/models/update_work_item_request.dart';
 import '../../../core/api/generated/models/update_work_item_request_priority.dart';
+import '../../../core/api/generated/models/update_work_note_request.dart';
 import '../../../core/api/generated/models/work_note_request.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/http/file_download.dart';
@@ -33,6 +34,11 @@ import 'work_item_mapping.dart';
 /// departmanı olmayan görev kapıda reddedilir (boş kimlik seçili kapsama düşmez). Yanıt gövdeleri
 /// okunmaz (yalnız yeni görevin kimliği): çağıran başarıdan sonra kaynağı yeniden okur
 /// (istemci akışları §8).
+///
+/// ADR-0027: oluşturma uçları (görev, not, alt görev, dosya) çağıranın verdiği işlem anahtarını
+/// `Idempotency-Key` başlığında taşır; düzenleme uçları okunan sürümü (`expected_revision`,
+/// `expected_dates_revision`) gövdede taşır. Anahtar burada üretilmez (eylem başına bir kez,
+/// form durumunda).
 ///
 /// Dosya yükleme üretilmiş `attachFile` ile DEĞİL ortak elle multipart yardımcısıyla gider
 /// ([postWorkItemFile]; arşiv yüklemesiyle aynı yol — parça türü bildirilir).
@@ -86,9 +92,14 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
   }
 
   @override
-  Future<void> addNote(TaskItem task, String text) => apiCall(
+  Future<void> addNote(
+    TaskItem task,
+    String text, {
+    required String requestKey,
+  }) => apiCall(
     () => _client.addWorkItemNote(
       id: task.id,
+      idempotencyKey: requestKey,
       body: WorkNoteRequest(content: text),
       extras: withScope(
         WorkClient.addWorkItemNoteOpenapiExtras,
@@ -99,11 +110,19 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
   );
 
   @override
-  Future<void> updateNote(TaskItem task, String noteId, String text) => apiCall(
+  Future<void> updateNote(
+    TaskItem task,
+    String noteId,
+    String text, {
+    required int expectedRevision,
+  }) => apiCall(
     () => _client.updateWorkItemNote(
       id: task.id,
       noteId: noteId,
-      body: WorkNoteRequest(content: text),
+      body: UpdateWorkNoteRequest(
+        content: text,
+        expectedRevision: expectedRevision,
+      ),
       extras: withScope(
         WorkClient.updateWorkItemNoteOpenapiExtras,
         _program(task),
@@ -126,9 +145,14 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
   );
 
   @override
-  Future<void> createSubtask(TaskItem task, String title) => apiCall(
+  Future<void> createSubtask(
+    TaskItem task,
+    String title, {
+    required String requestKey,
+  }) => apiCall(
     () => _client.createWorkItemSubtask(
       id: task.id,
+      idempotencyKey: requestKey,
       body: CreateSubtaskRequest(title: title),
       extras: withScope(
         WorkClient.createWorkItemSubtaskOpenapiExtras,
@@ -154,6 +178,7 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
       startOn: dates == null ? null : _day(dates.start),
       endOn: dates == null ? null : _day(dates.end),
       done: patch.done,
+      expectedRevision: patch.expectedRevision,
     );
     return apiCall(
       () => _client.updateWorkItemSubtask(
@@ -185,10 +210,14 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
   // ---- görev -------------------------------------------------------------------------------
 
   @override
-  Future<String> createWorkItem(WorkItemDraft draft) async {
+  Future<String> createWorkItem(
+    WorkItemDraft draft, {
+    required String requestKey,
+  }) async {
     final p = draft.priority;
     final r = await apiCall(
       () => _client.createWorkItem(
+        idempotencyKey: requestKey,
         body: CreateWorkItemRequest(
           title: draft.title,
           startOn: day(draft.start),
@@ -226,6 +255,8 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
           startOn: start == null ? null : day(start),
           endOn: end == null ? null : day(end),
           completionEvidenceRequired: patch.evidenceRequired,
+          expectedRevision: patch.expectedRevision,
+          expectedDatesRevision: patch.expectedDatesRevision,
         ),
         extras: withScope(
           WorkClient.updateWorkItemOpenapiExtras,
@@ -367,6 +398,7 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     UploadSource file,
     EvidenceTag tag, {
     String? subtaskId,
+    required String requestKey,
   }) async {
     final type = file.contentType;
     final wire = evidenceTagToWire(tag);
@@ -381,6 +413,7 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
         filePath: file.path,
         filename: file.name,
         contentType: type,
+        requestKey: requestKey,
         subtaskId: subtaskId,
         extras: withScope(
           RecordsClient.attachFileOpenapiExtras,

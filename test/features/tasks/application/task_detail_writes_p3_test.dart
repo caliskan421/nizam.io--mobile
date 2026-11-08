@@ -22,48 +22,7 @@ import '../../../support/fake_backend.dart';
 import '../../../support/harness.dart';
 import '../../pilot_support.dart';
 
-Map<String, Object?> _item(
-  String id, {
-  List<String> assignees = const ['u2'],
-  String priority = 'orta',
-  String status = 'devam_ediyor',
-  bool evidence = true,
-}) => {
-  'work_item_id': id,
-  'title': 'Hidrofor kurulumu',
-  'program_id': 'prog-1',
-  'department_id': 'd1',
-  'priority': priority,
-  'status': status,
-  'assignee_account_ids': assignees,
-  'assignees': [
-    for (final a in assignees) {'account_id': a, 'full_name': 'Ad $a'},
-  ],
-  'start_on': '2026-11-01',
-  'end_on': '2026-11-10',
-  'is_overdue': false,
-  'days_overdue': 0,
-  'is_completed_late': false,
-  'days_late': 0,
-  'is_completed_early': false,
-  'days_early': 0,
-  'completion_evidence_required': evidence,
-  'subtask_counts': {'total': 0, 'done': 0},
-  'created_at': '2026-10-01T09:00:00Z',
-  'created_by_account_id': 'u-creator',
-  'created_by_full_name': 'Oluşturan Kişi',
-};
-
-Map<String, Object?> _file(String id, String by) => {
-  'file_id': id,
-  'work_item_id': 'w1',
-  'display_name': 'rapor.pdf',
-  'content_type': 'application/pdf',
-  'size_bytes': 2048,
-  'tag': 'sonuc',
-  'uploaded_by_account_id': by,
-  'uploaded_at': '2026-10-03T09:00:00Z',
-};
+part 'task_detail_writes_p3_fixtures.dart';
 
 /// Ayarlanabilir sahte sunucu (görev `w1`, departman `d1`, oturum hesabı `acc-1`).
 class _Server {
@@ -285,6 +244,7 @@ void main() {
       expect(patch.body, {
         'priority': 'acil',
         'completion_evidence_required': false,
+        'expected_revision': 1,
       });
       expect(patch.header('X-Nizamio-Department'), 'd1');
       expect(_only(h, 'POST', '/v1/work-items/w1/assignments').body, {
@@ -328,6 +288,7 @@ void main() {
         expect((await ctl.submitEdit()).kind, WriteKind.done);
         expect(_only(h, 'PATCH', '/v1/work-items/w1').body, {
           'title': 'Yeni ad',
+          'expected_revision': 1,
         });
         expect(_log(h).where((l) => l.contains('assignments')), isEmpty);
       },
@@ -373,6 +334,7 @@ void main() {
       expect((await ctl.setPriority(TaskPriority.high)).ok, isTrue);
       expect(_only(h, 'PATCH', '/v1/work-items/w1').body, {
         'priority': 'yuksek',
+        'expected_revision': 1,
       });
       expect(_log(h).where((l) => l == 'GET /v1/work-items/w1'), hasLength(1));
       expect(_log(h), isNot(contains('GET /v1/program/work-items')));
@@ -849,6 +811,8 @@ void main() {
       (403, 'work.not_authorized'),
       (409, 'platform.conflict_retry'),
     ]) {
+      // conflict_retry (F60, ADR-0027): aynı anahtarla tek otomatik tekrar; sonra tekrar yok.
+      final sends = code == 'platform.conflict_retry' ? 2 : 1;
       test(
         'yeni görev $status → katalog + rol olguları okunur, tekrar yok',
         () async {
@@ -863,7 +827,7 @@ void main() {
           final f = c.read(newTaskFormControllerProvider);
           expect(f.failure!.code, code);
           expect(f.title, 'X', reason: 'taslak korunur');
-          expect(h.backend.count('POST', '/v1/work-items'), 1);
+          expect(h.backend.count('POST', '/v1/work-items'), sends);
           final log = _log(h);
           expect(
             log.indexOf('GET /v1/me'),
@@ -908,6 +872,7 @@ void main() {
         expect(log.first, 'PATCH /v1/work-items/w1');
         expect((_only(h, 'PATCH', '/v1/work-items/w1').body! as Map).keys, [
           'end_on',
+          'expected_dates_revision',
         ]);
         expect(log, contains('GET /v1/program/work-items'));
         expect(log, contains('GET /v1/work-items/w1'));

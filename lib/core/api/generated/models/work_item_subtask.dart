@@ -28,6 +28,9 @@ abstract class WorkItemSubtask with _$WorkItemSubtask {
 
     /// Oluşturanın görünen adı; ad çözülemezse (geçici okuma hatası dahil) `null`.
     @JsonKey(name: 'created_by_full_name') required String? createdByFullName,
+
+    /// Yönetim alanlarının (başlık, atanan, tarihler) düzenleme sürümü (ADR-0027); kapatma/açma artırmaz, atama kaldırma ve ekip devrinin atanan boşaltması artırır.
+    @JsonKey(name: 'edit_revision') required int editRevision,
     @JsonKey(name: 'assignee_account_id') String? assigneeAccountId,
     @DateOnlyConverter() @JsonKey(name: 'start_on') DateTime? startOn,
     @DateOnlyConverter() @JsonKey(name: 'end_on') DateTime? endOn,

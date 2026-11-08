@@ -17,7 +17,8 @@ T _$identity<T>(T value) => value;
 mixin _$MeetingNote {
 
 @JsonKey(name: 'note_id') String get noteId;@JsonKey(name: 'meeting_id') String get meetingId;@JsonKey(name: 'author_account_id') String? get authorAccountId;@JsonKey(name: 'author_name') String get authorName;/// Yazarın rol kopyası; eski notlarda boş (null) olabilir.
-@JsonKey(name: 'author_role') MeetingNoteAuthorRole? get authorRole; String get content;@JsonKey(name: 'converted_to_work_item_id') String? get convertedToWorkItemId;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'updated_at') DateTime get updatedAt;
+@JsonKey(name: 'author_role') MeetingNoteAuthorRole? get authorRole; String get content;@JsonKey(name: 'converted_to_work_item_id') String? get convertedToWorkItemId;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'updated_at') DateTime get updatedAt;/// Not içeriğinin düzenleme sürümü (ADR-0027); dönüşüm işareti ve silme artırmaz.
+@JsonKey(name: 'edit_revision') int get editRevision;
 /// Create a copy of MeetingNote
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,20 +32,20 @@ $MeetingNoteCopyWith<MeetingNote> get copyWith => _$MeetingNoteCopyWithImpl<Meet
 @override
 bool operator ==(Object other) {
   final _this = this as MeetingNote;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MeetingNote&&(identical(other.noteId, _this.noteId) || other.noteId == _this.noteId)&&(identical(other.meetingId, _this.meetingId) || other.meetingId == _this.meetingId)&&(identical(other.authorAccountId, _this.authorAccountId) || other.authorAccountId == _this.authorAccountId)&&(identical(other.authorName, _this.authorName) || other.authorName == _this.authorName)&&(identical(other.authorRole, _this.authorRole) || other.authorRole == _this.authorRole)&&(identical(other.content, _this.content) || other.content == _this.content)&&(identical(other.convertedToWorkItemId, _this.convertedToWorkItemId) || other.convertedToWorkItemId == _this.convertedToWorkItemId)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MeetingNote&&(identical(other.noteId, _this.noteId) || other.noteId == _this.noteId)&&(identical(other.meetingId, _this.meetingId) || other.meetingId == _this.meetingId)&&(identical(other.authorAccountId, _this.authorAccountId) || other.authorAccountId == _this.authorAccountId)&&(identical(other.authorName, _this.authorName) || other.authorName == _this.authorName)&&(identical(other.authorRole, _this.authorRole) || other.authorRole == _this.authorRole)&&(identical(other.content, _this.content) || other.content == _this.content)&&(identical(other.convertedToWorkItemId, _this.convertedToWorkItemId) || other.convertedToWorkItemId == _this.convertedToWorkItemId)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.editRevision, _this.editRevision) || other.editRevision == _this.editRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MeetingNote;
-  return Object.hash(runtimeType,_this.noteId,_this.meetingId,_this.authorAccountId,_this.authorName,_this.authorRole,_this.content,_this.convertedToWorkItemId,_this.createdAt,_this.updatedAt);
+  return Object.hash(runtimeType,_this.noteId,_this.meetingId,_this.authorAccountId,_this.authorName,_this.authorRole,_this.content,_this.convertedToWorkItemId,_this.createdAt,_this.updatedAt,_this.editRevision);
 }
 
 @override
 String toString() {
   final _this = this as MeetingNote;
-  return 'MeetingNote(noteId: ${_this.noteId}, meetingId: ${_this.meetingId}, authorAccountId: ${_this.authorAccountId}, authorName: ${_this.authorName}, authorRole: ${_this.authorRole}, content: ${_this.content}, convertedToWorkItemId: ${_this.convertedToWorkItemId}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt})';
+  return 'MeetingNote(noteId: ${_this.noteId}, meetingId: ${_this.meetingId}, authorAccountId: ${_this.authorAccountId}, authorName: ${_this.authorName}, authorRole: ${_this.authorRole}, content: ${_this.content}, convertedToWorkItemId: ${_this.convertedToWorkItemId}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, editRevision: ${_this.editRevision})';
 }
 
 
@@ -55,7 +56,7 @@ abstract mixin class $MeetingNoteCopyWith<$Res>  {
   factory $MeetingNoteCopyWith(MeetingNote value, $Res Function(MeetingNote) _then) = _$MeetingNoteCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'note_id') String noteId,@JsonKey(name: 'meeting_id') String meetingId,@JsonKey(name: 'author_account_id') String? authorAccountId,@JsonKey(name: 'author_name') String authorName,@JsonKey(name: 'author_role') MeetingNoteAuthorRole? authorRole, String content,@JsonKey(name: 'converted_to_work_item_id') String? convertedToWorkItemId,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt
+@JsonKey(name: 'note_id') String noteId,@JsonKey(name: 'meeting_id') String meetingId,@JsonKey(name: 'author_account_id') String? authorAccountId,@JsonKey(name: 'author_name') String authorName,@JsonKey(name: 'author_role') MeetingNoteAuthorRole? authorRole, String content,@JsonKey(name: 'converted_to_work_item_id') String? convertedToWorkItemId,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt,@JsonKey(name: 'edit_revision') int editRevision
 });
 
 
@@ -72,7 +73,7 @@ class _$MeetingNoteCopyWithImpl<$Res>
 
 /// Create a copy of MeetingNote
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? noteId = null,Object? meetingId = null,Object? authorAccountId = freezed,Object? authorName = null,Object? authorRole = freezed,Object? content = null,Object? convertedToWorkItemId = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? noteId = null,Object? meetingId = null,Object? authorAccountId = freezed,Object? authorName = null,Object? authorRole = freezed,Object? content = null,Object? convertedToWorkItemId = freezed,Object? createdAt = null,Object? updatedAt = null,Object? editRevision = null,}) {
   return _then(MeetingNote(
 noteId: null == noteId ? _self.noteId : noteId // ignore: cast_nullable_to_non_nullable
 as String,meetingId: null == meetingId ? _self.meetingId : meetingId // ignore: cast_nullable_to_non_nullable
@@ -83,7 +84,8 @@ as MeetingNoteAuthorRole?,content: null == content ? _self.content : content // 
 as String,convertedToWorkItemId: freezed == convertedToWorkItemId ? _self.convertedToWorkItemId : convertedToWorkItemId // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,editRevision: null == editRevision ? _self.editRevision : editRevision // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -168,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'note_id')  String noteId, @JsonKey(name: 'meeting_id')  String meetingId, @JsonKey(name: 'author_account_id')  String? authorAccountId, @JsonKey(name: 'author_name')  String authorName, @JsonKey(name: 'author_role')  MeetingNoteAuthorRole? authorRole,  String content, @JsonKey(name: 'converted_to_work_item_id')  String? convertedToWorkItemId, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'note_id')  String noteId, @JsonKey(name: 'meeting_id')  String meetingId, @JsonKey(name: 'author_account_id')  String? authorAccountId, @JsonKey(name: 'author_name')  String authorName, @JsonKey(name: 'author_role')  MeetingNoteAuthorRole? authorRole,  String content, @JsonKey(name: 'converted_to_work_item_id')  String? convertedToWorkItemId, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt, @JsonKey(name: 'edit_revision')  int editRevision)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MeetingNote() when $default != null:
-return $default(_that.noteId,_that.meetingId,_that.authorAccountId,_that.authorName,_that.authorRole,_that.content,_that.convertedToWorkItemId,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.noteId,_that.meetingId,_that.authorAccountId,_that.authorName,_that.authorRole,_that.content,_that.convertedToWorkItemId,_that.createdAt,_that.updatedAt,_that.editRevision);case _:
   return orElse();
 
 }
@@ -189,10 +191,10 @@ return $default(_that.noteId,_that.meetingId,_that.authorAccountId,_that.authorN
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'note_id')  String noteId, @JsonKey(name: 'meeting_id')  String meetingId, @JsonKey(name: 'author_account_id')  String? authorAccountId, @JsonKey(name: 'author_name')  String authorName, @JsonKey(name: 'author_role')  MeetingNoteAuthorRole? authorRole,  String content, @JsonKey(name: 'converted_to_work_item_id')  String? convertedToWorkItemId, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'note_id')  String noteId, @JsonKey(name: 'meeting_id')  String meetingId, @JsonKey(name: 'author_account_id')  String? authorAccountId, @JsonKey(name: 'author_name')  String authorName, @JsonKey(name: 'author_role')  MeetingNoteAuthorRole? authorRole,  String content, @JsonKey(name: 'converted_to_work_item_id')  String? convertedToWorkItemId, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt, @JsonKey(name: 'edit_revision')  int editRevision)  $default,) {final _that = this;
 switch (_that) {
 case _MeetingNote():
-return $default(_that.noteId,_that.meetingId,_that.authorAccountId,_that.authorName,_that.authorRole,_that.content,_that.convertedToWorkItemId,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.noteId,_that.meetingId,_that.authorAccountId,_that.authorName,_that.authorRole,_that.content,_that.convertedToWorkItemId,_that.createdAt,_that.updatedAt,_that.editRevision);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -209,10 +211,10 @@ return $default(_that.noteId,_that.meetingId,_that.authorAccountId,_that.authorN
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'note_id')  String noteId, @JsonKey(name: 'meeting_id')  String meetingId, @JsonKey(name: 'author_account_id')  String? authorAccountId, @JsonKey(name: 'author_name')  String authorName, @JsonKey(name: 'author_role')  MeetingNoteAuthorRole? authorRole,  String content, @JsonKey(name: 'converted_to_work_item_id')  String? convertedToWorkItemId, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'note_id')  String noteId, @JsonKey(name: 'meeting_id')  String meetingId, @JsonKey(name: 'author_account_id')  String? authorAccountId, @JsonKey(name: 'author_name')  String authorName, @JsonKey(name: 'author_role')  MeetingNoteAuthorRole? authorRole,  String content, @JsonKey(name: 'converted_to_work_item_id')  String? convertedToWorkItemId, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt, @JsonKey(name: 'edit_revision')  int editRevision)?  $default,) {final _that = this;
 switch (_that) {
 case _MeetingNote() when $default != null:
-return $default(_that.noteId,_that.meetingId,_that.authorAccountId,_that.authorName,_that.authorRole,_that.content,_that.convertedToWorkItemId,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.noteId,_that.meetingId,_that.authorAccountId,_that.authorName,_that.authorRole,_that.content,_that.convertedToWorkItemId,_that.createdAt,_that.updatedAt,_that.editRevision);case _:
   return null;
 
 }
@@ -224,7 +226,7 @@ return $default(_that.noteId,_that.meetingId,_that.authorAccountId,_that.authorN
 @JsonSerializable()
 
 class _MeetingNote implements MeetingNote {
-  const _MeetingNote({@JsonKey(name: 'note_id') required this.noteId, @JsonKey(name: 'meeting_id') required this.meetingId, @JsonKey(name: 'author_account_id') required this.authorAccountId, @JsonKey(name: 'author_name') required this.authorName, @JsonKey(name: 'author_role') required this.authorRole, required this.content, @JsonKey(name: 'converted_to_work_item_id') required this.convertedToWorkItemId, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'updated_at') required this.updatedAt});
+  const _MeetingNote({@JsonKey(name: 'note_id') required this.noteId, @JsonKey(name: 'meeting_id') required this.meetingId, @JsonKey(name: 'author_account_id') required this.authorAccountId, @JsonKey(name: 'author_name') required this.authorName, @JsonKey(name: 'author_role') required this.authorRole, required this.content, @JsonKey(name: 'converted_to_work_item_id') required this.convertedToWorkItemId, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'updated_at') required this.updatedAt, @JsonKey(name: 'edit_revision') required this.editRevision});
   factory _MeetingNote.fromJson(Map<String, dynamic> json) => _$MeetingNoteFromJson(json);
 
 @override@JsonKey(name: 'note_id') final  String noteId;
@@ -237,6 +239,8 @@ class _MeetingNote implements MeetingNote {
 @override@JsonKey(name: 'converted_to_work_item_id') final  String? convertedToWorkItemId;
 @override@JsonKey(name: 'created_at') final  DateTime createdAt;
 @override@JsonKey(name: 'updated_at') final  DateTime updatedAt;
+/// Not içeriğinin düzenleme sürümü (ADR-0027); dönüşüm işareti ve silme artırmaz.
+@override@JsonKey(name: 'edit_revision') final  int editRevision;
 
 /// Create a copy of MeetingNote
 /// with the given fields replaced by the non-null parameter values.
@@ -251,18 +255,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MeetingNote&&(identical(other.noteId, noteId) || other.noteId == noteId)&&(identical(other.meetingId, meetingId) || other.meetingId == meetingId)&&(identical(other.authorAccountId, authorAccountId) || other.authorAccountId == authorAccountId)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.authorRole, authorRole) || other.authorRole == authorRole)&&(identical(other.content, content) || other.content == content)&&(identical(other.convertedToWorkItemId, convertedToWorkItemId) || other.convertedToWorkItemId == convertedToWorkItemId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MeetingNote&&(identical(other.noteId, noteId) || other.noteId == noteId)&&(identical(other.meetingId, meetingId) || other.meetingId == meetingId)&&(identical(other.authorAccountId, authorAccountId) || other.authorAccountId == authorAccountId)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.authorRole, authorRole) || other.authorRole == authorRole)&&(identical(other.content, content) || other.content == content)&&(identical(other.convertedToWorkItemId, convertedToWorkItemId) || other.convertedToWorkItemId == convertedToWorkItemId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.editRevision, editRevision) || other.editRevision == editRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,noteId,meetingId,authorAccountId,authorName,authorRole,content,convertedToWorkItemId,createdAt,updatedAt);
+    return Object.hash(runtimeType,noteId,meetingId,authorAccountId,authorName,authorRole,content,convertedToWorkItemId,createdAt,updatedAt,editRevision);
 }
 
 @override
 String toString() {
-    return 'MeetingNote(noteId: $noteId, meetingId: $meetingId, authorAccountId: $authorAccountId, authorName: $authorName, authorRole: $authorRole, content: $content, convertedToWorkItemId: $convertedToWorkItemId, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'MeetingNote(noteId: $noteId, meetingId: $meetingId, authorAccountId: $authorAccountId, authorName: $authorName, authorRole: $authorRole, content: $content, convertedToWorkItemId: $convertedToWorkItemId, createdAt: $createdAt, updatedAt: $updatedAt, editRevision: $editRevision)';
 }
 
 
@@ -273,7 +277,7 @@ abstract mixin class _$MeetingNoteCopyWith<$Res> implements $MeetingNoteCopyWith
   factory _$MeetingNoteCopyWith(_MeetingNote value, $Res Function(_MeetingNote) _then) = __$MeetingNoteCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'note_id') String noteId,@JsonKey(name: 'meeting_id') String meetingId,@JsonKey(name: 'author_account_id') String? authorAccountId,@JsonKey(name: 'author_name') String authorName,@JsonKey(name: 'author_role') MeetingNoteAuthorRole? authorRole, String content,@JsonKey(name: 'converted_to_work_item_id') String? convertedToWorkItemId,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt
+@JsonKey(name: 'note_id') String noteId,@JsonKey(name: 'meeting_id') String meetingId,@JsonKey(name: 'author_account_id') String? authorAccountId,@JsonKey(name: 'author_name') String authorName,@JsonKey(name: 'author_role') MeetingNoteAuthorRole? authorRole, String content,@JsonKey(name: 'converted_to_work_item_id') String? convertedToWorkItemId,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt,@JsonKey(name: 'edit_revision') int editRevision
 });
 
 
@@ -290,7 +294,7 @@ class __$MeetingNoteCopyWithImpl<$Res>
 
 /// Create a copy of MeetingNote
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? noteId = null,Object? meetingId = null,Object? authorAccountId = freezed,Object? authorName = null,Object? authorRole = freezed,Object? content = null,Object? convertedToWorkItemId = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? noteId = null,Object? meetingId = null,Object? authorAccountId = freezed,Object? authorName = null,Object? authorRole = freezed,Object? content = null,Object? convertedToWorkItemId = freezed,Object? createdAt = null,Object? updatedAt = null,Object? editRevision = null,}) {
   return _then(_MeetingNote(
 noteId: null == noteId ? _self.noteId : noteId // ignore: cast_nullable_to_non_nullable
 as String,meetingId: null == meetingId ? _self.meetingId : meetingId // ignore: cast_nullable_to_non_nullable
@@ -301,7 +305,8 @@ as MeetingNoteAuthorRole?,content: null == content ? _self.content : content // 
 as String,convertedToWorkItemId: freezed == convertedToWorkItemId ? _self.convertedToWorkItemId : convertedToWorkItemId // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,editRevision: null == editRevision ? _self.editRevision : editRevision // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

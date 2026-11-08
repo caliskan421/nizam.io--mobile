@@ -38,6 +38,7 @@ const _subtask = {
   'created_by_account_id': 'u1',
   'created_at': '2026-07-02T08:00:00Z',
   'updated_at': '2026-07-02T08:00:00Z',
+  'edit_revision': 2,
 };
 
 void main() {
@@ -75,19 +76,23 @@ void main() {
       'content': 'x',
       'created_at': '2026-10-03T09:00:00Z',
       'updated_at': '2026-10-03T09:00:00Z',
+      'edit_revision': 1,
     });
-    await ApiTaskWriteRepository(dio).addNote(_task(), 'Not');
+    await ApiTaskWriteRepository(dio)
+        .addNote(_task(), 'Not', requestKey: 'k-0123456789abcdefghij');
     expect('${a.last.method} ${a.last.path}', 'POST /v1/work-items/w1/notes');
     expect(a.sentJson, {'content': 'Not'});
+    expect(a.last.headers['Idempotency-Key'], 'k-0123456789abcdefghij');
     expect(a.last.extra.values, contains('d9'));
 
-    (dio, a) = fakeDio({'status': 'ok'});
-    await ApiTaskWriteRepository(dio).updateNote(_task(), 'n1', 'Yeni');
+    (dio, a) = fakeDio({'status': 'updated', 'edit_revision': 4});
+    await ApiTaskWriteRepository(dio)
+        .updateNote(_task(), 'n1', 'Yeni', expectedRevision: 3);
     expect(
       '${a.last.method} ${a.last.path}',
       'PATCH /v1/work-items/w1/notes/n1',
     );
-    expect(a.sentJson, {'content': 'Yeni'});
+    expect(a.sentJson, {'content': 'Yeni', 'expected_revision': 3});
 
     (dio, a) = fakeDio({'status': 'ok'});
     await ApiTaskWriteRepository(dio).deleteNote(_task(), 'n1');
@@ -102,12 +107,15 @@ void main() {
     'alt görev: oluştur / değiştir (atama kaldırma, tarihler) / sil',
     () async {
       var (dio, a) = fakeDio(_subtask);
-      await ApiTaskWriteRepository(dio).createSubtask(_task(), 'Pompa');
+      await ApiTaskWriteRepository(
+        dio,
+      ).createSubtask(_task(), 'Pompa', requestKey: 'k-0123456789abcdefghij');
       expect(
         '${a.last.method} ${a.last.path}',
         'POST /v1/work-items/w1/subtasks',
       );
       expect(a.sentJson, {'title': 'Pompa'});
+      expect(a.last.headers['Idempotency-Key'], 'k-0123456789abcdefghij');
 
       (dio, a) = fakeDio(_subtask);
       await ApiTaskWriteRepository(dio).updateSubtask(
@@ -117,6 +125,7 @@ void main() {
           assignee: (id: null),
           dates: (start: DateTime(2026, 7, 2), end: DateTime(2026, 7, 9)),
           done: true,
+          expectedRevision: 2,
         ),
       );
       expect(
@@ -128,6 +137,7 @@ void main() {
         'start_on': '2026-07-02',
         'end_on': '2026-07-09',
         'done': true,
+        'expected_revision': 2,
       });
 
       (dio, a) = fakeDio(_subtask);

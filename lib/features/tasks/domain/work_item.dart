@@ -141,10 +141,18 @@ final class TaskPatch {
     this.start,
     this.due,
     this.plannedEnd,
+    this.expectedRevision,
+    this.expectedDatesRevision,
   });
 
   final String? title;
   final String? description;
+
+  /// Okunan `edit_revision` (başlık/açıklama/öncelik verilince zorunlu, ADR-0027).
+  final int? expectedRevision;
+
+  /// Okunan `dates_revision` (başlangıç/bitiş/planlanan bitiş verilince zorunlu).
+  final int? expectedDatesRevision;
 
   /// [TaskPriority.unknown] gönderilemez.
   final TaskPriority? priority;

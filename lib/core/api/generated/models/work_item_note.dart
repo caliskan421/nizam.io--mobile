@@ -19,6 +19,9 @@ abstract class WorkItemNote with _$WorkItemNote {
     required String content,
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'updated_at') required DateTime updatedAt,
+
+    /// Not içeriğinin düzenleme sürümü (ADR-0027).
+    @JsonKey(name: 'edit_revision') required int editRevision,
   }) = _WorkItemNote;
 
   factory WorkItemNote.fromJson(Map<String, Object?> json) =>

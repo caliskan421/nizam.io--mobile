@@ -29,6 +29,8 @@ _UpdateWorkItemRequest _$UpdateWorkItemRequestFromJson(
   completionEvidenceRequired: json['completion_evidence_required'] as bool?,
   completedOn: json['completed_on'] as String?,
   submittedOn: json['submitted_on'] as String?,
+  expectedRevision: (json['expected_revision'] as num?)?.toInt(),
+  expectedDatesRevision: (json['expected_dates_revision'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$UpdateWorkItemRequestToJson(
@@ -52,6 +54,8 @@ Map<String, dynamic> _$UpdateWorkItemRequestToJson(
   'completion_evidence_required': ?instance.completionEvidenceRequired,
   'completed_on': ?instance.completedOn,
   'submitted_on': ?instance.submittedOn,
+  'expected_revision': ?instance.expectedRevision,
+  'expected_dates_revision': ?instance.expectedDatesRevision,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

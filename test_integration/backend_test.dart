@@ -314,7 +314,10 @@ void main() {
     _webToken = webToken;
   });
 
-  test('kontrol: aynı belirteçle yeniden denemek hesabın BÜTÜN oturumlarını düşürür (K-05 gerekçesi)', () async {
+  // v0.11 (ADR-0028): tekrar kullanım yalnız belirtecin SOYUNU düşürür (önceden hesabın bütün
+  // oturumları, TB-16). K-05 istemci kuralı (aynı belirteçle tekrar yok) geçerli: tekrar
+  // kullanılan belirteç reddedilir ve kendi soyunu öldürür; başka cihazın oturumu düşmez.
+  test('kontrol: aynı belirteçle yeniden deneme reddedilir; yalnız soyu düşer (ADR-0028)', () async {
     expect(_lostRefreshToken, isNotNull);
     expect(await meStatus(backend, _webToken!), 200);
     final reuse = await rawRequest(
@@ -329,8 +332,8 @@ void main() {
     expect(reuse.status, 401);
     expect(
       await meStatus(backend, _webToken!),
-      401,
-      reason: 'tekrar kullanım (TB-16) web oturumunu da düşürdü — istemci kuralı bu yüzden var',
+      200,
+      reason: 'soy iptali başka soydaki web oturumunu düşürmez (ADR-0028)',
     );
     // Hesap kilitlenmez; sonraki koşumlar için giriş hâlâ mümkün.
     expect(

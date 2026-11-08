@@ -164,10 +164,12 @@ abstract final class RecordsDownloadTargets {
 abstract interface class RecordsRepository implements ArchiveRepository {
   /// Göreve dosya yükler (multipart; [filePath] yerel dosya yolu). [tag] [RecordTag.unknown]
   /// olamaz. Uzantı izinli kümede değilse istek gönderilmez (`records.content_rejected`).
+  /// [requestKey] işlem anahtarı (`Idempotency-Key`, ADR-0027).
   Future<RecordFile> attachFile({
     required String workItemId,
     required RecordTag tag,
     required String filePath,
+    required String requestKey,
   });
 
   /// Görevin dosyaları (tek zarf; imleç yok).

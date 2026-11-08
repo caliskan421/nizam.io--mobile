@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
-import 'package:nizamio/features/tasks/application/task_catalog_controller.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 import 'package:nizamio/features/timeline/application/horizontal_timeline_controller.dart';
 import 'package:nizamio/features/timeline/domain/horizontal_timeline.dart';

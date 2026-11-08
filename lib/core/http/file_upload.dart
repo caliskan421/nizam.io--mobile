@@ -19,6 +19,7 @@ Future<Object?> postWorkItemFile(
   required String filePath,
   required String filename,
   required String contentType,
+  required String requestKey,
   String? subtaskId,
   Map<String, dynamic>? extras,
 }) async {
@@ -39,6 +40,8 @@ Future<Object?> postWorkItemFile(
     data: form,
     options: Options(
       contentType: 'multipart/form-data',
+      // İşlem anahtarı (ADR-0027): aynı yüklemenin tekrarı aynı anahtarla gider.
+      headers: {'Idempotency-Key': requestKey},
       extra: extras ?? RecordsClient.attachFileOpenapiExtras,
     ),
   );

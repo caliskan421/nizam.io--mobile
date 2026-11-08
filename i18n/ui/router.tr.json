@@ -21,8 +21,8 @@
     "ui.router.tab_archive": "Arşiv",
     "ui.router.tab_messages": "Mesajlar",
     "ui.router.assistant_soon_tablet": "Asistan tablette sonraki adımda tasarlanacak",
+    "ui.router.all_modules": "Tüm modüller",
     "ui.router.pick_title": "Bir kayıt seç",
-    "ui.router.pick_body": "Soldaki listeden bir kayıt seç, ayrıntısı burada açılır.",
-    "ui.router.all_modules": "Tüm modüller"
+    "ui.router.pick_body": "Soldaki listeden bir kayıt seç, ayrıntısı burada açılır."
   }
 }

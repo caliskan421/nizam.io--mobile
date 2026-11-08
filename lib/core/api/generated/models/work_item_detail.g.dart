@@ -40,6 +40,8 @@ _WorkItemDetail _$WorkItemDetailFromJson(Map<String, dynamic> json) =>
       createdAt: DateTime.parse(json['created_at'] as String),
       createdByAccountId: json['created_by_account_id'] as String,
       createdByFullName: json['created_by_full_name'] as String?,
+      editRevision: (json['edit_revision'] as num).toInt(),
+      datesRevision: (json['dates_revision'] as num).toInt(),
       description: json['description'] as String,
       plannedEndOn: _$JsonConverterFromJson<String, DateTime>(
         json['planned_end_on'],
@@ -75,6 +77,8 @@ Map<String, dynamic> _$WorkItemDetailToJson(_WorkItemDetail instance) =>
       'created_at': instance.createdAt.toIso8601String(),
       'created_by_account_id': instance.createdByAccountId,
       'created_by_full_name': ?instance.createdByFullName,
+      'edit_revision': instance.editRevision,
+      'dates_revision': instance.datesRevision,
       'description': instance.description,
       'planned_end_on': ?_$JsonConverterToJson<String, DateTime>(
         instance.plannedEndOn,

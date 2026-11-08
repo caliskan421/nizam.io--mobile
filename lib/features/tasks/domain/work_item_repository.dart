@@ -13,8 +13,8 @@ abstract interface class WorkItemRepository {
   /// `GET /v1/work-items` (imleçli; Ü yalnız atandığını görür — WORK-K24).
   Future<PageSlice<TaskSummary>> list([PageRequest page = const PageRequest()]);
 
-  /// `POST /v1/work-items`.
-  Future<TaskSummary> create(TaskDraft draft);
+  /// `POST /v1/work-items`; [requestKey] işlem anahtarı (`Idempotency-Key`, ADR-0027).
+  Future<TaskSummary> create(TaskDraft draft, {required String requestKey});
 
   /// `PATCH /v1/work-items/{id}`.
   Future<TaskSummary> update(String id, TaskPatch patch);
@@ -85,11 +85,21 @@ abstract interface class WorkItemNoteRepository {
   /// `GET /v1/work-items/{id}/notes` (sayfasız; sunucu `total` bildirir).
   Future<CountedList<TaskNote>> list(String workItemId);
 
-  /// `POST /v1/work-items/{id}/notes`.
-  Future<TaskNote> add(String workItemId, String text);
+  /// `POST /v1/work-items/{id}/notes`; [requestKey] işlem anahtarı (ADR-0027).
+  Future<TaskNote> add(
+    String workItemId,
+    String text, {
+    required String requestKey,
+  });
 
-  /// `PATCH /v1/work-items/{id}/notes/{noteId}`.
-  Future<void> update(String workItemId, String noteId, String text);
+  /// `PATCH /v1/work-items/{id}/notes/{noteId}`; [expectedRevision] notun okunan
+  /// `edit_revision`'ı (ADR-0027).
+  Future<void> update(
+    String workItemId,
+    String noteId,
+    String text, {
+    required int expectedRevision,
+  });
 
   /// `DELETE /v1/work-items/{id}/notes/{noteId}`.
   Future<void> delete(String workItemId, String noteId);

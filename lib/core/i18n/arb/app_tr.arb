@@ -1,6 +1,6 @@
 {
   "@@locale": "tr",
-  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit 9fa47f4fe6369cc48f4caf58c6729f1ec1cd8b7c src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.9.0-api (250dd78b8a3bfbf84f3d0c6ddd13dc554f267127); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
+  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit a8e79dd1ae07e19a32d81b69a5cea60546d61039 src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.11.0-api (4d0bbd0605ade5adfc0599e9586944ed8dab7bcb); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
   "errAssistantBusy": "Asistan şu anda meşgul; biraz sonra yeniden deneyin.",
   "@errAssistantBusy": {
     "description": "assistant.busy"
@@ -69,6 +69,14 @@
   "@errCollaborationConferenceWebhookUnauthorized": {
     "description": "collaboration.conference_webhook_unauthorized"
   },
+  "errCollaborationEditConflict": "Not siz düzenlerken başkası tarafından değiştirildi; güncel hâlini görüp yeniden deneyin.",
+  "@errCollaborationEditConflict": {
+    "description": "collaboration.edit_conflict"
+  },
+  "errCollaborationIdempotencyKeyReused": "Bu istek anahtarı farklı bir istekle kullanılmış.",
+  "@errCollaborationIdempotencyKeyReused": {
+    "description": "collaboration.idempotency_key_reused"
+  },
   "errCollaborationInputInvalid": "Girilen bilgiler geçersiz.",
   "@errCollaborationInputInvalid": {
     "description": "collaboration.input_invalid"
@@ -81,14 +89,6 @@
   "@errCollaborationMeetingNotFound": {
     "description": "collaboration.meeting_not_found"
   },
-  "errCollaborationMessageNotFound": "Mesaj bulunamadı.",
-  "@errCollaborationMessageNotFound": {
-    "description": "collaboration.message_not_found"
-  },
-  "errCollaborationMessageUnread": "Mesaj henüz okunmadı.",
-  "@errCollaborationMessageUnread": {
-    "description": "collaboration.message_unread"
-  },
   "errCollaborationNotAuthorized": "Bu işlem için yetkiniz yok.",
   "@errCollaborationNotAuthorized": {
     "description": "collaboration.not_authorized"
@@ -100,6 +100,10 @@
   "errCollaborationNoteConverted": "Not zaten göreve dönüştürüldü.",
   "@errCollaborationNoteConverted": {
     "description": "collaboration.note_converted"
+  },
+  "errCollaborationNoteDeleted": "Not silinmiş; işlem yapılamaz.",
+  "@errCollaborationNoteDeleted": {
+    "description": "collaboration.note_deleted"
   },
   "errCollaborationNoteImmutable": "Bu not artık değiştirilemez.",
   "@errCollaborationNoteImmutable": {
@@ -116,6 +120,22 @@
   "errCollaborationPermanentRequiresDeleted": "Kalıcı silme için kayıt önce silinmiş olmalı.",
   "@errCollaborationPermanentRequiresDeleted": {
     "description": "collaboration.permanent_requires_deleted"
+  },
+  "errCollaborationRequestKeyInvalid": "İstek anahtarı geçersiz.",
+  "@errCollaborationRequestKeyInvalid": {
+    "description": "collaboration.request_key_invalid"
+  },
+  "errCollaborationRequestKeyRequired": "İstek anahtarı gerekli.",
+  "@errCollaborationRequestKeyRequired": {
+    "description": "collaboration.request_key_required"
+  },
+  "errCollaborationRevisionInvalid": "Düzenleme sürümü geçersiz; kaydı yenileyip yeniden deneyin.",
+  "@errCollaborationRevisionInvalid": {
+    "description": "collaboration.revision_invalid"
+  },
+  "errCollaborationRevisionRequired": "Düzenleme sürümü gerekli; uygulamayı güncelleyin.",
+  "@errCollaborationRevisionRequired": {
+    "description": "collaboration.revision_required"
   },
   "errCollaborationScopeInvalid": "Seçili kapsam bu işlem için geçersiz.",
   "@errCollaborationScopeInvalid": {
@@ -232,6 +252,90 @@
   "errIdentityWeakPassword": "Parola yeterince güçlü değil.",
   "@errIdentityWeakPassword": {
     "description": "identity.weak_password"
+  },
+  "errMessagingChatDeleted": "Sohbet silinmiş; işlem yapılamaz.",
+  "@errMessagingChatDeleted": {
+    "description": "messaging.chat_deleted"
+  },
+  "errMessagingChatNotFound": "Sohbet bulunamadı.",
+  "@errMessagingChatNotFound": {
+    "description": "messaging.chat_not_found"
+  },
+  "errMessagingEditConflict": "Mesaj siz düzenlerken değiştirildi; güncel hâlini görüp yeniden deneyin.",
+  "@errMessagingEditConflict": {
+    "description": "messaging.edit_conflict"
+  },
+  "errMessagingFileRejected": "Dosya kabul edilmedi.",
+  "@errMessagingFileRejected": {
+    "description": "messaging.file_rejected"
+  },
+  "errMessagingFileTooLarge": "Dosya çok büyük.",
+  "@errMessagingFileTooLarge": {
+    "description": "messaging.file_too_large"
+  },
+  "errMessagingIdempotencyKeyReused": "Bu istek anahtarı farklı bir istekle kullanılmış.",
+  "@errMessagingIdempotencyKeyReused": {
+    "description": "messaging.idempotency_key_reused"
+  },
+  "errMessagingInputInvalid": "Girilen bilgiler geçersiz.",
+  "@errMessagingInputInvalid": {
+    "description": "messaging.input_invalid"
+  },
+  "errMessagingInvalidCursor": "Liste konumu geçersiz; listeyi yenileyin.",
+  "@errMessagingInvalidCursor": {
+    "description": "messaging.invalid_cursor"
+  },
+  "errMessagingMemberNotFound": "Üye bulunamadı.",
+  "@errMessagingMemberNotFound": {
+    "description": "messaging.member_not_found"
+  },
+  "errMessagingMemberSourceManaged": "Bu üye grubun kaynağından gelir; elle çıkarılamaz.",
+  "@errMessagingMemberSourceManaged": {
+    "description": "messaging.member_source_managed"
+  },
+  "errMessagingMessageDeleted": "Mesaj silinmiş; işlem yapılamaz.",
+  "@errMessagingMessageDeleted": {
+    "description": "messaging.message_deleted"
+  },
+  "errMessagingMessageNotFound": "Mesaj bulunamadı.",
+  "@errMessagingMessageNotFound": {
+    "description": "messaging.message_not_found"
+  },
+  "errMessagingNotAuthorized": "Bu işlem için yetkiniz yok.",
+  "@errMessagingNotAuthorized": {
+    "description": "messaging.not_authorized"
+  },
+  "errMessagingPollClosed": "Anket kapandı.",
+  "@errMessagingPollClosed": {
+    "description": "messaging.poll_closed"
+  },
+  "errMessagingRefNotFound": "Bu öğe artık yok ya da erişiminiz yok.",
+  "@errMessagingRefNotFound": {
+    "description": "messaging.ref_not_found"
+  },
+  "errMessagingRequestKeyInvalid": "İstek anahtarı geçersiz.",
+  "@errMessagingRequestKeyInvalid": {
+    "description": "messaging.request_key_invalid"
+  },
+  "errMessagingRequestKeyRequired": "İstek anahtarı gerekli.",
+  "@errMessagingRequestKeyRequired": {
+    "description": "messaging.request_key_required"
+  },
+  "errMessagingRevisionInvalid": "Düzenleme sürümü geçersiz; mesajı yenileyip yeniden deneyin.",
+  "@errMessagingRevisionInvalid": {
+    "description": "messaging.revision_invalid"
+  },
+  "errMessagingRevisionRequired": "Düzenleme sürümü gerekli; uygulamayı güncelleyin.",
+  "@errMessagingRevisionRequired": {
+    "description": "messaging.revision_required"
+  },
+  "errMessagingScopeInvalid": "Seçili kapsam bu işlem için geçersiz.",
+  "@errMessagingScopeInvalid": {
+    "description": "messaging.scope_invalid"
+  },
+  "errMessagingTaskDeleted": "Görev silinmiş; işlem yapılamaz.",
+  "@errMessagingTaskDeleted": {
+    "description": "messaging.task_deleted"
   },
   "errNotificationsInputInvalid": "Girilen bilgiler geçersiz.",
   "@errNotificationsInputInvalid": {
@@ -557,6 +661,10 @@
   "@errRecordsFileNotFound": {
     "description": "records.file_not_found"
   },
+  "errRecordsIdempotencyKeyReused": "Bu istek anahtarı farklı bir istekle kullanılmış.",
+  "@errRecordsIdempotencyKeyReused": {
+    "description": "records.idempotency_key_reused"
+  },
   "errRecordsInputInvalid": "Girilen bilgiler geçersiz.",
   "@errRecordsInputInvalid": {
     "description": "records.input_invalid"
@@ -584,6 +692,14 @@
   "errRecordsNotAuthorized": "Bu işlem için yetkiniz yok.",
   "@errRecordsNotAuthorized": {
     "description": "records.not_authorized"
+  },
+  "errRecordsRequestKeyInvalid": "İstek anahtarı geçersiz.",
+  "@errRecordsRequestKeyInvalid": {
+    "description": "records.request_key_invalid"
+  },
+  "errRecordsRequestKeyRequired": "İstek anahtarı gerekli.",
+  "@errRecordsRequestKeyRequired": {
+    "description": "records.request_key_required"
   },
   "errRecordsTagInvalid": "Dosya etiketi geçersiz.",
   "@errRecordsTagInvalid": {
@@ -717,9 +833,17 @@
   "@errWorkDependencyNotCompleted": {
     "description": "work.dependency_not_completed"
   },
+  "errWorkEditConflict": "Görev siz düzenlerken başkası tarafından değiştirildi; güncel hâlini görüp yeniden deneyin.",
+  "@errWorkEditConflict": {
+    "description": "work.edit_conflict"
+  },
   "errWorkExtendDaysOutOfRange": "Uzatma gün sayısı izin verilen aralıkta değil.",
   "@errWorkExtendDaysOutOfRange": {
     "description": "work.extend_days_out_of_range"
+  },
+  "errWorkIdempotencyKeyReused": "Bu istek anahtarı farklı bir istekle kullanılmış.",
+  "@errWorkIdempotencyKeyReused": {
+    "description": "work.idempotency_key_reused"
   },
   "errWorkInputInvalid": "Girilen bilgiler geçersiz.",
   "@errWorkInputInvalid": {
@@ -732,6 +856,10 @@
   "errWorkItemCompleted": "Görev zaten tamamlandı.",
   "@errWorkItemCompleted": {
     "description": "work.item_completed"
+  },
+  "errWorkItemDeleted": "Görev silinmiş; işlem yapılamaz.",
+  "@errWorkItemDeleted": {
+    "description": "work.item_deleted"
   },
   "errWorkItemNotCompleted": "Görev henüz tamamlanmadı.",
   "@errWorkItemNotCompleted": {
@@ -777,9 +905,25 @@
   "@errWorkProtectedField": {
     "description": "work.protected_field"
   },
+  "errWorkRequestKeyInvalid": "İstek anahtarı geçersiz.",
+  "@errWorkRequestKeyInvalid": {
+    "description": "work.request_key_invalid"
+  },
+  "errWorkRequestKeyRequired": "İstek anahtarı gerekli.",
+  "@errWorkRequestKeyRequired": {
+    "description": "work.request_key_required"
+  },
   "errWorkRevertReasonRequired": "Geri alma için gerekçe gerekli.",
   "@errWorkRevertReasonRequired": {
     "description": "work.revert_reason_required"
+  },
+  "errWorkRevisionInvalid": "Düzenleme sürümü geçersiz; görevi yenileyip yeniden deneyin.",
+  "@errWorkRevisionInvalid": {
+    "description": "work.revision_invalid"
+  },
+  "errWorkRevisionRequired": "Düzenleme sürümü gerekli; uygulamayı güncelleyin.",
+  "@errWorkRevisionRequired": {
+    "description": "work.revision_required"
   },
   "errWorkStaleCompletion": "Görev başka biri tarafından güncellendi; yenileyip yeniden deneyin.",
   "@errWorkStaleCompletion": {
@@ -833,9 +977,17 @@
   "@errClientNotSignedIn": {
     "description": "client.not_signed_in"
   },
+  "errClientOutcomeUnknown": "Gönderildi mi bilinmiyor. Aynı isteği yeniden deneyin; kayıt iki kez oluşmaz.",
+  "@errClientOutcomeUnknown": {
+    "description": "client.outcome_unknown"
+  },
   "errClientReauthRequired": "Oturum doğrulanamadı. Güvenliğiniz için yeniden giriş yapın.",
   "@errClientReauthRequired": {
     "description": "client.reauth_required"
+  },
+  "errClientRequestNotResent": "İstek tekrar gönderilemedi; işlemi yeniden başlatın.",
+  "@errClientRequestNotResent": {
+    "description": "client.request_not_resent"
   },
   "errClientScopeChanged": "Seçili program veya departman işlem sırasında değişti; kalan adımlar gönderilmedi. Görevi yeniden açıp deneyin.",
   "@errClientScopeChanged": {
@@ -852,6 +1004,10 @@
   "errClientServerNotVerified": "Önce sunucu adresi doğrulanmalı.",
   "@errClientServerNotVerified": {
     "description": "client.server_not_verified"
+  },
+  "errClientServerOutdated": "Sunucu bu uygulama sürümü için güncellenmeli; değişiklik gönderilmedi.",
+  "@errClientServerOutdated": {
+    "description": "client.server_outdated"
   },
   "errClientServerUnrecognized": "Bu adres bir NIZAM.IO sunucusu değil.",
   "@errClientServerUnrecognized": {
@@ -3805,6 +3961,10 @@
   "@uiRouterAssistantSoonTablet": {
     "description": "ui.router.assistant_soon_tablet"
   },
+  "uiRouterAllModules": "Tüm modüller",
+  "@uiRouterAllModules": {
+    "description": "ui.router.all_modules"
+  },
   "uiRouterPickTitle": "Bir kayıt seç",
   "@uiRouterPickTitle": {
     "description": "ui.router.pick_title"
@@ -3812,10 +3972,6 @@
   "uiRouterPickBody": "Soldaki listeden bir kayıt seç, ayrıntısı burada açılır.",
   "@uiRouterPickBody": {
     "description": "ui.router.pick_body"
-  },
-  "uiRouterAllModules": "Tüm modüller",
-  "@uiRouterAllModules": {
-    "description": "ui.router.all_modules"
   },
   "uiScopeTitle": "Program seçimi",
   "@uiScopeTitle": {
@@ -5132,6 +5288,66 @@
   "uiTasksSubCheckBlocked": "Alt görevi atanan kişi ya da departman koordinatörü işaretler; yönetici ekip satırı olmadan işaretleyemez.",
   "@uiTasksSubCheckBlocked": {
     "description": "ui.tasks.sub_check_blocked"
+  },
+  "uiTasksConflictTitle": "Görev siz düzenlerken değişti",
+  "@uiTasksConflictTitle": {
+    "description": "ui.tasks.conflict_title"
+  },
+  "uiTasksConflictDesc": "Aynı alanı başkası da değiştirdi. Her alan için hangi değerin kalacağını seçin; diğer alanlar korunur.",
+  "@uiTasksConflictDesc": {
+    "description": "ui.tasks.conflict_desc"
+  },
+  "uiTasksConflictBase": "Açtığınızda",
+  "@uiTasksConflictBase": {
+    "description": "ui.tasks.conflict_base"
+  },
+  "uiTasksConflictMine": "Sizin değeriniz",
+  "@uiTasksConflictMine": {
+    "description": "ui.tasks.conflict_mine"
+  },
+  "uiTasksConflictServer": "Sunucudaki değer",
+  "@uiTasksConflictServer": {
+    "description": "ui.tasks.conflict_server"
+  },
+  "uiTasksConflictKeepMine": "Benimkini tut",
+  "@uiTasksConflictKeepMine": {
+    "description": "ui.tasks.conflict_keep_mine"
+  },
+  "uiTasksConflictTakeServer": "Sunucudakini al",
+  "@uiTasksConflictTakeServer": {
+    "description": "ui.tasks.conflict_take_server"
+  },
+  "uiTasksConflictPending": "Kaydetmeden önce işaretli alanlar için seçim yapın",
+  "@uiTasksConflictPending": {
+    "description": "ui.tasks.conflict_pending"
+  },
+  "uiTasksTextConflictTitle": "Metin siz düzenlerken değişti",
+  "@uiTasksTextConflictTitle": {
+    "description": "ui.tasks.text_conflict_title"
+  },
+  "uiTasksTextConflictDesc": "Sunucudaki metin sizinkinden farklı. Hangisi kalsın?",
+  "@uiTasksTextConflictDesc": {
+    "description": "ui.tasks.text_conflict_desc"
+  },
+  "uiTasksRetryAfterHead": "Yeniden denemek için",
+  "@uiTasksRetryAfterHead": {
+    "description": "ui.tasks.retry_after_head"
+  },
+  "uiTasksRetryAfterTail": "sn bekleyin",
+  "@uiTasksRetryAfterTail": {
+    "description": "ui.tasks.retry_after_tail"
+  },
+  "uiTasksEmptyValue": "—",
+  "@uiTasksEmptyValue": {
+    "description": "ui.tasks.empty_value"
+  },
+  "uiTasksConflictOn": "Açık",
+  "@uiTasksConflictOn": {
+    "description": "ui.tasks.conflict_on"
+  },
+  "uiTasksConflictOff": "Kapalı",
+  "@uiTasksConflictOff": {
+    "description": "ui.tasks.conflict_off"
   },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {

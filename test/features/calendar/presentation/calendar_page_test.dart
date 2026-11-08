@@ -1,8 +1,8 @@
 // CalendarPage: boş sağ bölme. (Görev örnek kataloğunun "bugün"üne — 21 Ekim — ve görevlerine
 // dayanan sayfa vakaları örnek mod kaldırılınca silindi.)
 //
-// Gerçek bileşim kökü (`Harness`) kullanılır: takvim modülünün bileşime bağlanmış olması
-// (`registerCalendarModule` + `calendarOverrides`) beklenir.
+// Gerçek bileşim kökü (`Harness`) kullanılır; takvim ayrı bir modül kaydı taşımaz, sayfa
+// görev/toplantı modüllerinin bileşime bağlı olmasına dayanır.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';

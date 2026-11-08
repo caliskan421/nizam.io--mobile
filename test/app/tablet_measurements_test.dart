@@ -1,10 +1,8 @@
-// Tablet ölçüm sözleşmesi, host (cihazsız) widget testi. Kanonik yüzey 1180×820 (prototip
-// artboard, dpr 1); `screen_matrix.dart` büyütülmez. Beklentiler `tablet_harness.dart`'taki
-// HTML literal sözleşmesidir (ray 100 · liste 390 + 1 kenar · sağ kalan; TB_DEF varsayılanları;
-// merkezi modal 560). Gerçek `NizamioApp` + gerçek bileşim kökü + sahte HTTP; backend yok.
-//
-// Henüz uygulanmamış özellikler (takvim, yatay Gantt, merkezi modal…) testi KIRMIZI bırakır;
-// atlanmaz. Cihaz görüntüleri bu dosyanın işi değildir: `integration_test/tablet_visual_test.dart`.
+// Tablet gezinme/durum sözleşmesi, host (cihazsız) widget testi: değişmezler (kaynak gezinme
+// ve taslak kuralları) ve ölçüye göre bölme kararı (yön değil genişlik). Gerçek `NizamioApp` +
+// gerçek bileşim kökü + sahte HTTP; backend yok. Piksel geometrisi ve tema sahneleri burada
+// sınanmaz (test kapsamı: yerleşim ölçüsü test edilmez); sahneler cihaz görüntüsü için
+// `integration_test/tablet_visual_test.dart`'ta koşar.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,42 +12,6 @@ import '../support/tablet_harness.dart';
 
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
-
-  group('kanonik 1180×820: sahneler (koyu)', () {
-    for (final scene in tabletScenes) {
-      testWidgets(scene.name, (tester) async {
-        final s = await TabletSession.launch(
-          tester,
-          hostSize: tabletReferenceSize,
-        );
-        if (scene.needsSignIn) await s.signIn();
-        await scene.run(s);
-        final m = s.measurements(scene.name);
-        expect(
-          (m['logicalSize']! as Map)['w'],
-          tabletReferenceSize.width,
-          reason: 'host yüzeyi prototip artboard',
-        );
-      });
-    }
-  });
-
-  group('kanonik 1180×820: açık tema', () {
-    for (final scene in tabletScenes.where(
-      (s) => const {'home', 'tasks', 'task-create', 'drawer'}.contains(s.name),
-    )) {
-      testWidgets('${scene.name}-light', (tester) async {
-        final s = await TabletSession.launch(
-          tester,
-          hostSize: tabletReferenceSize,
-          theme: ThemeMode.light,
-        );
-        await s.signIn();
-        await scene.run(s);
-        expect(s.measurements(scene.name)['theme'], 'light');
-      });
-    }
-  });
 
   group('değişmezler 1180×820 (kaynak gezinme/durum kuralları)', () {
     for (final scene in tabletInvariantScenes) {

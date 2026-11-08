@@ -103,7 +103,8 @@ abstract final class NzBottomSheet {
                         _scrimIn / _sheetIn,
                         curve: Curves.ease,
                       ),
-                      reverseCurve: Curves.ease,
+                      // Kaynak `rpFadeOut` ileri yönde `ease`; geri yönde çevrilmiş okunur.
+                      reverseCurve: Curves.ease.flipped,
                     ),
                     child: ColoredBox(color: c.scrim),
                   ),
@@ -119,7 +120,7 @@ abstract final class NzBottomSheet {
                       CurvedAnimation(
                         parent: animation,
                         curve: NizamioMotion.easeSheet,
-                        reverseCurve: NizamioMotion.easeExit,
+                        reverseCurve: NzMotion.exitReverse,
                       ),
                     ),
                 child: Dialog(
@@ -168,7 +169,7 @@ abstract final class NzBottomSheet {
         duration: NzMotion.of(context, NizamioMotion.durSheet),
         reverseDuration: NzMotion.of(context, NizamioMotion.durExit),
         curve: NizamioMotion.easeSheet,
-        reverseCurve: NizamioMotion.easeExit,
+        reverseCurve: NzMotion.exitReverse,
       ),
       builder: (sheetContext) => content(sheetContext, modal: false),
     );

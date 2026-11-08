@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../../theme/generated/tokens.gen.dart';
+
 /// Süreler genel bileşenlerde `NizamioMotion`, sayfalarda [RpMotion] üzerinden gelir.
 /// Sistemde "hareketi azalt" açıksa süre sıfırlanır.
 abstract final class NzMotion {
@@ -9,6 +11,12 @@ abstract final class NzMotion {
   /// [duration] ya da azaltılmış harekette [Duration.zero].
   static Duration of(BuildContext context, Duration duration) =>
       reduced(context) ? Duration.zero : duration;
+
+  /// Kapanış eğrisi (`easeExit`) için `reverseCurve`. Tasarımda kapanış ileri yönde oynayan
+  /// ayrı bir animasyondur (`m-sheet-down .24s ease-exit`: yavaş başlar, hızlanarak çıkar).
+  /// Flutter `reverseCurve`'ü ise geri yönde (t: 1 → 0) okur; eğri çevrilmezse hareket en
+  /// hızlı noktasından başlar ve katman ekrandan birden fırlar.
+  static const Curve exitReverse = FlippedCurve(NizamioMotion.easeExit);
 }
 
 /// Sayfa, içerik ve sekme hareketlerinin tek değer kaynağı.

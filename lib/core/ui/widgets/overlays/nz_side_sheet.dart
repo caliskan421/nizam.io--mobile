@@ -32,7 +32,7 @@ abstract final class NzSideSheet {
             CurvedAnimation(
               parent: animation,
               curve: NizamioMotion.easeSheet,
-              reverseCurve: NizamioMotion.easeExit,
+              reverseCurve: NzMotion.exitReverse,
             ),
           ),
           child: child,

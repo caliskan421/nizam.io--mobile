@@ -58,10 +58,12 @@ class _MeetingNotesState extends ConsumerState<MeetingNotes> {
   Future<void> _add() async {
     // Uçuş kilidi denetleyicide (sekme değişince sıfırlanmaz).
     if (_draft.text.trim().isEmpty || widget.room.noteSubmitting) return;
-    final ok = await widget.actions.addNote(_draft.text);
+    final sent = _draft.text;
+    final ok = await widget.actions.addNote(sent);
     if (!mounted) return;
     if (ok) {
-      _draft.clear();
+      // Alan uçuşta düzenlenebilir: yalnız gönderilen metin hâlâ duruyorsa temizlenir.
+      if (_draft.text == sent) _draft.clear();
       ref
           .read(
             meetingDetailViewControllerProvider(widget.room.meeting.id)

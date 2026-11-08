@@ -1,5 +1,7 @@
 // Toplantı listesi ve ayrıntısı: dar ekran × 2.0 metin taşma yok (bütün sekme ve bölümler),
 // kart dokunuşu ayrıntıyı kimlikle açar, yönetici olmayana Silinenler sekmesi çıkmaz.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -87,6 +89,53 @@ void main() {
       },
     );
   }
+
+  testWidgets('not: uçuşta yazılan yeni metin geç gelen başarıyla silinmez', (
+    tester,
+  ) async {
+    _screen(tester, 390, 1);
+    final s = _server();
+    final (h, _) = await real(tester, () => openMeetings(s));
+    await pumpScreen(tester, h, const MeetingPage(id: 'm1'));
+    await settle(tester);
+    await _tap(tester, find.textContaining(_l.uiMeetingsTabNotes));
+    final field = find.byWidgetPredicate(
+      (w) => w is TextField && w.decoration?.hintText == _l.uiMeetingsNoteHint,
+    );
+    await tester.enterText(field, 'Birinci not');
+    await tester.pump();
+    s.hold = Completer();
+    await _tap(tester, find.text(_l.uiMeetingsAdd));
+    // Uçuşta alan kilitli değil: kullanıcı ikinci notu yazmaya başlar.
+    await tester.enterText(field, 'İkinci not taslağı');
+    await tester.pump();
+    s.hold!.complete();
+    await settle(tester);
+    expect(
+      tester.widget<TextField>(field).controller!.text,
+      'İkinci not taslağı',
+      reason: 'A başarısı B taslağını silmez',
+    );
+    expect(find.textContaining('Birinci not'), findsWidgets);
+  });
+
+  testWidgets('not: alan değişmediyse başarıda taslak temizlenir', (
+    tester,
+  ) async {
+    _screen(tester, 390, 1);
+    final (h, _) = await real(tester, () => openMeetings(_server()));
+    await pumpScreen(tester, h, const MeetingPage(id: 'm1'));
+    await settle(tester);
+    await _tap(tester, find.textContaining(_l.uiMeetingsTabNotes));
+    final field = find.byWidgetPredicate(
+      (w) => w is TextField && w.decoration?.hintText == _l.uiMeetingsNoteHint,
+    );
+    await tester.enterText(field, 'Tek not');
+    await tester.pump();
+    await _tap(tester, find.text(_l.uiMeetingsAdd));
+    await settle(tester);
+    expect(tester.widget<TextField>(field).controller!.text, isEmpty);
+  });
 
   testWidgets('yönetici olmayana Silinenler sekmesi yok', (tester) async {
     _screen(tester, 390, 1);

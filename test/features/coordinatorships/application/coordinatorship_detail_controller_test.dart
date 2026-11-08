@@ -1,13 +1,15 @@
 // CoordinatorshipDetailController: bölüm ve görev süzgeci durumu (kod başına); ayrıntı türetimi
-// (katalog + ek bilgiler), bilinmeyen kod null.
+// (sunucu kataloğu + ek bilgiler), bilinmeyen kimlik null.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorship_detail_controller.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorship_profiles_controller.dart';
 import 'package:nizamio/features/coordinatorships/domain/coordinatorship_board.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../pilot_support.dart';
+import '../coord_backend.dart';
 
 /// Kaynaklar (katalog + ek bilgiler) yüklenince ayrıntı eşzamanlı okunur.
 Future<void> _ready(ProviderContainer c) async {
@@ -46,36 +48,50 @@ void main() {
     },
   );
 
-  test('ayrıntı: özet, dikkat gerektirenler, ekip, etkinlik', () async {
-    final h = await pilotHarness(PilotBackend());
+  test('ayrıntı sunucu verisinden: özet, dikkat gerektirenler, ekip; bilinmeyen kimlik null', () async {
+    final backend = CoordBackend();
+    final h = await pilotHarness(backend, signedIn: true);
+    h.read(scopeControllerProvider).selectProgram(coordProgram);
     final c = h.container;
-    c.listen(coordinatorshipDetailProvider('ALT'), (_, _) {});
-    expect(c.read(coordinatorshipDetailProvider('ALT')).isLoading, isTrue);
+    c.listen(coordinatorshipDetailProvider(dAlt), (_, _) {});
+    expect(c.read(coordinatorshipDetailProvider(dAlt)).isLoading, isTrue);
     await _ready(c);
-    final d = c.read(coordinatorshipDetailProvider('ALT')).requireValue!;
-    // Kaynak `D` kaydı: 7/12 tamamlandı, 3 geciken.
-    expect((d.stats.open, d.stats.late, d.stats.total), (5, 3, 12));
-    expect(d.seasonRatio, 0.41);
-    expect(d.attention.map((a) => (a.code, a.overdueDays)), [
-      ('ALT-5', 98),
-      ('ALT-7', 41),
-      ('ALT-10', 21),
+    final d = c.read(coordinatorshipDetailProvider(dAlt)).requireValue!;
+    expect(d.stats.shortCode, 'ALT');
+    expect((d.stats.open, d.stats.late, d.stats.total), (2, 2, 4));
+    // Sunucu kaydının ek bilgisi yok (rapor yok): sezon oranı program görevlerinden, 5/9.
+    expect(d.profile.reported, isNull);
+    expect(d.seasonRatio, 5 / 9);
+    // Geciken görevler sunucunun `days_overdue` değeriyle, en çok gecikenden; ekranda
+    // kimlik değil departman kodu.
+    expect(d.attention.map((a) => (a.code, a.label, a.overdueDays)), [
+      (tAltLate30, 'ALT', 30),
+      (tAltLate12, 'ALT', 12),
     ]);
-    expect(d.attention.first.assignee, 'Kadir Özbek');
-    expect(d.leads.map((m) => (m.name, m.unit)), [
-      ('Abdullah Ateş', 'Arıtma tesisi'),
-      ('Ali Avcı', 'Su ve atıksu hatları'),
+    expect(d.attention.map((a) => a.assignee), ['Kadir Özbek', 'Ali Avcı']);
+    expect(d.leads.map((m) => (m.name, m.lead)), [
+      ('Abdullah Ateş', true),
+      ('Ali Avcı', true),
     ]);
-    // Katalog üyesi + 6 örnek üye.
-    expect(d.members, hasLength(7));
-    expect(d.members.first.name, 'Kadir Özbek');
-    expect(d.members.first.unit, 'Depolama ve hidrofor');
-    expect(d.people, 9);
-    expect(d.feed.first.who, 'Kadir Özbek');
-    expect(d.others, hasLength(11));
-    expect(d.profile.chatId, 'hid');
+    // Silinmiş üyelik ekipte yok.
+    expect(d.members.map((m) => m.name), ['Kadir Özbek']);
+    expect(d.people, 3);
+    expect(d.feed, isEmpty);
+    expect(d.others.map((s) => s.code), [dAlt, dEgi, dEle, dIda]);
 
-    c.listen(coordinatorshipDetailProvider('YOK'), (_, _) {});
-    expect(c.read(coordinatorshipDetailProvider('YOK')).requireValue, isNull);
+    final ida = c.read(coordinatorshipDetailProvider(dIda)).requireValue!;
+    expect((ida.stats.shortCode, ida.stats.name), (null, 'İdari işler'));
+    expect((ida.stats.total, ida.attention.length, ida.people), (0, 0, 0));
+
+    // Örnek ek bilgilerin kodu ('ALT') sunucu kimliği değildir: ayrıntı açılmaz.
+    for (final code in ['ALT', 'YOK']) {
+      c.listen(coordinatorshipDetailProvider(code), (_, _) {});
+      expect(
+        c.read(coordinatorshipDetailProvider(code)).requireValue,
+        isNull,
+        reason: code,
+      );
+    }
+    expect(backend.unhandled, isEmpty);
   });
 }

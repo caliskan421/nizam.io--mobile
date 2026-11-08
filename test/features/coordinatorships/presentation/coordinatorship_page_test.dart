@@ -1,5 +1,5 @@
-// CoordinatorshipPage: segmentli bölümler (Genel / Görevler / Üyeler / Arşiv / Toplantı),
-// bilinmeyen kod, taşma matrisi.
+// CoordinatorshipPage (sunucu verisiyle): bilinmeyen kimlik boş durum; taşma matrisi bütün
+// segmentli bölümleri (Genel / Görevler / Üyeler / Arşiv / Toplantı) açarak gezer.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,19 +15,18 @@ import 'package:nizamio/features/coordinatorships/presentation/coordinatorship_p
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
 import '../../pilot_support.dart';
+import '../coord_backend.dart';
 
 final _l = AppLocalizationsTr();
 
-Future<(Harness, RecordingAppNav)> _open(
+Future<(Harness, CoordBackend)> _open(
   WidgetTester tester, {
-  String code = 'ALT',
+  String code = dAlt,
   bool dark = false,
 }) async {
-  final h = await real(
-    tester,
-    () => pilotHarness(PilotBackend(), signedIn: true),
-  );
-  h.read(scopeControllerProvider).selectProgram('prog-1');
+  final backend = CoordBackend();
+  final h = await real(tester, () => pilotHarness(backend, signedIn: true));
+  h.read(scopeControllerProvider).selectProgram(coordProgram);
   final nav = RecordingAppNav();
   await pumpScreen(
     tester,
@@ -37,7 +36,7 @@ Future<(Harness, RecordingAppNav)> _open(
     dark: dark,
   );
   await settle(tester);
-  return (h, nav);
+  return (h, backend);
 }
 
 /// Sayfanın kendi kaydırmasıyla [f]'yi dokunulabilir yapar (`ensureVisible` dıştaki
@@ -92,19 +91,14 @@ List<(String, Type)> get _tabs => [
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets('bölümler: her hap kendi bölümünü açar', (tester) async {
-    await _open(tester);
-    expect(find.byType(CoordGeneralTab), findsOneWidget);
-    for (final (label, type) in _tabs) {
-      await _tap(tester, _tab(label));
-      expect(find.byType(type), findsOneWidget, reason: label);
-    }
-  });
-
-  testWidgets('bilinmeyen kod: boş durum', (tester) async {
-    await _open(tester, code: 'YOK');
-    expect(find.text(_l.uiCoordNotFound), findsOneWidget);
-  });
+  // Örnek ek bilgilerin kodu ('ALT') sunucu kimliği değildir.
+  for (final code in ['ALT', 'YOK']) {
+    testWidgets('bilinmeyen kimlik ($code): boş durum', (tester) async {
+      await _open(tester, code: code);
+      expect(find.text(_l.uiCoordNotFound), findsOneWidget);
+      expect(find.byType(NzPillTabs), findsNothing);
+    });
+  }
 
   for (final width in [360.0, 390.0]) {
     for (final scale in [1.0, 2.0]) {
@@ -119,7 +113,10 @@ void main() {
             addTearDown(
               tester.platformDispatcher.clearTextScaleFactorTestValue,
             );
-            await _open(tester, dark: dark);
+            final (_, backend) = await _open(tester, dark: dark);
+            // Sunucu kaydı açıldı: kısa kod üst çubukta, Genel bölümü çizili.
+            expect(find.text('ALT'), findsWidgets);
+            expect(find.byType(CoordGeneralTab), findsOneWidget);
             Future<void> scroll() async {
               final s = _pageScroll;
               for (var i = 0; i < 8; i++) {
@@ -133,11 +130,13 @@ void main() {
             }
 
             await scroll();
-            for (final (label, _) in _tabs) {
+            for (final (label, type) in _tabs) {
               await _tap(tester, _tab(label));
+              expect(find.byType(type), findsOneWidget, reason: label);
               await scroll();
             }
             expect(tester.takeException(), isNull);
+            expect(backend.unhandled, isEmpty);
           },
         );
       }

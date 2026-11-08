@@ -110,7 +110,7 @@ final class NotificationsControllerProvider
 }
 
 String _$notificationsControllerHash() =>
-    r'35021e06e25d71dc4d058aa3a490e6161ad9dafe';
+    r'808fb3be3ff9a52213dd258fa995aad75127c57b';
 
 /// Bildirim listesi (`listNotifications`, en yeni önce, imleçli). Çan açıkken yaşar; her
 /// açılışta ilk sayfa yeniden okunur. Her liste yanıtının `unread_count`'u ve başarılı yazma

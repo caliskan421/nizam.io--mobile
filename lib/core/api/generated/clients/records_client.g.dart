@@ -23,6 +23,7 @@ class _RecordsClient implements RecordsClient {
   @override
   Future<FileRecord> attachFile({
     required String id,
+    required String idempotencyKey,
     required Tag tag,
     required File file,
     String? subtaskId,
@@ -35,7 +36,8 @@ class _RecordsClient implements RecordsClient {
       r'subtask_id': subtaskId,
     };
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Idempotency-Key': idempotencyKey};
+    _headers.removeWhere((k, v) => v == null);
     final _data = FormData();
     _data.files.add(
       MapEntry(

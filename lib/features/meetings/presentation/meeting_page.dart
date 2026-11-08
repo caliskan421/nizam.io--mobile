@@ -269,9 +269,16 @@ class MeetingActions {
   }
 
   Future<bool> addNote(String text) async {
-    final e = await _ctl.addNote(text);
-    report(e);
-    return e == null;
+    switch (await _ctl.addNote(text)) {
+      case NoteAdded():
+        report(null);
+        return true;
+      case NoteFailed(:final error):
+        report(error);
+        return false;
+      case NoteIgnored():
+        return false;
+    }
   }
 
   Future<bool> updateNote(MeetingNote n, String text) async {

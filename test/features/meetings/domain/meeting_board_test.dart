@@ -56,6 +56,7 @@ MeetingNote _n(
   convertedToWorkItemId: task,
   createdAt: DateTime(2026, 10, 14, 10, minute),
   updatedAt: DateTime(2026, 10, 14, 10, minute),
+  editRevision: 1,
 );
 
 void main() {

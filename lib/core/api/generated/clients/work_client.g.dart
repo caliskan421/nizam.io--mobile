@@ -60,6 +60,7 @@ class _WorkClient implements WorkClient {
 
   @override
   Future<WorkItem> createWorkItem({
+    required String idempotencyKey,
     required CreateWorkItemRequest body,
     Map<String, dynamic>? extras = WorkClient.createWorkItemOpenapiExtras,
   }) async {
@@ -67,7 +68,8 @@ class _WorkClient implements WorkClient {
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Idempotency-Key': idempotencyKey};
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _options = _setStreamType<WorkItem>(
@@ -458,6 +460,7 @@ class _WorkClient implements WorkClient {
   @override
   Future<WorkItemNote> addWorkItemNote({
     required String id,
+    required String idempotencyKey,
     required WorkNoteRequest body,
     Map<String, dynamic>? extras = WorkClient.addWorkItemNoteOpenapiExtras,
   }) async {
@@ -465,7 +468,8 @@ class _WorkClient implements WorkClient {
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Idempotency-Key': idempotencyKey};
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _options = _setStreamType<WorkItemNote>(
@@ -522,10 +526,10 @@ class _WorkClient implements WorkClient {
   }
 
   @override
-  Future<StatusResult> updateWorkItemNote({
+  Future<WorkNoteUpdated> updateWorkItemNote({
     required String id,
     required String noteId,
-    required WorkNoteRequest body,
+    required UpdateWorkNoteRequest body,
     Map<String, dynamic>? extras = WorkClient.updateWorkItemNoteOpenapiExtras,
   }) async {
     final _extra = <String, dynamic>{};
@@ -535,7 +539,7 @@ class _WorkClient implements WorkClient {
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _options = _setStreamType<StatusResult>(
+    final _options = _setStreamType<WorkNoteUpdated>(
       Options(method: 'PATCH', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -546,9 +550,9 @@ class _WorkClient implements WorkClient {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, Object?>>(_options);
-    late StatusResult _value;
+    late WorkNoteUpdated _value;
     try {
-      _value = StatusResult.fromJson(_result.data!);
+      _value = WorkNoteUpdated.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -624,6 +628,7 @@ class _WorkClient implements WorkClient {
   @override
   Future<WorkItemSubtask> createWorkItemSubtask({
     required String id,
+    required String idempotencyKey,
     required CreateSubtaskRequest body,
     Map<String, dynamic>? extras =
         WorkClient.createWorkItemSubtaskOpenapiExtras,
@@ -632,7 +637,8 @@ class _WorkClient implements WorkClient {
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Idempotency-Key': idempotencyKey};
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _options = _setStreamType<WorkItemSubtask>(

@@ -1,6 +1,9 @@
 import 'package:meta/meta.dart';
 
+import 'date_change_request.dart';
 import 'task_access.dart';
+
+export 'date_change_request.dart';
 
 /// Görev durumu (sunucu kavramı; istemci geçiş kuralı türetmez). Sunucu değerleri (`data`
 /// katmanında eşlenir): todo ↔ `baslanmadi`, inProgress ↔ `devam_ediyor`, review ↔
@@ -97,10 +100,15 @@ final class Subtask {
     this.assigneeRequired = false,
     this.doneBy,
     this.createdBy,
+    this.editRevision,
   });
 
   final String id;
   final String title;
+
+  /// Düzenleme sürümü (`edit_revision`, ADR-0027): başlık/atanan/tarih değişikliği bunu
+  /// `expected_revision` olarak geri gönderir. Örnek veride null.
+  final int? editRevision;
   final bool done;
   final String? assignee;
 
@@ -136,71 +144,7 @@ final class Subtask {
     assigneeRequired: assigneeRequired,
     doneBy: doneBy,
     createdBy: createdBy,
-  );
-}
-
-/// Tarih değişikliği talebinin durumu (sunucu `pending`/`approved`/`rejected`; [unknown]:
-/// tanımsız sunucu değeri).
-enum DateRequestState { pending, approved, rejected, unknown }
-
-/// Tarih talebi incelemesinin kararı (`POST /v1/date-change-requests/{id}/review`).
-enum DateRequestDecision { approve, reject }
-
-/// Tarih değişikliği talebi: [oldDue] → [due] (yeni aralık [start]–[due]). Sunucu şeması
-/// `DateChangeRequest` ile birleşik: `request_id` → [id], `work_item_id` → [workItemId],
-/// `old_start_on` → [oldStart], `old_end_on` → [oldDue], `new_start_on` → [start],
-/// `new_end_on` → [due], `status` → [state], `reason` → [reason] (sunucuda isteğe bağlı; yoksa
-/// boş dize).
-@immutable
-final class DateChangeRequest {
-  const DateChangeRequest({
-    this.id,
-    this.workItemId,
-    this.by,
-    this.at,
-    this.oldStart,
-    required this.oldDue,
-    required this.start,
-    required this.due,
-    this.reason = '',
-    this.state = DateRequestState.pending,
-  });
-
-  /// Talep kimliği (`request_id`; inceleme ve silme bununla yapılır).
-  final String? id;
-
-  /// Talebin görevi (`work_item_id`).
-  final String? workItemId;
-
-  /// Talep eden kişi kimliği. Sunucuda yok — entegrasyonda karar (backend adayı B-08).
-  final String? by;
-
-  /// Talep anı. Sunucuda yok — entegrasyonda karar (backend adayı B-08).
-  final DateTime? at;
-
-  /// Talep anındaki başlangıç (`old_start_on`).
-  final DateTime? oldStart;
-  final DateTime oldDue;
-  final DateTime start;
-  final DateTime due;
-
-  /// Gerekçe; sunucuda isteğe bağlı (yoksa boş).
-  final String reason;
-  final DateRequestState state;
-
-  bool get isPending => state == DateRequestState.pending;
-
-  DateChangeRequest withState(DateRequestState s) => DateChangeRequest(
-    id: id,
-    workItemId: workItemId,
-    by: by,
-    at: at,
-    oldStart: oldStart,
-    oldDue: oldDue,
-    start: start,
-    due: due,
-    reason: reason,
-    state: s,
+    editRevision: editRevision,
   );
 }
 
@@ -262,10 +206,15 @@ final class TaskNote {
     required this.at,
     required this.text,
     this.updatedAt,
+    this.editRevision,
   });
 
   /// Not kimliği (düzenleme/silme bununla).
   final String? id;
+
+  /// İçeriğin düzenleme sürümü (`edit_revision`, ADR-0027); düzenleme `expected_revision`
+  /// olarak geri gönderir.
+  final int? editRevision;
 
   /// Notun görevi.
   final String? workItemId;
@@ -401,6 +350,8 @@ final class TaskItem {
     this.noteEntries = const [],
     this.evidenceRequired = false,
     this.subtaskCounts,
+    this.editRevision,
+    this.datesRevision,
   }) : id = id ?? code;
 
   /// Rota kimliği. Sunucuda insan okunur görev anahtarı yok (backend adayı B-03): [id]
@@ -485,6 +436,14 @@ final class TaskItem {
   /// listede ilerleme için. null → kaynak taşımaz ([subtasks] sayılır).
   final ({int total, int done})? subtaskCounts;
 
+  /// Alan grubunun (başlık, açıklama, öncelik, kanıt bayrağı) düzenleme sürümü (`edit_revision`,
+  /// ADR-0027). Örnek veride null; sunucu kaleminde null ise sunucu sürümlü yazmayı
+  /// desteklemiyordur (eski backend) ve yazma gönderilmez.
+  final int? editRevision;
+
+  /// Tarih grubunun (başlangıç, bitiş, planlanan bitiş) düzenleme sürümü (`dates_revision`).
+  final int? datesRevision;
+
   bool get isOverdue => overdueDays > 0;
   bool get isDone => status == TaskStatus.done;
   bool get hasPendingRequest => dateRequest?.isPending ?? false;
@@ -543,6 +502,8 @@ final class TaskItem {
     noteEntries: noteEntries ?? this.noteEntries,
     evidenceRequired: evidenceRequired ?? this.evidenceRequired,
     subtaskCounts: subtaskCounts,
+    editRevision: editRevision,
+    datesRevision: datesRevision,
   );
 }
 

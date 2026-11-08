@@ -131,6 +131,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
             at: n.createdAt,
             text: n.content,
             updatedAt: n.updatedAt,
+            editRevision: n.editRevision,
           ),
       ],
       files: [
@@ -207,6 +208,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
     assignee: s.assigneeAccountId,
     doneBy: s.doneByAccountId,
     createdBy: s.createdByAccountId,
+    editRevision: s.editRevision,
     start: s.startOn,
     end: s.endOn,
     evidence: files
@@ -260,6 +262,8 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
         start: w.startOn,
         end: w.endOn,
       ),
+      editRevision: w.editRevision,
+      datesRevision: w.datesRevision,
     );
   }
 

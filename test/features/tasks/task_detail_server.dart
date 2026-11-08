@@ -51,6 +51,8 @@ class TaskDetailServer {
     'days_early': 0,
     'completion_evidence_required': false,
     'subtask_counts': {'total': subtasks.length, 'done': 0},
+    'edit_revision': 1,
+    'dates_revision': 1,
     'created_at': '2026-10-01T09:00:00Z',
     'created_by_account_id': 'u-creator',
     'created_by_full_name': 'Oluşturan Kişi',
@@ -131,6 +133,9 @@ class TaskDetailServer {
     if (r.path.contains('/subtasks/') && r.method == 'PATCH') {
       return subtaskWire('s1', done: true);
     }
+    if (r.path.contains('/notes/') && r.method == 'PATCH') {
+      return {'status': 'updated', 'edit_revision': 2};
+    }
     return {'status': 'ok'};
   }
 }
@@ -147,6 +152,7 @@ Map<String, Object?> subtaskWire(
   'created_by_account_id': 'acc-1',
   'created_at': '2026-10-02T08:00:00Z',
   'updated_at': '2026-10-02T08:00:00Z',
+  'edit_revision': 1,
   'assignee_account_id': ?assignee,
 };
 
@@ -157,4 +163,5 @@ Map<String, Object?> taskNoteWire(String id, String by, String text) => {
   'content': text,
   'created_at': '2026-10-03T09:00:00Z',
   'updated_at': '2026-10-03T09:00:00Z',
+  'edit_revision': 1,
 };

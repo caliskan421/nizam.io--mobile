@@ -193,6 +193,8 @@ Map<String, Object?> workItem(
   'completed_on': status == 'tamamlandi' ? '2026-10-15' : null,
   'completion_evidence_required': false,
   'subtask_counts': {'total': 0, 'done': 0},
+  'edit_revision': 1,
+  'dates_revision': 1,
   'pending_date_request': null,
   'created_at': '2026-08-20T09:00:00Z',
   'created_by_account_id': 'acc-1',

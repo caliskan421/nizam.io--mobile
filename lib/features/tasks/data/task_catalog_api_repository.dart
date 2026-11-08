@@ -344,6 +344,8 @@ class ApiTaskCatalogRepository
         start: w.startOn,
         end: w.endOn,
       ),
+      editRevision: w.editRevision,
+      datesRevision: w.datesRevision,
     );
   }
 }

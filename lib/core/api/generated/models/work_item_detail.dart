@@ -71,6 +71,12 @@ abstract class WorkItemDetail with _$WorkItemDetail {
 
     /// Oluşturanın görünen adı (WORK-K83); `WorkItemAssignee.full_name` ile aynı kural: hesabın satırı yoksa ya da ad okuması o an başarısızsa `null` (yanıt yine başarılıdır); silinmiş (geri yüklenebilir) hesabın adı döner.
     @JsonKey(name: 'created_by_full_name') required String? createdByFullName,
+
+    /// Görev alanları grubunun (başlık, açıklama, öncelik, kanıt bayrağı) düzenleme sürümü (ADR-0027); PATCH gövdesinde `expected_revision` olarak geri gönderilir. Durum, atama, aktarım ve silme artırmaz.
+    @JsonKey(name: 'edit_revision') required int editRevision,
+
+    /// Tarih grubunun (başlangıç, bitiş, planlanan bitiş) düzenleme sürümü (ADR-0027); PATCH gövdesinde `expected_dates_revision` olarak geri gönderilir. Bu üç değeri ya da tamamlanma gününü değiştiren her yol artırır (form, tarih talebi onayı, uzatma, iki çekme, yönetici ayarı, tamamlanmaya geçiş, bağımlılık zinciri); gönderim çıpası artırmaz.
+    @JsonKey(name: 'dates_revision') required int datesRevision,
     required String description,
     @DateOnlyConverter()
     @JsonKey(name: 'planned_end_on')

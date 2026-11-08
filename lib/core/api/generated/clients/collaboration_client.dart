@@ -12,9 +12,7 @@ import '../models/conference_empty_request.dart';
 import '../models/conference_result.dart';
 import '../models/conference_token.dart';
 import '../models/convert_note_request.dart';
-import '../models/count_result.dart';
 import '../models/create_meeting_request.dart';
-import '../models/filter.dart';
 import '../models/meeting_created.dart';
 import '../models/meeting_detail.dart';
 import '../models/meeting_lifecycle_result.dart';
@@ -22,14 +20,11 @@ import '../models/meeting_list.dart';
 import '../models/meeting_note.dart';
 import '../models/meeting_note_list.dart';
 import '../models/meeting_revised.dart';
-import '../models/message_list.dart';
 import '../models/note_converted.dart';
 import '../models/note_request.dart';
 import '../models/participant_request.dart';
 import '../models/participant_result.dart';
-import '../models/recipient_groups.dart';
-import '../models/send_message_request.dart';
-import '../models/sent_message.dart';
+import '../models/revise_meeting_note_request.dart';
 import '../models/update_agenda_item_request.dart';
 import '../models/update_meeting_request.dart';
 
@@ -40,54 +35,6 @@ abstract class CollaborationClient {
   factory CollaborationClient(Dio dio, {String? baseUrl}) =
       _CollaborationClient;
 
-  static const Map<String, dynamic> sendMessageOpenapiExtras =
-      <String, dynamic>{
-        'openapi': <String, dynamic>{
-          'tags': <String>["collaboration"],
-          'operationId': "sendMessage",
-          'externalDocsUrl': null,
-        },
-      };
-  static const Map<String, dynamic> listMessagesOpenapiExtras =
-      <String, dynamic>{
-        'openapi': <String, dynamic>{
-          'tags': <String>["collaboration"],
-          'operationId': "listMessages",
-          'externalDocsUrl': null,
-        },
-      };
-  static const Map<String, dynamic> countUnreadMessagesOpenapiExtras =
-      <String, dynamic>{
-        'openapi': <String, dynamic>{
-          'tags': <String>["collaboration"],
-          'operationId': "countUnreadMessages",
-          'externalDocsUrl': null,
-        },
-      };
-  static const Map<String, dynamic> listMessageRecipientsOpenapiExtras =
-      <String, dynamic>{
-        'openapi': <String, dynamic>{
-          'tags': <String>["collaboration"],
-          'operationId': "listMessageRecipients",
-          'externalDocsUrl': null,
-        },
-      };
-  static const Map<String, dynamic> markMessageReadOpenapiExtras =
-      <String, dynamic>{
-        'openapi': <String, dynamic>{
-          'tags': <String>["collaboration"],
-          'operationId': "markMessageRead",
-          'externalDocsUrl': null,
-        },
-      };
-  static const Map<String, dynamic> deleteMessageOpenapiExtras =
-      <String, dynamic>{
-        'openapi': <String, dynamic>{
-          'tags': <String>["collaboration"],
-          'operationId': "deleteMessage",
-          'externalDocsUrl': null,
-        },
-      };
   static const Map<String, dynamic> createMeetingOpenapiExtras =
       <String, dynamic>{
         'openapi': <String, dynamic>{
@@ -271,65 +218,6 @@ abstract class CollaborationClient {
         },
       };
 
-  /// Mesaj gönderir (gönderim matrisi use-case sınırında).
-  @POST('/v1/messages')
-  Future<SentMessage> sendMessage({
-    @Body() required SendMessageRequest body,
-    @Extras()
-    Map<String, dynamic>? extras = CollaborationClient.sendMessageOpenapiExtras,
-  });
-
-  /// Gelen/giden mesajlar (imleçli).
-  ///
-  /// [filter] - `inbox` (varsayılan) ya da `sent`; başka değer 422 `collaboration.input_invalid`.
-  ///
-  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
-  ///
-  /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
-  @GET('/v1/messages')
-  Future<MessageList> listMessages({
-    @Query('filter') Filter? filter,
-    @Query('limit') int? limit,
-    @Query('cursor') String? cursor,
-    @Extras()
-    Map<String, dynamic>? extras =
-        CollaborationClient.listMessagesOpenapiExtras,
-  });
-
-  /// Seçili programdaki okunmamış gelen mesaj sayısı.
-  @GET('/v1/messages/unread-count')
-  Future<CountResult> countUnreadMessages({
-    @Extras()
-    Map<String, dynamic>? extras =
-        CollaborationClient.countUnreadMessagesOpenapiExtras,
-  });
-
-  /// Alıcı adayları (gruplu; yöneticiye kapalı).
-  @GET('/v1/messages/recipients')
-  Future<RecipientGroups> listMessageRecipients({
-    @Extras()
-    Map<String, dynamic>? extras =
-        CollaborationClient.listMessageRecipientsOpenapiExtras,
-  });
-
-  /// Mesajı okundu işaretler (yalnız alıcı; idempotent).
-  @POST('/v1/messages/{id}/read')
-  Future<void> markMessageRead({
-    @Path('id') required String id,
-    @Extras()
-    Map<String, dynamic>? extras =
-        CollaborationClient.markMessageReadOpenapiExtras,
-  });
-
-  /// Mesajı kalıcı siler (gönderen her zaman; alıcı okuduktan sonra).
-  @DELETE('/v1/messages/{id}')
-  Future<void> deleteMessage({
-    @Path('id') required String id,
-    @Extras()
-    Map<String, dynamic>? extras =
-        CollaborationClient.deleteMessageOpenapiExtras,
-  });
-
   /// Toplantı açar; ilk gündem aynı transaction, katılımcılar en iyi çabayla.
   @POST('/v1/meetings')
   Future<MeetingCreated> createMeeting({
@@ -341,7 +229,7 @@ abstract class CollaborationClient {
 
   /// Görünür toplantılar (imleçli).
   ///
-  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
+  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration ve messaging 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` / `messaging.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
   ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/meetings')
@@ -355,7 +243,7 @@ abstract class CollaborationClient {
 
   /// Silinmiş toplantılar (imleçli; yalnız yönetici).
   ///
-  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
+  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration ve messaging 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` / `messaging.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
   ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/meetings/deleted')
@@ -369,7 +257,7 @@ abstract class CollaborationClient {
 
   /// Silinmiş toplantılar — yönetici yaşam döngüsü yolu (aynı use-case).
   ///
-  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
+  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration ve messaging 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` / `messaging.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
   ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/admin/deleted/meetings')
@@ -513,9 +401,12 @@ abstract class CollaborationClient {
   });
 
   /// Toplantı notu ekler (üye için dakikada 20 not).
+  ///
+  /// [idempotencyKey] - İstemcinin ürettiği opak işlem anahtarı (en az 128 bit; ör. base64url 22 karakter; ADR-0027). Uzunluk baştaki/sondaki boşluk kırpıldıktan sonra bayt olarak 22–200'dür. Eksik ya da sınır dışı anahtar 422; program aktarımında `program.transfer_input_invalid`, oluşturma uçlarında modülün `<mod>.input_invalid` zarfı (alan `idempotency_key`, kod `<mod>.request_key_required` / `<mod>.request_key_invalid`). Aynı anahtar + aynı istek ilk sonucu döndürür (oluşturmada 200 + kaynağın bugünkü temsili, güncel görme yetkisiyle); farklı istek 409 `<mod>.idempotency_key_reused`. Anahtar aktör + uç tablosu kapsamındadır; sunucu kaynağı yaşadıkça tutar (kalıcı silinen kaynakta anahtar da gider).
   @POST('/v1/meetings/{id}/notes')
   Future<MeetingNote> addMeetingNote({
     @Path('id') required String id,
+    @Header('Idempotency-Key') required String idempotencyKey,
     @Body() required NoteRequest body,
     @Extras()
     Map<String, dynamic>? extras =
@@ -524,7 +415,7 @@ abstract class CollaborationClient {
 
   /// Toplantı notları (imleçli).
   ///
-  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
+  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration ve messaging 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` / `messaging.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
   ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/meetings/{id}/notes')
@@ -541,7 +432,7 @@ abstract class CollaborationClient {
   @PATCH('/v1/meeting-notes/{noteId}')
   Future<MeetingNote> updateMeetingNote({
     @Path('noteId') required String noteId,
-    @Body() required NoteRequest body,
+    @Body() required ReviseMeetingNoteRequest body,
     @Extras()
     Map<String, dynamic>? extras =
         CollaborationClient.updateMeetingNoteOpenapiExtras,

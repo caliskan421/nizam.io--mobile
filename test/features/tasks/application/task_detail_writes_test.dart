@@ -280,6 +280,7 @@ void main() {
       expect((await ctl.editNote(mine, 'Düzeltildi')).kind, WriteKind.done);
       expect(_only(h, 'PATCH', '/v1/work-items/w1/notes/n1').body, {
         'content': 'Düzeltildi',
+        'expected_revision': 1,
       });
       expect((await ctl.deleteNote(mine)).kind, WriteKind.done);
       expect(h.backend.count('DELETE', '/v1/work-items/w1/notes/n1'), 1);
@@ -326,9 +327,13 @@ void main() {
       expect(
         bodies,
         [
-          {'assignee_account_id': 'u2'},
-          {'assignee_account_id': ''},
-          {'start_on': '2026-10-25', 'end_on': '2026-10-25'},
+          {'assignee_account_id': 'u2', 'expected_revision': 1},
+          {'assignee_account_id': '', 'expected_revision': 1},
+          {
+            'start_on': '2026-10-25',
+            'end_on': '2026-10-25',
+            'expected_revision': 1,
+          },
         ],
         reason:
             'tarihsiz alt görevde tarih kaldırma değişiklik değil (istek yok)',

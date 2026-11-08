@@ -9,7 +9,6 @@ import 'package:nizamio/core/network/connectivity_monitor.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/core/ui/theme/app_theme.dart';
-import 'package:nizamio/features/tasks/application/task_catalog_controller.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 import 'package:nizamio/features/timeline/presentation/gantt/gantt_controls.dart';
 import 'package:nizamio/features/timeline/presentation/horizontal_timeline_page.dart';

@@ -237,5 +237,5 @@ Map<String, Object> emptyDashboardWire() => {
   },
   '/v1/reports/dashboard/tasks': {'tasks': <Object>[], 'total': 0},
   '/v1/date-change-requests': {'requests': <Object>[], 'total': 0},
-  '/v1/messages/unread-count': {'count': 0},
+  '/v1/me/chat-unread': {'items': <Object>[]},
 };

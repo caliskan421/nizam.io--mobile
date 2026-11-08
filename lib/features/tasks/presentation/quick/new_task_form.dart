@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/errors/error_text.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
@@ -180,7 +179,8 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
       ),
       footer: [
         if (error != null) TaskFormError(l.newTaskError(error)),
-        if (f.failure case final failure?) TaskFormError(errorText(l, failure)),
+        if (f.failure case final failure?)
+          TaskFormError(l.writeErrorText(failure)),
       ],
     );
   }

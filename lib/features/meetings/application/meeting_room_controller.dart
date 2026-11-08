@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/domain/page_slice.dart';
+import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
 import '../../tasks/tasks.dart';
@@ -61,7 +62,12 @@ final class MeetingRoom {
     this.coordinatesLinked = false,
     this.me,
     this.extras = MeetingExtras.none,
+    this.noteSubmitting = false,
   }) : notes = List.unmodifiable(notes);
+
+  /// Not ekleme isteği uçuşta: gönder düğmesi kapalı, yeni gönderim reddedilir. Kilit widget'ta
+  /// değil burada durur (sekme değişip dönünce sıfırlanmaz).
+  final bool noteSubmitting;
 
   final MeetingDetail detail;
   final List<MeetingNote> notes;
@@ -92,14 +98,37 @@ final class MeetingRoom {
     coordinatesLinked: coordinatesLinked,
   );
 
-  MeetingRoom copyWith({MeetingDetail? detail, List<MeetingNote>? notes}) =>
-      MeetingRoom(
-        detail: detail ?? this.detail,
-        notes: notes ?? this.notes,
-        coordinatesLinked: coordinatesLinked,
-        me: me,
-        extras: extras,
-      );
+  MeetingRoom copyWith({
+    MeetingDetail? detail,
+    List<MeetingNote>? notes,
+    bool? noteSubmitting,
+  }) => MeetingRoom(
+    detail: detail ?? this.detail,
+    notes: notes ?? this.notes,
+    coordinatesLinked: coordinatesLinked,
+    me: me,
+    extras: extras,
+    noteSubmitting: noteSubmitting ?? this.noteSubmitting,
+  );
+}
+
+/// Not ekleme sonucu: yalnız [NoteAdded] başarıdır (çağıran taslağı yalnız onda temizler).
+sealed class NoteSubmit {
+  const NoteSubmit();
+}
+
+final class NoteAdded extends NoteSubmit {
+  const NoteAdded();
+}
+
+final class NoteFailed extends NoteSubmit {
+  const NoteFailed(this.error);
+  final ApiError error;
+}
+
+/// İstek gönderilmedi (uçuşta istek var ya da metin boş); geri bildirim yok.
+final class NoteIgnored extends NoteSubmit {
+  const NoteIgnored();
 }
 
 /// Toplantı ayrıntısı ve yazmaları. Komutlar sunucu yanıtıyla durumu günceller ve hata kodunu
@@ -110,6 +139,9 @@ class MeetingRoomController extends _$MeetingRoomController {
   static const notesMaxPages = 10;
 
   MeetingsRepository get _repo => ref.read(meetingsRepositoryProvider);
+
+  /// Bekleyen not ekleme anahtarı (ADR-0027): aynı metnin yeniden gönderimi aynı anahtarla.
+  RequestKeys _keys = const RequestKeys();
 
   @override
   Future<MeetingRoom> build(String id) async {
@@ -143,6 +175,7 @@ class MeetingRoomController extends _$MeetingRoomController {
         (s) =>
             s.role == SeatRole.coordinator && linked.contains(s.departmentId),
       ),
+      noteSubmitting: _noteInFlight != null,
     );
     _syncSummary(room);
     return room;
@@ -162,7 +195,7 @@ class MeetingRoomController extends _$MeetingRoomController {
 
   void _put(MeetingRoom room) {
     if (!ref.mounted) return;
-    state = AsyncData(room);
+    state = AsyncData(room.copyWith(noteSubmitting: _noteInFlight != null));
     _syncSummary(room);
   }
 
@@ -252,24 +285,69 @@ class MeetingRoomController extends _$MeetingRoomController {
     }
   }
 
-  Future<ApiError?> addNote(String content) async {
+  /// Uçuştaki not ekleme isteğinin kimliği (işlem anahtarından ayrı; her uçuşa ayrı nesne).
+  /// State'ten bağımsızdır: yenileme state'i yeniden kursa da kilit kalır;
+  /// [MeetingRoom.noteSubmitting] yalnız bundan türer ([_put], [build]).
+  Object? _noteInFlight;
+
+  /// Not ekler. Uçuşta istek varken ya da metin boşken istek gönderilmez: [NoteIgnored]
+  /// (taslak ve anahtar olduğu gibi kalır). Anahtar yalnız TAMAMLANAN isteğin anahtarıyla
+  /// eşleşiyorsa düşer (başarı ya da "anahtar başka istekle kullanılmış"); ağ/zaman aşımı
+  /// hatasında kalır, aynı metin aynı anahtarla gider. Kilidi yalnız kendi uçuşu açar.
+  Future<NoteSubmit> addNote(String content) async {
     final t = content.trim();
-    if (t.isEmpty || _room == null) return null;
-    try {
-      final note = await _repo.addNote(id, t);
-      final cur = _room;
-      if (cur != null) _notes([note, ...cur.notes]);
-      return null;
-    } on Object catch (e) {
-      return toApiError(e);
+    final r = _room;
+    if (t.isEmpty || r == null || _noteInFlight != null) {
+      return const NoteIgnored();
     }
+    final (keys, key) = _keys.keyFor('note', t);
+    _keys = keys;
+    final flight = Object();
+    _noteInFlight = flight;
+    // Kilit alındıktan sonraki her adım try içinde; kilit finally'de (kimlik denetimli) kapanır.
+    List<MeetingNote> Function(MeetingRoom cur)? added;
+    try {
+      _put(r);
+      final note = await _repo.addNote(id, t, requestKey: key);
+      _clearNoteKey(key);
+      added = (cur) => [note, ...cur.notes];
+      return const NoteAdded();
+    } on Object catch (e) {
+      final err = toApiError(e);
+      if (isKeyReused(err)) _clearNoteKey(key);
+      return NoteFailed(err);
+    } finally {
+      _endNoteFlight(flight, added);
+    }
+  }
+
+  /// Bekleyen not ekleme anahtarı (test ve tanı için; yoksa null).
+  @visibleForTesting
+  String? get pendingNoteKey => _keys.pending('note');
+
+  void _clearNoteKey(String key) {
+    if (_keys.pending('note') == key) _keys = _keys.clear('note');
+  }
+
+  /// Uçuşu kapatır (yalnız [flight] hâlâ uçuştaki ise); [notes] varsa listeyi günceller.
+  void _endNoteFlight(
+    Object flight,
+    List<MeetingNote> Function(MeetingRoom cur)? notes,
+  ) {
+    if (identical(_noteInFlight, flight)) _noteInFlight = null;
+    final cur = _room;
+    if (cur != null) _put(cur.copyWith(notes: notes?.call(cur)));
   }
 
   Future<ApiError?> updateNote(MeetingNote n, String content) async {
     final t = content.trim();
     if (t.isEmpty || t == n.content) return null;
     try {
-      final saved = await _repo.updateNote(n.id, t);
+      final saved = await _repo.updateNote(
+        n.id,
+        t,
+        expectedRevision: n.editRevision,
+      );
       final cur = _room;
       if (cur != null) _notes(_replace(cur.notes, n, saved));
       return null;

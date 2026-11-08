@@ -17,7 +17,7 @@ bool _generated(String path) =>
 
 /// Sınırı aşan eski dosyalar → tavan (bölünene kadar). Yeni giriş eklenmez.
 const _legacy = <String, int>{
-  'test/support/tablet_harness.dart': 1378,
+  'test/support/tablet_harness.dart': 1187,
   'test/tool/boundaries_test.dart': 1055,
   'tool/boundaries.dart': 973,
   'tool/api_surface.dart': 919,
@@ -36,7 +36,6 @@ const _legacy = <String, int>{
   'test/tool/gen_test.dart': 732,
   'lib/features/timeline/presentation/chart/timeline_chart.dart': 666,
   'lib/features/activity/presentation/activity_page.dart': 656,
-  'test/features/meetings/data/meetings_api_repository_test.dart': 645,
   'test/tool/api_surface_test.dart': 644,
   'lib/features/archive/presentation/archive_page.dart': 634,
 };

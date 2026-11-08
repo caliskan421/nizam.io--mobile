@@ -4,7 +4,10 @@ library;
 
 export 'application/meeting_form_controller.dart' show MeetingSeed;
 export 'application/task_catalog_controller.dart'
-    show taskCatalogControllerProvider, canCreateTaskProvider;
+    show
+        TaskCatalogController,
+        taskCatalogControllerProvider,
+        canCreateTaskProvider;
 export 'application/tasks_nav_caption.dart' show tasksNavCaptionProvider;
 export 'application/tasks_providers.dart'
     show

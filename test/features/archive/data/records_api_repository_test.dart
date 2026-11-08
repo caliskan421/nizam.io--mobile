@@ -104,6 +104,7 @@ void main() {
         workItemId: 'w1',
         tag: RecordTag.cikti,
         filePath: path,
+        requestKey: 'k-0123456789abcdefghij',
       );
       final o = a.seen.single;
       expect(o.method, 'POST');
@@ -133,7 +134,12 @@ void main() {
         final txt = '${dir.path}/not.txt';
         File(txt).writeAsStringSync('x');
         await expectLater(
-          repo.attachFile(workItemId: 'w1', tag: RecordTag.plan, filePath: txt),
+          repo.attachFile(
+            workItemId: 'w1',
+            tag: RecordTag.plan,
+            filePath: txt,
+            requestKey: 'k-0123456789abcdefghij',
+          ),
           throwsA(
             isA<ApiError>().having(
               (e) => e.code,
@@ -149,7 +155,12 @@ void main() {
     test('nesne olmayan gövde → client.invalid_response', () async {
       final (repo, _) = _repo((_) => _json(<Object>[]));
       await expectLater(
-        repo.attachFile(workItemId: 'w1', tag: RecordTag.plan, filePath: path),
+        repo.attachFile(
+          workItemId: 'w1',
+          tag: RecordTag.plan,
+          filePath: path,
+          requestKey: 'k-0123456789abcdefghij',
+        ),
         throwsA(
           isA<ApiError>().having(
             (e) => e.code,
@@ -167,6 +178,7 @@ void main() {
           workItemId: 'w1',
           tag: RecordTag.unknown,
           filePath: path,
+          requestKey: 'k-0123456789abcdefghij',
         ),
         throwsArgumentError,
       );
@@ -176,7 +188,12 @@ void main() {
     test('422 records.tag_invalid → ApiError', () async {
       final (repo, _) = _repo((_) => _err(422, 'records.tag_invalid'));
       await expectLater(
-        repo.attachFile(workItemId: 'w1', tag: RecordTag.plan, filePath: path),
+        repo.attachFile(
+          workItemId: 'w1',
+          tag: RecordTag.plan,
+          filePath: path,
+          requestKey: 'k-0123456789abcdefghij',
+        ),
         throwsA(
           isA<ApiError>()
               .having((e) => e.code, 'code', 'records.tag_invalid')

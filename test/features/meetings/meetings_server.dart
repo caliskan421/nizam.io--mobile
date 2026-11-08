@@ -70,6 +70,7 @@ Map<String, Object?> noteWire(
   'converted_to_work_item_id': task,
   'created_at': created,
   'updated_at': created,
+  'edit_revision': 1,
 };
 
 class MeetingsServer {

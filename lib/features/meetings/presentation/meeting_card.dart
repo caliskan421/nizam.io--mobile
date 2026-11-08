@@ -140,8 +140,13 @@ class MeetingCard extends ConsumerWidget {
         );
         final row = Padding(
           padding: wide
-              ? const EdgeInsets.fromLTRB(16, 16, 20, 16)
-              : const EdgeInsets.all(14),
+              ? const EdgeInsets.fromLTRB(
+                  NizamioSpacing.cardPad,
+                  NizamioSpacing.cardPad,
+                  NizamioSpacing.space5,
+                  NizamioSpacing.cardPad,
+                )
+              : const EdgeInsets.all(NizamioSpacing.rowPad),
           child: Row(
             crossAxisAlignment: wide
                 ? CrossAxisAlignment.center

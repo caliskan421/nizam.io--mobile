@@ -60,7 +60,7 @@ class CoordHero extends StatelessWidget {
                   ),
                 ),
               ),
-              const Gap(14),
+              const Gap(NizamioSpacing.rowPad),
             ],
             Expanded(
               child: Column(

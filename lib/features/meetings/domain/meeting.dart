@@ -4,10 +4,8 @@ import '../../../core/domain/page_slice.dart';
 
 // Toplantı domain varlıkları (collaboration modülünün toplantı ve konferans uçları, `v0.3.0-api`).
 //
-// Takvimdeki `MeetingEntry` (calendar/domain/calendar.dart) aynı kavramın örnek veriden türeyen
-// görünümüdür; örtüşen alanlar (başlık, tarih, departmanlar, gündem, katılımcı) takvim
-// entegrasyonunda bu tiplerden doldurulacak. Eşleme envanterdedir
-// (docs/yurutme/servis-katmani/envanter-records-meetings.md).
+// Takvimdeki `MeetingEntry` (calendar/domain/calendar.dart) [Meeting] liste satırından eşlenir
+// (yerel gün/saat, başlık, departman adları).
 
 /// Toplantı bağlamındaki rol (oluşturan, görüntüleyen, not yazarı). Sunucu değerleri
 /// `admin`, `coordinator`, `member`; bilinmeyen/boş değer [unknown].

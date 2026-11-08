@@ -1601,10 +1601,6 @@
   "@uiCalendarRecordsLc": {
     "description": "ui.calendar.records_lc"
   },
-  "uiCalendarSeasonLc": "sezon",
-  "@uiCalendarSeasonLc": {
-    "description": "ui.calendar.season_lc"
-  },
   "uiCalendarGroupMeetings": "toplantılar",
   "@uiCalendarGroupMeetings": {
     "description": "ui.calendar.group_meetings"
@@ -1613,25 +1609,9 @@
   "@uiCalendarGroupTasks": {
     "description": "ui.calendar.group_tasks"
   },
-  "uiCalendarGroupRequests": "talepler",
+  "uiCalendarGroupRequests": "tarih talepleri",
   "@uiCalendarGroupRequests": {
     "description": "ui.calendar.group_requests"
-  },
-  "uiCalendarGroupSheets": "tablo kayıtları",
-  "@uiCalendarGroupSheets": {
-    "description": "ui.calendar.group_sheets"
-  },
-  "uiCalendarParticipantsLc": "katılımcı",
-  "@uiCalendarParticipantsLc": {
-    "description": "ui.calendar.participants_lc"
-  },
-  "uiCalendarAgendaLc": "gündem",
-  "@uiCalendarAgendaLc": {
-    "description": "ui.calendar.agenda_lc"
-  },
-  "uiCalendarPeopleLc": "kişi",
-  "@uiCalendarPeopleLc": {
-    "description": "ui.calendar.people_lc"
   },
   "uiCalendarTaskEnds": "Bitiyor",
   "@uiCalendarTaskEnds": {
@@ -1645,41 +1625,13 @@
   "@uiCalendarLateLc": {
     "description": "ui.calendar.late_lc"
   },
-  "uiCalendarDoneLc": "yapıldı",
-  "@uiCalendarDoneLc": {
-    "description": "ui.calendar.done_lc"
-  },
-  "uiCalendarReqPurchase": "Satın alma",
-  "@uiCalendarReqPurchase": {
-    "description": "ui.calendar.req_purchase"
-  },
-  "uiCalendarReqQuote": "Fiyat teklifi",
-  "@uiCalendarReqQuote": {
-    "description": "ui.calendar.req_quote"
-  },
-  "uiCalendarReqExpense": "Masraf",
-  "@uiCalendarReqExpense": {
-    "description": "ui.calendar.req_expense"
-  },
-  "uiCalendarReqBudget": "Ek bütçe",
-  "@uiCalendarReqBudget": {
-    "description": "ui.calendar.req_budget"
+  "uiCalendarRequestedRange": "İstenen aralık",
+  "@uiCalendarRequestedRange": {
+    "description": "ui.calendar.requested_range"
   },
   "uiCalendarStatePending": "Onay bekliyor",
   "@uiCalendarStatePending": {
     "description": "ui.calendar.state_pending"
-  },
-  "uiCalendarStateApproved": "Onaylandı",
-  "@uiCalendarStateApproved": {
-    "description": "ui.calendar.state_approved"
-  },
-  "uiCalendarStateOrdered": "Sipariş verildi",
-  "@uiCalendarStateOrdered": {
-    "description": "ui.calendar.state_ordered"
-  },
-  "uiCalendarStateDelivered": "Teslim alındı",
-  "@uiCalendarStateDelivered": {
-    "description": "ui.calendar.state_delivered"
   },
   "uiCalendarEmpty": "Bu gün için planlanmış bir şey yok.",
   "@uiCalendarEmpty": {
@@ -1689,115 +1641,11 @@
   "@uiCalendarPlan": {
     "description": "ui.calendar.plan"
   },
-  "uiCalendarAllCoordinatorships": "Tüm koordinatörlükler",
-  "@uiCalendarAllCoordinatorships": {
-    "description": "ui.calendar.all_coordinatorships"
-  },
-  "uiCalendarPreview": "Kayıt önizleme",
-  "@uiCalendarPreview": {
-    "description": "ui.calendar.preview"
-  },
-  "uiCalendarKickerMeeting": "toplantı",
-  "@uiCalendarKickerMeeting": {
-    "description": "ui.calendar.kicker_meeting"
-  },
-  "uiCalendarKickerRequest": "talep",
-  "@uiCalendarKickerRequest": {
-    "description": "ui.calendar.kicker_request"
-  },
-  "uiCalendarKickerSheet": "tablo kaydı",
-  "@uiCalendarKickerSheet": {
-    "description": "ui.calendar.kicker_sheet"
-  },
-  "uiCalendarFactTime": "Zaman",
-  "@uiCalendarFactTime": {
-    "description": "ui.calendar.fact_time"
-  },
-  "uiCalendarFactPlace": "Yer",
-  "@uiCalendarFactPlace": {
-    "description": "ui.calendar.fact_place"
-  },
-  "uiCalendarFactInvited": "Davetli",
-  "@uiCalendarFactInvited": {
-    "description": "ui.calendar.fact_invited"
-  },
-  "uiCalendarFactType": "Tür",
-  "@uiCalendarFactType": {
-    "description": "ui.calendar.fact_type"
-  },
-  "uiCalendarFactCoordinatorship": "Koordinatörlük",
-  "@uiCalendarFactCoordinatorship": {
-    "description": "ui.calendar.fact_coordinatorship"
-  },
-  "uiCalendarFactAmount": "Tutar",
-  "@uiCalendarFactAmount": {
-    "description": "ui.calendar.fact_amount"
-  },
-  "uiCalendarFactState": "Durum",
-  "@uiCalendarFactState": {
-    "description": "ui.calendar.fact_state"
-  },
-  "uiCalendarFactNeed": "İhtiyaç tarihi",
-  "@uiCalendarFactNeed": {
-    "description": "ui.calendar.fact_need"
-  },
-  "uiCalendarFactTask": "Bağlı görev",
-  "@uiCalendarFactTask": {
-    "description": "ui.calendar.fact_task"
-  },
-  "uiCalendarFactTable": "Tablo",
-  "@uiCalendarFactTable": {
-    "description": "ui.calendar.fact_table"
-  },
-  "uiCalendarFactDate": "Tarih",
-  "@uiCalendarFactDate": {
-    "description": "ui.calendar.fact_date"
-  },
-  "uiCalendarFactPerson": "Kişi",
-  "@uiCalendarFactPerson": {
-    "description": "ui.calendar.fact_person"
-  },
-  "uiCalendarQuotePending": "Teklif bekleniyor",
-  "@uiCalendarQuotePending": {
-    "description": "ui.calendar.quote_pending"
-  },
-  "uiCalendarSheetDone": "Yapıldı",
-  "@uiCalendarSheetDone": {
-    "description": "ui.calendar.sheet_done"
-  },
-  "uiCalendarSheetWaiting": "Bekliyor",
-  "@uiCalendarSheetWaiting": {
-    "description": "ui.calendar.sheet_waiting"
-  },
-  "uiCalendarRemind": "Hatırlat",
-  "@uiCalendarRemind": {
-    "description": "ui.calendar.remind"
-  },
-  "uiCalendarReminded": "Katılımcılara hatırlatma gönderildi",
-  "@uiCalendarReminded": {
-    "description": "ui.calendar.reminded"
-  },
-  "uiCalendarWriteGroup": "Gruba yaz",
-  "@uiCalendarWriteGroup": {
-    "description": "ui.calendar.write_group"
-  },
-  "uiCalendarClose": "Kapat",
-  "@uiCalendarClose": {
-    "description": "ui.calendar.close"
-  },
-  "uiCalendarGoTask": "Bağlı göreve git",
-  "@uiCalendarGoTask": {
-    "description": "ui.calendar.go_task"
-  },
-  "uiCalendarGoCoordinatorship": "Koordinatörlüğe git",
-  "@uiCalendarGoCoordinatorship": {
-    "description": "ui.calendar.go_coordinatorship"
-  },
   "uiCalendarPickTitle": "Bir kayıt seç",
   "@uiCalendarPickTitle": {
     "description": "ui.calendar.pick_title"
   },
-  "uiCalendarPickBody": "Soldaki listeden bir göreve dokun, ayrıntısı burada açılır. Toplantı ve talepler önizleme penceresinde açılır.",
+  "uiCalendarPickBody": "Soldaki listeden bir kayda dokun, ayrıntısı burada açılır.",
   "@uiCalendarPickBody": {
     "description": "ui.calendar.pick_body"
   },

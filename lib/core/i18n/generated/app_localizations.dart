@@ -2494,12 +2494,6 @@ abstract class AppLocalizations {
   /// **'kayıt'**
   String get uiCalendarRecordsLc;
 
-  /// ui.calendar.season_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'sezon'**
-  String get uiCalendarSeasonLc;
-
   /// ui.calendar.group_meetings
   ///
   /// In tr, this message translates to:
@@ -2515,32 +2509,8 @@ abstract class AppLocalizations {
   /// ui.calendar.group_requests
   ///
   /// In tr, this message translates to:
-  /// **'talepler'**
+  /// **'tarih talepleri'**
   String get uiCalendarGroupRequests;
-
-  /// ui.calendar.group_sheets
-  ///
-  /// In tr, this message translates to:
-  /// **'tablo kayıtları'**
-  String get uiCalendarGroupSheets;
-
-  /// ui.calendar.participants_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'katılımcı'**
-  String get uiCalendarParticipantsLc;
-
-  /// ui.calendar.agenda_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'gündem'**
-  String get uiCalendarAgendaLc;
-
-  /// ui.calendar.people_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'kişi'**
-  String get uiCalendarPeopleLc;
 
   /// ui.calendar.task_ends
   ///
@@ -2560,59 +2530,17 @@ abstract class AppLocalizations {
   /// **'gecikti'**
   String get uiCalendarLateLc;
 
-  /// ui.calendar.done_lc
+  /// ui.calendar.requested_range
   ///
   /// In tr, this message translates to:
-  /// **'yapıldı'**
-  String get uiCalendarDoneLc;
-
-  /// ui.calendar.req_purchase
-  ///
-  /// In tr, this message translates to:
-  /// **'Satın alma'**
-  String get uiCalendarReqPurchase;
-
-  /// ui.calendar.req_quote
-  ///
-  /// In tr, this message translates to:
-  /// **'Fiyat teklifi'**
-  String get uiCalendarReqQuote;
-
-  /// ui.calendar.req_expense
-  ///
-  /// In tr, this message translates to:
-  /// **'Masraf'**
-  String get uiCalendarReqExpense;
-
-  /// ui.calendar.req_budget
-  ///
-  /// In tr, this message translates to:
-  /// **'Ek bütçe'**
-  String get uiCalendarReqBudget;
+  /// **'İstenen aralık'**
+  String get uiCalendarRequestedRange;
 
   /// ui.calendar.state_pending
   ///
   /// In tr, this message translates to:
   /// **'Onay bekliyor'**
   String get uiCalendarStatePending;
-
-  /// ui.calendar.state_approved
-  ///
-  /// In tr, this message translates to:
-  /// **'Onaylandı'**
-  String get uiCalendarStateApproved;
-
-  /// ui.calendar.state_ordered
-  ///
-  /// In tr, this message translates to:
-  /// **'Sipariş verildi'**
-  String get uiCalendarStateOrdered;
-
-  /// ui.calendar.state_delivered
-  ///
-  /// In tr, this message translates to:
-  /// **'Teslim alındı'**
-  String get uiCalendarStateDelivered;
 
   /// ui.calendar.empty
   ///
@@ -2626,162 +2554,6 @@ abstract class AppLocalizations {
   /// **'Toplantı planla'**
   String get uiCalendarPlan;
 
-  /// ui.calendar.all_coordinatorships
-  ///
-  /// In tr, this message translates to:
-  /// **'Tüm koordinatörlükler'**
-  String get uiCalendarAllCoordinatorships;
-
-  /// ui.calendar.preview
-  ///
-  /// In tr, this message translates to:
-  /// **'Kayıt önizleme'**
-  String get uiCalendarPreview;
-
-  /// ui.calendar.kicker_meeting
-  ///
-  /// In tr, this message translates to:
-  /// **'toplantı'**
-  String get uiCalendarKickerMeeting;
-
-  /// ui.calendar.kicker_request
-  ///
-  /// In tr, this message translates to:
-  /// **'talep'**
-  String get uiCalendarKickerRequest;
-
-  /// ui.calendar.kicker_sheet
-  ///
-  /// In tr, this message translates to:
-  /// **'tablo kaydı'**
-  String get uiCalendarKickerSheet;
-
-  /// ui.calendar.fact_time
-  ///
-  /// In tr, this message translates to:
-  /// **'Zaman'**
-  String get uiCalendarFactTime;
-
-  /// ui.calendar.fact_place
-  ///
-  /// In tr, this message translates to:
-  /// **'Yer'**
-  String get uiCalendarFactPlace;
-
-  /// ui.calendar.fact_invited
-  ///
-  /// In tr, this message translates to:
-  /// **'Davetli'**
-  String get uiCalendarFactInvited;
-
-  /// ui.calendar.fact_type
-  ///
-  /// In tr, this message translates to:
-  /// **'Tür'**
-  String get uiCalendarFactType;
-
-  /// ui.calendar.fact_coordinatorship
-  ///
-  /// In tr, this message translates to:
-  /// **'Koordinatörlük'**
-  String get uiCalendarFactCoordinatorship;
-
-  /// ui.calendar.fact_amount
-  ///
-  /// In tr, this message translates to:
-  /// **'Tutar'**
-  String get uiCalendarFactAmount;
-
-  /// ui.calendar.fact_state
-  ///
-  /// In tr, this message translates to:
-  /// **'Durum'**
-  String get uiCalendarFactState;
-
-  /// ui.calendar.fact_need
-  ///
-  /// In tr, this message translates to:
-  /// **'İhtiyaç tarihi'**
-  String get uiCalendarFactNeed;
-
-  /// ui.calendar.fact_task
-  ///
-  /// In tr, this message translates to:
-  /// **'Bağlı görev'**
-  String get uiCalendarFactTask;
-
-  /// ui.calendar.fact_table
-  ///
-  /// In tr, this message translates to:
-  /// **'Tablo'**
-  String get uiCalendarFactTable;
-
-  /// ui.calendar.fact_date
-  ///
-  /// In tr, this message translates to:
-  /// **'Tarih'**
-  String get uiCalendarFactDate;
-
-  /// ui.calendar.fact_person
-  ///
-  /// In tr, this message translates to:
-  /// **'Kişi'**
-  String get uiCalendarFactPerson;
-
-  /// ui.calendar.quote_pending
-  ///
-  /// In tr, this message translates to:
-  /// **'Teklif bekleniyor'**
-  String get uiCalendarQuotePending;
-
-  /// ui.calendar.sheet_done
-  ///
-  /// In tr, this message translates to:
-  /// **'Yapıldı'**
-  String get uiCalendarSheetDone;
-
-  /// ui.calendar.sheet_waiting
-  ///
-  /// In tr, this message translates to:
-  /// **'Bekliyor'**
-  String get uiCalendarSheetWaiting;
-
-  /// ui.calendar.remind
-  ///
-  /// In tr, this message translates to:
-  /// **'Hatırlat'**
-  String get uiCalendarRemind;
-
-  /// ui.calendar.reminded
-  ///
-  /// In tr, this message translates to:
-  /// **'Katılımcılara hatırlatma gönderildi'**
-  String get uiCalendarReminded;
-
-  /// ui.calendar.write_group
-  ///
-  /// In tr, this message translates to:
-  /// **'Gruba yaz'**
-  String get uiCalendarWriteGroup;
-
-  /// ui.calendar.close
-  ///
-  /// In tr, this message translates to:
-  /// **'Kapat'**
-  String get uiCalendarClose;
-
-  /// ui.calendar.go_task
-  ///
-  /// In tr, this message translates to:
-  /// **'Bağlı göreve git'**
-  String get uiCalendarGoTask;
-
-  /// ui.calendar.go_coordinatorship
-  ///
-  /// In tr, this message translates to:
-  /// **'Koordinatörlüğe git'**
-  String get uiCalendarGoCoordinatorship;
-
   /// ui.calendar.pick_title
   ///
   /// In tr, this message translates to:
@@ -2791,7 +2563,7 @@ abstract class AppLocalizations {
   /// ui.calendar.pick_body
   ///
   /// In tr, this message translates to:
-  /// **'Soldaki listeden bir göreve dokun, ayrıntısı burada açılır. Toplantı ve talepler önizleme penceresinde açılır.'**
+  /// **'Soldaki listeden bir kayda dokun, ayrıntısı burada açılır.'**
   String get uiCalendarPickBody;
 
   /// ui.common.retry

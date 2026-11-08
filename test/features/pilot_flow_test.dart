@@ -48,7 +48,6 @@ void main() {
   ) async {
     useScreen(tester, screen);
     final backend = PilotBackend()..force = true;
-    await backend.useSampleDashboard();
     final h = Harness(handler: backend.handle);
     addTearDown(h.dispose);
     await tester.pumpWidget(
@@ -178,9 +177,10 @@ void main() {
       expect(h.read(appPhaseProvider), AppPhase.scoped);
 
       await _openMenu(tester, screen);
-      // Küçük ekranda çekmecenin son satırı ilk karede kurulmamış olabilir: kaydırılır.
+      // Küçük ekranda çekmecenin son satırı ilk karede kurulmamış ya da kurulu ama görünür
+      // alanın altında olabilir: dokunulabilir olana dek kaydırılır.
       await tester.scrollUntilVisible(
-        find.text(_l.uiIdentitySignOut),
+        find.text(_l.uiIdentitySignOut).hitTestable(),
         200,
         scrollable: find.byType(Scrollable).last,
       );

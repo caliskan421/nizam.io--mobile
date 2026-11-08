@@ -70,6 +70,14 @@ class AppLocalizationsTr extends AppLocalizations {
       'Görüşme bildirimi doğrulanamadı.';
 
   @override
+  String get errCollaborationEditConflict =>
+      'Not siz düzenlerken başkası tarafından değiştirildi; güncel hâlini görüp yeniden deneyin.';
+
+  @override
+  String get errCollaborationIdempotencyKeyReused =>
+      'Bu istek anahtarı farklı bir istekle kullanılmış.';
+
+  @override
   String get errCollaborationInputInvalid => 'Girilen bilgiler geçersiz.';
 
   @override
@@ -80,12 +88,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errCollaborationMeetingNotFound => 'Toplantı bulunamadı.';
 
   @override
-  String get errCollaborationMessageNotFound => 'Mesaj bulunamadı.';
-
-  @override
-  String get errCollaborationMessageUnread => 'Mesaj henüz okunmadı.';
-
-  @override
   String get errCollaborationNotAuthorized => 'Bu işlem için yetkiniz yok.';
 
   @override
@@ -93,6 +95,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errCollaborationNoteConverted => 'Not zaten göreve dönüştürüldü.';
+
+  @override
+  String get errCollaborationNoteDeleted => 'Not silinmiş; işlem yapılamaz.';
 
   @override
   String get errCollaborationNoteImmutable => 'Bu not artık değiştirilemez.';
@@ -106,6 +111,20 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get errCollaborationPermanentRequiresDeleted =>
       'Kalıcı silme için kayıt önce silinmiş olmalı.';
+
+  @override
+  String get errCollaborationRequestKeyInvalid => 'İstek anahtarı geçersiz.';
+
+  @override
+  String get errCollaborationRequestKeyRequired => 'İstek anahtarı gerekli.';
+
+  @override
+  String get errCollaborationRevisionInvalid =>
+      'Düzenleme sürümü geçersiz; kaydı yenileyip yeniden deneyin.';
+
+  @override
+  String get errCollaborationRevisionRequired =>
+      'Düzenleme sürümü gerekli; uygulamayı güncelleyin.';
 
   @override
   String get errCollaborationScopeInvalid =>
@@ -210,6 +229,77 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errIdentityWeakPassword => 'Parola yeterince güçlü değil.';
+
+  @override
+  String get errMessagingChatDeleted => 'Sohbet silinmiş; işlem yapılamaz.';
+
+  @override
+  String get errMessagingChatNotFound => 'Sohbet bulunamadı.';
+
+  @override
+  String get errMessagingEditConflict =>
+      'Mesaj siz düzenlerken değiştirildi; güncel hâlini görüp yeniden deneyin.';
+
+  @override
+  String get errMessagingFileRejected => 'Dosya kabul edilmedi.';
+
+  @override
+  String get errMessagingFileTooLarge => 'Dosya çok büyük.';
+
+  @override
+  String get errMessagingIdempotencyKeyReused =>
+      'Bu istek anahtarı farklı bir istekle kullanılmış.';
+
+  @override
+  String get errMessagingInputInvalid => 'Girilen bilgiler geçersiz.';
+
+  @override
+  String get errMessagingInvalidCursor =>
+      'Liste konumu geçersiz; listeyi yenileyin.';
+
+  @override
+  String get errMessagingMemberNotFound => 'Üye bulunamadı.';
+
+  @override
+  String get errMessagingMemberSourceManaged =>
+      'Bu üye grubun kaynağından gelir; elle çıkarılamaz.';
+
+  @override
+  String get errMessagingMessageDeleted => 'Mesaj silinmiş; işlem yapılamaz.';
+
+  @override
+  String get errMessagingMessageNotFound => 'Mesaj bulunamadı.';
+
+  @override
+  String get errMessagingNotAuthorized => 'Bu işlem için yetkiniz yok.';
+
+  @override
+  String get errMessagingPollClosed => 'Anket kapandı.';
+
+  @override
+  String get errMessagingRefNotFound =>
+      'Bu öğe artık yok ya da erişiminiz yok.';
+
+  @override
+  String get errMessagingRequestKeyInvalid => 'İstek anahtarı geçersiz.';
+
+  @override
+  String get errMessagingRequestKeyRequired => 'İstek anahtarı gerekli.';
+
+  @override
+  String get errMessagingRevisionInvalid =>
+      'Düzenleme sürümü geçersiz; mesajı yenileyip yeniden deneyin.';
+
+  @override
+  String get errMessagingRevisionRequired =>
+      'Düzenleme sürümü gerekli; uygulamayı güncelleyin.';
+
+  @override
+  String get errMessagingScopeInvalid =>
+      'Seçili kapsam bu işlem için geçersiz.';
+
+  @override
+  String get errMessagingTaskDeleted => 'Görev silinmiş; işlem yapılamaz.';
 
   @override
   String get errNotificationsInputInvalid => 'Girilen bilgiler geçersiz.';
@@ -490,6 +580,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errRecordsFileNotFound => 'Dosya bulunamadı.';
 
   @override
+  String get errRecordsIdempotencyKeyReused =>
+      'Bu istek anahtarı farklı bir istekle kullanılmış.';
+
+  @override
   String get errRecordsInputInvalid => 'Girilen bilgiler geçersiz.';
 
   @override
@@ -510,6 +604,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errRecordsNotAuthorized => 'Bu işlem için yetkiniz yok.';
+
+  @override
+  String get errRecordsRequestKeyInvalid => 'İstek anahtarı geçersiz.';
+
+  @override
+  String get errRecordsRequestKeyRequired => 'İstek anahtarı gerekli.';
 
   @override
   String get errRecordsTagInvalid => 'Dosya etiketi geçersiz.';
@@ -625,8 +725,16 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bağımlı olunan görev henüz tamamlanmadı.';
 
   @override
+  String get errWorkEditConflict =>
+      'Görev siz düzenlerken başkası tarafından değiştirildi; güncel hâlini görüp yeniden deneyin.';
+
+  @override
   String get errWorkExtendDaysOutOfRange =>
       'Uzatma gün sayısı izin verilen aralıkta değil.';
+
+  @override
+  String get errWorkIdempotencyKeyReused =>
+      'Bu istek anahtarı farklı bir istekle kullanılmış.';
 
   @override
   String get errWorkInputInvalid => 'Girilen bilgiler geçersiz.';
@@ -636,6 +744,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errWorkItemCompleted => 'Görev zaten tamamlandı.';
+
+  @override
+  String get errWorkItemDeleted => 'Görev silinmiş; işlem yapılamaz.';
 
   @override
   String get errWorkItemNotCompleted => 'Görev henüz tamamlanmadı.';
@@ -673,7 +784,21 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errWorkProtectedField => 'Bu alan değiştirilemez.';
 
   @override
+  String get errWorkRequestKeyInvalid => 'İstek anahtarı geçersiz.';
+
+  @override
+  String get errWorkRequestKeyRequired => 'İstek anahtarı gerekli.';
+
+  @override
   String get errWorkRevertReasonRequired => 'Geri alma için gerekçe gerekli.';
+
+  @override
+  String get errWorkRevisionInvalid =>
+      'Düzenleme sürümü geçersiz; görevi yenileyip yeniden deneyin.';
+
+  @override
+  String get errWorkRevisionRequired =>
+      'Düzenleme sürümü gerekli; uygulamayı güncelleyin.';
 
   @override
   String get errWorkStaleCompletion =>
@@ -724,8 +849,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errClientNotSignedIn => 'Bu işlem için giriş yapılmalı.';
 
   @override
+  String get errClientOutcomeUnknown =>
+      'Gönderildi mi bilinmiyor. Aynı isteği yeniden deneyin; kayıt iki kez oluşmaz.';
+
+  @override
   String get errClientReauthRequired =>
       'Oturum doğrulanamadı. Güvenliğiniz için yeniden giriş yapın.';
+
+  @override
+  String get errClientRequestNotResent =>
+      'İstek tekrar gönderilemedi; işlemi yeniden başlatın.';
 
   @override
   String get errClientScopeChanged =>
@@ -741,6 +874,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errClientServerNotVerified => 'Önce sunucu adresi doğrulanmalı.';
+
+  @override
+  String get errClientServerOutdated =>
+      'Sunucu bu uygulama sürümü için güncellenmeli; değişiklik gönderilmedi.';
 
   @override
   String get errClientServerUnrecognized =>
@@ -1427,13 +1564,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordPeopleTail => 'kişi';
 
   @override
-  String get uiCoordStateActive => 'Aktif';
-
-  @override
   String get uiCoordMessageTeam => 'Ekibe mesaj';
 
   @override
   String get uiCoordAssignTask => 'Görev ata';
+
+  @override
+  String get uiCoordMessage => 'Mesaj';
 
   @override
   String get uiCoordTabsLabel => 'Koordinatörlük bölümleri';
@@ -1538,9 +1675,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordRoleMember => 'üye';
 
   @override
-  String get uiCoordUnassigned => 'Koordinatör atanmamış';
-
-  @override
   String get uiCoordUnassignedHint => 'Görev atanabilmesi için bir sorumlu seç';
 
   @override
@@ -1557,21 +1691,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordCollapse => 'Daralt';
-
-  @override
-  String get uiCoordAbout => 'hakkında';
-
-  @override
-  String get uiCoordFactParent => 'Üst birim';
-
-  @override
-  String get uiCoordFactFounded => 'Kuruluş';
-
-  @override
-  String get uiCoordFactVisibility => 'Görünürlük';
-
-  @override
-  String get uiCoordVisibilityAll => 'Tüm koordinatörler';
 
   @override
   String get uiCoordFeed => 'son etkinlik';
@@ -1612,6 +1731,217 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordNotFound => 'Bu koordinatörlük bulunamadı.';
+
+  @override
+  String get uiCoordAllInArchive => 'Arşivde tümünü gör';
+
+  @override
+  String get uiCoordClear => 'Temizle';
+
+  @override
+  String get uiCoordDaysLaterTail => 'gün sonra';
+
+  @override
+  String get uiCoordDepartmentsTail => 'birim';
+
+  @override
+  String get uiCoordEveryone => 'Herkes';
+
+  @override
+  String get uiCoordFilter => 'Görevleri süz';
+
+  @override
+  String get uiCoordFilterPerson => 'atanan kişi';
+
+  @override
+  String get uiCoordFilterStatus => 'durum';
+
+  @override
+  String get uiCoordGroupLeads => 'koordinatörler';
+
+  @override
+  String get uiCoordGroupMembers => 'üyeler';
+
+  @override
+  String get uiCoordInvited => 'Davetli';
+
+  @override
+  String get uiCoordKindDoc => 'Belge';
+
+  @override
+  String get uiCoordKindImage => 'Görsel';
+
+  @override
+  String get uiCoordKindPdf => 'PDF';
+
+  @override
+  String get uiCoordLater => 'sonra';
+
+  @override
+  String get uiCoordLeadRole => 'Koordinatör';
+
+  @override
+  String get uiCoordLeadsTail => 'koordinatör';
+
+  @override
+  String get uiCoordMemberRole => 'Üye';
+
+  @override
+  String get uiCoordMembersTail => 'üye';
+
+  @override
+  String get uiCoordNext => 'Sıradaki';
+
+  @override
+  String get uiCoordNoFiles => 'Bu birimin arşivinde dosya yok.';
+
+  @override
+  String get uiCoordNoMeetings =>
+      'Bu birimin toplantısı yok. Sağ üstten planlayabilirsin.';
+
+  @override
+  String get uiCoordNoMeetingsPlanned => 'planlı toplantı yok';
+
+  @override
+  String get uiCoordNoMembers => 'Bu birimde henüz kimse yok.';
+
+  @override
+  String get uiCoordNoOpen => 'açık görevi yok';
+
+  @override
+  String get uiCoordNoTasks => 'Bu süzgeçte görev yok.';
+
+  @override
+  String get uiCoordOpenInTasks => 'Görevler sayfasında aç';
+
+  @override
+  String get uiCoordOpenTail => 'açık';
+
+  @override
+  String get uiCoordOpenTasksTail => 'açık görev';
+
+  @override
+  String get uiCoordOvTeam => 'Ekip';
+
+  @override
+  String get uiCoordOwner => 'Sahip';
+
+  @override
+  String get uiCoordPastMeetings => 'Geçmiş toplantılar';
+
+  @override
+  String get uiCoordPastTail => 'geçmiş';
+
+  @override
+  String get uiCoordPersonLateTail => 'görevi gecikmede';
+
+  @override
+  String get uiCoordPersonMessage => 'Mesaj gönder';
+
+  @override
+  String get uiCoordPersonTasks => 'Görevlerini gör';
+
+  @override
+  String get uiCoordRecentFiles => 'son yüklenenler';
+
+  @override
+  String get uiCoordStAll => 'Tümü';
+
+  @override
+  String get uiCoordStDone => 'Tamamlandı';
+
+  @override
+  String get uiCoordStLate => 'Gecikmede';
+
+  @override
+  String get uiCoordStOpen => 'Açık';
+
+  @override
+  String get uiCoordStRequest => 'Tarih talebi';
+
+  @override
+  String get uiCoordStReview => 'Onay bekleyen';
+
+  @override
+  String get uiCoordStTodo => 'Başlamadı';
+
+  @override
+  String get uiCoordTabArchive => 'Arşiv';
+
+  @override
+  String get uiCoordTabMeetings => 'Toplantı';
+
+  @override
+  String get uiCoordTabMembers => 'Üyeler';
+
+  @override
+  String get uiCoordTabTasks => 'Görevler';
+
+  @override
+  String get uiCoordToastUpload => 'Dosya yükleme görev ayrıntısından yapılır';
+
+  @override
+  String get uiCoordToday => 'bugün';
+
+  @override
+  String get uiCoordTomorrow => 'yarın';
+
+  @override
+  String get uiCoordUpcomingTail => 'yaklaşan';
+
+  @override
+  String get uiCoordUpload => 'Dosya yükle';
+
+  @override
+  String get uiCoordFlow => 'Akış';
+
+  @override
+  String get uiCoordFlowSub => 'teslimler ve toplantılar';
+
+  @override
+  String get uiCoordTodayPill => 'Bugün';
+
+  @override
+  String get uiCoordDaysAgoTail => 'gün geçti';
+
+  @override
+  String get uiCoordDaysTail => 'gün';
+
+  @override
+  String get uiCoordMeetingTag => 'toplantı';
+
+  @override
+  String get uiCoordDeadlineTag => 'teslim';
+
+  @override
+  String get uiCoordNobody => 'atanmamış';
+
+  @override
+  String get uiCoordLoad => 'İş yükü';
+
+  @override
+  String get uiCoordLoadDone => 'biten';
+
+  @override
+  String get uiCoordLateTasksTail => 'görev gecikmede';
+
+  @override
+  String get uiCoordOnTime => 'zamanında';
+
+  @override
+  String get uiCoordFinishedTail => 'görev bitirdi';
+
+  @override
+  String get uiCoordNoLoad => 'Bu birimde atanmış görev yok.';
+
+  @override
+  String get uiCoordAllTeam => 'Tüm ekip';
+
+  @override
+  String get uiCoordActivity => 'Son hareketler';
+
+  @override
+  String get uiCoordNoActivity => 'Henüz hareket yok.';
 
   @override
   String get uiFeedbackLoading => 'Yükleniyor';
@@ -1705,6 +2035,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeCoordinatorshipsLc => 'koordinatörlük';
 
   @override
+  String get uiHomeTeamTotal => 'Toplam üye';
+
+  @override
   String get uiHomeRoleAdmin => 'Admin';
 
   @override
@@ -1759,22 +2092,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeSortAscending => 'küçükten büyüğe';
 
   @override
-  String get uiHomeFilterLabel => 'Koordinatörlük durumu';
-
-  @override
-  String get uiHomeFilterAll => 'Tümü';
-
-  @override
-  String get uiHomeFilterLate => 'Gecikmesi olan';
-
-  @override
-  String get uiHomeFilterOnTrack => 'Yolunda';
-
-  @override
-  String get uiHomeFilterUnassigned => 'Koordinatörsüz';
-
-  @override
-  String get uiHomeFilterEmpty => 'Bu filtreye uyan koordinatörlük yok.';
+  String get uiHomeCoordinatorshipsEmpty => 'Bu programda koordinatörlük yok.';
 
   @override
   String get uiHomeUnassigned => 'Koordinatör atanmamış';
@@ -1834,9 +2152,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeModuleHome => 'Ana sayfa';
 
   @override
-  String get uiHomeModuleTracking => 'İş takibi';
-
-  @override
   String get uiHomeModuleTasks => 'Görevler';
 
   @override
@@ -1856,12 +2171,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiHomeModuleSheets => 'Tablolar';
-
-  @override
-  String get uiHomeModuleRequests => 'Talepler';
-
-  @override
-  String get uiHomeModuleBudget => 'Bütçe';
 
   @override
   String get uiHomeModuleUsers => 'Kullanıcılar';
@@ -2025,6 +2334,440 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiListsTruncated =>
       'Liste kısaltıldı; yalnız ilk kayıtlar gösteriliyor.';
+
+  @override
+  String get uiMeetingsTitle => 'Toplantılar';
+
+  @override
+  String get uiMeetingsSearch => 'Ara';
+
+  @override
+  String get uiMeetingsSearchLabel => 'Toplantılarda ara';
+
+  @override
+  String get uiMeetingsSearchHint => 'Başlık ya da koordinatörlük kodu';
+
+  @override
+  String get uiMeetingsNew => 'Yeni toplantı';
+
+  @override
+  String get uiMeetingsListLabel => 'Toplantı listesi';
+
+  @override
+  String get uiMeetingsTabUpcoming => 'Yaklaşan';
+
+  @override
+  String get uiMeetingsTabPast => 'Geçmiş';
+
+  @override
+  String get uiMeetingsTabDeleted => 'Silinenler';
+
+  @override
+  String get uiMeetingsGroupToday => 'Bugün';
+
+  @override
+  String get uiMeetingsGroupTomorrow => 'Yarın';
+
+  @override
+  String get uiMeetingsGroupThisWeek => 'Bu hafta';
+
+  @override
+  String get uiMeetingsGroupNextWeek => 'Gelecek hafta';
+
+  @override
+  String get uiMeetingsGroupLater => 'Daha sonra';
+
+  @override
+  String get uiMeetingsYesterday => 'Dün';
+
+  @override
+  String get uiMeetingsEmptyUpcoming =>
+      'Yaklaşan toplantı yok. Yeni bir toplantı açabilirsin.';
+
+  @override
+  String get uiMeetingsEmptyPast => 'Geçmiş toplantı yok.';
+
+  @override
+  String get uiMeetingsEmptyDeleted => 'Silinmiş toplantı yok.';
+
+  @override
+  String get uiMeetingsEmptyFilter => 'Bu filtreyle eşleşen toplantı yok.';
+
+  @override
+  String get uiMeetingsPastNote =>
+      'Geçmiş tarihe toplantı açılamaz; tarih yalnız ileri alınabilir.';
+
+  @override
+  String get uiMeetingsTruncated =>
+      'Liste sınırına ulaşıldı; daha eski toplantılar gösterilmiyor.';
+
+  @override
+  String get uiMeetingsOwnerPrefix => 'Sahip:';
+
+  @override
+  String get uiMeetingsInvitedTail => 'koordinatörlük davetli';
+
+  @override
+  String get uiMeetingsDeletedPrefix => 'Silindi';
+
+  @override
+  String get uiMeetingsRestore => 'Geri yükle';
+
+  @override
+  String get uiMeetingsPurge => 'Kalıcı olarak sil';
+
+  @override
+  String get uiMeetingsPurgeQ => 'Toplantı kalıcı olarak silinsin mi?';
+
+  @override
+  String get uiMeetingsPurgeDesc =>
+      'Notlar, gündem ve koordinatörlük bağları da silinir. Bu işlem geri alınamaz.';
+
+  @override
+  String get uiMeetingsTRestored =>
+      'Toplantı geri yüklendi · konferans kayıtları geri gelmez';
+
+  @override
+  String get uiMeetingsTPurged => 'Toplantı kalıcı olarak silindi';
+
+  @override
+  String get uiMeetingsMore => 'Diğer işlemler';
+
+  @override
+  String get uiMeetingsNotFound => 'Toplantı bulunamadı.';
+
+  @override
+  String get uiMeetingsVisMembers => 'Üyeler dahil';
+
+  @override
+  String get uiMeetingsVisLeads => 'Yalnız koordinatörler';
+
+  @override
+  String get uiMeetingsConfLabel => 'Konferans';
+
+  @override
+  String get uiMeetingsConfLive => 'Canlı';
+
+  @override
+  String get uiMeetingsConfSince => 'Başladı';
+
+  @override
+  String get uiMeetingsConfStarting => 'Başlatılıyor';
+
+  @override
+  String get uiMeetingsConfStartingSub =>
+      'Oda açılıyor; birazdan katılabilirsin.';
+
+  @override
+  String get uiMeetingsConfEnding => 'Kapanıyor';
+
+  @override
+  String get uiMeetingsConfEndingSub => 'Konferans bitirildi, oda kapanıyor.';
+
+  @override
+  String get uiMeetingsConfNone => 'Henüz başlamadı';
+
+  @override
+  String get uiMeetingsConfNoneSub =>
+      'Konferans toplantı saatinde başlatılabilir · en çok 25 kişi.';
+
+  @override
+  String get uiMeetingsConfLateSub =>
+      'Toplantı saati geçti, konferans başlatılmadı.';
+
+  @override
+  String get uiMeetingsConfOff => 'Görüntülü konferans bu sunucuda kapalı.';
+
+  @override
+  String get uiMeetingsConfStart => 'Toplantıyı başlat';
+
+  @override
+  String get uiMeetingsConfEnd => 'Konferansı bitir';
+
+  @override
+  String get uiMeetingsConfJoin => 'Katıl';
+
+  @override
+  String get uiMeetingsConfJoinSoon => 'Görüntülü görüşme ekranı yakında';
+
+  @override
+  String get uiMeetingsTConfStarted => 'Konferans başlatıldı';
+
+  @override
+  String get uiMeetingsTConfEnded => 'Konferans herkes için bitirildi';
+
+  @override
+  String get uiMeetingsTabsLabel => 'Toplantı ayrıntısı';
+
+  @override
+  String get uiMeetingsTabAgenda => 'Gündem';
+
+  @override
+  String get uiMeetingsTabNotes => 'Notlar';
+
+  @override
+  String get uiMeetingsTabPeople => 'Kişiler';
+
+  @override
+  String get uiMeetingsTabInfo => 'Bilgi';
+
+  @override
+  String get uiMeetingsAgendaTitle => 'Gündem';
+
+  @override
+  String get uiMeetingsAgendaAdd => 'Gündem maddesi ekle';
+
+  @override
+  String get uiMeetingsAdd => 'Ekle';
+
+  @override
+  String get uiMeetingsAgendaOfTail => 'maddeden';
+
+  @override
+  String get uiMeetingsAgendaDoneTail => 'tamamlandı';
+
+  @override
+  String get uiMeetingsAgendaDeleteTail => 'maddesini sil';
+
+  @override
+  String get uiMeetingsAgendaEmpty => 'Gündem maddesi yok.';
+
+  @override
+  String get uiMeetingsAgendaLimit => '50 madde sınırına ulaşıldı';
+
+  @override
+  String get uiMeetingsTAgendaDeleted => 'Gündem maddesi silindi';
+
+  @override
+  String get uiMeetingsNfLabel => 'Not süzgeci';
+
+  @override
+  String get uiMeetingsNfAll => 'Tümü';
+
+  @override
+  String get uiMeetingsNfConverted => 'Göreve dönüşen';
+
+  @override
+  String get uiMeetingsNfMine => 'Benim';
+
+  @override
+  String get uiMeetingsNoteLabel => 'Not ekle';
+
+  @override
+  String get uiMeetingsNoteHint => 'Toplantıda konuşulanı not al…';
+
+  @override
+  String get uiMeetingsNoteFooter => 'Katılan herkes not ekleyebilir';
+
+  @override
+  String get uiMeetingsNoteEdit => 'Notu düzenle';
+
+  @override
+  String get uiMeetingsNoteDelete => 'Notu sil';
+
+  @override
+  String get uiMeetingsNoteDeleteQ => 'Not silinsin mi?';
+
+  @override
+  String get uiMeetingsCancel => 'Vazgeç';
+
+  @override
+  String get uiMeetingsSave => 'Kaydet';
+
+  @override
+  String get uiMeetingsDelete => 'Sil';
+
+  @override
+  String get uiMeetingsEdited => 'düzenlendi';
+
+  @override
+  String get uiMeetingsToTask => 'Göreve dönüştür';
+
+  @override
+  String get uiMeetingsConverted => 'Göreve dönüştü';
+
+  @override
+  String get uiMeetingsNotesEmpty =>
+      'Henüz not yok. Toplantıda konuşulanları buraya yaz.';
+
+  @override
+  String get uiMeetingsNotesEmptyFilter => 'Bu filtrede not yok.';
+
+  @override
+  String get uiMeetingsTNoteDeleted => 'Not silindi';
+
+  @override
+  String get uiMeetingsRoleAdmin => 'Admin';
+
+  @override
+  String get uiMeetingsRoleCoordinator => 'Koordinatör';
+
+  @override
+  String get uiMeetingsRoleMember => 'Üye';
+
+  @override
+  String get uiMeetingsUnknownPerson => 'Bilinmeyen kişi';
+
+  @override
+  String get uiMeetingsPeopleTail => 'katılımcı';
+
+  @override
+  String get uiMeetingsRemovePerson => 'Toplantıdan çıkar';
+
+  @override
+  String get uiMeetingsTRemovedTail => 'toplantıdan çıkarıldı';
+
+  @override
+  String get uiMeetingsMembersTail => 'üye';
+
+  @override
+  String get uiMeetingsOtherGroup => 'Diğer';
+
+  @override
+  String get uiMeetingsPeopleEmpty => 'Henüz katılımcı eklenmedi.';
+
+  @override
+  String get uiMeetingsAddPeopleTitle => 'Katılımcı ekle';
+
+  @override
+  String get uiMeetingsAddPeopleDesc =>
+      'Toplantıya bağlı koordinatörlüklerin ekibinden seç.';
+
+  @override
+  String get uiMeetingsNoCandidates => 'Eklenecek kişi kalmadı.';
+
+  @override
+  String get uiMeetingsTAddedTail => 'kişi eklendi';
+
+  @override
+  String get uiMeetingsTFailedTail => 'kişi eklenemedi';
+
+  @override
+  String get uiMeetingsInfoOwner => 'Sahip';
+
+  @override
+  String get uiMeetingsInfoCreator => 'Açan';
+
+  @override
+  String get uiMeetingsInfoInvite => 'Davet türü';
+
+  @override
+  String get uiMeetingsInfoCreated => 'Oluşturulma';
+
+  @override
+  String get uiMeetingsInfoVisibility => 'Kimler görür';
+
+  @override
+  String get uiMeetingsInfoConference => 'Konferans';
+
+  @override
+  String get uiMeetingsInfoRole => 'Senin rolün';
+
+  @override
+  String get uiMeetingsInviteCoord => 'Koordinatörlük';
+
+  @override
+  String get uiMeetingsUnitTail => 'birim';
+
+  @override
+  String get uiMeetingsVisAllLong => 'Davetli birimlerin tüm üyeleri';
+
+  @override
+  String get uiMeetingsVisLeadsLong => 'Yalnız koordinatörler ve katılımcılar';
+
+  @override
+  String get uiMeetingsConfInfo => 'Görüntülü · en çok 25 kişi';
+
+  @override
+  String get uiMeetingsConfInfoOff => 'Kapalı';
+
+  @override
+  String get uiMeetingsCoordsKicker => 'koordinatörlükler';
+
+  @override
+  String get uiMeetingsOwnerBadge => 'Sahip';
+
+  @override
+  String get uiMeetingsCoordNote =>
+      'İlk koordinatörlük sahiptir. Kümeyi yalnız admin değiştirebilir.';
+
+  @override
+  String get uiMeetingsMenuEdit => 'Toplantıyı düzenle';
+
+  @override
+  String get uiMeetingsMenuDelete => 'Toplantıyı sil';
+
+  @override
+  String get uiMeetingsDeleteQ => 'Toplantı silinsin mi?';
+
+  @override
+  String get uiMeetingsDeleteDesc =>
+      'Toplantı listeden kalkar ve artık değiştirilemez. Admin geri yükleyebilir; konferans kayıtları geri gelmez.';
+
+  @override
+  String get uiMeetingsDeleteLive =>
+      'Konferans canlı: bağlı herkesin bağlantısı kesilir.';
+
+  @override
+  String get uiMeetingsTDeleted => 'Toplantı silindi';
+
+  @override
+  String get uiMeetingsNavUpcomingTail => 'yaklaşan';
+
+  @override
+  String get uiMeetingsStLive => 'CANLI';
+
+  @override
+  String get uiMeetingsStWaiting => 'BEKLİYOR';
+
+  @override
+  String get uiMeetingsStNotHeld => 'YAPILMADI';
+
+  @override
+  String get uiMeetingsStDone => 'BİTTİ';
+
+  @override
+  String get uiMeetingsStatusWaiting => 'Bekliyor';
+
+  @override
+  String get uiMeetingsStatusNotHeld => 'Yapılmadı';
+
+  @override
+  String get uiMeetingsStatusDone => 'Bitti';
+
+  @override
+  String get uiMeetingsMinTail => 'dk';
+
+  @override
+  String get uiMeetingsNoteTail => 'not';
+
+  @override
+  String get uiMeetingsNoNotes => 'not yok';
+
+  @override
+  String get uiMeetingsPersonTail => 'kişi';
+
+  @override
+  String get uiMeetingsAgendaStat => 'gündem';
+
+  @override
+  String get uiMeetingsConnectedTail => 'kişi bağlı';
+
+  @override
+  String get uiMeetingsSinceTail => 'beri';
+
+  @override
+  String get uiMeetingsDeletedBy => 'Sildi:';
+
+  @override
+  String get uiMeetingsChat => 'Toplantı sohbeti';
+
+  @override
+  String get uiMeetingsConfRestart => 'Yeni konferans başlat';
+
+  @override
+  String get uiMeetingsAgendaCheckBlocked =>
+      'Gündemi yönetici ve toplantıya bağlı koordinatörler işaretler.';
 
   @override
   String get uiMessagesTitle => 'Mesajlar';
@@ -2365,7 +3108,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiRouterAssistant => 'Asistana sor';
 
   @override
-  String get uiRouterAssistantSoon => 'Asistan sonraki adımda eklenecek';
+  String get uiRouterAssistantSoon =>
+      'Asistan mobilde sonraki adımda eklenecek';
 
   @override
   String get uiRouterTabHistory => 'Geçmiş';
@@ -2383,14 +3127,18 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiRouterTabMessages => 'Mesajlar';
 
   @override
+  String get uiRouterAssistantSoonTablet =>
+      'Asistan tablette sonraki adımda tasarlanacak';
+
+  @override
+  String get uiRouterAllModules => 'Tüm modüller';
+
+  @override
   String get uiRouterPickTitle => 'Bir kayıt seç';
 
   @override
   String get uiRouterPickBody =>
       'Soldaki listeden bir kayıt seç, ayrıntısı burada açılır.';
-
-  @override
-  String get uiRouterAllModules => 'Tüm modüller';
 
   @override
   String get uiScopeTitle => 'Program seçimi';
@@ -2404,9 +3152,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiScopeEmptyMessage =>
       'Hesabınıza atanmış bir program bulunmuyor. Yöneticinizle görüşün.';
-
-  @override
-  String get uiScopeContinueWithSample => 'Örnek verilerle devam et';
 
   @override
   String get uiScopeTruncated =>
@@ -2726,9 +3471,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksDeletedFilesKept => 'Kanıt dosyaları arşivde kaldı.';
 
   @override
-  String get uiTasksUndo => 'Geri al';
-
-  @override
   String get uiTasksRequestDate => 'Tarih değişikliği iste';
 
   @override
@@ -2898,12 +3640,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksSend => 'Gönder';
 
   @override
-  String get uiTasksInMemory => '✓ Hafızada';
-
-  @override
-  String get uiTasksToMemory => 'Hafızaya ekle';
-
-  @override
   String get uiTasksSheetStatus => 'durum';
 
   @override
@@ -2935,21 +3671,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksFieldCoord => 'Koordinatörlük';
-
-  @override
-  String get uiTasksCoordinatorsLc => 'koordinatörler';
-
-  @override
-  String get uiTasksMembersLc => 'üyeler';
-
-  @override
-  String get uiTasksNoCoordinators => 'Bu koordinatörlükte koordinatör yok.';
-
-  @override
-  String get uiTasksNoMembers => 'Bu koordinatörlükte üye yok.';
-
-  @override
-  String get uiTasksErrAssignOne => 'En az bir kişi ata';
 
   @override
   String get uiTasksErrDates => 'Bitiş, başlangıçtan önce olamaz';
@@ -3027,18 +3748,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksTagUnknown => 'Diğer';
 
   @override
-  String get uiTasksFileName => 'Dosya adı';
-
-  @override
-  String get uiTasksErrFileName => 'Dosya adı gerekli';
-
-  @override
-  String get uiTasksPickFile => 'Fotoğraf çek ya da dosya seç';
-
-  @override
-  String get uiTasksProtoOnly => 'Prototipte yalnızca kayıt oluşturulur.';
-
-  @override
   String get uiTasksUploadOk => 'Yükle';
 
   @override
@@ -3055,23 +3764,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksDeleteOk => 'Sil';
 
   @override
-  String get uiTasksTSubsBlock => 'Alt görevler bitmeden görev tamamlanamaz';
-
-  @override
-  String get uiTasksTFinishedLc => 'bitti';
-
-  @override
-  String get uiTasksTEvidenceBlock =>
-      'Kanıt dosyası olmadan görev tamamlanamaz';
-
-  @override
   String get uiTasksTCreatedTail => 'oluşturuldu';
 
   @override
   String get uiTasksTDeleted => 'Görev silinen kayıtlara taşındı';
-
-  @override
-  String get uiTasksTRestoredTail => 'geri alındı';
 
   @override
   String get uiTasksTUpdatedTail => 'güncellendi';
@@ -3112,10 +3808,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksTSubFileKept => 'kanıt dosyası arşivde kaldı';
-
-  @override
-  String get uiTasksTNoteMemory =>
-      'Not kurumsal hafızaya deneyim olarak eklendi';
 
   @override
   String get uiTasksRevertTitle => 'Tamamlanmış görevi yeniden aç';
@@ -3217,9 +3909,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksErrCoord => 'Koordinatörlük seç.';
-
-  @override
-  String get uiTasksErrAssignee => 'En az bir kişi ata.';
 
   @override
   String get uiTasksErrDatesFull => 'Bitiş, başlangıçtan önce olamaz.';
@@ -3436,6 +4125,81 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiTasksDepartmentFilterCleared =>
       'Seçili departman artık bu programda yok; süzgeç temizlendi.';
+
+  @override
+  String get uiTasksNoteTaskTitle => 'Notu göreve dönüştür';
+
+  @override
+  String get uiTasksNoteTaskDesc =>
+      'Görev bu nottan açılır ve nota bağlanır. Atanan kişiye bildirim gider.';
+
+  @override
+  String get uiTasksMtEditTitle => 'Toplantıyı düzenle';
+
+  @override
+  String get uiTasksMtEditDesc =>
+      'Katılımcılar ve gündem toplantı ayrıntısında yönetilir.';
+
+  @override
+  String get uiTasksTMeetingSaved => 'Toplantı güncellendi';
+
+  @override
+  String get uiTasksErrMtOwner => 'Sahip koordinatörlüğü seç.';
+
+  @override
+  String get uiTasksRowOwner => 'Sahip koordinatörlük';
+
+  @override
+  String get uiTasksSubCheckBlocked =>
+      'Alt görevi atanan kişi ya da departman koordinatörü işaretler; yönetici ekip satırı olmadan işaretleyemez.';
+
+  @override
+  String get uiTasksConflictTitle => 'Görev siz düzenlerken değişti';
+
+  @override
+  String get uiTasksConflictDesc =>
+      'Aynı alanı başkası da değiştirdi. Her alan için hangi değerin kalacağını seçin; diğer alanlar korunur.';
+
+  @override
+  String get uiTasksConflictBase => 'Açtığınızda';
+
+  @override
+  String get uiTasksConflictMine => 'Sizin değeriniz';
+
+  @override
+  String get uiTasksConflictServer => 'Sunucudaki değer';
+
+  @override
+  String get uiTasksConflictKeepMine => 'Benimkini tut';
+
+  @override
+  String get uiTasksConflictTakeServer => 'Sunucudakini al';
+
+  @override
+  String get uiTasksConflictPending =>
+      'Kaydetmeden önce işaretli alanlar için seçim yapın';
+
+  @override
+  String get uiTasksTextConflictTitle => 'Metin siz düzenlerken değişti';
+
+  @override
+  String get uiTasksTextConflictDesc =>
+      'Sunucudaki metin sizinkinden farklı. Hangisi kalsın?';
+
+  @override
+  String get uiTasksRetryAfterHead => 'Yeniden denemek için';
+
+  @override
+  String get uiTasksRetryAfterTail => 'sn bekleyin';
+
+  @override
+  String get uiTasksEmptyValue => '—';
+
+  @override
+  String get uiTasksConflictOn => 'Açık';
+
+  @override
+  String get uiTasksConflictOff => 'Kapalı';
 
   @override
   String get uiTimelineTitle => 'Zaman çizelgesi';
@@ -3713,16 +4477,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTimelineOpen => 'aç';
 
   @override
-  String get uiTimelineGanttBack => 'Görevler';
-
-  @override
-  String get uiTimelineGanttBackLabel => 'Geri: Görevler';
-
-  @override
   String get uiTimelineGanttFilter => 'Görev filtresi';
 
   @override
-  String get uiTimelineGanttScaleSeason => 'Sezon';
+  String get uiTimelineGanttZoomDaily => 'Günlük';
+
+  @override
+  String get uiTimelineGanttZoomWeekly => 'Haftalık';
 
   @override
   String get uiTimelineGanttAllCoords => 'Tüm koordinatörlükler';
@@ -3744,9 +4505,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTimelineGanttLegendLate => 'Gecikme';
-
-  @override
-  String get uiTimelineGanttLegendFest => 'Teknofest günleri';
 
   @override
   String get uiTimelineGanttCardStatus => 'durum';

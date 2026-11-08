@@ -44,6 +44,12 @@ class RecordingAppNav implements NzAppNav {
   void openArchiveFolder(String code) => calls.add('folder:$code');
 
   @override
+  void openMeetings() => calls.add('meetings');
+
+  @override
+  void openMeeting(String id) => calls.add('meeting:$id');
+
+  @override
   void openMessages() => calls.add('messages');
 
   @override

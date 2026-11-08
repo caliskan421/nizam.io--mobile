@@ -1,59 +1,104 @@
-// calendarIndexProvider: kaynaklar + görevler sayfasıyla aynı görev kataloğu; katalog
-// komutları takvime yansır, kaynak bir kez yüklenir.
+// calendarIndexProvider: takvim kaynakları + görevler sayfasıyla AYNI görev kataloğu. Katalog
+// komutu (görev tamamlandı) takvime yansır; kaynaklar yalnız bir kez yüklenir.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/features/calendar/application/calendar_index_controller.dart';
 import 'package:nizamio/features/calendar/application/calendar_providers.dart';
-import 'package:nizamio/features/calendar/data/sample/sample_calendar_repository.dart';
 import 'package:nizamio/features/calendar/domain/calendar.dart';
-import 'package:nizamio/features/tasks/data/sample/sample_task_catalog_repository.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
-final class _Counting implements CalendarRepository {
+final _startsFrom = DateTime(2026, 11);
+
+TaskItem _task(String code, {required DateTime start, TaskStatus? status}) =>
+    TaskItem(
+      code: code,
+      title: 'Görev $code',
+      coordinatorship: 'd1',
+      status: status ?? TaskStatus.inProgress,
+      priority: TaskPriority.medium,
+      start: start,
+      due: DateTime(2026, 11, 10),
+      assignees: const [],
+    );
+
+final class _Sources implements CalendarRepository {
   var loads = 0;
 
   @override
-  Future<CalendarSources> load() {
+  Future<CalendarSources> load() async {
     loads++;
-    return const SampleCalendarRepository().load();
+    return CalendarSources(
+      seasons: const [],
+      meetings: const [],
+      requests: const [],
+      sheets: const [],
+      taskStartsFrom: _startsFrom,
+    );
   }
 }
 
+final class _Catalog implements TaskCatalogRepository {
+  @override
+  Future<TaskCatalog> load() async => TaskCatalog(
+    today: DateTime(2026, 11, 5, 14),
+    me: 'me',
+    tasks: [
+      _task('w1', start: DateTime(2026, 11, 2)),
+      // Başlangıcı kaynak sınırından önce: yalnız bitişi düşer.
+      _task('w2', start: DateTime(2026, 10, 1)),
+      // Tamamlanmış görev takvime düşmez.
+      _task('w3', start: DateTime(2026, 11, 3), status: TaskStatus.done),
+    ],
+    people: const [],
+    coordinatorships: const [],
+  );
+}
+
 void main() {
-  late _Counting repo;
+  late _Sources sources;
   late ProviderContainer c;
   setUp(() {
-    repo = _Counting();
+    sources = _Sources();
     c = ProviderContainer(
       overrides: [
-        calendarRepositoryProvider.overrideWithValue(repo),
-        taskCatalogRepositoryProvider.overrideWithValue(
-          SampleTaskCatalogRepository(),
+        calendarRepositoryProvider.overrideWithValue(sources),
+        taskCatalogRepositoryProvider.overrideWithValue(_Catalog()),
+        scopeStateProvider.overrideWith(
+          (ref) => const ScopeSelection(programId: 'p1'),
         ),
-        // Katalog kapsamı izler (kapsam değişince yeniden okunur).
-        scopeStateProvider.overrideWith((ref) => const ScopeSelection()),
       ],
     );
   });
   tearDown(() => c.dispose());
 
-  test('dizin kurulur; bugün kataloğun bugünü', () async {
+  test('dizin kaynaklar + katalogdan kurulur; bugün kataloğun günü', () async {
     final ix = await c.read(calendarIndexProvider.future);
-    expect(ix.today, DateTime(2026, 10, 21));
-    expect(ix.count(DateTime(2026, 10, 29)), 5);
+    expect(ix.today, DateTime(2026, 11, 5));
+    expect(ix.count(DateTime(2026, 11, 10)), 2, reason: 'w1 + w2 bitişi');
+    expect(ix.count(DateTime(2026, 11, 2)), 1, reason: 'w1 başlangıcı');
+    expect(
+      ix.count(DateTime(2026, 10)),
+      0,
+      reason: 'sınırdan önceki başlangıç',
+    );
+    expect(ix.count(DateTime(2026, 11, 3)), 0, reason: 'biten görev yok');
   });
 
   test(
-    'görev kaldırılınca takvim güncellenir; kaynak yeniden yüklenmez',
+    'katalogda görev tamamlanınca takvim güncellenir; kaynak yeniden yüklenmez',
     () async {
       c.listen(calendarIndexProvider, (_, _) {});
       await c.read(calendarIndexProvider.future);
-      c.read(taskCatalogControllerProvider.notifier).remove('SİS-1');
+      final w1 = c.read(taskCatalogControllerProvider).value!.task('w1')!;
+      c
+          .read(taskCatalogControllerProvider.notifier)
+          .applyItem('w1', w1.copyWith(status: TaskStatus.done));
       final ix = await c.read(calendarIndexProvider.future);
-      expect(ix.count(DateTime(2026, 10, 29)), 4);
-      expect(repo.loads, 1);
+      expect(ix.count(DateTime(2026, 11, 10)), 1, reason: 'yalnız w2 bitişi');
+      expect(ix.count(DateTime(2026, 11, 2)), 0);
+      expect(sources.loads, 1);
     },
   );
 }

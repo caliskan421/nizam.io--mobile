@@ -50,7 +50,7 @@ final class CoordinatorshipQueryControllerProvider
 }
 
 String _$coordinatorshipQueryControllerHash() =>
-    r'dc30d4c91825afb111d23b4e7a6b6508aad87e67';
+    r'0fdc646dde672b1e937330b244ec775486bf5c2a';
 
 /// Koordinatörlük listesinin ekran durumu ve komutları (widget'lar yalnız bunları çağırır).
 

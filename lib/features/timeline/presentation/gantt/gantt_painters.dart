@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
@@ -43,7 +44,7 @@ void paintGanttHatch(Canvas canvas, RRect rrect, Color color, double band) {
   canvas.restore();
 }
 
-/// Tarih alanı zemini (tarih alanı koordinatı): Teknofest gölgesi, grup satırı zemini ve özet
+/// Tarih alanı zemini (tarih alanı koordinatı): grup satırı zemini ve özet
 /// çizgisi, seçili satır zemini, haftalık ızgara, gecikme şeritleri. Kaydırmadan bağımsızdır;
 /// yalnız yerleşim ya da renkler değişince yeniden çizilir.
 class GanttBodyPainter extends CustomPainter {
@@ -56,10 +57,6 @@ class GanttBodyPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final c = colors;
     final p = Paint();
-    canvas.drawRect(
-      layout.festival(size.height),
-      p..color = c.danger.withValues(alpha: GanttGeometry.festAlpha),
-    );
     final grid = layout.gridLines.toList();
     for (final b in layout.rows) {
       final row = Rect.fromLTWH(0, b.top, size.width, GanttGeometry.row);
@@ -112,6 +109,148 @@ class GanttBodyPainter extends CustomPainter {
   @override
   bool shouldRepaint(GanttBodyPainter old) =>
       old.layout != layout || old.colors != colors;
+}
+
+/// Seçim halkasının geçişi: [selected] halkaya [fromIn]'den, [previous] halkadan [fromOut]'tan
+/// başlayarak [t] ile (0 → 1, doğrusal) geçer; diğer çubuklarda halka yoktur.
+@immutable
+final class GanttRing {
+  const GanttRing({
+    required this.t,
+    this.selected,
+    this.previous,
+    this.fromIn = 1,
+    this.fromOut = 0,
+  });
+
+  final Animation<double> t;
+  final String? selected;
+  final String? previous;
+  final double fromIn;
+  final double fromOut;
+
+  /// [code] çubuğunun halka saydamlığı (0–1).
+  double alphaOf(String code) => code == selected
+      ? fromIn + (1 - fromIn) * t.value
+      : code == previous
+      ? fromOut * (1 - t.value)
+      : 0;
+
+  @override
+  bool operator ==(Object other) =>
+      other is GanttRing &&
+      other.t == t &&
+      other.selected == selected &&
+      other.previous == previous &&
+      other.fromIn == fromIn &&
+      other.fromOut == fromOut;
+
+  @override
+  int get hashCode => Object.hash(t, selected, previous, fromIn, fromOut);
+}
+
+/// Görev çubukları (tarih alanı koordinatı): yalnız [visible] satırları çizer — durum rengi,
+/// seçili halka ([ring] ile geçişli), sığan başlık çubuğun içinde, sığmayan çubuğun sağında.
+/// Okuyucu düğümleri de yalnız görünür çubuklar içindir ([semantics]; çağıran kurar).
+class GanttBarsPainter extends CustomPainter {
+  GanttBarsPainter({
+    required this.layout,
+    required this.visible,
+    required this.colors,
+    required this.barStyle,
+    required this.outsideStyle,
+    required this.textScaler,
+    required this.ring,
+    required this.semantics,
+  }) : super(repaint: ring.t);
+
+  final GanttLayout layout;
+
+  /// Çizilecek görev satırlarının sırası ([GanttLayout.visibleBars]).
+  final List<int> visible;
+  final NizamioColors colors;
+  final TextStyle barStyle;
+  final TextStyle outsideStyle;
+  final TextScaler textScaler;
+  final GanttRing ring;
+  final List<CustomPainterSemantics> semantics;
+
+  TextPainter _text(String s, TextStyle style, double maxWidth) => TextPainter(
+    text: TextSpan(text: s, style: style),
+    textDirection: TextDirection.ltr,
+    textScaler: textScaler,
+    maxLines: 1,
+    ellipsis: '…',
+  )..layout(maxWidth: math.max(0, maxWidth));
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = colors;
+    final p = Paint();
+    const radius = Radius.circular(GanttGeometry.barRadius);
+    for (final i in visible) {
+      final b = layout.rows[i];
+      if (b.row case GanttTaskRow(:final task)) {
+        final bar = b.bar!;
+        final alpha = ring.alphaOf(task.code);
+        if (alpha > 0) {
+          // `BoxShadow(spreadRadius: 2)`: aynı köşeyle 2 px büyütülmüş dolgu.
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(bar.inflate(GanttGeometry.ring), radius),
+            p..color = c.text.withValues(alpha: c.text.a * alpha),
+          );
+        }
+        final shape = RRect.fromRectAndRadius(bar, radius);
+        canvas.drawRRect(shape, p..color = ganttStatusColor(c, task.status));
+        if (b.inside) {
+          final tp = _text(
+            task.item.title,
+            barStyle,
+            bar.width - 2 * GanttGeometry.barPad,
+          );
+          canvas
+            ..save()
+            ..clipRRect(shape);
+          tp.paint(
+            canvas,
+            Offset(
+              bar.left + GanttGeometry.barPad,
+              bar.top + (bar.height - tp.height) / 2,
+            ),
+          );
+          canvas.restore();
+        }
+      }
+    }
+    for (final i in visible) {
+      final b = layout.rows[i];
+      if (b.row case GanttTaskRow(:final task) when !b.inside) {
+        _text(
+          task.item.title,
+          outsideStyle,
+          GanttGeometry.outsideMax,
+        ).paint(canvas, Offset(b.outsideX, b.top + GanttGeometry.outsideTop));
+      }
+    }
+  }
+
+  @override
+  SemanticsBuilderCallback get semanticsBuilder =>
+      (_) => semantics;
+
+  @override
+  bool shouldRepaint(GanttBarsPainter old) =>
+      old.layout != layout ||
+      !listEquals(old.visible, visible) ||
+      old.colors != colors ||
+      old.barStyle != barStyle ||
+      old.outsideStyle != outsideStyle ||
+      old.textScaler != textScaler ||
+      old.ring != ring;
+
+  @override
+  bool shouldRebuildSemantics(GanttBarsPainter oldDelegate) =>
+      oldDelegate.layout != layout || !listEquals(oldDelegate.visible, visible);
 }
 
 /// Yapışkan tarih başlığının ay adları ve gün işaretleri (tarih alanı koordinatı). Metinler

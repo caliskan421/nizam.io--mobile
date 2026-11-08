@@ -3,7 +3,10 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/layout/nz_pane.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
+import '../../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../tasks/tasks.dart';
@@ -13,143 +16,208 @@ import 'gantt_geometry.dart';
 import 'gantt_painters.dart';
 import 'gantt_texts.dart';
 
-/// Üst başlık (72): "Görevler" geri düğmesi, başlık + sayı satırı, durum süzgeci, ölçek, Bugün.
+/// Üst başlık: liste sayfasıyla aynı "Görevler" başlığı (`NzPageHeader`), altında sayı satırı;
+/// sağda Liste / Zaman çizelgesi anahtarı (listeye dönüş, [onList]), ara ve yetki varsa yeni
+/// görev. Üst boşluk tablet liste bölmesiyle aynıdır (başlık geçişte aynı yerde kalır); eylem
+/// grubu geçişte liste bölmesindeki yerinden kayar ([TasksHeaderSlide]).
 class GanttTopBar extends StatelessWidget {
   const GanttTopBar({
     super.key,
     required this.view,
-    required this.onBack,
+    required this.onList,
+    required this.onSearch,
+    this.onNewTask,
+  });
+
+  final GanttView view;
+  final VoidCallback onList;
+  final VoidCallback onSearch;
+
+  /// null → yeni görev düğmesi yok (yetki yok).
+  final VoidCallback? onNewTask;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final onNewTask = this.onNewTask;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        GanttGeometry.headerPadRight,
+        NzTabletMetrics.paneTop,
+        GanttGeometry.headerPadRight,
+        NizamioSpacing.space3,
+      ),
+      child: NzPageHeader(
+        title: l.uiTasksTitle,
+        subtitle: l.ganttCountLine(view),
+        actions: [
+          TasksHeaderSlide(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TasksModeToggle(
+                  selected: 1,
+                  onSelected: (i) {
+                    if (i == 0) onList();
+                  },
+                ),
+                const Gap(NizamioSpacing.space1),
+                NzIconButton.circle(
+                  icon: NzIcons.search,
+                  semanticLabel: l.uiTasksSearch,
+                  onPressed: onSearch,
+                ),
+                if (onNewTask != null) ...[
+                  const Gap(NizamioSpacing.space1),
+                  NzIconButton.circleAccent(
+                    icon: NzIcons.add,
+                    semanticLabel: l.uiTasksNewTask,
+                    onPressed: onNewTask,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Araç satırı: solda telefondaki gibi tek düğmeli koordinatörlük seçimi ve filtre (seçim
+/// sayısı rozette; alt sayfa açar), sağda ölçek (Günlük / Haftalık) ve Bugün.
+class GanttToolbar extends StatelessWidget {
+  const GanttToolbar({
+    super.key,
+    required this.view,
+    required this.onCoord,
     required this.onFilter,
     required this.onZoom,
     required this.onToday,
   });
 
   final GanttView view;
-  final VoidCallback onBack;
-  final ValueChanged<GanttFilter> onFilter;
+  final VoidCallback onCoord;
+  final VoidCallback onFilter;
   final ValueChanged<GanttZoom> onZoom;
   final VoidCallback onToday;
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        GanttGeometry.headerPadRight,
+        0,
+        GanttGeometry.headerPadRight,
+        NizamioSpacing.space3,
+      ),
+      child: Row(
+        children: [
+          _ToolButton(
+            icon: NzIcons.coordinatorships,
+            label: l.uiTimelineCoord,
+            count: view.state.coords.length,
+            onTap: onCoord,
+          ),
+          const Gap(NizamioSpacing.space2),
+          _ToolButton(
+            icon: NzIcons.filter,
+            label: l.uiTimelineFilters,
+            count: view.state.filter == GanttFilter.all ? 0 : 1,
+            accent: true,
+            onTap: onFilter,
+          ),
+          const Spacer(),
+          GanttSegments<GanttZoom>(
+            label: l.uiTimelineScale,
+            values: GanttZoom.values,
+            selected: view.state.zoom,
+            labelOf: l.ganttZoomLabel,
+            onSelected: onZoom,
+          ),
+          const Gap(NizamioSpacing.space3),
+          _ToolButton(label: l.uiTimelineToday, onTap: onToday),
+        ],
+      ),
+    );
+  }
+}
+
+/// Araç satırı düğmesi (kapsül, Bugün düğmesiyle aynı ölçü): isteğe bağlı ikon ve sayı rozeti
+/// (telefondaki yüzen düğmelerin rozeti: filtrede vurgu, koordinatörlükte açık zemin).
+class _ToolButton extends StatelessWidget {
+  const _ToolButton({
+    required this.label,
+    required this.onTap,
+    this.icon,
+    this.count = 0,
+    this.accent = false,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final IconData? icon;
+  final int count;
+  final bool accent;
+
+  @override
+  Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
-    final l = context.l10n;
-    return SizedBox(
-      height: GanttGeometry.header,
-      child: Padding(
-        padding: const EdgeInsets.only(
-          left: GanttGeometry.headerPadLeft,
-          right: GanttGeometry.headerPadRight,
-        ),
-        child: Row(
-          children: [
-            Semantics(
-              button: true,
-              label: l.uiTimelineGanttBackLabel,
-              excludeSemantics: true,
-              onTap: onBack,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onBack,
-                child: SizedBox(
-                  height: GanttGeometry.backHeight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: GanttGeometry.backPadLeft,
-                      right: GanttGeometry.backPadRight,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        NzIcon(
-                          NzIcons.back,
-                          size: NizamioSize.iconSize,
-                          color: c.text,
-                        ),
-                        const Gap(NizamioSpacing.space1),
-                        Text(
-                          l.uiTimelineGanttBack,
-                          style: t.list.copyWith(
-                            fontSize: GanttGeometry.backFontSize,
-                          ),
-                        ),
-                      ],
-                    ),
+    final icon = this.icon;
+    return Semantics(
+      button: true,
+      label: count > 0 ? '$label · $count' : label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          height: GanttGeometry.todayButton,
+          padding: const EdgeInsets.symmetric(
+            horizontal: GanttGeometry.todayButtonPad,
+          ),
+          decoration: BoxDecoration(
+            color: c.surface,
+            borderRadius: BorderRadius.circular(NizamioRadius.pill),
+            border: Border.all(color: c.borderControl),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                NzIcon(icon, size: NizamioSize.iconSizeSm, color: c.text),
+                const Gap(NizamioSpacing.space2),
+              ],
+              Text(label, style: t.labelMd),
+              if (count > 0) ...[
+                const Gap(NizamioSpacing.space2),
+                Container(
+                  constraints: const BoxConstraints(
+                    minWidth: GanttGeometry.badge,
                   ),
-                ),
-              ),
-            ),
-            const Gap(NizamioSpacing.space3),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Semantics(
-                    header: true,
-                    child: Text(
-                      l.uiTimelineTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.titleLg.copyWith(
-                        fontSize: GanttGeometry.titleSize,
-                        height:
-                            GanttGeometry.titleLine / GanttGeometry.titleSize,
-                      ),
-                    ),
-                  ),
-                  const Gap(2),
-                  Text(
-                    l.ganttCountLine(view),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: t.monoSm.copyWith(color: c.textFaint),
-                  ),
-                ],
-              ),
-            ),
-            const Gap(NizamioSpacing.space3),
-            GanttSegments<GanttFilter>(
-              label: l.uiTimelineGanttFilter,
-              values: GanttFilter.values,
-              selected: view.state.filter,
-              labelOf: (f) => l.ganttFilterLabel(f, view.lateAll),
-              onSelected: onFilter,
-            ),
-            const Gap(NizamioSpacing.space3),
-            GanttSegments<GanttZoom>(
-              label: l.uiTimelineScale,
-              values: GanttZoom.values,
-              selected: view.state.zoom,
-              labelOf: l.ganttZoomLabel,
-              onSelected: onZoom,
-            ),
-            const Gap(NizamioSpacing.space3),
-            Semantics(
-              button: true,
-              label: l.uiTimelineToday,
-              excludeSemantics: true,
-              onTap: onToday,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onToday,
-                child: Container(
-                  height: GanttGeometry.todayButton,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: GanttGeometry.todayButtonPad,
+                    horizontal: NizamioSpacing.space1,
                   ),
                   alignment: Alignment.center,
+                  height: GanttGeometry.badge,
                   decoration: BoxDecoration(
-                    color: c.surface,
+                    color: accent ? c.primary : c.text,
                     borderRadius: BorderRadius.circular(NizamioRadius.pill),
-                    border: Border.all(color: c.borderControl),
                   ),
-                  child: Text(l.uiTimelineToday, style: t.labelMd),
+                  child: Text(
+                    '$count',
+                    style: t.caption.copyWith(
+                      color: accent ? c.onPrimary : c.background,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -239,109 +307,7 @@ class GanttSegments<T> extends StatelessWidget {
   }
 }
 
-/// Koordinatörlük çipleri (prototip `coordChips`): "Tüm koordinatörlükler" + kodlar; çoklu
-/// seçim, yatay kayar. Kodun tam adı ipucudur (`title`).
-class GanttCoordChips extends StatelessWidget {
-  const GanttCoordChips({
-    super.key,
-    required this.view,
-    required this.onAll,
-    required this.onToggle,
-  });
-
-  final GanttView view;
-  final VoidCallback onAll;
-  final ValueChanged<String> onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    return SizedBox(
-      height: GanttGeometry.chip + NizamioSpacing.space3,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(
-          left: GanttGeometry.headerPadRight,
-          right: GanttGeometry.headerPadRight,
-          bottom: NizamioSpacing.space3,
-        ),
-        children: [
-          _Chip(
-            label: l.uiTimelineGanttAllCoords,
-            tooltip: l.uiTimelineGanttAllCoords,
-            selected: view.state.coords.isEmpty,
-            onTap: onAll,
-          ),
-          for (final c in view.chips) ...[
-            const Gap(GanttGeometry.chipGap),
-            _Chip(
-              label: c.code,
-              tooltip: c.name,
-              selected: c.selected,
-              onTap: () => onToggle(c.code),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({
-    required this.label,
-    required this.tooltip,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final String tooltip;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    final d = NzMotion.of(context, GanttGeometry.chipDuration);
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: label,
-      tooltip: tooltip,
-      excludeSemantics: true,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: d,
-          height: GanttGeometry.chip,
-          padding: const EdgeInsets.symmetric(
-            horizontal: GanttGeometry.chipPad,
-          ),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: selected ? c.text : c.surfaceRaised,
-            borderRadius: BorderRadius.circular(NizamioRadius.pill),
-          ),
-          child: AnimatedDefaultTextStyle(
-            duration: d,
-            style: (selected ? t.labelMd : t.list).copyWith(
-              fontSize: GanttGeometry.chipFontSize,
-              height: t.labelMd.height,
-              color: selected ? c.background : c.textMuted,
-            ),
-            child: Text(label, maxLines: 1, softWrap: false),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Lejant (40): beş durum, gecikme deseni; sağda Teknofest günleri.
+/// Lejant (40): beş durum, gecikme deseni.
 class GanttLegend extends StatelessWidget {
   const GanttLegend({super.key});
 
@@ -386,11 +352,6 @@ class GanttLegend extends StatelessWidget {
           item(
             CustomPaint(painter: GanttHatchSwatchPainter(c.ganttLate)),
             l.uiTimelineGanttLegendLate,
-          ),
-          const Spacer(),
-          item(
-            solid(c.danger.withValues(alpha: GanttGeometry.festLegendAlpha)),
-            l.uiTimelineGanttLegendFest,
           ),
         ],
       ),

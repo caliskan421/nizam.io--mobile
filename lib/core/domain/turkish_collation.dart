@@ -1,3 +1,7 @@
+/// Türkçe küçük harf (`I` → `ı`, `İ` → `i`; arama ve karşılaştırma için).
+String trLower(String s) =>
+    s.replaceAll('I', 'ı').replaceAll('İ', 'i').toLowerCase();
+
 /// Türkçe alfabe sırasıyla karşılaştırma (`String.compareTo` kod birimine bakar: Ç, Ğ, İ, Ö, Ş,
 /// Ü sona düşer, I/ı ayrımı kaybolur). Büyük/küçük harf duyarsızdır; alfabe dışı karakterler
 /// kod birimiyle, Türkçe harflerden sonra sıralanır. Eşitlikte özgün dizeler karşılaştırılır

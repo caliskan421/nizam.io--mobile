@@ -11,6 +11,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
+import 'package:nizamio/core/session/session_controller.dart';
+import 'package:nizamio/core/session/token_store.dart';
+import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/features/scope/application/home_dashboard_controller.dart';
 import 'package:nizamio/features/scope/application/scope_providers.dart';
 import 'package:nizamio/features/scope/domain/home_dashboard.dart';
@@ -106,18 +109,18 @@ class _Pages implements TaskListRepository {
       calls[i].$2.completeError(ApiError('work.program_scope_invalid'));
 }
 
-/// Ayrıntı kaynağı: istenen görevleri kaydeder (ayrıntı yok → null).
+/// Ayrıntı kaynağı: istenen görevleri kaydeder (boş ayrıntı).
 class _Details implements TaskDetailsRepository {
   final List<String> loaded = [];
 
   @override
-  Future<TaskDetails?> load(TaskItem task, {TaskAccess? access}) async {
+  Future<TaskDetails> load(TaskItem task, {TaskAccess? access}) async {
     loaded.add(task.code);
-    return null;
+    return TaskDetails(subtasks: const [], notes: const [], files: const []);
   }
 
   @override
-  Future<TaskItem?> loadItem(TaskItem task) async => null;
+  Future<TaskItem> loadItem(TaskItem task) async => task;
 }
 
 class _Home implements HomeDashboardRepository {
@@ -150,6 +153,13 @@ void main() {
       retry: (_, _) => null,
       overrides: [
         scopeControllerProvider.overrideWithValue(scope),
+        // Yeni görev taslağı oturum neslini izler (S12).
+        sessionControllerProvider.overrideWithValue(
+          SessionController(
+            TokenStore(MemorySecureStore()),
+            (_, _) => throw StateError('yok'),
+          ),
+        ),
         taskCatalogRepositoryProvider.overrideWithValue(catalog),
         taskListRepositoryProvider.overrideWithValue(pages),
         homeDashboardRepositoryProvider.overrideWithValue(_Home()),

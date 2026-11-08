@@ -9,6 +9,7 @@ import '../../layout/nz_layout.dart';
 import '../../layout/nz_pane.dart';
 import '../../theme/nz_motion.dart';
 import '../../theme/nz_surfaces.dart';
+import '../buttons/nz_button.dart';
 import '../nz_icon.dart';
 import '../nz_icons.dart';
 
@@ -17,6 +18,26 @@ import '../nz_icons.dart';
 typedef NzSheetActionsBuilder = List<Widget> Function(
   BuildContext sheetContext,
 );
+
+/// Alt sayfa "Vazgeç / ana eylem" düğme çifti ([NzBottomSheet.show] `actions`): vazgeç sayfayı
+/// kapatır; [danger] ana eylemi kırmızı yapar.
+List<Widget> nzSheetActions(
+  BuildContext sheet, {
+  required String cancel,
+  required String ok,
+  required VoidCallback? onOk,
+  bool danger = false,
+}) => [
+  NzButton.secondary(
+    label: cancel,
+    expand: true,
+    onPressed: () => Navigator.of(sheet).maybePop(),
+  ),
+  if (danger)
+    NzButton.danger(label: ok, expand: true, onPressed: onOk)
+  else
+    NzButton.primary(label: ok, expand: true, onPressed: onOk),
+];
 
 /// Alt sayfa servisi (durumsuz). Uygulamanın KÖK Navigator'ında açılır: kabuktaki yüzen alt
 /// menü sayfanın ve karartmanın altında kalır (prototip: sayfa z 8, alt menü z 6).
@@ -103,34 +124,38 @@ abstract final class NzBottomSheet {
                         _scrimIn / _sheetIn,
                         curve: Curves.ease,
                       ),
-                      reverseCurve: Curves.ease,
+                      // Kaynak `rpFadeOut` ileri yönde `ease`; geri yönde çevrilmiş okunur.
+                      reverseCurve: Curves.ease.flipped,
                     ),
                     child: ColoredBox(color: c.scrim),
                   ),
                 ),
               ),
-              Dialog(
-                insetPadding: const EdgeInsets.symmetric(
-                  horizontal: NzTabletMetrics.modalEdge,
-                  vertical: NzTabletMetrics.modalVerticalInset / 2,
-                ),
-                // Görünüm (zemin, köşe, kenar) içeriktedir; Dialog yalnız yerleşimdir, böylece
-                // kayma modalın kendi boyu kadardır (`translateY(100%)`), pencere boyu değil.
-                backgroundColor: clear,
-                surfaceTintColor: clear,
-                shadowColor: clear,
-                elevation: 0,
-                child: SizedBox(
-                  width: NzTabletMetrics.modalMaxWidth,
-                  child: SlideTransition(
-                    position: Tween(begin: const Offset(0, 1), end: Offset.zero)
-                        .animate(
-                          CurvedAnimation(
-                            parent: animation,
-                            curve: NizamioMotion.easeSheet,
-                            reverseCurve: NizamioMotion.easeExit,
-                          ),
-                        ),
+              // Kayma pencere boyu kadardır (Dialog pencereyi kaplar): ortadaki modal kapanırken
+              // ekranın altından tamamen çıkar, açılışta dışarıdan gelir. Kaynak `translateY(100%)`
+              // modalın kendi boyudur; ortada duran modal bu mesafede ekranda kalır ve rota
+              // bitince yarı yolda birden kaybolurdu.
+              SlideTransition(
+                position: Tween(begin: const Offset(0, 1), end: Offset.zero)
+                    .animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: NizamioMotion.easeSheet,
+                        reverseCurve: NzMotion.exitReverse,
+                      ),
+                    ),
+                child: Dialog(
+                  insetPadding: const EdgeInsets.symmetric(
+                    horizontal: NzTabletMetrics.modalEdge,
+                    vertical: NzTabletMetrics.modalVerticalInset / 2,
+                  ),
+                  // Görünüm (zemin, köşe, kenar) içeriktedir; Dialog yalnız yerleşimdir.
+                  backgroundColor: clear,
+                  surfaceTintColor: clear,
+                  shadowColor: clear,
+                  elevation: 0,
+                  child: SizedBox(
+                    width: NzTabletMetrics.modalMaxWidth,
                     child: ClipRRect(
                       borderRadius: const BorderRadius.all(
                         Radius.circular(NizamioRadius.sheet),
@@ -165,7 +190,7 @@ abstract final class NzBottomSheet {
         duration: NzMotion.of(context, NizamioMotion.durSheet),
         reverseDuration: NzMotion.of(context, NizamioMotion.durExit),
         curve: NizamioMotion.easeSheet,
-        reverseCurve: NizamioMotion.easeExit,
+        reverseCurve: NzMotion.exitReverse,
       ),
       builder: (sheetContext) => content(sheetContext, modal: false),
     );

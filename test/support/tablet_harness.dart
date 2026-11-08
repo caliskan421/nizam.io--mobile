@@ -6,9 +6,10 @@
 //  - `integration_test/tablet_visual_test.dart`: gerçek iPad simülatörü; görünüm boyutu ASLA
 //    ayarlanmaz, gerçek yüzey çizilir ve ölçüler çalışma anında FlutterView'dan okunup yazılır.
 //
-// Uygulama gerçek `NizamioApp`, gerçek bileşim kökü ([Harness]: bellek depoları + sahte HTTP +
-// örnek veri depoları), sahte backend ([PilotBackend]): bağ doğrulanmış açılır → Giriş ekranı →
-// gerçek giriş akışı (sahte ağ) + program seçimi → ana sayfa. Kapıyı atlayan mod yoktur.
+// Uygulama gerçek `NizamioApp`, gerçek bileşim kökü ([Harness]: bellek depoları + sahte HTTP),
+// sunucu biçimli sahte backend ([TabletBackend]: görevler, koordinatörlükler, Gantt): bağ
+// doğrulanmış açılır → Giriş ekranı → gerçek giriş akışı (sahte ağ) + program seçimi → ana
+// sayfa. Kapıyı atlayan mod yoktur. Değişmez sahneleri `tablet_invariants.dart`'tadır.
 // Gerçek backend'e çıkılmaz. Bugünün tarihi sahtelenmez (üretim kancası yok); Ana sayfa
 // `DateTime.now()` farkı bilinen açık madde.
 //
@@ -40,8 +41,12 @@ import 'package:nizamio/features/messages/messages.dart' show ChatPage;
 import 'package:nizamio/features/timeline/presentation/gantt/gantt_chart.dart'
     show GanttChart;
 
-import '../features/pilot_support.dart' show PilotBackend, real;
+import '../features/pilot_support.dart' show real;
+import 'fake_backend.dart' show FakeHandler;
 import 'harness.dart';
+import 'tablet_backend.dart';
+
+export 'tablet_invariants.dart';
 
 final _l = AppLocalizationsTr();
 
@@ -222,13 +227,17 @@ class TabletSession {
     WidgetTester tester, {
     Size? hostSize,
     ThemeMode theme = ThemeMode.dark,
+    FakeHandler? handler,
   }) async {
     if (hostSize != null) {
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = hostSize;
       addTearDown(tester.view.reset);
     }
-    final h = Harness(flavor: Flavor.dev, handler: PilotBackend().handle);
+    final h = Harness(
+      flavor: Flavor.dev,
+      handler: handler ?? TabletBackend().handle,
+    );
     addTearDown(h.dispose);
     await real(tester, () => h.read(serverBindingProvider).verify(testUrl));
     h.read(themeModeControllerProvider).state.value = theme;
@@ -251,7 +260,10 @@ class TabletSession {
   }
 
   /// Giriş ekranından gerçek akış (sahte ağ): e-posta + parola → "Giriş yap" → program seçimi.
-  Future<void> signIn() async {
+  ///
+  /// [programId] verilirse varsayılan `prog-1` yerine bu sunucu programı seçilir (ölçüm düzeneği:
+  /// görev verisi sunucu sözleşmesi biçiminde sahte HTTP'den gelir).
+  Future<void> signIn({String? programId}) async {
     expect(
       find.byType(LoginPage),
       findsOneWidget,
@@ -261,7 +273,7 @@ class TabletSession {
     await tester.enterText(find.byType(TextFormField).at(1), 'p');
     await tester.tap(find.widgetWithText(NzButton, _l.uiIdentityLoginSubmit));
     await settle();
-    harness.read(scopeControllerProvider).selectSample();
+    harness.read(scopeControllerProvider).selectProgram(programId ?? 'prog-1');
     await settle();
   }
 
@@ -563,20 +575,6 @@ final tabletScenes = <TabletScene>[
     );
     s.expectSplitGeometry();
   }),
-  TabletScene('calendar', (s) async {
-    await s.tapRail(TabletModule.calendar);
-    // Takvim henüz uygulanmadıysa burada KIRMIZI kalır (atlanmaz).
-    await _expectDefaultDetail(s, TabletModule.calendar);
-    expect(
-      s.inPane(NzPaneRole.master, find.text('Takvim')),
-      findsWidgets,
-      reason: 'sol bölme "Takvim" başlığı',
-    );
-    expect(
-      s.inPane(NzPaneRole.master, find.textContaining('Ekim 2026')),
-      findsWidgets,
-    );
-  }),
   TabletScene('coordinatorships', (s) async {
     await s.tapRail(TabletModule.coordinatorships);
     await _expectDefaultDetail(s, TabletModule.coordinatorships);
@@ -776,42 +774,55 @@ Future<List<int>> hostPng(WidgetTester tester) async {
 Finder paneBack(TabletSession s) =>
     s.inPane(NzPaneRole.detail, find.bySemanticsLabel(RegExp(r'^Geri')));
 
-/// Gerçek BAR tıklaması. Çubuk anlamsal sarmalayıcısının merkezi yapışkan etiket sütununun
-/// ARKASINA düşebilir (`warnIfMissed` uyarısı bunun kanıtıydı); kullanıcı çubuğun gerçekten
-/// GÖRÜNEN kısmına basar. Burada: gerekirse görünür yap, çubuk ∩ görünüm penceresi −
-/// yapışkan etiket sütunu (`labelsKey` sağ kenarı) kesişimini ölç, pozitif alanın merkezine
-/// dokun ve dokunuşun yol listesinde ÇUBUĞUN render nesnesi olduğunu kanıtla.
+/// Gerçek BAR tıklaması. Çubuklar tek ressamdadır (`barsKey`); çubuğun yeri çizelgenin
+/// yerleşiminden okunur. Çubuk yapışkan etiket sütununun ARKASINA düşebilir; kullanıcı çubuğun
+/// gerçekten GÖRÜNEN kısmına basar. Burada: gerekirse kullanıcı gibi kaydır, çubuk ∩ görünüm
+/// penceresi − yapışkan etiket sütunu (`labelsKey` sağ kenarı) kesişimini ölç, pozitif alanın
+/// merkezine dokun; dokunuşun çubuk ressamına ulaştığını ve yerleşim aramasının aynı görevi
+/// bulduğunu kanıtla.
 Future<void> tapGanttBar(TabletSession s, String code) async {
   final t = s.tester;
-  final bar = find.byKey(GanttChart.barKey(code));
-  expect(bar, findsOneWidget, reason: 'Gantt çubuğu $code');
+  final chart = find.byType(GanttChart);
+  final bars = find.byKey(GanttChart.barsKey);
+  expect(bars, findsOneWidget, reason: 'Gantt çubukları');
+  final local = t.widget<GanttChart>(chart).layout.barOf(code);
+  expect(local, isNotNull, reason: 'Gantt çubuğu $code');
+  Rect bar() => local!.shift(t.getTopLeft(bars));
+  Rect view() => t
+      .getRect(find.byKey(GanttChart.horizontalKey))
+      .intersect(t.getRect(find.byKey(GanttChart.verticalKey)));
   Rect visible() {
-    final b = t.getRect(bar);
-    final view = t
-        .getRect(find.byKey(GanttChart.horizontalKey))
-        .intersect(t.getRect(find.byKey(GanttChart.verticalKey)));
+    final b = bar();
     final labelsRight = t.getRect(find.byKey(GanttChart.labelsKey)).right;
     return Rect.fromLTRB(
       b.left > labelsRight ? b.left : labelsRight,
       b.top,
       b.right,
       b.bottom,
-    ).intersect(view);
+    ).intersect(view());
   }
 
   var v = visible();
   if (v.isEmpty || v.width < 2 || v.height < 2) {
     // Kullanıcı gibi kaydır: önce dikeyde görünür yap, sonra çubuğu yatay sürüklemeyle
-    // yapışkan etiket sütununun SAĞINA getir (ensureVisible çubuğu sütunun altına bırakır).
-    await t.ensureVisible(bar);
-    await t.pump();
+    // yapışkan etiket sütununun SAĞINA getir.
     for (var i = 0; i < 8; i++) {
       v = visible();
       if (!(v.isEmpty || v.width < 24 || v.height < 2)) break;
-      final b = t.getRect(bar);
+      final b = bar();
+      final w = view();
       final labelsRight = t.getRect(find.byKey(GanttChart.labelsKey)).right;
-      final dx = (labelsRight + 32) - b.left;
-      await t.drag(find.byKey(GanttChart.horizontalKey), Offset(dx, 0));
+      final dy = b.top < w.top || b.bottom > w.bottom
+          ? w.center.dy - b.center.dy
+          : 0.0;
+      if (dy != 0) {
+        await t.drag(find.byKey(GanttChart.verticalKey), Offset(0, dy));
+      } else {
+        await t.drag(
+          find.byKey(GanttChart.horizontalKey),
+          Offset((labelsRight + 32) - b.left, 0),
+        );
+      }
       await t.pump(const Duration(milliseconds: 100));
     }
     await s.settle();
@@ -825,22 +836,30 @@ Future<void> tapGanttBar(TabletSession s, String code) async {
   );
   final point = v.center;
   final hit = t.hitTestOnBinding(point);
-  final target = t.renderObject(bar);
+  final target = t.renderObject(bars);
   expect(
     hit.path.any((e) => identical(e.target, target)),
     isTrue,
-    reason:
-        '$code: $point noktasına dokunuş çubuğun render nesnesine ulaşmıyor',
+    reason: '$code: $point noktasına dokunuş çubuk ressamına ulaşmıyor',
+  );
+  expect(
+    t.widget<GanttChart>(chart).layout.barAt(point - t.getTopLeft(bars)),
+    code,
+    reason: '$code: dokunuş konumu yerleşimde bu çubuğa düşmüyor',
   );
   await t.tapAt(point);
   await s.settle();
 }
 
-/// Görevler listesinden "Zaman çizelgesi" hapı. Liste tembeldir ve seçim kartı görünür yapmak
-/// için kaydırmış olabilir; kaynak akışında kullanıcı başa döner, burada da öyle: hap kurulu
-/// değilse dikey liste yukarı kaydırılır (üretim listesi tembel kalır).
+/// Görevler listesi başlığındaki "Zaman çizelgesi" anahtarı (yalnız simge; erişilebilirlik
+/// etiketiyle bulunur). Liste tembeldir ve seçim kartı görünür yapmak için kaydırmış olabilir;
+/// kaynak akışında kullanıcı başa döner, burada da öyle: anahtar kurulu değilse dikey liste
+/// yukarı kaydırılır (üretim listesi tembel kalır).
 Future<void> openTimelineFromTasks(TabletSession s) async {
-  final pill = s.inPane(NzPaneRole.master, find.text(_l.uiTasksModeTimeline));
+  final pill = s.inPane(
+    NzPaneRole.master,
+    find.bySemanticsLabel(_l.uiTasksModeTimeline),
+  );
   if (pill.evaluate().isEmpty) {
     final scrollable = s.inPane(
       NzPaneRole.master,
@@ -1166,405 +1185,3 @@ void expectTasksSourceGeometry(TabletSession s) {
     'Geciken',
   );
 }
-
-Finder _composerField() => find.descendant(
-  of: find.byType(NzComposer),
-  matching: find.byType(TextField),
-);
-
-/// Takvim hücresi (kaynak aria: "22 Ekim, Perşembe[, bugün][, n kayıt]").
-Finder calendarCell(String dayTitle) => find.bySemanticsLabel(
-  RegExp('^${RegExp.escape(dayTitle)}(, bugün)?(, \\d+ kayıt)?\$'),
-);
-
-final tabletInvariantScenes = <TabletScene>[
-  // --- Çapraz özellik açma: yalnız sağ yığın değişir, sol modül korunur (HTML 3517–3522, 3823–3830)
-  TabletScene('nav-cross-feature-keeps-left-module', (s) async {
-    await s.tapRail(TabletModule.coordinatorships);
-    await s.tapText(
-      s.inPane(NzPaneRole.master, find.text('Mekanik sistemler')),
-      reason: 'sol koordinatörlük kartı',
-    );
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Mekanik sistemler')),
-      findsWidgets,
-      reason: 'seçilen koordinatörlük sağda (taban yer değiştirir)',
-    );
-    expect(
-      paneBack(s),
-      findsNothing,
-      reason: 'taban değişimi yığını büyütmez: geri yok',
-    );
-    await s.tapText(
-      s.inPane(NzPaneRole.detail, find.text(_l.uiCoordLinkArchive)),
-      reason: 'ayrıntıdaki "Arşiv klasörü" kısayolu',
-    );
-    expect(
-      s.inPane(NzPaneRole.master, find.textContaining('11 koordinatörlük')),
-      findsWidgets,
-      reason: 'sol modül Koordinatörlükler kalır, Arşiv\'e atlamaz',
-    );
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Görev klasörleri')),
-      findsWidgets,
-      reason: 'sağda arşiv klasörü',
-    );
-    expect(paneBack(s), findsWidgets, reason: 'yığın 2 → geri görünür');
-    s.expectSplitGeometry();
-    await s.tapText(paneBack(s));
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Mekanik sistemler')),
-      findsWidgets,
-      reason: 'geri → önceki koordinatörlük (Mekanik), varsayılan ALT değil',
-    );
-    expect(paneBack(s), findsNothing);
-  }),
-  // --- Aynı modüle ray basışı: derin yığın tabana döner (HTML 3819)
-  TabletScene('nav-same-module-rail-pops-to-base', (s) async {
-    await s.tapRail(TabletModule.coordinatorships);
-    await s.tapText(
-      s.inPane(NzPaneRole.master, find.text('Mekanik sistemler')),
-    );
-    await s.tapText(
-      s.inPane(NzPaneRole.detail, find.text(_l.uiCoordLinkArchive)),
-    );
-    expect(paneBack(s), findsWidgets);
-    await s.tapRail(TabletModule.coordinatorships);
-    expect(
-      paneBack(s),
-      findsNothing,
-      reason: 'aynı modüle basış yığını tabana indirir',
-    );
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Mekanik sistemler')),
-      findsWidgets,
-      reason: 'taban kaydı (son yüklenen) korunur',
-    );
-    // Tek kayıtlıyken yeniden basış hiçbir şeyi değiştirmez.
-    await s.tapRail(TabletModule.coordinatorships);
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Mekanik sistemler')),
-      findsWidgets,
-    );
-  }),
-  // --- Modül değişimi: sağ TÜR varsayılana döner, ALT içerik son yüklenen kalır (HTML 3820, 2401)
-  TabletScene('nav-module-roundtrip-keeps-last-loaded-record', (s) async {
-    await s.tapRail(TabletModule.coordinatorships);
-    await s.tapText(
-      s.inPane(NzPaneRole.master, find.text('Mekanik sistemler')),
-    );
-    await s.tapRail(TabletModule.archive);
-    await _expectDefaultDetail(s, TabletModule.archive);
-    await s.tapRail(TabletModule.coordinatorships);
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Mekanik sistemler')),
-      findsWidgets,
-      reason: 'sub ekran durumu kalıcıdır: son yüklenen koordinatörlük (ALT\'ye sıfırlanmaz)',
-    );
-    expect(paneBack(s), findsNothing, reason: 'rs=[TB_DEF] tek giriş');
-  }),
-  // --- Liste (master) alt durumu modül gidiş-dönüşünde kalır; yalnız kaydırma sıfırlanır
-  TabletScene('master-search-survives-module-roundtrip', (s) async {
-    await _openTasks(s);
-    await s.tapText(find.bySemanticsLabel(_l.uiTasksSearch));
-    final field = s.inPane(NzPaneRole.master, find.byType(TextField));
-    await s.tester.enterText(field.first, 'asfalt');
-    await s.settle();
-    expect(
-      s.inPane(NzPaneRole.master, find.text('Faz3 asfalt işlemi')),
-      findsWidgets,
-    );
-    await s.tapRail(TabletModule.archive);
-    await s.tapRail(TabletModule.tasks);
-    // Kaynakta S_tasks.q kalıcıdır: süzgeç ve alan metni tutarlı biçimde korunur.
-    final texts = s
-        .inPane(NzPaneRole.master, find.byType(EditableText))
-        .evaluate()
-        .map((e) => (e.widget as EditableText).controller.text)
-        .toList();
-    expect(
-      texts,
-      contains('asfalt'),
-      reason: 'arama metni modül dönüşünde kalır',
-    );
-    expect(
-      s.inPane(NzPaneRole.master, find.text('Faz3 asfalt işlemi')),
-      findsWidgets,
-      reason: 'liste hâlâ süzülü',
-    );
-    expect(
-      s.inPane(NzPaneRole.master, find.text('ULA-1')),
-      findsNothing,
-      reason: 'süzgeç uygulanır',
-    );
-  }),
-  // --- Sohbet DEĞİŞİMİ sıfırlar (S_chat.load, HTML 3212–3216): A→B→A taslak yok
-  TabletScene('chat-switch-resets-draft', (s) async {
-    await s.tapRail(TabletModule.messages);
-    await _expectDefaultDetail(s, TabletModule.messages);
-    await s.tester.enterText(_composerField().last, 'Sohbete özel taslak');
-    await s.settle();
-    expect(
-      s.tester.widget<TextField>(_composerField().last).controller!.text,
-      'Sohbete özel taslak',
-    );
-    await s.tapText(s.inPane(NzPaneRole.master, find.text('Genel')));
-    expect(
-      s.tester.widget<TextField>(_composerField().last).controller!.text,
-      isEmpty,
-      reason: 'sohbet değişince taslak temizlenir',
-    );
-    await s.tapText(s.inPane(NzPaneRole.master, find.text('Koordinatörler')));
-    expect(
-      s.tester.widget<TextField>(_composerField().last).controller!.text,
-      isEmpty,
-      reason:
-          'ilk sohbete dönünce de boş (prototipte sohbet başına taslak yok)',
-    );
-    expect(find.textContaining(_l.uiMessagesReplyTo), findsNothing);
-  }),
-  // --- AYNI sohbet yeniden seçimi: KAYNAK `S_chat.load` koşulsuz sıfırlar (HTML 3212–3216) ve
-  // `openChat` her seçimde onu çağırır (3517, 3204): taslak/yanıt temizlenir, mesajlar kalır,
-  // yığın büyümez. (Yeniden BOYUT ise ayrı kuraldır: taslak korunur, host testinde.)
-  TabletScene('chat-same-reselect-follows-source', (s) async {
-    await s.tapRail(TabletModule.messages);
-    await _expectDefaultDetail(s, TabletModule.messages);
-    expectUnreadDivider(s, present: true);
-    // Kaynak `S_chat.load`: draft, reply, edit, refs, info, pin, atQ… hepsi sıfırlanır.
-    await startReplyToK2(s);
-    await s.tester.enterText(_composerField().last, 'Aynı sohbet taslağı');
-    await s.settle();
-    expectReplyChip(present: true);
-    await s.tapText(s.inPane(NzPaneRole.master, find.text('Koordinatörler')));
-    // Sıra: önce işaretçi ve taslak, en sonda yanıt çipi (hepsi aynı `load` sıfırlamasıdır;
-    // tek kırmızıda hangisinin kaldığı görünsün diye yanıt çipi sona bırakıldı).
-    expectUnreadDivider(s, present: false);
-    expect(
-      s.tester.widget<TextField>(_composerField().last).controller!.text,
-      isEmpty,
-      reason: 'kaynak: aynı sohbet seçimi de load ile taslağı sıfırlar',
-    );
-    expectReplyChip(present: false);
-    expect(
-      inChat(find.textContaining('trafo onayı')),
-      findsWidgets,
-      reason: 'sohbet içeriği (mesajlar) kalır',
-    );
-    expect(paneBack(s), findsNothing, reason: 'yığın büyümez');
-    s.expectSplitGeometry();
-  }),
-  // --- Etiket sütunundan seçim (kaynak: etiket tıklaması da `pick`): BAR seçiminden ayrı sözleşme.
-  TabletScene('gantt-label-selects-task', (s) async {
-    await _openTasks(s);
-    await openTimelineFromTasks(s);
-    await s.tapText(
-      find.descendant(
-        of: find.byKey(GanttChart.labelsKey),
-        matching: find.textContaining('Faz3 asfalt işlemi'),
-      ),
-      reason: 'Gantt etiket sütunu satırı',
-    );
-    expect(find.bySemanticsLabel('Seçili görev'), findsWidgets);
-    expect(find.text('Görev ayrıntısını aç'), findsWidgets);
-  }),
-  // --- Gantt kapat: mod/rs aynı (HTML 3807); ray aynı modüle basış kapatır (3817–3819)
-  TabletScene('gantt-close-keeps-module-and-selection', (s) async {
-    await _openTasks(s);
-    await s.tapText(
-      s.inPane(NzPaneRole.master, find.text('Faz3 asfalt işlemi')),
-    );
-    await openTimelineFromTasks(s);
-    expect(
-      s.pane(NzPaneRole.master),
-      findsNothing,
-      reason: 'Gantt tam genişlik',
-    );
-    expect(s.railRect, isNotNull, reason: 'ray görünür');
-    await s.tapText(find.bySemanticsLabel('Geri: Görevler'));
-    expect(
-      s.pane(NzPaneRole.master),
-      findsOneWidget,
-      reason: 'Görevler listesi geri geldi',
-    );
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Faz3 asfalt işlemi')),
-      findsWidgets,
-      reason: 'closeGantt sağ yığını değiştirmez',
-    );
-    s.expectSplitGeometry();
-  }),
-  TabletScene('gantt-rail-same-module-closes-other-module-leaves', (s) async {
-    await _openTasks(s);
-    await openTimelineFromTasks(s);
-    await s.tapRail(TabletModule.tasks);
-    expect(
-      s.pane(NzPaneRole.master),
-      findsOneWidget,
-      reason: 'aynı modüle basış Gantt\'ı kapatır',
-    );
-    await openTimelineFromTasks(s);
-    await s.tapRail(TabletModule.archive);
-    expect(
-      find.bySemanticsLabel('Geri: Görevler'),
-      findsNothing,
-      reason: 'başka modül Gantt\'ı bırakır',
-    );
-    await _expectDefaultDetail(s, TabletModule.archive);
-  }),
-  // --- openTaskFromGantt: kaynak istisnası (HTML 3776, 3808): Görevler modülü + tek detail, geri yok
-  TabletScene('gantt-open-task-resets-stack-to-tasks', (s) async {
-    await s.tapRail(TabletModule.coordinatorships);
-    await s.tapText(
-      s.inPane(NzPaneRole.detail, find.text(_l.uiCoordLinkArchive)),
-    );
-    await s.tapRail(TabletModule.tasks);
-    await openTimelineFromTasks(s);
-    await tapGanttBar(s, 'MEK-6');
-    await s.tapText(find.text('Görev ayrıntısını aç'));
-    expect(s.pane(NzPaneRole.master), findsOneWidget);
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Faz3 asfalt işlemi')),
-      findsWidgets,
-      reason: 'seçilen görev sağda; Görevler modülü',
-    );
-    expect(paneBack(s), findsNothing, reason: 'rs=[detail] tek giriş');
-    expect(find.bySemanticsLabel('Geri: Görevler'), findsNothing);
-  }),
-  // --- Takvim (HTML S_cal 3401–3500): bugün, ay/hafta, adım, seçili gün kalıcılığı
-  TabletScene('calendar-default-today-and-month', (s) async {
-    await s.tapRail(TabletModule.calendar);
-    final master = NzPaneRole.master;
-    expect(s.inPane(master, find.text('Ekim 2026')), findsWidgets);
-    expect(
-      s.inPane(master, find.text('21 Ekim, Çarşamba')),
-      findsWidgets,
-      reason: 'seçili gün = örnek verinin bugünü',
-    );
-    expect(calendarCell('21 Ekim, Çarşamba'), findsWidgets);
-    expect(
-      s.inPane(master, find.textContaining('toplantılar · 2')),
-      findsWidgets,
-    );
-    expect(
-      s.inPane(NzPaneRole.detail, find.text('Bir kayıt seç')),
-      findsWidgets,
-    );
-  }),
-  TabletScene('calendar-mode-step-today', (s) async {
-    await s.tapRail(TabletModule.calendar);
-    final master = NzPaneRole.master;
-    await s.tapText(find.bySemanticsLabel(RegExp(r'^Haftaya daralt')));
-    expect(find.bySemanticsLabel(RegExp(r'^Aya genişlet')), findsWidgets);
-    expect(
-      s.inPane(master, find.textContaining('. hafta')),
-      findsWidgets,
-      reason: 'hafta kipi başlığı',
-    );
-    await s.tapText(find.bySemanticsLabel('Sonraki hafta'));
-    expect(
-      s.inPane(master, find.text('28 Ekim, Çarşamba')),
-      findsWidgets,
-      reason: 'hafta kipinde ±7 gün',
-    );
-    await s.tapText(s.inPane(master, find.text('Bugün')));
-    expect(s.inPane(master, find.text('21 Ekim, Çarşamba')), findsWidgets);
-    await s.tapText(find.bySemanticsLabel(RegExp(r'^Aya genişlet')));
-    await s.tapText(find.bySemanticsLabel('Sonraki ay'));
-    expect(s.inPane(master, find.text('Kasım 2026')), findsWidgets);
-    expect(
-      s.inPane(master, find.text('1 Kasım, Pazar')),
-      findsWidgets,
-      reason: 'bugünün ayı değilse ayın 1\'i',
-    );
-    await s.tapText(find.bySemanticsLabel('Önceki ay'));
-    expect(
-      s.inPane(master, find.text('21 Ekim, Çarşamba')),
-      findsWidgets,
-      reason: 'bugünün ayına dönünce bugün seçili',
-    );
-  }),
-  TabletScene('calendar-selection-survives-module-roundtrip', (s) async {
-    await s.tapRail(TabletModule.calendar);
-    await s.tapText(calendarCell('22 Ekim, Perşembe'));
-    expect(
-      s.inPane(NzPaneRole.master, find.text('22 Ekim, Perşembe')),
-      findsWidgets,
-    );
-    await s.tapRail(TabletModule.archive);
-    await s.tapRail(TabletModule.calendar);
-    expect(
-      s.inPane(NzPaneRole.master, find.text('22 Ekim, Perşembe')),
-      findsWidgets,
-      reason: 'S_cal durumu kalıcı: seçili gün modül gidiş-dönüşünde korunur',
-    );
-    expect(
-      s.inPane(NzPaneRole.detail, find.text('Bir kayıt seç')),
-      findsWidgets,
-      reason: 'sağ TÜR varsayılana döner',
-    );
-  }),
-  TabletScene('calendar-meeting-preview-and-write-to-group', (s) async {
-    await s.tapRail(TabletModule.calendar);
-    await s.tapText(
-      s.inPane(NzPaneRole.master, find.text('Hidrofor teslim kontrolü')),
-    );
-    expect(
-      find.byType(Dialog),
-      findsWidgets,
-      reason: 'önizleme tablette merkezi pencere',
-    );
-    expect(find.text('Havalimanı yerleşkesi'), findsWidgets, reason: 'Yer');
-    expect(find.text('Basınç testi sonuçları'), findsWidgets, reason: 'gündem');
-    await s.tapText(find.text('Gruba yaz'));
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Hidrofor teslim ekibi')),
-      findsWidgets,
-      reason: 'sohbet SAĞ yığına açılır',
-    );
-    expect(
-      s.inPane(NzPaneRole.master, find.text('Ekim 2026')),
-      findsWidgets,
-      reason: 'sol modül Takvim kalır, Mesajlar\'a atlamaz',
-    );
-    expect(paneBack(s), findsWidgets, reason: 'rs=[empty, chat]');
-    await s.tapText(paneBack(s));
-    expect(
-      s.inPane(NzPaneRole.detail, find.text('Bir kayıt seç')),
-      findsWidgets,
-    );
-  }),
-  TabletScene('calendar-task-row-opens-detail-keeps-left', (s) async {
-    await s.tapRail(TabletModule.calendar);
-    await s.tapText(calendarCell('23 Ekim, Cuma'));
-    await s.tapText(
-      s.inPane(NzPaneRole.master, find.text('Yemek planlama takip')),
-    );
-    expect(
-      s.inPane(NzPaneRole.detail, find.textContaining('Yemek planlama takip')),
-      findsWidgets,
-      reason: 'görev detayı sağda',
-    );
-    expect(
-      s.inPane(NzPaneRole.master, find.text('Ekim 2026')),
-      findsWidgets,
-      reason: 'takvim solda kalır',
-    );
-    expect(paneBack(s), findsWidgets);
-  }),
-  TabletScene('calendar-plan-meeting-modal-prefilled', (s) async {
-    await s.tapRail(TabletModule.calendar);
-    await s.tapText(calendarCell('22 Ekim, Perşembe'));
-    await s.tapText(find.bySemanticsLabel('Seçili güne toplantı planla'));
-    final r = s.modalRect;
-    expect(r, isNotNull, reason: 'merkezi modal');
-    expect(
-      r!.width,
-      closeTo(TabletContract.modalWidth(s.windowSize.width), 0.01),
-    );
-    expect(
-      find.textContaining('22 Ekim'),
-      findsWidgets,
-      reason: 'tarih seçili günle dolu',
-    );
-  }),
-];

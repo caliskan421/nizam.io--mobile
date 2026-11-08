@@ -7,33 +7,28 @@ import '../domain/task_details.dart';
 import '../domain/task_permissions.dart';
 import '../domain/task_writes.dart';
 
-/// Görev kataloğunun kaynak seçimi: sunucu programı seçiliyse sunucu, örnek kapsamda
-/// ("örnek verilerle devam") geliştirme örneği. Seçim her okumada güncel kapsamdan yapılır;
-/// katalog kapsam değişince yeniden okunur.
+/// Görev kataloğunun kaynağı: seçili programın sunucu kataloğu. Program seçili değilse
+/// `client.scope_missing`, doğrulanmış bağ yoksa `client.server_not_verified`; katalog kapsam
+/// değişince yeniden okunur.
 final class TaskCatalogSource implements TaskCatalogRepository {
-  TaskCatalogSource({
-    required this.scope,
-    required this.server,
-    required this.sample,
-  });
+  TaskCatalogSource({required this.scope, required this.server});
 
   final ScopeController scope;
 
   /// Doğrulanmış bağın sunucu kaynağı; bağ yoksa null.
   final TaskCatalogRepository? Function() server;
-  final TaskCatalogRepository sample;
 
   @override
   Future<TaskCatalog> load() async {
-    if (!scope.current.hasServerProgram) return sample.load();
+    if (!scope.current.hasProgram) throw ApiError(ClientErrorCode.scopeMissing);
     final s = server();
     if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
     return s.load();
   }
 }
 
-/// Departman süzgeçli okumanın kaynağı: yalnız sunucu programında (örnek katalogda süzgeç
-/// seçeneği yoktur; çağrılırsa `client.scope_missing`).
+/// Departman süzgeçli okumanın kaynağı: seçili programın sunucusu (program yoksa
+/// `client.scope_missing`).
 final class TaskListSource implements TaskListRepository {
   TaskListSource({required this.scope, required this.server});
 
@@ -46,7 +41,7 @@ final class TaskListSource implements TaskListRepository {
     bool Function()? isCurrent,
     List<TaskDepartment> departments = const [],
   }) async {
-    if (!scope.current.hasServerProgram) {
+    if (!scope.current.hasProgram) {
       throw ApiError(ClientErrorCode.scopeMissing);
     }
     final s = server();
@@ -59,8 +54,7 @@ final class TaskListSource implements TaskListRepository {
   }
 }
 
-/// Görev ayrıntısının kaynak seçimi: örnek kapsamda ayrıntı yüklenmez (örnek görev zaten
-/// taşır, null döner); sunucu programında sunucudan okunur.
+/// Görev ayrıntısının kaynağı: seçili programın sunucusu (program yoksa `client.scope_missing`).
 final class TaskDetailsSource implements TaskDetailsRepository {
   TaskDetailsSource({required this.scope, required this.server});
 
@@ -68,24 +62,24 @@ final class TaskDetailsSource implements TaskDetailsRepository {
   final TaskDetailsRepository? Function() server;
 
   @override
-  Future<TaskDetails?> load(TaskItem task, {TaskAccess? access}) async {
-    if (!scope.current.hasServerProgram) return null;
+  Future<TaskDetails> load(TaskItem task, {TaskAccess? access}) async {
+    if (!scope.current.hasProgram) throw ApiError(ClientErrorCode.scopeMissing);
     final s = server();
     if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
     return s.load(task, access: access);
   }
 
   @override
-  Future<TaskItem?> loadItem(TaskItem task) async {
-    if (!scope.current.hasServerProgram) return null;
+  Future<TaskItem> loadItem(TaskItem task) async {
+    if (!scope.current.hasProgram) throw ApiError(ClientErrorCode.scopeMissing);
     final s = server();
     if (s == null) throw ApiError(ClientErrorCode.serverNotVerified);
     return s.loadItem(task);
   }
 }
 
-/// Görev yazmalarının kaynağı: yalnız doğrulanmış bağın sunucusu. Örnek katalogda yazma
-/// denetleyicide yereldir (bu kaynak çağrılmaz); bağ yoksa `client.server_not_verified`.
+/// Görev yazmalarının kaynağı: doğrulanmış bağın sunucusu; bağ yoksa
+/// `client.server_not_verified`.
 final class TaskWriteSource implements TaskWriteRepository {
   TaskWriteSource({required this.server});
 
@@ -113,20 +107,31 @@ final class TaskWriteSource implements TaskWriteRepository {
   );
 
   @override
-  Future<void> addNote(TaskItem task, String text) async =>
-      _s.addNote(task, text);
+  Future<void> addNote(
+    TaskItem task,
+    String text, {
+    required String requestKey,
+  }) async => _s.addNote(task, text, requestKey: requestKey);
 
   @override
-  Future<void> updateNote(TaskItem task, String noteId, String text) async =>
-      _s.updateNote(task, noteId, text);
+  Future<void> updateNote(
+    TaskItem task,
+    String noteId,
+    String text, {
+    required int expectedRevision,
+  }) async =>
+      _s.updateNote(task, noteId, text, expectedRevision: expectedRevision);
 
   @override
   Future<void> deleteNote(TaskItem task, String noteId) async =>
       _s.deleteNote(task, noteId);
 
   @override
-  Future<void> createSubtask(TaskItem task, String title) async =>
-      _s.createSubtask(task, title);
+  Future<void> createSubtask(
+    TaskItem task,
+    String title, {
+    required String requestKey,
+  }) async => _s.createSubtask(task, title, requestKey: requestKey);
 
   @override
   Future<void> updateSubtask(
@@ -140,8 +145,10 @@ final class TaskWriteSource implements TaskWriteRepository {
       _s.deleteSubtask(task, subtaskId);
 
   @override
-  Future<String> createWorkItem(WorkItemDraft draft) async =>
-      _s.createWorkItem(draft);
+  Future<String> createWorkItem(
+    WorkItemDraft draft, {
+    required String requestKey,
+  }) async => _s.createWorkItem(draft, requestKey: requestKey);
 
   @override
   Future<void> updateWorkItem(TaskItem task, WorkItemPatch patch) async =>
@@ -192,7 +199,14 @@ final class TaskWriteSource implements TaskWriteRepository {
     UploadSource file,
     EvidenceTag tag, {
     String? subtaskId,
-  }) async => _s.attachFile(task, file, tag, subtaskId: subtaskId);
+    required String requestKey,
+  }) async => _s.attachFile(
+    task,
+    file,
+    tag,
+    subtaskId: subtaskId,
+    requestKey: requestKey,
+  );
 
   @override
   Future<void> renameFile(TaskItem task, String fileId, String name) async =>

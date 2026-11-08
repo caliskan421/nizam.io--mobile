@@ -16,11 +16,13 @@ import '../../../core/api/generated/models/meeting_side_effects.dart' as api;
 import '../../../core/api/generated/models/note_request.dart';
 import '../../../core/api/generated/models/participant.dart' as api;
 import '../../../core/api/generated/models/participant_request.dart';
+import '../../../core/api/generated/models/revise_meeting_note_request.dart';
 import '../../../core/api/generated/models/update_agenda_item_request.dart';
 import '../../../core/api/generated/models/update_meeting_request.dart';
 import '../../../core/domain/enum_parse.dart';
 import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../domain/meeting.dart';
 import '../domain/meetings_repository.dart';
 
@@ -28,10 +30,17 @@ import '../domain/meetings_repository.dart';
 /// kapsamı dışındadır (messages feature'ı). Üretilmiş DTO'lar bu katmanda kalır; dışarıya domain
 /// varlıkları döner (A1/A2). Bütün hatalar [ApiError] olarak fırlar.
 class ApiMeetingsRepository implements MeetingsRepository {
-  /// [dio]: doğrulanmış bağın API istemcisi (program başlığını ara katman ekler).
-  ApiMeetingsRepository(Dio dio) : _client = CollaborationClient(dio);
+  /// [dio]: doğrulanmış bağın güncel API istemcisi (program başlığını ara katman ekler); bağ
+  /// yoksa null → `client.server_not_verified`. İstek anında okunur (bağ değişebilir).
+  ApiMeetingsRepository(this._dio);
 
-  final CollaborationClient _client;
+  final Dio? Function() _dio;
+
+  CollaborationClient get _client {
+    final d = _dio();
+    if (d == null) throw ApiError(ClientErrorCode.serverNotVerified);
+    return CollaborationClient(d);
+  }
 
   @override
   Future<MeetingCreated> createMeeting(MeetingDraft draft) async {
@@ -225,10 +234,15 @@ class ApiMeetingsRepository implements MeetingsRepository {
       apiCall(() => _client.deleteAgendaItem(itemId: itemId));
 
   @override
-  Future<MeetingNote> addNote(String meetingId, String content) async => _note(
+  Future<MeetingNote> addNote(
+    String meetingId,
+    String content, {
+    required String requestKey,
+  }) async => _note(
     await apiCall(
       () => _client.addMeetingNote(
         id: meetingId,
+        idempotencyKey: requestKey,
         body: NoteRequest(content: content),
       ),
     ),
@@ -249,11 +263,18 @@ class ApiMeetingsRepository implements MeetingsRepository {
   );
 
   @override
-  Future<MeetingNote> updateNote(String noteId, String content) async => _note(
+  Future<MeetingNote> updateNote(
+    String noteId,
+    String content, {
+    required int expectedRevision,
+  }) async => _note(
     await apiCall(
       () => _client.updateMeetingNote(
         noteId: noteId,
-        body: NoteRequest(content: content),
+        body: ReviseMeetingNoteRequest(
+          content: content,
+          expectedRevision: expectedRevision,
+        ),
       ),
     ),
   );
@@ -413,6 +434,7 @@ class ApiMeetingsRepository implements MeetingsRepository {
     convertedToWorkItemId: r.convertedToWorkItemId,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
+    editRevision: r.editRevision,
   );
 
   static MeetingSideEffects _effects(api.MeetingSideEffects r) =>

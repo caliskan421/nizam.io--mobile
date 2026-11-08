@@ -8,11 +8,14 @@ abstract final class ClientErrorCode {
   static const invalidServerAddress = 'client.invalid_server_address';
   static const networkError = 'client.network_error';
   static const notSignedIn = 'client.not_signed_in';
+  static const outcomeUnknown = 'client.outcome_unknown';
   static const reauthRequired = 'client.reauth_required';
+  static const requestNotResent = 'client.request_not_resent';
   static const scopeChanged = 'client.scope_changed';
   static const scopeMissing = 'client.scope_missing';
   static const secureStorageError = 'client.secure_storage_error';
   static const serverNotVerified = 'client.server_not_verified';
+  static const serverOutdated = 'client.server_outdated';
   static const serverUnrecognized = 'client.server_unrecognized';
   static const sessionEnded = 'client.session_ended';
   static const sessionRefreshed = 'client.session_refreshed';
@@ -28,11 +31,14 @@ abstract final class ClientErrorCode {
     invalidServerAddress,
     networkError,
     notSignedIn,
+    outcomeUnknown,
     reauthRequired,
+    requestNotResent,
     scopeChanged,
     scopeMissing,
     secureStorageError,
     serverNotVerified,
+    serverOutdated,
     serverUnrecognized,
     sessionEnded,
     sessionRefreshed,

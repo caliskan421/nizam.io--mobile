@@ -13,7 +13,10 @@ enum NzContentWidth {
   /// Tablet girişi (prototip ortada 420).
   login(420),
   reading(720),
-  list(960);
+  list(960),
+
+  /// Tablette tam genişlik liste (Görevler kart ızgarası, Koordinatörlükler).
+  wide(1280);
 
   const NzContentWidth(this.maxWidth);
 

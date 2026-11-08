@@ -8,9 +8,8 @@ import '../timeline_texts.dart';
 /// Yatay çizelgenin birleşik cümleleri (parçalar ARB'den; tarih biçimi `tr`).
 extension GanttTexts on AppLocalizations {
   String ganttZoomLabel(GanttZoom z) => switch (z) {
-    GanttZoom.week => uiTimelineScaleWeek,
-    GanttZoom.month => uiTimelineScaleMonth,
-    GanttZoom.season => uiTimelineGanttScaleSeason,
+    GanttZoom.week => uiTimelineGanttZoomDaily,
+    GanttZoom.month => uiTimelineGanttZoomWeekly,
   };
 
   /// "Tümü" / "Açık" / "Geciken · 15".
@@ -28,26 +27,34 @@ extension GanttTexts on AppLocalizations {
   String ganttRange(GanttTask t, int year) =>
       '${ganttDay(t.start, year)} – ${ganttDay(t.end - 1, year)}';
 
-  /// Ay başlığı: "Ocak" (sezon ölçeğinde "Oca").
-  String ganttMonth(int month, int year, {required bool short}) =>
-      DateFormat(short ? 'MMM' : 'MMMM', 'tr').format(DateTime(year, month));
+  /// Ay başlığı: "Ocak".
+  String ganttMonth(int month, int year) =>
+      DateFormat('MMMM', 'tr').format(DateTime(year, month));
 
   /// "76 görev · tüm koordinatörlükler" / "13 görev · ALT, MEK".
   String ganttCountLine(GanttView v) =>
       '${v.visible} $uiTimelineTasksLc · '
-      '${v.state.coords.isEmpty ? uiTimelineGanttAllCoordsLc : v.state.coords.join(', ')}';
+      '${v.state.coords.isEmpty ? uiTimelineGanttAllCoordsLc : _coordLabels(v)}';
+
+  /// Seçili koordinatörlüklerin etiketleri (anahtar değil; çiplerle aynı metin).
+  String _coordLabels(GanttView v) {
+    final labels = {for (final c in v.chips) c.code: c.label};
+    return [for (final c in v.state.coords) labels[c] ?? c].join(', ');
+  }
 
   /// Grup başlığı: "3 gecikme".
   String ganttGroupLate(int n) => '$n $uiTimelineGanttLateTail';
 
   /// Okuyucu etiketi (prototip `aria`): "ALT-5 · Su deposu… · 16 Haz – 15 Tem · Devam ediyor ·
   /// gecikmede".
-  String ganttBarLabel(GanttTask t, int year) =>
-      '${t.code} · ${t.item.title} · ${ganttRange(t, year)} · '
-      '${statusLabel(t.status)}${t.late ? ' · $uiTimelineLateLc' : ''}';
+  String ganttBarLabel(GanttTaskRow r, int year) {
+    final t = r.task;
+    return '${r.key} · ${t.item.title} · ${ganttRange(t, year)} · '
+        '${statusLabel(t.status)}${t.late ? ' · $uiTimelineLateLc' : ''}';
+  }
 
-  /// Görev satırı etiketi: "ALT-5 Su deposu…".
-  String ganttRowLabel(GanttTask t) => '${t.code} ${t.item.title}';
+  /// Görev satırı etiketi: "ALT 5 Su deposu…".
+  String ganttRowLabel(GanttTaskRow r) => '${r.key} ${r.task.item.title}';
 
   /// Kart: "98 gün gecikti".
   String ganttLateDays(GanttTask t) => '${t.lateDays} $uiTimelineGanttDaysLate';

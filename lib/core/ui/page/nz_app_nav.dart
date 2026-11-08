@@ -24,6 +24,12 @@ abstract interface class NzAppNav {
   void openCoordinatorship(String code);
   void openArchive();
   void openArchiveFolder(String code);
+
+  /// Toplantılar modülü.
+  void openMeetings();
+
+  /// Toplantı ayrıntısı ([id] = `meeting_id`).
+  void openMeeting(String id);
   void openMessages();
   void openChat(String id);
   void openProfile();

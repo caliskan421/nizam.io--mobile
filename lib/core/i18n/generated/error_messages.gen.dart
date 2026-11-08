@@ -22,18 +22,23 @@ const localizedErrorCodes = <String>{
   'collaboration.conference_provider_unavailable',
   'collaboration.conference_webhook_invalid',
   'collaboration.conference_webhook_unauthorized',
+  'collaboration.edit_conflict',
+  'collaboration.idempotency_key_reused',
   'collaboration.input_invalid',
   'collaboration.invalid_cursor',
   'collaboration.meeting_not_found',
-  'collaboration.message_not_found',
-  'collaboration.message_unread',
   'collaboration.not_authorized',
   'collaboration.not_deleted',
   'collaboration.note_converted',
+  'collaboration.note_deleted',
   'collaboration.note_immutable',
   'collaboration.note_not_found',
   'collaboration.participant_invalid',
   'collaboration.permanent_requires_deleted',
+  'collaboration.request_key_invalid',
+  'collaboration.request_key_required',
+  'collaboration.revision_invalid',
+  'collaboration.revision_required',
   'collaboration.scope_invalid',
   'collaboration.target_department_invalid',
   'identity.account_email_deleted',
@@ -63,6 +68,27 @@ const localizedErrorCodes = <String>{
   'identity.session_invalid',
   'identity.unavailable',
   'identity.weak_password',
+  'messaging.chat_deleted',
+  'messaging.chat_not_found',
+  'messaging.edit_conflict',
+  'messaging.file_rejected',
+  'messaging.file_too_large',
+  'messaging.idempotency_key_reused',
+  'messaging.input_invalid',
+  'messaging.invalid_cursor',
+  'messaging.member_not_found',
+  'messaging.member_source_managed',
+  'messaging.message_deleted',
+  'messaging.message_not_found',
+  'messaging.not_authorized',
+  'messaging.poll_closed',
+  'messaging.ref_not_found',
+  'messaging.request_key_invalid',
+  'messaging.request_key_required',
+  'messaging.revision_invalid',
+  'messaging.revision_required',
+  'messaging.scope_invalid',
+  'messaging.task_deleted',
   'notifications.input_invalid',
   'notifications.invalid_cursor',
   'notifications.notification_not_found',
@@ -144,6 +170,7 @@ const localizedErrorCodes = <String>{
   'records.busy',
   'records.content_rejected',
   'records.file_not_found',
+  'records.idempotency_key_reused',
   'records.input_invalid',
   'records.invalid_cursor',
   'records.invalid_file',
@@ -151,6 +178,8 @@ const localizedErrorCodes = <String>{
   'records.name_invalid',
   'records.name_taken',
   'records.not_authorized',
+  'records.request_key_invalid',
+  'records.request_key_required',
   'records.tag_invalid',
   'records.tag_required',
   'records.too_large',
@@ -184,10 +213,13 @@ const localizedErrorCodes = <String>{
   'work.dependency_date_order',
   'work.dependency_duplicate',
   'work.dependency_not_completed',
+  'work.edit_conflict',
   'work.extend_days_out_of_range',
+  'work.idempotency_key_reused',
   'work.input_invalid',
   'work.invalid_input',
   'work.item_completed',
+  'work.item_deleted',
   'work.item_not_completed',
   'work.item_not_found',
   'work.not_assigned',
@@ -199,7 +231,11 @@ const localizedErrorCodes = <String>{
   'work.permanent_requires_deleted',
   'work.program_scope_invalid',
   'work.protected_field',
+  'work.request_key_invalid',
+  'work.request_key_required',
   'work.revert_reason_required',
+  'work.revision_invalid',
+  'work.revision_required',
   'work.stale_completion',
   'work.stale_transition',
   'work.subtask_assignee_not_assigned',
@@ -213,11 +249,14 @@ const localizedErrorCodes = <String>{
   'client.invalid_server_address',
   'client.network_error',
   'client.not_signed_in',
+  'client.outcome_unknown',
   'client.reauth_required',
+  'client.request_not_resent',
   'client.scope_changed',
   'client.scope_missing',
   'client.secure_storage_error',
   'client.server_not_verified',
+  'client.server_outdated',
   'client.server_unrecognized',
   'client.session_ended',
   'client.session_refreshed',
@@ -265,22 +304,24 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errCollaborationConferenceWebhookInvalid;
     case 'collaboration.conference_webhook_unauthorized':
       return l.errCollaborationConferenceWebhookUnauthorized;
+    case 'collaboration.edit_conflict':
+      return l.errCollaborationEditConflict;
+    case 'collaboration.idempotency_key_reused':
+      return l.errCollaborationIdempotencyKeyReused;
     case 'collaboration.input_invalid':
       return l.errCollaborationInputInvalid;
     case 'collaboration.invalid_cursor':
       return l.errCollaborationInvalidCursor;
     case 'collaboration.meeting_not_found':
       return l.errCollaborationMeetingNotFound;
-    case 'collaboration.message_not_found':
-      return l.errCollaborationMessageNotFound;
-    case 'collaboration.message_unread':
-      return l.errCollaborationMessageUnread;
     case 'collaboration.not_authorized':
       return l.errCollaborationNotAuthorized;
     case 'collaboration.not_deleted':
       return l.errCollaborationNotDeleted;
     case 'collaboration.note_converted':
       return l.errCollaborationNoteConverted;
+    case 'collaboration.note_deleted':
+      return l.errCollaborationNoteDeleted;
     case 'collaboration.note_immutable':
       return l.errCollaborationNoteImmutable;
     case 'collaboration.note_not_found':
@@ -289,6 +330,14 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errCollaborationParticipantInvalid;
     case 'collaboration.permanent_requires_deleted':
       return l.errCollaborationPermanentRequiresDeleted;
+    case 'collaboration.request_key_invalid':
+      return l.errCollaborationRequestKeyInvalid;
+    case 'collaboration.request_key_required':
+      return l.errCollaborationRequestKeyRequired;
+    case 'collaboration.revision_invalid':
+      return l.errCollaborationRevisionInvalid;
+    case 'collaboration.revision_required':
+      return l.errCollaborationRevisionRequired;
     case 'collaboration.scope_invalid':
       return l.errCollaborationScopeInvalid;
     case 'collaboration.target_department_invalid':
@@ -347,6 +396,48 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errIdentityUnavailable;
     case 'identity.weak_password':
       return l.errIdentityWeakPassword;
+    case 'messaging.chat_deleted':
+      return l.errMessagingChatDeleted;
+    case 'messaging.chat_not_found':
+      return l.errMessagingChatNotFound;
+    case 'messaging.edit_conflict':
+      return l.errMessagingEditConflict;
+    case 'messaging.file_rejected':
+      return l.errMessagingFileRejected;
+    case 'messaging.file_too_large':
+      return l.errMessagingFileTooLarge;
+    case 'messaging.idempotency_key_reused':
+      return l.errMessagingIdempotencyKeyReused;
+    case 'messaging.input_invalid':
+      return l.errMessagingInputInvalid;
+    case 'messaging.invalid_cursor':
+      return l.errMessagingInvalidCursor;
+    case 'messaging.member_not_found':
+      return l.errMessagingMemberNotFound;
+    case 'messaging.member_source_managed':
+      return l.errMessagingMemberSourceManaged;
+    case 'messaging.message_deleted':
+      return l.errMessagingMessageDeleted;
+    case 'messaging.message_not_found':
+      return l.errMessagingMessageNotFound;
+    case 'messaging.not_authorized':
+      return l.errMessagingNotAuthorized;
+    case 'messaging.poll_closed':
+      return l.errMessagingPollClosed;
+    case 'messaging.ref_not_found':
+      return l.errMessagingRefNotFound;
+    case 'messaging.request_key_invalid':
+      return l.errMessagingRequestKeyInvalid;
+    case 'messaging.request_key_required':
+      return l.errMessagingRequestKeyRequired;
+    case 'messaging.revision_invalid':
+      return l.errMessagingRevisionInvalid;
+    case 'messaging.revision_required':
+      return l.errMessagingRevisionRequired;
+    case 'messaging.scope_invalid':
+      return l.errMessagingScopeInvalid;
+    case 'messaging.task_deleted':
+      return l.errMessagingTaskDeleted;
     case 'notifications.input_invalid':
       return l.errNotificationsInputInvalid;
     case 'notifications.invalid_cursor':
@@ -509,6 +600,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errRecordsContentRejected;
     case 'records.file_not_found':
       return l.errRecordsFileNotFound;
+    case 'records.idempotency_key_reused':
+      return l.errRecordsIdempotencyKeyReused;
     case 'records.input_invalid':
       return l.errRecordsInputInvalid;
     case 'records.invalid_cursor':
@@ -523,6 +616,10 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errRecordsNameTaken;
     case 'records.not_authorized':
       return l.errRecordsNotAuthorized;
+    case 'records.request_key_invalid':
+      return l.errRecordsRequestKeyInvalid;
+    case 'records.request_key_required':
+      return l.errRecordsRequestKeyRequired;
     case 'records.tag_invalid':
       return l.errRecordsTagInvalid;
     case 'records.tag_required':
@@ -589,14 +686,20 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errWorkDependencyDuplicate;
     case 'work.dependency_not_completed':
       return l.errWorkDependencyNotCompleted;
+    case 'work.edit_conflict':
+      return l.errWorkEditConflict;
     case 'work.extend_days_out_of_range':
       return l.errWorkExtendDaysOutOfRange;
+    case 'work.idempotency_key_reused':
+      return l.errWorkIdempotencyKeyReused;
     case 'work.input_invalid':
       return l.errWorkInputInvalid;
     case 'work.invalid_input':
       return l.errWorkInvalidInput;
     case 'work.item_completed':
       return l.errWorkItemCompleted;
+    case 'work.item_deleted':
+      return l.errWorkItemDeleted;
     case 'work.item_not_completed':
       return l.errWorkItemNotCompleted;
     case 'work.item_not_found':
@@ -619,8 +722,16 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errWorkProgramScopeInvalid;
     case 'work.protected_field':
       return l.errWorkProtectedField;
+    case 'work.request_key_invalid':
+      return l.errWorkRequestKeyInvalid;
+    case 'work.request_key_required':
+      return l.errWorkRequestKeyRequired;
     case 'work.revert_reason_required':
       return l.errWorkRevertReasonRequired;
+    case 'work.revision_invalid':
+      return l.errWorkRevisionInvalid;
+    case 'work.revision_required':
+      return l.errWorkRevisionRequired;
     case 'work.stale_completion':
       return l.errWorkStaleCompletion;
     case 'work.stale_transition':
@@ -647,8 +758,12 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errClientNetworkError;
     case 'client.not_signed_in':
       return l.errClientNotSignedIn;
+    case 'client.outcome_unknown':
+      return l.errClientOutcomeUnknown;
     case 'client.reauth_required':
       return l.errClientReauthRequired;
+    case 'client.request_not_resent':
+      return l.errClientRequestNotResent;
     case 'client.scope_changed':
       return l.errClientScopeChanged;
     case 'client.scope_missing':
@@ -657,6 +772,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errClientSecureStorageError;
     case 'client.server_not_verified':
       return l.errClientServerNotVerified;
+    case 'client.server_outdated':
+      return l.errClientServerOutdated;
     case 'client.server_unrecognized':
       return l.errClientServerUnrecognized;
     case 'client.session_ended':

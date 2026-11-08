@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/errors/error_text.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
@@ -45,12 +44,10 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
     final coord = f.coordinatorship == null
         ? null
         : catalog?.coordinatorship(f.coordinatorship!);
-    // Sunucu katalogu: koordinatörlük = departman; adaylar departman ekibinden (tek atanan).
-    final server = catalog?.access != null;
-    // Ekip (`listMembers`) yalnız görev açabilen hesapta okunur: yetkisizde istek yok.
-    final teamOpen =
-        server && coord != null && ref.watch(canCreateTaskProvider);
-    // Seçili atananın adı: sunucuda departman ekibinden (`listMembers`, seçicinin kaynağı),
+    // Koordinatörlük = departman; adaylar departman ekibinden (tek atanan). Ekip
+    // (`listMembers`) yalnız görev açabilen hesapta okunur: yetkisizde istek yok.
+    final teamOpen = coord != null && ref.watch(canCreateTaskProvider);
+    // Seçili atananın adı: departman ekibinden (`listMembers`, seçicinin kaynağı),
     // yoksa katalogdaki addan; bilinmiyorsa nötr etiket.
     final team = teamOpen
         ? ref.watch(taskTeamProvider(coord.code)).value
@@ -170,17 +167,20 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
               onSelected: (i) => ctl.setPriority(TaskPriority.pickable[i]),
             ),
           ),
-          NzFormRow.toggle(
-            label: l.uiTasksEvidenceRequired,
-            icon: NzIcons.attach,
-            value: f.evidenceRequired,
-            onChanged: (v) => ctl.setEvidenceRequired(value: v),
-          ),
+          // Nottan görevde kanıt bayrağı yoktur (`convertNoteToTask` gövdesi).
+          if (f.note == null)
+            NzFormRow.toggle(
+              label: l.uiTasksEvidenceRequired,
+              icon: NzIcons.attach,
+              value: f.evidenceRequired,
+              onChanged: (v) => ctl.setEvidenceRequired(value: v),
+            ),
         ],
       ),
       footer: [
         if (error != null) TaskFormError(l.newTaskError(error)),
-        if (f.failure case final failure?) TaskFormError(errorText(l, failure)),
+        if (f.failure case final failure?)
+          TaskFormError(l.writeErrorText(failure)),
       ],
     );
   }

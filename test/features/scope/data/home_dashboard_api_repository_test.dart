@@ -171,7 +171,23 @@ Map<String, Object> _bodies({bool admin = true}) => {
     ],
     'total': 3,
   },
-  '/v1/messages/unread-count': {'count': 7},
+  '/v1/me/chat-unread': {
+    'items': [
+      {
+        'program_id': 'prog-1',
+        'program_name': 'P',
+        'unread_chats': 5,
+        'mentioned': false,
+      },
+      // Rozet programlar arası toplamdır (5 + 2).
+      {
+        'program_id': 'prog-2',
+        'program_name': 'Q',
+        'unread_chats': 2,
+        'mentioned': true,
+      },
+    ],
+  },
 };
 
 void main() {
@@ -202,7 +218,6 @@ void main() {
     expect(d.coordinatorships.single.code, 'd1');
     expect(d.coordinatorships.single.leads, ['Ayşe Kaya']);
     expect(d.counts.unreadMessages, 7);
-    expect(d.counts.pendingRequests, 2);
     expect(d.counts.lateTasks, 2);
     expect(d.counts.tasksAwaitingApproval, 1);
   });
@@ -280,7 +295,16 @@ void main() {
       'new_end_on': '2026-11-14',
     };
     Map<String, Object> bodies() => {
-      '/v1/messages/unread-count': {'count': 2},
+      '/v1/me/chat-unread': {
+        'items': [
+          {
+            'program_id': 'prog-1',
+            'program_name': 'P',
+            'unread_chats': 2,
+            'mentioned': false,
+          },
+        ],
+      },
       '/v1/date-change-requests/mine': {
         'requests': [request('w1', 'pending'), request('w2', 'approved')],
         'total': 2,
@@ -316,9 +340,7 @@ void main() {
             .loadTeamExtras(departmentId: dept, coordinator: coordinator);
         expect(x.unreadMessages, 2);
         expect(x.pendingDateRequests, isEmpty);
-        expect(adapter.seen.map((o) => o.uri.path), [
-          '/v1/messages/unread-count',
-        ]);
+        expect(adapter.seen.map((o) => o.uri.path), ['/v1/me/chat-unread']);
       }
     });
   });

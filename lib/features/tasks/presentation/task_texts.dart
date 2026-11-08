@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/errors/api_error.dart';
+import '../../../core/errors/error_text.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../application/meeting_form_controller.dart';
 import '../application/quick_forms_controller.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_query.dart';
@@ -10,6 +13,15 @@ import '../domain/task_query.dart';
 /// Görev ekranlarının etiketleri ve sayılı cümleleri. UI metin kaynağı yer tutucu kabul
 /// etmediği için parçalar ARB'den gelir, burada birleşir; tarih biçimi `tr`.
 extension TaskTexts on AppLocalizations {
+  /// Yazma hatasının metni; 429'da sunucunun `Retry-After` süresi eklenir (otomatik tekrar
+  /// yok; karar kullanıcının, S12).
+  String writeErrorText(ApiError e) {
+    final text = errorText(this, e);
+    final wait = e.retryAfter;
+    if (wait == null || wait <= Duration.zero) return text;
+    return '$text · $uiTasksRetryAfterHead ${wait.inSeconds} $uiTasksRetryAfterTail';
+  }
+
   String statusLabel(TaskStatus s) => switch (s) {
     TaskStatus.todo => uiTasksStatusTodo,
     TaskStatus.inProgress => uiTasksStatusDoing,
@@ -101,7 +113,6 @@ extension TaskTexts on AppLocalizations {
   String newTaskError(NewTaskError e) => switch (e) {
     NewTaskError.title => uiTasksErrTitle,
     NewTaskError.coordinatorship => uiTasksErrCoord,
-    NewTaskError.assignees => uiTasksErrAssignee,
     NewTaskError.dates => uiTasksErrDatesFull,
   };
 
@@ -110,6 +121,7 @@ extension TaskTexts on AppLocalizations {
     MeetingError.past => uiTasksErrPast,
     MeetingError.coordinatorships => uiTasksErrMtCoords,
     MeetingError.people => uiTasksErrMtPeople,
+    MeetingError.owner => uiTasksErrMtOwner,
   };
 
   String inviteError(InviteError e) => switch (e) {

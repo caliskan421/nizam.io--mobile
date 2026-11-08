@@ -115,6 +115,8 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
     );
     final folders = ref.watch(archiveFoldersControllerProvider);
     return NzPage.feed(
+      // Klasör ön yüzü cam (NzFolder): giriş yalnız yükselir.
+      fadeContent: false,
       onRetry: () => ref.invalidate(archiveFoldersControllerProvider),
       topBar: const RootTopBar(),
       children: [

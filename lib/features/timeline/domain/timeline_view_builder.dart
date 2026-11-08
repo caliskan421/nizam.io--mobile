@@ -71,7 +71,12 @@ TimelineView buildTimelineView(
       s.priorities.isEmpty || s.priorities.contains(t.item.priority);
   final base = [
     for (final t in tasks)
-      if (personOk(t) && prioOk(t)) t,
+      if (personOk(t) &&
+          prioOk(t) &&
+          ('${t.item.title} ${t.item.displayCode} ${t.item.assignees.map(catalog.nameOf).join(' ')}')
+              .toLowerCase()
+              .contains(s.query.toLowerCase().trim()))
+        t,
   ];
   bool statusOk(TimelineTask t, TimelineStatusFilter f) => switch (f) {
     TimelineStatusFilter.all => true,

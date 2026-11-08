@@ -62,16 +62,6 @@ extension HomeTexts on AppLocalizations {
           '${t.members} $uiHomeRoleMemberLc)',
   };
 
-  /// "Son işlem bugün 14:27 · Abdullah Ateş" (bugün değilse tarih).
-  String lastActivity(LastActivity a, DateTime now) {
-    final sameDay =
-        a.at.year == now.year && a.at.month == now.month && a.at.day == now.day;
-    final when = sameDay
-        ? '$uiHomeHistoryToday ${DateFormat.Hm('tr').format(a.at)}'
-        : DateFormat('d MMM HH:mm', 'tr').format(a.at);
-    return '$uiHomeHistoryLast $when · ${a.actorName}';
-  }
-
   /// "%9 · 11 görev".
   String coordProgress(CoordinatorshipSummary c) =>
       '${percent(c.donePercent / 100)} · ${c.total} $uiHomeTasksLc';
@@ -84,13 +74,6 @@ extension HomeTexts on AppLocalizations {
     CoordinatorshipSort.late => uiHomeSortLate,
     CoordinatorshipSort.progress => uiHomeSortProgress,
     CoordinatorshipSort.name => uiHomeSortName,
-  };
-
-  String filterLabel(CoordinatorshipFilter f) => switch (f) {
-    CoordinatorshipFilter.all => uiHomeFilterAll,
-    CoordinatorshipFilter.late => uiHomeFilterLate,
-    CoordinatorshipFilter.onTrack => uiHomeFilterOnTrack,
-    CoordinatorshipFilter.unassigned => uiHomeFilterUnassigned,
   };
 
   /// "ALT-7 · Tarih talebi · +51 gün" / "ULA-1 · Tarih talebi · 15 Kas" / "İDA-2 · Onay

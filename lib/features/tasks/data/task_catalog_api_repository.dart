@@ -8,6 +8,8 @@ import '../../../core/api/generated/clients/work_client.dart';
 import '../../../core/api/generated/models/me_response.dart';
 import '../../../core/api/generated/models/my_department.dart' as api;
 import '../../../core/api/generated/models/my_department_list.dart';
+import '../../../core/api/generated/models/roster_member.dart';
+import '../../../core/api/generated/models/roster_member_status.dart';
 import '../../../core/api/generated/models/work_item.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/http/interceptors.dart';
@@ -91,7 +93,10 @@ class ApiTaskCatalogRepository
             false,
           );
 
+    // Ekipler görev sayfalarıyla eşzamanlı okunur (koordinatörlük kartı/ayrıntısı kişileri).
+    final teamsF = _teams(program, access, departments);
     final (items, truncated) = await _items(program, null);
+    final teams = await teamsF;
 
     final labels = {for (final d in departments) d.id: d.label};
     final tasks = [
@@ -108,20 +113,28 @@ class ApiTaskCatalogRepository
       departmentsTruncated: departmentsTruncated,
       names: _names(items),
       tasks: tasks,
-      people: [
+      people: _people(
         Person(
           id: access.accountId,
           name: me.fullName,
           role: access.personRoleIn(program),
         ),
-      ],
+        [for (final (_, rows) in teams) rows],
+      ),
       coordinatorships: [
         for (final d in departments)
           CoordinatorshipRef(
             code: d.id,
             name: d.name,
-            leads: const [],
-            members: const [],
+            shortCode: d.code,
+            leads: [
+              for (final m in _teamOf(teams, d.id))
+                if (m.role == 'koordinator') m.accountId,
+            ],
+            members: [
+              for (final m in _teamOf(teams, d.id))
+                if (m.role != 'koordinator') m.accountId,
+            ],
           ),
       ],
     );
@@ -154,10 +167,81 @@ class ApiTaskCatalogRepository
     );
   }
 
+  /// Okunabilen departmanların etkin ekibi (`listMembers`, S2; program açıkça sabitlenir).
+  /// Yalnız yönetici ya da o departmanın koordinatörü okur ([TaskAccess.canReadTeamIn]);
+  /// üyede çağrı yoktur. Ekip ek bilgidir: bir departmanın okuması düşerse o koordinatörlük
+  /// kişisiz görünür, katalog düşmez.
+  Future<List<(String, List<RosterMember>)>> _teams(
+    String program,
+    TaskAccess access,
+    List<TaskDepartment> departments,
+  ) async {
+    final readable = [
+      for (final d in departments)
+        if (access.canReadTeamIn(program, d.id)) d.id,
+    ];
+    final rows = await Future.wait([
+      for (final id in readable)
+        apiCall(
+              () => _organization.listMembers(
+                id: id,
+                extras: withProgram(
+                  OrganizationClient.listMembersOpenapiExtras,
+                  program,
+                ),
+              ),
+            )
+            .then(
+              (r) => [
+                for (final m in r.data.members ?? const <RosterMember>[])
+                  if (m.status == RosterMemberStatus.active) m,
+              ],
+            )
+            .catchError((Object _) => const <RosterMember>[]),
+    ]);
+    return [for (var i = 0; i < readable.length; i++) (readable[i], rows[i])];
+  }
+
+  static List<RosterMember> _teamOf(
+    List<(String, List<RosterMember>)> teams,
+    String departmentId,
+  ) => [
+    for (final (id, rows) in teams)
+      if (id == departmentId) ...rows,
+  ];
+
+  /// Katalog kişileri: oturum sahibi (rolü erişimden) + ekiplerdeki herkes (bir yerde
+  /// koordinatörse koordinatör).
+  static List<Person> _people(Person me, Iterable<List<RosterMember>> teams) {
+    final out = [me];
+    for (final m in teams.expand((t) => t)) {
+      final lead = m.role == 'koordinator';
+      final i = out.indexWhere((p) => p.id == m.accountId);
+      if (i == 0 ||
+          (i > 0 && (out[i].role == PersonRole.coordinator || !lead))) {
+        continue;
+      }
+      final person = Person(
+        id: m.accountId,
+        name: m.fullName,
+        role: lead ? PersonRole.coordinator : PersonRole.member,
+      );
+      if (i > 0) {
+        out[i] = person;
+      } else {
+        out.add(person);
+      }
+    }
+    return out;
+  }
+
   static List<PersonName> _names(List<WorkItem> items) => [
-    for (final w in items)
+    for (final w in items) ...[
       for (final a in w.assignees)
         if (a.fullName case final name?) PersonName(a.accountId, name),
+      if (w.createdByFullName case final name?)
+        PersonName(w.createdByAccountId, name),
+    ],
   ];
 
   /// Şirket yöneticisinin süzgeç seçenekleri (programa bağlı canlı departmanlar, ada göre
@@ -250,6 +334,18 @@ class ApiTaskCatalogRepository
       overdueDays: lateness.daysOverdue,
       evidenceRequired: w.completionEvidenceRequired,
       subtaskCounts: (total: w.subtaskCounts.total, done: w.subtaskCounts.done),
+      creator: w.createdByAccountId,
+      createdAt: w.createdAt.toLocal(),
+      dateRequest: pendingDateRequest(
+        requestId: w.pendingDateRequest?.requestId,
+        newStart: w.pendingDateRequest?.newStartOn,
+        newEnd: w.pendingDateRequest?.newEndOn,
+        workItemId: w.workItemId,
+        start: w.startOn,
+        end: w.endOn,
+      ),
+      editRevision: w.editRevision,
+      datesRevision: w.datesRevision,
     );
   }
 }

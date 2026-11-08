@@ -28,6 +28,7 @@ import '../widgets/surfaces/nz_glass.dart';
 class NzPage extends ConsumerWidget {
   const NzPage({
     super.key,
+    this.animateContent = true,
     required this.title,
     required this.body,
     this.width = NzContentWidth.list,
@@ -36,7 +37,8 @@ class NzPage extends ConsumerWidget {
     this.loading = false,
     this.onRetry,
     this.showTitleBar = true,
-  }) : topBar = null,
+  }) : fadeContent = true,
+       topBar = null,
        onRefresh = null,
        onRevisit = null,
        children = const [],
@@ -59,6 +61,7 @@ class NzPage extends ConsumerWidget {
   /// sayfa yeniden görünür olunca (sekme dönüşü, üstteki sayfa kapanınca) çağrılır.
   const NzPage.feed({
     super.key,
+    this.animateContent = true,
     required Widget this.topBar,
     required this.children,
     this.width = NzContentWidth.list,
@@ -69,6 +72,7 @@ class NzPage extends ConsumerWidget {
     this.paneLead,
     this.onRefresh,
     this.onRevisit,
+    this.fadeContent = true,
   }) : title = '',
        body = const SizedBox.shrink(),
        actions = const [],
@@ -83,9 +87,11 @@ class NzPage extends ConsumerWidget {
   /// kaymaz). Yatay boşluk ve alt güvenli alan [body]'nindir.
   const NzPage.fill({
     super.key,
+    this.animateContent = true,
     required Widget this.topBar,
     required this.body,
     this.onRetry,
+    this.fadeContent = true,
   }) : title = '',
        onRefresh = null,
        onRevisit = null,
@@ -106,8 +112,9 @@ class NzPage extends ConsumerWidget {
   /// güvenli alan yoktur; [body] bütün alanı alır ve güvenli alanı/klavyeyi kendisi yönetir
   /// (`MediaQuery.paddingOf` / `viewInsetsOf`; Scaffold gövdeyi klavye için küçültmez).
   /// Metin ölçeği sınırı ve toast kabuğu (Scaffold) standart sayfayla aynıdır.
-  const NzPage.bare({super.key, required this.body})
-    : title = '',
+  const NzPage.bare({super.key, required this.body, this.animateContent = true})
+    : fadeContent = true,
+      title = '',
       onRefresh = null,
       onRevisit = null,
       topBar = null,
@@ -126,6 +133,12 @@ class NzPage extends ConsumerWidget {
       _bare = true;
 
   /// AppBar başlığı (ARB'den).
+  final bool animateContent;
+
+  /// [NzPage.feed] / [NzPage.fill]: false → içerik girişi solmaz, yalnız yükselir (gövdede
+  /// cam / `BackdropFilter` var; bkz. [PageContentEntrance.fade]). Feed'de camlı yapışkan
+  /// şerit ([pinned]) kendiliğinden solmaz; solma şeridin dışındaki katmanlarda oynar.
+  final bool fadeContent;
   final String title;
 
   /// false → üst AppBar çizilmez (giriş gibi başlığını gövdede taşıyan tam ekranlar).
@@ -170,7 +183,8 @@ class NzPage extends ConsumerWidget {
   final Future<void> Function()? onRefresh;
 
   /// [NzPage.feed]: sayfa gizliyken yeniden görünür olunca (kabuk sekmesine dönüş, üstüne
-  /// itilen sayfanın kapanması; `TickerMode` kapalı → açık). İlk açılışta çağrılmaz.
+  /// itilen sayfanın kapanması; `TickerMode` kapalı → açık). İlk açılışta çağrılmaz;
+  /// içerik giriş hareketi bitince çalışır ([PageContentEntrance.onRevisit]).
   /// Arka planda bayat veriyi tazelemek içindir (ör. `refreshIfStale`); gösterge çizilmez,
   /// eski veri görünür kalır.
   final VoidCallback? onRevisit;
@@ -199,7 +213,11 @@ class NzPage extends ConsumerWidget {
                 SliverToBoxAdapter(child: NzBanner.offline(onAction: onRetry)),
               SliverFillRemaining(
                 hasScrollBody: true,
-                child: PageContentEntrance(child: body),
+                child: PageContentEntrance(
+                  enabled: animateContent,
+                  fade: fadeContent,
+                  child: body,
+                ),
               ),
             ],
           ),
@@ -223,7 +241,7 @@ class NzPage extends ConsumerWidget {
           ? null
           : () => _guardedRefresh(context, onRefresh!);
       final cupertino = refresh != null && _cupertinoRefresh(context);
-      Widget page = NzTextScaleLimit(
+      return NzTextScaleLimit(
         child: Scaffold(
           body: LayoutBuilder(
             builder: (context, constraints) {
@@ -241,21 +259,34 @@ class NzPage extends ConsumerWidget {
                   if (pane != NzPaneRole.master) topBar,
                   if (cupertino)
                     CupertinoSliverRefreshControl(onRefresh: refresh),
+                  // Camlı yapışkan şerit varsa grup yalnız yükselir; solma şeridin
+                  // üstündeki ve altındaki camsız katmanlarda grubun eğrisiyle oynar.
                   PageContentEntrance.sliver(
+                    enabled: animateContent,
+                    fade: fadeContent && pinned == null,
+                    onRevisit: onRevisit,
                     child: SliverMainAxisGroup(
                       slivers: [
-                        if (offline)
-                          SliverToBoxAdapter(
-                            child: NzBanner.offline(onAction: onRetry),
+                        PageContentEntrance.sliver(
+                          enabled: animateContent,
+                          fade: fadeContent,
+                          child: SliverMainAxisGroup(
+                            slivers: [
+                              if (offline)
+                                SliverToBoxAdapter(
+                                  child: NzBanner.offline(onAction: onRetry),
+                                ),
+                              SliverPadding(
+                                padding: EdgeInsets.fromLTRB(
+                                  side,
+                                  top,
+                                  side,
+                                  pinned == null ? bottom : 0,
+                                ),
+                                sliver: SliverList.list(children: children),
+                              ),
+                            ],
                           ),
-                        SliverPadding(
-                          padding: EdgeInsets.fromLTRB(
-                            side,
-                            top,
-                            side,
-                            pinned == null ? bottom : 0,
-                          ),
-                          sliver: SliverList.list(children: children),
                         ),
                         if (pinned case final pinned?) ...[
                           PinnedHeaderSliver(
@@ -272,6 +303,7 @@ class NzPage extends ConsumerWidget {
                             padding: EdgeInsets.fromLTRB(side, 0, side, bottom),
                             sliver: PageContentEntrance.sliver(
                               key: afterKey,
+                              fade: fadeContent,
                               child: SliverList.list(children: after),
                             ),
                           ),
@@ -297,10 +329,6 @@ class NzPage extends ConsumerWidget {
           ),
         ),
       );
-      if (onRevisit case final revisit?) {
-        page = _RevisitWatch(onRevisit: revisit, child: page);
-      }
-      return page;
     }
     return NzTextScaleLimit(
       child: Scaffold(
@@ -369,38 +397,6 @@ Future<void> _guardedRefresh(
     if (sessionEndedErrorCodes.contains(error.code) || !context.mounted) return;
     NzToast.error(context, error);
   }
-}
-
-/// `TickerMode` kapalı → açık geçişinde (gizli sayfa yeniden görünür) [onRevisit].
-class _RevisitWatch extends StatefulWidget {
-  const _RevisitWatch({required this.onRevisit, required this.child});
-
-  final VoidCallback onRevisit;
-  final Widget child;
-
-  @override
-  State<_RevisitWatch> createState() => _RevisitWatchState();
-}
-
-class _RevisitWatchState extends State<_RevisitWatch> {
-  bool? _active;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final active = TickerMode.valuesOf(context).enabled;
-    final returning = _active == false && active;
-    _active = active;
-    // Bağımlılık değişimi sırasında sağlayıcı yazımı yapılmaz: kare sonrasına bırakılır.
-    if (returning) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) widget.onRevisit();
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
 }
 
 /// Dokunmayı keser; gövdeyi yarı saydam örter, ortada [NzLoader.page].

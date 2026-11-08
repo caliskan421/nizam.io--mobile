@@ -3,38 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 
-/// Prototip satır grubu (`bg-raised`, köşe 18, satırlar arası 1 px `border-subtle`).
-class CoordGroup extends StatelessWidget {
-  const CoordGroup({super.key, required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(NizamioRadius.row),
-      child: ColoredBox(
-        color: c.surfaceRaised,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < children.length; i++) ...[
-              if (i > 0)
-                Divider(
-                  height: NizamioSize.borderWidth,
-                  thickness: NizamioSize.borderWidth,
-                  color: c.border,
-                ),
-              children[i],
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 /// Grup içi dokunulabilir satır (en az [minHeight], yatay 14 iç boşluk).
 class CoordRow extends StatelessWidget {
   const CoordRow({
@@ -56,6 +24,9 @@ class CoordRow extends StatelessWidget {
   /// Açılır satır (aria-expanded) için durum; null → düz düğme.
   final bool? expanded;
 
+  /// Üzerine gelme / odak katmanı (basmada efekt yok: dalga ve vurgu kapalı, NzCard gibi).
+  static const _overlayAlpha = 0.12;
+
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
@@ -67,6 +38,16 @@ class CoordRow extends StatelessWidget {
       type: MaterialType.transparency,
       child: InkWell(
         onTap: onTap,
+        splashFactory: NoSplash.splashFactory,
+        overlayColor: WidgetStateProperty.resolveWith(
+          (s) => context.colors.text.withValues(
+            alpha:
+                s.contains(WidgetState.hovered) ||
+                    s.contains(WidgetState.focused)
+                ? _overlayAlpha
+                : 0,
+          ),
+        ),
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: minHeight),
           child: Padding(

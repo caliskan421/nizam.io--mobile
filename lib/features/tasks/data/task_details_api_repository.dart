@@ -36,7 +36,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
   final RecordsClient _records;
 
   @override
-  Future<TaskDetails?> load(TaskItem task, {TaskAccess? access}) async {
+  Future<TaskDetails> load(TaskItem task, {TaskAccess? access}) async {
     // Programı/departmanı olmayan görev kapıda reddedilir (seçili kapsama düşülmez).
     final program = task.programId ?? '';
     final department = task.departmentId ?? '';
@@ -111,6 +111,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
       item: _item(item, task.shortCode),
       names: [
         for (final a in item.assignees) ?_name(a.accountId, a.fullName),
+        ?_name(item.createdByAccountId, item.createdByFullName),
         for (final n in notes) ?_name(n.authorAccountId, n.authorFullName),
         for (final s in subtasks) ...[
           ?_name(s.createdByAccountId, s.createdByFullName),
@@ -130,6 +131,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
             at: n.createdAt,
             text: n.content,
             updatedAt: n.updatedAt,
+            editRevision: n.editRevision,
           ),
       ],
       files: [
@@ -160,7 +162,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
   }
 
   @override
-  Future<TaskItem?> loadItem(TaskItem task) async {
+  Future<TaskItem> loadItem(TaskItem task) async {
     final item = await apiCall(
       () => _work.getWorkItem(
         id: task.id,
@@ -206,6 +208,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
     assignee: s.assigneeAccountId,
     doneBy: s.doneByAccountId,
     createdBy: s.createdByAccountId,
+    editRevision: s.editRevision,
     start: s.startOn,
     end: s.endOn,
     evidence: files
@@ -249,6 +252,18 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
       overdueDays: lateness.daysOverdue,
       evidenceRequired: w.completionEvidenceRequired,
       subtaskCounts: (total: w.subtaskCounts.total, done: w.subtaskCounts.done),
+      creator: w.createdByAccountId,
+      createdAt: w.createdAt.toLocal(),
+      dateRequest: pendingDateRequest(
+        requestId: w.pendingDateRequest?.requestId,
+        newStart: w.pendingDateRequest?.newStartOn,
+        newEnd: w.pendingDateRequest?.newEndOn,
+        workItemId: w.workItemId,
+        start: w.startOn,
+        end: w.endOn,
+      ),
+      editRevision: w.editRevision,
+      datesRevision: w.datesRevision,
     );
   }
 

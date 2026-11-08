@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/errors/error_text.dart';
+import '../../../../core/domain/turkish_collation.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
@@ -16,10 +16,11 @@ import '../../application/task_detail_controller.dart';
 import '../../application/tasks_providers.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_permissions.dart';
-import '../../domain/task_query.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 import 'detail_forms.dart';
+
+part 'detail_list_option.dart';
 
 /// Ayrıntı ekranının eylemleri: denetleyici komutu + prototipteki sonuç bildirimi ve alt
 /// sayfalar. Sayfa her çizimde kurar; geri çağrılar sayfa bağlamıyla çalışır. Sunucu yazması
@@ -59,16 +60,13 @@ class TaskDetailActions {
   /// Kanıt yükle (koordinatör ya da atanmış üye; yöneticilik reddeder).
   bool get canUpload => _perms.canUpload;
 
-  /// Silmeyi geri al yalnız örnekte.
-  bool get canUndoDelete => _perms.local;
-
   /// Durum seçicisi açılabilir mi (aktörün geçerli durumdan en az bir hedefi var).
   bool get canChangeStatus {
     final t = _task;
     return t != null && _ctl.permissions.statusTargets(t.status).isNotEmpty;
   }
 
-  /// Durum seçici: geçerli durum + aktörün matristeki hedefleri (örnekte her durum).
+  /// Durum seçici: geçerli durum + aktörün matristeki hedefleri.
   void openStatus() {
     final t = _task;
     if (t == null) return;
@@ -125,13 +123,6 @@ class TaskDetailActions {
         if (yes && context.mounted) {
           await _setStatus(s, reason: reason, closeSubtasks: true);
         }
-      case WriteKind.blockedBySubtasks:
-        _say(
-          '${l.uiTasksTSubsBlock} · ${t.subtasksDone}/${t.subtasks.length} '
-          '${l.uiTasksTFinishedLc}',
-        );
-      case WriteKind.blockedByEvidence:
-        _say(l.uiTasksTEvidenceBlock);
       case WriteKind.done:
         _say('$key · ${l.statusLabel(s)}');
       case _:
@@ -161,9 +152,12 @@ class TaskDetailActions {
   void _report(WriteOutcome r, {String? done}) {
     if (!context.mounted) return;
     switch (r.kind) {
-      case WriteKind.failed || WriteKind.subtasksOpen:
+      case WriteKind.failed ||
+          WriteKind.subtasksOpen ||
+          WriteKind.conflict ||
+          WriteKind.unknown:
         final e = r.error;
-        if (e != null) _say(errorText(context.l10n, e));
+        if (e != null) _say(context.l10n.writeErrorText(e));
       case WriteKind.done:
         if (done != null) _say(done);
       case WriteKind.invalid:
@@ -179,6 +173,7 @@ class TaskDetailActions {
     required String title,
     required String description,
     required String ok,
+    String? cancel,
     bool danger = false,
   }) async {
     final l = context.l10n;
@@ -187,9 +182,9 @@ class TaskDetailActions {
       context,
       title: title,
       description: description,
-      actions: (sheet) => sheetActions(
+      actions: (sheet) => nzSheetActions(
         sheet,
-        cancel: l.uiTasksCancel,
+        cancel: cancel ?? l.uiTasksCancel,
         ok: ok,
         danger: danger,
         onOk: () {
@@ -217,33 +212,33 @@ class TaskDetailActions {
     final l = context.l10n;
     final controller = TextEditingController(text: initial);
     String? result;
-    try {
-      await NzBottomSheet.show<void>(
-        context,
-        title: title,
-        description: description,
-        actions: (sheet) => sheetActions(
-          sheet,
-          cancel: l.uiTasksCancel,
-          ok: ok,
-          onOk: () {
-            final v = controller.text.trim();
-            if (v.isEmpty || !(valid?.call(v) ?? true)) return;
-            result = v;
-            Navigator.of(sheet).pop();
-          },
-        ),
-        builder: (_) => NzTextField(
+    // Denetleyiciyi sayfa kalkınca sil: kapanış hareketinde alan yeniden çizilir.
+    await NzBottomSheet.show<void>(
+      context,
+      title: title,
+      description: description,
+      actions: (sheet) => nzSheetActions(
+        sheet,
+        cancel: l.uiTasksCancel,
+        ok: ok,
+        onOk: () {
+          final v = controller.text.trim();
+          if (v.isEmpty || !(valid?.call(v) ?? true)) return;
+          result = v;
+          Navigator.of(sheet).pop();
+        },
+      ),
+      builder: (_) => DisposeWith(
+        controller,
+        child: NzTextField(
           label: label,
           hint: hint,
           helper: helper,
           controller: controller,
           textInputAction: TextInputAction.done,
         ),
-      );
-    } finally {
-      controller.dispose();
-    }
+      ),
+    );
     return result;
   }
 
@@ -377,7 +372,7 @@ class TaskDetailActions {
       context,
       title: title,
       description: description,
-      actions: (sheet) => sheetActions(
+      actions: (sheet) => nzSheetActions(
         sheet,
         cancel: l.uiTasksCancel,
         ok: ok,
@@ -389,10 +384,21 @@ class TaskDetailActions {
             case WriteKind.done || WriteKind.unchanged:
               if (r.ok) msg = text;
               if (sheet.mounted) Navigator.of(sheet).pop();
-            case WriteKind.failed:
+            // Sonuç bilinmiyorsa da sayfa açık kalır: aynı düğme aynı anahtarla yeniden gönderir.
+            case WriteKind.failed || WriteKind.unknown:
               final e = r.error;
               if (e != null && context.mounted) {
-                _say(errorText(context.l10n, e));
+                _say(context.l10n.writeErrorText(e));
+              }
+            // V3: sayfa açık kalır; çakışan alanlar formda seçime sunulur.
+            case WriteKind.conflict:
+              final e = r.error;
+              if (context.mounted) {
+                _say(
+                  e != null
+                      ? context.l10n.writeErrorText(e)
+                      : context.l10n.uiTasksConflictPending,
+                );
               }
             case _:
               break;
@@ -599,33 +605,28 @@ class TaskDetailActions {
     );
   }
 
-  void undoDelete() {
-    _ctl.undoDelete();
-    _say('$code ${context.l10n.uiTasksTRestoredTail}');
-  }
-
   // ---- alt görev, not ---------------------------------------------------------------------
 
   Future<void> toggleSubtask(String id) async =>
       _report(await _ctl.toggleSubtask(id));
 
-  /// Alt görev ekle: örnek katalogda satır içi; sunucuda başlık alt sayfası → oluştur.
+  /// Alt görev ekle: başlık alt sayfası → oluştur.
   Future<void> addSubtask() async {
-    if (_ctl.permissions.local) {
-      _ctl.addSubtask();
-      return;
-    }
     final l = context.l10n;
     final title = await _askText(
       title: l.uiTasksSubAdd,
       description: l.uiTasksSubsHint,
       label: l.uiTasksSubName,
       ok: l.uiTasksCreate,
+      // S12: sonucu bilinmeyen/başarısız eklemenin adı geri gelir (aynı ad → aynı anahtar).
+      initial: _ctl.pendingSubtaskTitle ?? '',
     );
     if (title == null || !context.mounted) return;
     _report(await _ctl.createSubtask(title), done: l.uiTasksTSubAdded);
   }
 
+  /// Alt görev adı: gönderilemeyen ad state'te kalır ve diyalog onunla açılır (S12); 409
+  /// `work.edit_conflict`'te sunucudaki ad ile sizinki arasında seçim (V3).
   Future<void> renameSubtask(Subtask u) async {
     final l = context.l10n;
     final title = await _askText(
@@ -633,10 +634,34 @@ class TaskDetailActions {
       description: l.uiTasksSubName,
       label: l.uiTasksSubName,
       ok: l.uiTasksSave,
-      initial: u.title,
+      initial: _ctl.subtaskRenameDraft(u.id) ?? u.title,
     );
     if (title == null || !context.mounted) return;
-    _report(await _ctl.renameSubtask(u.id, title));
+    final r = await _ctl.renameSubtask(u.id, title);
+    if (!context.mounted) return;
+    if (r.kind != WriteKind.conflict) return _report(r);
+    final mine = await _pickText(server: r.serverText, mine: title);
+    if (!context.mounted) return;
+    if (mine) {
+      _report(await _ctl.renameSubtask(u.id, title));
+    } else {
+      _ctl.discardTextDraft((TextTarget.subtask, u.id));
+    }
+  }
+
+  /// İki seçenekli metin çakışması (V3): true → sizinki yeniden gönderilir (yeni sürümle),
+  /// false → sunucudaki kalır.
+  Future<bool> _pickText({required String? server, required String mine}) {
+    final l = context.l10n;
+    return _confirm(
+      title: l.uiTasksTextConflictTitle,
+      description:
+          '${l.uiTasksTextConflictDesc}\n'
+          '${l.uiTasksConflictServer}: ${server ?? l.uiTasksEmptyValue}\n'
+          '${l.uiTasksConflictMine}: $mine',
+      ok: l.uiTasksConflictKeepMine,
+      cancel: l.uiTasksConflictTakeServer,
+    );
   }
 
   Future<void> setSubtaskAssignee(String id, String? person) async =>
@@ -680,11 +705,23 @@ class TaskDetailActions {
           : note.text,
       label: l.uiTasksNoteHint,
       ok: l.uiTasksSave,
-      initial: note.text,
+      // S12: gönderilemeyen düzenleme metni kaybolmaz.
+      initial: _ctl.noteEditDraft(note) ?? note.text,
     );
     if (text == null || !context.mounted) return;
     final r = await _ctl.editNote(note, text);
-    if (context.mounted) _report(r, done: l.uiTasksTNoteSaved);
+    if (!context.mounted) return;
+    if (r.kind != WriteKind.conflict) {
+      return _report(r, done: l.uiTasksTNoteSaved);
+    }
+    final mine = await _pickText(server: r.serverText, mine: text);
+    if (!context.mounted) return;
+    final fresh = _task?.noteEntries.where((n) => n.id == note.id).firstOrNull;
+    if (mine && fresh != null) {
+      _report(await _ctl.editNote(fresh, text), done: l.uiTasksTNoteSaved);
+    } else {
+      _ctl.discardTextDraft((TextTarget.note, note.id ?? ''));
+    }
   }
 
   Future<void> deleteNote(TaskNote note) async {
@@ -698,83 +735,5 @@ class TaskDetailActions {
     if (!yes || !context.mounted) return;
     final r = await _ctl.deleteNote(note);
     if (context.mounted) _report(r, done: l.uiTasksTNoteDeleted);
-  }
-
-  void addNoteToMemory(int i) {
-    if (_ctl.addNoteToMemory(i)) _say(context.l10n.uiTasksTNoteMemory);
-  }
-}
-
-/// Liste tipi alt sayfa satırı (prototip `.rp-menuitem`).
-class _ListOption extends StatelessWidget {
-  const _ListOption({
-    required this.label,
-    required this.leading,
-    required this.onTap,
-    this.hint,
-    this.selected = false,
-    this.color,
-  });
-
-  final String label;
-  final Widget leading;
-  final VoidCallback onTap;
-  final String? hint;
-  final bool selected;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    final hint = this.hint;
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: [label, ?hint].join(', '),
-      excludeSemantics: true,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(NizamioRadius.tile),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: NizamioSize.row),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: NizamioSpacing.space2,
-            ),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: NizamioSize.iconSize,
-                  child: Center(child: leading),
-                ),
-                const Gap(NizamioSpacing.space3),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: t.list.copyWith(
-                      color: color ?? c.text,
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                    ),
-                  ),
-                ),
-                if (hint != null) ...[
-                  const Gap(NizamioSpacing.space2),
-                  Text(hint, style: t.caption.copyWith(color: c.textMuted)),
-                ],
-                if (selected) ...[
-                  const Gap(NizamioSpacing.space2),
-                  NzIcon(
-                    NzIcons.check,
-                    size: NizamioSize.iconSizeSm,
-                    color: c.accentText,
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

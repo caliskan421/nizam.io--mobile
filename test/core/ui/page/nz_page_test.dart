@@ -17,6 +17,7 @@ import 'package:nizamio/core/theme/generated/tokens.gen.dart';
 import 'package:nizamio/core/ui/layout/layout.dart';
 import 'package:nizamio/core/ui/page/nz_page.dart';
 import 'package:nizamio/core/ui/theme/app_theme.dart';
+import 'package:nizamio/core/ui/theme/nz_motion.dart';
 import 'package:nizamio/core/ui/widgets/feedback/nz_banner.dart';
 import 'package:nizamio/core/ui/widgets/feedback/nz_loader.dart';
 
@@ -302,6 +303,40 @@ void main() {
     expect(y, closeTo(56, 1), reason: 'üst çubuğun hemen altında');
   });
 
+  // Görev listesi kartları `children` öğesidir (tasks_list_parts): uzun listede yalnız
+  // görünür alan + önbellek payı kurulur; zaman çizelgesinden dönüşte maliyet öğe sayısıyla
+  // büyümez.
+  testWidgets(
+    'feed: 150 öğede ilk karede az öğe kurulur; kaydırınca sıradaki kurulur',
+    (tester) async {
+      _size(tester, 390, 844);
+      final built = <int>{};
+      await tester.pumpWidget(
+        _app(
+          NzPage.feed(
+            topBar: const SliverAppBar(pinned: true, title: Text('üst')),
+            onRefresh: () async {},
+            children: [
+              for (var i = 0; i < 150; i++)
+                _CountedRow(key: ValueKey('row:$i'), index: i, built: built),
+            ],
+          ),
+        ),
+      );
+      final first = built.length;
+      expect(first, lessThan(30), reason: 'tembel kurulum: $first / 150');
+      expect(built, isNot(contains(first + 20)));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -2000));
+      await tester.pumpAndSettle();
+      expect(
+        built,
+        contains(first + 20),
+        reason: 'kaydırınca sıradaki öğe kurulur',
+      );
+      expect(built.length, lessThan(150));
+    },
+  );
+
   // Geniş pencerede (1400) sayfaya yalnız 400 dp ayrılır (bölünmüş ekran / yan panel).
   Widget narrow(Widget page) => Align(
     alignment: Alignment.topLeft,
@@ -449,7 +484,7 @@ void main() {
   });
 
   testWidgets(
-    'feed onRevisit: gizli sayfa yeniden görünür olunca, ilk açılışta değil',
+    'feed onRevisit: yeniden görünür olunca giriş bitince bir kez, ilk açılışta değil',
     (tester) async {
       var revisits = 0;
       Widget host(bool visible) => _app(
@@ -470,7 +505,27 @@ void main() {
       expect(revisits, 0);
       await tester.pumpWidget(host(true));
       await tester.pump();
+      // Tazeleme giriş hareketiyle aynı karelere düşmez.
+      expect(revisits, 0);
+      await tester.pump(RpMotion.enterDuration ~/ 2);
+      expect(revisits, 0);
+      await tester.pump(RpMotion.enterDuration);
+      expect(revisits, 1);
+      await tester.pump(RpMotion.enterDuration);
       expect(revisits, 1);
     },
   );
+}
+
+class _CountedRow extends StatelessWidget {
+  const _CountedRow({super.key, required this.index, required this.built});
+
+  final int index;
+  final Set<int> built;
+
+  @override
+  Widget build(BuildContext context) {
+    built.add(index);
+    return SizedBox(height: 80, child: Text('satır $index'));
+  }
 }

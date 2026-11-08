@@ -12,10 +12,14 @@ part of 'task_catalog_controller.dart';
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
 /// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
-/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog).
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
 /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
-/// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+/// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse uygulamalar yok sayılır.
+///
+/// Önbellek: sağlayıcı uygulama ömrünce yaşar; ekranlar ilk yüklemeden sonra eski kataloğu
+/// hemen gösterir. [refresh] / [refreshIfStale] / [reload] yeniden okurken önceki katalog
+/// durumda kalır (Riverpod `invalidateSelf` → `isRefreshing`, `value` korunur); yenileme
+/// hatasında da (`AsyncError` önceki değeri taşır) görünür veri silinmez.
 
 @ProviderFor(TaskCatalogController)
 final taskCatalogControllerProvider = TaskCatalogControllerProvider._();
@@ -24,20 +28,28 @@ final taskCatalogControllerProvider = TaskCatalogControllerProvider._();
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
 /// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
-/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog).
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
 /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
-/// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+/// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse uygulamalar yok sayılır.
+///
+/// Önbellek: sağlayıcı uygulama ömrünce yaşar; ekranlar ilk yüklemeden sonra eski kataloğu
+/// hemen gösterir. [refresh] / [refreshIfStale] / [reload] yeniden okurken önceki katalog
+/// durumda kalır (Riverpod `invalidateSelf` → `isRefreshing`, `value` korunur); yenileme
+/// hatasında da (`AsyncError` önceki değeri taşır) görünür veri silinmez.
 final class TaskCatalogControllerProvider
     extends $AsyncNotifierProvider<TaskCatalogController, TaskCatalog> {
   /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
   /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
   /// aksi hâlde yeniden yükleme yalnız dokunuşla.
   ///
-  /// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog).
   /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
   /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
-  /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+  /// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse uygulamalar yok sayılır.
+  ///
+  /// Önbellek: sağlayıcı uygulama ömrünce yaşar; ekranlar ilk yüklemeden sonra eski kataloğu
+  /// hemen gösterir. [refresh] / [refreshIfStale] / [reload] yeniden okurken önceki katalog
+  /// durumda kalır (Riverpod `invalidateSelf` → `isRefreshing`, `value` korunur); yenileme
+  /// hatasında da (`AsyncError` önceki değeri taşır) görünür veri silinmez.
   TaskCatalogControllerProvider._()
     : super(
         from: null,
@@ -58,16 +70,20 @@ final class TaskCatalogControllerProvider
 }
 
 String _$taskCatalogControllerHash() =>
-    r'f9fe21c5695e9376fa4e89505b1ba5705d012aec';
+    r'330815af74a77693ea1e32fcc800951446c1556c';
 
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
 /// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
-/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog).
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
 /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
-/// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+/// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse uygulamalar yok sayılır.
+///
+/// Önbellek: sağlayıcı uygulama ömrünce yaşar; ekranlar ilk yüklemeden sonra eski kataloğu
+/// hemen gösterir. [refresh] / [refreshIfStale] / [reload] yeniden okurken önceki katalog
+/// durumda kalır (Riverpod `invalidateSelf` → `isRefreshing`, `value` korunur); yenileme
+/// hatasında da (`AsyncError` önceki değeri taşır) görünür veri silinmez.
 
 abstract class _$TaskCatalogController extends $AsyncNotifier<TaskCatalog> {
   FutureOr<TaskCatalog> build();
@@ -88,7 +104,7 @@ abstract class _$TaskCatalogController extends $AsyncNotifier<TaskCatalog> {
 }
 
 /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da programda en az bir
+/// kapısı): yönetici ya da programda en az bir
 /// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
 /// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
 
@@ -96,14 +112,14 @@ abstract class _$TaskCatalogController extends $AsyncNotifier<TaskCatalog> {
 final canCreateTaskProvider = CanCreateTaskProvider._();
 
 /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da programda en az bir
+/// kapısı): yönetici ya da programda en az bir
 /// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
 /// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
 
 final class CanCreateTaskProvider extends $FunctionalProvider<bool, bool, bool>
     with $Provider<bool> {
   /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-  /// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da programda en az bir
+  /// kapısı): yönetici ya da programda en az bir
   /// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
   /// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
   CanCreateTaskProvider._()
@@ -139,4 +155,4 @@ final class CanCreateTaskProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$canCreateTaskHash() => r'f19c7dee84b9733bf1b077ca4f02749290afd81e';
+String _$canCreateTaskHash() => r'138348c492eddbe03d30acdddb41c55c9ef72b64';

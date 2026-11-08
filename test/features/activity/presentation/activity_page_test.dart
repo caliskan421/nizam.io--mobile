@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
-import 'package:nizamio/core/ui/widgets/inputs/nz_checkbox.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_filter_rail.dart';
 import 'package:nizamio/features/activity/presentation/activity_page.dart';
 
@@ -28,7 +28,11 @@ Future<(Harness, RecordingAppNav)> _open(
     tester.view.physicalSize = const Size(800, 4200);
     addTearDown(tester.view.reset);
   }
-  final h = await real(tester, () => pilotHarness(PilotBackend()));
+  final h = await real(
+    tester,
+    () => pilotHarness(PilotBackend(), signedIn: true),
+  );
+  h.read(scopeControllerProvider).selectProgram('prog-1');
   final nav = RecordingAppNav();
   await pumpScreen(tester, h, const ActivityPage(), nav: nav, dark: dark);
   await settle(tester);
@@ -109,54 +113,6 @@ void main() {
     expect(find.text('0 / 0 ${_l.uiActivityShownTail}'), findsOneWidget);
   });
 
-  testWidgets('filtre alt sayfası: kişi ve koordinatörlük; nokta ve çipler', (
-    tester,
-  ) async {
-    await _open(tester);
-    await _tap(tester, find.byIcon(Icons.tune_rounded));
-    expect(find.text(_l.uiActivityByRole), findsOneWidget);
-    expect(find.byType(NzCheckbox), findsNWidgets(10));
-    expect(find.text('${_l.uiActivityRoleAdmin} · 4'), findsOneWidget);
-    Finder box(String label) => find.descendant(
-      of: find.byType(NzCheckbox),
-      matching: find.text(label),
-    );
-    await _tap(tester, box('Kadir Özbek'));
-    expect(find.text('4 ${_l.uiActivityApplyTail}'), findsOneWidget);
-    await _tap(tester, box('Kadir Özbek'));
-    await _tap(tester, box('Eğitim ve Arge'));
-    final apply = find.textContaining(_l.uiActivityApplyTail);
-    await _tap(tester, apply);
-    expect(find.text(_l.uiActivityByRole), findsNothing);
-    // Çip: koordinatörlük adı; yalnız EĞİ kişileri.
-    expect(find.text('Eğitim ve Arge'), findsOneWidget);
-    expect(find.text('Oturum açtı'), findsWidgets);
-    expect(find.textContaining('Kadir Özbek'), findsNothing);
-    await _tap(tester, find.text('Eğitim ve Arge'));
-    expect(find.textContaining('Kadir Özbek'), findsWidgets);
-  });
-
-  testWidgets('alt sayfa: "Temizle" başlık satırında; kişi satırında avatar', (
-    tester,
-  ) async {
-    await _open(tester);
-    await _tap(tester, find.byIcon(Icons.tune_rounded));
-    expect(find.text('KÖ'), findsOneWidget);
-    final title = tester.getRect(find.text(_l.uiActivityFilters));
-    final clear = tester.getRect(find.text(_l.uiActivityClear));
-    expect((clear.center.dy - title.center.dy).abs(), lessThan(8));
-    await _tap(
-      tester,
-      find.descendant(
-        of: find.byType(NzCheckbox),
-        matching: find.text('Kadir Özbek'),
-      ),
-    );
-    expect(find.text('4 ${_l.uiActivityApplyTail}'), findsOneWidget);
-    await _tap(tester, find.text(_l.uiActivityClear));
-    expect(find.text('38 ${_l.uiActivityApplyTail}'), findsOneWidget);
-  });
-
   testWidgets('kayıt satırları tembel kurulur (yalnız görünen bölge)', (
     tester,
   ) async {
@@ -174,7 +130,11 @@ void main() {
   testWidgets('geri dönüşte süzgeç korunur (prototip: alt durum kalıcı)', (
     tester,
   ) async {
-    final h = await real(tester, () => pilotHarness(PilotBackend()));
+    final h = await real(
+      tester,
+      () => pilotHarness(PilotBackend(), signedIn: true),
+    );
+    h.read(scopeControllerProvider).selectProgram('prog-1');
     await pumpScreen(tester, h, const ActivityPage());
     await settle(tester);
     await _tap(tester, _rail(_l.uiActivityTypeFile));

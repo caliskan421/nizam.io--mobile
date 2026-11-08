@@ -277,6 +277,56 @@ void main() {
       await tester.pump(const Duration(seconds: 10));
     },
   );
+
+  testWidgets('art arda gösterim: yeniden canlanmaz, süre baştan sayılır', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      testApp(_trigger((c) => NzToast.show(c, 'Kaydedildi'))),
+    );
+    double shift() => tester
+        .widget<FractionalTranslation>(
+          find
+              .ancestor(
+                of: find.byType(NzToastBubble),
+                matching: find.byType(FractionalTranslation),
+              )
+              .first,
+        )
+        .translation
+        .dy;
+    await tester.tap(find.text('göster'));
+    await tester.pump();
+    expect(shift(), greaterThan(0), reason: 'aşağıdan başlar');
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(shift(), 0, reason: 'bütün olarak yerine kaydı');
+
+    await tester.pump(const Duration(milliseconds: 1700));
+    await tester.tap(find.text('göster'));
+    await tester.pump();
+    expect(shift(), 0, reason: 'yeniden oynamaz');
+    await tester.pump(const Duration(milliseconds: 1500));
+    expect(find.text('Kaydedildi'), findsOneWidget, reason: 'sayaç sıfırlandı');
+    await tester.pump(const Duration(milliseconds: 1000));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(NzToastBubble), findsNothing, reason: 'indi ve kalktı');
+  });
+
+  testWidgets('inerken gelen toast kutuyu geri çıkarır', (tester) async {
+    await tester.pumpWidget(
+      testApp(_trigger((c) => NzToast.show(c, 'Tekrar'))),
+    );
+    await tester.tap(find.text('göster'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 2500));
+    await tester.tap(find.text('göster'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(NzToastBubble), findsOneWidget);
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(NzToastBubble), findsNothing);
+  });
 }
 
 Color? _fill(WidgetTester tester) {

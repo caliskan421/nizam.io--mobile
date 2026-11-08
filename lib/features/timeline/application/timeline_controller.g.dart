@@ -10,7 +10,7 @@ part of 'timeline_controller.dart';
 // ignore_for_file: type=lint, type=warning
 /// Zaman çizelgesi ekranının durumu ve komutları (prototip `S_gantt`). Seçim, ölçek, süzgeçler,
 /// tarih taslağı, kayıt/geri alma ve tarih talepleri bellekte tutulur (sunucuya yazılmaz).
-/// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse kataloğun ilki;
+/// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse tüm koordinatörlükler;
 /// [timelineAllCoordinatorships] ise hepsi.
 
 @ProviderFor(TimelineController)
@@ -18,13 +18,13 @@ final timelineControllerProvider = TimelineControllerFamily._();
 
 /// Zaman çizelgesi ekranının durumu ve komutları (prototip `S_gantt`). Seçim, ölçek, süzgeçler,
 /// tarih taslağı, kayıt/geri alma ve tarih talepleri bellekte tutulur (sunucuya yazılmaz).
-/// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse kataloğun ilki;
+/// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse tüm koordinatörlükler;
 /// [timelineAllCoordinatorships] ise hepsi.
 final class TimelineControllerProvider
     extends $NotifierProvider<TimelineController, TimelineState> {
   /// Zaman çizelgesi ekranının durumu ve komutları (prototip `S_gantt`). Seçim, ölçek, süzgeçler,
   /// tarih taslağı, kayıt/geri alma ve tarih talepleri bellekte tutulur (sunucuya yazılmaz).
-  /// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse kataloğun ilki;
+  /// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse tüm koordinatörlükler;
   /// [timelineAllCoordinatorships] ise hepsi.
   TimelineControllerProvider._({
     required TimelineControllerFamily super.from,
@@ -71,11 +71,11 @@ final class TimelineControllerProvider
 }
 
 String _$timelineControllerHash() =>
-    r'ed61ee9df855138936d994d0ea0abf8ca957f53f';
+    r'223d9cc6b6063da96f20c0b7e2fa156b5d6a06b2';
 
 /// Zaman çizelgesi ekranının durumu ve komutları (prototip `S_gantt`). Seçim, ölçek, süzgeçler,
 /// tarih taslağı, kayıt/geri alma ve tarih talepleri bellekte tutulur (sunucuya yazılmaz).
-/// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse kataloğun ilki;
+/// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse tüm koordinatörlükler;
 /// [timelineAllCoordinatorships] ise hepsi.
 
 final class TimelineControllerFamily extends $Family
@@ -98,7 +98,7 @@ final class TimelineControllerFamily extends $Family
 
   /// Zaman çizelgesi ekranının durumu ve komutları (prototip `S_gantt`). Seçim, ölçek, süzgeçler,
   /// tarih taslağı, kayıt/geri alma ve tarih talepleri bellekte tutulur (sunucuya yazılmaz).
-  /// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse kataloğun ilki;
+  /// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse tüm koordinatörlükler;
   /// [timelineAllCoordinatorships] ise hepsi.
 
   TimelineControllerProvider call(String? coordinatorship) =>
@@ -110,7 +110,7 @@ final class TimelineControllerFamily extends $Family
 
 /// Zaman çizelgesi ekranının durumu ve komutları (prototip `S_gantt`). Seçim, ölçek, süzgeçler,
 /// tarih taslağı, kayıt/geri alma ve tarih talepleri bellekte tutulur (sunucuya yazılmaz).
-/// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse kataloğun ilki;
+/// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse tüm koordinatörlükler;
 /// [timelineAllCoordinatorships] ise hepsi.
 
 abstract class _$TimelineController extends $Notifier<TimelineState> {
@@ -202,7 +202,7 @@ final class TimelineViewProvider
   }
 }
 
-String _$timelineViewHash() => r'207d4c4ceb272041ea1eb22f3c97795e08ac8da9';
+String _$timelineViewHash() => r'9920f1e291f16b2f8424a54a9218857c418b5dae';
 
 /// Ekranın türetilmiş görünümü: görev kataloğu + ekran durumu.
 

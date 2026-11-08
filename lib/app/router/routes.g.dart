@@ -211,6 +211,18 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
           ],
         ),
         GoRouteData.$route(
+          path: '/meetings',
+          hasOverriddenOnExit: false,
+          factory: $MeetingsRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: ':id',
+              hasOverriddenOnExit: false,
+              factory: $MeetingRoute._fromState,
+            ),
+          ],
+        ),
+        GoRouteData.$route(
           path: '/messages',
           hasOverriddenOnExit: false,
           factory: $MessagesRoute._fromState,
@@ -485,6 +497,71 @@ mixin $ArchiveFolderRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/archive/${Uri.encodeComponent(_self.code)}',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $MeetingsRoute on GoRouteData {
+  static MeetingsRoute _fromState(GoRouterState state) => MeetingsRoute(
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
+
+  MeetingsRoute get _self => this as MeetingsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/meetings',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $MeetingRoute on GoRouteData {
+  static MeetingRoute _fromState(GoRouterState state) => MeetingRoute(
+    id: state.pathParameters['id']!,
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
+
+  MeetingRoute get _self => this as MeetingRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/meetings/${Uri.encodeComponent(_self.id)}',
     queryParams: {
       if (!_$iterablesEqual(_self.trail, const []))
         'trail': _self.trail.map((e) => e).toList(),

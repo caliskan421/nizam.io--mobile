@@ -8,14 +8,12 @@ abstract final class NzIcons {
   static const IconData add = Icons.add_rounded;
   static const IconData arrowDown = Icons.arrow_downward_rounded;
   static const IconData arrowUp = Icons.arrow_upward_rounded;
-  static const IconData assignmentDone = Icons.assignment_turned_in_outlined;
   static const IconData assistant = Icons.smart_toy_outlined;
   static const IconData attach = Icons.attach_file_rounded;
   static const IconData back = Icons.arrow_back_ios_new_rounded;
   static const IconData barChart = Icons.bar_chart_rounded;
   static const IconData bell = Icons.notifications_none_rounded;
   static const IconData bolt = Icons.bolt_rounded;
-  static const IconData budget = Icons.account_balance_wallet_outlined;
   static const IconData calendar = Icons.calendar_today_outlined;
   static const IconData calendarFilled = Icons.calendar_today_rounded;
   static const IconData calendarMonth = Icons.calendar_month_outlined;
@@ -91,7 +89,6 @@ abstract final class NzIcons {
   static const IconData tasks = Icons.checklist_rounded;
   static const IconData thumbUp = Icons.thumb_up_outlined;
   static const IconData timeline = Icons.view_timeline_outlined;
-  static const IconData tracking = Icons.work_outline_rounded;
   static const IconData tune = Icons.tune_rounded;
   static const IconData unfold = Icons.unfold_more_rounded;
   static const IconData upload = Icons.upload_rounded;

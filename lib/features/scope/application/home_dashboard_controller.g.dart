@@ -12,7 +12,7 @@ part of 'home_dashboard_controller.dart';
 /// dokunuşuyla (`ref.invalidate`).
 ///
 /// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-/// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
 /// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
@@ -22,6 +22,11 @@ part of 'home_dashboard_controller.dart';
 /// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
 /// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
 /// ek istek gönderilmez.
+///
+/// Önbellek / yenileme: özet ekranda açık kaldıkça (kabuk dalı korunur) bellekte kalır;
+/// [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye dönüş) önceki özeti durumda tutarak
+/// yeniden okur (`invalidateSelf` → `isRefreshing`, `value` korunur). Kapsam değişimi
+/// bağımlılık yeniden kurulumudur (`isReloading`); ekran o durumda iskelet gösterir.
 
 @ProviderFor(HomeDashboardController)
 final homeDashboardControllerProvider = HomeDashboardControllerProvider._();
@@ -30,7 +35,7 @@ final homeDashboardControllerProvider = HomeDashboardControllerProvider._();
 /// dokunuşuyla (`ref.invalidate`).
 ///
 /// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-/// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
 /// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
@@ -40,13 +45,18 @@ final homeDashboardControllerProvider = HomeDashboardControllerProvider._();
 /// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
 /// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
 /// ek istek gönderilmez.
+///
+/// Önbellek / yenileme: özet ekranda açık kaldıkça (kabuk dalı korunur) bellekte kalır;
+/// [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye dönüş) önceki özeti durumda tutarak
+/// yeniden okur (`invalidateSelf` → `isRefreshing`, `value` korunur). Kapsam değişimi
+/// bağımlılık yeniden kurulumudur (`isReloading`); ekran o durumda iskelet gösterir.
 final class HomeDashboardControllerProvider
     extends $AsyncNotifierProvider<HomeDashboardController, HomeDashboard> {
   /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
   /// dokunuşuyla (`ref.invalidate`).
   ///
   /// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-  /// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+  /// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
   /// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
   ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
   ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
@@ -56,6 +66,11 @@ final class HomeDashboardControllerProvider
   /// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
   /// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
   /// ek istek gönderilmez.
+  ///
+  /// Önbellek / yenileme: özet ekranda açık kaldıkça (kabuk dalı korunur) bellekte kalır;
+  /// [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye dönüş) önceki özeti durumda tutarak
+  /// yeniden okur (`invalidateSelf` → `isRefreshing`, `value` korunur). Kapsam değişimi
+  /// bağımlılık yeniden kurulumudur (`isReloading`); ekran o durumda iskelet gösterir.
   HomeDashboardControllerProvider._()
     : super(
         from: null,
@@ -76,13 +91,13 @@ final class HomeDashboardControllerProvider
 }
 
 String _$homeDashboardControllerHash() =>
-    r'21d817493533eadbe92e0be36d590eaf6f10b51f';
+    r'a7cdfe4f86bddea3d1064bbefc3502ad5f899c3e';
 
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).
 ///
 /// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-/// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
 /// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
@@ -92,6 +107,11 @@ String _$homeDashboardControllerHash() =>
 /// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
 /// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
 /// ek istek gönderilmez.
+///
+/// Önbellek / yenileme: özet ekranda açık kaldıkça (kabuk dalı korunur) bellekte kalır;
+/// [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye dönüş) önceki özeti durumda tutarak
+/// yeniden okur (`invalidateSelf` → `isRefreshing`, `value` korunur). Kapsam değişimi
+/// bağımlılık yeniden kurulumudur (`isReloading`); ekran o durumda iskelet gösterir.
 
 abstract class _$HomeDashboardController extends $AsyncNotifier<HomeDashboard> {
   FutureOr<HomeDashboard> build();

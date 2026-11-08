@@ -131,6 +131,11 @@ Map<String, Object?> _detail() => {
   'days_early': 0,
   'completion_evidence_required': true,
   'subtask_counts': {'total': 2, 'done': 1},
+  'edit_revision': 1,
+  'dates_revision': 1,
+  'created_at': '2026-10-01T09:00:00Z',
+  'created_by_account_id': 'u-creator',
+  'created_by_full_name': 'Oluşturan Kişi',
   'description': 'Pompa odasının kurulumu',
 };
 
@@ -146,6 +151,7 @@ Map<String, Object> _bodies() => {
         'created_by_account_id': 'u1',
         'created_at': '2026-07-02T08:00:00Z',
         'updated_at': '2026-07-03T08:00:00Z',
+        'edit_revision': 1,
         'assignee_account_id': 'u2',
         'start_on': '2026-07-02',
         'end_on': '2026-07-10',
@@ -162,6 +168,7 @@ Map<String, Object> _bodies() => {
         'created_by_account_id': 'u1',
         'created_at': '2026-07-02T08:00:00Z',
         'updated_at': '2026-07-02T08:00:00Z',
+        'edit_revision': 1,
       },
     ],
     'total': 2,
@@ -176,6 +183,7 @@ Map<String, Object> _bodies() => {
         'content': 'Pompa geldi',
         'created_at': '2026-07-05T09:00:00Z',
         'updated_at': '2026-07-05T09:00:00Z',
+        'edit_revision': 1,
       },
     ],
     'total': 1,
@@ -233,7 +241,7 @@ void main() {
   });
 
   test('alt görevler, notlar, dosyalar ve talep eşlenir', () async {
-    final d = (await _repo(_Adapter(_bodies())).load(_task, access: _admin))!;
+    final d = (await _repo(_Adapter(_bodies())).load(_task, access: _admin));
     final [pompa, test] = d.subtasks;
     expect(pompa.id, 's1');
     expect(pompa.title, 'Pompa');
@@ -274,7 +282,7 @@ void main() {
   test('getWorkItem: görevin kendisi (tarih, açıklama, durum, sunucu gecikmesi) ve kişi adları; '
       'null ad dizine girmez', () async {
     final adapter = _Adapter(_bodies());
-    final d = (await _repo(adapter).load(_task, access: _admin))!;
+    final d = (await _repo(adapter).load(_task, access: _admin));
     final get = adapter.seen.singleWhere(
       (o) => o.uri.path == '/v1/work-items/w1',
     );
@@ -298,7 +306,12 @@ void main() {
     expect(d.subtasks.first.doneBy, 'u4');
     expect(d.subtasks.first.createdBy, 'u1');
     final names = {for (final n in d.names) n.id: n.name};
-    expect(names, {'u2': 'Ali Veli', 'u4': 'Deniz Kapatan', 'u1': 'Ufuk Bir'});
+    expect(names, {
+      'u2': 'Ali Veli',
+      'u-creator': 'Oluşturan Kişi',
+      'u4': 'Deniz Kapatan',
+      'u1': 'Ufuk Bir',
+    });
     expect(
       names.containsKey('u3') || names.containsKey('u5'),
       isFalse,
@@ -313,7 +326,7 @@ void main() {
         '/v1/date-change-requests': {'requests': <Object>[], 'total': 0},
       }),
     ).load(_task, access: _admin);
-    expect(d!.dateRequest, isNull);
+    expect(d.dateRequest, isNull);
   });
 
   test('koordinatör: kendi talepleri görevin departmanıyla; bekleyen önce, yoksa son', () async {
@@ -334,7 +347,7 @@ void main() {
     );
     final d = await _repo(adapter)
         .load(_task, access: _access(role: SeatRole.coordinator));
-    expect(d!.dateRequest!.id, 'r2');
+    expect(d.dateRequest!.id, 'r2');
     final mine = adapter.seen.singleWhere(
       (o) => o.uri.path == '/v1/date-change-requests/mine',
     );
@@ -353,7 +366,7 @@ void main() {
         },
       }),
     ).load(_task, access: _access(role: SeatRole.coordinator));
-    expect(settled!.dateRequest!.state, DateRequestState.rejected);
+    expect(settled.dateRequest!.state, DateRequestState.rejected);
   });
 
   test(
@@ -372,7 +385,7 @@ void main() {
           },
         );
         final d = await _repo(adapter).load(_task, access: access);
-        expect(d!.subtasks, hasLength(2));
+        expect(d.subtasks, hasLength(2));
         expect(d.dateRequest, isNull);
         expect(
           adapter.seen.where(

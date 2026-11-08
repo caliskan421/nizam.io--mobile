@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/layout/nz_layout.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
@@ -37,7 +38,9 @@ class CoordinatorshipsPage extends ConsumerWidget {
     });
     final list = ref.watch(coordinatorshipListProvider);
     final nav = context.appNav;
+    // Tablette açık kayıt yokken liste tam genişliktir; kartlar yatayda uzar.
     return NzPage.feed(
+      width: NzContentWidth.wide,
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       topBar: const RootTopBar(),
       children: [
@@ -77,7 +80,7 @@ class CoordinatorshipsPage extends ConsumerWidget {
 }
 
 /// Liste kartı (prototip `.t-card`): kod + ad, kişiler; sağda "9/13 bitti" ve gecikme rozeti;
-/// altta ilerleme çubuğu.
+/// altta ilerleme çubuğu. Kartlar eşit yüksekliktedir (rozet yokken yeri boş kalır).
 class CoordinatorshipCard extends StatelessWidget {
   const CoordinatorshipCard({
     super.key,
@@ -99,7 +102,7 @@ class CoordinatorshipCard extends StatelessWidget {
       padding: const EdgeInsets.all(NizamioSpacing.cardPad),
       onTap: onTap,
       semanticLabel: [
-        s.code,
+        ?s.shortCode,
         s.name,
         people,
         l.coordDone(s),
@@ -119,11 +122,13 @@ class CoordinatorshipCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       textBaseline: TextBaseline.alphabetic,
                       children: [
-                        Text(
-                          s.code,
-                          style: t.monoSm.copyWith(color: c.textMuted),
-                        ),
-                        const Gap(NizamioSpacing.space2),
+                        if (s.shortCode case final tag?) ...[
+                          Text(
+                            tag,
+                            style: t.monoSm.copyWith(color: c.textMuted),
+                          ),
+                          const Gap(NizamioSpacing.space2),
+                        ],
                         Expanded(
                           child: Text(
                             s.name,
@@ -151,11 +156,14 @@ class CoordinatorshipCard extends StatelessWidget {
                 spacing: NizamioSpacing.space1,
                 children: [
                   Text(l.coordDone(s), style: t.mono),
-                  if (s.late > 0)
-                    NzStatusLabel.badge(
+                  // Gecikme yokken rozet yeri korunur: bütün kartlar aynı yükseklikte.
+                  Visibility.maintain(
+                    visible: s.late > 0,
+                    child: NzStatusLabel.badge(
                       label: l.coordLate(s),
                       tone: NzTone.danger,
                     ),
+                  ),
                 ],
               ),
             ],

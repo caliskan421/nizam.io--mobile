@@ -13,10 +13,9 @@ part 'task_catalog_controller.g.dart';
 /// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
 /// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
-/// Komutlar ([add], [replace], [remove]) değişikliği yalnız bellekte tutar (örnek katalog).
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
 /// yalnız görev kümesi değişince (oluşturma, silme, zincirli tarih onayı) [reload] ile yeniden
-/// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse komutlar yok sayılır.
+/// okunur (iyimser güncelleme yok). Katalog henüz yüklenmediyse uygulamalar yok sayılır.
 ///
 /// Önbellek: sağlayıcı uygulama ömrünce yaşar; ekranlar ilk yüklemeden sonra eski kataloğu
 /// hemen gösterir. [refresh] / [refreshIfStale] / [reload] yeniden okurken önceki katalog
@@ -132,32 +131,6 @@ class TaskCatalogController extends _$TaskCatalogController {
     }
   }
 
-  /// Görevi ekler ([at] verilirse o sıraya, yoksa başa).
-  void add(TaskItem task, {int? at}) {
-    final c = _catalog;
-    if (c == null) return;
-    final list = [...c.tasks];
-    list.insert((at ?? 0).clamp(0, list.length), task);
-    state = AsyncData(c.withTasks(list));
-  }
-
-  /// Aynı kodlu görevi [task] ile değiştirir. Örnek görevde gecikme günü yeni bitiş/duruma
-  /// göre yeniden hesaplanır; sunucu görevinde ([TaskItem.lateness] dolu) sunucu değeri
-  /// korunur (istemci gecikme türetmez — WORK-K37).
-  void replace(TaskItem task) {
-    _touch(task.code);
-    final c = _catalog;
-    if (c == null) return;
-    final fixed = task.lateness != null
-        ? task
-        : task.copyWith(
-            overdueDays: c.overdueDaysFor(task.due, done: task.isDone),
-          );
-    state = AsyncData(
-      c.withTasks([for (final t in c.tasks) t.code == task.code ? fixed : t]),
-    );
-  }
-
   /// [code] görevine sunucudan okunan ayrıntıyı uygular: tekil okuma ([TaskDetails.item];
   /// tarih, açıklama, durum, atananlar, sayılar) katalogdaki görevin YERİNE geçer, alt görev /
   /// not / dosya / tarih talebi eklenir, adlar [TaskCatalog.names]'e katılır. Yazma sonrası
@@ -186,7 +159,10 @@ class TaskCatalogController extends _$TaskCatalogController {
   }
 
   /// [code] görevini taze tekil okumayla ([item]; açıklama, tarih, atananlar) değiştirir;
-  /// ayrıntı parçaları (alt görev, not, dosya, tarih talebi) korunur. Gecikme sunucu değeri.
+  /// ayrıntı parçaları (alt görev, not, dosya) korunur. Gecikme sunucu değeri. Tarih talebi:
+  /// tekil okuma bekleyen talebi taşır (WORK-K82); aynı talep zaten ayrıntıdan okunmuşsa
+  /// (gerekçe, talep eden) o korunur; bekleyen talep kalmadıysa eldeki bekleyen talep düşer,
+  /// incelenmiş talep (ayrıntı geçmişi) kalır.
   void applyItem(String code, TaskItem item) {
     _touch(code);
     final c = _catalog;
@@ -199,26 +175,25 @@ class TaskCatalogController extends _$TaskCatalogController {
                   subtasks: t.subtasks,
                   noteEntries: t.noteEntries,
                   fileEntries: t.fileEntries,
-                  dateRequest: () => t.dateRequest,
+                  dateRequest: () =>
+                      _mergeRequest(t.dateRequest, item.dateRequest),
                 )
               : t,
       ]),
     );
   }
 
-  /// Görevi kaldırır; eski sırasını döner (geri almak için `add(at:)`), yoksa -1.
-  int remove(String code) {
-    final c = _catalog;
-    if (c == null) return -1;
-    final i = c.tasks.indexWhere((t) => t.code == code);
-    if (i < 0) return -1;
-    state = AsyncData(c.withTasks([...c.tasks]..removeAt(i)));
-    return i;
+  static DateChangeRequest? _mergeRequest(
+    DateChangeRequest? held,
+    DateChangeRequest? fresh,
+  ) {
+    if (fresh == null) return held != null && held.isPending ? null : held;
+    return held != null && held.id == fresh.id ? held : fresh;
   }
 }
 
 /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-/// kapısı). Örnek katalogda her zaman; sunucu kataloğunda yönetici ya da programda en az bir
+/// kapısı): yönetici ya da programda en az bir
 /// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
 /// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
 @riverpod
@@ -226,7 +201,6 @@ bool canCreateTask(Ref ref) {
   final catalog = ref.watch(taskCatalogControllerProvider).value;
   if (catalog == null) return false;
   final access = catalog.access;
-  if (access == null) return true;
   final program = ref.watch(scopeStateProvider).programId;
-  return program != null && access.canCreateAnyIn(program);
+  return access != null && program != null && access.canCreateAnyIn(program);
 }

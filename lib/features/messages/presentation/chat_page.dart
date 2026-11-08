@@ -357,7 +357,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     return Stack(
       children: [
         Positioned.fill(
+          // Akışta cam gün hapları var: giriş yalnız yükselir.
           child: PageContentEntrance(
+            fade: false,
             child: _MessageList(
               chatId: widget.id,
               catalog: catalog,

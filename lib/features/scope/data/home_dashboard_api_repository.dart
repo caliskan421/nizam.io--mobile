@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
-import '../../../core/api/generated/clients/collaboration_client.dart';
 import '../../../core/api/generated/clients/identity_client.dart';
+import '../../../core/api/generated/clients/messaging_client.dart';
 import '../../../core/api/generated/clients/reporting_client.dart';
 import '../../../core/api/generated/clients/work_client.dart';
-import '../../../core/api/generated/models/count_result.dart';
+import '../../../core/api/generated/models/chat_unread_overview.dart';
 import '../../../core/api/generated/models/date_change_request.dart';
 import '../../../core/api/generated/models/date_change_request_list.dart';
 import '../../../core/api/generated/models/me_response.dart';
@@ -26,7 +26,8 @@ import 'dashboard_report_api_repository.dart';
 /// - `GET /v1/reports/dashboard/tasks` → bekleyen onayların ve tarih taleplerinin görev adları,
 ///   zamanında ilerleyen görev sayısı;
 /// - `GET /v1/date-change-requests?status=pending` → bekleyen tarih talepleri;
-/// - `GET /v1/messages/unread-count` → okunmamış mesaj rozeti.
+/// - `GET /v1/me/chat-unread` → okunmamış sohbet rozeti (programlar arası toplam; eski mesaj
+///   kutusu uçları v0.10'da kalktı).
 ///
 /// [load] yalnız şirket yöneticisi içindir (pano uçları yöneticiye açık); rol seçimi
 /// application katmanında (`HomeDashboardController`, `TaskAccess`). Uçlardan biri hata
@@ -40,13 +41,13 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
       _identity = IdentityClient(dio),
       _reporting = ReportingClient(dio),
       _work = WorkClient(dio),
-      _messages = CollaborationClient(dio);
+      _messages = MessagingClient(dio);
 
   final DashboardReportRepository _report;
   final IdentityClient _identity;
   final ReportingClient _reporting;
   final WorkClient _work;
-  final CollaborationClient _messages;
+  final MessagingClient _messages;
 
   static const _submitted = 'onaya_sunuldu';
   static const _inProgress = 'devam_ediyor';
@@ -59,13 +60,13 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
       _report.load(),
       apiCall(_reporting.reportDashboardTasks),
       apiCall(() => _work.listDateChangeRequests(status: 'pending')),
-      apiCall(_messages.countUnreadMessages),
+      apiCall(_messages.getChatUnreadOverview),
     ], eagerError: true);
     final me = r[0] as MeResponse;
     final report = r[1] as DashboardReport;
     final taskList = r[2] as HttpResponse<ReportTaskList>;
     final dateChanges = (r[3] as DateChangeRequestList).requests;
-    final unread = (r[4] as CountResult).count;
+    final unread = _unread(r[4] as ChatUnreadOverview);
 
     final tasks = taskList.data.tasks;
     final truncated = _truncated(taskList);
@@ -106,7 +107,6 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
         lateTasks: t.late,
         tasksAwaitingApproval: t.awaitingApproval,
         unreadMessages: unread,
-        pendingRequests: report.pendingDateChanges,
       ),
     );
   }
@@ -118,7 +118,7 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
   }) async {
     final mine = coordinator && departmentId != null;
     final r = await Future.wait<Object>([
-      apiCall(_messages.countUnreadMessages),
+      apiCall(_messages.getChatUnreadOverview),
       if (mine)
         apiCall(
           () => _work.myDateChangeRequests(
@@ -130,7 +130,7 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
         ),
     ], eagerError: true);
     return TeamDashboardExtras(
-      unreadMessages: (r[0] as CountResult).count,
+      unreadMessages: _unread(r[0] as ChatUnreadOverview),
       pendingDateRequests: [
         if (mine)
           for (final d in (r[1] as DateChangeRequestList).requests)
@@ -156,6 +156,11 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
       requestedShiftDays: shift == 0 ? null : shift,
     );
   }
+
+  /// Okunmamış sohbet sayısı: programların `unread_chats` toplamı (S1 uç; seçili programa
+  /// indirme sohbet bağlama fazının işi).
+  static int _unread(ChatUnreadOverview o) =>
+      o.items.fold(0, (sum, p) => sum + p.unreadChats);
 
   static bool _truncated(HttpResponse<Object?> r) {
     final values =

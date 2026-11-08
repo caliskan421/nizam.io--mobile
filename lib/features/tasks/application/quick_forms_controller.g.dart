@@ -8,15 +8,13 @@ part of 'quick_forms_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Yeni görev formunun koordinatörlük seçenekleri: örnek katalogda hepsi; sunucu kataloğunda
-/// yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
+/// Yeni görev formunun koordinatörlük seçenekleri: yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
 /// departmanları, karma rolde yalnız koordinatörlükler; üyelik departmanı listelenmez).
 
 @ProviderFor(newTaskCoordinatorships)
 final newTaskCoordinatorshipsProvider = NewTaskCoordinatorshipsProvider._();
 
-/// Yeni görev formunun koordinatörlük seçenekleri: örnek katalogda hepsi; sunucu kataloğunda
-/// yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
+/// Yeni görev formunun koordinatörlük seçenekleri: yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
 /// departmanları, karma rolde yalnız koordinatörlükler; üyelik departmanı listelenmez).
 
 final class NewTaskCoordinatorshipsProvider
@@ -27,8 +25,7 @@ final class NewTaskCoordinatorshipsProvider
           List<CoordinatorshipRef>
         >
     with $Provider<List<CoordinatorshipRef>> {
-  /// Yeni görev formunun koordinatörlük seçenekleri: örnek katalogda hepsi; sunucu kataloğunda
-  /// yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
+  /// Yeni görev formunun koordinatörlük seçenekleri: yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
   /// departmanları, karma rolde yalnız koordinatörlükler; üyelik departmanı listelenmez).
   NewTaskCoordinatorshipsProvider._()
     : super(
@@ -65,7 +62,7 @@ final class NewTaskCoordinatorshipsProvider
 }
 
 String _$newTaskCoordinatorshipsHash() =>
-    r'13b15bc62f307fc2353df2d0bd0b1465008ebb57';
+    r'5719067f7b2e63e902a48f6db2c7d369376affbf';
 
 @ProviderFor(NewTaskFormController)
 final newTaskFormControllerProvider = NewTaskFormControllerProvider._();
@@ -100,7 +97,7 @@ final class NewTaskFormControllerProvider
 }
 
 String _$newTaskFormControllerHash() =>
-    r'0ffc096fababfc0adcedcbc084bb9aaf069d539a';
+    r'c82d75dde579be05a6799a2dce9a368dbaf942c8';
 
 abstract class _$NewTaskFormController extends $Notifier<NewTaskForm> {
   NewTaskForm build();
@@ -113,59 +110,6 @@ abstract class _$NewTaskFormController extends $Notifier<NewTaskForm> {
             as $ClassProviderElement<
               AnyNotifier<NewTaskForm, NewTaskForm>,
               NewTaskForm,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
-@ProviderFor(MeetingFormController)
-final meetingFormControllerProvider = MeetingFormControllerProvider._();
-
-final class MeetingFormControllerProvider
-    extends $NotifierProvider<MeetingFormController, MeetingForm> {
-  MeetingFormControllerProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'meetingFormControllerProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$meetingFormControllerHash();
-
-  @$internal
-  @override
-  MeetingFormController create() => MeetingFormController();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(MeetingForm value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<MeetingForm>(value),
-    );
-  }
-}
-
-String _$meetingFormControllerHash() =>
-    r'53ffacdd9f681f8a057290381f9feb97b8340b9f';
-
-abstract class _$MeetingFormController extends $Notifier<MeetingForm> {
-  MeetingForm build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<MeetingForm, MeetingForm>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<MeetingForm, MeetingForm>,
-              MeetingForm,
               Object?,
               Object?
             >;
@@ -206,7 +150,7 @@ final class InviteFormControllerProvider
 }
 
 String _$inviteFormControllerHash() =>
-    r'0f97afdc6d3ee04b7a3ba1bf49598630c385f14a';
+    r'3050edb9b46f0c4040bf564c84d20f4450d16e1e';
 
 abstract class _$InviteFormController extends $Notifier<InviteForm> {
   InviteForm build();

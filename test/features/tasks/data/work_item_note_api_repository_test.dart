@@ -12,6 +12,7 @@ Map<String, Object?> _note(String id) => {
   'content': 'metin $id',
   'created_at': '2026-11-01T10:00:00Z',
   'updated_at': '2026-11-02T11:00:00Z',
+  'edit_revision': 1,
 };
 
 (ApiWorkItemNoteRepository, FakeAdapter) _repo(
@@ -40,7 +41,6 @@ void main() {
     expect(n.text, 'metin n1');
     expect(n.at, DateTime.utc(2026, 11, 1, 10));
     expect(n.updatedAt, DateTime.utc(2026, 11, 2, 11));
-    expect(n.inMemory, isFalse);
   });
 
   test('list: total yok → client.invalid_response', () async {
@@ -53,27 +53,32 @@ void main() {
 
   test('add: POST gövdesi → TaskNote', () async {
     final (repo, a) = _repo(_note('n3'));
-    final n = await repo.add('w1', 'merhaba');
+    final n = await repo.add(
+      'w1',
+      'merhaba',
+      requestKey: 'k-0123456789abcdefghij',
+    );
     expect(a.last.method, 'POST');
     expect(a.last.uri.path, '/v1/work-items/w1/notes');
     expect(a.sentJson, {'content': 'merhaba'});
+    expect(a.last.headers['Idempotency-Key'], 'k-0123456789abcdefghij');
     expect(n.id, 'n3');
   });
 
   test('add: ŞY yazamaz → ApiError', () async {
     final (repo, _) = _repo(errorEnvelope('work.not_authorized'), status: 403);
     await expectLater(
-      repo.add('w1', 'x'),
+      repo.add('w1', 'x', requestKey: 'k-0123456789abcdefghij'),
       throwsApiError('work.not_authorized'),
     );
   });
 
   test('update: PATCH gövdesi', () async {
-    final (repo, a) = _repo({'status': 'updated'});
-    await repo.update('w1', 'n1', 'yeni');
+    final (repo, a) = _repo({'status': 'updated', 'edit_revision': 3});
+    await repo.update('w1', 'n1', 'yeni', expectedRevision: 2);
     expect(a.last.method, 'PATCH');
     expect(a.last.uri.path, '/v1/work-items/w1/notes/n1');
-    expect(a.sentJson, {'content': 'yeni'});
+    expect(a.sentJson, {'content': 'yeni', 'expected_revision': 2});
   });
 
   test('delete: DELETE', () async {

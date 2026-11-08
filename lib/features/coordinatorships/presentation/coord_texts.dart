@@ -48,7 +48,8 @@ extension CoordTexts on AppLocalizations {
 
   /// "Teknik altyapı · 3 alt birim · 9 kişi · " (durum ayrıca vurgulanır).
   String coordIdentityLine(CoordinatorshipDetail d) =>
-      '${d.profile.parent} · ${d.profile.units.length} $uiCoordSubUnitsTail · '
+      '${d.profile.parent.isEmpty ? '' : '${d.profile.parent} · '}'
+      '${d.profile.units.isEmpty ? '' : '${d.profile.units.length} $uiCoordSubUnitsTail · '}'
       '${d.people} $uiCoordPeopleTail · ';
 
   /// "13 görevden 9 tamamlandı · sezon ortalaması %51".
@@ -58,7 +59,7 @@ extension CoordTexts on AppLocalizations {
 
   /// "ALT-5 · Kadir Özbek".
   String coordAttentionWho(AttentionItem a) =>
-      [a.code, ?a.assignee].join(' · ');
+      [a.label, ?a.assignee].join(' · ');
 
   /// "98 gün gecikti".
   String coordDaysLate(AttentionItem a) =>
@@ -84,11 +85,8 @@ extension CoordTexts on AppLocalizations {
 
   /// "ALT · 9/13 bitti · 3 gecikmede" (kısayol menüsü alt satırı).
   String coordFlyoutCaption(CoordinatorshipStats c) =>
-      [c.code, coordDone(c), if (c.late > 0) coordLate(c)].join(' · ');
+      [?c.shortCode, coordDone(c), if (c.late > 0) coordLate(c)].join(' · ');
 
   /// "19.10".
   String coordShortDate(DateTime d) => DateFormat('dd.MM', 'tr').format(d);
-
-  /// "10.06.2026".
-  String coordDate(DateTime d) => DateFormat('dd.MM.y', 'tr').format(d);
 }

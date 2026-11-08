@@ -1,6 +1,5 @@
-// taskDetails: ayrıntı kaynaktan okunur ve katalogdaki göreve eklenir; kaynak null dönerse
-// (örnek kapsam) katalog değişmez; görev yoksa kaynağa gidilmez. Kaynak seçiciler
-// (TaskCatalogSource / TaskDetailsSource) kapsama göre sunucu ya da örnek seçer.
+// taskDetails: ayrıntı kaynaktan okunur ve katalogdaki göreve eklenir; görev yoksa kaynağa
+// gidilmez. Kaynaklar (TaskCatalogSource / TaskDetailsSource) yalnız seçili programın sunucusu.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/errors/api_error.dart';
@@ -48,19 +47,19 @@ final _access = TaskAccess(
 class _Details implements TaskDetailsRepository {
   _Details(this.result);
 
-  final TaskDetails? result;
+  final TaskDetails result;
   final asked = <String>[];
   final accesses = <TaskAccess?>[];
 
   @override
-  Future<TaskDetails?> load(TaskItem task, {TaskAccess? access}) async {
+  Future<TaskDetails> load(TaskItem task, {TaskAccess? access}) async {
     asked.add(task.code);
     accesses.add(access);
     return result;
   }
 
   @override
-  Future<TaskItem?> loadItem(TaskItem task) async => null;
+  Future<TaskItem> loadItem(TaskItem task) async => task;
 }
 
 final _details = TaskDetails(
@@ -139,15 +138,6 @@ void main() {
     expect(details.asked, ['w1', 'w1']);
   });
 
-  test('kaynak null dönerse katalog değişmez', () async {
-    final c = _container(_Details(null));
-    c.listen(taskDetailsProvider('w1'), (_, _) {});
-    await c.read(taskDetailsProvider('w1').future);
-    final t = c.read(taskCatalogControllerProvider).value!.task('w1')!;
-    expect(t.subtasks, isEmpty);
-    expect(t.dateRequest, isNull);
-  });
-
   test('görev katalogda yoksa kaynağa gidilmez', () async {
     final details = _Details(_details);
     final c = _container(details);
@@ -166,38 +156,24 @@ void main() {
       server.asked.clear();
     });
 
-    test(
-      'katalog: sunucu programında sunucu, örnek/boş kapsamda örnek',
-      () async {
-        final sample = TaskCatalog(
-          today: DateTime(2026),
-          me: 'örnek',
-          tasks: const [],
-          people: const [],
-          coordinatorships: const [],
-        );
-        final source = TaskCatalogSource(
-          scope: scope,
-          server: () => bound ? _Catalog() : null,
-          sample: _Fixed(sample),
-        );
-        expect((await source.load()).me, 'örnek');
-        scope.selectSample();
-        expect((await source.load()).me, 'örnek');
-        scope.selectProgram('p1');
-        expect((await source.load()).me, 'me');
-        bound = false;
-        await expectLater(source.load(), _notVerified);
-      },
-    );
+    test('katalog: program yokken scope_missing, programda sunucu', () async {
+      final source = TaskCatalogSource(
+        scope: scope,
+        server: () => bound ? _Catalog() : null,
+      );
+      await expectLater(source.load(), _scopeMissing);
+      scope.selectProgram('p1');
+      expect((await source.load()).me, 'me');
+      bound = false;
+      await expectLater(source.load(), _notVerified);
+    });
 
-    test('ayrıntı: örnek kapsamda null, sunucu programında sunucu', () async {
+    test('ayrıntı: program yokken scope_missing, programda sunucu', () async {
       final source = TaskDetailsSource(
         scope: scope,
         server: () => bound ? server : null,
       );
-      scope.selectSample();
-      expect(await source.load(_task), isNull);
+      await expectLater(source.load(_task), _scopeMissing);
       expect(server.asked, isEmpty);
       scope.selectProgram('p1');
       expect(await source.load(_task), same(_details));
@@ -207,6 +183,10 @@ void main() {
   });
 }
 
+final _scopeMissing = throwsA(
+  isA<ApiError>().having((e) => e.code, 'code', ClientErrorCode.scopeMissing),
+);
+
 final _notVerified = throwsA(
   isA<ApiError>().having(
     (e) => e.code,
@@ -214,12 +194,3 @@ final _notVerified = throwsA(
     ClientErrorCode.serverNotVerified,
   ),
 );
-
-class _Fixed implements TaskCatalogRepository {
-  _Fixed(this.catalog);
-
-  final TaskCatalog catalog;
-
-  @override
-  Future<TaskCatalog> load() async => catalog;
-}

@@ -9,22 +9,33 @@ import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/features/scope/application/home_dashboard_controller.dart';
 import 'package:nizamio/features/scope/application/scope_providers.dart';
-import 'package:nizamio/features/scope/data/sample/sample_home_dashboard_repository.dart';
 import 'package:nizamio/features/scope/domain/home_dashboard.dart';
 import 'package:nizamio/features/scope/domain/home_dashboard_repository.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
-import '../../pilot_support.dart';
-
 class _Counting implements HomeDashboardRepository {
   var loads = 0;
   final extras = <(String?, bool)>[];
-  final _inner = SampleHomeDashboardRepository();
-
   @override
-  Future<HomeDashboard> load() {
+  Future<HomeDashboard> load() async {
     loads++;
-    return _inner.load();
+    return const HomeDashboard(
+      greetingName: 'Yönetici',
+      tasks: TaskTotals(
+        total: 0,
+        done: 0,
+        inProgress: 0,
+        late: 0,
+        awaitingApproval: 0,
+      ),
+      coordinatorships: [],
+      pending: [],
+      counts: ModuleCounts(
+        lateTasks: 0,
+        tasksAwaitingApproval: 0,
+        unreadMessages: 0,
+      ),
+    );
   }
 
   @override
@@ -48,22 +59,13 @@ class _Counting implements HomeDashboardRepository {
 }
 
 void main() {
-  test('bileşim kökündeki örnek kaynak bağlı; ağ isteği yok', () async {
-    final h = await pilotHarness(PilotBackend(), signedIn: true);
-    final before = h.backend.requests.length;
-    h.container.listen(homeDashboardControllerProvider, (_, _) {});
-    final d = await h.container.read(homeDashboardControllerProvider.future);
-    expect(d.coordinatorships, hasLength(11));
-    expect(h.backend.requests.length, before);
-  });
-
   test('kapsam değişince yeniden okunur', () async {
     final repo = _Counting();
     var program = 0;
     final c = ProviderContainer(
       overrides: [
         homeDashboardRepositoryProvider.overrideWithValue(repo),
-        // Rol bilgisi taşımayan katalog → pano yolu.
+        // Şirket yöneticisi → pano yolu.
         taskCatalogRepositoryProvider.overrideWithValue(
           _Fixed(
             TaskCatalog(
@@ -72,6 +74,11 @@ void main() {
               tasks: const [],
               people: const [],
               coordinatorships: const [],
+              access: TaskAccess(
+                accountId: 'me',
+                companyAdmin: true,
+                seats: const [],
+              ),
             ),
           ),
         ),
@@ -273,7 +280,6 @@ void main() {
           ('w3', PendingKind.approval),
         ]);
         expect(d.pending.first.requestedShiftDays, 3);
-        expect(d.counts.pendingRequests, 1);
         expect(d.counts.tasksAwaitingApproval, 1);
       },
     );

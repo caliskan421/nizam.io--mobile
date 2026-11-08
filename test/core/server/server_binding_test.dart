@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/config/flavor.dart';
+import 'package:nizamio/core/config/generated/app_version.gen.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/providers.dart';
@@ -195,7 +196,10 @@ void main() {
     });
 
     test('minimum_mobile_version = uygulama sürümü → kabul', () async {
-      h = Harness(handler: (r) => discoveryHandler(r, minimum: '0.1.0'));
+      // F60 mobil sürümü 0.2.0 (sürüm kapısı: NIZAMIO_MINIMUM_MOBILE_VERSION=0.2.0 eski
+      // mobili "güncelleme gerekli"ye düşürür).
+      expect(appVersion, '0.2.0');
+      h = Harness(handler: (r) => discoveryHandler(r, minimum: appVersion));
       expect(
         await h.read(serverBindingProvider).verify(testUrl),
         isA<BindingVerified>(),

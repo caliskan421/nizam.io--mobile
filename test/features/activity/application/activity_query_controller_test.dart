@@ -2,6 +2,7 @@
 // grupları ve sayaçlar; "daha fazla göster"; temizleme.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/activity/application/activity_log_controller.dart';
 import 'package:nizamio/features/activity/application/activity_query_controller.dart';
 import 'package:nizamio/features/activity/domain/activity_log.dart';
@@ -11,7 +12,8 @@ import 'package:nizamio/features/tasks/tasks.dart';
 import '../../pilot_support.dart';
 
 Future<(ProviderContainer, ActivityQueryController)> _open() async {
-  final h = await pilotHarness(PilotBackend());
+  final h = await pilotHarness(PilotBackend(), signedIn: true);
+  h.read(scopeControllerProvider).selectProgram('prog-1');
   final c = h.container;
   c.listen(activityViewProvider, (_, _) {});
   return (c, c.read(activityQueryControllerProvider.notifier));
@@ -59,54 +61,6 @@ void main() {
       expect(v.days, hasLength(4));
     },
   );
-
-  test('tür, kişi, koordinatörlük ve arama süzer; temizleme', () async {
-    final (c, q) = await _open();
-    q.selectKind(ActivityKind.task);
-    var v = await _view(c);
-    expect(v.total, v.kindCounts[ActivityKind.task]);
-    expect(v.allCount, 38, reason: 'tür sayıları tür süzgecinden bağımsız');
-
-    q
-      ..selectKind(null)
-      ..togglePerson('ko');
-    v = await _view(c);
-    expect(
-      v.days.expand((d) => d.entries).every((e) => e.actorId == 'ko'),
-      isTrue,
-    );
-    expect(c.read(activityQueryControllerProvider).hasExtra, isTrue);
-
-    q
-      ..togglePerson('ko')
-      ..toggleCoordinatorship('EĞİ');
-    v = await _view(c);
-    expect(v.days.expand((d) => d.entries).map((e) => e.actorId).toSet(), {
-      'mk',
-      'gn',
-      'mey',
-    });
-    q.toggleCoordinatorship('EĞİ');
-    expect(c.read(activityQueryControllerProvider).coordinatorship, isNull);
-
-    q.search('hidrofor');
-    v = await _view(c);
-    expect(v.total, greaterThan(0));
-    expect(v.total, lessThan(38));
-
-    q
-      ..search('')
-      ..selectKind(ActivityKind.file)
-      ..togglePerson('bk')
-      ..clearAll();
-    expect(c.read(activityQueryControllerProvider).isEmpty, isTrue);
-
-    q
-      ..togglePerson('bk')
-      ..toggleCoordinatorship('İDA')
-      ..clearExtra();
-    expect(c.read(activityQueryControllerProvider).hasExtra, isFalse);
-  });
 
   test('görev hedefli kayıt kodu çözülür', () {
     ActivityEntry e(String target) => ActivityEntry(

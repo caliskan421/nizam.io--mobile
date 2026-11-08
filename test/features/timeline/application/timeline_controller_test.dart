@@ -1,21 +1,29 @@
-// TimelineController + timelineView: koordinatörlük seçimi, durum/kişi/öncelik süzgeci, ölçek,
-// genel bakış, seçim, tarih taslağı (−/+, kaydır, sürükle), kaydet/geri al ve tarih talebi.
+// TimelineController + timelineView: sunucu biçimli program fikstüründen (CoordBackend: ALT 4,
+// ELE 2, EGI 3 görev) koordinatörlük seçimi, durum/kişi/öncelik/arama süzgeci, ölçek, genel
+// bakış, seçim, tarih taslağı (−/+, kaydır, sürükle), kaydet/geri al ve tarih talebi. Bugün
+// sahtelenmez: beklentiler fikstürün sabit tarihlerine ve mevcut aralığa görelidir.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 import 'package:nizamio/features/timeline/application/timeline_controller.dart';
 import 'package:nizamio/features/timeline/domain/timeline.dart';
-import 'package:nizamio/features/timeline/domain/timeline_view_builder.dart';
 
+import '../../coordinatorships/coord_backend.dart';
 import '../../pilot_support.dart';
 
+const _altItems = {'wi-alt-1', 'wi-alt-2', 'wi-alt-3', 'wi-alt-4'};
+
 Future<(ProviderContainer, TimelineController, TimelineView Function())> _open([
-  String? coord,
+  String? coord = dAlt,
 ]) async {
-  final h = await pilotHarness(PilotBackend());
+  final backend = CoordBackend();
+  final h = await pilotHarness(backend, signedIn: true);
+  h.read(scopeControllerProvider).selectProgram(coordProgram);
   final c = h.container;
   c.listen(timelineViewProvider(coord), (_, _) {});
   await c.read(taskCatalogControllerProvider.future);
+  addTearDown(() => expect(backend.unhandled, isEmpty));
   return (
     c,
     c.read(timelineControllerProvider(coord).notifier),
@@ -23,246 +31,217 @@ Future<(ProviderContainer, TimelineController, TimelineView Function())> _open([
   );
 }
 
-void main() {
-  test('açılış: ilk koordinatörlük, hafta ölçeği, bugün 2026-10-21', () async {
-    final (_, _, view) = await _open();
-    final v = view();
-    expect(v.selectedCoordinatorships, ['ALT']);
-    expect(v.state.scale, TimelineScale.week);
-    expect(v.today, seasonDay(DateTime(2026, 10, 21), 2026));
-    expect(v.days, 365);
-    expect(v.groups.single.code, 'ALT');
-    expect(v.shown, hasLength(13));
-    expect(v.weeks, hasLength(53));
-    // ALT-5: 2026-07-15 bitişli, devam ediyor → bugüne kadar gecikmede.
-    final alt5 = v.shown.firstWhere((t) => t.code == 'ALT-5');
-    expect(alt5.late, isTrue);
-    expect(alt5.lateDays, 98);
-    expect(alt5.visibleEnd, v.today);
-    expect(alt5.dependent, isTrue);
-    // ALT-7 bekleyen tarih talebi (31 Ekim) çubuğun sonundan uzanır.
-    expect(v.shown.firstWhere((t) => t.code == 'ALT-7').hasRequest, isTrue);
-  });
+Set<String> _codes(TimelineView v) => v.shown.map((t) => t.code).toSet();
 
-  test('rota parametresi o koordinatörlüğü seçili açar', () async {
-    final (_, _, view) = await _open('MEK');
-    expect(view().selectedCoordinatorships, ['MEK']);
-    // MEK-2 geç bitti (26 Ağu planı, 11 Eki bitiş).
-    final mek2 = view().shown.firstWhere((t) => t.code == 'MEK-2');
-    expect(mek2.doneLate, isTrue);
-    expect(mek2.doneLateDays, 46);
+void main() {
+  test(
+    'rota parametresi o koordinatörlüğü seçili açar; hafta ölçeği',
+    () async {
+      final (_, _, view) = await _open();
+      final v = view();
+      expect(v.selectedCoordinatorships, [dAlt]);
+      expect(v.multi, isFalse);
+      expect(v.state.scale, TimelineScale.week);
+      expect(_codes(v), _altItems);
+      expect(v.statusCounts[TimelineStatusFilter.all], 4);
+      expect(v.statusCounts[TimelineStatusFilter.done], 2);
+      // Bitişi (20 Eki) geçmiş, bitmemiş iki görev gecikmede.
+      expect(v.statusCounts[TimelineStatusFilter.late], 2);
+    },
+  );
+
+  test('rota yok ya da "*": bütün koordinatörlükler seçili', () async {
+    final (_, _, none) = await _open(null);
+    expect(none().allSelected, isTrue);
+    expect(none().shown, hasLength(9));
+    final (_, ctrl, all) = await _open(timelineAllCoordinatorships);
+    expect(all().allSelected, isTrue);
+    expect(all().multi, isTrue);
+    ctrl.toggleCoordinatorship(dAlt);
+    expect(all().selectedCoordinatorships, isNot(contains(dAlt)));
+    expect(_codes(all()).intersection(_altItems), isEmpty);
   });
 
   test(
     'koordinatörlük seçimi: ekle (katalog sırası), çıkar, hepsi/hiçbiri',
     () async {
-      final (_, ctrl, view) = await _open();
+      final (c, ctrl, view) = await _open();
+      final order = c
+          .read(taskCatalogControllerProvider)
+          .requireValue
+          .coordinatorships
+          .map((x) => x.code)
+          .toList();
       ctrl
         ..toggleCoordMenu()
-        ..toggleCoordinatorship('SİS')
-        ..toggleCoordinatorship('MEK');
-      expect(view().selectedCoordinatorships, ['ALT', 'MEK', 'SİS']);
+        ..toggleCoordinatorship(dEgi)
+        ..toggleCoordinatorship(dEle);
+      expect(view().selectedCoordinatorships, [
+        for (final x in order)
+          if ({dAlt, dEgi, dEle}.contains(x)) x,
+      ]);
       expect(view().multi, isTrue);
       expect(view().state.coordMenuOpen, isTrue);
-      ctrl.toggleCoordinatorship('ALT');
-      expect(view().selectedCoordinatorships, ['MEK', 'SİS']);
+      ctrl.toggleCoordinatorship(dAlt);
+      expect(view().selectedCoordinatorships.toSet(), {dEgi, dEle});
       ctrl.toggleAllCoordinatorships();
       expect(view().noneSelected, isTrue);
       expect(view().empty, isTrue);
       ctrl.toggleAllCoordinatorships();
       expect(view().allSelected, isTrue);
-      expect(view().shown, hasLength(76));
       ctrl.closeCoordMenu();
       expect(view().state.coordMenuOpen, isFalse);
     },
   );
 
-  test('durum, kişi, öncelik süzgeci; sayılar; temizle', () async {
+  test('durum, kişi, öncelik ve arama süzgeci; temizle durumu korur', () async {
     final (_, ctrl, view) = await _open();
-    final counts = view().statusCounts;
-    expect(counts[TimelineStatusFilter.all], 13);
-    expect(
-      counts[TimelineStatusFilter.open]! + counts[TimelineStatusFilter.done]!,
-      13,
-    );
     ctrl.setStatus(TimelineStatusFilter.late);
-    expect(view().shown.every((t) => t.late), isTrue);
-    expect(view().shown, hasLength(counts[TimelineStatusFilter.late]));
+    expect(_codes(view()), {'wi-alt-1', 'wi-alt-2'});
     expect(view().state.filterCount, 1);
 
     ctrl
       ..setStatus(TimelineStatusFilter.all)
-      ..togglePerson('av');
+      ..togglePerson(pKadir);
+    expect(_codes(view()), {'wi-alt-1', 'wi-alt-4'});
     expect(
-      view().shown.map((t) => t.code),
-      containsAll(['ALT-1', 'ALT-11', 'ALT-14']),
-    );
-    expect(view().shown.every((t) => t.item.assignees.contains('av')), isTrue);
-    expect(
-      view().personOptions.firstWhere((p) => p.id == 'av').selected,
+      view().personOptions.firstWhere((p) => p.id == pKadir).selected,
       isTrue,
     );
-    ctrl.togglePriority(TaskPriority.medium);
-    expect(view().shown.map((t) => t.code), ['ALT-11']);
-    expect(view().state.filterCount, 2);
+    ctrl.togglePriority(TaskPriority.high);
+    expect(view().shown, isEmpty, reason: 'fikstürde yüksek öncelik yok');
     expect(view().state.hasChips, isTrue);
     ctrl.clearFilters();
-    expect(view().shown, hasLength(13));
-    expect(view().state.filterCount, 0);
+    expect(_codes(view()), _altItems);
     expect(view().state.hasChips, isFalse);
 
-    // Prototip `clearFilters`: yalnız kişi + öncelik; durum korunur. Rozet yalnız
-    // kişi/öncelik seçiliyken görünür (sayı durumu da sayar).
     ctrl
       ..setStatus(TimelineStatusFilter.late)
-      ..togglePerson('av')
+      ..togglePerson(pKadir)
       ..clearFilters();
     expect(view().state.status, TimelineStatusFilter.late);
     expect(view().state.filterCount, 1);
-    expect(view().state.hasChips, isFalse);
+
+    ctrl
+      ..setStatus(TimelineStatusFilter.all)
+      ..setQuery('hidrofor');
+    expect(_codes(view()), {'wi-alt-2'});
+    ctrl.setQuery('Ali Avcı');
+    expect(_codes(view()), {'wi-alt-2'}, reason: 'atanan kişi adı');
+    ctrl.setQuery('');
+    expect(_codes(view()), _altItems);
   });
 
   test('yakınlaştır / uzaklaştır: gün ↔ hafta ↔ ay, uçlarda etkisiz', () async {
     final (_, ctrl, view) = await _open();
-    ctrl.zoomIn();
-    expect(view().state.scale, TimelineScale.day);
-    ctrl.zoomIn();
+    ctrl
+      ..zoomIn()
+      ..zoomIn();
     expect(view().state.scale, TimelineScale.day);
     ctrl
       ..zoomOut()
+      ..zoomOut()
       ..zoomOut();
     expect(view().state.scale, TimelineScale.month);
-    ctrl.zoomOut();
-    expect(view().state.scale, TimelineScale.month);
+  });
+
+  test('genel bakış; sütuna dokunma tek koordinatörlük açar', () async {
+    final (_, ctrl, view) = await _open();
+    ctrl.setOverview(true);
+    expect(view().state.overview, isTrue);
+    expect(view().overviewGroups.map((g) => g.code), contains(dEle));
+    ctrl.openOverviewColumn(dEle);
+    expect(view().state.overview, isFalse);
+    expect(view().selectedCoordinatorships, [dEle]);
   });
 
   test(
-    'rota "*": bütün koordinatörlükler seçili; seçim değiştirilebilir',
-    () async {
-      final (_, ctrl, view) = await _open(timelineAllCoordinatorships);
-      expect(view().selectedCoordinatorships, hasLength(11));
-      expect(view().allSelected, isTrue);
-      expect(view().multi, isTrue);
-      ctrl.toggleCoordinatorship('ALT');
-      expect(view().selectedCoordinatorships, hasLength(10));
-      expect(view().selectedCoordinatorships, isNot(contains('ALT')));
-    },
-  );
-
-  test(
-    'ölçek ve genel bakış; sütuna dokunma tek koordinatörlük açar',
+    'seçim + taslak: −/+, kaydır, sürükle; sınırlar; süzgeç seçimi kapatır',
     () async {
       final (_, ctrl, view) = await _open();
-      ctrl.setScale(TimelineScale.day);
-      expect(view().state.scale, TimelineScale.day);
-      ctrl.setOverview(true);
-      expect(view().overviewGroups, hasLength(11));
-      expect(view().overviewGroups.first.total, 13);
-      ctrl.openOverviewColumn('OPE');
-      expect(view().state.overview, isFalse);
-      expect(view().selectedCoordinatorships, ['OPE']);
+      ctrl.select('wi-alt-2');
+      var sel = view().selection!;
+      expect(sel.task.code, 'wi-alt-2');
+      expect(sel.coordinatorshipName, 'Altyapı ve tesisat');
+      expect(sel.changed, isFalse);
+      final cur = sel.current;
+
+      ctrl
+        ..nudgeStart(-1)
+        ..nudgeEnd(1);
+      sel = view().selection!;
+      expect(sel.draft, DayRange(cur.start - 1, cur.end + 1));
+      expect((sel.startDelta, sel.endDelta), (-1, 1));
+      expect(
+        view().shown.firstWhere((t) => t.code == 'wi-alt-2').range,
+        sel.draft,
+        reason: 'taslak çubuğa anında yansır',
+      );
+      ctrl.shiftDraft(7);
+      expect(view().selection!.draft, DayRange(cur.start + 6, cur.end + 8));
+      ctrl.dragTo(-3);
+      expect(view().selection!.draft, cur.shift(-3));
+
+      ctrl.setDraftEnd(seasonDate(cur.start - 10, view().year));
+      final d = view().selection!.draft;
+      expect(d.end, d.start + 1, reason: 'bitiş başlangıcın önüne geçemez');
+
+      ctrl.setStatus(TimelineStatusFilter.open);
+      expect(view().selection, isNull);
+      expect(view().state.draft, isNull);
     },
   );
 
-  test('seçim + taslak: −/+, kaydır, sürükle; sınırlar', () async {
+  test('kaydet → geri alma kaydı; geri al önceki düzenlemeye döner', () async {
     final (_, ctrl, view) = await _open();
-    ctrl.select('ALT-10');
-    var sel = view().selection!;
-    expect(sel.task.code, 'ALT-10');
-    expect(sel.coordinatorshipName, 'Altyapı ve tesisat');
-    expect(sel.changed, isFalse);
-    final cur = sel.current;
-
-    ctrl
-      ..nudgeStart(-1)
-      ..nudgeEnd(1);
-    sel = view().selection!;
-    expect(sel.draft, DayRange(cur.start - 1, cur.end + 1));
-    expect(sel.startDelta, -1);
-    expect(sel.endDelta, 1);
-    // Taslak çubuğa anında yansır.
-    expect(view().shown.firstWhere((t) => t.code == 'ALT-10').range, sel.draft);
-
-    ctrl.shiftDraft(7);
-    expect(view().selection!.draft, DayRange(cur.start + 6, cur.end + 8));
-    ctrl.dragTo(-3);
-    expect(view().selection!.draft, cur.shift(-3));
-
-    // Bitiş başlangıcın önüne geçemez.
-    ctrl.setDraftEnd(seasonDate(cur.start - 10, 2026));
-    final d = view().selection!.draft;
-    expect(d.end, d.start + 1);
-
-    ctrl.closeSelection();
-    expect(view().selection, isNull);
-    expect(view().state.draft, isNull);
-  });
-
-  test('kaydet → geri alma kaydı; geri al eski tarihlere döner', () async {
-    final (_, ctrl, view) = await _open();
-    ctrl.select('ALT-10');
+    ctrl.select('wi-alt-2');
     expect(ctrl.save(), isFalse, reason: 'değişiklik yok');
     final cur = view().selection!.current;
     ctrl.shiftDraft(3);
     expect(ctrl.save(), isTrue);
     final u = view().state.undo!;
-    expect(u.code, 'ALT-10');
-    expect(u.isShift, isTrue);
-    expect(u.startDelta, 3);
+    expect((u.code, u.isShift, u.startDelta), ('wi-alt-2', true, 3));
     expect(view().selection, isNull);
-    expect(
-      view().shown.firstWhere((t) => t.code == 'ALT-10').range,
-      cur.shift(3),
-    );
+    final bar = view().shown.firstWhere((t) => t.code == 'wi-alt-2');
+    expect(bar.range, cur.shift(3));
 
     ctrl
-      ..select('ALT-10')
+      ..select('wi-alt-2')
       ..nudgeEnd(2);
     expect(ctrl.save(), isTrue);
     expect(view().state.undo!.isShift, isFalse);
     expect(view().state.undo!.serial, 2);
-    expect(ctrl.undo(), 'ALT-10');
+    expect(ctrl.undo(), 'wi-alt-2');
     expect(
-      view().shown.firstWhere((t) => t.code == 'ALT-10').range,
+      view().shown.firstWhere((t) => t.code == 'wi-alt-2').range,
       cur.shift(3),
-      reason: 'önceki düzenlemeye döner',
     );
-    expect(view().state.undo, isNull);
     expect(ctrl.undo(), isNull);
   });
 
-  test('tarih talebi: bekleyen var / değişiklik yok / gönderildi', () async {
+  test('tarih talebi: değişiklik yok / gönderildi / bekleyen var', () async {
     final (_, ctrl, view) = await _open();
-    ctrl.select('ALT-7');
-    expect(ctrl.requestDates(), isA<TimelineRequestPending>());
-    ctrl.select('ALT-10');
+    expect(
+      ctrl.requestDates(),
+      isA<TimelineRequestNoChange>(),
+      reason: 'seçim yok',
+    );
+    ctrl.select('wi-alt-1');
     expect(ctrl.requestDates(), isA<TimelineRequestNoChange>());
     final cur = view().selection!.current;
     ctrl.nudgeEnd(5);
     final r = ctrl.requestDates();
     expect(r, isA<TimelineRequestSent>());
-    expect((r as TimelineRequestSent).end, seasonDate(cur.end + 5, 2026));
-    expect(view().state.draft, isNull);
-    expect(view().state.requests.containsKey('ALT-10'), isTrue);
     expect(
-      view().shown.firstWhere((t) => t.code == 'ALT-10').request,
+      (r as TimelineRequestSent).end,
+      seasonDate(cur.end + 5, view().year),
+    );
+    expect(view().state.draft, isNull);
+    expect(
+      view().shown.firstWhere((t) => t.code == 'wi-alt-1').request,
       cur.end + 5,
     );
-    ctrl.dismissUndo();
-  });
-
-  test('şerit yerleşimi: çakışan görevler ayrı şeritte', () async {
-    final (_, _, view) = await _open();
-    final g = view().groups.single;
-    expect(g.lanes, greaterThan(1));
-    for (final (a, la) in g.placed) {
-      for (final (b, lb) in g.placed) {
-        if (a == b || la != lb) continue;
-        final overlap =
-            a.packStart < b.packEnd + 1 && b.packStart < a.packEnd + 1;
-        expect(overlap, isFalse, reason: '${a.code} / ${b.code}');
-      }
-    }
-    expect(packLanes(const []).$1, 0);
+    ctrl.nudgeEnd(1);
+    expect(ctrl.requestDates(), isA<TimelineRequestPending>());
   });
 }

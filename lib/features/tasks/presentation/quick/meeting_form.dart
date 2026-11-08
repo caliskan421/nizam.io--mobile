@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/errors/error_text.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
@@ -10,7 +11,7 @@ import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
-import '../../application/quick_forms_controller.dart';
+import '../../application/meeting_form_controller.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../domain/task_catalog.dart';
 import '../task_texts.dart';
@@ -18,7 +19,9 @@ import '../task_widgets.dart';
 import 'quick_parts.dart';
 
 /// "Toplantı oluştur" formu: başlık + tarih (takvim), saat (çark), davetliler
-/// (koordinatörlük ya da kişi), gündem maddeleri.
+/// (koordinatörlük ya da kişi), gündem maddeleri; kişi kipinde sahip koordinatörlük (sunucu en
+/// az bir departman ister). Düzenlemede yalnız başlık, an ve koordinatörlükler (kip ve gündem
+/// yok; katılımcı ve gündem toplantı ayrıntısında yönetilir).
 class MeetingFormBody extends ConsumerStatefulWidget {
   const MeetingFormBody({super.key, required this.expansion});
 
@@ -80,6 +83,10 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
     }
     if (_draft.text != f.agendaDraft) _draft.text = f.agendaDraft;
     final error = f.error;
+    final editing = f.editing != null;
+    final owner = f.owner == null
+        ? null
+        : catalog?.coordinatorship(f.owner!)?.name ?? f.owner;
     final time =
         '${f.hour.toString().padLeft(2, '0')}:${f.minute.toString().padLeft(2, '0')}';
 
@@ -135,12 +142,14 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TaskSegmented(
-                    labels: [l.uiTasksGroupCoord, l.uiTasksModePeople],
-                    selected: f.mode.index,
-                    onSelected: (i) => ctl.setMode(MeetingMode.values[i]),
-                  ),
-                  const Gap(NizamioSpacing.space2),
+                  if (!editing) ...[
+                    TaskSegmented(
+                      labels: [l.uiTasksGroupCoord, l.uiTasksModePeople],
+                      selected: f.mode.index,
+                      onSelected: (i) => ctl.setMode(MeetingMode.values[i]),
+                    ),
+                    const Gap(NizamioSpacing.space2),
+                  ],
                   if (f.mode == MeetingMode.coordinatorships) ...[
                     for (final co in coords)
                       TaskCheckRow(
@@ -170,59 +179,85 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
               ),
             ),
           ),
-          NzFormRow(
-            label: l.uiTasksRowAgenda,
-            icon: NzIcons.listBulleted,
-            value: f.agenda.isEmpty
-                ? l.uiTasksAddItem
-                : '${f.agenda.length} ${l.uiTasksItemsLc}',
-            valueSet: f.agenda.isNotEmpty,
-            content: QuickPane(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (var i = 0; i < f.agenda.length; i++)
-                    _AgendaItem(
-                      key: ValueKey('ag-$i-${f.agenda.length}'),
-                      index: i,
-                      text: f.agenda[i],
-                      onChanged: (v) => ctl.setAgendaItem(i, v),
-                      onDone: () => ctl.finishAgendaItem(i),
-                      onRemove: () => ctl.removeAgenda(i),
-                    ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _draft,
-                          maxLength: 160,
-                          onChanged: ctl.setAgendaDraft,
-                          onSubmitted: (_) => ctl.addAgenda(),
-                          style: t.bodyMd,
-                          decoration: InputDecoration(
-                            labelText: l.uiTasksAgendaItem,
-                            hintText: l.uiTasksAddItem,
-                            counterText: '',
-                            border: InputBorder.none,
+          if (!editing)
+            NzFormRow(
+              label: l.uiTasksRowAgenda,
+              icon: NzIcons.listBulleted,
+              value: f.agenda.isEmpty
+                  ? l.uiTasksAddItem
+                  : '${f.agenda.length} ${l.uiTasksItemsLc}',
+              valueSet: f.agenda.isNotEmpty,
+              content: QuickPane(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < f.agenda.length; i++)
+                      _AgendaItem(
+                        key: ValueKey('ag-$i-${f.agenda.length}'),
+                        index: i,
+                        text: f.agenda[i],
+                        onChanged: (v) => ctl.setAgendaItem(i, v),
+                        onDone: () => ctl.finishAgendaItem(i),
+                        onRemove: () => ctl.removeAgenda(i),
+                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _draft,
+                            maxLength: 160,
+                            onChanged: ctl.setAgendaDraft,
+                            onSubmitted: (_) => ctl.addAgenda(),
+                            style: t.bodyMd,
+                            decoration: InputDecoration(
+                              labelText: l.uiTasksAgendaItem,
+                              hintText: l.uiTasksAddItem,
+                              counterText: '',
+                              border: InputBorder.none,
+                            ),
                           ),
                         ),
-                      ),
-                      NzIconButton.circleAccent(
-                        icon: NzIcons.add,
-                        semanticLabel: l.uiTasksAddItemLabel,
-                        onPressed: f.agendaDraft.trim().isEmpty
-                            ? null
-                            : ctl.addAgenda,
-                      ),
-                    ],
-                  ),
-                ],
+                        NzIconButton.circleAccent(
+                          icon: NzIcons.add,
+                          semanticLabel: l.uiTasksAddItemLabel,
+                          onPressed: f.agendaDraft.trim().isEmpty
+                              ? null
+                              : ctl.addAgenda,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+          // Kişi kipinde sahip koordinatörlük (sunucu: departman kümesinin ilki).
+          if (!editing && f.mode == MeetingMode.people)
+            NzFormRow(
+              label: l.uiTasksRowOwner,
+              icon: NzIcons.coordinatorships,
+              value: owner ?? l.uiTasksPick,
+              valueSet: owner != null,
+              content: QuickPane(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final co in coords)
+                      TaskCheckRow(
+                        label: co.name,
+                        radio: true,
+                        selected: f.owner == co.code,
+                        onTap: () => ctl.pickOwner(co.code),
+                      ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
-      footer: [if (error != null) TaskFormError(l.meetingError(error))],
+      footer: [
+        if (error != null) TaskFormError(l.meetingError(error)),
+        if (f.failure case final failure?) TaskFormError(errorText(l, failure)),
+      ],
     );
   }
 }

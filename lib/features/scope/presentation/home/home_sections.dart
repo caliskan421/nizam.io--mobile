@@ -5,14 +5,15 @@ import '../../../../core/i18n/generated/app_localizations.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
-import '../../../../core/ui/widgets/buttons/buttons.dart';
-import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
+import 'home_grid_layout.dart';
 import 'home_texts.dart';
+import 'home_wide.dart';
 
-/// İki ya da daha çok eşit sütun; satırdaki öğeler aynı yüksekliğe uzar (prototip `grid`).
+/// İki ya da daha çok eşit sütun (prototip `grid`); bütün öğeler en uzun öğenin yüksekliğinde
+/// (koordinatörlük kartları: adı iki satıra kayan kart diğerlerinden uzun durmaz).
 class HomeGrid extends StatelessWidget {
   const HomeGrid({
     super.key,
@@ -26,26 +27,8 @@ class HomeGrid extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) => Column(
-    spacing: gap,
-    children: [
-      for (var r = 0; r < children.length; r += columns)
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: gap,
-            children: [
-              for (var i = r; i < r + columns; i++)
-                Expanded(
-                  child: i < children.length
-                      ? children[i]
-                      : const SizedBox.shrink(),
-                ),
-            ],
-          ),
-        ),
-    ],
-  );
+  Widget build(BuildContext context) =>
+      UniformGrid(columns: columns, gap: gap, children: children);
 }
 
 /// Karşılama: tarih + "Merhaba" ve ad (ad tek satırda kesilir; tam ad okuyucuda).
@@ -89,11 +72,18 @@ class HomeGreeting extends StatelessWidget {
   }
 }
 
-/// 2×2 özet kutuları (tamamlanma, devam eden, gecikmede, onay bekleyen).
+/// Özet kutuları (tamamlanma, devam eden, gecikmede, onay bekleyen): 2×2, geniş ana sayfada
+/// tek satır ([columns] 4).
 class HomeKpiGrid extends StatelessWidget {
-  const HomeKpiGrid({super.key, required this.tasks, required this.onOpen});
+  const HomeKpiGrid({
+    super.key,
+    required this.tasks,
+    required this.onOpen,
+    this.columns = 2,
+  });
 
   final TaskTotals tasks;
+  final int columns;
 
   /// Kutuya dokunma → görev listesi o kutunun görünümüyle (prototip `go.done/doing/late/review`).
   final ValueChanged<NzTaskView> onOpen;
@@ -128,7 +118,7 @@ class HomeKpiGrid extends StatelessWidget {
       container: true,
       label: l.uiHomeSummaryLabel,
       child: HomeGrid(
-        columns: 2,
+        columns: columns,
         gap: NizamioSpacing.gapMd,
         children: [
           tile(
@@ -174,21 +164,15 @@ class HomeKpiGrid extends StatelessWidget {
   }
 }
 
-/// Hızlı işlem türü (kutucuk ve kısayol menüsü aynı listeyi kullanır).
-enum HomeQuickAction { task, meeting, invite, report }
+/// Hızlı işlem türü (kutucuk ve kısayol menüsü aynı listeyi kullanır). Görev açma Görevler
+/// sayfasının "+" düğmesindedir; işlem geçmişi buradan açılır (ayrı kartı yok).
+enum HomeQuickAction { history, meeting, invite, report }
 
-/// Dört hızlı işlem kutucuğu.
+/// Hızlı işlemler: başlık + ayraçlı tek kart ([HomeQuickActionsBar]).
 class HomeQuickActions extends StatelessWidget {
-  const HomeQuickActions({
-    super.key,
-    required this.onAction,
-    this.canCreateTask = true,
-  });
+  const HomeQuickActions({super.key, required this.onAction});
 
   final ValueChanged<HomeQuickAction> onAction;
-
-  /// "Yeni görev" kutusu görünsün mü (seçili kapsamda görev açma yetkisi).
-  final bool canCreateTask;
 
   @override
   Widget build(BuildContext context) {
@@ -198,19 +182,9 @@ class HomeQuickActions extends StatelessWidget {
       children: [
         NzKicker(l.uiHomeQuickActions),
         const Gap(NizamioSpacing.gapMd),
-        HomeGrid(
-          columns: 4,
-          gap: NizamioSpacing.space2,
-          children: [
-            for (final a in HomeQuickAction.values)
-              if (a != HomeQuickAction.task || canCreateTask)
-                NzActionTile(
-                  icon: quickActionIcon(a),
-                  label: quickActionLabel(l, a),
-                  primary: a == HomeQuickAction.task,
-                  onPressed: () => onAction(a),
-                ),
-          ],
+        // Geniş düzendeki tek kart (ayraçlı dört bölme); yükseklik içerikten.
+        IntrinsicHeight(
+          child: HomeQuickActionsBar(onAction: onAction, compact: true),
         ),
       ],
     );
@@ -218,14 +192,14 @@ class HomeQuickActions extends StatelessWidget {
 }
 
 IconData quickActionIcon(HomeQuickAction a) => switch (a) {
-  HomeQuickAction.task => NzIcons.add,
+  HomeQuickAction.history => NzIcons.history,
   HomeQuickAction.meeting => NzIcons.video,
   HomeQuickAction.invite => NzIcons.personAdd,
   HomeQuickAction.report => NzIcons.document,
 };
 
 String quickActionLabel(AppLocalizations l, HomeQuickAction a) => switch (a) {
-  HomeQuickAction.task => l.uiHomeQaTask,
+  HomeQuickAction.history => l.uiHomeHistoryTitle,
   HomeQuickAction.meeting => l.uiHomeQaMeeting,
   HomeQuickAction.invite => l.uiHomeQaInvite,
   HomeQuickAction.report => l.uiHomeQaReport,
@@ -234,14 +208,14 @@ String quickActionLabel(AppLocalizations l, HomeQuickAction a) => switch (a) {
 /// Kısayol menüsündeki uzun ad ("Toplantı oluştur").
 String quickActionLongLabel(AppLocalizations l, HomeQuickAction a) =>
     switch (a) {
-      HomeQuickAction.task => l.uiHomeQaTaskLong,
+      HomeQuickAction.history => l.uiHomeHistoryOpen,
       HomeQuickAction.meeting => l.uiHomeQaMeetingLong,
       HomeQuickAction.invite => l.uiHomeQaInviteLong,
       HomeQuickAction.report => l.uiHomeQaReportLong,
     };
 
-/// Ekip: rol başına sayı kutusu (rol rengi yalnız işarettir). Yalnız [team] bilinirken
-/// (yönetici özeti) kurulur.
+/// Ekip: rol başına [HomeTeamTile] (rol rengi işaret ve pay çubuğudur). Yalnız [team]
+/// bilinirken (yönetici özeti) kurulur.
 class HomeTeam extends StatelessWidget {
   const HomeTeam({
     super.key,
@@ -260,31 +234,6 @@ class HomeTeam extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final c = context.colors;
-    Widget tile(TeamRole r, Color dot, int n, String role) => NzCard.outlined(
-      padding: const EdgeInsets.all(NizamioSpacing.space3),
-      onTap: r == TeamRole.admin ? null : () => onOpen(r),
-      semanticLabel: r == TeamRole.admin
-          ? '$n $role'
-          : '$n $role. ${l.uiHomeOpenList}',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: NizamioSpacing.space1,
-        children: [
-          DecoratedBox(
-            decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
-            child: const Padding(padding: EdgeInsets.all(NizamioSize.dot / 2)),
-          ),
-          Text('$n', maxLines: 1, style: context.text.titleMd),
-          Text(
-            role,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: context.text.caption.copyWith(color: c.textMuted),
-          ),
-        ],
-      ),
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -293,81 +242,9 @@ class HomeTeam extends StatelessWidget {
         HomeGrid(
           columns: 3,
           gap: NizamioSpacing.space2,
-          children: [
-            tile(TeamRole.admin, c.roleAdmin, team.admins, l.uiHomeRoleAdmin),
-            tile(
-              TeamRole.coordinator,
-              c.roleCoordinator,
-              team.coordinators,
-              l.uiHomeRoleCoordinator,
-            ),
-            tile(
-              TeamRole.member,
-              c.roleMember,
-              team.members,
-              l.uiHomeRoleMember,
-            ),
-          ],
+          children: homeRoleTiles(context, team, onOpen, compact: true),
         ),
       ],
-    );
-  }
-}
-
-/// İşlem geçmişi giriş kartı.
-class HomeHistoryCard extends StatelessWidget {
-  const HomeHistoryCard({
-    super.key,
-    required this.activity,
-    required this.now,
-    required this.onOpen,
-  });
-
-  final LastActivity? activity;
-  final DateTime now;
-  final VoidCallback onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final a = activity;
-    return NzCard.outlined(
-      onTap: onOpen,
-      semanticLabel: l.uiHomeHistoryOpen,
-      child: Row(
-        children: [
-          const NzIconTile(icon: NzIcons.history),
-          const Gap(NizamioSpacing.space3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: NizamioSpacing.space1 / 2,
-              children: [
-                Text(
-                  l.uiHomeHistoryTitle,
-                  style: context.text.list.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (a != null)
-                  Text(
-                    l.lastActivity(a, now),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.text.caption.copyWith(color: c.textMuted),
-                  ),
-              ],
-            ),
-          ),
-          const Gap(NizamioSpacing.space3),
-          NzIcon(
-            NzIcons.chevronRight,
-            size: NizamioSize.iconSizeSm,
-            color: c.textFaint,
-          ),
-        ],
-      ),
     );
   }
 }

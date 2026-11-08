@@ -12,8 +12,9 @@ import '../nz_icons.dart';
 /// "Tarih" satırları). Durumsuz: seçim kuralı ekranın denetleyicisindedir.
 ///
 /// Üstte ay adı ve önceki/sonraki ay düğmeleri ([onMonthStep] −1/+1), haftanın günleri
-/// (Pazartesi başlar), 34 px satırlar. [end] verilirse [start]–[end] aralığı satır boyunca
-/// `text` renginde hap ile, uçlar `background` dairesiyle çizilir; [end] null ise yalnız
+/// (Pazartesi başlar), 36 px satırlar. [end] verilirse [start]–[end] aralığı satır boyunca
+/// `text` renginde 32 px hap ile çizilir; uçların 28 px `background` dairesi hapın içinde
+/// kalır (hap daireyi her yandan sarar); [end] null ise yalnız
 /// [start] tek gün olarak seçilidir. Ay dışı günler ve [firstDate]'ten önceki günler
 /// dokunulamaz. [today] (seçili değilse) ince halkalı.
 class NzRangeCalendar extends StatelessWidget {
@@ -39,7 +40,7 @@ class NzRangeCalendar extends StatelessWidget {
   final DateTime? firstDate;
   final String? semanticLabel;
 
-  static const _rowHeight = 34.0;
+  static const _rowHeight = 36.0;
   static const _navButton = 32.0;
 
   static DateTime _d(DateTime d) => DateTime(d.year, d.month, d.day);
@@ -170,6 +171,11 @@ class _Week extends StatelessWidget {
   final ValueChanged<DateTime> onDayTap;
   final double rowHeight;
 
+  /// Hap satırdan ince, gün dairesi haptan ince: ardışık satırların hapları birbirine
+  /// değmez, uç daire hapın içinde kalır (tasarım referansı).
+  double get _pill => rowHeight - 4;
+  double get _dot => _pill - 4;
+
   bool _inRange(DateTime d) {
     final s = start;
     final e = end;
@@ -196,17 +202,18 @@ class _Week extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final cell = constraints.maxWidth / 7;
-          final half = rowHeight / 2;
+          final half = _pill / 2;
+          final inset = (rowHeight - _pill) / 2;
           return Stack(
             children: [
               if (range && a >= 0)
                 AnimatedPositioned(
                   duration: NzMotion.of(context, NizamioMotion.durSheet),
                   curve: NizamioMotion.easeSheet,
-                  top: 0,
-                  bottom: 0,
+                  top: inset,
+                  bottom: inset,
                   left: (a + 0.5) * cell - half,
-                  width: (b - a) * cell + rowHeight,
+                  width: (b - a) * cell + _pill,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: c.text,
@@ -264,7 +271,7 @@ class _Week extends StatelessWidget {
         onTap: enabled ? () => onDayTap(d) : null,
         child: Center(
           child: SizedBox.square(
-            dimension: rowHeight,
+            dimension: _dot,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: circle,

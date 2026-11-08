@@ -146,7 +146,7 @@ final class CoordinatorshipSummary {
   /// Koordinatör adları; boş → atanmamış.
   final List<String> leads;
 
-  /// Koordinatörlerin hesap kimlikleri ([leads] ile aynı sırada; örnekte boş).
+  /// Koordinatörlerin hesap kimlikleri ([leads] ile aynı sırada).
   final List<String> leadAccountIds;
 
   /// Sunucu `not_started_tasks`.
@@ -197,7 +197,7 @@ final class PendingItem {
     this.requestedShiftDays,
   });
 
-  /// Rota kimliği: örnekte görev kodu (`ALT-7`), sunucu kaynağında `work_item_id`.
+  /// Rota kimliği (`work_item_id`).
   final String taskCode;
 
   /// Satır altyazısının başı; null → [taskCode]. Sunucu kaynağında departman adı (kimlik
@@ -221,13 +221,11 @@ final class ModuleCounts {
     required this.lateTasks,
     required this.tasksAwaitingApproval,
     required this.unreadMessages,
-    required this.pendingRequests,
   });
 
   final int lateTasks;
   final int tasksAwaitingApproval;
   final int unreadMessages;
-  final int pendingRequests;
 }
 
 /// Yönetici olmayan hesabın özetinde görev listesinden sayılamayan parçalar

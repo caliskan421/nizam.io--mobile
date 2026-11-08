@@ -83,13 +83,13 @@ abstract final class NzFlyoutMenu {
           final curved = CurvedAnimation(
             parent: animation,
             curve: NizamioMotion.easeSpring,
-            reverseCurve: NizamioMotion.easeExit,
+            reverseCurve: NzMotion.exitReverse,
           );
           return FadeTransition(
             opacity: CurvedAnimation(
               parent: animation,
               curve: NizamioMotion.easeOut,
-              reverseCurve: NizamioMotion.easeExit,
+              reverseCurve: NzMotion.exitReverse,
             ),
             child: ScaleTransition(
               scale: Tween<double>(begin: 0.6, end: 1).animate(curved),

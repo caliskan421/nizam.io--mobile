@@ -279,8 +279,11 @@ void main() {
         tester.getSize(find.byType(NzTabletRail)).width,
         NzTabletMetrics.railWidth,
       );
+      // Ana sayfa kökünde sağ bölme gizli bekler (liste tam genişlik); ağaçta durur.
       final roles = tester
-          .widgetList<NzPaneScope>(find.byType(NzPaneScope))
+          .widgetList<NzPaneScope>(
+            find.byType(NzPaneScope, skipOffstage: false),
+          )
           .map((p) => p.role);
       expect(roles, containsAll(NzPaneRole.values));
     });
@@ -319,8 +322,8 @@ void main() {
         expect(locationOf(router), '/home');
         await tester.tap(_railItem('Görevler'));
         await settle(tester);
-        // Son açılan görev (prototip alt ekranı kalıcı), rotada kimlikle.
-        expect(locationOf(router), '/tasks/9');
+        // Görevler son açılan görevi geri getirmez: kök, liste tam genişlik.
+        expect(locationOf(router), '/tasks');
       },
     );
   });
@@ -421,7 +424,10 @@ void main() {
     (tester) async {
       await _scoped(tester);
       int fades(Type page) => find
-          .ancestor(of: find.byType(page), matching: find.byType(Opacity))
+          .ancestor(
+            of: find.byType(page),
+            matching: find.byType(FadeTransition),
+          )
           .evaluate()
           .length;
 

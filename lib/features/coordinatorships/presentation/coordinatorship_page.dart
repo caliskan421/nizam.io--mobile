@@ -5,8 +5,6 @@ import 'package:gap/gap.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
-import '../../../core/ui/layout/nz_pane.dart';
-import '../../../core/ui/motion/page_content_entrance.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
@@ -22,14 +20,20 @@ import '../../tasks/tasks.dart';
 import '../application/coordinatorship_detail_controller.dart';
 import '../application/coordinatorship_profiles_controller.dart';
 import '../application/coordinatorships_controller.dart';
+import '../domain/coordinatorship_board.dart';
 import '../domain/coordinatorship_overview.dart';
+import 'coord_archive_meetings_tabs.dart';
+import 'coord_detail_texts.dart';
+import 'coord_general_tab.dart';
+import 'coord_hero.dart';
+import 'coord_people_sheet.dart';
+import 'coord_tasks_tab.dart';
 import 'coord_texts.dart';
-import 'coordinatorship_tabs.dart';
 
-/// Koordinatörlük ayrıntısı (prototip `cdetail`): mono kodlu üst çubuk + "diğer işlemler",
-/// ad, kimlik satırı, "Ekibe mesaj" / "Görev ata", yapışkan hap sekmeler (Genel, Birimler,
-/// Ekip, Hakkında; prototip `position: sticky; top: 64px`). Alt menüde modül sekmesine yeniden
-/// dokunmak diğer koordinatörlükleri listede seçili sıralamayla listeler.
+/// Koordinatörlük ayrıntısı (prototip `cdetail`, telefon ve tablet sağ panel): kısa kodlu cam
+/// üst çubuk + "diğer işlemler", kimlik ([CoordHero]), yapışkan segmentli bölümler
+/// (Genel, Görevler, Üyeler, Arşiv, Toplantı). Alt menüde modül sekmesine yeniden dokunmak diğer
+/// koordinatörlükleri listede seçili sıralamayla listeler.
 class CoordinatorshipPage extends ConsumerWidget {
   const CoordinatorshipPage({super.key, required this.code});
 
@@ -53,10 +57,26 @@ class CoordinatorshipPage extends ConsumerWidget {
     });
     final l = context.l10n;
     final d = detail.value;
-    return NzPage.fill(
+    final catalog = ref.watch(taskCatalogControllerProvider).value;
+    final tab = ref.watch(
+      coordinatorshipDetailControllerProvider(code).select((v) => v.tab),
+    );
+    final ready = d != null && catalog != null;
+    final tasks = ready ? catalog.tasksOf(code) : const <TaskItem>[];
+    final pulse = CoordPulse.of(tasks);
+    final people = ready
+        ? coordPeople(d.stats.leads, d.stats.members, tasks)
+        : const <CoordPerson>[];
+    // Diğer ayrıntı sayfaları gibi: cam üst çubuk, içerik altından akar; bölümler çubuğun
+    // altına yapışan cam şerit (prototip `.cd-tabwrap`, `position: sticky; top: 56px`).
+    return NzPage.feed(
+      width: NzContentWidth.wide,
+      // Tablet sağ bölmesi: kaynak gap 22, kimlik -6 → 16.
+      paneLead: NizamioSpacing.space4,
       onRetry: () => _retry(ref),
       topBar: NzTopBar.detail(
-        code: code,
+        // Kullanıcıya kimlik (department_id) değil kısa etiket; kod yoksa yazı yok.
+        code: d?.stats.shortCode,
         actions: [
           NzIconButton(
             icon: NzIcons.more,
@@ -65,13 +85,65 @@ class CoordinatorshipPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: NzAsyncView<CoordinatorshipDetail?>(
-        value: detail,
-        onRetry: () => _retry(ref),
-        isEmpty: (d) => d == null,
-        empty: NzEmptyState(title: l.uiCoordNotFound),
-        data: (d) => _Body(detail: d!),
-      ),
+      pinned: !ready
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(top: 6, bottom: 8),
+              child: NzPillTabs(
+                semanticLabel: l.uiCoordTabsLabel,
+                selected: tab.index,
+                onSelected: (i) => ref
+                    .read(
+                      coordinatorshipDetailControllerProvider(code).notifier,
+                    )
+                    .selectTab(CoordinatorshipTab.values[i]),
+                tabs: [
+                  for (final t in CoordinatorshipTab.values)
+                    NzPillTab(label: l.coordTabLabel(t)),
+                ],
+              ),
+            ),
+      afterKey: ValueKey(tab),
+      after: !ready
+          ? const []
+          : [
+              const Gap(NizamioSpacing.space3),
+              switch (tab) {
+                CoordinatorshipTab.general => CoordGeneralTab(
+                  detail: d,
+                  pulse: pulse,
+                  people: people,
+                  catalog: catalog,
+                ),
+                CoordinatorshipTab.tasks => CoordTasksTab(
+                  code: code,
+                  catalog: catalog,
+                  people: people,
+                ),
+                CoordinatorshipTab.members => CoordMembersTab(
+                  code: code,
+                  people: people,
+                ),
+                CoordinatorshipTab.archive => CoordArchiveTab(
+                  code: code,
+                  folder: d.stats.shortCode ?? code,
+                  catalog: catalog,
+                ),
+                CoordinatorshipTab.meetings => CoordMeetingsTab(code: code),
+              },
+            ],
+      children: [
+        if (ready)
+          CoordHero(detail: d)
+        else
+          NzAsyncView<CoordinatorshipDetail?>(
+            value: detail,
+            onRetry: () => _retry(ref),
+            isEmpty: (d) => d == null,
+            empty: NzEmptyState(title: l.uiCoordNotFound),
+            data: (_) => const SizedBox.shrink(),
+          ),
+      ],
     );
   }
 
@@ -172,150 +244,6 @@ class CoordinatorshipPage extends ConsumerWidget {
                   danger: true,
                 ),
               ],
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _Body extends ConsumerWidget {
-  const _Body({required this.detail});
-
-  final CoordinatorshipDetail detail;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final c = context.colors;
-    final t = context.text;
-    final d = detail;
-    final code = d.stats.code;
-    final view = ref.watch(coordinatorshipDetailControllerProvider(code));
-    final commands = ref.read(
-      coordinatorshipDetailControllerProvider(code).notifier,
-    );
-    const tabs = CoordinatorshipTab.values;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Sağ bölmede yan 28 (`.tb-rpane`), sayfa sonu 40.
-        final side = NzPaneScope.sideInset(
-          context,
-          constraints,
-          NzContentWidth.list,
-        );
-        return CustomScrollView(
-          slivers: [
-            SliverPadding(
-              // Tablet sağ bölmesi: kaynak gap 22, kimlik -6 → 16.
-              padding: EdgeInsets.fromLTRB(
-                side,
-                NzPaneScope.maybeOf(context)?.role == NzPaneRole.detail
-                    ? NizamioSpacing.space4
-                    : NizamioSpacing.gapXl,
-                side,
-                0,
-              ),
-              sliver: SliverList.list(
-                children: [
-                  Semantics(
-                    header: true,
-                    child: Text(d.stats.name, style: t.titleMd),
-                  ),
-                  const Gap(NizamioSpacing.space1),
-                  Text.rich(
-                    TextSpan(
-                      text: l.coordIdentityLine(d),
-                      children: [
-                        TextSpan(
-                          text: l.uiCoordStateActive,
-                          style: t.caption.copyWith(
-                            color: c.accentText,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    style: t.caption.copyWith(color: c.textMuted),
-                  ),
-                  const Gap(NizamioSpacing.space4),
-                  Row(
-                    spacing: NizamioSpacing.space2,
-                    children: [
-                      Expanded(
-                        child: NzButton.secondary(
-                          label: l.uiCoordMessageTeam,
-                          icon: NzIcons.messages,
-                          expand: true,
-                          onPressed: () =>
-                              context.appNav.openChat(d.profile.chatId),
-                        ),
-                      ),
-                      Expanded(
-                        child: NzButton.primary(
-                          label: l.uiCoordAssignTask,
-                          icon: NzIcons.add,
-                          expand: true,
-                          onPressed: () =>
-                              showNewTaskSheet(context, coordinatorship: code),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            // Yapışkan sekmeler: üst çubuğun altında kalır; zemin yarı saydam taban rengi.
-            PinnedHeaderSliver(
-              child: ColoredBox(
-                color: c.background.withValues(alpha: 0.92),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    side,
-                    NizamioSpacing.space4,
-                    side,
-                    NizamioSpacing.space3,
-                  ),
-                  child: NzPillTabs(
-                    semanticLabel: l.uiCoordTabsLabel,
-                    selected: tabs.indexOf(view.tab),
-                    onSelected: (i) => commands.selectTab(tabs[i]),
-                    tabs: [
-                      NzPillTab(label: l.uiCoordTabGeneral),
-                      NzPillTab(
-                        label: l.uiCoordTabUnits,
-                        count: d.profile.units.length,
-                      ),
-                      NzPillTab(label: l.uiCoordTabTeam, count: d.people),
-                      NzPillTab(label: l.uiCoordTabAbout),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: EdgeInsets.fromLTRB(
-                side,
-                NizamioSpacing.space3,
-                side,
-                NzPaneScope.pageBottom(context),
-              ),
-              sliver: SliverToBoxAdapter(
-                child: PageContentEntrance(
-                  key: ValueKey(view.tab),
-                  child: switch (view.tab) {
-                    CoordinatorshipTab.general => CoordGeneralTab(detail: d),
-                    CoordinatorshipTab.units => CoordUnitsTab(detail: d),
-                    CoordinatorshipTab.team => CoordTeamTab(
-                      detail: d,
-                      membersOpen: view.membersOpen,
-                      onToggleMembers: commands.toggleMembers,
-                    ),
-                    CoordinatorshipTab.about => CoordAboutTab(detail: d),
-                  },
-                ),
-              ),
             ),
           ],
         );

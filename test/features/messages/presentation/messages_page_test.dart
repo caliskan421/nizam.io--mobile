@@ -30,7 +30,7 @@ Future<(Harness, RecordingAppNav)> _open(
     tester,
     () => pilotHarness(PilotBackend(), signedIn: true),
   );
-  h.read(scopeControllerProvider).selectSample();
+  h.read(scopeControllerProvider).selectProgram('prog-1');
   final nav = RecordingAppNav();
   await pumpScreen(tester, h, const MessagesPage(), nav: nav, dark: dark);
   await settle(tester);
@@ -46,31 +46,6 @@ Future<void> _tap(WidgetTester tester, Finder f) async {
 
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
-
-  testWidgets('satırlar: son mesaj, saat, okunmamış; sohbet açılır', (
-    tester,
-  ) async {
-    final (_, nav) = await _open(tester, tall: true);
-    expect(find.text(_l.uiMessagesTitle), findsOneWidget);
-    expect(find.byType(NzChatRow), findsNWidgets(8));
-    expect(find.text('Genel'), findsOneWidget);
-    expect(
-      find.text(
-        'Sen: Kapanış yemeği için gün seçelim, 25 Ekim akşamına kadar oy verin.',
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.text(
-        'Reha: @Muhammet Ali trafo onayı bugün bekleniyor, son durumu #ELE-4 kartına yazdım.',
-      ),
-      findsOneWidget,
-    );
-    // Kaynak başlangıcı: koord 1 okunmamış + anma.
-    expect(find.text('@'), findsOneWidget);
-    await _tap(tester, find.text('Koordinatörler'));
-    expect(nav.calls, ['chat:koord']);
-  });
 
   testWidgets('süzgeç: okunmamış 5, kişiler 3; arama', (tester) async {
     await _open(tester);

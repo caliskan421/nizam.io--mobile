@@ -1,27 +1,32 @@
-// CoordinatorshipPage: kimlik + eylemler, sekmeler (Genel / Birimler / Ekip / Hakkında), gezinme
-// hedefleri, tostlar, diğer işlemler alt sayfası, kısayol menüsü (diğer koordinatörlükler),
-// bilinmeyen kod, taşma matrisi.
+// CoordinatorshipPage (sunucu verisiyle): bilinmeyen kimlik boş durum; taşma matrisi bütün
+// segmentli bölümleri (Genel / Görevler / Üyeler / Arşiv / Toplantı) açarak gezer.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
-import 'package:nizamio/core/ui/page/nz_shell_events.dart';
-import 'package:nizamio/features/coordinatorships/application/coordinatorships_controller.dart';
-import 'package:nizamio/features/coordinatorships/domain/coordinatorship_overview.dart';
+import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/ui/widgets/inputs/inputs.dart';
+import 'package:nizamio/features/coordinatorships/presentation/coord_archive_meetings_tabs.dart';
+import 'package:nizamio/features/coordinatorships/presentation/coord_general_tab.dart';
+import 'package:nizamio/features/coordinatorships/presentation/coord_people_sheet.dart';
+import 'package:nizamio/features/coordinatorships/presentation/coord_tasks_tab.dart';
 import 'package:nizamio/features/coordinatorships/presentation/coordinatorship_page.dart';
 
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
 import '../../pilot_support.dart';
+import '../coord_backend.dart';
 
 final _l = AppLocalizationsTr();
 
-Future<(Harness, RecordingAppNav)> _open(
+Future<(Harness, CoordBackend)> _open(
   WidgetTester tester, {
-  String code = 'ALT',
+  String code = dAlt,
   bool dark = false,
 }) async {
-  final h = await real(tester, () => pilotHarness(PilotBackend()));
+  final backend = CoordBackend();
+  final h = await real(tester, () => pilotHarness(backend, signedIn: true));
+  h.read(scopeControllerProvider).selectProgram(coordProgram);
   final nav = RecordingAppNav();
   await pumpScreen(
     tester,
@@ -31,7 +36,7 @@ Future<(Harness, RecordingAppNav)> _open(
     dark: dark,
   );
   await settle(tester);
-  return (h, nav);
+  return (h, backend);
 }
 
 /// Sayfanın kendi kaydırmasıyla [f]'yi dokunulabilir yapar (`ensureVisible` dıştaki
@@ -64,192 +69,36 @@ Future<void> _tap(WidgetTester tester, Finder f) async {
   await settle(tester);
 }
 
-/// Tostu kaldırır (alttaki satırların üstünü örtmesin).
-Future<void> _dismissToast(WidgetTester tester) async {
-  ScaffoldMessenger.of(tester.element(find.byType(CoordinatorshipPage)))
-      .removeCurrentSnackBar();
-  await settle(tester);
-}
-
-/// Sayfanın kendi dikey kaydırması (dıştaki `NzPage.fill` kaydırmaz).
+/// Sayfanın dikey kaydırması.
 final _pageScroll = find
     .byWidgetPredicate(
       (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
     )
-    .at(1);
+    .first;
+
+/// Bölüm hapı (pinli sekme şeridi; Genel'deki özet kartlarında aynı ad geçer).
+Finder _tab(String label) =>
+    find.descendant(of: find.byType(NzPillTabs), matching: find.text(label));
+
+List<(String, Type)> get _tabs => [
+  (_l.uiCoordTabTasks, CoordTasksTab),
+  (_l.uiCoordTabMembers, CoordMembersTab),
+  (_l.uiCoordTabArchive, CoordArchiveTab),
+  (_l.uiCoordTabMeetings, CoordMeetingsTab),
+  (_l.uiCoordTabGeneral, CoordGeneralTab),
+];
 
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets('Genel: kimlik, özet, dikkat gerektirenler, kısayollar', (
-    tester,
-  ) async {
-    final (_, nav) = await _open(tester);
-    expect(find.text('ALT'), findsOneWidget);
-    expect(find.text('Altyapı ve tesisat'), findsOneWidget);
-    expect(
-      find.textContaining('Teknik altyapı · 3 alt birim · 9 kişi · '),
-      findsOneWidget,
-    );
-    expect(find.text('%58'), findsOneWidget);
-    expect(find.text(_l.uiCoordKpiOpen), findsOneWidget);
-    expect(
-      find.text('12 görevden 7 tamamlandı · sezon ortalaması %41'),
-      findsOneWidget,
-    );
-    expect(find.text(_l.uiCoordAttention), findsOneWidget);
-    expect(find.text('98 gün gecikti'), findsOneWidget);
-    expect(find.text('ALT-5 · Kadir Özbek'), findsOneWidget);
-
-    await _tap(tester, find.text(_l.uiCoordMessageTeam));
-    await _tap(tester, find.text('Su deposu temel betonunun yapılması'));
-    await _tap(tester, find.text(_l.uiCoordAllTasks));
-    await _tap(tester, find.text(_l.uiCoordKpiLate));
-    await _tap(tester, find.text(_l.uiCoordLinkTimeline));
-    await _tap(tester, find.text(_l.uiCoordLinkArchive));
-    expect(nav.calls, [
-      'chat:hid',
-      'task:ALT-5',
-      // Dikkat gerektirenler ve "geciken" KPI'ı gecikenler görünümüyle açar.
-      'tasks:late',
-      'tasks:late',
-      'timeline:ALT',
-      'folder:ALT',
-    ]);
-    await _tap(tester, find.text(_l.uiCoordLinkMeetings));
-    expect(
-      find.text('Altyapı ve tesisat ${_l.uiCoordToastMeetingsTail}'),
-      findsOneWidget,
-    );
-    expect(find.text('15 dosya'), findsOneWidget);
-    expect(find.text('2 planlı'), findsOneWidget);
-  });
-
-  testWidgets('Görev ata görevler feature alt sayfasını açar', (tester) async {
-    await _open(tester);
-    await _tap(tester, find.text(_l.uiCoordAssignTask));
-    expect(find.text(_l.uiHomeQaTaskLong), findsOneWidget);
-  });
-
-  testWidgets('sekmeler: Birimler, Ekip (açılır üyeler), Hakkında', (
-    tester,
-  ) async {
-    await _open(tester);
-    await _tap(tester, find.text(_l.uiCoordTabUnits));
-    expect(find.text(_l.uiCoordUnits), findsOneWidget);
-    expect(find.text('Depolama ve hidrofor'), findsOneWidget);
-    expect(find.text('1/5'), findsOneWidget);
-    await _tap(tester, find.text('Arıtma tesisi'));
-    expect(
-      find.text('Arıtma tesisi ${_l.uiCoordToastUnitTail}'),
-      findsOneWidget,
-    );
-    await _dismissToast(tester);
-
-    await _tap(tester, find.text(_l.uiCoordTabTeam));
-    expect(find.text('ekip · 9'), findsOneWidget);
-    expect(find.text('Abdullah Ateş'), findsOneWidget);
-    expect(find.text(_l.uiCoordRoleLead), findsNWidgets(2));
-    expect(find.text('7 üye daha'), findsOneWidget);
-    await _tap(tester, find.text('7 üye daha'));
-    expect(find.text(_l.uiCoordCollapse), findsOneWidget);
-    expect(find.text('Kadir Özbek'), findsOneWidget);
-    await _tap(tester, find.text(_l.uiCoordCollapse));
-    expect(find.text('7 üye daha'), findsOneWidget);
-    await _tap(tester, find.text(_l.uiCoordAddMember));
-    expect(find.text(_l.uiHomeQaInviteLong), findsOneWidget);
-    await tester.tapAt(const Offset(10, 10));
-    await settle(tester);
-
-    await _tap(tester, find.text(_l.uiCoordTabAbout));
-    expect(find.textContaining('Havalimanı yerleşkesinin'), findsOneWidget);
-    expect(find.text('10.06.2026'), findsOneWidget);
-    expect(find.text(_l.uiCoordFeed), findsOneWidget);
-    expect(find.text('19.10'), findsOneWidget);
-  });
-
-  testWidgets('koordinatörsüz: "Koordinatör atanmamış" satırı ve tost', (
-    tester,
-  ) async {
-    await _open(tester, code: 'İDA');
-    await _tap(tester, find.text(_l.uiCoordTabTeam));
-    expect(find.text(_l.uiCoordUnassigned), findsOneWidget);
-    await _tap(tester, find.text(_l.uiCoordUnassigned));
-    expect(
-      find.text('İdari işler ${_l.uiCoordToastPickLeadTail}'),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('diğer işlemler alt sayfası: pasifleştir tostu', (tester) async {
-    await _open(tester);
-    await _tap(tester, find.byIcon(Icons.more_vert_rounded));
-    // Prototip: başlıksız sayfa; ad yalnız anlamsal etiket.
-    expect(find.text('Altyapı ve tesisat işlemleri'), findsNothing);
-    expect(
-      find.bySemanticsLabel('Altyapı ve tesisat işlemleri'),
-      findsOneWidget,
-    );
-    expect(find.text(_l.uiCoordMenuMerge), findsOneWidget);
-    await _tap(tester, find.text(_l.uiCoordMenuDeactivate));
-    expect(
-      find.text('Altyapı ve tesisat ${_l.uiCoordToastDeactivatedTail}'),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('kısayol menüsü: diğer koordinatörlükler ve tüm liste', (
-    tester,
-  ) async {
-    final (h, nav) = await _open(tester);
-    h
-        .read(shellReselectEventsProvider.notifier)
-        .fire(CoordinatorshipPage.shellTab);
-    await settle(tester);
-    expect(find.text('ALT · 9/13 bitti · 3 gecikmede'), findsOneWidget);
-    await tester.tap(find.text('Mekanik sistemler'));
-    await settle(tester);
-    h
-        .read(shellReselectEventsProvider.notifier)
-        .fire(CoordinatorshipPage.shellTab);
-    await settle(tester);
-    await _tap(tester, find.text(_l.uiCoordFlyAllList));
-    expect(nav.calls, ['coord:MEK', 'coordinatorships']);
-  });
-
-  testWidgets('kısayol menüsü liste sıralamasını izler', (tester) async {
-    final (h, _) = await _open(tester);
-    h
-        .read(coordinatorshipsControllerProvider.notifier)
-        .sortBy(CoordinatorshipSort.late);
-    h
-        .read(shellReselectEventsProvider.notifier)
-        .fire(CoordinatorshipPage.shellTab);
-    await settle(tester);
-    // Gecikmeye göre: İdari işler (4) en üstte.
-    final idari = tester.getTopLeft(find.text('İdari işler').last).dy;
-    final alt = tester.getTopLeft(find.text('Altyapı ve tesisat').last).dy;
-    expect(idari, lessThan(alt));
-  });
-
-  testWidgets('sekmeler yapışkan: aşağı kayınca üstte kalır', (tester) async {
-    await _open(tester);
-    final tab = find.text(_l.uiCoordTabAbout);
-    final y0 = tester.getTopLeft(tab).dy;
-    await tester.drag(_pageScroll, const Offset(0, -600));
-    await settle(tester);
-    final y1 = tester.getTopLeft(tab).dy;
-    expect(y1, lessThan(y0));
-    expect(y1, greaterThan(0), reason: 'üst çubuğun altında kalır');
-    await tester.tap(tab);
-    await settle(tester);
-    expect(find.text(_l.uiCoordFeed), findsOneWidget);
-  });
-
-  testWidgets('bilinmeyen kod: boş durum', (tester) async {
-    await _open(tester, code: 'YOK');
-    expect(find.text(_l.uiCoordNotFound), findsOneWidget);
-  });
+  // Örnek ek bilgilerin kodu ('ALT') sunucu kimliği değildir.
+  for (final code in ['ALT', 'YOK']) {
+    testWidgets('bilinmeyen kimlik ($code): boş durum', (tester) async {
+      await _open(tester, code: code);
+      expect(find.text(_l.uiCoordNotFound), findsOneWidget);
+      expect(find.byType(NzPillTabs), findsNothing);
+    });
+  }
 
   for (final width in [360.0, 390.0]) {
     for (final scale in [1.0, 2.0]) {
@@ -264,7 +113,10 @@ void main() {
             addTearDown(
               tester.platformDispatcher.clearTextScaleFactorTestValue,
             );
-            await _open(tester, dark: dark);
+            final (_, backend) = await _open(tester, dark: dark);
+            // Sunucu kaydı açıldı: kısa kod üst çubukta, Genel bölümü çizili.
+            expect(find.text('ALT'), findsWidgets);
+            expect(find.byType(CoordGeneralTab), findsOneWidget);
             Future<void> scroll() async {
               final s = _pageScroll;
               for (var i = 0; i < 8; i++) {
@@ -278,18 +130,13 @@ void main() {
             }
 
             await scroll();
-            for (final tab in [
-              _l.uiCoordTabUnits,
-              _l.uiCoordTabTeam,
-              _l.uiCoordTabAbout,
-            ]) {
-              await _tap(tester, find.text(tab).first);
-              if (tab == _l.uiCoordTabTeam) {
-                await _tap(tester, find.text('7 üye daha'));
-              }
+            for (final (label, type) in _tabs) {
+              await _tap(tester, _tab(label));
+              expect(find.byType(type), findsOneWidget, reason: label);
               await scroll();
             }
             expect(tester.takeException(), isNull);
+            expect(backend.unhandled, isEmpty);
           },
         );
       }

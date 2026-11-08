@@ -18,6 +18,8 @@ import 'package:nizamio/features/tasks/data/task_catalog_api_repository.dart';
 import 'package:nizamio/features/tasks/domain/task_access.dart';
 import 'package:nizamio/features/tasks/domain/task_catalog.dart';
 
+part 'task_catalog_fixtures.dart';
+
 const _url = 'https://api.test';
 const _list = '/v1/program/work-items';
 
@@ -114,83 +116,6 @@ class _CountingCursor extends _Adapter {
   }
 }
 
-Map<String, Object> _page(List<Object> items, [String? next]) => {
-  'items': items,
-  'next_cursor': ?next,
-};
-
-Map<String, Object?> _item(
-  String id,
-  String dept, {
-  bool evidence = false,
-  int total = 0,
-  int done = 0,
-  String? name = 'Ali Veli',
-}) => {
-  'work_item_id': id,
-  'program_id': 'p1',
-  'department_id': dept,
-  'title': 'Görev $id',
-  'priority': 'yuksek',
-  'status': 'devam_ediyor',
-  'assignee_account_ids': ['u2'],
-  'assignees': [
-    {'account_id': 'u2', 'full_name': name},
-  ],
-  'start_on': '2026-10-05',
-  'end_on': '2026-10-18',
-  'is_overdue': true,
-  'days_overdue': 4,
-  'is_completed_late': false,
-  'days_late': 0,
-  'is_completed_early': false,
-  'days_early': 0,
-  'completion_evidence_required': evidence,
-  'subtask_counts': {'total': total, 'done': done},
-  'planned_end_on': '2026-10-20',
-};
-
-Map<String, Object> _me({bool admin = false}) => {
-  'account_id': 'me',
-  'email': 'a@b.test',
-  'full_name': 'Ayşe Kaya',
-  'company_admin': admin,
-};
-
-Map<String, Object> _programDepartments(List<(String, String, String?)> rows) =>
-    {
-      'departments': [
-        for (final (id, name, code) in rows)
-          {'department_id': id, 'display_name': name, 'code': ?code},
-      ],
-    };
-
-Map<String, Object> _seats(List<(String, String, String)> rows) => {
-  'departments': [
-    for (final (program, dept, role) in rows)
-      {
-        'program_id': program,
-        'program_name': 'Program',
-        'department_id': dept,
-        'display_name': 'Ad $dept',
-        'role': role,
-      },
-  ],
-};
-
-const _forbidden = {
-  'code': 'work.not_authorized',
-  'message': 'x',
-  'request_id': 'q',
-};
-
-const _adminOnly = [
-  '/v1/work-items/gantt/admin',
-  '/v1/reports/dashboard/tasks',
-  '/v1/reports/dashboard/coordinatorships',
-  '/v1/admin/users',
-];
-
 void main() {
   test('üye: tek liste ucu (program bağlamı), departman başlığı yok, imleçle bütün sayfalar '
       '(sayfa 200); fan-out ve yönetici uçları yok', () async {
@@ -226,11 +151,17 @@ void main() {
       null,
       'c2',
     ]);
-    expect(adapter.seen.map((o) => o.uri.path).toSet(), {
-      '/v1/me',
-      '/v1/me/departments',
-      _list,
-    }, reason: 'departman başına liste yok; yönetici/şirket uçları yok');
+    expect(
+      adapter.seen.map((o) => o.uri.path).toSet(),
+      {
+        '/v1/me',
+        '/v1/me/departments',
+        _list,
+        // Ekip yalnız koordinatörü olunan departmanda okunur (üyede 403 → çağrılmaz).
+        '/v1/departments/d2/members',
+      },
+      reason: 'departman başına görev listesi yok; yönetici/şirket uçları yok',
+    );
     expect(c.access!.roleIn('p1', 'd1'), SeatRole.member);
     expect(c.people.single.role, PersonRole.coordinator);
     expect(c.departmentId, isNull, reason: 'süzgeç yok');
@@ -270,6 +201,49 @@ void main() {
     expect(c.today, DateTime(2026, 11));
     expect(c.me, 'me');
     expect(c.people.single.name, 'Ayşe Kaya');
+    expect(t.creator, 'u-creator', reason: 'created_by_account_id');
+    expect(
+      t.createdAt,
+      DateTime.utc(2026, 10, 1, 9).toLocal(),
+      reason: 'created_at',
+    );
+    expect(
+      c.nameOf('u-creator'),
+      'Oluşturan Kişi',
+      reason: 'created_by_full_name',
+    );
+    expect(
+      t.dateRequest,
+      isNull,
+      reason: 'pending_date_request null → talep yok',
+    );
+  });
+
+  test('pending_date_request → bekleyen tarih talebi (WORK-K82; eski tarih görevinki)', () async {
+    final c = await _repo(
+      _Adapter({
+        '/v1/me': _me(),
+        '/v1/me/departments': _seats([('p1', 'd1', 'koordinator')]),
+        _list: _page([
+          _item(
+            'w1',
+            'd1',
+            pending: {
+              'request_id': 'r1',
+              'new_start_on': '2026-10-05',
+              'new_end_on': '2026-10-25',
+            },
+          ),
+        ]),
+      }),
+    ).load();
+    final r = c.tasks.single.dateRequest!;
+    expect(r.id, 'r1');
+    expect(r.workItemId, 'w1');
+    expect(r.isPending, isTrue);
+    expect(r.oldDue, DateTime(2026, 10, 18));
+    expect(r.start, DateTime(2026, 10, 5));
+    expect(r.due, DateTime(2026, 10, 25));
   });
 
   test('loadTasks: department_id her sayfada; yalnız görev sayfaları (kimlik/ekip/seçenek '
@@ -281,7 +255,13 @@ void main() {
     });
     final page = await _repo(adapter).loadTasks('d2');
     expect(page.tasks.map((t) => t.id), ['w9', 'w10']);
-    expect(page.names.map((n) => n.name), ['Ali Veli', 'Ali Veli']);
+    // Atanan ve oluşturan adları (WORK-K83) satır başına.
+    expect(page.names.map((n) => n.name), [
+      'Ali Veli',
+      'Oluşturan Kişi',
+      'Ali Veli',
+      'Oluşturan Kişi',
+    ]);
     expect(page.truncated, isFalse);
     expect(adapter.seen.map((o) => o.uri.path).toSet(), {_list});
     expect(adapter.lists.map((o) => o.uri.queryParameters['department_id']), [
@@ -429,14 +409,35 @@ void main() {
         ('d7', 'Saha', 'SAH'),
       ]),
       _list: _page([_item('w5', 'd5'), _item('w2', 'd2'), _item('w7', 'd7')]),
+      '/v1/departments/d5/members': {
+        'members': [
+          _roster('a1', 'Ayşe Koç', 'koordinator'),
+          _roster('a2', 'Ali Can', 'uye'),
+          _roster('a3', 'Silinen', 'uye', status: 'deleted'),
+        ],
+      },
     });
     final c = await _repo(adapter).load();
-    expect(adapter.seen.map((o) => o.uri.path), [
+    expect(adapter.seen.map((o) => o.uri.path).toSet(), {
       '/v1/me',
       '/v1/me/departments',
       '/v1/program/departments',
       _list,
-    ]);
+      '/v1/departments/d5/members',
+      '/v1/departments/d2/members',
+      '/v1/departments/d7/members',
+    });
+    final members = adapter.seen.where((o) => o.uri.path.endsWith('/members'));
+    expect(members.map((o) => o.headers['X-Nizamio-Program']).toSet(), {'p1'});
+    final alt = c.coordinatorships.firstWhere((d) => d.code == 'd5');
+    expect(alt.leads, ['a1']);
+    expect(alt.members, ['a2'], reason: 'silinmiş üyelik ekipte yok');
+    expect(c.person('a1')?.role, PersonRole.coordinator);
+    expect(
+      c.coordinatorships.firstWhere((d) => d.code == 'd2').leads,
+      isEmpty,
+      reason: 'okuması düşen ekip boş, katalog düşmez',
+    );
     expect(c.departmentId, isNull);
     expect(c.departments.map((d) => d.label), ['ALT', 'Bilişim', 'SAH']);
     expect(c.departmentsTruncated, isFalse);
@@ -446,7 +447,7 @@ void main() {
       'Bilişim',
       'Saha',
     ]);
-    expect(c.people.single.role, PersonRole.admin);
+    expect(c.person(c.me)?.role, PersonRole.admin);
   });
 
   test('yönetici: X-Result-Truncated → kesik bayrağı', () async {

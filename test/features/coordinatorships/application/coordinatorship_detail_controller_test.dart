@@ -1,12 +1,15 @@
-// CoordinatorshipDetailController: sekme ve üye listesi durumu (kod başına); ayrıntı türetimi
-// (katalog + ek bilgiler), bilinmeyen kod null.
+// CoordinatorshipDetailController: bölüm ve görev süzgeci durumu (kod başına); ayrıntı türetimi
+// (sunucu kataloğu + ek bilgiler), bilinmeyen kimlik null.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorship_detail_controller.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorship_profiles_controller.dart';
+import 'package:nizamio/features/coordinatorships/domain/coordinatorship_board.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../pilot_support.dart';
+import '../coord_backend.dart';
 
 /// Kaynaklar (katalog + ek bilgiler) yüklenince ayrıntı eşzamanlı okunur.
 Future<void> _ready(ProviderContainer c) async {
@@ -15,66 +18,80 @@ Future<void> _ready(ProviderContainer c) async {
 }
 
 void main() {
-  test('sekme ve üye listesi kod başına; varsayılan Genel, kapalı', () async {
-    final h = await pilotHarness(PilotBackend());
-    final c = h.container;
-    final alt = coordinatorshipDetailControllerProvider('ALT');
-    c.listen(alt, (_, _) {});
-    expect(c.read(alt).tab, CoordinatorshipTab.general);
-    c.read(alt.notifier)
-      ..selectTab(CoordinatorshipTab.team)
-      ..toggleMembers();
-    expect(c.read(alt).tab, CoordinatorshipTab.team);
-    expect(c.read(alt).membersOpen, isTrue);
-    c.read(alt.notifier).selectTab(CoordinatorshipTab.about);
-    expect(c.read(alt).membersOpen, isTrue, reason: 'sekme değişimi korur');
-    expect(
-      c.read(coordinatorshipDetailControllerProvider('MEK')).tab,
-      CoordinatorshipTab.general,
-    );
-  });
+  test(
+    'bölüm ve görev süzgeci kod başına; kişi süzgeci Görevler bölümünü açar',
+    () async {
+      final h = await pilotHarness(PilotBackend());
+      final c = h.container;
+      final alt = coordinatorshipDetailControllerProvider('ALT');
+      c.listen(alt, (_, _) {});
+      expect(c.read(alt).tab, CoordinatorshipTab.general);
+      expect(c.read(alt).filtered, isFalse);
+      c.read(alt.notifier).showTasks(CoordTaskFilter.late, person: 'ko');
+      expect(c.read(alt).tab, CoordinatorshipTab.tasks);
+      expect(
+        (c.read(alt).filter, c.read(alt).person),
+        (CoordTaskFilter.late, 'ko'),
+      );
+      c.read(alt.notifier).selectTab(CoordinatorshipTab.members);
+      expect(
+        c.read(alt).filter,
+        CoordTaskFilter.late,
+        reason: 'bölüm değişimi korur',
+      );
+      c.read(alt.notifier).clearFilter();
+      expect(c.read(alt).filtered, isFalse);
+      expect(
+        c.read(coordinatorshipDetailControllerProvider('MEK')).tab,
+        CoordinatorshipTab.general,
+      );
+    },
+  );
 
-  test('ayrıntı: özet, dikkat gerektirenler, ekip, etkinlik', () async {
-    final h = await pilotHarness(PilotBackend());
+  test('ayrıntı sunucu verisinden: özet, dikkat gerektirenler, ekip; bilinmeyen kimlik null', () async {
+    final backend = CoordBackend();
+    final h = await pilotHarness(backend, signedIn: true);
+    h.read(scopeControllerProvider).selectProgram(coordProgram);
     final c = h.container;
-    c.listen(coordinatorshipDetailProvider('ALT'), (_, _) {});
-    expect(c.read(coordinatorshipDetailProvider('ALT')).isLoading, isTrue);
+    c.listen(coordinatorshipDetailProvider(dAlt), (_, _) {});
+    expect(c.read(coordinatorshipDetailProvider(dAlt)).isLoading, isTrue);
     await _ready(c);
-    final d = c.read(coordinatorshipDetailProvider('ALT')).requireValue!;
-    // Kaynak `D` kaydı: 7/12 tamamlandı, 3 geciken.
-    expect((d.stats.open, d.stats.late, d.stats.total), (5, 3, 12));
-    expect(d.seasonRatio, 0.41);
-    expect(d.attention.map((a) => (a.code, a.overdueDays)), [
-      ('ALT-5', 98),
-      ('ALT-7', 41),
-      ('ALT-10', 21),
+    final d = c.read(coordinatorshipDetailProvider(dAlt)).requireValue!;
+    expect(d.stats.shortCode, 'ALT');
+    expect((d.stats.open, d.stats.late, d.stats.total), (2, 2, 4));
+    // Sunucu kaydının ek bilgisi yok (rapor yok): sezon oranı program görevlerinden, 5/9.
+    expect(d.profile.reported, isNull);
+    expect(d.seasonRatio, 5 / 9);
+    // Geciken görevler sunucunun `days_overdue` değeriyle, en çok gecikenden; ekranda
+    // kimlik değil departman kodu.
+    expect(d.attention.map((a) => (a.code, a.label, a.overdueDays)), [
+      (tAltLate30, 'ALT', 30),
+      (tAltLate12, 'ALT', 12),
     ]);
-    expect(d.attention.first.assignee, 'Kadir Özbek');
-    expect(d.leads.map((m) => (m.name, m.unit)), [
-      ('Abdullah Ateş', 'Arıtma tesisi'),
-      ('Ali Avcı', 'Su ve atıksu hatları'),
+    expect(d.attention.map((a) => a.assignee), ['Kadir Özbek', 'Ali Avcı']);
+    expect(d.leads.map((m) => (m.name, m.lead)), [
+      ('Abdullah Ateş', true),
+      ('Ali Avcı', true),
     ]);
-    // Katalog üyesi + 6 örnek üye.
-    expect(d.members, hasLength(7));
-    expect(d.members.first.name, 'Kadir Özbek');
-    expect(d.members.first.unit, 'Depolama ve hidrofor');
-    expect(d.people, 9);
-    expect(d.feed.first.who, 'Kadir Özbek');
-    expect(d.others, hasLength(11));
-    expect(d.profile.chatId, 'hid');
+    // Silinmiş üyelik ekipte yok.
+    expect(d.members.map((m) => m.name), ['Kadir Özbek']);
+    expect(d.people, 3);
+    expect(d.feed, isEmpty);
+    expect(d.others.map((s) => s.code), [dAlt, dEgi, dEle, dIda]);
 
-    c.listen(coordinatorshipDetailProvider('YOK'), (_, _) {});
-    expect(c.read(coordinatorshipDetailProvider('YOK')).requireValue, isNull);
-  });
+    final ida = c.read(coordinatorshipDetailProvider(dIda)).requireValue!;
+    expect((ida.stats.shortCode, ida.stats.name), (null, 'İdari işler'));
+    expect((ida.stats.total, ida.attention.length, ida.people), (0, 0, 0));
 
-  test('koordinatörsüz: lider yok, üye katalogdan', () async {
-    final h = await pilotHarness(PilotBackend());
-    final c = h.container;
-    c.listen(coordinatorshipDetailProvider('İDA'), (_, _) {});
-    await _ready(c);
-    final d = c.read(coordinatorshipDetailProvider('İDA')).requireValue!;
-    expect(d.leads, isEmpty);
-    expect(d.members.map((m) => m.name), ['Bahar Kılıç']);
-    expect(d.people, 1);
+    // Örnek ek bilgilerin kodu ('ALT') sunucu kimliği değildir: ayrıntı açılmaz.
+    for (final code in ['ALT', 'YOK']) {
+      c.listen(coordinatorshipDetailProvider(code), (_, _) {});
+      expect(
+        c.read(coordinatorshipDetailProvider(code)).requireValue,
+        isNull,
+        reason: code,
+      );
+    }
+    expect(backend.unhandled, isEmpty);
   });
 }

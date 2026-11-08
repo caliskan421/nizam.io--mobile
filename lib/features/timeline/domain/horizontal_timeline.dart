@@ -1,11 +1,13 @@
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 
 import '../../tasks/tasks.dart';
 import 'timeline.dart';
 
-/// Yatay çizelgenin ölçeği (tablet prototipi `S_hgantt` `zoom`: hafta / ay / sezon). Gün başına
-/// piksel görünüm geometrisidir (presentation).
-enum GanttZoom { week, month, season }
+/// Yatay çizelgenin ölçeği: [week] gün gün ("Günlük"), [month] hafta hafta ("Haftalık"). Gün
+/// başına piksel görünüm geometrisidir (presentation).
+enum GanttZoom { week, month }
 
 /// Yatay çizelgenin durum süzgeci (prototip `filt`: tümü / açık / geciken).
 enum GanttFilter { all, open, late }
@@ -20,6 +22,7 @@ final class GanttState {
     this.coords = const [],
     this.closed = const {},
     this.selected,
+    this.query = '',
   });
 
   final GanttZoom zoom;
@@ -34,19 +37,27 @@ final class GanttState {
   /// Seçili görev kodu.
   final String? selected;
 
+  /// Arama metni (görev başlığı, koordinatörlük etiketi/adı ya da atanan kişi adı içinde);
+  /// boş → süzgeç yok.
+  final String query;
+
   GanttState _copy({
     GanttZoom? zoom,
     GanttFilter? filter,
     List<String>? coords,
     Set<String>? closed,
     String? Function()? selected,
+    String? query,
   }) => GanttState(
     zoom: zoom ?? this.zoom,
     filter: filter ?? this.filter,
     coords: coords ?? this.coords,
     closed: closed ?? this.closed,
     selected: selected == null ? this.selected : selected(),
+    query: query ?? this.query,
   );
+
+  GanttState withQuery(String q) => _copy(query: q);
 
   GanttState withZoom(GanttZoom z) => _copy(zoom: z);
 
@@ -93,7 +104,8 @@ final class GanttState {
       _sameList(other.coords, coords) &&
       other.closed.length == closed.length &&
       other.closed.containsAll(closed) &&
-      other.selected == selected;
+      other.selected == selected &&
+      other.query == query;
 
   @override
   int get hashCode => Object.hash(
@@ -102,6 +114,7 @@ final class GanttState {
     Object.hashAll(coords),
     Object.hashAllUnordered(closed),
     selected,
+    query,
   );
 
   static bool _sameList(List<String> a, List<String> b) {
@@ -158,6 +171,7 @@ sealed class GanttRow {
 final class GanttHeadRow extends GanttRow {
   const GanttHeadRow({
     required this.code,
+    required this.label,
     required this.name,
     required this.count,
     required this.late,
@@ -166,7 +180,11 @@ final class GanttHeadRow extends GanttRow {
     required this.end,
   });
 
+  /// Anahtar (sunucuda `department_id`; ekranda gösterilmez).
   final String code;
+
+  /// Ekrandaki kısa etiket ([CoordinatorshipRef.label]: departman kodu, yoksa ad).
+  final String label;
   final String name;
 
   /// Görünen (süzgeçten geçen) görev sayısı.
@@ -183,10 +201,24 @@ final class GanttHeadRow extends GanttRow {
 
 /// Görev satırı (prototip `isRow`).
 final class GanttTaskRow extends GanttRow {
-  const GanttTaskRow({required this.task, required this.selected});
+  const GanttTaskRow({
+    required this.task,
+    required this.selected,
+    required this.label,
+    required this.number,
+  });
 
   final GanttTask task;
   final bool selected;
+
+  /// Koordinatörlük etiketi (grup başlığıyla aynı).
+  final String label;
+
+  /// Koordinatörlük içindeki sıra (1'den; oluşturma sırası, süzgeçten bağımsız).
+  final int number;
+
+  /// Ekrandaki görev anahtarı: "ALT 3".
+  String get key => '$label $number';
 }
 
 /// Koordinatörlük çipi.
@@ -194,11 +226,15 @@ final class GanttTaskRow extends GanttRow {
 final class GanttCoordChip {
   const GanttCoordChip({
     required this.code,
+    required this.label,
     required this.name,
     required this.selected,
   });
 
   final String code;
+
+  /// Ekrandaki kısa etiket ([CoordinatorshipRef.label]).
+  final String label;
   final String name;
   final bool selected;
 }
@@ -231,7 +267,6 @@ final class GanttView {
     required this.visible,
     required this.lateAll,
     required this.chips,
-    required this.festival,
     required this.selection,
   });
 
@@ -254,8 +289,6 @@ final class GanttView {
   /// "Tüm koordinatörlükler" dışındaki çipler (prototip sırası).
   final List<GanttCoordChip> chips;
 
-  /// Teknofest günleri (başlangıç dahil, bitiş hariç).
-  final DayRange festival;
   final GanttSelection? selection;
 
   bool get empty => rows.isEmpty;
@@ -267,25 +300,37 @@ final class GanttView {
       .firstOrNull;
 }
 
-/// Koordinatörlüklerin görünüm sırası: [order]'dakiler o sırayla, kalanlar katalog sırasıyla.
-List<CoordinatorshipRef> orderedCoordinatorships(
-  TaskCatalog catalog,
-  List<String> order,
-) => [
-  for (final code in order) ?catalog.coordinatorship(code),
-  for (final c in catalog.coordinatorships)
-    if (!order.contains(c.code)) c,
-];
+/// Görev → koordinatörlük içindeki sıra numarası (1'den). Sunucuda insan okunur görev anahtarı
+/// yoktur; numara yalnız gösterimdir ve kalıcı değildir (görev silinir ya da taşınırsa kayar).
+/// Sıra oluşturma zamanıdır (`created_at`; zamansız görevler sonda), eşitlikte katalog sırası;
+/// süzgeç numarayı değiştirmez (tüm katalog görevleri sayılır).
+HashMap<String, int> taskNumbers(List<TaskItem> tasks) {
+  final groups = HashMap<String, List<(int, TaskItem)>>();
+  for (final (i, t) in tasks.indexed) {
+    (groups[t.coordinatorship] ??= []).add((i, t));
+  }
+  final numbers = HashMap<String, int>();
+  for (final group in groups.values) {
+    group.sort((a, b) {
+      final x = a.$2.createdAt;
+      final y = b.$2.createdAt;
+      // Zamanı olan önce; ikisi de varsa zamana, yoksa katalog sırasına göre.
+      final byTime = x == null
+          ? (y == null ? 0 : 1)
+          : (y == null ? -1 : x.compareTo(y));
+      return byTime != 0 ? byTime : a.$1 - b.$1;
+    });
+    for (final (n, (_, t)) in group.indexed) {
+      numbers[t.code] = n + 1;
+    }
+  }
+  return numbers;
+}
 
 /// Prototip `S_hgantt.renderVals` mantığı: süzgeç, gruplama (başlangıca göre kararlı sıra),
 /// kapalı gruplar, sayılar, çipler ve seçili kart. Katalog görevlerinin hepsi kullanılır (ikinci
 /// veri kaynağı yok).
-GanttView buildGanttView(
-  TaskCatalog catalog,
-  GanttState s, {
-  required List<String> order,
-  required DayRange festival,
-}) {
+GanttView buildGanttView(TaskCatalog catalog, GanttState s) {
   final year = catalog.today.year;
   final today = seasonDay(catalog.today, year);
   final days = DateTime.utc(year + 1).difference(DateTime.utc(year)).inDays;
@@ -318,12 +363,24 @@ GanttView buildGanttView(
   };
   bool coordOk(GanttTask t) =>
       s.coords.isEmpty || s.coords.contains(t.item.coordinatorship);
+  final q = s.query.trim().toLowerCase();
+  bool queryOk(GanttTask t) {
+    if (q.isEmpty) return true;
+    bool has(String? s) => s != null && s.toLowerCase().contains(q);
+    final c = catalog.coordinatorship(t.item.coordinatorship);
+    return has(t.item.title) ||
+        has(c?.label) ||
+        has(c?.name) ||
+        t.item.assignees.any((id) => has(catalog.nameOf(id)));
+  }
+
   final visible = [
     for (final t in tasks)
-      if (statusOk(t) && coordOk(t)) t,
+      if (statusOk(t) && coordOk(t) && queryOk(t)) t,
   ];
 
-  final coords = orderedCoordinatorships(catalog, order);
+  final coords = catalog.coordinatorships;
+  final numbers = taskNumbers(catalog.tasks);
   final rows = <GanttRow>[];
   for (final c in coords) {
     final indexed = [
@@ -341,6 +398,7 @@ GanttView buildGanttView(
     rows.add(
       GanttHeadRow(
         code: c.code,
+        label: c.label,
         name: c.name,
         count: group.length,
         late: group.where((t) => t.late).length,
@@ -351,7 +409,14 @@ GanttView buildGanttView(
     );
     if (open) {
       for (final t in group) {
-        rows.add(GanttTaskRow(task: t, selected: s.selected == t.code));
+        rows.add(
+          GanttTaskRow(
+            task: t,
+            selected: s.selected == t.code,
+            label: c.label,
+            number: numbers[t.code]!,
+          ),
+        );
       }
     }
   }
@@ -385,11 +450,11 @@ GanttView buildGanttView(
       for (final c in coords)
         GanttCoordChip(
           code: c.code,
+          label: c.label,
           name: c.name,
           selected: s.coords.contains(c.code),
         ),
     ],
-    festival: festival,
     selection: selection,
   );
 }

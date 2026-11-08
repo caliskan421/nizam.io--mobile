@@ -6,18 +6,14 @@ import '../domain/home_dashboard.dart';
 
 part 'coordinatorship_query_controller.g.dart';
 
-/// Ana sayfadaki koordinatörlük listesinin görünüm filtresi.
-enum CoordinatorshipFilter { all, late, onTrack, unassigned }
-
 /// Sıralama ölçütü (döngü sırası: gecikme → ilerleme → ad).
 enum CoordinatorshipSort { late, progress, name }
 
-/// Liste sorgusu: filtre, ölçüt, yön ve "tümünü göster". Görünüm durumudur; süzme yalnız
-/// sunucunun verdiği sayılara bakar (gecikme > 0, koordinatör yok).
+/// Ana sayfadaki koordinatörlük listesinin sorgusu: ölçüt, yön ve "tümünü göster" (görünüm
+/// durumu; süzgeç yok, bütün koordinatörlükler sıralanır).
 @immutable
 final class CoordinatorshipQuery {
   const CoordinatorshipQuery({
-    this.filter = CoordinatorshipFilter.all,
     this.sort = CoordinatorshipSort.late,
     this.descending = true,
     this.expanded = false,
@@ -26,27 +22,15 @@ final class CoordinatorshipQuery {
   /// Daraltılmış listede görünen kart sayısı.
   static const collapsedCount = 4;
 
-  final CoordinatorshipFilter filter;
   final CoordinatorshipSort sort;
   final bool descending;
   final bool expanded;
 
-  static bool matches(CoordinatorshipFilter f, CoordinatorshipSummary c) =>
-      switch (f) {
-        CoordinatorshipFilter.all => true,
-        CoordinatorshipFilter.late => c.late > 0,
-        CoordinatorshipFilter.onTrack => c.late == 0,
-        CoordinatorshipFilter.unassigned => !c.hasLead,
-      };
-
-  /// Filtreye uyan, sıralanmış tam liste (prototip `CS`): gecikmede eşitlik adla, yönle
+  /// Sıralanmış tam liste (prototip `CS`): gecikmede eşitlik adla, yönle
   /// birlikte döner (büyükten küçüğe → A→Z, tersinde Z→A); ilerlemede eşitler sunucu sırasını
   /// korur (kararlı); ad ölçütü Türkçe sıradır.
-  List<CoordinatorshipSummary> filtered(List<CoordinatorshipSummary> all) {
-    final indexed = [
-      for (final (i, c) in all.indexed)
-        if (matches(filter, c)) (i, c),
-    ];
+  List<CoordinatorshipSummary> sorted(List<CoordinatorshipSummary> all) {
+    final indexed = [...all.indexed];
     int compare(CoordinatorshipSummary a, CoordinatorshipSummary b) =>
         switch (sort) {
           CoordinatorshipSort.late =>
@@ -65,19 +49,20 @@ final class CoordinatorshipQuery {
     return [for (final (_, c) in indexed) c];
   }
 
-  /// Ekranda görünen kartlar (daraltılmışken ilk [collapsedCount]).
-  List<CoordinatorshipSummary> visible(List<CoordinatorshipSummary> all) {
-    final list = filtered(all);
-    return expanded ? list : list.take(collapsedCount).toList();
+  /// Ekranda görünen kartlar (daraltılmışken ilk [collapsed]; geniş ana sayfada iki satır).
+  List<CoordinatorshipSummary> visible(
+    List<CoordinatorshipSummary> all, {
+    int collapsed = collapsedCount,
+  }) {
+    final list = sorted(all);
+    return expanded ? list : list.take(collapsed).toList();
   }
 
   CoordinatorshipQuery copyWith({
-    CoordinatorshipFilter? filter,
     CoordinatorshipSort? sort,
     bool? descending,
     bool? expanded,
   }) => CoordinatorshipQuery(
-    filter: filter ?? this.filter,
     sort: sort ?? this.sort,
     descending: descending ?? this.descending,
     expanded: expanded ?? this.expanded,
@@ -86,13 +71,12 @@ final class CoordinatorshipQuery {
   @override
   bool operator ==(Object other) =>
       other is CoordinatorshipQuery &&
-      other.filter == filter &&
       other.sort == sort &&
       other.descending == descending &&
       other.expanded == expanded;
 
   @override
-  int get hashCode => Object.hash(filter, sort, descending, expanded);
+  int get hashCode => Object.hash(sort, descending, expanded);
 }
 
 /// Koordinatörlük listesinin ekran durumu ve komutları (widget'lar yalnız bunları çağırır).
@@ -100,10 +84,6 @@ final class CoordinatorshipQuery {
 class CoordinatorshipQueryController extends _$CoordinatorshipQueryController {
   @override
   CoordinatorshipQuery build() => const CoordinatorshipQuery();
-
-  /// Filtre değişince liste daralır.
-  void selectFilter(CoordinatorshipFilter filter) =>
-      state = state.copyWith(filter: filter, expanded: false);
 
   /// Sonraki ölçüt; ad ölçütü A→Z, diğerleri büyükten küçüğe başlar.
   void cycleSort() {

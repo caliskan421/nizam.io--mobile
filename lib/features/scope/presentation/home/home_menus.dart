@@ -22,44 +22,24 @@ import 'home_texts.dart';
 const _tabletTop = 52.0;
 const _tabletBottom = 28.0;
 
-/// Alt menüde "Ana sayfa"ya yeniden dokununca açılan kısayol menüsü.
+/// Alt menüde "Ana sayfa"ya yeniden dokununca açılan kısayol menüsü: yalnız hızlı işlemler
+/// (bekleyen işler ana sayfada; işlem geçmişi de hızlı işlemdir).
 Future<void> showHomeShortcuts(
   BuildContext context, {
-  required HomeDashboard dashboard,
-  required ValueChanged<String> onOpenTask,
   required ValueChanged<HomeQuickAction> onQuickAction,
-  required VoidCallback onOpenHistory,
 }) {
   final l = context.l10n;
-  final c = context.colors;
   return NzFlyoutMenu.show(
     context,
     semanticLabel: l.uiHomeShortcuts,
     entries: [
-      if (dashboard.pending.isNotEmpty) ...[
-        NzFlyoutSection(l.uiHomeWaitingForYou),
-        for (final p in dashboard.pending)
-          NzFlyoutItem(
-            label: p.title,
-            caption: l.pendingCaption(p),
-            dot: p.kind == PendingKind.dateChange ? c.warning : c.inProgress,
-            onSelected: () => onOpenTask(p.taskCode),
-          ),
-      ],
       NzFlyoutSection(l.uiHomeQuickActions),
       for (final a in HomeQuickAction.values)
         NzFlyoutItem(
           label: quickActionLongLabel(l, a),
           icon: quickActionIcon(a),
-          accent: a == HomeQuickAction.task,
           onSelected: () => onQuickAction(a),
         ),
-      NzFlyoutSection(l.uiHomeGo),
-      NzFlyoutItem(
-        label: l.uiHomeHistoryTitle,
-        icon: NzIcons.history,
-        onSelected: onOpenHistory,
-      ),
     ],
   );
 }
@@ -67,7 +47,6 @@ Future<void> showHomeShortcuts(
 /// Çekmece satırının hedefi (ekranı olmayanlar yer tutucuya düşer).
 enum HomeModule {
   home,
-  tracking,
   tasks,
   calendar,
   memory,
@@ -75,8 +54,6 @@ enum HomeModule {
   meetings,
   messages,
   sheets,
-  requests,
-  budget,
   users,
   coordinatorships,
   season,
@@ -160,17 +137,18 @@ Future<void> showHomeDrawer(
       final tablet = NzTabletMetrics.tabletVisualAt(
         MediaQuery.sizeOf(context).width,
       );
+      // Çekmece güvenli alanı tüketmez: liste durum çubuğunun altına kadar kayar, açılışta
+      // içerik güvenli alanın altında başlar.
+      final safe = MediaQuery.paddingOf(sheet);
       return ListView(
         padding: EdgeInsets.fromLTRB(
           NizamioSpacing.rowPad,
-          tablet
-              ? math.max(
-                  NizamioSpacing.space4,
-                  _tabletTop - MediaQuery.viewPaddingOf(context).top,
-                )
-              : NizamioSpacing.space4,
+          safe.top +
+              (tablet
+                  ? math.max(NizamioSpacing.space4, _tabletTop - safe.top)
+                  : NizamioSpacing.space4),
           NizamioSpacing.rowPad,
-          tablet ? _tabletBottom : NizamioSpacing.space6,
+          safe.bottom + (tablet ? _tabletBottom : NizamioSpacing.space6),
         ),
         children: [
           Row(
@@ -250,11 +228,6 @@ Future<void> showHomeDrawer(
             rows: [
               row(HomeModule.home, NzIcons.home, l.uiHomeModuleHome),
               row(
-                HomeModule.tracking,
-                NzIcons.tracking,
-                l.uiHomeModuleTracking,
-              ),
-              row(
                 HomeModule.tasks,
                 NzIcons.tasks,
                 l.uiHomeModuleTasks,
@@ -294,17 +267,6 @@ Future<void> showHomeDrawer(
           NzMenuGroup(
             label: l.uiHomeGroupAdmin,
             rows: [
-              row(
-                HomeModule.requests,
-                NzIcons.assignmentDone,
-                l.uiHomeModuleRequests,
-                trailing: count(
-                  counts?.pendingRequests,
-                  fill: c.warning,
-                  ink: c.onWarning,
-                ),
-              ),
-              row(HomeModule.budget, NzIcons.budget, l.uiHomeModuleBudget),
               row(HomeModule.users, NzIcons.group, l.uiHomeModuleUsers),
               row(
                 HomeModule.coordinatorships,

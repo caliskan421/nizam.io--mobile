@@ -1,183 +1,164 @@
-// TasksListController + queryTasks: görünüm sayıları (prototip 76/15/20/3/3/14/39), başlangıç
-// süzgeci, sıralama ve yön, arama, filtre grupları, sayfalama, koordinatörlük grupları.
+// TasksListController + tasksListResult: başlangıç süzgeci (görünüm, kişiler), sıralama döngüsü
+// ve yön, arama (kapanınca sorgu silinir), süzgeç geçişleri, sayfa sınırı, oturum boyunca
+// korunan tercihler (TasksListPrefsStore) ve sunucu biçimli katalogdan (CoordBackend) sonuç.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/tasks/application/tasks_list_controller.dart';
 import 'package:nizamio/features/tasks/domain/task_query.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
+import '../../coordinatorships/coord_backend.dart';
 import '../../pilot_support.dart';
 
-Future<(ProviderContainer, TaskCatalog)> _setup() async {
-  final h = await pilotHarness(PilotBackend());
-  h.container.listen(taskCatalogControllerProvider, (_, _) {});
-  final c = await h.container.read(taskCatalogControllerProvider.future);
-  return (h.container, c);
+Future<ProviderContainer> _container() async {
+  final backend = CoordBackend();
+  final h = await pilotHarness(backend, signedIn: true);
+  h.read(scopeControllerProvider).selectProgram(coordProgram);
+  addTearDown(() => expect(backend.unhandled, isEmpty));
+  return h.container;
 }
 
-TaskQueryResult _q(TaskCatalog c, TasksListState s) => queryTasks(
-  c,
-  view: s.view,
-  sort: s.sort,
-  descending: s.descending,
-  filter: s.filter,
-);
+/// Durumsuz denetleyici testi için düz kapsayıcı (katalog gerekmez).
+ProviderContainer _bare() {
+  final c = ProviderContainer();
+  addTearDown(c.dispose);
+  return c;
+}
 
 void main() {
-  test('görünüm sayıları prototiple aynı', () async {
-    final (_, c) = await _setup();
-    final r = _q(c, const TasksListState());
-    expect(r.counts, {
-      TaskView.all: 76,
-      TaskView.late: 15,
-      TaskView.inProgress: 20,
-      TaskView.review: 3,
-      TaskView.dateRequest: 3,
-      TaskView.notStarted: 14,
-      TaskView.done: 39,
-    });
-    // Bitiş tarihine göre: bitenler sonda, ilk kart en eski bitişli açık görev (ALT-5).
-    expect(r.tasks.first.code, 'ALT-5');
-    expect(r.tasks.last.isDone, isTrue);
+  test('başlangıç süzgeci: görünüm ve virgüllü kişi listesi', () {
+    final c = _bare();
+    final s = c.read(tasksListControllerProvider(TaskView.late, 'a,,b'));
+    expect(s.view, TaskView.late);
+    expect(s.filter.people, {'a', 'b'});
+    expect(s.sort, TaskSort.due);
+    expect(s.descending, isFalse);
+    expect(s.limit, TasksListState.pageSize);
   });
 
-  test('başlangıç süzgeci, sıralama yönü, arama ve filtreler', () async {
-    final (container, c) = await _setup();
-    final p = tasksListControllerProvider(TaskView.late, 'ko');
-    container.listen(p, (_, _) {});
-    final ctl = container.read(p.notifier);
-    var s = container.read(p);
-    expect(s.view, TaskView.late);
-    expect(s.filter.people, {'ko'});
-    expect(_q(c, s).tasks.every((t) => t.assignees.contains('ko')), isTrue);
-
-    ctl.clearAll();
+  test('sıralama: döngü varsayılan yönle; seçili tarihli ölçüt yönü çevirir, '
+      'koordinatörlük yönsüz', () {
+    final c = _bare();
+    final p = tasksListControllerProvider(TaskView.all, '');
+    final ctl = c.read(p.notifier);
+    ctl.cycleSort();
+    expect(c.read(p).sort, TaskSort.start);
     ctl.selectSort(TaskSort.created);
-    s = container.read(p);
-    expect((s.sort, s.descending), (TaskSort.created, true));
-    ctl.selectSort(TaskSort.created);
-    expect(container.read(p).descending, isFalse);
+    expect((c.read(p).sort, c.read(p).descending), (TaskSort.created, true));
+    ctl.flipDirection();
+    expect(c.read(p).descending, isFalse);
     ctl.selectSort(TaskSort.coordinatorship);
-    ctl.selectSort(TaskSort.coordinatorship);
-    s = container.read(p);
-    expect((s.sort, s.descending), (TaskSort.coordinatorship, false));
-    final r = _q(c, s);
-    expect(r.groups, hasLength(11));
-    expect(r.groups.first.coordinatorship, 'ALT');
-    expect(s.isGroupOpen('ALT', first: true), isTrue);
-    ctl.toggleGroup('ALT');
-    expect(container.read(p).isGroupOpen('ALT', first: true), isFalse);
+    final before = c.read(p);
+    ctl.flipDirection();
+    expect(c.read(p), same(before), reason: 'koordinatörlük sıralaması yönsüz');
+    ctl.cycleSort();
+    expect(c.read(p).sort, TaskSort.created, reason: 'döngü başa sarar');
+  });
 
-    ctl.toggleSearch();
-    ctl.setQuery('hidrofor');
-    expect(_q(c, container.read(p)).tasks.map((t) => t.code), ['ALT-7']);
-    ctl.setQuery('kadir özbek');
-    expect(_q(c, container.read(p)).tasks, isNotEmpty);
-    ctl.toggleSearch();
-    expect(container.read(p).filter.query, '');
-
+  test('arama kapanınca sorgu silinir; süzgeçler ve sayfa sınırı', () {
+    final c = _bare();
+    final p = tasksListControllerProvider(TaskView.all, '');
+    final ctl = c.read(p.notifier);
     ctl
-      ..toggleCoordinatorship('ALT')
-      ..togglePriority(TaskPriority.high);
-    final f = _q(c, container.read(p)).tasks;
-    expect(
-      f.every(
-        (t) => t.coordinatorship == 'ALT' && t.priority == TaskPriority.high,
-      ),
-      isTrue,
-    );
-    ctl.clearExtra();
-    expect(container.read(p).filter.hasExtra, isFalse);
+      ..toggleSearch()
+      ..setQuery('hidrofor')
+      ..togglePerson(pKadir)
+      ..toggleCoordinatorship(dAlt)
+      ..togglePriority(TaskPriority.medium);
+    var s = c.read(p);
+    expect(s.searchOpen, isTrue);
+    expect(s.filter.query, 'hidrofor');
+    expect(s.filter.people, {pKadir});
+    expect(s.filter.coordinatorships, {dAlt});
+    expect(s.filter.priorities, {TaskPriority.medium});
 
     ctl.showMore();
-    expect(container.read(p).limit, 16);
-    ctl.selectView(TaskView.done);
-    expect(container.read(p).limit, 8);
-    ctl.toggleFilterGroup(TaskFilterGroup.priority);
-    expect(container.read(p).openFilterGroups, {
+    expect(c.read(p).limit, 2 * TasksListState.pageSize);
+    ctl.togglePerson(pKadir);
+    expect(c.read(p).filter.people, isEmpty, reason: 'ikinci dokunuş çıkarır');
+    expect(
+      c.read(p).limit,
+      TasksListState.pageSize,
+      reason: 'süzgeç sayfayı sıfırlar',
+    );
+
+    ctl.clearExtra();
+    s = c.read(p);
+    expect(s.filter.query, 'hidrofor', reason: 'arama kalır');
+    expect(s.filter.coordinatorships, isEmpty);
+    expect(s.filter.priorities, isEmpty);
+
+    ctl.toggleSearch();
+    expect(c.read(p).searchOpen, isFalse);
+    expect(c.read(p).filter.query, isEmpty);
+
+    ctl
+      ..selectView(TaskView.done)
+      ..togglePerson(pAli)
+      ..clearAll();
+    s = c.read(p);
+    expect(s.view, TaskView.all);
+    expect(s.filter.people, isEmpty);
+  });
+
+  test('tercihler (sıralama, yön, gruplar) yeni denetleyiciye taşınır; süzgeç taşınmaz', () {
+    final c = _bare();
+    final a = tasksListControllerProvider(TaskView.all, '');
+    c.read(a.notifier)
+      ..selectSort(TaskSort.start)
+      ..flipDirection()
+      ..toggleGroup(dEle)
+      ..toggleFilterGroup(TaskFilterGroup.priority)
+      ..setQuery('x');
+    final b = c.read(tasksListControllerProvider(TaskView.late, pAli));
+    expect(b.sort, TaskSort.start);
+    expect(b.descending, isTrue);
+    expect(b.flippedGroups, {dEle});
+    expect(b.openFilterGroups, {
       TaskFilterGroup.people,
       TaskFilterGroup.priority,
     });
+    expect(b.filter.query, isEmpty);
+    expect(
+      b.isGroupOpen(dEle, first: true),
+      isFalse,
+      reason: 'çevrilmiş ilk grup kapalı',
+    );
+    expect(b.isGroupOpen(dAlt, first: false), isFalse);
   });
 
-  test('Türkçe sıralama ve küçük harf', () {
-    expect(trCompare('İdari işler', 'Fuar'), greaterThan(0));
-    expect(trCompare('Çevre', 'Cami'), greaterThan(0));
-    expect(trLower('IŞIK İzmir'), 'ışık izmir');
-  });
-
-  test(
-    'geçişte sıralama korunur, süzgeç/görünüm/arama yeni rotayla sıfırlanır',
-    () async {
-      final (container, _) = await _setup();
-      final all = tasksListControllerProvider(TaskView.all, '');
-      final sub = container.listen(all, (_, _) {});
-      final ctl = container.read(all.notifier)
-        ..selectSort(TaskSort.created)
-        ..toggleFilterGroup(TaskFilterGroup.priority)
-        ..togglePriority(TaskPriority.high)
-        ..toggleSearch()
-        ..setQuery('pompa');
-      expect(container.read(all).descending, isTrue);
-      sub.close();
-      ctl.showMore();
-      // KPI kartından `view=late` ile açılan liste (prototip `openTasks({view:'late'})`).
-      final late = tasksListControllerProvider(TaskView.late, '');
-      container.listen(late, (_, _) {});
-      final s = container.read(late);
-      expect(s.view, TaskView.late);
-      expect(s.sort, TaskSort.created);
-      expect(s.descending, isTrue);
-      expect(s.openFilterGroups, contains(TaskFilterGroup.priority));
-      expect(s.filter, const TaskFilter());
-      expect(s.searchOpen, isFalse);
-      expect(s.limit, TasksListState.pageSize);
-    },
-  );
-
-  test('sonuç sağlayıcısı yalnız sorgu değişince yeniden hesaplanır', () async {
-    final (container, c) = await _setup();
+  test('sonuç sunucu kataloğundan: görünüm, arama ve kişi süzgeci', () async {
+    final c = await _container();
     final p = tasksListControllerProvider(TaskView.all, '');
-    final r = tasksListResultProvider(TaskView.all, '');
-    var builds = 0;
-    container.listen(r, (_, _) => builds++);
-    final first = container.read(r);
-    expect(first?.tasks.length, 76);
-    final ctl = container.read(p.notifier)
-      ..toggleSearch()
-      ..showMore()
-      ..toggleFilterGroup(TaskFilterGroup.priority)
-      ..setQuery('');
-    // Arama açmak, sayfalamak, boş sorgu, filtre bölümü açmak: aynı sonuç örneği.
-    expect(identical(container.read(r), first), isTrue);
-    expect(builds, 0);
-    ctl.setQuery('hidrofor');
-    expect(container.read(r)?.tasks.map((t) => t.code), ['ALT-7']);
-    expect(builds, 1);
-    expect(identical(tasksListResultOf(p), r), isFalse);
-    expect(tasksListResultOf(p), r);
-    expect(c.task('ALT-7')?.code, 'ALT-7');
-  });
+    final r = tasksListResultOf(p);
+    c.listen(r, (_, _) {});
+    await c.read(taskCatalogControllerProvider.future);
+    var res = c.read(r)!;
+    expect(res.tasks, hasLength(9));
+    expect(res.counts[TaskView.late], 3);
 
-  test('TaskFilter değer eşitliği ve filtre seçenek sayıları', () async {
-    final (container, c) = await _setup();
-    // Çalışma anında kurulan (const olmayan) kümeler: eşitlik kimliğe değil değere bakar.
-    final ids = ['aa', 'ko'];
-    expect(
-      const TaskFilter(people: {'ko', 'aa'}),
-      TaskFilter(people: ids.toSet()),
+    c.read(p.notifier).selectView(TaskView.late);
+    res = c.read(r)!;
+    expect(res.tasks.map((t) => t.code).toSet(), {
+      'wi-alt-1',
+      'wi-alt-2',
+      'wi-egi-1',
+    });
+
+    c.read(p.notifier)
+      ..selectView(TaskView.all)
+      ..setQuery('hidrofor');
+    expect(c.read(r)!.tasks.map((t) => t.code), ['wi-alt-2']);
+
+    // Kişi süzgeciyle açılan liste (ana sayfa ekip kutusu): yalnız o kişinin görevleri.
+    final kadir = tasksListResultOf(
+      tasksListControllerProvider(TaskView.all, pKadir),
     );
-    expect(
-      const TaskFilter(people: {'ko', 'aa'}).hashCode,
-      TaskFilter(people: ids.reversed.toSet()).hashCode,
-    );
-    expect(const TaskFilter(query: 'a') == const TaskFilter(), isFalse);
-    final o = container.read(taskFilterOptionsProvider)!;
-    // Kişiler görev sayısına göre azalan; görevi olmayan düşer.
-    final counts = [for (final (_, n) in o.people) n];
-    expect(counts, [...counts]..sort((a, b) => b - a));
-    expect(counts.every((n) => n > 0), isTrue);
-    expect(o.priorities.values.fold<int>(0, (a, b) => a + b), c.tasks.length);
-    expect(o.coordinatorships.fold<int>(0, (a, e) => a + e.$2), c.tasks.length);
+    c.listen(kadir, (_, _) {});
+    expect(c.read(kadir)!.tasks.map((t) => t.code).toSet(), {
+      'wi-alt-1',
+      'wi-alt-4',
+    });
   });
 }

@@ -125,10 +125,8 @@ final class ChatPoll {
 /// Sohbet mesajı. [from] örnek veride görev kataloğundaki kişi kimliğidir; sunucudan gelen
 /// mesajda gönderenin hesap kimliğidir (`Message.sender_account_id`).
 ///
-/// Sunucu eşlemesi (`data/message_api_repository.dart`): [id] ← `message_id`, [from] ←
-/// `sender_account_id`, [to] ← `receiver_account_id`, [at] ← `created_at`, [text] ← `content`,
-/// [read] ← `is_read`, [readAt] ← `read_at`. Konu, kutu yönü ve görünen adlar [ChatMessage]'a
-/// değil `MailboxMessage`'a (`mailbox.dart`) girer.
+/// Sunucu eşlemesi yok: eski mesaj kutusu uçları (`/v1/messages*`) backend v0.10'da kalktı;
+/// sohbet uçlarına (`/v1/chats*`) bağlama sohbet bağlama fazının işidir (F60 SK-1).
 @immutable
 final class ChatMessage {
   const ChatMessage({
@@ -239,9 +237,8 @@ final class ChatMessage {
   }
 }
 
-/// Sohbet (grup ya da birebir). Sunucuda konuşma kavramı yoktur: birebir sohbet, gelen ve
-/// giden kutularındaki `MailboxMessage`'ların karşı tarafa göre birleşimidir (istemcide).
-/// [group], [members], [mention], [pins], [newBefore], [typing], [online], [lastSeen] ve
+/// Sohbet (grup ya da birebir); örnek veri. Sunucu sohbet uçlarına bağlama sohbet bağlama
+/// fazının işidir. [group], [members], [mention], [pins], [newBefore], [typing], [online], [lastSeen] ve
 /// [muted] sunucuda yok — entegrasyonda karar.
 @immutable
 final class Chat {
@@ -328,9 +325,8 @@ final class Chat {
       copyWith(messages: [for (final m in messages) m.id == id ? f(m) : m]);
 }
 
-/// Mesajlar kutusu: sohbetler (liste sırasıyla) ve bahsedilebilir kişiler. Sunucu karşılığı
-/// `MessageRepository` (`message_repository.dart`): [people] ≈ alıcı adayları
-/// (`MessageRecipientGroup`), [unreadChats] sunucuda yok (sunucu toplamı mesaj sayısıdır).
+/// Mesajlar kutusu: sohbetler (liste sırasıyla) ve bahsedilebilir kişiler (örnek veri; sunucu
+/// sohbet uçlarına bağlama sohbet bağlama fazının işidir).
 @immutable
 final class ChatInbox {
   ChatInbox({required List<Chat> chats, required List<String> people})

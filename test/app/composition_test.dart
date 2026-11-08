@@ -26,17 +26,11 @@ import 'package:nizamio/core/session/token_pair.dart';
 import 'package:nizamio/core/session/token_store.dart';
 import 'package:nizamio/core/storage/preference_store.dart';
 import 'package:nizamio/core/storage/secure_store.dart';
-import 'package:nizamio/features/activity/activity.dart';
-import 'package:nizamio/features/archive/application/archive_providers.dart';
-import 'package:nizamio/features/calendar/application/calendar_providers.dart';
-import 'package:nizamio/features/coordinatorships/coordinatorships.dart';
 import 'package:nizamio/features/identity/identity.dart';
-import 'package:nizamio/features/messages/application/messages_providers.dart';
-import 'package:nizamio/features/scope/scope.dart';
-import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../support/fake_backend.dart';
 import '../support/harness.dart';
+import 'composition_ports.dart';
 
 String instance = 'inst-1';
 
@@ -86,37 +80,6 @@ Future<MemorySecureStore> seeded(String id) async {
   );
   return store;
 }
-
-/// Q3 — kayıt denetimi (ADR-0003 karar 13). Port listesi KODDAN toplanır: `lib/` altında
-/// `_unbound('<ad>')` (core) ya da `throw UnimplementedError('<ad> …')` (feature) ile
-/// bileşim kökünde bağlanmayı bekleyen her sağlayıcı bir porttur. Dart'ta ada göre sağlayıcı
-/// nesnesi çözülemediğinden nesne eşlemesi aşağıdaki [portProviders] tablosundadır; tablo
-/// koddan toplanan listeyle birebir olmak ZORUNDA (yeni port eklenip tabloya yazılmazsa test
-/// kırılır), tablodaki her port da bileşim kökünde okunur.
-final portProviders = <String, ProviderBase<Object?>>{
-  'flavorProvider': flavorProvider,
-  'httpAdapterProvider': httpAdapterProvider,
-  'scopeControllerProvider': scopeControllerProvider,
-  'serverBindingProvider': serverBindingProvider,
-  'sessionControllerProvider': sessionControllerProvider,
-  'themeModeControllerProvider': themeModeControllerProvider,
-  'connectivityMonitorProvider': connectivityMonitorProvider,
-  'localeControllerProvider': localeControllerProvider,
-  'identityServiceProvider': identityServiceProvider,
-  'scopeServiceProvider': scopeServiceProvider,
-  'homeDashboardRepositoryProvider': homeDashboardRepositoryProvider,
-  'taskCatalogRepositoryProvider': taskCatalogRepositoryProvider,
-  'taskListRepositoryProvider': taskListRepositoryProvider,
-  'taskDetailsRepositoryProvider': taskDetailsRepositoryProvider,
-  'taskWriteRepositoryProvider': taskWriteRepositoryProvider,
-  'downloadSinkProvider': downloadSinkProvider,
-  'coordinatorshipProfileRepositoryProvider':
-      coordinatorshipProfileRepositoryProvider,
-  'activityLogRepositoryProvider': activityLogRepositoryProvider,
-  'archiveRepositoryProvider': archiveRepositoryProvider,
-  'calendarRepositoryProvider': calendarRepositoryProvider,
-  'chatRepositoryProvider': chatRepositoryProvider,
-};
 
 const compositionPath = 'lib/app/di/composition.dart';
 

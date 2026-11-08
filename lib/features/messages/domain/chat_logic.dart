@@ -1,11 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../../../core/domain/turkish_collation.dart';
 import '../../tasks/tasks.dart';
 import 'chat.dart';
-
-/// Türkçe küçük harf (arama).
-String lowerTr(String s) =>
-    s.replaceAll('I', 'ı').replaceAll('İ', 'i').toLowerCase();
 
 final _taskToken = RegExp(r'#[A-ZÇĞİÖŞÜ]{2,4}-\d+');
 
@@ -196,7 +193,7 @@ List<Chat> visibleChats(
   ChatFilter filter = ChatFilter.all,
   String query = '',
 }) {
-  final q = lowerTr(query.trim());
+  final q = trLower(query.trim());
   bool pass(Chat c) => switch (filter) {
     ChatFilter.all => true,
     ChatFilter.unread => c.isUnread,
@@ -207,7 +204,7 @@ List<Chat> visibleChats(
     for (final c in chats)
       if (pass(c) &&
           (q.isEmpty ||
-              lowerTr('${c.name} ${c.messages.map((m) => m.text).join(' ')}')
+              trLower('${c.name} ${c.messages.map((m) => m.text).join(' ')}')
                   .contains(q)))
         c,
   ];
@@ -243,12 +240,12 @@ List<ChatSuggestion> suggestions(
 ) {
   final hash = _hashTail.firstMatch(draft);
   if (hash != null) {
-    final k = lowerTr(hash.group(1)!);
+    final k = trLower(hash.group(1)!);
     return [
       for (final t in catalog.tasks)
         if (k.isEmpty ||
-            lowerTr(t.code).startsWith(k) ||
-            lowerTr(t.title).contains(k))
+            trLower(t.code).startsWith(k) ||
+            trLower(t.title).contains(k))
           ChatSuggestion(
             key: t.code,
             label: t.title,
@@ -258,7 +255,7 @@ List<ChatSuggestion> suggestions(
   }
   final at = _atTail.firstMatch(draft);
   if (at != null) {
-    final k = lowerTr(at.group(1)!);
+    final k = trLower(at.group(1)!);
     final all = <(String, String, PersonRole?)>[
       ('herkes', 'herkes', null),
       for (final id in people)
@@ -266,7 +263,7 @@ List<ChatSuggestion> suggestions(
     ];
     return [
       for (final (name, label, role) in all)
-        if (k.isEmpty || lowerTr(name).startsWith(k))
+        if (k.isEmpty || trLower(name).startsWith(k))
           ChatSuggestion(
             key: '@',
             label: label,

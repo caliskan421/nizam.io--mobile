@@ -1,136 +1,109 @@
-// TaskDetailController (örnek katalog — yerel yazma): durum kuralları (alt görev/kanıt), talep onay/ret, düzenle doğrulama,
-// kanıt yükleme, sil/geri al, kopyala, alt görev ve not komutları; değişiklik katalogda kalır.
+// TaskDetailController — yazma testlerinde (task_detail_writes*_test, task_detail_f60_test)
+// kapsanmayan yerel durum geçişleri ve ön denetimler: sekme, tarih talebi formu (+14 gün
+// önerisi), formları kapatma, alt görev aç/kapa, alt görev BİTİŞİ ile tarih eşitleme, talepsiz
+// görevde talep silme (istek yok). Sunucu: TaskDetailServer (görev `w1`, departman `d1`).
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/tasks/application/task_detail_controller.dart';
+import 'package:nizamio/features/tasks/application/task_details_controller.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
+import '../../../support/harness.dart';
 import '../../pilot_support.dart';
+import '../task_detail_server.dart';
 
-Future<ProviderContainer> _setup() async {
-  final h = await pilotHarness(PilotBackend());
-  h.container.listen(taskCatalogControllerProvider, (_, _) {});
-  await h.container.read(taskCatalogControllerProvider.future);
-  return h.container;
+Future<(Harness, ProviderContainer, TaskDetailController)> _open(
+  TaskDetailServer server,
+) async {
+  final h = await pilotHarness(PilotBackend(), signedIn: true);
+  h.backend.handler = server.handle;
+  final c = h.container;
+  h.read(scopeControllerProvider).selectProgram('prog-1');
+  c
+    ..listen(taskCatalogControllerProvider, (_, _) {})
+    ..listen(taskDetailsProvider('w1'), (_, _) {})
+    ..listen(taskDetailControllerProvider('w1'), (_, _) {});
+  await c.read(taskCatalogControllerProvider.future);
+  await c.read(taskDetailsProvider('w1').future);
+  h.backend.requests.clear();
+  return (h, c, c.read(taskDetailControllerProvider('w1').notifier));
 }
 
 void main() {
-  test('durum: alt görev ve kanıt kuralı; öncelik', () async {
-    final c = await _setup();
-    final p = taskDetailControllerProvider('ALT-7');
-    c.listen(p, (_, _) {});
-    final ctl = c.read(p.notifier);
-    TaskItem task() =>
-        c.read(taskCatalogControllerProvider).value!.task('ALT-7')!;
-    Future<WriteKind> status(TaskStatus s) async =>
-        (await ctl.setStatus(s)).kind;
-    expect(await status(TaskStatus.inProgress), WriteKind.unchanged);
-    expect(await status(TaskStatus.done), WriteKind.blockedBySubtasks);
-    expect(await status(TaskStatus.review), WriteKind.done);
-    expect(task().status, TaskStatus.review);
-    expect((await ctl.setPriority(TaskPriority.low)).ok, isTrue);
-    expect((await ctl.setPriority(TaskPriority.low)).kind, WriteKind.unchanged);
-
-    // Alt görevde kanıt bayrağı yok (ADR-0024): yükleme alt görev önseçmez; alt görevler
-    // kanıtsız bitirilir.
-    ctl.openUpload();
-    expect(c.read(p).upload!.subtask, isNull);
-    expect((await ctl.submitUpload()).ok, isTrue);
-    expect(c.read(p).tab, TaskDetailTab.files);
-    expect(task().fileEntries, hasLength(2));
-    await ctl.toggleSubtask('s3');
-    await ctl.toggleSubtask('s2');
-    expect(await status(TaskStatus.done), WriteKind.done);
-    expect(task().overdueDays, 0);
-    expect(
-      c
-          .read(taskCatalogControllerProvider)
-          .value!
-          .tasks
-          .where((t) => t.code == 'ALT-7')
-          .single
-          .isDone,
-      isTrue,
-    );
-  });
-
-  test('talep onay/ret, yeni talep, düzenle doğrulaması', () async {
-    final c = await _setup();
-    final p = taskDetailControllerProvider('ALT-7');
-    c.listen(p, (_, _) {});
-    final ctl = c.read(p.notifier);
-    TaskItem task() =>
-        c.read(taskCatalogControllerProvider).value!.task('ALT-7')!;
-    expect(ctl.openDateRequest(), isFalse); // bekleyen talep var
-    await ctl.approveRequest();
-    expect(task().due, DateTime(2026, 10, 31));
-    expect(task().hasPendingRequest, isFalse);
-    expect(task().overdueDays, 0);
-    expect(ctl.openDateRequest(), isTrue);
-    expect(c.read(p).dateDraft!.due, DateTime(2026, 11, 14));
-    expect((await ctl.submitDateRequest()).ok, isTrue);
-    expect(task().hasPendingRequest, isTrue);
-    await ctl.rejectRequest();
-    expect(task().dateRequest!.state, DateRequestState.rejected);
-
-    await ctl.openEdit();
-    ctl.updateEdit(c.read(p).edit!.copyWith(title: '  '));
-    expect((await ctl.submitEdit()).kind, WriteKind.invalid);
-    expect(c.read(p).showErrors, isTrue);
-    ctl
-      ..updateEdit(c.read(p).edit!.copyWith(title: 'Yeni başlık'))
-      ..editCoordinatorship('MEK');
-    expect(c.read(p).edit!.assignees, isEmpty);
-    ctl.editToggleAssignee('my');
-    expect((await ctl.submitEdit()).ok, isTrue);
-    expect(task().title, 'Yeni başlık');
-    expect(task().coordinatorship, 'MEK');
-  });
-
-  test('sil / geri al, kopyala, alt görev ve not', () async {
-    final c = await _setup();
-    final p = taskDetailControllerProvider('ALT-7');
-    c.listen(p, (_, _) {});
-    final ctl = c.read(p.notifier);
-    TaskCatalog cat() => c.read(taskCatalogControllerProvider).value!;
-    final index = cat().tasks.indexWhere((t) => t.code == 'ALT-7');
-    await ctl.delete();
-    expect(cat().task('ALT-7'), isNull);
-    expect(c.read(p).deleted, isNotNull);
-    ctl.undoDelete();
-    expect(cat().tasks.indexWhere((t) => t.code == 'ALT-7'), index);
-
-    final (_, copy) = await ctl.copy('(kopya)');
-    expect(copy, startsWith('ALT-'));
-    expect(cat().task(copy!)!.title, endsWith('(kopya)'));
-    expect(cat().tasks, hasLength(77));
-
-    ctl.addSubtask();
-    final id = c.read(p).editingSubtask!;
-    expect(cat().task('ALT-7')!.subtasks, hasLength(4));
-    ctl.finishSubtaskEdit(); // boş ad → atılır
-    expect(cat().task('ALT-7')!.subtasks, hasLength(3));
-    expect(cat().task('ALT-7')!.subtasks.any((s) => s.id == id), isFalse);
-    await ctl.setSubtaskAssignee('s2', 'ko');
-    await ctl.setSubtaskStart('s2', DateTime(2026, 10, 25));
-    await ctl.setSubtaskEnd('s2', DateTime(2026, 10, 20));
-    await ctl.setSubtaskStart('s2', DateTime(2026, 10, 26));
-    final s2 = cat().task('ALT-7')!.subtasks.firstWhere((s) => s.id == 's2');
-    expect(s2.assignee, 'ko');
-    expect(s2.end, DateTime(2026, 10, 26));
-    expect(
-      (await ctl.removeSubtask('s1')).$2?.title,
-      'Pompa tedarikçisinden teyit al',
-    );
-
-    ctl.setNoteDraft('  Saha kontrol edildi ');
-    expect((await ctl.sendNote()).kind, WriteKind.done);
-    final notes = cat().task('ALT-7')!.noteEntries;
-    expect(notes.last.text, 'Saha kontrol edildi');
-    expect(c.read(p).noteDraft, '');
-    expect(ctl.addNoteToMemory(0), isFalse); // örnek not zaten hafızada
-    expect(ctl.addNoteToMemory(1), isTrue);
+  test('sekme ve alt görev açık/kapalı yerel durumdur (istek yok)', () async {
+    final (h, c, ctl) = await _open(TaskDetailServer());
+    TaskDetailState st() => c.read(taskDetailControllerProvider('w1'));
+    expect(st().tab, TaskDetailTab.summary);
     ctl.selectTab(TaskDetailTab.notes);
-    expect(c.read(p).tab, TaskDetailTab.notes);
+    expect(st().tab, TaskDetailTab.notes);
+    ctl
+      ..toggleSubtaskOpen('s1')
+      ..toggleSubtaskOpen('s2');
+    expect(st().openSubtasks, {'s1', 's2'});
+    ctl.toggleSubtaskOpen('s1');
+    expect(st().openSubtasks, {'s2'});
+    expect(h.backend.requests, isEmpty);
+  });
+
+  test('tarih talebi formu: bitiş +14 gün önerilir; closeForms tüm formları kapatır', () async {
+    final (h, c, ctl) = await _open(TaskDetailServer());
+    TaskDetailState st() => c.read(taskDetailControllerProvider('w1'));
+    expect(ctl.openDateRequest(), isTrue);
+    final d = st().dateDraft!;
+    expect(d.start, DateTime(2026, 11));
+    expect(d.due, DateTime(2026, 11, 24));
+    ctl.updateDateDraft(
+      DateRequestDraft(start: d.start, due: d.due, reason: 'Malzeme'),
+    );
+    expect(st().dateDraft!.reason, 'Malzeme');
+    expect(ctl.openUpload(), isTrue, reason: 'koordinatör yükleyebilir');
+    expect(st().upload, isNotNull);
+
+    ctl.closeForms();
+    expect(st().dateDraft, isNull);
+    expect(st().upload, isNull);
+    expect(st().edit, isNull);
+    expect(st().showErrors, isFalse);
+    expect(h.backend.requests, isEmpty);
+  });
+
+  test('yetkisi olmayan hesapta talep formu açılmaz', () async {
+    final (_, c, ctl) = await _open(
+      TaskDetailServer()
+        ..role = 'uye'
+        ..assignees = ['acc-1'],
+    );
+    expect(ctl.openDateRequest(), isFalse);
+    expect(c.read(taskDetailControllerProvider('w1')).dateDraft, isNull);
+  });
+
+  test('alt görev bitişi: başlangıç yoksa bitiş gününe eşitlenir; tarihsizde kaldırma '
+      'değişiklik değil', () async {
+    final (h, _, ctl) = await _open(TaskDetailServer());
+    expect(
+      (await ctl.setSubtaskEnd('s1', DateTime(2026, 11, 5))).kind,
+      WriteKind.done,
+    );
+    final patch = h.backend.requests.where((r) => r.method == 'PATCH').single;
+    expect(patch.path, '/v1/work-items/w1/subtasks/s1');
+    expect(patch.body, {
+      'start_on': '2026-11-05',
+      'end_on': '2026-11-05',
+      'expected_revision': 1,
+    });
+    h.backend.requests.clear();
+    expect((await ctl.setSubtaskEnd('s2', null)).kind, WriteKind.unchanged);
+    expect(
+      (await ctl.setSubtaskEnd('yok', DateTime(2026, 11))).kind,
+      WriteKind.invalid,
+    );
+    expect(h.backend.requests, isEmpty);
+  });
+
+  test('talebi olmayan görevde talep silme: istek gönderilmez', () async {
+    final (h, _, ctl) = await _open(TaskDetailServer()..admin = true);
+    expect((await ctl.deleteDateRequest()).kind, WriteKind.invalid);
+    expect(h.backend.requests, isEmpty);
   });
 }

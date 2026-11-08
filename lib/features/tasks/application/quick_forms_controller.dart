@@ -1,8 +1,12 @@
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
+import '../../../core/server/write_compat.dart';
+import '../domain/meeting_planner.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_writes.dart';
 import 'task_catalog_controller.dart';
@@ -11,7 +15,9 @@ import 'tasks_providers.dart';
 part 'quick_forms_controller.g.dart';
 
 // Hızlı işlem formları (prototip `S_home.state.tk/mt/iv`). Taslaklar sayfa kapanınca korunur
-// (keepAlive); yalnız başarılı gönderimde sıfırlanır. Açılışta `prepare` bağlamı uygular.
+// (keepAlive); başarılı gönderimde sıfırlanır. Yeni görev taslağı oturum nesli değişince de
+// (çıkış, başka hesapla giriş, yeniden bağlanma) sıfırlanır: önceki hesabın taslağı ve işlem
+// anahtarı yeni oturuma taşınmaz (S12). Açılışta `prepare` bağlamı uygular.
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -20,7 +26,7 @@ DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 /// Yeni görev formunda yerinde açık satır.
 enum NewTaskPane { coordinatorship, assignees, dates }
 
-enum NewTaskError { title, coordinatorship, assignees, dates }
+enum NewTaskError { title, coordinatorship, dates }
 
 @immutable
 final class NewTaskForm {
@@ -39,6 +45,8 @@ final class NewTaskForm {
     this.error,
     this.failure,
     this.busy = false,
+    this.note,
+    this.keys = const RequestKeys(),
   });
 
   final String title;
@@ -66,6 +74,14 @@ final class NewTaskForm {
   /// Oluşturma isteği uçuşta (ikinci dokunuş istek göndermez).
   final bool busy;
 
+  /// Kaynak toplantı notu: verilmişse görev `convertNoteToTask` ile açılır ve not göreve
+  /// bağlanır (kanıt bayrağı yoktur); null → bağımsız yeni görev.
+  final String? note;
+
+  /// Bekleyen oluşturmanın işlem anahtarı (ADR-0027): aynı gövdenin yeniden gönderimi aynı
+  /// anahtarla gider; gövde değişince yeni anahtar. Bellek içi (form ömrü).
+  final RequestKeys keys;
+
   int get days => end.difference(start).inDays;
 
   NewTaskForm copyWith({
@@ -83,6 +99,8 @@ final class NewTaskForm {
     NewTaskError? Function()? error,
     ApiError? Function()? failure,
     bool? busy,
+    String? Function()? note,
+    RequestKeys? keys,
   }) => NewTaskForm(
     title: title ?? this.title,
     coordinatorship: coordinatorship == null
@@ -100,20 +118,20 @@ final class NewTaskForm {
     error: error == null ? this.error : error(),
     failure: failure == null ? this.failure : failure(),
     busy: busy ?? this.busy,
+    note: note == null ? this.note : note(),
+    keys: keys ?? this.keys,
   );
 }
 
-/// Yeni görev formunun koordinatörlük seçenekleri: örnek katalogda hepsi; sunucu kataloğunda
-/// yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
+/// Yeni görev formunun koordinatörlük seçenekleri: yalnız görev açılabilen departmanlar ([TaskAccess.canCreateIn]: yönetici programın bütün
 /// departmanları, karma rolde yalnız koordinatörlükler; üyelik departmanı listelenmez).
 @riverpod
 List<CoordinatorshipRef> newTaskCoordinatorships(Ref ref) {
   final catalog = ref.watch(taskCatalogControllerProvider).value;
   if (catalog == null) return const [];
   final access = catalog.access;
-  if (access == null) return catalog.coordinatorships;
   final program = ref.watch(scopeStateProvider).programId;
-  if (program == null) return const [];
+  if (access == null || program == null) return const [];
   return [
     for (final c in catalog.coordinatorships)
       if (access.canCreateIn(program, c.code)) c,
@@ -123,20 +141,35 @@ List<CoordinatorshipRef> newTaskCoordinatorships(Ref ref) {
 /// Oluşturulan görevin özeti (sonuç bildirimi).
 typedef CreatedTask = ({String code, int notified});
 
+/// İşlem anahtarı defterinde yeni görev eylemi.
+const _create = 'create';
+
 @Riverpod(keepAlive: true)
 class NewTaskFormController extends _$NewTaskFormController {
   @override
-  NewTaskForm build() => _initial();
+  NewTaskForm build() {
+    final session = ref.read(sessionControllerProvider);
+    _session = session.generation;
+    ref.listen(sessionStateProvider, (_, _) {
+      if (session.generation == _session) return;
+      _session = session.generation;
+      state = _initial();
+    });
+    return _initial();
+  }
 
-  /// Boş taslak; prototip `tk` ilk durumu gibi ilk koordinatörlük (ALT) seçili açılır.
+  /// Taslağın ait olduğu oturum nesli.
+  int _session = 0;
+
+  /// Boş taslak; açılabilir ilk koordinatörlük seçili açılır.
   NewTaskForm _initial() {
     final today = _today();
     return NewTaskForm(
       start: today,
       end: today.add(const Duration(days: 14)),
       month: DateTime(today.year, today.month),
-      // Sunucu varsayılanı açık (WORK-K75); örnek prototipte kapalı.
-      evidenceRequired: _server,
+      // Sunucu varsayılanı açık (WORK-K75).
+      evidenceRequired: true,
       coordinatorship: _defaultCoordinatorship(),
     );
   }
@@ -145,9 +178,6 @@ class NewTaskFormController extends _$NewTaskFormController {
   /// kataloğunda yalnız görev açılabilen departmanlar — üyelik departmanı varsayılan olmaz).
   String? _defaultCoordinatorship() =>
       ref.read(newTaskCoordinatorshipsProvider).firstOrNull?.code;
-
-  bool get _server =>
-      ref.read(taskCatalogControllerProvider).value?.access != null;
 
   DateTime _today() => _day(
     ref.read(taskCatalogControllerProvider).value?.today ?? DateTime.now(),
@@ -158,14 +188,21 @@ class NewTaskFormController extends _$NewTaskFormController {
   /// listesi, koordinatörlük ayrıntısı, sohbet); [reset] olmadan taslak olduğu gibi kalır
   /// (ana sayfa hızlı işlemi). Her iki durumda satırlar kapalı, hata yok, yarım takvim
   /// seçimi geri alınır. [title] verilirse başlık onunla doldurulur (mesajı göreve
-  /// dönüştür: metnin ilk 120 karakteri).
-  void prepare({String? coordinatorship, bool reset = true, String? title}) {
+  /// dönüştür: metnin ilk 120 karakteri). [note] toplantı notundan görev açar (bkz.
+  /// [NewTaskForm.note]); nottan açılmış taslağa nottan olmayan açılış boş taslakla başlar.
+  void prepare({
+    String? coordinatorship,
+    bool reset = true,
+    String? title,
+    String? note,
+  }) {
     var f = _cancelPick(state);
+    if (note != null || f.note != null) {
+      f = _initial().copyWith(note: () => note);
+    }
     if (title != null) f = f.copyWith(title: title);
-    // Sunucu kataloğunda hedefsiz sıfırlama (görev listesi) hesaplanan açılabilir
-    // varsayılana düşer; örnek katalogda seçilmemiş kalır (prototip).
-    final target =
-        coordinatorship ?? (_server ? _defaultCoordinatorship() : null);
+    // Hedefsiz sıfırlama (görev listesi) hesaplanan açılabilir varsayılana düşer.
+    final target = coordinatorship ?? _defaultCoordinatorship();
     state = reset
         ? f.copyWith(
             coordinatorship: () => target,
@@ -209,16 +246,14 @@ class NewTaskFormController extends _$NewTaskFormController {
     error: () => null,
   );
 
-  /// Atanan seçimi; sunucuda TEK atanan (`assignee_account_id`): seçim yer değiştirir.
+  /// Atanan seçimi; TEK atanan (`assignee_account_id`): seçim yer değiştirir.
   void toggleAssignee(String id) => state = state.copyWith(
     assignees: state.assignees.contains(id)
         ? [
             for (final a in state.assignees)
               if (a != id) a,
           ]
-        : _server
-        ? [id]
-        : [...state.assignees, id],
+        : [id],
     error: () => null,
   );
 
@@ -262,31 +297,15 @@ class NewTaskFormController extends _$NewTaskFormController {
   /// Doğrular ve görevi oluşturur; hata varsa [NewTaskForm.error] / [NewTaskForm.failure]
   /// ile null döner.
   ///
-  /// Sunucuda `createWorkItem`: koordinatörlük = departman (isteğin açık departmanı), tek
+  /// `createWorkItem`: koordinatörlük = departman (isteğin açık departmanı), tek
   /// atanan (boş → atamasız görev), tarihler, öncelik, kanıt bayrağı. Kod yerelde üretilmez;
   /// sunucunun verdiği kimlik kullanılır ve katalog yeniden okunur (iyimser ekleme yok).
   /// Yetki: kapsamda yönetici ya da koordinatör ([TaskAccess.canCreateIn]); değilse istek
   /// gönderilmez (`work.not_authorized`). Uçuştaki istekte ikinci çağrı null döner.
   Future<CreatedTask?> submit() async {
-    if (_server) return _submitServer();
-    return _submitLocal();
-  }
-
-  NewTaskError? _validate(NewTaskForm f, {required bool server}) =>
-      f.title.trim().isEmpty
-      ? NewTaskError.title
-      : f.coordinatorship == null
-      ? NewTaskError.coordinatorship
-      : !server && f.assignees.isEmpty
-      ? NewTaskError.assignees
-      : f.end.isBefore(f.start)
-      ? NewTaskError.dates
-      : null;
-
-  Future<CreatedTask?> _submitServer() async {
     if (state.busy) return null;
     final f = _cancelPick(state);
-    final err = _validate(f, server: true);
+    final err = _validate(f);
     if (err != null) {
       state = state.copyWith(error: () => err, failure: () => null);
       return null;
@@ -301,23 +320,59 @@ class NewTaskFormController extends _$NewTaskFormController {
       state = state.copyWith(failure: () => ApiError('work.not_authorized'));
       return null;
     }
-    state = state.copyWith(busy: true, failure: () => null, error: () => null);
+    // Sunucu uyum kapısı (CX-P0K-04): eski sunucu işlem anahtarını yok sayar → gönderilmez.
+    if (!serverSupportsVersionedWrites(ref.read(bindingStateProvider))) {
+      state = state.copyWith(
+        failure: () => ApiError(ClientErrorCode.serverOutdated),
+      );
+      return null;
+    }
+    final draft = WorkItemDraft(
+      programId: program,
+      departmentId: dept,
+      title: f.title.trim(),
+      start: f.start,
+      end: f.end,
+      priority: f.priority,
+      assignee: f.assignees.firstOrNull,
+      evidenceRequired: f.evidenceRequired,
+    );
+    final (keys, requestKey) = state.keys.keyFor(_create, draft.signature);
+    state = state.copyWith(
+      busy: true,
+      failure: () => null,
+      error: () => null,
+      keys: keys,
+    );
     final store = ref.read(taskCatalogControllerProvider.notifier);
+    final note = f.note;
+    final writes = ref.read(taskWriteRepositoryProvider);
     try {
-      final id = await ref
-          .read(taskWriteRepositoryProvider)
-          .createWorkItem(
-            WorkItemDraft(
-              programId: program,
-              departmentId: dept,
-              title: f.title.trim(),
-              start: f.start,
-              end: f.end,
-              priority: f.priority,
-              assignee: f.assignees.firstOrNull,
-              evidenceRequired: f.evidenceRequired,
-            ),
-          );
+      String id;
+      if (note != null) {
+        // Toplantı notundan görev: not göreve bağlanır (kanıt bayrağı yok).
+        id = await ref
+            .read(meetingPlannerProvider)
+            .convertNote(
+              note,
+              NoteTaskPlan(
+                title: f.title.trim(),
+                start: f.start,
+                end: f.end,
+                priority: f.priority,
+                departmentId: dept,
+                assigneeIds: f.assignees,
+              ),
+            );
+      } else {
+        try {
+          id = await writes.createWorkItem(draft, requestKey: requestKey);
+        } on ApiError catch (e) {
+          // Nadir yarış: aynı anahtarla bir kez yeniden (200 ya da 201).
+          if (e.code != conflictRetryCode) rethrow;
+          id = await writes.createWorkItem(draft, requestKey: requestKey);
+        }
+      }
       await store.reload();
       if (!ref.mounted) return null;
       final key =
@@ -331,270 +386,58 @@ class NewTaskFormController extends _$NewTaskFormController {
       return (code: key, notified: f.assignees.length);
     } on Object catch (e) {
       final err = toApiError(e);
+      // Sonuç bilinmiyor (zaman aşımı, ağ, 5xx): görev açılmış olabilir. Taslak ve anahtar
+      // korunur; "Oluştur" aynı anahtarla yeniden gönderir (ikinci görev açılmaz).
+      if (isOutcomeUnknown(err)) {
+        if (ref.mounted) {
+          state = state.copyWith(
+            busy: false,
+            failure: () =>
+                ApiError(ClientErrorCode.outcomeUnknown, status: err.status),
+          );
+        }
+        return null;
+      }
       // 409 (kapsam/çakışma) ya da 403 (yetki değişmiş): kapsam kataloğu ve rol olguları
       // (`/v1/me`, `/v1/me/departments`, departmanlar, liste) yeniden okunur; otomatik
       // gönderim YOK — karar kullanıcıda (taslak korunur).
       if (_rereadAfterCreate(err)) await store.reload();
       if (ref.mounted) {
-        state = state.copyWith(busy: false, failure: () => err);
+        // Anahtar başka istekle kullanılmış: tekrar gönderilemedi; sonraki gönderim yeni eylem.
+        final reused = isKeyReused(err);
+        state = state.copyWith(
+          busy: false,
+          failure: () => reused
+              ? ApiError(ClientErrorCode.requestNotResent, status: err.status)
+              : err,
+          keys: reused ? state.keys.clear(_create) : null,
+        );
       }
       return null;
     }
   }
 
+  NewTaskError? _validate(NewTaskForm f) => f.title.trim().isEmpty
+      ? NewTaskError.title
+      : f.coordinatorship == null
+      ? NewTaskError.coordinatorship
+      : f.end.isBefore(f.start)
+      ? NewTaskError.dates
+      : null;
+
   static bool _rereadAfterCreate(ApiError e) =>
       e.status == 409 ||
       e.status == 403 ||
       const {'work.not_authorized', 'platform.conflict_retry'}.contains(e.code);
-
-  CreatedTask? _submitLocal() {
-    final f = _cancelPick(state);
-    final err = f.title.trim().isEmpty
-        ? NewTaskError.title
-        : f.coordinatorship == null
-        ? NewTaskError.coordinatorship
-        : f.assignees.isEmpty
-        ? NewTaskError.assignees
-        : f.end.isBefore(f.start)
-        ? NewTaskError.dates
-        : null;
-    if (err != null) {
-      state = state.copyWith(error: () => err);
-      return null;
-    }
-    final c = ref.read(taskCatalogControllerProvider).value;
-    final coord = f.coordinatorship!;
-    final code = c?.nextCode(coord) ?? '$coord-1';
-    ref
-        .read(taskCatalogControllerProvider.notifier)
-        .add(
-          TaskItem(
-            code: code,
-            title: f.title.trim(),
-            coordinatorship: coord,
-            status: TaskStatus.todo,
-            priority: f.priority,
-            start: f.start,
-            due: f.end,
-            assignees: f.assignees,
-            creator: c?.me ?? '',
-            createdAt: _today(),
-            overdueDays: c?.overdueDaysFor(f.end, done: false) ?? 0,
-            evidenceRequired: f.evidenceRequired,
-          ),
-        );
-    state = _initial();
-    return (code: code, notified: f.assignees.length);
-  }
 }
 
-// ================================================================================= toplantı
-
-enum MeetingPane { date, time, invitees, agenda }
-
-enum MeetingMode { coordinatorships, people }
-
-enum MeetingError { title, past, coordinatorships, people }
-
-@immutable
-final class MeetingForm {
-  const MeetingForm({
-    required this.date,
-    required this.month,
-    this.title = '',
-    this.hour = 10,
-    this.minute = 0,
-    this.mode = MeetingMode.coordinatorships,
-    this.coordinatorships = const [],
-    this.people = const [],
-    this.allMembers = false,
-    this.pane,
-    this.agenda = const [],
-    this.agendaDraft = '',
-    this.openGroups = const {'ALT'},
-    this.error,
-  });
-
-  final String title;
-  final DateTime date;
-  final DateTime month;
-  final int hour;
-  final int minute;
-  final MeetingMode mode;
-  final List<String> coordinatorships;
-  final List<String> people;
-  final bool allMembers;
-  final MeetingPane? pane;
-  final List<String> agenda;
-  final String agendaDraft;
-
-  /// Kişiler kipinde açık koordinatörlük grupları.
-  final Set<String> openGroups;
-  final MeetingError? error;
-
-  MeetingForm copyWith({
-    String? title,
-    DateTime? date,
-    DateTime? month,
-    int? hour,
-    int? minute,
-    MeetingMode? mode,
-    List<String>? coordinatorships,
-    List<String>? people,
-    bool? allMembers,
-    MeetingPane? Function()? pane,
-    List<String>? agenda,
-    String? agendaDraft,
-    Set<String>? openGroups,
-    MeetingError? Function()? error,
-  }) => MeetingForm(
-    title: title ?? this.title,
-    date: date ?? this.date,
-    month: month ?? this.month,
-    hour: hour ?? this.hour,
-    minute: minute ?? this.minute,
-    mode: mode ?? this.mode,
-    coordinatorships: coordinatorships ?? this.coordinatorships,
-    people: people ?? this.people,
-    allMembers: allMembers ?? this.allMembers,
-    pane: pane == null ? this.pane : pane(),
-    agenda: agenda ?? this.agenda,
-    agendaDraft: agendaDraft ?? this.agendaDraft,
-    openGroups: openGroups ?? this.openGroups,
-    error: error == null ? this.error : error(),
-  );
-}
-
-List<T> _toggled<T>(List<T> list, T x) => list.contains(x)
+/// [list]'te [x] varsa çıkarılmış, yoksa eklenmiş kopya (çoklu seçim satırları).
+List<T> toggled<T>(List<T> list, T x) => list.contains(x)
     ? [
         for (final y in list)
           if (y != x) y,
       ]
     : [...list, x];
-
-@Riverpod(keepAlive: true)
-class MeetingFormController extends _$MeetingFormController {
-  @override
-  MeetingForm build() => _initial(
-    agenda: const [
-      'Saha kurulum takvimi',
-      'Güvenlik ve tahliye planının fuar alanına uyarlanması',
-    ],
-  );
-
-  MeetingForm _initial({List<String> agenda = const []}) {
-    final t = today;
-    final d = t.add(const Duration(days: 1));
-    return MeetingForm(
-      date: d,
-      month: DateTime(t.year, t.month),
-      agenda: agenda,
-    );
-  }
-
-  /// Verinin bugünü (geçmiş günler seçilemez).
-  DateTime get today => _day(
-    ref.read(taskCatalogControllerProvider).value?.today ?? DateTime.now(),
-  );
-
-  /// [date] verilirse (takvimden "seçili güne toplantı planla") tarih ve ay o güne gelir.
-  void prepare({String? coordinatorship, DateTime? date}) {
-    var f = state.copyWith(pane: () => null, error: () => null);
-    if (coordinatorship != null) {
-      f = f.copyWith(
-        mode: MeetingMode.coordinatorships,
-        coordinatorships: [coordinatorship],
-      );
-    }
-    if (date != null) {
-      f = f.copyWith(date: _day(date), month: DateTime(date.year, date.month));
-    }
-    state = f;
-  }
-
-  void _set(MeetingForm f) => state = f.copyWith(error: () => null);
-
-  void setTitle(String v) => _set(state.copyWith(title: v));
-
-  void togglePane(MeetingPane p) =>
-      _set(state.copyWith(pane: () => state.pane == p ? null : p));
-
-  void pickDate(DateTime d) => _set(state.copyWith(date: _day(d)));
-
-  void stepMonth(int delta) => _set(
-    state.copyWith(
-      month: DateTime(state.month.year, state.month.month + delta),
-    ),
-  );
-
-  void setTime(int hour, int minute) =>
-      _set(state.copyWith(hour: hour, minute: minute));
-
-  void setMode(MeetingMode m) => _set(state.copyWith(mode: m));
-
-  void toggleCoordinatorship(String code) => _set(
-    state.copyWith(coordinatorships: _toggled(state.coordinatorships, code)),
-  );
-
-  void togglePerson(String id) =>
-      _set(state.copyWith(people: _toggled(state.people, id)));
-
-  void toggleAllMembers() =>
-      _set(state.copyWith(allMembers: !state.allMembers));
-
-  void toggleGroup(String code) {
-    final g = {...state.openGroups};
-    if (!g.remove(code)) g.add(code);
-    _set(state.copyWith(openGroups: g));
-  }
-
-  void setAgendaDraft(String v) => _set(state.copyWith(agendaDraft: v));
-
-  void addAgenda() {
-    final d = state.agendaDraft.trim();
-    if (d.isEmpty) return;
-    _set(state.copyWith(agenda: [...state.agenda, d], agendaDraft: ''));
-  }
-
-  void setAgendaItem(int i, String v) => _set(
-    state.copyWith(
-      agenda: [
-        for (var j = 0; j < state.agenda.length; j++)
-          j == i ? v : state.agenda[j],
-      ],
-    ),
-  );
-
-  /// Düzenleme bitince boş kalan madde atılır.
-  void finishAgendaItem(int i) {
-    if (i < state.agenda.length && state.agenda[i].trim().isEmpty) {
-      removeAgenda(i);
-    }
-  }
-
-  void removeAgenda(int i) =>
-      _set(state.copyWith(agenda: [...state.agenda]..removeAt(i)));
-
-  /// Doğrular; geçerliyse gönderilen formu döner ve taslağı sıfırlar.
-  MeetingForm? submit() {
-    final f = state;
-    final err = f.title.trim().isEmpty
-        ? MeetingError.title
-        : f.date.isBefore(today)
-        ? MeetingError.past
-        : f.mode == MeetingMode.coordinatorships && f.coordinatorships.isEmpty
-        ? MeetingError.coordinatorships
-        : f.mode == MeetingMode.people && f.people.isEmpty
-        ? MeetingError.people
-        : null;
-    if (err != null) {
-      state = f.copyWith(error: () => err);
-      return null;
-    }
-    state = _initial();
-    return f;
-  }
-}
 
 // ==================================================================================== davet
 
@@ -676,7 +519,7 @@ class InviteFormController extends _$InviteFormController {
   }
 
   void toggleCoordinatorship(String code) => _set(
-    state.copyWith(coordinatorships: _toggled(state.coordinatorships, code)),
+    state.copyWith(coordinatorships: toggled(state.coordinatorships, code)),
   );
 
   /// Doğrular; geçerliyse gönderilen formu döner ve taslağı sıfırlar.

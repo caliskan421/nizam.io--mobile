@@ -8,16 +8,12 @@ import '../../domain/horizontal_timeline.dart';
 /// Yatay çizelgenin ölçüleri (tablet prototipi `12-Tablet.dc.html` "Yatay zaman çizelgesi · tam
 /// genişlik" ve `S_hgantt`). Değerler kaynak CSS'tendir; çizelgeye özgü olduğu için token değildir.
 abstract final class GanttGeometry {
-  /// Üst başlık (geri, başlık, süzgeç, ölçek, Bugün): 72; yan dolgu sol 12, sağ 20.
-  static const double header = 72;
-  static const double headerPadLeft = 12;
+  /// Başlık ve araç satırının yan dolgusu: 20.
   static const double headerPadRight = 20;
 
-  /// Koordinatörlük çipleri: 32 yükseklik, 12 yatay dolgu, 6 aralık; şerit yanları 20, altı 12.
-  static const double chip = 32;
-  static const double chipPad = 12;
+  /// Kapsül düğmeleri arası 6; araç satırı düğmesindeki sayı rozeti 18.
   static const double chipGap = 6;
-  static const double chipFontSize = 12.5;
+  static const double badge = 18;
 
   /// Süzgeç / ölçek kapsülü: 3 iç dolgu, 34 düğme, 14 yan dolgu. Bugün düğmesi 40, 16 yan.
   static const double segPad = 3;
@@ -26,17 +22,7 @@ abstract final class GanttGeometry {
   static const double todayButton = 40;
   static const double todayButtonPad = 16;
 
-  /// Geri düğmesi 44, dolgu sol 6 sağ 12, ikon–metin 4.
-  static const double backHeight = 44;
-  static const double backPadLeft = 6;
-  static const double backPadRight = 12;
-
-  /// Başlık yazısı 22/28.
-  static const double titleSize = 22;
-  static const double titleLine = 28;
-
-  /// Geri düğmesi yazısı 14; ay adı 12.
-  static const double backFontSize = 14;
+  /// Ay adı 12.
   static const double monthFontSize = 12;
 
   /// Yapışkan tarih başlığı 52: ay adları üstten 6 (12/16, sol çizgi + 8 dolgu), gün işaretleri
@@ -62,7 +48,9 @@ abstract final class GanttGeometry {
   static const double groupPadLeft = 10;
   static const double groupPadRight = 12;
   static const double taskPadLeft = 34;
-  static const double idColumn = 56;
+
+  /// Görev anahtarının (etiket + numara) en geniş hâli; uzun etiket soluklaşır.
+  static const double keyMaxWidth = 110;
   static const double groupNameSize = 13.5;
   static const double countMinWidth = 22;
 
@@ -100,10 +88,8 @@ abstract final class GanttGeometry {
   static const double summaryHeight = 4;
   static const double minSummary = 4;
 
-  /// Bugün çizgisi 2; Teknofest gölgesi danger %9, lejant örneği %30; seçili satır %6.
+  /// Bugün çizgisi 2; seçili satır %6.
   static const double todayLine = 2;
-  static const double festAlpha = 0.09;
-  static const double festLegendAlpha = 0.30;
   static const double selectedRowAlpha = 0.06;
 
   /// Lejant: 40 yükseklik, yan 20, öğeler arası 18; örnek 14 × 8, köşe 3, çizgi deseni 3 + 3.
@@ -151,7 +137,6 @@ abstract final class GanttGeometry {
   static const centerDuration = Duration(milliseconds: 420);
   static const chevronDuration = Duration(milliseconds: 350);
   static const segDuration = Duration(milliseconds: 250);
-  static const chipDuration = Duration(milliseconds: 220);
   static const ringDuration = Duration(milliseconds: 200);
   static const cardDuration = Duration(milliseconds: 320);
   static const double cardRise = 14;
@@ -161,7 +146,6 @@ abstract final class GanttGeometry {
   static double ppd(GanttZoom z) => switch (z) {
     GanttZoom.week => 28,
     GanttZoom.month => 10,
-    GanttZoom.season => 3.4,
   };
 
   /// Prototip `center`: `max(0, TD × ppd − (clientWidth − LW) × 0.4)`; kaydırma sınırında kesilir.
@@ -325,7 +309,6 @@ final class GanttLayout {
           ),
       ],
       ticks: switch (v.state.zoom) {
-        GanttZoom.season => const [],
         final z => [
           for (var d = 0; d < v.days; d++)
             if (z == GanttZoom.week ||
@@ -360,14 +343,6 @@ final class GanttLayout {
   /// Bugün çizgisinin tarih alanındaki x'i (`TD × ppd`).
   double get todayX => view.today * ppd;
 
-  /// Teknofest gölgesi.
-  Rect festival(double height) => Rect.fromLTWH(
-    view.festival.start * ppd,
-    0,
-    view.festival.length * ppd,
-    height,
-  );
-
   /// Haftalık ızgara çizgilerinin x'leri (`background-size 7·ppd`, `position 4·ppd`: pazartesi).
   Iterable<double> get gridLines sync* {
     final step = 7 * ppd;
@@ -384,4 +359,48 @@ final class GanttLayout {
 
   /// Görev çubuğu (tarih alanı koordinatı).
   Rect? barOf(String code) => boxOf(code)?.bar;
+
+  /// [p] noktasındaki (tarih alanı koordinatı) görev çubuğunun kodu: satır `dy / satır`,
+  /// isabet satırın çubuk dikdörtgeninden. Çubuk dışı (boşluk, grup satırı) → null.
+  String? barAt(Offset p) {
+    if (p.dy < 0) return null;
+    final i = p.dy ~/ GanttGeometry.row;
+    if (i >= rows.length) return null;
+    final b = rows[i];
+    return switch (b.row) {
+      GanttTaskRow(:final task) when b.bar!.contains(p) => task.code,
+      _ => null,
+    };
+  }
+
+  /// [window] (tarih alanı koordinatı) ile kesişen görev satırlarının sırası (artan). Çizilen
+  /// alan çubuk + seçim halkası ve sığmayan başlığın kutusudur; yalnız pencerenin kapsadığı
+  /// satırlar taranır.
+  List<int> visibleBars(Rect window) {
+    if (window.isEmpty || rows.isEmpty) return const [];
+    final first = math.max(0, window.top ~/ GanttGeometry.row);
+    final last = math.min(
+      rows.length - 1,
+      (window.bottom / GanttGeometry.row).ceil() - 1,
+    );
+    return [
+      for (var i = first; i <= last; i++)
+        if (rows[i] case GanttRowBox(:final bar?) && final b
+            when _paintedOf(b, bar).overlaps(window))
+          i,
+    ];
+  }
+
+  static Rect _paintedOf(GanttRowBox b, Rect bar) {
+    final ring = bar.inflate(GanttGeometry.ring);
+    if (b.inside) return ring;
+    return ring.expandToInclude(
+      Rect.fromLTWH(
+        b.outsideX,
+        b.top + GanttGeometry.outsideTop,
+        GanttGeometry.outsideMax,
+        GanttGeometry.outsideLine,
+      ),
+    );
+  }
 }

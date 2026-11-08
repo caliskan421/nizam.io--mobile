@@ -196,6 +196,18 @@ abstract class AppLocalizations {
   /// **'Görüşme bildirimi doğrulanamadı.'**
   String get errCollaborationConferenceWebhookUnauthorized;
 
+  /// collaboration.edit_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Not siz düzenlerken başkası tarafından değiştirildi; güncel hâlini görüp yeniden deneyin.'**
+  String get errCollaborationEditConflict;
+
+  /// collaboration.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu istek anahtarı farklı bir istekle kullanılmış.'**
+  String get errCollaborationIdempotencyKeyReused;
+
   /// collaboration.input_invalid
   ///
   /// In tr, this message translates to:
@@ -214,18 +226,6 @@ abstract class AppLocalizations {
   /// **'Toplantı bulunamadı.'**
   String get errCollaborationMeetingNotFound;
 
-  /// collaboration.message_not_found
-  ///
-  /// In tr, this message translates to:
-  /// **'Mesaj bulunamadı.'**
-  String get errCollaborationMessageNotFound;
-
-  /// collaboration.message_unread
-  ///
-  /// In tr, this message translates to:
-  /// **'Mesaj henüz okunmadı.'**
-  String get errCollaborationMessageUnread;
-
   /// collaboration.not_authorized
   ///
   /// In tr, this message translates to:
@@ -243,6 +243,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Not zaten göreve dönüştürüldü.'**
   String get errCollaborationNoteConverted;
+
+  /// collaboration.note_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Not silinmiş; işlem yapılamaz.'**
+  String get errCollaborationNoteDeleted;
 
   /// collaboration.note_immutable
   ///
@@ -267,6 +273,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kalıcı silme için kayıt önce silinmiş olmalı.'**
   String get errCollaborationPermanentRequiresDeleted;
+
+  /// collaboration.request_key_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı geçersiz.'**
+  String get errCollaborationRequestKeyInvalid;
+
+  /// collaboration.request_key_required
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı gerekli.'**
+  String get errCollaborationRequestKeyRequired;
+
+  /// collaboration.revision_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme sürümü geçersiz; kaydı yenileyip yeniden deneyin.'**
+  String get errCollaborationRevisionInvalid;
+
+  /// collaboration.revision_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme sürümü gerekli; uygulamayı güncelleyin.'**
+  String get errCollaborationRevisionRequired;
 
   /// collaboration.scope_invalid
   ///
@@ -441,6 +471,132 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Parola yeterince güçlü değil.'**
   String get errIdentityWeakPassword;
+
+  /// messaging.chat_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Sohbet silinmiş; işlem yapılamaz.'**
+  String get errMessagingChatDeleted;
+
+  /// messaging.chat_not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Sohbet bulunamadı.'**
+  String get errMessagingChatNotFound;
+
+  /// messaging.edit_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj siz düzenlerken değiştirildi; güncel hâlini görüp yeniden deneyin.'**
+  String get errMessagingEditConflict;
+
+  /// messaging.file_rejected
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya kabul edilmedi.'**
+  String get errMessagingFileRejected;
+
+  /// messaging.file_too_large
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya çok büyük.'**
+  String get errMessagingFileTooLarge;
+
+  /// messaging.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu istek anahtarı farklı bir istekle kullanılmış.'**
+  String get errMessagingIdempotencyKeyReused;
+
+  /// messaging.input_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Girilen bilgiler geçersiz.'**
+  String get errMessagingInputInvalid;
+
+  /// messaging.invalid_cursor
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste konumu geçersiz; listeyi yenileyin.'**
+  String get errMessagingInvalidCursor;
+
+  /// messaging.member_not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye bulunamadı.'**
+  String get errMessagingMemberNotFound;
+
+  /// messaging.member_source_managed
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu üye grubun kaynağından gelir; elle çıkarılamaz.'**
+  String get errMessagingMemberSourceManaged;
+
+  /// messaging.message_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj silinmiş; işlem yapılamaz.'**
+  String get errMessagingMessageDeleted;
+
+  /// messaging.message_not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj bulunamadı.'**
+  String get errMessagingMessageNotFound;
+
+  /// messaging.not_authorized
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem için yetkiniz yok.'**
+  String get errMessagingNotAuthorized;
+
+  /// messaging.poll_closed
+  ///
+  /// In tr, this message translates to:
+  /// **'Anket kapandı.'**
+  String get errMessagingPollClosed;
+
+  /// messaging.ref_not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu öğe artık yok ya da erişiminiz yok.'**
+  String get errMessagingRefNotFound;
+
+  /// messaging.request_key_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı geçersiz.'**
+  String get errMessagingRequestKeyInvalid;
+
+  /// messaging.request_key_required
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı gerekli.'**
+  String get errMessagingRequestKeyRequired;
+
+  /// messaging.revision_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme sürümü geçersiz; mesajı yenileyip yeniden deneyin.'**
+  String get errMessagingRevisionInvalid;
+
+  /// messaging.revision_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme sürümü gerekli; uygulamayı güncelleyin.'**
+  String get errMessagingRevisionRequired;
+
+  /// messaging.scope_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili kapsam bu işlem için geçersiz.'**
+  String get errMessagingScopeInvalid;
+
+  /// messaging.task_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev silinmiş; işlem yapılamaz.'**
+  String get errMessagingTaskDeleted;
 
   /// notifications.input_invalid
   ///
@@ -928,6 +1084,12 @@ abstract class AppLocalizations {
   /// **'Dosya bulunamadı.'**
   String get errRecordsFileNotFound;
 
+  /// records.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu istek anahtarı farklı bir istekle kullanılmış.'**
+  String get errRecordsIdempotencyKeyReused;
+
   /// records.input_invalid
   ///
   /// In tr, this message translates to:
@@ -969,6 +1131,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu işlem için yetkiniz yok.'**
   String get errRecordsNotAuthorized;
+
+  /// records.request_key_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı geçersiz.'**
+  String get errRecordsRequestKeyInvalid;
+
+  /// records.request_key_required
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı gerekli.'**
+  String get errRecordsRequestKeyRequired;
 
   /// records.tag_invalid
   ///
@@ -1168,11 +1342,23 @@ abstract class AppLocalizations {
   /// **'Bağımlı olunan görev henüz tamamlanmadı.'**
   String get errWorkDependencyNotCompleted;
 
+  /// work.edit_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev siz düzenlerken başkası tarafından değiştirildi; güncel hâlini görüp yeniden deneyin.'**
+  String get errWorkEditConflict;
+
   /// work.extend_days_out_of_range
   ///
   /// In tr, this message translates to:
   /// **'Uzatma gün sayısı izin verilen aralıkta değil.'**
   String get errWorkExtendDaysOutOfRange;
+
+  /// work.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu istek anahtarı farklı bir istekle kullanılmış.'**
+  String get errWorkIdempotencyKeyReused;
 
   /// work.input_invalid
   ///
@@ -1191,6 +1377,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Görev zaten tamamlandı.'**
   String get errWorkItemCompleted;
+
+  /// work.item_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev silinmiş; işlem yapılamaz.'**
+  String get errWorkItemDeleted;
 
   /// work.item_not_completed
   ///
@@ -1258,11 +1450,35 @@ abstract class AppLocalizations {
   /// **'Bu alan değiştirilemez.'**
   String get errWorkProtectedField;
 
+  /// work.request_key_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı geçersiz.'**
+  String get errWorkRequestKeyInvalid;
+
+  /// work.request_key_required
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek anahtarı gerekli.'**
+  String get errWorkRequestKeyRequired;
+
   /// work.revert_reason_required
   ///
   /// In tr, this message translates to:
   /// **'Geri alma için gerekçe gerekli.'**
   String get errWorkRevertReasonRequired;
+
+  /// work.revision_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme sürümü geçersiz; görevi yenileyip yeniden deneyin.'**
+  String get errWorkRevisionInvalid;
+
+  /// work.revision_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme sürümü gerekli; uygulamayı güncelleyin.'**
+  String get errWorkRevisionRequired;
 
   /// work.stale_completion
   ///
@@ -1342,11 +1558,23 @@ abstract class AppLocalizations {
   /// **'Bu işlem için giriş yapılmalı.'**
   String get errClientNotSignedIn;
 
+  /// client.outcome_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Gönderildi mi bilinmiyor. Aynı isteği yeniden deneyin; kayıt iki kez oluşmaz.'**
+  String get errClientOutcomeUnknown;
+
   /// client.reauth_required
   ///
   /// In tr, this message translates to:
   /// **'Oturum doğrulanamadı. Güvenliğiniz için yeniden giriş yapın.'**
   String get errClientReauthRequired;
+
+  /// client.request_not_resent
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek tekrar gönderilemedi; işlemi yeniden başlatın.'**
+  String get errClientRequestNotResent;
 
   /// client.scope_changed
   ///
@@ -1371,6 +1599,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Önce sunucu adresi doğrulanmalı.'**
   String get errClientServerNotVerified;
+
+  /// client.server_outdated
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucu bu uygulama sürümü için güncellenmeli; değişiklik gönderilmedi.'**
+  String get errClientServerOutdated;
 
   /// client.server_unrecognized
   ///
@@ -2716,12 +2950,6 @@ abstract class AppLocalizations {
   /// **'kişi'**
   String get uiCoordPeopleTail;
 
-  /// ui.coord.state_active
-  ///
-  /// In tr, this message translates to:
-  /// **'Aktif'**
-  String get uiCoordStateActive;
-
   /// ui.coord.message_team
   ///
   /// In tr, this message translates to:
@@ -2733,6 +2961,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Görev ata'**
   String get uiCoordAssignTask;
+
+  /// ui.coord.message
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj'**
+  String get uiCoordMessage;
 
   /// ui.coord.tabs_label
   ///
@@ -2938,12 +3172,6 @@ abstract class AppLocalizations {
   /// **'üye'**
   String get uiCoordRoleMember;
 
-  /// ui.coord.unassigned
-  ///
-  /// In tr, this message translates to:
-  /// **'Koordinatör atanmamış'**
-  String get uiCoordUnassigned;
-
   /// ui.coord.unassigned_hint
   ///
   /// In tr, this message translates to:
@@ -2979,36 +3207,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Daralt'**
   String get uiCoordCollapse;
-
-  /// ui.coord.about
-  ///
-  /// In tr, this message translates to:
-  /// **'hakkında'**
-  String get uiCoordAbout;
-
-  /// ui.coord.fact_parent
-  ///
-  /// In tr, this message translates to:
-  /// **'Üst birim'**
-  String get uiCoordFactParent;
-
-  /// ui.coord.fact_founded
-  ///
-  /// In tr, this message translates to:
-  /// **'Kuruluş'**
-  String get uiCoordFactFounded;
-
-  /// ui.coord.fact_visibility
-  ///
-  /// In tr, this message translates to:
-  /// **'Görünürlük'**
-  String get uiCoordFactVisibility;
-
-  /// ui.coord.visibility_all
-  ///
-  /// In tr, this message translates to:
-  /// **'Tüm koordinatörler'**
-  String get uiCoordVisibilityAll;
 
   /// ui.coord.feed
   ///
@@ -3087,6 +3285,426 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu koordinatörlük bulunamadı.'**
   String get uiCoordNotFound;
+
+  /// ui.coord.all_in_archive
+  ///
+  /// In tr, this message translates to:
+  /// **'Arşivde tümünü gör'**
+  String get uiCoordAllInArchive;
+
+  /// ui.coord.clear
+  ///
+  /// In tr, this message translates to:
+  /// **'Temizle'**
+  String get uiCoordClear;
+
+  /// ui.coord.days_later_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gün sonra'**
+  String get uiCoordDaysLaterTail;
+
+  /// ui.coord.departments_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'birim'**
+  String get uiCoordDepartmentsTail;
+
+  /// ui.coord.everyone
+  ///
+  /// In tr, this message translates to:
+  /// **'Herkes'**
+  String get uiCoordEveryone;
+
+  /// ui.coord.filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevleri süz'**
+  String get uiCoordFilter;
+
+  /// ui.coord.filter_person
+  ///
+  /// In tr, this message translates to:
+  /// **'atanan kişi'**
+  String get uiCoordFilterPerson;
+
+  /// ui.coord.filter_status
+  ///
+  /// In tr, this message translates to:
+  /// **'durum'**
+  String get uiCoordFilterStatus;
+
+  /// ui.coord.group_leads
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörler'**
+  String get uiCoordGroupLeads;
+
+  /// ui.coord.group_members
+  ///
+  /// In tr, this message translates to:
+  /// **'üyeler'**
+  String get uiCoordGroupMembers;
+
+  /// ui.coord.invited
+  ///
+  /// In tr, this message translates to:
+  /// **'Davetli'**
+  String get uiCoordInvited;
+
+  /// ui.coord.kind_doc
+  ///
+  /// In tr, this message translates to:
+  /// **'Belge'**
+  String get uiCoordKindDoc;
+
+  /// ui.coord.kind_image
+  ///
+  /// In tr, this message translates to:
+  /// **'Görsel'**
+  String get uiCoordKindImage;
+
+  /// ui.coord.kind_pdf
+  ///
+  /// In tr, this message translates to:
+  /// **'PDF'**
+  String get uiCoordKindPdf;
+
+  /// ui.coord.later
+  ///
+  /// In tr, this message translates to:
+  /// **'sonra'**
+  String get uiCoordLater;
+
+  /// ui.coord.lead_role
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör'**
+  String get uiCoordLeadRole;
+
+  /// ui.coord.leads_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatör'**
+  String get uiCoordLeadsTail;
+
+  /// ui.coord.member_role
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye'**
+  String get uiCoordMemberRole;
+
+  /// ui.coord.members_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'üye'**
+  String get uiCoordMembersTail;
+
+  /// ui.coord.next
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıradaki'**
+  String get uiCoordNext;
+
+  /// ui.coord.no_files
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu birimin arşivinde dosya yok.'**
+  String get uiCoordNoFiles;
+
+  /// ui.coord.no_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu birimin toplantısı yok. Sağ üstten planlayabilirsin.'**
+  String get uiCoordNoMeetings;
+
+  /// ui.coord.no_meetings_planned
+  ///
+  /// In tr, this message translates to:
+  /// **'planlı toplantı yok'**
+  String get uiCoordNoMeetingsPlanned;
+
+  /// ui.coord.no_members
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu birimde henüz kimse yok.'**
+  String get uiCoordNoMembers;
+
+  /// ui.coord.no_open
+  ///
+  /// In tr, this message translates to:
+  /// **'açık görevi yok'**
+  String get uiCoordNoOpen;
+
+  /// ui.coord.no_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu süzgeçte görev yok.'**
+  String get uiCoordNoTasks;
+
+  /// ui.coord.open_in_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler sayfasında aç'**
+  String get uiCoordOpenInTasks;
+
+  /// ui.coord.open_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'açık'**
+  String get uiCoordOpenTail;
+
+  /// ui.coord.open_tasks_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'açık görev'**
+  String get uiCoordOpenTasksTail;
+
+  /// ui.coord.ov_team
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekip'**
+  String get uiCoordOvTeam;
+
+  /// ui.coord.owner
+  ///
+  /// In tr, this message translates to:
+  /// **'Sahip'**
+  String get uiCoordOwner;
+
+  /// ui.coord.past_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçmiş toplantılar'**
+  String get uiCoordPastMeetings;
+
+  /// ui.coord.past_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'geçmiş'**
+  String get uiCoordPastTail;
+
+  /// ui.coord.person_late_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görevi gecikmede'**
+  String get uiCoordPersonLateTail;
+
+  /// ui.coord.person_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj gönder'**
+  String get uiCoordPersonMessage;
+
+  /// ui.coord.person_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevlerini gör'**
+  String get uiCoordPersonTasks;
+
+  /// ui.coord.recent_files
+  ///
+  /// In tr, this message translates to:
+  /// **'son yüklenenler'**
+  String get uiCoordRecentFiles;
+
+  /// ui.coord.st_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get uiCoordStAll;
+
+  /// ui.coord.st_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlandı'**
+  String get uiCoordStDone;
+
+  /// ui.coord.st_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikmede'**
+  String get uiCoordStLate;
+
+  /// ui.coord.st_open
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık'**
+  String get uiCoordStOpen;
+
+  /// ui.coord.st_request
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talebi'**
+  String get uiCoordStRequest;
+
+  /// ui.coord.st_review
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekleyen'**
+  String get uiCoordStReview;
+
+  /// ui.coord.st_todo
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlamadı'**
+  String get uiCoordStTodo;
+
+  /// ui.coord.tab_archive
+  ///
+  /// In tr, this message translates to:
+  /// **'Arşiv'**
+  String get uiCoordTabArchive;
+
+  /// ui.coord.tab_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı'**
+  String get uiCoordTabMeetings;
+
+  /// ui.coord.tab_members
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyeler'**
+  String get uiCoordTabMembers;
+
+  /// ui.coord.tab_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler'**
+  String get uiCoordTabTasks;
+
+  /// ui.coord.toast_upload
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya yükleme görev ayrıntısından yapılır'**
+  String get uiCoordToastUpload;
+
+  /// ui.coord.today
+  ///
+  /// In tr, this message translates to:
+  /// **'bugün'**
+  String get uiCoordToday;
+
+  /// ui.coord.tomorrow
+  ///
+  /// In tr, this message translates to:
+  /// **'yarın'**
+  String get uiCoordTomorrow;
+
+  /// ui.coord.upcoming_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'yaklaşan'**
+  String get uiCoordUpcomingTail;
+
+  /// ui.coord.upload
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya yükle'**
+  String get uiCoordUpload;
+
+  /// ui.coord.flow
+  ///
+  /// In tr, this message translates to:
+  /// **'Akış'**
+  String get uiCoordFlow;
+
+  /// ui.coord.flow_sub
+  ///
+  /// In tr, this message translates to:
+  /// **'teslimler ve toplantılar'**
+  String get uiCoordFlowSub;
+
+  /// ui.coord.today_pill
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get uiCoordTodayPill;
+
+  /// ui.coord.days_ago_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gün geçti'**
+  String get uiCoordDaysAgoTail;
+
+  /// ui.coord.days_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gün'**
+  String get uiCoordDaysTail;
+
+  /// ui.coord.meeting_tag
+  ///
+  /// In tr, this message translates to:
+  /// **'toplantı'**
+  String get uiCoordMeetingTag;
+
+  /// ui.coord.deadline_tag
+  ///
+  /// In tr, this message translates to:
+  /// **'teslim'**
+  String get uiCoordDeadlineTag;
+
+  /// ui.coord.nobody
+  ///
+  /// In tr, this message translates to:
+  /// **'atanmamış'**
+  String get uiCoordNobody;
+
+  /// ui.coord.load
+  ///
+  /// In tr, this message translates to:
+  /// **'İş yükü'**
+  String get uiCoordLoad;
+
+  /// ui.coord.load_done
+  ///
+  /// In tr, this message translates to:
+  /// **'biten'**
+  String get uiCoordLoadDone;
+
+  /// ui.coord.late_tasks_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görev gecikmede'**
+  String get uiCoordLateTasksTail;
+
+  /// ui.coord.on_time
+  ///
+  /// In tr, this message translates to:
+  /// **'zamanında'**
+  String get uiCoordOnTime;
+
+  /// ui.coord.finished_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görev bitirdi'**
+  String get uiCoordFinishedTail;
+
+  /// ui.coord.no_load
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu birimde atanmış görev yok.'**
+  String get uiCoordNoLoad;
+
+  /// ui.coord.all_team
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm ekip'**
+  String get uiCoordAllTeam;
+
+  /// ui.coord.activity
+  ///
+  /// In tr, this message translates to:
+  /// **'Son hareketler'**
+  String get uiCoordActivity;
+
+  /// ui.coord.no_activity
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz hareket yok.'**
+  String get uiCoordNoActivity;
 
   /// ui.feedback.loading
   ///
@@ -3268,6 +3886,12 @@ abstract class AppLocalizations {
   /// **'koordinatörlük'**
   String get uiHomeCoordinatorshipsLc;
 
+  /// ui.home.team_total
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplam üye'**
+  String get uiHomeTeamTotal;
+
   /// ui.home.role_admin
   ///
   /// In tr, this message translates to:
@@ -3376,41 +4000,11 @@ abstract class AppLocalizations {
   /// **'küçükten büyüğe'**
   String get uiHomeSortAscending;
 
-  /// ui.home.filter_label
+  /// ui.home.coordinatorships_empty
   ///
   /// In tr, this message translates to:
-  /// **'Koordinatörlük durumu'**
-  String get uiHomeFilterLabel;
-
-  /// ui.home.filter_all
-  ///
-  /// In tr, this message translates to:
-  /// **'Tümü'**
-  String get uiHomeFilterAll;
-
-  /// ui.home.filter_late
-  ///
-  /// In tr, this message translates to:
-  /// **'Gecikmesi olan'**
-  String get uiHomeFilterLate;
-
-  /// ui.home.filter_on_track
-  ///
-  /// In tr, this message translates to:
-  /// **'Yolunda'**
-  String get uiHomeFilterOnTrack;
-
-  /// ui.home.filter_unassigned
-  ///
-  /// In tr, this message translates to:
-  /// **'Koordinatörsüz'**
-  String get uiHomeFilterUnassigned;
-
-  /// ui.home.filter_empty
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu filtreye uyan koordinatörlük yok.'**
-  String get uiHomeFilterEmpty;
+  /// **'Bu programda koordinatörlük yok.'**
+  String get uiHomeCoordinatorshipsEmpty;
 
   /// ui.home.unassigned
   ///
@@ -3526,12 +4120,6 @@ abstract class AppLocalizations {
   /// **'Ana sayfa'**
   String get uiHomeModuleHome;
 
-  /// ui.home.module_tracking
-  ///
-  /// In tr, this message translates to:
-  /// **'İş takibi'**
-  String get uiHomeModuleTracking;
-
   /// ui.home.module_tasks
   ///
   /// In tr, this message translates to:
@@ -3573,18 +4161,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Tablolar'**
   String get uiHomeModuleSheets;
-
-  /// ui.home.module_requests
-  ///
-  /// In tr, this message translates to:
-  /// **'Talepler'**
-  String get uiHomeModuleRequests;
-
-  /// ui.home.module_budget
-  ///
-  /// In tr, this message translates to:
-  /// **'Bütçe'**
-  String get uiHomeModuleBudget;
 
   /// ui.home.module_users
   ///
@@ -3903,6 +4479,846 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Liste kısaltıldı; yalnız ilk kayıtlar gösteriliyor.'**
   String get uiListsTruncated;
+
+  /// ui.meetings.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantılar'**
+  String get uiMeetingsTitle;
+
+  /// ui.meetings.search
+  ///
+  /// In tr, this message translates to:
+  /// **'Ara'**
+  String get uiMeetingsSearch;
+
+  /// ui.meetings.search_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantılarda ara'**
+  String get uiMeetingsSearchLabel;
+
+  /// ui.meetings.search_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlık ya da koordinatörlük kodu'**
+  String get uiMeetingsSearchHint;
+
+  /// ui.meetings.new
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni toplantı'**
+  String get uiMeetingsNew;
+
+  /// ui.meetings.list_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı listesi'**
+  String get uiMeetingsListLabel;
+
+  /// ui.meetings.tab_upcoming
+  ///
+  /// In tr, this message translates to:
+  /// **'Yaklaşan'**
+  String get uiMeetingsTabUpcoming;
+
+  /// ui.meetings.tab_past
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçmiş'**
+  String get uiMeetingsTabPast;
+
+  /// ui.meetings.tab_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinenler'**
+  String get uiMeetingsTabDeleted;
+
+  /// ui.meetings.group_today
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get uiMeetingsGroupToday;
+
+  /// ui.meetings.group_tomorrow
+  ///
+  /// In tr, this message translates to:
+  /// **'Yarın'**
+  String get uiMeetingsGroupTomorrow;
+
+  /// ui.meetings.group_this_week
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hafta'**
+  String get uiMeetingsGroupThisWeek;
+
+  /// ui.meetings.group_next_week
+  ///
+  /// In tr, this message translates to:
+  /// **'Gelecek hafta'**
+  String get uiMeetingsGroupNextWeek;
+
+  /// ui.meetings.group_later
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha sonra'**
+  String get uiMeetingsGroupLater;
+
+  /// ui.meetings.yesterday
+  ///
+  /// In tr, this message translates to:
+  /// **'Dün'**
+  String get uiMeetingsYesterday;
+
+  /// ui.meetings.empty_upcoming
+  ///
+  /// In tr, this message translates to:
+  /// **'Yaklaşan toplantı yok. Yeni bir toplantı açabilirsin.'**
+  String get uiMeetingsEmptyUpcoming;
+
+  /// ui.meetings.empty_past
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçmiş toplantı yok.'**
+  String get uiMeetingsEmptyPast;
+
+  /// ui.meetings.empty_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinmiş toplantı yok.'**
+  String get uiMeetingsEmptyDeleted;
+
+  /// ui.meetings.empty_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu filtreyle eşleşen toplantı yok.'**
+  String get uiMeetingsEmptyFilter;
+
+  /// ui.meetings.past_note
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçmiş tarihe toplantı açılamaz; tarih yalnız ileri alınabilir.'**
+  String get uiMeetingsPastNote;
+
+  /// ui.meetings.truncated
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste sınırına ulaşıldı; daha eski toplantılar gösterilmiyor.'**
+  String get uiMeetingsTruncated;
+
+  /// ui.meetings.owner_prefix
+  ///
+  /// In tr, this message translates to:
+  /// **'Sahip:'**
+  String get uiMeetingsOwnerPrefix;
+
+  /// ui.meetings.invited_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlük davetli'**
+  String get uiMeetingsInvitedTail;
+
+  /// ui.meetings.deleted_prefix
+  ///
+  /// In tr, this message translates to:
+  /// **'Silindi'**
+  String get uiMeetingsDeletedPrefix;
+
+  /// ui.meetings.restore
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri yükle'**
+  String get uiMeetingsRestore;
+
+  /// ui.meetings.purge
+  ///
+  /// In tr, this message translates to:
+  /// **'Kalıcı olarak sil'**
+  String get uiMeetingsPurge;
+
+  /// ui.meetings.purge_q
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı kalıcı olarak silinsin mi?'**
+  String get uiMeetingsPurgeQ;
+
+  /// ui.meetings.purge_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Notlar, gündem ve koordinatörlük bağları da silinir. Bu işlem geri alınamaz.'**
+  String get uiMeetingsPurgeDesc;
+
+  /// ui.meetings.t_restored
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı geri yüklendi · konferans kayıtları geri gelmez'**
+  String get uiMeetingsTRestored;
+
+  /// ui.meetings.t_purged
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı kalıcı olarak silindi'**
+  String get uiMeetingsTPurged;
+
+  /// ui.meetings.more
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer işlemler'**
+  String get uiMeetingsMore;
+
+  /// ui.meetings.not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı bulunamadı.'**
+  String get uiMeetingsNotFound;
+
+  /// ui.meetings.vis_members
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyeler dahil'**
+  String get uiMeetingsVisMembers;
+
+  /// ui.meetings.vis_leads
+  ///
+  /// In tr, this message translates to:
+  /// **'Yalnız koordinatörler'**
+  String get uiMeetingsVisLeads;
+
+  /// ui.meetings.conf_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Konferans'**
+  String get uiMeetingsConfLabel;
+
+  /// ui.meetings.conf_live
+  ///
+  /// In tr, this message translates to:
+  /// **'Canlı'**
+  String get uiMeetingsConfLive;
+
+  /// ui.meetings.conf_since
+  ///
+  /// In tr, this message translates to:
+  /// **'Başladı'**
+  String get uiMeetingsConfSince;
+
+  /// ui.meetings.conf_starting
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlatılıyor'**
+  String get uiMeetingsConfStarting;
+
+  /// ui.meetings.conf_starting_sub
+  ///
+  /// In tr, this message translates to:
+  /// **'Oda açılıyor; birazdan katılabilirsin.'**
+  String get uiMeetingsConfStartingSub;
+
+  /// ui.meetings.conf_ending
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapanıyor'**
+  String get uiMeetingsConfEnding;
+
+  /// ui.meetings.conf_ending_sub
+  ///
+  /// In tr, this message translates to:
+  /// **'Konferans bitirildi, oda kapanıyor.'**
+  String get uiMeetingsConfEndingSub;
+
+  /// ui.meetings.conf_none
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz başlamadı'**
+  String get uiMeetingsConfNone;
+
+  /// ui.meetings.conf_none_sub
+  ///
+  /// In tr, this message translates to:
+  /// **'Konferans toplantı saatinde başlatılabilir · en çok 25 kişi.'**
+  String get uiMeetingsConfNoneSub;
+
+  /// ui.meetings.conf_late_sub
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı saati geçti, konferans başlatılmadı.'**
+  String get uiMeetingsConfLateSub;
+
+  /// ui.meetings.conf_off
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüntülü konferans bu sunucuda kapalı.'**
+  String get uiMeetingsConfOff;
+
+  /// ui.meetings.conf_start
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantıyı başlat'**
+  String get uiMeetingsConfStart;
+
+  /// ui.meetings.conf_end
+  ///
+  /// In tr, this message translates to:
+  /// **'Konferansı bitir'**
+  String get uiMeetingsConfEnd;
+
+  /// ui.meetings.conf_join
+  ///
+  /// In tr, this message translates to:
+  /// **'Katıl'**
+  String get uiMeetingsConfJoin;
+
+  /// ui.meetings.conf_join_soon
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüntülü görüşme ekranı yakında'**
+  String get uiMeetingsConfJoinSoon;
+
+  /// ui.meetings.t_conf_started
+  ///
+  /// In tr, this message translates to:
+  /// **'Konferans başlatıldı'**
+  String get uiMeetingsTConfStarted;
+
+  /// ui.meetings.t_conf_ended
+  ///
+  /// In tr, this message translates to:
+  /// **'Konferans herkes için bitirildi'**
+  String get uiMeetingsTConfEnded;
+
+  /// ui.meetings.tabs_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı ayrıntısı'**
+  String get uiMeetingsTabsLabel;
+
+  /// ui.meetings.tab_agenda
+  ///
+  /// In tr, this message translates to:
+  /// **'Gündem'**
+  String get uiMeetingsTabAgenda;
+
+  /// ui.meetings.tab_notes
+  ///
+  /// In tr, this message translates to:
+  /// **'Notlar'**
+  String get uiMeetingsTabNotes;
+
+  /// ui.meetings.tab_people
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişiler'**
+  String get uiMeetingsTabPeople;
+
+  /// ui.meetings.tab_info
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilgi'**
+  String get uiMeetingsTabInfo;
+
+  /// ui.meetings.agenda_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Gündem'**
+  String get uiMeetingsAgendaTitle;
+
+  /// ui.meetings.agenda_add
+  ///
+  /// In tr, this message translates to:
+  /// **'Gündem maddesi ekle'**
+  String get uiMeetingsAgendaAdd;
+
+  /// ui.meetings.add
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekle'**
+  String get uiMeetingsAdd;
+
+  /// ui.meetings.agenda_of_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'maddeden'**
+  String get uiMeetingsAgendaOfTail;
+
+  /// ui.meetings.agenda_done_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'tamamlandı'**
+  String get uiMeetingsAgendaDoneTail;
+
+  /// ui.meetings.agenda_delete_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'maddesini sil'**
+  String get uiMeetingsAgendaDeleteTail;
+
+  /// ui.meetings.agenda_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Gündem maddesi yok.'**
+  String get uiMeetingsAgendaEmpty;
+
+  /// ui.meetings.agenda_limit
+  ///
+  /// In tr, this message translates to:
+  /// **'50 madde sınırına ulaşıldı'**
+  String get uiMeetingsAgendaLimit;
+
+  /// ui.meetings.t_agenda_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Gündem maddesi silindi'**
+  String get uiMeetingsTAgendaDeleted;
+
+  /// ui.meetings.nf_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Not süzgeci'**
+  String get uiMeetingsNfLabel;
+
+  /// ui.meetings.nf_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get uiMeetingsNfAll;
+
+  /// ui.meetings.nf_converted
+  ///
+  /// In tr, this message translates to:
+  /// **'Göreve dönüşen'**
+  String get uiMeetingsNfConverted;
+
+  /// ui.meetings.nf_mine
+  ///
+  /// In tr, this message translates to:
+  /// **'Benim'**
+  String get uiMeetingsNfMine;
+
+  /// ui.meetings.note_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Not ekle'**
+  String get uiMeetingsNoteLabel;
+
+  /// ui.meetings.note_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantıda konuşulanı not al…'**
+  String get uiMeetingsNoteHint;
+
+  /// ui.meetings.note_footer
+  ///
+  /// In tr, this message translates to:
+  /// **'Katılan herkes not ekleyebilir'**
+  String get uiMeetingsNoteFooter;
+
+  /// ui.meetings.note_edit
+  ///
+  /// In tr, this message translates to:
+  /// **'Notu düzenle'**
+  String get uiMeetingsNoteEdit;
+
+  /// ui.meetings.note_delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Notu sil'**
+  String get uiMeetingsNoteDelete;
+
+  /// ui.meetings.note_delete_q
+  ///
+  /// In tr, this message translates to:
+  /// **'Not silinsin mi?'**
+  String get uiMeetingsNoteDeleteQ;
+
+  /// ui.meetings.cancel
+  ///
+  /// In tr, this message translates to:
+  /// **'Vazgeç'**
+  String get uiMeetingsCancel;
+
+  /// ui.meetings.save
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydet'**
+  String get uiMeetingsSave;
+
+  /// ui.meetings.delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Sil'**
+  String get uiMeetingsDelete;
+
+  /// ui.meetings.edited
+  ///
+  /// In tr, this message translates to:
+  /// **'düzenlendi'**
+  String get uiMeetingsEdited;
+
+  /// ui.meetings.to_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Göreve dönüştür'**
+  String get uiMeetingsToTask;
+
+  /// ui.meetings.converted
+  ///
+  /// In tr, this message translates to:
+  /// **'Göreve dönüştü'**
+  String get uiMeetingsConverted;
+
+  /// ui.meetings.notes_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz not yok. Toplantıda konuşulanları buraya yaz.'**
+  String get uiMeetingsNotesEmpty;
+
+  /// ui.meetings.notes_empty_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu filtrede not yok.'**
+  String get uiMeetingsNotesEmptyFilter;
+
+  /// ui.meetings.t_note_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Not silindi'**
+  String get uiMeetingsTNoteDeleted;
+
+  /// ui.meetings.role_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Admin'**
+  String get uiMeetingsRoleAdmin;
+
+  /// ui.meetings.role_coordinator
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör'**
+  String get uiMeetingsRoleCoordinator;
+
+  /// ui.meetings.role_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye'**
+  String get uiMeetingsRoleMember;
+
+  /// ui.meetings.unknown_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilinmeyen kişi'**
+  String get uiMeetingsUnknownPerson;
+
+  /// ui.meetings.people_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'katılımcı'**
+  String get uiMeetingsPeopleTail;
+
+  /// ui.meetings.remove_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantıdan çıkar'**
+  String get uiMeetingsRemovePerson;
+
+  /// ui.meetings.t_removed_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'toplantıdan çıkarıldı'**
+  String get uiMeetingsTRemovedTail;
+
+  /// ui.meetings.members_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'üye'**
+  String get uiMeetingsMembersTail;
+
+  /// ui.meetings.other_group
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer'**
+  String get uiMeetingsOtherGroup;
+
+  /// ui.meetings.people_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz katılımcı eklenmedi.'**
+  String get uiMeetingsPeopleEmpty;
+
+  /// ui.meetings.add_people_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Katılımcı ekle'**
+  String get uiMeetingsAddPeopleTitle;
+
+  /// ui.meetings.add_people_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantıya bağlı koordinatörlüklerin ekibinden seç.'**
+  String get uiMeetingsAddPeopleDesc;
+
+  /// ui.meetings.no_candidates
+  ///
+  /// In tr, this message translates to:
+  /// **'Eklenecek kişi kalmadı.'**
+  String get uiMeetingsNoCandidates;
+
+  /// ui.meetings.t_added_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi eklendi'**
+  String get uiMeetingsTAddedTail;
+
+  /// ui.meetings.t_failed_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi eklenemedi'**
+  String get uiMeetingsTFailedTail;
+
+  /// ui.meetings.info_owner
+  ///
+  /// In tr, this message translates to:
+  /// **'Sahip'**
+  String get uiMeetingsInfoOwner;
+
+  /// ui.meetings.info_creator
+  ///
+  /// In tr, this message translates to:
+  /// **'Açan'**
+  String get uiMeetingsInfoCreator;
+
+  /// ui.meetings.info_invite
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet türü'**
+  String get uiMeetingsInfoInvite;
+
+  /// ui.meetings.info_created
+  ///
+  /// In tr, this message translates to:
+  /// **'Oluşturulma'**
+  String get uiMeetingsInfoCreated;
+
+  /// ui.meetings.info_visibility
+  ///
+  /// In tr, this message translates to:
+  /// **'Kimler görür'**
+  String get uiMeetingsInfoVisibility;
+
+  /// ui.meetings.info_conference
+  ///
+  /// In tr, this message translates to:
+  /// **'Konferans'**
+  String get uiMeetingsInfoConference;
+
+  /// ui.meetings.info_role
+  ///
+  /// In tr, this message translates to:
+  /// **'Senin rolün'**
+  String get uiMeetingsInfoRole;
+
+  /// ui.meetings.invite_coord
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük'**
+  String get uiMeetingsInviteCoord;
+
+  /// ui.meetings.unit_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'birim'**
+  String get uiMeetingsUnitTail;
+
+  /// ui.meetings.vis_all_long
+  ///
+  /// In tr, this message translates to:
+  /// **'Davetli birimlerin tüm üyeleri'**
+  String get uiMeetingsVisAllLong;
+
+  /// ui.meetings.vis_leads_long
+  ///
+  /// In tr, this message translates to:
+  /// **'Yalnız koordinatörler ve katılımcılar'**
+  String get uiMeetingsVisLeadsLong;
+
+  /// ui.meetings.conf_info
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüntülü · en çok 25 kişi'**
+  String get uiMeetingsConfInfo;
+
+  /// ui.meetings.conf_info_off
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapalı'**
+  String get uiMeetingsConfInfoOff;
+
+  /// ui.meetings.coords_kicker
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlükler'**
+  String get uiMeetingsCoordsKicker;
+
+  /// ui.meetings.owner_badge
+  ///
+  /// In tr, this message translates to:
+  /// **'Sahip'**
+  String get uiMeetingsOwnerBadge;
+
+  /// ui.meetings.coord_note
+  ///
+  /// In tr, this message translates to:
+  /// **'İlk koordinatörlük sahiptir. Kümeyi yalnız admin değiştirebilir.'**
+  String get uiMeetingsCoordNote;
+
+  /// ui.meetings.menu_edit
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantıyı düzenle'**
+  String get uiMeetingsMenuEdit;
+
+  /// ui.meetings.menu_delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantıyı sil'**
+  String get uiMeetingsMenuDelete;
+
+  /// ui.meetings.delete_q
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı silinsin mi?'**
+  String get uiMeetingsDeleteQ;
+
+  /// ui.meetings.delete_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı listeden kalkar ve artık değiştirilemez. Admin geri yükleyebilir; konferans kayıtları geri gelmez.'**
+  String get uiMeetingsDeleteDesc;
+
+  /// ui.meetings.delete_live
+  ///
+  /// In tr, this message translates to:
+  /// **'Konferans canlı: bağlı herkesin bağlantısı kesilir.'**
+  String get uiMeetingsDeleteLive;
+
+  /// ui.meetings.t_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı silindi'**
+  String get uiMeetingsTDeleted;
+
+  /// ui.meetings.nav_upcoming_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'yaklaşan'**
+  String get uiMeetingsNavUpcomingTail;
+
+  /// ui.meetings.st_live
+  ///
+  /// In tr, this message translates to:
+  /// **'CANLI'**
+  String get uiMeetingsStLive;
+
+  /// ui.meetings.st_waiting
+  ///
+  /// In tr, this message translates to:
+  /// **'BEKLİYOR'**
+  String get uiMeetingsStWaiting;
+
+  /// ui.meetings.st_not_held
+  ///
+  /// In tr, this message translates to:
+  /// **'YAPILMADI'**
+  String get uiMeetingsStNotHeld;
+
+  /// ui.meetings.st_done
+  ///
+  /// In tr, this message translates to:
+  /// **'BİTTİ'**
+  String get uiMeetingsStDone;
+
+  /// ui.meetings.status_waiting
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekliyor'**
+  String get uiMeetingsStatusWaiting;
+
+  /// ui.meetings.status_not_held
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapılmadı'**
+  String get uiMeetingsStatusNotHeld;
+
+  /// ui.meetings.status_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitti'**
+  String get uiMeetingsStatusDone;
+
+  /// ui.meetings.min_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'dk'**
+  String get uiMeetingsMinTail;
+
+  /// ui.meetings.note_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'not'**
+  String get uiMeetingsNoteTail;
+
+  /// ui.meetings.no_notes
+  ///
+  /// In tr, this message translates to:
+  /// **'not yok'**
+  String get uiMeetingsNoNotes;
+
+  /// ui.meetings.person_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi'**
+  String get uiMeetingsPersonTail;
+
+  /// ui.meetings.agenda_stat
+  ///
+  /// In tr, this message translates to:
+  /// **'gündem'**
+  String get uiMeetingsAgendaStat;
+
+  /// ui.meetings.connected_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi bağlı'**
+  String get uiMeetingsConnectedTail;
+
+  /// ui.meetings.since_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'beri'**
+  String get uiMeetingsSinceTail;
+
+  /// ui.meetings.deleted_by
+  ///
+  /// In tr, this message translates to:
+  /// **'Sildi:'**
+  String get uiMeetingsDeletedBy;
+
+  /// ui.meetings.chat
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı sohbeti'**
+  String get uiMeetingsChat;
+
+  /// ui.meetings.conf_restart
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni konferans başlat'**
+  String get uiMeetingsConfRestart;
+
+  /// ui.meetings.agenda_check_blocked
+  ///
+  /// In tr, this message translates to:
+  /// **'Gündemi yönetici ve toplantıya bağlı koordinatörler işaretler.'**
+  String get uiMeetingsAgendaCheckBlocked;
 
   /// ui.messages.title
   ///
@@ -4579,7 +5995,7 @@ abstract class AppLocalizations {
   /// ui.router.assistant_soon
   ///
   /// In tr, this message translates to:
-  /// **'Asistan sonraki adımda eklenecek'**
+  /// **'Asistan mobilde sonraki adımda eklenecek'**
   String get uiRouterAssistantSoon;
 
   /// ui.router.tab_history
@@ -4612,6 +6028,18 @@ abstract class AppLocalizations {
   /// **'Mesajlar'**
   String get uiRouterTabMessages;
 
+  /// ui.router.assistant_soon_tablet
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistan tablette sonraki adımda tasarlanacak'**
+  String get uiRouterAssistantSoonTablet;
+
+  /// ui.router.all_modules
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm modüller'**
+  String get uiRouterAllModules;
+
   /// ui.router.pick_title
   ///
   /// In tr, this message translates to:
@@ -4623,12 +6051,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Soldaki listeden bir kayıt seç, ayrıntısı burada açılır.'**
   String get uiRouterPickBody;
-
-  /// ui.router.all_modules
-  ///
-  /// In tr, this message translates to:
-  /// **'Tüm modüller'**
-  String get uiRouterAllModules;
 
   /// ui.scope.title
   ///
@@ -4653,12 +6075,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Hesabınıza atanmış bir program bulunmuyor. Yöneticinizle görüşün.'**
   String get uiScopeEmptyMessage;
-
-  /// ui.scope.continue_with_sample
-  ///
-  /// In tr, this message translates to:
-  /// **'Örnek verilerle devam et'**
-  String get uiScopeContinueWithSample;
 
   /// ui.scope.truncated
   ///
@@ -5284,12 +6700,6 @@ abstract class AppLocalizations {
   /// **'Kanıt dosyaları arşivde kaldı.'**
   String get uiTasksDeletedFilesKept;
 
-  /// ui.tasks.undo
-  ///
-  /// In tr, this message translates to:
-  /// **'Geri al'**
-  String get uiTasksUndo;
-
   /// ui.tasks.request_date
   ///
   /// In tr, this message translates to:
@@ -5626,18 +7036,6 @@ abstract class AppLocalizations {
   /// **'Gönder'**
   String get uiTasksSend;
 
-  /// ui.tasks.in_memory
-  ///
-  /// In tr, this message translates to:
-  /// **'✓ Hafızada'**
-  String get uiTasksInMemory;
-
-  /// ui.tasks.to_memory
-  ///
-  /// In tr, this message translates to:
-  /// **'Hafızaya ekle'**
-  String get uiTasksToMemory;
-
   /// ui.tasks.sheet_status
   ///
   /// In tr, this message translates to:
@@ -5703,36 +7101,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Koordinatörlük'**
   String get uiTasksFieldCoord;
-
-  /// ui.tasks.coordinators_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'koordinatörler'**
-  String get uiTasksCoordinatorsLc;
-
-  /// ui.tasks.members_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'üyeler'**
-  String get uiTasksMembersLc;
-
-  /// ui.tasks.no_coordinators
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu koordinatörlükte koordinatör yok.'**
-  String get uiTasksNoCoordinators;
-
-  /// ui.tasks.no_members
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu koordinatörlükte üye yok.'**
-  String get uiTasksNoMembers;
-
-  /// ui.tasks.err_assign_one
-  ///
-  /// In tr, this message translates to:
-  /// **'En az bir kişi ata'**
-  String get uiTasksErrAssignOne;
 
   /// ui.tasks.err_dates
   ///
@@ -5884,30 +7252,6 @@ abstract class AppLocalizations {
   /// **'Diğer'**
   String get uiTasksTagUnknown;
 
-  /// ui.tasks.file_name
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya adı'**
-  String get uiTasksFileName;
-
-  /// ui.tasks.err_file_name
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya adı gerekli'**
-  String get uiTasksErrFileName;
-
-  /// ui.tasks.pick_file
-  ///
-  /// In tr, this message translates to:
-  /// **'Fotoğraf çek ya da dosya seç'**
-  String get uiTasksPickFile;
-
-  /// ui.tasks.proto_only
-  ///
-  /// In tr, this message translates to:
-  /// **'Prototipte yalnızca kayıt oluşturulur.'**
-  String get uiTasksProtoOnly;
-
   /// ui.tasks.upload_ok
   ///
   /// In tr, this message translates to:
@@ -5938,24 +7282,6 @@ abstract class AppLocalizations {
   /// **'Sil'**
   String get uiTasksDeleteOk;
 
-  /// ui.tasks.t_subs_block
-  ///
-  /// In tr, this message translates to:
-  /// **'Alt görevler bitmeden görev tamamlanamaz'**
-  String get uiTasksTSubsBlock;
-
-  /// ui.tasks.t_finished_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'bitti'**
-  String get uiTasksTFinishedLc;
-
-  /// ui.tasks.t_evidence_block
-  ///
-  /// In tr, this message translates to:
-  /// **'Kanıt dosyası olmadan görev tamamlanamaz'**
-  String get uiTasksTEvidenceBlock;
-
   /// ui.tasks.t_created_tail
   ///
   /// In tr, this message translates to:
@@ -5967,12 +7293,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Görev silinen kayıtlara taşındı'**
   String get uiTasksTDeleted;
-
-  /// ui.tasks.t_restored_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'geri alındı'**
-  String get uiTasksTRestoredTail;
 
   /// ui.tasks.t_updated_tail
   ///
@@ -6045,12 +7365,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'kanıt dosyası arşivde kaldı'**
   String get uiTasksTSubFileKept;
-
-  /// ui.tasks.t_note_memory
-  ///
-  /// In tr, this message translates to:
-  /// **'Not kurumsal hafızaya deneyim olarak eklendi'**
-  String get uiTasksTNoteMemory;
 
   /// ui.tasks.revert_title
   ///
@@ -6249,12 +7563,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Koordinatörlük seç.'**
   String get uiTasksErrCoord;
-
-  /// ui.tasks.err_assignee
-  ///
-  /// In tr, this message translates to:
-  /// **'En az bir kişi ata.'**
-  String get uiTasksErrAssignee;
 
   /// ui.tasks.err_dates_full
   ///
@@ -6669,6 +7977,144 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Seçili departman artık bu programda yok; süzgeç temizlendi.'**
   String get uiTasksDepartmentFilterCleared;
+
+  /// ui.tasks.note_task_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Notu göreve dönüştür'**
+  String get uiTasksNoteTaskTitle;
+
+  /// ui.tasks.note_task_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev bu nottan açılır ve nota bağlanır. Atanan kişiye bildirim gider.'**
+  String get uiTasksNoteTaskDesc;
+
+  /// ui.tasks.mt_edit_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantıyı düzenle'**
+  String get uiTasksMtEditTitle;
+
+  /// ui.tasks.mt_edit_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Katılımcılar ve gündem toplantı ayrıntısında yönetilir.'**
+  String get uiTasksMtEditDesc;
+
+  /// ui.tasks.t_meeting_saved
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı güncellendi'**
+  String get uiTasksTMeetingSaved;
+
+  /// ui.tasks.err_mt_owner
+  ///
+  /// In tr, this message translates to:
+  /// **'Sahip koordinatörlüğü seç.'**
+  String get uiTasksErrMtOwner;
+
+  /// ui.tasks.row_owner
+  ///
+  /// In tr, this message translates to:
+  /// **'Sahip koordinatörlük'**
+  String get uiTasksRowOwner;
+
+  /// ui.tasks.sub_check_blocked
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görevi atanan kişi ya da departman koordinatörü işaretler; yönetici ekip satırı olmadan işaretleyemez.'**
+  String get uiTasksSubCheckBlocked;
+
+  /// ui.tasks.conflict_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev siz düzenlerken değişti'**
+  String get uiTasksConflictTitle;
+
+  /// ui.tasks.conflict_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı alanı başkası da değiştirdi. Her alan için hangi değerin kalacağını seçin; diğer alanlar korunur.'**
+  String get uiTasksConflictDesc;
+
+  /// ui.tasks.conflict_base
+  ///
+  /// In tr, this message translates to:
+  /// **'Açtığınızda'**
+  String get uiTasksConflictBase;
+
+  /// ui.tasks.conflict_mine
+  ///
+  /// In tr, this message translates to:
+  /// **'Sizin değeriniz'**
+  String get uiTasksConflictMine;
+
+  /// ui.tasks.conflict_server
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucudaki değer'**
+  String get uiTasksConflictServer;
+
+  /// ui.tasks.conflict_keep_mine
+  ///
+  /// In tr, this message translates to:
+  /// **'Benimkini tut'**
+  String get uiTasksConflictKeepMine;
+
+  /// ui.tasks.conflict_take_server
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucudakini al'**
+  String get uiTasksConflictTakeServer;
+
+  /// ui.tasks.conflict_pending
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydetmeden önce işaretli alanlar için seçim yapın'**
+  String get uiTasksConflictPending;
+
+  /// ui.tasks.text_conflict_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Metin siz düzenlerken değişti'**
+  String get uiTasksTextConflictTitle;
+
+  /// ui.tasks.text_conflict_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucudaki metin sizinkinden farklı. Hangisi kalsın?'**
+  String get uiTasksTextConflictDesc;
+
+  /// ui.tasks.retry_after_head
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeniden denemek için'**
+  String get uiTasksRetryAfterHead;
+
+  /// ui.tasks.retry_after_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'sn bekleyin'**
+  String get uiTasksRetryAfterTail;
+
+  /// ui.tasks.empty_value
+  ///
+  /// In tr, this message translates to:
+  /// **'—'**
+  String get uiTasksEmptyValue;
+
+  /// ui.tasks.conflict_on
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık'**
+  String get uiTasksConflictOn;
+
+  /// ui.tasks.conflict_off
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapalı'**
+  String get uiTasksConflictOff;
 
   /// ui.timeline.title
   ///
@@ -7204,29 +8650,23 @@ abstract class AppLocalizations {
   /// **'aç'**
   String get uiTimelineOpen;
 
-  /// ui.timeline.gantt_back
-  ///
-  /// In tr, this message translates to:
-  /// **'Görevler'**
-  String get uiTimelineGanttBack;
-
-  /// ui.timeline.gantt_back_label
-  ///
-  /// In tr, this message translates to:
-  /// **'Geri: Görevler'**
-  String get uiTimelineGanttBackLabel;
-
   /// ui.timeline.gantt_filter
   ///
   /// In tr, this message translates to:
   /// **'Görev filtresi'**
   String get uiTimelineGanttFilter;
 
-  /// ui.timeline.gantt_scale_season
+  /// ui.timeline.gantt_zoom_daily
   ///
   /// In tr, this message translates to:
-  /// **'Sezon'**
-  String get uiTimelineGanttScaleSeason;
+  /// **'Günlük'**
+  String get uiTimelineGanttZoomDaily;
+
+  /// ui.timeline.gantt_zoom_weekly
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftalık'**
+  String get uiTimelineGanttZoomWeekly;
 
   /// ui.timeline.gantt_all_coords
   ///
@@ -7269,12 +8709,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Gecikme'**
   String get uiTimelineGanttLegendLate;
-
-  /// ui.timeline.gantt_legend_fest
-  ///
-  /// In tr, this message translates to:
-  /// **'Teknofest günleri'**
-  String get uiTimelineGanttLegendFest;
 
   /// ui.timeline.gantt_card_status
   ///

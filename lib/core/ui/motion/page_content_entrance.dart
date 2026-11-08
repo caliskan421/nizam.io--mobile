@@ -7,11 +7,19 @@ import '../theme/nz_motion.dart';
 /// Sıradan yeniden çizimler animasyonu başlatmaz; mesafe sabit mantıksal pikseldir.
 /// Sekme paneline kimliğinden ValueKey vererek yeni giriş başlatılabilir; liste/ızgara
 /// öğeleri için hazır sarmalayıcı [NzEntrance]'tır.
+///
+/// Alt ağacında cam (`NzGlass` / `BackdropFilter`) olan girişe [fade] false verilir: hareket
+/// yalnız ötelemedir. Saydamlık katmanı altındaki bulanıklık her karede saveLayer ve yeniden
+/// bulanıklaştırma ister. İçteki camsız giriş, üst hareketin solmasını kendi katmanında yapar
+/// (kapsayan hareketle aynı eğri; mesafe ikiye katlanmaz).
 class PageContentEntrance extends StatefulWidget {
   const PageContentEntrance({
     super.key,
     required this.child,
     this.delay = Duration.zero,
+    this.enabled = true,
+    this.fade = true,
+    this.onRevisit,
   }) : _sliver = false;
 
   /// Sliver geometrisini ve tembel liste kurulumunu koruyan aynı hareket.
@@ -19,9 +27,23 @@ class PageContentEntrance extends StatefulWidget {
     super.key,
     required this.child,
     this.delay = Duration.zero,
+    this.enabled = true,
+    this.fade = true,
+    this.onRevisit,
   }) : _sliver = true;
 
   final Widget child;
+  final bool enabled;
+
+  /// false → opaklık animasyonu yok, yalnız öteleme (alt ağaçta cam var; bkz. sınıf belgesi).
+  final bool fade;
+
+  /// Gizli içerik yeniden görünür olunca (`TickerMode` kapalı → açık; ilk açılışta değil)
+  /// giriş hareketi BİTİNCE bir kez çağrılır: bu girişin ya da katıldığı üst hareketin
+  /// (tablet bölme geçişi). Hareket yoksa (hareketi azalt, [enabled] false) kare sonunda.
+  /// Bayat veri tazelemesi içindir (ör. `refreshIfStale`): istek ve yeniden kurulum hareketle
+  /// aynı karelere düşmez. Hareket bitmeden yeniden gizlenirse çağrılmaz.
+  final VoidCallback? onRevisit;
 
   /// Hareketin başlamadan önce beklediği süre (kademeli giriş; bkz. [RpMotion.stagger]).
   /// Yalnız ilk kurulumda okunur; süre boyunca içerik saydam ve aşağıda bekler.
@@ -39,6 +61,9 @@ class _PageContentEntranceState extends State<PageContentEntrance>
   bool? _coveredByParent;
   bool? _active;
   Animation<double>? _parentAnimation;
+
+  /// [PageContentEntrance.onRevisit] için bitişi beklenen hareket.
+  Animation<double>? _revisitAfter;
 
   /// Gecikme + giriş; gecikme eğrinin başındaki düz [Interval] bölümüdür (zamanlayıcı yok).
   Duration get _total => RpMotion.enterDuration + widget.delay;
@@ -68,16 +93,14 @@ class _PageContentEntranceState extends State<PageContentEntrance>
     final active = TickerMode.valuesOf(context).enabled;
     final returning = _active == false && active;
     _active = active;
-    if (NzMotion.reduced(context)) {
+    if (!active) _cancelRevisit();
+    if (NzMotion.reduced(context) || !widget.enabled) {
       _controller.duration = Duration.zero;
       _controller.value = 1;
-      return;
-    }
-    if (!active) {
+    } else if (!active) {
       _controller.stop();
       return;
-    }
-    if (returning) {
+    } else if (returning) {
       // go_router korunan dalları TickerMode ile gizler. Yalnız dış içerik yeniden
       // oynar; alt paneller onun hareketine katılır ve mesafeyi ikiye katlamaz.
       // Üst hareket şu an oynuyorsa (tablet bölme geçişi) ona katılınır.
@@ -89,37 +112,81 @@ class _PageContentEntranceState extends State<PageContentEntrance>
       _controller.duration = Duration.zero;
       _controller.value = 1;
     }
+    if (returning) _scheduleRevisit();
+  }
+
+  void _scheduleRevisit() {
+    if (widget.onRevisit == null) return;
+    final motion = _coveredByParent! ? _parentAnimation! : _controller;
+    if (motion.isAnimating) {
+      _revisitAfter = motion..addStatusListener(_onMotionStatus);
+    } else {
+      // Bağımlılık değişimi sırasında sağlayıcı yazımı yapılmaz: kare sonrasına bırakılır.
+      WidgetsBinding.instance.addPostFrameCallback((_) => _revisit());
+    }
+  }
+
+  /// Yalnız tamamlanma sayılır: hareket `forward(from: 0)` ile baştan başlarsa (dismissed)
+  /// ya da durdurulursa bekleme sürer; yeniden gizlenme [_cancelRevisit] ile bırakır.
+  void _onMotionStatus(AnimationStatus status) {
+    if (!status.isCompleted) return;
+    _cancelRevisit();
+    _revisit();
+  }
+
+  void _revisit() {
+    if (mounted && _active == true) widget.onRevisit?.call();
+  }
+
+  void _cancelRevisit() {
+    _revisitAfter?.removeStatusListener(_onMotionStatus);
+    _revisitAfter = null;
   }
 
   @override
   void dispose() {
+    _cancelRevisit();
     _animation.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => _EntranceScope(
-    animation: _coveredByParent! ? _parentAnimation! : _animation,
-    child: AnimatedBuilder(
-      animation: _animation,
-      child: widget.child,
-      builder: (context, child) {
-        final t = _animation.value;
-        final dy = RpMotion.enterOffset * (1 - t);
-        if (widget._sliver) {
-          return SliverOpacity(
-            opacity: t,
-            sliver: _SliverTranslate(dy: dy, child: child!),
-          );
-        }
-        return Opacity(
-          opacity: t,
-          child: Transform.translate(offset: Offset(0, dy), child: child),
-        );
-      },
-    ),
-  );
+  Widget build(BuildContext context) {
+    if (!widget.enabled) return widget.child;
+    final covered = _coveredByParent!;
+    // Üst hareket solmuyorsa (cam taşıyan kapsayıcı) bu katman onun solmasını üstlenir.
+    final parentFaded =
+        covered &&
+        (context.getInheritedWidgetOfExactType<_EntranceScope>()?.faded ??
+            false);
+    final Animation<double> opacity = !widget.fade || parentFaded
+        ? kAlwaysCompleteAnimation
+        : covered
+        ? _parentAnimation!
+        : _animation;
+    return _EntranceScope(
+      animation: covered ? _parentAnimation! : _animation,
+      faded: widget.fade || parentFaded,
+      // Kare başına build yok: öteleme ve opaklık animasyonu render nesnesinde dinlenir.
+      // Öteleme dışta, opaklık içte: opaklık katmanı yeniden boyanmadan kaydırılır.
+      // Ağaç yapısı [fade]'den bağımsızdır (değişince alt ağacın State'i korunur).
+      child: widget._sliver
+          ? _SliverTranslate(
+              animation: _animation,
+              dy: RpMotion.enterOffset,
+              child: SliverFadeTransition(
+                opacity: opacity,
+                sliver: widget.child,
+              ),
+            )
+          : _Translate(
+              animation: _animation,
+              from: const Offset(0, RpMotion.enterOffset),
+              child: FadeTransition(opacity: opacity, child: widget.child),
+            ),
+    );
+  }
 }
 
 /// Değişen içeriğin girişi (görev ayrıntısı sekme paneliyle aynı hareket: opaklık 0 → 1,
@@ -166,16 +233,22 @@ class NzEntrance extends StatelessWidget {
   }
 }
 
-/// Tablet bölme geçişinin türü (prototip `A`): [fade] `rpFadeIn .3s ease` (modül değişimi,
-/// aynı türde kayıt seçimi, aynı kaydı yeniden seçme), [push] `rpPush .38s` (36 px sağdan),
-/// [pop] `rpPop .38s` (36 px soldan), eğri `cubic(.2,.8,.2,1)`.
-enum NzPaneMotion { fade, push, pop }
+/// Tablet bölme geçişinin türü: [rise] telefondaki sayfa girişinin yükselişi
+/// ([PageContentEntrance]: [RpMotion.enterOffset] aşağıdan yükseliş,
+/// [RpMotion.enterDuration], [RpMotion.enterCurve]; modül değişimi, aynı türde kayıt seçimi,
+/// aynı kaydı yeniden seçme), [push] `rpPush .38s` (36 px sağdan), [pop] `rpPop .38s` (36 px
+/// soldan), eğri `cubic(.2,.8,.2,1)`.
+enum NzPaneMotion { rise, push, pop }
 
 /// Tablet bölmesine giren ekranın hareketi. Ağaç yapısı her zaman aynıdır (çocuğun State'i
 /// korunur); [enabled] false iken (telefon, tek bölme) hareket yoktur ve içteki
 /// [PageContentEntrance] kendi yükselişini oynatır. [enabled] iken oluşunca ve [play] her
 /// değiştiğinde (null hariç) [motion] oynar; içteki [PageContentEntrance] bunu üst hareket
 /// sayar (çift animasyon yok). Hareketi azalt → anlık.
+///
+/// Yalnız ötelemedir: bölmedeki ekranlar cam taşır (üst çubuk, yapışkan şerit, sohbet hapı,
+/// çizelge sütunu); opaklık 0 → 1 içteki camsız [PageContentEntrance] katmanında bu hareketin
+/// eğrisiyle oynar.
 class NzPaneTransition extends StatefulWidget {
   const NzPaneTransition({
     super.key,
@@ -219,11 +292,9 @@ class _NzPaneTransitionState extends State<NzPaneTransition>
 
   void _start(NzPaneMotion motion) {
     _motion = motion;
-    final fade = motion == NzPaneMotion.fade;
-    _controller.duration = fade
-        ? RpMotion.tabFadeDuration
+    _controller.duration = motion == NzPaneMotion.rise
+        ? RpMotion.enterDuration
         : RpMotion.pushDuration;
-    _animation.curve = fade ? Curves.ease : RpMotion.enterCurve;
     _controller.forward(from: 0);
   }
 
@@ -256,62 +327,188 @@ class _NzPaneTransitionState extends State<NzPaneTransition>
   @override
   Widget build(BuildContext context) => _EntranceScope(
     animation: _animation,
-    child: FadeTransition(
-      opacity: _animation,
-      child: AnimatedBuilder(
-        animation: _animation,
-        child: widget.child,
-        builder: (context, child) {
-          final t = _controller.isCompleted ? 1.0 : _animation.value;
-          final dx = switch (_motion) {
-            NzPaneMotion.fade => 0.0,
-            NzPaneMotion.push => RpMotion.pushOffset * (1 - t),
-            NzPaneMotion.pop => -RpMotion.pushOffset * (1 - t),
-          };
-          return Transform.translate(offset: Offset(dx, 0), child: child);
-        },
-      ),
+    faded: false,
+    child: _Translate(
+      animation: _animation,
+      from: switch (_motion) {
+        NzPaneMotion.rise => const Offset(0, RpMotion.enterOffset),
+        NzPaneMotion.push => const Offset(RpMotion.pushOffset, 0),
+        NzPaneMotion.pop => const Offset(-RpMotion.pushOffset, 0),
+      },
+      child: widget.child,
     ),
   );
 }
 
 class _EntranceScope extends InheritedWidget {
-  const _EntranceScope({required this.animation, required super.child});
+  const _EntranceScope({
+    required this.animation,
+    required this.faded,
+    required super.child,
+  });
 
   final Animation<double> animation;
 
+  /// Bu kapsamın içeriği zaten soluyor mu (içteki giriş opaklığı ikiye katlamaz).
+  final bool faded;
+
   @override
   bool updateShouldNotify(_EntranceScope oldWidget) =>
-      animation != oldWidget.animation;
+      animation != oldWidget.animation || faded != oldWidget.faded;
 }
 
-/// Yalnız boyama dönüşür; scrollExtent, layoutExtent ve sabit başlık hesabı değişmez.
-class _SliverTranslate extends SingleChildRenderObjectWidget {
-  const _SliverTranslate({required this.dy, required super.child});
+/// [animation] değerine göre çocuğu boyamada öteler: t = 0 → [from], t = 1 → yerinde.
+/// Yerleşim değişmez; değer değişince yalnız boyama geçersizlenir (build yok).
+class _Translate extends SingleChildRenderObjectWidget {
+  const _Translate({
+    required this.animation,
+    required this.from,
+    required super.child,
+  });
 
+  final Animation<double> animation;
+  final Offset from;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderTranslate(animation, from);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderTranslate renderObject,
+  ) => renderObject
+    ..animation = animation
+    ..from = from;
+}
+
+class _RenderTranslate extends RenderProxyBox {
+  _RenderTranslate(this._animation, this._from);
+
+  Animation<double> _animation;
+  Offset _from;
+  Offset _offset = Offset.zero;
+
+  set animation(Animation<double> value) {
+    if (_animation == value) return;
+    if (attached) _animation.removeListener(_update);
+    _animation = value;
+    if (attached) _animation.addListener(_update);
+    _update();
+  }
+
+  set from(Offset value) {
+    if (_from == value) return;
+    _from = value;
+    _update();
+  }
+
+  void _update() {
+    final next = _from * (1 - _animation.value);
+    if (next == _offset) return;
+    _offset = next;
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _animation.addListener(_update);
+    _update();
+  }
+
+  @override
+  void detach() {
+    _animation.removeListener(_update);
+    super.detach();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) context.paintChild(child!, offset + _offset);
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.translateByDouble(_offset.dx, _offset.dy, 0, 1);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      result.addWithPaintOffset(
+        offset: _offset,
+        position: position,
+        hitTest: (result, position) =>
+            super.hitTestChildren(result, position: position),
+      );
+}
+
+/// Sliver öteleme ([_Translate] gibi animasyonu dinler): yalnız boyama dönüşür;
+/// scrollExtent, layoutExtent ve sabit başlık hesabı değişmez. t = 0 → [dy] aşağıda.
+class _SliverTranslate extends SingleChildRenderObjectWidget {
+  const _SliverTranslate({
+    required this.animation,
+    required this.dy,
+    required super.child,
+  });
+
+  final Animation<double> animation;
   final double dy;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      _RenderSliverTranslate(dy);
+      _RenderSliverTranslate(animation, dy);
 
   @override
   void updateRenderObject(
     BuildContext context,
     _RenderSliverTranslate renderObject,
-  ) => renderObject.dy = dy;
+  ) => renderObject
+    ..animation = animation
+    ..dy = dy;
 }
 
 class _RenderSliverTranslate extends RenderProxySliver {
-  _RenderSliverTranslate(this._dy);
+  _RenderSliverTranslate(this._animation, this._from);
 
-  double _dy;
+  Animation<double> _animation;
+  double _from;
+  double _dy = 0;
+
+  set animation(Animation<double> value) {
+    if (_animation == value) return;
+    if (attached) _animation.removeListener(_update);
+    _animation = value;
+    if (attached) _animation.addListener(_update);
+    _update();
+  }
 
   set dy(double value) {
-    if (_dy == value) return;
-    _dy = value;
+    if (_from == value) return;
+    _from = value;
+    _update();
+  }
+
+  void _update() {
+    final next = _from * (1 - _animation.value);
+    if (next == _dy) return;
+    _dy = next;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _animation.addListener(_update);
+    _update();
+  }
+
+  @override
+  void detach() {
+    _animation.removeListener(_update);
+    super.detach();
   }
 
   @override

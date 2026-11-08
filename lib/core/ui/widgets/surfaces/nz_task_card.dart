@@ -36,7 +36,9 @@ class NzTaskCardDate {
 /// Alt satır: avatar yığını ([assignees]) + [assigneeText] + sağda rozet ([badge],
 /// [badgeTone]; ör. "98 gün gecikti"). Kart `NzCard.outlined`, iç boşluk `m-card-pad`, basınca
 /// `.985`. Okuyucu etiketi [semanticLabel] (verilmezse görünen metinler). [muted] başlığı
-/// soluk çizer (prototip: tamamlanmış görev `ink-muted`).
+/// soluk çizer (prototip: tamamlanmış görev `ink-muted`). [fill] (sınırlı yükseklikte, ör. eşit
+/// yükseklikli ızgara satırı) kartı verilen boya uzatır; alt görev çubuğu ve alt satır en alta
+/// yaslanır. Sınırsız yükseklikte (alt alta liste) [fill] verilmez.
 class NzTaskCard extends StatelessWidget {
   const NzTaskCard({
     super.key,
@@ -60,6 +62,7 @@ class NzTaskCard extends StatelessWidget {
     this.semanticLabel,
     this.trailing = const [],
     this.muted = false,
+    this.fill = false,
   });
 
   final String code;
@@ -83,6 +86,7 @@ class NzTaskCard extends StatelessWidget {
   final VoidCallback? onTap;
   final String? semanticLabel;
   final bool muted;
+  final bool fill;
 
   /// Alt satırda rozetin ardından ek işaretler (ör. ikinci rozet, dosya/not sayaçları).
   final List<Widget> trailing;
@@ -103,6 +107,94 @@ class NzTaskCard extends StatelessWidget {
         assigneeText != null ||
         badge != null ||
         trailing.isNotEmpty;
+
+    // Alt görev çubuğu + alt satır; [fill] → kalan boşluğun altına yaslı tek blok.
+    final bottomParts = <Widget>[
+      if (subtaskProgress != null)
+        Row(
+          children: [
+            Expanded(
+              child: NzProgressBar(value: subtaskProgress, color: c.accentText),
+            ),
+            if (subtaskText != null) ...[
+              const Gap(NizamioSpacing.gapMd),
+              Text(subtaskText, style: _mono12(context, c.textMuted)),
+            ],
+          ],
+        ),
+      if (hasFoot)
+        Row(
+          children: [
+            if (assignees.isNotEmpty) ...[
+              if (_tablet(context))
+                // Kaynak halka `box-shadow`tur, yerleşime girmez: satır avatar boyu (26).
+                SizedBox(
+                  height: NzAvatarSize.sm.diameter,
+                  child: OverflowBox(
+                    fit: OverflowBoxFit.deferToChild,
+                    maxHeight: double.infinity,
+                    child: NzAvatarStack(
+                      names: assignees,
+                      extent: NzAvatarSize.sm,
+                    ),
+                  ),
+                )
+              else
+                NzAvatarStack(names: assignees, extent: NzAvatarSize.sm),
+              const Gap(NizamioSpacing.gapMd),
+            ],
+            Expanded(
+              child: assigneeText == null
+                  ? const SizedBox.shrink()
+                  : Text(
+                      assigneeText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: t.caption.copyWith(color: c.textMuted),
+                    ),
+            ),
+            if (badge != null || trailing.isNotEmpty) ...[
+              const Gap(NizamioSpacing.space2),
+              // Rozetler tek blokta, pay içinde sağa yaslı; satır yüksekliği değişmez.
+              Flexible(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  heightFactor: 1,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (badge != null)
+                        Flexible(
+                          child: NzStatusLabel.badge(
+                            label: badge,
+                            tone: badgeTone,
+                          ),
+                        ),
+                      for (final (i, w) in trailing.indexed) ...[
+                        if (badge != null || i > 0)
+                          const Gap(NizamioSpacing.space2),
+                        Flexible(child: w),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+    ];
+    final bottom = fill && bottomParts.isNotEmpty
+        ? <Widget>[
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: NizamioSpacing.space3,
+                children: bottomParts,
+              ),
+            ),
+          ]
+        : bottomParts;
 
     return NzCard.outlined(
       // Tablet kenarlık payını NzCard.outlined ekler (border-box, çocuklar kenardan 17).
@@ -134,7 +226,12 @@ class NzTaskCard extends StatelessWidget {
                 ),
                 const Gap(NizamioSpacing.space2),
                 Flexible(
-                  child: NzStatusLabel(label: statusLabel, tone: statusTone),
+                  // Pay içinde sağa yaslı; satır yüksekliği değişmez.
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    heightFactor: 1,
+                    child: NzStatusLabel(label: statusLabel, tone: statusTone),
+                  ),
                 ),
               ],
             ),
@@ -170,97 +267,45 @@ class NzTaskCard extends StatelessWidget {
                     if (priority != null)
                       Flexible(
                         flex: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            if (priorityCaption case final pc?)
-                              Text(pc, style: _caption(context)),
-                            const Gap(NizamioSpacing.space1 / 2),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                NzPriorityBars(level: priorityLevel),
-                                const Gap(
-                                  NizamioSpacing.space1 +
-                                      NizamioSpacing.space1 / 2,
-                                ),
-                                Flexible(
-                                  child: Text(
-                                    priority,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: t.caption.copyWith(
-                                      color: c.textMuted,
+                        // Pay içinde sağa yaslı; satır yüksekliği değişmez.
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          heightFactor: 1,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              if (priorityCaption case final pc?)
+                                Text(pc, style: _caption(context)),
+                              const Gap(NizamioSpacing.space1 / 2),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  NzPriorityBars(level: priorityLevel),
+                                  const Gap(
+                                    NizamioSpacing.space1 +
+                                        NizamioSpacing.space1 / 2,
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      priority,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: t.caption.copyWith(
+                                        color: c.textMuted,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                   ],
                 ),
               ),
             ),
-          if (subtaskProgress != null)
-            Row(
-              children: [
-                Expanded(
-                  child: NzProgressBar(
-                    value: subtaskProgress,
-                    color: c.accentText,
-                  ),
-                ),
-                if (subtaskText != null) ...[
-                  const Gap(NizamioSpacing.gapMd),
-                  Text(subtaskText, style: _mono12(context, c.textMuted)),
-                ],
-              ],
-            ),
-          if (hasFoot)
-            Row(
-              children: [
-                if (assignees.isNotEmpty) ...[
-                  if (_tablet(context))
-                    // Kaynak halka `box-shadow`tur, yerleşime girmez: satır avatar boyu (26).
-                    SizedBox(
-                      height: NzAvatarSize.sm.diameter,
-                      child: OverflowBox(
-                        fit: OverflowBoxFit.deferToChild,
-                        maxHeight: double.infinity,
-                        child: NzAvatarStack(
-                          names: assignees,
-                          extent: NzAvatarSize.sm,
-                        ),
-                      ),
-                    )
-                  else
-                    NzAvatarStack(names: assignees, extent: NzAvatarSize.sm),
-                  const Gap(NizamioSpacing.gapMd),
-                ],
-                Expanded(
-                  child: assigneeText == null
-                      ? const SizedBox.shrink()
-                      : Text(
-                          assigneeText,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: t.caption.copyWith(color: c.textMuted),
-                        ),
-                ),
-                if (badge != null) ...[
-                  const Gap(NizamioSpacing.space2),
-                  Flexible(
-                    child: NzStatusLabel.badge(label: badge, tone: badgeTone),
-                  ),
-                ],
-                for (final w in trailing) ...[
-                  const Gap(NizamioSpacing.space2),
-                  Flexible(child: w),
-                ],
-              ],
-            ),
+          ...bottom,
         ],
       ),
     );

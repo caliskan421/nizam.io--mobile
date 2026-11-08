@@ -124,6 +124,8 @@ class ArchiveFolderPage extends ConsumerWidget {
       paneLead: NizamioSpacing.rowPad,
       onRetry: retry,
       topBar: topBar,
+      // Görev klasörü satırları cam (NzFolder): giriş yalnız yükselir.
+      fadeContent: false,
       // Prototip: sekme hapları üst çubuğun altına yapışır (`position: sticky; top: 64px`).
       pinned: Padding(
         padding: const EdgeInsets.only(

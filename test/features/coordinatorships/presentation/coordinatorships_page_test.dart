@@ -1,16 +1,16 @@
-// CoordinatorshipsPage: başlık + özet satırı, 11 kart (katalogdan), kart → ayrıntı; kabukta
-// yeniden dokunma kısayol menüsü (zaman çizelgesi, ekle tostu, sıralama); taşma matrisi.
+// CoordinatorshipsPage (sunucu verisiyle): özet satırı ve kartlar departmanlardan, ekiplerden
+// ve görevlerden; kart → ayrıntı (departman kimliğiyle); taşma matrisi.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
-import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/features/coordinatorships/presentation/coordinatorships_page.dart';
 
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
 import '../../pilot_support.dart';
+import '../coord_backend.dart';
 
 final _l = AppLocalizationsTr();
 
@@ -20,9 +20,9 @@ Future<(Harness, RecordingAppNav)> _open(
 }) async {
   final h = await real(
     tester,
-    () => pilotHarness(PilotBackend(), signedIn: true),
+    () => pilotHarness(CoordBackend(), signedIn: true),
   );
-  h.read(scopeControllerProvider).selectSample();
+  h.read(scopeControllerProvider).selectProgram(coordProgram);
   final nav = RecordingAppNav();
   await pumpScreen(
     tester,
@@ -43,67 +43,23 @@ List<String> _cardOrder(WidgetTester tester) => tester
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets('başlık, özet satırı, kart içeriği; kart ayrıntıyı açar', (
+  testWidgets('özet satırı ve kartlar sunucu verisinden; kart ayrıntıyı açar', (
     tester,
   ) async {
     final (_, nav) = await _open(tester);
     expect(find.text(_l.uiCoordTitle), findsOneWidget);
     expect(
-      find.text('11 koordinatörlük · 76 görev · 7 koordinatörlükte gecikme'),
+      find.text('4 koordinatörlük · 9 görev · 2 koordinatörlükte gecikme'),
       findsOneWidget,
     );
-    expect(find.text('Altyapı ve tesisat'), findsOneWidget);
-    expect(find.text('9/13 bitti'), findsOneWidget);
-    expect(find.text('3 gecikmede'), findsWidgets);
-    expect(
-      find.text('Abdullah Ateş, Ali Avcı · Kadir Özbek (üye)'),
-      findsOneWidget,
-    );
+    expect(_cardOrder(tester), [dAlt, dEgi, dEle, dIda]);
+    expect(find.text('2/4 bitti'), findsOneWidget);
+    expect(find.text('2 gecikmede'), findsOneWidget);
+    expect(find.text('Abdullah Ateş, Ali Avcı'), findsOneWidget);
     expect(find.text('Koordinatör yok · Bahar Kılıç (üye)'), findsOneWidget);
-    expect(_cardOrder(tester).take(3), ['ALT', 'EĞİ', 'ELE']);
     await tester.tap(find.text('Altyapı ve tesisat'));
     await settle(tester);
-    expect(nav.calls, ['coord:ALT']);
-  });
-
-  testWidgets('kısayol menüsü: sıralama, zaman çizelgesi, ekleme tostu', (
-    tester,
-  ) async {
-    final (h, nav) = await _open(tester);
-    void fire(int tab) =>
-        h.read(shellReselectEventsProvider.notifier).fire(tab);
-
-    // Başka sekmenin olayı menü açmaz.
-    fire(0);
-    await settle(tester);
-    expect(find.text(_l.uiCoordFlyTimelineAll), findsNothing);
-
-    fire(CoordinatorshipsPage.shellTab);
-    await settle(tester);
-    expect(find.text(_l.uiCoordFlyTimelineAll), findsOneWidget);
-    expect(find.text(_l.uiCoordSortProgress), findsOneWidget);
-    await tester.tap(find.text(_l.uiCoordSortLate));
-    await settle(tester);
-    expect(_cardOrder(tester).take(3), ['İDA', 'ALT', 'ULA']);
-
-    fire(CoordinatorshipsPage.shellTab);
-    await settle(tester);
-    await tester.tap(find.text(_l.uiCoordSortProgress));
-    await settle(tester);
-    expect(_cardOrder(tester).first, 'MEK');
-
-    fire(CoordinatorshipsPage.shellTab);
-    await settle(tester);
-    await tester.tap(find.text(_l.uiCoordFlyAdd));
-    await settle(tester);
-    expect(find.text(_l.uiCoordToastAddForm), findsOneWidget);
-
-    fire(CoordinatorshipsPage.shellTab);
-    await settle(tester);
-    await tester.tap(find.text(_l.uiCoordFlyTimelineAll));
-    await settle(tester);
-    // Prototip: bütün koordinatörlükler seçili açılır.
-    expect(nav.calls, ['timeline:*']);
+    expect(nav.calls, ['coord:$dAlt']);
   });
 
   for (final width in [360.0, 390.0]) {
@@ -120,6 +76,7 @@ void main() {
               tester.platformDispatcher.clearTextScaleFactorTestValue,
             );
             await _open(tester, dark: dark);
+            expect(find.byType(CoordinatorshipCard), findsWidgets);
             final scrollable = find.byType(Scrollable).first;
             for (var i = 0; i < 12; i++) {
               await tester.drag(scrollable, const Offset(0, -300));

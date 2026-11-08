@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -11,16 +13,25 @@ import '../nz_icons.dart';
 
 enum NzToastTone { info, success, danger }
 
-/// Snackbar servisi (durumsuz). `ScaffoldMessenger` üzerinden gösterilir; `MaterialApp.builder`
-/// içindeki PrivacyMask altında kalır, ayrı Overlay/pencere açılmaz. Yeni toast öncekinin yerini
-/// alır (kuyruk birikmez).
+/// Snackbar servisi. `ScaffoldMessenger` üzerinden gösterilir (konum: kabukta alt menünün
+/// üstü; `MaterialApp.builder` içindeki PrivacyMask altında kalır, ayrı Overlay/pencere açılmaz).
 ///
 /// Görünüm (prototip `.rp-toast`, bundle.css `.m-toast`): ortada içeriğe sarılan yüzen kutu,
 /// köşe `m-r-attach` 14, `ink` zemin + `bg-base` yazı 13/600, `m-sh-float` gölge; ton ikonla
 /// (bilgi/başarı/hata) ve ikon renginde ayrışır (karşı temanın `accent-text` / `danger` rengi).
-/// Kabukta Scaffold'un alt menüsünün (`NzFloatingNav`) üstünde durur (floating snackbar alt
-/// menü yüksekliği kadar yukarıda yerleşir); giriş `easeSheet` ile alttan yükselir.
+///
+/// Hareket (prototip `say`): kutu BİR BÜTÜN olarak aşağıdan hızlıca kayıp gelir, [life] sonra
+/// aşağı iner (SnackBar'ın kendi kırparak büyüyen girişi kapalıdır). Görünürken yeni toast
+/// gelirse yeniden canlandırılmaz: içerik yerinde değişir ve süre baştan sayılır (aynı düğmeye
+/// art arda basmak kutuyu oynatmaz). İnerken gelen toast kutuyu geri çıkarır.
 abstract final class NzToast {
+  /// Görünürlük süresi (prototip 2400 ms; eylemliyse 3200 ms).
+  static const life = Duration(milliseconds: 2400);
+  static const lifeWithAction = Duration(milliseconds: 3200);
+
+  /// Ekrandaki toast (yoksa null); yeni çağrı onu günceller.
+  static _ToastSlotState? _current;
+
   static void show(
     BuildContext context,
     String message, {
@@ -32,38 +43,38 @@ abstract final class NzToast {
       (actionLabel == null) == (onAction == null),
       'actionLabel ve onAction birlikte verilir',
     );
-    final colors = context.colors;
     final messenger = ScaffoldMessenger.of(context);
+    final data = _ToastData(message, tone, actionLabel, onAction);
+    final current = _current;
+    if (current != null && current.mounted && current.messenger == messenger) {
+      current.update(data);
+      return;
+    }
+    final colors = context.colors;
     messenger
-      ..hideCurrentSnackBar()
+      ..removeCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          // Zemin kutunun kendisinde; SnackBar yalnız konum/zamanlama taşır.
+          // Zemin kutunun kendisinde; SnackBar yalnız konum taşır. Süre ve hareket kutunundur:
+          // SnackBar'ın zamanlayıcısı devreye girmesin diye uzun, kendi hareketi sıfır, kırpma yok
+          // (kutu sınırın dışından kayarak gelir).
           backgroundColor: colors.text.withValues(alpha: 0),
           elevation: 0,
           padding: EdgeInsets.zero,
+          clipBehavior: Clip.none,
           behavior: SnackBarBehavior.floating,
+          duration: const Duration(hours: 1),
           margin: const EdgeInsets.fromLTRB(
             NizamioSpacing.gutter,
             0,
             NizamioSpacing.gutter,
             NizamioSpacing.gapSm,
           ),
-          content: NzToastBubble(
-            message: message,
-            tone: tone,
-            actionLabel: actionLabel,
-            onAction: onAction == null
-                ? null
-                : () {
-                    messenger.hideCurrentSnackBar();
-                    onAction();
-                  },
-          ),
+          content: _ToastSlot(messenger: messenger, initial: data),
         ),
-        snackBarAnimationStyle: AnimationStyle(
-          duration: NzMotion.of(context, NizamioMotion.durSheet),
-          reverseDuration: NzMotion.of(context, NizamioMotion.durExit),
+        snackBarAnimationStyle: const AnimationStyle(
+          duration: Duration.zero,
+          reverseDuration: Duration.zero,
         ),
       );
   }
@@ -76,7 +87,126 @@ abstract final class NzToast {
       show(context, errorText(context.l10n, error), tone: NzToastTone.danger);
 }
 
-/// Toast kutusu (servisin çizdiği görünüm; katalog/golden için dışa açık).
+@immutable
+class _ToastData {
+  const _ToastData(this.message, this.tone, this.actionLabel, this.onAction);
+
+  final String message;
+  final NzToastTone tone;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+}
+
+/// Toast'ın yaşam döngüsü: giriş, süre sayacı, güncelleme, çıkış ve SnackBar'ın kaldırılması.
+class _ToastSlot extends StatefulWidget {
+  const _ToastSlot({required this.messenger, required this.initial});
+
+  final ScaffoldMessengerState messenger;
+  final _ToastData initial;
+
+  @override
+  State<_ToastSlot> createState() => _ToastSlotState();
+}
+
+class _ToastSlotState extends State<_ToastSlot>
+    with SingleTickerProviderStateMixin {
+  // Hızlı giriş (yumuşak duruş), daha hızlı iniş.
+  static const _in = Duration(milliseconds: 260);
+  static const _out = Duration(milliseconds: 200);
+  static const _inCurve = Cubic(.2, .8, .2, 1);
+
+  late _ToastData _data = widget.initial;
+  late final _move = AnimationController(vsync: this);
+  Timer? _life;
+
+  ScaffoldMessengerState get messenger => widget.messenger;
+
+  @override
+  void initState() {
+    super.initState();
+    NzToast._current = this;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // İlk kare: bağımlılıklar (hareketi azalt) hazır olunca giriş.
+    if (_move.status == AnimationStatus.dismissed && _life == null) _enter();
+  }
+
+  void _enter() {
+    _move.animateTo(1, duration: NzMotion.of(context, _in), curve: _inCurve);
+    _restart();
+  }
+
+  void _restart() {
+    _life?.cancel();
+    _life = Timer(
+      _data.onAction == null ? NzToast.life : NzToast.lifeWithAction,
+      _exit,
+    );
+  }
+
+  /// Yeni içerik: yerinde değişir, süre baştan; inerken geldiyse kutu geri çıkar.
+  void update(_ToastData data) {
+    setState(() => _data = data);
+    if (_move.status == AnimationStatus.reverse ||
+        _move.status == AnimationStatus.dismissed) {
+      _enter();
+    } else {
+      _restart();
+    }
+  }
+
+  Future<void> _exit() async {
+    _life?.cancel();
+    await _move.animateBack(
+      0,
+      duration: NzMotion.of(context, _out),
+      curve: Curves.easeIn,
+    );
+    // Bu arada güncellendiyse (yeniden çıkıyor) kaldırılmaz.
+    if (mounted && _move.isDismissed) messenger.removeCurrentSnackBar();
+  }
+
+  @override
+  void dispose() {
+    _life?.cancel();
+    _move.dispose();
+    if (identical(NzToast._current, this)) NzToast._current = null;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final d = _data;
+    final action = d.onAction;
+    return AnimatedBuilder(
+      animation: _move,
+      builder: (context, child) {
+        final v = _move.value;
+        return FractionalTranslation(
+          translation: Offset(0, (1 - v) * 1.4),
+          child: Opacity(opacity: (v * 1.6).clamp(0, 1), child: child),
+        );
+      },
+      child: NzToastBubble(
+        message: d.message,
+        tone: d.tone,
+        actionLabel: d.actionLabel,
+        onAction: action == null
+            ? null
+            : () {
+                _exit();
+                action();
+              },
+      ),
+    );
+  }
+}
+
+/// Toast kutusu (servisin çizdiği durağan görünüm; hareket servisindir; katalog/golden için
+/// dışa açık).
 class NzToastBubble extends StatelessWidget {
   const NzToastBubble({
     super.key,
@@ -91,12 +221,11 @@ class NzToastBubble extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
 
-  // Prototip `.rp-toast` iç boşluğu 12 / 18; giriş kayması 8 px (`m-rise-in`).
+  // Prototip `.rp-toast` iç boşluğu 12 / 18.
   static const _padding = EdgeInsets.symmetric(
     horizontal: NizamioSpacing.gapLg,
     vertical: NizamioSpacing.space3,
   );
-  static const _rise = 8.0;
 
   /// Kutunun zemini (`ink`).
   static Color fill(NizamioColors c) => c.text;
@@ -168,20 +297,6 @@ class NzToastBubble extends StatelessWidget {
         ),
       ),
     );
-    return Center(
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: 1),
-        duration: NzMotion.of(context, NizamioMotion.durSheet),
-        curve: NizamioMotion.easeSheet,
-        builder: (context, v, child) => Opacity(
-          opacity: v.clamp(0, 1),
-          child: Transform.translate(
-            offset: Offset(0, (1 - v) * _rise),
-            child: child,
-          ),
-        ),
-        child: bubble,
-      ),
-    );
+    return Center(child: bubble);
   }
 }

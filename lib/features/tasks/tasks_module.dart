@@ -7,7 +7,6 @@ import 'application/task_sources.dart';
 import 'application/tasks_providers.dart';
 import 'data/download_sink.dart';
 import 'data/file_upload_picker.dart';
-import 'data/sample/sample_task_catalog_repository.dart';
 import 'data/task_catalog_api_repository.dart';
 import 'data/task_details_api_repository.dart';
 import 'data/task_write_api_repository.dart';
@@ -19,7 +18,7 @@ import 'domain/task_writes.dart';
 ///
 /// [apiDio]: doğrulanmış bağın güncel API istemcisi (Riverpod `apiDioProvider`); bağ yoksa null.
 void registerTasksModule(GetIt locator, {required Dio? Function() apiDio}) {
-  // Sunucu programı seçiliyse sunucu kataloğu; örnek kapsamda geliştirme örneği.
+  // Seçili programın sunucu kataloğu (program yoksa scope_missing).
   locator
     ..registerLazySingleton<TaskCatalogRepository>(
       () => TaskCatalogSource(
@@ -33,7 +32,6 @@ void registerTasksModule(GetIt locator, {required Dio? Function() apiDio}) {
                   programId: () => locator<ScopeController>().current.programId,
                 );
         },
-        sample: SampleTaskCatalogRepository(),
       ),
     )
     ..registerLazySingleton<TaskListRepository>(

@@ -28,16 +28,17 @@ Ayrıntılar: [DI kararı](docs/architecture/adr-0001-di-get-it.md),
 
 ## Okuma sırası (oturum başı)
 
-1. `../program/DURUM.md` — aktif faz ve sıradaki tek iş (yönetim deposu `NIZAM.IO/program/`).
-2. `../program/fazlar/FNN-*.md` — aktif mobil fazının amacı, kapsamı, kabul ölçütü.
+1. `../program/DURUM.md` — aktif iş ve sıradaki tek adım (yönetim deposu `NIZAM.IO/program/`).
+2. `../program/isler/FNN-*.md` — aktif mobil işinin amacı, kapsamı, kabul ölçütü.
 3. Backend API sözleşmesi (tek kaynak): `../nizam.io--backend/docs/api/`
    - `openapi.yaml` — uçlar, şemalar, kapsam başlıkları, hata yanıtları
    - `error-codes.json` — hata kodu → HTTP durumu → `fields[]` → mesaj anahtarı
    - `README.md` — sürüm ve etiket ilkesi
-4. Bu depodaki `README.md` (komutlar, flavor'lar, dizin düzeni) ve açık PR'lar.
+4. Bu depodaki `README.md` (komutlar, flavor'lar, dizin düzeni), `lib/CLAUDE.md` ve
+   `lib/core/api/CLAUDE.md` (kaynak haritaları) ve açık PR'lar.
 
-Spec her zaman bir **backend etiketinden** okunur (ilk pin: `v0.1.0-api`). Etiketsiz
-`main` spec'inden kod üretilmez.
+Pin kuralı tek yerde: kök [`../README.md`](../README.md) (tek cümle) ve backend
+`docs/api/README.md` §8; güncel pin `api-pin.json`.
 
 ## Kurallar
 
@@ -50,11 +51,17 @@ Spec her zaman bir **backend etiketinden** okunur (ilk pin: `v0.1.0-api`). Etike
 - **Belirteçler:** erişim + yenileme gövdede, yalnız `flutter_secure_storage`'da; yeni
   belirteç kaydedilmeden eski silinmez; log'a belirteç yazılmaz. Yenileme belirsiz
   düşerse (zaman aşımı/ağ) aynı belirteçle tekrar denenmez → yeniden giriş.
-- **Kapsam açık taşınır:** S2'de `X-Nizamio-Program`, S3'te ek `X-Nizamio-Department`.
-- **Hata zarfı:** `{code, message, request_id, fields[]}`; metin `code`'dan ARB anahtarıyla.
+- Sözleşme ayrıntıları (kapsam başlıkları, hata zarfı, sayfalama, sürüm):
+  `../nizam.io--backend/docs/api/README.md`.
 - v1'de push yok (uygulama içi çan + ön planda yoklama); pinning ve biyometrik yok.
 - Eski mobil kod veya sahte kontrol düzlemi geri getirilmez.
 - Backend veya yönetim deposuna bu depodan yazılmaz.
+- **Dosya boyutu:** el yazımı Dart dosyası (lib, test, tool) en çok **600 satır**; 600'e
+  yaklaşan dosya anlamlı parçalara bölünür (sekme, sayfa parçası, ressam, sayfa ayrı dosya).
+  Üretilmiş dosyalar (`generated/`, `*.g.dart`, `*.freezed.dart`, `*.gen.dart`, ARB) ölçüt
+  dışıdır. Denetim `test/tool/file_size_test.dart`; sınırı aşan eski dosyalar oradaki
+  listede bugünkü boylarıyla tavanlıdır, büyüyemez ve yeni giriş eklenmez. Bir dosya 600'ün
+  altına inince listeden çıkarılır.
 
 ## Test kapsamı
 
@@ -67,8 +74,8 @@ durumları (boş, hata, yükleniyor) bileşende bir kez test edilir, her ekranda
 
 ## Teslim
 
-Her değişiklik PR ile gelir; şablon `.github/pull_request_template.md`. "Bitti" yalnız
+Her değişiklik PR ile gelir; şablon `.github/pull_request_template.md`. Dal adı
+`ozellik|duzeltme|arayuz|belge|bakim/<kısa-açıklama>` (tablo: `README.md` §Süreç; CI denetler). "Bitti" yalnız
 CI yeşil + kabul ölçütü kanıtıyla söylenir. Faz sonunda Codex tek koşum (salt okunur)
 hükmü `docs/reviews/` altına yazılır; faz kapanışı `../program/DURUM.md`'ye işlenir.
-Ürün sahibine oturum içinde soru sorulmaz; kırmızı karar (ör. mobil yenileme ömrü,
-uygulama kimliği/imzalama) faz dosyasındaki varsayılanla ilerler ve DURUM.md'ye yazılır.
+Oturum protokolü ve kırmızı karar kuralı: `../program/README.md`.

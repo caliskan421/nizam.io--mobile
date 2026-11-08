@@ -14,7 +14,7 @@ part 'home_dashboard_controller.g.dart';
 /// dokunuşuyla (`ref.invalidate`).
 ///
 /// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-/// - örnek kapsam ya da şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
 /// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
@@ -54,7 +54,7 @@ class HomeDashboardController extends _$HomeDashboardController {
     final scope = ref.read(scopeStateProvider);
     Object? failure;
     StackTrace? trace;
-    if (scope.hasServerProgram && scope.programId != null) {
+    if (scope.hasProgram) {
       try {
         await ref.read(taskCatalogControllerProvider.notifier).refresh();
       } on Object catch (e, s) {
@@ -88,7 +88,9 @@ class HomeDashboardController extends _$HomeDashboardController {
     final scope = ref.watch(scopeStateProvider);
     final repo = ref.read(homeDashboardRepositoryProvider);
     final program = scope.programId;
-    if (!scope.hasServerProgram || program == null) return repo.load();
+    if (!scope.hasProgram || program == null) {
+      throw ApiError(ClientErrorCode.scopeMissing);
+    }
 
     void followCatalog() => ref.listen(taskCatalogControllerProvider, (
       prev,
@@ -107,7 +109,8 @@ class HomeDashboardController extends _$HomeDashboardController {
       rethrow;
     }
     final access = catalog.access;
-    if (access == null || access.companyAdmin) return repo.load();
+    if (access == null) throw ApiError(ClientErrorCode.scopeMissing);
+    if (access.companyAdmin) return repo.load();
 
     followCatalog();
     // Özetin departmanı (görevler ekranının süzgecinden bağımsız): programdaki ilk

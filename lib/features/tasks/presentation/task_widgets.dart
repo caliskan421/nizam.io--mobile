@@ -5,7 +5,6 @@ import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_pane.dart';
 import '../../../core/ui/theme/nz_motion.dart';
-import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
@@ -542,27 +541,31 @@ class TaskDateField extends StatelessWidget {
   }
 }
 
-/// Alt sayfa "Vazgeç / ana eylem" düğme çifti.
-List<Widget> sheetActions(
-  BuildContext sheet, {
-  required String cancel,
-  required String ok,
-  required VoidCallback onOk,
-  bool danger = false,
-}) => [
-  NzButton.secondary(
-    label: cancel,
-    expand: true,
-    onPressed: () => Navigator.of(sheet).maybePop(),
-  ),
-  if (danger)
-    NzButton.danger(label: ok, expand: true, onPressed: onOk)
-  else
-    NzButton.primary(label: ok, expand: true, onPressed: onOk),
-];
-
 /// Tablet kaynak öncelik düğmesi yüksekliği (30).
 const _pillButton = 30.0;
 
 bool _tablet(BuildContext context) =>
     NzTabletMetrics.tabletVisualAt(MediaQuery.sizeOf(context).width);
+
+/// [child]'ı çizer; ağaçtan kalkınca [notifier]'ı siler (alt sayfa denetleyicisinin ömrü sayfanın
+/// kapanış hareketi bitene dek sürsün diye).
+class DisposeWith extends StatefulWidget {
+  const DisposeWith(this.notifier, {super.key, required this.child});
+
+  final ChangeNotifier notifier;
+  final Widget child;
+
+  @override
+  State<DisposeWith> createState() => _DisposeWithState();
+}
+
+class _DisposeWithState extends State<DisposeWith> {
+  @override
+  void dispose() {
+    widget.notifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}

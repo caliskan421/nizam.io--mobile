@@ -11,6 +11,8 @@ import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/features/meetings/data/meetings_api_repository.dart';
 import 'package:nizamio/features/meetings/domain/meeting.dart';
 
+part 'meetings_api_fixtures.dart';
+
 class _Adapter implements HttpClientAdapter {
   _Adapter(this.respond);
 
@@ -55,68 +57,10 @@ ResponseBody _err(int status, String code) =>
   ResponseBody Function(RequestOptions o) respond,
 ) {
   final adapter = _Adapter(respond);
-  return (
-    ApiMeetingsRepository(
-      Dio(BaseOptions(baseUrl: 'https://api.test'))
-        ..httpClientAdapter = adapter,
-    ),
-    adapter,
-  );
+  final dio = Dio(BaseOptions(baseUrl: 'https://api.test'))
+    ..httpClientAdapter = adapter;
+  return (ApiMeetingsRepository(() => dio), adapter);
 }
-
-const _t = '2026-11-03T07:00:00Z';
-
-Map<String, Object?> _meeting({
-  String role = 'coordinator',
-  String id = 'm1',
-}) => {
-  'meeting_id': id,
-  'program_id': 'p1',
-  'owner_department_id': 'd1',
-  'title': 'Haftalık',
-  'meeting_date': _t,
-  'members_included': true,
-  'created_by_account_id': 'a1',
-  'created_by_role': role,
-  'created_at': _t,
-  'updated_at': _t,
-  'departments': [
-    {'department_id': 'd1', 'department_name': 'Mekanik'},
-    {'department_id': 'd2', 'department_name': 'Yazılım'},
-  ],
-};
-
-Map<String, Object?> _agenda({bool checked = false}) => {
-  'agenda_item_id': 'g1',
-  'meeting_id': 'm1',
-  'title': 'Bütçe',
-  'sort_order': 1,
-  'is_checked': checked,
-  'checked_at': checked ? _t : null,
-  'checked_by_account_id': checked ? 'a2' : null,
-  'created_at': _t,
-};
-
-Map<String, Object?> _note({Object? role = 'member'}) => {
-  'note_id': 'n1',
-  'meeting_id': 'm1',
-  'author_account_id': null,
-  'author_name': 'Ayşe',
-  'author_role': role,
-  'content': 'Not',
-  'converted_to_work_item_id': null,
-  'created_at': _t,
-  'updated_at': _t,
-};
-
-Map<String, Object?> _conference({String status = 'live'}) => {
-  'id': 'c1',
-  'status': status,
-  'started_at': _t,
-  'started_by_account_id': 'a1',
-};
-
-const _effects = {'failed_messages': 2, 'event_failed': true};
 
 void main() {
   group('createMeeting', () {
@@ -455,9 +399,13 @@ void main() {
         }
         return _json(_note(role: 'coordinator'));
       });
-      final n = await repo.addNote('m1', 'Not');
+      final n = await repo.addNote(
+        'm1',
+        'Not',
+        requestKey: 'k-0123456789abcdefghij',
+      );
       final s = await repo.listNotes('m1', const PageRequest(limit: 2));
-      final u = await repo.updateNote('n1', 'Düzeltme');
+      final u = await repo.updateNote('n1', 'Düzeltme', expectedRevision: 3);
       await repo.deleteNote('n1');
       expect(a.seen.map((o) => (o.method, o.uri.path)), [
         ('POST', '/v1/meetings/m1/notes'),
@@ -467,7 +415,8 @@ void main() {
       ]);
       expect(a.seen[1].uri.queryParameters, {'limit': '2'});
       expect(a.bodies[0], {'content': 'Not'});
-      expect(a.bodies[2], {'content': 'Düzeltme'});
+      expect(a.bodies[2], {'content': 'Düzeltme', 'expected_revision': 3});
+      expect(a.seen[0].headers['Idempotency-Key'], 'k-0123456789abcdefghij');
       expect(n.authorRole, MeetingRole.coordinator);
       expect(s.items.map((x) => x.authorRole), [
         MeetingRole.member,
@@ -480,7 +429,7 @@ void main() {
     test('429 hız sınırı → ApiError', () async {
       final (repo, _) = _repo((_) => _err(429, 'platform.rate_limited'));
       await expectLater(
-        repo.addNote('m1', 'x'),
+        repo.addNote('m1', 'x', requestKey: 'k-0123456789abcdefghij'),
         throwsA(isA<ApiError>().having((e) => e.status, 'status', 429)),
       );
     });

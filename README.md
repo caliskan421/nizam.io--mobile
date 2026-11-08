@@ -1,7 +1,7 @@
 # NIZAM.IO — Mobil istemci
 
 NIZAM.IO'nun iOS/Android istemcisi. Durum: **MOB-0 altyapı iskeleti** (program F14,
-`../program/fazlar/F14-mob-1-kimlik-kabuk-can.md`). Ekran yoktur: ekran tasarımı ve UI
+`../program/arsiv/v1-teslim/fazlar/F14-mob-1-kimlik-kabuk-can.md`). Ekran yoktur: ekran tasarımı ve UI
 geliştirmesi program sonrası ayrı çalışmadadır (D-0174).
 
 ## Yığın
@@ -120,6 +120,8 @@ negatif matrisler `test/tool/boundaries_test.dart` ve `test/tool/api_surface_tes
   geri çağrı veremez (A5) ve `dynamic` üzerinde çağrı lint ile yasak (`avoid_dynamic_calls`).
 - `flutter_secure_storage` yalnız `lib/core/storage/`; `badCertificateCallback` /
   `HttpOverrides` hiçbir yerde; `debugPrint`/`dart:developer` yalnız `lib/core/logging/`.
+- El yazımı Dart dosyası ≤ 600 satır (üretilmiş dosyalar hariç); `test/tool/file_size_test.dart`
+  (`make test`, CI). Eski aşan dosyalar orada tavanlı listede, liste yalnız küçülür.
 
 ## Üretim (`make gen`, `tool/gen.dart`)
 
@@ -250,3 +252,17 @@ Senaryolar (`test_integration/backend_test.dart`):
 
 Faz sırası ve durum: `../program/DURUM.md`. Her değişiklik PR + CI; faz sonunda
 Codex tek koşum. Bu depoda `project-control` kaydı tutulmaz.
+
+### Dal adı
+
+Biçim `<önek>/<kısa-açıklama>`: küçük harf, ASCII, kelimeler `-` ile; faz varsa başa
+(`ozellik/f62-tarih-talebi`). CI (`verify` işinin ilk adımı) PR dal adını bu kurala göre
+denetler. Bir dal tek türde iş taşır; karışırsa ayrı dala bölünür.
+
+| Önek | Ne zaman |
+|---|---|
+| `ozellik/` | olmayan bir şeyin eklenmesi: yeni ekran, akış, uç ya da sözleşme (pin) yükseltmesi |
+| `duzeltme/` | var olan davranışın düzeltilmesi ya da değiştirilmesi: hata, kural, akış, varsayılan |
+| `arayuz/` | yalnız görünüm: yerleşim, bileşen, animasyon, tablet/telefon uyumu; veri ve iş mantığı değişmez |
+| `belge/` | her türlü belge ekleme/düzeltme: README, CLAUDE/AGENTS, ADR, `docs/`, yönetim deposu `program/` |
+| `bakim/` | yeniden düzenleme, bağımlılık, CI, araç, üretilmiş kod yenilemesi |

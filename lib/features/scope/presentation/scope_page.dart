@@ -46,10 +46,6 @@ class ScopePage extends ConsumerWidget {
                 title: l.uiScopeEmptyTitle,
                 message: l.uiScopeEmptyMessage,
                 icon: NzIcons.folderOff,
-                actionLabel: l.uiScopeContinueWithSample,
-                onAction: () => ref
-                    .read(scopeSelectionControllerProvider.notifier)
-                    .selectSample(),
               ),
               data: (slice) => ListView(
                 children: [

@@ -1,6 +1,5 @@
 // HTTP ara katmanı (F14 kapsam 6) + kimlik servisi + log redaksiyonu: gerçek provider bağları,
 // sahte bağdaştırıcı.
-
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -528,6 +527,7 @@ void main() {
             filePath: file.path,
             filename: 'rapor.pdf',
             contentType: 'application/pdf',
+            requestKey: 'k-0123456789abcdefghij',
             extras: withDepartment(RecordsClient.attachFileOpenapiExtras, 'd1'),
           ),
           apiError(ClientErrorCode.sessionRefreshed),

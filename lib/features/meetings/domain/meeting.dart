@@ -163,10 +163,15 @@ final class MeetingNote {
     required this.updatedAt,
     this.authorAccountId,
     this.convertedToWorkItemId,
+    required this.editRevision,
   });
 
   final String id;
   final String meetingId;
+
+  /// İçeriğin düzenleme sürümü (`edit_revision`, ADR-0027); düzenleme `expected_revision`
+  /// olarak geri gönderir.
+  final int editRevision;
 
   /// Yazar hesabı silinmişse `null`.
   final String? authorAccountId;
@@ -211,6 +216,20 @@ final class MeetingDetail {
   /// Bağlı video sağlayıcısı oda açabiliyor mu (sağlayıcı `none` iken `false`). Başlat
   /// düğmesi buna göre gösterilir.
   final bool conferenceAvailable;
+
+  MeetingDetail copyWith({
+    List<MeetingParticipant>? participants,
+    List<AgendaItem>? agenda,
+    MeetingConference? Function()? conference,
+  }) => MeetingDetail(
+    meeting: meeting,
+    viewerRole: viewerRole,
+    participants: participants ?? this.participants,
+    agenda: agenda ?? this.agenda,
+    notes: notes,
+    conference: conference == null ? this.conference : conference(),
+    conferenceAvailable: conferenceAvailable,
+  );
 }
 
 /// İşlem sonrası en iyi çabalı yan etkiler (arıza işlemi geri almaz).

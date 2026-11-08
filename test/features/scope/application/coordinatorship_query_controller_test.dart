@@ -36,7 +36,7 @@ List<String> _names(List<CoordinatorshipSummary> l) => [
 void main() {
   test('varsayılan: gecikme, büyükten küçüğe; eşitlikte ad A→Z; ilk 4', () {
     const q = CoordinatorshipQuery();
-    expect(_names(q.filtered(_all)), [
+    expect(_names(q.sorted(_all)), [
       'İdari',
       'Bütçe',
       'Fuar',
@@ -51,7 +51,7 @@ void main() {
     'gecikme eşitliği yönle döner (küçükten büyüğe: Z→A); ilerleme kararlı',
     () {
       const asc = CoordinatorshipQuery(descending: false);
-      expect(_names(asc.filtered(_all)), [
+      expect(_names(asc.sorted(_all)), [
         'Ulaşım',
         'Çevre',
         'Fuar',
@@ -61,8 +61,8 @@ void main() {
       // İlerleme eşitleri gelen (sunucu) sırasını korur.
       final same = [_c('Zeta'), _c('Alfa'), _c('Mavi')];
       const prog = CoordinatorshipQuery(sort: CoordinatorshipSort.progress);
-      expect(_names(prog.filtered(same)), ['Zeta', 'Alfa', 'Mavi']);
-      expect(_names(prog.copyWith(descending: false).filtered(same)), [
+      expect(_names(prog.sorted(same)), ['Zeta', 'Alfa', 'Mavi']);
+      expect(_names(prog.copyWith(descending: false).sorted(same)), [
         'Zeta',
         'Alfa',
         'Mavi',
@@ -70,30 +70,21 @@ void main() {
     },
   );
 
-  test('filtreler sunucu sayılarına bakar', () {
-    int n(CoordinatorshipFilter f) =>
-        _all.where((c) => CoordinatorshipQuery.matches(f, c)).length;
-    expect(n(CoordinatorshipFilter.all), 5);
-    expect(n(CoordinatorshipFilter.late), 3);
-    expect(n(CoordinatorshipFilter.onTrack), 2);
-    expect(n(CoordinatorshipFilter.unassigned), 1);
-  });
-
   test('ilerleme ve ad (Türkçe sıra) ölçütleri; yön çevrilir', () {
     const q = CoordinatorshipQuery(sort: CoordinatorshipSort.progress);
-    expect(_names(q.filtered(_all)).first, 'Çevre');
+    expect(_names(q.sorted(_all)).first, 'Çevre');
     const byName = CoordinatorshipQuery(
       sort: CoordinatorshipSort.name,
       descending: false,
     );
-    expect(_names(byName.filtered(_all)), [
+    expect(_names(byName.sorted(_all)), [
       'Bütçe',
       'Çevre',
       'Fuar',
       'İdari',
       'Ulaşım',
     ]);
-    expect(_names(byName.copyWith(descending: true).filtered(_all)), [
+    expect(_names(byName.copyWith(descending: true).sorted(_all)), [
       'Ulaşım',
       'İdari',
       'Fuar',
@@ -102,15 +93,15 @@ void main() {
     ]);
   });
 
-  test('komutlar: döngü, yön, filtre daraltır, eşitlik', () {
+  test('komutlar: döngü, yön, tümünü göster, eşitlik', () {
     final c = ProviderContainer();
     addTearDown(c.dispose);
     final ctl = c.read(coordinatorshipQueryControllerProvider.notifier);
     CoordinatorshipQuery q() => c.read(coordinatorshipQueryControllerProvider);
     ctl.toggleExpanded();
     expect(q().expanded, isTrue);
-    ctl.selectFilter(CoordinatorshipFilter.late);
-    expect((q().filter, q().expanded), (CoordinatorshipFilter.late, false));
+    ctl.toggleExpanded();
+    expect(q().expanded, isFalse);
     ctl.cycleSort();
     expect((q().sort, q().descending), (CoordinatorshipSort.progress, true));
     ctl.cycleSort();

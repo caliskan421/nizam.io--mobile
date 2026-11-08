@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show SemanticsProperties;
 import 'package:gap/gap.dart';
 
+import '../../../../core/i18n/generated/app_localizations.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
@@ -21,7 +23,8 @@ import 'timeline_painters.dart';
 /// kendi `RepaintBoundary`'sinde bir kez kaydedilir, kaydırmada yalnız kayar) ve kaydırmaya
 /// bağlı ince [TimelineStickyPainter] (yapışkan etiketler, grup başlıkları). Yerleşim yalnız
 /// görünüm ya da genişlik değişince yeniden hesaplanır; "bugüne dön" düğmesi kaydırmanın her
-/// karesinde değil, görünürlüğü değişince yeniden kurulur.
+/// karesinde değil, görünürlüğü değişince yeniden kurulur. Okuyucu düğümleri çubuk başına widget
+/// değil, yalnız görünür çubuklar için tek painter'ın `semanticsBuilder`'ıdır.
 class TimelineChart extends StatefulWidget {
   const TimelineChart({
     super.key,
@@ -30,8 +33,10 @@ class TimelineChart extends StatefulWidget {
     required this.onOverview,
     required this.onDrag,
     required this.bottomInset,
+    this.onBlankTap,
   });
 
+  final VoidCallback? onBlankTap;
   final TimelineView view;
   final ValueChanged<String> onSelect;
   final ValueChanged<String> onOverview;
@@ -169,7 +174,11 @@ class _TimelineChartState extends State<TimelineChart> {
       return;
     }
     final b = l.barAt(p);
-    if (b != null) widget.onSelect(b.task.code);
+    if (b != null) {
+      widget.onSelect(b.task.code);
+    } else {
+      widget.onBlankTap?.call();
+    }
   }
 
   void _longPressStart(LongPressStartDetails d) {
@@ -271,6 +280,9 @@ class _TimelineChartState extends State<TimelineChart> {
                           Positioned.fill(
                             child: _BarSemantics(
                               layout: layout,
+                              vertical: v,
+                              horizontal: _h,
+                              viewport: box.biggest,
                               onSelect: widget.onSelect,
                               onOverview: widget.onOverview,
                             ),
@@ -316,7 +328,7 @@ class _TimelineChartState extends State<TimelineChart> {
               ),
             if (!selection)
               Positioned(
-                left: NizamioSpacing.gutter,
+                left: TimelineGeometry.dateColumn + 10,
                 right: NizamioSpacing.gutter,
                 bottom: NizamioSpacing.gutter + widget.bottomInset,
                 child: _SeasonStrip(
@@ -339,7 +351,7 @@ class _TimelineChartState extends State<TimelineChart> {
                           Positioned(
                             top: above ? TimelineGeometry.header + 10 : null,
                             bottom: above ? null : 70 + widget.bottomInset,
-                            left: 0,
+                            left: TimelineGeometry.dateColumn,
                             right: 0,
                             child: Center(
                               child: _TodayButton(
@@ -360,48 +372,175 @@ class _TimelineChartState extends State<TimelineChart> {
   }
 }
 
-/// Çubuk ve sütunların okuyucu düğümleri (çizimle aynı dikdörtgenler).
-class _BarSemantics extends StatelessWidget {
+/// Çubuk ve sütunların okuyucu düğümleri (çizimle aynı dikdörtgenler), yalnız görünür alan
+/// ve yarım ekran payı için: tek [CustomPaint]'in `semanticsBuilder`'ı (çubuk başına widget
+/// yok). Pencere yarım görünür alan adımlarıyla kayar; kaydırmada yalnız adım değişince
+/// yeniden kurulur.
+class _BarSemantics extends StatefulWidget {
   const _BarSemantics({
     required this.layout,
+    required this.vertical,
+    required this.horizontal,
+    required this.viewport,
     required this.onSelect,
     required this.onOverview,
   });
 
   final TimelineLayout layout;
+  final ScrollController vertical;
+  final ScrollController horizontal;
+  final Size viewport;
   final ValueChanged<String> onSelect;
   final ValueChanged<String> onOverview;
 
   @override
+  State<_BarSemantics> createState() => _BarSemanticsState();
+}
+
+class _BarSemanticsState extends State<_BarSemantics> {
+  Rect _window = Rect.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.vertical.addListener(_sync);
+    widget.horizontal.addListener(_sync);
+  }
+
+  @override
+  void didUpdateWidget(_BarSemantics old) {
+    super.didUpdateWidget(old);
+    if (old.vertical != widget.vertical) {
+      old.vertical.removeListener(_sync);
+      widget.vertical.addListener(_sync);
+    }
+    if (old.horizontal != widget.horizontal) {
+      old.horizontal.removeListener(_sync);
+      widget.horizontal.addListener(_sync);
+    }
+    // Yeni yerleşim kaydırma konumunu bildirimsiz düzeltebilir (içerik/genişlik daralması);
+    // pencere kare sonunda yeniden hesaplanır.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
+  }
+
+  @override
+  void dispose() {
+    widget.vertical.removeListener(_sync);
+    widget.horizontal.removeListener(_sync);
+    super.dispose();
+  }
+
+  /// Görünür alanı yarım ekran adımına yuvarlar ve yarım adım pay ekler: görünür alan her
+  /// zaman pencerenin içindedir.
+  static (double, double) _band(double offset, double extent) {
+    if (extent <= 0) return (0, 0);
+    final step = extent / 2;
+    final top = (offset / step).floorToDouble() * step;
+    return (top - step / 2, top + step + extent + step / 2);
+  }
+
+  Rect _compute() {
+    final v = widget.vertical;
+    final h = widget.horizontal;
+    final (y0, y1) = _band(
+      v.hasClients ? v.offset : v.initialScrollOffset,
+      widget.viewport.height,
+    );
+    final (x0, x1) = _band(
+      h.hasClients ? h.offset : h.initialScrollOffset,
+      widget.viewport.width,
+    );
+    return Rect.fromLTRB(x0, y0, x1, y1);
+  }
+
+  void _sync() {
+    if (!mounted) return;
+    final w = _compute();
+    if (w != _window) setState(() => _window = w);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final l = context.l10n;
-    final year = layout.view.year;
-    return Stack(
-      children: [
-        for (final o in layout.overview)
-          Positioned.fromRect(
-            rect: o.column,
-            child: Semantics(
-              button: true,
-              label: l.overviewLabel(o.group),
-              onTap: () => onOverview(o.group.code),
-              child: const SizedBox.shrink(),
-            ),
-          ),
-        for (final b in layout.bars)
-          Positioned.fromRect(
-            rect: b.rect,
-            child: Semantics(
-              button: true,
-              selected: layout.view.state.selected == b.task.code,
-              label: l.barLabel(b.task, year),
-              onTap: () => onSelect(b.task.code),
-              child: const SizedBox.shrink(),
-            ),
-          ),
-      ],
+    _window = _compute();
+    return CustomPaint(
+      painter: _BarSemanticsPainter(
+        layout: widget.layout,
+        window: _window,
+        l10n: context.l10n,
+        textDirection: Directionality.of(context),
+        onSelect: widget.onSelect,
+        onOverview: widget.onOverview,
+      ),
     );
   }
+}
+
+class _BarSemanticsPainter extends CustomPainter {
+  _BarSemanticsPainter({
+    required this.layout,
+    required this.window,
+    required this.l10n,
+    required this.textDirection,
+    required this.onSelect,
+    required this.onOverview,
+  });
+
+  final TimelineLayout layout;
+
+  /// İçerik koordinatında düğüm kurulan alan.
+  final Rect window;
+  final AppLocalizations l10n;
+  final TextDirection textDirection;
+  final ValueChanged<String> onSelect;
+  final ValueChanged<String> onOverview;
+
+  @override
+  void paint(Canvas canvas, Size size) {}
+
+  @override
+  bool shouldRepaint(_BarSemanticsPainter old) => false;
+
+  @override
+  SemanticsBuilderCallback get semanticsBuilder => (size) {
+    final year = layout.view.year;
+    final sel = layout.view.state.selected;
+    return [
+      for (final o in layout.overview)
+        if (o.column.overlaps(window))
+          CustomPainterSemantics(
+            key: ValueKey('overview-${o.group.code}'),
+            rect: o.column,
+            properties: SemanticsProperties(
+              button: true,
+              label: l10n.overviewLabel(o.group),
+              textDirection: textDirection,
+              onTap: () => onOverview(o.group.code),
+            ),
+          ),
+      for (final b in layout.bars)
+        if (b.rect.overlaps(window))
+          CustomPainterSemantics(
+            key: ValueKey('bar-${b.task.code}'),
+            rect: b.rect,
+            properties: SemanticsProperties(
+              button: true,
+              selected: sel == b.task.code,
+              label: l10n.barLabel(b.task, year),
+              textDirection: textDirection,
+              onTap: () => onSelect(b.task.code),
+            ),
+          ),
+    ];
+  };
+
+  @override
+  bool shouldRebuildSemantics(_BarSemanticsPainter old) =>
+      old.layout != layout ||
+      old.window != window ||
+      old.l10n != l10n ||
+      old.textDirection != textDirection ||
+      old.onSelect != onSelect ||
+      old.onOverview != onOverview;
 }
 
 class _SeasonStrip extends StatelessWidget {

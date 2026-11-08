@@ -3,7 +3,6 @@
 // liste (State) kalır; modül değişimi varsayılana döner; telefon ↔ tablet geçişinde liste ve
 // ayrıntı State'i korunur.
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nizamio/app/router/shell.dart';
@@ -12,7 +11,6 @@ import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/ui/layout/nz_pane.dart';
 import 'package:nizamio/core/ui/page/nz_app_nav.dart';
 import 'package:nizamio/core/ui/widgets/feedback/nz_pick_record.dart';
-import 'package:nizamio/core/ui/widgets/inputs/nz_composer.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_floating_nav.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_tablet_rail.dart';
 import 'package:nizamio/core/ui/widgets/nz_icon.dart';
@@ -21,8 +19,6 @@ import 'package:nizamio/features/activity/activity.dart';
 import 'package:nizamio/features/archive/archive.dart';
 import 'package:nizamio/features/calendar/calendar.dart';
 import 'package:nizamio/features/coordinatorships/coordinatorships.dart';
-import 'package:nizamio/features/messages/application/chat_controller.dart';
-import 'package:nizamio/features/messages/domain/chat.dart';
 import 'package:nizamio/features/messages/messages.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 import 'package:nizamio/features/timeline/timeline.dart';
@@ -63,7 +59,7 @@ void main() {
     '1180×820: ray 100 + liste 390 (+1 kenar) + ayrıntı 689; kayıt yoksa "Bir kayıt seç"',
     (tester) async {
       final router = await _pump(tester, const Size(1180, 820));
-      router.go('/tasks');
+      router.go('/archive');
       await settle(tester);
       expect(find.byType(NzFloatingNav), findsNothing);
       expect(tester.getSize(find.byType(NzTabletRail)).width, 100);
@@ -79,16 +75,16 @@ void main() {
       expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 390, 820));
       expect(tester.getRect(detail), const Rect.fromLTWH(491, 0, 689, 820));
       expect(
-        _inPane(NzPaneRole.master, find.byType(TasksPage)),
+        _inPane(NzPaneRole.master, find.byType(ArchivePage)),
         findsOneWidget,
       );
-      // Prod'da örnek kimlik açılmaz: kayıt hiç açılmamışsa sağda "Bir kayıt seç".
+      // Kayıt hiç açılmamışsa sağda "Bir kayıt seç".
       expect(
         _inPane(NzPaneRole.detail, find.byType(NzPickRecord)),
         findsOneWidget,
       );
       expect(
-        _inPane(NzPaneRole.detail, find.byType(TaskDetailPage)),
+        _inPane(NzPaneRole.detail, find.byType(ArchiveFolderPage)),
         findsNothing,
       );
       // Tek ekranlık sağ yığında "Geri" yok.
@@ -96,8 +92,72 @@ void main() {
       expect(_inPane(NzPaneRole.detail, _backIcon), findsNothing);
       expect(
         tester.widget<NzTabletRail>(find.byType(NzTabletRail)).currentIndex,
-        RailModule.tasks.index,
+        RailModule.archive.index,
       );
+    },
+  );
+
+  testWidgets(
+    'Görevler: kökte liste tam genişlik; görev açılınca 390, Geri kapatır',
+    (tester) async {
+      final router = await _pump(tester, const Size(1180, 820));
+      router.go('/tasks?view=late');
+      await settle(tester);
+      final master = find.byWidgetPredicate(
+        (w) => w is NzPaneScope && w.role == NzPaneRole.master,
+      );
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
+      expect(find.byType(NzPickRecord).hitTestable(), findsNothing);
+      final list = tester.state(find.byType(TasksPage));
+
+      tester.element(find.byType(TasksPage)).appNav.openTask('ALT-7');
+      await settle(tester);
+      expect(locationOf(router), '/tasks/ALT-7');
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 390, 820));
+      expect(tester.state(find.byType(TasksPage)), same(list));
+      final back = _inPane(NzPaneRole.detail, _backIcon).hitTestable();
+      expect(back, findsOneWidget);
+
+      await tester.tap(back);
+      await settle(tester);
+      // Süzgeç korunur; liste yeniden tam genişlik, aynı State.
+      expect(locationOf(router), '/tasks?view=late');
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
+      expect(tester.state(find.byType(TasksPage)), same(list));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'Koordinatörlükler: kökte liste tam genişlik; kayıt açılınca 390, Geri kapatır',
+    (tester) async {
+      final router = await _pump(tester, const Size(1180, 820));
+      router.go('/coordinatorships');
+      await settle(tester);
+      final master = find.byWidgetPredicate(
+        (w) => w is NzPaneScope && w.role == NzPaneRole.master,
+      );
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
+
+      tester
+          .element(find.byType(CoordinatorshipsPage))
+          .appNav
+          .openCoordinatorship('ALT');
+      await settle(tester);
+      expect(locationOf(router), '/coordinatorships/ALT');
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 390, 820));
+
+      await tester.tap(_inPane(NzPaneRole.detail, _backIcon).hitTestable());
+      await settle(tester);
+      expect(locationOf(router), '/coordinatorships');
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
+      // Modüle dönüş son kaydı geri getirmez.
+      await tester.tap(_rail('Arşiv'));
+      await settle(tester);
+      await tester.tap(_rail('Koordinatörlükler'));
+      await settle(tester);
+      expect(locationOf(router), '/coordinatorships');
+      expect(tester.takeException(), isNull);
     },
   );
 
@@ -178,31 +238,41 @@ void main() {
       expect(locationOf(router), '/messages/gen');
       final chat = _inPane(NzPaneRole.detail, find.byType(ChatPage));
       expect(tester.widget<ChatPage>(chat).id, 'gen');
+      // Görevler son görevi geri getirmez: kök, liste tam genişlik.
       await tester.tap(_rail('Görevler'));
       await settle(tester);
-      expect(locationOf(router), '/tasks/ALT-7');
+      expect(locationOf(router), '/tasks');
     },
   );
 
   testWidgets(
-    'ana sayfa: geçmiş varsayılan kapalı; kartla açılır, daire "Kapat" boşa döndürür',
+    'ana sayfa: kökte tam genişlik (geçmiş kapalı); geçmiş açılınca 390, "Kapat" genişletir',
     (tester) async {
       final router = await _pump(tester, const Size(1180, 820));
       router.go('/home');
       await settle(tester);
-      expect(_inPane(NzPaneRole.detail, find.byType(NzPickRecord)), findsOne);
+      final master = find.byWidgetPredicate(
+        (w) => w is NzPaneScope && w.role == NzPaneRole.master,
+      );
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
+      expect(
+        find.byType(NzPickRecord),
+        findsNothing,
+        reason: 'sağ bölme gizli',
+      );
       expect(find.byType(ActivityPage), findsNothing);
 
       tester.element(find.byType(NzTabletRail)).appNav.openHistory();
       await settle(tester);
       expect(locationOf(router), '/home/history');
       expect(find.byType(ActivityPage).hitTestable(), findsOneWidget);
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 390, 820));
 
       await tester.tap(find.bySemanticsLabel('Kapat').hitTestable());
       await settle(tester);
       expect(locationOf(router), '/home');
       expect(find.byType(ActivityPage), findsNothing);
-      expect(_inPane(NzPaneRole.detail, find.byType(NzPickRecord)), findsOne);
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
 
       // Modüle geri giriş geçmişi hatırlamaz (kimliksiz; yalnız dokunuşla açılır).
       tester.element(find.byType(NzTabletRail)).appNav.openHistory();
@@ -346,77 +416,24 @@ void main() {
     expect(tester.state(find.byType(MessagesPage)), same(list));
   });
 
-  testWidgets(
-    'aynı sohbet satırını yeniden seç taslağı ve yazma bağlamını sıfırlar '
-    '(S_chat.load); yeniden boyut korur',
-    (tester) async {
-      final router = await _pump(tester, const Size(1180, 820));
-      router.go('/messages/gen');
-      await settle(tester);
-      final field = find
-          .descendant(
-            of: find.byType(NzComposer),
-            matching: find.byType(TextField),
-          )
-          .hitTestable();
-      ChatViewState view() =>
-          ProviderScope.containerOf(tester.element(find.byType(ChatPage)))
-              .read(chatControllerProvider('gen'));
-      ChatController ctrl() =>
-          ProviderScope.containerOf(tester.element(find.byType(ChatPage)))
-              .read(chatControllerProvider('gen').notifier);
-      await tester.enterText(field.first, 'Taslak');
-      ctrl()
-        ..reply('g1')
-        ..toggleRef(const ChatRef(ChatRefKind.task, 'ALT-5'))
-        ..nextPin();
-      await settle(tester);
-      for (final size in const [Size(1032, 1376), Size(1180, 820)]) {
-        tester.view.physicalSize = size;
-        await settle(tester);
-        expect(
-          tester.widget<TextField>(field.first).controller!.text,
-          'Taslak',
-          reason: '$size',
-        );
-        expect(view().reply, 'g1', reason: '$size: yanıt bağlamı kalır');
-        expect(view().refs, hasLength(1), reason: '$size');
-      }
-      // Ek paneli sağ bölmededir; sol satır basılabilir kalır.
-      ctrl().toggleAttach();
-      await settle(tester);
-      expect(view().attach, isNotNull);
-      await tester.tap(_inPane(NzPaneRole.master, find.text('Genel')));
-      await settle(tester);
-      expect(locationOf(router), '/messages/gen');
-      expect(tester.widget<TextField>(field.first).controller!.text, isEmpty);
-      final v = view();
-      expect(v.reply, isNull, reason: 'yanıt çipi kalkar');
-      expect(v.edit, isNull);
-      expect(v.refs, isEmpty);
-      expect(v.attach, isNull);
-      expect(v.pin, 0);
-    },
-  );
-
   testWidgets('modüle dönünce son açılan kayıt (prototip alt ekranı kalıcı)', (
     tester,
   ) async {
     final router = await _pump(tester, const Size(1180, 820));
-    router.go('/tasks/ALT-7');
+    router.go('/archive/ALT');
+    await settle(tester);
+    await tester.tap(_rail('Takvim'));
     await settle(tester);
     await tester.tap(_rail('Arşiv'));
     await settle(tester);
-    await tester.tap(_rail('Görevler'));
-    await settle(tester);
-    expect(locationOf(router), '/tasks/ALT-7');
+    expect(locationOf(router), '/archive/ALT');
     expect(
       tester
-          .widget<TaskDetailPage>(
-            _inPane(NzPaneRole.detail, find.byType(TaskDetailPage)),
+          .widget<ArchiveFolderPage>(
+            _inPane(NzPaneRole.detail, find.byType(ArchiveFolderPage)),
           )
           .code,
-      'ALT-7',
+      'ALT',
     );
   });
 
@@ -489,50 +506,6 @@ void main() {
     await settle(tester);
     expect(locationOf(router), '/tasks');
   });
-
-  testWidgets(
-    'telefon ↔ tablet: liste ve ayrıntı State korunur, rota aynı, hata yok',
-    (tester) async {
-      final router = await _pump(tester, const Size(390, 844));
-      router.go('/tasks/ALT-7');
-      await settle(tester);
-      expect(find.byType(NzFloatingNav), findsOneWidget);
-      final list = tester.state(find.byType(TasksPage, skipOffstage: false));
-      final detail = tester.state(find.byType(TaskDetailPage));
-      for (final size in const [
-        Size(1180, 820),
-        Size(390, 844),
-        Size(1032, 1376),
-        Size(820, 1180),
-        Size(1376, 1032),
-      ]) {
-        tester.view.physicalSize = size;
-        await settle(tester);
-        final why = 'boyut $size';
-        expect(tester.takeException(), isNull, reason: why);
-        expect(locationOf(router), '/tasks/ALT-7', reason: why);
-        expect(
-          tester.state(find.byType(TasksPage, skipOffstage: false)),
-          same(list),
-          reason: why,
-        );
-        final top = find
-            .byWidgetPredicate((w) => w is TaskDetailPage && w.code == 'ALT-7')
-            .hitTestable();
-        expect(tester.state(top), same(detail), reason: why);
-        expect(
-          find.byType(NzTabletRail),
-          size.width >= 600 ? findsOneWidget : findsNothing,
-          reason: why,
-        );
-        expect(
-          _inPane(NzPaneRole.master, find.byType(TasksPage)),
-          size.width >= 840 ? findsOneWidget : findsNothing,
-          reason: why,
-        );
-      }
-    },
-  );
 
   testWidgets('telefonda kabuk içi sohbet (tabletten daralınca) alt menüsüz', (
     tester,

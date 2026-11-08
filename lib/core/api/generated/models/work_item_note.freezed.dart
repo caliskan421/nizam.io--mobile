@@ -17,7 +17,8 @@ T _$identity<T>(T value) => value;
 mixin _$WorkItemNote {
 
 @JsonKey(name: 'note_id') String get noteId;@JsonKey(name: 'work_item_id') String get workItemId;@JsonKey(name: 'author_account_id') String get authorAccountId;/// Yazarın görünen adı; ad çözülemezse (geçici okuma hatası dahil) `null`.
-@JsonKey(name: 'author_full_name') String? get authorFullName; String get content;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'updated_at') DateTime get updatedAt;
+@JsonKey(name: 'author_full_name') String? get authorFullName; String get content;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'updated_at') DateTime get updatedAt;/// Not içeriğinin düzenleme sürümü (ADR-0027).
+@JsonKey(name: 'edit_revision') int get editRevision;
 /// Create a copy of WorkItemNote
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,20 +32,20 @@ $WorkItemNoteCopyWith<WorkItemNote> get copyWith => _$WorkItemNoteCopyWithImpl<W
 @override
 bool operator ==(Object other) {
   final _this = this as WorkItemNote;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is WorkItemNote&&(identical(other.noteId, _this.noteId) || other.noteId == _this.noteId)&&(identical(other.workItemId, _this.workItemId) || other.workItemId == _this.workItemId)&&(identical(other.authorAccountId, _this.authorAccountId) || other.authorAccountId == _this.authorAccountId)&&(identical(other.authorFullName, _this.authorFullName) || other.authorFullName == _this.authorFullName)&&(identical(other.content, _this.content) || other.content == _this.content)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is WorkItemNote&&(identical(other.noteId, _this.noteId) || other.noteId == _this.noteId)&&(identical(other.workItemId, _this.workItemId) || other.workItemId == _this.workItemId)&&(identical(other.authorAccountId, _this.authorAccountId) || other.authorAccountId == _this.authorAccountId)&&(identical(other.authorFullName, _this.authorFullName) || other.authorFullName == _this.authorFullName)&&(identical(other.content, _this.content) || other.content == _this.content)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.editRevision, _this.editRevision) || other.editRevision == _this.editRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as WorkItemNote;
-  return Object.hash(runtimeType,_this.noteId,_this.workItemId,_this.authorAccountId,_this.authorFullName,_this.content,_this.createdAt,_this.updatedAt);
+  return Object.hash(runtimeType,_this.noteId,_this.workItemId,_this.authorAccountId,_this.authorFullName,_this.content,_this.createdAt,_this.updatedAt,_this.editRevision);
 }
 
 @override
 String toString() {
   final _this = this as WorkItemNote;
-  return 'WorkItemNote(noteId: ${_this.noteId}, workItemId: ${_this.workItemId}, authorAccountId: ${_this.authorAccountId}, authorFullName: ${_this.authorFullName}, content: ${_this.content}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt})';
+  return 'WorkItemNote(noteId: ${_this.noteId}, workItemId: ${_this.workItemId}, authorAccountId: ${_this.authorAccountId}, authorFullName: ${_this.authorFullName}, content: ${_this.content}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, editRevision: ${_this.editRevision})';
 }
 
 
@@ -55,7 +56,7 @@ abstract mixin class $WorkItemNoteCopyWith<$Res>  {
   factory $WorkItemNoteCopyWith(WorkItemNote value, $Res Function(WorkItemNote) _then) = _$WorkItemNoteCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'note_id') String noteId,@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'author_account_id') String authorAccountId,@JsonKey(name: 'author_full_name') String? authorFullName, String content,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt
+@JsonKey(name: 'note_id') String noteId,@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'author_account_id') String authorAccountId,@JsonKey(name: 'author_full_name') String? authorFullName, String content,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt,@JsonKey(name: 'edit_revision') int editRevision
 });
 
 
@@ -72,7 +73,7 @@ class _$WorkItemNoteCopyWithImpl<$Res>
 
 /// Create a copy of WorkItemNote
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? noteId = null,Object? workItemId = null,Object? authorAccountId = null,Object? authorFullName = freezed,Object? content = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? noteId = null,Object? workItemId = null,Object? authorAccountId = null,Object? authorFullName = freezed,Object? content = null,Object? createdAt = null,Object? updatedAt = null,Object? editRevision = null,}) {
   return _then(WorkItemNote(
 noteId: null == noteId ? _self.noteId : noteId // ignore: cast_nullable_to_non_nullable
 as String,workItemId: null == workItemId ? _self.workItemId : workItemId // ignore: cast_nullable_to_non_nullable
@@ -81,7 +82,8 @@ as String,authorFullName: freezed == authorFullName ? _self.authorFullName : aut
 as String?,content: null == content ? _self.content : content // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,editRevision: null == editRevision ? _self.editRevision : editRevision // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -166,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'note_id')  String noteId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'author_account_id')  String authorAccountId, @JsonKey(name: 'author_full_name')  String? authorFullName,  String content, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'note_id')  String noteId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'author_account_id')  String authorAccountId, @JsonKey(name: 'author_full_name')  String? authorFullName,  String content, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt, @JsonKey(name: 'edit_revision')  int editRevision)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WorkItemNote() when $default != null:
-return $default(_that.noteId,_that.workItemId,_that.authorAccountId,_that.authorFullName,_that.content,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.noteId,_that.workItemId,_that.authorAccountId,_that.authorFullName,_that.content,_that.createdAt,_that.updatedAt,_that.editRevision);case _:
   return orElse();
 
 }
@@ -187,10 +189,10 @@ return $default(_that.noteId,_that.workItemId,_that.authorAccountId,_that.author
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'note_id')  String noteId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'author_account_id')  String authorAccountId, @JsonKey(name: 'author_full_name')  String? authorFullName,  String content, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'note_id')  String noteId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'author_account_id')  String authorAccountId, @JsonKey(name: 'author_full_name')  String? authorFullName,  String content, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt, @JsonKey(name: 'edit_revision')  int editRevision)  $default,) {final _that = this;
 switch (_that) {
 case _WorkItemNote():
-return $default(_that.noteId,_that.workItemId,_that.authorAccountId,_that.authorFullName,_that.content,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.noteId,_that.workItemId,_that.authorAccountId,_that.authorFullName,_that.content,_that.createdAt,_that.updatedAt,_that.editRevision);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +209,10 @@ return $default(_that.noteId,_that.workItemId,_that.authorAccountId,_that.author
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'note_id')  String noteId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'author_account_id')  String authorAccountId, @JsonKey(name: 'author_full_name')  String? authorFullName,  String content, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'note_id')  String noteId, @JsonKey(name: 'work_item_id')  String workItemId, @JsonKey(name: 'author_account_id')  String authorAccountId, @JsonKey(name: 'author_full_name')  String? authorFullName,  String content, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt, @JsonKey(name: 'edit_revision')  int editRevision)?  $default,) {final _that = this;
 switch (_that) {
 case _WorkItemNote() when $default != null:
-return $default(_that.noteId,_that.workItemId,_that.authorAccountId,_that.authorFullName,_that.content,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.noteId,_that.workItemId,_that.authorAccountId,_that.authorFullName,_that.content,_that.createdAt,_that.updatedAt,_that.editRevision);case _:
   return null;
 
 }
@@ -222,7 +224,7 @@ return $default(_that.noteId,_that.workItemId,_that.authorAccountId,_that.author
 @JsonSerializable()
 
 class _WorkItemNote implements WorkItemNote {
-  const _WorkItemNote({@JsonKey(name: 'note_id') required this.noteId, @JsonKey(name: 'work_item_id') required this.workItemId, @JsonKey(name: 'author_account_id') required this.authorAccountId, @JsonKey(name: 'author_full_name') required this.authorFullName, required this.content, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'updated_at') required this.updatedAt});
+  const _WorkItemNote({@JsonKey(name: 'note_id') required this.noteId, @JsonKey(name: 'work_item_id') required this.workItemId, @JsonKey(name: 'author_account_id') required this.authorAccountId, @JsonKey(name: 'author_full_name') required this.authorFullName, required this.content, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'updated_at') required this.updatedAt, @JsonKey(name: 'edit_revision') required this.editRevision});
   factory _WorkItemNote.fromJson(Map<String, dynamic> json) => _$WorkItemNoteFromJson(json);
 
 @override@JsonKey(name: 'note_id') final  String noteId;
@@ -233,6 +235,8 @@ class _WorkItemNote implements WorkItemNote {
 @override final  String content;
 @override@JsonKey(name: 'created_at') final  DateTime createdAt;
 @override@JsonKey(name: 'updated_at') final  DateTime updatedAt;
+/// Not içeriğinin düzenleme sürümü (ADR-0027).
+@override@JsonKey(name: 'edit_revision') final  int editRevision;
 
 /// Create a copy of WorkItemNote
 /// with the given fields replaced by the non-null parameter values.
@@ -247,18 +251,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _WorkItemNote&&(identical(other.noteId, noteId) || other.noteId == noteId)&&(identical(other.workItemId, workItemId) || other.workItemId == workItemId)&&(identical(other.authorAccountId, authorAccountId) || other.authorAccountId == authorAccountId)&&(identical(other.authorFullName, authorFullName) || other.authorFullName == authorFullName)&&(identical(other.content, content) || other.content == content)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _WorkItemNote&&(identical(other.noteId, noteId) || other.noteId == noteId)&&(identical(other.workItemId, workItemId) || other.workItemId == workItemId)&&(identical(other.authorAccountId, authorAccountId) || other.authorAccountId == authorAccountId)&&(identical(other.authorFullName, authorFullName) || other.authorFullName == authorFullName)&&(identical(other.content, content) || other.content == content)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.editRevision, editRevision) || other.editRevision == editRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,noteId,workItemId,authorAccountId,authorFullName,content,createdAt,updatedAt);
+    return Object.hash(runtimeType,noteId,workItemId,authorAccountId,authorFullName,content,createdAt,updatedAt,editRevision);
 }
 
 @override
 String toString() {
-    return 'WorkItemNote(noteId: $noteId, workItemId: $workItemId, authorAccountId: $authorAccountId, authorFullName: $authorFullName, content: $content, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'WorkItemNote(noteId: $noteId, workItemId: $workItemId, authorAccountId: $authorAccountId, authorFullName: $authorFullName, content: $content, createdAt: $createdAt, updatedAt: $updatedAt, editRevision: $editRevision)';
 }
 
 
@@ -269,7 +273,7 @@ abstract mixin class _$WorkItemNoteCopyWith<$Res> implements $WorkItemNoteCopyWi
   factory _$WorkItemNoteCopyWith(_WorkItemNote value, $Res Function(_WorkItemNote) _then) = __$WorkItemNoteCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'note_id') String noteId,@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'author_account_id') String authorAccountId,@JsonKey(name: 'author_full_name') String? authorFullName, String content,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt
+@JsonKey(name: 'note_id') String noteId,@JsonKey(name: 'work_item_id') String workItemId,@JsonKey(name: 'author_account_id') String authorAccountId,@JsonKey(name: 'author_full_name') String? authorFullName, String content,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt,@JsonKey(name: 'edit_revision') int editRevision
 });
 
 
@@ -286,7 +290,7 @@ class __$WorkItemNoteCopyWithImpl<$Res>
 
 /// Create a copy of WorkItemNote
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? noteId = null,Object? workItemId = null,Object? authorAccountId = null,Object? authorFullName = freezed,Object? content = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? noteId = null,Object? workItemId = null,Object? authorAccountId = null,Object? authorFullName = freezed,Object? content = null,Object? createdAt = null,Object? updatedAt = null,Object? editRevision = null,}) {
   return _then(_WorkItemNote(
 noteId: null == noteId ? _self.noteId : noteId // ignore: cast_nullable_to_non_nullable
 as String,workItemId: null == workItemId ? _self.workItemId : workItemId // ignore: cast_nullable_to_non_nullable
@@ -295,7 +299,8 @@ as String,authorFullName: freezed == authorFullName ? _self.authorFullName : aut
 as String?,content: null == content ? _self.content : content // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,editRevision: null == editRevision ? _self.editRevision : editRevision // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

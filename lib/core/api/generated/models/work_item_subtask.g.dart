@@ -18,6 +18,7 @@ _WorkItemSubtask _$WorkItemSubtaskFromJson(Map<String, dynamic> json) =>
       assigneeFullName: json['assignee_full_name'] as String?,
       doneByFullName: json['done_by_full_name'] as String?,
       createdByFullName: json['created_by_full_name'] as String?,
+      editRevision: (json['edit_revision'] as num).toInt(),
       assigneeAccountId: json['assignee_account_id'] as String?,
       startOn: _$JsonConverterFromJson<String, DateTime>(
         json['start_on'],
@@ -45,6 +46,7 @@ Map<String, dynamic> _$WorkItemSubtaskToJson(_WorkItemSubtask instance) =>
       'assignee_full_name': ?instance.assigneeFullName,
       'done_by_full_name': ?instance.doneByFullName,
       'created_by_full_name': ?instance.createdByFullName,
+      'edit_revision': instance.editRevision,
       'assignee_account_id': ?instance.assigneeAccountId,
       'start_on': ?_$JsonConverterToJson<String, DateTime>(
         instance.startOn,

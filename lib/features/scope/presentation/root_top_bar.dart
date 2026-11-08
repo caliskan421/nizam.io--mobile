@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
@@ -47,8 +48,8 @@ class RootTopBar extends ConsumerWidget {
 
 /// Tablet liste bölmesinde kök üst çubuk gizlidir (`.tb-pane`); seçili program adı (S2) orada
 /// Ana sayfanın başında, telefondaki üst çubuk alt satırıyla aynı `m-program` biçiminde
-/// (`text-faint`) durur. Program yokken (yükleniyor/hata) hiçbir şey çizmez; [bottom] yalnız ad
-/// varken eklenir.
+/// (`text-faint`) durur. Sunucu programı seçiliyken ad ilk kez yüklenirken satırın yeri boş
+/// ayrılır (ad gelince akış kaymaz); program yoksa ya da hata varsa hiçbir şey çizmez.
 class RootProgramLine extends ConsumerWidget {
   const RootProgramLine({super.key, this.bottom = 0});
 
@@ -59,11 +60,20 @@ class RootProgramLine extends ConsumerWidget {
     final program = ref.watch(
       currentProgramControllerProvider.select((p) => p.value?.name),
     );
-    if (program == null || program.isEmpty) return const SizedBox.shrink();
+    final pending = ref.watch(
+      currentProgramControllerProvider.select(
+        (p) => p.isLoading && !p.hasValue,
+      ),
+    );
+    final reserve =
+        pending && ref.watch(scopeStateProvider.select((s) => s.hasProgram));
+    if ((program == null || program.isEmpty) && !reserve) {
+      return const SizedBox.shrink();
+    }
     return Padding(
       padding: EdgeInsets.only(bottom: bottom),
       child: Text(
-        program,
+        program ?? ' ',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: context.text.program.copyWith(color: context.colors.textFaint),

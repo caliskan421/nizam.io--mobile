@@ -3,6 +3,7 @@
 // listenin yeniden okunması, bağlı koordinatörlük (K21) türetimi.
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/features/meetings/application/meeting_room_controller.dart';
@@ -28,6 +29,23 @@ Future<(Harness, ProviderContainer, MeetingRoomController)> _open(
 }
 
 MeetingRoom _now(ProviderContainer c) => c.read(_room).requireValue;
+
+DioException _networkError() => DioException(
+  requestOptions: RequestOptions(path: '/v1/meetings/m1/notes'),
+  type: DioExceptionType.connectionError,
+);
+
+ResponseBody _noteCreated(String content) => jsonResponse(
+  201,
+  noteWire('n-$content', content: content, created: '2030-01-10T08:00:00Z'),
+);
+
+/// Gönderilen not isteklerinin işlem anahtarları (sırayla).
+List<String?> _noteKeys(Harness h) => [
+  for (final r in h.backend.requests)
+    if (r.method == 'POST' && r.path == '/v1/meetings/m1/notes')
+      r.header('Idempotency-Key'),
+];
 
 void main() {
   test('ayrıntı + kalan not sayfası birlikte okunur', () async {
@@ -120,6 +138,54 @@ void main() {
       'PATCH /v1/meeting-notes/n1',
       'DELETE /v1/meeting-notes/n9',
     ]);
+  });
+
+  test('not: ağ hatasından sonra aynı metin aynı işlem anahtarıyla gider; uçuşta kilitli', () async {
+    final s = MeetingsServer();
+    var fail = true;
+    s.overrides['POST /v1/meetings/m1/notes'] = () =>
+        fail ? throw _networkError() : _noteCreated('A');
+    final (h, c, ctl) = await _open(s);
+    final first = ctl.addNote('A');
+    expect(_now(c).noteSubmitting, isTrue, reason: 'kilit denetleyicide');
+    expect(await ctl.addNote('B'), isNull);
+    expect(await first, isNotNull, reason: 'ağ hatası');
+    expect(_now(c).noteSubmitting, isFalse);
+    fail = false;
+    expect(await ctl.addNote(' A '), isNull);
+    final keys = _noteKeys(h);
+    expect(keys, hasLength(2), reason: 'kilitliyken B gönderilmedi');
+    expect(keys.first, isNotNull);
+    expect(keys.last, keys.first, reason: 'tekrar aynı anahtarla');
+  });
+
+  test('geç tamamlanan A başarısı B\'nin bekleyen anahtarını silmez', () async {
+    final s = MeetingsServer();
+    final gateA = Completer<void>();
+    var n = 0;
+    s.overrides['POST /v1/meetings/m1/notes'] = () {
+      n++;
+      if (n == 2) throw _networkError(); // B: sonucu bilinmiyor
+      return _noteCreated(n == 1 ? 'A' : 'B');
+    };
+    s.hold = gateA;
+    final (h, c, ctl) = await _open(s);
+    final a = ctl.addNote('A');
+    await Future<void>.delayed(Duration.zero);
+    // Kilit yenilemeyle kaybolur (ör. aşağı çekme): B, A uçuştayken yeni anahtarla gider.
+    await ctl.refresh();
+    expect(_now(c).noteSubmitting, isFalse);
+    final ctlB = c.read(_room.notifier);
+    final b = ctlB.addNote('B');
+    await Future<void>.delayed(Duration.zero);
+    gateA.complete();
+    expect(await a, isNull);
+    expect(await b, isNotNull, reason: 'B ağ hatası');
+    expect(await ctlB.addNote('B'), isNull);
+    final keys = _noteKeys(h);
+    expect(keys, hasLength(3));
+    expect(keys[1], isNot(keys[0]), reason: 'B yeni eylem');
+    expect(keys[2], keys[1], reason: 'A başarısı B anahtarını silmedi');
   });
 
   test('konferans başlat → canlı; bitir → yok', () async {

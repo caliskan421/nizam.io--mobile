@@ -42,7 +42,6 @@ class MeetingNotes extends ConsumerStatefulWidget {
 
 class _MeetingNotesState extends ConsumerState<MeetingNotes> {
   final _draft = TextEditingController();
-  var _busy = false;
 
   @override
   void initState() {
@@ -57,11 +56,10 @@ class _MeetingNotesState extends ConsumerState<MeetingNotes> {
   }
 
   Future<void> _add() async {
-    if (_draft.text.trim().isEmpty || _busy) return;
-    setState(() => _busy = true);
+    // Uçuş kilidi denetleyicide (sekme değişince sıfırlanmaz).
+    if (_draft.text.trim().isEmpty || widget.room.noteSubmitting) return;
     final ok = await widget.actions.addNote(_draft.text);
     if (!mounted) return;
-    setState(() => _busy = false);
     if (ok) {
       _draft.clear();
       ref
@@ -143,8 +141,11 @@ class _MeetingNotesState extends ConsumerState<MeetingNotes> {
                       NzButton.primary(
                         label: l.uiMeetingsAdd,
                         size: NzSize.sm,
-                        loading: _busy,
-                        onPressed: _draft.text.trim().isEmpty ? null : _add,
+                        loading: room.noteSubmitting,
+                        onPressed:
+                            _draft.text.trim().isEmpty || room.noteSubmitting
+                            ? null
+                            : _add,
                       ),
                     ],
                   ),

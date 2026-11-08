@@ -11,6 +11,7 @@ import '../../../core/ui/widgets/feedback/nz_pick_record.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
+import '../../meetings/meetings.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
 import '../application/calendar_controller.dart';
@@ -45,7 +46,16 @@ class CalendarPage extends ConsumerWidget {
       }
     }
 
-    void retry() => ref.invalidate(calendarSourcesProvider);
+    // Yeniden deneme yalnız dokunuşla (A3): hata veren kaynak yeniden okunur.
+    void retry() {
+      if (ref.read(meetingsBoardControllerProvider).hasError) {
+        ref.invalidate(meetingsBoardControllerProvider);
+      }
+      if (ref.read(taskCatalogControllerProvider).hasError) {
+        ref.invalidate(taskCatalogControllerProvider);
+      }
+    }
+
     return NzPage.feed(
       onRetry: retry,
       topBar: const RootTopBar(),

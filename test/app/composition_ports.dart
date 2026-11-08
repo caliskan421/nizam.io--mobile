@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/activity/activity.dart';
 import 'package:nizamio/features/archive/application/archive_providers.dart';
-import 'package:nizamio/features/calendar/application/calendar_providers.dart';
 import 'package:nizamio/features/coordinatorships/coordinatorships.dart';
 import 'package:nizamio/features/identity/identity.dart';
 import 'package:nizamio/features/meetings/meetings.dart';
@@ -41,7 +40,6 @@ final portProviders = <String, ProviderBase<Object?>>{
       coordinatorshipActivityRepositoryProvider,
   'activityLogRepositoryProvider': activityLogRepositoryProvider,
   'archiveRepositoryProvider': archiveRepositoryProvider,
-  'calendarRepositoryProvider': calendarRepositoryProvider,
   'chatRepositoryProvider': chatRepositoryProvider,
   'notificationRepositoryProvider': notificationRepositoryProvider,
 };

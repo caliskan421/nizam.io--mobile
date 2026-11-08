@@ -17,9 +17,6 @@ extension CalendarTexts on AppLocalizations {
   /// Gün başlığı: "21 Ekim, Çarşamba".
   String dayTitle(DateTime d) => '${d.day} ${monthName(d)}, ${weekdayName(d)}';
 
-  /// Önizleme tarihi (prototip virgülsüz): "21 Ekim Çarşamba".
-  String dayText(DateTime d) => '${d.day} ${monthName(d)} ${weekdayName(d)}';
-
   /// Pazartesiden başlayan kısa gün adları.
   List<String> get weekdaysShort => uiCalendarWeekdaysShort.split(' ');
 
@@ -50,39 +47,19 @@ extension CalendarTexts on AppLocalizations {
     CalendarKind.meeting => uiCalendarGroupMeetings,
     CalendarKind.task => uiCalendarGroupTasks,
     CalendarKind.request => uiCalendarGroupRequests,
-    CalendarKind.sheet => uiCalendarGroupSheets,
-    CalendarKind.season => uiCalendarSeasonLc,
   };
-
-  String requestType(RequestType t) => switch (t) {
-    RequestType.purchase => uiCalendarReqPurchase,
-    RequestType.quote => uiCalendarReqQuote,
-    RequestType.expense => uiCalendarReqExpense,
-    RequestType.budget => uiCalendarReqBudget,
-  };
-
-  String requestState(RequestState s) => switch (s) {
-    RequestState.pending => uiCalendarStatePending,
-    RequestState.approved => uiCalendarStateApproved,
-    RequestState.ordered => uiCalendarStateOrdered,
-    RequestState.delivered => uiCalendarStateDelivered,
-  };
-
-  /// "₺14.600".
-  String money(int amount) =>
-      '₺${NumberFormat.decimalPattern('tr').format(amount)}';
 
   /// "14:00".
   String clock(MeetingEntry m) =>
       '${m.hour.toString().padLeft(2, '0')}:${m.minute.toString().padLeft(2, '0')}';
 
-  /// Davetli koordinatörlükler: "İDA, OPE" ya da "Tüm koordinatörlükler".
-  String invited(MeetingEntry m) => m.allCoordinatorships
-      ? uiCalendarAllCoordinatorships
-      : m.coordinatorships.join(', ');
+  /// Toplantı satırı alt yazısı: bağlı departmanlar ("Altyapı, Mekanik").
+  String meetingSub(MeetingEntry m) => m.departments.join(', ');
 
-  /// Toplantı satırı alt yazısı: "ALT · 6 katılımcı · 3 gündem".
-  String meetingSub(MeetingEntry m) =>
-      '${invited(m)} · ${m.participants} $uiCalendarParticipantsLc · '
-      '${m.agenda.length} $uiCalendarAgendaLc';
+  /// Tarih talebi satırı alt yazısı: "İstenen aralık · 5 Kas – 14 Kas".
+  String requestSub(RequestEntry r) {
+    final f = DateFormat('d MMM', 'tr');
+    return '$uiCalendarRequestedRange · ${f.format(r.start)} – '
+        '${f.format(r.date)}';
+  }
 }

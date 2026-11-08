@@ -1335,28 +1335,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarRecordsLc => 'kayıt';
 
   @override
-  String get uiCalendarSeasonLc => 'sezon';
-
-  @override
   String get uiCalendarGroupMeetings => 'toplantılar';
 
   @override
   String get uiCalendarGroupTasks => 'görevler';
 
   @override
-  String get uiCalendarGroupRequests => 'talepler';
-
-  @override
-  String get uiCalendarGroupSheets => 'tablo kayıtları';
-
-  @override
-  String get uiCalendarParticipantsLc => 'katılımcı';
-
-  @override
-  String get uiCalendarAgendaLc => 'gündem';
-
-  @override
-  String get uiCalendarPeopleLc => 'kişi';
+  String get uiCalendarGroupRequests => 'tarih talepleri';
 
   @override
   String get uiCalendarTaskEnds => 'Bitiyor';
@@ -1368,31 +1353,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarLateLc => 'gecikti';
 
   @override
-  String get uiCalendarDoneLc => 'yapıldı';
-
-  @override
-  String get uiCalendarReqPurchase => 'Satın alma';
-
-  @override
-  String get uiCalendarReqQuote => 'Fiyat teklifi';
-
-  @override
-  String get uiCalendarReqExpense => 'Masraf';
-
-  @override
-  String get uiCalendarReqBudget => 'Ek bütçe';
+  String get uiCalendarRequestedRange => 'İstenen aralık';
 
   @override
   String get uiCalendarStatePending => 'Onay bekliyor';
-
-  @override
-  String get uiCalendarStateApproved => 'Onaylandı';
-
-  @override
-  String get uiCalendarStateOrdered => 'Sipariş verildi';
-
-  @override
-  String get uiCalendarStateDelivered => 'Teslim alındı';
 
   @override
   String get uiCalendarEmpty => 'Bu gün için planlanmış bir şey yok.';
@@ -1401,89 +1365,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarPlan => 'Toplantı planla';
 
   @override
-  String get uiCalendarAllCoordinatorships => 'Tüm koordinatörlükler';
-
-  @override
-  String get uiCalendarPreview => 'Kayıt önizleme';
-
-  @override
-  String get uiCalendarKickerMeeting => 'toplantı';
-
-  @override
-  String get uiCalendarKickerRequest => 'talep';
-
-  @override
-  String get uiCalendarKickerSheet => 'tablo kaydı';
-
-  @override
-  String get uiCalendarFactTime => 'Zaman';
-
-  @override
-  String get uiCalendarFactPlace => 'Yer';
-
-  @override
-  String get uiCalendarFactInvited => 'Davetli';
-
-  @override
-  String get uiCalendarFactType => 'Tür';
-
-  @override
-  String get uiCalendarFactCoordinatorship => 'Koordinatörlük';
-
-  @override
-  String get uiCalendarFactAmount => 'Tutar';
-
-  @override
-  String get uiCalendarFactState => 'Durum';
-
-  @override
-  String get uiCalendarFactNeed => 'İhtiyaç tarihi';
-
-  @override
-  String get uiCalendarFactTask => 'Bağlı görev';
-
-  @override
-  String get uiCalendarFactTable => 'Tablo';
-
-  @override
-  String get uiCalendarFactDate => 'Tarih';
-
-  @override
-  String get uiCalendarFactPerson => 'Kişi';
-
-  @override
-  String get uiCalendarQuotePending => 'Teklif bekleniyor';
-
-  @override
-  String get uiCalendarSheetDone => 'Yapıldı';
-
-  @override
-  String get uiCalendarSheetWaiting => 'Bekliyor';
-
-  @override
-  String get uiCalendarRemind => 'Hatırlat';
-
-  @override
-  String get uiCalendarReminded => 'Katılımcılara hatırlatma gönderildi';
-
-  @override
-  String get uiCalendarWriteGroup => 'Gruba yaz';
-
-  @override
-  String get uiCalendarClose => 'Kapat';
-
-  @override
-  String get uiCalendarGoTask => 'Bağlı göreve git';
-
-  @override
-  String get uiCalendarGoCoordinatorship => 'Koordinatörlüğe git';
-
-  @override
   String get uiCalendarPickTitle => 'Bir kayıt seç';
 
   @override
   String get uiCalendarPickBody =>
-      'Soldaki listeden bir göreve dokun, ayrıntısı burada açılır. Toplantı ve talepler önizleme penceresinde açılır.';
+      'Soldaki listeden bir kayda dokun, ayrıntısı burada açılır.';
 
   @override
   String get uiCommonRetry => 'Yeniden dene';

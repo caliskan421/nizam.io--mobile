@@ -526,7 +526,7 @@ class TaskDetailController extends _$TaskDetailController {
   // ---- kanıt yükle ----------------------------------------------------------------------
 
   /// Yükleme formunu açar; alt görev önseçilmez (alt görevde kanıt bayrağı yok, ADR-0024).
-  /// Sunucuda yalnız yükleme yetkisi varsa (koordinatör ya da atanmış üye; yönetici hayır).
+  /// Sunucuda yalnız yükleme yetkisi varsa (yönetici, koordinatör ya da atanmış üye).
   bool openUpload() {
     if (_task == null || !permissions.canUpload) return false;
     state = state.copyWith(
@@ -603,7 +603,7 @@ class TaskDetailController extends _$TaskDetailController {
     return _write(() => _writes.renameFile(t, file.id, v), list: false);
   }
 
-  /// Dosyayı siler (yalnız yükleyen, ekip satırı varken).
+  /// Dosyayı siler (yalnız yükleyen, ekip satırı varken; yükleyen yönetici satırsız da).
   Future<WriteOutcome> deleteFile(TaskFile file) async {
     final t = _task;
     if (t == null) return WriteOutcome.invalid;

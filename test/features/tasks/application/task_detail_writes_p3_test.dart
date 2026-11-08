@@ -516,12 +516,26 @@ void main() {
       expect(h.backend.requests, isEmpty);
     });
 
-    test('yönetici yükleyemez (koordinatör satırı olsa da)', () async {
-      final s = _Server()..admin = true;
-      final (h, _, ctl) = await _open(s);
-      expect(ctl.openUpload(), isFalse);
-      expect((await ctl.submitUpload()).kind, WriteKind.invalid);
+    test('yönetici ekip satırı olmadan yükler, yalnız kendi dosyasını siler (ADR-0030)', () async {
+      final s = _Server()
+        ..admin = true
+        ..role = 'yok';
+      final (h, c, ctl) = await _open(s);
+      expect(ctl.openUpload(), isTrue);
+      final d = c.read(taskDetailControllerProvider('w1')).upload!;
+      ctl.updateUpload(d.copyWith(file: () => src('rapor.pdf')));
+      expect((await ctl.submitUpload()).ok, isTrue);
+      _only(h, 'POST', '/v1/work-items/w1/files');
+      h.backend.requests.clear();
+      final files = _task(c).fileEntries;
+      final other = files.firstWhere((f) => f.id == 'f2');
+      expect((await ctl.deleteFile(other)).kind, WriteKind.invalid);
       expect(h.backend.requests, isEmpty);
+      expect(
+        (await ctl.deleteFile(files.firstWhere((f) => f.id == 'f1'))).ok,
+        isTrue,
+      );
+      _only(h, 'DELETE', '/v1/files/f1');
     });
 
     test('bileşim kökü sistem seçicisini bağlar', () async {

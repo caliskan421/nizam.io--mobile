@@ -3559,7 +3559,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksSubsHint =>
-      'Kişi ve tarih isteğe bağlıdır; kanıtı zorunlu olan alt görev, kanıt yüklenmeden bitirilemez. Görev, tüm alt görevler bitmeden tamamlanamaz.';
+      'Kişi ve tarih isteğe bağlıdır. Görev, tüm alt görevler bitmeden tamamlanamaz.';
 
   @override
   String get uiTasksDoneLc => 'tamamlandı';
@@ -4151,7 +4151,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksSubCheckBlocked =>
-      'Alt görevi atanan kişi ya da departman koordinatörü işaretler; yönetici ekip satırı olmadan işaretleyemez.';
+      'Alt görevi yönetici, departman koordinatörü ya da alt göreve atanan kişi işaretler.';
 
   @override
   String get uiTasksConflictTitle => 'Görev siz düzenlerken değişti';

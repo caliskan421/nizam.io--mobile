@@ -304,17 +304,20 @@ class MeetingRoomController extends _$MeetingRoomController {
     _keys = keys;
     final flight = Object();
     _noteInFlight = flight;
-    _put(r);
+    // Kilit alındıktan sonraki her adım try içinde; kilit finally'de (kimlik denetimli) kapanır.
+    List<MeetingNote> Function(MeetingRoom cur)? added;
     try {
+      _put(r);
       final note = await _repo.addNote(id, t, requestKey: key);
       _clearNoteKey(key);
-      _endNoteFlight(flight, (cur) => [note, ...cur.notes]);
+      added = (cur) => [note, ...cur.notes];
       return const NoteAdded();
     } on Object catch (e) {
       final err = toApiError(e);
       if (isKeyReused(err)) _clearNoteKey(key);
-      _endNoteFlight(flight, null);
       return NoteFailed(err);
+    } finally {
+      _endNoteFlight(flight, added);
     }
   }
 

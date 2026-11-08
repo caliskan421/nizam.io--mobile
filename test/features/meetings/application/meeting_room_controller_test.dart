@@ -219,6 +219,23 @@ void main() {
     );
   });
 
+  test('not: beklenmeyen Error ile düşen uçuşta da kilit kapanır', () async {
+    final s = MeetingsServer();
+    var boom = true;
+    s.overrides['POST /v1/meetings/m1/notes'] = () =>
+        boom ? throw StateError('beklenmeyen') : _noteCreated('A');
+    final (h, c, ctl) = await _open(s);
+    expect(await ctl.addNote('A'), isA<NoteFailed>());
+    expect(
+      _now(c).noteSubmitting,
+      isFalse,
+      reason: 'kilit finally ile kapandı',
+    );
+    boom = false;
+    expect(await ctl.addNote('A'), isA<NoteAdded>(), reason: 'yoksayılmaz');
+    expect(_noteKeys(h), hasLength(2));
+  });
+
   test('konferans başlat → canlı; bitir → yok', () async {
     final s = MeetingsServer();
     final (h, c, ctl) = await _open(s);

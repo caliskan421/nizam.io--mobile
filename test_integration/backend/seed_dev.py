@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Yerel geliştirme backend'ine (up.sh) prototip örnek verisini YALNIZ API ile basar.
 
-Kaynak: mobil örnek kataloğu (lib/features/tasks/data/sample/sample_task_data.dart — 16 kişi,
+Kaynak: mobil örnek kataloğu (seed_task_data.txt: lib'den kaldırılan sample_task_data.dart — 16 kişi,
 11 koordinatörlük, 76 görev) ve takvim/mesaj örneklerinin prototip içerikleri. Görevler Dart
 dosyasından okunur; örnek katalog değişirse tohum da değişir.
 
@@ -31,7 +31,7 @@ BASE = os.environ.get('NIZAMIO_IT_BACKEND', 'http://127.0.0.1:18140')
 ADMIN_EMAIL = os.environ.get('NIZAMIO_IT_ADMIN_EMAIL', 'admin@nizam.local')
 PASSWORD = os.environ.get('NIZAMIO_IT_ADMIN_PASSWORD', 'Pasword.123123')
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-TASKS_DART = os.path.join(ROOT, 'lib/features/tasks/data/sample/sample_task_data.dart')
+TASKS_DART = os.path.join(ROOT, 'test_integration/backend/seed_task_data.txt')
 SAMPLE_TODAY = dt.date(2026, 10, 21)
 
 PROGRAM = {'name': 'Şanlıurfa Teknofest', 'year': 2026,
@@ -155,6 +155,9 @@ class Session:
         if self.token and time.time() > self.expires_at - 120:
             self.login()
         h = {'X-Requested-With': 'XMLHttpRequest'}
+        if method == 'POST':
+            # Yazma uçları işlem anahtarı ister (ADR-0027); 429 tekrarında aynı anahtar gider.
+            h['Idempotency-Key'] = str(uuid.uuid4())
         if self.token:
             h['Authorization'] = 'Bearer ' + self.token
         if program:
@@ -378,11 +381,12 @@ def main():
             'reason': reason}, program=prog, dept=dept[t['coord']])
     print(f'== alt görevler: {sum(map(len, SUBTASKS.values()))} · tarih talebi: {len(DATE_REQUESTS)}')
 
-    # Mesajlar.
+    # Mesajlar: birebir sohbet açılır (varsa aynısı döner), konu ilk satırda.
     for frm, to, subject, content in MESSAGES:
         try:
-            sessions[frm].call('POST', '/v1/messages', {
-                'receiver_account_id': acc[to], 'subject': subject, 'content': content}, program=prog)
+            chat = sessions[frm].call('POST', '/v1/chats/direct', {'account_id': acc[to]}, program=prog)
+            sessions[frm].call('POST', f"/v1/chats/{chat['chat_id']}/messages", {
+                'client_message_id': str(uuid.uuid4()), 'body': f'{subject}\n{content}'}, program=prog)
         except ApiError as e:
             problems.append(f'mesaj {frm} → {to} ({subject}): {e}')
     print(f'== mesajlar: {len(MESSAGES)}')

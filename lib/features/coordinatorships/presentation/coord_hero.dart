@@ -8,10 +8,9 @@ import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../tasks/tasks.dart';
 import '../domain/coordinatorship_overview.dart';
-import 'coord_detail_texts.dart';
 import 'coord_parts.dart';
 
-/// Kimlik (prototip `.cd-hero`): kod kutucuğu, ad, alt satır (üst birim · kişi) ve
+/// Kimlik (prototip `.cd-hero`): kod kutucuğu, ad, alt satır (üst birim · koordinatörler) ve
 /// "Görev ata" / "Mesaj". Genişte düğmeler sol yarıda (prototip iki sütunlu kimlik).
 class CoordHero extends StatelessWidget {
   const CoordHero({super.key, required this.detail});
@@ -77,7 +76,10 @@ class CoordHero extends StatelessWidget {
                   Text(
                     [
                       if (parent.isNotEmpty) parent,
-                      l.coordPeopleCount(d.people),
+                      if (d.leads.isEmpty)
+                        l.uiCoordNoLead
+                      else
+                        d.leads.map((p) => p.name).join(',\u2003'),
                     ].join(' · '),
                     style: t.caption.copyWith(color: c.textMuted),
                   ),

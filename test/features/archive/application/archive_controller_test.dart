@@ -1,55 +1,62 @@
-// ArchiveController: arama aç/kapa, sıralama döngüsü, etiket seçimi, yeni etiket.
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+// ArchiveController: arama aç/kapa; dönemin tam arşivi yalnız yöneticide (akış kaydedilir).
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/features/archive/application/archive_controller.dart';
-import 'package:nizamio/features/archive/domain/archive.dart';
+
+import '../archive_fixture.dart';
 
 void main() {
-  late ProviderContainer c;
-  setUp(() => c = ProviderContainer());
-  tearDown(() => c.dispose());
-  ArchiveController ctrl() => c.read(archiveControllerProvider.notifier);
-  ArchiveViewState s() => c.read(archiveControllerProvider);
-
   test('arama: açılınca sorgu tutulur, kapanınca temizlenir', () {
-    ctrl()
+    final c = archiveContainer(FakeArchiveRepository());
+    final ctrl = c.read(archiveControllerProvider.notifier)
       ..toggleSearch()
-      ..setQuery('fuar');
-    expect(s().searchOpen, isTrue);
-    expect(s().query, 'fuar');
-    ctrl().toggleSearch();
-    expect(s().searchOpen, isFalse);
-    expect(s().query, '');
+      ..setQuery('alt');
+    expect(c.read(archiveControllerProvider).searchOpen, isTrue);
+    expect(c.read(archiveControllerProvider).query, 'alt');
+    ctrl.toggleSearch();
+    expect(c.read(archiveControllerProvider).searchOpen, isFalse);
+    expect(c.read(archiveControllerProvider).query, '');
   });
 
-  test('sıralama: son yükleme → ad → boyut → son yükleme', () {
-    expect(s().sort, ArchiveSort.recent);
-    ctrl().cycleSort();
-    expect(s().sort, ArchiveSort.name);
-    ctrl().cycleSort();
-    expect(s().sort, ArchiveSort.size);
-    ctrl().cycleSort();
-    expect(s().sort, ArchiveSort.recent);
+  test('yönetici: tam arşiv ZIP akışı kaydedilir', () async {
+    final repo = FakeArchiveRepository();
+    final sink = RecordingSink();
+    final c = archiveContainer(
+      repo,
+      catalog: archiveCatalog(admin: true, seats: {}),
+      sink: sink,
+    );
+    final r = await c
+        .read(archiveControllerProvider.notifier)
+        .downloadAll('Arşiv.zip');
+    expect(r.ok, isTrue);
+    expect(r.path, '/indirilenler/Arşiv.zip');
+    expect(repo.calls.single, ('periodZip', 'd1', null));
+    expect(sink.saved['Arşiv.zip'], [1, 2, 3]);
+    expect(c.read(archiveControllerProvider).busy, isFalse);
   });
 
-  test('etiket: seç, aynısı kaldırır; özel etiket hazırı bırakır; temizle', () {
-    ctrl().pickTag(ArchiveTag.field);
-    expect(s().tag, ArchiveTag.field);
-    ctrl().pickTag(ArchiveTag.field);
-    expect(s().tag, isNull);
-    ctrl()
-      ..pickTag(ArchiveTag.data)
-      ..setDraftColor(ArchiveTagColor.red);
-    expect(ctrl().addTag('  '), isNull);
-    expect(ctrl().addTag(' Teslim '), 'Teslim');
-    expect(s().tagTotal, 4);
-    expect(s().customTags.single.color, ArchiveTagColor.red);
-    ctrl().pickCustomTag(s().customTags.single.id);
-    expect(s().tag, isNull);
-    expect(s().hasTag, isTrue);
-    ctrl().clearTag();
-    expect(s().hasTag, isFalse);
-    ctrl().toggleTags();
-    expect(s().tagsOpen, isTrue);
+  test('yönetici değil: istek gönderilmez', () async {
+    final repo = FakeArchiveRepository();
+    final c = archiveContainer(repo);
+    final r = await c
+        .read(archiveControllerProvider.notifier)
+        .downloadAll('Arşiv.zip');
+    expect(r.ok, isFalse);
+    expect(r.error, isNull);
+    expect(repo.calls, isEmpty);
+  });
+
+  test('sunucu hatası sonuçta döner', () async {
+    final repo = FakeArchiveRepository()..error = ApiError('records.busy');
+    final c = archiveContainer(
+      repo,
+      catalog: archiveCatalog(admin: true, seats: {}),
+    );
+    final r = await c
+        .read(archiveControllerProvider.notifier)
+        .downloadAll('Arşiv.zip');
+    expect(r.ok, isFalse);
+    expect(r.error?.code, 'records.busy');
   });
 }

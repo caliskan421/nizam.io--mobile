@@ -1045,7 +1045,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveSearch => 'Arşivde ara';
 
   @override
-  String get uiArchiveSearchHint => 'Dosya, görev, kişi veya etiket';
+  String get uiArchiveSearchHint => 'Klasör adı';
 
   @override
   String get uiArchiveUpload => 'Dosya yükle';
@@ -1055,57 +1055,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiArchiveUploadSoon => 'Dosya yükleme sonraki adımda tasarlanacak';
-
-  @override
-  String get uiArchiveTags => 'Etiketler';
-
-  @override
-  String get uiArchiveTagsClear => 'Temizle';
-
-  @override
-  String get uiArchiveNewTag => 'Yeni etiket';
-
-  @override
-  String get uiArchiveTagColor => 'Etiket rengi';
-
-  @override
-  String get uiArchiveAddTag => 'Etiketi ekle';
-
-  @override
-  String get uiArchiveTagAdded => 'etiketi eklendi';
-
-  @override
-  String get uiArchiveColorViolet => 'Mor';
-
-  @override
-  String get uiArchiveColorGold => 'Sarı';
-
-  @override
-  String get uiArchiveColorGreen => 'Yeşil';
-
-  @override
-  String get uiArchiveColorRed => 'Kırmızı';
-
-  @override
-  String get uiArchiveColorGray => 'Gri';
-
-  @override
-  String get uiArchiveTagField => 'Saha görselleri';
-
-  @override
-  String get uiArchiveTagResult => 'Sonuç dosyası';
-
-  @override
-  String get uiArchiveTagData => 'Güncel durum verisi';
-
-  @override
-  String get uiArchiveTagFieldShort => 'Saha';
-
-  @override
-  String get uiArchiveTagResultShort => 'Sonuç';
-
-  @override
-  String get uiArchiveTagDataShort => 'Güncel';
 
   @override
   String get uiArchiveStorage => 'Depolama';
@@ -1123,9 +1072,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveFoldersLc => 'klasör';
 
   @override
-  String get uiArchiveCoordinatorshipsLc => 'koordinatörlükler';
-
-  @override
   String get uiArchiveSortRecent => 'Son yükleme';
 
   @override
@@ -1133,9 +1079,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiArchiveSortSize => 'Boyuta göre';
-
-  @override
-  String get uiArchiveSortHint => 'Sıralamayı değiştir';
 
   @override
   String get uiArchiveNoFiles => 'Dosya yok';
@@ -1147,8 +1090,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveDownloadAll => 'Tümünü indir';
 
   @override
-  String get uiArchiveDownloadAllToast =>
-      'Tüm arşiv hazırlanıyor · bitince bildirim gelir';
+  String get uiArchiveDownloadAllToast => 'Tüm arşiv ZIP olarak hazırlanıyor';
 
   @override
   String get uiArchiveCreateFolder => 'Klasör oluştur';
@@ -1183,9 +1125,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiArchiveCoordinatorship => 'Koordinatörlük';
-
-  @override
-  String get uiArchiveNoLead => 'Koordinatör yok';
 
   @override
   String get uiArchiveTabs => 'Klasör';
@@ -1230,10 +1169,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveFactBy => 'Yükleyen';
 
   @override
-  String get uiArchiveFactDate => 'Tarih';
-
-  @override
-  String get uiArchiveUploaderUnknown => 'Admin';
+  String get uiArchiveUploaderUnknown => 'Bilinmeyen kişi';
 
   @override
   String get uiArchiveDownload => 'İndir';
@@ -1257,7 +1193,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveMoveSoon => 'Klasör seçimi sonraki adımda tasarlanacak';
 
   @override
-  String get uiArchiveDeleted => 'Dosya silinen kayıtlara taşındı';
+  String get uiArchiveDeleted => 'Dosya silindi';
 
   @override
   String get uiArchiveKindImage => 'Resim';
@@ -1276,6 +1212,72 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiArchiveKindPdfShort => 'PDF';
+
+  @override
+  String get uiArchiveFoldersTitle => 'klasörler';
+
+  @override
+  String get uiArchiveTagIster => 'İster';
+
+  @override
+  String get uiArchiveTagPlan => 'Plan';
+
+  @override
+  String get uiArchiveTagGirdi => 'Girdi';
+
+  @override
+  String get uiArchiveTagAnaliz => 'Analiz';
+
+  @override
+  String get uiArchiveTagCikti => 'Çıktı';
+
+  @override
+  String get uiArchiveTagSonuc => 'Sonuç';
+
+  @override
+  String get uiArchiveTagUnknown => 'Diğer';
+
+  @override
+  String get uiArchiveSaved => 'Kaydedildi';
+
+  @override
+  String get uiArchiveDeleteConfirm => 'Dosya kalıcı olarak silinsin mi?';
+
+  @override
+  String get uiArchiveDeleteOk => 'Sil';
+
+  @override
+  String get uiArchiveZipSelection => 'Görünen dosyaları ZIP olarak indir';
+
+  @override
+  String get uiArchiveZipEmpty => 'İndirilecek dosya yok';
+
+  @override
+  String get uiArchiveLoadMore => 'Daha fazla yükle';
+
+  @override
+  String get uiArchiveUploaderFilter => 'Yükleyen';
+
+  @override
+  String get uiArchiveUploaderAll => 'Tüm yükleyenler';
+
+  @override
+  String get uiArchivePickTask => 'Görev seç';
+
+  @override
+  String get uiArchivePickTag => 'Etiket seç';
+
+  @override
+  String get uiArchiveUploadNoTask => 'Bu klasörde dosya yüklenecek görev yok';
+
+  @override
+  String get uiArchiveUploaded => 'Dosya yüklendi';
+
+  @override
+  String get uiArchivePickerMissing => 'Bu sürümde dosya seçici yok';
+
+  @override
+  String get uiArchiveFolderMissing => 'Klasör bulunamadı';
 
   @override
   String get uiButtonsBusy => 'Meşgul';

@@ -10,8 +10,12 @@ import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
-import '../../application/archive_folder_controller.dart';
+import '../../../tasks/tasks.dart';
+import '../../application/archive_actions_controller.dart';
+import '../../application/archive_files_controller.dart';
 import '../../domain/archive.dart';
+import '../../domain/records.dart';
+import 'archive_outcome.dart';
 import 'archive_texts.dart';
 
 /// Dosya türü kutusu (44 px, `bg-overlay`, mono "IMG/DOC/PDF").
@@ -44,38 +48,44 @@ class ArchiveKindTile extends StatelessWidget {
   }
 }
 
-/// Dosya önizleme alt sayfası: sıra (n / N) + önceki/sonraki, önizleme alanı, ad + tür/boyut,
-/// bilgi satırları (görev, etiket, yükleyen, tarih), İndir + etiket / taşı / sil. Liste
-/// klasörün güncel süzgecidir; silme dosyayı kaldırır ve sayfayı kapatır.
+/// Dosya önizleme alt sayfası: sıra (n / N) + önceki/sonraki, tür alanı, ad + tür/boyut,
+/// bilgi satırları (görev, etiket, yükleyen), İndir + etiket / taşı (yakında) / sil (yalnız
+/// yükleyene). Liste klasörün yüklenmiş, süzgeçten geçmiş dosyalarıdır; silme sunucuda
+/// yapılır ve sayfayı kapatır. Sunucu yükleme zamanı vermez (tarih satırı yok).
 Future<void> showArchivePreview(
   BuildContext context, {
   required String code,
-  required List<ArchiveFile> all,
+  required String? Function(String workItemId) taskTitle,
   required String fileId,
 }) {
   final l = context.l10n;
-  void toast(String m) => NzToast.show(context, m);
   return NzBottomSheet.show<void>(
     context,
     title: l.uiArchivePreview,
     showHeader: false,
-    builder: (_) =>
-        _Preview(code: code, all: all, initial: fileId, onToast: toast),
+    builder: (_) => _Preview(
+      code: code,
+      taskTitle: taskTitle,
+      initial: fileId,
+      host: context,
+    ),
   );
 }
 
 class _Preview extends ConsumerStatefulWidget {
   const _Preview({
     required this.code,
-    required this.all,
+    required this.taskTitle,
     required this.initial,
-    required this.onToast,
+    required this.host,
   });
 
   final String code;
-  final List<ArchiveFile> all;
+  final String? Function(String workItemId) taskTitle;
   final String initial;
-  final ValueChanged<String> onToast;
+
+  /// Bildirimlerin gösterildiği sayfa bağlamı (alt sayfa kapandıktan sonra da geçerli).
+  final BuildContext host;
 
   @override
   ConsumerState<_Preview> createState() => _PreviewState();
@@ -84,13 +94,46 @@ class _Preview extends ConsumerStatefulWidget {
 class _PreviewState extends ConsumerState<_Preview> {
   late String _id = widget.initial;
 
+  ArchiveActionsController get _ctrl =>
+      ref.read(archiveActionsControllerProvider(widget.code).notifier);
+
+  void _toast(String m) {
+    if (widget.host.mounted) NzToast.show(widget.host, m);
+  }
+
+  Future<void> _download(RecordFile f) async {
+    final l = context.l10n;
+    _toast('${f.displayName} ${l.uiArchiveDownloading}');
+    final r = await _ctrl.downloadFile(f);
+    if (widget.host.mounted) showArchiveOutcome(widget.host, r);
+  }
+
+  Future<void> _delete(RecordFile f) async {
+    final l = context.l10n;
+    final ok = await NzDialog.confirm(
+      context,
+      title: l.uiArchiveDelete,
+      message: '${f.displayName} · ${l.uiArchiveDeleteConfirm}',
+      confirmLabel: l.uiArchiveDeleteOk,
+      tone: NzDialogTone.destructive,
+    );
+    if (!ok || !mounted) return;
+    final r = await _ctrl.deleteFile(f);
+    if (r.ok && mounted) Navigator.of(context).pop();
+    if (widget.host.mounted) {
+      showArchiveOutcome(widget.host, r, success: l.uiArchiveDeleted);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final view = ref.watch(archiveFolderControllerProvider(widget.code));
-    final list = view.visible(widget.all);
+    final list =
+        ref.watch(archiveFilesControllerProvider(widget.code)).value?.items ??
+        const <RecordFile>[];
+    final catalog = ref.watch(taskCatalogControllerProvider).value;
     final i = list.indexWhere((f) => f.id == _id);
     if (i < 0) return const SizedBox.shrink();
     final f = list[i];
@@ -116,12 +159,19 @@ class _PreviewState extends ConsumerState<_Preview> {
         ),
       ),
     );
+    final uploader = f.uploaderId;
+    final title = widget.taskTitle(f.workItemId);
     final facts = <(String, String, Color?)>[
-      (l.uiArchiveFactTask, l.short(f.taskTitle), null),
+      if (title != null) (l.uiArchiveFactTask, l.short(title), null),
       (l.uiArchiveFactTag, l.tagLabel(f.tag), c.tag(f.tag)),
-      (l.uiArchiveFactBy, f.uploadedBy ?? l.uiArchiveUploaderUnknown, null),
-      (l.uiArchiveFactDate, l.uploadedAt(f.uploadedAt), null),
+      (
+        l.uiArchiveFactBy,
+        (uploader == null ? null : catalog?.nameOf(uploader)) ??
+            l.uiArchiveUploaderUnknown,
+        null,
+      ),
     ];
+    final mine = uploader != null && uploader == catalog?.me;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -170,10 +220,10 @@ class _PreviewState extends ConsumerState<_Preview> {
           ),
         ),
         const Gap(NizamioSpacing.space3),
-        Text(f.name, style: t.mono),
+        Text(f.displayName, style: t.mono),
         const Gap(NizamioSpacing.space1),
         Text(
-          '${l.kindLabel(f.kind)} · ${l.size(f.sizeMb, minKb: 12)}',
+          '${l.kindLabel(f.kind)} · ${l.size(f.sizeBytes)}',
           style: t.caption.copyWith(color: c.textMuted),
         ),
         const Gap(NizamioSpacing.space3),
@@ -239,32 +289,27 @@ class _PreviewState extends ConsumerState<_Preview> {
                 label: l.uiArchiveDownload,
                 icon: NzIcons.download,
                 expand: true,
-                onPressed: () =>
-                    widget.onToast('${f.name} ${l.uiArchiveDownloading}'),
+                onPressed: () => _download(f),
               ),
             ),
             const Gap(NizamioSpacing.space1),
             NzIconButton.circle(
               icon: NzIcons.tag,
               semanticLabel: l.uiArchiveRetag,
-              onPressed: () => widget.onToast(l.uiArchiveRetagSoon),
+              onPressed: () => _toast(l.uiArchiveRetagSoon),
             ),
             NzIconButton.circle(
               icon: NzIcons.folderMove,
               semanticLabel: l.uiArchiveMove,
-              onPressed: () => widget.onToast(l.uiArchiveMoveSoon),
+              onPressed: () => _toast(l.uiArchiveMoveSoon),
             ),
-            NzIconButton.circle(
-              icon: NzIcons.delete,
-              semanticLabel: l.uiArchiveDelete,
-              onPressed: () {
-                ref
-                    .read(archiveFolderControllerProvider(widget.code).notifier)
-                    .remove(f.id);
-                Navigator.of(context).pop();
-                widget.onToast(l.uiArchiveDeleted);
-              },
-            ),
+            // Silme yalnız yükleyene açıktır (RECORDS-K10); diğerlerinde düğme yok.
+            if (mine)
+              NzIconButton.circle(
+                icon: NzIcons.delete,
+                semanticLabel: l.uiArchiveDelete,
+                onPressed: () => _delete(f),
+              ),
           ],
         ),
       ],

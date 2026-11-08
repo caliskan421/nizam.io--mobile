@@ -21,15 +21,26 @@ Future<Stream<List<int>>> getFileStream(
   Dio dio, {
   required String fileId,
   Map<String, dynamic>? extras,
+}) => getBinaryStream(
+  dio,
+  '/v1/files/${Uri.encodeComponent(fileId)}/download',
+  extras: extras ?? RecordsClient.downloadFileOpenapiExtras,
+);
+
+/// İkili `GET` yanıtının AKIŞI ([getFileStream] ile aynı kurallar): ZIP gibi büyük gövdeler
+/// belleğe toplanmaz. [path] (gerekirse ham sorgu dizesiyle) üretilmiş istemcideki uçla,
+/// [extras] o ucun `…OpenapiExtras` değeriyle aynı olmalıdır (sözleşme kapısı operationId'yi
+/// buradan okur).
+Future<Stream<List<int>>> getBinaryStream(
+  Dio dio,
+  String path, {
+  required Map<String, dynamic> extras,
 }) async {
   final Response<ResponseBody> r;
   try {
     r = await dio.get<ResponseBody>(
-      '/v1/files/${Uri.encodeComponent(fileId)}/download',
-      options: Options(
-        responseType: ResponseType.stream,
-        extra: extras ?? RecordsClient.downloadFileOpenapiExtras,
-      ),
+      path,
+      options: Options(responseType: ResponseType.stream, extra: extras),
     );
   } on DioException catch (e) {
     throw await streamApiError(e);

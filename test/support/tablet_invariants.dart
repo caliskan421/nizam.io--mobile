@@ -90,9 +90,9 @@ final tabletInvariantScenes = <TabletScene>[
   TabletScene('nav-module-roundtrip-keeps-last-loaded-record', (s) async {
     await s.tapRail(TabletModule.archive);
     expectModuleRoot(s, TabletModule.archive);
-    await s.tapText(s.inPane(NzPaneRole.master, find.text('Operasyon')));
+    await s.tapText(s.inPane(NzPaneRole.master, find.text('İdari işler')));
     expect(
-      s.inPane(NzPaneRole.detail, find.text('Operasyon')),
+      s.inPane(NzPaneRole.detail, find.text('İdari işler')),
       findsWidgets,
       reason: 'seçilen klasör sağda',
     );
@@ -100,7 +100,7 @@ final tabletInvariantScenes = <TabletScene>[
     expectModuleRoot(s, TabletModule.messages);
     await s.tapRail(TabletModule.archive);
     expect(
-      s.inPane(NzPaneRole.detail, find.text('Operasyon')),
+      s.inPane(NzPaneRole.detail, find.text('İdari işler')),
       findsWidgets,
       reason: 'arşiv dönüşünde son yüklenen klasör (varsayılana sıfırlanmaz)',
     );

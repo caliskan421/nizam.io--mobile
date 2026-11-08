@@ -2,88 +2,85 @@ import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../domain/archive.dart';
+import '../domain/records.dart';
 
 part 'archive_folder_controller.g.dart';
 
 /// Klasör ayrıntısı sekmesi.
 enum ArchiveFolderTab { tasks, files }
 
-/// Klasör ayrıntısının durumu: sekme, etiket ve görev süzgeci, silinen dosyalar.
+/// Klasör ayrıntısının durumu: sekme ve sunucu süzgeçleri (etiket, görev, yükleyen, sıralama).
 @immutable
 final class ArchiveFolderViewState {
   const ArchiveFolderViewState({
     this.tab = ArchiveFolderTab.tasks,
     this.tag,
     this.task,
-    this.removed = const {},
+    this.uploader,
+    this.sort = ArchiveSort.recent,
   });
 
   final ArchiveFolderTab tab;
-  final ArchiveTag? tag;
+  final RecordTag? tag;
 
-  /// Görev süzgeci (görev kodu).
+  /// Görev süzgeci (`work_item_id`).
   final String? task;
 
-  /// Silinen kayıtlara taşınan dosyaların kimlikleri.
-  final Set<String> removed;
+  /// Yükleyen süzgeci (hesap kimliği).
+  final String? uploader;
+  final ArchiveSort sort;
+
+  /// Sıralama dışında süzgeç var mı (ZIP düğmesi görünen dosyaları indirir).
+  bool get filtered => tag != null || task != null || uploader != null;
+
+  /// Dosya listesinin sunucu süzgeci.
+  ArchiveAttachmentFilter get filter => ArchiveAttachmentFilter(
+    tag: tag,
+    workItemId: task,
+    uploaderId: uploader,
+    sort: sort,
+  );
 
   ArchiveFolderViewState copyWith({
     ArchiveFolderTab? tab,
-    ArchiveTag? Function()? tag,
+    RecordTag? Function()? tag,
     String? Function()? task,
-    Set<String>? removed,
+    String? Function()? uploader,
+    ArchiveSort? sort,
   }) => ArchiveFolderViewState(
     tab: tab ?? this.tab,
     tag: tag == null ? this.tag : tag(),
     task: task == null ? this.task : task(),
-    removed: removed ?? this.removed,
+    uploader: uploader == null ? this.uploader : uploader(),
+    sort: sort ?? this.sort,
   );
-
-  /// [all] içinden silinmemiş dosyalar.
-  List<ArchiveFile> present(List<ArchiveFile> all) => [
-    for (final f in all)
-      if (!removed.contains(f.id)) f,
-  ];
-
-  /// Süzgeçlerden geçen dosyalar.
-  List<ArchiveFile> visible(List<ArchiveFile> all) => [
-    for (final f in present(all))
-      if ((tag == null || f.tag == tag) && (task == null || f.taskCode == task))
-        f,
-  ];
 }
 
-/// Silinen kayıtlara taşınan dosya kimlikleri (oturum boyunca; prototip `gone` klasör yeniden
-/// açılınca da korunur). Dosya kimlikleri klasörler arasında tektir.
-@Riverpod(keepAlive: true)
-class ArchiveRemovedFiles extends _$ArchiveRemovedFiles {
-  @override
-  Set<String> build() => const {};
-
-  void add(String fileId) => state = {...state, fileId};
-}
-
-/// Klasör ayrıntısı komutları; klasör kodu başına ayrı durum. Ekran kapanınca sekme ve
-/// süzgeçler sıfırlanır (prototip `openAFolder`), silinenler [ArchiveRemovedFiles]'ta kalır.
+/// Klasör ayrıntısı görünüm komutları; klasör kodu başına ayrı durum. Ekran kapanınca sekme
+/// ve süzgeçler sıfırlanır. Sunucu eylemleri `ArchiveActionsController`'dadır.
 @riverpod
 class ArchiveFolderController extends _$ArchiveFolderController {
   @override
-  ArchiveFolderViewState build(String code) =>
-      ArchiveFolderViewState(removed: ref.read(archiveRemovedFilesProvider));
+  ArchiveFolderViewState build(String code) => const ArchiveFolderViewState();
 
   void setTab(ArchiveFolderTab t) => state = state.copyWith(tab: t);
 
-  void setTag(ArchiveTag? t) => state = state.copyWith(tag: () => t);
+  void setTag(RecordTag? t) => state = state.copyWith(tag: () => t);
 
   /// Görev klasörüne dokunuş: dosyalar sekmesi o görevle süzülür.
-  void openTask(String taskCode) =>
-      state = state.copyWith(tab: ArchiveFolderTab.files, task: () => taskCode);
+  void openTask(String workItemId) => state = state.copyWith(
+    tab: ArchiveFolderTab.files,
+    task: () => workItemId,
+  );
 
   void clearTask() => state = state.copyWith(task: () => null);
 
-  /// Dosyayı silinen kayıtlara taşır (yerel).
-  void remove(String fileId) {
-    ref.read(archiveRemovedFilesProvider.notifier).add(fileId);
-    state = state.copyWith(removed: {...state.removed, fileId});
-  }
+  void setUploader(String? accountId) =>
+      state = state.copyWith(uploader: () => accountId);
+
+  /// Son yükleme → Ada göre → Boyuta göre → …
+  void cycleSort() => state = state.copyWith(
+    sort:
+        ArchiveSort.values[(state.sort.index + 1) % ArchiveSort.values.length],
+  );
 }

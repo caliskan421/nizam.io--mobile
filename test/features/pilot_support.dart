@@ -70,6 +70,12 @@ class PilotBackend {
   String? loginError;
   List<Map<String, Object?>>? loginErrorFields;
 
+  /// `GET /v1/me` `company_admin` değeri.
+  bool companyAdmin = true;
+
+  /// `GET /v1/me/departments` satırları (varsayılan: ekip satırı yok).
+  List<Map<String, Object?>> seats = const [];
+
   /// Ana sayfa özeti uçlarının (pano, görevler, tarih talepleri, okunmamış) yanıtları yola
   /// göre; varsayılan [emptyDashboardWire] (görevsiz program).
   Map<String, Object> dashboard = emptyDashboardWire();
@@ -94,11 +100,11 @@ class PilotBackend {
           'account_id': 'acc-1',
           'email': 'a@b.test',
           'full_name': 'Ayşe Yılmaz',
-          'company_admin': true,
+          'company_admin': companyAdmin,
         });
       case 'GET /v1/me/departments':
-        // Ekip satırı yok (şirket yöneticisi): görev kataloğu rolü türetir.
-        return jsonResponse(200, {'departments': <Object>[]});
+        // Varsayılan ekip satırı yok (şirket yöneticisi): görev kataloğu rolü türetir.
+        return jsonResponse(200, {'departments': seats});
       case 'GET /v1/program/departments':
         // Programa bağlı departman yok: yöneticinin süzgeç seçenekleri boş.
         return jsonResponse(200, {'departments': <Object>[]});

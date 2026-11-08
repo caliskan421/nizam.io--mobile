@@ -8,16 +8,19 @@ part of 'archive_folders_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Arşiv klasörleri (koordinatörlük başına bir klasör). Yeniden yükleme yalnız dokunuşla.
+/// Arşiv klasörleri (`archiveFolders`; yönetici tüm koordinatörlükler, koordinatör kendi
+/// klasörü, üye tek sanal klasör). Kapsam değişince yeniden okunur; aksi hâlde yalnız dokunuşla.
 
 @ProviderFor(ArchiveFoldersController)
 final archiveFoldersControllerProvider = ArchiveFoldersControllerProvider._();
 
-/// Arşiv klasörleri (koordinatörlük başına bir klasör). Yeniden yükleme yalnız dokunuşla.
+/// Arşiv klasörleri (`archiveFolders`; yönetici tüm koordinatörlükler, koordinatör kendi
+/// klasörü, üye tek sanal klasör). Kapsam değişince yeniden okunur; aksi hâlde yalnız dokunuşla.
 final class ArchiveFoldersControllerProvider
     extends
         $AsyncNotifierProvider<ArchiveFoldersController, List<ArchiveFolder>> {
-  /// Arşiv klasörleri (koordinatörlük başına bir klasör). Yeniden yükleme yalnız dokunuşla.
+  /// Arşiv klasörleri (`archiveFolders`; yönetici tüm koordinatörlükler, koordinatör kendi
+  /// klasörü, üye tek sanal klasör). Kapsam değişince yeniden okunur; aksi hâlde yalnız dokunuşla.
   ArchiveFoldersControllerProvider._()
     : super(
         from: null,
@@ -38,9 +41,10 @@ final class ArchiveFoldersControllerProvider
 }
 
 String _$archiveFoldersControllerHash() =>
-    r'a38947a53170e5f1fba22c31179c985e383245e3';
+    r'62304453fbf5d9c6b160824997f83c1689830e73';
 
-/// Arşiv klasörleri (koordinatörlük başına bir klasör). Yeniden yükleme yalnız dokunuşla.
+/// Arşiv klasörleri (`archiveFolders`; yönetici tüm koordinatörlükler, koordinatör kendi
+/// klasörü, üye tek sanal klasör). Kapsam değişince yeniden okunur; aksi hâlde yalnız dokunuşla.
 
 abstract class _$ArchiveFoldersController
     extends $AsyncNotifier<List<ArchiveFolder>> {

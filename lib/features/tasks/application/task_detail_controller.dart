@@ -538,11 +538,12 @@ class TaskDetailController extends _$TaskDetailController {
 
   void updateUpload(UploadDraft d) => state = state.copyWith(upload: () => d);
 
-  /// Sistem seçicisinden dosya seçer. Seçici yoksa ya da vazgeçilirse false.
-  Future<bool> pickUploadFile() async {
+  /// [origin] seçicisinden (dosyalar/fotoğraflar) dosya seçer. Seçici yoksa ya da
+  /// vazgeçilirse false.
+  Future<bool> pickUploadFile(UploadOrigin origin) async {
     final picker = ref.read(uploadPickerProvider);
     if (!picker.available) return false;
-    final f = await picker.pick();
+    final f = await picker.pick(origin);
     final d = state.upload;
     if (f == null || d == null || !ref.mounted) return false;
     state = state.copyWith(

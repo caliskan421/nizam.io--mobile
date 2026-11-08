@@ -6,7 +6,7 @@ import 'task_catalog.dart';
 import 'task_permissions.dart';
 
 export '../../../core/domain/upload_types.dart'
-    show uploadContentType, uploadExtensions;
+    show normalizeUploadName, uploadContentType, uploadExtensions;
 
 /// Alt görev değişikliği (`PATCH …/subtasks/{id}`). null alan değişmez. [assignee] verilirse
 /// `id` null → atamayı kaldır; [dates] verilirse ikisi birlikte gider (ikisi null → kaldır).
@@ -196,12 +196,15 @@ final class TeamMember {
   final bool coordinator;
 }
 
+/// Seçicinin kaynağı: cihaz dosyaları (Dosyalar / SAF) ya da fotoğraflar (galeri).
+enum UploadOrigin { files, photos }
+
 /// Sistem dosya seçicisi portu. [pick] null → kullanıcı vazgeçti.
 abstract interface class UploadPicker {
   /// Seçici bu kurulumda var mı (yoksa yükleme formu dosya seçtiremez).
   bool get available;
 
-  Future<UploadSource?> pick();
+  Future<UploadSource?> pick(UploadOrigin origin);
 }
 
 /// Seçici bağlı olmayan kurulumda (testler, örnek) kullanılan gerçekleştirme; gerçek seçici
@@ -213,7 +216,7 @@ final class UnavailableUploadPicker implements UploadPicker {
   bool get available => false;
 
   @override
-  Future<UploadSource?> pick() async => null;
+  Future<UploadSource?> pick(UploadOrigin origin) async => null;
 }
 
 /// İndirilen dosyanın yazıldığı yer (portu; gerçekleştirme `data/`). [bytes] akışı parça

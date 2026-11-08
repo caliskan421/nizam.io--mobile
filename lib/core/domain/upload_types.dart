@@ -35,3 +35,13 @@ const uploadExtensions = [
   'pptx',
   'pages',
 ];
+
+/// Seçicinin verdiği adı izinli kümenin yazımına getirir: uzantı küçük harfe iner,
+/// `jpeg` → `jpg` (galeri `IMG_1.JPEG`/`.JPG` verebilir; içerik türü yine `image/jpeg`).
+/// Küme dışı uzantı (ör. `heic`, `webp`) yalnız küçülür; tür ön denetimi onu reddeder.
+String normalizeUploadName(String name) {
+  final i = name.lastIndexOf('.');
+  if (i < 0 || i == name.length - 1) return name;
+  final ext = name.substring(i + 1).toLowerCase();
+  return '${name.substring(0, i)}.${ext == 'jpeg' ? 'jpg' : ext}';
+}

@@ -36,14 +36,34 @@ enum NotificationType {
   }
 }
 
+/// Bildirime dokununca açılan uygulama hedefi ([NotificationSubject.link]).
+enum NotificationLink {
+  /// Görev ayrıntısı (`subject_ref.kind = work_item`; id = `work_item_id`).
+  task,
+
+  /// Toplantı ayrıntısı (`subject_ref.kind = meeting`; id = `meeting_id`).
+  meeting,
+
+  /// Uygulamada rotası yok (üyelik, program aktarımı, bilinmeyen tür): yalnız okundu olur.
+  none,
+}
+
 /// Bildirimin konusu (`NotificationSubject`). [kind] değer kümesi sözleşmede tanımsızdır;
-/// opak dize olarak taşınır (gezinme kararı entegrasyonda).
+/// opak dize olarak taşınır. Bugün backend olay üreticilerinin yazdığı türler: `work_item`
+/// (görev ve tarih talebi olayları), `meeting`, `membership`, `program_transfer`.
 @immutable
 final class NotificationSubject {
   const NotificationSubject({required this.kind, required this.id});
 
   final String kind;
   final String id;
+
+  /// Dokunuşta açılacak hedef; tanınmayan tür [NotificationLink.none].
+  NotificationLink get link => switch (kind) {
+    'work_item' => NotificationLink.task,
+    'meeting' => NotificationLink.meeting,
+    _ => NotificationLink.none,
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -73,6 +93,16 @@ final class AppNotification {
   final NotificationSubject subject;
   final bool isRead;
   final DateTime createdAt;
+
+  /// Okundu işaretlenmiş kopyası.
+  AppNotification asRead() => AppNotification(
+    id: id,
+    type: type,
+    rawType: rawType,
+    subject: subject,
+    isRead: true,
+    createdAt: createdAt,
+  );
 }
 
 /// Çan listesinin bir sayfası (`NotificationList`): satırlar + okunmamış toplamı.

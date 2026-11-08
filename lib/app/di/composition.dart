@@ -21,6 +21,7 @@ import '../../features/identity/identity.dart' show LoginPrefill;
 import '../../features/identity/identity_module.dart';
 import '../../features/meetings/meetings_module.dart';
 import '../../features/messages/messages_module.dart';
+import '../../features/notifications/notifications_module.dart';
 import '../../features/scope/scope_module.dart';
 import '../../features/tasks/tasks_module.dart';
 import '../../features/timeline/timeline_module.dart';
@@ -76,6 +77,10 @@ class Composition {
       flavor: flavor,
     );
     registerMessagesModule(locator);
+    registerNotificationsModule(
+      locator,
+      apiDio: () => container.read(apiDioProvider),
+    );
     registerTasksModule(locator, apiDio: () => container.read(apiDioProvider));
     registerTimelineModule(locator);
     container = ProviderContainer(
@@ -109,6 +114,7 @@ class Composition {
         ...coordinatorshipsOverrides(locator),
         ...meetingsOverrides(locator),
         ...messagesOverrides(locator),
+        ...notificationsOverrides(locator),
         ...tasksOverrides(locator),
         ...timelineOverrides(locator),
       ],

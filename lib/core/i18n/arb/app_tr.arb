@@ -2633,10 +2633,6 @@
   "@uiHomeCollapse": {
     "description": "ui.home.collapse"
   },
-  "uiHomeNotifications": "Bildirimler",
-  "@uiHomeNotifications": {
-    "description": "ui.home.notifications"
-  },
   "uiHomeWaitingTail": "iş seni bekliyor",
   "@uiHomeWaitingTail": {
     "description": "ui.home.waiting_tail"
@@ -2752,22 +2748,6 @@
   "uiHomeShiftDaysTail": "gün",
   "@uiHomeShiftDaysTail": {
     "description": "ui.home.shift_days_tail"
-  },
-  "uiHomeNotifyDateRequests": "tarih talebi",
-  "@uiHomeNotifyDateRequests": {
-    "description": "ui.home.notify_date_requests"
-  },
-  "uiHomeNotifyApprovals": "onay",
-  "@uiHomeNotifyApprovals": {
-    "description": "ui.home.notify_approvals"
-  },
-  "uiHomeNotifyAnd": "ve",
-  "@uiHomeNotifyAnd": {
-    "description": "ui.home.notify_and"
-  },
-  "uiHomeNotifyTail": "seni bekliyor",
-  "@uiHomeNotifyTail": {
-    "description": "ui.home.notify_tail"
   },
   "uiHomeSeasonTail": "sezonu",
   "@uiHomeSeasonTail": {
@@ -3880,6 +3860,94 @@
   "uiMessagesNewChatHint": "Kişi seç",
   "@uiMessagesNewChatHint": {
     "description": "ui.messages.new_chat_hint"
+  },
+  "uiNotificationsTitle": "Bildirimler",
+  "@uiNotificationsTitle": {
+    "description": "ui.notifications.title"
+  },
+  "uiNotificationsUnreadTail": "okunmamış",
+  "@uiNotificationsUnreadTail": {
+    "description": "ui.notifications.unread_tail"
+  },
+  "uiNotificationsUnreadBadge": "Okunmadı",
+  "@uiNotificationsUnreadBadge": {
+    "description": "ui.notifications.unread_badge"
+  },
+  "uiNotificationsMarkAll": "Tümünü okundu yap",
+  "@uiNotificationsMarkAll": {
+    "description": "ui.notifications.mark_all"
+  },
+  "uiNotificationsMarkedAll": "Bütün bildirimler okundu",
+  "@uiNotificationsMarkedAll": {
+    "description": "ui.notifications.marked_all"
+  },
+  "uiNotificationsMore": "Daha fazla göster",
+  "@uiNotificationsMore": {
+    "description": "ui.notifications.more"
+  },
+  "uiNotificationsEmptyTitle": "Bildirim yok",
+  "@uiNotificationsEmptyTitle": {
+    "description": "ui.notifications.empty_title"
+  },
+  "uiNotificationsEmptyMessage": "Görev, toplantı ve koordinatörlük gelişmeleri burada görünür.",
+  "@uiNotificationsEmptyMessage": {
+    "description": "ui.notifications.empty_message"
+  },
+  "uiNotificationsTypeWorkItemCreated": "Yeni görev oluşturuldu",
+  "@uiNotificationsTypeWorkItemCreated": {
+    "description": "ui.notifications.type_work_item_created"
+  },
+  "uiNotificationsTypeWorkItemTransitioned": "Görevin durumu değişti",
+  "@uiNotificationsTypeWorkItemTransitioned": {
+    "description": "ui.notifications.type_work_item_transitioned"
+  },
+  "uiNotificationsTypeWorkItemAssignmentChanged": "Görevin atamaları değişti",
+  "@uiNotificationsTypeWorkItemAssignmentChanged": {
+    "description": "ui.notifications.type_work_item_assignment_changed"
+  },
+  "uiNotificationsTypeWorkItemDateChanged": "Görevin tarihleri değişti",
+  "@uiNotificationsTypeWorkItemDateChanged": {
+    "description": "ui.notifications.type_work_item_date_changed"
+  },
+  "uiNotificationsTypeWorkDateChangeRequested": "Tarih değişikliği talep edildi",
+  "@uiNotificationsTypeWorkDateChangeRequested": {
+    "description": "ui.notifications.type_work_date_change_requested"
+  },
+  "uiNotificationsTypeWorkDateChangeReviewed": "Tarih talebi yanıtlandı",
+  "@uiNotificationsTypeWorkDateChangeReviewed": {
+    "description": "ui.notifications.type_work_date_change_reviewed"
+  },
+  "uiNotificationsTypeCollaborationMessageSent": "Yeni mesaj",
+  "@uiNotificationsTypeCollaborationMessageSent": {
+    "description": "ui.notifications.type_collaboration_message_sent"
+  },
+  "uiNotificationsTypeCollaborationMeetingCreated": "Yeni toplantı",
+  "@uiNotificationsTypeCollaborationMeetingCreated": {
+    "description": "ui.notifications.type_collaboration_meeting_created"
+  },
+  "uiNotificationsTypeCollaborationMeetingUpdated": "Toplantıya ekip üyeleri eklendi",
+  "@uiNotificationsTypeCollaborationMeetingUpdated": {
+    "description": "ui.notifications.type_collaboration_meeting_updated"
+  },
+  "uiNotificationsTypeMembershipAssigned": "Koordinatörlüğe üye eklendi",
+  "@uiNotificationsTypeMembershipAssigned": {
+    "description": "ui.notifications.type_membership_assigned"
+  },
+  "uiNotificationsTypeMembershipRemoved": "Koordinatörlükten üye çıkarıldı",
+  "@uiNotificationsTypeMembershipRemoved": {
+    "description": "ui.notifications.type_membership_removed"
+  },
+  "uiNotificationsTypeMembershipRoleChanged": "Koordinatörlükte rol değişti",
+  "@uiNotificationsTypeMembershipRoleChanged": {
+    "description": "ui.notifications.type_membership_role_changed"
+  },
+  "uiNotificationsTypeProgramTransferCompleted": "Program aktarımı tamamlandı",
+  "@uiNotificationsTypeProgramTransferCompleted": {
+    "description": "ui.notifications.type_program_transfer_completed"
+  },
+  "uiNotificationsTypeUnknown": "Yeni bildirim",
+  "@uiNotificationsTypeUnknown": {
+    "description": "ui.notifications.type_unknown"
   },
   "uiRouterTabHome": "Ana sayfa",
   "@uiRouterTabHome": {

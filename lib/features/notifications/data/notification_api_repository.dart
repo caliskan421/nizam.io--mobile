@@ -7,16 +7,24 @@ import '../../../core/api/generated/models/register_target_request.dart';
 import '../../../core/domain/enum_parse.dart';
 import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../domain/app_notification.dart';
 import '../domain/notification_repository.dart';
 
 /// notifications uçlarına üretilmiş istemciyle erişim. Üretilmiş DTO'lar bu katmanda kalır;
 /// dışarıya domain varlıkları döner (sınır kuralı A1). Bütün hatalar [ApiError] olarak fırlar.
 class ApiNotificationRepository implements NotificationRepository {
-  /// [dio]: doğrulanmış bağın API istemcisi (S1: kapsam başlığı gerekmez).
-  ApiNotificationRepository(Dio dio) : _client = NotificationsClient(dio);
+  /// [dio]: doğrulanmış bağın güncel API istemcisi (S1: kapsam başlığı gerekmez); bağ yoksa
+  /// null → `client.server_not_verified`. İstek anında okunur (bağ değişebilir).
+  ApiNotificationRepository(this._dio);
 
-  final NotificationsClient _client;
+  final Dio? Function() _dio;
+
+  NotificationsClient get _client {
+    final d = _dio();
+    if (d == null) throw ApiError(ClientErrorCode.serverNotVerified);
+    return NotificationsClient(d);
+  }
 
   @override
   Future<NotificationFeed> list({

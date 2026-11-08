@@ -1,13 +1,17 @@
 // V10 (F60): uygulama ön plana dönünce okunmuş görev kataloğu bayatsa yeniden okunur; hiç
 // okunmamış katalog için okuma başlatılmaz; taze katalog yeniden okunmaz (yoklama yok).
-// Kabukta `resumed` geçişi bu işlevi çağırır (widget testi).
+// Kabukta `resumed` geçişi bu işlevi çağırır (widget testi). Zil rozeti yalnız ekrandaysa
+// (sağlayıcı yaşıyorsa) yeniden okunur.
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/app/foreground_refresh.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/features/notifications/application/notifications_providers.dart';
+import 'package:nizamio/features/notifications/notifications.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
+import '../features/notifications/notification_count_stub.dart';
 import '../features/pilot_support.dart';
 import '../support/fake_backend.dart';
 import '../support/harness.dart';
@@ -69,4 +73,25 @@ void main() {
     await tester.pump();
     expect(c.exists(taskCatalogControllerProvider), isFalse);
   });
+
+  test(
+    'zil rozeti: ekranda değilse istek yok; ekrandaysa yeniden okunur',
+    () async {
+      final repo = NotificationCountStub()..unread = 2;
+      final c = ProviderContainer(
+        retry: (_, _) => null,
+        overrides: [notificationRepositoryProvider.overrideWithValue(repo)],
+      );
+      addTearDown(c.dispose);
+      await refreshNotificationBadge(c);
+      expect(repo.countCalls, 0);
+
+      c.listen(notificationUnreadControllerProvider, (_, _) {});
+      await c.read(notificationUnreadControllerProvider.future);
+      repo.unread = 5;
+      await refreshNotificationBadge(c);
+      expect(repo.countCalls, 2);
+      expect(c.read(notificationUnreadControllerProvider).value, 5);
+    },
+  );
 }

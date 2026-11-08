@@ -210,7 +210,7 @@ final class CoordinatorshipDetailProvider
 }
 
 String _$coordinatorshipDetailHash() =>
-    r'439f8173de45f47f4fd4d9b06f71f0838f2023a9';
+    r'922fa1eb7028d1d113aa566bc10b4545b6c8480e';
 
 /// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
 /// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,

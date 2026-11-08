@@ -26,8 +26,8 @@ import 'dashboard_report_api_repository.dart';
 /// - `GET /v1/reports/dashboard/tasks` → bekleyen onayların ve tarih taleplerinin görev adları,
 ///   zamanında ilerleyen görev sayısı;
 /// - `GET /v1/date-change-requests?status=pending` → bekleyen tarih talepleri;
-/// - `GET /v1/me/chat-unread` → okunmamış sohbet rozeti (programlar arası toplam; eski mesaj
-///   kutusu uçları v0.10'da kalktı).
+/// - `GET /v1/me/chat-unread` → okunmamış sohbet rozeti (S1 uç programlar arası liste verir;
+///   rozet seçili programın satırıdır, satır yoksa 0).
 ///
 /// [load] yalnız şirket yöneticisi içindir (pano uçları yöneticiye açık); rol seçimi
 /// application katmanında (`HomeDashboardController`, `TaskAccess`). Uçlardan biri hata
@@ -36,7 +36,8 @@ import 'dashboard_report_api_repository.dart';
 /// [loadTeamExtras] yönetici olmayan hesap içindir: yalnız okunmamış sayısı ve (koordinatörde)
 /// `GET /v1/date-change-requests/mine` (S3, açık departman); rapor uçları çağrılmaz.
 class ApiHomeDashboardRepository implements HomeDashboardRepository {
-  ApiHomeDashboardRepository(Dio dio)
+  /// İkinci argüman seçili programın kimliğini verir (okunmamış rozeti o programa iner).
+  ApiHomeDashboardRepository(Dio dio, this._programId)
     : _report = ApiDashboardReportRepository(dio),
       _identity = IdentityClient(dio),
       _reporting = ReportingClient(dio),
@@ -48,6 +49,7 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
   final ReportingClient _reporting;
   final WorkClient _work;
   final MessagingClient _messages;
+  final String? Function() _programId;
 
   static const _submitted = 'onaya_sunuldu';
   static const _inProgress = 'devam_ediyor';
@@ -157,10 +159,15 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
     );
   }
 
-  /// Okunmamış sohbet sayısı: programların `unread_chats` toplamı (S1 uç; seçili programa
-  /// indirme sohbet bağlama fazının işi).
-  static int _unread(ChatUnreadOverview o) =>
-      o.items.fold(0, (sum, p) => sum + p.unreadChats);
+  /// Seçili programın okunmamış sohbet sayısı (`unread_chats`; programın satırı yoksa 0).
+  int _unread(ChatUnreadOverview o) {
+    final program = _programId();
+    return o.items
+            .where((p) => p.programId == program)
+            .firstOrNull
+            ?.unreadChats ??
+        0;
+  }
 
   static bool _truncated(HttpResponse<Object?> r) {
     final values =

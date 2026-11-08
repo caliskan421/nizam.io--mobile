@@ -3321,10 +3321,6 @@
   "@uiMessagesNewMessage": {
     "description": "ui.messages.new_message"
   },
-  "uiMessagesNewChatSoon": "Yeni sohbet sonraki adımda tasarlanacak",
-  "@uiMessagesNewChatSoon": {
-    "description": "ui.messages.new_chat_soon"
-  },
   "uiMessagesFilters": "Sohbet süzgeci",
   "@uiMessagesFilters": {
     "description": "ui.messages.filters"
@@ -3381,10 +3377,6 @@
   "@uiMessagesYesterday": {
     "description": "ui.messages.yesterday"
   },
-  "uiMessagesMembersLc": "üye",
-  "@uiMessagesMembersLc": {
-    "description": "ui.messages.members_lc"
-  },
   "uiMessagesTyping": "yazıyor…",
   "@uiMessagesTyping": {
     "description": "ui.messages.typing"
@@ -3396,10 +3388,6 @@
   "uiMessagesLastSeen": "son görülme",
   "@uiMessagesLastSeen": {
     "description": "ui.messages.last_seen"
-  },
-  "uiMessagesYesterdayLc": "dün",
-  "@uiMessagesYesterdayLc": {
-    "description": "ui.messages.yesterday_lc"
   },
   "uiMessagesSearchChat": "Sohbette ara",
   "@uiMessagesSearchChat": {
@@ -3437,46 +3425,6 @@
   "@uiMessagesAttach": {
     "description": "ui.messages.attach"
   },
-  "uiMessagesPhotoVideo": "Fotoğraf ve video",
-  "@uiMessagesPhotoVideo": {
-    "description": "ui.messages.photo_video"
-  },
-  "uiMessagesFile": "Dosya",
-  "@uiMessagesFile": {
-    "description": "ui.messages.file"
-  },
-  "uiMessagesPortalRefs": "portaldan atıf",
-  "@uiMessagesPortalRefs": {
-    "description": "ui.messages.portal_refs"
-  },
-  "uiMessagesRefTask": "Görev",
-  "@uiMessagesRefTask": {
-    "description": "ui.messages.ref_task"
-  },
-  "uiMessagesRefCoordinatorship": "Koordinatörlük",
-  "@uiMessagesRefCoordinatorship": {
-    "description": "ui.messages.ref_coordinatorship"
-  },
-  "uiMessagesRefArchive": "Arşiv",
-  "@uiMessagesRefArchive": {
-    "description": "ui.messages.ref_archive"
-  },
-  "uiMessagesSearchTask": "Görev ara",
-  "@uiMessagesSearchTask": {
-    "description": "ui.messages.search_task"
-  },
-  "uiMessagesSearchCoordinatorship": "Koordinatörlük ara",
-  "@uiMessagesSearchCoordinatorship": {
-    "description": "ui.messages.search_coordinatorship"
-  },
-  "uiMessagesSearchFile": "Arşivde dosya ara",
-  "@uiMessagesSearchFile": {
-    "description": "ui.messages.search_file"
-  },
-  "uiMessagesRemove": "Kaldır",
-  "@uiMessagesRemove": {
-    "description": "ui.messages.remove"
-  },
   "uiMessagesCancel": "Vazgeç",
   "@uiMessagesCancel": {
     "description": "ui.messages.cancel"
@@ -3496,10 +3444,6 @@
   "uiMessagesVotedTail": "kişi oy verdi",
   "@uiMessagesVotedTail": {
     "description": "ui.messages.voted_tail"
-  },
-  "uiMessagesVotesLc": "oy",
-  "@uiMessagesVotesLc": {
-    "description": "ui.messages.votes_lc"
   },
   "uiMessagesReactLike": "Beğen",
   "@uiMessagesReactLike": {
@@ -3553,21 +3497,9 @@
   "@uiMessagesCopied": {
     "description": "ui.messages.copied"
   },
-  "uiMessagesPinnedToast": "Mesaj sabitlendi",
-  "@uiMessagesPinnedToast": {
-    "description": "ui.messages.pinned_toast"
-  },
-  "uiMessagesUnpinnedToast": "Sabitleme kaldırıldı",
-  "@uiMessagesUnpinnedToast": {
-    "description": "ui.messages.unpinned_toast"
-  },
   "uiMessagesPollResults": "Anket sonuçları",
   "@uiMessagesPollResults": {
     "description": "ui.messages.poll_results"
-  },
-  "uiMessagesPollResultsLc": "anket sonuçları",
-  "@uiMessagesPollResultsLc": {
-    "description": "ui.messages.poll_results_lc"
   },
   "uiMessagesToTask": "Göreve dönüştür",
   "@uiMessagesToTask": {
@@ -3580,34 +3512,6 @@
   "uiMessagesDeleted": "Mesaj silindi",
   "@uiMessagesDeleted": {
     "description": "ui.messages.deleted"
-  },
-  "uiMessagesNotVoted": "Henüz oy vermeyenler",
-  "@uiMessagesNotVoted": {
-    "description": "ui.messages.not_voted"
-  },
-  "uiMessagesNotVotedNone": "Grubun diğer üyeleri henüz oy vermedi",
-  "@uiMessagesNotVotedNone": {
-    "description": "ui.messages.not_voted_none"
-  },
-  "uiMessagesRemind": "Hatırlat",
-  "@uiMessagesRemind": {
-    "description": "ui.messages.remind"
-  },
-  "uiMessagesReminded": "Oy vermeyenlere hatırlatma gönderildi",
-  "@uiMessagesReminded": {
-    "description": "ui.messages.reminded"
-  },
-  "uiMessagesEndPoll": "Anketi bitir",
-  "@uiMessagesEndPoll": {
-    "description": "ui.messages.end_poll"
-  },
-  "uiMessagesPollEnded": "Anket bitti",
-  "@uiMessagesPollEnded": {
-    "description": "ui.messages.poll_ended"
-  },
-  "uiMessagesPollConcluded": "Anket sonuçlandı",
-  "@uiMessagesPollConcluded": {
-    "description": "ui.messages.poll_concluded"
   },
   "uiMessagesConcluded": "sonuçlandı",
   "@uiMessagesConcluded": {
@@ -3625,33 +3529,13 @@
   "@uiMessagesInfo": {
     "description": "ui.messages.info"
   },
-  "uiMessagesMute": "Sessize al",
-  "@uiMessagesMute": {
-    "description": "ui.messages.mute"
-  },
-  "uiMessagesMutedTail": "sessize alındı",
-  "@uiMessagesMutedTail": {
-    "description": "ui.messages.muted_tail"
-  },
   "uiMessagesLeaveGroup": "Gruptan çık",
   "@uiMessagesLeaveGroup": {
     "description": "ui.messages.leave_group"
   },
-  "uiMessagesBlock": "Engelle",
-  "@uiMessagesBlock": {
-    "description": "ui.messages.block"
-  },
   "uiMessagesActionSoon": "Bu işlem sonraki adımda tasarlanacak",
   "@uiMessagesActionSoon": {
     "description": "ui.messages.action_soon"
-  },
-  "uiMessagesShared": "paylaşılanlar",
-  "@uiMessagesShared": {
-    "description": "ui.messages.shared"
-  },
-  "uiMessagesMembers": "üyeler",
-  "@uiMessagesMembers": {
-    "description": "ui.messages.members"
   },
   "uiMessagesAllUsers": "Tüm kullanıcılar",
   "@uiMessagesAllUsers": {
@@ -3660,26 +3544,6 @@
   "uiMessagesGroup": "Grup",
   "@uiMessagesGroup": {
     "description": "ui.messages.group"
-  },
-  "uiMessagesWroteHere": "bu sohbette yazdı",
-  "@uiMessagesWroteHere": {
-    "description": "ui.messages.wrote_here"
-  },
-  "uiMessagesMember": "üye",
-  "@uiMessagesMember": {
-    "description": "ui.messages.member"
-  },
-  "uiMessagesManager": "yönetici",
-  "@uiMessagesManager": {
-    "description": "ui.messages.manager"
-  },
-  "uiMessagesPhoto": "Fotoğraf",
-  "@uiMessagesPhoto": {
-    "description": "ui.messages.photo"
-  },
-  "uiMessagesDownloading": "indiriliyor",
-  "@uiMessagesDownloading": {
-    "description": "ui.messages.downloading"
   },
   "uiMessagesRoleAdmin": "Admin",
   "@uiMessagesRoleAdmin": {
@@ -3696,6 +3560,78 @@
   "uiMessagesNewChatHint": "Kişi seç",
   "@uiMessagesNewChatHint": {
     "description": "ui.messages.new_chat_hint"
+  },
+  "uiMessagesNewGroup": "Yeni grup",
+  "@uiMessagesNewGroup": {
+    "description": "ui.messages.new_group"
+  },
+  "uiMessagesGroupName": "Grup adı",
+  "@uiMessagesGroupName": {
+    "description": "ui.messages.group_name"
+  },
+  "uiMessagesCreateGroup": "Grubu kur",
+  "@uiMessagesCreateGroup": {
+    "description": "ui.messages.create_group"
+  },
+  "uiMessagesCandidatesTruncated": "Liste ilk 200 kişiyle sınırlı.",
+  "@uiMessagesCandidatesTruncated": {
+    "description": "ui.messages.candidates_truncated"
+  },
+  "uiMessagesWhyCannotWrite": "Listede olmayan kişiyle doğrudan yazışamazsınız: birebir sohbet yalnız koordinatörlük zinciri içinde açılır. Ortak bir grupta yazışabilirsiniz.",
+  "@uiMessagesWhyCannotWrite": {
+    "description": "ui.messages.why_cannot_write"
+  },
+  "uiMessagesNoCandidates": "Listede kimse yok.",
+  "@uiMessagesNoCandidates": {
+    "description": "ui.messages.no_candidates"
+  },
+  "uiMessagesPeerLeft": "Bu kişi artık programda değil; mesaj gönderilemez.",
+  "@uiMessagesPeerLeft": {
+    "description": "ui.messages.peer_left"
+  },
+  "uiMessagesChatGone": "Bu sohbete artık erişimin yok.",
+  "@uiMessagesChatGone": {
+    "description": "ui.messages.chat_gone"
+  },
+  "uiMessagesSendFailed": "gönderilemedi",
+  "@uiMessagesSendFailed": {
+    "description": "ui.messages.send_failed"
+  },
+  "uiMessagesRetrySend": "Tekrar gönder",
+  "@uiMessagesRetrySend": {
+    "description": "ui.messages.retry_send"
+  },
+  "uiMessagesDiscardMessage": "Mesajı at",
+  "@uiMessagesDiscardMessage": {
+    "description": "ui.messages.discard_message"
+  },
+  "uiMessagesMessageRestored": "Mesaj silinmiş; metin taslağa geri kondu.",
+  "@uiMessagesMessageRestored": {
+    "description": "ui.messages.message_restored"
+  },
+  "uiMessagesOlderMessages": "Önceki mesajlar",
+  "@uiMessagesOlderMessages": {
+    "description": "ui.messages.older_messages"
+  },
+  "uiMessagesDeletedMessage": "Silinmiş mesaj",
+  "@uiMessagesDeletedMessage": {
+    "description": "ui.messages.deleted_message"
+  },
+  "uiMessagesNoMessages": "Henüz mesaj yok",
+  "@uiMessagesNoMessages": {
+    "description": "ui.messages.no_messages"
+  },
+  "uiMessagesListTruncated": "Yalnız son sohbetler gösteriliyor.",
+  "@uiMessagesListTruncated": {
+    "description": "ui.messages.list_truncated"
+  },
+  "uiMessagesSingleChoice": "Tek seçim",
+  "@uiMessagesSingleChoice": {
+    "description": "ui.messages.single_choice"
+  },
+  "uiMessagesMultiChoice": "Çoklu seçim",
+  "@uiMessagesMultiChoice": {
+    "description": "ui.messages.multi_choice"
   },
   "uiNotificationsTitle": "Bildirimler",
   "@uiNotificationsTitle": {

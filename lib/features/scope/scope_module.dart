@@ -34,7 +34,12 @@ void registerScopeModule(GetIt locator, {required Dio? Function() apiDio}) {
     () => HomeDashboardSource(
       server: () {
         final dio = apiDio();
-        return dio == null ? null : ApiHomeDashboardRepository(dio);
+        return dio == null
+            ? null
+            : ApiHomeDashboardRepository(
+                dio,
+                () => locator<ScopeController>().current.programId,
+              );
       },
     ),
   );

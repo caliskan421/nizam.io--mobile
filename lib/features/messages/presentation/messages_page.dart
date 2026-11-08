@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/errors/api_error.dart';
+import '../../../core/errors/error_text.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_bleed.dart';
@@ -18,17 +20,21 @@ import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
-import '../../tasks/tasks.dart';
 import '../application/chat_controller.dart';
+import '../application/chat_room_controller.dart';
 import '../application/chats_controller.dart';
 import '../application/messages_controller.dart';
+import '../application/messages_providers.dart';
 import '../domain/chat.dart';
 import '../domain/chat_logic.dart';
+import 'chat/chat_sync_scope.dart';
 import 'chat/messages_texts.dart';
+import 'chat/new_chat_sheet.dart';
 
 /// Mesajlar (prototip `messages`): başlık + ara + yeni mesaj, süzgeç hapları (Tümü, Okunmamış
-/// N, Gruplar, Kişiler), sohbet satırları → sohbet. Alt menüde modül sekmesine yeniden
-/// dokunmak kısayol menüsünü açar ("Tümünü okundu say" gerçekten uygular).
+/// N, Gruplar, Kişiler), sohbet satırları → sohbet (seçili programın `listChats` sayfaları).
+/// Alt menüde modül sekmesine yeniden dokunmak kısayol menüsünü açar ("Tümünü okundu say"
+/// sunucuda uygular). Yeni mesaj birebir adaylarını ve grup kurmayı açar.
 class MessagesPage extends ConsumerStatefulWidget {
   const MessagesPage({super.key});
 
@@ -98,17 +104,26 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
         NzFlyoutItem(
           label: l.uiMessagesMarkAllRead,
           icon: NzIcons.check,
-          onSelected: () {
-            ref.read(chatsControllerProvider.notifier).markAllRead();
-            _ctrl.setFilter(ChatFilter.all);
-          },
+          onSelected: _markAllRead,
         ),
       ],
     );
   }
 
-  /// Yeni mesaj: prototip gibi yer tutucu bildirimi (sohbet oluşturma sonraki adımda).
-  void _newChat() => NzToast.show(context, context.l10n.uiMessagesNewChatSoon);
+  Future<void> _markAllRead() async {
+    _ctrl.setFilter(ChatFilter.all);
+    try {
+      await ref.read(chatsControllerProvider.notifier).markAllRead();
+    } on ApiError catch (e) {
+      if (mounted) NzToast.show(context, errorText(context.l10n, e));
+    }
+  }
+
+  /// Yeni mesaj: aday seçimi ya da grup kurma; açılan sohbete gider.
+  Future<void> _newChat() async {
+    final id = await showNewChatSheet(context);
+    if (id != null && mounted) context.appNav.openChat(id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,13 +138,9 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
     );
     final view = ref.watch(messagesControllerProvider);
     final inbox = ref.watch(chatsControllerProvider);
-    final catalog = ref.watch(taskCatalogControllerProvider);
-    void retry() => ref
-      ..invalidate(chatsControllerProvider)
-      ..invalidate(taskCatalogControllerProvider);
+    void retry() => ref.invalidate(chatsControllerProvider);
     final box = inbox.value;
-    final cat = catalog.value;
-    return NzPage.feed(
+    final page = NzPage.feed(
       onRetry: retry,
       topBar: const RootTopBar(),
       children: [
@@ -167,28 +178,24 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
           ),
         ),
         Gap(tablet ? _tabletFilterTop : NizamioSpacing.space3),
-        if (box == null || cat == null)
+        if (box == null)
           NzAsyncView<ChatInbox>(
             value: inbox,
             onRetry: retry,
-            data: (_) => NzAsyncView<TaskCatalog>(
-              value: catalog,
-              onRetry: retry,
-              data: (_) => const SizedBox.shrink(),
-            ),
+            data: (_) => const SizedBox.shrink(),
           )
         else
           // Sohbet satırları ayrı akış öğeleridir (tembel kurulum; uzun kutuda yalnız
           // görünenler kurulur).
-          ..._list(context, box, cat, view, tablet: tablet),
+          ..._list(context, box, view, tablet: tablet),
       ],
     );
+    return ChatSyncScope(child: page);
   }
 
   List<Widget> _list(
     BuildContext context,
     ChatInbox inbox,
-    TaskCatalog catalog,
     MessagesViewState view, {
     required bool tablet,
   }) {
@@ -230,12 +237,7 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
       ),
       Gap(tablet ? _tabletListTop : NizamioSpacing.space2),
       for (final (i, chat) in list.indexed)
-        _ChatListRow(
-          key: ValueKey(chat.id),
-          chat: chat,
-          catalog: catalog,
-          index: i,
-        ),
+        _ChatListRow(key: ValueKey(chat.id), chat: chat, index: i),
       if (list.isEmpty)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: NizamioSpacing.space8),
@@ -245,20 +247,23 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
             style: t.caption.copyWith(color: c.textMuted),
           ),
         ),
+      if (inbox.truncated)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: NizamioSpacing.space4),
+          child: Text(
+            l.uiMessagesListTruncated,
+            textAlign: TextAlign.center,
+            style: t.caption.copyWith(color: c.textMuted),
+          ),
+        ),
     ];
   }
 }
 
 class _ChatListRow extends ConsumerWidget {
-  const _ChatListRow({
-    super.key,
-    required this.chat,
-    required this.catalog,
-    required this.index,
-  });
+  const _ChatListRow({super.key, required this.chat, required this.index});
 
   final Chat chat;
-  final TaskCatalog catalog;
 
   /// Görünen (süzülmüş) listedeki sıra: kaynak kişi avatarı rengi `GC[i % 5]`.
   final int index;
@@ -267,41 +272,42 @@ class _ChatListRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final last = chat.last;
-    final mine = last.from == catalog.me;
-    final senderName = catalog.person(last.from)?.name ?? '';
-    final who = mine
+    final mine = last != null && last.senderId == ref.watch(chatMeProvider);
+    final who = last == null
+        ? ''
+        : mine
         ? '${l.uiMessagesYou}: '
         : chat.group
-        ? '${senderName.split(' ').first}: '
+        ? '${last.senderName.split(' ').first}: '
         : '';
-    final body = last.text.isNotEmpty
-        ? last.text
-        : last.poll?.question ?? last.file?.name ?? '';
+    final body = last == null
+        ? l.uiMessagesNoMessages
+        : last.deleted
+        ? l.uiMessagesDeletedMessage
+        : last.text ?? '';
     final preview = who + body.replaceAll(RegExp(r'\s+'), ' ');
     final row = NzChatRow(
       name: chat.name,
       initials: chatInitials(chat.name),
       group: chat.group,
       tone: index % NzAvatar.toneCount,
-      online: chat.online,
+      online: chat.peerOnline ?? false,
       preview: preview,
-      time: l.listTime(last.at, catalog.today),
+      time: l.listTime(last?.at ?? chat.lastActivity, DateTime.now()),
       unread: chat.unread,
       mention: chat.mention,
-      muted: chat.muted,
-      tick: !mine
-          ? NzChatTick.none
-          : last.read
-          ? NzChatTick.read
-          : NzChatTick.delivered,
+      // Listede okundu bilgisi yok (tikler yalnız sohbet geçmişinde, §10.4): sunucuda.
+      tick: mine && !last.deleted ? NzChatTick.delivered : NzChatTick.none,
       semanticHint: chat.unread > 0
           ? '${chat.unread} ${l.uiMessagesUnreadLc}'
           : null,
       onTap: () {
-        // Kaynak `S_chat.load`: açık sohbetin satırına yeniden basmak yazma bağlamını da sıfırlar
-        // (ekran yeniden kurulsa da aynı aile sağlayıcısı aynı karede dinlendiği için kalırdı).
+        // Kaynak `S_chat.load`: açık sohbetin satırına yeniden basmak yazma bağlamını ve
+        // okunmamış ayırıcısını da sıfırlar (aynı aile sağlayıcısı aynı karede dinlenir).
         final view = chatControllerProvider(chat.id);
         if (ref.exists(view)) ref.read(view.notifier).open();
+        final room = chatRoomControllerProvider(chat.id);
+        if (ref.exists(room)) ref.read(room.notifier).reopen();
         context.appNav.openChat(chat.id);
       },
     );

@@ -112,6 +112,25 @@ final class MeetingRoom {
   );
 }
 
+/// Not ekleme sonucu: yalnız [NoteAdded] başarıdır (çağıran taslağı yalnız onda temizler).
+sealed class NoteSubmit {
+  const NoteSubmit();
+}
+
+final class NoteAdded extends NoteSubmit {
+  const NoteAdded();
+}
+
+final class NoteFailed extends NoteSubmit {
+  const NoteFailed(this.error);
+  final ApiError error;
+}
+
+/// İstek gönderilmedi (uçuşta istek var ya da metin boş); geri bildirim yok.
+final class NoteIgnored extends NoteSubmit {
+  const NoteIgnored();
+}
+
 /// Toplantı ayrıntısı ve yazmaları. Komutlar sunucu yanıtıyla durumu günceller ve hata kodunu
 /// döner (null → başarı); gündem işareti ve silmeler iyimserdir, hatada geri alınır.
 @riverpod
@@ -268,13 +287,14 @@ class MeetingRoomController extends _$MeetingRoomController {
   /// Uçuştaki not ekleme isteğinin anahtarı (kilidi yalnız kendi isteği açar).
   String? _noteInFlight;
 
-  /// Not ekler. Uçuşta istek varken ([MeetingRoom.noteSubmitting]) istek gönderilmez. Anahtar
-  /// yalnız TAMAMLANAN isteğin anahtarıyla eşleşiyorsa düşer (başarı ya da "anahtar başka
-  /// istekle kullanılmış"); ağ/zaman aşımı hatasında kalır, aynı metin aynı anahtarla gider.
-  Future<ApiError?> addNote(String content) async {
+  /// Not ekler. Uçuşta istek varken ([MeetingRoom.noteSubmitting]) ya da metin boşken istek
+  /// gönderilmez: [NoteIgnored] (taslak ve anahtar olduğu gibi kalır). Anahtar yalnız TAMAMLANAN
+  /// isteğin anahtarıyla eşleşiyorsa düşer (başarı ya da "anahtar başka istekle kullanılmış");
+  /// ağ/zaman aşımı hatasında kalır, aynı metin aynı anahtarla gider.
+  Future<NoteSubmit> addNote(String content) async {
     final t = content.trim();
     final r = _room;
-    if (t.isEmpty || r == null || r.noteSubmitting) return null;
+    if (t.isEmpty || r == null || r.noteSubmitting) return const NoteIgnored();
     final (keys, key) = _keys.keyFor('note', t);
     _keys = keys;
     _noteInFlight = key;
@@ -283,14 +303,18 @@ class MeetingRoomController extends _$MeetingRoomController {
       final note = await _repo.addNote(id, t, requestKey: key);
       _clearNoteKey(key);
       _releaseNote(key, (cur) => [note, ...cur.notes]);
-      return null;
+      return const NoteAdded();
     } on Object catch (e) {
       final err = toApiError(e);
       if (isKeyReused(err)) _clearNoteKey(key);
       _releaseNote(key, null);
-      return err;
+      return NoteFailed(err);
     }
   }
+
+  /// Bekleyen not ekleme anahtarı (test ve tanı için; yoksa null).
+  @visibleForTesting
+  String? get pendingNoteKey => _keys.pending('note');
 
   void _clearNoteKey(String key) {
     if (_keys.pending('note') == key) _keys = _keys.clear('note');

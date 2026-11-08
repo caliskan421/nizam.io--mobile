@@ -123,7 +123,7 @@ void main() {
   test('not ekle (başa), düzenle, sil', () async {
     final s = MeetingsServer();
     final (h, c, ctl) = await _open(s);
-    expect(await ctl.addNote('Basınç testi tamam'), isNull);
+    expect(await ctl.addNote('Basınç testi tamam'), isA<NoteAdded>());
     expect(
       filterNotes(_now(c).notes, NoteFilter.all, 'acc-1').first.content,
       'Basınç testi tamam',
@@ -148,15 +148,31 @@ void main() {
     final (h, c, ctl) = await _open(s);
     final first = ctl.addNote('A');
     expect(_now(c).noteSubmitting, isTrue, reason: 'kilit denetleyicide');
-    expect(await ctl.addNote('B'), isNull);
-    expect(await first, isNotNull, reason: 'ağ hatası');
+    expect(await ctl.addNote('B'), isA<NoteIgnored>());
+    expect(await first, isA<NoteFailed>(), reason: 'ağ hatası');
     expect(_now(c).noteSubmitting, isFalse);
     fail = false;
-    expect(await ctl.addNote(' A '), isNull);
+    expect(await ctl.addNote(' A '), isA<NoteAdded>());
     final keys = _noteKeys(h);
     expect(keys, hasLength(2), reason: 'kilitliyken B gönderilmedi');
     expect(keys.first, isNotNull);
     expect(keys.last, keys.first, reason: 'tekrar aynı anahtarla');
+  });
+
+  test('uçuştayken ikinci gönderim "yoksayıldı": istek yok, anahtar ve kilit değişmez', () async {
+    final s = MeetingsServer()..hold = Completer();
+    final (h, c, ctl) = await _open(s);
+    final first = ctl.addNote('A');
+    final key = ctl.pendingNoteKey;
+    expect(key, isNotNull);
+    final notes = _now(c).notes;
+    expect(await ctl.addNote('B'), isA<NoteIgnored>());
+    expect(ctl.pendingNoteKey, key, reason: 'anahtar A\'nınki kalır');
+    expect(_now(c).noteSubmitting, isTrue);
+    expect(_now(c).notes, same(notes));
+    s.hold!.complete();
+    expect(await first, isA<NoteAdded>());
+    expect(_noteKeys(h), [key], reason: 'yalnız A gönderildi');
   });
 
   test('geç tamamlanan A başarısı B\'nin bekleyen anahtarını silmez', () async {
@@ -179,9 +195,9 @@ void main() {
     final b = ctlB.addNote('B');
     await Future<void>.delayed(Duration.zero);
     gateA.complete();
-    expect(await a, isNull);
-    expect(await b, isNotNull, reason: 'B ağ hatası');
-    expect(await ctlB.addNote('B'), isNull);
+    expect(await a, isA<NoteAdded>());
+    expect(await b, isA<NoteFailed>(), reason: 'B ağ hatası');
+    expect(await ctlB.addNote('B'), isA<NoteAdded>());
     final keys = _noteKeys(h);
     expect(keys, hasLength(3));
     expect(keys[1], isNot(keys[0]), reason: 'B yeni eylem');

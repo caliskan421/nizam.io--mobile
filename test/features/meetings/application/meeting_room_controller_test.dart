@@ -175,33 +175,48 @@ void main() {
     expect(_noteKeys(h), [key], reason: 'yalnız A gönderildi');
   });
 
-  test('geç tamamlanan A başarısı B\'nin bekleyen anahtarını silmez', () async {
+  test('yenileme uçuş kilidini kaldırmaz: aynı metin ikinci kez gitmez; uçuş bitince kilit '
+      'açılır, anahtar korunur', () async {
     final s = MeetingsServer();
-    final gateA = Completer<void>();
+    final gate = Completer<void>();
     var n = 0;
     s.overrides['POST /v1/meetings/m1/notes'] = () {
       n++;
-      if (n == 2) throw _networkError(); // B: sonucu bilinmiyor
-      return _noteCreated(n == 1 ? 'A' : 'B');
+      if (n == 1) throw _networkError(); // A: sonucu bilinmiyor
+      return _noteCreated('A');
     };
-    s.hold = gateA;
+    s.hold = gate;
     final (h, c, ctl) = await _open(s);
     final a = ctl.addNote('A');
     await Future<void>.delayed(Duration.zero);
-    // Kilit yenilemeyle kaybolur (ör. aşağı çekme): B, A uçuştayken yeni anahtarla gider.
+    final key = ctl.pendingNoteKey;
+    // Aşağı çekerek yenileme state'i yeniden kurar; kilit denetleyicide kalır.
     await ctl.refresh();
-    expect(_now(c).noteSubmitting, isFalse);
-    final ctlB = c.read(_room.notifier);
-    final b = ctlB.addNote('B');
-    await Future<void>.delayed(Duration.zero);
-    gateA.complete();
-    expect(await a, isA<NoteAdded>());
-    expect(await b, isA<NoteFailed>(), reason: 'B ağ hatası');
-    expect(await ctlB.addNote('B'), isA<NoteAdded>());
+    final again = c.read(_room.notifier);
+    expect(
+      _now(c).noteSubmitting,
+      isTrue,
+      reason: 'kilit yenilemeden sonra da açık',
+    );
+    expect(await again.addNote('A'), isA<NoteIgnored>(), reason: 'aynı metin');
+    expect(
+      await again.addNote('B'),
+      isA<NoteIgnored>(),
+      reason: 'farklı metin',
+    );
+    expect(_noteKeys(h), hasLength(1), reason: 'tek istek uçuşta');
+    gate.complete();
+    expect(await a, isA<NoteFailed>());
+    expect(_now(c).noteSubmitting, isFalse, reason: 'kendi uçuşu kilidi açtı');
+    expect(again.pendingNoteKey, key, reason: 'ağ hatasında anahtar korunur');
+    expect(await again.addNote('A'), isA<NoteAdded>());
     final keys = _noteKeys(h);
-    expect(keys, hasLength(3));
-    expect(keys[1], isNot(keys[0]), reason: 'B yeni eylem');
-    expect(keys[2], keys[1], reason: 'A başarısı B anahtarını silmedi');
+    expect(keys, [key, key], reason: 'tekrar aynı anahtarla, tek ek istek');
+    expect(
+      again.pendingNoteKey,
+      isNull,
+      reason: 'başarıda kendi anahtarı düşer',
+    );
   });
 
   test('konferans başlat → canlı; bitir → yok', () async {

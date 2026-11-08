@@ -175,6 +175,7 @@ class MeetingRoomController extends _$MeetingRoomController {
         (s) =>
             s.role == SeatRole.coordinator && linked.contains(s.departmentId),
       ),
+      noteSubmitting: _noteInFlight != null,
     );
     _syncSummary(room);
     return room;
@@ -194,7 +195,7 @@ class MeetingRoomController extends _$MeetingRoomController {
 
   void _put(MeetingRoom room) {
     if (!ref.mounted) return;
-    state = AsyncData(room);
+    state = AsyncData(room.copyWith(noteSubmitting: _noteInFlight != null));
     _syncSummary(room);
   }
 
@@ -284,30 +285,35 @@ class MeetingRoomController extends _$MeetingRoomController {
     }
   }
 
-  /// Uçuştaki not ekleme isteğinin anahtarı (kilidi yalnız kendi isteği açar).
-  String? _noteInFlight;
+  /// Uçuştaki not ekleme isteğinin kimliği (işlem anahtarından ayrı; her uçuşa ayrı nesne).
+  /// State'ten bağımsızdır: yenileme state'i yeniden kursa da kilit kalır;
+  /// [MeetingRoom.noteSubmitting] yalnız bundan türer ([_put], [build]).
+  Object? _noteInFlight;
 
-  /// Not ekler. Uçuşta istek varken ([MeetingRoom.noteSubmitting]) ya da metin boşken istek
-  /// gönderilmez: [NoteIgnored] (taslak ve anahtar olduğu gibi kalır). Anahtar yalnız TAMAMLANAN
-  /// isteğin anahtarıyla eşleşiyorsa düşer (başarı ya da "anahtar başka istekle kullanılmış");
-  /// ağ/zaman aşımı hatasında kalır, aynı metin aynı anahtarla gider.
+  /// Not ekler. Uçuşta istek varken ya da metin boşken istek gönderilmez: [NoteIgnored]
+  /// (taslak ve anahtar olduğu gibi kalır). Anahtar yalnız TAMAMLANAN isteğin anahtarıyla
+  /// eşleşiyorsa düşer (başarı ya da "anahtar başka istekle kullanılmış"); ağ/zaman aşımı
+  /// hatasında kalır, aynı metin aynı anahtarla gider. Kilidi yalnız kendi uçuşu açar.
   Future<NoteSubmit> addNote(String content) async {
     final t = content.trim();
     final r = _room;
-    if (t.isEmpty || r == null || r.noteSubmitting) return const NoteIgnored();
+    if (t.isEmpty || r == null || _noteInFlight != null) {
+      return const NoteIgnored();
+    }
     final (keys, key) = _keys.keyFor('note', t);
     _keys = keys;
-    _noteInFlight = key;
-    _put(r.copyWith(noteSubmitting: true));
+    final flight = Object();
+    _noteInFlight = flight;
+    _put(r);
     try {
       final note = await _repo.addNote(id, t, requestKey: key);
       _clearNoteKey(key);
-      _releaseNote(key, (cur) => [note, ...cur.notes]);
+      _endNoteFlight(flight, (cur) => [note, ...cur.notes]);
       return const NoteAdded();
     } on Object catch (e) {
       final err = toApiError(e);
       if (isKeyReused(err)) _clearNoteKey(key);
-      _releaseNote(key, null);
+      _endNoteFlight(flight, null);
       return NoteFailed(err);
     }
   }
@@ -320,22 +326,14 @@ class MeetingRoomController extends _$MeetingRoomController {
     if (_keys.pending('note') == key) _keys = _keys.clear('note');
   }
 
-  /// Kilidi yalnız [key] isteği hâlâ uçuştaki istekse açar; [notes] varsa listeyi günceller.
-  void _releaseNote(
-    String key,
+  /// Uçuşu kapatır (yalnız [flight] hâlâ uçuştaki ise); [notes] varsa listeyi günceller.
+  void _endNoteFlight(
+    Object flight,
     List<MeetingNote> Function(MeetingRoom cur)? notes,
   ) {
+    if (identical(_noteInFlight, flight)) _noteInFlight = null;
     final cur = _room;
-    if (cur == null) return;
-    final mine = _noteInFlight == key;
-    if (mine) _noteInFlight = null;
-    if (!mine && notes == null) return;
-    _put(
-      cur.copyWith(
-        notes: notes?.call(cur),
-        noteSubmitting: mine ? false : null,
-      ),
-    );
+    if (cur != null) _put(cur.copyWith(notes: notes?.call(cur)));
   }
 
   Future<ApiError?> updateNote(MeetingNote n, String content) async {

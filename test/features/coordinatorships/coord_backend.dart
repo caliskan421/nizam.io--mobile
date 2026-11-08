@@ -48,6 +48,32 @@ class CoordBackend extends PilotBackend {
     {'department_id': dIda, 'display_name': 'İdari işler'},
   ];
 
+  /// `GET /v1/departments` satırları (S1, yalnız şirket yöneticisi; tür serbest dizge). İdari
+  /// işler listede yok (kesilmiş liste gibi).
+  List<Map<String, Object?>> companyDepartments = [
+    {
+      'department_id': dAlt,
+      'name': 'Altyapı ve tesisat',
+      'kind': 'koordinatorluk',
+      'code': 'ALT',
+      'description': 'Su ve yapı işleri',
+    },
+    {
+      'department_id': dEle,
+      'name': 'Elektrik ve enerji',
+      'kind': 'calisma_grubu',
+      'code': 'ELE',
+    },
+    {'department_id': dEgi, 'name': 'Eğitim ve Arge', 'kind': 'yeni_tur'},
+  ];
+
+  /// false → oturumdaki hesap şirket yöneticisi değil, programda ALT koordinatörü
+  /// (`/v1/me`, `/v1/me/departments`); `GET /v1/departments` 403 döner.
+  bool admin = true;
+
+  /// Doluysa `GET /v1/departments` bu kodla (HTTP 503) düşer.
+  String? departmentsError;
+
   /// `GET /v1/departments/{id}/members` satırları, departmana göre.
   Map<String, List<Map<String, Object?>>> rosters = {
     dAlt: [
@@ -118,6 +144,30 @@ class CoordBackend extends PilotBackend {
     final program = r.header('X-Nizamio-Program');
     final key = '${r.method} ${r.path}';
     switch (key) {
+      case 'GET /v1/me' when !admin:
+        return jsonResponse(200, {
+          'account_id': pAli,
+          'email': 'ali@b.test',
+          'full_name': 'Ali Avcı',
+          'company_admin': false,
+        });
+      case 'GET /v1/me/departments' when !admin:
+        return jsonResponse(200, {
+          'departments': [
+            {
+              'program_id': coordProgram,
+              'program_name': 'Program Bir',
+              'department_id': dAlt,
+              'display_name': 'Altyapı ve tesisat',
+              'role': 'koordinator',
+            },
+          ],
+        });
+      case 'GET /v1/departments':
+        if (!admin) return errorBody(403, 'organization.not_authorized');
+        final err = departmentsError;
+        if (err != null) return errorBody(503, err);
+        return jsonResponse(200, {'departments': companyDepartments});
       case 'GET /v1/program/departments':
         if (program != coordProgram) return _scopeMissing();
         return jsonResponse(200, {'departments': departments});

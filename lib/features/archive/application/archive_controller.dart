@@ -1,68 +1,39 @@
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../domain/archive.dart';
+import '../../../core/errors/api_error.dart';
+import '../../tasks/tasks.dart';
+import 'archive_actions_controller.dart';
+import 'archive_providers.dart';
 
 part 'archive_controller.g.dart';
 
-/// Arşiv ekranının durumu: arama, sıralama, etiket süzgeci ve kullanıcının eklediği etiketler.
+/// Arşiv ekranının durumu: klasör araması ve süren indirme.
 @immutable
 final class ArchiveViewState {
   const ArchiveViewState({
-    this.sort = ArchiveSort.recent,
     this.searchOpen = false,
     this.query = '',
-    this.tagsOpen = false,
-    this.tag,
-    this.customTag,
-    this.customTags = const [],
-    this.draftColor = ArchiveTagColor.gold,
+    this.busy = false,
   });
 
-  final ArchiveSort sort;
   final bool searchOpen;
   final String query;
-  final bool tagsOpen;
 
-  /// Seçili hazır etiket (en çok biri [tag] ya da [customTag]).
-  final ArchiveTag? tag;
+  /// Tam arşiv indirmesi sürüyor (çift dokunuş tek istek).
+  final bool busy;
 
-  /// Seçili özel etiketin kimliği.
-  final String? customTag;
-  final List<ArchiveCustomTag> customTags;
-  final ArchiveTagColor draftColor;
-
-  bool get hasTag => tag != null || customTag != null;
-
-  /// Hazır üç etiket + eklenenler.
-  int get tagTotal => ArchiveTag.values.length + customTags.length;
-
-  ArchiveViewState copyWith({
-    ArchiveSort? sort,
-    bool? searchOpen,
-    String? query,
-    bool? tagsOpen,
-    ArchiveTag? Function()? tag,
-    String? Function()? customTag,
-    List<ArchiveCustomTag>? customTags,
-    ArchiveTagColor? draftColor,
-  }) => ArchiveViewState(
-    sort: sort ?? this.sort,
-    searchOpen: searchOpen ?? this.searchOpen,
-    query: query ?? this.query,
-    tagsOpen: tagsOpen ?? this.tagsOpen,
-    tag: tag == null ? this.tag : tag(),
-    customTag: customTag == null ? this.customTag : customTag(),
-    customTags: customTags ?? this.customTags,
-    draftColor: draftColor ?? this.draftColor,
-  );
+  ArchiveViewState copyWith({bool? searchOpen, String? query, bool? busy}) =>
+      ArchiveViewState(
+        searchOpen: searchOpen ?? this.searchOpen,
+        query: query ?? this.query,
+        busy: busy ?? this.busy,
+      );
 }
 
-/// Arşiv ekranı komutları (yerel durum; sunucuya yazmaz).
+/// Arşiv ekranı komutları: yerel arama ve dönemin tam arşivi.
 @Riverpod(keepAlive: true)
 class ArchiveController extends _$ArchiveController {
-  var _seq = 0;
-
   @override
   ArchiveViewState build() => const ArchiveViewState();
 
@@ -74,42 +45,23 @@ class ArchiveController extends _$ArchiveController {
 
   void setQuery(String q) => state = state.copyWith(query: q);
 
-  /// Son yükleme → Ada göre → Boyuta göre → …
-  void cycleSort() => state = state.copyWith(
-    sort:
-        ArchiveSort.values[(state.sort.index + 1) % ArchiveSort.values.length],
-  );
-
-  void toggleTags() => state = state.copyWith(tagsOpen: !state.tagsOpen);
-
-  /// Hazır etiketi seçer; seçiliyse kaldırır.
-  void pickTag(ArchiveTag t) => state = state.copyWith(
-    tag: () => state.tag == t ? null : t,
-    customTag: () => null,
-  );
-
-  /// Özel etiketi seçer; seçiliyse kaldırır.
-  void pickCustomTag(String id) => state = state.copyWith(
-    customTag: () => state.customTag == id ? null : id,
-    tag: () => null,
-  );
-
-  void clearTag() =>
-      state = state.copyWith(tag: () => null, customTag: () => null);
-
-  void setDraftColor(ArchiveTagColor c) =>
-      state = state.copyWith(draftColor: c);
-
-  /// Yeni etiket ekler; boş adda null döner, yoksa eklenen etiketin adı.
-  String? addTag(String name) {
-    final n = name.trim();
-    if (n.isEmpty) return null;
-    state = state.copyWith(
-      customTags: [
-        ...state.customTags,
-        ArchiveCustomTag(id: 'x${++_seq}', name: n, color: state.draftColor),
-      ],
-    );
-    return n;
+  /// Dönemin tam arşivi (`archiveFullZip`; yalnız şirket yöneticisi — diğer rollerde istek
+  /// gönderilmez, vazgeçme döner). [name] kayıt adı.
+  Future<ArchiveOutcome> downloadAll(String name) async {
+    if (state.busy) return (ok: false, error: null, path: null);
+    state = state.copyWith(busy: true);
+    try {
+      final scope = await ref.read(archiveScopeProvider.future);
+      if (!scope.admin) return (ok: false, error: null, path: null);
+      final bytes = await ref
+          .read(archiveRepositoryProvider)
+          .downloadPeriodZip(department: scope.department);
+      final path = await ref.read(downloadSinkProvider).save(name, bytes);
+      return (ok: true, error: null, path: path);
+    } on Object catch (e) {
+      return (ok: false, error: toApiError(e), path: null);
+    } finally {
+      state = state.copyWith(busy: false);
+    }
   }
 }

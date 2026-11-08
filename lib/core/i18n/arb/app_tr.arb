@@ -1217,7 +1217,7 @@
   "@uiArchiveSearch": {
     "description": "ui.archive.search"
   },
-  "uiArchiveSearchHint": "Dosya, görev, kişi veya etiket",
+  "uiArchiveSearchHint": "Klasör adı",
   "@uiArchiveSearchHint": {
     "description": "ui.archive.search_hint"
   },
@@ -1232,74 +1232,6 @@
   "uiArchiveUploadSoon": "Dosya yükleme sonraki adımda tasarlanacak",
   "@uiArchiveUploadSoon": {
     "description": "ui.archive.upload_soon"
-  },
-  "uiArchiveTags": "Etiketler",
-  "@uiArchiveTags": {
-    "description": "ui.archive.tags"
-  },
-  "uiArchiveTagsClear": "Temizle",
-  "@uiArchiveTagsClear": {
-    "description": "ui.archive.tags_clear"
-  },
-  "uiArchiveNewTag": "Yeni etiket",
-  "@uiArchiveNewTag": {
-    "description": "ui.archive.new_tag"
-  },
-  "uiArchiveTagColor": "Etiket rengi",
-  "@uiArchiveTagColor": {
-    "description": "ui.archive.tag_color"
-  },
-  "uiArchiveAddTag": "Etiketi ekle",
-  "@uiArchiveAddTag": {
-    "description": "ui.archive.add_tag"
-  },
-  "uiArchiveTagAdded": "etiketi eklendi",
-  "@uiArchiveTagAdded": {
-    "description": "ui.archive.tag_added"
-  },
-  "uiArchiveColorViolet": "Mor",
-  "@uiArchiveColorViolet": {
-    "description": "ui.archive.color_violet"
-  },
-  "uiArchiveColorGold": "Sarı",
-  "@uiArchiveColorGold": {
-    "description": "ui.archive.color_gold"
-  },
-  "uiArchiveColorGreen": "Yeşil",
-  "@uiArchiveColorGreen": {
-    "description": "ui.archive.color_green"
-  },
-  "uiArchiveColorRed": "Kırmızı",
-  "@uiArchiveColorRed": {
-    "description": "ui.archive.color_red"
-  },
-  "uiArchiveColorGray": "Gri",
-  "@uiArchiveColorGray": {
-    "description": "ui.archive.color_gray"
-  },
-  "uiArchiveTagField": "Saha görselleri",
-  "@uiArchiveTagField": {
-    "description": "ui.archive.tag_field"
-  },
-  "uiArchiveTagResult": "Sonuç dosyası",
-  "@uiArchiveTagResult": {
-    "description": "ui.archive.tag_result"
-  },
-  "uiArchiveTagData": "Güncel durum verisi",
-  "@uiArchiveTagData": {
-    "description": "ui.archive.tag_data"
-  },
-  "uiArchiveTagFieldShort": "Saha",
-  "@uiArchiveTagFieldShort": {
-    "description": "ui.archive.tag_field_short"
-  },
-  "uiArchiveTagResultShort": "Sonuç",
-  "@uiArchiveTagResultShort": {
-    "description": "ui.archive.tag_result_short"
-  },
-  "uiArchiveTagDataShort": "Güncel",
-  "@uiArchiveTagDataShort": {
-    "description": "ui.archive.tag_data_short"
   },
   "uiArchiveStorage": "Depolama",
   "@uiArchiveStorage": {
@@ -1321,10 +1253,6 @@
   "@uiArchiveFoldersLc": {
     "description": "ui.archive.folders_lc"
   },
-  "uiArchiveCoordinatorshipsLc": "koordinatörlükler",
-  "@uiArchiveCoordinatorshipsLc": {
-    "description": "ui.archive.coordinatorships_lc"
-  },
   "uiArchiveSortRecent": "Son yükleme",
   "@uiArchiveSortRecent": {
     "description": "ui.archive.sort_recent"
@@ -1336,10 +1264,6 @@
   "uiArchiveSortSize": "Boyuta göre",
   "@uiArchiveSortSize": {
     "description": "ui.archive.sort_size"
-  },
-  "uiArchiveSortHint": "Sıralamayı değiştir",
-  "@uiArchiveSortHint": {
-    "description": "ui.archive.sort_hint"
   },
   "uiArchiveNoFiles": "Dosya yok",
   "@uiArchiveNoFiles": {
@@ -1353,7 +1277,7 @@
   "@uiArchiveDownloadAll": {
     "description": "ui.archive.download_all"
   },
-  "uiArchiveDownloadAllToast": "Tüm arşiv hazırlanıyor · bitince bildirim gelir",
+  "uiArchiveDownloadAllToast": "Tüm arşiv ZIP olarak hazırlanıyor",
   "@uiArchiveDownloadAllToast": {
     "description": "ui.archive.download_all_toast"
   },
@@ -1400,10 +1324,6 @@
   "uiArchiveCoordinatorship": "Koordinatörlük",
   "@uiArchiveCoordinatorship": {
     "description": "ui.archive.coordinatorship"
-  },
-  "uiArchiveNoLead": "Koordinatör yok",
-  "@uiArchiveNoLead": {
-    "description": "ui.archive.no_lead"
   },
   "uiArchiveTabs": "Klasör",
   "@uiArchiveTabs": {
@@ -1461,11 +1381,7 @@
   "@uiArchiveFactBy": {
     "description": "ui.archive.fact_by"
   },
-  "uiArchiveFactDate": "Tarih",
-  "@uiArchiveFactDate": {
-    "description": "ui.archive.fact_date"
-  },
-  "uiArchiveUploaderUnknown": "Admin",
+  "uiArchiveUploaderUnknown": "Bilinmeyen kişi",
   "@uiArchiveUploaderUnknown": {
     "description": "ui.archive.uploader_unknown"
   },
@@ -1497,7 +1413,7 @@
   "@uiArchiveMoveSoon": {
     "description": "ui.archive.move_soon"
   },
-  "uiArchiveDeleted": "Dosya silinen kayıtlara taşındı",
+  "uiArchiveDeleted": "Dosya silindi",
   "@uiArchiveDeleted": {
     "description": "ui.archive.deleted"
   },
@@ -1524,6 +1440,94 @@
   "uiArchiveKindPdfShort": "PDF",
   "@uiArchiveKindPdfShort": {
     "description": "ui.archive.kind_pdf_short"
+  },
+  "uiArchiveFoldersTitle": "klasörler",
+  "@uiArchiveFoldersTitle": {
+    "description": "ui.archive.folders_title"
+  },
+  "uiArchiveTagIster": "İster",
+  "@uiArchiveTagIster": {
+    "description": "ui.archive.tag_ister"
+  },
+  "uiArchiveTagPlan": "Plan",
+  "@uiArchiveTagPlan": {
+    "description": "ui.archive.tag_plan"
+  },
+  "uiArchiveTagGirdi": "Girdi",
+  "@uiArchiveTagGirdi": {
+    "description": "ui.archive.tag_girdi"
+  },
+  "uiArchiveTagAnaliz": "Analiz",
+  "@uiArchiveTagAnaliz": {
+    "description": "ui.archive.tag_analiz"
+  },
+  "uiArchiveTagCikti": "Çıktı",
+  "@uiArchiveTagCikti": {
+    "description": "ui.archive.tag_cikti"
+  },
+  "uiArchiveTagSonuc": "Sonuç",
+  "@uiArchiveTagSonuc": {
+    "description": "ui.archive.tag_sonuc"
+  },
+  "uiArchiveTagUnknown": "Diğer",
+  "@uiArchiveTagUnknown": {
+    "description": "ui.archive.tag_unknown"
+  },
+  "uiArchiveSaved": "Kaydedildi",
+  "@uiArchiveSaved": {
+    "description": "ui.archive.saved"
+  },
+  "uiArchiveDeleteConfirm": "Dosya kalıcı olarak silinsin mi?",
+  "@uiArchiveDeleteConfirm": {
+    "description": "ui.archive.delete_confirm"
+  },
+  "uiArchiveDeleteOk": "Sil",
+  "@uiArchiveDeleteOk": {
+    "description": "ui.archive.delete_ok"
+  },
+  "uiArchiveZipSelection": "Görünen dosyaları ZIP olarak indir",
+  "@uiArchiveZipSelection": {
+    "description": "ui.archive.zip_selection"
+  },
+  "uiArchiveZipEmpty": "İndirilecek dosya yok",
+  "@uiArchiveZipEmpty": {
+    "description": "ui.archive.zip_empty"
+  },
+  "uiArchiveLoadMore": "Daha fazla yükle",
+  "@uiArchiveLoadMore": {
+    "description": "ui.archive.load_more"
+  },
+  "uiArchiveUploaderFilter": "Yükleyen",
+  "@uiArchiveUploaderFilter": {
+    "description": "ui.archive.uploader_filter"
+  },
+  "uiArchiveUploaderAll": "Tüm yükleyenler",
+  "@uiArchiveUploaderAll": {
+    "description": "ui.archive.uploader_all"
+  },
+  "uiArchivePickTask": "Görev seç",
+  "@uiArchivePickTask": {
+    "description": "ui.archive.pick_task"
+  },
+  "uiArchivePickTag": "Etiket seç",
+  "@uiArchivePickTag": {
+    "description": "ui.archive.pick_tag"
+  },
+  "uiArchiveUploadNoTask": "Bu klasörde dosya yüklenecek görev yok",
+  "@uiArchiveUploadNoTask": {
+    "description": "ui.archive.upload_no_task"
+  },
+  "uiArchiveUploaded": "Dosya yüklendi",
+  "@uiArchiveUploaded": {
+    "description": "ui.archive.uploaded"
+  },
+  "uiArchivePickerMissing": "Bu sürümde dosya seçici yok",
+  "@uiArchivePickerMissing": {
+    "description": "ui.archive.picker_missing"
+  },
+  "uiArchiveFolderMissing": "Klasör bulunamadı",
+  "@uiArchiveFolderMissing": {
+    "description": "ui.archive.folder_missing"
   },
   "uiButtonsBusy": "Meşgul",
   "@uiButtonsBusy": {

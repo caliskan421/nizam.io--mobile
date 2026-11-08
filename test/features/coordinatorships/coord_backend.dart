@@ -137,6 +137,47 @@ class CoordBackend extends PilotBackend {
         final dept = r.header('X-Nizamio-Department');
         if (program != coordProgram || dept == null) return _scopeMissing();
         return jsonResponse(200, {'files': files[dept] ?? const <Object>[]});
+      // Arşiv özetleri yönetici görünümüyle (dönem geneli; RECORDS-K18/K21).
+      case 'GET /v1/records/archive/folders':
+        if (program != coordProgram ||
+            r.header('X-Nizamio-Department') == null) {
+          return _scopeMissing();
+        }
+        return jsonResponse(200, {
+          'folders': [
+            for (final d in departments)
+              {
+                'folder_id': d['department_id'],
+                'name': d['display_name'],
+                'file_count': files[d['department_id']]?.length ?? 0,
+                'is_virtual': false,
+              },
+          ],
+        });
+      case 'GET /v1/records/archive/tasks':
+        if (program != coordProgram) return _scopeMissing();
+        final all = [for (final rows in files.values) ...rows];
+        return jsonResponse(200, {
+          'tasks': [
+            for (final w in workItems)
+              if (all.any((f) => f['work_item_id'] == w['work_item_id']))
+                {
+                  'work_item_id': w['work_item_id'],
+                  'title': w['title'],
+                  'file_count': all
+                      .where((f) => f['work_item_id'] == w['work_item_id'])
+                      .length,
+                },
+          ],
+        });
+      case 'GET /v1/records/archive/uploaders':
+        if (program != coordProgram) return _scopeMissing();
+        return jsonResponse(200, {
+          'uploaders': {
+            for (final rows in files.values)
+              for (final f in rows) f['uploaded_by_account_id'],
+          }.toList(),
+        });
     }
     final members = RegExp(r'^/v1/departments/([^/]+)/members$')
         .firstMatch(r.path);

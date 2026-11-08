@@ -587,20 +587,20 @@ final tabletScenes = <TabletScene>[
   TabletScene('archive', (s) async {
     await s.tapRail(TabletModule.archive);
     await _expectDefaultDetail(s, TabletModule.archive);
-    expect(s.inPane(NzPaneRole.master, find.text('Operasyon')), findsWidgets);
+    expect(s.inPane(NzPaneRole.master, find.text('İdari işler')), findsWidgets);
   }),
   TabletScene('archive-folder', (s) async {
     await s.tapRail(TabletModule.archive);
     await s.tapText(
-      s.inPane(NzPaneRole.master, find.text('Operasyon')),
-      reason: 'sol klasör listesi "Operasyon"',
+      s.inPane(NzPaneRole.master, find.text('İdari işler')),
+      reason: 'sol klasör listesi "İdari işler"',
     );
     expect(
-      s.inPane(NzPaneRole.detail, find.text('Operasyon')),
+      s.inPane(NzPaneRole.detail, find.text('İdari işler')),
       findsWidgets,
       reason: 'klasör sağ panelde',
     );
-    expect(s.inPane(NzPaneRole.master, find.text('Operasyon')), findsWidgets);
+    expect(s.inPane(NzPaneRole.master, find.text('İdari işler')), findsWidgets);
     s.expectSplitGeometry();
   }),
   TabletScene('messages', (s) async {

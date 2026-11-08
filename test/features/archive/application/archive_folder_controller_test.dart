@@ -1,65 +1,40 @@
-// ArchiveFolderController: sekme, etiket ve görev süzgeci, silme; klasör başına ayrı durum.
+// ArchiveFolderController: sekme, görev klasörü → dosyalar sekmesi, süzgeçler ve sıralama döngüsü.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/features/archive/application/archive_files_controller.dart';
 import 'package:nizamio/features/archive/application/archive_folder_controller.dart';
 import 'package:nizamio/features/archive/domain/archive.dart';
+import 'package:nizamio/features/archive/domain/records.dart';
 
-ArchiveFile _f(String id, ArchiveTag tag, String task) => ArchiveFile(
-  id: id,
-  name: '$id.pdf',
-  kind: ArchiveFileKind.pdf,
-  tag: tag,
-  taskCode: task,
-  taskTitle: task,
-  uploadedBy: null,
-  uploadedAt: DateTime(2026, 10, 1),
-  sizeMb: 0.1,
-);
+import '../archive_fixture.dart';
+
+ArchiveFolderController _ctrl(ProviderContainer c, [String code = 'd1']) {
+  c
+    ..listen(archiveFolderControllerProvider(code), (_, _) {})
+    ..listen(archiveFilesControllerProvider(code), (_, _) {});
+  return c.read(archiveFolderControllerProvider(code).notifier);
+}
 
 void main() {
-  test('görev klasörü dosyalar sekmesini o görevle süzer; etiket; silme', () {
-    final c = ProviderContainer();
-    addTearDown(c.dispose);
-    final p = archiveFolderControllerProvider('ALT');
-    c.listen(p, (_, _) {});
-    final all = [
-      _f('a', ArchiveTag.field, 'ALT-1'),
-      _f('b', ArchiveTag.result, 'ALT-1'),
-      _f('c', ArchiveTag.field, 'ALT-4'),
-    ];
-    c.read(p.notifier).openTask('ALT-1');
-    expect(c.read(p).tab, ArchiveFolderTab.files);
-    expect(c.read(p).visible(all).map((f) => f.id), ['a', 'b']);
-    c.read(p.notifier).setTag(ArchiveTag.field);
-    expect(c.read(p).visible(all).map((f) => f.id), ['a']);
-    c.read(p.notifier)
+  test('görev klasörü dosyalar sekmesini o görevle açar; süzgeçler', () {
+    final c = archiveContainer(FakeArchiveRepository());
+    final ctrl = _ctrl(c)..openTask('w1');
+    ArchiveFolderViewState s() => c.read(archiveFolderControllerProvider('d1'));
+    expect(s().tab, ArchiveFolderTab.files);
+    expect(s().task, 'w1');
+    expect(s().filtered, isTrue);
+    ctrl
       ..clearTask()
-      ..remove('a');
-    expect(c.read(p).visible(all).map((f) => f.id), ['c']);
-    expect(c.read(p).present(all), hasLength(2));
-    c.read(p.notifier).setTab(ArchiveFolderTab.tasks);
-    expect(c.read(p).tab, ArchiveFolderTab.tasks);
-    expect(
-      c.read(archiveFolderControllerProvider('MEK')).tab,
-      ArchiveFolderTab.tasks,
-    );
-  });
-
-  test('ekran kapanınca süzgeçler sıfırlanır, silinenler kalır', () async {
-    final c = ProviderContainer();
-    addTearDown(c.dispose);
-    final p = archiveFolderControllerProvider('ALT');
-    final sub = c.listen(p, (_, _) {});
-    c.read(p.notifier)
-      ..openTask('ALT-1')
-      ..remove('a');
-    sub.close();
-    await c.pump(); // autoDispose: durum bırakılır
-    final again = c.listen(p, (_, _) {});
-    addTearDown(again.close);
-    expect(c.read(p).tab, ArchiveFolderTab.tasks);
-    expect(c.read(p).task, isNull);
-    expect(c.read(p).removed, {'a'});
-    expect(c.read(archiveRemovedFilesProvider), {'a'});
+      ..setTag(RecordTag.ister);
+    expect(s().filter, const ArchiveAttachmentFilter(tag: RecordTag.ister));
+    ctrl
+      ..setTag(null)
+      ..cycleSort()
+      ..cycleSort()
+      ..cycleSort();
+    expect(s().sort, ArchiveSort.recent);
+    expect(s().filtered, isFalse);
+    ctrl.setTab(ArchiveFolderTab.tasks);
+    expect(s().tab, ArchiveFolderTab.tasks);
   });
 }

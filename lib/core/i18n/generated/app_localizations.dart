@@ -1921,7 +1921,7 @@ abstract class AppLocalizations {
   /// ui.archive.search_hint
   ///
   /// In tr, this message translates to:
-  /// **'Dosya, görev, kişi veya etiket'**
+  /// **'Klasör adı'**
   String get uiArchiveSearchHint;
 
   /// ui.archive.upload
@@ -1941,108 +1941,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Dosya yükleme sonraki adımda tasarlanacak'**
   String get uiArchiveUploadSoon;
-
-  /// ui.archive.tags
-  ///
-  /// In tr, this message translates to:
-  /// **'Etiketler'**
-  String get uiArchiveTags;
-
-  /// ui.archive.tags_clear
-  ///
-  /// In tr, this message translates to:
-  /// **'Temizle'**
-  String get uiArchiveTagsClear;
-
-  /// ui.archive.new_tag
-  ///
-  /// In tr, this message translates to:
-  /// **'Yeni etiket'**
-  String get uiArchiveNewTag;
-
-  /// ui.archive.tag_color
-  ///
-  /// In tr, this message translates to:
-  /// **'Etiket rengi'**
-  String get uiArchiveTagColor;
-
-  /// ui.archive.add_tag
-  ///
-  /// In tr, this message translates to:
-  /// **'Etiketi ekle'**
-  String get uiArchiveAddTag;
-
-  /// ui.archive.tag_added
-  ///
-  /// In tr, this message translates to:
-  /// **'etiketi eklendi'**
-  String get uiArchiveTagAdded;
-
-  /// ui.archive.color_violet
-  ///
-  /// In tr, this message translates to:
-  /// **'Mor'**
-  String get uiArchiveColorViolet;
-
-  /// ui.archive.color_gold
-  ///
-  /// In tr, this message translates to:
-  /// **'Sarı'**
-  String get uiArchiveColorGold;
-
-  /// ui.archive.color_green
-  ///
-  /// In tr, this message translates to:
-  /// **'Yeşil'**
-  String get uiArchiveColorGreen;
-
-  /// ui.archive.color_red
-  ///
-  /// In tr, this message translates to:
-  /// **'Kırmızı'**
-  String get uiArchiveColorRed;
-
-  /// ui.archive.color_gray
-  ///
-  /// In tr, this message translates to:
-  /// **'Gri'**
-  String get uiArchiveColorGray;
-
-  /// ui.archive.tag_field
-  ///
-  /// In tr, this message translates to:
-  /// **'Saha görselleri'**
-  String get uiArchiveTagField;
-
-  /// ui.archive.tag_result
-  ///
-  /// In tr, this message translates to:
-  /// **'Sonuç dosyası'**
-  String get uiArchiveTagResult;
-
-  /// ui.archive.tag_data
-  ///
-  /// In tr, this message translates to:
-  /// **'Güncel durum verisi'**
-  String get uiArchiveTagData;
-
-  /// ui.archive.tag_field_short
-  ///
-  /// In tr, this message translates to:
-  /// **'Saha'**
-  String get uiArchiveTagFieldShort;
-
-  /// ui.archive.tag_result_short
-  ///
-  /// In tr, this message translates to:
-  /// **'Sonuç'**
-  String get uiArchiveTagResultShort;
-
-  /// ui.archive.tag_data_short
-  ///
-  /// In tr, this message translates to:
-  /// **'Güncel'**
-  String get uiArchiveTagDataShort;
 
   /// ui.archive.storage
   ///
@@ -2074,12 +1972,6 @@ abstract class AppLocalizations {
   /// **'klasör'**
   String get uiArchiveFoldersLc;
 
-  /// ui.archive.coordinatorships_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'koordinatörlükler'**
-  String get uiArchiveCoordinatorshipsLc;
-
   /// ui.archive.sort_recent
   ///
   /// In tr, this message translates to:
@@ -2097,12 +1989,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Boyuta göre'**
   String get uiArchiveSortSize;
-
-  /// ui.archive.sort_hint
-  ///
-  /// In tr, this message translates to:
-  /// **'Sıralamayı değiştir'**
-  String get uiArchiveSortHint;
 
   /// ui.archive.no_files
   ///
@@ -2125,7 +2011,7 @@ abstract class AppLocalizations {
   /// ui.archive.download_all_toast
   ///
   /// In tr, this message translates to:
-  /// **'Tüm arşiv hazırlanıyor · bitince bildirim gelir'**
+  /// **'Tüm arşiv ZIP olarak hazırlanıyor'**
   String get uiArchiveDownloadAllToast;
 
   /// ui.archive.create_folder
@@ -2193,12 +2079,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Koordinatörlük'**
   String get uiArchiveCoordinatorship;
-
-  /// ui.archive.no_lead
-  ///
-  /// In tr, this message translates to:
-  /// **'Koordinatör yok'**
-  String get uiArchiveNoLead;
 
   /// ui.archive.tabs
   ///
@@ -2284,16 +2164,10 @@ abstract class AppLocalizations {
   /// **'Yükleyen'**
   String get uiArchiveFactBy;
 
-  /// ui.archive.fact_date
-  ///
-  /// In tr, this message translates to:
-  /// **'Tarih'**
-  String get uiArchiveFactDate;
-
   /// ui.archive.uploader_unknown
   ///
   /// In tr, this message translates to:
-  /// **'Admin'**
+  /// **'Bilinmeyen kişi'**
   String get uiArchiveUploaderUnknown;
 
   /// ui.archive.download
@@ -2341,7 +2215,7 @@ abstract class AppLocalizations {
   /// ui.archive.deleted
   ///
   /// In tr, this message translates to:
-  /// **'Dosya silinen kayıtlara taşındı'**
+  /// **'Dosya silindi'**
   String get uiArchiveDeleted;
 
   /// ui.archive.kind_image
@@ -2379,6 +2253,138 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'PDF'**
   String get uiArchiveKindPdfShort;
+
+  /// ui.archive.folders_title
+  ///
+  /// In tr, this message translates to:
+  /// **'klasörler'**
+  String get uiArchiveFoldersTitle;
+
+  /// ui.archive.tag_ister
+  ///
+  /// In tr, this message translates to:
+  /// **'İster'**
+  String get uiArchiveTagIster;
+
+  /// ui.archive.tag_plan
+  ///
+  /// In tr, this message translates to:
+  /// **'Plan'**
+  String get uiArchiveTagPlan;
+
+  /// ui.archive.tag_girdi
+  ///
+  /// In tr, this message translates to:
+  /// **'Girdi'**
+  String get uiArchiveTagGirdi;
+
+  /// ui.archive.tag_analiz
+  ///
+  /// In tr, this message translates to:
+  /// **'Analiz'**
+  String get uiArchiveTagAnaliz;
+
+  /// ui.archive.tag_cikti
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıktı'**
+  String get uiArchiveTagCikti;
+
+  /// ui.archive.tag_sonuc
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonuç'**
+  String get uiArchiveTagSonuc;
+
+  /// ui.archive.tag_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer'**
+  String get uiArchiveTagUnknown;
+
+  /// ui.archive.saved
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydedildi'**
+  String get uiArchiveSaved;
+
+  /// ui.archive.delete_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya kalıcı olarak silinsin mi?'**
+  String get uiArchiveDeleteConfirm;
+
+  /// ui.archive.delete_ok
+  ///
+  /// In tr, this message translates to:
+  /// **'Sil'**
+  String get uiArchiveDeleteOk;
+
+  /// ui.archive.zip_selection
+  ///
+  /// In tr, this message translates to:
+  /// **'Görünen dosyaları ZIP olarak indir'**
+  String get uiArchiveZipSelection;
+
+  /// ui.archive.zip_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'İndirilecek dosya yok'**
+  String get uiArchiveZipEmpty;
+
+  /// ui.archive.load_more
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha fazla yükle'**
+  String get uiArchiveLoadMore;
+
+  /// ui.archive.uploader_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Yükleyen'**
+  String get uiArchiveUploaderFilter;
+
+  /// ui.archive.uploader_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm yükleyenler'**
+  String get uiArchiveUploaderAll;
+
+  /// ui.archive.pick_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev seç'**
+  String get uiArchivePickTask;
+
+  /// ui.archive.pick_tag
+  ///
+  /// In tr, this message translates to:
+  /// **'Etiket seç'**
+  String get uiArchivePickTag;
+
+  /// ui.archive.upload_no_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu klasörde dosya yüklenecek görev yok'**
+  String get uiArchiveUploadNoTask;
+
+  /// ui.archive.uploaded
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya yüklendi'**
+  String get uiArchiveUploaded;
+
+  /// ui.archive.picker_missing
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sürümde dosya seçici yok'**
+  String get uiArchivePickerMissing;
+
+  /// ui.archive.folder_missing
+  ///
+  /// In tr, this message translates to:
+  /// **'Klasör bulunamadı'**
+  String get uiArchiveFolderMissing;
 
   /// ui.buttons.busy
   ///

@@ -8,51 +8,48 @@ import 'package:nizamio/app/router/router.dart';
 import 'package:nizamio/app/router/shell.dart';
 import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/widgets/feedback/nz_pick_record.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_search_field.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_floating_nav.dart';
 import 'package:nizamio/core/ui/widgets/navigation/nz_tablet_rail.dart';
 import 'package:nizamio/features/archive/application/archive_controller.dart';
 import 'package:nizamio/features/archive/archive.dart';
-import 'package:nizamio/features/archive/data/sample/sample_archive_repository.dart';
 import 'package:nizamio/features/archive/domain/archive.dart';
 
 import '../../core/ui/widgets/feedback/feedback_test_support.dart';
-import '../../support/harness.dart';
+import '../../features/archive/archive_fixture.dart';
+import '../../features/pilot_support.dart' show pilotHarness, real;
 import 'router_test_support.dart';
 
 final _l = AppLocalizationsTr();
 
-/// Başlangıç kaydırma konumu (arama ve etiket alanları her boyutta kurulu kalır).
+/// Başlangıç kaydırma konumu (arama alanı her boyutta kurulu kalır).
 const _offset = 100.0;
-
-/// Gerçek örnek depoyu sayan sarmalayıcı (yalnız test; üretim modülü değişmez).
-final class _CountingArchiveRepository implements ArchiveRepository {
-  var loads = 0;
-
-  @override
-  Future<List<ArchiveFolder>> loadFolders() {
-    loads++;
-    return const SampleArchiveRepository().loadFolders();
-  }
-}
 
 void main() {
   setUpFonts();
 
   testWidgets(
-    'arşiv sekmesi yeniden boyutlanmada State, süzgeç, metin, kaydırma ve tek yüklemeyi korur',
+    'arşiv sekmesi yeniden boyutlanmada State, arama, kaydırma ve tek yüklemeyi korur',
     (tester) async {
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = const Size(599, 700);
       addTearDown(tester.view.reset);
-      final repo = _CountingArchiveRepository();
-      final harness = Harness();
-      addTearDown(harness.dispose);
+      // Taşan içerik için çok sayıda klasör (sunucu yanıtı sahte depodan).
+      final repo = FakeArchiveRepository()
+        ..folders = [
+          for (var i = 0; i < 12; i++)
+            ArchiveFolder(code: 'd$i', name: 'Klasör $i', files: i),
+        ];
+      final harness = await real(
+        tester,
+        () => pilotHarness(archiveBackend(), signedIn: true),
+      );
       // Port, get_it kaydından tembel okunur (archiveOverrides): ilk okumadan önce değiştirilir.
-      harness.composition.locator
-        ..unregister<ArchiveRepository>()
-        ..registerSingleton<ArchiveRepository>(repo);
+      useArchiveFakes(harness, repo);
+      harness.read(scopeControllerProvider).selectProgram('prog-1');
+      int loads() => repo.calls.where((c) => c.$1 == 'folders').length;
       final phase = ValueNotifier(AppPhase.scoped);
       addTearDown(phase.dispose);
       final router = createRouter(phase);
@@ -62,7 +59,7 @@ void main() {
       router.go('/archive');
       await settle(tester);
       expect(locationOf(router), '/archive');
-      expect(repo.loads, 1);
+      expect(loads(), 1);
 
       final page = find.byType(ArchivePage);
       Finder inPage(Finder f) => find.descendant(of: page, matching: f);
@@ -81,34 +78,16 @@ void main() {
           matching: find.byType(TextField),
         ),
       );
-      await tester.enterText(searchField, 'i');
-      await settle(tester);
-      await tap(inPage(find.text(_l.uiArchiveSortRecent)));
-      await tap(inPage(find.text('${_l.uiArchiveTags} · 3')));
-      await tap(
-        inPage(find.bySemanticsLabel(RegExp('^${_l.uiArchiveTagField} '))),
-      );
-      final draftField = inPage(
-        find.byWidgetPredicate(
-          (w) => w is TextField && w.decoration?.hintText == _l.uiArchiveNewTag,
-        ),
-      );
-      await tester.enterText(draftField, 'Taslak etiket');
+      await tester.enterText(searchField, 'k');
       await settle(tester);
       final view = harness.read(archiveControllerProvider);
-      expect(view.query, 'i');
-      expect(view.sort, ArchiveSort.name);
-      expect(view.tag, ArchiveTag.field);
-      expect(view.tagsOpen, isTrue);
-      final caption = inPage(
-        find.textContaining(_l.uiArchiveCoordinatorshipsLc),
-      );
+      expect(view.query, 'k');
+      final caption = inPage(find.textContaining(_l.uiArchiveFoldersTitle));
       final captionText = tester.widget<Text>(caption).data;
 
       final state = tester.state(page);
       final shell = tester.state(find.byType(NzAdaptiveShell));
       final search = tester.widget<TextField>(searchField).controller!;
-      final draft = tester.widget<TextField>(draftField).controller!;
       ScrollPosition position() => tester
           .state<ScrollableState>(inPage(find.byType(Scrollable)).first)
           .position;
@@ -171,13 +150,7 @@ void main() {
           same(search),
           reason: why,
         );
-        expect(search.text, 'i', reason: why);
-        expect(
-          tester.widget<TextField>(draftField).controller,
-          same(draft),
-          reason: why,
-        );
-        expect(draft.text, 'Taslak etiket', reason: why);
+        expect(search.text, 'k', reason: why);
         expect(harness.read(archiveControllerProvider), same(view));
         expect(tester.widget<Text>(caption).data, captionText, reason: why);
         // Konum korunur; yeni içerik daha kısaysa yeni sınıra sıkıştırılır.
@@ -187,7 +160,7 @@ void main() {
         if (expected > 0 && expected == offset) kept++;
         if (expected < offset) clamped++;
         offset = p.pixels;
-        expect(repo.loads, 1, reason: why);
+        expect(loads(), 1, reason: why);
       }
       // Kanıtın boş olmadığı: sıfırdan farklı konum birebir korundu ve kısalan içerikte sıkıştı.
       expect(kept, greaterThanOrEqualTo(4));

@@ -212,63 +212,56 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ),
       ),
     );
-    if (tablet) {
-      return NzPage(
-        title: l.uiIdentityLoginTitle,
-        width: NzContentWidth.login,
-        showTitleBar: false,
-        body: LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              NizamioSpacing.space6,
-              _tabletTop,
-              NizamioSpacing.space6,
-              NizamioSpacing.space10,
-            ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight:
-                    (constraints.maxHeight -
-                            _tabletTop -
-                            NizamioSpacing.space10)
-                        .clamp(0, double.infinity),
+    // Geliştirici satırı telefon ve tablette ekranın en altındadır; içerik kısa
+    // kaldığında boşluk forma ile satır arasına girer, uzadığında sayfa kayar.
+    final padding = tablet
+        ? const EdgeInsets.fromLTRB(
+            NizamioSpacing.space6,
+            _tabletTop,
+            NizamioSpacing.space6,
+            NizamioSpacing.space10,
+          )
+        : const EdgeInsets.fromLTRB(
+            NizamioSpacing.space2,
+            NizamioSpacing.space16,
+            NizamioSpacing.space2,
+            NizamioSpacing.space10,
+          );
+    return NzPage(
+      title: l.uiIdentityLoginTitle,
+      width: tablet ? NzContentWidth.login : NzContentWidth.form,
+      showTitleBar: false,
+      body: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          padding: padding,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: (constraints.maxHeight - padding.vertical).clamp(
+                0,
+                double.infinity,
               ),
-              child: IntrinsicHeight(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    form,
-                    const Spacer(),
-                    const Gap(NizamioSpacing.space10),
-                    Text(
-                      l.uiIdentityLoginFooter,
-                      textAlign: TextAlign.center,
-                      style: t.monoSm.copyWith(
-                        height: _footerLine / t.monoSm.fontSize!,
-                        letterSpacing: 0.02 * t.monoSm.fontSize!,
-                        color: c.textFaint.withValues(alpha: _footerOpacity),
-                      ),
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  form,
+                  const Spacer(),
+                  const Gap(NizamioSpacing.space10),
+                  Text(
+                    l.uiIdentityLoginFooter,
+                    textAlign: TextAlign.center,
+                    style: t.monoSm.copyWith(
+                      height: _footerLine / t.monoSm.fontSize!,
+                      letterSpacing: 0.02 * t.monoSm.fontSize!,
+                      color: c.textFaint.withValues(alpha: _footerOpacity),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
-      );
-    }
-    return NzPage(
-      title: l.uiIdentityLoginTitle,
-      width: NzContentWidth.form,
-      showTitleBar: false,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          NizamioSpacing.space2,
-          NizamioSpacing.space16,
-          NizamioSpacing.space2,
-          NizamioSpacing.space10,
-        ),
-        child: form,
       ),
     );
   }

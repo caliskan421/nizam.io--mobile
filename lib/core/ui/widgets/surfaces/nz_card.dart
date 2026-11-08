@@ -95,6 +95,8 @@ class NzCard extends StatelessWidget {
               onTap: tap,
               borderRadius: radius,
               splashFactory: NoSplash.splashFactory,
+              // Basma geri bildirimi yalnız küçülme (NzPressable); basılı vurgu yok.
+              highlightColor: colors.text.withValues(alpha: 0),
               overlayColor: WidgetStateProperty.resolveWith(
                 (s) =>
                     s.contains(WidgetState.hovered) ||

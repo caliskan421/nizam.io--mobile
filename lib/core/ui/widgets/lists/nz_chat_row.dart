@@ -187,6 +187,9 @@ class NzChatRow extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(NizamioRadius.row),
+          // Basma geri bildirimi yalnız küçülme (NzPressable); dalga ve vurgu yok.
+          splashFactory: NoSplash.splashFactory,
+          highlightColor: c.text.withValues(alpha: 0),
           child: Padding(
             padding: const EdgeInsets.all(NizamioSpacing.space2),
             child: Row(

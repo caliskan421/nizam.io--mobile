@@ -416,12 +416,12 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                 child: Material(
                   color: context.colors.surfaceRaised,
                   borderRadius: BorderRadius.circular(20),
-                  child: const Padding(
-                    padding: EdgeInsets.all(10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
                     child: Text(
                       'Tam ekran · çıkmak için boş alana dokun',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12),
+                      style: context.text.caption,
                     ),
                   ),
                 ),

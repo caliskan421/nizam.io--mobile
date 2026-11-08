@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 
 import '../../tasks/tasks.dart';
@@ -302,12 +304,12 @@ final class GanttView {
 /// yoktur; numara yalnız gösterimdir ve kalıcı değildir (görev silinir ya da taşınırsa kayar).
 /// Sıra oluşturma zamanıdır (`created_at`; zamansız görevler sonda), eşitlikte katalog sırası;
 /// süzgeç numarayı değiştirmez (tüm katalog görevleri sayılır).
-Map<String, int> taskNumbers(List<TaskItem> tasks) {
-  final groups = <String, List<(int, TaskItem)>>{};
+HashMap<String, int> taskNumbers(List<TaskItem> tasks) {
+  final groups = HashMap<String, List<(int, TaskItem)>>();
   for (final (i, t) in tasks.indexed) {
     (groups[t.coordinatorship] ??= []).add((i, t));
   }
-  final numbers = <String, int>{};
+  final numbers = HashMap<String, int>();
   for (final group in groups.values) {
     group.sort((a, b) {
       final x = a.$2.createdAt;

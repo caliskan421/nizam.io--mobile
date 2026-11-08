@@ -385,15 +385,17 @@ class TimelineFloatingFilters extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                 constraints: const BoxConstraints(minWidth: 18),
                 decoration: BoxDecoration(
-                  color: lime ? context.colors.primary : Colors.white,
+                  // Beyaz zemin iki temada da sabit (anahtar topuzuyla aynı belirteç).
+                  color: lime
+                      ? context.colors.primary
+                      : context.colors.switchKnob,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   '$count',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 12,
+                  style: context.text.caption.copyWith(
+                    color: context.colors.onPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

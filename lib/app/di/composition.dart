@@ -75,7 +75,10 @@ class Composition {
       apiDio: () => container.read(apiDioProvider),
       flavor: flavor,
     );
-    registerMessagesModule(locator);
+    registerMessagesModule(
+      locator,
+      apiDio: () => container.read(apiDioProvider),
+    );
     registerTasksModule(locator, apiDio: () => container.read(apiDioProvider));
     registerTimelineModule(locator);
     container = ProviderContainer(

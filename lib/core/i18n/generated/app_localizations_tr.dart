@@ -2785,9 +2785,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesNewMessage => 'Yeni mesaj';
 
   @override
-  String get uiMessagesNewChatSoon => 'Yeni sohbet sonraki adımda tasarlanacak';
-
-  @override
   String get uiMessagesFilters => 'Sohbet süzgeci';
 
   @override
@@ -2830,9 +2827,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesYesterday => 'Dün';
 
   @override
-  String get uiMessagesMembersLc => 'üye';
-
-  @override
   String get uiMessagesTyping => 'yazıyor…';
 
   @override
@@ -2840,9 +2834,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMessagesLastSeen => 'son görülme';
-
-  @override
-  String get uiMessagesYesterdayLc => 'dün';
 
   @override
   String get uiMessagesSearchChat => 'Sohbette ara';
@@ -2873,36 +2864,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesAttach => 'Görev, koordinatörlük veya arşiv ekle';
 
   @override
-  String get uiMessagesPhotoVideo => 'Fotoğraf ve video';
-
-  @override
-  String get uiMessagesFile => 'Dosya';
-
-  @override
-  String get uiMessagesPortalRefs => 'portaldan atıf';
-
-  @override
-  String get uiMessagesRefTask => 'Görev';
-
-  @override
-  String get uiMessagesRefCoordinatorship => 'Koordinatörlük';
-
-  @override
-  String get uiMessagesRefArchive => 'Arşiv';
-
-  @override
-  String get uiMessagesSearchTask => 'Görev ara';
-
-  @override
-  String get uiMessagesSearchCoordinatorship => 'Koordinatörlük ara';
-
-  @override
-  String get uiMessagesSearchFile => 'Arşivde dosya ara';
-
-  @override
-  String get uiMessagesRemove => 'Kaldır';
-
-  @override
   String get uiMessagesCancel => 'Vazgeç';
 
   @override
@@ -2916,9 +2877,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMessagesVotedTail => 'kişi oy verdi';
-
-  @override
-  String get uiMessagesVotesLc => 'oy';
 
   @override
   String get uiMessagesReactLike => 'Beğen';
@@ -2960,16 +2918,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesCopied => 'Mesaj kopyalandı';
 
   @override
-  String get uiMessagesPinnedToast => 'Mesaj sabitlendi';
-
-  @override
-  String get uiMessagesUnpinnedToast => 'Sabitleme kaldırıldı';
-
-  @override
   String get uiMessagesPollResults => 'Anket sonuçları';
-
-  @override
-  String get uiMessagesPollResultsLc => 'anket sonuçları';
 
   @override
   String get uiMessagesToTask => 'Göreve dönüştür';
@@ -2979,27 +2928,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMessagesDeleted => 'Mesaj silindi';
-
-  @override
-  String get uiMessagesNotVoted => 'Henüz oy vermeyenler';
-
-  @override
-  String get uiMessagesNotVotedNone => 'Grubun diğer üyeleri henüz oy vermedi';
-
-  @override
-  String get uiMessagesRemind => 'Hatırlat';
-
-  @override
-  String get uiMessagesReminded => 'Oy vermeyenlere hatırlatma gönderildi';
-
-  @override
-  String get uiMessagesEndPoll => 'Anketi bitir';
-
-  @override
-  String get uiMessagesPollEnded => 'Anket bitti';
-
-  @override
-  String get uiMessagesPollConcluded => 'Anket sonuçlandı';
 
   @override
   String get uiMessagesConcluded => 'sonuçlandı';
@@ -3014,46 +2942,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesInfo => 'bilgisi';
 
   @override
-  String get uiMessagesMute => 'Sessize al';
-
-  @override
-  String get uiMessagesMutedTail => 'sessize alındı';
-
-  @override
   String get uiMessagesLeaveGroup => 'Gruptan çık';
 
   @override
-  String get uiMessagesBlock => 'Engelle';
-
-  @override
   String get uiMessagesActionSoon => 'Bu işlem sonraki adımda tasarlanacak';
-
-  @override
-  String get uiMessagesShared => 'paylaşılanlar';
-
-  @override
-  String get uiMessagesMembers => 'üyeler';
 
   @override
   String get uiMessagesAllUsers => 'Tüm kullanıcılar';
 
   @override
   String get uiMessagesGroup => 'Grup';
-
-  @override
-  String get uiMessagesWroteHere => 'bu sohbette yazdı';
-
-  @override
-  String get uiMessagesMember => 'üye';
-
-  @override
-  String get uiMessagesManager => 'yönetici';
-
-  @override
-  String get uiMessagesPhoto => 'Fotoğraf';
-
-  @override
-  String get uiMessagesDownloading => 'indiriliyor';
 
   @override
   String get uiMessagesRoleAdmin => 'Admin';
@@ -3066,6 +2964,63 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMessagesNewChatHint => 'Kişi seç';
+
+  @override
+  String get uiMessagesNewGroup => 'Yeni grup';
+
+  @override
+  String get uiMessagesGroupName => 'Grup adı';
+
+  @override
+  String get uiMessagesCreateGroup => 'Grubu kur';
+
+  @override
+  String get uiMessagesCandidatesTruncated => 'Liste ilk 200 kişiyle sınırlı.';
+
+  @override
+  String get uiMessagesWhyCannotWrite =>
+      'Listede olmayan kişiyle doğrudan yazışamazsınız: birebir sohbet yalnız koordinatörlük zinciri içinde açılır. Ortak bir grupta yazışabilirsiniz.';
+
+  @override
+  String get uiMessagesNoCandidates => 'Listede kimse yok.';
+
+  @override
+  String get uiMessagesPeerLeft =>
+      'Bu kişi artık programda değil; mesaj gönderilemez.';
+
+  @override
+  String get uiMessagesChatGone => 'Bu sohbete artık erişimin yok.';
+
+  @override
+  String get uiMessagesSendFailed => 'gönderilemedi';
+
+  @override
+  String get uiMessagesRetrySend => 'Tekrar gönder';
+
+  @override
+  String get uiMessagesDiscardMessage => 'Mesajı at';
+
+  @override
+  String get uiMessagesMessageRestored =>
+      'Mesaj silinmiş; metin taslağa geri kondu.';
+
+  @override
+  String get uiMessagesOlderMessages => 'Önceki mesajlar';
+
+  @override
+  String get uiMessagesDeletedMessage => 'Silinmiş mesaj';
+
+  @override
+  String get uiMessagesNoMessages => 'Henüz mesaj yok';
+
+  @override
+  String get uiMessagesListTruncated => 'Yalnız son sohbetler gösteriliyor.';
+
+  @override
+  String get uiMessagesSingleChoice => 'Tek seçim';
+
+  @override
+  String get uiMessagesMultiChoice => 'Çoklu seçim';
 
   @override
   String get uiRouterTabHome => 'Ana sayfa';

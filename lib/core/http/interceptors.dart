@@ -105,20 +105,33 @@ class ApiGuardInterceptor extends Interceptor {
   final Flavor flavor;
   final ScopeController? scope;
 
-  late final List<(RegExp, ApiOperation)> _templates = [
-    for (final op in operations.values) (_templateRegExp(op.path), op),
+  late final List<(RegExp, int, ApiOperation)> _templates = [
+    for (final op in operations.values)
+      (_templateRegExp(op.path), _paramCount(op.path), op),
   ];
 
+  /// Yolun işlemi. Birden çok şablon eşleşirse sabit segmenti çok olan (yol parametresi az
+  /// olan) kazanır (OpenAPI kuralı: `/v1/chats/stream` → `streamChatEvents`, `getChat` değil);
+  /// en özgül düzeyde birden çok eşleşme belirsizdir: fail-closed.
   ApiOperation? _resolve(String method, String path) {
     ApiOperation? found;
-    for (final (re, op) in _templates) {
-      if (op.method == method && re.hasMatch(path)) {
-        if (found != null) return null; // belirsiz eşleşme: fail-closed
+    var params = -1;
+    var ambiguous = false;
+    for (final (re, n, op) in _templates) {
+      if (op.method != method || !re.hasMatch(path)) continue;
+      if (found == null || n < params) {
         found = op;
+        params = n;
+        ambiguous = false;
+      } else if (n == params) {
+        ambiguous = true;
       }
     }
-    return found;
+    return ambiguous ? null : found;
   }
+
+  static int _paramCount(String template) =>
+      RegExp(r'\{[^/{}]+\}').allMatches(template).length;
 
   /// `/v1/departments/{id}/members` → `^/v1/departments/[^/]+/members$`.
   static RegExp _templateRegExp(String template) {

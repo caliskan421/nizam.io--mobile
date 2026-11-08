@@ -1,16 +1,20 @@
 // Tablet gezinme değişmezlerinin sahte sunucusu (yalnız test): [CoordBackend] programı
-// (departmanlar, ekipler, görevler, toplantılar, arşiv dosyaları) + görev ayrıntısı ve Gantt
-// uçları SUNUCU BİÇİMİNDE. Ekranlar gerçek depolar → üretilmiş istemci → bu yanıtlar zinciriyle
+// (departmanlar, ekipler, görevler, toplantılar, arşiv dosyaları) + görev ayrıntısı, Gantt ve
+// sohbet ([ChatFixture]) uçları SUNUCU BİÇİMİNDE. Ekranlar gerçek depolar → üretilmiş istemci → bu yanıtlar zinciriyle
 // beslenir; örnek (in-memory) görev/koordinatörlük verisi yoktur.
 import 'package:dio/dio.dart';
 
 import '../features/coordinatorships/coord_backend.dart';
+import '../features/messages/chat_backend.dart';
 import '../features/pilot_support.dart';
 import 'fake_backend.dart';
 
 class TabletBackend extends CoordBackend {
+  final chats = ChatFixture();
+
   @override
   ResponseBody handle(Seen r) {
+    if (chats.handle(r) case final chat?) return chat;
     final key = '${r.method} ${r.path}';
     switch (key) {
       case 'GET /v1/work-items/gantt' ||

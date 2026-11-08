@@ -3,10 +3,9 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/i18n/generated/app_localizations.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
-import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
-import '../../../tasks/tasks.dart';
 import '../../domain/chat.dart';
+import '../../domain/chat_room.dart';
 
 /// Mesajlar ekranlarının biçimli metinleri (parçalar ARB'den; tarih `tr`).
 extension MessagesTexts on AppLocalizations {
@@ -28,21 +27,23 @@ extension MessagesTexts on AppLocalizations {
   String listTime(DateTime at, DateTime today) =>
       _sameDay(at, today) ? time(at) : dayLabel(at, today);
 
-  String role(PersonRole r) => switch (r) {
-    PersonRole.admin => uiMessagesRoleAdmin,
-    PersonRole.coordinator => uiMessagesRoleCoordinator,
-    PersonRole.member => uiMessagesRoleMember,
+  String candidateRole(ChatCandidateRole r) => switch (r) {
+    ChatCandidateRole.companyAdmin => uiMessagesRoleAdmin,
+    ChatCandidateRole.coordinator => uiMessagesRoleCoordinator,
+    ChatCandidateRole.member => uiMessagesRoleMember,
   };
 
-  /// Üst çubuk alt satırı: grupta "18 üye", kişide "çevrimiçi" / "son görülme 09:41".
-  String chatSubtitle(Chat c, DateTime today) {
-    if (c.group) return '${c.members} $uiMessagesMembersLc';
-    if (c.online) return uiMessagesOnline;
-    final seen = c.lastSeen;
+  /// Üst çubuk alt satırı: yazıyor; grupta "Tüm kullanıcılar" / "Grup"; birebirde sunucunun
+  /// verdiği çevrimiçi / son görülme (bilinmiyorsa boş).
+  String chatSubtitle(ChatRoom room, DateTime today) {
+    final typing = room.typing;
+    if (typing != null) return '${typing.split(' ').first} $uiMessagesTyping';
+    final c = room.chat;
+    if (c.group) return c.general ? uiMessagesAllUsers : uiMessagesGroup;
+    if (c.peerOnline ?? false) return uiMessagesOnline;
+    final seen = c.peerLastSeen;
     if (seen == null) return '';
-    return _sameDay(seen, today)
-        ? '$uiMessagesLastSeen ${time(seen)}'
-        : '$uiMessagesLastSeen $uiMessagesYesterdayLc';
+    return '$uiMessagesLastSeen ${listTime(seen, today).toLowerCase()}';
   }
 
   String reaction(ChatReaction r) => switch (r) {
@@ -54,36 +55,21 @@ extension MessagesTexts on AppLocalizations {
 
   /// "9 kişi oy verdi".
   String voters(int n) => '$n $uiMessagesVotedTail';
+
+  /// Mesajın kısa metni (alıntı, sabit şeridi, önizleme): metin, yoksa ilk ek adı.
+  String summaryOf(ChatMessage m) =>
+      m.text.isNotEmpty ? m.text : m.attachments.firstOrNull?.fileName ?? '';
 }
 
 /// Tepkinin kit karşılığı.
 NzReaction nzReaction(ChatReaction r) => NzReaction.values[r.index];
 
-/// Kişinin sohbet rengi sırası (prototip renk eşlemesi; bilinmeyen kişi addan).
-int personTone(String id, String name) => switch (id) {
-  'ma' || 'my' || 'mk' => 0,
-  'bk' || 'ss' => 1,
-  'yc' || 'bc' => 2,
-  'ko' || 'av' => 3,
-  'rk' || 'aa' => 4,
-  _ => NzAvatar.toneOf(name),
-};
+/// Kişinin avatar/ad rengi sırası (addan; aynı kişi her yerde aynı renk).
+int personTone(String name) => NzAvatar.toneOf(name);
 
-/// Atfın ikonu.
-IconData refIcon(ChatRefKind k) => switch (k) {
-  ChatRefKind.task => NzIcons.tasks,
-  ChatRefKind.coordinatorship => NzIcons.coordinatorships,
-  ChatRefKind.file => NzIcons.file,
-  ChatRefKind.photo => NzIcons.image,
-  ChatRefKind.document => NzIcons.document,
-};
-
-/// Atıf etiketi: "#ALT-7", koordinatörlük adı, "Belge_1.pdf · 320 KB".
-String refLabel(ChatRef r, TaskCatalog catalog) => switch (r.kind) {
-  ChatRefKind.task => '#${r.id}',
-  ChatRefKind.coordinatorship => catalog.coordinatorship(r.id)?.name ?? r.id,
-  _ => r.size == null ? r.id : '${r.id} · ${r.size}',
-};
+/// Kişinin sohbet rengi.
+Color personColor(BuildContext context, String name) =>
+    NzChatAvatar.toneColor(context, personTone(name));
 
 /// Kit avatarı için baş harfler.
 String chatInitials(String name) => NzChatAvatar.initialsOf(name);

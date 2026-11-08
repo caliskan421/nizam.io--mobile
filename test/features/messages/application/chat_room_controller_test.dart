@@ -1,0 +1,289 @@
+// ChatRoomController: açılış (bilgi + son sayfa, ayırıcı, okundu imleci), gönderim durumu ve
+// istemci kimliği kararlılığı, 409 eşlemeleri, düzenleme çakışması, akıştan gelen olayların
+// yerleşmesi (çift mesaj yok, silme okumasız), yeniden bağlanma uzlaştırması, yazıyor sınırı.
+import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/features/messages/application/chat_room_controller.dart';
+import 'package:nizamio/features/messages/application/chats_controller.dart';
+import 'package:nizamio/features/messages/application/messages_providers.dart';
+import 'package:nizamio/features/messages/domain/chat.dart';
+import 'package:nizamio/features/messages/domain/chat_room.dart';
+
+import '../fake_chat_repository.dart';
+
+const _coalesce = Duration(milliseconds: 1150);
+
+Future<(ProviderContainer, FakeChatRepository)> _open({
+  List<ChatMessage>? history,
+  bool group = false,
+}) async {
+  final repo = FakeChatRepository()
+    ..server['c1'] = history ?? [msg(1), msg(2, sender: me), msg(3), msg(4)]
+    ..getChatResult = (id) => chat(id, group: group);
+  final c = chatContainer(repo);
+  c
+    ..listen(chatsControllerProvider, (_, _) {})
+    ..listen(chatRoomControllerProvider('c1'), (_, _) {});
+  await c.read(chatsControllerProvider.future);
+  await c.read(chatRoomControllerProvider('c1').future);
+  await pumpEventQueue();
+  return (c, repo);
+}
+
+ChatRoom _room(ProviderContainer c) =>
+    c.read(chatRoomControllerProvider('c1')).requireValue;
+
+ChatRoomController _ctrl(ProviderContainer c) =>
+    c.read(chatRoomControllerProvider('c1').notifier);
+
+List<String> _ids(ProviderContainer c) => [
+  for (final m in _room(c).messages) m.id,
+];
+
+void main() {
+  test(
+    'açılış: bilgi + son sayfa; ayırıcı listedeki okunmamıştan; okundu imleci',
+    () async {
+      final (c, repo) = await _open();
+      expect(repo.calls, containsAll(['getChat c1', 'list c1']));
+      expect(_ids(c), ['m1', 'm2', 'm3', 'm4']);
+      expect(_room(c).unreadMarker, 'm3', reason: 'listede 2 okunmamış');
+      expect(repo.calls, contains('read c1 m4'));
+      expect(
+        c.read(chatsControllerProvider).requireValue.chat('c1')!.unread,
+        0,
+        reason: 'satır sayacı düşer',
+      );
+      _ctrl(c).reopen();
+      expect(_room(c).unreadMarker, isNull);
+    },
+  );
+
+  test('gönderim: gönderiliyor → sunucu kaydı; tek balon', () async {
+    final (c, repo) = await _open();
+    final f = _ctrl(c).send('merhaba', replyTo: 'm3');
+    final pending = _room(c).messages.last;
+    expect((pending.state, pending.onServer), (ChatSendState.sending, false));
+    expect(pending.replyTo?.messageId, 'm3');
+    expect(await f, ChatSendOutcome.sent);
+    expect(_ids(c), ['m1', 'm2', 'm3', 'm4', 'm5']);
+    expect(repo.sent.single.replyTo, 'm3');
+    expect(repo.sent.single.clientId, pending.clientId);
+    expect(_room(c).messages.last.state, ChatSendState.sent);
+  });
+
+  test(
+    'sonuç bilinmiyor → gönderilemedi; tekrar AYNI istemci kimliğiyle',
+    () async {
+      final (c, repo) = await _open();
+      repo.sendError = ApiError('client.timeout');
+      expect(await _ctrl(c).send('a'), ChatSendOutcome.failed);
+      final failed = _room(c).messages.last;
+      expect(failed.state, ChatSendState.failed);
+      expect(await _ctrl(c).retry(failed.clientId), ChatSendOutcome.sent);
+      expect(repo.sent.map((m) => (m.clientId, m.text)).toSet(), {
+        (failed.clientId, 'a'),
+      }, reason: 'aynı kimlik, aynı gövde');
+      expect(_ids(c).where((id) => id.startsWith('local:')), isEmpty);
+    },
+  );
+
+  test(
+    '409 idempotency_key_reused: reddedildi, kendiliğinden tekrar yok',
+    () async {
+      final (c, repo) = await _open();
+      repo.sendError = ApiError(
+        'messaging.idempotency_key_reused',
+        status: 409,
+      );
+      expect(await _ctrl(c).send('a'), ChatSendOutcome.rejected);
+      final m = _room(c).messages.last;
+      expect(
+        (m.state, m.failure),
+        (ChatSendState.failed, 'messaging.idempotency_key_reused'),
+      );
+      expect(repo.sent, hasLength(1));
+    },
+  );
+
+  test(
+    '409 message_deleted: balon kalkar; 403 birebirde yazma kapanır',
+    () async {
+      final (c, repo) = await _open();
+      repo.sendError = ApiError('messaging.message_deleted', status: 409);
+      expect(await _ctrl(c).send('a'), ChatSendOutcome.deleted);
+      expect(_ids(c), ['m1', 'm2', 'm3', 'm4']);
+      repo.sendError = ApiError('messaging.not_authorized', status: 403);
+      expect(await _ctrl(c).send('b'), ChatSendOutcome.blocked);
+      expect(_room(c).blocked, isTrue);
+    },
+  );
+
+  test(
+    'düzenleme: okunan sürüm gider; 409 edit_conflict mesajı yeniden okur',
+    () async {
+      final (c, repo) = await _open(
+        history: [
+          msg(1),
+          msg(2, sender: me, revision: 3),
+        ],
+      );
+      await _ctrl(c).edit('m2', 'yeni');
+      expect(repo.calls, contains('edit m2 rev=3'));
+      expect(_room(c).message('m2')!.text, 'yeni');
+      repo.editError = ApiError('messaging.edit_conflict', status: 409);
+      await expectLater(
+        _ctrl(c).edit('m2', 'daha yeni'),
+        throwsA(
+          isA<ApiError>().having(
+            (e) => e.code,
+            'code',
+            'messaging.edit_conflict',
+          ),
+        ),
+      );
+      expect(repo.calls.last, 'list c1 around=2');
+    },
+  );
+
+  test('silme: yerelden kalkar', () async {
+    final (c, repo) = await _open();
+    await _ctrl(c).delete('m2');
+    expect(repo.calls, contains('delete m2'));
+    expect(_ids(c), ['m1', 'm3', 'm4']);
+  });
+
+  test('akış: oluşturma olayları birleşip tek after okuması; kendi kopyam çift olmaz', () async {
+    final (c, repo) = await _open();
+    final bus = c.read(chatSignalBusProvider);
+    // Gönderim yanıtı gelmeden akış kopyası düşer: sunucuda kayıt var, yanıt geç.
+    final gate = repo.sendGate = Completer<void>();
+    final pendingSend = _ctrl(c).send('x');
+    for (var i = 0; i < 3; i++) {
+      bus.add(
+        const ChatEvent(
+          kind: ChatEventKind.messageCreated,
+          chatId: 'c1',
+          actorId: peer,
+        ),
+      );
+    }
+    bus.add(
+      const ChatEvent(
+        kind: ChatEventKind.messageCreated,
+        chatId: 'baska',
+        actorId: peer,
+      ),
+    );
+    repo.server['c1']!.add(msg(6));
+    await Future<void>.delayed(_coalesce);
+    await pumpEventQueue();
+    expect(
+      repo.calls.where((x) => x.startsWith('list c1 after=')),
+      hasLength(1),
+    );
+    expect(_ids(c), ['m1', 'm2', 'm3', 'm4', 'm5', 'm6']);
+    gate.complete();
+    await pendingSend;
+    expect(_ids(c), ['m1', 'm2', 'm3', 'm4', 'm5', 'm6']);
+  });
+
+  test(
+    'akış: silme olayı okumasız uygulanır; düzenleme around ile okunur',
+    () async {
+      final (c, repo) = await _open();
+      final bus = c.read(chatSignalBusProvider);
+      final before = repo.calls.length;
+      bus.add(
+        const ChatEvent(
+          kind: ChatEventKind.messageDeleted,
+          chatId: 'c1',
+          actorId: peer,
+          messageId: 'm3',
+        ),
+      );
+      await pumpEventQueue();
+      expect(_ids(c), ['m1', 'm2', 'm4']);
+      expect(repo.calls.length, before);
+      repo.server['c1']![0] = msg(1, text: 'güncel');
+      bus.add(
+        const ChatEvent(
+          kind: ChatEventKind.messageUpdated,
+          chatId: 'c1',
+          actorId: peer,
+          messageId: 'm1',
+        ),
+      );
+      await Future<void>.delayed(_coalesce);
+      await pumpEventQueue();
+      expect(repo.calls, contains('list c1 around=1'));
+      expect(_room(c).message('m1')!.text, 'güncel');
+    },
+  );
+
+  test('yeniden bağlanma: pencere baştan okunur, sunucuda silinmiş yerel kayıt kalkar', () async {
+    final (c, repo) = await _open();
+    repo.server['c1']!
+      ..removeWhere((m) => m.id == 'm2')
+      ..add(msg(5));
+    c.read(chatSignalBusProvider).add(const ChatStreamOpened());
+    await pumpEventQueue(times: 50);
+    expect(repo.calls, contains('list c1 after=4'));
+    expect(repo.calls, contains('list c1 before=5'));
+    expect(_ids(c), ['m1', 'm3', 'm4', 'm5']);
+  });
+
+  test(
+    'yazıyor: en az 3 sn aralıkla; karşı tarafın olayı adıyla görünür',
+    () async {
+      final (c, repo) = await _open();
+      _ctrl(c)
+        ..typing()
+        ..typing()
+        ..typing();
+      await pumpEventQueue();
+      expect(repo.typings, ['c1']);
+      c
+          .read(chatSignalBusProvider)
+          .add(
+            const ChatEvent(
+              kind: ChatEventKind.typing,
+              chatId: 'c1',
+              actorId: peer,
+            ),
+          );
+      await pumpEventQueue();
+      expect(_room(c).typing, 'Kadir Özbek');
+      c
+          .read(chatSignalBusProvider)
+          .add(
+            const ChatEvent(
+              kind: ChatEventKind.typing,
+              chatId: 'c1',
+              actorId: me,
+            ),
+          );
+      await pumpEventQueue();
+      expect(
+        _room(c).typing,
+        'Kadir Özbek',
+        reason: 'kendi olayım yok sayılır',
+      );
+    },
+  );
+
+  test('eski sayfa: before=<en küçük seq>, başa eklenir', () async {
+    final (c, repo) = await _open(
+      history: [for (var s = 1; s <= 60; s++) msg(s)],
+    );
+    expect(_room(c).hasOlder, isTrue);
+    expect(_room(c).lowSeq, 11);
+    await _ctrl(c).loadOlder();
+    expect(repo.calls, contains('list c1 before=11'));
+    expect(_room(c).lowSeq, 1);
+    expect(_room(c).hasOlder, isFalse);
+  });
+}

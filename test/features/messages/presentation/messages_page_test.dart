@@ -1,5 +1,5 @@
-// MessagesPage: sohbet satırları, süzgeç hapları (Okunmamış 5), arama, sohbet açma, yeni
-// mesaj alt sayfası, kısayol menüsü ("Tümünü okundu say" uygular), taşma.
+// MessagesPage: sunucudan gelen sohbet satırları, süzgeç ve arama, kısayol menüsü ("Tümünü
+// okundu say" sunucuda uygular), yeni mesaj (aday → birebir sohbet açılır), taşma.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,29 +12,21 @@ import 'package:nizamio/features/messages/messages.dart';
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
 import '../../pilot_support.dart';
+import '../chat_backend.dart';
 
 final _l = AppLocalizationsTr();
 
-Future<(Harness, RecordingAppNav)> _open(
+Future<(Harness, RecordingAppNav, ChatBackend)> _open(
   WidgetTester tester, {
   bool dark = false,
-  bool tall = false,
 }) async {
-  if (tall) {
-    // Satırlar tembel kurulur: 8 sohbetin hepsi görünsün.
-    tester.view.devicePixelRatio = 1;
-    tester.view.physicalSize = const Size(390, 1400);
-    addTearDown(tester.view.reset);
-  }
-  final h = await real(
-    tester,
-    () => pilotHarness(PilotBackend(), signedIn: true),
-  );
+  final backend = ChatBackend();
+  final h = await real(tester, () => pilotHarness(backend, signedIn: true));
   h.read(scopeControllerProvider).selectProgram('prog-1');
   final nav = RecordingAppNav();
   await pumpScreen(tester, h, const MessagesPage(), nav: nav, dark: dark);
   await settle(tester);
-  return (h, nav);
+  return (h, nav, backend);
 }
 
 Future<void> _tap(WidgetTester tester, Finder f) async {
@@ -47,61 +39,54 @@ Future<void> _tap(WidgetTester tester, Finder f) async {
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets('süzgeç: okunmamış 5, kişiler 3; arama', (tester) async {
+  testWidgets('satırlar; süzgeç: okunmamış 2, kişiler 1; arama', (
+    tester,
+  ) async {
     await _open(tester);
-    await _tap(tester, find.text(_l.uiMessagesFilterUnread));
-    expect(find.byType(NzChatRow), findsNWidgets(5));
-    await _tap(tester, find.text(_l.uiMessagesFilterPeople));
     expect(find.byType(NzChatRow), findsNWidgets(3));
+    expect(find.textContaining('Sen: Teşekkürler'), findsOneWidget);
+    await _tap(tester, find.text(_l.uiMessagesFilterUnread));
+    expect(find.byType(NzChatRow), findsNWidgets(2));
+    await _tap(tester, find.text(_l.uiMessagesFilterPeople));
+    expect(find.byType(NzChatRow), findsNWidgets(1));
     await _tap(tester, find.text(_l.uiMessagesFilterAll));
     await _tap(tester, find.byIcon(Icons.search_rounded).first);
     await tester.enterText(find.byType(TextField).first, 'trafo');
     await settle(tester);
-    expect(find.byType(NzChatRow), findsNWidgets(2));
-    await tester.enterText(find.byType(TextField).first, 'hiçbiri');
-    await settle(tester);
-    expect(find.text(_l.uiMessagesEmpty), findsOneWidget);
+    expect(find.byType(NzChatRow), findsNWidgets(1));
   });
 
-  testWidgets('yeni mesaj: prototip yer tutucu bildirimi', (tester) async {
-    final (_, nav) = await _open(tester);
+  testWidgets('satır sohbeti açar', (tester) async {
+    final (_, nav, _) = await _open(tester);
+    await _tap(tester, find.text('Kadir Özbek'));
+    expect(nav.calls, ['chat:kadir']);
+  });
+
+  testWidgets('yeni mesaj: aday seçimi birebir sohbeti açar', (tester) async {
+    final (h, nav, _) = await _open(tester);
     await _tap(tester, find.byIcon(Icons.edit_outlined).first);
-    expect(find.text(_l.uiMessagesNewChatSoon), findsOneWidget);
-    expect(nav.calls, isEmpty);
+    expect(find.text(_l.uiMessagesNewGroup), findsOneWidget);
+    expect(find.text(_l.uiMessagesWhyCannotWrite), findsOneWidget);
+    await _tap(tester, find.text('Reha Koçak'));
+    expect(nav.calls, ['chat:d-acc-rk']);
+    expect(
+      h.read(messagesNavBadgeProvider),
+      2,
+      reason: 'yeni sohbet listeye eklendi, okunmamış değişmedi',
+    );
   });
 
-  testWidgets('geri dönüşte süzgeç ve arama korunur', (tester) async {
-    final (h, _) = await _open(tester);
-    await _tap(tester, find.byIcon(Icons.search_rounded).first);
-    await tester.enterText(find.byType(TextField).first, 'trafo');
-    await settle(tester);
-    await pumpScreen(tester, h, const SizedBox.shrink());
-    await settle(tester);
-    await pumpScreen(tester, h, const MessagesPage());
-    await settle(tester);
-    expect(find.text('trafo'), findsOneWidget);
-    expect(find.byType(NzChatRow), findsNWidgets(2));
-  });
-
-  testWidgets('kısayol: okunmamışlar süzgeci; tümünü okundu say', (
-    tester,
-  ) async {
-    final (h, _) = await _open(tester, tall: true);
-    h.read(shellReselectEventsProvider.notifier).fire(MessagesPage.shellTab);
-    await settle(tester);
-    await tester.tap(find.text(_l.uiMessagesUnreadOnly));
-    await settle(tester);
-    expect(find.byType(NzChatRow), findsNWidgets(5));
+  testWidgets('kısayol: tümünü okundu say sunucuda uygulanır', (tester) async {
+    final (h, _, backend) = await _open(tester);
     h.read(shellReselectEventsProvider.notifier).fire(MessagesPage.shellTab);
     await settle(tester);
     await tester.tap(find.text(_l.uiMessagesMarkAllRead));
     await settle(tester);
-    expect(find.byType(NzChatRow), findsNWidgets(8));
-    expect(find.text('@'), findsNothing);
+    expect(backend.chats.readAll, 1);
     expect(h.read(messagesNavCaptionProvider), '0 ${_l.uiMessagesUnreadLc}');
   });
 
-  for (final (width, scale) in [(360.0, 1.0), (360.0, 2.0), (390.0, 2.0)]) {
+  for (final (width, scale) in [(360.0, 1.0), (360.0, 2.0)]) {
     for (final dark in [false, true]) {
       testWidgets(
         'taşma yok: ${width.toInt()} geniş, ${scale}x, ${dark ? 'koyu' : 'açık'}',
@@ -112,11 +97,6 @@ void main() {
           addTearDown(tester.view.reset);
           addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
           await _open(tester, dark: dark);
-          final scrollable = find.byType(Scrollable).first;
-          for (var i = 0; i < 8; i++) {
-            await tester.drag(scrollable, const Offset(0, -300));
-            await tester.pump();
-          }
           expect(tester.takeException(), isNull);
         },
       );

@@ -5350,12 +5350,6 @@ abstract class AppLocalizations {
   /// **'Yeni mesaj'**
   String get uiMessagesNewMessage;
 
-  /// ui.messages.new_chat_soon
-  ///
-  /// In tr, this message translates to:
-  /// **'Yeni sohbet sonraki adımda tasarlanacak'**
-  String get uiMessagesNewChatSoon;
-
   /// ui.messages.filters
   ///
   /// In tr, this message translates to:
@@ -5440,12 +5434,6 @@ abstract class AppLocalizations {
   /// **'Dün'**
   String get uiMessagesYesterday;
 
-  /// ui.messages.members_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'üye'**
-  String get uiMessagesMembersLc;
-
   /// ui.messages.typing
   ///
   /// In tr, this message translates to:
@@ -5463,12 +5451,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'son görülme'**
   String get uiMessagesLastSeen;
-
-  /// ui.messages.yesterday_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'dün'**
-  String get uiMessagesYesterdayLc;
 
   /// ui.messages.search_chat
   ///
@@ -5524,66 +5506,6 @@ abstract class AppLocalizations {
   /// **'Görev, koordinatörlük veya arşiv ekle'**
   String get uiMessagesAttach;
 
-  /// ui.messages.photo_video
-  ///
-  /// In tr, this message translates to:
-  /// **'Fotoğraf ve video'**
-  String get uiMessagesPhotoVideo;
-
-  /// ui.messages.file
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya'**
-  String get uiMessagesFile;
-
-  /// ui.messages.portal_refs
-  ///
-  /// In tr, this message translates to:
-  /// **'portaldan atıf'**
-  String get uiMessagesPortalRefs;
-
-  /// ui.messages.ref_task
-  ///
-  /// In tr, this message translates to:
-  /// **'Görev'**
-  String get uiMessagesRefTask;
-
-  /// ui.messages.ref_coordinatorship
-  ///
-  /// In tr, this message translates to:
-  /// **'Koordinatörlük'**
-  String get uiMessagesRefCoordinatorship;
-
-  /// ui.messages.ref_archive
-  ///
-  /// In tr, this message translates to:
-  /// **'Arşiv'**
-  String get uiMessagesRefArchive;
-
-  /// ui.messages.search_task
-  ///
-  /// In tr, this message translates to:
-  /// **'Görev ara'**
-  String get uiMessagesSearchTask;
-
-  /// ui.messages.search_coordinatorship
-  ///
-  /// In tr, this message translates to:
-  /// **'Koordinatörlük ara'**
-  String get uiMessagesSearchCoordinatorship;
-
-  /// ui.messages.search_file
-  ///
-  /// In tr, this message translates to:
-  /// **'Arşivde dosya ara'**
-  String get uiMessagesSearchFile;
-
-  /// ui.messages.remove
-  ///
-  /// In tr, this message translates to:
-  /// **'Kaldır'**
-  String get uiMessagesRemove;
-
   /// ui.messages.cancel
   ///
   /// In tr, this message translates to:
@@ -5613,12 +5535,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'kişi oy verdi'**
   String get uiMessagesVotedTail;
-
-  /// ui.messages.votes_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'oy'**
-  String get uiMessagesVotesLc;
 
   /// ui.messages.react_like
   ///
@@ -5698,29 +5614,11 @@ abstract class AppLocalizations {
   /// **'Mesaj kopyalandı'**
   String get uiMessagesCopied;
 
-  /// ui.messages.pinned_toast
-  ///
-  /// In tr, this message translates to:
-  /// **'Mesaj sabitlendi'**
-  String get uiMessagesPinnedToast;
-
-  /// ui.messages.unpinned_toast
-  ///
-  /// In tr, this message translates to:
-  /// **'Sabitleme kaldırıldı'**
-  String get uiMessagesUnpinnedToast;
-
   /// ui.messages.poll_results
   ///
   /// In tr, this message translates to:
   /// **'Anket sonuçları'**
   String get uiMessagesPollResults;
-
-  /// ui.messages.poll_results_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'anket sonuçları'**
-  String get uiMessagesPollResultsLc;
 
   /// ui.messages.to_task
   ///
@@ -5739,48 +5637,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Mesaj silindi'**
   String get uiMessagesDeleted;
-
-  /// ui.messages.not_voted
-  ///
-  /// In tr, this message translates to:
-  /// **'Henüz oy vermeyenler'**
-  String get uiMessagesNotVoted;
-
-  /// ui.messages.not_voted_none
-  ///
-  /// In tr, this message translates to:
-  /// **'Grubun diğer üyeleri henüz oy vermedi'**
-  String get uiMessagesNotVotedNone;
-
-  /// ui.messages.remind
-  ///
-  /// In tr, this message translates to:
-  /// **'Hatırlat'**
-  String get uiMessagesRemind;
-
-  /// ui.messages.reminded
-  ///
-  /// In tr, this message translates to:
-  /// **'Oy vermeyenlere hatırlatma gönderildi'**
-  String get uiMessagesReminded;
-
-  /// ui.messages.end_poll
-  ///
-  /// In tr, this message translates to:
-  /// **'Anketi bitir'**
-  String get uiMessagesEndPoll;
-
-  /// ui.messages.poll_ended
-  ///
-  /// In tr, this message translates to:
-  /// **'Anket bitti'**
-  String get uiMessagesPollEnded;
-
-  /// ui.messages.poll_concluded
-  ///
-  /// In tr, this message translates to:
-  /// **'Anket sonuçlandı'**
-  String get uiMessagesPollConcluded;
 
   /// ui.messages.concluded
   ///
@@ -5806,47 +5662,17 @@ abstract class AppLocalizations {
   /// **'bilgisi'**
   String get uiMessagesInfo;
 
-  /// ui.messages.mute
-  ///
-  /// In tr, this message translates to:
-  /// **'Sessize al'**
-  String get uiMessagesMute;
-
-  /// ui.messages.muted_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'sessize alındı'**
-  String get uiMessagesMutedTail;
-
   /// ui.messages.leave_group
   ///
   /// In tr, this message translates to:
   /// **'Gruptan çık'**
   String get uiMessagesLeaveGroup;
 
-  /// ui.messages.block
-  ///
-  /// In tr, this message translates to:
-  /// **'Engelle'**
-  String get uiMessagesBlock;
-
   /// ui.messages.action_soon
   ///
   /// In tr, this message translates to:
   /// **'Bu işlem sonraki adımda tasarlanacak'**
   String get uiMessagesActionSoon;
-
-  /// ui.messages.shared
-  ///
-  /// In tr, this message translates to:
-  /// **'paylaşılanlar'**
-  String get uiMessagesShared;
-
-  /// ui.messages.members
-  ///
-  /// In tr, this message translates to:
-  /// **'üyeler'**
-  String get uiMessagesMembers;
 
   /// ui.messages.all_users
   ///
@@ -5859,36 +5685,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Grup'**
   String get uiMessagesGroup;
-
-  /// ui.messages.wrote_here
-  ///
-  /// In tr, this message translates to:
-  /// **'bu sohbette yazdı'**
-  String get uiMessagesWroteHere;
-
-  /// ui.messages.member
-  ///
-  /// In tr, this message translates to:
-  /// **'üye'**
-  String get uiMessagesMember;
-
-  /// ui.messages.manager
-  ///
-  /// In tr, this message translates to:
-  /// **'yönetici'**
-  String get uiMessagesManager;
-
-  /// ui.messages.photo
-  ///
-  /// In tr, this message translates to:
-  /// **'Fotoğraf'**
-  String get uiMessagesPhoto;
-
-  /// ui.messages.downloading
-  ///
-  /// In tr, this message translates to:
-  /// **'indiriliyor'**
-  String get uiMessagesDownloading;
 
   /// ui.messages.role_admin
   ///
@@ -5913,6 +5709,114 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kişi seç'**
   String get uiMessagesNewChatHint;
+
+  /// ui.messages.new_group
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni grup'**
+  String get uiMessagesNewGroup;
+
+  /// ui.messages.group_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Grup adı'**
+  String get uiMessagesGroupName;
+
+  /// ui.messages.create_group
+  ///
+  /// In tr, this message translates to:
+  /// **'Grubu kur'**
+  String get uiMessagesCreateGroup;
+
+  /// ui.messages.candidates_truncated
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste ilk 200 kişiyle sınırlı.'**
+  String get uiMessagesCandidatesTruncated;
+
+  /// ui.messages.why_cannot_write
+  ///
+  /// In tr, this message translates to:
+  /// **'Listede olmayan kişiyle doğrudan yazışamazsınız: birebir sohbet yalnız koordinatörlük zinciri içinde açılır. Ortak bir grupta yazışabilirsiniz.'**
+  String get uiMessagesWhyCannotWrite;
+
+  /// ui.messages.no_candidates
+  ///
+  /// In tr, this message translates to:
+  /// **'Listede kimse yok.'**
+  String get uiMessagesNoCandidates;
+
+  /// ui.messages.peer_left
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kişi artık programda değil; mesaj gönderilemez.'**
+  String get uiMessagesPeerLeft;
+
+  /// ui.messages.chat_gone
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sohbete artık erişimin yok.'**
+  String get uiMessagesChatGone;
+
+  /// ui.messages.send_failed
+  ///
+  /// In tr, this message translates to:
+  /// **'gönderilemedi'**
+  String get uiMessagesSendFailed;
+
+  /// ui.messages.retry_send
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrar gönder'**
+  String get uiMessagesRetrySend;
+
+  /// ui.messages.discard_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesajı at'**
+  String get uiMessagesDiscardMessage;
+
+  /// ui.messages.message_restored
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj silinmiş; metin taslağa geri kondu.'**
+  String get uiMessagesMessageRestored;
+
+  /// ui.messages.older_messages
+  ///
+  /// In tr, this message translates to:
+  /// **'Önceki mesajlar'**
+  String get uiMessagesOlderMessages;
+
+  /// ui.messages.deleted_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinmiş mesaj'**
+  String get uiMessagesDeletedMessage;
+
+  /// ui.messages.no_messages
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz mesaj yok'**
+  String get uiMessagesNoMessages;
+
+  /// ui.messages.list_truncated
+  ///
+  /// In tr, this message translates to:
+  /// **'Yalnız son sohbetler gösteriliyor.'**
+  String get uiMessagesListTruncated;
+
+  /// ui.messages.single_choice
+  ///
+  /// In tr, this message translates to:
+  /// **'Tek seçim'**
+  String get uiMessagesSingleChoice;
+
+  /// ui.messages.multi_choice
+  ///
+  /// In tr, this message translates to:
+  /// **'Çoklu seçim'**
+  String get uiMessagesMultiChoice;
 
   /// ui.router.tab_home
   ///

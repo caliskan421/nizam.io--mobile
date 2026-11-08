@@ -16,6 +16,7 @@ import '../../application/task_detail_controller.dart';
 import '../../application/tasks_providers.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_permissions.dart';
+import '../../domain/task_writes.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 import 'detail_forms.dart';
@@ -464,13 +465,30 @@ class TaskDetailActions {
     );
   }
 
-  /// Sistem seçicisinden dosya (sunucu yükleme formu); seçici yoksa bildirilir.
+  /// Kaynak (Fotoğraflar / Dosyalar) → sistem seçicisi; seçici yoksa bildirilir.
   Future<void> pickUploadFile() async {
+    final l = context.l10n;
     if (!ref.read(uploadPickerProvider).available) {
-      _say(context.l10n.uiTasksPickerMissing);
+      _say(l.uiTasksPickerMissing);
       return;
     }
-    await _ctl.pickUploadFile();
+    await _listSheet(
+      title: l.uiTasksPickFileAction,
+      builder: (sheet) => [
+        for (final (o, label, icon) in [
+          (UploadOrigin.photos, l.uiTasksPickPhotos, NzIcons.image),
+          (UploadOrigin.files, l.uiTasksPickFiles, NzIcons.folder),
+        ])
+          _ListOption(
+            label: label,
+            leading: NzIcon(icon, size: NizamioSize.iconSizeSm),
+            onTap: () async {
+              Navigator.of(sheet).pop();
+              await _ctl.pickUploadFile(o);
+            },
+          ),
+      ],
+    );
   }
 
   void openDelete() {

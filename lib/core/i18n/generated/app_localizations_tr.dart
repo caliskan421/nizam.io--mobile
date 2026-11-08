@@ -4104,6 +4104,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksPickFileAction => 'Dosya seç';
 
   @override
+  String get uiTasksPickPhotos => 'Fotoğraflar';
+
+  @override
+  String get uiTasksPickFiles => 'Dosyalar';
+
+  @override
   String get uiTasksPickerMissing => 'Bu sürümde dosya seçici yok';
 
   @override

@@ -5209,6 +5209,14 @@
   "@uiTasksPickFileAction": {
     "description": "ui.tasks.pick_file_action"
   },
+  "uiTasksPickPhotos": "Fotoğraflar",
+  "@uiTasksPickPhotos": {
+    "description": "ui.tasks.pick_photos"
+  },
+  "uiTasksPickFiles": "Dosyalar",
+  "@uiTasksPickFiles": {
+    "description": "ui.tasks.pick_files"
+  },
   "uiTasksPickerMissing": "Bu sürümde dosya seçici yok",
   "@uiTasksPickerMissing": {
     "description": "ui.tasks.picker_missing"

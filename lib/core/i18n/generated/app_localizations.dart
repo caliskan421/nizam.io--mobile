@@ -7906,6 +7906,18 @@ abstract class AppLocalizations {
   /// **'Dosya seç'**
   String get uiTasksPickFileAction;
 
+  /// ui.tasks.pick_photos
+  ///
+  /// In tr, this message translates to:
+  /// **'Fotoğraflar'**
+  String get uiTasksPickPhotos;
+
+  /// ui.tasks.pick_files
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosyalar'**
+  String get uiTasksPickFiles;
+
   /// ui.tasks.picker_missing
   ///
   /// In tr, this message translates to:

@@ -293,6 +293,8 @@
     "ui.tasks.t_file_renamed": "Dosya adı güncellendi",
     "ui.tasks.t_file_deleted": "Dosya silindi",
     "ui.tasks.pick_file_action": "Dosya seç",
+    "ui.tasks.pick_photos": "Fotoğraflar",
+    "ui.tasks.pick_files": "Dosyalar",
     "ui.tasks.picker_missing": "Bu sürümde dosya seçici yok",
     "ui.tasks.err_pick_file": "Yüklemek için bir dosya seç",
     "ui.tasks.upload_types": "PDF, PNG, JPG, CSV, Word, Excel, PowerPoint, Pages · 90 MB altı",

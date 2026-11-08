@@ -2,7 +2,9 @@
 // lcov.info'yu ayrıştırır, ADR-0003 karar 10 (Q1) dizin eşiklerini uygular; eşik altı ya da
 // kapsamasız dosya varsa 1 döner. Üretilmiş dosyalar (generated/, *.g.dart, *.freezed.dart)
 // hariçtir. lcov'da hiç görünmeyen eşikli dizin dosyası kapsamasız sayılır (karar 11,
-// fail-closed); yalnız yönerge (import/export/part/library) içeren dosya hariç.
+// fail-closed); yalnız yönerge (import/export/part/library) içeren dosya hariç. lcov'da
+// olmayan dosya yalnız çalıştırılabilir kod içeriyorsa kapsamasızdır: yalnız bildirimden
+// (sınıf başlığı + `static const` alan) oluşan dosyaya Dart VM kayıt yazmaz, sayılmaz.
 import 'dart:io';
 
 /// ADR-0003 karar 10. Yalnız ADR ile değişir.
@@ -70,15 +72,36 @@ Map<String, Map<int, int>> parseLcov(String text, {String root = ''}) {
   return out;
 }
 
-/// Yorum, boş satır ve yönergeler çıkarıldıktan sonra kalan satır sayısı.
-int codeLineCount(String source) {
+/// Yorumlar ve yönergeler (import/export/part/library) çıkarılmış kaynak.
+String _stripped(String source) {
   var s = source.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
   s = s.replaceAll(RegExp(r'//[^\n]*'), '');
-  s = s.replaceAll(
+  return s.replaceAll(
     RegExp(r'^\s*(import|export|part|library)\b[^;]*;', multiLine: true),
     '',
   );
-  return s.split('\n').where((l) => l.trim().isNotEmpty).length;
+}
+
+/// Yorum, boş satır ve yönergeler çıkarıldıktan sonra kalan satır sayısı.
+int codeLineCount(String source) =>
+    _stripped(source).split('\n').where((l) => l.trim().isNotEmpty).length;
+
+/// Dosyada çalıştırılabilir kod yok mu: yalnız sınıf başlıkları, `const`/`static const`
+/// alanlar ve kapanış ayraçları (gövde, `=>`, `final`/`var` alan ya da yapıcı yok). Dart VM
+/// böyle dosya için lcov'a `SF:` kaydı yazmaz. Emin olunamayan her biçim kod sayılır.
+bool declarationsOnly(String source) {
+  var s = _stripped(source);
+  if (s.contains('=>')) return false;
+  s = s.replaceAll(RegExp(r'\b(?:static\s+)?const\s[^;{}]*;'), '');
+  s = s.replaceAll(
+    RegExp(
+      r'^\s*(?:(?:abstract|final|sealed|base|interface)\s+)*class\s+\w+'
+      r'(?:<[^{]*>)?(?:\s+(?:extends|implements|with)\s[^{]+)?\s*\{',
+      multiLine: true,
+    ),
+    '',
+  );
+  return s.replaceAll('}', '').trim().isEmpty;
 }
 
 class GroupResult {
@@ -117,7 +140,8 @@ CoverageReport evaluateCoverage(
     final g = coverageGroup(rel);
     if (g == null || lcov.containsKey(rel)) continue;
     final n = codeLineCount(src);
-    if (n == 0) continue; // yalnız yönerge/yorum
+    // Yalnız yönerge/yorum ya da yalnız bildirim (Dart kayıt üretmez): kapsama birimi yok.
+    if (n == 0 || declarationsOnly(src)) continue;
     final r = report.groups[g]!;
     r.total += n;
     r.uncovered.add(rel);

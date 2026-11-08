@@ -129,6 +129,45 @@ void main() {
       );
       expect(r.failed, isFalse);
     });
+    test('yalnız static const bildiren dosya lcov\'da yokken kapsamasız değil, toplamı '
+        'etkilemez (Dart kayıt üretmez)', () {
+      final r = eval(
+        {'lib/core/ui/widgets/a.dart': lines(7, 10)},
+        sources: {
+          'core/ui/widgets/nz_icons.dart':
+              "import 'package:flutter/widgets.dart';\n"
+              '/// İkonlar.\n'
+              'abstract final class NzIcons {\n'
+              '  static const IconData add = Icons.add_rounded;\n'
+              '  static const IconData back =\n'
+              '      Icons.arrow_back_rounded;\n'
+              '}\n',
+        },
+      );
+      final w = r.groups['widgets']!;
+      expect(w.uncovered, isEmpty);
+      expect((w.covered, w.total), (7, 10));
+      expect(r.failed, isFalse);
+    });
+    test(
+      'metot gövdesi olan dosya lcov\'da yokken kapsamasız (davranış korunur)',
+      () {
+        final r = eval(
+          {'lib/core/ui/widgets/a.dart': lines(10, 10)},
+          sources: {
+            'core/ui/widgets/nz_b.dart':
+                'abstract final class B {\n'
+                '  static const int x = 1;\n'
+                '  static int twice(int v) {\n'
+                '    return v * 2;\n'
+                '  }\n'
+                '}\n',
+          },
+        );
+        expect(r.groups['widgets']!.uncovered, ['core/ui/widgets/nz_b.dart']);
+        expect(r.failed, isTrue);
+      },
+    );
     test('eşiksiz ve üretilmiş görünmeyen dosya sorun değil', () {
       final r = eval(
         {},

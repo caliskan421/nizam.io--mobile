@@ -3,13 +3,11 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
-import '../../../../core/ui/widgets/lists/lists.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/chat.dart';
-import '../../domain/chat_room.dart';
 import 'messages_texts.dart';
 
 /// Mesaj işlemleri sayfasının sonucu (sayfa kapandıktan sonra ekran uygular).
@@ -28,6 +26,7 @@ enum ChatSimpleAction {
   pin,
   edit,
   pollResults,
+  closePoll,
   toTask,
   delete,
   retry,
@@ -40,15 +39,19 @@ final class ChatActSimple extends ChatAction {
 }
 
 /// Mesaja basılı tutunca açılan işlem sayfası (tasarım sistemi `components/ActionSheet`):
-/// tepki çubuğu, hızlı ızgara (Yanıtla, Kopyala, Sabitle, [canEdit] ise Düzenle), liste (anket
-/// sonuçları ya da göreve dönüştür, [canDelete] ise Sil — `danger`). Gönderilemeyen kendi
-/// mesajımda yalnız Tekrar gönder ([canRetry]), Kopyala ve Mesajı at. Seçim sonuç olarak döner.
+/// tepki çubuğu, hızlı ızgara (Yanıtla, Kopyala, [canPin] ise Sabitle, [canEdit] ise Düzenle),
+/// liste (anket sonuçları ve [canClosePoll] ise anketi bitir; [canToTask] ise göreve dönüştür;
+/// [canDelete] ise Sil — `danger`). Gönderilemeyen kendi mesajımda yalnız Tekrar gönder
+/// ([canRetry]), Kopyala ve Mesajı at. Seçim sonuç olarak döner.
 Future<ChatAction?> showMessageActions(
   BuildContext context, {
   required ChatMessage message,
   required bool canEdit,
   required bool canDelete,
   bool canRetry = true,
+  bool canPin = false,
+  bool canToTask = false,
+  bool canClosePoll = false,
 }) {
   final l = context.l10n;
   final failed = message.state == ChatSendState.failed;
@@ -103,7 +106,14 @@ Future<ChatAction?> showMessageActions(
             ChatSimpleAction.pollResults,
             c.accentText,
           ),
-        if (!failed && message.poll == null)
+        if (!failed && canClosePoll)
+          (
+            NzIcons.close,
+            l.uiMessagesPollClose,
+            ChatSimpleAction.closePoll,
+            c.accentText,
+          ),
+        if (!failed && canToTask)
           (
             NzIcons.add,
             l.uiMessagesToTask,
@@ -171,7 +181,7 @@ Future<ChatAction?> showMessageActions(
               if (!failed)
                 quick(NzIcons.reply, l.uiMessagesReply, ChatSimpleAction.reply),
               quick(NzIcons.copy, l.uiMessagesCopy, ChatSimpleAction.copy),
-              if (!failed)
+              if (!failed && canPin)
                 quick(
                   NzIcons.pin,
                   message.pinned ? l.uiMessagesUnpin : l.uiMessagesPin,
@@ -222,112 +232,6 @@ Future<ChatAction?> showMessageActions(
                 ],
               ),
             ),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-/// Sohbet bilgisi seçimi.
-sealed class ChatInfoAction {
-  const ChatInfoAction();
-}
-
-final class ChatInfoSearch extends ChatInfoAction {
-  const ChatInfoSearch();
-}
-
-final class ChatInfoLeave extends ChatInfoAction {
-  const ChatInfoLeave();
-}
-
-/// Sohbet bilgisi: büyük avatar, ad, alt satır; Ara ve (grupta) Gruptan çık. Paylaşılanlar ve
-/// üye listesi sonraki pakette.
-Future<ChatInfoAction?> showChatInfo(
-  BuildContext context, {
-  required ChatRoom room,
-}) {
-  final l = context.l10n;
-  final chat = room.chat;
-  return NzBottomSheet.show<ChatInfoAction>(
-    context,
-    title: '${chat.name} ${l.uiMessagesInfo}',
-    showHeader: false,
-    builder: (sheet) {
-      final c = sheet.colors;
-      final t = sheet.text;
-      void done(ChatInfoAction a) => Navigator.of(sheet).pop(a);
-      final sub = l.chatSubtitle(room, DateTime.now());
-      Widget act(IconData icon, String label, Color color, ChatInfoAction a) =>
-          Expanded(
-            child: Material(
-              color: c.surfaceRaised,
-              borderRadius: BorderRadius.circular(NizamioRadius.group),
-              child: InkWell(
-                onTap: () => done(a),
-                borderRadius: BorderRadius.circular(NizamioRadius.group),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 12,
-                  ),
-                  child: Column(
-                    children: [
-                      NzIcon(icon, size: NizamioSize.iconSizeSm, color: color),
-                      const Gap(6),
-                      Text(
-                        label,
-                        textAlign: TextAlign.center,
-                        style: t.caption.copyWith(color: color),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        spacing: NizamioSpacing.space4,
-        children: [
-          Column(
-            spacing: 6,
-            children: [
-              NzChatAvatar(
-                initials: chatInitials(chat.name),
-                group: chat.group,
-                tone: chat.group ? 0 : personTone(chat.name),
-                extent: 84,
-              ),
-              Text(chat.name, textAlign: TextAlign.center, style: t.titleSm),
-              if (sub.isNotEmpty)
-                Text(
-                  sub,
-                  textAlign: TextAlign.center,
-                  style: t.caption.copyWith(color: c.textMuted),
-                ),
-            ],
-          ),
-          Row(
-            spacing: NizamioSpacing.space2,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              act(
-                NzIcons.search,
-                l.uiMessagesSearchChat,
-                c.text,
-                const ChatInfoSearch(),
-              ),
-              if (chat.group)
-                act(
-                  NzIcons.logout,
-                  l.uiMessagesLeaveGroup,
-                  c.danger,
-                  const ChatInfoLeave(),
-                ),
-            ],
           ),
         ],
       );

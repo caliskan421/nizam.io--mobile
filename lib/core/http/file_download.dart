@@ -23,24 +23,28 @@ Future<Stream<List<int>>> getFileStream(
   Map<String, dynamic>? extras,
 }) => getBinaryStream(
   dio,
-  '/v1/files/${Uri.encodeComponent(fileId)}/download',
+  path: '/v1/files/${Uri.encodeComponent(fileId)}/download',
   extras: extras ?? RecordsClient.downloadFileOpenapiExtras,
 );
 
-/// İkili `GET` yanıtının AKIŞI ([getFileStream] ile aynı kurallar): ZIP gibi büyük gövdeler
-/// belleğe toplanmaz. [path] (gerekirse ham sorgu dizesiyle) üretilmiş istemcideki uçla,
-/// [extras] o ucun `…OpenapiExtras` değeriyle aynı olmalıdır (sözleşme kapısı operationId'yi
-/// buradan okur).
+/// İkili gövdeli herhangi bir indirme ucunun ([path]; yol parametreleri kodlanmış) AKIŞLI okuması
+/// ([getFileStream] ile aynı kurallar). [extras] üretilmiş istemcinin o uç için verdiği
+/// `…OpenapiExtras` metaverisidir (sözleşme kapısı ve kapsam başlıkları; ör. sohbet eki,
+/// paylaşılan dosya, arşiv ZIP'leri — [path] gerekirse ham sorgu dizesi taşır). Büyük gövde
+/// belleğe toplanmaz. Sabit harita kopyalanır (kapı halkası `extra`'ya yazar).
 Future<Stream<List<int>>> getBinaryStream(
-  Dio dio,
-  String path, {
+  Dio dio, {
+  required String path,
   required Map<String, dynamic> extras,
 }) async {
   final Response<ResponseBody> r;
   try {
     r = await dio.get<ResponseBody>(
       path,
-      options: Options(responseType: ResponseType.stream, extra: extras),
+      options: Options(
+        responseType: ResponseType.stream,
+        extra: Map.of(extras),
+      ),
     );
   } on DioException catch (e) {
     throw await streamApiError(e);

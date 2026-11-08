@@ -79,4 +79,15 @@ class ChatsController extends _$ChatsController {
 
   /// Yeni açılan (ya da kurulan) sohbet listede yoksa başa eklenir.
   void opened(Chat chat) => _set((v) => v.withChat(chat));
+
+  /// Gruptan ayrıldım ya da grup silindi: satır listeden kalkar.
+  void removed(String chatId) => _set(
+    (v) => ChatInbox(
+      chats: [
+        for (final c in v.chats)
+          if (c.id != chatId) c,
+      ],
+      truncated: v.truncated,
+    ),
+  );
 }

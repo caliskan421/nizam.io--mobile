@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../domain/chat_task_planner.dart';
 import '../domain/meeting_planner.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_details.dart';
@@ -41,6 +42,13 @@ TaskWriteRepository taskWriteRepository(Ref ref) => throw UnimplementedError(
 @Riverpod(keepAlive: true)
 MeetingPlanner meetingPlanner(Ref ref) => throw UnimplementedError(
   'meetingPlannerProvider bileşim kökünde (lib/app/di) bağlanır',
+);
+
+/// PORT: mesajdan görev ("mesajdan görev" kipindeki yeni görev formu). Gerçekleştirme messages
+/// feature'ındadır; bileşim kökünde bağlanır.
+@Riverpod(keepAlive: true)
+ChatTaskPlanner chatTaskPlanner(Ref ref) => throw UnimplementedError(
+  'chatTaskPlannerProvider bileşim kökünde (lib/app/di) bağlanır',
 );
 
 /// PORT: sistem dosya seçicisi (`tasks_module.dart`'ta `FileUploadPicker` bağlanır).

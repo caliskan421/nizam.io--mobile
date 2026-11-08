@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/providers.dart';
@@ -66,6 +67,40 @@ class FakeChatRepository implements ChatRepository {
   final typings = <String>[];
   final groupKeys = <String>[];
   final List<ApiError> groupErrors = [];
+
+  /// Doluysa sonraki tepki/oy/sabit/üye yazması bu hatayla düşer (bir kez).
+  ApiError? writeError;
+
+  /// Sabit şeridi (sunucu sırası).
+  List<ChatMessage> pinned = [];
+  ChatMembers memberList = ChatMembers(
+    items: const [
+      ChatMember(accountId: me, name: 'Ben', role: ChatMemberRole.admin),
+      ChatMember(
+        accountId: peer,
+        name: 'Kadir Özbek',
+        role: ChatMemberRole.member,
+      ),
+    ],
+  );
+
+  /// Paylaşılanlar sayfaları (imleç → sayfa; null ilk sayfa).
+  final sharedPages = <String?, ChatSharedPage>{};
+  final taskKeys = <String>[];
+  final List<ApiError> taskErrors = [];
+  final uploads = <(String, ChatUpload)>[];
+
+  /// Arama sonuçları (artan seq; `before` süzer).
+  List<ChatMessage> searchHits = [];
+
+  void _write(String call) {
+    calls.add(call);
+    final e = writeError;
+    if (e != null) {
+      writeError = null;
+      throw e;
+    }
+  }
 
   List<ChatMessage> _of(String id) => server[id] ?? const [];
 
@@ -178,8 +213,11 @@ class FakeChatRepository implements ChatRepository {
   Future<void> typing(String chatId) async => typings.add(chatId);
 
   @override
-  Future<ChatCandidates> candidates(ChatCandidatePurpose purpose) async {
-    calls.add('candidates ${purpose.name}');
+  Future<ChatCandidates> candidates(
+    ChatCandidatePurpose purpose, {
+    String? chatId,
+  }) async {
+    calls.add('candidates ${purpose.name}${chatId == null ? '' : ' $chatId'}');
     return ChatCandidates(
       items: const [ChatCandidate(accountId: peer, name: 'Kadir Özbek')],
     );
@@ -204,6 +242,166 @@ class FakeChatRepository implements ChatRepository {
   }
 
   @override
+  Future<void> setReaction(
+    String chatId,
+    String messageId,
+    ChatReaction kind,
+  ) async => _write('react $messageId ${kind.name}');
+
+  @override
+  Future<void> clearReaction(String chatId, String messageId) async =>
+      _write('unreact $messageId');
+
+  @override
+  Future<void> pin(String chatId, String messageId) async =>
+      _write('pin $messageId');
+
+  @override
+  Future<void> unpin(String chatId, String messageId) async =>
+      _write('unpin $messageId');
+
+  @override
+  Future<List<ChatMessage>> pins(String chatId) async {
+    calls.add('pins $chatId');
+    return pinned;
+  }
+
+  @override
+  Future<void> vote(String chatId, String messageId, Set<int> options) async =>
+      _write('vote $messageId ${(options.toList()..sort()).join(',')}');
+
+  @override
+  Future<void> closePoll(String chatId, String messageId) async =>
+      _write('close $messageId');
+
+  @override
+  Future<ChatMessage> sendAttachment(
+    String chatId,
+    String clientId,
+    ChatUpload file, {
+    String? replyTo,
+  }) async {
+    uploads.add((clientId, file));
+    _write('attach $chatId');
+    final list = server.putIfAbsent(chatId, () => []);
+    final seq = (list.lastOrNull?.seq ?? 0) + 1;
+    final m = ChatMessage(
+      id: 'm$seq',
+      clientId: clientId,
+      seq: seq,
+      senderId: me,
+      at: at(seq),
+      text: '',
+      attachments: [
+        ChatAttachment(id: 'a$seq', fileName: file.name, sizeBytes: 1),
+      ],
+    );
+    list.add(m);
+    return m;
+  }
+
+  @override
+  Future<Stream<List<int>>> downloadAttachment(String attachmentId) async {
+    calls.add('download $attachmentId');
+    return Stream.value(const [1, 2, 3]);
+  }
+
+  @override
+  Future<ChatMembers> members(String chatId) async {
+    calls.add('members $chatId');
+    return memberList;
+  }
+
+  @override
+  Future<void> addMembers(String chatId, List<String> accountIds) async =>
+      _write('add ${accountIds.join(',')}');
+
+  @override
+  Future<void> removeMember(String chatId, String accountId) async =>
+      _write('remove $accountId');
+
+  @override
+  Future<void> setAdmin(
+    String chatId,
+    String accountId, {
+    required bool admin,
+  }) async => _write('admin $accountId $admin');
+
+  @override
+  Future<Chat> rename(String chatId, String name) async {
+    _write('rename $name');
+    return chat(chatId, group: true, name: name);
+  }
+
+  @override
+  Future<void> deleteChat(String chatId) async => _write('deleteChat $chatId');
+
+  @override
+  Future<ChatSharedPage> shared(String chatId, {String? cursor}) async {
+    calls.add('shared ${cursor ?? '-'}');
+    return sharedPages[cursor] ?? ChatSharedPage(items: const []);
+  }
+
+  @override
+  Future<ChatRefCard> refCard(String refId) async {
+    calls.add('card $refId');
+    return ChatRefCard(
+      refId: refId,
+      kind: ChatRefKind.file,
+      available: true,
+      title: 'Rapor.pdf',
+      sizeBytes: 2400000,
+    );
+  }
+
+  @override
+  Future<Stream<List<int>>> downloadSharedFile(String refId) async {
+    calls.add('sharedFile $refId');
+    return Stream.value(const [1]);
+  }
+
+  @override
+  Future<ChatTaskCreated> createTask(
+    String chatId,
+    String messageId,
+    ChatTaskDraft draft, {
+    required String requestKey,
+  }) async {
+    taskKeys.add(requestKey);
+    if (taskErrors.isNotEmpty) throw taskErrors.removeAt(0);
+    final old = server[chatId]!.firstWhere((m) => m.id == messageId);
+    return (
+      workItemId: 'w1',
+      message: ChatMessage(
+        id: old.id,
+        clientId: old.clientId,
+        seq: old.seq,
+        senderId: old.senderId,
+        at: old.at,
+        text: old.text,
+        taskIds: const ['w1'],
+      ),
+    );
+  }
+
+  @override
+  Future<ChatHistoryPage> search(
+    String chatId,
+    String query, {
+    int? before,
+  }) async {
+    calls.add('search $query${before == null ? '' : ' before=$before'}');
+    final hits = [
+      for (final m in searchHits)
+        if (before == null || m.seq! < before) m,
+    ];
+    final page = hits.length <= chatSearchPageSize
+        ? hits
+        : hits.sublist(hits.length - chatSearchPageSize);
+    return ChatHistoryPage(messages: page);
+  }
+
+  @override
   Stream<ChatSignal> events() {
     connects++;
     if (connections.isNotEmpty) return connections.removeAt(0).stream;
@@ -218,6 +416,7 @@ class FakeChatRepository implements ChatRepository {
 ProviderContainer chatContainer(
   FakeChatRepository repo, {
   Duration Function(int)? delay,
+  List<Override> extra = const [],
 }) {
   final scope = ScopeController()..selectProgram('prog-1');
   final c = ProviderContainer(
@@ -231,6 +430,7 @@ ProviderContainer chatContainer(
       chatReconnectDelayProvider.overrideWithValue(
         delay ?? (_) => Duration.zero,
       ),
+      ...extra,
     ],
   );
   addTearDown(c.dispose);

@@ -182,7 +182,7 @@ class ApiRecordsRepository implements ArchiveRepository {
     required String department,
   }) async => getBinaryStream(
     _http,
-    '/v1/records/archive/folders/${Uri.encodeComponent(folderId)}/download-zip',
+    path: '/v1/records/archive/folders/${Uri.encodeComponent(folderId)}/download-zip',
     extras: withDepartment(
       RecordsClient.archiveFolderZipOpenapiExtras,
       department,
@@ -196,7 +196,7 @@ class ApiRecordsRepository implements ArchiveRepository {
   }) async {
     return getBinaryStream(
       _http,
-      RecordsDownloadTargets.selectionZip(fileIds),
+      path: RecordsDownloadTargets.selectionZip(fileIds),
       extras: withDepartment(
         RecordsClient.archiveSelectionZipOpenapiExtras,
         department,
@@ -209,7 +209,7 @@ class ApiRecordsRepository implements ArchiveRepository {
     required String department,
   }) async => getBinaryStream(
     _http,
-    '/v1/records/archive/period/download-zip',
+    path: '/v1/records/archive/period/download-zip',
     extras: withDepartment(
       RecordsClient.archiveFullZipOpenapiExtras,
       department,

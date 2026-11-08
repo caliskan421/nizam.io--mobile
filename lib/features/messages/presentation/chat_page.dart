@@ -10,6 +10,7 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/errors/error_text.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/layout/nz_pane.dart';
 import '../../../core/ui/motion/page_content_entrance.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/theme/nz_motion.dart';
@@ -17,15 +18,22 @@ import '../../../core/ui/theme/nz_surfaces.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
+import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../tasks/tasks.dart';
+import '../application/chat_actions_controller.dart';
 import '../application/chat_controller.dart';
+import '../application/chat_members_controller.dart';
 import '../application/chat_room_controller.dart';
 import '../application/messages_providers.dart';
 import '../domain/chat.dart';
 import '../domain/chat_room.dart';
 import 'chat/chat_composer.dart';
+import 'chat/chat_find_sheets.dart';
+import 'chat/chat_info_sheet.dart';
 import 'chat/chat_message_list.dart';
 import 'chat/chat_parts.dart';
+import 'chat/chat_poll_sheets.dart';
 import 'chat/chat_sheets.dart';
 import 'chat/chat_sync_scope.dart';
 
@@ -34,8 +42,9 @@ import 'chat/chat_sync_scope.dart';
 /// balonlar (gruplanmış köşe, ad, alıntı, ekler, anket, tepkiler), "alta in", yazma alanı
 /// (yanıt/düzenleme bağlamı). Basılı tutma işlem sayfasını, üst çubuk sohbet bilgisini açar.
 /// Gönderilen mesaj hemen "gönderiliyor" görünür; sunucu yanıtıyla ya da akıştan gelen kopyayla
-/// tek balon olarak yerleşir. Tepki, sabitleme, anket, ek, mesajdan görev ve grup üyeliği sonraki
-/// pakette ("yakında").
+/// tek balon olarak yerleşir. Tepki ve oy iyimser, sabit şeridi sunucudan; ek (dosya seçici) ve
+/// anket yazma alanının ek menüsünden; `@` bahsetme önerisi grupta üye listesinden; mesajdan
+/// görev tasks'ın yeni görev formuyla; sohbet bilgisi üyeleri, paylaşılanları ve aramayı açar.
 class ChatPage extends ConsumerStatefulWidget {
   const ChatPage({super.key, required this.id});
 
@@ -58,6 +67,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   final _flash = ValueNotifier<String?>(null);
   Timer? _flashTimer;
   var _lastDraft = '';
+
+  /// Yazma alanında seçilen bahsetmeler (gönderimde metinde kalanlar gider).
+  final _mentions = <MentionPick>[];
 
   /// Akıştaki sıra; görünmeyen mesaja atlamak için liste yazar.
   final _order = HashMap<String, int>();
@@ -104,7 +116,35 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   void _toast(String m) => NzToast.show(context, m);
 
-  void _soon() => _toast(context.l10n.uiMessagesActionSoon);
+  ChatActionsController get _acts =>
+      ref.read(chatActionsControllerProvider(widget.id).notifier);
+
+  /// Eylemi koşar; hata zarfı bildirim olarak gösterilir.
+  Future<void> _try(Future<void> Function() op) async {
+    try {
+      await op();
+    } on ApiError catch (e) {
+      if (mounted) _toast(errorText(context.l10n, e));
+    }
+  }
+
+  Future<void> _save(Future<String> Function() download, String name) =>
+      _try(() async {
+        await download();
+        if (mounted) _toast('${context.l10n.uiMessagesFileSaved} · $name');
+      });
+
+  /// Pencere dışındaki mesaja (sabit, arama sonucu) önce eskiye inilir, sonra kaydırılır.
+  Future<void> _reveal(ChatMessage m) async {
+    final seq = m.seq;
+    if (seq == null) return;
+    if (!await _room.reveal(m.id, seq)) {
+      if (mounted) _toast(context.l10n.uiMessagesNotInWindow);
+      return;
+    }
+    await WidgetsBinding.instance.endOfFrame;
+    if (mounted) await _jumpTo(m.id);
+  }
 
   void _toBottom() {
     if (!_scroll.hasClients) return;
@@ -167,10 +207,16 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       }
       return;
     }
+    final mentions = mentionsIn(text, _mentions);
+    _mentions.clear();
     _view.clearContext();
     _draft.clear();
     _toBottom();
-    final outcome = await _room.send(text, replyTo: view.reply);
+    final outcome = await _room.send(
+      text,
+      replyTo: view.reply,
+      mentions: mentions,
+    );
     if (!mounted) return;
     switch (outcome) {
       case ChatSendOutcome.sent || ChatSendOutcome.failed:
@@ -197,14 +243,18 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       canEdit: mine && m.poll == null && m.attachments.isEmpty,
       canDelete: mine || room.chat.canModerate,
       canRetry: m.failure != 'messaging.idempotency_key_reused',
+      canPin: room.chat.canPin,
+      // Mesajdan görev program rolüyle görünür (şirket yöneticisi ya da koordinatör; §10.9).
+      canToTask: m.poll == null && ref.read(canCreateTaskProvider),
+      canClosePoll: mine && m.poll != null && !m.poll!.isClosed(DateTime.now()),
     );
     if (!mounted) return;
     if (_flash.value == m.id) _flash.value = null;
     switch (a) {
       case null:
         return;
-      case ChatActReact():
-        _soon();
+      case ChatActReact(:final reaction):
+        unawaited(_try(() => _acts.react(m.id, reaction)));
       case ChatActSimple(:final action):
         switch (action) {
           case ChatSimpleAction.reply:
@@ -217,10 +267,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             _view.edit(m.id);
             _draft.text = m.text;
             _focus.requestFocus();
-          case ChatSimpleAction.pin ||
-              ChatSimpleAction.pollResults ||
-              ChatSimpleAction.toTask:
-            _soon();
+          case ChatSimpleAction.pin:
+            await _try(() => _acts.togglePin(m.id));
+          case ChatSimpleAction.pollResults:
+            await showPollResults(context, m);
+          case ChatSimpleAction.closePoll:
+            await _try(() => _acts.closePoll(m.id));
+          case ChatSimpleAction.toTask:
+            await _toTask(m);
           case ChatSimpleAction.delete:
             try {
               await _room.delete(m.id);
@@ -236,17 +290,101 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }
   }
 
+  /// Mesajdan görev (§10.9): mesajdan daha önce görev açıldıysa önce uyarılır; form başlığı
+  /// mesaj metniyle dolar (sunucu boş başlıkta ilk 100 karakteri alır).
+  Future<void> _toTask(ChatMessage m) async {
+    final l = context.l10n;
+    if (m.taskIds.isNotEmpty &&
+        !await NzDialog.confirm(
+          context,
+          title: l.uiMessagesTaskAgainTitle,
+          message: l.uiMessagesTaskAgain,
+          confirmLabel: l.uiMessagesContinue,
+        )) {
+      return;
+    }
+    if (!mounted) return;
+    await showNewTaskSheet(
+      context,
+      resetTarget: true,
+      title: String.fromCharCodes(m.text.trim().runes.take(100)),
+      chatMessage: ChatTaskSource(chatId: widget.id, messageId: m.id),
+    );
+  }
+
+  /// Yazma alanının ek menüsü: dosya (seçici; izinli tür ön denetimi) ya da anket (grupta).
+  Future<void> _attach(ChatRoom room) async {
+    final l = context.l10n;
+    final kind = await showAttachMenu(context, group: room.chat.group);
+    if (!mounted || kind == null) return;
+    switch (kind) {
+      case ChatAttachKind.poll:
+        final input = await showPollComposer(context);
+        if (input == null || !mounted) return;
+        _toBottom();
+        await _room.send(input.question, poll: input.poll);
+      case ChatAttachKind.file:
+        final picker = ref.read(uploadPickerProvider);
+        if (!picker.available) return _toast(l.uiMessagesPickerMissing);
+        final f = await picker.pick();
+        if (f == null || !mounted) return;
+        final type = f.contentType;
+        if (type == null) {
+          return _toast(errorText(l, ApiError('messaging.file_rejected')));
+        }
+        _toBottom();
+        await _try(
+          () => _room.sendAttachment(
+            ChatUpload(
+              path: f.path,
+              name: f.name,
+              sizeBytes: f.sizeBytes,
+              contentType: type,
+            ),
+          ),
+        );
+    }
+  }
+
   Future<void> _info(ChatRoom room) async {
     final l = context.l10n;
-    final a = await showChatInfo(context, room: room);
-    if (!mounted) return;
+    final a = await showChatInfo(context, chatId: widget.id);
+    if (!mounted || a == null) return;
+    final members = ref.read(chatMembersControllerProvider(widget.id).notifier);
     switch (a) {
-      case null:
-        return;
-      case ChatInfoSearch():
-        _toast(l.uiMessagesSearchChatSoon);
-      case ChatInfoLeave():
-        _soon();
+      case ChatInfoAction.search:
+        final hit = await showChatSearch(context, widget.id);
+        if (hit != null && mounted) await _reveal(hit);
+      case ChatInfoAction.shared:
+        await showChatShared(
+          context,
+          widget.id,
+          onFile: (refId, name) =>
+              unawaited(_save(() => _acts.downloadShared(refId, name), name)),
+        );
+      case ChatInfoAction.rename:
+        final name = await showRenameSheet(context, room.chat.name);
+        if (name != null) await _try(() => members.rename(name));
+      case ChatInfoAction.leave || ChatInfoAction.delete:
+        final leave = a == ChatInfoAction.leave;
+        final ok = await NzDialog.confirm(
+          context,
+          title: leave ? l.uiMessagesLeaveGroup : l.uiMessagesDeleteGroup,
+          message: leave
+              ? l.uiMessagesLeaveConfirm
+              : l.uiMessagesDeleteGroupConfirm,
+          confirmLabel: leave
+              ? l.uiMessagesLeaveGroup
+              : l.uiMessagesDeleteGroup,
+          tone: NzDialogTone.destructive,
+        );
+        if (!ok || !mounted) return;
+        var done = false;
+        await _try(() async {
+          await (leave ? members.leave() : members.deleteChat());
+          done = true;
+        });
+        if (done && mounted) NzPaneScope.back(context);
     }
   }
 
@@ -269,16 +407,19 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     } else {
       body = const NzLoader.page();
     }
+    // Grupta üye listesi ekran açıkken canlı (yazıyor adları, bahsetme önerisi); eylem
+    // denetleyicisi birleştirme süresince yaşar.
+    if (room.value?.chat.group ?? false) {
+      ref.listen(chatMembersControllerProvider(widget.id), (_, _) {});
+    }
+    ref.listen(chatActionsControllerProvider(widget.id), (_, _) {});
     return ChatSyncScope(child: NzPage.bare(body: body));
   }
 
   Widget _chatBody(ChatRoom room) {
     final l = context.l10n;
     final c = context.colors;
-    final pins = [
-      for (final m in room.messages)
-        if (m.pinned) m,
-    ]..sort((a, b) => b.pinnedAt!.compareTo(a.pinnedAt!));
+    final pins = room.pins;
     return Stack(
       children: [
         Positioned.fill(
@@ -295,7 +436,15 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               composerH: _composerH,
               onJump: (id) => unawaited(_jumpTo(id)),
               onActions: (room, m) => unawaited(_actions(room, m)),
-              onSoon: _soon,
+              onReact: (m, kind) =>
+                  unawaited(_try(() => _acts.react(m.id, kind))),
+              onVote: (m, i) => unawaited(_try(() => _acts.vote(m.id, i))),
+              onAttachment: (a) => unawaited(
+                _save(() => _acts.downloadAttachment(a), a.fileName),
+              ),
+              onSharedFile: (refId, name) => unawaited(
+                _save(() => _acts.downloadShared(refId, name), name),
+              ),
             ),
           ),
         ),
@@ -317,11 +466,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   pins: pins,
                   pinIndex: pin,
                   onInfo: () => unawaited(_info(room)),
-                  onSearch: () => _toast(l.uiMessagesSearchChatSoon),
+                  onSearch: () async {
+                    final hit = await showChatSearch(context, widget.id);
+                    if (hit != null && mounted) await _reveal(hit);
+                  },
                   onNextPin: () {
                     if (pins.isEmpty) return;
                     _view.nextPin();
-                    unawaited(_jumpTo(pins[(pin + 1) % pins.length].id));
+                    unawaited(_reveal(pins[(pin + 1) % pins.length]));
                   },
                 );
               },
@@ -369,7 +521,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               draft: _draft,
               focus: _focus,
               onSend: () => unawaited(_send()),
-              onAttach: _soon,
+              onAttach: () => unawaited(_attach(room)),
+              onMention: _mentions.add,
             ),
           ),
         ),

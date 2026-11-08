@@ -15,7 +15,9 @@ final class ChatRoom {
     this.typing,
     this.blocked = false,
     this.gone = false,
-  }) : messages = List.unmodifiable(messages);
+    List<ChatMessage> pins = const [],
+  }) : messages = List.unmodifiable(messages),
+       pins = List.unmodifiable(pins);
 
   final Chat chat;
   final List<ChatMessage> messages;
@@ -36,6 +38,9 @@ final class ChatRoom {
   /// Sohbete artık erişim yok (çıkarıldım ya da sohbet silindi).
   final bool gone;
 
+  /// Sabit şeridi (`listChatPins`; en yeni sabit başta). Pencere dışındaki mesajı da taşır.
+  final List<ChatMessage> pins;
+
   ChatMessage? message(String id) =>
       messages.where((m) => m.id == id).firstOrNull;
 
@@ -55,6 +60,7 @@ final class ChatRoom {
     String? Function()? typing,
     bool? blocked,
     bool? gone,
+    List<ChatMessage>? pins,
   }) => ChatRoom(
     chat: chat ?? this.chat,
     messages: messages ?? this.messages,
@@ -64,6 +70,13 @@ final class ChatRoom {
     typing: typing == null ? this.typing : typing(),
     blocked: blocked ?? this.blocked,
     gone: gone ?? this.gone,
+    pins: pins ?? this.pins,
+  );
+
+  /// Mesajı yerinde değiştirir (iyimser güncelleme); sabit şeridindeki kopyası da.
+  ChatRoom patch(String id, ChatMessage Function(ChatMessage) f) => copyWith(
+    messages: [for (final m in messages) m.id == id ? f(m) : m],
+    pins: [for (final m in pins) m.id == id ? f(m) : m],
   );
 }
 
@@ -155,4 +168,49 @@ String? unreadMarkerOf(List<ChatMessage> messages, int unread, String? me) {
   ];
   if (others.isEmpty) return null;
   return others[(others.length - unread).clamp(0, others.length - 1)].id;
+}
+
+/// Gönderilmekte olan kendi mesajımın yerel balonu (kimlik `local:<istemci kimliği>`): yanıt
+/// alıntısı penceredeki [quoted]'tan, anket ve ek taslaktan.
+ChatMessage pendingMessage(
+  OutgoingMessage out, {
+  required String me,
+  ChatMessage? quoted,
+  ChatUpload? upload,
+}) {
+  final poll = out.poll;
+  final replyTo = out.replyTo;
+  return ChatMessage(
+    id: 'local:${out.clientId}',
+    clientId: out.clientId,
+    senderId: me,
+    at: DateTime.now(),
+    text: out.text,
+    mentions: out.mentions,
+    poll: poll == null
+        ? null
+        : ChatPoll(
+            multi: poll.multi,
+            voters: 0,
+            options: [for (final o in poll.options) ChatPollOption(o, 0)],
+          ),
+    attachments: [
+      if (upload != null)
+        ChatAttachment(
+          id: 'local:${out.clientId}',
+          fileName: upload.name,
+          sizeBytes: upload.sizeBytes,
+          contentType: upload.contentType,
+        ),
+    ],
+    replyTo: replyTo == null
+        ? null
+        : ChatQuote(
+            messageId: replyTo,
+            senderId: quoted?.senderId,
+            senderName: quoted?.senderName,
+            text: quoted?.text,
+          ),
+    state: ChatSendState.sending,
+  );
 }

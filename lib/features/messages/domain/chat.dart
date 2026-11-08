@@ -1,5 +1,9 @@
 import 'package:meta/meta.dart';
 
+import 'chat_extras.dart';
+
+export 'chat_extras.dart';
+
 /// Mesaj tepkisi (sunucu `like|heart|check|star`; kişi başına bir tane).
 enum ChatReaction { like, heart, check, star }
 
@@ -34,56 +38,20 @@ final class ChatQuote {
   final bool deleted;
 }
 
-/// Mesaj eki (yalnız gösterim; ek gönderme/indirme sonraki pakette).
+/// Mesaj eki (`attachments`); indirme `downloadChatAttachment`.
 @immutable
 final class ChatAttachment {
   const ChatAttachment({
     required this.id,
     required this.fileName,
     required this.sizeBytes,
+    this.contentType = '',
   });
 
   final String id;
   final String fileName;
   final int sizeBytes;
-}
-
-/// Anket seçeneğinin sonucu.
-@immutable
-final class ChatPollOption {
-  const ChatPollOption(this.label, this.count, {this.voterIds = const {}});
-
-  final String label;
-  final int count;
-
-  /// Oy verenlerin hesap kimlikleri (sunucu `voters`; kendi oyum buradan çıkarılır).
-  final Set<String> voterIds;
-}
-
-/// Anket (soru mesaj gövdesidir). Yalnız gösterim: oy ve bitirme sonraki pakette.
-@immutable
-final class ChatPoll {
-  const ChatPoll({
-    required this.multi,
-    required this.options,
-    required this.voters,
-    this.closesAt,
-    this.closed = false,
-  });
-
-  final bool multi;
-  final List<ChatPollOption> options;
-
-  /// Oy veren tekil kişi sayısı.
-  final int voters;
-  final DateTime? closesAt;
-  final bool closed;
-
-  int get totalVotes => options.fold(0, (t, o) => t + o.count);
-
-  /// Seçeneğin yüzdesi (yuvarlanmış).
-  int percent(int i) =>
-      totalVotes == 0 ? 0 : (options[i].count / totalVotes * 100).round();
+  final String contentType;
 }
 
 /// Kendi mesajımın istemci durumu: gönderiliyor, gönderilemedi (sonuç bilinmiyor ya da
@@ -109,6 +77,9 @@ final class ChatMessage {
     this.pinnedAt,
     this.poll,
     this.attachments = const [],
+    this.mentions = const [],
+    this.refs = const [],
+    this.taskIds = const [],
     this.state = ChatSendState.sent,
     this.failure,
   });
@@ -131,6 +102,15 @@ final class ChatMessage {
   final DateTime? pinnedAt;
   final ChatPoll? poll;
   final List<ChatAttachment> attachments;
+
+  /// Gönderimdeki bahsetmeler (düzenleme değiştirmez; ad çözülmez).
+  final List<ChatMention> mentions;
+
+  /// Paylaşılan öğeler (kart tekil okumayla).
+  final List<ChatMessageRef> refs;
+
+  /// Bu mesajdan açılan görevler (doluysa ikinci görevden önce uyarılır).
+  final List<String> taskIds;
   final ChatSendState state;
 
   /// [ChatSendState.failed] iken hata kodu (sunucu ya da `client.*`).
@@ -139,25 +119,33 @@ final class ChatMessage {
   bool get pinned => pinnedAt != null;
   bool get onServer => seq != null;
 
-  ChatMessage copyWith({ChatSendState? state, String? Function()? failure}) =>
-      ChatMessage(
-        id: id,
-        clientId: clientId,
-        seq: seq,
-        senderId: senderId,
-        senderName: senderName,
-        at: at,
-        text: text,
-        edited: edited,
-        revision: revision,
-        replyTo: replyTo,
-        reactions: reactions,
-        pinnedAt: pinnedAt,
-        poll: poll,
-        attachments: attachments,
-        state: state ?? this.state,
-        failure: failure == null ? this.failure : failure(),
-      );
+  ChatMessage copyWith({
+    ChatSendState? state,
+    String? Function()? failure,
+    List<ChatReactionCount>? reactions,
+    DateTime? Function()? pinnedAt,
+    ChatPoll? poll,
+  }) => ChatMessage(
+    id: id,
+    clientId: clientId,
+    seq: seq,
+    senderId: senderId,
+    senderName: senderName,
+    at: at,
+    text: text,
+    edited: edited,
+    revision: revision,
+    replyTo: replyTo,
+    reactions: reactions ?? this.reactions,
+    pinnedAt: pinnedAt == null ? this.pinnedAt : pinnedAt(),
+    poll: poll ?? this.poll,
+    attachments: attachments,
+    mentions: mentions,
+    refs: refs,
+    taskIds: taskIds,
+    state: state ?? this.state,
+    failure: failure == null ? this.failure : failure(),
+  );
 }
 
 /// Listedeki son mesaj özeti (silinmişse [text] `null`, [deleted] `true`).
@@ -225,8 +213,15 @@ final class Chat {
 
   bool get isUnread => unread > 0 || mention;
 
-  /// Grupta yönetici: gruptaki her mesajı silebilir (§10.7 M-10).
+  /// Grupta yönetici: gruptaki her mesajı silebilir (§10.7 M-10), yönetici atar.
   bool get canModerate => group && role == ChatMemberRole.admin;
+
+  /// Grupta yönetici ya da kurucu: ad, üye ekleme/çıkarma, grubu silme, `@herkes` (K07, K28).
+  bool get canManage =>
+      group && (role == ChatMemberRole.admin || role == ChatMemberRole.founder);
+
+  /// Sabitleme: birebirde iki taraf, grupta yönetici ya da kurucu (M-12).
+  bool get canPin => !group || canManage;
 
   Chat copyWith({int? unread, bool? mention, ChatMemberRole? role}) => Chat(
     id: id,
@@ -292,11 +287,17 @@ final class OutgoingMessage {
     required this.clientId,
     required this.text,
     this.replyTo,
+    this.mentions = const [],
+    this.poll,
   });
 
   final String clientId;
   final String text;
   final String? replyTo;
+  final List<ChatMention> mentions;
+
+  /// Doluysa mesaj anket olarak açılır (soru = [text]).
+  final PollDraft? poll;
 }
 
 /// Aday listesinin amacı (`purpose`).
@@ -411,12 +412,83 @@ abstract interface class ChatRepository {
 
   Future<void> typing(String chatId);
 
-  Future<ChatCandidates> candidates(ChatCandidatePurpose purpose);
+  /// [chatId] ile `purpose=group`: o gruba eklenebilecekler.
+  Future<ChatCandidates> candidates(
+    ChatCandidatePurpose purpose, {
+    String? chatId,
+  });
 
   /// Birebir sohbeti açar ya da mevcut olanı döndürür.
   Future<Chat> openDirect(String accountId);
 
   Future<Chat> createGroup(GroupDraft draft, {required String requestKey});
+
+  // --- Tepki, sabit, anket (§10.10) ---
+
+  /// Kişi başına tek tepki; yenisi eskinin yerine geçer.
+  Future<void> setReaction(String chatId, String messageId, ChatReaction kind);
+
+  /// Tepkiyi kaldırır (yoksa da başarı).
+  Future<void> clearReaction(String chatId, String messageId);
+
+  Future<void> pin(String chatId, String messageId);
+
+  Future<void> unpin(String chatId, String messageId);
+
+  /// Sabit şeridi (`pinned_at` azalan; imleçsiz).
+  Future<List<ChatMessage>> pins(String chatId);
+
+  /// Oy kümesi önceki oyun yerine geçer; boş küme oyu geri çeker.
+  Future<void> vote(String chatId, String messageId, Set<int> options);
+
+  Future<void> closePoll(String chatId, String messageId);
+
+  // --- Ek (§10.10) ---
+
+  /// Tek dosyalık ek mesajı; tekrar AYNI [clientId] ve aynı dosyayla.
+  Future<ChatMessage> sendAttachment(
+    String chatId,
+    String clientId,
+    ChatUpload file, {
+    String? replyTo,
+  });
+
+  /// Ekin baytları (akış; belleğe toplanmaz).
+  Future<Stream<List<int>>> downloadAttachment(String attachmentId);
+
+  // --- Üyeler ve grup ayarları (§10.1) ---
+
+  Future<ChatMembers> members(String chatId);
+
+  Future<void> addMembers(String chatId, List<String> accountIds);
+
+  /// Üyeyi çıkarır; [accountId] kendim ise gruptan ayrılmadır.
+  Future<void> removeMember(String chatId, String accountId);
+
+  Future<void> setAdmin(String chatId, String accountId, {required bool admin});
+
+  Future<Chat> rename(String chatId, String name);
+
+  Future<void> deleteChat(String chatId);
+
+  // --- Paylaşılanlar, mesajdan görev, arama (§10.8–§10.10) ---
+
+  Future<ChatSharedPage> shared(String chatId, {String? cursor});
+
+  Future<ChatRefCard> refCard(String refId);
+
+  Future<Stream<List<int>>> downloadSharedFile(String refId);
+
+  /// [requestKey]: `Idempotency-Key` (aynı eylemin tekrarı aynı anahtar).
+  Future<ChatTaskCreated> createTask(
+    String chatId,
+    String messageId,
+    ChatTaskDraft draft, {
+    required String requestKey,
+  });
+
+  /// Sohbet içi arama (`q`): en yeniden eskiye sayfa; sonraki sayfa [before] ile.
+  Future<ChatHistoryPage> search(String chatId, String query, {int? before});
 
   /// Tek akış bağlantısı: açılınca [ChatStreamOpened], sonra olaylar; sunucu kapatınca biter,
   /// açılış ya da okuma hatasında `ApiError` fırlatır. Dinleyici bırakınca bağlantı kapanır.

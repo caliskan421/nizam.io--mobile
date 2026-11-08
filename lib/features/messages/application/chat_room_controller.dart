@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -8,6 +9,7 @@ import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../domain/chat.dart';
 import '../domain/chat_room.dart';
 import '../domain/chat_stream_policy.dart';
+import 'chat_members_controller.dart';
 import 'chats_controller.dart';
 import 'messages_providers.dart';
 
@@ -33,9 +35,10 @@ enum ChatSendOutcome {
 }
 
 /// Açık sohbet: bilgi + mesaj penceresi, gönderim/düzenleme/silme, okundu imleci ve akıştan
-/// gelen olayların uzlaştırılması (istemci akışları §10.2–§10.5). Olaylar en az 1 sn
-/// birleştirilip tek okumayla uygulanır; silme olayı okumasız uygulanır. Otomatik yeniden
-/// deneme yoktur.
+/// gelen olayların uzlaştırılması (istemci akışları §10.2–§10.5), ek gönderimi ve sabit şeridi
+/// (§10.10). Olaylar en az 1 sn birleştirilip tek okumayla uygulanır; silme olayı okumasız
+/// uygulanır. Tepki, sabit, oy ve anket bitirme `message.updated` yayar: yerelde olan mesaj
+/// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Otomatik yeniden deneme yoktur.
 @riverpod
 class ChatRoomController extends _$ChatRoomController {
   /// Geçmiş sayfa boyu.
@@ -48,7 +51,12 @@ class ChatRoomController extends _$ChatRoomController {
   Timer? _typingOff;
   var _dirtyAfter = false;
   var _dirtyInfo = false;
+  var _dirtyPins = false;
   final _dirtyIds = <String>{};
+
+  /// Gönderilmekte olan eklerin dosyası (tekrar AYNI istemci kimliği ve aynı dosyayla).
+  final _uploads = HashMap<String, ChatUpload>();
+  final _outgoing = HashMap<String, OutgoingMessage>();
   Future<void> _queue = Future<void>.value();
   var _readSeq = 0;
   DateTime? _lastTyping;
@@ -67,15 +75,23 @@ class ChatRoomController extends _$ChatRoomController {
     final inbox = ref
         .read(chatsControllerProvider.future)
         .then<ChatInbox?>((v) => v, onError: (Object _) => null);
+    // Sabit şeridi okunamazsa şerit boş açılır (sonraki olay ya da yeniden bağlanma tazeler).
+    final pins = _repo
+        .pins(id)
+        .then<List<ChatMessage>>(
+          (v) => v,
+          onError: (Object _) => const <ChatMessage>[],
+        );
     final r = await Future.wait<Object?>([
       _repo.getChat(id),
       _repo.listMessages(id, limit: pageSize),
       inbox,
+      pins,
     ], eagerError: true);
     final detail = r[0]! as Chat;
     final page = r[1]! as ChatHistoryPage;
     final row = (r[2] as ChatInbox?)?.chat(id);
-    Timer.run(() => unawaited(_markRead()));
+    Timer.run(() => ref.mounted ? unawaited(_markRead()) : null);
     return ChatRoom(
       chat: row == null
           ? detail
@@ -84,6 +100,7 @@ class ChatRoomController extends _$ChatRoomController {
       peerReadSeq: page.peerReadSeq,
       hasOlder: page.messages.length >= pageSize,
       unreadMarker: unreadMarkerOf(page.messages, row?.unread ?? 0, me),
+      pins: r[3]! as List<ChatMessage>,
     );
   }
 
@@ -132,10 +149,12 @@ class ChatRoomController extends _$ChatRoomController {
         _schedule();
       case ChatEvent(kind: ChatEventKind.messageUpdated, :final messageId):
         // Düzenleme `seq`'i değiştirmez: yerelde olan mesaj `around` ile yeniden okunur.
+        // Sabitleme de bu olayla gelir (pencere dışındaki mesaj dahil): şerit yeniden okunur.
         if (messageId != null && state.value?.message(messageId) != null) {
           _dirtyIds.add(messageId);
-          _schedule();
         }
+        _dirtyPins = true;
+        _schedule();
       case ChatEvent(
         kind: ChatEventKind.memberChanged || ChatEventKind.chatChanged,
       ):
@@ -152,15 +171,27 @@ class ChatRoomController extends _$ChatRoomController {
   Future<void> _applyDirty() async {
     final info = _dirtyInfo;
     final after = _dirtyAfter;
+    final pins = _dirtyPins;
     final ids = {..._dirtyIds};
-    _dirtyInfo = _dirtyAfter = false;
+    _dirtyInfo = _dirtyAfter = _dirtyPins = false;
     _dirtyIds.clear();
     if (info) await _refreshInfo();
     if (after) await _fetchNewer();
     for (final m in ids) {
       await _refreshAround(m);
     }
+    if (pins) await reloadPins();
     await _markRead();
+  }
+
+  /// Sabit şeridini sunucudan yeniden okur (hata yutulur: eski şerit kalır).
+  Future<void> reloadPins() async {
+    try {
+      final pins = await _repo.pins(id);
+      _update((r) => r.copyWith(pins: pins));
+    } on Object {
+      // Sonraki olay ya da yeniden bağlanma tazeler.
+    }
   }
 
   /// Yeniden bağlanma protokolü adım 3 (§10.5): sohbet bilgisi, yeni mesajlar (`after`) ve
@@ -172,6 +203,7 @@ class ChatRoomController extends _$ChatRoomController {
     final high = room.highSeq;
     await _refreshInfo();
     await _fetchNewer();
+    await reloadPins();
     if (low == null || high == null) return;
     var cursor = high + 1;
     for (var i = 0; i < maxPages; i++) {
@@ -272,13 +304,14 @@ class ChatRoomController extends _$ChatRoomController {
   void _typingFrom(String actor) {
     final room = state.value;
     if (room == null || actor == ref.read(chatMeProvider)) return;
+    // Grupta ad üye listesinden (§10.10), yoksa yüklü mesajlardan; çözülemeyen kişi gösterilmez.
     final name = room.chat.group
-        ? room.messages
-              .where((m) => m.senderId == actor && m.senderName != null)
-              .lastOrNull
-              ?.senderName
+        ? ref.read(chatMembersControllerProvider(id)).value?.name(actor) ??
+              room.messages
+                  .where((m) => m.senderId == actor && m.senderName != null)
+                  .lastOrNull
+                  ?.senderName
         : room.chat.name;
-    // Grupta adı yüklü mesajlardan çözülemeyen kişi gösterilmez (üye listesi sonraki pakette).
     if (name == null || name.isEmpty) return;
     _update((r) => r.copyWith(typing: () => name));
     _typingOff?.cancel();
@@ -314,6 +347,46 @@ class ChatRoomController extends _$ChatRoomController {
   /// Yeniden seçim (`S_chat.load`): okunmamış ayırıcısı kalkar; mesajlar kalır.
   void reopen() => _update((r) => r.copyWith(unreadMarker: () => null));
 
+  /// Mesajı sunucudan yeniden okur (`around`; sıradaki okumalarla birlikte, hata yutulur).
+  Future<void> refreshMessage(String messageId) =>
+      _enqueue(() => _refreshAround(messageId));
+
+  /// Sunucudan gelen güncel mesajı pencereye yerleştirir (mesajdan görev, eylem yanıtı).
+  void apply(ChatMessage m) =>
+      _update((r) => r.copyWith(messages: mergeMessages(r.messages, [m])));
+
+  /// Mesajı yerinde değiştirir (iyimser güncelleme ve geri alma).
+  void patch(String messageId, ChatMessage Function(ChatMessage) f) =>
+      _update((r) => r.patch(messageId, f));
+
+  /// Sohbet bilgisini değiştirir (ad değişimi); okunmamış sayısı korunur.
+  void setChat(Chat chat) => _update(
+    (r) => r.copyWith(
+      chat: chat.copyWith(unread: r.chat.unread, mention: r.chat.mention),
+    ),
+  );
+
+  /// Mesajı (sabit, arama sonucu) pencereye getirir: pencerede yoksa `before` sayfalarıyla
+  /// [seq]'e kadar eskiye inilir (en çok [maxPages]); bulunamazsa false.
+  Future<bool> reveal(String messageId, int seq) async {
+    await _enqueue(() async {
+      for (var i = 0; i < maxPages; i++) {
+        final room = state.value;
+        final low = room?.lowSeq;
+        if (room == null || room.message(messageId) != null) return;
+        if (low == null || low <= seq || !room.hasOlder) return;
+        final page = await _repo.listMessages(id, before: low, limit: pageSize);
+        _update(
+          (r) => r.copyWith(
+            messages: mergeMessages(r.messages, page.messages),
+            hasOlder: page.messages.length >= pageSize,
+          ),
+        );
+      }
+    });
+    return state.value?.message(messageId) != null;
+  }
+
   /// Daha eski mesajları (`before=<en küçük seq>`) pencerenin başına ekler.
   Future<void> loadOlder() => _enqueue(() async {
     final room = state.value;
@@ -335,29 +408,45 @@ class ChatRoomController extends _$ChatRoomController {
   });
 
   /// Yeni mesaj: istemci kimliği bir kez üretilir, balon "gönderiliyor" olarak hemen eklenir.
-  Future<ChatSendOutcome> send(String text, {String? replyTo}) {
+  /// [mentions] yapılandırılmış bahsetmeler (§10.8); [poll] doluysa mesaj ankettir (soru [text]).
+  Future<ChatSendOutcome> send(
+    String text, {
+    String? replyTo,
+    List<ChatMention> mentions = const [],
+    PollDraft? poll,
+  }) => _post(text: text, replyTo: replyTo, mentions: mentions, poll: poll);
+
+  /// Ek mesajı (tek dosya): gönderim kuralları [send] ile aynıdır (aynı kimlikle tekrar).
+  Future<ChatSendOutcome> sendAttachment(ChatUpload file, {String? replyTo}) =>
+      _post(text: '', replyTo: replyTo, upload: file);
+
+  Future<ChatSendOutcome> _post({
+    required String text,
+    String? replyTo,
+    List<ChatMention> mentions = const [],
+    PollDraft? poll,
+    ChatUpload? upload,
+  }) {
     final me = ref.read(chatMeProvider);
     final room = state.value;
     if (me == null || room == null) {
       throw ApiError(ClientErrorCode.notSignedIn);
     }
     final clientId = newRequestKey();
-    final quoted = replyTo == null ? null : room.message(replyTo);
-    final local = ChatMessage(
-      id: 'local:$clientId',
+    if (upload != null) _uploads[clientId] = upload;
+    final out = OutgoingMessage(
       clientId: clientId,
-      senderId: me,
-      at: DateTime.now(),
       text: text,
-      replyTo: replyTo == null
-          ? null
-          : ChatQuote(
-              messageId: replyTo,
-              senderId: quoted?.senderId,
-              senderName: quoted?.senderName,
-              text: quoted?.text,
-            ),
-      state: ChatSendState.sending,
+      replyTo: replyTo,
+      mentions: mentions,
+      poll: poll,
+    );
+    _outgoing[clientId] = out;
+    final local = pendingMessage(
+      out,
+      me: me,
+      quoted: replyTo == null ? null : room.message(replyTo),
+      upload: upload,
     );
     _update(
       (r) => r.copyWith(
@@ -379,14 +468,18 @@ class ChatRoomController extends _$ChatRoomController {
   }
 
   /// Gönderilemeyen mesajı listeden atar.
-  void discard(String clientId) => _update(
-    (r) => r.copyWith(
-      messages: [
-        for (final m in r.messages)
-          if (m.onServer || m.clientId != clientId) m,
-      ],
-    ),
-  );
+  void discard(String clientId) {
+    _uploads.remove(clientId);
+    _outgoing.remove(clientId);
+    _update(
+      (r) => r.copyWith(
+        messages: [
+          for (final m in r.messages)
+            if (m.onServer || m.clientId != clientId) m,
+        ],
+      ),
+    );
+  }
 
   ChatMessage? _pending(String clientId) => state.value?.messages
       .where((m) => !m.onServer && m.clientId == clientId)
@@ -404,16 +497,20 @@ class ChatRoomController extends _$ChatRoomController {
         ),
       );
 
+  /// Gönderim (tekrarda AYNI gövde: metin, yanıt, bahsetme, anket ya da aynı dosya).
   Future<ChatSendOutcome> _deliver(ChatMessage local) async {
+    final upload = _uploads[local.clientId];
     try {
-      final sent = await _repo.send(
-        id,
-        OutgoingMessage(
-          clientId: local.clientId,
-          text: local.text,
-          replyTo: local.replyTo?.messageId,
-        ),
-      );
+      final sent = upload != null
+          ? await _repo.sendAttachment(
+              id,
+              local.clientId,
+              upload,
+              replyTo: local.replyTo?.messageId,
+            )
+          : await _repo.send(id, _outgoing[local.clientId]!);
+      _uploads.remove(local.clientId);
+      _outgoing.remove(local.clientId);
       _update((r) => r.copyWith(messages: mergeMessages(r.messages, [sent])));
       return ChatSendOutcome.sent;
     } on ApiError catch (e) {
@@ -421,6 +518,11 @@ class ChatRoomController extends _$ChatRoomController {
         case 'messaging.message_deleted':
           discard(local.clientId);
           return ChatSendOutcome.deleted;
+        case 'messaging.file_too_large' || 'messaging.file_rejected'
+            when upload != null:
+          // Dosya kabul edilmez: tekrar anlamsız, balon kalkar ve hata ekrana iletilir.
+          discard(local.clientId);
+          rethrow;
         case 'messaging.idempotency_key_reused':
           _setPending(local.clientId, ChatSendState.failed, e.code);
           return ChatSendOutcome.rejected;
@@ -453,9 +555,7 @@ class ChatRoomController extends _$ChatRoomController {
         (r) => r.copyWith(messages: mergeMessages(r.messages, [updated])),
       );
     } on ApiError catch (e) {
-      if (e.code == 'messaging.edit_conflict') {
-        await _enqueue(() => _refreshAround(messageId));
-      }
+      if (e.code == 'messaging.edit_conflict') await refreshMessage(messageId);
       rethrow;
     }
   }

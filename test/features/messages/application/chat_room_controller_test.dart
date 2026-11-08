@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/features/messages/application/chat_members_controller.dart';
 import 'package:nizamio/features/messages/application/chat_room_controller.dart';
 import 'package:nizamio/features/messages/application/chats_controller.dart';
 import 'package:nizamio/features/messages/application/messages_providers.dart';
@@ -44,6 +45,7 @@ List<String> _ids(ProviderContainer c) => [
 ];
 
 void main() {
+  group('K5b', k5b);
   test(
     'açılış: bilgi + son sayfa; ayırıcı listedeki okunmamıştan; okundu imleci',
     () async {
@@ -286,4 +288,127 @@ void main() {
     expect(_room(c).lowSeq, 1);
     expect(_room(c).hasOlder, isFalse);
   });
+}
+
+void k5b() {
+  test(
+    'sabit şeridi açılışta; pencere dışı sabit olayı şeridi yeniden okur',
+    () async {
+      final repo = FakeChatRepository()
+        ..server['c1'] = [msg(1), msg(2)]
+        ..pinned = [msg(1)];
+      final c = chatContainer(repo)
+        ..listen(chatsControllerProvider, (_, _) {})
+        ..listen(chatRoomControllerProvider('c1'), (_, _) {});
+      await c.read(chatRoomControllerProvider('c1').future);
+      expect(_room(c).pins.single.id, 'm1');
+      repo.pinned = [];
+      c
+          .read(chatSignalBusProvider)
+          .add(
+            const ChatEvent(
+              kind: ChatEventKind.messageUpdated,
+              chatId: 'c1',
+              actorId: peer,
+              messageId: 'eski',
+            ),
+          );
+      await Future<void>.delayed(_coalesce);
+      await pumpEventQueue();
+      expect(repo.calls.where((x) => x == 'pins c1'), hasLength(2));
+      expect(repo.calls.where((x) => x.contains('around')), isEmpty);
+      expect(_room(c).pins, isEmpty);
+    },
+  );
+
+  test('bahsetme ve anket gönderimde; tekrar aynı gövdeyle', () async {
+    final (c, repo) = await _open(group: true);
+    repo.sendError = ApiError('client.timeout');
+    final poll = PollDraft(options: const ['A', 'B'], multi: true);
+    expect(
+      await _ctrl(c)
+          .send('Hangisi?', mentions: const [ChatMention.all()], poll: poll),
+      ChatSendOutcome.failed,
+    );
+    final failed = _room(c).messages.last;
+    expect(failed.poll!.options.map((o) => o.label), ['A', 'B']);
+    await _ctrl(c).retry(failed.clientId);
+    expect(repo.sent, hasLength(2));
+    expect(identical(repo.sent.first, repo.sent.last), isTrue);
+    expect(repo.sent.last.mentions, [const ChatMention.all()]);
+    expect(repo.sent.last.poll, same(poll));
+  });
+
+  test(
+    'ek: gönderiliyor balonu; tekrar aynı kimlik; reddedilen dosya kalkar',
+    () async {
+      final (c, repo) = await _open();
+      const file = ChatUpload(
+        path: '/tmp/r.pdf',
+        name: 'r.pdf',
+        sizeBytes: 10,
+        contentType: 'application/pdf',
+      );
+      repo.writeError = ApiError('client.timeout');
+      expect(await _ctrl(c).sendAttachment(file), ChatSendOutcome.failed);
+      final pending = _room(c).messages.last;
+      expect(pending.attachments.single.fileName, 'r.pdf');
+      expect(await _ctrl(c).retry(pending.clientId), ChatSendOutcome.sent);
+      expect(repo.uploads.map((u) => u.$1).toSet(), {pending.clientId});
+      expect(_room(c).messages.last.onServer, isTrue);
+      repo.writeError = ApiError('messaging.file_rejected', status: 422);
+      await expectLater(
+        _ctrl(c).sendAttachment(file),
+        throwsA(isA<ApiError>()),
+      );
+      expect(_room(c).messages.where((m) => !m.onServer), isEmpty);
+    },
+  );
+
+  test('reveal: pencere dışındaki mesaja kadar eskiye iner', () async {
+    final (c, repo) = await _open(
+      history: [for (var s = 1; s <= 120; s++) msg(s)],
+    );
+    expect(_room(c).lowSeq, 71);
+    expect(await _ctrl(c).reveal('m5', 5), isTrue);
+    expect(_room(c).message('m5'), isNotNull);
+    expect(
+      repo.calls,
+      containsAllInOrder(['list c1 before=71', 'list c1 before=21']),
+    );
+    expect(await _ctrl(c).reveal('yok', 0), isFalse);
+  });
+
+  test(
+    'grupta yazıyor adı üye listesinden; ad değişimi ve dışarıdan yerleşim',
+    () async {
+      final (c, repo) = await _open(group: true);
+      repo.memberList = ChatMembers(
+        items: const [
+          ChatMember(
+            accountId: 'acc-x',
+            name: 'Yeni Üye',
+            role: ChatMemberRole.member,
+          ),
+        ],
+      );
+      c.listen(chatMembersControllerProvider('c1'), (_, _) {});
+      await c.read(chatMembersControllerProvider('c1').future);
+      c
+          .read(chatSignalBusProvider)
+          .add(
+            const ChatEvent(
+              kind: ChatEventKind.typing,
+              chatId: 'c1',
+              actorId: 'acc-x',
+            ),
+          );
+      await pumpEventQueue();
+      expect(_room(c).typing, 'Yeni Üye');
+      _ctrl(c).setChat(chat('c1', group: true, name: 'Yeni ad'));
+      expect(_room(c).chat.name, 'Yeni ad');
+      _ctrl(c).apply(msg(4, text: 'güncel'));
+      expect(_room(c).message('m4')!.text, 'güncel');
+    },
+  );
 }

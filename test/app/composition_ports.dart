@@ -33,6 +33,7 @@ final portProviders = <String, ProviderBase<Object?>>{
   'taskWriteRepositoryProvider': taskWriteRepositoryProvider,
   'downloadSinkProvider': downloadSinkProvider,
   'meetingPlannerProvider': meetingPlannerProvider,
+  'chatTaskPlannerProvider': chatTaskPlannerProvider,
   'meetingsRepositoryProvider': meetingsRepositoryProvider,
   'coordinatorshipProfileRepositoryProvider':
       coordinatorshipProfileRepositoryProvider,

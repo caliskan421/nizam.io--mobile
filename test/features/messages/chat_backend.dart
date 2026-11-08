@@ -68,6 +68,9 @@ class ChatFixture {
       'Hidrofor için yeni tarih talebini gönderdim.',
     );
     _add('kadir', chatMe, 'Ayşe Yılmaz', 'Planı onayladım.');
+    messages['koord']!.first['refs'] = [
+      {'ref_id': 'ref-1', 'kind': 'file', 'target_id': 'f1'},
+    ];
   }
 
   /// Liste sırası (son etkinlik).
@@ -91,6 +94,12 @@ class ChatFixture {
 
   final messages = <String, List<Map<String, Object?>>>{};
   final reads = <String, String>{};
+
+  /// Eylem yazmaları (`METOT yol`): tepki, sabit, üye, grup ayarı.
+  final writes = <String>[];
+
+  /// `getChat` rolü (eylem görünürlüğü).
+  String role = 'member';
   var readAll = 0;
   var _seq = 0;
 
@@ -166,11 +175,27 @@ class ChatFixture {
     for (final e in _row(c).entries)
       if (!const {'unread_count', 'mentioned', 'last_message'}.contains(e.key))
         e.key: e.value,
-    'role': 'member',
+    'role': role,
   };
 
   /// Mesajlaşma isteğini yanıtlar; başka uç ise null.
   ResponseBody? handle(Seen r) {
+    if (r.path.startsWith('/v1/chat-refs/')) {
+      return jsonResponse(200, {
+        'ref_id': r.path.split('/').last,
+        'kind': 'file',
+        'target_id': 'f1',
+        'chat_id': 'koord',
+        'message_id': 'm1',
+        'available': true,
+        'file': {
+          'name': 'Rapor.pdf',
+          'content_type': 'application/pdf',
+          'size_bytes': 2400000,
+          'created_at': '2026-11-01T07:00:00Z',
+        },
+      });
+    }
     if (!r.path.startsWith('/v1/chats')) return null;
     final key = '${r.method} ${r.path}';
     switch (key) {
@@ -210,6 +235,7 @@ class ChatFixture {
         chats.insert(0, c);
         return jsonResponse(201, _detail(c));
     }
+    if (_actions(r) case final res?) return res;
     final m = RegExp(
       r'^/v1/chats/([^/]+)(?:/(messages|read|typing)(?:/([^/]+))?)?$',
     ).firstMatch(r.path);
@@ -226,7 +252,9 @@ class ChatFixture {
         final limit = int.tryParse(q['limit'] ?? '') ?? 50;
         int? n(String k) => int.tryParse(q[k] ?? '');
         Iterable<Map<String, Object?>> items = list;
-        if (n('after') case final a?) {
+        if (q['q'] case final text?) {
+          items = list.where((x) => (x['body']! as String).contains(text));
+        } else if (n('after') case final a?) {
           items = list.where((x) => (x['seq']! as int) > a).take(limit);
         } else if (n('around') case final a?) {
           items = list.where((x) => ((x['seq']! as int) - a).abs() <= 2);
@@ -255,6 +283,23 @@ class ChatFixture {
           clientId: body['client_message_id']! as String,
           replyTo: body['reply_to_message_id'] as String?,
         );
+        if (body['poll'] case final Map<String, Object?> poll) {
+          final options = poll['options']! as List<Object?>;
+          msg['poll'] = {
+            'multi': poll['multi'] ?? false,
+            'closes_at': null,
+            'closed_at': null,
+            'results': [
+              for (var i = 0; i < options.length; i++)
+                {
+                  'option_index': i,
+                  'label': options[i],
+                  'count': 0,
+                  'voters': <Object>[],
+                },
+            ],
+          };
+        }
         list.add(msg);
         return jsonResponse(201, msg);
       case ('PATCH', 'messages', final mid?):
@@ -282,6 +327,80 @@ class ChatFixture {
         return ResponseBody.fromString('', 204);
     }
     return errorBody(404, 'platform.not_found');
+  }
+}
+
+extension on ChatFixture {
+  /// Sabit şeridi, üyeler, tepki ve sabitleme (sunucu biçimli; yazmalar [writes]'a).
+  ResponseBody? _actions(Seen r) {
+    if (RegExp(r'^/v1/chats/[^/]+/refs$').hasMatch(r.path)) {
+      return jsonResponse(200, {
+        'items': [
+          {
+            'ref_id': 'ref-1',
+            'kind': 'file',
+            'target_id': 'f1',
+            'message_id': 'm1',
+            'sender_account_id': 'acc-my',
+            'created_at': '2026-11-01T07:00:00Z',
+          },
+        ],
+        'next_cursor': null,
+      });
+    }
+    if (r.method == 'PATCH' && RegExp(r'^/v1/chats/[^/]+$').hasMatch(r.path)) {
+      writes.add('PATCH ${r.path}');
+      final c = chats.firstWhere((x) => r.path.endsWith('/${x['chat_id']}'));
+      c['name'] = (r.body! as Map<String, Object?>)['name'];
+      return jsonResponse(200, _detail(c));
+    }
+    final m = RegExp(
+      r'^/v1/chats/([^/]+)/(pins|admins/[^/]+|members(?:/[^/]+)?|messages/([^/]+)/(reaction|pin))$',
+    ).firstMatch(r.path);
+    if (m == null) return null;
+    final id = m.group(1)!;
+    final list = messages[id] ?? const [];
+    switch ((r.method, m.group(2)!, m.group(4))) {
+      case ('GET', 'pins', null):
+        return jsonResponse(200, {
+          'items': [
+            for (final x in list)
+              if (x['pinned_at'] != null) x,
+          ],
+          'truncated': false,
+        });
+      case ('GET', 'members', null):
+        return jsonResponse(200, {
+          'items': [
+            for (final (acc, name, role) in [
+              (chatMe, 'Ayşe Yılmaz', 'admin'),
+              ('acc-rk', 'Reha Koçak', 'member'),
+            ])
+              {
+                'account_id': acc,
+                'full_name': name,
+                'role': role,
+                'founder': false,
+                'from_source': false,
+              },
+          ],
+          'truncated': false,
+        });
+    }
+    writes.add('${r.method} ${r.path}');
+    final msg = list.where((x) => x['message_id'] == m.group(3)).firstOrNull;
+    if (msg != null && m.group(4) == 'reaction') {
+      final kind = (r.body as Map<String, Object?>?)?['kind'];
+      msg['reactions'] = r.method == 'PUT'
+          ? [
+              {'kind': kind, 'count': 1, 'mine': true},
+            ]
+          : <Object>[];
+    }
+    if (msg != null && m.group(4) == 'pin') {
+      msg['pinned_at'] = r.method == 'PUT' ? '2026-11-09T09:00:00Z' : null;
+    }
+    return ResponseBody.fromString('', 204);
   }
 }
 

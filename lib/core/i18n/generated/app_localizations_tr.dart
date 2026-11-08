@@ -2700,10 +2700,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesSearchChat => 'Sohbette ara';
 
   @override
-  String get uiMessagesSearchChatSoon =>
-      'Sohbette arama sonraki adımda tasarlanacak';
-
-  @override
   String get uiMessagesPinned => 'Sabitlenen mesaj';
 
   @override
@@ -2806,9 +2802,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesLeaveGroup => 'Gruptan çık';
 
   @override
-  String get uiMessagesActionSoon => 'Bu işlem sonraki adımda tasarlanacak';
-
-  @override
   String get uiMessagesAllUsers => 'Tüm kullanıcılar';
 
   @override
@@ -2882,6 +2875,132 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMessagesMultiChoice => 'Çoklu seçim';
+
+  @override
+  String get uiMessagesAttachFile => 'Dosya';
+
+  @override
+  String get uiMessagesAttachPoll => 'Anket';
+
+  @override
+  String get uiMessagesPickerMissing => 'Dosya seçici bu kurulumda yok.';
+
+  @override
+  String get uiMessagesFileSaved => 'Dosya kaydedildi';
+
+  @override
+  String get uiMessagesPollNew => 'Anket oluştur';
+
+  @override
+  String get uiMessagesPollQuestion => 'Soru';
+
+  @override
+  String get uiMessagesPollOption => 'Seçenek';
+
+  @override
+  String get uiMessagesPollAddOption => 'Seçenek ekle';
+
+  @override
+  String get uiMessagesPollClose => 'Anketi bitir';
+
+  @override
+  String get uiMessagesPollClosed => 'Anket bitirildi';
+
+  @override
+  String get uiMessagesPollNoVotes => 'Henüz oy yok';
+
+  @override
+  String get uiMessagesMembers => 'Üyeler';
+
+  @override
+  String get uiMessagesAddMembers => 'Üye ekle';
+
+  @override
+  String get uiMessagesAdd => 'Ekle';
+
+  @override
+  String get uiMessagesRoleGroupAdmin => 'Yönetici';
+
+  @override
+  String get uiMessagesRoleFounder => 'Kurucu';
+
+  @override
+  String get uiMessagesFromSource => 'Kaynaktan';
+
+  @override
+  String get uiMessagesMakeAdmin => 'Yönetici yap';
+
+  @override
+  String get uiMessagesRevokeAdmin => 'Yöneticiliği al';
+
+  @override
+  String get uiMessagesRemoveMember => 'Gruptan çıkar';
+
+  @override
+  String get uiMessagesRename => 'Adı değiştir';
+
+  @override
+  String get uiMessagesSave => 'Kaydet';
+
+  @override
+  String get uiMessagesDeleteGroup => 'Grubu sil';
+
+  @override
+  String get uiMessagesDeleteGroupConfirm =>
+      'Grup ve mesajları herkes için silinir. Bu işlem geri alınamaz.';
+
+  @override
+  String get uiMessagesLeaveConfirm =>
+      'Gruptan ayrılırsan mesajları artık göremezsin.';
+
+  @override
+  String get uiMessagesShared => 'Paylaşılanlar';
+
+  @override
+  String get uiMessagesSharedEmpty => 'Henüz paylaşılan öğe yok.';
+
+  @override
+  String get uiMessagesMore => 'Daha fazla';
+
+  @override
+  String get uiMessagesRefGone => 'Artık yok';
+
+  @override
+  String get uiMessagesRefTask => 'Görev';
+
+  @override
+  String get uiMessagesRefDepartment => 'Koordinatörlük';
+
+  @override
+  String get uiMessagesRefFile => 'Dosya';
+
+  @override
+  String get uiMessagesTaskAgainTitle => 'Bu mesajdan görev açılmış';
+
+  @override
+  String get uiMessagesTaskAgain =>
+      'Aynı mesajdan yeni bir görev daha açılacak.';
+
+  @override
+  String get uiMessagesContinue => 'Devam et';
+
+  @override
+  String get uiMessagesMentionAll => 'herkes';
+
+  @override
+  String get uiMessagesMentionSuggestions => 'Bahsetme önerileri';
+
+  @override
+  String get uiMessagesSearchInChatHint => 'Mesaj metni';
+
+  @override
+  String get uiMessagesSearchEmpty => 'Eşleşen mesaj yok.';
+
+  @override
+  String get uiMessagesSearchMore => 'Daha eski sonuçlar';
+
+  @override
+  String get uiMessagesNotInWindow => 'Mesaj bulunamadı.';
 
   @override
   String get uiNotificationsTitle => 'Bildirimler';
@@ -4025,6 +4144,13 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiTasksNoteTaskDesc =>
       'Görev bu nottan açılır ve nota bağlanır. Atanan kişiye bildirim gider.';
+
+  @override
+  String get uiTasksMessageTaskTitle => 'Mesajı göreve dönüştür';
+
+  @override
+  String get uiTasksMessageTaskDesc =>
+      'Görevin açıklaması mesaj metnidir; görev mesaja bağlanır. Atanan kişiye bildirim gider.';
 
   @override
   String get uiTasksMtEditTitle => 'Toplantıyı düzenle';

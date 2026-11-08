@@ -5182,12 +5182,6 @@ abstract class AppLocalizations {
   /// **'Sohbette ara'**
   String get uiMessagesSearchChat;
 
-  /// ui.messages.search_chat_soon
-  ///
-  /// In tr, this message translates to:
-  /// **'Sohbette arama sonraki adımda tasarlanacak'**
-  String get uiMessagesSearchChatSoon;
-
   /// ui.messages.pinned
   ///
   /// In tr, this message translates to:
@@ -5392,12 +5386,6 @@ abstract class AppLocalizations {
   /// **'Gruptan çık'**
   String get uiMessagesLeaveGroup;
 
-  /// ui.messages.action_soon
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu işlem sonraki adımda tasarlanacak'**
-  String get uiMessagesActionSoon;
-
   /// ui.messages.all_users
   ///
   /// In tr, this message translates to:
@@ -5541,6 +5529,252 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Çoklu seçim'**
   String get uiMessagesMultiChoice;
+
+  /// ui.messages.attach_file
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya'**
+  String get uiMessagesAttachFile;
+
+  /// ui.messages.attach_poll
+  ///
+  /// In tr, this message translates to:
+  /// **'Anket'**
+  String get uiMessagesAttachPoll;
+
+  /// ui.messages.picker_missing
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya seçici bu kurulumda yok.'**
+  String get uiMessagesPickerMissing;
+
+  /// ui.messages.file_saved
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya kaydedildi'**
+  String get uiMessagesFileSaved;
+
+  /// ui.messages.poll_new
+  ///
+  /// In tr, this message translates to:
+  /// **'Anket oluştur'**
+  String get uiMessagesPollNew;
+
+  /// ui.messages.poll_question
+  ///
+  /// In tr, this message translates to:
+  /// **'Soru'**
+  String get uiMessagesPollQuestion;
+
+  /// ui.messages.poll_option
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçenek'**
+  String get uiMessagesPollOption;
+
+  /// ui.messages.poll_add_option
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçenek ekle'**
+  String get uiMessagesPollAddOption;
+
+  /// ui.messages.poll_close
+  ///
+  /// In tr, this message translates to:
+  /// **'Anketi bitir'**
+  String get uiMessagesPollClose;
+
+  /// ui.messages.poll_closed
+  ///
+  /// In tr, this message translates to:
+  /// **'Anket bitirildi'**
+  String get uiMessagesPollClosed;
+
+  /// ui.messages.poll_no_votes
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz oy yok'**
+  String get uiMessagesPollNoVotes;
+
+  /// ui.messages.members
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyeler'**
+  String get uiMessagesMembers;
+
+  /// ui.messages.add_members
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye ekle'**
+  String get uiMessagesAddMembers;
+
+  /// ui.messages.add
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekle'**
+  String get uiMessagesAdd;
+
+  /// ui.messages.role_group_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetici'**
+  String get uiMessagesRoleGroupAdmin;
+
+  /// ui.messages.role_founder
+  ///
+  /// In tr, this message translates to:
+  /// **'Kurucu'**
+  String get uiMessagesRoleFounder;
+
+  /// ui.messages.from_source
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaynaktan'**
+  String get uiMessagesFromSource;
+
+  /// ui.messages.make_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetici yap'**
+  String get uiMessagesMakeAdmin;
+
+  /// ui.messages.revoke_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Yöneticiliği al'**
+  String get uiMessagesRevokeAdmin;
+
+  /// ui.messages.remove_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Gruptan çıkar'**
+  String get uiMessagesRemoveMember;
+
+  /// ui.messages.rename
+  ///
+  /// In tr, this message translates to:
+  /// **'Adı değiştir'**
+  String get uiMessagesRename;
+
+  /// ui.messages.save
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydet'**
+  String get uiMessagesSave;
+
+  /// ui.messages.delete_group
+  ///
+  /// In tr, this message translates to:
+  /// **'Grubu sil'**
+  String get uiMessagesDeleteGroup;
+
+  /// ui.messages.delete_group_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Grup ve mesajları herkes için silinir. Bu işlem geri alınamaz.'**
+  String get uiMessagesDeleteGroupConfirm;
+
+  /// ui.messages.leave_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Gruptan ayrılırsan mesajları artık göremezsin.'**
+  String get uiMessagesLeaveConfirm;
+
+  /// ui.messages.shared
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşılanlar'**
+  String get uiMessagesShared;
+
+  /// ui.messages.shared_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz paylaşılan öğe yok.'**
+  String get uiMessagesSharedEmpty;
+
+  /// ui.messages.more
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha fazla'**
+  String get uiMessagesMore;
+
+  /// ui.messages.ref_gone
+  ///
+  /// In tr, this message translates to:
+  /// **'Artık yok'**
+  String get uiMessagesRefGone;
+
+  /// ui.messages.ref_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get uiMessagesRefTask;
+
+  /// ui.messages.ref_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük'**
+  String get uiMessagesRefDepartment;
+
+  /// ui.messages.ref_file
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya'**
+  String get uiMessagesRefFile;
+
+  /// ui.messages.task_again_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu mesajdan görev açılmış'**
+  String get uiMessagesTaskAgainTitle;
+
+  /// ui.messages.task_again
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı mesajdan yeni bir görev daha açılacak.'**
+  String get uiMessagesTaskAgain;
+
+  /// ui.messages.continue
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam et'**
+  String get uiMessagesContinue;
+
+  /// ui.messages.mention_all
+  ///
+  /// In tr, this message translates to:
+  /// **'herkes'**
+  String get uiMessagesMentionAll;
+
+  /// ui.messages.mention_suggestions
+  ///
+  /// In tr, this message translates to:
+  /// **'Bahsetme önerileri'**
+  String get uiMessagesMentionSuggestions;
+
+  /// ui.messages.search_in_chat_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj metni'**
+  String get uiMessagesSearchInChatHint;
+
+  /// ui.messages.search_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Eşleşen mesaj yok.'**
+  String get uiMessagesSearchEmpty;
+
+  /// ui.messages.search_more
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha eski sonuçlar'**
+  String get uiMessagesSearchMore;
+
+  /// ui.messages.not_in_window
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj bulunamadı.'**
+  String get uiMessagesNotInWindow;
 
   /// ui.notifications.title
   ///
@@ -7749,6 +7983,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Görev bu nottan açılır ve nota bağlanır. Atanan kişiye bildirim gider.'**
   String get uiTasksNoteTaskDesc;
+
+  /// ui.tasks.message_task_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesajı göreve dönüştür'**
+  String get uiTasksMessageTaskTitle;
+
+  /// ui.tasks.message_task_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevin açıklaması mesaj metnidir; görev mesaja bağlanır. Atanan kişiye bildirim gider.'**
+  String get uiTasksMessageTaskDesc;
 
   /// ui.tasks.mt_edit_title
   ///

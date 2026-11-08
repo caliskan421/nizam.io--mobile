@@ -168,6 +168,30 @@ void main() {
         expect(r.failed, isTrue);
       },
     );
+    test(
+      'kaçış denemeleri kod sayılır: const yapıcı + assert, late final, getter',
+      () {
+        final escapes = {
+          'core/ui/widgets/nz_c.dart':
+              'class X {\n  const X(int n) : assert(n > 0);\n}\n',
+          'core/ui/widgets/nz_d.dart':
+              'abstract final class D {\n'
+              '  static const int a = 1;\n'
+              '  static late final int x = f();\n'
+              '}\n',
+          'core/ui/widgets/nz_e.dart':
+              'abstract final class E {\n'
+              '  static IconData get x => Icons.add;\n'
+              '}\n',
+          'core/ui/widgets/nz_f.dart': 'class F {\n  const F();\n}\n',
+        };
+        final r = eval({
+          'lib/core/ui/widgets/a.dart': lines(10, 10),
+        }, sources: escapes);
+        expect(r.groups['widgets']!.uncovered, unorderedEquals(escapes.keys));
+        expect(r.failed, isTrue);
+      },
+    );
     test('eşiksiz ve üretilmiş görünmeyen dosya sorun değil', () {
       final r = eval(
         {},

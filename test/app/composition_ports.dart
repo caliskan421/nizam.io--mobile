@@ -8,6 +8,7 @@ import 'package:nizamio/features/coordinatorships/coordinatorships.dart';
 import 'package:nizamio/features/identity/identity.dart';
 import 'package:nizamio/features/meetings/meetings.dart';
 import 'package:nizamio/features/messages/application/messages_providers.dart';
+import 'package:nizamio/features/notifications/application/notifications_providers.dart';
 import 'package:nizamio/features/scope/scope.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
@@ -42,4 +43,5 @@ final portProviders = <String, ProviderBase<Object?>>{
   'archiveRepositoryProvider': archiveRepositoryProvider,
   'calendarRepositoryProvider': calendarRepositoryProvider,
   'chatRepositoryProvider': chatRepositoryProvider,
+  'notificationRepositoryProvider': notificationRepositoryProvider,
 };

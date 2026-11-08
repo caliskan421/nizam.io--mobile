@@ -93,22 +93,6 @@ extension HomeTexts on AppLocalizations {
     };
   }
 
-  /// Zil etiketi: "Bildirimler · 3 tarih talebi ve 3 onay seni bekliyor" (yalnız biri varsa o
-  /// parça); bekleyen yoksa "Bildirimler".
-  String notificationsLabel(List<PendingItem> pending) {
-    int n(PendingKind k) => pending.where((p) => p.kind == k).length;
-    final parts = [
-      if (n(PendingKind.dateChange) case final d when d > 0)
-        '$d $uiHomeNotifyDateRequests',
-      if (n(PendingKind.approval) case final a when a > 0)
-        '$a $uiHomeNotifyApprovals',
-    ];
-    return parts.isEmpty
-        ? uiHomeNotifications
-        : '$uiHomeNotifications · ${parts.join(' $uiHomeNotifyAnd ')} '
-              '$uiHomeNotifyTail';
-  }
-
   /// Çekmecedeki sezon kartının alt satırı: "2026 sezonu" (yıl yoksa kapsam değiştirme).
   String seasonCaption(int? year, String fallback) =>
       year == null ? fallback : '$year $uiHomeSeasonTail';

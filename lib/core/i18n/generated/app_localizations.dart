@@ -4042,12 +4042,6 @@ abstract class AppLocalizations {
   /// **'Daralt'**
   String get uiHomeCollapse;
 
-  /// ui.home.notifications
-  ///
-  /// In tr, this message translates to:
-  /// **'Bildirimler'**
-  String get uiHomeNotifications;
-
   /// ui.home.waiting_tail
   ///
   /// In tr, this message translates to:
@@ -4221,30 +4215,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'gün'**
   String get uiHomeShiftDaysTail;
-
-  /// ui.home.notify_date_requests
-  ///
-  /// In tr, this message translates to:
-  /// **'tarih talebi'**
-  String get uiHomeNotifyDateRequests;
-
-  /// ui.home.notify_approvals
-  ///
-  /// In tr, this message translates to:
-  /// **'onay'**
-  String get uiHomeNotifyApprovals;
-
-  /// ui.home.notify_and
-  ///
-  /// In tr, this message translates to:
-  /// **'ve'**
-  String get uiHomeNotifyAnd;
-
-  /// ui.home.notify_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'seni bekliyor'**
-  String get uiHomeNotifyTail;
 
   /// ui.home.season_tail
   ///
@@ -5913,6 +5883,138 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kişi seç'**
   String get uiMessagesNewChatHint;
+
+  /// ui.notifications.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirimler'**
+  String get uiNotificationsTitle;
+
+  /// ui.notifications.unread_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'okunmamış'**
+  String get uiNotificationsUnreadTail;
+
+  /// ui.notifications.unread_badge
+  ///
+  /// In tr, this message translates to:
+  /// **'Okunmadı'**
+  String get uiNotificationsUnreadBadge;
+
+  /// ui.notifications.mark_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü okundu yap'**
+  String get uiNotificationsMarkAll;
+
+  /// ui.notifications.marked_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Bütün bildirimler okundu'**
+  String get uiNotificationsMarkedAll;
+
+  /// ui.notifications.more
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha fazla göster'**
+  String get uiNotificationsMore;
+
+  /// ui.notifications.empty_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirim yok'**
+  String get uiNotificationsEmptyTitle;
+
+  /// ui.notifications.empty_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev, toplantı ve koordinatörlük gelişmeleri burada görünür.'**
+  String get uiNotificationsEmptyMessage;
+
+  /// ui.notifications.type_work_item_created
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni görev oluşturuldu'**
+  String get uiNotificationsTypeWorkItemCreated;
+
+  /// ui.notifications.type_work_item_transitioned
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevin durumu değişti'**
+  String get uiNotificationsTypeWorkItemTransitioned;
+
+  /// ui.notifications.type_work_item_assignment_changed
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevin atamaları değişti'**
+  String get uiNotificationsTypeWorkItemAssignmentChanged;
+
+  /// ui.notifications.type_work_item_date_changed
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevin tarihleri değişti'**
+  String get uiNotificationsTypeWorkItemDateChanged;
+
+  /// ui.notifications.type_work_date_change_requested
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih değişikliği talep edildi'**
+  String get uiNotificationsTypeWorkDateChangeRequested;
+
+  /// ui.notifications.type_work_date_change_reviewed
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talebi yanıtlandı'**
+  String get uiNotificationsTypeWorkDateChangeReviewed;
+
+  /// ui.notifications.type_collaboration_message_sent
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni mesaj'**
+  String get uiNotificationsTypeCollaborationMessageSent;
+
+  /// ui.notifications.type_collaboration_meeting_created
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni toplantı'**
+  String get uiNotificationsTypeCollaborationMeetingCreated;
+
+  /// ui.notifications.type_collaboration_meeting_updated
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantıya ekip üyeleri eklendi'**
+  String get uiNotificationsTypeCollaborationMeetingUpdated;
+
+  /// ui.notifications.type_membership_assigned
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlüğe üye eklendi'**
+  String get uiNotificationsTypeMembershipAssigned;
+
+  /// ui.notifications.type_membership_removed
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlükten üye çıkarıldı'**
+  String get uiNotificationsTypeMembershipRemoved;
+
+  /// ui.notifications.type_membership_role_changed
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlükte rol değişti'**
+  String get uiNotificationsTypeMembershipRoleChanged;
+
+  /// ui.notifications.type_program_transfer_completed
+  ///
+  /// In tr, this message translates to:
+  /// **'Program aktarımı tamamlandı'**
+  String get uiNotificationsTypeProgramTransferCompleted;
+
+  /// ui.notifications.type_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni bildirim'**
+  String get uiNotificationsTypeUnknown;
 
   /// ui.router.tab_home
   ///

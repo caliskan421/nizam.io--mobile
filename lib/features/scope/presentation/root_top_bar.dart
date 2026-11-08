@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,16 +7,15 @@ import '../../../core/providers.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
-import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
+import '../../notifications/notifications.dart';
 import '../application/current_program_controller.dart';
-import '../application/home_dashboard_controller.dart';
-import 'home/home_texts.dart';
 
 /// Kök sayfaların (Ana sayfa, Görevler, Koordinatörlükler, Arşiv, Mesajlar) ortak üst çubuğu
 /// (prototip kök `header`): ürün işareti ve adı, altında seçili program (S2), bildirim zili
-/// (bekleyen iş varsa nokta) ve uygulama menüsünü açan cam daire. Sliver'dır.
+/// (okunmamış bildirim varsa nokta; dokununca bildirim listesi) ve uygulama menüsünü açan cam
+/// daire. Sliver'dır.
 class RootTopBar extends ConsumerWidget {
   const RootTopBar({super.key});
 
@@ -34,7 +35,7 @@ class RootTopBar extends ConsumerWidget {
           icon: NzIcons.bell,
           semanticLabel: bell.label,
           dot: bell.dot ? context.colors.danger : null,
-          onPressed: () => showNotificationsSoon(context),
+          onPressed: () => unawaited(showNotifications(context)),
         ),
         NzIconButton.glass(
           icon: NzIcons.menu,
@@ -80,26 +81,4 @@ class RootProgramLine extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// Zile dokunuş (bildirim listesi henüz yok); kök üst çubuk ve tablet rayı aynı bildirimi
-/// gösterir.
-void showNotificationsSoon(BuildContext context) {
-  final l = context.l10n;
-  NzToast.show(context, l.soon(l.uiHomeNotifications));
-}
-
-/// Bildirim zilinin okuyucu etiketi ("Bildirimler · 3 tarih talebi ve 3 onay…") ve bekleyen
-/// iş noktası; kök üst çubuk ve tablet rayı aynı kaynağı okur.
-({String label, bool dot}) watchNotificationBell(
-  BuildContext context,
-  WidgetRef ref,
-) {
-  final pending = ref.watch(
-    homeDashboardControllerProvider.select((d) => d.value?.pending ?? const []),
-  );
-  return (
-    label: context.l10n.notificationsLabel(pending),
-    dot: pending.isNotEmpty,
-  );
 }

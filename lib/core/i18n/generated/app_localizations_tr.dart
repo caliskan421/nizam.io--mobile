@@ -2113,9 +2113,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeCollapse => 'Daralt';
 
   @override
-  String get uiHomeNotifications => 'Bildirimler';
-
-  @override
   String get uiHomeWaitingTail => 'iş seni bekliyor';
 
   @override
@@ -2201,18 +2198,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiHomeShiftDaysTail => 'gün';
-
-  @override
-  String get uiHomeNotifyDateRequests => 'tarih talebi';
-
-  @override
-  String get uiHomeNotifyApprovals => 'onay';
-
-  @override
-  String get uiHomeNotifyAnd => 've';
-
-  @override
-  String get uiHomeNotifyTail => 'seni bekliyor';
 
   @override
   String get uiHomeSeasonTail => 'sezonu';
@@ -3066,6 +3051,83 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMessagesNewChatHint => 'Kişi seç';
+
+  @override
+  String get uiNotificationsTitle => 'Bildirimler';
+
+  @override
+  String get uiNotificationsUnreadTail => 'okunmamış';
+
+  @override
+  String get uiNotificationsUnreadBadge => 'Okunmadı';
+
+  @override
+  String get uiNotificationsMarkAll => 'Tümünü okundu yap';
+
+  @override
+  String get uiNotificationsMarkedAll => 'Bütün bildirimler okundu';
+
+  @override
+  String get uiNotificationsMore => 'Daha fazla göster';
+
+  @override
+  String get uiNotificationsEmptyTitle => 'Bildirim yok';
+
+  @override
+  String get uiNotificationsEmptyMessage =>
+      'Görev, toplantı ve koordinatörlük gelişmeleri burada görünür.';
+
+  @override
+  String get uiNotificationsTypeWorkItemCreated => 'Yeni görev oluşturuldu';
+
+  @override
+  String get uiNotificationsTypeWorkItemTransitioned =>
+      'Görevin durumu değişti';
+
+  @override
+  String get uiNotificationsTypeWorkItemAssignmentChanged =>
+      'Görevin atamaları değişti';
+
+  @override
+  String get uiNotificationsTypeWorkItemDateChanged =>
+      'Görevin tarihleri değişti';
+
+  @override
+  String get uiNotificationsTypeWorkDateChangeRequested =>
+      'Tarih değişikliği talep edildi';
+
+  @override
+  String get uiNotificationsTypeWorkDateChangeReviewed =>
+      'Tarih talebi yanıtlandı';
+
+  @override
+  String get uiNotificationsTypeCollaborationMessageSent => 'Yeni mesaj';
+
+  @override
+  String get uiNotificationsTypeCollaborationMeetingCreated => 'Yeni toplantı';
+
+  @override
+  String get uiNotificationsTypeCollaborationMeetingUpdated =>
+      'Toplantıya ekip üyeleri eklendi';
+
+  @override
+  String get uiNotificationsTypeMembershipAssigned =>
+      'Koordinatörlüğe üye eklendi';
+
+  @override
+  String get uiNotificationsTypeMembershipRemoved =>
+      'Koordinatörlükten üye çıkarıldı';
+
+  @override
+  String get uiNotificationsTypeMembershipRoleChanged =>
+      'Koordinatörlükte rol değişti';
+
+  @override
+  String get uiNotificationsTypeProgramTransferCompleted =>
+      'Program aktarımı tamamlandı';
+
+  @override
+  String get uiNotificationsTypeUnknown => 'Yeni bildirim';
 
   @override
   String get uiRouterTabHome => 'Ana sayfa';

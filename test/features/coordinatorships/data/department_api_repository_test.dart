@@ -213,7 +213,6 @@ void main() {
       expect(lead.membershipId, 'm1');
       expect(lead.role, DepartmentRole.coordinator);
       expect(lead.status, MemberStatus.active);
-      expect(lead.unit, '');
       expect(member.lead, isFalse);
       expect(member.role, DepartmentRole.member);
       expect(member.status, MemberStatus.deleted);

@@ -3,8 +3,7 @@ import 'package:meta/meta.dart';
 import '../../../core/domain/turkish_collation.dart';
 import '../../scope/scope.dart' show DepartmentRole;
 import '../../tasks/tasks.dart';
-import 'coordinatorship_profile.dart';
-import 'department.dart' show MemberStatus;
+import 'department.dart' show Department, MemberStatus;
 
 /// Koordinatörlük listesinin sıralama ölçütü (prototip kısayol menüsü: ad / gecikme /
 /// ilerleme).
@@ -111,16 +110,15 @@ final class AttentionItem {
   final int overdueDays;
 }
 
-/// Ekip satırı (koordinatör ya da üye) ve bağlı olduğu birim. Sunucuda departman üye
-/// listesinin (`GET /v1/departments/{id}/members`, `RosterMember`) satırıdır: [name] ↔
-/// `full_name`, [lead] ↔ `role == koordinator`; [accountId], [membershipId], [role] ve
-/// [status] yalnız sunucudan eşlenen satırda doludur (örnek veride `null`).
+/// Ekip satırı (koordinatör ya da üye). Sunucuda departman üye listesinin
+/// (`GET /v1/departments/{id}/members`, `RosterMember`) satırıdır: [name] ↔ `full_name`,
+/// [lead] ↔ `role == koordinator`; [accountId], [membershipId], [role] ve [status] yalnız
+/// üye listesinden eşlenen satırda doludur (katalogdan türetilen ayrıntı satırında `null`).
 @immutable
 final class TeamMember {
   const TeamMember({
     required this.name,
     required this.lead,
-    this.unit = '',
     this.accountId,
     this.membershipId,
     this.role,
@@ -129,9 +127,6 @@ final class TeamMember {
 
   final String name;
 
-  /// Alt birim adı (yoksa üst birim). Sunucuda yok — alt birim kavramı backend'de
-  /// bulunmaz; sunucudan eşlenen satırda boş dizgedir (entegrasyonda karar).
-  final String unit;
   final bool lead;
 
   final String? accountId;
@@ -140,96 +135,51 @@ final class TeamMember {
   final MemberStatus? status;
 }
 
-/// Son etkinlik satırı (yapanın adı çözülmüş).
-@immutable
-final class FeedItem {
-  const FeedItem({
-    required this.who,
-    required this.action,
-    required this.target,
-    required this.at,
-  });
-
-  final String who;
-  final String action;
-  final String target;
-  final DateTime at;
-}
-
-/// Koordinatörlük ayrıntısı: katalog özeti + ek bilgiler + türetilmiş listeler.
+/// Koordinatörlük ayrıntısı: katalog özeti + departman kaydı + türetilmiş listeler.
 @immutable
 final class CoordinatorshipDetail {
   const CoordinatorshipDetail({
     required this.stats,
-    required this.profile,
     required this.attention,
     required this.leads,
     required this.members,
-    required this.feed,
-    required this.seasonRatio,
     required this.others,
+    this.department,
   });
 
   final CoordinatorshipStats stats;
-  final CoordinatorshipProfile profile;
+
+  /// Sunucunun departman kaydı (tür, açıklama). Yalnız şirket yöneticisi okuyabilir; diğer
+  /// rollerde ya da kayıt listede yoksa null (ekranda tür gösterilmez).
+  final Department? department;
 
   /// Geciken görevler, en çok gecikenden.
   final List<AttentionItem> attention;
   final List<TeamMember> leads;
   final List<TeamMember> members;
-  final List<FeedItem> feed;
-
-  /// Tüm görevlerde tamamlanma oranı (sezon ortalaması).
-  final double seasonRatio;
 
   /// Kısayol menüsü için bütün koordinatörlükler (ada göre).
   final List<CoordinatorshipStats> others;
 
   int get people => leads.length + members.length;
 
-  /// [code] için ayrıntı; katalogda ya da ek bilgilerde yoksa null.
+  /// [code] (`department_id`) için ayrıntı; katalogda yoksa null. [departments] departman
+  /// kayıtlarıdır (yönetici dışında boş).
   static CoordinatorshipDetail? from(
     TaskCatalog catalog,
-    List<CoordinatorshipProfile> profiles,
+    List<Department> departments,
     String code,
   ) {
     final ref = catalog.coordinatorship(code);
     if (ref == null) return null;
-    // Örnek ek bilgi yalnız kimliği tutan kayda uyar; sunucu kaydında boş profil.
-    final profile =
-        profiles.where((p) => p.code == code).firstOrNull ??
-        emptyCoordinatorshipProfile(code);
-    final computed = _stats(catalog, ref);
-    final report = profile.reported;
-    final stats = report == null
-        ? computed
-        : CoordinatorshipStats(
-            code: computed.code,
-            name: computed.name,
-            shortCode: computed.shortCode,
-            done: report.done,
-            total: report.total,
-            late: report.late,
-            leads: computed.leads,
-            members: computed.members,
-          );
-    String unitOf(String? personId, int index) {
-      final own = personId == null
-          ? null
-          : profile.units.where((u) => u.leadId == personId).firstOrNull;
-      if (own != null) return own.name;
-      if (profile.units.isEmpty) return profile.parent;
-      return profile.units[index % profile.units.length].name;
-    }
-
+    final stats = _stats(catalog, ref);
     final overdue = [
       for (final t in catalog.tasksOf(code))
         if (t.isOverdue) t,
     ]..sort((a, b) => b.overdueDays.compareTo(a.overdueDays));
-    final all = catalog.tasks;
     return CoordinatorshipDetail(
       stats: stats,
-      profile: profile,
+      department: departments.where((d) => d.id == code).firstOrNull,
       attention: [
         for (final t in overdue)
           AttentionItem(
@@ -245,43 +195,11 @@ final class CoordinatorshipDetail {
           ),
       ],
       leads: [
-        for (final p in stats.leads)
-          TeamMember(
-            name: p.name,
-            unit:
-                profile.units
-                    .where((u) => u.leadId == p.id)
-                    .firstOrNull
-                    ?.name ??
-                profile.parent,
-            lead: true,
-          ),
+        for (final p in stats.leads) TeamMember(name: p.name, lead: true),
       ],
       members: [
-        for (final (i, p) in stats.members.indexed)
-          TeamMember(name: p.name, unit: unitOf(p.id, i), lead: false),
-        for (final (i, n) in profile.extraMembers.indexed)
-          TeamMember(
-            name: n,
-            unit: unitOf(null, i + stats.members.length),
-            lead: false,
-          ),
+        for (final p in stats.members) TeamMember(name: p.name, lead: false),
       ],
-      feed: [
-        for (final e in profile.events)
-          FeedItem(
-            who: catalog.person(e.actorId)?.name ?? e.actorId,
-            action: e.action,
-            target: e.target,
-            at: e.at,
-          ),
-      ],
-      seasonRatio:
-          report?.seasonRatio ??
-          (all.isEmpty
-              ? 0
-              : all.where((t) => t.status == TaskStatus.done).length /
-                    all.length),
       others: sortCoordinatorships(
         coordinatorshipStats(catalog),
         CoordinatorshipSort.name,

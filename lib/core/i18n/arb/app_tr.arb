@@ -1749,10 +1749,6 @@
   "@uiCoordFlyAllList": {
     "description": "ui.coord.fly_all_list"
   },
-  "uiCoordSubUnitsTail": "alt birim",
-  "@uiCoordSubUnitsTail": {
-    "description": "ui.coord.sub_units_tail"
-  },
   "uiCoordPeopleTail": "kişi",
   "@uiCoordPeopleTail": {
     "description": "ui.coord.people_tail"
@@ -1768,6 +1764,14 @@
   "uiCoordMessage": "Mesaj",
   "@uiCoordMessage": {
     "description": "ui.coord.message"
+  },
+  "uiCoordDeptKindCoordinatorship": "Koordinatörlük",
+  "@uiCoordDeptKindCoordinatorship": {
+    "description": "ui.coord.dept_kind_coordinatorship"
+  },
+  "uiCoordDeptKindWorkingGroup": "Çalışma grubu",
+  "@uiCoordDeptKindWorkingGroup": {
+    "description": "ui.coord.dept_kind_working_group"
   },
   "uiCoordTabsLabel": "Koordinatörlük bölümleri",
   "@uiCoordTabsLabel": {
@@ -1804,18 +1808,6 @@
   "uiCoordKpiDone": "tamamlanma",
   "@uiCoordKpiDone": {
     "description": "ui.coord.kpi_done"
-  },
-  "uiCoordPctNoteOf": "görevden",
-  "@uiCoordPctNoteOf": {
-    "description": "ui.coord.pct_note_of"
-  },
-  "uiCoordPctNoteDone": "tamamlandı",
-  "@uiCoordPctNoteDone": {
-    "description": "ui.coord.pct_note_done"
-  },
-  "uiCoordSeasonAverage": "sezon ortalaması",
-  "@uiCoordSeasonAverage": {
-    "description": "ui.coord.season_average"
   },
   "uiCoordAttention": "dikkat gerektirenler",
   "@uiCoordAttention": {
@@ -2252,14 +2244,6 @@
   "uiCoordAllTeam": "Tüm ekip",
   "@uiCoordAllTeam": {
     "description": "ui.coord.all_team"
-  },
-  "uiCoordActivity": "Son hareketler",
-  "@uiCoordActivity": {
-    "description": "ui.coord.activity"
-  },
-  "uiCoordNoActivity": "Henüz hareket yok.",
-  "@uiCoordNoActivity": {
-    "description": "ui.coord.no_activity"
   },
   "uiFeedbackLoading": "Yükleniyor",
   "@uiFeedbackLoading": {

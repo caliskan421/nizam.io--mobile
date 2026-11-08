@@ -8,20 +8,23 @@ part of 'coordinatorship_profiles_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Koordinatörlük ek bilgileri (üst birim, alt birimler, açıklama, son etkinlik).
+/// Departman kayıtları (tür, açıklama). Yalnız ayrıntı ekranı izler ve yalnız şirket
+/// yöneticisinde (`coordinatorshipDetail`); liste ekranı istek atmaz.
 
 @ProviderFor(CoordinatorshipProfilesController)
 final coordinatorshipProfilesControllerProvider =
     CoordinatorshipProfilesControllerProvider._();
 
-/// Koordinatörlük ek bilgileri (üst birim, alt birimler, açıklama, son etkinlik).
+/// Departman kayıtları (tür, açıklama). Yalnız ayrıntı ekranı izler ve yalnız şirket
+/// yöneticisinde (`coordinatorshipDetail`); liste ekranı istek atmaz.
 final class CoordinatorshipProfilesControllerProvider
     extends
         $AsyncNotifierProvider<
           CoordinatorshipProfilesController,
-          List<CoordinatorshipProfile>
+          List<Department>
         > {
-  /// Koordinatörlük ek bilgileri (üst birim, alt birimler, açıklama, son etkinlik).
+  /// Departman kayıtları (tür, açıklama). Yalnız ayrıntı ekranı izler ve yalnız şirket
+  /// yöneticisinde (`coordinatorshipDetail`); liste ekranı istek atmaz.
   CoordinatorshipProfilesControllerProvider._()
     : super(
         from: null,
@@ -44,30 +47,24 @@ final class CoordinatorshipProfilesControllerProvider
 }
 
 String _$coordinatorshipProfilesControllerHash() =>
-    r'a72750d0bc117cdbf3e2b73970a3412352682c43';
+    r'6e212577fafd6a1e1d4851d88c5f0269ed90f2b7';
 
-/// Koordinatörlük ek bilgileri (üst birim, alt birimler, açıklama, son etkinlik).
+/// Departman kayıtları (tür, açıklama). Yalnız ayrıntı ekranı izler ve yalnız şirket
+/// yöneticisinde (`coordinatorshipDetail`); liste ekranı istek atmaz.
 
 abstract class _$CoordinatorshipProfilesController
-    extends $AsyncNotifier<List<CoordinatorshipProfile>> {
-  FutureOr<List<CoordinatorshipProfile>> build();
+    extends $AsyncNotifier<List<Department>> {
+  FutureOr<List<Department>> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
     final ref =
-        this.ref
-            as $Ref<
-              AsyncValue<List<CoordinatorshipProfile>>,
-              List<CoordinatorshipProfile>
-            >;
+        this.ref as $Ref<AsyncValue<List<Department>>, List<Department>>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<
-                AsyncValue<List<CoordinatorshipProfile>>,
-                List<CoordinatorshipProfile>
-              >,
-              AsyncValue<List<CoordinatorshipProfile>>,
+              AnyNotifier<AsyncValue<List<Department>>, List<Department>>,
+              AsyncValue<List<Department>>,
               Object?,
               Object?
             >;

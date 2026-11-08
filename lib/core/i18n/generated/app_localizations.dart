@@ -2716,12 +2716,6 @@ abstract class AppLocalizations {
   /// **'Tüm liste'**
   String get uiCoordFlyAllList;
 
-  /// ui.coord.sub_units_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'alt birim'**
-  String get uiCoordSubUnitsTail;
-
   /// ui.coord.people_tail
   ///
   /// In tr, this message translates to:
@@ -2745,6 +2739,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Mesaj'**
   String get uiCoordMessage;
+
+  /// ui.coord.dept_kind_coordinatorship
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük'**
+  String get uiCoordDeptKindCoordinatorship;
+
+  /// ui.coord.dept_kind_working_group
+  ///
+  /// In tr, this message translates to:
+  /// **'Çalışma grubu'**
+  String get uiCoordDeptKindWorkingGroup;
 
   /// ui.coord.tabs_label
   ///
@@ -2799,24 +2805,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'tamamlanma'**
   String get uiCoordKpiDone;
-
-  /// ui.coord.pct_note_of
-  ///
-  /// In tr, this message translates to:
-  /// **'görevden'**
-  String get uiCoordPctNoteOf;
-
-  /// ui.coord.pct_note_done
-  ///
-  /// In tr, this message translates to:
-  /// **'tamamlandı'**
-  String get uiCoordPctNoteDone;
-
-  /// ui.coord.season_average
-  ///
-  /// In tr, this message translates to:
-  /// **'sezon ortalaması'**
-  String get uiCoordSeasonAverage;
 
   /// ui.coord.attention
   ///
@@ -3471,18 +3459,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Tüm ekip'**
   String get uiCoordAllTeam;
-
-  /// ui.coord.activity
-  ///
-  /// In tr, this message translates to:
-  /// **'Son hareketler'**
-  String get uiCoordActivity;
-
-  /// ui.coord.no_activity
-  ///
-  /// In tr, this message translates to:
-  /// **'Henüz hareket yok.'**
-  String get uiCoordNoActivity;
 
   /// ui.feedback.loading
   ///

@@ -8,15 +8,15 @@ part of 'coordinatorships_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// PORT: koordinatörlük ek bilgilerinin kaynağı (`coordinatorships_module.dart`'ta bağlanır;
-/// bugün geliştirme örneği).
+/// PORT: koordinatörlük departman kaydının (tür, açıklama) kaynağı
+/// (`coordinatorships_module.dart`'ta bağlanır; sunucu).
 
 @ProviderFor(coordinatorshipProfileRepository)
 final coordinatorshipProfileRepositoryProvider =
     CoordinatorshipProfileRepositoryProvider._();
 
-/// PORT: koordinatörlük ek bilgilerinin kaynağı (`coordinatorships_module.dart`'ta bağlanır;
-/// bugün geliştirme örneği).
+/// PORT: koordinatörlük departman kaydının (tür, açıklama) kaynağı
+/// (`coordinatorships_module.dart`'ta bağlanır; sunucu).
 
 final class CoordinatorshipProfileRepositoryProvider
     extends
@@ -26,8 +26,8 @@ final class CoordinatorshipProfileRepositoryProvider
           CoordinatorshipProfileRepository
         >
     with $Provider<CoordinatorshipProfileRepository> {
-  /// PORT: koordinatörlük ek bilgilerinin kaynağı (`coordinatorships_module.dart`'ta bağlanır;
-  /// bugün geliştirme örneği).
+  /// PORT: koordinatörlük departman kaydının (tür, açıklama) kaynağı
+  /// (`coordinatorships_module.dart`'ta bağlanır; sunucu).
   CoordinatorshipProfileRepositoryProvider._()
     : super(
         from: null,

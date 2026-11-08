@@ -1446,9 +1446,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordFlyAllList => 'Tüm liste';
 
   @override
-  String get uiCoordSubUnitsTail => 'alt birim';
-
-  @override
   String get uiCoordPeopleTail => 'kişi';
 
   @override
@@ -1459,6 +1456,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordMessage => 'Mesaj';
+
+  @override
+  String get uiCoordDeptKindCoordinatorship => 'Koordinatörlük';
+
+  @override
+  String get uiCoordDeptKindWorkingGroup => 'Çalışma grubu';
 
   @override
   String get uiCoordTabsLabel => 'Koordinatörlük bölümleri';
@@ -1486,15 +1489,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordKpiDone => 'tamamlanma';
-
-  @override
-  String get uiCoordPctNoteOf => 'görevden';
-
-  @override
-  String get uiCoordPctNoteDone => 'tamamlandı';
-
-  @override
-  String get uiCoordSeasonAverage => 'sezon ortalaması';
 
   @override
   String get uiCoordAttention => 'dikkat gerektirenler';
@@ -1824,12 +1818,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordAllTeam => 'Tüm ekip';
-
-  @override
-  String get uiCoordActivity => 'Son hareketler';
-
-  @override
-  String get uiCoordNoActivity => 'Henüz hareket yok.';
 
   @override
   String get uiFeedbackLoading => 'Yükleniyor';

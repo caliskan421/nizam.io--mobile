@@ -21,11 +21,12 @@
     "ui.coord.fly_add": "Koordinatörlük ekle",
     "ui.coord.toast_add_form": "Koordinatörlük formu açılır",
     "ui.coord.fly_all_list": "Tüm liste",
-    "ui.coord.sub_units_tail": "alt birim",
     "ui.coord.people_tail": "kişi",
     "ui.coord.message_team": "Ekibe mesaj",
     "ui.coord.assign_task": "Görev ata",
     "ui.coord.message": "Mesaj",
+    "ui.coord.dept_kind_coordinatorship": "Koordinatörlük",
+    "ui.coord.dept_kind_working_group": "Çalışma grubu",
     "ui.coord.tabs_label": "Koordinatörlük bölümleri",
     "ui.coord.tab_general": "Genel",
     "ui.coord.tab_units": "Birimler",
@@ -35,9 +36,6 @@
     "ui.coord.kpi_open": "açık görev",
     "ui.coord.kpi_late": "geciken",
     "ui.coord.kpi_done": "tamamlanma",
-    "ui.coord.pct_note_of": "görevden",
-    "ui.coord.pct_note_done": "tamamlandı",
-    "ui.coord.season_average": "sezon ortalaması",
     "ui.coord.attention": "dikkat gerektirenler",
     "ui.coord.all_tasks": "Tüm görevler",
     "ui.coord.days_late_tail": "gün gecikti",
@@ -146,8 +144,6 @@
     "ui.coord.on_time": "zamanında",
     "ui.coord.finished_tail": "görev bitirdi",
     "ui.coord.no_load": "Bu birimde atanmış görev yok.",
-    "ui.coord.all_team": "Tüm ekip",
-    "ui.coord.activity": "Son hareketler",
-    "ui.coord.no_activity": "Henüz hareket yok."
+    "ui.coord.all_team": "Tüm ekip"
   }
 }

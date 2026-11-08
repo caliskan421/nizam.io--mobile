@@ -5,7 +5,7 @@ import 'package:get_it/get_it.dart';
 import '../../core/scope/scope_controller.dart';
 import 'application/coordinatorships_providers.dart';
 import 'data/coordinatorship_activity_api_repository.dart';
-import 'data/sample/sample_coordinatorship_profile_repository.dart';
+import 'data/coordinatorship_profile_api_repository.dart';
 import 'domain/coordinatorship_board.dart';
 import 'domain/coordinatorship_profile.dart';
 
@@ -17,9 +17,9 @@ void registerCoordinatorshipsModule(
   required Dio? Function() apiDio,
 }) {
   locator
-    // GEÇİCİ: koordinatörlük ek bilgileri backend'de hazır olana kadar geliştirme örneği.
+    // Departman kaydı (tür, açıklama): sunucu, yalnız şirket yöneticisinde okunur.
     ..registerLazySingleton<CoordinatorshipProfileRepository>(
-      SampleCoordinatorshipProfileRepository.new,
+      () => ApiCoordinatorshipProfileRepository(apiDio),
     )
     // Toplantı ve arşiv: sunucu (seçili program).
     ..registerLazySingleton<CoordinatorshipActivityRepository>(

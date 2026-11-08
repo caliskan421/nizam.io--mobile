@@ -1,6 +1,7 @@
 // ChatPage (sunucu biçimli fikstürle): açılışta okunmamış ayırıcısı ve okundu imleci, gönderim
 // (`client_message_id`, tek balon), gönderilemeyen mesajın aynı kimlikle tekrarı, düzenleme
-// çakışmasının görünür olması, silme, "yakında" eylemleri, taşma ve yazarken yeniden kurulum.
+// çakışmasının görünür olması, silme, tepki ve sabitleme, grup bilgisi (üyeler, ayrılma), taşma
+// ve yazarken yeniden kurulum.
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart' as widgets show debugOnRebuildDirtyWidget;
 import 'package:flutter_test/flutter_test.dart';
@@ -21,13 +22,14 @@ Future<(Harness, ChatBackend)> _open(
   WidgetTester tester, {
   String id = 'koord',
   bool dark = false,
+  ChatBackend? server,
 }) async {
   tester.view.devicePixelRatio = 1;
   if (tester.view.physicalSize.width > 500) {
     tester.view.physicalSize = const Size(390, 844);
   }
   addTearDown(tester.view.reset);
-  final backend = ChatBackend();
+  final backend = server ?? ChatBackend();
   final h = await real(tester, () => pilotHarness(backend, signedIn: true));
   h.read(scopeControllerProvider).selectProgram('prog-1');
   await pumpScreen(tester, h, ChatPage(id: id), dark: dark);
@@ -114,11 +116,89 @@ void main() {
     expect(_bubble('güncel.'), findsNothing);
   });
 
-  testWidgets('sonraki paket eylemleri "yakında"', (tester) async {
+  testWidgets('tepki ve sabitleme: sunucuya gider, şerit sunucudan', (
+    tester,
+  ) async {
+    final (_, backend) = await _open(tester, id: 'kadir');
+    await _longPress(tester, 'Planı onayladım');
+    await _tap(tester, find.bySemanticsLabel(_l.uiMessagesReactHeart).last);
+    await tester.pump(const Duration(milliseconds: 500));
+    await settle(tester);
+    expect(backend.chats.writes, ['PUT /v1/chats/kadir/messages/m6/reaction']);
+    await _longPress(tester, 'Planı onayladım');
+    await _tap(tester, find.text(_l.uiMessagesPin));
+    expect(backend.chats.writes.last, 'PUT /v1/chats/kadir/messages/m6/pin');
+    expect(find.text(_l.uiMessagesPinned), findsOneWidget);
+  });
+
+  testWidgets('grup bilgisi: üyeler listeden; gruptan ayrılma onaylı', (
+    tester,
+  ) async {
+    final (_, backend) = await _open(tester);
+    await _tap(tester, find.bySemanticsLabel(RegExp(_l.uiMessagesGroupInfo)));
+    expect(find.text('${_l.uiMessagesMembers} (2)'), findsOneWidget);
+    await _tap(tester, find.text(_l.uiMessagesLeaveGroup));
+    await _tap(tester, find.text(_l.uiMessagesLeaveGroup).last);
+    expect(backend.chats.writes, ['DELETE /v1/chats/koord/members/$chatMe']);
+  });
+
+  testWidgets('arama: sonuç sayfası, sonuca gidilir; paylaşılan kart', (
+    tester,
+  ) async {
     await _open(tester);
-    await _longPress(tester, 'trafo onayı');
-    await _tap(tester, find.text(_l.uiMessagesToTask));
-    expect(find.text(_l.uiMessagesActionSoon), findsOneWidget);
+    expect(find.text('Rapor.pdf'), findsOneWidget, reason: 'balondaki kart');
+    await _tap(tester, find.bySemanticsLabel(_l.uiMessagesSearchChat).first);
+    await tester.enterText(find.byType(TextField).last, 'haftalık');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await settle(tester);
+    await _tap(tester, find.textContaining('haftalık raporu').last);
+    expect(_bubble('haftalık raporu'), findsOneWidget);
+    await _tap(tester, find.bySemanticsLabel(RegExp(_l.uiMessagesGroupInfo)));
+    await _tap(tester, find.text(_l.uiMessagesShared));
+    expect(find.text('Rapor.pdf'), findsWidgets);
+  });
+
+  testWidgets('anket: ek menüsünden oluşturulur; sonuçlar sayfası', (
+    tester,
+  ) async {
+    final (_, backend) = await _open(tester);
+    await _tap(tester, find.bySemanticsLabel(_l.uiMessagesAttach).last);
+    await _tap(tester, find.text(_l.uiMessagesAttachPoll));
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(fields.evaluate().length - 3), 'Hangisi?');
+    await tester.enterText(
+      fields.at(fields.evaluate().length - 2),
+      'Pazartesi',
+    );
+    await tester.enterText(fields.last, 'Salı');
+    await settle(tester);
+    await _tap(tester, find.text(_l.uiMessagesPollAddOption));
+    await _tap(tester, find.text(_l.uiMessagesSend).last);
+    final sent = backend.chats.messages['koord']!.last;
+    expect(sent['body'], 'Hangisi?');
+    expect((sent['poll']! as Map<String, Object?>)['results'], hasLength(2));
+    await _longPress(tester, 'Hangisi?');
+    await _tap(tester, find.text(_l.uiMessagesPollResults));
+    expect(find.text(_l.uiMessagesPollNoVotes), findsWidgets);
+  });
+
+  testWidgets('grup yöneticisi: ad, üye ekleme ve yöneticilik', (tester) async {
+    final backend0 = ChatBackend()..chats.role = 'admin';
+    final (_, backend) = await _open(tester, server: backend0);
+    await _tap(tester, find.bySemanticsLabel(RegExp(_l.uiMessagesGroupInfo)));
+    await _tap(tester, find.text(_l.uiMessagesRename));
+    await tester.enterText(find.byType(TextField).last, 'Koordinasyon');
+    await settle(tester);
+    await _tap(tester, find.text(_l.uiMessagesSave));
+    expect(backend.chats.writes, ['PATCH /v1/chats/koord']);
+    await _tap(tester, find.bySemanticsLabel(RegExp(_l.uiMessagesGroupInfo)));
+    await _tap(tester, find.bySemanticsLabel(_l.uiMessagesAddMembers));
+    await _tap(tester, find.text('Reha Koçak').last);
+    await _tap(tester, find.text(_l.uiMessagesAdd));
+    expect(backend.chats.writes.last, 'POST /v1/chats/koord/members');
+    await _tap(tester, find.bySemanticsLabel('Reha Koçak').last);
+    await _tap(tester, find.text(_l.uiMessagesMakeAdmin));
+    expect(backend.chats.writes.last, 'PUT /v1/chats/koord/admins/acc-rk');
   });
 
   testWidgets('yazarken balonlar yeniden kurulmaz', (tester) async {

@@ -269,6 +269,56 @@ final class MeetingPlannerProvider
 
 String _$meetingPlannerHash() => r'aad57cfc5c031795fe4b62aca040e00aa964c892';
 
+/// PORT: mesajdan görev ("mesajdan görev" kipindeki yeni görev formu). Gerçekleştirme messages
+/// feature'ındadır; bileşim kökünde bağlanır.
+
+@ProviderFor(chatTaskPlanner)
+final chatTaskPlannerProvider = ChatTaskPlannerProvider._();
+
+/// PORT: mesajdan görev ("mesajdan görev" kipindeki yeni görev formu). Gerçekleştirme messages
+/// feature'ındadır; bileşim kökünde bağlanır.
+
+final class ChatTaskPlannerProvider
+    extends
+        $FunctionalProvider<ChatTaskPlanner, ChatTaskPlanner, ChatTaskPlanner>
+    with $Provider<ChatTaskPlanner> {
+  /// PORT: mesajdan görev ("mesajdan görev" kipindeki yeni görev formu). Gerçekleştirme messages
+  /// feature'ındadır; bileşim kökünde bağlanır.
+  ChatTaskPlannerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chatTaskPlannerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatTaskPlannerHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChatTaskPlanner> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ChatTaskPlanner create(Ref ref) {
+    return chatTaskPlanner(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChatTaskPlanner value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChatTaskPlanner>(value),
+    );
+  }
+}
+
+String _$chatTaskPlannerHash() => r'cccfe08f9cafdcdf2e3ba2b3aef0e7e187077c1a';
+
 /// PORT: sistem dosya seçicisi (`tasks_module.dart`'ta `FileUploadPicker` bağlanır).
 /// Bağlanmamışsa (testler) "yok" gerçekleştirmesi: form dosya seçtiremez, istek gönderilmez.
 

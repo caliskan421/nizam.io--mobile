@@ -48,6 +48,47 @@ Future<Object?> postWorkItemFile(
   return r.data;
 }
 
+/// `sendChatAttachment` (`POST /v1/chats/{chatId}/attachments`) için elle kurulan multipart
+/// isteği: sözleşme isteğe bağlı `body` parçasının DOSYADAN ÖNCE gelmesini ister ve sunucu türü
+/// parçanın `Content-Type`'ından okur (üretilmiş istemci parça sırasını ve türünü
+/// belirleyemez). `client_message_id` sorgudadır; tekrar AYNI kimlik ve aynı dosyayla gider.
+/// [extras] üretilmiş `sendChatAttachmentOpenapiExtras` (kapı ve kapsam başlıkları). Dosya
+/// içeriği günlüğe yazılmaz. Ham yanıt gövdesini döner.
+Future<Object?> postChatAttachment(
+  Dio dio, {
+  required String chatId,
+  required String clientMessageId,
+  required String filePath,
+  required String filename,
+  required String contentType,
+  required Map<String, dynamic> extras,
+  String? body,
+  String? replyToMessageId,
+}) async {
+  final form = FormData();
+  if (body != null && body.isNotEmpty) form.fields.add(MapEntry('body', body));
+  form.files.add(
+    MapEntry(
+      'file',
+      await MultipartFile.fromFile(
+        filePath,
+        filename: filename,
+        contentType: DioMediaType.parse(contentType),
+      ),
+    ),
+  );
+  final r = await dio.post<Object?>(
+    '/v1/chats/${Uri.encodeComponent(chatId)}/attachments',
+    queryParameters: {
+      'client_message_id': clientMessageId,
+      'reply_to_message_id': ?replyToMessageId,
+    },
+    data: form,
+    options: Options(contentType: 'multipart/form-data', extra: Map.of(extras)),
+  );
+  return r.data;
+}
+
 /// JSON nesne gövdesini [fromJson] ile çözer; nesne değilse `client.invalid_response`.
 T decodeJsonObject<T>(
   Object? body,

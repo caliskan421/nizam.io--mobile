@@ -33,7 +33,10 @@ class ChatMessageList extends ConsumerStatefulWidget {
     required this.composerH,
     required this.onJump,
     required this.onActions,
-    required this.onSoon,
+    required this.onReact,
+    required this.onVote,
+    required this.onAttachment,
+    required this.onSharedFile,
   });
 
   final String chatId;
@@ -46,8 +49,11 @@ class ChatMessageList extends ConsumerStatefulWidget {
   final ValueChanged<String> onJump;
   final void Function(ChatRoom room, ChatMessage m) onActions;
 
-  /// Sonraki pakette bağlanacak eylem (tepki, oy, ek indirme): "yakında" bildirimi.
-  final VoidCallback onSoon;
+  /// Tepki çipine dokunuş (aynı tür kaldırır).
+  final void Function(ChatMessage m, ChatReaction kind) onReact;
+  final void Function(ChatMessage m, int option) onVote;
+  final ValueChanged<ChatAttachment> onAttachment;
+  final void Function(String refId, String name) onSharedFile;
 
   @override
   ConsumerState<ChatMessageList> createState() => _ChatMessageListState();
@@ -269,7 +275,8 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
                     ),
               body: ChatMessageBody(
                 message: m,
-                onAttachment: (_) => widget.onSoon(),
+                onAttachment: m.onServer ? widget.onAttachment : (_) {},
+                onSharedFile: widget.onSharedFile,
               ),
               extra: m.poll == null
                   ? null
@@ -277,7 +284,7 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
                       question: m.text,
                       poll: m.poll!,
                       me: me,
-                      onVote: (_) => widget.onSoon(),
+                      onVote: (i) => widget.onVote(m, i),
                     ),
               editedLabel: tick == ChatTick.failed
                   ? l.uiMessagesSendFailed
@@ -301,7 +308,7 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
                       count: r.count,
                       mine: r.mine,
                       semanticLabel: l.reaction(r.kind),
-                      onTap: widget.onSoon,
+                      onTap: () => widget.onReact(m, r.kind),
                     ),
               ],
               showAvatarSlot: chat.group && !mine,

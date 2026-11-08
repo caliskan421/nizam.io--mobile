@@ -3,19 +3,27 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/domain/turkish_collation.dart';
+import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_surfaces.dart';
+import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
+import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/chat_controller.dart';
+import '../../application/chat_members_controller.dart';
 import '../../application/messages_providers.dart';
+import '../../domain/chat.dart';
 import '../../domain/chat_room.dart';
 import 'messages_texts.dart';
 
 /// Yazma alanı: taslağı ve yazma durumunu kendisi dinler; tuş vuruşu ve klavye kalkışı (her kare
 /// değişen `viewInsets`) yalnız bu alt ağacı yeniden kurar. Gönderim kapalıysa (karşı taraf
-/// programda değil, sohbete erişim yok) yazma alanı yerine açıklama görünür.
+/// programda değil, sohbete erişim yok) yazma alanı yerine açıklama görünür. Grupta metnin son
+/// `@sorgu` parçası için üye listesinden bahsetme önerisi (yönetici/kurucuya `@herkes`; §10.8);
+/// seçim [onMention] ile yapılandırılmış bahsetme olarak ekrana bildirilir.
 class ChatComposerArea extends ConsumerWidget {
   const ChatComposerArea({
     super.key,
@@ -24,6 +32,7 @@ class ChatComposerArea extends ConsumerWidget {
     required this.focus,
     required this.onSend,
     required this.onAttach,
+    required this.onMention,
   });
 
   final ChatRoom room;
@@ -31,6 +40,26 @@ class ChatComposerArea extends ConsumerWidget {
   final FocusNode focus;
   final VoidCallback onSend;
   final VoidCallback onAttach;
+  final ValueChanged<MentionPick> onMention;
+
+  /// Gösterilen en çok öneri.
+  static const maxSuggestions = 5;
+
+  List<MentionPick> _suggest(
+    String query,
+    ChatMembers? members,
+    String? me,
+    String all,
+  ) {
+    final q = trLower(query);
+    return [
+      if (room.chat.canManage && trLower(all).startsWith(q))
+        (label: all, mention: const ChatMention.all()),
+      for (final m in members?.items ?? const <ChatMember>[])
+        if (m.accountId != me && trLower(m.name).contains(q))
+          (label: m.name, mention: ChatMention.account(m.accountId)),
+    ].take(maxSuggestions).toList();
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -57,6 +86,9 @@ class ChatComposerArea extends ConsumerWidget {
     final view = ref.watch(chatControllerProvider(room.chat.id));
     final ctrl = ref.read(chatControllerProvider(room.chat.id).notifier);
     final me = ref.watch(chatMeProvider);
+    final members = room.chat.group
+        ? ref.watch(chatMembersControllerProvider(room.chat.id)).value
+        : null;
     final ctxMsg = view.edit != null
         ? room.message(view.edit!)
         : view.reply != null
@@ -64,37 +96,71 @@ class ChatComposerArea extends ConsumerWidget {
         : null;
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: draft,
-      builder: (context, value, _) => MediaQuery.withClampedTextScaling(
-        maxScaleFactor: 1.3,
-        child: NzComposer(
-          controller: draft,
-          focusNode: focus,
-          hint: l.uiMessagesMessageHint,
-          canSend: value.text.trim().isNotEmpty,
-          onSend: onSend,
-          sendLabel: l.uiMessagesSend,
-          onAttach: onAttach,
-          attachLabel: l.uiMessagesAttach,
-          bottomInset: bottom,
-          header: [
-            if (ctxMsg != null)
-              NzComposerContext(
-                icon: view.edit != null ? NzIcons.edit : NzIcons.reply,
-                title: view.edit != null
-                    ? l.uiMessagesEditMessage
-                    : ctxMsg.senderId == me
-                    ? l.uiMessagesReplySelf
-                    : '${ctxMsg.senderName ?? room.chat.name} ${l.uiMessagesReplyTo}',
-                text: l.summaryOf(ctxMsg),
-                cancelLabel: l.uiMessagesCancel,
-                onCancel: () {
-                  if (view.edit != null) draft.clear();
-                  ctrl.clearContext();
-                },
-              ),
-          ],
-        ),
-      ),
+      builder: (context, value, _) {
+        final query = members == null || view.edit != null
+            ? null
+            : mentionQuery(value.text);
+        final picks = query == null
+            ? const <MentionPick>[]
+            : _suggest(query, members, me, l.uiMessagesMentionAll);
+        return MediaQuery.withClampedTextScaling(
+          maxScaleFactor: 1.3,
+          child: NzComposer(
+            controller: draft,
+            focusNode: focus,
+            hint: l.uiMessagesMessageHint,
+            canSend: value.text.trim().isNotEmpty,
+            onSend: onSend,
+            sendLabel: l.uiMessagesSend,
+            onAttach: onAttach,
+            attachLabel: l.uiMessagesAttach,
+            bottomInset: bottom,
+            header: [
+              if (picks.isNotEmpty)
+                Semantics(
+                  container: true,
+                  label: l.uiMessagesMentionSuggestions,
+                  child: Wrap(
+                    spacing: NizamioSpacing.space1,
+                    runSpacing: NizamioSpacing.space1,
+                    children: [
+                      for (final p in picks)
+                        NzButton.ghost(
+                          label: '@${p.label}',
+                          size: NzSize.sm,
+                          onPressed: () {
+                            final text = applyMention(draft.text, p.label);
+                            draft.value = TextEditingValue(
+                              text: text,
+                              selection: TextSelection.collapsed(
+                                offset: text.length,
+                              ),
+                            );
+                            onMention(p);
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+              if (ctxMsg != null)
+                NzComposerContext(
+                  icon: view.edit != null ? NzIcons.edit : NzIcons.reply,
+                  title: view.edit != null
+                      ? l.uiMessagesEditMessage
+                      : ctxMsg.senderId == me
+                      ? l.uiMessagesReplySelf
+                      : '${ctxMsg.senderName ?? room.chat.name} ${l.uiMessagesReplyTo}',
+                  text: l.summaryOf(ctxMsg),
+                  cancelLabel: l.uiMessagesCancel,
+                  onCancel: () {
+                    if (view.edit != null) draft.clear();
+                    ctrl.clearContext();
+                  },
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

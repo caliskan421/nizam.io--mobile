@@ -3577,10 +3577,6 @@
   "@uiMessagesSearchChat": {
     "description": "ui.messages.search_chat"
   },
-  "uiMessagesSearchChatSoon": "Sohbette arama sonraki adımda tasarlanacak",
-  "@uiMessagesSearchChatSoon": {
-    "description": "ui.messages.search_chat_soon"
-  },
   "uiMessagesPinned": "Sabitlenen mesaj",
   "@uiMessagesPinned": {
     "description": "ui.messages.pinned"
@@ -3717,10 +3713,6 @@
   "@uiMessagesLeaveGroup": {
     "description": "ui.messages.leave_group"
   },
-  "uiMessagesActionSoon": "Bu işlem sonraki adımda tasarlanacak",
-  "@uiMessagesActionSoon": {
-    "description": "ui.messages.action_soon"
-  },
   "uiMessagesAllUsers": "Tüm kullanıcılar",
   "@uiMessagesAllUsers": {
     "description": "ui.messages.all_users"
@@ -3816,6 +3808,170 @@
   "uiMessagesMultiChoice": "Çoklu seçim",
   "@uiMessagesMultiChoice": {
     "description": "ui.messages.multi_choice"
+  },
+  "uiMessagesAttachFile": "Dosya",
+  "@uiMessagesAttachFile": {
+    "description": "ui.messages.attach_file"
+  },
+  "uiMessagesAttachPoll": "Anket",
+  "@uiMessagesAttachPoll": {
+    "description": "ui.messages.attach_poll"
+  },
+  "uiMessagesPickerMissing": "Dosya seçici bu kurulumda yok.",
+  "@uiMessagesPickerMissing": {
+    "description": "ui.messages.picker_missing"
+  },
+  "uiMessagesFileSaved": "Dosya kaydedildi",
+  "@uiMessagesFileSaved": {
+    "description": "ui.messages.file_saved"
+  },
+  "uiMessagesPollNew": "Anket oluştur",
+  "@uiMessagesPollNew": {
+    "description": "ui.messages.poll_new"
+  },
+  "uiMessagesPollQuestion": "Soru",
+  "@uiMessagesPollQuestion": {
+    "description": "ui.messages.poll_question"
+  },
+  "uiMessagesPollOption": "Seçenek",
+  "@uiMessagesPollOption": {
+    "description": "ui.messages.poll_option"
+  },
+  "uiMessagesPollAddOption": "Seçenek ekle",
+  "@uiMessagesPollAddOption": {
+    "description": "ui.messages.poll_add_option"
+  },
+  "uiMessagesPollClose": "Anketi bitir",
+  "@uiMessagesPollClose": {
+    "description": "ui.messages.poll_close"
+  },
+  "uiMessagesPollClosed": "Anket bitirildi",
+  "@uiMessagesPollClosed": {
+    "description": "ui.messages.poll_closed"
+  },
+  "uiMessagesPollNoVotes": "Henüz oy yok",
+  "@uiMessagesPollNoVotes": {
+    "description": "ui.messages.poll_no_votes"
+  },
+  "uiMessagesMembers": "Üyeler",
+  "@uiMessagesMembers": {
+    "description": "ui.messages.members"
+  },
+  "uiMessagesAddMembers": "Üye ekle",
+  "@uiMessagesAddMembers": {
+    "description": "ui.messages.add_members"
+  },
+  "uiMessagesAdd": "Ekle",
+  "@uiMessagesAdd": {
+    "description": "ui.messages.add"
+  },
+  "uiMessagesRoleGroupAdmin": "Yönetici",
+  "@uiMessagesRoleGroupAdmin": {
+    "description": "ui.messages.role_group_admin"
+  },
+  "uiMessagesRoleFounder": "Kurucu",
+  "@uiMessagesRoleFounder": {
+    "description": "ui.messages.role_founder"
+  },
+  "uiMessagesFromSource": "Kaynaktan",
+  "@uiMessagesFromSource": {
+    "description": "ui.messages.from_source"
+  },
+  "uiMessagesMakeAdmin": "Yönetici yap",
+  "@uiMessagesMakeAdmin": {
+    "description": "ui.messages.make_admin"
+  },
+  "uiMessagesRevokeAdmin": "Yöneticiliği al",
+  "@uiMessagesRevokeAdmin": {
+    "description": "ui.messages.revoke_admin"
+  },
+  "uiMessagesRemoveMember": "Gruptan çıkar",
+  "@uiMessagesRemoveMember": {
+    "description": "ui.messages.remove_member"
+  },
+  "uiMessagesRename": "Adı değiştir",
+  "@uiMessagesRename": {
+    "description": "ui.messages.rename"
+  },
+  "uiMessagesSave": "Kaydet",
+  "@uiMessagesSave": {
+    "description": "ui.messages.save"
+  },
+  "uiMessagesDeleteGroup": "Grubu sil",
+  "@uiMessagesDeleteGroup": {
+    "description": "ui.messages.delete_group"
+  },
+  "uiMessagesDeleteGroupConfirm": "Grup ve mesajları herkes için silinir. Bu işlem geri alınamaz.",
+  "@uiMessagesDeleteGroupConfirm": {
+    "description": "ui.messages.delete_group_confirm"
+  },
+  "uiMessagesLeaveConfirm": "Gruptan ayrılırsan mesajları artık göremezsin.",
+  "@uiMessagesLeaveConfirm": {
+    "description": "ui.messages.leave_confirm"
+  },
+  "uiMessagesShared": "Paylaşılanlar",
+  "@uiMessagesShared": {
+    "description": "ui.messages.shared"
+  },
+  "uiMessagesSharedEmpty": "Henüz paylaşılan öğe yok.",
+  "@uiMessagesSharedEmpty": {
+    "description": "ui.messages.shared_empty"
+  },
+  "uiMessagesMore": "Daha fazla",
+  "@uiMessagesMore": {
+    "description": "ui.messages.more"
+  },
+  "uiMessagesRefGone": "Artık yok",
+  "@uiMessagesRefGone": {
+    "description": "ui.messages.ref_gone"
+  },
+  "uiMessagesRefTask": "Görev",
+  "@uiMessagesRefTask": {
+    "description": "ui.messages.ref_task"
+  },
+  "uiMessagesRefDepartment": "Koordinatörlük",
+  "@uiMessagesRefDepartment": {
+    "description": "ui.messages.ref_department"
+  },
+  "uiMessagesRefFile": "Dosya",
+  "@uiMessagesRefFile": {
+    "description": "ui.messages.ref_file"
+  },
+  "uiMessagesTaskAgainTitle": "Bu mesajdan görev açılmış",
+  "@uiMessagesTaskAgainTitle": {
+    "description": "ui.messages.task_again_title"
+  },
+  "uiMessagesTaskAgain": "Aynı mesajdan yeni bir görev daha açılacak.",
+  "@uiMessagesTaskAgain": {
+    "description": "ui.messages.task_again"
+  },
+  "uiMessagesContinue": "Devam et",
+  "@uiMessagesContinue": {
+    "description": "ui.messages.continue"
+  },
+  "uiMessagesMentionAll": "herkes",
+  "@uiMessagesMentionAll": {
+    "description": "ui.messages.mention_all"
+  },
+  "uiMessagesMentionSuggestions": "Bahsetme önerileri",
+  "@uiMessagesMentionSuggestions": {
+    "description": "ui.messages.mention_suggestions"
+  },
+  "uiMessagesSearchInChatHint": "Mesaj metni",
+  "@uiMessagesSearchInChatHint": {
+    "description": "ui.messages.search_in_chat_hint"
+  },
+  "uiMessagesSearchEmpty": "Eşleşen mesaj yok.",
+  "@uiMessagesSearchEmpty": {
+    "description": "ui.messages.search_empty"
+  },
+  "uiMessagesSearchMore": "Daha eski sonuçlar",
+  "@uiMessagesSearchMore": {
+    "description": "ui.messages.search_more"
+  },
+  "uiMessagesNotInWindow": "Mesaj bulunamadı.",
+  "@uiMessagesNotInWindow": {
+    "description": "ui.messages.not_in_window"
   },
   "uiRouterTabHome": "Ana sayfa",
   "@uiRouterTabHome": {
@@ -5200,6 +5356,14 @@
   "uiTasksNoteTaskDesc": "Görev bu nottan açılır ve nota bağlanır. Atanan kişiye bildirim gider.",
   "@uiTasksNoteTaskDesc": {
     "description": "ui.tasks.note_task_desc"
+  },
+  "uiTasksMessageTaskTitle": "Mesajı göreve dönüştür",
+  "@uiTasksMessageTaskTitle": {
+    "description": "ui.tasks.message_task_title"
+  },
+  "uiTasksMessageTaskDesc": "Görevin açıklaması mesaj metnidir; görev mesaja bağlanır. Atanan kişiye bildirim gider.",
+  "@uiTasksMessageTaskDesc": {
+    "description": "ui.tasks.message_task_desc"
   },
   "uiTasksMtEditTitle": "Toplantıyı düzenle",
   "@uiTasksMtEditTitle": {

@@ -21,14 +21,28 @@ Future<Stream<List<int>>> getFileStream(
   Dio dio, {
   required String fileId,
   Map<String, dynamic>? extras,
+}) => getBinaryStream(
+  dio,
+  path: '/v1/files/${Uri.encodeComponent(fileId)}/download',
+  extras: extras ?? RecordsClient.downloadFileOpenapiExtras,
+);
+
+/// İkili gövdeli herhangi bir indirme ucunun ([path]; yol parametreleri kodlanmış) AKIŞLI okuması
+/// ([getFileStream] ile aynı kurallar). [extras] üretilmiş istemcinin o uç için verdiği
+/// `…OpenapiExtras` metaverisidir (sözleşme kapısı ve kapsam başlıkları; ör. sohbet eki ve
+/// paylaşılan dosya). Sabit harita kopyalanır (kapı halkası `extra`'ya yazar).
+Future<Stream<List<int>>> getBinaryStream(
+  Dio dio, {
+  required String path,
+  required Map<String, dynamic> extras,
 }) async {
   final Response<ResponseBody> r;
   try {
     r = await dio.get<ResponseBody>(
-      '/v1/files/${Uri.encodeComponent(fileId)}/download',
+      path,
       options: Options(
         responseType: ResponseType.stream,
-        extra: extras ?? RecordsClient.downloadFileOpenapiExtras,
+        extra: Map.of(extras),
       ),
     );
   } on DioException catch (e) {

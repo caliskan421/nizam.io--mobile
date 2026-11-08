@@ -167,8 +167,8 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
               onSelected: (i) => ctl.setPriority(TaskPriority.pickable[i]),
             ),
           ),
-          // Nottan görevde kanıt bayrağı yoktur (`convertNoteToTask` gövdesi).
-          if (f.note == null)
+          // Nottan ve mesajdan görevde kanıt bayrağı yoktur (dönüştürme gövdeleri).
+          if (f.standalone)
             NzFormRow.toggle(
               label: l.uiTasksEvidenceRequired,
               icon: NzIcons.attach,

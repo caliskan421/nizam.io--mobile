@@ -9,6 +9,7 @@ import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../application/meeting_form_controller.dart';
 import '../application/quick_forms_controller.dart';
 import '../application/task_catalog_controller.dart';
+import '../domain/chat_task_planner.dart';
 import 'quick/invite_form.dart';
 import 'quick/meeting_form.dart';
 import 'quick/new_task_form.dart';
@@ -26,7 +27,8 @@ import 'task_texts.dart';
 /// koordinatörlük ve atananlarıyla korunur. [title] başlık alanını önceden doldurur
 /// (sohbette "Göreve dönüştür": mesaj metninin ilk 120 karakteri; kırpma burada yapılır).
 /// [note] verilirse görev o toplantı notundan açılır (`convertNoteToTask`; not göreve bağlanır,
-/// kanıt satırı yoktur). Seçili kapsamda görev açma yetkisi yoksa ([canCreateTaskProvider])
+/// kanıt satırı yoktur). [chatMessage] verilirse görev o sohbet mesajından açılır
+/// (`createTaskFromChatMessage`; açıklama mesaj gövdesi, kanıt satırı yok). Seçili kapsamda görev açma yetkisi yoksa ([canCreateTaskProvider])
 /// sayfa açılmaz. Görev açıldıysa true döner.
 Future<bool> showNewTaskSheet(
   BuildContext context, {
@@ -34,6 +36,7 @@ Future<bool> showNewTaskSheet(
   bool resetTarget = false,
   String? title,
   String? note,
+  ChatTaskSource? chatMessage,
 }) async {
   final container = ProviderScope.containerOf(context, listen: false);
   if (!container.read(canCreateTaskProvider)) return false;
@@ -41,17 +44,30 @@ Future<bool> showNewTaskSheet(
       .read(newTaskFormControllerProvider.notifier)
       .prepare(
         coordinatorship: coordinatorship,
-        reset: resetTarget || coordinatorship != null || note != null,
+        reset:
+            resetTarget ||
+            coordinatorship != null ||
+            note != null ||
+            chatMessage != null,
         title: title == null
             ? null
             : String.fromCharCodes(title.trim().runes.take(120)),
         note: note,
+        chatMessage: chatMessage,
       );
   final l = context.l10n;
   return _show(
     context,
-    title: note == null ? l.uiTasksNewTask : l.uiTasksNoteTaskTitle,
-    description: note == null ? l.uiTasksNtDesc : l.uiTasksNoteTaskDesc,
+    title: chatMessage != null
+        ? l.uiTasksMessageTaskTitle
+        : note == null
+        ? l.uiTasksNewTask
+        : l.uiTasksNoteTaskTitle,
+    description: chatMessage != null
+        ? l.uiTasksMessageTaskDesc
+        : note == null
+        ? l.uiTasksNtDesc
+        : l.uiTasksNoteTaskDesc,
     ok: l.uiTasksCreate,
     onOk: (sheet) async {
       final r = await container

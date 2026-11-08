@@ -11,56 +11,7 @@ import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/features/messages/data/chat_api_repository.dart';
 import 'package:nizamio/features/messages/domain/chat.dart';
 
-class _Adapter implements HttpClientAdapter {
-  _Adapter(this.routes);
-
-  /// "GET /v1/chats" → (durum, gövde) ya da akış.
-  final Map<String, Object> routes;
-  final seen = <RequestOptions>[];
-
-  RequestOptions only(String method, String path) =>
-      seen.singleWhere((o) => o.method == method && o.path == path);
-
-  @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<void>? cancelFuture,
-  ) async {
-    seen.add(options);
-    final r = routes['${options.method} ${options.path}'];
-    if (r is Stream<Uint8List>) {
-      return ResponseBody(
-        r,
-        200,
-        headers: {
-          Headers.contentTypeHeader: ['text/event-stream'],
-        },
-      );
-    }
-    final (status, body) = r is (int, Object?) ? r : (404, null);
-    return ResponseBody.fromString(
-      jsonEncode(body),
-      status,
-      headers: {
-        Headers.contentTypeHeader: [Headers.jsonContentType],
-      },
-    );
-  }
-
-  @override
-  void close({bool force = false}) {}
-}
-
-(ApiChatRepository, _Adapter) _repo(Map<String, Object> routes) {
-  final a = _Adapter(routes);
-  final dio = Dio(BaseOptions(baseUrl: 'https://api.test'))
-    ..httpClientAdapter = a;
-  return (ApiChatRepository(() => dio), a);
-}
-
-Object? _sent(RequestOptions o) =>
-    o.data is String ? jsonDecode(o.data as String) : o.data;
+import 'chat_http.dart';
 
 Map<String, Object?> _summary(String id, {String kind = 'direct'}) => {
   'chat_id': id,
@@ -165,7 +116,7 @@ void main() {
   });
 
   test('geçmiş: imleç parametreleri ve mesaj eşlemesi', () async {
-    final (repo, a) = _repo({
+    final (repo, a) = chatRepo({
       'GET /v1/chats/c1/messages': (
         200,
         {
@@ -193,7 +144,7 @@ void main() {
   test(
     'gönderim client_message_id; düzenleme expected_revision; okundu; 409',
     () async {
-      final (repo, a) = _repo({
+      final (repo, a) = chatRepo({
         'POST /v1/chats/c1/messages': (201, _message(3, sender: 'acc-1')),
         'PATCH /v1/chats/c1/messages/m3': (
           409,
@@ -212,7 +163,7 @@ void main() {
         const OutgoingMessage(clientId: 'k-1', text: 'selam', replyTo: 'm1'),
       );
       expect(m.id, 'm3');
-      expect(_sent(a.only('POST', '/v1/chats/c1/messages')), {
+      expect(sentJson(a.only('POST', '/v1/chats/c1/messages')), {
         'client_message_id': 'k-1',
         'body': 'selam',
         'reply_to_message_id': 'm1',
@@ -225,12 +176,14 @@ void main() {
               .having((e) => e.status, 'status', 409),
         ),
       );
-      expect(_sent(a.only('PATCH', '/v1/chats/c1/messages/m3')), {
+      expect(sentJson(a.only('PATCH', '/v1/chats/c1/messages/m3')), {
         'body': 'yeni',
         'expected_revision': 4,
       });
       await repo.markRead('c1', 'm3');
-      expect(_sent(a.only('POST', '/v1/chats/c1/read')), {'message_id': 'm3'});
+      expect(sentJson(a.only('POST', '/v1/chats/c1/read')), {
+        'message_id': 'm3',
+      });
       await repo.delete('c1', 'm3');
       await repo.typing('c1');
       expect(a.seen.last.path, '/v1/chats/c1/typing');
@@ -238,7 +191,7 @@ void main() {
   );
 
   test('adaylar purpose ile; birebir; grup Idempotency-Key ile', () async {
-    final (repo, a) = _repo({
+    final (repo, a) = chatRepo({
       'GET /v1/chats/candidates': (
         200,
         {
@@ -262,14 +215,16 @@ void main() {
     expect(list.items.single.role, ChatCandidateRole.coordinator);
     final d = await repo.openDirect('acc-2');
     expect(d.role, ChatMemberRole.admin);
-    expect(_sent(a.only('POST', '/v1/chats/direct')), {'account_id': 'acc-2'});
+    expect(sentJson(a.only('POST', '/v1/chats/direct')), {
+      'account_id': 'acc-2',
+    });
     await repo.createGroup(
       GroupDraft(name: ' Saha ', memberIds: const ['b', 'a', 'b']),
       requestKey: 'anahtar-anahtar-anahtar-1',
     );
     final g = a.only('POST', '/v1/chats/groups');
     expect(g.headers['Idempotency-Key'], 'anahtar-anahtar-anahtar-1');
-    expect(_sent(g), {
+    expect(sentJson(g), {
       'name': 'Saha',
       'member_account_ids': ['a', 'b'],
     });
@@ -281,7 +236,7 @@ void main() {
     test(
       'açılış sinyali, olaylar; yorum, ping ve bilinmeyen olay yok sayılır',
       () async {
-        final (repo, a) = _repo({
+        final (repo, a) = chatRepo({
           'GET /v1/chats/stream': _sse([
             ': ok\n\n',
             'event: message.created\ndata: {"chat_id":"c1","message_id":"m9",',
@@ -308,7 +263,7 @@ void main() {
     );
 
     test('şemaya uymayan olay yükü invalid_response', () async {
-      final (repo, _) = _repo({
+      final (repo, _) = chatRepo({
         'GET /v1/chats/stream': _sse([
           'event: message.deleted\ndata: {"x":1}\n\n',
         ]),
@@ -326,7 +281,7 @@ void main() {
     });
 
     test('açılış hatası zarfla eşlenir', () async {
-      final (repo, _) = _repo({
+      final (repo, _) = chatRepo({
         'GET /v1/chats/stream': (
           403,
           {

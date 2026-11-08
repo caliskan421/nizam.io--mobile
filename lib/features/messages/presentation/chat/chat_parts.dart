@@ -14,6 +14,7 @@ import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/chat.dart';
 import '../../domain/chat_room.dart';
+import 'chat_refs.dart';
 import 'messages_texts.dart';
 
 /// Çocuğunun boyutunu yerleşimden sonra bildirir (cam çubukların altına akış dolgusu için).
@@ -49,16 +50,18 @@ class ChatMeasureBox extends RenderProxyBox {
   }
 }
 
-/// Mesaj gövdesi: düz metin ve (varsa) ek adları. Ekin indirilmesi sonraki pakette ("yakında").
+/// Mesaj gövdesi: düz metin, ek adları (dokununca indirme) ve paylaşılan öğe kartları.
 class ChatMessageBody extends StatelessWidget {
   const ChatMessageBody({
     super.key,
     required this.message,
     required this.onAttachment,
+    required this.onSharedFile,
   });
 
   final ChatMessage message;
   final ValueChanged<ChatAttachment> onAttachment;
+  final void Function(String refId, String name) onSharedFile;
 
   @override
   Widget build(BuildContext context) {
@@ -100,12 +103,14 @@ class ChatMessageBody extends StatelessWidget {
               ),
             ),
           ),
+        for (final r in message.refs)
+          ChatRefTile(refId: r.refId, kind: r.kind, onFile: onSharedFile),
       ],
     );
   }
 }
 
-/// Balon içi anket (yalnız gösterim): soru, seçim türü / sonuçlandı, seçenekler (yüzde çubuğu,
+/// Balon içi anket: soru, seçim türü / sonuçlandı, seçenekler (yüzde çubuğu,
 /// benim oyum işaretli; dokununca [onVote]), oy veren sayısı.
 class ChatPollView extends StatelessWidget {
   const ChatPollView({
@@ -126,6 +131,7 @@ class ChatPollView extends StatelessWidget {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
+    final closed = poll.isClosed(DateTime.now());
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 220),
       child: Column(
@@ -136,7 +142,7 @@ class ChatPollView extends StatelessWidget {
           const Gap(NizamioSpacing.space1),
           Text(question, style: t.bodyMd.copyWith(fontWeight: FontWeight.w600)),
           Text(
-            poll.closed
+            closed
                 ? l.uiMessagesConcluded
                 : poll.multi
                 ? l.uiMessagesMultiChoice
@@ -147,8 +153,8 @@ class ChatPollView extends StatelessWidget {
             _PollOption(
               label: poll.options[i].label,
               percent: poll.percent(i),
-              on: poll.options[i].voterIds.contains(me),
-              onTap: poll.closed ? null : () => onVote(i),
+              on: poll.options[i].votedBy(me),
+              onTap: closed ? null : () => onVote(i),
             ),
           Text(
             l.voters(poll.voters),

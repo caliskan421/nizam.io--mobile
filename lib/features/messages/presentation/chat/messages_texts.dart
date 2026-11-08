@@ -59,6 +59,40 @@ extension MessagesTexts on AppLocalizations {
   /// Mesajın kısa metni (alıntı, sabit şeridi, önizleme): metin, yoksa ilk ek adı.
   String summaryOf(ChatMessage m) =>
       m.text.isNotEmpty ? m.text : m.attachments.firstOrNull?.fileName ?? '';
+
+  String refKind(ChatRefKind k) => switch (k) {
+    ChatRefKind.task => uiMessagesRefTask,
+    ChatRefKind.department => uiMessagesRefDepartment,
+    ChatRefKind.file => uiMessagesRefFile,
+  };
+
+  /// Kartın alt satırı: görevde koordinatörlük ve tarih aralığı, dosyada boyut.
+  String refSubtitle(ChatRefCard c) => switch (c.kind) {
+    ChatRefKind.task => [
+      c.department ?? uiMessagesRefTask,
+      if (c.start != null && c.end != null)
+        '${DateFormat('d MMM', 'tr').format(c.start!)} – '
+            '${DateFormat('d MMM', 'tr').format(c.end!)}',
+    ].join(' · '),
+    ChatRefKind.file =>
+      c.sizeBytes == null ? uiMessagesRefFile : fileSize(c.sizeBytes!),
+    ChatRefKind.department => uiMessagesRefDepartment,
+  };
+
+  /// Boyut: ≥ 1 MB "2,4 MB", altı "300 KB".
+  String fileSize(int bytes) {
+    final mb = bytes / 1000000;
+    return mb >= 1
+        ? '${mb.toStringAsFixed(1).replaceAll('.', ',')} $uiArchiveMb'
+        : '${(bytes / 1000).round().clamp(1, 999)} $uiArchiveKb';
+  }
+
+  /// Üyenin gruptaki rolü (üye için boş).
+  String memberRole(ChatMember m) => [
+    if (m.role == ChatMemberRole.admin) uiMessagesRoleGroupAdmin,
+    if (m.role == ChatMemberRole.founder) uiMessagesRoleFounder,
+    if (m.fromSource) uiMessagesFromSource,
+  ].join(' · ');
 }
 
 /// Tepkinin kit karşılığı.

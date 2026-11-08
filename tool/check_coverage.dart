@@ -86,8 +86,8 @@ String _stripped(String source) {
 int codeLineCount(String source) =>
     _stripped(source).split('\n').where((l) => l.trim().isNotEmpty).length;
 
-/// Dosyada çalıştırılabilir kod yok mu: yalnız sınıf başlıkları, `static const <tip>? <ad> =
-/// …;` alanları ve kapanış ayraçları. Yapıcı (const olanı da), `assert`, `=>`, gövde, getter,
+/// Dosyada çalıştırılabilir kod yok mu: yalnız sınıf başlıkları,
+/// `static const <tip>? <ad> = …;` alanları ve kapanış ayraçları. Yapıcı (const olanı da), `assert`, `=>`, gövde, getter,
 /// `final`/`late`/`var` alan kalırsa kod sayılır (fail-closed). Dart VM yalnız bildirimli dosya
 /// için lcov'a `SF:` kaydı yazmaz.
 bool declarationsOnly(String source) {

@@ -9,7 +9,9 @@ import '../../theme/nz_motion.dart';
 /// Sağdan açılan çekmece (README "Gezinme": tüm modüller): `bg-surface`, sol kenarda 1 px
 /// `border-strong`, sol köşeler `m-r-sheet`, gölge `m-sh-drawer`, arkada `scrim`. Açılış
 /// `easeSheet` / `durSheet`, kapanış `easeExit` / `durExit`; dışarı dokunma ve geri kapatır.
-/// Uygulamanın kök Navigator'ında açılır (PrivacyMask altında kalır).
+/// Uygulamanın kök Navigator'ında açılır (PrivacyMask altında kalır). Üst/alt güvenli alan
+/// tüketilmez: içerik ekranın kenarına kadar kayar, payı kendi kaydırma dolgusuna ekler
+/// (`MediaQuery.paddingOf`).
 abstract final class NzSideSheet {
   static Future<T?> show<T>(
     BuildContext context, {
@@ -86,7 +88,12 @@ class _Panel extends StatelessWidget {
               borderRadius: radius,
               child: Material(
                 type: MaterialType.transparency,
-                child: SafeArea(left: false, child: Builder(builder: builder)),
+                child: SafeArea(
+                  left: false,
+                  top: false,
+                  bottom: false,
+                  child: Builder(builder: builder),
+                ),
               ),
             ),
           ),

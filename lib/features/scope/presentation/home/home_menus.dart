@@ -137,17 +137,18 @@ Future<void> showHomeDrawer(
       final tablet = NzTabletMetrics.tabletVisualAt(
         MediaQuery.sizeOf(context).width,
       );
+      // Çekmece güvenli alanı tüketmez: liste durum çubuğunun altına kadar kayar, açılışta
+      // içerik güvenli alanın altında başlar.
+      final safe = MediaQuery.paddingOf(sheet);
       return ListView(
         padding: EdgeInsets.fromLTRB(
           NizamioSpacing.rowPad,
-          tablet
-              ? math.max(
-                  NizamioSpacing.space4,
-                  _tabletTop - MediaQuery.viewPaddingOf(context).top,
-                )
-              : NizamioSpacing.space4,
+          safe.top +
+              (tablet
+                  ? math.max(NizamioSpacing.space4, _tabletTop - safe.top)
+                  : NizamioSpacing.space4),
           NizamioSpacing.rowPad,
-          tablet ? _tabletBottom : NizamioSpacing.space6,
+          safe.bottom + (tablet ? _tabletBottom : NizamioSpacing.space6),
         ),
         children: [
           Row(

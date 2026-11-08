@@ -1,7 +1,7 @@
 // ChatPage (sunucu biçimli fikstürle): açılışta okunmamış ayırıcısı ve okundu imleci, gönderim
 // (`client_message_id`, tek balon), gönderilemeyen mesajın aynı kimlikle tekrarı, düzenleme
-// çakışmasının görünür olması, silme, tepki ve sabitleme, grup bilgisi (üyeler, ayrılma), taşma
-// ve yazarken yeniden kurulum.
+// çakışmasının görünür olması, silme, tepki ve sabitleme, grup bilgisi (üyeler, ayrılma), taşma,
+// ek kaynağının seçiciye geçmesi ve yazarken yeniden kurulum.
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart' as widgets show debugOnRebuildDirtyWidget;
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +11,7 @@ import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_composer.dart';
 import 'package:nizamio/core/ui/widgets/surfaces/nz_chat_bubble.dart';
 import 'package:nizamio/features/messages/messages.dart';
+import 'package:nizamio/features/tasks/domain/task_writes.dart';
 
 import '../../../support/harness.dart';
 import '../../pilot_support.dart';
@@ -182,6 +183,30 @@ void main() {
     expect(find.text(_l.uiMessagesPollNoVotes), findsWidgets);
   });
 
+  testWidgets('ek: kaynak seçiciye geçer; izinsiz tür istek atmaz', (
+    tester,
+  ) async {
+    final (h, backend) = await _open(tester);
+    final picker = _Picker();
+    h.composition.locator
+      ..unregister<UploadPicker>()
+      ..registerSingleton<UploadPicker>(picker);
+    final before = backend.chats.messages['koord']!.length;
+    await _tap(tester, find.bySemanticsLabel(_l.uiMessagesAttach).last);
+    await _tap(tester, find.text(_l.uiMessagesAttachFile));
+    expect(picker.origins, [UploadOrigin.files]);
+    picker.next = const UploadSource(
+      path: '/tmp/IMG_1.heic',
+      name: 'IMG_1.heic',
+      sizeBytes: 9,
+    );
+    await _tap(tester, find.bySemanticsLabel(_l.uiMessagesAttach).last);
+    await _tap(tester, find.text(_l.uiMessagesAttachPhotos));
+    expect(picker.origins, [UploadOrigin.files, UploadOrigin.photos]);
+    expect(find.text(_l.errMessagingFileRejected), findsOneWidget);
+    expect(backend.chats.messages['koord']!.length, before);
+  });
+
   testWidgets('grup yöneticisi: ad, üye ekleme ve yöneticilik', (tester) async {
     final backend0 = ChatBackend()..chats.role = 'admin';
     final (_, backend) = await _open(tester, server: backend0);
@@ -231,5 +256,20 @@ void main() {
         },
       );
     }
+  }
+}
+
+/// Kaynağı kaydeden, [next] seçimini döndüren seçici.
+final class _Picker implements UploadPicker {
+  UploadSource? next;
+  final origins = <UploadOrigin>[];
+
+  @override
+  bool get available => true;
+
+  @override
+  Future<UploadSource?> pick(UploadOrigin origin) async {
+    origins.add(origin);
+    return next;
   }
 }

@@ -109,16 +109,18 @@ class ArchiveActionsController extends _$ArchiveActionsController {
       ? ArchiveUploadStart.ready
       : ArchiveUploadStart.noPicker;
 
-  /// [workItemId] görevine [tag] etiketiyle dosya yükler: seçici açılır (vazgeçme → `ok: false`),
-  /// izinli tür ve boyut istekten önce denetlenir (`records.content_rejected`,
-  /// `records.too_large`; istek gönderilmez). Başarıda listeler yeniden okunur.
+  /// [workItemId] görevine [tag] etiketiyle dosya yükler: [origin] seçicisi (fotoğraflar /
+  /// dosyalar) açılır (vazgeçme → `ok: false`), izinli tür ve boyut istekten önce denetlenir
+  /// (`records.content_rejected`, `records.too_large`; istek gönderilmez). Başarıda listeler
+  /// yeniden okunur.
   Future<ArchiveOutcome> upload({
     required String workItemId,
     required RecordTag tag,
+    required UploadOrigin origin,
   }) => _run(() async {
     final picker = ref.read(uploadPickerProvider);
     if (!picker.available) return _cancelled;
-    final file = await picker.pick();
+    final file = await picker.pick(origin);
     if (file == null || !ref.mounted) return _cancelled;
     if (file.contentType == null) throw ApiError('records.content_rejected');
     if (file.tooLarge) throw ApiError('records.too_large');

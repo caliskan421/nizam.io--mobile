@@ -5530,10 +5530,16 @@ abstract class AppLocalizations {
   /// **'Çoklu seçim'**
   String get uiMessagesMultiChoice;
 
+  /// ui.messages.attach_photos
+  ///
+  /// In tr, this message translates to:
+  /// **'Fotoğraflar'**
+  String get uiMessagesAttachPhotos;
+
   /// ui.messages.attach_file
   ///
   /// In tr, this message translates to:
-  /// **'Dosya'**
+  /// **'Dosyalar'**
   String get uiMessagesAttachFile;
 
   /// ui.messages.attach_poll

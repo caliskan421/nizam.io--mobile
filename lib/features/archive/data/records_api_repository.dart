@@ -182,7 +182,8 @@ class ApiRecordsRepository implements ArchiveRepository {
     required String department,
   }) async => getBinaryStream(
     _http,
-    path: '/v1/records/archive/folders/${Uri.encodeComponent(folderId)}/download-zip',
+    path:
+        '/v1/records/archive/folders/${Uri.encodeComponent(folderId)}/download-zip',
     extras: withDepartment(
       RecordsClient.archiveFolderZipOpenapiExtras,
       department,

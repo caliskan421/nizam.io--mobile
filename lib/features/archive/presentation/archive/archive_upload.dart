@@ -5,6 +5,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
+import '../../../tasks/tasks.dart';
 import '../../application/archive_actions_controller.dart';
 import '../../application/archive_folder_controller.dart';
 import '../../application/archive_folder_sources.dart';
@@ -13,7 +14,8 @@ import 'archive_texts.dart';
 
 /// Klasörden dosya yükleme: görev bağlamı seçili görevdir; seçili görev yoksa klasörün dosyalı
 /// görevlerinden biri seçtirilir (görev yoksa bilgi). Ardından etiket (sunucunun kapalı
-/// kümesi) seçilir ve görev ayrıntısıyla aynı sistem seçicisi açılır.
+/// kümesi) ve görev ayrıntısıyla aynı kaynak (Fotoğraflar / Dosyalar) seçilip sistem seçicisi
+/// açılır.
 void startArchiveUpload(BuildContext context, WidgetRef ref, String code) {
   final l = context.l10n;
   final ctrl = ref.read(archiveActionsControllerProvider(code).notifier);
@@ -63,7 +65,13 @@ void _pickTag(
           label: l.tagLabel(tag),
           dot: c.tag(tag),
           onSelected: () async {
-            final r = await ctrl.upload(workItemId: workItemId, tag: tag);
+            final origin = await showUploadOriginSheet(context);
+            if (origin == null || !context.mounted) return;
+            final r = await ctrl.upload(
+              workItemId: workItemId,
+              tag: tag,
+              origin: origin,
+            );
             if (context.mounted) {
               showArchiveOutcome(context, r, success: l.uiArchiveUploaded);
             }

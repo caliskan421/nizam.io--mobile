@@ -312,7 +312,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     );
   }
 
-  /// Yazma alanının ek menüsü: dosya (seçici; izinli tür ön denetimi) ya da anket (grupta).
+  /// Yazma alanının ek menüsü: fotoğraf / dosya (seçici; galeri adı seçicide normalleşir,
+  /// izinli tür ön denetimi) ya da anket (grupta).
   Future<void> _attach(ChatRoom room) async {
     final l = context.l10n;
     final kind = await showAttachMenu(context, group: room.chat.group);
@@ -323,10 +324,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         if (input == null || !mounted) return;
         _toBottom();
         await _room.send(input.question, poll: input.poll);
-      case ChatAttachKind.file:
+      case ChatAttachKind.photos || ChatAttachKind.files:
         final picker = ref.read(uploadPickerProvider);
         if (!picker.available) return _toast(l.uiMessagesPickerMissing);
-        final f = await picker.pick();
+        final f = await picker.pick(
+          kind == ChatAttachKind.photos
+              ? UploadOrigin.photos
+              : UploadOrigin.files,
+        );
         if (f == null || !mounted) return;
         final type = f.contentType;
         if (type == null) {

@@ -109,11 +109,17 @@ void main() {
     UploadSource src(String name, {int size = 10}) =>
         UploadSource(path: '/tmp/$name', name: name, sizeBytes: size);
 
-    test('seçilen dosya göreve, etiketle, klasör departmanıyla', () async {
+    test('seçilen dosya (kaynak seçiciye geçer) göreve, etiketle, klasör departmanıyla', () async {
       final repo = FakeArchiveRepository();
-      final c = archiveContainer(repo, picker: FakePicker(src('rapor.pdf')));
-      final r = await _ctrl(c).upload(workItemId: 'w2', tag: RecordTag.cikti);
+      final picker = FakePicker(src('rapor.pdf'));
+      final c = archiveContainer(repo, picker: picker);
+      final r = await _ctrl(c).upload(
+        workItemId: 'w2',
+        tag: RecordTag.cikti,
+        origin: UploadOrigin.photos,
+      );
       expect(r.ok, isTrue);
+      expect(picker.origins, [UploadOrigin.photos]);
       expect(repo.calls.firstWhere((x) => x.$1 == 'attach'), (
         'attach',
         'd1',
@@ -124,7 +130,11 @@ void main() {
     test('vazgeçme: istek yok', () async {
       final repo = FakeArchiveRepository();
       final c = archiveContainer(repo, picker: FakePicker());
-      final r = await _ctrl(c).upload(workItemId: 'w1', tag: RecordTag.plan);
+      final r = await _ctrl(c).upload(
+        workItemId: 'w1',
+        tag: RecordTag.plan,
+        origin: UploadOrigin.files,
+      );
       expect((r.ok, r.error), (false, null));
       expect(repo.calls.where((x) => x.$1 == 'attach'), isEmpty);
     });
@@ -134,10 +144,18 @@ void main() {
       final picker = FakePicker(src('not.txt'));
       final c = archiveContainer(repo, picker: picker);
       final ctrl = _ctrl(c);
-      final a = await ctrl.upload(workItemId: 'w1', tag: RecordTag.plan);
+      final a = await ctrl.upload(
+        workItemId: 'w1',
+        tag: RecordTag.plan,
+        origin: UploadOrigin.files,
+      );
       expect(a.error?.code, 'records.content_rejected');
       picker.next = src('b.pdf', size: uploadMaxBytes);
-      final b = await ctrl.upload(workItemId: 'w1', tag: RecordTag.plan);
+      final b = await ctrl.upload(
+        workItemId: 'w1',
+        tag: RecordTag.plan,
+        origin: UploadOrigin.files,
+      );
       expect(b.error?.code, 'records.too_large');
       expect(repo.calls.where((x) => x.$1 == 'attach'), isEmpty);
     });

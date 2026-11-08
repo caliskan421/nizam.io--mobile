@@ -22,6 +22,7 @@ import '../task_widgets.dart';
 import 'detail_forms.dart';
 
 part 'detail_list_option.dart';
+part 'upload_origin_sheet.dart';
 
 /// Ayrıntı ekranının eylemleri: denetleyici komutu + prototipteki sonuç bildirimi ve alt
 /// sayfalar. Sayfa her çizimde kurar; geri çağrılar sayfa bağlamıyla çalışır. Sunucu yazması
@@ -467,28 +468,12 @@ class TaskDetailActions {
 
   /// Kaynak (Fotoğraflar / Dosyalar) → sistem seçicisi; seçici yoksa bildirilir.
   Future<void> pickUploadFile() async {
-    final l = context.l10n;
     if (!ref.read(uploadPickerProvider).available) {
-      _say(l.uiTasksPickerMissing);
+      _say(context.l10n.uiTasksPickerMissing);
       return;
     }
-    await _listSheet(
-      title: l.uiTasksPickFileAction,
-      builder: (sheet) => [
-        for (final (o, label, icon) in [
-          (UploadOrigin.photos, l.uiTasksPickPhotos, NzIcons.image),
-          (UploadOrigin.files, l.uiTasksPickFiles, NzIcons.folder),
-        ])
-          _ListOption(
-            label: label,
-            leading: NzIcon(icon, size: NizamioSize.iconSizeSm),
-            onTap: () async {
-              Navigator.of(sheet).pop();
-              await _ctl.pickUploadFile(o);
-            },
-          ),
-      ],
-    );
+    final origin = await showUploadOriginSheet(context);
+    if (origin != null) await _ctl.pickUploadFile(origin);
   }
 
   void openDelete() {

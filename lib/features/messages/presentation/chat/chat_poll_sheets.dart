@@ -11,10 +11,11 @@ import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../domain/chat.dart';
 import 'messages_texts.dart';
 
-/// Ek menüsünün seçimi.
-enum ChatAttachKind { file, poll }
+/// Ek menüsünün seçimi: galeriden fotoğraf, cihaz dosyası ya da anket.
+enum ChatAttachKind { photos, files, poll }
 
-/// Yazma alanındaki ek düğmesinin menüsü: dosya ve (yalnız grupta) anket.
+/// Yazma alanındaki ek düğmesinin menüsü: görev ayrıntısındaki yüklemeyle aynı kaynak seçimi
+/// (Fotoğraflar / Dosyalar) ve (yalnız grupta) anket.
 Future<ChatAttachKind?> showAttachMenu(
   BuildContext context, {
   required bool group,
@@ -28,9 +29,14 @@ Future<ChatAttachKind?> showAttachMenu(
       mainAxisSize: MainAxisSize.min,
       children: [
         NzListTile(
+          title: l.uiMessagesAttachPhotos,
+          leading: const NzIcon(NzIcons.image),
+          onTap: () => Navigator.of(sheet).pop(ChatAttachKind.photos),
+        ),
+        NzListTile(
           title: l.uiMessagesAttachFile,
-          leading: const NzIcon(NzIcons.file),
-          onTap: () => Navigator.of(sheet).pop(ChatAttachKind.file),
+          leading: const NzIcon(NzIcons.folder),
+          onTap: () => Navigator.of(sheet).pop(ChatAttachKind.files),
         ),
         if (group)
           NzListTile(

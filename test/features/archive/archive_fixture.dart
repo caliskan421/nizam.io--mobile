@@ -158,14 +158,14 @@ class FakePicker implements UploadPicker {
   FakePicker([this.next]);
 
   UploadSource? next;
-  var picks = 0;
+  final origins = <UploadOrigin>[];
 
   @override
   bool get available => true;
 
   @override
-  Future<UploadSource?> pick() async {
-    picks++;
+  Future<UploadSource?> pick(UploadOrigin origin) async {
+    origins.add(origin);
     return next;
   }
 }

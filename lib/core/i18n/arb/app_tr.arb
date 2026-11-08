@@ -3625,7 +3625,11 @@
   "@uiMessagesMultiChoice": {
     "description": "ui.messages.multi_choice"
   },
-  "uiMessagesAttachFile": "Dosya",
+  "uiMessagesAttachPhotos": "Fotoğraflar",
+  "@uiMessagesAttachPhotos": {
+    "description": "ui.messages.attach_photos"
+  },
+  "uiMessagesAttachFile": "Dosyalar",
   "@uiMessagesAttachFile": {
     "description": "ui.messages.attach_file"
   },

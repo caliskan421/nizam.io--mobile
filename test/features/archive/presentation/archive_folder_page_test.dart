@@ -109,7 +109,7 @@ void main() {
     expect(find.text(_l.uiArchiveDeleted), findsOneWidget);
   });
 
-  testWidgets('yükle: görev → etiket → seçici → göreve yüklenir', (
+  testWidgets('yükle: görev → etiket → kaynak → seçici → göreve yüklenir', (
     tester,
   ) async {
     final repo = FakeArchiveRepository();
@@ -120,6 +120,8 @@ void main() {
     await _tap(tester, find.text(_l.uiArchiveUploadShort));
     await _tap(tester, find.text('Rapor').last);
     await _tap(tester, find.text(_l.uiArchiveTagPlan).last);
+    await _tap(tester, find.text(_l.uiTasksPickPhotos));
+    expect(picker.origins, [UploadOrigin.photos]);
     final attach = repo.calls.where((c) => c.$1 == 'attach').single;
     expect(attach, ('attach', 'd1', ('w2', RecordTag.plan, 'r.pdf')));
     expect(find.text(_l.uiArchiveUploaded), findsOneWidget);

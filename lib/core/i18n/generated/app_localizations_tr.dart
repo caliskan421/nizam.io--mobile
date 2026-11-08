@@ -2877,7 +2877,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesMultiChoice => 'Çoklu seçim';
 
   @override
-  String get uiMessagesAttachFile => 'Dosya';
+  String get uiMessagesAttachPhotos => 'Fotoğraflar';
+
+  @override
+  String get uiMessagesAttachFile => 'Dosyalar';
 
   @override
   String get uiMessagesAttachPoll => 'Anket';

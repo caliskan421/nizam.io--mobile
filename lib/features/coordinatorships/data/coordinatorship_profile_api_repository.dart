@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/errors/api_error.dart';
-import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../domain/coordinatorship_profile.dart';
 import '../domain/department.dart';
 import 'department_api_repository.dart';
@@ -17,9 +15,6 @@ class ApiCoordinatorshipProfileRepository
   final Dio? Function() dio;
 
   @override
-  Future<List<Department>> load() async {
-    final d = dio();
-    if (d == null) throw ApiError(ClientErrorCode.serverNotVerified);
-    return (await ApiDepartmentRepository(d).listDepartments()).items;
-  }
+  Future<List<Department>> load() async =>
+      (await ApiDepartmentRepository(dio).listDepartments()).items;
 }

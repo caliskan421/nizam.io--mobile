@@ -7,10 +7,12 @@ import 'application/task_sources.dart';
 import 'application/tasks_providers.dart';
 import 'data/download_sink.dart';
 import 'data/file_upload_picker.dart';
+import 'data/meeting_invitee_api_repository.dart';
 import 'data/task_catalog_api_repository.dart';
 import 'data/task_details_api_repository.dart';
 import 'data/task_write_api_repository.dart';
 import 'data/upload_digest.dart';
+import 'domain/meeting_invitees.dart';
 import 'domain/task_catalog.dart';
 import 'domain/task_details.dart';
 import 'domain/task_writes.dart';
@@ -66,6 +68,12 @@ void registerTasksModule(GetIt locator, {required Dio? Function() apiDio}) {
         },
       ),
     )
+    ..registerLazySingleton<MeetingInviteeRepository>(
+      () => ApiMeetingInviteeRepository(
+        apiDio,
+        programId: () => locator<ScopeController>().current.programId,
+      ),
+    )
     ..registerLazySingleton<DownloadSink>(FileDownloadSink.new)
     ..registerLazySingleton<UploadPicker>(() => const FileUploadPicker())
     ..registerSingleton<UploadDigest>(uploadDigest);
@@ -84,6 +92,9 @@ List<Override> tasksOverrides(GetIt locator) => [
   ),
   taskWriteRepositoryProvider.overrideWith(
     (ref) => locator<TaskWriteRepository>(),
+  ),
+  meetingInviteeRepositoryProvider.overrideWith(
+    (ref) => locator<MeetingInviteeRepository>(),
   ),
   downloadSinkProvider.overrideWith((ref) => locator<DownloadSink>()),
   uploadPickerProvider.overrideWith((ref) => locator<UploadPicker>()),

@@ -93,6 +93,7 @@ void main() {
           'department_ids': ['d1', 'd2'],
           'participant_ids': ['u1'],
           'members_included': true,
+          'invite_mode': 'coordinatorship',
           'agenda_items': ['Bütçe'],
           'is_instant': false,
         });
@@ -245,7 +246,7 @@ void main() {
           ..._meeting(),
           'viewer_role': 'member',
           'participants': [
-            {'account_id': 'u1', 'full_name': 'Ali Veli'},
+            {'account_id': 'u1', 'full_name': 'Ali Veli', 'teams': <Object>[]},
           ],
           'agenda': [_agenda(checked: true)],
           'notes': {
@@ -406,7 +407,7 @@ void main() {
       );
       final s = await repo.listNotes('m1', const PageRequest(limit: 2));
       final u = await repo.updateNote('n1', 'Düzeltme', expectedRevision: 3);
-      await repo.deleteNote('n1');
+      await repo.deleteNote('n1', programId: 'prog-9');
       expect(a.seen.map((o) => (o.method, o.uri.path)), [
         ('POST', '/v1/meetings/m1/notes'),
         ('GET', '/v1/meetings/m1/notes'),
@@ -417,6 +418,7 @@ void main() {
       expect(a.bodies[0], {'content': 'Not'});
       expect(a.bodies[2], {'content': 'Düzeltme', 'expected_revision': 3});
       expect(a.seen[0].headers['Idempotency-Key'], 'k-0123456789abcdefghij');
+      expect(a.seen[3].extra['nizamio.program'], 'prog-9');
       expect(n.authorRole, MeetingRole.coordinator);
       expect(s.items.map((x) => x.authorRole), [
         MeetingRole.member,

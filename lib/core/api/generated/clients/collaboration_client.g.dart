@@ -56,6 +56,9 @@ class _CollaborationClient implements CollaborationClient {
 
   @override
   Future<MeetingList> listMeetings({
+    String? departmentId,
+    DateTime? from,
+    DateTime? to,
     int? limit,
     String? cursor,
     Map<String, dynamic>? extras =
@@ -64,6 +67,9 @@ class _CollaborationClient implements CollaborationClient {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{
+      r'department_id': departmentId,
+      r'from': from?.toIso8601String(),
+      r'to': to?.toIso8601String(),
       r'limit': limit,
       r'cursor': cursor,
     };

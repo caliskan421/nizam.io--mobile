@@ -11,6 +11,9 @@ _Conference _$ConferenceFromJson(Map<String, dynamic> json) => _Conference(
   status: ConferenceStatus.fromJson(json['status'] as String),
   startedAt: DateTime.parse(json['started_at'] as String),
   startedByAccountId: json['started_by_account_id'] as String,
+  connected: ConferenceConnected.fromJson(
+    json['connected'] as Map<String, dynamic>,
+  ),
 );
 
 Map<String, dynamic> _$ConferenceToJson(_Conference instance) =>
@@ -19,6 +22,7 @@ Map<String, dynamic> _$ConferenceToJson(_Conference instance) =>
       'status': _$ConferenceStatusEnumMap[instance.status]!,
       'started_at': instance.startedAt.toIso8601String(),
       'started_by_account_id': instance.startedByAccountId,
+      'connected': instance.connected.toJson(),
     };
 
 const _$ConferenceStatusEnumMap = {

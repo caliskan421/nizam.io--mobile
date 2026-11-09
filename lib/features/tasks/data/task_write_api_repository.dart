@@ -5,6 +5,7 @@ import '../../../core/api/generated/clients/records_client.dart';
 import '../../../core/api/generated/clients/work_client.dart';
 import '../../../core/api/generated/models/assignments_request.dart';
 import '../../../core/api/generated/models/create_subtask_request.dart';
+import '../../../core/api/generated/models/create_user_request.dart';
 import '../../../core/api/generated/models/create_work_item_request.dart';
 import '../../../core/api/generated/models/create_work_item_request_priority.dart';
 import '../../../core/api/generated/models/date_change_request_create.dart';
@@ -347,6 +348,25 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
             coordinator: m.role == 'koordinator',
           ),
     ];
+  }
+
+  @override
+  Future<void> enrollMember(MemberEnrollment e) async {
+    final transfer = e.transferAccountId;
+    await apiCall(
+      () => _organization.createUser(
+        body: CreateUserRequest(
+          email: e.email,
+          programId: e.programId,
+          departmentId: e.departmentId,
+          // Aktarımda hesap açılmaz: ad gönderilmez.
+          fullName: transfer == null ? e.fullName : null,
+          role: e.coordinator ? 'koordinator' : 'uye',
+          transferAccountId: transfer,
+          companyAdmin: e.companyAdmin ? true : null,
+        ),
+      ),
+    );
   }
 
   // ---- tarih talebi ------------------------------------------------------------------------

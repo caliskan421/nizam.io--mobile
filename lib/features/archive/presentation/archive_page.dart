@@ -24,7 +24,7 @@ import 'archive/archive_texts.dart';
 
 /// Arşiv (prototip `archive`): başlık + ara + yükle, dosya/klasör özeti, 3 sütunlu klasörler
 /// (sunucunun klasör özeti) → klasör ayrıntısı. Alt menüde modül sekmesine yeniden dokunmak
-/// kısayol menüsünü açar. Görev bağlamı olmayan yükleme ve klasör oluşturma "yakında"dır.
+/// kısayol menüsünü açar. Görev bağlamı olmayan yükleme "yakında"dır.
 class ArchivePage extends ConsumerStatefulWidget {
   const ArchivePage({super.key});
 
@@ -95,11 +95,6 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
           label: l.uiArchiveSearch,
           icon: NzIcons.search,
           onSelected: _toggleSearch,
-        ),
-        NzFlyoutItem(
-          label: l.uiArchiveCreateFolder,
-          icon: NzIcons.folderNew,
-          onSelected: () => _toast(l.uiArchiveCreateFolderSoon),
         ),
         NzFlyoutSection(l.uiArchiveSectionGo),
         NzFlyoutItem(

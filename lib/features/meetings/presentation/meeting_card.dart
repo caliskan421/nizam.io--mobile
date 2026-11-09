@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
@@ -10,8 +9,6 @@ import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/nz_size.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
-import '../application/meeting_summary_controller.dart';
-import '../application/meetings_providers.dart';
 import '../domain/meeting.dart';
 import '../domain/meeting_status.dart';
 import 'meeting_parts.dart';
@@ -22,12 +19,12 @@ import 'meetings_texts.dart';
 const _wideCard = 620.0;
 
 /// Toplantı kartı (prototip `.rp-mcard`): tarih kutusu (durumlu), tek satır başlık, tek satır
-/// koordinatörlük şeridi (en çok 4, kalanı "+N"), sahip satırı ve sayaçlar (gündem, not, kişi);
-/// yükseklik koordinatörlük sayısından ve başlık uzunluğundan bağımsızdır. Liste ucu sayaç ve konferans
-/// taşımadığından (COLLABORATION-K51) sayaçlar ve canlı/bekliyor durumu kart başına ayrıntıdan
-/// gelir ([meetingSummaryControllerProvider]); gelene kadar iskelet. Silinmiş toplantıda altta
-/// "Sildi: … · tarih", geri yükle ve kalıcı sil ([onRestore], [onPurge]; yalnız yönetici).
-class MeetingCard extends ConsumerWidget {
+/// koordinatörlük şeridi (en çok 4, kalanı "+N"), sahip (ve yer) satırı ve sayaçlar (gündem,
+/// not, kişi); yükseklik koordinatörlük sayısından ve başlık uzunluğundan bağımsızdır. Sayaçlar
+/// ve canlı/bekliyor/bitti durumu liste satırının özetindendir ([Meeting.summary],
+/// COLLABORATION-K70). Silinmiş toplantıda altta "Sildi: … · tarih", geri yükle ve kalıcı sil
+/// ([onRestore], [onPurge]; yalnız yönetici).
+class MeetingCard extends StatelessWidget {
   const MeetingCard({
     super.key,
     required this.meeting,
@@ -46,40 +43,28 @@ class MeetingCard extends ConsumerWidget {
   final VoidCallback? onPurge;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
     final m = meeting;
     final deletedAt = m.deletedAt;
-    final now = DateTime.now();
-    final extras = ref
-        .watch(meetingExtrasRepositoryProvider)
-        .of(m, DateTime(now.year, now.month, now.day));
-    // Silinmiş toplantının ayrıntısı okunamaz (COLLABORATION-K22): sayaç istenmez.
-    final summary = deletedAt == null
-        ? ref.watch(meetingSummaryControllerProvider(m.id))
-        : null;
-    final s = summary?.value;
-    final status = deletedAt != null
+    // Silinenler listesi özet taşımaz: sayaç ve durum yok.
+    final s = deletedAt == null ? m.summary : null;
+    final status = s == null
         ? null
-        : meetingStatus(
-            m,
-            now: now,
-            conference: s?.conference,
-            conferenceKnown: s != null,
-            extras: extras,
-          );
+        : meetingStatus(m, now: DateTime.now(), summary: s);
     final owner = m.departments
         .where((d) => d.id == m.ownerDepartmentId)
         .firstOrNull;
-    final ownerLine = l.meetingOwnerLine(
-      m,
-      owner == null ? '' : meetingDeptName(catalog, owner),
-      invited: false,
-    );
-    // Ayrıntı okunamadıysa sayaç yeri boş kalır (kart yine açılır).
-    final showStats = deletedAt == null && !(summary?.hasError ?? false);
+    final ownerLine = [
+      l.meetingOwnerLine(
+        m,
+        owner == null ? '' : meetingDeptName(catalog, owner),
+        invited: false,
+      ),
+      ?m.place,
+    ].join(' · ');
     return LayoutBuilder(
       builder: (context, box) {
         final wide = box.maxWidth >= _wideCard;
@@ -94,7 +79,7 @@ class MeetingCard extends ConsumerWidget {
           overflow: TextOverflow.ellipsis,
           style: t.caption.copyWith(color: c.textMuted),
         );
-        final stats = MeetingStats(summary: s, wide: wide);
+        final stats = s == null ? null : MeetingStats(summary: s, wide: wide);
         final chevron = NzIcon(
           NzIcons.chevronRight,
           size: NizamioSize.iconSizeSm,
@@ -127,13 +112,13 @@ class MeetingCard extends ConsumerWidget {
               // Tek satır: büyük metin ölçeğinde sarmak yerine küçülür.
               SizedBox(
                 height: 20,
-                child: showStats
-                    ? FittedBox(
+                child: stats == null
+                    ? null
+                    : FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: stats,
-                      )
-                    : null,
+                      ),
               ),
             ],
           ],
@@ -159,7 +144,7 @@ class MeetingCard extends ConsumerWidget {
               ),
               Gap(wide ? 20 : 14),
               Expanded(child: body),
-              if (wide && showStats) ...[const Gap(20), stats],
+              if (wide && stats != null) ...[const Gap(20), stats],
               if (deletedAt == null) ...[
                 const Gap(NizamioSpacing.space2),
                 if (wide) chevron else const Gap(NizamioSize.iconSizeSm),
@@ -170,7 +155,7 @@ class MeetingCard extends ConsumerWidget {
         final deletedLine = deletedAt == null
             ? null
             : [
-                if (extras.deletedBy case final by?)
+                if (m.deletedByName case final by?)
                   '${l.uiMeetingsDeletedBy} $by',
                 l.meetingDeletedLine(deletedAt),
               ].join(' · ');

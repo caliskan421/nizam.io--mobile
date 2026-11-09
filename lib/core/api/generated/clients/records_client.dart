@@ -119,7 +119,7 @@ abstract class RecordsClient {
         },
       };
 
-  /// Göreve dosya yükler (multipart `file` parçası; akışla). CSRF başlığı istenmez (taşıyıcı yalnız Bearer).
+  /// Göreve dosya yükler (multipart `file` parçası; akışla): şirket yöneticisi, koordinatör, atanmış üye. CSRF başlığı istenmez (taşıyıcı yalnız Bearer).
   ///
   /// [idempotencyKey] - İstemcinin ürettiği opak işlem anahtarı (en az 128 bit; ör. base64url 22 karakter; ADR-0027). Uzunluk baştaki/sondaki boşluk kırpıldıktan sonra bayt olarak 22–200'dür. Eksik ya da sınır dışı anahtar 422; program aktarımında `program.transfer_input_invalid`, oluşturma uçlarında modülün `<mod>.input_invalid` zarfı (alan `idempotency_key`, kod `<mod>.request_key_required` / `<mod>.request_key_invalid`). Aynı anahtar + aynı istek ilk sonucu döndürür (oluşturmada 200 + kaynağın bugünkü temsili, güncel görme yetkisiyle); farklı istek 409 `<mod>.idempotency_key_reused`. Anahtar aktör + uç tablosu kapsamındadır; sunucu kaynağı yaşadıkça tutar (kalıcı silinen kaynakta anahtar da gider).
   ///
@@ -164,7 +164,7 @@ abstract class RecordsClient {
     Map<String, dynamic>? extras = RecordsClient.renameFileOpenapiExtras,
   });
 
-  /// Dosyayı siler (metadata + nesne). Yalnız dosyanın `(program, departman)` ekibinde satırı olan yükleyen siler (aksi 403 `records.not_authorized`); ikinci silme 404 `records.file_not_found` alır.
+  /// Dosyayı siler (metadata + nesne). Yalnız yükleyen siler: dosyanın `(program, departman)` ekibinde satırı olan yükleyen ya da yükleyen şirket yöneticisi (aksi 403 `records.not_authorized`); ikinci silme 404 `records.file_not_found` alır.
   @DELETE('/v1/files/{id}')
   Future<void> deleteFile({
     @Path('id') required String id,

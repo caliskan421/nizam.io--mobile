@@ -61,6 +61,32 @@ final class Department {
   int get hashCode => Object.hash(id, name, kind, code, description);
 }
 
+/// Departmanın bir programa bağı (`linkDepartment`, `renameDepartmentLink` yanıtı). Ekranlarda
+/// görünen ad [displayName]'dir (programdaki ad); katalog adı ([Department.name]) değişse de bağ
+/// adı değişmez (ADR-0023 kural 4).
+@immutable
+final class DepartmentLink {
+  const DepartmentLink({
+    required this.programId,
+    required this.departmentId,
+    required this.displayName,
+  });
+
+  final String programId;
+  final String departmentId;
+  final String displayName;
+
+  @override
+  bool operator ==(Object other) =>
+      other is DepartmentLink &&
+      other.programId == programId &&
+      other.departmentId == departmentId &&
+      other.displayName == displayName;
+
+  @override
+  int get hashCode => Object.hash(programId, departmentId, displayName);
+}
+
 /// Departmana atanabilir hesap (`GET /v1/departments/{id}/assignable`).
 @immutable
 final class AssignableAccount {

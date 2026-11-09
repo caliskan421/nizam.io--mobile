@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../../core/domain/page_slice.dart';
 
-// Toplantı domain varlıkları (collaboration modülünün toplantı ve konferans uçları, `v0.3.0-api`).
+// Toplantı domain varlıkları (collaboration modülünün toplantı ve konferans uçları, `v0.12.0-api`).
 //
 // Takvimdeki `MeetingEntry` (calendar/domain/calendar.dart) [Meeting] liste satırından eşlenir
 // (yerel gün/saat, başlık, departman adları).
@@ -14,6 +14,11 @@ enum MeetingRole { admin, coordinator, member, unknown }
 /// Yönetici yaşam döngüsü sonucu (`restored`, `purged`).
 enum MeetingLifecycleStatus { restored, purged, unknown }
 
+/// Davet kipi (COLLABORATION-K73): `coordinatorship` bağlı departmanların koordinatörleri (ve
+/// `members_included` ise üyeleri); `person` yalnız tek tek seçilen katılımcılar. Kuruluşta
+/// seçilir, değişmez.
+enum MeetingInviteMode { coordinatorship, person, unknown }
+
 /// Nottan açılan görevin önceliği (istekte: `dusuk`, `orta`, `yuksek`, `acil`).
 enum MeetingTaskPriority { low, medium, high, urgent }
 
@@ -21,9 +26,44 @@ enum MeetingTaskPriority { low, medium, high, urgent }
 /// oda henüz kapanmadı.
 enum ConferenceStatus { starting, live, ending, unknown }
 
-/// Konferanstaki rol: `host` (yönetici ve toplantıya bağlı departmanın koordinatörü),
-/// `speaker` (toplantıyı gören üye).
+/// Konferanstaki rol: `host` (toplantıyı yöneten), `speaker` (toplantıyı gören üye ve
+/// katılımcı).
 enum ConferenceRole { host, speaker, unknown }
+
+/// Konferansa bağlı kişilerin son görüntüsü (COLLABORATION-K78). Uzlaştırma turunun gözlemidir,
+/// yetki kararı değildir; hiç gözlenmediyse [count] 0 ve [observedAt] null.
+@immutable
+final class ConferenceConnected {
+  const ConferenceConnected({
+    required this.count,
+    required this.accountIds,
+    this.observedAt,
+  });
+
+  static const none = ConferenceConnected(count: 0, accountIds: []);
+
+  /// Tazelik sınırı: uzlaştırma aralığı varsayılan 1 dk (`NIZAMIO_VIDEO_RECONCILE_INTERVAL`);
+  /// bundan eski gözlem "şu an bağlı" sayılmaz, zamanıyla gösterilir (F63 devri §5).
+  static const freshFor = Duration(minutes: 3);
+
+  final int count;
+
+  /// Sıralı, tekil hesap kimlikleri.
+  final List<String> accountIds;
+  final DateTime? observedAt;
+
+  /// Gözlenmiş ve [now] anında [freshFor]'dan eski değil (saat kayması: gelecekteki gözlem taze).
+  bool isFreshAt(DateTime now) {
+    final at = observedAt;
+    return at != null && now.difference(at) <= freshFor;
+  }
+
+  /// Gözlemin yaşı (tam dakika); gözlenmediyse null.
+  int? ageMinutes(DateTime now) {
+    final at = observedAt;
+    return at == null ? null : now.difference(at).inMinutes;
+  }
+}
 
 /// Toplantıya bağlı görüntülü konferans (sunucu `Conference`; dış oda adı taşınmaz).
 @immutable
@@ -33,12 +73,32 @@ final class MeetingConference {
     required this.status,
     required this.startedAt,
     required this.startedByAccountId,
+    this.connected = ConferenceConnected.none,
   });
 
   final String id;
   final ConferenceStatus status;
   final DateTime startedAt;
   final String startedByAccountId;
+  final ConferenceConnected connected;
+
+  /// Bitirme isteği kabul edildi, oda kapanışı henüz okunmadı: `ending`, bağlı görüntüsü boş.
+  MeetingConference get closing => MeetingConference(
+    id: id,
+    status: ConferenceStatus.ending,
+    startedAt: startedAt,
+    startedByAccountId: startedByAccountId,
+  );
+}
+
+/// Toplantının en yeni biten konferansı (`last_conference`, COLLABORATION-K70). Süre
+/// `endedAt − startedAt`; sistem kapanışında boş oda payı (5 dk) süreye dahildir.
+@immutable
+final class PastConference {
+  const PastConference({required this.startedAt, required this.endedAt});
+
+  final DateTime startedAt;
+  final DateTime endedAt;
 }
 
 /// Konferansa katılım token'ı (`joinConference`). [token] SIRDIR: log'a, hata metnine ve
@@ -88,7 +148,11 @@ final class Meeting {
     required this.createdAt,
     required this.updatedAt,
     required this.departments,
+    this.place,
+    this.inviteMode = MeetingInviteMode.coordinatorship,
     this.deletedAt,
+    this.deletedByName,
+    this.summary,
   });
 
   final String id;
@@ -111,17 +175,133 @@ final class Meeting {
   final DateTime updatedAt;
   final List<MeetingDepartment> departments;
 
+  /// Toplantı yeri (düz metin); belirtilmemişse null (COLLABORATION-K76).
+  final String? place;
+  final MeetingInviteMode inviteMode;
+
   /// Yumuşak silinmişse silinme anı.
   final DateTime? deletedAt;
+
+  /// Silenin adı (yalnız silinenler listesinde; eski silinmelerde ya da ad bilinmiyorsa null).
+  final String? deletedByName;
+
+  /// Liste satırının özeti (yalnız `listMeetings` satırında; diğer görüntülerde null).
+  final MeetingSummary? summary;
+
+  bool get byPerson => inviteMode == MeetingInviteMode.person;
+
+  Meeting withSummary(MeetingSummary s) => Meeting(
+    id: id,
+    programId: programId,
+    ownerDepartmentId: ownerDepartmentId,
+    title: title,
+    meetingDate: meetingDate,
+    membersIncluded: membersIncluded,
+    createdByAccountId: createdByAccountId,
+    createdByRole: createdByRole,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    departments: departments,
+    place: place,
+    inviteMode: inviteMode,
+    deletedAt: deletedAt,
+    deletedByName: deletedByName,
+    summary: s,
+  );
+}
+
+/// Liste ucundaki konferans durumu: `none` hiç açılmadı; `starting`/`live`/`ending` açık
+/// konferansın durumu; `ended` açık konferans yok, son konferans bitti.
+enum SummaryConferenceStatus { none, starting, live, ending, ended, unknown }
+
+/// Toplantı satırı özeti (sunucu `MeetingSummary`, COLLABORATION-K70/K78): kart sayaçları ve
+/// konferans durumu. Ayrıntıdan da türetilir ([MeetingSummary.of]); açık ayrıntı yazdıkça liste
+/// kartı ağ isteği olmadan güncellenir.
+@immutable
+final class MeetingSummary {
+  const MeetingSummary({
+    required this.agendaTotal,
+    required this.agendaChecked,
+    required this.noteCount,
+    required this.participantCount,
+    required this.conferenceStatus,
+    required this.connectedCount,
+    this.conferenceStartedAt,
+    this.conferenceEndedAt,
+  });
+
+  /// Ayrıntının güncel sayaçları ([notes]: okunan bütün notların sayısı). Açık konferans varsa
+  /// onun, yoksa son biten konferansın anları.
+  factory MeetingSummary.of(MeetingDetail d, {required int notes}) {
+    final c = d.conference;
+    final last = d.lastConference;
+    return MeetingSummary(
+      agendaTotal: d.agenda.length,
+      agendaChecked: d.agenda.where((a) => a.isChecked).length,
+      noteCount: notes,
+      participantCount: d.participants.length,
+      conferenceStatus: c != null
+          ? switch (c.status) {
+              ConferenceStatus.starting => SummaryConferenceStatus.starting,
+              ConferenceStatus.live => SummaryConferenceStatus.live,
+              ConferenceStatus.ending => SummaryConferenceStatus.ending,
+              ConferenceStatus.unknown => SummaryConferenceStatus.unknown,
+            }
+          : last != null
+          ? SummaryConferenceStatus.ended
+          : SummaryConferenceStatus.none,
+      conferenceStartedAt: c?.startedAt ?? last?.startedAt,
+      conferenceEndedAt: c == null ? last?.endedAt : null,
+      connectedCount: c?.connected.count ?? 0,
+    );
+  }
+
+  final int agendaTotal;
+  final int agendaChecked;
+  final int noteCount;
+  final int participantCount;
+  final SummaryConferenceStatus conferenceStatus;
+
+  /// `starting`/`live` iken null; `ending`/`ended` iken kapanma anı.
+  final DateTime? conferenceStartedAt;
+  final DateTime? conferenceEndedAt;
+
+  /// Bağlı kişi sayısı (`none`/`ended` iken 0).
+  final int connectedCount;
+}
+
+/// Katılımcının toplantının programındaki ekip satırı (COLLABORATION-K72; görüntüdür).
+@immutable
+final class ParticipantTeam {
+  const ParticipantTeam({
+    required this.departmentId,
+    required this.departmentName,
+    required this.coordinator,
+  });
+
+  final String departmentId;
+
+  /// Departmanın programdaki adı.
+  final String departmentName;
+
+  /// Oradaki rol koordinatör mü (değilse üye).
+  final bool coordinator;
 }
 
 /// Toplantı katılımcısı.
 @immutable
 final class MeetingParticipant {
-  const MeetingParticipant({required this.accountId, required this.fullName});
+  const MeetingParticipant({
+    required this.accountId,
+    required this.fullName,
+    this.teams = const [],
+  });
 
   final String accountId;
   final String fullName;
+
+  /// Programdaki ekip satırları; ekip satırı olmayan (yalnız yönetici) katılımcıda boş.
+  final List<ParticipantTeam> teams;
 }
 
 /// Gündem maddesi.
@@ -195,6 +375,7 @@ final class MeetingDetail {
     required this.agenda,
     required this.notes,
     this.conference,
+    this.lastConference,
     this.conferenceAvailable = false,
   });
 
@@ -211,6 +392,9 @@ final class MeetingDetail {
   /// Aktif ya da kapanmakta olan konferans; yoksa `null`.
   final MeetingConference? conference;
 
+  /// En yeni biten konferans; [conference] ile ikisi de null ise hiç konferans açılmadı.
+  final PastConference? lastConference;
+
   /// Bağlı video sağlayıcısı oda açabiliyor mu (sağlayıcı `none` iken `false`). Başlat
   /// düğmesi buna göre gösterilir.
   final bool conferenceAvailable;
@@ -226,6 +410,7 @@ final class MeetingDetail {
     agenda: agenda ?? this.agenda,
     notes: notes,
     conference: conference == null ? this.conference : conference(),
+    lastConference: lastConference,
     conferenceAvailable: conferenceAvailable,
   );
 }
@@ -299,9 +484,17 @@ final class MeetingDraft {
     this.membersIncluded,
     this.agendaItems,
     this.isInstant,
+    this.place,
+    this.inviteMode = MeetingInviteMode.coordinatorship,
   });
 
   final String title;
+
+  /// Yer (en çok 200 karakter); null → yer yok.
+  final String? place;
+
+  /// `person` kipinde [departmentIds] tek eleman (sahip) ve [membersIncluded] `true` olamaz.
+  final MeetingInviteMode inviteMode;
 
   /// UTC ise RFC 3339 (`Z`) gönderilir; yerel (UTC olmayan) değer saat dilimsiz duvar saati
   /// (`YYYY-MM-DDTHH:MM:SS`) olarak gider ve sunucu onu KURULUM saat diliminde yorumlar.
@@ -319,7 +512,8 @@ final class MeetingDraft {
   final bool? isInstant;
 }
 
-/// Toplantı güncellemesi; `null` alan değişmez. Departman seti yalnız yönetici yolunda.
+/// Toplantı güncellemesi; `null` alan değişmez. Departman seti yalnız yönetici yolunda; `person`
+/// kipinde departman seti ve üye bayrağı gönderilmez (422). Kip değişmez.
 @immutable
 final class MeetingChanges {
   const MeetingChanges({
@@ -327,9 +521,13 @@ final class MeetingChanges {
     this.meetingDate,
     this.departmentIds,
     this.membersIncluded,
+    this.place,
   });
 
   final String? title;
+
+  /// Boş dizge yeri kaldırır.
+  final String? place;
 
   /// [MeetingDraft.meetingDate] ile aynı kural.
   final DateTime? meetingDate;

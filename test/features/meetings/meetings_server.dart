@@ -19,6 +19,9 @@ Map<String, Object?> meetingWire({
   String date = '2030-01-10T07:00:00Z',
   String? deletedAt,
   List<String> departments = const ['d1', 'd2'],
+  String inviteMode = 'coordinatorship',
+  String? place,
+  Map<String, Object?>? summary,
 }) => {
   'meeting_id': id,
   'program_id': 'prog-1',
@@ -26,6 +29,8 @@ Map<String, Object?> meetingWire({
   'title': title,
   'meeting_date': date,
   'members_included': false,
+  'invite_mode': inviteMode,
+  'place': place,
   'created_by_account_id': 'acc-1',
   'created_by_role': 'admin',
   'created_at': _t,
@@ -35,6 +40,58 @@ Map<String, Object?> meetingWire({
       {'department_id': d, 'department_name': 'Ad $d'},
   ],
   'deleted_at': deletedAt,
+  'summary': ?summary,
+};
+
+/// Liste satırı özeti (`MeetingSummary`).
+Map<String, Object?> summaryWire({
+  int agenda = 2,
+  int checked = 0,
+  int notes = 1,
+  int people = 1,
+  String status = 'none',
+  String? started,
+  String? ended,
+  int connected = 0,
+}) => {
+  'agenda_total': agenda,
+  'agenda_checked': checked,
+  'note_count': notes,
+  'participant_count': people,
+  'conference_status': status,
+  'conference_started_at': started,
+  'conference_ended_at': ended,
+  'connected_count': connected,
+};
+
+/// Katılımcı satırı (`Participant`); [teams]: (departman, rol) çiftleri.
+Map<String, Object?> participantWire(
+  String id,
+  String name, {
+  List<(String, String)> teams = const [],
+}) => {
+  'account_id': id,
+  'full_name': name,
+  'teams': [
+    for (final (d, role) in teams)
+      {'department_id': d, 'department_name': 'Ad $d', 'role': role},
+  ],
+};
+
+/// Konferans (`Conference`); [connected] bağlı hesaplar (gözlenmişse).
+Map<String, Object?> conferenceWire({
+  String status = 'live',
+  List<String>? connected,
+}) => {
+  'id': 'c1',
+  'status': status,
+  'started_at': _t,
+  'started_by_account_id': 'acc-1',
+  'connected': {
+    'count': connected?.length ?? 0,
+    'account_ids': connected ?? const <String>[],
+    'observed_at': connected == null ? null : _t,
+  },
 };
 
 Map<String, Object?> agendaWire(
@@ -86,14 +143,18 @@ class MeetingsServer {
 
   /// `listMeetings` sayfaları (imleç `c1`, `c2`… ile ilerler).
   List<List<Map<String, Object?>>> pages = [
-    [meetingWire()],
+    [meetingWire(summary: summaryWire())],
   ];
   List<Map<String, Object?>> deleted = [];
 
   String viewerRole = 'admin';
   List<Map<String, Object?>> participants = [
-    {'account_id': 'acc-1', 'full_name': 'Ayşe Yılmaz'},
+    participantWire('acc-1', 'Ayşe Yılmaz'),
   ];
+
+  /// Ayrıntının davet kipi ve son biten konferansı.
+  String inviteMode = 'coordinatorship';
+  Map<String, Object?>? lastConference;
   List<Map<String, Object?>> agenda = [
     agendaWire('g1'),
     agendaWire('g2', order: 2),
@@ -154,8 +215,9 @@ class MeetingsServer {
         return jsonResponse(200, {'items': deleted, 'next_cursor': ''});
       case 'GET /v1/meetings/m1':
         return jsonResponse(200, {
-          ...meetingWire(),
+          ...meetingWire(inviteMode: inviteMode),
           'conference': conference,
+          'last_conference': lastConference,
           'conference_available': true,
           'viewer_role': viewerRole,
           'participants': participants,
@@ -182,14 +244,7 @@ class MeetingsServer {
           ),
         );
       case 'POST /v1/meetings/m1/conference':
-        return jsonResponse(201, {
-          'conference': {
-            'id': 'c1',
-            'status': 'live',
-            'started_at': _t,
-            'started_by_account_id': 'acc-1',
-          },
-        });
+        return jsonResponse(201, {'conference': conferenceWire()});
       case 'POST /v1/meetings/m1/participants':
         return jsonResponse(201, {
           'meeting_id': 'm1',
@@ -203,7 +258,7 @@ class MeetingsServer {
         });
       case 'PATCH /v1/meetings/m1':
         return jsonResponse(200, {
-          ...meetingWire(),
+          ...meetingWire(inviteMode: inviteMode),
           'side_effects': {'failed_messages': 0, 'event_failed': false},
         });
       case 'PATCH /v1/admin/restore/meetings/mx':

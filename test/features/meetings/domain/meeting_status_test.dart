@@ -1,15 +1,14 @@
-// Toplantı durumu (canlı, bekliyor, yapılmadı, bitti) ve kart sayaçları; dev örnek olguları
-// kimlikten kararlı ve üretimde boş.
+// Toplantı durumu (canlı, bekliyor, yapılmadı, bitti) sunucu özetinden; ayrıntıdan türetilen
+// özet (sayaçlar, açık/son konferans, bağlı kişi).
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/domain/page_slice.dart';
-import 'package:nizamio/features/meetings/data/sample/sample_meeting_extras.dart';
 import 'package:nizamio/features/meetings/domain/meeting.dart';
 import 'package:nizamio/features/meetings/domain/meeting_status.dart';
 
 final _now = DateTime(2026, 10, 14, 14, 27);
 
-Meeting _m(DateTime at, {String id = 'm', DateTime? deletedAt}) => Meeting(
-  id: id,
+Meeting _m(DateTime at, {MeetingSummary? summary}) => Meeting(
+  id: 'm',
   programId: 'p',
   ownerDepartmentId: 'd',
   title: 't',
@@ -20,67 +19,89 @@ Meeting _m(DateTime at, {String id = 'm', DateTime? deletedAt}) => Meeting(
   createdAt: at,
   updatedAt: at,
   departments: const [MeetingDepartment(id: 'd', name: 'D')],
-  deletedAt: deletedAt,
+  summary: summary,
 );
 
-MeetingConference _conf(ConferenceStatus s) => MeetingConference(
-  id: 'c',
-  status: s,
-  startedAt: _now,
-  startedByAccountId: 'a',
+MeetingSummary _s(
+  SummaryConferenceStatus st, {
+  DateTime? start,
+  DateTime? end,
+}) => MeetingSummary(
+  agendaTotal: 0,
+  agendaChecked: 0,
+  noteCount: 0,
+  participantCount: 0,
+  conferenceStatus: st,
+  conferenceStartedAt: start,
+  conferenceEndedAt: end,
+  connectedCount: 0,
 );
+
+MeetingStatus? _status(DateTime at, MeetingSummary? s) =>
+    meetingStatus(_m(at, summary: s), now: _now);
 
 void main() {
-  test('canlı konferans her şeyden önce; kapanan konferans canlı sayılmaz', () {
-    final m = _m(DateTime(2026, 10, 14, 14));
-    expect(
-      meetingStatus(m, now: _now, conference: _conf(ConferenceStatus.live)),
-      const MeetingStatus(MeetingPhase.live),
-    );
-    expect(
-      meetingStatus(m, now: _now, conference: _conf(ConferenceStatus.starting)),
-      const MeetingStatus(MeetingPhase.live),
-    );
-    expect(
-      meetingStatus(
-        m,
-        now: _now,
-        conference: _conf(ConferenceStatus.ending),
-        conferenceKnown: true,
-      ),
-      const MeetingStatus(MeetingPhase.waiting),
-    );
+  final today14 = DateTime(2026, 10, 14, 14);
+  final yesterday = DateTime(2026, 10, 13, 10);
+  final tomorrow = DateTime(2026, 10, 15, 10);
+
+  test('özet yoksa durum yok (silinenler, kuruluş yanıtı)', () {
+    expect(_status(yesterday, null), isNull);
   });
 
-  test('bekliyor: bugün, saati geçmiş, konferans bilgisi okunmuş ve yok', () {
-    final past = _m(DateTime(2026, 10, 14, 14));
-    final later = _m(DateTime(2026, 10, 14, 16, 30));
-    expect(meetingStatus(past, now: _now), isNull, reason: 'bilinmiyor');
-    expect(
-      meetingStatus(past, now: _now, conferenceKnown: true),
-      const MeetingStatus(MeetingPhase.waiting),
-    );
-    expect(meetingStatus(later, now: _now, conferenceKnown: true), isNull);
+  test('açılan ve süren konferans canlı', () {
+    for (final st in [
+      SummaryConferenceStatus.starting,
+      SummaryConferenceStatus.live,
+    ]) {
+      expect(
+        _status(tomorrow, _s(st, start: _now)),
+        const MeetingStatus(MeetingPhase.live),
+      );
+    }
   });
 
-  test('bitti ve yapılmadı yalnız olgudan gelir', () {
-    final m = _m(DateTime(2026, 10, 12, 10));
-    expect(meetingStatus(m, now: _now, conferenceKnown: true), isNull);
+  test('biten konferans: süre başlangıç–bitişten, dakikaya yuvarlanır', () {
+    final start = DateTime.utc(2026, 10, 13, 7);
     expect(
-      meetingStatus(
-        m,
-        now: _now,
-        extras: const MeetingExtras(finishedMinutes: 42),
+      _status(
+        yesterday,
+        _s(
+          SummaryConferenceStatus.ended,
+          start: start,
+          end: start.add(const Duration(minutes: 41, seconds: 40)),
+        ),
       ),
       const MeetingStatus(MeetingPhase.finished, minutes: 42),
     );
+    // Kapanmakta olan konferansın kapanma anı biliniyorsa da bitti.
     expect(
-      meetingStatus(m, now: _now, extras: const MeetingExtras(notHeld: true)),
-      const MeetingStatus(MeetingPhase.notHeld),
+      _status(
+        today14,
+        _s(
+          SummaryConferenceStatus.ending,
+          start: start,
+          end: start.add(const Duration(minutes: 5)),
+        ),
+      ),
+      const MeetingStatus(MeetingPhase.finished, minutes: 5),
     );
   });
 
-  test('sayaçlar: işaretli gündem, ilk not sayfası (+ devamı), katılımcı', () {
+  test('anı eksik bitti/kapanıyor ve bilinmeyen durum: durum yok', () {
+    expect(_status(yesterday, _s(SummaryConferenceStatus.ending)), isNull);
+    expect(_status(yesterday, _s(SummaryConferenceStatus.unknown)), isNull);
+  });
+
+  test('hiç açılmadı: geçmiş gün yapılmadı, bugün saati geçtiyse bekliyor', () {
+    final none = _s(SummaryConferenceStatus.none);
+    expect(_status(yesterday, none), const MeetingStatus(MeetingPhase.notHeld));
+    expect(_status(today14, none), const MeetingStatus(MeetingPhase.waiting));
+    expect(_status(DateTime(2026, 10, 14, 15), none), isNull, reason: 'sonra');
+    expect(_status(tomorrow, none), isNull);
+  });
+
+  group('ayrıntıdan özet', () {
     AgendaItem a(String id, {bool done = false}) => AgendaItem(
       id: id,
       meetingId: 'm',
@@ -89,53 +110,63 @@ void main() {
       isChecked: done,
       createdAt: _now,
     );
-    final d = MeetingDetail(
-      meeting: _m(_now),
-      viewerRole: MeetingRole.admin,
-      participants: const [MeetingParticipant(accountId: 'x', fullName: 'X')],
-      agenda: [a('1', done: true), a('2')],
-      notes: PageSlice(items: const [], nextCursor: 'n2'),
-    );
-    final s = MeetingSummary.of(d);
-    expect(
-      (s.agendaDone, s.agendaTotal, s.notes, s.moreNotes, s.people),
-      (1, 2, 0, true, 1),
-    );
-    final all = MeetingSummary.of(d, notes: 23);
-    expect((all.notes, all.moreNotes), (23, false));
-  });
+    MeetingDetail d({MeetingConference? conference, PastConference? last}) =>
+        MeetingDetail(
+          meeting: _m(_now),
+          viewerRole: MeetingRole.admin,
+          participants: const [
+            MeetingParticipant(accountId: 'x', fullName: 'X'),
+          ],
+          agenda: [a('1', done: true), a('2')],
+          notes: PageSlice(items: const [], nextCursor: 'n2'),
+          conference: conference,
+          lastConference: last,
+        );
 
-  test(
-    'dev örnek olguları kimlikten kararlı; geleceğe geçmiş olgusu yazılmaz',
-    () {
-      const x = SampleMeetingExtras();
-      final today = DateTime(2026, 10, 14);
-      final future = x.of(_m(DateTime(2026, 10, 20), id: 'a'), today);
+    test('sayaçlar: işaretli gündem, okunan not sayısı, katılımcı', () {
+      final s = MeetingSummary.of(d(), notes: 23);
       expect(
-        (future.finishedMinutes, future.notHeld, future.deletedBy),
-        (null, false, null),
+        (s.agendaChecked, s.agendaTotal, s.noteCount, s.participantCount),
+        (1, 2, 23, 1),
       );
-      final pasts = [
-        for (var i = 0; i < 12; i++)
-          x.of(_m(DateTime(2026, 10, 1), id: 'm$i'), today),
-      ];
-      expect(pasts.any((e) => e.notHeld), isTrue);
-      expect(pasts.any((e) => e.finishedMinutes != null), isTrue);
-      expect(
-        pasts.every((e) => e.notHeld != (e.finishedMinutes != null)),
-        isTrue,
-        reason: 'geçmiş toplantı ya bitti ya yapılmadı',
+      expect(s.conferenceStatus, SummaryConferenceStatus.none);
+      expect(s.connectedCount, 0);
+    });
+
+    test('açık konferans: durumu, başlangıcı ve bağlı kişi sayısı', () {
+      final s = MeetingSummary.of(
+        d(
+          conference: MeetingConference(
+            id: 'c',
+            status: ConferenceStatus.live,
+            startedAt: _now,
+            startedByAccountId: 'a',
+            connected: ConferenceConnected(
+              count: 2,
+              accountIds: const ['x', 'y'],
+              observedAt: _now,
+            ),
+          ),
+          last: PastConference(startedAt: _now, endedAt: _now),
+        ),
+        notes: 0,
       );
-      expect(
-        x.of(_m(DateTime(2026, 10, 1), id: 'm1'), today).finishedMinutes,
-        x.of(_m(DateTime(2026, 10, 1), id: 'm1'), today).finishedMinutes,
+      expect(s.conferenceStatus, SummaryConferenceStatus.live);
+      expect(s.conferenceStartedAt, _now);
+      expect(s.conferenceEndedAt, isNull);
+      expect(s.connectedCount, 2);
+    });
+
+    test('yalnız son konferans: bitti ve anları', () {
+      final end = _now.add(const Duration(minutes: 30));
+      final s = MeetingSummary.of(
+        d(
+          last: PastConference(startedAt: _now, endedAt: end),
+        ),
+        notes: 0,
       );
-      final del = x.of(_m(DateTime(2026, 10, 1), deletedAt: _now), today);
-      expect(del.deletedBy, isNotNull);
-      expect(
-        const NoMeetingExtras().of(_m(DateTime(2026, 10, 1)), today),
-        same(MeetingExtras.none),
-      );
-    },
-  );
+      expect(s.conferenceStatus, SummaryConferenceStatus.ended);
+      expect((s.conferenceStartedAt, s.conferenceEndedAt), (_now, end));
+    });
+  });
 }

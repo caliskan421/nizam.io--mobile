@@ -7,12 +7,17 @@ import '../../../core/api/generated/models/conference.dart' as api;
 import '../../../core/api/generated/models/convert_note_request.dart';
 import '../../../core/api/generated/models/convert_note_request_priority.dart';
 import '../../../core/api/generated/models/create_meeting_request.dart';
+import '../../../core/api/generated/models/create_meeting_request_invite_mode.dart';
+import '../../../core/api/generated/models/last_conference.dart' as api;
 import '../../../core/api/generated/models/meeting.dart' as api;
+import '../../../core/api/generated/models/meeting_deleted_by.dart' as api;
 import '../../../core/api/generated/models/meeting_department.dart' as api;
+import '../../../core/api/generated/models/meeting_invite_mode.dart' as api;
 import '../../../core/api/generated/models/meeting_list.dart' as api;
 import '../../../core/api/generated/models/meeting_note.dart' as api;
 import '../../../core/api/generated/models/meeting_note_list.dart' as api;
 import '../../../core/api/generated/models/meeting_side_effects.dart' as api;
+import '../../../core/api/generated/models/meeting_summary.dart' as api;
 import '../../../core/api/generated/models/note_request.dart';
 import '../../../core/api/generated/models/participant.dart' as api;
 import '../../../core/api/generated/models/participant_request.dart';
@@ -22,6 +27,7 @@ import '../../../core/api/generated/models/update_meeting_request.dart';
 import '../../../core/domain/enum_parse.dart';
 import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/http/interceptors.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../domain/meeting.dart';
 import '../domain/meetings_repository.dart';
@@ -54,6 +60,10 @@ class ApiMeetingsRepository implements MeetingsRepository {
           membersIncluded: draft.membersIncluded,
           agendaItems: draft.agendaItems,
           isInstant: draft.isInstant,
+          place: draft.place,
+          inviteMode: draft.inviteMode == MeetingInviteMode.person
+              ? CreateMeetingRequestInviteMode.person
+              : CreateMeetingRequestInviteMode.coordinatorship,
         ),
       ),
     );
@@ -132,6 +142,8 @@ class ApiMeetingsRepository implements MeetingsRepository {
         createdAt: r.createdAt,
         updatedAt: r.updatedAt,
         departments: _departments(r.departments),
+        place: r.place,
+        inviteMode: _inviteMode(r.inviteMode),
         deletedAt: r.deletedAt,
       ),
       viewerRole: _role(r.viewerRole.json),
@@ -139,6 +151,9 @@ class ApiMeetingsRepository implements MeetingsRepository {
       agenda: List.unmodifiable(r.agenda.map(_agenda)),
       notes: _notes(r.notes),
       conference: r.conference == null ? null : _conference(r.conference!),
+      lastConference: r.lastConference == null
+          ? null
+          : _pastConference(r.lastConference!),
       conferenceAvailable: r.conferenceAvailable,
     );
   }
@@ -157,6 +172,7 @@ class ApiMeetingsRepository implements MeetingsRepository {
           meetingDate: date == null ? null : meetingDateWire(date),
           departmentIds: changes.departmentIds,
           membersIncluded: changes.membersIncluded,
+          place: changes.place,
         ),
       ),
     );
@@ -173,6 +189,8 @@ class ApiMeetingsRepository implements MeetingsRepository {
         createdAt: r.createdAt,
         updatedAt: r.updatedAt,
         departments: _departments(r.departments),
+        place: r.place,
+        inviteMode: _inviteMode(r.inviteMode),
         deletedAt: r.deletedAt,
       ),
       sideEffects: _effects(r.sideEffects),
@@ -280,8 +298,16 @@ class ApiMeetingsRepository implements MeetingsRepository {
   );
 
   @override
-  Future<void> deleteNote(String noteId) =>
-      apiCall(() => _client.deleteMeetingNote(noteId: noteId));
+  Future<void> deleteNote(String noteId, {required String programId}) =>
+      apiCall(
+        () => _client.deleteMeetingNote(
+          noteId: noteId,
+          extras: withProgram(
+            CollaborationClient.deleteMeetingNoteOpenapiExtras,
+            programId,
+          ),
+        ),
+      );
 
   /// Not: üretilmiş `ConvertNoteRequest` `format: date` alanlarını tam ISO tarih-saat
   /// (`2026-11-03T00:00:00.000`) olarak yazar; sunucu yalnız `YYYY-MM-DD` kabul eder. Üretici
@@ -343,7 +369,18 @@ class ApiMeetingsRepository implements MeetingsRepository {
     ),
     startedAt: c.startedAt,
     startedByAccountId: c.startedByAccountId,
+    connected: ConferenceConnected(
+      count: c.connected.count,
+      accountIds: List.unmodifiable(c.connected.accountIds),
+      observedAt: c.connected.observedAt,
+    ),
   );
+
+  static PastConference _pastConference(api.LastConference c) =>
+      PastConference(startedAt: c.startedAt, endedAt: c.endedAt);
+
+  static MeetingInviteMode _inviteMode(api.MeetingInviteMode m) =>
+      enumFromWire(MeetingInviteMode.values, m.json, MeetingInviteMode.unknown);
 
   /// `meeting_date` tel biçimi: UTC → RFC 3339 (`…Z`); yerel → saat dilimsiz duvar saati
   /// (`YYYY-MM-DDTHH:MM:SS`, sunucu kurulum saat diliminde yorumlar).
@@ -407,11 +444,48 @@ class ApiMeetingsRepository implements MeetingsRepository {
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
     departments: _departments(r.departments),
+    place: r.place,
+    inviteMode: _inviteMode(r.inviteMode),
     deletedAt: r.deletedAt,
+    deletedByName: _deletedBy(r.deletedBy),
+    summary: r.summary == null ? null : _summary(r.summary!),
+  );
+
+  /// Silenin adı; hesap bulunamazsa sunucu boş ad döner → null.
+  static String? _deletedBy(api.MeetingDeletedBy? b) {
+    final name = b?.fullName.trim() ?? '';
+    return name.isEmpty ? null : name;
+  }
+
+  static MeetingSummary _summary(api.MeetingSummary s) => MeetingSummary(
+    agendaTotal: s.agendaTotal,
+    agendaChecked: s.agendaChecked,
+    noteCount: s.noteCount,
+    participantCount: s.participantCount,
+    conferenceStatus: enumFromWire(
+      SummaryConferenceStatus.values,
+      s.conferenceStatus.json,
+      SummaryConferenceStatus.unknown,
+    ),
+    conferenceStartedAt: s.conferenceStartedAt,
+    conferenceEndedAt: s.conferenceEndedAt,
+    connectedCount: s.connectedCount,
   );
 
   static MeetingParticipant _participant(api.Participant r) =>
-      MeetingParticipant(accountId: r.accountId, fullName: r.fullName);
+      MeetingParticipant(
+        accountId: r.accountId,
+        fullName: r.fullName,
+        teams: List.unmodifiable(
+          r.teams.map(
+            (t) => ParticipantTeam(
+              departmentId: t.departmentId,
+              departmentName: t.departmentName,
+              coordinator: t.role.json == 'coordinator',
+            ),
+          ),
+        ),
+      );
 
   static AgendaItem _agenda(api.AgendaItem r) => AgendaItem(
     id: r.agendaItemId,

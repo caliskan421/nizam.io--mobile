@@ -17,7 +17,8 @@ T _$identity<T>(T value) => value;
 mixin _$UpdateMeetingRequest {
 
  String? get title;/// Verilirse kuruluştaki kuralla aynı: geçmiş gün olamaz.
-@JsonKey(name: 'meeting_date') String? get meetingDate;@JsonKey(name: 'department_ids') List<String>? get departmentIds;@JsonKey(name: 'members_included') bool? get membersIncluded;
+@JsonKey(name: 'meeting_date') String? get meetingDate;/// Alan yoksa yer değişmez; `null` ya da boş dizge yeri kaldırır; değer kuruluştaki kuralla doğrulanır (COLLABORATION-K76).
+ String? get place;@JsonKey(name: 'department_ids') List<String>? get departmentIds;@JsonKey(name: 'members_included') bool? get membersIncluded;
 /// Create a copy of UpdateMeetingRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,20 +32,20 @@ $UpdateMeetingRequestCopyWith<UpdateMeetingRequest> get copyWith => _$UpdateMeet
 @override
 bool operator ==(Object other) {
   final _this = this as UpdateMeetingRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateMeetingRequest&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.meetingDate, _this.meetingDate) || other.meetingDate == _this.meetingDate)&&const DeepCollectionEquality().equals(other.departmentIds, _this.departmentIds)&&(identical(other.membersIncluded, _this.membersIncluded) || other.membersIncluded == _this.membersIncluded));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateMeetingRequest&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.meetingDate, _this.meetingDate) || other.meetingDate == _this.meetingDate)&&(identical(other.place, _this.place) || other.place == _this.place)&&const DeepCollectionEquality().equals(other.departmentIds, _this.departmentIds)&&(identical(other.membersIncluded, _this.membersIncluded) || other.membersIncluded == _this.membersIncluded));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as UpdateMeetingRequest;
-  return Object.hash(runtimeType,_this.title,_this.meetingDate,const DeepCollectionEquality().hash(_this.departmentIds),_this.membersIncluded);
+  return Object.hash(runtimeType,_this.title,_this.meetingDate,_this.place,const DeepCollectionEquality().hash(_this.departmentIds),_this.membersIncluded);
 }
 
 @override
 String toString() {
   final _this = this as UpdateMeetingRequest;
-  return 'UpdateMeetingRequest(title: ${_this.title}, meetingDate: ${_this.meetingDate}, departmentIds: ${_this.departmentIds}, membersIncluded: ${_this.membersIncluded})';
+  return 'UpdateMeetingRequest(title: ${_this.title}, meetingDate: ${_this.meetingDate}, place: ${_this.place}, departmentIds: ${_this.departmentIds}, membersIncluded: ${_this.membersIncluded})';
 }
 
 
@@ -55,7 +56,7 @@ abstract mixin class $UpdateMeetingRequestCopyWith<$Res>  {
   factory $UpdateMeetingRequestCopyWith(UpdateMeetingRequest value, $Res Function(UpdateMeetingRequest) _then) = _$UpdateMeetingRequestCopyWithImpl;
 @useResult
 $Res call({
- String? title,@JsonKey(name: 'meeting_date') String? meetingDate,@JsonKey(name: 'department_ids') List<String>? departmentIds,@JsonKey(name: 'members_included') bool? membersIncluded
+ String? title,@JsonKey(name: 'meeting_date') String? meetingDate, String? place,@JsonKey(name: 'department_ids') List<String>? departmentIds,@JsonKey(name: 'members_included') bool? membersIncluded
 });
 
 
@@ -72,10 +73,11 @@ class _$UpdateMeetingRequestCopyWithImpl<$Res>
 
 /// Create a copy of UpdateMeetingRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? title = freezed,Object? meetingDate = freezed,Object? departmentIds = freezed,Object? membersIncluded = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? title = freezed,Object? meetingDate = freezed,Object? place = freezed,Object? departmentIds = freezed,Object? membersIncluded = freezed,}) {
   return _then(UpdateMeetingRequest(
 title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,meetingDate: freezed == meetingDate ? _self.meetingDate : meetingDate // ignore: cast_nullable_to_non_nullable
+as String?,place: freezed == place ? _self.place : place // ignore: cast_nullable_to_non_nullable
 as String?,departmentIds: freezed == departmentIds ? _self.departmentIds : departmentIds // ignore: cast_nullable_to_non_nullable
 as List<String>?,membersIncluded: freezed == membersIncluded ? _self.membersIncluded : membersIncluded // ignore: cast_nullable_to_non_nullable
 as bool?,
@@ -163,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? title, @JsonKey(name: 'meeting_date')  String? meetingDate, @JsonKey(name: 'department_ids')  List<String>? departmentIds, @JsonKey(name: 'members_included')  bool? membersIncluded)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? title, @JsonKey(name: 'meeting_date')  String? meetingDate,  String? place, @JsonKey(name: 'department_ids')  List<String>? departmentIds, @JsonKey(name: 'members_included')  bool? membersIncluded)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UpdateMeetingRequest() when $default != null:
-return $default(_that.title,_that.meetingDate,_that.departmentIds,_that.membersIncluded);case _:
+return $default(_that.title,_that.meetingDate,_that.place,_that.departmentIds,_that.membersIncluded);case _:
   return orElse();
 
 }
@@ -184,10 +186,10 @@ return $default(_that.title,_that.meetingDate,_that.departmentIds,_that.membersI
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? title, @JsonKey(name: 'meeting_date')  String? meetingDate, @JsonKey(name: 'department_ids')  List<String>? departmentIds, @JsonKey(name: 'members_included')  bool? membersIncluded)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? title, @JsonKey(name: 'meeting_date')  String? meetingDate,  String? place, @JsonKey(name: 'department_ids')  List<String>? departmentIds, @JsonKey(name: 'members_included')  bool? membersIncluded)  $default,) {final _that = this;
 switch (_that) {
 case _UpdateMeetingRequest():
-return $default(_that.title,_that.meetingDate,_that.departmentIds,_that.membersIncluded);case _:
+return $default(_that.title,_that.meetingDate,_that.place,_that.departmentIds,_that.membersIncluded);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +206,10 @@ return $default(_that.title,_that.meetingDate,_that.departmentIds,_that.membersI
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? title, @JsonKey(name: 'meeting_date')  String? meetingDate, @JsonKey(name: 'department_ids')  List<String>? departmentIds, @JsonKey(name: 'members_included')  bool? membersIncluded)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? title, @JsonKey(name: 'meeting_date')  String? meetingDate,  String? place, @JsonKey(name: 'department_ids')  List<String>? departmentIds, @JsonKey(name: 'members_included')  bool? membersIncluded)?  $default,) {final _that = this;
 switch (_that) {
 case _UpdateMeetingRequest() when $default != null:
-return $default(_that.title,_that.meetingDate,_that.departmentIds,_that.membersIncluded);case _:
+return $default(_that.title,_that.meetingDate,_that.place,_that.departmentIds,_that.membersIncluded);case _:
   return null;
 
 }
@@ -219,12 +221,14 @@ return $default(_that.title,_that.meetingDate,_that.departmentIds,_that.membersI
 @JsonSerializable()
 
 class _UpdateMeetingRequest implements UpdateMeetingRequest {
-  const _UpdateMeetingRequest({this.title, @JsonKey(name: 'meeting_date') this.meetingDate, @JsonKey(name: 'department_ids')  List<String>? departmentIds, @JsonKey(name: 'members_included') this.membersIncluded}): _departmentIds = departmentIds;
+  const _UpdateMeetingRequest({this.title, @JsonKey(name: 'meeting_date') this.meetingDate, this.place, @JsonKey(name: 'department_ids')  List<String>? departmentIds, @JsonKey(name: 'members_included') this.membersIncluded}): _departmentIds = departmentIds;
   factory _UpdateMeetingRequest.fromJson(Map<String, dynamic> json) => _$UpdateMeetingRequestFromJson(json);
 
 @override final  String? title;
 /// Verilirse kuruluştaki kuralla aynı: geçmiş gün olamaz.
 @override@JsonKey(name: 'meeting_date') final  String? meetingDate;
+/// Alan yoksa yer değişmez; `null` ya da boş dizge yeri kaldırır; değer kuruluştaki kuralla doğrulanır (COLLABORATION-K76).
+@override final  String? place;
  final  List<String>? _departmentIds;
 @override@JsonKey(name: 'department_ids') List<String>? get departmentIds {
   final value = _departmentIds;
@@ -249,18 +253,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateMeetingRequest&&(identical(other.title, title) || other.title == title)&&(identical(other.meetingDate, meetingDate) || other.meetingDate == meetingDate)&&const DeepCollectionEquality().equals(other.departmentIds, _departmentIds)&&(identical(other.membersIncluded, membersIncluded) || other.membersIncluded == membersIncluded));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateMeetingRequest&&(identical(other.title, title) || other.title == title)&&(identical(other.meetingDate, meetingDate) || other.meetingDate == meetingDate)&&(identical(other.place, place) || other.place == place)&&const DeepCollectionEquality().equals(other.departmentIds, _departmentIds)&&(identical(other.membersIncluded, membersIncluded) || other.membersIncluded == membersIncluded));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,title,meetingDate,const DeepCollectionEquality().hash(_departmentIds),membersIncluded);
+    return Object.hash(runtimeType,title,meetingDate,place,const DeepCollectionEquality().hash(_departmentIds),membersIncluded);
 }
 
 @override
 String toString() {
-    return 'UpdateMeetingRequest(title: $title, meetingDate: $meetingDate, departmentIds: $departmentIds, membersIncluded: $membersIncluded)';
+    return 'UpdateMeetingRequest(title: $title, meetingDate: $meetingDate, place: $place, departmentIds: $departmentIds, membersIncluded: $membersIncluded)';
 }
 
 
@@ -271,7 +275,7 @@ abstract mixin class _$UpdateMeetingRequestCopyWith<$Res> implements $UpdateMeet
   factory _$UpdateMeetingRequestCopyWith(_UpdateMeetingRequest value, $Res Function(_UpdateMeetingRequest) _then) = __$UpdateMeetingRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String? title,@JsonKey(name: 'meeting_date') String? meetingDate,@JsonKey(name: 'department_ids') List<String>? departmentIds,@JsonKey(name: 'members_included') bool? membersIncluded
+ String? title,@JsonKey(name: 'meeting_date') String? meetingDate, String? place,@JsonKey(name: 'department_ids') List<String>? departmentIds,@JsonKey(name: 'members_included') bool? membersIncluded
 });
 
 
@@ -288,10 +292,11 @@ class __$UpdateMeetingRequestCopyWithImpl<$Res>
 
 /// Create a copy of UpdateMeetingRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? title = freezed,Object? meetingDate = freezed,Object? departmentIds = freezed,Object? membersIncluded = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? title = freezed,Object? meetingDate = freezed,Object? place = freezed,Object? departmentIds = freezed,Object? membersIncluded = freezed,}) {
   return _then(_UpdateMeetingRequest(
 title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,meetingDate: freezed == meetingDate ? _self.meetingDate : meetingDate // ignore: cast_nullable_to_non_nullable
+as String?,place: freezed == place ? _self.place : place // ignore: cast_nullable_to_non_nullable
 as String?,departmentIds: freezed == departmentIds ? _self._departmentIds : departmentIds // ignore: cast_nullable_to_non_nullable
 as List<String>?,membersIncluded: freezed == membersIncluded ? _self.membersIncluded : membersIncluded // ignore: cast_nullable_to_non_nullable
 as bool?,

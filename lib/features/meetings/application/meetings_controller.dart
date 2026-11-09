@@ -8,7 +8,6 @@ import '../../../core/stale_clock.dart';
 import '../../tasks/tasks.dart';
 import '../domain/meeting.dart';
 import '../domain/meeting_board.dart';
-import 'meeting_summary_controller.dart';
 import 'meetings_providers.dart';
 
 part 'meetings_controller.g.dart';
@@ -61,10 +60,10 @@ class MeetingsViewController extends _$MeetingsViewController {
 
 /// Toplantı listesi: görünür toplantılar (`listMeetings`) ve yöneticiye silinenler. Silinenler
 /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı
-/// silme de bu yoldadır): `/v1/meetings/deleted` istemci kapısında `/v1/meetings/{id}` ile
-/// belirsiz eşleşir ve fail-closed reddedilir. İkisi de imleçli; en çok [maxPages] × [pageSize]
-/// satır okunur. Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka
-/// planda tazelenir ([refreshIfStale]).
+/// silme de bu yoldadır). İkisi de imleçli; en çok [maxPages] × [pageSize] satır okunur. Kart
+/// sayaçları ve konferans durumu satır özetindedir (COLLABORATION-K70; kart başına istek yok).
+/// Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka planda tazelenir
+/// ([refreshIfStale]).
 @Riverpod(keepAlive: true)
 class MeetingsBoardController extends _$MeetingsBoardController {
   static const pageSize = 200;
@@ -107,9 +106,7 @@ class MeetingsBoardController extends _$MeetingsBoardController {
 
   /// Aşağı çekerek yenileme: yeniden okur ve bitmesini bekler (hata ekranda görünür).
   Future<void> refresh() async {
-    ref
-      ..invalidate(meetingSummaryControllerProvider)
-      ..invalidateSelf();
+    ref.invalidateSelf();
     try {
       await future;
     } on Object {
@@ -118,13 +115,28 @@ class MeetingsBoardController extends _$MeetingsBoardController {
   }
 
   /// Yeniden ziyaret (sekmeye ya da ön plana dönüş): son başarılı okuma [maxAge]'den eskiyse
-  /// liste arka planda yeniden okunur; eski liste görünür kalır, hata yutulur. Kart ayrıntıları
-  /// (sayaç, konferans) geçersizlenmez: kart başına istek yalnız aşağı çekerek yenilemede.
+  /// liste arka planda yeniden okunur; eski liste görünür kalır, hata yutulur. Kart sayaçları ve
+  /// konferans durumu satır özetinde olduğundan liste ile birlikte tazelenir (ek istek yok).
   Future<void> refreshIfStale({Duration maxAge = StaleClock.staleAfter}) =>
       _clock.refreshIfStale(state, () {
         ref.invalidateSelf();
         return future;
       }, maxAge: maxAge);
+
+  /// Açık ayrıntının güncel özetini liste satırına yazar (ağ isteği yok); liste yüklenmemişse ya
+  /// da toplantı listede yoksa bir şey yapmaz.
+  void putSummary(String id, MeetingSummary summary) {
+    final board = state.value;
+    if (board == null || !board.visible.any((m) => m.id == id)) return;
+    state = AsyncData(
+      board.copyWith(
+        visible: [
+          for (final m in board.visible)
+            m.id == id ? m.withSummary(summary) : m,
+        ],
+      ),
+    );
+  }
 
   /// Silinmiş toplantıyı geri yükler (yalnız yönetici); liste yeniden okunur.
   Future<ApiError?> restore(String id) async {

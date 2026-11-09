@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../domain/meeting_planner.dart';
+import '../domain/task_catalog.dart';
 import 'quick_forms_controller.dart' show toggled;
 import 'task_catalog_controller.dart';
 import 'tasks_providers.dart';
@@ -20,7 +21,20 @@ enum MeetingPane { date, time, invitees, agenda, owner }
 
 enum MeetingMode { coordinatorships, people }
 
-enum MeetingError { title, past, coordinatorships, people, owner }
+enum MeetingError { title, past, place, coordinatorships, people, owner }
+
+/// Yerin en çok uzunluğu (COLLABORATION-K76).
+const meetingPlaceMax = 200;
+
+/// Kişi kipinde seçilebilen sahip koordinatörlükler (K73): yönetici her birini, koordinatör
+/// yalnız kendi koordinatörlüklerini seçer.
+List<CoordinatorshipRef> meetingOwnerChoices(TaskCatalog catalog) =>
+    catalog.access?.companyAdmin ?? false
+    ? catalog.coordinatorships
+    : [
+        for (final c in catalog.coordinatorships)
+          if (c.leads.contains(catalog.me)) c,
+      ];
 
 @immutable
 final class MeetingForm {
@@ -28,6 +42,7 @@ final class MeetingForm {
     required this.date,
     required this.month,
     this.title = '',
+    this.place = '',
     this.hour = 10,
     this.minute = 0,
     this.mode = MeetingMode.coordinatorships,
@@ -43,9 +58,13 @@ final class MeetingForm {
     this.error,
     this.failure,
     this.busy = false,
+    this.created,
   });
 
   final String title;
+
+  /// Yer (isteğe bağlı).
+  final String place;
   final DateTime date;
   final DateTime month;
   final int hour;
@@ -67,7 +86,8 @@ final class MeetingForm {
   final Set<String> openGroups;
 
   /// Düzenlenen toplantının kimliği; null → yeni toplantı. Düzenlemede kip seçimi ve gündem
-  /// yoktur (katılımcı ve gündem toplantı ayrıntısında yönetilir).
+  /// yoktur (katılımcı ve gündem toplantı ayrıntısında yönetilir); kişi kipindeki toplantının
+  /// departman seti de değişmez (K73).
   final String? editing;
   final MeetingError? error;
 
@@ -75,8 +95,16 @@ final class MeetingForm {
   final ApiError? failure;
   final bool busy;
 
+  /// Yalnız [MeetingFormController.submit]'in döndürdüğü gönderilmiş formda: açılan toplantı
+  /// (eklenemeyen katılımcılarıyla); düzenlemede ve taslakta null.
+  final MeetingPlanned? created;
+
+  /// Davet edilen ve eklenemeyen kişi kimlikleri (kişi kipinde; [created]'tan).
+  List<String> get notInvited => created?.failedParticipantIds ?? const [];
+
   MeetingForm copyWith({
     String? title,
+    String? place,
     DateTime? date,
     DateTime? month,
     int? hour,
@@ -93,8 +121,10 @@ final class MeetingForm {
     MeetingError? Function()? error,
     ApiError? Function()? failure,
     bool? busy,
+    MeetingPlanned? created,
   }) => MeetingForm(
     title: title ?? this.title,
+    place: place ?? this.place,
     date: date ?? this.date,
     month: month ?? this.month,
     hour: hour ?? this.hour,
@@ -112,6 +142,7 @@ final class MeetingForm {
     error: error == null ? this.error : error(),
     failure: failure == null ? this.failure : failure(),
     busy: busy ?? this.busy,
+    created: created ?? this.created,
   );
 
   /// Gönderilecek departman seti (ilki sahip).
@@ -131,6 +162,8 @@ final class MeetingSeed {
     required this.at,
     required this.departmentIds,
     required this.membersIncluded,
+    this.place,
+    this.byPerson = false,
   });
 
   final String id;
@@ -140,6 +173,10 @@ final class MeetingSeed {
   final DateTime at;
   final List<String> departmentIds;
   final bool membersIncluded;
+  final String? place;
+
+  /// Davet kipi `person` (değişmez; formda kip `people`, sahip departman setinin ilki).
+  final bool byPerson;
 }
 
 @Riverpod(keepAlive: true)
@@ -187,12 +224,15 @@ class MeetingFormController extends _$MeetingFormController {
     final day = _day(seed.at).isBefore(t) ? t : _day(seed.at);
     state = MeetingForm(
       title: seed.title,
+      place: seed.place ?? '',
       date: day,
       month: DateTime(day.year, day.month),
       hour: seed.at.hour,
       minute: seed.at.minute,
-      coordinatorships: seed.departmentIds,
-      allMembers: seed.membersIncluded,
+      mode: seed.byPerson ? MeetingMode.people : MeetingMode.coordinatorships,
+      coordinatorships: seed.byPerson ? const [] : seed.departmentIds,
+      owner: seed.byPerson ? seed.departmentIds.firstOrNull : null,
+      allMembers: !seed.byPerson && seed.membersIncluded,
       editing: seed.id,
     );
   }
@@ -201,6 +241,8 @@ class MeetingFormController extends _$MeetingFormController {
       state = f.copyWith(error: () => null, failure: () => null);
 
   void setTitle(String v) => _set(state.copyWith(title: v));
+
+  void setPlace(String v) => _set(state.copyWith(place: v));
 
   void togglePane(MeetingPane p) =>
       _set(state.copyWith(pane: () => state.pane == p ? null : p));
@@ -265,19 +307,23 @@ class MeetingFormController extends _$MeetingFormController {
   void removeAgenda(int i) =>
       _set(state.copyWith(agenda: [...state.agenda]..removeAt(i)));
 
+  /// Kişi kipinde katılımcı yalnız açılışta istenir (düzenlemede ayrıntıda yönetilir).
   MeetingError? _validate(MeetingForm f) => f.title.trim().isEmpty
       ? MeetingError.title
       : f.date.isBefore(today)
       ? MeetingError.past
+      : f.place.trim().length > meetingPlaceMax
+      ? MeetingError.place
       : f.mode == MeetingMode.coordinatorships && f.coordinatorships.isEmpty
       ? MeetingError.coordinatorships
-      : f.mode == MeetingMode.people && f.people.isEmpty
+      : f.mode == MeetingMode.people && f.editing == null && f.people.isEmpty
       ? MeetingError.people
       : f.mode == MeetingMode.people && f.owner == null
       ? MeetingError.owner
       : null;
 
-  /// Doğrular ve sunucuya yazar (yeni ya da düzenleme). Başarıda gönderilen formu döner ve
+  /// Doğrular ve sunucuya yazar (yeni ya da düzenleme). Başarıda gönderilen formu döner (yeni
+  /// toplantıda [MeetingForm.created] dolu: eklenemeyen katılımcılar bildirimde ayrı yazılır) ve
   /// taslağı sıfırlar; doğrulama ya da sunucu hatasında null (hata formda görünür, taslak kalır).
   Future<MeetingForm?> submit() async {
     final f = state;
@@ -291,6 +337,8 @@ class MeetingFormController extends _$MeetingFormController {
     final people = f.mode == MeetingMode.people;
     final plan = MeetingPlan(
       title: f.title.trim(),
+      place: f.place.trim(),
+      byPerson: people,
       at: f.at,
       departmentIds: f.departmentIds,
       participantIds: people ? f.people : const [],
@@ -303,14 +351,15 @@ class MeetingFormController extends _$MeetingFormController {
     try {
       final planner = ref.read(meetingPlannerProvider);
       final id = f.editing;
+      MeetingPlanned? created;
       if (id == null) {
-        await planner.create(plan);
+        created = await planner.create(plan);
       } else {
         await planner.update(id, plan);
       }
       if (!ref.mounted) return null;
       state = _initial();
-      return f;
+      return f.copyWith(created: created);
     } on Object catch (e) {
       if (ref.mounted) {
         state = state.copyWith(busy: false, failure: () => toApiError(e));

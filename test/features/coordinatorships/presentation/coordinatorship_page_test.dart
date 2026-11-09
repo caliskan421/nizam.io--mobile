@@ -23,8 +23,9 @@ Future<(Harness, CoordBackend)> _open(
   WidgetTester tester, {
   String code = dAlt,
   bool dark = false,
+  bool admin = true,
 }) async {
-  final backend = CoordBackend();
+  final backend = CoordBackend()..admin = admin;
   final h = await real(tester, () => pilotHarness(backend, signedIn: true));
   h.read(scopeControllerProvider).selectProgram(coordProgram);
   final nav = RecordingAppNav();
@@ -99,6 +100,44 @@ void main() {
       expect(find.byType(NzPillTabs), findsNothing);
     });
   }
+
+  for (final admin in [true, false]) {
+    testWidgets(
+      'diğer işlemler: bilgileri düzenle yalnız yöneticide ($admin)',
+      (tester) async {
+        await _open(tester, admin: admin);
+        await tester.tap(find.bySemanticsLabel(_l.uiCoordMoreActions));
+        await settle(tester);
+        expect(find.text(_l.uiCoordMenuMeeting), findsOneWidget);
+        expect(
+          find.text(_l.uiCoordMenuEdit),
+          admin ? findsOneWidget : findsNothing,
+        );
+      },
+    );
+  }
+
+  testWidgets('yönetici: bilgileri düzenle → programdaki ad değişir', (
+    tester,
+  ) async {
+    final (_, backend) = await _open(tester);
+    await tester.tap(find.bySemanticsLabel(_l.uiCoordMoreActions));
+    await settle(tester);
+    await tester.tap(find.text(_l.uiCoordMenuEdit));
+    await settle(tester);
+    await tester.enterText(
+      find.widgetWithText(NzTextField, _l.uiCoordFormName),
+      'Altyapı',
+    );
+    await tester.tap(find.text(_l.uiCoordFormSave));
+    await settle(tester);
+    expect(
+      [for (final (k, _) in backend.writes) k],
+      ['PATCH /v1/program/departments/$dAlt'],
+    );
+    expect(find.text(_l.uiCoordFormSave), findsNothing, reason: 'kapandı');
+    expect(backend.unhandled, isEmpty);
+  });
 
   for (final width in [360.0, 390.0]) {
     for (final scale in [1.0, 2.0]) {

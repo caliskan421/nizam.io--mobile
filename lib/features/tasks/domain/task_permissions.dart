@@ -152,10 +152,10 @@ final class TaskPermissions {
   /// Alt görev oluştur/sil, başlık/atanan/tarih düzenle: yönetici ya da koordinatör.
   bool get canManageSubtasks => admin || coordinator;
 
-  /// Alt görevi kapat/aç: koordinatör her alt görevde; ana göreve atanmış üye alt görev
-  /// atamasızsa ya da kendisine atanmışsa. Yönetici tek başına işaretleyemez.
+  /// Alt görevi kapat/aç (WORK-K71, ADR-0030): yönetici (ekip satırı olmadan) ve koordinatör
+  /// her alt görevde; ana göreve atanmış üye alt görev atamasızsa ya da kendisine atanmışsa.
   bool canToggleSubtask(Subtask sub) {
-    if (coordinator) return true;
+    if (admin || coordinator) return true;
     if (!member || !assigned) return false;
     return sub.assignee == null || sub.assignee == accountId;
   }
@@ -180,15 +180,17 @@ final class TaskPermissions {
   bool canUnclaim(TaskItem task) =>
       coordinator && assigned && task.status != TaskStatus.done;
 
-  /// Dosya yükle: koordinatör ya da atanmış üye; yöneticilik baskındır (reddeder).
-  bool get canUpload => (!admin && (coordinator || (member && assigned)));
+  /// Dosya yükle (RECORDS-K01, ADR-0030): yönetici (ekip satırı ve atama aranmadan),
+  /// koordinatör ya da atanmış üye.
+  bool get canUpload => admin || coordinator || (member && assigned);
 
   /// Dosya adını değiştir: yönetici, koordinatör ya da kapsamda ekip satırı olan yükleyen.
   bool canRenameFile(TaskFile file) =>
       admin || coordinator || (file.by == accountId && _seat);
 
-  /// Dosya sil: YALNIZ yükleyen, kapsamda ekip satırı varken (yönetici/koordinatör hayır).
-  bool canDeleteFile(TaskFile file) => (file.by == accountId && _seat);
+  /// Dosya sil (RECORDS-K10, ADR-0030): YALNIZ yükleyen, kapsamda ekip satırı varken; yükleyen
+  /// yönetici ekip satırı olmadan. Başkasının dosyasını yönetici/koordinatör silemez.
+  bool canDeleteFile(TaskFile file) => file.by == accountId && (_seat || admin);
 
   /// Dosya indir: görevi okuyabilen (yönetici, koordinatör, atanmış üye).
   bool get canDownloadFile => (admin || coordinator || assigned);

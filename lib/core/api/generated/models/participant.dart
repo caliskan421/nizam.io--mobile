@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'teams.dart';
+
 part 'participant.freezed.dart';
 part 'participant.g.dart';
 
@@ -12,6 +14,9 @@ abstract class Participant with _$Participant {
   const factory Participant({
     @JsonKey(name: 'account_id') required String accountId,
     @JsonKey(name: 'full_name') required String fullName,
+
+    /// Katılımcının toplantının programındaki ekip satırları (COLLABORATION-K72): departman, programdaki adı ve oradaki rolü. Ekip satırı olmayan (yalnız şirket yöneticisi) katılımcıda boştur. Görüntüdür; erişim kararı değildir.
+    required List<Teams> teams,
   }) = _Participant;
 
   factory Participant.fromJson(Map<String, Object?> json) =>

@@ -176,6 +176,10 @@ final class TaskWriteSource implements TaskWriteRepository {
       _s.listTeam(departmentId);
 
   @override
+  Future<void> enrollMember(MemberEnrollment enrollment) async =>
+      _s.enrollMember(enrollment);
+
+  @override
   Future<void> requestDateChange(
     TaskItem task,
     DateTime start,

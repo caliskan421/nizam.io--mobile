@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
+import '../application/invite_form_controller.dart';
 import '../application/meeting_form_controller.dart';
 import '../application/quick_forms_controller.dart';
 import '../application/task_catalog_controller.dart';
@@ -82,13 +85,15 @@ Future<bool> showNewTaskSheet(
 }
 
 /// Toplantı oluştur; [edit] verilirse o toplantıyı düzenler (gündem ve kip seçimi yok).
-/// Toplantı yazıldıysa true döner.
+/// Sunucu bazı katılımcıları yazamadıysa (`failed_participants`) eklenenler ve eklenemeyenler
+/// ayrı sayılır; bildirim başarı tonunda değildir ve toplantıyı açar (Kişiler'den yeniden
+/// eklenir). Toplantı yazıldıysa true döner.
 Future<bool> showMeetingSheet(
   BuildContext context, {
   String? coordinatorship,
   DateTime? date,
   MeetingSeed? edit,
-}) {
+}) async {
   final container = ProviderScope.containerOf(context, listen: false);
   final form = container.read(meetingFormControllerProvider.notifier);
   if (edit != null) {
@@ -97,7 +102,8 @@ Future<bool> showMeetingSheet(
     form.prepare(coordinatorship: coordinatorship, date: date);
   }
   final l = context.l10n;
-  return _show(
+  MeetingForm? partial;
+  final ok = await _show(
     context,
     title: edit == null ? l.uiTasksMtTitle : l.uiTasksMtEditTitle,
     description: edit == null ? l.uiTasksMtDesc : l.uiTasksMtEditDesc,
@@ -106,21 +112,48 @@ Future<bool> showMeetingSheet(
       final f = await form.submit();
       if (f == null) return null;
       if (f.editing != null) return l.uiTasksTMeetingSaved;
-      final when =
-          '${TaskDates.short(f.date)} '
-          '${f.hour.toString().padLeft(2, '0')}:'
-          '${f.minute.toString().padLeft(2, '0')}';
-      final who = f.mode == MeetingMode.coordinatorships
-          ? '${f.coordinatorships.length} ${l.uiTasksTCoordsInvited}'
-          : '${f.people.length} ${l.uiTasksTPeopleInvited}';
-      return '${l.uiTasksTMeeting} · $when · $who';
+      if (f.notInvited.isNotEmpty) partial = f;
+      return _meetingCreated(l, f);
     },
     body: (expansion) => MeetingFormBody(expansion: expansion),
   );
+  final f = partial;
+  final id = f?.created?.id;
+  if (f != null && id != null && context.mounted) {
+    // Başarı tostunun yerine (aynı kutu güncellenir): eklenemeyenler ayrı, toplantıya git.
+    NzToast.show(
+      context,
+      _meetingCreated(l, f),
+      actionLabel: l.uiTasksTMeetingOpen,
+      onAction: () {
+        if (context.mounted) context.appNav.openMeeting(id);
+      },
+    );
+  }
+  return ok;
 }
 
-/// [coordinatorship] verilirse o koordinatörlük seçili, rol Üye açılır (koordinatörlük
-/// ayrıntısı "Üye ekle").
+/// "Toplantı oluşturuldu · 12 Kas 10:00 · 2 kişi davetli · 1 kişi eklenemedi".
+String _meetingCreated(AppLocalizations l, MeetingForm f) {
+  final when =
+      '${TaskDates.short(f.date)} '
+      '${f.hour.toString().padLeft(2, '0')}:'
+      '${f.minute.toString().padLeft(2, '0')}';
+  final failed = f.notInvited.toSet();
+  final who = f.mode == MeetingMode.coordinatorships
+      ? '${f.coordinatorships.length} ${l.uiTasksTCoordsInvited}'
+      : [
+          '${f.people.where((p) => !failed.contains(p)).length} '
+              '${l.uiTasksTPeopleInvited}',
+          if (failed.isNotEmpty) '${failed.length} ${l.uiTasksTPeopleFailed}',
+        ].join(' · ');
+  return '${l.uiTasksTMeeting} · $when · $who';
+}
+
+/// Kullanıcı ekle (`createUser`): hesap açılır ya da var olan hesap (aktarım teklifi) seçilen
+/// koordinatörlüğün ekibine eklenir; e-posta gönderilmez. Bildirim yalnız sunucu yazmasından
+/// sonra çıkar. [coordinatorship] verilirse o koordinatörlük seçili, rol Üye açılır
+/// (koordinatörlük ayrıntısı "Üye ekle").
 Future<void> showInviteSheet(BuildContext context, {String? coordinatorship}) {
   final container = ProviderScope.containerOf(context, listen: false);
   container
@@ -132,10 +165,12 @@ Future<void> showInviteSheet(BuildContext context, {String? coordinatorship}) {
     title: l.uiTasksIvTitle,
     description: l.uiTasksIvDesc,
     ok: l.uiTasksIvSend,
-    onOk: (sheet) {
-      final f = container.read(inviteFormControllerProvider.notifier).submit();
+    onOk: (sheet) async {
+      final f = await container
+          .read(inviteFormControllerProvider.notifier)
+          .submit();
       if (f == null) return null;
-      return '${l.uiTasksTInvited} ${f.email}';
+      return '${l.uiTasksTInvited} ${f.email.trim()}';
     },
     body: (expansion) => InviteFormBody(expansion: expansion),
   );

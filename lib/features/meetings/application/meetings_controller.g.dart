@@ -64,28 +64,28 @@ abstract class _$MeetingsViewController extends $Notifier<MeetingsView> {
 
 /// Toplantı listesi: görünür toplantılar (`listMeetings`) ve yöneticiye silinenler. Silinenler
 /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı
-/// silme de bu yoldadır): `/v1/meetings/deleted` istemci kapısında `/v1/meetings/{id}` ile
-/// belirsiz eşleşir ve fail-closed reddedilir. İkisi de imleçli; en çok [maxPages] × [pageSize]
-/// satır okunur. Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka
-/// planda tazelenir ([refreshIfStale]).
+/// silme de bu yoldadır). İkisi de imleçli; en çok [maxPages] × [pageSize] satır okunur. Kart
+/// sayaçları ve konferans durumu satır özetindedir (COLLABORATION-K70; kart başına istek yok).
+/// Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka planda tazelenir
+/// ([refreshIfStale]).
 
 @ProviderFor(MeetingsBoardController)
 final meetingsBoardControllerProvider = MeetingsBoardControllerProvider._();
 
 /// Toplantı listesi: görünür toplantılar (`listMeetings`) ve yöneticiye silinenler. Silinenler
 /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı
-/// silme de bu yoldadır): `/v1/meetings/deleted` istemci kapısında `/v1/meetings/{id}` ile
-/// belirsiz eşleşir ve fail-closed reddedilir. İkisi de imleçli; en çok [maxPages] × [pageSize]
-/// satır okunur. Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka
-/// planda tazelenir ([refreshIfStale]).
+/// silme de bu yoldadır). İkisi de imleçli; en çok [maxPages] × [pageSize] satır okunur. Kart
+/// sayaçları ve konferans durumu satır özetindedir (COLLABORATION-K70; kart başına istek yok).
+/// Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka planda tazelenir
+/// ([refreshIfStale]).
 final class MeetingsBoardControllerProvider
     extends $AsyncNotifierProvider<MeetingsBoardController, MeetingsBoard> {
   /// Toplantı listesi: görünür toplantılar (`listMeetings`) ve yöneticiye silinenler. Silinenler
   /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı
-  /// silme de bu yoldadır): `/v1/meetings/deleted` istemci kapısında `/v1/meetings/{id}` ile
-  /// belirsiz eşleşir ve fail-closed reddedilir. İkisi de imleçli; en çok [maxPages] × [pageSize]
-  /// satır okunur. Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka
-  /// planda tazelenir ([refreshIfStale]).
+  /// silme de bu yoldadır). İkisi de imleçli; en çok [maxPages] × [pageSize] satır okunur. Kart
+  /// sayaçları ve konferans durumu satır özetindedir (COLLABORATION-K70; kart başına istek yok).
+  /// Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka planda tazelenir
+  /// ([refreshIfStale]).
   MeetingsBoardControllerProvider._()
     : super(
         from: null,
@@ -106,14 +106,14 @@ final class MeetingsBoardControllerProvider
 }
 
 String _$meetingsBoardControllerHash() =>
-    r'54c2e48894b70367053348dd9ee9ff6ea404a68f';
+    r'0b44e3a57a69cd756b6798d2c980823f31c58b04';
 
 /// Toplantı listesi: görünür toplantılar (`listMeetings`) ve yöneticiye silinenler. Silinenler
 /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı
-/// silme de bu yoldadır): `/v1/meetings/deleted` istemci kapısında `/v1/meetings/{id}` ile
-/// belirsiz eşleşir ve fail-closed reddedilir. İkisi de imleçli; en çok [maxPages] × [pageSize]
-/// satır okunur. Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka
-/// planda tazelenir ([refreshIfStale]).
+/// silme de bu yoldadır). İkisi de imleçli; en çok [maxPages] × [pageSize] satır okunur. Kart
+/// sayaçları ve konferans durumu satır özetindedir (COLLABORATION-K70; kart başına istek yok).
+/// Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka planda tazelenir
+/// ([refreshIfStale]).
 
 abstract class _$MeetingsBoardController extends $AsyncNotifier<MeetingsBoard> {
   FutureOr<MeetingsBoard> build();

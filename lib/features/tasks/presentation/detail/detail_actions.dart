@@ -59,7 +59,7 @@ class TaskDetailActions {
   /// Tarih talebi kararı (yalnız şirket yöneticisi).
   bool get canReviewDate => _perms.canReviewDate;
 
-  /// Kanıt yükle (koordinatör ya da atanmış üye; yöneticilik reddeder).
+  /// Kanıt yükle (yönetici, koordinatör ya da atanmış üye; ADR-0030).
   bool get canUpload => _perms.canUpload;
 
   /// Durum seçicisi açılabilir mi (aktörün geçerli durumdan en az bir hedefi var).

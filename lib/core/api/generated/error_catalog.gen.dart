@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket v0.11.0-api (4d0bbd0605ade5adfc0599e9586944ed8dab7bcb) — docs/api/error-codes.json
+// Kaynak: nizam.io--backend etiket v0.12.0-api (861beb5ec246f62efb2854f7d4098a3ad5847bba) — docs/api/error-codes.json
 
 import '../api_meta.dart';
 
@@ -137,11 +137,6 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [409],
     fields: [],
     messageKey: 'errors.collaboration.note_converted',
-  ),
-  'collaboration.note_deleted': ErrorCatalogEntry(
-    statuses: [409],
-    fields: [],
-    messageKey: 'errors.collaboration.note_deleted',
   ),
   'collaboration.note_immutable': ErrorCatalogEntry(
     statuses: [409],

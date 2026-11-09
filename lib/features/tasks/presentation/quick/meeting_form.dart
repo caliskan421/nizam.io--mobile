@@ -7,21 +7,24 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/meeting_form_controller.dart';
 import '../../application/task_catalog_controller.dart';
+import '../../application/tasks_providers.dart';
 import '../../domain/task_catalog.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 import 'quick_parts.dart';
 
-/// "Toplantı oluştur" formu: başlık + tarih (takvim), saat (çark), davetliler
-/// (koordinatörlük ya da kişi), gündem maddeleri; kişi kipinde sahip koordinatörlük (sunucu en
-/// az bir departman ister). Düzenlemede yalnız başlık, an ve koordinatörlükler (kip ve gündem
-/// yok; katılımcı ve gündem toplantı ayrıntısında yönetilir).
+/// "Toplantı oluştur" formu: başlık, yer (isteğe bağlı) + tarih (takvim), saat (çark),
+/// davetliler (davet türü: koordinatörlük ya da kişi), gündem maddeleri; kişi kipinde sahip
+/// koordinatörlük (tek departman; koordinatör yalnız kendi koordinatörlüğünü seçer, K73).
+/// Düzenlemede yalnız başlık, yer, an ve (koordinatörlük kipinde) koordinatörlükler (kip ve
+/// gündem yok; katılımcı ve gündem toplantı ayrıntısında yönetilir).
 class MeetingFormBody extends ConsumerStatefulWidget {
   const MeetingFormBody({super.key, required this.expansion});
 
@@ -62,7 +65,16 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
     final ctl = ref.read(meetingFormControllerProvider.notifier);
     final catalog = ref.watch(taskCatalogControllerProvider).value;
     final coords = catalog?.coordinatorships ?? const <CoordinatorshipRef>[];
-    String name(String id) => catalog?.nameOf(id) ?? l.uiTasksUnknownPerson;
+    final owners = catalog == null
+        ? const <CoordinatorshipRef>[]
+        : meetingOwnerChoices(catalog);
+    final editing = f.editing != null;
+    // Kişi kipinde havuz programın kişileridir (yalnız açılışta; düzenlemede katılımcı yok).
+    final invitees = !editing && f.mode == MeetingMode.people
+        ? ref.watch(meetingInviteesProvider).value
+        : null;
+    String name(String id) =>
+        invitees?.nameOf(id) ?? catalog?.nameOf(id) ?? l.uiTasksUnknownPerson;
     final String? who;
     if (f.mode == MeetingMode.coordinatorships) {
       who = f.coordinatorships.isEmpty
@@ -83,7 +95,6 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
     }
     if (_draft.text != f.agendaDraft) _draft.text = f.agendaDraft;
     final error = f.error;
-    final editing = f.editing != null;
     final owner = f.owner == null
         ? null
         : catalog?.coordinatorship(f.owner!)?.name ?? f.owner;
@@ -98,6 +109,13 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
           value: f.title,
           maxLength: 255,
           onChanged: ctl.setTitle,
+        ),
+        QuickTitleField(
+          label: l.uiTasksFieldPlace,
+          hint: l.uiTasksMtPlaceHint,
+          value: f.place,
+          maxLength: meetingPlaceMax,
+          onChanged: ctl.setPlace,
         ),
       ],
       rows: NzFormRows(
@@ -133,52 +151,69 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
               ),
             ),
           ),
-          NzFormRow(
-            label: l.uiTasksRowInvitees,
-            icon: NzIcons.group,
-            value: who ?? l.uiTasksPick,
-            valueSet: who != null,
-            content: QuickPane(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (!editing) ...[
-                    TaskSegmented(
-                      labels: [l.uiTasksGroupCoord, l.uiTasksModePeople],
-                      selected: f.mode.index,
-                      onSelected: (i) => ctl.setMode(MeetingMode.values[i]),
-                    ),
-                    const Gap(NizamioSpacing.space2),
+          // Kişi kipindeki toplantının davetlileri ayrıntıda yönetilir (departman seti değişmez).
+          if (!editing || f.mode == MeetingMode.coordinatorships)
+            NzFormRow(
+              label: l.uiTasksRowInvitees,
+              icon: NzIcons.group,
+              value: who ?? l.uiTasksPick,
+              valueSet: who != null,
+              content: QuickPane(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!editing) ...[
+                      TaskSegmented(
+                        labels: [l.uiTasksGroupCoord, l.uiTasksModePeople],
+                        selected: f.mode.index,
+                        onSelected: (i) => ctl.setMode(MeetingMode.values[i]),
+                      ),
+                      const Gap(NizamioSpacing.space2),
+                    ],
+                    if (f.mode == MeetingMode.coordinatorships) ...[
+                      for (final co in coords)
+                        TaskCheckRow(
+                          label: co.name,
+                          caption: f.allMembers
+                              ? l.peopleCount(co.team.length)
+                              : '${co.leads.length} ${l.uiTasksCoordAbbr}',
+                          selected: f.coordinatorships.contains(co.code),
+                          onTap: () => ctl.toggleCoordinatorship(co.code),
+                        ),
+                      NzSwitch(
+                        label: l.uiTasksInviteMembers,
+                        value: f.allMembers,
+                        onChanged: (_) => ctl.toggleAllMembers(),
+                      ),
+                    ] else if (invitees == null)
+                      const NzLoader()
+                    else ...[
+                      for (final co in invitees.groups)
+                        _PeopleGroup(
+                          coord: co,
+                          name: name,
+                          open: f.openGroups.contains(co.code),
+                          selected: f.people,
+                          onToggle: () => ctl.toggleGroup(co.code),
+                          onPick: ctl.togglePerson,
+                        ),
+                      if (invitees.partial)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: NizamioSpacing.space2,
+                          ),
+                          child: Text(
+                            l.uiTasksMtPoolPartial,
+                            style: t.caption.copyWith(
+                              color: context.colors.textMuted,
+                            ),
+                          ),
+                        ),
+                    ],
                   ],
-                  if (f.mode == MeetingMode.coordinatorships) ...[
-                    for (final co in coords)
-                      TaskCheckRow(
-                        label: co.name,
-                        caption: f.allMembers
-                            ? l.peopleCount(co.team.length)
-                            : '${co.leads.length} ${l.uiTasksCoordAbbr}',
-                        selected: f.coordinatorships.contains(co.code),
-                        onTap: () => ctl.toggleCoordinatorship(co.code),
-                      ),
-                    NzSwitch(
-                      label: l.uiTasksInviteMembers,
-                      value: f.allMembers,
-                      onChanged: (_) => ctl.toggleAllMembers(),
-                    ),
-                  ] else
-                    for (final co in coords.where((x) => x.team.isNotEmpty))
-                      _PeopleGroup(
-                        coord: co,
-                        name: name,
-                        open: f.openGroups.contains(co.code),
-                        selected: f.people,
-                        onToggle: () => ctl.toggleGroup(co.code),
-                        onPick: ctl.togglePerson,
-                      ),
-                ],
+                ),
               ),
             ),
-          ),
           if (!editing)
             NzFormRow(
               label: l.uiTasksRowAgenda,
@@ -241,7 +276,7 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (final co in coords)
+                    for (final co in owners)
                       TaskCheckRow(
                         label: co.name,
                         radio: true,

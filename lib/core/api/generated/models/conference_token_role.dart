@@ -4,7 +4,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-/// host: yönetici ve toplantıya bağlı departmanın koordinatörü; speaker: toplantıyı gören üye.
+/// host: yönetici; `coordinatorship` kipinde toplantıya bağlı departmanın koordinatörü, `person` kipinde sahip departmanı hâlâ koordine eden oluşturan. speaker: toplantıyı gören üye ve katılımcı (koordinatörlüğü düşmüş katılımcı oluşturan dahil).
 @JsonEnum()
 enum ConferenceTokenRole {
   @JsonValue('host')

@@ -27,6 +27,23 @@ abstract interface class DepartmentRepository {
     String? description,
   });
 
+  /// `POST /v1/program/departments` (S2, program [programId] açık): departmanı programa bağlar.
+  /// [displayName] verilmezse katalog adı kopyalanır. Bağ zaten varsa sunucu var olan bağı
+  /// döndürür (aynı çağrı tekrarlanabilir). Yalnız şirket yöneticisi.
+  Future<DepartmentLink> linkDepartment(
+    String programId,
+    String departmentId, {
+    String? displayName,
+  });
+
+  /// `PATCH /v1/program/departments/{departmentId}` (S2): yalnız bu programdaki adı değiştirir;
+  /// katalog adı ve başka programlardaki adlar değişmez. Yalnız şirket yöneticisi.
+  Future<DepartmentLink> renameDepartmentLink(
+    String programId,
+    String departmentId,
+    String displayName,
+  );
+
   /// `DELETE /v1/departments/{id}` (geri alınabilir silme). Dönen: sunucu sildi mi.
   Future<bool> deleteDepartment(String departmentId);
 

@@ -257,3 +257,123 @@ abstract class _$ChatForeground extends $Notifier<bool> {
     return element.handleCreate(ref, build);
   }
 }
+
+/// Açık sohbetlerin paylaştığı ucuz sinyal kovası (yazıyor + okundu; [SignalBudget]).
+
+@ProviderFor(chatSignalBudget)
+final chatSignalBudgetProvider = ChatSignalBudgetProvider._();
+
+/// Açık sohbetlerin paylaştığı ucuz sinyal kovası (yazıyor + okundu; [SignalBudget]).
+
+final class ChatSignalBudgetProvider
+    extends $FunctionalProvider<SignalBudget, SignalBudget, SignalBudget>
+    with $Provider<SignalBudget> {
+  /// Açık sohbetlerin paylaştığı ucuz sinyal kovası (yazıyor + okundu; [SignalBudget]).
+  ChatSignalBudgetProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chatSignalBudgetProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatSignalBudgetHash();
+
+  @$internal
+  @override
+  $ProviderElement<SignalBudget> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SignalBudget create(Ref ref) {
+    return chatSignalBudget(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SignalBudget value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SignalBudget>(value),
+    );
+  }
+}
+
+String _$chatSignalBudgetHash() => r'32cd8f829dc2c50273db93d6cdefbcc345156333';
+
+/// Akışın en erken yeniden açılış anı (429 `Retry-After`; yazma bütçesi hesap başınadır). Akış
+/// denetleyicisinin ömründen bağımsızdır: ön plana dönüş ve ekranın yeniden açılması da uyar.
+
+@ProviderFor(ChatStreamHold)
+final chatStreamHoldProvider = ChatStreamHoldProvider._();
+
+/// Akışın en erken yeniden açılış anı (429 `Retry-After`; yazma bütçesi hesap başınadır). Akış
+/// denetleyicisinin ömründen bağımsızdır: ön plana dönüş ve ekranın yeniden açılması da uyar.
+final class ChatStreamHoldProvider
+    extends
+        $NotifierProvider<ChatStreamHold, ({String account, DateTime until})?> {
+  /// Akışın en erken yeniden açılış anı (429 `Retry-After`; yazma bütçesi hesap başınadır). Akış
+  /// denetleyicisinin ömründen bağımsızdır: ön plana dönüş ve ekranın yeniden açılması da uyar.
+  ChatStreamHoldProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chatStreamHoldProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatStreamHoldHash();
+
+  @$internal
+  @override
+  ChatStreamHold create() => ChatStreamHold();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(({String account, DateTime until})? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<({String account, DateTime until})?>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$chatStreamHoldHash() => r'f5a739fda5064ab8682b7baa637249a077ea01e9';
+
+/// Akışın en erken yeniden açılış anı (429 `Retry-After`; yazma bütçesi hesap başınadır). Akış
+/// denetleyicisinin ömründen bağımsızdır: ön plana dönüş ve ekranın yeniden açılması da uyar.
+
+abstract class _$ChatStreamHold
+    extends $Notifier<({String account, DateTime until})?> {
+  ({String account, DateTime until})? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref
+            as $Ref<
+              ({String account, DateTime until})?,
+              ({String account, DateTime until})?
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                ({String account, DateTime until})?,
+                ({String account, DateTime until})?
+              >,
+              ({String account, DateTime until})?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

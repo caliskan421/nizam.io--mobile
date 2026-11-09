@@ -195,15 +195,25 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final view = ref.read(chatControllerProvider(widget.id));
     if (text.isEmpty) return;
     final edit = view.edit;
-    if (edit != null) {
+    final base = view.editRevision;
+    if (edit != null && base != null) {
       try {
-        await _room.edit(edit, text);
+        await _room.edit(edit, text, expectedRevision: base);
         if (!mounted) return;
         _view.clearContext();
         _draft.clear();
       } on ApiError catch (e) {
-        // Bayat sürümde mesaj yeniden okundu; taslak ve düzenleme bağlamı kalır.
-        if (mounted) _toast(errorText(l, e));
+        if (!mounted) return;
+        _toast(errorText(l, e));
+        // Bayat sürüm: mesaj yeniden okundu ve sunucunun değeri görünüyor; taslak kalır. Yeniden
+        // gönderim kullanıcının bilinçli kararıdır, taban okunan yeni sürüme taşınır.
+        final fresh = ref
+            .read(chatRoomControllerProvider(widget.id))
+            .value
+            ?.message(edit);
+        if (e.code == 'messaging.edit_conflict' && fresh != null) {
+          _view.edit(edit, revision: fresh.revision);
+        }
       }
       return;
     }
@@ -264,7 +274,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             unawaited(Clipboard.setData(ClipboardData(text: m.text)));
             _toast(l.uiMessagesCopied);
           case ChatSimpleAction.edit:
-            _view.edit(m.id);
+            _view.edit(m.id, revision: m.revision);
             _draft.text = m.text;
             _focus.requestFocus();
           case ChatSimpleAction.pin:

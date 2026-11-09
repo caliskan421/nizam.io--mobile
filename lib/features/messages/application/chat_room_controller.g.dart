@@ -12,7 +12,9 @@ part of 'chat_room_controller.dart';
 /// gelen olayların uzlaştırılması (istemci akışları §10.2–§10.5), ek gönderimi ve sabit şeridi
 /// (§10.10). Olaylar en az 1 sn birleştirilip tek okumayla uygulanır; silme olayı okumasız
 /// uygulanır. Tepki, sabit, oy ve anket bitirme `message.updated` yayar: yerelde olan mesaj
-/// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Otomatik yeniden deneme yoktur.
+/// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Açılış okumaları sürerken gelen
+/// sinyaller kaybolmaz: açılış bitince uzlaştırma bir kez koşar. Geçmiş uzlaştırması
+/// `chat_room_reconcile.dart`'tadır. Otomatik yeniden deneme yoktur.
 
 @ProviderFor(ChatRoomController)
 final chatRoomControllerProvider = ChatRoomControllerFamily._();
@@ -21,14 +23,18 @@ final chatRoomControllerProvider = ChatRoomControllerFamily._();
 /// gelen olayların uzlaştırılması (istemci akışları §10.2–§10.5), ek gönderimi ve sabit şeridi
 /// (§10.10). Olaylar en az 1 sn birleştirilip tek okumayla uygulanır; silme olayı okumasız
 /// uygulanır. Tepki, sabit, oy ve anket bitirme `message.updated` yayar: yerelde olan mesaj
-/// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Otomatik yeniden deneme yoktur.
+/// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Açılış okumaları sürerken gelen
+/// sinyaller kaybolmaz: açılış bitince uzlaştırma bir kez koşar. Geçmiş uzlaştırması
+/// `chat_room_reconcile.dart`'tadır. Otomatik yeniden deneme yoktur.
 final class ChatRoomControllerProvider
     extends $AsyncNotifierProvider<ChatRoomController, ChatRoom> {
   /// Açık sohbet: bilgi + mesaj penceresi, gönderim/düzenleme/silme, okundu imleci ve akıştan
   /// gelen olayların uzlaştırılması (istemci akışları §10.2–§10.5), ek gönderimi ve sabit şeridi
   /// (§10.10). Olaylar en az 1 sn birleştirilip tek okumayla uygulanır; silme olayı okumasız
   /// uygulanır. Tepki, sabit, oy ve anket bitirme `message.updated` yayar: yerelde olan mesaj
-  /// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Otomatik yeniden deneme yoktur.
+  /// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Açılış okumaları sürerken gelen
+  /// sinyaller kaybolmaz: açılış bitince uzlaştırma bir kez koşar. Geçmiş uzlaştırması
+  /// `chat_room_reconcile.dart`'tadır. Otomatik yeniden deneme yoktur.
   ChatRoomControllerProvider._({
     required ChatRoomControllerFamily super.from,
     required String super.argument,
@@ -66,13 +72,15 @@ final class ChatRoomControllerProvider
 }
 
 String _$chatRoomControllerHash() =>
-    r'aac2a88efbf11a85393c51ed9737fff0a10ce176';
+    r'41851d6c7270752f79d5bf09cc6d4e7a192e0d26';
 
 /// Açık sohbet: bilgi + mesaj penceresi, gönderim/düzenleme/silme, okundu imleci ve akıştan
 /// gelen olayların uzlaştırılması (istemci akışları §10.2–§10.5), ek gönderimi ve sabit şeridi
 /// (§10.10). Olaylar en az 1 sn birleştirilip tek okumayla uygulanır; silme olayı okumasız
 /// uygulanır. Tepki, sabit, oy ve anket bitirme `message.updated` yayar: yerelde olan mesaj
-/// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Otomatik yeniden deneme yoktur.
+/// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Açılış okumaları sürerken gelen
+/// sinyaller kaybolmaz: açılış bitince uzlaştırma bir kez koşar. Geçmiş uzlaştırması
+/// `chat_room_reconcile.dart`'tadır. Otomatik yeniden deneme yoktur.
 
 final class ChatRoomControllerFamily extends $Family
     with
@@ -96,7 +104,9 @@ final class ChatRoomControllerFamily extends $Family
   /// gelen olayların uzlaştırılması (istemci akışları §10.2–§10.5), ek gönderimi ve sabit şeridi
   /// (§10.10). Olaylar en az 1 sn birleştirilip tek okumayla uygulanır; silme olayı okumasız
   /// uygulanır. Tepki, sabit, oy ve anket bitirme `message.updated` yayar: yerelde olan mesaj
-  /// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Otomatik yeniden deneme yoktur.
+  /// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Açılış okumaları sürerken gelen
+  /// sinyaller kaybolmaz: açılış bitince uzlaştırma bir kez koşar. Geçmiş uzlaştırması
+  /// `chat_room_reconcile.dart`'tadır. Otomatik yeniden deneme yoktur.
 
   ChatRoomControllerProvider call(String id) =>
       ChatRoomControllerProvider._(argument: id, from: this);
@@ -109,7 +119,9 @@ final class ChatRoomControllerFamily extends $Family
 /// gelen olayların uzlaştırılması (istemci akışları §10.2–§10.5), ek gönderimi ve sabit şeridi
 /// (§10.10). Olaylar en az 1 sn birleştirilip tek okumayla uygulanır; silme olayı okumasız
 /// uygulanır. Tepki, sabit, oy ve anket bitirme `message.updated` yayar: yerelde olan mesaj
-/// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Otomatik yeniden deneme yoktur.
+/// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Açılış okumaları sürerken gelen
+/// sinyaller kaybolmaz: açılış bitince uzlaştırma bir kez koşar. Geçmiş uzlaştırması
+/// `chat_room_reconcile.dart`'tadır. Otomatik yeniden deneme yoktur.
 
 abstract class _$ChatRoomController extends $AsyncNotifier<ChatRoom> {
   late final _$args = ref.$arg as String;

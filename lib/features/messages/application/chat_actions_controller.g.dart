@@ -11,8 +11,11 @@ part of 'chat_actions_controller.dart';
 /// Mesaj eylemleri (istemci akışları §10.10): tepki, oy, sabitleme, anket bitirme ve indirmeler.
 /// Tepki ve oy iyimser uygulanır; aynı mesajdaki ardışık dokunuşlar [settle] süresince
 /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
-/// istek gitmez (yazma kovası 60/dk). Hata önceki (sunucuda doğrulanmış) duruma geri alır ve
-/// dokunuşun Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
+/// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
+/// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
+/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
+/// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+/// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
 /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
 
 @ProviderFor(ChatActionsController)
@@ -21,16 +24,22 @@ final chatActionsControllerProvider = ChatActionsControllerFamily._();
 /// Mesaj eylemleri (istemci akışları §10.10): tepki, oy, sabitleme, anket bitirme ve indirmeler.
 /// Tepki ve oy iyimser uygulanır; aynı mesajdaki ardışık dokunuşlar [settle] süresince
 /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
-/// istek gitmez (yazma kovası 60/dk). Hata önceki (sunucuda doğrulanmış) duruma geri alır ve
-/// dokunuşun Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
+/// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
+/// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
+/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
+/// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+/// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
 /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
 final class ChatActionsControllerProvider
     extends $NotifierProvider<ChatActionsController, int> {
   /// Mesaj eylemleri (istemci akışları §10.10): tepki, oy, sabitleme, anket bitirme ve indirmeler.
   /// Tepki ve oy iyimser uygulanır; aynı mesajdaki ardışık dokunuşlar [settle] süresince
   /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
-  /// istek gitmez (yazma kovası 60/dk). Hata önceki (sunucuda doğrulanmış) duruma geri alır ve
-  /// dokunuşun Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
+  /// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
+  /// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
+  /// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
+  /// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+  /// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
   /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
   ChatActionsControllerProvider._({
     required ChatActionsControllerFamily super.from,
@@ -77,13 +86,16 @@ final class ChatActionsControllerProvider
 }
 
 String _$chatActionsControllerHash() =>
-    r'25f2b1ecbba572995c0181923315069b6ff69b7a';
+    r'e65792efe8111be4a404dd57c8be053013cbc1a0';
 
 /// Mesaj eylemleri (istemci akışları §10.10): tepki, oy, sabitleme, anket bitirme ve indirmeler.
 /// Tepki ve oy iyimser uygulanır; aynı mesajdaki ardışık dokunuşlar [settle] süresince
 /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
-/// istek gitmez (yazma kovası 60/dk). Hata önceki (sunucuda doğrulanmış) duruma geri alır ve
-/// dokunuşun Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
+/// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
+/// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
+/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
+/// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+/// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
 /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
 
 final class ChatActionsControllerFamily extends $Family
@@ -100,8 +112,11 @@ final class ChatActionsControllerFamily extends $Family
   /// Mesaj eylemleri (istemci akışları §10.10): tepki, oy, sabitleme, anket bitirme ve indirmeler.
   /// Tepki ve oy iyimser uygulanır; aynı mesajdaki ardışık dokunuşlar [settle] süresince
   /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
-  /// istek gitmez (yazma kovası 60/dk). Hata önceki (sunucuda doğrulanmış) duruma geri alır ve
-  /// dokunuşun Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
+  /// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
+  /// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
+  /// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
+  /// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+  /// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
   /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
 
   ChatActionsControllerProvider call(String chatId) =>
@@ -114,8 +129,11 @@ final class ChatActionsControllerFamily extends $Family
 /// Mesaj eylemleri (istemci akışları §10.10): tepki, oy, sabitleme, anket bitirme ve indirmeler.
 /// Tepki ve oy iyimser uygulanır; aynı mesajdaki ardışık dokunuşlar [settle] süresince
 /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
-/// istek gitmez (yazma kovası 60/dk). Hata önceki (sunucuda doğrulanmış) duruma geri alır ve
-/// dokunuşun Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
+/// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
+/// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
+/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
+/// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+/// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
 /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
 
 abstract class _$ChatActionsController extends $Notifier<int> {

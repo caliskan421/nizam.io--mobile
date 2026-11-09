@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 
 /// Anlık akışın (SSE) zamanlama ve yeniden bağlanma kuralları (istemci akışları §10.5, §10.10;
@@ -25,6 +26,10 @@ abstract final class ChatStreamPolicy {
 
   /// "Yazıyor" sinyali en az bu aralıkla gönderilir (ucuz sinyal kovası 180/dk).
   static const typingInterval = Duration(seconds: 3);
+
+  /// İstemcinin dakikadaki ucuz sinyal (yazıyor + okundu) tavanı. Sunucu kovası hesap başına
+  /// 180/dk'dır (ADR-0028); bildirim okundu ve diğer cihazlar da aynı kovadan yer, pay bırakılır.
+  static const signalsPerMinute = 120;
 
   /// Karşı tarafın "yazıyor" bilgisi son olaydan sonra bu kadar görünür.
   static const typingShownFor = Duration(seconds: 6);
@@ -75,3 +80,23 @@ StreamErrorAction streamErrorAction({
 /// bağlantı sayacı sıfırlar; açılamayan ya da hemen kapanan bağlantı sayacı artırır.
 int nextFailures(int failures, {required Duration? lived}) =>
     lived != null && lived >= ChatStreamPolicy.healthyAfter ? 0 : failures + 1;
+
+/// Ucuz sinyal kovası (yazıyor + okundu): son bir dakikada [limit] sinyal gönderildiyse yenisi
+/// gönderilmez. Açık sohbetler aynı kovayı paylaşır (tablet izinde birden çok sohbet açık olabilir).
+final class SignalBudget {
+  SignalBudget({this.limit = ChatStreamPolicy.signalsPerMinute});
+
+  final int limit;
+  final _sent = Queue<DateTime>();
+
+  /// [now] anında bir sinyal için yer varsa ayırır ve true döner.
+  bool take(DateTime now) {
+    while (_sent.isNotEmpty &&
+        now.difference(_sent.first) >= const Duration(minutes: 1)) {
+      _sent.removeFirst();
+    }
+    if (_sent.length >= limit) return false;
+    _sent.add(now);
+    return true;
+  }
+}

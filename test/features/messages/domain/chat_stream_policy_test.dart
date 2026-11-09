@@ -18,6 +18,14 @@ class _Fixed implements Random {
 }
 
 void main() {
+  test('ucuz sinyal kovası: dakikada en çok tavan kadar, pencere kayar', () {
+    final b = SignalBudget(limit: 3);
+    final t0 = DateTime(2026, 11, 9, 10);
+    expect([for (var i = 0; i < 4; i++) b.take(t0)], [true, true, true, false]);
+    expect(b.take(t0.add(const Duration(seconds: 59))), isFalse);
+    expect(b.take(t0.add(const Duration(minutes: 1))), isTrue);
+  });
+
   test('gecikme: jitter 0–5 sn, üstel 1-2-4… en çok 60 sn', () {
     expect(reconnectDelay(0, _Fixed(0)), Duration.zero);
     expect(reconnectDelay(0, _Fixed(1 << 30)), const Duration(seconds: 5));

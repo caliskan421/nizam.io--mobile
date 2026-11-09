@@ -4,24 +4,25 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'chat_controller.g.dart';
 
 /// Sohbet ekranının yazma durumu: yanıt/düzenleme bağlamı ve görünen sabit mesaj sırası.
-/// Taslak metni ekrandaki metin denetleyicisindedir.
+/// Taslak metni ekrandaki metin denetleyicisindedir (düzenlemede açılıştaki mesaj metniyle dolar).
 @immutable
 final class ChatViewState {
-  const ChatViewState({this.reply, this.edit, this.pin = 0});
+  const ChatViewState({this.reply, this.edit, this.editRevision, this.pin = 0});
 
   final String? reply;
   final String? edit;
 
+  /// Düzenleme taslağının tabanı: taslak açılırken okunan `edit_revision` (gönderimde
+  /// `expected_revision`; akışla gelen sonraki düzenleme bunu değiştirmez).
+  final int? editRevision;
+
   /// Sabit mesaj şeridinde gösterilen sıra (sabit sayısına göre döner).
   final int pin;
 
-  ChatViewState copyWith({
-    String? Function()? reply,
-    String? Function()? edit,
-    int? pin,
-  }) => ChatViewState(
-    reply: reply == null ? this.reply : reply(),
-    edit: edit == null ? this.edit : edit(),
+  ChatViewState copyWith({int? pin}) => ChatViewState(
+    reply: reply,
+    edit: edit,
+    editRevision: editRevision,
     pin: pin ?? this.pin,
   );
 }
@@ -36,14 +37,14 @@ class ChatController extends _$ChatController {
   /// koşulsuz sıfırlanır. Yalnız açma komutundan çağrılır; yeniden boyutlandırma çağırmaz.
   void open() => state = const ChatViewState();
 
-  void reply(String msg) =>
-      state = state.copyWith(reply: () => msg, edit: () => null);
+  void reply(String msg) => state = ChatViewState(reply: msg, pin: state.pin);
 
-  void edit(String msg) =>
-      state = state.copyWith(edit: () => msg, reply: () => null);
+  /// Düzenleme taslağını [revision] tabanıyla açar (409 çakışmasından sonra kullanıcı sunucunun
+  /// yeni değerini görmüş olarak yeni tabanla yeniden açar).
+  void edit(String msg, {required int revision}) =>
+      state = ChatViewState(edit: msg, editRevision: revision, pin: state.pin);
 
-  void clearContext() =>
-      state = state.copyWith(reply: () => null, edit: () => null);
+  void clearContext() => state = ChatViewState(pin: state.pin);
 
   void nextPin() => state = state.copyWith(pin: state.pin + 1);
 

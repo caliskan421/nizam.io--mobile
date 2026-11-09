@@ -73,6 +73,9 @@ class CoordinatorshipPage extends ConsumerWidget {
     // altına yapışan cam şerit (prototip `.cd-tabwrap`, `position: sticky; top: 56px`).
     return NzPage.feed(
       width: NzContentWidth.wide,
+      onRefresh: () => ref
+          .read(coordinatorshipsControllerProvider.notifier)
+          .refresh(code: code),
       // Tablet sağ bölmesi: kaynak gap 22, kimlik -6 → 16.
       paneLead: NizamioSpacing.space4,
       onRetry: () => _retry(ref),

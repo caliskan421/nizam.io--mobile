@@ -2,8 +2,13 @@ import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/api_error.dart';
+import '../../../core/refresh.dart';
 import '../../tasks/tasks.dart';
 import 'archive_actions_controller.dart';
+import 'archive_files_controller.dart';
+import 'archive_folder_controller.dart';
+import 'archive_folder_sources.dart';
+import 'archive_folders_controller.dart';
 import 'archive_providers.dart';
 
 part 'archive_controller.g.dart';
@@ -36,6 +41,33 @@ final class ArchiveViewState {
 class ArchiveController extends _$ArchiveController {
   @override
   ArchiveViewState build() => const ArchiveViewState();
+
+  /// Yeniden denemeyle aynı kaynakları tazeler; açık klasörün okumasını da bekler.
+  Future<void> refresh({String? code}) => refreshWithFeedback(
+    shown: code == null
+        ? ref.read(archiveFoldersControllerProvider).hasValue
+        : ref.read(archiveFolderContextProvider(code)).value != null,
+    reload: () async {
+      if (ref.read(taskCatalogControllerProvider).hasError) {
+        await ref.read(taskCatalogControllerProvider.notifier).refresh();
+      }
+      ref
+        ..invalidate(archiveScopeProvider)
+        ..invalidate(archiveFoldersControllerProvider);
+      await ref.read(archiveFoldersControllerProvider.future);
+      if (code == null) return;
+      await ref.read(archiveFolderContextProvider(code).future);
+      if (ref.read(archiveFolderControllerProvider(code)).tab ==
+          ArchiveFolderTab.tasks) {
+        await ref.read(archiveFolderTasksProvider(code).future);
+      } else {
+        await Future.wait([
+          ref.read(archiveFilesControllerProvider(code).future),
+          ref.read(archiveFolderUploadersProvider(code).future),
+        ]);
+      }
+    },
+  );
 
   /// Arama kutusunu açar/kapatır; kapanınca sorgu temizlenir.
   void toggleSearch() => state = state.copyWith(

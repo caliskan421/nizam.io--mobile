@@ -15,6 +15,7 @@ import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../tasks/tasks.dart';
 import '../application/archive_actions_controller.dart';
+import '../application/archive_controller.dart';
 import '../application/archive_files_controller.dart';
 import '../application/archive_folder_controller.dart';
 import '../application/archive_folder_sources.dart';
@@ -117,6 +118,8 @@ class ArchiveFolderPage extends ConsumerWidget {
       return NzPage.feed(
         // Tablet sağ bölmesi (arşiv klasörü: gap 20, başlık -6).
         paneLead: NizamioSpacing.rowPad,
+        onRefresh: () =>
+            ref.read(archiveControllerProvider.notifier).refresh(code: code),
         onRetry: retry,
         topBar: topBar,
         children: [
@@ -132,6 +135,8 @@ class ArchiveFolderPage extends ConsumerWidget {
     final tasks = ref.watch(archiveFolderTasksProvider(code));
     return NzPage.feed(
       paneLead: NizamioSpacing.rowPad,
+      onRefresh: () =>
+          ref.read(archiveControllerProvider.notifier).refresh(code: code),
       onRetry: retry,
       topBar: topBar,
       // Görev klasörü satırları cam (NzFolder): giriş yalnız yükselir.

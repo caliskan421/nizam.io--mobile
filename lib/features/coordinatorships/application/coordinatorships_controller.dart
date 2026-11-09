@@ -4,9 +4,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/domain/page_slice.dart';
 import '../../../core/providers.dart';
+import '../../../core/refresh.dart';
 import '../../tasks/tasks.dart';
 import '../domain/coordinatorship_overview.dart';
 import '../domain/coordinatorship_stats_repository.dart';
+import 'coordinatorship_detail_controller.dart';
+import 'coordinatorship_profiles_controller.dart';
 
 part 'coordinatorships_controller.g.dart';
 
@@ -51,6 +54,29 @@ final serverCoordinatorshipStatsProvider = FutureProvider((ref) async {
 class CoordinatorshipsController extends _$CoordinatorshipsController {
   @override
   CoordinatorshipSort build() => CoordinatorshipSort.name;
+
+  /// Katalog ve ekranın bağlı kaynakları; katalog yenilemesi raporu da geçersiz kılar.
+  Future<void> refresh({String? code}) => refreshWithFeedback(
+    shown: code == null
+        ? ref.read(serverCoordinatorshipStatsProvider).hasValue
+        : ref.read(coordinatorshipDetailProvider(code)).value != null,
+    reload: () async {
+      await ref.read(taskCatalogControllerProvider.notifier).refresh();
+      if (code == null) {
+        await ref.read(serverCoordinatorshipStatsProvider.future);
+      } else {
+        ref.invalidate(coordinatorshipProfilesControllerProvider);
+        if (ref
+                .read(taskCatalogControllerProvider)
+                .value
+                ?.access
+                ?.companyAdmin ==
+            true) {
+          await ref.read(coordinatorshipProfilesControllerProvider.future);
+        }
+      }
+    },
+  );
 
   void sortBy(CoordinatorshipSort sort) => state = sort;
 }

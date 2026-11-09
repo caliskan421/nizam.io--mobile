@@ -63,13 +63,13 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     });
     final l = context.l10n;
     final view = ref.watch(activityViewProvider);
-    // Tablet sağ bölmesi: geçmiş yalnız açıldığında görünür; daire "Kapat" bölmeyi boş hâline
-    // ("Bir kayıt seç") döndürür (yığında geri varsa bir adım geri). Telefonda geri yeter.
+    // "Kapat" tablet bölmesini boşaltır; telefonda geri döner.
     final pane = NzPaneScope.maybeOf(context);
     final inDetail = pane?.role == NzPaneRole.detail;
     return NzPage.feed(
       // Tablet sağ bölmesi (işlem geçmişi: gap 20, açıklama -8).
       paneLead: NizamioSpacing.space3,
+      onRefresh: ref.read(activityLogControllerProvider.notifier).refresh,
       onRetry: _retry,
       topBar: NzTopBar.detail(
         title: l.uiActivityTitle,

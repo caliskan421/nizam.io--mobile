@@ -7,6 +7,7 @@ import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorship_detail_controller.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorship_profiles_controller.dart';
+import 'package:nizamio/features/coordinatorships/application/coordinatorships_controller.dart';
 import 'package:nizamio/features/coordinatorships/coordinatorships.dart'
     show DepartmentKind;
 import 'package:nizamio/features/coordinatorships/domain/coordinatorship_board.dart';
@@ -22,6 +23,25 @@ Future<void> _ready(ProviderContainer c) async {
 }
 
 void main() {
+  test('yenileme departmanı da okur; hata önceki ayrıntıyı korur', () async {
+    final backend = CoordBackend();
+    final h = await pilotHarness(backend, signedIn: true);
+    h.read(scopeControllerProvider).selectProgram(coordProgram);
+    final c = h.container;
+    final provider = coordinatorshipDetailProvider(dAlt);
+    c.listen(provider, (_, _) {});
+    await _ready(c);
+    final previous = c.read(provider).value!.department;
+    final requests = h.backend.count('GET', '/v1/departments');
+    backend.departmentsError = 'organization.authority_unavailable';
+    await expectLater(
+      c.read(coordinatorshipsControllerProvider.notifier).refresh(code: dAlt),
+      throwsA(isA<ApiError>()),
+    );
+    expect(h.backend.count('GET', '/v1/departments'), requests + 1);
+    expect(c.read(provider).value!.department, previous);
+  });
+
   test(
     'bölüm ve görev süzgeci kod başına; kişi süzgeci Görevler bölümünü açar',
     () async {

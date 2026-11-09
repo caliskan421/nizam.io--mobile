@@ -99,6 +99,14 @@ class TaskDetailPage extends ConsumerWidget {
     // Alt görev, not, dosya ve tarih talebi ayrıntıda okunur.
     final details = ref.watch(taskDetailsProvider(code));
     return NzPage.feed(
+      onRefresh: () async {
+        ref.invalidate(taskDetailsProvider(code));
+        try {
+          await ref.read(taskDetailsProvider(code).future);
+        } catch (_) {
+          // Ayrıntı hatasını sayfadaki banner bildirir.
+        }
+      },
       // Tablet sağ bölmesi (görev ayrıntısı: gap 20, başlık -8).
       paneLead: NizamioSpacing.space3,
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),

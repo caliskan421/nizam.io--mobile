@@ -43,6 +43,7 @@ class CoordinatorshipsPage extends ConsumerWidget {
     // Tablette açık kayıt yokken liste tam genişliktir; kartlar yatayda uzar.
     return NzPage.feed(
       width: NzContentWidth.wide,
+      onRefresh: ref.read(coordinatorshipsControllerProvider.notifier).refresh,
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       topBar: const RootTopBar(),
       children: [

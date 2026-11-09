@@ -94,8 +94,8 @@ class CoordinatorshipDetailController
 @riverpod
 AsyncValue<CoordinatorshipDetail?> coordinatorshipDetail(Ref ref, String code) {
   final catalog = ref.watch(taskCatalogControllerProvider);
-  if (catalog case AsyncError(:final error, :final stackTrace)) {
-    return AsyncError(error, stackTrace);
+  if (catalog.hasError && !catalog.hasValue) {
+    return AsyncError(catalog.error!, catalog.stackTrace!);
   }
   final c = catalog.value;
   if (c == null) return const AsyncLoading();
@@ -103,8 +103,8 @@ AsyncValue<CoordinatorshipDetail?> coordinatorshipDetail(Ref ref, String code) {
     return AsyncData(CoordinatorshipDetail.from(c, const [], code));
   }
   final departments = ref.watch(coordinatorshipProfilesControllerProvider);
-  if (departments case AsyncError(:final error, :final stackTrace)) {
-    return AsyncError(error, stackTrace);
+  if (departments.hasError && !departments.hasValue) {
+    return AsyncError(departments.error!, departments.stackTrace!);
   }
   final d = departments.value;
   if (d == null) return const AsyncLoading();

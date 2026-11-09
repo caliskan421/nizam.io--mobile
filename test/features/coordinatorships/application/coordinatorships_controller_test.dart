@@ -1,5 +1,6 @@
 // CoordinatorshipsController: sıralama ölçütü (ad / gecikme / ilerleme) ve sunucu verisinden
 // (departmanlar, ekipler, görevler) türetilen liste.
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorships_controller.dart';
@@ -53,6 +54,18 @@ void main() {
     list = c.read(coordinatorshipListProvider).requireValue;
     // ELE 2/2, ALT 2/4, EGI 1/3, İdari görevsiz (0).
     expect(list.map((s) => s.code), [dEle, dAlt, dEgi, dIda]);
+    final reports = h.backend.count(
+      'GET',
+      '/v1/reports/dashboard/coordinatorships',
+    );
+    final catalogs = h.backend.count('GET', '/v1/program/work-items');
+    await c.read(coordinatorshipsControllerProvider.notifier).refresh();
+    expect(
+      h.backend.count('GET', '/v1/reports/dashboard/coordinatorships'),
+      reports + 1,
+    );
+    expect(h.backend.count('GET', '/v1/program/work-items'), catalogs + 1);
+    expect(c.read(serverCoordinatorshipStatsProvider).isLoading, isFalse);
     expect(backend.unhandled, isEmpty);
   });
 }

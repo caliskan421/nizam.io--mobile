@@ -215,7 +215,6 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     final page = NzPage.feed(
       topBar: NzTopBar.detail(
         onBack: widget.onBack,
-        bottomEdgeOpacity: _collapse,
         borderRadius: const BorderRadius.vertical(
           bottom: Radius.circular(_barRadius),
         ),

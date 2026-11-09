@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../coordinatorships/coordinatorships.dart' show DepartmentKind;
+import '../../scope/scope.dart' show DepartmentRole;
 
 /// Yönetim kullanıcı listesinin sıralama alanı (`sort_by`). Sözleşmede serbest dizgedir;
 /// kapalı küme backend'dedir (`name`, `created_at`; tanımsız değer 422).
@@ -26,13 +27,39 @@ final class KnownUser {
     required this.accountId,
     required this.fullName,
     required List<String> memberships,
-  }) : memberships = List.unmodifiable(memberships);
+  }) : memberships = List.unmodifiable(memberships),
+       teams = List.unmodifiable(
+         memberships.map(UserMembership.parse).whereType<UserMembership>(),
+       );
 
   final String accountId;
   final String fullName;
 
   /// Üyelik etiketleri (sunucu biçimi, olduğu gibi).
   final List<String> memberships;
+  final List<UserMembership> teams;
+}
+
+/// Typed membership label from the pinned `program:department:role` contract.
+@immutable
+final class UserMembership {
+  const UserMembership({
+    required this.programId,
+    required this.departmentId,
+    required this.role,
+  });
+  final String programId;
+  final String departmentId;
+  final DepartmentRole role;
+  static UserMembership? parse(String label) {
+    final parts = label.split(':');
+    if (parts.length != 3 || parts[0].isEmpty || parts[1].isEmpty) return null;
+    return UserMembership(
+      programId: parts[0],
+      departmentId: parts[1],
+      role: DepartmentRole.fromWire(parts[2]),
+    );
+  }
 }
 
 /// Kullanıcı oluşturma/güncelleme/silme sonucu (`UserResult`).

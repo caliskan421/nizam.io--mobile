@@ -34,6 +34,10 @@ abstract interface class NzAppNav {
   void openMessages();
   void openChat(String id);
   void openProfile();
+  void openUsers();
+  void openUser(String accountId);
+  void openTables();
+  void openTable(String id);
 
   /// Sağdan açılan uygulama menüsü (tüm modüller, kapsam, çıkış); kök sayfaların üst çubuğundaki
   /// cam menü dairesi çağırır.

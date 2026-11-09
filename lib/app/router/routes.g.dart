@@ -350,6 +350,30 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
           hasOverriddenOnExit: false,
           factory: $CalendarRoute._fromState,
         ),
+        GoRouteData.$route(
+          path: '/users',
+          hasOverriddenOnExit: false,
+          factory: $UsersRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: ':accountId',
+              hasOverriddenOnExit: false,
+              factory: $UserRoute._fromState,
+            ),
+          ],
+        ),
+        GoRouteData.$route(
+          path: '/tables',
+          hasOverriddenOnExit: false,
+          factory: $TablesRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: ':id',
+              hasOverriddenOnExit: false,
+              factory: $TableRoute._fromState,
+            ),
+          ],
+        ),
       ],
     ),
   ],
@@ -770,6 +794,136 @@ mixin $CalendarRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/calendar',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $UsersRoute on GoRouteData {
+  static UsersRoute _fromState(GoRouterState state) => UsersRoute(
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
+
+  UsersRoute get _self => this as UsersRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/users',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $UserRoute on GoRouteData {
+  static UserRoute _fromState(GoRouterState state) => UserRoute(
+    accountId: state.pathParameters['accountId']!,
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
+
+  UserRoute get _self => this as UserRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/users/${Uri.encodeComponent(_self.accountId)}',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $TablesRoute on GoRouteData {
+  static TablesRoute _fromState(GoRouterState state) => TablesRoute(
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
+
+  TablesRoute get _self => this as TablesRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/tables',
+    queryParams: {
+      if (!_$iterablesEqual(_self.trail, const []))
+        'trail': _self.trail.map((e) => e).toList(),
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $TableRoute on GoRouteData {
+  static TableRoute _fromState(GoRouterState state) => TableRoute(
+    id: state.pathParameters['id']!,
+    trail:
+        state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
+        const [],
+  );
+
+  TableRoute get _self => this as TableRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/tables/${Uri.encodeComponent(_self.id)}',
     queryParams: {
       if (!_$iterablesEqual(_self.trail, const []))
         'trail': _self.trail.map((e) => e).toList(),

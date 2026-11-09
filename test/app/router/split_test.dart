@@ -8,6 +8,37 @@ SplitMove _move(String location, PaneEntry to) =>
     splitMove(Uri.parse(location), to, _none);
 
 void main() {
+  test(
+    'kullanıcı ve tablo kökleri tam liste açar, kendi kaydı tabana gider',
+    () {
+      for (final (root, kind) in [
+        ('/users', PaneKind.user),
+        ('/tables', PaneKind.table),
+      ]) {
+        expect(splitListFull(Uri.parse(root)), isTrue);
+        expect(splitListFull(Uri.parse('$root/record')), isFalse);
+        expect(baseEntryOf(Uri.parse(root), (_) => 'last'), isNull);
+        expect(
+          (_move(root, PaneEntry(kind, 'record')) as SplitGo).location,
+          '$root/record',
+        );
+        expect(
+          baseEntryOf(Uri.parse('$root/record'), _none),
+          PaneEntry(kind, 'record'),
+        );
+      }
+    },
+  );
+
+  test('kişi-tablosu geçişi ana listeyi korur ve geri izini kısaltır', () {
+    final move = _move(
+      '/users/person',
+      const PaneEntry(PaneKind.table, 'sheet'),
+    ) as SplitGo;
+    expect(move.location, '/users/person?trail=table%3Asheet');
+    expect(splitBack(Uri.parse(move.location)), '/users/person');
+  });
+
   test('kayıt kodu: ayrıştırma ve geri yazma', () {
     expect(
       PaneEntry.parse('task:ALT-5'),

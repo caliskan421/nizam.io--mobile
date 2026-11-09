@@ -40,6 +40,7 @@ Future<bool> showNewTaskSheet(
   String? title,
   String? note,
   ChatTaskSource? chatMessage,
+  String? initialAssignee,
 }) async {
   final container = ProviderScope.containerOf(context, listen: false);
   if (!container.read(canCreateTaskProvider)) return false;
@@ -47,8 +48,10 @@ Future<bool> showNewTaskSheet(
       .read(newTaskFormControllerProvider.notifier)
       .prepare(
         coordinatorship: coordinatorship,
+        initialAssignee: initialAssignee,
         reset:
             resetTarget ||
+            initialAssignee != null ||
             coordinatorship != null ||
             note != null ||
             chatMessage != null,

@@ -18,14 +18,10 @@ import 'calendar_texts.dart';
 /// (toplantılar, görevler, tarih talepleri); boş günde "Toplantı planla". Toplantı satırı
 /// toplantı ayrıntısını, görev ve talep satırı görev ayrıntısını açar.
 class CalendarDay extends ConsumerWidget {
-  const CalendarDay({
-    super.key,
-    required this.index,
-    required this.onPlanMeeting,
-  });
+  const CalendarDay({super.key, required this.index, this.onPlanMeeting});
 
   final CalendarIndex index;
-  final VoidCallback onPlanMeeting;
+  final VoidCallback? onPlanMeeting;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -99,12 +95,13 @@ class CalendarDay extends ConsumerWidget {
                   style: t.bodyMd.copyWith(color: c.textMuted),
                 ),
                 const Gap(14),
-                Center(
-                  child: NzButton.secondary(
-                    label: l.uiCalendarPlan,
-                    onPressed: onPlanMeeting,
+                if (onPlanMeeting != null)
+                  Center(
+                    child: NzButton.secondary(
+                      label: l.uiCalendarPlan,
+                      onPressed: onPlanMeeting,
+                    ),
                   ),
-                ),
                 const Gap(NizamioSpacing.space2),
               ],
             ],

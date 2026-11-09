@@ -6226,6 +6226,618 @@ abstract class AppLocalizations {
   /// **'Yeniden denetle'**
   String get uiServerUpdateRecheck;
 
+  /// ui.tables.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablolar'**
+  String get uiTablesTitle;
+
+  /// ui.tables.new
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni tablo'**
+  String get uiTablesNew;
+
+  /// ui.tables.search
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablolarda ara'**
+  String get uiTablesSearch;
+
+  /// ui.tables.coord
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük'**
+  String get uiTablesCoord;
+
+  /// ui.tables.personal
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişisel'**
+  String get uiTablesPersonal;
+
+  /// ui.tables.shared
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşılan'**
+  String get uiTablesShared;
+
+  /// ui.tables.all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get uiTablesAll;
+
+  /// ui.tables.open
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık'**
+  String get uiTablesOpen;
+
+  /// ui.tables.done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanan'**
+  String get uiTablesDone;
+
+  /// ui.tables.empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz tablo yok'**
+  String get uiTablesEmpty;
+
+  /// ui.tables.no_results
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonuç bulunamadı'**
+  String get uiTablesNoResults;
+
+  /// ui.tables.name
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo adı'**
+  String get uiTablesName;
+
+  /// ui.tables.template
+  ///
+  /// In tr, this message translates to:
+  /// **'Şablon'**
+  String get uiTablesTemplate;
+
+  /// ui.tables.blank
+  ///
+  /// In tr, this message translates to:
+  /// **'Boş tablo'**
+  String get uiTablesBlank;
+
+  /// ui.tables.task_list
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev listesi'**
+  String get uiTablesTaskList;
+
+  /// ui.tables.event_plan
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik planı'**
+  String get uiTablesEventPlan;
+
+  /// ui.tables.action_list
+  ///
+  /// In tr, this message translates to:
+  /// **'Aksiyon listesi'**
+  String get uiTablesActionList;
+
+  /// ui.tables.supplier_list
+  ///
+  /// In tr, this message translates to:
+  /// **'Tedarikçi listesi'**
+  String get uiTablesSupplierList;
+
+  /// ui.tables.volunteer_list
+  ///
+  /// In tr, this message translates to:
+  /// **'Gönüllü listesi'**
+  String get uiTablesVolunteerList;
+
+  /// ui.tables.inventory
+  ///
+  /// In tr, this message translates to:
+  /// **'Envanter'**
+  String get uiTablesInventory;
+
+  /// ui.tables.create
+  ///
+  /// In tr, this message translates to:
+  /// **'Oluştur'**
+  String get uiTablesCreate;
+
+  /// ui.tables.cancel
+  ///
+  /// In tr, this message translates to:
+  /// **'Vazgeç'**
+  String get uiTablesCancel;
+
+  /// ui.tables.save
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydet'**
+  String get uiTablesSave;
+
+  /// ui.tables.row
+  ///
+  /// In tr, this message translates to:
+  /// **'satır'**
+  String get uiTablesRow;
+
+  /// ui.tables.column
+  ///
+  /// In tr, this message translates to:
+  /// **'sütun'**
+  String get uiTablesColumn;
+
+  /// ui.tables.new_row
+  ///
+  /// In tr, this message translates to:
+  /// **'Satır ekle'**
+  String get uiTablesNewRow;
+
+  /// ui.tables.new_column
+  ///
+  /// In tr, this message translates to:
+  /// **'Sütun ekle'**
+  String get uiTablesNewColumn;
+
+  /// ui.tables.fields
+  ///
+  /// In tr, this message translates to:
+  /// **'Alanlar'**
+  String get uiTablesFields;
+
+  /// ui.tables.share
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaş'**
+  String get uiTablesShare;
+
+  /// ui.tables.options
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo işlemleri'**
+  String get uiTablesOptions;
+
+  /// ui.tables.rename
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeniden adlandır'**
+  String get uiTablesRename;
+
+  /// ui.tables.duplicate
+  ///
+  /// In tr, this message translates to:
+  /// **'Kopya oluştur'**
+  String get uiTablesDuplicate;
+
+  /// ui.tables.duplicate_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Boş kopya oluştur'**
+  String get uiTablesDuplicateEmpty;
+
+  /// ui.tables.delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Sil'**
+  String get uiTablesDelete;
+
+  /// ui.tables.delete_table
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo silinsin mi?'**
+  String get uiTablesDeleteTable;
+
+  /// ui.tables.delete_row
+  ///
+  /// In tr, this message translates to:
+  /// **'Satır silinsin mi?'**
+  String get uiTablesDeleteRow;
+
+  /// ui.tables.delete_column
+  ///
+  /// In tr, this message translates to:
+  /// **'Sütun silinsin mi?'**
+  String get uiTablesDeleteColumn;
+
+  /// ui.tables.delete_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem örnek veriyi bu oturumdan kaldırır.'**
+  String get uiTablesDeleteMessage;
+
+  /// ui.tables.readonly
+  ///
+  /// In tr, this message translates to:
+  /// **'Yalnızca görüntüleme'**
+  String get uiTablesReadonly;
+
+  /// ui.tables.editable
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleme erişimi'**
+  String get uiTablesEditable;
+
+  /// ui.tables.text
+  ///
+  /// In tr, this message translates to:
+  /// **'Metin'**
+  String get uiTablesText;
+
+  /// ui.tables.number
+  ///
+  /// In tr, this message translates to:
+  /// **'Sayı'**
+  String get uiTablesNumber;
+
+  /// ui.tables.date
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih'**
+  String get uiTablesDate;
+
+  /// ui.tables.phone
+  ///
+  /// In tr, this message translates to:
+  /// **'Telefon'**
+  String get uiTablesPhone;
+
+  /// ui.tables.email
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta'**
+  String get uiTablesEmail;
+
+  /// ui.tables.person
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi'**
+  String get uiTablesPerson;
+
+  /// ui.tables.unit
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük'**
+  String get uiTablesUnit;
+
+  /// ui.tables.task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get uiTablesTask;
+
+  /// ui.tables.link
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo bağlantısı'**
+  String get uiTablesLink;
+
+  /// ui.tables.file
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya'**
+  String get uiTablesFile;
+
+  /// ui.tables.todo
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapıldı'**
+  String get uiTablesTodo;
+
+  /// ui.tables.edit_row
+  ///
+  /// In tr, this message translates to:
+  /// **'Satırı düzenle'**
+  String get uiTablesEditRow;
+
+  /// ui.tables.edit_column
+  ///
+  /// In tr, this message translates to:
+  /// **'Sütunu düzenle'**
+  String get uiTablesEditColumn;
+
+  /// ui.tables.move_left
+  ///
+  /// In tr, this message translates to:
+  /// **'Sola taşı'**
+  String get uiTablesMoveLeft;
+
+  /// ui.tables.move_right
+  ///
+  /// In tr, this message translates to:
+  /// **'Sağa taşı'**
+  String get uiTablesMoveRight;
+
+  /// ui.tables.sort_asc
+  ///
+  /// In tr, this message translates to:
+  /// **'Artan sırala'**
+  String get uiTablesSortAsc;
+
+  /// ui.tables.sort_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Azalan sırala'**
+  String get uiTablesSortDesc;
+
+  /// ui.tables.sort_none
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıralamayı kaldır'**
+  String get uiTablesSortNone;
+
+  /// ui.tables.program_access
+  ///
+  /// In tr, this message translates to:
+  /// **'Program erişimi'**
+  String get uiTablesProgramAccess;
+
+  /// ui.tables.off
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapalı'**
+  String get uiTablesOff;
+
+  /// ui.tables.view
+  ///
+  /// In tr, this message translates to:
+  /// **'Görür'**
+  String get uiTablesView;
+
+  /// ui.tables.edit
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenler'**
+  String get uiTablesEdit;
+
+  /// ui.tables.owner
+  ///
+  /// In tr, this message translates to:
+  /// **'Sahip'**
+  String get uiTablesOwner;
+
+  /// ui.tables.add_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Demo kişi ekle'**
+  String get uiTablesAddPerson;
+
+  /// ui.tables.remove_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Erişimi kaldır'**
+  String get uiTablesRemovePerson;
+
+  /// ui.tables.demo_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Demo üye'**
+  String get uiTablesDemoPerson;
+
+  /// ui.tables.demo_notice
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu çalışma alanı yalnızca oturumluk örnek veridir.'**
+  String get uiTablesDemoNotice;
+
+  /// ui.tables.attachment
+  ///
+  /// In tr, this message translates to:
+  /// **'Örnek ek ekle'**
+  String get uiTablesAttachment;
+
+  /// ui.tables.linked_table
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlı tablo'**
+  String get uiTablesLinkedTable;
+
+  /// ui.tables.summary
+  ///
+  /// In tr, this message translates to:
+  /// **'Özet'**
+  String get uiTablesSummary;
+
+  /// ui.tables.clear
+  ///
+  /// In tr, this message translates to:
+  /// **'Temizle'**
+  String get uiTablesClear;
+
+  /// ui.tables.table_missing
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo bulunamadı'**
+  String get uiTablesTableMissing;
+
+  /// ui.tables.grid
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo görünümü'**
+  String get uiTablesGrid;
+
+  /// ui.tables.copy_suffix
+  ///
+  /// In tr, this message translates to:
+  /// **'(kopya)'**
+  String get uiTablesCopySuffix;
+
+  /// ui.tables.empty_suffix
+  ///
+  /// In tr, this message translates to:
+  /// **'(boş)'**
+  String get uiTablesEmptySuffix;
+
+  /// ui.tables.task_sample
+  ///
+  /// In tr, this message translates to:
+  /// **'Örnek görev'**
+  String get uiTablesTaskSample;
+
+  /// ui.tables.unit_sample
+  ///
+  /// In tr, this message translates to:
+  /// **'Demo koordinatörlük'**
+  String get uiTablesUnitSample;
+
+  /// ui.tables.field_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Alan adı'**
+  String get uiTablesFieldName;
+
+  /// ui.tables.name_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad boş bırakılamaz'**
+  String get uiTablesNameRequired;
+
+  /// ui.tables.new_record
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni kayıt'**
+  String get uiTablesNewRecord;
+
+  /// ui.tables.recent
+  ///
+  /// In tr, this message translates to:
+  /// **'Son kullanılanlar'**
+  String get uiTablesRecent;
+
+  /// ui.tables.back_areas
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlüklere dön'**
+  String get uiTablesBackAreas;
+
+  /// ui.tables.copy_link
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantıyı kopyala'**
+  String get uiTablesCopyLink;
+
+  /// ui.tables.link_copied
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo bağlantısı kopyalandı'**
+  String get uiTablesLinkCopied;
+
+  /// ui.tables.person_search
+  ///
+  /// In tr, this message translates to:
+  /// **'Demo kişilerde ara'**
+  String get uiTablesPersonSearch;
+
+  /// ui.tables.place
+  ///
+  /// In tr, this message translates to:
+  /// **'Yer'**
+  String get uiTablesPlace;
+
+  /// ui.tables.approved
+  ///
+  /// In tr, this message translates to:
+  /// **'Onaylandı'**
+  String get uiTablesApproved;
+
+  /// ui.tables.company
+  ///
+  /// In tr, this message translates to:
+  /// **'Firma'**
+  String get uiTablesCompany;
+
+  /// ui.tables.full_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad soyad'**
+  String get uiTablesFullName;
+
+  /// ui.tables.material
+  ///
+  /// In tr, this message translates to:
+  /// **'Malzeme'**
+  String get uiTablesMaterial;
+
+  /// ui.tables.offer
+  ///
+  /// In tr, this message translates to:
+  /// **'Teklif'**
+  String get uiTablesOffer;
+
+  /// ui.tables.action
+  ///
+  /// In tr, this message translates to:
+  /// **'Aksiyon'**
+  String get uiTablesAction;
+
+  /// ui.tables.activity
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik'**
+  String get uiTablesActivity;
+
+  /// ui.tables.due_date
+  ///
+  /// In tr, this message translates to:
+  /// **'Son tarih'**
+  String get uiTablesDueDate;
+
+  /// ui.tables.copy_to
+  ///
+  /// In tr, this message translates to:
+  /// **'Başka alana kopyala'**
+  String get uiTablesCopyTo;
+
+  /// ui.tables.destination
+  ///
+  /// In tr, this message translates to:
+  /// **'Kopyanın konumu'**
+  String get uiTablesDestination;
+
+  /// ui.tables.related
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlı tablolar'**
+  String get uiTablesRelated;
+
+  /// ui.tables.backlinks
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu tabloya bağlananlar'**
+  String get uiTablesBacklinks;
+
+  /// ui.tables.links
+  ///
+  /// In tr, this message translates to:
+  /// **'bağlantı'**
+  String get uiTablesLinks;
+
+  /// ui.tables.recent_action
+  ///
+  /// In tr, this message translates to:
+  /// **'Son çalıştıkların'**
+  String get uiTablesRecentAction;
+
+  /// ui.tables.unit_a
+  ///
+  /// In tr, this message translates to:
+  /// **'Atölye'**
+  String get uiTablesUnitA;
+
+  /// ui.tables.unit_b
+  ///
+  /// In tr, this message translates to:
+  /// **'Operasyon'**
+  String get uiTablesUnitB;
+
   /// ui.tasks.title
   ///
   /// In tr, this message translates to:
@@ -8877,6 +9489,384 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Görev ayrıntısını aç'**
   String get uiTimelineGanttOpenTask;
+
+  /// ui.users.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcılar'**
+  String get uiUsersTitle;
+
+  /// ui.users.subtitle
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesaplar ve ekip üyelikleri'**
+  String get uiUsersSubtitle;
+
+  /// ui.users.search
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı ara'**
+  String get uiUsersSearch;
+
+  /// ui.users.all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get uiUsersAll;
+
+  /// ui.users.coordinators
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörler'**
+  String get uiUsersCoordinators;
+
+  /// ui.users.members
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyeler'**
+  String get uiUsersMembers;
+
+  /// ui.users.filters
+  ///
+  /// In tr, this message translates to:
+  /// **'Süzgeç ve sıralama'**
+  String get uiUsersFilters;
+
+  /// ui.users.empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı bulunamadı.'**
+  String get uiUsersEmpty;
+
+  /// ui.users.unassigned
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyelik yok'**
+  String get uiUsersUnassigned;
+
+  /// ui.users.partial
+  ///
+  /// In tr, this message translates to:
+  /// **'Görünen kayıtlar kısmi olabilir.'**
+  String get uiUsersPartial;
+
+  /// ui.users.more
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha fazla göster'**
+  String get uiUsersMore;
+
+  /// ui.users.management
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer yönetim işlemleri'**
+  String get uiUsersManagement;
+
+  /// ui.users.sort_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Ada göre'**
+  String get uiUsersSortName;
+
+  /// ui.users.sort_created
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt tarihine göre'**
+  String get uiUsersSortCreated;
+
+  /// ui.users.descending
+  ///
+  /// In tr, this message translates to:
+  /// **'Azalan sıralama'**
+  String get uiUsersDescending;
+
+  /// ui.users.profile
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı profili'**
+  String get uiUsersProfile;
+
+  /// ui.users.not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı bulunamadı veya erişiminiz yok.'**
+  String get uiUsersNotFound;
+
+  /// ui.users.scope_note
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev özeti yalnız seçili programdaki erişebildiğiniz görevleri kapsar.'**
+  String get uiUsersScopeNote;
+
+  /// ui.users.open
+  ///
+  /// In tr, this message translates to:
+  /// **'açık'**
+  String get uiUsersOpen;
+
+  /// ui.users.late
+  ///
+  /// In tr, this message translates to:
+  /// **'gecikmede'**
+  String get uiUsersLate;
+
+  /// ui.users.review
+  ///
+  /// In tr, this message translates to:
+  /// **'onay bekliyor'**
+  String get uiUsersReview;
+
+  /// ui.users.done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlandı'**
+  String get uiUsersDone;
+
+  /// ui.users.tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler'**
+  String get uiUsersTasks;
+
+  /// ui.users.files
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosyalar'**
+  String get uiUsersFiles;
+
+  /// ui.users.calendar
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvim'**
+  String get uiUsersCalendar;
+
+  /// ui.users.history
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçmiş'**
+  String get uiUsersHistory;
+
+  /// ui.users.account
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap'**
+  String get uiUsersAccount;
+
+  /// ui.users.no_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu süzgeçte erişilebilir görev bulunamadı.'**
+  String get uiUsersNoTasks;
+
+  /// ui.users.history_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.'**
+  String get uiUsersHistoryUnavailable;
+
+  /// ui.users.account_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta, giriş kilidi ve son giriş bilgisi sunucu tarafından okunabilir olarak sunulmuyor. Hesap değişikliklerini aşağıdaki işlemlerden yapabilirsiniz.'**
+  String get uiUsersAccountUnavailable;
+
+  /// ui.users.membership_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyelik bilgisi bilinmiyor'**
+  String get uiUsersMembershipUnknown;
+
+  /// ui.users.other_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer programdaki koordinatörlük'**
+  String get uiUsersOtherDepartment;
+
+  /// ui.users.coordinator
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör'**
+  String get uiUsersCoordinator;
+
+  /// ui.users.member
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye'**
+  String get uiUsersMember;
+
+  /// ui.users.memberships
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük ve roller'**
+  String get uiUsersMemberships;
+
+  /// ui.users.membership_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu üyelik değişikliği görevleri etkiliyor. Sunucunun bildirdiği etkiyi onaylayarak devam etmek istiyor musunuz?'**
+  String get uiUsersMembershipConfirm;
+
+  /// ui.users.saved
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem tamamlandı.'**
+  String get uiUsersSaved;
+
+  /// ui.users.membership_scope
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyelik işlemleri seçili program için uygulanır.'**
+  String get uiUsersMembershipScope;
+
+  /// ui.users.not_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyelik yok'**
+  String get uiUsersNotMember;
+
+  /// ui.users.remove_membership
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyeliği kaldır'**
+  String get uiUsersRemoveMembership;
+
+  /// ui.users.remove_membership_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu koordinatörlükteki üyelik kaldırılsın mı?'**
+  String get uiUsersRemoveMembershipConfirm;
+
+  /// ui.users.set_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye olarak ata'**
+  String get uiUsersSetMember;
+
+  /// ui.users.set_coordinator
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör olarak ata'**
+  String get uiUsersSetCoordinator;
+
+  /// ui.users.open_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlüğü aç'**
+  String get uiUsersOpenDepartment;
+
+  /// ui.users.add
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı ekle'**
+  String get uiUsersAdd;
+
+  /// ui.users.quick_actions
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı işlemleri'**
+  String get uiUsersQuickActions;
+
+  /// ui.users.open_profile
+  ///
+  /// In tr, this message translates to:
+  /// **'Profili aç'**
+  String get uiUsersOpenProfile;
+
+  /// ui.users.clear_departments
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük seçimini temizle'**
+  String get uiUsersClearDepartments;
+
+  /// ui.users.loaded_filter_note
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük süzgeci yüklenmiş kullanıcı sayfalarında uygulanır. Daha fazla göster ile aramayı genişletebilirsiniz.'**
+  String get uiUsersLoadedFilterNote;
+
+  /// ui.users.export_loaded
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüklenmiş ve süzülmüş satırları CSV olarak kaydet'**
+  String get uiUsersExportLoaded;
+
+  /// ui.users.export_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad soyad'**
+  String get uiUsersExportName;
+
+  /// ui.users.export_saved
+  ///
+  /// In tr, this message translates to:
+  /// **'CSV kaydedildi:'**
+  String get uiUsersExportSaved;
+
+  /// ui.users.distribution
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev durumu dağılımı'**
+  String get uiUsersDistribution;
+
+  /// ui.users.not_started
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlamadı'**
+  String get uiUsersNotStarted;
+
+  /// ui.users.in_progress
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam ediyor'**
+  String get uiUsersInProgress;
+
+  /// ui.users.returned
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri gönderildi'**
+  String get uiUsersReturned;
+
+  /// ui.users.unknown_status
+  ///
+  /// In tr, this message translates to:
+  /// **'Durumu bilinmiyor'**
+  String get uiUsersUnknownStatus;
+
+  /// ui.users.kpi_completion
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanma'**
+  String get uiUsersKpiCompletion;
+
+  /// ui.users.kpi_open
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık'**
+  String get uiUsersKpiOpen;
+
+  /// ui.users.kpi_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikme'**
+  String get uiUsersKpiLate;
+
+  /// ui.users.kpi_review
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay'**
+  String get uiUsersKpiReview;
+
+  /// ui.users.loaded_count_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kullanıcı yüklendi'**
+  String get uiUsersLoadedCountTail;
+
+  /// ui.users.more_available
+  ///
+  /// In tr, this message translates to:
+  /// **'Devamı var'**
+  String get uiUsersMoreAvailable;
 }
 
 class _AppLocalizationsDelegate

@@ -270,7 +270,7 @@ Future<void> showHomeDrawer(
             label: l.uiHomeGroupAdmin,
             rows: [
               if (greetingRole == TeamRole.admin)
-                row(HomeModule.users, NzIcons.group, 'Yönetim'),
+                row(HomeModule.users, NzIcons.group, l.uiHomeModuleUsers),
               row(
                 HomeModule.coordinatorships,
                 NzIcons.coordinatorships,

@@ -94,6 +94,16 @@ class GoRouterAppNav implements NzAppNav {
   void openProfile() => _router.push(const ProfileRoute().location);
 
   @override
+  void openUsers() => _router.go(const UsersRoute().location);
+  @override
+  void openUser(String accountId) =>
+      _record(PaneEntry(PaneKind.user, accountId));
+  @override
+  void openTables() => _router.go(const TablesRoute().location);
+  @override
+  void openTable(String id) => _record(PaneEntry(PaneKind.table, id));
+
+  @override
   void openMenu(BuildContext context) {
     final dashboard = _ref.read(homeDashboardControllerProvider).value;
     final program = _ref.read(currentProgramControllerProvider).value;
@@ -106,6 +116,8 @@ class GoRouterAppNav implements NzAppNav {
       ShellModule.messages => HomeModule.messages,
       ShellModule.calendar => HomeModule.calendar,
       ShellModule.meetings => HomeModule.meetings,
+      ShellModule.users => HomeModule.users,
+      ShellModule.tables => HomeModule.sheets,
       null =>
         // Zaman çizelgesi görevler modülünün parçasıdır (prototip `ON.tasks`).
         location.startsWith(const TasksRoute().location) ||
@@ -149,7 +161,9 @@ class GoRouterAppNav implements NzAppNav {
           case HomeModule.season:
             _router.push(const ReportsRoute().location);
           case HomeModule.users:
-            _router.push(const AdministrationRoute().location);
+            openUsers();
+          case HomeModule.sheets:
+            openTables();
           case HomeModule.deleted:
             _router.push(const DeletedTasksRoute().location);
           case HomeModule.assistant:

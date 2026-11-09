@@ -1,0 +1,89 @@
+import '../../../core/i18n/generated/app_localizations.dart';
+import '../domain/table_document.dart';
+
+extension TableTexts on AppLocalizations {
+  String tableUnit(String id) => switch (id) {
+    'DEMO-A' => uiTablesUnitA,
+    'DEMO-B' => uiTablesUnitB,
+    _ => '$uiTablesUnitSample $id',
+  };
+  String tableType(TableFieldType t) => switch (t) {
+    TableFieldType.text => uiTablesText,
+    TableFieldType.number => uiTablesNumber,
+    TableFieldType.date => uiTablesDate,
+    TableFieldType.phone => uiTablesPhone,
+    TableFieldType.email => uiTablesEmail,
+    TableFieldType.person => uiTablesPerson,
+    TableFieldType.unit => uiTablesUnit,
+    TableFieldType.task => uiTablesTask,
+    TableFieldType.link => uiTablesLink,
+    TableFieldType.file => uiTablesFile,
+    TableFieldType.todo => uiTablesTodo,
+  };
+  String tableArea(TableArea t) => switch (t) {
+    TableArea.coord => uiTablesCoord,
+    TableArea.personal => uiTablesPersonal,
+    TableArea.shared => uiTablesShared,
+  };
+  String tableAccess(TableAccess t) => switch (t) {
+    TableAccess.off => uiTablesOff,
+    TableAccess.view => uiTablesView,
+    TableAccess.edit => uiTablesEdit,
+    TableAccess.owner => uiTablesOwner,
+  };
+  String tableTemplate(TableTemplate t) => switch (t) {
+    TableTemplate.blank => uiTablesBlank,
+    TableTemplate.taskList => uiTablesTaskList,
+    TableTemplate.eventPlan => uiTablesEventPlan,
+    TableTemplate.actionList => uiTablesActionList,
+    TableTemplate.supplierList => uiTablesSupplierList,
+    TableTemplate.volunteerList => uiTablesVolunteerList,
+    TableTemplate.inventory => uiTablesInventory,
+  };
+  List<TableField> templateFields(TableTemplate t) {
+    final List<(String, TableFieldType)> pairs = switch (t) {
+      TableTemplate.blank => [(uiTablesName, TableFieldType.text)],
+      TableTemplate.taskList => [
+        (uiTablesTask, TableFieldType.text),
+        (uiTablesPerson, TableFieldType.person),
+        (uiTablesUnit, TableFieldType.unit),
+        (uiTablesDate, TableFieldType.date),
+        (uiTablesTodo, TableFieldType.todo),
+      ],
+      TableTemplate.eventPlan => [
+        (uiTablesActivity, TableFieldType.text),
+        (uiTablesPlace, TableFieldType.text),
+        (uiTablesPerson, TableFieldType.person),
+        (uiTablesDate, TableFieldType.date),
+        (uiTablesTodo, TableFieldType.todo),
+      ],
+      TableTemplate.actionList => [
+        (uiTablesAction, TableFieldType.text),
+        (uiTablesPerson, TableFieldType.person),
+        (uiTablesTask, TableFieldType.task),
+        (uiTablesTodo, TableFieldType.todo),
+      ],
+      TableTemplate.supplierList => [
+        (uiTablesName, TableFieldType.text),
+        (uiTablesPhone, TableFieldType.phone),
+        (uiTablesEmail, TableFieldType.email),
+        (uiTablesNumber, TableFieldType.number),
+      ],
+      TableTemplate.volunteerList => [
+        (uiTablesName, TableFieldType.text),
+        (uiTablesPhone, TableFieldType.phone),
+        (uiTablesUnit, TableFieldType.unit),
+      ],
+      TableTemplate.inventory => [
+        (uiTablesMaterial, TableFieldType.text),
+        (uiTablesNumber, TableFieldType.number),
+        (uiTablesDate, TableFieldType.date),
+        (uiTablesTodo, TableFieldType.todo),
+      ],
+    };
+    return [
+      for (var i = 0; i < pairs.length; i++)
+        TableField(id: 'f$i', name: pairs[i].$1, type: pairs[i].$2),
+    ];
+  }
+}

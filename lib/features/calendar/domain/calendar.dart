@@ -148,6 +148,7 @@ final class CalendarIndex {
     List<Meeting> meetings,
     TaskCatalog catalog, {
     bool meetingsTruncated = false,
+    String? accountId,
   }) {
     final today = calendarDay(catalog.today);
     final by = <DateTime, List<CalendarEntry>>{};
@@ -155,6 +156,7 @@ final class CalendarIndex {
         (by[calendarDay(e.date)] ??= <CalendarEntry>[]).add(e);
     meetings.map(MeetingEntry.of).forEach(add);
     for (final t in catalog.tasks) {
+      if (accountId != null && !t.assignees.contains(accountId)) continue;
       if (t.dateRequest case final r? when r.isPending) {
         add(
           RequestEntry(

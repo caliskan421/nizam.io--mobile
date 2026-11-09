@@ -16,6 +16,7 @@ import '../../features/messages/messages.dart';
 import '../../features/reports/reports.dart';
 import '../../features/scope/scope.dart';
 import '../../features/server/server.dart';
+import '../../features/tables/tables.dart';
 import '../../features/tasks/tasks.dart';
 import '../../features/timeline/timeline.dart';
 import 'shell.dart';
@@ -32,12 +33,13 @@ class DeletedTasksRoute extends NzRouteData with $DeletedTasksRoute {
       const DeletedTasksPage();
 }
 
+/// Eski yönetim bağlantıları kullanıcı modülüne açılır.
 @TypedGoRoute<AdministrationRoute>(path: '/administration')
 class AdministrationRoute extends NzRouteData with $AdministrationRoute {
   const AdministrationRoute();
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const AdministrationPage();
+  String redirect(BuildContext context, GoRouterState state) =>
+      const UsersRoute().location;
 }
 
 @TypedGoRoute<ReportsRoute>(path: '/reports')
@@ -159,6 +161,14 @@ class ScopeRoute extends NzRouteData with $ScopeRoute {
           routes: [TypedGoRoute<MessagesChatRoute>(path: ':id')],
         ),
         TypedGoRoute<CalendarRoute>(path: '/calendar'),
+        TypedGoRoute<UsersRoute>(
+          path: '/users',
+          routes: [TypedGoRoute<UserRoute>(path: ':accountId')],
+        ),
+        TypedGoRoute<TablesRoute>(
+          path: '/tables',
+          routes: [TypedGoRoute<TableRoute>(path: ':id')],
+        ),
       ],
     ),
   ],
@@ -401,6 +411,50 @@ class MessagesChatRoute extends NzRouteData with $MessagesChatRoute {
   );
 }
 
+class UsersRoute extends NzTabRouteData with $UsersRoute {
+  const UsersRoute({this.trail = const []});
+  final List<String> trail;
+  @override
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    base: SplitRoot(
+      master: (_) => usersMaster(),
+      detail: (c) => _splitBase(c, PaneKind.user, _keyedUserPage),
+    ),
+  );
+}
+
+class UserRoute extends NzRouteData with $UserRoute {
+  const UserRoute({required this.accountId, this.trail = const []});
+  final String accountId;
+  final List<String> trail;
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      PaneStack(trail: trail, base: _keyedUserPage(accountId));
+}
+
+class TablesRoute extends NzTabRouteData with $TablesRoute {
+  const TablesRoute({this.trail = const []});
+  final List<String> trail;
+  @override
+  Widget build(BuildContext context, GoRouterState state) => PaneStack(
+    trail: trail,
+    base: SplitRoot(
+      master: (_) => tablesMaster(),
+      detail: (c) => _splitBase(c, PaneKind.table, _keyedTablePage),
+    ),
+  );
+}
+
+class TableRoute extends NzRouteData with $TableRoute {
+  const TableRoute({required this.id, this.trail = const []});
+  final String id;
+  final List<String> trail;
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      PaneStack(trail: trail, base: _keyedTablePage(id));
+}
+
 // ---- Kabuk dışı (alt menü gizli) ----
 
 /// Zaman çizelgesi. Telefonda dikey çizelge (kabuk dışı tam ekran); ray genişliğinde yatay
@@ -481,3 +535,13 @@ Widget _keyedArchiveFolderPage(String code) =>
     ArchiveFolderPage(key: ValueKey(code), code: code);
 Widget _keyedChatPage(String id) => ChatPage(key: ValueKey(id), id: id);
 Widget _keyedMeetingPage(String id) => MeetingPage(key: ValueKey(id), id: id);
+
+Widget _keyedUserPage(String id) =>
+    AdminUserProfilePage(key: ValueKey(id), accountId: id);
+Widget _keyedTablePage(String id) => Builder(
+  builder: (context) => TablePage(
+    key: ValueKey(id),
+    id: id,
+    onOpenTable: context.appNav.openTable,
+  ),
+);

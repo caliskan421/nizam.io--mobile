@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/theme/generated/tokens.gen.dart';
+import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/widgets/buttons/nz_button.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
-import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
 import '../application/admin_controller.dart';
 import '../domain/organization_admin.dart';
@@ -30,8 +32,11 @@ class AdminUserActions extends ConsumerWidget {
 
     final command = ref.read(adminCommandProvider.notifier);
     return Wrap(
+      spacing: NizamioSpacing.space2,
+      runSpacing: NizamioSpacing.space2,
       children: [
-        TextButton(
+        NzButton.secondary(
+          label: 'Kullanıcıyı düzenle',
           onPressed: () async {
             final values = await adminForm(context, 'Kullanıcı bilgileri', [
               (
@@ -59,9 +64,9 @@ class AdminUserActions extends ConsumerWidget {
               );
             }
           },
-          child: const Text('Kullanıcıyı düzenle'),
         ),
-        TextButton(
+        NzButton.secondary(
+          label: 'Hesabı düzenle',
           onPressed: () async {
             final values = await adminForm(context, 'Hesap bilgileri', [
               (
@@ -96,9 +101,9 @@ class AdminUserActions extends ConsumerWidget {
               );
             }
           },
-          child: const Text('Hesabı düzenle'),
         ),
-        TextButton(
+        NzButton.secondary(
+          label: 'Parolayı sıfırla',
           onPressed: () async {
             if (await adminConfirm(
               context,
@@ -116,17 +121,17 @@ class AdminUserActions extends ConsumerWidget {
               );
             }
           },
-          child: const Text('Parolayı sıfırla'),
         ),
-        TextButton(
+        NzButton.secondary(
+          label: 'Kilidi kaldır',
           onPressed: () => run(
             () => command.run((o, p) async {
               await o.unlockAccount(user.accountId);
             }),
           ),
-          child: const Text('Kilidi kaldır'),
         ),
-        TextButton(
+        NzButton.danger(
+          label: 'Kullanıcıyı sil',
           onPressed: () async {
             if (await adminConfirm(
               context,
@@ -140,9 +145,9 @@ class AdminUserActions extends ConsumerWidget {
               );
             }
           },
-          child: const Text('Kullanıcıyı sil'),
         ),
-        TextButton(
+        NzButton.danger(
+          label: 'Hesabı sil',
           onPressed: () async {
             if (await adminConfirm(
               context,
@@ -156,7 +161,6 @@ class AdminUserActions extends ConsumerWidget {
               );
             }
           },
-          child: const Text('Hesabı sil'),
         ),
       ],
     );
@@ -167,59 +171,20 @@ class AdminCreateUser extends ConsumerWidget {
   const AdminCreateUser({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) => TextButton(
-    onPressed: () async {
-      final catalog = ref.read(taskCatalogControllerProvider).value;
-      final program = ref.read(currentProgramControllerProvider).value;
-      final session = ref.read(sessionGenerationProvider);
-      final scope = ref.read(scopeStateProvider);
-      if (catalog == null || program == null) {
-        return;
-      }
-      final department = await showDialog<String>(
-        context: context,
-        builder: (context) => SimpleDialog(
-          title: const Text('Koordinatörlük seç'),
-          children: [
-            for (final d in catalog.coordinatorships)
-              SimpleDialogOption(
-                onPressed: () => Navigator.pop(context, d.code),
-                child: Text(d.name),
-              ),
-          ],
-        ),
-      );
-      if (department == null ||
-          !context.mounted ||
-          session != ref.read(sessionGenerationProvider) ||
-          scope != ref.read(scopeStateProvider)) {
-        return;
-      }
-      final values = await adminForm(context, 'Kullanıcı oluştur', [
-        (label: 'Ad soyad', initial: '', secret: false, required: true),
-        (label: 'E-posta', initial: '', secret: false, required: true),
-      ]);
-      if (values == null || !context.mounted) {
-        return;
-      }
-      try {
-        await ref.read(adminCommandProvider.notifier).run((o, p) async {
-          await o.createUser(
-            email: values[1],
-            fullName: values[0],
-            programId: program.id,
-            departmentId: department,
-            role: DepartmentRole.member,
-          );
-        });
-        if (context.mounted) {
-          NzToast.show(context, 'Kullanıcı oluşturuldu.');
-        }
-      } on Object catch (e) {
-        if (context.mounted) {
-          NzToast.error(context, toApiError(e));
-        }
-      }
-    },
-    child: const Text('Koordinatörlüğe kullanıcı oluştur'),
+    onPressed: () => showAdminCreateUser(context, ref),
+    child: Text(context.l10n.uiUsersAdd),
   );
+}
+
+Future<void> showAdminCreateUser(BuildContext context, WidgetRef ref) async {
+  final session = ref.read(sessionGenerationProvider);
+  final scope = ref.read(scopeStateProvider);
+  await showInviteSheet(context);
+  if (!context.mounted ||
+      session != ref.read(sessionGenerationProvider) ||
+      scope != ref.read(scopeStateProvider)) {
+    return;
+  }
+  ref.invalidate(adminUsersProvider);
+  ref.invalidate(adminUserProfileProvider);
 }

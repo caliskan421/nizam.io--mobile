@@ -4089,6 +4089,414 @@
   "@uiServerUpdateRecheck": {
     "description": "ui.server.update_recheck"
   },
+  "uiTablesTitle": "Tablolar",
+  "@uiTablesTitle": {
+    "description": "ui.tables.title"
+  },
+  "uiTablesNew": "Yeni tablo",
+  "@uiTablesNew": {
+    "description": "ui.tables.new"
+  },
+  "uiTablesSearch": "Tablolarda ara",
+  "@uiTablesSearch": {
+    "description": "ui.tables.search"
+  },
+  "uiTablesCoord": "Koordinatörlük",
+  "@uiTablesCoord": {
+    "description": "ui.tables.coord"
+  },
+  "uiTablesPersonal": "Kişisel",
+  "@uiTablesPersonal": {
+    "description": "ui.tables.personal"
+  },
+  "uiTablesShared": "Paylaşılan",
+  "@uiTablesShared": {
+    "description": "ui.tables.shared"
+  },
+  "uiTablesAll": "Tümü",
+  "@uiTablesAll": {
+    "description": "ui.tables.all"
+  },
+  "uiTablesOpen": "Açık",
+  "@uiTablesOpen": {
+    "description": "ui.tables.open"
+  },
+  "uiTablesDone": "Tamamlanan",
+  "@uiTablesDone": {
+    "description": "ui.tables.done"
+  },
+  "uiTablesEmpty": "Henüz tablo yok",
+  "@uiTablesEmpty": {
+    "description": "ui.tables.empty"
+  },
+  "uiTablesNoResults": "Sonuç bulunamadı",
+  "@uiTablesNoResults": {
+    "description": "ui.tables.no_results"
+  },
+  "uiTablesName": "Tablo adı",
+  "@uiTablesName": {
+    "description": "ui.tables.name"
+  },
+  "uiTablesTemplate": "Şablon",
+  "@uiTablesTemplate": {
+    "description": "ui.tables.template"
+  },
+  "uiTablesBlank": "Boş tablo",
+  "@uiTablesBlank": {
+    "description": "ui.tables.blank"
+  },
+  "uiTablesTaskList": "Görev listesi",
+  "@uiTablesTaskList": {
+    "description": "ui.tables.task_list"
+  },
+  "uiTablesEventPlan": "Etkinlik planı",
+  "@uiTablesEventPlan": {
+    "description": "ui.tables.event_plan"
+  },
+  "uiTablesActionList": "Aksiyon listesi",
+  "@uiTablesActionList": {
+    "description": "ui.tables.action_list"
+  },
+  "uiTablesSupplierList": "Tedarikçi listesi",
+  "@uiTablesSupplierList": {
+    "description": "ui.tables.supplier_list"
+  },
+  "uiTablesVolunteerList": "Gönüllü listesi",
+  "@uiTablesVolunteerList": {
+    "description": "ui.tables.volunteer_list"
+  },
+  "uiTablesInventory": "Envanter",
+  "@uiTablesInventory": {
+    "description": "ui.tables.inventory"
+  },
+  "uiTablesCreate": "Oluştur",
+  "@uiTablesCreate": {
+    "description": "ui.tables.create"
+  },
+  "uiTablesCancel": "Vazgeç",
+  "@uiTablesCancel": {
+    "description": "ui.tables.cancel"
+  },
+  "uiTablesSave": "Kaydet",
+  "@uiTablesSave": {
+    "description": "ui.tables.save"
+  },
+  "uiTablesRow": "satır",
+  "@uiTablesRow": {
+    "description": "ui.tables.row"
+  },
+  "uiTablesColumn": "sütun",
+  "@uiTablesColumn": {
+    "description": "ui.tables.column"
+  },
+  "uiTablesNewRow": "Satır ekle",
+  "@uiTablesNewRow": {
+    "description": "ui.tables.new_row"
+  },
+  "uiTablesNewColumn": "Sütun ekle",
+  "@uiTablesNewColumn": {
+    "description": "ui.tables.new_column"
+  },
+  "uiTablesFields": "Alanlar",
+  "@uiTablesFields": {
+    "description": "ui.tables.fields"
+  },
+  "uiTablesShare": "Paylaş",
+  "@uiTablesShare": {
+    "description": "ui.tables.share"
+  },
+  "uiTablesOptions": "Tablo işlemleri",
+  "@uiTablesOptions": {
+    "description": "ui.tables.options"
+  },
+  "uiTablesRename": "Yeniden adlandır",
+  "@uiTablesRename": {
+    "description": "ui.tables.rename"
+  },
+  "uiTablesDuplicate": "Kopya oluştur",
+  "@uiTablesDuplicate": {
+    "description": "ui.tables.duplicate"
+  },
+  "uiTablesDuplicateEmpty": "Boş kopya oluştur",
+  "@uiTablesDuplicateEmpty": {
+    "description": "ui.tables.duplicate_empty"
+  },
+  "uiTablesDelete": "Sil",
+  "@uiTablesDelete": {
+    "description": "ui.tables.delete"
+  },
+  "uiTablesDeleteTable": "Tablo silinsin mi?",
+  "@uiTablesDeleteTable": {
+    "description": "ui.tables.delete_table"
+  },
+  "uiTablesDeleteRow": "Satır silinsin mi?",
+  "@uiTablesDeleteRow": {
+    "description": "ui.tables.delete_row"
+  },
+  "uiTablesDeleteColumn": "Sütun silinsin mi?",
+  "@uiTablesDeleteColumn": {
+    "description": "ui.tables.delete_column"
+  },
+  "uiTablesDeleteMessage": "Bu işlem örnek veriyi bu oturumdan kaldırır.",
+  "@uiTablesDeleteMessage": {
+    "description": "ui.tables.delete_message"
+  },
+  "uiTablesReadonly": "Yalnızca görüntüleme",
+  "@uiTablesReadonly": {
+    "description": "ui.tables.readonly"
+  },
+  "uiTablesEditable": "Düzenleme erişimi",
+  "@uiTablesEditable": {
+    "description": "ui.tables.editable"
+  },
+  "uiTablesText": "Metin",
+  "@uiTablesText": {
+    "description": "ui.tables.text"
+  },
+  "uiTablesNumber": "Sayı",
+  "@uiTablesNumber": {
+    "description": "ui.tables.number"
+  },
+  "uiTablesDate": "Tarih",
+  "@uiTablesDate": {
+    "description": "ui.tables.date"
+  },
+  "uiTablesPhone": "Telefon",
+  "@uiTablesPhone": {
+    "description": "ui.tables.phone"
+  },
+  "uiTablesEmail": "E-posta",
+  "@uiTablesEmail": {
+    "description": "ui.tables.email"
+  },
+  "uiTablesPerson": "Kişi",
+  "@uiTablesPerson": {
+    "description": "ui.tables.person"
+  },
+  "uiTablesUnit": "Koordinatörlük",
+  "@uiTablesUnit": {
+    "description": "ui.tables.unit"
+  },
+  "uiTablesTask": "Görev",
+  "@uiTablesTask": {
+    "description": "ui.tables.task"
+  },
+  "uiTablesLink": "Tablo bağlantısı",
+  "@uiTablesLink": {
+    "description": "ui.tables.link"
+  },
+  "uiTablesFile": "Dosya",
+  "@uiTablesFile": {
+    "description": "ui.tables.file"
+  },
+  "uiTablesTodo": "Yapıldı",
+  "@uiTablesTodo": {
+    "description": "ui.tables.todo"
+  },
+  "uiTablesEditRow": "Satırı düzenle",
+  "@uiTablesEditRow": {
+    "description": "ui.tables.edit_row"
+  },
+  "uiTablesEditColumn": "Sütunu düzenle",
+  "@uiTablesEditColumn": {
+    "description": "ui.tables.edit_column"
+  },
+  "uiTablesMoveLeft": "Sola taşı",
+  "@uiTablesMoveLeft": {
+    "description": "ui.tables.move_left"
+  },
+  "uiTablesMoveRight": "Sağa taşı",
+  "@uiTablesMoveRight": {
+    "description": "ui.tables.move_right"
+  },
+  "uiTablesSortAsc": "Artan sırala",
+  "@uiTablesSortAsc": {
+    "description": "ui.tables.sort_asc"
+  },
+  "uiTablesSortDesc": "Azalan sırala",
+  "@uiTablesSortDesc": {
+    "description": "ui.tables.sort_desc"
+  },
+  "uiTablesSortNone": "Sıralamayı kaldır",
+  "@uiTablesSortNone": {
+    "description": "ui.tables.sort_none"
+  },
+  "uiTablesProgramAccess": "Program erişimi",
+  "@uiTablesProgramAccess": {
+    "description": "ui.tables.program_access"
+  },
+  "uiTablesOff": "Kapalı",
+  "@uiTablesOff": {
+    "description": "ui.tables.off"
+  },
+  "uiTablesView": "Görür",
+  "@uiTablesView": {
+    "description": "ui.tables.view"
+  },
+  "uiTablesEdit": "Düzenler",
+  "@uiTablesEdit": {
+    "description": "ui.tables.edit"
+  },
+  "uiTablesOwner": "Sahip",
+  "@uiTablesOwner": {
+    "description": "ui.tables.owner"
+  },
+  "uiTablesAddPerson": "Demo kişi ekle",
+  "@uiTablesAddPerson": {
+    "description": "ui.tables.add_person"
+  },
+  "uiTablesRemovePerson": "Erişimi kaldır",
+  "@uiTablesRemovePerson": {
+    "description": "ui.tables.remove_person"
+  },
+  "uiTablesDemoPerson": "Demo üye",
+  "@uiTablesDemoPerson": {
+    "description": "ui.tables.demo_person"
+  },
+  "uiTablesDemoNotice": "Bu çalışma alanı yalnızca oturumluk örnek veridir.",
+  "@uiTablesDemoNotice": {
+    "description": "ui.tables.demo_notice"
+  },
+  "uiTablesAttachment": "Örnek ek ekle",
+  "@uiTablesAttachment": {
+    "description": "ui.tables.attachment"
+  },
+  "uiTablesLinkedTable": "Bağlı tablo",
+  "@uiTablesLinkedTable": {
+    "description": "ui.tables.linked_table"
+  },
+  "uiTablesSummary": "Özet",
+  "@uiTablesSummary": {
+    "description": "ui.tables.summary"
+  },
+  "uiTablesClear": "Temizle",
+  "@uiTablesClear": {
+    "description": "ui.tables.clear"
+  },
+  "uiTablesTableMissing": "Tablo bulunamadı",
+  "@uiTablesTableMissing": {
+    "description": "ui.tables.table_missing"
+  },
+  "uiTablesGrid": "Tablo görünümü",
+  "@uiTablesGrid": {
+    "description": "ui.tables.grid"
+  },
+  "uiTablesCopySuffix": "(kopya)",
+  "@uiTablesCopySuffix": {
+    "description": "ui.tables.copy_suffix"
+  },
+  "uiTablesEmptySuffix": "(boş)",
+  "@uiTablesEmptySuffix": {
+    "description": "ui.tables.empty_suffix"
+  },
+  "uiTablesTaskSample": "Örnek görev",
+  "@uiTablesTaskSample": {
+    "description": "ui.tables.task_sample"
+  },
+  "uiTablesUnitSample": "Demo koordinatörlük",
+  "@uiTablesUnitSample": {
+    "description": "ui.tables.unit_sample"
+  },
+  "uiTablesFieldName": "Alan adı",
+  "@uiTablesFieldName": {
+    "description": "ui.tables.field_name"
+  },
+  "uiTablesNameRequired": "Ad boş bırakılamaz",
+  "@uiTablesNameRequired": {
+    "description": "ui.tables.name_required"
+  },
+  "uiTablesNewRecord": "Yeni kayıt",
+  "@uiTablesNewRecord": {
+    "description": "ui.tables.new_record"
+  },
+  "uiTablesRecent": "Son kullanılanlar",
+  "@uiTablesRecent": {
+    "description": "ui.tables.recent"
+  },
+  "uiTablesBackAreas": "Koordinatörlüklere dön",
+  "@uiTablesBackAreas": {
+    "description": "ui.tables.back_areas"
+  },
+  "uiTablesCopyLink": "Bağlantıyı kopyala",
+  "@uiTablesCopyLink": {
+    "description": "ui.tables.copy_link"
+  },
+  "uiTablesLinkCopied": "Tablo bağlantısı kopyalandı",
+  "@uiTablesLinkCopied": {
+    "description": "ui.tables.link_copied"
+  },
+  "uiTablesPersonSearch": "Demo kişilerde ara",
+  "@uiTablesPersonSearch": {
+    "description": "ui.tables.person_search"
+  },
+  "uiTablesPlace": "Yer",
+  "@uiTablesPlace": {
+    "description": "ui.tables.place"
+  },
+  "uiTablesApproved": "Onaylandı",
+  "@uiTablesApproved": {
+    "description": "ui.tables.approved"
+  },
+  "uiTablesCompany": "Firma",
+  "@uiTablesCompany": {
+    "description": "ui.tables.company"
+  },
+  "uiTablesFullName": "Ad soyad",
+  "@uiTablesFullName": {
+    "description": "ui.tables.full_name"
+  },
+  "uiTablesMaterial": "Malzeme",
+  "@uiTablesMaterial": {
+    "description": "ui.tables.material"
+  },
+  "uiTablesOffer": "Teklif",
+  "@uiTablesOffer": {
+    "description": "ui.tables.offer"
+  },
+  "uiTablesAction": "Aksiyon",
+  "@uiTablesAction": {
+    "description": "ui.tables.action"
+  },
+  "uiTablesActivity": "Etkinlik",
+  "@uiTablesActivity": {
+    "description": "ui.tables.activity"
+  },
+  "uiTablesDueDate": "Son tarih",
+  "@uiTablesDueDate": {
+    "description": "ui.tables.due_date"
+  },
+  "uiTablesCopyTo": "Başka alana kopyala",
+  "@uiTablesCopyTo": {
+    "description": "ui.tables.copy_to"
+  },
+  "uiTablesDestination": "Kopyanın konumu",
+  "@uiTablesDestination": {
+    "description": "ui.tables.destination"
+  },
+  "uiTablesRelated": "Bağlı tablolar",
+  "@uiTablesRelated": {
+    "description": "ui.tables.related"
+  },
+  "uiTablesBacklinks": "Bu tabloya bağlananlar",
+  "@uiTablesBacklinks": {
+    "description": "ui.tables.backlinks"
+  },
+  "uiTablesLinks": "bağlantı",
+  "@uiTablesLinks": {
+    "description": "ui.tables.links"
+  },
+  "uiTablesRecentAction": "Son çalıştıkların",
+  "@uiTablesRecentAction": {
+    "description": "ui.tables.recent_action"
+  },
+  "uiTablesUnitA": "Atölye",
+  "@uiTablesUnitA": {
+    "description": "ui.tables.unit_a"
+  },
+  "uiTablesUnitB": "Operasyon",
+  "@uiTablesUnitB": {
+    "description": "ui.tables.unit_b"
+  },
   "uiTasksTitle": "Görevler",
   "@uiTasksTitle": {
     "description": "ui.tasks.title"
@@ -5856,5 +6264,257 @@
   "uiTimelineGanttOpenTask": "Görev ayrıntısını aç",
   "@uiTimelineGanttOpenTask": {
     "description": "ui.timeline.gantt_open_task"
+  },
+  "uiUsersTitle": "Kullanıcılar",
+  "@uiUsersTitle": {
+    "description": "ui.users.title"
+  },
+  "uiUsersSubtitle": "Hesaplar ve ekip üyelikleri",
+  "@uiUsersSubtitle": {
+    "description": "ui.users.subtitle"
+  },
+  "uiUsersSearch": "Kullanıcı ara",
+  "@uiUsersSearch": {
+    "description": "ui.users.search"
+  },
+  "uiUsersAll": "Tümü",
+  "@uiUsersAll": {
+    "description": "ui.users.all"
+  },
+  "uiUsersCoordinators": "Koordinatörler",
+  "@uiUsersCoordinators": {
+    "description": "ui.users.coordinators"
+  },
+  "uiUsersMembers": "Üyeler",
+  "@uiUsersMembers": {
+    "description": "ui.users.members"
+  },
+  "uiUsersFilters": "Süzgeç ve sıralama",
+  "@uiUsersFilters": {
+    "description": "ui.users.filters"
+  },
+  "uiUsersEmpty": "Kullanıcı bulunamadı.",
+  "@uiUsersEmpty": {
+    "description": "ui.users.empty"
+  },
+  "uiUsersUnassigned": "Üyelik yok",
+  "@uiUsersUnassigned": {
+    "description": "ui.users.unassigned"
+  },
+  "uiUsersPartial": "Görünen kayıtlar kısmi olabilir.",
+  "@uiUsersPartial": {
+    "description": "ui.users.partial"
+  },
+  "uiUsersMore": "Daha fazla göster",
+  "@uiUsersMore": {
+    "description": "ui.users.more"
+  },
+  "uiUsersManagement": "Diğer yönetim işlemleri",
+  "@uiUsersManagement": {
+    "description": "ui.users.management"
+  },
+  "uiUsersSortName": "Ada göre",
+  "@uiUsersSortName": {
+    "description": "ui.users.sort_name"
+  },
+  "uiUsersSortCreated": "Kayıt tarihine göre",
+  "@uiUsersSortCreated": {
+    "description": "ui.users.sort_created"
+  },
+  "uiUsersDescending": "Azalan sıralama",
+  "@uiUsersDescending": {
+    "description": "ui.users.descending"
+  },
+  "uiUsersProfile": "Kullanıcı profili",
+  "@uiUsersProfile": {
+    "description": "ui.users.profile"
+  },
+  "uiUsersNotFound": "Kullanıcı bulunamadı veya erişiminiz yok.",
+  "@uiUsersNotFound": {
+    "description": "ui.users.not_found"
+  },
+  "uiUsersScopeNote": "Görev özeti yalnız seçili programdaki erişebildiğiniz görevleri kapsar.",
+  "@uiUsersScopeNote": {
+    "description": "ui.users.scope_note"
+  },
+  "uiUsersOpen": "açık",
+  "@uiUsersOpen": {
+    "description": "ui.users.open"
+  },
+  "uiUsersLate": "gecikmede",
+  "@uiUsersLate": {
+    "description": "ui.users.late"
+  },
+  "uiUsersReview": "onay bekliyor",
+  "@uiUsersReview": {
+    "description": "ui.users.review"
+  },
+  "uiUsersDone": "Tamamlandı",
+  "@uiUsersDone": {
+    "description": "ui.users.done"
+  },
+  "uiUsersTasks": "Görevler",
+  "@uiUsersTasks": {
+    "description": "ui.users.tasks"
+  },
+  "uiUsersFiles": "Dosyalar",
+  "@uiUsersFiles": {
+    "description": "ui.users.files"
+  },
+  "uiUsersCalendar": "Takvim",
+  "@uiUsersCalendar": {
+    "description": "ui.users.calendar"
+  },
+  "uiUsersHistory": "Geçmiş",
+  "@uiUsersHistory": {
+    "description": "ui.users.history"
+  },
+  "uiUsersAccount": "Hesap",
+  "@uiUsersAccount": {
+    "description": "ui.users.account"
+  },
+  "uiUsersNoTasks": "Bu süzgeçte erişilebilir görev bulunamadı.",
+  "@uiUsersNoTasks": {
+    "description": "ui.users.no_tasks"
+  },
+  "uiUsersHistoryUnavailable": "Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.",
+  "@uiUsersHistoryUnavailable": {
+    "description": "ui.users.history_unavailable"
+  },
+  "uiUsersAccountUnavailable": "E-posta, giriş kilidi ve son giriş bilgisi sunucu tarafından okunabilir olarak sunulmuyor. Hesap değişikliklerini aşağıdaki işlemlerden yapabilirsiniz.",
+  "@uiUsersAccountUnavailable": {
+    "description": "ui.users.account_unavailable"
+  },
+  "uiUsersMembershipUnknown": "Üyelik bilgisi bilinmiyor",
+  "@uiUsersMembershipUnknown": {
+    "description": "ui.users.membership_unknown"
+  },
+  "uiUsersOtherDepartment": "Diğer programdaki koordinatörlük",
+  "@uiUsersOtherDepartment": {
+    "description": "ui.users.other_department"
+  },
+  "uiUsersCoordinator": "Koordinatör",
+  "@uiUsersCoordinator": {
+    "description": "ui.users.coordinator"
+  },
+  "uiUsersMember": "Üye",
+  "@uiUsersMember": {
+    "description": "ui.users.member"
+  },
+  "uiUsersMemberships": "Koordinatörlük ve roller",
+  "@uiUsersMemberships": {
+    "description": "ui.users.memberships"
+  },
+  "uiUsersMembershipConfirm": "Bu üyelik değişikliği görevleri etkiliyor. Sunucunun bildirdiği etkiyi onaylayarak devam etmek istiyor musunuz?",
+  "@uiUsersMembershipConfirm": {
+    "description": "ui.users.membership_confirm"
+  },
+  "uiUsersSaved": "İşlem tamamlandı.",
+  "@uiUsersSaved": {
+    "description": "ui.users.saved"
+  },
+  "uiUsersMembershipScope": "Üyelik işlemleri seçili program için uygulanır.",
+  "@uiUsersMembershipScope": {
+    "description": "ui.users.membership_scope"
+  },
+  "uiUsersNotMember": "Üyelik yok",
+  "@uiUsersNotMember": {
+    "description": "ui.users.not_member"
+  },
+  "uiUsersRemoveMembership": "Üyeliği kaldır",
+  "@uiUsersRemoveMembership": {
+    "description": "ui.users.remove_membership"
+  },
+  "uiUsersRemoveMembershipConfirm": "Bu koordinatörlükteki üyelik kaldırılsın mı?",
+  "@uiUsersRemoveMembershipConfirm": {
+    "description": "ui.users.remove_membership_confirm"
+  },
+  "uiUsersSetMember": "Üye olarak ata",
+  "@uiUsersSetMember": {
+    "description": "ui.users.set_member"
+  },
+  "uiUsersSetCoordinator": "Koordinatör olarak ata",
+  "@uiUsersSetCoordinator": {
+    "description": "ui.users.set_coordinator"
+  },
+  "uiUsersOpenDepartment": "Koordinatörlüğü aç",
+  "@uiUsersOpenDepartment": {
+    "description": "ui.users.open_department"
+  },
+  "uiUsersAdd": "Kullanıcı ekle",
+  "@uiUsersAdd": {
+    "description": "ui.users.add"
+  },
+  "uiUsersQuickActions": "Kullanıcı işlemleri",
+  "@uiUsersQuickActions": {
+    "description": "ui.users.quick_actions"
+  },
+  "uiUsersOpenProfile": "Profili aç",
+  "@uiUsersOpenProfile": {
+    "description": "ui.users.open_profile"
+  },
+  "uiUsersClearDepartments": "Koordinatörlük seçimini temizle",
+  "@uiUsersClearDepartments": {
+    "description": "ui.users.clear_departments"
+  },
+  "uiUsersLoadedFilterNote": "Koordinatörlük süzgeci yüklenmiş kullanıcı sayfalarında uygulanır. Daha fazla göster ile aramayı genişletebilirsiniz.",
+  "@uiUsersLoadedFilterNote": {
+    "description": "ui.users.loaded_filter_note"
+  },
+  "uiUsersExportLoaded": "Yüklenmiş ve süzülmüş satırları CSV olarak kaydet",
+  "@uiUsersExportLoaded": {
+    "description": "ui.users.export_loaded"
+  },
+  "uiUsersExportName": "Ad soyad",
+  "@uiUsersExportName": {
+    "description": "ui.users.export_name"
+  },
+  "uiUsersExportSaved": "CSV kaydedildi:",
+  "@uiUsersExportSaved": {
+    "description": "ui.users.export_saved"
+  },
+  "uiUsersDistribution": "Görev durumu dağılımı",
+  "@uiUsersDistribution": {
+    "description": "ui.users.distribution"
+  },
+  "uiUsersNotStarted": "Başlamadı",
+  "@uiUsersNotStarted": {
+    "description": "ui.users.not_started"
+  },
+  "uiUsersInProgress": "Devam ediyor",
+  "@uiUsersInProgress": {
+    "description": "ui.users.in_progress"
+  },
+  "uiUsersReturned": "Geri gönderildi",
+  "@uiUsersReturned": {
+    "description": "ui.users.returned"
+  },
+  "uiUsersUnknownStatus": "Durumu bilinmiyor",
+  "@uiUsersUnknownStatus": {
+    "description": "ui.users.unknown_status"
+  },
+  "uiUsersKpiCompletion": "Tamamlanma",
+  "@uiUsersKpiCompletion": {
+    "description": "ui.users.kpi_completion"
+  },
+  "uiUsersKpiOpen": "Açık",
+  "@uiUsersKpiOpen": {
+    "description": "ui.users.kpi_open"
+  },
+  "uiUsersKpiLate": "Gecikme",
+  "@uiUsersKpiLate": {
+    "description": "ui.users.kpi_late"
+  },
+  "uiUsersKpiReview": "Onay",
+  "@uiUsersKpiReview": {
+    "description": "ui.users.kpi_review"
+  },
+  "uiUsersLoadedCountTail": "kullanıcı yüklendi",
+  "@uiUsersLoadedCountTail": {
+    "description": "ui.users.loaded_count_tail"
+  },
+  "uiUsersMoreAvailable": "Devamı var",
+  "@uiUsersMoreAvailable": {
+    "description": "ui.users.more_available"
   }
 }

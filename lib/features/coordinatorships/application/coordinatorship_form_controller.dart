@@ -60,6 +60,9 @@ bool canManageCoordinatorships(Ref ref) =>
     ref.watch(taskCatalogControllerProvider).value?.access?.companyAdmin ??
     false;
 
+/// Uçuştaki işlemin sahibi (yerel nesil, oturum nesli, program).
+typedef _Owner = ({int epoch, int session, String program});
+
 /// Koordinatörlük ekle / bilgileri düzenle komutları. Uygulama ömrünce yaşar: oluşturulup
 /// bağlanamamış departman ([CoordinatorshipFormState.pending]) form kapanıp açılsa da
 /// korunur. Otomatik yeniden deneme yoktur; tekrar kullanıcı eylemiyle.
@@ -97,8 +100,21 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
     state = const CoordinatorshipFormState();
   }
 
-  /// Uçuştaki işlem hâlâ başladığı oturum ve programa mı ait.
-  bool _live(int epoch) => ref.mounted && epoch == _epoch;
+  /// Uçuştaki işlemin sahipliği: yerel nesil, gerçek oturum nesli ve hedef program.
+  _Owner _own(String program) => (
+    epoch: _epoch,
+    session: ref.read(sessionControllerProvider).generation,
+    program: program,
+  );
+
+  /// Uçuştaki işlem hâlâ başladığı oturum ve programa mı ait. Oturum nesli ve program
+  /// doğrudan okunur: çıkışta nesil, durum bildirimi yayımlanmadan (depo temizliği sürerken)
+  /// artar; o aralıkta dönen yanıt da sonraki adıma geçmez.
+  bool _live(_Owner o) =>
+      ref.mounted &&
+      o.epoch == _epoch &&
+      ref.read(sessionControllerProvider).generation == o.session &&
+      ref.read(scopeStateProvider).programId == o.program;
 
   /// Form açılırken önceki gönderimin hatasını siler (bekleyen departman kalır).
   void clearError() {
@@ -122,7 +138,7 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
       _fail(ApiError(ClientErrorCode.scopeMissing));
       return false;
     }
-    final epoch = _epoch;
+    final owner = _own(program);
     final repo = ref.read(departmentRepositoryProvider);
     var pending = state.pending;
     state = CoordinatorshipFormState(saving: true, pending: pending);
@@ -136,7 +152,7 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
           kind: kind,
           description: draft.description.isEmpty ? null : draft.description,
         );
-        if (!_live(epoch)) return false;
+        if (!_live(owner)) return false;
         state = CoordinatorshipFormState(saving: true, pending: pending);
       }
       final link = await repo.linkDepartment(
@@ -144,18 +160,18 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
         pending.id,
         displayName: draft.name,
       );
-      if (!_live(epoch)) return false;
+      if (!_live(owner)) return false;
       if (link.displayName != draft.name) {
         await repo.renameDepartmentLink(program, pending.id, draft.name);
       }
     } on Object catch (e) {
-      if (_live(epoch)) _fail(toApiError(e));
+      if (_live(owner)) _fail(toApiError(e));
       return false;
     }
-    if (!_live(epoch)) return false;
+    if (!_live(owner)) return false;
     state = const CoordinatorshipFormState();
     await _reload();
-    return true;
+    return _live(owner);
   }
 
   /// Bilgileri düzenler: tür ve açıklama departman kaydındadır (`updateDepartment`, yalnız
@@ -179,7 +195,7 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
     final descriptionChanged = draft.description != initial.description;
     final nameChanged = draft.name != initial.name;
     if (!kindChanged && !descriptionChanged && !nameChanged) return true;
-    final epoch = _epoch;
+    final owner = _own(program);
     final repo = ref.read(departmentRepositoryProvider);
     state = CoordinatorshipFormState(saving: true, pending: state.pending);
     try {
@@ -189,19 +205,19 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
           kind: kindChanged ? kind : null,
           description: descriptionChanged ? draft.description : null,
         );
-        if (!_live(epoch)) return false;
+        if (!_live(owner)) return false;
       }
       if (nameChanged) {
         await repo.renameDepartmentLink(program, departmentId, draft.name);
       }
     } on Object catch (e) {
-      if (_live(epoch)) _fail(toApiError(e));
+      if (_live(owner)) _fail(toApiError(e));
       return false;
     }
-    if (!_live(epoch)) return false;
+    if (!_live(owner)) return false;
     state = CoordinatorshipFormState(pending: state.pending);
     await _reload();
-    return true;
+    return _live(owner);
   }
 
   void _fail(ApiError e) =>

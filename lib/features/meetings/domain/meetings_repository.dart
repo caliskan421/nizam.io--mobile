@@ -83,8 +83,9 @@ abstract interface class MeetingsRepository {
     required int expectedRevision,
   });
 
-  /// `deleteMeetingNote` — kalıcı silme (COLLABORATION-K75; geri yükleme yok).
-  Future<void> deleteNote(String noteId);
+  /// `deleteMeetingNote` — kalıcı silme (COLLABORATION-K75; geri yükleme yok). Program
+  /// seçili kapsamdan değil [programId]'den gelir (gecikmeli silme başladığı programla gider).
+  Future<void> deleteNote(String noteId, {required String programId});
 
   /// `convertNoteToTask`.
   Future<NoteConversion> convertNoteToTask(String noteId, NoteTaskDraft draft);

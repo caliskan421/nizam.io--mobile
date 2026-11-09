@@ -2,6 +2,8 @@
 // göndermez; yönetici rol/yöneticilik gönderir, koordinatör yalnız kendi koordinatörlüğüne üye
 // ekler; var olan e-postada aktarım teklifi ikinci gönderimde `transfer_account_id` olur;
 // sunucu hatası başarı sayılmaz; başarıda ekip yeniden okunur; oturum değişince taslak düşer.
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
@@ -183,7 +185,11 @@ void main() {
         ..pickCoordinatorship(dEle);
       expect(await ctl.submit(), isNull);
       var f = _form(h);
-      expect(f.existing, (accountId: pKadir, fullName: 'Kadir Özbek'));
+      expect(f.existing, (
+        accountId: pKadir,
+        fullName: 'Kadir Özbek',
+        email: 'kadir@ornek.test',
+      ));
       expect((f.failure, f.busy), (null, false));
 
       expect(await ctl.submit(), isNotNull);
@@ -208,6 +214,49 @@ void main() {
       expect(f.existing, isNull);
     },
   );
+
+  test('geciken teklif: A gönderilir, taslak B olur → A teklifi B taslağına yazılmaz', () async {
+    final backend = _Backend();
+    final h = await _harness(backend);
+    final reached = Completer<void>();
+    final gate = Completer<void>();
+    final serve = h.backend.handler;
+    h.backend.handler = (r) async {
+      if (r.method == 'POST' &&
+          r.path == '/v1/admin/users' &&
+          !gate.isCompleted) {
+        reached.complete();
+        await gate.future;
+      }
+      return serve(r);
+    };
+    final ctl = _ctl(h)
+      ..setName('Kadir')
+      ..setEmail('kadir@ornek.test')
+      ..pickCoordinatorship(dEle);
+    final flight = ctl.submit();
+    await reached.future;
+    ctl.setEmail('baska@ornek.test');
+    gate.complete();
+    expect(await flight, isNull);
+    var f = _form(h);
+    expect((f.offer, f.failure, f.busy), (null, null, false));
+
+    // Sonraki gönderim B'yi yeni hesap olarak açar; A'nın hesabı aktarılmaz.
+    expect(await ctl.submit(), isNotNull);
+    expect(backend.created.last, isNot(contains('transfer_account_id')));
+    expect(backend.created.last, containsPair('email', 'baska@ornek.test'));
+
+    // Teklif kaynak e-postasına bağlı: e-posta aynı değilse aktarım gönderilmez.
+    ctl
+      ..setName('Kadir')
+      ..setEmail('kadir@ornek.test')
+      ..pickCoordinatorship(dEgi);
+    await ctl.submit();
+    f = _form(h);
+    expect(f.offer?.accountId, pKadir);
+    expect(f.copyWith(email: 'diger@ornek.test').offer, isNull);
+  });
 
   test(
     'koordinatör: yalnız kendi koordinatörlüğü; rol ve yöneticilik gönderilmez',

@@ -128,15 +128,28 @@ final class NoteIgnored extends NoteSubmit {
   const NoteIgnored();
 }
 
-/// Geri alınabilir bekleyen not silmesi: not, listedeki yeri, zamanlayıcı ve sonuç.
+/// Geri alınabilir bekleyen not silmesi (başladığı program ve oturuma bağlı).
 final class _PendingDelete {
-  _PendingDelete(this.note, this.index, this.repo);
+  _PendingDelete(
+    this.note,
+    this.index,
+    this.repo, {
+    required this.programId,
+    required this.live,
+  });
 
   final MeetingNote note;
   final int index;
 
   /// Zamanlama anındaki kaynak (ekran kapansa da istek aynı kaynakla gider).
   final MeetingsRepository repo;
+
+  /// Başladığı program: istek seçili kapsamla değil bununla gider (arada programa geçilse
+  /// de not kendi programında silinir; kullanıcı silip geri almadı).
+  final String programId;
+
+  /// Silmenin başladığı oturum hâlâ etkin mi; değilse istek gönderilmez, not sunucuda kalır.
+  final bool Function() live;
   final done = Completer<ApiError?>();
   Timer? timer;
 }
@@ -389,13 +402,23 @@ class MeetingRoomController extends _$MeetingRoomController {
   /// Geri alınırsa istek GİTMEZ. Ekran kapanırsa sağlayıcı silme bitene dek canlı kalır ve istek
   /// süre dolunca gider (kullanıcı sildi, geri almadı; bildirimdeki "Geri al" o süre boyunca
   /// çalışır). Sonuç silme bitince ya da geri alınınca gelir: hata (not yerine döner) ya da null.
+  /// İstek başladığı programla gider; oturum değiştiyse gönderilmez ([_PendingDelete]).
   Future<ApiError?> deleteNote(
     MeetingNote n, {
     Duration window = noteUndoWindow,
   }) async {
     final r = _room;
-    if (r == null || _pendingFor(n.id) != null) return null;
-    final p = _PendingDelete(n, r.notes.indexWhere((x) => x.id == n.id), _repo);
+    final program = ref.read(scopeStateProvider).programId;
+    if (r == null || program == null || _pendingFor(n.id) != null) return null;
+    final session = ref.read(sessionControllerProvider);
+    final generation = session.generation;
+    final p = _PendingDelete(
+      n,
+      r.notes.indexWhere((x) => x.id == n.id),
+      _repo,
+      programId: program,
+      live: () => session.generation == generation,
+    );
     _pendingDeletes.add(p);
     _deleteHold ??= ref.keepAlive();
     _notes([
@@ -422,9 +445,16 @@ class MeetingRoomController extends _$MeetingRoomController {
   Future<void> _commitDelete(String noteId) async {
     final p = _pendingFor(noteId);
     if (p == null) return;
+    if (!p.live()) {
+      // Oturum değişti (çıkış/başka hesap): istek gönderilmez, not sunucuda kalır.
+      _pendingDeletes.remove(p);
+      if (ref.mounted) _releaseHold();
+      p.done.complete(null);
+      return;
+    }
     ApiError? error;
     try {
-      await p.repo.deleteNote(noteId);
+      await p.repo.deleteNote(noteId, programId: p.programId);
     } on Object catch (e) {
       error = toApiError(e);
     }

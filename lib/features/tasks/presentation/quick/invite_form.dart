@@ -55,7 +55,7 @@ class _InviteFormBodyState extends ConsumerState<InviteFormBody> {
         : catalog?.coordinatorship(picked)?.name ?? picked;
     final error = f.error;
     final failure = f.failure;
-    final existing = f.existing;
+    final existing = f.offer;
 
     // Ortak standart: yazı alanları (ad soyad, e-posta) çerçeveli metin alanı; rol ve
     // koordinatörlük satır kartında (etiket solda, değer sağda).

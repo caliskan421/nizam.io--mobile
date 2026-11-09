@@ -1528,6 +1528,12 @@ abstract class AppLocalizations {
   /// **'Bu durum geçişine izin verilmiyor.'**
   String get errWorkTransitionNotAllowed;
 
+  /// client.file_unreadable
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin.'**
+  String get errClientFileUnreadable;
+
   /// client.insecure_server
   ///
   /// In tr, this message translates to:

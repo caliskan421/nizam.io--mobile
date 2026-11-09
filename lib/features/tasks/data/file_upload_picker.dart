@@ -1,7 +1,8 @@
 import 'package:file_picker/file_picker.dart';
 
+import '../../../core/errors/api_error.dart';
+import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../domain/task_writes.dart';
-import 'upload_digest.dart';
 
 /// [UploadPicker]'ın sistem seçicisi gerçekleştirmesi (ADR-0002: `file_picker` YALNIZ bu
 /// dosyada — sınır kuralı F1). İnce sarmalayıcıdır, tek dosya:
@@ -11,9 +12,10 @@ import 'upload_digest.dart';
 ///   istemez), `compatible` kipi HEIC'i JPEG'e çevirir; Android'de sistem görsel seçicisi
 ///   (izin yok). Ad [normalizeUploadName] ile izinli yazıma gelir (`IMG_1.JPEG` → `.jpg`);
 ///   küme dışı tür (HEIC/WEBP) denetleyicinin tür ön denetiminde açıkça reddedilir.
-/// Ağ yok; içerik yalnız özet için akışla okunur ([uploadDigest]), günlüğe yazılmaz;
-/// tür/boyut ön denetimi denetleyicide ([UploadSource]). Yerel yolu olmayan seçim (yalnız
-/// URI) yüklenemez → vazgeçilmiş sayılır.
+/// Ağ yok; içerik OKUNMAZ (yalnız boyut): özet görev/arşiv gönderiminde, tür/boyut ön
+/// denetiminden sonra hesaplanır ([UploadSource]; sohbet eki özet hesaplamaz). Yerel yolu
+/// olmayan seçim (yalnız URI) yüklenemez → vazgeçilmiş sayılır. Seçici ya da boyut okuma
+/// hatası `client.file_unreadable` olarak düşer (çağıran kullanıcıya gösterir).
 class FileUploadPicker implements UploadPicker {
   const FileUploadPicker();
 
@@ -22,6 +24,14 @@ class FileUploadPicker implements UploadPicker {
 
   @override
   Future<UploadSource?> pick(UploadOrigin origin) async {
+    try {
+      return await _pick(origin);
+    } on Exception {
+      throw ApiError(ClientErrorCode.fileUnreadable);
+    }
+  }
+
+  Future<UploadSource?> _pick(UploadOrigin origin) async {
     final photos = origin == UploadOrigin.photos;
     final f = photos
         ? await FilePicker.pickFile(
@@ -39,11 +49,6 @@ class FileUploadPicker implements UploadPicker {
     final size = f.lengthSync() ?? await f.length();
     if (size == null) return null;
     final name = photos ? normalizeUploadName(f.name) : f.name;
-    return UploadSource(
-      path: path,
-      name: name,
-      sizeBytes: size,
-      digest: await uploadDigest(path),
-    );
+    return UploadSource(path: path, name: name, sizeBytes: size);
   }
 }

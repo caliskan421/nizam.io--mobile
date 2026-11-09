@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/features/messages/application/chat_members_controller.dart';
 import 'package:nizamio/features/messages/application/chat_room_controller.dart';
 import 'package:nizamio/features/messages/application/chats_controller.dart';
@@ -351,7 +352,8 @@ void k5b() {
   });
 
   test(
-    'ek: gönderiliyor balonu; tekrar aynı kimlik; reddedilen dosya kalkar',
+    'ek: gönderiliyor balonu; tekrar aynı kimlik; reddedilen ya da okunamayan '
+    'dosya kalkar',
     () async {
       final (c, repo) = await _open();
       const file = ChatUpload(
@@ -367,12 +369,17 @@ void k5b() {
       expect(await _ctrl(c).retry(pending.clientId), ChatSendOutcome.sent);
       expect(repo.uploads.map((u) => u.$1).toSet(), {pending.clientId});
       expect(_room(c).messages.last.onServer, isTrue);
-      repo.writeError = ApiError('messaging.file_rejected', status: 422);
-      await expectLater(
-        _ctrl(c).sendAttachment(file),
-        throwsA(isA<ApiError>()),
-      );
-      expect(_room(c).messages.where((m) => !m.onServer), isEmpty);
+      for (final code in [
+        'messaging.file_rejected',
+        ClientErrorCode.fileUnreadable,
+      ]) {
+        repo.writeError = ApiError(code);
+        await expectLater(
+          _ctrl(c).sendAttachment(file),
+          throwsA(isA<ApiError>()),
+        );
+        expect(_room(c).messages.where((m) => !m.onServer), isEmpty);
+      }
     },
   );
 

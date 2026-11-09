@@ -12,6 +12,7 @@ import '../domain/task_writes.dart';
 import 'task_catalog_controller.dart';
 import 'task_details_controller.dart';
 import 'tasks_providers.dart';
+import 'upload_digest_memo.dart';
 
 part 'task_detail_controller.g.dart';
 part 'task_detail_state.dart';
@@ -76,6 +77,7 @@ class TaskDetailController extends _$TaskDetailController {
   TaskCatalogController get _store =>
       ref.read(taskCatalogControllerProvider.notifier);
   TaskWriteRepository get _writes => ref.read(taskWriteRepositoryProvider);
+  final _digests = UploadDigestMemo();
 
   /// Görevdeki işlem bazlı yetkiler (sunum düğme görünürlüğünü buradan okur). Görev ya da
   /// erişim bilinmiyorsa hiçbir eylem açık değil.
@@ -538,24 +540,27 @@ class TaskDetailController extends _$TaskDetailController {
 
   void updateUpload(UploadDraft d) => state = state.copyWith(upload: () => d);
 
-  /// [origin] seçicisinden (dosyalar/fotoğraflar) dosya seçer. Seçici yoksa ya da
-  /// vazgeçilirse false.
-  Future<bool> pickUploadFile(UploadOrigin origin) async {
+  /// Dosya seçer (içerik okunmaz): seçim → done; yok/vazgeçme → unchanged; hata → failed.
+  Future<WriteOutcome> pickUploadFile(UploadOrigin origin) async {
     final picker = ref.read(uploadPickerProvider);
-    if (!picker.available) return false;
-    final f = await picker.pick(origin);
+    if (!picker.available) return WriteOutcome.unchanged;
+    final UploadSource? f;
+    try {
+      f = await picker.pick(origin);
+    } on ApiError catch (e) {
+      return WriteOutcome(WriteKind.failed, e);
+    }
     final d = state.upload;
-    if (f == null || d == null || !ref.mounted) return false;
-    state = state.copyWith(
-      upload: () => d.copyWith(file: () => f, name: f.name),
-    );
-    return true;
+    if (f == null || d == null || !ref.mounted) return WriteOutcome.unchanged;
+    final next = d.copyWith(file: () => f, name: f.name);
+    state = state.copyWith(upload: () => next);
+    return WriteOutcome.done;
   }
 
-  /// Dosyayı yükler ve Dosya sekmesine geçer. İstek öncesi yerel denetim (istek
-  /// gönderilmez, metin yine koddan): dosya seçilmemiş → [WriteKind.invalid]; izinli tür
-  /// dışı → `records.content_rejected`; 90 MiB → `records.too_large`; görevde 30 dosya →
-  /// `records.too_many_files`. Başarıda yalnız ayrıntı yeniden okunur (liste dosya taşımaz).
+  /// Dosyayı yükler, Dosya sekmesine geçer. Yerel denetim (istek yok, metin koddan): seçim yok
+  /// → invalid; tür dışı → `records.content_rejected`; 90 MiB → `records.too_large`; 30 dosya
+  /// → `records.too_many_files`. İçerik özeti ([UploadDigestMemo]) bunlardan SONRA alınır
+  /// (sınır dışı dosya okunmaz). Başarıda yalnız ayrıntı okunur (liste dosya taşımaz).
   Future<WriteOutcome> submitUpload() async {
     final t = _task;
     final d = state.upload;
@@ -572,11 +577,17 @@ class TaskDetailController extends _$TaskDetailController {
     if (t.fileEntries.length >= uploadMaxFilesPerTask) {
       return _rejected('records.too_many_files');
     }
+    final String? digest;
+    try {
+      digest = await _digests.of(ref, f);
+    } on ApiError catch (e) {
+      return WriteOutcome(WriteKind.failed, e);
+    }
+    if (digest == null || !ref.mounted) return WriteOutcome.unchanged;
     final r = await _writeKeyed(
       _upload,
-      // Geçici yol imzada yok: aynı içeriğin yeniden seçimi (yeni yol) aynı anahtarı taşır;
-      // içerik özeti var: aynı ad/boyutlu farklı içerik yeni anahtar alır (§8, metadata tekrarı).
-      '${f.name}|${f.sizeBytes}|${f.digest}|${d.tag.name}|${d.subtask}',
+      // Yol imzada yok (yeniden seçim aynı anahtar); özet var: farklı içerik yeni anahtar (§8).
+      '${f.name}|${f.sizeBytes}|$digest|${d.tag.name}|${d.subtask}',
       (key) => _writes.attachFile(
         t,
         f,

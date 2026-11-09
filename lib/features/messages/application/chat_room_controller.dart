@@ -468,9 +468,12 @@ class ChatRoomController extends _$ChatRoomController {
         case 'messaging.message_deleted':
           discard(local.clientId);
           return ChatSendOutcome.deleted;
-        case 'messaging.file_too_large' || 'messaging.file_rejected'
+        case 'messaging.file_too_large' ||
+                'messaging.file_rejected' ||
+                ClientErrorCode.fileUnreadable
             when upload != null:
-          // Dosya kabul edilmez: tekrar anlamsız, balon kalkar ve hata ekrana iletilir.
+          // Dosya kabul edilmez ya da okunamaz (silinmiş): tekrar anlamsız, balon kalkar ve
+          // hata ekrana iletilir.
           discard(local.clientId);
           rethrow;
         case 'messaging.idempotency_key_reused':

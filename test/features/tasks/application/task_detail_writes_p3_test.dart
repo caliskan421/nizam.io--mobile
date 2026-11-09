@@ -472,12 +472,7 @@ void main() {
 
     UploadSource src(String name, {int size = 4}) {
       final f = File('${dir.path}/$name')..writeAsBytesSync([37, 80, 68, 70]);
-      return UploadSource(
-        path: f.path,
-        name: name,
-        sizeBytes: size,
-        digest: 'sha-$name',
-      );
+      return UploadSource(path: f.path, name: name, sizeBytes: size);
     }
 
     test('yükle: multipart (file parçası, bildirilen tür), tag + subtask_id sorguda; yalnız ayrıntı okunur', () async {
@@ -540,7 +535,7 @@ void main() {
         picker: const UnavailableUploadPicker(),
       );
       ctl.openUpload();
-      expect(await ctl.pickUploadFile(UploadOrigin.files), isFalse);
+      expect((await ctl.pickUploadFile(UploadOrigin.files)).ok, isFalse);
       expect(h.backend.requests, isEmpty);
     });
 
@@ -549,10 +544,10 @@ void main() {
       final (h, c, ctl) = await _open(_Server(), picker: p);
       String? name() => c.read(taskDetailControllerProvider('w1')).upload?.name;
       ctl.openUpload();
-      expect(await ctl.pickUploadFile(UploadOrigin.photos), isTrue);
+      expect((await ctl.pickUploadFile(UploadOrigin.photos)).ok, isTrue);
       expect(name(), 'foto.jpg');
       p.next = null;
-      expect(await ctl.pickUploadFile(UploadOrigin.files), isFalse);
+      expect((await ctl.pickUploadFile(UploadOrigin.files)).ok, isFalse);
       expect(p.origins, [UploadOrigin.photos, UploadOrigin.files]);
       expect(name(), 'foto.jpg');
       expect(h.backend.requests, isEmpty);

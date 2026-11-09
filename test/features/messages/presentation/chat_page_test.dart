@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart' as widgets show debugOnRebuildDirtyWidget;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
+import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_composer.dart';
 import 'package:nizamio/core/ui/widgets/surfaces/nz_chat_bubble.dart';
@@ -199,13 +201,28 @@ void main() {
       path: '/tmp/IMG_1.heic',
       name: 'IMG_1.heic',
       sizeBytes: 9,
-      digest: 'd',
     );
     await _tap(tester, find.bySemanticsLabel(_l.uiMessagesAttach).last);
     await _tap(tester, find.text(_l.uiMessagesAttachPhotos));
     expect(picker.origins, [UploadOrigin.files, UploadOrigin.photos]);
     expect(find.text(_l.errMessagingFileRejected), findsOneWidget);
     expect(backend.chats.messages['koord']!.length, before);
+  });
+
+  // Codex tur 4 / N7: seçici (ya da dosya okuma) hatası yutulmaz, kullanıcıya gösterilir.
+  testWidgets('ek: seçici hatası bildirilir, istek yok', (tester) async {
+    final (h, backend) = await _open(tester);
+    final picker = _Picker()..error = ApiError(ClientErrorCode.fileUnreadable);
+    h.composition.locator
+      ..unregister<UploadPicker>()
+      ..registerSingleton<UploadPicker>(picker);
+    final before = backend.chats.messages['koord']!.length;
+    await _tap(tester, find.bySemanticsLabel(_l.uiMessagesAttach).last);
+    await _tap(tester, find.text(_l.uiMessagesAttachFile));
+    expect(picker.origins, [UploadOrigin.files]);
+    expect(find.text(_l.errClientFileUnreadable), findsOneWidget);
+    expect(backend.chats.messages['koord']!.length, before);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('grup yöneticisi: ad, üye ekleme ve yöneticilik', (tester) async {
@@ -260,9 +277,10 @@ void main() {
   }
 }
 
-/// Kaynağı kaydeden, [next] seçimini döndüren seçici.
+/// Kaynağı kaydeden, [next] seçimini (ya da [error] hatasını) döndüren seçici.
 final class _Picker implements UploadPicker {
   UploadSource? next;
+  ApiError? error;
   final origins = <UploadOrigin>[];
 
   @override
@@ -271,6 +289,7 @@ final class _Picker implements UploadPicker {
   @override
   Future<UploadSource?> pick(UploadOrigin origin) async {
     origins.add(origin);
+    if (error case final e?) throw e;
     return next;
   }
 }

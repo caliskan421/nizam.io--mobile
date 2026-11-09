@@ -120,19 +120,20 @@ class ArchiveActionsController extends _$ArchiveActionsController {
       : ArchiveUploadStart.noPicker;
 
   /// [workItemId] görevine [tag] etiketiyle dosya yükler: [origin] seçicisi (fotoğraflar /
-  /// dosyalar) açılır (vazgeçme → `ok: false`), izinli tür ve boyut istekten önce denetlenir
-  /// (`records.content_rejected`, `records.too_large`; istek gönderilmez). Başarıda listeler
-  /// yeniden okunur.
+  /// dosyalar) açılır (vazgeçme → `ok: false`), izinli tür ve boyut istekten önce, içerik
+  /// okunmadan denetlenir (`records.content_rejected`, `records.too_large`; istek gönderilmez).
+  /// İçerik özeti YALNIZ bunlardan sonra okunur; denetleyici kapanırsa okuma durur, sonuç yok
+  /// sayılır; okunamayan dosya `client.file_unreadable`. Başarıda listeler yeniden okunur.
   ///
   /// İşlem anahtarı (istemci akışları §8, görev ayrıntısındaki yüklemeyle aynı kural): niyet
   /// (kapsam, görev, etiket, dosya adı, boyutu ve içerik özeti) başına bir anahtar. Geçici
   /// dosya yolu imzada yoktur: gerçek seçici yeniden seçimde yeni geçici yol döndürür, aynı
-  /// içeriğin yeniden seçimi aynı anahtarı taşır. İçerik özeti ([UploadSource.digest]) imzadadır:
-  /// sunucu tekrarı gövde okumadan metadata'dan tanır, aynı ad/boyutlu farklı içerik eski
-  /// anahtarla gitse yüklenmeden başarı sayılırdı; özet onu yeni niyet yapar. Sonuç bilinmezse
-  /// (`client.outcome_unknown`) niyet ve anahtarı saklanır; [retryUpload] seçiciyi açmadan aynı
-  /// niyeti AYNI anahtarla gönderir. `platform.conflict_retry` aynı anahtarla bir kez otomatik
-  /// yeniden denenir. Başarı ve "anahtar başka istekle kullanılmış" niyeti düşürür; bekleyen
+  /// içeriğin yeniden seçimi aynı anahtarı taşır. İçerik özeti (`uploadDigesterProvider`)
+  /// imzadadır: sunucu tekrarı gövde okumadan metadata'dan tanır, aynı ad/boyutlu farklı içerik
+  /// eski anahtarla gitse yüklenmeden başarı sayılırdı; özet onu yeni niyet yapar. Sonuç
+  /// bilinmezse (`client.outcome_unknown`) niyet (özetiyle) ve anahtarı saklanır;
+  /// [retryUpload] seçiciyi açmadan ve özeti yeniden hesaplamadan aynı niyeti AYNI anahtarla
+  /// gönderir. `platform.conflict_retry` aynı anahtarla bir kez otomatik yeniden denenir. Başarı ve "anahtar başka istekle kullanılmış" niyeti düşürür; bekleyen
   /// anahtar denetleyici ömrü (klasör sayfası) boyunca kalır.
   Future<ArchiveOutcome> upload({
     required String workItemId,
@@ -145,12 +146,18 @@ class ArchiveActionsController extends _$ArchiveActionsController {
     if (file == null || !ref.mounted) return _cancelled;
     if (file.contentType == null) throw ApiError('records.content_rejected');
     if (file.tooLarge) throw ApiError('records.too_large');
+    final digest = await ref.read(uploadDigesterProvider)(
+      file.path,
+      cancelled: () => !ref.mounted,
+    );
+    if (digest == null || !ref.mounted) return _cancelled;
     final ctx = await _context();
     return _send((
       department: ctx.department,
       workItemId: workItemId,
       tag: tag,
       file: file,
+      digest: digest,
     ));
   });
 
@@ -169,7 +176,7 @@ class ArchiveActionsController extends _$ArchiveActionsController {
     final (keys, key) = _keys.keyFor(
       _upload,
       '${i.department}|${i.workItemId}|${i.tag.name}|${f.name}|${f.sizeBytes}|'
-      '${f.digest}',
+      '${i.digest}',
     );
     _keys = keys;
     _intent = null;
@@ -218,10 +225,11 @@ class ArchiveActionsController extends _$ArchiveActionsController {
   }
 }
 
-/// Yükleme niyeti: kapsam (departman), görev, etiket ve seçilmiş dosya kaynağı.
+/// Yükleme niyeti: kapsam (departman), görev, etiket, seçilmiş dosya kaynağı ve içerik özeti.
 typedef _UploadIntent = ({
   String department,
   String workItemId,
   RecordTag tag,
   UploadSource file,
+  String digest,
 });

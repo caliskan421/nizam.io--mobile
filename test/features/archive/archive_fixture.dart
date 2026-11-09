@@ -185,6 +185,12 @@ class FakePicker implements UploadPicker {
   }
 }
 
+/// Dosyayı okumayan sahte özet (yola bağlı): aynı yol aynı özet.
+Future<String?> pathDigest(
+  String path, {
+  required bool Function() cancelled,
+}) async => 'sha-$path';
+
 /// Pilot backend'de koordinatör ekip satırı (`prog-1` / `d1`): arşiv kapsamı `d1`, yönetici değil.
 PilotBackend archiveBackend({bool admin = false}) => PilotBackend()
   ..companyAdmin = admin
@@ -198,8 +204,9 @@ PilotBackend archiveBackend({bool admin = false}) => PilotBackend()
     },
   ];
 
-/// Gerçek bileşim kökünün arşiv, indirme ve seçici portlarını fakelerle değiştirir (portlar
-/// get_it kaydından tembel okunur; ilk okumadan önce çağrılır).
+/// Gerçek bileşim kökünün arşiv, indirme, seçici ve içerik özeti ([pathDigest]; dosya
+/// okunmaz) portlarını fakelerle değiştirir (portlar get_it kaydından tembel okunur; ilk
+/// okumadan önce çağrılır).
 void useArchiveFakes(
   Harness h,
   FakeArchiveRepository repo, {
@@ -208,7 +215,9 @@ void useArchiveFakes(
 }) {
   final l = h.composition.locator
     ..unregister<ArchiveRepository>()
-    ..registerSingleton<ArchiveRepository>(repo);
+    ..registerSingleton<ArchiveRepository>(repo)
+    ..unregister<UploadDigest>()
+    ..registerSingleton<UploadDigest>(pathDigest);
   if (sink != null) {
     l
       ..unregister<DownloadSink>()
@@ -286,6 +295,7 @@ ProviderContainer archiveContainer(
   TaskCatalog? catalog,
   DownloadSink? sink,
   UploadPicker? picker,
+  UploadDigest? digest,
 }) {
   final c = ProviderContainer(
     retry: (_, _) => null,
@@ -300,6 +310,7 @@ ProviderContainer archiveContainer(
       archiveRepositoryProvider.overrideWithValue(repo),
       downloadSinkProvider.overrideWithValue(sink ?? RecordingSink()),
       uploadPickerProvider.overrideWithValue(picker ?? FakePicker()),
+      uploadDigesterProvider.overrideWithValue(digest ?? pathDigest),
     ],
   );
   addTearDown(c.dispose);

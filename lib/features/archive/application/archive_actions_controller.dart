@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../tasks/tasks.dart';
 import '../domain/archive.dart';
 import '../domain/records.dart';
@@ -19,6 +20,9 @@ typedef ArchiveOutcome = ({bool ok, ApiError? error, String? path});
 
 const ArchiveOutcome _cancelled = (ok: false, error: null, path: null);
 
+/// Yükleme eyleminin işlem anahtarı adı ([RequestKeys]).
+const _upload = 'upload';
+
 /// Yükleme akışının ön sonucu: seçici yok → [noPicker].
 enum ArchiveUploadStart { ready, noPicker }
 
@@ -31,6 +35,9 @@ class ArchiveActionsController extends _$ArchiveActionsController {
   bool build(String code) => false;
 
   ArchiveRepository get _repo => ref.read(archiveRepositoryProvider);
+
+  /// Bekleyen yükleme niyeti (anahtar + imza; denetleyici ömrü = klasör sayfası).
+  var _keys = const RequestKeys();
 
   /// [op] süren eylem kilidiyle çalışır; hata [ApiError]'a çevrilir.
   Future<ArchiveOutcome> _run(Future<ArchiveOutcome> Function() op) async {
@@ -113,6 +120,12 @@ class ArchiveActionsController extends _$ArchiveActionsController {
   /// dosyalar) açılır (vazgeçme → `ok: false`), izinli tür ve boyut istekten önce denetlenir
   /// (`records.content_rejected`, `records.too_large`; istek gönderilmez). Başarıda listeler
   /// yeniden okunur.
+  ///
+  /// İşlem anahtarı (istemci akışları §8, görev ayrıntısındaki yüklemeyle aynı kural): niyet
+  /// (kapsam, görev, etiket, dosya yolu/adı/boyutu) başına bir anahtar; sonuç bilinmezse
+  /// (`client.outcome_unknown`) niyet saklanır ve aynı niyetin yeniden gönderimi AYNI anahtarı
+  /// taşır, farklı niyet yeni anahtar alır. `platform.conflict_retry` aynı anahtarla bir kez
+  /// otomatik yeniden denenir. Başarı ve "anahtar başka istekle kullanılmış" niyeti düşürür.
   Future<ArchiveOutcome> upload({
     required String workItemId,
     required RecordTag tag,
@@ -125,17 +138,45 @@ class ArchiveActionsController extends _$ArchiveActionsController {
     if (file.contentType == null) throw ApiError('records.content_rejected');
     if (file.tooLarge) throw ApiError('records.too_large');
     final ctx = await _context();
-    await _repo.attachFile(
+    final (keys, key) = _keys.keyFor(
+      _upload,
+      '${ctx.department}|$workItemId|${tag.name}|'
+      '${file.path}|${file.name}|${file.sizeBytes}',
+    );
+    _keys = keys;
+    Future<void> send() => _repo.attachFile(
       department: ctx.department,
       workItemId: workItemId,
       tag: tag,
       filePath: file.path,
       filename: file.name,
-      requestKey: newRequestKey(),
+      requestKey: key,
     );
+    try {
+      try {
+        await send();
+      } on ApiError catch (e) {
+        if (e.code != conflictRetryCode) rethrow;
+        await send();
+      }
+    } on Object catch (e) {
+      final err = toApiError(e);
+      if (isOutcomeUnknown(err)) {
+        throw ApiError(ClientErrorCode.outcomeUnknown, status: err.status);
+      }
+      if (isKeyReused(err)) {
+        _keys = _keys.clear(_upload);
+        throw ApiError(ClientErrorCode.requestNotResent, status: err.status);
+      }
+      rethrow;
+    }
+    _keys = _keys.clear(_upload);
     _reload();
     return (ok: true, error: null, path: null);
   });
+
+  /// Bekleyen yükleme anahtarı (test ve tanılama).
+  String? get pendingUploadKey => _keys.pending(_upload);
 
   void _reload() {
     if (!ref.mounted) return;

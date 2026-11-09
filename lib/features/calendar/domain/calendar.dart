@@ -139,11 +139,16 @@ typedef CalendarGroup = ({CalendarKind kind, List<CalendarEntry> entries});
 /// Günlere dağıtılmış kayıtlar ve verinin "bugün"ü.
 @immutable
 final class CalendarIndex {
-  const CalendarIndex._(this.today, this._catalog, this._byDay);
+  const CalendarIndex._(this.today, this._catalog, this._byDay, this.truncated);
 
   /// Görünür toplantılar + görev kataloğu: bitmemiş her görevin başlangıcı ve bitişi, bekleyen
-  /// her tarih talebinin yeni bitişi.
-  factory CalendarIndex.build(List<Meeting> meetings, TaskCatalog catalog) {
+  /// her tarih talebinin yeni bitişi. [meetingsTruncated]: toplantı listesi sayfa tavanında
+  /// kesildi; katalog kesilmesi [TaskCatalog.truncated]'dan okunur (ikisi [truncated]'da birleşir).
+  factory CalendarIndex.build(
+    List<Meeting> meetings,
+    TaskCatalog catalog, {
+    bool meetingsTruncated = false,
+  }) {
     final today = calendarDay(catalog.today);
     final by = <DateTime, List<CalendarEntry>>{};
     void add(CalendarEntry e) =>
@@ -179,10 +184,19 @@ final class CalendarIndex {
         );
       }
     }
-    return CalendarIndex._(today, catalog, by);
+    return CalendarIndex._(
+      today,
+      catalog,
+      by,
+      meetingsTruncated || catalog.truncated,
+    );
   }
 
   final DateTime today;
+
+  /// Kaynaklardan biri (toplantı listesi ya da görev kataloğu) kesik: boş görünen gün gerçekte
+  /// boş olmayabilir; arayüz kısa uyarı gösterir.
+  final bool truncated;
   final TaskCatalog _catalog;
   final Map<DateTime, List<CalendarEntry>> _byDay;
 

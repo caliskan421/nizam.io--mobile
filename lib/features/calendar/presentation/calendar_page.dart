@@ -70,6 +70,17 @@ class CalendarPage extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               CalendarGrid(index: ix),
+              // Kesik kaynak (toplantı listesi ya da katalog): boş gün gerçekte boş olmayabilir.
+              if (ix.truncated) ...[
+                const Gap(NizamioSpacing.space2),
+                Text(
+                  context.l10n.uiListsTruncated,
+                  textAlign: TextAlign.center,
+                  style: context.text.caption.copyWith(
+                    color: context.colors.textMuted,
+                  ),
+                ),
+              ],
               const Gap(NizamioSpacing.space4),
               CalendarDay(index: ix, onPlanMeeting: plan),
             ],

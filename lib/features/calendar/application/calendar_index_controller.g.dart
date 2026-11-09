@@ -12,7 +12,8 @@ part of 'calendar_index_controller.dart';
 /// (`listMeetings`, bütün sayfalar) + görevler sayfasının okuduğu AYNI görev kataloğu (görevler
 /// ve satırlarındaki bekleyen tarih talepleri). Kaynaklardan biri değişince (yeni toplantı,
 /// tamamlanan görev, program değişimi) takvim de güncellenir; biri hata verirse takvim hata
-/// durumundadır (kısmi veriyle devam etmez).
+/// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
+/// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır.
 
 @ProviderFor(calendarIndex)
 final calendarIndexProvider = CalendarIndexProvider._();
@@ -21,7 +22,8 @@ final calendarIndexProvider = CalendarIndexProvider._();
 /// (`listMeetings`, bütün sayfalar) + görevler sayfasının okuduğu AYNI görev kataloğu (görevler
 /// ve satırlarındaki bekleyen tarih talepleri). Kaynaklardan biri değişince (yeni toplantı,
 /// tamamlanan görev, program değişimi) takvim de güncellenir; biri hata verirse takvim hata
-/// durumundadır (kısmi veriyle devam etmez).
+/// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
+/// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır.
 
 final class CalendarIndexProvider
     extends
@@ -35,7 +37,8 @@ final class CalendarIndexProvider
   /// (`listMeetings`, bütün sayfalar) + görevler sayfasının okuduğu AYNI görev kataloğu (görevler
   /// ve satırlarındaki bekleyen tarih talepleri). Kaynaklardan biri değişince (yeni toplantı,
   /// tamamlanan görev, program değişimi) takvim de güncellenir; biri hata verirse takvim hata
-  /// durumundadır (kısmi veriyle devam etmez).
+  /// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
+  /// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır.
   CalendarIndexProvider._()
     : super(
         from: null,
@@ -62,4 +65,4 @@ final class CalendarIndexProvider
   }
 }
 
-String _$calendarIndexHash() => r'cfe1aae3b5a97c26448cc466e983f902b210b62e';
+String _$calendarIndexHash() => r'c49b288bdeb03d7b7331f7a9b1a07d50162ea675';

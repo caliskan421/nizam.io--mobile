@@ -62,6 +62,12 @@ class FakeArchiveRepository implements ArchiveRepository {
   };
   ApiError? error;
   final List<ArchiveCall> calls = [];
+
+  /// Yükleme çağrılarının işlem anahtarları (sırayla).
+  final List<String> attachKeys = [];
+
+  /// Sıradaki yükleme çağrılarının hataları (FIFO; boşsa [error] geçerli).
+  final List<Object> attachErrors = [];
   final List<ArchiveAttachmentFilter> filters = [];
 
   Future<T> _do<T>(String op, String department, T value, [Object? arg]) {
@@ -108,12 +114,19 @@ class FakeArchiveRepository implements ArchiveRepository {
     required String filePath,
     required String filename,
     required String requestKey,
-  }) => _do(
-    'attach',
-    department,
-    archiveFile('new', task: workItemId, tag: tag),
-    (workItemId, tag, filename),
-  );
+  }) {
+    attachKeys.add(requestKey);
+    if (attachErrors.isNotEmpty) {
+      calls.add(('attach', department, (workItemId, tag, filename)));
+      return Future.error(attachErrors.removeAt(0));
+    }
+    return _do(
+      'attach',
+      department,
+      archiveFile('new', task: workItemId, tag: tag),
+      (workItemId, tag, filename),
+    );
+  }
 
   @override
   Future<void> deleteFile(String fileId, {required String department}) =>

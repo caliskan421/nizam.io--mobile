@@ -9,6 +9,7 @@ import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/features/calendar/application/calendar_index_controller.dart';
 import 'package:nizamio/features/calendar/domain/calendar.dart';
+import 'package:nizamio/features/meetings/application/meetings_controller.dart';
 import 'package:nizamio/features/meetings/domain/meeting.dart';
 import 'package:nizamio/features/meetings/domain/meetings_repository.dart';
 import 'package:nizamio/features/meetings/meetings.dart';
@@ -67,8 +68,13 @@ final class _Meetings implements MeetingsRepository {
 }
 
 final class _Catalog implements TaskCatalogRepository {
+  _Catalog({this.truncated = false});
+
+  final bool truncated;
+
   @override
   Future<TaskCatalog> load() async => TaskCatalog(
+    truncated: truncated,
     today: DateTime(2026, 11, 5, 14),
     me: 'me',
     tasks: [
@@ -82,6 +88,18 @@ final class _Catalog implements TaskCatalogRepository {
   );
 }
 
+ProviderContainer _container(_Meetings meetings, _Catalog catalog) =>
+    ProviderContainer(
+      retry: (_, _) => null,
+      overrides: [
+        meetingsRepositoryProvider.overrideWithValue(meetings),
+        taskCatalogRepositoryProvider.overrideWithValue(catalog),
+        scopeStateProvider.overrideWith(
+          (ref) => const ScopeSelection(programId: 'p1'),
+        ),
+      ],
+    );
+
 void main() {
   late _Meetings meetings;
   late ProviderContainer c;
@@ -90,16 +108,7 @@ void main() {
       [_meeting('m1', DateTime(2026, 11, 2, 9))],
       [_meeting('m2', DateTime(2026, 11, 10, 14))],
     ]);
-    c = ProviderContainer(
-      retry: (_, _) => null,
-      overrides: [
-        meetingsRepositoryProvider.overrideWithValue(meetings),
-        taskCatalogRepositoryProvider.overrideWithValue(_Catalog()),
-        scopeStateProvider.overrideWith(
-          (ref) => const ScopeSelection(programId: 'p1'),
-        ),
-      ],
-    );
+    c = _container(meetings, _Catalog());
   });
   tearDown(() => c.dispose());
 
@@ -111,6 +120,7 @@ void main() {
     expect(ix.count(DateTime(2026, 11, 2)), 2, reason: 'm1 + w1 başlangıcı');
     expect(ix.count(DateTime(2026, 10)), 1, reason: 'w2 başlangıcı (eşik yok)');
     expect(ix.count(DateTime(2026, 11, 3)), 0, reason: 'biten görev yok');
+    expect(ix.truncated, isFalse);
     expect(
       ix.groups(DateTime(2026, 11, 2)).first.entries.single,
       isA<MeetingEntry>().having((m) => m.id, 'id', 'm1'),
@@ -144,5 +154,23 @@ void main() {
     c.invalidate(meetingsBoardControllerProvider);
     final ix = await c.read(calendarIndexProvider.future);
     expect(ix.count(DateTime(2026, 11, 2)), 2);
+  });
+
+  // Codex tur 1 / 8: kesik kaynak takvimde sessizce tam veri gibi görünmez.
+  test('kesilme bilgisi takvim durumuna geçer (toplantı listesi ya da katalog)', () async {
+    final cat = _container(meetings, _Catalog(truncated: true));
+    addTearDown(cat.dispose);
+    expect((await cat.read(calendarIndexProvider.future)).truncated, isTrue);
+
+    // Toplantı listesi sayfa tavanında kesildi (her sayfa devam imleci taşır).
+    final capped = _Meetings([
+      for (var i = 0; i <= MeetingsBoardController.maxPages; i++)
+        [_meeting('m$i', DateTime(2026, 11, 2, 9))],
+    ]);
+    final mc = _container(capped, _Catalog());
+    addTearDown(mc.dispose);
+    final ix = await mc.read(calendarIndexProvider.future);
+    expect(capped.calls, MeetingsBoardController.maxPages);
+    expect(ix.truncated, isTrue);
   });
 }

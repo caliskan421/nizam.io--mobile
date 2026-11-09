@@ -265,7 +265,12 @@ void main() {
       }, status: 201);
       await ApiTaskWriteRepository(dio).attachFile(
         _task(),
-        UploadSource(path: file.path, name: 'rapor.pdf', sizeBytes: 4),
+        UploadSource(
+          path: file.path,
+          name: 'rapor.pdf',
+          sizeBytes: 4,
+          digest: 'd',
+        ),
         EvidenceTag.outcome,
         subtaskId: 's1',
         requestKey: 'k-0123456789abcdefghij',
@@ -295,7 +300,12 @@ void main() {
       }, status: 201);
       await ApiTaskWriteRepository(dio).attachFile(
         _task(),
-        UploadSource(path: file.path, name: 'rapor.pdf', sizeBytes: 4),
+        UploadSource(
+          path: file.path,
+          name: 'rapor.pdf',
+          sizeBytes: 4,
+          digest: 'd',
+        ),
         EvidenceTag.requirement,
         requestKey: 'k-0123456789abcdefghij',
       );
@@ -327,7 +337,12 @@ void main() {
       await expectLater(
         ApiTaskWriteRepository(dio).attachFile(
           _task(),
-          UploadSource(path: file.path, name: 'rapor.pdf', sizeBytes: 4),
+          UploadSource(
+            path: file.path,
+            name: 'rapor.pdf',
+            sizeBytes: 4,
+            digest: 'd',
+          ),
           EvidenceTag.outcome,
           requestKey: 'k-0123456789abcdefghij',
         ),
@@ -337,14 +352,29 @@ void main() {
   });
 
   test('UploadSource: izinli tür, jpeg reddi, sınır', () {
-    const ok = UploadSource(path: '/x', name: 'Plan.DOCX', sizeBytes: 1);
+    const ok = UploadSource(
+      path: '/x',
+      name: 'Plan.DOCX',
+      sizeBytes: 1,
+      digest: 'd',
+    );
     expect(ok.contentType, startsWith('application/vnd.openxml'));
     expect(
-      const UploadSource(path: '/x', name: 'a.jpeg', sizeBytes: 1).contentType,
+      const UploadSource(
+        path: '/x',
+        name: 'a.jpeg',
+        sizeBytes: 1,
+        digest: 'd',
+      ).contentType,
       isNull,
     );
     expect(
-      const UploadSource(path: '/x', name: 'a', sizeBytes: 1).contentType,
+      const UploadSource(
+        path: '/x',
+        name: 'a',
+        sizeBytes: 1,
+        digest: 'd',
+      ).contentType,
       isNull,
     );
     expect(
@@ -352,6 +382,7 @@ void main() {
         path: '/x',
         name: 'a.pdf',
         sizeBytes: uploadMaxBytes,
+        digest: 'd',
       ).tooLarge,
       isTrue,
     );
@@ -360,6 +391,7 @@ void main() {
         path: '/x',
         name: 'a.pdf',
         sizeBytes: uploadMaxBytes - 1,
+        digest: 'd',
       ).tooLarge,
       isFalse,
     );

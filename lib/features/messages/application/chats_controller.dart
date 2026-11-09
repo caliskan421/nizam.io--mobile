@@ -12,13 +12,19 @@ part 'chats_controller.g.dart';
 
 /// Mesajlar kutusu (seçili programın sohbetleri). Hesap ya da program değişince yeniden okunur.
 /// Akış açılınca (yeniden bağlanma protokolü adım 2) hemen, olaylarda en az 1 sn birleştirilip
-/// tek `listChats` okumasıyla tazelenir; tazeleme hatası eski listeyi bozmaz.
+/// tek `listChats` okumasıyla tazelenir; tazeleme hatası eski listeyi bozmaz. Okumalar
+/// yanıt nesliyle sıralanır: yalnız en son başlatılan okumanın yanıtı yazılır (geç gelen eski
+/// yanıt yeni listeyi ezmez).
 @Riverpod(keepAlive: true)
 class ChatsController extends _$ChatsController {
   Timer? _coalesce;
 
+  /// Son başlatılan okumanın nesli ([build] ve [refresh] artırır).
+  var _generation = 0;
+
   @override
   Future<ChatInbox> build() {
+    _generation++;
     ref
       ..watch(chatMeProvider)
       ..watch(scopeStateProvider.select((s) => s.programId));
@@ -54,12 +60,15 @@ class ChatsController extends _$ChatsController {
     }
   }
 
-  /// Listeyi sessizce yeniden okur (hata yutulur: eski liste görünür kalır).
+  /// Listeyi sessizce yeniden okur (hata yutulur: eski liste görünür kalır). Bu okuma
+  /// sürerken başka okuma başladıysa (ör. ön plan yenilemesi sürerken akış açıldı) yanıtı
+  /// atılır; uçuş birleştirmesi yok.
   Future<void> refresh() async {
     if (state.value == null) return;
+    final generation = ++_generation;
     try {
       final inbox = await _repo.loadInbox();
-      if (ref.mounted) state = AsyncData(inbox);
+      if (ref.mounted && generation == _generation) state = AsyncData(inbox);
     } on Object {
       // Ağ/sunucu hatası: sonraki olay ya da yeniden bağlanma tazeler.
     }

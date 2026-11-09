@@ -635,20 +635,19 @@ void main() {
     });
   });
 
-  group('F1 dosya seçici yalıtımı', () {
+  group('F1/F2 dosya seçici ve içerik özeti yalıtımı', () {
     const fp = "import 'package:file_picker/file_picker.dart';";
-    test('yalnız UploadPicker gerçekleştirmesi; dışa verilemez', () {
-      expect(rules('features/tasks/data/file_upload_picker.dart', fp), isEmpty);
-      expect(rules('features/tasks/data/a.dart', fp), ['F1']);
+    const cr = "import 'package:crypto/crypto.dart';";
+    const picker = 'features/tasks/data/file_upload_picker.dart';
+    const digest = 'features/tasks/data/upload_digest.dart';
+    test('yalnız kendi kesin dosyalarında; dışa verilemez', () {
+      expect(rules(picker, fp), isEmpty);
       expect(rules('features/tasks/presentation/a.dart', fp), ['F1']);
       expect(rules('core/http/a.dart', fp), ['F1']);
-      expect(
-        rules(
-          'features/tasks/data/file_upload_picker.dart',
-          "export 'package:file_picker/file_picker.dart';",
-        ),
-        ['F1'],
-      );
+      expect(rules(picker, fp.replaceFirst('import', 'export')), ['F1']);
+      expect(rules(digest, cr), isEmpty);
+      expect(rules(picker, cr), ['F2']);
+      expect(rules(digest, cr.replaceFirst('import', 'export')), ['F2']);
     });
   });
 

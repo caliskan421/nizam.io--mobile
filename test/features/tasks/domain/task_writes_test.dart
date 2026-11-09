@@ -15,7 +15,12 @@ void main() {
     for (final e in ['jpeg', 'exe', '']) {
       expect(uploadContentType(e), isNull, reason: e);
       expect(
-        UploadSource(path: '/x', name: 'a.$e', sizeBytes: 1).contentType,
+        UploadSource(
+          path: '/x',
+          name: 'a.$e',
+          sizeBytes: 1,
+          digest: 'd',
+        ).contentType,
         isNull,
       );
     }

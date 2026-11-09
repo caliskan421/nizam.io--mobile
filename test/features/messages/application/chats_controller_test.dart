@@ -1,5 +1,8 @@
 // ChatsController: liste, tümünü okundu (sunucuda), satır okundu, yeni sohbetin eklenmesi,
-// akış sinyalleri (açılışta hemen, olaylarda birleşik tek okuma); alt menü alt yazısı.
+// akış sinyalleri (açılışta hemen, olaylarda birleşik tek okuma); alt menü alt yazısı;
+// yanıt nesli (geç gelen eski okuma yeni listeyi ezmez).
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/features/messages/application/chats_controller.dart';
 import 'package:nizamio/features/messages/application/messages_providers.dart';
@@ -57,4 +60,30 @@ void main() {
       expect(reads(), 3);
     },
   );
+
+  // Codex tur 3 / N6: ön plana dönüş R1'i başlatır; R1 sürerken mesaj ekranı açılır, akış
+  // açılışı R2'yi başlatır. R2 biter, sonra R1'in eski yanıtı gelir: state R2'de kalır.
+  test('yanıt nesli: geç gelen eski okuma yeni listeyi ezmez', () async {
+    final repo = FakeChatRepository();
+    final c = chatContainer(repo)
+      ..listen(chatsControllerProvider, (_, _) {})
+      ..listen(messagesNavBadgeProvider, (_, _) {});
+    await c.read(chatsControllerProvider.future);
+    final r1 = Completer<ChatInbox>();
+    final r2 = Completer<ChatInbox>();
+    repo.inboxReplies.addAll([r1, r2]);
+
+    final first = refreshMessagesBadge(c);
+    c.read(chatSignalBusProvider).add(const ChatStreamOpened());
+    await pumpEventQueue();
+    expect(repo.calls.where((x) => x == 'loadInbox'), hasLength(3));
+
+    r2.complete(ChatInbox(chats: [chat('a', unread: 1), chat('b', unread: 1)]));
+    await pumpEventQueue();
+    expect(c.read(messagesNavBadgeProvider), 2);
+    r1.complete(ChatInbox(chats: [chat('a', unread: 1)]));
+    await first;
+    expect(c.read(messagesNavBadgeProvider), 2, reason: 'R1 eski yanıt atılır');
+    expect(c.read(chatsControllerProvider).requireValue.chats, hasLength(2));
+  });
 }

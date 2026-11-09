@@ -125,9 +125,11 @@ class ArchiveActionsController extends _$ArchiveActionsController {
   /// yeniden okunur.
   ///
   /// İşlem anahtarı (istemci akışları §8, görev ayrıntısındaki yüklemeyle aynı kural): niyet
-  /// (kapsam, görev, etiket, dosya adı ve boyutu) başına bir anahtar. Geçici dosya yolu imzada
-  /// yoktur: gerçek seçici yeniden seçimde yeni geçici yol döndürür, aynı dosyanın yeniden
-  /// seçimi aynı anahtarı taşır (sunucu tekrarı metadata'dan tanır). Sonuç bilinmezse
+  /// (kapsam, görev, etiket, dosya adı, boyutu ve içerik özeti) başına bir anahtar. Geçici
+  /// dosya yolu imzada yoktur: gerçek seçici yeniden seçimde yeni geçici yol döndürür, aynı
+  /// içeriğin yeniden seçimi aynı anahtarı taşır. İçerik özeti ([UploadSource.digest]) imzadadır:
+  /// sunucu tekrarı gövde okumadan metadata'dan tanır, aynı ad/boyutlu farklı içerik eski
+  /// anahtarla gitse yüklenmeden başarı sayılırdı; özet onu yeni niyet yapar. Sonuç bilinmezse
   /// (`client.outcome_unknown`) niyet ve anahtarı saklanır; [retryUpload] seçiciyi açmadan aynı
   /// niyeti AYNI anahtarla gönderir. `platform.conflict_retry` aynı anahtarla bir kez otomatik
   /// yeniden denenir. Başarı ve "anahtar başka istekle kullanılmış" niyeti düşürür; bekleyen
@@ -166,7 +168,8 @@ class ArchiveActionsController extends _$ArchiveActionsController {
     final f = i.file;
     final (keys, key) = _keys.keyFor(
       _upload,
-      '${i.department}|${i.workItemId}|${i.tag.name}|${f.name}|${f.sizeBytes}',
+      '${i.department}|${i.workItemId}|${i.tag.name}|${f.name}|${f.sizeBytes}|'
+      '${f.digest}',
     );
     _keys = keys;
     _intent = null;

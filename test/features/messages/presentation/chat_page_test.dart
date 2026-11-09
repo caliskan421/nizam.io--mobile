@@ -244,6 +244,43 @@ void main() {
     expect(backend.chats.writes.last, 'PUT /v1/chats/koord/admins/acc-rk');
   });
 
+  testWidgets('yavaş yukarı kaydırma alta geri atılmaz', (tester) async {
+    final server = ChatBackend();
+    final list = server.chats.messages['koord']!;
+    final first = list.first;
+    for (var i = 3; i <= 60; i++) {
+      list.add({
+        ...first,
+        'message_id': 'm$i',
+        'seq': i,
+        'client_message_id': 'c$i',
+        'body': 'Geçmiş mesaj numarası $i ' * (1 + i % 4),
+        'created_at': DateTime.utc(2026, 11, 9, 7, i % 60).toIso8601String(),
+      });
+    }
+    await _open(tester, server: server);
+    final scroll = tester.widget<CustomScrollView>(
+      find.byType(CustomScrollView).first,
+    );
+    final c = scroll.controller!;
+    expect(c.position.maxScrollExtent - c.position.pixels, lessThan(1));
+    final g = await tester.startGesture(const Offset(200, 400));
+    var last = c.position.pixels;
+    for (var i = 0; i < 12; i++) {
+      await g.moveBy(const Offset(0, 6));
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(
+        c.position.pixels,
+        lessThanOrEqualTo(last + 0.5),
+        reason: 'parmak yukarı çekerken liste alta atlamamalı',
+      );
+      last = c.position.pixels;
+    }
+    await g.up();
+    await settle(tester);
+    expect(c.position.maxScrollExtent - c.position.pixels, greaterThan(20));
+  });
+
   testWidgets('yazarken balonlar yeniden kurulmaz', (tester) async {
     await _open(tester);
     var n = 0;

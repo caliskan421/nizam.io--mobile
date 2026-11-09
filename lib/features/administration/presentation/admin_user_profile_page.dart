@@ -41,7 +41,6 @@ class AdminUserProfilePage extends ConsumerStatefulWidget {
 
 class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
   static const _sectionGap = 18.0;
-  static const _barRadius = 28.0;
   static const _largeTextThreshold = 1.3;
   final _headingKey = GlobalKey(debugLabel: 'user-profile-heading');
   final _barKey = GlobalKey(debugLabel: 'user-profile-bar-title-box');
@@ -215,9 +214,6 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     final page = NzPage.feed(
       topBar: NzTopBar.detail(
         onBack: widget.onBack,
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(_barRadius),
-        ),
         titleContent: user == null
             ? SizedBox.expand(key: _barKey)
             : AdminUserCollapsedTitle(

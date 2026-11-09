@@ -1,6 +1,7 @@
 // ChatSyncController: dinleyen varken tek bağlantı; açılış ve olaylar veriyoluna; ağ hatasında
 // geri çekilmeyle yeniden bağlanma, yetki hatasında durma, ardışık başarısızlık sınırı; arka
-// plana geçince kapanır, ön plana dönünce yeniden açılır.
+// plana geçince kapanır, ön plana dönünce yeniden açılır; 429 beklemesi yaşam döngüsünü ve
+// ekranın yeniden açılışını da bağlar.
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -101,6 +102,46 @@ void main() {
     expect(c.read(chatSyncControllerProvider), ChatSyncStatus.retrying);
   });
 
+  test(
+    '429: arka plan/ön plan ve ekranın yeniden açılışı beklemeyi kısaltmaz',
+    () async {
+      final repo = FakeChatRepository();
+      _rateLimited(repo, const Duration(hours: 1));
+      final c = chatContainer(repo);
+      var sub = c.listen(chatSyncControllerProvider, (_, _) {});
+      await pumpEventQueue(times: 50);
+      expect(repo.connects, 1);
+      c.read(chatForegroundProvider.notifier).set(false);
+      await pumpEventQueue();
+      c.read(chatForegroundProvider.notifier).set(true);
+      await pumpEventQueue();
+      expect(repo.connects, 1, reason: 'ön plana dönüş beklemeye uyar');
+      expect(c.read(chatSyncControllerProvider), ChatSyncStatus.retrying);
+      sub.close();
+      await pumpEventQueue();
+      sub = c.listen(chatSyncControllerProvider, (_, _) {});
+      await pumpEventQueue();
+      expect(repo.connects, 1, reason: 'ekranın yeniden açılışı uyar');
+      expect(c.read(chatSyncControllerProvider), ChatSyncStatus.retrying);
+    },
+  );
+
+  test('429: bekleme bitince ön plan döngüsünden sonra akış açılır', () async {
+    final repo = FakeChatRepository();
+    _rateLimited(repo, const Duration(milliseconds: 300));
+    final c = chatContainer(repo)
+      ..listen(chatSyncControllerProvider, (_, _) {});
+    await pumpEventQueue(times: 50);
+    c.read(chatForegroundProvider.notifier).set(false);
+    await pumpEventQueue();
+    c.read(chatForegroundProvider.notifier).set(true);
+    await pumpEventQueue();
+    expect(repo.connects, 1);
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    await pumpEventQueue();
+    expect(repo.connects, 2);
+  });
+
   test('arka plan kapatır, ön plan yeniden açar', () async {
     final repo = FakeChatRepository();
     final first = StreamController<ChatSignal>();
@@ -118,3 +159,10 @@ void main() {
     expect(repo.connects, 2);
   });
 }
+
+void _rateLimited(FakeChatRepository repo, Duration wait) =>
+    repo.connections.add(
+      StreamController<ChatSignal>()..addError(
+        ApiError('platform.rate_limited', status: 429, retryAfter: wait),
+      ),
+    );

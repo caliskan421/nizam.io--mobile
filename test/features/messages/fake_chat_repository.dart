@@ -71,6 +71,16 @@ class FakeChatRepository implements ChatRepository {
   /// Doluysa sonraki tepki/oy/sabit/üye yazması bu hatayla düşer (bir kez).
   ApiError? writeError;
 
+  /// Doluysa yazmalar (çağrı anında okunur) bu kapı açılana dek bekler.
+  Completer<void>? writeGate;
+
+  /// Aynı anda uçuşta olan en çok yazma sayısı.
+  int maxWriting = 0;
+  var _writing = 0;
+
+  /// Doluysa geçmiş okumaları (sayfa çağrı anında kesilir) bu kapı açılana dek bekler.
+  Completer<void>? listGate;
+
   /// Sabit şeridi (sunucu sırası).
   List<ChatMessage> pinned = [];
   ChatMembers memberList = ChatMembers(
@@ -93,12 +103,17 @@ class FakeChatRepository implements ChatRepository {
   /// Arama sonuçları (artan seq; `before` süzer).
   List<ChatMessage> searchHits = [];
 
-  void _write(String call) {
+  Future<void> _write(String call) async {
     calls.add(call);
     final e = writeError;
-    if (e != null) {
-      writeError = null;
-      throw e;
+    writeError = null;
+    final gate = writeGate;
+    if (++_writing > maxWriting) maxWriting = _writing;
+    try {
+      if (gate != null) await gate.future;
+      if (e != null) throw e;
+    } finally {
+      _writing--;
     }
   }
 
@@ -143,7 +158,10 @@ class FakeChatRepository implements ChatRepository {
       if (before != null) all = all.where((m) => m.seq! < before).toList();
       page = all.length <= n ? all : all.sublist(all.length - n);
     }
-    return ChatHistoryPage(messages: page, peerReadSeq: peerReadSeq);
+    final read = ChatHistoryPage(messages: page, peerReadSeq: peerReadSeq);
+    final gate = listGate;
+    if (gate != null) await gate.future;
+    return read;
   }
 
   @override
@@ -186,6 +204,11 @@ class FakeChatRepository implements ChatRepository {
     final list = server[chatId]!;
     final i = list.indexWhere((m) => m.id == messageId);
     final old = list[i];
+    // §10.2: bayat sürüm ve farklı gövde 409; gövde zaten istenen metinse 200.
+    if (old.text == text) return old;
+    if (expectedRevision != old.revision) {
+      throw ApiError('messaging.edit_conflict', status: 409);
+    }
     return list[i] = ChatMessage(
       id: old.id,
       clientId: old.clientId,
@@ -282,7 +305,7 @@ class FakeChatRepository implements ChatRepository {
     String? replyTo,
   }) async {
     uploads.add((clientId, file));
-    _write('attach $chatId');
+    await _write('attach $chatId');
     final list = server.putIfAbsent(chatId, () => []);
     final seq = (list.lastOrNull?.seq ?? 0) + 1;
     final m = ChatMessage(
@@ -329,7 +352,7 @@ class FakeChatRepository implements ChatRepository {
 
   @override
   Future<Chat> rename(String chatId, String name) async {
-    _write('rename $name');
+    await _write('rename $name');
     return chat(chatId, group: true, name: name);
   }
 

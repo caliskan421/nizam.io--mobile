@@ -14,6 +14,7 @@ import 'chats_controller.dart';
 import 'messages_providers.dart';
 
 part 'chat_room_controller.g.dart';
+part 'chat_room_reconcile.dart';
 
 /// Gönderimin ekrana dönen sonucu.
 enum ChatSendOutcome {
@@ -38,7 +39,9 @@ enum ChatSendOutcome {
 /// gelen olayların uzlaştırılması (istemci akışları §10.2–§10.5), ek gönderimi ve sabit şeridi
 /// (§10.10). Olaylar en az 1 sn birleştirilip tek okumayla uygulanır; silme olayı okumasız
 /// uygulanır. Tepki, sabit, oy ve anket bitirme `message.updated` yayar: yerelde olan mesaj
-/// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Otomatik yeniden deneme yoktur.
+/// `around` ile, sabit şeridi `listChatPins` ile yeniden okunur. Açılış okumaları sürerken gelen
+/// sinyaller kaybolmaz: açılış bitince uzlaştırma bir kez koşar. Geçmiş uzlaştırması
+/// `chat_room_reconcile.dart`'tadır. Otomatik yeniden deneme yoktur.
 @riverpod
 class ChatRoomController extends _$ChatRoomController {
   /// Geçmiş sayfa boyu.
@@ -49,6 +52,10 @@ class ChatRoomController extends _$ChatRoomController {
 
   Timer? _flush;
   Timer? _typingOff;
+
+  /// Açılış okumaları sürüyor; bu arada gelen sinyal [_missed]'i kirletir.
+  var _booting = true;
+  var _missed = false;
   var _dirtyAfter = false;
   var _dirtyInfo = false;
   var _dirtyPins = false;
@@ -71,6 +78,8 @@ class ChatRoomController extends _$ChatRoomController {
       _typingOff?.cancel();
     });
     _readSeq = 0;
+    _booting = true;
+    _missed = false;
     // Okunmamış sayısı (ayırıcı) liste satırından gelir; liste okunamazsa ayırıcı yok.
     final inbox = ref
         .read(chatsControllerProvider.future)
@@ -91,7 +100,7 @@ class ChatRoomController extends _$ChatRoomController {
     final detail = r[0]! as Chat;
     final page = r[1]! as ChatHistoryPage;
     final row = (r[2] as ChatInbox?)?.chat(id);
-    Timer.run(() => ref.mounted ? unawaited(_markRead()) : null);
+    Timer.run(_booted);
     return ChatRoom(
       chat: row == null
           ? detail
@@ -105,6 +114,17 @@ class ChatRoomController extends _$ChatRoomController {
   }
 
   ChatRepository get _repo => ref.read(chatRepositoryProvider);
+  ChatRoom? get _current => state.value;
+
+  /// Açılış bitti: okumalar sürerken sinyal geldiyse uzlaştırma bir kez koşar (oluşturma ve
+  /// silme kaçmaz; okundu imleci uzlaştırmanın sonunda ilerler), gelmediyse okundu imleci ilerler.
+  void _booted() {
+    if (!ref.mounted) return;
+    _booting = false;
+    if (!_missed) return unawaited(_markRead());
+    _missed = false;
+    unawaited(_enqueue(_reconcile));
+  }
 
   void _update(ChatRoom Function(ChatRoom) f) {
     final v = state.value;
@@ -127,6 +147,14 @@ class ChatRoomController extends _$ChatRoomController {
   // --- Akış ---------------------------------------------------------------------------------
 
   void _onSignal(ChatSignal s) {
+    if (_booting) {
+      _missed |= switch (s) {
+        ChatStreamOpened() => true,
+        ChatEvent(:final chatId, :final kind) =>
+          chatId == id && kind != ChatEventKind.typing,
+      };
+      return;
+    }
     if (state.value == null) return;
     switch (s) {
       case ChatStreamOpened():
@@ -194,104 +222,6 @@ class ChatRoomController extends _$ChatRoomController {
     }
   }
 
-  /// Yeniden bağlanma protokolü adım 3 (§10.5): sohbet bilgisi, yeni mesajlar (`after`) ve
-  /// görünür pencerenin `before` ile baştan okunması (düzenleme ve silme uzlaşır).
-  Future<void> _reconcile() async {
-    final room = state.value;
-    if (room == null || room.gone) return;
-    final low = room.lowSeq;
-    final high = room.highSeq;
-    await _refreshInfo();
-    await _fetchNewer();
-    await reloadPins();
-    if (low == null || high == null) return;
-    var cursor = high + 1;
-    for (var i = 0; i < maxPages; i++) {
-      final page = await _repo.listMessages(
-        id,
-        before: cursor,
-        limit: pageSize,
-      );
-      final c = cursor;
-      _update(
-        (r) => r.copyWith(
-          messages: applyWindowPage(
-            r.messages,
-            page.messages,
-            cursor: c,
-            limit: pageSize,
-          ),
-          peerReadSeq: () => page.peerReadSeq,
-        ),
-      );
-      if (windowDone(page.messages, limit: pageSize, windowLow: low)) break;
-      cursor = page.messages.first.seq!;
-    }
-    await _markRead();
-  }
-
-  Future<void> _refreshInfo() async {
-    try {
-      final chat = await _repo.getChat(id);
-      _update(
-        (r) => r.copyWith(
-          chat: chat.copyWith(unread: r.chat.unread, mention: r.chat.mention),
-        ),
-      );
-    } on ApiError catch (e) {
-      // Sohbetten düştüm ya da sohbet silindi: sohbet kapanır (sonraki olaylar gelmez).
-      if (e.status == 404 || e.status == 403) {
-        _update((r) => r.copyWith(gone: true));
-      }
-    }
-  }
-
-  /// `after=<yerel üst seq>`, sayfa dolu döndükçe son dönen `seq` ile tekrar.
-  Future<void> _fetchNewer() async {
-    var cursor = state.value?.highSeq;
-    if (cursor == null) return _reloadLatest();
-    for (var i = 0; i < maxPages; i++) {
-      final ChatHistoryPage page;
-      try {
-        page = await _repo.listMessages(id, after: cursor, limit: pageSize);
-      } on ApiError catch (e) {
-        if (e.code == _invalidCursor) return _reloadLatest();
-        rethrow;
-      }
-      _merge(page);
-      if (page.messages.length < pageSize) return;
-      cursor = page.messages.last.seq;
-    }
-  }
-
-  /// Geçersiz imleç (422 `invalid_cursor`) ya da boş pencere: son sayfadan başlanır.
-  Future<void> _reloadLatest() async {
-    final page = await _repo.listMessages(id, limit: pageSize);
-    _update(
-      (r) => r.copyWith(
-        messages: mergeMessages([
-          for (final m in r.messages)
-            if (!m.onServer) m,
-        ], page.messages),
-        peerReadSeq: () => page.peerReadSeq,
-        hasOlder: page.messages.length >= pageSize,
-      ),
-    );
-  }
-
-  Future<void> _refreshAround(String messageId) async {
-    final seq = state.value?.message(messageId)?.seq;
-    if (seq == null) return;
-    _merge(await _repo.listMessages(id, around: seq, limit: 5));
-  }
-
-  void _merge(ChatHistoryPage page) => _update(
-    (r) => r.copyWith(
-      messages: mergeMessages(r.messages, page.messages),
-      peerReadSeq: () => page.peerReadSeq,
-    ),
-  );
-
   void _remove(String messageId) => _update(
     (r) => r.copyWith(
       messages: [
@@ -330,6 +260,8 @@ class ChatRoomController extends _$ChatRoomController {
     final last = room?.lastOnServer;
     if (room == null || room.gone || last == null) return;
     if (last.seq! <= _readSeq || !ref.read(chatForegroundProvider)) return;
+    // Ucuz sinyal kovası doluysa imleç ilerlemez; sonraki okuma ya da olay yeniden dener.
+    if (!ref.read(chatSignalBudgetProvider).take(DateTime.now())) return;
     final previous = _readSeq;
     _readSeq = last.seq!;
     try {
@@ -396,8 +328,9 @@ class ChatRoomController extends _$ChatRoomController {
     try {
       page = await _repo.listMessages(id, before: low, limit: pageSize);
     } on ApiError catch (e) {
-      if (e.code == _invalidCursor) return _reloadLatest();
-      rethrow;
+      if (e.code != _invalidCursor) rethrow;
+      await _reloadLatest();
+      return;
     }
     _update(
       (r) => r.copyWith(
@@ -537,9 +470,14 @@ class ChatRoomController extends _$ChatRoomController {
     }
   }
 
-  /// Kendi mesajımı düzenler (`expected_revision` = okunan sürüm). Bayat sürümde (409
-  /// `edit_conflict`) mesaj sunucudan yeniden okunur ve hata ekrana iletilir.
-  Future<void> edit(String messageId, String text) async {
+  /// Kendi mesajımı düzenler. [expectedRevision] taslak AÇILIRKEN okunan `edit_revision`'dır
+  /// (gönderim anındaki canlı sürüm değil): arada akışla gelen başka düzenleme 409
+  /// `edit_conflict` üretir, sessizce ezilmez. Çakışmada mesaj yeniden okunur ve hata iletilir.
+  Future<void> edit(
+    String messageId,
+    String text, {
+    required int expectedRevision,
+  }) async {
     final m = state.value?.message(messageId);
     if (m == null || !m.onServer) {
       throw ApiError('messaging.message_not_found');
@@ -549,7 +487,7 @@ class ChatRoomController extends _$ChatRoomController {
         id,
         messageId,
         text: text,
-        expectedRevision: m.revision,
+        expectedRevision: expectedRevision,
       );
       _update(
         (r) => r.copyWith(messages: mergeMessages(r.messages, [updated])),
@@ -570,7 +508,7 @@ class ChatRoomController extends _$ChatRoomController {
     _remove(messageId);
   }
 
-  /// "Yazıyor" sinyali: en az 3 sn aralıkla (ucuz sinyal kovası); hata yutulur.
+  /// "Yazıyor" sinyali: en az 3 sn aralıkla ve ucuz sinyal kovası izin verdikçe; hata yutulur.
   void typing() {
     final room = state.value;
     if (room == null || room.blocked || room.gone) return;
@@ -581,6 +519,7 @@ class ChatRoomController extends _$ChatRoomController {
       return;
     }
     _lastTyping = now;
+    if (!ref.read(chatSignalBudgetProvider).take(now)) return;
     unawaited(_typingSignal());
   }
 

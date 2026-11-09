@@ -11,13 +11,20 @@ void main() {
     c.listen(p, (_, _) {});
     final ctrl = c.read(p.notifier)..reply('m1');
     expect(c.read(p).reply, 'm1');
-    ctrl.edit('m2');
-    expect((c.read(p).reply, c.read(p).edit), (null, 'm2'));
+    ctrl.edit('m2', revision: 3);
+    expect(
+      (c.read(p).reply, c.read(p).edit, c.read(p).editRevision),
+      (null, 'm2', 3),
+      reason: 'taslağın tabanı açılıştaki sürüm',
+    );
     ctrl
       ..clearContext()
       ..nextPin()
       ..nextPin();
-    expect((c.read(p).edit, c.read(p).pin), (null, 2));
+    expect(
+      (c.read(p).edit, c.read(p).editRevision, c.read(p).pin),
+      (null, null, 2),
+    );
     ctrl
       ..reply('m3')
       ..open();

@@ -15,16 +15,19 @@ part 'chat_actions_controller.g.dart';
 /// Mesaj eylemleri (istemci akışları §10.10): tepki, oy, sabitleme, anket bitirme ve indirmeler.
 /// Tepki ve oy iyimser uygulanır; aynı mesajdaki ardışık dokunuşlar [settle] süresince
 /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
-/// istek gitmez (yazma kovası 60/dk). Hata önceki (sunucuda doğrulanmış) duruma geri alır ve
-/// dokunuşun Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
+/// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
+/// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
+/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
+/// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+/// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
 /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
 @riverpod
 class ChatActionsController extends _$ChatActionsController {
   /// Birleştirme penceresi (çift dokunuş tek istek).
   static const settle = Duration(milliseconds: 400);
 
-  final _reactions = HashMap<String, _Pending<ChatReaction?>>();
-  final _votes = HashMap<String, _Pending<Set<int>>>();
+  final _reactions = HashMap<String, _Flight<ChatReaction?>>();
+  final _votes = HashMap<String, _Flight<Set<int>>>();
   final _pinning = <String>{};
 
   @override
@@ -175,9 +178,10 @@ class ChatActionsController extends _$ChatActionsController {
   }
 
   /// [desired] durumu [settle] sonra gönderir; arada gelen dokunuş yalnız istenen durumu
-  /// değiştirir. [confirmed] ilk dokunuştaki sunucu durumudur (geri alma hedefi).
+  /// değiştirir. [confirmed] defter yokken (uçuş ya da bekleyen dokunuş yok) ekrandaki, yani
+  /// sunucuda doğrulanmış durumdur.
   Future<void> _queue<T>(
-    HashMap<String, _Pending<T>> book,
+    HashMap<String, _Flight<T>> book,
     String messageId, {
     required T confirmed,
     required T desired,
@@ -186,40 +190,96 @@ class ChatActionsController extends _$ChatActionsController {
     required void Function(T value) revert,
     void Function(ApiError e)? onError,
   }) {
-    final p = book.putIfAbsent(messageId, () => _Pending<T>(confirmed))
+    final f = book.putIfAbsent(messageId, () => _Flight<T>(confirmed))
       ..desired = desired;
-    p.timer?.cancel();
-    p.timer = Timer(settle, () async {
-      book.remove(messageId);
-      if (same(p.desired, p.confirmed)) return p.done.complete();
-      try {
-        await _write(() => send(p.desired));
-        p.done.complete();
-      } on ApiError catch (e) {
-        if (ref.mounted) {
-          revert(p.confirmed);
-          onError?.call(e);
+    final w = Completer<void>();
+    f.waiters.add(w);
+    if (!f.busy) {
+      f.timer?.cancel();
+      f.timer = Timer(settle, () async {
+        f.timer = null;
+        f.busy = true;
+        try {
+          await _fly(
+            f,
+            same: same,
+            send: send,
+            revert: revert,
+            onError: onError,
+          );
+        } finally {
+          f.busy = false;
+          if (identical(book[messageId], f) && f.waiters.isEmpty) {
+            book.remove(messageId);
+          }
         }
-        p.done.completeError(e);
+      });
+    }
+    return w.future;
+  }
+
+  /// Uçuş döngüsü: her turda istenen durum doğrulanmıştan farklıysa TEK istek gider; tur
+  /// sırasında gelen dokunuşlar sonraki turu bekler.
+  Future<void> _fly<T>(
+    _Flight<T> f, {
+    required bool Function(T a, T b) same,
+    required Future<void> Function(T value) send,
+    required void Function(T value) revert,
+    void Function(ApiError e)? onError,
+  }) async {
+    while (ref.mounted && f.waiters.isNotEmpty) {
+      final waiters = f.waiters;
+      f.waiters = [];
+      final sending = f.desired;
+      if (same(sending, f.confirmed)) {
+        for (final w in waiters) {
+          w.complete();
+        }
+        continue;
       }
-    });
-    return p.done.future;
+      try {
+        await _write(() => send(sending));
+        f.confirmed = sending;
+        for (final w in waiters) {
+          w.complete();
+        }
+      } on Object catch (e) {
+        // Yalnız bu isteğin katmanı geri alınır: uçuşta yeni durum istendiyse o kalır.
+        if (ref.mounted && same(f.desired, sending)) {
+          f.desired = f.confirmed;
+          revert(f.confirmed);
+        }
+        if (ref.mounted && e is ApiError) onError?.call(e);
+        for (final w in waiters) {
+          w.completeError(e);
+        }
+      }
+    }
   }
 
   static const _pollClosed = 'messaging.poll_closed';
 }
 
-/// Birleştirilen eylemin defter kaydı.
-final class _Pending<T> {
-  _Pending(this.confirmed);
+/// Mesaj başına tepki/oy defteri: doğrulanmış ve istenen durum, uçuş bayrağı, bekleyenler.
+final class _Flight<T> {
+  _Flight(this.confirmed) : desired = confirmed;
 
-  final T confirmed;
-  late T desired;
+  /// Sunucuda doğrulanmış durum (geri alma hedefi).
+  T confirmed;
+
+  /// Kullanıcının son istediği durum (ekrandaki).
+  T desired;
+  bool busy = false;
   Timer? timer;
-  final done = Completer<void>();
+
+  /// Sonraki istekte gidecek dokunuşların Future'ları.
+  var waiters = <Completer<void>>[];
 
   void cancel() {
     timer?.cancel();
-    if (!done.isCompleted) done.complete();
+    for (final w in waiters) {
+      if (!w.isCompleted) w.complete();
+    }
+    waiters = [];
   }
 }

@@ -62,3 +62,27 @@ class ChatForeground extends _$ChatForeground {
     if (state != value) state = value;
   }
 }
+
+/// Açık sohbetlerin paylaştığı ucuz sinyal kovası (yazıyor + okundu; [SignalBudget]).
+@Riverpod(keepAlive: true)
+SignalBudget chatSignalBudget(Ref ref) => SignalBudget();
+
+/// Akışın en erken yeniden açılış anı (429 `Retry-After`; yazma bütçesi hesap başınadır). Akış
+/// denetleyicisinin ömründen bağımsızdır: ön plana dönüş ve ekranın yeniden açılması da uyar.
+@Riverpod(keepAlive: true)
+class ChatStreamHold extends _$ChatStreamHold {
+  @override
+  ({String account, DateTime until})? build() => null;
+
+  void hold(String account, DateTime until) =>
+      state = (account: account, until: until);
+
+  /// [account] için kalan bekleme; yoksa null.
+  Duration? left(String? account, DateTime now) {
+    final h = state;
+    if (h == null || h.account != account || !h.until.isAfter(now)) {
+      return null;
+    }
+    return h.until.difference(now);
+  }
+}

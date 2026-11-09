@@ -1,6 +1,6 @@
 // ChatActionsController: tepki ve oy iyimser; çift dokunuş tek istek, geri dönen dokunuş istek
 // göndermez; hata geri alır; 409 poll_closed anketi kapatır; sabitleme şeridi yeniden okur;
-// indirmeler kayda gider.
+// indirmeler kayda gider; mesaj başına uçuşta tek yazma, geç hata yalnız kendi katmanını geri alır.
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -146,6 +146,8 @@ void main() {
     },
   );
 
+  group('uçuş', flights);
+
   test('indirmeler kayda akar', () async {
     final (c, repo, sink) = await _open();
     final path = await _acts(c).downloadAttachment(
@@ -157,4 +159,64 @@ void main() {
     expect(repo.calls, containsAll(['download a1', 'sharedFile ref1']));
     await Future<void>.delayed(_wait);
   });
+}
+
+Iterable<String> _reacts(FakeChatRepository repo) =>
+    repo.calls.where((x) => x.contains('react'));
+
+void flights() {
+  test('gecikmeli başarı: uçuşta tek istek, sonra son istenen durum', () async {
+    final (c, repo, _) = await _open();
+    final gate = repo.writeGate = Completer<void>();
+    final a = _acts(c).react('m1', ChatReaction.like);
+    await Future<void>.delayed(_wait);
+    final taps = [
+      for (final k in [
+        ChatReaction.heart,
+        ChatReaction.star,
+        ChatReaction.check,
+      ])
+        _acts(c).react('m1', k),
+    ];
+    await Future<void>.delayed(_wait);
+    expect(_reacts(repo), ['react m1 like'], reason: 'uçuş bitmeden istek yok');
+    expect(_m(c, 'm1').reactions.single.kind, ChatReaction.check);
+    repo.writeGate = null;
+    gate.complete();
+    await Future.wait([a, ...taps]);
+    expect(_reacts(repo), ['react m1 like', 'react m1 check']);
+    expect(repo.maxWriting, 1, reason: 'sunucuya en çok bir uçuşta istek');
+    expect(_m(c, 'm1').reactions.single.kind, ChatReaction.check);
+  });
+
+  test('gecikmeli hata: kendi katmanı geri alınır', () async {
+    final (c, repo, _) = await _open();
+    final gate = repo.writeGate = Completer<void>();
+    repo.writeError = ApiError('platform.unavailable', status: 503);
+    final a = _acts(c).vote('m2', 0);
+    await Future<void>.delayed(_wait);
+    expect(_m(c, 'm2').poll!.mine(me), {0}, reason: 'iyimser');
+    gate.complete();
+    await expectLater(a, throwsA(isA<ApiError>()));
+    expect(_m(c, 'm2').poll!.mine(me), isEmpty);
+  });
+
+  test(
+    'ters tamamlanma: ilk isteğin geç hatası sonraki seçimi geri almaz',
+    () async {
+      final (c, repo, _) = await _open();
+      final gate = repo.writeGate = Completer<void>();
+      repo.writeError = ApiError('platform.unavailable', status: 503);
+      final a = _acts(c).react('m1', ChatReaction.like);
+      await Future<void>.delayed(_wait);
+      final b = _acts(c).react('m1', ChatReaction.heart);
+      repo.writeGate = null;
+      gate.complete();
+      await expectLater(a, throwsA(isA<ApiError>()));
+      await b;
+      expect(_reacts(repo), ['react m1 like', 'react m1 heart']);
+      expect(repo.maxWriting, 1);
+      expect(_m(c, 'm1').reactions.single.kind, ChatReaction.heart);
+    },
+  );
 }

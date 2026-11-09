@@ -189,6 +189,79 @@ class CoordBackend extends PilotBackend {
               if (dept == null || w['department_id'] == dept) w,
           ],
         });
+      case 'GET /v1/work-items/gantt/admin':
+      case 'GET /v1/work-items/gantt':
+      case 'GET /v1/work-items/gantt/mine':
+        if (program != coordProgram) return _scopeMissing();
+        return jsonResponse(200, {
+          'tasks': [
+            for (final w in workItems)
+              if (admin ||
+                  w['department_id'] == r.header('X-Nizamio-Department'))
+                {
+                  ...w,
+                  'planned_end_on': '',
+                  'completed_on': w['completed_on'] ?? '',
+                  'lateness': {
+                    for (final field in [
+                      'is_overdue',
+                      'days_overdue',
+                      'is_completed_late',
+                      'days_late',
+                      'is_completed_early',
+                      'days_early',
+                    ])
+                      field: w[field],
+                  },
+                },
+          ],
+          'links': <Object>[],
+        });
+      case 'GET /v1/reports/dashboard/coordinatorships':
+        if (!admin) return errorBody(403, 'reporting.not_authorized');
+        return jsonResponse(200, {
+          'coordinatorships': [
+            for (final d in departments)
+              {
+                'department_id': d['department_id'],
+                'name': d['display_name'],
+                'kind': 'koordinatorluk',
+                'coordinators': [
+                  for (final m
+                      in rosters[d['department_id']] ??
+                          const <Map<String, Object?>>[])
+                    if (m['role'] == 'koordinator' && m['status'] == 'active')
+                      {
+                        'account_id': m['account_id'],
+                        'full_name': m['full_name'],
+                      },
+                ],
+                'total_tasks': workItems
+                    .where((w) => w['department_id'] == d['department_id'])
+                    .length,
+                'completed_tasks': workItems
+                    .where(
+                      (w) =>
+                          w['department_id'] == d['department_id'] &&
+                          w['status'] == 'tamamlandi',
+                    )
+                    .length,
+                'overdue_tasks': workItems
+                    .where(
+                      (w) =>
+                          w['department_id'] == d['department_id'] &&
+                          w['is_overdue'] == true,
+                    )
+                    .length,
+                'in_progress_tasks': 0,
+                'not_started_tasks': 0,
+                'completion_rate': 0.0,
+                'member_count': 0,
+                'meeting_count': 0,
+                'last_activity_at': null,
+              },
+          ],
+        });
       case 'GET /v1/meetings':
         if (program != coordProgram) return _scopeMissing();
         return jsonResponse(200, {'items': meetings, 'next_cursor': ''});
@@ -237,6 +310,45 @@ class CoordBackend extends PilotBackend {
               for (final f in rows) f['uploaded_by_account_id'],
           }.toList(),
         });
+    }
+    final work = RegExp(r'^/v1/work-items/([^/]+)$').firstMatch(r.path);
+    if (work != null && (r.method == 'GET' || r.method == 'PATCH')) {
+      final item = workItems.firstWhere(
+        (w) => w['work_item_id'] == work.group(1),
+      );
+      if (r.method == 'PATCH') {
+        final body = r.body! as Map<String, Object?>;
+        if (body['expected_dates_revision'] != item['dates_revision']) {
+          return errorBody(409, 'work.edit_conflict');
+        }
+        for (final field in ['start_on', 'end_on']) {
+          if (body.containsKey(field)) item[field] = body[field];
+        }
+        item['dates_revision'] = (item['dates_revision']! as int) + 1;
+        writes.add((key, r.body));
+      }
+      return jsonResponse(200, {...item, 'description': ''});
+    }
+    if (key == 'POST /v1/date-change-requests') {
+      writes.add((key, r.body));
+      final body = r.body! as Map<String, Object?>;
+      final item = workItems.firstWhere(
+        (w) => w['work_item_id'] == body['work_item_id'],
+      );
+      item['pending_date_request'] = {
+        'request_id': 'request',
+        'new_start_on': body['new_start_on'],
+        'new_end_on': body['new_end_on'],
+      };
+      return jsonResponse(201, {
+        'request_id': 'request',
+        'work_item_id': body['work_item_id'],
+        'status': 'pending',
+        'old_start_on': item['start_on'],
+        'old_end_on': item['end_on'],
+        'new_start_on': body['new_start_on'],
+        'new_end_on': body['new_end_on'],
+      });
     }
     if (r.method != 'GET') {
       if (_write(r, key, program) case final res?) return res;

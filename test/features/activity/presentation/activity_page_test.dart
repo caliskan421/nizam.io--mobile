@@ -13,6 +13,7 @@ import 'package:nizamio/features/activity/presentation/activity_page.dart';
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
 import '../../pilot_support.dart';
+import '../activity_test_source.dart';
 
 final _l = AppLocalizationsTr();
 
@@ -33,6 +34,7 @@ Future<(Harness, RecordingAppNav)> _open(
     () => pilotHarness(PilotBackend(), signedIn: true),
   );
   h.read(scopeControllerProvider).selectProgram('prog-1');
+  await real(tester, () => useActivityFixture(h));
   final nav = RecordingAppNav();
   await pumpScreen(tester, h, const ActivityPage(), nav: nav, dark: dark);
   await settle(tester);
@@ -135,6 +137,7 @@ void main() {
       () => pilotHarness(PilotBackend(), signedIn: true),
     );
     h.read(scopeControllerProvider).selectProgram('prog-1');
+    await real(tester, () => useActivityFixture(h));
     await pumpScreen(tester, h, const ActivityPage());
     await settle(tester);
     await _tap(tester, _rail(_l.uiActivityTypeFile));

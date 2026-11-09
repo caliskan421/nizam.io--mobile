@@ -14,13 +14,16 @@ import '../../core/session/session_controller.dart';
 import '../../core/storage/preference_store.dart';
 import '../../core/storage/secure_store.dart';
 import '../../features/activity/activity_module.dart';
+import '../../features/administration/administration_module.dart';
 import '../../features/archive/archive_module.dart';
+import '../../features/assistant/assistant_module.dart';
 import '../../features/coordinatorships/coordinatorships_module.dart';
 import '../../features/identity/identity.dart' show LoginPrefill;
 import '../../features/identity/identity_module.dart';
 import '../../features/meetings/meetings_module.dart';
 import '../../features/messages/messages_module.dart';
 import '../../features/notifications/notifications_module.dart';
+import '../../features/reports/reports_module.dart';
 import '../../features/scope/scope_module.dart';
 import '../../features/tasks/tasks_module.dart';
 import '../../features/timeline/timeline_module.dart';
@@ -64,6 +67,18 @@ class Composition {
     );
     registerScopeModule(locator, apiDio: () => container.read(apiDioProvider));
     registerActivityModule(locator);
+    registerReportsModule(
+      locator,
+      apiDio: () => container.read(apiDioProvider),
+    );
+    registerAssistantModule(
+      locator,
+      apiDio: () => container.read(apiDioProvider),
+    );
+    registerAdministrationModule(
+      locator,
+      apiDio: () => container.read(apiDioProvider),
+    );
     registerArchiveModule(
       locator,
       apiDio: () => container.read(apiDioProvider),
@@ -112,13 +127,25 @@ class Composition {
         ...identityOverrides(locator, loginPrefill: loginPrefill),
         ...scopeOverrides(locator),
         ...activityOverrides(locator),
+        ...reportsOverrides(locator),
+        ...assistantOverrides(locator),
+        ...administrationOverrides(locator),
         ...archiveOverrides(locator),
-        ...coordinatorshipsOverrides(locator),
+        ...coordinatorshipsOverrides(
+          locator,
+          apiDio: () => container.read(apiDioProvider),
+        ),
         ...meetingsOverrides(locator),
         ...messagesOverrides(locator),
         ...notificationsOverrides(locator),
-        ...tasksOverrides(locator),
-        ...timelineOverrides(locator),
+        ...tasksOverrides(
+          locator,
+          apiDio: () => container.read(apiDioProvider),
+        ),
+        ...timelineOverrides(
+          locator,
+          apiDio: () => container.read(apiDioProvider),
+        ),
       ],
     );
     return Composition._(locator, container);

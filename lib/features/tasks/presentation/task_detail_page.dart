@@ -26,6 +26,7 @@ import '../domain/task_catalog.dart';
 import 'detail/detail_actions.dart';
 import 'detail/detail_subtasks.dart';
 import 'detail/detail_tabs.dart';
+import 'detail/task_dependencies.dart';
 import 'task_texts.dart';
 
 /// Görev ayrıntısı (prototip `detail`): üst çubukta kod + düzenle/diğer işlemler;
@@ -150,6 +151,7 @@ class TaskDetailPage extends ConsumerWidget {
             const Gap(NizamioSpacing.space3),
           ],
           _Body(task: task, catalog: data, actions: actions),
+          TaskDependencies(code: code),
         ] else
           NzAsyncView<TaskCatalog>(
             value: catalog,

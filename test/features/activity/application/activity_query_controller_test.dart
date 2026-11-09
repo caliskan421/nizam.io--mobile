@@ -10,9 +10,11 @@ import 'package:nizamio/features/activity/domain/activity_query.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../pilot_support.dart';
+import '../activity_test_source.dart';
 
 Future<(ProviderContainer, ActivityQueryController)> _open() async {
   final h = await pilotHarness(PilotBackend(), signedIn: true);
+  await useActivityFixture(h);
   h.read(scopeControllerProvider).selectProgram('prog-1');
   final c = h.container;
   c.listen(activityViewProvider, (_, _) {});

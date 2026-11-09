@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
@@ -13,6 +14,7 @@ import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
@@ -165,21 +167,39 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     start ? _ctrl.setDraftStart(picked) : _ctrl.setDraftEnd(picked);
   }
 
-  void _request() {
+  Future<void> _request() async {
     final l = context.l10n;
-    switch (_ctrl.requestDates()) {
-      case TimelineRequestPending():
-        _say(l.uiTimelineRequestPending);
-      case TimelineRequestNoChange():
-        _say(l.uiTimelineRequestNoChange);
-      case TimelineRequestSent(:final end):
-        _say(l.requestSentText(end));
+    try {
+      final result = await _ctrl.requestDates();
+      if (!mounted) return;
+      switch (result) {
+        case TimelineRequestPending():
+          _say(l.uiTimelineRequestPending);
+        case TimelineRequestNoChange():
+          _say(l.uiTimelineRequestNoChange);
+        case TimelineRequestSent(:final end):
+          _say(l.requestSentText(end));
+      }
+    } on Object catch (e) {
+      if (mounted) NzToast.error(context, toApiError(e));
     }
   }
 
-  void _undo() {
-    final code = _ctrl.undo();
-    if (code != null) _say('$code ${context.l10n.uiTimelineUndoneTail}');
+  Future<void> _undo() async {
+    try {
+      final code = await _ctrl.undo();
+      if (code != null && mounted) _say(context.l10n.uiTimelineUndoneTail);
+    } on Object catch (e) {
+      if (mounted) NzToast.error(context, toApiError(e));
+    }
+  }
+
+  Future<void> _save() async {
+    try {
+      await _ctrl.save();
+    } on Object catch (e) {
+      if (mounted) NzToast.error(context, toApiError(e));
+    }
   }
 
   @override
@@ -444,7 +464,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                 onPickStart: () => _pick(v, start: true),
                 onPickEnd: () => _pick(v, start: false),
                 onShift: ctrl.shiftDraft,
-                onSave: ctrl.save,
+                onSave: _save,
                 onRequest: _request,
                 onRemind: () => _say(
                   '${l.uiTimelineReminded} · ${sel.assignees.join(', ')}',

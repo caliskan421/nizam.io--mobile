@@ -23,7 +23,9 @@ import 'package:nizamio/features/tasks/application/task_details_controller.dart'
 import 'package:nizamio/features/tasks/application/task_list_filter.dart';
 import 'package:nizamio/features/tasks/domain/task_details.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
+import 'package:nizamio/features/timeline/application/gantt_provider.dart';
 import 'package:nizamio/features/timeline/application/timeline_controller.dart';
+import 'package:nizamio/features/timeline/domain/gantt_schedule.dart';
 
 TaskItem _task(String id, String dept) => TaskItem(
   code: id,
@@ -84,6 +86,25 @@ class _Catalog implements TaskCatalogRepository {
       ],
     );
   }
+}
+
+/// Bu izole testin Gantt kaynağı da görünür görevleri sunucudan okumuş gibi döndürür.
+class _Gantt implements GanttRepository {
+  _Gantt(this.department);
+  final String department;
+  Future<GanttSchedule> _load() async => GanttSchedule(
+    tasks: [
+      for (final (id, dept) in [('w1', 'd1'), ('w2', 'd2'), ('w3', 'd3')])
+        if (department.isEmpty || department == dept) _task(id, dept),
+    ],
+    links: const [],
+  );
+  @override
+  Future<GanttSchedule> admin({bool overdueOnly = false}) => _load();
+  @override
+  Future<GanttSchedule> coordinator() => _load();
+  @override
+  Future<GanttSchedule> member() => _load();
 }
 
 /// Süzgeçli okuma: her çağrı bir Completer açar (testi sırayı kendisi tamamlar).
@@ -152,6 +173,9 @@ void main() {
     final c = ProviderContainer(
       retry: (_, _) => null,
       overrides: [
+        ganttRepositoryProvider.overrideWith(
+          (ref, scope) => _Gantt(scope.department),
+        ),
         scopeControllerProvider.overrideWithValue(scope),
         // Yeni görev taslağı oturum neslini izler (S12).
         sessionControllerProvider.overrideWithValue(
@@ -197,6 +221,7 @@ void main() {
         ..listen(timelineViewProvider(null), (_, _) {});
       final shared = await c.read(taskCatalogControllerProvider.future);
       final homeBefore = await c.read(homeDashboardControllerProvider.future);
+      await c.read(ganttScheduleProvider.future);
       final timelineBefore = c.read(timelineViewProvider(null)).value!;
       expect(homeBefore.tasks.total, 3);
       expect(homeBefore.greetingRole, TeamRole.coordinator);
@@ -223,6 +248,7 @@ void main() {
             'süzgeç paylaşılan kataloğu süzmez (aynı satırlar upsert edilir)',
       );
       final homeAfter = await c.read(homeDashboardControllerProvider.future);
+      await c.read(ganttScheduleProvider.future);
       expect(homeAfter.tasks.total, 3);
       expect(homeAfter.greetingRole, TeamRole.coordinator);
       expect(homeAfter.coordinatorships.single.code, 'd2');

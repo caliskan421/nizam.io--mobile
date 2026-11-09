@@ -62,11 +62,11 @@ Map<String, Object?> _ganttTask(Map<String, Object?> w) => {
     'status',
     'start_on',
     'end_on',
-    'completed_on',
     'assignee_account_ids',
   ])
     k: w[k],
   'planned_end_on': w['end_on'],
+  'completed_on': w['completed_on'] ?? '',
   'lateness': {
     for (final k in const [
       'is_overdue',

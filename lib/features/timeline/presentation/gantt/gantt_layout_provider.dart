@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers.dart';
-import '../../../tasks/tasks.dart';
+import '../../application/gantt_provider.dart';
 import '../../application/horizontal_timeline_controller.dart';
 import '../../application/horizontal_timeline_view.dart';
 import 'gantt_geometry.dart';
@@ -20,9 +20,16 @@ import 'gantt_geometry.dart';
 final ganttLayoutProvider = Provider.autoDispose<GanttLayout?>((ref) {
   if (!ref.watch(scopeStateProvider).hasProgram) return null;
   final catalog = ref.watch(
-    taskCatalogControllerProvider.select((c) => c.isReloading ? null : c.value),
+    timelineCatalogProvider.select((c) => c.isReloading ? null : c.value),
   );
   if (catalog == null) return null;
   final state = ref.watch(horizontalTimelineControllerProvider);
-  return GanttLayout.of(horizontalTimelineView(catalog, state));
+  return GanttLayout.of(
+    horizontalTimelineView(
+      catalog,
+      state,
+      dependent:
+          ref.watch(ganttScheduleProvider).value?.dependentIds ?? const {},
+    ),
+  );
 });

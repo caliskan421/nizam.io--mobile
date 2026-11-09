@@ -11,6 +11,7 @@ import '../../../core/ui/widgets/feedback/nz_skeleton.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../../tasks/tasks.dart';
+import '../application/gantt_provider.dart';
 import '../application/horizontal_timeline_controller.dart';
 import '../domain/horizontal_timeline.dart';
 import 'gantt/gantt_chart.dart';
@@ -148,7 +149,7 @@ class _HorizontalTimelinePageState
 
   @override
   Widget build(BuildContext context) {
-    final catalog = ref.watch(taskCatalogControllerProvider);
+    final catalog = ref.watch(timelineCatalogProvider);
     // Yerleşim önbellekten: katalog ya da ekran durumu değişmedikçe aynı örnek (kaydırma ve
     // yeniden kurulum hesaplatmaz). Kapsam değişiminde yeni katalog gelene kadar null.
     final layout = ref.watch(ganttLayoutProvider);

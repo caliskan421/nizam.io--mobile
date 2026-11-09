@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 import 'package:nizamio/core/ui/page/nz_app_nav.dart';
 
 class RecordingAppNav implements NzAppNav {
+  @override
+  void openDeletedTasks() => calls.add('deletedTasks');
   final calls = <String>[];
 
   @override

@@ -46,6 +46,11 @@ class CoordinatorshipsPage extends ConsumerWidget {
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       topBar: const RootTopBar(),
       children: [
+        if (ref.watch(serverCoordinatorshipStatsProvider).value?.truncated ==
+            true)
+          const Text(
+            'Koordinatörlük raporu kesildi; ilk kayıtlar gösteriliyor.',
+          ),
         NzAsyncView<List<CoordinatorshipStats>>(
           value: list,
           onRetry: () => ref.invalidate(taskCatalogControllerProvider),

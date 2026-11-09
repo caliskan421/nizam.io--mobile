@@ -62,3 +62,15 @@ final class ActivityLog {
 abstract interface class ActivityLogRepository {
   Future<ActivityLog> load();
 }
+
+/// Pinli sözleşmede işlem geçmişini okuyan bir uç yoktur.
+final class ActivityUnavailable implements Exception {
+  const ActivityUnavailable();
+}
+
+final class UnavailableActivityLogRepository implements ActivityLogRepository {
+  const UnavailableActivityLogRepository();
+
+  @override
+  Future<ActivityLog> load() async => throw const ActivityUnavailable();
+}

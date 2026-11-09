@@ -5,12 +5,15 @@ import '../../core/ui/extensions/context_ext.dart';
 import '../../core/ui/page/nz_app_nav.dart';
 import '../../core/ui/widgets/feedback/nz_pick_record.dart';
 import '../../features/activity/activity.dart';
+import '../../features/administration/administration.dart';
 import '../../features/archive/archive.dart';
+import '../../features/assistant/assistant.dart';
 import '../../features/calendar/calendar.dart';
 import '../../features/coordinatorships/coordinatorships.dart';
 import '../../features/identity/identity.dart';
 import '../../features/meetings/meetings.dart';
 import '../../features/messages/messages.dart';
+import '../../features/reports/reports.dart';
 import '../../features/scope/scope.dart';
 import '../../features/server/server.dart';
 import '../../features/tasks/tasks.dart';
@@ -20,6 +23,38 @@ import 'split.dart';
 import 'transitions.dart';
 
 part 'routes.g.dart';
+
+@TypedGoRoute<DeletedTasksRoute>(path: '/deleted-tasks')
+class DeletedTasksRoute extends NzRouteData with $DeletedTasksRoute {
+  const DeletedTasksRoute();
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const DeletedTasksPage();
+}
+
+@TypedGoRoute<AdministrationRoute>(path: '/administration')
+class AdministrationRoute extends NzRouteData with $AdministrationRoute {
+  const AdministrationRoute();
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const AdministrationPage();
+}
+
+@TypedGoRoute<ReportsRoute>(path: '/reports')
+class ReportsRoute extends NzRouteData with $ReportsRoute {
+  const ReportsRoute();
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const ReportsPage();
+}
+
+@TypedGoRoute<AssistantRoute>(path: '/assistant')
+class AssistantRoute extends NzRouteData with $AssistantRoute {
+  const AssistantRoute();
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const AssistantPage();
+}
 
 // Tipli rotalar (go_router_builder, A5). Kurallar:
 //  - Rota NESNE değil KİMLİK taşır: yol/sorgu parametresi; `extra` ile nesne taşıma ve dize yolla

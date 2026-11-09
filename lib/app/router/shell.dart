@@ -479,6 +479,8 @@ void closeTimeline(BuildContext context) {
 /// modül niyetleri, zaman çizelgesi, profil ve menü uygulama gerçeklemesine gider.
 class _SplitAppNav implements NzAppNav {
   _SplitAppNav(this._base, this._pane, this._module);
+  @override
+  void openDeletedTasks() => _base.openDeletedTasks();
 
   final NzAppNav _base;
   final ValueChanged<PaneEntry> _pane;

@@ -60,6 +60,7 @@ enum HomeModule {
   simulation,
   deleted,
   help,
+  assistant,
 }
 
 /// Sağdan açılan uygulama çekmecesi: hesap, kapsam (program) değiştirme, tüm modüller, çıkış.
@@ -252,6 +253,7 @@ Future<void> showHomeDrawer(
             label: l.uiHomeGroupContent,
             rows: [
               row(HomeModule.memory, NzIcons.idea, l.uiHomeModuleMemory),
+              row(HomeModule.assistant, NzIcons.idea, 'Asistan'),
               row(HomeModule.archive, NzIcons.folder, l.uiHomeModuleArchive),
               row(HomeModule.meetings, NzIcons.video, l.uiHomeModuleMeetings),
               row(
@@ -267,13 +269,15 @@ Future<void> showHomeDrawer(
           NzMenuGroup(
             label: l.uiHomeGroupAdmin,
             rows: [
-              row(HomeModule.users, NzIcons.group, l.uiHomeModuleUsers),
+              if (greetingRole == TeamRole.admin)
+                row(HomeModule.users, NzIcons.group, 'Yönetim'),
               row(
                 HomeModule.coordinatorships,
                 NzIcons.coordinatorships,
                 l.uiHomeCoordinatorships,
               ),
-              row(HomeModule.season, NzIcons.flag, l.uiHomeModuleSeason),
+              if (greetingRole == TeamRole.admin)
+                row(HomeModule.season, NzIcons.flag, 'Raporlar'),
             ],
           ),
           const Gap(NizamioSpacing.space4),
@@ -291,7 +295,8 @@ Future<void> showHomeDrawer(
           const Gap(NizamioSpacing.gapLg),
           NzMenuGroup(
             rows: [
-              row(HomeModule.deleted, NzIcons.delete, l.uiHomeDeletedRecords),
+              if (greetingRole == TeamRole.admin)
+                row(HomeModule.deleted, NzIcons.delete, l.uiHomeDeletedRecords),
               row(HomeModule.help, NzIcons.help, l.uiHomeHelp),
               NzMenuRow(
                 icon: NzIcons.logout,

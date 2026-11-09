@@ -10,6 +10,8 @@ import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/core/ui/theme/app_theme.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
+import 'package:nizamio/features/timeline/application/gantt_provider.dart';
+import 'package:nizamio/features/timeline/domain/gantt_schedule.dart';
 import 'package:nizamio/features/timeline/presentation/gantt/gantt_controls.dart';
 import 'package:nizamio/features/timeline/presentation/horizontal_timeline_page.dart';
 
@@ -55,6 +57,12 @@ void main() {
     addTearDown(t.view.reset);
     final c = ProviderContainer(
       overrides: [
+        timelineCatalogProvider.overrideWith(
+          (ref) => ref.watch(taskCatalogControllerProvider),
+        ),
+        ganttScheduleProvider.overrideWith(
+          (ref) async => GanttSchedule(tasks: const [], links: const []),
+        ),
         scopeStateProvider.overrideWithValue(
           const ScopeSelection(programId: 'p1'),
         ),

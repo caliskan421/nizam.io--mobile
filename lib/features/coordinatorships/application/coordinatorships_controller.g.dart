@@ -128,4 +128,4 @@ final class CoordinatorshipListProvider
 }
 
 String _$coordinatorshipListHash() =>
-    r'14f48aab01cc2bedf1f193b249d40f81194a3c2a';
+    r'd91623730eca38885fce2e9e83798bd67265a286';

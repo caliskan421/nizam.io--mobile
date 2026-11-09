@@ -36,9 +36,12 @@ Future<Harness> _harness(CoordBackend backend) async {
   return h;
 }
 
-List<String> _names(Harness h) => [
-  for (final c in h.read(coordinatorshipListProvider).requireValue) c.name,
-];
+Future<List<String>> _names(Harness h) async {
+  await h.read(serverCoordinatorshipStatsProvider.future);
+  return [
+    for (final c in h.read(coordinatorshipListProvider).requireValue) c.name,
+  ];
+}
 
 List<String> _writes(CoordBackend b) => [for (final (k, _) in b.writes) k];
 
@@ -71,7 +74,7 @@ void main() {
       ],
     ]);
     expect(h.read(coordinatorshipFormControllerProvider).pending, isNull);
-    expect(_names(h), contains('Saha'));
+    expect(await _names(h), contains('Saha'));
     expect(backend.unhandled, isEmpty);
   });
 
@@ -87,7 +90,7 @@ void main() {
     var f = h.read(coordinatorshipFormControllerProvider);
     expect(f.error?.code, 'platform.internal');
     expect(f.pending?.id, 'dep-new-3');
-    expect(_names(h), isNot(contains('Saha')));
+    expect(await _names(h), isNot(contains('Saha')));
 
     // Form yeniden açılır: hata silinir, bekleyen departman kalır.
     ctl.clearError();
@@ -115,7 +118,7 @@ void main() {
       'display_name': 'Saha ekibi',
     });
     expect(h.read(coordinatorshipFormControllerProvider).pending, isNull);
-    expect(_names(h), contains('Saha ekibi'));
+    expect(await _names(h), contains('Saha ekibi'));
   });
 
   test('bağlama hatası → çıkış, başka hesapla giriş → form boş; tekrar eski departmanı kullanmaz', () async {
@@ -299,8 +302,8 @@ void main() {
         {'display_name': 'Saha ekibi'},
       ],
     ]);
-    expect(_names(h), contains('Saha ekibi'));
-    expect(_names(h), isNot(contains('Saha')));
+    expect(await _names(h), contains('Saha ekibi'));
+    expect(await _names(h), isNot(contains('Saha')));
   });
 
   test('oluşturma hatası: bekleyen yok, hata durumda', () async {
@@ -357,7 +360,7 @@ void main() {
           {'display_name': 'Altyapı'},
         ],
       ]);
-      expect(_names(h), contains('Altyapı'));
+      expect(await _names(h), contains('Altyapı'));
 
       // Tür ve açıklama (boş → silinir): yalnız değişen alanlarla departman kaydı.
       backend.writes.clear();

@@ -7,6 +7,10 @@ part of 'routes.dart';
 // **************************************************************************
 
 List<RouteBase> get $appRoutes => [
+  $deletedTasksRoute,
+  $administrationRoute,
+  $reportsRoute,
+  $assistantRoute,
   $serverRoute,
   $updateRequiredRoute,
   $loginRoute,
@@ -17,6 +21,113 @@ List<RouteBase> get $appRoutes => [
   $chatRoute,
   $profileRoute,
 ];
+
+RouteBase get $deletedTasksRoute => GoRouteData.$route(
+  path: '/deleted-tasks',
+  hasOverriddenOnExit: false,
+  factory: $DeletedTasksRoute._fromState,
+);
+
+mixin $DeletedTasksRoute on GoRouteData {
+  static DeletedTasksRoute _fromState(GoRouterState state) =>
+      const DeletedTasksRoute();
+
+  @override
+  String get location => GoRouteData.$location('/deleted-tasks');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $administrationRoute => GoRouteData.$route(
+  path: '/administration',
+  hasOverriddenOnExit: false,
+  factory: $AdministrationRoute._fromState,
+);
+
+mixin $AdministrationRoute on GoRouteData {
+  static AdministrationRoute _fromState(GoRouterState state) =>
+      const AdministrationRoute();
+
+  @override
+  String get location => GoRouteData.$location('/administration');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $reportsRoute => GoRouteData.$route(
+  path: '/reports',
+  hasOverriddenOnExit: false,
+  factory: $ReportsRoute._fromState,
+);
+
+mixin $ReportsRoute on GoRouteData {
+  static ReportsRoute _fromState(GoRouterState state) => const ReportsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/reports');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $assistantRoute => GoRouteData.$route(
+  path: '/assistant',
+  hasOverriddenOnExit: false,
+  factory: $AssistantRoute._fromState,
+);
+
+mixin $AssistantRoute on GoRouteData {
+  static AssistantRoute _fromState(GoRouterState state) =>
+      const AssistantRoute();
+
+  @override
+  String get location => GoRouteData.$location('/assistant');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
 
 RouteBase get $serverRoute => GoRouteData.$route(
   path: '/server',

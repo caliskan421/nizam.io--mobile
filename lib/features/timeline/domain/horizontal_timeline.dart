@@ -328,9 +328,13 @@ HashMap<String, int> taskNumbers(List<TaskItem> tasks) {
 }
 
 /// Prototip `S_hgantt.renderVals` mantığı: süzgeç, gruplama (başlangıca göre kararlı sıra),
-/// kapalı gruplar, sayılar, çipler ve seçili kart. Katalog görevlerinin hepsi kullanılır (ikinci
-/// veri kaynağı yok).
-GanttView buildGanttView(TaskCatalog catalog, GanttState s) {
+/// kapalı gruplar, sayılar, çipler ve seçili kart. Girdi, Gantt görünür görev kümesi ve
+/// katalog metaverisinin birleşimidir; bağımlılıklar Gantt bağlantılarından gelir.
+GanttView buildGanttView(
+  TaskCatalog catalog,
+  GanttState s, {
+  Set<String> dependent = const {},
+}) {
   final year = catalog.today.year;
   final today = seasonDay(catalog.today, year);
   final days = DateTime.utc(year + 1).difference(DateTime.utc(year)).inDays;
@@ -351,7 +355,7 @@ GanttView buildGanttView(TaskCatalog catalog, GanttState s) {
           request: null,
           packStart: 0,
           packEnd: 0,
-          dependent: false,
+          dependent: dependent.contains(item.code),
         ),
       ),
   ];

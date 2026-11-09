@@ -39,7 +39,7 @@ TimelineView buildTimelineView(
       () {
         final cur = currentRange(item, s, year);
         final draft = s.selected == item.code ? s.draft : null;
-        final req = s.requests[item.code];
+        final req = item.hasPendingRequest ? item.dateRequest?.due : null;
         final base = TimelineTask(
           item: item,
           range: cur,

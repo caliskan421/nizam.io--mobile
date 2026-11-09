@@ -8,7 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
+import 'package:nizamio/features/timeline/application/gantt_provider.dart';
 import 'package:nizamio/features/timeline/application/horizontal_timeline_controller.dart';
+import 'package:nizamio/features/timeline/domain/gantt_schedule.dart';
 import 'package:nizamio/features/timeline/domain/horizontal_timeline.dart';
 import 'package:nizamio/features/timeline/presentation/gantt/gantt_geometry.dart';
 import 'package:nizamio/features/timeline/presentation/gantt/gantt_layout_provider.dart';
@@ -66,6 +68,12 @@ void main() {
     scope = ScopeController()..selectProgram('p1');
     c = ProviderContainer(
       overrides: [
+        timelineCatalogProvider.overrideWith(
+          (ref) => ref.watch(taskCatalogControllerProvider),
+        ),
+        ganttScheduleProvider.overrideWith(
+          (ref) async => GanttSchedule(tasks: const [], links: const []),
+        ),
         scopeControllerProvider.overrideWithValue(scope),
         taskCatalogControllerProvider.overrideWith(
           () => _Catalog(() => next()),

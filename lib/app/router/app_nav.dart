@@ -53,6 +53,8 @@ class GoRouterAppNav implements NzAppNav {
 
   @override
   void openTask(String code) => _record(PaneEntry(PaneKind.task, code));
+  @override
+  void openDeletedTasks() => _router.push(const DeletedTasksRoute().location);
 
   @override
   void openCalendar() => _router.go(const CalendarRoute().location);
@@ -144,6 +146,14 @@ class GoRouterAppNav implements NzAppNav {
             openCalendar();
           case HomeModule.meetings:
             openMeetings();
+          case HomeModule.season:
+            _router.push(const ReportsRoute().location);
+          case HomeModule.users:
+            _router.push(const AdministrationRoute().location);
+          case HomeModule.deleted:
+            _router.push(const DeletedTasksRoute().location);
+          case HomeModule.assistant:
+            _router.push(const AssistantRoute().location);
           default:
             NzToast.show(
               context,
@@ -171,6 +181,7 @@ class GoRouterAppNav implements NzAppNav {
       HomeModule.simulation => l.uiHomeModuleSimulation,
       HomeModule.deleted => l.uiHomeDeletedRecords,
       HomeModule.help => l.uiHomeHelp,
+      HomeModule.assistant => 'Asistan',
     };
   }
 }

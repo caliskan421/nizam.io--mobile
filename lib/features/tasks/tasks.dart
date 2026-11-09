@@ -27,7 +27,10 @@ export 'domain/meeting_invitees.dart' show MeetingInvitees;
 export 'domain/meeting_planner.dart';
 export 'domain/task_access.dart';
 export 'domain/task_catalog.dart';
-export 'domain/task_writes.dart' show UploadOrigin, UploadSource;
+export 'domain/task_permissions.dart' show TaskPermissions;
+export 'domain/task_writes.dart'
+    show UploadOrigin, UploadSource, WorkItemPatch, TaskWriteRepository;
+export 'presentation/deleted_tasks_page.dart' show DeletedTasksPage;
 export 'presentation/detail/detail_actions.dart' show showUploadOriginSheet;
 export 'presentation/quick_action_sheets.dart'
     show showInviteSheet, showMeetingSheet, showNewTaskSheet;

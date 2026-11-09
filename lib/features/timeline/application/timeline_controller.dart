@@ -2,9 +2,13 @@ import 'dart:math' as math;
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/errors/api_error.dart';
+import '../../../core/providers.dart';
+import '../../../core/server/write_compat.dart';
 import '../../tasks/tasks.dart';
 import '../domain/timeline.dart';
 import '../domain/timeline_view_builder.dart';
+import 'gantt_provider.dart';
 
 part 'timeline_controller.g.dart';
 
@@ -30,14 +34,23 @@ final class TimelineRequestSent extends TimelineRequestResult {
   final DateTime end;
 }
 
-/// Zaman çizelgesi ekranının durumu ve komutları (prototip `S_gantt`). Seçim, ölçek, süzgeçler,
-/// tarih taslağı, kayıt/geri alma ve tarih talepleri bellekte tutulur (sunucuya yazılmaz).
+/// Zaman çizelgesinin seçim, ölçek, süzgeç ve tarih taslağı bellekte tutulur. Kayıt,
+/// geri alma ve tarih talepleri sunucuya gider; sonuç katalog ve Gantt'tan yeniden okunur.
 /// [coordinatorship] verilirse yalnız o koordinatörlük seçili açılır; verilmezse tüm koordinatörlükler;
 /// [timelineAllCoordinatorships] ise hepsi.
 @riverpod
 class TimelineController extends _$TimelineController {
+  TaskItem? _baseTask;
+  bool _busy = false;
+  int _epoch = 0;
+  bool _valid(int epoch) => ref.mounted && epoch == _epoch;
   @override
   TimelineState build(String? coordinatorship) {
+    ref.watch(sessionGenerationProvider);
+    ref.watch(scopeStateProvider);
+    _epoch++;
+    _baseTask = null;
+    _busy = false;
     final all =
         coordinatorship == null ||
         coordinatorship == timelineAllCoordinatorships;
@@ -49,7 +62,7 @@ class TimelineController extends _$TimelineController {
     );
   }
 
-  TaskCatalog? get _catalog => ref.read(taskCatalogControllerProvider).value;
+  TaskCatalog? get _catalog => ref.read(timelineCatalogProvider).value;
 
   List<String> _coords() {
     final c = _catalog;
@@ -142,8 +155,12 @@ class TimelineController extends _$TimelineController {
 
   // --- seçim ve tarih taslağı ---
 
-  void select(String code) =>
-      state = state.copyWith(selected: () => code, draft: () => null);
+  void select(String code) {
+    _baseTask =
+        ref.read(taskCatalogControllerProvider).value?.task(code) ??
+        _catalog?.task(code);
+    state = state.copyWith(selected: () => code, draft: () => null);
+  }
 
   void closeSelection() => state = _cleared(state);
 
@@ -208,16 +225,38 @@ class TimelineController extends _$TimelineController {
   }
 
   /// Taslağı kaydeder; değişiklik yoksa false. Seçim kapanır, geri alma kaydı oluşur.
-  bool save() {
+  Future<bool> save() async {
+    final epoch = _epoch;
+    final snapshot = state;
     final cur = _current();
     final draft = state.draft;
     final code = state.selected;
     if (cur == null || draft == null || code == null || draft == cur) {
       return false;
     }
+    var task = _baseTask;
+    if (task == null || _busy) return false;
+    if (!TaskPermissions.of(_catalog?.access, task).canManageTask) {
+      throw ApiError('work.not_authorized');
+    }
+    final year = _catalog!.today.year;
+    if (task.datesRevision == null) {
+      _busy = true;
+      try {
+        task = await ref.read(taskDetailsRepositoryProvider).loadItem(task);
+        if (!_valid(epoch)) return false;
+        if (seasonDay(task.start, year) != cur.start ||
+            seasonDay(task.due, year) != cur.end) {
+          throw ApiError('work.edit_conflict');
+        }
+      } finally {
+        if (_valid(epoch)) _busy = false;
+      }
+    }
+    await _writeDates(task, draft, year);
+    if (!_valid(epoch) || !identical(state, snapshot)) return true;
     state = _cleared(
       state.copyWith(
-        edits: state.edits.put(code, draft),
         undo: () => TimelineUndo(
           code: code,
           previousEdit: state.edits[code],
@@ -231,38 +270,112 @@ class TimelineController extends _$TimelineController {
   }
 
   /// Son kaydı geri alır; geri alınan görevin kodu (yoksa null).
-  String? undo() {
+  Future<String?> undo() async {
+    final epoch = _epoch;
     final u = state.undo;
     if (u == null) return null;
-    final prev = u.previousEdit;
-    state = state.copyWith(
-      edits: prev != null
-          ? state.edits.put(u.code, prev)
-          : state.edits.remove(u.code),
-      undo: () => null,
-    );
-    return u.code;
+    if (_busy) return null;
+    final task = _catalog?.task(u.code);
+    if (task == null) return null;
+    final year = _catalog!.today.year;
+    _busy = true;
+    try {
+      final fresh = await ref
+          .read(taskDetailsRepositoryProvider)
+          .loadItem(task);
+      if (!_valid(epoch)) return null;
+      if (seasonDay(fresh.start, year) != u.to.start ||
+          seasonDay(fresh.due, year) != u.to.end) {
+        throw ApiError('work.edit_conflict');
+      }
+      await _writeDates(fresh, u.from, year);
+      if (!_valid(epoch)) return u.code;
+      final prev = u.previousEdit;
+      state = state.copyWith(
+        edits: prev != null
+            ? state.edits.put(u.code, prev)
+            : state.edits.remove(u.code),
+        undo: () => null,
+      );
+      return u.code;
+    } finally {
+      if (_valid(epoch)) _busy = false;
+    }
   }
 
   void dismissUndo() => state = state.copyWith(undo: () => null);
 
   /// Taslaktaki bitişi tarih talebi olarak gönderir (prototip `request`).
-  TimelineRequestResult requestDates() {
+  Future<TimelineRequestResult> requestDates() async {
+    final epoch = _epoch;
+    final snapshot = state;
     final code = state.selected;
     final c = _catalog;
     final cur = _current();
     if (code == null || c == null || cur == null) {
       return const TimelineRequestNoChange();
     }
-    if (state.requests.containsKey(code)) return const TimelineRequestPending();
     final draft = state.draft;
     if (draft == null || draft == cur) return const TimelineRequestNoChange();
     final end = seasonDate(draft.end, c.today.year);
-    state = state.copyWith(
-      requests: state.requests.put(code, end),
-      draft: () => null,
-    );
+    final task = c.task(code);
+    if (task == null || _busy) return const TimelineRequestNoChange();
+    if (!TaskPermissions.of(c.access, task).canRequestDate) {
+      throw ApiError('work.not_authorized');
+    }
+    if (task.hasPendingRequest) return const TimelineRequestPending();
+    _busy = true;
+    try {
+      await ref
+          .read(taskWriteRepositoryProvider)
+          .requestDateChange(task, seasonDate(draft.start, c.today.year), end);
+      if (_valid(epoch)) {
+        await ref.read(taskCatalogControllerProvider.notifier).reload();
+        if (_valid(epoch)) {
+          await ref.read(ganttScheduleProvider.future);
+        }
+      }
+    } finally {
+      if (_valid(epoch)) _busy = false;
+    }
+    if (!_valid(epoch) || !identical(state, snapshot)) {
+      return TimelineRequestSent(end);
+    }
+    state = state.copyWith(draft: () => null);
     return TimelineRequestSent(end);
+  }
+
+  Future<void> _writeDates(TaskItem task, DayRange range, int year) async {
+    final epoch = _epoch;
+    if (!serverSupportsVersionedWrites(ref.read(bindingStateProvider)) ||
+        task.datesRevision == null) {
+      throw ApiError('client.server_outdated');
+    }
+    _busy = true;
+    final store = ref.read(taskCatalogControllerProvider.notifier);
+    try {
+      await ref
+          .read(taskWriteRepositoryProvider)
+          .updateWorkItem(
+            task,
+            WorkItemPatch.diff(
+              task,
+              start: seasonDate(range.start, year),
+              end: seasonDate(range.end, year),
+            ),
+          );
+    } finally {
+      if (_valid(epoch)) {
+        try {
+          await store.reload();
+          if (_valid(epoch)) {
+            await ref.read(ganttScheduleProvider.future);
+          }
+        } finally {
+          if (_valid(epoch)) _busy = false;
+        }
+      }
+    }
   }
 }
 
@@ -271,6 +384,13 @@ class TimelineController extends _$TimelineController {
 AsyncValue<TimelineView> timelineView(Ref ref, String? coordinatorship) {
   final state = ref.watch(timelineControllerProvider(coordinatorship));
   return ref
-      .watch(taskCatalogControllerProvider)
-      .whenData((c) => buildTimelineView(c, state));
+      .watch(timelineCatalogProvider)
+      .whenData(
+        (c) => buildTimelineView(
+          c,
+          state,
+          dependent:
+              ref.watch(ganttScheduleProvider).value?.dependentIds ?? const {},
+        ),
+      );
 }

@@ -21,6 +21,7 @@ void main() {
       CoordinatorshipSort.name,
     );
     await c.read(taskCatalogControllerProvider.future);
+    await c.read(serverCoordinatorshipStatsProvider.future);
     // Eşzamanlı türetim: katalog hazırken liste aynı karede dolu.
     var list = c.read(coordinatorshipListProvider).requireValue;
     // Türkçe A→Z (sunucu "Elektrik"i "Eğitim"den önce verir).

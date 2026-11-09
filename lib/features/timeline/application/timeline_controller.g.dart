@@ -71,7 +71,7 @@ final class TimelineControllerProvider
 }
 
 String _$timelineControllerHash() =>
-    r'223d9cc6b6063da96f20c0b7e2fa156b5d6a06b2';
+    r'16676f3473e73d03c75041fc773493f5bfee2eae';
 
 /// Zaman çizelgesi ekranının durumu ve komutları (prototip `S_gantt`). Seçim, ölçek, süzgeçler,
 /// tarih taslağı, kayıt/geri alma ve tarih talepleri bellekte tutulur (sunucuya yazılmaz).
@@ -202,7 +202,7 @@ final class TimelineViewProvider
   }
 }
 
-String _$timelineViewHash() => r'9920f1e291f16b2f8424a54a9218857c418b5dae';
+String _$timelineViewHash() => r'eab6247abad42ca4b07a35a8932933290b48b4db';
 
 /// Ekranın türetilmiş görünümü: görev kataloğu + ekran durumu.
 

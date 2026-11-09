@@ -2,9 +2,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../core/errors/api_error.dart';
+import '../../core/providers.dart';
 import '../../core/scope/scope_controller.dart';
+import 'application/task_lifecycle_controller.dart';
 import 'application/task_sources.dart';
 import 'application/tasks_providers.dart';
+import 'data/deleted_work_item_api_repository.dart';
 import 'data/download_sink.dart';
 import 'data/file_upload_picker.dart';
 import 'data/meeting_invitee_api_repository.dart';
@@ -12,6 +16,7 @@ import 'data/task_catalog_api_repository.dart';
 import 'data/task_details_api_repository.dart';
 import 'data/task_write_api_repository.dart';
 import 'data/upload_digest.dart';
+import 'data/work_item_dependency_api_repository.dart';
 import 'domain/meeting_invitees.dart';
 import 'domain/task_catalog.dart';
 import 'domain/task_details.dart';
@@ -80,7 +85,24 @@ void registerTasksModule(GetIt locator, {required Dio? Function() apiDio}) {
 }
 
 /// tasks'in Riverpod portlarını get_it örnekleriyle bağlar.
-List<Override> tasksOverrides(GetIt locator) => [
+List<Override> tasksOverrides(
+  GetIt locator, {
+  required Dio? Function() apiDio,
+}) => [
+  deletedTasksRepositoryProvider.overrideWith((ref) {
+    ref.watch(sessionGenerationProvider);
+    ref.watch(scopeStateProvider);
+    final dio = apiDio();
+    if (dio == null) throw ApiError('client.scope_missing');
+    return ApiDeletedWorkItemRepository(dio);
+  }),
+  taskDependencyRepositoryProvider.overrideWith((ref, task) {
+    ref.watch(sessionGenerationProvider);
+    ref.watch(scopeStateProvider);
+    final dio = apiDio();
+    if (dio == null) throw ApiError('client.scope_missing');
+    return ApiWorkItemDependencyRepository(dio, task: task);
+  }),
   taskCatalogRepositoryProvider.overrideWith(
     (ref) => locator<TaskCatalogRepository>(),
   ),

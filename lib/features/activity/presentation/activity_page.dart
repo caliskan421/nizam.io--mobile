@@ -23,15 +23,12 @@ import '../application/activity_query_controller.dart';
 import '../domain/activity_log.dart';
 import '../domain/activity_query.dart';
 import 'activity_texts.dart';
+import 'activity_unavailable_page.dart';
 
-/// İşlem geçmişi (prototip `history`, Ana sayfa sekmesi içinde): başlık + CSV, açıklama, arama +
-/// filtre dairesi, renk noktalı tür rayı, etkin süzgeç çipleri, gün gruplu kayıt listesi, "daha
-/// fazla göster", filtre alt sayfası (yapan kişi, koordinatörlük). Alt menüde Ana sayfa
-/// sekmesine yeniden dokunmak (bu sayfa görünürken) kısayol menüsünü açar.
+/// İşlem geçmişi: kayıt süzgeçleri ve gün grupları; desteklenmeyen sunucuda kullanılabilirlik durumu.
 class ActivityPage extends ConsumerStatefulWidget {
   const ActivityPage({super.key});
 
-  /// Kabukta bu sayfanın sekme sırası (kısayol olayı süzgeci).
   static const shellTab = 0;
 
   @override
@@ -53,6 +50,9 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (ref.watch(activityLogControllerProvider).error is ActivityUnavailable) {
+      return const ActivityUnavailablePage();
+    }
     ref.listen(shellReselectEventsProvider, (_, next) {
       final visible = ModalRoute.of(context)?.isCurrent ?? true;
       final view = ref.read(activityViewProvider).value;

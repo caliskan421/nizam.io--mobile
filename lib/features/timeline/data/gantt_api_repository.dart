@@ -4,6 +4,7 @@ import '../../../core/api/generated/clients/work_client.dart';
 import '../../../core/api/generated/models/gantt.dart';
 import '../../../core/api/generated/models/gantt_task.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/http/interceptors.dart';
 import '../../tasks/tasks.dart';
 import '../domain/gantt_schedule.dart';
 
@@ -15,7 +16,10 @@ import '../domain/gantt_schedule.dart';
 /// taşımadığından dizge üretilir (backend adayı B-20); `planned_end_on` ve `completed_on`
 /// boş dizgeyse yoktur.
 class ApiGanttRepository implements GanttRepository {
-  ApiGanttRepository(Dio dio) : _client = WorkClient(dio);
+  ApiGanttRepository(Dio dio, {this.programId, this.departmentId})
+    : _client = WorkClient(dio);
+  final String? programId;
+  final String? departmentId;
 
   /// Sözleşmede "yalnız gecikenler" süzgecinin değeri.
   static const overdueFlag = 'true';
@@ -23,17 +27,48 @@ class ApiGanttRepository implements GanttRepository {
   final WorkClient _client;
 
   @override
-  Future<GanttSchedule> coordinator() =>
-      apiCall(() async => _schedule(await _client.coordinatorGantt()));
+  Future<GanttSchedule> coordinator() => apiCall(
+    () async => _schedule(
+      await _client.coordinatorGantt(
+        extras: programId == null
+            ? WorkClient.coordinatorGanttOpenapiExtras
+            : withScope(
+                WorkClient.coordinatorGanttOpenapiExtras,
+                programId!,
+                departmentId ?? '',
+              ),
+      ),
+    ),
+  );
 
   @override
-  Future<GanttSchedule> member() =>
-      apiCall(() async => _schedule(await _client.memberGantt()));
+  Future<GanttSchedule> member() => apiCall(
+    () async => _schedule(
+      await _client.memberGantt(
+        extras: programId == null
+            ? WorkClient.memberGanttOpenapiExtras
+            : withScope(
+                WorkClient.memberGanttOpenapiExtras,
+                programId!,
+                departmentId ?? '',
+              ),
+      ),
+    ),
+  );
 
   @override
   Future<GanttSchedule> admin({bool overdueOnly = false}) => apiCall(
     () async => _schedule(
-      await _client.adminGantt(overdue: overdueOnly ? overdueFlag : null),
+      await _client.adminGantt(
+        overdue: overdueOnly ? overdueFlag : null,
+        extras: programId == null
+            ? WorkClient.adminGanttOpenapiExtras
+            : withScope(
+                WorkClient.adminGanttOpenapiExtras,
+                programId!,
+                departmentId ?? '',
+              ),
+      ),
     ),
   );
 

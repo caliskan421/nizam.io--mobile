@@ -171,6 +171,16 @@ class _TasksPageState extends ConsumerState<TasksPage> {
       },
       topBar: const RootTopBar(),
       children: [
+        if (ref
+                .watch(taskCatalogControllerProvider)
+                .value
+                ?.access
+                ?.companyAdmin ==
+            true)
+          TextButton(
+            onPressed: context.appNav.openDeletedTasks,
+            child: const Text('Silinen görevler'),
+          ),
         ColoredBox(
           color: context.colors.background,
           child: NzPageHeader(

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
+import 'package:nizamio/features/timeline/application/gantt_provider.dart';
 import 'package:nizamio/features/timeline/application/timeline_controller.dart';
 import 'package:nizamio/features/timeline/domain/timeline.dart';
 
@@ -16,13 +17,15 @@ const _altItems = {'wi-alt-1', 'wi-alt-2', 'wi-alt-3', 'wi-alt-4'};
 
 Future<(ProviderContainer, TimelineController, TimelineView Function())> _open([
   String? coord = dAlt,
+  bool admin = true,
 ]) async {
-  final backend = CoordBackend();
+  final backend = CoordBackend()..admin = admin;
   final h = await pilotHarness(backend, signedIn: true);
   h.read(scopeControllerProvider).selectProgram(coordProgram);
   final c = h.container;
   c.listen(timelineViewProvider(coord), (_, _) {});
   await c.read(taskCatalogControllerProvider.future);
+  await c.read(ganttScheduleProvider.future);
   addTearDown(() => expect(backend.unhandled, isEmpty));
   return (
     c,
@@ -195,10 +198,10 @@ void main() {
   test('kaydet → geri alma kaydı; geri al önceki düzenlemeye döner', () async {
     final (_, ctrl, view) = await _open();
     ctrl.select('wi-alt-2');
-    expect(ctrl.save(), isFalse, reason: 'değişiklik yok');
+    expect(await ctrl.save(), isFalse, reason: 'değişiklik yok');
     final cur = view().selection!.current;
     ctrl.shiftDraft(3);
-    expect(ctrl.save(), isTrue);
+    expect(await ctrl.save(), isTrue);
     final u = view().state.undo!;
     expect((u.code, u.isShift, u.startDelta), ('wi-alt-2', true, 3));
     expect(view().selection, isNull);
@@ -208,29 +211,29 @@ void main() {
     ctrl
       ..select('wi-alt-2')
       ..nudgeEnd(2);
-    expect(ctrl.save(), isTrue);
+    expect(await ctrl.save(), isTrue);
     expect(view().state.undo!.isShift, isFalse);
     expect(view().state.undo!.serial, 2);
-    expect(ctrl.undo(), 'wi-alt-2');
+    expect(await ctrl.undo(), 'wi-alt-2');
     expect(
       view().shown.firstWhere((t) => t.code == 'wi-alt-2').range,
       cur.shift(3),
     );
-    expect(ctrl.undo(), isNull);
+    expect(await ctrl.undo(), isNull);
   });
 
   test('tarih talebi: değişiklik yok / gönderildi / bekleyen var', () async {
-    final (_, ctrl, view) = await _open();
+    final (_, ctrl, view) = await _open(dAlt, false);
     expect(
-      ctrl.requestDates(),
+      await ctrl.requestDates(),
       isA<TimelineRequestNoChange>(),
       reason: 'seçim yok',
     );
     ctrl.select('wi-alt-1');
-    expect(ctrl.requestDates(), isA<TimelineRequestNoChange>());
+    expect(await ctrl.requestDates(), isA<TimelineRequestNoChange>());
     final cur = view().selection!.current;
     ctrl.nudgeEnd(5);
-    final r = ctrl.requestDates();
+    final r = await ctrl.requestDates();
     expect(r, isA<TimelineRequestSent>());
     expect(
       (r as TimelineRequestSent).end,
@@ -242,6 +245,6 @@ void main() {
       cur.end + 5,
     );
     ctrl.nudgeEnd(1);
-    expect(ctrl.requestDates(), isA<TimelineRequestPending>());
+    expect(await ctrl.requestDates(), isA<TimelineRequestPending>());
   });
 }

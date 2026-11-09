@@ -14,6 +14,7 @@ abstract interface class NzAppNav {
   /// Görev listesi; [view] ve [people] (kişi kimlikleri) başlangıç süzgecidir.
   void openTasks({NzTaskView? view, List<String> people});
   void openTask(String code);
+  void openDeletedTasks();
 
   /// Takvim modülü.
   void openCalendar();

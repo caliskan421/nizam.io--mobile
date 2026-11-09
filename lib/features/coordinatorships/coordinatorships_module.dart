@@ -2,10 +2,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../core/errors/api_error.dart';
+import '../../core/providers.dart';
 import '../../core/scope/scope_controller.dart';
+import 'application/coordinatorships_controller.dart';
 import 'application/coordinatorships_providers.dart';
 import 'data/coordinatorship_activity_api_repository.dart';
 import 'data/coordinatorship_profile_api_repository.dart';
+import 'data/coordinatorship_stats_api_repository.dart';
 import 'data/department_api_repository.dart';
 import 'domain/coordinatorship_board.dart';
 import 'domain/coordinatorship_profile.dart';
@@ -37,7 +41,17 @@ void registerCoordinatorshipsModule(
 }
 
 /// coordinatorships'in Riverpod portlarını get_it örnekleriyle bağlar.
-List<Override> coordinatorshipsOverrides(GetIt locator) => [
+List<Override> coordinatorshipsOverrides(
+  GetIt locator, {
+  required Dio? Function() apiDio,
+}) => [
+  coordinatorshipStatsRepositoryProvider.overrideWith((ref) {
+    ref.watch(sessionGenerationProvider);
+    ref.watch(scopeStateProvider);
+    final dio = apiDio();
+    if (dio == null) throw ApiError('client.scope_missing');
+    return ApiCoordinatorshipStatsRepository(dio);
+  }),
   coordinatorshipProfileRepositoryProvider.overrideWith(
     (ref) => locator<CoordinatorshipProfileRepository>(),
   ),

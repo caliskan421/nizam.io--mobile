@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/domain/page_slice.dart';
 import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/features/archive/application/archive_actions_controller.dart';
 import 'package:nizamio/features/archive/application/archive_files_controller.dart';
 import 'package:nizamio/features/archive/application/archive_folder_controller.dart';
@@ -158,6 +159,97 @@ void main() {
       );
       expect(b.error?.code, 'records.too_large');
       expect(repo.calls.where((x) => x.$1 == 'attach'), isEmpty);
+    });
+
+    // Codex tur 1 / 7 (istemci akışları §8): işlem anahtarı niyet başına bir kez.
+    test(
+      'sonuç bilinmiyor: niyet saklanır, aynı niyetin tekrarı aynı anahtar',
+      () async {
+        final repo = FakeArchiveRepository()
+          ..attachErrors.add(ApiError(ClientErrorCode.timeout));
+        final c = archiveContainer(repo, picker: FakePicker(src('rapor.pdf')));
+        final ctrl = _ctrl(c);
+        Future<ArchiveOutcome> send() => ctrl.upload(
+          workItemId: 'w1',
+          tag: RecordTag.plan,
+          origin: UploadOrigin.files,
+        );
+        final a = await send();
+        expect(a.error?.code, ClientErrorCode.outcomeUnknown);
+        final pending = ctrl.pendingUploadKey;
+        expect(pending, repo.attachKeys.single);
+        final b = await send();
+        expect(b.ok, isTrue);
+        expect(repo.attachKeys, [pending, pending]);
+        // Başarı niyeti düşürür: aynı dosyanın yeni gönderimi yeni eylemdir.
+        expect(ctrl.pendingUploadKey, isNull);
+        await send();
+        expect(repo.attachKeys.last, isNot(pending));
+      },
+    );
+
+    test('conflict_retry aynı anahtarla tek kez yeniden denenir', () async {
+      final repo = FakeArchiveRepository()
+        ..attachErrors.add(ApiError(conflictRetryCode, status: 409));
+      final c = archiveContainer(repo, picker: FakePicker(src('rapor.pdf')));
+      final ctrl = _ctrl(c);
+      final r = await ctrl.upload(
+        workItemId: 'w1',
+        tag: RecordTag.plan,
+        origin: UploadOrigin.files,
+      );
+      expect(r.ok, isTrue);
+      expect(repo.attachKeys, hasLength(2));
+      expect(repo.attachKeys.toSet(), hasLength(1));
+
+      // İkinci 409 kullanıcıya gösterilir; üçüncü deneme yok.
+      repo
+        ..attachKeys.clear()
+        ..attachErrors.addAll([
+          ApiError(conflictRetryCode, status: 409),
+          ApiError(conflictRetryCode, status: 409),
+        ]);
+      final e = await ctrl.upload(
+        workItemId: 'w1',
+        tag: RecordTag.plan,
+        origin: UploadOrigin.files,
+      );
+      expect(e.error?.code, conflictRetryCode);
+      expect(repo.attachKeys, hasLength(2));
+    });
+
+    test('farklı dosya yeni anahtar; key_reused niyeti düşürür', () async {
+      final repo = FakeArchiveRepository()
+        ..attachErrors.addAll([
+          ApiError(ClientErrorCode.networkError),
+          ApiError(ClientErrorCode.networkError),
+        ]);
+      final picker = FakePicker(src('a.pdf'));
+      final c = archiveContainer(repo, picker: picker);
+      final ctrl = _ctrl(c);
+      await ctrl.upload(
+        workItemId: 'w1',
+        tag: RecordTag.plan,
+        origin: UploadOrigin.files,
+      );
+      picker.next = src('b.pdf');
+      await ctrl.upload(
+        workItemId: 'w1',
+        tag: RecordTag.plan,
+        origin: UploadOrigin.files,
+      );
+      expect(repo.attachKeys.toSet(), hasLength(2));
+
+      repo.attachErrors.add(
+        ApiError('records.idempotency_key_reused', status: 409),
+      );
+      final r = await ctrl.upload(
+        workItemId: 'w1',
+        tag: RecordTag.plan,
+        origin: UploadOrigin.files,
+      );
+      expect(r.error?.code, ClientErrorCode.requestNotResent);
+      expect(ctrl.pendingUploadKey, isNull);
     });
 
     test('seçici yoksa başlangıç noPicker', () {

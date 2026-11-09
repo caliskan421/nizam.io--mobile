@@ -37,9 +37,15 @@ class HomeDashboardController extends _$HomeDashboardController {
   /// Son başarılı okumadan beri geçen süre (notifier yeniden kurulumlarda korunur).
   final _age = Stopwatch();
 
+  /// Önceki başarılı okumanın ait olduğu program (kapsam). Yeniden kurulum aynı programda ise
+  /// eski özet başka kümeye ait değildir; ekran iskelet yerine onu gösterir.
+  Object? loadedProgram;
+
   @override
   Future<HomeDashboard> build() async {
+    final program = ref.read(scopeStateProvider).programId;
     final dashboard = await _load();
+    loadedProgram = program;
     _age
       ..reset()
       ..start();

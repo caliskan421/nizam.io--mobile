@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/errors/api_error.dart';
+import '../../../core/providers.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/extensions/ref_ext.dart';
@@ -94,7 +95,12 @@ class HomePage extends ConsumerWidget {
           value: dashboard,
           onRetry: retry,
           loading: const HomeSkeleton(),
-          skeletonOnReload: true,
+          // İskelet yalnız program değişince; aynı programda yeniden kurulumda eski özet kalır.
+          skeletonOnReload:
+              ref
+                  .read(homeDashboardControllerProvider.notifier)
+                  .loadedProgram !=
+              ref.watch(scopeStateProvider).programId,
           data: (d) => _Feed(
             dashboard: d,
             onQuickAction: (a) => _quickAction(context, a),

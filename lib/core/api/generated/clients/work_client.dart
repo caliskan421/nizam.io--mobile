@@ -581,7 +581,7 @@ abstract class WorkClient {
         WorkClient.createWorkItemSubtaskOpenapiExtras,
   });
 
-  /// Alt görevi değiştirir: başlık/atama/tarih (koordinatör, şirket yöneticisi), `done` (atanan ya da koordinatör).
+  /// Alt görevi değiştirir: başlık/atama/tarih (koordinatör, şirket yöneticisi), `done` (atanan, koordinatör ya da şirket yöneticisi).
   @PATCH('/v1/work-items/{id}/subtasks/{subtaskId}')
   Future<WorkItemSubtask> updateWorkItemSubtask({
     @Path('id') required String id,

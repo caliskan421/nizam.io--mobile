@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/meetings/application/meeting_room_controller.dart';
 import 'package:nizamio/features/meetings/application/meetings_controller.dart';
 import 'package:nizamio/features/meetings/domain/meeting.dart';
@@ -73,6 +74,31 @@ void main() {
     expect(_now(c).permissions.canManageParticipants, isTrue);
   });
 
+  test(
+    'kişi kipinde yöneten koordinatör bağ olmadan katılımcı yönetir',
+    () async {
+      final s = MeetingsServer(admin: false)
+        ..viewerRole = 'coordinator'
+        ..inviteMode = 'person';
+      final (_, c, _) = await _open(s);
+      expect(_now(c).permissions.canManageParticipants, isTrue);
+    },
+  );
+
+  test(
+    'ayrıntı yazması liste satırının özetini ağ isteği olmadan günceller',
+    () async {
+      final s = MeetingsServer();
+      final (h, c, ctl) = await _open(s);
+      c.listen(meetingsBoardControllerProvider, (_, _) {});
+      await c.read(meetingsBoardControllerProvider.future);
+      expect(await ctl.addAgenda('Yeni'), isNull);
+      final row = c.read(meetingsBoardControllerProvider).value!.visible.single;
+      expect((row.summary!.agendaTotal, row.summary!.noteCount), (3, 1));
+      expect(calls(h).where((x) => x.startsWith('GET /v1/meetings/')), isEmpty);
+    },
+  );
+
   test('gündem işareti iyimser; sunucu yanıtıyla oturur', () async {
     final s = MeetingsServer()..hold = Completer();
     final (h, c, ctl) = await _open(s);
@@ -132,7 +158,10 @@ void main() {
     expect(await ctl.updateNote(n1, 'Düzeltildi'), isNull);
     expect(_now(c).notes.firstWhere((n) => n.id == 'n1').content, 'Düzeltildi');
     expect(await ctl.updateNote(n1, '  '), isNull, reason: 'boş: istek yok');
-    expect(await ctl.deleteNote(_now(c).notes.first), isNull);
+    expect(
+      await ctl.deleteNote(_now(c).notes.first, window: Duration.zero),
+      isNull,
+    );
     expect(calls(h), [
       'POST /v1/meetings/m1/notes',
       'PATCH /v1/meeting-notes/n1',
@@ -236,17 +265,64 @@ void main() {
     expect(_noteKeys(h), hasLength(2));
   });
 
-  test('konferans başlat → canlı; bitir → yok', () async {
+  test('konferans başlat → canlı; bitir → geçmiş ve özet sunucudan (liste kartı dahil)', () async {
     final s = MeetingsServer();
     final (h, c, ctl) = await _open(s);
+    c.listen(meetingsBoardControllerProvider, (_, _) {});
+    await c.read(meetingsBoardControllerProvider.future);
+    h.backend.requests.clear();
     expect(await ctl.startConference(), isNull);
     expect(_now(c).detail.conference?.status, ConferenceStatus.live);
+    s.lastConference = {
+      'id': 'c1',
+      'started_at': '2026-11-03T07:00:00Z',
+      'ended_at': '2026-11-03T07:40:00Z',
+      'end_reason': 'ended_by_user',
+    };
     expect(await ctl.endConference(), isNull);
-    expect(_now(c).detail.conference, isNull);
+    final r = _now(c);
+    expect(r.detail.conference, isNull);
+    expect(r.detail.lastConference?.endedAt, DateTime.utc(2026, 11, 3, 7, 40));
+    expect(r.summary.conferenceStatus, SummaryConferenceStatus.ended);
+    final row = c.read(meetingsBoardControllerProvider).value!.visible.single;
+    expect(
+      (row.summary!.conferenceStatus, row.summary!.conferenceEndedAt),
+      (SummaryConferenceStatus.ended, DateTime.utc(2026, 11, 3, 7, 40)),
+    );
     expect(calls(h), [
       'POST /v1/meetings/m1/conference',
       'DELETE /v1/meetings/m1/conference',
+      'GET /v1/meetings/m1',
     ]);
+  });
+
+  test(
+    'bitirme sonrası okuma düşerse konferans "kapanıyor"; geçmiş uydurulmaz',
+    () async {
+      final s = MeetingsServer()
+        ..conference = conferenceWire(connected: ['acc-1']);
+      final (_, c, ctl) = await _open(s);
+      s.overrides['GET /v1/meetings/m1'] = () =>
+          errorBody(503, 'identity.unavailable');
+      expect(await ctl.endConference(), isNull, reason: 'bitirme başarılı');
+      final r = _now(c);
+      expect(r.detail.conference?.status, ConferenceStatus.ending);
+      expect(r.detail.conference?.connected.count, 0);
+      expect(r.detail.lastConference, isNull);
+      expect(r.summary.conferenceStatus, SummaryConferenceStatus.ending);
+    },
+  );
+
+  test('bağlı kişi görüntüsü 3 dk\'dan eskiyse güncel sayılmaz', () async {
+    final s = MeetingsServer()
+      ..conference = conferenceWire(connected: ['acc-1']);
+    final (_, c, _) = await _open(s);
+    final seen = _now(c).detail.conference!.connected;
+    final at = seen.observedAt!;
+    expect(seen.isFreshAt(at.add(const Duration(minutes: 3))), isTrue);
+    expect(seen.isFreshAt(at.add(const Duration(minutes: 4))), isFalse);
+    expect(seen.ageMinutes(at.add(const Duration(minutes: 12))), 12);
+    expect(ConferenceConnected.none.isFreshAt(at), isFalse);
   });
 
   test(
@@ -279,6 +355,119 @@ void main() {
       );
     },
   );
+
+  group('not silme: geri al süresi (F63 devri §4)', () {
+    test(
+      'not hemen gizlenir; geri alınırsa istek gitmez, yerine döner',
+      () async {
+        final s = MeetingsServer()..notes = [noteWire('n1'), noteWire('n2')];
+        final (h, c, ctl) = await _open(s);
+        final n1 = _now(c).notes.first;
+        final done = ctl.deleteNote(n1, window: const Duration(hours: 1));
+        expect(_now(c).notes.map((n) => n.id), ['n2']);
+        expect(ctl.undoNoteDelete('n1'), isTrue);
+        expect(await done, isNull);
+        expect(_now(c).notes.map((n) => n.id), ['n1', 'n2']);
+        expect(ctl.undoNoteDelete('n1'), isFalse, reason: 'bekleyen yok');
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        expect(calls(h), isEmpty);
+      },
+    );
+
+    test('süre dolunca DELETE gider; hata olursa not geri gelir', () async {
+      final s = MeetingsServer()..notes = [noteWire('n1'), noteWire('n2')];
+      final (h, c, ctl) = await _open(s);
+      final pending = ctl.deleteNote(
+        _now(c).notes.first,
+        window: const Duration(milliseconds: 10),
+      );
+      expect(calls(h), isEmpty, reason: 'süre içinde istek yok');
+      expect(await pending, isNull);
+      expect(calls(h), ['DELETE /v1/meeting-notes/n1']);
+      expect(ctl.undoNoteDelete('n1'), isFalse, reason: 'süre doldu');
+
+      s.overrides['DELETE /v1/meeting-notes/n2'] = () =>
+          errorBody(404, 'collaboration.note_not_found');
+      final e = await ctl.deleteNote(
+        _now(c).notes.single,
+        window: Duration.zero,
+      );
+      expect(e?.code, 'collaboration.note_not_found');
+      expect(_now(c).notes.map((n) => n.id), ['n2']);
+    });
+
+    test('yenileme bekleyen notu geri getirmez', () async {
+      final s = MeetingsServer()..notes = [noteWire('n1'), noteWire('n2')];
+      final (_, c, ctl) = await _open(s);
+      final done = ctl.deleteNote(
+        _now(c).notes.first,
+        window: const Duration(hours: 1),
+      );
+      await ctl.refresh();
+      expect(_now(c).notes.map((n) => n.id), ['n2']);
+      expect(c.read(_room.notifier).undoNoteDelete('n1'), isTrue);
+      await done;
+      expect(_now(c).notes.map((n) => n.id), ['n1', 'n2']);
+    });
+
+    test(
+      'ekran kapanırsa sağlayıcı canlı kalır, istek süre dolunca gider',
+      () async {
+        final s = MeetingsServer();
+        final (h, c) = await openMeetings(s);
+        final sub = c.listen(_room, (_, _) {});
+        await c.read(_room.future);
+        h.backend.requests.clear();
+        final ctl = c.read(_room.notifier);
+        final done = ctl.deleteNote(
+          _now(c).notes.single,
+          window: const Duration(milliseconds: 30),
+        );
+        sub.close(); // ekran kapandı
+        await Future<void>.delayed(Duration.zero);
+        expect(c.exists(_room), isTrue, reason: 'bekleyen silme tutuyor');
+        expect(await done, isNull);
+        expect(calls(h), ['DELETE /v1/meeting-notes/n1']);
+      },
+    );
+
+    test(
+      'program A → B: bekleyen silme tek istekle A program başlığıyla gider',
+      () async {
+        final s = MeetingsServer()..notes = [noteWire('n1'), noteWire('n2')];
+        final (h, c, ctl) = await _open(s);
+        final done = ctl.deleteNote(
+          _now(c).notes.first,
+          window: const Duration(milliseconds: 30),
+        );
+        h.read(scopeControllerProvider).selectProgram('prog-2');
+        expect(await done, isNull);
+        final deletes = [
+          for (final r in h.backend.requests)
+            if (r.method == 'DELETE') r,
+        ];
+        expect(deletes.map((r) => r.path), ['/v1/meeting-notes/n1']);
+        expect(deletes.single.header('X-Nizamio-Program'), 'prog-1');
+      },
+    );
+
+    test(
+      'çıkış ve yeniden giriş: bekleyen silme gönderilmez, not sunucuda kalır',
+      () async {
+        final s = MeetingsServer()..notes = [noteWire('n1'), noteWire('n2')];
+        final (h, c, ctl) = await _open(s);
+        final done = ctl.deleteNote(
+          _now(c).notes.first,
+          window: const Duration(milliseconds: 30),
+        );
+        await h.identity.logout();
+        await h.identity.login(email: 'a@b.test', password: 'p');
+        h.read(scopeControllerProvider).selectProgram('prog-1');
+        expect(await done, isNull);
+        expect(h.backend.count('DELETE', '/v1/meeting-notes/n1'), 0);
+      },
+    );
+  });
 
   test('toplantıyı silmek listeyi yeniden okutur', () async {
     final s = MeetingsServer();

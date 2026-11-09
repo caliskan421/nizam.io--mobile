@@ -17,9 +17,18 @@ final class MeetingPlan {
     this.participantIds = const [],
     this.membersIncluded = false,
     this.agenda = const [],
+    this.place = '',
+    this.byPerson = false,
   });
 
   final String title;
+
+  /// Yer (kırpılmış); boş → yer yok (düzenlemede boş dizge yeri kaldırır).
+  final String place;
+
+  /// Davet kipi `person` (yalnız açılışta seçilir; düzenlemede departman seti ve üye bayrağı
+  /// gönderilmez).
+  final bool byPerson;
 
   /// Yerel duvar saati (sunucu kurulum saat diliminde yorumlar).
   final DateTime at;
@@ -33,6 +42,19 @@ final class MeetingPlan {
 
   /// İlk gündem maddeleri (yalnız açılışta).
   final List<String> agenda;
+}
+
+/// Açılan toplantı: kimlik ve sunucunun yazamadığı katılımcılar (`failed_participants`;
+/// toplantı yine açıldı, kişiler ayrıntıdaki "katılımcı ekle" ile yeniden eklenebilir).
+@immutable
+final class MeetingPlanned {
+  const MeetingPlanned({
+    required this.id,
+    this.failedParticipantIds = const [],
+  });
+
+  final String id;
+  final List<String> failedParticipantIds;
 }
 
 /// Nottan görev girdisi (`convertNoteToTask`).
@@ -57,10 +79,11 @@ final class NoteTaskPlan {
 
 /// Toplantı yazmaları (hata: `ApiError`).
 abstract interface class MeetingPlanner {
-  /// Yeni toplantı; kimliğini döner.
-  Future<String> create(MeetingPlan plan);
+  /// Yeni toplantı; kimliğini ve eklenemeyen katılımcıları döner.
+  Future<MeetingPlanned> create(MeetingPlan plan);
 
-  /// Başlık, an, departman seti ve üye bayrağını günceller (katılımcı ve gündem değişmez).
+  /// Başlık, an, yer, departman seti ve üye bayrağını günceller (katılımcı, gündem ve davet
+  /// kipi değişmez).
   Future<void> update(String meetingId, MeetingPlan plan);
 
   /// Notu göreve dönüştürür; görev kimliğini döner.

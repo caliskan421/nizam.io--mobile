@@ -8,7 +8,7 @@ abstract interface class MeetingsRepository {
   /// `createMeeting`.
   Future<MeetingCreated> createMeeting(MeetingDraft draft);
 
-  /// `listMeetings` — görünür toplantılar (imleçli; tarih aralığı süzgeci yok).
+  /// `listMeetings` — görünür toplantılar (imleçli; satırda özet [Meeting.summary]).
   Future<PageSlice<Meeting>> listMeetings([
     PageRequest page = const PageRequest(),
   ]);
@@ -83,14 +83,14 @@ abstract interface class MeetingsRepository {
     required int expectedRevision,
   });
 
-  /// `deleteMeetingNote` (yumuşak silme).
-  Future<void> deleteNote(String noteId);
+  /// `deleteMeetingNote` — kalıcı silme (COLLABORATION-K75; geri yükleme yok). Program
+  /// seçili kapsamdan değil [programId]'den gelir (gecikmeli silme başladığı programla gider).
+  Future<void> deleteNote(String noteId, {required String programId});
 
   /// `convertNoteToTask`.
   Future<NoteConversion> convertNoteToTask(String noteId, NoteTaskDraft draft);
 
-  /// `startConference` — toplantının konferansını başlatır (yönetici ve bağlı departmanın
-  /// koordinatörü). Aktif konferans varsa yenisi açılmaz, mevcut döner.
+  /// `startConference` — toplantının konferansını başlatır (toplantıyı yöneten). Aktif konferans varsa yenisi açılmaz, mevcut döner.
   Future<MeetingConference> startConference(String meetingId);
 
   /// `endConference` — konferansı bitirir (aktif konferans yoksa da başarılıdır).

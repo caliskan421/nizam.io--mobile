@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -17,7 +19,7 @@ import 'meeting_parts.dart';
 import 'meetings_texts.dart';
 
 /// Kimlik (prototip `mdetail` kimlik bölümü): an (bugünse vurgulu), başlık, koordinatörlük
-/// kodları + görünürlük hapı, sahip satırı.
+/// kodları + görünürlük hapı, sahip satırı, yer.
 class MeetingHero extends ConsumerWidget {
   const MeetingHero({super.key, required this.room});
 
@@ -58,7 +60,9 @@ class MeetingHero extends ConsumerWidget {
           meeting: m,
           label: (d) => meetingDeptLabel(catalog, d),
           trailing: MeetingPill(
-            label: m.membersIncluded
+            label: m.byPerson
+                ? l.uiMeetingsVisPeople
+                : m.membersIncluded
                 ? l.uiMeetingsVisMembers
                 : l.uiMeetingsVisLeads,
             bold: true,
@@ -75,31 +79,79 @@ class MeetingHero extends ConsumerWidget {
                 ? ''
                 : '${meetingDeptLabel(catalog, owner)} · '
                       '${meetingDeptName(catalog, owner)}',
+            invited: !m.byPerson,
           ),
           style: t.caption.copyWith(color: c.textMuted),
         ),
+        if (m.place case final place?)
+          Text(
+            '${l.uiMeetingsPlacePrefix} $place',
+            style: t.caption.copyWith(color: c.textMuted),
+          ),
       ],
     );
   }
 }
 
 /// Konferans kartı (prototip "Konferans"): durum başlığı ve alt satırı; canlıyken bağlı
-/// kişiler (avatar yığını), bittiyse süre ve saat aralığı. Yöneticiye ve bağlı koordinatöre
-/// başlat/bitir, toplantıyı gören herkese katıl. Liste konferans taşımaz; durum yalnız
-/// ayrıntıdan (COLLABORATION-K51). Bağlı kişi ve konferans geçmişi backend'de yok
-/// ([MeetingExtras]; üretimde gizli). Katılım ekranı henüz yok (ürün kararı).
-class MeetingConferenceCard extends StatelessWidget {
+/// kişiler (sayı ve avatar yığını, `conference.connected`, COLLABORATION-K78), bittiyse süre ve
+/// saat aralığı (`last_conference`, K70). Yönetene başlat/bitir, toplantıyı gören herkese katıl.
+/// Katılım ekranı henüz yok (ürün kararı). Açık ekranda taze bağlı kişi görüntüsü eşik
+/// anında ([ConferenceConnected.freshFor]) kendiliğinden eski duruma geçer: o ana tek seferlik
+/// zamanlayıcı kurulur (sürekli yoklama yok), kart kapanınca iptal edilir.
+class MeetingConferenceCard extends ConsumerStatefulWidget {
   const MeetingConferenceCard({
     super.key,
     required this.room,
     required this.actions,
+    this.clock = DateTime.now,
   });
 
   final MeetingRoom room;
   final MeetingActions actions;
 
+  /// Şimdiki an (test sahte saat verir).
+  final DateTime Function() clock;
+
+  @override
+  ConsumerState<MeetingConferenceCard> createState() =>
+      _MeetingConferenceCardState();
+}
+
+class _MeetingConferenceCardState extends ConsumerState<MeetingConferenceCard> {
+  Timer? _stale;
+
+  /// Kurulu zamanlayıcının hedef anı (aynı eşik için yeniden kurulmaz).
+  DateTime? _staleAt;
+
+  @override
+  void dispose() {
+    _stale?.cancel();
+    super.dispose();
+  }
+
+  /// Görüntü [now] anında tazeyse eşiği geçtiği ana bir kez yeniden çizim kurar.
+  void _scheduleStale(ConferenceConnected? seen, DateTime now) {
+    final at = seen != null && seen.isFreshAt(now)
+        ? seen.observedAt!.add(
+            ConferenceConnected.freshFor + const Duration(seconds: 1),
+          )
+        : null;
+    if (at == _staleAt) return;
+    _stale?.cancel();
+    _staleAt = at;
+    _stale = at == null
+        ? null
+        : Timer(at.difference(now), () {
+            _staleAt = null;
+            if (mounted) setState(() {});
+          });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final room = widget.room;
+    final actions = widget.actions;
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
@@ -107,9 +159,14 @@ class MeetingConferenceCard extends StatelessWidget {
     final m = d.meeting;
     final conf = d.conference;
     final manage = room.permissions.canManage;
-    final now = DateTime.now();
+    final now = widget.clock();
     final status = room.status(now);
-    final connected = room.extras.connected;
+    final summary = room.summary;
+    // Hiç gözlenmemiş görüntü (observed_at null) gösterilmez; eski görüntü (K78, > 3 dk) "şu an
+    // bağlı" sayılmaz: zamanıyla yazılır, avatar ve "görüşmede" yığını çizilmez.
+    final seen = conf?.connected.observedAt == null ? null : conf!.connected;
+    final fresh = seen != null && seen.isFreshAt(now);
+    _scheduleStale(seen, now);
     final live = status?.phase == MeetingPhase.live;
     final finished = status?.phase == MeetingPhase.finished;
     final late = m.meetingDate.isBefore(now);
@@ -118,7 +175,7 @@ class MeetingConferenceCard extends StatelessWidget {
         l.uiMeetingsConfLive,
         [
           l.meetingSince(conf!.startedAt),
-          if (connected != null) '$connected / 25 ${l.uiMeetingsConnectedTail}',
+          if (seen != null) l.meetingConnected(seen, now),
         ].join(' · '),
         c.textMuted,
       ),
@@ -134,8 +191,8 @@ class MeetingConferenceCard extends StatelessWidget {
       ),
       null when finished => (
         l.meetingStatusLabel(status!),
-        '${l.meetingTime(m.meetingDate)} – '
-            '${l.meetingTime(m.meetingDate.add(Duration(minutes: status.minutes ?? 0)))}',
+        '${l.meetingTime(summary.conferenceStartedAt!)} – '
+            '${l.meetingTime(summary.conferenceEndedAt!)}',
         c.textMuted,
       ),
       null when !d.conferenceAvailable => (
@@ -151,9 +208,14 @@ class MeetingConferenceCard extends StatelessWidget {
     };
     final active = conf != null && conf.status != ConferenceStatus.ending;
     final canStart = manage && !active && d.conferenceAvailable;
-    // Canlıyken bağlı kişiler: katılımcılardan ilk [connected] kişi (örnek veri; sunucu alanı yok).
-    final faces = live && connected != null
-        ? [for (final p in d.participants.take(connected)) p.fullName]
+    // Canlıyken bağlı kişiler: hesap kimlikleri katılımcı adlarına (yoksa katalog adına) çevrilir.
+    final names = {for (final p in d.participants) p.accountId: p.fullName};
+    final catalog = ref.watch(taskCatalogControllerProvider).value;
+    final faces = live && fresh
+        ? [
+            for (final id in seen.accountIds)
+              names[id] ?? catalog?.nameOf(id) ?? l.uiMeetingsUnknownPerson,
+          ]
         : const <String>[];
     return Semantics(
       container: true,

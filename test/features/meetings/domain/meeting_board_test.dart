@@ -199,6 +199,20 @@ void main() {
       },
     );
 
+    test('kişi kipi: katılımcıyı yöneten (yönetici, yöneten oluşturan) yönetir (K21/K74)', () {
+      MeetingPermissions p(MeetingRole r) =>
+          MeetingPermissions(role: r, me: 'me', byPerson: true);
+      expect(
+        [for (final r in MeetingRole.values) p(r).canManageParticipants],
+        [true, true, false, false],
+      );
+      expect(
+        p(MeetingRole.member).canAddNote,
+        isTrue,
+        reason: 'katılımcı not yazar',
+      );
+    });
+
     test('üye yalnız kendi dönüşmemiş notunu düzenler ve siler (K28/K29)', () {
       final own = _n('o');
       final converted = _n('c', task: 'w1');

@@ -123,3 +123,59 @@ final class CoordinatorshipActivityRepositoryProvider
 
 String _$coordinatorshipActivityRepositoryHash() =>
     r'49062873e70f15fb3b785db75fecddf83a765492';
+
+/// PORT: departman yazma uçları (oluştur, düzenle, programa bağla, programdaki ad;
+/// `coordinatorships_module.dart`'ta bağlanır; sunucu).
+
+@ProviderFor(departmentRepository)
+final departmentRepositoryProvider = DepartmentRepositoryProvider._();
+
+/// PORT: departman yazma uçları (oluştur, düzenle, programa bağla, programdaki ad;
+/// `coordinatorships_module.dart`'ta bağlanır; sunucu).
+
+final class DepartmentRepositoryProvider
+    extends
+        $FunctionalProvider<
+          DepartmentRepository,
+          DepartmentRepository,
+          DepartmentRepository
+        >
+    with $Provider<DepartmentRepository> {
+  /// PORT: departman yazma uçları (oluştur, düzenle, programa bağla, programdaki ad;
+  /// `coordinatorships_module.dart`'ta bağlanır; sunucu).
+  DepartmentRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'departmentRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$departmentRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<DepartmentRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  DepartmentRepository create(Ref ref) {
+    return departmentRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DepartmentRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DepartmentRepository>(value),
+    );
+  }
+}
+
+String _$departmentRepositoryHash() =>
+    r'137dd45d9d59f945cb94afd61a0e8b5d3f279a50';

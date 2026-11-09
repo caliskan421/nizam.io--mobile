@@ -14,8 +14,9 @@ import '../application/meeting_room_controller.dart';
 import 'meeting_parts.dart';
 import 'meetings_texts.dart';
 
-/// Bilgi (prototip Bilgi bölümü): sahip, açan, davet türü, oluşturulma, görünürlük, konferans,
-/// görüntüleyen rolü; koordinatörlük listesi (dokunuş → koordinatörlük ayrıntısı).
+/// Bilgi (prototip Bilgi bölümü): sahip, açan, davet türü (`invite_mode`), yer, oluşturulma,
+/// görünürlük, konferans, görüntüleyen rolü; koordinatörlük listesi (dokunuş → koordinatörlük
+/// ayrıntısı).
 class MeetingInfo extends ConsumerWidget {
   const MeetingInfo({super.key, required this.room});
 
@@ -50,10 +51,15 @@ class MeetingInfo extends ConsumerWidget {
       ),
       (l.uiMeetingsInfoCreator, '$creator · ${l.meetingRole(m.createdByRole)}'),
       (l.uiMeetingsInfoInvite, l.meetingInviteKind(m)),
+      if (m.place case final place?) (l.uiMeetingsInfoPlace, place),
       (l.uiMeetingsInfoCreated, l.meetingDayMonth(m.createdAt)),
       (
         l.uiMeetingsInfoVisibility,
-        m.membersIncluded ? l.uiMeetingsVisAllLong : l.uiMeetingsVisLeadsLong,
+        m.byPerson
+            ? l.uiMeetingsVisPeopleLong
+            : m.membersIncluded
+            ? l.uiMeetingsVisAllLong
+            : l.uiMeetingsVisLeadsLong,
       ),
       (
         l.uiMeetingsInfoConference,
@@ -128,10 +134,12 @@ class MeetingInfo extends ConsumerWidget {
               ),
           ],
         ),
-        Text(
-          l.uiMeetingsCoordNote,
-          style: t.caption.copyWith(color: c.textMuted),
-        ),
+        // Kişi kipinde departman seti değişmez (K73); not yalnız koordinatörlük kipinde.
+        if (!m.byPerson)
+          Text(
+            l.uiMeetingsCoordNote,
+            style: t.caption.copyWith(color: c.textMuted),
+          ),
       ],
     );
   }

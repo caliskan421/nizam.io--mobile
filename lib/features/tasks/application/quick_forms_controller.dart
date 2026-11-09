@@ -15,10 +15,11 @@ import 'tasks_providers.dart';
 
 part 'quick_forms_controller.g.dart';
 
-// Hızlı işlem formları (prototip `S_home.state.tk/mt/iv`). Taslaklar sayfa kapanınca korunur
-// (keepAlive); başarılı gönderimde sıfırlanır. Yeni görev taslağı oturum nesli değişince de
-// (çıkış, başka hesapla giriş, yeniden bağlanma) sıfırlanır: önceki hesabın taslağı ve işlem
-// anahtarı yeni oturuma taşınmaz (S12). Açılışta `prepare` bağlamı uygular.
+// Hızlı işlem formları (prototip `S_home.state.tk/mt`; kişi ekleme `invite_form_controller.dart`).
+// Taslaklar sayfa kapanınca korunur (keepAlive); başarılı gönderimde sıfırlanır. Yeni görev
+// taslağı oturum nesli değişince de (çıkış, başka hesapla giriş, yeniden bağlanma) sıfırlanır:
+// önceki hesabın taslağı ve işlem anahtarı yeni oturuma taşınmaz (S12). Açılışta `prepare`
+// bağlamı uygular.
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -469,105 +470,3 @@ List<T> toggled<T>(List<T> list, T x) => list.contains(x)
           if (y != x) y,
       ]
     : [...list, x];
-
-// ==================================================================================== davet
-
-enum InviteRole { member, coordinator, admin }
-
-enum InviteError { name, email, coordinatorships }
-
-@immutable
-final class InviteForm {
-  const InviteForm({
-    this.name = '',
-    this.email = '',
-    this.role = InviteRole.member,
-    this.coordinatorships = const [],
-    this.paneOpen = false,
-    this.error,
-  });
-
-  final String name;
-  final String email;
-  final InviteRole role;
-  final List<String> coordinatorships;
-  final bool paneOpen;
-  final InviteError? error;
-
-  static final _email = RegExp(r'.+@.+\..+');
-
-  bool get emailValid => _email.hasMatch(email);
-
-  InviteForm copyWith({
-    String? name,
-    String? email,
-    InviteRole? role,
-    List<String>? coordinatorships,
-    bool? paneOpen,
-    InviteError? Function()? error,
-  }) => InviteForm(
-    name: name ?? this.name,
-    email: email ?? this.email,
-    role: role ?? this.role,
-    coordinatorships: coordinatorships ?? this.coordinatorships,
-    paneOpen: paneOpen ?? this.paneOpen,
-    error: error == null ? this.error : error(),
-  );
-}
-
-@Riverpod(keepAlive: true)
-class InviteFormController extends _$InviteFormController {
-  @override
-  InviteForm build() => const InviteForm();
-
-  void prepare({String? coordinatorship}) {
-    var f = state.copyWith(paneOpen: false, error: () => null);
-    if (coordinatorship != null) {
-      f = f.copyWith(
-        coordinatorships: [coordinatorship],
-        role: InviteRole.member,
-      );
-    }
-    state = f;
-  }
-
-  void _set(InviteForm f) => state = f.copyWith(error: () => null);
-
-  void setName(String v) => _set(state.copyWith(name: v));
-  void setEmail(String v) => _set(state.copyWith(email: v));
-
-  /// Admin tüm koordinatörlükleri yönetir: seçim satırı kapanır ve kilitlenir.
-  void setRole(InviteRole r) => _set(
-    state.copyWith(
-      role: r,
-      paneOpen: r == InviteRole.admin ? false : state.paneOpen,
-    ),
-  );
-
-  void togglePane() {
-    if (state.role == InviteRole.admin) return;
-    _set(state.copyWith(paneOpen: !state.paneOpen));
-  }
-
-  void toggleCoordinatorship(String code) => _set(
-    state.copyWith(coordinatorships: toggled(state.coordinatorships, code)),
-  );
-
-  /// Doğrular; geçerliyse gönderilen formu döner ve taslağı sıfırlar.
-  InviteForm? submit() {
-    final f = state;
-    final err = f.name.trim().isEmpty
-        ? InviteError.name
-        : !f.emailValid
-        ? InviteError.email
-        : f.role == InviteRole.coordinator && f.coordinatorships.isEmpty
-        ? InviteError.coordinatorships
-        : null;
-    if (err != null) {
-      state = f.copyWith(error: () => err);
-      return null;
-    }
-    state = const InviteForm();
-    return f;
-  }
-}

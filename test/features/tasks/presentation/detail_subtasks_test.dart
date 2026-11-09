@@ -115,10 +115,8 @@ void main() {
   testWidgets('yetkisiz işaret: soluk, dokununca neden bildirilir, istek yok', (
     tester,
   ) async {
-    // Şirket yöneticisi, departmanda üye ve göreve atanmamış: kapatamaz (WORK-K71).
-    final server = _server()
-      ..admin = true
-      ..role = 'uye';
+    // Departmanda üye, ana göreve atanmamış: kapatamaz (WORK-K71; yönetici kapatır, ADR-0030).
+    final server = _server()..role = 'uye';
     final h = await _open(tester, server);
     h.backend.requests.clear();
     await _check(tester, 'Alt s1');

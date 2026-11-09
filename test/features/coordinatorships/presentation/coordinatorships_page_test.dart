@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/ui/page/nz_shell_events.dart';
+import 'package:nizamio/core/ui/widgets/inputs/inputs.dart';
 import 'package:nizamio/features/coordinatorships/presentation/coordinatorships_page.dart';
 
 import '../../../support/harness.dart';
@@ -17,10 +19,11 @@ final _l = AppLocalizationsTr();
 Future<(Harness, RecordingAppNav)> _open(
   WidgetTester tester, {
   bool dark = false,
+  CoordBackend? backend,
 }) async {
   final h = await real(
     tester,
-    () => pilotHarness(CoordBackend(), signedIn: true),
+    () => pilotHarness(backend ?? CoordBackend(), signedIn: true),
   );
   h.read(scopeControllerProvider).selectProgram(coordProgram);
   final nav = RecordingAppNav();
@@ -60,6 +63,43 @@ void main() {
     await tester.tap(find.text('Altyapı ve tesisat'));
     await settle(tester);
     expect(nav.calls, ['coord:$dAlt']);
+  });
+
+  testWidgets('kısayol: koordinatörlük ekle yalnız şirket yöneticisinde', (
+    tester,
+  ) async {
+    final (h, _) = await _open(tester, backend: CoordBackend()..admin = false);
+    h
+        .read(shellReselectEventsProvider.notifier)
+        .fire(CoordinatorshipsPage.shellTab);
+    await settle(tester);
+    expect(find.text(_l.uiCoordFlyTimelineAll), findsOneWidget);
+    expect(find.text(_l.uiCoordFlyAdd), findsNothing);
+  });
+
+  testWidgets('yönetici: ekle formu → oluşturulur, bağlanır, listede görünür', (
+    tester,
+  ) async {
+    final backend = CoordBackend();
+    final (h, _) = await _open(tester, backend: backend);
+    h
+        .read(shellReselectEventsProvider.notifier)
+        .fire(CoordinatorshipsPage.shellTab);
+    await settle(tester);
+    await tester.tap(find.text(_l.uiCoordFlyAdd));
+    await settle(tester);
+    await tester.enterText(
+      find.widgetWithText(NzTextField, _l.uiCoordFormName),
+      'Saha',
+    );
+    await tester.tap(find.text(_l.uiCoordFormCreate));
+    await settle(tester);
+    expect(
+      [for (final (k, _) in backend.writes) k],
+      ['POST /v1/departments', 'POST /v1/program/departments'],
+    );
+    expect(find.text(_l.uiCoordFormCreate), findsNothing, reason: 'kapandı');
+    expect(find.text('Saha'), findsOneWidget);
   });
 
   for (final width in [360.0, 390.0]) {

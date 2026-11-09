@@ -24,7 +24,7 @@ mixin _UploadFlow on _$TaskDetailController {
   var _uploadGen = 0;
 
   /// Yükleme formunu açar; alt görev önseçilmez (alt görevde kanıt bayrağı yok, ADR-0024).
-  /// Sunucuda yalnız yükleme yetkisi varsa (koordinatör ya da atanmış üye; yönetici hayır).
+  /// Sunucuda yalnız yükleme yetkisi varsa (yönetici, koordinatör ya da atanmış üye).
   bool openUpload() {
     if (_task == null || !permissions.canUpload) return false;
     _uploadGen++;

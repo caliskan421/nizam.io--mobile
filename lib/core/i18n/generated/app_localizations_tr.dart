@@ -97,9 +97,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errCollaborationNoteConverted => 'Not zaten göreve dönüştürüldü.';
 
   @override
-  String get errCollaborationNoteDeleted => 'Not silinmiş; işlem yapılamaz.';
-
-  @override
   String get errCollaborationNoteImmutable => 'Bu not artık değiştirilemez.';
 
   @override
@@ -1097,13 +1094,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveDownloadAllToast => 'Tüm arşiv ZIP olarak hazırlanıyor';
 
   @override
-  String get uiArchiveCreateFolder => 'Klasör oluştur';
-
-  @override
-  String get uiArchiveCreateFolderSoon =>
-      'Klasör oluşturma sonraki adımda tasarlanacak';
-
-  @override
   String get uiArchiveShortcuts => 'Arşiv kısayolları';
 
   @override
@@ -1444,7 +1434,38 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordFlyAdd => 'Koordinatörlük ekle';
 
   @override
-  String get uiCoordToastAddForm => 'Koordinatörlük formu açılır';
+  String get uiCoordFormName => 'Ad';
+
+  @override
+  String get uiCoordFormNameEditHelper => 'Yalnız bu programdaki ad değişir';
+
+  @override
+  String get uiCoordFormKind => 'Tür';
+
+  @override
+  String get uiCoordFormDescription => 'Açıklama';
+
+  @override
+  String get uiCoordFormDescriptionHint => 'İsteğe bağlı';
+
+  @override
+  String get uiCoordFormCreate => 'Oluştur';
+
+  @override
+  String get uiCoordFormSave => 'Kaydet';
+
+  @override
+  String get uiCoordFormLinkRetry => 'Programa bağlamayı tekrar dene';
+
+  @override
+  String get uiCoordFormLinkFailed =>
+      'Koordinatörlük oluşturuldu ama seçili programa bağlanamadı. Tekrar denediğinde yeni koordinatörlük açılmaz, aynı kayıt bağlanır.';
+
+  @override
+  String get uiCoordToastCreated => 'Koordinatörlük eklendi';
+
+  @override
+  String get uiCoordToastSaved => 'Bilgiler kaydedildi';
 
   @override
   String get uiCoordFlyAllList => 'Tüm liste';
@@ -1591,29 +1612,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordMenuEdit => 'Bilgileri düzenle';
 
   @override
-  String get uiCoordToastEditTail => 'düzenleme formu açılır';
-
-  @override
   String get uiCoordMenuMeeting => 'Toplantı planla';
-
-  @override
-  String get uiCoordMenuParent => 'Üst birimi değiştir';
-
-  @override
-  String get uiCoordToastParent => 'Üst birim seçimi açılır';
 
   @override
   String get uiCoordMenuMerge => 'Başka koordinatörlükle birleştir';
 
   @override
   String get uiCoordToastMerge => 'Birleştirme önizlemesi açılır';
-
-  @override
-  String get uiCoordMenuDeactivate => 'Pasifleştir';
-
-  @override
-  String get uiCoordToastDeactivatedTail =>
-      'pasifleştirildi · görevler arşivde kalır';
 
   @override
   String get uiCoordNotFound => 'Bu koordinatörlük bulunamadı.';
@@ -1884,7 +1889,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeQaMeeting => 'Toplantı';
 
   @override
-  String get uiHomeQaInvite => 'Davet et';
+  String get uiHomeQaInvite => 'Kişi ekle';
 
   @override
   String get uiHomeQaReport => 'Rapor';
@@ -1896,7 +1901,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeQaMeetingLong => 'Toplantı oluştur';
 
   @override
-  String get uiHomeQaInviteLong => 'Kullanıcı davet et';
+  String get uiHomeQaInviteLong => 'Kullanıcı ekle';
 
   @override
   String get uiHomeQaReportLong => 'Rapor oluştur';
@@ -2431,16 +2436,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMeetingsNoteDelete => 'Notu sil';
 
   @override
-  String get uiMeetingsNoteDeleteQ => 'Not silinsin mi?';
-
-  @override
   String get uiMeetingsCancel => 'Vazgeç';
 
   @override
   String get uiMeetingsSave => 'Kaydet';
-
-  @override
-  String get uiMeetingsDelete => 'Sil';
 
   @override
   String get uiMeetingsEdited => 'düzenlendi';
@@ -2625,14 +2624,49 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMeetingsDeletedBy => 'Sildi:';
 
   @override
-  String get uiMeetingsChat => 'Toplantı sohbeti';
-
-  @override
   String get uiMeetingsConfRestart => 'Yeni konferans başlat';
 
   @override
   String get uiMeetingsAgendaCheckBlocked =>
       'Gündemi yönetici ve toplantıya bağlı koordinatörler işaretler.';
+
+  @override
+  String get uiMeetingsInvitePerson => 'Kişi';
+
+  @override
+  String get uiMeetingsVisPeople => 'Davetli kişiler';
+
+  @override
+  String get uiMeetingsVisPeopleLong => 'Yalnız davetli kişiler';
+
+  @override
+  String get uiMeetingsInfoPlace => 'Yer';
+
+  @override
+  String get uiMeetingsPlacePrefix => 'Yer:';
+
+  @override
+  String get uiMeetingsDeleteLivePrefix => 'Konferans canlı:';
+
+  @override
+  String get uiMeetingsDeleteLiveTail => 'kişinin bağlantısı kesilir.';
+
+  @override
+  String get uiMeetingsAddPeopleDescPerson =>
+      'Programdaki koordinatörlüklerin ekiplerinden seç.';
+
+  @override
+  String get uiMeetingsPoolPartial =>
+      'Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.';
+
+  @override
+  String get uiMeetingsUndo => 'Geri al';
+
+  @override
+  String get uiMeetingsSeenAgoTail => 'dk önce';
+
+  @override
+  String get uiMeetingsConnectedWasTail => 'kişi bağlıydı';
 
   @override
   String get uiMessagesTitle => 'Mesajlar';
@@ -3578,7 +3612,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksSubsHint =>
-      'Kişi ve tarih isteğe bağlıdır; kanıtı zorunlu olan alt görev, kanıt yüklenmeden bitirilemez. Görev, tüm alt görevler bitmeden tamamlanamaz.';
+      'Kişi ve tarih isteğe bağlıdır. Görev, tüm alt görevler bitmeden tamamlanamaz.';
 
   @override
   String get uiTasksDoneLc => 'tamamlandı';
@@ -4001,14 +4035,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksTPeopleInvited => 'kişi davetli';
 
   @override
-  String get uiTasksIvTitle => 'Kullanıcı davet et';
+  String get uiTasksIvTitle => 'Kullanıcı ekle';
 
   @override
   String get uiTasksIvDesc =>
-      'Davet e-postası gönderilir; kullanıcı ilk girişte şifresini belirler.';
+      'Hesap açılır ya da var olan hesap seçilen koordinatörlüğün ekibine eklenir. E-posta ya da parola gönderilmez.';
 
   @override
-  String get uiTasksIvSend => 'Davet gönder';
+  String get uiTasksIvSend => 'Ekle';
 
   @override
   String get uiTasksIvName => 'Ad soyad';
@@ -4035,15 +4069,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksRoleAdmin => 'Admin';
 
   @override
-  String get uiTasksOptionalAny => 'İsteğe bağlı';
-
-  @override
   String get uiTasksRdAdmin =>
       'Tüm koordinatörlükleri, kullanıcıları ve sezonu yönetir.';
 
   @override
   String get uiTasksRdCoordinator =>
-      'Seçtiğin koordinatörlüklerde görev atar ve dosyaları onaylar.';
+      'Seçtiğin koordinatörlükte görev atar ve dosyaları onaylar.';
 
   @override
   String get uiTasksRdMember =>
@@ -4056,11 +4087,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksErrEmail => 'Geçerli bir e-posta gir.';
 
   @override
-  String get uiTasksErrIvCoord =>
-      'Koordinatör için en az bir koordinatörlük seç.';
+  String get uiTasksErrIvCoord => 'Bir koordinatörlük seç.';
 
   @override
-  String get uiTasksTInvited => 'Davet gönderildi:';
+  String get uiTasksTInvited => 'Ekibe eklendi:';
+
+  @override
+  String get uiTasksIvExisting => 'Bu e-posta var olan bir hesaba ait:';
+
+  @override
+  String get uiTasksIvExistingTail => '“Ekle” bu hesabı ekibe ekler.';
 
   @override
   String get uiTasksExpandSheet => 'Sayfayı büyüt';
@@ -4183,7 +4219,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksSubCheckBlocked =>
-      'Alt görevi atanan kişi ya da departman koordinatörü işaretler; yönetici ekip satırı olmadan işaretleyemez.';
+      'Alt görevi yönetici, departman koordinatörü ya da alt göreve atanan kişi işaretler.';
 
   @override
   String get uiTasksConflictTitle => 'Görev siz düzenlerken değişti';
@@ -4232,6 +4268,25 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksConflictOff => 'Kapalı';
+
+  @override
+  String get uiTasksFieldPlace => 'Yer';
+
+  @override
+  String get uiTasksMtPlaceHint => 'İsteğe bağlı · ör. toplantı salonu';
+
+  @override
+  String get uiTasksErrMtPlace => 'Yer en çok 200 karakter olabilir.';
+
+  @override
+  String get uiTasksMtPoolPartial =>
+      'Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.';
+
+  @override
+  String get uiTasksTPeopleFailed => 'kişi eklenemedi';
+
+  @override
+  String get uiTasksTMeetingOpen => 'Toplantıyı aç';
 
   @override
   String get uiTimelineTitle => 'Zaman çizelgesi';

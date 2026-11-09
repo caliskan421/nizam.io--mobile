@@ -17,7 +17,7 @@ T _$identity<T>(T value) => value;
 mixin _$ConferenceToken {
 
  String get token;/// İstemcinin bağlanacağı genel adres (wss).
- String get url;@JsonKey(name: 'expires_at') DateTime get expiresAt;/// host: yönetici ve toplantıya bağlı departmanın koordinatörü; speaker: toplantıyı gören üye.
+ String get url;@JsonKey(name: 'expires_at') DateTime get expiresAt;/// host: yönetici; `coordinatorship` kipinde toplantıya bağlı departmanın koordinatörü, `person` kipinde sahip departmanı hâlâ koordine eden oluşturan. speaker: toplantıyı gören üye ve katılımcı (koordinatörlüğü düşmüş katılımcı oluşturan dahil).
  ConferenceTokenRole get role;
 /// Create a copy of ConferenceToken
 /// with the given fields replaced by the non-null parameter values.
@@ -222,7 +222,7 @@ class _ConferenceToken implements ConferenceToken {
 /// İstemcinin bağlanacağı genel adres (wss).
 @override final  String url;
 @override@JsonKey(name: 'expires_at') final  DateTime expiresAt;
-/// host: yönetici ve toplantıya bağlı departmanın koordinatörü; speaker: toplantıyı gören üye.
+/// host: yönetici; `coordinatorship` kipinde toplantıya bağlı departmanın koordinatörü, `person` kipinde sahip departmanı hâlâ koordine eden oluşturan. speaker: toplantıyı gören üye ve katılımcı (koordinatörlüğü düşmüş katılımcı oluşturan dahil).
 @override final  ConferenceTokenRole role;
 
 /// Create a copy of ConferenceToken

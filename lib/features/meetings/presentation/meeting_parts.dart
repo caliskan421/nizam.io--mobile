@@ -3,7 +3,6 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
-import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
@@ -356,12 +355,11 @@ class _MeetingLiveDotState extends State<MeetingLiveDot>
   );
 }
 
-/// Kart sayaçları (prototip `.rp-mc-stats`): gündem "2 / 3", not, kişi. [summary] null → iskelet
-/// (ayrıntı yükleniyor).
+/// Kart sayaçları (prototip `.rp-mc-stats`): gündem "2 / 3", not, kişi.
 class MeetingStats extends StatelessWidget {
   const MeetingStats({super.key, required this.summary, this.wide = false});
 
-  final MeetingSummary? summary;
+  final MeetingSummary summary;
   final bool wide;
 
   @override
@@ -369,9 +367,6 @@ class MeetingStats extends StatelessWidget {
     final l = context.l10n;
     final c = context.colors;
     final s = summary;
-    if (s == null) {
-      return const NzSkeleton.block(height: 14, width: 160);
-    }
     final style = context.text.bodySm.copyWith(
       fontSize: wide ? 13.5 : 12.5,
       color: c.textMuted,
@@ -386,18 +381,18 @@ class MeetingStats extends StatelessWidget {
     );
     return Semantics(
       label: [
-        '${l.uiMeetingsAgendaStat} ${s.agendaDone}/${s.agendaTotal}',
-        l.meetingNotesStat(s),
-        l.meetingPeopleStat(s.people),
+        '${l.uiMeetingsAgendaStat} ${s.agendaChecked}/${s.agendaTotal}',
+        l.meetingNotesStat(s.noteCount),
+        l.meetingPeopleStat(s.participantCount),
       ].join(', '),
       excludeSemantics: true,
       child: Wrap(
         spacing: wide ? 28 : 14,
         runSpacing: 6,
         children: [
-          stat(NzIcons.listBulleted, '${s.agendaDone} / ${s.agendaTotal}'),
-          stat(NzIcons.document, l.meetingNotesStat(s)),
-          stat(NzIcons.person, l.meetingPeopleStat(s.people)),
+          stat(NzIcons.listBulleted, '${s.agendaChecked} / ${s.agendaTotal}'),
+          stat(NzIcons.document, l.meetingNotesStat(s.noteCount)),
+          stat(NzIcons.person, l.meetingPeopleStat(s.participantCount)),
         ],
       ),
     );

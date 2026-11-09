@@ -541,7 +541,7 @@ class TaskDetailController extends _$TaskDetailController with _UploadFlow {
     return _write(() => _writes.renameFile(t, file.id, v), list: false);
   }
 
-  /// Dosyayı siler (yalnız yükleyen, ekip satırı varken).
+  /// Dosyayı siler (yalnız yükleyen, ekip satırı varken; yükleyen yönetici satırsız da).
   Future<WriteOutcome> deleteFile(TaskFile file) async {
     final t = _task;
     if (t == null) return WriteOutcome.invalid;

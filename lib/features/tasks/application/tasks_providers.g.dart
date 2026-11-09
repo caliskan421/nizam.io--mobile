@@ -269,6 +269,59 @@ final class MeetingPlannerProvider
 
 String _$meetingPlannerHash() => r'aad57cfc5c031795fe4b62aca040e00aa964c892';
 
+/// PORT: kişi kipindeki toplantının program havuzu (`tasks_module.dart`'ta bağlanır).
+
+@ProviderFor(meetingInviteeRepository)
+final meetingInviteeRepositoryProvider = MeetingInviteeRepositoryProvider._();
+
+/// PORT: kişi kipindeki toplantının program havuzu (`tasks_module.dart`'ta bağlanır).
+
+final class MeetingInviteeRepositoryProvider
+    extends
+        $FunctionalProvider<
+          MeetingInviteeRepository,
+          MeetingInviteeRepository,
+          MeetingInviteeRepository
+        >
+    with $Provider<MeetingInviteeRepository> {
+  /// PORT: kişi kipindeki toplantının program havuzu (`tasks_module.dart`'ta bağlanır).
+  MeetingInviteeRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'meetingInviteeRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$meetingInviteeRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<MeetingInviteeRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  MeetingInviteeRepository create(Ref ref) {
+    return meetingInviteeRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MeetingInviteeRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MeetingInviteeRepository>(value),
+    );
+  }
+}
+
+String _$meetingInviteeRepositoryHash() =>
+    r'8a72813fd366ff8ea89263139af25fc40a741a32';
+
 /// PORT: mesajdan görev ("mesajdan görev" kipindeki yeni görev formu). Gerçekleştirme messages
 /// feature'ındadır; bileşim kökünde bağlanır.
 
@@ -556,3 +609,59 @@ final class TaskTeamFamily extends $Family
   @override
   String toString() => r'taskTeamProvider';
 }
+
+/// Kişi kipindeki toplantının davet havuzu (toplantı formu ve ayrıntıdaki "katılımcı ekle").
+/// Şirket yöneticisi: kataloğun bütün ekipleri (programın departmanları okunur). Koordinatör:
+/// kendi ekipleri (katalog) + programın geri kalanı ([MeetingInviteeRepository], koordinatörü
+/// olunan ilk departman üzerinden). Havuz okunamazsa ya da koordinatörlük yoksa yalnız
+/// katalogdaki ekipler, [MeetingInvitees.partial] ile (ekran kısıtı açıkça yazar).
+
+@ProviderFor(meetingInvitees)
+final meetingInviteesProvider = MeetingInviteesProvider._();
+
+/// Kişi kipindeki toplantının davet havuzu (toplantı formu ve ayrıntıdaki "katılımcı ekle").
+/// Şirket yöneticisi: kataloğun bütün ekipleri (programın departmanları okunur). Koordinatör:
+/// kendi ekipleri (katalog) + programın geri kalanı ([MeetingInviteeRepository], koordinatörü
+/// olunan ilk departman üzerinden). Havuz okunamazsa ya da koordinatörlük yoksa yalnız
+/// katalogdaki ekipler, [MeetingInvitees.partial] ile (ekran kısıtı açıkça yazar).
+
+final class MeetingInviteesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<MeetingInvitees>,
+          MeetingInvitees,
+          FutureOr<MeetingInvitees>
+        >
+    with $FutureModifier<MeetingInvitees>, $FutureProvider<MeetingInvitees> {
+  /// Kişi kipindeki toplantının davet havuzu (toplantı formu ve ayrıntıdaki "katılımcı ekle").
+  /// Şirket yöneticisi: kataloğun bütün ekipleri (programın departmanları okunur). Koordinatör:
+  /// kendi ekipleri (katalog) + programın geri kalanı ([MeetingInviteeRepository], koordinatörü
+  /// olunan ilk departman üzerinden). Havuz okunamazsa ya da koordinatörlük yoksa yalnız
+  /// katalogdaki ekipler, [MeetingInvitees.partial] ile (ekran kısıtı açıkça yazar).
+  MeetingInviteesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'meetingInviteesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$meetingInviteesHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<MeetingInvitees> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<MeetingInvitees> create(Ref ref) {
+    return meetingInvitees(ref);
+  }
+}
+
+String _$meetingInviteesHash() => r'2cf73b5e8c623282bd8e5e0a56f092aa3cd59159';

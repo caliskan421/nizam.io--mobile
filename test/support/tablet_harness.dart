@@ -1132,7 +1132,7 @@ void expectHomeSourceGeometry(TabletSession s) {
   ));
   card('Yeni görev', RegExp(r'^Yeni görev$'), (l: 16, t: 496, w: 83.5, h: 90));
   card('Toplantı', RegExp(r'^Toplantı$'), (l: 107.5, t: 496, w: 83.5, h: 90));
-  card('Davet et', RegExp(r'^Davet et$'), (l: 199, t: 496, w: 83.5, h: 90));
+  card('Kişi ekle', RegExp(r'^Kişi ekle$'), (l: 199, t: 496, w: 83.5, h: 90));
   card('Rapor', RegExp(r'^Rapor$'), (l: 290.5, t: 496, w: 83.5, h: 90));
   card('Rol Admin', RegExp(r'^2\s*Admin'), (l: 16, t: 636, w: 114, h: 88));
   card('Rol Koordinatör', RegExp(r'^15\s*Koordinatör'), (

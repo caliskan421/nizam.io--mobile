@@ -1,6 +1,6 @@
 {
   "@@locale": "tr",
-  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit a8e79dd1ae07e19a32d81b69a5cea60546d61039 src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.11.0-api (4d0bbd0605ade5adfc0599e9586944ed8dab7bcb); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
+  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit a8e79dd1ae07e19a32d81b69a5cea60546d61039 src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.12.0-api (861beb5ec246f62efb2854f7d4098a3ad5847bba); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
   "errAssistantBusy": "Asistan şu anda meşgul; biraz sonra yeniden deneyin.",
   "@errAssistantBusy": {
     "description": "assistant.busy"
@@ -100,10 +100,6 @@
   "errCollaborationNoteConverted": "Not zaten göreve dönüştürüldü.",
   "@errCollaborationNoteConverted": {
     "description": "collaboration.note_converted"
-  },
-  "errCollaborationNoteDeleted": "Not silinmiş; işlem yapılamaz.",
-  "@errCollaborationNoteDeleted": {
-    "description": "collaboration.note_deleted"
   },
   "errCollaborationNoteImmutable": "Bu not artık değiştirilemez.",
   "@errCollaborationNoteImmutable": {
@@ -1285,14 +1281,6 @@
   "@uiArchiveDownloadAllToast": {
     "description": "ui.archive.download_all_toast"
   },
-  "uiArchiveCreateFolder": "Klasör oluştur",
-  "@uiArchiveCreateFolder": {
-    "description": "ui.archive.create_folder"
-  },
-  "uiArchiveCreateFolderSoon": "Klasör oluşturma sonraki adımda tasarlanacak",
-  "@uiArchiveCreateFolderSoon": {
-    "description": "ui.archive.create_folder_soon"
-  },
   "uiArchiveShortcuts": "Arşiv kısayolları",
   "@uiArchiveShortcuts": {
     "description": "ui.archive.shortcuts"
@@ -1745,9 +1733,49 @@
   "@uiCoordFlyAdd": {
     "description": "ui.coord.fly_add"
   },
-  "uiCoordToastAddForm": "Koordinatörlük formu açılır",
-  "@uiCoordToastAddForm": {
-    "description": "ui.coord.toast_add_form"
+  "uiCoordFormName": "Ad",
+  "@uiCoordFormName": {
+    "description": "ui.coord.form_name"
+  },
+  "uiCoordFormNameEditHelper": "Yalnız bu programdaki ad değişir",
+  "@uiCoordFormNameEditHelper": {
+    "description": "ui.coord.form_name_edit_helper"
+  },
+  "uiCoordFormKind": "Tür",
+  "@uiCoordFormKind": {
+    "description": "ui.coord.form_kind"
+  },
+  "uiCoordFormDescription": "Açıklama",
+  "@uiCoordFormDescription": {
+    "description": "ui.coord.form_description"
+  },
+  "uiCoordFormDescriptionHint": "İsteğe bağlı",
+  "@uiCoordFormDescriptionHint": {
+    "description": "ui.coord.form_description_hint"
+  },
+  "uiCoordFormCreate": "Oluştur",
+  "@uiCoordFormCreate": {
+    "description": "ui.coord.form_create"
+  },
+  "uiCoordFormSave": "Kaydet",
+  "@uiCoordFormSave": {
+    "description": "ui.coord.form_save"
+  },
+  "uiCoordFormLinkRetry": "Programa bağlamayı tekrar dene",
+  "@uiCoordFormLinkRetry": {
+    "description": "ui.coord.form_link_retry"
+  },
+  "uiCoordFormLinkFailed": "Koordinatörlük oluşturuldu ama seçili programa bağlanamadı. Tekrar denediğinde yeni koordinatörlük açılmaz, aynı kayıt bağlanır.",
+  "@uiCoordFormLinkFailed": {
+    "description": "ui.coord.form_link_failed"
+  },
+  "uiCoordToastCreated": "Koordinatörlük eklendi",
+  "@uiCoordToastCreated": {
+    "description": "ui.coord.toast_created"
+  },
+  "uiCoordToastSaved": "Bilgiler kaydedildi",
+  "@uiCoordToastSaved": {
+    "description": "ui.coord.toast_saved"
   },
   "uiCoordFlyAllList": "Tüm liste",
   "@uiCoordFlyAllList": {
@@ -1941,21 +1969,9 @@
   "@uiCoordMenuEdit": {
     "description": "ui.coord.menu_edit"
   },
-  "uiCoordToastEditTail": "düzenleme formu açılır",
-  "@uiCoordToastEditTail": {
-    "description": "ui.coord.toast_edit_tail"
-  },
   "uiCoordMenuMeeting": "Toplantı planla",
   "@uiCoordMenuMeeting": {
     "description": "ui.coord.menu_meeting"
-  },
-  "uiCoordMenuParent": "Üst birimi değiştir",
-  "@uiCoordMenuParent": {
-    "description": "ui.coord.menu_parent"
-  },
-  "uiCoordToastParent": "Üst birim seçimi açılır",
-  "@uiCoordToastParent": {
-    "description": "ui.coord.toast_parent"
   },
   "uiCoordMenuMerge": "Başka koordinatörlükle birleştir",
   "@uiCoordMenuMerge": {
@@ -1964,14 +1980,6 @@
   "uiCoordToastMerge": "Birleştirme önizlemesi açılır",
   "@uiCoordToastMerge": {
     "description": "ui.coord.toast_merge"
-  },
-  "uiCoordMenuDeactivate": "Pasifleştir",
-  "@uiCoordMenuDeactivate": {
-    "description": "ui.coord.menu_deactivate"
-  },
-  "uiCoordToastDeactivatedTail": "pasifleştirildi · görevler arşivde kalır",
-  "@uiCoordToastDeactivatedTail": {
-    "description": "ui.coord.toast_deactivated_tail"
   },
   "uiCoordNotFound": "Bu koordinatörlük bulunamadı.",
   "@uiCoordNotFound": {
@@ -2329,7 +2337,7 @@
   "@uiHomeQaMeeting": {
     "description": "ui.home.qa_meeting"
   },
-  "uiHomeQaInvite": "Davet et",
+  "uiHomeQaInvite": "Kişi ekle",
   "@uiHomeQaInvite": {
     "description": "ui.home.qa_invite"
   },
@@ -2345,7 +2353,7 @@
   "@uiHomeQaMeetingLong": {
     "description": "ui.home.qa_meeting_long"
   },
-  "uiHomeQaInviteLong": "Kullanıcı davet et",
+  "uiHomeQaInviteLong": "Kullanıcı ekle",
   "@uiHomeQaInviteLong": {
     "description": "ui.home.qa_invite_long"
   },
@@ -3041,10 +3049,6 @@
   "@uiMeetingsNoteDelete": {
     "description": "ui.meetings.note_delete"
   },
-  "uiMeetingsNoteDeleteQ": "Not silinsin mi?",
-  "@uiMeetingsNoteDeleteQ": {
-    "description": "ui.meetings.note_delete_q"
-  },
   "uiMeetingsCancel": "Vazgeç",
   "@uiMeetingsCancel": {
     "description": "ui.meetings.cancel"
@@ -3052,10 +3056,6 @@
   "uiMeetingsSave": "Kaydet",
   "@uiMeetingsSave": {
     "description": "ui.meetings.save"
-  },
-  "uiMeetingsDelete": "Sil",
-  "@uiMeetingsDelete": {
-    "description": "ui.meetings.delete"
   },
   "uiMeetingsEdited": "düzenlendi",
   "@uiMeetingsEdited": {
@@ -3293,10 +3293,6 @@
   "@uiMeetingsDeletedBy": {
     "description": "ui.meetings.deleted_by"
   },
-  "uiMeetingsChat": "Toplantı sohbeti",
-  "@uiMeetingsChat": {
-    "description": "ui.meetings.chat"
-  },
   "uiMeetingsConfRestart": "Yeni konferans başlat",
   "@uiMeetingsConfRestart": {
     "description": "ui.meetings.conf_restart"
@@ -3304,6 +3300,54 @@
   "uiMeetingsAgendaCheckBlocked": "Gündemi yönetici ve toplantıya bağlı koordinatörler işaretler.",
   "@uiMeetingsAgendaCheckBlocked": {
     "description": "ui.meetings.agenda_check_blocked"
+  },
+  "uiMeetingsInvitePerson": "Kişi",
+  "@uiMeetingsInvitePerson": {
+    "description": "ui.meetings.invite_person"
+  },
+  "uiMeetingsVisPeople": "Davetli kişiler",
+  "@uiMeetingsVisPeople": {
+    "description": "ui.meetings.vis_people"
+  },
+  "uiMeetingsVisPeopleLong": "Yalnız davetli kişiler",
+  "@uiMeetingsVisPeopleLong": {
+    "description": "ui.meetings.vis_people_long"
+  },
+  "uiMeetingsInfoPlace": "Yer",
+  "@uiMeetingsInfoPlace": {
+    "description": "ui.meetings.info_place"
+  },
+  "uiMeetingsPlacePrefix": "Yer:",
+  "@uiMeetingsPlacePrefix": {
+    "description": "ui.meetings.place_prefix"
+  },
+  "uiMeetingsDeleteLivePrefix": "Konferans canlı:",
+  "@uiMeetingsDeleteLivePrefix": {
+    "description": "ui.meetings.delete_live_prefix"
+  },
+  "uiMeetingsDeleteLiveTail": "kişinin bağlantısı kesilir.",
+  "@uiMeetingsDeleteLiveTail": {
+    "description": "ui.meetings.delete_live_tail"
+  },
+  "uiMeetingsAddPeopleDescPerson": "Programdaki koordinatörlüklerin ekiplerinden seç.",
+  "@uiMeetingsAddPeopleDescPerson": {
+    "description": "ui.meetings.add_people_desc_person"
+  },
+  "uiMeetingsPoolPartial": "Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.",
+  "@uiMeetingsPoolPartial": {
+    "description": "ui.meetings.pool_partial"
+  },
+  "uiMeetingsUndo": "Geri al",
+  "@uiMeetingsUndo": {
+    "description": "ui.meetings.undo"
+  },
+  "uiMeetingsSeenAgoTail": "dk önce",
+  "@uiMeetingsSeenAgoTail": {
+    "description": "ui.meetings.seen_ago_tail"
+  },
+  "uiMeetingsConnectedWasTail": "kişi bağlıydı",
+  "@uiMeetingsConnectedWasTail": {
+    "description": "ui.meetings.connected_was_tail"
   },
   "uiMessagesTitle": "Mesajlar",
   "@uiMessagesTitle": {
@@ -4525,7 +4569,7 @@
   "@uiTasksEvDue": {
     "description": "ui.tasks.ev_due"
   },
-  "uiTasksSubsHint": "Kişi ve tarih isteğe bağlıdır; kanıtı zorunlu olan alt görev, kanıt yüklenmeden bitirilemez. Görev, tüm alt görevler bitmeden tamamlanamaz.",
+  "uiTasksSubsHint": "Kişi ve tarih isteğe bağlıdır. Görev, tüm alt görevler bitmeden tamamlanamaz.",
   "@uiTasksSubsHint": {
     "description": "ui.tasks.subs_hint"
   },
@@ -5077,15 +5121,15 @@
   "@uiTasksTPeopleInvited": {
     "description": "ui.tasks.t_people_invited"
   },
-  "uiTasksIvTitle": "Kullanıcı davet et",
+  "uiTasksIvTitle": "Kullanıcı ekle",
   "@uiTasksIvTitle": {
     "description": "ui.tasks.iv_title"
   },
-  "uiTasksIvDesc": "Davet e-postası gönderilir; kullanıcı ilk girişte şifresini belirler.",
+  "uiTasksIvDesc": "Hesap açılır ya da var olan hesap seçilen koordinatörlüğün ekibine eklenir. E-posta ya da parola gönderilmez.",
   "@uiTasksIvDesc": {
     "description": "ui.tasks.iv_desc"
   },
-  "uiTasksIvSend": "Davet gönder",
+  "uiTasksIvSend": "Ekle",
   "@uiTasksIvSend": {
     "description": "ui.tasks.iv_send"
   },
@@ -5121,15 +5165,11 @@
   "@uiTasksRoleAdmin": {
     "description": "ui.tasks.role_admin"
   },
-  "uiTasksOptionalAny": "İsteğe bağlı",
-  "@uiTasksOptionalAny": {
-    "description": "ui.tasks.optional_any"
-  },
   "uiTasksRdAdmin": "Tüm koordinatörlükleri, kullanıcıları ve sezonu yönetir.",
   "@uiTasksRdAdmin": {
     "description": "ui.tasks.rd_admin"
   },
-  "uiTasksRdCoordinator": "Seçtiğin koordinatörlüklerde görev atar ve dosyaları onaylar.",
+  "uiTasksRdCoordinator": "Seçtiğin koordinatörlükte görev atar ve dosyaları onaylar.",
   "@uiTasksRdCoordinator": {
     "description": "ui.tasks.rd_coordinator"
   },
@@ -5145,13 +5185,21 @@
   "@uiTasksErrEmail": {
     "description": "ui.tasks.err_email"
   },
-  "uiTasksErrIvCoord": "Koordinatör için en az bir koordinatörlük seç.",
+  "uiTasksErrIvCoord": "Bir koordinatörlük seç.",
   "@uiTasksErrIvCoord": {
     "description": "ui.tasks.err_iv_coord"
   },
-  "uiTasksTInvited": "Davet gönderildi:",
+  "uiTasksTInvited": "Ekibe eklendi:",
   "@uiTasksTInvited": {
     "description": "ui.tasks.t_invited"
+  },
+  "uiTasksIvExisting": "Bu e-posta var olan bir hesaba ait:",
+  "@uiTasksIvExisting": {
+    "description": "ui.tasks.iv_existing"
+  },
+  "uiTasksIvExistingTail": "“Ekle” bu hesabı ekibe ekler.",
+  "@uiTasksIvExistingTail": {
+    "description": "ui.tasks.iv_existing_tail"
   },
   "uiTasksExpandSheet": "Sayfayı büyüt",
   "@uiTasksExpandSheet": {
@@ -5305,7 +5353,7 @@
   "@uiTasksRowOwner": {
     "description": "ui.tasks.row_owner"
   },
-  "uiTasksSubCheckBlocked": "Alt görevi atanan kişi ya da departman koordinatörü işaretler; yönetici ekip satırı olmadan işaretleyemez.",
+  "uiTasksSubCheckBlocked": "Alt görevi yönetici, departman koordinatörü ya da alt göreve atanan kişi işaretler.",
   "@uiTasksSubCheckBlocked": {
     "description": "ui.tasks.sub_check_blocked"
   },
@@ -5368,6 +5416,30 @@
   "uiTasksConflictOff": "Kapalı",
   "@uiTasksConflictOff": {
     "description": "ui.tasks.conflict_off"
+  },
+  "uiTasksFieldPlace": "Yer",
+  "@uiTasksFieldPlace": {
+    "description": "ui.tasks.field_place"
+  },
+  "uiTasksMtPlaceHint": "İsteğe bağlı · ör. toplantı salonu",
+  "@uiTasksMtPlaceHint": {
+    "description": "ui.tasks.mt_place_hint"
+  },
+  "uiTasksErrMtPlace": "Yer en çok 200 karakter olabilir.",
+  "@uiTasksErrMtPlace": {
+    "description": "ui.tasks.err_mt_place"
+  },
+  "uiTasksMtPoolPartial": "Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.",
+  "@uiTasksMtPoolPartial": {
+    "description": "ui.tasks.mt_pool_partial"
+  },
+  "uiTasksTPeopleFailed": "kişi eklenemedi",
+  "@uiTasksTPeopleFailed": {
+    "description": "ui.tasks.t_people_failed"
+  },
+  "uiTasksTMeetingOpen": "Toplantıyı aç",
+  "@uiTasksTMeetingOpen": {
+    "description": "ui.tasks.t_meeting_open"
   },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {

@@ -70,6 +70,8 @@ Map<String, Object?> _meeting(
   'title': 'Toplantı $id',
   'meeting_date': '2026-11-20T07:00:00Z',
   'members_included': true,
+  'invite_mode': 'coordinatorship',
+  'place': null,
   'created_by_account_id': 'a1',
   'created_by_role': 'admin',
   'created_at': '2026-11-01T08:00:00Z',

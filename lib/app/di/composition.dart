@@ -75,7 +75,6 @@ class Composition {
     registerMeetingsModule(
       locator,
       apiDio: () => container.read(apiDioProvider),
-      flavor: flavor,
     );
     registerMessagesModule(
       locator,

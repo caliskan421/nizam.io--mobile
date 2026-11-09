@@ -30,7 +30,6 @@ const localizedErrorCodes = <String>{
   'collaboration.not_authorized',
   'collaboration.not_deleted',
   'collaboration.note_converted',
-  'collaboration.note_deleted',
   'collaboration.note_immutable',
   'collaboration.note_not_found',
   'collaboration.participant_invalid',
@@ -321,8 +320,6 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errCollaborationNotDeleted;
     case 'collaboration.note_converted':
       return l.errCollaborationNoteConverted;
-    case 'collaboration.note_deleted':
-      return l.errCollaborationNoteDeleted;
     case 'collaboration.note_immutable':
       return l.errCollaborationNoteImmutable;
     case 'collaboration.note_not_found':

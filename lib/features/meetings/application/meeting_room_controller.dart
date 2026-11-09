@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter_riverpod/misc.dart' show KeepAliveLink;
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -10,7 +13,6 @@ import '../domain/meeting.dart';
 import '../domain/meeting_board.dart';
 import '../domain/meeting_status.dart';
 import '../domain/meetings_repository.dart';
-import 'meeting_summary_controller.dart';
 import 'meetings_controller.dart';
 import 'meetings_providers.dart';
 
@@ -61,7 +63,6 @@ final class MeetingRoom {
     required List<MeetingNote> notes,
     this.coordinatesLinked = false,
     this.me,
-    this.extras = MeetingExtras.none,
     this.noteSubmitting = false,
   }) : notes = List.unmodifiable(notes);
 
@@ -72,29 +73,26 @@ final class MeetingRoom {
   final MeetingDetail detail;
   final List<MeetingNote> notes;
 
-  /// Görüntüleyen toplantıya bağlı bir departmanın koordinatörü (katılımcı yönetimi, K21).
+  /// Görüntüleyen toplantıya bağlı bir departmanın koordinatörü (`coordinatorship` kipinde
+  /// katılımcı yönetimi, K21).
   final bool coordinatesLinked;
 
   /// Oturumdaki hesap.
   final String? me;
 
-  /// Backend'in taşımadığı olgular (geçici; üretimde boş).
-  final MeetingExtras extras;
-
   Meeting get meeting => detail.meeting;
 
+  /// Ayrıntının güncel özeti (sayaçlar, konferans durumu; liste kartına da yazılır).
+  MeetingSummary get summary => MeetingSummary.of(detail, notes: notes.length);
+
   /// Konferans kartı ve kimlik durumu ([now] anına göre).
-  MeetingStatus? status(DateTime now) => meetingStatus(
-    meeting,
-    now: now,
-    conference: detail.conference,
-    conferenceKnown: true,
-    extras: extras,
-  );
+  MeetingStatus? status(DateTime now) =>
+      meetingStatus(meeting, now: now, summary: summary);
 
   MeetingPermissions get permissions => MeetingPermissions(
     role: detail.viewerRole,
     me: me,
+    byPerson: meeting.byPerson,
     coordinatesLinked: coordinatesLinked,
   );
 
@@ -107,7 +105,6 @@ final class MeetingRoom {
     notes: notes ?? this.notes,
     coordinatesLinked: coordinatesLinked,
     me: me,
-    extras: extras,
     noteSubmitting: noteSubmitting ?? this.noteSubmitting,
   );
 }
@@ -131,6 +128,32 @@ final class NoteIgnored extends NoteSubmit {
   const NoteIgnored();
 }
 
+/// Geri alınabilir bekleyen not silmesi (başladığı program ve oturuma bağlı).
+final class _PendingDelete {
+  _PendingDelete(
+    this.note,
+    this.index,
+    this.repo, {
+    required this.programId,
+    required this.live,
+  });
+
+  final MeetingNote note;
+  final int index;
+
+  /// Zamanlama anındaki kaynak (ekran kapansa da istek aynı kaynakla gider).
+  final MeetingsRepository repo;
+
+  /// Başladığı program: istek seçili kapsamla değil bununla gider (arada programa geçilse
+  /// de not kendi programında silinir; kullanıcı silip geri almadı).
+  final String programId;
+
+  /// Silmenin başladığı oturum hâlâ etkin mi; değilse istek gönderilmez, not sunucuda kalır.
+  final bool Function() live;
+  final done = Completer<ApiError?>();
+  Timer? timer;
+}
+
 /// Toplantı ayrıntısı ve yazmaları. Komutlar sunucu yanıtıyla durumu günceller ve hata kodunu
 /// döner (null → başarı); gündem işareti ve silmeler iyimserdir, hatada geri alınır.
 @riverpod
@@ -145,11 +168,16 @@ class MeetingRoomController extends _$MeetingRoomController {
 
   @override
   Future<MeetingRoom> build(String id) async {
+    // Bekleyen silme varken sağlayıcı canlı kalır (yeniden kurulumda bağ yenilenir); kalıcı
+    // atılmada (kapsayıcı kapanışı) bekleyen silmeler GÖNDERİLMEDEN iptal edilir.
+    _deleteHold = _pendingDeletes.isEmpty ? null : ref.keepAlive();
+    ref.onDispose(() {
+      if (!ref.mounted) _dropPendingDeletes();
+    });
     final program = ref.watch(scopeStateProvider).programId;
     final repo = ref.read(meetingsRepositoryProvider);
     final catalog = await ref.read(taskCatalogControllerProvider.future);
     final detail = await repo.getMeeting(id);
-    final now = DateTime.now();
     final notes = [...detail.notes.items];
     var cursor = detail.notes.nextCursor;
     for (var p = 0; cursor != null && p < notesMaxPages; p++) {
@@ -166,11 +194,12 @@ class MeetingRoomController extends _$MeetingRoomController {
         : catalog.access?.seatsIn(program) ?? const <TeamSeat>[];
     final room = MeetingRoom(
       detail: detail,
-      notes: notes,
+      // Silinmesi bekleyen not yeniden okunsa da gizli kalır.
+      notes: [
+        for (final n in notes)
+          if (_pendingFor(n.id) == null) n,
+      ],
       me: catalog.me,
-      extras: ref
-          .read(meetingExtrasRepositoryProvider)
-          .of(detail.meeting, DateTime(now.year, now.month, now.day)),
       coordinatesLinked: seats.any(
         (s) =>
             s.role == SeatRole.coordinator && linked.contains(s.departmentId),
@@ -199,13 +228,12 @@ class MeetingRoomController extends _$MeetingRoomController {
     _syncSummary(room);
   }
 
-  /// Liste kartı açıksa sayaçlarını ayrıntıdan günceller (ağ isteği yok).
+  /// Liste okunduysa satırın özetini ayrıntıdan günceller (ağ isteği yok).
   void _syncSummary(MeetingRoom room) {
-    final summary = meetingSummaryControllerProvider(id);
-    if (!ref.exists(summary)) return;
+    if (!ref.exists(meetingsBoardControllerProvider)) return;
     ref
-        .read(summary.notifier)
-        .put(MeetingSummary.of(room.detail, notes: room.notes.length));
+        .read(meetingsBoardControllerProvider.notifier)
+        .putSummary(id, room.summary);
   }
 
   void _agenda(List<AgendaItem> items) {
@@ -356,22 +384,112 @@ class MeetingRoomController extends _$MeetingRoomController {
     }
   }
 
-  /// Notu siler (yumuşak; iyimser).
-  Future<ApiError?> deleteNote(MeetingNote n) async {
+  /// "Geri al" süresi: eylemli bildirimin görünürlüğüyle aynı (`NzToast.lifeWithAction`).
+  static const noteUndoWindow = Duration(milliseconds: 3200);
+
+  /// Geri alınabilir bekleyen not silmeleri. State'ten bağımsızdır: yenileme state'i yeniden
+  /// kursa da bekleyen not gizli kalır, zamanlayıcı sürer.
+  final _pendingDeletes = <_PendingDelete>[];
+
+  _PendingDelete? _pendingFor(String noteId) =>
+      _pendingDeletes.where((p) => p.note.id == noteId).firstOrNull;
+
+  /// Bekleyen silme varken sağlayıcıyı canlı tutan bağ (ekran kapansa da istek gider).
+  KeepAliveLink? _deleteHold;
+
+  /// Notu hemen gizler; [window] içinde [undoNoteDelete] çağrılmazsa kalıcı siler
+  /// (COLLABORATION-K75: sunucuda geri yükleme yok, "Geri al" istemcidedir; F63 devri §4).
+  /// Geri alınırsa istek GİTMEZ. Ekran kapanırsa sağlayıcı silme bitene dek canlı kalır ve istek
+  /// süre dolunca gider (kullanıcı sildi, geri almadı; bildirimdeki "Geri al" o süre boyunca
+  /// çalışır). Sonuç silme bitince ya da geri alınınca gelir: hata (not yerine döner) ya da null.
+  /// İstek başladığı programla gider; oturum değiştiyse gönderilmez ([_PendingDelete]).
+  Future<ApiError?> deleteNote(
+    MeetingNote n, {
+    Duration window = noteUndoWindow,
+  }) async {
     final r = _room;
-    if (r == null) return null;
+    final program = ref.read(scopeStateProvider).programId;
+    if (r == null || program == null || _pendingFor(n.id) != null) return null;
+    final session = ref.read(sessionControllerProvider);
+    final generation = session.generation;
+    final p = _PendingDelete(
+      n,
+      r.notes.indexWhere((x) => x.id == n.id),
+      _repo,
+      programId: program,
+      live: () => session.generation == generation,
+    );
+    _pendingDeletes.add(p);
+    _deleteHold ??= ref.keepAlive();
     _notes([
       for (final x in r.notes)
-        if (!identical(x, n)) x,
+        if (x.id != n.id) x,
     ]);
-    try {
-      await _repo.deleteNote(n.id);
-      return null;
-    } on Object catch (e) {
-      final cur = _room;
-      if (cur != null) _notes([n, ...cur.notes]);
-      return toApiError(e);
+    p.timer = Timer(window, () => _commitDelete(n.id));
+    return p.done.future;
+  }
+
+  /// Bekleyen silmeyi iptal eder (istek gönderilmez, not yerine döner). Süre dolmuşsa ya da
+  /// istek uçuştaysa false.
+  bool undoNoteDelete(String noteId) {
+    final p = _pendingFor(noteId);
+    if (p == null || !(p.timer?.isActive ?? false)) return false;
+    p.timer!.cancel();
+    _pendingDeletes.remove(p);
+    _restoreNote(p);
+    _releaseHold();
+    p.done.complete(null);
+    return true;
+  }
+
+  Future<void> _commitDelete(String noteId) async {
+    final p = _pendingFor(noteId);
+    if (p == null) return;
+    if (!p.live()) {
+      // Oturum değişti (çıkış/başka hesap): istek gönderilmez, not sunucuda kalır.
+      _pendingDeletes.remove(p);
+      if (ref.mounted) _releaseHold();
+      p.done.complete(null);
+      return;
     }
+    ApiError? error;
+    try {
+      await p.repo.deleteNote(noteId, programId: p.programId);
+    } on Object catch (e) {
+      error = toApiError(e);
+    }
+    _pendingDeletes.remove(p);
+    if (ref.mounted) {
+      if (error != null) _restoreNote(p);
+      _releaseHold();
+    }
+    p.done.complete(error);
+  }
+
+  /// Notu eski yerine koyar (zaten listedeyse dokunmaz).
+  void _restoreNote(_PendingDelete p) {
+    final cur = _room;
+    if (cur == null || cur.notes.any((x) => x.id == p.note.id)) return;
+    final at = p.index < 0 || p.index > cur.notes.length ? 0 : p.index;
+    _notes([...cur.notes]..insert(at, p.note));
+  }
+
+  void _releaseHold() {
+    if (_pendingDeletes.isNotEmpty) return;
+    _deleteHold?.close();
+    _deleteHold = null;
+  }
+
+  /// Kalıcı atılma: bekleyen silmeler gönderilmeden iptal (oturum/kapsayıcı gitti).
+  void _dropPendingDeletes() {
+    for (final p in _pendingDeletes) {
+      if (p.timer?.isActive ?? false) {
+        p.timer!.cancel();
+        p.done.complete(null);
+      }
+    }
+    _pendingDeletes.removeWhere((p) => p.done.isCompleted);
+    _deleteHold = null;
   }
 
   /// Konferansı başlatır (aktif varsa sunucu mevcut olanı döner).
@@ -388,18 +506,32 @@ class MeetingRoomController extends _$MeetingRoomController {
     }
   }
 
-  /// Konferansı herkes için bitirir.
+  /// Konferansı herkes için bitirir, sonra ayrıntıyı sunucudan yeniden okur: kapanış durumu,
+  /// `last_conference` ve özet (liste kartı dahil) sunucudan gelir; geçmiş yerelde uydurulmaz.
+  /// Yeniden okuma düşerse bitirme yine başarıdır; konferans "kapanıyor" (`ending`) görünür ve
+  /// aşağı çekerek yenilenir (otomatik yeniden deneme yok).
   Future<ApiError?> endConference() async {
     try {
       await _repo.endConference(id);
-      final cur = _room;
-      if (cur != null) {
-        _put(cur.copyWith(detail: cur.detail.copyWith(conference: () => null)));
-      }
-      return null;
     } on Object catch (e) {
       return toApiError(e);
     }
+    try {
+      final detail = await _repo.getMeeting(id);
+      final cur = _room;
+      if (cur != null) _put(cur.copyWith(detail: detail));
+    } on Object {
+      final cur = _room;
+      final c = cur?.detail.conference;
+      if (cur != null && c != null) {
+        _put(
+          cur.copyWith(
+            detail: cur.detail.copyWith(conference: () => c.closing),
+          ),
+        );
+      }
+    }
+    return null;
   }
 
   /// [people] sırayla eklenir (yanıt yalnız girdiyi yansıtır; ad katalogdan gelir); eklenemeyenler

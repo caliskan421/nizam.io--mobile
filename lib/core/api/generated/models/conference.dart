@@ -4,6 +4,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'conference_connected.dart';
 import 'conference_status.dart';
 
 part 'conference.freezed.dart';
@@ -19,6 +20,7 @@ abstract class Conference with _$Conference {
     required ConferenceStatus status,
     @JsonKey(name: 'started_at') required DateTime startedAt,
     @JsonKey(name: 'started_by_account_id') required String startedByAccountId,
+    required ConferenceConnected connected,
   }) = _Conference;
 
   factory Conference.fromJson(Map<String, Object?> json) =>

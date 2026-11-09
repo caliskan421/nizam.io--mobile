@@ -42,7 +42,7 @@ final class MeetingFormControllerProvider
 }
 
 String _$meetingFormControllerHash() =>
-    r'35c93520e76e2d70cc506e5c0fc97eaf78a4f056';
+    r'ea09eeb6e225b16014b4b7dec694ceae35716b9c';
 
 abstract class _$MeetingFormController extends $Notifier<MeetingForm> {
   MeetingForm build();

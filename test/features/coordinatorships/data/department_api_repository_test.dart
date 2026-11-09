@@ -50,13 +50,9 @@ class _Adapter implements HttpClientAdapter {
   Map<String, List<String>> headers = const {},
 }) {
   final adapter = _Adapter(body, status, headers);
-  return (
-    ApiDepartmentRepository(
-      Dio(BaseOptions(baseUrl: 'https://api.test'))
-        ..httpClientAdapter = adapter,
-    ),
-    adapter,
-  );
+  final dio = Dio(BaseOptions(baseUrl: 'https://api.test'))
+    ..httpClientAdapter = adapter;
+  return (ApiDepartmentRepository(() => dio), adapter);
 }
 
 const _truncated = {
@@ -167,6 +163,14 @@ void main() {
       expect(a.sent, {'name': 'Yeni', 'kind': 'koordinatorluk'});
     });
 
+    test('boş açıklama gönderilir (açıklamayı siler)', () async {
+      final (repo, a) = _repo(
+        '{"department_id":"d1","name":"A","kind":"koordinatorluk"}',
+      );
+      await repo.updateDepartment('d1', description: '');
+      expect(a.sent, {'description': ''});
+    });
+
     test('hata → ApiError', () async {
       final (repo, _) = _repo(
         _err('organization.department_not_found'),
@@ -175,6 +179,90 @@ void main() {
       await expectLater(
         repo.updateDepartment('d9', name: 'x'),
         _apiError('organization.department_not_found'),
+      );
+    });
+  });
+
+  group('linkDepartment', () {
+    const link =
+        '{"program_id":"p1","department_id":"d1","display_name":"Altyapı",'
+        '"copied_member_count":0}';
+
+    test('POST /v1/program/departments: program açık, gövde, eşleme', () async {
+      final (repo, a) = _repo(link, status: 201);
+      final r = await repo.linkDepartment('p1', 'd1', displayName: 'Altyapı');
+      expect(
+        r,
+        const DepartmentLink(
+          programId: 'p1',
+          departmentId: 'd1',
+          displayName: 'Altyapı',
+        ),
+      );
+      expect(a.seen!.method, 'POST');
+      expect(a.seen!.uri.path, '/v1/program/departments');
+      // S2: program istek başına sabit (ara katman başlığa çevirir); departman başlığı yok.
+      expect(a.seen!.extra['nizamio.program'], 'p1');
+      expect(a.seen!.extra.containsKey('nizamio.department'), isFalse);
+      expect(a.sent, {'department_id': 'd1', 'display_name': 'Altyapı'});
+    });
+
+    test('var olan bağ: dönen ad yanıttakidir, istekteki değil', () async {
+      // Bağ zaten varsa sunucu var olanı eski adıyla döndürür (adı değiştirmez); form
+      // farkı bu değerden görür ve programdaki adı ayrıca düzeltir.
+      final (repo, a) = _repo(link);
+      final r = await repo.linkDepartment('p1', 'd1', displayName: 'Yeni ad');
+      expect(a.sent, {'department_id': 'd1', 'display_name': 'Yeni ad'});
+      expect(r.displayName, 'Altyapı');
+    });
+
+    test('ad verilmezse gövdede yok (katalog adı kopyalanır)', () async {
+      final (repo, a) = _repo(link, status: 201);
+      await repo.linkDepartment('p1', 'd1');
+      expect(a.sent, {'department_id': 'd1'});
+    });
+
+    test('hata → ApiError', () async {
+      final (repo, _) = _repo(
+        _err('program.department_link_name_exists'),
+        status: 409,
+      );
+      await expectLater(
+        repo.linkDepartment('p1', 'd1', displayName: 'x'),
+        _apiError('program.department_link_name_exists'),
+      );
+    });
+
+    test('bağ yok → client.server_not_verified (istek yok)', () async {
+      await expectLater(
+        ApiDepartmentRepository(() => null).linkDepartment('p1', 'd1'),
+        _apiError(ClientErrorCode.serverNotVerified),
+      );
+    });
+  });
+
+  group('renameDepartmentLink', () {
+    test(
+      'PATCH /v1/program/departments/{id}: program açık, yalnız ad',
+      () async {
+        final (repo, a) = _repo(
+          '{"program_id":"p1","department_id":"d1","display_name":"Yeni",'
+          '"copied_member_count":0}',
+        );
+        final r = await repo.renameDepartmentLink('p1', 'd1', 'Yeni');
+        expect(r.displayName, 'Yeni');
+        expect(a.seen!.method, 'PATCH');
+        expect(a.seen!.uri.path, '/v1/program/departments/d1');
+        expect(a.seen!.extra['nizamio.program'], 'p1');
+        expect(a.sent, {'display_name': 'Yeni'});
+      },
+    );
+
+    test('hata → ApiError', () async {
+      final (repo, _) = _repo(_err('program.not_authorized'), status: 403);
+      await expectLater(
+        repo.renameDepartmentLink('p1', 'd1', 'Yeni'),
+        _apiError('program.not_authorized'),
       );
     });
   });

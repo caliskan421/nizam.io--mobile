@@ -20,8 +20,6 @@
     "ui.archive.empty_search": "Bu aramayla eşleşen klasör yok.",
     "ui.archive.download_all": "Tümünü indir",
     "ui.archive.download_all_toast": "Tüm arşiv ZIP olarak hazırlanıyor",
-    "ui.archive.create_folder": "Klasör oluştur",
-    "ui.archive.create_folder_soon": "Klasör oluşturma sonraki adımda tasarlanacak",
     "ui.archive.shortcuts": "Arşiv kısayolları",
     "ui.archive.section_archive": "arşiv",
     "ui.archive.section_go": "git",

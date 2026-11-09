@@ -6913,7 +6913,7 @@ abstract class AppLocalizations {
   /// ui.tasks.subs_hint
   ///
   /// In tr, this message translates to:
-  /// **'Kişi ve tarih isteğe bağlıdır; kanıtı zorunlu olan alt görev, kanıt yüklenmeden bitirilemez. Görev, tüm alt görevler bitmeden tamamlanamaz.'**
+  /// **'Kişi ve tarih isteğe bağlıdır. Görev, tüm alt görevler bitmeden tamamlanamaz.'**
   String get uiTasksSubsHint;
 
   /// ui.tasks.done_lc
@@ -8083,7 +8083,7 @@ abstract class AppLocalizations {
   /// ui.tasks.sub_check_blocked
   ///
   /// In tr, this message translates to:
-  /// **'Alt görevi atanan kişi ya da departman koordinatörü işaretler; yönetici ekip satırı olmadan işaretleyemez.'**
+  /// **'Alt görevi yönetici, departman koordinatörü ya da alt göreve atanan kişi işaretler.'**
   String get uiTasksSubCheckBlocked;
 
   /// ui.tasks.conflict_title

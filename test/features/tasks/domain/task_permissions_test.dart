@@ -209,12 +209,13 @@ void main() {
       },
     );
 
-    test('yönetici tek başına işaretleyemez', () {
-      expect(
-        _p(_access(admin: true), assigned: true).canToggleSubtask(free),
-        isFalse,
-      );
-    });
+    test(
+      'yönetici ekip satırı olmadan her alt görevi işaretler (ADR-0030)',
+      () {
+        final admin = _p(_access(admin: true));
+        expect([free, mine, other].every(admin.canToggleSubtask), isTrue);
+      },
+    );
 
     test('atanabilecekler ana görevin atananları', () {
       final t = _task(assignees: ['me', 'u2']);
@@ -252,9 +253,10 @@ void main() {
       expect(p.canManageTask, isTrue);
       expect(p.canAssign, isFalse);
       expect(p.canClaim(_task()), isFalse);
-      expect(p.canUpload, isFalse);
+      expect(p.canUpload, isTrue, reason: 'ADR-0030: atama aranmaz');
       expect(p.canRenameFile(file('u2')), isTrue);
-      expect(p.canDeleteFile(file('me')), isFalse);
+      expect(p.canDeleteFile(file('me')), isTrue, reason: 'kendi dosyası');
+      expect(p.canDeleteFile(file('u2')), isFalse, reason: 'başkasının');
       expect(p.canRequestDate, isFalse);
       expect(p.canReviewDate, isTrue);
       expect(p.canDeleteDateRequest(pending), isFalse);
@@ -263,10 +265,12 @@ void main() {
     });
 
     test(
-      'yönetici + koordinatör: yükleme yine reddedilir (yöneticilik baskın)',
+      'yönetici + koordinatör: yükler (yöneticilik yüklemeyi reddetmez)',
       () {
         final p = _p(_access(admin: true, role: SeatRole.coordinator));
-        expect(p.canUpload, isFalse);
+        expect(p.canUpload, isTrue);
+        expect(p.canDeleteFile(file('me')), isTrue);
+        expect(p.canDeleteFile(file('u2')), isFalse);
         expect(p.canAssign, isTrue);
         expect(p.canRequestDate, isTrue);
         expect(p.canReviewDate, isTrue);

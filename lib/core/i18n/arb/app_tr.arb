@@ -4545,7 +4545,7 @@
   "@uiTasksEvDue": {
     "description": "ui.tasks.ev_due"
   },
-  "uiTasksSubsHint": "Kişi ve tarih isteğe bağlıdır; kanıtı zorunlu olan alt görev, kanıt yüklenmeden bitirilemez. Görev, tüm alt görevler bitmeden tamamlanamaz.",
+  "uiTasksSubsHint": "Kişi ve tarih isteğe bağlıdır. Görev, tüm alt görevler bitmeden tamamlanamaz.",
   "@uiTasksSubsHint": {
     "description": "ui.tasks.subs_hint"
   },
@@ -5325,7 +5325,7 @@
   "@uiTasksRowOwner": {
     "description": "ui.tasks.row_owner"
   },
-  "uiTasksSubCheckBlocked": "Alt görevi atanan kişi ya da departman koordinatörü işaretler; yönetici ekip satırı olmadan işaretleyemez.",
+  "uiTasksSubCheckBlocked": "Alt görevi yönetici, departman koordinatörü ya da alt göreve atanan kişi işaretler.",
   "@uiTasksSubCheckBlocked": {
     "description": "ui.tasks.sub_check_blocked"
   },

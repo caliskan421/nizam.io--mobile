@@ -311,7 +311,7 @@ class _Body extends StatelessWidget {
                 label: l.uiTasksUpload,
                 icon: NzIcons.uploadFile,
                 expand: true,
-                // Yükleme: koordinatör ya da atanmış üye; yöneticilik reddeder.
+                // Yükleme: yönetici, koordinatör ya da atanmış üye (ADR-0030).
                 onPressed: actions.canUpload ? actions.openUpload : null,
               ),
             ),

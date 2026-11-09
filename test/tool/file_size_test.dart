@@ -21,7 +21,7 @@ const _legacy = <String, int>{
   'test/tool/boundaries_test.dart': 1055,
   'tool/boundaries.dart': 973,
   'tool/api_surface.dart': 919,
-  'test/features/tasks/application/task_detail_writes_p3_test.dart': 912,
+  'test/features/tasks/application/task_detail_writes_p3_test.dart': 788,
   'lib/features/tasks/application/task_detail_controller.dart': 835,
   'tool/gen/sources.dart': 900,
   'lib/features/timeline/presentation/gantt/gantt_chart.dart': 868,

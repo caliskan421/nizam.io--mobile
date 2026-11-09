@@ -6,6 +6,8 @@ import 'organization_admin.dart';
 /// koordinatör/üye kümeleri birbirini dışlamaz.
 enum AdminUserRoleFilter { all, admin, coordinator, member }
 
+const unassignedDepartmentFilter = '__unassigned__';
+
 class AdminUserCount {
   const AdminUserCount(this.value, {required this.exact});
   final int value;
@@ -65,9 +67,13 @@ bool userMatchesDirectory(
   required String? Function(String departmentId) departmentName,
 }) {
   if (departments.isNotEmpty &&
-      !user.teams.any(
-        (m) => m.programId == programId && departments.contains(m.departmentId),
-      )) {
+      !(user.teams.any(
+            (m) =>
+                m.programId == programId &&
+                departments.contains(m.departmentId),
+          ) ||
+          (departments.contains(unassignedDepartmentFilter) &&
+              !user.teams.any((m) => m.programId == programId)))) {
     return false;
   }
   final needle = trLower(search.trim());

@@ -28,6 +28,7 @@ class NzButton extends StatelessWidget {
     this.loading = false,
     this.icon,
     this.expand = false,
+    this.radius,
   }) : _variant = _ButtonVariant.primary;
 
   const NzButton.secondary({
@@ -38,6 +39,7 @@ class NzButton extends StatelessWidget {
     this.loading = false,
     this.icon,
     this.expand = false,
+    this.radius,
   }) : _variant = _ButtonVariant.secondary;
 
   const NzButton.ghost({
@@ -48,6 +50,7 @@ class NzButton extends StatelessWidget {
     this.loading = false,
     this.icon,
     this.expand = false,
+    this.radius,
   }) : _variant = _ButtonVariant.ghost;
 
   const NzButton.danger({
@@ -58,6 +61,7 @@ class NzButton extends StatelessWidget {
     this.loading = false,
     this.icon,
     this.expand = false,
+    this.radius,
   }) : _variant = _ButtonVariant.danger;
 
   final String label;
@@ -70,6 +74,7 @@ class NzButton extends StatelessWidget {
 
   /// true → üst kısıt genişliği.
   final bool expand;
+  final double? radius;
   final _ButtonVariant _variant;
 
   static const _borderWidth = NizamioSize.borderWidth;
@@ -86,11 +91,13 @@ class NzButton extends StatelessWidget {
     lg: NizamioSize.controlLg,
   );
 
-  double get _radius => size.pick(
-    sm: NizamioRadius.tile,
-    md: NizamioRadius.group,
-    lg: NizamioRadius.group,
-  );
+  double get _radius =>
+      radius ??
+      size.pick(
+        sm: NizamioRadius.tile,
+        md: NizamioRadius.group,
+        lg: NizamioRadius.group,
+      );
 
   double get _iconExtent => size.pick(
     sm: NizamioSpacing.space4,

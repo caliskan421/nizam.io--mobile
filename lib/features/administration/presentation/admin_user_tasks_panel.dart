@@ -69,19 +69,12 @@ List<Widget> adminUserTaskPanelChildren(
         runSpacing: 6,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          if (!state.defaultStatuses)
-            if (state.statuses.isEmpty)
+          for (final status in UserTaskStatus.values)
+            if (state.statuses.contains(status))
               InputChip(
-                label: Text(l.uiUsersTaskAllFilter),
-                onDeleted: ctl.resetStatuses,
-              )
-            else
-              for (final status in UserTaskStatus.values)
-                if (state.statuses.contains(status))
-                  InputChip(
-                    label: Text(userTaskFilterLabel(context, status)),
-                    onDeleted: () => ctl.toggleStatus(status),
-                  ),
+                label: Text(userTaskFilterLabel(context, status)),
+                onDeleted: () => ctl.toggleStatus(status),
+              ),
           for (final priority in TaskPriority.values)
             if (state.priorities.contains(priority))
               InputChip(

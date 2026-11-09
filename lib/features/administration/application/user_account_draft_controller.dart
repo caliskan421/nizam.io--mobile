@@ -132,21 +132,40 @@ class UserAccountDraftController extends Notifier<UserAccountDraft?> {
     );
   }
 
-  void toggleDepartment(String id) => _edit(
-    (s) => s.copyWith(
-      value: s.value.copyWith(
-        teams: s.value.teams.any((t) => t.departmentId == id)
-            ? [
-                for (final t in s.value.teams)
-                  if (t.departmentId != id) t,
-              ]
-            : [
-                ...s.value.teams,
-                AccountTeamDraft(departmentId: id, role: s.roleForNew),
-              ],
+  void setDepartmentRole(
+    String id,
+    DepartmentRole role, {
+    required bool selected,
+  }) {
+    if (role == DepartmentRole.unknown) return;
+    _edit(
+      (s) => s.copyWith(
+        roleForNew: role,
+        value: s.value.copyWith(
+          teams: [
+            for (final team in s.value.teams)
+              if (team.departmentId != id) team,
+            if (selected) AccountTeamDraft(departmentId: id, role: role),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
+
+  void clearDepartmentRole(DepartmentRole role, Set<String> departmentIds) =>
+      _edit(
+        (s) => s.copyWith(
+          value: s.value.copyWith(
+            teams: [
+              for (final team in s.value.teams)
+                if (team.role != role ||
+                    !departmentIds.contains(team.departmentId))
+                  team,
+            ],
+          ),
+        ),
+      );
+
   void discard() => _edit(
     (s) => s.copyWith(
       value: s.base,

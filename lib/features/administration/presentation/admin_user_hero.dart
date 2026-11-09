@@ -94,13 +94,19 @@ class AdminUserHero extends StatelessWidget {
                         dot: context.colors.roleMember,
                         maxWidth: constraints.maxWidth,
                       ),
-                    _IdentityBadge(
-                      label: names.isEmpty
-                          ? l.uiUsersUnassigned
-                          : names.join(', '),
-                      icon: NzIcons.coordinatorships,
-                      maxWidth: constraints.maxWidth,
-                    ),
+                    if (names.isEmpty)
+                      _IdentityBadge(
+                        label: l.uiUsersUnassigned,
+                        icon: NzIcons.coordinatorships,
+                        maxWidth: constraints.maxWidth,
+                      )
+                    else
+                      for (final name in names)
+                        _IdentityBadge(
+                          label: name,
+                          icon: NzIcons.coordinatorships,
+                          maxWidth: constraints.maxWidth,
+                        ),
                   ],
                 ),
               ),

@@ -8,15 +8,14 @@ enum UserTaskView { list, calendar }
 
 class UserTaskPanelState {
   const UserTaskPanelState({
-    this.statuses = const {UserTaskStatus.open},
+    this.statuses = const {},
     this.priorities = const {},
     this.view = UserTaskView.list,
   });
   final Set<UserTaskStatus> statuses;
   final Set<TaskPriority> priorities;
   final UserTaskView view;
-  bool get defaultStatuses =>
-      statuses.length == 1 && statuses.contains(UserTaskStatus.open);
+  bool get defaultStatuses => statuses.isEmpty;
   bool get filtered => !defaultStatuses || priorities.isNotEmpty;
   bool matchesStatus(TaskItem task) =>
       statuses.isEmpty || statuses.any((s) => userTaskHasStatus(task, s));

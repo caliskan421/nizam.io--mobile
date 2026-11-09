@@ -172,6 +172,7 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     if (!current()) return;
     await ref.read(adminUsersProvider.notifier).refresh();
     if (!current()) return;
+    ref.invalidate(adminUserProfileProvider(id));
     await ref.read(adminUserProfileProvider(id).future);
     if (!current()) return;
     if (_tab == 1) {
@@ -184,7 +185,6 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final profile = adminUserProfileProvider(widget.accountId);
-    final accountDraft = ref.watch(userAccountDraftProvider(widget.accountId));
     ref.watch(adminUserTaskPanelProvider(widget.accountId));
     final value = ref.watch(profile);
     ref.listen(profile, (_, next) {
@@ -197,9 +197,7 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     final catalog = catalogState.value;
     final scope = ref.watch(scopeStateProvider);
     final allowed =
-        catalog?.access?.companyAdmin == true &&
-        !catalogState.isReloading &&
-        !catalogState.hasError;
+        catalog?.access?.companyAdmin == true && !catalogState.hasError;
     final AsyncValue<KnownUser?> displayed = !allowed
         ? catalogState.isLoading
               ? const AsyncLoading()
@@ -210,9 +208,7 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
         : value.hasError
         ? AsyncError(value.error!, value.stackTrace ?? StackTrace.current)
         : value;
-    final user = allowed && !value.isReloading && !value.hasError
-        ? value.value
-        : null;
+    final user = allowed && !value.hasError ? value.value : null;
     if (user == null) {
       _headingTopAtZero = null;
       _headingHeight = null;
@@ -254,20 +250,12 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     _scheduleGeometry();
 
     final page = NzPage.feed(
-      bottomDock:
-          _tab == 3 &&
-              user != null &&
-              accountDraft != null &&
-              (accountDraft.dirty || accountDraft.busy)
-          ? AdminUserAccountDock(
-              draft: accountDraft,
-              onDiscard: ref
-                  .read(userAccountDraftProvider(widget.accountId).notifier)
-                  .discard,
-              onSave: _saveAccount,
-            )
-          : null,
-      bottomDockExtent: 54,
+      bottomDock: AdminUserAccountDockSlot(
+        accountId: widget.accountId,
+        active: _tab == 3 && user != null,
+        onSave: _saveAccount,
+      ),
+      bottomDockExtent: 64,
       topBar: NzTopBar.detail(
         onBack: widget.onBack,
         titleContent: user == null

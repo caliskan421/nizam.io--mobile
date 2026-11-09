@@ -9,6 +9,7 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/layout/nz_layout.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/buttons/nz_icon_button.dart';
@@ -16,6 +17,7 @@ import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/nz_bottom_sheet.dart';
+import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
 import '../application/admin_controller.dart';
@@ -27,7 +29,6 @@ import 'admin_user_identity.dart';
 import 'admin_user_list_row.dart';
 import 'admin_user_memberships.dart';
 import 'admin_user_profile_page.dart';
-import 'admin_users_export.dart';
 import 'admin_users_filter.dart';
 
 class AdministrationPage extends ConsumerStatefulWidget {
@@ -42,12 +43,17 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
   static const _searchDelayDuration = Duration(milliseconds: 300);
   static const _betweenControls = 14.0;
   Timer? _searchDelay;
-  final _search = TextEditingController();
+  late final _search = TextEditingController(
+    text: ref.read(adminUserQueryProvider).search,
+  );
+  final _searchFocus = FocusNode();
+  bool _searchOpen = false;
 
   @override
   void dispose() {
     _searchDelay?.cancel();
     _search.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
@@ -145,12 +151,15 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
     ref.listen(sessionGenerationProvider, (_, _) {
       _searchDelay?.cancel();
       _search.clear();
+      _searchFocus.unfocus();
+      setState(() => _searchOpen = false);
     });
     void update(AdminUserQuery q) =>
         ref.read(adminUserQueryProvider.notifier).set(q);
 
     return NzPage.feed(
-      topBar: const RootTopBar(referenceHeader: true),
+      width: NzContentWidth.wide,
+      topBar: const RootTopBar(),
       onRefresh: ctl.refresh,
       onRevisit: () => unawaited(ctl.refreshIfStale()),
       onRetry: _retry,
@@ -177,18 +186,33 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
               ),
             ),
             const Gap(NizamioSpacing.space1),
+            Semantics(
+              selected: _searchOpen,
+              child: NzIconButton.circle(
+                icon: NzIcons.search,
+                semanticLabel: l.uiUsersSearch,
+                onPressed: () {
+                  setState(() => _searchOpen = !_searchOpen);
+                  if (!_searchOpen) {
+                    _searchDelay?.cancel();
+                    _search.clear();
+                    _searchFocus.unfocus();
+                    update((
+                      search: '',
+                      role: query.role,
+                      sort: query.sort,
+                      direction: query.direction,
+                    ));
+                  }
+                },
+              ),
+            ),
+            const Gap(NizamioSpacing.space1),
             NzIconButton.circle(
-              icon: NzIcons.download,
-              semanticLabel: l.uiUsersExportLoaded,
-              onPressed: allowed && shown.isNotEmpty
-                  ? () => exportAdminUsers(
-                      context,
-                      ref,
-                      shown,
-                      catalog,
-                      programId,
-                    )
-                  : null,
+              icon: NzIcons.filter,
+              semanticLabel: l.uiUsersFilters,
+              dot: departments.isEmpty ? null : context.colors.accentText,
+              onPressed: () => showAdminUsersFilter(context),
             ),
             const Gap(NizamioSpacing.space1),
             NzIconButton.circleAccent(
@@ -200,38 +224,33 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
             ),
           ],
         ),
-        const Gap(NizamioSpacing.gapLg),
-        Row(
-          children: [
-            Expanded(
-              child: NzSearchField(
-                controller: _search,
-                label: l.uiUsersSearch,
-                hint: l.uiUsersSearchHint,
-                onChanged: (text) {
-                  _searchDelay?.cancel();
-                  _searchDelay = Timer(_searchDelayDuration, () {
-                    if (!mounted) return;
-                    final now = ref.read(adminUserQueryProvider);
-                    update((
-                      search: text.trim(),
-                      role: now.role,
-                      sort: now.sort,
-                      direction: now.direction,
-                    ));
-                  });
-                },
-              ),
+        NzReveal(
+          open: _searchOpen,
+          onOpened: _searchFocus.requestFocus,
+          child: Padding(
+            padding: const EdgeInsets.only(top: NizamioSpacing.space5),
+            child: NzSearchField(
+              controller: _search,
+              focusNode: _searchFocus,
+              label: l.uiUsersSearch,
+              hint: l.uiUsersSearchHint,
+              onChanged: (text) {
+                _searchDelay?.cancel();
+                _searchDelay = Timer(_searchDelayDuration, () {
+                  if (!mounted) return;
+                  final now = ref.read(adminUserQueryProvider);
+                  update((
+                    search: text.trim(),
+                    role: now.role,
+                    sort: now.sort,
+                    direction: now.direction,
+                  ));
+                });
+              },
             ),
-            const Gap(NizamioSpacing.space2),
-            NzIconButton.circle(
-              icon: NzIcons.filter,
-              semanticLabel: l.uiUsersFilters,
-              dot: departments.isEmpty ? null : context.colors.accentText,
-              onPressed: () => showAdminUsersFilter(context),
-            ),
-          ],
+          ),
         ),
+        const Gap(NizamioSpacing.gapLg),
         if (departments.isNotEmpty) ...[
           const Gap(NizamioSpacing.space2),
           Wrap(
@@ -246,6 +265,13 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
                         .read(adminUserDepartmentsProvider.notifier)
                         .toggle(d.code),
                   ),
+              if (departments.contains(unassignedDepartmentFilter))
+                InputChip(
+                  label: Text(l.uiUsersUnassigned),
+                  onDeleted: () => ref
+                      .read(adminUserDepartmentsProvider.notifier)
+                      .toggle(unassignedDepartmentFilter),
+                ),
             ],
           ),
         ],

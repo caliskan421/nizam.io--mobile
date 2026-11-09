@@ -173,6 +173,7 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
   /// Çift bölmede son görülen modül: liste bölmesi modül değişince baştan kurulur (sekme
   /// dalı gizlenip açılmaz), bu yüzden `onRevisit` çalışmaz; bayat veri burada tazelenir.
   RailModule? _staleChecked;
+  Timer? _staleTimer;
 
   StatefulNavigationShell get _shell => widget.navigationShell;
 
@@ -181,9 +182,10 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
   void _refreshStaleOnSwitch(RailModule? module) {
     if (module == _staleChecked) return;
     _staleChecked = module;
+    _staleTimer?.cancel();
     if (module == null) return;
-    Future<void>.delayed(RpMotion.enterDuration, () {
-      if (!mounted || _staleChecked != module) return;
+    _staleTimer = Timer(RpMotion.enterDuration, () {
+      if (!mounted) return;
       final c = ProviderScope.containerOf(context, listen: false);
       switch (module) {
         case RailModule.home:
@@ -220,6 +222,12 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
   void initState() {
     super.initState();
     _remember();
+  }
+
+  @override
+  void dispose() {
+    _staleTimer?.cancel();
+    super.dispose();
   }
 
   void _remember() {

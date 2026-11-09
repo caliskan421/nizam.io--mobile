@@ -1035,7 +1035,7 @@ void main() {
       expect(raw.where((v) => v.rule == 'U5').map((v) => v.path).toSet(), {
         'lib/core/ui/extensions/context_ext.dart',
       });
-      expect(count('U4') + count('U6'), 0);
+      expect(count('U4') + count('U6'), 1); // U4: nz_tablet_scale.dart (izinli)
     },
   );
 

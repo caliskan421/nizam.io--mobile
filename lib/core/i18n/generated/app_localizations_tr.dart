@@ -2199,9 +2199,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiInputsValidationMustChoose => 'Bir seçim yapın.';
 
   @override
-  String get uiListsEmptyTitle => 'Gösterilecek kayıt yok';
-
-  @override
   String get uiListsTruncated =>
       'Liste kısaltıldı; yalnız ilk kayıtlar gösteriliyor.';
 

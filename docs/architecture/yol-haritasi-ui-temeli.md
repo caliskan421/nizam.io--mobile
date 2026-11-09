@@ -250,7 +250,7 @@ v0 envanteri (tasarımsız, token'la nötr görünüm):
 | inputs | `NzTextField` (`ApiFieldError` → alan hatası eşleme dahil), `NzPasswordField`, `NzSearchField`, `NzCheckbox`, `NzSwitch`, `NzSelect` |
 | feedback (A3'te) | `NzLoader`, `NzSkeleton`, `NzEmptyState`, `NzErrorState`, `NzBanner` (çevrimdışı/uyarı), `NzToast` (snackbar servisi) |
 | surfaces | `NzCard`, `NzSection`, `NzDivider`, `NzBadge`, `NzAvatar` |
-| lists | `NzListTile`, `NzPagedList` (sayfalama + aşağı çek yenile) |
+| lists | `NzListTile` (yenileme `NzPage.feed`, sayfalama feature controller’larında) |
 | overlays | `NzDialog.confirm`, `NzBottomSheet` |
 
 - Form: `NzForm` + alan doğrulayıcıları; sunucu `fields[]` hataları `ApiError.fields`'tan

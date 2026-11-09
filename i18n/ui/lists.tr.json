@@ -1,7 +1,6 @@
 {
-  "$comment": "Liste kiti metinleri (boş liste, kısaltılmış liste). ELLE yazılır; make gen ARB'ye birleştirir.",
+  "$comment": "Liste kiti metinleri (kısaltılmış liste). ELLE yazılır; make gen ARB'ye birleştirir.",
   "texts": {
-    "ui.lists.empty_title": "Gösterilecek kayıt yok",
     "ui.lists.truncated": "Liste kısaltıldı; yalnız ilk kayıtlar gösteriliyor."
   }
 }

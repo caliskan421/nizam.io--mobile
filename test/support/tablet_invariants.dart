@@ -1,10 +1,9 @@
 // Tablet değişmez (invariant) sahneleri: ekran görüntüsü almaz; kaynak gezinme/durum kurallarını
-// (seçim, taslak, sağ yığın, liste arama metni) uygulamanın gerçek UI'sinden sınar. Görev ve
-// koordinatörlük verisi [TabletBackend]'in sunucu biçimli fikstüründen gelir (örnek mod yok);
-// mesajlar ve arşiv klasörleri modüllerin bugünkü kayıtlı deposundan (GEÇİCİ geliştirme
-// örneği, `messages_module.dart`, `archive_module.dart`). Piksel/yerleşim ölçüsü ve veri sayısı
-// iddiası içermez (CLAUDE.md test kapsamı); bölme geometrisi `tablet_measurements_test.dart`
-// "ölçüye göre bölme" grubundadır.
+// (seçim, taslak, sağ yığın, liste arama metni) uygulamanın gerçek UI'sinden sınar. Görev,
+// koordinatörlük ve sohbet verisi [TabletBackend]'in sunucu biçimli fikstüründen gelir (örnek
+// mod yok); arşiv klasörleri modülün bugünkü kayıtlı deposundan (`archive_module.dart`).
+// Piksel/yerleşim ölçüsü ve veri sayısı iddiası içermez (CLAUDE.md test kapsamı); bölme
+// geometrisi `tablet_measurements_test.dart` "ölçüye göre bölme" grubundadır.
 //
 // Modül kökü kuralı (`split.dart` `restoresLastRecord`): Görevler ve Koordinatörlükler son açılan
 // kaydı geri getirmez (liste tam genişlik, sağ bölme yok); Arşiv ve Mesajlar son kaydı geri
@@ -28,7 +27,7 @@ const _hidrofor = 'Hidrofor montajı';
 const _iletim = 'İletim hattı yapımı';
 const _aritma = 'Arıtma devreye alma';
 
-/// Mesajlar modülünde varsayılan olarak açılan sohbet (k1/k2 mesajlarını taşır).
+/// Mesajlar modülünde açılan sohbet (fikstürde iki mesaj; ikincisi okunmamış).
 const tabletChat = 'Koordinatörler';
 
 /// Modül kökünün sağ bölme varsayılanı (kayıt açılmamış ya da modül son kaydı getirmez).
@@ -90,9 +89,9 @@ final tabletInvariantScenes = <TabletScene>[
   TabletScene('nav-module-roundtrip-keeps-last-loaded-record', (s) async {
     await s.tapRail(TabletModule.archive);
     expectModuleRoot(s, TabletModule.archive);
-    await s.tapText(s.inPane(NzPaneRole.master, find.text('Operasyon')));
+    await s.tapText(s.inPane(NzPaneRole.master, find.text('İdari işler')));
     expect(
-      s.inPane(NzPaneRole.detail, find.text('Operasyon')),
+      s.inPane(NzPaneRole.detail, find.text('İdari işler')),
       findsWidgets,
       reason: 'seçilen klasör sağda',
     );
@@ -100,7 +99,7 @@ final tabletInvariantScenes = <TabletScene>[
     expectModuleRoot(s, TabletModule.messages);
     await s.tapRail(TabletModule.archive);
     expect(
-      s.inPane(NzPaneRole.detail, find.text('Operasyon')),
+      s.inPane(NzPaneRole.detail, find.text('İdari işler')),
       findsWidgets,
       reason: 'arşiv dönüşünde son yüklenen klasör (varsayılana sıfırlanmaz)',
     );

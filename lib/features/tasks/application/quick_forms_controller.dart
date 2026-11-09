@@ -6,6 +6,7 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
 import '../../../core/server/write_compat.dart';
+import '../domain/chat_task_planner.dart';
 import '../domain/meeting_planner.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_writes.dart';
@@ -46,6 +47,7 @@ final class NewTaskForm {
     this.failure,
     this.busy = false,
     this.note,
+    this.chatMessage,
     this.keys = const RequestKeys(),
   });
 
@@ -78,6 +80,13 @@ final class NewTaskForm {
   /// bağlanır (kanıt bayrağı yoktur); null → bağımsız yeni görev.
   final String? note;
 
+  /// Kaynak sohbet mesajı: verilmişse görev `createTaskFromChatMessage` ile açılır (açıklama
+  /// mesaj gövdesi; kanıt bayrağı yoktur); null → bağımsız yeni görev.
+  final ChatTaskSource? chatMessage;
+
+  /// Kanıt bayrağı yalnız bağımsız görevde (nottan ya da mesajdan görevde yok).
+  bool get standalone => note == null && chatMessage == null;
+
   /// Bekleyen oluşturmanın işlem anahtarı (ADR-0027): aynı gövdenin yeniden gönderimi aynı
   /// anahtarla gider; gövde değişince yeni anahtar. Bellek içi (form ömrü).
   final RequestKeys keys;
@@ -100,6 +109,7 @@ final class NewTaskForm {
     ApiError? Function()? failure,
     bool? busy,
     String? Function()? note,
+    ChatTaskSource? Function()? chatMessage,
     RequestKeys? keys,
   }) => NewTaskForm(
     title: title ?? this.title,
@@ -119,6 +129,7 @@ final class NewTaskForm {
     failure: failure == null ? this.failure : failure(),
     busy: busy ?? this.busy,
     note: note == null ? this.note : note(),
+    chatMessage: chatMessage == null ? this.chatMessage : chatMessage(),
     keys: keys ?? this.keys,
   );
 }
@@ -190,15 +201,17 @@ class NewTaskFormController extends _$NewTaskFormController {
   /// seçimi geri alınır. [title] verilirse başlık onunla doldurulur (mesajı göreve
   /// dönüştür: metnin ilk 120 karakteri). [note] toplantı notundan görev açar (bkz.
   /// [NewTaskForm.note]); nottan açılmış taslağa nottan olmayan açılış boş taslakla başlar.
+  /// [chatMessage] sohbet mesajından görev açar (aynı kural).
   void prepare({
     String? coordinatorship,
     bool reset = true,
     String? title,
     String? note,
+    ChatTaskSource? chatMessage,
   }) {
     var f = _cancelPick(state);
-    if (note != null || f.note != null) {
-      f = _initial().copyWith(note: () => note);
+    if (!f.standalone || note != null || chatMessage != null) {
+      f = _initial().copyWith(note: () => note, chatMessage: () => chatMessage);
     }
     if (title != null) f = f.copyWith(title: title);
     // Hedefsiz sıfırlama (görev listesi) hesaplanan açılabilir varsayılana düşer.
@@ -337,7 +350,12 @@ class NewTaskFormController extends _$NewTaskFormController {
       assignee: f.assignees.firstOrNull,
       evidenceRequired: f.evidenceRequired,
     );
-    final (keys, requestKey) = state.keys.keyFor(_create, draft.signature);
+    final source = f.chatMessage;
+    // Mesajdan görevde anahtar mesaja da bağlıdır (başka mesajdan aynı taslak yeni eylemdir).
+    final signature = source == null
+        ? draft.signature
+        : '${draft.signature}\u0000${source.chatId}/${source.messageId}';
+    final (keys, requestKey) = state.keys.keyFor(_create, signature);
     state = state.copyWith(
       busy: true,
       failure: () => null,
@@ -349,21 +367,34 @@ class NewTaskFormController extends _$NewTaskFormController {
     final writes = ref.read(taskWriteRepositoryProvider);
     try {
       String id;
-      if (note != null) {
+      final plan = NoteTaskPlan(
+        title: f.title.trim(),
+        start: f.start,
+        end: f.end,
+        priority: f.priority,
+        departmentId: dept,
+        assigneeIds: f.assignees,
+      );
+      if (source != null) {
+        final planner = ref.read(chatTaskPlannerProvider);
+        try {
+          id = await planner.convertMessage(
+            source,
+            plan,
+            requestKey: requestKey,
+          );
+        } on ApiError catch (e) {
+          // Nadir yarış: aynı anahtarla bir kez yeniden (200 ya da 201).
+          if (e.code != conflictRetryCode) rethrow;
+          id = await planner.convertMessage(
+            source,
+            plan,
+            requestKey: requestKey,
+          );
+        }
+      } else if (note != null) {
         // Toplantı notundan görev: not göreve bağlanır (kanıt bayrağı yok).
-        id = await ref
-            .read(meetingPlannerProvider)
-            .convertNote(
-              note,
-              NoteTaskPlan(
-                title: f.title.trim(),
-                start: f.start,
-                end: f.end,
-                priority: f.priority,
-                departmentId: dept,
-                assigneeIds: f.assignees,
-              ),
-            );
+        id = await ref.read(meetingPlannerProvider).convertNote(note, plan);
       } else {
         try {
           id = await writes.createWorkItem(draft, requestKey: requestKey);

@@ -2,19 +2,11 @@ import 'package:intl/intl.dart';
 
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../domain/coordinatorship_overview.dart';
-import '../domain/coordinatorship_profile.dart';
+import '../domain/department.dart';
 
 /// Koordinatörlük ekranlarının sayılı cümleleri. UI metin kaynağı yer tutucu kabul etmediği
 /// için parçalar ARB'den gelir, Türkçe söz dizimiyle burada birleşir.
 extension CoordTexts on AppLocalizations {
-  static final _percent = NumberFormat.decimalPercentPattern(
-    locale: 'tr',
-    decimalDigits: 0,
-  );
-
-  /// 0–1 oran → "%69".
-  String coordPercent(double ratio) => _percent.format(ratio);
-
   /// "11 koordinatörlük · 76 görev · 7 koordinatörlükte gecikme".
   String coordListSubtitle(List<CoordinatorshipStats> list) {
     final tasks = list.fold<int>(0, (a, c) => a + c.total);
@@ -46,16 +38,12 @@ extension CoordTexts on AppLocalizations {
     CoordinatorshipSort.progress => uiCoordSortProgress,
   };
 
-  /// "Teknik altyapı · 3 alt birim · 9 kişi · " (durum ayrıca vurgulanır).
-  String coordIdentityLine(CoordinatorshipDetail d) =>
-      '${d.profile.parent.isEmpty ? '' : '${d.profile.parent} · '}'
-      '${d.profile.units.isEmpty ? '' : '${d.profile.units.length} $uiCoordSubUnitsTail · '}'
-      '${d.people} $uiCoordPeopleTail · ';
-
-  /// "13 görevden 9 tamamlandı · sezon ortalaması %51".
-  String coordPctNote(CoordinatorshipDetail d) =>
-      '${d.stats.total} $uiCoordPctNoteOf ${d.stats.done} $uiCoordPctNoteDone'
-      ' · $uiCoordSeasonAverage ${coordPercent(d.seasonRatio)}';
+  /// Departman türünün adı ("Koordinatörlük", "Çalışma grubu"); tanımsız tür null.
+  String? coordKind(DepartmentKind k) => switch (k) {
+    DepartmentKind.coordinatorship => uiCoordDeptKindCoordinatorship,
+    DepartmentKind.workingGroup => uiCoordDeptKindWorkingGroup,
+    DepartmentKind.unknown => null,
+  };
 
   /// "ALT-5 · Kadir Özbek".
   String coordAttentionWho(AttentionItem a) =>
@@ -70,9 +58,6 @@ extension CoordTexts on AppLocalizations {
 
   /// "2 planlı" / "yok".
   String coordMeetings(int n) => n > 0 ? '$n $uiCoordPlannedTail' : uiCoordNone;
-
-  /// "3/4".
-  String coordUnitCount(CoordinatorshipUnit u) => '${u.done}/${u.total}';
 
   /// "ekip · 9".
   String coordTeamKicker(int people) => '$uiCoordTeam · $people';

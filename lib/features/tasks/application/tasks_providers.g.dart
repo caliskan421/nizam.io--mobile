@@ -269,6 +269,56 @@ final class MeetingPlannerProvider
 
 String _$meetingPlannerHash() => r'aad57cfc5c031795fe4b62aca040e00aa964c892';
 
+/// PORT: mesajdan görev ("mesajdan görev" kipindeki yeni görev formu). Gerçekleştirme messages
+/// feature'ındadır; bileşim kökünde bağlanır.
+
+@ProviderFor(chatTaskPlanner)
+final chatTaskPlannerProvider = ChatTaskPlannerProvider._();
+
+/// PORT: mesajdan görev ("mesajdan görev" kipindeki yeni görev formu). Gerçekleştirme messages
+/// feature'ındadır; bileşim kökünde bağlanır.
+
+final class ChatTaskPlannerProvider
+    extends
+        $FunctionalProvider<ChatTaskPlanner, ChatTaskPlanner, ChatTaskPlanner>
+    with $Provider<ChatTaskPlanner> {
+  /// PORT: mesajdan görev ("mesajdan görev" kipindeki yeni görev formu). Gerçekleştirme messages
+  /// feature'ındadır; bileşim kökünde bağlanır.
+  ChatTaskPlannerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chatTaskPlannerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatTaskPlannerHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChatTaskPlanner> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ChatTaskPlanner create(Ref ref) {
+    return chatTaskPlanner(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChatTaskPlanner value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChatTaskPlanner>(value),
+    );
+  }
+}
+
+String _$chatTaskPlannerHash() => r'cccfe08f9cafdcdf2e3ba2b3aef0e7e187077c1a';
+
 /// PORT: sistem dosya seçicisi (`tasks_module.dart`'ta `FileUploadPicker` bağlanır).
 /// Bağlanmamışsa (testler) "yok" gerçekleştirmesi: form dosya seçtiremez, istek gönderilmez.
 
@@ -317,6 +367,55 @@ final class UploadPickerProvider
 }
 
 String _$uploadPickerHash() => r'0748ecb6edf44f81d4cb239af148e8348b283698';
+
+/// PORT: yükleme içerik özeti (`tasks_module.dart`'ta `uploadDigest` bağlanır). Yalnız görev
+/// ve arşiv yükleme gönderiminde, tür/boyut ön denetiminden sonra okunur.
+
+@ProviderFor(uploadDigester)
+final uploadDigesterProvider = UploadDigesterProvider._();
+
+/// PORT: yükleme içerik özeti (`tasks_module.dart`'ta `uploadDigest` bağlanır). Yalnız görev
+/// ve arşiv yükleme gönderiminde, tür/boyut ön denetiminden sonra okunur.
+
+final class UploadDigesterProvider
+    extends $FunctionalProvider<UploadDigest, UploadDigest, UploadDigest>
+    with $Provider<UploadDigest> {
+  /// PORT: yükleme içerik özeti (`tasks_module.dart`'ta `uploadDigest` bağlanır). Yalnız görev
+  /// ve arşiv yükleme gönderiminde, tür/boyut ön denetiminden sonra okunur.
+  UploadDigesterProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'uploadDigesterProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$uploadDigesterHash();
+
+  @$internal
+  @override
+  $ProviderElement<UploadDigest> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  UploadDigest create(Ref ref) {
+    return uploadDigester(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UploadDigest value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UploadDigest>(value),
+    );
+  }
+}
+
+String _$uploadDigesterHash() => r'c56f95b0664eac7333cba1cacc8524576a2c938a';
 
 /// PORT: indirilen dosyanın kaydı (`tasks_module.dart`'ta bağlanır).
 

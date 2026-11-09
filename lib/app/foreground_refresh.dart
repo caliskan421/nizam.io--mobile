@@ -3,12 +3,17 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/messages/messages.dart';
+import '../features/notifications/notifications.dart';
 import '../features/tasks/tasks.dart';
 
 /// V10 güncellik (F60): uygulama ön plana dönünce (`resumed`) okunmuş görev kataloğu, son
 /// okumadan beri [maxAge] geçtiyse arka planda yeniden okunur; eski veri görünür kalır, açık
 /// ayrıntı katalogla birlikte yeniden okunur, açık düzenleme taslağı tabanını korur. Hiç
 /// okunmamış katalog için okuma başlatılmaz; yoklama yoktur (arka planda iş yapılmaz).
+/// Aynı geçişte zil rozeti (okunmamış bildirim sayısı) ekrandaysa yeniden okunur
+/// ([refreshNotificationBadge]; v1 ön plan yoklaması, zamanlayıcı yok); Mesajlar rozeti de
+/// akış açık değilse tek okumayla tazelenir ([refreshMessagesBadge]).
 class ForegroundRefresh extends ConsumerStatefulWidget {
   const ForegroundRefresh({
     super.key,
@@ -32,12 +37,12 @@ class _ForegroundRefreshState extends ConsumerState<ForegroundRefresh> {
     _listener = AppLifecycleListener(onResume: _resumed);
   }
 
-  void _resumed() => unawaited(
-    refreshStaleTasks(
-      ProviderScope.containerOf(context, listen: false),
-      maxAge: widget.maxAge,
-    ),
-  );
+  void _resumed() {
+    final container = ProviderScope.containerOf(context, listen: false);
+    unawaited(refreshStaleTasks(container, maxAge: widget.maxAge));
+    unawaited(refreshNotificationBadge(container));
+    unawaited(refreshMessagesBadge(container));
+  }
 
   @override
   void dispose() {
@@ -59,4 +64,11 @@ Future<void> refreshStaleTasks(
   await container
       .read(taskCatalogControllerProvider.notifier)
       .refreshIfStale(maxAge: maxAge);
+}
+
+/// Ön plana dönüşte zil rozeti: rozet ekranda değilse (sağlayıcı yaşamıyorsa) istek yok;
+/// yaşıyorsa okunmamış sayısı yeniden okunur (hata durumda kalır, önceki sayı görünür).
+Future<void> refreshNotificationBadge(ProviderContainer container) async {
+  if (!container.exists(notificationUnreadControllerProvider)) return;
+  await container.read(notificationUnreadControllerProvider.notifier).refresh();
 }

@@ -18,8 +18,6 @@ extension CalendarKindColor on NizamioColors {
     CalendarKind.meeting => roleCoordinator,
     CalendarKind.task => inProgress,
     CalendarKind.request => warning,
-    CalendarKind.sheet => roleMember,
-    CalendarKind.season => danger,
   };
 }
 

@@ -6,7 +6,7 @@ import 'task_catalog.dart';
 import 'task_permissions.dart';
 
 export '../../../core/domain/upload_types.dart'
-    show uploadContentType, uploadExtensions;
+    show normalizeUploadName, uploadContentType, uploadExtensions;
 
 /// Alt görev değişikliği (`PATCH …/subtasks/{id}`). null alan değişmez. [assignee] verilirse
 /// `id` null → atamayı kaldır; [dates] verilirse ikisi birlikte gider (ikisi null → kaldır).
@@ -137,7 +137,8 @@ final class WorkItemPatch {
       evidenceRequired == null;
 }
 
-/// Yüklenecek yerel dosya (seçiciden): [path] okunur, [name] görünen ad olur.
+/// Yüklenecek yerel dosya (seçiciden): [path] okunur, [name] görünen ad olur. Seçim içeriği
+/// okumaz; içerik özeti ([UploadDigest]) görev/arşiv gönderiminde ön denetimden sonra alınır.
 @immutable
 final class UploadSource {
   const UploadSource({
@@ -196,13 +197,26 @@ final class TeamMember {
   final bool coordinator;
 }
 
+/// Seçicinin kaynağı: cihaz dosyaları (Dosyalar / SAF) ya da fotoğraflar (galeri).
+enum UploadOrigin { files, photos }
+
 /// Sistem dosya seçicisi portu. [pick] null → kullanıcı vazgeçti.
 abstract interface class UploadPicker {
   /// Seçici bu kurulumda var mı (yoksa yükleme formu dosya seçtiremez).
   bool get available;
 
-  Future<UploadSource?> pick();
+  Future<UploadSource?> pick(UploadOrigin origin);
 }
+
+/// Yükleme içerik özeti portu (SHA-256, akışla; gerçekleştirme `data/upload_digest.dart`).
+/// Görev ve arşiv yükleme niyeti imzasında ad/boyutla birlikte durur: aynı ad/boyutlu farklı
+/// içerik yeni niyettir (istemci akışları §8). YALNIZ tür/boyut ön denetimi geçtikten sonra
+/// çağrılır. [cancelled] true olunca okuma durur ve null döner; okunamayan dosya
+/// `client.file_unreadable` hatasıdır.
+typedef UploadDigest = Future<String?> Function(
+  String path, {
+  required bool Function() cancelled,
+});
 
 /// Seçici bağlı olmayan kurulumda (testler, örnek) kullanılan gerçekleştirme; gerçek seçici
 /// `data/file_upload_picker.dart` (ADR-0002).
@@ -213,7 +227,7 @@ final class UnavailableUploadPicker implements UploadPicker {
   bool get available => false;
 
   @override
-  Future<UploadSource?> pick() async => null;
+  Future<UploadSource?> pick(UploadOrigin origin) async => null;
 }
 
 /// İndirilen dosyanın yazıldığı yer (portu; gerçekleştirme `data/`). [bytes] akışı parça

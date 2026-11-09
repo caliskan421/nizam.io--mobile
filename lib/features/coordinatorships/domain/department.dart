@@ -27,12 +27,9 @@ enum DepartmentKind {
 /// Departman üyeliğinin durumu (`RosterMember.status`).
 enum MemberStatus { active, deleted, unknown }
 
-/// Departman (sunucu varlığı; `GET /v1/departments`, oluşturma/güncelleme yanıtı).
-///
-/// Birleştirme notu: `CoordinatorshipProfile.code`/`about` bu varlığın [code]/[description]
-/// alanlarıyla örtüşür; profilin geri kalanı (üst birim, kuruluş, alt birimler, ek üyeler,
-/// sohbet, etkinlik) sunucuda yoktur. Profil kimlik taşımadığı ve zorunlu alanlarının sunucu
-/// karşılığı olmadığı için ayrı tutuldu — entegrasyonda karar.
+/// Departman (sunucu varlığı; `GET /v1/departments`, oluşturma/güncelleme yanıtı). Koordinatörlük
+/// ayrıntısının katalog dışı bilgisi budur (`CoordinatorshipProfileRepository`); üst birim,
+/// kuruluş, alt birim, ek üye, ekip sohbeti ve etkinlik sunucuda yoktur.
 @immutable
 final class Department {
   const Department({
@@ -144,10 +141,8 @@ final class MembershipChange {
 
 /// Departmanın görev özeti (`GET /v1/departments/{id}/task-summary`).
 ///
-/// Birleştirme notu: `CoordinatorshipReport` (done/total/late/seasonRatio) ile örtüşür ama
-/// sunucu gecikme sayısı ve sezon oranı vermez; o tipin zorunlu alanları doldurulamadığı için
-/// ayrı tutuldu. [completedItems] ↔ `done`, [activeItems] + [completedItems] ↔ `total`
-/// (entegrasyonda karar).
+/// Ayrıntı ekranı bunu kullanmaz: görev sayıları seçili programın görev kataloğundan sayılır
+/// (gecikme dahil; bu uç gecikme vermez ve yalnız şirket yöneticisine açıktır).
 @immutable
 final class DepartmentTaskSummary {
   const DepartmentTaskSummary({

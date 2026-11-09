@@ -5,9 +5,11 @@
 // - 409 work.edit_conflict: yeniden okuma, taban/yerel/sunucu ayrımı, ayrık alan korunur, aynı
 //   alan seçime kalır, seçimden sonra yeni sürümle gönderim; otomatik tekrar yok;
 // - not/alt görev metin çakışması: sunucudaki metin döner, taslak state'te;
-// - işlem anahtarı: aynı eylem aynı anahtar, yeni eylem yeni anahtar;
+// - işlem anahtarı: aynı eylem aynı anahtar, yeni eylem yeni anahtar; yükleme imzası geçici
+//   yoldan bağımsız (ad + boyut + içerik özeti);
 // - sunucu uyum kapısı: eski sunucu sürümünde istek gönderilmez.
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -412,6 +414,46 @@ void main() {
       expect(ctl.pendingSubtaskTitle, 'Vana', reason: 'diyalog adla açılır');
       expect(h.backend.count('POST', '/v1/work-items/w1/subtasks'), 1);
     });
+
+    // Codex tur 3 / N5: sunucu yükleme tekrarını gövde okumadan metadata'dan tanır (§8); A
+    // kaydedilip yanıtı kaybolduktan sonra aynı ad/boyutlu farklı içerikli B yeni anahtar alır.
+    test(
+      'yükleme: aynı içeriğin yeniden seçimi (yeni geçici yol) aynı anahtar; '
+      'farklı ad, boyut ya da aynı ad/boyutta farklı içerik yeni anahtar',
+      () async {
+        final s = _Server();
+        final (h, c, ctl) = await _open(s);
+        const path = '/v1/work-items/w1/files';
+        s.queued['POST $path'] = [
+          for (var i = 0; i < 5; i++) () => timeout(null),
+        ];
+        final dir = Directory.systemTemp.createTempSync('nz_f60_');
+        addTearDown(() => dir.deleteSync(recursive: true));
+        Future<String?> submit(
+          String sub,
+          String name, {
+          int size = 4,
+          List<int> content = const [37, 80],
+        }) async {
+          final f = File('${dir.path}/$sub-$name')..writeAsBytesSync(content);
+          final up = UploadSource(path: f.path, name: name, sizeBytes: size);
+          final d = c.read(taskDetailControllerProvider('w1')).upload!;
+          ctl.updateUpload(d.copyWith(file: () => up));
+          expect((await ctl.submitUpload()).kind, WriteKind.unknown);
+          return key(h, path);
+        }
+
+        expect(ctl.openUpload(), isTrue);
+        final first = await submit('1', 'rapor.pdf');
+        expect(await submit('2', 'rapor.pdf'), first, reason: 'yeni yol');
+        // A kaydedildi, yanıt kayboldu; aynı ad/boyutta farklı içerikli B seçildi.
+        final b = await submit('b', 'rapor.pdf', content: const [37, 81]);
+        expect(b, isNot(first), reason: 'farklı içerik');
+        expect(await submit('3', 'rapor.pdf', size: 5), isNot(first));
+        final other = await submit('4', 'plan.pdf');
+        expect(other, isNot(first));
+      },
+    );
 
     test('409 conflict_retry: aynı anahtarla tek otomatik tekrar', () async {
       final s = _Server();

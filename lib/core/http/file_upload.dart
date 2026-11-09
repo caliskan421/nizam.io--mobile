@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 import '../api/generated/clients/records_client.dart';
@@ -25,14 +27,7 @@ Future<Object?> postWorkItemFile(
 }) async {
   final form = FormData()
     ..files.add(
-      MapEntry(
-        'file',
-        await MultipartFile.fromFile(
-          filePath,
-          filename: filename,
-          contentType: DioMediaType.parse(contentType),
-        ),
-      ),
+      MapEntry('file', await _filePart(filePath, filename, contentType)),
     );
   final r = await dio.post<Object?>(
     '/v1/work-items/${Uri.encodeComponent(workItemId)}/files',
@@ -46,6 +41,68 @@ Future<Object?> postWorkItemFile(
     ),
   );
   return r.data;
+}
+
+/// `sendChatAttachment` (`POST /v1/chats/{chatId}/attachments`) için elle kurulan multipart
+/// isteği: sözleşme isteğe bağlı `body` parçasının DOSYADAN ÖNCE gelmesini ister ve sunucu türü
+/// parçanın `Content-Type`'ından okur (üretilmiş istemci parça sırasını ve türünü
+/// belirleyemez). `client_message_id` sorgudadır; tekrar AYNI kimlik ve aynı dosyayla gider.
+/// [extras] üretilmiş `sendChatAttachmentOpenapiExtras` (kapı ve kapsam başlıkları). Dosya
+/// içeriği günlüğe yazılmaz. Ham yanıt gövdesini döner.
+Future<Object?> postChatAttachment(
+  Dio dio, {
+  required String chatId,
+  required String clientMessageId,
+  required String filePath,
+  required String filename,
+  required String contentType,
+  required Map<String, dynamic> extras,
+  String? body,
+  String? replyToMessageId,
+}) async {
+  final form = FormData();
+  if (body != null && body.isNotEmpty) form.fields.add(MapEntry('body', body));
+  form.files.add(
+    MapEntry('file', await _filePart(filePath, filename, contentType)),
+  );
+  final r = await dio.post<Object?>(
+    '/v1/chats/${Uri.encodeComponent(chatId)}/attachments',
+    queryParameters: {
+      'client_message_id': clientMessageId,
+      'reply_to_message_id': ?replyToMessageId,
+    },
+    data: form,
+    options: Options(contentType: 'multipart/form-data', extra: Map.of(extras)),
+  );
+  return r.data;
+}
+
+/// Multipart dosya parçası. Seçimden sonra silinmiş ya da okunamayan dosya
+/// `client.file_unreadable` olur (ham `FileSystemException` sızmaz, sonuç belirsiz ya da ağ
+/// hatası sayılmaz): boyut okunamazsa istek gönderilmeden; içerik akışı gönderim sırasında
+/// açılır (Dio `fromFile` de böyle), açılma/okuma hatası akışta [ApiError]'a çevrilir ve
+/// `toApiError` onu `DioException.error`'dan aynen döner. Ağ ve TLS hataları etkilenmez.
+Future<MultipartFile> _filePart(
+  String path,
+  String filename,
+  String contentType,
+) async {
+  final file = File(path);
+  final int length;
+  try {
+    length = await file.length();
+  } on FileSystemException {
+    throw ApiError(ClientErrorCode.fileUnreadable);
+  }
+  return MultipartFile.fromStream(
+    () => file.openRead().handleError(
+      (Object _) => throw ApiError(ClientErrorCode.fileUnreadable),
+      test: (e) => e is FileSystemException,
+    ),
+    length,
+    filename: filename,
+    contentType: DioMediaType.parse(contentType),
+  );
 }
 
 /// JSON nesne gövdesini [fromJson] ile çözer; nesne değilse `client.invalid_response`.

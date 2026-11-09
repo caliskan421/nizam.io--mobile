@@ -130,16 +130,18 @@ abstract class _$CoordinatorshipDetailController
   }
 }
 
-/// [code] koordinatörlüğünün ayrıntısı (katalog + ek bilgiler); bilinmeyen kod → null.
-/// Eşzamanlı türetilir: iki kaynak (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
-/// biri yükleniyorsa yükleniyor.
+/// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
+/// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
+/// biri yükleniyorsa yükleniyor. Departman kaydı yalnız şirket yöneticisinde okunur
+/// (`listDepartments` yalnız ona açık, ORGANIZATION-K08); diğer rollerde istek yoktur.
 
 @ProviderFor(coordinatorshipDetail)
 final coordinatorshipDetailProvider = CoordinatorshipDetailFamily._();
 
-/// [code] koordinatörlüğünün ayrıntısı (katalog + ek bilgiler); bilinmeyen kod → null.
-/// Eşzamanlı türetilir: iki kaynak (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
-/// biri yükleniyorsa yükleniyor.
+/// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
+/// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
+/// biri yükleniyorsa yükleniyor. Departman kaydı yalnız şirket yöneticisinde okunur
+/// (`listDepartments` yalnız ona açık, ORGANIZATION-K08); diğer rollerde istek yoktur.
 
 final class CoordinatorshipDetailProvider
     extends
@@ -149,9 +151,10 @@ final class CoordinatorshipDetailProvider
           AsyncValue<CoordinatorshipDetail?>
         >
     with $Provider<AsyncValue<CoordinatorshipDetail?>> {
-  /// [code] koordinatörlüğünün ayrıntısı (katalog + ek bilgiler); bilinmeyen kod → null.
-  /// Eşzamanlı türetilir: iki kaynak (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
-  /// biri yükleniyorsa yükleniyor.
+  /// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
+  /// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
+  /// biri yükleniyorsa yükleniyor. Departman kaydı yalnız şirket yöneticisinde okunur
+  /// (`listDepartments` yalnız ona açık, ORGANIZATION-K08); diğer rollerde istek yoktur.
   CoordinatorshipDetailProvider._({
     required CoordinatorshipDetailFamily super.from,
     required String super.argument,
@@ -207,11 +210,12 @@ final class CoordinatorshipDetailProvider
 }
 
 String _$coordinatorshipDetailHash() =>
-    r'e769aa5e70bf5ab0bd2b22bd84ad6d1dded5d328';
+    r'922fa1eb7028d1d113aa566bc10b4545b6c8480e';
 
-/// [code] koordinatörlüğünün ayrıntısı (katalog + ek bilgiler); bilinmeyen kod → null.
-/// Eşzamanlı türetilir: iki kaynak (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
-/// biri yükleniyorsa yükleniyor.
+/// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
+/// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
+/// biri yükleniyorsa yükleniyor. Departman kaydı yalnız şirket yöneticisinde okunur
+/// (`listDepartments` yalnız ona açık, ORGANIZATION-K08); diğer rollerde istek yoktur.
 
 final class CoordinatorshipDetailFamily extends $Family
     with $FunctionalFamilyOverride<AsyncValue<CoordinatorshipDetail?>, String> {
@@ -224,9 +228,10 @@ final class CoordinatorshipDetailFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// [code] koordinatörlüğünün ayrıntısı (katalog + ek bilgiler); bilinmeyen kod → null.
-  /// Eşzamanlı türetilir: iki kaynak (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
-  /// biri yükleniyorsa yükleniyor.
+  /// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
+  /// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
+  /// biri yükleniyorsa yükleniyor. Departman kaydı yalnız şirket yöneticisinde okunur
+  /// (`listDepartments` yalnız ona açık, ORGANIZATION-K08); diğer rollerde istek yoktur.
 
   CoordinatorshipDetailProvider call(String code) =>
       CoordinatorshipDetailProvider._(argument: code, from: this);

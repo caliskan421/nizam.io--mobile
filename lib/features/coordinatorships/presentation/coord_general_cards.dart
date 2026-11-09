@@ -12,7 +12,6 @@ import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
 import '../application/coordinatorship_detail_controller.dart';
 import '../domain/coordinatorship_board.dart';
-import '../domain/coordinatorship_overview.dart';
 import 'coord_detail_texts.dart';
 import 'coord_parts.dart';
 import 'coord_people_sheet.dart';
@@ -479,78 +478,6 @@ class CoordLoadCard extends ConsumerWidget {
             ),
           ),
         ),
-      ],
-    );
-  }
-}
-
-/// Son hareketler (prototip `.cd-act`): yapan, eylem, hedef ve gün.
-class CoordActivityCard extends StatelessWidget {
-  const CoordActivityCard({super.key, required this.feed});
-
-  final List<FeedItem> feed;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final t = context.text;
-    return CoordGenCard(
-      title: l.uiCoordActivity,
-      children: [
-        for (final f in feed.take(4))
-          MergeSemantics(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: NizamioSpacing.rowPad,
-                vertical: 9,
-              ),
-              child: Row(
-                spacing: NizamioSpacing.space3,
-                children: [
-                  NzAvatar.initials(
-                    name: f.who,
-                    extent: NzAvatarSize.md,
-                    tone: NzAvatar.toneOf(f.who),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 2,
-                      children: [
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: f.who,
-                                style: t.bodySm.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: c.text,
-                                ),
-                              ),
-                              TextSpan(text: ' ${f.action}'),
-                            ],
-                          ),
-                          style: t.bodySm.copyWith(color: c.textMuted),
-                        ),
-                        Text(
-                          f.target,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: t.caption.copyWith(color: c.textMuted),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    l.coordShortDate(f.at),
-                    style: t.monoSm.copyWith(color: c.textMuted),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        if (feed.isEmpty) CoordEmpty(l.uiCoordNoActivity),
       ],
     );
   }

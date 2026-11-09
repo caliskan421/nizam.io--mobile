@@ -1,0 +1,27 @@
+{
+  "$comment": "Uygulama içi bildirimler (zil, bildirim listesi; features/notifications). ELLE yazılır; make gen ARB'ye birleştirir. Yer tutucu ({ }) yasak: sayılı cümleler parça parça yazılıp sunumda birleştirilir.",
+  "texts": {
+    "ui.notifications.title": "Bildirimler",
+    "ui.notifications.unread_tail": "okunmamış",
+    "ui.notifications.unread_badge": "Okunmadı",
+    "ui.notifications.mark_all": "Tümünü okundu yap",
+    "ui.notifications.marked_all": "Bütün bildirimler okundu",
+    "ui.notifications.more": "Daha fazla göster",
+    "ui.notifications.empty_title": "Bildirim yok",
+    "ui.notifications.empty_message": "Görev, toplantı ve koordinatörlük gelişmeleri burada görünür.",
+    "ui.notifications.type_work_item_created": "Yeni görev oluşturuldu",
+    "ui.notifications.type_work_item_transitioned": "Görevin durumu değişti",
+    "ui.notifications.type_work_item_assignment_changed": "Görevin atamaları değişti",
+    "ui.notifications.type_work_item_date_changed": "Görevin tarihleri değişti",
+    "ui.notifications.type_work_date_change_requested": "Tarih değişikliği talep edildi",
+    "ui.notifications.type_work_date_change_reviewed": "Tarih talebi yanıtlandı",
+    "ui.notifications.type_collaboration_message_sent": "Yeni mesaj",
+    "ui.notifications.type_collaboration_meeting_created": "Yeni toplantı",
+    "ui.notifications.type_collaboration_meeting_updated": "Toplantıya ekip üyeleri eklendi",
+    "ui.notifications.type_membership_assigned": "Koordinatörlüğe üye eklendi",
+    "ui.notifications.type_membership_removed": "Koordinatörlükten üye çıkarıldı",
+    "ui.notifications.type_membership_role_changed": "Koordinatörlükte rol değişti",
+    "ui.notifications.type_program_transfer_completed": "Program aktarımı tamamlandı",
+    "ui.notifications.type_unknown": "Yeni bildirim"
+  }
+}

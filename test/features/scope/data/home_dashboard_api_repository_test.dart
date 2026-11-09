@@ -40,11 +40,13 @@ class _Adapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-ApiHomeDashboardRepository _repo(_Adapter adapter) =>
-    ApiHomeDashboardRepository(
-      Dio(BaseOptions(baseUrl: 'https://api.test'))
-        ..httpClientAdapter = adapter,
-    );
+ApiHomeDashboardRepository _repo(
+  _Adapter adapter, {
+  String? program = 'prog-1',
+}) => ApiHomeDashboardRepository(
+  Dio(BaseOptions(baseUrl: 'https://api.test'))..httpClientAdapter = adapter,
+  () => program,
+);
 
 Map<String, Object?> _task(
   String id,
@@ -179,7 +181,7 @@ Map<String, Object> _bodies({bool admin = true}) => {
         'unread_chats': 5,
         'mentioned': false,
       },
-      // Rozet programlar arası toplamdır (5 + 2).
+      // Rozet seçili programın satırıdır (prog-1 → 5); diğer program sayılmaz.
       {
         'program_id': 'prog-2',
         'program_name': 'Q',
@@ -217,10 +219,20 @@ void main() {
     expect(d.team!.users, 9);
     expect(d.coordinatorships.single.code, 'd1');
     expect(d.coordinatorships.single.leads, ['Ayşe Kaya']);
-    expect(d.counts.unreadMessages, 7);
+    expect(d.counts.unreadMessages, 5);
     expect(d.counts.lateTasks, 2);
     expect(d.counts.tasksAwaitingApproval, 1);
   });
+
+  test(
+    'okunmamış rozeti seçili programa iner; satırı olmayan program 0',
+    () async {
+      final other = await _repo(_Adapter(_bodies()), program: 'prog-2').load();
+      expect(other.counts.unreadMessages, 2);
+      final none = await _repo(_Adapter(_bodies()), program: 'prog-9').load();
+      expect(none.counts.unreadMessages, 0);
+    },
+  );
 
   test('yönetici olmayan hesapta rol bilinmiyor', () async {
     final d = await _repo(_Adapter(_bodies(admin: false))).load();

@@ -7,7 +7,7 @@
 //    ayarlanmaz, gerçek yüzey çizilir ve ölçüler çalışma anında FlutterView'dan okunup yazılır.
 //
 // Uygulama gerçek `NizamioApp`, gerçek bileşim kökü ([Harness]: bellek depoları + sahte HTTP),
-// sunucu biçimli sahte backend ([TabletBackend]: görevler, koordinatörlükler, Gantt): bağ
+// sunucu biçimli sahte backend ([TabletBackend]: görevler, koordinatörlükler, Gantt, sohbet): bağ
 // doğrulanmış açılır → Giriş ekranı → gerçek giriş akışı (sahte ağ) + program seçimi → ana
 // sayfa. Kapıyı atlayan mod yoktur. Değişmez sahneleri `tablet_invariants.dart`'tadır.
 // Gerçek backend'e çıkılmaz. Bugünün tarihi sahtelenmez (üretim kancası yok); Ana sayfa
@@ -521,12 +521,11 @@ final tabletScenes = <TabletScene>[
     }
     expect(s.railMenu, findsOneWidget);
     expect(find.bySemanticsLabel(_l.uiRouterAssistant), findsOneWidget);
-    // Referans AX (home): rozet ve zil etiketi birebir. Kaynakta kurucu `chat.load('koord')`
-    // koordinatör sohbetini baştan okunmuş sayar → ray rozeti ana sayfada 4 (5 değil).
+    // Ray rozeti seçili programın okunmamış sohbet sayısıdır (sohbet fikstürü: 2).
     expect(
-      find.bySemanticsLabel('Mesajlar · 4'),
+      find.bySemanticsLabel('Mesajlar · 2'),
       findsWidgets,
-      reason: 'ray Mesajlar rozeti 4',
+      reason: 'ray Mesajlar rozeti 2',
     );
     expect(
       find.bySemanticsLabel(
@@ -587,36 +586,35 @@ final tabletScenes = <TabletScene>[
   TabletScene('archive', (s) async {
     await s.tapRail(TabletModule.archive);
     await _expectDefaultDetail(s, TabletModule.archive);
-    expect(s.inPane(NzPaneRole.master, find.text('Operasyon')), findsWidgets);
+    expect(s.inPane(NzPaneRole.master, find.text('İdari işler')), findsWidgets);
   }),
   TabletScene('archive-folder', (s) async {
     await s.tapRail(TabletModule.archive);
     await s.tapText(
-      s.inPane(NzPaneRole.master, find.text('Operasyon')),
-      reason: 'sol klasör listesi "Operasyon"',
+      s.inPane(NzPaneRole.master, find.text('İdari işler')),
+      reason: 'sol klasör listesi "İdari işler"',
     );
     expect(
-      s.inPane(NzPaneRole.detail, find.text('Operasyon')),
+      s.inPane(NzPaneRole.detail, find.text('İdari işler')),
       findsWidgets,
       reason: 'klasör sağ panelde',
     );
-    expect(s.inPane(NzPaneRole.master, find.text('Operasyon')), findsWidgets);
+    expect(s.inPane(NzPaneRole.master, find.text('İdari işler')), findsWidgets);
     s.expectSplitGeometry();
   }),
   TabletScene('messages', (s) async {
     await s.tapRail(TabletModule.messages);
     await _expectDefaultDetail(s, TabletModule.messages);
     expect(s.inPane(NzPaneRole.master, find.text('Genel')), findsWidgets);
-    // Referans (messages.jpg/AX): rozet 4 ve k1–k2 arasında ayırıcı; ilk giriş bunları bozmaz.
-    expect(find.bySemanticsLabel('Mesajlar · 4'), findsWidgets);
+    // Sohbet fikstürü: ilk girişte okunmamış ayırıcısı iki mesajın arasında.
     expectUnreadDivider(s, present: true);
     expectChatSourceGeometry(s);
     expectInboxRowSourceGeometry(s);
   }),
   TabletScene('chat-reply', (s) async {
     await s.tapRail(TabletModule.messages);
-    // Örnek veri adları referanstan farklıdır (Kadir Özbek ↔ Kerem Özdal…); varsayılan
-    // "Koordinatörler" sohbeti ve içindeki mesaj kullanılır, kişi adına bağlanılmaz.
+    // Fikstür adları referanstan farklıdır; "Koordinatörler" sohbeti ve içindeki mesaj
+    // kullanılır, kişi adına bağlanılmaz.
     await _expectDefaultDetail(s, TabletModule.messages);
     await s.tester.longPress(_bubble('trafo onayı bugün bekleniyor').first);
     await s.settle();
@@ -640,9 +638,7 @@ final tabletScenes = <TabletScene>[
     // Gönder düğmesi artık NzIcon: Icons.* yerine erişilebilirlik etiketiyle bulunur.
     await s.tester.tap(find.bySemanticsLabel(_l.uiMessagesSend).last);
     await s.settle();
-    // Kaynak: gönder 500 ms'de tek tik, 1600 ms'de okundu (S_chat.send). Görüntü KARARLI okundu
-    // fazında alınsın: >1600 ms bekle (Live bağlayıcıda gerçek duvar zamanı; sahte boyut yok).
-    await s.tester.pump(const Duration(seconds: 2));
+    // Gönderim sunucu yanıtıyla yerleşir (sahte tik zamanlayıcısı yok).
     await s.settle();
     expect(
       find.textContaining('Tablet taslak', findRichText: true),

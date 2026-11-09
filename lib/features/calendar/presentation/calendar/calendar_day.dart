@@ -12,12 +12,11 @@ import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/calendar_controller.dart';
 import '../../domain/calendar.dart';
 import 'calendar_grid.dart';
-import 'calendar_preview_sheet.dart';
 import 'calendar_texts.dart';
 
-/// Seçili gün (prototip "Seçili gün"): başlık + bugüne göre uzaklık, sezon şeritleri, türlere
-/// göre bölümler (toplantılar, görevler, talepler, tablo kayıtları); boş günde "Toplantı
-/// planla". Görev satırı görev ayrıntısını açar; diğerleri önizleme penceresini.
+/// Seçili gün (prototip "Seçili gün"): başlık + bugüne göre uzaklık, türlere göre bölümler
+/// (toplantılar, görevler, tarih talepleri); boş günde "Toplantı planla". Toplantı satırı
+/// toplantı ayrıntısını, görev ve talep satırı görev ayrıntısını açar.
 class CalendarDay extends ConsumerWidget {
   const CalendarDay({
     super.key,
@@ -38,7 +37,6 @@ class CalendarDay extends ConsumerWidget {
     );
     final rel = calendarDiff(day, index.today);
     final title = l.dayTitle(day);
-    final seasons = index.seasons(day);
     final groups = index.groups(day);
     return Semantics(
       label: title,
@@ -75,10 +73,6 @@ class CalendarDay extends ConsumerWidget {
                   ),
                 ],
               ),
-              for (final s in seasons) ...[
-                const Gap(NizamioSpacing.gapMd),
-                _SeasonStrip(title: s.title),
-              ],
               for (final g in groups) ...[
                 const Gap(14),
                 NzKicker('${l.groupLabel(g.kind)} · ${g.entries.length}'),
@@ -116,46 +110,6 @@ class CalendarDay extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Sezon şeridi: `danger` %13 zemin, 8 px nokta, sağda mono "sezon".
-class _SeasonStrip extends StatelessWidget {
-  const _SeasonStrip({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    return Container(
-      constraints: const BoxConstraints(minHeight: NizamioSize.tap),
-      padding: const EdgeInsets.symmetric(horizontal: NizamioSpacing.rowPad),
-      decoration: BoxDecoration(
-        color: c.danger.withValues(alpha: 0.13),
-        borderRadius: BorderRadius.circular(NizamioRadius.attach),
-      ),
-      child: Row(
-        children: [
-          NzDot(color: c.danger),
-          const Gap(NizamioSpacing.gapMd),
-          Expanded(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: t.bodyMd.copyWith(fontWeight: FontWeight.w500),
-            ),
-          ),
-          const Gap(NizamioSpacing.gapMd),
-          Text(
-            context.l10n.uiCalendarSeasonLc,
-            style: t.monoSm.copyWith(color: c.danger),
-          ),
-        ],
       ),
     );
   }
@@ -210,31 +164,19 @@ class _EntryRow extends StatelessWidget {
         c.danger.withValues(alpha: 0.16),
       ),
       RequestEntry() => (
-        e.id,
+        e.code,
         e.title,
-        '${l.requestType(e.type)} · ${e.coordinatorship}'
-            '${e.amount > 0 ? ' · ${l.money(e.amount)}' : ''}',
-        l.requestState(e.state),
-        e.state == RequestState.pending ? c.warning : c.textMuted,
+        l.requestSub(e),
+        l.uiCalendarStatePending,
+        c.warning,
         c.surfaceOverlay,
       ),
-      SheetEntry() => (
-        e.coordinatorship,
-        e.label,
-        '${e.table} · ${index.personName(e.person) ?? l.uiTasksUnknownPerson}',
-        e.done ? l.uiCalendarDoneLc : null,
-        c.accentText,
-        c.surfaceOverlay,
-      ),
-      SeasonEntry() => ('', e.title, '', null, c.danger, c.surfaceOverlay),
     };
-    void open() {
-      if (e is TaskEntry) {
-        context.appNav.openTask(e.code);
-      } else {
-        showCalendarPreview(context, entry: e, index: index);
-      }
-    }
+    void open() => switch (e) {
+      MeetingEntry() => context.appNav.openMeeting(e.id),
+      TaskEntry() => context.appNav.openTask(e.code),
+      RequestEntry() => context.appNav.openTask(e.code),
+    };
 
     return MergeSemantics(
       child: Semantics(

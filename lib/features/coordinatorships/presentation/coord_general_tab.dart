@@ -16,8 +16,8 @@ import 'coord_general_cards.dart';
 import 'coord_parts.dart';
 
 /// Genel bölümü (prototip `.cd-genw`): dört özet kartı (Görevler, Ekip, Arşiv, Toplantı;
-/// dokununca bölüm), Akış, İş yükü ve Son hareketler. Genişte özet kartları 4'lü, Akış tam
-/// genişlik, altında İş yükü ile Son hareketler yan yana.
+/// dokununca bölüm), Akış ve İş yükü. Genişte özet kartları 4'lü. Prototipteki "Son
+/// hareketler" kartı yok: sunucuda koordinatörlük etkinlik akışı yoktur.
 class CoordGeneralTab extends ConsumerWidget {
   const CoordGeneralTab({
     super.key,
@@ -131,7 +131,6 @@ class CoordGeneralTab extends ConsumerWidget {
           tasks: tasks,
           people: people,
         );
-        final act = CoordActivityCard(feed: detail.feed);
         // Prototip: özet kartları arası 10, özet ile kartlar arası 22, kartlar arası 12.
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -147,10 +146,7 @@ class CoordGeneralTab extends ConsumerWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: NizamioSpacing.space3,
-              children: [
-                flow,
-                if (wide) row([load, act]) else ...[load, act],
-              ],
+              children: [flow, load],
             ),
           ],
         );

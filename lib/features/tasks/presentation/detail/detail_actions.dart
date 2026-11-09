@@ -16,11 +16,13 @@ import '../../application/task_detail_controller.dart';
 import '../../application/tasks_providers.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_permissions.dart';
+import '../../domain/task_writes.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 import 'detail_forms.dart';
 
 part 'detail_list_option.dart';
+part 'upload_origin_sheet.dart';
 
 /// Ayrıntı ekranının eylemleri: denetleyici komutu + prototipteki sonuç bildirimi ve alt
 /// sayfalar. Sayfa her çizimde kurar; geri çağrılar sayfa bağlamıyla çalışır. Sunucu yazması
@@ -464,13 +466,14 @@ class TaskDetailActions {
     );
   }
 
-  /// Sistem seçicisinden dosya (sunucu yükleme formu); seçici yoksa bildirilir.
+  /// Kaynak (Fotoğraflar / Dosyalar) → sistem seçicisi; seçici yoksa ya da hata verirse
+  /// bildirilir.
   Future<void> pickUploadFile() async {
     if (!ref.read(uploadPickerProvider).available) {
-      _say(context.l10n.uiTasksPickerMissing);
-      return;
+      return _say(context.l10n.uiTasksPickerMissing);
     }
-    await _ctl.pickUploadFile();
+    final origin = await showUploadOriginSheet(context);
+    if (origin != null) _report(await _ctl.pickUploadFile(origin));
   }
 
   void openDelete() {

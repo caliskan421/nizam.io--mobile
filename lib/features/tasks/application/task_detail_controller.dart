@@ -12,9 +12,11 @@ import '../domain/task_writes.dart';
 import 'task_catalog_controller.dart';
 import 'task_details_controller.dart';
 import 'tasks_providers.dart';
+import 'upload_digest_memo.dart';
 
 part 'task_detail_controller.g.dart';
 part 'task_detail_state.dart';
+part 'task_detail_upload.dart';
 
 /// Sunucu 409'u: görev yeniden okunur, ileti gösterilir, otomatik tekrar YOK (istemci
 /// akışları §8). Kod listesi durum dışı 409'ları da kapsasın diye HTTP durumu da okunur.
@@ -67,18 +69,21 @@ WriteOutcome _rejected(String code) =>
 /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
 /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
 @riverpod
-class TaskDetailController extends _$TaskDetailController {
+class TaskDetailController extends _$TaskDetailController with _UploadFlow {
   @override
   TaskDetailState build(String code) => const TaskDetailState();
 
   TaskCatalog? get _catalog => ref.read(taskCatalogControllerProvider).value;
+  @override
   TaskItem? get _task => _catalog?.task(code);
   TaskCatalogController get _store =>
       ref.read(taskCatalogControllerProvider.notifier);
+  @override
   TaskWriteRepository get _writes => ref.read(taskWriteRepositoryProvider);
 
   /// Görevdeki işlem bazlı yetkiler (sunum düğme görünürlüğünü buradan okur). Görev ya da
   /// erişim bilinmiyorsa hiçbir eylem açık değil.
+  @override
   TaskPermissions get permissions {
     final t = _task;
     return t == null
@@ -155,6 +160,7 @@ class TaskDetailController extends _$TaskDetailController {
   /// değişen gövde yeni anahtarı alır. 409 `platform.conflict_retry` aynı anahtarla bir kez
   /// otomatik yeniden denenir. Anahtar başarıda ve "anahtar başka istekle kullanılmış"
   /// yanıtında düşer (sonraki gönderim yeni eylem); diğer hatalarda korunur.
+  @override
   Future<WriteOutcome> _writeKeyed(
     String action,
     String body,
@@ -523,75 +529,7 @@ class TaskDetailController extends _$TaskDetailController {
     return _write(() => _writes.unclaim(t), list: false);
   }
 
-  // ---- kanıt yükle ----------------------------------------------------------------------
-
-  /// Yükleme formunu açar; alt görev önseçilmez (alt görevde kanıt bayrağı yok, ADR-0024).
-  /// Sunucuda yalnız yükleme yetkisi varsa (koordinatör ya da atanmış üye; yönetici hayır).
-  bool openUpload() {
-    if (_task == null || !permissions.canUpload) return false;
-    state = state.copyWith(
-      upload: () => const UploadDraft(tag: EvidenceTag.outcome, name: ''),
-      showErrors: false,
-    );
-    return true;
-  }
-
-  void updateUpload(UploadDraft d) => state = state.copyWith(upload: () => d);
-
-  /// Sistem seçicisinden dosya seçer. Seçici yoksa ya da vazgeçilirse false.
-  Future<bool> pickUploadFile() async {
-    final picker = ref.read(uploadPickerProvider);
-    if (!picker.available) return false;
-    final f = await picker.pick();
-    final d = state.upload;
-    if (f == null || d == null || !ref.mounted) return false;
-    state = state.copyWith(
-      upload: () => d.copyWith(file: () => f, name: f.name),
-    );
-    return true;
-  }
-
-  /// Dosyayı yükler ve Dosya sekmesine geçer. İstek öncesi yerel denetim (istek
-  /// gönderilmez, metin yine koddan): dosya seçilmemiş → [WriteKind.invalid]; izinli tür
-  /// dışı → `records.content_rejected`; 90 MiB → `records.too_large`; görevde 30 dosya →
-  /// `records.too_many_files`. Başarıda yalnız ayrıntı yeniden okunur (liste dosya taşımaz).
-  Future<WriteOutcome> submitUpload() async {
-    final t = _task;
-    final d = state.upload;
-    if (t == null || d == null) return WriteOutcome.invalid;
-    if (!permissions.canUpload) return WriteOutcome.invalid;
-    final f = d.file;
-    if (f == null) {
-      state = state.copyWith(showErrors: true);
-      return WriteOutcome.invalid;
-    }
-    if (!uploadTags.contains(d.tag)) return WriteOutcome.invalid;
-    if (f.contentType == null) return _rejected('records.content_rejected');
-    if (f.tooLarge) return _rejected('records.too_large');
-    if (t.fileEntries.length >= uploadMaxFilesPerTask) {
-      return _rejected('records.too_many_files');
-    }
-    final r = await _writeKeyed(
-      _upload,
-      '${f.path}|${f.name}|${f.sizeBytes}|${d.tag.name}|${d.subtask}',
-      (key) => _writes.attachFile(
-        t,
-        f,
-        d.tag,
-        subtaskId: d.subtask,
-        requestKey: key,
-      ),
-      list: false,
-    );
-    if (r.ok && ref.mounted) {
-      state = state.copyWith(
-        upload: () => null,
-        showErrors: false,
-        tab: TaskDetailTab.files,
-      );
-    }
-    return r;
-  }
+  // ---- kanıt dosyaları (yükleme: [_UploadFlow], task_detail_upload.dart) -----------------
 
   /// Görünen adı değiştirir (yönetici, koordinatör ya da ekip satırlı yükleyen).
   Future<WriteOutcome> renameFile(TaskFile file, String name) async {
@@ -631,12 +569,16 @@ class TaskDetailController extends _$TaskDetailController {
     }
   }
 
-  void closeForms() => state = state.copyWith(
-    edit: () => null,
-    dateDraft: () => null,
-    upload: () => null,
-    showErrors: false,
-  );
+  /// Formları kapatır; yükleme taslağının nesli artar (özet sürerken gönderim istek atmaz).
+  void closeForms() {
+    _uploadGen++;
+    state = state.copyWith(
+      edit: () => null,
+      dateDraft: () => null,
+      upload: () => null,
+      showErrors: false,
+    );
+  }
 
   // ---- sil, kopyala ---------------------------------------------------------------------
 

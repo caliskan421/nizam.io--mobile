@@ -1,32 +1,39 @@
-// ArchivePage: bölümler, sıralama döngüsü, arama, etiket paneli (süzgeç + yeni etiket),
-// yükleme tostu, klasör → klasör ayrıntısı, kısayol menüsü, dar ekran / 2.0 / koyu.
+// ArchivePage (sunucu verisi, sahte depo): özet ve klasörler, arama, klasör → ayrıntı, yükleme
+// tostu, kısayol menüsü (tam arşiv yalnız yöneticide), hata görünümü, dar ekran / 2.0 / koyu.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
+import 'package:nizamio/core/ui/widgets/feedback/feedback.dart';
 import 'package:nizamio/features/archive/archive.dart';
 
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
 import '../../pilot_support.dart';
+import '../archive_fixture.dart';
 
 final _l = AppLocalizationsTr();
 
-Future<(Harness, RecordingAppNav)> _open(
+Future<(Harness, RecordingAppNav, RecordingSink)> _open(
   WidgetTester tester, {
+  FakeArchiveRepository? repo,
+  bool admin = false,
   bool dark = false,
 }) async {
   final h = await real(
     tester,
-    () => pilotHarness(PilotBackend(), signedIn: true),
+    () => pilotHarness(archiveBackend(admin: admin), signedIn: true),
   );
+  final sink = RecordingSink();
+  useArchiveFakes(h, repo ?? FakeArchiveRepository(), sink: sink);
   h.read(scopeControllerProvider).selectProgram('prog-1');
   final nav = RecordingAppNav();
   await pumpScreen(tester, h, const ArchivePage(), nav: nav, dark: dark);
   await settle(tester);
-  return (h, nav);
+  return (h, nav, sink);
 }
 
 Future<void> _tap(WidgetTester tester, Finder f) async {
@@ -39,91 +46,71 @@ Future<void> _tap(WidgetTester tester, Finder f) async {
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets(
-    'bölümler: başlık, etiket hapı, depolama, klasörler; klasör açılır',
-    (tester) async {
-      final (_, nav) = await _open(tester);
-      expect(find.text(_l.uiArchiveTitle), findsOneWidget);
-      expect(find.text('${_l.uiArchiveTags} · 3'), findsOneWidget);
-      expect(find.textContaining('559,3', findRichText: true), findsOneWidget);
-      expect(find.text('227 dosya · 11 klasör'), findsOneWidget);
-      expect(find.text('koordinatörlükler · 11'), findsOneWidget);
-      expect(find.text(_l.uiArchiveSortRecent), findsOneWidget);
-      expect(find.text('İdari işler'), findsOneWidget);
-      expect(find.text('78 dosya'), findsOneWidget);
-      await _tap(tester, find.text('Operasyon'));
-      expect(nav.calls, ['folder:OPE']);
-    },
-  );
+  testWidgets('özet ve klasörler sunucudan; klasör açılır', (tester) async {
+    final repo = FakeArchiveRepository();
+    final (_, nav, _) = await _open(tester, repo: repo);
+    expect(find.text(_l.uiArchiveTitle), findsOneWidget);
+    expect(find.text('3 dosya · 2 klasör'), findsOneWidget);
+    expect(find.text('${_l.uiArchiveFoldersTitle} · 2'), findsOneWidget);
+    expect(find.text('3 dosya'), findsOneWidget);
+    expect(find.text(_l.uiArchiveNoFiles), findsOneWidget);
+    // Koordinatör satırının departmanı başlık olarak gider.
+    expect(repo.calls.single, ('folders', 'd1', null));
+    await _tap(tester, find.text('Bilişim'));
+    expect(nav.calls, ['folder:d2']);
+  });
 
-  testWidgets('sıralama döngüsü ve arama; eşleşme yoksa boş metni', (
+  testWidgets('arama süzer; eşleşme yoksa boş metni; geri dönüşte korunur', (
     tester,
   ) async {
-    await _open(tester);
-    await _tap(tester, find.text(_l.uiArchiveSortRecent));
-    expect(find.text(_l.uiArchiveSortName), findsOneWidget);
-    await _tap(tester, find.text(_l.uiArchiveSortName));
-    expect(find.text(_l.uiArchiveSortSize), findsOneWidget);
-    await tester.drag(find.byType(Scrollable).first, const Offset(0, 2000));
-    await settle(tester);
+    final (h, _, _) = await _open(tester);
     await _tap(tester, find.byIcon(Icons.search_rounded).first);
-    await tester.enterText(find.byType(TextField).first, 'fuar');
+    await tester.enterText(find.byType(TextField).first, 'bili');
     await settle(tester);
-    expect(find.text('koordinatörlükler · 1'), findsOneWidget);
+    expect(find.text('${_l.uiArchiveFoldersTitle} · 1'), findsOneWidget);
+    await pumpScreen(tester, h, const SizedBox.shrink());
+    await settle(tester);
+    await pumpScreen(tester, h, const ArchivePage());
+    await settle(tester);
+    expect(find.text('bili'), findsOneWidget);
     await tester.enterText(find.byType(TextField).first, 'yok böyle');
     await settle(tester);
     expect(find.text(_l.uiArchiveEmptySearch), findsOneWidget);
   });
 
-  testWidgets('geri dönüşte arama kutusu sorguyu korur', (tester) async {
-    final (h, _) = await _open(tester);
-    await _tap(tester, find.byIcon(Icons.search_rounded).first);
-    await tester.enterText(find.byType(TextField).first, 'fuar');
-    await settle(tester);
-    await pumpScreen(tester, h, const SizedBox.shrink());
-    await settle(tester);
-    await pumpScreen(tester, h, const ArchivePage());
-    await settle(tester);
-    expect(find.text('fuar'), findsOneWidget);
-    expect(find.text('koordinatörlükler · 1'), findsOneWidget);
-  });
-
-  testWidgets(
-    'etiket: seç → klasör sayıları süzülür; temizle; yeni etiket tostu',
-    (tester) async {
-      await _open(tester);
-      await _tap(tester, find.text('${_l.uiArchiveTags} · 3'));
-      await _tap(tester, find.text(_l.uiArchiveTagField).last);
-      expect(find.text('39 dosya'), findsOneWidget);
-      await _tap(tester, find.text(_l.uiArchiveTagsClear));
-      expect(find.text('78 dosya'), findsOneWidget);
-      await tester.enterText(
-        find.widgetWithText(TextField, _l.uiArchiveNewTag),
-        'Teslim',
-      );
-      await settle(tester);
-      await _tap(tester, find.bySemanticsLabel(_l.uiArchiveAddTag));
-      expect(find.text('“Teslim” ${_l.uiArchiveTagAdded}'), findsOneWidget);
-      expect(find.text('${_l.uiArchiveTags} · 4'), findsOneWidget);
-    },
-  );
-
-  testWidgets('yükle tostu; kısayol menüsü satırları ve gezinme', (
+  testWidgets('yükleme görev bağlamı yok → yakında; kısayollar (koordinatör)', (
     tester,
   ) async {
-    final (h, nav) = await _open(tester);
+    final (h, nav, _) = await _open(tester);
     await _tap(tester, find.byIcon(Icons.arrow_upward_rounded));
     expect(find.text(_l.uiArchiveUploadSoon), findsOneWidget);
     h.read(shellReselectEventsProvider.notifier).fire(ArchivePage.shellTab);
     await settle(tester);
-    expect(find.text(_l.uiArchiveDownloadAll), findsOneWidget);
     expect(find.text(_l.uiArchiveCreateFolder), findsOneWidget);
+    // Tam arşiv yalnız şirket yöneticisine.
+    expect(find.text(_l.uiArchiveDownloadAll), findsNothing);
     await tester.tap(find.text(_l.uiArchiveGoCoordinatorships));
     await settle(tester);
     expect(nav.calls, ['coordinatorships']);
-    h.read(shellReselectEventsProvider.notifier).fire(0);
+  });
+
+  testWidgets('yönetici: tam arşiv indirilir ve kaydedilir', (tester) async {
+    final repo = FakeArchiveRepository();
+    final (h, _, sink) = await _open(tester, repo: repo, admin: true);
+    h.read(shellReselectEventsProvider.notifier).fire(ArchivePage.shellTab);
     await settle(tester);
-    expect(find.text(_l.uiArchiveDownloadAll), findsNothing);
+    await tester.tap(find.text(_l.uiArchiveDownloadAll));
+    await settle(tester);
+    expect(repo.calls.last, ('periodZip', 'd1', null));
+    expect(sink.saved.keys, ['${_l.uiArchiveTitle}.zip']);
+    expect(find.text(_l.uiArchiveSaved), findsOneWidget);
+  });
+
+  testWidgets('sunucu hatası: hata görünümü', (tester) async {
+    final repo = FakeArchiveRepository()
+      ..error = ApiError('records.not_authorized');
+    await _open(tester, repo: repo);
+    expect(find.byType(NzErrorState), findsOneWidget);
   });
 
   for (final (width, scale) in [(360.0, 1.0), (360.0, 2.0), (390.0, 2.0)]) {
@@ -137,9 +124,8 @@ void main() {
           addTearDown(tester.view.reset);
           addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
           await _open(tester, dark: dark);
-          await _tap(tester, find.textContaining('${_l.uiArchiveTags} ·'));
           final scrollable = find.byType(Scrollable).first;
-          for (var i = 0; i < 10; i++) {
+          for (var i = 0; i < 4; i++) {
             await tester.drag(scrollable, const Offset(0, -300));
             await tester.pump();
           }

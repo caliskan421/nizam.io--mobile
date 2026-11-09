@@ -3,6 +3,9 @@
 library;
 
 export 'application/messages_nav_caption.dart'
-    show messagesNavBadgeProvider, messagesNavCaptionProvider;
+    show
+        messagesNavBadgeProvider,
+        messagesNavCaptionProvider,
+        refreshMessagesBadge;
 export 'presentation/chat_page.dart' show ChatPage;
 export 'presentation/messages_page.dart' show MessagesPage;

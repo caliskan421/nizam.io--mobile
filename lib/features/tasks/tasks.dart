@@ -17,10 +17,15 @@ export 'application/tasks_providers.dart'
         taskWriteRepositoryProvider,
         downloadSinkProvider,
         meetingPlannerProvider,
-        uploadPickerProvider;
+        chatTaskPlannerProvider,
+        uploadPickerProvider,
+        uploadDigesterProvider;
+export 'domain/chat_task_planner.dart';
 export 'domain/meeting_planner.dart';
 export 'domain/task_access.dart';
 export 'domain/task_catalog.dart';
+export 'domain/task_writes.dart' show UploadOrigin, UploadSource;
+export 'presentation/detail/detail_actions.dart' show showUploadOriginSheet;
 export 'presentation/quick_action_sheets.dart'
     show showInviteSheet, showMeetingSheet, showNewTaskSheet;
 export 'presentation/task_detail_page.dart' show TaskDetailPage;

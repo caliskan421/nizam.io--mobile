@@ -3,7 +3,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/features/meetings/application/meeting_room_controller.dart';
 import 'package:nizamio/features/meetings/application/meeting_summary_controller.dart';
-import 'package:nizamio/features/meetings/application/meetings_controller.dart';
 import 'package:nizamio/features/meetings/meetings.dart';
 
 import '../meetings_server.dart';

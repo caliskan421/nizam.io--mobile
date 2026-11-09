@@ -1,5 +1,5 @@
 // archive data katmanı: records uçları → domain (RecordFile, ArchiveFolder, ArchiveTaskSummary),
-// bilinmeyen etiket → unknown, imleç, ikili indirme, hata zarfı → ApiError.
+// açık departman başlığı, bilinmeyen etiket → unknown, imleç, akışlı indirme, hata zarfı → ApiError.
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/domain/page_slice.dart';
 import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/core/http/interceptors.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/features/archive/data/records_api_repository.dart';
 import 'package:nizamio/features/archive/domain/archive.dart';
@@ -63,14 +64,19 @@ ResponseBody _err(int status, String code) =>
   ResponseBody Function(RequestOptions o) respond,
 ) {
   final adapter = _Adapter(respond);
-  return (
-    ApiRecordsRepository(
-      Dio(BaseOptions(baseUrl: 'https://api.test'))
-        ..httpClientAdapter = adapter,
-    ),
-    adapter,
-  );
+  final dio = Dio(BaseOptions(baseUrl: 'https://api.test'))
+    ..httpClientAdapter = adapter;
+  return (ApiRecordsRepository(() => dio), adapter);
 }
+
+/// İsteğin açık departman kapsamı (`withDepartment` anahtarı; başlığı ara katman yazar).
+final _deptKey = withDepartment(const {}, 'x').keys.single;
+
+String? _dept(RequestOptions o) => o.extra[_deptKey] as String?;
+
+Future<List<int>> _read(Stream<List<int>> s) => s.expand((c) => c).toList();
+
+const _d = 'd1';
 
 Map<String, Object?> _record({String tag = 'plan'}) => {
   'file_id': 'f1',
@@ -101,13 +107,17 @@ void main() {
     test('multipart POST + tag sorgusu → RecordFile', () async {
       final (repo, a) = _repo((_) => _json(_record(tag: 'cikti')));
       final f = await repo.attachFile(
+        department: _d,
         workItemId: 'w1',
         tag: RecordTag.cikti,
         filePath: path,
+        filename: 'kanit.pdf',
         requestKey: 'k-0123456789abcdefghij',
       );
       final o = a.seen.single;
       expect(o.method, 'POST');
+      expect(_dept(o), _d);
+      expect(o.headers['Idempotency-Key'], 'k-0123456789abcdefghij');
       expect(o.uri.path, '/v1/work-items/w1/files');
       expect(o.uri.queryParameters['tag'], 'cikti');
       expect(o.contentType, startsWith('multipart/form-data'));
@@ -135,9 +145,11 @@ void main() {
         File(txt).writeAsStringSync('x');
         await expectLater(
           repo.attachFile(
+            department: _d,
             workItemId: 'w1',
             tag: RecordTag.plan,
             filePath: txt,
+            filename: 'not.txt',
             requestKey: 'k-0123456789abcdefghij',
           ),
           throwsA(
@@ -156,9 +168,11 @@ void main() {
       final (repo, _) = _repo((_) => _json(<Object>[]));
       await expectLater(
         repo.attachFile(
+          department: _d,
           workItemId: 'w1',
           tag: RecordTag.plan,
           filePath: path,
+          filename: 'kanit.pdf',
           requestKey: 'k-0123456789abcdefghij',
         ),
         throwsA(
@@ -175,9 +189,11 @@ void main() {
       final (repo, a) = _repo((_) => _json(_record()));
       await expectLater(
         repo.attachFile(
+          department: _d,
           workItemId: 'w1',
           tag: RecordTag.unknown,
           filePath: path,
+          filename: 'kanit.pdf',
           requestKey: 'k-0123456789abcdefghij',
         ),
         throwsArgumentError,
@@ -189,9 +205,11 @@ void main() {
       final (repo, _) = _repo((_) => _err(422, 'records.tag_invalid'));
       await expectLater(
         repo.attachFile(
+          department: _d,
           workItemId: 'w1',
           tag: RecordTag.plan,
           filePath: path,
+          filename: 'kanit.pdf',
           requestKey: 'k-0123456789abcdefghij',
         ),
         throwsA(
@@ -203,42 +221,16 @@ void main() {
     });
   });
 
-  test(
-    'listWorkItemFiles → RecordFile listesi; bilinmeyen etiket unknown',
-    () async {
-      final (repo, a) = _repo(
-        (_) => _json({
-          'files': [_item(), _item(tag: 'yeni_etiket', id: 'f2')],
-        }),
-      );
-      final files = await repo.listWorkItemFiles('w9');
-      expect(a.seen.single.uri.path, '/v1/work-items/w9/files');
-      expect(files.map((f) => f.tag), [RecordTag.ister, RecordTag.unknown]);
-      expect(files.first.uploaderId, 'a1');
-    },
-  );
-
-  test('renameFile → PATCH gövde display_name', () async {
-    final (repo, a) = _repo((_) => _json(_record(tag: 'bilinmez')));
-    final f = await repo.renameFile('f1', 'Yeni.pdf');
-    final o = a.seen.single;
-    expect(o.method, 'PATCH');
-    expect(o.uri.path, '/v1/files/f1/name');
-    expect(jsonDecode(utf8.decode(a.bodies.single)), {
-      'display_name': 'Yeni.pdf',
-    });
-    expect(f.tag, RecordTag.unknown);
-  });
-
   test('deleteFile → DELETE; 404 → ApiError', () async {
     final (repo, a) = _repo((_) => ResponseBody.fromString('', 204));
-    await repo.deleteFile('f1');
+    await repo.deleteFile('f1', department: _d);
     expect(a.seen.single.method, 'DELETE');
+    expect(_dept(a.seen.single), _d);
     expect(a.seen.single.uri.path, '/v1/files/f1');
 
     final (repo2, _) = _repo((_) => _err(404, 'records.file_not_found'));
     await expectLater(
-      repo2.deleteFile('f1'),
+      repo2.deleteFile('f1', department: _d),
       throwsA(
         isA<ApiError>().having((e) => e.code, 'code', 'records.file_not_found'),
       ),
@@ -254,6 +246,7 @@ void main() {
         }),
       );
       final slice = await repo.archiveAttachments(
+        department: _d,
         filter: ArchiveAttachmentFilter(
           mimeCategory: ArchiveMimeCategory.gorsel,
           tag: RecordTag.sonuc,
@@ -268,6 +261,7 @@ void main() {
       );
       final q = a.seen.single.uri.queryParameters;
       expect(a.seen.single.uri.path, '/v1/records/archive/attachments');
+      expect(_dept(a.seen.single), _d);
       expect(q, {
         'mime_category': 'gorsel',
         'tag': 'sonuc',
@@ -291,7 +285,7 @@ void main() {
         {'files': <Object>[], 'next_cursor': ''},
       ]) {
         final (repo, a) = _repo((_) => _json(body));
-        final slice = await repo.archiveAttachments();
+        final slice = await repo.archiveAttachments(department: _d);
         expect(a.seen.single.uri.queryParameters, isEmpty);
         expect(slice.items, isEmpty);
         expect(slice.hasMore, isFalse);
@@ -301,6 +295,7 @@ void main() {
     test('ArchiveSort.name → sort=name', () async {
       final (repo, a) = _repo((_) => _json({'files': <Object>[]}));
       await repo.archiveAttachments(
+        department: _d,
         filter: const ArchiveAttachmentFilter(sort: ArchiveSort.name),
       );
       expect(a.seen.single.uri.queryParameters['sort'], 'name');
@@ -309,7 +304,10 @@ void main() {
     test('422 records.invalid_cursor → ApiError', () async {
       final (repo, _) = _repo((_) => _err(422, 'records.invalid_cursor'));
       await expectLater(
-        repo.archiveAttachments(page: const PageRequest(cursor: 'eski')),
+        repo.archiveAttachments(
+          department: _d,
+          page: const PageRequest(cursor: 'eski'),
+        ),
         throwsA(
           isA<ApiError>().having(
             (e) => e.code,
@@ -340,14 +338,13 @@ void main() {
         ],
       }),
     );
-    final folders = await repo.loadFolders();
+    final folders = await repo.loadFolders(department: _d);
     expect(a.seen.single.uri.path, '/v1/records/archive/folders');
+    expect(_dept(a.seen.single), _d);
     expect(folders.map((f) => (f.code, f.name, f.files, f.isVirtual)), [
       ('d1', 'Mekanik', 4, false),
       ('me', 'Görevlerim', 1, true),
     ]);
-    expect(folders.first.leads, isEmpty);
-    expect(folders.first.lastUploadDays, isNull);
   });
 
   test('archiveTasks → ArchiveTaskSummary', () async {
@@ -358,8 +355,9 @@ void main() {
         ],
       }),
     );
-    final t = (await repo.archiveTasks()).single;
+    final t = (await repo.archiveTasks(department: _d)).single;
     expect(a.seen.single.uri.path, '/v1/records/archive/tasks');
+    expect(_dept(a.seen.single), _d);
     expect((t.workItemId, t.title, t.fileCount), ('w1', 'Saha', 3));
   });
 
@@ -369,14 +367,15 @@ void main() {
         'uploaders': ['a1', 'a2'],
       }),
     );
-    expect(await repo.archiveUploaders(), ['a1', 'a2']);
+    expect(await repo.archiveUploaders(department: _d), ['a1', 'a2']);
     expect(a.seen.single.uri.path, '/v1/records/archive/uploaders');
+    expect(_dept(a.seen.single), _d);
   });
 
   test('bozuk gövde → client.invalid_response', () async {
     final (repo, _) = _repo((_) => _json({'folders': 'x'}));
     await expectLater(
-      repo.loadFolders(),
+      repo.loadFolders(department: _d),
       throwsA(
         isA<ApiError>().having(
           (e) => e.code,
@@ -387,21 +386,26 @@ void main() {
     );
   });
 
-  group('indirmeler (ikili; UTF-8 olmayan bayt bozulmaz)', () {
+  group('indirmeler (akış; UTF-8 olmayan bayt bozulmaz)', () {
     const bytes = [0x50, 0x4b, 0x03, 0x04, 0xff, 0xfe, 0x00, 0x80];
 
     test('downloadFile', () async {
       final (repo, a) = _repo((_) => _bin(bytes));
-      expect(await repo.downloadFile('f1'), bytes);
+      expect(await _read(await repo.downloadFile('f1', department: _d)), bytes);
       final o = a.seen.single;
       expect(o.method, 'GET');
+      expect(o.responseType, ResponseType.stream);
+      expect(_dept(o), _d);
       expect(o.uri.path, '/v1/files/f1/download');
       expect((o.extra['openapi'] as Map)['operationId'], 'downloadFile');
     });
 
     test('downloadFolderZip', () async {
       final (repo, a) = _repo((_) => _bin(bytes));
-      expect(await repo.downloadFolderZip('d1'), bytes);
+      expect(
+        await _read(await repo.downloadFolderZip('d1', department: _d)),
+        bytes,
+      );
       expect(
         a.seen.single.uri.path,
         '/v1/records/archive/folders/d1/download-zip',
@@ -414,8 +418,14 @@ void main() {
 
     test('downloadSelectionZip: file_ids virgüllü', () async {
       final (repo, a) = _repo((_) => _bin(bytes));
-      expect(await repo.downloadSelectionZip(['f1', 'f2']), bytes);
+      expect(
+        await _read(
+          await repo.downloadSelectionZip(['f1', 'f2'], department: _d),
+        ),
+        bytes,
+      );
       final o = a.seen.single;
+      expect(_dept(o), _d);
       expect(o.uri.path, '/v1/records/archive/files/download-zip');
       expect(o.uri.queryParameters['file_ids'], 'f1,f2');
       expect((o.extra['openapi'] as Map)['operationId'], 'archiveSelectionZip');
@@ -425,10 +435,14 @@ void main() {
       'downloadSelectionZip: 0 ya da 100+ kimlik → ArgumentError, istek yok',
       () async {
         final (repo, a) = _repo((_) => _bin(bytes));
-        expect(() => repo.downloadSelectionZip([]), throwsArgumentError);
-        expect(
-          () =>
-              repo.downloadSelectionZip([for (var i = 0; i < 101; i++) 'f$i']),
+        await expectLater(
+          repo.downloadSelectionZip([], department: _d),
+          throwsArgumentError,
+        );
+        await expectLater(
+          repo.downloadSelectionZip([
+            for (var i = 0; i < 101; i++) 'f$i',
+          ], department: _d),
           throwsArgumentError,
         );
         expect(a.seen, isEmpty);
@@ -437,7 +451,7 @@ void main() {
 
     test('downloadPeriodZip', () async {
       final (repo, a) = _repo((_) => _bin(bytes));
-      expect(await repo.downloadPeriodZip(), bytes);
+      expect(await _read(await repo.downloadPeriodZip(department: _d)), bytes);
       expect(a.seen.single.uri.path, '/v1/records/archive/period/download-zip');
       expect(
         (a.seen.single.extra['openapi'] as Map)['operationId'],
@@ -448,10 +462,31 @@ void main() {
     test('hata zarfı → ApiError (429 kota)', () async {
       final (repo, _) = _repo((_) => _err(429, 'records.busy'));
       await expectLater(
-        repo.downloadPeriodZip(),
+        repo.downloadPeriodZip(department: _d),
         throwsA(isA<ApiError>().having((e) => e.status, 'status', 429)),
       );
     });
+
+    test(
+      'doğrulanmış bağ yok → client.server_not_verified, istek yok',
+      () async {
+        final repo = ApiRecordsRepository(() => null);
+        await expectLater(
+          repo.downloadFolderZip('d1', department: _d),
+          throwsA(
+            isA<ApiError>().having(
+              (e) => e.code,
+              'code',
+              ClientErrorCode.serverNotVerified,
+            ),
+          ),
+        );
+        await expectLater(
+          repo.loadFolders(department: _d),
+          throwsA(isA<ApiError>()),
+        );
+      },
+    );
   });
 
   group('RecordsDownloadTargets (bilet hedefi)', () {

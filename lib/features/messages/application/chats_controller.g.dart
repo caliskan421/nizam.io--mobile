@@ -8,18 +8,27 @@ part of 'chats_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Mesajlar kutusu ve sohbet komutları. Örnek kaynakta değişiklikler bellekte kalır (sunucuya
-/// yazılmaz); liste ve sohbet ekranı aynı durumu okur.
+/// Mesajlar kutusu (seçili programın sohbetleri). Hesap ya da program değişince yeniden okunur.
+/// Akış açılınca (yeniden bağlanma protokolü adım 2) hemen, olaylarda en az 1 sn birleştirilip
+/// tek `listChats` okumasıyla tazelenir; tazeleme hatası eski listeyi bozmaz. Okumalar
+/// yanıt nesliyle sıralanır: yalnız en son başlatılan okumanın yanıtı yazılır (geç gelen eski
+/// yanıt yeni listeyi ezmez).
 
 @ProviderFor(ChatsController)
 final chatsControllerProvider = ChatsControllerProvider._();
 
-/// Mesajlar kutusu ve sohbet komutları. Örnek kaynakta değişiklikler bellekte kalır (sunucuya
-/// yazılmaz); liste ve sohbet ekranı aynı durumu okur.
+/// Mesajlar kutusu (seçili programın sohbetleri). Hesap ya da program değişince yeniden okunur.
+/// Akış açılınca (yeniden bağlanma protokolü adım 2) hemen, olaylarda en az 1 sn birleştirilip
+/// tek `listChats` okumasıyla tazelenir; tazeleme hatası eski listeyi bozmaz. Okumalar
+/// yanıt nesliyle sıralanır: yalnız en son başlatılan okumanın yanıtı yazılır (geç gelen eski
+/// yanıt yeni listeyi ezmez).
 final class ChatsControllerProvider
     extends $AsyncNotifierProvider<ChatsController, ChatInbox> {
-  /// Mesajlar kutusu ve sohbet komutları. Örnek kaynakta değişiklikler bellekte kalır (sunucuya
-  /// yazılmaz); liste ve sohbet ekranı aynı durumu okur.
+  /// Mesajlar kutusu (seçili programın sohbetleri). Hesap ya da program değişince yeniden okunur.
+  /// Akış açılınca (yeniden bağlanma protokolü adım 2) hemen, olaylarda en az 1 sn birleştirilip
+  /// tek `listChats` okumasıyla tazelenir; tazeleme hatası eski listeyi bozmaz. Okumalar
+  /// yanıt nesliyle sıralanır: yalnız en son başlatılan okumanın yanıtı yazılır (geç gelen eski
+  /// yanıt yeni listeyi ezmez).
   ChatsControllerProvider._()
     : super(
         from: null,
@@ -39,10 +48,13 @@ final class ChatsControllerProvider
   ChatsController create() => ChatsController();
 }
 
-String _$chatsControllerHash() => r'4a02b31ff374b94139c101a1a627538e213b8763';
+String _$chatsControllerHash() => r'9b6341b85b4dc6dc52baecacee6c25db9c478e1c';
 
-/// Mesajlar kutusu ve sohbet komutları. Örnek kaynakta değişiklikler bellekte kalır (sunucuya
-/// yazılmaz); liste ve sohbet ekranı aynı durumu okur.
+/// Mesajlar kutusu (seçili programın sohbetleri). Hesap ya da program değişince yeniden okunur.
+/// Akış açılınca (yeniden bağlanma protokolü adım 2) hemen, olaylarda en az 1 sn birleştirilip
+/// tek `listChats` okumasıyla tazelenir; tazeleme hatası eski listeyi bozmaz. Okumalar
+/// yanıt nesliyle sıralanır: yalnız en son başlatılan okumanın yanıtı yazılır (geç gelen eski
+/// yanıt yeni listeyi ezmez).
 
 abstract class _$ChatsController extends $AsyncNotifier<ChatInbox> {
   FutureOr<ChatInbox> build();

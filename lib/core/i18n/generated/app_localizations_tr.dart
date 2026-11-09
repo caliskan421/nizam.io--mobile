@@ -831,6 +831,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu durum geçişine izin verilmiyor.';
 
   @override
+  String get errClientFileUnreadable =>
+      'Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin.';
+
+  @override
   String get errClientInsecureServer =>
       'Sunucu adresi https ile başlamalı; güvenli olmayan bağlantı kurulmaz.';
 
@@ -1045,7 +1049,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveSearch => 'Arşivde ara';
 
   @override
-  String get uiArchiveSearchHint => 'Dosya, görev, kişi veya etiket';
+  String get uiArchiveSearchHint => 'Klasör adı';
 
   @override
   String get uiArchiveUpload => 'Dosya yükle';
@@ -1055,57 +1059,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiArchiveUploadSoon => 'Dosya yükleme sonraki adımda tasarlanacak';
-
-  @override
-  String get uiArchiveTags => 'Etiketler';
-
-  @override
-  String get uiArchiveTagsClear => 'Temizle';
-
-  @override
-  String get uiArchiveNewTag => 'Yeni etiket';
-
-  @override
-  String get uiArchiveTagColor => 'Etiket rengi';
-
-  @override
-  String get uiArchiveAddTag => 'Etiketi ekle';
-
-  @override
-  String get uiArchiveTagAdded => 'etiketi eklendi';
-
-  @override
-  String get uiArchiveColorViolet => 'Mor';
-
-  @override
-  String get uiArchiveColorGold => 'Sarı';
-
-  @override
-  String get uiArchiveColorGreen => 'Yeşil';
-
-  @override
-  String get uiArchiveColorRed => 'Kırmızı';
-
-  @override
-  String get uiArchiveColorGray => 'Gri';
-
-  @override
-  String get uiArchiveTagField => 'Saha görselleri';
-
-  @override
-  String get uiArchiveTagResult => 'Sonuç dosyası';
-
-  @override
-  String get uiArchiveTagData => 'Güncel durum verisi';
-
-  @override
-  String get uiArchiveTagFieldShort => 'Saha';
-
-  @override
-  String get uiArchiveTagResultShort => 'Sonuç';
-
-  @override
-  String get uiArchiveTagDataShort => 'Güncel';
 
   @override
   String get uiArchiveStorage => 'Depolama';
@@ -1123,9 +1076,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveFoldersLc => 'klasör';
 
   @override
-  String get uiArchiveCoordinatorshipsLc => 'koordinatörlükler';
-
-  @override
   String get uiArchiveSortRecent => 'Son yükleme';
 
   @override
@@ -1133,9 +1083,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiArchiveSortSize => 'Boyuta göre';
-
-  @override
-  String get uiArchiveSortHint => 'Sıralamayı değiştir';
 
   @override
   String get uiArchiveNoFiles => 'Dosya yok';
@@ -1147,8 +1094,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveDownloadAll => 'Tümünü indir';
 
   @override
-  String get uiArchiveDownloadAllToast =>
-      'Tüm arşiv hazırlanıyor · bitince bildirim gelir';
+  String get uiArchiveDownloadAllToast => 'Tüm arşiv ZIP olarak hazırlanıyor';
 
   @override
   String get uiArchiveCreateFolder => 'Klasör oluştur';
@@ -1183,9 +1129,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiArchiveCoordinatorship => 'Koordinatörlük';
-
-  @override
-  String get uiArchiveNoLead => 'Koordinatör yok';
 
   @override
   String get uiArchiveTabs => 'Klasör';
@@ -1230,10 +1173,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveFactBy => 'Yükleyen';
 
   @override
-  String get uiArchiveFactDate => 'Tarih';
-
-  @override
-  String get uiArchiveUploaderUnknown => 'Admin';
+  String get uiArchiveUploaderUnknown => 'Bilinmeyen kişi';
 
   @override
   String get uiArchiveDownload => 'İndir';
@@ -1257,7 +1197,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveMoveSoon => 'Klasör seçimi sonraki adımda tasarlanacak';
 
   @override
-  String get uiArchiveDeleted => 'Dosya silinen kayıtlara taşındı';
+  String get uiArchiveDeleted => 'Dosya silindi';
 
   @override
   String get uiArchiveKindImage => 'Resim';
@@ -1276,6 +1216,72 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiArchiveKindPdfShort => 'PDF';
+
+  @override
+  String get uiArchiveFoldersTitle => 'klasörler';
+
+  @override
+  String get uiArchiveTagIster => 'İster';
+
+  @override
+  String get uiArchiveTagPlan => 'Plan';
+
+  @override
+  String get uiArchiveTagGirdi => 'Girdi';
+
+  @override
+  String get uiArchiveTagAnaliz => 'Analiz';
+
+  @override
+  String get uiArchiveTagCikti => 'Çıktı';
+
+  @override
+  String get uiArchiveTagSonuc => 'Sonuç';
+
+  @override
+  String get uiArchiveTagUnknown => 'Diğer';
+
+  @override
+  String get uiArchiveSaved => 'Kaydedildi';
+
+  @override
+  String get uiArchiveDeleteConfirm => 'Dosya kalıcı olarak silinsin mi?';
+
+  @override
+  String get uiArchiveDeleteOk => 'Sil';
+
+  @override
+  String get uiArchiveZipSelection => 'Görünen dosyaları ZIP olarak indir';
+
+  @override
+  String get uiArchiveZipEmpty => 'İndirilecek dosya yok';
+
+  @override
+  String get uiArchiveLoadMore => 'Daha fazla yükle';
+
+  @override
+  String get uiArchiveUploaderFilter => 'Yükleyen';
+
+  @override
+  String get uiArchiveUploaderAll => 'Tüm yükleyenler';
+
+  @override
+  String get uiArchivePickTask => 'Görev seç';
+
+  @override
+  String get uiArchivePickTag => 'Etiket seç';
+
+  @override
+  String get uiArchiveUploadNoTask => 'Bu klasörde dosya yüklenecek görev yok';
+
+  @override
+  String get uiArchiveUploaded => 'Dosya yüklendi';
+
+  @override
+  String get uiArchivePickerMissing => 'Bu sürümde dosya seçici yok';
+
+  @override
+  String get uiArchiveFolderMissing => 'Klasör bulunamadı';
 
   @override
   String get uiButtonsBusy => 'Meşgul';
@@ -1335,28 +1341,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarRecordsLc => 'kayıt';
 
   @override
-  String get uiCalendarSeasonLc => 'sezon';
-
-  @override
   String get uiCalendarGroupMeetings => 'toplantılar';
 
   @override
   String get uiCalendarGroupTasks => 'görevler';
 
   @override
-  String get uiCalendarGroupRequests => 'talepler';
-
-  @override
-  String get uiCalendarGroupSheets => 'tablo kayıtları';
-
-  @override
-  String get uiCalendarParticipantsLc => 'katılımcı';
-
-  @override
-  String get uiCalendarAgendaLc => 'gündem';
-
-  @override
-  String get uiCalendarPeopleLc => 'kişi';
+  String get uiCalendarGroupRequests => 'tarih talepleri';
 
   @override
   String get uiCalendarTaskEnds => 'Bitiyor';
@@ -1368,31 +1359,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarLateLc => 'gecikti';
 
   @override
-  String get uiCalendarDoneLc => 'yapıldı';
-
-  @override
-  String get uiCalendarReqPurchase => 'Satın alma';
-
-  @override
-  String get uiCalendarReqQuote => 'Fiyat teklifi';
-
-  @override
-  String get uiCalendarReqExpense => 'Masraf';
-
-  @override
-  String get uiCalendarReqBudget => 'Ek bütçe';
+  String get uiCalendarRequestedRange => 'İstenen aralık';
 
   @override
   String get uiCalendarStatePending => 'Onay bekliyor';
-
-  @override
-  String get uiCalendarStateApproved => 'Onaylandı';
-
-  @override
-  String get uiCalendarStateOrdered => 'Sipariş verildi';
-
-  @override
-  String get uiCalendarStateDelivered => 'Teslim alındı';
 
   @override
   String get uiCalendarEmpty => 'Bu gün için planlanmış bir şey yok.';
@@ -1401,89 +1371,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarPlan => 'Toplantı planla';
 
   @override
-  String get uiCalendarAllCoordinatorships => 'Tüm koordinatörlükler';
-
-  @override
-  String get uiCalendarPreview => 'Kayıt önizleme';
-
-  @override
-  String get uiCalendarKickerMeeting => 'toplantı';
-
-  @override
-  String get uiCalendarKickerRequest => 'talep';
-
-  @override
-  String get uiCalendarKickerSheet => 'tablo kaydı';
-
-  @override
-  String get uiCalendarFactTime => 'Zaman';
-
-  @override
-  String get uiCalendarFactPlace => 'Yer';
-
-  @override
-  String get uiCalendarFactInvited => 'Davetli';
-
-  @override
-  String get uiCalendarFactType => 'Tür';
-
-  @override
-  String get uiCalendarFactCoordinatorship => 'Koordinatörlük';
-
-  @override
-  String get uiCalendarFactAmount => 'Tutar';
-
-  @override
-  String get uiCalendarFactState => 'Durum';
-
-  @override
-  String get uiCalendarFactNeed => 'İhtiyaç tarihi';
-
-  @override
-  String get uiCalendarFactTask => 'Bağlı görev';
-
-  @override
-  String get uiCalendarFactTable => 'Tablo';
-
-  @override
-  String get uiCalendarFactDate => 'Tarih';
-
-  @override
-  String get uiCalendarFactPerson => 'Kişi';
-
-  @override
-  String get uiCalendarQuotePending => 'Teklif bekleniyor';
-
-  @override
-  String get uiCalendarSheetDone => 'Yapıldı';
-
-  @override
-  String get uiCalendarSheetWaiting => 'Bekliyor';
-
-  @override
-  String get uiCalendarRemind => 'Hatırlat';
-
-  @override
-  String get uiCalendarReminded => 'Katılımcılara hatırlatma gönderildi';
-
-  @override
-  String get uiCalendarWriteGroup => 'Gruba yaz';
-
-  @override
-  String get uiCalendarClose => 'Kapat';
-
-  @override
-  String get uiCalendarGoTask => 'Bağlı göreve git';
-
-  @override
-  String get uiCalendarGoCoordinatorship => 'Koordinatörlüğe git';
-
-  @override
   String get uiCalendarPickTitle => 'Bir kayıt seç';
 
   @override
   String get uiCalendarPickBody =>
-      'Soldaki listeden bir göreve dokun, ayrıntısı burada açılır. Toplantı ve talepler önizleme penceresinde açılır.';
+      'Soldaki listeden bir kayda dokun, ayrıntısı burada açılır.';
 
   @override
   String get uiCommonRetry => 'Yeniden dene';
@@ -1558,9 +1450,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordFlyAllList => 'Tüm liste';
 
   @override
-  String get uiCoordSubUnitsTail => 'alt birim';
-
-  @override
   String get uiCoordPeopleTail => 'kişi';
 
   @override
@@ -1571,6 +1460,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordMessage => 'Mesaj';
+
+  @override
+  String get uiCoordDeptKindCoordinatorship => 'Koordinatörlük';
+
+  @override
+  String get uiCoordDeptKindWorkingGroup => 'Çalışma grubu';
 
   @override
   String get uiCoordTabsLabel => 'Koordinatörlük bölümleri';
@@ -1598,15 +1493,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordKpiDone => 'tamamlanma';
-
-  @override
-  String get uiCoordPctNoteOf => 'görevden';
-
-  @override
-  String get uiCoordPctNoteDone => 'tamamlandı';
-
-  @override
-  String get uiCoordSeasonAverage => 'sezon ortalaması';
 
   @override
   String get uiCoordAttention => 'dikkat gerektirenler';
@@ -1938,12 +1824,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordAllTeam => 'Tüm ekip';
 
   @override
-  String get uiCoordActivity => 'Son hareketler';
-
-  @override
-  String get uiCoordNoActivity => 'Henüz hareket yok.';
-
-  @override
   String get uiFeedbackLoading => 'Yükleniyor';
 
   @override
@@ -2113,9 +1993,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeCollapse => 'Daralt';
 
   @override
-  String get uiHomeNotifications => 'Bildirimler';
-
-  @override
   String get uiHomeWaitingTail => 'iş seni bekliyor';
 
   @override
@@ -2201,18 +2078,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiHomeShiftDaysTail => 'gün';
-
-  @override
-  String get uiHomeNotifyDateRequests => 'tarih talebi';
-
-  @override
-  String get uiHomeNotifyApprovals => 'onay';
-
-  @override
-  String get uiHomeNotifyAnd => 've';
-
-  @override
-  String get uiHomeNotifyTail => 'seni bekliyor';
 
   @override
   String get uiHomeSeasonTail => 'sezonu';
@@ -2785,9 +2650,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesNewMessage => 'Yeni mesaj';
 
   @override
-  String get uiMessagesNewChatSoon => 'Yeni sohbet sonraki adımda tasarlanacak';
-
-  @override
   String get uiMessagesFilters => 'Sohbet süzgeci';
 
   @override
@@ -2830,9 +2692,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesYesterday => 'Dün';
 
   @override
-  String get uiMessagesMembersLc => 'üye';
-
-  @override
   String get uiMessagesTyping => 'yazıyor…';
 
   @override
@@ -2842,14 +2701,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesLastSeen => 'son görülme';
 
   @override
-  String get uiMessagesYesterdayLc => 'dün';
-
-  @override
   String get uiMessagesSearchChat => 'Sohbette ara';
-
-  @override
-  String get uiMessagesSearchChatSoon =>
-      'Sohbette arama sonraki adımda tasarlanacak';
 
   @override
   String get uiMessagesPinned => 'Sabitlenen mesaj';
@@ -2873,36 +2725,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesAttach => 'Görev, koordinatörlük veya arşiv ekle';
 
   @override
-  String get uiMessagesPhotoVideo => 'Fotoğraf ve video';
-
-  @override
-  String get uiMessagesFile => 'Dosya';
-
-  @override
-  String get uiMessagesPortalRefs => 'portaldan atıf';
-
-  @override
-  String get uiMessagesRefTask => 'Görev';
-
-  @override
-  String get uiMessagesRefCoordinatorship => 'Koordinatörlük';
-
-  @override
-  String get uiMessagesRefArchive => 'Arşiv';
-
-  @override
-  String get uiMessagesSearchTask => 'Görev ara';
-
-  @override
-  String get uiMessagesSearchCoordinatorship => 'Koordinatörlük ara';
-
-  @override
-  String get uiMessagesSearchFile => 'Arşivde dosya ara';
-
-  @override
-  String get uiMessagesRemove => 'Kaldır';
-
-  @override
   String get uiMessagesCancel => 'Vazgeç';
 
   @override
@@ -2916,9 +2738,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMessagesVotedTail => 'kişi oy verdi';
-
-  @override
-  String get uiMessagesVotesLc => 'oy';
 
   @override
   String get uiMessagesReactLike => 'Beğen';
@@ -2960,16 +2779,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesCopied => 'Mesaj kopyalandı';
 
   @override
-  String get uiMessagesPinnedToast => 'Mesaj sabitlendi';
-
-  @override
-  String get uiMessagesUnpinnedToast => 'Sabitleme kaldırıldı';
-
-  @override
   String get uiMessagesPollResults => 'Anket sonuçları';
-
-  @override
-  String get uiMessagesPollResultsLc => 'anket sonuçları';
 
   @override
   String get uiMessagesToTask => 'Göreve dönüştür';
@@ -2979,27 +2789,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMessagesDeleted => 'Mesaj silindi';
-
-  @override
-  String get uiMessagesNotVoted => 'Henüz oy vermeyenler';
-
-  @override
-  String get uiMessagesNotVotedNone => 'Grubun diğer üyeleri henüz oy vermedi';
-
-  @override
-  String get uiMessagesRemind => 'Hatırlat';
-
-  @override
-  String get uiMessagesReminded => 'Oy vermeyenlere hatırlatma gönderildi';
-
-  @override
-  String get uiMessagesEndPoll => 'Anketi bitir';
-
-  @override
-  String get uiMessagesPollEnded => 'Anket bitti';
-
-  @override
-  String get uiMessagesPollConcluded => 'Anket sonuçlandı';
 
   @override
   String get uiMessagesConcluded => 'sonuçlandı';
@@ -3014,46 +2803,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesInfo => 'bilgisi';
 
   @override
-  String get uiMessagesMute => 'Sessize al';
-
-  @override
-  String get uiMessagesMutedTail => 'sessize alındı';
-
-  @override
   String get uiMessagesLeaveGroup => 'Gruptan çık';
-
-  @override
-  String get uiMessagesBlock => 'Engelle';
-
-  @override
-  String get uiMessagesActionSoon => 'Bu işlem sonraki adımda tasarlanacak';
-
-  @override
-  String get uiMessagesShared => 'paylaşılanlar';
-
-  @override
-  String get uiMessagesMembers => 'üyeler';
 
   @override
   String get uiMessagesAllUsers => 'Tüm kullanıcılar';
 
   @override
   String get uiMessagesGroup => 'Grup';
-
-  @override
-  String get uiMessagesWroteHere => 'bu sohbette yazdı';
-
-  @override
-  String get uiMessagesMember => 'üye';
-
-  @override
-  String get uiMessagesManager => 'yönetici';
-
-  @override
-  String get uiMessagesPhoto => 'Fotoğraf';
-
-  @override
-  String get uiMessagesDownloading => 'indiriliyor';
 
   @override
   String get uiMessagesRoleAdmin => 'Admin';
@@ -3066,6 +2822,269 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMessagesNewChatHint => 'Kişi seç';
+
+  @override
+  String get uiMessagesNewGroup => 'Yeni grup';
+
+  @override
+  String get uiMessagesGroupName => 'Grup adı';
+
+  @override
+  String get uiMessagesCreateGroup => 'Grubu kur';
+
+  @override
+  String get uiMessagesCandidatesTruncated => 'Liste ilk 200 kişiyle sınırlı.';
+
+  @override
+  String get uiMessagesWhyCannotWrite =>
+      'Listede olmayan kişiyle doğrudan yazışamazsınız: birebir sohbet yalnız koordinatörlük zinciri içinde açılır. Ortak bir grupta yazışabilirsiniz.';
+
+  @override
+  String get uiMessagesNoCandidates => 'Listede kimse yok.';
+
+  @override
+  String get uiMessagesPeerLeft =>
+      'Bu kişi artık programda değil; mesaj gönderilemez.';
+
+  @override
+  String get uiMessagesChatGone => 'Bu sohbete artık erişimin yok.';
+
+  @override
+  String get uiMessagesSendFailed => 'gönderilemedi';
+
+  @override
+  String get uiMessagesRetrySend => 'Tekrar gönder';
+
+  @override
+  String get uiMessagesDiscardMessage => 'Mesajı at';
+
+  @override
+  String get uiMessagesMessageRestored =>
+      'Mesaj silinmiş; metin taslağa geri kondu.';
+
+  @override
+  String get uiMessagesOlderMessages => 'Önceki mesajlar';
+
+  @override
+  String get uiMessagesDeletedMessage => 'Silinmiş mesaj';
+
+  @override
+  String get uiMessagesNoMessages => 'Henüz mesaj yok';
+
+  @override
+  String get uiMessagesListTruncated => 'Yalnız son sohbetler gösteriliyor.';
+
+  @override
+  String get uiMessagesSingleChoice => 'Tek seçim';
+
+  @override
+  String get uiMessagesMultiChoice => 'Çoklu seçim';
+
+  @override
+  String get uiMessagesAttachPhotos => 'Fotoğraflar';
+
+  @override
+  String get uiMessagesAttachFile => 'Dosyalar';
+
+  @override
+  String get uiMessagesAttachPoll => 'Anket';
+
+  @override
+  String get uiMessagesPickerMissing => 'Dosya seçici bu kurulumda yok.';
+
+  @override
+  String get uiMessagesFileSaved => 'Dosya kaydedildi';
+
+  @override
+  String get uiMessagesPollNew => 'Anket oluştur';
+
+  @override
+  String get uiMessagesPollQuestion => 'Soru';
+
+  @override
+  String get uiMessagesPollOption => 'Seçenek';
+
+  @override
+  String get uiMessagesPollAddOption => 'Seçenek ekle';
+
+  @override
+  String get uiMessagesPollClose => 'Anketi bitir';
+
+  @override
+  String get uiMessagesPollClosed => 'Anket bitirildi';
+
+  @override
+  String get uiMessagesPollNoVotes => 'Henüz oy yok';
+
+  @override
+  String get uiMessagesMembers => 'Üyeler';
+
+  @override
+  String get uiMessagesAddMembers => 'Üye ekle';
+
+  @override
+  String get uiMessagesAdd => 'Ekle';
+
+  @override
+  String get uiMessagesRoleGroupAdmin => 'Yönetici';
+
+  @override
+  String get uiMessagesRoleFounder => 'Kurucu';
+
+  @override
+  String get uiMessagesFromSource => 'Kaynaktan';
+
+  @override
+  String get uiMessagesMakeAdmin => 'Yönetici yap';
+
+  @override
+  String get uiMessagesRevokeAdmin => 'Yöneticiliği al';
+
+  @override
+  String get uiMessagesRemoveMember => 'Gruptan çıkar';
+
+  @override
+  String get uiMessagesRename => 'Adı değiştir';
+
+  @override
+  String get uiMessagesSave => 'Kaydet';
+
+  @override
+  String get uiMessagesDeleteGroup => 'Grubu sil';
+
+  @override
+  String get uiMessagesDeleteGroupConfirm =>
+      'Grup ve mesajları herkes için silinir. Bu işlem geri alınamaz.';
+
+  @override
+  String get uiMessagesLeaveConfirm =>
+      'Gruptan ayrılırsan mesajları artık göremezsin.';
+
+  @override
+  String get uiMessagesShared => 'Paylaşılanlar';
+
+  @override
+  String get uiMessagesSharedEmpty => 'Henüz paylaşılan öğe yok.';
+
+  @override
+  String get uiMessagesMore => 'Daha fazla';
+
+  @override
+  String get uiMessagesRefGone => 'Artık yok';
+
+  @override
+  String get uiMessagesRefTask => 'Görev';
+
+  @override
+  String get uiMessagesRefDepartment => 'Koordinatörlük';
+
+  @override
+  String get uiMessagesRefFile => 'Dosya';
+
+  @override
+  String get uiMessagesTaskAgainTitle => 'Bu mesajdan görev açılmış';
+
+  @override
+  String get uiMessagesTaskAgain =>
+      'Aynı mesajdan yeni bir görev daha açılacak.';
+
+  @override
+  String get uiMessagesContinue => 'Devam et';
+
+  @override
+  String get uiMessagesMentionAll => 'herkes';
+
+  @override
+  String get uiMessagesMentionSuggestions => 'Bahsetme önerileri';
+
+  @override
+  String get uiMessagesSearchInChatHint => 'Mesaj metni';
+
+  @override
+  String get uiMessagesSearchEmpty => 'Eşleşen mesaj yok.';
+
+  @override
+  String get uiMessagesSearchMore => 'Daha eski sonuçlar';
+
+  @override
+  String get uiMessagesNotInWindow => 'Mesaj bulunamadı.';
+
+  @override
+  String get uiNotificationsTitle => 'Bildirimler';
+
+  @override
+  String get uiNotificationsUnreadTail => 'okunmamış';
+
+  @override
+  String get uiNotificationsUnreadBadge => 'Okunmadı';
+
+  @override
+  String get uiNotificationsMarkAll => 'Tümünü okundu yap';
+
+  @override
+  String get uiNotificationsMarkedAll => 'Bütün bildirimler okundu';
+
+  @override
+  String get uiNotificationsMore => 'Daha fazla göster';
+
+  @override
+  String get uiNotificationsEmptyTitle => 'Bildirim yok';
+
+  @override
+  String get uiNotificationsEmptyMessage =>
+      'Görev, toplantı ve koordinatörlük gelişmeleri burada görünür.';
+
+  @override
+  String get uiNotificationsTypeWorkItemCreated => 'Yeni görev oluşturuldu';
+
+  @override
+  String get uiNotificationsTypeWorkItemTransitioned =>
+      'Görevin durumu değişti';
+
+  @override
+  String get uiNotificationsTypeWorkItemAssignmentChanged =>
+      'Görevin atamaları değişti';
+
+  @override
+  String get uiNotificationsTypeWorkItemDateChanged =>
+      'Görevin tarihleri değişti';
+
+  @override
+  String get uiNotificationsTypeWorkDateChangeRequested =>
+      'Tarih değişikliği talep edildi';
+
+  @override
+  String get uiNotificationsTypeWorkDateChangeReviewed =>
+      'Tarih talebi yanıtlandı';
+
+  @override
+  String get uiNotificationsTypeCollaborationMessageSent => 'Yeni mesaj';
+
+  @override
+  String get uiNotificationsTypeCollaborationMeetingCreated => 'Yeni toplantı';
+
+  @override
+  String get uiNotificationsTypeCollaborationMeetingUpdated =>
+      'Toplantıya ekip üyeleri eklendi';
+
+  @override
+  String get uiNotificationsTypeMembershipAssigned =>
+      'Koordinatörlüğe üye eklendi';
+
+  @override
+  String get uiNotificationsTypeMembershipRemoved =>
+      'Koordinatörlükten üye çıkarıldı';
+
+  @override
+  String get uiNotificationsTypeMembershipRoleChanged =>
+      'Koordinatörlükte rol değişti';
+
+  @override
+  String get uiNotificationsTypeProgramTransferCompleted =>
+      'Program aktarımı tamamlandı';
+
+  @override
+  String get uiNotificationsTypeUnknown => 'Yeni bildirim';
 
   @override
   String get uiRouterTabHome => 'Ana sayfa';
@@ -4092,6 +4111,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksPickFileAction => 'Dosya seç';
 
   @override
+  String get uiTasksPickPhotos => 'Fotoğraflar';
+
+  @override
+  String get uiTasksPickFiles => 'Dosyalar';
+
+  @override
   String get uiTasksPickerMissing => 'Bu sürümde dosya seçici yok';
 
   @override
@@ -4132,6 +4157,13 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiTasksNoteTaskDesc =>
       'Görev bu nottan açılır ve nota bağlanır. Atanan kişiye bildirim gider.';
+
+  @override
+  String get uiTasksMessageTaskTitle => 'Mesajı göreve dönüştür';
+
+  @override
+  String get uiTasksMessageTaskDesc =>
+      'Görevin açıklaması mesaj metnidir; görev mesaja bağlanır. Atanan kişiye bildirim gider.';
 
   @override
   String get uiTasksMtEditTitle => 'Toplantıyı düzenle';

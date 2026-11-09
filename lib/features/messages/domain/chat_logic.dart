@@ -1,113 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../../core/domain/turkish_collation.dart';
-import '../../tasks/tasks.dart';
 import 'chat.dart';
-
-final _taskToken = RegExp(r'#[A-ZÇĞİÖŞÜ]{2,4}-\d+');
-
-/// Mesaj metninin parçası.
-enum ChatTokenKind { text, mention, task }
-
-@immutable
-final class ChatToken {
-  const ChatToken(this.kind, this.text);
-
-  final ChatTokenKind kind;
-  final String text;
-}
-
-/// Metinde bahsedilebilen adlar: "herkes", koordinatörlük adları, benim kısa adım (ilk iki
-/// sözcük) ve kişilerin tam adları; uzun ad önce eşleşir.
-List<String> mentionNames(TaskCatalog catalog, List<String> people) {
-  final me = catalog.person(catalog.me)?.name ?? '';
-  final short = me.split(' ').take(2).join(' ');
-  final names = <String>{
-    'herkes',
-    for (final c in catalog.coordinatorships) c.name,
-    if (short.isNotEmpty) short,
-    for (final id in [catalog.me, ...people]) ?catalog.person(id)?.name,
-  }.toList()..sort((a, b) => b.length.compareTo(a.length));
-  return names;
-}
-
-/// Metni düz yazı, `@bahsetme` ve `#GÖREV-n` parçalarına böler.
-List<ChatToken> tokenize(String text, List<String> mentions) {
-  final alt = mentions.map(RegExp.escape).join('|');
-  final re = RegExp(
-    '(${alt.isEmpty ? '' : '@(?:$alt)|'}#[A-ZÇĞİÖŞÜ]{2,4}-\\d+)',
-  );
-  final out = <ChatToken>[];
-  var last = 0;
-  for (final m in re.allMatches(text)) {
-    if (m.start > last) {
-      out.add(ChatToken(ChatTokenKind.text, text.substring(last, m.start)));
-    }
-    final tok = m.group(0)!;
-    out.add(
-      ChatToken(
-        tok.startsWith('#') ? ChatTokenKind.task : ChatTokenKind.mention,
-        tok,
-      ),
-    );
-    last = m.end;
-  }
-  if (last < text.length) {
-    out.add(ChatToken(ChatTokenKind.text, text.substring(last)));
-  }
-  return out;
-}
-
-/// Metindeki var olan görev kodları (tekrarsız, sırayla).
-List<String> taskCodesIn(String text, TaskCatalog catalog) => [
-  ...{
-    for (final m in _taskToken.allMatches(text))
-      if (catalog.task(m.group(0)!.substring(1)) != null)
-        m.group(0)!.substring(1),
-  },
-];
-
-/// Mesajdaki bütün atıflar: metindeki #görev ve @koordinatörlük, ekli dosya ve eklenenler.
-List<ChatRef> refsOf(ChatMessage m, TaskCatalog catalog) {
-  final out = <ChatRef>[];
-  void add(ChatRef r) {
-    if (!out.contains(r)) out.add(r);
-  }
-
-  for (final code in taskCodesIn(m.text, catalog)) {
-    add(ChatRef(ChatRefKind.task, code));
-  }
-  for (final c in catalog.coordinatorships) {
-    if (m.text.contains('@${c.name}')) {
-      add(ChatRef(ChatRefKind.coordinatorship, c.code));
-    }
-  }
-  if (m.file case final f?) {
-    add(ChatRef(ChatRefKind.file, f.name, coordinatorship: f.coordinatorship));
-  }
-  m.refs.forEach(add);
-  return out;
-}
-
-/// Metinde zaten görünmeyen ek atıflar (balonda satır içi atıf olarak eklenir).
-List<ChatRef> extraRefs(ChatMessage m, TaskCatalog catalog) => [
-  for (final r in refsOf(m, catalog))
-    if (!(r.kind == ChatRefKind.task && m.text.contains('#${r.id}')) &&
-        !(r.kind == ChatRefKind.coordinatorship &&
-            m.text.contains('@${catalog.coordinatorship(r.id)?.name}')))
-      r,
-];
-
-/// Sohbetteki bütün atıflar (paylaşılanlar), tekrarsız.
-List<ChatRef> sharedRefs(Chat chat, TaskCatalog catalog) {
-  final out = <ChatRef>[];
-  for (final m in chat.messages) {
-    for (final r in refsOf(m, catalog)) {
-      if (!out.contains(r)) out.add(r);
-    }
-  }
-  return out;
-}
 
 /// Akış öğesi: gün hapı, okunmamış ayırıcısı ya da mesaj.
 sealed class ChatItem {
@@ -124,6 +18,7 @@ final class ChatNewItem extends ChatItem {
   const ChatNewItem();
 }
 
+@immutable
 final class ChatMessageItem extends ChatItem {
   const ChatMessageItem(
     this.message, {
@@ -143,10 +38,10 @@ final class ChatMessageItem extends ChatItem {
 bool _sameDay(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;
 
-/// Sohbet akışı: gün değişiminde hap, okunmamış işaretinde ayırıcı; ardışık mesaj grupları.
-List<ChatItem> timeline(Chat chat) {
+/// Sohbet akışı: gün değişiminde hap, [unreadMarker] mesajından önce ayırıcı; ardışık mesaj
+/// grupları.
+List<ChatItem> timeline(List<ChatMessage> msgs, {String? unreadMarker}) {
   final out = <ChatItem>[];
-  final msgs = chat.messages;
   DateTime? prevDay;
   String? prevFrom;
   for (var i = 0; i < msgs.length; i++) {
@@ -156,38 +51,26 @@ List<ChatItem> timeline(Chat chat) {
       prevDay = m.at;
       prevFrom = null;
     }
-    if (chat.unreadMarker == m.id) {
+    if (unreadMarker == m.id) {
       out.add(const ChatNewItem());
       prevFrom = null;
     }
     final next = i + 1 < msgs.length ? msgs[i + 1] : null;
     final last =
         next == null ||
-        next.from != m.from ||
+        next.senderId != m.senderId ||
         !_sameDay(next.at, m.at) ||
-        chat.unreadMarker == next.id;
-    out.add(ChatMessageItem(m, first: prevFrom != m.from, last: last));
-    prevFrom = m.from;
+        unreadMarker == next.id;
+    out.add(ChatMessageItem(m, first: prevFrom != m.senderId, last: last));
+    prevFrom = m.senderId;
   }
   return out;
-}
-
-/// Açılışta "okunmamış mesajlar" ayırıcısının mesajı.
-String? unreadMarkerOf(Chat chat) {
-  if (chat.unread <= 0 || chat.messages.isEmpty) return null;
-  return chat.newBefore ??
-      chat
-          .messages[(chat.messages.length - chat.unread).clamp(
-            0,
-            chat.messages.length - 1,
-          )]
-          .id;
 }
 
 /// Mesaj listesi süzgeci.
 enum ChatFilter { all, unread, groups, people }
 
-/// Süzgeç + arama (ad ve mesaj metinlerinde).
+/// Süzgeç + yerel arama (sohbet adı ve son mesaj metni; yüklü liste içinde).
 List<Chat> visibleChats(
   List<Chat> chats, {
   ChatFilter filter = ChatFilter.all,
@@ -203,74 +86,7 @@ List<Chat> visibleChats(
   return [
     for (final c in chats)
       if (pass(c) &&
-          (q.isEmpty ||
-              trLower('${c.name} ${c.messages.map((m) => m.text).join(' ')}')
-                  .contains(q)))
+          (q.isEmpty || trLower('${c.name} ${c.last?.text ?? ''}').contains(q)))
         c,
   ];
-}
-
-/// Yazma alanı önerisi: [key] solda mono (görev kodu ya da "@"), [label] satır, [draft]
-/// seçilince yazılacak metin.
-@immutable
-final class ChatSuggestion {
-  const ChatSuggestion({
-    required this.key,
-    required this.label,
-    required this.draft,
-    this.role,
-  });
-
-  final String key;
-  final String label;
-
-  /// Kişi önerisinde rol (sunumda "ad · rol").
-  final PersonRole? role;
-  final String draft;
-}
-
-final _hashTail = RegExp(r'#([\wÇĞİÖŞÜçğıöşü-]*)$');
-final _atTail = RegExp(r'@([\wçğıöşüÇĞİÖŞÜ]*)$');
-
-/// Taslağın sonundaki `#…` için görev, `@…` için kişi önerileri (en çok 6).
-List<ChatSuggestion> suggestions(
-  String draft,
-  TaskCatalog catalog,
-  List<String> people,
-) {
-  final hash = _hashTail.firstMatch(draft);
-  if (hash != null) {
-    final k = trLower(hash.group(1)!);
-    return [
-      for (final t in catalog.tasks)
-        if (k.isEmpty ||
-            trLower(t.code).startsWith(k) ||
-            trLower(t.title).contains(k))
-          ChatSuggestion(
-            key: t.code,
-            label: t.title,
-            draft: draft.replaceFirst(RegExp(r'#[^\s#]*$'), '#${t.code} '),
-          ),
-    ].take(6).toList();
-  }
-  final at = _atTail.firstMatch(draft);
-  if (at != null) {
-    final k = trLower(at.group(1)!);
-    final all = <(String, String, PersonRole?)>[
-      ('herkes', 'herkes', null),
-      for (final id in people)
-        if (catalog.person(id) case final p?) (p.name, p.name, p.role),
-    ];
-    return [
-      for (final (name, label, role) in all)
-        if (k.isEmpty || trLower(name).startsWith(k))
-          ChatSuggestion(
-            key: '@',
-            label: label,
-            role: role,
-            draft: draft.replaceFirst(RegExp(r'@[^\s@]*$'), '@$name '),
-          ),
-    ].take(6).toList();
-  }
-  return const [];
 }

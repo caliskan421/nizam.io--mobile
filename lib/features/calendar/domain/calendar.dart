@@ -1,16 +1,11 @@
 import 'package:meta/meta.dart';
 
+import '../../meetings/meetings.dart';
 import '../../tasks/tasks.dart';
 
-/// Takvim kaydı türü; sıra hücre noktalarının ve gün listesinin sırasıdır (prototip
-/// `ORDER`: sezon, toplantı, görev, talep, tablo kaydı).
-enum CalendarKind { season, meeting, task, request, sheet }
-
-/// Talep türü.
-enum RequestType { purchase, quote, expense, budget }
-
-/// Talep durumu.
-enum RequestState { pending, approved, ordered, delivered }
+/// Takvim kaydı türü; sıra hücre noktalarının ve gün listesinin sırasıdır (toplantı, görev,
+/// tarih talebi).
+enum CalendarKind { meeting, task, request }
 
 /// Görev kaydının hangi ucu o güne düşer.
 enum TaskEdge { start, end }
@@ -40,48 +35,40 @@ sealed class CalendarEntry {
   CalendarKind get kind;
 }
 
-/// Sezon tarihi (ör. "Saha teslimi").
-final class SeasonEntry extends CalendarEntry {
-  const SeasonEntry({required this.date, required this.title});
-
-  @override
-  final DateTime date;
-  final String title;
-
-  @override
-  CalendarKind get kind => CalendarKind.season;
-}
-
-/// Toplantı; [coordinatorships] boşsa bütün koordinatörlükler davetlidir.
+/// Toplantı (`listMeetings` satırı): yerel gün ve saat, başlık, bağlı departman adları.
+/// Liste ucu yer, katılımcı ve gündem taşımaz; ayrıntı toplantı sayfasındadır.
 final class MeetingEntry extends CalendarEntry {
   const MeetingEntry({
+    required this.id,
     required this.date,
     required this.hour,
     required this.minute,
     required this.title,
-    required this.coordinatorships,
-    required this.participants,
-    required this.place,
-    required this.chatId,
-    required this.agenda,
+    required this.departments,
   });
 
+  /// Toplantı anını ([Meeting.meetingDate], UTC) yerel güne ve saate çevirir.
+  factory MeetingEntry.of(Meeting m) {
+    final at = m.meetingDate.toLocal();
+    return MeetingEntry(
+      id: m.id,
+      date: calendarDay(at),
+      hour: at.hour,
+      minute: at.minute,
+      title: m.title,
+      departments: [for (final d in m.departments) d.name],
+    );
+  }
+
+  final String id;
   @override
   final DateTime date;
   final int hour;
   final int minute;
   final String title;
 
-  /// Davetli koordinatörlük kodları; boş → tüm koordinatörlükler.
-  final List<String> coordinatorships;
-  final int participants;
-  final String place;
-
-  /// Toplantının sohbet kimliği ("Gruba yaz").
-  final String chatId;
-  final List<String> agenda;
-
-  bool get allCoordinatorships => coordinatorships.isEmpty;
+  /// Bağlı departman adları (sahip departman ilk).
+  final List<String> departments;
 
   /// Gün içi sıralama anahtarı (dakika).
   int get minuteOfDay => hour * 60 + minute;
@@ -119,154 +106,108 @@ final class TaskEntry extends CalendarEntry {
   CalendarKind get kind => CalendarKind.task;
 }
 
-/// Satın alma / teklif / masraf / ek bütçe talebi; [date] ihtiyaç tarihidir.
+/// Görevin bekleyen tarih değişikliği talebi (görev satırının `pending_date_request`'i);
+/// talep edilen yeni bitiş gününe ([date]) düşer.
 final class RequestEntry extends CalendarEntry {
   const RequestEntry({
-    required this.id,
-    required this.type,
+    required this.code,
     required this.title,
-    required this.coordinatorship,
-    required this.amount,
-    required this.state,
+    required this.start,
     required this.date,
-    this.taskCode,
   });
 
-  final String id;
-  final RequestType type;
-  final String title;
-  final String coordinatorship;
+  /// Görev kodu.
+  final String code;
 
-  /// Tutar (TL); 0 → teklif bekleniyor.
-  final int amount;
-  final RequestState state;
+  /// Görev başlığı.
+  final String title;
+
+  /// Talep edilen başlangıç.
+  final DateTime start;
+
+  /// Talep edilen bitiş.
   @override
   final DateTime date;
-
-  /// Bağlı görev kodu.
-  final String? taskCode;
 
   @override
   CalendarKind get kind => CalendarKind.request;
 }
 
-/// Tablo kaydı (kontrol listesi / çizelge satırı).
-final class SheetEntry extends CalendarEntry {
-  const SheetEntry({
-    required this.date,
-    required this.label,
-    required this.table,
-    required this.person,
-    required this.coordinatorship,
-    required this.done,
-  });
-
-  @override
-  final DateTime date;
-  final String label;
-  final String table;
-
-  /// Kişi kimliği (görev kataloğundaki kişiler).
-  final String person;
-  final String coordinatorship;
-  final bool done;
-
-  @override
-  CalendarKind get kind => CalendarKind.sheet;
-}
-
-/// Takvimin görev dışı kaynakları (görevler görev kataloğundan gelir).
-@immutable
-final class CalendarSources {
-  const CalendarSources({
-    required this.seasons,
-    required this.meetings,
-    required this.requests,
-    required this.sheets,
-    required this.taskStartsFrom,
-  });
-
-  final List<SeasonEntry> seasons;
-  final List<MeetingEntry> meetings;
-  final List<RequestEntry> requests;
-  final List<SheetEntry> sheets;
-
-  /// Bu günden önce başlayan görevlerin başlangıcı takvime düşmez (bitişi düşer).
-  final DateTime taskStartsFrom;
-}
-
-/// Takvim kaynaklarının kaynağı (domain portu; gerçekleştirmeler `data/`).
-abstract interface class CalendarRepository {
-  Future<CalendarSources> load();
-}
-
-/// Gün listesinin bir bölümü (toplantılar, görevler, talepler, tablo kayıtları).
+/// Gün listesinin bir bölümü (toplantılar, görevler, talepler).
 typedef CalendarGroup = ({CalendarKind kind, List<CalendarEntry> entries});
 
 /// Günlere dağıtılmış kayıtlar ve verinin "bugün"ü.
 @immutable
 final class CalendarIndex {
-  const CalendarIndex._(this.today, this._catalog, this._byDay);
+  const CalendarIndex._(this.today, this._catalog, this._byDay, this.truncated);
 
-  /// Kaynaklar + görev kataloğu: bitmemiş her görevin bitişi ve
-  /// [CalendarSources.taskStartsFrom]'dan sonraki başlangıcı düşer.
-  factory CalendarIndex.build(CalendarSources s, TaskCatalog catalog) {
+  /// Görünür toplantılar + görev kataloğu: bitmemiş her görevin başlangıcı ve bitişi, bekleyen
+  /// her tarih talebinin yeni bitişi. [meetingsTruncated]: toplantı listesi sayfa tavanında
+  /// kesildi; katalog kesilmesi [TaskCatalog.truncated]'dan okunur (ikisi [truncated]'da birleşir).
+  factory CalendarIndex.build(
+    List<Meeting> meetings,
+    TaskCatalog catalog, {
+    bool meetingsTruncated = false,
+  }) {
     final today = calendarDay(catalog.today);
     final by = <DateTime, List<CalendarEntry>>{};
     void add(CalendarEntry e) =>
         (by[calendarDay(e.date)] ??= <CalendarEntry>[]).add(e);
-    s.seasons.forEach(add);
-    s.meetings.forEach(add);
-    s.requests.forEach(add);
-    s.sheets.forEach(add);
+    meetings.map(MeetingEntry.of).forEach(add);
     for (final t in catalog.tasks) {
+      if (t.dateRequest case final r? when r.isPending) {
+        add(
+          RequestEntry(
+            code: t.code,
+            title: t.title,
+            start: calendarDay(r.start),
+            date: calendarDay(r.due),
+          ),
+        );
+      }
       if (t.isDone) continue;
       final due = calendarDay(t.due);
-      add(
-        TaskEntry(
-          date: due,
-          code: t.code,
-          title: t.title,
-          coordinatorship: t.coordinatorship,
-          edge: TaskEdge.end,
-          assignees: t.assignees,
-          late: due.isBefore(today),
-        ),
-      );
-      final start = calendarDay(t.start);
-      if (!start.isBefore(calendarDay(s.taskStartsFrom))) {
+      for (final (edge, day) in [
+        (TaskEdge.end, due),
+        (TaskEdge.start, calendarDay(t.start)),
+      ]) {
         add(
           TaskEntry(
-            date: start,
+            date: day,
             code: t.code,
             title: t.title,
             coordinatorship: t.coordinatorship,
-            edge: TaskEdge.start,
+            edge: edge,
             assignees: t.assignees,
-            late: false,
+            late: edge == TaskEdge.end && due.isBefore(today),
           ),
         );
       }
     }
-    return CalendarIndex._(today, catalog, by);
+    return CalendarIndex._(
+      today,
+      catalog,
+      by,
+      meetingsTruncated || catalog.truncated,
+    );
   }
 
   final DateTime today;
+
+  /// Kaynaklardan biri (toplantı listesi ya da görev kataloğu) kesik: boş görünen gün gerçekte
+  /// boş olmayabilir; arayüz kısa uyarı gösterir.
+  final bool truncated;
   final TaskCatalog _catalog;
   final Map<DateTime, List<CalendarEntry>> _byDay;
 
   /// Kişi adı (sunucunun verdiği ad dahil); bilinmiyorsa null (arayüz nötr etiket gösterir).
   String? personName(String id) => _catalog.nameOf(id);
 
-  /// Koordinatörlük adı (bilinmeyen kod olduğu gibi).
-  String coordinatorshipName(String code) =>
-      _catalog.coordinatorship(code)?.name ?? code;
-
-  /// Günün bütün kayıtları (sezon dahil).
+  /// Günün bütün kayıtları.
   List<CalendarEntry> on(DateTime day) =>
       _byDay[calendarDay(day)] ?? const <CalendarEntry>[];
 
-  /// Hücredeki kayıt sayısı (sezon dahil; prototip `evOn(iso).length`).
+  /// Hücredeki kayıt sayısı.
   int count(DateTime day) => on(day).length;
 
   /// Günün türleri, [CalendarKind] sırasıyla, yinelenmeden (hücre noktaları).
@@ -278,10 +219,7 @@ final class CalendarIndex {
     ];
   }
 
-  List<SeasonEntry> seasons(DateTime day) =>
-      on(day).whereType<SeasonEntry>().toList();
-
-  /// Sezon dışı bölümler (boşlar atlanır): toplantılar saate göre, görevlerde bitenler önce.
+  /// Bölümler (boşlar atlanır): toplantılar saate göre, görevlerde bitenler önce.
   List<CalendarGroup> groups(DateTime day) {
     final list = on(day);
     final meetings = list.whereType<MeetingEntry>().toList()
@@ -297,10 +235,6 @@ final class CalendarIndex {
         (
           kind: CalendarKind.request,
           entries: list.whereType<RequestEntry>().toList(),
-        ),
-        (
-          kind: CalendarKind.sheet,
-          entries: list.whereType<SheetEntry>().toList(),
         ),
       ])
         if (g.entries.isNotEmpty) g,

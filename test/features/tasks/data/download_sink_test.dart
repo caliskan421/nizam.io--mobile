@@ -1,6 +1,7 @@
 // FileDownloadSink: dosya `indirilenler/` altına AKIŞLA (parça parça) yazılır; ad yalnız son yol
 // parçasıdır (sunucu adındaki `../` ya da `\` kökün dışına yazdıramaz). Akış hatasında yarım
-// dosya kalmaz. Geçici dosya `indirilenler/.tmp/` altında işleme özgü klasördedir.
+// dosya kalmaz. Geçici dosya `indirilenler/.tmp/` altında işleme özgü klasördedir. Aynı ad
+// var olan dosyayı ezmez: `ad (2).uzantı` …
 import 'dart:async';
 import 'dart:io';
 
@@ -61,9 +62,14 @@ void main() {
     expect(FileDownloadSink.safeName('.TMP'), '_.TMP');
     expect(FileDownloadSink.safeName(r'y\.Tmp'), '_.Tmp');
     final sink = FileDownloadSink(root: () async => root);
-    for (final n in ['.', '..']) {
-      final p = await sink.save(n, _bytes());
-      expect(p, '${root.path}/indirilenler/dosya');
+    final saved = [
+      for (final n in ['.', '..']) await sink.save(n, _bytes()),
+    ];
+    expect(saved, [
+      '${root.path}/indirilenler/dosya',
+      '${root.path}/indirilenler/dosya (2)',
+    ]);
+    for (final p in saved) {
       expect(File(p).readAsBytesSync(), [1, 2, 3]);
     }
   });
@@ -108,7 +114,7 @@ void main() {
     expect(_visible(root), ['rapor.pdf', 'rapor.pdf.part']);
   });
 
-  test('aynı adlı iki eşzamanlı indirme birbirini bozmaz', () async {
+  test('aynı adlı iki eşzamanlı indirme birbirini bozmaz, ezmez', () async {
     final sink = FileDownloadSink(root: () async => root);
     final a = StreamController<List<int>>();
     final b = StreamController<List<int>>();
@@ -125,30 +131,47 @@ void main() {
     expect(_tmpFiles(root), hasLength(2));
     await a.close();
     final pa = await sa;
-    // Bitmiş A tam ve tutarlıdır (B'nin baytları karışmaz).
-    expect(File(pa).readAsBytesSync(), List.filled(20, 1));
     await b.close();
     final pb = await sb;
-    expect(pb, pa);
-    // Son biten kazanır (üzerine yazma); içerik yine tek indirmenin baytlarıdır.
+    // İkisi de kendi adında, tam ve tutarlı (biri diğerini ezmez).
+    expect(pa, '${root.path}/indirilenler/ayni.bin');
+    expect(pb, '${root.path}/indirilenler/ayni (2).bin');
+    expect(File(pa).readAsBytesSync(), List.filled(20, 1));
     expect(File(pb).readAsBytesSync(), List.filled(40, 2));
     expect(_tmpFiles(root), isEmpty);
   });
 
-  test('taşıma hatası: geçici dosya kalmaz, hata fırlar', () async {
-    // Hedef adda bir klasör var → rename başarısız; kopyalama yedeği yok, hata iletilir.
+  // Codex tur 1 / 6: ortak `indirilenler/` hedefinde aynı ad var olan dosyayı ezmez.
+  test('aynı adla ardışık indirmeler ayrı dosyalar üretir', () async {
+    final dir = Directory('${root.path}/indirilenler')..createSync();
+    final mine = File('${dir.path}/rapor.pdf')..writeAsBytesSync([7, 7]);
+    final sink = FileDownloadSink(root: () async => root);
+    final a = await sink.save('rapor.pdf', _bytes());
+    final b = await sink.save('../x/rapor.pdf', _bytes());
+    expect(a, '${dir.path}/rapor (2).pdf');
+    expect(b, '${dir.path}/rapor (3).pdf');
+    expect(mine.readAsBytesSync(), [7, 7]);
+    expect(File(b).readAsBytesSync(), [1, 2, 3]);
+    // Uzantısız ve nokta ile başlayan ad.
+    await sink.save('dosya', _bytes());
+    expect(await sink.save('dosya', _bytes()), '${dir.path}/dosya (2)');
+    expect(FileDownloadSink.copyName('.profil', 2), '.profil (2)');
+    expect(_visible(root), [
+      'dosya',
+      'dosya (2)',
+      'rapor (2).pdf',
+      'rapor (3).pdf',
+      'rapor.pdf',
+    ]);
+  });
+
+  test('hedef adda klasör: klasöre dokunulmaz, kopya adına yazılır', () async {
     Directory('${root.path}/indirilenler/engel').createSync(recursive: true);
     final sink = FileDownloadSink(root: () async => root);
-    await expectLater(
-      sink.save('engel', _bytes()),
-      throwsA(isA<FileSystemException>()),
-    );
+    final p = await sink.save('engel', _bytes());
+    expect(p, '${root.path}/indirilenler/engel (2)');
+    expect(File(p).readAsBytesSync(), [1, 2, 3]);
     expect(_tmpFiles(root), isEmpty);
-    expect(
-      Directory('${root.path}/indirilenler/${FileDownloadSink.tmpDirName}')
-          .listSync(),
-      isEmpty,
-    );
     expect(Directory('${root.path}/indirilenler/engel').existsSync(), isTrue);
   });
 
@@ -171,6 +194,7 @@ void main() {
     expect(calls, 1);
     expect(target.readAsBytesSync(), [7, 7]);
     expect(_tmpFiles(root), isEmpty);
+    // Ayrılan kopya adı (`rapor (2).pdf`) da geri alınır.
     expect(_visible(root), ['rapor.pdf']);
   });
 }

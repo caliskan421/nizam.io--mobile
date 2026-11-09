@@ -535,7 +535,21 @@ void main() {
         picker: const UnavailableUploadPicker(),
       );
       ctl.openUpload();
-      expect(await ctl.pickUploadFile(), isFalse);
+      expect((await ctl.pickUploadFile(UploadOrigin.files)).ok, isFalse);
+      expect(h.backend.requests, isEmpty);
+    });
+
+    test('seçim: kaynak seçiciye geçer; vazgeçme taslağı korur', () async {
+      final p = _Picker(src('foto.jpg'));
+      final (h, c, ctl) = await _open(_Server(), picker: p);
+      String? name() => c.read(taskDetailControllerProvider('w1')).upload?.name;
+      ctl.openUpload();
+      expect((await ctl.pickUploadFile(UploadOrigin.photos)).ok, isTrue);
+      expect(name(), 'foto.jpg');
+      p.next = null;
+      expect((await ctl.pickUploadFile(UploadOrigin.files)).ok, isFalse);
+      expect(p.origins, [UploadOrigin.photos, UploadOrigin.files]);
+      expect(name(), 'foto.jpg');
       expect(h.backend.requests, isEmpty);
     });
 
@@ -879,4 +893,20 @@ void main() {
       },
     );
   });
+}
+
+/// Seçilen kaynağı kaydeden seçici; [next] null → vazgeçme.
+final class _Picker implements UploadPicker {
+  _Picker(this.next);
+  UploadSource? next;
+  final origins = <UploadOrigin>[];
+
+  @override
+  bool get available => true;
+
+  @override
+  Future<UploadSource?> pick(UploadOrigin origin) async {
+    origins.add(origin);
+    return next;
+  }
 }

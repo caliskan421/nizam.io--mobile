@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../core/providers.dart';
+import 'chat_sync_controller.dart';
 import 'chats_controller.dart';
 
 part 'messages_nav_caption.g.dart';
@@ -20,3 +21,14 @@ String? messagesNavCaption(Ref ref) {
 @riverpod
 int? messagesNavBadge(Ref ref) =>
     ref.watch(chatsControllerProvider).value?.unreadChats;
+
+/// Ön plana dönüşte Mesajlar rozeti: liste hiç okunmadıysa istek yok; mesaj ekranı akışı
+/// tutuyorsa ([ChatSyncController] yaşıyor) akışın açılışı listeyi zaten tazeler, ikinci istek
+/// yok; değilse tek `listChats` okuması (hata yutulur, önceki sayı görünür).
+Future<void> refreshMessagesBadge(ProviderContainer container) async {
+  if (!container.exists(chatsControllerProvider) ||
+      container.exists(chatSyncControllerProvider)) {
+    return;
+  }
+  await container.read(chatsControllerProvider.notifier).refresh();
+}

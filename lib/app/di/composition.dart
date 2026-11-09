@@ -15,12 +15,12 @@ import '../../core/storage/preference_store.dart';
 import '../../core/storage/secure_store.dart';
 import '../../features/activity/activity_module.dart';
 import '../../features/archive/archive_module.dart';
-import '../../features/calendar/calendar_module.dart';
 import '../../features/coordinatorships/coordinatorships_module.dart';
 import '../../features/identity/identity.dart' show LoginPrefill;
 import '../../features/identity/identity_module.dart';
 import '../../features/meetings/meetings_module.dart';
 import '../../features/messages/messages_module.dart';
+import '../../features/notifications/notifications_module.dart';
 import '../../features/scope/scope_module.dart';
 import '../../features/tasks/tasks_module.dart';
 import '../../features/timeline/timeline_module.dart';
@@ -64,8 +64,10 @@ class Composition {
     );
     registerScopeModule(locator, apiDio: () => container.read(apiDioProvider));
     registerActivityModule(locator);
-    registerArchiveModule(locator);
-    registerCalendarModule(locator);
+    registerArchiveModule(
+      locator,
+      apiDio: () => container.read(apiDioProvider),
+    );
     registerCoordinatorshipsModule(
       locator,
       apiDio: () => container.read(apiDioProvider),
@@ -75,7 +77,14 @@ class Composition {
       apiDio: () => container.read(apiDioProvider),
       flavor: flavor,
     );
-    registerMessagesModule(locator);
+    registerMessagesModule(
+      locator,
+      apiDio: () => container.read(apiDioProvider),
+    );
+    registerNotificationsModule(
+      locator,
+      apiDio: () => container.read(apiDioProvider),
+    );
     registerTasksModule(locator, apiDio: () => container.read(apiDioProvider));
     registerTimelineModule(locator);
     container = ProviderContainer(
@@ -105,10 +114,10 @@ class Composition {
         ...scopeOverrides(locator),
         ...activityOverrides(locator),
         ...archiveOverrides(locator),
-        ...calendarOverrides(locator),
         ...coordinatorshipsOverrides(locator),
         ...meetingsOverrides(locator),
         ...messagesOverrides(locator),
+        ...notificationsOverrides(locator),
         ...tasksOverrides(locator),
         ...timelineOverrides(locator),
       ],

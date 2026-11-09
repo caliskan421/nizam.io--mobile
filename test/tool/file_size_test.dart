@@ -17,27 +17,23 @@ bool _generated(String path) =>
 
 /// Sınırı aşan eski dosyalar → tavan (bölünene kadar). Yeni giriş eklenmez.
 const _legacy = <String, int>{
-  'test/support/tablet_harness.dart': 1187,
+  'test/support/tablet_harness.dart': 1183,
   'test/tool/boundaries_test.dart': 1055,
   'tool/boundaries.dart': 973,
   'tool/api_surface.dart': 919,
-  'test/features/tasks/application/task_detail_writes_p3_test.dart': 917,
-  'lib/features/tasks/application/task_detail_controller.dart': 909,
+  'test/features/tasks/application/task_detail_writes_p3_test.dart': 912,
+  'lib/features/tasks/application/task_detail_controller.dart': 835,
   'tool/gen/sources.dart': 900,
-  'lib/features/messages/presentation/chat_page.dart': 894,
   'lib/features/timeline/presentation/gantt/gantt_chart.dart': 868,
-  'lib/features/messages/presentation/chat/chat_parts.dart': 795,
   'test/app/composition_test.dart': 744,
-  'lib/features/messages/presentation/chat/chat_sheets.dart': 773,
   'test/core/http/api_stack_test.dart': 766,
   'lib/features/tasks/domain/task_catalog.dart': 765,
-  'lib/features/tasks/presentation/detail/detail_actions.dart': 757,
+  'lib/features/tasks/presentation/detail/detail_actions.dart': 742,
   'lib/features/timeline/presentation/chart/timeline_painters.dart': 746,
   'test/tool/gen_test.dart': 732,
   'lib/features/timeline/presentation/chart/timeline_chart.dart': 666,
   'lib/features/activity/presentation/activity_page.dart': 656,
   'test/tool/api_surface_test.dart': 644,
-  'lib/features/archive/presentation/archive_page.dart': 634,
 };
 
 int _lines(File f) {

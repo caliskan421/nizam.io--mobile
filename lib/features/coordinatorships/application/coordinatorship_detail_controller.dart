@@ -87,21 +87,28 @@ class CoordinatorshipDetailController
   void togglePast() => state = state.copyWith(pastOpen: !state.pastOpen);
 }
 
-/// [code] koordinatörlüğünün ayrıntısı (katalog + ek bilgiler); bilinmeyen kod → null.
-/// Eşzamanlı türetilir: iki kaynak (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
-/// biri yükleniyorsa yükleniyor.
+/// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
+/// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
+/// biri yükleniyorsa yükleniyor. Departman kaydı yalnız şirket yöneticisinde okunur
+/// (`listDepartments` yalnız ona açık, ORGANIZATION-K08); diğer rollerde istek yoktur.
 @riverpod
 AsyncValue<CoordinatorshipDetail?> coordinatorshipDetail(Ref ref, String code) {
   final catalog = ref.watch(taskCatalogControllerProvider);
-  final profiles = ref.watch(coordinatorshipProfilesControllerProvider);
-  for (final v in [catalog, profiles]) {
-    if (v case AsyncError(:final error, :final stackTrace)) {
-      return AsyncError(error, stackTrace);
-    }
+  if (catalog case AsyncError(:final error, :final stackTrace)) {
+    return AsyncError(error, stackTrace);
   }
-  final (c, p) = (catalog.value, profiles.value);
-  if (c == null || p == null) return const AsyncLoading();
-  return AsyncData(CoordinatorshipDetail.from(c, p, code));
+  final c = catalog.value;
+  if (c == null) return const AsyncLoading();
+  if (c.access?.companyAdmin != true) {
+    return AsyncData(CoordinatorshipDetail.from(c, const [], code));
+  }
+  final departments = ref.watch(coordinatorshipProfilesControllerProvider);
+  if (departments case AsyncError(:final error, :final stackTrace)) {
+    return AsyncError(error, stackTrace);
+  }
+  final d = departments.value;
+  if (d == null) return const AsyncLoading();
+  return AsyncData(CoordinatorshipDetail.from(c, d, code));
 }
 
 /// Koordinatörlüğün ([code] = `department_id`) toplantıları, tarihe göre.

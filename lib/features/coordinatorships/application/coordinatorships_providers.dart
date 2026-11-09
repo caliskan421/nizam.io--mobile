@@ -5,8 +5,8 @@ import '../domain/coordinatorship_profile.dart';
 
 part 'coordinatorships_providers.g.dart';
 
-/// PORT: koordinatörlük ek bilgilerinin kaynağı (`coordinatorships_module.dart`'ta bağlanır;
-/// bugün geliştirme örneği).
+/// PORT: koordinatörlük departman kaydının (tür, açıklama) kaynağı
+/// (`coordinatorships_module.dart`'ta bağlanır; sunucu).
 @Riverpod(keepAlive: true)
 CoordinatorshipProfileRepository coordinatorshipProfileRepository(Ref ref) =>
     throw UnimplementedError(

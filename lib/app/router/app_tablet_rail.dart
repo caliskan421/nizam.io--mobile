@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,7 +11,7 @@ import '../../core/ui/widgets/navigation/nz_tablet_rail.dart';
 import '../../core/ui/widgets/navigation/nz_top_bar.dart';
 import '../../core/ui/widgets/nz_icons.dart';
 import '../../features/messages/messages.dart';
-import '../../features/scope/scope.dart';
+import '../../features/notifications/notifications.dart';
 import 'split.dart';
 
 /// Uygulamanın tablet rayı: modüller, Mesajlar rozeti, bildirim zili, tüm modüller menüsü,
@@ -71,7 +73,7 @@ class AppTabletRail extends ConsumerWidget {
       menuLabel: l.uiRouterAllModules,
       onMenu: () => context.appNav.openMenu(context),
       assistantLabel: l.uiRouterAssistant,
-      onBell: () => showNotificationsSoon(context),
+      onBell: () => unawaited(showNotifications(context)),
       onAssistant: () => NzToast.show(context, l.uiRouterAssistantSoon),
     );
   }

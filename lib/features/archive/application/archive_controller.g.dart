@@ -8,15 +8,15 @@ part of 'archive_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Arşiv ekranı komutları (yerel durum; sunucuya yazmaz).
+/// Arşiv ekranı komutları: yerel arama ve dönemin tam arşivi.
 
 @ProviderFor(ArchiveController)
 final archiveControllerProvider = ArchiveControllerProvider._();
 
-/// Arşiv ekranı komutları (yerel durum; sunucuya yazmaz).
+/// Arşiv ekranı komutları: yerel arama ve dönemin tam arşivi.
 final class ArchiveControllerProvider
     extends $NotifierProvider<ArchiveController, ArchiveViewState> {
-  /// Arşiv ekranı komutları (yerel durum; sunucuya yazmaz).
+  /// Arşiv ekranı komutları: yerel arama ve dönemin tam arşivi.
   ArchiveControllerProvider._()
     : super(
         from: null,
@@ -44,9 +44,9 @@ final class ArchiveControllerProvider
   }
 }
 
-String _$archiveControllerHash() => r'dff11e1d18555cc9033e8521954e54803a042c67';
+String _$archiveControllerHash() => r'b4083466fa0083b9d17e7d970839bbe2ba257cf6';
 
-/// Arşiv ekranı komutları (yerel durum; sunucuya yazmaz).
+/// Arşiv ekranı komutları: yerel arama ve dönemin tam arşivi.
 
 abstract class _$ArchiveController extends $Notifier<ArchiveViewState> {
   ArchiveViewState build();

@@ -1,13 +1,25 @@
 // V10 (F60): uygulama ön plana dönünce okunmuş görev kataloğu bayatsa yeniden okunur; hiç
 // okunmamış katalog için okuma başlatılmaz; taze katalog yeniden okunmaz (yoklama yok).
-// Kabukta `resumed` geçişi bu işlevi çağırır (widget testi).
+// Kabukta `resumed` geçişi bu işlevi çağırır (widget testi). Zil rozeti yalnız ekrandaysa
+// (sağlayıcı yaşıyorsa) yeniden okunur. Mesajlar rozeti liste okunmuşsa ve akış açık değilse
+// tek `listChats` ile yenilenir (akış açıkken açılışı zaten tazeler: çift istek yok).
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/app/foreground_refresh.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/features/messages/application/chat_sync_controller.dart';
+import 'package:nizamio/features/messages/application/chats_controller.dart';
+import 'package:nizamio/features/messages/domain/chat.dart';
+import 'package:nizamio/features/messages/messages.dart';
+import 'package:nizamio/features/notifications/application/notifications_providers.dart';
+import 'package:nizamio/features/notifications/notifications.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
+import '../features/messages/fake_chat_repository.dart' as chats;
+import '../features/notifications/notification_count_stub.dart';
 import '../features/pilot_support.dart';
 import '../support/fake_backend.dart';
 import '../support/harness.dart';
@@ -68,5 +80,52 @@ void main() {
       ..handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
     expect(c.exists(taskCatalogControllerProvider), isFalse);
+  });
+
+  test(
+    'zil rozeti: ekranda değilse istek yok; ekrandaysa yeniden okunur',
+    () async {
+      final repo = NotificationCountStub()..unread = 2;
+      final c = ProviderContainer(
+        retry: (_, _) => null,
+        overrides: [notificationRepositoryProvider.overrideWithValue(repo)],
+      );
+      addTearDown(c.dispose);
+      await refreshNotificationBadge(c);
+      expect(repo.countCalls, 0);
+
+      c.listen(notificationUnreadControllerProvider, (_, _) {});
+      await c.read(notificationUnreadControllerProvider.future);
+      repo.unread = 5;
+      await refreshNotificationBadge(c);
+      expect(repo.countCalls, 2);
+      expect(c.read(notificationUnreadControllerProvider).value, 5);
+    },
+  );
+
+  test('Mesajlar rozeti: ön plana dönüşte yenilenir; okunmamış liste ve açık '
+      'akışta istek yok', () async {
+    final repo = chats.FakeChatRepository();
+    final c = chats.chatContainer(repo);
+    int reads() => repo.calls.where((x) => x == 'loadInbox').length;
+    await refreshMessagesBadge(c);
+    expect(reads(), 0, reason: 'liste hiç okunmadı');
+
+    c.listen(messagesNavBadgeProvider, (_, _) {});
+    await c.read(chatsControllerProvider.future);
+    expect(c.read(messagesNavBadgeProvider), 1);
+    repo.inbox = ChatInbox(
+      chats: [chats.chat('c1', unread: 2), chats.chat('c2', unread: 1)],
+    );
+    await refreshMessagesBadge(c);
+    expect(reads(), 2);
+    expect(c.read(messagesNavBadgeProvider), 2);
+
+    final conn = StreamController<ChatSignal>();
+    addTearDown(conn.close);
+    repo.connections.add(conn);
+    c.listen(chatSyncControllerProvider, (_, _) {});
+    await refreshMessagesBadge(c);
+    expect(reads(), 2, reason: 'akış açıkken açılış tazeler');
   });
 }

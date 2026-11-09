@@ -8,58 +8,22 @@ part of 'calendar_index_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Takvim kaynakları (sezon, toplantı, talep, tablo kaydı); yeniden yükleme yalnız dokunuşla.
-
-@ProviderFor(calendarSources)
-final calendarSourcesProvider = CalendarSourcesProvider._();
-
-/// Takvim kaynakları (sezon, toplantı, talep, tablo kaydı); yeniden yükleme yalnız dokunuşla.
-
-final class CalendarSourcesProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<CalendarSources>,
-          CalendarSources,
-          FutureOr<CalendarSources>
-        >
-    with $FutureModifier<CalendarSources>, $FutureProvider<CalendarSources> {
-  /// Takvim kaynakları (sezon, toplantı, talep, tablo kaydı); yeniden yükleme yalnız dokunuşla.
-  CalendarSourcesProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'calendarSourcesProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$calendarSourcesHash();
-
-  @$internal
-  @override
-  $FutureProviderElement<CalendarSources> $createElement(
-    $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
-
-  @override
-  FutureOr<CalendarSources> create(Ref ref) {
-    return calendarSources(ref);
-  }
-}
-
-String _$calendarSourcesHash() => r'7271439c8f130a4d5a5d09894c4d3e884b314996';
-
-/// Günlere dağıtılmış kayıtlar: kaynaklar + görevler sayfasının okuduğu aynı görev kataloğu
-/// (katalog değişince — yeni/silinen görev — takvim de güncellenir).
+/// Günlere dağıtılmış kayıtlar: toplantılar sayfasının okuduğu AYNI toplantı listesi
+/// (`listMeetings`, bütün sayfalar) + görevler sayfasının okuduğu AYNI görev kataloğu (görevler
+/// ve satırlarındaki bekleyen tarih talepleri). Kaynaklardan biri değişince (yeni toplantı,
+/// tamamlanan görev, program değişimi) takvim de güncellenir; biri hata verirse takvim hata
+/// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
+/// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır.
 
 @ProviderFor(calendarIndex)
 final calendarIndexProvider = CalendarIndexProvider._();
 
-/// Günlere dağıtılmış kayıtlar: kaynaklar + görevler sayfasının okuduğu aynı görev kataloğu
-/// (katalog değişince — yeni/silinen görev — takvim de güncellenir).
+/// Günlere dağıtılmış kayıtlar: toplantılar sayfasının okuduğu AYNI toplantı listesi
+/// (`listMeetings`, bütün sayfalar) + görevler sayfasının okuduğu AYNI görev kataloğu (görevler
+/// ve satırlarındaki bekleyen tarih talepleri). Kaynaklardan biri değişince (yeni toplantı,
+/// tamamlanan görev, program değişimi) takvim de güncellenir; biri hata verirse takvim hata
+/// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
+/// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır.
 
 final class CalendarIndexProvider
     extends
@@ -69,8 +33,12 @@ final class CalendarIndexProvider
           FutureOr<CalendarIndex>
         >
     with $FutureModifier<CalendarIndex>, $FutureProvider<CalendarIndex> {
-  /// Günlere dağıtılmış kayıtlar: kaynaklar + görevler sayfasının okuduğu aynı görev kataloğu
-  /// (katalog değişince — yeni/silinen görev — takvim de güncellenir).
+  /// Günlere dağıtılmış kayıtlar: toplantılar sayfasının okuduğu AYNI toplantı listesi
+  /// (`listMeetings`, bütün sayfalar) + görevler sayfasının okuduğu AYNI görev kataloğu (görevler
+  /// ve satırlarındaki bekleyen tarih talepleri). Kaynaklardan biri değişince (yeni toplantı,
+  /// tamamlanan görev, program değişimi) takvim de güncellenir; biri hata verirse takvim hata
+  /// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
+  /// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır.
   CalendarIndexProvider._()
     : super(
         from: null,
@@ -97,4 +65,4 @@ final class CalendarIndexProvider
   }
 }
 
-String _$calendarIndexHash() => r'e03bea91615de5f1c70722fbfc6602a6298a7242';
+String _$calendarIndexHash() => r'c49b288bdeb03d7b7331f7a9b1a07d50162ea675';

@@ -1,5 +1,5 @@
 // notifications data katmanı: üretilmiş DTO → domain, olay türü enum'u (bilinmeyen →
-// unknown), imleç + okunmamış toplamı, push uçları, hata → ApiError.
+// unknown), konu → uygulama hedefi, imleç + okunmamış toplamı, push uçları, hata → ApiError.
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
@@ -42,8 +42,9 @@ class _Adapter implements HttpClientAdapter {
   final adapter = _Adapter(body, status);
   return (
     ApiNotificationRepository(
-      Dio(BaseOptions(baseUrl: 'https://api.test'))
-        ..httpClientAdapter = adapter,
+      () =>
+          Dio(BaseOptions(baseUrl: 'https://api.test'))
+            ..httpClientAdapter = adapter,
     ),
     adapter,
   );
@@ -136,6 +137,28 @@ void main() {
         _apiError(ClientErrorCode.invalidResponse),
       );
     });
+  });
+
+  test('konu türü → uygulama hedefi; rotasız tür yalnız okundu olur', () {
+    NotificationLink link(String kind) =>
+        NotificationSubject(kind: kind, id: 'x').link;
+    expect(link('work_item'), NotificationLink.task);
+    expect(link('meeting'), NotificationLink.meeting);
+    for (final kind in ['membership', 'program_transfer', '', 'yeni_tur']) {
+      expect(link(kind), NotificationLink.none, reason: kind);
+    }
+  });
+
+  test('bağ yok → client.server_not_verified (istek gönderilmez)', () async {
+    final repo = ApiNotificationRepository(() => null);
+    await expectLater(
+      repo.unreadCount(),
+      _apiError(ClientErrorCode.serverNotVerified),
+    );
+    await expectLater(
+      repo.markRead('n1'),
+      _apiError(ClientErrorCode.serverNotVerified),
+    );
   });
 
   test('unreadCount', () async {

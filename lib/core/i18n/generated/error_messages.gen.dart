@@ -244,6 +244,7 @@ const localizedErrorCodes = <String>{
   'work.subtasks_open',
   'work.transfer_active',
   'work.transition_not_allowed',
+  'client.file_unreadable',
   'client.insecure_server',
   'client.invalid_response',
   'client.invalid_server_address',
@@ -748,6 +749,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errWorkTransferActive;
     case 'work.transition_not_allowed':
       return l.errWorkTransitionNotAllowed;
+    case 'client.file_unreadable':
+      return l.errClientFileUnreadable;
     case 'client.insecure_server':
       return l.errClientInsecureServer;
     case 'client.invalid_response':

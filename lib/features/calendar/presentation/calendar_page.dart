@@ -11,6 +11,7 @@ import '../../../core/ui/widgets/feedback/nz_pick_record.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
+import '../../meetings/meetings.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
 import '../application/calendar_controller.dart';
@@ -45,7 +46,16 @@ class CalendarPage extends ConsumerWidget {
       }
     }
 
-    void retry() => ref.invalidate(calendarSourcesProvider);
+    // Yeniden deneme yalnız dokunuşla (A3): hata veren kaynak yeniden okunur.
+    void retry() {
+      if (ref.read(meetingsBoardControllerProvider).hasError) {
+        ref.invalidate(meetingsBoardControllerProvider);
+      }
+      if (ref.read(taskCatalogControllerProvider).hasError) {
+        ref.invalidate(taskCatalogControllerProvider);
+      }
+    }
+
     return NzPage.feed(
       onRetry: retry,
       topBar: const RootTopBar(),
@@ -60,6 +70,17 @@ class CalendarPage extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               CalendarGrid(index: ix),
+              // Kesik kaynak (toplantı listesi ya da katalog): boş gün gerçekte boş olmayabilir.
+              if (ix.truncated) ...[
+                const Gap(NizamioSpacing.space2),
+                Text(
+                  context.l10n.uiListsTruncated,
+                  textAlign: TextAlign.center,
+                  style: context.text.caption.copyWith(
+                    color: context.colors.textMuted,
+                  ),
+                ),
+              ],
               const Gap(NizamioSpacing.space4),
               CalendarDay(index: ix, onPlanMeeting: plan),
             ],

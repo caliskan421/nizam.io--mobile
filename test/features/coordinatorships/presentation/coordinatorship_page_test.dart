@@ -91,7 +91,7 @@ List<(String, Type)> get _tabs => [
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  // Örnek ek bilgilerin kodu ('ALT') sunucu kimliği değildir.
+  // Kısa kod ('ALT') sunucu kimliği (`department_id`) değildir.
   for (final code in ['ALT', 'YOK']) {
     testWidgets('bilinmeyen kimlik ($code): boş durum', (tester) async {
       await _open(tester, code: code);

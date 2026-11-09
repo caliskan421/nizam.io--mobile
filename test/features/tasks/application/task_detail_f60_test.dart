@@ -5,9 +5,11 @@
 // - 409 work.edit_conflict: yeniden okuma, taban/yerel/sunucu ayrımı, ayrık alan korunur, aynı
 //   alan seçime kalır, seçimden sonra yeni sürümle gönderim; otomatik tekrar yok;
 // - not/alt görev metin çakışması: sunucudaki metin döner, taslak state'te;
-// - işlem anahtarı: aynı eylem aynı anahtar, yeni eylem yeni anahtar;
+// - işlem anahtarı: aynı eylem aynı anahtar, yeni eylem yeni anahtar; yükleme imzası geçici
+//   yoldan bağımsız (ad + boyut);
 // - sunucu uyum kapısı: eski sunucu sürümünde istek gönderilmez.
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -411,6 +413,33 @@ void main() {
       expect(r.kind, WriteKind.unknown);
       expect(ctl.pendingSubtaskTitle, 'Vana', reason: 'diyalog adla açılır');
       expect(h.backend.count('POST', '/v1/work-items/w1/subtasks'), 1);
+    });
+
+    test('yükleme: aynı ad ve boyutun yeniden seçimi (yeni geçici yol) aynı '
+        'anahtar; farklı ad ya da boyut yeni anahtar', () async {
+      final s = _Server();
+      final (h, c, ctl) = await _open(s);
+      const path = '/v1/work-items/w1/files';
+      s.queued['POST $path'] = [
+        for (var i = 0; i < 4; i++) () => timeout(null),
+      ];
+      final dir = Directory.systemTemp.createTempSync('nz_f60_');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      Future<String?> submit(String sub, String name, {int size = 4}) async {
+        final f = File('${dir.path}/$sub-$name')..writeAsBytesSync([37, 80]);
+        final up = UploadSource(path: f.path, name: name, sizeBytes: size);
+        final d = c.read(taskDetailControllerProvider('w1')).upload!;
+        ctl.updateUpload(d.copyWith(file: () => up));
+        expect((await ctl.submitUpload()).kind, WriteKind.unknown);
+        return key(h, path);
+      }
+
+      expect(ctl.openUpload(), isTrue);
+      final first = await submit('1', 'rapor.pdf');
+      expect(await submit('2', 'rapor.pdf'), first, reason: 'yeni yol');
+      expect(await submit('3', 'rapor.pdf', size: 5), isNot(first));
+      final other = await submit('4', 'plan.pdf');
+      expect(other, isNot(first));
     });
 
     test('409 conflict_retry: aynı anahtarla tek otomatik tekrar', () async {

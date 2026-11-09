@@ -287,6 +287,38 @@ void main() {
       },
     );
 
+    test('belirsiz sonuç sonrası aynı dosyanın yeniden seçimi (yeni yol) aynı '
+        'anahtar; farklı ad ya da boyut yeni anahtar', () async {
+      final repo = FakeArchiveRepository()
+        ..attachErrors.addAll([
+          for (var i = 0; i < 4; i++) ApiError(ClientErrorCode.timeout),
+        ]);
+      final picker = _FreshPathPicker();
+      final c = archiveContainer(repo, picker: picker);
+      final ctrl = _ctrl(c);
+      Future<String> pickAndSend({
+        String name = 'rapor.pdf',
+        int size = 10,
+      }) async {
+        picker
+          ..name = name
+          ..size = size;
+        final r = await ctrl.upload(
+          workItemId: 'w1',
+          tag: RecordTag.plan,
+          origin: UploadOrigin.files,
+        );
+        expect(r.error?.code, ClientErrorCode.outcomeUnknown);
+        return repo.attachKeys.last;
+      }
+
+      final first = await pickAndSend();
+      expect(await pickAndSend(), first);
+      expect(repo.attachPaths.toSet(), hasLength(2), reason: 'yeni geçici yol');
+      expect(await pickAndSend(size: 11), isNot(first));
+      expect(await pickAndSend(name: 'plan.pdf'), isNot(first));
+    });
+
     test('seçici yoksa başlangıç noPicker', () {
       final c = archiveContainer(
         FakeArchiveRepository(),
@@ -300,14 +332,13 @@ void main() {
 /// Gerçek seçici gibi her seçimde yeni geçici yol döndürür (`/tmp/<n>/rapor.pdf`).
 class _FreshPathPicker implements UploadPicker {
   int picks = 0;
+  String name = 'rapor.pdf';
+  int size = 10;
 
   @override
   bool get available => true;
 
   @override
-  Future<UploadSource?> pick(UploadOrigin origin) async => UploadSource(
-    path: '/tmp/${++picks}/rapor.pdf',
-    name: 'rapor.pdf',
-    sizeBytes: 10,
-  );
+  Future<UploadSource?> pick(UploadOrigin origin) async =>
+      UploadSource(path: '/tmp/${++picks}/$name', name: name, sizeBytes: size);
 }

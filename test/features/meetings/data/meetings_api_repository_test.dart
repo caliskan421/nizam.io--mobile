@@ -93,6 +93,7 @@ void main() {
           'department_ids': ['d1', 'd2'],
           'participant_ids': ['u1'],
           'members_included': true,
+          'invite_mode': 'coordinatorship',
           'agenda_items': ['Bütçe'],
           'is_instant': false,
         });
@@ -245,7 +246,7 @@ void main() {
           ..._meeting(),
           'viewer_role': 'member',
           'participants': [
-            {'account_id': 'u1', 'full_name': 'Ali Veli'},
+            {'account_id': 'u1', 'full_name': 'Ali Veli', 'teams': <Object>[]},
           ],
           'agenda': [_agenda(checked: true)],
           'notes': {

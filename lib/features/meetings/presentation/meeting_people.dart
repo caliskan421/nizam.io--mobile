@@ -20,9 +20,7 @@ import 'meeting_page.dart';
 import 'meeting_parts.dart';
 import 'meetings_texts.dart';
 
-/// Katılımcının listedeki yeri: toplantıya bağlı departmanlardan ekibinde olduğu ilki (sahip
-/// önde) ve oradaki rolü; hiçbirinde değilse "Diğer" grubu. Katılımcı satırı sunucuda yalnız
-/// kimlik + ad taşır; rol ve departman katalogdaki ekipten okunur.
+/// Katılımcının listedeki yeri ve oradaki rolü (sunucu `Participant.teams`, COLLABORATION-K72).
 @immutable
 class _Person {
   const _Person(this.p, {required this.lead});
@@ -31,8 +29,52 @@ class _Person {
   final bool lead;
 }
 
+/// Katılımcıları departman gruplarına böler: her kişi ekip satırlarından toplantıya bağlı ilk
+/// departmanda (sahip önde), bağlı değilse ilk ekip satırının departmanında, ekip satırı yoksa
+/// (yalnız yönetici) "Diğer" grubunda (null) bir kez yer alır. Gruplar: toplantının
+/// departmanları sırasıyla, sonra diğer departmanlar görünüş sırasıyla, en sonda "Diğer".
+List<(MeetingDepartment?, List<_Person>)> _groupPeople(
+  Meeting m,
+  List<MeetingParticipant> people,
+) {
+  final linked = [for (final d in ownerFirst(m)) d.id];
+  final placed = [
+    for (final p in people)
+      (
+        p,
+        p.teams.where((t) => linked.contains(t.departmentId)).firstOrNull ??
+            p.teams.firstOrNull,
+      ),
+  ];
+  final teams = {
+    for (final t in placed.map((x) => x.$2).nonNulls) t.departmentId: t,
+  };
+  final order = [
+    for (final id in linked)
+      if (teams.containsKey(id)) id,
+    for (final id in teams.keys)
+      if (!linked.contains(id)) id,
+  ];
+  final rest = [
+    for (final (p, t) in placed)
+      if (t == null) _Person(p, lead: false),
+  ];
+  return [
+    for (final id in order)
+      (
+        m.departments.where((d) => d.id == id).firstOrNull ??
+            MeetingDepartment(id: id, name: teams[id]!.departmentName),
+        [
+          for (final (p, t) in placed)
+            if (t?.departmentId == id) _Person(p, lead: t!.coordinator),
+        ],
+      ),
+    if (rest.isNotEmpty) (null, rest),
+  ];
+}
+
 /// Kişiler (prototip Kişiler bölümü): katılımcı sayısı + ekle; departman gruplarında önce
-/// koordinatörler, üyeler açılır satırda; bağlı koordinatöre çıkar (COLLABORATION-K21).
+/// koordinatörler, üyeler açılır satırda; yönetene çıkar (COLLABORATION-K21).
 class MeetingPeople extends ConsumerStatefulWidget {
   const MeetingPeople({super.key, required this.room, required this.actions});
 
@@ -56,24 +98,7 @@ class _MeetingPeopleState extends ConsumerState<MeetingPeople> {
     final room = widget.room;
     final m = room.meeting;
     final manage = room.permissions.canManageParticipants;
-    final placed = <String>{};
-    final groups = <(MeetingDepartment?, List<_Person>)>[];
-    for (final d in ownerFirst(m)) {
-      final team = catalog?.coordinatorship(d.id);
-      final ps = <_Person>[
-        for (final p in room.detail.participants)
-          if (!placed.contains(p.accountId) &&
-              (team?.team.contains(p.accountId) ?? false))
-            _Person(p, lead: team!.leads.contains(p.accountId)),
-      ];
-      placed.addAll(ps.map((x) => x.p.accountId));
-      if (ps.isNotEmpty) groups.add((d, ps));
-    }
-    final rest = [
-      for (final p in room.detail.participants)
-        if (!placed.contains(p.accountId)) _Person(p, lead: false),
-    ];
-    if (rest.isNotEmpty) groups.add((null, rest));
+    final groups = _groupPeople(m, room.detail.participants);
     final total = room.detail.participants.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -206,20 +231,35 @@ class _MeetingPeopleState extends ConsumerState<MeetingPeople> {
     );
   }
 
-  /// Katılımcı ekle: toplantıya bağlı koordinatörlüklerin ekibinden henüz katılımcı olmayanlar
-  /// (sunucu ayrıca programın kadrosunu denetler, K21).
+  /// Katılımcı ekle: henüz katılımcı olmayanlar; `coordinatorship` kipinde toplantıya bağlı
+  /// koordinatörlüklerin ekibinden, `person` kipinde programdaki bütün koordinatörlüklerden
+  /// (sunucu ayrıca programın kadrosunu denetler, K21). Ekip satırları yeni satır sunucudan
+  /// okunana dek katalogdan doldurulur.
   Future<void> _showAdd(BuildContext context, TaskCatalog? catalog) async {
     final l = context.l10n;
     final room = widget.room;
+    final m = room.meeting;
+    final all = catalog?.coordinatorships ?? const <CoordinatorshipRef>[];
+    final pool = m.byPerson
+        ? all
+        : [for (final d in ownerFirst(m)) ?catalog?.coordinatorship(d.id)];
     final seen = {for (final p in room.detail.participants) p.accountId};
     final candidates = [
-      for (final d in ownerFirst(room.meeting))
-        for (final id
-            in catalog?.coordinatorship(d.id)?.team ?? const <String>[])
+      for (final co in pool)
+        for (final id in co.team)
           if (seen.add(id))
             MeetingParticipant(
               accountId: id,
               fullName: catalog?.nameOf(id) ?? l.uiMeetingsUnknownPerson,
+              teams: [
+                for (final x in all)
+                  if (x.team.contains(id))
+                    ParticipantTeam(
+                      departmentId: x.code,
+                      departmentName: x.name,
+                      coordinator: x.leads.contains(id),
+                    ),
+              ],
             ),
     ]..sort((a, b) => compareTurkish(a.fullName, b.fullName));
     final picked = await NzBottomSheet.show<List<MeetingParticipant>>(

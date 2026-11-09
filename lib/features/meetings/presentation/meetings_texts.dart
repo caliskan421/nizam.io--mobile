@@ -147,16 +147,22 @@ extension MeetingsTexts on AppLocalizations {
     return "${meetingTime(at)}'$suffix $uiMeetingsSinceTail";
   }
 
-  /// Kart sayaçları: "2 not" / "not yok" (devamı varsa "20+ not"), "3 kişi".
-  String meetingNotesStat(MeetingSummary s) => s.notes == 0
-      ? uiMeetingsNoNotes
-      : '${s.notes}${s.moreNotes ? '+' : ''} $uiMeetingsNoteTail';
+  /// Kart sayaçları: "2 not" / "not yok", "3 kişi".
+  String meetingNotesStat(int n) =>
+      n == 0 ? uiMeetingsNoNotes : '$n $uiMeetingsNoteTail';
 
   String meetingPeopleStat(int n) => '$n $uiMeetingsPersonTail';
 
-  /// "Koordinatörlük · 3 birim".
-  String meetingInviteKind(Meeting m) =>
-      '$uiMeetingsInviteCoord · ${m.departments.length} $uiMeetingsUnitTail';
+  /// "Koordinatörlük · 3 birim" ya da "Kişi".
+  String meetingInviteKind(Meeting m) => m.byPerson
+      ? uiMeetingsInvitePerson
+      : '$uiMeetingsInviteCoord · ${m.departments.length} $uiMeetingsUnitTail';
+
+  /// Silme uyarısındaki canlı konferans cümlesi: bağlı kişi sayısı biliniyorsa "Konferans canlı:
+  /// 3 kişinin bağlantısı kesilir.", yoksa genel cümle.
+  String meetingDeleteLive(int connected) => connected > 0
+      ? '$uiMeetingsDeleteLivePrefix $connected $uiMeetingsDeleteLiveTail'
+      : uiMeetingsDeleteLive;
 }
 
 /// Toplantı departmanının ekrandaki kısa etiketi: katalogdaki departman kodu, yoksa toplantının

@@ -2622,14 +2622,32 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMeetingsDeletedBy => 'Sildi:';
 
   @override
-  String get uiMeetingsChat => 'Toplantı sohbeti';
-
-  @override
   String get uiMeetingsConfRestart => 'Yeni konferans başlat';
 
   @override
   String get uiMeetingsAgendaCheckBlocked =>
       'Gündemi yönetici ve toplantıya bağlı koordinatörler işaretler.';
+
+  @override
+  String get uiMeetingsInvitePerson => 'Kişi';
+
+  @override
+  String get uiMeetingsVisPeople => 'Davetli kişiler';
+
+  @override
+  String get uiMeetingsVisPeopleLong => 'Yalnız davetli kişiler';
+
+  @override
+  String get uiMeetingsInfoPlace => 'Yer';
+
+  @override
+  String get uiMeetingsPlacePrefix => 'Yer:';
+
+  @override
+  String get uiMeetingsDeleteLivePrefix => 'Konferans canlı:';
+
+  @override
+  String get uiMeetingsDeleteLiveTail => 'kişinin bağlantısı kesilir.';
 
   @override
   String get uiMessagesTitle => 'Mesajlar';
@@ -4229,6 +4247,15 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksConflictOff => 'Kapalı';
+
+  @override
+  String get uiTasksFieldPlace => 'Yer';
+
+  @override
+  String get uiTasksMtPlaceHint => 'İsteğe bağlı · ör. toplantı salonu';
+
+  @override
+  String get uiTasksErrMtPlace => 'Yer en çok 200 karakter olabilir.';
 
   @override
   String get uiTimelineTitle => 'Zaman çizelgesi';

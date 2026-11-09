@@ -10,7 +10,6 @@ import '../domain/meeting.dart';
 import '../domain/meeting_board.dart';
 import '../domain/meeting_status.dart';
 import '../domain/meetings_repository.dart';
-import 'meeting_summary_controller.dart';
 import 'meetings_controller.dart';
 import 'meetings_providers.dart';
 
@@ -61,7 +60,6 @@ final class MeetingRoom {
     required List<MeetingNote> notes,
     this.coordinatesLinked = false,
     this.me,
-    this.extras = MeetingExtras.none,
     this.noteSubmitting = false,
   }) : notes = List.unmodifiable(notes);
 
@@ -72,29 +70,26 @@ final class MeetingRoom {
   final MeetingDetail detail;
   final List<MeetingNote> notes;
 
-  /// Görüntüleyen toplantıya bağlı bir departmanın koordinatörü (katılımcı yönetimi, K21).
+  /// Görüntüleyen toplantıya bağlı bir departmanın koordinatörü (`coordinatorship` kipinde
+  /// katılımcı yönetimi, K21).
   final bool coordinatesLinked;
 
   /// Oturumdaki hesap.
   final String? me;
 
-  /// Backend'in taşımadığı olgular (geçici; üretimde boş).
-  final MeetingExtras extras;
-
   Meeting get meeting => detail.meeting;
 
+  /// Ayrıntının güncel özeti (sayaçlar, konferans durumu; liste kartına da yazılır).
+  MeetingSummary get summary => MeetingSummary.of(detail, notes: notes.length);
+
   /// Konferans kartı ve kimlik durumu ([now] anına göre).
-  MeetingStatus? status(DateTime now) => meetingStatus(
-    meeting,
-    now: now,
-    conference: detail.conference,
-    conferenceKnown: true,
-    extras: extras,
-  );
+  MeetingStatus? status(DateTime now) =>
+      meetingStatus(meeting, now: now, summary: summary);
 
   MeetingPermissions get permissions => MeetingPermissions(
     role: detail.viewerRole,
     me: me,
+    byPerson: meeting.byPerson,
     coordinatesLinked: coordinatesLinked,
   );
 
@@ -107,7 +102,6 @@ final class MeetingRoom {
     notes: notes ?? this.notes,
     coordinatesLinked: coordinatesLinked,
     me: me,
-    extras: extras,
     noteSubmitting: noteSubmitting ?? this.noteSubmitting,
   );
 }
@@ -149,7 +143,6 @@ class MeetingRoomController extends _$MeetingRoomController {
     final repo = ref.read(meetingsRepositoryProvider);
     final catalog = await ref.read(taskCatalogControllerProvider.future);
     final detail = await repo.getMeeting(id);
-    final now = DateTime.now();
     final notes = [...detail.notes.items];
     var cursor = detail.notes.nextCursor;
     for (var p = 0; cursor != null && p < notesMaxPages; p++) {
@@ -168,9 +161,6 @@ class MeetingRoomController extends _$MeetingRoomController {
       detail: detail,
       notes: notes,
       me: catalog.me,
-      extras: ref
-          .read(meetingExtrasRepositoryProvider)
-          .of(detail.meeting, DateTime(now.year, now.month, now.day)),
       coordinatesLinked: seats.any(
         (s) =>
             s.role == SeatRole.coordinator && linked.contains(s.departmentId),
@@ -199,13 +189,12 @@ class MeetingRoomController extends _$MeetingRoomController {
     _syncSummary(room);
   }
 
-  /// Liste kartı açıksa sayaçlarını ayrıntıdan günceller (ağ isteği yok).
+  /// Liste okunduysa satırın özetini ayrıntıdan günceller (ağ isteği yok).
   void _syncSummary(MeetingRoom room) {
-    final summary = meetingSummaryControllerProvider(id);
-    if (!ref.exists(summary)) return;
+    if (!ref.exists(meetingsBoardControllerProvider)) return;
     ref
-        .read(summary.notifier)
-        .put(MeetingSummary.of(room.detail, notes: room.notes.length));
+        .read(meetingsBoardControllerProvider.notifier)
+        .putSummary(id, room.summary);
   }
 
   void _agenda(List<AgendaItem> items) {
@@ -356,7 +345,8 @@ class MeetingRoomController extends _$MeetingRoomController {
     }
   }
 
-  /// Notu siler (yumuşak; iyimser).
+  /// Notu kalıcı siler (COLLABORATION-K75; iyimser, hatada geri gelir). Sunucuda geri yükleme
+  /// yoktur: onay ya da "geri al" bu çağrıdan ÖNCE yapılır.
   Future<ApiError?> deleteNote(MeetingNote n) async {
     final r = _room;
     if (r == null) return null;

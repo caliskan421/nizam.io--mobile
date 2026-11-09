@@ -4,7 +4,6 @@ import '../../tasks/tasks.dart';
 import '../domain/meeting.dart';
 import '../domain/meetings_repository.dart';
 import 'meeting_room_controller.dart';
-import 'meeting_summary_controller.dart';
 import 'meetings_controller.dart';
 import 'meetings_providers.dart';
 
@@ -29,6 +28,10 @@ class MeetingsPlanner implements MeetingPlanner {
             : plan.participantIds,
         membersIncluded: plan.membersIncluded,
         agendaItems: plan.agenda.isEmpty ? null : plan.agenda,
+        place: plan.place.isEmpty ? null : plan.place,
+        inviteMode: plan.byPerson
+            ? MeetingInviteMode.person
+            : MeetingInviteMode.coordinatorship,
       ),
     );
     _ref.invalidate(meetingsBoardControllerProvider);
@@ -39,16 +42,17 @@ class MeetingsPlanner implements MeetingPlanner {
   Future<void> update(String meetingId, MeetingPlan plan) async {
     await _repo.updateMeeting(
       meetingId,
+      // Kişi kipinde departman seti ve üye bayrağı gönderilmez (K73: 422). Boş yer kaldırır.
       MeetingChanges(
         title: plan.title,
         meetingDate: plan.at,
-        departmentIds: plan.departmentIds,
-        membersIncluded: plan.membersIncluded,
+        departmentIds: plan.byPerson ? null : plan.departmentIds,
+        membersIncluded: plan.byPerson ? null : plan.membersIncluded,
+        place: plan.place,
       ),
     );
     _ref
       ..invalidate(meetingsBoardControllerProvider)
-      ..invalidate(meetingSummaryControllerProvider(meetingId))
       ..invalidate(meetingRoomControllerProvider(meetingId));
   }
 

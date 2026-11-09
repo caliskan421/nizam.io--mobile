@@ -1,10 +1,12 @@
-// Hızlı toplantı formu: doğrulama (kişi kipinde sahip koordinatörlük), yeni toplantı ve
-// düzenleme gövdeleri (toplantı yazma portu meetings'te; gerçek bileşim kökü), sunucu hatasında
-// taslağın korunması. "Nottan görev" kipindeki yeni görev formu `convertNoteToTask`'e gider.
+// Hızlı toplantı formu: doğrulama (kişi kipinde sahip koordinatörlük, yer uzunluğu), yeni
+// toplantı ve düzenleme gövdeleri (davet kipi, yer; toplantı yazma portu meetings'te; gerçek
+// bileşim kökü), kişi kipinde sahip seçenekleri, sunucu hatasında taslağın korunması. "Nottan görev" kipindeki yeni görev formu `convertNoteToTask`'e gider.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/features/tasks/application/meeting_form_controller.dart';
 import 'package:nizamio/features/tasks/application/quick_forms_controller.dart';
+import 'package:nizamio/features/tasks/domain/task_access.dart';
+import 'package:nizamio/features/tasks/domain/task_catalog.dart';
 
 import '../../../support/harness.dart';
 import '../../meetings/meetings_server.dart';
@@ -49,6 +51,7 @@ void main() {
             '${day.year}-${two(day.month)}-${two(day.day)}T15:30:00',
         'department_ids': ['d1', 'd2'],
         'members_included': true,
+        'invite_mode': 'coordinatorship',
         'agenda_items': ['Jeneratör yerleşimi'],
       });
       expect(
@@ -78,7 +81,80 @@ void main() {
       'department_ids': ['d2'],
       'participant_ids': ['u1'],
       'members_included': false,
+      'invite_mode': 'person',
     });
+  });
+
+  test('yer: kırpılarak gider; 200 karakteri aşan istek göndermez', () async {
+    final (h, c, f) = await _open(MeetingsServer());
+    f
+      ..prepare(coordinatorship: 'd1')
+      ..setTitle('Bütçe')
+      ..setPlace('x' * 201);
+    expect(await f.submit(), isNull);
+    expect(c.read(meetingFormControllerProvider).error, MeetingError.place);
+    expect(h.backend.requests, isEmpty);
+    f.setPlace('  Toplantı salonu ');
+    expect(await f.submit(), isNotNull);
+    expect(_body(h)['place'], 'Toplantı salonu');
+  });
+
+  test(
+    'kişi kipi düzenleme: departman/üye bayrağı/kip gitmez; boş yer kaldırır',
+    () async {
+      final (h, c, f) = await _open(MeetingsServer()..inviteMode = 'person');
+      f.prepareEdit(
+        MeetingSeed(
+          id: 'm1',
+          title: 'Saha',
+          at: DateTime(2030, 1, 1, 9),
+          departmentIds: const ['d2'],
+          membersIncluded: false,
+          place: 'Depo',
+          byPerson: true,
+        ),
+      );
+      final form = c.read(meetingFormControllerProvider);
+      expect(
+        (form.mode, form.owner, form.place),
+        (MeetingMode.people, 'd2', 'Depo'),
+      );
+      f.setPlace('');
+      expect(
+        await f.submit(),
+        isNotNull,
+        reason: 'katılımcı düzenlemede istenmez',
+      );
+      expect(_body(h), {
+        'title': 'Saha',
+        'meeting_date': isA<String>(),
+        'place': '',
+      });
+    },
+  );
+
+  test('sahip seçenekleri: yönetici hepsi, koordinatör yalnız kendi koordinatörlüğü', () {
+    TaskCatalog cat({required bool admin}) => TaskCatalog(
+      today: DateTime(2030),
+      me: 'me',
+      tasks: const [],
+      people: const [],
+      access: TaskAccess(accountId: 'me', companyAdmin: admin, seats: const []),
+      coordinatorships: const [
+        CoordinatorshipRef(code: 'd1', name: 'A', leads: ['me'], members: []),
+        CoordinatorshipRef(
+          code: 'd2',
+          name: 'B',
+          leads: ['x'],
+          members: ['me'],
+        ),
+      ],
+    );
+    expect(meetingOwnerChoices(cat(admin: true)).map((c) => c.code), [
+      'd1',
+      'd2',
+    ]);
+    expect(meetingOwnerChoices(cat(admin: false)).map((c) => c.code), ['d1']);
   });
 
   test('düzenleme: PATCH, geçmiş gün bugüne çekilir; gündem/kip yok', () async {

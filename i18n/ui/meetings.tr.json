@@ -138,8 +138,14 @@
     "ui.meetings.connected_tail": "kişi bağlı",
     "ui.meetings.since_tail": "beri",
     "ui.meetings.deleted_by": "Sildi:",
-    "ui.meetings.chat": "Toplantı sohbeti",
     "ui.meetings.conf_restart": "Yeni konferans başlat",
-    "ui.meetings.agenda_check_blocked": "Gündemi yönetici ve toplantıya bağlı koordinatörler işaretler."
+    "ui.meetings.agenda_check_blocked": "Gündemi yönetici ve toplantıya bağlı koordinatörler işaretler.",
+    "ui.meetings.invite_person": "Kişi",
+    "ui.meetings.vis_people": "Davetli kişiler",
+    "ui.meetings.vis_people_long": "Yalnız davetli kişiler",
+    "ui.meetings.info_place": "Yer",
+    "ui.meetings.place_prefix": "Yer:",
+    "ui.meetings.delete_live_prefix": "Konferans canlı:",
+    "ui.meetings.delete_live_tail": "kişinin bağlantısı kesilir."
   }
 }

@@ -119,6 +119,7 @@ extension TaskTexts on AppLocalizations {
   String meetingError(MeetingError e) => switch (e) {
     MeetingError.title => uiTasksErrTitle,
     MeetingError.past => uiTasksErrPast,
+    MeetingError.place => uiTasksErrMtPlace,
     MeetingError.coordinatorships => uiTasksErrMtCoords,
     MeetingError.people => uiTasksErrMtPeople,
     MeetingError.owner => uiTasksErrMtOwner,

@@ -14,6 +14,8 @@ Map<String, Object?> _meeting({
   'title': 'Haftalık',
   'meeting_date': _t,
   'members_included': true,
+  'invite_mode': 'coordinatorship',
+  'place': null,
   'created_by_account_id': 'a1',
   'created_by_role': role,
   'created_at': _t,
@@ -53,6 +55,7 @@ Map<String, Object?> _conference({String status = 'live'}) => {
   'status': status,
   'started_at': _t,
   'started_by_account_id': 'a1',
+  'connected': {'count': 0, 'account_ids': <String>[], 'observed_at': null},
 };
 
 const _effects = {'failed_messages': 2, 'event_failed': true};

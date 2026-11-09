@@ -73,6 +73,31 @@ void main() {
     expect(_now(c).permissions.canManageParticipants, isTrue);
   });
 
+  test(
+    'kişi kipinde yöneten koordinatör bağ olmadan katılımcı yönetir',
+    () async {
+      final s = MeetingsServer(admin: false)
+        ..viewerRole = 'coordinator'
+        ..inviteMode = 'person';
+      final (_, c, _) = await _open(s);
+      expect(_now(c).permissions.canManageParticipants, isTrue);
+    },
+  );
+
+  test(
+    'ayrıntı yazması liste satırının özetini ağ isteği olmadan günceller',
+    () async {
+      final s = MeetingsServer();
+      final (h, c, ctl) = await _open(s);
+      c.listen(meetingsBoardControllerProvider, (_, _) {});
+      await c.read(meetingsBoardControllerProvider.future);
+      expect(await ctl.addAgenda('Yeni'), isNull);
+      final row = c.read(meetingsBoardControllerProvider).value!.visible.single;
+      expect((row.summary!.agendaTotal, row.summary!.noteCount), (3, 1));
+      expect(calls(h).where((x) => x.startsWith('GET /v1/meetings/')), isEmpty);
+    },
+  );
+
   test('gündem işareti iyimser; sunucu yanıtıyla oturur', () async {
     final s = MeetingsServer()..hold = Completer();
     final (h, c, ctl) = await _open(s);

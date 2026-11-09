@@ -5026,12 +5026,6 @@ abstract class AppLocalizations {
   /// **'Sildi:'**
   String get uiMeetingsDeletedBy;
 
-  /// ui.meetings.chat
-  ///
-  /// In tr, this message translates to:
-  /// **'Toplantı sohbeti'**
-  String get uiMeetingsChat;
-
   /// ui.meetings.conf_restart
   ///
   /// In tr, this message translates to:
@@ -5043,6 +5037,48 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Gündemi yönetici ve toplantıya bağlı koordinatörler işaretler.'**
   String get uiMeetingsAgendaCheckBlocked;
+
+  /// ui.meetings.invite_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi'**
+  String get uiMeetingsInvitePerson;
+
+  /// ui.meetings.vis_people
+  ///
+  /// In tr, this message translates to:
+  /// **'Davetli kişiler'**
+  String get uiMeetingsVisPeople;
+
+  /// ui.meetings.vis_people_long
+  ///
+  /// In tr, this message translates to:
+  /// **'Yalnız davetli kişiler'**
+  String get uiMeetingsVisPeopleLong;
+
+  /// ui.meetings.info_place
+  ///
+  /// In tr, this message translates to:
+  /// **'Yer'**
+  String get uiMeetingsInfoPlace;
+
+  /// ui.meetings.place_prefix
+  ///
+  /// In tr, this message translates to:
+  /// **'Yer:'**
+  String get uiMeetingsPlacePrefix;
+
+  /// ui.meetings.delete_live_prefix
+  ///
+  /// In tr, this message translates to:
+  /// **'Konferans canlı:'**
+  String get uiMeetingsDeleteLivePrefix;
+
+  /// ui.meetings.delete_live_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kişinin bağlantısı kesilir.'**
+  String get uiMeetingsDeleteLiveTail;
 
   /// ui.messages.title
   ///
@@ -8139,6 +8175,24 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kapalı'**
   String get uiTasksConflictOff;
+
+  /// ui.tasks.field_place
+  ///
+  /// In tr, this message translates to:
+  /// **'Yer'**
+  String get uiTasksFieldPlace;
+
+  /// ui.tasks.mt_place_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'İsteğe bağlı · ör. toplantı salonu'**
+  String get uiTasksMtPlaceHint;
+
+  /// ui.tasks.err_mt_place
+  ///
+  /// In tr, this message translates to:
+  /// **'Yer en çok 200 karakter olabilir.'**
+  String get uiTasksErrMtPlace;
 
   /// ui.timeline.title
   ///

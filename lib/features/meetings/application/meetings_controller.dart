@@ -7,7 +7,6 @@ import '../../../core/providers.dart';
 import '../../tasks/tasks.dart';
 import '../domain/meeting.dart';
 import '../domain/meeting_board.dart';
-import 'meeting_summary_controller.dart';
 import 'meetings_providers.dart';
 
 part 'meetings_controller.g.dart';
@@ -60,9 +59,9 @@ class MeetingsViewController extends _$MeetingsViewController {
 
 /// Toplantı listesi: görünür toplantılar (`listMeetings`) ve yöneticiye silinenler. Silinenler
 /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı
-/// silme de bu yoldadır): `/v1/meetings/deleted` istemci kapısında `/v1/meetings/{id}` ile
-/// belirsiz eşleşir ve fail-closed reddedilir. İkisi de imleçli; en çok [maxPages] × [pageSize]
-/// satır okunur. Seçili program değişince yeniden yüklenir.
+/// silme de bu yoldadır). İkisi de imleçli; en çok [maxPages] × [pageSize] satır okunur. Kart
+/// sayaçları ve konferans durumu satır özetindedir (COLLABORATION-K70; kart başına istek yok).
+/// Seçili program değişince yeniden yüklenir.
 @riverpod
 class MeetingsBoardController extends _$MeetingsBoardController {
   static const pageSize = 200;
@@ -101,14 +100,27 @@ class MeetingsBoardController extends _$MeetingsBoardController {
 
   /// Aşağı çekerek yenileme: yeniden okur ve bitmesini bekler (hata ekranda görünür).
   Future<void> refresh() async {
-    ref
-      ..invalidate(meetingSummaryControllerProvider)
-      ..invalidateSelf();
+    ref.invalidateSelf();
     try {
       await future;
     } on Object {
       // Hata durumda (AsyncError) gösterilir; yenileme göstergesi kapanır.
     }
+  }
+
+  /// Açık ayrıntının güncel özetini liste satırına yazar (ağ isteği yok); liste yüklenmemişse ya
+  /// da toplantı listede yoksa bir şey yapmaz.
+  void putSummary(String id, MeetingSummary summary) {
+    final board = state.value;
+    if (board == null || !board.visible.any((m) => m.id == id)) return;
+    state = AsyncData(
+      board.copyWith(
+        visible: [
+          for (final m in board.visible)
+            m.id == id ? m.withSummary(summary) : m,
+        ],
+      ),
+    );
   }
 
   /// Silinmiş toplantıyı geri yükler (yalnız yönetici); liste yeniden okunur.

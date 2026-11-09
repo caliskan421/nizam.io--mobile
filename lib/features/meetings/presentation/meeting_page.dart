@@ -8,7 +8,6 @@ import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
 import '../../../core/ui/layout/nz_pane.dart';
-import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
@@ -63,12 +62,6 @@ class MeetingPage extends ConsumerWidget {
         // Toplantının adı (yüklenene kadar boş).
         title: room?.meeting.title,
         actions: [
-          if (room?.extras.chatId case final chat?)
-            NzIconButton(
-              icon: NzIcons.messages,
-              semanticLabel: l.uiMeetingsChat,
-              onPressed: () => context.appNav.openChat(chat),
-            ),
           if (room != null && room.permissions.canManage)
             NzIconButton(
               icon: NzIcons.more,
@@ -226,18 +219,21 @@ class MeetingActions {
         at: m.meetingDate.toLocal(),
         departmentIds: [for (final d in ownerFirst(m)) d.id],
         membersIncluded: m.membersIncluded,
+        place: m.place,
+        byPerson: m.byPerson,
       ),
     );
   }
 
   Future<void> _delete() async {
     final l = context.l10n;
-    final live = _room?.detail.conference != null;
+    final conf = _room?.detail.conference;
     final yes = await NzDialog.confirm(
       context,
       title: l.uiMeetingsDeleteQ,
-      message: live
-          ? '${l.uiMeetingsDeleteDesc}\n\n${l.uiMeetingsDeleteLive}'
+      message: conf != null
+          ? '${l.uiMeetingsDeleteDesc}\n\n'
+                '${l.meetingDeleteLive(conf.connected.count)}'
           : l.uiMeetingsDeleteDesc,
       confirmLabel: l.uiMeetingsMenuDelete,
       cancelLabel: l.uiMeetingsCancel,

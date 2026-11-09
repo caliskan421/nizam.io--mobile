@@ -311,6 +311,8 @@ Map<String, Object?> _meeting(
   'title': title,
   'meeting_date': at,
   'members_included': true,
+  'invite_mode': 'coordinatorship',
+  'place': null,
   'created_by_account_id': 'acc-1',
   'created_by_role': 'admin',
   'created_at': '2026-11-01T17:28:17Z',

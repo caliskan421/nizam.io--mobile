@@ -4,8 +4,7 @@ import '../../../core/domain/turkish_collation.dart';
 import 'meeting.dart';
 
 // Toplantı listesi ve ayrıntısının saf karar mantığı (prototip `S_meetings` / `S_mdetail`):
-// sekme ayrımı, gün grupları, arama, gündem sırası ve görüntüleyen izinleri. Liste ucu durum
-// (konferans) ve sayaç taşımaz (COLLABORATION-K51); bunlar yalnız ayrıntıda vardır.
+// sekme ayrımı, gün grupları, arama, gündem sırası ve görüntüleyen izinleri.
 
 /// Liste sekmeleri. Silinenler yalnız yöneticiye açıktır (COLLABORATION-K22).
 enum MeetingsTab { upcoming, past, deleted }
@@ -25,8 +24,8 @@ int dayDiff(DateTime a, DateTime b) => DateTime.utc(
   a.day,
 ).difference(DateTime.utc(b.year, b.month, b.day)).inDays;
 
-/// [today] ve sonrası yaklaşan; bugünkü toplantı gün boyunca yaklaşandadır (liste konferans
-/// durumu taşımadığından saat geçse de "geçmiş"e düşmez).
+/// [today] ve sonrası yaklaşan; bugünkü toplantı gün boyunca yaklaşandadır (saat geçse de
+/// "geçmiş"e düşmez).
 bool isUpcoming(Meeting m, DateTime today) =>
     dayDiff(meetingDay(m), today) >= 0;
 
@@ -191,12 +190,15 @@ List<MeetingNote> filterNotes(
 }
 
 /// Görüntüleyenin toplantıdaki yetkileri. Karar sunucudadır; bu sınıf yalnız hangi düğmenin
-/// görüneceğini seçer (COLLABORATION-K16, K20, K21, K26, K28, K29, K32, K44).
+/// görüneceğini seçer (COLLABORATION-K16, K20, K21, K26, K28, K29, K32, K44, K74). Yönetim
+/// sunucunun `viewer_role`'ündendir: `admin` ve `coordinator` yönetir, `member` (katılımcı
+/// dahil) okur ve not yazar.
 @immutable
 final class MeetingPermissions {
   const MeetingPermissions({
     required this.role,
     required this.me,
+    this.byPerson = false,
     this.coordinatesLinked = false,
   });
 
@@ -206,8 +208,12 @@ final class MeetingPermissions {
   /// Oturumdaki hesap.
   final String? me;
 
-  /// Görüntüleyen toplantıya bağlı bir departmanın koordinatörü mü (katılımcı yönetimi
-  /// yalnız ona açıktır; koordinatör rolü olmayan yönetici dahil başkası reddedilir, K21).
+  /// Davet kipi `person` mi.
+  final bool byPerson;
+
+  /// Görüntüleyen toplantıya bağlı bir departmanın koordinatörü mü (`coordinatorship`
+  /// kipinde katılımcı yönetimi yalnız ona açıktır; koordinatör rolü olmayan yönetici dahil
+  /// başkası reddedilir, K21).
   final bool coordinatesLinked;
 
   bool get _manager =>
@@ -216,7 +222,9 @@ final class MeetingPermissions {
   /// Düzenle, sil, gündem yazma, konferans başlat/bitir, nottan görev.
   bool get canManage => _manager;
 
-  bool get canManageParticipants => coordinatesLinked;
+  /// `person` kipinde yönetici ve yöneten oluşturan; `coordinatorship` kipinde bağlı
+  /// departmanın koordinatörü (K21).
+  bool get canManageParticipants => byPerson ? _manager : coordinatesLinked;
 
   /// Not ekleme toplantıyı gören herkese açıktır.
   bool get canAddNote => role != MeetingRole.unknown;

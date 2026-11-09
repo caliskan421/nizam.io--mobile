@@ -3289,10 +3289,6 @@
   "@uiMeetingsDeletedBy": {
     "description": "ui.meetings.deleted_by"
   },
-  "uiMeetingsChat": "Toplantı sohbeti",
-  "@uiMeetingsChat": {
-    "description": "ui.meetings.chat"
-  },
   "uiMeetingsConfRestart": "Yeni konferans başlat",
   "@uiMeetingsConfRestart": {
     "description": "ui.meetings.conf_restart"
@@ -3300,6 +3296,34 @@
   "uiMeetingsAgendaCheckBlocked": "Gündemi yönetici ve toplantıya bağlı koordinatörler işaretler.",
   "@uiMeetingsAgendaCheckBlocked": {
     "description": "ui.meetings.agenda_check_blocked"
+  },
+  "uiMeetingsInvitePerson": "Kişi",
+  "@uiMeetingsInvitePerson": {
+    "description": "ui.meetings.invite_person"
+  },
+  "uiMeetingsVisPeople": "Davetli kişiler",
+  "@uiMeetingsVisPeople": {
+    "description": "ui.meetings.vis_people"
+  },
+  "uiMeetingsVisPeopleLong": "Yalnız davetli kişiler",
+  "@uiMeetingsVisPeopleLong": {
+    "description": "ui.meetings.vis_people_long"
+  },
+  "uiMeetingsInfoPlace": "Yer",
+  "@uiMeetingsInfoPlace": {
+    "description": "ui.meetings.info_place"
+  },
+  "uiMeetingsPlacePrefix": "Yer:",
+  "@uiMeetingsPlacePrefix": {
+    "description": "ui.meetings.place_prefix"
+  },
+  "uiMeetingsDeleteLivePrefix": "Konferans canlı:",
+  "@uiMeetingsDeleteLivePrefix": {
+    "description": "ui.meetings.delete_live_prefix"
+  },
+  "uiMeetingsDeleteLiveTail": "kişinin bağlantısı kesilir.",
+  "@uiMeetingsDeleteLiveTail": {
+    "description": "ui.meetings.delete_live_tail"
   },
   "uiMessagesTitle": "Mesajlar",
   "@uiMessagesTitle": {
@@ -5364,6 +5388,18 @@
   "uiTasksConflictOff": "Kapalı",
   "@uiTasksConflictOff": {
     "description": "ui.tasks.conflict_off"
+  },
+  "uiTasksFieldPlace": "Yer",
+  "@uiTasksFieldPlace": {
+    "description": "ui.tasks.field_place"
+  },
+  "uiTasksMtPlaceHint": "İsteğe bağlı · ör. toplantı salonu",
+  "@uiTasksMtPlaceHint": {
+    "description": "ui.tasks.mt_place_hint"
+  },
+  "uiTasksErrMtPlace": "Yer en çok 200 karakter olabilir.",
+  "@uiTasksErrMtPlace": {
+    "description": "ui.tasks.err_mt_place"
   },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {

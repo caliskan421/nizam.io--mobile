@@ -36,8 +36,11 @@ class ArchiveActionsController extends _$ArchiveActionsController {
 
   ArchiveRepository get _repo => ref.read(archiveRepositoryProvider);
 
-  /// Bekleyen yükleme niyeti (anahtar + imza; denetleyici ömrü = klasör sayfası).
+  /// Bekleyen yükleme anahtarı (anahtar + imza; denetleyici ömrü = klasör sayfası).
   var _keys = const RequestKeys();
+
+  /// Sonucu bilinmeyen yüklemenin niyeti ([retryUpload] seçiciyi açmadan bunu gönderir).
+  _UploadIntent? _intent;
 
   /// [op] süren eylem kilidiyle çalışır; hata [ApiError]'a çevrilir.
   Future<ArchiveOutcome> _run(Future<ArchiveOutcome> Function() op) async {
@@ -122,10 +125,12 @@ class ArchiveActionsController extends _$ArchiveActionsController {
   /// yeniden okunur.
   ///
   /// İşlem anahtarı (istemci akışları §8, görev ayrıntısındaki yüklemeyle aynı kural): niyet
-  /// (kapsam, görev, etiket, dosya yolu/adı/boyutu) başına bir anahtar; sonuç bilinmezse
-  /// (`client.outcome_unknown`) niyet saklanır ve aynı niyetin yeniden gönderimi AYNI anahtarı
-  /// taşır, farklı niyet yeni anahtar alır. `platform.conflict_retry` aynı anahtarla bir kez
-  /// otomatik yeniden denenir. Başarı ve "anahtar başka istekle kullanılmış" niyeti düşürür.
+  /// (kapsam, görev, etiket, seçilmiş dosyanın yolu/adı/boyutu) başına bir anahtar; sonuç
+  /// bilinmezse (`client.outcome_unknown`) niyet ve anahtarı saklanır, [retryUpload] seçiciyi
+  /// açmadan aynı niyeti AYNI anahtarla gönderir (gerçek seçici yeniden seçimde yeni geçici yol
+  /// döndürür; yeni seçim yeni niyet ve yeni anahtardır). `platform.conflict_retry` aynı
+  /// anahtarla bir kez otomatik yeniden denenir. Başarı ve "anahtar başka istekle kullanılmış"
+  /// niyeti düşürür.
   Future<ArchiveOutcome> upload({
     required String workItemId,
     required RecordTag tag,
@@ -138,18 +143,39 @@ class ArchiveActionsController extends _$ArchiveActionsController {
     if (file.contentType == null) throw ApiError('records.content_rejected');
     if (file.tooLarge) throw ApiError('records.too_large');
     final ctx = await _context();
-    final (keys, key) = _keys.keyFor(
-      _upload,
-      '${ctx.department}|$workItemId|${tag.name}|'
-      '${file.path}|${file.name}|${file.sizeBytes}',
-    );
-    _keys = keys;
-    Future<void> send() => _repo.attachFile(
+    return _send((
       department: ctx.department,
       workItemId: workItemId,
       tag: tag,
-      filePath: file.path,
-      filename: file.name,
+      file: file,
+    ));
+  });
+
+  /// Sonucu bilinmeyen yüklemeyi seçici açmadan aynı niyet ve aynı anahtarla yeniden gönderir;
+  /// bekleyen niyet yoksa vazgeçme.
+  Future<ArchiveOutcome> retryUpload() => _run(() async {
+    final intent = _intent;
+    return intent == null ? _cancelled : _send(intent);
+  });
+
+  /// Seçici açmadan gönderilebilecek, sonucu bilinmeyen yükleme var mı.
+  bool get hasPendingUpload => _intent != null;
+
+  Future<ArchiveOutcome> _send(_UploadIntent i) async {
+    final f = i.file;
+    final (keys, key) = _keys.keyFor(
+      _upload,
+      '${i.department}|${i.workItemId}|${i.tag.name}|'
+      '${f.path}|${f.name}|${f.sizeBytes}',
+    );
+    _keys = keys;
+    _intent = null;
+    Future<void> send() => _repo.attachFile(
+      department: i.department,
+      workItemId: i.workItemId,
+      tag: i.tag,
+      filePath: f.path,
+      filename: f.name,
       requestKey: key,
     );
     try {
@@ -162,6 +188,7 @@ class ArchiveActionsController extends _$ArchiveActionsController {
     } on Object catch (e) {
       final err = toApiError(e);
       if (isOutcomeUnknown(err)) {
+        _intent = i;
         throw ApiError(ClientErrorCode.outcomeUnknown, status: err.status);
       }
       if (isKeyReused(err)) {
@@ -173,7 +200,7 @@ class ArchiveActionsController extends _$ArchiveActionsController {
     _keys = _keys.clear(_upload);
     _reload();
     return (ok: true, error: null, path: null);
-  });
+  }
 
   /// Bekleyen yükleme anahtarı (test ve tanılama).
   String? get pendingUploadKey => _keys.pending(_upload);
@@ -187,3 +214,11 @@ class ArchiveActionsController extends _$ArchiveActionsController {
       ..invalidate(archiveFoldersControllerProvider);
   }
 }
+
+/// Yükleme niyeti: kapsam (departman), görev, etiket ve seçilmiş dosya kaynağı.
+typedef _UploadIntent = ({
+  String department,
+  String workItemId,
+  RecordTag tag,
+  UploadSource file,
+});

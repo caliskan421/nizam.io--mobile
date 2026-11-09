@@ -13,8 +13,10 @@ part of 'chat_actions_controller.dart';
 /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
 /// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
 /// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
-/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
-/// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Geri alma kararı
+/// dokunuş nesline bağlıdır: hata, istek gittikten sonra yeni dokunuş yoksa doğrulanmış duruma
+/// geri döndürür; varsa son istenen durum korunur ve (hatalı sonucun sunucu durumu belirsiz
+/// olduğundan) değeri ne olursa olsun tek istekle gönderilir. Hatalı isteği bekleyen
 /// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
 /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
 
@@ -26,8 +28,10 @@ final chatActionsControllerProvider = ChatActionsControllerFamily._();
 /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
 /// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
 /// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
-/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
-/// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Geri alma kararı
+/// dokunuş nesline bağlıdır: hata, istek gittikten sonra yeni dokunuş yoksa doğrulanmış duruma
+/// geri döndürür; varsa son istenen durum korunur ve (hatalı sonucun sunucu durumu belirsiz
+/// olduğundan) değeri ne olursa olsun tek istekle gönderilir. Hatalı isteği bekleyen
 /// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
 /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
 final class ChatActionsControllerProvider
@@ -37,8 +41,10 @@ final class ChatActionsControllerProvider
   /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
   /// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
   /// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
-  /// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
-  /// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+  /// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Geri alma kararı
+  /// dokunuş nesline bağlıdır: hata, istek gittikten sonra yeni dokunuş yoksa doğrulanmış duruma
+  /// geri döndürür; varsa son istenen durum korunur ve (hatalı sonucun sunucu durumu belirsiz
+  /// olduğundan) değeri ne olursa olsun tek istekle gönderilir. Hatalı isteği bekleyen
   /// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
   /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
   ChatActionsControllerProvider._({
@@ -86,15 +92,17 @@ final class ChatActionsControllerProvider
 }
 
 String _$chatActionsControllerHash() =>
-    r'e65792efe8111be4a404dd57c8be053013cbc1a0';
+    r'e511727a7b3a74d1dd0acef99ec87528c7bd13cd';
 
 /// Mesaj eylemleri (istemci akışları §10.10): tepki, oy, sabitleme, anket bitirme ve indirmeler.
 /// Tepki ve oy iyimser uygulanır; aynı mesajdaki ardışık dokunuşlar [settle] süresince
 /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
 /// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
 /// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
-/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
-/// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Geri alma kararı
+/// dokunuş nesline bağlıdır: hata, istek gittikten sonra yeni dokunuş yoksa doğrulanmış duruma
+/// geri döndürür; varsa son istenen durum korunur ve (hatalı sonucun sunucu durumu belirsiz
+/// olduğundan) değeri ne olursa olsun tek istekle gönderilir. Hatalı isteği bekleyen
 /// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
 /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
 
@@ -114,8 +122,10 @@ final class ChatActionsControllerFamily extends $Family
   /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
   /// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
   /// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
-  /// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
-  /// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+  /// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Geri alma kararı
+  /// dokunuş nesline bağlıdır: hata, istek gittikten sonra yeni dokunuş yoksa doğrulanmış duruma
+  /// geri döndürür; varsa son istenen durum korunur ve (hatalı sonucun sunucu durumu belirsiz
+  /// olduğundan) değeri ne olursa olsun tek istekle gönderilir. Hatalı isteği bekleyen
   /// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
   /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
 
@@ -131,8 +141,10 @@ final class ChatActionsControllerFamily extends $Family
 /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
 /// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
 /// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
-/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
-/// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Geri alma kararı
+/// dokunuş nesline bağlıdır: hata, istek gittikten sonra yeni dokunuş yoksa doğrulanmış duruma
+/// geri döndürür; varsa son istenen durum korunur ve (hatalı sonucun sunucu durumu belirsiz
+/// olduğundan) değeri ne olursa olsun tek istekle gönderilir. Hatalı isteği bekleyen
 /// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
 /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
 

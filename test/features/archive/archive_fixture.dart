@@ -63,8 +63,9 @@ class FakeArchiveRepository implements ArchiveRepository {
   ApiError? error;
   final List<ArchiveCall> calls = [];
 
-  /// Yükleme çağrılarının işlem anahtarları (sırayla).
+  /// Yükleme çağrılarının işlem anahtarları ve dosya yolları (sırayla).
   final List<String> attachKeys = [];
+  final List<String> attachPaths = [];
 
   /// Sıradaki yükleme çağrılarının hataları (FIFO; boşsa [error] geçerli).
   final List<Object> attachErrors = [];
@@ -116,6 +117,7 @@ class FakeArchiveRepository implements ArchiveRepository {
     required String requestKey,
   }) {
     attachKeys.add(requestKey);
+    attachPaths.add(filePath);
     if (attachErrors.isNotEmpty) {
       calls.add(('attach', department, (workItemId, tag, filename)));
       return Future.error(attachErrors.removeAt(0));

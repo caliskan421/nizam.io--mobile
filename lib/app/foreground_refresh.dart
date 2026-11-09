@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/messages/messages.dart';
 import '../features/notifications/notifications.dart';
 import '../features/tasks/tasks.dart';
 
@@ -11,7 +12,8 @@ import '../features/tasks/tasks.dart';
 /// ayrıntı katalogla birlikte yeniden okunur, açık düzenleme taslağı tabanını korur. Hiç
 /// okunmamış katalog için okuma başlatılmaz; yoklama yoktur (arka planda iş yapılmaz).
 /// Aynı geçişte zil rozeti (okunmamış bildirim sayısı) ekrandaysa yeniden okunur
-/// ([refreshNotificationBadge]; v1 ön plan yoklaması, zamanlayıcı yok).
+/// ([refreshNotificationBadge]; v1 ön plan yoklaması, zamanlayıcı yok); Mesajlar rozeti de
+/// akış açık değilse tek okumayla tazelenir ([refreshMessagesBadge]).
 class ForegroundRefresh extends ConsumerStatefulWidget {
   const ForegroundRefresh({
     super.key,
@@ -39,6 +41,7 @@ class _ForegroundRefreshState extends ConsumerState<ForegroundRefresh> {
     final container = ProviderScope.containerOf(context, listen: false);
     unawaited(refreshStaleTasks(container, maxAge: widget.maxAge));
     unawaited(refreshNotificationBadge(container));
+    unawaited(refreshMessagesBadge(container));
   }
 
   @override

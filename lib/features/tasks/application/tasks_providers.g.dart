@@ -368,6 +368,55 @@ final class UploadPickerProvider
 
 String _$uploadPickerHash() => r'0748ecb6edf44f81d4cb239af148e8348b283698';
 
+/// PORT: yükleme içerik özeti (`tasks_module.dart`'ta `uploadDigest` bağlanır). Yalnız görev
+/// ve arşiv yükleme gönderiminde, tür/boyut ön denetiminden sonra okunur.
+
+@ProviderFor(uploadDigester)
+final uploadDigesterProvider = UploadDigesterProvider._();
+
+/// PORT: yükleme içerik özeti (`tasks_module.dart`'ta `uploadDigest` bağlanır). Yalnız görev
+/// ve arşiv yükleme gönderiminde, tür/boyut ön denetiminden sonra okunur.
+
+final class UploadDigesterProvider
+    extends $FunctionalProvider<UploadDigest, UploadDigest, UploadDigest>
+    with $Provider<UploadDigest> {
+  /// PORT: yükleme içerik özeti (`tasks_module.dart`'ta `uploadDigest` bağlanır). Yalnız görev
+  /// ve arşiv yükleme gönderiminde, tür/boyut ön denetiminden sonra okunur.
+  UploadDigesterProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'uploadDigesterProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$uploadDigesterHash();
+
+  @$internal
+  @override
+  $ProviderElement<UploadDigest> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  UploadDigest create(Ref ref) {
+    return uploadDigester(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UploadDigest value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UploadDigest>(value),
+    );
+  }
+}
+
+String _$uploadDigesterHash() => r'c56f95b0664eac7333cba1cacc8524576a2c938a';
+
 /// PORT: indirilen dosyanın kaydı (`tasks_module.dart`'ta bağlanır).
 
 @ProviderFor(downloadSink)

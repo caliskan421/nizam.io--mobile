@@ -323,7 +323,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   }
 
   /// Yazma alanının ek menüsü: fotoğraf / dosya (seçici; galeri adı seçicide normalleşir,
-  /// izinli tür ön denetimi) ya da anket (grupta).
+  /// izinli tür ön denetimi; içerik özeti yok) ya da anket (grupta). Seçici hatası ve okunamayan
+  /// dosya (`client.file_unreadable`) bildirim olarak gösterilir.
   Future<void> _attach(ChatRoom room) async {
     final l = context.l10n;
     final kind = await showAttachMenu(context, group: room.chat.group);
@@ -337,27 +338,25 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       case ChatAttachKind.photos || ChatAttachKind.files:
         final picker = ref.read(uploadPickerProvider);
         if (!picker.available) return _toast(l.uiMessagesPickerMissing);
-        final f = await picker.pick(
-          kind == ChatAttachKind.photos
-              ? UploadOrigin.photos
-              : UploadOrigin.files,
-        );
-        if (f == null || !mounted) return;
-        final type = f.contentType;
-        if (type == null) {
-          return _toast(errorText(l, ApiError('messaging.file_rejected')));
-        }
-        _toBottom();
-        await _try(
-          () => _room.sendAttachment(
+        await _try(() async {
+          final f = await picker.pick(
+            kind == ChatAttachKind.photos
+                ? UploadOrigin.photos
+                : UploadOrigin.files,
+          );
+          if (f == null || !mounted) return;
+          final type = f.contentType;
+          if (type == null) throw ApiError('messaging.file_rejected');
+          _toBottom();
+          await _room.sendAttachment(
             ChatUpload(
               path: f.path,
               name: f.name,
               sizeBytes: f.sizeBytes,
               contentType: type,
             ),
-          ),
-        );
+          );
+        });
     }
   }
 

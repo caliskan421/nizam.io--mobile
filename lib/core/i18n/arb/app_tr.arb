@@ -957,6 +957,10 @@
   "@errWorkTransitionNotAllowed": {
     "description": "work.transition_not_allowed"
   },
+  "errClientFileUnreadable": "Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin.",
+  "@errClientFileUnreadable": {
+    "description": "client.file_unreadable"
+  },
   "errClientInsecureServer": "Sunucu adresi https ile başlamalı; güvenli olmayan bağlantı kurulmaz.",
   "@errClientInsecureServer": {
     "description": "client.insecure_server"

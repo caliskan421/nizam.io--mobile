@@ -29,8 +29,8 @@
 //   S6  firebase_* yalnız `lib/app/**` ve `lib/core/telemetry/telemetry.dart` içinde (kesin
 //       dosya; başlatma ve telemetri tek yerden).
 //   F1  file_picker YALNIZ `lib/features/tasks/data/file_upload_picker.dart` (`UploadPicker`
-//       gerçekleştirmesi, F57); F2 crypto YALNIZ `…/tasks/data/upload_digest.dart` (yükleme
-//       içerik özeti). Kesin dosya, dışa verilemez (ADR-0002); başka katman paketi görmez.
+//       gerçekleştirmesi, F57); F2 crypto YALNIZ `…/tasks/data/upload_digest.dart` (görev/arşiv
+//       gönderiminde, ön denetimden sonra içerik özeti). Kesin dosya, dışa verilemez (ADR-0002).
 //   S7  Ham tercih deposu (`core/storage/preference_store.dart`,
 //       `shared_preference_store.dart`) yalnız bu iki dosya,
 //       `core/preferences/app_preferences.dart` ve `lib/app/di/**` tarafından import edilir

@@ -56,6 +56,13 @@ ChatTaskPlanner chatTaskPlanner(Ref ref) => throw UnimplementedError(
 @Riverpod(keepAlive: true)
 UploadPicker uploadPicker(Ref ref) => const UnavailableUploadPicker();
 
+/// PORT: yükleme içerik özeti (`tasks_module.dart`'ta `uploadDigest` bağlanır). Yalnız görev
+/// ve arşiv yükleme gönderiminde, tür/boyut ön denetiminden sonra okunur.
+@Riverpod(keepAlive: true)
+UploadDigest uploadDigester(Ref ref) => throw UnimplementedError(
+  'uploadDigesterProvider bileşim kökünde (lib/app/di) bağlanır',
+);
+
 /// PORT: indirilen dosyanın kaydı (`tasks_module.dart`'ta bağlanır).
 @Riverpod(keepAlive: true)
 DownloadSink downloadSink(Ref ref) => throw UnimplementedError(

@@ -114,12 +114,7 @@ void main() {
   ) async {
     final repo = FakeArchiveRepository();
     final picker = FakePicker(
-      const UploadSource(
-        path: '/tmp/r.pdf',
-        name: 'r.pdf',
-        sizeBytes: 9,
-        digest: 'd',
-      ),
+      const UploadSource(path: '/tmp/r.pdf', name: 'r.pdf', sizeBytes: 9),
     );
     await _open(tester, repo: repo, picker: picker);
     await _tap(tester, find.text(_l.uiArchiveUploadShort));

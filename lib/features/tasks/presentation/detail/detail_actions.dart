@@ -466,14 +466,14 @@ class TaskDetailActions {
     );
   }
 
-  /// Kaynak (Fotoğraflar / Dosyalar) → sistem seçicisi; seçici yoksa bildirilir.
+  /// Kaynak (Fotoğraflar / Dosyalar) → sistem seçicisi; seçici yoksa ya da hata verirse
+  /// bildirilir.
   Future<void> pickUploadFile() async {
     if (!ref.read(uploadPickerProvider).available) {
-      _say(context.l10n.uiTasksPickerMissing);
-      return;
+      return _say(context.l10n.uiTasksPickerMissing);
     }
     final origin = await showUploadOriginSheet(context);
-    if (origin != null) await _ctl.pickUploadFile(origin);
+    if (origin != null) _report(await _ctl.pickUploadFile(origin));
   }
 
   void openDelete() {

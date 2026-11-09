@@ -21,6 +21,7 @@
     "client.secure_storage_error": "Oturum bilgisi cihazda güvenli olarak saklanamadı. Yeniden giriş yapın.",
     "client.server_outdated": "Sunucu bu uygulama sürümü için güncellenmeli; değişiklik gönderilmedi.",
     "client.outcome_unknown": "Gönderildi mi bilinmiyor. Aynı isteği yeniden deneyin; kayıt iki kez oluşmaz.",
-    "client.request_not_resent": "İstek tekrar gönderilemedi; işlemi yeniden başlatın."
+    "client.request_not_resent": "İstek tekrar gönderilemedi; işlemi yeniden başlatın.",
+    "client.file_unreadable": "Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin."
   }
 }

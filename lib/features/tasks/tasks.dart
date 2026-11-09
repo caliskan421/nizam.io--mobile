@@ -18,7 +18,8 @@ export 'application/tasks_providers.dart'
         downloadSinkProvider,
         meetingPlannerProvider,
         chatTaskPlannerProvider,
-        uploadPickerProvider;
+        uploadPickerProvider,
+        uploadDigesterProvider;
 export 'domain/chat_task_planner.dart';
 export 'domain/meeting_planner.dart';
 export 'domain/task_access.dart';

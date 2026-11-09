@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 import '../api/generated/clients/records_client.dart';
@@ -25,14 +27,7 @@ Future<Object?> postWorkItemFile(
 }) async {
   final form = FormData()
     ..files.add(
-      MapEntry(
-        'file',
-        await MultipartFile.fromFile(
-          filePath,
-          filename: filename,
-          contentType: DioMediaType.parse(contentType),
-        ),
-      ),
+      MapEntry('file', await _filePart(filePath, filename, contentType)),
     );
   final r = await dio.post<Object?>(
     '/v1/work-items/${Uri.encodeComponent(workItemId)}/files',
@@ -68,14 +63,7 @@ Future<Object?> postChatAttachment(
   final form = FormData();
   if (body != null && body.isNotEmpty) form.fields.add(MapEntry('body', body));
   form.files.add(
-    MapEntry(
-      'file',
-      await MultipartFile.fromFile(
-        filePath,
-        filename: filename,
-        contentType: DioMediaType.parse(contentType),
-      ),
-    ),
+    MapEntry('file', await _filePart(filePath, filename, contentType)),
   );
   final r = await dio.post<Object?>(
     '/v1/chats/${Uri.encodeComponent(chatId)}/attachments',
@@ -87,6 +75,24 @@ Future<Object?> postChatAttachment(
     options: Options(contentType: 'multipart/form-data', extra: Map.of(extras)),
   );
   return r.data;
+}
+
+/// Multipart dosya parçası. Seçimden sonra silinmiş ya da okunamayan dosya istek gönderilmeden
+/// `client.file_unreadable` olur (ham `FileSystemException` sızmaz, sonuç belirsiz sayılmaz).
+Future<MultipartFile> _filePart(
+  String path,
+  String filename,
+  String contentType,
+) async {
+  try {
+    return await MultipartFile.fromFile(
+      path,
+      filename: filename,
+      contentType: DioMediaType.parse(contentType),
+    );
+  } on FileSystemException {
+    throw ApiError(ClientErrorCode.fileUnreadable);
+  }
 }
 
 /// JSON nesne gövdesini [fromJson] ile çözer; nesne değilse `client.invalid_response`.

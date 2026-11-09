@@ -21,7 +21,6 @@ import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/tasks/application/quick_forms_controller.dart';
 import 'package:nizamio/features/tasks/application/task_detail_controller.dart';
 import 'package:nizamio/features/tasks/application/task_details_controller.dart';
-import 'package:nizamio/features/tasks/data/upload_digest.dart';
 import 'package:nizamio/features/tasks/presentation/task_texts.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
@@ -437,12 +436,7 @@ void main() {
           List<int> content = const [37, 80],
         }) async {
           final f = File('${dir.path}/$sub-$name')..writeAsBytesSync(content);
-          final up = UploadSource(
-            path: f.path,
-            name: name,
-            sizeBytes: size,
-            digest: await uploadDigest(f.path),
-          );
+          final up = UploadSource(path: f.path, name: name, sizeBytes: size);
           final d = c.read(taskDetailControllerProvider('w1')).upload!;
           ctl.updateUpload(d.copyWith(file: () => up));
           expect((await ctl.submitUpload()).kind, WriteKind.unknown);

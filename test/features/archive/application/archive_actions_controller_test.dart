@@ -1,6 +1,8 @@
 // ArchiveActionsController: ZIP (klasör / görünen seçim, 100 sınırı), dosya indirme, silme ve
 // yükleme (seçici, tür/boyut ön denetimi, departman, yeniden okuma; belirsiz sonuçta seçicisiz
-// "Yeniden dene" aynı niyet ve aynı anahtarla; niyet imzasında içerik özeti).
+// "Yeniden dene" aynı niyet ve aynı anahtarla; niyet imzasında içerik özeti: gönderimde, ön
+// denetimden sonra, okunamayan dosyada hata, denetleyici kapanınca yok sayılır).
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -111,12 +113,8 @@ void main() {
   });
 
   group('yükleme', () {
-    UploadSource src(String name, {int size = 10}) => UploadSource(
-      path: '/tmp/$name',
-      name: name,
-      sizeBytes: size,
-      digest: 'sha-$name',
-    );
+    UploadSource src(String name, {int size = 10}) =>
+        UploadSource(path: '/tmp/$name', name: name, sizeBytes: size);
 
     test('seçilen dosya (kaynak seçiciye geçer) göreve, etiketle, klasör departmanıyla', () async {
       final repo = FakeArchiveRepository();
@@ -148,24 +146,85 @@ void main() {
       expect(repo.calls.where((x) => x.$1 == 'attach'), isEmpty);
     });
 
-    test('izinli olmayan tür ve 90 MiB: istek gönderilmeden hata', () async {
+    test(
+      'izinli olmayan tür ve 90 MiB: özet okunmadan, istek gönderilmeden hata',
+      () async {
+        final repo = FakeArchiveRepository();
+        final picker = FakePicker(src('not.txt'));
+        final digest = _CountingDigest();
+        final c = archiveContainer(repo, picker: picker, digest: digest.call);
+        final ctrl = _ctrl(c);
+        final a = await ctrl.upload(
+          workItemId: 'w1',
+          tag: RecordTag.plan,
+          origin: UploadOrigin.files,
+        );
+        expect(a.error?.code, 'records.content_rejected');
+        picker.next = src('b.pdf', size: uploadMaxBytes);
+        final b = await ctrl.upload(
+          workItemId: 'w1',
+          tag: RecordTag.plan,
+          origin: UploadOrigin.files,
+        );
+        expect(b.error?.code, 'records.too_large');
+        expect(digest.reads, 0, reason: 'sınır dışı dosyada okuyucu açılmaz');
+        expect(repo.calls.where((x) => x.$1 == 'attach'), isEmpty);
+      },
+    );
+
+    // Codex tur 4 / N7: seçimden sonra silinen ya da okunamayan dosya kullanıcıya gösterilen
+    // hatadır; istek gönderilmez, bekleyen niyet ve anahtar bozulmaz.
+    test(
+      'okunamayan dosya: client.file_unreadable, istek yok, niyet korunur',
+      () async {
+        final repo = FakeArchiveRepository()
+          ..attachErrors.add(ApiError(ClientErrorCode.timeout));
+        final picker = _FreshPathPicker();
+        addTearDown(picker.dispose);
+        final c = archiveContainer(repo, picker: picker, digest: uploadDigest);
+        final ctrl = _ctrl(c);
+        Future<ArchiveOutcome> send() => ctrl.upload(
+          workItemId: 'w1',
+          tag: RecordTag.plan,
+          origin: UploadOrigin.files,
+        );
+        expect((await send()).error?.code, ClientErrorCode.outcomeUnknown);
+        final key = ctrl.pendingUploadKey;
+        picker.deleteNext = true;
+        final r = await send();
+        expect((r.ok, r.error?.code), (false, ClientErrorCode.fileUnreadable));
+        expect(repo.attachKeys, [key], reason: 'istek gönderilmedi');
+        expect((ctrl.hasPendingUpload, ctrl.pendingUploadKey), (true, key));
+        expect((await ctrl.retryUpload()).ok, isTrue);
+        expect(repo.attachKeys, [key, key]);
+      },
+    );
+
+    // Codex tur 4 / N8: başlamış özet denetleyici kapanınca yok sayılır, okuma durur.
+    test('denetleyici kapanınca özet sonucu yok sayılır, istek yok', () async {
       final repo = FakeArchiveRepository();
-      final picker = FakePicker(src('not.txt'));
-      final c = archiveContainer(repo, picker: picker);
-      final ctrl = _ctrl(c);
-      final a = await ctrl.upload(
-        workItemId: 'w1',
-        tag: RecordTag.plan,
-        origin: UploadOrigin.files,
+      final digest = _CountingDigest()..gate = Completer<void>();
+      final c = archiveContainer(
+        repo,
+        picker: FakePicker(src('rapor.pdf')),
+        digest: digest.call,
       );
-      expect(a.error?.code, 'records.content_rejected');
-      picker.next = src('b.pdf', size: uploadMaxBytes);
-      final b = await ctrl.upload(
-        workItemId: 'w1',
-        tag: RecordTag.plan,
-        origin: UploadOrigin.files,
-      );
-      expect(b.error?.code, 'records.too_large');
+      final sub = c.listen(archiveActionsControllerProvider('d1'), (_, _) {});
+      final pending = c
+          .read(archiveActionsControllerProvider('d1').notifier)
+          .upload(
+            workItemId: 'w1',
+            tag: RecordTag.plan,
+            origin: UploadOrigin.files,
+          );
+      await pumpEventQueue();
+      expect(digest.reads, 1);
+      sub.close();
+      await pumpEventQueue();
+      digest.gate!.complete();
+      final r = await pending;
+      expect((r.ok, r.error), (false, null));
+      expect(digest.cancelled, isTrue);
       expect(repo.calls.where((x) => x.$1 == 'attach'), isEmpty);
     });
 
@@ -272,7 +331,8 @@ void main() {
           ]);
         final picker = _FreshPathPicker();
         addTearDown(picker.dispose);
-        final c = archiveContainer(repo, picker: picker);
+        final digest = _CountingDigest(uploadDigest);
+        final c = archiveContainer(repo, picker: picker, digest: digest.call);
         final ctrl = _ctrl(c);
         expect((await ctrl.retryUpload()).ok, isFalse, reason: 'niyet yok');
         final a = await ctrl.upload(
@@ -288,6 +348,7 @@ void main() {
         final ok = await ctrl.retryUpload();
         expect(ok.ok, isTrue);
         expect(picker.picks, 1, reason: 'yeniden dene seçiciyi açmaz');
+        expect(digest.reads, 1, reason: 'saklanan niyetin özeti kullanılır');
         expect(repo.attachKeys, [key, key, key]);
         expect(repo.attachPaths.toSet(), {'${picker.dir.path}/1/rapor.pdf'});
         expect(ctrl.hasPendingUpload, isFalse);
@@ -307,7 +368,7 @@ void main() {
         ]);
       final picker = _FreshPathPicker();
       addTearDown(picker.dispose);
-      final c = archiveContainer(repo, picker: picker);
+      final c = archiveContainer(repo, picker: picker, digest: uploadDigest);
       final ctrl = _ctrl(c);
       Future<String> pickAndSend({
         String name = 'rapor.pdf',
@@ -351,14 +412,16 @@ void main() {
 const _contentA = [37, 80, 68, 70, 1];
 const _contentB = [37, 80, 68, 70, 2];
 
-/// Gerçek seçici gibi her seçimde yeni geçici yola ([dir]`/<n>/<ad>`) [content] yazar ve
-/// özeti gerçek [uploadDigest] ile hesaplar.
+/// Gerçek seçici gibi her seçimde yeni geçici yola ([dir]`/<n>/<ad>`) [content] yazar (özet
+/// gönderimde, testin verdiği özetleyiciyle). [deleteNext]: sonraki seçim dosyayı seçimden
+/// sonra siler (okunamayan dosya).
 class _FreshPathPicker implements UploadPicker {
   final dir = Directory.systemTemp.createTempSync('archive_upload_');
   int picks = 0;
   String name = 'rapor.pdf';
   int size = 10;
   List<int> content = _contentA;
+  bool deleteNext = false;
 
   void dispose() => dir.deleteSync(recursive: true);
 
@@ -370,11 +433,30 @@ class _FreshPathPicker implements UploadPicker {
     final f = File('${dir.path}/${++picks}/$name')
       ..createSync(recursive: true)
       ..writeAsBytesSync(content);
-    return UploadSource(
-      path: f.path,
-      name: name,
-      sizeBytes: size,
-      digest: await uploadDigest(f.path),
-    );
+    if (deleteNext) f.deleteSync();
+    deleteNext = false;
+    return UploadSource(path: f.path, name: name, sizeBytes: size);
+  }
+}
+
+/// Sayan özetleyici: [inner] varsa ona devreder (yoksa yola bağlı sahte); [gate] doluysa
+/// tamamlanmasını bekler, sonra iptal sorusunun yanıtını [cancelled]'a yazar.
+class _CountingDigest {
+  _CountingDigest([this.inner = pathDigest]);
+
+  final UploadDigest inner;
+  int reads = 0;
+  Completer<void>? gate;
+  bool? cancelled;
+
+  Future<String?> call(
+    String path, {
+    required bool Function() cancelled,
+  }) async {
+    reads++;
+    await gate?.future;
+    final stop = this.cancelled = cancelled();
+    if (stop) return null;
+    return inner(path, cancelled: cancelled);
   }
 }

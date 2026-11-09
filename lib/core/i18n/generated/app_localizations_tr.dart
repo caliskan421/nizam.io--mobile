@@ -831,6 +831,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu durum geçişine izin verilmiyor.';
 
   @override
+  String get errClientFileUnreadable =>
+      'Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin.';
+
+  @override
   String get errClientInsecureServer =>
       'Sunucu adresi https ile başlamalı; güvenli olmayan bağlantı kurulmaz.';
 

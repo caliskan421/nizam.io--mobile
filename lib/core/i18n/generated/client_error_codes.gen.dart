@@ -3,6 +3,7 @@
 
 /// İstemcinin ürettiği kararlı hata kodları ('client.' önekli; sunucu kataloğunda yok).
 abstract final class ClientErrorCode {
+  static const fileUnreadable = 'client.file_unreadable';
   static const insecureServer = 'client.insecure_server';
   static const invalidResponse = 'client.invalid_response';
   static const invalidServerAddress = 'client.invalid_server_address';
@@ -26,6 +27,7 @@ abstract final class ClientErrorCode {
   static const updateRequired = 'client.update_required';
 
   static const all = <String>{
+    fileUnreadable,
     insecureServer,
     invalidResponse,
     invalidServerAddress,

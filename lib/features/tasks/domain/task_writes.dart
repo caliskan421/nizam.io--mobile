@@ -137,22 +137,19 @@ final class WorkItemPatch {
       evidenceRequired == null;
 }
 
-/// Yüklenecek yerel dosya (seçiciden): [path] okunur, [name] görünen ad olur. [digest]
-/// içerik özetidir (SHA-256, seçimde hesaplanır): yükleme niyeti imzasında ad ve boyutla
-/// birlikte durur, aynı ad/boyutlu farklı içerik yeni niyet sayılır (istemci akışları §8).
+/// Yüklenecek yerel dosya (seçiciden): [path] okunur, [name] görünen ad olur. Seçim içeriği
+/// okumaz; içerik özeti ([UploadDigest]) görev/arşiv gönderiminde ön denetimden sonra alınır.
 @immutable
 final class UploadSource {
   const UploadSource({
     required this.path,
     required this.name,
     required this.sizeBytes,
-    required this.digest,
   });
 
   final String path;
   final String name;
   final int sizeBytes;
-  final String digest;
 
   /// Küçük harf uzantı (noktasız); yoksa ''.
   String get extension {
@@ -210,6 +207,16 @@ abstract interface class UploadPicker {
 
   Future<UploadSource?> pick(UploadOrigin origin);
 }
+
+/// Yükleme içerik özeti portu (SHA-256, akışla; gerçekleştirme `data/upload_digest.dart`).
+/// Görev ve arşiv yükleme niyeti imzasında ad/boyutla birlikte durur: aynı ad/boyutlu farklı
+/// içerik yeni niyettir (istemci akışları §8). YALNIZ tür/boyut ön denetimi geçtikten sonra
+/// çağrılır. [cancelled] true olunca okuma durur ve null döner; okunamayan dosya
+/// `client.file_unreadable` hatasıdır.
+typedef UploadDigest = Future<String?> Function(
+  String path, {
+  required bool Function() cancelled,
+});
 
 /// Seçici bağlı olmayan kurulumda (testler, örnek) kullanılan gerçekleştirme; gerçek seçici
 /// `data/file_upload_picker.dart` (ADR-0002).

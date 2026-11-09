@@ -7,6 +7,7 @@ import '../core/app_phase.dart';
 import '../core/i18n/generated/app_localizations.dart';
 import '../core/providers.dart';
 import '../core/security/privacy_mask.dart';
+import '../core/ui/layout/nz_tablet_scale.dart';
 import '../core/ui/page/nz_app_nav.dart';
 import '../core/ui/theme/app_theme.dart';
 import 'foreground_refresh.dart';
@@ -66,7 +67,7 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
           child: ForegroundRefresh(
             child: PrivacyMask(
               controller: _mask,
-              child: child ?? const SizedBox.shrink(),
+              child: NzTabletScale(child: child ?? const SizedBox.shrink()),
             ),
           ),
         ),

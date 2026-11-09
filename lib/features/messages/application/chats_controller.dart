@@ -64,14 +64,20 @@ class ChatsController extends _$ChatsController {
   /// sürerken başka okuma başladıysa (ör. ön plan yenilemesi sürerken akış açıldı) yanıtı
   /// atılır; uçuş birleştirmesi yok.
   Future<void> refresh() async {
-    if (state.value == null) return;
-    final generation = ++_generation;
     try {
-      final inbox = await _repo.loadInbox();
-      if (ref.mounted && generation == _generation) state = AsyncData(inbox);
+      await reload();
     } on Object {
       // Ağ/sunucu hatası: sonraki olay ya da yeniden bağlanma tazeler.
     }
+  }
+
+  /// Kullanıcı yenilemesi (aşağı çekerek): [refresh] ile aynı okuma; hata FIRLATILIR (çağıran
+  /// bildirir), önceki liste durumda kalır.
+  Future<void> reload() async {
+    if (state.value == null) return;
+    final generation = ++_generation;
+    final inbox = await _repo.loadInbox();
+    if (ref.mounted && generation == _generation) state = AsyncData(inbox);
   }
 
   /// Bütün sohbetleri sunucuda okundu sayar; başarıda yerel sayaçlar sıfırlanır.

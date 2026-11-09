@@ -77,7 +77,7 @@ final class HomeDashboardControllerProvider
         argument: null,
         retry: null,
         name: r'homeDashboardControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -91,7 +91,7 @@ final class HomeDashboardControllerProvider
 }
 
 String _$homeDashboardControllerHash() =>
-    r'8d6e0173dc9e088156f0fb0919da2a7a28df3dac';
+    r'47f2e441dac072f17dbf252de8607c1b33269c91';
 
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).

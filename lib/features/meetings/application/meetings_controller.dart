@@ -65,7 +65,7 @@ class MeetingsViewController extends _$MeetingsViewController {
 /// belirsiz eşleşir ve fail-closed reddedilir. İkisi de imleçli; en çok [maxPages] × [pageSize]
 /// satır okunur. Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka
 /// planda tazelenir ([refreshIfStale]).
-@riverpod
+@Riverpod(keepAlive: true)
 class MeetingsBoardController extends _$MeetingsBoardController {
   static const pageSize = 200;
   static const maxPages = 10;

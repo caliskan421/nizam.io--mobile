@@ -142,6 +142,7 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
     final box = inbox.value;
     final page = NzPage.feed(
       onRetry: retry,
+      onRefresh: () => ref.read(chatsControllerProvider.notifier).reload(),
       topBar: const RootTopBar(),
       children: [
         NzPageHeader(

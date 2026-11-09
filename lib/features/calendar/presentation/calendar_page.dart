@@ -63,8 +63,17 @@ class CalendarPage extends ConsumerWidget {
       ref.read(taskCatalogControllerProvider.notifier).refreshIfStale();
     }
 
+    // Aşağı çekerek yenileme: iki kaynak birlikte yeniden okunur. Önce katalog başlar (toplantı
+    // listesi onun erişim bilgisini okur); katalog hatası fırlar ve toast olur, toplantı listesi
+    // hatası kendi durumunda görünür.
+    Future<void> refresh() => Future.wait([
+      ref.read(taskCatalogControllerProvider.notifier).refresh(),
+      ref.read(meetingsBoardControllerProvider.notifier).refresh(),
+    ]);
+
     return NzPage.feed(
       onRetry: retry,
+      onRefresh: refresh,
       onRevisit: revisit,
       topBar: const RootTopBar(),
       children: [

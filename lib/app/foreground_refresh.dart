@@ -7,6 +7,7 @@ import '../core/stale_clock.dart';
 import '../features/meetings/meetings.dart';
 import '../features/messages/messages.dart';
 import '../features/notifications/notifications.dart';
+import '../features/scope/scope.dart';
 import '../features/tasks/tasks.dart';
 
 /// V10 güncellik (F60): uygulama ön plana dönünce (`resumed`) okunmuş görev kataloğu, son
@@ -45,6 +46,7 @@ class _ForegroundRefreshState extends ConsumerState<ForegroundRefresh> {
     final container = ProviderScope.containerOf(context, listen: false);
     unawaited(refreshStaleTasks(container, maxAge: widget.maxAge));
     unawaited(refreshStaleMeetings(container, maxAge: widget.maxAge));
+    unawaited(refreshStaleHome(container, maxAge: widget.maxAge));
     unawaited(refreshNotificationBadge(container));
     unawaited(refreshMessagesBadge(container));
   }
@@ -80,6 +82,17 @@ Future<void> refreshStaleMeetings(
   if (!container.exists(meetingsBoardControllerProvider)) return;
   await container
       .read(meetingsBoardControllerProvider.notifier)
+      .refreshIfStale(maxAge: maxAge);
+}
+
+/// Ana sayfa özeti: yaşamıyorsa (hiç açılmadı) istek yok; yaşıyorsa bayatsa arka planda tazelenir.
+Future<void> refreshStaleHome(
+  ProviderContainer container, {
+  Duration maxAge = StaleClock.staleAfter,
+}) async {
+  if (!container.exists(homeDashboardControllerProvider)) return;
+  await container
+      .read(homeDashboardControllerProvider.notifier)
       .refreshIfStale(maxAge: maxAge);
 }
 

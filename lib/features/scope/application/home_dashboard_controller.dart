@@ -30,7 +30,7 @@ part 'home_dashboard_controller.g.dart';
 /// [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye dönüş) önceki özeti durumda tutarak
 /// yeniden okur (`invalidateSelf` → `isRefreshing`, `value` korunur). Kapsam değişimi
 /// bağımlılık yeniden kurulumudur (`isReloading`); ekran o durumda iskelet gösterir.
-@riverpod
+@Riverpod(keepAlive: true)
 class HomeDashboardController extends _$HomeDashboardController {
   /// Son başarılı okumadan beri geçen süre (notifier yeniden kurulumlarda korunur).
   final _clock = StaleClock();

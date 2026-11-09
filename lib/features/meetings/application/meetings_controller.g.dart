@@ -92,7 +92,7 @@ final class MeetingsBoardControllerProvider
         argument: null,
         retry: null,
         name: r'meetingsBoardControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -106,7 +106,7 @@ final class MeetingsBoardControllerProvider
 }
 
 String _$meetingsBoardControllerHash() =>
-    r'e10bee442e9558ae1dbcb9db5ad29df88c03ec1c';
+    r'54c2e48894b70367053348dd9ee9ff6ea404a68f';
 
 /// Toplantı listesi: görünür toplantılar (`listMeetings`) ve yöneticiye silinenler. Silinenler
 /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı

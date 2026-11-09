@@ -408,6 +408,12 @@ extension on ChatFixture {
 class ChatBackend extends PilotBackend {
   final chats = ChatFixture();
 
+  /// `GET /v1/chats` (sohbet listesi) okuma sayısı.
+  var inboxReads = 0;
+
   @override
-  ResponseBody handle(Seen r) => chats.handle(r) ?? super.handle(r);
+  ResponseBody handle(Seen r) {
+    if (r.method == 'GET' && r.path == '/v1/chats') inboxReads++;
+    return chats.handle(r) ?? super.handle(r);
+  }
 }

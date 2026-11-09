@@ -9952,11 +9952,11 @@ abstract class AppLocalizations {
   /// **'Görevleri süz'**
   String get uiUsersTaskFilters;
 
-  /// ui.users.task_filter_hint
+  /// ui.users.task_filter_count_hint
   ///
   /// In tr, this message translates to:
-  /// **'Birden çok seçebilirsin'**
-  String get uiUsersTaskFilterHint;
+  /// **'görev gösteriliyor · birden çok seçebilirsin'**
+  String get uiUsersTaskFilterCountHint;
 
   /// ui.users.task_status_group
   ///
@@ -10275,6 +10275,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kaydet'**
   String get uiUsersAccountSave;
+
+  /// ui.users.task_showing_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'görev gösteriliyor · birden çok seçebilirsin'**
+  String get uiUsersTaskShowingHint;
 }
 
 class _AppLocalizationsDelegate

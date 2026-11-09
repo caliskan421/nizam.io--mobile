@@ -6573,9 +6573,9 @@
   "@uiUsersTaskFilters": {
     "description": "ui.users.task_filters"
   },
-  "uiUsersTaskFilterHint": "Birden çok seçebilirsin",
-  "@uiUsersTaskFilterHint": {
-    "description": "ui.users.task_filter_hint"
+  "uiUsersTaskFilterCountHint": "görev gösteriliyor · birden çok seçebilirsin",
+  "@uiUsersTaskFilterCountHint": {
+    "description": "ui.users.task_filter_count_hint"
   },
   "uiUsersTaskStatusGroup": "durum",
   "@uiUsersTaskStatusGroup": {
@@ -6788,5 +6788,9 @@
   "uiUsersAccountSave": "Kaydet",
   "@uiUsersAccountSave": {
     "description": "ui.users.account_save"
+  },
+  "uiUsersTaskShowingHint": "görev gösteriliyor · birden çok seçebilirsin",
+  "@uiUsersTaskShowingHint": {
+    "description": "ui.users.task_showing_hint"
   }
 }

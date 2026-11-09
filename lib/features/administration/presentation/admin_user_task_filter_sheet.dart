@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/theme/nz_motion.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
-import '../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../core/ui/widgets/inputs/nz_check_circle.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
-import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
 import '../application/admin_user_task_panel_controller.dart';
 import '../domain/admin_user_tasks.dart';
@@ -18,23 +20,42 @@ Future<void> showAdminUserTaskFilters(
 ) => NzBottomSheet.show<void>(
   context,
   title: context.l10n.uiUsersTaskFilters,
-  description: context.l10n.uiUsersTaskFilterHint,
+  showHeader: false,
+  actionsDivider: false,
+  backgroundColor: context.colors.background,
   builder: (_) => _Filters(accountId: accountId),
+  // Tek ortak slot içinde eşit sütunlar: genel 1:2 form-footer davranışı değişmez.
   actions: (sheet) => [
     Consumer(
       builder: (context, ref, _) {
         final state = ref.watch(adminUserTaskPanelProvider(accountId));
+        final ctl = ref.read(adminUserTaskPanelProvider(accountId).notifier);
         final catalog = ref.watch(taskCatalogControllerProvider);
         final tasks =
             catalog.value?.tasks.where(
               (t) => t.assignees.contains(accountId),
             ) ??
             const <TaskItem>[];
-        return NzButton.primary(
-          label:
-              '${state.select(tasks).length} ${context.l10n.uiUsersTaskShowCount}',
-          expand: true,
-          onPressed: () => Navigator.of(sheet).pop(),
+        final count =
+            '${state.select(tasks).length}${catalog.value?.truncated == true ? '+' : ''}';
+        return Row(
+          spacing: 8,
+          children: [
+            Expanded(
+              child: NzButton.secondary(
+                label: context.l10n.uiTasksClear,
+                expand: true,
+                onPressed: ctl.clear,
+              ),
+            ),
+            Expanded(
+              child: NzButton.primary(
+                label: '$count ${context.l10n.uiUsersTaskShowCount}',
+                expand: true,
+                onPressed: () => Navigator.of(sheet).pop(),
+              ),
+            ),
+          ],
         );
       },
     ),
@@ -68,20 +89,65 @@ class _Filters extends ConsumerWidget {
       if (tasks.any((t) => t.priority == TaskPriority.unknown))
         TaskPriority.unknown,
     ];
-    return Material(
-      type: MaterialType.transparency,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: NizamioSpacing.space2,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          NzKicker(context.l10n.uiUsersTaskStatusGroup),
-          for (final status in UserTaskStatus.values)
-            NzCheckbox(
-              label: userTaskFilterLabel(context, status),
-              value: state.statuses.contains(status),
-              trailing: Text(
-                number(
+    Widget kicker(String text) => Padding(
+      padding: const EdgeInsets.fromLTRB(4, 4, 0, 6),
+      child: Text(
+        text,
+        style: context.text.monoSm.copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: context.colors.textFaint,
+          letterSpacing: .24,
+        ),
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        context.l10n.uiUsersTaskFilters,
+                        style: context.text.titleSm,
+                      ),
+                    ),
+                    const Gap(4),
+                    Text(
+                      '${number(state.select(tasks).length)} ${context.l10n.uiUsersTaskFilterCountHint}',
+                      style: context.text.caption.copyWith(
+                        color: context.colors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            NzIconButton(
+              icon: NzIcons.close,
+              semanticLabel: context.l10n.uiCommonClose,
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+        const Gap(14),
+        kicker(context.l10n.uiUsersTaskStatusGroup),
+        _OptionGroup(
+          children: [
+            for (final status in UserTaskStatus.values)
+              _Option(
+                label: userTaskFilterLabel(context, status),
+                selected: state.statuses.contains(status),
+                count: number(
                   tasks
                       .where(
                         (t) =>
@@ -90,35 +156,146 @@ class _Filters extends ConsumerWidget {
                       )
                       .length,
                 ),
-                style: context.text.monoSm,
+                onTap: () => ctl.toggleStatus(status),
               ),
-              onChanged: (_) => ctl.toggleStatus(status),
-            ),
-          NzKicker(context.l10n.uiUsersTaskPriorityGroup),
-          for (final priority in priorities)
-            NzCheckbox(
-              label: userTaskPriorityLabel(context, priority),
-              value: state.priorities.contains(priority),
-              trailing: Text(
-                number(
+          ],
+        ),
+        const Gap(14),
+        kicker(context.l10n.uiUsersTaskPriorityGroup),
+        _OptionGroup(
+          children: [
+            for (final priority in priorities)
+              _Option(
+                label: userTaskPriorityLabel(context, priority),
+                selected: state.priorities.contains(priority),
+                count: number(
                   tasks
                       .where(
                         (t) => state.matchesStatus(t) && t.priority == priority,
                       )
                       .length,
                 ),
-                style: context.text.monoSm,
+                onTap: () => ctl.togglePriority(priority),
               ),
-              onChanged: (_) => ctl.togglePriority(priority),
-            ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: NzButton.ghost(
-              label: context.l10n.uiTasksClearFilters,
-              onPressed: ctl.clear,
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _OptionGroup extends StatelessWidget {
+  const _OptionGroup({required this.children});
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: context.colors.surface,
+      border: Border.all(color: context.colors.border),
+      borderRadius: BorderRadius.circular(NizamioRadius.card),
+    ),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(NizamioRadius.card),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          children: [
+            for (final (i, child) in children.indexed) ...[
+              if (i > 0)
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  indent: 16,
+                  color: context.colors.border,
+                ),
+              child,
+            ],
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _Option extends StatefulWidget {
+  const _Option({
+    required this.label,
+    required this.selected,
+    required this.count,
+    required this.onTap,
+  });
+  final String label;
+  final bool selected;
+  final String count;
+  final VoidCallback onTap;
+  @override
+  State<_Option> createState() => _OptionState();
+}
+
+class _OptionState extends State<_Option> {
+  bool _down = false;
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Semantics(
+      checked: widget.selected,
+      label: '${widget.label}, ${widget.count}',
+      onTap: widget.onTap,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: widget.onTap,
+        onTapDown: (_) => setState(() => _down = true),
+        onTapUp: (_) => setState(() => _down = false),
+        onTapCancel: () => setState(() => _down = false),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 52),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                IgnorePointer(
+                  child: AnimatedScale(
+                    scale: _down ? .88 : 1,
+                    duration: NzMotion.of(
+                      context,
+                      const Duration(milliseconds: 300),
+                    ),
+                    curve: const Cubic(.34, 1.56, .64, 1),
+                    child: SizedBox(
+                      width: 22,
+                      child: NzCheckCircle(
+                        value: widget.selected,
+                        label: widget.label,
+                        selectedColor: c.primary,
+                        unselectedBorderColor: c.borderControl,
+                        onChanged: widget.onTap,
+                      ),
+                    ),
+                  ),
+                ),
+                const Gap(12),
+                Expanded(
+                  child: Text(
+                    widget.label,
+                    style: context.text.bodyMd.copyWith(fontSize: 14),
+                  ),
+                ),
+                const Gap(12),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minWidth: 44),
+                  child: Text(
+                    widget.count,
+                    textAlign: TextAlign.right,
+                    style: context.text.monoSm.copyWith(
+                      fontSize: 11,
+                      color: c.textFaint,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

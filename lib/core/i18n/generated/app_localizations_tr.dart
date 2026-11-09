@@ -5159,7 +5159,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiUsersTaskFilters => 'Görevleri süz';
 
   @override
-  String get uiUsersTaskFilterHint => 'Birden çok seçebilirsin';
+  String get uiUsersTaskFilterCountHint =>
+      'görev gösteriliyor · birden çok seçebilirsin';
 
   @override
   String get uiUsersTaskStatusGroup => 'durum';
@@ -5331,4 +5332,8 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiUsersAccountSave => 'Kaydet';
+
+  @override
+  String get uiUsersTaskShowingHint =>
+      'görev gösteriliyor · birden çok seçebilirsin';
 }

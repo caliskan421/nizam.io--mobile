@@ -78,7 +78,7 @@
     "ui.users.task_done_filter": "Tamamlananlar",
     "ui.users.task_all_filter": "Tüm görevler",
     "ui.users.task_filters": "Görevleri süz",
-    "ui.users.task_filter_hint": "Birden çok seçebilirsin",
+    "ui.users.task_filter_count_hint": "görev gösteriliyor · birden çok seçebilirsin",
     "ui.users.task_status_group": "durum",
     "ui.users.task_priority_group": "öncelik",
     "ui.users.task_group_late": "Gecikmede",

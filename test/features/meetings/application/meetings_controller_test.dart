@@ -1,9 +1,11 @@
 // Toplantı listesi: imleçli okuma, yöneticiye silinenler, geri yükleme / kalıcı silme, bayat
-// liste tazelemesi; görünüm durumu (arama kapanınca sorgu temizlenir).
+// liste tazelemesi (satır özeti dahil) ve putSummary; görünüm durumu (arama kapanınca sorgu
+// temizlenir).
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/app/foreground_refresh.dart';
 import 'package:nizamio/features/meetings/application/meetings_controller.dart';
+import 'package:nizamio/features/meetings/domain/meeting.dart';
 import 'package:nizamio/features/meetings/domain/meeting_board.dart';
 
 import '../../pilot_support.dart';
@@ -115,6 +117,42 @@ void main() {
     await ctl.refreshIfStale(maxAge: Duration.zero);
     final failed = c.read(meetingsBoardControllerProvider);
     expect((failed.hasError, failed.hasValue), (true, true));
+  });
+
+  test('bayat tazeleme satır özetini sunucudan yeniler; putSummary sonra yine yazar', () async {
+    final s = MeetingsServer(admin: false, seat: 'koordinator')
+      ..pages = [
+        [meetingWire(summary: summaryWire())],
+      ];
+    final (h, c) = await openMeetings(s);
+    await _board(c);
+    final ctl = c.read(meetingsBoardControllerProvider.notifier);
+    s.pages = [
+      [meetingWire(summary: summaryWire(notes: 4, status: 'live'))],
+    ];
+    h.backend.requests.clear();
+    await ctl.refreshIfStale(maxAge: Duration.zero);
+    MeetingSummary row() =>
+        c.read(meetingsBoardControllerProvider).value!.visible.single.summary!;
+    expect(
+      (row().noteCount, row().conferenceStatus),
+      (4, SummaryConferenceStatus.live),
+    );
+    expect(calls(h), ['GET /v1/meetings'], reason: 'kart başına istek yok');
+
+    ctl.putSummary(
+      'm1',
+      const MeetingSummary(
+        agendaTotal: 2,
+        agendaChecked: 0,
+        noteCount: 5,
+        participantCount: 1,
+        conferenceStatus: SummaryConferenceStatus.live,
+        connectedCount: 0,
+      ),
+    );
+    expect(row().noteCount, 5);
+    expect(calls(h), ['GET /v1/meetings'], reason: 'putSummary ağsız');
   });
 
   test(

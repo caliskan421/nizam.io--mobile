@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
+import '../application/invite_form_controller.dart';
 import '../application/meeting_form_controller.dart';
 import '../application/quick_forms_controller.dart';
 import '../application/task_catalog_controller.dart';
@@ -119,8 +120,10 @@ Future<bool> showMeetingSheet(
   );
 }
 
-/// [coordinatorship] verilirse o koordinatörlük seçili, rol Üye açılır (koordinatörlük
-/// ayrıntısı "Üye ekle").
+/// Kullanıcı ekle (`createUser`): hesap açılır ya da var olan hesap (aktarım teklifi) seçilen
+/// koordinatörlüğün ekibine eklenir; e-posta gönderilmez. Bildirim yalnız sunucu yazmasından
+/// sonra çıkar. [coordinatorship] verilirse o koordinatörlük seçili, rol Üye açılır
+/// (koordinatörlük ayrıntısı "Üye ekle").
 Future<void> showInviteSheet(BuildContext context, {String? coordinatorship}) {
   final container = ProviderScope.containerOf(context, listen: false);
   container
@@ -132,10 +135,12 @@ Future<void> showInviteSheet(BuildContext context, {String? coordinatorship}) {
     title: l.uiTasksIvTitle,
     description: l.uiTasksIvDesc,
     ok: l.uiTasksIvSend,
-    onOk: (sheet) {
-      final f = container.read(inviteFormControllerProvider.notifier).submit();
+    onOk: (sheet) async {
+      final f = await container
+          .read(inviteFormControllerProvider.notifier)
+          .submit();
       if (f == null) return null;
-      return '${l.uiTasksTInvited} ${f.email}';
+      return '${l.uiTasksTInvited} ${f.email.trim()}';
     },
     body: (expansion) => InviteFormBody(expansion: expansion),
   );

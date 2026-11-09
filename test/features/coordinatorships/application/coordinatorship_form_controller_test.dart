@@ -1,6 +1,8 @@
 // CoordinatorshipFormController (sunucu biçimli sahte backend): oluştur → programa bağla →
 // liste yenilenir; bağlama düşerse departman bekler ve tekrar denemede yeniden oluşturulmaz;
 // düzenleme tür/açıklamayı departman kaydına, adı programdaki bağa yazar; yetki görünürlüğü.
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorship_form_controller.dart';
@@ -8,6 +10,7 @@ import 'package:nizamio/features/coordinatorships/application/coordinatorships_c
 import 'package:nizamio/features/coordinatorships/domain/department.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
+import '../../../support/fake_backend.dart';
 import '../../../support/harness.dart';
 import '../../pilot_support.dart';
 import '../coord_backend.dart';
@@ -100,6 +103,151 @@ void main() {
     });
     expect(h.read(coordinatorshipFormControllerProvider).pending, isNull);
     expect(_names(h), contains('Saha ekibi'));
+  });
+
+  test('bağlama hatası → çıkış, başka hesapla giriş → form boş; tekrar eski departmanı kullanmaz', () async {
+    final backend = CoordBackend()..linkError = 'platform.internal';
+    final h = await _harness(backend);
+    var account = 'acc-1';
+    final serve = h.backend.handler;
+    h.backend.handler = (r) => r.method == 'POST' && r.path == '/v1/auth/login'
+        ? jsonResponse(200, loginBody('1')..['account_id'] = account)
+        : serve(r);
+    final ctl = h.read(coordinatorshipFormControllerProvider.notifier);
+    expect(
+      await ctl.create(
+        const CoordinatorshipDraft(
+          name: 'Saha',
+          kind: DepartmentKind.coordinatorship,
+        ),
+      ),
+      isFalse,
+    );
+    expect(
+      h.read(coordinatorshipFormControllerProvider).pending?.id,
+      'dep-new-3',
+    );
+
+    await h.identity.logout();
+    expect(h.read(coordinatorshipFormControllerProvider).pending, isNull);
+    account = 'acc-2';
+    await h.identity.login(email: 'b@b.test', password: 'p');
+    h.read(scopeControllerProvider).selectProgram(coordProgram);
+    final f = h.read(coordinatorshipFormControllerProvider);
+    expect((f.pending, f.error, f.saving), (null, null, false));
+
+    backend
+      ..linkError = null
+      ..writes.clear();
+    expect(
+      await ctl.create(
+        const CoordinatorshipDraft(
+          name: 'Depo',
+          kind: DepartmentKind.coordinatorship,
+        ),
+      ),
+      isTrue,
+    );
+    // Yeni hesabın departmanı yeniden oluşturulur; önceki hesabın kimliği bağlanmaz.
+    expect(_log(backend), [
+      [
+        'POST /v1/departments',
+        {'name': 'Depo', 'kind': 'koordinatorluk'},
+      ],
+      [
+        'POST /v1/program/departments',
+        {'department_id': 'dep-new-4', 'display_name': 'Depo'},
+      ],
+    ]);
+  });
+
+  test('program değişir → bekleyen departman silinir', () async {
+    final backend = CoordBackend()..linkError = 'platform.internal';
+    final h = await _harness(backend);
+    final ctl = h.read(coordinatorshipFormControllerProvider.notifier);
+    await ctl.create(
+      const CoordinatorshipDraft(
+        name: 'Saha',
+        kind: DepartmentKind.coordinatorship,
+      ),
+    );
+    expect(h.read(coordinatorshipFormControllerProvider).pending, isNotNull);
+    h.read(scopeControllerProvider).selectProgram('prog-2');
+    expect(h.read(coordinatorshipFormControllerProvider).pending, isNull);
+  });
+
+  test('uçuştaki bağlama çıkıştan sonra döner → sonucu yok sayılır', () async {
+    final backend = CoordBackend();
+    final h = await _harness(backend);
+    final reached = Completer<void>();
+    final gate = Completer<void>();
+    final serve = h.backend.handler;
+    h.backend.handler = (r) async {
+      if (r.method == 'POST' && r.path == '/v1/program/departments') {
+        reached.complete();
+        await gate.future;
+      }
+      return serve(r);
+    };
+    final ctl = h.read(coordinatorshipFormControllerProvider.notifier);
+    final flight = ctl.create(
+      const CoordinatorshipDraft(
+        name: 'Saha',
+        kind: DepartmentKind.coordinatorship,
+      ),
+    );
+    await reached.future;
+    await h.identity.logout();
+    gate.complete();
+    expect(await flight, isFalse);
+    final f = h.read(coordinatorshipFormControllerProvider);
+    expect((f.pending, f.error, f.saving), (null, null, false));
+  });
+
+  test('bağ kurulmuş, yanıt kaybolmuş → tekrar denemede dönen eski ad yeniden adlandırılır', () async {
+    final backend = CoordBackend()..linkLost = true;
+    final h = await _harness(backend);
+    final ctl = h.read(coordinatorshipFormControllerProvider.notifier);
+    expect(
+      await ctl.create(
+        const CoordinatorshipDraft(
+          name: 'Saha',
+          kind: DepartmentKind.coordinatorship,
+        ),
+      ),
+      isFalse,
+    );
+    backend.linkLost = false;
+    expect(
+      await ctl.create(
+        const CoordinatorshipDraft(
+          name: 'Saha ekibi',
+          kind: DepartmentKind.coordinatorship,
+        ),
+      ),
+      isTrue,
+    );
+    // Var olan bağ eski adla döner (sunucu adı değiştirmez) → programdaki ad düzeltilir.
+    expect(_log(backend), [
+      [
+        'POST /v1/departments',
+        {'name': 'Saha', 'kind': 'koordinatorluk'},
+      ],
+      [
+        'POST /v1/program/departments',
+        {'department_id': 'dep-new-3', 'display_name': 'Saha'},
+      ],
+      [
+        'POST /v1/program/departments',
+        {'department_id': 'dep-new-3', 'display_name': 'Saha ekibi'},
+      ],
+      [
+        'PATCH /v1/program/departments/dep-new-3',
+        {'display_name': 'Saha ekibi'},
+      ],
+    ]);
+    expect(_names(h), contains('Saha ekibi'));
+    expect(_names(h), isNot(contains('Saha')));
   });
 
   test('oluşturma hatası: bekleyen yok, hata durumda', () async {

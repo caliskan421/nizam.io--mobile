@@ -64,6 +64,10 @@ String _$canManageCoordinatorshipsHash() =>
 /// Koordinatörlük ekle / bilgileri düzenle komutları. Uygulama ömrünce yaşar: oluşturulup
 /// bağlanamamış departman ([CoordinatorshipFormState.pending]) form kapanıp açılsa da
 /// korunur. Otomatik yeniden deneme yoktur; tekrar kullanıcı eylemiyle.
+///
+/// Bekleyen işlem oturum nesline (hesap ve sunucu: çıkış, başka hesapla giriş, yeniden
+/// bağlanma nesli artırır) ve seçili programa aittir: ikisinden biri değişince form boşalır
+/// ve uçuştaki işlemin sonucu yok sayılır (önceki hesabın departmanı yeni oturumda bağlanmaz).
 
 @ProviderFor(CoordinatorshipFormController)
 final coordinatorshipFormControllerProvider =
@@ -72,6 +76,10 @@ final coordinatorshipFormControllerProvider =
 /// Koordinatörlük ekle / bilgileri düzenle komutları. Uygulama ömrünce yaşar: oluşturulup
 /// bağlanamamış departman ([CoordinatorshipFormState.pending]) form kapanıp açılsa da
 /// korunur. Otomatik yeniden deneme yoktur; tekrar kullanıcı eylemiyle.
+///
+/// Bekleyen işlem oturum nesline (hesap ve sunucu: çıkış, başka hesapla giriş, yeniden
+/// bağlanma nesli artırır) ve seçili programa aittir: ikisinden biri değişince form boşalır
+/// ve uçuştaki işlemin sonucu yok sayılır (önceki hesabın departmanı yeni oturumda bağlanmaz).
 final class CoordinatorshipFormControllerProvider
     extends
         $NotifierProvider<
@@ -81,6 +89,10 @@ final class CoordinatorshipFormControllerProvider
   /// Koordinatörlük ekle / bilgileri düzenle komutları. Uygulama ömrünce yaşar: oluşturulup
   /// bağlanamamış departman ([CoordinatorshipFormState.pending]) form kapanıp açılsa da
   /// korunur. Otomatik yeniden deneme yoktur; tekrar kullanıcı eylemiyle.
+  ///
+  /// Bekleyen işlem oturum nesline (hesap ve sunucu: çıkış, başka hesapla giriş, yeniden
+  /// bağlanma nesli artırır) ve seçili programa aittir: ikisinden biri değişince form boşalır
+  /// ve uçuştaki işlemin sonucu yok sayılır (önceki hesabın departmanı yeni oturumda bağlanmaz).
   CoordinatorshipFormControllerProvider._()
     : super(
         from: null,
@@ -109,11 +121,15 @@ final class CoordinatorshipFormControllerProvider
 }
 
 String _$coordinatorshipFormControllerHash() =>
-    r'0e7296151bf111a2073bef9c899c1cb2a607a431';
+    r'3b909156da098da25062a20a5474a75ffb0bafb9';
 
 /// Koordinatörlük ekle / bilgileri düzenle komutları. Uygulama ömrünce yaşar: oluşturulup
 /// bağlanamamış departman ([CoordinatorshipFormState.pending]) form kapanıp açılsa da
 /// korunur. Otomatik yeniden deneme yoktur; tekrar kullanıcı eylemiyle.
+///
+/// Bekleyen işlem oturum nesline (hesap ve sunucu: çıkış, başka hesapla giriş, yeniden
+/// bağlanma nesli artırır) ve seçili programa aittir: ikisinden biri değişince form boşalır
+/// ve uçuştaki işlemin sonucu yok sayılır (önceki hesabın departmanı yeni oturumda bağlanmaz).
 
 abstract class _$CoordinatorshipFormController
     extends $Notifier<CoordinatorshipFormState> {

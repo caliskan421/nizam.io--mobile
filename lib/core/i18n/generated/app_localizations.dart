@@ -3601,7 +3601,7 @@ abstract class AppLocalizations {
   /// ui.home.qa_invite
   ///
   /// In tr, this message translates to:
-  /// **'Davet et'**
+  /// **'Kişi ekle'**
   String get uiHomeQaInvite;
 
   /// ui.home.qa_report
@@ -3625,7 +3625,7 @@ abstract class AppLocalizations {
   /// ui.home.qa_invite_long
   ///
   /// In tr, this message translates to:
-  /// **'Kullanıcı davet et'**
+  /// **'Kullanıcı ekle'**
   String get uiHomeQaInviteLong;
 
   /// ui.home.qa_report_long
@@ -7759,19 +7759,19 @@ abstract class AppLocalizations {
   /// ui.tasks.iv_title
   ///
   /// In tr, this message translates to:
-  /// **'Kullanıcı davet et'**
+  /// **'Kullanıcı ekle'**
   String get uiTasksIvTitle;
 
   /// ui.tasks.iv_desc
   ///
   /// In tr, this message translates to:
-  /// **'Davet e-postası gönderilir; kullanıcı ilk girişte şifresini belirler.'**
+  /// **'Hesap açılır ya da var olan hesap seçilen koordinatörlüğün ekibine eklenir. E-posta ya da parola gönderilmez.'**
   String get uiTasksIvDesc;
 
   /// ui.tasks.iv_send
   ///
   /// In tr, this message translates to:
-  /// **'Davet gönder'**
+  /// **'Ekle'**
   String get uiTasksIvSend;
 
   /// ui.tasks.iv_name
@@ -7822,12 +7822,6 @@ abstract class AppLocalizations {
   /// **'Admin'**
   String get uiTasksRoleAdmin;
 
-  /// ui.tasks.optional_any
-  ///
-  /// In tr, this message translates to:
-  /// **'İsteğe bağlı'**
-  String get uiTasksOptionalAny;
-
   /// ui.tasks.rd_admin
   ///
   /// In tr, this message translates to:
@@ -7837,7 +7831,7 @@ abstract class AppLocalizations {
   /// ui.tasks.rd_coordinator
   ///
   /// In tr, this message translates to:
-  /// **'Seçtiğin koordinatörlüklerde görev atar ve dosyaları onaylar.'**
+  /// **'Seçtiğin koordinatörlükte görev atar ve dosyaları onaylar.'**
   String get uiTasksRdCoordinator;
 
   /// ui.tasks.rd_member
@@ -7861,14 +7855,26 @@ abstract class AppLocalizations {
   /// ui.tasks.err_iv_coord
   ///
   /// In tr, this message translates to:
-  /// **'Koordinatör için en az bir koordinatörlük seç.'**
+  /// **'Bir koordinatörlük seç.'**
   String get uiTasksErrIvCoord;
 
   /// ui.tasks.t_invited
   ///
   /// In tr, this message translates to:
-  /// **'Davet gönderildi:'**
+  /// **'Ekibe eklendi:'**
   String get uiTasksTInvited;
+
+  /// ui.tasks.iv_existing
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu e-posta var olan bir hesaba ait:'**
+  String get uiTasksIvExisting;
+
+  /// ui.tasks.iv_existing_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'“Ekle” bu hesabı ekibe ekler.'**
+  String get uiTasksIvExistingTail;
 
   /// ui.tasks.expand_sheet
   ///

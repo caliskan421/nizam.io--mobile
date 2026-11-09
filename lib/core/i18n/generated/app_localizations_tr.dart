@@ -1889,7 +1889,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeQaMeeting => 'Toplantı';
 
   @override
-  String get uiHomeQaInvite => 'Davet et';
+  String get uiHomeQaInvite => 'Kişi ekle';
 
   @override
   String get uiHomeQaReport => 'Rapor';
@@ -1901,7 +1901,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeQaMeetingLong => 'Toplantı oluştur';
 
   @override
-  String get uiHomeQaInviteLong => 'Kullanıcı davet et';
+  String get uiHomeQaInviteLong => 'Kullanıcı ekle';
 
   @override
   String get uiHomeQaReportLong => 'Rapor oluştur';
@@ -4024,14 +4024,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksTPeopleInvited => 'kişi davetli';
 
   @override
-  String get uiTasksIvTitle => 'Kullanıcı davet et';
+  String get uiTasksIvTitle => 'Kullanıcı ekle';
 
   @override
   String get uiTasksIvDesc =>
-      'Davet e-postası gönderilir; kullanıcı ilk girişte şifresini belirler.';
+      'Hesap açılır ya da var olan hesap seçilen koordinatörlüğün ekibine eklenir. E-posta ya da parola gönderilmez.';
 
   @override
-  String get uiTasksIvSend => 'Davet gönder';
+  String get uiTasksIvSend => 'Ekle';
 
   @override
   String get uiTasksIvName => 'Ad soyad';
@@ -4058,15 +4058,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksRoleAdmin => 'Admin';
 
   @override
-  String get uiTasksOptionalAny => 'İsteğe bağlı';
-
-  @override
   String get uiTasksRdAdmin =>
       'Tüm koordinatörlükleri, kullanıcıları ve sezonu yönetir.';
 
   @override
   String get uiTasksRdCoordinator =>
-      'Seçtiğin koordinatörlüklerde görev atar ve dosyaları onaylar.';
+      'Seçtiğin koordinatörlükte görev atar ve dosyaları onaylar.';
 
   @override
   String get uiTasksRdMember =>
@@ -4079,11 +4076,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksErrEmail => 'Geçerli bir e-posta gir.';
 
   @override
-  String get uiTasksErrIvCoord =>
-      'Koordinatör için en az bir koordinatörlük seç.';
+  String get uiTasksErrIvCoord => 'Bir koordinatörlük seç.';
 
   @override
-  String get uiTasksTInvited => 'Davet gönderildi:';
+  String get uiTasksTInvited => 'Ekibe eklendi:';
+
+  @override
+  String get uiTasksIvExisting => 'Bu e-posta var olan bir hesaba ait:';
+
+  @override
+  String get uiTasksIvExistingTail => '“Ekle” bu hesabı ekibe ekler.';
 
   @override
   String get uiTasksExpandSheet => 'Sayfayı büyüt';

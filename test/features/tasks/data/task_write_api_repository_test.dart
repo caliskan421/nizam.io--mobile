@@ -3,6 +3,7 @@
 // alt görev atama kaldırma '' ve tarihler YYYY-AA-GG birlikte); departmansız görev boş kimlik
 // taşır (kapı reddeder); hata ApiError. Başlığa çevirme ara katman testindedir (interceptors).
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/features/tasks/data/task_write_api_repository.dart';
 import 'package:nizamio/features/tasks/domain/task_catalog.dart';
 import 'package:nizamio/features/tasks/domain/task_permissions.dart';
@@ -174,5 +175,81 @@ void main() {
           .changeStatus(_task(), StatusEndpoint.transition, TaskStatus.done),
       throwsApiError('work.subtasks_open'),
     );
+  });
+
+  group('enrollMember (createUser)', () {
+    const ok = {'account_id': 'u9', 'membership_id': 'm9', 'created': true};
+
+    test('yeni hesap: S1 uç, gövde (ad, rol, program, departman)', () async {
+      final (dio, a) = fakeDio(ok, status: 201);
+      await ApiTaskWriteRepository(dio).enrollMember(
+        const MemberEnrollment(
+          programId: 'p1',
+          departmentId: 'd9',
+          email: 'ayse@ornek.test',
+          fullName: 'Ayşe',
+          coordinator: true,
+        ),
+      );
+      expect('${a.last.method} ${a.last.path}', 'POST /v1/admin/users');
+      expect(a.sentJson, {
+        'email': 'ayse@ornek.test',
+        'program_id': 'p1',
+        'department_id': 'd9',
+        'full_name': 'Ayşe',
+        'role': 'koordinator',
+      });
+    });
+
+    test('aktarım: ad gönderilmez; yöneticilik bayrağı', () async {
+      final (dio, a) = fakeDio(ok, status: 201);
+      await ApiTaskWriteRepository(dio).enrollMember(
+        const MemberEnrollment(
+          programId: 'p1',
+          departmentId: 'd9',
+          email: 'kadir@ornek.test',
+          fullName: 'Kadir',
+          companyAdmin: true,
+          transferAccountId: 'u3',
+        ),
+      );
+      expect(a.sentJson, {
+        'email': 'kadir@ornek.test',
+        'program_id': 'p1',
+        'department_id': 'd9',
+        'role': 'uye',
+        'transfer_account_id': 'u3',
+        'company_admin': true,
+      });
+    });
+
+    test('409 account_exists → ApiError (teklif alanları taşınır)', () async {
+      final (dio, _) = fakeDio({
+        'code': 'identity.account_exists',
+        'message': 'x',
+        'request_id': 'r1',
+        'fields': [
+          {
+            'field': 'account_id',
+            'code': 'organization.transfer_available',
+            'message': 'u3',
+          },
+        ],
+      }, status: 409);
+      await expectLater(
+        ApiTaskWriteRepository(dio).enrollMember(
+          const MemberEnrollment(
+            programId: 'p1',
+            departmentId: 'd9',
+            email: 'kadir@ornek.test',
+          ),
+        ),
+        throwsA(
+          isA<ApiError>()
+              .having((e) => e.code, 'code', 'identity.account_exists')
+              .having((e) => e.fields.single.message, 'hesap', 'u3'),
+        ),
+      );
+    });
   });
 }

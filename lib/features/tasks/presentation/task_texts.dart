@@ -5,6 +5,7 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/errors/error_text.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../application/invite_form_controller.dart';
 import '../application/meeting_form_controller.dart';
 import '../application/quick_forms_controller.dart';
 import '../domain/task_catalog.dart';
@@ -128,8 +129,12 @@ extension TaskTexts on AppLocalizations {
   String inviteError(InviteError e) => switch (e) {
     InviteError.name => uiTasksErrName,
     InviteError.email => uiTasksErrEmail,
-    InviteError.coordinatorships => uiTasksErrIvCoord,
+    InviteError.coordinatorship => uiTasksErrIvCoord,
   };
+
+  /// Aktarım teklifi: "Bu e-posta var olan bir hesaba ait: Ad. “Ekle” bu hesabı ekibe ekler."
+  String inviteExisting(String name) =>
+      '$uiTasksIvExisting $name. $uiTasksIvExistingTail';
 
   /// "76 görev" ya da "8 / 76 görev".
   String countLine(int shown, int total) => shown == total

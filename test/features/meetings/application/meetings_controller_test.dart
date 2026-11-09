@@ -2,6 +2,7 @@
 // liste tazelemesi; görünüm durumu (arama kapanınca sorgu temizlenir).
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/app/foreground_refresh.dart';
 import 'package:nizamio/features/meetings/application/meetings_controller.dart';
 import 'package:nizamio/features/meetings/domain/meeting_board.dart';
 
@@ -115,6 +116,24 @@ void main() {
     final failed = c.read(meetingsBoardControllerProvider);
     expect((failed.hasError, failed.hasValue), (true, true));
   });
+
+  test(
+    'ön plana dönüş: okunmamış liste okunmaz; taze liste okunmaz, bayat okunur',
+    () async {
+      final s = MeetingsServer(admin: false, seat: 'koordinator');
+      final (h, c) = await openMeetings(s);
+      await refreshStaleMeetings(c, maxAge: Duration.zero);
+      expect(c.exists(meetingsBoardControllerProvider), isFalse);
+      expect(calls(h), isEmpty);
+
+      await _board(c);
+      h.backend.requests.clear();
+      await refreshStaleMeetings(c);
+      expect(calls(h), isEmpty, reason: 'staleAfter içinde');
+      await refreshStaleMeetings(c, maxAge: Duration.zero);
+      expect(calls(h), ['GET /v1/meetings']);
+    },
+  );
 
   test('görünüm: arama kapanınca sorgu temizlenir; sekme korunur', () {
     final c = ProviderContainer();

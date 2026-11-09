@@ -207,6 +207,15 @@ void main() {
       expect(a.sent, {'department_id': 'd1', 'display_name': 'Altyapı'});
     });
 
+    test('var olan bağ: dönen ad yanıttakidir, istekteki değil', () async {
+      // Bağ zaten varsa sunucu var olanı eski adıyla döndürür (adı değiştirmez); form
+      // farkı bu değerden görür ve programdaki adı ayrıca düzeltir.
+      final (repo, a) = _repo(link);
+      final r = await repo.linkDepartment('p1', 'd1', displayName: 'Yeni ad');
+      expect(a.sent, {'department_id': 'd1', 'display_name': 'Yeni ad'});
+      expect(r.displayName, 'Altyapı');
+    });
+
     test('ad verilmezse gövdede yok (katalog adı kopyalanır)', () async {
       final (repo, a) = _repo(link, status: 201);
       await repo.linkDepartment('p1', 'd1');

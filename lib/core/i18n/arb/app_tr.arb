@@ -2337,7 +2337,7 @@
   "@uiHomeQaMeeting": {
     "description": "ui.home.qa_meeting"
   },
-  "uiHomeQaInvite": "Davet et",
+  "uiHomeQaInvite": "Kişi ekle",
   "@uiHomeQaInvite": {
     "description": "ui.home.qa_invite"
   },
@@ -2353,7 +2353,7 @@
   "@uiHomeQaMeetingLong": {
     "description": "ui.home.qa_meeting_long"
   },
-  "uiHomeQaInviteLong": "Kullanıcı davet et",
+  "uiHomeQaInviteLong": "Kullanıcı ekle",
   "@uiHomeQaInviteLong": {
     "description": "ui.home.qa_invite_long"
   },
@@ -5121,15 +5121,15 @@
   "@uiTasksTPeopleInvited": {
     "description": "ui.tasks.t_people_invited"
   },
-  "uiTasksIvTitle": "Kullanıcı davet et",
+  "uiTasksIvTitle": "Kullanıcı ekle",
   "@uiTasksIvTitle": {
     "description": "ui.tasks.iv_title"
   },
-  "uiTasksIvDesc": "Davet e-postası gönderilir; kullanıcı ilk girişte şifresini belirler.",
+  "uiTasksIvDesc": "Hesap açılır ya da var olan hesap seçilen koordinatörlüğün ekibine eklenir. E-posta ya da parola gönderilmez.",
   "@uiTasksIvDesc": {
     "description": "ui.tasks.iv_desc"
   },
-  "uiTasksIvSend": "Davet gönder",
+  "uiTasksIvSend": "Ekle",
   "@uiTasksIvSend": {
     "description": "ui.tasks.iv_send"
   },
@@ -5165,15 +5165,11 @@
   "@uiTasksRoleAdmin": {
     "description": "ui.tasks.role_admin"
   },
-  "uiTasksOptionalAny": "İsteğe bağlı",
-  "@uiTasksOptionalAny": {
-    "description": "ui.tasks.optional_any"
-  },
   "uiTasksRdAdmin": "Tüm koordinatörlükleri, kullanıcıları ve sezonu yönetir.",
   "@uiTasksRdAdmin": {
     "description": "ui.tasks.rd_admin"
   },
-  "uiTasksRdCoordinator": "Seçtiğin koordinatörlüklerde görev atar ve dosyaları onaylar.",
+  "uiTasksRdCoordinator": "Seçtiğin koordinatörlükte görev atar ve dosyaları onaylar.",
   "@uiTasksRdCoordinator": {
     "description": "ui.tasks.rd_coordinator"
   },
@@ -5189,13 +5185,21 @@
   "@uiTasksErrEmail": {
     "description": "ui.tasks.err_email"
   },
-  "uiTasksErrIvCoord": "Koordinatör için en az bir koordinatörlük seç.",
+  "uiTasksErrIvCoord": "Bir koordinatörlük seç.",
   "@uiTasksErrIvCoord": {
     "description": "ui.tasks.err_iv_coord"
   },
-  "uiTasksTInvited": "Davet gönderildi:",
+  "uiTasksTInvited": "Ekibe eklendi:",
   "@uiTasksTInvited": {
     "description": "ui.tasks.t_invited"
+  },
+  "uiTasksIvExisting": "Bu e-posta var olan bir hesaba ait:",
+  "@uiTasksIvExisting": {
+    "description": "ui.tasks.iv_existing"
+  },
+  "uiTasksIvExistingTail": "“Ekle” bu hesabı ekibe ekler.",
+  "@uiTasksIvExistingTail": {
+    "description": "ui.tasks.iv_existing_tail"
   },
   "uiTasksExpandSheet": "Sayfayı büyüt",
   "@uiTasksExpandSheet": {

@@ -237,6 +237,32 @@ abstract interface class DownloadSink {
   Future<String> save(String name, Stream<List<int>> bytes);
 }
 
+/// Ekibe kişi ekleme ("Kullanıcı ekle" formu; `createUser`). [transferAccountId] yoksa hesap
+/// açılır ([fullName] zorunlu); varsa o var olan hesap ekibe eklenir (aktarım: hesabın
+/// nitelikleri değişmez, ad gönderilmez). Rol [coordinator] (`koordinator`) ya da üye
+/// (`uye`); [companyAdmin] şirket yöneticiliği de verir. Koordinatör çağıranın rolünü sunucu
+/// `uye`'ye zorlar, yöneticilik isteğini 403 ile reddeder.
+@immutable
+final class MemberEnrollment {
+  const MemberEnrollment({
+    required this.programId,
+    required this.departmentId,
+    required this.email,
+    this.fullName = '',
+    this.coordinator = false,
+    this.companyAdmin = false,
+    this.transferAccountId,
+  });
+
+  final String programId;
+  final String departmentId;
+  final String email;
+  final String fullName;
+  final bool coordinator;
+  final bool companyAdmin;
+  final String? transferAccountId;
+}
+
 /// Görev ayrıntısının sunucu yazmaları (domain portu; gerçekleştirme `data/`). Görev
 /// kapsamlı her çağrı görevin KENDİ (program, departman) kapsamıyla gider (S3). Yanıt gövdesi
 /// yerel durumu değiştirmek için kullanılmaz (iyimser güncelleme yok; çağıran yeniden okur).
@@ -312,6 +338,11 @@ abstract interface class TaskWriteRepository {
 
   /// [departmentId] ekibi (S2; yönetici ya da o departmanın koordinatörü).
   Future<List<TeamMember>> listTeam(String departmentId);
+
+  /// `POST /v1/admin/users` (S1; yönetici ya da hedef departmanın koordinatörü). Yeni
+  /// hesabın ilk parolası sunucuda üretilir ve yanıtta dönmez; e-posta gönderilmez. E-posta
+  /// başka hesaptaysa 409 `identity.account_exists` (yöneticiye aktarım teklifi alanlarda).
+  Future<void> enrollMember(MemberEnrollment enrollment);
 
   // ---- tarih talebi --------------------------------------------------------------------
 

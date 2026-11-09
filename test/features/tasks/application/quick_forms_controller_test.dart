@@ -1,45 +1,26 @@
-// Hızlı işlem formları: davet (e-posta, rol kuralları).
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+// Hızlı işlem formlarının koordinatörlük seçenekleri (yeni görev ve kullanıcı ekle ortak):
+// yönetici programın bütün koordinatörlüklerini, koordinatör yalnız kendininkileri görür.
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/tasks/application/quick_forms_controller.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
 
+import '../../coordinatorships/coord_backend.dart';
 import '../../pilot_support.dart';
 
-Future<ProviderContainer> _setup() async =>
-    (await pilotHarness(PilotBackend())).container;
+Future<List<String>> _options({required bool admin}) async {
+  final h = await pilotHarness(CoordBackend()..admin = admin, signedIn: true);
+  h.read(scopeControllerProvider).selectProgram(coordProgram);
+  await h.read(taskCatalogControllerProvider.future);
+  return [for (final c in h.read(newTaskCoordinatorshipsProvider)) c.code];
+}
 
 void main() {
-  test(
-    'davet: ad, e-posta, koordinatör için koordinatörlük, admin kilidi',
-    () async {
-      final c = await _setup();
-      final ctl = c.read(inviteFormControllerProvider.notifier);
-      InviteForm f() => c.read(inviteFormControllerProvider);
-      expect(ctl.submit(), isNull);
-      expect(f().error, InviteError.name);
-      ctl
-        ..setName('Ayşe Deneme')
-        ..setEmail('ayse');
-      expect(ctl.submit(), isNull);
-      expect(f().error, InviteError.email);
-      ctl
-        ..setEmail('ayse.deneme@ornek.test')
-        ..setRole(InviteRole.coordinator);
-      expect(ctl.submit(), isNull);
-      expect(f().error, InviteError.coordinatorships);
-      ctl
-        ..togglePane()
-        ..toggleCoordinatorship('ALT');
-      expect(f().paneOpen, isTrue);
-      ctl.setRole(InviteRole.admin);
-      expect(f().paneOpen, isFalse);
-      ctl.togglePane();
-      expect(f().paneOpen, isFalse);
-      expect(ctl.submit()!.email, 'ayse.deneme@ornek.test');
-      expect(f().name, '');
-      ctl.prepare(coordinatorship: 'EĞİ');
-      expect(f().role, InviteRole.member);
-      expect(f().coordinatorships, ['EĞİ']);
-    },
-  );
+  test('seçenekler: yönetici hepsi, koordinatör yalnız kendininki', () async {
+    expect(
+      await _options(admin: true),
+      unorderedEquals([dAlt, dEle, dEgi, dIda]),
+    );
+    expect(await _options(admin: false), [dAlt]);
+  });
 }

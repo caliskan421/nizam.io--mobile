@@ -145,6 +145,9 @@ class CoordBackend extends PilotBackend {
   /// Doluysa `POST /v1/program/departments` bu kodla (HTTP 503) düşer.
   String? linkError;
 
+  /// true → `POST /v1/program/departments` bağı kurar ama yanıt kaybolur (HTTP 503).
+  bool linkLost = false;
+
   @override
   ResponseBody handle(Seen r) {
     final program = r.header('X-Nizamio-Program');
@@ -315,6 +318,7 @@ class CoordBackend extends PilotBackend {
         });
         rosters[id] = [];
       }
+      if (linkLost) return errorBody(503, 'platform.internal');
       return jsonResponse(201, link_(id));
     }
     if (link != null) {

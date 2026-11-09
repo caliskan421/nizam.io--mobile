@@ -117,8 +117,10 @@ class MeetingConferenceCard extends ConsumerWidget {
     final now = DateTime.now();
     final status = room.status(now);
     final summary = room.summary;
-    // Hiç gözlenmemiş görüntü (observed_at null) gösterilmez.
+    // Hiç gözlenmemiş görüntü (observed_at null) gösterilmez; eski görüntü (K78, > 3 dk) "şu an
+    // bağlı" sayılmaz: zamanıyla yazılır, avatar ve "görüşmede" yığını çizilmez.
     final seen = conf?.connected.observedAt == null ? null : conf!.connected;
+    final fresh = seen != null && seen.isFreshAt(now);
     final live = status?.phase == MeetingPhase.live;
     final finished = status?.phase == MeetingPhase.finished;
     final late = m.meetingDate.isBefore(now);
@@ -127,7 +129,7 @@ class MeetingConferenceCard extends ConsumerWidget {
         l.uiMeetingsConfLive,
         [
           l.meetingSince(conf!.startedAt),
-          if (seen != null) '${seen.count} / 25 ${l.uiMeetingsConnectedTail}',
+          if (seen != null) l.meetingConnected(seen, now),
         ].join(' · '),
         c.textMuted,
       ),
@@ -163,7 +165,7 @@ class MeetingConferenceCard extends ConsumerWidget {
     // Canlıyken bağlı kişiler: hesap kimlikleri katılımcı adlarına (yoksa katalog adına) çevrilir.
     final names = {for (final p in d.participants) p.accountId: p.fullName};
     final catalog = ref.watch(taskCatalogControllerProvider).value;
-    final faces = live && seen != null
+    final faces = live && fresh
         ? [
             for (final id in seen.accountIds)
               names[id] ?? catalog?.nameOf(id) ?? l.uiMeetingsUnknownPerson,

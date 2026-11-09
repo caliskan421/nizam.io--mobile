@@ -3,7 +3,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
 import '../domain/chat_task_planner.dart';
+import '../domain/meeting_invitees.dart';
 import '../domain/meeting_planner.dart';
+import '../domain/task_access.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_details.dart';
 import '../domain/task_writes.dart';
@@ -44,6 +46,13 @@ MeetingPlanner meetingPlanner(Ref ref) => throw UnimplementedError(
   'meetingPlannerProvider bileşim kökünde (lib/app/di) bağlanır',
 );
 
+/// PORT: kişi kipindeki toplantının program havuzu (`tasks_module.dart`'ta bağlanır).
+@Riverpod(keepAlive: true)
+MeetingInviteeRepository meetingInviteeRepository(Ref ref) =>
+    throw UnimplementedError(
+      'meetingInviteeRepositoryProvider bileşim kökünde (lib/app/di) bağlanır',
+    );
+
 /// PORT: mesajdan görev ("mesajdan görev" kipindeki yeni görev formu). Gerçekleştirme messages
 /// feature'ındadır; bileşim kökünde bağlanır.
 @Riverpod(keepAlive: true)
@@ -83,4 +92,36 @@ Future<List<TeamMember>> taskTeam(Ref ref, String departmentId) async {
     }
   }
   return ref.read(taskWriteRepositoryProvider).listTeam(departmentId);
+}
+
+/// Kişi kipindeki toplantının davet havuzu (toplantı formu ve ayrıntıdaki "katılımcı ekle").
+/// Şirket yöneticisi: kataloğun bütün ekipleri (programın departmanları okunur). Koordinatör:
+/// kendi ekipleri (katalog) + programın geri kalanı ([MeetingInviteeRepository], koordinatörü
+/// olunan ilk departman üzerinden). Havuz okunamazsa ya da koordinatörlük yoksa yalnız
+/// katalogdaki ekipler, [MeetingInvitees.partial] ile (ekran kısıtı açıkça yazar).
+@riverpod
+Future<MeetingInvitees> meetingInvitees(Ref ref) async {
+  final catalog = await ref.watch(taskCatalogControllerProvider.future);
+  final own = catalog.coordinatorships;
+  final access = catalog.access;
+  if (access == null || access.companyAdmin) {
+    return MeetingInvitees(groups: own, partial: catalog.departmentsTruncated);
+  }
+  final program = ref.read(scopeStateProvider).programId;
+  final anchor = program == null
+      ? null
+      : access
+            .seatsIn(program)
+            .where((s) => s.role == SeatRole.coordinator)
+            .firstOrNull;
+  if (anchor == null) return MeetingInvitees(groups: own, partial: true);
+  try {
+    final pool = await ref
+        .read(meetingInviteeRepositoryProvider)
+        .programPeople(anchor.departmentId);
+    return pool.withTeams(own);
+  } on Object {
+    // Havuz ek bilgidir: okunamazsa kendi ekipler kalır, eksiklik ekranda yazılır.
+    return MeetingInvitees(groups: own, partial: true);
+  }
 }

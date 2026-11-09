@@ -8,6 +8,7 @@ import 'package:nizamio/features/tasks/application/quick_forms_controller.dart';
 import 'package:nizamio/features/tasks/domain/task_access.dart';
 import 'package:nizamio/features/tasks/domain/task_catalog.dart';
 
+import '../../../support/fake_backend.dart';
 import '../../../support/harness.dart';
 import '../../meetings/meetings_server.dart';
 import '../../pilot_support.dart';
@@ -84,6 +85,30 @@ void main() {
       'invite_mode': 'person',
     });
   });
+
+  test(
+    'kişi kipi: sunucunun yazamadığı katılımcılar gönderilen formda ayrı döner',
+    () async {
+      final s = MeetingsServer();
+      s.overrides['POST /v1/meetings'] = () => jsonResponse(201, {
+        'meeting': meetingWire(id: 'm7', title: 'Saha'),
+        'failed_participants': ['u2'],
+        'side_effects': {'failed_messages': 0, 'event_failed': false},
+      });
+      final (_, _, f) = await _open(s);
+      f
+        ..prepare()
+        ..setTitle('Saha')
+        ..setMode(MeetingMode.people)
+        ..togglePerson('u1')
+        ..togglePerson('u2')
+        ..pickOwner('d2');
+      final sent = await f.submit();
+      expect(sent?.created?.id, 'm7');
+      expect(sent?.people, ['u1', 'u2']);
+      expect(sent?.notInvited, ['u2']);
+    },
+  );
 
   test('yer: kırpılarak gider; 200 karakteri aşan istek göndermez', () async {
     final (h, c, f) = await _open(MeetingsServer());

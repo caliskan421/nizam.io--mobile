@@ -7,12 +7,14 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/meeting_form_controller.dart';
 import '../../application/task_catalog_controller.dart';
+import '../../application/tasks_providers.dart';
 import '../../domain/task_catalog.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
@@ -66,7 +68,13 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
     final owners = catalog == null
         ? const <CoordinatorshipRef>[]
         : meetingOwnerChoices(catalog);
-    String name(String id) => catalog?.nameOf(id) ?? l.uiTasksUnknownPerson;
+    final editing = f.editing != null;
+    // Kişi kipinde havuz programın kişileridir (yalnız açılışta; düzenlemede katılımcı yok).
+    final invitees = !editing && f.mode == MeetingMode.people
+        ? ref.watch(meetingInviteesProvider).value
+        : null;
+    String name(String id) =>
+        invitees?.nameOf(id) ?? catalog?.nameOf(id) ?? l.uiTasksUnknownPerson;
     final String? who;
     if (f.mode == MeetingMode.coordinatorships) {
       who = f.coordinatorships.isEmpty
@@ -87,7 +95,6 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
     }
     if (_draft.text != f.agendaDraft) _draft.text = f.agendaDraft;
     final error = f.error;
-    final editing = f.editing != null;
     final owner = f.owner == null
         ? null
         : catalog?.coordinatorship(f.owner!)?.name ?? f.owner;
@@ -178,8 +185,10 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
                         value: f.allMembers,
                         onChanged: (_) => ctl.toggleAllMembers(),
                       ),
-                    ] else
-                      for (final co in coords.where((x) => x.team.isNotEmpty))
+                    ] else if (invitees == null)
+                      const NzLoader()
+                    else ...[
+                      for (final co in invitees.groups)
                         _PeopleGroup(
                           coord: co,
                           name: name,
@@ -188,6 +197,19 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
                           onToggle: () => ctl.toggleGroup(co.code),
                           onPick: ctl.togglePerson,
                         ),
+                      if (invitees.partial)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: NizamioSpacing.space2,
+                          ),
+                          child: Text(
+                            l.uiTasksMtPoolPartial,
+                            style: t.caption.copyWith(
+                              color: context.colors.textMuted,
+                            ),
+                          ),
+                        ),
+                    ],
                   ],
                 ),
               ),

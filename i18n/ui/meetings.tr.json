@@ -75,10 +75,8 @@
     "ui.meetings.note_footer": "Katılan herkes not ekleyebilir",
     "ui.meetings.note_edit": "Notu düzenle",
     "ui.meetings.note_delete": "Notu sil",
-    "ui.meetings.note_delete_q": "Not silinsin mi?",
     "ui.meetings.cancel": "Vazgeç",
     "ui.meetings.save": "Kaydet",
-    "ui.meetings.delete": "Sil",
     "ui.meetings.edited": "düzenlendi",
     "ui.meetings.to_task": "Göreve dönüştür",
     "ui.meetings.converted": "Göreve dönüştü",
@@ -146,6 +144,11 @@
     "ui.meetings.info_place": "Yer",
     "ui.meetings.place_prefix": "Yer:",
     "ui.meetings.delete_live_prefix": "Konferans canlı:",
-    "ui.meetings.delete_live_tail": "kişinin bağlantısı kesilir."
+    "ui.meetings.delete_live_tail": "kişinin bağlantısı kesilir.",
+    "ui.meetings.add_people_desc_person": "Programdaki koordinatörlüklerin ekiplerinden seç.",
+    "ui.meetings.pool_partial": "Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.",
+    "ui.meetings.undo": "Geri al",
+    "ui.meetings.seen_ago_tail": "dk önce",
+    "ui.meetings.connected_was_tail": "kişi bağlıydı"
   }
 }

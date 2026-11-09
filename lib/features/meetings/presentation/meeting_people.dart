@@ -98,6 +98,8 @@ class _MeetingPeopleState extends ConsumerState<MeetingPeople> {
     final room = widget.room;
     final m = room.meeting;
     final manage = room.permissions.canManageParticipants;
+    // Kişi kipinde ekleme havuzu programın kişileridir; ekran açıkken önceden okunur.
+    if (manage && m.byPerson) ref.watch(meetingInviteesProvider);
     final groups = _groupPeople(m, room.detail.participants);
     final total = room.detail.participants.length;
     return Column(
@@ -232,14 +234,26 @@ class _MeetingPeopleState extends ConsumerState<MeetingPeople> {
   }
 
   /// Katılımcı ekle: henüz katılımcı olmayanlar; `coordinatorship` kipinde toplantıya bağlı
-  /// koordinatörlüklerin ekibinden, `person` kipinde programdaki bütün koordinatörlüklerden
-  /// (sunucu ayrıca programın kadrosunu denetler, K21). Ekip satırları yeni satır sunucudan
-  /// okunana dek katalogdan doldurulur.
+  /// koordinatörlüklerin ekibinden, `person` kipinde programın kişilerinden
+  /// ([meetingInviteesProvider]; eksik olabilirse açıkça yazılır). Sunucu ayrıca programın
+  /// kadrosunu denetler (K21). Ekip satırları yeni satır sunucudan okunana dek havuzdan doldurulur.
   Future<void> _showAdd(BuildContext context, TaskCatalog? catalog) async {
     final l = context.l10n;
     final room = widget.room;
     final m = room.meeting;
-    final all = catalog?.coordinatorships ?? const <CoordinatorshipRef>[];
+    MeetingInvitees? invitees;
+    if (m.byPerson) {
+      try {
+        invitees = await ref.read(meetingInviteesProvider.future);
+      } on Object {
+        invitees = null; // katalog ekipleri kalır; eksiklik aşağıda yazılır
+      }
+      if (!context.mounted) return;
+    }
+    final all =
+        invitees?.groups ??
+        catalog?.coordinatorships ??
+        const <CoordinatorshipRef>[];
     final pool = m.byPerson
         ? all
         : [for (final d in ownerFirst(m)) ?catalog?.coordinatorship(d.id)];
@@ -250,7 +264,10 @@ class _MeetingPeopleState extends ConsumerState<MeetingPeople> {
           if (seen.add(id))
             MeetingParticipant(
               accountId: id,
-              fullName: catalog?.nameOf(id) ?? l.uiMeetingsUnknownPerson,
+              fullName:
+                  invitees?.nameOf(id) ??
+                  catalog?.nameOf(id) ??
+                  l.uiMeetingsUnknownPerson,
               teams: [
                 for (final x in all)
                   if (x.team.contains(id))
@@ -265,8 +282,15 @@ class _MeetingPeopleState extends ConsumerState<MeetingPeople> {
     final picked = await NzBottomSheet.show<List<MeetingParticipant>>(
       context,
       title: l.uiMeetingsAddPeopleTitle,
-      description: l.uiMeetingsAddPeopleDesc,
-      builder: (_) => _AddPeople(candidates: candidates),
+      description: m.byPerson
+          ? l.uiMeetingsAddPeopleDescPerson
+          : l.uiMeetingsAddPeopleDesc,
+      builder: (_) => _AddPeople(
+        candidates: candidates,
+        note: m.byPerson && (invitees?.partial ?? true)
+            ? l.uiMeetingsPoolPartial
+            : null,
+      ),
     );
     if (picked == null || picked.isEmpty) return;
     await widget.actions.addParticipants(picked);
@@ -275,9 +299,12 @@ class _MeetingPeopleState extends ConsumerState<MeetingPeople> {
 
 /// Katılımcı ekleme seçimi (çoklu); "Ekle" seçilenleri döner.
 class _AddPeople extends StatefulWidget {
-  const _AddPeople({required this.candidates});
+  const _AddPeople({required this.candidates, this.note});
 
   final List<MeetingParticipant> candidates;
+
+  /// Havuz eksik olabilir uyarısı (yoksa null).
+  final String? note;
 
   @override
   State<_AddPeople> createState() => _AddPeopleState();
@@ -291,18 +318,32 @@ class _AddPeopleState extends State<_AddPeople> {
     final l = context.l10n;
     final c = context.colors;
     final people = widget.candidates;
+    final note = widget.note == null
+        ? null
+        : Text(
+            widget.note!,
+            style: context.text.caption.copyWith(color: c.textMuted),
+          );
     if (people.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: NizamioSpacing.space4),
-        child: Text(
-          l.uiMeetingsNoCandidates,
-          style: context.text.caption.copyWith(color: c.textMuted),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: NizamioSpacing.space2,
+          children: [
+            Text(
+              l.uiMeetingsNoCandidates,
+              style: context.text.caption.copyWith(color: c.textMuted),
+            ),
+            ?note,
+          ],
         ),
       );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (note != null) ...[note, const Gap(NizamioSpacing.space2)],
         for (final p in people)
           NzCheckbox(
             label: p.fullName,

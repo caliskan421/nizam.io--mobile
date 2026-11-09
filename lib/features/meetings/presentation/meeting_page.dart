@@ -145,8 +145,14 @@ class MeetingActions {
 
   MeetingRoom? get _room => ref.read(meetingRoomControllerProvider(id)).value;
 
-  void say(String msg) {
-    if (context.mounted) NzToast.show(context, msg);
+  void say(String msg, {VoidCallback? undo}) {
+    if (!context.mounted) return;
+    NzToast.show(
+      context,
+      msg,
+      actionLabel: undo == null ? null : context.l10n.uiMeetingsUndo,
+      onAction: undo,
+    );
   }
 
   /// Hata varsa metnini, yoksa [done]'ı bildirir (sayfa kapanmışsa hiçbiri).
@@ -228,12 +234,15 @@ class MeetingActions {
   Future<void> _delete() async {
     final l = context.l10n;
     final conf = _room?.detail.conference;
+    // Kesin sayı yalnız taze görüntüden (K78); eskiyse genel cümle.
+    final connected = conf != null && conf.connected.isFreshAt(DateTime.now())
+        ? conf.connected.count
+        : 0;
     final yes = await NzDialog.confirm(
       context,
       title: l.uiMeetingsDeleteQ,
       message: conf != null
-          ? '${l.uiMeetingsDeleteDesc}\n\n'
-                '${l.meetingDeleteLive(conf.connected.count)}'
+          ? '${l.uiMeetingsDeleteDesc}\n\n${l.meetingDeleteLive(connected)}'
           : l.uiMeetingsDeleteDesc,
       confirmLabel: l.uiMeetingsMenuDelete,
       cancelLabel: l.uiMeetingsCancel,
@@ -283,17 +292,14 @@ class MeetingActions {
     return e == null;
   }
 
+  /// Not hemen gizlenir; bildirimdeki "Geri al" süresince istek gitmez (onay penceresi yok,
+  /// F63 devri §4). Süre dolunca kalıcı silinir; hata olursa not geri gelir ve hata yazılır.
   Future<void> deleteNote(MeetingNote n) async {
     final l = context.l10n;
-    final yes = await NzDialog.confirm(
-      context,
-      title: l.uiMeetingsNoteDeleteQ,
-      confirmLabel: l.uiMeetingsDelete,
-      cancelLabel: l.uiMeetingsCancel,
-      tone: NzDialogTone.destructive,
-    );
-    if (!yes) return;
-    report(await _ctl.deleteNote(n), done: l.uiMeetingsTNoteDeleted);
+    final ctl = _ctl;
+    final pending = ctl.deleteNote(n);
+    say(l.uiMeetingsTNoteDeleted, undo: () => ctl.undoNoteDelete(n.id));
+    report(await pending);
   }
 
   /// Notu göreve dönüştürür: yeni görev formu nottan kipinde açılır (başlık nottan, hedef sahip

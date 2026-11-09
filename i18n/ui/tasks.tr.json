@@ -333,6 +333,9 @@
     "ui.tasks.conflict_off": "Kapalı",
     "ui.tasks.field_place": "Yer",
     "ui.tasks.mt_place_hint": "İsteğe bağlı · ör. toplantı salonu",
-    "ui.tasks.err_mt_place": "Yer en çok 200 karakter olabilir."
+    "ui.tasks.err_mt_place": "Yer en çok 200 karakter olabilir.",
+    "ui.tasks.mt_pool_partial": "Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.",
+    "ui.tasks.t_people_failed": "kişi eklenemedi",
+    "ui.tasks.t_meeting_open": "Toplantıyı aç"
   }
 }

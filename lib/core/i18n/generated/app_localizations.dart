@@ -4666,12 +4666,6 @@ abstract class AppLocalizations {
   /// **'Notu sil'**
   String get uiMeetingsNoteDelete;
 
-  /// ui.meetings.note_delete_q
-  ///
-  /// In tr, this message translates to:
-  /// **'Not silinsin mi?'**
-  String get uiMeetingsNoteDeleteQ;
-
   /// ui.meetings.cancel
   ///
   /// In tr, this message translates to:
@@ -4683,12 +4677,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kaydet'**
   String get uiMeetingsSave;
-
-  /// ui.meetings.delete
-  ///
-  /// In tr, this message translates to:
-  /// **'Sil'**
-  String get uiMeetingsDelete;
 
   /// ui.meetings.edited
   ///
@@ -5097,6 +5085,36 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'kişinin bağlantısı kesilir.'**
   String get uiMeetingsDeleteLiveTail;
+
+  /// ui.meetings.add_people_desc_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Programdaki koordinatörlüklerin ekiplerinden seç.'**
+  String get uiMeetingsAddPeopleDescPerson;
+
+  /// ui.meetings.pool_partial
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.'**
+  String get uiMeetingsPoolPartial;
+
+  /// ui.meetings.undo
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri al'**
+  String get uiMeetingsUndo;
+
+  /// ui.meetings.seen_ago_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'dk önce'**
+  String get uiMeetingsSeenAgoTail;
+
+  /// ui.meetings.connected_was_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi bağlıydı'**
+  String get uiMeetingsConnectedWasTail;
 
   /// ui.messages.title
   ///
@@ -8211,6 +8229,24 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Yer en çok 200 karakter olabilir.'**
   String get uiTasksErrMtPlace;
+
+  /// ui.tasks.mt_pool_partial
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.'**
+  String get uiTasksMtPoolPartial;
+
+  /// ui.tasks.t_people_failed
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi eklenemedi'**
+  String get uiTasksTPeopleFailed;
+
+  /// ui.tasks.t_meeting_open
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantıyı aç'**
+  String get uiTasksTMeetingOpen;
 
   /// ui.timeline.title
   ///

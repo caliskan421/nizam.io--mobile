@@ -2,11 +2,13 @@
 /// import eder (sınır kuralı B3).
 library;
 
+export 'application/company_admin_index.dart' show companyAdminIndexProvider;
 export 'application/messages_nav_caption.dart'
     show
         messagesNavBadgeProvider,
         messagesNavCaptionProvider,
         refreshMessagesBadge;
+export 'domain/company_admin_index.dart' show CompanyAdminIndex;
 export 'presentation/chat_page.dart' show ChatPage;
 export 'presentation/messages_page.dart' show MessagesPage;
 export 'presentation/open_person_chat.dart' show openPersonChat;

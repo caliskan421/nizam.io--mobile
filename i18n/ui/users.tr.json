@@ -63,6 +63,13 @@
     "ui.users.kpi_late": "Gecikme",
     "ui.users.kpi_review": "Onay",
     "ui.users.loaded_count_tail": "kullanıcı yüklendi",
-    "ui.users.more_available": "Devamı var"
+    "ui.users.more_available": "Devamı var",
+    "ui.users.admin": "Admin",
+    "ui.users.count_tail": "kullanıcı",
+    "ui.users.nav_count_tail": "kişi",
+    "ui.users.search_hint": "Ad veya koordinatörlük",
+    "ui.users.row_hint": "Profili açmak için dokunun. Hızlı işlemler için basılı tutun.",
+    "ui.users.no_loaded_match": "Yüklenen kullanıcılar arasında eşleşme yok. Diğer kayıtları yükleyebilirsiniz.",
+    "ui.users.directory_partial": "+ işareti, listenin devamı olduğunu gösterir. Sayılar yüklenen kayıtları kapsar."
   }
 }

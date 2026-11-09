@@ -5112,4 +5112,28 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiUsersMoreAvailable => 'Devamı var';
+
+  @override
+  String get uiUsersAdmin => 'Admin';
+
+  @override
+  String get uiUsersCountTail => 'kullanıcı';
+
+  @override
+  String get uiUsersNavCountTail => 'kişi';
+
+  @override
+  String get uiUsersSearchHint => 'Ad veya koordinatörlük';
+
+  @override
+  String get uiUsersRowHint =>
+      'Profili açmak için dokunun. Hızlı işlemler için basılı tutun.';
+
+  @override
+  String get uiUsersNoLoadedMatch =>
+      'Yüklenen kullanıcılar arasında eşleşme yok. Diğer kayıtları yükleyebilirsiniz.';
+
+  @override
+  String get uiUsersDirectoryPartial =>
+      '+ işareti, listenin devamı olduğunu gösterir. Sayılar yüklenen kayıtları kapsar.';
 }

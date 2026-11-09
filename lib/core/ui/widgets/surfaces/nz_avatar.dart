@@ -10,6 +10,7 @@ import '../nz_size.dart';
 enum NzAvatarSize {
   sm(26),
   md(32),
+  list(40),
   lg(44),
   xl(52);
 
@@ -31,6 +32,8 @@ class NzAvatar extends StatelessWidget {
     this.size = NzSize.md,
     this.tone,
     this.extent,
+    this.fillColor,
+    this.foregroundColor,
   }) : icon = null,
        semanticLabel = null;
 
@@ -42,6 +45,8 @@ class NzAvatar extends StatelessWidget {
     this.size = NzSize.md,
     this.tone,
     this.extent,
+    this.fillColor,
+    this.foregroundColor,
   }) : name = null;
 
   /// Nötr ton (`bg-overlay` zemin, `ink` yazı).
@@ -75,6 +80,10 @@ class NzAvatar extends StatelessWidget {
   /// Prototip ölçüsü; verilirse [size] çapını ezer.
   final NzAvatarSize? extent;
 
+  /// Explicit role palette, preserving initials and accessibility semantics.
+  final Color? fillColor;
+  final Color? foregroundColor;
+
   (Color, Color) _palette(NizamioColors c) {
     final tone = this.tone;
     if (tone == null) return (c.primary, c.onPrimary);
@@ -102,7 +111,9 @@ class NzAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = _resolveStyle(context);
-    final (fill, ink) = _palette(context.colors);
+    final (baseFill, baseInk) = _palette(context.colors);
+    final fill = fillColor ?? baseFill;
+    final ink = foregroundColor ?? baseInk;
     final shownName = name;
     final Widget inner = shownName != null
         ? Text(
@@ -139,6 +150,7 @@ class NzAvatar extends StatelessWidget {
       // `.rp-av` 12/600; büyük boylarda kart başlığı rolü (FittedBox küçültür).
       final role = switch (extent) {
         NzAvatarSize.sm || NzAvatarSize.md => text.caption,
+        NzAvatarSize.list => text.navLabel,
         NzAvatarSize.lg || NzAvatarSize.xl => text.labelLg,
       };
       return (

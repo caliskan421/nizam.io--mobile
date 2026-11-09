@@ -6,10 +6,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/app/router/app_nav.dart';
 import 'package:nizamio/app/router/router.dart';
 import 'package:nizamio/core/app_phase.dart';
+import 'package:nizamio/core/config/flavor.dart';
 import 'package:nizamio/core/domain/page_slice.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations.dart';
 import 'package:nizamio/core/network/connectivity_monitor.dart';
+import 'package:nizamio/core/preferences/app_preferences.dart';
+import 'package:nizamio/core/preferences/locale_controller.dart';
+import 'package:nizamio/core/preferences/theme_mode_controller.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/storage/preference_store.dart';
 import 'package:nizamio/core/ui/page/nz_app_nav.dart';
 import 'package:nizamio/features/administration/application/admin_controller.dart';
 import 'package:nizamio/features/administration/domain/organization_admin.dart';
@@ -29,15 +34,50 @@ class _Users implements OrganizationAdminRepository {
     String? search,
     dynamic sortBy,
     dynamic sortOrder,
-  }) async => PageSlice(
-    items: [
-      KnownUser(
-        accountId: 'person-1',
-        fullName: 'Deniz Örnek',
-        memberships: const [],
-      ),
-    ],
-  );
+  }) async => search != null && search.isNotEmpty
+      ? PageSlice(
+          items: [
+            KnownUser(
+              accountId: 'person-1',
+              fullName: 'Deniz Örnek',
+              memberships: const ['program:department:koordinator'],
+            ),
+          ],
+        )
+      : page.cursor == null
+      ? PageSlice(
+          items: [
+            KnownUser(
+              accountId: 'person-1',
+              fullName: 'Deniz Örnek',
+              memberships: const ['program:department:koordinator'],
+            ),
+            KnownUser(
+              accountId: 'person-2',
+              fullName: 'Mina Güneş Uzunsoy Çınar Örnekçi',
+              memberships: const [
+                'program:department:uye',
+                'program:design:koordinator',
+                'program:events:uye',
+              ],
+            ),
+            KnownUser(
+              accountId: 'person-3',
+              fullName: 'Arda Demir',
+              memberships: const [],
+            ),
+          ],
+          nextCursor: 'page-2',
+        )
+      : PageSlice(
+          items: [
+            KnownUser(
+              accountId: 'person-4',
+              fullName: 'Ekin Kaya',
+              memberships: const ['program:department:uye'],
+            ),
+          ],
+        );
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -50,10 +90,18 @@ void main() {
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = size;
       addTearDown(tester.view.reset);
+      final prefs = AppPreferences(MemoryPreferenceStore());
+      final locale = LocaleController(prefs);
+      final themeMode = ThemeModeController(prefs);
+      addTearDown(locale.dispose);
+      addTearDown(themeMode.dispose);
       final container = moduleContainer(
         overrides: [
           organizationAdminRepositoryProvider.overrideWithValue(_Users()),
           connectivityStateProvider.overrideWithValue(ConnectivityState.online),
+          flavorProvider.overrideWithValue(Flavor.dev),
+          localeControllerProvider.overrideWithValue(locale),
+          themeModeControllerProvider.overrideWithValue(themeMode),
         ],
       );
       addTearDown(container.dispose);
@@ -66,7 +114,7 @@ void main() {
           container: container,
           child: Consumer(
             builder: (context, ref, _) => MaterialApp.router(
-              theme: theme(false),
+              theme: theme(true),
               locale: const Locale('tr'),
               supportedLocales: AppLocalizations.supportedLocales,
               localizationsDelegates: testLocalizationDelegates,
@@ -82,6 +130,41 @@ void main() {
       router.go('/users');
       await settle(tester);
       expect(find.text('Deniz Örnek'), findsOneWidget);
+      expect(find.text('Mina Güneş Uzunsoy Çınar Örnekçi'), findsOneWidget);
+      if (const bool.fromEnvironment('NIZAMIO_TABLET_HOST_SHOTS')) {
+        File('/tmp/nizam-users-list-${size.width.toInt()}.png')
+            .writeAsBytesSync(await hostPng(tester));
+      }
+      await tester.enterText(find.byType(TextField).first, 'Deniz');
+      await tester.pump(const Duration(seconds: 1));
+      await settle(tester);
+      expect(container.read(adminUserQueryProvider).search, 'Deniz');
+      expect(find.text('Mina Güneş Uzunsoy Çınar Örnekçi'), findsNothing);
+      expect(find.text('Deniz Örnek'), findsOneWidget);
+      await tester.enterText(find.byType(TextField).first, '');
+      await tester.pump(const Duration(seconds: 1));
+      await settle(tester);
+      final before = container
+          .read(adminUsersProvider.notifier)
+          .visible
+          .requireValue;
+      expect(find.text('3+ kullanıcı'), findsOneWidget);
+      expect(find.text('3+ kişi'), findsWidgets);
+      expect(before.items.length, 3);
+      expect(before.nextCursor, 'page-2');
+      await tester.ensureVisible(find.text('Daha fazla göster'));
+      await tester.tap(find.text('Daha fazla göster'));
+      await settle(tester);
+      final after = container
+          .read(adminUsersProvider.notifier)
+          .visible
+          .requireValue;
+      expect(find.text('4 kullanıcı'), findsOneWidget);
+      expect(find.text('4 kişi'), findsWidgets);
+      expect(after.items.length, 4);
+      expect(after.nextCursor, isNull);
+      expect(find.text('Ekin Kaya'), findsOneWidget);
+      await tester.ensureVisible(find.text('Deniz Örnek'));
       await tester.tap(find.text('Deniz Örnek'));
       await settle(tester);
       expect(locationOf(router), '/users/person-1');

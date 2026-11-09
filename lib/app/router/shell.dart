@@ -14,6 +14,7 @@ import '../../core/ui/widgets/navigation/nz_floating_nav.dart';
 import '../../core/ui/widgets/navigation/nz_tablet_rail.dart';
 import '../../core/ui/widgets/nz_icons.dart';
 import '../../features/activity/activity.dart';
+import '../../features/administration/administration.dart';
 import '../../features/archive/archive.dart';
 import '../../features/coordinatorships/coordinatorships.dart';
 import '../../features/meetings/meetings.dart';
@@ -110,6 +111,7 @@ List<NzShellTab> shellTabsFor(
         icon: NzIcons.group,
         selectedIcon: NzIcons.group,
         label: l.uiHomeModuleUsers,
+        caption: ref.watch(adminUsersNavCaptionProvider),
       ),
       ShellModule.tables => NzShellTab(
         icon: NzIcons.sheets,

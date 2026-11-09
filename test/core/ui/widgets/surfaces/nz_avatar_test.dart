@@ -186,7 +186,7 @@ void main() {
       expect(t.widget<Text>(find.text('AV')).style!.color, c.text);
     });
 
-    testWidgets('extent çapları 26/32/44/52', (t) async {
+    testWidgets('extent çapları 26/32/40/44/52', (t) async {
       for (final e in NzAvatarSize.values) {
         await t.pumpWidget(
           testApp(
@@ -197,7 +197,7 @@ void main() {
         );
         expect(t.getSize(find.byType(NzAvatar)), Size.square(e.diameter));
       }
-      expect(NzAvatarSize.values.map((e) => e.diameter), [26, 32, 44, 52]);
+      expect(NzAvatarSize.values.map((e) => e.diameter), [26, 32, 40, 44, 52]);
     });
 
     testWidgets('extent 2.0 metinde taşma yok', (t) async {

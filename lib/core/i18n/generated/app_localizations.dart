@@ -9867,6 +9867,48 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Devamı var'**
   String get uiUsersMoreAvailable;
+
+  /// ui.users.admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Admin'**
+  String get uiUsersAdmin;
+
+  /// ui.users.count_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kullanıcı'**
+  String get uiUsersCountTail;
+
+  /// ui.users.nav_count_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi'**
+  String get uiUsersNavCountTail;
+
+  /// ui.users.search_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad veya koordinatörlük'**
+  String get uiUsersSearchHint;
+
+  /// ui.users.row_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Profili açmak için dokunun. Hızlı işlemler için basılı tutun.'**
+  String get uiUsersRowHint;
+
+  /// ui.users.no_loaded_match
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüklenen kullanıcılar arasında eşleşme yok. Diğer kayıtları yükleyebilirsiniz.'**
+  String get uiUsersNoLoadedMatch;
+
+  /// ui.users.directory_partial
+  ///
+  /// In tr, this message translates to:
+  /// **'+ işareti, listenin devamı olduğunu gösterir. Sayılar yüklenen kayıtları kapsar.'**
+  String get uiUsersDirectoryPartial;
 }
 
 class _AppLocalizationsDelegate

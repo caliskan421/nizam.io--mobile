@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/config/display_brand.dart';
+import '../../../core/config/flavor.dart';
 import '../../../core/providers.dart';
+import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
@@ -17,7 +20,10 @@ import '../application/current_program_controller.dart';
 /// (okunmamış bildirim varsa nokta; dokununca bildirim listesi) ve uygulama menüsünü açan cam
 /// daire. Sliver'dır.
 class RootTopBar extends ConsumerWidget {
-  const RootTopBar({super.key});
+  const RootTopBar({super.key, this.referenceHeader = false});
+
+  /// Reference list header: central brand identity and menu, without notification bell.
+  final bool referenceHeader;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,18 +31,30 @@ class RootTopBar extends ConsumerWidget {
     final program = ref.watch(
       currentProgramControllerProvider.select((p) => p.value?.name),
     );
-    final bell = watchNotificationBell(context, ref);
+    final bell = referenceHeader ? null : watchNotificationBell(context, ref);
+    final flavor = referenceHeader ? ref.watch(flavorProvider) : null;
+    final brand = flavor == null
+        ? l.uiHomeAppName
+        : displayBrand(flavor).name ?? l.uiHomeAppName;
     return NzTopBar(
-      leading: NzBrandMark(monogram: l.uiHomeAppName.characters.first),
-      title: l.uiHomeAppName,
+      leading: flavor == Flavor.dev
+          ? Image.asset(
+              'assets/branding/roketportal-mark.png',
+              width: NizamioSpacing.space8,
+              height: NizamioSpacing.space8,
+              excludeFromSemantics: true,
+            )
+          : NzBrandMark(monogram: brand.characters.first),
+      title: brand,
       subtitle: program,
       actions: [
-        NzIconButton(
-          icon: NzIcons.bell,
-          semanticLabel: bell.label,
-          dot: bell.dot ? context.colors.danger : null,
-          onPressed: () => unawaited(showNotifications(context)),
-        ),
+        if (bell != null)
+          NzIconButton(
+            icon: NzIcons.bell,
+            semanticLabel: bell.label,
+            dot: bell.dot ? context.colors.danger : null,
+            onPressed: () => unawaited(showNotifications(context)),
+          ),
         NzIconButton.glass(
           icon: NzIcons.menu,
           semanticLabel: l.uiHomeMenu,

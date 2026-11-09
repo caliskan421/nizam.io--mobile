@@ -58,7 +58,7 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     if (ref.read(taskCatalogControllerProvider).hasError) {
       ref.invalidate(taskCatalogControllerProvider);
     }
-    ref.invalidate(adminUsersProvider);
+    ref.read(adminUsersProvider.notifier).invalidate();
     ref.invalidate(adminUserProfileProvider(widget.accountId));
   }
 

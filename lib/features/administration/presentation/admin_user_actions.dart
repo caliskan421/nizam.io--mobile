@@ -179,12 +179,13 @@ class AdminCreateUser extends ConsumerWidget {
 Future<void> showAdminCreateUser(BuildContext context, WidgetRef ref) async {
   final session = ref.read(sessionGenerationProvider);
   final scope = ref.read(scopeStateProvider);
-  await showInviteSheet(context);
+  final changed = await showInviteSheet(context);
+  if (!changed) return;
   if (!context.mounted ||
       session != ref.read(sessionGenerationProvider) ||
       scope != ref.read(scopeStateProvider)) {
     return;
   }
-  ref.invalidate(adminUsersProvider);
+  ref.read(adminUsersProvider.notifier).invalidate();
   ref.invalidate(adminUserProfileProvider);
 }

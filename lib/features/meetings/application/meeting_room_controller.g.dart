@@ -168,7 +168,7 @@ final class MeetingRoomControllerProvider
 }
 
 String _$meetingRoomControllerHash() =>
-    r'a9dd25440ce61c35c7b545007599ae4ce2fd857f';
+    r'65718966ff07674571477a1724881dbdc98f472b';
 
 /// Toplantı ayrıntısı ve yazmaları. Komutlar sunucu yanıtıyla durumu günceller ve hata kodunu
 /// döner (null → başarı); gündem işareti ve silmeler iyimserdir, hatada geri alınır.

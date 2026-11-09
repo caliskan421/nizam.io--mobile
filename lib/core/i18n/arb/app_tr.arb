@@ -3049,10 +3049,6 @@
   "@uiMeetingsNoteDelete": {
     "description": "ui.meetings.note_delete"
   },
-  "uiMeetingsNoteDeleteQ": "Not silinsin mi?",
-  "@uiMeetingsNoteDeleteQ": {
-    "description": "ui.meetings.note_delete_q"
-  },
   "uiMeetingsCancel": "Vazgeç",
   "@uiMeetingsCancel": {
     "description": "ui.meetings.cancel"
@@ -3060,10 +3056,6 @@
   "uiMeetingsSave": "Kaydet",
   "@uiMeetingsSave": {
     "description": "ui.meetings.save"
-  },
-  "uiMeetingsDelete": "Sil",
-  "@uiMeetingsDelete": {
-    "description": "ui.meetings.delete"
   },
   "uiMeetingsEdited": "düzenlendi",
   "@uiMeetingsEdited": {
@@ -3336,6 +3328,26 @@
   "uiMeetingsDeleteLiveTail": "kişinin bağlantısı kesilir.",
   "@uiMeetingsDeleteLiveTail": {
     "description": "ui.meetings.delete_live_tail"
+  },
+  "uiMeetingsAddPeopleDescPerson": "Programdaki koordinatörlüklerin ekiplerinden seç.",
+  "@uiMeetingsAddPeopleDescPerson": {
+    "description": "ui.meetings.add_people_desc_person"
+  },
+  "uiMeetingsPoolPartial": "Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.",
+  "@uiMeetingsPoolPartial": {
+    "description": "ui.meetings.pool_partial"
+  },
+  "uiMeetingsUndo": "Geri al",
+  "@uiMeetingsUndo": {
+    "description": "ui.meetings.undo"
+  },
+  "uiMeetingsSeenAgoTail": "dk önce",
+  "@uiMeetingsSeenAgoTail": {
+    "description": "ui.meetings.seen_ago_tail"
+  },
+  "uiMeetingsConnectedWasTail": "kişi bağlıydı",
+  "@uiMeetingsConnectedWasTail": {
+    "description": "ui.meetings.connected_was_tail"
   },
   "uiMessagesTitle": "Mesajlar",
   "@uiMessagesTitle": {
@@ -5412,6 +5424,18 @@
   "uiTasksErrMtPlace": "Yer en çok 200 karakter olabilir.",
   "@uiTasksErrMtPlace": {
     "description": "ui.tasks.err_mt_place"
+  },
+  "uiTasksMtPoolPartial": "Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.",
+  "@uiTasksMtPoolPartial": {
+    "description": "ui.tasks.mt_pool_partial"
+  },
+  "uiTasksTPeopleFailed": "kişi eklenemedi",
+  "@uiTasksTPeopleFailed": {
+    "description": "ui.tasks.t_people_failed"
+  },
+  "uiTasksTMeetingOpen": "Toplantıyı aç",
+  "@uiTasksTMeetingOpen": {
+    "description": "ui.tasks.t_meeting_open"
   },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {

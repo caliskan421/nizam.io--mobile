@@ -42,11 +42,27 @@ final class ConferenceConnected {
 
   static const none = ConferenceConnected(count: 0, accountIds: []);
 
+  /// Tazelik sınırı: uzlaştırma aralığı varsayılan 1 dk (`NIZAMIO_VIDEO_RECONCILE_INTERVAL`);
+  /// bundan eski gözlem "şu an bağlı" sayılmaz, zamanıyla gösterilir (F63 devri §5).
+  static const freshFor = Duration(minutes: 3);
+
   final int count;
 
   /// Sıralı, tekil hesap kimlikleri.
   final List<String> accountIds;
   final DateTime? observedAt;
+
+  /// Gözlenmiş ve [now] anında [freshFor]'dan eski değil (saat kayması: gelecekteki gözlem taze).
+  bool isFreshAt(DateTime now) {
+    final at = observedAt;
+    return at != null && now.difference(at) <= freshFor;
+  }
+
+  /// Gözlemin yaşı (tam dakika); gözlenmediyse null.
+  int? ageMinutes(DateTime now) {
+    final at = observedAt;
+    return at == null ? null : now.difference(at).inMinutes;
+  }
 }
 
 /// Toplantıya bağlı görüntülü konferans (sunucu `Conference`; dış oda adı taşınmaz).
@@ -65,6 +81,14 @@ final class MeetingConference {
   final DateTime startedAt;
   final String startedByAccountId;
   final ConferenceConnected connected;
+
+  /// Bitirme isteği kabul edildi, oda kapanışı henüz okunmadı: `ending`, bağlı görüntüsü boş.
+  MeetingConference get closing => MeetingConference(
+    id: id,
+    status: ConferenceStatus.ending,
+    startedAt: startedAt,
+    startedByAccountId: startedByAccountId,
+  );
 }
 
 /// Toplantının en yeni biten konferansı (`last_conference`, COLLABORATION-K70). Süre

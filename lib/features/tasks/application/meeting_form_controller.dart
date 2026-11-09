@@ -58,6 +58,7 @@ final class MeetingForm {
     this.error,
     this.failure,
     this.busy = false,
+    this.created,
   });
 
   final String title;
@@ -94,6 +95,13 @@ final class MeetingForm {
   final ApiError? failure;
   final bool busy;
 
+  /// Yalnız [MeetingFormController.submit]'in döndürdüğü gönderilmiş formda: açılan toplantı
+  /// (eklenemeyen katılımcılarıyla); düzenlemede ve taslakta null.
+  final MeetingPlanned? created;
+
+  /// Davet edilen ve eklenemeyen kişi kimlikleri (kişi kipinde; [created]'tan).
+  List<String> get notInvited => created?.failedParticipantIds ?? const [];
+
   MeetingForm copyWith({
     String? title,
     String? place,
@@ -113,6 +121,7 @@ final class MeetingForm {
     MeetingError? Function()? error,
     ApiError? Function()? failure,
     bool? busy,
+    MeetingPlanned? created,
   }) => MeetingForm(
     title: title ?? this.title,
     place: place ?? this.place,
@@ -133,6 +142,7 @@ final class MeetingForm {
     error: error == null ? this.error : error(),
     failure: failure == null ? this.failure : failure(),
     busy: busy ?? this.busy,
+    created: created ?? this.created,
   );
 
   /// Gönderilecek departman seti (ilki sahip).
@@ -312,7 +322,8 @@ class MeetingFormController extends _$MeetingFormController {
       ? MeetingError.owner
       : null;
 
-  /// Doğrular ve sunucuya yazar (yeni ya da düzenleme). Başarıda gönderilen formu döner ve
+  /// Doğrular ve sunucuya yazar (yeni ya da düzenleme). Başarıda gönderilen formu döner (yeni
+  /// toplantıda [MeetingForm.created] dolu: eklenemeyen katılımcılar bildirimde ayrı yazılır) ve
   /// taslağı sıfırlar; doğrulama ya da sunucu hatasında null (hata formda görünür, taslak kalır).
   Future<MeetingForm?> submit() async {
     final f = state;
@@ -340,14 +351,15 @@ class MeetingFormController extends _$MeetingFormController {
     try {
       final planner = ref.read(meetingPlannerProvider);
       final id = f.editing;
+      MeetingPlanned? created;
       if (id == null) {
-        await planner.create(plan);
+        created = await planner.create(plan);
       } else {
         await planner.update(id, plan);
       }
       if (!ref.mounted) return null;
       state = _initial();
-      return f;
+      return f.copyWith(created: created);
     } on Object catch (e) {
       if (ref.mounted) {
         state = state.copyWith(busy: false, failure: () => toApiError(e));

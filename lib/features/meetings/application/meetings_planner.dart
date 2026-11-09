@@ -17,7 +17,7 @@ class MeetingsPlanner implements MeetingPlanner {
   MeetingsRepository get _repo => _ref.read(meetingsRepositoryProvider);
 
   @override
-  Future<String> create(MeetingPlan plan) async {
+  Future<MeetingPlanned> create(MeetingPlan plan) async {
     final r = await _repo.createMeeting(
       MeetingDraft(
         title: plan.title,
@@ -35,7 +35,10 @@ class MeetingsPlanner implements MeetingPlanner {
       ),
     );
     _ref.invalidate(meetingsBoardControllerProvider);
-    return r.meeting.id;
+    return MeetingPlanned(
+      id: r.meeting.id,
+      failedParticipantIds: r.failedParticipants,
+    );
   }
 
   @override

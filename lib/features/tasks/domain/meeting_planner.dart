@@ -44,6 +44,19 @@ final class MeetingPlan {
   final List<String> agenda;
 }
 
+/// Açılan toplantı: kimlik ve sunucunun yazamadığı katılımcılar (`failed_participants`;
+/// toplantı yine açıldı, kişiler ayrıntıdaki "katılımcı ekle" ile yeniden eklenebilir).
+@immutable
+final class MeetingPlanned {
+  const MeetingPlanned({
+    required this.id,
+    this.failedParticipantIds = const [],
+  });
+
+  final String id;
+  final List<String> failedParticipantIds;
+}
+
 /// Nottan görev girdisi (`convertNoteToTask`).
 @immutable
 final class NoteTaskPlan {
@@ -66,8 +79,8 @@ final class NoteTaskPlan {
 
 /// Toplantı yazmaları (hata: `ApiError`).
 abstract interface class MeetingPlanner {
-  /// Yeni toplantı; kimliğini döner.
-  Future<String> create(MeetingPlan plan);
+  /// Yeni toplantı; kimliğini ve eklenemeyen katılımcıları döner.
+  Future<MeetingPlanned> create(MeetingPlan plan);
 
   /// Başlık, an, yer, departman seti ve üye bayrağını günceller (katılımcı, gündem ve davet
   /// kipi değişmez).

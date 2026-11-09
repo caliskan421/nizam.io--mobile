@@ -158,6 +158,14 @@ extension MeetingsTexts on AppLocalizations {
       ? uiMeetingsInvitePerson
       : '$uiMeetingsInviteCoord · ${m.departments.length} $uiMeetingsUnitTail';
 
+  /// Bağlı kişi görüntüsü: tazeyse "3 / 25 kişi bağlı", eskiyse "12 dk önce 3 kişi bağlıydı"
+  /// (K78; eski görüntü güncel bağlılık iddiası taşımaz).
+  String meetingConnected(ConferenceConnected c, DateTime now) =>
+      c.isFreshAt(now)
+      ? '${c.count} / 25 $uiMeetingsConnectedTail'
+      : '${c.ageMinutes(now)} $uiMeetingsSeenAgoTail '
+            '${c.count} $uiMeetingsConnectedWasTail';
+
   /// Silme uyarısındaki canlı konferans cümlesi: bağlı kişi sayısı biliniyorsa "Konferans canlı:
   /// 3 kişinin bağlantısı kesilir.", yoksa genel cümle.
   String meetingDeleteLive(int connected) => connected > 0

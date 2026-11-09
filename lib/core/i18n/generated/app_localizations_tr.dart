@@ -2436,16 +2436,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMeetingsNoteDelete => 'Notu sil';
 
   @override
-  String get uiMeetingsNoteDeleteQ => 'Not silinsin mi?';
-
-  @override
   String get uiMeetingsCancel => 'Vazgeç';
 
   @override
   String get uiMeetingsSave => 'Kaydet';
-
-  @override
-  String get uiMeetingsDelete => 'Sil';
 
   @override
   String get uiMeetingsEdited => 'düzenlendi';
@@ -2656,6 +2650,23 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMeetingsDeleteLiveTail => 'kişinin bağlantısı kesilir.';
+
+  @override
+  String get uiMeetingsAddPeopleDescPerson =>
+      'Programdaki koordinatörlüklerin ekiplerinden seç.';
+
+  @override
+  String get uiMeetingsPoolPartial =>
+      'Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.';
+
+  @override
+  String get uiMeetingsUndo => 'Geri al';
+
+  @override
+  String get uiMeetingsSeenAgoTail => 'dk önce';
+
+  @override
+  String get uiMeetingsConnectedWasTail => 'kişi bağlıydı';
 
   @override
   String get uiMessagesTitle => 'Mesajlar';
@@ -4264,6 +4275,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksErrMtPlace => 'Yer en çok 200 karakter olabilir.';
+
+  @override
+  String get uiTasksMtPoolPartial =>
+      'Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.';
+
+  @override
+  String get uiTasksTPeopleFailed => 'kişi eklenemedi';
+
+  @override
+  String get uiTasksTMeetingOpen => 'Toplantıyı aç';
 
   @override
   String get uiTimelineTitle => 'Zaman çizelgesi';

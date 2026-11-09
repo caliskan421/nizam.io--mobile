@@ -5,7 +5,7 @@ part of 'task_detail_controller.dart';
 /// Uçuş kilidi (`busy`) gönderim başlar başlamaz, içerik özetinden ÖNCE kurulur: özet sürerken
 /// ikinci gönderim ve diğer yazmalar [WriteKind.busy] alır. Taslağın nesli (form açma, dosya
 /// seçimi ve form kapatma artırır) gönderimin başında alınır; özet bitince ve istekten hemen
-/// önce nesil ve denetleyici doğrulanır: değişmişse istek gönderilmez, sonuç yok sayılır.
+/// önce nesil ve denetleyici doğrulanır: değişmişse istek gönderilmez ([WriteKind.superseded]).
 /// Başarı yalnız kendi neslindeki taslağı kapatır (kapatılıp açılan yeni taslak bozulmaz).
 mixin _UploadFlow on _$TaskDetailController {
   TaskItem? get _task;
@@ -87,7 +87,7 @@ mixin _UploadFlow on _$TaskDetailController {
     } finally {
       if (ref.mounted) state = state.copyWith(busy: false);
     }
-    if (digest == null || stale()) return WriteOutcome.unchanged;
+    if (digest == null || stale()) return WriteOutcome.superseded;
     // Kilit bırakıldı; [_writeKeyed] onu arada `await` olmadan, aynı adımda yeniden kurar.
     final r = await _writeKeyed(
       _upload,

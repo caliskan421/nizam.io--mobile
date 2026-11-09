@@ -14,6 +14,10 @@ enum WriteKind {
   /// Değişiklik yok (aynı değer); istek gönderilmedi.
   unchanged,
 
+  /// Gönderim bayatladı (taslak değişti ya da denetleyici kapandı); istek gönderilmedi. Form
+  /// açık kalır ve bildirim gösterilmez: yeni taslak kullanıcının.
+  superseded,
+
   /// Önceki istek uçuşta; istek gönderilmedi (çift dokunma = tek istek).
   busy,
 
@@ -51,6 +55,7 @@ final class WriteOutcome {
   static const unchanged = WriteOutcome(WriteKind.unchanged);
   static const busy = WriteOutcome(WriteKind.busy);
   static const invalid = WriteOutcome(WriteKind.invalid);
+  static const superseded = WriteOutcome(WriteKind.superseded);
 
   final WriteKind kind;
   final ApiError? error;

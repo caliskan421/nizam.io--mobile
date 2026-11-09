@@ -203,7 +203,7 @@ void main() {
     o.sub.close();
     await pumpEventQueue();
     digest.gate!.complete();
-    expect((await pending).kind, WriteKind.unchanged);
+    expect((await pending).kind, WriteKind.superseded);
     expect(digest.cancelled, isTrue);
     expect(_posts(o.h), 0);
   });
@@ -244,11 +244,27 @@ void main() {
       final b = src('2', 'yeni.pdf');
       choose(o.ctl, o.c, b);
       digest.gate!.complete();
-      expect((await pending).kind, WriteKind.unchanged);
+      expect((await pending).kind, WriteKind.superseded);
       expect(digest.cancelled, isTrue, reason: 'okuma durdu');
       expect(_posts(o.h), 0);
       expect(st(o).upload?.file, same(b));
       expect(st(o).busy, isFalse);
+    });
+
+    test('özet sürerken aynı formda yeni dosya seçilir: superseded, istek yok, '
+        'yeni seçim korunur (N12)', () async {
+      final digest = _Digest()..gate = Completer<void>();
+      final picker = _Picker();
+      final o = await _open(digest, picker, ok: true);
+      choose(o.ctl, o.c, src('1', 'rapor.pdf'));
+      final pending = o.ctl.submitUpload();
+      await pumpEventQueue();
+      final b = picker.next = src('2', 'yeni.pdf');
+      expect((await o.ctl.pickUploadFile(UploadOrigin.files)).ok, isTrue);
+      digest.gate!.complete();
+      expect((await pending).kind, WriteKind.superseded);
+      expect(_posts(o.h), 0);
+      expect(st(o).upload?.file, same(b));
     });
 
     test('istek uçuştayken kapatılıp yeni taslak açılır: eski başarı yeni '

@@ -77,22 +77,32 @@ Future<Object?> postChatAttachment(
   return r.data;
 }
 
-/// Multipart dosya parçası. Seçimden sonra silinmiş ya da okunamayan dosya istek gönderilmeden
-/// `client.file_unreadable` olur (ham `FileSystemException` sızmaz, sonuç belirsiz sayılmaz).
+/// Multipart dosya parçası. Seçimden sonra silinmiş ya da okunamayan dosya
+/// `client.file_unreadable` olur (ham `FileSystemException` sızmaz, sonuç belirsiz ya da ağ
+/// hatası sayılmaz): boyut okunamazsa istek gönderilmeden; içerik akışı gönderim sırasında
+/// açılır (Dio `fromFile` de böyle), açılma/okuma hatası akışta [ApiError]'a çevrilir ve
+/// `toApiError` onu `DioException.error`'dan aynen döner. Ağ ve TLS hataları etkilenmez.
 Future<MultipartFile> _filePart(
   String path,
   String filename,
   String contentType,
 ) async {
+  final file = File(path);
+  final int length;
   try {
-    return await MultipartFile.fromFile(
-      path,
-      filename: filename,
-      contentType: DioMediaType.parse(contentType),
-    );
+    length = await file.length();
   } on FileSystemException {
     throw ApiError(ClientErrorCode.fileUnreadable);
   }
+  return MultipartFile.fromStream(
+    () => file.openRead().handleError(
+      (Object _) => throw ApiError(ClientErrorCode.fileUnreadable),
+      test: (e) => e is FileSystemException,
+    ),
+    length,
+    filename: filename,
+    contentType: DioMediaType.parse(contentType),
+  );
 }
 
 /// JSON nesne gövdesini [fromJson] ile çözer; nesne değilse `client.invalid_response`.

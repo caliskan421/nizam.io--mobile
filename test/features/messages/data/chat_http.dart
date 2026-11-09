@@ -13,6 +13,9 @@ class ChatHttpAdapter implements HttpClientAdapter {
   final Map<String, Object> routes;
   final seen = <RequestOptions>[];
 
+  /// İstek gövdesi akışı okunmadan hemen önce çalışır (gönderim sırasındaki yerel hata).
+  void Function()? beforeBody;
+
   RequestOptions only(String method, String path) =>
       seen.singleWhere((o) => o.method == method && o.path == path);
 
@@ -23,6 +26,9 @@ class ChatHttpAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     seen.add(options);
+    // Gerçek bağdaştırıcı gibi gövde akışı tüketilir (multipart dosyası bu sırada okunur).
+    beforeBody?.call();
+    await requestStream?.drain<void>();
     final r = routes['${options.method} ${options.path}'];
     if (r is Stream<Uint8List>) {
       return ResponseBody(

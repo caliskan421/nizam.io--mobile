@@ -66,7 +66,8 @@ abstract class _$MeetingsViewController extends $Notifier<MeetingsView> {
 /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı
 /// silme de bu yoldadır): `/v1/meetings/deleted` istemci kapısında `/v1/meetings/{id}` ile
 /// belirsiz eşleşir ve fail-closed reddedilir. İkisi de imleçli; en çok [maxPages] × [pageSize]
-/// satır okunur. Seçili program değişince yeniden yüklenir.
+/// satır okunur. Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka
+/// planda tazelenir ([refreshIfStale]).
 
 @ProviderFor(MeetingsBoardController)
 final meetingsBoardControllerProvider = MeetingsBoardControllerProvider._();
@@ -75,14 +76,16 @@ final meetingsBoardControllerProvider = MeetingsBoardControllerProvider._();
 /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı
 /// silme de bu yoldadır): `/v1/meetings/deleted` istemci kapısında `/v1/meetings/{id}` ile
 /// belirsiz eşleşir ve fail-closed reddedilir. İkisi de imleçli; en çok [maxPages] × [pageSize]
-/// satır okunur. Seçili program değişince yeniden yüklenir.
+/// satır okunur. Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka
+/// planda tazelenir ([refreshIfStale]).
 final class MeetingsBoardControllerProvider
     extends $AsyncNotifierProvider<MeetingsBoardController, MeetingsBoard> {
   /// Toplantı listesi: görünür toplantılar (`listMeetings`) ve yöneticiye silinenler. Silinenler
   /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı
   /// silme de bu yoldadır): `/v1/meetings/deleted` istemci kapısında `/v1/meetings/{id}` ile
   /// belirsiz eşleşir ve fail-closed reddedilir. İkisi de imleçli; en çok [maxPages] × [pageSize]
-  /// satır okunur. Seçili program değişince yeniden yüklenir.
+  /// satır okunur. Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka
+  /// planda tazelenir ([refreshIfStale]).
   MeetingsBoardControllerProvider._()
     : super(
         from: null,
@@ -103,13 +106,14 @@ final class MeetingsBoardControllerProvider
 }
 
 String _$meetingsBoardControllerHash() =>
-    r'e5e8353a1a94dcdb5061120d2f3bd3600448c660';
+    r'e10bee442e9558ae1dbcb9db5ad29df88c03ec1c';
 
 /// Toplantı listesi: görünür toplantılar (`listMeetings`) ve yöneticiye silinenler. Silinenler
 /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı
 /// silme de bu yoldadır): `/v1/meetings/deleted` istemci kapısında `/v1/meetings/{id}` ile
 /// belirsiz eşleşir ve fail-closed reddedilir. İkisi de imleçli; en çok [maxPages] × [pageSize]
-/// satır okunur. Seçili program değişince yeniden yüklenir.
+/// satır okunur. Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka
+/// planda tazelenir ([refreshIfStale]).
 
 abstract class _$MeetingsBoardController extends $AsyncNotifier<MeetingsBoard> {
   FutureOr<MeetingsBoard> build();

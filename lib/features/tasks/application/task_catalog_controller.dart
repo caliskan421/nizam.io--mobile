@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers.dart';
+import '../../../core/stale_clock.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_details.dart';
 import 'tasks_providers.dart';
@@ -23,19 +24,14 @@ part 'task_catalog_controller.g.dart';
 /// hatasında da (`AsyncError` önceki değeri taşır) görünür veri silinmez.
 @Riverpod(keepAlive: true)
 class TaskCatalogController extends _$TaskCatalogController {
-  /// Yeniden ziyarette ([refreshIfStale]) kataloğun taze sayıldığı süre.
-  static const staleAfter = Duration(seconds: 30);
-
   /// Son başarılı okumadan beri geçen süre (notifier yeniden kurulumlarda korunur).
-  final _age = Stopwatch();
+  final _clock = StaleClock();
 
   @override
   Future<TaskCatalog> build() async {
     ref.watch(scopeStateProvider);
     final catalog = await ref.read(taskCatalogRepositoryProvider).load();
-    _age
-      ..reset()
-      ..start();
+    _clock.markFresh();
     return catalog;
   }
 
@@ -121,15 +117,8 @@ class TaskCatalogController extends _$TaskCatalogController {
   /// yeniden okur; eski katalog görünür kalır. Hiç yüklenmemişse (ilk yükleme hatası yalnız
   /// dokunuşla yeniden denenir) ya da zaten yükleniyorsa bir şey yapmaz. Hata yutulur
   /// (durumda kalır).
-  Future<void> refreshIfStale({Duration maxAge = staleAfter}) async {
-    if (state.isLoading || !state.hasValue) return;
-    if (_age.isRunning && _age.elapsed < maxAge) return;
-    try {
-      await refresh();
-    } on Object {
-      // Arka plan yenilemesi: hata durumda, veri yerinde.
-    }
-  }
+  Future<void> refreshIfStale({Duration maxAge = StaleClock.staleAfter}) =>
+      _clock.refreshIfStale(state, refresh, maxAge: maxAge);
 
   /// [code] görevine sunucudan okunan ayrıntıyı uygular: tekil okuma ([TaskDetails.item];
   /// tarih, açıklama, durum, atananlar, sayılar) katalogdaki görevin YERİNE geçer, alt görev /

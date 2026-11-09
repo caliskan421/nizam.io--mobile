@@ -49,6 +49,32 @@ List<String?> _noteKeys(Harness h) => [
 ];
 
 void main() {
+  test(
+    'yenileme hatası veri varken fırlatılır ve önceki oda korunur',
+    () async {
+      final s = MeetingsServer();
+      final (_, c, ctl) = await _open(s);
+      final previous = _now(c);
+      s.overrides['GET /v1/meetings/m1'] = () =>
+          errorBody(503, 'identity.unavailable');
+      await expectLater(ctl.refresh(), throwsA(isA<Object>()));
+      expect(c.read(_room).value, same(previous));
+      expect(c.read(_room).hasError, isTrue);
+    },
+  );
+
+  test('yenileme hatası veri yokken yalnız durumda kalır', () async {
+    final s = MeetingsServer()
+      ..overrides['GET /v1/meetings/m1'] = () =>
+          errorBody(503, 'identity.unavailable');
+    final (_, c) = await openMeetings(s);
+    c.listen(_room, (_, _) {});
+    await expectLater(c.read(_room.future), throwsA(isA<Object>()));
+    await c.read(_room.notifier).refresh();
+    expect(c.read(_room).hasValue, isFalse);
+    expect(c.read(_room).hasError, isTrue);
+  });
+
   test('ayrıntı + kalan not sayfası birlikte okunur', () async {
     final s = MeetingsServer()
       ..moreNotes = [noteWire('n2', created: '2026-11-02T07:00:00Z')];

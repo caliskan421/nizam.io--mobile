@@ -210,13 +210,14 @@ class MeetingRoomController extends _$MeetingRoomController {
     return room;
   }
 
-  /// Aşağı çekerek yenileme: yeniden okur ve bitmesini bekler (hata ekranda görünür).
+  /// Yenilemeyi bekler; eski veri görünürken hatayı çağırana bildirir.
   Future<void> refresh() async {
+    final shown = state.hasValue;
     ref.invalidateSelf();
     try {
       await future;
     } on Object {
-      // Hata durumda (AsyncError) gösterilir; yenileme göstergesi kapanır.
+      if (shown) rethrow; // Veri yoksa hata görünümü yeterlidir.
     }
   }
 

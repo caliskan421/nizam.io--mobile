@@ -16,9 +16,8 @@ import '../application/admin_controller.dart';
 import '../domain/organization_admin.dart';
 import 'admin_forms.dart';
 
-/// Hesap sekmesinin son işlem grubu (.us-acc .cd-group). Pinli API aktiflik/kalıcı
-/// kilitleme durumunu ve e-posta sıfırlama bağlantısını sunmaz. Bu iki işlem temsili
-/// anahtarla başarı üretmez; yalnız gerçek kullanıcı silme ucu çalışır.
+/// Hesap sekmesinin son işlem grubu. Pinli API aktiflik değiştirmeyi sunmaz;
+/// yalnız mevcut oturumun hesabının açık olduğu bilinir. Silme gerçek ucu kullanır.
 class AdminUserAccountOperations extends ConsumerWidget {
   const AdminUserAccountOperations({super.key, required this.user});
   final KnownUser user;
@@ -32,6 +31,10 @@ class AdminUserAccountOperations extends ConsumerWidget {
     final admin =
         !catalog.hasError && !catalog.isLoading && access?.companyAdmin == true;
     final self = access?.accountId == user.accountId;
+    final activeSession = !catalog.hasError && !catalog.isLoading && self;
+    final statusDescription = activeSession
+        ? l.uiUserAccountFieldsSignedInStatusHint
+        : l.uiUsersOpsStatusUnavailable;
     final busy = ref.watch(adminCommandProvider);
     Future<void> remove() async {
       if (!admin || self || busy) return;
@@ -80,7 +83,7 @@ class AdminUserAccountOperations extends ConsumerWidget {
               Semantics(
                 enabled: false,
                 label:
-                    '${l.uiUsersOpsActive}. ${l.uiUsersOpsStatusUnavailable}',
+                    '${l.uiUsersOpsActive}${activeSession ? '' : ' · —'}. $statusDescription',
                 child: ExcludeSemantics(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -95,34 +98,28 @@ class AdminUserAccountOperations extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${l.uiUsersOpsActive} · —',
+                                '${l.uiUsersOpsActive}${activeSession ? '' : ' · —'}',
                                 style: context.text.bodyMd,
                               ),
                               const Gap(2),
                               Text(
-                                l.uiUsersOpsStatusUnavailable,
+                                statusDescription,
                                 style: context.text.caption.copyWith(
                                   color: c.textMuted,
+                                  fontSize: 13,
                                 ),
                               ),
                             ],
                           ),
                         ),
                         const Gap(12),
-                        // Yok/false aktiflik olgusu değildir: anahtar yalnız devre dışı görünür,
-                        // erişilebilirlikte bilinmeyen durumu yukarıdaki etiket açıklar.
-                        const NzToggle(value: false, onChanged: null),
+                        // Diğer hesaplarda false bir aktiflik olgusu değildir;
+                        // bilinmeyen durum başlık ve alt metinde açıklanır.
+                        NzToggle(value: activeSession, onChanged: null),
                       ],
                     ),
                   ),
                 ),
-              ),
-              divider(),
-              NzListTile(
-                title: l.uiUsersOpsResetLink,
-                subtitle: l.uiUsersOpsResetUnavailable,
-                leading: icon(NzIcons.mail),
-                onTap: null,
               ),
               divider(),
               AbsorbPointer(

@@ -46,6 +46,8 @@ class NzPage extends ConsumerWidget {
        after = const [],
        afterKey = null,
        paneLead = null,
+       bottomDock = null,
+       bottomDockExtent = 54,
        _fill = false,
        _bare = false;
 
@@ -73,7 +75,10 @@ class NzPage extends ConsumerWidget {
     this.onRefresh,
     this.onRevisit,
     this.fadeContent = true,
-  }) : title = '',
+    this.bottomDock,
+    this.bottomDockExtent = 54,
+  }) : assert(bottomDockExtent >= 0),
+       title = '',
        body = const SizedBox.shrink(),
        actions = const [],
        floatingAction = null,
@@ -105,6 +110,8 @@ class NzPage extends ConsumerWidget {
        showTitleBar = false,
        afterKey = null,
        paneLead = null,
+       bottomDock = null,
+       bottomDockExtent = 54,
        _fill = true,
        _bare = false;
 
@@ -129,6 +136,8 @@ class NzPage extends ConsumerWidget {
       showTitleBar = false,
       afterKey = null,
       paneLead = null,
+      bottomDock = null,
+      bottomDockExtent = 54,
       _fill = false,
       _bare = true;
 
@@ -163,6 +172,14 @@ class NzPage extends ConsumerWidget {
   /// Tablet sağ bölmesinde üst çubuk ile ilk öğe arası (kaynak ekranın `gap` + ilk öğenin
   /// negatif `margin-top` toplamı, ör. görev ayrıntısı 12); null → `gap-xl`. Telefonda kullanılmaz.
   final double? paneLead;
+
+  /// [NzPage.feed]: kaydırma dışında, sayfanın kendi viewportunda duran alt eylem.
+  /// Alt menü/güvenli alan MediaQuery rezervinin 16 px üstündedir; yatay sınırlar içerikle
+  /// aynıdır. null olduğunda ek kaydırma payı veya katman kurulmaz.
+  final Widget? bottomDock;
+
+  /// Etkin alt eylem için kaydırılan içerikte ayrılan yükseklik (alt aralık hariç).
+  final double bottomDockExtent;
   final NzContentWidth width;
 
   /// AppBar eylemleri.
@@ -229,7 +246,11 @@ class NzPage extends ConsumerWidget {
       // Tablet bölmesi (`.tb-pane`): liste bölmesinde kök üst çubuk gizli, içerik üstten 18;
       // iki bölmede de sayfa sonu 40 (telefondaki alt menü payı yok); sağ bölmede yan 28.
       final pane = NzPaneScope.maybeOf(context)?.role;
-      final bottom = NzPaneScope.pageBottom(context);
+      const dockGap = NizamioSpacing.space4;
+      final dock = bottomDock;
+      final bottom =
+          NzPaneScope.pageBottom(context) +
+          (dock == null ? 0 : bottomDockExtent + dockGap);
       final top = switch (pane) {
         NzPaneRole.master => safe.top + NzTabletMetrics.paneTop,
         NzPaneRole.detail => paneLead ?? NizamioSpacing.gapXl,
@@ -313,17 +334,34 @@ class NzPage extends ConsumerWidget {
                   ),
                 ],
               );
-              if (refresh == null || cupertino) return scroll;
               // Material gösterge cam üst çubuğun altından iner (çubuk kaydırma görünümünün
               // içindedir; yüksekliği NzTopBar ile aynı: güvenli alan + space2 + appbar).
-              return RefreshIndicator(
-                onRefresh: refresh,
-                edgeOffset: pane == NzPaneRole.master
-                    ? safe.top
-                    : safe.top + NizamioSpacing.space2 + NizamioSize.appbar,
-                color: context.colors.accentText,
-                backgroundColor: context.colors.surfaceRaised,
-                child: scroll,
+              final content = refresh == null || cupertino
+                  ? scroll
+                  : RefreshIndicator(
+                      onRefresh: refresh,
+                      edgeOffset: pane == NzPaneRole.master
+                          ? safe.top
+                          : safe.top +
+                                NizamioSpacing.space2 +
+                                NizamioSize.appbar,
+                      color: context.colors.accentText,
+                      backgroundColor: context.colors.surfaceRaised,
+                      child: scroll,
+                    );
+              if (dock == null) return content;
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  content,
+                  Positioned(
+                    left: side,
+                    right: side,
+                    // Shell extendBody'nin MediaQuery rezervi alt menüyü zaten içerir.
+                    bottom: safe.bottom + dockGap,
+                    child: dock,
+                  ),
+                ],
               );
             },
           ),

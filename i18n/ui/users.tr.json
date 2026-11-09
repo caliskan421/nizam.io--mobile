@@ -131,6 +131,13 @@
     "ui.users.account_add_as_member": "Üye olarak ekle",
     "ui.users.account_unsaved": "Kaydedilmedi",
     "ui.users.account_cancel": "Vazgeç",
-    "ui.users.account_save": "Kaydet"
+    "ui.users.account_save": "Kaydet",
+    "ui.users.draft_roles": "roller",
+    "ui.users.draft_add_department": "Koordinatörlük ekle",
+    "ui.users.draft_selected": "seçili",
+    "ui.users.draft_invalid": "Ad soyadı ve geçerli bir e-posta adresini kontrol edin.",
+    "ui.users.draft_admin_unknown": "Yönetici yetkisi henüz doğrulanamadı.",
+    "ui.users.draft_role_scope": "Admin şirket genelidir. Koordinatör ve Üye seçimi bu programdaki seçili koordinatörlüklere uygulanır.",
+    "ui.users.draft_self_conflict": "Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin."
   }
 }

@@ -9490,6 +9490,60 @@ abstract class AppLocalizations {
   /// **'Görev ayrıntısını aç'**
   String get uiTimelineGanttOpenTask;
 
+  /// ui.user_account_fields.heading
+  ///
+  /// In tr, this message translates to:
+  /// **'hesap bilgileri'**
+  String get uiUserAccountFieldsHeading;
+
+  /// ui.user_account_fields.full_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad soyad'**
+  String get uiUserAccountFieldsFullName;
+
+  /// ui.user_account_fields.email
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta'**
+  String get uiUserAccountFieldsEmail;
+
+  /// ui.user_account_fields.password
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre'**
+  String get uiUserAccountFieldsPassword;
+
+  /// ui.user_account_fields.edit_full_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad soyadı düzenle'**
+  String get uiUserAccountFieldsEditFullName;
+
+  /// ui.user_account_fields.edit_email
+  ///
+  /// In tr, this message translates to:
+  /// **'E-postayı düzenle'**
+  String get uiUserAccountFieldsEditEmail;
+
+  /// ui.user_account_fields.edit_password
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni şifre belirle'**
+  String get uiUserAccountFieldsEditPassword;
+
+  /// ui.user_account_fields.new_password
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni şifre'**
+  String get uiUserAccountFieldsNewPassword;
+
+  /// ui.user_account_fields.signed_in_status_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.'**
+  String get uiUserAccountFieldsSignedInStatusHint;
+
   /// ui.users.title
   ///
   /// In tr, this message translates to:
@@ -10276,11 +10330,47 @@ abstract class AppLocalizations {
   /// **'Kaydet'**
   String get uiUsersAccountSave;
 
-  /// ui.users.task_showing_hint
+  /// ui.users.draft_roles
   ///
   /// In tr, this message translates to:
-  /// **'görev gösteriliyor · birden çok seçebilirsin'**
-  String get uiUsersTaskShowingHint;
+  /// **'roller'**
+  String get uiUsersDraftRoles;
+
+  /// ui.users.draft_add_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük ekle'**
+  String get uiUsersDraftAddDepartment;
+
+  /// ui.users.draft_selected
+  ///
+  /// In tr, this message translates to:
+  /// **'seçili'**
+  String get uiUsersDraftSelected;
+
+  /// ui.users.draft_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad soyadı ve geçerli bir e-posta adresini kontrol edin.'**
+  String get uiUsersDraftInvalid;
+
+  /// ui.users.draft_admin_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetici yetkisi henüz doğrulanamadı.'**
+  String get uiUsersDraftAdminUnknown;
+
+  /// ui.users.draft_role_scope
+  ///
+  /// In tr, this message translates to:
+  /// **'Admin şirket genelidir. Koordinatör ve Üye seçimi bu programdaki seçili koordinatörlüklere uygulanır.'**
+  String get uiUsersDraftRoleScope;
+
+  /// ui.users.draft_self_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.'**
+  String get uiUsersDraftSelfConflict;
 }
 
 class _AppLocalizationsDelegate

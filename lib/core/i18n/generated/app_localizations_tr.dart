@@ -4917,6 +4917,34 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTimelineGanttOpenTask => 'Görev ayrıntısını aç';
 
   @override
+  String get uiUserAccountFieldsHeading => 'hesap bilgileri';
+
+  @override
+  String get uiUserAccountFieldsFullName => 'Ad soyad';
+
+  @override
+  String get uiUserAccountFieldsEmail => 'E-posta';
+
+  @override
+  String get uiUserAccountFieldsPassword => 'Şifre';
+
+  @override
+  String get uiUserAccountFieldsEditFullName => 'Ad soyadı düzenle';
+
+  @override
+  String get uiUserAccountFieldsEditEmail => 'E-postayı düzenle';
+
+  @override
+  String get uiUserAccountFieldsEditPassword => 'Yeni şifre belirle';
+
+  @override
+  String get uiUserAccountFieldsNewPassword => 'Yeni şifre';
+
+  @override
+  String get uiUserAccountFieldsSignedInStatusHint =>
+      'Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.';
+
+  @override
   String get uiUsersTitle => 'Kullanıcılar';
 
   @override
@@ -5334,6 +5362,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiUsersAccountSave => 'Kaydet';
 
   @override
-  String get uiUsersTaskShowingHint =>
-      'görev gösteriliyor · birden çok seçebilirsin';
+  String get uiUsersDraftRoles => 'roller';
+
+  @override
+  String get uiUsersDraftAddDepartment => 'Koordinatörlük ekle';
+
+  @override
+  String get uiUsersDraftSelected => 'seçili';
+
+  @override
+  String get uiUsersDraftInvalid =>
+      'Ad soyadı ve geçerli bir e-posta adresini kontrol edin.';
+
+  @override
+  String get uiUsersDraftAdminUnknown =>
+      'Yönetici yetkisi henüz doğrulanamadı.';
+
+  @override
+  String get uiUsersDraftRoleScope =>
+      'Admin şirket genelidir. Koordinatör ve Üye seçimi bu programdaki seçili koordinatörlüklere uygulanır.';
+
+  @override
+  String get uiUsersDraftSelfConflict =>
+      'Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.';
 }

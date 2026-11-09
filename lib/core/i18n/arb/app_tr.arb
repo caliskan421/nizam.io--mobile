@@ -6265,6 +6265,42 @@
   "@uiTimelineGanttOpenTask": {
     "description": "ui.timeline.gantt_open_task"
   },
+  "uiUserAccountFieldsHeading": "hesap bilgileri",
+  "@uiUserAccountFieldsHeading": {
+    "description": "ui.user_account_fields.heading"
+  },
+  "uiUserAccountFieldsFullName": "Ad soyad",
+  "@uiUserAccountFieldsFullName": {
+    "description": "ui.user_account_fields.full_name"
+  },
+  "uiUserAccountFieldsEmail": "E-posta",
+  "@uiUserAccountFieldsEmail": {
+    "description": "ui.user_account_fields.email"
+  },
+  "uiUserAccountFieldsPassword": "Şifre",
+  "@uiUserAccountFieldsPassword": {
+    "description": "ui.user_account_fields.password"
+  },
+  "uiUserAccountFieldsEditFullName": "Ad soyadı düzenle",
+  "@uiUserAccountFieldsEditFullName": {
+    "description": "ui.user_account_fields.edit_full_name"
+  },
+  "uiUserAccountFieldsEditEmail": "E-postayı düzenle",
+  "@uiUserAccountFieldsEditEmail": {
+    "description": "ui.user_account_fields.edit_email"
+  },
+  "uiUserAccountFieldsEditPassword": "Yeni şifre belirle",
+  "@uiUserAccountFieldsEditPassword": {
+    "description": "ui.user_account_fields.edit_password"
+  },
+  "uiUserAccountFieldsNewPassword": "Yeni şifre",
+  "@uiUserAccountFieldsNewPassword": {
+    "description": "ui.user_account_fields.new_password"
+  },
+  "uiUserAccountFieldsSignedInStatusHint": "Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.",
+  "@uiUserAccountFieldsSignedInStatusHint": {
+    "description": "ui.user_account_fields.signed_in_status_hint"
+  },
   "uiUsersTitle": "Kullanıcılar",
   "@uiUsersTitle": {
     "description": "ui.users.title"
@@ -6789,8 +6825,32 @@
   "@uiUsersAccountSave": {
     "description": "ui.users.account_save"
   },
-  "uiUsersTaskShowingHint": "görev gösteriliyor · birden çok seçebilirsin",
-  "@uiUsersTaskShowingHint": {
-    "description": "ui.users.task_showing_hint"
+  "uiUsersDraftRoles": "roller",
+  "@uiUsersDraftRoles": {
+    "description": "ui.users.draft_roles"
+  },
+  "uiUsersDraftAddDepartment": "Koordinatörlük ekle",
+  "@uiUsersDraftAddDepartment": {
+    "description": "ui.users.draft_add_department"
+  },
+  "uiUsersDraftSelected": "seçili",
+  "@uiUsersDraftSelected": {
+    "description": "ui.users.draft_selected"
+  },
+  "uiUsersDraftInvalid": "Ad soyadı ve geçerli bir e-posta adresini kontrol edin.",
+  "@uiUsersDraftInvalid": {
+    "description": "ui.users.draft_invalid"
+  },
+  "uiUsersDraftAdminUnknown": "Yönetici yetkisi henüz doğrulanamadı.",
+  "@uiUsersDraftAdminUnknown": {
+    "description": "ui.users.draft_admin_unknown"
+  },
+  "uiUsersDraftRoleScope": "Admin şirket genelidir. Koordinatör ve Üye seçimi bu programdaki seçili koordinatörlüklere uygulanır.",
+  "@uiUsersDraftRoleScope": {
+    "description": "ui.users.draft_role_scope"
+  },
+  "uiUsersDraftSelfConflict": "Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.",
+  "@uiUsersDraftSelfConflict": {
+    "description": "ui.users.draft_self_conflict"
   }
 }

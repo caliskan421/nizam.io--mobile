@@ -12,6 +12,7 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/buttons/nz_icon_button.dart';
+import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/nz_top_bar.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
@@ -20,7 +21,11 @@ import '../../messages/messages.dart';
 import '../../tasks/tasks.dart';
 import '../application/admin_controller.dart';
 import '../application/admin_user_task_panel_controller.dart';
+import '../application/user_account_draft_controller.dart';
 import '../domain/organization_admin.dart';
+import '../domain/user_account_draft.dart';
+import 'admin_forms.dart';
+import 'admin_user_account_dock.dart';
 import 'admin_user_account_panel.dart';
 import 'admin_user_collapsed_title.dart';
 import 'admin_user_hero.dart';
@@ -109,6 +114,43 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     _scheduleGeometry();
   }
 
+  Future<void> _saveAccount() async {
+    final id = widget.accountId;
+    final scope = ref.read(scopeStateProvider);
+    final session = ref.read(sessionGenerationProvider);
+    final draft = ref.read(userAccountDraftProvider(id));
+    final self =
+        ref.read(taskCatalogControllerProvider).value?.access?.accountId == id;
+    if (draft != null &&
+        self &&
+        draft.password.isNotEmpty &&
+        draft.adminChanged &&
+        draft.value.companyAdmin == false) {
+      NzToast.show(context, context.l10n.uiUsersDraftSelfConflict);
+      return;
+    }
+    final result = await ref
+        .read(userAccountDraftProvider(id).notifier)
+        .save(
+          confirmEffects: () => adminConfirm(
+            context,
+            context.l10n.uiUsersMemberships,
+            context.l10n.uiUsersMembershipConfirm,
+          ),
+        );
+    if (!mounted ||
+        id != widget.accountId ||
+        scope != ref.read(scopeStateProvider) ||
+        session != ref.read(sessionGenerationProvider))
+      return;
+    if (result == AccountSaveResult.saved)
+      NzToast.success(context, context.l10n.uiUsersSaved);
+    if (result == AccountSaveResult.failed) {
+      final error = ref.read(userAccountDraftProvider(id))?.error;
+      if (error != null) NzToast.error(context, error);
+    }
+  }
+
   void _retry() {
     if (ref.read(taskCatalogControllerProvider).hasError) {
       ref.invalidate(taskCatalogControllerProvider);
@@ -142,6 +184,7 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final profile = adminUserProfileProvider(widget.accountId);
+    final accountDraft = ref.watch(userAccountDraftProvider(widget.accountId));
     ref.watch(adminUserTaskPanelProvider(widget.accountId));
     final value = ref.watch(profile);
     ref.listen(profile, (_, next) {
@@ -211,6 +254,20 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     _scheduleGeometry();
 
     final page = NzPage.feed(
+      bottomDock:
+          _tab == 3 &&
+              user != null &&
+              accountDraft != null &&
+              (accountDraft.dirty || accountDraft.busy)
+          ? AdminUserAccountDock(
+              draft: accountDraft,
+              onDiscard: ref
+                  .read(userAccountDraftProvider(widget.accountId).notifier)
+                  .discard,
+              onSave: _saveAccount,
+            )
+          : null,
+      bottomDockExtent: 54,
       topBar: NzTopBar.detail(
         onBack: widget.onBack,
         titleContent: user == null

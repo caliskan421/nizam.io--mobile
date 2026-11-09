@@ -1,5 +1,6 @@
 // ArchiveActionsController: ZIP (klasör / görünen seçim, 100 sınırı), dosya indirme, silme ve
-// yükleme (seçici, tür/boyut ön denetimi, departman, yeniden okuma).
+// yükleme (seçici, tür/boyut ön denetimi, departman, yeniden okuma; belirsiz sonuçta seçicisiz
+// "Yeniden dene" aynı niyet ve aynı anahtarla).
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/domain/page_slice.dart';
@@ -252,6 +253,72 @@ void main() {
       expect(ctrl.pendingUploadKey, isNull);
     });
 
+    // Codex tur 2 / N2: gerçek seçici her seçimde yeni geçici yol döndürür; "Yeniden dene"
+    // seçiciyi açmadan saklanan niyeti aynı anahtarla gönderir.
+    test(
+      'belirsiz sonuç → yeniden dene seçicisiz, aynı yol ve aynı anahtar',
+      () async {
+        final repo = FakeArchiveRepository()
+          ..attachErrors.addAll([
+            ApiError(ClientErrorCode.timeout),
+            ApiError(ClientErrorCode.networkError),
+          ]);
+        final picker = _FreshPathPicker();
+        final c = archiveContainer(repo, picker: picker);
+        final ctrl = _ctrl(c);
+        expect((await ctrl.retryUpload()).ok, isFalse, reason: 'niyet yok');
+        final a = await ctrl.upload(
+          workItemId: 'w1',
+          tag: RecordTag.plan,
+          origin: UploadOrigin.files,
+        );
+        expect(a.error?.code, ClientErrorCode.outcomeUnknown);
+        expect(ctrl.hasPendingUpload, isTrue);
+        final key = repo.attachKeys.single;
+        final b = await ctrl.retryUpload();
+        expect(b.error?.code, ClientErrorCode.outcomeUnknown);
+        final ok = await ctrl.retryUpload();
+        expect(ok.ok, isTrue);
+        expect(picker.picks, 1, reason: 'yeniden dene seçiciyi açmaz');
+        expect(repo.attachKeys, [key, key, key]);
+        expect(repo.attachPaths.toSet(), {'/tmp/1/rapor.pdf'});
+        expect(ctrl.hasPendingUpload, isFalse);
+        expect(ctrl.pendingUploadKey, isNull);
+      },
+    );
+
+    test('belirsiz sonuç sonrası aynı dosyanın yeniden seçimi (yeni yol) aynı '
+        'anahtar; farklı ad ya da boyut yeni anahtar', () async {
+      final repo = FakeArchiveRepository()
+        ..attachErrors.addAll([
+          for (var i = 0; i < 4; i++) ApiError(ClientErrorCode.timeout),
+        ]);
+      final picker = _FreshPathPicker();
+      final c = archiveContainer(repo, picker: picker);
+      final ctrl = _ctrl(c);
+      Future<String> pickAndSend({
+        String name = 'rapor.pdf',
+        int size = 10,
+      }) async {
+        picker
+          ..name = name
+          ..size = size;
+        final r = await ctrl.upload(
+          workItemId: 'w1',
+          tag: RecordTag.plan,
+          origin: UploadOrigin.files,
+        );
+        expect(r.error?.code, ClientErrorCode.outcomeUnknown);
+        return repo.attachKeys.last;
+      }
+
+      final first = await pickAndSend();
+      expect(await pickAndSend(), first);
+      expect(repo.attachPaths.toSet(), hasLength(2), reason: 'yeni geçici yol');
+      expect(await pickAndSend(size: 11), isNot(first));
+      expect(await pickAndSend(name: 'plan.pdf'), isNot(first));
+    });
+
     test('seçici yoksa başlangıç noPicker', () {
       final c = archiveContainer(
         FakeArchiveRepository(),
@@ -260,4 +327,18 @@ void main() {
       expect(_ctrl(c).uploadStart, ArchiveUploadStart.noPicker);
     });
   });
+}
+
+/// Gerçek seçici gibi her seçimde yeni geçici yol döndürür (`/tmp/<n>/rapor.pdf`).
+class _FreshPathPicker implements UploadPicker {
+  int picks = 0;
+  String name = 'rapor.pdf';
+  int size = 10;
+
+  @override
+  bool get available => true;
+
+  @override
+  Future<UploadSource?> pick(UploadOrigin origin) async =>
+      UploadSource(path: '/tmp/${++picks}/$name', name: name, sizeBytes: size);
 }

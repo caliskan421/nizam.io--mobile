@@ -574,7 +574,8 @@ class TaskDetailController extends _$TaskDetailController {
     }
     final r = await _writeKeyed(
       _upload,
-      '${f.path}|${f.name}|${f.sizeBytes}|${d.tag.name}|${d.subtask}',
+      // Geçici yol imzada yok: aynı dosyanın yeniden seçimi (yeni yol) aynı anahtarı taşır.
+      '${f.name}|${f.sizeBytes}|${d.tag.name}|${d.subtask}',
       (key) => _writes.attachFile(
         t,
         f,

@@ -17,8 +17,10 @@ part 'chat_actions_controller.g.dart';
 /// birleştirilip TEK istekte (son istenen durum) gider — istenen durum sunucudakiyle aynıysa
 /// istek gitmez (yazma kovası 60/dk). Mesaj başına uçuşta en çok bir yazma vardır: doğrulanmış
 /// (sunucu) ve istenen durum ayrı tutulur; uçuş sırasındaki dokunuşlar yalnız istenen durumu
-/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Hata yalnız kendi
-/// isteğinin iyimser katmanını geri alır (sonradan istenen durum kalır) ve o isteği bekleyen
+/// değiştirir, uçuş bitince istenen ≠ doğrulanmışsa tek istek daha gider. Geri alma kararı
+/// dokunuş nesline bağlıdır: hata, istek gittikten sonra yeni dokunuş yoksa doğrulanmış duruma
+/// geri döndürür; varsa son istenen durum korunur ve (hatalı sonucun sunucu durumu belirsiz
+/// olduğundan) değeri ne olursa olsun tek istekle gönderilir. Hatalı isteği bekleyen
 /// dokunuşların Future'ı hatayla biter. Sabitleme mesaj başına tek istek; sonuçta şerit yeniden
 /// okunur. Otomatik yeniden deneme yoktur. Durum: uçuştaki istek sayısı.
 @riverpod
@@ -191,7 +193,8 @@ class ChatActionsController extends _$ChatActionsController {
     void Function(ApiError e)? onError,
   }) {
     final f = book.putIfAbsent(messageId, () => _Flight<T>(confirmed))
-      ..desired = desired;
+      ..desired = desired
+      ..gen += 1;
     final w = Completer<void>();
     f.waiters.add(w);
     if (!f.busy) {
@@ -219,7 +222,9 @@ class ChatActionsController extends _$ChatActionsController {
   }
 
   /// Uçuş döngüsü: her turda istenen durum doğrulanmıştan farklıysa TEK istek gider; tur
-  /// sırasında gelen dokunuşlar sonraki turu bekler.
+  /// sırasında gelen dokunuşlar sonraki turu bekler. Önceki tur hatayla bittiyse ve arada
+  /// dokunuş geldiyse ([uncertain]) istek eşitlikten bağımsız gider: bekleyenler istek
+  /// gönderilmeden başarı sayılmaz.
   Future<void> _fly<T>(
     _Flight<T> f, {
     required bool Function(T a, T b) same,
@@ -227,16 +232,19 @@ class ChatActionsController extends _$ChatActionsController {
     required void Function(T value) revert,
     void Function(ApiError e)? onError,
   }) async {
+    var uncertain = false;
     while (ref.mounted && f.waiters.isNotEmpty) {
       final waiters = f.waiters;
       f.waiters = [];
       final sending = f.desired;
-      if (same(sending, f.confirmed)) {
+      final gen = f.gen;
+      if (!uncertain && same(sending, f.confirmed)) {
         for (final w in waiters) {
           w.complete();
         }
         continue;
       }
+      uncertain = false;
       try {
         await _write(() => send(sending));
         f.confirmed = sending;
@@ -244,8 +252,10 @@ class ChatActionsController extends _$ChatActionsController {
           w.complete();
         }
       } on Object catch (e) {
-        // Yalnız bu isteğin katmanı geri alınır: uçuşta yeni durum istendiyse o kalır.
-        if (ref.mounted && same(f.desired, sending)) {
+        // Geri alma yalnız istekten sonra dokunuş yoksa; varsa son istenen durum kalır.
+        if (f.gen != gen) {
+          uncertain = true;
+        } else if (ref.mounted) {
           f.desired = f.confirmed;
           revert(f.confirmed);
         }
@@ -269,6 +279,9 @@ final class _Flight<T> {
 
   /// Kullanıcının son istediği durum (ekrandaki).
   T desired;
+
+  /// Dokunuş nesli: her dokunuşta artar (geri alma kararı değer eşitliğine değil buna bağlı).
+  int gen = 0;
   bool busy = false;
   Timer? timer;
 

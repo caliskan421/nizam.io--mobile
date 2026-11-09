@@ -1,7 +1,8 @@
 // ChatRoomController: açılış (bilgi + son sayfa, ayırıcı, okundu imleci), gönderim durumu ve
 // istemci kimliği kararlılığı, 409 eşlemeleri, düzenleme çakışması, akıştan gelen olayların
 // yerleşmesi (çift mesaj yok, silme okumasız), yeniden bağlanma uzlaştırması, yazıyor sınırı;
-// düzenleme tabanı, açılış sırasında gelen olaylar ve uzlaştırma tavanı (Codex tur 1).
+// düzenleme tabanı, açılış sırasında gelen olaylar ve uzlaştırma tavanı (Codex tur 1); kova
+// dolunca okundu devamı (Codex tur 2).
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,7 @@ import 'package:nizamio/features/messages/application/chats_controller.dart';
 import 'package:nizamio/features/messages/application/messages_providers.dart';
 import 'package:nizamio/features/messages/domain/chat.dart';
 import 'package:nizamio/features/messages/domain/chat_room.dart';
+import 'package:nizamio/features/messages/domain/chat_stream_policy.dart';
 
 import '../fake_chat_repository.dart';
 
@@ -21,11 +23,17 @@ const _coalesce = Duration(milliseconds: 1150);
 Future<(ProviderContainer, FakeChatRepository)> _open({
   List<ChatMessage>? history,
   bool group = false,
+  SignalBudget? budget,
 }) async {
   final repo = FakeChatRepository()
     ..server['c1'] = history ?? [msg(1), msg(2, sender: me), msg(3), msg(4)]
     ..getChatResult = (id) => chat(id, group: group);
-  final c = chatContainer(repo);
+  final c = chatContainer(
+    repo,
+    extra: [
+      if (budget != null) chatSignalBudgetProvider.overrideWithValue(budget),
+    ],
+  );
   c
     ..listen(chatsControllerProvider, (_, _) {})
     ..listen(chatRoomControllerProvider('c1'), (_, _) {});
@@ -48,6 +56,7 @@ List<String> _ids(ProviderContainer c) => [
 void main() {
   group('K5b', k5b);
   group('Codex tur 1', codexRound1);
+  group('Codex tur 2', codexRound2);
   test(
     'açılış: bilgi + son sayfa; ayırıcı listedeki okunmamıştan; okundu imleci',
     () async {
@@ -538,4 +547,32 @@ void codexRound1() {
       expect(_room(c).lowSeq, 1101, reason: 'eski geçmiş yeniden okunur');
     },
   );
+}
+
+void codexRound2() {
+  /// Tek yerli kova; yeri ~300 ms sonra açılır.
+  SignalBudget full() => SignalBudget(limit: 1)
+    ..take(
+      DateTime.now().subtract(const Duration(seconds: 59, milliseconds: 700)),
+    );
+  Iterable<String> reads(FakeChatRepository r) =>
+      r.calls.where((x) => x.startsWith('read c1'));
+
+  test('kova dolu → başka olay yok → yer açılınca tek okundu gider', () async {
+    final (c, repo) = await _open(budget: full());
+    expect(reads(repo), isEmpty, reason: 'kova dolu');
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    expect(reads(repo), ['read c1 m4']);
+    expect(c.read(chatsControllerProvider).value!.chat('c1')!.unread, 0);
+  });
+
+  test('kova dolu: sohbet kapanınca ya da arka planda okundu gitmez', () async {
+    final (c, repo) = await _open(budget: full());
+    c.read(chatForegroundProvider.notifier).set(false);
+    final (c2, repo2) = await _open(budget: full());
+    c2.dispose();
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    expect([...reads(repo), ...reads(repo2)], isEmpty);
+    expect(c.exists(chatRoomControllerProvider('c1')), isTrue);
+  });
 }

@@ -1,6 +1,7 @@
 // ChatActionsController: tepki ve oy iyimser; çift dokunuş tek istek, geri dönen dokunuş istek
 // göndermez; hata geri alır; 409 poll_closed anketi kapatır; sabitleme şeridi yeniden okur;
-// indirmeler kayda gider; mesaj başına uçuşta tek yazma, geç hata yalnız kendi katmanını geri alır.
+// indirmeler kayda gider; mesaj başına uçuşta tek yazma, geç hata yalnız kendi katmanını geri alır;
+// geri alma dokunuş nesline bağlı (A→B→A ve A→B gecikmeli hatada son istenen durum gider).
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -219,4 +220,72 @@ void flights() {
       expect(_m(c, 'm1').reactions.single.kind, ChatReaction.heart);
     },
   );
+
+  // Gecikmeli hata sırasında yeni dokunuşlar: ilk değere dönse de (A→B→A) son istenen durum
+  // korunur ve tek istek daha gider; bekleyenler istek gönderilmeden başarı sayılmaz.
+  for (final (name, taps, sent, check)
+      in <
+        (
+          String,
+          List<Future<void> Function(ChatActionsController)>,
+          List<String>,
+          void Function(ChatMessage),
+        )
+      >[
+        (
+          'tepki A→B→A',
+          [
+            (a) => a.react('m1', ChatReaction.heart),
+            (a) => a.react('m1', ChatReaction.like),
+          ],
+          ['react m1 like', 'react m1 like'],
+          (m) => expect(m.reactions.single.kind, ChatReaction.like),
+        ),
+        (
+          'tepki A→B',
+          [(a) => a.react('m1', ChatReaction.heart)],
+          ['react m1 like', 'react m1 heart'],
+          (m) => expect(m.reactions.single.kind, ChatReaction.heart),
+        ),
+        (
+          'tepki A→yok (doğrulanmışa dönüş yine gider)',
+          [(a) => a.react('m1', ChatReaction.like)],
+          ['react m1 like', 'unreact m1'],
+          (m) => expect(m.reactions, isEmpty),
+        ),
+        (
+          'oy A→B→A',
+          [(a) => a.vote('m2', 1), (a) => a.vote('m2', 0)],
+          ['vote m2 0', 'vote m2 0'],
+          (m) => expect(m.poll!.mine(me), {0}),
+        ),
+        (
+          'oy A→B',
+          [(a) => a.vote('m2', 1)],
+          ['vote m2 0', 'vote m2 1'],
+          (m) => expect(m.poll!.mine(me), {1}),
+        ),
+      ]) {
+    test('gecikmeli hata, $name: son istenen durum gider', () async {
+      final (c, repo, _) = await _open();
+      final gate = repo.writeGate = Completer<void>();
+      repo.writeError = ApiError('platform.unavailable', status: 503);
+      final vote = name.startsWith('oy');
+      final first = vote
+          ? _acts(c).vote('m2', 0)
+          : _acts(c).react('m1', ChatReaction.like);
+      await Future<void>.delayed(_wait);
+      final later = [for (final t in taps) t(_acts(c))];
+      repo.writeGate = null;
+      gate.complete();
+      await expectLater(first, throwsA(isA<ApiError>()));
+      await Future.wait(later);
+      final writes = repo.calls.where(
+        (x) => vote ? x.startsWith('vote') : x.contains('react'),
+      );
+      expect(writes, sent);
+      expect(repo.maxWriting, 1);
+      check(_m(c, vote ? 'm2' : 'm1'));
+    });
+  }
 }

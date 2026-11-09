@@ -1,16 +1,24 @@
 // V10 (F60): uygulama ön plana dönünce okunmuş görev kataloğu bayatsa yeniden okunur; hiç
 // okunmamış katalog için okuma başlatılmaz; taze katalog yeniden okunmaz (yoklama yok).
 // Kabukta `resumed` geçişi bu işlevi çağırır (widget testi). Zil rozeti yalnız ekrandaysa
-// (sağlayıcı yaşıyorsa) yeniden okunur.
+// (sağlayıcı yaşıyorsa) yeniden okunur. Mesajlar rozeti liste okunmuşsa ve akış açık değilse
+// tek `listChats` ile yenilenir (akış açıkken açılışı zaten tazeler: çift istek yok).
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/app/foreground_refresh.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/features/messages/application/chat_sync_controller.dart';
+import 'package:nizamio/features/messages/application/chats_controller.dart';
+import 'package:nizamio/features/messages/domain/chat.dart';
+import 'package:nizamio/features/messages/messages.dart';
 import 'package:nizamio/features/notifications/application/notifications_providers.dart';
 import 'package:nizamio/features/notifications/notifications.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
+import '../features/messages/fake_chat_repository.dart' as chats;
 import '../features/notifications/notification_count_stub.dart';
 import '../features/pilot_support.dart';
 import '../support/fake_backend.dart';
@@ -94,4 +102,30 @@ void main() {
       expect(c.read(notificationUnreadControllerProvider).value, 5);
     },
   );
+
+  test('Mesajlar rozeti: ön plana dönüşte yenilenir; okunmamış liste ve açık '
+      'akışta istek yok', () async {
+    final repo = chats.FakeChatRepository();
+    final c = chats.chatContainer(repo);
+    int reads() => repo.calls.where((x) => x == 'loadInbox').length;
+    await refreshMessagesBadge(c);
+    expect(reads(), 0, reason: 'liste hiç okunmadı');
+
+    c.listen(messagesNavBadgeProvider, (_, _) {});
+    await c.read(chatsControllerProvider.future);
+    expect(c.read(messagesNavBadgeProvider), 1);
+    repo.inbox = ChatInbox(
+      chats: [chats.chat('c1', unread: 2), chats.chat('c2', unread: 1)],
+    );
+    await refreshMessagesBadge(c);
+    expect(reads(), 2);
+    expect(c.read(messagesNavBadgeProvider), 2);
+
+    final conn = StreamController<ChatSignal>();
+    addTearDown(conn.close);
+    repo.connections.add(conn);
+    c.listen(chatSyncControllerProvider, (_, _) {});
+    await refreshMessagesBadge(c);
+    expect(reads(), 2, reason: 'akış açıkken açılış tazeler');
+  });
 }

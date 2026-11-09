@@ -23,6 +23,10 @@ void main() {
     final t0 = DateTime(2026, 11, 9, 10);
     expect([for (var i = 0; i < 4; i++) b.take(t0)], [true, true, true, false]);
     expect(b.take(t0.add(const Duration(seconds: 59))), isFalse);
+    expect(
+      b.retryIn(t0.add(const Duration(seconds: 59))),
+      const Duration(seconds: 1),
+    );
     expect(b.take(t0.add(const Duration(minutes: 1))), isTrue);
   });
 

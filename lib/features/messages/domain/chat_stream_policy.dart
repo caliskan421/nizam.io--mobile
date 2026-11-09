@@ -99,4 +99,12 @@ final class SignalBudget {
     _sent.add(now);
     return true;
   }
+
+  /// Kova doluysa [now]'dan ilk yerin açılmasına kalan süre; dolu değilse sıfır.
+  Duration retryIn(DateTime now) {
+    if (_sent.length < limit) return Duration.zero;
+    if (_sent.isEmpty) return const Duration(minutes: 1);
+    final left = const Duration(minutes: 1) - now.difference(_sent.first);
+    return left.isNegative ? Duration.zero : left;
+  }
 }

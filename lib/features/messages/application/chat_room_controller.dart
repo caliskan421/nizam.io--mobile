@@ -53,6 +53,9 @@ class ChatRoomController extends _$ChatRoomController {
   Timer? _flush;
   Timer? _typingOff;
 
+  /// Kova reddinden sonra okundu devamı (tek zamanlayıcı; bkz. [_markRead]).
+  Timer? _readLater;
+
   /// Açılış okumaları sürüyor; bu arada gelen sinyal [_missed]'i kirletir.
   var _booting = true;
   var _missed = false;
@@ -76,6 +79,8 @@ class ChatRoomController extends _$ChatRoomController {
       unawaited(sub.cancel());
       _flush?.cancel();
       _typingOff?.cancel();
+      _readLater?.cancel();
+      _readLater = null;
     });
     _readSeq = 0;
     _booting = true;
@@ -260,8 +265,19 @@ class ChatRoomController extends _$ChatRoomController {
     final last = room?.lastOnServer;
     if (room == null || room.gone || last == null) return;
     if (last.seq! <= _readSeq || !ref.read(chatForegroundProvider)) return;
-    // Ucuz sinyal kovası doluysa imleç ilerlemez; sonraki okuma ya da olay yeniden dener.
-    if (!ref.read(chatSignalBudgetProvider).take(DateTime.now())) return;
+    // Ucuz sinyal kovası doluysa imleç ilerlemez; yer açılınca TEK gönderim planlanır. Hedef
+    // ateşlemede yüklü en yeni sunucu mesajıdır (bekleyen hedefler en büyük seq'te birleşir);
+    // sohbet kapanınca zamanlayıcı iptal olur, ateşlemede arka plandaysa gitmez (ön plana
+    // dönüşte akış açılışının uzlaştırması dener).
+    final budget = ref.read(chatSignalBudgetProvider);
+    final now = DateTime.now();
+    if (!budget.take(now)) {
+      _readLater ??= Timer(budget.retryIn(now), () {
+        _readLater = null;
+        unawaited(_enqueue(_markRead));
+      });
+      return;
+    }
     final previous = _readSeq;
     _readSeq = last.seq!;
     try {
@@ -319,7 +335,8 @@ class ChatRoomController extends _$ChatRoomController {
     return state.value?.message(messageId) != null;
   }
 
-  /// Daha eski mesajları (`before=<en küçük seq>`) pencerenin başına ekler.
+  /// Daha eski mesajları (`before=<en küçük seq>`) pencerenin başına ekler. Okundu
+  /// tetiklemez: imleç yalnız en yeni sunucu mesajına ilerler, eski sayfa onu değiştirmez.
   Future<void> loadOlder() => _enqueue(() async {
     final room = state.value;
     final low = room?.lowSeq;

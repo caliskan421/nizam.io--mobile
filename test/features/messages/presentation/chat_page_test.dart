@@ -199,6 +199,7 @@ void main() {
       path: '/tmp/IMG_1.heic',
       name: 'IMG_1.heic',
       sizeBytes: 9,
+      digest: 'd',
     );
     await _tap(tester, find.bySemanticsLabel(_l.uiMessagesAttach).last);
     await _tap(tester, find.text(_l.uiMessagesAttachPhotos));

@@ -1,6 +1,8 @@
 // ArchiveActionsController: ZIP (klasör / görünen seçim, 100 sınırı), dosya indirme, silme ve
 // yükleme (seçici, tür/boyut ön denetimi, departman, yeniden okuma; belirsiz sonuçta seçicisiz
-// "Yeniden dene" aynı niyet ve aynı anahtarla).
+// "Yeniden dene" aynı niyet ve aynı anahtarla; niyet imzasında içerik özeti).
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/domain/page_slice.dart';
@@ -10,6 +12,7 @@ import 'package:nizamio/features/archive/application/archive_actions_controller.
 import 'package:nizamio/features/archive/application/archive_files_controller.dart';
 import 'package:nizamio/features/archive/application/archive_folder_controller.dart';
 import 'package:nizamio/features/archive/domain/records.dart';
+import 'package:nizamio/features/tasks/data/upload_digest.dart';
 import 'package:nizamio/features/tasks/domain/task_writes.dart';
 
 import '../archive_fixture.dart';
@@ -108,8 +111,12 @@ void main() {
   });
 
   group('yükleme', () {
-    UploadSource src(String name, {int size = 10}) =>
-        UploadSource(path: '/tmp/$name', name: name, sizeBytes: size);
+    UploadSource src(String name, {int size = 10}) => UploadSource(
+      path: '/tmp/$name',
+      name: name,
+      sizeBytes: size,
+      digest: 'sha-$name',
+    );
 
     test('seçilen dosya (kaynak seçiciye geçer) göreve, etiketle, klasör departmanıyla', () async {
       final repo = FakeArchiveRepository();
@@ -264,6 +271,7 @@ void main() {
             ApiError(ClientErrorCode.networkError),
           ]);
         final picker = _FreshPathPicker();
+        addTearDown(picker.dispose);
         final c = archiveContainer(repo, picker: picker);
         final ctrl = _ctrl(c);
         expect((await ctrl.retryUpload()).ok, isFalse, reason: 'niyet yok');
@@ -281,28 +289,35 @@ void main() {
         expect(ok.ok, isTrue);
         expect(picker.picks, 1, reason: 'yeniden dene seçiciyi açmaz');
         expect(repo.attachKeys, [key, key, key]);
-        expect(repo.attachPaths.toSet(), {'/tmp/1/rapor.pdf'});
+        expect(repo.attachPaths.toSet(), {'${picker.dir.path}/1/rapor.pdf'});
         expect(ctrl.hasPendingUpload, isFalse);
         expect(ctrl.pendingUploadKey, isNull);
       },
     );
 
-    test('belirsiz sonuç sonrası aynı dosyanın yeniden seçimi (yeni yol) aynı '
-        'anahtar; farklı ad ya da boyut yeni anahtar', () async {
+    // Codex tur 3 / N5: sunucu yükleme tekrarını gövde okumadan metadata'dan tanır (§8);
+    // A kaydedilip yanıtı kaybolduktan sonra aynı ad/boyutlu farklı içerikli B eski anahtarla
+    // gitse yüklenmeden başarı sayılırdı. İmzadaki içerik özeti B'yi yeni niyet yapar.
+    test('belirsiz sonuç sonrası aynı içeriğin yeniden seçimi (yeni yol) aynı '
+        'anahtar; farklı ad, boyut ya da aynı ad/boyutta farklı içerik yeni '
+        'anahtar', () async {
       final repo = FakeArchiveRepository()
         ..attachErrors.addAll([
-          for (var i = 0; i < 4; i++) ApiError(ClientErrorCode.timeout),
+          for (var i = 0; i < 5; i++) ApiError(ClientErrorCode.timeout),
         ]);
       final picker = _FreshPathPicker();
+      addTearDown(picker.dispose);
       final c = archiveContainer(repo, picker: picker);
       final ctrl = _ctrl(c);
       Future<String> pickAndSend({
         String name = 'rapor.pdf',
         int size = 10,
+        List<int> content = _contentA,
       }) async {
         picker
           ..name = name
-          ..size = size;
+          ..size = size
+          ..content = content;
         final r = await ctrl.upload(
           workItemId: 'w1',
           tag: RecordTag.plan,
@@ -312,9 +327,12 @@ void main() {
         return repo.attachKeys.last;
       }
 
+      // A sunucuya kaydedildi, yanıt kayboldu (sahte depo çağrıyı kaydedip zaman aşımı döner).
       final first = await pickAndSend();
       expect(await pickAndSend(), first);
       expect(repo.attachPaths.toSet(), hasLength(2), reason: 'yeni geçici yol');
+      final b = await pickAndSend(content: _contentB);
+      expect(b, isNot(first), reason: 'aynı ad/boyut, farklı içerik');
       expect(await pickAndSend(size: 11), isNot(first));
       expect(await pickAndSend(name: 'plan.pdf'), isNot(first));
     });
@@ -329,16 +347,34 @@ void main() {
   });
 }
 
-/// Gerçek seçici gibi her seçimde yeni geçici yol döndürür (`/tmp/<n>/rapor.pdf`).
+/// Aynı uzunlukta (aynı bildirilen boyut) iki farklı içerik.
+const _contentA = [37, 80, 68, 70, 1];
+const _contentB = [37, 80, 68, 70, 2];
+
+/// Gerçek seçici gibi her seçimde yeni geçici yola ([dir]`/<n>/<ad>`) [content] yazar ve
+/// özeti gerçek [uploadDigest] ile hesaplar.
 class _FreshPathPicker implements UploadPicker {
+  final dir = Directory.systemTemp.createTempSync('archive_upload_');
   int picks = 0;
   String name = 'rapor.pdf';
   int size = 10;
+  List<int> content = _contentA;
+
+  void dispose() => dir.deleteSync(recursive: true);
 
   @override
   bool get available => true;
 
   @override
-  Future<UploadSource?> pick(UploadOrigin origin) async =>
-      UploadSource(path: '/tmp/${++picks}/$name', name: name, sizeBytes: size);
+  Future<UploadSource?> pick(UploadOrigin origin) async {
+    final f = File('${dir.path}/${++picks}/$name')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(content);
+    return UploadSource(
+      path: f.path,
+      name: name,
+      sizeBytes: size,
+      digest: await uploadDigest(f.path),
+    );
+  }
 }

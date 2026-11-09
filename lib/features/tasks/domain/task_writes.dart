@@ -137,18 +137,22 @@ final class WorkItemPatch {
       evidenceRequired == null;
 }
 
-/// Yüklenecek yerel dosya (seçiciden): [path] okunur, [name] görünen ad olur.
+/// Yüklenecek yerel dosya (seçiciden): [path] okunur, [name] görünen ad olur. [digest]
+/// içerik özetidir (SHA-256, seçimde hesaplanır): yükleme niyeti imzasında ad ve boyutla
+/// birlikte durur, aynı ad/boyutlu farklı içerik yeni niyet sayılır (istemci akışları §8).
 @immutable
 final class UploadSource {
   const UploadSource({
     required this.path,
     required this.name,
     required this.sizeBytes,
+    required this.digest,
   });
 
   final String path;
   final String name;
   final int sizeBytes;
+  final String digest;
 
   /// Küçük harf uzantı (noktasız); yoksa ''.
   String get extension {

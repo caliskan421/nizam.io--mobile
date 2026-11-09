@@ -45,6 +45,10 @@ Chat chat(
 class FakeChatRepository implements ChatRepository {
   final calls = <String>[];
   ChatInbox inbox = ChatInbox(chats: [chat('c1', unread: 2)]);
+
+  /// Doluysa sıradaki `loadInbox` çağrıları sırayla bu tamamlayıcıların yanıtını bekler
+  /// (FIFO; yanıt sırası testte elle belirlenir).
+  final inboxReplies = <Completer<ChatInbox>>[];
   Chat Function(String id) getChatResult = chat;
 
   /// Sohbet başına sunucudaki mesajlar (artan seq).
@@ -122,6 +126,7 @@ class FakeChatRepository implements ChatRepository {
   @override
   Future<ChatInbox> loadInbox() async {
     calls.add('loadInbox');
+    if (inboxReplies.isNotEmpty) return inboxReplies.removeAt(0).future;
     return inbox;
   }
 

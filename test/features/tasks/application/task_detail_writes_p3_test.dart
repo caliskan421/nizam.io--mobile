@@ -472,7 +472,12 @@ void main() {
 
     UploadSource src(String name, {int size = 4}) {
       final f = File('${dir.path}/$name')..writeAsBytesSync([37, 80, 68, 70]);
-      return UploadSource(path: f.path, name: name, sizeBytes: size);
+      return UploadSource(
+        path: f.path,
+        name: name,
+        sizeBytes: size,
+        digest: 'sha-$name',
+      );
     }
 
     test('yükle: multipart (file parçası, bildirilen tür), tag + subtask_id sorguda; yalnız ayrıntı okunur', () async {

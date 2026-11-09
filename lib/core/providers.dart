@@ -72,6 +72,15 @@ BindingState bindingState(Ref ref) =>
 SessionState sessionState(Ref ref) =>
     _listen(ref, ref.watch(sessionControllerProvider).state);
 
+/// Oturum nesli ([SessionController.generation]: giriş, çıkış ve yeniden giriş gerektiren her
+/// geçiş artırır; hesap ya da kurulum değişimi her zaman yeni nesildir). Oturum durumu değişince
+/// yeniden okunur; belirteç yenilemesi nesli değiştirmez (bildirim yok).
+@Riverpod(keepAlive: true)
+int sessionGeneration(Ref ref) {
+  ref.watch(sessionStateProvider);
+  return ref.read(sessionControllerProvider).generation;
+}
+
 @Riverpod(keepAlive: true)
 ScopeSelection scopeState(Ref ref) =>
     _listen(ref, ref.watch(scopeControllerProvider).state);

@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../core/providers.dart';
+import '../../../core/cache_owner.dart';
 import '../domain/chat.dart';
 import '../domain/chat_stream_policy.dart';
 import 'messages_providers.dart';
@@ -14,7 +13,8 @@ part 'chats_controller.g.dart';
 /// Akış açılınca (yeniden bağlanma protokolü adım 2) hemen, olaylarda en az 1 sn birleştirilip
 /// tek `listChats` okumasıyla tazelenir; tazeleme hatası eski listeyi bozmaz. Okumalar
 /// yanıt nesliyle sıralanır: yalnız en son başlatılan okumanın yanıtı yazılır (geç gelen eski
-/// yanıt yeni listeyi ezmez).
+/// yanıt yeni listeyi ezmez). Liste okunduğu sahibe (oturum nesli + program) bağlıdır; ekran
+/// [visible] durumunu gösterir (başka hesabın/programın sohbetleri görünmez).
 @Riverpod(keepAlive: true)
 class ChatsController extends _$ChatsController {
   Timer? _coalesce;
@@ -22,20 +22,27 @@ class ChatsController extends _$ChatsController {
   /// Son başlatılan okumanın nesli ([build] ve [refresh] artırır).
   var _generation = 0;
 
+  /// Durumdaki listenin sahibi (notifier yeniden kurulumlarda korunur).
+  final _owner = CacheOwnership();
+
   @override
-  Future<ChatInbox> build() {
+  Future<ChatInbox> build() async {
     _generation++;
-    ref
-      ..watch(chatMeProvider)
-      ..watch(scopeStateProvider.select((s) => s.programId));
+    final owner = _owner.watch(ref);
+    ref.watch(chatMeProvider);
     final sub = ref.watch(chatSignalBusProvider).stream.listen(_onSignal);
     ref.onDispose(() {
       unawaited(sub.cancel());
       _coalesce?.cancel();
       _coalesce = null;
     });
-    return ref.read(chatRepositoryProvider).loadInbox();
+    final inbox = await ref.read(chatRepositoryProvider).loadInbox();
+    _owner.markLoaded(ref, owner);
+    return inbox;
   }
+
+  /// Ekranın gösterebileceği durum (bkz. [CacheOwnership.visible]); çağıran sağlayıcıyı izler.
+  AsyncValue<ChatInbox> get visible => _owner.visible(ref, state);
 
   ChatRepository get _repo => ref.read(chatRepositoryProvider);
 

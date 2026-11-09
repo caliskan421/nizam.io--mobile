@@ -451,6 +451,7 @@ ProviderContainer chatContainer(
     retry: (_, _) => null,
     overrides: [
       chatRepositoryProvider.overrideWithValue(repo),
+      sessionGenerationProvider.overrideWithValue(1),
       sessionStateProvider.overrideWithValue(
         const SessionActive(accountId: me, forcePasswordChange: false),
       ),

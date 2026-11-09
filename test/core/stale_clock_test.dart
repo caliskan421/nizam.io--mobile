@@ -1,5 +1,5 @@
-// Bayat veri saati: yalnız değer taşıyan, yüklenmeyen ve süresi geçmiş durumda tazeler;
-// hata yutulur.
+// Bayat veri saati: yalnız değer taşıyan, yüklenmeyen, hatasız ve süresi geçmiş durumda
+// tazeler; hata yutulur (otomatik yol sessiz, hata sonrası tekrar yok).
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,6 +64,32 @@ void main() {
       expect(calls, 1);
     },
   );
+
+  test('refreshIfStale: son okuma hatalıysa (önceki değer olsa da; 429 dahil) '
+      'otomatik yol istek atmaz', () async {
+    var calls = 0;
+    final clock = StaleClock()..markFresh();
+    // Gerçek sağlayıcı: değer taşıyan AsyncError (yenileme hatası).
+    var fail = false;
+    final source = FutureProvider<int>(
+      (ref) => fail ? Future.error(StateError('429')) : Future.value(1),
+    );
+    final c = ProviderContainer(retry: (_, _) => null);
+    addTearDown(c.dispose);
+    c.listen(source, (_, _) {});
+    await c.read(source.future);
+    fail = true;
+    c.invalidate(source);
+    await expectLater(c.read(source.future), throwsStateError);
+    final failed = c.read(source);
+    expect((failed.hasError, failed.hasValue), (true, true));
+    await clock.refreshIfStale(
+      failed,
+      () async => calls++,
+      maxAge: Duration.zero,
+    );
+    expect(calls, 0);
+  });
 
   test('refreshIfStale: yenileme hatası yutulur', () async {
     await expectLater(

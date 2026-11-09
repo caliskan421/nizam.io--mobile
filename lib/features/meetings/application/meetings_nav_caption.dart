@@ -10,7 +10,11 @@ part 'meetings_nav_caption.g.dart';
 /// Alt menüde Toplantılar etkinken görünen mono alt yazı ("11 yaklaşan"); liste yüklenmeden null.
 @riverpod
 String? meetingsNavCaption(Ref ref) {
-  final board = ref.watch(meetingsBoardControllerProvider).value;
+  ref.watch(meetingsBoardControllerProvider);
+  final board = ref
+      .read(meetingsBoardControllerProvider.notifier)
+      .visible
+      .value;
   if (board == null) return null;
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);

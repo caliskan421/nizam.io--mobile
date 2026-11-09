@@ -10,7 +10,8 @@ part 'messages_nav_caption.g.dart';
 /// Alt menüde bu modül etkinken görünen mono alt yazı ("5 okunmamış"); veri yokken null.
 @riverpod
 String? messagesNavCaption(Ref ref) {
-  final inbox = ref.watch(chatsControllerProvider).value;
+  ref.watch(chatsControllerProvider);
+  final inbox = ref.read(chatsControllerProvider.notifier).visible.value;
   if (inbox == null) return null;
   final l = lookupAppLocalizations(ref.watch(localeProvider));
   return '${inbox.unreadChats} ${l.uiMessagesUnreadLc}';
@@ -19,8 +20,10 @@ String? messagesNavCaption(Ref ref) {
 /// Tablet rayındaki Mesajlar rozeti: okunmamış ya da anılan sohbet sayısı (prototip
 /// `unread || mention`); veri yokken null.
 @riverpod
-int? messagesNavBadge(Ref ref) =>
-    ref.watch(chatsControllerProvider).value?.unreadChats;
+int? messagesNavBadge(Ref ref) {
+  ref.watch(chatsControllerProvider);
+  return ref.read(chatsControllerProvider.notifier).visible.value?.unreadChats;
+}
 
 /// Ön plana dönüşte Mesajlar rozeti: liste hiç okunmadıysa istek yok; mesaj ekranı akışı
 /// tutuyorsa ([ChatSyncController] yaşıyor) akışın açılışı listeyi zaten tazeler, ikinci istek

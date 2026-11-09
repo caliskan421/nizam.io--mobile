@@ -18,19 +18,26 @@ class StaleClock {
   bool isStale([Duration maxAge = staleAfter]) =>
       !_age.isRunning || _age.elapsed >= maxAge;
 
-  /// [state] bir değer taşıyor, yüklenmiyor ve veri [maxAge]'den eskiyse [refresh]'i bekler.
-  /// Hiç yüklenmemiş (ilk yükleme hatası yalnız dokunuşla yeniden denenir) ya da zaten
-  /// yüklenen durumda bir şey yapmaz. Hata yutulur: durumda kalır, önceki veri görünür.
+  /// [state] bir değer taşıyor, yüklenmiyor, son okuma hatasız ve veri [maxAge]'den eskiyse
+  /// [refresh]'i bekler. Bu otomatik yoldur (sekmeye/ön plana dönüş): hiç yüklenmemiş, zaten
+  /// yüklenen ya da son okuması hatayla bitmiş (429 dahil; `Retry-After` beklemesi) durumda
+  /// bir şey yapmaz — hata sonrası yeniden deneme yalnız kullanıcı eylemiyle (aşağı çekme,
+  /// "yeniden dene"). Hata yutulur ve bildirilmez: durumda kalır, önceki veri görünür.
   Future<void> refreshIfStale(
     AsyncValue<Object?> state,
     Future<void> Function() refresh, {
     Duration maxAge = staleAfter,
   }) async {
-    if (state.isLoading || !state.hasValue || !isStale(maxAge)) return;
+    if (state.isLoading ||
+        !state.hasValue ||
+        state.hasError ||
+        !isStale(maxAge)) {
+      return;
+    }
     try {
       await refresh();
     } on Object {
-      // Arka plan yenilemesi: hata durumda, veri yerinde.
+      // Otomatik yol sessizdir: hata durumda, veri yerinde; sonraki deneme kullanıcıdan.
     }
   }
 }

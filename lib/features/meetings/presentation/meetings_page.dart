@@ -96,7 +96,9 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final view = ref.watch(meetingsViewControllerProvider);
-    final board = ref.watch(meetingsBoardControllerProvider);
+    ref.watch(meetingsBoardControllerProvider);
+    // Başka hesabın/programın listesi görünmez (yükleniyor ya da yalnız hata).
+    final board = ref.read(meetingsBoardControllerProvider.notifier).visible;
     final catalog = ref.watch(taskCatalogControllerProvider).value;
     final b = board.value;
     // Tablette açık kayıt yokken liste tam genişliktir; kartlar geniş düzene geçer.

@@ -1,8 +1,11 @@
 // HomeDashboardController: özet bileşim kökündeki kaynaktan okunur; kapsam değişince yeniden
 // okunur. Rol → kaynak: yönetici pano yolu (load); koordinatör/üye yönetici yolunu ÇAĞIRMAZ,
 // özet görev kataloğundan sayılır + loadTeamExtras (koordinatör bayrağı, departman).
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/app/foreground_refresh.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/providers.dart';
@@ -16,9 +19,14 @@ import 'package:nizamio/features/tasks/tasks.dart';
 class _Counting implements HomeDashboardRepository {
   var loads = 0;
   final extras = <(String?, bool)>[];
+
+  /// Doluysa pano okuması bunu bekler (geciken ya da başarısız yanıt).
+  Future<void> Function()? gate;
+
   @override
   Future<HomeDashboard> load() async {
     loads++;
+    await gate?.call();
     return const HomeDashboard(
       greetingName: 'Yönetici',
       tasks: TaskTotals(
@@ -65,6 +73,7 @@ void main() {
     final c = ProviderContainer(
       overrides: [
         homeDashboardRepositoryProvider.overrideWithValue(repo),
+        sessionGenerationProvider.overrideWithValue(1),
         // Şirket yöneticisi → pano yolu.
         taskCatalogRepositoryProvider.overrideWithValue(
           _Fixed(
@@ -159,6 +168,7 @@ void main() {
         overrides: [
           homeDashboardRepositoryProvider.overrideWithValue(repo),
           taskCatalogRepositoryProvider.overrideWithValue(catalogs),
+          sessionGenerationProvider.overrideWithValue(1),
           scopeStateProvider.overrideWith(
             (ref) => const ScopeSelection(programId: 'p1'),
           ),
@@ -362,6 +372,99 @@ void main() {
           expect(catalogs.loads, 1);
         },
       );
+    });
+
+    group('sahiplik ve ön plan', () {
+      test('A hesabı → çıkış → B hesabı aynı program: geciken ve başarısız '
+          'yanıtta A özeti görünmez', () async {
+        final repo = _Counting();
+        var session = 1;
+        String? program = 'p1';
+        final c = ProviderContainer(
+          retry: (_, _) => null,
+          overrides: [
+            homeDashboardRepositoryProvider.overrideWithValue(repo),
+            taskCatalogRepositoryProvider.overrideWithValue(
+              _Fixed(catalogOf(admin: true)),
+            ),
+            sessionGenerationProvider.overrideWith((ref) => session),
+            scopeStateProvider.overrideWith(
+              (ref) => ScopeSelection(programId: program),
+            ),
+          ],
+        );
+        addTearDown(c.dispose);
+        c.listen(homeDashboardControllerProvider, (_, _) {});
+        final ctl = c.read(homeDashboardControllerProvider.notifier);
+        final a = await c.read(homeDashboardControllerProvider.future);
+        expect(ctl.visible.value, same(a));
+
+        void owner(int s, String? p) {
+          session = s;
+          program = p;
+          c
+            ..invalidate(sessionGenerationProvider)
+            ..invalidate(scopeStateProvider);
+        }
+
+        owner(2, null); // çıkış: nesil artar, kapsam temizlenir
+        final gate = Completer<void>();
+        repo.gate = () => gate.future;
+        owner(3, 'p1'); // B hesabı aynı programı seçti; okuma gecikiyor
+        await pumpEventQueue();
+        final loading = ctl.visible;
+        expect((loading.isLoading, loading.hasValue), (true, false));
+        expect(
+          c.read(homeDashboardControllerProvider).value,
+          same(a),
+          reason: 'ham durum eski değeri taşır; ekran görmez',
+        );
+
+        gate.completeError(ApiError(ClientErrorCode.networkError));
+        await expectLater(
+          c.read(homeDashboardControllerProvider.future),
+          throwsA(isA<ApiError>()),
+        );
+        final failed = ctl.visible;
+        expect((failed.hasError, failed.hasValue), (true, false));
+
+        repo.gate = null;
+        await ctl.refresh();
+        expect(ctl.visible.hasValue, isTrue, reason: 'B özeti okundu');
+      });
+
+      test('ön plana dönüş (yönetici): katalog ve özet bayatken katalog '
+          'deposu tek kez okunur', () async {
+        final repo = _Counting();
+        final catalogs = _Scripted([catalogOf(admin: true)]);
+        final c = containerOf(repo, catalogs);
+        await c.read(homeDashboardControllerProvider.future);
+        expect((catalogs.loads, repo.loads), (1, 1));
+        // `ForegroundRefresh._resumed` sırası: katalog, sonra özet.
+        await Future.wait([
+          refreshStaleTasks(c, maxAge: Duration.zero),
+          refreshStaleHome(c, maxAge: Duration.zero),
+        ]);
+        expect(catalogs.loads, 2, reason: 'çift katalog okuması yok');
+        expect(repo.loads, 2);
+      });
+
+      test('otomatik yenileme hatası sessiz kalır ve kendiliğinden yeniden '
+          'denenmez; kullanıcı yenilemesi dener', () async {
+        final repo = _Counting();
+        final catalogs = _Scripted([catalogOf(), null, catalogOf()]);
+        final c = containerOf(repo, catalogs);
+        await c.read(homeDashboardControllerProvider.future);
+        final ctl = c.read(homeDashboardControllerProvider.notifier);
+        await ctl.refreshIfStale(maxAge: Duration.zero);
+        expect(catalogs.loads, 2);
+        expect(c.read(homeDashboardControllerProvider).hasError, isTrue);
+        await ctl.refreshIfStale(maxAge: Duration.zero);
+        expect(catalogs.loads, 2, reason: 'hata sonrası otomatik istek yok');
+        await ctl.refresh();
+        expect(catalogs.loads, 3);
+        expect(c.read(homeDashboardControllerProvider).hasError, isFalse);
+      });
     });
   });
 }

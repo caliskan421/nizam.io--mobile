@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/cache_owner.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_page.dart';
@@ -33,7 +34,13 @@ class CalendarPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final index = ref.watch(calendarIndexProvider);
+    // Dizin toplantı listesinden (o da kataloktan sonra) kurulur: liste başka hesabın/programın
+    // ise takvim de görünmez (yükleniyor ya da yalnız hata).
+    final owned = ref.read(meetingsBoardControllerProvider.notifier).ownsValue;
+    final index = CacheOwnership.ownedOnly(
+      ref.watch(calendarIndexProvider),
+      owned: owned,
+    );
     void plan() {
       final ix = index.value;
       if (ix == null) return;
@@ -64,8 +71,8 @@ class CalendarPage extends ConsumerWidget {
     }
 
     // Aşağı çekerek yenileme: iki kaynak birlikte yeniden okunur. Önce katalog başlar (toplantı
-    // listesi onun erişim bilgisini okur); katalog hatası fırlar ve toast olur, toplantı listesi
-    // hatası kendi durumunda görünür.
+    // listesi onun erişim bilgisini okur). İlk hata fırlar ve ortak yenileme kabuğunda tek
+    // bildirim olur; önceki takvim yerinde kalır.
     Future<void> refresh() => Future.wait([
       ref.read(taskCatalogControllerProvider.notifier).refresh(),
       ref.read(meetingsBoardControllerProvider.notifier).refresh(),

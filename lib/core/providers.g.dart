@@ -465,6 +465,57 @@ final class SessionStateProvider
 
 String _$sessionStateHash() => r'9b3dbf1ada4cf936d9324a08db14faf2a72b9040';
 
+/// Oturum nesli ([SessionController.generation]: giriş, çıkış ve yeniden giriş gerektiren her
+/// geçiş artırır; hesap ya da kurulum değişimi her zaman yeni nesildir). Oturum durumu değişince
+/// yeniden okunur; belirteç yenilemesi nesli değiştirmez (bildirim yok).
+
+@ProviderFor(sessionGeneration)
+final sessionGenerationProvider = SessionGenerationProvider._();
+
+/// Oturum nesli ([SessionController.generation]: giriş, çıkış ve yeniden giriş gerektiren her
+/// geçiş artırır; hesap ya da kurulum değişimi her zaman yeni nesildir). Oturum durumu değişince
+/// yeniden okunur; belirteç yenilemesi nesli değiştirmez (bildirim yok).
+
+final class SessionGenerationProvider extends $FunctionalProvider<int, int, int>
+    with $Provider<int> {
+  /// Oturum nesli ([SessionController.generation]: giriş, çıkış ve yeniden giriş gerektiren her
+  /// geçiş artırır; hesap ya da kurulum değişimi her zaman yeni nesildir). Oturum durumu değişince
+  /// yeniden okunur; belirteç yenilemesi nesli değiştirmez (bildirim yok).
+  SessionGenerationProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'sessionGenerationProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$sessionGenerationHash();
+
+  @$internal
+  @override
+  $ProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  int create(Ref ref) {
+    return sessionGeneration(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int>(value),
+    );
+  }
+}
+
+String _$sessionGenerationHash() => r'9e3002858396ba4ac31018b932950604da1f7bfd';
+
 @ProviderFor(scopeState)
 final scopeStateProvider = ScopeStateProvider._();
 

@@ -67,7 +67,8 @@ abstract class _$MeetingsViewController extends $Notifier<MeetingsView> {
 /// silme de bu yoldadır). İkisi de imleçli; en çok [maxPages] × [pageSize] satır okunur. Kart
 /// sayaçları ve konferans durumu satır özetindedir (COLLABORATION-K70; kart başına istek yok).
 /// Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka planda tazelenir
-/// ([refreshIfStale]).
+/// ([refreshIfStale]). Liste okunduğu sahibe (oturum nesli + program) bağlıdır; ekran [visible]
+/// durumunu gösterir (başka hesabın/programın listesi görünmez).
 
 @ProviderFor(MeetingsBoardController)
 final meetingsBoardControllerProvider = MeetingsBoardControllerProvider._();
@@ -77,7 +78,8 @@ final meetingsBoardControllerProvider = MeetingsBoardControllerProvider._();
 /// silme de bu yoldadır). İkisi de imleçli; en çok [maxPages] × [pageSize] satır okunur. Kart
 /// sayaçları ve konferans durumu satır özetindedir (COLLABORATION-K70; kart başına istek yok).
 /// Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka planda tazelenir
-/// ([refreshIfStale]).
+/// ([refreshIfStale]). Liste okunduğu sahibe (oturum nesli + program) bağlıdır; ekran [visible]
+/// durumunu gösterir (başka hesabın/programın listesi görünmez).
 final class MeetingsBoardControllerProvider
     extends $AsyncNotifierProvider<MeetingsBoardController, MeetingsBoard> {
   /// Toplantı listesi: görünür toplantılar (`listMeetings`) ve yöneticiye silinenler. Silinenler
@@ -85,7 +87,8 @@ final class MeetingsBoardControllerProvider
   /// silme de bu yoldadır). İkisi de imleçli; en çok [maxPages] × [pageSize] satır okunur. Kart
   /// sayaçları ve konferans durumu satır özetindedir (COLLABORATION-K70; kart başına istek yok).
   /// Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka planda tazelenir
-  /// ([refreshIfStale]).
+  /// ([refreshIfStale]). Liste okunduğu sahibe (oturum nesli + program) bağlıdır; ekran [visible]
+  /// durumunu gösterir (başka hesabın/programın listesi görünmez).
   MeetingsBoardControllerProvider._()
     : super(
         from: null,
@@ -106,14 +109,15 @@ final class MeetingsBoardControllerProvider
 }
 
 String _$meetingsBoardControllerHash() =>
-    r'0b44e3a57a69cd756b6798d2c980823f31c58b04';
+    r'55bc4ebdc624c6c6d80acbeb873a3d3e030a2b49';
 
 /// Toplantı listesi: görünür toplantılar (`listMeetings`) ve yöneticiye silinenler. Silinenler
 /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı
 /// silme de bu yoldadır). İkisi de imleçli; en çok [maxPages] × [pageSize] satır okunur. Kart
 /// sayaçları ve konferans durumu satır özetindedir (COLLABORATION-K70; kart başına istek yok).
 /// Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka planda tazelenir
-/// ([refreshIfStale]).
+/// ([refreshIfStale]). Liste okunduğu sahibe (oturum nesli + program) bağlıdır; ekran [visible]
+/// durumunu gösterir (başka hesabın/programın listesi görünmez).
 
 abstract class _$MeetingsBoardController extends $AsyncNotifier<MeetingsBoard> {
   FutureOr<MeetingsBoard> build();

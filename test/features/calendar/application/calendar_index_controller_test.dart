@@ -94,6 +94,7 @@ ProviderContainer _container(_Meetings meetings, _Catalog catalog) =>
       overrides: [
         meetingsRepositoryProvider.overrideWithValue(meetings),
         taskCatalogRepositoryProvider.overrideWithValue(catalog),
+        sessionGenerationProvider.overrideWithValue(1),
         scopeStateProvider.overrideWith(
           (ref) => const ScopeSelection(programId: 'p1'),
         ),

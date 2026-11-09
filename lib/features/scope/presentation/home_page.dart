@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/errors/api_error.dart';
-import '../../../core/providers.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/extensions/ref_ext.dart';
@@ -49,7 +48,10 @@ class HomePage extends ConsumerWidget {
       ..listenErrors(scopeSelectionControllerProvider, context)
       ..listenErrors(signOutProvider, context)
       ..listen(shellReselectEventsProvider, (_, next) {
-        final dashboard = ref.read(homeDashboardControllerProvider).value;
+        final dashboard = ref
+            .read(homeDashboardControllerProvider.notifier)
+            .visible
+            .value;
         // Yalnız görünen sayfa (yığının tepesi) kendi kısayol menüsünü açar.
         final visible = ModalRoute.of(context)?.isCurrent ?? true;
         if (next?.tab != shellTab || dashboard == null || !visible) return;
@@ -59,7 +61,11 @@ class HomePage extends ConsumerWidget {
         );
       });
     final programState = ref.watch(currentProgramControllerProvider);
-    final dashboard = ref.watch(homeDashboardControllerProvider);
+    ref.watch(homeDashboardControllerProvider);
+    // Başka hesabın/programın özeti görünmez (yükleniyor ya da yalnız hata).
+    final dashboard = ref
+        .read(homeDashboardControllerProvider.notifier)
+        .visible;
     // Özet hatası katalog hatası olabilir (yönetici olmayan hesap); katalog da yeniden okunur.
     void retry() {
       if (ref.read(taskCatalogControllerProvider).hasError) {
@@ -95,12 +101,6 @@ class HomePage extends ConsumerWidget {
           value: dashboard,
           onRetry: retry,
           loading: const HomeSkeleton(),
-          // İskelet yalnız program değişince; aynı programda yeniden kurulumda eski özet kalır.
-          skeletonOnReload:
-              ref
-                  .read(homeDashboardControllerProvider.notifier)
-                  .loadedProgram !=
-              ref.watch(scopeStateProvider).programId,
           data: (d) => _Feed(
             dashboard: d,
             onQuickAction: (a) => _quickAction(context, a),

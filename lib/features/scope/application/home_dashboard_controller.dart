@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/cache_owner.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
@@ -26,39 +27,61 @@ part 'home_dashboard_controller.g.dart';
 /// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
 /// ek istek gönderilmez.
 ///
-/// Önbellek / yenileme: özet ekranda açık kaldıkça (kabuk dalı korunur) bellekte kalır;
-/// [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye dönüş) önceki özeti durumda tutarak
-/// yeniden okur (`invalidateSelf` → `isRefreshing`, `value` korunur). Kapsam değişimi
-/// bağımlılık yeniden kurulumudur (`isReloading`); ekran o durumda iskelet gösterir.
+/// Önbellek / yenileme: özet uygulama ömrünce bellekte kalır ve okunduğu sahibe (oturum nesli +
+/// program, [CacheOwnership]) bağlıdır; ekran [visible] durumunu gösterir: başka hesap, kurulum
+/// ya da program için okunmuş özet görünmez (yükleniyor ya da yalnız hata). [refresh] (aşağı
+/// çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
+/// okur (`invalidateSelf` → `isRefreshing`, `value` korunur).
 @Riverpod(keepAlive: true)
 class HomeDashboardController extends _$HomeDashboardController {
   /// Son başarılı okumadan beri geçen süre (notifier yeniden kurulumlarda korunur).
   final _clock = StaleClock();
 
-  /// Önceki başarılı okumanın ait olduğu program (kapsam). Yeniden kurulum aynı programda ise
-  /// eski özet başka kümeye ait değildir; ekran iskelet yerine onu gösterir.
-  Object? loadedProgram;
+  /// Durumdaki özetin sahibi (notifier yeniden kurulumlarda korunur).
+  final _owner = CacheOwnership();
 
   @override
   Future<HomeDashboard> build() async {
-    final program = ref.read(scopeStateProvider).programId;
+    final owner = _owner.watch(ref);
     final dashboard = await _load();
-    loadedProgram = program;
+    _owner.markLoaded(ref, owner);
     _clock.markFresh();
     return dashboard;
   }
 
+  /// Ekranın gösterebileceği durum (bkz. [CacheOwnership.visible]); çağıran sağlayıcıyı izler.
+  AsyncValue<HomeDashboard> get visible => _owner.visible(ref, state);
+
   /// Kullanıcı yenilemesi: sunucu kapsamında rol kaynağı olan görev kataloğu ve özet yeniden
-  /// okunur, ikisi de bitince döner. Hata FIRLATILIR (çağıran bildirir); önceki özet durumda
-  /// kalır. Yönetici olmayan hesapta özet kataloğu izler: katalog yüklemeye geçince kendini
-  /// zaten yeniden kurar, ikinci kez geçersizlenmez (çift istek yok).
-  Future<void> refresh() async {
+  /// okunur, ikisi de bitince döner. Hata FIRLATILIR (ortak yenileme kabuğu bildirir); önceki
+  /// özet durumda kalır.
+  Future<void> refresh() => _refresh((catalog) => catalog.refresh());
+
+  /// Yeniden ziyaret (sekmeye ya da ön plana dönüş): son başarılı okuma [maxAge]'den eskiyse
+  /// arka planda yeniden okunur; eski özet görünür kalır, bildirim yok. Hiç yüklenmemişse,
+  /// yükleniyorsa ya da son okuma hatayla bittiyse bir şey yapmaz (hata sonrası yeniden deneme
+  /// yalnız kullanıcı eylemiyle). Kataloğu zorlamaz: katalog kendi bayatlık kuralıyla
+  /// ([TaskCatalogController.refreshIfStale]) yenilenir, sürmekte olan katalog okuması
+  /// paylaşılır (tek ön plan olayında tek katalog okuması).
+  Future<void> refreshIfStale({Duration maxAge = StaleClock.staleAfter}) =>
+      _clock.refreshIfStale(
+        state,
+        () => _refresh((catalog) => catalog.refreshIfStale(maxAge: maxAge)),
+        maxAge: maxAge,
+      );
+
+  /// Önce katalog ([catalogStep]), sonra özet; ikisi de bitince ilk hata fırlatılır. Yönetici
+  /// olmayan hesapta özet kataloğu izler: katalog yüklemeye geçince kendini zaten yeniden kurar,
+  /// ikinci kez geçersizlenmez (çift istek yok).
+  Future<void> _refresh(
+    Future<void> Function(TaskCatalogController catalog) catalogStep,
+  ) async {
     final scope = ref.read(scopeStateProvider);
     Object? failure;
     StackTrace? trace;
     if (scope.hasProgram) {
       try {
-        await ref.read(taskCatalogControllerProvider.notifier).refresh();
+        await catalogStep(ref.read(taskCatalogControllerProvider.notifier));
       } on Object catch (e, s) {
         failure = e;
         trace = s;
@@ -73,11 +96,6 @@ class HomeDashboardController extends _$HomeDashboardController {
     }
     if (failure != null) Error.throwWithStackTrace(failure, trace!);
   }
-
-  /// Yeniden ziyaret: son başarılı okuma [maxAge]'den eskiyse arka planda [refresh]; eski
-  /// özet görünür kalır. Hiç yüklenmemişse ya da yükleniyorsa bir şey yapmaz; hata yutulur.
-  Future<void> refreshIfStale({Duration maxAge = StaleClock.staleAfter}) =>
-      _clock.refreshIfStale(state, refresh, maxAge: maxAge);
 
   Future<HomeDashboard> _load() async {
     final scope = ref.watch(scopeStateProvider);

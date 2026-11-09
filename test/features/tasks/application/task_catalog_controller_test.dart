@@ -118,12 +118,17 @@ void main() {
     await ctl.reload(); // hata yutulur
     expect(loads, 4);
 
-    // Yeniden ziyaret: taze değilse (maxAge 0) okur; zaten taze ise okumaz.
+    // Hata sonrası otomatik yol (yeniden ziyaret) okumaz; yeniden deneme kullanıcıdan.
     fail = false;
     await ctl.refreshIfStale(maxAge: Duration.zero);
+    expect(loads, 4);
+    await ctl.refresh();
     expect(loads, 5);
+    // Yeniden ziyaret: taze değilse (maxAge 0) okur; zaten taze ise okumaz.
+    await ctl.refreshIfStale(maxAge: Duration.zero);
+    expect(loads, 6);
     await ctl.refreshIfStale();
-    expect(loads, 5);
+    expect(loads, 6);
   });
 }
 

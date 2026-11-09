@@ -23,10 +23,11 @@ part of 'home_dashboard_controller.dart';
 /// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
 /// ek istek gönderilmez.
 ///
-/// Önbellek / yenileme: özet ekranda açık kaldıkça (kabuk dalı korunur) bellekte kalır;
-/// [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye dönüş) önceki özeti durumda tutarak
-/// yeniden okur (`invalidateSelf` → `isRefreshing`, `value` korunur). Kapsam değişimi
-/// bağımlılık yeniden kurulumudur (`isReloading`); ekran o durumda iskelet gösterir.
+/// Önbellek / yenileme: özet uygulama ömrünce bellekte kalır ve okunduğu sahibe (oturum nesli +
+/// program, [CacheOwnership]) bağlıdır; ekran [visible] durumunu gösterir: başka hesap, kurulum
+/// ya da program için okunmuş özet görünmez (yükleniyor ya da yalnız hata). [refresh] (aşağı
+/// çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
+/// okur (`invalidateSelf` → `isRefreshing`, `value` korunur).
 
 @ProviderFor(HomeDashboardController)
 final homeDashboardControllerProvider = HomeDashboardControllerProvider._();
@@ -46,10 +47,11 @@ final homeDashboardControllerProvider = HomeDashboardControllerProvider._();
 /// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
 /// ek istek gönderilmez.
 ///
-/// Önbellek / yenileme: özet ekranda açık kaldıkça (kabuk dalı korunur) bellekte kalır;
-/// [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye dönüş) önceki özeti durumda tutarak
-/// yeniden okur (`invalidateSelf` → `isRefreshing`, `value` korunur). Kapsam değişimi
-/// bağımlılık yeniden kurulumudur (`isReloading`); ekran o durumda iskelet gösterir.
+/// Önbellek / yenileme: özet uygulama ömrünce bellekte kalır ve okunduğu sahibe (oturum nesli +
+/// program, [CacheOwnership]) bağlıdır; ekran [visible] durumunu gösterir: başka hesap, kurulum
+/// ya da program için okunmuş özet görünmez (yükleniyor ya da yalnız hata). [refresh] (aşağı
+/// çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
+/// okur (`invalidateSelf` → `isRefreshing`, `value` korunur).
 final class HomeDashboardControllerProvider
     extends $AsyncNotifierProvider<HomeDashboardController, HomeDashboard> {
   /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
@@ -67,10 +69,11 @@ final class HomeDashboardControllerProvider
   /// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
   /// ek istek gönderilmez.
   ///
-  /// Önbellek / yenileme: özet ekranda açık kaldıkça (kabuk dalı korunur) bellekte kalır;
-  /// [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye dönüş) önceki özeti durumda tutarak
-  /// yeniden okur (`invalidateSelf` → `isRefreshing`, `value` korunur). Kapsam değişimi
-  /// bağımlılık yeniden kurulumudur (`isReloading`); ekran o durumda iskelet gösterir.
+  /// Önbellek / yenileme: özet uygulama ömrünce bellekte kalır ve okunduğu sahibe (oturum nesli +
+  /// program, [CacheOwnership]) bağlıdır; ekran [visible] durumunu gösterir: başka hesap, kurulum
+  /// ya da program için okunmuş özet görünmez (yükleniyor ya da yalnız hata). [refresh] (aşağı
+  /// çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
+  /// okur (`invalidateSelf` → `isRefreshing`, `value` korunur).
   HomeDashboardControllerProvider._()
     : super(
         from: null,
@@ -91,7 +94,7 @@ final class HomeDashboardControllerProvider
 }
 
 String _$homeDashboardControllerHash() =>
-    r'47f2e441dac072f17dbf252de8607c1b33269c91';
+    r'5574e2575b487d2f60a2225fc56cb887f446199c';
 
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).
@@ -108,10 +111,11 @@ String _$homeDashboardControllerHash() =>
 /// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
 /// ek istek gönderilmez.
 ///
-/// Önbellek / yenileme: özet ekranda açık kaldıkça (kabuk dalı korunur) bellekte kalır;
-/// [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye dönüş) önceki özeti durumda tutarak
-/// yeniden okur (`invalidateSelf` → `isRefreshing`, `value` korunur). Kapsam değişimi
-/// bağımlılık yeniden kurulumudur (`isReloading`); ekran o durumda iskelet gösterir.
+/// Önbellek / yenileme: özet uygulama ömrünce bellekte kalır ve okunduğu sahibe (oturum nesli +
+/// program, [CacheOwnership]) bağlıdır; ekran [visible] durumunu gösterir: başka hesap, kurulum
+/// ya da program için okunmuş özet görünmez (yükleniyor ya da yalnız hata). [refresh] (aşağı
+/// çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
+/// okur (`invalidateSelf` → `isRefreshing`, `value` korunur).
 
 abstract class _$HomeDashboardController extends $AsyncNotifier<HomeDashboard> {
   FutureOr<HomeDashboard> build();

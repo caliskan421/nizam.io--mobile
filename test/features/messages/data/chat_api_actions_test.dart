@@ -2,7 +2,8 @@
 // bahsetme ve anket gönderim gövdesi, ek multipart'ı (`client_message_id` sorguda, `body`
 // dosyadan önce, parça türü), indirmeler (akış, kapı metaverisi), üye ve grup uçları, paylaşılanlar
 // ve kart eşlemesi, mesajdan görev (`Idempotency-Key`, öncelik değeri), arama (`q`, `before`),
-// 409 eşlemesi; mesajda bahsetme/referans/görev ve anket oy verenleri.
+// 409 eşlemesi; mesajda bahsetme/referans/görev ve anket oy verenleri. Ek dosyasının içerik
+// akışı gönderimde okunamazsa `client.file_unreadable` (Codex tur 5 / N11).
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -10,6 +11,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/features/messages/domain/chat.dart';
 
 import 'chat_http.dart';
@@ -215,6 +217,35 @@ void main() {
       expect(a.seen.last.extra['openapi'], isNotNull);
     },
   );
+
+  test('ek: boyut okunur, içerik akışı gönderimde okunamaz → client.file_unreadable', () async {
+    final dir = await Directory.systemTemp.createTemp('k5b');
+    addTearDown(() => dir.delete(recursive: true));
+    final f = File('${dir.path}/r.pdf')..writeAsBytesSync([1, 2, 3]);
+    final (repo, a) = chatRepo({
+      'POST /v1/chats/c1/attachments': (201, _msg()),
+    });
+    a.beforeBody = f.deleteSync;
+    await expectLater(
+      repo.sendAttachment(
+        'c1',
+        'k-9',
+        ChatUpload(
+          path: f.path,
+          name: 'r.pdf',
+          sizeBytes: 3,
+          contentType: 'application/pdf',
+        ),
+      ),
+      throwsA(
+        isA<ApiError>().having(
+          (e) => e.code,
+          'code',
+          ClientErrorCode.fileUnreadable,
+        ),
+      ),
+    );
+  });
 
   test('üyeler ve grup ayarları', () async {
     final (repo, a) = chatRepo({

@@ -2,7 +2,9 @@
 // HTTP yığını, sahte sunucu: özet seçimde DEĞİL gönderimde ve tür/boyut ön denetiminden sonra
 // okunur; okunamayan dosya kullanıcıya gösterilen hatadır (istek yok, anahtar ve seçim
 // bozulmaz); seçici hatası önceki seçimi korur; denetleyici kapanınca özet sonucu yok sayılır;
-// sonucu bilinmeyen yüklemenin aynı taslakla tekrarı özeti yeniden okumaz.
+// sonucu bilinmeyen yüklemenin aynı taslakla tekrarı özeti yeniden okumaz. Uçuş kilidi özetten
+// önce kurulur, taslak nesli form kapanınca/yeniden açılınca eski gönderimi geçersiz kılar
+// (Codex tur 5 / N10).
 import 'dart:async';
 import 'dart:io';
 
@@ -59,15 +61,17 @@ class _Picker implements UploadPicker {
 }
 
 typedef _Open = ({
+  TaskDetailServer server,
   Harness h,
   ProviderContainer c,
   TaskDetailController ctl,
   ProviderSubscription<TaskDetailState> sub,
 });
 
-Future<_Open> _open(_Digest digest, _Picker picker) async {
-  final server = TaskDetailServer()
-    ..writes['POST $_files'] = () => timeout(null);
+/// [ok] false → yükleme isteği zaman aşımı (sonuç bilinmiyor); true → varsayılan başarı.
+Future<_Open> _open(_Digest digest, _Picker picker, {bool ok = false}) async {
+  final server = TaskDetailServer();
+  if (!ok) server.writes['POST $_files'] = () => timeout(null);
   final h = await pilotHarness(PilotBackend(), signedIn: true);
   h.backend.handler = server.handle;
   h.composition.locator
@@ -85,7 +89,7 @@ Future<_Open> _open(_Digest digest, _Picker picker) async {
   await c.read(taskDetailsProvider('w1').future);
   h.backend.requests.clear();
   final ctl = c.read(taskDetailControllerProvider('w1').notifier)..openUpload();
-  return (h: h, c: c, ctl: ctl, sub: sub);
+  return (server: server, h: h, c: c, ctl: ctl, sub: sub);
 }
 
 int _posts(Harness h) => h.backend.count('POST', _files);
@@ -202,5 +206,75 @@ void main() {
     expect((await pending).kind, WriteKind.unchanged);
     expect(digest.cancelled, isTrue);
     expect(_posts(o.h), 0);
+  });
+
+  group('uçuş kilidi ve taslak nesli (N10)', () {
+    TaskDetailState st(_Open o) => o.c.read(taskDetailControllerProvider('w1'));
+
+    test(
+      'özet sürerken ikinci gönderim busy; ilk başarılı, tek istek',
+      () async {
+        final digest = _Digest()..gate = Completer<void>();
+        final o = await _open(digest, _Picker(), ok: true);
+        choose(o.ctl, o.c, src('1', 'rapor.pdf'));
+        final first = o.ctl.submitUpload();
+        await pumpEventQueue();
+        expect(st(o).busy, isTrue, reason: 'kilit özetten önce');
+        expect((await o.ctl.submitUpload()).kind, WriteKind.busy);
+        digest.gate!.complete();
+        expect((await first).ok, isTrue);
+        expect(digest.reads, 1);
+        expect(_posts(o.h), 1);
+        expect(st(o).upload, isNull);
+        expect((await o.ctl.submitUpload()).kind, WriteKind.invalid);
+        expect(_posts(o.h), 1, reason: 'aynı dosya yeniden yüklenmez');
+      },
+    );
+
+    test('özet sürerken form kapanır (ya da yenisi açılır): istek yok, yeni '
+        'taslak bozulmaz', () async {
+      final digest = _Digest()..gate = Completer<void>();
+      final o = await _open(digest, _Picker(), ok: true);
+      choose(o.ctl, o.c, src('1', 'rapor.pdf'));
+      final pending = o.ctl.submitUpload();
+      await pumpEventQueue();
+      o.ctl
+        ..closeForms()
+        ..openUpload();
+      final b = src('2', 'yeni.pdf');
+      choose(o.ctl, o.c, b);
+      digest.gate!.complete();
+      expect((await pending).kind, WriteKind.unchanged);
+      expect(digest.cancelled, isTrue, reason: 'okuma durdu');
+      expect(_posts(o.h), 0);
+      expect(st(o).upload?.file, same(b));
+      expect(st(o).busy, isFalse);
+    });
+
+    test('istek uçuştayken kapatılıp yeni taslak açılır: eski başarı yeni '
+        'taslağı temizlemez', () async {
+      final o = await _open(_Digest(), _Picker(), ok: true);
+      final hold = o.server.hold = Completer<void>();
+      // İstek sunucuya ulaşınca haber verilir (özet gerçek dosyayı okur; süre belirsiz).
+      final arrived = Completer<void>();
+      final inner = o.h.backend.handler;
+      o.h.backend.handler = (r) {
+        if (r.method == 'POST' && r.path == _files) arrived.complete();
+        return inner(r);
+      };
+      choose(o.ctl, o.c, src('1', 'rapor.pdf'));
+      final pending = o.ctl.submitUpload();
+      await arrived.future;
+      expect(_posts(o.h), 1);
+      o.ctl
+        ..closeForms()
+        ..openUpload();
+      final b = src('2', 'yeni.pdf');
+      choose(o.ctl, o.c, b);
+      hold.complete();
+      expect((await pending).ok, isTrue);
+      expect(st(o).upload?.file, same(b));
+      expect(st(o).tab, isNot(TaskDetailTab.files));
+    });
   });
 }

@@ -1,7 +1,9 @@
 import 'dart:collection';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/cache_owner.dart';
 import '../../../core/providers.dart';
 import '../../../core/stale_clock.dart';
 import '../domain/task_catalog.dart';
@@ -9,9 +11,11 @@ import '../domain/task_details.dart';
 import 'tasks_providers.dart';
 
 part 'task_catalog_controller.g.dart';
+part 'task_catalog_owner.dart';
 
 /// Görev kataloğu (görevler, kişiler, koordinatörlükler). Görevler, zaman çizelgesi,
-/// koordinatörlük ve arşiv ekranları bunu okur; seçili kapsam değişince yeniden okunur,
+/// koordinatörlük ve arşiv ekranları bunu okur; oturum nesli veya program değişince eski
+/// değer durumdan silinerek yeniden okunur (yüklenirken ve hatada önceki sahip görünmez),
 /// aksi hâlde yeniden yükleme yalnız dokunuşla.
 ///
 /// Sunucu yazmasından sonra etkilenen görev tekil okumayla ([applyDetails]) değişir; liste
@@ -22,20 +26,44 @@ part 'task_catalog_controller.g.dart';
 /// hemen gösterir. [refresh] / [refreshIfStale] / [reload] yeniden okurken önceki katalog
 /// durumda kalır (Riverpod `invalidateSelf` → `isRefreshing`, `value` korunur); yenileme
 /// hatasında da (`AsyncError` önceki değeri taşır) görünür veri silinmez.
-@Riverpod(keepAlive: true)
-class TaskCatalogController extends _$TaskCatalogController {
-  /// Son başarılı okumadan beri geçen süre (notifier yeniden kurulumlarda korunur).
-  final _clock = StaleClock();
+class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
+  /// Son başarılı okumadan beri geçen süre (aynı sahipte yeniden kurulumlarda korunur).
+  var _clock = StaleClock();
+  final _ownership = CacheOwnership();
+  CacheOwner? _owner;
 
   @override
   Future<TaskCatalog> build() async {
-    ref.watch(scopeStateProvider);
+    final buildRef = ref;
+    final owner = _ownership.watch(buildRef);
+    if (_owner != owner) {
+      _owner = owner;
+      _touched.clear();
+      _generation++;
+      _namesAt = 0;
+      _clock = StaleClock();
+    }
     final catalog = await ref.read(taskCatalogRepositoryProvider).load();
-    _clock.markFresh();
+    // Riverpod iptal edilmiş build'in sonucunu atar; notifier alanı da eski okumadan etkilenmez.
+    if (buildRef.mounted) {
+      _ownership.markLoaded(buildRef, owner);
+      if (_ownership.owns(buildRef)) _clock.markFresh();
+    }
     return catalog;
   }
 
-  TaskCatalog? get _catalog => state.value;
+  @override
+  bool updateShouldNotify(
+    AsyncValue<TaskCatalog> previous,
+    AsyncValue<TaskCatalog> next,
+  ) {
+    // Eleman eski değeri süzerken iki durum da loading olabilir; sahip değişimi yine
+    // bildirilir ki value okuyan ekranlar önceki çizdikleri kataloğu da kaldırsın.
+    if (_owner != null && !_ownership.owns(ref)) return true;
+    return super.updateShouldNotify(previous, next);
+  }
+
+  TaskCatalog? get _catalog => _ownership.visible(ref, state).value;
 
   // Yerel güncelleme nesli: [replace] / [applyDetails] / [applyItem] görevi işaretler; [upsert]
   // okuma başladıktan SONRA yerelde güncellenmiş görevi eski okumayla ezmez.

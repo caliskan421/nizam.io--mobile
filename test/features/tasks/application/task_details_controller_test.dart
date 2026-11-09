@@ -85,6 +85,7 @@ final _details = TaskDetails(
 ProviderContainer _container(_Details details) {
   final c = ProviderContainer(
     overrides: [
+      sessionGenerationProvider.overrideWith((ref) => 1),
       taskCatalogRepositoryProvider.overrideWithValue(_Catalog()),
       taskDetailsRepositoryProvider.overrideWithValue(details),
       scopeStateProvider.overrideWith(

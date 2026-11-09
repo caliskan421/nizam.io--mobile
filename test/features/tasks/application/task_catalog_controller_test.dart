@@ -1,4 +1,6 @@
 // TaskCatalogController: bileşim kökündeki örnek kaynaktan katalog; arama yardımcıları.
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
@@ -8,9 +10,87 @@ import 'package:nizamio/features/tasks/domain/task_details.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
 void main() {
+  test('oturum değişince başarısız okuma önceki kataloğu taşımaz', () async {
+    final h = _OwnershipHarness();
+    addTearDown(h.container.dispose);
+    final first = await _Server().load();
+    h.server.requests.single.complete(first);
+    await h.container.read(taskCatalogControllerProvider.future);
+
+    h.changeSession();
+    expect(h.state.isLoading, isTrue);
+    expect(h.state.hasValue, isFalse);
+    expect(
+      h.states.last.hasValue,
+      isFalse,
+      reason: 'dinleyiciler de temiz durumu görür',
+    );
+    final pending = h.container.read(taskCatalogControllerProvider.future);
+    final check = expectLater(pending, throwsStateError);
+    h.server.requests.last.completeError(StateError('yeni oturum'));
+    await check;
+    expect(h.state, isA<AsyncError<TaskCatalog>>());
+    expect(h.state.hasError, isTrue);
+    expect(h.state.isLoading, isFalse);
+    expect(h.state.hasValue, isFalse);
+    expect(h.state.value, isNull);
+  });
+
+  test('program değişince okuma sürerken önceki katalog görünmez', () async {
+    final h = _OwnershipHarness();
+    addTearDown(h.container.dispose);
+    h.server.requests.single.complete(await _Server().load());
+    await h.container.read(taskCatalogControllerProvider.future);
+
+    h.program = 'p2';
+    h.container.invalidate(scopeStateProvider);
+    expect(h.state, isA<AsyncLoading<TaskCatalog>>());
+    expect(h.states.last, isA<AsyncLoading<TaskCatalog>>());
+    expect(h.states.last.hasValue, isFalse);
+    expect(h.state.isLoading, isTrue);
+    expect(h.state.hasValue, isFalse);
+    expect(h.state.value, isNull);
+    final next = await _Counting(() {}, () => 'd2').load();
+    h.server.requests.last.complete(next);
+    expect(
+      await h.container.read(taskCatalogControllerProvider.future),
+      same(next),
+    );
+  });
+
+  for (final oldFirst in [true, false]) {
+    test(
+      'geç eski yanıt yeni sahibine yazılmaz (eski önce: $oldFirst)',
+      () async {
+        final h = _OwnershipHarness();
+        addTearDown(h.container.dispose);
+        final oldRequest = h.server.requests.single;
+        h.changeSession();
+        expect(h.state.hasValue, isFalse);
+        expect(h.server.requests, hasLength(2));
+        final old = await _Server().load();
+        if (oldFirst) {
+          oldRequest.complete(old);
+          await h.container.pump();
+          expect(h.state.isLoading, isTrue);
+          expect(h.state.hasValue, isFalse);
+        }
+        final next = await _Counting(() {}, () => 'd2').load();
+        h.server.requests.last.complete(next);
+        await h.container.read(taskCatalogControllerProvider.future);
+        if (!oldFirst) {
+          oldRequest.complete(old);
+          await h.container.pump();
+        }
+        expect(h.state.value, same(next));
+      },
+    );
+  }
+
   test('applyDetails: tekil okuma kalemin yerine geçer (yalnız o kalem), adlar dizine katılır', () async {
     final c = ProviderContainer(
       overrides: [
+        sessionGenerationProvider.overrideWith((ref) => 1),
         taskCatalogRepositoryProvider.overrideWithValue(_Server()),
         scopeStateProvider.overrideWith(
           (ref) => const ScopeSelection(programId: 'p1'),
@@ -67,6 +147,7 @@ void main() {
     var loads = 0;
     final c = ProviderContainer(
       overrides: [
+        sessionGenerationProvider.overrideWith((ref) => 1),
         scopeControllerProvider.overrideWithValue(scope),
         taskCatalogRepositoryProvider.overrideWithValue(
           _Counting(() => loads++, () => null),
@@ -88,6 +169,7 @@ void main() {
     final c = ProviderContainer(
       retry: (_, _) => null,
       overrides: [
+        sessionGenerationProvider.overrideWith((ref) => 1),
         scopeStateProvider.overrideWith(
           (ref) => const ScopeSelection(programId: 'p1'),
         ),
@@ -129,6 +211,9 @@ void main() {
     expect(loads, 6);
     await ctl.refreshIfStale();
     expect(loads, 6);
+    c.invalidate(taskCatalogControllerProvider);
+    await c.read(taskCatalogControllerProvider.future);
+    expect(loads, 7, reason: 'dışarıdan yeniden dene asıl okumayı yeniler');
   });
 }
 
@@ -189,4 +274,48 @@ class _Server implements TaskCatalogRepository {
     people: const [],
     coordinatorships: const [],
   );
+}
+
+class _OwnershipHarness {
+  _OwnershipHarness() {
+    container = ProviderContainer(
+      retry: (_, _) => null,
+      overrides: [
+        sessionGenerationProvider.overrideWith((ref) => session),
+        scopeStateProvider.overrideWith(
+          (ref) => ScopeSelection(programId: program),
+        ),
+        taskCatalogRepositoryProvider.overrideWithValue(server),
+      ],
+    );
+    container.listen(
+      taskCatalogControllerProvider,
+      (_, next) => states.add(next),
+    );
+  }
+
+  final states = <AsyncValue<TaskCatalog>>[];
+  var session = 1;
+  var program = 'p1';
+  final server = _PendingServer();
+  late final ProviderContainer container;
+
+  AsyncValue<TaskCatalog> get state =>
+      container.read(taskCatalogControllerProvider);
+
+  void changeSession() {
+    session++;
+    container.invalidate(sessionGenerationProvider);
+  }
+}
+
+class _PendingServer implements TaskCatalogRepository {
+  final requests = <Completer<TaskCatalog>>[];
+
+  @override
+  Future<TaskCatalog> load() {
+    final request = Completer<TaskCatalog>();
+    requests.add(request);
+    return request.future;
+  }
 }

@@ -10125,6 +10125,156 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu gün için görevi yok.'**
   String get uiUsersTaskNoDay;
+
+  /// ui.users.ops_active
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap aktif'**
+  String get uiUsersOpsActive;
+
+  /// ui.users.ops_status_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Durum bilgisi ve açma/kapatma işlemi bu sunucuda sunulmuyor.'**
+  String get uiUsersOpsStatusUnavailable;
+
+  /// ui.users.ops_reset_link
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre sıfırlama bağlantısı gönder'**
+  String get uiUsersOpsResetLink;
+
+  /// ui.users.ops_reset_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sunucu e-posta ile sıfırlama bağlantısı göndermiyor.'**
+  String get uiUsersOpsResetUnavailable;
+
+  /// ui.users.ops_delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcıyı sil'**
+  String get uiUsersOpsDelete;
+
+  /// ui.users.ops_delete_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kullanıcı silinmiş kayıtlara taşınacak ve oturumları kapatılacak.'**
+  String get uiUsersOpsDeleteConfirm;
+
+  /// ui.users.ops_self_delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendi hesabınızı bu ekrandan silemezsiniz.'**
+  String get uiUsersOpsSelfDelete;
+
+  /// ui.users.ops_admin_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem için şirket yöneticisi yetkisi gerekir.'**
+  String get uiUsersOpsAdminRequired;
+
+  /// ui.users.ops_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı silinmiş kayıtlara taşındı.'**
+  String get uiUsersOpsDeleted;
+
+  /// ui.users.account_email
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta'**
+  String get uiUsersAccountEmail;
+
+  /// ui.users.account_email_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni e-posta'**
+  String get uiUsersAccountEmailHint;
+
+  /// ui.users.account_email_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçerli bir e-posta adresi gir'**
+  String get uiUsersAccountEmailInvalid;
+
+  /// ui.users.account_role_heading
+  ///
+  /// In tr, this message translates to:
+  /// **'roller · birden çok seçilebilir'**
+  String get uiUsersAccountRoleHeading;
+
+  /// ui.users.account_department_heading
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlük'**
+  String get uiUsersAccountDepartmentHeading;
+
+  /// ui.users.account_admin_description
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm programları ve kullanıcıları yönetir'**
+  String get uiUsersAccountAdminDescription;
+
+  /// ui.users.account_coordinator_description
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlükte görevleri ve üyeleri yönetir'**
+  String get uiUsersAccountCoordinatorDescription;
+
+  /// ui.users.account_member_description
+  ///
+  /// In tr, this message translates to:
+  /// **'Atandığı koordinatörlükte görev alır'**
+  String get uiUsersAccountMemberDescription;
+
+  /// ui.users.account_role_scope
+  ///
+  /// In tr, this message translates to:
+  /// **'Rol koordinatörlük bazında atanır. Değiştirilecek koordinatörlüğü seçin.'**
+  String get uiUsersAccountRoleScope;
+
+  /// ui.users.account_grant_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kullanıcıya şirket yöneticisi yetkisi verilsin mi?'**
+  String get uiUsersAccountGrantAdmin;
+
+  /// ui.users.account_revoke_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kullanıcının şirket yöneticisi yetkisi kaldırılsın mı?'**
+  String get uiUsersAccountRevokeAdmin;
+
+  /// ui.users.account_add
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekle'**
+  String get uiUsersAccountAdd;
+
+  /// ui.users.account_add_as_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye olarak ekle'**
+  String get uiUsersAccountAddAsMember;
+
+  /// ui.users.account_unsaved
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydedilmedi'**
+  String get uiUsersAccountUnsaved;
+
+  /// ui.users.account_cancel
+  ///
+  /// In tr, this message translates to:
+  /// **'Vazgeç'**
+  String get uiUsersAccountCancel;
+
+  /// ui.users.account_save
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydet'**
+  String get uiUsersAccountSave;
 }
 
 class _AppLocalizationsDelegate

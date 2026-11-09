@@ -21,11 +21,10 @@ import '../../tasks/tasks.dart';
 import '../application/admin_controller.dart';
 import '../application/admin_user_task_panel_controller.dart';
 import '../domain/organization_admin.dart';
-import 'admin_user_actions.dart';
+import 'admin_user_account_panel.dart';
 import 'admin_user_collapsed_title.dart';
 import 'admin_user_hero.dart';
 import 'admin_user_identity.dart';
-import 'admin_user_memberships.dart';
 import 'admin_user_profile_menu.dart';
 import 'admin_user_related.dart';
 import 'admin_user_tasks_panel.dart';
@@ -272,21 +271,23 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
                     ),
                   ),
                 ),
-              if (_tab == 3) ...[
-                AdminUserMemberships(user: user),
-                const Gap(_sectionGap),
-                AbsorbPointer(
-                  absorbing: ref.watch(adminCommandProvider),
-                  child: AdminUserActions(user: user, grouped: true),
+              if (_tab == 3)
+                AdminUserAccountPanel(
+                  key: ValueKey(user.accountId),
+                  user: user,
+                  catalog: catalog!,
+                  email: user.accountId == catalog.me
+                      ? catalog.accountEmail
+                      : null,
+                  companyAdmin: isAdmin
+                      ? true
+                      : adminIndex != null &&
+                            !adminIndex.isLoading &&
+                            !adminIndex.hasError &&
+                            adminIndex.value?.complete == true
+                      ? false
+                      : null,
                 ),
-                const Gap(NizamioSpacing.gapMd),
-                Text(
-                  l.uiUsersAccountUnavailable,
-                  style: context.text.caption.copyWith(
-                    color: context.colors.textMuted,
-                  ),
-                ),
-              ],
             ],
       children: [
         if (user == null)

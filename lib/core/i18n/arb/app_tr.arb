@@ -6688,5 +6688,105 @@
   "uiUsersTaskNoDay": "Bu gün için görevi yok.",
   "@uiUsersTaskNoDay": {
     "description": "ui.users.task_no_day"
+  },
+  "uiUsersOpsActive": "Hesap aktif",
+  "@uiUsersOpsActive": {
+    "description": "ui.users.ops_active"
+  },
+  "uiUsersOpsStatusUnavailable": "Durum bilgisi ve açma/kapatma işlemi bu sunucuda sunulmuyor.",
+  "@uiUsersOpsStatusUnavailable": {
+    "description": "ui.users.ops_status_unavailable"
+  },
+  "uiUsersOpsResetLink": "Şifre sıfırlama bağlantısı gönder",
+  "@uiUsersOpsResetLink": {
+    "description": "ui.users.ops_reset_link"
+  },
+  "uiUsersOpsResetUnavailable": "Bu sunucu e-posta ile sıfırlama bağlantısı göndermiyor.",
+  "@uiUsersOpsResetUnavailable": {
+    "description": "ui.users.ops_reset_unavailable"
+  },
+  "uiUsersOpsDelete": "Kullanıcıyı sil",
+  "@uiUsersOpsDelete": {
+    "description": "ui.users.ops_delete"
+  },
+  "uiUsersOpsDeleteConfirm": "Bu kullanıcı silinmiş kayıtlara taşınacak ve oturumları kapatılacak.",
+  "@uiUsersOpsDeleteConfirm": {
+    "description": "ui.users.ops_delete_confirm"
+  },
+  "uiUsersOpsSelfDelete": "Kendi hesabınızı bu ekrandan silemezsiniz.",
+  "@uiUsersOpsSelfDelete": {
+    "description": "ui.users.ops_self_delete"
+  },
+  "uiUsersOpsAdminRequired": "Bu işlem için şirket yöneticisi yetkisi gerekir.",
+  "@uiUsersOpsAdminRequired": {
+    "description": "ui.users.ops_admin_required"
+  },
+  "uiUsersOpsDeleted": "Kullanıcı silinmiş kayıtlara taşındı.",
+  "@uiUsersOpsDeleted": {
+    "description": "ui.users.ops_deleted"
+  },
+  "uiUsersAccountEmail": "E-posta",
+  "@uiUsersAccountEmail": {
+    "description": "ui.users.account_email"
+  },
+  "uiUsersAccountEmailHint": "Yeni e-posta",
+  "@uiUsersAccountEmailHint": {
+    "description": "ui.users.account_email_hint"
+  },
+  "uiUsersAccountEmailInvalid": "Geçerli bir e-posta adresi gir",
+  "@uiUsersAccountEmailInvalid": {
+    "description": "ui.users.account_email_invalid"
+  },
+  "uiUsersAccountRoleHeading": "roller · birden çok seçilebilir",
+  "@uiUsersAccountRoleHeading": {
+    "description": "ui.users.account_role_heading"
+  },
+  "uiUsersAccountDepartmentHeading": "koordinatörlük",
+  "@uiUsersAccountDepartmentHeading": {
+    "description": "ui.users.account_department_heading"
+  },
+  "uiUsersAccountAdminDescription": "Tüm programları ve kullanıcıları yönetir",
+  "@uiUsersAccountAdminDescription": {
+    "description": "ui.users.account_admin_description"
+  },
+  "uiUsersAccountCoordinatorDescription": "Koordinatörlükte görevleri ve üyeleri yönetir",
+  "@uiUsersAccountCoordinatorDescription": {
+    "description": "ui.users.account_coordinator_description"
+  },
+  "uiUsersAccountMemberDescription": "Atandığı koordinatörlükte görev alır",
+  "@uiUsersAccountMemberDescription": {
+    "description": "ui.users.account_member_description"
+  },
+  "uiUsersAccountRoleScope": "Rol koordinatörlük bazında atanır. Değiştirilecek koordinatörlüğü seçin.",
+  "@uiUsersAccountRoleScope": {
+    "description": "ui.users.account_role_scope"
+  },
+  "uiUsersAccountGrantAdmin": "Bu kullanıcıya şirket yöneticisi yetkisi verilsin mi?",
+  "@uiUsersAccountGrantAdmin": {
+    "description": "ui.users.account_grant_admin"
+  },
+  "uiUsersAccountRevokeAdmin": "Bu kullanıcının şirket yöneticisi yetkisi kaldırılsın mı?",
+  "@uiUsersAccountRevokeAdmin": {
+    "description": "ui.users.account_revoke_admin"
+  },
+  "uiUsersAccountAdd": "Ekle",
+  "@uiUsersAccountAdd": {
+    "description": "ui.users.account_add"
+  },
+  "uiUsersAccountAddAsMember": "Üye olarak ekle",
+  "@uiUsersAccountAddAsMember": {
+    "description": "ui.users.account_add_as_member"
+  },
+  "uiUsersAccountUnsaved": "Kaydedilmedi",
+  "@uiUsersAccountUnsaved": {
+    "description": "ui.users.account_unsaved"
+  },
+  "uiUsersAccountCancel": "Vazgeç",
+  "@uiUsersAccountCancel": {
+    "description": "ui.users.account_cancel"
+  },
+  "uiUsersAccountSave": "Kaydet",
+  "@uiUsersAccountSave": {
+    "description": "ui.users.account_save"
   }
 }

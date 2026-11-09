@@ -5245,4 +5245,90 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiUsersTaskNoDay => 'Bu gün için görevi yok.';
+
+  @override
+  String get uiUsersOpsActive => 'Hesap aktif';
+
+  @override
+  String get uiUsersOpsStatusUnavailable =>
+      'Durum bilgisi ve açma/kapatma işlemi bu sunucuda sunulmuyor.';
+
+  @override
+  String get uiUsersOpsResetLink => 'Şifre sıfırlama bağlantısı gönder';
+
+  @override
+  String get uiUsersOpsResetUnavailable =>
+      'Bu sunucu e-posta ile sıfırlama bağlantısı göndermiyor.';
+
+  @override
+  String get uiUsersOpsDelete => 'Kullanıcıyı sil';
+
+  @override
+  String get uiUsersOpsDeleteConfirm =>
+      'Bu kullanıcı silinmiş kayıtlara taşınacak ve oturumları kapatılacak.';
+
+  @override
+  String get uiUsersOpsSelfDelete =>
+      'Kendi hesabınızı bu ekrandan silemezsiniz.';
+
+  @override
+  String get uiUsersOpsAdminRequired =>
+      'Bu işlem için şirket yöneticisi yetkisi gerekir.';
+
+  @override
+  String get uiUsersOpsDeleted => 'Kullanıcı silinmiş kayıtlara taşındı.';
+
+  @override
+  String get uiUsersAccountEmail => 'E-posta';
+
+  @override
+  String get uiUsersAccountEmailHint => 'Yeni e-posta';
+
+  @override
+  String get uiUsersAccountEmailInvalid => 'Geçerli bir e-posta adresi gir';
+
+  @override
+  String get uiUsersAccountRoleHeading => 'roller · birden çok seçilebilir';
+
+  @override
+  String get uiUsersAccountDepartmentHeading => 'koordinatörlük';
+
+  @override
+  String get uiUsersAccountAdminDescription =>
+      'Tüm programları ve kullanıcıları yönetir';
+
+  @override
+  String get uiUsersAccountCoordinatorDescription =>
+      'Koordinatörlükte görevleri ve üyeleri yönetir';
+
+  @override
+  String get uiUsersAccountMemberDescription =>
+      'Atandığı koordinatörlükte görev alır';
+
+  @override
+  String get uiUsersAccountRoleScope =>
+      'Rol koordinatörlük bazında atanır. Değiştirilecek koordinatörlüğü seçin.';
+
+  @override
+  String get uiUsersAccountGrantAdmin =>
+      'Bu kullanıcıya şirket yöneticisi yetkisi verilsin mi?';
+
+  @override
+  String get uiUsersAccountRevokeAdmin =>
+      'Bu kullanıcının şirket yöneticisi yetkisi kaldırılsın mı?';
+
+  @override
+  String get uiUsersAccountAdd => 'Ekle';
+
+  @override
+  String get uiUsersAccountAddAsMember => 'Üye olarak ekle';
+
+  @override
+  String get uiUsersAccountUnsaved => 'Kaydedilmedi';
+
+  @override
+  String get uiUsersAccountCancel => 'Vazgeç';
+
+  @override
+  String get uiUsersAccountSave => 'Kaydet';
 }

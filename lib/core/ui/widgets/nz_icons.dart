@@ -23,6 +23,7 @@ abstract final class NzIcons {
   static const IconData chevronDown = Icons.expand_more_rounded;
   static const IconData chevronLeft = Icons.chevron_left_rounded;
   static const IconData chevronRight = Icons.chevron_right_rounded;
+  static const IconData lock = Icons.lock_outline_rounded;
   static const IconData clock = Icons.schedule_rounded;
   static const IconData close = Icons.close_rounded;
   static const IconData coordinatorships = Icons.apartment_rounded;

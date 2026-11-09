@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
+import '../../../core/stale_clock.dart';
 import '../../tasks/tasks.dart';
 import '../domain/home_dashboard.dart';
 import 'scope_providers.dart';
@@ -31,11 +32,8 @@ part 'home_dashboard_controller.g.dart';
 /// bağımlılık yeniden kurulumudur (`isReloading`); ekran o durumda iskelet gösterir.
 @riverpod
 class HomeDashboardController extends _$HomeDashboardController {
-  /// Yeniden ziyarette özetin taze sayıldığı süre.
-  static const staleAfter = Duration(seconds: 30);
-
   /// Son başarılı okumadan beri geçen süre (notifier yeniden kurulumlarda korunur).
-  final _age = Stopwatch();
+  final _clock = StaleClock();
 
   /// Önceki başarılı okumanın ait olduğu program (kapsam). Yeniden kurulum aynı programda ise
   /// eski özet başka kümeye ait değildir; ekran iskelet yerine onu gösterir.
@@ -46,9 +44,7 @@ class HomeDashboardController extends _$HomeDashboardController {
     final program = ref.read(scopeStateProvider).programId;
     final dashboard = await _load();
     loadedProgram = program;
-    _age
-      ..reset()
-      ..start();
+    _clock.markFresh();
     return dashboard;
   }
 
@@ -80,15 +76,8 @@ class HomeDashboardController extends _$HomeDashboardController {
 
   /// Yeniden ziyaret: son başarılı okuma [maxAge]'den eskiyse arka planda [refresh]; eski
   /// özet görünür kalır. Hiç yüklenmemişse ya da yükleniyorsa bir şey yapmaz; hata yutulur.
-  Future<void> refreshIfStale({Duration maxAge = staleAfter}) async {
-    if (state.isLoading || !state.hasValue) return;
-    if (_age.isRunning && _age.elapsed < maxAge) return;
-    try {
-      await refresh();
-    } on Object {
-      // Arka plan yenilemesi: hata durumda, veri yerinde.
-    }
-  }
+  Future<void> refreshIfStale({Duration maxAge = StaleClock.staleAfter}) =>
+      _clock.refreshIfStale(state, refresh, maxAge: maxAge);
 
   Future<HomeDashboard> _load() async {
     final scope = ref.watch(scopeStateProvider);

@@ -1,5 +1,5 @@
-// Toplantı listesi: imleçli okuma, yöneticiye silinenler, geri yükleme / kalıcı silme; görünüm
-// durumu (arama kapanınca sorgu temizlenir).
+// Toplantı listesi: imleçli okuma, yöneticiye silinenler, geri yükleme / kalıcı silme, bayat
+// liste tazelemesi; görünüm durumu (arama kapanınca sorgu temizlenir).
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/features/meetings/application/meetings_controller.dart';
@@ -93,6 +93,27 @@ void main() {
       c.read(meetingsBoardControllerProvider).value!.deleted,
       hasLength(1),
     );
+  });
+
+  test('refreshIfStale: tazeyse istek yok; bayatsa yalnız liste arka planda, hata yutulur', () async {
+    final s = MeetingsServer(admin: false, seat: 'koordinator');
+    final (h, c) = await openMeetings(s);
+    final first = await _board(c);
+    final ctl = c.read(meetingsBoardControllerProvider.notifier);
+    h.backend.requests.clear();
+
+    await ctl.refreshIfStale();
+    expect(calls(h), isEmpty, reason: 'staleAfter içinde');
+
+    final pending = ctl.refreshIfStale(maxAge: Duration.zero);
+    expect(c.read(meetingsBoardControllerProvider).value, same(first));
+    await pending;
+    expect(calls(h), ['GET /v1/meetings'], reason: 'kart ayrıntısı yok');
+
+    s.overrides['GET /v1/meetings'] = () => errorBody(500, 'platform.internal');
+    await ctl.refreshIfStale(maxAge: Duration.zero);
+    final failed = c.read(meetingsBoardControllerProvider);
+    expect((failed.hasError, failed.hasValue), (true, true));
   });
 
   test('görünüm: arama kapanınca sorgu temizlenir; sekme korunur', () {

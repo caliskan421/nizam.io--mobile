@@ -56,8 +56,16 @@ class CalendarPage extends ConsumerWidget {
       }
     }
 
+    // Yeniden ziyaret: takvimin iki kaynağı (toplantı listesi, görev kataloğu) bayatsa arka
+    // planda yeniden okunur; dizin onları izlediği için eski takvim yerinde güncellenir.
+    void revisit() {
+      ref.read(meetingsBoardControllerProvider.notifier).refreshIfStale();
+      ref.read(taskCatalogControllerProvider.notifier).refreshIfStale();
+    }
+
     return NzPage.feed(
       onRetry: retry,
+      onRevisit: revisit,
       topBar: const RootTopBar(),
       children: [
         _Header(onPlan: plan),

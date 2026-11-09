@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/stale_clock.dart';
 import '../../tasks/tasks.dart';
 import '../domain/meeting.dart';
 import '../domain/meeting_board.dart';
@@ -62,11 +63,15 @@ class MeetingsViewController extends _$MeetingsViewController {
 /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı
 /// silme de bu yoldadır): `/v1/meetings/deleted` istemci kapısında `/v1/meetings/{id}` ile
 /// belirsiz eşleşir ve fail-closed reddedilir. İkisi de imleçli; en çok [maxPages] × [pageSize]
-/// satır okunur. Seçili program değişince yeniden yüklenir.
+/// satır okunur. Seçili program değişince yeniden yüklenir; yeniden ziyarette bayatsa arka
+/// planda tazelenir ([refreshIfStale]).
 @riverpod
 class MeetingsBoardController extends _$MeetingsBoardController {
   static const pageSize = 200;
   static const maxPages = 10;
+
+  /// Son başarılı okumadan beri geçen süre (notifier yeniden kurulumlarda korunur).
+  final _clock = StaleClock();
 
   @override
   Future<MeetingsBoard> build() async {
@@ -78,6 +83,7 @@ class MeetingsBoardController extends _$MeetingsBoardController {
     final deleted = admin
         ? (await _all(repo.adminListDeletedMeetings)).$1
         : null;
+    _clock.markFresh();
     return MeetingsBoard(
       visible: visible,
       deleted: deleted,
@@ -110,6 +116,15 @@ class MeetingsBoardController extends _$MeetingsBoardController {
       // Hata durumda (AsyncError) gösterilir; yenileme göstergesi kapanır.
     }
   }
+
+  /// Yeniden ziyaret (sekmeye ya da ön plana dönüş): son başarılı okuma [maxAge]'den eskiyse
+  /// liste arka planda yeniden okunur; eski liste görünür kalır, hata yutulur. Kart ayrıntıları
+  /// (sayaç, konferans) geçersizlenmez: kart başına istek yalnız aşağı çekerek yenilemede.
+  Future<void> refreshIfStale({Duration maxAge = StaleClock.staleAfter}) =>
+      _clock.refreshIfStale(state, () {
+        ref.invalidateSelf();
+        return future;
+      }, maxAge: maxAge);
 
   /// Silinmiş toplantıyı geri yükler (yalnız yönetici); liste yeniden okunur.
   Future<ApiError?> restore(String id) async {

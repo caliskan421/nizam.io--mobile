@@ -105,6 +105,8 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
       onRetry: _retry,
       onRefresh: () =>
           ref.read(meetingsBoardControllerProvider.notifier).refresh(),
+      onRevisit: () =>
+          ref.read(meetingsBoardControllerProvider.notifier).refreshIfStale(),
       topBar: const RootTopBar(),
       children: [
         NzPageHeader(

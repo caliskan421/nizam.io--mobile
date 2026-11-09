@@ -18,12 +18,14 @@ import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../tasks/tasks.dart';
 import '../application/coordinatorship_detail_controller.dart';
+import '../application/coordinatorship_form_controller.dart';
 import '../application/coordinatorship_profiles_controller.dart';
 import '../application/coordinatorships_controller.dart';
 import '../domain/coordinatorship_board.dart';
 import '../domain/coordinatorship_overview.dart';
 import 'coord_archive_meetings_tabs.dart';
 import 'coord_detail_texts.dart';
+import 'coord_form_sheet.dart';
 import 'coord_general_tab.dart';
 import 'coord_hero.dart';
 import 'coord_people_sheet.dart';
@@ -81,7 +83,9 @@ class CoordinatorshipPage extends ConsumerWidget {
           NzIconButton(
             icon: NzIcons.more,
             semanticLabel: l.uiCoordMoreActions,
-            onPressed: d == null ? null : () => _showMoreActions(context, d),
+            onPressed: d == null
+                ? null
+                : () => _showMoreActions(context, ref, d),
           ),
         ],
       ),
@@ -180,9 +184,14 @@ class CoordinatorshipPage extends ConsumerWidget {
     );
   }
 
-  void _showMoreActions(BuildContext context, CoordinatorshipDetail d) {
+  void _showMoreActions(
+    BuildContext context,
+    WidgetRef ref,
+    CoordinatorshipDetail d,
+  ) {
     final l = context.l10n;
     final name = d.stats.name;
+    final canManage = ref.read(canManageCoordinatorshipsProvider);
     void toast(String m) {
       if (context.mounted) NzToast.show(context, m);
     }
@@ -193,55 +202,43 @@ class CoordinatorshipPage extends ConsumerWidget {
       // Prototip: başlıksız işlem sayfası (tutamak + iki satır grubu); ad anlamsal etiket.
       showHeader: false,
       builder: (sheet) {
-        NzMenuRow row(
-          IconData icon,
-          String label,
-          VoidCallback then, {
-          bool danger = false,
-        }) => NzMenuRow(
-          icon: icon,
-          label: label,
-          danger: danger,
-          onTap: () {
-            Navigator.of(sheet).pop();
-            then();
-          },
-        );
+        NzMenuRow row(IconData icon, String label, VoidCallback then) =>
+            NzMenuRow(
+              icon: icon,
+              label: label,
+              onTap: () {
+                Navigator.of(sheet).pop();
+                then();
+              },
+            );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             NzMenuGroup(
               rows: [
-                row(
-                  NzIcons.edit,
-                  l.uiCoordMenuEdit,
-                  () => toast('$name ${l.uiCoordToastEditTail}'),
-                ),
+                // Bilgileri düzenle yalnız şirket yöneticisine (updateDepartment,
+                // renameDepartmentLink).
+                if (canManage)
+                  row(NzIcons.edit, l.uiCoordMenuEdit, () {
+                    if (context.mounted) {
+                      showCoordinatorshipForm(context, ref, detail: d);
+                    }
+                  }),
                 row(
                   NzIcons.event,
                   l.uiCoordMenuMeeting,
                   () => showMeetingSheet(context, coordinatorship: code),
-                ),
-                row(
-                  NzIcons.hierarchy,
-                  l.uiCoordMenuParent,
-                  () => toast(l.uiCoordToastParent),
                 ),
               ],
             ),
             const Gap(NizamioSpacing.gapMd),
             NzMenuGroup(
               rows: [
+                // Birleştirmenin sunucu ucu yok: yer tutucu.
                 row(
                   NzIcons.merge,
                   l.uiCoordMenuMerge,
                   () => toast(l.uiCoordToastMerge),
-                ),
-                row(
-                  NzIcons.removeCircle,
-                  l.uiCoordMenuDeactivate,
-                  () => toast('$name ${l.uiCoordToastDeactivatedTail}'),
-                  danger: true,
                 ),
               ],
             ),

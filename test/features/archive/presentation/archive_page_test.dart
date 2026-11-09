@@ -86,7 +86,7 @@ void main() {
     expect(find.text(_l.uiArchiveUploadSoon), findsOneWidget);
     h.read(shellReselectEventsProvider.notifier).fire(ArchivePage.shellTab);
     await settle(tester);
-    expect(find.text(_l.uiArchiveCreateFolder), findsOneWidget);
+    expect(find.text(_l.uiArchiveGoCoordinatorships), findsOneWidget);
     // Tam arşiv yalnız şirket yöneticisine.
     expect(find.text(_l.uiArchiveDownloadAll), findsNothing);
     await tester.tap(find.text(_l.uiArchiveGoCoordinatorships));

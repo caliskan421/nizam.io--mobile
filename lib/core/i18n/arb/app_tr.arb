@@ -1281,14 +1281,6 @@
   "@uiArchiveDownloadAllToast": {
     "description": "ui.archive.download_all_toast"
   },
-  "uiArchiveCreateFolder": "Klasör oluştur",
-  "@uiArchiveCreateFolder": {
-    "description": "ui.archive.create_folder"
-  },
-  "uiArchiveCreateFolderSoon": "Klasör oluşturma sonraki adımda tasarlanacak",
-  "@uiArchiveCreateFolderSoon": {
-    "description": "ui.archive.create_folder_soon"
-  },
   "uiArchiveShortcuts": "Arşiv kısayolları",
   "@uiArchiveShortcuts": {
     "description": "ui.archive.shortcuts"
@@ -1741,9 +1733,49 @@
   "@uiCoordFlyAdd": {
     "description": "ui.coord.fly_add"
   },
-  "uiCoordToastAddForm": "Koordinatörlük formu açılır",
-  "@uiCoordToastAddForm": {
-    "description": "ui.coord.toast_add_form"
+  "uiCoordFormName": "Ad",
+  "@uiCoordFormName": {
+    "description": "ui.coord.form_name"
+  },
+  "uiCoordFormNameEditHelper": "Yalnız bu programdaki ad değişir",
+  "@uiCoordFormNameEditHelper": {
+    "description": "ui.coord.form_name_edit_helper"
+  },
+  "uiCoordFormKind": "Tür",
+  "@uiCoordFormKind": {
+    "description": "ui.coord.form_kind"
+  },
+  "uiCoordFormDescription": "Açıklama",
+  "@uiCoordFormDescription": {
+    "description": "ui.coord.form_description"
+  },
+  "uiCoordFormDescriptionHint": "İsteğe bağlı",
+  "@uiCoordFormDescriptionHint": {
+    "description": "ui.coord.form_description_hint"
+  },
+  "uiCoordFormCreate": "Oluştur",
+  "@uiCoordFormCreate": {
+    "description": "ui.coord.form_create"
+  },
+  "uiCoordFormSave": "Kaydet",
+  "@uiCoordFormSave": {
+    "description": "ui.coord.form_save"
+  },
+  "uiCoordFormLinkRetry": "Programa bağlamayı tekrar dene",
+  "@uiCoordFormLinkRetry": {
+    "description": "ui.coord.form_link_retry"
+  },
+  "uiCoordFormLinkFailed": "Koordinatörlük oluşturuldu ama seçili programa bağlanamadı. Tekrar denediğinde yeni koordinatörlük açılmaz, aynı kayıt bağlanır.",
+  "@uiCoordFormLinkFailed": {
+    "description": "ui.coord.form_link_failed"
+  },
+  "uiCoordToastCreated": "Koordinatörlük eklendi",
+  "@uiCoordToastCreated": {
+    "description": "ui.coord.toast_created"
+  },
+  "uiCoordToastSaved": "Bilgiler kaydedildi",
+  "@uiCoordToastSaved": {
+    "description": "ui.coord.toast_saved"
   },
   "uiCoordFlyAllList": "Tüm liste",
   "@uiCoordFlyAllList": {
@@ -1937,21 +1969,9 @@
   "@uiCoordMenuEdit": {
     "description": "ui.coord.menu_edit"
   },
-  "uiCoordToastEditTail": "düzenleme formu açılır",
-  "@uiCoordToastEditTail": {
-    "description": "ui.coord.toast_edit_tail"
-  },
   "uiCoordMenuMeeting": "Toplantı planla",
   "@uiCoordMenuMeeting": {
     "description": "ui.coord.menu_meeting"
-  },
-  "uiCoordMenuParent": "Üst birimi değiştir",
-  "@uiCoordMenuParent": {
-    "description": "ui.coord.menu_parent"
-  },
-  "uiCoordToastParent": "Üst birim seçimi açılır",
-  "@uiCoordToastParent": {
-    "description": "ui.coord.toast_parent"
   },
   "uiCoordMenuMerge": "Başka koordinatörlükle birleştir",
   "@uiCoordMenuMerge": {
@@ -1960,14 +1980,6 @@
   "uiCoordToastMerge": "Birleştirme önizlemesi açılır",
   "@uiCoordToastMerge": {
     "description": "ui.coord.toast_merge"
-  },
-  "uiCoordMenuDeactivate": "Pasifleştir",
-  "@uiCoordMenuDeactivate": {
-    "description": "ui.coord.menu_deactivate"
-  },
-  "uiCoordToastDeactivatedTail": "pasifleştirildi · görevler arşivde kalır",
-  "@uiCoordToastDeactivatedTail": {
-    "description": "ui.coord.toast_deactivated_tail"
   },
   "uiCoordNotFound": "Bu koordinatörlük bulunamadı.",
   "@uiCoordNotFound": {

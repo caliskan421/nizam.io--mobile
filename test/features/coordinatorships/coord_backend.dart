@@ -139,6 +139,12 @@ class CoordBackend extends PilotBackend {
   /// gittiğini görünür kılar.
   final unhandled = <String>[];
 
+  /// Yazma istekleri (`YÖNTEM yol`) ve gövdeleri, geliş sırasıyla.
+  final writes = <(String, Object?)>[];
+
+  /// Doluysa `POST /v1/program/departments` bu kodla (HTTP 503) düşer.
+  String? linkError;
+
   @override
   ResponseBody handle(Seen r) {
     final program = r.header('X-Nizamio-Program');
@@ -229,6 +235,9 @@ class CoordBackend extends PilotBackend {
           }.toList(),
         });
     }
+    if (r.method != 'GET') {
+      if (_write(r, key, program) case final res?) return res;
+    }
     final members = RegExp(r'^/v1/departments/([^/]+)/members$')
         .firstMatch(r.path);
     if (r.method == 'GET' && members != null) {
@@ -240,6 +249,84 @@ class CoordBackend extends PilotBackend {
     final res = super.handle(r);
     if (res.statusCode == 404) unhandled.add(key);
     return res;
+  }
+
+  /// Departman yazmaları (şirket yöneticisi): oluştur (ad küresel tekil), düzenle, programa
+  /// bağla (bağ varsa var olanı döndürür), programdaki adı değiştir.
+  ResponseBody? _write(Seen r, String key, String? program) {
+    final body = (r.body as Map<String, Object?>?) ?? const {};
+    final dept = RegExp(r'^/v1/departments/([^/]+)$').firstMatch(r.path);
+    final link = RegExp(r'^/v1/program/departments/([^/]+)$')
+        .firstMatch(r.path);
+    final known =
+        key == 'POST /v1/departments' ||
+        key == 'POST /v1/program/departments' ||
+        (r.method == 'PATCH' && (dept != null || link != null));
+    if (!known) return null;
+    writes.add((key, r.body));
+    if (!admin) {
+      return errorBody(
+        403,
+        r.path.startsWith('/v1/program')
+            ? 'program.not_authorized'
+            : 'organization.not_authorized',
+      );
+    }
+    if (r.path.startsWith('/v1/program') && program != coordProgram) {
+      return _scopeMissing();
+    }
+    Map<String, Object?> link_(String id) {
+      final row = departments.firstWhere((d) => d['department_id'] == id);
+      return {
+        'program_id': coordProgram,
+        'department_id': id,
+        'display_name': row['display_name'],
+        'copied_member_count': 0,
+      };
+    }
+
+    if (key == 'POST /v1/departments') {
+      final name = body['name']! as String;
+      if (companyDepartments.any(
+        (d) => (d['name']! as String).toLowerCase() == name.toLowerCase(),
+      )) {
+        return errorBody(409, 'organization.department_exists');
+      }
+      final row = <String, Object?>{
+        'department_id': 'dep-new-${companyDepartments.length}',
+        'name': name,
+        'kind': body['kind'],
+        'description': ?body['description'],
+      };
+      companyDepartments.add(row);
+      return jsonResponse(201, row);
+    }
+    if (key == 'POST /v1/program/departments') {
+      final err = linkError;
+      if (err != null) return errorBody(503, err);
+      final id = body['department_id']! as String;
+      final catalog = companyDepartments.firstWhere(
+        (d) => d['department_id'] == id,
+      );
+      if (!departments.any((d) => d['department_id'] == id)) {
+        departments.add({
+          'department_id': id,
+          'display_name': body['display_name'] ?? catalog['name'],
+        });
+        rosters[id] = [];
+      }
+      return jsonResponse(201, link_(id));
+    }
+    if (link != null) {
+      final id = link.group(1)!;
+      departments.firstWhere((d) => d['department_id'] == id)['display_name'] =
+          body['display_name'];
+      return jsonResponse(200, link_(id));
+    }
+    final row = companyDepartments.firstWhere(
+      (d) => d['department_id'] == dept!.group(1),
+    )..addAll(body);
+    return jsonResponse(200, row);
   }
 
   static ResponseBody _scopeMissing() =>

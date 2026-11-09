@@ -40,6 +40,7 @@ final portProviders = <String, ProviderBase<Object?>>{
       coordinatorshipProfileRepositoryProvider,
   'coordinatorshipActivityRepositoryProvider':
       coordinatorshipActivityRepositoryProvider,
+  'departmentRepositoryProvider': departmentRepositoryProvider,
   'activityLogRepositoryProvider': activityLogRepositoryProvider,
   'archiveRepositoryProvider': archiveRepositoryProvider,
   'chatRepositoryProvider': chatRepositoryProvider,

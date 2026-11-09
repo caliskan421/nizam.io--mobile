@@ -43,12 +43,10 @@ abstract final class NzIcons {
   static const IconData folder = Icons.folder_outlined;
   static const IconData folderFilled = Icons.folder_rounded;
   static const IconData folderMove = Icons.drive_file_move_outline;
-  static const IconData folderNew = Icons.create_new_folder_outlined;
   static const IconData folderOff = Icons.folder_off_outlined;
   static const IconData group = Icons.group_outlined;
   static const IconData help = Icons.help_outline_rounded;
   static const IconData hidden = Icons.visibility_off;
-  static const IconData hierarchy = Icons.account_tree_outlined;
   static const IconData history = Icons.history_rounded;
   static const IconData home = Icons.home_outlined;
   static const IconData homeFilled = Icons.home_rounded;
@@ -75,7 +73,6 @@ abstract final class NzIcons {
   static const IconData pin = Icons.push_pin_outlined;
   static const IconData redo = Icons.redo_rounded;
   static const IconData remove = Icons.remove_rounded;
-  static const IconData removeCircle = Icons.remove_circle_outline_rounded;
   static const IconData reply = Icons.reply_rounded;
   static const IconData science = Icons.science_outlined;
   static const IconData search = Icons.search_rounded;

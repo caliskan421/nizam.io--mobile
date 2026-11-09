@@ -2014,18 +2014,6 @@ abstract class AppLocalizations {
   /// **'Tüm arşiv ZIP olarak hazırlanıyor'**
   String get uiArchiveDownloadAllToast;
 
-  /// ui.archive.create_folder
-  ///
-  /// In tr, this message translates to:
-  /// **'Klasör oluştur'**
-  String get uiArchiveCreateFolder;
-
-  /// ui.archive.create_folder_soon
-  ///
-  /// In tr, this message translates to:
-  /// **'Klasör oluşturma sonraki adımda tasarlanacak'**
-  String get uiArchiveCreateFolderSoon;
-
   /// ui.archive.shortcuts
   ///
   /// In tr, this message translates to:
@@ -2704,11 +2692,71 @@ abstract class AppLocalizations {
   /// **'Koordinatörlük ekle'**
   String get uiCoordFlyAdd;
 
-  /// ui.coord.toast_add_form
+  /// ui.coord.form_name
   ///
   /// In tr, this message translates to:
-  /// **'Koordinatörlük formu açılır'**
-  String get uiCoordToastAddForm;
+  /// **'Ad'**
+  String get uiCoordFormName;
+
+  /// ui.coord.form_name_edit_helper
+  ///
+  /// In tr, this message translates to:
+  /// **'Yalnız bu programdaki ad değişir'**
+  String get uiCoordFormNameEditHelper;
+
+  /// ui.coord.form_kind
+  ///
+  /// In tr, this message translates to:
+  /// **'Tür'**
+  String get uiCoordFormKind;
+
+  /// ui.coord.form_description
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıklama'**
+  String get uiCoordFormDescription;
+
+  /// ui.coord.form_description_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'İsteğe bağlı'**
+  String get uiCoordFormDescriptionHint;
+
+  /// ui.coord.form_create
+  ///
+  /// In tr, this message translates to:
+  /// **'Oluştur'**
+  String get uiCoordFormCreate;
+
+  /// ui.coord.form_save
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydet'**
+  String get uiCoordFormSave;
+
+  /// ui.coord.form_link_retry
+  ///
+  /// In tr, this message translates to:
+  /// **'Programa bağlamayı tekrar dene'**
+  String get uiCoordFormLinkRetry;
+
+  /// ui.coord.form_link_failed
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük oluşturuldu ama seçili programa bağlanamadı. Tekrar denediğinde yeni koordinatörlük açılmaz, aynı kayıt bağlanır.'**
+  String get uiCoordFormLinkFailed;
+
+  /// ui.coord.toast_created
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük eklendi'**
+  String get uiCoordToastCreated;
+
+  /// ui.coord.toast_saved
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilgiler kaydedildi'**
+  String get uiCoordToastSaved;
 
   /// ui.coord.fly_all_list
   ///
@@ -2998,29 +3046,11 @@ abstract class AppLocalizations {
   /// **'Bilgileri düzenle'**
   String get uiCoordMenuEdit;
 
-  /// ui.coord.toast_edit_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'düzenleme formu açılır'**
-  String get uiCoordToastEditTail;
-
   /// ui.coord.menu_meeting
   ///
   /// In tr, this message translates to:
   /// **'Toplantı planla'**
   String get uiCoordMenuMeeting;
-
-  /// ui.coord.menu_parent
-  ///
-  /// In tr, this message translates to:
-  /// **'Üst birimi değiştir'**
-  String get uiCoordMenuParent;
-
-  /// ui.coord.toast_parent
-  ///
-  /// In tr, this message translates to:
-  /// **'Üst birim seçimi açılır'**
-  String get uiCoordToastParent;
 
   /// ui.coord.menu_merge
   ///
@@ -3033,18 +3063,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Birleştirme önizlemesi açılır'**
   String get uiCoordToastMerge;
-
-  /// ui.coord.menu_deactivate
-  ///
-  /// In tr, this message translates to:
-  /// **'Pasifleştir'**
-  String get uiCoordMenuDeactivate;
-
-  /// ui.coord.toast_deactivated_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'pasifleştirildi · görevler arşivde kalır'**
-  String get uiCoordToastDeactivatedTail;
 
   /// ui.coord.not_found
   ///

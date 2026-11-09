@@ -6,8 +6,10 @@ import '../../core/scope/scope_controller.dart';
 import 'application/coordinatorships_providers.dart';
 import 'data/coordinatorship_activity_api_repository.dart';
 import 'data/coordinatorship_profile_api_repository.dart';
+import 'data/department_api_repository.dart';
 import 'domain/coordinatorship_board.dart';
 import 'domain/coordinatorship_profile.dart';
+import 'domain/department_repository.dart';
 
 /// coordinatorships modülünün kayıt fonksiyonu (ADR-0001). YALNIZ bileşim kökünden çağrılır (G2).
 ///
@@ -20,6 +22,10 @@ void registerCoordinatorshipsModule(
     // Departman kaydı (tür, açıklama): sunucu, yalnız şirket yöneticisinde okunur.
     ..registerLazySingleton<CoordinatorshipProfileRepository>(
       () => ApiCoordinatorshipProfileRepository(apiDio),
+    )
+    // Koordinatörlük ekle / bilgileri düzenle (yalnız şirket yöneticisi; sunucu).
+    ..registerLazySingleton<DepartmentRepository>(
+      () => ApiDepartmentRepository(apiDio),
     )
     // Toplantı ve arşiv: sunucu (seçili program).
     ..registerLazySingleton<CoordinatorshipActivityRepository>(
@@ -37,5 +43,8 @@ List<Override> coordinatorshipsOverrides(GetIt locator) => [
   ),
   coordinatorshipActivityRepositoryProvider.overrideWith(
     (ref) => locator<CoordinatorshipActivityRepository>(),
+  ),
+  departmentRepositoryProvider.overrideWith(
+    (ref) => locator<DepartmentRepository>(),
   ),
 ];

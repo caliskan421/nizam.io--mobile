@@ -16,8 +16,10 @@ import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
 import '../../timeline/timeline.dart';
+import '../application/coordinatorship_form_controller.dart';
 import '../application/coordinatorships_controller.dart';
 import '../domain/coordinatorship_overview.dart';
+import 'coord_form_sheet.dart';
 import 'coord_texts.dart';
 
 /// Koordinatörlükler (prototip `coord`): kök üst çubuk, başlık + özet satırı, koordinatörlük
@@ -177,7 +179,7 @@ class CoordinatorshipCard extends StatelessWidget {
 }
 
 /// Alt menüde "Koordinatörlükler"e yeniden dokununca açılan kısayol menüsü: tümünü zaman
-/// çizelgesinde gör, koordinatörlük ekle (yer tutucu), sıralama.
+/// çizelgesinde gör, koordinatörlük ekle (yalnız şirket yöneticisi), sıralama.
 Future<void> showCoordinatorshipsShortcuts(
   BuildContext context,
   WidgetRef ref,
@@ -186,7 +188,7 @@ Future<void> showCoordinatorshipsShortcuts(
   final nav = context.appNav;
   final sort = ref.read(coordinatorshipsControllerProvider);
   final commands = ref.read(coordinatorshipsControllerProvider.notifier);
-  final messenger = context;
+  final canManage = ref.read(canManageCoordinatorshipsProvider);
   return NzFlyoutMenu.show(
     context,
     semanticLabel: l.uiCoordShortcuts,
@@ -199,15 +201,14 @@ Future<void> showCoordinatorshipsShortcuts(
         onSelected: () =>
             nav.openTimeline(coordinatorship: TimelinePage.allCoordinatorships),
       ),
-      NzFlyoutItem(
-        label: l.uiCoordFlyAdd,
-        icon: NzIcons.add,
-        onSelected: () {
-          if (messenger.mounted) {
-            NzToast.show(messenger, l.uiCoordToastAddForm);
-          }
-        },
-      ),
+      if (canManage)
+        NzFlyoutItem(
+          label: l.uiCoordFlyAdd,
+          icon: NzIcons.add,
+          onSelected: () {
+            if (context.mounted) showCoordinatorshipForm(context, ref);
+          },
+        ),
       NzFlyoutSection(l.uiCoordFlySectionSort),
       for (final (s, icon) in const [
         (CoordinatorshipSort.name, NzIcons.sortAlpha),

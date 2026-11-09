@@ -1094,13 +1094,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveDownloadAllToast => 'Tüm arşiv ZIP olarak hazırlanıyor';
 
   @override
-  String get uiArchiveCreateFolder => 'Klasör oluştur';
-
-  @override
-  String get uiArchiveCreateFolderSoon =>
-      'Klasör oluşturma sonraki adımda tasarlanacak';
-
-  @override
   String get uiArchiveShortcuts => 'Arşiv kısayolları';
 
   @override
@@ -1441,7 +1434,38 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordFlyAdd => 'Koordinatörlük ekle';
 
   @override
-  String get uiCoordToastAddForm => 'Koordinatörlük formu açılır';
+  String get uiCoordFormName => 'Ad';
+
+  @override
+  String get uiCoordFormNameEditHelper => 'Yalnız bu programdaki ad değişir';
+
+  @override
+  String get uiCoordFormKind => 'Tür';
+
+  @override
+  String get uiCoordFormDescription => 'Açıklama';
+
+  @override
+  String get uiCoordFormDescriptionHint => 'İsteğe bağlı';
+
+  @override
+  String get uiCoordFormCreate => 'Oluştur';
+
+  @override
+  String get uiCoordFormSave => 'Kaydet';
+
+  @override
+  String get uiCoordFormLinkRetry => 'Programa bağlamayı tekrar dene';
+
+  @override
+  String get uiCoordFormLinkFailed =>
+      'Koordinatörlük oluşturuldu ama seçili programa bağlanamadı. Tekrar denediğinde yeni koordinatörlük açılmaz, aynı kayıt bağlanır.';
+
+  @override
+  String get uiCoordToastCreated => 'Koordinatörlük eklendi';
+
+  @override
+  String get uiCoordToastSaved => 'Bilgiler kaydedildi';
 
   @override
   String get uiCoordFlyAllList => 'Tüm liste';
@@ -1588,29 +1612,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordMenuEdit => 'Bilgileri düzenle';
 
   @override
-  String get uiCoordToastEditTail => 'düzenleme formu açılır';
-
-  @override
   String get uiCoordMenuMeeting => 'Toplantı planla';
-
-  @override
-  String get uiCoordMenuParent => 'Üst birimi değiştir';
-
-  @override
-  String get uiCoordToastParent => 'Üst birim seçimi açılır';
 
   @override
   String get uiCoordMenuMerge => 'Başka koordinatörlükle birleştir';
 
   @override
   String get uiCoordToastMerge => 'Birleştirme önizlemesi açılır';
-
-  @override
-  String get uiCoordMenuDeactivate => 'Pasifleştir';
-
-  @override
-  String get uiCoordToastDeactivatedTail =>
-      'pasifleştirildi · görevler arşivde kalır';
 
   @override
   String get uiCoordNotFound => 'Bu koordinatörlük bulunamadı.';

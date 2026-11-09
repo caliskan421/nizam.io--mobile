@@ -19,7 +19,7 @@ abstract class ConferenceToken with _$ConferenceToken {
     required String url,
     @JsonKey(name: 'expires_at') required DateTime expiresAt,
 
-    /// host: yönetici ve toplantıya bağlı departmanın koordinatörü; speaker: toplantıyı gören üye.
+    /// host: yönetici; `coordinatorship` kipinde toplantıya bağlı departmanın koordinatörü, `person` kipinde sahip departmanı hâlâ koordine eden oluşturan. speaker: toplantıyı gören üye ve katılımcı (koordinatörlüğü düşmüş katılımcı oluşturan dahil).
     required ConferenceTokenRole role,
   }) = _ConferenceToken;
 

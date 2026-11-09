@@ -244,12 +244,6 @@ abstract class AppLocalizations {
   /// **'Not zaten göreve dönüştürüldü.'**
   String get errCollaborationNoteConverted;
 
-  /// collaboration.note_deleted
-  ///
-  /// In tr, this message translates to:
-  /// **'Not silinmiş; işlem yapılamaz.'**
-  String get errCollaborationNoteDeleted;
-
   /// collaboration.note_immutable
   ///
   /// In tr, this message translates to:

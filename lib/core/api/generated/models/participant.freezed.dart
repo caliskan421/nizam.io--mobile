@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Participant {
 
-@JsonKey(name: 'account_id') String get accountId;@JsonKey(name: 'full_name') String get fullName;
+@JsonKey(name: 'account_id') String get accountId;@JsonKey(name: 'full_name') String get fullName;/// Katılımcının toplantının programındaki ekip satırları (COLLABORATION-K72): departman, programdaki adı ve oradaki rolü. Ekip satırı olmayan (yalnız şirket yöneticisi) katılımcıda boştur. Görüntüdür; erişim kararı değildir.
+ List<Teams> get teams;
 /// Create a copy of Participant
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $ParticipantCopyWith<Participant> get copyWith => _$ParticipantCopyWithImpl<Part
 @override
 bool operator ==(Object other) {
   final _this = this as Participant;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Participant&&(identical(other.accountId, _this.accountId) || other.accountId == _this.accountId)&&(identical(other.fullName, _this.fullName) || other.fullName == _this.fullName));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Participant&&(identical(other.accountId, _this.accountId) || other.accountId == _this.accountId)&&(identical(other.fullName, _this.fullName) || other.fullName == _this.fullName)&&const DeepCollectionEquality().equals(other.teams, _this.teams));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Participant;
-  return Object.hash(runtimeType,_this.accountId,_this.fullName);
+  return Object.hash(runtimeType,_this.accountId,_this.fullName,const DeepCollectionEquality().hash(_this.teams));
 }
 
 @override
 String toString() {
   final _this = this as Participant;
-  return 'Participant(accountId: ${_this.accountId}, fullName: ${_this.fullName})';
+  return 'Participant(accountId: ${_this.accountId}, fullName: ${_this.fullName}, teams: ${_this.teams})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $ParticipantCopyWith<$Res>  {
   factory $ParticipantCopyWith(Participant value, $Res Function(Participant) _then) = _$ParticipantCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'account_id') String accountId,@JsonKey(name: 'full_name') String fullName
+@JsonKey(name: 'account_id') String accountId,@JsonKey(name: 'full_name') String fullName, List<Teams> teams
 });
 
 
@@ -71,11 +72,12 @@ class _$ParticipantCopyWithImpl<$Res>
 
 /// Create a copy of Participant
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? accountId = null,Object? fullName = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? accountId = null,Object? fullName = null,Object? teams = null,}) {
   return _then(Participant(
 accountId: null == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
 as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
-as String,
+as String,teams: null == teams ? _self.teams : teams // ignore: cast_nullable_to_non_nullable
+as List<Teams>,
   ));
 }
 
@@ -160,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId, @JsonKey(name: 'full_name')  String fullName)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId, @JsonKey(name: 'full_name')  String fullName,  List<Teams> teams)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Participant() when $default != null:
-return $default(_that.accountId,_that.fullName);case _:
+return $default(_that.accountId,_that.fullName,_that.teams);case _:
   return orElse();
 
 }
@@ -181,10 +183,10 @@ return $default(_that.accountId,_that.fullName);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId, @JsonKey(name: 'full_name')  String fullName)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId, @JsonKey(name: 'full_name')  String fullName,  List<Teams> teams)  $default,) {final _that = this;
 switch (_that) {
 case _Participant():
-return $default(_that.accountId,_that.fullName);case _:
+return $default(_that.accountId,_that.fullName,_that.teams);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +203,10 @@ return $default(_that.accountId,_that.fullName);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'account_id')  String accountId, @JsonKey(name: 'full_name')  String fullName)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'account_id')  String accountId, @JsonKey(name: 'full_name')  String fullName,  List<Teams> teams)?  $default,) {final _that = this;
 switch (_that) {
 case _Participant() when $default != null:
-return $default(_that.accountId,_that.fullName);case _:
+return $default(_that.accountId,_that.fullName,_that.teams);case _:
   return null;
 
 }
@@ -216,11 +218,20 @@ return $default(_that.accountId,_that.fullName);case _:
 @JsonSerializable()
 
 class _Participant implements Participant {
-  const _Participant({@JsonKey(name: 'account_id') required this.accountId, @JsonKey(name: 'full_name') required this.fullName});
+  const _Participant({@JsonKey(name: 'account_id') required this.accountId, @JsonKey(name: 'full_name') required this.fullName, required  List<Teams> teams}): _teams = teams;
   factory _Participant.fromJson(Map<String, dynamic> json) => _$ParticipantFromJson(json);
 
 @override@JsonKey(name: 'account_id') final  String accountId;
 @override@JsonKey(name: 'full_name') final  String fullName;
+/// Katılımcının toplantının programındaki ekip satırları (COLLABORATION-K72): departman, programdaki adı ve oradaki rolü. Ekip satırı olmayan (yalnız şirket yöneticisi) katılımcıda boştur. Görüntüdür; erişim kararı değildir.
+ final  List<Teams> _teams;
+/// Katılımcının toplantının programındaki ekip satırları (COLLABORATION-K72): departman, programdaki adı ve oradaki rolü. Ekip satırı olmayan (yalnız şirket yöneticisi) katılımcıda boştur. Görüntüdür; erişim kararı değildir.
+@override List<Teams> get teams {
+  if (_teams is EqualUnmodifiableListView) return _teams;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_teams);
+}
+
 
 /// Create a copy of Participant
 /// with the given fields replaced by the non-null parameter values.
@@ -235,18 +246,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Participant&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.fullName, fullName) || other.fullName == fullName));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Participant&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&const DeepCollectionEquality().equals(other.teams, _teams));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,accountId,fullName);
+    return Object.hash(runtimeType,accountId,fullName,const DeepCollectionEquality().hash(_teams));
 }
 
 @override
 String toString() {
-    return 'Participant(accountId: $accountId, fullName: $fullName)';
+    return 'Participant(accountId: $accountId, fullName: $fullName, teams: $teams)';
 }
 
 
@@ -257,7 +268,7 @@ abstract mixin class _$ParticipantCopyWith<$Res> implements $ParticipantCopyWith
   factory _$ParticipantCopyWith(_Participant value, $Res Function(_Participant) _then) = __$ParticipantCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'account_id') String accountId,@JsonKey(name: 'full_name') String fullName
+@JsonKey(name: 'account_id') String accountId,@JsonKey(name: 'full_name') String fullName, List<Teams> teams
 });
 
 
@@ -274,11 +285,12 @@ class __$ParticipantCopyWithImpl<$Res>
 
 /// Create a copy of Participant
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? accountId = null,Object? fullName = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? accountId = null,Object? fullName = null,Object? teams = null,}) {
   return _then(_Participant(
 accountId: null == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
 as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
-as String,
+as String,teams: null == teams ? _self._teams : teams // ignore: cast_nullable_to_non_nullable
+as List<Teams>,
   ));
 }
 

@@ -11,6 +11,7 @@ _UpdateMeetingRequest _$UpdateMeetingRequestFromJson(
 ) => _UpdateMeetingRequest(
   title: json['title'] as String?,
   meetingDate: json['meeting_date'] as String?,
+  place: json['place'] as String?,
   departmentIds: (json['department_ids'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -22,6 +23,7 @@ Map<String, dynamic> _$UpdateMeetingRequestToJson(
 ) => <String, dynamic>{
   'title': ?instance.title,
   'meeting_date': ?instance.meetingDate,
+  'place': ?instance.place,
   'department_ids': ?instance.departmentIds,
   'members_included': ?instance.membersIncluded,
 };

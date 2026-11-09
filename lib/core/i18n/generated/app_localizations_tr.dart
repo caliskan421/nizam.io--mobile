@@ -97,9 +97,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errCollaborationNoteConverted => 'Not zaten göreve dönüştürüldü.';
 
   @override
-  String get errCollaborationNoteDeleted => 'Not silinmiş; işlem yapılamaz.';
-
-  @override
   String get errCollaborationNoteImmutable => 'Bu not artık değiştirilemez.';
 
   @override

@@ -14,6 +14,10 @@ _CreateMeetingRequest _$CreateMeetingRequestFromJson(
   departmentIds: (json['department_ids'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),
+  inviteMode: json['invite_mode'] == null
+      ? CreateMeetingRequestInviteMode.coordinatorship
+      : CreateMeetingRequestInviteMode.fromJson(json['invite_mode'] as String),
+  place: json['place'] as String?,
   participantIds: (json['participant_ids'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -30,8 +34,16 @@ Map<String, dynamic> _$CreateMeetingRequestToJson(
   'title': instance.title,
   'meeting_date': instance.meetingDate,
   'department_ids': instance.departmentIds,
+  'invite_mode': _$CreateMeetingRequestInviteModeEnumMap[instance.inviteMode]!,
+  'place': ?instance.place,
   'participant_ids': ?instance.participantIds,
   'members_included': ?instance.membersIncluded,
   'agenda_items': ?instance.agendaItems,
   'is_instant': ?instance.isInstant,
+};
+
+const _$CreateMeetingRequestInviteModeEnumMap = {
+  CreateMeetingRequestInviteMode.coordinatorship: 'coordinatorship',
+  CreateMeetingRequestInviteMode.person: 'person',
+  CreateMeetingRequestInviteMode.$unknown: r'$unknown',
 };

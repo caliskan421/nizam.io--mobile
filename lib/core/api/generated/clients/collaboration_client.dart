@@ -227,13 +227,24 @@ abstract class CollaborationClient {
         CollaborationClient.createMeetingOpenapiExtras,
   });
 
-  /// Görünür toplantılar (imleçli).
+  /// Görünür toplantılar (imleçli), satır özetiyle.
+  ///
+  /// Satır başına `summary` (COLLABORATION-K70) sayfa başına sabit sayıda sorguyla okunur. Süzgeçler (COLLABORATION-K71) görünürlük kuralına (COLLABORATION-K19) eklenir: yalnız daraltır, görünmeyen toplantıyı açmaz; görünmeyen ya da olmayan departman boş sayfa döner. Sıra ve imleç süzgeçsiz listeyle aynıdır (`created_at`, `id`; en yeni önce); imleç aynı süzgeçlerle kullanılır.
+  ///
+  /// [departmentId] - Toplantının sahip ya da bağlı departmanı. Boş ya da yalnız boşluk değer süzgeç yok sayılır.
+  ///
+  /// [from] - Toplantı günü alt sınırı (dahil), `YYYY-MM-DD`, kurulum saat diliminin takvim günü (COLLABORATION-K17 kuralı). Başka biçim 422 `collaboration.input_invalid` (alan `from`).
+  ///
+  /// [to] - Toplantı günü üst sınırı (dahil), `YYYY-MM-DD`, kurulum saat dilimi. Başka biçim ya da `from`'dan önceki gün 422 `collaboration.input_invalid` (alan `to`).
   ///
   /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration ve messaging 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` / `messaging.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
   ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/meetings')
   Future<MeetingList> listMeetings({
+    @Query('department_id') String? departmentId,
+    @Query('from') DateTime? from,
+    @Query('to') DateTime? to,
     @Query('limit') int? limit,
     @Query('cursor') String? cursor,
     @Extras()
@@ -334,7 +345,7 @@ abstract class CollaborationClient {
         CollaborationClient.removeMeetingParticipantOpenapiExtras,
   });
 
-  /// Toplantıya bağlı görüntülü konferansı başlatır (yönetici ve bağlı departmanın koordinatörü). Aktif konferans varsa yeni satır açılmaz ve 200 döner.
+  /// Toplantıya bağlı görüntülü konferansı başlatır (yönetici; `coordinatorship` kipinde bağlı departmanın koordinatörü, `person` kipinde sahip departmanı hâlâ koordine eden oluşturan). Aktif konferans varsa yeni satır açılmaz ve 200 döner.
   @POST('/v1/meetings/{id}/conference')
   Future<ConferenceResult> startConference({
     @Path('id') required String id,
@@ -438,7 +449,9 @@ abstract class CollaborationClient {
         CollaborationClient.updateMeetingNoteOpenapiExtras,
   });
 
-  /// Notu yumuşak siler (sahiplik matrisi).
+  /// Notu kalıcı siler (sahiplik matrisi).
+  ///
+  /// Satır silinir, iz audit'te kalır (COLLABORATION-K75); geri yükleme yoktur, "geri al" istemcide silme gönderilmeden önce yapılır. İkinci silme 404 `collaboration.note_not_found` alır. Notun işlem anahtarı satırla gider: aynı anahtarla tekrar ekleme yeni not açar (201; ADR-0027 Ek F63). Dönüşmüş notun görevi etkilenmez.
   @DELETE('/v1/meeting-notes/{noteId}')
   Future<void> deleteMeetingNote({
     @Path('noteId') required String noteId,

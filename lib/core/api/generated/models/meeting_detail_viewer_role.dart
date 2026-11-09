@@ -4,6 +4,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+/// Çağıranın erişimi (COLLABORATION-K74): `coordinator` yönetimdir (`person` kipinde sahip departmanı hâlâ koordine eden oluşturan); `member` salt okuma ve not (katılımcı ve koordinatörlüğü düşmüş katılımcı oluşturan dahil).
 @JsonEnum()
 enum MeetingDetailViewerRole {
   @JsonValue('admin')

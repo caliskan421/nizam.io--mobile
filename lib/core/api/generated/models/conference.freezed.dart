@@ -17,7 +17,7 @@ T _$identity<T>(T value) => value;
 mixin _$Conference {
 
  String get id;/// starting: sağlayıcı onayı bekleniyor; live: sürüyor; ending: kapatıldı, oda henüz kapanmadı.
- ConferenceStatus get status;@JsonKey(name: 'started_at') DateTime get startedAt;@JsonKey(name: 'started_by_account_id') String get startedByAccountId;
+ ConferenceStatus get status;@JsonKey(name: 'started_at') DateTime get startedAt;@JsonKey(name: 'started_by_account_id') String get startedByAccountId; ConferenceConnected get connected;
 /// Create a copy of Conference
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,20 +31,20 @@ $ConferenceCopyWith<Conference> get copyWith => _$ConferenceCopyWithImpl<Confere
 @override
 bool operator ==(Object other) {
   final _this = this as Conference;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Conference&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.startedAt, _this.startedAt) || other.startedAt == _this.startedAt)&&(identical(other.startedByAccountId, _this.startedByAccountId) || other.startedByAccountId == _this.startedByAccountId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Conference&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.startedAt, _this.startedAt) || other.startedAt == _this.startedAt)&&(identical(other.startedByAccountId, _this.startedByAccountId) || other.startedByAccountId == _this.startedByAccountId)&&(identical(other.connected, _this.connected) || other.connected == _this.connected));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Conference;
-  return Object.hash(runtimeType,_this.id,_this.status,_this.startedAt,_this.startedByAccountId);
+  return Object.hash(runtimeType,_this.id,_this.status,_this.startedAt,_this.startedByAccountId,_this.connected);
 }
 
 @override
 String toString() {
   final _this = this as Conference;
-  return 'Conference(id: ${_this.id}, status: ${_this.status}, startedAt: ${_this.startedAt}, startedByAccountId: ${_this.startedByAccountId})';
+  return 'Conference(id: ${_this.id}, status: ${_this.status}, startedAt: ${_this.startedAt}, startedByAccountId: ${_this.startedByAccountId}, connected: ${_this.connected})';
 }
 
 
@@ -55,11 +55,11 @@ abstract mixin class $ConferenceCopyWith<$Res>  {
   factory $ConferenceCopyWith(Conference value, $Res Function(Conference) _then) = _$ConferenceCopyWithImpl;
 @useResult
 $Res call({
- String id, ConferenceStatus status,@JsonKey(name: 'started_at') DateTime startedAt,@JsonKey(name: 'started_by_account_id') String startedByAccountId
+ String id, ConferenceStatus status,@JsonKey(name: 'started_at') DateTime startedAt,@JsonKey(name: 'started_by_account_id') String startedByAccountId, ConferenceConnected connected
 });
 
 
-
+$ConferenceConnectedCopyWith<$Res> get connected;
 
 }
 /// @nodoc
@@ -72,16 +72,26 @@ class _$ConferenceCopyWithImpl<$Res>
 
 /// Create a copy of Conference
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? status = null,Object? startedAt = null,Object? startedByAccountId = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? status = null,Object? startedAt = null,Object? startedByAccountId = null,Object? connected = null,}) {
   return _then(Conference(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ConferenceStatus,startedAt: null == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,startedByAccountId: null == startedByAccountId ? _self.startedByAccountId : startedByAccountId // ignore: cast_nullable_to_non_nullable
-as String,
+as String,connected: null == connected ? _self.connected : connected // ignore: cast_nullable_to_non_nullable
+as ConferenceConnected,
   ));
 }
-
+/// Create a copy of Conference
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ConferenceConnectedCopyWith<$Res> get connected {
+  
+  return $ConferenceConnectedCopyWith<$Res>(_self.connected, (value) {
+    return _then(_self.copyWith(connected: value));
+  });
+}
 }
 
 
@@ -163,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  ConferenceStatus status, @JsonKey(name: 'started_at')  DateTime startedAt, @JsonKey(name: 'started_by_account_id')  String startedByAccountId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  ConferenceStatus status, @JsonKey(name: 'started_at')  DateTime startedAt, @JsonKey(name: 'started_by_account_id')  String startedByAccountId,  ConferenceConnected connected)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Conference() when $default != null:
-return $default(_that.id,_that.status,_that.startedAt,_that.startedByAccountId);case _:
+return $default(_that.id,_that.status,_that.startedAt,_that.startedByAccountId,_that.connected);case _:
   return orElse();
 
 }
@@ -184,10 +194,10 @@ return $default(_that.id,_that.status,_that.startedAt,_that.startedByAccountId);
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  ConferenceStatus status, @JsonKey(name: 'started_at')  DateTime startedAt, @JsonKey(name: 'started_by_account_id')  String startedByAccountId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  ConferenceStatus status, @JsonKey(name: 'started_at')  DateTime startedAt, @JsonKey(name: 'started_by_account_id')  String startedByAccountId,  ConferenceConnected connected)  $default,) {final _that = this;
 switch (_that) {
 case _Conference():
-return $default(_that.id,_that.status,_that.startedAt,_that.startedByAccountId);case _:
+return $default(_that.id,_that.status,_that.startedAt,_that.startedByAccountId,_that.connected);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +214,10 @@ return $default(_that.id,_that.status,_that.startedAt,_that.startedByAccountId);
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  ConferenceStatus status, @JsonKey(name: 'started_at')  DateTime startedAt, @JsonKey(name: 'started_by_account_id')  String startedByAccountId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  ConferenceStatus status, @JsonKey(name: 'started_at')  DateTime startedAt, @JsonKey(name: 'started_by_account_id')  String startedByAccountId,  ConferenceConnected connected)?  $default,) {final _that = this;
 switch (_that) {
 case _Conference() when $default != null:
-return $default(_that.id,_that.status,_that.startedAt,_that.startedByAccountId);case _:
+return $default(_that.id,_that.status,_that.startedAt,_that.startedByAccountId,_that.connected);case _:
   return null;
 
 }
@@ -219,7 +229,7 @@ return $default(_that.id,_that.status,_that.startedAt,_that.startedByAccountId);
 @JsonSerializable()
 
 class _Conference implements Conference {
-  const _Conference({required this.id, required this.status, @JsonKey(name: 'started_at') required this.startedAt, @JsonKey(name: 'started_by_account_id') required this.startedByAccountId});
+  const _Conference({required this.id, required this.status, @JsonKey(name: 'started_at') required this.startedAt, @JsonKey(name: 'started_by_account_id') required this.startedByAccountId, required this.connected});
   factory _Conference.fromJson(Map<String, dynamic> json) => _$ConferenceFromJson(json);
 
 @override final  String id;
@@ -227,6 +237,7 @@ class _Conference implements Conference {
 @override final  ConferenceStatus status;
 @override@JsonKey(name: 'started_at') final  DateTime startedAt;
 @override@JsonKey(name: 'started_by_account_id') final  String startedByAccountId;
+@override final  ConferenceConnected connected;
 
 /// Create a copy of Conference
 /// with the given fields replaced by the non-null parameter values.
@@ -241,18 +252,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Conference&&(identical(other.id, id) || other.id == id)&&(identical(other.status, status) || other.status == status)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.startedByAccountId, startedByAccountId) || other.startedByAccountId == startedByAccountId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Conference&&(identical(other.id, id) || other.id == id)&&(identical(other.status, status) || other.status == status)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.startedByAccountId, startedByAccountId) || other.startedByAccountId == startedByAccountId)&&(identical(other.connected, connected) || other.connected == connected));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,status,startedAt,startedByAccountId);
+    return Object.hash(runtimeType,id,status,startedAt,startedByAccountId,connected);
 }
 
 @override
 String toString() {
-    return 'Conference(id: $id, status: $status, startedAt: $startedAt, startedByAccountId: $startedByAccountId)';
+    return 'Conference(id: $id, status: $status, startedAt: $startedAt, startedByAccountId: $startedByAccountId, connected: $connected)';
 }
 
 
@@ -263,11 +274,11 @@ abstract mixin class _$ConferenceCopyWith<$Res> implements $ConferenceCopyWith<$
   factory _$ConferenceCopyWith(_Conference value, $Res Function(_Conference) _then) = __$ConferenceCopyWithImpl;
 @override @useResult
 $Res call({
- String id, ConferenceStatus status,@JsonKey(name: 'started_at') DateTime startedAt,@JsonKey(name: 'started_by_account_id') String startedByAccountId
+ String id, ConferenceStatus status,@JsonKey(name: 'started_at') DateTime startedAt,@JsonKey(name: 'started_by_account_id') String startedByAccountId, ConferenceConnected connected
 });
 
 
-
+@override $ConferenceConnectedCopyWith<$Res> get connected;
 
 }
 /// @nodoc
@@ -280,17 +291,27 @@ class __$ConferenceCopyWithImpl<$Res>
 
 /// Create a copy of Conference
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? status = null,Object? startedAt = null,Object? startedByAccountId = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? status = null,Object? startedAt = null,Object? startedByAccountId = null,Object? connected = null,}) {
   return _then(_Conference(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ConferenceStatus,startedAt: null == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,startedByAccountId: null == startedByAccountId ? _self.startedByAccountId : startedByAccountId // ignore: cast_nullable_to_non_nullable
-as String,
+as String,connected: null == connected ? _self.connected : connected // ignore: cast_nullable_to_non_nullable
+as ConferenceConnected,
   ));
 }
 
-
+/// Create a copy of Conference
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ConferenceConnectedCopyWith<$Res> get connected {
+  
+  return $ConferenceConnectedCopyWith<$Res>(_self.connected, (value) {
+    return _then(_self.copyWith(connected: value));
+  });
+}
 }
 
 // dart format on

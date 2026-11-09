@@ -563,6 +563,7 @@ final class TaskCatalog {
     required List<Person> people,
     required List<CoordinatorshipRef> coordinatorships,
     this.access,
+    this.accountEmail,
     this.departmentId,
     this.departmentFilterCleared = false,
     this.truncated = false,
@@ -579,6 +580,9 @@ final class TaskCatalog {
 
   /// Oturumdaki kişinin kimliği.
   final String me;
+
+  /// Yalnız oturumdaki hesabın /me yanıtındaki doğrulanmış e-posta adresi.
+  final String? accountEmail;
   final List<TaskItem> tasks;
   final List<Person> people;
   final List<CoordinatorshipRef> coordinatorships;
@@ -636,6 +640,7 @@ final class TaskCatalog {
   TaskCatalog withTasks(List<TaskItem> tasks) => TaskCatalog(
     today: today,
     me: me,
+    accountEmail: accountEmail,
     tasks: tasks,
     people: people,
     coordinatorships: coordinatorships,
@@ -660,6 +665,7 @@ final class TaskCatalog {
   }) => TaskCatalog(
     today: today,
     me: me,
+    accountEmail: accountEmail,
     tasks: codes == null ? tasks : [for (final code in codes) ?task(code)],
     people: people,
     coordinatorships: coordinatorships,
@@ -678,6 +684,7 @@ final class TaskCatalog {
       : TaskCatalog(
           today: today,
           me: me,
+          accountEmail: accountEmail,
           tasks: tasks,
           people: people,
           coordinatorships: coordinatorships,

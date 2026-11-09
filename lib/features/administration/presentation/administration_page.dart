@@ -23,6 +23,7 @@ import '../domain/admin_user_directory.dart';
 import '../domain/organization_admin.dart';
 import 'admin_management_tools.dart';
 import 'admin_user_actions.dart';
+import 'admin_user_identity.dart';
 import 'admin_user_list_row.dart';
 import 'admin_user_memberships.dart';
 import 'admin_user_profile_page.dart';
@@ -317,43 +318,20 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
                 final user = entry.value;
                 final admin =
                     summary?.adminAccountIds?.contains(user.accountId) == true;
-                final coordinator = user.teams.any(
-                  (m) => m.role == DepartmentRole.coordinator,
+                final identity = AdminUserIdentity(user, companyAdmin: admin);
+                final roleNames = identity.roles(context);
+                final departmentNames = identity.departmentNames(
+                  catalog,
+                  programId,
                 );
-                final member = user.teams.any(
-                  (m) => m.role == DepartmentRole.member,
-                );
-                final roleNames = [
-                  if (admin) l.uiUsersAdmin,
-                  if (coordinator) l.uiUsersCoordinator,
-                  if (member) l.uiUsersMember,
-                ];
-                final departmentNames = <String>{};
-                for (final membership in user.teams.where(
-                  (m) => m.programId == programId,
-                )) {
-                  final name = catalog?.coordinatorships
-                      .where((d) => d.code == membership.departmentId)
-                      .firstOrNull
-                      ?.name;
-                  if (name != null) departmentNames.add(name);
-                }
                 return AdminUserListRow(
                   name: user.fullName,
                   roles: roleNames.isEmpty
                       ? l.uiUsersUnassigned
                       : roleNames.join(', '),
                   departments: departmentNames.join(', '),
-                  avatarColor: admin
-                      ? context.colors.roleAdmin
-                      : coordinator
-                      ? context.colors.avatar1
-                      : member
-                      ? context.colors.roleMember
-                      : context.colors.surfaceOverlay,
-                  avatarForeground: admin || coordinator || member
-                      ? context.colors.onAvatar
-                      : context.colors.text,
+                  avatarColor: identity.fill(context),
+                  avatarForeground: identity.ink(context),
                   first: entry.key == 0,
                   last: entry.key == shown.length - 1,
                   onOpen: () => _open(user.accountId),

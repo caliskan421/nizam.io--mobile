@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -28,6 +29,9 @@ class NzTopBar extends StatelessWidget {
        code = null,
        onBack = null,
        backLabel = null,
+       titleContent = null,
+       borderRadius = BorderRadius.zero,
+       bottomEdgeOpacity = null,
        _detail = false;
 
   /// Ayrıntı sayfası çubuğu (görev ayrıntısı, işlem geçmişi, koordinatörlük ayrıntısı): aynı
@@ -39,6 +43,9 @@ class NzTopBar extends StatelessWidget {
     super.key,
     this.code,
     this.title,
+    this.titleContent,
+    this.borderRadius = BorderRadius.zero,
+    this.bottomEdgeOpacity,
     this.onBack,
     this.backLabel,
     this.actions = const [],
@@ -50,6 +57,13 @@ class NzTopBar extends StatelessWidget {
        _detail = true;
 
   final String? title;
+
+  /// Custom detail title (for example a scroll-driven identity); back/actions stay shared.
+  final Widget? titleContent;
+  final BorderRadius borderRadius;
+
+  /// Paint-only visibility of the rounded detail header bottom edge.
+  final ValueListenable<double>? bottomEdgeOpacity;
   final String? subtitle;
   final Widget? leading;
   final List<Widget> actions;
@@ -164,9 +178,10 @@ extension on _TopBarDelegate {
               NzTabletMetrics.detailHeaderSide -
               NizamioSpacing.space2
         : NizamioSpacing.space1;
-    return NzGlass(
+    final glass = NzGlass(
       tone: NzGlassTone.bar,
       edge: false,
+      borderRadius: bar.borderRadius,
       child: MediaQuery.withClampedTextScaling(
         maxScaleFactor: NzTopBar.maxTextScale,
         child: SizedBox.expand(
@@ -191,22 +206,24 @@ extension on _TopBarDelegate {
                   const Gap(NizamioSpacing.space1),
                 ],
                 Expanded(
-                  child: code != null
-                      ? Text(
-                          code,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: t.mono.copyWith(color: c.textMuted),
-                        )
-                      : Semantics(
-                          header: true,
-                          child: Text(
-                            title ?? '',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: t.labelLg,
-                          ),
-                        ),
+                  child:
+                      bar.titleContent ??
+                      (code != null
+                          ? Text(
+                              code,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: t.mono.copyWith(color: c.textMuted),
+                            )
+                          : Semantics(
+                              header: true,
+                              child: Text(
+                                title ?? '',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: t.labelLg,
+                              ),
+                            )),
                 ),
                 ...bar.actions,
               ],
@@ -214,6 +231,16 @@ extension on _TopBarDelegate {
           ),
         ),
       ),
+    );
+    final progress = bar.bottomEdgeOpacity;
+    if (progress == null) return glass;
+    return CustomPaint(
+      foregroundPainter: _DetailBottomEdge(
+        color: c.border,
+        radius: bar.borderRadius.bottomLeft.x,
+        progress: progress,
+      ),
+      child: glass,
     );
   }
 }
@@ -254,4 +281,45 @@ class NzBrandMark extends StatelessWidget {
       ),
     );
   }
+}
+
+class _DetailBottomEdge extends CustomPainter {
+  _DetailBottomEdge({
+    required this.color,
+    required this.radius,
+    required this.progress,
+  }) : super(repaint: progress);
+  final Color color;
+  final double radius;
+  final ValueListenable<double> progress;
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (progress.value <= 0) return;
+    final edge = NizamioSize.borderWidth / 2;
+    final bottom = size.height - edge;
+    final r = radius.clamp(0.0, size.width / 2).toDouble();
+    final path = Path()
+      ..moveTo(edge, bottom - r)
+      ..quadraticBezierTo(edge, bottom, r, bottom)
+      ..lineTo(size.width - r, bottom)
+      ..quadraticBezierTo(
+        size.width - edge,
+        bottom,
+        size.width - edge,
+        bottom - r,
+      );
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = color.withValues(alpha: progress.value)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = NizamioSize.borderWidth,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_DetailBottomEdge oldDelegate) =>
+      color != oldDelegate.color ||
+      radius != oldDelegate.radius ||
+      progress != oldDelegate.progress;
 }

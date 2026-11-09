@@ -12,7 +12,8 @@ enum NzAvatarSize {
   md(32),
   list(40),
   lg(44),
-  xl(52);
+  xl(52),
+  profile(72);
 
   const NzAvatarSize(this.diameter);
   final double diameter;
@@ -152,6 +153,8 @@ class NzAvatar extends StatelessWidget {
         NzAvatarSize.sm || NzAvatarSize.md => text.caption,
         NzAvatarSize.list => text.navLabel,
         NzAvatarSize.lg || NzAvatarSize.xl => text.labelLg,
+        // Source .us-avxl: 72 px with 22 px initials.
+        NzAvatarSize.profile => text.titleMd.copyWith(fontSize: 22),
       };
       return (
         diameter: extent.diameter,

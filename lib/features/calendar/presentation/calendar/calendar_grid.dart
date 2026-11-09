@@ -25,9 +25,16 @@ extension CalendarKindColor on NizamioColors {
 /// önceki/sonraki, gün adları ve haftalar. Hafta kipinde yalnız seçili günün haftası açık
 /// kalır; diğer haftalar yükseklik ve saydamlıkla kapanır.
 class CalendarGrid extends ConsumerWidget {
-  const CalendarGrid({super.key, required this.index});
+  const CalendarGrid({
+    super.key,
+    required this.index,
+    this.compact = false,
+    this.headerAction,
+  });
 
   final CalendarIndex index;
+  final bool compact;
+  final Widget? headerAction;
 
   static const _rowHeight = 50.0;
 
@@ -95,7 +102,10 @@ class CalendarGrid extends ConsumerWidget {
                           const Gap(6),
                           AnimatedRotation(
                             turns: week ? 0 : 0.5,
-                            duration: const Duration(milliseconds: 400),
+                            duration: NzMotion.of(
+                              context,
+                              const Duration(milliseconds: 400),
+                            ),
                             curve: NizamioMotion.easeSpring,
                             child: NzIcon(
                               NzIcons.chevronDown,
@@ -109,9 +119,10 @@ class CalendarGrid extends ConsumerWidget {
                   ),
                 ),
               ),
+              if (headerAction != null) headerAction!,
               // Prototip: sonraki düğmesi sağ kenardan 10 taşar.
               Transform.translate(
-                offset: const Offset(10, 0),
+                offset: Offset(compact ? 0 : 10, 0),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -163,12 +174,13 @@ class CalendarGrid extends ConsumerWidget {
                     key: ValueKey((month, w)),
                     open: !week || w == selWeek,
                     child: SizedBox(
-                      height: _rowHeight,
+                      height: compact ? 34 : _rowHeight,
                       child: Row(
                         children: [
                           for (var k = 0; k < 7; k++)
                             Expanded(
                               child: _DayCell(
+                                compact: compact,
                                 day: weeks[w][k],
                                 inMonth: weeks[w][k].month == month.month,
                                 weekend: k > 4,
@@ -216,8 +228,10 @@ class _DayCell extends StatelessWidget {
     required this.today,
     required this.index,
     required this.onTap,
+    required this.compact,
   });
 
+  final bool compact;
   final DateTime day;
   final bool inMonth;
   final bool weekend;
@@ -257,21 +271,21 @@ class _DayCell extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.only(top: 3),
+          padding: EdgeInsets.only(top: compact ? 0 : 3),
           child: Column(
             children: [
               AnimatedContainer(
                 duration: fade,
                 curve: Curves.ease,
-                width: _circle,
-                height: _circle,
+                width: compact ? 24 : _circle,
+                height: compact ? 24 : _circle,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
                 child: AnimatedDefaultTextStyle(
                   duration: fade,
                   curve: Curves.ease,
                   style: context.text.bodyMd.copyWith(
-                    fontSize: 15,
+                    fontSize: compact ? 12.5 : 15,
                     fontWeight: selected || today
                         ? FontWeight.w600
                         : FontWeight.w400,

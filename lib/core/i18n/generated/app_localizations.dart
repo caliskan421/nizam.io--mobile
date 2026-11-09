@@ -9805,7 +9805,7 @@ abstract class AppLocalizations {
   /// ui.users.distribution
   ///
   /// In tr, this message translates to:
-  /// **'Görev durumu dağılımı'**
+  /// **'Durum dağılımı'**
   String get uiUsersDistribution;
 
   /// ui.users.not_started
@@ -9909,6 +9909,222 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'+ işareti, listenin devamı olduğunu gösterir. Sayılar yüklenen kayıtları kapsar.'**
   String get uiUsersDirectoryPartial;
+
+  /// ui.users.task_count_noun
+  ///
+  /// In tr, this message translates to:
+  /// **'görev'**
+  String get uiUsersTaskCountNoun;
+
+  /// ui.users.task_open_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık görevler'**
+  String get uiUsersTaskOpenFilter;
+
+  /// ui.users.task_late_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikmede olanlar'**
+  String get uiUsersTaskLateFilter;
+
+  /// ui.users.task_review_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekleyenler'**
+  String get uiUsersTaskReviewFilter;
+
+  /// ui.users.task_done_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlananlar'**
+  String get uiUsersTaskDoneFilter;
+
+  /// ui.users.task_all_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm görevler'**
+  String get uiUsersTaskAllFilter;
+
+  /// ui.users.task_filters
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevleri süz'**
+  String get uiUsersTaskFilters;
+
+  /// ui.users.task_filter_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Birden çok seçebilirsin'**
+  String get uiUsersTaskFilterHint;
+
+  /// ui.users.task_status_group
+  ///
+  /// In tr, this message translates to:
+  /// **'durum'**
+  String get uiUsersTaskStatusGroup;
+
+  /// ui.users.task_priority_group
+  ///
+  /// In tr, this message translates to:
+  /// **'öncelik'**
+  String get uiUsersTaskPriorityGroup;
+
+  /// ui.users.task_group_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikmede'**
+  String get uiUsersTaskGroupLate;
+
+  /// ui.users.task_group_week
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hafta'**
+  String get uiUsersTaskGroupWeek;
+
+  /// ui.users.task_group_later
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonra'**
+  String get uiUsersTaskGroupLater;
+
+  /// ui.users.task_group_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanan'**
+  String get uiUsersTaskGroupDone;
+
+  /// ui.users.task_urgent
+  ///
+  /// In tr, this message translates to:
+  /// **'Acil'**
+  String get uiUsersTaskUrgent;
+
+  /// ui.users.task_unknown_priority
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilinmeyen öncelik'**
+  String get uiUsersTaskUnknownPriority;
+
+  /// ui.users.task_today
+  ///
+  /// In tr, this message translates to:
+  /// **'bugün'**
+  String get uiUsersTaskToday;
+
+  /// ui.users.task_completed
+  ///
+  /// In tr, this message translates to:
+  /// **'tamamlandı'**
+  String get uiUsersTaskCompleted;
+
+  /// ui.users.task_late_days
+  ///
+  /// In tr, this message translates to:
+  /// **'gün gecikti'**
+  String get uiUsersTaskLateDays;
+
+  /// ui.users.task_remaining_days
+  ///
+  /// In tr, this message translates to:
+  /// **'gün kaldı'**
+  String get uiUsersTaskRemainingDays;
+
+  /// ui.users.task_files_count
+  ///
+  /// In tr, this message translates to:
+  /// **'dosya'**
+  String get uiUsersTaskFilesCount;
+
+  /// ui.users.task_show_count
+  ///
+  /// In tr, this message translates to:
+  /// **'görevi göster'**
+  String get uiUsersTaskShowCount;
+
+  /// ui.users.task_priority_chip
+  ///
+  /// In tr, this message translates to:
+  /// **'öncelik'**
+  String get uiUsersTaskPriorityChip;
+
+  /// ui.users.message
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj'**
+  String get uiUsersMessage;
+
+  /// ui.users.assign
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev ata'**
+  String get uiUsersAssign;
+
+  /// ui.users.edit_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap ve rolleri düzenle'**
+  String get uiUsersEditAccount;
+
+  /// ui.users.more_actions
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer işlemler'**
+  String get uiUsersMoreActions;
+
+  /// ui.users.personal_report
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev raporu (CSV)'**
+  String get uiUsersPersonalReport;
+
+  /// ui.users.personal_report_note
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili programda erişebildiğiniz görevlerin özeti'**
+  String get uiUsersPersonalReportNote;
+
+  /// ui.users.account_and_roles
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap ve roller'**
+  String get uiUsersAccountAndRoles;
+
+  /// ui.users.send_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj gönder'**
+  String get uiUsersSendMessage;
+
+  /// ui.users.report_scope
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapsam'**
+  String get uiUsersReportScope;
+
+  /// ui.users.report_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get uiUsersReportTask;
+
+  /// ui.users.report_status
+  ///
+  /// In tr, this message translates to:
+  /// **'Durum'**
+  String get uiUsersReportStatus;
+
+  /// ui.users.report_due
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş'**
+  String get uiUsersReportDue;
+
+  /// ui.users.task_no_day
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu gün için görevi yok.'**
+  String get uiUsersTaskNoDay;
 }
 
 class _AppLocalizationsDelegate

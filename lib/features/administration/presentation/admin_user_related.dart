@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../messages/messages.dart';
 import '../../tasks/tasks.dart';
 
-/// Kişiye ait eylemler; atama yalnız seçili programda güncel ekip ve oluşturma yetkisi
-/// birlikte varsa açılır. Mesajın kimliği sunucunun birebir sohbet yanıtından gelir.
 class AdminUserRelatedActions extends ConsumerStatefulWidget {
   const AdminUserRelatedActions({super.key, required this.accountId});
   final String accountId;
@@ -20,7 +20,6 @@ class AdminUserRelatedActions extends ConsumerStatefulWidget {
 
 class _RelatedActionsState extends ConsumerState<AdminUserRelatedActions> {
   bool _messaging = false;
-
   Future<void> _message() async {
     if (_messaging) return;
     setState(() => _messaging = true);
@@ -34,7 +33,7 @@ class _RelatedActionsState extends ConsumerState<AdminUserRelatedActions> {
   @override
   Widget build(BuildContext context) {
     final value = ref.watch(taskCatalogControllerProvider);
-    final catalog = value.isReloading ? null : value.value;
+    final catalog = value.isReloading || value.hasError ? null : value.value;
     final program = ref.watch(scopeStateProvider).programId;
     final access = catalog?.access;
     final department = catalog?.coordinatorships
@@ -45,25 +44,34 @@ class _RelatedActionsState extends ConsumerState<AdminUserRelatedActions> {
               (access?.canCreateIn(program, d.code) ?? false),
         )
         .firstOrNull;
-    return Wrap(
-      spacing: NizamioSpacing.space2,
-      runSpacing: NizamioSpacing.space2,
+    return Row(
       children: [
-        if (access != null && access.accountId != widget.accountId)
-          NzButton.secondary(
-            label: context.l10n.uiMessagesNewMessage,
+        Expanded(
+          child: NzButton.secondary(
+            label: context.l10n.uiUsersMessage,
+            icon: NzIcons.mail,
             loading: _messaging,
-            onPressed: _message,
+            expand: true,
+            onPressed: access != null && access.accountId != widget.accountId
+                ? _message
+                : null,
           ),
-        if (department != null)
-          NzButton.secondary(
-            label: context.l10n.uiTasksNewTask,
-            onPressed: () => showNewTaskSheet(
-              context,
-              coordinatorship: department.code,
-              initialAssignee: widget.accountId,
-            ),
+        ),
+        const Gap(NizamioSpacing.space2),
+        Expanded(
+          child: NzButton.primary(
+            label: context.l10n.uiUsersAssign,
+            icon: NzIcons.add,
+            expand: true,
+            onPressed: department == null
+                ? null
+                : () => showNewTaskSheet(
+                    context,
+                    coordinatorship: department.code,
+                    initialAssignee: widget.accountId,
+                  ),
           ),
+        ),
       ],
     );
   }

@@ -6473,7 +6473,7 @@
   "@uiUsersExportSaved": {
     "description": "ui.users.export_saved"
   },
-  "uiUsersDistribution": "Görev durumu dağılımı",
+  "uiUsersDistribution": "Durum dağılımı",
   "@uiUsersDistribution": {
     "description": "ui.users.distribution"
   },
@@ -6544,5 +6544,149 @@
   "uiUsersDirectoryPartial": "+ işareti, listenin devamı olduğunu gösterir. Sayılar yüklenen kayıtları kapsar.",
   "@uiUsersDirectoryPartial": {
     "description": "ui.users.directory_partial"
+  },
+  "uiUsersTaskCountNoun": "görev",
+  "@uiUsersTaskCountNoun": {
+    "description": "ui.users.task_count_noun"
+  },
+  "uiUsersTaskOpenFilter": "Açık görevler",
+  "@uiUsersTaskOpenFilter": {
+    "description": "ui.users.task_open_filter"
+  },
+  "uiUsersTaskLateFilter": "Gecikmede olanlar",
+  "@uiUsersTaskLateFilter": {
+    "description": "ui.users.task_late_filter"
+  },
+  "uiUsersTaskReviewFilter": "Onay bekleyenler",
+  "@uiUsersTaskReviewFilter": {
+    "description": "ui.users.task_review_filter"
+  },
+  "uiUsersTaskDoneFilter": "Tamamlananlar",
+  "@uiUsersTaskDoneFilter": {
+    "description": "ui.users.task_done_filter"
+  },
+  "uiUsersTaskAllFilter": "Tüm görevler",
+  "@uiUsersTaskAllFilter": {
+    "description": "ui.users.task_all_filter"
+  },
+  "uiUsersTaskFilters": "Görevleri süz",
+  "@uiUsersTaskFilters": {
+    "description": "ui.users.task_filters"
+  },
+  "uiUsersTaskFilterHint": "Birden çok seçebilirsin",
+  "@uiUsersTaskFilterHint": {
+    "description": "ui.users.task_filter_hint"
+  },
+  "uiUsersTaskStatusGroup": "durum",
+  "@uiUsersTaskStatusGroup": {
+    "description": "ui.users.task_status_group"
+  },
+  "uiUsersTaskPriorityGroup": "öncelik",
+  "@uiUsersTaskPriorityGroup": {
+    "description": "ui.users.task_priority_group"
+  },
+  "uiUsersTaskGroupLate": "Gecikmede",
+  "@uiUsersTaskGroupLate": {
+    "description": "ui.users.task_group_late"
+  },
+  "uiUsersTaskGroupWeek": "Bu hafta",
+  "@uiUsersTaskGroupWeek": {
+    "description": "ui.users.task_group_week"
+  },
+  "uiUsersTaskGroupLater": "Sonra",
+  "@uiUsersTaskGroupLater": {
+    "description": "ui.users.task_group_later"
+  },
+  "uiUsersTaskGroupDone": "Tamamlanan",
+  "@uiUsersTaskGroupDone": {
+    "description": "ui.users.task_group_done"
+  },
+  "uiUsersTaskUrgent": "Acil",
+  "@uiUsersTaskUrgent": {
+    "description": "ui.users.task_urgent"
+  },
+  "uiUsersTaskUnknownPriority": "Bilinmeyen öncelik",
+  "@uiUsersTaskUnknownPriority": {
+    "description": "ui.users.task_unknown_priority"
+  },
+  "uiUsersTaskToday": "bugün",
+  "@uiUsersTaskToday": {
+    "description": "ui.users.task_today"
+  },
+  "uiUsersTaskCompleted": "tamamlandı",
+  "@uiUsersTaskCompleted": {
+    "description": "ui.users.task_completed"
+  },
+  "uiUsersTaskLateDays": "gün gecikti",
+  "@uiUsersTaskLateDays": {
+    "description": "ui.users.task_late_days"
+  },
+  "uiUsersTaskRemainingDays": "gün kaldı",
+  "@uiUsersTaskRemainingDays": {
+    "description": "ui.users.task_remaining_days"
+  },
+  "uiUsersTaskFilesCount": "dosya",
+  "@uiUsersTaskFilesCount": {
+    "description": "ui.users.task_files_count"
+  },
+  "uiUsersTaskShowCount": "görevi göster",
+  "@uiUsersTaskShowCount": {
+    "description": "ui.users.task_show_count"
+  },
+  "uiUsersTaskPriorityChip": "öncelik",
+  "@uiUsersTaskPriorityChip": {
+    "description": "ui.users.task_priority_chip"
+  },
+  "uiUsersMessage": "Mesaj",
+  "@uiUsersMessage": {
+    "description": "ui.users.message"
+  },
+  "uiUsersAssign": "Görev ata",
+  "@uiUsersAssign": {
+    "description": "ui.users.assign"
+  },
+  "uiUsersEditAccount": "Hesap ve rolleri düzenle",
+  "@uiUsersEditAccount": {
+    "description": "ui.users.edit_account"
+  },
+  "uiUsersMoreActions": "Diğer işlemler",
+  "@uiUsersMoreActions": {
+    "description": "ui.users.more_actions"
+  },
+  "uiUsersPersonalReport": "Görev raporu (CSV)",
+  "@uiUsersPersonalReport": {
+    "description": "ui.users.personal_report"
+  },
+  "uiUsersPersonalReportNote": "Seçili programda erişebildiğiniz görevlerin özeti",
+  "@uiUsersPersonalReportNote": {
+    "description": "ui.users.personal_report_note"
+  },
+  "uiUsersAccountAndRoles": "Hesap ve roller",
+  "@uiUsersAccountAndRoles": {
+    "description": "ui.users.account_and_roles"
+  },
+  "uiUsersSendMessage": "Mesaj gönder",
+  "@uiUsersSendMessage": {
+    "description": "ui.users.send_message"
+  },
+  "uiUsersReportScope": "Kapsam",
+  "@uiUsersReportScope": {
+    "description": "ui.users.report_scope"
+  },
+  "uiUsersReportTask": "Görev",
+  "@uiUsersReportTask": {
+    "description": "ui.users.report_task"
+  },
+  "uiUsersReportStatus": "Durum",
+  "@uiUsersReportStatus": {
+    "description": "ui.users.report_status"
+  },
+  "uiUsersReportDue": "Bitiş",
+  "@uiUsersReportDue": {
+    "description": "ui.users.report_due"
+  },
+  "uiUsersTaskNoDay": "Bu gün için görevi yok.",
+  "@uiUsersTaskNoDay": {
+    "description": "ui.users.task_no_day"
   }
 }

@@ -64,6 +64,7 @@ abstract final class NzIcons {
   static const IconData messages = Icons.chat_bubble_outline_rounded;
   static const IconData messagesFilled = Icons.chat_bubble_rounded;
   static const IconData more = Icons.more_vert_rounded;
+  static const IconData moreHorizontal = Icons.more_horiz_rounded;
   static const IconData mute = Icons.volume_off_outlined;
   static const IconData northEast = Icons.north_east_rounded;
   static const IconData offline = Icons.cloud_off_outlined;

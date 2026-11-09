@@ -5081,7 +5081,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiUsersExportSaved => 'CSV kaydedildi:';
 
   @override
-  String get uiUsersDistribution => 'Görev durumu dağılımı';
+  String get uiUsersDistribution => 'Durum dağılımı';
 
   @override
   String get uiUsersNotStarted => 'Başlamadı';
@@ -5136,4 +5136,113 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiUsersDirectoryPartial =>
       '+ işareti, listenin devamı olduğunu gösterir. Sayılar yüklenen kayıtları kapsar.';
+
+  @override
+  String get uiUsersTaskCountNoun => 'görev';
+
+  @override
+  String get uiUsersTaskOpenFilter => 'Açık görevler';
+
+  @override
+  String get uiUsersTaskLateFilter => 'Gecikmede olanlar';
+
+  @override
+  String get uiUsersTaskReviewFilter => 'Onay bekleyenler';
+
+  @override
+  String get uiUsersTaskDoneFilter => 'Tamamlananlar';
+
+  @override
+  String get uiUsersTaskAllFilter => 'Tüm görevler';
+
+  @override
+  String get uiUsersTaskFilters => 'Görevleri süz';
+
+  @override
+  String get uiUsersTaskFilterHint => 'Birden çok seçebilirsin';
+
+  @override
+  String get uiUsersTaskStatusGroup => 'durum';
+
+  @override
+  String get uiUsersTaskPriorityGroup => 'öncelik';
+
+  @override
+  String get uiUsersTaskGroupLate => 'Gecikmede';
+
+  @override
+  String get uiUsersTaskGroupWeek => 'Bu hafta';
+
+  @override
+  String get uiUsersTaskGroupLater => 'Sonra';
+
+  @override
+  String get uiUsersTaskGroupDone => 'Tamamlanan';
+
+  @override
+  String get uiUsersTaskUrgent => 'Acil';
+
+  @override
+  String get uiUsersTaskUnknownPriority => 'Bilinmeyen öncelik';
+
+  @override
+  String get uiUsersTaskToday => 'bugün';
+
+  @override
+  String get uiUsersTaskCompleted => 'tamamlandı';
+
+  @override
+  String get uiUsersTaskLateDays => 'gün gecikti';
+
+  @override
+  String get uiUsersTaskRemainingDays => 'gün kaldı';
+
+  @override
+  String get uiUsersTaskFilesCount => 'dosya';
+
+  @override
+  String get uiUsersTaskShowCount => 'görevi göster';
+
+  @override
+  String get uiUsersTaskPriorityChip => 'öncelik';
+
+  @override
+  String get uiUsersMessage => 'Mesaj';
+
+  @override
+  String get uiUsersAssign => 'Görev ata';
+
+  @override
+  String get uiUsersEditAccount => 'Hesap ve rolleri düzenle';
+
+  @override
+  String get uiUsersMoreActions => 'Diğer işlemler';
+
+  @override
+  String get uiUsersPersonalReport => 'Görev raporu (CSV)';
+
+  @override
+  String get uiUsersPersonalReportNote =>
+      'Seçili programda erişebildiğiniz görevlerin özeti';
+
+  @override
+  String get uiUsersAccountAndRoles => 'Hesap ve roller';
+
+  @override
+  String get uiUsersSendMessage => 'Mesaj gönder';
+
+  @override
+  String get uiUsersReportScope => 'Kapsam';
+
+  @override
+  String get uiUsersReportTask => 'Görev';
+
+  @override
+  String get uiUsersReportStatus => 'Durum';
+
+  @override
+  String get uiUsersReportDue => 'Bitiş';
+
+  @override
+  String get uiUsersTaskNoDay => 'Bu gün için görevi yok.';
 }

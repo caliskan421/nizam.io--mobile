@@ -17,9 +17,12 @@ import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/storage/preference_store.dart';
 import 'package:nizamio/core/ui/page/nz_app_nav.dart';
 import 'package:nizamio/features/administration/application/admin_controller.dart';
+import 'package:nizamio/features/administration/application/admin_user_task_panel_controller.dart';
+import 'package:nizamio/features/administration/domain/admin_user_tasks.dart';
 import 'package:nizamio/features/administration/domain/organization_admin.dart';
 import 'package:nizamio/features/administration/domain/organization_admin_repository.dart';
 import 'package:nizamio/features/administration/presentation/admin_user_profile_page.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../core/ui/widgets/feedback/feedback_test_support.dart';
 import '../../features/connected_module_support.dart';
@@ -83,6 +86,58 @@ class _Users implements OrganizationAdminRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+TaskCatalog _profileCatalog() {
+  final base = moduleCatalog();
+  TaskItem task(
+    String code,
+    String title,
+    String department,
+    TaskStatus status,
+    int day,
+  ) => TaskItem(
+    code: code,
+    title: title,
+    coordinatorship: department,
+    departmentId: department,
+    programId: 'program',
+    status: status,
+    priority: TaskPriority.medium,
+    start: DateTime(2026, 11, 1),
+    due: DateTime(2026, 11, day),
+    assignees: const ['person-1'],
+  );
+  return TaskCatalog(
+    today: base.today,
+    me: base.me,
+    access: base.access,
+    people: base.people,
+    coordinatorships: const [
+      CoordinatorshipRef(
+        code: 'department',
+        name: 'İletişim',
+        leads: [],
+        members: [],
+      ),
+      CoordinatorshipRef(
+        code: 'design',
+        name: 'Tasarım',
+        leads: [],
+        members: [],
+      ),
+    ],
+    tasks: [
+      task('task-1', 'Etkinlik planı', 'department', TaskStatus.todo, 10),
+      task('task-2', 'Duyuru metni', 'department', TaskStatus.inProgress, 22),
+      task('task-3', 'Afiş tasarımı', 'design', TaskStatus.review, 12),
+      task('task-4', 'Görsel arşivi', 'design', TaskStatus.done, 13),
+      task('task-5', 'Program hazırlığı', 'department', TaskStatus.todo, 23),
+      task('task-6', 'Salon planı', 'design', TaskStatus.inProgress, 24),
+      task('task-7', 'İçerik kontrolü', 'department', TaskStatus.review, 25),
+      task('task-8', 'Son düzenleme', 'design', TaskStatus.todo, 26),
+    ],
+  );
+}
+
 void main() {
   setUpFonts();
   for (final size in const [Size(390, 844), Size(1180, 820)]) {
@@ -96,6 +151,7 @@ void main() {
       addTearDown(locale.dispose);
       addTearDown(themeMode.dispose);
       final container = moduleContainer(
+        catalog: _profileCatalog(),
         overrides: [
           organizationAdminRepositoryProvider.overrideWithValue(_Users()),
           connectivityStateProvider.overrideWithValue(ConnectivityState.online),
@@ -169,6 +225,55 @@ void main() {
       await settle(tester);
       expect(locationOf(router), '/users/person-1');
       expect(find.byType(AdminUserProfilePage), findsOneWidget);
+      if (const bool.fromEnvironment('NIZAMIO_TABLET_HOST_SHOTS')) {
+        File('/tmp/nizam-user-profile-${size.width.toInt()}.png')
+            .writeAsBytesSync(await hostPng(tester));
+      }
+
+      final collapsed = find.byKey(
+        const ValueKey('user-profile-collapsed-title'),
+      );
+      expect(tester.widget<Opacity>(collapsed).opacity, 0);
+      final scroll = tester.state<ScrollableState>(
+        find
+            .descendant(
+              of: find.byType(AdminUserProfilePage),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      expect(scroll.position.maxScrollExtent, greaterThan(200));
+      scroll.position.jumpTo(scroll.position.maxScrollExtent);
+      await tester.pump();
+      await settle(tester);
+      expect(tester.widget<Opacity>(collapsed).opacity, greaterThan(0));
+      await tester.ensureVisible(find.text('Takvim').last);
+      await tester.tap(find.text('Takvim').last);
+      await settle(tester);
+      expect(
+        container.read(adminUserTaskPanelProvider('person-1')).view,
+        UserTaskView.calendar,
+      );
+      await tester.tap(find.text('Liste').last);
+      await settle(tester);
+      expect(
+        container.read(adminUserTaskPanelProvider('person-1')).view,
+        UserTaskView.list,
+      );
+      await tester.tap(find.bySemanticsLabel('Görevleri süz').last);
+      await settle(tester);
+      await tester.tap(find.text('Tamamlananlar').last);
+      await settle(tester);
+      expect(
+        container.read(adminUserTaskPanelProvider('person-1')).statuses,
+        contains(UserTaskStatus.done),
+      );
+      Navigator.of(tester.element(find.text('Tamamlananlar').last)).pop();
+      await settle(tester);
+      scroll.position.jumpTo(0);
+      await tester.pump();
+      await settle(tester);
+      expect(tester.widget<Opacity>(collapsed).opacity, 0);
       await tester.ensureVisible(find.text('Hesap').last);
       await tester.tap(find.text('Hesap').last, warnIfMissed: true);
       await settle(tester);

@@ -154,7 +154,7 @@ class NzPage extends ConsumerWidget {
   /// [NzPage.feed]: yapışkan şerit (bkz. yapıcı).
   final Widget? pinned;
 
-  /// [NzPage.feed]: [pinned] şeridinden sonraki öğeler.
+  /// [NzPage.feed]: optional lazy panel after [children] and the optional [pinned] header.
   final List<Widget> after;
 
   /// Sekme kimliği değişince tembel panelin girişini yeniler.
@@ -281,14 +281,14 @@ class NzPage extends ConsumerWidget {
                                   side,
                                   top,
                                   side,
-                                  pinned == null ? bottom : 0,
+                                  pinned == null && after.isEmpty ? bottom : 0,
                                 ),
                                 sliver: SliverList.list(children: children),
                               ),
                             ],
                           ),
                         ),
-                        if (pinned case final pinned?) ...[
+                        if (pinned case final pinned?)
                           PinnedHeaderSliver(
                             child: NzGlass(
                               tone: NzGlassTone.bar,
@@ -299,6 +299,7 @@ class NzPage extends ConsumerWidget {
                               ),
                             ),
                           ),
+                        if (pinned != null || after.isNotEmpty)
                           SliverPadding(
                             padding: EdgeInsets.fromLTRB(side, 0, side, bottom),
                             sliver: PageContentEntrance.sliver(
@@ -307,7 +308,6 @@ class NzPage extends ConsumerWidget {
                               child: SliverList.list(children: after),
                             ),
                           ),
-                        ],
                       ],
                     ),
                   ),

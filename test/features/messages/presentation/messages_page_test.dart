@@ -56,6 +56,21 @@ void main() {
     expect(find.byType(NzChatRow), findsNWidgets(1));
   });
 
+  testWidgets('aşağı çekince sohbet listesi sunucudan yeniden okunur', (
+    tester,
+  ) async {
+    final (_, _, backend) = await _open(tester);
+    final before = backend.inboxReads;
+    await tester.fling(
+      find.byType(NzChatRow).first,
+      const Offset(0, 400),
+      1000,
+    );
+    await settle(tester);
+    expect(backend.inboxReads, greaterThan(before));
+    expect(find.byType(NzChatRow), findsNWidgets(3));
+  });
+
   testWidgets('satır sohbeti açar', (tester) async {
     final (_, nav, _) = await _open(tester);
     await _tap(tester, find.text('Kadir Özbek'));

@@ -48,7 +48,10 @@ class HomePage extends ConsumerWidget {
       ..listenErrors(scopeSelectionControllerProvider, context)
       ..listenErrors(signOutProvider, context)
       ..listen(shellReselectEventsProvider, (_, next) {
-        final dashboard = ref.read(homeDashboardControllerProvider).value;
+        final dashboard = ref
+            .read(homeDashboardControllerProvider.notifier)
+            .visible
+            .value;
         // Yalnız görünen sayfa (yığının tepesi) kendi kısayol menüsünü açar.
         final visible = ModalRoute.of(context)?.isCurrent ?? true;
         if (next?.tab != shellTab || dashboard == null || !visible) return;
@@ -58,7 +61,11 @@ class HomePage extends ConsumerWidget {
         );
       });
     final programState = ref.watch(currentProgramControllerProvider);
-    final dashboard = ref.watch(homeDashboardControllerProvider);
+    ref.watch(homeDashboardControllerProvider);
+    // Başka hesabın/programın özeti görünmez (yükleniyor ya da yalnız hata).
+    final dashboard = ref
+        .read(homeDashboardControllerProvider.notifier)
+        .visible;
     // Özet hatası katalog hatası olabilir (yönetici olmayan hesap); katalog da yeniden okunur.
     void retry() {
       if (ref.read(taskCatalogControllerProvider).hasError) {
@@ -94,7 +101,6 @@ class HomePage extends ConsumerWidget {
           value: dashboard,
           onRetry: retry,
           loading: const HomeSkeleton(),
-          skeletonOnReload: true,
           data: (d) => _Feed(
             dashboard: d,
             onQuickAction: (a) => _quickAction(context, a),

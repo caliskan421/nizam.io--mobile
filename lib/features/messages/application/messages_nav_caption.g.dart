@@ -53,7 +53,7 @@ final class MessagesNavCaptionProvider
 }
 
 String _$messagesNavCaptionHash() =>
-    r'a51c3cf0d57d6f50bdfbad01bb68ab7f9c9576fe';
+    r'a3f94ab20724f20d8a43195fb4ccc37c91575a4b';
 
 /// Tablet rayındaki Mesajlar rozeti: okunmamış ya da anılan sohbet sayısı (prototip
 /// `unread || mention`); veri yokken null.
@@ -102,4 +102,4 @@ final class MessagesNavBadgeProvider
   }
 }
 
-String _$messagesNavBadgeHash() => r'c7c996addd25b303dd097df000fecc235149ced1';
+String _$messagesNavBadgeHash() => r'fe6cdac9d1e7e06f9dd5d229627de5459a1c1e71';

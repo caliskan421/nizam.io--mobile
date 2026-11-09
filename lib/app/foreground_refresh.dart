@@ -3,14 +3,19 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/stale_clock.dart';
+import '../features/meetings/meetings.dart';
 import '../features/messages/messages.dart';
 import '../features/notifications/notifications.dart';
+import '../features/scope/scope.dart';
 import '../features/tasks/tasks.dart';
 
 /// V10 güncellik (F60): uygulama ön plana dönünce (`resumed`) okunmuş görev kataloğu, son
 /// okumadan beri [maxAge] geçtiyse arka planda yeniden okunur; eski veri görünür kalır, açık
 /// ayrıntı katalogla birlikte yeniden okunur, açık düzenleme taslağı tabanını korur. Hiç
 /// okunmamış katalog için okuma başlatılmaz; yoklama yoktur (arka planda iş yapılmaz).
+/// Toplantı listesi (toplantılar ve takvim ekranı) yaşıyorsa aynı kuralla tazelenir
+/// ([refreshStaleMeetings]).
 /// Aynı geçişte zil rozeti (okunmamış bildirim sayısı) ekrandaysa yeniden okunur
 /// ([refreshNotificationBadge]; v1 ön plan yoklaması, zamanlayıcı yok); Mesajlar rozeti de
 /// akış açık değilse tek okumayla tazelenir ([refreshMessagesBadge]).
@@ -18,7 +23,7 @@ class ForegroundRefresh extends ConsumerStatefulWidget {
   const ForegroundRefresh({
     super.key,
     required this.child,
-    this.maxAge = TaskCatalogController.staleAfter,
+    this.maxAge = StaleClock.staleAfter,
   });
 
   final Widget child;
@@ -40,6 +45,8 @@ class _ForegroundRefreshState extends ConsumerState<ForegroundRefresh> {
   void _resumed() {
     final container = ProviderScope.containerOf(context, listen: false);
     unawaited(refreshStaleTasks(container, maxAge: widget.maxAge));
+    unawaited(refreshStaleMeetings(container, maxAge: widget.maxAge));
+    unawaited(refreshStaleHome(container, maxAge: widget.maxAge));
     unawaited(refreshNotificationBadge(container));
     unawaited(refreshMessagesBadge(container));
   }
@@ -58,11 +65,34 @@ class _ForegroundRefreshState extends ConsumerState<ForegroundRefresh> {
 /// [TaskCatalogController.refreshIfStale] (hata durumda kalır, veri görünür).
 Future<void> refreshStaleTasks(
   ProviderContainer container, {
-  Duration maxAge = TaskCatalogController.staleAfter,
+  Duration maxAge = StaleClock.staleAfter,
 }) async {
   if (!container.exists(taskCatalogControllerProvider)) return;
   await container
       .read(taskCatalogControllerProvider.notifier)
+      .refreshIfStale(maxAge: maxAge);
+}
+
+/// Ön plana dönüş: toplantı listesi yaşamıyorsa (toplantılar/takvim açılmadı) istek yok;
+/// yaşıyorsa [refreshStaleTasks] kuralıyla bayatsa arka planda yeniden okunur.
+Future<void> refreshStaleMeetings(
+  ProviderContainer container, {
+  Duration maxAge = StaleClock.staleAfter,
+}) async {
+  if (!container.exists(meetingsBoardControllerProvider)) return;
+  await container
+      .read(meetingsBoardControllerProvider.notifier)
+      .refreshIfStale(maxAge: maxAge);
+}
+
+/// Ana sayfa özeti: yaşamıyorsa (hiç açılmadı) istek yok; yaşıyorsa bayatsa arka planda tazelenir.
+Future<void> refreshStaleHome(
+  ProviderContainer container, {
+  Duration maxAge = StaleClock.staleAfter,
+}) async {
+  if (!container.exists(homeDashboardControllerProvider)) return;
+  await container
+      .read(homeDashboardControllerProvider.notifier)
       .refreshIfStale(maxAge: maxAge);
 }
 

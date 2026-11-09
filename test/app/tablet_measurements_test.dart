@@ -64,10 +64,15 @@ void main() {
           final card = s.modalRect!;
           expect(
             card.width,
-            lessThanOrEqualTo(TabletContract.modalWidth(size.width) + 0.01),
+            lessThanOrEqualTo(
+              TabletContract.modalWidth(s.windowSize.width) + 0.01,
+            ),
             reason: '$size: modal pencereye sığar',
           );
-          expect(card.height, lessThanOrEqualTo(size.height - 64 + 0.01));
+          expect(
+            card.height,
+            lessThanOrEqualTo(s.windowSize.height - 64 + 0.01),
+          );
         }
       },
     );

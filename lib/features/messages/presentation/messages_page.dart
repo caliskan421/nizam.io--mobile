@@ -137,11 +137,14 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
       MediaQuery.sizeOf(context).width,
     );
     final view = ref.watch(messagesControllerProvider);
-    final inbox = ref.watch(chatsControllerProvider);
+    ref.watch(chatsControllerProvider);
+    // Başka hesabın/programın sohbetleri görünmez (yükleniyor ya da yalnız hata).
+    final inbox = ref.read(chatsControllerProvider.notifier).visible;
     void retry() => ref.invalidate(chatsControllerProvider);
     final box = inbox.value;
     final page = NzPage.feed(
       onRetry: retry,
+      onRefresh: () => ref.read(chatsControllerProvider.notifier).reload(),
       topBar: const RootTopBar(),
       children: [
         NzPageHeader(

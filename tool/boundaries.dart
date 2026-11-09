@@ -49,8 +49,7 @@
 //   U3  Ham metin stili yasak: `TextStyle(…)` yalnız `lib/core/ui/theme/**`;
 //       `package:google_fonts` importu `lib/core/ui/theme/**`, `lib/app/bootstrap.dart` içinde.
 //       `copyWith` her yerde serbest.
-//   U4  `MediaQuery.of` / `MediaQuery.maybeOf` (ve tear-off'ları) yasak; `sizeOf`,
-//       `paddingOf`, `maybeSizeOf` … serbest.
+//   U4  `MediaQuery.of/maybeOf` (ve tear-off) yasak, `sizeOf` … serbest; izinli: [_tabletScale].
 //   U5  `.extension<…>()` ve `ThemeData.extensions` erişimi yalnız
 //       `lib/core/ui/extensions/context_ext.dart` içinde (`ThemeData(extensions: …)` kurulum,
 //       erişim değil).
@@ -352,7 +351,7 @@ UiPolicy uiPolicyFor(String libPath, {bool allowances = true}) {
     [
       if (!colorOk) _colorBan,
       if (!(allowances && libPath.startsWith('core/ui/theme/'))) _textStyleBan,
-      _mediaQueryBan,
+      if (!allowances || libPath != _tabletScale) _mediaQueryBan,
       if (here.area == 'feature' && here.layer == 'presentation') ...[
         _scaffoldBan,
         _cupertinoScaffoldBan,
@@ -827,6 +826,7 @@ const _textStyleBan = UiBan('U3', 'TextStyle', {
   null,
   'new',
 }, 'ham TextStyle yasak; context.text.* kullanın (copyWith serbest)');
+const _tabletScale = 'core/ui/layout/nz_tablet_scale.dart';
 const _mediaQueryBan = UiBan(
   'U4',
   'MediaQuery',

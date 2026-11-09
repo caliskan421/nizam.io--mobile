@@ -53,4 +53,4 @@ final class MeetingsNavCaptionProvider
 }
 
 String _$meetingsNavCaptionHash() =>
-    r'782a99a139693164d0d5dd0bc13aa23a807ab75c';
+    r'88829c8b2149aafc1002935e50aa728c9b027ca8';

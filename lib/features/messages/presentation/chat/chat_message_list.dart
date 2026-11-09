@@ -66,15 +66,27 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
   var _sticking = false;
   var _loadingOlder = false;
 
+  /// Parmak ekrandayken (sürükleme) otomatik alta dönüş yapılmaz; yoksa tembel listenin ölçü
+  /// değişimi yavaş yukarı kaydırmayı geri alır.
+  var _dragging = false;
+
   bool _onScroll(ScrollNotification n) {
-    if (n is ScrollUpdateNotification && n.depth == 0) {
-      _pinned = chatAtEnd(n.metrics);
+    if (n.depth != 0) return false;
+    if (n is ScrollStartNotification) {
+      _dragging = n.dragDetails != null;
+    } else if (n is ScrollEndNotification) {
+      _dragging = false;
+    } else if (n is ScrollUpdateNotification) {
+      // Sürüklerken yapışıklık yalnız tam altta; parmak kalkınca/ataletle 80 px payı geçerli.
+      _pinned = n.dragDetails != null
+          ? _atEndExact(n.metrics)
+          : chatAtEnd(n.metrics);
     }
     return false;
   }
 
   bool _onMetrics(ScrollMetricsNotification n) {
-    if (_pinned && !_atEndExact(n.metrics)) _stick();
+    if (_pinned && !_dragging && !_atEndExact(n.metrics)) _stick();
     return false;
   }
 
@@ -84,7 +96,9 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
     _sticking = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _sticking = false;
-      if (!mounted || !widget.scroll.hasClients || !_pinned) return;
+      if (!mounted || !widget.scroll.hasClients || !_pinned || _dragging) {
+        return;
+      }
       final p = widget.scroll.position;
       if (_atEndExact(p)) return;
       p.jumpTo(p.maxScrollExtent);

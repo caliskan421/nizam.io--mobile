@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +11,7 @@ import '../../core/ui/layout/layout.dart';
 import '../../core/ui/motion/page_content_entrance.dart';
 import '../../core/ui/page/nz_app_nav.dart';
 import '../../core/ui/page/nz_shell_events.dart';
+import '../../core/ui/theme/nz_motion.dart';
 import '../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../core/ui/widgets/navigation/nz_floating_nav.dart';
 import '../../core/ui/widgets/navigation/nz_tablet_rail.dart';
@@ -19,6 +22,7 @@ import '../../features/coordinatorships/coordinatorships.dart';
 import '../../features/meetings/meetings.dart';
 import '../../features/messages/messages.dart';
 import '../../features/tasks/tasks.dart';
+import '../foreground_refresh.dart';
 import 'app_tablet_rail.dart';
 import 'routes.dart';
 import 'split.dart';
@@ -166,7 +170,40 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
   var _refresh = 0;
   var _refreshReloads = false;
 
+  /// Çift bölmede son görülen modül: liste bölmesi modül değişince baştan kurulur (sekme
+  /// dalı gizlenip açılmaz), bu yüzden `onRevisit` çalışmaz; bayat veri burada tazelenir.
+  RailModule? _staleChecked;
+  Timer? _staleTimer;
+
   StatefulNavigationShell get _shell => widget.navigationShell;
+
+  /// Çift bölmede modül değişince (ilk kurulum dahil) liste verisi bayatsa arka planda tazelenir;
+  /// hareket bitince başlar (istek ve yeniden kurulum aynı karelere düşmez).
+  void _refreshStaleOnSwitch(RailModule? module) {
+    if (module == _staleChecked) return;
+    _staleChecked = module;
+    _staleTimer?.cancel();
+    if (module == null) return;
+    _staleTimer = Timer(RpMotion.enterDuration, () {
+      if (!mounted) return;
+      final c = ProviderScope.containerOf(context, listen: false);
+      switch (module) {
+        case RailModule.home:
+          unawaited(refreshStaleHome(c));
+        case RailModule.tasks:
+          unawaited(refreshStaleTasks(c));
+        case RailModule.meetings:
+          unawaited(refreshStaleMeetings(c));
+        case RailModule.calendar:
+          unawaited(refreshStaleMeetings(c));
+          unawaited(refreshStaleTasks(c));
+        case RailModule.coordinatorships ||
+            RailModule.archive ||
+            RailModule.messages:
+          break;
+      }
+    });
+  }
 
   String get _location => widget.location ?? '';
 
@@ -185,6 +222,12 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
   void initState() {
     super.initState();
     _remember();
+  }
+
+  @override
+  void dispose() {
+    _staleTimer?.cancel();
+    super.dispose();
   }
 
   void _remember() {
@@ -335,6 +378,7 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
         ),
       );
     }
+    _refreshStaleOnSwitch(current);
     final master = switch (current) {
       RailModule.home => homeMaster(),
       RailModule.tasks => tasksMaster(

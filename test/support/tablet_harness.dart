@@ -42,6 +42,7 @@ import 'package:nizamio/features/timeline/presentation/gantt/gantt_chart.dart'
     show GanttChart;
 
 import '../features/pilot_support.dart' show real;
+import 'app_frame.dart';
 import 'fake_backend.dart' show FakeHandler;
 import 'harness.dart';
 import 'tablet_backend.dart';
@@ -317,7 +318,7 @@ class TabletSession {
   // ---- ölçü ----
 
   Rect? rectOf(Finder f) =>
-      f.evaluate().isEmpty ? null : tester.getRect(f.first);
+      f.evaluate().isEmpty ? null : appRect(tester, f.first);
 
   Rect? get railRect => rectOf(find.byType(NzTabletRail));
   Rect? get masterRect => rectOf(pane(NzPaneRole.master));
@@ -326,10 +327,9 @@ class TabletSession {
   /// Üst güvenli alan (mantıksal pt): host'ta 0; gerçek iPad'de işletim sistemi durum çubuğu/
   /// pencere kontrolleri. Kaynak geometrisindeki dikey konumlar pencere üstünden başlar;
   /// bölme içeriği güvenli alanın ALTINDA başladığı için beklenen üst değerlere eklenir.
-  double get safeTop => tester.view.padding.top / tester.view.devicePixelRatio;
+  double get safeTop => appSafeTop(tester);
 
-  Size get windowSize =>
-      tester.view.physicalSize / tester.view.devicePixelRatio;
+  Size get windowSize => appWindow(tester);
 
   /// Merkezi modalın görünen kartı: başlık alanını içeren `Dialog`un ilk `Material`'ı.
   /// Dialog yoksa (alt sayfa vb.) null; çağıran başarısız olmalıdır.
@@ -340,7 +340,7 @@ class TabletSession {
       of: dialog.last,
       matching: find.byType(Material),
     );
-    return card.evaluate().isEmpty ? null : tester.getRect(card.first);
+    return card.evaluate().isEmpty ? null : appRect(tester, card.first);
   }
 
   /// Merkezi modal kartının köşe yarıçapı (okunamazsa null).
@@ -783,7 +783,7 @@ Future<void> tapGanttBar(TabletSession s, String code) async {
   expect(bars, findsOneWidget, reason: 'Gantt çubukları');
   final local = t.widget<GanttChart>(chart).layout.barOf(code);
   expect(local, isNotNull, reason: 'Gantt çubuğu $code');
-  Rect bar() => local!.shift(t.getTopLeft(bars));
+  Rect bar() => localToScreen(t, bars, local!);
   Rect view() => t
       .getRect(find.byKey(GanttChart.horizontalKey))
       .intersect(t.getRect(find.byKey(GanttChart.verticalKey)));
@@ -839,7 +839,7 @@ Future<void> tapGanttBar(TabletSession s, String code) async {
     reason: '$code: $point noktasına dokunuş çubuk ressamına ulaşmıyor',
   );
   expect(
-    t.widget<GanttChart>(chart).layout.barAt(point - t.getTopLeft(bars)),
+    t.widget<GanttChart>(chart).layout.barAt(screenToLocal(t, bars, point)),
     code,
     reason: '$code: dokunuş konumu yerleşimde bu çubuğa düşmüyor',
   );
@@ -969,7 +969,7 @@ void expectPaneRect(
 
 Rect _firstRect(TabletSession s, Finder f, String what) {
   expect(f, findsWidgets, reason: '$what bulunamadı');
-  return s.tester.getRect(f.first);
+  return appRect(s.tester, f.first);
 }
 
 /// Sağ bölme genişliği kaynak artboard'ındakiyle (1180 − 491 = 689) aynı mı? Yalnız o zaman

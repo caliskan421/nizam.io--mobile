@@ -27,6 +27,7 @@ import '../../../core/api/generated/models/update_meeting_request.dart';
 import '../../../core/domain/enum_parse.dart';
 import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/http/interceptors.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../domain/meeting.dart';
 import '../domain/meetings_repository.dart';
@@ -297,8 +298,16 @@ class ApiMeetingsRepository implements MeetingsRepository {
   );
 
   @override
-  Future<void> deleteNote(String noteId) =>
-      apiCall(() => _client.deleteMeetingNote(noteId: noteId));
+  Future<void> deleteNote(String noteId, {required String programId}) =>
+      apiCall(
+        () => _client.deleteMeetingNote(
+          noteId: noteId,
+          extras: withProgram(
+            CollaborationClient.deleteMeetingNoteOpenapiExtras,
+            programId,
+          ),
+        ),
+      );
 
   /// Not: üretilmiş `ConvertNoteRequest` `format: date` alanlarını tam ISO tarih-saat
   /// (`2026-11-03T00:00:00.000`) olarak yazar; sunucu yalnız `YYYY-MM-DD` kabul eder. Üretici

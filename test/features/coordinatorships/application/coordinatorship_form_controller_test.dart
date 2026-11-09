@@ -5,6 +5,8 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/session/session_state.dart';
+import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorship_form_controller.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorships_controller.dart';
 import 'package:nizamio/features/coordinatorships/domain/department.dart';
@@ -14,6 +16,17 @@ import '../../../support/fake_backend.dart';
 import '../../../support/harness.dart';
 import '../../pilot_support.dart';
 import '../coord_backend.dart';
+
+/// Silmeyi [hold] tamamlanana dek bekleten bellek deposu.
+class _GatedStore extends MemorySecureStore {
+  Completer<void>? hold;
+
+  @override
+  Future<void> delete(String key) async {
+    await hold?.future;
+    return super.delete(key);
+  }
+}
 
 Future<Harness> _harness(CoordBackend backend) async {
   final h = await pilotHarness(backend, signedIn: true);
@@ -202,6 +215,46 @@ void main() {
     expect(await flight, isFalse);
     final f = h.read(coordinatorshipFormControllerProvider);
     expect((f.pending, f.error, f.saving), (null, null, false));
+  });
+
+  test('oturum nesli arttı, bildirim henüz yok → dönen oluşturma yanıtı bağlamaya geçmez', () async {
+    final backend = CoordBackend();
+    // Depo temizliği bekletilir: nesil artar, oturum durumu yayımlanmaz.
+    final store = _GatedStore();
+    final h = Harness(handler: backend.handle, store: store);
+    addTearDown(h.dispose);
+    await h.read(serverBindingProvider).verify(testUrl);
+    await h.identity.login(email: 'a@b.test', password: 'p');
+    h.read(scopeControllerProvider).selectProgram(coordProgram);
+    await h.read(taskCatalogControllerProvider.future);
+    final reached = Completer<void>();
+    final gate = Completer<void>();
+    final serve = h.backend.handler;
+    h.backend.handler = (r) async {
+      if (r.method == 'POST' && r.path == '/v1/departments') {
+        reached.complete();
+        await gate.future;
+      }
+      return serve(r);
+    };
+    final flight = h
+        .read(coordinatorshipFormControllerProvider.notifier)
+        .create(
+          const CoordinatorshipDraft(
+            name: 'Saha',
+            kind: DepartmentKind.coordinatorship,
+          ),
+        );
+    await reached.future;
+    final session = h.read(sessionControllerProvider);
+    store.hold = Completer();
+    final cleared = session.clear();
+    gate.complete();
+    expect(await flight, isFalse);
+    expect(session.state.value, isA<SessionActive>(), reason: 'aralık');
+    expect(_writes(backend), ['POST /v1/departments']);
+    store.hold!.complete();
+    await cleared;
   });
 
   test('bağ kurulmuş, yanıt kaybolmuş → tekrar denemede dönen eski ad yeniden adlandırılır', () async {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -94,19 +96,62 @@ class MeetingHero extends ConsumerWidget {
 /// Konferans kartı (prototip "Konferans"): durum başlığı ve alt satırı; canlıyken bağlı
 /// kişiler (sayı ve avatar yığını, `conference.connected`, COLLABORATION-K78), bittiyse süre ve
 /// saat aralığı (`last_conference`, K70). Yönetene başlat/bitir, toplantıyı gören herkese katıl.
-/// Katılım ekranı henüz yok (ürün kararı).
-class MeetingConferenceCard extends ConsumerWidget {
+/// Katılım ekranı henüz yok (ürün kararı). Açık ekranda taze bağlı kişi görüntüsü eşik
+/// anında ([ConferenceConnected.freshFor]) kendiliğinden eski duruma geçer: o ana tek seferlik
+/// zamanlayıcı kurulur (sürekli yoklama yok), kart kapanınca iptal edilir.
+class MeetingConferenceCard extends ConsumerStatefulWidget {
   const MeetingConferenceCard({
     super.key,
     required this.room,
     required this.actions,
+    this.clock = DateTime.now,
   });
 
   final MeetingRoom room;
   final MeetingActions actions;
 
+  /// Şimdiki an (test sahte saat verir).
+  final DateTime Function() clock;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MeetingConferenceCard> createState() =>
+      _MeetingConferenceCardState();
+}
+
+class _MeetingConferenceCardState extends ConsumerState<MeetingConferenceCard> {
+  Timer? _stale;
+
+  /// Kurulu zamanlayıcının hedef anı (aynı eşik için yeniden kurulmaz).
+  DateTime? _staleAt;
+
+  @override
+  void dispose() {
+    _stale?.cancel();
+    super.dispose();
+  }
+
+  /// Görüntü [now] anında tazeyse eşiği geçtiği ana bir kez yeniden çizim kurar.
+  void _scheduleStale(ConferenceConnected? seen, DateTime now) {
+    final at = seen != null && seen.isFreshAt(now)
+        ? seen.observedAt!.add(
+            ConferenceConnected.freshFor + const Duration(seconds: 1),
+          )
+        : null;
+    if (at == _staleAt) return;
+    _stale?.cancel();
+    _staleAt = at;
+    _stale = at == null
+        ? null
+        : Timer(at.difference(now), () {
+            _staleAt = null;
+            if (mounted) setState(() {});
+          });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final room = widget.room;
+    final actions = widget.actions;
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
@@ -114,13 +159,14 @@ class MeetingConferenceCard extends ConsumerWidget {
     final m = d.meeting;
     final conf = d.conference;
     final manage = room.permissions.canManage;
-    final now = DateTime.now();
+    final now = widget.clock();
     final status = room.status(now);
     final summary = room.summary;
     // Hiç gözlenmemiş görüntü (observed_at null) gösterilmez; eski görüntü (K78, > 3 dk) "şu an
     // bağlı" sayılmaz: zamanıyla yazılır, avatar ve "görüşmede" yığını çizilmez.
     final seen = conf?.connected.observedAt == null ? null : conf!.connected;
     final fresh = seen != null && seen.isFreshAt(now);
+    _scheduleStale(seen, now);
     final live = status?.phase == MeetingPhase.live;
     final finished = status?.phase == MeetingPhase.finished;
     final late = m.meetingDate.isBefore(now);

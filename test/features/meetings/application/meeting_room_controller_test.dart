@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/meetings/application/meeting_room_controller.dart';
 import 'package:nizamio/features/meetings/application/meetings_controller.dart';
 import 'package:nizamio/features/meetings/domain/meeting.dart';
@@ -427,6 +428,43 @@ void main() {
         expect(c.exists(_room), isTrue, reason: 'bekleyen silme tutuyor');
         expect(await done, isNull);
         expect(calls(h), ['DELETE /v1/meeting-notes/n1']);
+      },
+    );
+
+    test(
+      'program A → B: bekleyen silme tek istekle A program başlığıyla gider',
+      () async {
+        final s = MeetingsServer()..notes = [noteWire('n1'), noteWire('n2')];
+        final (h, c, ctl) = await _open(s);
+        final done = ctl.deleteNote(
+          _now(c).notes.first,
+          window: const Duration(milliseconds: 30),
+        );
+        h.read(scopeControllerProvider).selectProgram('prog-2');
+        expect(await done, isNull);
+        final deletes = [
+          for (final r in h.backend.requests)
+            if (r.method == 'DELETE') r,
+        ];
+        expect(deletes.map((r) => r.path), ['/v1/meeting-notes/n1']);
+        expect(deletes.single.header('X-Nizamio-Program'), 'prog-1');
+      },
+    );
+
+    test(
+      'çıkış ve yeniden giriş: bekleyen silme gönderilmez, not sunucuda kalır',
+      () async {
+        final s = MeetingsServer()..notes = [noteWire('n1'), noteWire('n2')];
+        final (h, c, ctl) = await _open(s);
+        final done = ctl.deleteNote(
+          _now(c).notes.first,
+          window: const Duration(milliseconds: 30),
+        );
+        await h.identity.logout();
+        await h.identity.login(email: 'a@b.test', password: 'p');
+        h.read(scopeControllerProvider).selectProgram('prog-1');
+        expect(await done, isNull);
+        expect(h.backend.count('DELETE', '/v1/meeting-notes/n1'), 0);
       },
     );
   });

@@ -22,8 +22,9 @@ enum InviteRole { member, coordinator, admin }
 
 enum InviteError { name, email, coordinatorship }
 
-/// Sunucunun aktarım teklifindeki var olan hesap.
-typedef ExistingAccount = ({String accountId, String fullName});
+/// Sunucunun aktarım teklifindeki var olan hesap; [email] teklifin geldiği gönderimin
+/// (kırpılmış) e-postasıdır. Teklif yalnız bu e-postayla gönderimde kullanılır.
+typedef ExistingAccount = ({String accountId, String fullName, String email});
 
 @immutable
 final class InviteForm {
@@ -55,8 +56,12 @@ final class InviteForm {
   final bool busy;
 
   /// Aktarım teklifi: e-posta bu hesaba ait; sonraki gönderim onu ekibe ekler. E-posta
-  /// değişince düşer.
+  /// değişince düşer; geciken teklif değişmiş taslağa yazılmaz.
   final ExistingAccount? existing;
+
+  /// Teklif bu taslağın e-postasına aitse teklif, değilse null.
+  ExistingAccount? get offer =>
+      existing?.email == email.trim() ? existing : null;
 
   static final _email = RegExp(r'.+@.+\..+');
 
@@ -156,7 +161,8 @@ class InviteFormController extends _$InviteFormController {
       );
       return null;
     }
-    final existing = f.existing;
+    // Teklif yalnız kaynak e-postasıyla birebir eşleşen gönderimde aktarım olur.
+    final existing = f.offer;
     final dept = f.coordinatorship;
     final options = ref.read(newTaskCoordinatorshipsProvider);
     final err = existing == null && f.name.trim().isEmpty
@@ -171,10 +177,11 @@ class InviteFormController extends _$InviteFormController {
       return null;
     }
     final admin = access.companyAdmin;
+    final email = f.email.trim();
     final enrollment = MemberEnrollment(
       programId: program,
       departmentId: dept!,
-      email: f.email.trim(),
+      email: email,
       fullName: f.name.trim(),
       coordinator: admin && f.role == InviteRole.coordinator,
       companyAdmin: admin && f.role == InviteRole.admin,
@@ -189,7 +196,10 @@ class InviteFormController extends _$InviteFormController {
     } on Object catch (e) {
       if (!live()) return null;
       final error = toApiError(e);
-      final offer = _offer(error);
+      // Teklif gönderilen e-postaya bağlıdır; taslağın e-postası bu arada değiştiyse
+      // (A gönderilip B'ye düzenlendi) A'nın hesabı B taslağına yazılmaz.
+      final current = state.email.trim() == email;
+      final offer = _offer(error, email);
       state = state.copyWith(
         busy: false,
         // Sonuç bilinmiyor: hesap açılmış olabilir; tekrar gönderim çakışmayı sunucu söyler.
@@ -198,7 +208,7 @@ class InviteFormController extends _$InviteFormController {
             : isOutcomeUnknown(error)
             ? ApiError(ClientErrorCode.outcomeUnknown, status: error.status)
             : error,
-        existing: () => offer,
+        existing: () => current ? offer : state.existing,
       );
       return null;
     }
@@ -212,7 +222,7 @@ class InviteFormController extends _$InviteFormController {
   /// `identity.account_exists` zarfındaki aktarım teklifi: `organization.transfer_available`
   /// kodlu `account_id` ve `user_full_name` alanlarının değeri sözleşme gereği hesap kimliği
   /// ve addır (yalnız şirket yöneticisine gelir). Teklif yoksa null.
-  static ExistingAccount? _offer(ApiError e) {
+  static ExistingAccount? _offer(ApiError e, String email) {
     if (e.code != 'identity.account_exists') return null;
     String? field(String name) => e.fields
         .where(
@@ -222,6 +232,10 @@ class InviteFormController extends _$InviteFormController {
         ?.message;
     final id = field('account_id');
     if (id == null || id.isEmpty) return null;
-    return (accountId: id, fullName: field('user_full_name') ?? '');
+    return (
+      accountId: id,
+      fullName: field('user_full_name') ?? '',
+      email: email,
+    );
   }
 }

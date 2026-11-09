@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/ui/motion/page_content_entrance.dart';
 import 'package:nizamio/core/ui/theme/nz_motion.dart';
@@ -207,55 +208,63 @@ void main() {
   group('onRevisit', () {
     var revisits = 0;
     setUp(() => revisits = 0);
-    Widget host(bool visible, {bool reduced = false}) => app(
-      TickerMode(
-        enabled: visible,
-        child: PageContentEntrance(
-          onRevisit: () => revisits++,
-          child: const SizedBox(),
-        ),
-      ),
-      reduced: reduced,
-    );
+    Widget host(bool visible, {bool reduced = false, bool enabled = true}) =>
+        app(
+          TickerMode(
+            enabled: visible,
+            child: PageContentEntrance(
+              enabled: enabled,
+              onRevisit: () {
+                expect(
+                  SchedulerBinding.instance.schedulerPhase,
+                  SchedulerPhase.postFrameCallbacks,
+                );
+                revisits++;
+              },
+              child: const SizedBox(),
+            ),
+          ),
+          reduced: reduced,
+        );
 
-    testWidgets('dönüş hareketi bitmeden çağrılmaz, bitince bir kez', (
+    testWidgets('ilk görünüş ve dönüş: hareket bitince kare sonunda bir kez', (
       tester,
     ) async {
       await tester.pumpWidget(host(true));
-      await tester.pump(RpMotion.enterDuration);
-      expect(revisits, 0);
+      await tester.pumpAndSettle();
+      expect(revisits, 1);
       await tester.pumpWidget(host(false));
       await tester.pumpWidget(host(true));
       await tester.pump(
         RpMotion.enterDuration - const Duration(milliseconds: 1),
       );
-      expect(revisits, 0);
+      expect(revisits, 1);
       await tester.pump(const Duration(milliseconds: 2));
-      expect(revisits, 1);
+      expect(revisits, 2);
       await tester.pump(RpMotion.enterDuration);
-      expect(revisits, 1);
+      expect(revisits, 2);
     });
 
     testWidgets('hareket bitmeden yeniden gizlenirse çağrılmaz', (
       tester,
     ) async {
       await tester.pumpWidget(host(true));
-      await tester.pump(RpMotion.enterDuration);
+      await tester.pumpAndSettle();
       await tester.pumpWidget(host(false));
       await tester.pumpWidget(host(true));
       await tester.pump(RpMotion.enterDuration ~/ 2);
       await tester.pumpWidget(host(false));
       await tester.pump(RpMotion.enterDuration * 2);
-      expect(revisits, 0);
+      expect(revisits, 1);
     });
 
     testWidgets('hareketi azalt: dönüşte kare sonunda', (tester) async {
       await tester.pumpWidget(host(true, reduced: true));
       await tester.pumpWidget(host(false, reduced: true));
       await tester.pumpWidget(host(true, reduced: true));
-      expect(revisits, 1);
+      expect(revisits, 2);
       await tester.pump(RpMotion.enterDuration);
-      expect(revisits, 1);
+      expect(revisits, 2);
     });
 
     testWidgets('bölme geçişine katılan giriş, bölme hareketi bitince', (
@@ -275,15 +284,15 @@ void main() {
         ),
       );
       await tester.pumpWidget(pane(true, 0));
-      await tester.pump(RpMotion.pushDuration);
+      await tester.pumpAndSettle();
       await tester.pumpWidget(pane(false, 0));
       await tester.pumpWidget(pane(true, 1));
       await tester.pump(RpMotion.enterDuration);
       // Giriş süresi geçti ama bölme hareketi sürüyor: iç giriş ona katılır, onu bekler.
       expect(tester.hasRunningAnimations, isTrue);
-      expect(revisits, 0);
-      await tester.pumpAndSettle();
       expect(revisits, 1);
+      await tester.pumpAndSettle();
+      expect(revisits, 2);
     });
 
     testWidgets(
@@ -310,6 +319,128 @@ void main() {
         // Bölme hareketi baştan başlar (dismissed): tazeleme hâlâ bitişi bekler.
         await tester.pumpWidget(pane(2));
         await tester.pump();
+        expect(revisits, 1);
+        await tester.pump(RpMotion.pushDuration ~/ 2);
+        expect(revisits, 1);
+        await tester.pumpAndSettle();
+        expect(revisits, 2);
+      },
+    );
+
+    testWidgets('ilk gizli kurulum çağırmaz; ilk etkin görünüş bir kez', (
+      tester,
+    ) async {
+      await tester.pumpWidget(host(false));
+      await tester.pump(RpMotion.enterDuration * 2);
+      expect(revisits, 0);
+      await tester.pumpWidget(host(true));
+      await tester.pumpAndSettle();
+      expect(revisits, 1);
+      await tester.pumpWidget(host(true));
+      await tester.pumpAndSettle();
+      expect(revisits, 1, reason: 'sıradan rebuild yeni ziyaret değildir');
+    });
+
+    testWidgets(
+      'hareketsiz ilk görünüş ve hızlı dönüş kare sonunda tek çağrı',
+      (tester) async {
+        await tester.pumpWidget(host(false, enabled: false));
+        expect(revisits, 0);
+        await tester.pumpWidget(host(true, enabled: false));
+        expect(revisits, 1);
+        await tester.pumpWidget(host(false, enabled: false));
+        await tester.pumpWidget(host(true, enabled: false));
+        await tester.pumpWidget(host(true, enabled: false));
+        expect(revisits, 2);
+      },
+    );
+
+    testWidgets('ilk giriş bitmeden dispose olursa bekleyen çağrı iptal', (
+      tester,
+    ) async {
+      await tester.pumpWidget(host(true));
+      await tester.pump(RpMotion.enterDuration ~/ 2);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(RpMotion.enterDuration);
+      expect(revisits, 0);
+      await tester.pumpWidget(host(true));
+      await tester.pumpAndSettle();
+      expect(revisits, 1);
+    });
+
+    testWidgets(
+      'bitiş karesinde gizlenip açılınca eski kare sonu işi çağırmaz',
+      (tester) async {
+        // İlk hareket tamamlandığında build aşamasında gizle; status dinleyicisi daha önce
+        // post-frame işi kuyruğa koymuştur. Aynı State tekrar açılınca yalnız yeni ziyaret sayılır.
+        var visible = true;
+        late StateSetter rebuild;
+        await tester.pumpWidget(
+          app(
+            StatefulBuilder(
+              builder: (context, setState) {
+                rebuild = setState;
+                return TickerMode(
+                  enabled: visible,
+                  child: PageContentEntrance(
+                    onRevisit: () => revisits++,
+                    child: const SizedBox(),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+        rebuild(() => visible = false);
+        await tester.pump(
+          RpMotion.enterDuration + const Duration(milliseconds: 1),
+        );
+        expect(revisits, 0);
+        rebuild(() => visible = true);
+        await tester.pump();
+        await tester.pumpAndSettle();
+        expect(revisits, 1);
+      },
+    );
+
+    testWidgets('bitiş karesinde dispose, kuyruğa alınmış çağrıyı iptal eder', (
+      tester,
+    ) async {
+      await tester.pumpWidget(host(true));
+      await tester.pumpWidget(
+        const SizedBox(),
+        duration: RpMotion.enterDuration + const Duration(milliseconds: 1),
+      );
+      await tester.pumpAndSettle();
+      expect(revisits, 0);
+    });
+
+    testWidgets(
+      'bitiş karesinde üst hareket yeniden başlarsa yeni bitiş beklenir',
+      (tester) async {
+        var play = 0;
+        late StateSetter rebuild;
+        await tester.pumpWidget(
+          app(
+            StatefulBuilder(
+              builder: (context, setState) {
+                rebuild = setState;
+                return NzPaneTransition(
+                  motion: NzPaneMotion.pop,
+                  play: play,
+                  child: PageContentEntrance(
+                    onRevisit: () => revisits++,
+                    child: const SizedBox(),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+        rebuild(() => play++);
+        await tester.pump(
+          RpMotion.pushDuration + const Duration(milliseconds: 1),
+        );
         expect(revisits, 0);
         await tester.pump(RpMotion.pushDuration ~/ 2);
         expect(revisits, 0);

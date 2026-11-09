@@ -483,38 +483,39 @@ void main() {
     });
   });
 
-  testWidgets(
-    'feed onRevisit: yeniden görünür olunca giriş bitince bir kez, ilk açılışta değil',
-    (tester) async {
-      var revisits = 0;
-      Widget host(bool visible) => _app(
-        TickerMode(
-          enabled: visible,
-          child: NzPage.feed(
-            topBar: const SliverAppBar(pinned: true, title: Text('üst')),
-            onRevisit: () => revisits++,
-            children: const [SizedBox(height: 40)],
-          ),
+  testWidgets('feed onRevisit: ilk görünüş ve dönüş giriş bitince bir kez', (
+    tester,
+  ) async {
+    var revisits = 0;
+    Widget host(bool visible) => _app(
+      TickerMode(
+        enabled: visible,
+        child: NzPage.feed(
+          topBar: const SliverAppBar(pinned: true, title: Text('üst')),
+          onRevisit: () => revisits++,
+          children: const [SizedBox(height: 40)],
         ),
-      );
-      await tester.pumpWidget(host(true));
-      await tester.pump();
-      expect(revisits, 0);
-      await tester.pumpWidget(host(false));
-      await tester.pump();
-      expect(revisits, 0);
-      await tester.pumpWidget(host(true));
-      await tester.pump();
-      // Tazeleme giriş hareketiyle aynı karelere düşmez.
-      expect(revisits, 0);
-      await tester.pump(RpMotion.enterDuration ~/ 2);
-      expect(revisits, 0);
-      await tester.pump(RpMotion.enterDuration);
-      expect(revisits, 1);
-      await tester.pump(RpMotion.enterDuration);
-      expect(revisits, 1);
-    },
-  );
+      ),
+    );
+    await tester.pumpWidget(host(true));
+    await tester.pump();
+    expect(revisits, 0);
+    await tester.pumpAndSettle();
+    expect(revisits, 1);
+    await tester.pumpWidget(host(false));
+    await tester.pump();
+    expect(revisits, 1);
+    await tester.pumpWidget(host(true));
+    await tester.pump();
+    // Tazeleme giriş hareketiyle aynı karelere düşmez.
+    expect(revisits, 1);
+    await tester.pump(RpMotion.enterDuration ~/ 2);
+    expect(revisits, 1);
+    await tester.pump(RpMotion.enterDuration);
+    expect(revisits, 2);
+    await tester.pump(RpMotion.enterDuration);
+    expect(revisits, 2);
+  });
 }
 
 class _CountedRow extends StatelessWidget {

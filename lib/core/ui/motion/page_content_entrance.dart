@@ -38,9 +38,10 @@ class PageContentEntrance extends StatefulWidget {
   /// false → opaklık animasyonu yok, yalnız öteleme (alt ağaçta cam var; bkz. sınıf belgesi).
   final bool fade;
 
-  /// Gizli içerik yeniden görünür olunca (`TickerMode` kapalı → açık; ilk açılışta değil)
+  /// İlk etkin görünüşte ve gizli içerik yeniden görünür olunca (`TickerMode` kapalı → açık)
   /// giriş hareketi BİTİNCE bir kez çağrılır: bu girişin ya da katıldığı üst hareketin
-  /// (tablet bölme geçişi). Hareket yoksa (hareketi azalt, [enabled] false) kare sonunda.
+  /// (tablet bölme geçişi), her durumda kare sonunda. Hareket yoksa (hareketi azalt,
+  /// [enabled] false) ilk etkin karenin sonunda.
   /// Bayat veri tazelemesi içindir (ör. `refreshIfStale`): istek ve yeniden kurulum hareketle
   /// aynı karelere düşmez. Hareket bitmeden yeniden gizlenirse çağrılmaz.
   final VoidCallback? onRevisit;
@@ -64,6 +65,7 @@ class _PageContentEntranceState extends State<PageContentEntrance>
 
   /// [PageContentEntrance.onRevisit] için bitişi beklenen hareket.
   Animation<double>? _revisitAfter;
+  int _revisitEpoch = 0;
 
   /// Gecikme + giriş; gecikme eğrinin başındaki düz [Interval] bölümüdür (zamanlayıcı yok).
   Duration get _total => RpMotion.enterDuration + widget.delay;
@@ -91,6 +93,7 @@ class _PageContentEntranceState extends State<PageContentEntrance>
         ?.animation;
     _coveredByParent ??= _parentAnimation?.isCompleted == false;
     final active = TickerMode.valuesOf(context).enabled;
+    final entering = _active != true && active;
     final returning = _active == false && active;
     _active = active;
     if (!active) _cancelRevisit();
@@ -112,7 +115,7 @@ class _PageContentEntranceState extends State<PageContentEntrance>
       _controller.duration = Duration.zero;
       _controller.value = 1;
     }
-    if (returning) _scheduleRevisit();
+    if (entering) _scheduleRevisit();
   }
 
   void _scheduleRevisit() {
@@ -121,8 +124,7 @@ class _PageContentEntranceState extends State<PageContentEntrance>
     if (motion.isAnimating) {
       _revisitAfter = motion..addStatusListener(_onMotionStatus);
     } else {
-      // Bağımlılık değişimi sırasında sağlayıcı yazımı yapılmaz: kare sonrasına bırakılır.
-      WidgetsBinding.instance.addPostFrameCallback((_) => _revisit());
+      _queueRevisit(motion);
     }
   }
 
@@ -130,15 +132,29 @@ class _PageContentEntranceState extends State<PageContentEntrance>
   /// ya da durdurulursa bekleme sürer; yeniden gizlenme [_cancelRevisit] ile bırakır.
   void _onMotionStatus(AnimationStatus status) {
     if (!status.isCompleted) return;
-    _cancelRevisit();
-    _revisit();
+    final motion = _revisitAfter!;
+    motion.removeStatusListener(_onMotionStatus);
+    _revisitAfter = null;
+    _queueRevisit(motion);
   }
 
-  void _revisit() {
-    if (mounted && _active == true) widget.onRevisit?.call();
+  void _queueRevisit(Animation<double> motion) {
+    final epoch = _revisitEpoch;
+    // Hareket dinleyicisi de kare içinde çalışır: sağlayıcı yazımı her zaman kare sonuna.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _active != true || epoch != _revisitEpoch) return;
+      // Üst hareket tamamlandıktan sonra aynı karede yeniden başlamış olabilir.
+      if (motion.isAnimating) {
+        _revisitAfter = motion..addStatusListener(_onMotionStatus);
+        return;
+      }
+      _revisitEpoch++;
+      widget.onRevisit?.call();
+    });
   }
 
   void _cancelRevisit() {
+    _revisitEpoch++;
     _revisitAfter?.removeStatusListener(_onMotionStatus);
     _revisitAfter = null;
   }

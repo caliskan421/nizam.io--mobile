@@ -182,9 +182,9 @@ class NzPage extends ConsumerWidget {
   /// Yenileme yalnız kullanıcı hareketiyle başlar (otomatik yeniden deneme değildir).
   final Future<void> Function()? onRefresh;
 
-  /// [NzPage.feed]: sayfa gizliyken yeniden görünür olunca (kabuk sekmesine dönüş, üstüne
-  /// itilen sayfanın kapanması; `TickerMode` kapalı → açık). İlk açılışta çağrılmaz;
-  /// içerik giriş hareketi bitince çalışır ([PageContentEntrance.onRevisit]).
+  /// [NzPage.feed]: ilk etkin görünüşte ve sayfa gizliyken yeniden görünür olunca (kabuk
+  /// sekmesine dönüş, üstüne itilen sayfanın kapanması; `TickerMode` kapalı → açık).
+  /// İçerik/üst giriş hareketi bitince kare sonunda çalışır ([PageContentEntrance.onRevisit]).
   /// Arka planda bayat veriyi tazelemek içindir (ör. `refreshIfStale`); gösterge çizilmez,
   /// eski veri görünür kalır.
   final VoidCallback? onRevisit;

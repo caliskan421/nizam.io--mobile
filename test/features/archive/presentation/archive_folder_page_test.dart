@@ -1,15 +1,19 @@
 // ArchiveFolderPage (sunucu verisi, sahte depo): başlık, sekmeler, görev klasörü → dosya süzgeci,
 // ZIP, önizleme (indir, yükleyen adı, silme yalnız yükleyene), yükleme akışı, bilinmeyen klasör,
 // kısayol menüsü, taşma.
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nizamio/core/domain/page_slice.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/features/archive/archive.dart';
 import 'package:nizamio/features/archive/domain/records.dart';
-import 'package:nizamio/features/tasks/domain/task_writes.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
@@ -17,6 +21,21 @@ import '../../pilot_support.dart';
 import '../archive_fixture.dart';
 
 final _l = AppLocalizationsTr();
+
+class _ImageArchiveRepository extends FakeArchiveRepository {
+  @override
+  Future<Stream<List<int>>> downloadFile(
+    String fileId, {
+    required String department,
+  }) async {
+    calls.add(('file', department, fileId));
+    return Stream.value(
+      base64Decode(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a6b0AAAAASUVORK5CYII=',
+      ),
+    );
+  }
+}
 
 Future<(Harness, RecordingAppNav)> _open(
   WidgetTester tester, {
@@ -59,6 +78,55 @@ Future<void> _tap(WidgetTester tester, Finder f) async {
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
+  testWidgets(
+    'doğrudan açılış sonraki sayfadaki dosyanın önizlemesini gösterir',
+    (tester) async {
+      final h = await real(
+        tester,
+        () => pilotHarness(archiveBackend(), signedIn: true),
+      );
+      final repo = FakeArchiveRepository()
+        ..pages = {
+          null: PageSlice(
+            items: [archiveFile('f1', type: 'application/octet-stream')],
+            nextCursor: 'next',
+          ),
+          'next': PageSlice(
+            items: [archiveFile('f2', type: 'application/octet-stream')],
+          ),
+        };
+      useArchiveFakes(h, repo, sink: RecordingSink(), picker: FakePicker());
+      h.read(scopeControllerProvider).selectProgram('prog-1');
+      await pumpScreen(
+        tester,
+        h,
+        Consumer(
+          builder: (context, ref, _) => Scaffold(
+            body: TextButton(
+              onPressed: () => openArchiveFile(
+                context,
+                folderCode: 'd1',
+                workItemId: 'w1',
+                fileId: 'f2',
+                taskTitle: (_) => 'Saha keşfi',
+              ),
+              child: const Text('Dosyayı aç'),
+            ),
+          ),
+        ),
+      );
+      await settle(tester);
+      await real(
+        tester,
+        () => h.container.read(taskCatalogControllerProvider.future),
+      );
+      await _tap(tester, find.text('Dosyayı aç'));
+      expect(find.text('f2.pdf'), findsOneWidget);
+      expect(find.text(_l.uiArchiveDownload), findsOneWidget);
+      expect(repo.filters.any((filter) => filter.workItemId == 'w1'), isTrue);
+    },
+  );
+
   testWidgets('başlık ve görev klasörleri; görev → dosyalar süzülür', (
     tester,
   ) async {
@@ -89,10 +157,73 @@ void main() {
     expect(sink.saved.keys, ['Altyapı.zip']);
   });
 
+  testWidgets('görsel önizlemesi yetkili dosya akışını gösterir', (
+    tester,
+  ) async {
+    final repo = _ImageArchiveRepository();
+    await _open(tester, repo: repo);
+    await _tap(tester, find.text(_l.uiArchiveTabFiles));
+    await _tap(tester, find.text('f3.pdf'));
+    expect(find.byType(Image), findsOneWidget);
+    expect(repo.calls.where((call) => call.$1 == 'file').single, (
+      'file',
+      'd1',
+      'f3',
+    ));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('büyük görsel indirilmeden önizleme sınırı gösterilir', (
+    tester,
+  ) async {
+    final repo = _ImageArchiveRepository()
+      ..pages = {
+        null: PageSlice(
+          items: [
+            archiveFile('big', type: 'image/png', size: 11 * 1024 * 1024),
+          ],
+        ),
+      };
+    await _open(tester, repo: repo);
+    await _tap(tester, find.text(_l.uiArchiveTabFiles));
+    await _tap(tester, find.text('big.pdf'));
+    expect(find.text(_l.uiArchiveImageTooLarge), findsOneWidget);
+    expect(find.text(_l.uiArchiveDownload), findsOneWidget);
+    expect(repo.calls.where((call) => call.$1 == 'file'), isEmpty);
+  });
+
+  testWidgets('büyük PDF indirilmeden önizleme sınırı gösterilir', (
+    tester,
+  ) async {
+    final repo = FakeArchiveRepository()
+      ..pages = {
+        null: PageSlice(items: [archiveFile('big', size: 11 * 1024 * 1024)]),
+      };
+    await _open(tester, repo: repo);
+    await _tap(tester, find.text(_l.uiArchiveTabFiles));
+    await _tap(tester, find.text('big.pdf'));
+    expect(find.text(_l.uiArchivePdfTooLarge), findsOneWidget);
+    expect(find.text(_l.uiArchiveDownload), findsOneWidget);
+    expect(repo.calls.where((call) => call.$1 == 'file'), isEmpty);
+  });
+
   testWidgets('önizleme: indir; yükleyenin kendi dosyasında sil', (
     tester,
   ) async {
-    final repo = FakeArchiveRepository();
+    final repo = FakeArchiveRepository()
+      ..pages = {
+        null: PageSlice(
+          items: [
+            archiveFile('f1', type: 'application/octet-stream'),
+            archiveFile(
+              'f2',
+              type: 'application/octet-stream',
+              tag: RecordTag.sonuc,
+              uploader: 'acc-9',
+            ),
+          ],
+        ),
+      };
     final sink = RecordingSink();
     await _open(tester, repo: repo, sink: sink);
     await _tap(tester, find.text(_l.uiArchiveTabFiles));

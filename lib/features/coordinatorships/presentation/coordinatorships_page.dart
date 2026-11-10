@@ -9,6 +9,7 @@ import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
 import '../../../core/ui/state/nz_async_view.dart';
+import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
@@ -39,6 +40,14 @@ class CoordinatorshipsPage extends ConsumerWidget {
       showCoordinatorshipsShortcuts(context, ref);
     });
     final list = ref.watch(coordinatorshipListProvider);
+    final sort = ref.watch(coordinatorshipsControllerProvider);
+    final descending = ref.watch(coordinatorshipSortDescendingProvider);
+    const sorts = [
+      CoordinatorshipSort.tasks,
+      CoordinatorshipSort.members,
+      CoordinatorshipSort.progress,
+      CoordinatorshipSort.late,
+    ];
     final nav = context.appNav;
     // Tablette açık kayıt yokken liste tam genişliktir; kartlar yatayda uzar.
     return NzPage.feed(
@@ -63,6 +72,29 @@ class CoordinatorshipsPage extends ConsumerWidget {
                 subtitle: context.l10n.coordListSubtitle(items),
               ),
               const Gap(NizamioSpacing.space5),
+              Align(
+                alignment: Alignment.centerRight,
+                child: NzSplitButton(
+                  label: context.l10n.coordSortLabel(sort),
+                  semanticLabel:
+                      '${context.l10n.uiHomeSortChange}: ${context.l10n.coordSortLabel(sort)}',
+                  onPressed: () {
+                    final next =
+                        sorts[(sorts.indexOf(sort) + 1) % sorts.length];
+                    ref
+                        .read(coordinatorshipsControllerProvider.notifier)
+                        .sortBy(next);
+                  },
+                  icon: NzIcons.chevronDown,
+                  iconTurns: descending ? 0 : 0.5,
+                  iconSemanticLabel:
+                      '${context.l10n.uiHomeSortFlip}: ${descending ? context.l10n.uiHomeSortDescending : context.l10n.uiHomeSortAscending}',
+                  onIconPressed: ref
+                      .read(coordinatorshipSortDescendingProvider.notifier)
+                      .flip,
+                ),
+              ),
+              const Gap(NizamioSpacing.space2),
               Semantics(
                 container: true,
                 label: context.l10n.uiCoordListLabel,

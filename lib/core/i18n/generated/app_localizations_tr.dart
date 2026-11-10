@@ -1142,6 +1142,21 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveEmptyFiles => 'Bu filtreyle eşleşen dosya yok.';
 
   @override
+  String get uiArchivePdfPreviewError =>
+      'PDF önizlenemedi. Dosya bozuk veya parola korumalı olabilir.';
+
+  @override
+  String get uiArchivePdfTooLarge =>
+      'Bu PDF önizleme için çok büyük. İndirerek açabilirsiniz.';
+
+  @override
+  String get uiArchiveImagePreviewError => 'Görsel önizlenemedi.';
+
+  @override
+  String get uiArchiveImageTooLarge =>
+      'Bu görsel önizleme için çok büyük. İndirerek açabilirsiniz.';
+
+  @override
   String get uiArchivePreview => 'Dosya önizleme';
 
   @override
@@ -1410,13 +1425,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordListLabel => 'Koordinatörlük listesi';
 
   @override
+  String get uiCoordSortTasks => 'Görev sayısı';
+
+  @override
+  String get uiCoordSortMembers => 'Üye sayısı';
+
+  @override
   String get uiCoordSortName => 'Ada göre';
 
   @override
-  String get uiCoordSortLate => 'Gecikmeye göre';
+  String get uiCoordSortLate => 'Gecikme';
 
   @override
-  String get uiCoordSortProgress => 'İlerlemeye göre';
+  String get uiCoordSortProgress => 'Tamamlanma';
 
   @override
   String get uiCoordShortcuts => 'Koordinatörlük kısayolları';

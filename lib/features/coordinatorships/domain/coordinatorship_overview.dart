@@ -7,7 +7,7 @@ import 'department.dart' show Department, MemberStatus;
 
 /// Koordinatörlük listesinin sıralama ölçütü (prototip kısayol menüsü: ad / gecikme /
 /// ilerleme).
-enum CoordinatorshipSort { name, late, progress }
+enum CoordinatorshipSort { name, tasks, members, progress, late }
 
 /// Görev kataloğundan türetilmiş koordinatörlük özeti (liste kartı, ayrıntı özeti).
 @immutable
@@ -21,6 +21,7 @@ final class CoordinatorshipStats {
     required this.leads,
     required this.members,
     this.shortCode,
+    this.memberCount,
   });
 
   /// Anahtar: `department_id` (kullanıcıya gösterilmez; ekranda [shortCode]).
@@ -38,6 +39,10 @@ final class CoordinatorshipStats {
 
   /// Katalogdaki üye kişiler.
   final List<Person> members;
+
+  /// Sunucunun toplam üye sayısı; bilinmiyorsa katalogdaki kişiler kullanılır.
+  final int? memberCount;
+  int get totalMembers => memberCount ?? members.length;
 
   int get open => total - done;
   double get ratio => total == 0 ? 0 : done / total;
@@ -67,22 +72,22 @@ CoordinatorshipStats _stats(TaskCatalog catalog, CoordinatorshipRef c) {
 /// ilerleme yüksekten düşüğe (eşitlikte ad).
 List<CoordinatorshipStats> sortCoordinatorships(
   List<CoordinatorshipStats> list,
-  CoordinatorshipSort sort,
-) {
+  CoordinatorshipSort sort, {
+  bool? descending,
+}) {
   int byName(CoordinatorshipStats a, CoordinatorshipStats b) =>
       compareTurkish(a.name, b.name);
-  return [...list]..sort(
-    (a, b) => switch (sort) {
+  final reverse = descending ?? sort != CoordinatorshipSort.name;
+  return [...list]..sort((a, b) {
+    final comparison = switch (sort) {
       CoordinatorshipSort.name => byName(a, b),
-      CoordinatorshipSort.late => _or(b.late.compareTo(a.late), a, b, byName),
-      CoordinatorshipSort.progress => _or(
-        b.ratio.compareTo(a.ratio),
-        a,
-        b,
-        byName,
-      ),
-    },
-  );
+      CoordinatorshipSort.tasks => a.total.compareTo(b.total),
+      CoordinatorshipSort.members => a.totalMembers.compareTo(b.totalMembers),
+      CoordinatorshipSort.late => a.late.compareTo(b.late),
+      CoordinatorshipSort.progress => a.ratio.compareTo(b.ratio),
+    };
+    return _or(reverse ? -comparison : comparison, a, b, byName);
+  });
 }
 
 int _or<T>(int d, T a, T b, int Function(T, T) tie) => d != 0 ? d : tie(a, b);

@@ -133,7 +133,6 @@ class CoordinatorshipPage extends ConsumerWidget {
                 ),
                 CoordinatorshipTab.archive => CoordArchiveTab(
                   code: code,
-                  folder: d.stats.shortCode ?? code,
                   catalog: catalog,
                 ),
                 CoordinatorshipTab.meetings => CoordMeetingsTab(code: code),

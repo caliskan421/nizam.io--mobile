@@ -1345,6 +1345,14 @@
   "@uiArchiveEmptyFiles": {
     "description": "ui.archive.empty_files"
   },
+  "uiArchivePdfPreviewError": "PDF önizlenemedi. Dosya bozuk veya parola korumalı olabilir.",
+  "@uiArchivePdfPreviewError": {"description": "Arşiv PDF önizlemesi başarısız olduğunda"},
+  "uiArchivePdfTooLarge": "Bu PDF önizleme için çok büyük. İndirerek açabilirsiniz.",
+  "@uiArchivePdfTooLarge": {"description": "PDF önizleme sınırını aştığında"},
+  "uiArchiveImagePreviewError": "Görsel önizlenemedi.",
+  "@uiArchiveImagePreviewError": {"description": "Arşiv görseli yüklenemediğinde"},
+  "uiArchiveImageTooLarge": "Bu görsel önizleme için çok büyük. İndirerek açabilirsiniz.",
+  "@uiArchiveImageTooLarge": {"description": "Arşiv görseli önizleme sınırını aştığında"},
   "uiArchivePreview": "Dosya önizleme",
   "@uiArchivePreview": {
     "description": "ui.archive.preview"
@@ -1701,15 +1709,19 @@
   "@uiCoordListLabel": {
     "description": "ui.coord.list_label"
   },
+  "uiCoordSortTasks": "Görev sayısı",
+  "@uiCoordSortTasks": {"description": "Koordinatörlük sıralama ölçütü"},
+  "uiCoordSortMembers": "Üye sayısı",
+  "@uiCoordSortMembers": {"description": "Koordinatörlük sıralama ölçütü"},
   "uiCoordSortName": "Ada göre",
   "@uiCoordSortName": {
     "description": "ui.coord.sort_name"
   },
-  "uiCoordSortLate": "Gecikmeye göre",
+  "uiCoordSortLate": "Gecikme",
   "@uiCoordSortLate": {
     "description": "ui.coord.sort_late"
   },
-  "uiCoordSortProgress": "İlerlemeye göre",
+  "uiCoordSortProgress": "Tamamlanma",
   "@uiCoordSortProgress": {
     "description": "ui.coord.sort_progress"
   },

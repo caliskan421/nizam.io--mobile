@@ -105,8 +105,20 @@ class GoRouterAppNav implements NzAppNav {
 
   @override
   void openMenu(BuildContext context) {
-    final dashboard = _ref.read(homeDashboardControllerProvider).value;
-    final program = _ref.read(currentProgramControllerProvider).value;
+    final dashboard = _ref
+        .read(homeDashboardControllerProvider.notifier)
+        .visible
+        .value;
+    final unread = _ref.read(homeUnreadProvider);
+    final unreadCount = unread.isLoading || unread.hasError
+        ? null
+        : unread.value;
+    final selection = _ref.read(scopeStateProvider);
+    final programState = _ref.read(currentProgramControllerProvider);
+    final currentProgram = programState.isLoading ? null : programState.value;
+    final program = currentProgram?.id == selection.programId
+        ? currentProgram
+        : null;
     final brand = displayBrand(_ref.read(flavorProvider));
     final l = context.l10n;
     final location = _location;
@@ -133,11 +145,25 @@ class GoRouterAppNav implements NzAppNav {
       greetingName: dashboard?.greetingName ?? '',
       greetingRole: dashboard?.greetingRole,
       greetingEmail: dashboard?.greetingEmail,
-      programName: program?.name ?? dashboard?.demoProgramName,
-      programYear: program?.year ?? dashboard?.demoProgramYear,
+      programName:
+          program?.name ??
+          (selection.hasProgram ? null : dashboard?.demoProgramName),
+      programShortName: program?.shortName,
+      programColor: program?.color,
+      programYear:
+          program?.year ??
+          (selection.hasProgram ? null : dashboard?.demoProgramYear),
       version: brand.version,
       productName: brand.name,
-      counts: dashboard?.counts,
+      counts: dashboard == null
+          ? null
+          : ModuleCounts(
+              lateTasks: dashboard.counts.lateTasks,
+              tasksAwaitingApproval: dashboard.counts.tasksAwaitingApproval,
+              unreadMessages: dashboard.greetingRole == TeamRole.admin
+                  ? unreadCount
+                  : dashboard.counts.unreadMessages,
+            ),
       onProfile: openProfile,
       onChangeScope: () =>
           _ref.read(scopeSelectionControllerProvider.notifier).clear(),

@@ -193,9 +193,44 @@ Map<String, Object> _bodies({bool admin = true}) => {
 };
 
 void main() {
-  test('beş uç okunur, tarih talebi yalnız bekleyenler', () async {
+  test(
+    'yardımcı uç hatası temel özeti bozmaz ve tekrar temel raporu çağırmaz',
+    () async {
+      final adapter = _Adapter(
+        {
+          ..._bodies(),
+          '/v1/me/chat-unread': {
+            'code': 'platform.internal',
+            'message': 'x',
+            'request_id': 'r',
+          },
+        },
+        statuses: {'/v1/me/chat-unread': 500},
+      );
+      final repo = _repo(adapter);
+      expect((await repo.load()).tasks.total, 10);
+      await expectLater(repo.loadUnread(), throwsA(isA<ApiError>()));
+      await expectLater(repo.loadUnread(), throwsA(isA<ApiError>()));
+      expect(
+        adapter.seen.where((r) => r.path == '/v1/reports/dashboard'),
+        hasLength(1),
+      );
+      expect(
+        adapter.seen.where((r) => r.path == '/v1/me/chat-unread'),
+        hasLength(2),
+      );
+    },
+  );
+  test('temel özet iki uçtan, yardımcılar ayrı okunur', () async {
     final adapter = _Adapter(_bodies());
-    await _repo(adapter).load();
+    final repo = _repo(adapter);
+    await repo.load();
+    expect(adapter.seen.map((o) => o.uri.path).toSet(), {
+      '/v1/me',
+      '/v1/reports/dashboard',
+    });
+    await repo.loadPending();
+    await repo.loadUnread();
     expect(adapter.seen.map((o) => o.uri.path).toSet(), _bodies().keys.toSet());
     final dcr = adapter.seen.singleWhere(
       (o) => o.uri.path == '/v1/date-change-requests',
@@ -213,13 +248,13 @@ void main() {
     expect(d.tasks.total, 10);
     expect(d.tasks.done, 4);
     expect(d.tasks.inProgress, 3);
-    expect(d.tasks.inProgressOnTime, 2, reason: 'devam eden ve gecikmemiş');
+    expect(d.tasks.inProgressOnTime, isNull);
     expect(d.tasks.late, 2);
     expect(d.tasks.awaitingApproval, 1);
     expect(d.team!.users, 9);
     expect(d.coordinatorships.single.code, 'd1');
     expect(d.coordinatorships.single.leads, ['Ayşe Kaya']);
-    expect(d.counts.unreadMessages, 5);
+    expect(d.counts.unreadMessages, isNull);
     expect(d.counts.lateTasks, 2);
     expect(d.counts.tasksAwaitingApproval, 1);
   });
@@ -227,10 +262,16 @@ void main() {
   test(
     'okunmamış rozeti seçili programa iner; satırı olmayan program 0',
     () async {
-      final other = await _repo(_Adapter(_bodies()), program: 'prog-2').load();
-      expect(other.counts.unreadMessages, 2);
-      final none = await _repo(_Adapter(_bodies()), program: 'prog-9').load();
-      expect(none.counts.unreadMessages, 0);
+      final other = await _repo(
+        _Adapter(_bodies()),
+        program: 'prog-2',
+      ).loadUnread();
+      expect(other, 2);
+      final none = await _repo(
+        _Adapter(_bodies()),
+        program: 'prog-9',
+      ).loadUnread();
+      expect(none, 0);
     },
   );
 
@@ -242,9 +283,14 @@ void main() {
   test(
     'bekleyen işler: tarih talepleri (görev adıyla), sonra onaylar',
     () async {
-      final d = await _repo(_Adapter(_bodies())).load();
-      expect(d.pending, hasLength(3), reason: 'listede olmayan görev atlanır');
-      final [shift, startOnly, approval] = d.pending;
+      final pending = await _repo(_Adapter(_bodies())).loadPending();
+      expect(
+        pending.items,
+        hasLength(3),
+        reason: 'listede olmayan görev atlanır',
+      );
+      expect(pending.inProgressOnTime, 2);
+      final [shift, startOnly, approval] = pending.items;
       expect(shift.taskCode, 'w5');
       expect(shift.title, 'Hidrofor');
       expect(shift.label, 'Altyapı', reason: 'kimlik yerine departman adı');
@@ -270,6 +316,9 @@ void main() {
     );
     final d = await _repo(adapter).load();
     expect(d.tasks.inProgressOnTime, isNull);
+    final pending = await _repo(adapter).loadPending();
+    expect(pending.truncated, isTrue);
+    expect(pending.inProgressOnTime, isNull);
   });
 
   test('pano yetkisi yoksa sunucu hatası fırlar', () async {

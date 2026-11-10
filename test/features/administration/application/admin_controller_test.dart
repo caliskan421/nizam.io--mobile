@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/domain/page_slice.dart';
 import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/administration/application/admin_controller.dart';
 import 'package:nizamio/features/administration/domain/organization_admin.dart';
 import 'package:nizamio/features/administration/domain/organization_admin_repository.dart';
@@ -14,13 +15,23 @@ import '../../connected_module_support.dart';
 
 class _Organization implements OrganizationAdminRepository {
   @override
-  Future<PageSlice<KnownUser>> listUsers({
+  Future<UserDirectoryPage> listUsers({
     PageRequest page = const PageRequest(),
     dynamic role,
+    bool companyAdminOnly = false,
+    String? programId,
+    String? departmentId,
     String? search,
     dynamic sortBy,
     dynamic sortOrder,
-  }) async => PageSlice(
+  }) async => UserDirectoryPage(
+    total: 2,
+    roleCounts: const UserRoleCounts(
+      all: 2,
+      admins: 1,
+      coordinators: 0,
+      members: 0,
+    ),
     items: [
       KnownUser(
         accountId: page.cursor ?? 'first',
@@ -38,16 +49,39 @@ class _QueryOrganization extends _Organization {
   _QueryOrganization(this.load);
   final Future<PageSlice<KnownUser>> Function(PageRequest, String?) load;
   final requests = <({String? cursor, String? search})>[];
+  int profileReads = 0;
   @override
-  Future<PageSlice<KnownUser>> listUsers({
+  Future<KnownUser> readUser(String accountId) async {
+    profileReads++;
+    final page = await load(const PageRequest(), null);
+    return page.items.firstWhere((u) => u.accountId == accountId);
+  }
+
+  @override
+  Future<UserDirectoryPage> listUsers({
     PageRequest page = const PageRequest(),
     dynamic role,
+    bool companyAdminOnly = false,
+    String? programId,
+    String? departmentId,
     String? search,
     dynamic sortBy,
     dynamic sortOrder,
-  }) {
+  }) async {
     requests.add((cursor: page.cursor, search: search));
-    return load(page, search);
+    final result = await load(page, search);
+    return UserDirectoryPage(
+      items: result.items,
+      nextCursor: result.nextCursor,
+      truncated: result.truncated,
+      total: result.items.length,
+      roleCounts: UserRoleCounts(
+        all: result.items.length,
+        admins: 0,
+        coordinators: 0,
+        members: 0,
+      ),
+    );
   }
 }
 
@@ -56,7 +90,32 @@ class _Program implements ProgramAdminRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class _DelayedProfile extends _Organization {
+  final started = Completer<void>();
+  final response = Completer<KnownUser>();
+  @override
+  Future<KnownUser> readUser(String accountId) {
+    started.complete();
+    return response.future;
+  }
+}
+
 void main() {
+  test('kapsam değişince gecikmiş readUser yanıtı uygulanmaz', () async {
+    final repo = _DelayedProfile();
+    final container = moduleContainer(
+      overrides: [organizationAdminRepositoryProvider.overrideWithValue(repo)],
+    );
+    addTearDown(container.dispose);
+    container.listen(adminUserProfileProvider('u1'), (_, _) {});
+    final old = container.read(adminUserProfileProvider('u1').future);
+    await repo.started.future.timeout(const Duration(seconds: 5));
+    container.read(scopeControllerProvider).selectDepartment('other');
+    repo.response.complete(
+      KnownUser(accountId: 'u1', fullName: 'Eski', memberships: const []),
+    );
+    await expectLater(old, throwsA(isA<ApiError>()));
+  });
   test(
     'ilk liste hatası görünür kalır ve kullanıcı yenileyerek kurtarır',
     () async {
@@ -148,7 +207,7 @@ void main() {
     },
   );
 
-  test('profil görünen kullanıcıyı ek liste isteği atmadan kullanır', () async {
+  test('profil listeden bağımsız tek kullanıcı okur', () async {
     final repo = _QueryOrganization(
       (_, _) async => PageSlice(
         items: [
@@ -174,6 +233,7 @@ void main() {
       'Seçili',
     );
     expect(repo.requests.length, 1);
+    expect(repo.profileReads, 1);
   });
 
   test(
@@ -204,13 +264,13 @@ void main() {
         'Önceki',
       );
       name = 'Güncel';
-      await container.read(adminUsersProvider.notifier).refresh();
+      container.invalidate(adminUserProfileProvider('selected'));
       expect(
         (await container.read(adminUserProfileProvider('selected').future))
             ?.fullName,
         'Güncel',
       );
-      expect(repo.requests.length, 2);
+      expect(repo.profileReads, 2);
     },
   );
 

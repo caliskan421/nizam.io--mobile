@@ -13,6 +13,7 @@ import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
+import '../../../core/ui/widgets/lists/nz_list_tile.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../identity/identity.dart';
 import '../../tasks/tasks.dart';
@@ -133,6 +134,8 @@ class _Feed extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final d = dashboard;
+    final pending = ref.watch(homePendingProvider);
+    final unread = ref.watch(homeUnreadProvider);
     final nav = context.appNav;
     // Tarih satırı görev kataloğunun "bugün"üdür. Katalog yokken cihaz saati.
     final now =
@@ -172,11 +175,50 @@ class _Feed extends ConsumerWidget {
       textAlign: TextAlign.center,
       style: context.text.caption.copyWith(color: context.colors.textMuted),
     );
+    final extras = d.greetingRole != TeamRole.admin
+        ? const SizedBox.shrink()
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Gap(NizamioSpacing.gapXl),
+              Text(context.l10n.uiHomePendingHeading),
+              HomePendingSection(
+                value: pending,
+                onRetry: () => ref.invalidate(homePendingProvider),
+                onOpen: nav.openTask,
+              ),
+              if (unread.isLoading)
+                Text(context.l10n.uiHomeUnreadLoading)
+              else if (unread.hasError)
+                TextButton(
+                  onPressed: () => ref.invalidate(homeUnreadProvider),
+                  child: Text(context.l10n.uiHomeUnreadErrorRetry),
+                )
+              else
+                Text(
+                  '${context.l10n.uiHomeUnreadChats}: ${unread.value ?? '—'}',
+                ),
+            ],
+          );
     return LayoutBuilder(
       builder: (context, box) {
         final wide = box.maxWidth >= homeWideMinWidth;
+        final counts = d.tasks;
+        final taskTotals =
+            d.greetingRole == TeamRole.admin &&
+                !pending.isLoading &&
+                !pending.hasError
+            ? TaskTotals(
+                total: counts.total,
+                done: counts.done,
+                inProgress: counts.inProgress,
+                late: counts.late,
+                awaitingApproval: counts.awaitingApproval,
+                inProgressOnTime: pending.value?.inProgressOnTime,
+              )
+            : counts;
         final kpis = HomeKpiGrid(
-          tasks: d.tasks,
+          tasks: taskTotals,
           columns: wide ? 4 : 2,
           onOpen: (view) => nav.openTasks(view: view),
         );
@@ -193,6 +235,7 @@ class _Feed extends ConsumerWidget {
               greeting,
               const Gap(NizamioSpacing.gapXl),
               kpis,
+              extras,
               ...truncated,
               const Gap(NizamioSpacing.gapXl),
               HomeQuickActions(onAction: onQuickAction),
@@ -215,6 +258,7 @@ class _Feed extends ConsumerWidget {
             greeting,
             const Gap(NizamioSpacing.gapXl),
             kpis,
+            extras,
             ...truncated,
             const Gap(NizamioSpacing.gapXl),
             Row(
@@ -258,6 +302,45 @@ class _Feed extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Bekleyen görev bölümü, temel rapordan bağımsız yüklenir ve yenilenir.
+class HomePendingSection extends StatelessWidget {
+  const HomePendingSection({
+    super.key,
+    required this.value,
+    required this.onRetry,
+    required this.onOpen,
+  });
+  final AsyncValue<PendingOverview?> value;
+  final VoidCallback onRetry;
+  final ValueChanged<String> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    if (value.isLoading) return const CircularProgressIndicator();
+    if (value.hasError) {
+      return NzErrorState.inline(
+        error: toApiError(value.error!),
+        onRetry: onRetry,
+      );
+    }
+    final pending = value.value;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if ((pending?.items.isEmpty ?? true) && pending?.truncated != true)
+          Text(context.l10n.uiHomePendingEmpty),
+        for (final item in pending?.items ?? const <PendingItem>[])
+          NzListTile.navigation(
+            title: item.title,
+            subtitle: context.l10n.pendingCaption(item),
+            onTap: () => onOpen(item.taskCode),
+          ),
+        if (pending?.truncated == true) Text(context.l10n.uiListsTruncated),
+      ],
     );
   }
 }

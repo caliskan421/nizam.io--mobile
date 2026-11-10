@@ -12,6 +12,10 @@ _CreateProgramRequest _$CreateProgramRequestFromJson(
   name: json['name'] as String,
   year: (json['year'] as num?)?.toInt(),
   description: json['description'] as String?,
+  shortName: json['short_name'] as String?,
+  color: json['color'] == null
+      ? null
+      : CreateProgramRequestColor.fromJson(json['color'] as String),
 );
 
 Map<String, dynamic> _$CreateProgramRequestToJson(
@@ -20,4 +24,19 @@ Map<String, dynamic> _$CreateProgramRequestToJson(
   'name': instance.name,
   'year': ?instance.year,
   'description': ?instance.description,
+  'short_name': ?instance.shortName,
+  'color': ?_$CreateProgramRequestColorEnumMap[instance.color],
+};
+
+const _$CreateProgramRequestColorEnumMap = {
+  CreateProgramRequestColor.violet: 'violet',
+  CreateProgramRequestColor.gold: 'gold',
+  CreateProgramRequestColor.blue: 'blue',
+  CreateProgramRequestColor.teal: 'teal',
+  CreateProgramRequestColor.green: 'green',
+  CreateProgramRequestColor.orange: 'orange',
+  CreateProgramRequestColor.red: 'red',
+  CreateProgramRequestColor.slate: 'slate',
+  CreateProgramRequestColor.valueNull: 'null',
+  CreateProgramRequestColor.$unknown: r'$unknown',
 };

@@ -10,6 +10,7 @@ import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../application/task_list_filter.dart';
 import '../../application/tasks_list_controller.dart';
 import '../../domain/task_catalog.dart';
 import '../task_texts.dart';
@@ -42,7 +43,12 @@ Future<void> showTasksFilterSheet(
       ),
       Consumer(
         builder: (context, ref, _) {
-          final n = ref.watch(tasksListResultOf(provider))?.tasks.length ?? 0;
+          final result = ref.watch(tasksListResultOf(provider));
+          final truncated =
+              ref.watch(taskListCatalogProvider).value?.truncated ?? false;
+          final n = result == null
+              ? '—'
+              : '${truncated ? '≥' : ''}${result.tasks.length}';
           return NzButton.primary(
             label: '$n ${l.uiTasksShowTasksTail}',
             expand: true,
@@ -68,6 +74,8 @@ class _FilterBody extends ConsumerWidget {
     final s = ref.watch(provider);
     final ctl = ref.read(provider.notifier);
     final options = ref.watch(taskFilterOptionsProvider);
+    final truncated =
+        ref.watch(taskListCatalogProvider).value?.truncated ?? false;
     if (options == null) return const SizedBox.shrink();
 
     Widget group(
@@ -150,6 +158,7 @@ class _FilterBody extends ConsumerWidget {
               TaskCheckRow(
                 label: p.name,
                 count: n,
+                countLowerBound: truncated,
                 square: true,
                 selected: s.filter.people.contains(p.id),
                 leading: NzAvatar.initials(
@@ -171,6 +180,7 @@ class _FilterBody extends ConsumerWidget {
                 TaskCheckRow(
                   label: co.name,
                   count: n,
+                  countLowerBound: truncated,
                   square: true,
                   selected: s.filter.coordinatorships.contains(co.code),
                   onTap: () => ctl.toggleCoordinatorship(co.code),
@@ -186,6 +196,7 @@ class _FilterBody extends ConsumerWidget {
               TaskCheckRow(
                 label: l.priorityLabel(p),
                 count: options.priorities[p] ?? 0,
+                countLowerBound: truncated,
                 square: true,
                 selected: s.filter.priorities.contains(p),
                 leading: NzPriorityBars(level: priorityLevel(p)),

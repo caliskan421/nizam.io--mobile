@@ -7,8 +7,8 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/theme/nz_motion.dart';
 import '../../../core/ui/widgets/buttons/nz_button.dart';
 import '../../../core/ui/widgets/nz_size.dart';
-import '../domain/user_account_draft.dart';
 import '../application/user_account_draft_controller.dart';
+import '../domain/user_account_draft.dart';
 
 class AdminUserAccountDockSlot extends ConsumerWidget {
   const AdminUserAccountDockSlot({
@@ -58,7 +58,11 @@ class AdminUserAccountDockSlot extends ConsumerWidget {
               onDiscard: ref.read(provider.notifier).discard,
               onSave: onSave,
             )
-          : const SizedBox(key: ValueKey('empty-dock'), height: 0),
+          : const Row(
+              key: ValueKey('empty-dock'),
+              mainAxisSize: MainAxisSize.min,
+              children: [Gap(0)],
+            ),
     );
   }
 }

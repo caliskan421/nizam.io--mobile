@@ -22,6 +22,7 @@ import 'package:nizamio/features/administration/domain/admin_user_tasks.dart';
 import 'package:nizamio/features/administration/domain/organization_admin.dart';
 import 'package:nizamio/features/administration/domain/organization_admin_repository.dart';
 import 'package:nizamio/features/administration/presentation/admin_user_profile_page.dart';
+import 'package:nizamio/features/scope/scope.dart' show DepartmentRole;
 import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../core/ui/widgets/feedback/feedback_test_support.dart';
@@ -31,56 +32,129 @@ import 'router_test_support.dart' show locationOf, settle;
 
 class _Users implements OrganizationAdminRepository {
   @override
-  Future<PageSlice<KnownUser>> listUsers({
+  Future<UserDirectoryPage> listUsers({
     PageRequest page = const PageRequest(),
     dynamic role,
+    bool companyAdminOnly = false,
+    String? programId,
+    String? departmentId,
     String? search,
     dynamic sortBy,
     dynamic sortOrder,
-  }) async => search != null && search.isNotEmpty
-      ? PageSlice(
-          items: [
-            KnownUser(
-              accountId: 'person-1',
-              fullName: 'Deniz Örnek',
-              memberships: const ['program:department:koordinator'],
-            ),
-          ],
-        )
-      : page.cursor == null
-      ? PageSlice(
-          items: [
-            KnownUser(
-              accountId: 'person-1',
-              fullName: 'Deniz Örnek',
-              memberships: const ['program:department:koordinator'],
-            ),
-            KnownUser(
-              accountId: 'person-2',
-              fullName: 'Mina Güneş Uzunsoy Çınar Örnekçi',
-              memberships: const [
-                'program:department:uye',
-                'program:design:koordinator',
-                'program:events:uye',
-              ],
-            ),
-            KnownUser(
-              accountId: 'person-3',
-              fullName: 'Arda Demir',
-              memberships: const [],
-            ),
-          ],
-          nextCursor: 'page-2',
-        )
-      : PageSlice(
-          items: [
-            KnownUser(
-              accountId: 'person-4',
-              fullName: 'Ekin Kaya',
-              memberships: const ['program:department:uye'],
-            ),
-          ],
-        );
+  }) async {
+    final PageSlice<KnownUser> slice = search != null && search.isNotEmpty
+        ? PageSlice(
+            items: [
+              KnownUser(
+                accountId: 'person-1',
+                fullName: 'Deniz Örnek',
+                memberships: const ['program:department:koordinator'],
+                teams: const [
+                  UserMembership(
+                    programId: 'program',
+                    departmentId: 'department',
+                    role: DepartmentRole.coordinator,
+                  ),
+                ],
+              ),
+            ],
+          )
+        : page.cursor == null
+        ? PageSlice(
+            items: [
+              KnownUser(
+                accountId: 'person-1',
+                fullName: 'Deniz Örnek',
+                memberships: const ['program:department:koordinator'],
+                teams: const [
+                  UserMembership(
+                    programId: 'program',
+                    departmentId: 'department',
+                    role: DepartmentRole.coordinator,
+                  ),
+                ],
+              ),
+              KnownUser(
+                accountId: 'person-2',
+                fullName: 'Mina Güneş Uzunsoy Çınar Örnekçi',
+                memberships: const [
+                  'program:department:uye',
+                  'program:design:koordinator',
+                  'program:events:uye',
+                ],
+                teams: const [
+                  UserMembership(
+                    programId: 'program',
+                    departmentId: 'department',
+                    role: DepartmentRole.member,
+                  ),
+                  UserMembership(
+                    programId: 'program',
+                    departmentId: 'design',
+                    role: DepartmentRole.coordinator,
+                  ),
+                  UserMembership(
+                    programId: 'program',
+                    departmentId: 'events',
+                    role: DepartmentRole.member,
+                  ),
+                ],
+              ),
+              KnownUser(
+                accountId: 'person-3',
+                fullName: 'Arda Demir',
+                memberships: const [],
+              ),
+            ],
+            nextCursor: 'page-2',
+          )
+        : PageSlice(
+            items: [
+              KnownUser(
+                accountId: 'person-4',
+                fullName: 'Ekin Kaya',
+                memberships: const ['program:department:uye'],
+                teams: const [
+                  UserMembership(
+                    programId: 'program',
+                    departmentId: 'department',
+                    role: DepartmentRole.member,
+                  ),
+                ],
+              ),
+            ],
+          );
+    return UserDirectoryPage(
+      items: slice.items,
+      nextCursor: slice.nextCursor,
+      total: search != null && search.isNotEmpty ? 1 : 4,
+      roleCounts: const UserRoleCounts(
+        all: 4,
+        admins: 0,
+        coordinators: 2,
+        members: 2,
+      ),
+    );
+  }
+
+  @override
+  Future<KnownUser> readUser(String accountId) async {
+    final first = await listUsers();
+    final second = await listUsers(page: const PageRequest(cursor: 'page-2'));
+    final user = [
+      ...first.items,
+      ...second.items,
+    ].firstWhere((u) => u.accountId == accountId);
+    return KnownUser(
+      accountId: user.accountId,
+      fullName: user.fullName,
+      memberships: user.memberships,
+      teams: user.teams,
+      email: 'deniz@example.test',
+      accountStatus: AccountStatus.disabled,
+      loginLocked: true,
+    );
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -191,6 +265,8 @@ void main() {
         File('/tmp/nizam-users-list-${size.width.toInt()}.png')
             .writeAsBytesSync(await hostPng(tester));
       }
+      await tester.tap(find.bySemanticsLabel('Kullanıcı ara'));
+      await settle(tester);
       await tester.enterText(find.byType(TextField).first, 'Deniz');
       await tester.pump(const Duration(seconds: 1));
       await settle(tester);
@@ -204,8 +280,8 @@ void main() {
           .read(adminUsersProvider.notifier)
           .visible
           .requireValue;
-      expect(find.text('3+ kullanıcı'), findsOneWidget);
-      expect(find.text('3+ kişi'), findsWidgets);
+      expect(find.text('4 kullanıcı (geçerli filtre)'), findsOneWidget);
+      expect(find.text('4 kişi'), findsWidgets);
       expect(before.items.length, 3);
       expect(before.nextCursor, 'page-2');
       await tester.ensureVisible(find.text('Daha fazla göster'));
@@ -215,7 +291,7 @@ void main() {
           .read(adminUsersProvider.notifier)
           .visible
           .requireValue;
-      expect(find.text('4 kullanıcı'), findsOneWidget);
+      expect(find.text('4 kullanıcı (geçerli filtre)'), findsOneWidget);
       expect(find.text('4 kişi'), findsWidgets);
       expect(after.items.length, 4);
       expect(after.nextCursor, isNull);
@@ -247,13 +323,22 @@ void main() {
       await tester.pump();
       await settle(tester);
       expect(tester.widget<Opacity>(collapsed).opacity, greaterThan(0));
-      await tester.ensureVisible(find.text('Takvim').last);
+      await Scrollable.ensureVisible(
+        tester.element(find.text('Takvim').last),
+        alignment: 0.5,
+      );
+      await tester.pump();
       await tester.tap(find.text('Takvim').last);
       await settle(tester);
       expect(
         container.read(adminUserTaskPanelProvider('person-1')).view,
         UserTaskView.calendar,
       );
+      await Scrollable.ensureVisible(
+        tester.element(find.text('Liste').last),
+        alignment: 0.5,
+      );
+      await tester.pump();
       await tester.tap(find.text('Liste').last);
       await settle(tester);
       expect(
@@ -277,10 +362,9 @@ void main() {
       await tester.ensureVisible(find.text('Hesap').last);
       await tester.tap(find.text('Hesap').last, warnIfMissed: true);
       await settle(tester);
-      expect(
-        find.textContaining('E-posta, giriş kilidi ve son giriş bilgisi'),
-        findsOneWidget,
-      );
+      expect(find.text('deniz@example.test'), findsWidgets);
+      await tester.ensureVisible(find.text('Hesabı aç'));
+      expect(find.text('Hesabı aç'), findsOneWidget);
       expect(tester.takeException(), isNull);
       if (const bool.fromEnvironment('NIZAMIO_TABLET_HOST_SHOTS')) {
         File('/tmp/nizam-users-${size.width.toInt()}.png')

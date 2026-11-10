@@ -20,6 +20,9 @@ abstract class DateChangeRequestCreate with _$DateChangeRequestCreate {
     @JsonKey(name: 'new_end_on')
     required DateTime newEndOn,
     String? reason,
+
+    /// İsteğe bağlı: istemcinin gördüğü tarih sürümü (`dates_revision`; WORK-K89). Verilirse görev kilidi altında okunan güncel sürümle karşılaştırılır; farklıysa 409 `work.edit_conflict` (`fields[0].field = expected_dates_revision`), talep açılmaz. Pozitif değilse 422 `work.input_invalid` (alan kodu `work.revision_invalid`).
+    @JsonKey(name: 'expected_dates_revision') int? expectedDatesRevision,
   }) = _DateChangeRequestCreate;
 
   factory DateChangeRequestCreate.fromJson(Map<String, Object?> json) =>

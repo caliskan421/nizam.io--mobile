@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/domain/page_slice.dart';
 import 'package:nizamio/core/errors/api_error.dart';
@@ -6,55 +9,209 @@ import 'package:nizamio/features/administration/application/admin_controller.dar
 import 'package:nizamio/features/administration/domain/admin_user_directory.dart';
 import 'package:nizamio/features/administration/domain/organization_admin.dart';
 import 'package:nizamio/features/administration/domain/organization_admin_repository.dart';
-import 'package:nizamio/features/messages/messages.dart';
 import 'package:nizamio/features/scope/scope.dart';
 
 import '../../connected_module_support.dart';
 
-KnownUser _user(String id, List<String> memberships, {String? name}) =>
-    KnownUser(accountId: id, fullName: name ?? id, memberships: memberships);
-
 class _Repository implements OrganizationAdminRepository {
-  final calls = <({String? search, DepartmentRole? role, String? cursor})>[];
-  List<KnownUser> users = [
-    _user('me', ['program:department:koordinator', 'other:else:uye']),
-    _user('member', ['program:department:uye']),
-    _user('other', ['other:department:uye']),
-  ];
-  bool partial = false;
+  final calls =
+      <
+        ({
+          String? search,
+          DepartmentRole? role,
+          bool admin,
+          String? program,
+          String? department,
+          String? cursor,
+        })
+      >[];
+  Future<UserDirectoryPage> Function(String?, String?)? load;
   ApiError? failure;
   @override
-  Future<PageSlice<KnownUser>> listUsers({
+  Future<UserDirectoryPage> listUsers({
     PageRequest page = const PageRequest(),
     DepartmentRole? role,
+    bool companyAdminOnly = false,
+    String? programId,
+    String? departmentId,
     String? search,
     UserSortField? sortBy,
     SortDirection? sortOrder,
   }) async {
-    calls.add((search: search, role: role, cursor: page.cursor));
+    calls.add((
+      search: search,
+      role: role,
+      admin: companyAdminOnly,
+      program: programId,
+      department: departmentId,
+      cursor: page.cursor,
+    ));
     if (failure case final error?) throw error;
-    final items = users
-        .where(
-          (u) =>
-              (search == null || u.fullName.contains(search)) &&
-              (role == null || u.teams.any((m) => m.role == role)),
-        )
-        .toList();
-    if (!partial) return PageSlice(items: items);
-    return PageSlice(
-      items: page.cursor == null
-          ? items.take(1).toList()
-          : items.skip(1).toList(),
-      nextCursor: page.cursor == null ? 'next' : null,
-    );
+    return load?.call(search, page.cursor) ?? _page();
   }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+UserDirectoryPage _page({
+  List<KnownUser> items = const [],
+  String? cursor,
+  int total = 1,
+}) => UserDirectoryPage(
+  items: items,
+  nextCursor: cursor,
+  total: total,
+  roleCounts: const UserRoleCounts(
+    all: 3,
+    admins: 1,
+    coordinators: 2,
+    members: 2,
+  ),
+);
+
 void main() {
-  test('liste yenilemesindeki yetki kaybı önceki satırları ve dizin cacheini kaldırır', () async {
+  test(
+    'şirket geneli ve örtüşen rol sayıları filtreli totalden ayrıdır',
+    () async {
+      final repo = _Repository();
+      final c = moduleContainer(
+        overrides: [
+          organizationAdminRepositoryProvider.overrideWithValue(repo),
+        ],
+      );
+      addTearDown(c.dispose);
+      c.listen(adminUsersProvider, (_, _) {});
+      c.listen(adminUsersSummaryProvider, (_, _) {});
+      await c.read(adminUsersProvider.future);
+      expect(repo.calls, hasLength(1));
+      expect(repo.calls.single.program, isNull);
+      final q = c.read(adminUserQueryProvider);
+      c.read(adminUserQueryProvider.notifier).set((
+        search: '',
+        role: AdminUserRoleFilter.admin,
+        sort: q.sort,
+        direction: q.direction,
+      ));
+      await c.read(adminUsersProvider.future);
+      expect(repo.calls, hasLength(2));
+      expect(repo.calls.last.admin, isTrue);
+      final s = c.read(adminUsersSummaryProvider)!;
+      expect(
+        (
+          s.total.value,
+          s.all.value,
+          s.admins!.value,
+          s.coordinators.value,
+          s.members.value,
+        ),
+        (1, 3, 1, 2, 2),
+      );
+    },
+  );
+  test('departman seçimi program ile sunucuya gider', () async {
+    final repo = _Repository();
+    final c = moduleContainer(
+      overrides: [organizationAdminRepositoryProvider.overrideWithValue(repo)],
+    );
+    addTearDown(c.dispose);
+    c.listen(adminUsersProvider, (_, _) {});
+    await c.read(adminUsersProvider.future);
+    c.read(adminUserDepartmentsProvider.notifier).toggle('department');
+    await c.read(adminUsersProvider.future);
+    expect(repo.calls, hasLength(2));
+    expect(
+      (repo.calls.last.program, repo.calls.last.department),
+      ('program', 'department'),
+    );
+  });
+  test('boş sayfa dolu imleçle devam eder', () async {
+    final repo = _Repository()
+      ..load = (_, cursor) async => cursor == null
+          ? _page(cursor: 'next')
+          : _page(
+              items: [
+                KnownUser(
+                  accountId: 'u1',
+                  fullName: 'Ad',
+                  memberships: const [],
+                ),
+              ],
+            );
+    final c = moduleContainer(
+      overrides: [organizationAdminRepositoryProvider.overrideWithValue(repo)],
+    );
+    addTearDown(c.dispose);
+    c.listen(adminUsersProvider, (_, _) {});
+    expect((await c.read(adminUsersProvider.future)).items, isEmpty);
+    await c.read(adminUsersProvider.notifier).loadMore();
+    expect(repo.calls, hasLength(2));
+    expect(repo.calls.last.cursor, 'next');
+    expect(
+      c.read(adminUsersProvider).requireValue.items.single.accountId,
+      'u1',
+    );
+  });
+  test('gecikmiş eski sorgu sonucu yeni sorguya uygulanmaz', () async {
+    final old = Completer<UserDirectoryPage>();
+    final started = Completer<void>();
+    final repo = _Repository()
+      ..load = (search, _) {
+        if (search == null) {
+          started.complete();
+          return old.future;
+        }
+        return Future.value(
+          _page(
+            items: [
+              KnownUser(
+                accountId: 'new',
+                fullName: 'Yeni',
+                memberships: const [],
+              ),
+            ],
+          ),
+        );
+      };
+    final c = moduleContainer(
+      overrides: [organizationAdminRepositoryProvider.overrideWithValue(repo)],
+    );
+    addTearDown(c.dispose);
+    c.listen(adminUsersProvider, (_, _) {});
+    final first = c.read(adminUsersProvider.future);
+    await started.future.timeout(const Duration(seconds: 5));
+    final q = c.read(adminUserQueryProvider);
+    c.read(adminUserQueryProvider.notifier).set((
+      search: 'Yeni',
+      role: q.role,
+      sort: q.sort,
+      direction: q.direction,
+    ));
+    expect(
+      (await c.read(adminUsersProvider.future)).items.single.accountId,
+      'new',
+    );
+    old.complete(
+      _page(
+        items: [
+          KnownUser(accountId: 'old', fullName: 'Eski', memberships: const []),
+        ],
+      ),
+    );
+    await first;
+    expect(
+      c
+          .read(adminUsersProvider.notifier)
+          .visible
+          .requireValue
+          .items
+          .single
+          .accountId,
+      'new',
+    );
+    expect(repo.calls, hasLength(2));
+  });
+  test('yetki kaybı eski dizini gizler', () async {
     final repo = _Repository();
     final c = moduleContainer(
       overrides: [organizationAdminRepositoryProvider.overrideWithValue(repo)],
@@ -67,203 +224,7 @@ void main() {
       c.read(adminUsersProvider.notifier).refresh(),
       throwsA(isA<ApiError>()),
     );
-    final controller = c.read(adminUsersProvider.notifier);
-    expect(controller.visible.hasError, isTrue);
-    expect(controller.visible.hasValue, isFalse);
-    expect(controller.directory, isNull);
-    repo.failure = null;
-    repo.users = [_user('new-owner', [])];
-    c.invalidate(adminUsersProvider);
-    await c.read(adminUsersProvider.future);
-    expect(controller.visible.requireValue.items.single.accountId, 'new-owner');
-  });
-
-  test(
-    'kesik admin indeksi tam kullanıcı dizininde de yalnız alt sınır sayılır',
-    () async {
-      final repo = _Repository();
-      final c = moduleContainer(
-        overrides: [
-          organizationAdminRepositoryProvider.overrideWithValue(repo),
-          companyAdminIndexProvider.overrideWith(
-            (ref) async => CompanyAdminIndex(['me'], complete: false),
-          ),
-        ],
-      );
-      addTearDown(c.dispose);
-      c.listen(adminUsersProvider, (_, _) {});
-      c.listen(adminUsersSummaryProvider, (_, _) {});
-      await c.read(adminUsersProvider.future);
-      await c.read(companyAdminIndexProvider.future);
-      expect(c.read(adminUsersSummaryProvider)!.admins?.label, '1+');
-    },
-  );
-
-  test('tam dizin çoklu rolleri sayar, arama ve rol değişiminde yeniden çağrı yapmaz', () async {
-    final repo = _Repository();
-    final c = moduleContainer(
-      overrides: [
-        organizationAdminRepositoryProvider.overrideWithValue(repo),
-        companyAdminIndexProvider.overrideWith(
-          (ref) async => CompanyAdminIndex(['me'], complete: true),
-        ),
-      ],
-    );
-    addTearDown(c.dispose);
-    c.listen(adminUsersProvider, (_, _) {});
-    c.listen(adminUsersSummaryProvider, (_, _) {});
-    await c.read(adminUsersProvider.future);
-    await c.read(companyAdminIndexProvider.future);
-    final all = c.read(adminUsersSummaryProvider)!;
-    expect(all.total.label, '3');
-    expect(all.coordinators.value, 1);
-    expect(
-      all.members.value,
-      3,
-      reason: 'Koordinatör başka programda üye de olabilir',
-    );
-    expect(all.admins?.label, '1');
-    final q = c.read(adminUserQueryProvider);
-    c.read(adminUserQueryProvider.notifier).set((
-      search: 'EKİP',
-      role: AdminUserRoleFilter.member,
-      sort: q.sort,
-      direction: q.direction,
-    ));
-    final filtered = await c.read(adminUsersProvider.future);
-    expect(filtered.items.map((u) => u.accountId), ['me', 'member']);
-    expect(c.read(adminUsersSummaryProvider)!.all.label, '3');
-    expect(c.read(adminUsersSummaryProvider)!.members.value, 3);
-    expect(c.read(adminUsersSummaryProvider)!.matched?.label, '2');
-    expect(repo.calls, hasLength(1));
-    c.read(adminUserQueryProvider.notifier).set((
-      search: '',
-      role: AdminUserRoleFilter.admin,
-      sort: q.sort,
-      direction: q.direction,
-    ));
-    expect(
-      (await c.read(adminUsersProvider.future)).items.single.accountId,
-      'me',
-    );
-    expect(repo.calls, hasLength(1));
-  });
-
-  test(
-    'kısmi dizinde sunucu ad ve rol sorgusu ile devam imleci korunur',
-    () async {
-      final repo = _Repository()..partial = true;
-      final c = moduleContainer(
-        overrides: [
-          organizationAdminRepositoryProvider.overrideWithValue(repo),
-        ],
-      );
-      addTearDown(c.dispose);
-      c.listen(adminUsersProvider, (_, _) {});
-      await c.read(adminUsersProvider.future);
-      final q = c.read(adminUserQueryProvider);
-      c.read(adminUserQueryProvider.notifier).set((
-        search: 'member',
-        role: AdminUserRoleFilter.member,
-        sort: q.sort,
-        direction: q.direction,
-      ));
-      await c.read(adminUsersProvider.future);
-      expect(repo.calls.last, (
-        search: 'member',
-        role: DepartmentRole.member,
-        cursor: null,
-      ));
-      await c.read(adminUsersProvider.notifier).loadMore();
-      expect(repo.calls.last, (
-        search: 'member',
-        role: DepartmentRole.member,
-        cursor: 'next',
-      ));
-    },
-  );
-
-  test('kısmi departman-adı araması sonraki sayfadaki doğru program kişisini bulur', () async {
-    final repo = _Repository()..partial = true;
-    final c = moduleContainer(
-      overrides: [organizationAdminRepositoryProvider.overrideWithValue(repo)],
-    );
-    addTearDown(c.dispose);
-    c.listen(adminUsersProvider, (_, _) {});
-    await c.read(adminUsersProvider.future);
-    final q = c.read(adminUserQueryProvider);
-    c.read(adminUserQueryProvider.notifier).set((
-      search: 'Ekip',
-      role: AdminUserRoleFilter.all,
-      sort: q.sort,
-      direction: q.direction,
-    ));
-    await c.read(adminUsersProvider.future);
-    await c.read(adminUsersProvider.notifier).loadMore();
-    expect(
-      c.read(adminUsersProvider).requireValue.items.map((u) => u.accountId),
-      ['me', 'member'],
-    );
-    expect(repo.calls.every((call) => call.search == null), isTrue);
-  });
-
-  test(
-    'filtreli yenileme ve açık invalidate küresel kaynağı yeniler',
-    () async {
-      final repo = _Repository();
-      final c = moduleContainer(
-        overrides: [
-          organizationAdminRepositoryProvider.overrideWithValue(repo),
-        ],
-      );
-      addTearDown(c.dispose);
-      c.listen(adminUsersProvider, (_, _) {});
-      await c.read(adminUsersProvider.future);
-      final q = c.read(adminUserQueryProvider);
-      c.read(adminUserQueryProvider.notifier).set((
-        search: 'new',
-        role: q.role,
-        sort: q.sort,
-        direction: q.direction,
-      ));
-      await c.read(adminUsersProvider.future);
-      repo.users.add(_user('new', ['program:department:uye']));
-      await c.read(adminUsersProvider.notifier).refresh();
-      expect(
-        c.read(adminUsersProvider).requireValue.items.single.accountId,
-        'new',
-      );
-      expect(c.read(adminUsersProvider.notifier).directory!.items.length, 4);
-      repo.users.add(_user('newer', ['program:department:uye']));
-      c.invalidate(adminUsersProvider);
-      await c.read(adminUsersProvider.future);
-      expect(c.read(adminUsersProvider).requireValue.items, hasLength(2));
-    },
-  );
-
-  test('lookup hatası ana listeyi korur, kesik lookup kesin admin toplamı iddia etmez', () async {
-    final repo = _Repository()..partial = true;
-    final c = moduleContainer(
-      overrides: [
-        organizationAdminRepositoryProvider.overrideWithValue(repo),
-        companyAdminIndexProvider.overrideWith(
-          (ref) async => throw ApiError('client.timeout'),
-        ),
-      ],
-    );
-    addTearDown(c.dispose);
-    c.listen(adminUsersProvider, (_, _) {});
-    c.listen(adminUsersSummaryProvider, (_, _) {});
-    await c.read(adminUsersProvider.future);
-    await expectLater(
-      c.read(companyAdminIndexProvider.future),
-      throwsA(isA<ApiError>()),
-    );
-    expect(c.read(adminUsersSummaryProvider)!.admins, isNull);
-    expect(c.read(adminUsersSummaryProvider)!.total.label, '1+');
-    expect(
-      c.read(adminUsersProvider).requireValue.items.single.accountId,
-      'me',
-    );
+    expect(c.read(adminUsersProvider.notifier).visible.hasError, isTrue);
+    expect(c.read(adminUsersProvider.notifier).directory, isNull);
   });
 }

@@ -67,6 +67,9 @@ Map<String, Object?> _ganttTask(Map<String, Object?> w) => {
     k: w[k],
   'planned_end_on': w['end_on'],
   'completed_on': w['completed_on'] ?? '',
+  'pending_date_request': null,
+  'subtask_counts': w['subtask_counts'] ?? {'total': 0, 'done': 0},
+  'dates_revision': w['dates_revision'] ?? 1,
   'lateness': {
     for (final k in const [
       'is_overdue',

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/motion/page_content_entrance.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
@@ -154,7 +153,7 @@ List<Widget> adminUserTaskPanelChildren(
         ),
       ),
     );
-    for (final (i, task) in rows.indexed)
+    for (final (i, task) in rows.indexed) {
       result.add(
         NzEntrance(
           key: ValueKey(('user-task', task.code)),
@@ -174,6 +173,7 @@ List<Widget> adminUserTaskPanelChildren(
           ),
         ),
       );
+    }
   }
   return result;
 }

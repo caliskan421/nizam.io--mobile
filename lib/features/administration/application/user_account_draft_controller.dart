@@ -182,8 +182,9 @@ class UserAccountDraftController extends Notifier<UserAccountDraft?> {
         !initial.dirty ||
         initial.busy ||
         !initial.valid ||
-        ref.read(adminCommandProvider))
+        ref.read(adminCommandProvider)) {
       return AccountSaveResult.unchanged;
+    }
     final generation = _generation;
     final session = ref.read(sessionGenerationProvider);
     final scope = ref.read(scopeStateProvider);
@@ -339,8 +340,9 @@ class UserAccountDraftController extends Notifier<UserAccountDraft?> {
       if (current()) state = state!.copyWith(busy: false);
       return AccountSaveResult.cancelled;
     } on Object catch (e) {
-      if (current())
+      if (current()) {
         state = state!.copyWith(busy: false, error: () => toApiError(e));
+      }
       return AccountSaveResult.failed;
     }
   }

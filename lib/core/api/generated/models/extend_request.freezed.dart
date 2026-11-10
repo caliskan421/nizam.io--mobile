@@ -17,7 +17,8 @@ T _$identity<T>(T value) => value;
 mixin _$ExtendRequest {
 
 /// Ek gün sayısı, 1–90 (aksi 422 `work.input_invalid`).
- int get days;
+ int get days;/// İsteğe bağlı: istemcinin gördüğü tarih sürümü (`dates_revision`; WORK-K89). Verilirse kilit altındaki güncel sürümle karşılaştırılır; farklıysa 409 `work.edit_conflict` (`fields[0].field = expected_dates_revision`), uzatma uygulanmaz. Pozitif değilse 422 `work.input_invalid` (alan kodu `work.revision_invalid`). Uzatma göreli olduğundan ADR-0027'nin "istenen değer zaten güncelse 200" kuralı yoktur.
+@JsonKey(name: 'expected_dates_revision') int? get expectedDatesRevision;
 /// Create a copy of ExtendRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,20 +32,20 @@ $ExtendRequestCopyWith<ExtendRequest> get copyWith => _$ExtendRequestCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as ExtendRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExtendRequest&&(identical(other.days, _this.days) || other.days == _this.days));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExtendRequest&&(identical(other.days, _this.days) || other.days == _this.days)&&(identical(other.expectedDatesRevision, _this.expectedDatesRevision) || other.expectedDatesRevision == _this.expectedDatesRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ExtendRequest;
-  return Object.hash(runtimeType,_this.days);
+  return Object.hash(runtimeType,_this.days,_this.expectedDatesRevision);
 }
 
 @override
 String toString() {
   final _this = this as ExtendRequest;
-  return 'ExtendRequest(days: ${_this.days})';
+  return 'ExtendRequest(days: ${_this.days}, expectedDatesRevision: ${_this.expectedDatesRevision})';
 }
 
 
@@ -55,7 +56,7 @@ abstract mixin class $ExtendRequestCopyWith<$Res>  {
   factory $ExtendRequestCopyWith(ExtendRequest value, $Res Function(ExtendRequest) _then) = _$ExtendRequestCopyWithImpl;
 @useResult
 $Res call({
- int days
+ int days,@JsonKey(name: 'expected_dates_revision') int? expectedDatesRevision
 });
 
 
@@ -72,10 +73,11 @@ class _$ExtendRequestCopyWithImpl<$Res>
 
 /// Create a copy of ExtendRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? days = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? days = null,Object? expectedDatesRevision = freezed,}) {
   return _then(ExtendRequest(
 days: null == days ? _self.days : days // ignore: cast_nullable_to_non_nullable
-as int,
+as int,expectedDatesRevision: freezed == expectedDatesRevision ? _self.expectedDatesRevision : expectedDatesRevision // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -160,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int days)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int days, @JsonKey(name: 'expected_dates_revision')  int? expectedDatesRevision)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ExtendRequest() when $default != null:
-return $default(_that.days);case _:
+return $default(_that.days,_that.expectedDatesRevision);case _:
   return orElse();
 
 }
@@ -181,10 +183,10 @@ return $default(_that.days);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int days)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int days, @JsonKey(name: 'expected_dates_revision')  int? expectedDatesRevision)  $default,) {final _that = this;
 switch (_that) {
 case _ExtendRequest():
-return $default(_that.days);case _:
+return $default(_that.days,_that.expectedDatesRevision);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +203,10 @@ return $default(_that.days);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int days)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int days, @JsonKey(name: 'expected_dates_revision')  int? expectedDatesRevision)?  $default,) {final _that = this;
 switch (_that) {
 case _ExtendRequest() when $default != null:
-return $default(_that.days);case _:
+return $default(_that.days,_that.expectedDatesRevision);case _:
   return null;
 
 }
@@ -216,11 +218,13 @@ return $default(_that.days);case _:
 @JsonSerializable()
 
 class _ExtendRequest implements ExtendRequest {
-  const _ExtendRequest({required this.days});
+  const _ExtendRequest({required this.days, @JsonKey(name: 'expected_dates_revision') this.expectedDatesRevision});
   factory _ExtendRequest.fromJson(Map<String, dynamic> json) => _$ExtendRequestFromJson(json);
 
 /// Ek gün sayısı, 1–90 (aksi 422 `work.input_invalid`).
 @override final  int days;
+/// İsteğe bağlı: istemcinin gördüğü tarih sürümü (`dates_revision`; WORK-K89). Verilirse kilit altındaki güncel sürümle karşılaştırılır; farklıysa 409 `work.edit_conflict` (`fields[0].field = expected_dates_revision`), uzatma uygulanmaz. Pozitif değilse 422 `work.input_invalid` (alan kodu `work.revision_invalid`). Uzatma göreli olduğundan ADR-0027'nin "istenen değer zaten güncelse 200" kuralı yoktur.
+@override@JsonKey(name: 'expected_dates_revision') final  int? expectedDatesRevision;
 
 /// Create a copy of ExtendRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -235,18 +239,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ExtendRequest&&(identical(other.days, days) || other.days == days));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ExtendRequest&&(identical(other.days, days) || other.days == days)&&(identical(other.expectedDatesRevision, expectedDatesRevision) || other.expectedDatesRevision == expectedDatesRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,days);
+    return Object.hash(runtimeType,days,expectedDatesRevision);
 }
 
 @override
 String toString() {
-    return 'ExtendRequest(days: $days)';
+    return 'ExtendRequest(days: $days, expectedDatesRevision: $expectedDatesRevision)';
 }
 
 
@@ -257,7 +261,7 @@ abstract mixin class _$ExtendRequestCopyWith<$Res> implements $ExtendRequestCopy
   factory _$ExtendRequestCopyWith(_ExtendRequest value, $Res Function(_ExtendRequest) _then) = __$ExtendRequestCopyWithImpl;
 @override @useResult
 $Res call({
- int days
+ int days,@JsonKey(name: 'expected_dates_revision') int? expectedDatesRevision
 });
 
 
@@ -274,10 +278,11 @@ class __$ExtendRequestCopyWithImpl<$Res>
 
 /// Create a copy of ExtendRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? days = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? days = null,Object? expectedDatesRevision = freezed,}) {
   return _then(_ExtendRequest(
 days: null == days ? _self.days : days // ignore: cast_nullable_to_non_nullable
-as int,
+as int,expectedDatesRevision: freezed == expectedDatesRevision ? _self.expectedDatesRevision : expectedDatesRevision // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

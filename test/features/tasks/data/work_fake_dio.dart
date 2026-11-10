@@ -7,10 +7,11 @@ import 'package:nizamio/core/errors/api_error.dart';
 
 /// Tek yanıtlı sahte bağdaştırıcı; istekleri ve gövdelerini kaydeder.
 class FakeAdapter implements HttpClientAdapter {
-  FakeAdapter(this.body, [this.status = 200]);
+  FakeAdapter(this.body, [this.status = 200, this.headers = const {}]);
 
   final String body;
   final int status;
+  final Map<String, List<String>> headers;
   final List<RequestOptions> seen = [];
 
   RequestOptions get last => seen.single;
@@ -33,6 +34,7 @@ class FakeAdapter implements HttpClientAdapter {
       status,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
+        ...headers,
       },
     );
   }
@@ -42,8 +44,16 @@ class FakeAdapter implements HttpClientAdapter {
 }
 
 /// [body] yanıtını veren Dio ve bağdaştırıcı.
-(Dio, FakeAdapter) fakeDio(Object body, {int status = 200}) {
-  final adapter = FakeAdapter(body is String ? body : jsonEncode(body), status);
+(Dio, FakeAdapter) fakeDio(
+  Object body, {
+  int status = 200,
+  Map<String, List<String>> headers = const {},
+}) {
+  final adapter = FakeAdapter(
+    body is String ? body : jsonEncode(body),
+    status,
+    headers,
+  );
   return (
     Dio(BaseOptions(baseUrl: 'https://api.test'))..httpClientAdapter = adapter,
     adapter,

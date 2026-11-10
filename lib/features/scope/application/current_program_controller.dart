@@ -15,6 +15,7 @@ part 'current_program_controller.g.dart';
 class CurrentProgramController extends _$CurrentProgramController {
   @override
   Future<Program?> build() {
+    ref.watch(sessionGenerationProvider);
     final selection = ref.watch(scopeStateProvider);
     if (!selection.hasProgram) return Future.value();
     return ref.read(scopeServiceProvider).currentProgram();

@@ -177,7 +177,7 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
                   ),
                   const Gap(NizamioSpacing.space1 / 2),
                   Text(
-                    '${summary?.total.label ?? '—'} ${l.uiUsersCountTail}',
+                    '${summary?.total.label ?? '—'} ${l.uiUsersCountTail} (${l.uiUsersFilterScope})',
                     style: context.text.caption.copyWith(
                       color: context.colors.textMuted,
                     ),
@@ -233,7 +233,7 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
               controller: _search,
               focusNode: _searchFocus,
               label: l.uiUsersSearch,
-              hint: l.uiUsersSearchHint,
+              hint: l.uiUsersSearchNameEmail,
               onChanged: (text) {
                 _searchDelay?.cancel();
                 _searchDelay = Timer(_searchDelayDuration, () {
@@ -265,13 +265,6 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
                         .read(adminUserDepartmentsProvider.notifier)
                         .toggle(d.code),
                   ),
-              if (departments.contains(unassignedDepartmentFilter))
-                InputChip(
-                  label: Text(l.uiUsersUnassigned),
-                  onDeleted: () => ref
-                      .read(adminUserDepartmentsProvider.notifier)
-                      .toggle(unassignedDepartmentFilter),
-                ),
             ],
           ),
         ],
@@ -342,8 +335,7 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
               key: ValueKey(entry.value.accountId),
               builder: (context) {
                 final user = entry.value;
-                final admin =
-                    summary?.adminAccountIds?.contains(user.accountId) == true;
+                final admin = user.companyAdmin;
                 final identity = AdminUserIdentity(user, companyAdmin: admin);
                 final roleNames = identity.roles(context);
                 final departmentNames = identity.departmentNames(
@@ -352,9 +344,15 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
                 );
                 return AdminUserListRow(
                   name: user.fullName,
-                  roles: roleNames.isEmpty
-                      ? l.uiUsersUnassigned
-                      : roleNames.join(', '),
+                  roles: [
+                    if (roleNames.isEmpty)
+                      l.uiUsersUnassigned
+                    else
+                      ...roleNames,
+                    if (user.accountStatus == AccountStatus.disabled)
+                      l.uiUsersAccountDisabled,
+                    if (user.loginLocked) l.uiUsersLoginLocked,
+                  ].join(', '),
                   departments: departmentNames.join(', '),
                   avatarColor: identity.fill(context),
                   avatarForeground: identity.ink(context),

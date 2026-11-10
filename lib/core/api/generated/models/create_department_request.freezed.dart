@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CreateDepartmentRequest {
 
- String get name; CreateDepartmentRequestKind get kind; String? get code; String? get description;
+ String get name; CreateDepartmentRequestKind get kind;/// İsteğe bağlı kısa kod. Sunucu baş/son boşluğu kırpar ve büyük harfe çevirir; sonuç `^[A-Z0-9]{2,10}$` biçiminde olmalıdır (ORGANIZATION-K10), aksi 422 `organization.input_invalid` (alan kodu `organization.invalid_code`). Kod şirkette tekildir (silinmiş departmanlar dahil): 409 `organization.department_code_conflict`.
+ String? get code; String? get description;
 /// Create a copy of CreateDepartmentRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -223,6 +224,7 @@ class _CreateDepartmentRequest implements CreateDepartmentRequest {
 
 @override final  String name;
 @override final  CreateDepartmentRequestKind kind;
+/// İsteğe bağlı kısa kod. Sunucu baş/son boşluğu kırpar ve büyük harfe çevirir; sonuç `^[A-Z0-9]{2,10}$` biçiminde olmalıdır (ORGANIZATION-K10), aksi 422 `organization.input_invalid` (alan kodu `organization.invalid_code`). Kod şirkette tekildir (silinmiş departmanlar dahil): 409 `organization.department_code_conflict`.
 @override final  String? code;
 @override final  String? description;
 

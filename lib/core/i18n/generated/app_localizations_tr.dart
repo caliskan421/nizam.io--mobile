@@ -363,6 +363,14 @@ class AppLocalizationsTr extends AppLocalizations {
       'Departman bu programa bağlı değil.';
 
   @override
+  String get errOrganizationExistingDepartment =>
+      'Bu adda bir departman zaten var.';
+
+  @override
+  String get errOrganizationIdempotencyKeyReused =>
+      'Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.';
+
+  @override
   String get errOrganizationInputInvalid => 'Girilen bilgiler geçersiz.';
 
   @override
@@ -373,6 +381,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errOrganizationInvalidName => 'Ad geçersiz.';
+
+  @override
+  String get errOrganizationInvalidRequestKey => 'İşlem anahtarı geçersiz.';
 
   @override
   String get errOrganizationInvalidRole => 'Rol geçersiz.';
@@ -490,6 +501,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errProgramInputInvalid => 'Girilen bilgiler geçersiz.';
 
   @override
+  String get errProgramInvalidColor => 'Geçersiz renk seçimi.';
+
+  @override
   String get errProgramInvalidCopySource =>
       'Ekip kopyası için kaynak program geçersiz.';
 
@@ -505,6 +519,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errProgramInvalidName => 'Program adı geçersiz.';
+
+  @override
+  String get errProgramInvalidRequestKey => 'İşlem anahtarı geçersiz.';
+
+  @override
+  String get errProgramInvalidShortName =>
+      'Kısa ad 1–4 harf ya da rakam olmalıdır.';
 
   @override
   String get errProgramInvalidTransfer => 'Aktarım isteği geçersiz.';
@@ -1462,6 +1483,21 @@ class AppLocalizationsTr extends AppLocalizations {
       'Koordinatörlük oluşturuldu ama seçili programa bağlanamadı. Tekrar denediğinde yeni koordinatörlük açılmaz, aynı kayıt bağlanır.';
 
   @override
+  String get uiCoordFormExisting =>
+      'Bu adla bir departman zaten var. Mevcut kayıt kullanılacak; türü ve açıklaması değiştirilmez. Bağlamak istiyor musunuz?';
+
+  @override
+  String get uiCoordFormExistingDeleted =>
+      'Bu adla silinmiş bir departman var. Mevcut kayıt geri yüklenip bağlanacak; türü ve açıklaması değiştirilmez. Devam etmek istiyor musunuz?';
+
+  @override
+  String get uiCoordFormExistingConfirm => 'Mevcut kaydı kullan';
+
+  @override
+  String get uiCoordFormOutcomeUnknown =>
+      'Önceki işlemin sonucu bilinmiyor. Aynı bilgilerle yeniden deneyerek işlemi tamamlayın.';
+
+  @override
   String get uiCoordToastCreated => 'Koordinatörlük eklendi';
 
   @override
@@ -1842,6 +1878,26 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiFeedbackSecondsUnit => 'sn';
+
+  @override
+  String get uiHomePendingHeading => 'Bekleyen işler';
+
+  @override
+  String get uiHomePendingErrorRetry =>
+      'Bekleyen işler yüklenemedi · Yeniden dene';
+
+  @override
+  String get uiHomePendingEmpty => 'Bekleyen iş yok';
+
+  @override
+  String get uiHomeUnreadLoading => 'Mesaj sayısı yükleniyor';
+
+  @override
+  String get uiHomeUnreadErrorRetry =>
+      'Mesaj sayısı yüklenemedi · Yeniden dene';
+
+  @override
+  String get uiHomeUnreadChats => 'Okunmamış sohbet';
 
   @override
   String get uiHomeGreeting => 'Merhaba';
@@ -4941,8 +4997,52 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiUserAccountFieldsNewPassword => 'Yeni şifre';
 
   @override
-  String get uiUserAccountFieldsSignedInStatusHint =>
-      'Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.';
+  String get uiUsersProgramShortName => 'Kısa ad (1–4 harf veya rakam)';
+
+  @override
+  String get uiUsersProgramColor =>
+      'Renk (violet, gold, blue, teal, green, orange, red, slate)';
+
+  @override
+  String get uiUsersProgramBadgeInvalid => 'Kısa ad veya renk geçersiz.';
+
+  @override
+  String get uiUsersDisableAccount => 'Hesabı kapat';
+
+  @override
+  String get uiUsersEnableAccount => 'Hesabı aç';
+
+  @override
+  String get uiUsersDisableConfirm =>
+      'Oturumlar kapatılır, görevler ve geçmiş korunur.';
+
+  @override
+  String get uiUsersEnableConfirm =>
+      'Hesap mevcut rol ve üyelikleriyle erişim kazanır; yeniden giriş gerekir.';
+
+  @override
+  String get uiUsersAccountHistoryPreserved => 'Görevler ve geçmiş korunur.';
+
+  @override
+  String get uiUsersAccountStatusUnknown => 'Hesap durumu bilinmiyor';
+
+  @override
+  String get uiUsersOwnAccount => 'Kendi hesabınız';
+
+  @override
+  String get uiUsersAccountDisabled => 'Hesap kapalı';
+
+  @override
+  String get uiUsersLoginLocked => 'Giriş kilitli';
+
+  @override
+  String get uiUsersFilterScope => 'geçerli filtre';
+
+  @override
+  String get uiUsersSearchNameEmail => 'Ad veya e-posta ara';
+
+  @override
+  String get uiUsersOneDepartment => 'Bir koordinatörlük seçebilirsin';
 
   @override
   String get uiUsersTitle => 'Kullanıcılar';
@@ -5032,10 +5132,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiUsersHistoryUnavailable =>
       'Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.';
-
-  @override
-  String get uiUsersAccountUnavailable =>
-      'E-posta, giriş kilidi ve son giriş bilgisi sunucu tarafından okunabilir olarak sunulmuyor. Hesap değişikliklerini aşağıdaki işlemlerden yapabilirsiniz.';
 
   @override
   String get uiUsersMembershipUnknown => 'Üyelik bilgisi bilinmiyor';
@@ -5277,10 +5373,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiUsersOpsActive => 'Hesap aktif';
-
-  @override
-  String get uiUsersOpsStatusUnavailable =>
-      'Durum bilgisi ve açma/kapatma işlemi bu sunucuda sunulmuyor.';
 
   @override
   String get uiUsersOpsResetLink => 'Şifre sıfırlama bağlantısı gönder';

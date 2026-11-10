@@ -11,6 +11,64 @@
 // İki liste de openapi'den türetilir (elle liste yok).
 import 'package:yaml/yaml.dart';
 
+const programPatchFieldSource = r'''
+// GENERATED CODE - DO NOT MODIFY BY HAND
+import 'models/update_program_request_color.dart';
+
+/// Dönem PATCH isteğinde dış null alanı atlar; iç null alanı temizler.
+final class ProgramPatchField<T> {
+  const ProgramPatchField(this.value);
+  final T? value;
+}
+
+ProgramPatchField<String>? programPatchStringFromJson(String? value) =>
+    value == null ? null : ProgramPatchField(value);
+String? programPatchStringToJson(ProgramPatchField<String>? value) => value?.value;
+ProgramPatchField<UpdateProgramRequestColor>? programPatchColorFromJson(String? value) =>
+    value == null ? null : ProgramPatchField(UpdateProgramRequestColor.fromJson(value));
+String? programPatchColorToJson(ProgramPatchField<UpdateProgramRequestColor>? value) => value?.value?.json;
+''';
+
+/// Yalnız dönem PATCH modelinin iki üç hâlli alanını sarmalar.
+String rewriteProgramPatch(String source) {
+  const short = "@JsonKey(name: 'short_name')\n    String? shortName";
+  const color = 'UpdateProgramRequestColor? color';
+  if (!source.contains(short) || !source.contains(color)) {
+    throw const FormatException('UpdateProgramRequest alanları bulunamadı');
+  }
+  return source
+      .replaceFirst(
+        "import 'update_program_request_color.dart';",
+        "import 'update_program_request_color.dart';\nimport '../program_patch_field.dart';",
+      )
+      .replaceFirst(
+        short,
+        "@JsonKey(name: 'short_name', fromJson: programPatchStringFromJson, toJson: programPatchStringToJson) ProgramPatchField<String>? shortName",
+      )
+      .replaceFirst(
+        color,
+        '@JsonKey(fromJson: programPatchColorFromJson, toJson: programPatchColorToJson) ProgramPatchField<UpdateProgramRequestColor>? color',
+      );
+}
+
+/// Açık null değeri korumak için atlama kararını dönüştürülmüş değere değil sarmalayıcıya uygula.
+String rewriteProgramPatchJson(String source) {
+  const short = "'short_name': ?programPatchStringToJson(instance.shortName),";
+  const color = "'color': ?programPatchColorToJson(instance.color),";
+  if (!source.contains(short) || !source.contains(color)) {
+    throw const FormatException('UpdateProgramRequest JSON çıktısı bulunamadı');
+  }
+  return source
+      .replaceFirst(
+        short,
+        "if (instance.shortName != null) 'short_name': programPatchStringToJson(instance.shortName),",
+      )
+      .replaceFirst(
+        color,
+        "if (instance.color != null) 'color': programPatchColorToJson(instance.color),",
+      );
+}
+
 const _methods = ['get', 'post', 'put', 'patch', 'delete'];
 
 /// 2xx yanıtında `format: binary` gövde bildiren operasyonların `operationId` kümesi.

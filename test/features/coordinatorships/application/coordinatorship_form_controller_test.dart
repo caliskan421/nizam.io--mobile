@@ -51,6 +51,50 @@ List<List<Object?>> _log(CoordBackend b) => [
 ];
 
 void main() {
+  test(
+    'kesin doğrulama hatasından sonra düzeltilmiş gövde yeni anahtarla gider',
+    () async {
+      final backend = CoordBackend();
+      final h = await _harness(backend);
+      final serve = h.backend.handler;
+      var count = 0;
+      h.backend.handler = (r) {
+        if (r.method == 'POST' && r.path == '/v1/departments' && count++ == 0) {
+          return errorBody(422, 'organization.input_invalid');
+        }
+        return serve(r);
+      };
+      final ctl = h.read(coordinatorshipFormControllerProvider.notifier);
+      expect(
+        await ctl.create(
+          const CoordinatorshipDraft(
+            name: 'A',
+            kind: DepartmentKind.coordinatorship,
+          ),
+        ),
+        isFalse,
+      );
+      expect(h.read(coordinatorshipFormControllerProvider).frozen, isFalse);
+      expect(
+        await ctl.create(
+          const CoordinatorshipDraft(
+            name: 'Saha',
+            kind: DepartmentKind.workingGroup,
+          ),
+        ),
+        isTrue,
+      );
+      final requests = h.backend.requests
+          .where((r) => r.method == 'POST' && r.path == '/v1/departments')
+          .toList();
+      expect(requests.length, 2);
+      expect(requests[1].body, {'name': 'Saha', 'kind': 'calisma_grubu'});
+      expect(
+        requests[1].header('Idempotency-Key'),
+        isNot(requests[0].header('Idempotency-Key')),
+      );
+    },
+  );
   test('oluştur → seçili programa bağla → liste yenilenir', () async {
     final backend = CoordBackend();
     final h = await _harness(backend);
@@ -78,48 +122,51 @@ void main() {
     expect(backend.unhandled, isEmpty);
   });
 
-  test('bağlama düşer → departman bekler; tekrar denemede yeniden oluşturulmaz', () async {
-    final backend = CoordBackend()..linkError = 'platform.internal';
-    final h = await _harness(backend);
-    final ctl = h.read(coordinatorshipFormControllerProvider.notifier);
-    const draft = CoordinatorshipDraft(
-      name: 'Saha',
-      kind: DepartmentKind.coordinatorship,
-    );
-    expect(await ctl.create(draft), isFalse);
-    var f = h.read(coordinatorshipFormControllerProvider);
-    expect(f.error?.code, 'platform.internal');
-    expect(f.pending?.id, 'dep-new-3');
-    expect(await _names(h), isNot(contains('Saha')));
+  test(
+    'bağlama düşer → departman bekler; tekrar denemede yeniden oluşturulmaz',
+    () async {
+      final backend = CoordBackend()..linkError = 'platform.internal';
+      final h = await _harness(backend);
+      final ctl = h.read(coordinatorshipFormControllerProvider.notifier);
+      const draft = CoordinatorshipDraft(
+        name: 'Saha',
+        kind: DepartmentKind.coordinatorship,
+      );
+      expect(await ctl.create(draft), isFalse);
+      var f = h.read(coordinatorshipFormControllerProvider);
+      expect(f.error?.code, 'platform.internal');
+      expect(f.pending?.id, 'dep-new-3');
+      expect(await _names(h), isNot(contains('Saha')));
 
-    // Form yeniden açılır: hata silinir, bekleyen departman kalır.
-    ctl.clearError();
-    f = h.read(coordinatorshipFormControllerProvider);
-    expect((f.error, f.pending?.id), (null, 'dep-new-3'));
+      // Form yeniden açılır: hata silinir, bekleyen departman kalır.
+      ctl.clearError();
+      f = h.read(coordinatorshipFormControllerProvider);
+      expect((f.error, f.pending?.id), (null, 'dep-new-3'));
 
-    backend.linkError = null;
-    // Programdaki ad değiştirilerek yeniden denenir: yalnız bağlama, yeni adla.
-    expect(
-      await ctl.create(
-        const CoordinatorshipDraft(
-          name: 'Saha ekibi',
-          kind: DepartmentKind.coordinatorship,
+      backend.linkError = null;
+      // Belirsiz sonuçta gövde sabit kalır; sonraki form değeri uygulanmaz.
+      expect(
+        await ctl.create(
+          const CoordinatorshipDraft(
+            name: 'Saha ekibi',
+            kind: DepartmentKind.coordinatorship,
+          ),
         ),
-      ),
-      isTrue,
-    );
-    expect(_writes(backend), [
-      'POST /v1/departments',
-      'POST /v1/program/departments',
-      'POST /v1/program/departments',
-    ]);
-    expect(backend.writes.last.$2, {
-      'department_id': 'dep-new-3',
-      'display_name': 'Saha ekibi',
-    });
-    expect(h.read(coordinatorshipFormControllerProvider).pending, isNull);
-    expect(await _names(h), contains('Saha ekibi'));
-  });
+        isTrue,
+      );
+      expect(_writes(backend), [
+        'POST /v1/departments',
+        'POST /v1/program/departments',
+        'POST /v1/program/departments',
+      ]);
+      expect(backend.writes.last.$2, {
+        'department_id': 'dep-new-3',
+        'display_name': 'Saha',
+      });
+      expect(h.read(coordinatorshipFormControllerProvider).pending, isNull);
+      expect(await _names(h), contains('Saha'));
+    },
+  );
 
   test('bağlama hatası → çıkış, başka hesapla giriş → form boş; tekrar eski departmanı kullanmaz', () async {
     final backend = CoordBackend()..linkError = 'platform.internal';
@@ -260,51 +307,182 @@ void main() {
     await cleared;
   });
 
-  test('bağ kurulmuş, yanıt kaybolmuş → tekrar denemede dönen eski ad yeniden adlandırılır', () async {
-    final backend = CoordBackend()..linkLost = true;
-    final h = await _harness(backend);
-    final ctl = h.read(coordinatorshipFormControllerProvider.notifier);
-    expect(
-      await ctl.create(
-        const CoordinatorshipDraft(
-          name: 'Saha',
-          kind: DepartmentKind.coordinatorship,
+  test(
+    'bağ kurulmuş, yanıt kaybolmuş → aynı anahtar ve gövdeyle tekrarlanır',
+    () async {
+      final backend = CoordBackend()..linkLost = true;
+      final h = await _harness(backend);
+      final ctl = h.read(coordinatorshipFormControllerProvider.notifier);
+      expect(
+        await ctl.create(
+          const CoordinatorshipDraft(
+            name: 'Saha',
+            kind: DepartmentKind.coordinatorship,
+          ),
         ),
-      ),
-      isFalse,
-    );
-    backend.linkLost = false;
-    expect(
-      await ctl.create(
-        const CoordinatorshipDraft(
-          name: 'Saha ekibi',
-          kind: DepartmentKind.coordinatorship,
+        isFalse,
+      );
+      backend.linkLost = false;
+      expect(
+        await ctl.create(
+          const CoordinatorshipDraft(
+            name: 'Saha ekibi',
+            kind: DepartmentKind.coordinatorship,
+          ),
         ),
-      ),
-      isTrue,
-    );
-    // Var olan bağ eski adla döner (sunucu adı değiştirmez) → programdaki ad düzeltilir.
-    expect(_log(backend), [
-      [
-        'POST /v1/departments',
-        {'name': 'Saha', 'kind': 'koordinatorluk'},
-      ],
-      [
-        'POST /v1/program/departments',
-        {'department_id': 'dep-new-3', 'display_name': 'Saha'},
-      ],
-      [
-        'POST /v1/program/departments',
-        {'department_id': 'dep-new-3', 'display_name': 'Saha ekibi'},
-      ],
-      [
-        'PATCH /v1/program/departments/dep-new-3',
-        {'display_name': 'Saha ekibi'},
-      ],
-    ]);
-    expect(await _names(h), contains('Saha ekibi'));
-    expect(await _names(h), isNot(contains('Saha')));
-  });
+        isTrue,
+      );
+      // Var olan bağ eski adla döner (sunucu adı değiştirmez) → programdaki ad düzeltilir.
+      expect(_log(backend), [
+        [
+          'POST /v1/departments',
+          {'name': 'Saha', 'kind': 'koordinatorluk'},
+        ],
+        [
+          'POST /v1/program/departments',
+          {'department_id': 'dep-new-3', 'display_name': 'Saha'},
+        ],
+        [
+          'POST /v1/program/departments',
+          {'department_id': 'dep-new-3', 'display_name': 'Saha'},
+        ],
+      ]);
+      expect(await _names(h), contains('Saha'));
+      final requests = h.backend.requests
+          .where(
+            (r) => r.method == 'POST' && r.path == '/v1/program/departments',
+          )
+          .toList();
+      expect(requests.length, 2);
+      expect(requests[0].header('Idempotency-Key'), isNotNull);
+      expect(
+        requests[1].header('Idempotency-Key'),
+        requests[0].header('Idempotency-Key'),
+      );
+      expect(requests[1].body, requests[0].body);
+    },
+  );
+
+  test(
+    'oluşturma yanıtı kaybolunca aynı gövde ve anahtar tekrar edilir',
+    () async {
+      final backend = CoordBackend();
+      final h = await _harness(backend);
+      final serve = h.backend.handler;
+      var creates = 0;
+      h.backend.handler = (r) {
+        if (r.method == 'POST' && r.path == '/v1/departments') {
+          creates++;
+          if (creates == 1) {
+            serve(r);
+            return errorBody(503, 'platform.internal');
+          }
+          return jsonResponse(200, backend.companyDepartments.last);
+        }
+        return serve(r);
+      };
+      final ctl = h.read(coordinatorshipFormControllerProvider.notifier);
+      const draft = CoordinatorshipDraft(
+        name: 'Saha',
+        kind: DepartmentKind.coordinatorship,
+      );
+      expect(await ctl.create(draft), isFalse);
+      expect(
+        await ctl.create(
+          const CoordinatorshipDraft(
+            name: 'Başka',
+            kind: DepartmentKind.workingGroup,
+          ),
+        ),
+        isTrue,
+      );
+      final requests = h.backend.requests
+          .where((r) => r.method == 'POST' && r.path == '/v1/departments')
+          .toList();
+      expect(requests.length, 2);
+      expect(requests[0].header('Idempotency-Key'), isNotNull);
+      expect(
+        requests[1].header('Idempotency-Key'),
+        requests[0].header('Idempotency-Key'),
+      );
+      expect(requests[1].body, requests[0].body);
+      final links = h.backend.requests
+          .where(
+            (r) => r.method == 'POST' && r.path == '/v1/program/departments',
+          )
+          .toList();
+      expect(links.length, 1);
+      expect(
+        links.single.header('Idempotency-Key'),
+        isNot(requests[0].header('Idempotency-Key')),
+      );
+      expect(
+        backend.companyDepartments.where((d) => d['name'] == 'Saha').length,
+        1,
+      );
+    },
+  );
+
+  for (final deleted in [false, true]) {
+    test('mevcut kayıt $deleted: açık onay ve kalan adım', () async {
+      final backend = CoordBackend();
+      final h = await _harness(backend);
+      final serve = h.backend.handler;
+      var restores = 0;
+      h.backend.handler = (r) {
+        if (r.method == 'POST' && r.path == '/v1/departments') {
+          return jsonResponse(409, {
+            'code': 'organization.department_exists',
+            'message': '',
+            'request_id': 'r',
+            'fields': [
+              {
+                'field': 'department_id',
+                'code': 'organization.existing_department',
+                'message': dAlt,
+              },
+              {
+                'field': 'deleted',
+                'code': 'organization.existing_department',
+                'message': '$deleted',
+              },
+            ],
+          });
+        }
+        if (r.method == 'PATCH' &&
+            r.path == '/v1/admin/restore/departments/$dAlt') {
+          restores++;
+          return jsonResponse(200, {
+            'department_id': dAlt,
+            'status': 'restored',
+          });
+        }
+        return serve(r);
+      };
+      final ctl = h.read(coordinatorshipFormControllerProvider.notifier);
+      const draft = CoordinatorshipDraft(
+        name: 'Altyapı',
+        kind: DepartmentKind.workingGroup,
+        description: 'Yeni',
+      );
+      expect(await ctl.create(draft), isFalse);
+      expect(h.read(coordinatorshipFormControllerProvider).existingId, dAlt);
+      expect(h.backend.count('POST', '/v1/program/departments'), 0);
+      expect(restores, 0);
+      backend.linkError = 'platform.internal';
+      expect(await ctl.confirmExisting(), isFalse);
+      expect(restores, deleted ? 1 : 0);
+      backend.linkError = null;
+      expect(await ctl.confirmExisting(), isTrue);
+      expect(restores, deleted ? 1 : 0);
+      expect(h.backend.count('POST', '/v1/program/departments'), 2);
+      expect(
+        backend.companyDepartments.first['description'],
+        'Su ve yapı işleri',
+      );
+      expect(backend.companyDepartments.first['kind'], 'koordinatorluk');
+    });
+  }
 
   test('oluşturma hatası: bekleyen yok, hata durumda', () async {
     final backend = CoordBackend();

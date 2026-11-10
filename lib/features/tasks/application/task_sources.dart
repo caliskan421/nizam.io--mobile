@@ -184,8 +184,15 @@ final class TaskWriteSource implements TaskWriteRepository {
     TaskItem task,
     DateTime start,
     DateTime end, {
+    required String requestKey,
     String? reason,
-  }) async => _s.requestDateChange(task, start, end, reason: reason);
+  }) async => _s.requestDateChange(
+    task,
+    start,
+    end,
+    requestKey: requestKey,
+    reason: reason,
+  );
 
   @override
   Future<void> reviewDateChange(

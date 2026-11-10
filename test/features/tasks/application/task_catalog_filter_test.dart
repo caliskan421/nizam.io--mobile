@@ -146,6 +146,11 @@ class _Details implements TaskDetailsRepository {
 
 class _Home implements HomeDashboardRepository {
   @override
+  Future<PendingOverview> loadPending() async =>
+      const PendingOverview(items: [], truncated: false);
+  @override
+  Future<int> loadUnread() async => 0;
+  @override
   Future<HomeDashboard> load() => throw UnimplementedError('yönetici yolu');
 
   @override

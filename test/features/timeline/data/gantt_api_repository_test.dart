@@ -26,6 +26,9 @@ Map<String, Object?> _task({
   'planned_end_on': planned,
   'completed_on': completed,
   'assignee_account_ids': ['a1'],
+  'pending_date_request': null,
+  'subtask_counts': {'total': 0, 'done': 0},
+  'dates_revision': 1,
   'lateness': {
     'is_overdue': false,
     'days_overdue': 0,
@@ -54,6 +57,17 @@ Map<String, Object?> _gantt(List<Map<String, Object?>> tasks) => {
 }
 
 void main() {
+  test('kesilme başlığı Gantt sonucuna taşınır', () async {
+    final (dio, _) = fakeDio(
+      _gantt([]),
+      headers: {
+        'x-result-truncated': ['true'],
+      },
+    );
+    expect((await ApiGanttRepository(dio).coordinator()).truncated, isTrue);
+    final (plain, _) = _repo(_gantt([]));
+    expect((await plain.coordinator()).truncated, isFalse);
+  });
   test('coordinator: GET /gantt → TaskItem ve bağlantılar', () async {
     final (repo, a) = _repo(_gantt([_task()]));
     final g = await repo.coordinator();

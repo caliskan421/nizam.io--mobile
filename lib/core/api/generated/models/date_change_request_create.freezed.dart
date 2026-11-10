@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DateChangeRequestCreate {
 
-@JsonKey(name: 'work_item_id') String get workItemId;@DateOnlyConverter()@JsonKey(name: 'new_start_on') DateTime get newStartOn;@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime get newEndOn; String? get reason;
+@JsonKey(name: 'work_item_id') String get workItemId;@DateOnlyConverter()@JsonKey(name: 'new_start_on') DateTime get newStartOn;@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime get newEndOn; String? get reason;/// İsteğe bağlı: istemcinin gördüğü tarih sürümü (`dates_revision`; WORK-K89). Verilirse görev kilidi altında okunan güncel sürümle karşılaştırılır; farklıysa 409 `work.edit_conflict` (`fields[0].field = expected_dates_revision`), talep açılmaz. Pozitif değilse 422 `work.input_invalid` (alan kodu `work.revision_invalid`).
+@JsonKey(name: 'expected_dates_revision') int? get expectedDatesRevision;
 /// Create a copy of DateChangeRequestCreate
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $DateChangeRequestCreateCopyWith<DateChangeRequestCreate> get copyWith => _$Date
 @override
 bool operator ==(Object other) {
   final _this = this as DateChangeRequestCreate;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DateChangeRequestCreate&&(identical(other.workItemId, _this.workItemId) || other.workItemId == _this.workItemId)&&(identical(other.newStartOn, _this.newStartOn) || other.newStartOn == _this.newStartOn)&&(identical(other.newEndOn, _this.newEndOn) || other.newEndOn == _this.newEndOn)&&(identical(other.reason, _this.reason) || other.reason == _this.reason));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DateChangeRequestCreate&&(identical(other.workItemId, _this.workItemId) || other.workItemId == _this.workItemId)&&(identical(other.newStartOn, _this.newStartOn) || other.newStartOn == _this.newStartOn)&&(identical(other.newEndOn, _this.newEndOn) || other.newEndOn == _this.newEndOn)&&(identical(other.reason, _this.reason) || other.reason == _this.reason)&&(identical(other.expectedDatesRevision, _this.expectedDatesRevision) || other.expectedDatesRevision == _this.expectedDatesRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as DateChangeRequestCreate;
-  return Object.hash(runtimeType,_this.workItemId,_this.newStartOn,_this.newEndOn,_this.reason);
+  return Object.hash(runtimeType,_this.workItemId,_this.newStartOn,_this.newEndOn,_this.reason,_this.expectedDatesRevision);
 }
 
 @override
 String toString() {
   final _this = this as DateChangeRequestCreate;
-  return 'DateChangeRequestCreate(workItemId: ${_this.workItemId}, newStartOn: ${_this.newStartOn}, newEndOn: ${_this.newEndOn}, reason: ${_this.reason})';
+  return 'DateChangeRequestCreate(workItemId: ${_this.workItemId}, newStartOn: ${_this.newStartOn}, newEndOn: ${_this.newEndOn}, reason: ${_this.reason}, expectedDatesRevision: ${_this.expectedDatesRevision})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $DateChangeRequestCreateCopyWith<$Res>  {
   factory $DateChangeRequestCreateCopyWith(DateChangeRequestCreate value, $Res Function(DateChangeRequestCreate) _then) = _$DateChangeRequestCreateCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'work_item_id') String workItemId,@DateOnlyConverter()@JsonKey(name: 'new_start_on') DateTime newStartOn,@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime newEndOn, String? reason
+@JsonKey(name: 'work_item_id') String workItemId,@DateOnlyConverter()@JsonKey(name: 'new_start_on') DateTime newStartOn,@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime newEndOn, String? reason,@JsonKey(name: 'expected_dates_revision') int? expectedDatesRevision
 });
 
 
@@ -71,13 +72,14 @@ class _$DateChangeRequestCreateCopyWithImpl<$Res>
 
 /// Create a copy of DateChangeRequestCreate
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? workItemId = null,Object? newStartOn = null,Object? newEndOn = null,Object? reason = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? workItemId = null,Object? newStartOn = null,Object? newEndOn = null,Object? reason = freezed,Object? expectedDatesRevision = freezed,}) {
   return _then(DateChangeRequestCreate(
 workItemId: null == workItemId ? _self.workItemId : workItemId // ignore: cast_nullable_to_non_nullable
 as String,newStartOn: null == newStartOn ? _self.newStartOn : newStartOn // ignore: cast_nullable_to_non_nullable
 as DateTime,newEndOn: null == newEndOn ? _self.newEndOn : newEndOn // ignore: cast_nullable_to_non_nullable
 as DateTime,reason: freezed == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,expectedDatesRevision: freezed == expectedDatesRevision ? _self.expectedDatesRevision : expectedDatesRevision // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -162,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId, @DateOnlyConverter()@JsonKey(name: 'new_start_on')  DateTime newStartOn, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn,  String? reason)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId, @DateOnlyConverter()@JsonKey(name: 'new_start_on')  DateTime newStartOn, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn,  String? reason, @JsonKey(name: 'expected_dates_revision')  int? expectedDatesRevision)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DateChangeRequestCreate() when $default != null:
-return $default(_that.workItemId,_that.newStartOn,_that.newEndOn,_that.reason);case _:
+return $default(_that.workItemId,_that.newStartOn,_that.newEndOn,_that.reason,_that.expectedDatesRevision);case _:
   return orElse();
 
 }
@@ -183,10 +185,10 @@ return $default(_that.workItemId,_that.newStartOn,_that.newEndOn,_that.reason);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId, @DateOnlyConverter()@JsonKey(name: 'new_start_on')  DateTime newStartOn, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn,  String? reason)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId, @DateOnlyConverter()@JsonKey(name: 'new_start_on')  DateTime newStartOn, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn,  String? reason, @JsonKey(name: 'expected_dates_revision')  int? expectedDatesRevision)  $default,) {final _that = this;
 switch (_that) {
 case _DateChangeRequestCreate():
-return $default(_that.workItemId,_that.newStartOn,_that.newEndOn,_that.reason);case _:
+return $default(_that.workItemId,_that.newStartOn,_that.newEndOn,_that.reason,_that.expectedDatesRevision);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +205,10 @@ return $default(_that.workItemId,_that.newStartOn,_that.newEndOn,_that.reason);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'work_item_id')  String workItemId, @DateOnlyConverter()@JsonKey(name: 'new_start_on')  DateTime newStartOn, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn,  String? reason)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'work_item_id')  String workItemId, @DateOnlyConverter()@JsonKey(name: 'new_start_on')  DateTime newStartOn, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn,  String? reason, @JsonKey(name: 'expected_dates_revision')  int? expectedDatesRevision)?  $default,) {final _that = this;
 switch (_that) {
 case _DateChangeRequestCreate() when $default != null:
-return $default(_that.workItemId,_that.newStartOn,_that.newEndOn,_that.reason);case _:
+return $default(_that.workItemId,_that.newStartOn,_that.newEndOn,_that.reason,_that.expectedDatesRevision);case _:
   return null;
 
 }
@@ -218,13 +220,15 @@ return $default(_that.workItemId,_that.newStartOn,_that.newEndOn,_that.reason);c
 @JsonSerializable()
 
 class _DateChangeRequestCreate implements DateChangeRequestCreate {
-  const _DateChangeRequestCreate({@JsonKey(name: 'work_item_id') required this.workItemId, @DateOnlyConverter()@JsonKey(name: 'new_start_on') required this.newStartOn, @DateOnlyConverter()@JsonKey(name: 'new_end_on') required this.newEndOn, this.reason});
+  const _DateChangeRequestCreate({@JsonKey(name: 'work_item_id') required this.workItemId, @DateOnlyConverter()@JsonKey(name: 'new_start_on') required this.newStartOn, @DateOnlyConverter()@JsonKey(name: 'new_end_on') required this.newEndOn, this.reason, @JsonKey(name: 'expected_dates_revision') this.expectedDatesRevision});
   factory _DateChangeRequestCreate.fromJson(Map<String, dynamic> json) => _$DateChangeRequestCreateFromJson(json);
 
 @override@JsonKey(name: 'work_item_id') final  String workItemId;
 @override@DateOnlyConverter()@JsonKey(name: 'new_start_on') final  DateTime newStartOn;
 @override@DateOnlyConverter()@JsonKey(name: 'new_end_on') final  DateTime newEndOn;
 @override final  String? reason;
+/// İsteğe bağlı: istemcinin gördüğü tarih sürümü (`dates_revision`; WORK-K89). Verilirse görev kilidi altında okunan güncel sürümle karşılaştırılır; farklıysa 409 `work.edit_conflict` (`fields[0].field = expected_dates_revision`), talep açılmaz. Pozitif değilse 422 `work.input_invalid` (alan kodu `work.revision_invalid`).
+@override@JsonKey(name: 'expected_dates_revision') final  int? expectedDatesRevision;
 
 /// Create a copy of DateChangeRequestCreate
 /// with the given fields replaced by the non-null parameter values.
@@ -239,18 +243,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DateChangeRequestCreate&&(identical(other.workItemId, workItemId) || other.workItemId == workItemId)&&(identical(other.newStartOn, newStartOn) || other.newStartOn == newStartOn)&&(identical(other.newEndOn, newEndOn) || other.newEndOn == newEndOn)&&(identical(other.reason, reason) || other.reason == reason));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DateChangeRequestCreate&&(identical(other.workItemId, workItemId) || other.workItemId == workItemId)&&(identical(other.newStartOn, newStartOn) || other.newStartOn == newStartOn)&&(identical(other.newEndOn, newEndOn) || other.newEndOn == newEndOn)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.expectedDatesRevision, expectedDatesRevision) || other.expectedDatesRevision == expectedDatesRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,workItemId,newStartOn,newEndOn,reason);
+    return Object.hash(runtimeType,workItemId,newStartOn,newEndOn,reason,expectedDatesRevision);
 }
 
 @override
 String toString() {
-    return 'DateChangeRequestCreate(workItemId: $workItemId, newStartOn: $newStartOn, newEndOn: $newEndOn, reason: $reason)';
+    return 'DateChangeRequestCreate(workItemId: $workItemId, newStartOn: $newStartOn, newEndOn: $newEndOn, reason: $reason, expectedDatesRevision: $expectedDatesRevision)';
 }
 
 
@@ -261,7 +265,7 @@ abstract mixin class _$DateChangeRequestCreateCopyWith<$Res> implements $DateCha
   factory _$DateChangeRequestCreateCopyWith(_DateChangeRequestCreate value, $Res Function(_DateChangeRequestCreate) _then) = __$DateChangeRequestCreateCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'work_item_id') String workItemId,@DateOnlyConverter()@JsonKey(name: 'new_start_on') DateTime newStartOn,@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime newEndOn, String? reason
+@JsonKey(name: 'work_item_id') String workItemId,@DateOnlyConverter()@JsonKey(name: 'new_start_on') DateTime newStartOn,@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime newEndOn, String? reason,@JsonKey(name: 'expected_dates_revision') int? expectedDatesRevision
 });
 
 
@@ -278,13 +282,14 @@ class __$DateChangeRequestCreateCopyWithImpl<$Res>
 
 /// Create a copy of DateChangeRequestCreate
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? workItemId = null,Object? newStartOn = null,Object? newEndOn = null,Object? reason = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? workItemId = null,Object? newStartOn = null,Object? newEndOn = null,Object? reason = freezed,Object? expectedDatesRevision = freezed,}) {
   return _then(_DateChangeRequestCreate(
 workItemId: null == workItemId ? _self.workItemId : workItemId // ignore: cast_nullable_to_non_nullable
 as String,newStartOn: null == newStartOn ? _self.newStartOn : newStartOn // ignore: cast_nullable_to_non_nullable
 as DateTime,newEndOn: null == newEndOn ? _self.newEndOn : newEndOn // ignore: cast_nullable_to_non_nullable
 as DateTime,reason: freezed == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,expectedDatesRevision: freezed == expectedDatesRevision ? _self.expectedDatesRevision : expectedDatesRevision // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

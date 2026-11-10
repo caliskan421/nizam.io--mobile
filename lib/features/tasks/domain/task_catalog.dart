@@ -474,6 +474,7 @@ final class TaskItem {
     List<TaskNote>? noteEntries,
     bool? evidenceRequired,
     String? Function()? description,
+    int? datesRevision,
   }) => TaskItem(
     code: code ?? this.code,
     id: code == null || id != this.code ? id : code,
@@ -503,7 +504,7 @@ final class TaskItem {
     evidenceRequired: evidenceRequired ?? this.evidenceRequired,
     subtaskCounts: subtaskCounts,
     editRevision: editRevision,
-    datesRevision: datesRevision,
+    datesRevision: datesRevision ?? this.datesRevision,
   );
 }
 
@@ -637,7 +638,7 @@ final class TaskCatalog {
   ];
 
   /// Aynı kişi/koordinatörlük kümesiyle yeni görev listesi.
-  TaskCatalog withTasks(List<TaskItem> tasks) => TaskCatalog(
+  TaskCatalog withTasks(List<TaskItem> tasks, {bool? truncated}) => TaskCatalog(
     today: today,
     me: me,
     accountEmail: accountEmail,
@@ -647,7 +648,7 @@ final class TaskCatalog {
     access: access,
     departmentId: departmentId,
     departmentFilterCleared: departmentFilterCleared,
-    truncated: truncated,
+    truncated: truncated ?? this.truncated,
     departments: departments,
     departmentsTruncated: departmentsTruncated,
     names: names,

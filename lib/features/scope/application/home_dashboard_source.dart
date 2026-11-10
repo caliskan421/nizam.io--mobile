@@ -21,6 +21,12 @@ final class HomeDashboardSource implements HomeDashboardRepository {
   Future<HomeDashboard> load() => _s.load();
 
   @override
+  Future<PendingOverview> loadPending() => _s.loadPending();
+
+  @override
+  Future<int> loadUnread() => _s.loadUnread();
+
+  @override
   Future<TeamDashboardExtras> loadTeamExtras({
     required String? departmentId,
     required bool coordinator,

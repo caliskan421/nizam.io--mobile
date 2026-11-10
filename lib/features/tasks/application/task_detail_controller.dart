@@ -17,6 +17,7 @@ import 'upload_digest_memo.dart';
 part 'task_detail_controller.g.dart';
 part 'task_detail_state.dart';
 part 'task_detail_upload.dart';
+part 'task_detail_date_request.dart';
 
 /// Sunucu 409'u: görev yeniden okunur, ileti gösterilir, otomatik tekrar YOK (istemci
 /// akışları §8). Kod listesi durum dışı 409'ları da kapsasın diye HTTP durumu da okunur.
@@ -69,9 +70,15 @@ WriteOutcome _rejected(String code) =>
 /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
 /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
 @riverpod
-class TaskDetailController extends _$TaskDetailController with _UploadFlow {
+class TaskDetailController extends _$TaskDetailController
+    with _UploadFlow, _DateRequestFlow {
   @override
-  TaskDetailState build(String code) => const TaskDetailState();
+  TaskDetailState build(String code) {
+    ref.watch(sessionGenerationProvider);
+    ref.watch(scopeStateProvider);
+    _dateBase = null;
+    return const TaskDetailState();
+  }
 
   TaskCatalog? get _catalog => ref.read(taskCatalogControllerProvider).value;
   @override
@@ -107,6 +114,7 @@ class TaskDetailController extends _$TaskDetailController with _UploadFlow {
     if (state.busy) return WriteOutcome.busy;
     if (!_versionedServer) return _rejected(ClientErrorCode.serverOutdated);
     state = state.copyWith(busy: true);
+    final context = _writeContext();
     // Denetleyici istek sırasında kapanabilir (ekrandan çıkış): katalog yine yenilenir.
     final store = _store;
     try {
@@ -114,6 +122,9 @@ class TaskDetailController extends _$TaskDetailController with _UploadFlow {
         await call();
       } on Object catch (e) {
         final err = toApiError(e);
+        if (!ref.mounted || _writeContext() != context) {
+          return WriteOutcome(WriteKind.failed, err);
+        }
         // Çok adımlı yazmada (düzenle + atama) ilk adımlar yazılmış olabilir: her hatada
         // yeniden okunur; tek adımlıda 409 ve 403'te. 403'te rol olguları da bayat olabilir
         // (koordinatörlük kaldırılmış): katalog yeniden kurulur → `/v1/me` +
@@ -141,10 +152,18 @@ class TaskDetailController extends _$TaskDetailController with _UploadFlow {
           err,
         );
       }
-      await _reread(store, list: list);
+      if (ref.mounted && _writeContext() == context) {
+        try {
+          await _reread(store, list: list);
+        } on Object {
+          // Yazma başarılıdır; yenileme hatası yazma sonucunu değiştirmez.
+        }
+      }
       return WriteOutcome.done;
     } finally {
-      if (ref.mounted) state = state.copyWith(busy: false);
+      if (ref.mounted && _writeContext() == context) {
+        state = state.copyWith(busy: false);
+      }
     }
   }
 
@@ -168,6 +187,7 @@ class TaskDetailController extends _$TaskDetailController with _UploadFlow {
     required bool list,
   }) async {
     if (state.busy) return WriteOutcome.busy;
+    final context = _writeContext();
     final (keys, key) = state.keys.keyFor(action, body);
     state = state.copyWith(keys: keys);
     final r = await _write(() async {
@@ -175,10 +195,13 @@ class TaskDetailController extends _$TaskDetailController with _UploadFlow {
         await call(key);
       } on ApiError catch (e) {
         if (e.code != conflictRetryCode) rethrow;
+        if (!ref.mounted) throw ApiError(ClientErrorCode.sessionEnded);
+        _ensureContext(context);
         await call(key);
       }
     }, list: list);
     if (ref.mounted &&
+        _writeContext() == context &&
         (r.ok || r.error?.code == ClientErrorCode.requestNotResent)) {
       state = state.copyWith(keys: state.keys.clear(action));
     }
@@ -189,8 +212,9 @@ class TaskDetailController extends _$TaskDetailController with _UploadFlow {
   String? get pendingSubtaskTitle => state.keys.pendingBody(_subtask);
 
   /// Çok adımlı yazmanın başladığı bağlam: oturum nesli + seçili kapsam (program, departman).
+  @override
   ({int session, String? program, String? department}) _writeContext() {
-    final sel = ref.read(scopeStateProvider);
+    final sel = ref.read(scopeControllerProvider).current;
     return (
       session: ref.read(sessionControllerProvider).generation,
       program: sel.programId,
@@ -303,46 +327,6 @@ class TaskDetailController extends _$TaskDetailController with _UploadFlow {
       return WriteOutcome.invalid;
     }
     return _write(() => _writes.deleteDateChange(id), list: false);
-  }
-
-  /// Talep formunu açar (bitiş +14 gün önerilir); bekleyen talep varsa ya da eylem bu
-  /// hesaba açık değilse açmaz, false döner.
-  bool openDateRequest() {
-    final t = _task;
-    if (t == null || t.hasPendingRequest) return false;
-    if (!permissions.canRequestDate) return false;
-    state = state.copyWith(
-      dateDraft: () => DateRequestDraft(
-        start: t.start,
-        due: t.due.add(const Duration(days: 14)),
-      ),
-      showErrors: false,
-    );
-    return true;
-  }
-
-  void updateDateDraft(DateRequestDraft d) =>
-      state = state.copyWith(dateDraft: () => d);
-
-  /// Talebi gönderir (sunucuda yalnız kapsam koordinatörü; bekleyen varken 409
-  /// `work.date_request_pending_exists` → yeniden okunur). Başarıda form kapanır.
-  Future<WriteOutcome> submitDateRequest() async {
-    final t = _task;
-    final d = state.dateDraft;
-    if (t == null || d == null || d.datesInvalid) return WriteOutcome.invalid;
-    if (!permissions.canRequestDate) return WriteOutcome.invalid;
-    final reason = d.reason.trim();
-    final r = await _write(
-      () => _writes.requestDateChange(
-        t,
-        d.start,
-        d.due,
-        reason: reason.isEmpty ? null : reason,
-      ),
-      list: false,
-    );
-    if (r.ok && ref.mounted) state = state.copyWith(dateDraft: () => null);
-    return r;
   }
 
   // ---- düzenle --------------------------------------------------------------------------

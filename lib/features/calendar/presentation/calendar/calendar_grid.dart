@@ -119,7 +119,7 @@ class CalendarGrid extends ConsumerWidget {
                   ),
                 ),
               ),
-              if (headerAction != null) headerAction!,
+              ?headerAction,
               // Prototip: sonraki düğmesi sağ kenardan 10 taşar.
               Transform.translate(
                 offset: Offset(compact ? 0 : 10, 0),

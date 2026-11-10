@@ -15,6 +15,7 @@ _DateChangeRequestCreate _$DateChangeRequestCreateFromJson(
   ),
   newEndOn: const DateOnlyConverter().fromJson(json['new_end_on'] as String),
   reason: json['reason'] as String?,
+  expectedDatesRevision: (json['expected_dates_revision'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$DateChangeRequestCreateToJson(
@@ -24,4 +25,5 @@ Map<String, dynamic> _$DateChangeRequestCreateToJson(
   'new_start_on': const DateOnlyConverter().toJson(instance.newStartOn),
   'new_end_on': const DateOnlyConverter().toJson(instance.newEndOn),
   'reason': ?instance.reason,
+  'expected_dates_revision': ?instance.expectedDatesRevision,
 };

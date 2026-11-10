@@ -11,7 +11,8 @@ part 'tasks_nav_caption.g.dart';
 /// Uygulama tek dillidir (tr); metin parçası ARB'den.
 @riverpod
 String? tasksNavCaption(Ref ref) {
-  final n = ref.watch(taskCatalogControllerProvider).value?.tasks.length;
-  if (n == null) return null;
-  return '$n ${lookupAppLocalizations(const Locale('tr')).uiTasksTasksLc}';
+  final catalog = ref.watch(taskCatalogControllerProvider).value;
+  if (catalog == null) return null;
+  final prefix = catalog.truncated ? '≥' : '';
+  return '$prefix${catalog.tasks.length} ${lookupAppLocalizations(const Locale('tr')).uiTasksTasksLc}';
 }

@@ -28,9 +28,11 @@ class RootTopBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final program = ref.watch(
-      currentProgramControllerProvider.select((p) => p.value?.name),
-    );
+    final state = ref.watch(currentProgramControllerProvider);
+    final current = state.isLoading ? null : state.value;
+    final program = current?.id == ref.watch(scopeStateProvider).programId
+        ? current?.name
+        : null;
     final bell = referenceHeader ? null : watchNotificationBell(context, ref);
     final flavor = referenceHeader ? ref.watch(flavorProvider) : null;
     final brand = flavor == null
@@ -67,8 +69,9 @@ class RootTopBar extends ConsumerWidget {
 
 /// Tablet liste bölmesinde kök üst çubuk gizlidir (`.tb-pane`); seçili program adı (S2) orada
 /// Ana sayfanın başında, telefondaki üst çubuk alt satırıyla aynı `m-program` biçiminde
-/// (`text-faint`) durur. Sunucu programı seçiliyken ad ilk kez yüklenirken satırın yeri boş
-/// ayrılır (ad gelince akış kaymaz); program yoksa ya da hata varsa hiçbir şey çizmez.
+/// (`text-faint`) durur. Yükleme sırasında ve program kimliği seçimle uyuşmadığında etiket
+/// gizlenir; ilk yüklemede satırın yeri ayrılır. Aynı programın yenilemesi hata verirse son
+/// bilinen ad kalabilir; bu gösterim yetki kanıtı değildir.
 class RootProgramLine extends ConsumerWidget {
   const RootProgramLine({super.key, this.bottom = 0});
 
@@ -76,9 +79,11 @@ class RootProgramLine extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final program = ref.watch(
-      currentProgramControllerProvider.select((p) => p.value?.name),
-    );
+    final state = ref.watch(currentProgramControllerProvider);
+    final current = state.isLoading ? null : state.value;
+    final program = current?.id == ref.watch(scopeStateProvider).programId
+        ? current?.name
+        : null;
     final pending = ref.watch(
       currentProgramControllerProvider.select(
         (p) => p.isLoading && !p.hasValue,

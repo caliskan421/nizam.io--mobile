@@ -200,6 +200,10 @@ class CoordBackend extends PilotBackend {
                   w['department_id'] == r.header('X-Nizamio-Department'))
                 {
                   ...w,
+                  'pending_date_request': w['pending_date_request'],
+                  'subtask_counts':
+                      w['subtask_counts'] ?? {'total': 0, 'done': 0},
+                  'dates_revision': w['dates_revision'] ?? 1,
                   'planned_end_on': '',
                   'completed_on': w['completed_on'] ?? '',
                   'lateness': {
@@ -352,6 +356,22 @@ class CoordBackend extends PilotBackend {
     }
     if (r.method != 'GET') {
       if (_write(r, key, program) case final res?) return res;
+    }
+    final detail = RegExp(r'^/v1/program/departments/([^/]+)$')
+        .firstMatch(r.path);
+    if (r.method == 'GET' && detail != null) {
+      if (program != coordProgram) return _scopeMissing();
+      if (departmentsError case final error?) return errorBody(503, error);
+      final id = detail.group(1);
+      final links = departments.where((d) => d['department_id'] == id);
+      if (links.isEmpty) return errorBody(404, 'program.department_not_found');
+      final rows = companyDepartments.where((d) => d['department_id'] == id);
+      final row = rows.firstOrNull;
+      return jsonResponse(200, {
+        ...links.single,
+        'kind': row?['kind'] ?? 'koordinatorluk',
+        'description': ?row?['description'],
+      });
     }
     final members = RegExp(r'^/v1/departments/([^/]+)/members$')
         .firstMatch(r.path);

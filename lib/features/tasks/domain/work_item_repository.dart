@@ -7,67 +7,6 @@ import 'work_item.dart';
 // uçları tek departman içindir. Bütün hatalar `ApiError` olarak fırlar; yetki kararı
 // (ŞY/K/Ü matrisi) sunucudadır, istemci türetmez.
 
-/// Görev yaşam döngüsü: liste, oluşturma, güncelleme, silme, durum geçişleri, üstlenme,
-/// atamalar, "görevlerim" ve tarih düzeltmeleri (S3).
-abstract interface class WorkItemRepository {
-  /// `GET /v1/work-items` (imleçli; Ü yalnız atandığını görür — WORK-K24).
-  Future<PageSlice<TaskSummary>> list([PageRequest page = const PageRequest()]);
-
-  /// `POST /v1/work-items`; [requestKey] işlem anahtarı (`Idempotency-Key`, ADR-0027).
-  Future<TaskSummary> create(TaskDraft draft, {required String requestKey});
-
-  /// `PATCH /v1/work-items/{id}`.
-  Future<TaskSummary> update(String id, TaskPatch patch);
-
-  /// `DELETE /v1/work-items/{id}` (yumuşak silme).
-  Future<void> delete(String id);
-
-  /// `POST /v1/work-items/{id}/transitions` (koordinatör/ŞY geçiş tablosu). Geri almada
-  /// [reason] zorunludur (422 `work.revert_reason_required`). [to] [TaskStatus.unknown]
-  /// olamaz.
-  Future<TaskTransition> transition(
-    String id,
-    TaskStatus to, {
-    String? reason,
-    bool? pullEndDate,
-  });
-
-  /// `PATCH /v1/work-items/{id}/own-status`: atanmış üyenin kendi geçişi (geçiş günü bugün).
-  Future<TaskTransition> setOwnStatus(
-    String id,
-    TaskStatus to, {
-    String? reason,
-    bool? pullEndDate,
-  });
-
-  /// `POST /v1/work-items/{id}/claim`.
-  Future<void> claim(String id);
-
-  /// `DELETE /v1/work-items/{id}/claim`.
-  Future<void> unclaim(String id);
-
-  /// `POST /v1/work-items/{id}/assignments` (yalnız K — WORK-K10); eklenen kişi sayısı.
-  Future<int> addAssignees(String id, List<String> accountIds);
-
-  /// `DELETE /v1/work-items/{id}/assignments/{accountId}`; kaldırılan kişi sayısı.
-  Future<int> removeAssignee(String id, String accountId);
-
-  /// `GET /v1/work-items/my-tasks`: çağıranın atandığı görevler.
-  Future<List<AssignedTask>> myTasks();
-
-  /// `POST /v1/work-items/{id}/extend`: bitişi [days] gün uzatır (bağımlılara yayılır).
-  Future<TaskExtension> extend(String id, int days);
-
-  /// `POST /v1/work-items/{id}/pull-completion`: tamamlanma gününü [completedOn]'a çeker.
-  Future<TaskDates> pullCompletion(String id, DateTime completedOn);
-
-  /// `POST /v1/work-items/{id}/pull-end-date`: bitişi tamamlanma gününe çeker.
-  Future<TaskDates> pullEndDate(String id);
-
-  /// `PATCH /v1/work-items/{id}/completion-date`: tamamlanma gününü yönetici olarak düzeltir.
-  Future<TaskDates> setCompletionDate(String id, DateTime completedOn);
-}
-
 /// Görevler arası bağımlılıklar (S3).
 abstract interface class WorkItemDependencyRepository {
   /// `POST /v1/work-items/{id}/dependencies`: [id], [dependsOnId]'yi bekler.
@@ -103,30 +42,6 @@ abstract interface class WorkItemNoteRepository {
 
   /// `DELETE /v1/work-items/{id}/notes/{noteId}`.
   Future<void> delete(String workItemId, String noteId);
-}
-
-/// Tarih değişikliği talepleri. Açma yalnız departman K'si (S3, WORK-K38); liste/inceleme/
-/// silme yalnız ŞY (S1, WORK-K39).
-abstract interface class DateChangeRequestRepository {
-  /// `POST /v1/date-change-requests`.
-  Future<DateChangeRequest> request({
-    required String workItemId,
-    required DateTime start,
-    required DateTime due,
-    String? reason,
-  });
-
-  /// `GET /v1/date-change-requests` (ŞY inceleme yüzü); [pendingOnly] → `status=pending`.
-  Future<CountedList<DateChangeRequest>> list({bool pendingOnly = false});
-
-  /// `GET /v1/date-change-requests/mine` (çağıranın açtıkları).
-  Future<CountedList<DateChangeRequest>> mine();
-
-  /// `POST /v1/date-change-requests/{id}/review`; etkilenen görev sayısı.
-  Future<int> review(String requestId, DateRequestDecision decision);
-
-  /// `DELETE /v1/date-change-requests/{id}` (incelenmiş talep).
-  Future<void> delete(String requestId);
 }
 
 /// Silinmiş görevler (ŞY çöp kutusu, S2; WORK-K45).

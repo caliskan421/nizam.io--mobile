@@ -31,6 +31,8 @@ abstract class ReportTask with _$ReportTask {
     required DateTime? completedOn,
     @JsonKey(name: 'created_by') required ReportPerson createdBy,
     required List<ReportPerson> assignees,
+
+    /// `Lateness.is_overdue` ile aynı kural (WORK-K37): durum `tamamlandi` değilken bugün (kurulum saat dilimi) `end_on`'dan sonraysa `true`; tamamlanmış görevde her zaman `false`.
     @JsonKey(name: 'is_overdue') required bool isOverdue,
     @JsonKey(name: 'days_overdue') required int daysOverdue,
     @JsonKey(name: 'is_completed_late') required bool isCompletedLate,

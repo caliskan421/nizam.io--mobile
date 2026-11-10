@@ -700,6 +700,18 @@ abstract class AppLocalizations {
   /// **'Departman bu programa bağlı değil.'**
   String get errOrganizationDepartmentNotLinked;
 
+  /// organization.existing_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adda bir departman zaten var.'**
+  String get errOrganizationExistingDepartment;
+
+  /// organization.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.'**
+  String get errOrganizationIdempotencyKeyReused;
+
   /// organization.input_invalid
   ///
   /// In tr, this message translates to:
@@ -723,6 +735,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Ad geçersiz.'**
   String get errOrganizationInvalidName;
+
+  /// organization.invalid_request_key
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem anahtarı geçersiz.'**
+  String get errOrganizationInvalidRequestKey;
 
   /// organization.invalid_role
   ///
@@ -922,6 +940,12 @@ abstract class AppLocalizations {
   /// **'Girilen bilgiler geçersiz.'**
   String get errProgramInputInvalid;
 
+  /// program.invalid_color
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçersiz renk seçimi.'**
+  String get errProgramInvalidColor;
+
   /// program.invalid_copy_source
   ///
   /// In tr, this message translates to:
@@ -951,6 +975,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Program adı geçersiz.'**
   String get errProgramInvalidName;
+
+  /// program.invalid_request_key
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem anahtarı geçersiz.'**
+  String get errProgramInvalidRequestKey;
+
+  /// program.invalid_short_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa ad 1–4 harf ya da rakam olmalıdır.'**
+  String get errProgramInvalidShortName;
 
   /// program.invalid_transfer
   ///
@@ -2746,6 +2782,30 @@ abstract class AppLocalizations {
   /// **'Koordinatörlük oluşturuldu ama seçili programa bağlanamadı. Tekrar denediğinde yeni koordinatörlük açılmaz, aynı kayıt bağlanır.'**
   String get uiCoordFormLinkFailed;
 
+  /// ui.coord.form_existing
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adla bir departman zaten var. Mevcut kayıt kullanılacak; türü ve açıklaması değiştirilmez. Bağlamak istiyor musunuz?'**
+  String get uiCoordFormExisting;
+
+  /// ui.coord.form_existing_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adla silinmiş bir departman var. Mevcut kayıt geri yüklenip bağlanacak; türü ve açıklaması değiştirilmez. Devam etmek istiyor musunuz?'**
+  String get uiCoordFormExistingDeleted;
+
+  /// ui.coord.form_existing_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut kaydı kullan'**
+  String get uiCoordFormExistingConfirm;
+
+  /// ui.coord.form_outcome_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Önceki işlemin sonucu bilinmiyor. Aynı bilgilerle yeniden deneyerek işlemi tamamlayın.'**
+  String get uiCoordFormOutcomeUnknown;
+
   /// ui.coord.toast_created
   ///
   /// In tr, this message translates to:
@@ -3507,6 +3567,42 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'sn'**
   String get uiFeedbackSecondsUnit;
+
+  /// ui.home.pending_heading
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen işler'**
+  String get uiHomePendingHeading;
+
+  /// ui.home.pending_error_retry
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen işler yüklenemedi · Yeniden dene'**
+  String get uiHomePendingErrorRetry;
+
+  /// ui.home.pending_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen iş yok'**
+  String get uiHomePendingEmpty;
+
+  /// ui.home.unread_loading
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj sayısı yükleniyor'**
+  String get uiHomeUnreadLoading;
+
+  /// ui.home.unread_error_retry
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj sayısı yüklenemedi · Yeniden dene'**
+  String get uiHomeUnreadErrorRetry;
+
+  /// ui.home.unread_chats
+  ///
+  /// In tr, this message translates to:
+  /// **'Okunmamış sohbet'**
+  String get uiHomeUnreadChats;
 
   /// ui.home.greeting
   ///
@@ -9538,11 +9634,95 @@ abstract class AppLocalizations {
   /// **'Yeni şifre'**
   String get uiUserAccountFieldsNewPassword;
 
-  /// ui.user_account_fields.signed_in_status_hint
+  /// ui.users.program_short_name
   ///
   /// In tr, this message translates to:
-  /// **'Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.'**
-  String get uiUserAccountFieldsSignedInStatusHint;
+  /// **'Kısa ad (1–4 harf veya rakam)'**
+  String get uiUsersProgramShortName;
+
+  /// ui.users.program_color
+  ///
+  /// In tr, this message translates to:
+  /// **'Renk (violet, gold, blue, teal, green, orange, red, slate)'**
+  String get uiUsersProgramColor;
+
+  /// ui.users.program_badge_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa ad veya renk geçersiz.'**
+  String get uiUsersProgramBadgeInvalid;
+
+  /// ui.users.disable_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı kapat'**
+  String get uiUsersDisableAccount;
+
+  /// ui.users.enable_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı aç'**
+  String get uiUsersEnableAccount;
+
+  /// ui.users.disable_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Oturumlar kapatılır, görevler ve geçmiş korunur.'**
+  String get uiUsersDisableConfirm;
+
+  /// ui.users.enable_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap mevcut rol ve üyelikleriyle erişim kazanır; yeniden giriş gerekir.'**
+  String get uiUsersEnableConfirm;
+
+  /// ui.users.account_history_preserved
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler ve geçmiş korunur.'**
+  String get uiUsersAccountHistoryPreserved;
+
+  /// ui.users.account_status_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap durumu bilinmiyor'**
+  String get uiUsersAccountStatusUnknown;
+
+  /// ui.users.own_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendi hesabınız'**
+  String get uiUsersOwnAccount;
+
+  /// ui.users.account_disabled
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap kapalı'**
+  String get uiUsersAccountDisabled;
+
+  /// ui.users.login_locked
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş kilitli'**
+  String get uiUsersLoginLocked;
+
+  /// ui.users.filter_scope
+  ///
+  /// In tr, this message translates to:
+  /// **'geçerli filtre'**
+  String get uiUsersFilterScope;
+
+  /// ui.users.search_name_email
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad veya e-posta ara'**
+  String get uiUsersSearchNameEmail;
+
+  /// ui.users.one_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir koordinatörlük seçebilirsin'**
+  String get uiUsersOneDepartment;
 
   /// ui.users.title
   ///
@@ -9717,12 +9897,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.'**
   String get uiUsersHistoryUnavailable;
-
-  /// ui.users.account_unavailable
-  ///
-  /// In tr, this message translates to:
-  /// **'E-posta, giriş kilidi ve son giriş bilgisi sunucu tarafından okunabilir olarak sunulmuyor. Hesap değişikliklerini aşağıdaki işlemlerden yapabilirsiniz.'**
-  String get uiUsersAccountUnavailable;
 
   /// ui.users.membership_unknown
   ///
@@ -10185,12 +10359,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Hesap aktif'**
   String get uiUsersOpsActive;
-
-  /// ui.users.ops_status_unavailable
-  ///
-  /// In tr, this message translates to:
-  /// **'Durum bilgisi ve açma/kapatma işlemi bu sunucuda sunulmuyor.'**
-  String get uiUsersOpsStatusUnavailable;
 
   /// ui.users.ops_reset_link
   ///

@@ -8,7 +8,6 @@
     "ui.user_account_fields.edit_full_name": "Ad soyadı düzenle",
     "ui.user_account_fields.edit_email": "E-postayı düzenle",
     "ui.user_account_fields.edit_password": "Yeni şifre belirle",
-    "ui.user_account_fields.new_password": "Yeni şifre",
-    "ui.user_account_fields.signed_in_status_hint": "Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor."
+    "ui.user_account_fields.new_password": "Yeni şifre"
   }
 }

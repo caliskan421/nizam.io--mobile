@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
+import 'package:nizamio/core/session/session_controller.dart';
+import 'package:nizamio/core/session/token_store.dart';
+import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
 TaskCatalog moduleCatalog({bool admin = true, bool coordinator = false}) =>
@@ -67,6 +70,12 @@ ProviderContainer moduleContainer({
     overrides: [
       scopeControllerProvider.overrideWithValue(scope),
       sessionGenerationProvider.overrideWithValue(1),
+      sessionControllerProvider.overrideWithValue(
+        SessionController(
+          TokenStore(MemorySecureStore()),
+          (_, _) async => throw StateError('unexpected refresh'),
+        ),
+      ),
       taskCatalogControllerProvider.overrideWith(
         () => TestCatalog(catalog ?? moduleCatalog()),
       ),

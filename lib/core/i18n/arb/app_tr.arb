@@ -1,6 +1,6 @@
 {
   "@@locale": "tr",
-  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit a8e79dd1ae07e19a32d81b69a5cea60546d61039 src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.12.0-api (861beb5ec246f62efb2854f7d4098a3ad5847bba); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
+  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit a8e79dd1ae07e19a32d81b69a5cea60546d61039 src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.15.0-api (b8f6479a7971fa7056823acada47a7db4d9052de); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
   "errAssistantBusy": "Asistan şu anda meşgul; biraz sonra yeniden deneyin.",
   "@errAssistantBusy": {
     "description": "assistant.busy"
@@ -405,6 +405,14 @@
   "@errOrganizationDepartmentNotLinked": {
     "description": "organization.department_not_linked"
   },
+  "errOrganizationExistingDepartment": "Bu adda bir departman zaten var.",
+  "@errOrganizationExistingDepartment": {
+    "description": "organization.existing_department"
+  },
+  "errOrganizationIdempotencyKeyReused": "Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.",
+  "@errOrganizationIdempotencyKeyReused": {
+    "description": "organization.idempotency_key_reused"
+  },
   "errOrganizationInputInvalid": "Girilen bilgiler geçersiz.",
   "@errOrganizationInputInvalid": {
     "description": "organization.input_invalid"
@@ -420,6 +428,10 @@
   "errOrganizationInvalidName": "Ad geçersiz.",
   "@errOrganizationInvalidName": {
     "description": "organization.invalid_name"
+  },
+  "errOrganizationInvalidRequestKey": "İşlem anahtarı geçersiz.",
+  "@errOrganizationInvalidRequestKey": {
+    "description": "organization.invalid_request_key"
   },
   "errOrganizationInvalidRole": "Rol geçersiz.",
   "@errOrganizationInvalidRole": {
@@ -553,6 +565,10 @@
   "@errProgramInputInvalid": {
     "description": "program.input_invalid"
   },
+  "errProgramInvalidColor": "Geçersiz renk seçimi.",
+  "@errProgramInvalidColor": {
+    "description": "program.invalid_color"
+  },
   "errProgramInvalidCopySource": "Ekip kopyası için kaynak program geçersiz.",
   "@errProgramInvalidCopySource": {
     "description": "program.invalid_copy_source"
@@ -572,6 +588,14 @@
   "errProgramInvalidName": "Program adı geçersiz.",
   "@errProgramInvalidName": {
     "description": "program.invalid_name"
+  },
+  "errProgramInvalidRequestKey": "İşlem anahtarı geçersiz.",
+  "@errProgramInvalidRequestKey": {
+    "description": "program.invalid_request_key"
+  },
+  "errProgramInvalidShortName": "Kısa ad 1–4 harf ya da rakam olmalıdır.",
+  "@errProgramInvalidShortName": {
+    "description": "program.invalid_short_name"
   },
   "errProgramInvalidTransfer": "Aktarım isteği geçersiz.",
   "@errProgramInvalidTransfer": {
@@ -1769,6 +1793,22 @@
   "@uiCoordFormLinkFailed": {
     "description": "ui.coord.form_link_failed"
   },
+  "uiCoordFormExisting": "Bu adla bir departman zaten var. Mevcut kayıt kullanılacak; türü ve açıklaması değiştirilmez. Bağlamak istiyor musunuz?",
+  "@uiCoordFormExisting": {
+    "description": "ui.coord.form_existing"
+  },
+  "uiCoordFormExistingDeleted": "Bu adla silinmiş bir departman var. Mevcut kayıt geri yüklenip bağlanacak; türü ve açıklaması değiştirilmez. Devam etmek istiyor musunuz?",
+  "@uiCoordFormExistingDeleted": {
+    "description": "ui.coord.form_existing_deleted"
+  },
+  "uiCoordFormExistingConfirm": "Mevcut kaydı kullan",
+  "@uiCoordFormExistingConfirm": {
+    "description": "ui.coord.form_existing_confirm"
+  },
+  "uiCoordFormOutcomeUnknown": "Önceki işlemin sonucu bilinmiyor. Aynı bilgilerle yeniden deneyerek işlemi tamamlayın.",
+  "@uiCoordFormOutcomeUnknown": {
+    "description": "ui.coord.form_outcome_unknown"
+  },
   "uiCoordToastCreated": "Koordinatörlük eklendi",
   "@uiCoordToastCreated": {
     "description": "ui.coord.toast_created"
@@ -2276,6 +2316,30 @@
   "uiFeedbackSecondsUnit": "sn",
   "@uiFeedbackSecondsUnit": {
     "description": "ui.feedback.seconds_unit"
+  },
+  "uiHomePendingHeading": "Bekleyen işler",
+  "@uiHomePendingHeading": {
+    "description": "ui.home.pending_heading"
+  },
+  "uiHomePendingErrorRetry": "Bekleyen işler yüklenemedi · Yeniden dene",
+  "@uiHomePendingErrorRetry": {
+    "description": "ui.home.pending_error_retry"
+  },
+  "uiHomePendingEmpty": "Bekleyen iş yok",
+  "@uiHomePendingEmpty": {
+    "description": "ui.home.pending_empty"
+  },
+  "uiHomeUnreadLoading": "Mesaj sayısı yükleniyor",
+  "@uiHomeUnreadLoading": {
+    "description": "ui.home.unread_loading"
+  },
+  "uiHomeUnreadErrorRetry": "Mesaj sayısı yüklenemedi · Yeniden dene",
+  "@uiHomeUnreadErrorRetry": {
+    "description": "ui.home.unread_error_retry"
+  },
+  "uiHomeUnreadChats": "Okunmamış sohbet",
+  "@uiHomeUnreadChats": {
+    "description": "ui.home.unread_chats"
   },
   "uiHomeGreeting": "Merhaba",
   "@uiHomeGreeting": {
@@ -6297,9 +6361,65 @@
   "@uiUserAccountFieldsNewPassword": {
     "description": "ui.user_account_fields.new_password"
   },
-  "uiUserAccountFieldsSignedInStatusHint": "Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.",
-  "@uiUserAccountFieldsSignedInStatusHint": {
-    "description": "ui.user_account_fields.signed_in_status_hint"
+  "uiUsersProgramShortName": "Kısa ad (1–4 harf veya rakam)",
+  "@uiUsersProgramShortName": {
+    "description": "ui.users.program_short_name"
+  },
+  "uiUsersProgramColor": "Renk (violet, gold, blue, teal, green, orange, red, slate)",
+  "@uiUsersProgramColor": {
+    "description": "ui.users.program_color"
+  },
+  "uiUsersProgramBadgeInvalid": "Kısa ad veya renk geçersiz.",
+  "@uiUsersProgramBadgeInvalid": {
+    "description": "ui.users.program_badge_invalid"
+  },
+  "uiUsersDisableAccount": "Hesabı kapat",
+  "@uiUsersDisableAccount": {
+    "description": "ui.users.disable_account"
+  },
+  "uiUsersEnableAccount": "Hesabı aç",
+  "@uiUsersEnableAccount": {
+    "description": "ui.users.enable_account"
+  },
+  "uiUsersDisableConfirm": "Oturumlar kapatılır, görevler ve geçmiş korunur.",
+  "@uiUsersDisableConfirm": {
+    "description": "ui.users.disable_confirm"
+  },
+  "uiUsersEnableConfirm": "Hesap mevcut rol ve üyelikleriyle erişim kazanır; yeniden giriş gerekir.",
+  "@uiUsersEnableConfirm": {
+    "description": "ui.users.enable_confirm"
+  },
+  "uiUsersAccountHistoryPreserved": "Görevler ve geçmiş korunur.",
+  "@uiUsersAccountHistoryPreserved": {
+    "description": "ui.users.account_history_preserved"
+  },
+  "uiUsersAccountStatusUnknown": "Hesap durumu bilinmiyor",
+  "@uiUsersAccountStatusUnknown": {
+    "description": "ui.users.account_status_unknown"
+  },
+  "uiUsersOwnAccount": "Kendi hesabınız",
+  "@uiUsersOwnAccount": {
+    "description": "ui.users.own_account"
+  },
+  "uiUsersAccountDisabled": "Hesap kapalı",
+  "@uiUsersAccountDisabled": {
+    "description": "ui.users.account_disabled"
+  },
+  "uiUsersLoginLocked": "Giriş kilitli",
+  "@uiUsersLoginLocked": {
+    "description": "ui.users.login_locked"
+  },
+  "uiUsersFilterScope": "geçerli filtre",
+  "@uiUsersFilterScope": {
+    "description": "ui.users.filter_scope"
+  },
+  "uiUsersSearchNameEmail": "Ad veya e-posta ara",
+  "@uiUsersSearchNameEmail": {
+    "description": "ui.users.search_name_email"
+  },
+  "uiUsersOneDepartment": "Bir koordinatörlük seçebilirsin",
+  "@uiUsersOneDepartment": {
+    "description": "ui.users.one_department"
   },
   "uiUsersTitle": "Kullanıcılar",
   "@uiUsersTitle": {
@@ -6416,10 +6536,6 @@
   "uiUsersHistoryUnavailable": "Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.",
   "@uiUsersHistoryUnavailable": {
     "description": "ui.users.history_unavailable"
-  },
-  "uiUsersAccountUnavailable": "E-posta, giriş kilidi ve son giriş bilgisi sunucu tarafından okunabilir olarak sunulmuyor. Hesap değişikliklerini aşağıdaki işlemlerden yapabilirsiniz.",
-  "@uiUsersAccountUnavailable": {
-    "description": "ui.users.account_unavailable"
   },
   "uiUsersMembershipUnknown": "Üyelik bilgisi bilinmiyor",
   "@uiUsersMembershipUnknown": {
@@ -6728,10 +6844,6 @@
   "uiUsersOpsActive": "Hesap aktif",
   "@uiUsersOpsActive": {
     "description": "ui.users.ops_active"
-  },
-  "uiUsersOpsStatusUnavailable": "Durum bilgisi ve açma/kapatma işlemi bu sunucuda sunulmuyor.",
-  "@uiUsersOpsStatusUnavailable": {
-    "description": "ui.users.ops_status_unavailable"
   },
   "uiUsersOpsResetLink": "Şifre sıfırlama bağlantısı gönder",
   "@uiUsersOpsResetLink": {

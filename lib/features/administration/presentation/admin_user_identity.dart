@@ -32,7 +32,9 @@ class AdminUserIdentity {
   ];
   List<String> departmentNames(TaskCatalog? catalog, String? programId) => {
     for (final membership in user.teams.where((m) => m.programId == programId))
-      if (catalog?.coordinatorship(membership.departmentId)
+      if (membership.displayName.isNotEmpty)
+        membership.displayName
+      else if (catalog?.coordinatorship(membership.departmentId)
           case final department?)
         department.name,
   }.toList();

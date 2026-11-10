@@ -21,36 +21,31 @@ TaskItem _task(
 );
 
 void main() {
-  test(
-    'varsayılan açık; durum seçimleri birleşir ve öncelik seçimiyle kesişir',
-    () {
-      final tasks = [
-        _task('late', overdueDays: 2, priority: TaskPriority.high),
-        _task('review', status: TaskStatus.review),
-        _task('done', status: TaskStatus.done),
-      ];
-      expect(const UserTaskPanelState().select(tasks).map((t) => t.code), [
-        'late',
-        'review',
-      ]);
-      const status = UserTaskPanelState(
-        statuses: {UserTaskStatus.late, UserTaskStatus.review},
-      );
-      expect(status.select(tasks).map((t) => t.code), ['late', 'review']);
-      expect(
-        status
-            .copyWith(priorities: {TaskPriority.high})
-            .select(tasks)
-            .single
-            .code,
-        'late',
-      );
-      expect(
-        const UserTaskPanelState(statuses: {}).select(tasks),
-        hasLength(3),
-      );
-    },
-  );
+  test('varsayılan tüm durumlar; seçimler birleşir ve öncelikle kesişir', () {
+    final tasks = [
+      _task('late', overdueDays: 2, priority: TaskPriority.high),
+      _task('review', status: TaskStatus.review),
+      _task('done', status: TaskStatus.done),
+    ];
+    expect(const UserTaskPanelState().select(tasks).map((t) => t.code), [
+      'late',
+      'review',
+      'done',
+    ]);
+    const status = UserTaskPanelState(
+      statuses: {UserTaskStatus.late, UserTaskStatus.review},
+    );
+    expect(status.select(tasks).map((t) => t.code), ['late', 'review']);
+    expect(
+      status
+          .copyWith(priorities: {TaskPriority.high})
+          .select(tasks)
+          .single
+          .code,
+      'late',
+    );
+    expect(const UserTaskPanelState(statuses: {}).select(tasks), hasLength(3));
+  });
 
   test('tarih grupları sunucu gecikmesini ve tamamlanmayı korur; 7 gün sınırı dahildir', () {
     final today = DateTime(2026, 11, 10);

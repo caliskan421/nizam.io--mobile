@@ -113,6 +113,7 @@ List<Widget> tasksListChildren(
           ValueKey('group:${g.coordinatorship}'),
           _GroupHead(
             group: g,
+            truncated: catalog.truncated,
             name:
                 catalog.coordinatorship(g.coordinatorship)?.name ??
                 g.coordinatorship,
@@ -150,6 +151,7 @@ List<Widget> tasksListChildren(
   return [
     TaskViewGrid(
       counts: r.counts,
+      truncated: catalog.truncated,
       selected: state.view,
       onSelected: ctl.selectView,
     ),
@@ -312,6 +314,7 @@ String _groupCode(TaskCatalog catalog, String key) {
 class _GroupHead extends StatelessWidget {
   const _GroupHead({
     required this.group,
+    required this.truncated,
     required this.name,
     required this.code,
     required this.open,
@@ -319,6 +322,7 @@ class _GroupHead extends StatelessWidget {
   });
 
   final TaskGroup group;
+  final bool truncated;
   final String name;
 
   /// Kısa kod (`ALT`); sunucu kataloğunda departman kodu, kimlik değil.
@@ -333,7 +337,7 @@ class _GroupHead extends StatelessWidget {
     return Semantics(
       button: true,
       expanded: open,
-      label: '$name, $code, ${group.tasks.length}',
+      label: '$name, $code, ${truncated ? '≥' : ''}${group.tasks.length}',
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -375,7 +379,7 @@ class _GroupHead extends StatelessWidget {
                 ),
                 const Gap(NizamioSpacing.space2),
                 Text(
-                  '${group.tasks.length}',
+                  '${truncated ? '≥' : ''}${group.tasks.length}',
                   style: t.monoSm.copyWith(color: c.textMuted),
                 ),
                 const Gap(NizamioSpacing.space2),

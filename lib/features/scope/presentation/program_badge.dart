@@ -41,14 +41,17 @@ class ProgramBadge extends StatelessWidget {
       child: SizedBox(
         width: NizamioSize.controlSm - NizamioSpacing.space1,
         height: NizamioSize.controlSm - NizamioSpacing.space1,
-        child: Center(
-          child: Text(
-            text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.text.caption.copyWith(
-              color: ink,
-              fontWeight: FontWeight.w600,
+        child: Padding(
+          padding: const EdgeInsets.all(NizamioSpacing.space1),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              text,
+              maxLines: 1,
+              style: context.text.caption.copyWith(
+                color: ink,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),

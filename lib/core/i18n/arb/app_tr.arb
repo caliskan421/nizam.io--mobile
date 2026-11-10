@@ -6365,6 +6365,18 @@
   "@uiUserAccountFieldsSignedInStatusHint": {
     "description": "ui.user_account_fields.signed_in_status_hint"
   },
+  "uiUsersProgramShortName": "Kısa ad (1–4 harf veya rakam)",
+  "@uiUsersProgramShortName": {
+    "description": "ui.users.program_short_name"
+  },
+  "uiUsersProgramColor": "Renk (violet, gold, blue, teal, green, orange, red, slate)",
+  "@uiUsersProgramColor": {
+    "description": "ui.users.program_color"
+  },
+  "uiUsersProgramBadgeInvalid": "Kısa ad veya renk geçersiz.",
+  "@uiUsersProgramBadgeInvalid": {
+    "description": "ui.users.program_badge_invalid"
+  },
   "uiUsersDisableAccount": "Hesabı kapat",
   "@uiUsersDisableAccount": {
     "description": "ui.users.disable_account"

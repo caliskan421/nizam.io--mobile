@@ -1,6 +1,9 @@
 {
   "$comment": "Kullanıcı yönetimi liste ve profil ekranları. Elle düzenlenir.",
   "texts": {
+    "ui.users.program_short_name": "Kısa ad (1–4 harf veya rakam)",
+    "ui.users.program_color": "Renk (violet, gold, blue, teal, green, orange, red, slate)",
+    "ui.users.program_badge_invalid": "Kısa ad veya renk geçersiz.",
     "ui.users.disable_account": "Hesabı kapat",
     "ui.users.enable_account": "Hesabı aç",
     "ui.users.disable_confirm": "Oturumlar kapatılır, görevler ve geçmiş korunur.",

@@ -211,7 +211,9 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
         : value.hasError
         ? AsyncError(value.error!, value.stackTrace ?? StackTrace.current)
         : value;
-    final user = allowed && !value.isLoading && !value.hasError ? value.value : null;
+    final user = allowed && !value.isLoading && !value.hasError
+        ? value.value
+        : null;
     if (user == null) {
       _headingTopAtZero = null;
       _headingHeight = null;

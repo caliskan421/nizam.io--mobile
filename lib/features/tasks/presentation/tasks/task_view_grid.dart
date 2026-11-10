@@ -27,11 +27,13 @@ class TaskViewGrid extends StatelessWidget {
     required this.counts,
     required this.selected,
     required this.onSelected,
+    this.truncated = false,
   });
 
   final Map<TaskView, int> counts;
   final TaskView selected;
   final ValueChanged<TaskView> onSelected;
+  final bool truncated;
 
   /// Tek satıra geçilen genişlik (kutucuk ~85'ten geniş kalır).
   static const singleRowMinWidth = 720.0;
@@ -55,6 +57,7 @@ class TaskViewGrid extends StatelessWidget {
     Widget tile(TaskView v) => _ViewTile(
       view: v,
       count: counts[v] ?? 0,
+      truncated: truncated,
       selected: v == selected,
       onTap: () => onSelected(v),
     );
@@ -102,12 +105,14 @@ class _ViewTile extends StatelessWidget {
   const _ViewTile({
     required this.view,
     required this.count,
+    required this.truncated,
     required this.selected,
     required this.onTap,
   });
 
   final TaskView view;
   final int count;
+  final bool truncated;
   final bool selected;
   final VoidCallback onTap;
 
@@ -127,7 +132,7 @@ class _ViewTile extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '${l.viewLabel(view)}, $count',
+      label: '${l.viewLabel(view)}, ${truncated ? '≥' : ''}$count',
       excludeSemantics: true,
       child: NzPressable.card(
         child: InkWell(
@@ -151,7 +156,7 @@ class _ViewTile extends StatelessWidget {
               children: [
                 NzDot(color: viewDot(view, c)),
                 Text(
-                  '$count',
+                  '${truncated ? '≥' : ''}$count',
                   style: tablet
                       ? t.titleSm.copyWith(
                           fontSize: _tileNum,

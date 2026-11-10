@@ -5001,6 +5001,16 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.';
 
   @override
+  String get uiUsersProgramShortName => 'Kısa ad (1–4 harf veya rakam)';
+
+  @override
+  String get uiUsersProgramColor =>
+      'Renk (violet, gold, blue, teal, green, orange, red, slate)';
+
+  @override
+  String get uiUsersProgramBadgeInvalid => 'Kısa ad veya renk geçersiz.';
+
+  @override
   String get uiUsersDisableAccount => 'Hesabı kapat';
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
@@ -13,6 +14,7 @@ class AdminProgramActions extends ConsumerWidget {
   const AdminProgramActions({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     final state = ref.watch(currentProgramControllerProvider);
     final program = state.value;
     if (state.isLoading ||
@@ -60,13 +62,13 @@ class AdminProgramActions extends ConsumerWidget {
                 required: false,
               ),
               (
-                label: 'Kısa ad (1–4 harf veya rakam)',
+                label: l.uiUsersProgramShortName,
                 initial: program.shortName ?? '',
                 secret: false,
                 required: false,
               ),
               (
-                label: 'Renk (violet, gold, blue, teal, green, orange, red, slate)',
+                label: l.uiUsersProgramColor,
                 initial: program.color == ProgramColor.unknown
                     ? ''
                     : program.color?.name ?? '',
@@ -84,7 +86,7 @@ class AdminProgramActions extends ConsumerWidget {
             final shortName = values[3].trim();
             final color = values[4].trim();
             if (!_validBadge(shortName, color)) {
-              NzToast.show(context, 'Kısa ad veya renk geçersiz.');
+              NzToast.show(context, l.uiUsersProgramBadgeInvalid);
               return;
             }
             await run(() async {
@@ -125,13 +127,13 @@ class AdminProgramActions extends ConsumerWidget {
               ),
               (label: 'Açıklama', initial: '', secret: false, required: false),
               (
-                label: 'Kısa ad (1–4 harf veya rakam)',
+                label: l.uiUsersProgramShortName,
                 initial: '',
                 secret: false,
                 required: false,
               ),
               (
-                label: 'Renk (violet, gold, blue, teal, green, orange, red, slate)',
+                label: l.uiUsersProgramColor,
                 initial: '',
                 secret: false,
                 required: false,
@@ -147,7 +149,7 @@ class AdminProgramActions extends ConsumerWidget {
             final shortName = values[3].trim();
             final color = values[4].trim();
             if (!_validBadge(shortName, color)) {
-              NzToast.show(context, 'Kısa ad veya renk geçersiz.');
+              NzToast.show(context, l.uiUsersProgramBadgeInvalid);
               return;
             }
             await run(

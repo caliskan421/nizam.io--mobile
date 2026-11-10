@@ -9640,6 +9640,24 @@ abstract class AppLocalizations {
   /// **'Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.'**
   String get uiUserAccountFieldsSignedInStatusHint;
 
+  /// ui.users.program_short_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa ad (1–4 harf veya rakam)'**
+  String get uiUsersProgramShortName;
+
+  /// ui.users.program_color
+  ///
+  /// In tr, this message translates to:
+  /// **'Renk (violet, gold, blue, teal, green, orange, red, slate)'**
+  String get uiUsersProgramColor;
+
+  /// ui.users.program_badge_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa ad veya renk geçersiz.'**
+  String get uiUsersProgramBadgeInvalid;
+
   /// ui.users.disable_account
   ///
   /// In tr, this message translates to:

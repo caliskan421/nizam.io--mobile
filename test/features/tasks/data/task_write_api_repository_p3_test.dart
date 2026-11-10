@@ -214,6 +214,7 @@ void main() {
       _task(),
       DateTime(2026, 7, 2),
       DateTime(2026, 10, 4),
+      requestKey: 'key-1',
       reason: 'Tedarik',
     );
     expect('${a.last.method} ${a.last.path}', 'POST /v1/date-change-requests');
@@ -222,7 +223,9 @@ void main() {
       'new_start_on': '2026-07-02',
       'new_end_on': '2026-10-04',
       'reason': 'Tedarik',
+      'expected_dates_revision': 7,
     });
+    expect(a.last.headers['Idempotency-Key'], 'key-1');
     expect(a.last.extra.values, contains('d9'));
 
     (dio, a) = fakeDio({'affected_tasks_count': 1});

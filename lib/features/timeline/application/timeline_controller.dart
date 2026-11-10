@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
 import '../../../core/server/write_compat.dart';
@@ -43,14 +44,34 @@ class TimelineController extends _$TimelineController {
   TaskItem? _baseTask;
   bool _busy = false;
   int _epoch = 0;
-  bool _valid(int epoch) => ref.mounted && epoch == _epoch;
+  int _ownerSession = 0;
+  String? _ownerProgram;
+  String? _ownerDepartment;
+  RequestKeys _requestKeys = const RequestKeys();
+  TaskItem? _requestBase;
+  String? _requestBody;
+  bool _valid(int epoch) {
+    if (!ref.mounted || epoch != _epoch) return false;
+    final scope = ref.read(scopeControllerProvider).current;
+    return ref.read(sessionControllerProvider).generation == _ownerSession &&
+        scope.programId == _ownerProgram &&
+        scope.departmentId == _ownerDepartment;
+  }
+
   @override
   TimelineState build(String? coordinatorship) {
     ref.watch(sessionGenerationProvider);
     ref.watch(scopeStateProvider);
+    _ownerSession = ref.read(sessionControllerProvider).generation;
+    final scope = ref.read(scopeControllerProvider).current;
+    _ownerProgram = scope.programId;
+    _ownerDepartment = scope.departmentId;
     _epoch++;
     _baseTask = null;
     _busy = false;
+    _requestKeys = const RequestKeys();
+    _requestBase = null;
+    _requestBody = null;
     final all =
         coordinatorship == null ||
         coordinatorship == timelineAllCoordinatorships;
@@ -324,15 +345,57 @@ class TimelineController extends _$TimelineController {
       throw ApiError('work.not_authorized');
     }
     if (task.hasPendingRequest) return const TimelineRequestPending();
+    final baseTask = _baseTask;
+    if (!serverSupportsVersionedWrites(ref.read(bindingStateProvider)) ||
+        baseTask?.datesRevision == null) {
+      throw ApiError('client.server_outdated');
+    }
+    final start = seasonDate(draft.start, c.today.year);
+    final body =
+        '${task.id}|${start.toIso8601String()}|${end.toIso8601String()}';
+    if (_requestBody != body) {
+      _requestBody = body;
+      _requestBase = baseTask;
+    }
+    final base = _requestBase!;
+    final (keys, key) = _requestKeys.keyFor(
+      'date_request',
+      '$body|${base.datesRevision}',
+    );
+    _requestKeys = keys;
     _busy = true;
     try {
-      await ref
-          .read(taskWriteRepositoryProvider)
-          .requestDateChange(task, seasonDate(draft.start, c.today.year), end);
+      try {
+        await ref
+            .read(taskWriteRepositoryProvider)
+            .requestDateChange(base, start, end, requestKey: key);
+      } on Object catch (e) {
+        final error = toApiError(e);
+        if (_valid(epoch) &&
+            (error.code == 'work.edit_conflict' || isKeyReused(error))) {
+          _requestKeys = _requestKeys.clear('date_request');
+          _requestBase = null;
+          _requestBody = null;
+          if (error.code == 'work.edit_conflict') {
+            try {
+              await ref.read(taskCatalogControllerProvider.notifier).reload();
+            } on Object {
+              /* Hata asıl çakışma sonucunu gölgelemez. */
+            }
+            if (_valid(epoch)) state = _cleared(state);
+          }
+        }
+        rethrow;
+      }
       if (_valid(epoch)) {
-        await ref.read(taskCatalogControllerProvider.notifier).reload();
-        if (_valid(epoch)) {
-          await ref.read(ganttScheduleProvider.future);
+        _requestKeys = _requestKeys.clear('date_request');
+        _requestBase = null;
+        _requestBody = null;
+        try {
+          await ref.read(taskCatalogControllerProvider.notifier).reload();
+          if (_valid(epoch)) await ref.read(ganttScheduleProvider.future);
+        } on Object {
+          /* Yazma sonucu başarıdır; okuma hatası kaynak durumunda kalır. */
         }
       }
     } finally {

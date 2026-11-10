@@ -13,6 +13,8 @@ abstract class Department with _$Department {
     @JsonKey(name: 'department_id') required String departmentId,
     required String name,
     required String kind,
+
+    /// Kısa kod (büyük harf); kod verilmemişse alan yoktur.
     String? code,
     String? description,
   }) = _Department;

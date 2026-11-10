@@ -212,13 +212,15 @@ class _ProgramClient implements ProgramClient {
   @override
   Future<ProgramDepartmentLink> linkDepartment({
     required LinkDepartmentRequest body,
+    String? idempotencyKey,
     Map<String, dynamic>? extras = ProgramClient.linkDepartmentOpenapiExtras,
   }) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Idempotency-Key': idempotencyKey};
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _options = _setStreamType<ProgramDepartmentLink>(
@@ -235,6 +237,39 @@ class _ProgramClient implements ProgramClient {
     late ProgramDepartmentLink _value;
     try {
       _value = ProgramDepartmentLink.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<ProgramDepartmentDetail> readProgramDepartment({
+    required String departmentId,
+    Map<String, dynamic>? extras =
+        ProgramClient.readProgramDepartmentOpenapiExtras,
+  }) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras ?? <String, dynamic>{});
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<ProgramDepartmentDetail>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/v1/program/departments/${departmentId}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late ProgramDepartmentDetail _value;
+    try {
+      _value = ProgramDepartmentDetail.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

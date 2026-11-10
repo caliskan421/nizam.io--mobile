@@ -700,6 +700,18 @@ abstract class AppLocalizations {
   /// **'Departman bu programa bağlı değil.'**
   String get errOrganizationDepartmentNotLinked;
 
+  /// organization.existing_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adda bir departman zaten var.'**
+  String get errOrganizationExistingDepartment;
+
+  /// organization.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.'**
+  String get errOrganizationIdempotencyKeyReused;
+
   /// organization.input_invalid
   ///
   /// In tr, this message translates to:
@@ -723,6 +735,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Ad geçersiz.'**
   String get errOrganizationInvalidName;
+
+  /// organization.invalid_request_key
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem anahtarı geçersiz.'**
+  String get errOrganizationInvalidRequestKey;
 
   /// organization.invalid_role
   ///
@@ -922,6 +940,12 @@ abstract class AppLocalizations {
   /// **'Girilen bilgiler geçersiz.'**
   String get errProgramInputInvalid;
 
+  /// program.invalid_color
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçersiz renk seçimi.'**
+  String get errProgramInvalidColor;
+
   /// program.invalid_copy_source
   ///
   /// In tr, this message translates to:
@@ -951,6 +975,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Program adı geçersiz.'**
   String get errProgramInvalidName;
+
+  /// program.invalid_request_key
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem anahtarı geçersiz.'**
+  String get errProgramInvalidRequestKey;
+
+  /// program.invalid_short_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa ad 1–4 harf ya da rakam olmalıdır.'**
+  String get errProgramInvalidShortName;
 
   /// program.invalid_transfer
   ///

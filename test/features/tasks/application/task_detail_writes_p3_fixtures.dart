@@ -57,6 +57,7 @@ class _Server {
   List<Map<String, Object?>> files = [_file('f1', 'acc-1'), _file('f2', 'u2')];
   List<Map<String, Object?>> extraItems = [];
   Map<String, Object?>? pendingRequest;
+  bool failDetails = false;
 
   final Map<String, ResponseBody Function()> writes = {};
   Completer<void>? hold;
@@ -111,6 +112,7 @@ class _Server {
           ],
         });
       case 'GET /v1/work-items/w1':
+        if (failDetails) return envelope(500, 'platform.internal');
         return jsonResponse(200, {
           ..._item(
             'w1',

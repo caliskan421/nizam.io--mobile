@@ -200,6 +200,10 @@ class CoordBackend extends PilotBackend {
                   w['department_id'] == r.header('X-Nizamio-Department'))
                 {
                   ...w,
+                  'pending_date_request': w['pending_date_request'],
+                  'subtask_counts':
+                      w['subtask_counts'] ?? {'total': 0, 'done': 0},
+                  'dates_revision': w['dates_revision'] ?? 1,
                   'planned_end_on': '',
                   'completed_on': w['completed_on'] ?? '',
                   'lateness': {

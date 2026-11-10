@@ -106,10 +106,13 @@ const localizedErrorCodes = <String>{
   'organization.department_in_use',
   'organization.department_not_found',
   'organization.department_not_linked',
+  'organization.existing_department',
+  'organization.idempotency_key_reused',
   'organization.input_invalid',
   'organization.invalid_code',
   'organization.invalid_kind',
   'organization.invalid_name',
+  'organization.invalid_request_key',
   'organization.invalid_role',
   'organization.invalid_sort',
   'organization.last_admin',
@@ -143,11 +146,14 @@ const localizedErrorCodes = <String>{
   'program.duplicate_transfer_item',
   'program.idempotency_key_reused',
   'program.input_invalid',
+  'program.invalid_color',
   'program.invalid_copy_source',
   'program.invalid_cursor',
   'program.invalid_description',
   'program.invalid_limit',
   'program.invalid_name',
+  'program.invalid_request_key',
+  'program.invalid_short_name',
   'program.invalid_transfer',
   'program.invalid_year',
   'program.not_authorized',
@@ -472,6 +478,10 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errOrganizationDepartmentNotFound;
     case 'organization.department_not_linked':
       return l.errOrganizationDepartmentNotLinked;
+    case 'organization.existing_department':
+      return l.errOrganizationExistingDepartment;
+    case 'organization.idempotency_key_reused':
+      return l.errOrganizationIdempotencyKeyReused;
     case 'organization.input_invalid':
       return l.errOrganizationInputInvalid;
     case 'organization.invalid_code':
@@ -480,6 +490,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errOrganizationInvalidKind;
     case 'organization.invalid_name':
       return l.errOrganizationInvalidName;
+    case 'organization.invalid_request_key':
+      return l.errOrganizationInvalidRequestKey;
     case 'organization.invalid_role':
       return l.errOrganizationInvalidRole;
     case 'organization.invalid_sort':
@@ -546,6 +558,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errProgramIdempotencyKeyReused;
     case 'program.input_invalid':
       return l.errProgramInputInvalid;
+    case 'program.invalid_color':
+      return l.errProgramInvalidColor;
     case 'program.invalid_copy_source':
       return l.errProgramInvalidCopySource;
     case 'program.invalid_cursor':
@@ -556,6 +570,10 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errProgramInvalidLimit;
     case 'program.invalid_name':
       return l.errProgramInvalidName;
+    case 'program.invalid_request_key':
+      return l.errProgramInvalidRequestKey;
+    case 'program.invalid_short_name':
+      return l.errProgramInvalidShortName;
     case 'program.invalid_transfer':
       return l.errProgramInvalidTransfer;
     case 'program.invalid_year':

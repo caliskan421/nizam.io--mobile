@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket v0.12.0-api (861beb5ec246f62efb2854f7d4098a3ad5847bba) — docs/api/error-codes.json
+// Kaynak: nizam.io--backend etiket v0.15.0-api (b8f6479a7971fa7056823acada47a7db4d9052de) — docs/api/error-codes.json
 
 import '../api_meta.dart';
 
@@ -439,7 +439,7 @@ const errorCatalog = <String, ErrorCatalogEntry>{
   ),
   'organization.department_exists': ErrorCatalogEntry(
     statuses: [409],
-    fields: [],
+    fields: ['organization.existing_department'],
     messageKey: 'errors.organization.department_exists',
   ),
   'organization.department_in_use': ErrorCatalogEntry(
@@ -457,12 +457,23 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     fields: [],
     messageKey: 'errors.organization.department_not_linked',
   ),
+  'organization.existing_department': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.organization.existing_department',
+  ),
+  'organization.idempotency_key_reused': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.organization.idempotency_key_reused',
+  ),
   'organization.input_invalid': ErrorCatalogEntry(
     statuses: [422],
     fields: [
       'organization.invalid_code',
       'organization.invalid_kind',
       'organization.invalid_name',
+      'organization.invalid_request_key',
       'organization.invalid_role',
       'organization.invalid_sort',
       'organization.program_required',
@@ -612,10 +623,13 @@ const errorCatalog = <String, ErrorCatalogEntry>{
   'program.input_invalid': ErrorCatalogEntry(
     statuses: [422],
     fields: [
+      'program.invalid_color',
       'program.invalid_copy_source',
       'program.invalid_description',
       'program.invalid_limit',
       'program.invalid_name',
+      'program.invalid_request_key',
+      'program.invalid_short_name',
       'program.invalid_year',
       'program.password_required',
     ],

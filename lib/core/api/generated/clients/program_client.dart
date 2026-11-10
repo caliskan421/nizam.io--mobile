@@ -9,6 +9,7 @@ import '../models/create_program_request.dart';
 import '../models/delete_program_request.dart';
 import '../models/link_department_request.dart';
 import '../models/program.dart';
+import '../models/program_department_detail.dart';
 import '../models/program_department_link.dart';
 import '../models/program_department_list.dart';
 import '../models/program_list.dart';
@@ -82,6 +83,14 @@ abstract class ProgramClient {
         'openapi': <String, dynamic>{
           'tags': <String>["program"],
           'operationId': "linkDepartment",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> readProgramDepartmentOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["program"],
+          'operationId': "readProgramDepartment",
           'externalDocsUrl': null,
         },
       };
@@ -215,12 +224,35 @@ abstract class ProgramClient {
   /// Ad verilmezse katalog adı kopyalanır. `copy_members_from_program_id`.
   /// verilirse kaynak programdaki aynı departmanın ekibi rolleriyle.
   /// kopyalanır (silinmiş hesaplar hariç). Bağ zaten varsa 201 ve var olan.
-  /// bağ döner; ekip yeniden kopyalanmaz (ADR-0023).
+  /// bağ döner; ekip yeniden kopyalanmaz (ADR-0023). İsteğe bağlı.
+  /// `Idempotency-Key` (aktör kapsamlı; parmak izi program, departman,.
+  /// programdaki ad, kopya kaynağı): anahtar bağ bu istekle kurulsa da zaten.
+  /// var olsa da kaydedilir; bağ yaşadıkça tekrar 200 + bağın bugünkü hâli.
+  /// (`copied_member_count` 0), farklı istek 409 `program.idempotency_key_reused`.
+  ///
+  /// [idempotencyKey] - İsteğe bağlı işlem anahtarı (ADR-0027 kalıbı). Verilmezse uç anahtarsız davranır (mevcut davranış). Verilirse (boş ya da yalnız boşluk dahil) kırpılmış uzunluk 22–200 bayttır, aksi 422 `<mod>.input_invalid` (alan `idempotency_key`, kod `<mod>.invalid_request_key`). Anahtar aktör + uç tablosu kapsamındadır ve kaynak satırında yaşar. Aynı anahtar + aynı normalize istek ilk kaynağın bugünkü temsilini 200 ile döndürür; farklı istek 409 `<mod>.idempotency_key_reused`; aynı anahtarlı eşzamanlı istek ilk isteğin bitişini bekler ve tekrar olarak döner.
   @POST('/v1/program/departments')
   Future<ProgramDepartmentLink> linkDepartment({
     @Body() required LinkDepartmentRequest body,
+    @Header('Idempotency-Key') String? idempotencyKey,
     @Extras()
     Map<String, dynamic>? extras = ProgramClient.linkDepartmentOpenapiExtras,
+  });
+
+  /// Kapsamdaki programa bağlı tek departman; programdaki ad ve katalog nitelikleri.
+  ///
+  /// Görünürlük `listProgramDepartments` ile aynıdır (PROGRAM-K44): şirket.
+  /// yöneticisi ya da bu programda ekip satırı olan hesap; başka programda ekip.
+  /// satırı olan hesap ve olmayan program `404 program.not_found`, hiç ekip satırı.
+  /// olmayan hesap `403 organization.membership_required`. Görünür programda.
+  /// bağsız, başka programa bağlı, yumuşak silinmiş ya da var olmayan departman.
+  /// `404 program.department_not_found`.
+  @GET('/v1/program/departments/{departmentId}')
+  Future<ProgramDepartmentDetail> readProgramDepartment({
+    @Path('departmentId') required String departmentId,
+    @Extras()
+    Map<String, dynamic>? extras =
+        ProgramClient.readProgramDepartmentOpenapiExtras,
   });
 
   /// Departmanın kapsamdaki programdaki adını değiştirir.

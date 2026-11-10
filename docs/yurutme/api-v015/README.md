@@ -6,11 +6,13 @@ Durum: Açık — 2026-11-10. Koordinatör: ana ajan; uygulama/test yazımı: Te
 
 API pini v0.15.0-api olur. Mevcut feature-first, controller/Riverpod + get_it mimarisi korunur. Backend ve yönetim deposu değiştirilmez. Ana mobil çalışma ağacındaki kaydedilmemiş çalışmalar kapsam dışı ve dokunulmazdır. Ayrı worktree, mevcut kullanıcı arayüzü dalının kaydedilmiş ucunu içerir; bu tasarım dalını main'e birleştirme kararı bu işte otomatik verilmez.
 
+Teslim zinciri: mevcut kullanıcı/tablo PR #59 → arayüz PR #60 → bu geçişin ayrı PR'ı. Bu geçiş arayüz dalını taban alır; onun main'e birleşmesini zorlamaz. Son head commit [skip ci] taşır ve mobil CI tetiklenmez.
+
 ## Fazlar ve kabul
 
 | Faz | İş | Kabul | Durum |
 |---|---|---|---|
-| M015-0 | Pin, üretim, hata metinleri, Gantt HttpResponse, fixture uyumu | Etiketten üretim tekrarlanabilir; taban/yükseltme kırmızısı ayrılır; sınır/lint kapıları korunur | Bekliyor |
+| M015-0 | Pin, üretim, hata metinleri, Gantt HttpResponse, fixture uyumu | Etiketten üretim tekrarlanabilir; taban/yükseltme kırmızısı ayrılır; sınır/lint kapıları korunur | Uygulanıyor |
 | M015-1 | Tarih talebi anahtarı/sürümü; Gantt kesilme bilgisi; ölü repository temizliği | Aynı belirsiz işlemde aynı gövde+anahtar+sürüm; 200/201 başarı; çakışmada taze okuma ve kullanıcı kararı; oturum/kapsam sızıntısı yok | Bekliyor |
 | M015-2 | Kullanıcı listesi/sayaç/profil ve hesap kapatma-açma | Sunucu filtre/sıra; boş sayfa+dolu imleç devam eder; sorgu değişiminde eski cevap atılır; sayaçlar doğru kapsamda; readUser; kilit/kapalı ayrımı; self/last_admin/403/404 ve changed:false | Bekliyor |
 | M015-3 | Koordinatörlük ayrıntısı ve iki adımlı oluşturma/bağlama | readProgramDepartment; adım başına anahtar; mevcut/silinmiş departmanda açık kullanıcı onayı; kısmi başarıdan kalan adıma devam; küresel kayıt sessiz değiştirilmez | Bekliyor |
@@ -23,6 +25,7 @@ API pini v0.15.0-api olur. Mevcut feature-first, controller/Riverpod + get_it mi
 - Dönem seçicisinde ad/kısa ad/renk bulunur; her dönem için ayrı sayaç isteği eklenmez. Program listesi bu sayaçları taşımıyor.
 - Hesabı kapatma silme değildir: oturumlar iptal, erişim kapalı; görev/geçmiş kalır. Açma eski rol/üyeliklerden gelen erişimi geri verir. UI bunu açıklar; sunucu yetkisi esastır.
 - E-posta yalnız yetkili yönetici kullanıcı yüzünde gösterilir. Başarısız giriş kilidi ve yönetici kapatması ayrı gösterilir.
+- Kullanıcı filtresi tek departman seçer; API çoklu departman ve üyeliksiz/atanmamış filtresi desteklemediğinden bu seçenekler sunulmaz. Arama ad/e-posta içindir; eski yerel departman adı araması kaldırılır. Departman seçeneklerinde eksik listeden türetilmiş kesin kişi sayısı gösterilmez. Bu görünür ürün farkları teslimde belirtilir.
 - Silinmiş departman otomatik geri yüklenmez; mevcut kaydı bağlama ve geri yükleme açık onay ister. Oluşturma formunun tür/açıklaması mevcut kaydı sessiz ezmez.
 - Dönem kısa adı ve rengi temizlenebilir. Üretilmiş kod elle değiştirilmez; üç hâlli PATCH için mevcut üretici/altyapıda en küçük tipli çözüm kullanılır, katman sınırı delinmez.
 - Kart verisi zaten tek özet cevabından geliyorsa yeni sayaç isteği eklenmez. Görev listesi sayaçları gerekirse countProgramWorkItems ile aynı filtrede beslenir; yalnız saymak için bütün sayfalar çekilmez. Tam katalog zaten işlev için gerekliyse fazladan çağrı eklenmez.

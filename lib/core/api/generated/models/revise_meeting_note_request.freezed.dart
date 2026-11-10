@@ -16,6 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ReviseMeetingNoteRequest {
 
+/// Not içeriği. Sunucu düz metne indirir; sonuç boş olamaz, kontrol karakteri taşıyamaz ve en çok 5000 karakterdir (Unicode kod noktası/rune, düz metne indirildikten sonra ölçülür); aksi 422 `collaboration.input_invalid` (alan `content`).
  String get content;/// İstemcinin gördüğü not `edit_revision` değeri (ADR-0027). Eksikse 422 `collaboration.input_invalid` + `collaboration.revision_required`, pozitif değilse `collaboration.revision_invalid`; bayatsa ve içerik farklıysa 409 `collaboration.edit_conflict`. Tamsayı olmayan değer 422 `collaboration.input_invalid` (alan `body`).
 @JsonKey(name: 'expected_revision') int get expectedRevision;
 /// Create a copy of ReviseMeetingNoteRequest
@@ -220,6 +221,7 @@ class _ReviseMeetingNoteRequest implements ReviseMeetingNoteRequest {
   const _ReviseMeetingNoteRequest({required this.content, @JsonKey(name: 'expected_revision') required this.expectedRevision});
   factory _ReviseMeetingNoteRequest.fromJson(Map<String, dynamic> json) => _$ReviseMeetingNoteRequestFromJson(json);
 
+/// Not içeriği. Sunucu düz metne indirir; sonuç boş olamaz, kontrol karakteri taşıyamaz ve en çok 5000 karakterdir (Unicode kod noktası/rune, düz metne indirildikten sonra ölçülür); aksi 422 `collaboration.input_invalid` (alan `content`).
 @override final  String content;
 /// İstemcinin gördüğü not `edit_revision` değeri (ADR-0027). Eksikse 422 `collaboration.input_invalid` + `collaboration.revision_required`, pozitif değilse `collaboration.revision_invalid`; bayatsa ve içerik farklıysa 409 `collaboration.edit_conflict`. Tamsayı olmayan değer 422 `collaboration.input_invalid` (alan `body`).
 @override@JsonKey(name: 'expected_revision') final  int expectedRevision;

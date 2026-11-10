@@ -71,9 +71,9 @@ void main() {
   group('listUsers', () {
     test('GET /v1/admin/users: süzgeç/sıralama/sayfa sorguda; imleç', () async {
       final (repo, a) = _repo(
-        '{"users":[{"account_id":"a1","full_name":"Ayşe","memberships":["Basın:uye"]},'
-        '{"account_id":"a2","full_name":"Bora","memberships":null}],'
-        '"next_cursor":"c2"}',
+        '{"users":[{"account_id":"a1","full_name":"Ayşe","email":"a@b.c","company_admin":false,"account_status":"active","login_locked":false,"teams":[],"memberships":["Basın:uye"]},'
+        '{"account_id":"a2","full_name":"Bora","email":"b@b.c","company_admin":false,"account_status":"active","login_locked":false,"teams":[],"memberships":null}],'
+        '"total":2,"role_counts":{"all":2,"company_admin":0,"koordinator":1,"uye":1},"next_cursor":"c2"}',
       );
       final slice = await repo.listUsers(
         page: const PageRequest(limit: 20, cursor: 'c1'),
@@ -101,7 +101,9 @@ void main() {
     });
 
     test('süzgeçsiz: sorgu boş; users null → boş; son sayfa', () async {
-      final (repo, a) = _repo('{"users":null}');
+      final (repo, a) = _repo(
+        '{"users":null,"total":0,"role_counts":{"all":0,"company_admin":0,"koordinator":0,"uye":0}}',
+      );
       final slice = await repo.listUsers();
       expect(a.seen!.uri.queryParameters, isEmpty);
       expect(slice.items, isEmpty);

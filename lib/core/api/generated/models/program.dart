@@ -4,6 +4,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'program_color.dart';
+
 part 'program.freezed.dart';
 part 'program.g.dart';
 
@@ -12,6 +14,12 @@ abstract class Program with _$Program {
   const factory Program({
     @JsonKey(name: 'program_id') required String programId,
     required String name,
+
+    /// Dönemin kısa adı (PROGRAM-K46): 1–4 Unicode harf ya da rakam, kırpılmış, harf büyüklüğü korunur. Verilmemişse `null`; alan her cevapta bulunur.
+    @JsonKey(name: 'short_name') required String? shortName,
+
+    /// Dönem rozetinin palet anahtarı (PROGRAM-K46). Verilmemişse `null`; alan her cevapta bulunur.
+    required ProgramColor? color,
     int? year,
     String? description,
 

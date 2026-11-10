@@ -22,3 +22,17 @@ Kod turu: Bekliyor. Bu rapor uygulamanın kabul edildiği anlamına gelmez.
 - D02: TimelineController._valid yalnız epoch/mounted kullanıyor. SessionController.clear gerçek nesli artırıp depo silmesini beklerken provider bildirimi henüz gelmeyebilir. İşlem sahipliği gerçek session.generation + program/departman snapshot'ıyla doğrulanmalı; depo silmesi geciken yarış testi gerekli.
 
 Diğer sonuçlar: form açılış sürümü ve conflict'te eski taslağı kapatma uygulanmış; başarı sonrası okuma hatası başarıyı koruyor; Gantt OR uygulanmış, çok koltuklu sıra testi eksik; ölü repository'lerin üretim tüketicisi kalmamış. Dosya tavanı büyütülmeden tarih akışı mixin'e ayrılmış. D01/D02 kapanmadan faz kabul edilmez.
+
+## Faz kapanış okumaları
+
+- D01/D02 kaynakta düzeltildi; Sol kapanış okumasında yeni P1 bulmadı. Yarış testleri birleşik hedefli grupta doğrulandı.
+- M015-3: eski AsyncValue ayrıntısının yeni kapsamla birleşmesi P1'i sahiplik damgası ve loading/error süzmesiyle kapandı. Sol tekrar okudu; Luna GET=2 sınırını koruyan ayrıntı testlerini yeşil doğruladı.
+- M015-4: Sol iki alanla sınırlı PATCH üretimini, DTO sınırını, bilinmeyen rengi, rozet sahipliğini ve token blob'unu okudu; açık engel bulmadı. Luna 58 hedefli testi doğruladı.
+
+## Birleşik nihai tur — Sol
+
+25'ten fazla salt okunur kabuk çağrısıyla tüm geçiş incelendi. D03 açık P1: HomeDashboardController._load katalog await'inden sonra gerçek sahipliği doğrulamadan yönetici raporu/ekip ekleri HTTP'sini başlatabiliyor. Kontrol yalnız build sonunda kalmamalı; sonraki HTTP'den önce generation+program/departman kontrolü ve mutlak sıfır çağrı testi gerekli.
+
+P2 sunucu filtre/sayaçları, tekil profil, onay sonrası hesap eylemi sahipliği; P5 bağımsız bölüm ve retry; DTO/DI sınırları ile önceki fazlar için başka engel bulunmadı. D03 kapanmadan nihai kabul yok.
+
+Birleşik hedefli koşum ayrıca iki mevcut profil akışı testini farklı nedenle kırmızı buldu: Flex dışında fallback yönü olmayan Gap render hatası ve ekrandışı Takvim dokunuşu. Aynı test adlarının tabanda kırmızı olması bu yeni nedeni taban sorunu saydırmaz; kaynak ve akış düzeltilerek yeniden doğrulanacak.

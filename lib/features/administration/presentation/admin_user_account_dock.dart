@@ -58,7 +58,11 @@ class AdminUserAccountDockSlot extends ConsumerWidget {
               onDiscard: ref.read(provider.notifier).discard,
               onSave: onSave,
             )
-          : const Gap(0, key: ValueKey('empty-dock')),
+          : const Row(
+              key: ValueKey('empty-dock'),
+              mainAxisSize: MainAxisSize.min,
+              children: [Gap(0)],
+            ),
     );
   }
 }

@@ -93,20 +93,23 @@ class HomeDashboardController extends _$HomeDashboardController {
     final owner = _owner.watch(buildRef);
     final session = buildRef.read(sessionControllerProvider).generation;
     final scope = buildRef.read(scopeControllerProvider).current;
-    final dashboard = await _load();
-    if (buildRef.mounted) {
+    bool live() {
+      if (!buildRef.mounted) return false;
       final current = buildRef.read(scopeControllerProvider).current;
-      if (session == buildRef.read(sessionControllerProvider).generation &&
+      return session == buildRef.read(sessionControllerProvider).generation &&
           scope.programId == current.programId &&
-          scope.departmentId == current.departmentId) {
-        _owner.markLoaded(buildRef, owner);
-        _realOwner = (
-          session: session,
-          program: scope.programId,
-          department: scope.departmentId,
-        );
-        _clock.markFresh();
-      }
+          scope.departmentId == current.departmentId;
+    }
+
+    final dashboard = await _load(live);
+    if (live()) {
+      _owner.markLoaded(buildRef, owner);
+      _realOwner = (
+        session: session,
+        program: scope.programId,
+        department: scope.departmentId,
+      );
+      _clock.markFresh();
     }
     return dashboard;
   }
@@ -172,7 +175,7 @@ class HomeDashboardController extends _$HomeDashboardController {
     if (failure != null) Error.throwWithStackTrace(failure, trace!);
   }
 
-  Future<HomeDashboard> _load() async {
+  Future<HomeDashboard> _load(bool Function() live) async {
     final scope = ref.watch(scopeStateProvider);
     final repo = ref.read(homeDashboardRepositoryProvider);
     final program = scope.programId;
@@ -193,12 +196,17 @@ class HomeDashboardController extends _$HomeDashboardController {
     } on Object {
       // Hata yukarı taşınır (rol tahmini yok; yönetici uçlarına düşüş yok). Katalog yeniden
       // okununca özet de yeniden kurulur.
-      followCatalog();
+      if (live()) followCatalog();
       rethrow;
     }
+    if (!live()) throw ApiError(ClientErrorCode.scopeChanged);
     final access = catalog.access;
     if (access == null) throw ApiError(ClientErrorCode.scopeMissing);
-    if (access.companyAdmin) return repo.load();
+    if (access.companyAdmin) {
+      final dashboard = await repo.load();
+      if (!live()) throw ApiError(ClientErrorCode.scopeChanged);
+      return dashboard;
+    }
 
     followCatalog();
     // Özetin departmanı (görevler ekranının süzgecinden bağımsız): programdaki ilk
@@ -210,6 +218,7 @@ class HomeDashboardController extends _$HomeDashboardController {
       departmentId: dept,
       coordinator: coordinator,
     );
+    if (!live()) throw ApiError(ClientErrorCode.scopeChanged);
     return teamDashboard(
       catalog,
       extras,

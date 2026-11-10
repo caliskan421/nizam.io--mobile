@@ -3,6 +3,7 @@
 // özet görev kataloğundan sayılır + loadTeamExtras (koordinatör bayrağı, departman).
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/app/foreground_refresh.dart';
@@ -15,10 +16,12 @@ import 'package:nizamio/core/session/token_store.dart';
 import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/features/scope/application/home_dashboard_controller.dart';
 import 'package:nizamio/features/scope/application/scope_providers.dart';
+import 'package:nizamio/features/scope/data/home_dashboard_api_repository.dart';
 import 'package:nizamio/features/scope/domain/home_dashboard.dart';
 import 'package:nizamio/features/scope/domain/home_dashboard_repository.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
+import '../../../support/fake_backend.dart';
 import '../../connected_module_support.dart';
 
 part 'home_dashboard_sections_cases.dart';

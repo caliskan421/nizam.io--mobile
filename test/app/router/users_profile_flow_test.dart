@@ -314,13 +314,22 @@ void main() {
       await tester.pump();
       await settle(tester);
       expect(tester.widget<Opacity>(collapsed).opacity, greaterThan(0));
-      await tester.ensureVisible(find.text('Takvim').last);
+      await Scrollable.ensureVisible(
+        tester.element(find.text('Takvim').last),
+        alignment: 0.5,
+      );
+      await tester.pump();
       await tester.tap(find.text('Takvim').last);
       await settle(tester);
       expect(
         container.read(adminUserTaskPanelProvider('person-1')).view,
         UserTaskView.calendar,
       );
+      await Scrollable.ensureVisible(
+        tester.element(find.text('Liste').last),
+        alignment: 0.5,
+      );
+      await tester.pump();
       await tester.tap(find.text('Liste').last);
       await settle(tester);
       expect(

@@ -32,6 +32,24 @@ Tarih: 2026-11-10. Çalışma ağacı: `mobil-api-v015` worktree. Ham çıktıla
 - `/tmp/nizamio-m015-luna/analyze-base.txt`
 - `/tmp/nizamio-m015-luna/test-presence-base.txt`
 
+## Bütünleşik kapı 1 — HEAD 774701f
+
+Başlangıç doğrulaması: `git rev-parse HEAD` → `774701f837faa27df3c32fde80df86b9a3613c45`; `git status --porcelain=v1` boştu.
+
+| Komut | Exit | Sonuç |
+|---|---:|---|
+| `NIZAMIO_BACKEND_DIR=/Users/muhammetalicaliskan/Projects/NIZAM.IO/nizam.io--backend NIZAMIO_FRONTEND_DIR=/Users/muhammetalicaliskan/Projects/NIZAM.IO/nizam.io--frontend make gen-check` | 0 | Üretim ve diff denetimi başarılı; `git diff --exit-code` temiz. |
+| `flutter test test/features/administration test/features/scope test/features/coordinatorships test/features/tasks/application/task_detail_writes_p3_test.dart test/features/tasks/application/task_catalog_filter_test.dart test/features/tasks/application/tasks_nav_caption_test.dart test/features/tasks/presentation/task_view_grid_truncated_test.dart test/features/timeline/application test/app/router/users_profile_flow_test.dart test/core/generated test/tool/response_headers_test.dart test/tool/program_patch_generator_test.dart test/tool/file_size_test.dart --exclude-tags golden --reporter expanded --timeout=2m --concurrency=4` | 1 | 393 geçti, 2 başarısız. |
+
+Başarısız testlerin tam adları:
+
+- `test/app/router/users_profile_flow_test.dart: Kullanıcı listesi, profil ve hesap: Size(1180.0, 820.0)`
+- `test/app/router/users_profile_flow_test.dart: Kullanıcı listesi, profil ve hesap: Size(390.0, 844.0)`
+
+Her iki testte de görev görünümü için beklenen `UserTaskView.calendar`, gerçek `UserTaskView.list` oldu (test satırları 318–320; tam stack ve hit-test tanıları ham çıktıda). Aynı iki test adı taban test koşumunda da başarısız olduğundan, bunlar önceki taban kırmızılarıdır; bu bütünleşik koşumda yeni başarısızlık gözlenmedi. Golden kapsam dışıdır.
+
+Koşum sonrası `git rev-parse HEAD` aynı `774701f837faa27df3c32fde80df86b9a3613c45`; `git status --porcelain=v1` ve `git diff --stat` boş. Ham çıktılar `/tmp/nizamio-m015-luna/final-gen-check.txt` ve `/tmp/nizamio-m015-luna/final-targeted.txt`.
+
 ## M015-0/1 hedefli koşum
 
 Tarih: 2026-11-10. Kaynak ağacı dondurulduktan sonra çalıştırıldı; kaynak dosyaları değiştirilmedi.

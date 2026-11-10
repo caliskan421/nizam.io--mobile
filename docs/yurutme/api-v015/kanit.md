@@ -1,4 +1,6 @@
-# Luna kanıtı — taban
+# M015 doğrulama kanıtı
+
+**Son durum:** f722e22 üzerinde sıra kilidiyle tam make verify EXIT=0; 2378 test geçti, kapsama eşikleri yeşil ve kapsamasız dosya yok. gen-check EXIT=0; sonraki temizlikte spec/i18n/tasarım girdileri değişmedi, tekrar make gen üretilmiş fark bırakmadı. Sol son hüküm BULGU YOK. Linux golden Darwin üzerinde atlandı; CI/gerçek backend koşumu yapılmadı. Aşağıdaki kırmızı/kesilen turlar tarihsel kayıttır; son kabulü temsil etmez.
 
 Tarih: 2026-11-10. Çalışma ağacı: `mobil-api-v015` worktree. Ham çıktılar `/tmp/nizamio-m015-luna/` altında tutuldu; commit'e alınmamalı.
 
@@ -85,6 +87,26 @@ Coverage tanısında eşikler: core 96.15% (80), application 87.70% (80), data 9
 Verify sonrası `kilit.sh durum verify` → `kilit[agir-is]: boş`; `pgrep -x go`, `k6`, `vegeta`, `wrk`, `hey`, `locust` sonuç vermedi; verify/flutter süreçleri kapalı. HEAD aynı kaldı. Bu kanıt güncellemesi dışında worktree temizdi.
 
 Ham çıktılar: `/tmp/nizamio-m015-luna/final-r3-profile.txt`, `/tmp/nizamio-m015-luna/final-r3-gen-check.txt`, `/tmp/nizamio-m015-luna/final-verify.txt`, `/tmp/nizamio-m015-luna/final-coverage-diagnostic.txt`.
+
+## Son tam doğrulama r2 — HEAD f722e22
+
+Başlangıç `git rev-parse HEAD` → `f722e22bbae2c0887193c5b5d5cd411905404876`; `git status --porcelain=v1` boş. Ağır iş preflight'ı: `kilit.sh durum verify` → `kilit[agir-is]: boş`; `pgrep -x go/k6/vegeta/wrk/hey/locust` boş; load averages `3.18, 4.65, 5.23`.
+
+Komut: `NIZAMIO_BACKEND_DIR=/Users/muhammetalicaliskan/Projects/NIZAM.IO/nizam.io--backend NIZAMIO_FRONTEND_DIR=/Users/muhammetalicaliskan/Projects/NIZAM.IO/nizam.io--frontend /Users/muhammetalicaliskan/Projects/NIZAM.IO/program/araclar/verify-sirasi.sh /Users/muhammetalicaliskan/.codex/worktrees/mobil-api-v015/nizam.io--mobile verify` → **exit 0**.
+
+- Format: 1778 dosya, değişiklik yok.
+- `flutter analyze --fatal-infos`: sorun yok.
+- `check_boundaries`: 1443 dosya, ihlal yok.
+- `check_test_presence`: eksik test yok.
+- Tam test/coverage koşumu: 2378 test geçti.
+- Coverage: core %96.15 (eşik %80), application %87.70 (%80), data %97.92 (%80), presentation %61.94 (%60), core/ui/widgets %97.17 (%70); tamamı eşik üstü, kapsam dışı dosya yok.
+- Golden: sıra aracı `Darwin` üzerinde Linux'a özel golden adımını atladı. Linux golden, gerçek backend entegrasyonu ve CI bu koşumda doğrulanmadı.
+
+Bu turda `make gen-check` tekrarlanmadı; son üretim girdilerinin değişmediği ve önceki gen-check'in exit 0 olduğu teyit edilmişti. Son profil hedef testi de 2/2 geçti.
+
+Koşum sonrası `kilit.sh durum verify` → `kilit[agir-is]: boş`; go/load aracı süreçleri ve verify/flutter süreçleri görünmüyor. HEAD aynı kaldı; kanıt eklemesinden önce worktree temizdi, tek yerel değişiklik bu kanıt dosyasıdır.
+
+Ham çıktı: `/tmp/nizamio-m015-luna/final-verify-r2.txt`.
 
 ## M015-0/1 hedefli koşum
 

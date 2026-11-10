@@ -1,6 +1,6 @@
 # Kart ve kapsam kaynakları
 
-Uygulama öncesi kaynak haritası; M015-5 sonunda kodla tekrar doğrulanacak.
+M015-5 sonunda uygulanmış kod ve bağımsız testlerle doğrulanan kaynak haritası.
 
 | Görünüm | Kaynak | Kapsam / karar |
 |---|---|---|
@@ -12,7 +12,9 @@ Uygulama öncesi kaynak haritası; M015-5 sonunda kodla tekrar doğrulanacak.
 | Kullanıcı sekme rozetleri | listUsers.role_counts | Rol hariç geçerli arama/program/departman filtreleri; roller örtüşebilir, toplamları kişi sayısı değildir |
 | Kullanıcı liste toplamı | listUsers.total | Rol dahil bütün filtreler; aynı yanıtta sayfa+toplam+sayaç |
 | Kullanıcı profili | readUser | Yönetici yüzü; tek hesap; liste sayfaları taranmaz |
-| Görev listesi sayaçları | Tam katalog veya gerektiğinde countProgramWorkItems | Görünür görev listesiyle aynı filtre; kısmi katalog kesin toplam sayılmaz; sırf sayaç için tüm sayfaları çekme yok |
+| Görev listesi sayaçları | İşlevler için zaten yüklenen katalog | Görünür görev listesiyle aynı filtre; kısmi katalog sayıları ≥ ile belirtilir. countProgramWorkItems bu geçişte ek çağrı olarak bağlanmadı |
 | Koordinatör/üye ana sayfası | Mevcut yetkili katalog + ilgili ekler | Yönetici reporting uçları bu rollere taşınmaz; görünür görev kümesi korunur |
 
 reportDashboard ve countProgramWorkItems eşdeğer değildir: yönetici görev listesi/sayacı silinmiş departmanda kalan canlı görevleri de kapsayabilir, pano raporu kapsamaz. İki ayrı isteğin aynı anın snapshot'ı olduğu iddia edilmez. Hata/yükleme durumu sıfır sayıyla maskelenmez. Dönem/hesap geçişinde önceki kapsamın veri ve rozetleri yeni başlık altında gösterilmez.
+
+Yönetici temel pano yüklemesi me + reportDashboard ile hazır olur. Bekleyenler reportDashboardTasks + listDateChangeRequests, okunmamış rozeti getChatUnreadOverview ile bağımsız tamamlanır; yardımcı bölümün retry eylemi temel raporu yeniden çekmez. Toplam beş çağrının tüm panoyu tek isteğe dönüştürdüğü iddia edilmez; sayısal özetler aynı rapor yanıtındadır.

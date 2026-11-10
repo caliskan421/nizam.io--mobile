@@ -1,6 +1,6 @@
 # Mobil API v0.15 geçişi
 
-Durum: Açık — 2026-11-10. Koordinatör: ana ajan; uygulama/test yazımı: Terra medium; bağımsız kısa inceleme: Sol; test koşumu/kanıt: Luna. Süreç ve kapanış bu mobil depoda tutulur (ürün sahibi talimatı).
+Durum: Yerel kabul tamam — 2026-11-10. Koordinatör: ana ajan; uygulama/test yazımı: Terra medium; bağımsız kısa inceleme: Sol; test koşumu/kanıt: Luna. Süreç ve kapanış bu mobil depoda tutulur (ürün sahibi talimatı). Sonuç: 2378 test ve kapsama kapıları yeşil; Sol BULGU YOK. Linux golden/CI/gerçek backend doğrulaması bekliyor. Ayrıntı: [kapanış](kapanis.md).
 
 ## Kapsam ve taban
 
@@ -12,13 +12,13 @@ Teslim zinciri: mevcut kullanıcı/tablo PR #59 → arayüz PR #60 → bu geçi�
 
 | Faz | İş | Kabul | Durum |
 |---|---|---|---|
-| M015-0 | Pin, üretim, hata metinleri, Gantt HttpResponse, fixture uyumu | Etiketten üretim tekrarlanabilir; taban/yükseltme kırmızısı ayrılır; sınır/lint kapıları korunur | Uygulanıyor |
-| M015-1 | Tarih talebi anahtarı/sürümü; Gantt kesilme bilgisi; ölü repository temizliği | Aynı belirsiz işlemde aynı gövde+anahtar+sürüm; 200/201 başarı; çakışmada taze okuma ve kullanıcı kararı; oturum/kapsam sızıntısı yok | Uygulandı; yarış testleri yeniden doğrulanacak |
-| M015-2 | Kullanıcı listesi/sayaç/profil ve hesap kapatma-açma | Sunucu filtre/sıra; boş sayfa+dolu imleç devam eder; sorgu değişiminde eski cevap atılır; sayaçlar doğru kapsamda; readUser; kilit/kapalı ayrımı; self/last_admin/403/404 ve changed:false | Uygulanıyor |
-| M015-3 | Koordinatörlük ayrıntısı ve iki adımlı oluşturma/bağlama | readProgramDepartment; adım başına anahtar; mevcut/silinmiş departmanda açık kullanıcı onayı; kısmi başarıdan kalan adıma devam; küresel kayıt sessiz değiştirilmez | Ayrı worktree'de uygulanıyor |
-| M015-4 | Dönem kısa adı/renk ve tutarlı seçim UI'sı | Sidebar kartı, dönem listesi, ilgili başlıklar; oluştur/düzenle/temizle; null-yok-değer ayrımı; erişilebilir açık/koyu renk; bilinmeyen/boş güvenli yedek | Ayrı worktree'de uygulanıyor |
-| M015-5 | Kart/rozet veri kaynağı ve dönem geçişi denetimi | Kart→uç→kapsam tablosu; aynı bilgi için gereksiz istek yok; pano ve görev sayacı semantiği karıştırılmaz; eski dönem/hesap verisi görünmez; hata sıfır sayılmaz | Bekliyor |
-| M015-Q | Bağımsız inceleme, düzeltme, doğrulama, kapanış | Sol bulguları kapalı; Luna komut/exit/sonuç kanıtı; bütün yeşil yerel kapılar veya açık sınırlama; temiz commit'li görev dalı | Bekliyor |
+| M015-0 | Pin, üretim, hata metinleri, Gantt HttpResponse, fixture uyumu | Etiketten üretim tekrarlanabilir; taban/yükseltme kırmızısı ayrılır; sınır/lint kapıları korunur | Yerel geçti |
+| M015-1 | Tarih talebi anahtarı/sürümü; Gantt kesilme bilgisi; ölü repository temizliği | Aynı belirsiz işlemde aynı gövde+anahtar+sürüm; 200/201 başarı; çakışmada taze okuma ve kullanıcı kararı; oturum/kapsam sızıntısı yok | Yerel geçti |
+| M015-2 | Kullanıcı listesi/sayaç/profil ve hesap kapatma-açma | Sunucu filtre/sıra; boş sayfa+dolu imleç devam eder; sorgu değişiminde eski cevap atılır; sayaçlar doğru kapsamda; readUser; kilit/kapalı ayrımı; self/last_admin/403/404 ve changed:false | Yerel geçti |
+| M015-3 | Koordinatörlük ayrıntısı ve iki adımlı oluşturma/bağlama | readProgramDepartment; adım başına anahtar; mevcut/silinmiş departmanda açık kullanıcı onayı; kısmi başarıdan kalan adıma devam; küresel kayıt sessiz değiştirilmez | Birleşti; yerel geçti |
+| M015-4 | Dönem kısa adı/renk ve tutarlı seçim UI'sı | Sidebar kartı, dönem listesi, ilgili başlıklar; oluştur/düzenle/temizle; null-yok-değer ayrımı; erişilebilir açık/koyu renk; bilinmeyen/boş güvenli yedek | Birleşti; yerel geçti |
+| M015-5 | Kart/rozet veri kaynağı ve dönem geçişi denetimi | Kart→uç→kapsam tablosu; aynı bilgi için gereksiz istek yok; pano ve görev sayacı semantiği karıştırılmaz; eski dönem/hesap verisi görünmez; hata sıfır sayılmaz | Yerel geçti |
+| M015-Q | Bağımsız inceleme, düzeltme, doğrulama, kapanış | Sol bulguları kapalı; Luna komut/exit/sonuç kanıtı; bütün yeşil yerel kapılar veya açık sınırlama; temiz commit'li görev dalı | Yerel kabul; dış ortam kapıları bekliyor |
 
 ## Varsayılan ürün kararları
 
@@ -30,6 +30,7 @@ Teslim zinciri: mevcut kullanıcı/tablo PR #59 → arayüz PR #60 → bu geçi�
 - Dönem kısa adı ve rengi temizlenebilir. Üretilmiş kod elle değiştirilmez; üç hâlli PATCH için mevcut üretici/altyapıda en küçük tipli çözüm kullanılır, katman sınırı delinmez.
 - Kart verisi zaten tek özet cevabından geliyorsa yeni sayaç isteği eklenmez. Görev listesi sayaçları gerekirse countProgramWorkItems ile aynı filtrede beslenir; yalnız saymak için bütün sayfalar çekilmez. Tam katalog zaten işlev için gerekliyse fazladan çağrı eklenmez.
 - Pano bölümlerini bağımsız yüklemek ancak mevcut yapıda küçük, güvenli ayrıştırma ile mümkünse yapılır; büyük pano yeniden tasarımı yapılmaz. Yapılmayan iyileştirme somut gerekçeyle kapanışta kayıtlı kalır.
+- Sonuç: temel özet, bekleyen işler ve okunmamış sohbetler bağımsız yüklendi. Aynı programdaki etiket yenilemesi hata verirse son bilinen ad/renk kalabilir; yükleme ve program kimliği değişiminde eski etiket gizlenir. Bu etiket eylem yetkisi sağlamaz.
 - Süre uzatma UI'sı, yeni dönem toplu-sayaç backend ucu, backend değişikliği ve mimari yeniden yazım yok.
 
 ## Çalışma ve doğrulama

@@ -10,13 +10,41 @@ import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
+import 'package:nizamio/core/session/session_controller.dart';
+import 'package:nizamio/core/session/token_store.dart';
+import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/features/scope/application/home_dashboard_controller.dart';
 import 'package:nizamio/features/scope/application/scope_providers.dart';
 import 'package:nizamio/features/scope/domain/home_dashboard.dart';
 import 'package:nizamio/features/scope/domain/home_dashboard_repository.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
+import '../../connected_module_support.dart';
+
+part 'home_dashboard_sections_cases.dart';
+
 class _Counting implements HomeDashboardRepository {
+  Completer<PendingOverview>? pendingGate;
+  Completer<int>? unreadGate;
+  int pendingCalls = 0;
+  int unreadCalls = 0;
+  Completer<void>? pendingStarted;
+  @override
+  Future<PendingOverview> loadPending() async {
+    pendingCalls++;
+    if (pendingStarted case final started?) {
+      if (!started.isCompleted) started.complete();
+    }
+    return pendingGate?.future ??
+        const PendingOverview(items: [], truncated: false);
+  }
+
+  @override
+  Future<int> loadUnread() async {
+    unreadCalls++;
+    return unreadGate?.future ?? 0;
+  }
+
   var loads = 0;
   final extras = <(String?, bool)>[];
 
@@ -66,7 +94,13 @@ class _Counting implements HomeDashboardRepository {
   }
 }
 
+SessionController _session() => SessionController(
+  TokenStore(MemorySecureStore()),
+  (_, _) async => throw StateError('unexpected refresh'),
+);
+
 void main() {
+  homeDashboardSectionCases();
   test('kapsam değişince yeniden okunur', () async {
     final repo = _Counting();
     var program = 0;
@@ -74,6 +108,8 @@ void main() {
       overrides: [
         homeDashboardRepositoryProvider.overrideWithValue(repo),
         sessionGenerationProvider.overrideWithValue(1),
+        sessionControllerProvider.overrideWithValue(_session()),
+        scopeControllerProvider.overrideWithValue(ScopeController()),
         // Şirket yöneticisi → pano yolu.
         taskCatalogRepositoryProvider.overrideWithValue(
           _Fixed(
@@ -169,6 +205,8 @@ void main() {
           homeDashboardRepositoryProvider.overrideWithValue(repo),
           taskCatalogRepositoryProvider.overrideWithValue(catalogs),
           sessionGenerationProvider.overrideWithValue(1),
+          sessionControllerProvider.overrideWithValue(_session()),
+          scopeControllerProvider.overrideWithValue(ScopeController()),
           scopeStateProvider.overrideWith(
             (ref) => const ScopeSelection(programId: 'p1'),
           ),
@@ -388,6 +426,8 @@ void main() {
               _Fixed(catalogOf(admin: true)),
             ),
             sessionGenerationProvider.overrideWith((ref) => session),
+            sessionControllerProvider.overrideWithValue(_session()),
+            scopeControllerProvider.overrideWithValue(ScopeController()),
             scopeStateProvider.overrideWith(
               (ref) => ScopeSelection(programId: program),
             ),

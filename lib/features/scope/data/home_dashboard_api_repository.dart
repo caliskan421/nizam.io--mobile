@@ -52,27 +52,15 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
   final String? Function() _programId;
 
   static const _submitted = 'onaya_sunuldu';
-  static const _inProgress = 'devam_ediyor';
 
   @override
   Future<HomeDashboard> load() async {
-    // eagerError: ilk hata fırlar, diğerleri yutulur (işlenmemiş hata kalmaz).
     final r = await Future.wait<Object>([
       apiCall(_identity.me),
       _report.load(),
-      apiCall(_reporting.reportDashboardTasks),
-      apiCall(() => _work.listDateChangeRequests(status: 'pending')),
-      apiCall(_messages.getChatUnreadOverview),
     ], eagerError: true);
     final me = r[0] as MeResponse;
     final report = r[1] as DashboardReport;
-    final taskList = r[2] as HttpResponse<ReportTaskList>;
-    final dateChanges = (r[3] as DateChangeRequestList).requests;
-    final unread = _unread(r[4] as ChatUnreadOverview);
-
-    final tasks = taskList.data.tasks;
-    final truncated = _truncated(taskList);
-    final byId = {for (final t in tasks) t.workItemId: t};
     final t = report.tasks;
     return HomeDashboard(
       greetingName: me.fullName,
@@ -83,18 +71,41 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
         done: t.done,
         inProgress: t.inProgress,
         // Kesik listede eksik sayılır; o zaman bilinmiyor.
-        inProgressOnTime: truncated
-            ? null
-            : tasks
-                  .where((t) => t.status == _inProgress && !t.isOverdue)
-                  .length,
+        inProgressOnTime: null,
         late: t.late,
         awaitingApproval: t.awaitingApproval,
       ),
       team: report.team,
       coordinatorships: report.coordinatorships,
-      pending: [
-        for (final d in dateChanges)
+      pending: const [],
+      counts: ModuleCounts(
+        lateTasks: t.late,
+        tasksAwaitingApproval: t.awaitingApproval,
+        unreadMessages: null,
+      ),
+    );
+  }
+
+  @override
+  Future<PendingOverview> loadPending() async {
+    final r = await Future.wait<Object>([
+      apiCall(_reporting.reportDashboardTasks),
+      apiCall(() => _work.listDateChangeRequests(status: 'pending')),
+    ], eagerError: true);
+    final response = r[0] as HttpResponse<ReportTaskList>;
+    final tasks = response.data.tasks;
+    final byId = {for (final t in tasks) t.workItemId: t};
+    return PendingOverview(
+      truncated:
+          response.response.headers.value('x-result-truncated') == 'true',
+      inProgressOnTime:
+          response.response.headers.value('x-result-truncated') == 'true'
+          ? null
+          : tasks
+                .where((t) => t.status == 'devam_ediyor' && !t.isOverdue)
+                .length,
+      items: [
+        for (final d in (r[1] as DateChangeRequestList).requests)
           if (byId[d.workItemId] case final task?) _dateChange(d, task),
         for (final task in tasks)
           if (task.status == _submitted)
@@ -105,11 +116,15 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
               kind: PendingKind.approval,
             ),
       ],
-      counts: ModuleCounts(
-        lateTasks: t.late,
-        tasksAwaitingApproval: t.awaitingApproval,
-        unreadMessages: unread,
-      ),
+    );
+  }
+
+  @override
+  Future<int> loadUnread() async {
+    final program = _programId();
+    return _unread(
+      await apiCall(_messages.getChatUnreadOverview),
+      program: program,
     );
   }
 
@@ -160,18 +175,12 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
   }
 
   /// Seçili programın okunmamış sohbet sayısı (`unread_chats`; programın satırı yoksa 0).
-  int _unread(ChatUnreadOverview o) {
-    final program = _programId();
+  int _unread(ChatUnreadOverview o, {String? program}) {
+    program ??= _programId();
     return o.items
             .where((p) => p.programId == program)
             .firstOrNull
             ?.unreadChats ??
         0;
-  }
-
-  static bool _truncated(HttpResponse<Object?> r) {
-    final values =
-        r.response.headers[ApiDashboardReportRepository.truncationHeader];
-    return values != null && values.length == 1 && values[0] == 'true';
   }
 }

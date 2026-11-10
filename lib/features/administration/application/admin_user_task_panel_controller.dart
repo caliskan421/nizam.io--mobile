@@ -34,7 +34,6 @@ class UserTaskPanelController extends Notifier<UserTaskPanelState> {
     ),
   );
   void show(UserTaskView view) => state = state.copyWith(view: view);
-  void resetStatuses() =>
-      state = state.copyWith(statuses: const {});
+  void resetStatuses() => state = state.copyWith(statuses: const {});
   void clear() => state = UserTaskPanelState(view: state.view);
 }

@@ -1,6 +1,12 @@
 {
   "$comment": "Ana sayfa (features/scope) metinleri: karşılama, özet kutuları, hızlı işlemler, ekip, koordinatörlükler, kısayol menüsü, çekmece. ELLE yazılır; make gen ARB'ye birleştirir. Yer tutucu ({ }) yasak olduğundan sayılı cümleler parça parça yazılır ve sunumda birleştirilir (home_texts.dart).",
   "texts": {
+    "ui.home.pending_heading": "Bekleyen işler",
+    "ui.home.pending_error_retry": "Bekleyen işler yüklenemedi · Yeniden dene",
+    "ui.home.pending_empty": "Bekleyen iş yok",
+    "ui.home.unread_loading": "Mesaj sayısı yükleniyor",
+    "ui.home.unread_error_retry": "Mesaj sayısı yüklenemedi · Yeniden dene",
+    "ui.home.unread_chats": "Okunmamış sohbet",
     "ui.home.greeting": "Merhaba",
     "ui.home.summary_label": "Özet",
     "ui.home.kpi_done": "Tamamlanma",

@@ -1865,6 +1865,26 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiFeedbackSecondsUnit => 'sn';
 
   @override
+  String get uiHomePendingHeading => 'Bekleyen işler';
+
+  @override
+  String get uiHomePendingErrorRetry =>
+      'Bekleyen işler yüklenemedi · Yeniden dene';
+
+  @override
+  String get uiHomePendingEmpty => 'Bekleyen iş yok';
+
+  @override
+  String get uiHomeUnreadLoading => 'Mesaj sayısı yükleniyor';
+
+  @override
+  String get uiHomeUnreadErrorRetry =>
+      'Mesaj sayısı yüklenemedi · Yeniden dene';
+
+  @override
+  String get uiHomeUnreadChats => 'Okunmamış sohbet';
+
+  @override
   String get uiHomeGreeting => 'Merhaba';
 
   @override
@@ -4964,6 +4984,44 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiUserAccountFieldsSignedInStatusHint =>
       'Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.';
+
+  @override
+  String get uiUsersDisableAccount => 'Hesabı kapat';
+
+  @override
+  String get uiUsersEnableAccount => 'Hesabı aç';
+
+  @override
+  String get uiUsersDisableConfirm =>
+      'Oturumlar kapatılır, görevler ve geçmiş korunur.';
+
+  @override
+  String get uiUsersEnableConfirm =>
+      'Hesap mevcut rol ve üyelikleriyle erişim kazanır; yeniden giriş gerekir.';
+
+  @override
+  String get uiUsersAccountHistoryPreserved => 'Görevler ve geçmiş korunur.';
+
+  @override
+  String get uiUsersAccountStatusUnknown => 'Hesap durumu bilinmiyor';
+
+  @override
+  String get uiUsersOwnAccount => 'Kendi hesabınız';
+
+  @override
+  String get uiUsersAccountDisabled => 'Hesap kapalı';
+
+  @override
+  String get uiUsersLoginLocked => 'Giriş kilitli';
+
+  @override
+  String get uiUsersFilterScope => 'geçerli filtre';
+
+  @override
+  String get uiUsersSearchNameEmail => 'Ad veya e-posta ara';
+
+  @override
+  String get uiUsersOneDepartment => 'Bir koordinatörlük seçebilirsin';
 
   @override
   String get uiUsersTitle => 'Kullanıcılar';

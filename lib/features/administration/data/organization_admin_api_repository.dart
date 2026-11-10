@@ -30,9 +30,12 @@ class ApiOrganizationAdminRepository implements OrganizationAdminRepository {
   final OrganizationClient _client;
 
   @override
-  Future<PageSlice<KnownUser>> listUsers({
+  Future<UserDirectoryPage> listUsers({
     PageRequest page = const PageRequest(),
     DepartmentRole? role,
+    bool companyAdminOnly = false,
+    String? programId,
+    String? departmentId,
     String? search,
     UserSortField? sortBy,
     SortDirection? sortOrder,
@@ -40,7 +43,9 @@ class ApiOrganizationAdminRepository implements OrganizationAdminRepository {
     final wireRole = role == null ? null : _roleWire(role);
     final r = await apiCall(
       () => _client.listUsers(
-        role: wireRole,
+        role: companyAdminOnly ? 'company_admin' : wireRole,
+        programId: programId,
+        departmentId: departmentId,
         search: search,
         sortBy: sortBy?.wire,
         sortOrder: sortOrder?.name,
@@ -48,18 +53,67 @@ class ApiOrganizationAdminRepository implements OrganizationAdminRepository {
         cursor: page.cursor,
       ),
     );
-    return PageSlice(
-      items: (r.data.users ?? const <api.KnownUser>[])
-          .map(
-            (u) => KnownUser(
-              accountId: u.accountId,
-              fullName: u.fullName,
-              memberships: u.memberships ?? const [],
-            ),
-          )
-          .toList(),
+    return UserDirectoryPage(
+      total: r.data.total,
+      roleCounts: UserRoleCounts(
+        all: r.data.roleCounts.all,
+        admins: r.data.roleCounts.companyAdmin,
+        coordinators: r.data.roleCounts.koordinator,
+        members: r.data.roleCounts.uye,
+      ),
+      items: (r.data.users ?? const <api.KnownUser>[]).map(_knownUser).toList(),
       nextCursor: r.data.nextCursor,
       truncated: _truncated(r.response.headers),
+    );
+  }
+
+  static AccountStatus _accountStatus(String? wire) => switch (wire) {
+    'active' => AccountStatus.active,
+    'disabled' => AccountStatus.disabled,
+    _ => AccountStatus.unknown,
+  };
+
+  static KnownUser _knownUser(api.KnownUser u) => KnownUser(
+    accountId: u.accountId,
+    fullName: u.fullName,
+    email: u.email,
+    companyAdmin: u.companyAdmin,
+    accountStatus: _accountStatus(u.accountStatus.json),
+    loginLocked: u.loginLocked,
+    memberships: u.memberships ?? const [],
+    teams: [
+      for (final t in u.teams)
+        UserMembership(
+          programId: t.programId,
+          programName: t.programName,
+          departmentId: t.departmentId,
+          displayName: t.displayName,
+          role: DepartmentRole.fromWire(t.role.json ?? ''),
+        ),
+    ],
+  );
+
+  @override
+  Future<KnownUser> readUser(String accountId) async =>
+      _knownUser(await apiCall(() => _client.readUser(id: accountId)));
+
+  @override
+  Future<AccountStatusChange> disableAccount(String accountId) async {
+    final r = await apiCall(() => _client.disableAccount(id: accountId));
+    return AccountStatusChange(
+      status: _accountStatus(r.accountStatus.json),
+      changed: r.changed,
+      revokedSessions: r.revokedSessions,
+    );
+  }
+
+  @override
+  Future<AccountStatusChange> enableAccount(String accountId) async {
+    final r = await apiCall(() => _client.enableAccount(id: accountId));
+    return AccountStatusChange(
+      status: _accountStatus(r.accountStatus.json),
+      changed: r.changed,
+      revokedSessions: r.revokedSessions,
     );
   }
 

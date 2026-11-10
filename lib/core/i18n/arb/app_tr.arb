@@ -2301,6 +2301,30 @@
   "@uiFeedbackSecondsUnit": {
     "description": "ui.feedback.seconds_unit"
   },
+  "uiHomePendingHeading": "Bekleyen işler",
+  "@uiHomePendingHeading": {
+    "description": "ui.home.pending_heading"
+  },
+  "uiHomePendingErrorRetry": "Bekleyen işler yüklenemedi · Yeniden dene",
+  "@uiHomePendingErrorRetry": {
+    "description": "ui.home.pending_error_retry"
+  },
+  "uiHomePendingEmpty": "Bekleyen iş yok",
+  "@uiHomePendingEmpty": {
+    "description": "ui.home.pending_empty"
+  },
+  "uiHomeUnreadLoading": "Mesaj sayısı yükleniyor",
+  "@uiHomeUnreadLoading": {
+    "description": "ui.home.unread_loading"
+  },
+  "uiHomeUnreadErrorRetry": "Mesaj sayısı yüklenemedi · Yeniden dene",
+  "@uiHomeUnreadErrorRetry": {
+    "description": "ui.home.unread_error_retry"
+  },
+  "uiHomeUnreadChats": "Okunmamış sohbet",
+  "@uiHomeUnreadChats": {
+    "description": "ui.home.unread_chats"
+  },
   "uiHomeGreeting": "Merhaba",
   "@uiHomeGreeting": {
     "description": "ui.home.greeting"
@@ -6324,6 +6348,54 @@
   "uiUserAccountFieldsSignedInStatusHint": "Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.",
   "@uiUserAccountFieldsSignedInStatusHint": {
     "description": "ui.user_account_fields.signed_in_status_hint"
+  },
+  "uiUsersDisableAccount": "Hesabı kapat",
+  "@uiUsersDisableAccount": {
+    "description": "ui.users.disable_account"
+  },
+  "uiUsersEnableAccount": "Hesabı aç",
+  "@uiUsersEnableAccount": {
+    "description": "ui.users.enable_account"
+  },
+  "uiUsersDisableConfirm": "Oturumlar kapatılır, görevler ve geçmiş korunur.",
+  "@uiUsersDisableConfirm": {
+    "description": "ui.users.disable_confirm"
+  },
+  "uiUsersEnableConfirm": "Hesap mevcut rol ve üyelikleriyle erişim kazanır; yeniden giriş gerekir.",
+  "@uiUsersEnableConfirm": {
+    "description": "ui.users.enable_confirm"
+  },
+  "uiUsersAccountHistoryPreserved": "Görevler ve geçmiş korunur.",
+  "@uiUsersAccountHistoryPreserved": {
+    "description": "ui.users.account_history_preserved"
+  },
+  "uiUsersAccountStatusUnknown": "Hesap durumu bilinmiyor",
+  "@uiUsersAccountStatusUnknown": {
+    "description": "ui.users.account_status_unknown"
+  },
+  "uiUsersOwnAccount": "Kendi hesabınız",
+  "@uiUsersOwnAccount": {
+    "description": "ui.users.own_account"
+  },
+  "uiUsersAccountDisabled": "Hesap kapalı",
+  "@uiUsersAccountDisabled": {
+    "description": "ui.users.account_disabled"
+  },
+  "uiUsersLoginLocked": "Giriş kilitli",
+  "@uiUsersLoginLocked": {
+    "description": "ui.users.login_locked"
+  },
+  "uiUsersFilterScope": "geçerli filtre",
+  "@uiUsersFilterScope": {
+    "description": "ui.users.filter_scope"
+  },
+  "uiUsersSearchNameEmail": "Ad veya e-posta ara",
+  "@uiUsersSearchNameEmail": {
+    "description": "ui.users.search_name_email"
+  },
+  "uiUsersOneDepartment": "Bir koordinatörlük seçebilirsin",
+  "@uiUsersOneDepartment": {
+    "description": "ui.users.one_department"
   },
   "uiUsersTitle": "Kullanıcılar",
   "@uiUsersTitle": {

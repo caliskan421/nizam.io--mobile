@@ -94,7 +94,7 @@ final class HomeDashboardControllerProvider
 }
 
 String _$homeDashboardControllerHash() =>
-    r'5574e2575b487d2f60a2225fc56cb887f446199c';
+    r'934c78c124cd6853670d9ea2633e6ed0003f3dd7';
 
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).

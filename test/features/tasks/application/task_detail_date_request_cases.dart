@@ -9,6 +9,9 @@ void dateRequestCases() {
         final (h, _, ctl) = await _open(s);
         final arrived = Completer<void>();
         final release = Completer<void>();
+        addTearDown(() {
+          if (!release.isCompleted) release.complete();
+        });
         h.backend.handler = (r) async {
           if (r.method == 'POST' && r.path == '/v1/date-change-requests') {
             arrived.complete();
@@ -19,7 +22,7 @@ void dateRequestCases() {
         };
         ctl.openDateRequest();
         final request = ctl.submitDateRequest();
-        await arrived.future;
+        await arrived.future.timeout(const Duration(seconds: 5));
         final scope = h.read(scopeControllerProvider);
         Future<void>? clearing;
         if (change == 'program') {

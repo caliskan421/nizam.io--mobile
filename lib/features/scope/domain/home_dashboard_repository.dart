@@ -8,6 +8,8 @@ import 'home_dashboard.dart';
 ///   talepleri (`myDateChangeRequests`, [departmentId] ile). Yönetici uçları çağrılmaz.
 abstract interface class HomeDashboardRepository {
   Future<HomeDashboard> load();
+  Future<PendingOverview> loadPending();
+  Future<int> loadUnread();
 
   Future<TeamDashboardExtras> loadTeamExtras({
     required String? departmentId,

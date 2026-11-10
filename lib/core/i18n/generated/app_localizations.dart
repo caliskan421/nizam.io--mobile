@@ -3544,6 +3544,42 @@ abstract class AppLocalizations {
   /// **'sn'**
   String get uiFeedbackSecondsUnit;
 
+  /// ui.home.pending_heading
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen işler'**
+  String get uiHomePendingHeading;
+
+  /// ui.home.pending_error_retry
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen işler yüklenemedi · Yeniden dene'**
+  String get uiHomePendingErrorRetry;
+
+  /// ui.home.pending_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen iş yok'**
+  String get uiHomePendingEmpty;
+
+  /// ui.home.unread_loading
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj sayısı yükleniyor'**
+  String get uiHomeUnreadLoading;
+
+  /// ui.home.unread_error_retry
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj sayısı yüklenemedi · Yeniden dene'**
+  String get uiHomeUnreadErrorRetry;
+
+  /// ui.home.unread_chats
+  ///
+  /// In tr, this message translates to:
+  /// **'Okunmamış sohbet'**
+  String get uiHomeUnreadChats;
+
   /// ui.home.greeting
   ///
   /// In tr, this message translates to:
@@ -9579,6 +9615,78 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.'**
   String get uiUserAccountFieldsSignedInStatusHint;
+
+  /// ui.users.disable_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı kapat'**
+  String get uiUsersDisableAccount;
+
+  /// ui.users.enable_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı aç'**
+  String get uiUsersEnableAccount;
+
+  /// ui.users.disable_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Oturumlar kapatılır, görevler ve geçmiş korunur.'**
+  String get uiUsersDisableConfirm;
+
+  /// ui.users.enable_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap mevcut rol ve üyelikleriyle erişim kazanır; yeniden giriş gerekir.'**
+  String get uiUsersEnableConfirm;
+
+  /// ui.users.account_history_preserved
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler ve geçmiş korunur.'**
+  String get uiUsersAccountHistoryPreserved;
+
+  /// ui.users.account_status_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap durumu bilinmiyor'**
+  String get uiUsersAccountStatusUnknown;
+
+  /// ui.users.own_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendi hesabınız'**
+  String get uiUsersOwnAccount;
+
+  /// ui.users.account_disabled
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap kapalı'**
+  String get uiUsersAccountDisabled;
+
+  /// ui.users.login_locked
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş kilitli'**
+  String get uiUsersLoginLocked;
+
+  /// ui.users.filter_scope
+  ///
+  /// In tr, this message translates to:
+  /// **'geçerli filtre'**
+  String get uiUsersFilterScope;
+
+  /// ui.users.search_name_email
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad veya e-posta ara'**
+  String get uiUsersSearchNameEmail;
+
+  /// ui.users.one_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir koordinatörlük seçebilirsin'**
+  String get uiUsersOneDepartment;
 
   /// ui.users.title
   ///

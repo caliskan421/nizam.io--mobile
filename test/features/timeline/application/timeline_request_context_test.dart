@@ -35,7 +35,7 @@ void main() {
       await h.identity.login(email: 'a@b.test', password: 'p');
       h.read(scopeControllerProvider).selectProgram(coordProgram);
       final c = h.container;
-      c.listen(timelineControllerProvider(dAlt), (_, _) {});
+      c.listen(timelineViewProvider(dAlt), (_, _) {});
       await c.read(taskCatalogControllerProvider.future);
       await c.read(ganttScheduleProvider.future);
       final ctrl = c.read(timelineControllerProvider(dAlt).notifier);
@@ -44,6 +44,9 @@ void main() {
       h.backend.requests.clear();
       final arrived = Completer<void>();
       final release = Completer<void>();
+      addTearDown(() {
+        if (!release.isCompleted) release.complete();
+      });
       h.backend.handler = (r) async {
         if (r.method == 'POST' && r.path == '/v1/date-change-requests') {
           final response = backend.handle(r);
@@ -54,7 +57,13 @@ void main() {
         return backend.handle(r);
       };
       final request = ctrl.requestDates();
-      await arrived.future;
+      await arrived.future.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          if (!release.isCompleted) release.complete();
+          throw TimeoutException('POST başlamadı');
+        },
+      );
       final scope = h.read(scopeControllerProvider);
       if (change == 'program') {
         scope.selectProgram('prog-2');
@@ -79,7 +88,7 @@ void main() {
       await h.identity.login(email: 'a@b.test', password: 'p');
       h.read(scopeControllerProvider).selectProgram(coordProgram);
       final c = h.container;
-      c.listen(timelineControllerProvider(dAlt), (_, _) {});
+      c.listen(timelineViewProvider(dAlt), (_, _) {});
       await c.read(taskCatalogControllerProvider.future);
       await c.read(ganttScheduleProvider.future);
       final ctrl = c.read(timelineControllerProvider(dAlt).notifier);
@@ -88,6 +97,10 @@ void main() {
       h.backend.requests.clear();
       final arrived = Completer<void>();
       final release = Completer<void>();
+      addTearDown(() {
+        if (!release.isCompleted) release.complete();
+        if (!store.release.isCompleted) store.release.complete();
+      });
       h.backend.handler = (r) async {
         if (r.method == 'POST' && r.path == '/v1/date-change-requests') {
           final response = backend.handle(r);
@@ -98,10 +111,16 @@ void main() {
         return backend.handle(r);
       };
       final request = ctrl.requestDates();
-      await arrived.future;
+      await arrived.future.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          if (!release.isCompleted) release.complete();
+          throw TimeoutException('POST başlamadı');
+        },
+      );
       store.hold = true;
       final clearing = h.read(sessionControllerProvider).clear();
-      await store.started.future;
+      await store.started.future.timeout(const Duration(seconds: 5));
       release.complete();
       expect(await request, isA<TimelineRequestSent>());
       expect(h.backend.count('POST', '/v1/date-change-requests'), 1);

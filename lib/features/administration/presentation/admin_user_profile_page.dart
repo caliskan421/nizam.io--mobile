@@ -17,7 +17,6 @@ import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/nz_top_bar.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../archive/archive.dart';
-import '../../messages/messages.dart';
 import '../../tasks/tasks.dart';
 import '../application/admin_controller.dart';
 import '../application/admin_user_task_panel_controller.dart';
@@ -141,10 +140,12 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     if (!mounted ||
         id != widget.accountId ||
         scope != ref.read(scopeStateProvider) ||
-        session != ref.read(sessionGenerationProvider))
+        session != ref.read(sessionGenerationProvider)) {
       return;
-    if (result == AccountSaveResult.saved)
+    }
+    if (result == AccountSaveResult.saved) {
       NzToast.success(context, context.l10n.uiUsersSaved);
+    }
     if (result == AccountSaveResult.failed) {
       final error = ref.read(userAccountDraftProvider(id))?.error;
       if (error != null) NzToast.error(context, error);
@@ -205,10 +206,12 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
                   catalogState.error ?? ApiError('organization.not_authorized'),
                   catalogState.stackTrace ?? StackTrace.current,
                 )
+        : value.isLoading
+        ? const AsyncLoading()
         : value.hasError
         ? AsyncError(value.error!, value.stackTrace ?? StackTrace.current)
         : value;
-    final user = allowed && !value.hasError ? value.value : null;
+    final user = allowed && !value.isLoading && !value.hasError ? value.value : null;
     if (user == null) {
       _headingTopAtZero = null;
       _headingHeight = null;
@@ -218,14 +221,7 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
         });
       }
     }
-    final adminIndex = user == null
-        ? null
-        : ref.watch(companyAdminIndexProvider);
-    final isAdmin =
-        adminIndex != null &&
-        !adminIndex.isLoading &&
-        !adminIndex.hasError &&
-        adminIndex.value?.accountIds.contains(widget.accountId) == true;
+    final isAdmin = user?.companyAdmin == true;
     final identity = user == null
         ? null
         : AdminUserIdentity(user, companyAdmin: isAdmin);
@@ -321,17 +317,8 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
                   key: ValueKey(user.accountId),
                   user: user,
                   catalog: catalog!,
-                  email: user.accountId == catalog.me
-                      ? catalog.accountEmail
-                      : null,
-                  companyAdmin: isAdmin
-                      ? true
-                      : adminIndex != null &&
-                            !adminIndex.isLoading &&
-                            !adminIndex.hasError &&
-                            adminIndex.value?.complete == true
-                      ? false
-                      : null,
+                  email: user.email,
+                  companyAdmin: isAdmin,
                 ),
             ],
       children: [
@@ -348,7 +335,7 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
             catalog: catalog!,
             programId: scope.programId,
             nameKey: _headingKey,
-            email: user.accountId == catalog.me ? catalog.accountEmail : null,
+            email: user.email,
           ),
           const Gap(_sectionGap - NizamioSpacing.space1),
           AdminUserRelatedActions(accountId: widget.accountId),

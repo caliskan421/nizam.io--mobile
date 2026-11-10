@@ -59,7 +59,7 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
   ) {
     // Eleman eski değeri süzerken iki durum da loading olabilir; sahip değişimi yine
     // bildirilir ki value okuyan ekranlar önceki çizdikleri kataloğu da kaldırsın.
-    if (_owner != null && !_ownership.owns(ref)) return true;
+    if (!ref.mounted || (_owner != null && !_ownership.owns(ref))) return true;
     return super.updateShouldNotify(previous, next);
   }
 

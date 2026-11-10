@@ -105,7 +105,14 @@ class GoRouterAppNav implements NzAppNav {
 
   @override
   void openMenu(BuildContext context) {
-    final dashboard = _ref.read(homeDashboardControllerProvider).value;
+    final dashboard = _ref
+        .read(homeDashboardControllerProvider.notifier)
+        .visible
+        .value;
+    final unread = _ref.read(homeUnreadProvider);
+    final unreadCount = unread.isLoading || unread.hasError
+        ? null
+        : unread.value;
     final program = _ref.read(currentProgramControllerProvider).value;
     final brand = displayBrand(_ref.read(flavorProvider));
     final l = context.l10n;
@@ -137,7 +144,15 @@ class GoRouterAppNav implements NzAppNav {
       programYear: program?.year ?? dashboard?.demoProgramYear,
       version: brand.version,
       productName: brand.name,
-      counts: dashboard?.counts,
+      counts: dashboard == null
+          ? null
+          : ModuleCounts(
+              lateTasks: dashboard.counts.lateTasks,
+              tasksAwaitingApproval: dashboard.counts.tasksAwaitingApproval,
+              unreadMessages: dashboard.greetingRole == TeamRole.admin
+                  ? unreadCount
+                  : dashboard.counts.unreadMessages,
+            ),
       onProfile: openProfile,
       onChangeScope: () =>
           _ref.read(scopeSelectionControllerProvider.notifier).clear(),

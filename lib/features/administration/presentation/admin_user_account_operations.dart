@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 
 import '../../../core/errors/api_error.dart';
+import '../../../core/providers.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
-import '../../../core/ui/widgets/inputs/nz_switch.dart';
 import '../../../core/ui/widgets/lists/nz_list_tile.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
@@ -16,8 +15,7 @@ import '../application/admin_controller.dart';
 import '../domain/organization_admin.dart';
 import 'admin_forms.dart';
 
-/// Hesap sekmesinin son işlem grubu. Pinli API aktiflik değiştirmeyi sunmaz;
-/// yalnız mevcut oturumun hesabının açık olduğu bilinir. Silme gerçek ucu kullanır.
+/// Hesap durumu ve silme işlemleri.
 class AdminUserAccountOperations extends ConsumerWidget {
   const AdminUserAccountOperations({super.key, required this.user});
   final KnownUser user;
@@ -31,19 +29,60 @@ class AdminUserAccountOperations extends ConsumerWidget {
     final admin =
         !catalog.hasError && !catalog.isLoading && access?.companyAdmin == true;
     final self = access?.accountId == user.accountId;
-    final activeSession = !catalog.hasError && !catalog.isLoading && self;
-    final statusDescription = activeSession
-        ? l.uiUserAccountFieldsSignedInStatusHint
-        : l.uiUsersOpsStatusUnavailable;
     final busy = ref.watch(adminCommandProvider);
+    bool sameOwner(int session, String? program, String? department) {
+      if (!context.mounted) return false;
+      final scope = ref.read(scopeControllerProvider).current;
+      return ref.read(sessionControllerProvider).generation == session &&
+          scope.programId == program &&
+          scope.departmentId == department;
+    }
+
+    Future<void> changeStatus() async {
+      if (!admin ||
+          self ||
+          busy ||
+          user.accountStatus == AccountStatus.unknown) {
+        return;
+      }
+      final session = ref.read(sessionControllerProvider).generation;
+      final scope = ref.read(scopeControllerProvider).current;
+      final disable = user.accountStatus == AccountStatus.active;
+      final title = disable ? l.uiUsersDisableAccount : l.uiUsersEnableAccount;
+      final description = disable
+          ? l.uiUsersDisableConfirm
+          : l.uiUsersEnableConfirm;
+      if (!await adminConfirm(context, title, description) ||
+          !sameOwner(session, scope.programId, scope.departmentId)) {
+        return;
+      }
+      try {
+        await ref.read(adminCommandProvider.notifier).run((
+          organization,
+          _,
+        ) async {
+          if (disable) {
+            await organization.disableAccount(user.accountId);
+          } else {
+            await organization.enableAccount(user.accountId);
+          }
+        });
+        if (context.mounted) NzToast.success(context, title);
+      } on Object catch (error) {
+        if (context.mounted) NzToast.error(context, toApiError(error));
+      }
+    }
+
     Future<void> remove() async {
       if (!admin || self || busy) return;
+      final session = ref.read(sessionControllerProvider).generation;
+      final scope = ref.read(scopeControllerProvider).current;
       if (!await adminConfirm(
             context,
             l.uiUsersOpsDelete,
             l.uiUsersOpsDeleteConfirm,
           ) ||
-          !context.mounted) {
+          !sameOwner(session, scope.programId, scope.departmentId)) {
         return;
       }
       try {
@@ -80,47 +119,24 @@ class AdminUserAccountOperations extends ConsumerWidget {
           type: MaterialType.transparency,
           child: Column(
             children: [
-              Semantics(
-                enabled: false,
-                label:
-                    '${l.uiUsersOpsActive}${activeSession ? '' : ' · —'}. $statusDescription',
-                child: ExcludeSemantics(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    child: Row(
-                      children: [
-                        icon(NzIcons.lock), const Gap(12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${l.uiUsersOpsActive}${activeSession ? '' : ' · —'}',
-                                style: context.text.bodyMd,
-                              ),
-                              const Gap(2),
-                              Text(
-                                statusDescription,
-                                style: context.text.caption.copyWith(
-                                  color: c.textMuted,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Gap(12),
-                        // Diğer hesaplarda false bir aktiflik olgusu değildir;
-                        // bilinmeyen durum başlık ve alt metinde açıklanır.
-                        NzToggle(value: activeSession, onChanged: null),
-                      ],
-                    ),
+              if (!self && user.accountStatus != AccountStatus.unknown)
+                NzListTile(
+                  title: user.accountStatus == AccountStatus.active
+                      ? l.uiUsersDisableAccount
+                      : l.uiUsersEnableAccount,
+                  subtitle: l.uiUsersAccountHistoryPreserved,
+                  leading: icon(NzIcons.lock),
+                  onTap: admin && !busy ? changeStatus : null,
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    user.accountStatus == AccountStatus.unknown
+                        ? l.uiUsersAccountStatusUnknown
+                        : l.uiUsersOwnAccount,
                   ),
                 ),
-              ),
               divider(),
               AbsorbPointer(
                 absorbing: !admin || self || busy,

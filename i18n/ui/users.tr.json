@@ -1,6 +1,18 @@
 {
   "$comment": "Kullanıcı yönetimi liste ve profil ekranları. Elle düzenlenir.",
   "texts": {
+    "ui.users.disable_account": "Hesabı kapat",
+    "ui.users.enable_account": "Hesabı aç",
+    "ui.users.disable_confirm": "Oturumlar kapatılır, görevler ve geçmiş korunur.",
+    "ui.users.enable_confirm": "Hesap mevcut rol ve üyelikleriyle erişim kazanır; yeniden giriş gerekir.",
+    "ui.users.account_history_preserved": "Görevler ve geçmiş korunur.",
+    "ui.users.account_status_unknown": "Hesap durumu bilinmiyor",
+    "ui.users.own_account": "Kendi hesabınız",
+    "ui.users.account_disabled": "Hesap kapalı",
+    "ui.users.login_locked": "Giriş kilitli",
+    "ui.users.filter_scope": "geçerli filtre",
+    "ui.users.search_name_email": "Ad veya e-posta ara",
+    "ui.users.one_department": "Bir koordinatörlük seçebilirsin",
     "ui.users.title": "Kullanıcılar",
     "ui.users.subtitle": "Hesaplar ve ekip üyelikleri",
     "ui.users.search": "Kullanıcı ara",

@@ -2,7 +2,6 @@
 /// import eder (sınır kuralı B3).
 library;
 
-export 'application/company_admin_index.dart' show companyAdminIndexProvider;
 export 'application/messages_nav_caption.dart'
     show
         messagesNavBadgeProvider,

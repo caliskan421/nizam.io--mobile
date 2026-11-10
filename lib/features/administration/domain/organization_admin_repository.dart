@@ -9,13 +9,20 @@ import 'organization_admin.dart';
 abstract interface class OrganizationAdminRepository {
   /// `GET /v1/admin/users` (imleçli). [search] Türkçe büyük/küçük harf duyarsızdır; sıralama
   /// ekseni değişince eski imleç 422 `identity.invalid_cursor` alır.
-  Future<PageSlice<KnownUser>> listUsers({
+  Future<UserDirectoryPage> listUsers({
     PageRequest page = const PageRequest(),
     DepartmentRole? role,
+    bool companyAdminOnly = false,
+    String? programId,
+    String? departmentId,
     String? search,
     UserSortField? sortBy,
     SortDirection? sortOrder,
   });
+
+  Future<KnownUser> readUser(String accountId);
+  Future<AccountStatusChange> disableAccount(String accountId);
+  Future<AccountStatusChange> enableAccount(String accountId);
 
   /// `POST /v1/admin/users`: kullanıcı oluşturur ya da [transferAccountId] verilirse mevcut
   /// hesabı [departmentId]'ye aktarır; [programId] ilk ekip satırının programıdır (v0.4.0-api).

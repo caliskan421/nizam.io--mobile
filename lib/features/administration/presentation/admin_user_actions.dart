@@ -162,15 +162,16 @@ class AdminUserActions extends ConsumerWidget {
           }
         },
       ),
-      action(
-        label: 'Kilidi kaldır',
-        icon: NzIcons.checkCircle,
-        onPressed: () => run(
-          () => command.run((o, p) async {
-            await o.unlockAccount(user.accountId);
-          }),
+      if (user.loginLocked)
+        action(
+          label: 'Kilidi kaldır',
+          icon: NzIcons.checkCircle,
+          onPressed: () => run(
+            () => command.run((o, p) async {
+              await o.unlockAccount(user.accountId);
+            }),
+          ),
         ),
-      ),
       action(
         danger: true,
         label: 'Kullanıcıyı sil',

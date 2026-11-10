@@ -68,10 +68,51 @@ Matcher _apiError(String code) =>
 String _err(String code) => '{"code":"$code","message":"x","request_id":"r"}';
 
 void main() {
+  test('profil tek readUser isteğiyle gelir; 404 korunur', () async {
+    final (repo, a) = _repo(
+      '{"account_id":"a1","full_name":"Ayşe","email":"a@b.c","company_admin":true,"account_status":"active","login_locked":true,"memberships":[],"teams":[]}',
+    );
+    final user = await repo.readUser('a1');
+    expect(a.seen!.uri.path, '/v1/admin/users/a1');
+    expect(user.email, 'a@b.c');
+    expect(user.companyAdmin, isTrue);
+    expect(user.loginLocked, isTrue);
+    final (missing, _) = _repo(
+      _err('organization.account_not_found'),
+      status: 404,
+    );
+    await expectLater(
+      missing.readUser('missing'),
+      _apiError('organization.account_not_found'),
+    );
+  });
   group('listUsers', () {
+    test(
+      'şirket yöneticisi ve departman süzgeçleri sunucuya aktarılır',
+      () async {
+        final (repo, a) = _repo(
+          '{"users":[],"total":1,"role_counts":{"all":4,"company_admin":1,"koordinator":2,"uye":3},"next_cursor":"next"}',
+        );
+        final page = await repo.listUsers(
+          companyAdminOnly: true,
+          programId: 'p1',
+          departmentId: 'd1',
+        );
+        expect(a.seen!.uri.queryParameters, {
+          'role': 'company_admin',
+          'program_id': 'p1',
+          'department_id': 'd1',
+        });
+        expect(page.items, isEmpty);
+        expect(page.nextCursor, 'next');
+        expect(page.total, 1);
+        expect(page.roleCounts.all, 4);
+        expect(page.roleCounts.members, 3);
+      },
+    );
     test('GET /v1/admin/users: süzgeç/sıralama/sayfa sorguda; imleç', () async {
       final (repo, a) = _repo(
-        '{"users":[{"account_id":"a1","full_name":"Ayşe","email":"a@b.c","company_admin":false,"account_status":"active","login_locked":false,"teams":[],"memberships":["Basın:uye"]},'
+        '{"users":[{"account_id":"a1","full_name":"Ayşe","email":"a@b.c","company_admin":true,"account_status":"disabled","login_locked":true,"teams":[{"program_id":"p1","program_name":"P","department_id":"d1","display_name":"D","role":"koordinator"}],"memberships":["Basın:uye"]},'
         '{"account_id":"a2","full_name":"Bora","email":"b@b.c","company_admin":false,"account_status":"active","login_locked":false,"teams":[],"memberships":null}],'
         '"total":2,"role_counts":{"all":2,"company_admin":0,"koordinator":1,"uye":1},"next_cursor":"c2"}',
       );
@@ -93,6 +134,15 @@ void main() {
       });
       expect(slice.items.first.accountId, 'a1');
       expect(slice.items.first.fullName, 'Ayşe');
+      expect(slice.items.first.email, 'a@b.c');
+      expect(slice.items.first.companyAdmin, isTrue);
+      expect(slice.items.first.accountStatus, AccountStatus.disabled);
+      expect(slice.items.first.loginLocked, isTrue);
+      expect(slice.items.first.teams.single.role, DepartmentRole.coordinator);
+      expect(slice.items.first.teams.single.programName, 'P');
+      expect(slice.items.first.teams.single.displayName, 'D');
+      expect(slice.total, 2);
+      expect(slice.roleCounts.coordinators, 1);
       expect(slice.items.first.memberships, ['Basın:uye']);
       expect(slice.items.last.memberships, isEmpty);
       expect(slice.nextCursor, 'c2');
@@ -127,6 +177,33 @@ void main() {
       );
     });
   });
+
+  test(
+    'hesap durumu: changed false korunur, 403 ve son yönetici hataları taşınır',
+    () async {
+      final (repo, a) = _repo(
+        '{"account_id":"a1","account_status":"disabled","changed":false,"revoked_sessions":0}',
+      );
+      final result = await repo.disableAccount('a1');
+      expect(result.status, AccountStatus.disabled);
+      expect(result.changed, isFalse);
+      expect(result.revokedSessions, 0);
+      expect(a.seen!.uri.path, '/v1/admin/accounts/a1/disable');
+      final (forbidden, _) = _repo(
+        _err('organization.not_authorized'),
+        status: 403,
+      );
+      await expectLater(
+        forbidden.enableAccount('a1'),
+        _apiError('organization.not_authorized'),
+      );
+      final (last, _) = _repo(_err('organization.last_admin'), status: 409);
+      await expectLater(
+        last.disableAccount('a1'),
+        _apiError('organization.last_admin'),
+      );
+    },
+  );
 
   group('createUser', () {
     test('POST /v1/admin/users: gövde; eksik alanlar varsayılan', () async {

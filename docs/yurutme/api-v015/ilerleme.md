@@ -1,5 +1,7 @@
 # İlerleme
 
+- Son kalite turu: CSV dışa aktarma fonksiyonunun üretim çağırıcısı olmadığı ve üyelik metni yardımcısının yalnız bu işlevce kullanıldığı doğrulandı; iki ölü presentation dosyası kaldırıldı. Ortak CSV yazıcısı ve davranış testi korundu; kullanıcıya sunulan bir dışa aktarma eylemi kaldırılmadı.
+
 - 2026-11-10: Orkestrasyon açıldı. İzole worktree ve görev dalı hazır. Ana ağaçtaki kaydedilmemiş değişiklikler korunuyor. Önce Luna taban koşumunu alacak; aynı sırada Terra salt okunur keşif yapacak.
 - M015-0/1 uygulandı; Luna ilk hedefli grupta 137 testi ve boyut kontrolünü yeşil doğruladı. Sol D01/D02 oturum/kapsam açıklarını buldu, Terra düzeltti, Sol kaynakta kapandığını doğruladı.
 - Güvenlik yarış testleri ilk koşumunda disposed-ref kaynak hatası ve yeni timeline testinde etkinleştirilmemiş provider nedeniyle bekleme bulundu. Bu koşum yeşil kanıt değildir; faz kabulü açık. Checkpoint sonrasında Terra düzeltecek.

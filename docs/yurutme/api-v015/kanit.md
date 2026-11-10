@@ -65,6 +65,27 @@ Her iki senaryoda beklenen `E-posta, giriş kilidi ve son giriş bilgisi` metni 
 
 Ham çıktı: `/tmp/nizamio-m015-luna/final-r2-fixes.txt`.
 
+## Son tam verify — HEAD 21a6458
+
+Başlangıç: `git rev-parse HEAD` → `21a64587410236bef9026a730ed6671bc80a26a2`; `git status --porcelain=v1` boştu.
+
+| Aşama | Komut | Exit | Sonuç |
+|---|---|---:|---|
+| Profil hedef testi | `flutter test test/app/router/users_profile_flow_test.dart --reporter expanded --timeout=2m` | 0 | 2 geçti. |
+| Üretim doğrulaması | `NIZAMIO_BACKEND_DIR=/Users/muhammetalicaliskan/Projects/NIZAM.IO/nizam.io--backend NIZAMIO_FRONTEND_DIR=/Users/muhammetalicaliskan/Projects/NIZAM.IO/nizam.io--frontend make gen-check` | 0 | `git diff --exit-code` temiz. |
+| Tam kapı | `NIZAMIO_BACKEND_DIR=/Users/muhammetalicaliskan/Projects/NIZAM.IO/nizam.io--backend NIZAMIO_FRONTEND_DIR=/Users/muhammetalicaliskan/Projects/NIZAM.IO/nizam.io--frontend /Users/muhammetalicaliskan/Projects/NIZAM.IO/program/araclar/verify-sirasi.sh /Users/muhammetalicaliskan/.codex/worktrees/mobil-api-v015/nizam.io--mobile verify` | 2 | `make verify` coverage test aşamasında durdu; yeşil değil. |
+| Coverage tanısı (sonradan, lcov mevcut) | `dart run tool/check_coverage.dart coverage/lcov.info` | 1 | Eşik yüzdeleri geçti, iki dosya lcov'da yok; `KAPI KIRMIZI`. |
+
+Tam verify içinde `flutter pub get`, format denetimi, `flutter analyze --fatal-infos` (sorun yok), `check_boundaries` (1445 dosya, ihlal yok) ve `check_test_presence` (eksik test yok) geçti. `flutter test test/ --exclude-tags golden --coverage` sonucu 2377 geçti, 1 başarısız:
+
+- `test/tool/boundaries_test.dart: izinler kapalıyken ham ölçüm: U2=143, U3 TextStyle=0, google_fonts=2` — beklenen 143, gerçek 157 (`boundaries_test.dart:1020`). Koordinatörün incelemesi +14 sayımı üretilmiş palet tokenlarındaki rol renklerinin iki tema varyantına bağlandığını doğruladı; bu mevcut ham ölçüm beklentisiyle ilgili, gerçek boundary lint ihlali değil.
+
+Coverage tanısında eşikler: core 96.15% (80), application 87.70% (80), data 97.92% (80), presentation 61.73% (60), core/ui/widgets 97.17% (70); hepsi eşik üstü. Ancak `lib/features/administration/presentation/admin_users_export.dart` ve `lib/features/administration/presentation/admin_user_texts.dart` lcov'da yok. Tam verify `flutter test --coverage` başarısız olduğundan coverage denetimi ve golden hedefi sırasıyla tamamlanmadı. Makine macOS; Linux golden, backend entegrasyonu ve CI kanıtı bu koşumda yok.
+
+Verify sonrası `kilit.sh durum verify` → `kilit[agir-is]: boş`; `pgrep -x go`, `k6`, `vegeta`, `wrk`, `hey`, `locust` sonuç vermedi; verify/flutter süreçleri kapalı. HEAD aynı kaldı. Bu kanıt güncellemesi dışında worktree temizdi.
+
+Ham çıktılar: `/tmp/nizamio-m015-luna/final-r3-profile.txt`, `/tmp/nizamio-m015-luna/final-r3-gen-check.txt`, `/tmp/nizamio-m015-luna/final-verify.txt`, `/tmp/nizamio-m015-luna/final-coverage-diagnostic.txt`.
+
 ## M015-0/1 hedefli koşum
 
 Tarih: 2026-11-10. Kaynak ağacı dondurulduktan sonra çalıştırıldı; kaynak dosyaları değiştirilmedi.

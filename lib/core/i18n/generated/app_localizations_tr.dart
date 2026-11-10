@@ -1483,6 +1483,21 @@ class AppLocalizationsTr extends AppLocalizations {
       'Koordinatörlük oluşturuldu ama seçili programa bağlanamadı. Tekrar denediğinde yeni koordinatörlük açılmaz, aynı kayıt bağlanır.';
 
   @override
+  String get uiCoordFormExisting =>
+      'Bu adla bir departman zaten var. Mevcut kayıt kullanılacak; türü ve açıklaması değiştirilmez. Bağlamak istiyor musunuz?';
+
+  @override
+  String get uiCoordFormExistingDeleted =>
+      'Bu adla silinmiş bir departman var. Mevcut kayıt geri yüklenip bağlanacak; türü ve açıklaması değiştirilmez. Devam etmek istiyor musunuz?';
+
+  @override
+  String get uiCoordFormExistingConfirm => 'Mevcut kaydı kullan';
+
+  @override
+  String get uiCoordFormOutcomeUnknown =>
+      'Önceki işlemin sonucu bilinmiyor. Aynı bilgilerle yeniden deneyerek işlemi tamamlayın.';
+
+  @override
   String get uiCoordToastCreated => 'Koordinatörlük eklendi';
 
   @override

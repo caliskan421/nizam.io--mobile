@@ -2782,6 +2782,30 @@ abstract class AppLocalizations {
   /// **'Koordinatörlük oluşturuldu ama seçili programa bağlanamadı. Tekrar denediğinde yeni koordinatörlük açılmaz, aynı kayıt bağlanır.'**
   String get uiCoordFormLinkFailed;
 
+  /// ui.coord.form_existing
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adla bir departman zaten var. Mevcut kayıt kullanılacak; türü ve açıklaması değiştirilmez. Bağlamak istiyor musunuz?'**
+  String get uiCoordFormExisting;
+
+  /// ui.coord.form_existing_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adla silinmiş bir departman var. Mevcut kayıt geri yüklenip bağlanacak; türü ve açıklaması değiştirilmez. Devam etmek istiyor musunuz?'**
+  String get uiCoordFormExistingDeleted;
+
+  /// ui.coord.form_existing_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut kaydı kullan'**
+  String get uiCoordFormExistingConfirm;
+
+  /// ui.coord.form_outcome_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Önceki işlemin sonucu bilinmiyor. Aynı bilgilerle yeniden deneyerek işlemi tamamlayın.'**
+  String get uiCoordFormOutcomeUnknown;
+
   /// ui.coord.toast_created
   ///
   /// In tr, this message translates to:

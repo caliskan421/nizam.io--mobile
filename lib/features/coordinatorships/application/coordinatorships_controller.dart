@@ -9,7 +9,6 @@ import '../../tasks/tasks.dart';
 import '../domain/coordinatorship_overview.dart';
 import '../domain/coordinatorship_stats_repository.dart';
 import 'coordinatorship_detail_controller.dart';
-import 'coordinatorship_profiles_controller.dart';
 
 part 'coordinatorships_controller.g.dart';
 
@@ -65,15 +64,8 @@ class CoordinatorshipsController extends _$CoordinatorshipsController {
       if (code == null) {
         await ref.read(serverCoordinatorshipStatsProvider.future);
       } else {
-        ref.invalidate(coordinatorshipProfilesControllerProvider);
-        if (ref
-                .read(taskCatalogControllerProvider)
-                .value
-                ?.access
-                ?.companyAdmin ==
-            true) {
-          await ref.read(coordinatorshipProfilesControllerProvider.future);
-        }
+        ref.invalidate(programDepartmentProvider(code));
+        await ref.read(programDepartmentProvider(code).future);
       }
     },
   );

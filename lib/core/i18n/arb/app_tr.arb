@@ -1793,6 +1793,22 @@
   "@uiCoordFormLinkFailed": {
     "description": "ui.coord.form_link_failed"
   },
+  "uiCoordFormExisting": "Bu adla bir departman zaten var. Mevcut kayıt kullanılacak; türü ve açıklaması değiştirilmez. Bağlamak istiyor musunuz?",
+  "@uiCoordFormExisting": {
+    "description": "ui.coord.form_existing"
+  },
+  "uiCoordFormExistingDeleted": "Bu adla silinmiş bir departman var. Mevcut kayıt geri yüklenip bağlanacak; türü ve açıklaması değiştirilmez. Devam etmek istiyor musunuz?",
+  "@uiCoordFormExistingDeleted": {
+    "description": "ui.coord.form_existing_deleted"
+  },
+  "uiCoordFormExistingConfirm": "Mevcut kaydı kullan",
+  "@uiCoordFormExistingConfirm": {
+    "description": "ui.coord.form_existing_confirm"
+  },
+  "uiCoordFormOutcomeUnknown": "Önceki işlemin sonucu bilinmiyor. Aynı bilgilerle yeniden deneyerek işlemi tamamlayın.",
+  "@uiCoordFormOutcomeUnknown": {
+    "description": "ui.coord.form_outcome_unknown"
+  },
   "uiCoordToastCreated": "Koordinatörlük eklendi",
   "@uiCoordToastCreated": {
     "description": "ui.coord.toast_created"

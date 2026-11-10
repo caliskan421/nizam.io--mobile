@@ -1,10 +1,14 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart' show FutureProvider;
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/errors/api_error.dart';
+import '../../../core/i18n/generated/client_error_codes.gen.dart';
+import '../../../core/providers.dart';
 import '../../tasks/tasks.dart';
 import '../domain/coordinatorship_board.dart';
 import '../domain/coordinatorship_overview.dart';
-import 'coordinatorship_profiles_controller.dart';
+import '../domain/department.dart';
 import 'coordinatorships_providers.dart';
 
 part 'coordinatorship_detail_controller.g.dart';
@@ -87,28 +91,62 @@ class CoordinatorshipDetailController
   void togglePast() => state = state.copyWith(pastOpen: !state.pastOpen);
 }
 
-/// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
-/// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
-/// biri yükleniyorsa yükleniyor. Departman kaydı yalnız şirket yöneticisinde okunur
-/// (`listDepartments` yalnız ona açık, ORGANIZATION-K08); diğer rollerde istek yoktur.
+typedef ProgramDepartmentResult = ({
+  int session,
+  String program,
+  Department department,
+});
+
+final programDepartmentProvider = FutureProvider.autoDispose
+    .family<ProgramDepartmentResult, String>((Ref ref, String code) async {
+      ref.watch(sessionGenerationProvider);
+      ref.watch(scopeStateProvider);
+      final sessionController = ref.read(sessionControllerProvider);
+      final scopeController = ref.read(scopeControllerProvider);
+      final session = sessionController.generation;
+      final program = scopeController.current.programId;
+      if (program == null) throw StateError('Program seçilmedi');
+      final department = await ref
+          .watch(departmentRepositoryProvider)
+          .readProgramDepartment(program, code);
+      if (sessionController.generation != session ||
+          scopeController.current.programId != program) {
+        throw ApiError(ClientErrorCode.scopeMissing);
+      }
+      return (session: session, program: program, department: department);
+    });
+
+/// [code] koordinatörlüğünün ayrıntısı; tekil okuma sunucunun rol denetiminden geçer.
 @riverpod
 AsyncValue<CoordinatorshipDetail?> coordinatorshipDetail(Ref ref, String code) {
   final catalog = ref.watch(taskCatalogControllerProvider);
-  if (catalog.hasError && !catalog.hasValue) {
+  if (catalog.hasError) {
     return AsyncError(catalog.error!, catalog.stackTrace!);
+  }
+  if (catalog.isLoading) {
+    // Açık ayrıntının tekil okumasını katalog geçişinde dinlemeyi sürdür. İlk açılışta
+    // henüz doğrulanmamış kimlik için istek başlatılmaz.
+    if (ref.read(scopeControllerProvider).current.programId != null &&
+        ref.exists(programDepartmentProvider(code))) {
+      ref.watch(programDepartmentProvider(code));
+    }
+    return const AsyncLoading();
   }
   final c = catalog.value;
   if (c == null) return const AsyncLoading();
-  if (c.access?.companyAdmin != true) {
-    return AsyncData(CoordinatorshipDetail.from(c, const [], code));
-  }
-  final departments = ref.watch(coordinatorshipProfilesControllerProvider);
-  if (departments.hasError && !departments.hasValue) {
+  if (c.coordinatorship(code) == null) return const AsyncData(null);
+  final departments = ref.watch(programDepartmentProvider(code));
+  if (departments.hasError) {
     return AsyncError(departments.error!, departments.stackTrace!);
   }
+  if (departments.isLoading) return const AsyncLoading();
   final d = departments.value;
   if (d == null) return const AsyncLoading();
-  return AsyncData(CoordinatorshipDetail.from(c, d, code));
+  if (d.session != ref.read(sessionControllerProvider).generation ||
+      d.program != ref.read(scopeControllerProvider).current.programId) {
+    return const AsyncLoading();
+  }
+  return AsyncData(CoordinatorshipDetail.from(c, [d.department], code));
 }
 
 /// Koordinatörlüğün ([code] = `department_id`) toplantıları, tarihe göre.

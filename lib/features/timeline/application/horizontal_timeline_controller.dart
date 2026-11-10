@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../tasks/tasks.dart' show TaskPriority;
 import '../domain/horizontal_timeline.dart';
 import '../domain/timeline.dart';
 
@@ -41,6 +42,13 @@ class HorizontalTimelineController extends _$HorizontalTimelineController {
   void toggleCoord(String code) => state = state.toggleCoord(code);
 
   void clearCoords() => state = state.clearCoords();
+
+  void togglePerson(String id) => state = state.togglePerson(id);
+
+  void togglePriority(TaskPriority priority) =>
+      state = state.togglePriority(priority);
+
+  void clearFilters() => state = state.clearFilters();
 
   void toggleGroup(String code) => state = state.toggleGroup(code);
 

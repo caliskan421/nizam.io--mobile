@@ -22,6 +22,7 @@ class NzSearchField extends StatefulWidget {
     this.enabled = true,
     this.size = NzSize.md,
     this.focusNode,
+    this.onDismiss,
   });
 
   final TextEditingController? controller;
@@ -39,6 +40,7 @@ class NzSearchField extends StatefulWidget {
   final bool enabled;
   final NzSize size;
   final FocusNode? focusNode;
+  final VoidCallback? onDismiss;
 
   @override
   State<NzSearchField> createState() => _NzSearchFieldState();
@@ -46,12 +48,41 @@ class NzSearchField extends StatefulWidget {
 
 class _NzSearchFieldState extends State<NzSearchField> {
   TextEditingController? _own;
+  bool _hadFocus = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode?.addListener(_focusChanged);
+  }
+
+  @override
+  void didUpdateWidget(NzSearchField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusNode != widget.focusNode) {
+      oldWidget.focusNode?.removeListener(_focusChanged);
+      _hadFocus = false;
+      widget.focusNode?.addListener(_focusChanged);
+    }
+  }
+
+  void _focusChanged() {
+    final focused = widget.focusNode?.hasFocus == true;
+    if (_hadFocus && !focused && widget.onDismiss != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && widget.focusNode?.hasFocus != true)
+          widget.onDismiss?.call();
+      });
+    }
+    _hadFocus = focused;
+  }
 
   TextEditingController get _controller =>
       widget.controller ?? (_own ??= TextEditingController());
 
   @override
   void dispose() {
+    widget.focusNode?.removeListener(_focusChanged);
     _own?.dispose();
     super.dispose();
   }
@@ -85,6 +116,8 @@ class _NzSearchFieldState extends State<NzSearchField> {
           builder: (context, value, _) => _labelled(
             widget.hint == null || widget.hint == label ? null : label,
             TextField(
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
               controller: _controller,
               focusNode: widget.focusNode,
               enabled: widget.enabled,

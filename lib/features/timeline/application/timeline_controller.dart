@@ -146,6 +146,17 @@ class TimelineController extends _$TimelineController {
   void clearFilters() =>
       state = _cleared(state.copyWith(people: const [], priorities: const []));
 
+  /// Filtre penceresindeki bütün seçimleri varsayılana döndürür.
+  void clearSheetFilters() => state = _cleared(
+    state.copyWith(
+      coordinatorships:
+          _catalog?.coordinatorships.map((c) => c.code).toList() ?? const [],
+      people: const [],
+      priorities: const [],
+      status: TimelineStatusFilter.all,
+    ),
+  );
+
   static List<T> _toggled<T>(List<T> list, T v) => list.contains(v)
       ? [
           for (final x in list)

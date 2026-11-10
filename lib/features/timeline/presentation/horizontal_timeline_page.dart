@@ -59,6 +59,9 @@ class HorizontalTimelinePage extends ConsumerStatefulWidget {
 class _HorizontalTimelinePageState
     extends ConsumerState<HorizontalTimelinePage> {
   var _center = const GanttCenterRequest(0);
+  final _horizontalScroll = ScrollController();
+  bool _compactLabels = false;
+  final Set<String> _expandedTasks = {};
 
   // Arama alanı başlığın altında yerinde açılır; metin denetleyici durumundan başlar
   // (initState'te; `late` başlatma dispose'a kalırsa ref artık kullanılamaz).
@@ -72,6 +75,7 @@ class _HorizontalTimelinePageState
 
   @override
   void dispose() {
+    _horizontalScroll.dispose();
     _search.dispose();
     _searchFocus.dispose();
     super.dispose();
@@ -152,12 +156,16 @@ class _HorizontalTimelinePageState
     final catalog = ref.watch(timelineCatalogProvider);
     // Yerleşim önbellekten: katalog ya da ekran durumu değişmedikçe aynı örnek (kaydırma ve
     // yeniden kurulum hesaplatmaz). Kapsam değişiminde yeni katalog gelene kadar null.
+    for (final code in _expandedTasks) {
+      ref.watch(taskDetailsProvider(code));
+    }
     final layout = ref.watch(ganttLayoutProvider);
     // Sayfa girişi yok: başlık liste bölmesindeki yerinde kalır, eylemler kayar
     // ([TasksHeaderSlide]), araç satırı ve çizelge soldan yumuşakça girer.
     return NzPage.bare(
       animateContent: false,
       body: SafeArea(
+        bottom: false,
         child: NzAsyncView<TaskCatalog>(
           value: catalog,
           onRetry: () => ref.invalidate(taskCatalogControllerProvider),
@@ -165,7 +173,18 @@ class _HorizontalTimelinePageState
           // önceki programın çizelgesi çizilmez.
           data: (c) => layout == null
               ? const NzSkeleton.page()
-              : _body(context, layout, c.truncated),
+              : LayoutBuilder(
+                  builder: (context, box) => _body(
+                    context,
+                    GanttLayout.of(
+                      layout.view,
+                      labelWidth: _compactLabels ? 150 : 300,
+                      viewportWidth: box.maxWidth,
+                      expandedTasks: _expandedTasks,
+                    ),
+                    c.truncated,
+                  ),
+                ),
         ),
       ),
     );
@@ -224,7 +243,8 @@ class _HorizontalTimelinePageState
                       children: [
                         GanttToolbar(
                           view: v,
-                          onCoord: () => showGanttCoordSheet(context),
+                          layout: layout,
+                          scroll: _horizontalScroll,
                           onFilter: () => showGanttFilterSheet(context),
                           onZoom: _zoom,
                           onToday: _today,
@@ -254,6 +274,16 @@ class _HorizontalTimelinePageState
                                   ? GanttChart(
                                       key: HorizontalTimelinePage.chartKey,
                                       layout: layout,
+                                      horizontalController: _horizontalScroll,
+                                      expandedTasks: _expandedTasks,
+                                      onToggleSubtasks: (code) => setState(() {
+                                        if (!_expandedTasks.remove(code)) {
+                                          _expandedTasks.add(code);
+                                        }
+                                      }),
+                                      onToggleLabels: () => setState(
+                                        () => _compactLabels = !_compactLabels,
+                                      ),
                                       center: _center,
                                       onToggleGroup: ctrl.toggleGroup,
                                       onPick: ctrl.pick,

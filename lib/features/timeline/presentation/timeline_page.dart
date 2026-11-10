@@ -408,7 +408,6 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               bottom: 74 + bottom,
               child: TimelineFloatingFilters(
                 view: v,
-                onCoord: ctrl.toggleCoordMenu,
                 onFilter: () {
                   ctrl.closeCoordMenu();
                   showTimelineFilterSheet(

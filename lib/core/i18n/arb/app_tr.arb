@@ -2573,6 +2573,8 @@
   "@uiHomeBeta": {
     "description": "ui.home.beta"
   },
+  "uiHomeDeletedShortcut": "Silinenler",
+  "@uiHomeDeletedShortcut": {"description": "Ana sayfa silinen görevler kısayolu"},
   "uiHomeDeletedRecords": "Silinen kayıtlar",
   "@uiHomeDeletedRecords": {
     "description": "ui.home.deleted_records"
@@ -5081,6 +5083,8 @@
   "@uiTasksSend": {
     "description": "ui.tasks.send"
   },
+  "uiTasksNoStatusTransitions": "Bu görev için kullanabileceğiniz bir durum değişikliği yok.",
+  "@uiTasksNoStatusTransitions": {"description": "Kullanılabilir görev durumu geçişi yokken gösterilen açıklama"},
   "uiTasksSheetStatus": "durum",
   "@uiTasksSheetStatus": {
     "description": "ui.tasks.sheet_status"
@@ -6209,6 +6213,8 @@
   "@uiTimelineGanttZoomDaily": {
     "description": "ui.timeline.gantt_zoom_daily"
   },
+  "uiTimelineGanttZoomMonthly": "Aylık",
+  "@uiTimelineGanttZoomMonthly": {"description": "Tablet zaman çizelgesi aylık ölçek"},
   "uiTimelineGanttZoomWeekly": "Haftalık",
   "@uiTimelineGanttZoomWeekly": {
     "description": "ui.timeline.gantt_zoom_weekly"

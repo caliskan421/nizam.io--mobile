@@ -5,9 +5,9 @@ import 'package:meta/meta.dart';
 import '../../tasks/tasks.dart';
 import 'timeline.dart';
 
-/// Yatay çizelgenin ölçeği: [week] gün gün ("Günlük"), [month] hafta hafta ("Haftalık"). Gün
+/// Yatay çizelgenin ölçeği: [week] günlük, [month] haftalık, [monthly] aylık. Gün
 /// başına piksel görünüm geometrisidir (presentation).
-enum GanttZoom { week, month }
+enum GanttZoom { week, month, monthly }
 
 /// Yatay çizelgenin durum süzgeci (prototip `filt`: tümü / açık / geciken).
 enum GanttFilter { all, open, late }
@@ -20,6 +20,8 @@ final class GanttState {
     this.zoom = GanttZoom.month,
     this.filter = GanttFilter.all,
     this.coords = const [],
+    this.people = const [],
+    this.priorities = const [],
     this.closed = const {},
     this.selected,
     this.query = '',
@@ -30,6 +32,8 @@ final class GanttState {
 
   /// Seçili koordinatörlük kodları, seçilme sırasıyla; boş → hepsi.
   final List<String> coords;
+  final List<String> people;
+  final List<TaskPriority> priorities;
 
   /// Kapalı (daraltılmış) grup kodları.
   final Set<String> closed;
@@ -45,6 +49,8 @@ final class GanttState {
     GanttZoom? zoom,
     GanttFilter? filter,
     List<String>? coords,
+    List<String>? people,
+    List<TaskPriority>? priorities,
     Set<String>? closed,
     String? Function()? selected,
     String? query,
@@ -52,6 +58,8 @@ final class GanttState {
     zoom: zoom ?? this.zoom,
     filter: filter ?? this.filter,
     coords: coords ?? this.coords,
+    people: people ?? this.people,
+    priorities: priorities ?? this.priorities,
     closed: closed ?? this.closed,
     selected: selected == null ? this.selected : selected(),
     query: query ?? this.query,
@@ -80,6 +88,29 @@ final class GanttState {
   /// "Tüm koordinatörlükler" çipi.
   GanttState clearCoords() => _copy(coords: const []);
 
+  GanttState togglePerson(String id) => _copy(
+    people: people.contains(id)
+        ? [
+            for (final p in people)
+              if (p != id) p,
+          ]
+        : [...people, id],
+  );
+  GanttState togglePriority(TaskPriority priority) => _copy(
+    priorities: priorities.contains(priority)
+        ? [
+            for (final p in priorities)
+              if (p != priority) p,
+          ]
+        : [...priorities, priority],
+  );
+  GanttState clearFilters() => _copy(
+    coords: const [],
+    people: const [],
+    priorities: const [],
+    filter: GanttFilter.all,
+  );
+
   /// Grup başlığı: açıksa kapatır, kapalıysa açar.
   GanttState toggleGroup(String code) => _copy(
     closed: closed.contains(code)
@@ -102,6 +133,8 @@ final class GanttState {
       other.zoom == zoom &&
       other.filter == filter &&
       _sameList(other.coords, coords) &&
+      _sameList(other.people, people) &&
+      _samePriorities(other.priorities, priorities) &&
       other.closed.length == closed.length &&
       other.closed.containsAll(closed) &&
       other.selected == selected &&
@@ -112,10 +145,16 @@ final class GanttState {
     zoom,
     filter,
     Object.hashAll(coords),
+    Object.hashAll(people),
+    Object.hashAll(priorities),
     Object.hashAllUnordered(closed),
     selected,
     query,
   );
+
+  static bool _samePriorities(List<TaskPriority> a, List<TaskPriority> b) =>
+      a.length == b.length &&
+      Iterable<int>.generate(a.length).every((i) => a[i] == b[i]);
 
   static bool _sameList(List<String> a, List<String> b) {
     if (a.length != b.length) return false;
@@ -221,6 +260,12 @@ final class GanttTaskRow extends GanttRow {
   String get key => '$label $number';
 }
 
+/// Genişletilen görev altındaki alt görev satırı.
+final class GanttSubtaskRow extends GanttRow {
+  const GanttSubtaskRow(this.subtask);
+  final Subtask subtask;
+}
+
 /// Koordinatörlük çipi.
 @immutable
 final class GanttCoordChip {
@@ -264,6 +309,7 @@ final class GanttView {
     required this.days,
     required this.today,
     required this.rows,
+    required this.weeks,
     required this.visible,
     required this.lateAll,
     required this.chips,
@@ -279,6 +325,7 @@ final class GanttView {
   /// Bugünün sezon günü (katalog `today`).
   final int today;
   final List<GanttRow> rows;
+  final List<TimelineWeek> weeks;
 
   /// Süzgeçlerden geçen görev sayısı (`vis.length`).
   final int visible;
@@ -380,7 +427,12 @@ GanttView buildGanttView(
 
   final visible = [
     for (final t in tasks)
-      if (statusOk(t) && coordOk(t) && queryOk(t)) t,
+      if (statusOk(t) &&
+          coordOk(t) &&
+          queryOk(t) &&
+          (s.people.isEmpty || t.item.assignees.any(s.people.contains)) &&
+          (s.priorities.isEmpty || s.priorities.contains(t.item.priority)))
+        t,
   ];
 
   final coords = catalog.coordinatorships;
@@ -448,6 +500,7 @@ GanttView buildGanttView(
     days: days,
     today: today,
     rows: rows,
+    weeks: timelineWeeks(visible.map((t) => t.task), days),
     visible: visible.length,
     lateAll: tasks.where((t) => t.late).length,
     chips: [

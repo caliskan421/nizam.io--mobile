@@ -74,6 +74,20 @@ Future<void> _tap(WidgetTester tester, Finder f) async {
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
+  testWidgets('küçük telefonda yeni görev alanları erişilebilir', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(375, 667);
+    addTearDown(tester.view.reset);
+    await _open(tester);
+    await _tap(tester, find.text('görev'));
+    expect(find.text(_l.uiTasksFieldCoord), findsOneWidget);
+    expect(find.text(_l.uiTasksEvidenceRequired), findsOneWidget);
+    await _tap(tester, find.text(_l.uiTasksEvidenceRequired));
+    expect(tester.takeException(), isNull);
+  });
+
   for (final (width, scale) in [(360.0, 2.0), (390.0, 1.0)]) {
     for (final dark in [false, true]) {
       testWidgets(

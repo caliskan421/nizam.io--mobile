@@ -33,6 +33,7 @@ List<Widget> tasksListChildren(
   required TaskQueryResult result,
   required TasksListController ctl,
   required VoidCallback onClearAll,
+  required VoidCallback onFilter,
   required ValueChanged<String> onOpen,
   int columns = 1,
 }) {
@@ -106,7 +107,7 @@ List<Widget> tasksListChildren(
   if (byCoord) {
     for (var gi = 0; gi < r.groups.length; gi++) {
       final g = r.groups[gi];
-      final open = state.isGroupOpen(g.coordinatorship, first: gi == 0);
+      final open = state.isGroupOpen(g.coordinatorship);
       flush();
       rows.add(
         item(
@@ -177,7 +178,18 @@ List<Widget> tasksListChildren(
         action: sort,
       )
     else
-      Align(alignment: Alignment.centerRight, child: sort),
+      Row(
+        children: [
+          NzIconButton.circle(
+            icon: NzIcons.filter,
+            semanticLabel: l.uiTasksFilters,
+            dot: state.filter.hasExtra ? c.accentText : null,
+            onPressed: onFilter,
+          ),
+          const Spacer(),
+          sort,
+        ],
+      ),
     Gap(tablet ? NizamioSpacing.space3 : NizamioSpacing.space1),
     ...rows,
     if (list.isEmpty)

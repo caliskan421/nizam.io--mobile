@@ -3952,6 +3952,12 @@ abstract class AppLocalizations {
   /// **'beta'**
   String get uiHomeBeta;
 
+  /// Ana sayfa silinen görevler kısayolu
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinenler'**
+  String get uiHomeDeletedShortcut;
+
   /// ui.home.deleted_records
   ///
   /// In tr, this message translates to:
@@ -7714,6 +7720,12 @@ abstract class AppLocalizations {
   /// **'Gönder'**
   String get uiTasksSend;
 
+  /// Kullanılabilir görev durumu geçişi yokken gösterilen açıklama
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu görev için kullanabileceğiniz bir durum değişikliği yok.'**
+  String get uiTasksNoStatusTransitions;
+
   /// ui.tasks.sheet_status
   ///
   /// In tr, this message translates to:
@@ -9405,6 +9417,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Günlük'**
   String get uiTimelineGanttZoomDaily;
+
+  /// Tablet zaman çizelgesi aylık ölçek
+  ///
+  /// In tr, this message translates to:
+  /// **'Aylık'**
+  String get uiTimelineGanttZoomMonthly;
 
   /// ui.timeline.gantt_zoom_weekly
   ///

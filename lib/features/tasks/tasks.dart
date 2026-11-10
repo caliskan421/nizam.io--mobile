@@ -8,6 +8,7 @@ export 'application/task_catalog_controller.dart'
         TaskCatalogController,
         taskCatalogControllerProvider,
         canCreateTaskProvider;
+export 'application/task_details_controller.dart' show taskDetailsProvider;
 export 'application/tasks_nav_caption.dart' show tasksNavCaptionProvider;
 export 'application/tasks_providers.dart'
     show
@@ -35,6 +36,7 @@ export 'presentation/detail/detail_actions.dart' show showUploadOriginSheet;
 export 'presentation/quick_action_sheets.dart'
     show showInviteSheet, showMeetingSheet, showNewTaskSheet;
 export 'presentation/task_detail_page.dart' show TaskDetailPage;
+export 'presentation/task_widgets.dart' show TaskSegmented;
 export 'presentation/tasks/task_card_grid.dart' show TaskCardRow;
 export 'presentation/tasks/tasks_list_parts.dart' show TaskCardView;
 export 'presentation/tasks_mode_toggle.dart'

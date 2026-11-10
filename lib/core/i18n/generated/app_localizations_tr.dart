@@ -2067,6 +2067,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeBeta => 'beta';
 
   @override
+  String get uiHomeDeletedShortcut => 'Silinenler';
+
+  @override
   String get uiHomeDeletedRecords => 'Silinen kayıtlar';
 
   @override
@@ -3998,6 +4001,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksSend => 'Gönder';
 
   @override
+  String get uiTasksNoStatusTransitions =>
+      'Bu görev için kullanabileceğiniz bir durum değişikliği yok.';
+
+  @override
   String get uiTasksSheetStatus => 'durum';
 
   @override
@@ -4873,6 +4880,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTimelineGanttZoomDaily => 'Günlük';
+
+  @override
+  String get uiTimelineGanttZoomMonthly => 'Aylık';
 
   @override
   String get uiTimelineGanttZoomWeekly => 'Haftalık';

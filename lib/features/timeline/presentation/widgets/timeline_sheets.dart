@@ -6,33 +6,40 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
-import '../../../../core/ui/widgets/nz_size.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
 import '../../application/timeline_controller.dart';
 import '../../domain/timeline.dart';
 import '../timeline_texts.dart';
-import 'timeline_controls.dart';
 
-/// Filtre alt sayfası (prototip `modal: 'filter'`): başlık satırında "Temizle" (kişi + öncelik);
-/// durum (sayılı), kişi, öncelik; koordinatörlük ipucu ve "N görevi göster". Ölçek, genel bakış
-/// ve lejant çizelgenin üstündeki kontrollerdedir ([TimelineZoomControls]).
+/// Telefon çizelgesinin kişi, koordinatörlük ve öncelik filtreleri.
 Future<void> showTimelineFilterSheet(
   BuildContext context, {
   required String? coordinatorship,
 }) => NzBottomSheet.show<void>(
   context,
   title: context.l10n.uiTimelineFilters,
-  headerAction: Consumer(
-    builder: (context, ref, _) => NzButton.ghost(
-      label: context.l10n.uiTimelineClear,
-      size: NzSize.sm,
-      onPressed: ref
-          .read(timelineControllerProvider(coordinatorship).notifier)
-          .clearFilters,
+  actions: (sheet) => [
+    Consumer(
+      builder: (context, ref, _) => NzButton.secondary(
+        label: context.l10n.uiTimelineClear,
+        onPressed: ref
+            .read(timelineControllerProvider(coordinatorship).notifier)
+            .clearSheetFilters,
+      ),
     ),
-  ),
+    Consumer(
+      builder: (context, ref, _) {
+        final view = ref.watch(timelineViewProvider(coordinatorship)).value;
+        return NzButton.primary(
+          label: context.l10n.showTasks(view?.shown.length ?? 0),
+          onPressed: () => Navigator.of(sheet).maybePop(),
+        );
+      },
+    ),
+  ],
   builder: (_) => _FilterBody(coordinatorship: coordinatorship),
 );
 
@@ -44,28 +51,75 @@ Future<void> showTimelineLegendSheet(BuildContext context) =>
       builder: (_) => const _LegendBody(),
     );
 
-class _FilterBody extends ConsumerWidget {
+class _FilterBody extends ConsumerStatefulWidget {
   const _FilterBody({required this.coordinatorship});
-
   final String? coordinatorship;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_FilterBody> createState() => _FilterBodyState();
+}
+
+class _FilterBodyState extends ConsumerState<_FilterBody> {
+  int? _expanded;
+
+  @override
+  Widget build(BuildContext context) {
     final c = context.colors;
-    final t = context.text;
     final l = context.l10n;
-    final view = ref.watch(timelineViewProvider(coordinatorship)).value;
+    final view = ref.watch(timelineViewProvider(widget.coordinatorship)).value;
     if (view == null) return const SizedBox.shrink();
     final s = view.state;
-    final ctrl = ref.read(timelineControllerProvider(coordinatorship).notifier);
-    Widget label(String text) => Padding(
-      padding: const EdgeInsets.only(bottom: NizamioSpacing.space2),
-      child: Text(text, style: t.labelMd.copyWith(color: c.textMuted)),
+    final ctrl = ref.read(
+      timelineControllerProvider(widget.coordinatorship).notifier,
     );
+    String summary(int selected) =>
+        selected == 0 ? l.uiTasksAllLc : '$selected ${l.uiTasksSelectedTail}';
+    Widget option(
+      String label,
+      int? count,
+      bool selected,
+      VoidCallback onTap,
+    ) => InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: NizamioSpacing.space3,
+          vertical: NizamioSpacing.space2,
+        ),
+        child: Row(
+          children: [
+            NzCheckCircle(value: selected, label: label, onChanged: onTap),
+            const Gap(NizamioSpacing.space2),
+            Expanded(child: Text(label, style: context.text.list)),
+            if (count != null)
+              Text(
+                '$count',
+                style: context.text.monoSm.copyWith(color: c.textMuted),
+              ),
+          ],
+        ),
+      ),
+    );
+    Widget choices(List<Widget> children) => Padding(
+      padding: const EdgeInsets.fromLTRB(
+        NizamioSpacing.gapMd,
+        0,
+        NizamioSpacing.gapMd,
+        NizamioSpacing.gapMd,
+      ),
+      child: Column(children: children),
+    );
+    final coordCount = view.allSelected
+        ? 0
+        : view.selectedCoordinatorships.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        label(l.uiTimelineStatus),
+        Text(
+          l.uiTimelineStatus,
+          style: context.text.labelMd.copyWith(color: c.textMuted),
+        ),
+        const Gap(NizamioSpacing.space2),
         NzFilterRail(
           semanticLabel: l.uiTimelineStatus,
           selected: s.status.index,
@@ -81,48 +135,80 @@ class _FilterBody extends ConsumerWidget {
           ],
         ),
         const Gap(NizamioSpacing.space4),
-        label(l.uiTimelinePerson),
-        Wrap(
-          spacing: NizamioSpacing.space2,
-          children: [
-            for (final p in view.personOptions)
-              TimelineChip(
-                label: p.name,
-                count: p.count,
-                selected: p.selected,
-                onTap: () => ctrl.togglePerson(p.id),
+        NzFormRows(
+          expandedIndex: _expanded,
+          onToggle: (i) =>
+              setState(() => _expanded = _expanded == i ? null : i),
+          rows: [
+            NzFormRow(
+              label: l.uiTimelinePerson,
+              icon: NzIcons.person,
+              value: summary(s.people.length),
+              valueSet: s.people.isNotEmpty,
+              content: choices([
+                for (final p in view.personOptions)
+                  option(
+                    p.name,
+                    p.count,
+                    p.selected,
+                    () => ctrl.togglePerson(p.id),
+                  ),
+              ]),
+            ),
+            NzFormRow(
+              label: l.uiTimelineCoord,
+              icon: NzIcons.coordinatorships,
+              value: view.allSelected
+                  ? l.uiTasksAllLc
+                  : '$coordCount ${l.uiTasksSelectedTail}',
+              valueSet: !view.allSelected,
+              content: choices([
+                option(
+                  view.allSelected
+                      ? l.uiTimelineCoordClear
+                      : l.uiTimelineCoordSelectAll,
+                  null,
+                  view.allSelected,
+                  () {
+                    if (view.allSelected || view.noneSelected) {
+                      ctrl.toggleAllCoordinatorships();
+                    } else {
+                      for (final coord in view.coordOptions.where(
+                        (o) => !o.selected,
+                      )) {
+                        ctrl.toggleCoordinatorship(coord.code);
+                      }
+                    }
+                  },
+                ),
+                for (final coord in view.coordOptions)
+                  option(
+                    coord.name,
+                    coord.count,
+                    coord.selected,
+                    () => ctrl.toggleCoordinatorship(coord.code),
+                  ),
+              ]),
+            ),
+            NzFormRow.custom(
+              label: l.uiTimelinePriority,
+              leading: const NzPriorityBars(level: 2),
+              trailing: TaskSegmented(
+                compact: true,
+                semanticLabel: l.uiTimelinePriority,
+                labels: [
+                  for (final p in TaskPriority.pickable) l.priorityLabel(p),
+                ],
+                selected: -1,
+                selectedIndices: {
+                  for (final (i, p) in TaskPriority.pickable.indexed)
+                    if (s.priorities.contains(p)) i,
+                },
+                onSelected: (i) =>
+                    ctrl.togglePriority(TaskPriority.pickable[i]),
               ),
+            ),
           ],
-        ),
-        const Gap(NizamioSpacing.space4),
-        label(l.uiTimelinePriority),
-        Wrap(
-          spacing: NizamioSpacing.space2,
-          children: [
-            for (final (p, level) in const [
-              (TaskPriority.high, 3),
-              (TaskPriority.medium, 2),
-              (TaskPriority.low, 1),
-            ])
-              TimelineChip(
-                label: l.priorityLabel(p),
-                leading: NzPriorityBars(level: level),
-                selected: s.priorities.contains(p),
-                onTap: () => ctrl.togglePriority(p),
-              ),
-          ],
-        ),
-        const Gap(NizamioSpacing.space4),
-        Text(
-          l.uiTimelineCoordHint,
-          style: t.caption.copyWith(color: c.textMuted),
-        ),
-        const Gap(NizamioSpacing.space3),
-        NzButton.primary(
-          label: l.showTasks(view.shown.length),
-          size: NzSize.lg,
-          expand: true,
-          onPressed: () => Navigator.of(context).pop(),
         ),
       ],
     );

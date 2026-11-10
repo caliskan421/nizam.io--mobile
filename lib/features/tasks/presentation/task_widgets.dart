@@ -19,6 +19,7 @@ class TaskSegmented extends StatelessWidget {
     required this.labels,
     required this.selected,
     required this.onSelected,
+    this.selectedIndices,
     this.semanticLabel,
     this.icons,
     this.compact = false,
@@ -26,6 +27,9 @@ class TaskSegmented extends StatelessWidget {
 
   final List<String> labels;
   final int selected;
+
+  /// Birden çok bağımsız seçim gerektiğinde kullanılır.
+  final Set<int>? selectedIndices;
   final ValueChanged<int> onSelected;
   final String? semanticLabel;
   final List<IconData>? icons;
@@ -68,7 +72,7 @@ class TaskSegmented extends StatelessWidget {
 
   Widget _part(BuildContext context, int i, NizamioColors c, IconData? icon) {
     final pill = compact && _tablet(context);
-    final on = i == selected;
+    final on = selectedIndices?.contains(i) ?? i == selected;
     final t = context.text;
     final child = Semantics(
       button: true,

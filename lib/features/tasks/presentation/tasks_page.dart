@@ -61,6 +61,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
   }
 
   final _searchFocus = FocusNode();
+  bool _searchSubmitted = false;
   void _toTimeline() {
     context.appNav.openTimeline();
   }
@@ -171,16 +172,6 @@ class _TasksPageState extends ConsumerState<TasksPage> {
       },
       topBar: const RootTopBar(),
       children: [
-        if (ref
-                .watch(taskCatalogControllerProvider)
-                .value
-                ?.access
-                ?.companyAdmin ==
-            true)
-          TextButton(
-            onPressed: context.appNav.openDeletedTasks,
-            child: const Text('Silinen görevler'),
-          ),
         ColoredBox(
           color: context.colors.background,
           child: NzPageHeader(
@@ -197,6 +188,19 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                       },
                     ),
                     const Gap(NizamioSpacing.space1),
+                    if (NzTabletMetrics.tabletVisualAt(
+                      MediaQuery.sizeOf(context).width,
+                    )) ...[
+                      NzIconButton.circle(
+                        icon: NzIcons.filter,
+                        semanticLabel: l.uiTasksFilters,
+                        dot: state.filter.hasExtra
+                            ? context.colors.accentText
+                            : null,
+                        onPressed: _openFilters,
+                      ),
+                      const Gap(NizamioSpacing.space1),
+                    ],
                     NzIconButton.circle(
                       icon: NzIcons.search,
                       semanticLabel: l.uiTasksSearch,
@@ -226,6 +230,14 @@ class _TasksPageState extends ConsumerState<TasksPage> {
             child: NzSearchField(
               controller: _search,
               focusNode: _searchFocus,
+              onDismiss: () {
+                if (_searchSubmitted) {
+                  _searchSubmitted = false;
+                  return;
+                }
+                if (ref.read(_provider).searchOpen) _toggleSearch();
+              },
+              onSubmitted: (_) => _searchSubmitted = true,
               label: l.uiTasksSearchHint,
               hint: l.uiTasksSearchHint,
               onChanged: ref.read(_provider.notifier).setQuery,
@@ -246,6 +258,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
               ref.read(_provider.notifier).clearAll();
             },
             onOpen: nav.openTask,
+            onFilter: _openFilters,
             columns: columns,
           )
         else

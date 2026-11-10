@@ -16,7 +16,8 @@ export 'application/scope_selection_controller.dart'
 export 'application/scope_service.dart' show ScopeService;
 export 'domain/home_dashboard.dart' show HomeDashboard, ModuleCounts, TeamRole;
 export 'domain/my_department.dart' show DepartmentRole, MyDepartment;
-export 'domain/program.dart' show Program, ProgramDepartmentLink;
+export 'domain/program.dart'
+    show Program, ProgramColor, ProgramField, ProgramDepartmentLink;
 export 'presentation/home/home_menus.dart' show HomeModule, showHomeDrawer;
 export 'presentation/home_page.dart' show HomePage;
 export 'presentation/root_top_bar.dart' show RootTopBar;

@@ -113,7 +113,12 @@ class GoRouterAppNav implements NzAppNav {
     final unreadCount = unread.isLoading || unread.hasError
         ? null
         : unread.value;
-    final program = _ref.read(currentProgramControllerProvider).value;
+    final selection = _ref.read(scopeStateProvider);
+    final programState = _ref.read(currentProgramControllerProvider);
+    final currentProgram = programState.isLoading ? null : programState.value;
+    final program = currentProgram?.id == selection.programId
+        ? currentProgram
+        : null;
     final brand = displayBrand(_ref.read(flavorProvider));
     final l = context.l10n;
     final location = _location;
@@ -140,8 +145,14 @@ class GoRouterAppNav implements NzAppNav {
       greetingName: dashboard?.greetingName ?? '',
       greetingRole: dashboard?.greetingRole,
       greetingEmail: dashboard?.greetingEmail,
-      programName: program?.name ?? dashboard?.demoProgramName,
-      programYear: program?.year ?? dashboard?.demoProgramYear,
+      programName:
+          program?.name ??
+          (selection.hasProgram ? null : dashboard?.demoProgramName),
+      programShortName: program?.shortName,
+      programColor: program?.color,
+      programYear:
+          program?.year ??
+          (selection.hasProgram ? null : dashboard?.demoProgramYear),
       version: brand.version,
       productName: brand.name,
       counts: dashboard == null

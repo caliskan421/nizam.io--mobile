@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/api_error.dart';
+import '../../../core/providers.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
@@ -12,8 +13,11 @@ class AdminProgramActions extends ConsumerWidget {
   const AdminProgramActions({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final program = ref.watch(currentProgramControllerProvider).value;
-    if (program == null) {
+    final state = ref.watch(currentProgramControllerProvider);
+    final program = state.value;
+    if (state.isLoading ||
+        program == null ||
+        program.id != ref.watch(scopeStateProvider).programId) {
       return const SizedBox.shrink();
     }
     Future<void> run(Future<void> Function() call) async {
@@ -55,12 +59,32 @@ class AdminProgramActions extends ConsumerWidget {
                 secret: false,
                 required: false,
               ),
+              (
+                label: 'Kısa ad (1–4 harf veya rakam)',
+                initial: program.shortName ?? '',
+                secret: false,
+                required: false,
+              ),
+              (
+                label: 'Renk (violet, gold, blue, teal, green, orange, red, slate)',
+                initial: program.color == ProgramColor.unknown
+                    ? ''
+                    : program.color?.name ?? '',
+                secret: false,
+                required: false,
+              ),
             ]);
             if (values == null || !context.mounted) {
               return;
             }
             if (values[1].isNotEmpty && int.tryParse(values[1]) == null) {
               NzToast.show(context, 'Geçerli bir yıl girin.');
+              return;
+            }
+            final shortName = values[3].trim();
+            final color = values[4].trim();
+            if (!_validBadge(shortName, color)) {
+              NzToast.show(context, 'Kısa ad veya renk geçersiz.');
               return;
             }
             await run(() async {
@@ -70,6 +94,18 @@ class AdminProgramActions extends ConsumerWidget {
                   name: values[0],
                   year: int.tryParse(values[1]),
                   description: values[2],
+                  shortName: shortName == (program.shortName ?? '')
+                      ? null
+                      : ProgramField(shortName.isEmpty ? null : shortName),
+                  color:
+                      color ==
+                          (program.color == ProgramColor.unknown
+                              ? ''
+                              : program.color?.name ?? '')
+                      ? null
+                      : ProgramField(
+                          color.isEmpty ? null : ProgramColor.fromWire(color),
+                        ),
                 );
               });
               ref.invalidate(currentProgramControllerProvider);
@@ -88,6 +124,18 @@ class AdminProgramActions extends ConsumerWidget {
                 required: false,
               ),
               (label: 'Açıklama', initial: '', secret: false, required: false),
+              (
+                label: 'Kısa ad (1–4 harf veya rakam)',
+                initial: '',
+                secret: false,
+                required: false,
+              ),
+              (
+                label: 'Renk (violet, gold, blue, teal, green, orange, red, slate)',
+                initial: '',
+                secret: false,
+                required: false,
+              ),
             ]);
             if (values == null || !context.mounted) {
               return;
@@ -96,12 +144,20 @@ class AdminProgramActions extends ConsumerWidget {
               NzToast.show(context, 'Geçerli bir yıl girin.');
               return;
             }
+            final shortName = values[3].trim();
+            final color = values[4].trim();
+            if (!_validBadge(shortName, color)) {
+              NzToast.show(context, 'Kısa ad veya renk geçersiz.');
+              return;
+            }
             await run(
               () => command.run((o, p) async {
                 await p.createProgram(
                   name: values[0],
                   year: int.tryParse(values[1]),
                   description: values[2],
+                  shortName: shortName.isEmpty ? null : shortName,
+                  color: color.isEmpty ? null : ProgramColor.fromWire(color),
                 );
               }),
             );
@@ -164,3 +220,8 @@ class AdminProgramActions extends ConsumerWidget {
     );
   }
 }
+
+bool _validBadge(String shortName, String color) =>
+    (shortName.isEmpty ||
+        RegExp(r'^[\p{L}\p{N}]{1,4}$', unicode: true).hasMatch(shortName)) &&
+    (color.isEmpty || ProgramColor.fromWire(color) != ProgramColor.unknown);

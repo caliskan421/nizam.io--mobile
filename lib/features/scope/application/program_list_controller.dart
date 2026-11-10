@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/domain/page_slice.dart';
+import '../../../core/providers.dart';
 import '../domain/program.dart';
 import 'scope_providers.dart';
 
@@ -12,6 +13,8 @@ part 'program_list_controller.g.dart';
 @riverpod
 class ProgramListController extends _$ProgramListController {
   @override
-  Future<PageSlice<Program>> build() =>
-      ref.read(scopeServiceProvider).programs();
+  Future<PageSlice<Program>> build() {
+    ref.watch(sessionGenerationProvider);
+    return ref.read(scopeServiceProvider).programs();
+  }
 }

@@ -49,7 +49,7 @@ final class CurrentProgramControllerProvider
 }
 
 String _$currentProgramControllerHash() =>
-    r'bf7f8485de7b82606ebfaef1642a695397ef6291';
+    r'02d0893435a49009042c92b9bd84b18da20cf01d';
 
 /// Kapsamdaki program (`GET /v1/program`, S2): ana sayfada seçili programın adı BU yanıttan
 /// gelir — kapsam başlığının isteğe girdiğinin kanıtı. Seçim yoksa (`null`) istek atılmaz;

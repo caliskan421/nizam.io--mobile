@@ -5,6 +5,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'update_program_request_color.dart';
+import '../program_patch_field.dart';
 
 part 'update_program_request.freezed.dart';
 part 'update_program_request.g.dart';
@@ -17,10 +18,19 @@ abstract class UpdateProgramRequest with _$UpdateProgramRequest {
     String? description,
 
     /// Üç hâlli (PROGRAM-K46): alan yoksa değişmez; dizge verilirse kırpılıp doğrulanır (kırpılmış hâli 1–4 Unicode harf ya da rakam; ham uzunluk sınırlanmaz) ve yazılır; açık `null` kısa adı temizler. Boş dizge temizleme değildir: `422 program.input_invalid` (`program.invalid_short_name`).
-    @JsonKey(name: 'short_name') String? shortName,
+    @JsonKey(
+      name: 'short_name',
+      fromJson: programPatchStringFromJson,
+      toJson: programPatchStringToJson,
+    )
+    ProgramPatchField<String>? shortName,
 
     /// Üç hâlli (PROGRAM-K46): alan yoksa değişmez; palet anahtarı (`violet`, `gold`, `blue`, `teal`, `green`, `orange`, `red`, `slate`) yazılır; açık `null` rengi temizler. Başka değer `422 program.input_invalid` (`program.invalid_color`).
-    UpdateProgramRequestColor? color,
+    @JsonKey(
+      fromJson: programPatchColorFromJson,
+      toJson: programPatchColorToJson,
+    )
+    ProgramPatchField<UpdateProgramRequestColor>? color,
   }) = _UpdateProgramRequest;
 
   factory UpdateProgramRequest.fromJson(Map<String, Object?> json) =>

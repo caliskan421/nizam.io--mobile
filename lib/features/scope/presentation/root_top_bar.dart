@@ -28,9 +28,11 @@ class RootTopBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final program = ref.watch(
-      currentProgramControllerProvider.select((p) => p.value?.name),
-    );
+    final state = ref.watch(currentProgramControllerProvider);
+    final current = state.isLoading ? null : state.value;
+    final program = current?.id == ref.watch(scopeStateProvider).programId
+        ? current?.name
+        : null;
     final bell = referenceHeader ? null : watchNotificationBell(context, ref);
     final flavor = referenceHeader ? ref.watch(flavorProvider) : null;
     final brand = flavor == null
@@ -76,9 +78,11 @@ class RootProgramLine extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final program = ref.watch(
-      currentProgramControllerProvider.select((p) => p.value?.name),
-    );
+    final state = ref.watch(currentProgramControllerProvider);
+    final current = state.isLoading ? null : state.value;
+    final program = current?.id == ref.watch(scopeStateProvider).programId
+        ? current?.name
+        : null;
     final pending = ref.watch(
       currentProgramControllerProvider.select(
         (p) => p.isLoading && !p.hasValue,

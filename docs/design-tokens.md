@@ -168,3 +168,7 @@ girişi yeniden oynar; sıradan yeniden çizimlerde oynamaz. Sekme panelleri kim
 anahtarıyla yeniden açılır; ilk panelin hareketi sayfanın hareketine katlanmaz.
 Hareketi azalt açıkken süre sıfır, ilk kare son haldir.
 Sheet, dialog, toast, drawer ve kısayol menüsü kendi hareketlerini korur.
+# Dönem rozeti paleti
+
+Tasarım paletine dönem rozeti için `program-teal` eklendi. İki temada aynı turkuaz zemin ve `on-avatar` koyu metni kullanılır; diğer dönem renkleri mevcut tasarım tokenlarına bağlanır.
+

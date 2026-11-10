@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/domain/page_slice.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/extensions/ref_ext.dart';
@@ -14,6 +15,8 @@ import '../../../core/ui/widgets/nz_icons.dart';
 import '../../identity/identity.dart';
 import '../application/program_list_controller.dart';
 import '../application/scope_selection_controller.dart';
+import '../domain/program.dart';
+import 'program_badge.dart';
 
 /// Program (kapsam) seçimi (faz: `sessionOpen`). Seçim `ScopeController`'a yazılır; faz
 /// `scoped` olur ve yönlendirme faz makinesindedir — ekran kendisi gezinmez. Liste hatası
@@ -25,6 +28,7 @@ class ScopePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listenErrors(scopeSelectionControllerProvider, context);
     final l = context.l10n;
+    final programs = ref.watch(programListControllerProvider);
     return NzPage(
       title: l.uiScopeTitle,
       width: NzContentWidth.list,
@@ -39,7 +43,9 @@ class ScopePage extends ConsumerWidget {
           ),
           Expanded(
             child: NzAsyncView(
-              value: ref.watch(programListControllerProvider),
+              value: programs.isLoading
+                  ? const AsyncLoading<PageSlice<Program>>()
+                  : programs,
               onRetry: () => ref.invalidate(programListControllerProvider),
               isEmpty: (slice) => slice.items.isEmpty,
               empty: NzEmptyState(
@@ -56,6 +62,11 @@ class ScopePage extends ConsumerWidget {
                   for (final program in slice.items)
                     NzListTile.navigation(
                       title: program.name,
+                      leading: ProgramBadge(
+                        name: program.name,
+                        shortName: program.shortName,
+                        color: program.color,
+                      ),
                       onTap: () => ref
                           .read(scopeSelectionControllerProvider.notifier)
                           .select(program.id),

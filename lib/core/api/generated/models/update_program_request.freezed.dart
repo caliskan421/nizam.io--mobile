@@ -17,8 +17,8 @@ T _$identity<T>(T value) => value;
 mixin _$UpdateProgramRequest {
 
  String? get name; int? get year; String? get description;/// Üç hâlli (PROGRAM-K46): alan yoksa değişmez; dizge verilirse kırpılıp doğrulanır (kırpılmış hâli 1–4 Unicode harf ya da rakam; ham uzunluk sınırlanmaz) ve yazılır; açık `null` kısa adı temizler. Boş dizge temizleme değildir: `422 program.input_invalid` (`program.invalid_short_name`).
-@JsonKey(name: 'short_name') String? get shortName;/// Üç hâlli (PROGRAM-K46): alan yoksa değişmez; palet anahtarı (`violet`, `gold`, `blue`, `teal`, `green`, `orange`, `red`, `slate`) yazılır; açık `null` rengi temizler. Başka değer `422 program.input_invalid` (`program.invalid_color`).
- UpdateProgramRequestColor? get color;
+@JsonKey(name: 'short_name', fromJson: programPatchStringFromJson, toJson: programPatchStringToJson) ProgramPatchField<String>? get shortName;/// Üç hâlli (PROGRAM-K46): alan yoksa değişmez; palet anahtarı (`violet`, `gold`, `blue`, `teal`, `green`, `orange`, `red`, `slate`) yazılır; açık `null` rengi temizler. Başka değer `422 program.input_invalid` (`program.invalid_color`).
+@JsonKey(fromJson: programPatchColorFromJson, toJson: programPatchColorToJson) ProgramPatchField<UpdateProgramRequestColor>? get color;
 /// Create a copy of UpdateProgramRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -56,7 +56,7 @@ abstract mixin class $UpdateProgramRequestCopyWith<$Res>  {
   factory $UpdateProgramRequestCopyWith(UpdateProgramRequest value, $Res Function(UpdateProgramRequest) _then) = _$UpdateProgramRequestCopyWithImpl;
 @useResult
 $Res call({
- String? name, int? year, String? description,@JsonKey(name: 'short_name') String? shortName, UpdateProgramRequestColor? color
+ String? name, int? year, String? description,@JsonKey(name: 'short_name', fromJson: programPatchStringFromJson, toJson: programPatchStringToJson) ProgramPatchField<String>? shortName,@JsonKey(fromJson: programPatchColorFromJson, toJson: programPatchColorToJson) ProgramPatchField<UpdateProgramRequestColor>? color
 });
 
 
@@ -79,8 +79,8 @@ name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullab
 as String?,year: freezed == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,shortName: freezed == shortName ? _self.shortName : shortName // ignore: cast_nullable_to_non_nullable
-as String?,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
-as UpdateProgramRequestColor?,
+as ProgramPatchField<String>?,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
+as ProgramPatchField<UpdateProgramRequestColor>?,
   ));
 }
 
@@ -165,7 +165,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? name,  int? year,  String? description, @JsonKey(name: 'short_name')  String? shortName,  UpdateProgramRequestColor? color)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? name,  int? year,  String? description, @JsonKey(name: 'short_name', fromJson: programPatchStringFromJson, toJson: programPatchStringToJson)  ProgramPatchField<String>? shortName, @JsonKey(fromJson: programPatchColorFromJson, toJson: programPatchColorToJson)  ProgramPatchField<UpdateProgramRequestColor>? color)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UpdateProgramRequest() when $default != null:
 return $default(_that.name,_that.year,_that.description,_that.shortName,_that.color);case _:
@@ -186,7 +186,7 @@ return $default(_that.name,_that.year,_that.description,_that.shortName,_that.co
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? name,  int? year,  String? description, @JsonKey(name: 'short_name')  String? shortName,  UpdateProgramRequestColor? color)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? name,  int? year,  String? description, @JsonKey(name: 'short_name', fromJson: programPatchStringFromJson, toJson: programPatchStringToJson)  ProgramPatchField<String>? shortName, @JsonKey(fromJson: programPatchColorFromJson, toJson: programPatchColorToJson)  ProgramPatchField<UpdateProgramRequestColor>? color)  $default,) {final _that = this;
 switch (_that) {
 case _UpdateProgramRequest():
 return $default(_that.name,_that.year,_that.description,_that.shortName,_that.color);case _:
@@ -206,7 +206,7 @@ return $default(_that.name,_that.year,_that.description,_that.shortName,_that.co
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? name,  int? year,  String? description, @JsonKey(name: 'short_name')  String? shortName,  UpdateProgramRequestColor? color)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? name,  int? year,  String? description, @JsonKey(name: 'short_name', fromJson: programPatchStringFromJson, toJson: programPatchStringToJson)  ProgramPatchField<String>? shortName, @JsonKey(fromJson: programPatchColorFromJson, toJson: programPatchColorToJson)  ProgramPatchField<UpdateProgramRequestColor>? color)?  $default,) {final _that = this;
 switch (_that) {
 case _UpdateProgramRequest() when $default != null:
 return $default(_that.name,_that.year,_that.description,_that.shortName,_that.color);case _:
@@ -221,16 +221,16 @@ return $default(_that.name,_that.year,_that.description,_that.shortName,_that.co
 @JsonSerializable()
 
 class _UpdateProgramRequest implements UpdateProgramRequest {
-  const _UpdateProgramRequest({this.name, this.year, this.description, @JsonKey(name: 'short_name') this.shortName, this.color});
+  const _UpdateProgramRequest({this.name, this.year, this.description, @JsonKey(name: 'short_name', fromJson: programPatchStringFromJson, toJson: programPatchStringToJson) this.shortName, @JsonKey(fromJson: programPatchColorFromJson, toJson: programPatchColorToJson) this.color});
   factory _UpdateProgramRequest.fromJson(Map<String, dynamic> json) => _$UpdateProgramRequestFromJson(json);
 
 @override final  String? name;
 @override final  int? year;
 @override final  String? description;
 /// Üç hâlli (PROGRAM-K46): alan yoksa değişmez; dizge verilirse kırpılıp doğrulanır (kırpılmış hâli 1–4 Unicode harf ya da rakam; ham uzunluk sınırlanmaz) ve yazılır; açık `null` kısa adı temizler. Boş dizge temizleme değildir: `422 program.input_invalid` (`program.invalid_short_name`).
-@override@JsonKey(name: 'short_name') final  String? shortName;
+@override@JsonKey(name: 'short_name', fromJson: programPatchStringFromJson, toJson: programPatchStringToJson) final  ProgramPatchField<String>? shortName;
 /// Üç hâlli (PROGRAM-K46): alan yoksa değişmez; palet anahtarı (`violet`, `gold`, `blue`, `teal`, `green`, `orange`, `red`, `slate`) yazılır; açık `null` rengi temizler. Başka değer `422 program.input_invalid` (`program.invalid_color`).
-@override final  UpdateProgramRequestColor? color;
+@override@JsonKey(fromJson: programPatchColorFromJson, toJson: programPatchColorToJson) final  ProgramPatchField<UpdateProgramRequestColor>? color;
 
 /// Create a copy of UpdateProgramRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -267,7 +267,7 @@ abstract mixin class _$UpdateProgramRequestCopyWith<$Res> implements $UpdateProg
   factory _$UpdateProgramRequestCopyWith(_UpdateProgramRequest value, $Res Function(_UpdateProgramRequest) _then) = __$UpdateProgramRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String? name, int? year, String? description,@JsonKey(name: 'short_name') String? shortName, UpdateProgramRequestColor? color
+ String? name, int? year, String? description,@JsonKey(name: 'short_name', fromJson: programPatchStringFromJson, toJson: programPatchStringToJson) ProgramPatchField<String>? shortName,@JsonKey(fromJson: programPatchColorFromJson, toJson: programPatchColorToJson) ProgramPatchField<UpdateProgramRequestColor>? color
 });
 
 
@@ -290,8 +290,8 @@ name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullab
 as String?,year: freezed == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,shortName: freezed == shortName ? _self.shortName : shortName // ignore: cast_nullable_to_non_nullable
-as String?,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
-as UpdateProgramRequestColor?,
+as ProgramPatchField<String>?,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
+as ProgramPatchField<UpdateProgramRequestColor>?,
   ));
 }
 

@@ -3,7 +3,7 @@
   "version": 1,
   "source": {
     "path": "docs/design/design sytem/tokens.json",
-    "blob": "2e1521ab9fe632f81f418ed085d5ba0330c35bc6"
+    "blob": "294384a96186a9517878414784ad7d6e1f113ba3"
   },
   "colors": {
     "background": "bg-base",
@@ -35,6 +35,13 @@
     "buttonBorder": "btn-border",
     "inProgress": "violet",
     "onInProgress": "on-violet",
+    "programBlue": "avatar-4",
+    "programTeal": "program-teal",
+    "programGreen": "avatar-1",
+    "programOrange": "avatar-5",
+    "programRed": "gp-late",
+    "programSlate": "gp-todo",
+    "onProgramColor": "on-avatar",
     "glassBar": "glass-bar",
     "glassFloat": "glass-float",
     "glassMenu": "glass-menu",

@@ -43,7 +43,7 @@ final class ProgramListControllerProvider
 }
 
 String _$programListControllerHash() =>
-    r'b28a84f04ed8a68502cab800df2e70e60caae7d2';
+    r'70d9d67bf9c9929033f1d9c242d571aaa3a3059c';
 
 /// Program seçim ekranının listesi (`GET /v1/programs`, düz liste + `truncated`). Hata
 /// [ApiError]'dır (`program.not_authorized` dahil); yeniden yükleme yalnız kullanıcı

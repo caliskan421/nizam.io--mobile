@@ -18,9 +18,13 @@ class NzCheckCircle extends StatefulWidget {
     required this.label,
     this.onChanged,
     this.onBlocked,
+    this.selectedColor,
+    this.unselectedBorderColor,
   });
 
   final bool value;
+  final Color? selectedColor;
+  final Color? unselectedBorderColor;
   final String label;
   final VoidCallback? onChanged;
 
@@ -75,11 +79,15 @@ class _NzCheckCircleState extends State<NzCheckCircle> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: done
-                        ? Color.lerp(c.primary, c.textFaint, .28)
+                        ? widget.selectedColor ??
+                              Color.lerp(c.primary, c.textFaint, .28)
                         : null,
                     border: done
                         ? null
-                        : Border.all(color: c.textFaint, width: 1.5),
+                        : Border.all(
+                            color: widget.unselectedBorderColor ?? c.textFaint,
+                            width: 1.5,
+                          ),
                   ),
                   child: done
                       ? NzIcon(NzIcons.check, size: 13, color: c.onPrimary)

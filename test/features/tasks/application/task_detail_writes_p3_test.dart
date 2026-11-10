@@ -1,7 +1,5 @@
 // TaskDetailController + NewTaskFormController sunucu yazmaları (F57 P3) — gerçek bileşim kökü
 // ve HTTP yığını, sahte bağdaştırıcı: olgu → eylem (istek yok/var), uç seçimi, görevin KENDİ
-// departman başlığı, gövde (PATCH yalnız değişen alanlar; atama farkı; tarih talebi; karar;
-// multipart + tag), yazma sonrası yeniden okuma (liste + ayrıntı / yalnız ayrıntı), 409'da
 // yeniden okuma ve otomatik tekrar yok, uçuş kilidi, yerel ön denetim (tür/boyut/tavan → kod).
 import 'dart:async';
 import 'dart:io';
@@ -23,6 +21,7 @@ import '../../../support/harness.dart';
 import '../../pilot_support.dart';
 
 part 'task_detail_writes_p3_fixtures.dart';
+part 'task_detail_date_request_cases.dart';
 
 class _Sink implements DownloadSink {
   final saved = <String, List<int>>{};
@@ -262,6 +261,7 @@ void main() {
   });
 
   group('tarih talebi', () {
+    dateRequestCases();
     test('koordinatör talep açar (görevin departmanı); yalnız ayrıntı yeniden okunur', () async {
       final (h, c, ctl) = await _open(_Server());
       expect(ctl.openDateRequest(), isTrue);

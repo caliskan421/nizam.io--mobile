@@ -87,6 +87,7 @@ final class TaskEntry extends CalendarEntry {
     required this.edge,
     required this.assignees,
     required this.late,
+    this.status,
   });
 
   @override
@@ -95,6 +96,7 @@ final class TaskEntry extends CalendarEntry {
   final String title;
   final String coordinatorship;
   final TaskEdge edge;
+  final TaskStatus? status;
 
   /// Atanan kişi kimlikleri.
   final List<String> assignees;
@@ -191,6 +193,41 @@ final class CalendarIndex {
       catalog,
       by,
       meetingsTruncated || catalog.truncated,
+    );
+  }
+
+  /// Kişi profili: gerçek başlangıç/bitişler, tamamlananlar dahil; aynı gün tek bitiş
+  /// kaydı. Gecikme sunucunun olgusudur, yerel saatten yetki veya gecikme türetilmez.
+  factory CalendarIndex.personTasks(TaskCatalog catalog, String accountId) {
+    final by = <DateTime, List<CalendarEntry>>{};
+    for (final task in catalog.tasks.where(
+      (t) => t.assignees.contains(accountId),
+    )) {
+      final start = calendarDay(task.start);
+      final due = calendarDay(task.due);
+      for (final (edge, date) in [
+        (TaskEdge.end, due),
+        if (start != due) (TaskEdge.start, start),
+      ]) {
+        (by[date] ??= []).add(
+          TaskEntry(
+            date: date,
+            code: task.code,
+            title: task.title,
+            coordinatorship: task.coordinatorship,
+            edge: edge,
+            assignees: task.assignees,
+            late: edge == TaskEdge.end && !task.isDone && task.isOverdue,
+            status: task.status,
+          ),
+        );
+      }
+    }
+    return CalendarIndex._(
+      calendarDay(catalog.today),
+      catalog,
+      by,
+      catalog.truncated,
     );
   }
 

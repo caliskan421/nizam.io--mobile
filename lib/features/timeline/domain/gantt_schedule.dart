@@ -10,11 +10,13 @@ final class GanttSchedule {
   GanttSchedule({
     required List<TaskItem> tasks,
     required List<TaskDependency> links,
+    this.truncated = false,
   }) : tasks = List.unmodifiable(tasks),
        links = List.unmodifiable(links);
 
   final List<TaskItem> tasks;
   final List<TaskDependency> links;
+  final bool truncated;
 
   /// Başka göreve bağımlı görev kimlikleri (`TimelineTask.dependent` kaynağı).
   Set<String> get dependentIds => {for (final l in links) l.workItemId};

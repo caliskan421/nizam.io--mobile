@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/api/generated/clients/program_client.dart';
 import '../../../core/api/generated/models/create_program_request.dart';
+import '../../../core/api/generated/models/create_program_request_color.dart';
 import '../../../core/api/generated/models/delete_program_request.dart';
 import '../../../core/api/generated/models/program.dart' as api;
 import '../../../core/api/generated/models/reset_program_request.dart';
@@ -10,9 +11,11 @@ import '../../../core/api/generated/models/transfer_preview_request.dart';
 import '../../../core/api/generated/models/transfer_request.dart';
 import '../../../core/api/generated/models/transfer_result.dart';
 import '../../../core/api/generated/models/update_program_request.dart';
+import '../../../core/api/generated/models/update_program_request_color.dart';
+import '../../../core/api/generated/program_patch_field.dart';
 import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
-import '../../scope/scope.dart' show Program;
+import '../../scope/scope.dart' show Program, ProgramColor, ProgramField;
 import '../domain/program_admin.dart';
 import '../domain/program_admin_repository.dart';
 
@@ -30,13 +33,22 @@ class ApiProgramAdminRepository implements ProgramAdminRepository {
     required String name,
     int? year,
     String? description,
+    String? shortName,
+    ProgramColor? color,
   }) async {
+    if (color == ProgramColor.unknown) {
+      throw ArgumentError.value(color, 'color');
+    }
     final r = await apiCall(
       () => _client.createProgram(
         body: CreateProgramRequest(
           name: name,
           year: year,
           description: description,
+          shortName: shortName,
+          color: color == null
+              ? null
+              : CreateProgramRequestColor.fromJson(color.name),
         ),
       ),
     );
@@ -49,18 +61,35 @@ class ApiProgramAdminRepository implements ProgramAdminRepository {
     String? name,
     int? year,
     String? description,
-  }) async => _program(
-    await apiCall(
-      () => _client.updateProgram(
-        id: programId,
-        body: UpdateProgramRequest(
-          name: name,
-          year: year,
-          description: description,
+    ProgramField<String>? shortName,
+    ProgramField<ProgramColor>? color,
+  }) async {
+    if (color?.value == ProgramColor.unknown) {
+      throw ArgumentError.value(color?.value, 'color');
+    }
+    return _program(
+      await apiCall(
+        () => _client.updateProgram(
+          id: programId,
+          body: UpdateProgramRequest(
+            name: name,
+            year: year,
+            description: description,
+            shortName: shortName == null
+                ? null
+                : ProgramPatchField(shortName.value),
+            color: color == null
+                ? null
+                : ProgramPatchField(
+                    color.value == null
+                        ? null
+                        : UpdateProgramRequestColor.fromJson(color.value!.name),
+                  ),
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 
   @override
   Future<void> deleteProgram(String programId, {required String password}) =>
@@ -185,6 +214,8 @@ class ApiProgramAdminRepository implements ProgramAdminRepository {
     name: r.name,
     year: r.year,
     description: r.description,
+    shortName: r.shortName,
+    color: r.color == null ? null : ProgramColor.fromWire(r.color!.json),
   );
 
   static TransferOutcome _outcome(TransferResult r) => TransferOutcome(

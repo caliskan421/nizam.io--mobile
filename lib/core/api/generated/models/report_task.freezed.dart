@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ReportTask {
 
-@JsonKey(name: 'work_item_id') String get workItemId; String get title;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'department_name') String get departmentName; String get status; ReportTaskPriority get priority;@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime get startOn;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime get endOn;@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? get plannedEndOn;@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime? get completedOn;@JsonKey(name: 'created_by') ReportPerson get createdBy; List<ReportPerson> get assignees;@JsonKey(name: 'is_overdue') bool get isOverdue;@JsonKey(name: 'days_overdue') int get daysOverdue;@JsonKey(name: 'is_completed_late') bool get isCompletedLate;@JsonKey(name: 'days_late') int get daysLate;@JsonKey(name: 'is_completed_early') bool get isCompletedEarly;@JsonKey(name: 'days_early') int get daysEarly;@JsonKey(name: 'has_pending_dependency') bool get hasPendingDependency;@JsonKey(name: 'dependency_count') int get dependencyCount;@JsonKey(name: 'note_count') int get noteCount;@JsonKey(name: 'created_at') DateTime get createdAt;
+@JsonKey(name: 'work_item_id') String get workItemId; String get title;@JsonKey(name: 'department_id') String get departmentId;@JsonKey(name: 'department_name') String get departmentName; String get status; ReportTaskPriority get priority;@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime get startOn;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime get endOn;@DateOnlyConverter()@JsonKey(name: 'planned_end_on') DateTime? get plannedEndOn;@DateOnlyConverter()@JsonKey(name: 'completed_on') DateTime? get completedOn;@JsonKey(name: 'created_by') ReportPerson get createdBy; List<ReportPerson> get assignees;/// `Lateness.is_overdue` ile aynı kural (WORK-K37): durum `tamamlandi` değilken bugün (kurulum saat dilimi) `end_on`'dan sonraysa `true`; tamamlanmış görevde her zaman `false`.
+@JsonKey(name: 'is_overdue') bool get isOverdue;@JsonKey(name: 'days_overdue') int get daysOverdue;@JsonKey(name: 'is_completed_late') bool get isCompletedLate;@JsonKey(name: 'days_late') int get daysLate;@JsonKey(name: 'is_completed_early') bool get isCompletedEarly;@JsonKey(name: 'days_early') int get daysEarly;@JsonKey(name: 'has_pending_dependency') bool get hasPendingDependency;@JsonKey(name: 'dependency_count') int get dependencyCount;@JsonKey(name: 'note_count') int get noteCount;@JsonKey(name: 'created_at') DateTime get createdAt;
 /// Create a copy of ReportTask
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -266,6 +267,7 @@ class _ReportTask implements ReportTask {
   return EqualUnmodifiableListView(_assignees);
 }
 
+/// `Lateness.is_overdue` ile aynı kural (WORK-K37): durum `tamamlandi` değilken bugün (kurulum saat dilimi) `end_on`'dan sonraysa `true`; tamamlanmış görevde her zaman `false`.
 @override@JsonKey(name: 'is_overdue') final  bool isOverdue;
 @override@JsonKey(name: 'days_overdue') final  int daysOverdue;
 @override@JsonKey(name: 'is_completed_late') final  bool isCompletedLate;

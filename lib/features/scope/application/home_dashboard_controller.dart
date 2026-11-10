@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/cache_owner.dart';
@@ -11,6 +12,51 @@ import 'scope_providers.dart';
 import 'team_dashboard.dart';
 
 part 'home_dashboard_controller.g.dart';
+
+/// Yardımcı bölümler temel panodan bağımsız yüklenir; geç kalan yanıt eski sahibe aittir.
+final homePendingProvider = FutureProvider.autoDispose<PendingOverview?>((
+  ref,
+) async {
+  ref.watch(sessionGenerationProvider);
+  ref.watch(scopeStateProvider);
+  final session = ref.read(sessionControllerProvider).generation;
+  final scope = ref.read(scopeControllerProvider).current;
+  bool live() {
+    if (!ref.mounted) return false;
+    final current = ref.read(scopeControllerProvider).current;
+    return session == ref.read(sessionControllerProvider).generation &&
+        current.programId == scope.programId &&
+        current.departmentId == scope.departmentId;
+  }
+
+  final catalog = await ref.watch(taskCatalogControllerProvider.future);
+  if (!live()) throw ApiError('client.scope_changed');
+  if (catalog.access?.companyAdmin != true) return null;
+  final result = await ref.read(homeDashboardRepositoryProvider).loadPending();
+  if (!live()) throw ApiError('client.scope_changed');
+  return result;
+});
+
+final homeUnreadProvider = FutureProvider.autoDispose<int?>((ref) async {
+  ref.watch(sessionGenerationProvider);
+  ref.watch(scopeStateProvider);
+  final session = ref.read(sessionControllerProvider).generation;
+  final scope = ref.read(scopeControllerProvider).current;
+  bool live() {
+    if (!ref.mounted) return false;
+    final current = ref.read(scopeControllerProvider).current;
+    return session == ref.read(sessionControllerProvider).generation &&
+        current.programId == scope.programId &&
+        current.departmentId == scope.departmentId;
+  }
+
+  final catalog = await ref.watch(taskCatalogControllerProvider.future);
+  if (!live()) throw ApiError('client.scope_changed');
+  if (catalog.access?.companyAdmin != true) return null;
+  final result = await ref.read(homeDashboardRepositoryProvider).loadUnread();
+  if (!live()) throw ApiError('client.scope_changed');
+  return result;
+});
 
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).
@@ -39,18 +85,48 @@ class HomeDashboardController extends _$HomeDashboardController {
 
   /// Durumdaki özetin sahibi (notifier yeniden kurulumlarda korunur).
   final _owner = CacheOwnership();
+  ({int session, String? program, String? department})? _realOwner;
 
   @override
   Future<HomeDashboard> build() async {
-    final owner = _owner.watch(ref);
-    final dashboard = await _load();
-    _owner.markLoaded(ref, owner);
-    _clock.markFresh();
+    final buildRef = ref;
+    final owner = _owner.watch(buildRef);
+    final session = buildRef.read(sessionControllerProvider).generation;
+    final scope = buildRef.read(scopeControllerProvider).current;
+    bool live() {
+      if (!buildRef.mounted) return false;
+      final current = buildRef.read(scopeControllerProvider).current;
+      return session == buildRef.read(sessionControllerProvider).generation &&
+          scope.programId == current.programId &&
+          scope.departmentId == current.departmentId;
+    }
+
+    final dashboard = await _load(live);
+    if (live()) {
+      _owner.markLoaded(buildRef, owner);
+      _realOwner = (
+        session: session,
+        program: scope.programId,
+        department: scope.departmentId,
+      );
+      _clock.markFresh();
+    }
     return dashboard;
   }
 
   /// Ekranın gösterebileceği durum (bkz. [CacheOwnership.visible]); çağıran sağlayıcıyı izler.
-  AsyncValue<HomeDashboard> get visible => _owner.visible(ref, state);
+  AsyncValue<HomeDashboard> get visible {
+    final scope = ref.read(scopeControllerProvider).current;
+    final current = (
+      session: ref.read(sessionControllerProvider).generation,
+      program: scope.programId,
+      department: scope.departmentId,
+    );
+    return CacheOwnership.ownedOnly(
+      _owner.visible(ref, state),
+      owned: current == _realOwner,
+    );
+  }
 
   /// Kullanıcı yenilemesi: sunucu kapsamında rol kaynağı olan görev kataloğu ve özet yeniden
   /// okunur, ikisi de bitince döner. Hata FIRLATILIR (ortak yenileme kabuğu bildirir); önceki
@@ -76,6 +152,8 @@ class HomeDashboardController extends _$HomeDashboardController {
   Future<void> _refresh(
     Future<void> Function(TaskCatalogController catalog) catalogStep,
   ) async {
+    ref.invalidate(homePendingProvider);
+    ref.invalidate(homeUnreadProvider);
     final scope = ref.read(scopeStateProvider);
     Object? failure;
     StackTrace? trace;
@@ -97,7 +175,7 @@ class HomeDashboardController extends _$HomeDashboardController {
     if (failure != null) Error.throwWithStackTrace(failure, trace!);
   }
 
-  Future<HomeDashboard> _load() async {
+  Future<HomeDashboard> _load(bool Function() live) async {
     final scope = ref.watch(scopeStateProvider);
     final repo = ref.read(homeDashboardRepositoryProvider);
     final program = scope.programId;
@@ -118,12 +196,17 @@ class HomeDashboardController extends _$HomeDashboardController {
     } on Object {
       // Hata yukarı taşınır (rol tahmini yok; yönetici uçlarına düşüş yok). Katalog yeniden
       // okununca özet de yeniden kurulur.
-      followCatalog();
+      if (live()) followCatalog();
       rethrow;
     }
+    if (!live()) throw ApiError(ClientErrorCode.scopeChanged);
     final access = catalog.access;
     if (access == null) throw ApiError(ClientErrorCode.scopeMissing);
-    if (access.companyAdmin) return repo.load();
+    if (access.companyAdmin) {
+      final dashboard = await repo.load();
+      if (!live()) throw ApiError(ClientErrorCode.scopeChanged);
+      return dashboard;
+    }
 
     followCatalog();
     // Özetin departmanı (görevler ekranının süzgecinden bağımsız): programdaki ilk
@@ -135,6 +218,7 @@ class HomeDashboardController extends _$HomeDashboardController {
       departmentId: dept,
       coordinator: coordinator,
     );
+    if (!live()) throw ApiError(ClientErrorCode.scopeChanged);
     return teamDashboard(
       catalog,
       extras,

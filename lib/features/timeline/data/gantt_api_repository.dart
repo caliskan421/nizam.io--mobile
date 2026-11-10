@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
 
 import '../../../core/api/generated/clients/work_client.dart';
 import '../../../core/api/generated/models/gantt.dart';
@@ -72,18 +73,23 @@ class ApiGanttRepository implements GanttRepository {
     ),
   );
 
-  static GanttSchedule _schedule(Gantt g) => GanttSchedule(
-    tasks: g.tasks.map(_task).toList(),
-    links: [
-      for (final l in g.links)
-        TaskDependency(
-          id: l.dependencyId,
-          workItemId: l.target,
-          dependsOnId: l.source,
-          crossDepartment: l.crossDepartment,
-        ),
-    ],
-  );
+  static GanttSchedule _schedule(HttpResponse<Gantt> response) {
+    final g = response.data;
+    return GanttSchedule(
+      truncated:
+          response.response.headers.value('x-result-truncated') == 'true',
+      tasks: g.tasks.map(_task).toList(),
+      links: [
+        for (final l in g.links)
+          TaskDependency(
+            id: l.dependencyId,
+            workItemId: l.target,
+            dependsOnId: l.source,
+            crossDepartment: l.crossDepartment,
+          ),
+      ],
+    );
+  }
 
   static TaskItem _task(GanttTask t) {
     final lateness = TaskLateness(

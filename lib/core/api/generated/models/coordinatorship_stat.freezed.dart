@@ -16,7 +16,16 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CoordinatorshipStat {
 
-@JsonKey(name: 'department_id') String get departmentId; String get name; String get kind; List<ReportPerson> get coordinators;@JsonKey(name: 'total_tasks') int get totalTasks;@JsonKey(name: 'completed_tasks') int get completedTasks;@JsonKey(name: 'in_progress_tasks') int get inProgressTasks;@JsonKey(name: 'not_started_tasks') int get notStartedTasks;@JsonKey(name: 'overdue_tasks') int get overdueTasks;@JsonKey(name: 'completion_rate') double get completionRate;@JsonKey(name: 'member_count') int get memberCount;@JsonKey(name: 'meeting_count') int get meetingCount;@JsonKey(name: 'last_activity_at') String? get lastActivityAt; String? get description;
+@JsonKey(name: 'department_id') String get departmentId; String get name; String get kind;/// Departmanın bu programdaki koordinatörleri; silinmiş hesap listelenmez.
+ List<ReportPerson> get coordinators;/// Departmanın silinmemiş görev sayısı.
+@JsonKey(name: 'total_tasks') int get totalTasks;@JsonKey(name: 'completed_tasks') int get completedTasks;/// Durumu `devam_ediyor` olan görev sayısı (`onaya_sunuldu` ve `iade_edildi` bu üç sayaçtan hiçbirine girmez).
+@JsonKey(name: 'in_progress_tasks') int get inProgressTasks;/// Durumu `baslanmadi` olan görev sayısı.
+@JsonKey(name: 'not_started_tasks') int get notStartedTasks;/// Tamamlanmamış ve `end_on` günü bugünden (kurulum saat dilimi) önce olan görev sayısı.
+@JsonKey(name: 'overdue_tasks') int get overdueTasks;/// `completed_tasks / total_tasks × 100`; görev yoksa 0.
+@JsonKey(name: 'completion_rate') double get completionRate;/// Departmanın bu programdaki ekibinde `uye` rolündeki canlı hesap sayısı; koordinatörler DAHİL DEĞİLDİR (koordinatörler `coordinators` dizisindedir).
+@JsonKey(name: 'member_count') int get memberCount;/// `reportDashboard` ve `reportDashboardCoordinatorships` yanıtlarında doldurulmaz, her zaman 0'dır; departman başına toplantı sayısı yalnız dönem raporunda (`reportSeason`) hesaplanır ([GAP-221](../known-gaps.md#gap-221)).
+@JsonKey(name: 'meeting_count') int get meetingCount;/// Departmanın silinmemiş görevlerinin en son güncellenme anı (`updated_at` en büyüğü, UTC); görevi yoksa `null`. Toplantı, not ve mesaj etkinliği girmez.
+@JsonKey(name: 'last_activity_at') String? get lastActivityAt; String? get description;
 /// Create a copy of CoordinatorshipStat
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -234,21 +243,31 @@ class _CoordinatorshipStat implements CoordinatorshipStat {
 @override@JsonKey(name: 'department_id') final  String departmentId;
 @override final  String name;
 @override final  String kind;
+/// Departmanın bu programdaki koordinatörleri; silinmiş hesap listelenmez.
  final  List<ReportPerson> _coordinators;
+/// Departmanın bu programdaki koordinatörleri; silinmiş hesap listelenmez.
 @override List<ReportPerson> get coordinators {
   if (_coordinators is EqualUnmodifiableListView) return _coordinators;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_coordinators);
 }
 
+/// Departmanın silinmemiş görev sayısı.
 @override@JsonKey(name: 'total_tasks') final  int totalTasks;
 @override@JsonKey(name: 'completed_tasks') final  int completedTasks;
+/// Durumu `devam_ediyor` olan görev sayısı (`onaya_sunuldu` ve `iade_edildi` bu üç sayaçtan hiçbirine girmez).
 @override@JsonKey(name: 'in_progress_tasks') final  int inProgressTasks;
+/// Durumu `baslanmadi` olan görev sayısı.
 @override@JsonKey(name: 'not_started_tasks') final  int notStartedTasks;
+/// Tamamlanmamış ve `end_on` günü bugünden (kurulum saat dilimi) önce olan görev sayısı.
 @override@JsonKey(name: 'overdue_tasks') final  int overdueTasks;
+/// `completed_tasks / total_tasks × 100`; görev yoksa 0.
 @override@JsonKey(name: 'completion_rate') final  double completionRate;
+/// Departmanın bu programdaki ekibinde `uye` rolündeki canlı hesap sayısı; koordinatörler DAHİL DEĞİLDİR (koordinatörler `coordinators` dizisindedir).
 @override@JsonKey(name: 'member_count') final  int memberCount;
+/// `reportDashboard` ve `reportDashboardCoordinatorships` yanıtlarında doldurulmaz, her zaman 0'dır; departman başına toplantı sayısı yalnız dönem raporunda (`reportSeason`) hesaplanır ([GAP-221](../known-gaps.md#gap-221)).
 @override@JsonKey(name: 'meeting_count') final  int meetingCount;
+/// Departmanın silinmemiş görevlerinin en son güncellenme anı (`updated_at` en büyüğü, UTC); görevi yoksa `null`. Toplantı, not ve mesaj etkinliği girmez.
 @override@JsonKey(name: 'last_activity_at') final  String? lastActivityAt;
 @override final  String? description;
 

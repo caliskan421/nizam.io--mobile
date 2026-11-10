@@ -67,6 +67,23 @@ String _list(int n) => jsonEncode({
 
 void main() {
   group('listPrograms', () {
+    test(
+      'kısa ad ve renk, bilinmeyen renk ve null domain alanlarına eşlenir',
+      () async {
+        final (repo, _) = _repo(
+          '{"programs":['
+          '{"program_id":"p1","name":"Bir","short_name":"BİR","color":"teal"},'
+          '{"program_id":"p2","name":"İki","short_name":null,"color":"future"},'
+          '{"program_id":"p3","name":"Üç","short_name":null,"color":null}]}',
+        );
+        final programs = (await repo.listPrograms()).items;
+        expect(programs[0].shortName, 'BİR');
+        expect(programs[0].color, ProgramColor.teal);
+        expect(programs[1].color, ProgramColor.unknown);
+        expect(programs[2].color, isNull);
+        expect(programs[2].shortName, isNull);
+      },
+    );
     test('GET /v1/programs → domain Program listesi', () async {
       final (repo, adapter) = _repo(
         '{"programs":[{"program_id":"p1","name":"Bir"},'

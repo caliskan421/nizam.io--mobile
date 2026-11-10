@@ -21,13 +21,15 @@ class NzProgressBar extends StatelessWidget {
     super.key,
     required double this.value,
     required Color this.color,
+    this.height,
   }) : segments = const [];
 
   /// Boş dilimler (pay 0) çizilmez.
-  const NzProgressBar.segments({super.key, required this.segments})
+  const NzProgressBar.segments({super.key, required this.segments, this.height})
     : value = null,
       color = null;
 
+  final double? height;
   final double? value;
   final Color? color;
   final List<NzBarSegment> segments;
@@ -45,7 +47,7 @@ class NzProgressBar extends StatelessWidget {
           child: ColoredBox(
             color: context.colors.surfaceOverlay,
             child: SizedBox(
-              height: NizamioSize.progress,
+              height: height ?? NizamioSize.progress,
               width: double.infinity,
               child: FractionallySizedBox(
                 alignment: AlignmentDirectional.centerStart,
@@ -66,7 +68,7 @@ class NzProgressBar extends StatelessWidget {
       child: ClipRRect(
         borderRadius: radius,
         child: SizedBox(
-          height: NizamioSize.progressLg,
+          height: height ?? NizamioSize.progressLg,
           width: double.infinity,
           child: total == 0
               ? ColoredBox(color: context.colors.surfaceOverlay)

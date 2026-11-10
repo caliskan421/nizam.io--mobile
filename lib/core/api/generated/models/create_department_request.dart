@@ -14,6 +14,8 @@ abstract class CreateDepartmentRequest with _$CreateDepartmentRequest {
   const factory CreateDepartmentRequest({
     required String name,
     required CreateDepartmentRequestKind kind,
+
+    /// İsteğe bağlı kısa kod. Sunucu baş/son boşluğu kırpar ve büyük harfe çevirir; sonuç `^[A-Z0-9]{2,10}$` biçiminde olmalıdır (ORGANIZATION-K10), aksi 422 `organization.input_invalid` (alan kodu `organization.invalid_code`). Kod şirkette tekildir (silinmiş departmanlar dahil): 409 `organization.department_code_conflict`.
     String? code,
     String? description,
   }) = _CreateDepartmentRequest;

@@ -16,6 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$NoteRequest {
 
+/// Not içeriği. Sunucu düz metne indirir; sonuç boş olamaz, kontrol karakteri taşıyamaz ve en çok 5000 karakterdir (Unicode kod noktası/rune, düz metne indirildikten sonra ölçülür); aksi 422 `collaboration.input_invalid` (alan `content`).
  String get content;
 /// Create a copy of NoteRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -218,6 +219,7 @@ class _NoteRequest implements NoteRequest {
   const _NoteRequest({required this.content});
   factory _NoteRequest.fromJson(Map<String, dynamic> json) => _$NoteRequestFromJson(json);
 
+/// Not içeriği. Sunucu düz metne indirir; sonuç boş olamaz, kontrol karakteri taşıyamaz ve en çok 5000 karakterdir (Unicode kod noktası/rune, düz metne indirildikten sonra ölçülür); aksi 422 `collaboration.input_invalid` (alan `content`).
 @override final  String content;
 
 /// Create a copy of NoteRequest

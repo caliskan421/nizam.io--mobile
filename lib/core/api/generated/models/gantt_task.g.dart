@@ -21,6 +21,15 @@ _GanttTask _$GanttTaskFromJson(Map<String, dynamic> json) => _GanttTask(
       .map((e) => e as String)
       .toList(),
   lateness: Lateness.fromJson(json['lateness'] as Map<String, dynamic>),
+  pendingDateRequest: json['pending_date_request'] == null
+      ? null
+      : PendingDateRequest2.fromJson(
+          json['pending_date_request'] as Map<String, dynamic>,
+        ),
+  subtaskCounts: SubtaskCounts.fromJson(
+    json['subtask_counts'] as Map<String, dynamic>,
+  ),
+  datesRevision: (json['dates_revision'] as num).toInt(),
 );
 
 Map<String, dynamic> _$GanttTaskToJson(_GanttTask instance) =>
@@ -37,6 +46,9 @@ Map<String, dynamic> _$GanttTaskToJson(_GanttTask instance) =>
       'completed_on': instance.completedOn,
       'assignee_account_ids': instance.assigneeAccountIds,
       'lateness': instance.lateness.toJson(),
+      'pending_date_request': ?instance.pendingDateRequest?.toJson(),
+      'subtask_counts': instance.subtaskCounts.toJson(),
+      'dates_revision': instance.datesRevision,
     };
 
 const _$GanttTaskPriorityEnumMap = {

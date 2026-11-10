@@ -7,6 +7,7 @@ import 'package:retrofit/retrofit.dart';
 
 import '../models/account_lifecycle_result.dart';
 import '../models/account_result.dart';
+import '../models/account_status_result.dart';
 import '../models/assign_membership_request.dart';
 import '../models/assignable_list.dart';
 import '../models/change_role_request.dart';
@@ -21,6 +22,7 @@ import '../models/deleted_department_list.dart';
 import '../models/department.dart';
 import '../models/department_lifecycle_result.dart';
 import '../models/department_list.dart';
+import '../models/known_user.dart';
 import '../models/lockout_reset_result.dart';
 import '../models/membership.dart';
 import '../models/membership_change.dart';
@@ -158,6 +160,13 @@ abstract class OrganizationClient {
       'externalDocsUrl': null,
     },
   };
+  static const Map<String, dynamic> readUserOpenapiExtras = <String, dynamic>{
+    'openapi': <String, dynamic>{
+      'tags': <String>["organization"],
+      'operationId': "readUser",
+      'externalDocsUrl': null,
+    },
+  };
   static const Map<String, dynamic> updateUserOpenapiExtras = <String, dynamic>{
     'openapi': <String, dynamic>{
       'tags': <String>["organization"],
@@ -201,6 +210,22 @@ abstract class OrganizationClient {
         'openapi': <String, dynamic>{
           'tags': <String>["organization"],
           'operationId': "unlockAccount",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> disableAccountOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "disableAccount",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> enableAccountOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "enableAccount",
           'externalDocsUrl': null,
         },
       };
@@ -284,9 +309,23 @@ abstract class OrganizationClient {
   });
 
   /// Departman oluşturur.
+  ///
+  /// Ad şirkette büyük/küçük harf duyarsız tekildir (silinmiş departmanlar.
+  /// dahil). Çakışmada 409 `organization.department_exists` zarfı adı taşıyan.
+  /// mevcut departmanı alan girdileriyle taşır: `fields[]` içinde.
+  /// `{field: department_id, code: organization.existing_department, message: <kimlik>}`.
+  /// ve `{field: deleted, code: organization.existing_department, message: "true"|"false"}`.
+  /// (silinmişse geri yükleme ucuyla döndürülebilir). İsteğe bağlı.
+  /// `Idempotency-Key` (aktör kapsamlı; parmak izi normalize ad, tür, kod,.
+  /// açıklama): tekrar 200 + departmanın bugünkü hâli, tekrarlanan departman.
+  /// silinmişse 404 `organization.department_not_found`, farklı istek 409.
+  /// `organization.idempotency_key_reused`.
+  ///
+  /// [idempotencyKey] - İsteğe bağlı işlem anahtarı (ADR-0027 kalıbı). Verilmezse uç anahtarsız davranır (mevcut davranış). Verilirse (boş ya da yalnız boşluk dahil) kırpılmış uzunluk 22–200 bayttır, aksi 422 `<mod>.input_invalid` (alan `idempotency_key`, kod `<mod>.invalid_request_key`). Anahtar aktör + uç tablosu kapsamındadır ve kaynak satırında yaşar. Aynı anahtar + aynı normalize istek ilk kaynağın bugünkü temsilini 200 ile döndürür; farklı istek 409 `<mod>.idempotency_key_reused`; aynı anahtarlı eşzamanlı istek ilk isteğin bitişini bekler ve tekrar olarak döner.
   @POST('/v1/departments')
   Future<Department> createDepartment({
     @Body() required CreateDepartmentRequest body,
+    @Header('Idempotency-Key') String? idempotencyKey,
     @Extras()
     Map<String, dynamic>? extras =
         OrganizationClient.createDepartmentOpenapiExtras,
@@ -439,21 +478,50 @@ abstract class OrganizationClient {
     Map<String, dynamic>? extras = OrganizationClient.taskSummaryOpenapiExtras,
   });
 
-  /// Bilinen kullanıcı listesi (imleçli).
+  /// Kullanıcı listesi (imleçli, sayaçlı).
   ///
-  /// `memberships` her ekip satırını `program:departman:rol` etiketiyle.
-  /// taşır. `role` süzgeci "herhangi bir programda bu rol" demektir.
-  /// (ADR-0023 kural 18).
+  /// Yalnız şirket yöneticisi. Süzgeçsiz liste ("Tümü") şirketteki bütün.
+  /// canlı hesaplardır: ekip satırı olmayan yönetici, üyeliksiz hesap ve.
+  /// yalnız silinmiş departmanda ekip satırı olan hesap dahil; silinmiş.
+  /// hesap yoktur. `memberships` her canlı ekip satırını.
+  /// `program:departman:rol` etiketiyle taşır. `role` süzgeci (`uye`,.
+  /// `koordinator`) "herhangi bir programda bu rol" demektir (ADR-0023.
+  /// kural 18); `program_id`/`department_id` verilirse o kapsamdaki rol.
+  /// `total` ve `role_counts` her istekte aynı süzgeçlerle hesaplanır.
+  ///
+  /// [role] - `uye` / `koordinator`: herhangi bir programda bu ekip rolü; `company_admin`: şirket yöneticisi. Küme dışı değer 422 `organization.input_invalid`.
+  ///
+  /// [search] - Görünen adda (Türkçe büyük/küçük harf duyarsız) ya da e-postada (küçük harf) geçen metin; `%` ve `_` joker değil metindir.
+  ///
+  /// [programId] - Verilirse yalnız bu programda (canlı departmanda) ekip satırı olan hesaplar; rol süzgeci de bu programın rollerine daralır. Kimlik harf, rakam, `-` ve `_` taşır, en çok 64 bayttır (aksi 422 `organization.input_invalid`).
+  ///
+  /// [departmentId] - Verilirse yalnız bu departmanda (program verilmişse o programda) ekip satırı olan hesaplar. Biçim `program_id` ile aynıdır.
+  ///
+  /// [sortBy] - Sıralama alanı (ORGANIZATION-K33); değer kümesi `name` | `created_at`. Boş ya da.
+  /// verilmemiş değer `created_at`'tir; baştaki/sondaki boşluk kırpılır. `name` görünen adın.
+  /// küçük harfe ve Türkçe harf katlamasıyla (ç→c, ğ→g, ı→i, ö→o, ş→s, ü→u) normalize.
+  /// hâline göre, `created_at` hesabın oluşturulma zamanına göre sıralar; eşitlikte hesap.
+  /// kimliği ikincil anahtardır (imleç kararlı). Küme dışı değer 422 `organization.input_invalid`.
+  /// (alan `sort_by`, kod `organization.invalid_sort`); sessizce varsayılana düşmez. Değer kümesi.
+  /// `enum` olarak yazılmaz (eklemek sözleşmede kırıcıdır); kümeyi bu açıklama tanımlar.
+  ///
+  ///
+  /// [sortOrder] - Sıralama yönü (ORGANIZATION-K33); değer kümesi `asc` | `desc`. Boş ya da verilmemiş.
+  /// değer `asc`'tir; baştaki/sondaki boşluk kırpılır. Küme dışı değer 422.
+  /// `organization.input_invalid` (alan `sort_order`, kod `organization.invalid_sort`).
+  ///
   ///
   /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration ve messaging 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` / `messaging.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
   ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/admin/users')
   Future<HttpResponse<UserList>> listUsers({
+    @Query('sort_by') String? sortBy = 'created_at',
+    @Query('sort_order') String? sortOrder = 'asc',
     @Query('role') String? role,
     @Query('search') String? search,
-    @Query('sort_by') String? sortBy,
-    @Query('sort_order') String? sortOrder,
+    @Query('program_id') String? programId,
+    @Query('department_id') String? departmentId,
     @Query('limit') int? limit,
     @Query('cursor') String? cursor,
     @Extras()
@@ -467,11 +535,41 @@ abstract class OrganizationClient {
   /// zorunludur ve departman bu programa bağlı olmalıdır.
   /// (`422 organization.department_not_linked`). Koordinatör yalnız bu.
   /// programda koordine ettiği departmana `uye` ekler (ADR-0023 kural 18).
+  ///
+  /// **Aktarım teklifi (ORGANIZATION-K22).** E-posta başka bir hesaba aitse cevap 409.
+  /// `identity.account_exists`'tir (kod ve zarf biçimi her çağırana aynı). Çağıran şirket.
+  /// yöneticisiyse ve çakışan hesap hedef `(program_id, department_id)` ekibinde zaten yoksa.
+  /// zarfın `fields[]` dizisi aktarım teklifini taşır; üç girdinin hepsinin `code` değeri.
+  /// `organization.transfer_available`'dır ve `field` anlamı, `message` değeri taşır:.
+  ///
+  /// - `{field: "email", message: <sabit açıklama metni>}` — teklifin varlığı;.
+  /// - `{field: "account_id", message: <çakışan hesabın kimliği>}`;.
+  /// - `{field: "user_full_name", message: <çakışan hesabın görünen adı>}` (ad boşsa girdi yoktur).
+  ///
+  /// İstemci kullanıcıya "bu e-posta <ad> kişisine ait; aktarılsın mı?" diye sorar ve onayda.
+  /// AYNI uca aynı gövdeyi `transfer_account_id: <account_id girdisinin message'ı>` ile yeniden.
+  /// gönderir (201; yeni hesap açılmaz, hesap hedef ekibe eklenir). Koordinatöre ve hesap hedef.
+  /// ekipte zaten varken teklif girdileri gelmez (`fields` boş); `details` yapılandırılmış veri.
+  /// taşımaz, teklif yalnız `fields[]`'tadır.
   @POST('/v1/admin/users')
   Future<UserResult> createUser({
     @Body() required CreateUserRequest body,
     @Extras()
     Map<String, dynamic>? extras = OrganizationClient.createUserOpenapiExtras,
+  });
+
+  /// Tek kullanıcının yönetim görünümü.
+  ///
+  /// Yalnız şirket yöneticisi. Yetki kaynağa dokunmadan önce verilir:.
+  /// yönetici olmayan çağıran var olan ve olmayan kimlik için aynı 403'ü.
+  /// alır. Cevap liste satırının alanları ve bütün programlardaki ekip.
+  /// satırları (`teams`). Bulunmayan ya da silinmiş hesap 404.
+  /// `organization.account_not_found`.
+  @GET('/v1/admin/users/{id}')
+  Future<KnownUser> readUser({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras = OrganizationClient.readUserOpenapiExtras,
   });
 
   /// Kullanıcı günceller.
@@ -540,6 +638,37 @@ abstract class OrganizationClient {
     @Extras()
     Map<String, dynamic>? extras =
         OrganizationClient.unlockAccountOpenapiExtras,
+  });
+
+  /// Hesabın girişini kapatır.
+  ///
+  /// Yalnız şirket yöneticisi. Durum `disabled` olur, hesabın bütün.
+  /// oturumları (web ve mobil, erişim ve yenileme) aynı transaction'da.
+  /// iptal edilir ve audit yazılır. Kendini kapatma 403; son aktif şirket.
+  /// yöneticisini kapatma 409 `organization.last_admin` (kapatılmış.
+  /// yönetici aktif sayılmaz). Kapatılmış hesap giriş ve yenileme.
+  /// yapamaz; ekip satırları ve yöneticilik ataması değişmez.
+  @POST('/v1/admin/accounts/{id}/disable')
+  Future<AccountStatusResult> disableAccount({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.disableAccountOpenapiExtras,
+  });
+
+  /// Kapatılmış hesabı açar.
+  ///
+  /// Yalnız şirket yöneticisi; kendini açma 403 (kapatılmış hesap.
+  /// yetkisizdir). Durum `active` olur ve audit yazılır;.
+  /// kapatmada iptal edilen oturumlar geri gelmez (kullanıcı yeniden.
+  /// giriş yapar). Silinmiş hesap canlanmaz (404; geri yükleme ayrı.
+  /// uçtadır).
+  @POST('/v1/admin/accounts/{id}/enable')
+  Future<AccountStatusResult> enableAccount({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.enableAccountOpenapiExtras,
   });
 
   /// Bütün giriş kilitlerini ve başarısız deneme kayıtlarını sıfırlar.

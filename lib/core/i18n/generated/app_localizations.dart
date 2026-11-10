@@ -700,6 +700,18 @@ abstract class AppLocalizations {
   /// **'Departman bu programa bağlı değil.'**
   String get errOrganizationDepartmentNotLinked;
 
+  /// organization.existing_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adda bir departman zaten var.'**
+  String get errOrganizationExistingDepartment;
+
+  /// organization.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.'**
+  String get errOrganizationIdempotencyKeyReused;
+
   /// organization.input_invalid
   ///
   /// In tr, this message translates to:
@@ -723,6 +735,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Ad geçersiz.'**
   String get errOrganizationInvalidName;
+
+  /// organization.invalid_request_key
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem anahtarı geçersiz.'**
+  String get errOrganizationInvalidRequestKey;
 
   /// organization.invalid_role
   ///
@@ -922,6 +940,12 @@ abstract class AppLocalizations {
   /// **'Girilen bilgiler geçersiz.'**
   String get errProgramInputInvalid;
 
+  /// program.invalid_color
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçersiz renk seçimi.'**
+  String get errProgramInvalidColor;
+
   /// program.invalid_copy_source
   ///
   /// In tr, this message translates to:
@@ -951,6 +975,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Program adı geçersiz.'**
   String get errProgramInvalidName;
+
+  /// program.invalid_request_key
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem anahtarı geçersiz.'**
+  String get errProgramInvalidRequestKey;
+
+  /// program.invalid_short_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa ad 1–4 harf ya da rakam olmalıdır.'**
+  String get errProgramInvalidShortName;
 
   /// program.invalid_transfer
   ///
@@ -2746,6 +2782,30 @@ abstract class AppLocalizations {
   /// **'Koordinatörlük oluşturuldu ama seçili programa bağlanamadı. Tekrar denediğinde yeni koordinatörlük açılmaz, aynı kayıt bağlanır.'**
   String get uiCoordFormLinkFailed;
 
+  /// ui.coord.form_existing
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adla bir departman zaten var. Mevcut kayıt kullanılacak; türü ve açıklaması değiştirilmez. Bağlamak istiyor musunuz?'**
+  String get uiCoordFormExisting;
+
+  /// ui.coord.form_existing_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adla silinmiş bir departman var. Mevcut kayıt geri yüklenip bağlanacak; türü ve açıklaması değiştirilmez. Devam etmek istiyor musunuz?'**
+  String get uiCoordFormExistingDeleted;
+
+  /// ui.coord.form_existing_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut kaydı kullan'**
+  String get uiCoordFormExistingConfirm;
+
+  /// ui.coord.form_outcome_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Önceki işlemin sonucu bilinmiyor. Aynı bilgilerle yeniden deneyerek işlemi tamamlayın.'**
+  String get uiCoordFormOutcomeUnknown;
+
   /// ui.coord.toast_created
   ///
   /// In tr, this message translates to:
@@ -3507,6 +3567,42 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'sn'**
   String get uiFeedbackSecondsUnit;
+
+  /// ui.home.pending_heading
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen işler'**
+  String get uiHomePendingHeading;
+
+  /// ui.home.pending_error_retry
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen işler yüklenemedi · Yeniden dene'**
+  String get uiHomePendingErrorRetry;
+
+  /// ui.home.pending_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen iş yok'**
+  String get uiHomePendingEmpty;
+
+  /// ui.home.unread_loading
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj sayısı yükleniyor'**
+  String get uiHomeUnreadLoading;
+
+  /// ui.home.unread_error_retry
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj sayısı yüklenemedi · Yeniden dene'**
+  String get uiHomeUnreadErrorRetry;
+
+  /// ui.home.unread_chats
+  ///
+  /// In tr, this message translates to:
+  /// **'Okunmamış sohbet'**
+  String get uiHomeUnreadChats;
 
   /// ui.home.greeting
   ///
@@ -9490,6 +9586,144 @@ abstract class AppLocalizations {
   /// **'Görev ayrıntısını aç'**
   String get uiTimelineGanttOpenTask;
 
+  /// ui.user_account_fields.heading
+  ///
+  /// In tr, this message translates to:
+  /// **'hesap bilgileri'**
+  String get uiUserAccountFieldsHeading;
+
+  /// ui.user_account_fields.full_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad soyad'**
+  String get uiUserAccountFieldsFullName;
+
+  /// ui.user_account_fields.email
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta'**
+  String get uiUserAccountFieldsEmail;
+
+  /// ui.user_account_fields.password
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre'**
+  String get uiUserAccountFieldsPassword;
+
+  /// ui.user_account_fields.edit_full_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad soyadı düzenle'**
+  String get uiUserAccountFieldsEditFullName;
+
+  /// ui.user_account_fields.edit_email
+  ///
+  /// In tr, this message translates to:
+  /// **'E-postayı düzenle'**
+  String get uiUserAccountFieldsEditEmail;
+
+  /// ui.user_account_fields.edit_password
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni şifre belirle'**
+  String get uiUserAccountFieldsEditPassword;
+
+  /// ui.user_account_fields.new_password
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni şifre'**
+  String get uiUserAccountFieldsNewPassword;
+
+  /// ui.users.program_short_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa ad (1–4 harf veya rakam)'**
+  String get uiUsersProgramShortName;
+
+  /// ui.users.program_color
+  ///
+  /// In tr, this message translates to:
+  /// **'Renk (violet, gold, blue, teal, green, orange, red, slate)'**
+  String get uiUsersProgramColor;
+
+  /// ui.users.program_badge_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa ad veya renk geçersiz.'**
+  String get uiUsersProgramBadgeInvalid;
+
+  /// ui.users.disable_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı kapat'**
+  String get uiUsersDisableAccount;
+
+  /// ui.users.enable_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı aç'**
+  String get uiUsersEnableAccount;
+
+  /// ui.users.disable_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Oturumlar kapatılır, görevler ve geçmiş korunur.'**
+  String get uiUsersDisableConfirm;
+
+  /// ui.users.enable_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap mevcut rol ve üyelikleriyle erişim kazanır; yeniden giriş gerekir.'**
+  String get uiUsersEnableConfirm;
+
+  /// ui.users.account_history_preserved
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler ve geçmiş korunur.'**
+  String get uiUsersAccountHistoryPreserved;
+
+  /// ui.users.account_status_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap durumu bilinmiyor'**
+  String get uiUsersAccountStatusUnknown;
+
+  /// ui.users.own_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendi hesabınız'**
+  String get uiUsersOwnAccount;
+
+  /// ui.users.account_disabled
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap kapalı'**
+  String get uiUsersAccountDisabled;
+
+  /// ui.users.login_locked
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş kilitli'**
+  String get uiUsersLoginLocked;
+
+  /// ui.users.filter_scope
+  ///
+  /// In tr, this message translates to:
+  /// **'geçerli filtre'**
+  String get uiUsersFilterScope;
+
+  /// ui.users.search_name_email
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad veya e-posta ara'**
+  String get uiUsersSearchNameEmail;
+
+  /// ui.users.one_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir koordinatörlük seçebilirsin'**
+  String get uiUsersOneDepartment;
+
   /// ui.users.title
   ///
   /// In tr, this message translates to:
@@ -9664,12 +9898,6 @@ abstract class AppLocalizations {
   /// **'Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.'**
   String get uiUsersHistoryUnavailable;
 
-  /// ui.users.account_unavailable
-  ///
-  /// In tr, this message translates to:
-  /// **'E-posta, giriş kilidi ve son giriş bilgisi sunucu tarafından okunabilir olarak sunulmuyor. Hesap değişikliklerini aşağıdaki işlemlerden yapabilirsiniz.'**
-  String get uiUsersAccountUnavailable;
-
   /// ui.users.membership_unknown
   ///
   /// In tr, this message translates to:
@@ -9805,7 +10033,7 @@ abstract class AppLocalizations {
   /// ui.users.distribution
   ///
   /// In tr, this message translates to:
-  /// **'Görev durumu dağılımı'**
+  /// **'Durum dağılımı'**
   String get uiUsersDistribution;
 
   /// ui.users.not_started
@@ -9867,6 +10095,450 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Devamı var'**
   String get uiUsersMoreAvailable;
+
+  /// ui.users.admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Admin'**
+  String get uiUsersAdmin;
+
+  /// ui.users.count_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kullanıcı'**
+  String get uiUsersCountTail;
+
+  /// ui.users.nav_count_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi'**
+  String get uiUsersNavCountTail;
+
+  /// ui.users.search_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad veya koordinatörlük'**
+  String get uiUsersSearchHint;
+
+  /// ui.users.row_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Profili açmak için dokunun. Hızlı işlemler için basılı tutun.'**
+  String get uiUsersRowHint;
+
+  /// ui.users.no_loaded_match
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüklenen kullanıcılar arasında eşleşme yok. Diğer kayıtları yükleyebilirsiniz.'**
+  String get uiUsersNoLoadedMatch;
+
+  /// ui.users.directory_partial
+  ///
+  /// In tr, this message translates to:
+  /// **'+ işareti, listenin devamı olduğunu gösterir. Sayılar yüklenen kayıtları kapsar.'**
+  String get uiUsersDirectoryPartial;
+
+  /// ui.users.task_count_noun
+  ///
+  /// In tr, this message translates to:
+  /// **'görev'**
+  String get uiUsersTaskCountNoun;
+
+  /// ui.users.task_open_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık görevler'**
+  String get uiUsersTaskOpenFilter;
+
+  /// ui.users.task_late_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikmede olanlar'**
+  String get uiUsersTaskLateFilter;
+
+  /// ui.users.task_review_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekleyenler'**
+  String get uiUsersTaskReviewFilter;
+
+  /// ui.users.task_done_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlananlar'**
+  String get uiUsersTaskDoneFilter;
+
+  /// ui.users.task_all_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm görevler'**
+  String get uiUsersTaskAllFilter;
+
+  /// ui.users.task_filters
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevleri süz'**
+  String get uiUsersTaskFilters;
+
+  /// ui.users.task_filter_count_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'görev gösteriliyor · birden çok seçebilirsin'**
+  String get uiUsersTaskFilterCountHint;
+
+  /// ui.users.task_status_group
+  ///
+  /// In tr, this message translates to:
+  /// **'durum'**
+  String get uiUsersTaskStatusGroup;
+
+  /// ui.users.task_priority_group
+  ///
+  /// In tr, this message translates to:
+  /// **'öncelik'**
+  String get uiUsersTaskPriorityGroup;
+
+  /// ui.users.task_group_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikmede'**
+  String get uiUsersTaskGroupLate;
+
+  /// ui.users.task_group_week
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hafta'**
+  String get uiUsersTaskGroupWeek;
+
+  /// ui.users.task_group_later
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonra'**
+  String get uiUsersTaskGroupLater;
+
+  /// ui.users.task_group_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanan'**
+  String get uiUsersTaskGroupDone;
+
+  /// ui.users.task_urgent
+  ///
+  /// In tr, this message translates to:
+  /// **'Acil'**
+  String get uiUsersTaskUrgent;
+
+  /// ui.users.task_unknown_priority
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilinmeyen öncelik'**
+  String get uiUsersTaskUnknownPriority;
+
+  /// ui.users.task_today
+  ///
+  /// In tr, this message translates to:
+  /// **'bugün'**
+  String get uiUsersTaskToday;
+
+  /// ui.users.task_completed
+  ///
+  /// In tr, this message translates to:
+  /// **'tamamlandı'**
+  String get uiUsersTaskCompleted;
+
+  /// ui.users.task_late_days
+  ///
+  /// In tr, this message translates to:
+  /// **'gün gecikti'**
+  String get uiUsersTaskLateDays;
+
+  /// ui.users.task_remaining_days
+  ///
+  /// In tr, this message translates to:
+  /// **'gün kaldı'**
+  String get uiUsersTaskRemainingDays;
+
+  /// ui.users.task_files_count
+  ///
+  /// In tr, this message translates to:
+  /// **'dosya'**
+  String get uiUsersTaskFilesCount;
+
+  /// ui.users.task_show_count
+  ///
+  /// In tr, this message translates to:
+  /// **'görevi göster'**
+  String get uiUsersTaskShowCount;
+
+  /// ui.users.task_priority_chip
+  ///
+  /// In tr, this message translates to:
+  /// **'öncelik'**
+  String get uiUsersTaskPriorityChip;
+
+  /// ui.users.message
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj'**
+  String get uiUsersMessage;
+
+  /// ui.users.assign
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev ata'**
+  String get uiUsersAssign;
+
+  /// ui.users.edit_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap ve rolleri düzenle'**
+  String get uiUsersEditAccount;
+
+  /// ui.users.more_actions
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer işlemler'**
+  String get uiUsersMoreActions;
+
+  /// ui.users.personal_report
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev raporu (CSV)'**
+  String get uiUsersPersonalReport;
+
+  /// ui.users.personal_report_note
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili programda erişebildiğiniz görevlerin özeti'**
+  String get uiUsersPersonalReportNote;
+
+  /// ui.users.account_and_roles
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap ve roller'**
+  String get uiUsersAccountAndRoles;
+
+  /// ui.users.send_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj gönder'**
+  String get uiUsersSendMessage;
+
+  /// ui.users.report_scope
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapsam'**
+  String get uiUsersReportScope;
+
+  /// ui.users.report_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get uiUsersReportTask;
+
+  /// ui.users.report_status
+  ///
+  /// In tr, this message translates to:
+  /// **'Durum'**
+  String get uiUsersReportStatus;
+
+  /// ui.users.report_due
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş'**
+  String get uiUsersReportDue;
+
+  /// ui.users.task_no_day
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu gün için görevi yok.'**
+  String get uiUsersTaskNoDay;
+
+  /// ui.users.ops_active
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap aktif'**
+  String get uiUsersOpsActive;
+
+  /// ui.users.ops_reset_link
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre sıfırlama bağlantısı gönder'**
+  String get uiUsersOpsResetLink;
+
+  /// ui.users.ops_reset_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sunucu e-posta ile sıfırlama bağlantısı göndermiyor.'**
+  String get uiUsersOpsResetUnavailable;
+
+  /// ui.users.ops_delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcıyı sil'**
+  String get uiUsersOpsDelete;
+
+  /// ui.users.ops_delete_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kullanıcı silinmiş kayıtlara taşınacak ve oturumları kapatılacak.'**
+  String get uiUsersOpsDeleteConfirm;
+
+  /// ui.users.ops_self_delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendi hesabınızı bu ekrandan silemezsiniz.'**
+  String get uiUsersOpsSelfDelete;
+
+  /// ui.users.ops_admin_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem için şirket yöneticisi yetkisi gerekir.'**
+  String get uiUsersOpsAdminRequired;
+
+  /// ui.users.ops_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı silinmiş kayıtlara taşındı.'**
+  String get uiUsersOpsDeleted;
+
+  /// ui.users.account_email
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta'**
+  String get uiUsersAccountEmail;
+
+  /// ui.users.account_email_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni e-posta'**
+  String get uiUsersAccountEmailHint;
+
+  /// ui.users.account_email_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçerli bir e-posta adresi gir'**
+  String get uiUsersAccountEmailInvalid;
+
+  /// ui.users.account_role_heading
+  ///
+  /// In tr, this message translates to:
+  /// **'roller · birden çok seçilebilir'**
+  String get uiUsersAccountRoleHeading;
+
+  /// ui.users.account_department_heading
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlük'**
+  String get uiUsersAccountDepartmentHeading;
+
+  /// ui.users.account_admin_description
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm programları ve kullanıcıları yönetir'**
+  String get uiUsersAccountAdminDescription;
+
+  /// ui.users.account_coordinator_description
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlükte görevleri ve üyeleri yönetir'**
+  String get uiUsersAccountCoordinatorDescription;
+
+  /// ui.users.account_member_description
+  ///
+  /// In tr, this message translates to:
+  /// **'Atandığı koordinatörlükte görev alır'**
+  String get uiUsersAccountMemberDescription;
+
+  /// ui.users.account_role_scope
+  ///
+  /// In tr, this message translates to:
+  /// **'Rol koordinatörlük bazında atanır. Değiştirilecek koordinatörlüğü seçin.'**
+  String get uiUsersAccountRoleScope;
+
+  /// ui.users.account_grant_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kullanıcıya şirket yöneticisi yetkisi verilsin mi?'**
+  String get uiUsersAccountGrantAdmin;
+
+  /// ui.users.account_revoke_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kullanıcının şirket yöneticisi yetkisi kaldırılsın mı?'**
+  String get uiUsersAccountRevokeAdmin;
+
+  /// ui.users.account_add
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekle'**
+  String get uiUsersAccountAdd;
+
+  /// ui.users.account_add_as_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye olarak ekle'**
+  String get uiUsersAccountAddAsMember;
+
+  /// ui.users.account_unsaved
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydedilmedi'**
+  String get uiUsersAccountUnsaved;
+
+  /// ui.users.account_cancel
+  ///
+  /// In tr, this message translates to:
+  /// **'Vazgeç'**
+  String get uiUsersAccountCancel;
+
+  /// ui.users.account_save
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydet'**
+  String get uiUsersAccountSave;
+
+  /// ui.users.draft_roles
+  ///
+  /// In tr, this message translates to:
+  /// **'roller'**
+  String get uiUsersDraftRoles;
+
+  /// ui.users.draft_add_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük ekle'**
+  String get uiUsersDraftAddDepartment;
+
+  /// ui.users.draft_selected
+  ///
+  /// In tr, this message translates to:
+  /// **'seçili'**
+  String get uiUsersDraftSelected;
+
+  /// ui.users.draft_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad soyadı ve geçerli bir e-posta adresini kontrol edin.'**
+  String get uiUsersDraftInvalid;
+
+  /// ui.users.draft_admin_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetici yetkisi henüz doğrulanamadı.'**
+  String get uiUsersDraftAdminUnknown;
+
+  /// ui.users.draft_role_scope
+  ///
+  /// In tr, this message translates to:
+  /// **'Admin şirket genelidir. Koordinatör ve Üye seçimi bu programdaki seçili koordinatörlüklere uygulanır.'**
+  String get uiUsersDraftRoleScope;
+
+  /// ui.users.draft_self_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.'**
+  String get uiUsersDraftSelfConflict;
 }
 
 class _AppLocalizationsDelegate

@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Department {
 
-@JsonKey(name: 'department_id') String get departmentId; String get name; String get kind; String? get code; String? get description;
+@JsonKey(name: 'department_id') String get departmentId; String get name; String get kind;/// Kısa kod (büyük harf); kod verilmemişse alan yoktur.
+ String? get code; String? get description;
 /// Create a copy of Department
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -225,6 +226,7 @@ class _Department implements Department {
 @override@JsonKey(name: 'department_id') final  String departmentId;
 @override final  String name;
 @override final  String kind;
+/// Kısa kod (büyük harf); kod verilmemişse alan yoktur.
 @override final  String? code;
 @override final  String? description;
 

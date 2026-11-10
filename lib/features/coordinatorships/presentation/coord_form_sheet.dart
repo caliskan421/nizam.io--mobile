@@ -59,6 +59,10 @@ class _CoordFormState extends ConsumerState<_CoordForm> {
         description: d.department?.description ?? '',
       );
     }
+    if (ref.read(coordinatorshipFormControllerProvider.notifier).pendingDraft
+        case final draft?) {
+      return draft;
+    }
     if (ref.read(coordinatorshipFormControllerProvider).pending case final p?) {
       return CoordinatorshipDraft(
         name: p.name,
@@ -79,7 +83,7 @@ class _CoordFormState extends ConsumerState<_CoordForm> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit({bool confirmExisting = false}) async {
     final draft = CoordinatorshipDraft(
       name: _name.text.trim(),
       kind: _kind,
@@ -88,7 +92,8 @@ class _CoordFormState extends ConsumerState<_CoordForm> {
     final ctl = ref.read(coordinatorshipFormControllerProvider.notifier);
     final ok = switch (widget.detail) {
       final d? => await ctl.edit(d.stats.code, initial: _initial, draft: draft),
-      null => await ctl.create(draft),
+      null =>
+        confirmExisting ? await ctl.confirmExisting() : await ctl.create(draft),
     };
     if (!ok || !mounted) return;
     final l = context.l10n;
@@ -110,8 +115,8 @@ class _CoordFormState extends ConsumerState<_CoordForm> {
     final error = f.error;
     // Oluşturulmuş ama bağlanamamış departman: tür ve açıklama kayıtta; yalnız ad (programdaki
     // ad) değişebilir.
-    final pending = !_editing && f.pending != null;
-    final locked = f.saving || pending;
+    final pending = !_editing && (f.pending != null || f.existingId != null);
+    final locked = f.saving || pending || f.frozen;
     return NzForm(
       onSubmit: _submit,
       serverError: error,
@@ -121,7 +126,16 @@ class _CoordFormState extends ConsumerState<_CoordForm> {
           mainAxisSize: MainAxisSize.min,
           spacing: NizamioSpacing.space3,
           children: [
-            if (pending) NzBanner.warning(message: l.uiCoordFormLinkFailed),
+            if (f.existingId != null)
+              NzBanner.warning(
+                message: f.deleted
+                    ? l.uiCoordFormExistingDeleted
+                    : l.uiCoordFormExisting,
+              )
+            else if (pending)
+              NzBanner.warning(message: l.uiCoordFormLinkFailed),
+            if (f.frozen && !pending)
+              NzBanner.warning(message: l.uiCoordFormOutcomeUnknown),
             if (error != null && error.fields.isEmpty)
               NzBanner.danger(message: errorText(l, error)),
             NzTextField(
@@ -129,7 +143,7 @@ class _CoordFormState extends ConsumerState<_CoordForm> {
               name: _editing || pending ? 'display_name' : 'name',
               helper: _editing ? l.uiCoordFormNameEditHelper : null,
               controller: _name,
-              enabled: !f.saving,
+              enabled: !locked,
               maxLength: 120,
               validator: NzValidators.all([
                 NzValidators.requiredText,
@@ -161,7 +175,9 @@ class _CoordFormState extends ConsumerState<_CoordForm> {
               enabled: !locked,
             ),
             NzButton.primary(
-              label: _editing
+              label: f.existingId != null
+                  ? l.uiCoordFormExistingConfirm
+                  : _editing
                   ? l.uiCoordFormSave
                   : pending
                   ? l.uiCoordFormLinkRetry
@@ -170,6 +186,8 @@ class _CoordFormState extends ConsumerState<_CoordForm> {
               expand: true,
               onPressed: f.saving
                   ? null
+                  : f.existingId != null
+                  ? () => _submit(confirmExisting: true)
                   : () => NzForm.of(formContext).submit(),
             ),
           ],

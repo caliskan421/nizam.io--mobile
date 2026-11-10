@@ -376,6 +376,7 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     TaskItem task,
     DateTime start,
     DateTime end, {
+    required String requestKey,
     String? reason,
   }) => apiCall(
     () => _client.requestDateChange(
@@ -384,7 +385,9 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
         newStartOn: day(start),
         newEndOn: day(end),
         reason: reason,
+        expectedDatesRevision: task.datesRevision,
       ),
+      idempotencyKey: requestKey,
       extras: withScope(
         WorkClient.requestDateChangeOpenapiExtras,
         _program(task),

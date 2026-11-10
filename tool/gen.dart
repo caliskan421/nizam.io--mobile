@@ -178,13 +178,18 @@ swagger_parser:
   // gün alanları (`format: date`) `YYYY-MM-DD` yazılsın (tool/gen/wire_types.dart).
   final dateNames = dateOnlyPropertyNames(specText);
   File(p.join(apiOut.path, 'date_only.dart')).writeAsStringSync(dateOnlySource);
+  File(p.join(apiOut.path, 'program_patch_field.dart'))
+      .writeAsStringSync(programPatchFieldSource);
   final modelsDir = Directory(p.join(apiOut.path, 'models'));
   if (modelsDir.existsSync()) {
     for (final f in modelsDir.listSync().whereType<File>().where(
       (f) => f.path.endsWith('.dart'),
     )) {
       final src = f.readAsStringSync();
-      final masked = annotateDateOnly(maskSensitiveModels(src), dateNames);
+      var masked = annotateDateOnly(maskSensitiveModels(src), dateNames);
+      if (p.basename(f.path) == 'update_program_request.dart') {
+        masked = rewriteProgramPatch(masked);
+      }
       if (masked != src) f.writeAsStringSync(masked);
     }
   }
@@ -310,6 +315,12 @@ swagger_parser:
     'build',
     '--delete-conflicting-outputs',
   ], root);
+  final patchJson = File(
+    p.join(apiOut.path, 'models', 'update_program_request.g.dart'),
+  );
+  patchJson.writeAsStringSync(
+    rewriteProgramPatchJson(patchJson.readAsStringSync()),
+  );
   await _run('dart', [
     'format',
     'lib/core/api/generated',

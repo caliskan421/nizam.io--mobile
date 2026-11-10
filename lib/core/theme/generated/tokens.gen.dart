@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: docs/design/design sytem/tokens.json (blob 2e1521ab9fe6) + design/mobile-tokens.json
+// Kaynak: docs/design/design sytem/tokens.json (blob 294384a96186) + design/mobile-tokens.json
 //
 // Değerler tasarım sistemi tokens.json'dan; rol eşlemesi ve mobil değerler design/mobile-tokens.json'dan.
 
@@ -38,6 +38,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     required this.buttonBorder,
     required this.inProgress,
     required this.onInProgress,
+    required this.programBlue,
+    required this.programTeal,
+    required this.programGreen,
+    required this.programOrange,
+    required this.programRed,
+    required this.programSlate,
+    required this.onProgramColor,
     required this.glassBar,
     required this.glassFloat,
     required this.glassMenu,
@@ -104,6 +111,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
   final Color buttonBorder;
   final Color inProgress;
   final Color onInProgress;
+  final Color programBlue;
+  final Color programTeal;
+  final Color programGreen;
+  final Color programOrange;
+  final Color programRed;
+  final Color programSlate;
+  final Color onProgramColor;
   final Color glassBar;
   final Color glassFloat;
   final Color glassMenu;
@@ -170,6 +184,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     buttonBorder: Color(0xFFD5D5CE),
     inProgress: Color(0xFF7A26C1),
     onInProgress: Color(0xFFFFFFFF),
+    programBlue: Color(0xFF6EC1FF),
+    programTeal: Color(0xFF5DD6C0),
+    programGreen: Color(0xFFC8F53C),
+    programOrange: Color(0xFFFF8A65),
+    programRed: Color(0xFFFFA0A0),
+    programSlate: Color(0xFFD3D6DC),
+    onProgramColor: Color(0xFF121212),
     glassBar: Color(0xC7F6F6F3),
     glassFloat: Color(0xC7FFFFFF),
     glassMenu: Color(0xEBFFFFFF),
@@ -237,6 +258,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     buttonBorder: Color(0xFF3C3C3C),
     inProgress: Color(0xFF9B30D9),
     onInProgress: Color(0xFFFFFFFF),
+    programBlue: Color(0xFF6EC1FF),
+    programTeal: Color(0xFF5DD6C0),
+    programGreen: Color(0xFFC8F53C),
+    programOrange: Color(0xFFFF8A65),
+    programRed: Color(0xFFFF7D7D),
+    programSlate: Color(0xFFB4B7BE),
+    onProgramColor: Color(0xFF121212),
     glassBar: Color(0xC70B0B0B),
     glassFloat: Color(0xBD121212),
     glassMenu: Color(0xDB181818),
@@ -305,6 +333,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     Color? buttonBorder,
     Color? inProgress,
     Color? onInProgress,
+    Color? programBlue,
+    Color? programTeal,
+    Color? programGreen,
+    Color? programOrange,
+    Color? programRed,
+    Color? programSlate,
+    Color? onProgramColor,
     Color? glassBar,
     Color? glassFloat,
     Color? glassMenu,
@@ -371,6 +406,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       buttonBorder: buttonBorder ?? this.buttonBorder,
       inProgress: inProgress ?? this.inProgress,
       onInProgress: onInProgress ?? this.onInProgress,
+      programBlue: programBlue ?? this.programBlue,
+      programTeal: programTeal ?? this.programTeal,
+      programGreen: programGreen ?? this.programGreen,
+      programOrange: programOrange ?? this.programOrange,
+      programRed: programRed ?? this.programRed,
+      programSlate: programSlate ?? this.programSlate,
+      onProgramColor: onProgramColor ?? this.onProgramColor,
       glassBar: glassBar ?? this.glassBar,
       glassFloat: glassFloat ?? this.glassFloat,
       glassMenu: glassMenu ?? this.glassMenu,
@@ -442,6 +484,13 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       buttonBorder: Color.lerp(buttonBorder, other.buttonBorder, t)!,
       inProgress: Color.lerp(inProgress, other.inProgress, t)!,
       onInProgress: Color.lerp(onInProgress, other.onInProgress, t)!,
+      programBlue: Color.lerp(programBlue, other.programBlue, t)!,
+      programTeal: Color.lerp(programTeal, other.programTeal, t)!,
+      programGreen: Color.lerp(programGreen, other.programGreen, t)!,
+      programOrange: Color.lerp(programOrange, other.programOrange, t)!,
+      programRed: Color.lerp(programRed, other.programRed, t)!,
+      programSlate: Color.lerp(programSlate, other.programSlate, t)!,
+      onProgramColor: Color.lerp(onProgramColor, other.onProgramColor, t)!,
       glassBar: Color.lerp(glassBar, other.glassBar, t)!,
       glassFloat: Color.lerp(glassFloat, other.glassFloat, t)!,
       glassMenu: Color.lerp(glassMenu, other.glassMenu, t)!,

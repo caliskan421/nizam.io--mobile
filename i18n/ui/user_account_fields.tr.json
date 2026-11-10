@@ -1,0 +1,13 @@
+{
+  "$comment": "Kullanıcı hesabının yalnız taslak düzenleyen üst bilgi satırları.",
+  "texts": {
+    "ui.user_account_fields.heading": "hesap bilgileri",
+    "ui.user_account_fields.full_name": "Ad soyad",
+    "ui.user_account_fields.email": "E-posta",
+    "ui.user_account_fields.password": "Şifre",
+    "ui.user_account_fields.edit_full_name": "Ad soyadı düzenle",
+    "ui.user_account_fields.edit_email": "E-postayı düzenle",
+    "ui.user_account_fields.edit_password": "Yeni şifre belirle",
+    "ui.user_account_fields.new_password": "Yeni şifre"
+  }
+}

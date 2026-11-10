@@ -474,6 +474,7 @@ final class TaskItem {
     List<TaskNote>? noteEntries,
     bool? evidenceRequired,
     String? Function()? description,
+    int? datesRevision,
   }) => TaskItem(
     code: code ?? this.code,
     id: code == null || id != this.code ? id : code,
@@ -503,7 +504,7 @@ final class TaskItem {
     evidenceRequired: evidenceRequired ?? this.evidenceRequired,
     subtaskCounts: subtaskCounts,
     editRevision: editRevision,
-    datesRevision: datesRevision,
+    datesRevision: datesRevision ?? this.datesRevision,
   );
 }
 
@@ -563,6 +564,7 @@ final class TaskCatalog {
     required List<Person> people,
     required List<CoordinatorshipRef> coordinatorships,
     this.access,
+    this.accountEmail,
     this.departmentId,
     this.departmentFilterCleared = false,
     this.truncated = false,
@@ -579,6 +581,9 @@ final class TaskCatalog {
 
   /// Oturumdaki kişinin kimliği.
   final String me;
+
+  /// Yalnız oturumdaki hesabın /me yanıtındaki doğrulanmış e-posta adresi.
+  final String? accountEmail;
   final List<TaskItem> tasks;
   final List<Person> people;
   final List<CoordinatorshipRef> coordinatorships;
@@ -633,16 +638,17 @@ final class TaskCatalog {
   ];
 
   /// Aynı kişi/koordinatörlük kümesiyle yeni görev listesi.
-  TaskCatalog withTasks(List<TaskItem> tasks) => TaskCatalog(
+  TaskCatalog withTasks(List<TaskItem> tasks, {bool? truncated}) => TaskCatalog(
     today: today,
     me: me,
+    accountEmail: accountEmail,
     tasks: tasks,
     people: people,
     coordinatorships: coordinatorships,
     access: access,
     departmentId: departmentId,
     departmentFilterCleared: departmentFilterCleared,
-    truncated: truncated,
+    truncated: truncated ?? this.truncated,
     departments: departments,
     departmentsTruncated: departmentsTruncated,
     names: names,
@@ -660,6 +666,7 @@ final class TaskCatalog {
   }) => TaskCatalog(
     today: today,
     me: me,
+    accountEmail: accountEmail,
     tasks: codes == null ? tasks : [for (final code in codes) ?task(code)],
     people: people,
     coordinatorships: coordinatorships,
@@ -678,6 +685,7 @@ final class TaskCatalog {
       : TaskCatalog(
           today: today,
           me: me,
+          accountEmail: accountEmail,
           tasks: tasks,
           people: people,
           coordinatorships: coordinatorships,

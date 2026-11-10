@@ -63,11 +63,48 @@ class ApiDepartmentRepository implements DepartmentRepository {
   }
 
   @override
+  Future<Department> readProgramDepartment(
+    String programId,
+    String departmentId,
+  ) async {
+    final r = await apiCall(
+      () => _program.readProgramDepartment(
+        departmentId: departmentId,
+        extras: withProgram(
+          ProgramClient.readProgramDepartmentOpenapiExtras,
+          programId,
+        ),
+      ),
+    );
+    return Department(
+      id: r.departmentId,
+      name: r.displayName,
+      kind: DepartmentKind.fromWire(r.kind.json),
+      code: r.code,
+      description: r.description,
+    );
+  }
+
+  @override
+  Future<void> restoreDepartment(String programId, String departmentId) async {
+    await apiCall(
+      () => _client.restoreDepartment(
+        id: departmentId,
+        extras: withProgram(
+          OrganizationClient.restoreDepartmentOpenapiExtras,
+          programId,
+        ),
+      ),
+    );
+  }
+
+  @override
   Future<Department> createDepartment({
     required String name,
     required DepartmentKind kind,
     String? code,
     String? description,
+    String? requestKey,
   }) async {
     final wireKind = switch (kind) {
       DepartmentKind.coordinatorship =>
@@ -78,6 +115,7 @@ class ApiDepartmentRepository implements DepartmentRepository {
     return _department(
       await apiCall(
         () => _client.createDepartment(
+          idempotencyKey: requestKey,
           body: CreateDepartmentRequest(
             name: name,
             kind: wireKind,
@@ -124,9 +162,11 @@ class ApiDepartmentRepository implements DepartmentRepository {
     String programId,
     String departmentId, {
     String? displayName,
+    String? requestKey,
   }) async => _link(
     await apiCall(
       () => _program.linkDepartment(
+        idempotencyKey: requestKey,
         body: LinkDepartmentRequest(
           departmentId: departmentId,
           displayName: displayName,

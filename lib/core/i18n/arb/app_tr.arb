@@ -1,6 +1,6 @@
 {
   "@@locale": "tr",
-  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit a8e79dd1ae07e19a32d81b69a5cea60546d61039 src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.12.0-api (861beb5ec246f62efb2854f7d4098a3ad5847bba); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
+  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit a8e79dd1ae07e19a32d81b69a5cea60546d61039 src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.15.0-api (b8f6479a7971fa7056823acada47a7db4d9052de); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
   "errAssistantBusy": "Asistan şu anda meşgul; biraz sonra yeniden deneyin.",
   "@errAssistantBusy": {
     "description": "assistant.busy"
@@ -405,6 +405,14 @@
   "@errOrganizationDepartmentNotLinked": {
     "description": "organization.department_not_linked"
   },
+  "errOrganizationExistingDepartment": "Bu adda bir departman zaten var.",
+  "@errOrganizationExistingDepartment": {
+    "description": "organization.existing_department"
+  },
+  "errOrganizationIdempotencyKeyReused": "Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.",
+  "@errOrganizationIdempotencyKeyReused": {
+    "description": "organization.idempotency_key_reused"
+  },
   "errOrganizationInputInvalid": "Girilen bilgiler geçersiz.",
   "@errOrganizationInputInvalid": {
     "description": "organization.input_invalid"
@@ -420,6 +428,10 @@
   "errOrganizationInvalidName": "Ad geçersiz.",
   "@errOrganizationInvalidName": {
     "description": "organization.invalid_name"
+  },
+  "errOrganizationInvalidRequestKey": "İşlem anahtarı geçersiz.",
+  "@errOrganizationInvalidRequestKey": {
+    "description": "organization.invalid_request_key"
   },
   "errOrganizationInvalidRole": "Rol geçersiz.",
   "@errOrganizationInvalidRole": {
@@ -553,6 +565,10 @@
   "@errProgramInputInvalid": {
     "description": "program.input_invalid"
   },
+  "errProgramInvalidColor": "Geçersiz renk seçimi.",
+  "@errProgramInvalidColor": {
+    "description": "program.invalid_color"
+  },
   "errProgramInvalidCopySource": "Ekip kopyası için kaynak program geçersiz.",
   "@errProgramInvalidCopySource": {
     "description": "program.invalid_copy_source"
@@ -572,6 +588,14 @@
   "errProgramInvalidName": "Program adı geçersiz.",
   "@errProgramInvalidName": {
     "description": "program.invalid_name"
+  },
+  "errProgramInvalidRequestKey": "İşlem anahtarı geçersiz.",
+  "@errProgramInvalidRequestKey": {
+    "description": "program.invalid_request_key"
+  },
+  "errProgramInvalidShortName": "Kısa ad 1–4 harf ya da rakam olmalıdır.",
+  "@errProgramInvalidShortName": {
+    "description": "program.invalid_short_name"
   },
   "errProgramInvalidTransfer": "Aktarım isteği geçersiz.",
   "@errProgramInvalidTransfer": {
@@ -1769,6 +1793,22 @@
   "@uiCoordFormLinkFailed": {
     "description": "ui.coord.form_link_failed"
   },
+  "uiCoordFormExisting": "Bu adla bir departman zaten var. Mevcut kayıt kullanılacak; türü ve açıklaması değiştirilmez. Bağlamak istiyor musunuz?",
+  "@uiCoordFormExisting": {
+    "description": "ui.coord.form_existing"
+  },
+  "uiCoordFormExistingDeleted": "Bu adla silinmiş bir departman var. Mevcut kayıt geri yüklenip bağlanacak; türü ve açıklaması değiştirilmez. Devam etmek istiyor musunuz?",
+  "@uiCoordFormExistingDeleted": {
+    "description": "ui.coord.form_existing_deleted"
+  },
+  "uiCoordFormExistingConfirm": "Mevcut kaydı kullan",
+  "@uiCoordFormExistingConfirm": {
+    "description": "ui.coord.form_existing_confirm"
+  },
+  "uiCoordFormOutcomeUnknown": "Önceki işlemin sonucu bilinmiyor. Aynı bilgilerle yeniden deneyerek işlemi tamamlayın.",
+  "@uiCoordFormOutcomeUnknown": {
+    "description": "ui.coord.form_outcome_unknown"
+  },
   "uiCoordToastCreated": "Koordinatörlük eklendi",
   "@uiCoordToastCreated": {
     "description": "ui.coord.toast_created"
@@ -2276,6 +2316,30 @@
   "uiFeedbackSecondsUnit": "sn",
   "@uiFeedbackSecondsUnit": {
     "description": "ui.feedback.seconds_unit"
+  },
+  "uiHomePendingHeading": "Bekleyen işler",
+  "@uiHomePendingHeading": {
+    "description": "ui.home.pending_heading"
+  },
+  "uiHomePendingErrorRetry": "Bekleyen işler yüklenemedi · Yeniden dene",
+  "@uiHomePendingErrorRetry": {
+    "description": "ui.home.pending_error_retry"
+  },
+  "uiHomePendingEmpty": "Bekleyen iş yok",
+  "@uiHomePendingEmpty": {
+    "description": "ui.home.pending_empty"
+  },
+  "uiHomeUnreadLoading": "Mesaj sayısı yükleniyor",
+  "@uiHomeUnreadLoading": {
+    "description": "ui.home.unread_loading"
+  },
+  "uiHomeUnreadErrorRetry": "Mesaj sayısı yüklenemedi · Yeniden dene",
+  "@uiHomeUnreadErrorRetry": {
+    "description": "ui.home.unread_error_retry"
+  },
+  "uiHomeUnreadChats": "Okunmamış sohbet",
+  "@uiHomeUnreadChats": {
+    "description": "ui.home.unread_chats"
   },
   "uiHomeGreeting": "Merhaba",
   "@uiHomeGreeting": {
@@ -6265,6 +6329,98 @@
   "@uiTimelineGanttOpenTask": {
     "description": "ui.timeline.gantt_open_task"
   },
+  "uiUserAccountFieldsHeading": "hesap bilgileri",
+  "@uiUserAccountFieldsHeading": {
+    "description": "ui.user_account_fields.heading"
+  },
+  "uiUserAccountFieldsFullName": "Ad soyad",
+  "@uiUserAccountFieldsFullName": {
+    "description": "ui.user_account_fields.full_name"
+  },
+  "uiUserAccountFieldsEmail": "E-posta",
+  "@uiUserAccountFieldsEmail": {
+    "description": "ui.user_account_fields.email"
+  },
+  "uiUserAccountFieldsPassword": "Şifre",
+  "@uiUserAccountFieldsPassword": {
+    "description": "ui.user_account_fields.password"
+  },
+  "uiUserAccountFieldsEditFullName": "Ad soyadı düzenle",
+  "@uiUserAccountFieldsEditFullName": {
+    "description": "ui.user_account_fields.edit_full_name"
+  },
+  "uiUserAccountFieldsEditEmail": "E-postayı düzenle",
+  "@uiUserAccountFieldsEditEmail": {
+    "description": "ui.user_account_fields.edit_email"
+  },
+  "uiUserAccountFieldsEditPassword": "Yeni şifre belirle",
+  "@uiUserAccountFieldsEditPassword": {
+    "description": "ui.user_account_fields.edit_password"
+  },
+  "uiUserAccountFieldsNewPassword": "Yeni şifre",
+  "@uiUserAccountFieldsNewPassword": {
+    "description": "ui.user_account_fields.new_password"
+  },
+  "uiUsersProgramShortName": "Kısa ad (1–4 harf veya rakam)",
+  "@uiUsersProgramShortName": {
+    "description": "ui.users.program_short_name"
+  },
+  "uiUsersProgramColor": "Renk (violet, gold, blue, teal, green, orange, red, slate)",
+  "@uiUsersProgramColor": {
+    "description": "ui.users.program_color"
+  },
+  "uiUsersProgramBadgeInvalid": "Kısa ad veya renk geçersiz.",
+  "@uiUsersProgramBadgeInvalid": {
+    "description": "ui.users.program_badge_invalid"
+  },
+  "uiUsersDisableAccount": "Hesabı kapat",
+  "@uiUsersDisableAccount": {
+    "description": "ui.users.disable_account"
+  },
+  "uiUsersEnableAccount": "Hesabı aç",
+  "@uiUsersEnableAccount": {
+    "description": "ui.users.enable_account"
+  },
+  "uiUsersDisableConfirm": "Oturumlar kapatılır, görevler ve geçmiş korunur.",
+  "@uiUsersDisableConfirm": {
+    "description": "ui.users.disable_confirm"
+  },
+  "uiUsersEnableConfirm": "Hesap mevcut rol ve üyelikleriyle erişim kazanır; yeniden giriş gerekir.",
+  "@uiUsersEnableConfirm": {
+    "description": "ui.users.enable_confirm"
+  },
+  "uiUsersAccountHistoryPreserved": "Görevler ve geçmiş korunur.",
+  "@uiUsersAccountHistoryPreserved": {
+    "description": "ui.users.account_history_preserved"
+  },
+  "uiUsersAccountStatusUnknown": "Hesap durumu bilinmiyor",
+  "@uiUsersAccountStatusUnknown": {
+    "description": "ui.users.account_status_unknown"
+  },
+  "uiUsersOwnAccount": "Kendi hesabınız",
+  "@uiUsersOwnAccount": {
+    "description": "ui.users.own_account"
+  },
+  "uiUsersAccountDisabled": "Hesap kapalı",
+  "@uiUsersAccountDisabled": {
+    "description": "ui.users.account_disabled"
+  },
+  "uiUsersLoginLocked": "Giriş kilitli",
+  "@uiUsersLoginLocked": {
+    "description": "ui.users.login_locked"
+  },
+  "uiUsersFilterScope": "geçerli filtre",
+  "@uiUsersFilterScope": {
+    "description": "ui.users.filter_scope"
+  },
+  "uiUsersSearchNameEmail": "Ad veya e-posta ara",
+  "@uiUsersSearchNameEmail": {
+    "description": "ui.users.search_name_email"
+  },
+  "uiUsersOneDepartment": "Bir koordinatörlük seçebilirsin",
+  "@uiUsersOneDepartment": {
+    "description": "ui.users.one_department"
+  },
   "uiUsersTitle": "Kullanıcılar",
   "@uiUsersTitle": {
     "description": "ui.users.title"
@@ -6381,10 +6537,6 @@
   "@uiUsersHistoryUnavailable": {
     "description": "ui.users.history_unavailable"
   },
-  "uiUsersAccountUnavailable": "E-posta, giriş kilidi ve son giriş bilgisi sunucu tarafından okunabilir olarak sunulmuyor. Hesap değişikliklerini aşağıdaki işlemlerden yapabilirsiniz.",
-  "@uiUsersAccountUnavailable": {
-    "description": "ui.users.account_unavailable"
-  },
   "uiUsersMembershipUnknown": "Üyelik bilgisi bilinmiyor",
   "@uiUsersMembershipUnknown": {
     "description": "ui.users.membership_unknown"
@@ -6473,7 +6625,7 @@
   "@uiUsersExportSaved": {
     "description": "ui.users.export_saved"
   },
-  "uiUsersDistribution": "Görev durumu dağılımı",
+  "uiUsersDistribution": "Durum dağılımı",
   "@uiUsersDistribution": {
     "description": "ui.users.distribution"
   },
@@ -6516,5 +6668,301 @@
   "uiUsersMoreAvailable": "Devamı var",
   "@uiUsersMoreAvailable": {
     "description": "ui.users.more_available"
+  },
+  "uiUsersAdmin": "Admin",
+  "@uiUsersAdmin": {
+    "description": "ui.users.admin"
+  },
+  "uiUsersCountTail": "kullanıcı",
+  "@uiUsersCountTail": {
+    "description": "ui.users.count_tail"
+  },
+  "uiUsersNavCountTail": "kişi",
+  "@uiUsersNavCountTail": {
+    "description": "ui.users.nav_count_tail"
+  },
+  "uiUsersSearchHint": "Ad veya koordinatörlük",
+  "@uiUsersSearchHint": {
+    "description": "ui.users.search_hint"
+  },
+  "uiUsersRowHint": "Profili açmak için dokunun. Hızlı işlemler için basılı tutun.",
+  "@uiUsersRowHint": {
+    "description": "ui.users.row_hint"
+  },
+  "uiUsersNoLoadedMatch": "Yüklenen kullanıcılar arasında eşleşme yok. Diğer kayıtları yükleyebilirsiniz.",
+  "@uiUsersNoLoadedMatch": {
+    "description": "ui.users.no_loaded_match"
+  },
+  "uiUsersDirectoryPartial": "+ işareti, listenin devamı olduğunu gösterir. Sayılar yüklenen kayıtları kapsar.",
+  "@uiUsersDirectoryPartial": {
+    "description": "ui.users.directory_partial"
+  },
+  "uiUsersTaskCountNoun": "görev",
+  "@uiUsersTaskCountNoun": {
+    "description": "ui.users.task_count_noun"
+  },
+  "uiUsersTaskOpenFilter": "Açık görevler",
+  "@uiUsersTaskOpenFilter": {
+    "description": "ui.users.task_open_filter"
+  },
+  "uiUsersTaskLateFilter": "Gecikmede olanlar",
+  "@uiUsersTaskLateFilter": {
+    "description": "ui.users.task_late_filter"
+  },
+  "uiUsersTaskReviewFilter": "Onay bekleyenler",
+  "@uiUsersTaskReviewFilter": {
+    "description": "ui.users.task_review_filter"
+  },
+  "uiUsersTaskDoneFilter": "Tamamlananlar",
+  "@uiUsersTaskDoneFilter": {
+    "description": "ui.users.task_done_filter"
+  },
+  "uiUsersTaskAllFilter": "Tüm görevler",
+  "@uiUsersTaskAllFilter": {
+    "description": "ui.users.task_all_filter"
+  },
+  "uiUsersTaskFilters": "Görevleri süz",
+  "@uiUsersTaskFilters": {
+    "description": "ui.users.task_filters"
+  },
+  "uiUsersTaskFilterCountHint": "görev gösteriliyor · birden çok seçebilirsin",
+  "@uiUsersTaskFilterCountHint": {
+    "description": "ui.users.task_filter_count_hint"
+  },
+  "uiUsersTaskStatusGroup": "durum",
+  "@uiUsersTaskStatusGroup": {
+    "description": "ui.users.task_status_group"
+  },
+  "uiUsersTaskPriorityGroup": "öncelik",
+  "@uiUsersTaskPriorityGroup": {
+    "description": "ui.users.task_priority_group"
+  },
+  "uiUsersTaskGroupLate": "Gecikmede",
+  "@uiUsersTaskGroupLate": {
+    "description": "ui.users.task_group_late"
+  },
+  "uiUsersTaskGroupWeek": "Bu hafta",
+  "@uiUsersTaskGroupWeek": {
+    "description": "ui.users.task_group_week"
+  },
+  "uiUsersTaskGroupLater": "Sonra",
+  "@uiUsersTaskGroupLater": {
+    "description": "ui.users.task_group_later"
+  },
+  "uiUsersTaskGroupDone": "Tamamlanan",
+  "@uiUsersTaskGroupDone": {
+    "description": "ui.users.task_group_done"
+  },
+  "uiUsersTaskUrgent": "Acil",
+  "@uiUsersTaskUrgent": {
+    "description": "ui.users.task_urgent"
+  },
+  "uiUsersTaskUnknownPriority": "Bilinmeyen öncelik",
+  "@uiUsersTaskUnknownPriority": {
+    "description": "ui.users.task_unknown_priority"
+  },
+  "uiUsersTaskToday": "bugün",
+  "@uiUsersTaskToday": {
+    "description": "ui.users.task_today"
+  },
+  "uiUsersTaskCompleted": "tamamlandı",
+  "@uiUsersTaskCompleted": {
+    "description": "ui.users.task_completed"
+  },
+  "uiUsersTaskLateDays": "gün gecikti",
+  "@uiUsersTaskLateDays": {
+    "description": "ui.users.task_late_days"
+  },
+  "uiUsersTaskRemainingDays": "gün kaldı",
+  "@uiUsersTaskRemainingDays": {
+    "description": "ui.users.task_remaining_days"
+  },
+  "uiUsersTaskFilesCount": "dosya",
+  "@uiUsersTaskFilesCount": {
+    "description": "ui.users.task_files_count"
+  },
+  "uiUsersTaskShowCount": "görevi göster",
+  "@uiUsersTaskShowCount": {
+    "description": "ui.users.task_show_count"
+  },
+  "uiUsersTaskPriorityChip": "öncelik",
+  "@uiUsersTaskPriorityChip": {
+    "description": "ui.users.task_priority_chip"
+  },
+  "uiUsersMessage": "Mesaj",
+  "@uiUsersMessage": {
+    "description": "ui.users.message"
+  },
+  "uiUsersAssign": "Görev ata",
+  "@uiUsersAssign": {
+    "description": "ui.users.assign"
+  },
+  "uiUsersEditAccount": "Hesap ve rolleri düzenle",
+  "@uiUsersEditAccount": {
+    "description": "ui.users.edit_account"
+  },
+  "uiUsersMoreActions": "Diğer işlemler",
+  "@uiUsersMoreActions": {
+    "description": "ui.users.more_actions"
+  },
+  "uiUsersPersonalReport": "Görev raporu (CSV)",
+  "@uiUsersPersonalReport": {
+    "description": "ui.users.personal_report"
+  },
+  "uiUsersPersonalReportNote": "Seçili programda erişebildiğiniz görevlerin özeti",
+  "@uiUsersPersonalReportNote": {
+    "description": "ui.users.personal_report_note"
+  },
+  "uiUsersAccountAndRoles": "Hesap ve roller",
+  "@uiUsersAccountAndRoles": {
+    "description": "ui.users.account_and_roles"
+  },
+  "uiUsersSendMessage": "Mesaj gönder",
+  "@uiUsersSendMessage": {
+    "description": "ui.users.send_message"
+  },
+  "uiUsersReportScope": "Kapsam",
+  "@uiUsersReportScope": {
+    "description": "ui.users.report_scope"
+  },
+  "uiUsersReportTask": "Görev",
+  "@uiUsersReportTask": {
+    "description": "ui.users.report_task"
+  },
+  "uiUsersReportStatus": "Durum",
+  "@uiUsersReportStatus": {
+    "description": "ui.users.report_status"
+  },
+  "uiUsersReportDue": "Bitiş",
+  "@uiUsersReportDue": {
+    "description": "ui.users.report_due"
+  },
+  "uiUsersTaskNoDay": "Bu gün için görevi yok.",
+  "@uiUsersTaskNoDay": {
+    "description": "ui.users.task_no_day"
+  },
+  "uiUsersOpsActive": "Hesap aktif",
+  "@uiUsersOpsActive": {
+    "description": "ui.users.ops_active"
+  },
+  "uiUsersOpsResetLink": "Şifre sıfırlama bağlantısı gönder",
+  "@uiUsersOpsResetLink": {
+    "description": "ui.users.ops_reset_link"
+  },
+  "uiUsersOpsResetUnavailable": "Bu sunucu e-posta ile sıfırlama bağlantısı göndermiyor.",
+  "@uiUsersOpsResetUnavailable": {
+    "description": "ui.users.ops_reset_unavailable"
+  },
+  "uiUsersOpsDelete": "Kullanıcıyı sil",
+  "@uiUsersOpsDelete": {
+    "description": "ui.users.ops_delete"
+  },
+  "uiUsersOpsDeleteConfirm": "Bu kullanıcı silinmiş kayıtlara taşınacak ve oturumları kapatılacak.",
+  "@uiUsersOpsDeleteConfirm": {
+    "description": "ui.users.ops_delete_confirm"
+  },
+  "uiUsersOpsSelfDelete": "Kendi hesabınızı bu ekrandan silemezsiniz.",
+  "@uiUsersOpsSelfDelete": {
+    "description": "ui.users.ops_self_delete"
+  },
+  "uiUsersOpsAdminRequired": "Bu işlem için şirket yöneticisi yetkisi gerekir.",
+  "@uiUsersOpsAdminRequired": {
+    "description": "ui.users.ops_admin_required"
+  },
+  "uiUsersOpsDeleted": "Kullanıcı silinmiş kayıtlara taşındı.",
+  "@uiUsersOpsDeleted": {
+    "description": "ui.users.ops_deleted"
+  },
+  "uiUsersAccountEmail": "E-posta",
+  "@uiUsersAccountEmail": {
+    "description": "ui.users.account_email"
+  },
+  "uiUsersAccountEmailHint": "Yeni e-posta",
+  "@uiUsersAccountEmailHint": {
+    "description": "ui.users.account_email_hint"
+  },
+  "uiUsersAccountEmailInvalid": "Geçerli bir e-posta adresi gir",
+  "@uiUsersAccountEmailInvalid": {
+    "description": "ui.users.account_email_invalid"
+  },
+  "uiUsersAccountRoleHeading": "roller · birden çok seçilebilir",
+  "@uiUsersAccountRoleHeading": {
+    "description": "ui.users.account_role_heading"
+  },
+  "uiUsersAccountDepartmentHeading": "koordinatörlük",
+  "@uiUsersAccountDepartmentHeading": {
+    "description": "ui.users.account_department_heading"
+  },
+  "uiUsersAccountAdminDescription": "Tüm programları ve kullanıcıları yönetir",
+  "@uiUsersAccountAdminDescription": {
+    "description": "ui.users.account_admin_description"
+  },
+  "uiUsersAccountCoordinatorDescription": "Koordinatörlükte görevleri ve üyeleri yönetir",
+  "@uiUsersAccountCoordinatorDescription": {
+    "description": "ui.users.account_coordinator_description"
+  },
+  "uiUsersAccountMemberDescription": "Atandığı koordinatörlükte görev alır",
+  "@uiUsersAccountMemberDescription": {
+    "description": "ui.users.account_member_description"
+  },
+  "uiUsersAccountRoleScope": "Rol koordinatörlük bazında atanır. Değiştirilecek koordinatörlüğü seçin.",
+  "@uiUsersAccountRoleScope": {
+    "description": "ui.users.account_role_scope"
+  },
+  "uiUsersAccountGrantAdmin": "Bu kullanıcıya şirket yöneticisi yetkisi verilsin mi?",
+  "@uiUsersAccountGrantAdmin": {
+    "description": "ui.users.account_grant_admin"
+  },
+  "uiUsersAccountRevokeAdmin": "Bu kullanıcının şirket yöneticisi yetkisi kaldırılsın mı?",
+  "@uiUsersAccountRevokeAdmin": {
+    "description": "ui.users.account_revoke_admin"
+  },
+  "uiUsersAccountAdd": "Ekle",
+  "@uiUsersAccountAdd": {
+    "description": "ui.users.account_add"
+  },
+  "uiUsersAccountAddAsMember": "Üye olarak ekle",
+  "@uiUsersAccountAddAsMember": {
+    "description": "ui.users.account_add_as_member"
+  },
+  "uiUsersAccountUnsaved": "Kaydedilmedi",
+  "@uiUsersAccountUnsaved": {
+    "description": "ui.users.account_unsaved"
+  },
+  "uiUsersAccountCancel": "Vazgeç",
+  "@uiUsersAccountCancel": {
+    "description": "ui.users.account_cancel"
+  },
+  "uiUsersAccountSave": "Kaydet",
+  "@uiUsersAccountSave": {
+    "description": "ui.users.account_save"
+  },
+  "uiUsersDraftRoles": "roller",
+  "@uiUsersDraftRoles": {
+    "description": "ui.users.draft_roles"
+  },
+  "uiUsersDraftAddDepartment": "Koordinatörlük ekle",
+  "@uiUsersDraftAddDepartment": {
+    "description": "ui.users.draft_add_department"
+  },
+  "uiUsersDraftSelected": "seçili",
+  "@uiUsersDraftSelected": {
+    "description": "ui.users.draft_selected"
+  },
+  "uiUsersDraftInvalid": "Ad soyadı ve geçerli bir e-posta adresini kontrol edin.",
+  "@uiUsersDraftInvalid": {
+    "description": "ui.users.draft_invalid"
+  },
+  "uiUsersDraftAdminUnknown": "Yönetici yetkisi henüz doğrulanamadı.",
+  "@uiUsersDraftAdminUnknown": {
+    "description": "ui.users.draft_admin_unknown"
+  },
+  "uiUsersDraftRoleScope": "Admin şirket genelidir. Koordinatör ve Üye seçimi bu programdaki seçili koordinatörlüklere uygulanır.",
+  "@uiUsersDraftRoleScope": {
+    "description": "ui.users.draft_role_scope"
+  },
+  "uiUsersDraftSelfConflict": "Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.",
+  "@uiUsersDraftSelfConflict": {
+    "description": "ui.users.draft_self_conflict"
   }
 }

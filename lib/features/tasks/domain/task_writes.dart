@@ -351,6 +351,7 @@ abstract interface class TaskWriteRepository {
     TaskItem task,
     DateTime start,
     DateTime end, {
+    required String requestKey,
     String? reason,
   });
 

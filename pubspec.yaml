@@ -64,6 +64,7 @@ flutter:
   # Lisans metinleri (OFL-*.txt) bootstrap'te lisans sayfasına eklenir.
   assets:
     - assets/fonts/
+    - assets/branding/roketportal-mark.png
   # Yazı tipleri uygulamayla gelir; aile adı token'daki mantıksal ad (NizamioTypography.family*),
   # her dosya gerçek ağırlığıyla (OS/2 usWeightClass). Ağırlık kümesi tablet tasarımının Google
   # Fonts CSS'i (docs/design/tablet/12-Tablet.dc.html); test: nz_text_styles_test.

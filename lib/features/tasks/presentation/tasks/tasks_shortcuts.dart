@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
+import '../../application/task_list_filter.dart';
 import '../../application/tasks_list_controller.dart';
 import '../../domain/task_query.dart';
 import '../task_texts.dart';
@@ -26,6 +27,8 @@ Future<void> showTasksShortcuts(
   final state = container.read(provider);
   final ctl = container.read(provider.notifier);
   final r = container.read(tasksListResultOf(provider));
+  final truncated =
+      container.read(taskListCatalogProvider).value?.truncated ?? false;
   if (r == null) return Future.value();
   return NzFlyoutMenu.show(
     context,
@@ -36,7 +39,7 @@ Future<void> showTasksShortcuts(
         NzFlyoutItem(
           label: l.viewLabel(v),
           dot: viewDot(v, c),
-          count: '${r.counts[v] ?? 0}',
+          count: '${truncated ? '≥' : ''}${r.counts[v] ?? 0}',
           selected: v == state.view,
           onSelected: () => ctl.selectView(v),
         ),

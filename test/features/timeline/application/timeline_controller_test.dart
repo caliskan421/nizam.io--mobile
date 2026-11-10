@@ -10,6 +10,7 @@ import 'package:nizamio/features/timeline/application/gantt_provider.dart';
 import 'package:nizamio/features/timeline/application/timeline_controller.dart';
 import 'package:nizamio/features/timeline/domain/timeline.dart';
 
+import '../../../support/fake_backend.dart';
 import '../../coordinatorships/coord_backend.dart';
 import '../../pilot_support.dart';
 
@@ -37,6 +38,97 @@ Future<(ProviderContainer, TimelineController, TimelineView Function())> _open([
 Set<String> _codes(TimelineView v) => v.shown.map((t) => t.code).toSet();
 
 void main() {
+  test('tarih çakışması eski taslağı kapatır ve yeniden okur', () async {
+    final backend = CoordBackend()..admin = false;
+    final h = await pilotHarness(backend, signedIn: true);
+    h.read(scopeControllerProvider).selectProgram(coordProgram);
+    final c = h.container;
+    c.listen(timelineViewProvider(dAlt), (_, _) {});
+    await c.read(taskCatalogControllerProvider.future);
+    await c.read(ganttScheduleProvider.future);
+    final ctrl = c.read(timelineControllerProvider(dAlt).notifier);
+    ctrl.select('wi-alt-1');
+    ctrl.nudgeEnd(5);
+    h.backend.requests.clear();
+    h.backend.handler = (r) =>
+        r.method == 'POST' && r.path == '/v1/date-change-requests'
+        ? envelope(409, 'work.edit_conflict')
+        : backend.handle(r);
+    await expectLater(ctrl.requestDates(), throwsA(anything));
+    expect(h.backend.count('POST', '/v1/date-change-requests'), 1);
+    expect(h.backend.count('GET', '/v1/program/work-items'), 1);
+    expect(await ctrl.requestDates(), isA<TimelineRequestNoChange>());
+  });
+  test(
+    'tarih talebi kaydedildikten sonra katalog hatası başarıyı gizlemez',
+    () async {
+      final backend = CoordBackend()..admin = false;
+      final h = await pilotHarness(backend, signedIn: true);
+      h.read(scopeControllerProvider).selectProgram(coordProgram);
+      final c = h.container;
+      c.listen(timelineViewProvider(dAlt), (_, _) {});
+      await c.read(taskCatalogControllerProvider.future);
+      await c.read(ganttScheduleProvider.future);
+      final ctrl = c.read(timelineControllerProvider(dAlt).notifier);
+      ctrl.select('wi-alt-1');
+      ctrl.nudgeEnd(5);
+      var written = false;
+      h.backend.handler = (r) {
+        if (r.method == 'POST' && r.path == '/v1/date-change-requests') {
+          written = true;
+          return backend.handle(r);
+        }
+        if (written &&
+            r.method == 'GET' &&
+            r.path == '/v1/program/work-items') {
+          return envelope(500, 'platform.internal');
+        }
+        return backend.handle(r);
+      };
+      expect(await ctrl.requestDates(), isA<TimelineRequestSent>());
+      expect(h.backend.count('POST', '/v1/date-change-requests'), 1);
+      expect(h.backend.count('GET', '/v1/program/work-items'), greaterThan(1));
+    },
+  );
+  test(
+    'tarih talebi belirsizse aynı anahtar, gövde ve açılış sürümüyle yinelenir',
+    () async {
+      final backend = CoordBackend()..admin = false;
+      final h = await pilotHarness(backend, signedIn: true);
+      h.read(scopeControllerProvider).selectProgram(coordProgram);
+      final c = h.container;
+      c.listen(timelineViewProvider(dAlt), (_, _) {});
+      await c.read(taskCatalogControllerProvider.future);
+      await c.read(ganttScheduleProvider.future);
+      final ctrl = c.read(timelineControllerProvider(dAlt).notifier);
+      ctrl.select('wi-alt-1');
+      ctrl.nudgeEnd(5);
+      var posts = 0;
+      h.backend.handler = (r) {
+        if (r.method == 'POST' &&
+            r.path == '/v1/date-change-requests' &&
+            ++posts == 1) {
+          timeout(null);
+        }
+        return backend.handle(r);
+      };
+      await expectLater(ctrl.requestDates(), throwsA(anything));
+      expect(await ctrl.requestDates(), isA<TimelineRequestSent>());
+      final seen = h.backend.requests
+          .where(
+            (r) => r.method == 'POST' && r.path == '/v1/date-change-requests',
+          )
+          .toList();
+      expect(seen, hasLength(2));
+      expect(seen[0].body, seen[1].body);
+      expect(seen[0].header('Idempotency-Key'), isNotEmpty);
+      expect(
+        seen[0].header('Idempotency-Key'),
+        seen[1].header('Idempotency-Key'),
+      );
+      expect((seen[0].body! as Map)['expected_dates_revision'], isNotNull);
+    },
+  );
   test(
     'rota parametresi o koordinatörlüğü seçili açar; hafta ölçeği',
     () async {

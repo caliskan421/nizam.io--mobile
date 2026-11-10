@@ -16,7 +16,22 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DashboardReport {
 
-@JsonKey(name: 'program_id') String get programId;@JsonKey(name: 'program_name') String get programName;@JsonKey(name: 'total_coordinatorships') int get totalCoordinatorships;@JsonKey(name: 'total_tasks') int get totalTasks;@JsonKey(name: 'active_tasks') int get activeTasks;@JsonKey(name: 'completed_tasks') int get completedTasks;@JsonKey(name: 'overdue_tasks') int get overdueTasks;@JsonKey(name: 'pending_approvals') int get pendingApprovals;@JsonKey(name: 'pending_date_changes') int get pendingDateChanges;@JsonKey(name: 'task_status_distribution') Map<String, int> get taskStatusDistribution;@JsonKey(name: 'priority_distribution') Map<String, int> get priorityDistribution;@JsonKey(name: 'total_users') int get totalUsers;@JsonKey(name: 'total_admins') int get totalAdmins;@JsonKey(name: 'total_coordinators') int get totalCoordinators;@JsonKey(name: 'total_members') int get totalMembers;@JsonKey(name: 'deleted_records') int get deletedRecords;@JsonKey(name: 'coordinatorship_stats') List<CoordinatorshipStat> get coordinatorshipStats;@JsonKey(name: 'overdue_tasks_list') List<OverdueTask> get overdueTasksList;@JsonKey(name: 'generated_at') DateTime get generatedAt;
+@JsonKey(name: 'program_id') String get programId;@JsonKey(name: 'program_name') String get programName;/// Programa katılan canlı departman sayısı.
+@JsonKey(name: 'total_coordinatorships') int get totalCoordinatorships;/// Canlı katılan departmanlardaki silinmemiş görev sayısı.
+@JsonKey(name: 'total_tasks') int get totalTasks;/// `total_tasks − completed_tasks` (tamamlanmamış her durum).
+@JsonKey(name: 'active_tasks') int get activeTasks;/// Durumu `tamamlandi` olan görev sayısı.
+@JsonKey(name: 'completed_tasks') int get completedTasks;/// Tamamlanmamış ve `end_on` günü bugünden (kurulum saat dilimi) önce olan görev sayısı; `overdue_tasks_list` ile aynı kümedir.
+@JsonKey(name: 'overdue_tasks') int get overdueTasks;/// Durumu `onaya_sunuldu` olan görev sayısı.
+@JsonKey(name: 'pending_approvals') int get pendingApprovals;/// Canlı katılan departmanlardaki silinmemiş görevlerin bekleyen (`pending`) tarih talebi sayısı; diğer görev sayaçlarıyla aynı kapsam (silinmiş departmanda kalan canlı görevin talebi sayılmaz, `countProgramWorkItems` ise sayar).
+@JsonKey(name: 'pending_date_changes') int get pendingDateChanges;@JsonKey(name: 'task_status_distribution') Map<String, int> get taskStatusDistribution;@JsonKey(name: 'priority_distribution') Map<String, int> get priorityDistribution;/// Tekil hesap sayısı: canlı katılan departmanların bu programdaki ekibi + şirket geneli yöneticiler; silinmiş hesap sayılmaz.
+@JsonKey(name: 'total_users') int get totalUsers;/// Şirket geneli yönetici sayısı (programa bağlı değildir); silinmiş hesap sayılmaz.
+@JsonKey(name: 'total_admins') int get totalAdmins;/// Bu programda en az bir canlı departmanda koordinatör olan tekil hesap sayısı.
+@JsonKey(name: 'total_coordinators') int get totalCoordinators;/// Bu programda en az bir canlı departmanda `uye` olan tekil hesap sayısı. Rol sayaçları örtüşebilir: bir departmanda koordinatör, başka birinde üye olan hesap iki sayaçta da, ekipteki yönetici hem `total_admins`'ta hem rol sayacında sayılır; tekil toplam `total_users`'tır.
+@JsonKey(name: 'total_members') int get totalMembers;/// Toplam: programın silinmiş görevleri + programın silinmiş toplantıları + programa bağlı silinmiş departmanlar + ŞİRKET GENELİNDEKİ silinmiş hesaplar (hesaplar programa bağlı değildir).
+@JsonKey(name: 'deleted_records') int get deletedRecords;/// Canlı katılan her departman için bir satır; departmanın programdaki adına göre büyük/küçük harf duyarsız bayt sırasıyla (Türkçe alfabe sırası uygulanmaz). Kesilmez.
+@JsonKey(name: 'coordinatorship_stats') List<CoordinatorshipStat> get coordinatorshipStats;/// Geciken görevlerin tamamı (canlı katılan departmanlar), en yeni oluşturulan önce; atananlarda silinmiş hesap listelenmez. Kesilmez.
+@JsonKey(name: 'overdue_tasks_list') List<OverdueTask> get overdueTasksList;/// Değerlerin hesaplandığı an (UTC); önbellek yoktur.
+@JsonKey(name: 'generated_at') DateTime get generatedAt;
 /// Create a copy of DashboardReport
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -238,12 +253,19 @@ class _DashboardReport implements DashboardReport {
 
 @override@JsonKey(name: 'program_id') final  String programId;
 @override@JsonKey(name: 'program_name') final  String programName;
+/// Programa katılan canlı departman sayısı.
 @override@JsonKey(name: 'total_coordinatorships') final  int totalCoordinatorships;
+/// Canlı katılan departmanlardaki silinmemiş görev sayısı.
 @override@JsonKey(name: 'total_tasks') final  int totalTasks;
+/// `total_tasks − completed_tasks` (tamamlanmamış her durum).
 @override@JsonKey(name: 'active_tasks') final  int activeTasks;
+/// Durumu `tamamlandi` olan görev sayısı.
 @override@JsonKey(name: 'completed_tasks') final  int completedTasks;
+/// Tamamlanmamış ve `end_on` günü bugünden (kurulum saat dilimi) önce olan görev sayısı; `overdue_tasks_list` ile aynı kümedir.
 @override@JsonKey(name: 'overdue_tasks') final  int overdueTasks;
+/// Durumu `onaya_sunuldu` olan görev sayısı.
 @override@JsonKey(name: 'pending_approvals') final  int pendingApprovals;
+/// Canlı katılan departmanlardaki silinmemiş görevlerin bekleyen (`pending`) tarih talebi sayısı; diğer görev sayaçlarıyla aynı kapsam (silinmiş departmanda kalan canlı görevin talebi sayılmaz, `countProgramWorkItems` ise sayar).
 @override@JsonKey(name: 'pending_date_changes') final  int pendingDateChanges;
  final  Map<String, int> _taskStatusDistribution;
 @override@JsonKey(name: 'task_status_distribution') Map<String, int> get taskStatusDistribution {
@@ -259,25 +281,35 @@ class _DashboardReport implements DashboardReport {
   return EqualUnmodifiableMapView(_priorityDistribution);
 }
 
+/// Tekil hesap sayısı: canlı katılan departmanların bu programdaki ekibi + şirket geneli yöneticiler; silinmiş hesap sayılmaz.
 @override@JsonKey(name: 'total_users') final  int totalUsers;
+/// Şirket geneli yönetici sayısı (programa bağlı değildir); silinmiş hesap sayılmaz.
 @override@JsonKey(name: 'total_admins') final  int totalAdmins;
+/// Bu programda en az bir canlı departmanda koordinatör olan tekil hesap sayısı.
 @override@JsonKey(name: 'total_coordinators') final  int totalCoordinators;
+/// Bu programda en az bir canlı departmanda `uye` olan tekil hesap sayısı. Rol sayaçları örtüşebilir: bir departmanda koordinatör, başka birinde üye olan hesap iki sayaçta da, ekipteki yönetici hem `total_admins`'ta hem rol sayacında sayılır; tekil toplam `total_users`'tır.
 @override@JsonKey(name: 'total_members') final  int totalMembers;
+/// Toplam: programın silinmiş görevleri + programın silinmiş toplantıları + programa bağlı silinmiş departmanlar + ŞİRKET GENELİNDEKİ silinmiş hesaplar (hesaplar programa bağlı değildir).
 @override@JsonKey(name: 'deleted_records') final  int deletedRecords;
+/// Canlı katılan her departman için bir satır; departmanın programdaki adına göre büyük/küçük harf duyarsız bayt sırasıyla (Türkçe alfabe sırası uygulanmaz). Kesilmez.
  final  List<CoordinatorshipStat> _coordinatorshipStats;
+/// Canlı katılan her departman için bir satır; departmanın programdaki adına göre büyük/küçük harf duyarsız bayt sırasıyla (Türkçe alfabe sırası uygulanmaz). Kesilmez.
 @override@JsonKey(name: 'coordinatorship_stats') List<CoordinatorshipStat> get coordinatorshipStats {
   if (_coordinatorshipStats is EqualUnmodifiableListView) return _coordinatorshipStats;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_coordinatorshipStats);
 }
 
+/// Geciken görevlerin tamamı (canlı katılan departmanlar), en yeni oluşturulan önce; atananlarda silinmiş hesap listelenmez. Kesilmez.
  final  List<OverdueTask> _overdueTasksList;
+/// Geciken görevlerin tamamı (canlı katılan departmanlar), en yeni oluşturulan önce; atananlarda silinmiş hesap listelenmez. Kesilmez.
 @override@JsonKey(name: 'overdue_tasks_list') List<OverdueTask> get overdueTasksList {
   if (_overdueTasksList is EqualUnmodifiableListView) return _overdueTasksList;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_overdueTasksList);
 }
 
+/// Değerlerin hesaplandığı an (UTC); önbellek yoktur.
 @override@JsonKey(name: 'generated_at') final  DateTime generatedAt;
 
 /// Create a copy of DashboardReport

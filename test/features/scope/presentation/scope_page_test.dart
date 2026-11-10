@@ -20,6 +20,39 @@ final _l = AppLocalizationsTr();
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
+  testScreens('dönem kısa adı gösterilir ve seçim ek sayaç isteği yapmaz', (
+    tester,
+    screen,
+  ) async {
+    useScreen(tester, screen);
+    final backend = PilotBackend()
+      ..programs = [
+        {
+          'program_id': 'prog-1',
+          'name': 'Program Bir',
+          'short_name': 'PB',
+          'color': 'teal',
+        },
+        {
+          'program_id': 'prog-2',
+          'name': 'İkinci',
+          'short_name': null,
+          'color': null,
+        },
+      ];
+    final h = await real(tester, () => pilotHarness(backend, signedIn: true));
+    await pumpScreen(tester, h, const ScopePage());
+    await settle(tester);
+    expect(find.text('PB'), findsOneWidget);
+    expect(find.text('İ'), findsOneWidget);
+    expect(h.backend.count('GET', '/v1/programs'), 1);
+    expect(h.backend.count('GET', '/v1/program'), 0);
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.text('İkinci'));
+    await settle(tester);
+    expect(h.read(scopeStateProvider).programId, 'prog-2');
+  }, sizes: pilotSizes);
+
   testScreens('programlar listelenir; kapsam başlığı gönderilmez; taşma yok', (
     tester,
     screen,

@@ -12,6 +12,8 @@ _UpdateProgramRequest _$UpdateProgramRequestFromJson(
   name: json['name'] as String?,
   year: (json['year'] as num?)?.toInt(),
   description: json['description'] as String?,
+  shortName: programPatchStringFromJson(json['short_name'] as String?),
+  color: programPatchColorFromJson(json['color'] as String?),
 );
 
 Map<String, dynamic> _$UpdateProgramRequestToJson(
@@ -20,4 +22,7 @@ Map<String, dynamic> _$UpdateProgramRequestToJson(
   'name': ?instance.name,
   'year': ?instance.year,
   'description': ?instance.description,
+  if (instance.shortName != null)
+    'short_name': programPatchStringToJson(instance.shortName),
+  if (instance.color != null) 'color': programPatchColorToJson(instance.color),
 };

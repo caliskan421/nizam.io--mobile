@@ -67,6 +67,24 @@ String _err(String code) => '{"code":"$code","message":"x","request_id":"r"}';
 const _change = '{"membership_id":"m1","unassigned_tasks":2,"warning":true}';
 
 void main() {
+  test('programdaki tekil departman kapsam ve nitelikleriyle okunur', () async {
+    final (repo, a) = _repo(
+      '{"department_id":"d1","display_name":"Program adı","kind":"calisma_grubu","code":"SAH","description":"İşler"}',
+    );
+    expect(
+      await repo.readProgramDepartment('p1', 'd1'),
+      const Department(
+        id: 'd1',
+        name: 'Program adı',
+        kind: DepartmentKind.workingGroup,
+        code: 'SAH',
+        description: 'İşler',
+      ),
+    );
+    expect(a.seen!.method, 'GET');
+    expect(a.seen!.uri.path, '/v1/program/departments/d1');
+    expect(a.seen!.extra['nizamio.program'], 'p1');
+  });
   group('listDepartments', () {
     test('GET /v1/departments → Department; tür eşlemesi', () async {
       final (repo, a) = _repo(

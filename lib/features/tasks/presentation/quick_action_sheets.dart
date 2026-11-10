@@ -157,7 +157,7 @@ String _meetingCreated(AppLocalizations l, MeetingForm f) {
 /// koordinatörlüğün ekibine eklenir; e-posta gönderilmez. Bildirim yalnız sunucu yazmasından
 /// sonra çıkar. [coordinatorship] verilirse o koordinatörlük seçili, rol Üye açılır
 /// (koordinatörlük ayrıntısı "Üye ekle").
-Future<void> showInviteSheet(BuildContext context, {String? coordinatorship}) {
+Future<bool> showInviteSheet(BuildContext context, {String? coordinatorship}) {
   final container = ProviderScope.containerOf(context, listen: false);
   container
       .read(inviteFormControllerProvider.notifier)

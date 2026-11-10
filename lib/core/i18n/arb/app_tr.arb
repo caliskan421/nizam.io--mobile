@@ -6361,10 +6361,6 @@
   "@uiUserAccountFieldsNewPassword": {
     "description": "ui.user_account_fields.new_password"
   },
-  "uiUserAccountFieldsSignedInStatusHint": "Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.",
-  "@uiUserAccountFieldsSignedInStatusHint": {
-    "description": "ui.user_account_fields.signed_in_status_hint"
-  },
   "uiUsersProgramShortName": "Kısa ad (1–4 harf veya rakam)",
   "@uiUsersProgramShortName": {
     "description": "ui.users.program_short_name"
@@ -6540,10 +6536,6 @@
   "uiUsersHistoryUnavailable": "Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.",
   "@uiUsersHistoryUnavailable": {
     "description": "ui.users.history_unavailable"
-  },
-  "uiUsersAccountUnavailable": "E-posta, giriş kilidi ve son giriş bilgisi sunucu tarafından okunabilir olarak sunulmuyor. Hesap değişikliklerini aşağıdaki işlemlerden yapabilirsiniz.",
-  "@uiUsersAccountUnavailable": {
-    "description": "ui.users.account_unavailable"
   },
   "uiUsersMembershipUnknown": "Üyelik bilgisi bilinmiyor",
   "@uiUsersMembershipUnknown": {
@@ -6852,10 +6844,6 @@
   "uiUsersOpsActive": "Hesap aktif",
   "@uiUsersOpsActive": {
     "description": "ui.users.ops_active"
-  },
-  "uiUsersOpsStatusUnavailable": "Durum bilgisi ve açma/kapatma işlemi bu sunucuda sunulmuyor.",
-  "@uiUsersOpsStatusUnavailable": {
-    "description": "ui.users.ops_status_unavailable"
   },
   "uiUsersOpsResetLink": "Şifre sıfırlama bağlantısı gönder",
   "@uiUsersOpsResetLink": {

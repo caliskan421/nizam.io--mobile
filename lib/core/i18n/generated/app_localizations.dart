@@ -9634,12 +9634,6 @@ abstract class AppLocalizations {
   /// **'Yeni şifre'**
   String get uiUserAccountFieldsNewPassword;
 
-  /// ui.user_account_fields.signed_in_status_hint
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.'**
-  String get uiUserAccountFieldsSignedInStatusHint;
-
   /// ui.users.program_short_name
   ///
   /// In tr, this message translates to:
@@ -9903,12 +9897,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.'**
   String get uiUsersHistoryUnavailable;
-
-  /// ui.users.account_unavailable
-  ///
-  /// In tr, this message translates to:
-  /// **'E-posta, giriş kilidi ve son giriş bilgisi sunucu tarafından okunabilir olarak sunulmuyor. Hesap değişikliklerini aşağıdaki işlemlerden yapabilirsiniz.'**
-  String get uiUsersAccountUnavailable;
 
   /// ui.users.membership_unknown
   ///
@@ -10371,12 +10359,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Hesap aktif'**
   String get uiUsersOpsActive;
-
-  /// ui.users.ops_status_unavailable
-  ///
-  /// In tr, this message translates to:
-  /// **'Durum bilgisi ve açma/kapatma işlemi bu sunucuda sunulmuyor.'**
-  String get uiUsersOpsStatusUnavailable;
 
   /// ui.users.ops_reset_link
   ///

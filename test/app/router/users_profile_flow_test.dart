@@ -141,10 +141,19 @@ class _Users implements OrganizationAdminRepository {
   Future<KnownUser> readUser(String accountId) async {
     final first = await listUsers();
     final second = await listUsers(page: const PageRequest(cursor: 'page-2'));
-    return [
+    final user = [
       ...first.items,
       ...second.items,
     ].firstWhere((u) => u.accountId == accountId);
+    return KnownUser(
+      accountId: user.accountId,
+      fullName: user.fullName,
+      memberships: user.memberships,
+      teams: user.teams,
+      email: 'deniz@example.test',
+      accountStatus: AccountStatus.disabled,
+      loginLocked: true,
+    );
   }
 
   @override
@@ -353,10 +362,9 @@ void main() {
       await tester.ensureVisible(find.text('Hesap').last);
       await tester.tap(find.text('Hesap').last, warnIfMissed: true);
       await settle(tester);
-      expect(
-        find.textContaining('E-posta, giriş kilidi ve son giriş bilgisi'),
-        findsOneWidget,
-      );
+      expect(find.text('deniz@example.test'), findsWidgets);
+      await tester.ensureVisible(find.text('Hesabı aç'));
+      expect(find.text('Hesabı aç'), findsOneWidget);
       expect(tester.takeException(), isNull);
       if (const bool.fromEnvironment('NIZAMIO_TABLET_HOST_SHOTS')) {
         File('/tmp/nizam-users-${size.width.toInt()}.png')

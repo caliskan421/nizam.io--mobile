@@ -50,6 +50,21 @@ Her iki testte de görev görünümü için beklenen `UserTaskView.calendar`, ge
 
 Koşum sonrası `git rev-parse HEAD` aynı `774701f837faa27df3c32fde80df86b9a3613c45`; `git status --porcelain=v1` ve `git diff --stat` boş. Ham çıktılar `/tmp/nizamio-m015-luna/final-gen-check.txt` ve `/tmp/nizamio-m015-luna/final-targeted.txt`.
 
+## Son P1 ve profil render hedefli koşumu — HEAD 5845db2
+
+Başlangıç doğrulaması: `git rev-parse HEAD` → `5845db246a822de4b3f0440cf27db8eddcbd65ec`; `git status --porcelain=v1` boştu.
+
+Komut: `flutter test test/features/scope/application/home_dashboard_controller_test.dart test/app/router/users_profile_flow_test.dart --reporter expanded --timeout=2m --concurrency=2` → exit 1; 20 test geçti, 2 başarısız.
+
+Başarısız testlerin tam adları:
+
+- `test/app/router/users_profile_flow_test.dart: Kullanıcı listesi, profil ve hesap: Size(390.0, 844.0)`
+- `test/app/router/users_profile_flow_test.dart: Kullanıcı listesi, profil ve hesap: Size(1180.0, 820.0)`
+
+Her iki senaryoda beklenen `E-posta, giriş kilidi ve son giriş bilgisi` metni bulunamadı (test satırı 356; tam stack ham çıktıda). P1/dashboard testi ve router testlerinin kalanları geçti. Bu hedef koşumu yeşil değil; bu nedenle bütünleşik kapı kabulü sağlanmadı ve full verify başlatılmadı.
+
+Ham çıktı: `/tmp/nizamio-m015-luna/final-r2-fixes.txt`.
+
 ## M015-0/1 hedefli koşum
 
 Tarih: 2026-11-10. Kaynak ağacı dondurulduktan sonra çalıştırıldı; kaynak dosyaları değiştirilmedi.

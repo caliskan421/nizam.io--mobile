@@ -4997,10 +4997,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiUserAccountFieldsNewPassword => 'Yeni şifre';
 
   @override
-  String get uiUserAccountFieldsSignedInStatusHint =>
-      'Bu hesapla oturum açık. Açma/kapatma işlemi sunulmuyor.';
-
-  @override
   String get uiUsersProgramShortName => 'Kısa ad (1–4 harf veya rakam)';
 
   @override
@@ -5136,10 +5132,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiUsersHistoryUnavailable =>
       'Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.';
-
-  @override
-  String get uiUsersAccountUnavailable =>
-      'E-posta, giriş kilidi ve son giriş bilgisi sunucu tarafından okunabilir olarak sunulmuyor. Hesap değişikliklerini aşağıdaki işlemlerden yapabilirsiniz.';
 
   @override
   String get uiUsersMembershipUnknown => 'Üyelik bilgisi bilinmiyor';
@@ -5381,10 +5373,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiUsersOpsActive => 'Hesap aktif';
-
-  @override
-  String get uiUsersOpsStatusUnavailable =>
-      'Durum bilgisi ve açma/kapatma işlemi bu sunucuda sunulmuyor.';
 
   @override
   String get uiUsersOpsResetLink => 'Şifre sıfırlama bağlantısı gönder';

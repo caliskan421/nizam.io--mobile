@@ -94,9 +94,31 @@ class GoRouterAppNav implements NzAppNav {
   void openProfile() => _router.push(const ProfileRoute().location);
 
   @override
+  void openUsers() => _router.go(const UsersRoute().location);
+  @override
+  void openUser(String accountId) =>
+      _record(PaneEntry(PaneKind.user, accountId));
+  @override
+  void openTables() => _router.go(const TablesRoute().location);
+  @override
+  void openTable(String id) => _record(PaneEntry(PaneKind.table, id));
+
+  @override
   void openMenu(BuildContext context) {
-    final dashboard = _ref.read(homeDashboardControllerProvider).value;
-    final program = _ref.read(currentProgramControllerProvider).value;
+    final dashboard = _ref
+        .read(homeDashboardControllerProvider.notifier)
+        .visible
+        .value;
+    final unread = _ref.read(homeUnreadProvider);
+    final unreadCount = unread.isLoading || unread.hasError
+        ? null
+        : unread.value;
+    final selection = _ref.read(scopeStateProvider);
+    final programState = _ref.read(currentProgramControllerProvider);
+    final currentProgram = programState.isLoading ? null : programState.value;
+    final program = currentProgram?.id == selection.programId
+        ? currentProgram
+        : null;
     final brand = displayBrand(_ref.read(flavorProvider));
     final l = context.l10n;
     final location = _location;
@@ -106,6 +128,8 @@ class GoRouterAppNav implements NzAppNav {
       ShellModule.messages => HomeModule.messages,
       ShellModule.calendar => HomeModule.calendar,
       ShellModule.meetings => HomeModule.meetings,
+      ShellModule.users => HomeModule.users,
+      ShellModule.tables => HomeModule.sheets,
       null =>
         // Zaman çizelgesi görevler modülünün parçasıdır (prototip `ON.tasks`).
         location.startsWith(const TasksRoute().location) ||
@@ -121,11 +145,25 @@ class GoRouterAppNav implements NzAppNav {
       greetingName: dashboard?.greetingName ?? '',
       greetingRole: dashboard?.greetingRole,
       greetingEmail: dashboard?.greetingEmail,
-      programName: program?.name ?? dashboard?.demoProgramName,
-      programYear: program?.year ?? dashboard?.demoProgramYear,
+      programName:
+          program?.name ??
+          (selection.hasProgram ? null : dashboard?.demoProgramName),
+      programShortName: program?.shortName,
+      programColor: program?.color,
+      programYear:
+          program?.year ??
+          (selection.hasProgram ? null : dashboard?.demoProgramYear),
       version: brand.version,
       productName: brand.name,
-      counts: dashboard?.counts,
+      counts: dashboard == null
+          ? null
+          : ModuleCounts(
+              lateTasks: dashboard.counts.lateTasks,
+              tasksAwaitingApproval: dashboard.counts.tasksAwaitingApproval,
+              unreadMessages: dashboard.greetingRole == TeamRole.admin
+                  ? unreadCount
+                  : dashboard.counts.unreadMessages,
+            ),
       onProfile: openProfile,
       onChangeScope: () =>
           _ref.read(scopeSelectionControllerProvider.notifier).clear(),
@@ -149,7 +187,9 @@ class GoRouterAppNav implements NzAppNav {
           case HomeModule.season:
             _router.push(const ReportsRoute().location);
           case HomeModule.users:
-            _router.push(const AdministrationRoute().location);
+            openUsers();
+          case HomeModule.sheets:
+            openTables();
           case HomeModule.deleted:
             _router.push(const DeletedTasksRoute().location);
           case HomeModule.assistant:

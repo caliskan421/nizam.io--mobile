@@ -185,6 +185,17 @@ final class CoordinatorshipSummary {
 /// Bekleyen işin türü.
 enum PendingKind { dateChange, approval }
 
+final class PendingOverview {
+  const PendingOverview({
+    required this.items,
+    required this.truncated,
+    this.inProgressOnTime,
+  });
+  final List<PendingItem> items;
+  final bool truncated;
+  final int? inProgressOnTime;
+}
+
 /// Kişiyi bekleyen tek iş.
 @immutable
 final class PendingItem {
@@ -225,7 +236,7 @@ final class ModuleCounts {
 
   final int lateTasks;
   final int tasksAwaitingApproval;
-  final int unreadMessages;
+  final int? unreadMessages;
 }
 
 /// Yönetici olmayan hesabın özetinde görev listesinden sayılamayan parçalar

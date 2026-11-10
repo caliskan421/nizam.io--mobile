@@ -16,8 +16,13 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$KnownUser {
 
-@JsonKey(name: 'account_id') String get accountId;@JsonKey(name: 'full_name') String get fullName;/// Ekip satırı etiketleri, `program:departman:rol` biçiminde.
- List<String>? get memberships;
+@JsonKey(name: 'account_id') String get accountId;@JsonKey(name: 'full_name') String get fullName;/// Hesabın e-postası. Yalnız şirket yöneticisinin kullanıcı yönetim uçlarında döner; üye listesi, havuz ve diğer okuma yüzleri e-posta taşımaz.
+ String get email;/// Hesap şirket yöneticisi mi (ekip satırlarından bağımsız).
+@JsonKey(name: 'company_admin') bool get companyAdmin;/// Hesap durumu; `disabled` girişi kapatılmış hesaptır (silinmiş hesap listede yoktur).
+@JsonKey(name: 'account_status') KnownUserAccountStatus get accountStatus;/// Hesapta şu an süren başarısız giriş kilidi var mı (IDENTITY-K19). Süresi geçmiş kilit ve kilide varmamış sayaç `false`tur; yöneticinin kilit açma ucu ikisini de temizler. Hesabı kapatma (`account_status`) değildir.
+@JsonKey(name: 'login_locked') bool get loginLocked;/// Ekip satırı etiketleri, `program:departman:rol` biçiminde.
+ List<String>? get memberships;/// Aynı ekip satırlarının yapısal hâli (bütün programlar; canlı departmanlar). Ekipsiz hesapta boş dizi.
+ List<UserTeam> get teams;
 /// Create a copy of KnownUser
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,20 +36,20 @@ $KnownUserCopyWith<KnownUser> get copyWith => _$KnownUserCopyWithImpl<KnownUser>
 @override
 bool operator ==(Object other) {
   final _this = this as KnownUser;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is KnownUser&&(identical(other.accountId, _this.accountId) || other.accountId == _this.accountId)&&(identical(other.fullName, _this.fullName) || other.fullName == _this.fullName)&&const DeepCollectionEquality().equals(other.memberships, _this.memberships));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KnownUser&&(identical(other.accountId, _this.accountId) || other.accountId == _this.accountId)&&(identical(other.fullName, _this.fullName) || other.fullName == _this.fullName)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.companyAdmin, _this.companyAdmin) || other.companyAdmin == _this.companyAdmin)&&(identical(other.accountStatus, _this.accountStatus) || other.accountStatus == _this.accountStatus)&&(identical(other.loginLocked, _this.loginLocked) || other.loginLocked == _this.loginLocked)&&const DeepCollectionEquality().equals(other.memberships, _this.memberships)&&const DeepCollectionEquality().equals(other.teams, _this.teams));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as KnownUser;
-  return Object.hash(runtimeType,_this.accountId,_this.fullName,const DeepCollectionEquality().hash(_this.memberships));
+  return Object.hash(runtimeType,_this.accountId,_this.fullName,_this.email,_this.companyAdmin,_this.accountStatus,_this.loginLocked,const DeepCollectionEquality().hash(_this.memberships),const DeepCollectionEquality().hash(_this.teams));
 }
 
 @override
 String toString() {
   final _this = this as KnownUser;
-  return 'KnownUser(accountId: ${_this.accountId}, fullName: ${_this.fullName}, memberships: ${_this.memberships})';
+  return 'KnownUser(accountId: ${_this.accountId}, fullName: ${_this.fullName}, email: ${_this.email}, companyAdmin: ${_this.companyAdmin}, accountStatus: ${_this.accountStatus}, loginLocked: ${_this.loginLocked}, memberships: ${_this.memberships}, teams: ${_this.teams})';
 }
 
 
@@ -55,7 +60,7 @@ abstract mixin class $KnownUserCopyWith<$Res>  {
   factory $KnownUserCopyWith(KnownUser value, $Res Function(KnownUser) _then) = _$KnownUserCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'account_id') String accountId,@JsonKey(name: 'full_name') String fullName, List<String>? memberships
+@JsonKey(name: 'account_id') String accountId,@JsonKey(name: 'full_name') String fullName, String email,@JsonKey(name: 'company_admin') bool companyAdmin,@JsonKey(name: 'account_status') KnownUserAccountStatus accountStatus,@JsonKey(name: 'login_locked') bool loginLocked, List<String>? memberships, List<UserTeam> teams
 });
 
 
@@ -72,12 +77,17 @@ class _$KnownUserCopyWithImpl<$Res>
 
 /// Create a copy of KnownUser
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? accountId = null,Object? fullName = null,Object? memberships = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? accountId = null,Object? fullName = null,Object? email = null,Object? companyAdmin = null,Object? accountStatus = null,Object? loginLocked = null,Object? memberships = freezed,Object? teams = null,}) {
   return _then(KnownUser(
 accountId: null == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
 as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
-as String,memberships: freezed == memberships ? _self.memberships : memberships // ignore: cast_nullable_to_non_nullable
-as List<String>?,
+as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,companyAdmin: null == companyAdmin ? _self.companyAdmin : companyAdmin // ignore: cast_nullable_to_non_nullable
+as bool,accountStatus: null == accountStatus ? _self.accountStatus : accountStatus // ignore: cast_nullable_to_non_nullable
+as KnownUserAccountStatus,loginLocked: null == loginLocked ? _self.loginLocked : loginLocked // ignore: cast_nullable_to_non_nullable
+as bool,memberships: freezed == memberships ? _self.memberships : memberships // ignore: cast_nullable_to_non_nullable
+as List<String>?,teams: null == teams ? _self.teams : teams // ignore: cast_nullable_to_non_nullable
+as List<UserTeam>,
   ));
 }
 
@@ -162,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId, @JsonKey(name: 'full_name')  String fullName,  List<String>? memberships)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId, @JsonKey(name: 'full_name')  String fullName,  String email, @JsonKey(name: 'company_admin')  bool companyAdmin, @JsonKey(name: 'account_status')  KnownUserAccountStatus accountStatus, @JsonKey(name: 'login_locked')  bool loginLocked,  List<String>? memberships,  List<UserTeam> teams)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _KnownUser() when $default != null:
-return $default(_that.accountId,_that.fullName,_that.memberships);case _:
+return $default(_that.accountId,_that.fullName,_that.email,_that.companyAdmin,_that.accountStatus,_that.loginLocked,_that.memberships,_that.teams);case _:
   return orElse();
 
 }
@@ -183,10 +193,10 @@ return $default(_that.accountId,_that.fullName,_that.memberships);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId, @JsonKey(name: 'full_name')  String fullName,  List<String>? memberships)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'account_id')  String accountId, @JsonKey(name: 'full_name')  String fullName,  String email, @JsonKey(name: 'company_admin')  bool companyAdmin, @JsonKey(name: 'account_status')  KnownUserAccountStatus accountStatus, @JsonKey(name: 'login_locked')  bool loginLocked,  List<String>? memberships,  List<UserTeam> teams)  $default,) {final _that = this;
 switch (_that) {
 case _KnownUser():
-return $default(_that.accountId,_that.fullName,_that.memberships);case _:
+return $default(_that.accountId,_that.fullName,_that.email,_that.companyAdmin,_that.accountStatus,_that.loginLocked,_that.memberships,_that.teams);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +213,10 @@ return $default(_that.accountId,_that.fullName,_that.memberships);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'account_id')  String accountId, @JsonKey(name: 'full_name')  String fullName,  List<String>? memberships)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'account_id')  String accountId, @JsonKey(name: 'full_name')  String fullName,  String email, @JsonKey(name: 'company_admin')  bool companyAdmin, @JsonKey(name: 'account_status')  KnownUserAccountStatus accountStatus, @JsonKey(name: 'login_locked')  bool loginLocked,  List<String>? memberships,  List<UserTeam> teams)?  $default,) {final _that = this;
 switch (_that) {
 case _KnownUser() when $default != null:
-return $default(_that.accountId,_that.fullName,_that.memberships);case _:
+return $default(_that.accountId,_that.fullName,_that.email,_that.companyAdmin,_that.accountStatus,_that.loginLocked,_that.memberships,_that.teams);case _:
   return null;
 
 }
@@ -218,11 +228,19 @@ return $default(_that.accountId,_that.fullName,_that.memberships);case _:
 @JsonSerializable()
 
 class _KnownUser implements KnownUser {
-  const _KnownUser({@JsonKey(name: 'account_id') required this.accountId, @JsonKey(name: 'full_name') required this.fullName, required  List<String>? memberships}): _memberships = memberships;
+  const _KnownUser({@JsonKey(name: 'account_id') required this.accountId, @JsonKey(name: 'full_name') required this.fullName, required this.email, @JsonKey(name: 'company_admin') required this.companyAdmin, @JsonKey(name: 'account_status') required this.accountStatus, @JsonKey(name: 'login_locked') required this.loginLocked, required  List<String>? memberships, required  List<UserTeam> teams}): _memberships = memberships,_teams = teams;
   factory _KnownUser.fromJson(Map<String, dynamic> json) => _$KnownUserFromJson(json);
 
 @override@JsonKey(name: 'account_id') final  String accountId;
 @override@JsonKey(name: 'full_name') final  String fullName;
+/// Hesabın e-postası. Yalnız şirket yöneticisinin kullanıcı yönetim uçlarında döner; üye listesi, havuz ve diğer okuma yüzleri e-posta taşımaz.
+@override final  String email;
+/// Hesap şirket yöneticisi mi (ekip satırlarından bağımsız).
+@override@JsonKey(name: 'company_admin') final  bool companyAdmin;
+/// Hesap durumu; `disabled` girişi kapatılmış hesaptır (silinmiş hesap listede yoktur).
+@override@JsonKey(name: 'account_status') final  KnownUserAccountStatus accountStatus;
+/// Hesapta şu an süren başarısız giriş kilidi var mı (IDENTITY-K19). Süresi geçmiş kilit ve kilide varmamış sayaç `false`tur; yöneticinin kilit açma ucu ikisini de temizler. Hesabı kapatma (`account_status`) değildir.
+@override@JsonKey(name: 'login_locked') final  bool loginLocked;
 /// Ekip satırı etiketleri, `program:departman:rol` biçiminde.
  final  List<String>? _memberships;
 /// Ekip satırı etiketleri, `program:departman:rol` biçiminde.
@@ -232,6 +250,15 @@ class _KnownUser implements KnownUser {
   if (_memberships is EqualUnmodifiableListView) return _memberships;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(value);
+}
+
+/// Aynı ekip satırlarının yapısal hâli (bütün programlar; canlı departmanlar). Ekipsiz hesapta boş dizi.
+ final  List<UserTeam> _teams;
+/// Aynı ekip satırlarının yapısal hâli (bütün programlar; canlı departmanlar). Ekipsiz hesapta boş dizi.
+@override List<UserTeam> get teams {
+  if (_teams is EqualUnmodifiableListView) return _teams;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_teams);
 }
 
 
@@ -248,18 +275,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _KnownUser&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&const DeepCollectionEquality().equals(other.memberships, _memberships));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _KnownUser&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.email, email) || other.email == email)&&(identical(other.companyAdmin, companyAdmin) || other.companyAdmin == companyAdmin)&&(identical(other.accountStatus, accountStatus) || other.accountStatus == accountStatus)&&(identical(other.loginLocked, loginLocked) || other.loginLocked == loginLocked)&&const DeepCollectionEquality().equals(other.memberships, _memberships)&&const DeepCollectionEquality().equals(other.teams, _teams));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,accountId,fullName,const DeepCollectionEquality().hash(_memberships));
+    return Object.hash(runtimeType,accountId,fullName,email,companyAdmin,accountStatus,loginLocked,const DeepCollectionEquality().hash(_memberships),const DeepCollectionEquality().hash(_teams));
 }
 
 @override
 String toString() {
-    return 'KnownUser(accountId: $accountId, fullName: $fullName, memberships: $memberships)';
+    return 'KnownUser(accountId: $accountId, fullName: $fullName, email: $email, companyAdmin: $companyAdmin, accountStatus: $accountStatus, loginLocked: $loginLocked, memberships: $memberships, teams: $teams)';
 }
 
 
@@ -270,7 +297,7 @@ abstract mixin class _$KnownUserCopyWith<$Res> implements $KnownUserCopyWith<$Re
   factory _$KnownUserCopyWith(_KnownUser value, $Res Function(_KnownUser) _then) = __$KnownUserCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'account_id') String accountId,@JsonKey(name: 'full_name') String fullName, List<String>? memberships
+@JsonKey(name: 'account_id') String accountId,@JsonKey(name: 'full_name') String fullName, String email,@JsonKey(name: 'company_admin') bool companyAdmin,@JsonKey(name: 'account_status') KnownUserAccountStatus accountStatus,@JsonKey(name: 'login_locked') bool loginLocked, List<String>? memberships, List<UserTeam> teams
 });
 
 
@@ -287,12 +314,17 @@ class __$KnownUserCopyWithImpl<$Res>
 
 /// Create a copy of KnownUser
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? accountId = null,Object? fullName = null,Object? memberships = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? accountId = null,Object? fullName = null,Object? email = null,Object? companyAdmin = null,Object? accountStatus = null,Object? loginLocked = null,Object? memberships = freezed,Object? teams = null,}) {
   return _then(_KnownUser(
 accountId: null == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
 as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
-as String,memberships: freezed == memberships ? _self._memberships : memberships // ignore: cast_nullable_to_non_nullable
-as List<String>?,
+as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,companyAdmin: null == companyAdmin ? _self.companyAdmin : companyAdmin // ignore: cast_nullable_to_non_nullable
+as bool,accountStatus: null == accountStatus ? _self.accountStatus : accountStatus // ignore: cast_nullable_to_non_nullable
+as KnownUserAccountStatus,loginLocked: null == loginLocked ? _self.loginLocked : loginLocked // ignore: cast_nullable_to_non_nullable
+as bool,memberships: freezed == memberships ? _self._memberships : memberships // ignore: cast_nullable_to_non_nullable
+as List<String>?,teams: null == teams ? _self._teams : teams // ignore: cast_nullable_to_non_nullable
+as List<UserTeam>,
   ));
 }
 

@@ -24,6 +24,7 @@ final ganttScheduleProvider = FutureProvider.autoDispose((ref) async {
   }
   final tasks = <TaskItem>[];
   final links = <TaskDependency>[];
+  var truncated = false;
   for (final seat in access.seatsIn(program)) {
     if (!ref.mounted) {
       throw StateError('disposed');
@@ -42,8 +43,9 @@ final ganttScheduleProvider = FutureProvider.autoDispose((ref) async {
         : await repository.member();
     tasks.addAll(schedule.tasks);
     links.addAll(schedule.links);
+    truncated = truncated || schedule.truncated;
   }
-  return GanttSchedule(tasks: tasks, links: links);
+  return GanttSchedule(tasks: tasks, links: links, truncated: truncated);
 });
 
 /// Gantt okuması tam görevlerin yerine geçmez: düzenleme sürümleri katalogda kalır.
@@ -61,6 +63,6 @@ final timelineCatalogProvider = Provider.autoDispose<AsyncValue<TaskCatalog>>((
           task.copyWith(start: date.start, due: date.due)
         else
           date,
-    ]);
+    ], truncated: c.truncated || gantt.truncated);
   });
 });

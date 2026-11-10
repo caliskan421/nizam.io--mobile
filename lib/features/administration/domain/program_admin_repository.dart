@@ -1,5 +1,5 @@
 import '../../../core/domain/page_slice.dart';
-import '../../scope/scope.dart' show Program;
+import '../../scope/scope.dart' show Program, ProgramColor, ProgramField;
 import 'program_admin.dart';
 
 /// Program yönetimi: oluşturma/güncelleme/silme, dönem sıfırlama ve programlar arası görev
@@ -11,6 +11,8 @@ abstract interface class ProgramAdminRepository {
     required String name,
     int? year,
     String? description,
+    String? shortName,
+    ProgramColor? color,
   });
 
   /// `PATCH /v1/programs/{id}`: `null` alan değişmez.
@@ -19,6 +21,8 @@ abstract interface class ProgramAdminRepository {
     String? name,
     int? year,
     String? description,
+    ProgramField<String>? shortName,
+    ProgramField<ProgramColor>? color,
   });
 
   /// `DELETE /v1/programs/{id}`: [password] yeniden doğrulanır.

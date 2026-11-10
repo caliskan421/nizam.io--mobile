@@ -16,7 +16,14 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Lateness {
 
-@JsonKey(name: 'is_overdue') bool get isOverdue;@JsonKey(name: 'days_overdue') int get daysOverdue;@JsonKey(name: 'is_completed_late') bool get isCompletedLate;@JsonKey(name: 'days_late') int get daysLate;@JsonKey(name: 'is_completed_early') bool get isCompletedEarly;@JsonKey(name: 'days_early') int get daysEarly;
+/// Açık görevin gecikmesi (WORK-K37): durum `tamamlandi` değilken bugün `end_on`'dan.
+/// sonraysa `true`. Bitiş günü boyunca gecikmiş değildir; gecikme ertesi günden.
+/// başlar. Gün sınırı kurulumun saat dilimidir (`GET /v1/instance/profile`.
+/// `timezone`), istemcinin yerel saati değil. Tamamlanmış görevde her zaman `false`.
+/// (geç tamamlama `is_completed_late`/`days_late` ile taşınır).
+///
+@JsonKey(name: 'is_overdue') bool get isOverdue;/// Açık görevde `bugün − end_on` gün farkı (gecikmiyorsa 0); tamamlanmış görevde her zaman 0. Gün sınırı kurulumun saat dilimidir.
+@JsonKey(name: 'days_overdue') int get daysOverdue;@JsonKey(name: 'is_completed_late') bool get isCompletedLate;@JsonKey(name: 'days_late') int get daysLate;@JsonKey(name: 'is_completed_early') bool get isCompletedEarly;@JsonKey(name: 'days_early') int get daysEarly;
 /// Create a copy of Lateness
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -223,7 +230,14 @@ class _Lateness implements Lateness {
   const _Lateness({@JsonKey(name: 'is_overdue') required this.isOverdue, @JsonKey(name: 'days_overdue') required this.daysOverdue, @JsonKey(name: 'is_completed_late') required this.isCompletedLate, @JsonKey(name: 'days_late') required this.daysLate, @JsonKey(name: 'is_completed_early') required this.isCompletedEarly, @JsonKey(name: 'days_early') required this.daysEarly});
   factory _Lateness.fromJson(Map<String, dynamic> json) => _$LatenessFromJson(json);
 
+/// Açık görevin gecikmesi (WORK-K37): durum `tamamlandi` değilken bugün `end_on`'dan.
+/// sonraysa `true`. Bitiş günü boyunca gecikmiş değildir; gecikme ertesi günden.
+/// başlar. Gün sınırı kurulumun saat dilimidir (`GET /v1/instance/profile`.
+/// `timezone`), istemcinin yerel saati değil. Tamamlanmış görevde her zaman `false`.
+/// (geç tamamlama `is_completed_late`/`days_late` ile taşınır).
+///
 @override@JsonKey(name: 'is_overdue') final  bool isOverdue;
+/// Açık görevde `bugün − end_on` gün farkı (gecikmiyorsa 0); tamamlanmış görevde her zaman 0. Gün sınırı kurulumun saat dilimidir.
 @override@JsonKey(name: 'days_overdue') final  int daysOverdue;
 @override@JsonKey(name: 'is_completed_late') final  bool isCompletedLate;
 @override@JsonKey(name: 'days_late') final  int daysLate;

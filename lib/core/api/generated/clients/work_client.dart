@@ -21,6 +21,7 @@ import '../models/extend_request.dart';
 import '../models/extend_result.dart';
 import '../models/gantt.dart';
 import '../models/my_task_list.dart';
+import '../models/program_work_item_counts.dart';
 import '../models/removed_count.dart';
 import '../models/review_request.dart';
 import '../models/review_result.dart';
@@ -54,6 +55,14 @@ abstract class WorkClient {
         'openapi': <String, dynamic>{
           'tags': <String>["work"],
           'operationId': "listProgramWorkItems",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> countProgramWorkItemsOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["work"],
+          'operationId': "countProgramWorkItems",
           'externalDocsUrl': null,
         },
       };
@@ -365,6 +374,7 @@ abstract class WorkClient {
   /// Görev listesinin program bağlamındaki ucudur (WORK-K81). Satır biçimi.
   /// `listWorkItems` ile aynıdır (`WorkItemList`: tarihler, adlı atananlar, gecikme.
   /// etiketleri, `subtask_counts`, `pending_date_request`); toplam ya da sayaç eklenmez.
+  /// (sayaçlar aynı süzgeçlerle `countProgramWorkItems` ucundadır).
   /// Bekleyen tarih talebi satır başına yetkiyle dolar (yönetici her satırda,.
   /// koordinatör kendi departmanının satırında; üye satırında `null`; kural tekil.
   /// görev uçlarıyla aynıdır) ve listeyle aynı sorguda okunur; departman başına ek.
@@ -383,6 +393,14 @@ abstract class WorkClient {
   /// boşluktan oluşan `department_id` süzgeç verilmemiş sayılır (`limit` ve `cursor`.
   /// boş değerleriyle aynı gelenek).
   ///
+  /// `assignee_account_id` (tekrarlanabilir) verilirse görev verilen hesaplardan en az.
+  /// birine atanmışsa kalır (VEYA); süzgeç görünürlükle ve `department_id` ile.
+  /// **kesişir**, yetkiyi genişletmez (üye başkasının kimliğiyle süzerse yalnız zaten.
+  /// görebildiği görevler döner). En çok 50 değer; tekrar eden değer tek sayılır, boş.
+  /// değer yok sayılır. 50'den çok değer ya da biçimsiz kimlik `422 work.input_invalid`.
+  /// (`fields[].field` = `assignee_account_id`). Sonraki sayfa isteği aynı süzgeçleri.
+  /// tekrar gönderir.
+  ///
   /// Hiçbir programda ekip satırı olmayan ve yönetici olmayan hesap `403.
   /// organization.membership_required`; bu programda ekip satırı olmayan ve yönetici.
   /// olmayan hesap, var olmayan programla aynı `404 work.program_scope_invalid` alır.
@@ -392,16 +410,60 @@ abstract class WorkClient {
   ///
   /// [departmentId] - İsteğe bağlı departman süzgeci; görünürlükle kesişir. Boş ya da yalnız boşluk değer süzgeç yok sayılır.
   ///
+  /// [assigneeAccountId] - İsteğe bağlı, tekrarlanabilir atanan süzgeci (WORK-K81): görev verilen hesaplardan en.
+  /// az birine atanmışsa kalır. Görünürlükle ve `department_id` ile kesişir, yetkiyi.
+  /// genişletmez. En çok 50 değer; tekrar eden değer tek sayılır, boş değer yok sayılır;.
+  /// kimlik harf, rakam, `-` ve `_` dışında karakter taşıyamaz ve en çok 64 bayttır.
+  ///
+  ///
   /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration ve messaging 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` / `messaging.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
   ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/program/work-items')
   Future<WorkItemList> listProgramWorkItems({
     @Query('department_id') String? departmentId,
+    @Query('assignee_account_id') List<String>? assigneeAccountId,
     @Query('limit') int? limit,
     @Query('cursor') String? cursor,
     @Extras()
     Map<String, dynamic>? extras = WorkClient.listProgramWorkItemsOpenapiExtras,
+  });
+
+  /// Seçili programın görünür görevlerinin sayaçları (listeyle aynı görünürlük ve süzgeçler).
+  ///
+  /// Program görev listesinin (`listProgramWorkItems`) sayaç ucudur (WORK-K87). Görünürlük,.
+  /// `department_id` ve `assignee_account_id` süzgeçleri, redler (403/404/422) ve.
+  /// sıraları listeyle **aynıdır**; aynı süzgeçlerle `total`, listenin sayfalanarak.
+  /// okunan satır sayısına eşittir (iki ayrı istek aynı anı görmeyebilir). Liste.
+  /// cevabına sayaç eklenmez; sayaç bu uçtan alınır. `limit` ve `cursor` yok sayılır.
+  ///
+  /// - `by_status`: beş durumun her biri (sıfır dahil); toplamı `total`'dir.
+  /// - `overdue`: durumu `tamamlandi` olmayan ve `end_on` günü bugünden önce olan görev.
+  ///   sayısı. Bugün kurulumun saat dilimindeki takvim günüdür; bitiş günü bugün olan.
+  ///   görev gecikmiş değildir, tamamlanmış görev (geç tamamlansa da) sayılmaz. Satırdaki.
+  ///   `is_overdue` ile aynı kuraldır.
+  /// - `pending_date_requests`: bekleyen (`pending`) tarih talebi olan görünür görev.
+  ///   sayısı; satırdaki `pending_date_request` kuralıyla (WORK-K82): şirket yöneticisine.
+  ///   her görevde, koordinatöre yalnız **bu programda** koordinatörü olduğu departmanın.
+  ///   görevinde sayılır, üyeye 0.
+  ///
+  /// Silinmiş görev sayılmaz. Şirket yöneticisinin süzgeçsiz sayacı, listede olduğu gibi.
+  /// silinmiş departmandaki canlı görevleri de kapsar; `reportDashboard` sayaçları ise.
+  /// yalnız canlı katılan departmanları sayar (fark için `reportDashboard` açıklaması).
+  ///
+  /// [departmentId] - İsteğe bağlı departman süzgeci; listeyle aynı kural.
+  ///
+  /// [assigneeAccountId] - İsteğe bağlı, tekrarlanabilir atanan süzgeci (WORK-K81): görev verilen hesaplardan en.
+  /// az birine atanmışsa kalır. Görünürlükle ve `department_id` ile kesişir, yetkiyi.
+  /// genişletmez. En çok 50 değer; tekrar eden değer tek sayılır, boş değer yok sayılır;.
+  /// kimlik harf, rakam, `-` ve `_` dışında karakter taşıyamaz ve en çok 64 bayttır.
+  @GET('/v1/program/work-items/counts')
+  Future<ProgramWorkItemCounts> countProgramWorkItems({
+    @Query('department_id') String? departmentId,
+    @Query('assignee_account_id') List<String>? assigneeAccountId,
+    @Extras()
+    Map<String, dynamic>? extras =
+        WorkClient.countProgramWorkItemsOpenapiExtras,
   });
 
   /// Görev açar (tarihler `YYYY-MM-DD`).
@@ -631,24 +693,59 @@ abstract class WorkClient {
   });
 
   /// Departman Gantt görünümü.
+  ///
+  /// En çok 200 görev döner; imleç yoktur. Yüzün kapsamında 200'den fazla görev varsa.
+  /// ilk 200 döner ve cevap `X-Result-Truncated: true` taşır (tam 200 görevde başlık yoktur). Tarih, atama, alt.
+  /// görev sayacı ya da bağ okuması başarısızsa kısmi Gantt dönmez, cevap 500.
+  /// `platform.internal`'dır. Liste ile tarih okuması arasında silinen ya da aktarılan.
+  /// görev satırı düşer (hata değildir). Bağ yalnız iki ucu da listelenen görevler.
+  /// arasında döner (WORK-K36); satır alanları WORK-K88.
+  /// ([GAP-053](../known-gaps.md#gap-053)).
   @GET('/v1/work-items/gantt')
-  Future<Gantt> coordinatorGantt({
+  Future<HttpResponse<Gantt>> coordinatorGantt({
     @Extras()
     Map<String, dynamic>? extras = WorkClient.coordinatorGanttOpenapiExtras,
   });
 
   /// Çağıranın atandığı görevlerin Gantt görünümü.
+  ///
+  /// En çok 200 görev döner; imleç yoktur. Yüzün kapsamında 200'den fazla görev varsa.
+  /// ilk 200 döner ve cevap `X-Result-Truncated: true` taşır (tam 200 görevde başlık yoktur). Tarih, atama, alt.
+  /// görev sayacı ya da bağ okuması başarısızsa kısmi Gantt dönmez, cevap 500.
+  /// `platform.internal`'dır. Liste ile tarih okuması arasında silinen ya da aktarılan.
+  /// görev satırı düşer (hata değildir). Bağ yalnız iki ucu da listelenen görevler.
+  /// arasında döner (WORK-K36); satır alanları WORK-K88.
+  /// ([GAP-053](../known-gaps.md#gap-053)).
   @GET('/v1/work-items/gantt/mine')
-  Future<Gantt> memberGantt({
+  Future<HttpResponse<Gantt>> memberGantt({
     @Extras()
     Map<String, dynamic>? extras = WorkClient.memberGanttOpenapiExtras,
   });
 
   /// Bitişi gün sayısı kadar uzatır (bağımlılara yayılır).
+  ///
+  /// WORK-K40. İsteğe bağlı `Idempotency-Key` (WORK-K89): başlıksız istek mevcut davranıştır.
+  /// Verilmiş ama boş ya da sınır dışı anahtar 422 `work.input_invalid` (alan `idempotency_key`,.
+  /// kod `work.request_key_invalid`). Anahtar aktör kapsamlıdır; makbuzda ilk uzatmanın sonucu.
+  /// saklanır ve görev kalıcı silinene kadar yaşar. Aynı anahtar + aynı istek (kapsam, görev,.
+  /// `days`, `expected_dates_revision`) uzatmayı ikinci kez UYGULAMAZ: 200 + ilk sonuç +.
+  /// `replayed: true` (audit ve olay yazılmaz; başarı zaten 200 olduğundan tekrar durum koduyla.
+  /// değil bu alanla ayırt edilir). Anahtar kararı her doğrulamadan (sürümün biçimi dahil) ve her business reddinden önce.
+  /// verilir, görev kilidinden sonra yeniden verilir: kendi uzatmasıyla artmış sürüm, arada.
+  /// tamamlanan görev ya da farklı gövdedeki geçersiz sürüm (409 `work.idempotency_key_reused`).
+  /// tekrarı ya da çakışmayı gölgelemez.
+  /// Tekrar uzatma yetkisini yeniden sormaz, görevin güncel görme yetkisini ister (yetkisi düşen.
+  /// 403, kapsamı değişen 404). Farklı istek 409 `work.idempotency_key_reused`; görev soft.
+  /// silinmişse 409 `work.item_deleted`. Aynı anahtarlı eşzamanlı iki istek görev kilidinde.
+  /// serileşir: tek uzatma, ikincisi tekrar. "Sonuç bilinmiyor" (zaman aşımı, bağlantı kopması).
+  /// durumunda istemci AYNI anahtar ve gövdeyle yeniden dener.
+  ///
+  /// [idempotencyKey] - İsteğe bağlı işlem anahtarı (ADR-0027 kalıbı). Verilmezse uç anahtarsız davranır (mevcut davranış). Verilirse (boş ya da yalnız boşluk dahil) kırpılmış uzunluk 22–200 bayttır, aksi 422 `<mod>.input_invalid` (alan `idempotency_key`, kod `<mod>.invalid_request_key`). Anahtar aktör + uç tablosu kapsamındadır ve kaynak satırında yaşar. Aynı anahtar + aynı normalize istek ilk kaynağın bugünkü temsilini 200 ile döndürür; farklı istek 409 `<mod>.idempotency_key_reused`; aynı anahtarlı eşzamanlı istek ilk isteğin bitişini bekler ve tekrar olarak döner.
   @POST('/v1/work-items/{id}/extend')
   Future<ExtendResult> extendWorkItem({
     @Path('id') required String id,
     @Body() required ExtendRequest body,
+    @Header('Idempotency-Key') String? idempotencyKey,
     @Extras()
     Map<String, dynamic>? extras = WorkClient.extendWorkItemOpenapiExtras,
   });
@@ -681,17 +778,46 @@ abstract class WorkClient {
 
   /// Programın bütün departmanları için Gantt görünümü.
   ///
-  /// [overdue] - `true` ise yalnız gecikenler.
+  /// En çok 200 görev döner; imleç yoktur. Yüzün kapsamında 200'den fazla görev varsa.
+  /// ilk 200 döner ve cevap `X-Result-Truncated: true` taşır (tam 200 görevde başlık yoktur). Tarih, atama, alt.
+  /// görev sayacı ya da bağ okuması başarısızsa kısmi Gantt dönmez, cevap 500.
+  /// `platform.internal`'dır. Liste ile tarih okuması arasında silinen ya da aktarılan.
+  /// görev satırı düşer (hata değildir). Bağ yalnız iki ucu da listelenen görevler.
+  /// arasında döner (WORK-K36); satır alanları WORK-K88.
+  /// ([GAP-053](../known-gaps.md#gap-053)).
+  ///
+  /// `overdue=true` süzgeci taranan ilk 200 görevin üzerinde bellekte uygulanır: başlık.
+  /// taranan kümenin kesildiğini söyler; süzme sonrası 200'den az satırla da gelebilir.
+  ///
+  /// [overdue] - `true` ise yalnız bitiş günü bugünden (kurulum saat dilimi) önce olan görevler. Süzgeç görev durumuna bakmaz: bitişi geçmiş TAMAMLANMIŞ görev de listelenir; satırdaki `is_overdue` ise tamamlanmış görevde `false`'tur ([GAP-053](../known-gaps.md#gap-053)).
   @GET('/v1/work-items/gantt/admin')
-  Future<Gantt> adminGantt({
+  Future<HttpResponse<Gantt>> adminGantt({
     @Query('overdue') String? overdue,
     @Extras() Map<String, dynamic>? extras = WorkClient.adminGanttOpenapiExtras,
   });
 
   /// Tarih değişikliği talebi açar (görev başına tek bekleyen).
+  ///
+  /// WORK-K38. İsteğe bağlı `Idempotency-Key` (WORK-K89): başlıksız istek mevcut davranıştır.
+  /// Verilmiş ama boş ya da sınır dışı anahtar 422 `work.input_invalid` (alan `idempotency_key`,.
+  /// kod `work.request_key_invalid`). Anahtar aktör kapsamlıdır ve talep satırında yaşar. Yeni.
+  /// talep 201; aynı anahtar + aynı istek (kapsam, görev, günler, kırpılmış gerekçe,.
+  /// `expected_dates_revision`) 200 + talebin BUGÜNKÜ hâli (arada onaylanmış ya da reddedilmişse.
+  /// o durumla); farklı istek 409 `work.idempotency_key_reused`. Anahtar kararı her doğrulamadan.
+  /// (sürümün biçimi dahil) ve her business reddinden önce verilir; bekleyen talep, bağımlılık.
+  /// ve sürüm denetimleri görev kilidinden ve anahtarın yeniden sınıflanmasından sonradır. Tekrar okumadır: talep çağıranın.
+  /// kendi talebidir (`/mine` ile de görünür), oluşturma yetkisi yeniden sorulmaz; koordinatörlüğü.
+  /// sonradan kaldırılmış talepçi de 200 alır. Yönetici incelenmiş talebi silerse anahtar da gider:.
+  /// aynı anahtar yeni talep açar (201). Aynı anahtarlı eşzamanlı iki istek görev kilidinde.
+  /// serileşir: tek talep, ikincisi 200 (409 `work.date_request_pending_exists` değil); farklı.
+  /// anahtarlı iki istekten biri 409 `work.date_request_pending_exists` alır. "Sonuç bilinmiyor".
+  /// durumunda istemci AYNI anahtar ve gövdeyle yeniden dener.
+  ///
+  /// [idempotencyKey] - İsteğe bağlı işlem anahtarı (ADR-0027 kalıbı). Verilmezse uç anahtarsız davranır (mevcut davranış). Verilirse (boş ya da yalnız boşluk dahil) kırpılmış uzunluk 22–200 bayttır, aksi 422 `<mod>.input_invalid` (alan `idempotency_key`, kod `<mod>.invalid_request_key`). Anahtar aktör + uç tablosu kapsamındadır ve kaynak satırında yaşar. Aynı anahtar + aynı normalize istek ilk kaynağın bugünkü temsilini 200 ile döndürür; farklı istek 409 `<mod>.idempotency_key_reused`; aynı anahtarlı eşzamanlı istek ilk isteğin bitişini bekler ve tekrar olarak döner.
   @POST('/v1/date-change-requests')
   Future<DateChangeRequest> requestDateChange({
     @Body() required DateChangeRequestCreate body,
+    @Header('Idempotency-Key') String? idempotencyKey,
     @Extras()
     Map<String, dynamic>? extras = WorkClient.requestDateChangeOpenapiExtras,
   });

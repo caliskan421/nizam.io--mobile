@@ -363,6 +363,14 @@ class AppLocalizationsTr extends AppLocalizations {
       'Departman bu programa bağlı değil.';
 
   @override
+  String get errOrganizationExistingDepartment =>
+      'Bu adda bir departman zaten var.';
+
+  @override
+  String get errOrganizationIdempotencyKeyReused =>
+      'Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.';
+
+  @override
   String get errOrganizationInputInvalid => 'Girilen bilgiler geçersiz.';
 
   @override
@@ -373,6 +381,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errOrganizationInvalidName => 'Ad geçersiz.';
+
+  @override
+  String get errOrganizationInvalidRequestKey => 'İşlem anahtarı geçersiz.';
 
   @override
   String get errOrganizationInvalidRole => 'Rol geçersiz.';
@@ -490,6 +501,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errProgramInputInvalid => 'Girilen bilgiler geçersiz.';
 
   @override
+  String get errProgramInvalidColor => 'Geçersiz renk seçimi.';
+
+  @override
   String get errProgramInvalidCopySource =>
       'Ekip kopyası için kaynak program geçersiz.';
 
@@ -505,6 +519,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errProgramInvalidName => 'Program adı geçersiz.';
+
+  @override
+  String get errProgramInvalidRequestKey => 'İşlem anahtarı geçersiz.';
+
+  @override
+  String get errProgramInvalidShortName =>
+      'Kısa ad 1–4 harf ya da rakam olmalıdır.';
 
   @override
   String get errProgramInvalidTransfer => 'Aktarım isteği geçersiz.';
@@ -1462,6 +1483,21 @@ class AppLocalizationsTr extends AppLocalizations {
       'Koordinatörlük oluşturuldu ama seçili programa bağlanamadı. Tekrar denediğinde yeni koordinatörlük açılmaz, aynı kayıt bağlanır.';
 
   @override
+  String get uiCoordFormExisting =>
+      'Bu adla bir departman zaten var. Mevcut kayıt kullanılacak; türü ve açıklaması değiştirilmez. Bağlamak istiyor musunuz?';
+
+  @override
+  String get uiCoordFormExistingDeleted =>
+      'Bu adla silinmiş bir departman var. Mevcut kayıt geri yüklenip bağlanacak; türü ve açıklaması değiştirilmez. Devam etmek istiyor musunuz?';
+
+  @override
+  String get uiCoordFormExistingConfirm => 'Mevcut kaydı kullan';
+
+  @override
+  String get uiCoordFormOutcomeUnknown =>
+      'Önceki işlemin sonucu bilinmiyor. Aynı bilgilerle yeniden deneyerek işlemi tamamlayın.';
+
+  @override
   String get uiCoordToastCreated => 'Koordinatörlük eklendi';
 
   @override
@@ -1842,6 +1878,26 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiFeedbackSecondsUnit => 'sn';
+
+  @override
+  String get uiHomePendingHeading => 'Bekleyen işler';
+
+  @override
+  String get uiHomePendingErrorRetry =>
+      'Bekleyen işler yüklenemedi · Yeniden dene';
+
+  @override
+  String get uiHomePendingEmpty => 'Bekleyen iş yok';
+
+  @override
+  String get uiHomeUnreadLoading => 'Mesaj sayısı yükleniyor';
+
+  @override
+  String get uiHomeUnreadErrorRetry =>
+      'Mesaj sayısı yüklenemedi · Yeniden dene';
+
+  @override
+  String get uiHomeUnreadChats => 'Okunmamış sohbet';
 
   @override
   String get uiHomeGreeting => 'Merhaba';
@@ -3249,6 +3305,314 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiServerUpdateRecheck => 'Yeniden denetle';
 
   @override
+  String get uiTablesTitle => 'Tablolar';
+
+  @override
+  String get uiTablesNew => 'Yeni tablo';
+
+  @override
+  String get uiTablesSearch => 'Tablolarda ara';
+
+  @override
+  String get uiTablesCoord => 'Koordinatörlük';
+
+  @override
+  String get uiTablesPersonal => 'Kişisel';
+
+  @override
+  String get uiTablesShared => 'Paylaşılan';
+
+  @override
+  String get uiTablesAll => 'Tümü';
+
+  @override
+  String get uiTablesOpen => 'Açık';
+
+  @override
+  String get uiTablesDone => 'Tamamlanan';
+
+  @override
+  String get uiTablesEmpty => 'Henüz tablo yok';
+
+  @override
+  String get uiTablesNoResults => 'Sonuç bulunamadı';
+
+  @override
+  String get uiTablesName => 'Tablo adı';
+
+  @override
+  String get uiTablesTemplate => 'Şablon';
+
+  @override
+  String get uiTablesBlank => 'Boş tablo';
+
+  @override
+  String get uiTablesTaskList => 'Görev listesi';
+
+  @override
+  String get uiTablesEventPlan => 'Etkinlik planı';
+
+  @override
+  String get uiTablesActionList => 'Aksiyon listesi';
+
+  @override
+  String get uiTablesSupplierList => 'Tedarikçi listesi';
+
+  @override
+  String get uiTablesVolunteerList => 'Gönüllü listesi';
+
+  @override
+  String get uiTablesInventory => 'Envanter';
+
+  @override
+  String get uiTablesCreate => 'Oluştur';
+
+  @override
+  String get uiTablesCancel => 'Vazgeç';
+
+  @override
+  String get uiTablesSave => 'Kaydet';
+
+  @override
+  String get uiTablesRow => 'satır';
+
+  @override
+  String get uiTablesColumn => 'sütun';
+
+  @override
+  String get uiTablesNewRow => 'Satır ekle';
+
+  @override
+  String get uiTablesNewColumn => 'Sütun ekle';
+
+  @override
+  String get uiTablesFields => 'Alanlar';
+
+  @override
+  String get uiTablesShare => 'Paylaş';
+
+  @override
+  String get uiTablesOptions => 'Tablo işlemleri';
+
+  @override
+  String get uiTablesRename => 'Yeniden adlandır';
+
+  @override
+  String get uiTablesDuplicate => 'Kopya oluştur';
+
+  @override
+  String get uiTablesDuplicateEmpty => 'Boş kopya oluştur';
+
+  @override
+  String get uiTablesDelete => 'Sil';
+
+  @override
+  String get uiTablesDeleteTable => 'Tablo silinsin mi?';
+
+  @override
+  String get uiTablesDeleteRow => 'Satır silinsin mi?';
+
+  @override
+  String get uiTablesDeleteColumn => 'Sütun silinsin mi?';
+
+  @override
+  String get uiTablesDeleteMessage =>
+      'Bu işlem örnek veriyi bu oturumdan kaldırır.';
+
+  @override
+  String get uiTablesReadonly => 'Yalnızca görüntüleme';
+
+  @override
+  String get uiTablesEditable => 'Düzenleme erişimi';
+
+  @override
+  String get uiTablesText => 'Metin';
+
+  @override
+  String get uiTablesNumber => 'Sayı';
+
+  @override
+  String get uiTablesDate => 'Tarih';
+
+  @override
+  String get uiTablesPhone => 'Telefon';
+
+  @override
+  String get uiTablesEmail => 'E-posta';
+
+  @override
+  String get uiTablesPerson => 'Kişi';
+
+  @override
+  String get uiTablesUnit => 'Koordinatörlük';
+
+  @override
+  String get uiTablesTask => 'Görev';
+
+  @override
+  String get uiTablesLink => 'Tablo bağlantısı';
+
+  @override
+  String get uiTablesFile => 'Dosya';
+
+  @override
+  String get uiTablesTodo => 'Yapıldı';
+
+  @override
+  String get uiTablesEditRow => 'Satırı düzenle';
+
+  @override
+  String get uiTablesEditColumn => 'Sütunu düzenle';
+
+  @override
+  String get uiTablesMoveLeft => 'Sola taşı';
+
+  @override
+  String get uiTablesMoveRight => 'Sağa taşı';
+
+  @override
+  String get uiTablesSortAsc => 'Artan sırala';
+
+  @override
+  String get uiTablesSortDesc => 'Azalan sırala';
+
+  @override
+  String get uiTablesSortNone => 'Sıralamayı kaldır';
+
+  @override
+  String get uiTablesProgramAccess => 'Program erişimi';
+
+  @override
+  String get uiTablesOff => 'Kapalı';
+
+  @override
+  String get uiTablesView => 'Görür';
+
+  @override
+  String get uiTablesEdit => 'Düzenler';
+
+  @override
+  String get uiTablesOwner => 'Sahip';
+
+  @override
+  String get uiTablesAddPerson => 'Demo kişi ekle';
+
+  @override
+  String get uiTablesRemovePerson => 'Erişimi kaldır';
+
+  @override
+  String get uiTablesDemoPerson => 'Demo üye';
+
+  @override
+  String get uiTablesDemoNotice =>
+      'Bu çalışma alanı yalnızca oturumluk örnek veridir.';
+
+  @override
+  String get uiTablesAttachment => 'Örnek ek ekle';
+
+  @override
+  String get uiTablesLinkedTable => 'Bağlı tablo';
+
+  @override
+  String get uiTablesSummary => 'Özet';
+
+  @override
+  String get uiTablesClear => 'Temizle';
+
+  @override
+  String get uiTablesTableMissing => 'Tablo bulunamadı';
+
+  @override
+  String get uiTablesGrid => 'Tablo görünümü';
+
+  @override
+  String get uiTablesCopySuffix => '(kopya)';
+
+  @override
+  String get uiTablesEmptySuffix => '(boş)';
+
+  @override
+  String get uiTablesTaskSample => 'Örnek görev';
+
+  @override
+  String get uiTablesUnitSample => 'Demo koordinatörlük';
+
+  @override
+  String get uiTablesFieldName => 'Alan adı';
+
+  @override
+  String get uiTablesNameRequired => 'Ad boş bırakılamaz';
+
+  @override
+  String get uiTablesNewRecord => 'Yeni kayıt';
+
+  @override
+  String get uiTablesRecent => 'Son kullanılanlar';
+
+  @override
+  String get uiTablesBackAreas => 'Koordinatörlüklere dön';
+
+  @override
+  String get uiTablesCopyLink => 'Bağlantıyı kopyala';
+
+  @override
+  String get uiTablesLinkCopied => 'Tablo bağlantısı kopyalandı';
+
+  @override
+  String get uiTablesPersonSearch => 'Demo kişilerde ara';
+
+  @override
+  String get uiTablesPlace => 'Yer';
+
+  @override
+  String get uiTablesApproved => 'Onaylandı';
+
+  @override
+  String get uiTablesCompany => 'Firma';
+
+  @override
+  String get uiTablesFullName => 'Ad soyad';
+
+  @override
+  String get uiTablesMaterial => 'Malzeme';
+
+  @override
+  String get uiTablesOffer => 'Teklif';
+
+  @override
+  String get uiTablesAction => 'Aksiyon';
+
+  @override
+  String get uiTablesActivity => 'Etkinlik';
+
+  @override
+  String get uiTablesDueDate => 'Son tarih';
+
+  @override
+  String get uiTablesCopyTo => 'Başka alana kopyala';
+
+  @override
+  String get uiTablesDestination => 'Kopyanın konumu';
+
+  @override
+  String get uiTablesRelated => 'Bağlı tablolar';
+
+  @override
+  String get uiTablesBacklinks => 'Bu tabloya bağlananlar';
+
+  @override
+  String get uiTablesLinks => 'bağlantı';
+
+  @override
+  String get uiTablesRecentAction => 'Son çalıştıkların';
+
+  @override
+  String get uiTablesUnitA => 'Atölye';
+
+  @override
+  String get uiTablesUnitB => 'Operasyon';
+
+  @override
   String get uiTasksTitle => 'Görevler';
 
   @override
@@ -4607,4 +4971,510 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTimelineGanttOpenTask => 'Görev ayrıntısını aç';
+
+  @override
+  String get uiUserAccountFieldsHeading => 'hesap bilgileri';
+
+  @override
+  String get uiUserAccountFieldsFullName => 'Ad soyad';
+
+  @override
+  String get uiUserAccountFieldsEmail => 'E-posta';
+
+  @override
+  String get uiUserAccountFieldsPassword => 'Şifre';
+
+  @override
+  String get uiUserAccountFieldsEditFullName => 'Ad soyadı düzenle';
+
+  @override
+  String get uiUserAccountFieldsEditEmail => 'E-postayı düzenle';
+
+  @override
+  String get uiUserAccountFieldsEditPassword => 'Yeni şifre belirle';
+
+  @override
+  String get uiUserAccountFieldsNewPassword => 'Yeni şifre';
+
+  @override
+  String get uiUsersProgramShortName => 'Kısa ad (1–4 harf veya rakam)';
+
+  @override
+  String get uiUsersProgramColor =>
+      'Renk (violet, gold, blue, teal, green, orange, red, slate)';
+
+  @override
+  String get uiUsersProgramBadgeInvalid => 'Kısa ad veya renk geçersiz.';
+
+  @override
+  String get uiUsersDisableAccount => 'Hesabı kapat';
+
+  @override
+  String get uiUsersEnableAccount => 'Hesabı aç';
+
+  @override
+  String get uiUsersDisableConfirm =>
+      'Oturumlar kapatılır, görevler ve geçmiş korunur.';
+
+  @override
+  String get uiUsersEnableConfirm =>
+      'Hesap mevcut rol ve üyelikleriyle erişim kazanır; yeniden giriş gerekir.';
+
+  @override
+  String get uiUsersAccountHistoryPreserved => 'Görevler ve geçmiş korunur.';
+
+  @override
+  String get uiUsersAccountStatusUnknown => 'Hesap durumu bilinmiyor';
+
+  @override
+  String get uiUsersOwnAccount => 'Kendi hesabınız';
+
+  @override
+  String get uiUsersAccountDisabled => 'Hesap kapalı';
+
+  @override
+  String get uiUsersLoginLocked => 'Giriş kilitli';
+
+  @override
+  String get uiUsersFilterScope => 'geçerli filtre';
+
+  @override
+  String get uiUsersSearchNameEmail => 'Ad veya e-posta ara';
+
+  @override
+  String get uiUsersOneDepartment => 'Bir koordinatörlük seçebilirsin';
+
+  @override
+  String get uiUsersTitle => 'Kullanıcılar';
+
+  @override
+  String get uiUsersSubtitle => 'Hesaplar ve ekip üyelikleri';
+
+  @override
+  String get uiUsersSearch => 'Kullanıcı ara';
+
+  @override
+  String get uiUsersAll => 'Tümü';
+
+  @override
+  String get uiUsersCoordinators => 'Koordinatörler';
+
+  @override
+  String get uiUsersMembers => 'Üyeler';
+
+  @override
+  String get uiUsersFilters => 'Süzgeç ve sıralama';
+
+  @override
+  String get uiUsersEmpty => 'Kullanıcı bulunamadı.';
+
+  @override
+  String get uiUsersUnassigned => 'Üyelik yok';
+
+  @override
+  String get uiUsersPartial => 'Görünen kayıtlar kısmi olabilir.';
+
+  @override
+  String get uiUsersMore => 'Daha fazla göster';
+
+  @override
+  String get uiUsersManagement => 'Diğer yönetim işlemleri';
+
+  @override
+  String get uiUsersSortName => 'Ada göre';
+
+  @override
+  String get uiUsersSortCreated => 'Kayıt tarihine göre';
+
+  @override
+  String get uiUsersDescending => 'Azalan sıralama';
+
+  @override
+  String get uiUsersProfile => 'Kullanıcı profili';
+
+  @override
+  String get uiUsersNotFound => 'Kullanıcı bulunamadı veya erişiminiz yok.';
+
+  @override
+  String get uiUsersScopeNote =>
+      'Görev özeti yalnız seçili programdaki erişebildiğiniz görevleri kapsar.';
+
+  @override
+  String get uiUsersOpen => 'açık';
+
+  @override
+  String get uiUsersLate => 'gecikmede';
+
+  @override
+  String get uiUsersReview => 'onay bekliyor';
+
+  @override
+  String get uiUsersDone => 'Tamamlandı';
+
+  @override
+  String get uiUsersTasks => 'Görevler';
+
+  @override
+  String get uiUsersFiles => 'Dosyalar';
+
+  @override
+  String get uiUsersCalendar => 'Takvim';
+
+  @override
+  String get uiUsersHistory => 'Geçmiş';
+
+  @override
+  String get uiUsersAccount => 'Hesap';
+
+  @override
+  String get uiUsersNoTasks => 'Bu süzgeçte erişilebilir görev bulunamadı.';
+
+  @override
+  String get uiUsersHistoryUnavailable =>
+      'Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.';
+
+  @override
+  String get uiUsersMembershipUnknown => 'Üyelik bilgisi bilinmiyor';
+
+  @override
+  String get uiUsersOtherDepartment => 'Diğer programdaki koordinatörlük';
+
+  @override
+  String get uiUsersCoordinator => 'Koordinatör';
+
+  @override
+  String get uiUsersMember => 'Üye';
+
+  @override
+  String get uiUsersMemberships => 'Koordinatörlük ve roller';
+
+  @override
+  String get uiUsersMembershipConfirm =>
+      'Bu üyelik değişikliği görevleri etkiliyor. Sunucunun bildirdiği etkiyi onaylayarak devam etmek istiyor musunuz?';
+
+  @override
+  String get uiUsersSaved => 'İşlem tamamlandı.';
+
+  @override
+  String get uiUsersMembershipScope =>
+      'Üyelik işlemleri seçili program için uygulanır.';
+
+  @override
+  String get uiUsersNotMember => 'Üyelik yok';
+
+  @override
+  String get uiUsersRemoveMembership => 'Üyeliği kaldır';
+
+  @override
+  String get uiUsersRemoveMembershipConfirm =>
+      'Bu koordinatörlükteki üyelik kaldırılsın mı?';
+
+  @override
+  String get uiUsersSetMember => 'Üye olarak ata';
+
+  @override
+  String get uiUsersSetCoordinator => 'Koordinatör olarak ata';
+
+  @override
+  String get uiUsersOpenDepartment => 'Koordinatörlüğü aç';
+
+  @override
+  String get uiUsersAdd => 'Kullanıcı ekle';
+
+  @override
+  String get uiUsersQuickActions => 'Kullanıcı işlemleri';
+
+  @override
+  String get uiUsersOpenProfile => 'Profili aç';
+
+  @override
+  String get uiUsersClearDepartments => 'Koordinatörlük seçimini temizle';
+
+  @override
+  String get uiUsersLoadedFilterNote =>
+      'Koordinatörlük süzgeci yüklenmiş kullanıcı sayfalarında uygulanır. Daha fazla göster ile aramayı genişletebilirsiniz.';
+
+  @override
+  String get uiUsersExportLoaded =>
+      'Yüklenmiş ve süzülmüş satırları CSV olarak kaydet';
+
+  @override
+  String get uiUsersExportName => 'Ad soyad';
+
+  @override
+  String get uiUsersExportSaved => 'CSV kaydedildi:';
+
+  @override
+  String get uiUsersDistribution => 'Durum dağılımı';
+
+  @override
+  String get uiUsersNotStarted => 'Başlamadı';
+
+  @override
+  String get uiUsersInProgress => 'Devam ediyor';
+
+  @override
+  String get uiUsersReturned => 'Geri gönderildi';
+
+  @override
+  String get uiUsersUnknownStatus => 'Durumu bilinmiyor';
+
+  @override
+  String get uiUsersKpiCompletion => 'Tamamlanma';
+
+  @override
+  String get uiUsersKpiOpen => 'Açık';
+
+  @override
+  String get uiUsersKpiLate => 'Gecikme';
+
+  @override
+  String get uiUsersKpiReview => 'Onay';
+
+  @override
+  String get uiUsersLoadedCountTail => 'kullanıcı yüklendi';
+
+  @override
+  String get uiUsersMoreAvailable => 'Devamı var';
+
+  @override
+  String get uiUsersAdmin => 'Admin';
+
+  @override
+  String get uiUsersCountTail => 'kullanıcı';
+
+  @override
+  String get uiUsersNavCountTail => 'kişi';
+
+  @override
+  String get uiUsersSearchHint => 'Ad veya koordinatörlük';
+
+  @override
+  String get uiUsersRowHint =>
+      'Profili açmak için dokunun. Hızlı işlemler için basılı tutun.';
+
+  @override
+  String get uiUsersNoLoadedMatch =>
+      'Yüklenen kullanıcılar arasında eşleşme yok. Diğer kayıtları yükleyebilirsiniz.';
+
+  @override
+  String get uiUsersDirectoryPartial =>
+      '+ işareti, listenin devamı olduğunu gösterir. Sayılar yüklenen kayıtları kapsar.';
+
+  @override
+  String get uiUsersTaskCountNoun => 'görev';
+
+  @override
+  String get uiUsersTaskOpenFilter => 'Açık görevler';
+
+  @override
+  String get uiUsersTaskLateFilter => 'Gecikmede olanlar';
+
+  @override
+  String get uiUsersTaskReviewFilter => 'Onay bekleyenler';
+
+  @override
+  String get uiUsersTaskDoneFilter => 'Tamamlananlar';
+
+  @override
+  String get uiUsersTaskAllFilter => 'Tüm görevler';
+
+  @override
+  String get uiUsersTaskFilters => 'Görevleri süz';
+
+  @override
+  String get uiUsersTaskFilterCountHint =>
+      'görev gösteriliyor · birden çok seçebilirsin';
+
+  @override
+  String get uiUsersTaskStatusGroup => 'durum';
+
+  @override
+  String get uiUsersTaskPriorityGroup => 'öncelik';
+
+  @override
+  String get uiUsersTaskGroupLate => 'Gecikmede';
+
+  @override
+  String get uiUsersTaskGroupWeek => 'Bu hafta';
+
+  @override
+  String get uiUsersTaskGroupLater => 'Sonra';
+
+  @override
+  String get uiUsersTaskGroupDone => 'Tamamlanan';
+
+  @override
+  String get uiUsersTaskUrgent => 'Acil';
+
+  @override
+  String get uiUsersTaskUnknownPriority => 'Bilinmeyen öncelik';
+
+  @override
+  String get uiUsersTaskToday => 'bugün';
+
+  @override
+  String get uiUsersTaskCompleted => 'tamamlandı';
+
+  @override
+  String get uiUsersTaskLateDays => 'gün gecikti';
+
+  @override
+  String get uiUsersTaskRemainingDays => 'gün kaldı';
+
+  @override
+  String get uiUsersTaskFilesCount => 'dosya';
+
+  @override
+  String get uiUsersTaskShowCount => 'görevi göster';
+
+  @override
+  String get uiUsersTaskPriorityChip => 'öncelik';
+
+  @override
+  String get uiUsersMessage => 'Mesaj';
+
+  @override
+  String get uiUsersAssign => 'Görev ata';
+
+  @override
+  String get uiUsersEditAccount => 'Hesap ve rolleri düzenle';
+
+  @override
+  String get uiUsersMoreActions => 'Diğer işlemler';
+
+  @override
+  String get uiUsersPersonalReport => 'Görev raporu (CSV)';
+
+  @override
+  String get uiUsersPersonalReportNote =>
+      'Seçili programda erişebildiğiniz görevlerin özeti';
+
+  @override
+  String get uiUsersAccountAndRoles => 'Hesap ve roller';
+
+  @override
+  String get uiUsersSendMessage => 'Mesaj gönder';
+
+  @override
+  String get uiUsersReportScope => 'Kapsam';
+
+  @override
+  String get uiUsersReportTask => 'Görev';
+
+  @override
+  String get uiUsersReportStatus => 'Durum';
+
+  @override
+  String get uiUsersReportDue => 'Bitiş';
+
+  @override
+  String get uiUsersTaskNoDay => 'Bu gün için görevi yok.';
+
+  @override
+  String get uiUsersOpsActive => 'Hesap aktif';
+
+  @override
+  String get uiUsersOpsResetLink => 'Şifre sıfırlama bağlantısı gönder';
+
+  @override
+  String get uiUsersOpsResetUnavailable =>
+      'Bu sunucu e-posta ile sıfırlama bağlantısı göndermiyor.';
+
+  @override
+  String get uiUsersOpsDelete => 'Kullanıcıyı sil';
+
+  @override
+  String get uiUsersOpsDeleteConfirm =>
+      'Bu kullanıcı silinmiş kayıtlara taşınacak ve oturumları kapatılacak.';
+
+  @override
+  String get uiUsersOpsSelfDelete =>
+      'Kendi hesabınızı bu ekrandan silemezsiniz.';
+
+  @override
+  String get uiUsersOpsAdminRequired =>
+      'Bu işlem için şirket yöneticisi yetkisi gerekir.';
+
+  @override
+  String get uiUsersOpsDeleted => 'Kullanıcı silinmiş kayıtlara taşındı.';
+
+  @override
+  String get uiUsersAccountEmail => 'E-posta';
+
+  @override
+  String get uiUsersAccountEmailHint => 'Yeni e-posta';
+
+  @override
+  String get uiUsersAccountEmailInvalid => 'Geçerli bir e-posta adresi gir';
+
+  @override
+  String get uiUsersAccountRoleHeading => 'roller · birden çok seçilebilir';
+
+  @override
+  String get uiUsersAccountDepartmentHeading => 'koordinatörlük';
+
+  @override
+  String get uiUsersAccountAdminDescription =>
+      'Tüm programları ve kullanıcıları yönetir';
+
+  @override
+  String get uiUsersAccountCoordinatorDescription =>
+      'Koordinatörlükte görevleri ve üyeleri yönetir';
+
+  @override
+  String get uiUsersAccountMemberDescription =>
+      'Atandığı koordinatörlükte görev alır';
+
+  @override
+  String get uiUsersAccountRoleScope =>
+      'Rol koordinatörlük bazında atanır. Değiştirilecek koordinatörlüğü seçin.';
+
+  @override
+  String get uiUsersAccountGrantAdmin =>
+      'Bu kullanıcıya şirket yöneticisi yetkisi verilsin mi?';
+
+  @override
+  String get uiUsersAccountRevokeAdmin =>
+      'Bu kullanıcının şirket yöneticisi yetkisi kaldırılsın mı?';
+
+  @override
+  String get uiUsersAccountAdd => 'Ekle';
+
+  @override
+  String get uiUsersAccountAddAsMember => 'Üye olarak ekle';
+
+  @override
+  String get uiUsersAccountUnsaved => 'Kaydedilmedi';
+
+  @override
+  String get uiUsersAccountCancel => 'Vazgeç';
+
+  @override
+  String get uiUsersAccountSave => 'Kaydet';
+
+  @override
+  String get uiUsersDraftRoles => 'roller';
+
+  @override
+  String get uiUsersDraftAddDepartment => 'Koordinatörlük ekle';
+
+  @override
+  String get uiUsersDraftSelected => 'seçili';
+
+  @override
+  String get uiUsersDraftInvalid =>
+      'Ad soyadı ve geçerli bir e-posta adresini kontrol edin.';
+
+  @override
+  String get uiUsersDraftAdminUnknown =>
+      'Yönetici yetkisi henüz doğrulanamadı.';
+
+  @override
+  String get uiUsersDraftRoleScope =>
+      'Admin şirket genelidir. Koordinatör ve Üye seçimi bu programdaki seçili koordinatörlüklere uygulanır.';
+
+  @override
+  String get uiUsersDraftSelfConflict =>
+      'Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.';
 }

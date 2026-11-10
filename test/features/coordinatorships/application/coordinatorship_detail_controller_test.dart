@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorship_detail_controller.dart';
-import 'package:nizamio/features/coordinatorships/application/coordinatorship_profiles_controller.dart';
 import 'package:nizamio/features/coordinatorships/application/coordinatorships_controller.dart';
 import 'package:nizamio/features/coordinatorships/coordinatorships.dart'
     show DepartmentKind;
@@ -19,11 +18,17 @@ import '../coord_backend.dart';
 /// Kaynaklar (katalog + departman kaydı) yüklenince ayrıntı eşzamanlı okunur.
 Future<void> _ready(ProviderContainer c) async {
   await c.read(taskCatalogControllerProvider.future);
-  await c.read(coordinatorshipProfilesControllerProvider.future);
+  for (final id in [dAlt, dEle, dEgi, dIda]) {
+    c.listen(programDepartmentProvider(id), (_, _) {});
+  }
+  await c.read(programDepartmentProvider(dAlt).future);
+  await c.read(programDepartmentProvider(dEle).future);
+  await c.read(programDepartmentProvider(dEgi).future);
+  await c.read(programDepartmentProvider(dIda).future);
 }
 
 void main() {
-  test('yenileme departmanı da okur; hata önceki ayrıntıyı korur', () async {
+  test('yenileme hatası önceki ayrıntıyı göstermez', () async {
     final backend = CoordBackend();
     final h = await pilotHarness(backend, signedIn: true);
     h.read(scopeControllerProvider).selectProgram(coordProgram);
@@ -31,15 +36,18 @@ void main() {
     final provider = coordinatorshipDetailProvider(dAlt);
     c.listen(provider, (_, _) {});
     await _ready(c);
-    final previous = c.read(provider).value!.department;
-    final requests = h.backend.count('GET', '/v1/departments');
+    final requests = h.backend.count('GET', '/v1/program/departments/$dAlt');
     backend.departmentsError = 'organization.authority_unavailable';
     await expectLater(
       c.read(coordinatorshipsControllerProvider.notifier).refresh(code: dAlt),
       throwsA(isA<ApiError>()),
     );
-    expect(h.backend.count('GET', '/v1/departments'), requests + 1);
-    expect(c.read(provider).value!.department, previous);
+    expect(
+      h.backend.count('GET', '/v1/program/departments/$dAlt'),
+      requests + 1,
+    );
+    expect(c.read(provider).hasError, isTrue);
+    expect(c.read(provider).value, isNull);
   });
 
   test(
@@ -106,7 +114,7 @@ void main() {
     expect((ida.stats.shortCode, ida.stats.name), (null, 'İdari işler'));
     expect((ida.stats.total, ida.attention.length, ida.people), (0, 0, 0));
     // Departman listesinde olmayan kayıt: tür yok (ayrıntı yine açılır).
-    expect(ida.department, isNull);
+    expect(ida.department?.kind, DepartmentKind.coordinatorship);
     final ele = c.read(coordinatorshipDetailProvider(dEle)).requireValue!;
     expect(ele.department?.kind, DepartmentKind.workingGroup);
     c.listen(coordinatorshipDetailProvider(dEgi), (_, _) {});
@@ -118,7 +126,7 @@ void main() {
           ?.kind,
       DepartmentKind.unknown,
     );
-    expect(h.backend.count('GET', '/v1/departments'), 1);
+    expect(h.backend.count('GET', '/v1/departments'), 0);
 
     // Kısa kod ('ALT') sunucu kimliği (`department_id`) değildir: ayrıntı açılmaz.
     for (final code in ['ALT', 'YOK']) {
@@ -132,23 +140,21 @@ void main() {
     expect(backend.unhandled, isEmpty);
   });
 
-  test(
-    'yönetici olmayan: departman kaydı istenmez, ayrıntı katalogdan açılır',
-    () async {
-      final backend = CoordBackend()..admin = false;
-      final h = await pilotHarness(backend, signedIn: true);
-      h.read(scopeControllerProvider).selectProgram(coordProgram);
-      final c = h.container;
-      c.listen(coordinatorshipDetailProvider(dAlt), (_, _) {});
-      await c.read(taskCatalogControllerProvider.future);
-      final d = c.read(coordinatorshipDetailProvider(dAlt)).requireValue!;
-      expect(d.stats.name, 'Altyapı ve tesisat');
-      expect(d.department, isNull);
-      expect(d.leads.map((m) => m.name), ['Abdullah Ateş', 'Ali Avcı']);
-      expect(h.backend.count('GET', '/v1/departments'), 0);
-      expect(backend.unhandled, isEmpty);
-    },
-  );
+  test('yönetici olmayan: tekil okuma tür ve açıklamayı sağlar', () async {
+    final backend = CoordBackend()..admin = false;
+    final h = await pilotHarness(backend, signedIn: true);
+    h.read(scopeControllerProvider).selectProgram(coordProgram);
+    final c = h.container;
+    c.listen(coordinatorshipDetailProvider(dAlt), (_, _) {});
+    await c.read(taskCatalogControllerProvider.future);
+    await c.read(programDepartmentProvider(dAlt).future);
+    final d = c.read(coordinatorshipDetailProvider(dAlt)).requireValue!;
+    expect(d.stats.name, 'Altyapı ve tesisat');
+    expect(d.department?.description, 'Su ve yapı işleri');
+    expect(d.leads.map((m) => m.name), ['Abdullah Ateş', 'Ali Avcı']);
+    expect(h.backend.count('GET', '/v1/departments'), 0);
+    expect(backend.unhandled, isEmpty);
+  });
 
   test(
     'departman kaydı okunamazsa ayrıntı hata durumunda; boş liste hata değil',
@@ -161,7 +167,7 @@ void main() {
       c.listen(coordinatorshipDetailProvider(dAlt), (_, _) {});
       await c.read(taskCatalogControllerProvider.future);
       await expectLater(
-        c.read(coordinatorshipProfilesControllerProvider.future),
+        c.read(programDepartmentProvider(dAlt).future),
         throwsA(isA<ApiError>()),
       );
       final failed = c.read(coordinatorshipDetailProvider(dAlt));
@@ -170,14 +176,14 @@ void main() {
         'organization.authority_unavailable',
       );
 
-      // Kullanıcı yeniden dener; sunucu boş liste döner: kayıt yok, ayrıntı açılır.
+      // Kullanıcı yeniden dener; tekil kayıt okunur.
       backend
         ..departmentsError = null
         ..companyDepartments = [];
-      c.invalidate(coordinatorshipProfilesControllerProvider);
+      c.invalidate(programDepartmentProvider(dAlt));
       await _ready(c);
       final d = c.read(coordinatorshipDetailProvider(dAlt)).requireValue!;
-      expect(d.department, isNull);
+      expect(d.department?.kind, DepartmentKind.coordinatorship);
     },
   );
 }

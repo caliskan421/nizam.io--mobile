@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../../../core/domain/page_slice.dart';
 import '../../coordinatorships/coordinatorships.dart' show DepartmentKind;
+import '../../scope/scope.dart' show DepartmentRole;
 
 /// Yönetim kullanıcı listesinin sıralama alanı (`sort_by`). Sözleşmede serbest dizgedir;
 /// kapalı küme backend'dedir (`name`, `created_at`; tanımsız değer 422).
@@ -19,6 +21,41 @@ enum SortDirection { asc, desc }
 /// Silinmiş varlığın yaşam döngüsü işlemi sonucu (`restored` / `purged`).
 enum LifecycleStatus { restored, purged, unknown }
 
+enum AccountStatus { active, disabled, unknown }
+
+final class AccountStatusChange {
+  const AccountStatusChange({
+    required this.status,
+    required this.changed,
+    required this.revokedSessions,
+  });
+  final AccountStatus status;
+  final bool changed;
+  final int revokedSessions;
+}
+
+final class UserRoleCounts {
+  const UserRoleCounts({
+    required this.all,
+    required this.admins,
+    required this.coordinators,
+    required this.members,
+  });
+  final int all, admins, coordinators, members;
+}
+
+final class UserDirectoryPage extends PageSlice<KnownUser> {
+  UserDirectoryPage({
+    required super.items,
+    required this.total,
+    required this.roleCounts,
+    super.nextCursor,
+    super.truncated,
+  });
+  final int total;
+  final UserRoleCounts roleCounts;
+}
+
 /// Bilinen kullanıcı (`GET /v1/admin/users`, `KnownUser`).
 @immutable
 final class KnownUser {
@@ -26,13 +63,41 @@ final class KnownUser {
     required this.accountId,
     required this.fullName,
     required List<String> memberships,
-  }) : memberships = List.unmodifiable(memberships);
+    List<UserMembership> teams = const [],
+    this.email = '',
+    this.companyAdmin = false,
+    this.accountStatus = AccountStatus.unknown,
+    this.loginLocked = false,
+  }) : memberships = List.unmodifiable(memberships),
+       teams = List.unmodifiable(teams);
 
   final String accountId;
   final String fullName;
+  final String email;
+  final bool companyAdmin;
+  final AccountStatus accountStatus;
+  final bool loginLocked;
 
   /// Üyelik etiketleri (sunucu biçimi, olduğu gibi).
   final List<String> memberships;
+  final List<UserMembership> teams;
+}
+
+/// Typed membership label from the pinned `program:department:role` contract.
+@immutable
+final class UserMembership {
+  const UserMembership({
+    required this.programId,
+    required this.departmentId,
+    required this.role,
+    this.programName = '',
+    this.displayName = '',
+  });
+  final String programId;
+  final String departmentId;
+  final DepartmentRole role;
+  final String programName;
+  final String displayName;
 }
 
 /// Kullanıcı oluşturma/güncelleme/silme sonucu (`UserResult`).

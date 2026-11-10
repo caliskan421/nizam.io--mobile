@@ -96,7 +96,7 @@ abstract class C {
 
   group('üretilmiş istemciler (v0.6.0-api)', () {
     test(
-      'yalnız 12 operasyon HttpResponse döner; diğerlerinin imzası değişmez',
+      'yalnız 15 operasyon HttpResponse döner; diğerlerinin imzası değişmez',
       () {
         final wrapped = <String>{};
         final plain = <String>{};
@@ -116,6 +116,8 @@ abstract class C {
         // Yeni etiketle liste değişirse bu test kırılır; bilinçli güncellenir.
         expect(wrapped, {
           'assistantConversations',
+          'adminGantt',
+          'coordinatorGantt',
           'listAssignable',
           'listDeletedAccounts',
           'listDeletedDepartments',
@@ -125,6 +127,7 @@ abstract class C {
           'listPrograms',
           'listUsers',
           'myDepartments',
+          'memberGantt',
           'reportDashboardMeetings',
           'reportDashboardTasks',
         });

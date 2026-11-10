@@ -209,6 +209,7 @@ class NewTaskFormController extends _$NewTaskFormController {
     String? title,
     String? note,
     ChatTaskSource? chatMessage,
+    String? initialAssignee,
   }) {
     var f = _cancelPick(state);
     if (!f.standalone || note != null || chatMessage != null) {
@@ -217,10 +218,20 @@ class NewTaskFormController extends _$NewTaskFormController {
     if (title != null) f = f.copyWith(title: title);
     // Hedefsiz sıfırlama (görev listesi) hesaplanan açılabilir varsayılana düşer.
     final target = coordinatorship ?? _defaultCoordinatorship();
+    final team =
+        ref
+            .read(taskCatalogControllerProvider)
+            .value
+            ?.coordinatorship(target ?? '')
+            ?.team ??
+        const <String>[];
+    final assignees = initialAssignee != null && team.contains(initialAssignee)
+        ? [initialAssignee]
+        : const <String>[];
     state = reset
         ? f.copyWith(
             coordinatorship: () => target,
-            assignees: const [],
+            assignees: assignees,
             pane: () => null,
             error: () => null,
           )

@@ -200,6 +200,13 @@ void main() {
     expect(t.files, 0, reason: 'liste dosya sayısı taşımaz');
     expect(c.today, DateTime(2026, 11));
     expect(c.me, 'me');
+    expect(c.accountEmail, 'a@b.test');
+    expect(c.withTasks(c.tasks).accountEmail, 'a@b.test');
+    expect(c.filtered().accountEmail, 'a@b.test');
+    expect(
+      c.withNames([const PersonName('another', 'Başka')]).accountEmail,
+      'a@b.test',
+    );
     expect(c.people.single.name, 'Ayşe Kaya');
     expect(t.creator, 'u-creator', reason: 'created_by_account_id');
     expect(

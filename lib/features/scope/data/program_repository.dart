@@ -84,6 +84,8 @@ class ProgramRepository {
     name: r.name,
     year: r.year,
     description: r.description,
+    shortName: r.shortName,
+    color: r.color == null ? null : ProgramColor.fromWire(r.color!.json),
   );
 
   static MyDepartment _myDepartment(api.MyDepartment r) => MyDepartment(

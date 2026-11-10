@@ -107,6 +107,7 @@ class ApiTaskCatalogRepository
     return TaskCatalog(
       today: DateTime(today.year, today.month, today.day),
       me: access.accountId,
+      accountEmail: me.email,
       access: access,
       truncated: truncated,
       departments: departments,

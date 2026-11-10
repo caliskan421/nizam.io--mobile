@@ -55,4 +55,4 @@ final class TasksNavCaptionProvider
   }
 }
 
-String _$tasksNavCaptionHash() => r'2116241c1e0fa917c4d1d721dd2ba0d34ca758c3';
+String _$tasksNavCaptionHash() => r'2b991dd4a93d377b3d432195f980667eaa6a1a52';

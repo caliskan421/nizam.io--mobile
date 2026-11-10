@@ -16,6 +16,17 @@ Future<List<String>> _options({required bool admin}) async {
 }
 
 void main() {
+  test('profil ataması yalnız seçilen koordinatörlüğün güncel ekip üyesini hazırlar', () async {
+    final h = await pilotHarness(CoordBackend(), signedIn: true);
+    h.read(scopeControllerProvider).selectProgram(coordProgram);
+    await h.read(taskCatalogControllerProvider.future);
+    final form = h.read(newTaskFormControllerProvider.notifier);
+    form.prepare(coordinatorship: dAlt, initialAssignee: pKadir);
+    expect(h.read(newTaskFormControllerProvider).assignees, [pKadir]);
+    form.prepare(coordinatorship: dAlt, initialAssignee: pBurak);
+    expect(h.read(newTaskFormControllerProvider).assignees, isEmpty);
+  });
+
   test('seçenekler: yönetici hepsi, koordinatör yalnız kendininki', () async {
     expect(
       await _options(admin: true),

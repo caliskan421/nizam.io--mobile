@@ -8,7 +8,8 @@ import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/features/administration/data/program_admin_api_repository.dart';
 import 'package:nizamio/features/administration/domain/program_admin.dart';
-import 'package:nizamio/features/scope/scope.dart' show Program;
+import 'package:nizamio/features/scope/scope.dart'
+    show Program, ProgramColor, ProgramField;
 
 /// Tek yanıtlı sahte bağdaştırıcı; isteği ve JSON gövdesini kaydeder.
 class _Adapter implements HttpClientAdapter {
@@ -73,6 +74,56 @@ const _record =
     '"created_at":"2026-10-20T12:00:00Z","reverses_transfer_id":"t0"}';
 
 void main() {
+  test(
+    'dönem PATCH gövdesi iki alanın yok, null ve değer hâllerini korur',
+    () async {
+      final (repo, adapter) = _repo('{"program_id":"p1","name":"Bir"}');
+      await repo.updateProgram('p1');
+      expect(adapter.sent, isNot(contains('short_name')));
+      expect(adapter.sent, isNot(contains('color')));
+      await repo.updateProgram(
+        'p1',
+        shortName: const ProgramField(null),
+        color: const ProgramField(null),
+      );
+      expect(adapter.sent, containsPair('short_name', null));
+      expect(adapter.sent, containsPair('color', null));
+      await repo.updateProgram(
+        'p1',
+        shortName: const ProgramField('AB'),
+        color: const ProgramField(ProgramColor.blue),
+      );
+      expect(adapter.sent, containsPair('short_name', 'AB'));
+      expect(adapter.sent, containsPair('color', 'blue'));
+      expect(adapter.seen!.uri.path, '/v1/programs/p1');
+      expect(adapter.seen!.method, 'PATCH');
+    },
+  );
+
+  test('dönem oluşturma kısa ad ve palet rengini gönderir', () async {
+    final (repo, adapter) = _repo('{"program_id":"p1","name":"Bir"}');
+    await repo.createProgram(
+      name: 'Bir',
+      shortName: 'B',
+      color: ProgramColor.teal,
+    );
+    expect(adapter.sent, containsPair('short_name', 'B'));
+    expect(adapter.sent, containsPair('color', 'teal'));
+  });
+
+  test('bilinmeyen renk temizleme olarak gönderilmez', () async {
+    final (repo, adapter) = _repo('{"program_id":"p1","name":"Bir"}');
+    await expectLater(
+      repo.updateProgram('p1', color: const ProgramField(ProgramColor.unknown)),
+      throwsArgumentError,
+    );
+    expect(adapter.seen, isNull);
+    await expectLater(
+      repo.createProgram(name: 'Bir', color: ProgramColor.unknown),
+      throwsArgumentError,
+    );
+    expect(adapter.seen, isNull);
+  });
   group('createProgram', () {
     test('POST /v1/programs: yeni kayıt', () async {
       final (repo, a) = _repo(

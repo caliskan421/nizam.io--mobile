@@ -10,10 +10,16 @@ import '../nz_icon.dart';
 /// gündem "2/3", [countText]) ve baştaki [icon] (ör. Görevler "Liste / Zaman çizelgesi").
 @immutable
 class NzPillTab {
-  const NzPillTab({required this.label, this.count, this.countText, this.icon})
-    : assert(count == null || countText == null, 'count ya da countText');
+  const NzPillTab({
+    required this.label,
+    this.count,
+    this.countText,
+    this.icon,
+    this.enabled = true,
+  }) : assert(count == null || countText == null, 'count ya da countText');
 
   final String label;
+  final bool enabled;
   final int? count;
   final String? countText;
   final IconData? icon;
@@ -33,9 +39,13 @@ class NzPillTabs extends StatelessWidget {
     required this.onSelected,
     this.semanticLabel,
     this.iconsOnly = false,
+    this.compact = false,
   }) : assert(tabs.length >= 2, 'en az iki sekme');
 
   final bool iconsOnly;
+
+  /// Compact 40 px visual rail, while preserving 48 px touch targets.
+  final bool compact;
   final List<NzPillTab> tabs;
   final int selected;
   final ValueChanged<int> onSelected;
@@ -51,6 +61,7 @@ class NzPillTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final outer = compact ? NizamioSpacing.space1 : _outer;
     final n = tabs.length;
     final railRadius = BorderRadius.circular(NizamioRadius.pill);
     return Semantics(
@@ -64,8 +75,8 @@ class NzPillTabs extends StatelessWidget {
           return Stack(
             children: [
               Positioned.fill(
-                top: _outer,
-                bottom: _outer,
+                top: outer,
+                bottom: outer,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: c.surfaceRaised,
@@ -91,8 +102,8 @@ class NzPillTabs extends StatelessWidget {
                   ),
                 ),
                 builder: (context, left, thumb) => Positioned(
-                  top: _outer + _inset,
-                  bottom: _outer + _inset,
+                  top: outer + _inset,
+                  bottom: outer + _inset,
                   left: left.clamp(_inset, _inset + (n - 1) * w),
                   width: w,
                   child: thumb!,
@@ -107,6 +118,7 @@ class NzPillTabs extends StatelessWidget {
                         child: _Tab(
                           tab: tabs[i],
                           iconsOnly: iconsOnly,
+                          compact: compact,
                           selected: i == selected,
                           onTap: () => onSelected(i),
                         ),
@@ -128,9 +140,11 @@ class _Tab extends StatelessWidget {
     required this.selected,
     required this.onTap,
     required this.iconsOnly,
+    required this.compact,
   });
 
   final bool iconsOnly;
+  final bool compact;
   final NzPillTab tab;
   final bool selected;
   final VoidCallback onTap;
@@ -139,60 +153,81 @@ class _Tab extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
-    final color = selected ? c.text : c.textMuted;
+    final color = !tab.enabled
+        ? c.textFaint
+        : selected
+        ? c.text
+        : c.textMuted;
     final count = tab.countText ?? tab.count?.toString();
     final icon = tab.icon;
+    final label = Text(
+      tab.label,
+      maxLines: 1,
+      overflow: compact ? TextOverflow.visible : TextOverflow.ellipsis,
+      style: (compact ? t.caption : t.labelMd).copyWith(
+        color: color,
+        fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+      ),
+    );
+    final content = Row(
+      mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (icon != null) ...[
+          NzIcon(icon, size: NizamioSize.iconSizeSm, color: color),
+          if (!iconsOnly)
+            Gap(compact ? NizamioSpacing.space1 : NizamioSpacing.space1 + 1),
+        ],
+        if (!iconsOnly)
+          if (compact) label else Flexible(child: label),
+        if (count != null) ...[
+          Gap(compact ? NizamioSpacing.space1 : NizamioSpacing.space1 + 1),
+          Text(
+            count,
+            maxLines: 1,
+            style: compact
+                ? t.monoSm.copyWith(
+                    fontSize: NizamioTypography.caption.size,
+                    height:
+                        NizamioTypography.caption.lineHeight /
+                        NizamioTypography.caption.size,
+                    color: c.textFaint,
+                  )
+                : t.monoSm.copyWith(color: c.textMuted),
+          ),
+        ],
+      ],
+    );
     return Semantics(
       button: true,
       selected: selected,
+      enabled: tab.enabled,
       inMutuallyExclusiveGroup: true,
       label: count == null ? tab.label : '${tab.label}, $count',
-      onTap: onTap,
+      onTap: tab.enabled ? onTap : null,
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onTap,
+        onTap: tab.enabled ? onTap : null,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: NzPillTabs._outer + NzPillTabs._inset,
+          padding: EdgeInsets.symmetric(
+            vertical:
+                (compact ? NizamioSpacing.space1 : NzPillTabs._outer) +
+                NzPillTabs._inset,
           ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: NizamioSize.tabH),
+            constraints: BoxConstraints(
+              minHeight: compact ? NizamioSpacing.space8 : NizamioSize.tabH,
+            ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: NizamioSpacing.space1,
+              padding: EdgeInsets.symmetric(
+                horizontal: compact
+                    ? NizamioSpacing.space1 / 2
+                    : NizamioSpacing.space1,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[
-                    NzIcon(icon, size: NizamioSize.iconSizeSm, color: color),
-                    if (!iconsOnly) const Gap(NizamioSpacing.space1 + 1),
-                  ],
-                  if (!iconsOnly)
-                    Flexible(
-                      child: Text(
-                        tab.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: t.labelMd.copyWith(
-                          color: color,
-                          fontWeight: selected
-                              ? FontWeight.w600
-                              : FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  if (count != null) ...[
-                    const Gap(NizamioSpacing.space1 + 1),
-                    Text(
-                      count,
-                      maxLines: 1,
-                      style: t.monoSm.copyWith(color: c.textMuted),
-                    ),
-                  ],
-                ],
-              ),
+              child: compact
+                  ? FittedBox(fit: BoxFit.scaleDown, child: content)
+                  : content,
             ),
           ),
         ),

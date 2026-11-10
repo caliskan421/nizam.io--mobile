@@ -14,6 +14,7 @@ import '../../core/ui/widgets/navigation/nz_floating_nav.dart';
 import '../../core/ui/widgets/navigation/nz_tablet_rail.dart';
 import '../../core/ui/widgets/nz_icons.dart';
 import '../../features/activity/activity.dart';
+import '../../features/administration/administration.dart';
 import '../../features/archive/archive.dart';
 import '../../features/coordinatorships/coordinatorships.dart';
 import '../../features/meetings/meetings.dart';
@@ -24,7 +25,15 @@ import 'routes.dart';
 import 'split.dart';
 
 /// Alt menünün üçüncü öğesi: son girilen modül (README "Gezinme"). Üçü aynı kabuk dalındadır.
-enum ShellModule { coordinatorships, archive, messages, calendar, meetings }
+enum ShellModule {
+  coordinatorships,
+  archive,
+  messages,
+  calendar,
+  meetings,
+  users,
+  tables,
+}
 
 /// Alt menü öğesinin görünümü (simge, etiket, etkinken alt yazı).
 @immutable
@@ -63,6 +72,12 @@ ShellModule? moduleOf(String location) {
   if (location.startsWith(const MeetingsRoute().location)) {
     return ShellModule.meetings;
   }
+  if (location.startsWith(const UsersRoute().location)) {
+    return ShellModule.users;
+  }
+  if (location.startsWith(const TablesRoute().location)) {
+    return ShellModule.tables;
+  }
   return null;
 }
 
@@ -92,6 +107,17 @@ List<NzShellTab> shellTabsFor(
       caption: ref.watch(tasksNavCaptionProvider),
     ),
     switch (module) {
+      ShellModule.users => NzShellTab(
+        icon: NzIcons.group,
+        selectedIcon: NzIcons.group,
+        label: l.uiHomeModuleUsers,
+        caption: ref.watch(adminUsersNavCaptionProvider),
+      ),
+      ShellModule.tables => NzShellTab(
+        icon: NzIcons.sheets,
+        selectedIcon: NzIcons.sheets,
+        label: l.uiHomeModuleSheets,
+      ),
       ShellModule.coordinatorships => NzShellTab(
         icon: NzIcons.coordinatorships,
         selectedIcon: NzIcons.coordinatorships,
@@ -346,6 +372,8 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
       RailModule.archive => archiveMaster(),
       RailModule.messages => messagesMaster(),
       RailModule.meetings => meetingsMaster(),
+      RailModule.users => usersMaster(),
+      RailModule.tables => tablesMaster(),
       null => const SizedBox.shrink(),
     };
     // Ana sayfa/Görevler/Koordinatörlükler kökünde açık kayıt yoksa liste sağ bölmenin yerini de alır; kayıt açılınca 390'a
@@ -535,6 +563,14 @@ class _SplitAppNav implements NzAppNav {
   @override
   void openMessages() => _module(RailModule.messages);
 
+  @override
+  void openUsers() => _module(RailModule.users);
+  @override
+  void openUser(String accountId) => _pane(PaneEntry(PaneKind.user, accountId));
+  @override
+  void openTables() => _module(RailModule.tables);
+  @override
+  void openTable(String id) => _pane(PaneEntry(PaneKind.table, id));
   @override
   void openProfile() => _base.openProfile();
 

@@ -130,18 +130,12 @@ abstract class _$CoordinatorshipDetailController
   }
 }
 
-/// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
-/// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
-/// biri yükleniyorsa yükleniyor. Departman kaydı yalnız şirket yöneticisinde okunur
-/// (`listDepartments` yalnız ona açık, ORGANIZATION-K08); diğer rollerde istek yoktur.
+/// [code] koordinatörlüğünün ayrıntısı; tekil okuma sunucunun rol denetiminden geçer.
 
 @ProviderFor(coordinatorshipDetail)
 final coordinatorshipDetailProvider = CoordinatorshipDetailFamily._();
 
-/// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
-/// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
-/// biri yükleniyorsa yükleniyor. Departman kaydı yalnız şirket yöneticisinde okunur
-/// (`listDepartments` yalnız ona açık, ORGANIZATION-K08); diğer rollerde istek yoktur.
+/// [code] koordinatörlüğünün ayrıntısı; tekil okuma sunucunun rol denetiminden geçer.
 
 final class CoordinatorshipDetailProvider
     extends
@@ -151,10 +145,7 @@ final class CoordinatorshipDetailProvider
           AsyncValue<CoordinatorshipDetail?>
         >
     with $Provider<AsyncValue<CoordinatorshipDetail?>> {
-  /// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
-  /// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
-  /// biri yükleniyorsa yükleniyor. Departman kaydı yalnız şirket yöneticisinde okunur
-  /// (`listDepartments` yalnız ona açık, ORGANIZATION-K08); diğer rollerde istek yoktur.
+  /// [code] koordinatörlüğünün ayrıntısı; tekil okuma sunucunun rol denetiminden geçer.
   CoordinatorshipDetailProvider._({
     required CoordinatorshipDetailFamily super.from,
     required String super.argument,
@@ -210,12 +201,9 @@ final class CoordinatorshipDetailProvider
 }
 
 String _$coordinatorshipDetailHash() =>
-    r'db75e7fa9adf0f21de92cb4d0c49bc42ec282f82';
+    r'b2ac701a8ee55715cf70c3aa1ae09fcf5793e877';
 
-/// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
-/// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
-/// biri yükleniyorsa yükleniyor. Departman kaydı yalnız şirket yöneticisinde okunur
-/// (`listDepartments` yalnız ona açık, ORGANIZATION-K08); diğer rollerde istek yoktur.
+/// [code] koordinatörlüğünün ayrıntısı; tekil okuma sunucunun rol denetiminden geçer.
 
 final class CoordinatorshipDetailFamily extends $Family
     with $FunctionalFamilyOverride<AsyncValue<CoordinatorshipDetail?>, String> {
@@ -228,10 +216,7 @@ final class CoordinatorshipDetailFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// [code] koordinatörlüğünün ayrıntısı (katalog + departman kaydı); bilinmeyen kod → null.
-  /// Eşzamanlı türetilir: kaynaklar (keepAlive) hazırsa ilk kare doludur; biri hatalıysa hata,
-  /// biri yükleniyorsa yükleniyor. Departman kaydı yalnız şirket yöneticisinde okunur
-  /// (`listDepartments` yalnız ona açık, ORGANIZATION-K08); diğer rollerde istek yoktur.
+  /// [code] koordinatörlüğünün ayrıntısı; tekil okuma sunucunun rol denetiminden geçer.
 
   CoordinatorshipDetailProvider call(String code) =>
       CoordinatorshipDetailProvider._(argument: code, from: this);

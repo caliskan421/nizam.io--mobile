@@ -40,6 +40,7 @@ Future<bool> showNewTaskSheet(
   String? title,
   String? note,
   ChatTaskSource? chatMessage,
+  String? initialAssignee,
 }) async {
   final container = ProviderScope.containerOf(context, listen: false);
   if (!container.read(canCreateTaskProvider)) return false;
@@ -47,8 +48,10 @@ Future<bool> showNewTaskSheet(
       .read(newTaskFormControllerProvider.notifier)
       .prepare(
         coordinatorship: coordinatorship,
+        initialAssignee: initialAssignee,
         reset:
             resetTarget ||
+            initialAssignee != null ||
             coordinatorship != null ||
             note != null ||
             chatMessage != null,
@@ -154,7 +157,7 @@ String _meetingCreated(AppLocalizations l, MeetingForm f) {
 /// koordinatörlüğün ekibine eklenir; e-posta gönderilmez. Bildirim yalnız sunucu yazmasından
 /// sonra çıkar. [coordinatorship] verilirse o koordinatörlük seçili, rol Üye açılır
 /// (koordinatörlük ayrıntısı "Üye ekle").
-Future<void> showInviteSheet(BuildContext context, {String? coordinatorship}) {
+Future<bool> showInviteSheet(BuildContext context, {String? coordinatorship}) {
   final container = ProviderScope.containerOf(context, listen: false);
   container
       .read(inviteFormControllerProvider.notifier)

@@ -10,12 +10,20 @@ abstract interface class DepartmentRepository {
   /// `GET /v1/departments`: imleçsiz; kesilme `PageSlice.truncated`.
   Future<PageSlice<Department>> listDepartments();
 
+  Future<Department> readProgramDepartment(
+    String programId,
+    String departmentId,
+  );
+
+  Future<void> restoreDepartment(String programId, String departmentId);
+
   /// `POST /v1/departments`. [kind] [DepartmentKind.unknown] olamaz.
   Future<Department> createDepartment({
     required String name,
     required DepartmentKind kind,
     String? code,
     String? description,
+    String? requestKey,
   });
 
   /// `PATCH /v1/departments/{id}`: `null` alan değişmez.
@@ -34,6 +42,7 @@ abstract interface class DepartmentRepository {
     String programId,
     String departmentId, {
     String? displayName,
+    String? requestKey,
   });
 
   /// `PATCH /v1/program/departments/{departmentId}` (S2): yalnız bu programdaki adı değiştirir;

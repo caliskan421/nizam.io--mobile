@@ -288,6 +288,7 @@ class TaskCheckRow extends StatelessWidget {
     this.captionColor,
     this.leading,
     this.count,
+    this.countLowerBound = false,
     this.square = false,
     this.radio = false,
     this.dimmed = false,
@@ -302,6 +303,7 @@ class TaskCheckRow extends StatelessWidget {
 
   /// Sağda sayı (filtre).
   final int? count;
+  final bool countLowerBound;
   final bool square;
   final bool radio;
   final bool dimmed;
@@ -364,7 +366,11 @@ class TaskCheckRow extends StatelessWidget {
       inMutuallyExclusiveGroup: radio ? true : null,
       selected: radio ? selected : null,
       button: true,
-      label: [label, ?caption, if (count != null) '$count'].join(', '),
+      label: [
+        label,
+        ?caption,
+        if (count != null) '${countLowerBound ? '≥' : ''}$count',
+      ].join(', '),
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -404,7 +410,10 @@ class TaskCheckRow extends StatelessWidget {
                 ],
                 if (count != null) ...[
                   const Gap(NizamioSpacing.space2),
-                  Text('$count', style: t.monoSm.copyWith(color: c.textMuted)),
+                  Text(
+                    '${countLowerBound ? '≥' : ''}$count',
+                    style: t.monoSm.copyWith(color: c.textMuted),
+                  ),
                 ],
                 if (!square) ...[const Gap(NizamioSpacing.space3), box],
               ],

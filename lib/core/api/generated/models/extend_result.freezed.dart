@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ExtendResult {
 
-@JsonKey(name: 'cascade_count') int get cascadeCount;@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime get newEndOn;
+@JsonKey(name: 'cascade_count') int get cascadeCount;@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime get newEndOn;/// Uzatmanın yazdığı tarih sürümü; sonraki tarih yazımı bunu `expected_dates_revision` olarak okuma yapmadan gönderebilir. Tekrarda ilk uzatmanın değeridir (görevin bugünkü sürümü değil).
+@JsonKey(name: 'dates_revision') int get datesRevision;/// `true`: aynı `Idempotency-Key` + aynı istek; uzatma ikinci kez uygulanmadı, alanlar ilk uzatmanın sonucudur (WORK-K89).
+ bool get replayed;
 /// Create a copy of ExtendResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +32,20 @@ $ExtendResultCopyWith<ExtendResult> get copyWith => _$ExtendResultCopyWithImpl<E
 @override
 bool operator ==(Object other) {
   final _this = this as ExtendResult;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExtendResult&&(identical(other.cascadeCount, _this.cascadeCount) || other.cascadeCount == _this.cascadeCount)&&(identical(other.newEndOn, _this.newEndOn) || other.newEndOn == _this.newEndOn));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExtendResult&&(identical(other.cascadeCount, _this.cascadeCount) || other.cascadeCount == _this.cascadeCount)&&(identical(other.newEndOn, _this.newEndOn) || other.newEndOn == _this.newEndOn)&&(identical(other.datesRevision, _this.datesRevision) || other.datesRevision == _this.datesRevision)&&(identical(other.replayed, _this.replayed) || other.replayed == _this.replayed));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ExtendResult;
-  return Object.hash(runtimeType,_this.cascadeCount,_this.newEndOn);
+  return Object.hash(runtimeType,_this.cascadeCount,_this.newEndOn,_this.datesRevision,_this.replayed);
 }
 
 @override
 String toString() {
   final _this = this as ExtendResult;
-  return 'ExtendResult(cascadeCount: ${_this.cascadeCount}, newEndOn: ${_this.newEndOn})';
+  return 'ExtendResult(cascadeCount: ${_this.cascadeCount}, newEndOn: ${_this.newEndOn}, datesRevision: ${_this.datesRevision}, replayed: ${_this.replayed})';
 }
 
 
@@ -54,7 +56,7 @@ abstract mixin class $ExtendResultCopyWith<$Res>  {
   factory $ExtendResultCopyWith(ExtendResult value, $Res Function(ExtendResult) _then) = _$ExtendResultCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'cascade_count') int cascadeCount,@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime newEndOn
+@JsonKey(name: 'cascade_count') int cascadeCount,@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime newEndOn,@JsonKey(name: 'dates_revision') int datesRevision, bool replayed
 });
 
 
@@ -71,11 +73,13 @@ class _$ExtendResultCopyWithImpl<$Res>
 
 /// Create a copy of ExtendResult
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? cascadeCount = null,Object? newEndOn = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? cascadeCount = null,Object? newEndOn = null,Object? datesRevision = null,Object? replayed = null,}) {
   return _then(ExtendResult(
 cascadeCount: null == cascadeCount ? _self.cascadeCount : cascadeCount // ignore: cast_nullable_to_non_nullable
 as int,newEndOn: null == newEndOn ? _self.newEndOn : newEndOn // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,datesRevision: null == datesRevision ? _self.datesRevision : datesRevision // ignore: cast_nullable_to_non_nullable
+as int,replayed: null == replayed ? _self.replayed : replayed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -160,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'cascade_count')  int cascadeCount, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'cascade_count')  int cascadeCount, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn, @JsonKey(name: 'dates_revision')  int datesRevision,  bool replayed)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ExtendResult() when $default != null:
-return $default(_that.cascadeCount,_that.newEndOn);case _:
+return $default(_that.cascadeCount,_that.newEndOn,_that.datesRevision,_that.replayed);case _:
   return orElse();
 
 }
@@ -181,10 +185,10 @@ return $default(_that.cascadeCount,_that.newEndOn);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'cascade_count')  int cascadeCount, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'cascade_count')  int cascadeCount, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn, @JsonKey(name: 'dates_revision')  int datesRevision,  bool replayed)  $default,) {final _that = this;
 switch (_that) {
 case _ExtendResult():
-return $default(_that.cascadeCount,_that.newEndOn);case _:
+return $default(_that.cascadeCount,_that.newEndOn,_that.datesRevision,_that.replayed);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +205,10 @@ return $default(_that.cascadeCount,_that.newEndOn);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'cascade_count')  int cascadeCount, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'cascade_count')  int cascadeCount, @DateOnlyConverter()@JsonKey(name: 'new_end_on')  DateTime newEndOn, @JsonKey(name: 'dates_revision')  int datesRevision,  bool replayed)?  $default,) {final _that = this;
 switch (_that) {
 case _ExtendResult() when $default != null:
-return $default(_that.cascadeCount,_that.newEndOn);case _:
+return $default(_that.cascadeCount,_that.newEndOn,_that.datesRevision,_that.replayed);case _:
   return null;
 
 }
@@ -216,11 +220,15 @@ return $default(_that.cascadeCount,_that.newEndOn);case _:
 @JsonSerializable()
 
 class _ExtendResult implements ExtendResult {
-  const _ExtendResult({@JsonKey(name: 'cascade_count') required this.cascadeCount, @DateOnlyConverter()@JsonKey(name: 'new_end_on') required this.newEndOn});
+  const _ExtendResult({@JsonKey(name: 'cascade_count') required this.cascadeCount, @DateOnlyConverter()@JsonKey(name: 'new_end_on') required this.newEndOn, @JsonKey(name: 'dates_revision') required this.datesRevision, required this.replayed});
   factory _ExtendResult.fromJson(Map<String, dynamic> json) => _$ExtendResultFromJson(json);
 
 @override@JsonKey(name: 'cascade_count') final  int cascadeCount;
 @override@DateOnlyConverter()@JsonKey(name: 'new_end_on') final  DateTime newEndOn;
+/// Uzatmanın yazdığı tarih sürümü; sonraki tarih yazımı bunu `expected_dates_revision` olarak okuma yapmadan gönderebilir. Tekrarda ilk uzatmanın değeridir (görevin bugünkü sürümü değil).
+@override@JsonKey(name: 'dates_revision') final  int datesRevision;
+/// `true`: aynı `Idempotency-Key` + aynı istek; uzatma ikinci kez uygulanmadı, alanlar ilk uzatmanın sonucudur (WORK-K89).
+@override final  bool replayed;
 
 /// Create a copy of ExtendResult
 /// with the given fields replaced by the non-null parameter values.
@@ -235,18 +243,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ExtendResult&&(identical(other.cascadeCount, cascadeCount) || other.cascadeCount == cascadeCount)&&(identical(other.newEndOn, newEndOn) || other.newEndOn == newEndOn));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ExtendResult&&(identical(other.cascadeCount, cascadeCount) || other.cascadeCount == cascadeCount)&&(identical(other.newEndOn, newEndOn) || other.newEndOn == newEndOn)&&(identical(other.datesRevision, datesRevision) || other.datesRevision == datesRevision)&&(identical(other.replayed, replayed) || other.replayed == replayed));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,cascadeCount,newEndOn);
+    return Object.hash(runtimeType,cascadeCount,newEndOn,datesRevision,replayed);
 }
 
 @override
 String toString() {
-    return 'ExtendResult(cascadeCount: $cascadeCount, newEndOn: $newEndOn)';
+    return 'ExtendResult(cascadeCount: $cascadeCount, newEndOn: $newEndOn, datesRevision: $datesRevision, replayed: $replayed)';
 }
 
 
@@ -257,7 +265,7 @@ abstract mixin class _$ExtendResultCopyWith<$Res> implements $ExtendResultCopyWi
   factory _$ExtendResultCopyWith(_ExtendResult value, $Res Function(_ExtendResult) _then) = __$ExtendResultCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'cascade_count') int cascadeCount,@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime newEndOn
+@JsonKey(name: 'cascade_count') int cascadeCount,@DateOnlyConverter()@JsonKey(name: 'new_end_on') DateTime newEndOn,@JsonKey(name: 'dates_revision') int datesRevision, bool replayed
 });
 
 
@@ -274,11 +282,13 @@ class __$ExtendResultCopyWithImpl<$Res>
 
 /// Create a copy of ExtendResult
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? cascadeCount = null,Object? newEndOn = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? cascadeCount = null,Object? newEndOn = null,Object? datesRevision = null,Object? replayed = null,}) {
   return _then(_ExtendResult(
 cascadeCount: null == cascadeCount ? _self.cascadeCount : cascadeCount // ignore: cast_nullable_to_non_nullable
 as int,newEndOn: null == newEndOn ? _self.newEndOn : newEndOn // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,datesRevision: null == datesRevision ? _self.datesRevision : datesRevision // ignore: cast_nullable_to_non_nullable
+as int,replayed: null == replayed ? _self.replayed : replayed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

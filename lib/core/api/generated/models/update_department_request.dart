@@ -16,6 +16,8 @@ abstract class UpdateDepartmentRequest with _$UpdateDepartmentRequest {
 
     /// Gönderilmezse ya da boşsa tür değişmez.
     UpdateDepartmentRequestKind? kind,
+
+    /// Verilmezse kod değişmez. Verilirse kırpılır ve büyük harfe çevrilir; sonuç `^[A-Z0-9]{2,10}$` olmalıdır (422 `organization.invalid_code`). Mevcut kod boş dizeyle boşaltılamaz (ORGANIZATION-K10).
     String? code,
     String? description,
   }) = _UpdateDepartmentRequest;

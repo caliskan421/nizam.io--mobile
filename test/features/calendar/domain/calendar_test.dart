@@ -33,6 +33,7 @@ TaskItem _task(
   required DateTime due,
   TaskStatus status = TaskStatus.inProgress,
   DateChangeRequest? request,
+  List<String> assignees = const [],
 }) => TaskItem(
   code: code,
   title: 'Görev $code',
@@ -41,7 +42,7 @@ TaskItem _task(
   priority: TaskPriority.medium,
   start: start,
   due: due,
-  assignees: const [],
+  assignees: assignees,
   dateRequest: request,
 );
 
@@ -54,6 +55,38 @@ TaskCatalog _catalog(List<TaskItem> tasks) => TaskCatalog(
 );
 
 void main() {
+  test('profil takvimi tamamlanan görevi korur ve aynı gün başlangıç/bitişi tek kayıt yapar', () {
+    final day = DateTime(2026, 11, 5);
+    final task = _task(
+      'done',
+      start: day,
+      due: day,
+      status: TaskStatus.done,
+      assignees: ['person'],
+    );
+    final index = CalendarIndex.personTasks(_catalog([task]), 'person');
+    final entry = index.on(day).single as TaskEntry;
+    expect(entry.status, TaskStatus.done);
+    expect(entry.edge, TaskEdge.end);
+    expect(entry.late, isFalse);
+  });
+
+  test('kişi takvimi yalnız o kişiye atanmış görev tarihlerini içerir', () {
+    final date = DateTime(2026, 11, 5);
+    final index = CalendarIndex.build(
+      const [],
+      _catalog([
+        _task('mine', start: date, due: date, assignees: ['person']),
+        _task('other', start: date, due: date, assignees: ['someone']),
+      ]),
+      accountId: 'person',
+    );
+    expect(index.on(date).whereType<TaskEntry>().map((e) => e.code), [
+      'mine',
+      'mine',
+    ]);
+  });
+
   test('Ekim 2026 ızgarası 28 Eylül – 1 Kasım, 5 satır, pazartesi başlar', () {
     final w = monthWeeks(DateTime(2026, 10));
     expect(w, hasLength(5));

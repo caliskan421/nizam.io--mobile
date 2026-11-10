@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserList {
 
- List<KnownUser>? get users;@JsonKey(name: 'next_cursor') String? get nextCursor;
+ List<KnownUser>? get users;/// Bütün süzgeçlere (rol dahil) uyan hesap sayısı; imleç zincirinin toplam satır sayısıdır.
+ int get total;@JsonKey(name: 'role_counts') UserRoleCounts get roleCounts;/// Devam eden listede dolu. Süzgeçli listede sayfa `limit`ten az satırla (boş da olabilir) ve dolu `next_cursor` ile dönebilir (istek başına tarama bütçesi); istemci `next_cursor` boşalana dek devam eder, satır atlanmaz ve tekrar etmez.
+@JsonKey(name: 'next_cursor') String? get nextCursor;
 /// Create a copy of UserList
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +32,20 @@ $UserListCopyWith<UserList> get copyWith => _$UserListCopyWithImpl<UserList>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as UserList;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserList&&const DeepCollectionEquality().equals(other.users, _this.users)&&(identical(other.nextCursor, _this.nextCursor) || other.nextCursor == _this.nextCursor));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserList&&const DeepCollectionEquality().equals(other.users, _this.users)&&(identical(other.total, _this.total) || other.total == _this.total)&&(identical(other.roleCounts, _this.roleCounts) || other.roleCounts == _this.roleCounts)&&(identical(other.nextCursor, _this.nextCursor) || other.nextCursor == _this.nextCursor));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as UserList;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.users),_this.nextCursor);
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.users),_this.total,_this.roleCounts,_this.nextCursor);
 }
 
 @override
 String toString() {
   final _this = this as UserList;
-  return 'UserList(users: ${_this.users}, nextCursor: ${_this.nextCursor})';
+  return 'UserList(users: ${_this.users}, total: ${_this.total}, roleCounts: ${_this.roleCounts}, nextCursor: ${_this.nextCursor})';
 }
 
 
@@ -54,11 +56,11 @@ abstract mixin class $UserListCopyWith<$Res>  {
   factory $UserListCopyWith(UserList value, $Res Function(UserList) _then) = _$UserListCopyWithImpl;
 @useResult
 $Res call({
- List<KnownUser>? users,@JsonKey(name: 'next_cursor') String? nextCursor
+ List<KnownUser>? users, int total,@JsonKey(name: 'role_counts') UserRoleCounts roleCounts,@JsonKey(name: 'next_cursor') String? nextCursor
 });
 
 
-
+$UserRoleCountsCopyWith<$Res> get roleCounts;
 
 }
 /// @nodoc
@@ -71,14 +73,25 @@ class _$UserListCopyWithImpl<$Res>
 
 /// Create a copy of UserList
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? users = freezed,Object? nextCursor = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? users = freezed,Object? total = null,Object? roleCounts = null,Object? nextCursor = freezed,}) {
   return _then(UserList(
 users: freezed == users ? _self.users : users // ignore: cast_nullable_to_non_nullable
-as List<KnownUser>?,nextCursor: freezed == nextCursor ? _self.nextCursor : nextCursor // ignore: cast_nullable_to_non_nullable
+as List<KnownUser>?,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as int,roleCounts: null == roleCounts ? _self.roleCounts : roleCounts // ignore: cast_nullable_to_non_nullable
+as UserRoleCounts,nextCursor: freezed == nextCursor ? _self.nextCursor : nextCursor // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
-
+/// Create a copy of UserList
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserRoleCountsCopyWith<$Res> get roleCounts {
+  
+  return $UserRoleCountsCopyWith<$Res>(_self.roleCounts, (value) {
+    return _then(_self.copyWith(roleCounts: value));
+  });
+}
 }
 
 
@@ -160,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<KnownUser>? users, @JsonKey(name: 'next_cursor')  String? nextCursor)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<KnownUser>? users,  int total, @JsonKey(name: 'role_counts')  UserRoleCounts roleCounts, @JsonKey(name: 'next_cursor')  String? nextCursor)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserList() when $default != null:
-return $default(_that.users,_that.nextCursor);case _:
+return $default(_that.users,_that.total,_that.roleCounts,_that.nextCursor);case _:
   return orElse();
 
 }
@@ -181,10 +194,10 @@ return $default(_that.users,_that.nextCursor);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<KnownUser>? users, @JsonKey(name: 'next_cursor')  String? nextCursor)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<KnownUser>? users,  int total, @JsonKey(name: 'role_counts')  UserRoleCounts roleCounts, @JsonKey(name: 'next_cursor')  String? nextCursor)  $default,) {final _that = this;
 switch (_that) {
 case _UserList():
-return $default(_that.users,_that.nextCursor);case _:
+return $default(_that.users,_that.total,_that.roleCounts,_that.nextCursor);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +214,10 @@ return $default(_that.users,_that.nextCursor);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<KnownUser>? users, @JsonKey(name: 'next_cursor')  String? nextCursor)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<KnownUser>? users,  int total, @JsonKey(name: 'role_counts')  UserRoleCounts roleCounts, @JsonKey(name: 'next_cursor')  String? nextCursor)?  $default,) {final _that = this;
 switch (_that) {
 case _UserList() when $default != null:
-return $default(_that.users,_that.nextCursor);case _:
+return $default(_that.users,_that.total,_that.roleCounts,_that.nextCursor);case _:
   return null;
 
 }
@@ -216,7 +229,7 @@ return $default(_that.users,_that.nextCursor);case _:
 @JsonSerializable()
 
 class _UserList implements UserList {
-  const _UserList({required  List<KnownUser>? users, @JsonKey(name: 'next_cursor') this.nextCursor}): _users = users;
+  const _UserList({required  List<KnownUser>? users, required this.total, @JsonKey(name: 'role_counts') required this.roleCounts, @JsonKey(name: 'next_cursor') this.nextCursor}): _users = users;
   factory _UserList.fromJson(Map<String, dynamic> json) => _$UserListFromJson(json);
 
  final  List<KnownUser>? _users;
@@ -228,6 +241,10 @@ class _UserList implements UserList {
   return EqualUnmodifiableListView(value);
 }
 
+/// Bütün süzgeçlere (rol dahil) uyan hesap sayısı; imleç zincirinin toplam satır sayısıdır.
+@override final  int total;
+@override@JsonKey(name: 'role_counts') final  UserRoleCounts roleCounts;
+/// Devam eden listede dolu. Süzgeçli listede sayfa `limit`ten az satırla (boş da olabilir) ve dolu `next_cursor` ile dönebilir (istek başına tarama bütçesi); istemci `next_cursor` boşalana dek devam eder, satır atlanmaz ve tekrar etmez.
 @override@JsonKey(name: 'next_cursor') final  String? nextCursor;
 
 /// Create a copy of UserList
@@ -243,18 +260,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserList&&const DeepCollectionEquality().equals(other.users, _users)&&(identical(other.nextCursor, nextCursor) || other.nextCursor == nextCursor));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserList&&const DeepCollectionEquality().equals(other.users, _users)&&(identical(other.total, total) || other.total == total)&&(identical(other.roleCounts, roleCounts) || other.roleCounts == roleCounts)&&(identical(other.nextCursor, nextCursor) || other.nextCursor == nextCursor));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_users),nextCursor);
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_users),total,roleCounts,nextCursor);
 }
 
 @override
 String toString() {
-    return 'UserList(users: $users, nextCursor: $nextCursor)';
+    return 'UserList(users: $users, total: $total, roleCounts: $roleCounts, nextCursor: $nextCursor)';
 }
 
 
@@ -265,11 +282,11 @@ abstract mixin class _$UserListCopyWith<$Res> implements $UserListCopyWith<$Res>
   factory _$UserListCopyWith(_UserList value, $Res Function(_UserList) _then) = __$UserListCopyWithImpl;
 @override @useResult
 $Res call({
- List<KnownUser>? users,@JsonKey(name: 'next_cursor') String? nextCursor
+ List<KnownUser>? users, int total,@JsonKey(name: 'role_counts') UserRoleCounts roleCounts,@JsonKey(name: 'next_cursor') String? nextCursor
 });
 
 
-
+@override $UserRoleCountsCopyWith<$Res> get roleCounts;
 
 }
 /// @nodoc
@@ -282,15 +299,26 @@ class __$UserListCopyWithImpl<$Res>
 
 /// Create a copy of UserList
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? users = freezed,Object? nextCursor = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? users = freezed,Object? total = null,Object? roleCounts = null,Object? nextCursor = freezed,}) {
   return _then(_UserList(
 users: freezed == users ? _self._users : users // ignore: cast_nullable_to_non_nullable
-as List<KnownUser>?,nextCursor: freezed == nextCursor ? _self.nextCursor : nextCursor // ignore: cast_nullable_to_non_nullable
+as List<KnownUser>?,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as int,roleCounts: null == roleCounts ? _self.roleCounts : roleCounts // ignore: cast_nullable_to_non_nullable
+as UserRoleCounts,nextCursor: freezed == nextCursor ? _self.nextCursor : nextCursor // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
 
-
+/// Create a copy of UserList
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserRoleCountsCopyWith<$Res> get roleCounts {
+  
+  return $UserRoleCountsCopyWith<$Res>(_self.roleCounts, (value) {
+    return _then(_self.copyWith(roleCounts: value));
+  });
+}
 }
 
 // dart format on

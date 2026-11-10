@@ -9,6 +9,7 @@ import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../../tasks/tasks.dart';
 import '../../application/calendar_controller.dart';
 import '../../domain/calendar.dart';
 import 'calendar_grid.dart';
@@ -21,11 +22,13 @@ class CalendarDay extends ConsumerWidget {
   const CalendarDay({
     super.key,
     required this.index,
-    required this.onPlanMeeting,
+    this.onPlanMeeting,
+    this.emptyMessage,
   });
 
   final CalendarIndex index;
-  final VoidCallback onPlanMeeting;
+  final VoidCallback? onPlanMeeting;
+  final String? emptyMessage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -94,17 +97,18 @@ class CalendarDay extends ConsumerWidget {
               if (groups.isEmpty) ...[
                 const Gap(14 + 28),
                 Text(
-                  l.uiCalendarEmpty,
+                  emptyMessage ?? l.uiCalendarEmpty,
                   textAlign: TextAlign.center,
                   style: t.bodyMd.copyWith(color: c.textMuted),
                 ),
                 const Gap(14),
-                Center(
-                  child: NzButton.secondary(
-                    label: l.uiCalendarPlan,
-                    onPressed: onPlanMeeting,
+                if (onPlanMeeting != null)
+                  Center(
+                    child: NzButton.secondary(
+                      label: l.uiCalendarPlan,
+                      onPressed: onPlanMeeting,
+                    ),
                   ),
-                ),
                 const Gap(NizamioSpacing.space2),
               ],
             ],
@@ -158,7 +162,14 @@ class _EntryRow extends StatelessWidget {
         e.code,
         e.title,
         '${e.edge == TaskEdge.end ? l.uiCalendarTaskEnds : l.uiCalendarTaskStarts}'
-            ' · ${e.assignees.map((a) => index.personName(a) ?? l.uiTasksUnknownPerson).join(', ')}',
+            ' · ${e.status == null ? e.assignees.map((a) => index.personName(a) ?? l.uiTasksUnknownPerson).join(', ') : switch (e.status!) {
+                    TaskStatus.todo => l.uiTasksStatusTodo,
+                    TaskStatus.inProgress => l.uiTasksStatusDoing,
+                    TaskStatus.review => l.uiTasksStatusReview,
+                    TaskStatus.returned => l.uiTasksStatusReturned,
+                    TaskStatus.done => l.uiTasksStatusDone,
+                    TaskStatus.unknown => l.uiUsersUnknownStatus,
+                  }}',
         e.late ? l.uiCalendarLateLc : null,
         c.danger,
         c.danger.withValues(alpha: 0.16),

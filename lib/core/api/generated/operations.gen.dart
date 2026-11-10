@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket v0.12.0-api (861beb5ec246f62efb2854f7d4098a3ad5847bba) — docs/api/openapi.yaml
+// Kaynak: nizam.io--backend etiket v0.15.0-api (b8f6479a7971fa7056823acada47a7db4d9052de) — docs/api/openapi.yaml
 
 import '../api_meta.dart';
 
@@ -62,6 +62,26 @@ const apiOperations = <String, ApiOperation>{
     operationId: 'deleteAccount',
     method: 'DELETE',
     path: '/v1/admin/accounts/{id}',
+    scope: ScopeClass.s1,
+    csrf: true,
+    programHeader: false,
+    departmentHeader: false,
+    auth: true,
+  ),
+  'disableAccount': ApiOperation(
+    operationId: 'disableAccount',
+    method: 'POST',
+    path: '/v1/admin/accounts/{id}/disable',
+    scope: ScopeClass.s1,
+    csrf: true,
+    programHeader: false,
+    departmentHeader: false,
+    auth: true,
+  ),
+  'enableAccount': ApiOperation(
+    operationId: 'enableAccount',
+    method: 'POST',
+    path: '/v1/admin/accounts/{id}/enable',
     scope: ScopeClass.s1,
     csrf: true,
     programHeader: false,
@@ -224,6 +244,16 @@ const apiOperations = <String, ApiOperation>{
     path: '/v1/admin/users',
     scope: ScopeClass.s1,
     csrf: true,
+    programHeader: false,
+    departmentHeader: false,
+    auth: true,
+  ),
+  'readUser': ApiOperation(
+    operationId: 'readUser',
+    method: 'GET',
+    path: '/v1/admin/users/{id}',
+    scope: ScopeClass.s1,
+    csrf: false,
     programHeader: false,
     departmentHeader: false,
     auth: true,
@@ -1258,6 +1288,16 @@ const apiOperations = <String, ApiOperation>{
     departmentHeader: false,
     auth: true,
   ),
+  'readProgramDepartment': ApiOperation(
+    operationId: 'readProgramDepartment',
+    method: 'GET',
+    path: '/v1/program/departments/{departmentId}',
+    scope: ScopeClass.s2,
+    csrf: false,
+    programHeader: true,
+    departmentHeader: false,
+    auth: true,
+  ),
   'renameDepartmentLink': ApiOperation(
     operationId: 'renameDepartmentLink',
     method: 'PATCH',
@@ -1282,6 +1322,16 @@ const apiOperations = <String, ApiOperation>{
     operationId: 'listProgramWorkItems',
     method: 'GET',
     path: '/v1/program/work-items',
+    scope: ScopeClass.s2,
+    csrf: false,
+    programHeader: true,
+    departmentHeader: false,
+    auth: true,
+  ),
+  'countProgramWorkItems': ApiOperation(
+    operationId: 'countProgramWorkItems',
+    method: 'GET',
+    path: '/v1/program/work-items/counts',
     scope: ScopeClass.s2,
     csrf: false,
     programHeader: true,

@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/config/display_brand.dart';
+import '../../../core/config/flavor.dart';
 import '../../../core/providers.dart';
+import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
@@ -17,26 +20,43 @@ import '../application/current_program_controller.dart';
 /// (okunmamış bildirim varsa nokta; dokununca bildirim listesi) ve uygulama menüsünü açan cam
 /// daire. Sliver'dır.
 class RootTopBar extends ConsumerWidget {
-  const RootTopBar({super.key});
+  const RootTopBar({super.key, this.referenceHeader = false});
+
+  /// Reference list header: central brand identity and menu, without notification bell.
+  final bool referenceHeader;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final program = ref.watch(
-      currentProgramControllerProvider.select((p) => p.value?.name),
-    );
-    final bell = watchNotificationBell(context, ref);
+    final state = ref.watch(currentProgramControllerProvider);
+    final current = state.isLoading ? null : state.value;
+    final program = current?.id == ref.watch(scopeStateProvider).programId
+        ? current?.name
+        : null;
+    final bell = referenceHeader ? null : watchNotificationBell(context, ref);
+    final flavor = referenceHeader ? ref.watch(flavorProvider) : null;
+    final brand = flavor == null
+        ? l.uiHomeAppName
+        : displayBrand(flavor).name ?? l.uiHomeAppName;
     return NzTopBar(
-      leading: NzBrandMark(monogram: l.uiHomeAppName.characters.first),
-      title: l.uiHomeAppName,
+      leading: flavor == Flavor.dev
+          ? Image.asset(
+              'assets/branding/roketportal-mark.png',
+              width: NizamioSpacing.space8,
+              height: NizamioSpacing.space8,
+              excludeFromSemantics: true,
+            )
+          : NzBrandMark(monogram: brand.characters.first),
+      title: brand,
       subtitle: program,
       actions: [
-        NzIconButton(
-          icon: NzIcons.bell,
-          semanticLabel: bell.label,
-          dot: bell.dot ? context.colors.danger : null,
-          onPressed: () => unawaited(showNotifications(context)),
-        ),
+        if (bell != null)
+          NzIconButton(
+            icon: NzIcons.bell,
+            semanticLabel: bell.label,
+            dot: bell.dot ? context.colors.danger : null,
+            onPressed: () => unawaited(showNotifications(context)),
+          ),
         NzIconButton.glass(
           icon: NzIcons.menu,
           semanticLabel: l.uiHomeMenu,
@@ -49,8 +69,9 @@ class RootTopBar extends ConsumerWidget {
 
 /// Tablet liste bölmesinde kök üst çubuk gizlidir (`.tb-pane`); seçili program adı (S2) orada
 /// Ana sayfanın başında, telefondaki üst çubuk alt satırıyla aynı `m-program` biçiminde
-/// (`text-faint`) durur. Sunucu programı seçiliyken ad ilk kez yüklenirken satırın yeri boş
-/// ayrılır (ad gelince akış kaymaz); program yoksa ya da hata varsa hiçbir şey çizmez.
+/// (`text-faint`) durur. Yükleme sırasında ve program kimliği seçimle uyuşmadığında etiket
+/// gizlenir; ilk yüklemede satırın yeri ayrılır. Aynı programın yenilemesi hata verirse son
+/// bilinen ad kalabilir; bu gösterim yetki kanıtı değildir.
 class RootProgramLine extends ConsumerWidget {
   const RootProgramLine({super.key, this.bottom = 0});
 
@@ -58,9 +79,11 @@ class RootProgramLine extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final program = ref.watch(
-      currentProgramControllerProvider.select((p) => p.value?.name),
-    );
+    final state = ref.watch(currentProgramControllerProvider);
+    final current = state.isLoading ? null : state.value;
+    final program = current?.id == ref.watch(scopeStateProvider).programId
+        ? current?.name
+        : null;
     final pending = ref.watch(
       currentProgramControllerProvider.select(
         (p) => p.isLoading && !p.hasValue,

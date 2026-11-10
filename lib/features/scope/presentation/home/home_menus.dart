@@ -15,6 +15,8 @@ import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
+import '../../domain/program.dart';
+import '../program_badge.dart';
 import 'home_sections.dart';
 import 'home_texts.dart';
 
@@ -74,6 +76,8 @@ Future<void> showHomeDrawer(
   TeamRole? greetingRole,
   String? greetingEmail,
   int? programYear,
+  String? programShortName,
+  ProgramColor? programColor,
   String? version,
   String? productName,
   required ValueChanged<HomeModule> onModule,
@@ -220,6 +224,8 @@ Future<void> showHomeDrawer(
           // ↕); dokunuş mevcut kapsam değiştirme akışına bağlı.
           _SeasonCard(
             name: programName ?? l.uiScopeHomeChange,
+            shortName: programShortName,
+            color: programColor,
             caption: l.seasonCaption(programYear, l.uiScopeHomeChange),
             onTap: () => close(onChangeScope),
           ),
@@ -270,7 +276,7 @@ Future<void> showHomeDrawer(
             label: l.uiHomeGroupAdmin,
             rows: [
               if (greetingRole == TeamRole.admin)
-                row(HomeModule.users, NzIcons.group, 'Yönetim'),
+                row(HomeModule.users, NzIcons.group, l.uiHomeModuleUsers),
               row(
                 HomeModule.coordinatorships,
                 NzIcons.coordinatorships,
@@ -325,21 +331,21 @@ class _SeasonCard extends StatelessWidget {
   const _SeasonCard({
     required this.name,
     required this.caption,
+    this.shortName,
+    this.color,
     required this.onTap,
   });
 
   final String name;
   final String caption;
+  final String? shortName;
+  final ProgramColor? color;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
-    // Sayısal sözcükler ("2026") monograma girmez: "Örnek Sezon 2026" → "ÖS".
-    final monogram = NzAvatar.initialsOf(
-      name.split(' ').where((w) => int.tryParse(w) == null).join(' '),
-    );
     return NzCard.filled(
       padding: const EdgeInsets.symmetric(
         horizontal: NizamioSpacing.space3,
@@ -349,28 +355,7 @@ class _SeasonCard extends StatelessWidget {
       semanticLabel: '$name, $caption',
       child: Row(
         children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: c.inProgress,
-              borderRadius: BorderRadius.circular(NizamioRadius.tile),
-            ),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints.tightFor(
-                width: NizamioSize.controlSm - NizamioSpacing.space1,
-                height: NizamioSize.controlSm - NizamioSpacing.space1,
-              ),
-              child: Center(
-                child: Text(
-                  monogram,
-                  maxLines: 1,
-                  style: t.caption.copyWith(
-                    color: c.onInProgress,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          ProgramBadge(name: name, shortName: shortName, color: color),
           const Gap(NizamioSpacing.space3),
           Expanded(
             child: Column(

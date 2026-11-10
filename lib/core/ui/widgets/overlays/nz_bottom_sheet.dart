@@ -71,6 +71,7 @@ abstract final class NzBottomSheet {
     bool showHeader = true,
     bool compact = false,
     bool actionsDivider = true,
+    Color? backgroundColor,
   }) {
     Widget content(BuildContext sheetContext, {required bool modal}) =>
         PopScope(
@@ -86,6 +87,7 @@ abstract final class NzBottomSheet {
             compact: compact,
             modal: modal,
             actionsDivider: actionsDivider,
+            backgroundColor: backgroundColor,
             actions: actions?.call(sheetContext),
             child: Builder(builder: builder),
           ),
@@ -217,6 +219,7 @@ class NzBottomSheetContent extends StatefulWidget {
     this.compact = false,
     this.modal = false,
     this.actionsDivider = true,
+    this.backgroundColor,
   });
 
   final String title;
@@ -242,6 +245,7 @@ class NzBottomSheetContent extends StatefulWidget {
 
   /// Eylem satırının üstündeki 1 px `border-subtle` çizgi (kaynakta takvim önizlemesinde yok).
   final bool actionsDivider;
+  final Color? backgroundColor;
 
   @override
   State<NzBottomSheetContent> createState() => _NzBottomSheetContentState();
@@ -492,7 +496,7 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
 
     final sheet = DecoratedBox(
       decoration: BoxDecoration(
-        color: c.surface,
+        color: widget.backgroundColor ?? c.surface,
         borderRadius: radius,
         boxShadow: context.shadows.sheet,
       ),

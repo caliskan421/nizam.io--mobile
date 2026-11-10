@@ -89,6 +89,7 @@ class _OrganizationClient implements OrganizationClient {
   @override
   Future<Department> createDepartment({
     required CreateDepartmentRequest body,
+    String? idempotencyKey,
     Map<String, dynamic>? extras =
         OrganizationClient.createDepartmentOpenapiExtras,
   }) async {
@@ -96,7 +97,8 @@ class _OrganizationClient implements OrganizationClient {
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Idempotency-Key': idempotencyKey};
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _options = _setStreamType<Department>(
@@ -464,10 +466,12 @@ class _OrganizationClient implements OrganizationClient {
 
   @override
   Future<HttpResponse<UserList>> listUsers({
+    String? sortBy = 'created_at',
+    String? sortOrder = 'asc',
     String? role,
     String? search,
-    String? sortBy,
-    String? sortOrder,
+    String? programId,
+    String? departmentId,
     int? limit,
     String? cursor,
     Map<String, dynamic>? extras = OrganizationClient.listUsersOpenapiExtras,
@@ -475,10 +479,12 @@ class _OrganizationClient implements OrganizationClient {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{
-      r'role': role,
-      r'search': search,
       r'sort_by': sortBy,
       r'sort_order': sortOrder,
+      r'role': role,
+      r'search': search,
+      r'program_id': programId,
+      r'department_id': departmentId,
       r'limit': limit,
       r'cursor': cursor,
     };
@@ -533,6 +539,38 @@ class _OrganizationClient implements OrganizationClient {
     late UserResult _value;
     try {
       _value = UserResult.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<KnownUser> readUser({
+    required String id,
+    Map<String, dynamic>? extras = OrganizationClient.readUserOpenapiExtras,
+  }) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras ?? <String, dynamic>{});
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<KnownUser>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/v1/admin/users/${id}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late KnownUser _value;
+    try {
+      _value = KnownUser.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -733,6 +771,72 @@ class _OrganizationClient implements OrganizationClient {
     late AccountResult _value;
     try {
       _value = AccountResult.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<AccountStatusResult> disableAccount({
+    required String id,
+    Map<String, dynamic>? extras =
+        OrganizationClient.disableAccountOpenapiExtras,
+  }) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras ?? <String, dynamic>{});
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<AccountStatusResult>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/v1/admin/accounts/${id}/disable',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late AccountStatusResult _value;
+    try {
+      _value = AccountStatusResult.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<AccountStatusResult> enableAccount({
+    required String id,
+    Map<String, dynamic>? extras =
+        OrganizationClient.enableAccountOpenapiExtras,
+  }) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras ?? <String, dynamic>{});
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<AccountStatusResult>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/v1/admin/accounts/${id}/enable',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late AccountStatusResult _value;
+    try {
+      _value = AccountStatusResult.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

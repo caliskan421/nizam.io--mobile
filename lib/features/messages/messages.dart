@@ -9,3 +9,4 @@ export 'application/messages_nav_caption.dart'
         refreshMessagesBadge;
 export 'presentation/chat_page.dart' show ChatPage;
 export 'presentation/messages_page.dart' show MessagesPage;
+export 'presentation/open_person_chat.dart' show openPersonChat;

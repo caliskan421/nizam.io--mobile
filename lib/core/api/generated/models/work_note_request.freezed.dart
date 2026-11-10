@@ -16,6 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WorkNoteRequest {
 
+/// Not içeriği. Sunucu baş/son boşluğu kırpar; sonuç boş olamaz, kontrol karakteri taşıyamaz ve en çok 10000 karakterdir (Unicode kod noktası/rune, kırpmadan sonra ölçülür); aksi 422 `work.input_invalid` (alan `content`).
  String get content;
 /// Create a copy of WorkNoteRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -218,6 +219,7 @@ class _WorkNoteRequest implements WorkNoteRequest {
   const _WorkNoteRequest({required this.content});
   factory _WorkNoteRequest.fromJson(Map<String, dynamic> json) => _$WorkNoteRequestFromJson(json);
 
+/// Not içeriği. Sunucu baş/son boşluğu kırpar; sonuç boş olamaz, kontrol karakteri taşıyamaz ve en çok 10000 karakterdir (Unicode kod noktası/rune, kırpmadan sonra ölçülür); aksi 422 `work.input_invalid` (alan `content`).
 @override final  String content;
 
 /// Create a copy of WorkNoteRequest

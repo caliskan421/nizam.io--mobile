@@ -31,7 +31,7 @@ Koordinatör ortak public exports, oturum sahibiyle süzülen rozet görünümü
 
 Uygulama kapalıyken gelen **native mobil mesaj push bildirimi yoktur**. Paket bağımlılığı tek başına çalışan bildirim mekanizması değildir:
 
-- ADR-0002, Firebase projesi/yapılandırması belirlenene kadar `Firebase.initializeApp` çağrılmamasını kararlaştırır. Hazırlanan port/adaptör ve kayıt denetleyicisi henüz gerçek backend'e bağlı değildir; Firebase başlatma ve bildirimden sohbet açma zinciri çalıştırılmaz.
+- Dev Firebase Core/Remote Config [kullanıcının sağladığı dosyalarla bağlandı](firebase-kurulum-ve-kontroller.md); prod kapalıdır. Native push port/adaptörü ve kayıt denetleyicisi henüz gerçek backend'e bağlı değildir; bildirimden sohbet açma zinciri çalıştırılmaz.
 - Mevcut mobil notifications feature uygulama içi çan/liste/okundu işlemlerini ve ön plana dönüşte yenilemeyi yapar; arka planda çalışan bir push döngüsü değildir.
 - Backend notifications dış kanalı web push'tur; native FCM/APNs token teslimi değildir. Messaging MESSAGING-K24, sohbet mesajlarının bildirim olayı üretmediğini açıkça söyler.
 - Mesajlaşma SSE akışı yalnız ön planda ve mesaj ekranı dinlenirken açıktır. Uygulama kapalıyken SSE mesajı bildirim olarak gösteremez.

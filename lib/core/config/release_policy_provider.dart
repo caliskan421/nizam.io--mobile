@@ -8,3 +8,9 @@ final releasePolicySourceProvider = Provider<ReleasePolicySource>(
     'releasePolicySourceProvider bileşim kökünde bağlanır',
   ),
 );
+
+/// Geçerli süreçte tek politika okuması; UI bağlantısı bu reaktif yüzü izler.
+/// Başarısız istek kendiliğinden tekrarlanmaz (container retry politikası).
+final mobileReleasePolicyProvider = FutureProvider<MobileReleasePolicy>(
+  (ref) => ref.watch(releasePolicySourceProvider).fetch(),
+);

@@ -1,7 +1,8 @@
 # Firebase kurulumu ve uzaktan kontroller
 
 2026-11-11 ürün sahibi Firebase projesini oluşturdu; reverse-domain uygulama kimlikleri
-kabul edildi. Gerçek proje kimliği ve istemci yapılandırmaları henüz bu çalışmaya verilmedi.
+kabul edildi. Kullanıcının verdiği Android/iOS istemci yapılandırmaları doğrulandı:
+proje `nizamio-mobile`, iki platformda geliştirme kimliği `io.nizamio.mobile.dev`.
 
 ## Uygulama kayıtları
 
@@ -29,7 +30,8 @@ canlı ortam için ayrı proje açmak önerilir. Proje seçimi henüz otomatik y
    girmesi gerekir; dev dosyası tüm prod derlemelere ortak kopyalanmaz.
 5. Yapılandırma dosyaları alınca proje/uygulama kimlikleri doğrulanır; FlutterFire ile
    platform seçenekleri ve Gradle/Xcode bağlantısı tamamlanır. Yalnız dosyayı indirmek
-   veya klasöre koymak Firebase'i başlatmaz. Bu bağlantı ve başlatma henüz yapılmadı.
+   veya klasöre koymak Firebase'i başlatmaz. Dev bağlantısı ve Dart başlatması tamamlandı;
+   prod dosyaları henüz yok ve prod Firebase başlatması kapalıdır.
 6. Prod için karşılık gelen canlı proje/kayıtlar `io.nizamio.mobile` kimliğiyle oluşturulur.
 
 Firebase'deki uygulama kaydının paket/bundle kimliği sonradan düzenlenmez; kimlik değişirse
@@ -46,8 +48,24 @@ ve APNs anahtarı mobil uygulamaya gömülmez.
 
 `MobileReleasePolicy`, Firebase SDK'sından bağımsız karar mantığıdır.
 `FirebaseReleasePolicySource` açıkça verilmiş Remote Config örneği üzerinden ayarları
-okur. Bileşim kökü varsayılan olarak kapalı kaynak verir; uygulama açılışında Firebase
-başlatılmaz veya Remote Config isteği yapılmaz. Güncelleme ekranına bağlantı henüz yoktur.
+okur. Dev Android/iOS açılışında Firebase Core için en çok iki saniye beklenir; hata veya
+süre aşımında kapalı portlarla giriş akışı sürer. Geç tamamlanan sonuç o koşumdaki
+bileşime sonradan bağlanmaz. Başarılı dev başlatmasında ilk kareden sonra Remote Config
+bir kez okunur ve `mobileReleasePolicyProvider` üzerinden reaktif olarak tutulur. Prod,
+web ve masaüstü SDK'ya dokunmadan kapalı portlarla çalışır. Güncelleme ekranına bağlantı
+henüz yoktur; politika okumak tek başına kullanıcıyı güncelleme ekranına göndermez.
+
+Android Google Services 4.5.0 eklentisi yalnız ilgili flavor dosyasını işler; kök dosyaya
+fallback yapılmaz. Prod dosyası yoksa yalnız prod işleme görevleri kapanır ve bu
+görevlerin eski üretilmiş kaynakları temizlenir. iOS build phase aynı biçimde flavor'a
+ait plist'i seçer; bundle ID uyuşmazlığında derleme durur, prod dosyası yoksa eski dev
+plist'i çıktıdan kaldırılır. Swift/SPM Firebase bağımlılıkları Flutter paketleriyle gelir;
+konsoldaki yerel SwiftUI `FirebaseApp.configure()` veya elle SDK ekleme adımı tekrarlanmaz.
+Flutter başlatması `Firebase.initializeApp()` ile native flavor yapılandırmasını kullanır.
+
+FCM otomatik token üretimi, Analytics ve Crashlytics toplama kapalı kalır. Başlatma
+bildirim izni istemez veya token okumaz; native kayıt repository'si ve backend mesaj
+olayı henüz yoktur. Remote Config anahtarları `true` olsa bile bu dilim bunları otomatik açmaz.
 
 | Remote Config parametresi | Tür | Varsayılan / anlam |
 |---|---|---|
@@ -87,8 +105,8 @@ zorunlu güncelleme UI bağlantısından önce bu kalıcılık ve eskime politik
 
 ## Sıradaki bağlantılar
 
-- Doğrulanmış dev/prod dosyaları, flavor'a göre Firebase başlatma ve hatada uygulama
-  açılışını kilitlemeyen durum bildirimi.
+- Prod istemci dosyaları ve prod Firebase etkinleştirme kararı. Dev başlatma/Remote Config
+  okuma bağlıdır; kullanıcıya durum gösterimi ayrıca tasarlanacak.
 - Zorunlu güncelleme ekranı, isteğe bağlı güncelleme bottomsheet'i ve güvenilir mağaza
   hedefi. Platforma göre sürüm/build okunması, ön plana dönüşte kontrollü yenileme.
 - Remote Config geçerli politika kalıcılığı ve eskime kararı; güncelleme ekranı bu

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "130017297504",
+    "project_id": "nizamio-mobile",
+    "storage_bucket": "nizamio-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:130017297504:android:2e9b0a1674c4649e21ef05",
+        "android_client_info": {
+          "package_name": "io.nizamio.mobile.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDavl1FEdY4WaUNXafGsAJudpH-HY19U4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

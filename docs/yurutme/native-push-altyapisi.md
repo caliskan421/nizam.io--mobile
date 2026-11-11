@@ -12,10 +12,10 @@ temeli hazırlar. Mevcut uygulama içi çan ve ön plana dönüş tazelemesi ça
 | Firebase Messaging adaptörü | Hazır; ancak açıkça yapılandırılmış SDK örneğiyle kullanılabilir |
 | Ön plan bildirimi, arka plandan dokunuş, kapalı uygulamadan ilk bildirim | Adaptör olayları hazır; henüz uygulama tüketicisine bağlanmadı |
 | Hesap/kurulum/oturum bazında kayıt yaşam döngüsü | Denetleyici ve yarış testleri hazır; gerçek repository bekliyor |
-| Varsayılan uygulama bağı | Kapalı adaptör; Firebase başlatılmaz, izin istenmez, token alınmaz |
+| Varsayılan uygulama bağı | Dev Firebase taşıma portu bağlı; prod kapalı. İzin istenmez, token alınmaz |
 | Cihazda OS bildirimi / kapalı uygulamaya gerçek teslim | Henüz yok |
 
-Firebase bağımlılıkları zaten depodaydı. SDK yalnız `lib/app/notifications/` altında
+Firebase bağımlılıkları zaten depodaydı. SDK yalnız `lib/app/` altında
 kalır; core portları Firebase tanımaz. get_it sahipliği ve Riverpod portu mevcut DI
 kararını korur. Android ve iOS'ta FCM otomatik başlatma, analytics ve Crashlytics toplama
 kapalı tutulur. Bu bayraklar, daha önce çalışma anında açılmış otomatik başlatmayı
@@ -23,8 +23,9 @@ tek başına sıfırlamaz; etkinleştirme işi bunu ayrıca ele almalıdır.
 
 ## Hazırlanan mekanizma
 
-1. Bileşim kökü varsayılan olarak `DisabledPushNotifications` verir. Yapıcılar izin
-   penceresi açmaz. Yapılandırılmış Firebase adaptörü ileride açıkça enjekte edilir.
+1. Bileşim kökü varsayılan olarak `DisabledPushNotifications` verir. Dev Android/iOS
+   başlatması başarılıysa yapılandırılmış Firebase adaptörü enjekte edilir. Prod ve
+   başlatma hatası kapalı kalır. Yapıcılar izin penceresi açmaz.
 2. Açık kullanıcı tercihiyle `PushRegistrationController.enable(owner)` çağrılır.
    İzin reddedilirse cihaz tokenı okunmaz ve sunucuda kayıt yapılmaz.
 3. İzin varsa token alınır. iOS'ta APNs tokenı henüz yoksa FCM token isteği yapılmaz;

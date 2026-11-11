@@ -1,2 +1,1 @@
 #include "Debug.xcconfig"
-FLUTTER_TARGET = lib/main_prod.dart

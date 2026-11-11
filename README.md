@@ -11,7 +11,7 @@ alanı okur) · get_it 9 (bileşim kökü) · Riverpod 3 (kod üretimli; reaktif
 (OpenAPI'den üretim) · flutter_secure_storage · intl/ARB · shared_preferences (gizli olmayan
 tercihler) · yazı tipleri uygulamayla gelir (pubspec `fonts:`; google_fonts 8 yalnız çalışma anı indirmeyi kapatır) · gap (boşluk standardı) · drift +
 path_provider (yerel veri) · Firebase (core, messaging, analytics, crashlytics, remote_config;
-başlatılmamış) · flutter_native_splash + flutter_launcher_icons (yer tutucu marka). Paket
+dev: Core/Remote Config bağlı, prod kapalı) · flutter_native_splash + flutter_launcher_icons (yer tutucu marka). Paket
 kararları: `docs/architecture/adr-0002-paketler-tercih-yerel-veri-firebase.md`. Asgari platform:
 iOS 16+, Android 8.0 (API 26)+. Responsive yerleşim ve yön: ADR-0003 karar 25,
 [docs/yurutme/responsive-altyapi.md](docs/yurutme/responsive-altyapi.md).

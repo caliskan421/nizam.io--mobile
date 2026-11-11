@@ -5,6 +5,8 @@ import 'package:get_it/get_it.dart';
 import '../../core/config/flavor.dart';
 import '../../core/network/connectivity_link.dart';
 import '../../core/network/connectivity_monitor.dart';
+import '../../core/notifications/push_notifications.dart';
+import '../../core/notifications/push_providers.dart';
 import '../../core/preferences/locale_controller.dart';
 import '../../core/preferences/theme_mode_controller.dart';
 import '../../core/providers.dart';
@@ -48,8 +50,14 @@ class Composition {
     HttpClientAdapter? httpAdapter,
     PreferenceStore? preferenceStore,
     ConnectivityLink? connectivityLink,
+    PushNotifications? pushNotifications,
   }) {
     final locator = GetIt.asNewInstance();
+    // Native sözleşme ve Firebase dağıtım ayarları hazır olana kadar kapalı port.
+    // Burada Firebase başlatılmaz veya sistem izin penceresi gösterilmez.
+    locator.registerSingleton<PushNotifications>(
+      pushNotifications ?? const DisabledPushNotifications(),
+    );
     configureDependencies(
       locator,
       flavor: flavor,
@@ -107,6 +115,9 @@ class Composition {
       retry: (_, _) => null,
       overrides: [
         flavorProvider.overrideWithValue(flavor),
+        pushNotificationsProvider.overrideWithValue(
+          locator<PushNotifications>(),
+        ),
         httpAdapterProvider.overrideWithValue(registeredHttpAdapter(locator)),
         scopeControllerProvider.overrideWithValue(locator<ScopeController>()),
         localeControllerProvider.overrideWithValue(locator<LocaleController>()),

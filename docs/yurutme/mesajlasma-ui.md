@@ -31,12 +31,12 @@ Koordinatör ortak public exports, oturum sahibiyle süzülen rozet görünümü
 
 Uygulama kapalıyken gelen **native mobil mesaj push bildirimi yoktur**. Paket bağımlılığı tek başına çalışan bildirim mekanizması değildir:
 
-- ADR-0002, Firebase projesi/yapılandırması belirlenene kadar `Firebase.initializeApp` çağrılmamasını kararlaştırır. Mobil kaynakta Firebase Messaging başlatma, FCM token kaydı, arka plan işleyicisi ve bildirimden sohbet açma zinciri bulunmaz.
+- ADR-0002, Firebase projesi/yapılandırması belirlenene kadar `Firebase.initializeApp` çağrılmamasını kararlaştırır. Hazırlanan port/adaptör ve kayıt denetleyicisi henüz gerçek backend'e bağlı değildir; Firebase başlatma ve bildirimden sohbet açma zinciri çalıştırılmaz.
 - Mevcut mobil notifications feature uygulama içi çan/liste/okundu işlemlerini ve ön plana dönüşte yenilemeyi yapar; arka planda çalışan bir push döngüsü değildir.
 - Backend notifications dış kanalı web push'tur; native FCM/APNs token teslimi değildir. Messaging MESSAGING-K24, sohbet mesajlarının bildirim olayı üretmediğini açıkça söyler.
 - Mesajlaşma SSE akışı yalnız ön planda ve mesaj ekranı dinlenirken açıktır. Uygulama kapalıyken SSE mesajı bildirim olarak gösteremez.
 
-Native push ayrı uçtan uca iş gerektirir: backend mesaj bildirimi ve mobil cihaz/token yaşam döngüsü, FCM/APNs sağlayıcı/yapılandırma, izinler, arka plan teslimi ve bildirimden doğru kurulum/hesap/program/sohbete güvenli geçiş. Bu işte kullanıcının sorusu yanıtlanır; Firebase projesi veya bildirim politikası kendiliğinden değiştirilmez.
+Native push ayrı uçtan uca iş gerektirir: backend mesaj bildirimi ve mobil cihaz/token yaşam döngüsü, FCM/APNs sağlayıcı/yapılandırma, izinler, arka plan teslimi ve bildirimden doğru kurulum/hesap/program/sohbete güvenli geçiş. Ürün sahibinin sonraki isteğiyle [native push ilk altyapı dilimi](native-push-altyapisi.md) hazırlandı: kapalı varsayılan port, Firebase adaptörü ve test edilmiş kayıt yaşam döngüsü. Gerçek teslimat ve oturum/UI bağlantısı hâlâ bekler; Firebase projesi kendiliğinden oluşturulmaz veya başlatılmaz.
 
 ## Son doğrulama
 

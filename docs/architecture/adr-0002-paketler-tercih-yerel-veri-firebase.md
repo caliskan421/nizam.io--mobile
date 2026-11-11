@@ -28,6 +28,14 @@ standartların şimdiden yerleşmesini istedi. Bu ADR hangi paketin hangi kurall
 
 ## Sonuçlar
 
+2026-11-11 ürün sahibi native push altyapısının hazırlanmasını istedi.
+[İlk dilim ve etkinleştirme koşulları](../yurutme/native-push-altyapisi.md): platform
+portu, kapalı varsayılan, açık izin akışı ve Firebase Messaging adaptörü hazırlanır;
+Firebase başlatmama kararı yapılandırma ve backend native sözleşmesi gelene kadar sürer.
+Native push etkinleştirildiğinde FCM cihaz kayıt tokenı yalnız FCM ve doğrulanmış
+sunucunun native kayıt mekanizmasında kullanılır; uygulama erişim/yenileme belirteçleri
+Firebase'e gönderilmez. Analytics ve diğer Firebase hizmetleri ayrıca açılmaz.
+
 - Tema modu (sistem/açık/koyu) kalıcıdır: `ThemeModeController` (get_it) +
   `themeModeProvider` (Riverpod); `runApp`'ten önce yüklenir. Güvenlik açılış sırası
   (`startup`) tercihlere bağlı değildir.

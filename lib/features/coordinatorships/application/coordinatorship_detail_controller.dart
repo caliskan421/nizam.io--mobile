@@ -22,7 +22,7 @@ final class CoordinatorshipDetailView {
   const CoordinatorshipDetailView({
     this.tab = CoordinatorshipTab.general,
     this.filter = CoordTaskFilter.open,
-    this.person,
+    this.extra = const TaskFilter(),
     this.pastOpen = false,
   });
 
@@ -30,21 +30,22 @@ final class CoordinatorshipDetailView {
   final CoordTaskFilter filter;
 
   /// Görev süzgecindeki kişi kimliği (null → herkes).
-  final String? person;
+  final TaskFilter extra;
+  String? get person => extra.people.firstOrNull;
   final bool pastOpen;
 
   /// Varsayılandan farklı süzgeç (süz düğmesinin noktası).
-  bool get filtered => filter != CoordTaskFilter.open || person != null;
+  bool get filtered => filter != CoordTaskFilter.open || extra.hasExtra;
 
   CoordinatorshipDetailView copyWith({
     CoordinatorshipTab? tab,
     CoordTaskFilter? filter,
-    String? Function()? person,
+    TaskFilter? extra,
     bool? pastOpen,
   }) => CoordinatorshipDetailView(
     tab: tab ?? this.tab,
     filter: filter ?? this.filter,
-    person: person == null ? this.person : person(),
+    extra: extra ?? this.extra,
     pastOpen: pastOpen ?? this.pastOpen,
   );
 
@@ -53,11 +54,11 @@ final class CoordinatorshipDetailView {
       other is CoordinatorshipDetailView &&
       other.tab == tab &&
       other.filter == filter &&
-      other.person == person &&
+      other.extra == extra &&
       other.pastOpen == pastOpen;
 
   @override
-  int get hashCode => Object.hash(tab, filter, person, pastOpen);
+  int get hashCode => Object.hash(tab, filter, extra, pastOpen);
 }
 
 /// Koordinatörlük ayrıntısının görünüm durumu ([code] başına; başka koordinatörlüğe geçince
@@ -76,17 +77,51 @@ class CoordinatorshipDetailController
       state = state.copyWith(
         tab: CoordinatorshipTab.tasks,
         filter: filter,
-        person: () => person,
+        extra: TaskFilter(people: {?person}),
       );
 
   void setFilter(CoordTaskFilter filter) =>
       state = state.copyWith(filter: filter);
 
-  void setPerson(String? person) =>
-      state = state.copyWith(person: () => person);
+  void togglePerson(String id) =>
+      _update(people: _toggle(state.extra.people, id));
+  void togglePriority(TaskPriority p) =>
+      _update(priorities: _toggle(state.extra.priorities, p));
+  void toggleCoordinatorship(String code) =>
+      _update(coordinatorships: _toggle(state.extra.coordinatorships, code));
+  void _update({
+    Set<String>? people,
+    Set<String>? coordinatorships,
+    Set<TaskPriority>? priorities,
+  }) {
+    final f = state.extra;
+    state = state.copyWith(
+      extra: TaskFilter(
+        people: people ?? f.people,
+        coordinatorships: coordinatorships ?? f.coordinatorships,
+        priorities: priorities ?? f.priorities,
+      ),
+    );
+  }
 
-  void clearFilter() =>
-      state = state.copyWith(filter: CoordTaskFilter.open, person: () => null);
+  Set<T> _toggle<T>(Set<T> set, T item) =>
+      set.contains(item) ? ({...set}..remove(item)) : {...set, item};
+  void clearGroup(TaskFilterGroup group) {
+    switch (group) {
+      case TaskFilterGroup.people:
+        _update(people: {});
+      case TaskFilterGroup.coordinatorship:
+        _update(coordinatorships: {});
+      case TaskFilterGroup.priority:
+        _update(priorities: {});
+    }
+  }
+
+  void clearExtra() => state = state.copyWith(extra: const TaskFilter());
+  void clearFilter() => state = state.copyWith(
+    filter: CoordTaskFilter.open,
+    extra: const TaskFilter(),
+  );
 
   void togglePast() => state = state.copyWith(pastOpen: !state.pastOpen);
 }

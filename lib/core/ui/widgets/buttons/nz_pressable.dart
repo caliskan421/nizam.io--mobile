@@ -12,15 +12,21 @@ class NzPressable extends StatefulWidget {
     required this.child,
     this.enabled = true,
     this.scale = NizamioMotion.pressButton,
+    this.duration = NizamioMotion.durPress,
+    this.curve = NizamioMotion.easeOut,
   });
 
   /// Kart ölçeği (`.985`).
   const NzPressable.card({super.key, required this.child, this.enabled = true})
-    : scale = NizamioMotion.pressCard;
+    : scale = NizamioMotion.pressCard,
+      duration = NizamioMotion.durPress,
+      curve = NizamioMotion.easeOut;
 
   final Widget child;
   final bool enabled;
   final double scale;
+  final Duration duration;
+  final Curve curve;
 
   @override
   State<NzPressable> createState() => _NzPressableState();
@@ -40,8 +46,8 @@ class _NzPressableState extends State<NzPressable> {
     onPointerCancel: (_) => _set(false),
     child: AnimatedScale(
       scale: _down && widget.enabled ? widget.scale : 1,
-      duration: NzMotion.of(context, NizamioMotion.durPress),
-      curve: NizamioMotion.easeOut,
+      duration: NzMotion.of(context, widget.duration),
+      curve: widget.curve,
       child: widget.child,
     ),
   );

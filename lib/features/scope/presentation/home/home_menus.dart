@@ -28,7 +28,7 @@ const _tabletTop = 52.0;
 const _tabletBottom = 28.0;
 
 /// Alt menüde "Ana sayfa"ya yeniden dokununca açılan kısayol menüsü: yalnız hızlı işlemler
-/// (bekleyen işler ana sayfada; işlem geçmişi de hızlı işlemdir).
+/// (işlem geçmişi de hızlı işlemdir).
 Future<void> showHomeShortcuts(
   BuildContext context, {
   required ValueChanged<HomeQuickAction> onQuickAction,

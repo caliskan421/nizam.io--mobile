@@ -10,7 +10,9 @@ import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../core/ui/widgets/lists/nz_menu_group.dart';
 import '../../../core/ui/widgets/navigation/nz_top_bar.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../application/tables_controller.dart';
@@ -20,6 +22,8 @@ import 'table_navigation_sheets.dart';
 import 'table_sheet_host.dart';
 import 'table_sheets.dart';
 import 'table_texts.dart';
+
+part 'table_page_actions.dart';
 
 class TablePage extends ConsumerStatefulWidget {
   const TablePage({super.key, required this.id, this.onOpenTable});
@@ -31,19 +35,34 @@ class TablePage extends ConsumerStatefulWidget {
 
 class _TablePageState extends ConsumerState<TablePage> {
   final _horizontal = ScrollController();
+  final _search = TextEditingController();
+  final _searchFocus = FocusNode();
   String _query = '';
   bool _showSearch = false;
 
   @override
   void dispose() {
     _horizontal.dispose();
+    _search.dispose();
+    _searchFocus.dispose();
     super.dispose();
+  }
+
+  void _dismissSearch() {
+    if (!_showSearch) return;
+    setState(() {
+      _showSearch = false;
+      _query = '';
+    });
+    _search.clear();
+    _searchFocus.unfocus();
   }
 
   String? _sort;
   bool _descending = false;
   int _filter = 0;
-  TablesController get _controller => ref.read(tablesControllerProvider.notifier);
+  TablesController get _controller =>
+      ref.read(tablesControllerProvider.notifier);
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -54,14 +73,21 @@ class _TablePageState extends ConsumerState<TablePage> {
         body: Center(child: Text(l.uiTablesTableMissing)),
       );
     }
-    final todo = d.fields.where((f) => f.type == TableFieldType.todo).firstOrNull;
+    final todo = d.fields
+        .where((f) => f.type == TableFieldType.todo)
+        .firstOrNull;
     final rows = d.rows
         .where(
           (r) =>
-              (_filter == 0 || todo == null || (r.cells[TableFieldId(todo.id)] == true) == (_filter == 2)) &&
+              (_filter == 0 ||
+                  todo == null ||
+                  (r.cells[TableFieldId(todo.id)] == true) == (_filter == 2)) &&
               d.fields.any(
-                (f) =>
-                    tableCellText(context, f, r.cells[TableFieldId(f.id)]).toLowerCase().contains(_query.toLowerCase()),
+                (f) => tableCellText(
+                  context,
+                  f,
+                  r.cells[TableFieldId(f.id)],
+                ).toLowerCase().contains(_query.toLowerCase()),
               ),
         )
         .toList();
@@ -72,7 +98,11 @@ class _TablePageState extends ConsumerState<TablePage> {
         final bv = b.cells[TableFieldId(sortField.id)];
         final n = sortField.type == TableFieldType.number
             ? (num.tryParse('$av') ?? 0).compareTo(num.tryParse('$bv') ?? 0)
-            : tableCellText(context, sortField, av).compareTo(tableCellText(context, sortField, bv));
+            : tableCellText(
+                context,
+                sortField,
+                av,
+              ).compareTo(tableCellText(context, sortField, bv));
         return _descending ? -n : n;
       });
     }
@@ -84,9 +114,15 @@ class _TablePageState extends ConsumerState<TablePage> {
             child: NzAvatarStack(
               colored: true,
               names: [
-                if (d.id.startsWith('demo-plan-')) l.tableDemoPerson('demo-1') else l.uiTablesOwner,
+                if (d.id.startsWith('demo-plan-'))
+                  l.tableDemoPerson('demo-1')
+                else
+                  l.uiTablesOwner,
                 ...d.people.keys
-                    .where((p) => !d.id.startsWith('demo-plan-') || p.value != 'demo-1')
+                    .where(
+                      (p) =>
+                          !d.id.startsWith('demo-plan-') || p.value != 'demo-1',
+                    )
                     .map((p) => l.tableDemoPerson(p.value)),
               ],
             ),
@@ -94,7 +130,11 @@ class _TablePageState extends ConsumerState<TablePage> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(tooltip: l.uiTablesOptions, icon: const Icon(Icons.more_horiz), onPressed: () => _options(d)),
+              IconButton(
+                tooltip: l.uiTablesOptions,
+                icon: const Icon(Icons.more_horiz),
+                onPressed: () => _options(d),
+              ),
               FilledButton.icon(
                 onPressed: () => tableSharing(context, ref, d.id),
                 icon: const Icon(Icons.ios_share, size: 16),
@@ -123,12 +163,16 @@ class _TablePageState extends ConsumerState<TablePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    d.area == TableArea.coord ? l.tableUnit(d.unit) : l.tableArea(d.area),
+                    d.area == TableArea.coord
+                        ? l.tableUnit(d.unit)
+                        : l.tableArea(d.area),
                     style: context.text.monoSm,
                   ),
                   const Gap(6),
                   InkWell(
-                    onTap: d.editable ? () => tableRename(context, ref, d.id) : null,
+                    onTap: d.editable
+                        ? () => tableRename(context, ref, d.id)
+                        : null,
                     child: Text(d.title, style: context.text.titleLg),
                   ),
                   const Gap(6),
@@ -145,7 +189,11 @@ class _TablePageState extends ConsumerState<TablePage> {
                     builder: (context, constraints) {
                       final completed = todo == null
                           ? 0
-                          : d.rows.where((r) => r.cells[TableFieldId(todo.id)] == true).length;
+                          : d.rows
+                                .where(
+                                  (r) => r.cells[TableFieldId(todo.id)] == true,
+                                )
+                                .length;
                       final filters = todo == null
                           ? null
                           : NzPillTabs(
@@ -153,22 +201,43 @@ class _TablePageState extends ConsumerState<TablePage> {
                               selected: _filter,
                               onSelected: (i) => setState(() => _filter = i),
                               tabs: [
-                                NzPillTab(label: l.uiTablesAll, count: d.rows.length),
-                                NzPillTab(label: l.uiTablesOpen, count: d.rows.length - completed),
-                                NzPillTab(label: l.uiTablesDone, count: completed),
+                                NzPillTab(
+                                  label: l.uiTablesAll,
+                                  count: d.rows.length,
+                                ),
+                                NzPillTab(
+                                  label: l.uiTablesOpen,
+                                  count: d.rows.length - completed,
+                                ),
+                                NzPillTab(
+                                  label: l.uiTablesDone,
+                                  count: completed,
+                                ),
                               ],
                             );
                       final actions = Row(
                         children: [
-                          Expanded(child: Text('${rows.length} ${l.uiTablesRow}', style: context.text.monoSm)),
-                          IconButton(
-                            tooltip: l.uiTablesSearch,
-                            onPressed: () => setState(() {
-                              _showSearch = !_showSearch;
-                              if (!_showSearch) _query = '';
-                            }),
-                            icon: const Icon(Icons.search, size: 20),
+                          Expanded(
+                            child: Text(
+                              '${rows.length} ${l.uiTablesRow}',
+                              style: context.text.monoSm,
+                            ),
                           ),
+                          Semantics(
+                            selected: _showSearch,
+                            child: NzIconButton.circle(
+                              icon: NzIcons.search,
+                              semanticLabel: l.uiTablesSearch,
+                              onPressed: () {
+                                if (_showSearch) {
+                                  _dismissSearch();
+                                } else {
+                                  setState(() => _showSearch = true);
+                                }
+                              },
+                            ),
+                          ),
+                          const Gap(NizamioSpacing.space2),
                           NzButton.secondary(
                             label: l.uiTablesFields,
                             icon: Icons.view_column_outlined,
@@ -184,7 +253,7 @@ class _TablePageState extends ConsumerState<TablePage> {
                             ),
                           ),
                           if (d.editable) ...[
-                            const Gap(6),
+                            const Gap(NizamioSpacing.space2),
                             NzButton.primary(
                               label: l.uiTablesNewRow,
                               icon: Icons.add,
@@ -192,7 +261,14 @@ class _TablePageState extends ConsumerState<TablePage> {
                               onPressed: () {
                                 final id = _controller.addRow(d.id);
                                 if (id != null) {
-                                  tableRow(context, ref, d.id, id, onOpenTable: widget.onOpenTable, newRow: true);
+                                  tableRow(
+                                    context,
+                                    ref,
+                                    d.id,
+                                    id,
+                                    onOpenTable: widget.onOpenTable,
+                                    newRow: true,
+                                  );
                                 }
                               },
                             ),
@@ -202,7 +278,10 @@ class _TablePageState extends ConsumerState<TablePage> {
                       if (constraints.maxWidth >= 700) {
                         return Row(
                           children: [
-                            if (filters != null) ...[SizedBox(width: 360, child: filters), const Gap(12)],
+                            if (filters != null) ...[
+                              SizedBox(width: 360, child: filters),
+                              const Gap(12),
+                            ],
                             Expanded(child: actions),
                           ],
                         );
@@ -215,16 +294,42 @@ class _TablePageState extends ConsumerState<TablePage> {
                       );
                     },
                   ),
-                  if (_showSearch) ...[
-                    const Gap(10),
-                    NzTextField(label: l.uiTablesSearch, onChanged: (q) => setState(() => _query = q)),
-                  ],
+                  NzReveal(
+                    open: _showSearch,
+                    onOpened: _searchFocus.requestFocus,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: NizamioSpacing.space4,
+                      ),
+                      child: Focus(
+                        onKeyEvent: (node, event) {
+                          if (event is KeyDownEvent &&
+                              event.logicalKey == LogicalKeyboardKey.escape) {
+                            _dismissSearch();
+                            return KeyEventResult.handled;
+                          }
+                          return KeyEventResult.ignored;
+                        },
+                        child: NzSearchField(
+                          controller: _search,
+                          focusNode: _searchFocus,
+                          onDismiss: _dismissSearch,
+                          label: l.uiTablesSearch,
+                          onChanged: (q) => setState(() => _query = q),
+                        ),
+                      ),
+                    ),
+                  ),
                   if (!d.editable)
                     Padding(
-                      padding: const EdgeInsets.only(top: NizamioSpacing.space2),
+                      padding: const EdgeInsets.only(
+                        top: NizamioSpacing.space2,
+                      ),
                       child: Text(
                         l.uiTablesReadonly,
-                        style: context.text.caption.copyWith(color: context.colors.warning),
+                        style: context.text.caption.copyWith(
+                          color: context.colors.warning,
+                        ),
                       ),
                     ),
                 ],
@@ -235,16 +340,19 @@ class _TablePageState extends ConsumerState<TablePage> {
                 builder: (context, constraints) {
                   final local = NzLayout.fromConstraints(constraints);
                   final cellWidth = local.isCompact ? 168.0 : 190.0;
-                  final width = (d.fields.length * cellWidth + 48 + (d.editable ? 48 : 0)).clamp(
-                    constraints.maxWidth,
-                    double.infinity,
-                  );
+                  final width =
+                      (d.fields.length * cellWidth + 48 + (d.editable ? 48 : 0))
+                          .clamp(constraints.maxWidth, double.infinity);
                   return Align(
                     alignment: Alignment.topCenter,
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: constraints.maxHeight),
+                      constraints: BoxConstraints(
+                        maxHeight: constraints.maxHeight,
+                      ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(local.isCompact ? 0 : 20),
+                        borderRadius: BorderRadius.circular(
+                          local.isCompact ? 0 : 20,
+                        ),
                         child: SingleChildScrollView(
                           controller: _horizontal,
                           scrollDirection: Axis.horizontal,
@@ -258,7 +366,12 @@ class _TablePageState extends ConsumerState<TablePage> {
                                   children: [
                                     SizedBox(
                                       width: 48,
-                                      child: Center(child: Text('#', style: context.text.monoSm)),
+                                      child: Center(
+                                        child: Text(
+                                          '#',
+                                          style: context.text.monoSm,
+                                        ),
+                                      ),
                                     ),
                                     for (final f in d.fields)
                                       SizedBox(
@@ -269,22 +382,29 @@ class _TablePageState extends ConsumerState<TablePage> {
                                             ref,
                                             d.id,
                                             f.id,
-                                            onSort: (descending) => setState(() {
-                                              _sort = f.id;
-                                              _descending = descending;
-                                            }),
+                                            onSort: (descending) =>
+                                                setState(() {
+                                                  _sort = f.id;
+                                                  _descending = descending;
+                                                }),
                                           ),
                                           child: Padding(
-                                            padding: const EdgeInsets.all(NizamioSpacing.space3),
+                                            padding: const EdgeInsets.all(
+                                              NizamioSpacing.space3,
+                                            ),
                                             child: Row(
                                               children: [
-                                                Icon(_fieldIcon(f.type), size: 14),
+                                                Icon(
+                                                  _fieldIcon(f.type),
+                                                  size: 14,
+                                                ),
                                                 const Gap(7),
                                                 Expanded(
                                                   child: Text(
                                                     '${f.name}${_sort == f.id ? (_descending ? ' ↓' : ' ↑') : ''}',
                                                     maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                     style: context.text.labelMd,
                                                   ),
                                                 ),
@@ -299,7 +419,13 @@ class _TablePageState extends ConsumerState<TablePage> {
                                         child: IconButton(
                                           tooltip: l.uiTablesNewColumn,
                                           icon: const Icon(Icons.add, size: 20),
-                                          onPressed: () => tableColumn(context, ref, d.id, null, onSort: (_) {}),
+                                          onPressed: () => tableColumn(
+                                            context,
+                                            ref,
+                                            d.id,
+                                            null,
+                                            onSort: (_) {},
+                                          ),
                                         ),
                                       ),
                                   ],
@@ -307,7 +433,10 @@ class _TablePageState extends ConsumerState<TablePage> {
                                 ),
                                 Flexible(
                                   child: rows.isEmpty
-                                      ? Center(heightFactor: 1, child: Text(l.uiTablesNoResults))
+                                      ? Center(
+                                          heightFactor: 1,
+                                          child: Text(l.uiTablesNoResults),
+                                        )
                                       : ListView.builder(
                                           shrinkWrap: true,
                                           padding: EdgeInsets.zero,
@@ -324,8 +453,10 @@ class _TablePageState extends ConsumerState<TablePage> {
                                                       child: Text(
                                                         l.uiTablesSummary,
                                                         maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
-                                                        style: context.text.monoSm,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style:
+                                                            context.text.monoSm,
                                                       ),
                                                     ),
                                                   ),
@@ -333,11 +464,21 @@ class _TablePageState extends ConsumerState<TablePage> {
                                                     SizedBox(
                                                       width: cellWidth,
                                                       child: Padding(
-                                                        padding: const EdgeInsets.all(NizamioSpacing.space3),
-                                                        child: Text(_summary(d, f), style: context.text.monoSm),
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              NizamioSpacing
+                                                                  .space3,
+                                                            ),
+                                                        child: Text(
+                                                          _summary(d, f),
+                                                          style: context
+                                                              .text
+                                                              .monoSm,
+                                                        ),
                                                       ),
                                                     ),
-                                                  if (d.editable) const SizedBox(width: 48),
+                                                  if (d.editable)
+                                                    const SizedBox(width: 48),
                                                 ],
                                               );
                                             }
@@ -354,11 +495,13 @@ class _TablePageState extends ConsumerState<TablePage> {
                                                       ref,
                                                       d.id,
                                                       row.id,
-                                                      onOpenTable: widget.onOpenTable,
+                                                      onOpenTable:
+                                                          widget.onOpenTable,
                                                     ),
                                                     icon: Text(
                                                       '${d.rows.indexOf(row) + 1}',
-                                                      style: context.text.monoSm,
+                                                      style:
+                                                          context.text.monoSm,
                                                     ),
                                                   ),
                                                 ),
@@ -372,27 +515,44 @@ class _TablePageState extends ConsumerState<TablePage> {
                                                         d.id,
                                                         row.id,
                                                         focusField: field.id,
-                                                        onOpenTable: widget.onOpenTable,
+                                                        onOpenTable:
+                                                            widget.onOpenTable,
                                                       ),
                                                       child: Padding(
-                                                        padding: const EdgeInsets.all(NizamioSpacing.space3),
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              NizamioSpacing
+                                                                  .space3,
+                                                            ),
                                                         child: TableCellValue(
                                                           field: field,
-                                                          value: row.cells[TableFieldId(field.id)],
-                                                          documents: ref.read(tablesControllerProvider).documents,
+                                                          value:
+                                                              row.cells[TableFieldId(
+                                                                field.id,
+                                                              )],
+                                                          documents: ref
+                                                              .read(
+                                                                tablesControllerProvider,
+                                                              )
+                                                              .documents,
                                                           onToggle: d.editable
                                                               ? () => _controller.cell(
                                                                   d.id,
                                                                   row.id,
                                                                   field.id,
-                                                                  row.cells[TableFieldId(field.id)] != true,
+                                                                  row.cells[TableFieldId(
+                                                                        field
+                                                                            .id,
+                                                                      )] !=
+                                                                      true,
                                                                 )
                                                               : null,
                                                         ),
                                                       ),
                                                     ),
                                                   ),
-                                                if (d.editable) const SizedBox(width: 48),
+                                                if (d.editable)
+                                                  const SizedBox(width: 48),
                                               ],
                                             );
                                           },
@@ -410,149 +570,6 @@ class _TablePageState extends ConsumerState<TablePage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _gridLine(BuildContext context, {required List<Widget> children, bool header = false}) {
-    final color = header ? context.colors.surfaceRaised : context.colors.surface;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color,
-        border: Border(top: BorderSide(color: context.colors.border)),
-      ),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: header ? 44 : 52),
-        child: AnimatedBuilder(
-          animation: _horizontal,
-          builder: (context, _) => Stack(
-            children: [
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Opacity(opacity: 0, child: children.first),
-                    for (final cell in children.skip(1))
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border(left: BorderSide(color: context.colors.border)),
-                        ),
-                        child: cell,
-                      ),
-                  ],
-                ),
-              ),
-              Positioned(
-                left: _horizontal.hasClients ? _horizontal.positions.last.pixels : 0,
-                top: 0,
-                bottom: 0,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: color,
-                    border: Border(right: BorderSide(color: context.colors.border)),
-                  ),
-                  child: children.first,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  IconData _fieldIcon(TableFieldType type) => switch (type) {
-    TableFieldType.text => Icons.short_text,
-    TableFieldType.number => Icons.tag,
-    TableFieldType.date => Icons.calendar_today_outlined,
-    TableFieldType.phone => Icons.phone_outlined,
-    TableFieldType.email => Icons.mail_outline,
-    TableFieldType.person => Icons.person_outline,
-    TableFieldType.unit => Icons.account_tree_outlined,
-    TableFieldType.task => Icons.checklist,
-    TableFieldType.link => Icons.link,
-    TableFieldType.file => Icons.attach_file,
-    TableFieldType.todo => Icons.check_box_outlined,
-  };
-
-  String _summary(TableDocument d, TableField f) {
-    final values = d.rows.map((r) => r.cells[TableFieldId(f.id)]).where((v) => v != null && v != '' && (v is! List || v.isNotEmpty)).toList();
-    if (f.type == TableFieldType.number) {
-      return '${values.fold<num>(0, (sum, v) => sum + (num.tryParse('$v') ?? 0))}';
-    }
-    if (f.type == TableFieldType.todo) {
-      return '${values.where((v) => v == true).length} / ${d.rows.length}';
-    }
-    if (f.type == TableFieldType.person) return '${values.toSet().length} kişi';
-    if (f.type == TableFieldType.file) {
-      return '${values.fold<int>(0, (sum, value) => sum + (value is List ? value.length : 1))} dosya';
-    }
-    return '${values.length}';
-  }
-
-  Future<void> _options(TableDocument d) async {
-    final l = context.l10n;
-    await showTableSheet(
-      ref,
-      context,
-      title: l.uiTablesOptions,
-      builder: (sheet) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            title: Text(l.uiTablesCopyLink),
-            onTap: () async {
-              await Clipboard.setData(ClipboardData(text: '/tables/${d.id}'));
-              if (sheet.mounted) Navigator.of(sheet).pop();
-              if (mounted) NzToast.show(context, l.uiTablesLinkCopied);
-            },
-          ),
-
-          if (d.editable)
-            ListTile(
-              title: Text(l.uiTablesRename),
-              onTap: () {
-                Navigator.of(sheet).pop();
-                tableRename(context, ref, d.id);
-              },
-            ),
-          ListTile(
-            title: Text(l.uiTablesCopyTo),
-            onTap: () {
-              Navigator.of(sheet).pop();
-              showCopyTable(context, ref, d.id, widget.onOpenTable);
-            },
-          ),
-          for (final empty in [false, true])
-            ListTile(
-              title: Text(empty ? l.uiTablesDuplicateEmpty : l.uiTablesDuplicate),
-              onTap: () {
-                final id = _controller.duplicate(
-                  d.id,
-                  empty: empty,
-                  suffix: empty ? l.uiTablesEmptySuffix : l.uiTablesCopySuffix,
-                );
-                Navigator.of(sheet).pop();
-                if (id != null) widget.onOpenTable?.call(id);
-              },
-            ),
-          if (d.canShare)
-            ListTile(
-              title: Text(l.uiTablesDelete, style: context.text.bodyMd.copyWith(color: context.colors.danger)),
-              onTap: () async {
-                Navigator.of(sheet).pop();
-                final yes = await NzDialog.confirm(
-                  context,
-                  title: l.uiTablesDeleteTable,
-                  message: l.uiTablesDeleteMessage,
-                  confirmLabel: l.uiTablesDelete,
-                  cancelLabel: l.uiTablesCancel,
-                  tone: NzDialogTone.destructive,
-                );
-                if (yes && mounted) _controller.delete(d.id);
-              },
-            ),
-        ],
       ),
     );
   }

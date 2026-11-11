@@ -453,6 +453,7 @@ mixin $TasksRoute on GoRouteData {
     people:
         state.uri.queryParametersAll['people']?.map((e) => e).toList() ??
         const [],
+    coord: state.uri.queryParameters['coord'],
     trail:
         state.uri.queryParametersAll['trail']?.map((e) => e).toList() ??
         const [],
@@ -467,6 +468,7 @@ mixin $TasksRoute on GoRouteData {
       if (_self.view != null) 'view': _self.view,
       if (!_$iterablesEqual(_self.people, const []))
         'people': _self.people.map((e) => e).toList(),
+      if (_self.coord != null) 'coord': _self.coord,
       if (!_$iterablesEqual(_self.trail, const []))
         'trail': _self.trail.map((e) => e).toList(),
     },

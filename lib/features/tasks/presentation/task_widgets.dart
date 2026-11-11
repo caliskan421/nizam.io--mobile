@@ -23,6 +23,7 @@ class TaskSegmented extends StatelessWidget {
     this.semanticLabel,
     this.icons,
     this.compact = false,
+    this.filterSpacing = false,
   });
 
   final List<String> labels;
@@ -36,6 +37,7 @@ class TaskSegmented extends StatelessWidget {
 
   /// Satır içi küçük seçici (yeni görev önceliği): 32 yükseklik.
   final bool compact;
+  final bool filterSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +52,9 @@ class TaskSegmented extends StatelessWidget {
         decoration: BoxDecoration(
           color: pill ? c.surfaceOverlay : c.surfaceRaised,
           borderRadius: BorderRadius.circular(
-            pill ? NizamioRadius.pill : NizamioRadius.tile,
+            filterSpacing
+                ? NizamioRadius.tile
+                : (pill ? NizamioRadius.pill : NizamioRadius.tile),
           ),
           border: pill
               ? null
@@ -60,6 +64,7 @@ class TaskSegmented extends StatelessWidget {
           padding: EdgeInsets.all(pill ? 2 : NizamioSpacing.space1 - 1),
           child: Row(
             mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
+            spacing: filterSpacing ? NizamioSpacing.space2 : 0,
             children: [
               for (var i = 0; i < labels.length; i++)
                 _part(context, i, c, icons == null ? null : icons[i]),
@@ -103,7 +108,9 @@ class TaskSegmented extends StatelessWidget {
           decoration: BoxDecoration(
             color: on ? c.surface : c.surfaceRaised.withValues(alpha: 0),
             borderRadius: BorderRadius.circular(
-              pill
+              filterSpacing
+                  ? NizamioRadius.tile
+                  : pill
                   ? NizamioRadius.pill
                   : NizamioRadius.tile - NizamioSpacing.space1 / 2,
             ),

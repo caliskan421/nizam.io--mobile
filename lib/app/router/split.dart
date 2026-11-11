@@ -277,8 +277,16 @@ abstract final class MasterKeys {
 
 Widget homeMaster() => HomePage(key: MasterKeys.home);
 
-Widget tasksMaster({NzTaskView? view, List<String> people = const []}) =>
-    TasksPage(key: MasterKeys.tasks, view: view, people: people);
+Widget tasksMaster({
+  NzTaskView? view,
+  List<String> people = const [],
+  String? coordinatorship,
+}) => TasksPage(
+  key: MasterKeys.tasks,
+  view: view,
+  people: people,
+  coordinatorship: coordinatorship,
+);
 
 Widget calendarMaster(ValueChanged<DateTime> onPlanMeeting) =>
     CalendarPage(key: MasterKeys.calendar, onPlanMeeting: onPlanMeeting);

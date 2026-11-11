@@ -232,13 +232,19 @@ class HistoryRoute extends NzRouteData with $HistoryRoute {
 }
 
 class TasksRoute extends NzTabRouteData with $TasksRoute {
-  const TasksRoute({this.view, this.people = const [], this.trail = const []});
+  const TasksRoute({
+    this.view,
+    this.people = const [],
+    this.coord,
+    this.trail = const [],
+  });
 
   /// Başlangıç görünümü (`NzTaskView.name`); yalnız ad taşınır.
   final String? view;
 
   /// Başlangıç kişi süzgeci (kişi kimlikleri).
   final List<String> people;
+  final String? coord;
 
   final List<String> trail;
 
@@ -246,10 +252,19 @@ class TasksRoute extends NzTabRouteData with $TasksRoute {
   Widget build(BuildContext context, GoRouterState state) => PaneStack(
     trail: trail,
     base: SplitRoot(
-      master: (_) => tasksMaster(view: initialView, people: people),
+      master: (_) => tasksMaster(
+        view: initialView,
+        people: people,
+        coordinatorship: initialCoordinatorship,
+      ),
       detail: (c) => _splitBase(c, PaneKind.task, _keyedTaskDetailPage),
     ),
   );
+
+  String? get initialCoordinatorship {
+    final value = coord?.trim();
+    return value == null || value.isEmpty || value.contains(',') ? null : value;
+  }
 
   NzTaskView? get initialView =>
       NzTaskView.values.where((v) => v.name == view).firstOrNull;

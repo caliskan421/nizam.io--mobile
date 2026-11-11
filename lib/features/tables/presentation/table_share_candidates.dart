@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 
+import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/inputs/nz_text_field.dart';
+import '../../../core/ui/widgets/lists/nz_menu_group.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../application/tables_controller.dart';
 import '../domain/table_document.dart';
 
@@ -33,20 +37,25 @@ class _TableShareCandidatesState extends ConsumerState<TableShareCandidates> {
           label: l.uiTablesPersonSearch,
           onChanged: (v) => setState(() => _query = v),
         ),
-        for (final id in available)
-          ListTile(
-            title: Text('${l.uiTablesDemoPerson} ${id.split('-').last}'),
-            trailing: const Icon(Icons.add),
-            onTap: () => ref
-                .read(tablesControllerProvider.notifier)
-                .share(
-                  widget.document.id,
-                  people: {
-                    ...widget.document.people,
-                    TablePersonId(id): TableAccess.edit,
-                  },
-                ),
-          ),
+        const Gap(NizamioSpacing.space3),
+        NzMenuGroup(
+          rows: [
+            for (final id in available)
+              NzMenuRow(
+                icon: NzIcons.add,
+                label: '${l.uiTablesDemoPerson} ${id.split('-').last}',
+                onTap: () => ref
+                    .read(tablesControllerProvider.notifier)
+                    .share(
+                      widget.document.id,
+                      people: {
+                        ...widget.document.people,
+                        TablePersonId(id): TableAccess.edit,
+                      },
+                    ),
+              ),
+          ],
+        ),
       ],
     );
   }

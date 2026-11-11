@@ -255,9 +255,8 @@ TaskFilterOptions filterOptions(TaskCatalog c) {
   return TaskFilterOptions(
     people: [for (final e in indexed) e.$2],
     coordinatorships: [
-      if (c.access == null)
-        for (final co in c.coordinatorships)
-          if ((byCoord[co.code] ?? 0) > 0) (co, byCoord[co.code]!),
+      for (final co in c.coordinatorships)
+        if ((byCoord[co.code] ?? 0) > 0) (co, byCoord[co.code]!),
     ],
     priorities: byPrio,
   );

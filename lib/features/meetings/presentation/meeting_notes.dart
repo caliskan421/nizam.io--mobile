@@ -15,6 +15,7 @@ import '../../tasks/tasks.dart';
 import '../application/meeting_room_controller.dart';
 import '../domain/meeting.dart';
 import '../domain/meeting_board.dart';
+import 'meeting_input_visibility.dart';
 import 'meeting_page.dart';
 import 'meetings_texts.dart';
 
@@ -101,59 +102,61 @@ class _MeetingNotesState extends ConsumerState<MeetingNotes> {
           ],
         ),
         if (perms.canAddNote)
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: c.surfaceRaised,
-              borderRadius: BorderRadius.circular(NizamioRadius.row),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(NizamioSpacing.space3),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: NizamioSpacing.space2,
-                children: [
-                  TextField(
-                    onTapOutside: (_) =>
-                        FocusManager.instance.primaryFocus?.unfocus(),
-                    controller: _draft,
-                    minLines: 2,
-                    maxLines: 6,
-                    maxLength: noteMax,
-                    keyboardType: TextInputType.multiline,
-                    style: t.bodyLg,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      counterText: '',
-                      semanticCounterText: '',
-                      border: InputBorder.none,
-                      hintText: l.uiMeetingsNoteHint,
-                      hintStyle: t.bodyLg.copyWith(color: c.textFaint),
+          MeetingInputVisibility(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: c.surfaceRaised,
+                borderRadius: BorderRadius.circular(NizamioRadius.row),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(NizamioSpacing.space3),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: NizamioSpacing.space2,
+                  children: [
+                    TextField(
+                      onTapOutside: (_) =>
+                          FocusManager.instance.primaryFocus?.unfocus(),
+                      controller: _draft,
+                      minLines: 2,
+                      maxLines: 6,
+                      maxLength: noteMax,
+                      keyboardType: TextInputType.multiline,
+                      style: t.bodyLg,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        counterText: '',
+                        semanticCounterText: '',
+                        border: InputBorder.none,
+                        hintText: l.uiMeetingsNoteHint,
+                        hintStyle: t.bodyLg.copyWith(color: c.textFaint),
+                      ),
                     ),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${l.uiMeetingsNoteFooter} · '
-                          '${_draft.text.length} / $noteMax',
-                          style: t.caption.copyWith(
-                            fontSize: 11,
-                            color: c.textMuted,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${l.uiMeetingsNoteFooter} · '
+                            '${_draft.text.length} / $noteMax',
+                            style: t.caption.copyWith(
+                              fontSize: 11,
+                              color: c.textMuted,
+                            ),
                           ),
                         ),
-                      ),
-                      NzButton.primary(
-                        label: l.uiMeetingsAdd,
-                        size: NzSize.sm,
-                        loading: room.noteSubmitting,
-                        onPressed:
-                            _draft.text.trim().isEmpty || room.noteSubmitting
-                            ? null
-                            : _add,
-                      ),
-                    ],
-                  ),
-                ],
+                        NzButton.primary(
+                          label: l.uiMeetingsAdd,
+                          size: NzSize.sm,
+                          loading: room.noteSubmitting,
+                          onPressed:
+                              _draft.text.trim().isEmpty || room.noteSubmitting
+                              ? null
+                              : _add,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -301,27 +304,33 @@ class _NoteCardState extends ConsumerState<_NoteCard> {
           if (edit == null)
             Text(n.content, style: t.bodyMd.copyWith(height: 21 / 14))
           else ...[
-            NzTextField.multiline(
-              label: l.uiMeetingsNoteEdit,
-              controller: edit,
-              maxLength: noteMax,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              spacing: NizamioSpacing.space2,
-              children: [
-                NzButton.secondary(
-                  label: l.uiMeetingsCancel,
-                  size: NzSize.sm,
-                  onPressed: _cancelEdit,
-                ),
-                NzButton.primary(
-                  label: l.uiMeetingsSave,
-                  size: NzSize.sm,
-                  loading: _busy,
-                  onPressed: _save,
-                ),
-              ],
+            MeetingInputVisibility(
+              child: Column(
+                children: [
+                  NzTextField.multiline(
+                    label: l.uiMeetingsNoteEdit,
+                    controller: edit,
+                    maxLength: noteMax,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    spacing: NizamioSpacing.space2,
+                    children: [
+                      NzButton.secondary(
+                        label: l.uiMeetingsCancel,
+                        size: NzSize.sm,
+                        onPressed: _cancelEdit,
+                      ),
+                      NzButton.primary(
+                        label: l.uiMeetingsSave,
+                        size: NzSize.sm,
+                        loading: _busy,
+                        onPressed: _save,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
           if (task != null)

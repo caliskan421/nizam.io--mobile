@@ -76,23 +76,6 @@ extension HomeTexts on AppLocalizations {
     CoordinatorshipSort.name => uiHomeSortName,
   };
 
-  /// "ALT-7 · Tarih talebi · +51 gün" / "ULA-1 · Tarih talebi · 15 Kas" / "İDA-2 · Onay
-  /// bekliyor".
-  String pendingCaption(PendingItem p) {
-    final date = p.requestedDate;
-    final shift = p.requestedShiftDays;
-    final when = shift != null
-        ? ' · +$shift $uiHomeShiftDaysTail'
-        : date == null
-        ? ''
-        : ' · ${DateFormat('d MMM', 'tr').format(date)}';
-    final label = p.label ?? p.taskCode;
-    return switch (p.kind) {
-      PendingKind.dateChange => '$label · $uiHomeDateRequest$when',
-      PendingKind.approval => '$label · $uiHomeAwaitingApproval',
-    };
-  }
-
   /// Çekmecedeki sezon kartının alt satırı: "2026 sezonu" (yıl yoksa kapsam değiştirme).
   String seasonCaption(int? year, String fallback) =>
       year == null ? fallback : '$year $uiHomeSeasonTail';

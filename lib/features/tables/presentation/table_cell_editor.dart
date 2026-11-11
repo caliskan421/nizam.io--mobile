@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../core/ui/widgets/lists/nz_menu_group.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../domain/table_document.dart';
 import 'table_sheets.dart' show tableCellText;
 
@@ -30,11 +31,14 @@ class TableCellEditor extends StatelessWidget {
     final l = context.l10n;
     final f = field;
     if (f.type == TableFieldType.todo) {
-      return SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(f.name),
-        value: value == true,
-        onChanged: editable ? onChanged : null,
+      return NzFormRows(
+        rows: [
+          NzFormRow.toggle(
+            label: f.name,
+            value: value == true,
+            onChanged: editable ? onChanged : null,
+          ),
+        ],
       );
     }
     if (f.type == TableFieldType.person ||
@@ -45,24 +49,19 @@ class TableCellEditor extends StatelessWidget {
         TableFieldType.unit => tableDemoUnits,
         _ => ['demo-task-1', 'demo-task-2', 'demo-task-3'],
       };
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(f.name, style: context.text.labelMd),
-          Wrap(
-            spacing: NizamioSpacing.space2,
-            children: [
-              for (final v in pool)
-                ChoiceChip(
-                  label: Text(tableCellText(context, f, v)),
-                  selected: value == v,
-                  onSelected: editable
-                      ? (_) => onChanged(value == v ? '' : v)
-                      : null,
-                ),
-            ],
-          ),
+      return NzSelect<String>(
+        label: f.name,
+        value: pool.contains(value) ? value as String : null,
+        items: [
+          const NzSelectItem(value: '', label: '—'),
+          for (final v in pool)
+            NzSelectItem(value: v, label: tableCellText(context, f, v)),
         ],
+        onChanged: editable
+            ? (v) {
+                if (v != null) onChanged(v);
+              }
+            : null,
       );
     }
     if (f.type == TableFieldType.link) {
@@ -81,32 +80,35 @@ class TableCellEditor extends StatelessWidget {
                   : () => onOpenTable!(target.id),
               child: Text(target.title),
             ),
-            for (final row in target.rows)
-              CheckboxListTile(
-                secondary: IconButton(
-                  tooltip: l.uiTablesEditRow,
-                  icon: const Icon(Icons.open_in_new),
-                  onPressed: () => onOpenRow?.call(target.id, row.id),
-                ),
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  target.fields.isEmpty
-                      ? row.id
-                      : tableCellText(
-                          context,
-                          target.fields.first,
-                          row.cells[TableFieldId(target.fields.first.id)],
-                        ),
-                ),
-                value: selected.contains(row.id),
-                onChanged: editable
-                    ? (v) => onChanged(
-                        v == true
-                            ? [...selected, row.id]
-                            : selected.where((id) => id != row.id).toList(),
-                      )
-                    : null,
-              ),
+            NzMenuGroup(
+              rows: [
+                for (final row in target.rows)
+                  NzCheckbox(
+                    label: target.fields.isEmpty
+                        ? row.id
+                        : tableCellText(
+                            context,
+                            target.fields.first,
+                            row.cells[TableFieldId(target.fields.first.id)],
+                          ),
+                    trailing: NzIconButton(
+                      icon: NzIcons.openExternal,
+                      semanticLabel: l.uiTablesEditRow,
+                      onPressed: onOpenRow == null
+                          ? null
+                          : () => onOpenRow!(target.id, row.id),
+                    ),
+                    value: selected.contains(row.id),
+                    onChanged: !editable
+                        ? null
+                        : (v) => onChanged(
+                            v
+                                ? [...selected, row.id]
+                                : selected.where((id) => id != row.id).toList(),
+                          ),
+                  ),
+              ],
+            ),
           ] else
             Text(l.uiTablesTableMissing),
         ],
@@ -120,18 +122,24 @@ class TableCellEditor extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(f.name, style: context.text.labelMd),
-          for (final file in files)
-            ListTile(
-              title: Text('$file'),
-              trailing: editable
-                  ? IconButton(
-                      tooltip: l.uiTablesDelete,
-                      icon: const Icon(Icons.close),
-                      onPressed: () =>
-                          onChanged(files.where((f) => f != file).toList()),
-                    )
-                  : null,
-            ),
+          NzMenuGroup(
+            rows: [
+              for (final file in files)
+                NzMenuRow(
+                  icon: NzIcons.file,
+                  label: '$file',
+                  onTap: () {},
+                  trailing: editable
+                      ? NzIconButton(
+                          icon: NzIcons.close,
+                          semanticLabel: '${l.uiTablesDelete}: $file',
+                          onPressed: () =>
+                              onChanged(files.where((f) => f != file).toList()),
+                        )
+                      : null,
+                ),
+            ],
+          ),
           if (editable)
             NzButton.secondary(
               label: l.uiTablesAttachment,

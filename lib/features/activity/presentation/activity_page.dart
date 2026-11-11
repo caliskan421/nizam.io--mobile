@@ -12,8 +12,9 @@ import '../../../core/ui/page/nz_shell_events.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../core/ui/widgets/inputs/nz_active_filter.dart';
+import '../../../core/ui/widgets/inputs/nz_filter_choice.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
-import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
@@ -303,7 +304,11 @@ class _Controls extends ConsumerWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               for (final (label, aria, onClear) in chips)
-                _Chip(label: label, semanticLabel: aria, onClear: onClear),
+                NzActiveFilter(
+                  label: label,
+                  removeLabel: aria,
+                  onRemove: onClear,
+                ),
               _Link(label: l.uiActivityClearAll, onTap: commands.clearAll),
             ],
           ),
@@ -471,74 +476,6 @@ class _EntryRow extends StatelessWidget {
   }
 }
 
-/// Etkin süzgeç çipi (prototip `.t-chip`): etiket + kaldır; tamamı dokunulabilir (≥ 44).
-class _Chip extends StatelessWidget {
-  const _Chip({
-    required this.label,
-    required this.semanticLabel,
-    required this.onClear,
-  });
-
-  final String label;
-  final String semanticLabel;
-  final VoidCallback onClear;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    return Semantics(
-      button: true,
-      label: semanticLabel,
-      excludeSemantics: true,
-      onTap: onClear,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onClear,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: NizamioSize.tap),
-          child: Align(
-            widthFactor: 1,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: c.surfaceOverlay,
-                borderRadius: BorderRadius.circular(NizamioRadius.bubbleTail),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  NizamioSpacing.gapMd,
-                  NizamioSpacing.space1,
-                  NizamioSpacing.space1,
-                  NizamioSpacing.space1,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: t.labelMd.copyWith(fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                    const Gap(NizamioSpacing.space1),
-                    NzIcon(
-                      NzIcons.close,
-                      size: NizamioSize.iconSizeSm,
-                      color: c.textMuted,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _Link extends StatelessWidget {
   const _Link({required this.label, required this.onTap});
 
@@ -619,20 +556,12 @@ Future<void> showActivityFilters(BuildContext context) {
               kicker(l.uiActivityByRole),
               for (final id in log.people)
                 if (catalog.person(id) case final p?)
-                  NzCheckbox(
+                  NzFilterChoice(
                     label: p.name,
-                    labelLeading: NzAvatar.initials(
-                      name: p.name,
-                      tone: NzAvatar.neutralTone,
-                      extent: NzAvatarSize.sm,
-                    ),
-                    value: query.people.contains(id),
-                    onChanged: (_) => commands.togglePerson(id),
-                    trailing: Text(
-                      '${l.activityRole(p.role)} · '
-                      '${log.entries.where((e) => e.actorId == id).length}',
-                      style: t.caption.copyWith(color: c.textMuted),
-                    ),
+                    count:
+                        '${log.entries.where((e) => e.actorId == id).length}',
+                    selected: query.people.contains(id),
+                    onTap: () => commands.togglePerson(id),
                   ),
               const Gap(NizamioSpacing.space4),
               kicker(l.uiActivityCoordinatorship),

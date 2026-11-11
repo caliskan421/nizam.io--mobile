@@ -14,14 +14,18 @@ class RecordingAppNav implements NzAppNav {
   void openHistory() => calls.add('history');
 
   @override
-  void openTasks({NzTaskView? view, List<String> people = const []}) =>
-      calls.add(
-        [
-          'tasks',
-          if (view != null) view.name,
-          if (people.isNotEmpty) people.join(','),
-        ].join(':'),
-      );
+  void openTasks({
+    NzTaskView? view,
+    List<String> people = const [],
+    String? coordinatorship,
+  }) => calls.add(
+    [
+      'tasks',
+      if (view != null) view.name,
+      if (people.isNotEmpty) people.join(','),
+      ?coordinatorship,
+    ].join(':'),
+  );
 
   @override
   void openTask(String code) => calls.add('task:$code');

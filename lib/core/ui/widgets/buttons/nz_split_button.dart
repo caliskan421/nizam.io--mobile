@@ -20,6 +20,7 @@ class NzSplitButton extends StatelessWidget {
     required this.onIconPressed,
     required this.iconSemanticLabel,
     this.iconTurns = 0,
+    this.flexibleLabel = false,
   });
 
   final String label;
@@ -34,6 +35,9 @@ class NzSplitButton extends StatelessWidget {
   /// İkonun tur cinsinden dönüşü (0.5 = 180°).
   final double iconTurns;
 
+  /// Dar satırda metin parçasının kısalmasına izin verir.
+  final bool flexibleLabel;
+
   static const _inner = Radius.circular(NizamioSpacing.space1);
   static const _outer = Radius.circular(NizamioRadius.tile);
 
@@ -42,19 +46,39 @@ class NzSplitButton extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     spacing: NizamioSpacing.space1 / 2,
     children: [
-      _Segment(
-        semanticLabel: semanticLabel,
-        onPressed: onPressed,
-        radius: const BorderRadius.horizontal(left: _outer, right: _inner),
-        padding: NizamioSpacing.space4,
-        child: Text(
-          label,
-          maxLines: 1,
-          style: context.text.bodyMd.copyWith(
-            fontWeight: context.text.labelLg.fontWeight,
+      if (flexibleLabel)
+        Flexible(
+          child: _Segment(
+            semanticLabel: semanticLabel,
+            shrinkWrap: true,
+            onPressed: onPressed,
+            radius: const BorderRadius.horizontal(left: _outer, right: _inner),
+            padding: NizamioSpacing.space4,
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.text.bodyMd.copyWith(
+                fontWeight: context.text.labelLg.fontWeight,
+              ),
+            ),
+          ),
+        )
+      else
+        _Segment(
+          semanticLabel: semanticLabel,
+          onPressed: onPressed,
+          radius: const BorderRadius.horizontal(left: _outer, right: _inner),
+          padding: NizamioSpacing.space4,
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.text.bodyMd.copyWith(
+              fontWeight: context.text.labelLg.fontWeight,
+            ),
           ),
         ),
-      ),
       _Segment(
         semanticLabel: iconSemanticLabel,
         onPressed: onIconPressed,
@@ -78,6 +102,7 @@ class _Segment extends StatelessWidget {
     required this.radius,
     required this.padding,
     required this.child,
+    this.shrinkWrap = false,
   });
 
   final String semanticLabel;
@@ -85,6 +110,7 @@ class _Segment extends StatelessWidget {
   final BorderRadius radius;
   final double padding;
   final Widget child;
+  final bool shrinkWrap;
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +130,7 @@ class _Segment extends StatelessWidget {
             minWidth: NizamioSize.tap,
           ),
           child: Center(
+            widthFactor: shrinkWrap ? 1 : null,
             child: NzPressable(
               child: DecoratedBox(
                 decoration: BoxDecoration(

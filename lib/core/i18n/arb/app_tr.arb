@@ -2341,6 +2341,10 @@
   "@uiFeedbackSecondsUnit": {
     "description": "ui.feedback.seconds_unit"
   },
+  "uiHomeOverviewTitle": "Genel durum",
+  "@uiHomeOverviewTitle": {
+    "description": "ui.home.overview_title"
+  },
   "uiHomeDeletedShortcut": "Silinenler",
   "@uiHomeDeletedShortcut": {
     "description": "ui.home.deleted_shortcut"
@@ -4813,9 +4817,13 @@
   "@uiTasksViewDone": {
     "description": "ui.tasks.view_done"
   },
-  "uiTasksListAll": "tüm görevler",
+  "uiTasksListAll": "Tüm görevler",
   "@uiTasksListAll": {
     "description": "ui.tasks.list_all"
+  },
+  "uiTasksListFiltered": "Filtrelenmiş görevler",
+  "@uiTasksListFiltered": {
+    "description": "ui.tasks.list_filtered"
   },
   "uiTasksListLate": "geciken görevler",
   "@uiTasksListLate": {
@@ -5016,6 +5024,42 @@
   "uiTasksGroupPeople": "Kişi",
   "@uiTasksGroupPeople": {
     "description": "ui.tasks.group_people"
+  },
+  "uiTasksActiveFilters": "Aktif filtreler",
+  "@uiTasksActiveFilters": {
+    "description": "ui.tasks.active_filters"
+  },
+  "uiTasksFilterEdit": "filtresi: düzenle",
+  "@uiTasksFilterEdit": {
+    "description": "ui.tasks.filter_edit"
+  },
+  "uiTasksFilterRemove": "filtresini kaldır",
+  "@uiTasksFilterRemove": {
+    "description": "ui.tasks.filter_remove"
+  },
+  "uiTasksFilterActive": "aktif",
+  "@uiTasksFilterActive": {
+    "description": "ui.tasks.filter_active"
+  },
+  "uiTasksPeopleCount": "kişi",
+  "@uiTasksPeopleCount": {
+    "description": "ui.tasks.people_count"
+  },
+  "uiTasksCoordCount": "koordinatörlük",
+  "@uiTasksCoordCount": {
+    "description": "ui.tasks.coord_count"
+  },
+  "uiTasksSortCreatedCompact": "Tanımlanma",
+  "@uiTasksSortCreatedCompact": {
+    "description": "ui.tasks.sort_created_compact"
+  },
+  "uiTasksSortDueCompact": "Bitiş",
+  "@uiTasksSortDueCompact": {
+    "description": "ui.tasks.sort_due_compact"
+  },
+  "uiTasksSortStartCompact": "Başlangıç",
+  "@uiTasksSortStartCompact": {
+    "description": "ui.tasks.sort_start_compact"
   },
   "uiTasksGroupCoord": "Koordinatörlük",
   "@uiTasksGroupCoord": {

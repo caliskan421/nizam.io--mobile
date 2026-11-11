@@ -50,6 +50,68 @@ MeetingsServer _server() => MeetingsServer()
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
+  testWidgets('klavye açılınca gündem alanı ve ekleme eylemi görünür', (
+    tester,
+  ) async {
+    _screen(tester, 390, 1);
+    final server = _server()..agenda.add(agendaWire('g3', order: 3));
+    final (h, _) = await real(tester, () => openMeetings(server));
+    await pumpScreen(tester, h, const MeetingPage(id: 'm1'));
+    await settle(tester);
+    final field = find.byWidgetPredicate(
+      (w) => w is TextField && w.decoration?.hintText == _l.uiMeetingsAgendaAdd,
+    );
+    await _tap(tester, field);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 320);
+    tester.binding.handleMetricsChanged();
+    await settle(tester);
+    expect(tester.getBottomLeft(field).dy, lessThanOrEqualTo(524));
+    expect(
+      tester.getBottomLeft(find.text(_l.uiMeetingsAdd)).dy,
+      lessThanOrEqualTo(524),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final width in [390.0, 800.0]) {
+    testWidgets('not yazma ve düzenleme klavye üstünde kalır: $width', (
+      tester,
+    ) async {
+      _screen(tester, width, 1);
+      final (h, _) = await real(tester, () => openMeetings(_server()));
+      await pumpScreen(tester, h, const MeetingPage(id: 'm1'));
+      await settle(tester);
+      await _tap(tester, find.textContaining(_l.uiMeetingsTabNotes));
+      final field = find.byWidgetPredicate(
+        (w) =>
+            w is TextField && w.decoration?.hintText == _l.uiMeetingsNoteHint,
+      );
+      await _tap(tester, field);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 320);
+      tester.binding.handleMetricsChanged();
+      await settle(tester);
+      expect(
+        tester.getBottomLeft(find.text(_l.uiMeetingsAdd)).dy,
+        lessThanOrEqualTo(524),
+      );
+      tester.view.viewInsets = FakeViewPadding.zero;
+      tester.binding.handleMetricsChanged();
+      FocusManager.instance.primaryFocus?.unfocus();
+      await settle(tester);
+      await _tap(tester, find.bySemanticsLabel(_l.uiMeetingsNoteEdit).first);
+      final edit = find.byType(TextFormField).last;
+      await _tap(tester, edit);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 320);
+      tester.binding.handleMetricsChanged();
+      await settle(tester);
+      expect(
+        tester.getBottomLeft(find.text(_l.uiMeetingsSave)).dy,
+        lessThanOrEqualTo(524),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   for (final (width, scale) in [(360.0, 2.0), (390.0, 1.0)]) {
     testWidgets('liste: taşma yok ${width.toInt()} × $scale; kart → ayrıntı', (
       tester,

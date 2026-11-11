@@ -1901,6 +1901,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiFeedbackSecondsUnit => 'sn';
 
   @override
+  String get uiHomeOverviewTitle => 'Genel durum';
+
+  @override
   String get uiHomeDeletedShortcut => 'Silinenler';
 
   @override
@@ -3820,7 +3823,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksViewDone => 'Biten';
 
   @override
-  String get uiTasksListAll => 'tüm görevler';
+  String get uiTasksListAll => 'Tüm görevler';
+
+  @override
+  String get uiTasksListFiltered => 'Filtrelenmiş görevler';
 
   @override
   String get uiTasksListLate => 'geciken görevler';
@@ -3971,6 +3977,33 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksGroupPeople => 'Kişi';
+
+  @override
+  String get uiTasksActiveFilters => 'Aktif filtreler';
+
+  @override
+  String get uiTasksFilterEdit => 'filtresi: düzenle';
+
+  @override
+  String get uiTasksFilterRemove => 'filtresini kaldır';
+
+  @override
+  String get uiTasksFilterActive => 'aktif';
+
+  @override
+  String get uiTasksPeopleCount => 'kişi';
+
+  @override
+  String get uiTasksCoordCount => 'koordinatörlük';
+
+  @override
+  String get uiTasksSortCreatedCompact => 'Tanımlanma';
+
+  @override
+  String get uiTasksSortDueCompact => 'Bitiş';
+
+  @override
+  String get uiTasksSortStartCompact => 'Başlangıç';
 
   @override
   String get uiTasksGroupCoord => 'Koordinatörlük';

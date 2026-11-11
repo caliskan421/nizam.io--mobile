@@ -18,6 +18,7 @@ import '../../tasks/tasks.dart';
 import '../application/meeting_room_controller.dart';
 import '../domain/meeting.dart';
 import '../domain/meeting_board.dart';
+import 'meeting_input_visibility.dart';
 import 'meeting_page.dart';
 import 'meetings_texts.dart';
 
@@ -187,55 +188,60 @@ class _MeetingAgendaState extends ConsumerState<MeetingAgenda> {
             ),
           if (manage)
             _Divided(
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 30,
-                    child: NzIcon(
-                      NzIcons.add,
-                      size: NizamioSize.iconSizeSm,
-                      color: c.textMuted,
-                    ),
-                  ),
-                  const Gap(NizamioSpacing.space2),
-                  Expanded(
-                    child: TextField(
-                      onTapOutside: (_) =>
-                          FocusManager.instance.primaryFocus?.unfocus(),
-                      controller: _draft,
-                      maxLength: agendaTitleMax,
-                      textInputAction: TextInputAction.done,
-                      onSubmitted: (_) => _add(),
-                      style: t.bodyLg,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        counterText: '',
-                        // Prototip `.ag-in`: çerçevesiz, zeminsiz (tema dolgu ve kenar verir).
-                        filled: false,
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                        ),
-                        hintText: l.uiMeetingsAgendaAdd,
-                        hintStyle: t.bodyLg.copyWith(color: c.textFaint),
-                        semanticCounterText: '',
+              child: MeetingInputVisibility(
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 30,
+                      child: NzIcon(
+                        NzIcons.add,
+                        size: NizamioSize.iconSizeSm,
+                        color: c.textMuted,
                       ),
                     ),
-                  ),
-                  Text(
-                    '${_draft.text.length} / $agendaTitleMax',
-                    style: t.monoSm.copyWith(fontSize: 11, color: c.textFaint),
-                  ),
-                  const Gap(NizamioSpacing.space2),
-                  NzButton.primary(
-                    label: l.uiMeetingsAdd,
-                    size: NzSize.sm,
-                    loading: _busy,
-                    onPressed: canAdd ? _add : null,
-                  ),
-                ],
+                    const Gap(NizamioSpacing.space2),
+                    Expanded(
+                      child: TextField(
+                        onTapOutside: (_) =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
+                        controller: _draft,
+                        maxLength: agendaTitleMax,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _add(),
+                        style: t.bodyLg,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          counterText: '',
+                          // Prototip `.ag-in`: çerçevesiz, zeminsiz (tema dolgu ve kenar verir).
+                          filled: false,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
+                          hintText: l.uiMeetingsAgendaAdd,
+                          hintStyle: t.bodyLg.copyWith(color: c.textFaint),
+                          semanticCounterText: '',
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${_draft.text.length} / $agendaTitleMax',
+                      style: t.monoSm.copyWith(
+                        fontSize: 11,
+                        color: c.textFaint,
+                      ),
+                    ),
+                    const Gap(NizamioSpacing.space2),
+                    NzButton.primary(
+                      label: l.uiMeetingsAdd,
+                      size: NzSize.sm,
+                      loading: _busy,
+                      onPressed: canAdd ? _add : null,
+                    ),
+                  ],
+                ),
               ),
             ),
         ],

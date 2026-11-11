@@ -37,6 +37,59 @@ void main() {
     expect(s.limit, TasksListState.pageSize);
   });
 
+  test('koordinatörlükten yeniden açılış filtreleri sıfırlar ve seçim kaldırılabilir', () async {
+    final c = await _container();
+    await c.read(taskCatalogControllerProvider.future);
+    final p = tasksListControllerProvider(TaskView.all, '');
+    final ctl = c.read(p.notifier);
+    final result = tasksListResultOf(p);
+    c.listen(result, (_, _) {});
+    final options = c.read(taskFilterOptionsProvider)!;
+    expect(options.coordinatorships.map((e) => e.$1.code), contains(dAlt));
+    ctl
+      ..togglePriority(TaskPriority.high)
+      ..setQuery('old');
+    ctl.seedCoordinatorship(dAlt, view: TaskView.all, people: {});
+    expect(c.read(p).filter.coordinatorships, {dAlt});
+    expect(c.read(p).filter.priorities, isEmpty);
+    expect(c.read(p).filter.query, isEmpty);
+    expect(
+      c.read(result)!.tasks.every((t) => t.coordinatorship == dAlt),
+      isTrue,
+    );
+    ctl.toggleCoordinatorship(dAlt);
+    expect(c.read(result)!.tasks.any((t) => t.coordinatorship != dAlt), isTrue);
+    ctl.seedCoordinatorship(dAlt, view: TaskView.all, people: {});
+    expect(c.read(p).filter.coordinatorships, {dAlt});
+  });
+
+  test(
+    'tür kaldırma ve tüm ek filtreleri temizleme görünüm ve aramayı korur',
+    () {
+      final c = _bare();
+      final p = tasksListControllerProvider(TaskView.late, '');
+      final ctl = c.read(p.notifier);
+      ctl
+        ..setQuery('test')
+        ..togglePerson(pAli)
+        ..togglePerson(pKadir)
+        ..toggleCoordinatorship(dAlt)
+        ..togglePriority(TaskPriority.high);
+      ctl.clearGroup(TaskFilterGroup.people);
+      expect(c.read(p).filter.people, isEmpty);
+      expect(c.read(p).filter.coordinatorships, {dAlt});
+      ctl.clearExtra();
+      expect(c.read(p).filter.hasExtra, isFalse);
+      expect(c.read(p).filter.query, 'test');
+      expect(c.read(p).view, TaskView.late);
+      ctl.selectSort(TaskSort.start);
+      ctl.flipDirection();
+      expect((c.read(p).sort, c.read(p).descending), (TaskSort.start, true));
+      ctl.flipDirection();
+      expect(c.read(p).descending, isFalse);
+    },
+  );
+
   test('sıralama: döngü varsayılan yönle; seçili tarihli ölçüt yönü çevirir, '
       'koordinatörlük yönsüz', () {
     final c = _bare();

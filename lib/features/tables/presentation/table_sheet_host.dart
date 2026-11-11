@@ -12,6 +12,7 @@ Future<void> showTableSheet(
   required WidgetBuilder builder,
   bool expandable = false,
   String? description,
+  NzSheetActionsBuilder? actions,
 }) {
   final lease = ref.read(tablesControllerProvider.notifier).lease;
   return NzBottomSheet.show<void>(
@@ -19,6 +20,22 @@ Future<void> showTableSheet(
     title: title,
     description: description,
     expandable: expandable,
+    actions: actions == null
+        ? null
+        : (sheet) => [
+            for (final action in actions(sheet))
+              Consumer(
+                builder: (context, ref, _) {
+                  ref.watch(tablesControllerProvider);
+                  return identical(
+                        lease,
+                        ref.read(tablesControllerProvider.notifier).lease,
+                      )
+                      ? action
+                      : const SizedBox.shrink();
+                },
+              ),
+          ],
     builder: (sheet) => Consumer(
       builder: (context, ref, _) {
         ref.watch(tablesControllerProvider);

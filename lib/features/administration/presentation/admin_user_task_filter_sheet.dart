@@ -163,6 +163,7 @@ class _Filters extends ConsumerWidget {
         const Gap(14),
         kicker(context.l10n.uiUsersTaskPriorityGroup),
         _OptionGroup(
+          separated: true,
           children: [
             for (final priority in priorities)
               _Option(
@@ -185,36 +186,58 @@ class _Filters extends ConsumerWidget {
 }
 
 class _OptionGroup extends StatelessWidget {
-  const _OptionGroup({required this.children});
+  const _OptionGroup({required this.children, this.separated = false});
   final List<Widget> children;
+  final bool separated;
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: context.colors.surface,
-      border: Border.all(color: context.colors.border),
-      borderRadius: BorderRadius.circular(NizamioRadius.card),
-    ),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(NizamioRadius.card),
-      child: Material(
-        type: MaterialType.transparency,
-        child: Column(
-          children: [
-            for (final (i, child) in children.indexed) ...[
-              if (i > 0)
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  indent: 16,
-                  color: context.colors.border,
-                ),
-              child,
+  Widget build(BuildContext context) {
+    if (separated) {
+      return Column(
+        spacing: NizamioSpacing.space2,
+        children: [
+          for (final child in children)
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: context.colors.surface,
+                border: Border.all(color: context.colors.border),
+                borderRadius: BorderRadius.circular(NizamioRadius.tile),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(NizamioRadius.tile),
+                child: Material(type: MaterialType.transparency, child: child),
+              ),
+            ),
+        ],
+      );
+    }
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        border: Border.all(color: context.colors.border),
+        borderRadius: BorderRadius.circular(NizamioRadius.card),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(NizamioRadius.card),
+        child: Material(
+          type: MaterialType.transparency,
+          child: Column(
+            children: [
+              for (final (i, child) in children.indexed) ...[
+                if (i > 0)
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    indent: 16,
+                    color: context.colors.border,
+                  ),
+                child,
+              ],
             ],
-          ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _Option extends StatefulWidget {

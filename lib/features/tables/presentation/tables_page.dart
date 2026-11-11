@@ -16,8 +16,8 @@ import 'table_navigation_sheets.dart';
 import 'table_sheet_host.dart';
 import 'table_sheets.dart';
 import 'table_texts.dart';
-import 'tables_list_widgets.dart';
 import 'tables_header.dart';
+import 'tables_list_widgets.dart';
 
 class TablesPage extends ConsumerWidget {
   const TablesPage({super.key, required this.onOpenTable});
@@ -28,8 +28,9 @@ class TablesPage extends ConsumerWidget {
     final l = context.l10n;
     final state = ref.watch(tablesControllerProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.mounted)
+      if (context.mounted) {
         ref.read(tablesControllerProvider.notifier).ensureDemoFixtures();
+      }
     });
     return NzPage.feed(
       width: NzContentWidth.wide,
@@ -427,101 +428,123 @@ class TablesPage extends ConsumerWidget {
     var selectedUnit = initial.unit ?? 'DEMO-A';
     final epoch = ref.read(tablesControllerProvider.notifier);
     final lease = epoch.lease;
+    final changes = ValueNotifier(0);
+    void update(VoidCallback change) {
+      change();
+      changes.value++;
+    }
+
     await showTableSheet(
       ref,
       context,
       title: l.uiTablesNew,
-      builder: (sheet) => StatefulBuilder(
-        builder: (context, setState) => Column(
+      actions: (sheet) => [
+        ValueListenableBuilder<int>(
+          valueListenable: changes,
+          builder: (context, _, _) => NzButton.primary(
+            label: l.uiTablesCreate,
+            onPressed: name.trim().isEmpty
+                ? null
+                : () {
+                    final id = epoch.create(
+                      expectedLease: lease,
+                      unit: selectedUnit,
+                      title: name,
+                      area: area,
+                      fields: l.templateFields(template),
+                      people: share
+                          ? {const TablePersonId('demo-1'): shareAccess}
+                          : {},
+                    );
+                    Navigator.of(sheet).pop();
+                    if (id != null) onOpenTable(id);
+                  },
+          ),
+        ),
+      ],
+      builder: (sheet) => ValueListenableBuilder<int>(
+        valueListenable: changes,
+        builder: (context, _, _) => Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             NzTextField(
               label: l.uiTablesName,
-              onChanged: (v) => setState(() => name = v),
+              onChanged: (v) => update(() => name = v),
             ),
             const Gap(NizamioSpacing.space4),
-            Text(l.uiTablesTemplate, style: context.text.kicker),
-            Wrap(
-              spacing: NizamioSpacing.space2,
-              children: [
+            NzSelect<TableTemplate>(
+              label: l.uiTablesTemplate,
+              value: template,
+              items: [
                 for (final t in TableTemplate.values)
-                  ChoiceChip(
-                    label: Text(l.tableTemplate(t)),
-                    selected: template == t,
-                    onSelected: (_) => setState(() => template = t),
-                  ),
+                  NzSelectItem(value: t, label: l.tableTemplate(t)),
               ],
+              onChanged: (v) {
+                if (v != null) update(() => template = v);
+              },
             ),
-            const Gap(NizamioSpacing.space4),
-            Wrap(
-              spacing: NizamioSpacing.space2,
-              children: [
+            const Gap(NizamioSpacing.space3),
+            NzSelect<TableArea>(
+              label: l.uiTablesDestination,
+              value: area,
+              items: [
                 for (final a in [TableArea.personal, TableArea.coord])
-                  ChoiceChip(
-                    label: Text(l.tableArea(a)),
-                    selected: area == a,
-                    onSelected: (_) => setState(() => area = a),
-                  ),
+                  NzSelectItem(value: a, label: l.tableArea(a)),
+              ],
+              onChanged: (v) {
+                if (v != null) update(() => area = v);
+              },
+            ),
+            if (area == TableArea.coord) ...[
+              const Gap(NizamioSpacing.space3),
+              NzSelect<String>(
+                label: l.uiTablesCoord,
+                value: tableDemoUnits.contains(selectedUnit)
+                    ? selectedUnit
+                    : null,
+                items: [
+                  for (final unit in tableDemoUnits)
+                    NzSelectItem(value: unit, label: l.tableUnit(unit)),
+                ],
+                onChanged: (v) {
+                  if (v != null) update(() => selectedUnit = v);
+                },
+              ),
+            ],
+            const Gap(NizamioSpacing.space3),
+            NzFormRows(
+              rows: [
+                NzFormRow.toggle(
+                  label: l.uiTablesAddPerson,
+                  value: share,
+                  onChanged: (v) => update(() => share = v),
+                ),
               ],
             ),
-            if (area == TableArea.coord)
-              Wrap(
-                spacing: NizamioSpacing.space2,
-                children: [
-                  for (final unit in tableDemoUnits)
-                    ChoiceChip(
-                      label: Text(l.tableUnit(unit)),
-                      selected: selectedUnit == unit,
-                      onSelected: (_) => setState(() => selectedUnit = unit),
-                    ),
-                ],
-              ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l.uiTablesAddPerson),
-              value: share,
-              onChanged: (v) => setState(() => share = v),
-            ),
-            if (share)
-              Wrap(
-                spacing: NizamioSpacing.space2,
-                children: [
+            if (share) ...[
+              const Gap(NizamioSpacing.space3),
+              NzSelect<TableAccess>(
+                label: l.uiTablesProgramAccess,
+                value: shareAccess,
+                items: [
                   for (final access in [TableAccess.view, TableAccess.edit])
-                    ChoiceChip(
-                      label: Text(l.tableAccess(access)),
-                      selected: shareAccess == access,
-                      onSelected: (_) => setState(() => shareAccess = access),
-                    ),
+                    NzSelectItem(value: access, label: l.tableAccess(access)),
                 ],
+                onChanged: (v) {
+                  if (v != null) update(() => shareAccess = v);
+                },
               ),
+            ],
+            const Gap(NizamioSpacing.space3),
             Text(
               l.templateFields(template).map((f) => f.name).join(' · '),
               style: context.text.caption,
-            ),
-            const Gap(NizamioSpacing.space4),
-            NzButton.primary(
-              label: l.uiTablesCreate,
-              onPressed: name.trim().isEmpty
-                  ? null
-                  : () {
-                      final id = epoch.create(
-                        expectedLease: lease,
-                        unit: selectedUnit,
-                        title: name,
-                        area: area,
-                        fields: l.templateFields(template),
-                        people: share
-                            ? {const TablePersonId('demo-1'): shareAccess}
-                            : {},
-                      );
-                      Navigator.of(sheet).pop();
-                      if (id != null) onOpenTable(id);
-                    },
             ),
           ],
         ),
       ),
     );
+    changes.dispose();
   }
 }

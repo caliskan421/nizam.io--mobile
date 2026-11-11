@@ -124,6 +124,18 @@ class TasksListController extends _$TasksListController {
     ref.read(tasksListPrefsStoreProvider.notifier).save(value);
   }
 
+  /// Yeni koordinatörlük geçişi, önceki ekran süzgeçlerini başlangıç değerleriyle değiştirir.
+  void seedCoordinatorship(
+    String code, {
+    required TaskView view,
+    required Set<String> people,
+  }) => state = state.copyWith(
+    view: view,
+    filter: TaskFilter(people: people, coordinatorships: {code}),
+    searchOpen: false,
+    limit: TasksListState.pageSize,
+  );
+
   void selectView(TaskView v) =>
       state = state.copyWith(view: v, limit: TasksListState.pageSize);
 
@@ -182,6 +194,15 @@ class TasksListController extends _$TasksListController {
 
   void togglePriority(TaskPriority p) => state = state.copyWith(
     filter: _filter(priorities: _toggle(state.filter.priorities, p)),
+    limit: TasksListState.pageSize,
+  );
+
+  void clearGroup(TaskFilterGroup group) => state = state.copyWith(
+    filter: switch (group) {
+      TaskFilterGroup.people => _filter(people: {}),
+      TaskFilterGroup.coordinatorship => _filter(coordinatorships: {}),
+      TaskFilterGroup.priority => _filter(priorities: {}),
+    },
     limit: TasksListState.pageSize,
   );
 

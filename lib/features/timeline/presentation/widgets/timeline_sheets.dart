@@ -6,6 +6,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/inputs/nz_filter_choice.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
@@ -79,36 +80,14 @@ class _FilterBodyState extends ConsumerState<_FilterBody> {
       int? count,
       bool selected,
       VoidCallback onTap,
-    ) => InkWell(
+    ) => NzFilterChoice(
+      label: label,
+      count: count?.toString(),
+      selected: selected,
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: NizamioSpacing.space3,
-          vertical: NizamioSpacing.space2,
-        ),
-        child: Row(
-          children: [
-            NzCheckCircle(value: selected, label: label, onChanged: onTap),
-            const Gap(NizamioSpacing.space2),
-            Expanded(child: Text(label, style: context.text.list)),
-            if (count != null)
-              Text(
-                '$count',
-                style: context.text.monoSm.copyWith(color: c.textMuted),
-              ),
-          ],
-        ),
-      ),
     );
-    Widget choices(List<Widget> children) => Padding(
-      padding: const EdgeInsets.fromLTRB(
-        NizamioSpacing.gapMd,
-        0,
-        NizamioSpacing.gapMd,
-        NizamioSpacing.gapMd,
-      ),
-      child: Column(children: children),
-    );
+    Widget choices(List<Widget> children) =>
+        NzFilterChoices(children: children);
     final coordCount = view.allSelected
         ? 0
         : view.selectedCoordinatorships.length;
@@ -194,6 +173,7 @@ class _FilterBodyState extends ConsumerState<_FilterBody> {
               label: l.uiTimelinePriority,
               leading: const NzPriorityBars(level: 2),
               trailing: TaskSegmented(
+                filterSpacing: true,
                 compact: true,
                 semanticLabel: l.uiTimelinePriority,
                 labels: [

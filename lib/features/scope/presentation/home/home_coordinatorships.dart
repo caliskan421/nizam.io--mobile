@@ -6,9 +6,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/motion/page_content_entrance.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
-import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
-import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/coordinatorship_query_controller.dart';
 import '../../domain/home_dashboard.dart';
 import 'home_sections.dart';
@@ -23,10 +21,12 @@ class HomeCoordinatorships extends ConsumerWidget {
     required this.items,
     required this.onOpen,
     this.wide = false,
+    this.truncated = false,
   });
 
   final List<CoordinatorshipSummary> items;
   final bool wide;
+  final bool truncated;
 
   static const _wideColumns = 4;
 
@@ -103,7 +103,11 @@ class HomeCoordinatorships extends ConsumerWidget {
                 NzEntrance(
                   replay: (order, c.code),
                   index: i ~/ columns,
-                  child: _CoordCard(c: c, onTap: () => onOpen(c.code)),
+                  child: _CoordCard(
+                    c: c,
+                    truncated: truncated,
+                    onTap: () => onOpen(c.code),
+                  ),
                 ),
             ],
           ),
@@ -123,9 +127,13 @@ class HomeCoordinatorships extends ConsumerWidget {
 }
 
 class _CoordCard extends StatelessWidget {
-  const _CoordCard({required this.c, required this.onTap});
-
+  const _CoordCard({
+    required this.c,
+    required this.truncated,
+    required this.onTap,
+  });
   final CoordinatorshipSummary c;
+  final bool truncated;
   final VoidCallback onTap;
 
   @override
@@ -133,79 +141,114 @@ class _CoordCard extends StatelessWidget {
     final l = context.l10n;
     final colors = context.colors;
     final t = context.text;
-    final lead = c.hasLead ? c.leads.join(', ') : l.uiHomeUnassigned;
-    final progress = l.coordProgress(c);
-    final late = l.coordLate(c);
-    final mono = t.kicker.copyWith(fontWeight: FontWeight.w400);
-    return NzCard.outlined(
-      padding: const EdgeInsets.all(NizamioSpacing.rowPad),
+    final count = '${truncated ? '≥' : ''}${c.total} ${l.uiHomeTasksLc}';
+    final late = c.late > 0
+        ? '${truncated ? '≥' : ''}${c.late} ${l.uiHomeLateLc}'
+        : l.uiHomeNoLate;
+    final percent = l.percent(c.donePercent / 100);
+    // Sunucu özeti kalan durumu onay ve iadeyi birlikte taşır; ayrıymış gibi renklendirilmez.
+    final segments = <(int, Color)>[
+      (c.done, colors.accentText),
+      (c.inProgress, colors.inProgress),
+      (c.inReview, colors.info),
+      (c.todo, colors.textFaint),
+    ].where((entry) => entry.$1 > 0).toList();
+    return Semantics(
+      button: true,
+      label: '${c.name}. $percent. $count. $late',
       onTap: onTap,
-      semanticLabel: '${c.name}. $lead. $progress. $late',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            c.name,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: t.bodyMd.copyWith(fontWeight: FontWeight.w600),
+      excludeSemantics: true,
+      child: NzPressable.card(
+        child: Material(
+          color: colors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: BorderSide(color: colors.border),
           ),
-          const Gap(NizamioSpacing.space2),
-          Row(
-            children: [
-              // Atanmamış: `warning` yalnız işarettir — açık temada metin olarak 4.25:1
-              // (docs/design-tokens.md); yazı her iki temada ikincil metin rolüdür.
-              if (!c.hasLead) ...[
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colors.warning,
-                    shape: BoxShape.circle,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(NizamioSpacing.space5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    c.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: t.bodyMd.copyWith(
+                      color: colors.textMuted,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(NizamioSize.statusDot / 2),
+                  const Gap(NizamioSpacing.space2),
+                  Text(
+                    percent,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: t.displayLg.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: colors.text,
+                    ),
                   ),
-                ),
-                const Gap(NizamioSpacing.space1 + NizamioSpacing.space1 / 2),
-              ],
-              Expanded(
-                child: Text(
-                  lead,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: t.caption.copyWith(color: colors.textMuted),
-                ),
+                  const Spacer(),
+                  const Gap(NizamioSpacing.space3),
+                  SizedBox(
+                    key: const ValueKey('coord-task-distribution'),
+                    height: 6,
+                    child: segments.isEmpty
+                        ? DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: colors.surfaceRaised,
+                              borderRadius: BorderRadius.circular(
+                                NizamioRadius.pill,
+                              ),
+                            ),
+                            child: const SizedBox(width: double.infinity),
+                          )
+                        : Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            spacing: 2,
+                            children: [
+                              for (final segment in segments)
+                                Expanded(
+                                  flex: segment.$1,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: segment.$2,
+                                      borderRadius: BorderRadius.circular(
+                                        NizamioRadius.pill,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                  ),
+                  const Gap(NizamioSpacing.space3),
+                  Text.rich(
+                    TextSpan(
+                      style: t.bodySm.copyWith(color: colors.textMuted),
+                      children: [
+                        TextSpan(text: count),
+                        const TextSpan(text: ' · '),
+                        TextSpan(
+                          text: late,
+                          style: TextStyle(
+                            color: c.late > 0
+                                ? colors.danger
+                                : colors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          const Spacer(),
-          const Gap(NizamioSpacing.space2),
-          NzProgressBar.segments(
-            segments: [
-              NzBarSegment(c.todo, colors.textFaint),
-              NzBarSegment(c.inProgress, colors.inProgress),
-              NzBarSegment(c.inReview, colors.warning),
-              NzBarSegment(c.done, colors.accentText),
-            ],
-          ),
-          const Gap(NizamioSpacing.space2),
-          // Prototip: ilerleme solda, gecikme sağda tek satır; sığmazsa alt satıra sarılır.
-          ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: double.infinity),
-            child: Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              spacing: NizamioSpacing.space2,
-              children: [
-                Text(progress, style: mono),
-                Text(
-                  late,
-                  style: mono.copyWith(
-                    color: c.late > 0 ? colors.danger : colors.textFaint,
-                  ),
-                ),
-              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

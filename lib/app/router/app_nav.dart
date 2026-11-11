@@ -9,6 +9,7 @@ import '../../core/ui/page/nz_app_nav.dart';
 import '../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../features/identity/identity.dart';
 import '../../features/scope/scope.dart';
+import '../../features/tasks/tasks.dart';
 import 'routes.dart';
 import 'shell.dart' show ShellModule, moduleOf;
 import 'split.dart';
@@ -48,8 +49,27 @@ class GoRouterAppNav implements NzAppNav {
   void openHistory() => _open(const HistoryRoute().location);
 
   @override
-  void openTasks({NzTaskView? view, List<String> people = const []}) =>
-      _router.go(TasksRoute(view: view?.name, people: people).location);
+  void openTasks({
+    NzTaskView? view,
+    List<String> people = const [],
+    String? coordinatorship,
+  }) {
+    final route = TasksRoute(
+      view: view?.name,
+      people: people,
+      coord: coordinatorship,
+    );
+    final coord = route.initialCoordinatorship;
+    if (coord != null) {
+      seedTasksNavigation(
+        _ref,
+        view: view,
+        people: people,
+        coordinatorship: coord,
+      );
+    }
+    _router.go(route.location);
+  }
 
   @override
   void openTask(String code) => _record(PaneEntry(PaneKind.task, code));

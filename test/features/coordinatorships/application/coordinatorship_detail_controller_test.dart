@@ -65,6 +65,17 @@ void main() {
         (c.read(alt).filter, c.read(alt).person),
         (CoordTaskFilter.late, 'ko'),
       );
+      c.read(alt.notifier).togglePerson('another');
+      c.read(alt.notifier).togglePriority(TaskPriority.high);
+      c.read(alt.notifier).togglePriority(TaskPriority.low);
+      expect(c.read(alt).extra.people, {'ko', 'another'});
+      expect(c.read(alt).extra.priorities, {
+        TaskPriority.high,
+        TaskPriority.low,
+      });
+      c.read(alt.notifier).clearExtra();
+      expect(c.read(alt).extra.hasExtra, isFalse);
+      expect(c.read(alt).filter, CoordTaskFilter.late);
       c.read(alt.notifier).selectTab(CoordinatorshipTab.members);
       expect(
         c.read(alt).filter,

@@ -6,6 +6,7 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/motion/page_content_entrance.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../core/ui/widgets/inputs/nz_active_filter.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../calendar/calendar.dart';
 import '../../tasks/tasks.dart';
@@ -70,17 +71,20 @@ List<Widget> adminUserTaskPanelChildren(
         children: [
           for (final status in UserTaskStatus.values)
             if (state.statuses.contains(status))
-              InputChip(
-                label: Text(userTaskFilterLabel(context, status)),
-                onDeleted: () => ctl.toggleStatus(status),
+              NzActiveFilter(
+                label: userTaskFilterLabel(context, status),
+                removeLabel:
+                    '${userTaskFilterLabel(context, status)} ${l.uiTasksRemoveFilterTail}',
+                onRemove: () => ctl.toggleStatus(status),
               ),
           for (final priority in TaskPriority.values)
             if (state.priorities.contains(priority))
-              InputChip(
-                label: Text(
-                  '${userTaskPriorityLabel(context, priority)} ${l.uiUsersTaskPriorityChip}',
-                ),
-                onDeleted: () => ctl.togglePriority(priority),
+              NzActiveFilter(
+                label:
+                    '${userTaskPriorityLabel(context, priority)} ${l.uiUsersTaskPriorityChip}',
+                removeLabel:
+                    '${userTaskPriorityLabel(context, priority)} ${l.uiTasksRemoveFilterTail}',
+                onRemove: () => ctl.togglePriority(priority),
               ),
           TextButton(onPressed: ctl.clear, child: Text(l.uiTasksClear)),
         ],

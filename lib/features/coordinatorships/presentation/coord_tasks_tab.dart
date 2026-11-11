@@ -6,16 +6,12 @@ import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
-import '../../../core/ui/widgets/lists/lists.dart';
-import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
-import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../tasks/tasks.dart';
 import '../application/coordinatorship_detail_controller.dart';
 import '../domain/coordinatorship_board.dart';
 import 'coord_detail_texts.dart';
 import 'coord_parts.dart';
-import 'coord_widgets.dart';
 
 /// Görevler bölümü (prototip `tTask`): "Açık · 8 görev", süz ve "Görevler sayfasında aç"
 /// düğmeleri, kişi süzgeci çipi, görev kartları (genişte iki sütun).
@@ -42,11 +38,9 @@ class CoordTasksTab extends ConsumerWidget {
     final all = coordSortedTasks(catalog.tasksOf(code));
     final list = [
       for (final task in all)
-        if (view.filter.matches(task) &&
-            (view.person == null || task.assignees.contains(view.person)))
+        if (view.filter.matches(task) && view.extra.matches(task, catalog))
           task,
     ];
-    final person = people.where((p) => p.id == view.person).firstOrNull;
     return LayoutBuilder(
       builder: (context, box) {
         final columns = box.maxWidth >= coordWideWidth ? 2 : 1;
@@ -84,14 +78,7 @@ class CoordTasksTab extends ConsumerWidget {
                   icon: NzIcons.filter,
                   semanticLabel: l.uiCoordFilter,
                   dot: view.filtered ? c.accentText : null,
-                  onPressed: () => _showFilter(
-                    context,
-                    ref,
-                    code,
-                    all,
-                    view.filter,
-                    view.person,
-                  ),
+                  onPressed: () => _showFilter(context, ref, code, all),
                 ),
                 const Gap(NizamioSpacing.space2),
                 NzIconButton.circle(
@@ -99,27 +86,22 @@ class CoordTasksTab extends ConsumerWidget {
                   semanticLabel: l.uiCoordOpenInTasks,
                   onPressed: () => context.appNav.openTasks(
                     view: _taskView(view.filter),
-                    people: [?view.person],
+                    people: view.extra.people.toList(),
+                    coordinatorship: code,
                   ),
                 ),
               ],
             ),
-            if (person != null)
+            if (view.extra.hasExtra)
               Padding(
                 padding: const EdgeInsets.only(top: NizamioSpacing.space2),
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: NizamioSpacing.space2,
-                  children: [
-                    InputChip(
-                      label: Text(person.name),
-                      onDeleted: () => commands.setPerson(null),
-                    ),
-                    CoordLink(
-                      label: l.uiCoordClear,
-                      onTap: commands.clearFilter,
-                    ),
-                  ],
+                child: TaskFilterGroups(
+                  filter: view.extra,
+                  catalog: catalog,
+                  onEdit: (group) =>
+                      _showFilter(context, ref, code, all, initialGroup: group),
+                  onRemove: commands.clearGroup,
+                  onClear: commands.clearExtra,
                 ),
               ),
             const Gap(NizamioSpacing.space3),
@@ -167,73 +149,38 @@ NzTaskView _taskView(CoordTaskFilter f) => switch (f) {
   CoordTaskFilter.done => NzTaskView.done,
 };
 
-/// Süzgeç alt sayfası (prototip `tf`): durum (sayılarıyla) ve atanan kişi; seçim sayfayı kapatır.
 void _showFilter(
   BuildContext context,
   WidgetRef ref,
   String code,
-  List<TaskItem> all,
-  CoordTaskFilter filter,
-  String? person,
-) {
-  final l = context.l10n;
-  final commands = ref.read(
-    coordinatorshipDetailControllerProvider(code).notifier,
+  List<TaskItem> all, {
+  TaskFilterGroup? initialGroup,
+}) {
+  final provider = coordinatorshipDetailControllerProvider(code);
+  final catalog = ref.read(taskCatalogControllerProvider).value!;
+  final scoped = catalog.filtered(
+    codes: [for (final task in all) task.code],
+    truncated: catalog.truncated,
   );
-  final catalog = ref.read(taskCatalogControllerProvider).value;
-  final assignees = <String>{for (final t in all) ...t.assignees};
-  NzBottomSheet.show<void>(
+  showSharedTasksFilterSheet(
     context,
-    title: l.uiCoordFilter,
-    builder: (sheet) {
-      Widget check(bool on) => on
-          ? NzIcon(NzIcons.check, color: sheet.colors.accentText)
-          : const SizedBox.shrink();
-      void pick(VoidCallback f) {
-        Navigator.of(sheet).pop();
-        f();
-      }
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: NizamioSpacing.gapMd,
-        children: [
-          NzMenuGroup(
-            label: l.uiCoordFilterStatus,
-            rows: [
-              for (final f in CoordTaskFilter.values)
-                NzMenuRow(
-                  icon: f == filter ? NzIcons.checkCircle : NzIcons.tasks,
-                  label:
-                      '${l.coordFilterLabel(f)} · ${all.where(f.matches).length}',
-                  current: f == filter,
-                  trailing: check(f == filter),
-                  onTap: () => pick(() => commands.setFilter(f)),
-                ),
-            ],
-          ),
-          if (assignees.isNotEmpty)
-            NzMenuGroup(
-              label: l.uiCoordFilterPerson,
-              rows: [
-                NzMenuRow(
-                  icon: NzIcons.group,
-                  label: l.uiCoordEveryone,
-                  current: person == null,
-                  trailing: check(person == null),
-                  onTap: () => pick(() => commands.setPerson(null)),
-                ),
-                for (final id in assignees)
-                  NzMenuRow(
-                    icon: NzIcons.person,
-                    label: catalog?.nameOf(id) ?? id,
-                    current: person == id,
-                    trailing: check(person == id),
-                    onTap: () => pick(() => commands.setPerson(id)),
-                  ),
-              ],
-            ),
-        ],
+    initialGroup: initialGroup,
+    data: (ref) {
+      final view = ref.watch(provider);
+      final ctl = ref.read(provider.notifier);
+      return TasksFilterSheetData(
+        filter: view.extra,
+        options: filterOptions(scoped),
+        truncated: scoped.truncated,
+        count: all
+            .where(
+              (t) => view.filter.matches(t) && view.extra.matches(t, scoped),
+            )
+            .length,
+        onClear: ctl.clearExtra,
+        onPerson: ctl.togglePerson,
+        onCoordinatorship: ctl.toggleCoordinatorship,
+        onPriority: ctl.togglePriority,
       );
     },
   );

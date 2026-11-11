@@ -29,6 +29,26 @@ import 'tasks/tasks_list_parts.dart';
 import 'tasks/tasks_shortcuts.dart';
 import 'tasks_mode_toggle.dart';
 
+/// Yönlendirme niyeti sırasında listeyi yeniden başlangıç süzgecine getirir.
+void seedTasksNavigation(
+  WidgetRef ref, {
+  required NzTaskView? view,
+  required List<String> people,
+  required String coordinatorship,
+}) {
+  final taskView = view == null
+      ? TaskView.all
+      : TaskView.values.byName(view.name);
+  ref.read(taskListFilterProvider.notifier).select(null);
+  ref
+      .read(tasksListControllerProvider(taskView, people.join(',')).notifier)
+      .seedCoordinatorship(
+        coordinatorship,
+        view: taskView,
+        people: people.toSet(),
+      );
+}
+
 /// Görevler listesi (prototip `tasks`): cam üst çubuk, başlık + ikonlu görünüm/ara/yeni görev
 /// daireleri, Liste / Zaman çizelgesi anahtarı, yerinde açılan arama, 4×2 görünüm
 /// kutucukları, etkin filtre çipleri, sıralama menülü liste başlığı, görev kartları (8'er
@@ -36,10 +56,16 @@ import 'tasks_mode_toggle.dart';
 /// [people] başlangıç süzgecidir. Alt menüde "Görevler"e yeniden dokunmak kısayol menüsünü
 /// açar.
 class TasksPage extends ConsumerStatefulWidget {
-  const TasksPage({super.key, this.view, this.people = const []});
+  const TasksPage({
+    super.key,
+    this.view,
+    this.people = const [],
+    this.coordinatorship,
+  });
 
   final NzTaskView? view;
   final List<String> people;
+  final String? coordinatorship;
 
   /// Kabukta bu sayfanın sekme sırası.
   static const shellTab = 1;
@@ -57,6 +83,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
   @override
   void initState() {
     super.initState();
+    _scheduleSeed();
     _search = TextEditingController(text: ref.read(_provider).filter.query);
   }
 
@@ -73,13 +100,29 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     widget.people.join(','),
   );
 
+  void _scheduleSeed() {
+    final coord = widget.coordinatorship;
+    if (coord == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || widget.coordinatorship != coord) return;
+      seedTasksNavigation(
+        ref,
+        view: widget.view,
+        people: widget.people,
+        coordinatorship: coord,
+      );
+    });
+  }
+
   @override
   void didUpdateWidget(TasksPage old) {
     super.didUpdateWidget(old);
     // Başka başlangıç süzgeciyle açıldı (ör. ana sayfa KPI kartından `view=late`): yeni
     // denetleyicinin araması kapalı ve boştur; alandaki eski metin de silinir.
     if (old.view != widget.view ||
-        old.people.join(',') != widget.people.join(',')) {
+        old.people.join(',') != widget.people.join(',') ||
+        old.coordinatorship != widget.coordinatorship) {
+      _scheduleSeed();
       _search.clear();
       _searchFocus.unfocus();
     }
@@ -103,7 +146,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     }
   }
 
-  void _openFilters() => showTasksFilterSheet(context, provider: _provider);
+  void _openFilters([TaskFilterGroup? group]) =>
+      showTasksFilterSheet(context, provider: _provider, initialGroup: group);
 
   @override
   Widget build(BuildContext context) {
@@ -188,19 +232,6 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                       },
                     ),
                     const Gap(NizamioSpacing.space1),
-                    if (NzTabletMetrics.tabletVisualAt(
-                      MediaQuery.sizeOf(context).width,
-                    )) ...[
-                      NzIconButton.circle(
-                        icon: NzIcons.filter,
-                        semanticLabel: l.uiTasksFilters,
-                        dot: state.filter.hasExtra
-                            ? context.colors.accentText
-                            : null,
-                        onPressed: _openFilters,
-                      ),
-                      const Gap(NizamioSpacing.space1),
-                    ],
                     NzIconButton.circle(
                       icon: NzIcons.search,
                       semanticLabel: l.uiTasksSearch,

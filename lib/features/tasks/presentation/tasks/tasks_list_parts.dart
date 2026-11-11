@@ -3,7 +3,6 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
-import '../../../../core/ui/layout/nz_pane.dart';
 import '../../../../core/ui/motion/page_content_entrance.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
@@ -16,8 +15,9 @@ import '../../application/tasks_list_controller.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_query.dart';
 import '../task_texts.dart';
-import '../task_widgets.dart';
 import 'task_card_grid.dart';
+import 'task_filter_groups.dart';
+import 'task_list_toolbar.dart';
 import 'task_view_grid.dart';
 
 /// Liste gövdesi (görünüm kutucukları, çipler, başlık + sıralama, kartlar, sayfalama) akışın
@@ -33,7 +33,7 @@ List<Widget> tasksListChildren(
   required TaskQueryResult result,
   required TasksListController ctl,
   required VoidCallback onClearAll,
-  required VoidCallback onFilter,
+  required void Function(TaskFilterGroup?) onFilter,
   required ValueChanged<String> onOpen,
   int columns = 1,
 }) {
@@ -43,10 +43,6 @@ List<Widget> tasksListChildren(
   final r = result;
   final byCoord = state.sort == TaskSort.coordinatorship;
   final list = r.tasks;
-  final chips = _chips(context, catalog, state, ctl);
-  final tablet = NzTabletMetrics.tabletVisualAt(
-    MediaQuery.sizeOf(context).width,
-  );
 
   final rows = <Widget>[];
   Widget item(Key key, Widget child) => Padding(
@@ -138,17 +134,6 @@ List<Widget> tasksListChildren(
   }
   flush();
 
-  final sort = NzSplitButton(
-    label: l.sortLabel(state.sort),
-    semanticLabel: '${l.uiHomeSortChange}: ${l.sortLabel(state.sort)}',
-    onPressed: ctl.cycleSort,
-    icon: NzIcons.chevronDown,
-    iconTurns: state.descending ? 0 : 0.5,
-    iconSemanticLabel:
-        '${l.uiHomeSortFlip}: ${state.descending ? l.uiHomeSortDescending : l.uiHomeSortAscending}',
-    onIconPressed: ctl.flipDirection,
-  );
-
   return [
     TaskViewGrid(
       counts: r.counts,
@@ -156,43 +141,24 @@ List<Widget> tasksListChildren(
       selected: state.view,
       onSelected: ctl.selectView,
     ),
-    if (chips.isNotEmpty) ...[
-      const Gap(NizamioSpacing.space3),
-      Wrap(
-        spacing: NizamioSpacing.space2,
-        runSpacing: NizamioSpacing.space2,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          ...chips,
-          TaskLink(label: l.uiTasksClear, onTap: onClearAll),
-        ],
+    if (state.filter.hasExtra) ...[
+      const Gap(20),
+      TaskFilterGroups(
+        filter: state.filter,
+        catalog: catalog,
+        onEdit: onFilter,
+        onRemove: ctl.clearGroup,
+        onClear: ctl.clearExtra,
       ),
-    ],
-    // Tablet kaynağı: bölümler arası 20; başlık (44) sonrası `gap 20 − margin 8` = 12.
-    Gap(tablet ? NizamioSpacing.space5 : NizamioSpacing.space3),
-    // Ana sayfadaki koordinatörlük sıralamasıyla aynı bileşen: etiket ölçütü değiştirir, ok
-    // yönü çevirir (koordinatörlük ölçütü yönsüzdür). Tablette solda liste başlığı
-    // (`tüm görevler · 76`, kaynak `L.listTitle`).
-    if (tablet)
-      NzKicker(
-        '${l.viewListTitle(state.view)} · ${list.length}',
-        emphasis: true,
-        action: sort,
-      )
-    else
-      Row(
-        children: [
-          NzIconButton.circle(
-            icon: NzIcons.filter,
-            semanticLabel: l.uiTasksFilters,
-            dot: state.filter.hasExtra ? c.accentText : null,
-            onPressed: onFilter,
-          ),
-          const Spacer(),
-          sort,
-        ],
-      ),
-    Gap(tablet ? NizamioSpacing.space3 : NizamioSpacing.space1),
+      const Gap(8),
+    ] else
+      const Gap(20),
+    TaskListToolbar(
+      state: state,
+      onFilter: () => onFilter(null),
+      controller: ctl,
+    ),
+    const Gap(12),
     ...rows,
     if (list.isEmpty)
       NzEmptyState(
@@ -230,92 +196,6 @@ List<Widget> tasksListChildren(
   ];
 }
 
-List<Widget> _chips(
-  BuildContext context,
-  TaskCatalog catalog,
-  TasksListState state,
-  TasksListController ctl,
-) {
-  final l = context.l10n;
-  final f = state.filter;
-  return [
-    for (final p in f.people)
-      _FilterChip(
-        label: catalog.nameOf(p) ?? l.uiTasksUnknownPerson,
-        removeLabel:
-            '${catalog.nameOf(p) ?? l.uiTasksUnknownPerson} '
-            '${l.uiTasksRemoveFilterTail}',
-        onRemove: () => ctl.togglePerson(p),
-      ),
-    for (final code in f.coordinatorships)
-      _FilterChip(
-        label: catalog.coordinatorship(code)?.name ?? code,
-        removeLabel:
-            '${catalog.coordinatorship(code)?.name ?? code} '
-            '${l.uiTasksRemoveFilterTail}',
-        onRemove: () => ctl.toggleCoordinatorship(code),
-      ),
-    for (final p in f.priorities)
-      _FilterChip(
-        label: '${l.uiTasksPriority}: ${l.priorityLabel(p)}',
-        removeLabel: l.uiTasksPriorityFilterRemove,
-        onRemove: () => ctl.togglePriority(p),
-      ),
-  ];
-}
-
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
-    required this.label,
-    required this.removeLabel,
-    required this.onRemove,
-  });
-
-  final String label;
-  final String removeLabel;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: c.surfaceOverlay,
-        borderRadius: BorderRadius.circular(NizamioRadius.pill),
-        border: Border.all(
-          color: c.borderStrong,
-          width: NizamioSize.borderWidth,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(left: NizamioSpacing.space3),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.text.caption,
-              ),
-            ),
-            NzIconButton(
-              icon: NzIcons.close,
-              semanticLabel: removeLabel,
-              onPressed: onRemove,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Liste başlığındaki sıralama menüsü (prototip `.rp-pop`): seçili tarihli ölçüte yeniden
-/// dokunmak yönü çevirir (menü açık kalır); başka ölçüt seçmek menüyü kapatır.
-/// Grup başlığının kısa kodu: sunucu kataloğunda grup anahtarı departman kimliğidir, gösterilen
-/// departmanın kodudur (yoksa adı, [TaskDepartment.label]).
 String _groupCode(TaskCatalog catalog, String key) {
   for (final d in catalog.departments) {
     if (d.id == key) return d.label;

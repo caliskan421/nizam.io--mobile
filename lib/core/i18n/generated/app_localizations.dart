@@ -3604,6 +3604,12 @@ abstract class AppLocalizations {
   /// **'sn'**
   String get uiFeedbackSecondsUnit;
 
+  /// ui.home.overview_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Genel durum'**
+  String get uiHomeOverviewTitle;
+
   /// ui.home.deleted_shortcut
   ///
   /// In tr, this message translates to:
@@ -7315,8 +7321,14 @@ abstract class AppLocalizations {
   /// ui.tasks.list_all
   ///
   /// In tr, this message translates to:
-  /// **'tüm görevler'**
+  /// **'Tüm görevler'**
   String get uiTasksListAll;
+
+  /// ui.tasks.list_filtered
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtrelenmiş görevler'**
+  String get uiTasksListFiltered;
 
   /// ui.tasks.list_late
   ///
@@ -7617,6 +7629,60 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kişi'**
   String get uiTasksGroupPeople;
+
+  /// ui.tasks.active_filters
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif filtreler'**
+  String get uiTasksActiveFilters;
+
+  /// ui.tasks.filter_edit
+  ///
+  /// In tr, this message translates to:
+  /// **'filtresi: düzenle'**
+  String get uiTasksFilterEdit;
+
+  /// ui.tasks.filter_remove
+  ///
+  /// In tr, this message translates to:
+  /// **'filtresini kaldır'**
+  String get uiTasksFilterRemove;
+
+  /// ui.tasks.filter_active
+  ///
+  /// In tr, this message translates to:
+  /// **'aktif'**
+  String get uiTasksFilterActive;
+
+  /// ui.tasks.people_count
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi'**
+  String get uiTasksPeopleCount;
+
+  /// ui.tasks.coord_count
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlük'**
+  String get uiTasksCoordCount;
+
+  /// ui.tasks.sort_created_compact
+  ///
+  /// In tr, this message translates to:
+  /// **'Tanımlanma'**
+  String get uiTasksSortCreatedCompact;
+
+  /// ui.tasks.sort_due_compact
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş'**
+  String get uiTasksSortDueCompact;
+
+  /// ui.tasks.sort_start_compact
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç'**
+  String get uiTasksSortStartCompact;
 
   /// ui.tasks.group_coord
   ///

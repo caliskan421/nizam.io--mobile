@@ -6,7 +6,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
-import '../../../../core/ui/widgets/lists/lists.dart';
+import '../../../../core/ui/widgets/inputs/nz_filter_choice.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
@@ -65,25 +65,11 @@ class _FilterBody extends ConsumerWidget {
       String count,
       bool selected,
       VoidCallback toggle,
-    ) => InkWell(
+    ) => NzFilterChoice(
+      label: label,
+      count: count,
+      selected: selected,
       onTap: toggle,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: NizamioSpacing.space3,
-          vertical: NizamioSpacing.space1,
-        ),
-        child: Row(
-          children: [
-            NzCheckCircle(value: selected, label: label, onChanged: toggle),
-            const Gap(NizamioSpacing.space2),
-            Expanded(child: Text(label, style: context.text.list)),
-            Text(
-              count,
-              style: context.text.monoSm.copyWith(color: c.textMuted),
-            ),
-          ],
-        ),
-      ),
     );
     Widget group(String label, int selected, List<Widget> rows) =>
         ExpansionTile(
@@ -100,7 +86,7 @@ class _FilterBody extends ConsumerWidget {
               color: selected == 0 ? c.textFaint : c.accentText,
             ),
           ),
-          children: [NzMenuGroup(rows: rows)],
+          children: [NzFilterChoices(children: rows)],
         );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -143,6 +129,7 @@ class _FilterBody extends ConsumerWidget {
               label: l.uiTasksPriority,
               leading: const NzPriorityBars(level: 2),
               trailing: TaskSegmented(
+                filterSpacing: true,
                 compact: true,
                 semanticLabel: l.uiTasksPriority,
                 labels: [

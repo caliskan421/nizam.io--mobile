@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/lists/nz_menu_group.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
@@ -116,6 +117,24 @@ Future<void> showCopyTable(
     ref,
     context,
     title: l.uiTablesCopyTo,
+    actions: (sheet) => [
+      NzButton.primary(
+        label: l.uiTablesDuplicate,
+        onPressed: () {
+          final copied = ref
+              .read(tablesControllerProvider.notifier)
+              .duplicate(
+                id,
+                empty: false,
+                suffix: l.uiTablesCopySuffix,
+                area: area,
+                unit: unit,
+              );
+          Navigator.of(sheet).pop();
+          if (copied != null) onOpen?.call(copied);
+        },
+      ),
+    ],
     builder: (sheet) => StatefulBuilder(
       builder: (context, setState) => Column(
         mainAxisSize: MainAxisSize.min,
@@ -123,47 +142,32 @@ Future<void> showCopyTable(
         children: [
           Text(source.title, style: context.text.titleSm),
           const Gap(NizamioSpacing.space4),
-          Text(l.uiTablesDestination, style: context.text.kicker),
-          Wrap(
-            spacing: NizamioSpacing.space2,
-            children: [
+          NzSelect<TableArea>(
+            label: l.uiTablesDestination,
+            value: area,
+            items: [
               for (final a in [TableArea.personal, TableArea.coord])
-                ChoiceChip(
-                  label: Text(l.tableArea(a)),
-                  selected: area == a,
-                  onSelected: (_) => setState(() => area = a),
-                ),
+                NzSelectItem(value: a, label: l.tableArea(a)),
             ],
-          ),
-          if (area == TableArea.coord)
-            Wrap(
-              spacing: NizamioSpacing.space2,
-              children: [
-                for (final u in units)
-                  ChoiceChip(
-                    label: Text(l.tableUnit(u)),
-                    selected: unit == u,
-                    onSelected: (_) => setState(() => unit = u),
-                  ),
-              ],
-            ),
-          const Gap(NizamioSpacing.space4),
-          NzButton.primary(
-            label: l.uiTablesDuplicate,
-            onPressed: () {
-              final copied = ref
-                  .read(tablesControllerProvider.notifier)
-                  .duplicate(
-                    id,
-                    empty: false,
-                    suffix: l.uiTablesCopySuffix,
-                    area: area,
-                    unit: unit,
-                  );
-              Navigator.of(sheet).pop();
-              if (copied != null) onOpen?.call(copied);
+            onChanged: (v) {
+              if (v != null) setState(() => area = v);
             },
           ),
+          if (area == TableArea.coord) ...[
+            const Gap(NizamioSpacing.space3),
+            NzSelect<String>(
+              label: l.uiTablesCoord,
+              value: units.contains(unit) ? unit : null,
+              items: [
+                for (final u in units)
+                  NzSelectItem(value: u, label: l.tableUnit(u)),
+              ],
+              onChanged: (v) {
+                if (v != null) setState(() => unit = v);
+              },
+            ),
+          ],
+          const Gap(NizamioSpacing.space4),
         ],
       ),
     ),

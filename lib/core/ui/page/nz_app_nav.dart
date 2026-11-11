@@ -12,7 +12,11 @@ abstract interface class NzAppNav {
   void openHistory();
 
   /// Görev listesi; [view] ve [people] (kişi kimlikleri) başlangıç süzgecidir.
-  void openTasks({NzTaskView? view, List<String> people});
+  void openTasks({
+    NzTaskView? view,
+    List<String> people,
+    String? coordinatorship,
+  });
   void openTask(String code);
   void openDeletedTasks();
 

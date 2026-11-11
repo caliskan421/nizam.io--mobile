@@ -9,6 +9,7 @@ export 'application/task_catalog_controller.dart'
         taskCatalogControllerProvider,
         canCreateTaskProvider;
 export 'application/task_details_controller.dart' show taskDetailsProvider;
+export 'application/tasks_list_controller.dart' show TaskFilterGroup;
 export 'application/tasks_nav_caption.dart' show tasksNavCaptionProvider;
 export 'application/tasks_providers.dart'
     show
@@ -29,6 +30,8 @@ export 'domain/meeting_planner.dart';
 export 'domain/task_access.dart';
 export 'domain/task_catalog.dart';
 export 'domain/task_permissions.dart' show TaskPermissions;
+export 'domain/task_query.dart'
+    show TaskFilter, TaskFilterOptions, filterOptions;
 export 'domain/task_writes.dart'
     show UploadOrigin, UploadSource, WorkItemPatch, TaskWriteRepository;
 export 'presentation/deleted_tasks_page.dart' show DeletedTasksPage;
@@ -38,7 +41,10 @@ export 'presentation/quick_action_sheets.dart'
 export 'presentation/task_detail_page.dart' show TaskDetailPage;
 export 'presentation/task_widgets.dart' show TaskSegmented;
 export 'presentation/tasks/task_card_grid.dart' show TaskCardRow;
+export 'presentation/tasks/task_filter_groups.dart' show TaskFilterGroups;
+export 'presentation/tasks/tasks_filter_sheet.dart'
+    show showSharedTasksFilterSheet, TasksFilterSheetData, taskPriorityLabel;
 export 'presentation/tasks/tasks_list_parts.dart' show TaskCardView;
 export 'presentation/tasks_mode_toggle.dart'
     show TasksHeaderSlide, TasksModeToggle;
-export 'presentation/tasks_page.dart' show TasksPage;
+export 'presentation/tasks_page.dart' show TasksPage, seedTasksNavigation;

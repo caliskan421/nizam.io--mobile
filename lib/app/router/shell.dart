@@ -221,6 +221,7 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
       _tasksRoot = TasksRoute(
         view: view == null || view.isEmpty ? null : view.first,
         people: widget.query['people'] ?? const [],
+        coord: widget.query['coord']?.firstOrNull,
       );
     }
     final shown = [
@@ -366,6 +367,7 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
       RailModule.tasks => tasksMaster(
         view: _tasksRoot.initialView,
         people: _tasksRoot.people,
+        coordinatorship: _tasksRoot.initialCoordinatorship,
       ),
       RailModule.calendar => calendarMaster(_planMeeting),
       RailModule.coordinatorships => coordinatorshipsMaster(),
@@ -545,10 +547,17 @@ class _SplitAppNav implements NzAppNav {
 
   /// Süzgeçli açılış kökte kalır (süzgeç kök rotanın sorgusudur).
   @override
-  void openTasks({NzTaskView? view, List<String> people = const []}) =>
-      view == null && people.isEmpty
+  void openTasks({
+    NzTaskView? view,
+    List<String> people = const [],
+    String? coordinatorship,
+  }) => view == null && people.isEmpty && coordinatorship == null
       ? _module(RailModule.tasks)
-      : _base.openTasks(view: view, people: people);
+      : _base.openTasks(
+          view: view,
+          people: people,
+          coordinatorship: coordinatorship,
+        );
 
   @override
   void openCalendar() => _module(RailModule.calendar);

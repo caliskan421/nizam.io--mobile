@@ -126,7 +126,7 @@ class HomeKpiGrid extends StatelessWidget {
             icon: NzIcons.check,
             tone: c.accentText,
             label: l.uiHomeKpiDone,
-            value: l.percent(ratio(t.done, t.total)),
+            value: '${t.done}',
             progress: ratio(t.done, t.total),
             caption: l.kpiDoneCaption(t),
           ),

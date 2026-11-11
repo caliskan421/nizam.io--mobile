@@ -1,6 +1,7 @@
 // GoRouterAppNav: kabuk içi hedefler `go` (iç içe yığın, geri dal köküne); tam ekranlar itilir; uygulama
 // menüsü (çekmece) modülleri gerçek rotalara bağlar, ekranı olmayanlar yer tutucu bildirimidir.
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nizamio/app/router/shell.dart';
@@ -11,6 +12,8 @@ import 'package:nizamio/core/ui/page/nz_app_nav.dart';
 import 'package:nizamio/features/identity/identity.dart';
 import 'package:nizamio/features/messages/messages.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
+import 'package:nizamio/features/tasks/application/tasks_list_controller.dart';
+import 'package:nizamio/features/tasks/domain/task_query.dart';
 import 'package:nizamio/features/timeline/timeline.dart';
 
 import '../../core/ui/widgets/feedback/feedback_test_support.dart';
@@ -57,6 +60,34 @@ void main() {
     nav.openTasks(view: NzTaskView.late, people: const ['p1']);
     await settle(tester);
     expect(locationOf(router), '/tasks?view=late&people=p1');
+
+    nav.openTasks(
+      view: NzTaskView.late,
+      people: const ['p1'],
+      coordinatorship: 'ALT',
+    );
+    await settle(tester);
+    expect(locationOf(router), '/tasks?view=late&people=p1&coord=ALT');
+    expect(
+      tester.widget<TasksPage>(find.byType(TasksPage)).coordinatorship,
+      'ALT',
+    );
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(TasksPage)),
+    );
+    final list = tasksListControllerProvider(TaskView.late, 'p1');
+    expect(container.read(list).filter.coordinatorships, {'ALT'});
+    container.read(list.notifier).toggleCoordinatorship('ALT');
+    expect(container.read(list).filter.coordinatorships, isEmpty);
+    nav.openCoordinatorships();
+    await settle(tester);
+    nav.openTasks(
+      view: NzTaskView.late,
+      people: const ['p1'],
+      coordinatorship: 'ALT',
+    );
+    await settle(tester);
+    expect(container.read(list).filter.coordinatorships, {'ALT'});
 
     nav.openArchive();
     await settle(tester);

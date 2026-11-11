@@ -398,6 +398,9 @@ final class ChatEvent extends ChatSignal {
 
 /// Mesajlaşma uçlarının domain portu (gerçekleştirme `data/`). Hatalar `ApiError`.
 abstract interface class ChatRepository {
+  /// Seçili programın tüm bağlı koordinatörlükleri (kişinin kendi ekipleriyle sınırlı değil).
+  Future<ChatDepartments> programDepartments();
+
   /// Seçili programın sohbetleri (imleçli sayfalar birleştirilir; tavanda [ChatInbox.truncated]).
   /// [isCurrent] her sayfa isteğinden önce sınanır; kapsam değişince eski imleçle yeni
   /// programda istek kurulmaz. İlk okumayı başlatan oturum/program sahibi yakalanmalıdır.

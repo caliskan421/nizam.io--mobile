@@ -74,6 +74,24 @@ final class ChatRefDraft {
 /// Dinamik üyelik kaynağı. Kaynağı kapatmak için açıkça [none] gönderilir.
 enum ChatSource { none, department, program }
 
+/// Seçili programa bağlı koordinatörlüğün kullanıcıya gösterilen adı.
+@immutable
+final class ChatDepartmentOption {
+  const ChatDepartmentOption({required this.id, required this.name});
+  final String id;
+  final String name;
+}
+
+@immutable
+final class ChatDepartments {
+  ChatDepartments({
+    required List<ChatDepartmentOption> items,
+    this.truncated = false,
+  }) : items = List.unmodifiable(items);
+  final List<ChatDepartmentOption> items;
+  final bool truncated;
+}
+
 /// Programlar arası sayaç; bahsetme okunmamış sohbet sayısından ayrı korunur.
 @immutable
 final class ChatProgramUnread {

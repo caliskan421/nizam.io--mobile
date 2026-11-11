@@ -1229,6 +1229,22 @@
   "@uiActivitySoonTail": {
     "description": "ui.activity.soon_tail"
   },
+  "uiArchivePdfPreviewError": "PDF önizlenemedi. Dosya bozuk veya parola korumalı olabilir.",
+  "@uiArchivePdfPreviewError": {
+    "description": "ui.archive.pdf_preview_error"
+  },
+  "uiArchivePdfTooLarge": "Bu PDF önizleme için çok büyük. İndirerek açabilirsiniz.",
+  "@uiArchivePdfTooLarge": {
+    "description": "ui.archive.pdf_too_large"
+  },
+  "uiArchiveImagePreviewError": "Görsel önizlenemedi.",
+  "@uiArchiveImagePreviewError": {
+    "description": "ui.archive.image_preview_error"
+  },
+  "uiArchiveImageTooLarge": "Bu görsel önizleme için çok büyük. İndirerek açabilirsiniz.",
+  "@uiArchiveImageTooLarge": {
+    "description": "ui.archive.image_too_large"
+  },
   "uiArchiveTitle": "Arşiv",
   "@uiArchiveTitle": {
     "description": "ui.archive.title"
@@ -1369,14 +1385,6 @@
   "@uiArchiveEmptyFiles": {
     "description": "ui.archive.empty_files"
   },
-  "uiArchivePdfPreviewError": "PDF önizlenemedi. Dosya bozuk veya parola korumalı olabilir.",
-  "@uiArchivePdfPreviewError": {"description": "Arşiv PDF önizlemesi başarısız olduğunda"},
-  "uiArchivePdfTooLarge": "Bu PDF önizleme için çok büyük. İndirerek açabilirsiniz.",
-  "@uiArchivePdfTooLarge": {"description": "PDF önizleme sınırını aştığında"},
-  "uiArchiveImagePreviewError": "Görsel önizlenemedi.",
-  "@uiArchiveImagePreviewError": {"description": "Arşiv görseli yüklenemediğinde"},
-  "uiArchiveImageTooLarge": "Bu görsel önizleme için çok büyük. İndirerek açabilirsiniz.",
-  "@uiArchiveImageTooLarge": {"description": "Arşiv görseli önizleme sınırını aştığında"},
   "uiArchivePreview": "Dosya önizleme",
   "@uiArchivePreview": {
     "description": "ui.archive.preview"
@@ -1733,10 +1741,6 @@
   "@uiCoordListLabel": {
     "description": "ui.coord.list_label"
   },
-  "uiCoordSortTasks": "Görev sayısı",
-  "@uiCoordSortTasks": {"description": "Koordinatörlük sıralama ölçütü"},
-  "uiCoordSortMembers": "Üye sayısı",
-  "@uiCoordSortMembers": {"description": "Koordinatörlük sıralama ölçütü"},
   "uiCoordSortName": "Ada göre",
   "@uiCoordSortName": {
     "description": "ui.coord.sort_name"
@@ -1748,6 +1752,14 @@
   "uiCoordSortProgress": "Tamamlanma",
   "@uiCoordSortProgress": {
     "description": "ui.coord.sort_progress"
+  },
+  "uiCoordSortTasks": "Görev sayısı",
+  "@uiCoordSortTasks": {
+    "description": "ui.coord.sort_tasks"
+  },
+  "uiCoordSortMembers": "Üye sayısı",
+  "@uiCoordSortMembers": {
+    "description": "ui.coord.sort_members"
   },
   "uiCoordShortcuts": "Koordinatörlük kısayolları",
   "@uiCoordShortcuts": {
@@ -2329,6 +2341,10 @@
   "@uiFeedbackSecondsUnit": {
     "description": "ui.feedback.seconds_unit"
   },
+  "uiHomeDeletedShortcut": "Silinenler",
+  "@uiHomeDeletedShortcut": {
+    "description": "ui.home.deleted_shortcut"
+  },
   "uiHomePendingHeading": "Bekleyen işler",
   "@uiHomePendingHeading": {
     "description": "ui.home.pending_heading"
@@ -2649,8 +2665,6 @@
   "@uiHomeBeta": {
     "description": "ui.home.beta"
   },
-  "uiHomeDeletedShortcut": "Silinenler",
-  "@uiHomeDeletedShortcut": {"description": "Ana sayfa silinen görevler kısayolu"},
   "uiHomeDeletedRecords": "Silinen kayıtlar",
   "@uiHomeDeletedRecords": {
     "description": "ui.home.deleted_records"
@@ -3915,6 +3929,154 @@
   "@uiMessagesNotInWindow": {
     "description": "ui.messages.not_in_window"
   },
+  "uiMessagesComposeShareTask": "Görev paylaş",
+  "@uiMessagesComposeShareTask": {
+    "description": "ui.messages_compose.share_task"
+  },
+  "uiMessagesComposeShareDepartment": "Koordinatörlük paylaş",
+  "@uiMessagesComposeShareDepartment": {
+    "description": "ui.messages_compose.share_department"
+  },
+  "uiMessagesComposeShareFile": "Arşiv dosyası paylaş",
+  "@uiMessagesComposeShareFile": {
+    "description": "ui.messages_compose.share_file"
+  },
+  "uiMessagesComposeShareDescription": "Seçili programda erişebildiğin bir kaydı mesaja ekle.",
+  "@uiMessagesComposeShareDescription": {
+    "description": "ui.messages_compose.share_description"
+  },
+  "uiMessagesComposeShareSearch": "Kayıt ara",
+  "@uiMessagesComposeShareSearch": {
+    "description": "ui.messages_compose.share_search"
+  },
+  "uiMessagesComposeShareEmpty": "Paylaşılabilecek kayıt bulunamadı.",
+  "@uiMessagesComposeShareEmpty": {
+    "description": "ui.messages_compose.share_empty"
+  },
+  "uiMessagesComposePartial": "Liste sınırlandırıldı. Görünen kayıtlar arasından seçim yapabilirsin.",
+  "@uiMessagesComposePartial": {
+    "description": "ui.messages_compose.partial"
+  },
+  "uiMessagesComposeMore": "Daha fazla göster",
+  "@uiMessagesComposeMore": {
+    "description": "ui.messages_compose.more"
+  },
+  "uiMessagesComposeRemove": "Paylaşımı kaldır",
+  "@uiMessagesComposeRemove": {
+    "description": "ui.messages_compose.remove"
+  },
+  "uiMessagesComposeRefLimit": "Bir mesajda en fazla 10 kayıt paylaşabilirsin.",
+  "@uiMessagesComposeRefLimit": {
+    "description": "ui.messages_compose.ref_limit"
+  },
+  "uiMessagesComposeDeviceFile": "Cihazdan yeni dosya yükle",
+  "@uiMessagesComposeDeviceFile": {
+    "description": "ui.messages_compose.device_file"
+  },
+  "uiMessagesComposeAttachmentPreview": "Dosyayı gönder",
+  "@uiMessagesComposeAttachmentPreview": {
+    "description": "ui.messages_compose.attachment_preview"
+  },
+  "uiMessagesComposeCaption": "Açıklama (isteğe bağlı)",
+  "@uiMessagesComposeCaption": {
+    "description": "ui.messages_compose.caption"
+  },
+  "uiMessagesComposeClosesAt": "Son tarih",
+  "@uiMessagesComposeClosesAt": {
+    "description": "ui.messages_compose.closes_at"
+  },
+  "uiMessagesComposeCloseDate": "Kapanış günü",
+  "@uiMessagesComposeCloseDate": {
+    "description": "ui.messages_compose.close_date"
+  },
+  "uiMessagesComposeCloseTime": "Kapanış saati",
+  "@uiMessagesComposeCloseTime": {
+    "description": "ui.messages_compose.close_time"
+  },
+  "uiMessagesComposeNoDeadline": "Elle kapatılana kadar açık",
+  "@uiMessagesComposeNoDeadline": {
+    "description": "ui.messages_compose.no_deadline"
+  },
+  "uiMessagesComposeLocalTime": "Tarih ve saat cihazının yerel saat dilimindedir.",
+  "@uiMessagesComposeLocalTime": {
+    "description": "ui.messages_compose.local_time"
+  },
+  "uiMessagesComposeDeadlineInvalid": "Kapanış tarihi ve saati gelecekte olmalı.",
+  "@uiMessagesComposeDeadlineInvalid": {
+    "description": "ui.messages_compose.deadline_invalid"
+  },
+  "uiMessagesComposeClearDeadline": "Son tarihi kaldır",
+  "@uiMessagesComposeClearDeadline": {
+    "description": "ui.messages_compose.clear_deadline"
+  },
+  "uiMessagesComposePinsTruncated": "Sabitlenen mesajların yalnız bir bölümü gösteriliyor.",
+  "@uiMessagesComposePinsTruncated": {
+    "description": "ui.messages_compose.pins_truncated"
+  },
+  "uiMessagesGroupsSource": "Üyelik kaynağı",
+  "@uiMessagesGroupsSource": {
+    "description": "ui.messages_groups.source"
+  },
+  "uiMessagesGroupsManual": "Elle seçilen kişiler",
+  "@uiMessagesGroupsManual": {
+    "description": "ui.messages_groups.manual"
+  },
+  "uiMessagesGroupsProgram": "Programdaki herkes",
+  "@uiMessagesGroupsProgram": {
+    "description": "ui.messages_groups.program"
+  },
+  "uiMessagesGroupsDepartment": "Koordinatörlük ekibi",
+  "@uiMessagesGroupsDepartment": {
+    "description": "ui.messages_groups.department"
+  },
+  "uiMessagesGroupsPickDepartment": "Koordinatörlük seç",
+  "@uiMessagesGroupsPickDepartment": {
+    "description": "ui.messages_groups.pick_department"
+  },
+  "uiMessagesGroupsSourceHint": "Kaynağın güncel üyeleri gruba kendiliğinden katılır. Elle kişi de ekleyebilirsin.",
+  "@uiMessagesGroupsSourceHint": {
+    "description": "ui.messages_groups.source_hint"
+  },
+  "uiMessagesGroupsChangeSource": "Kaynağı değiştir",
+  "@uiMessagesGroupsChangeSource": {
+    "description": "ui.messages_groups.change_source"
+  },
+  "uiMessagesGroupsCloseSource": "Kaynağı kapat",
+  "@uiMessagesGroupsCloseSource": {
+    "description": "ui.messages_groups.close_source"
+  },
+  "uiMessagesGroupsCloseConfirm": "Kaynak kapatılınca mevcut üyeler grupta kalır ve elle yönetilir. Yeni ekip üyeleri gruba kendiliğinden katılmaz.",
+  "@uiMessagesGroupsCloseConfirm": {
+    "description": "ui.messages_groups.close_confirm"
+  },
+  "uiMessagesGroupsDepartmentUnavailable": "Koordinatörlük bilgisi şu anda kullanılamıyor.",
+  "@uiMessagesGroupsDepartmentUnavailable": {
+    "description": "ui.messages_groups.department_unavailable"
+  },
+  "uiMessagesGroupsNoDepartments": "Bu programda seçilebilecek koordinatörlük yok.",
+  "@uiMessagesGroupsNoDepartments": {
+    "description": "ui.messages_groups.no_departments"
+  },
+  "uiMessagesListsSearchEmpty": "Sohbet geçmişinde eşleşme bulunamadı.",
+  "@uiMessagesListsSearchEmpty": {
+    "description": "ui.messages_lists.search_empty"
+  },
+  "uiMessagesListsSearchTruncated": "Arama sonuçları sınırlı. Daha belirli bir ifade arayın.",
+  "@uiMessagesListsSearchTruncated": {
+    "description": "ui.messages_lists.search_truncated"
+  },
+  "uiMessagesListsSharedKind": "Paylaşılan öğe türü",
+  "@uiMessagesListsSharedKind": {
+    "description": "ui.messages_lists.shared_kind"
+  },
+  "uiMessagesListsMentioned": "Bahsedildin",
+  "@uiMessagesListsMentioned": {
+    "description": "ui.messages_lists.mentioned"
+  },
+  "uiMessagesListsUnreadChats": "okunmamış sohbet",
+  "@uiMessagesListsUnreadChats": {
+    "description": "ui.messages_lists.unread_chats"
+  },
   "uiNotificationsTitle": "Bildirimler",
   "@uiNotificationsTitle": {
     "description": "ui.notifications.title"
@@ -4575,6 +4737,10 @@
   "@uiTablesUnitB": {
     "description": "ui.tables.unit_b"
   },
+  "uiTasksNoStatusTransitions": "Bu görev için kullanabileceğiniz bir durum değişikliği yok.",
+  "@uiTasksNoStatusTransitions": {
+    "description": "ui.tasks.no_status_transitions"
+  },
   "uiTasksTitle": "Görevler",
   "@uiTasksTitle": {
     "description": "ui.tasks.title"
@@ -5159,8 +5325,6 @@
   "@uiTasksSend": {
     "description": "ui.tasks.send"
   },
-  "uiTasksNoStatusTransitions": "Bu görev için kullanabileceğiniz bir durum değişikliği yok.",
-  "@uiTasksNoStatusTransitions": {"description": "Kullanılabilir görev durumu geçişi yokken gösterilen açıklama"},
   "uiTasksSheetStatus": "durum",
   "@uiTasksSheetStatus": {
     "description": "ui.tasks.sheet_status"
@@ -6289,11 +6453,13 @@
   "@uiTimelineGanttZoomDaily": {
     "description": "ui.timeline.gantt_zoom_daily"
   },
-  "uiTimelineGanttZoomMonthly": "Aylık",
-  "@uiTimelineGanttZoomMonthly": {"description": "Tablet zaman çizelgesi aylık ölçek"},
   "uiTimelineGanttZoomWeekly": "Haftalık",
   "@uiTimelineGanttZoomWeekly": {
     "description": "ui.timeline.gantt_zoom_weekly"
+  },
+  "uiTimelineGanttZoomMonthly": "Aylık",
+  "@uiTimelineGanttZoomMonthly": {
+    "description": "ui.timeline.gantt_zoom_monthly"
   },
   "uiTimelineGanttAllCoords": "Tüm koordinatörlükler",
   "@uiTimelineGanttAllCoords": {

@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/errors/error_text.dart';
+import '../../../core/providers.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_pane.dart';
@@ -28,6 +29,8 @@ import '../application/chat_room_controller.dart';
 import '../application/messages_providers.dart';
 import '../domain/chat.dart';
 import '../domain/chat_room.dart';
+import '../domain/chat_share_option.dart';
+import 'chat/chat_compose_flow.dart';
 import 'chat/chat_composer.dart';
 import 'chat/chat_find_sheets.dart';
 import 'chat/chat_info_sheet.dart';
@@ -37,14 +40,7 @@ import 'chat/chat_poll_sheets.dart';
 import 'chat/chat_sheets.dart';
 import 'chat/chat_sync_scope.dart';
 
-/// Sohbet (prototip `chat`; kabuk dışında, alt menü yok): cam üst çubuk (geri, avatar, ad,
-/// grup / çevrimiçi / yazıyor…, ara) + sabit mesaj şeridi, gün hapları, okunmamış ayırıcısı,
-/// balonlar (gruplanmış köşe, ad, alıntı, ekler, anket, tepkiler), "alta in", yazma alanı
-/// (yanıt/düzenleme bağlamı). Basılı tutma işlem sayfasını, üst çubuk sohbet bilgisini açar.
-/// Gönderilen mesaj hemen "gönderiliyor" görünür; sunucu yanıtıyla ya da akıştan gelen kopyayla
-/// tek balon olarak yerleşir. Tepki ve oy iyimser, sabit şeridi sunucudan; ek (dosya seçici) ve
-/// anket yazma alanının ek menüsünden; `@` bahsetme önerisi grupta üye listesinden; mesajdan
-/// görev tasks'ın yeni görev formuyla; sohbet bilgisi üyeleri, paylaşılanları ve aramayı açar.
+/// Sohbet akışı: mevcut mesaj listesi, işlemler ve taslak composer'ı aynı controller'ı kullanır.
 class ChatPage extends ConsumerStatefulWidget {
   const ChatPage({super.key, required this.id});
 
@@ -70,6 +66,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   /// Yazma alanında seçilen bahsetmeler (gönderimde metinde kalanlar gider).
   final _mentions = <MentionPick>[];
+  final _refs = <ChatShareOption>[];
 
   /// Akıştaki sıra; görünmeyen mesaja atlamak için liste yazar.
   final _order = HashMap<String, int>();
@@ -116,15 +113,27 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   void _toast(String m) => NzToast.show(context, m);
 
+  Object get _composeOwner => (
+    ref.read(sessionGenerationProvider),
+    ref.read(scopeStateProvider).programId,
+  );
+
+  void _clearDraft() {
+    _draft.clear();
+    _mentions.clear();
+    setState(_refs.clear);
+  }
+
   ChatActionsController get _acts =>
       ref.read(chatActionsControllerProvider(widget.id).notifier);
 
   /// Eylemi koşar; hata zarfı bildirim olarak gösterilir.
   Future<void> _try(Future<void> Function() op) async {
+    final owner = _composeOwner;
     try {
       await op();
     } on ApiError catch (e) {
-      if (mounted) _toast(errorText(context.l10n, e));
+      if (mounted && _composeOwner == owner) _toast(errorText(context.l10n, e));
     }
   }
 
@@ -190,20 +199,23 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   }
 
   Future<void> _send() async {
+    final owner = _composeOwner;
+    final controller = _room;
     final l = context.l10n;
-    final text = _draft.text.trim();
+    final typed = _draft.text.trim();
+    final text = typed.isEmpty ? _refs.map((r) => r.label).join('\n') : typed;
     final view = ref.read(chatControllerProvider(widget.id));
-    if (text.isEmpty) return;
+    if (text.isEmpty && _refs.isEmpty) return;
     final edit = view.edit;
     final base = view.editRevision;
     if (edit != null && base != null) {
       try {
-        await _room.edit(edit, text, expectedRevision: base);
-        if (!mounted) return;
+        await controller.edit(edit, text, expectedRevision: base);
+        if (!mounted || _composeOwner != owner) return;
         _view.clearContext();
         _draft.clear();
       } on ApiError catch (e) {
-        if (!mounted) return;
+        if (!mounted || _composeOwner != owner) return;
         _toast(errorText(l, e));
         // Bayat sürüm: mesaj yeniden okundu ve sunucunun değeri görünüyor; taslak kalır. Yeniden
         // gönderim kullanıcının bilinçli kararıdır, taban okunan yeni sürüme taşınır.
@@ -218,21 +230,25 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       return;
     }
     final mentions = mentionsIn(text, _mentions);
+    final refs = List<ChatShareOption>.unmodifiable(_refs);
+    setState(_refs.clear);
     _mentions.clear();
     _view.clearContext();
     _draft.clear();
     _toBottom();
-    final outcome = await _room.send(
+    final outcome = await controller.send(
       text,
       replyTo: view.reply,
       mentions: mentions,
+      refs: [for (final item in refs) item.ref],
     );
-    if (!mounted) return;
+    if (!mounted || _composeOwner != owner) return;
     switch (outcome) {
       case ChatSendOutcome.sent || ChatSendOutcome.failed:
         return;
       case ChatSendOutcome.deleted:
         if (_draft.text.isEmpty) _draft.text = text;
+        if (_refs.isEmpty) setState(() => _refs.addAll(refs));
         _toast(l.uiMessagesMessageRestored);
       case ChatSendOutcome.rejected:
         _toast(errorText(l, ApiError('messaging.idempotency_key_reused')));
@@ -326,38 +342,54 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   /// izinli tür ön denetimi; içerik özeti yok) ya da anket (grupta). Seçici hatası ve okunamayan
   /// dosya (`client.file_unreadable`) bildirim olarak gösterilir.
   Future<void> _attach(ChatRoom room) async {
-    final l = context.l10n;
-    final kind = await showAttachMenu(context, group: room.chat.group);
-    if (!mounted || kind == null) return;
-    switch (kind) {
-      case ChatAttachKind.poll:
-        final input = await showPollComposer(context);
-        if (input == null || !mounted) return;
+    final session = ref.read(sessionGenerationProvider);
+    final program = ref.read(scopeStateProvider).programId;
+    final controller = _room;
+    final caption = _draft.text;
+    final view = ref.read(chatControllerProvider(widget.id));
+    bool current() =>
+        mounted &&
+        ref.read(sessionGenerationProvider) == session &&
+        ref.read(scopeStateProvider).programId == program;
+    await _try(() async {
+      final picker = ref.read(uploadPickerProvider);
+      final input = await chooseChatCompose(
+        context,
+        group: room.chat.group,
+        canShare: _refs.length < chatComposeMaxRefs,
+        pickerAvailable: picker.available,
+        pick: picker.pick,
+        onPickerMissing: () => _toast(context.l10n.uiMessagesPickerMissing),
+        isCurrent: current,
+        caption: caption,
+        reply: view.reply == null ? null : room.message(view.reply!),
+      );
+      if (!mounted || !current() || input == null) return;
+      if (input.share case final item?) {
+        if (_refs.any(item.sameTarget)) return;
+        if (_refs.length >= chatComposeMaxRefs) {
+          _toast(context.l10n.uiMessagesComposeRefLimit);
+          return;
+        }
+        setState(() => _refs.add(item));
+      } else if (input.poll case final poll?) {
         _toBottom();
-        await _room.send(input.question, poll: input.poll);
-      case ChatAttachKind.photos || ChatAttachKind.files:
-        final picker = ref.read(uploadPickerProvider);
-        if (!picker.available) return _toast(l.uiMessagesPickerMissing);
-        await _try(() async {
-          final f = await picker.pick(
-            kind == ChatAttachKind.photos
-                ? UploadOrigin.photos
-                : UploadOrigin.files,
-          );
-          if (f == null || !mounted) return;
-          final type = f.contentType;
-          if (type == null) throw ApiError('messaging.file_rejected');
-          _toBottom();
-          await _room.sendAttachment(
-            ChatUpload(
-              path: f.path,
-              name: f.name,
-              sizeBytes: f.sizeBytes,
-              contentType: type,
-            ),
-          );
-        });
-    }
+        await controller.send(poll.question, poll: poll.poll);
+      } else if (input.file case final file?) {
+        final attachment = input.attachment!;
+        if (_draft.text == caption) {
+          _draft.clear();
+          _mentions.clear();
+        }
+        _view.clearContext();
+        _toBottom();
+        await controller.sendAttachment(
+          file,
+          caption: attachment.caption,
+          replyTo: attachment.replyTo,
+        );
+      }
+    });
   }
 
   Future<void> _info(ChatRoom room) async {
@@ -404,6 +436,11 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(sessionGenerationProvider, (_, _) => _clearDraft());
+    ref.listen(
+      scopeStateProvider.select((s) => s.programId),
+      (_, _) => _clearDraft(),
+    );
     final room = ref.watch(chatRoomControllerProvider(widget.id));
     final Widget body;
     if (room.error case final error?) {
@@ -475,20 +512,29 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 final pin = ref.watch(
                   chatControllerProvider(widget.id).select((v) => v.pin),
                 );
-                return ChatHeader(
-                  room: room,
-                  pins: pins,
-                  pinIndex: pin,
-                  onInfo: () => unawaited(_info(room)),
-                  onSearch: () async {
-                    final hit = await showChatSearch(context, widget.id);
-                    if (hit != null && mounted) await _reveal(hit);
-                  },
-                  onNextPin: () {
-                    if (pins.isEmpty) return;
-                    _view.nextPin();
-                    unawaited(_reveal(pins[(pin + 1) % pins.length]));
-                  },
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ChatHeader(
+                      room: room,
+                      pins: pins,
+                      pinIndex: pin,
+                      onInfo: () => unawaited(_info(room)),
+                      onSearch: () async {
+                        final hit = await showChatSearch(context, widget.id);
+                        if (hit != null && mounted) await _reveal(hit);
+                      },
+                      onNextPin: () {
+                        if (pins.isEmpty) return;
+                        _view.nextPin();
+                        unawaited(_reveal(pins[(pin + 1) % pins.length]));
+                      },
+                    ),
+                    if (room.pinsTruncated)
+                      NzBanner.warning(
+                        message: l.uiMessagesComposePinsTruncated,
+                      ),
+                  ],
                 );
               },
             ),
@@ -537,6 +583,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               onSend: () => unawaited(_send()),
               onAttach: () => unawaited(_attach(room)),
               onMention: _mentions.add,
+              refs: List.unmodifiable(_refs),
+              onRemoveRef: (item) => setState(() => _refs.remove(item)),
             ),
           ),
         ),

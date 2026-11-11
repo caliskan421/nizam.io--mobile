@@ -97,53 +97,84 @@ Future<void> showChatShared(
   builder: (_) => _Shared(chatId, onFile),
 );
 
-class _Shared extends ConsumerWidget {
+class _Shared extends ConsumerStatefulWidget {
   const _Shared(this.chatId, this.onFile);
 
   final String chatId;
   final void Function(String refId, String name) onFile;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final value = ref.watch(chatSharedControllerProvider(chatId));
-    if (value.error case final e?) {
-      return NzErrorState(
-        error: toApiError(e),
-        onRetry: () => ref.invalidate(chatSharedControllerProvider(chatId)),
-      );
+  ConsumerState<_Shared> createState() => _SharedState();
+}
+
+class _SharedState extends ConsumerState<_Shared> {
+  ChatRefKind? _kind;
+
+  Future<void> _run(Future<void> Function() operation) async {
+    try {
+      await operation();
+    } on ApiError catch (e) {
+      if (mounted) NzToast.show(context, errorText(context.l10n, e));
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final provider = chatSharedControllerProvider(widget.chatId);
+    final value = ref.watch(provider);
     final s = value.value;
-    if (s == null) return const NzLoader();
-    if (s.items.isEmpty) return NzEmptyState(title: l.uiMessagesSharedEmpty);
+    const kinds = [
+      null,
+      ChatRefKind.task,
+      ChatRefKind.department,
+      ChatRefKind.file,
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       spacing: NizamioSpacing.space2,
       children: [
-        for (final item in s.items)
-          ChatRefTile(
-            refId: item.refId,
-            kind: item.kind,
-            onFile: (refId, name) {
-              Navigator.of(context).pop();
-              onFile(refId, name);
-            },
-          ),
-        if (s.nextCursor != null)
+        NzFilterRail(
+          semanticLabel: l.uiMessagesListsSharedKind,
+          options: [
+            NzFilterOption(label: l.uiMessagesFilterAll),
+            NzFilterOption(label: l.uiMessagesRefTask),
+            NzFilterOption(label: l.uiMessagesRefDepartment),
+            NzFilterOption(label: l.uiMessagesRefFile),
+          ],
+          selected: kinds.indexOf(_kind),
+          onSelected: (i) {
+            setState(() => _kind = kinds[i]);
+            _run(() => ref.read(provider.notifier).setKind(_kind));
+          },
+        ),
+        if (value.isLoading)
+          const NzLoader()
+        else if (value.error case final e?)
+          NzErrorState(
+            error: toApiError(e),
+            onRetry: () => ref.invalidate(provider),
+          )
+        else if (s != null && s.items.isEmpty)
+          NzEmptyState(title: l.uiMessagesSharedEmpty),
+        if (!value.isLoading && !value.hasError && s != null)
+          for (final item in s.items)
+            ChatRefTile(
+              refId: item.refId,
+              kind: item.kind,
+              onFile: (refId, name) {
+                Navigator.of(context).pop();
+                widget.onFile(refId, name);
+              },
+            ),
+        if (!value.isLoading && !value.hasError && s?.nextCursor != null)
           NzButton.secondary(
             label: l.uiMessagesMore,
-            onPressed: () async {
-              try {
-                await ref
-                    .read(chatSharedControllerProvider(chatId).notifier)
-                    .more();
-              } on ApiError catch (e) {
-                if (context.mounted) {
-                  NzToast.show(context, errorText(context.l10n, e));
-                }
-              }
-            },
+            loading: s!.busy,
+            onPressed: s.busy
+                ? null
+                : () => _run(ref.read(provider.notifier).more),
           ),
       ],
     );

@@ -19,6 +19,10 @@ void main() {
     () async {
       final fixture = await MessagingFixture.create();
       final repo = fixture.messages;
+      expect(
+        (await repo.programDepartments()).items.map((item) => item.id),
+        contains(fixture.departmentId),
+      );
 
       // The same request key returns the same group; it does not create another chat.
       final draft = GroupDraft(

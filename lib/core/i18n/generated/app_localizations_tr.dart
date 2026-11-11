@@ -1058,6 +1058,21 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiActivitySoonTail => 'mobilde sonraki adımda eklenecek';
 
   @override
+  String get uiArchivePdfPreviewError =>
+      'PDF önizlenemedi. Dosya bozuk veya parola korumalı olabilir.';
+
+  @override
+  String get uiArchivePdfTooLarge =>
+      'Bu PDF önizleme için çok büyük. İndirerek açabilirsiniz.';
+
+  @override
+  String get uiArchiveImagePreviewError => 'Görsel önizlenemedi.';
+
+  @override
+  String get uiArchiveImageTooLarge =>
+      'Bu görsel önizleme için çok büyük. İndirerek açabilirsiniz.';
+
+  @override
   String get uiArchiveTitle => 'Arşiv';
 
   @override
@@ -1161,21 +1176,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiArchiveEmptyFiles => 'Bu filtreyle eşleşen dosya yok.';
-
-  @override
-  String get uiArchivePdfPreviewError =>
-      'PDF önizlenemedi. Dosya bozuk veya parola korumalı olabilir.';
-
-  @override
-  String get uiArchivePdfTooLarge =>
-      'Bu PDF önizleme için çok büyük. İndirerek açabilirsiniz.';
-
-  @override
-  String get uiArchiveImagePreviewError => 'Görsel önizlenemedi.';
-
-  @override
-  String get uiArchiveImageTooLarge =>
-      'Bu görsel önizleme için çok büyük. İndirerek açabilirsiniz.';
 
   @override
   String get uiArchivePreview => 'Dosya önizleme';
@@ -1446,12 +1446,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordListLabel => 'Koordinatörlük listesi';
 
   @override
-  String get uiCoordSortTasks => 'Görev sayısı';
-
-  @override
-  String get uiCoordSortMembers => 'Üye sayısı';
-
-  @override
   String get uiCoordSortName => 'Ada göre';
 
   @override
@@ -1459,6 +1453,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordSortProgress => 'Tamamlanma';
+
+  @override
+  String get uiCoordSortTasks => 'Görev sayısı';
+
+  @override
+  String get uiCoordSortMembers => 'Üye sayısı';
 
   @override
   String get uiCoordShortcuts => 'Koordinatörlük kısayolları';
@@ -1901,6 +1901,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiFeedbackSecondsUnit => 'sn';
 
   @override
+  String get uiHomeDeletedShortcut => 'Silinenler';
+
+  @override
   String get uiHomePendingHeading => 'Bekleyen işler';
 
   @override
@@ -2142,9 +2145,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiHomeBeta => 'beta';
-
-  @override
-  String get uiHomeDeletedShortcut => 'Silinenler';
 
   @override
   String get uiHomeDeletedRecords => 'Silinen kayıtlar';
@@ -3121,6 +3121,130 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesNotInWindow => 'Mesaj bulunamadı.';
 
   @override
+  String get uiMessagesComposeShareTask => 'Görev paylaş';
+
+  @override
+  String get uiMessagesComposeShareDepartment => 'Koordinatörlük paylaş';
+
+  @override
+  String get uiMessagesComposeShareFile => 'Arşiv dosyası paylaş';
+
+  @override
+  String get uiMessagesComposeShareDescription =>
+      'Seçili programda erişebildiğin bir kaydı mesaja ekle.';
+
+  @override
+  String get uiMessagesComposeShareSearch => 'Kayıt ara';
+
+  @override
+  String get uiMessagesComposeShareEmpty =>
+      'Paylaşılabilecek kayıt bulunamadı.';
+
+  @override
+  String get uiMessagesComposePartial =>
+      'Liste sınırlandırıldı. Görünen kayıtlar arasından seçim yapabilirsin.';
+
+  @override
+  String get uiMessagesComposeMore => 'Daha fazla göster';
+
+  @override
+  String get uiMessagesComposeRemove => 'Paylaşımı kaldır';
+
+  @override
+  String get uiMessagesComposeRefLimit =>
+      'Bir mesajda en fazla 10 kayıt paylaşabilirsin.';
+
+  @override
+  String get uiMessagesComposeDeviceFile => 'Cihazdan yeni dosya yükle';
+
+  @override
+  String get uiMessagesComposeAttachmentPreview => 'Dosyayı gönder';
+
+  @override
+  String get uiMessagesComposeCaption => 'Açıklama (isteğe bağlı)';
+
+  @override
+  String get uiMessagesComposeClosesAt => 'Son tarih';
+
+  @override
+  String get uiMessagesComposeCloseDate => 'Kapanış günü';
+
+  @override
+  String get uiMessagesComposeCloseTime => 'Kapanış saati';
+
+  @override
+  String get uiMessagesComposeNoDeadline => 'Elle kapatılana kadar açık';
+
+  @override
+  String get uiMessagesComposeLocalTime =>
+      'Tarih ve saat cihazının yerel saat dilimindedir.';
+
+  @override
+  String get uiMessagesComposeDeadlineInvalid =>
+      'Kapanış tarihi ve saati gelecekte olmalı.';
+
+  @override
+  String get uiMessagesComposeClearDeadline => 'Son tarihi kaldır';
+
+  @override
+  String get uiMessagesComposePinsTruncated =>
+      'Sabitlenen mesajların yalnız bir bölümü gösteriliyor.';
+
+  @override
+  String get uiMessagesGroupsSource => 'Üyelik kaynağı';
+
+  @override
+  String get uiMessagesGroupsManual => 'Elle seçilen kişiler';
+
+  @override
+  String get uiMessagesGroupsProgram => 'Programdaki herkes';
+
+  @override
+  String get uiMessagesGroupsDepartment => 'Koordinatörlük ekibi';
+
+  @override
+  String get uiMessagesGroupsPickDepartment => 'Koordinatörlük seç';
+
+  @override
+  String get uiMessagesGroupsSourceHint =>
+      'Kaynağın güncel üyeleri gruba kendiliğinden katılır. Elle kişi de ekleyebilirsin.';
+
+  @override
+  String get uiMessagesGroupsChangeSource => 'Kaynağı değiştir';
+
+  @override
+  String get uiMessagesGroupsCloseSource => 'Kaynağı kapat';
+
+  @override
+  String get uiMessagesGroupsCloseConfirm =>
+      'Kaynak kapatılınca mevcut üyeler grupta kalır ve elle yönetilir. Yeni ekip üyeleri gruba kendiliğinden katılmaz.';
+
+  @override
+  String get uiMessagesGroupsDepartmentUnavailable =>
+      'Koordinatörlük bilgisi şu anda kullanılamıyor.';
+
+  @override
+  String get uiMessagesGroupsNoDepartments =>
+      'Bu programda seçilebilecek koordinatörlük yok.';
+
+  @override
+  String get uiMessagesListsSearchEmpty =>
+      'Sohbet geçmişinde eşleşme bulunamadı.';
+
+  @override
+  String get uiMessagesListsSearchTruncated =>
+      'Arama sonuçları sınırlı. Daha belirli bir ifade arayın.';
+
+  @override
+  String get uiMessagesListsSharedKind => 'Paylaşılan öğe türü';
+
+  @override
+  String get uiMessagesListsMentioned => 'Bahsedildin';
+
+  @override
+  String get uiMessagesListsUnreadChats => 'okunmamış sohbet';
+
+  @override
   String get uiNotificationsTitle => 'Bildirimler';
 
   @override
@@ -3637,6 +3761,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTablesUnitB => 'Operasyon';
 
   @override
+  String get uiTasksNoStatusTransitions =>
+      'Bu görev için kullanabileceğiniz bir durum değişikliği yok.';
+
+  @override
   String get uiTasksTitle => 'Görevler';
 
   @override
@@ -4076,10 +4204,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksSend => 'Gönder';
-
-  @override
-  String get uiTasksNoStatusTransitions =>
-      'Bu görev için kullanabileceğiniz bir durum değişikliği yok.';
 
   @override
   String get uiTasksSheetStatus => 'durum';
@@ -4959,10 +5083,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTimelineGanttZoomDaily => 'Günlük';
 
   @override
-  String get uiTimelineGanttZoomMonthly => 'Aylık';
+  String get uiTimelineGanttZoomWeekly => 'Haftalık';
 
   @override
-  String get uiTimelineGanttZoomWeekly => 'Haftalık';
+  String get uiTimelineGanttZoomMonthly => 'Aylık';
 
   @override
   String get uiTimelineGanttAllCoords => 'Tüm koordinatörlükler';

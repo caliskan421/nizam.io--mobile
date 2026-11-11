@@ -108,7 +108,27 @@ Future<ChatInbox> chatInboxSearch(Ref ref, String query) {
 
 /// Program seçicisindeki rozetlere hazır programlar arası okunmamış/bahsetme özeti.
 @riverpod
-Future<List<ChatProgramUnread>> chatUnreadOverview(Ref ref) {
-  ref.watch(sessionGenerationProvider);
-  return ref.read(chatRepositoryProvider).unreadOverview();
+Future<List<ChatProgramUnread>> chatUnreadOverview(Ref ref) async =>
+    (await ref.watch(chatUnreadSnapshotProvider.future)).items;
+
+/// Yanıtın oturum sahibi; eski hesabın rozeti yenileme sırasında gösterilmez.
+@riverpod
+Future<({int session, List<ChatProgramUnread> items})> chatUnreadSnapshot(
+  Ref ref,
+) async {
+  final session = ref.watch(sessionGenerationProvider);
+  final items = await ref.read(chatRepositoryProvider).unreadOverview();
+  return (session: session, items: items);
+}
+
+/// Senkron görünür yüz, Riverpod'un önceki async değerini sahiplikle süzer.
+@riverpod
+AsyncValue<List<ChatProgramUnread>> chatUnreadBadges(Ref ref) {
+  final session = ref.watch(sessionGenerationProvider);
+  final value = ref.watch(chatUnreadSnapshotProvider);
+  final snapshot = value.value;
+  if (snapshot?.session == session) return AsyncData(snapshot!.items);
+  if (value.isLoading) return const AsyncLoading();
+  if (value.hasError) return AsyncError(value.error!, value.stackTrace!);
+  return const AsyncLoading();
 }

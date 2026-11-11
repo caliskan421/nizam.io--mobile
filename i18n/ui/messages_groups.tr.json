@@ -1,0 +1,16 @@
+{
+  "$comment": "Grup kaynak seçimi ve yönetimi; make gen ile ARB'ye birleşir.",
+  "texts": {
+    "ui.messages_groups.source": "Üyelik kaynağı",
+    "ui.messages_groups.manual": "Elle seçilen kişiler",
+    "ui.messages_groups.program": "Programdaki herkes",
+    "ui.messages_groups.department": "Koordinatörlük ekibi",
+    "ui.messages_groups.pick_department": "Koordinatörlük seç",
+    "ui.messages_groups.source_hint": "Kaynağın güncel üyeleri gruba kendiliğinden katılır. Elle kişi de ekleyebilirsin.",
+    "ui.messages_groups.change_source": "Kaynağı değiştir",
+    "ui.messages_groups.close_source": "Kaynağı kapat",
+    "ui.messages_groups.close_confirm": "Kaynak kapatılınca mevcut üyeler grupta kalır ve elle yönetilir. Yeni ekip üyeleri gruba kendiliğinden katılmaz.",
+    "ui.messages_groups.department_unavailable": "Koordinatörlük bilgisi şu anda kullanılamıyor.",
+    "ui.messages_groups.no_departments": "Bu programda seçilebilecek koordinatörlük yok."
+  }
+}

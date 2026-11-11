@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/api_error.dart';
 import '../../../../core/errors/error_text.dart';
+import '../../../../core/providers.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
@@ -12,8 +13,10 @@ import '../../../../core/ui/widgets/lists/lists.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
+import '../../application/chat_group_sources.dart';
 import '../../application/new_chat_controller.dart';
 import '../../domain/chat.dart';
+import 'chat_group_source_fields.dart';
 import 'messages_texts.dart';
 
 /// Yeni sohbet: birebir adaylar (`purpose=direct`) ve "Yeni grup" (ad + `purpose=group`
@@ -26,8 +29,34 @@ Future<String?> showNewChatSheet(BuildContext context) =>
       builder: (_) => const _NewChat(),
     );
 
+Future<String?> _showNewGroup(BuildContext context) {
+  final submit = ValueNotifier<VoidCallback?>(null);
+  return NzBottomSheet.show<String>(
+    context,
+    title: context.l10n.uiMessagesNewGroup,
+    builder: (_) => _NewChat(group: true, submit: submit),
+    actions: (sheet) => [
+      NzButton.secondary(
+        label: sheet.l10n.uiMessagesCancel,
+        expand: true,
+        onPressed: () => Navigator.of(sheet).pop(),
+      ),
+      ValueListenableBuilder<VoidCallback?>(
+        valueListenable: submit,
+        builder: (_, create, _) => NzButton.primary(
+          label: sheet.l10n.uiMessagesCreateGroup,
+          expand: true,
+          onPressed: create,
+        ),
+      ),
+    ],
+  );
+}
+
 class _NewChat extends ConsumerStatefulWidget {
-  const _NewChat();
+  const _NewChat({this.group = false, this.submit});
+  final bool group;
+  final ValueNotifier<VoidCallback?>? submit;
 
   @override
   ConsumerState<_NewChat> createState() => _NewChatState();
@@ -36,12 +65,21 @@ class _NewChat extends ConsumerStatefulWidget {
 class _NewChatState extends ConsumerState<_NewChat> {
   final _name = TextEditingController();
   final _members = <String>{};
-  var _group = false;
   var _busy = false;
+  var _source = ChatSource.none;
+  String? _departmentId;
+
+  void _reset() => setState(() {
+    _name.clear();
+    _members.clear();
+    _source = ChatSource.none;
+    _departmentId = null;
+  });
 
   @override
   void dispose() {
     _name.dispose();
+    widget.submit?.dispose();
     super.dispose();
   }
 
@@ -58,13 +96,25 @@ class _NewChatState extends ConsumerState<_NewChat> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      _group ? _groupForm(context) : _direct(context);
+  Widget build(BuildContext context) {
+    ref.listen(scopeStateProvider, (old, next) {
+      if (old?.programId != next.programId) _reset();
+    });
+    ref.listen(sessionGenerationProvider, (old, next) {
+      if (old != next) _reset();
+    });
+    return Material(
+      type: MaterialType.transparency,
+      child: widget.group ? _groupForm(context) : _direct(context),
+    );
+  }
 
   Widget _direct(BuildContext context) {
     final l = context.l10n;
     const purpose = ChatCandidatePurpose.direct;
     final value = ref.watch(newChatControllerProvider(purpose));
+    final program = ref.watch(scopeStateProvider).programId;
+    final session = ref.watch(sessionGenerationProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -73,7 +123,10 @@ class _NewChatState extends ConsumerState<_NewChat> {
         NzListTile(
           title: l.uiMessagesNewGroup,
           leading: NzIcon(NzIcons.add, color: context.colors.accentText),
-          onTap: () => setState(() => _group = true),
+          onTap: () async {
+            final id = await _showNewGroup(context);
+            if (context.mounted && id != null) Navigator.of(context).pop(id);
+          },
         ),
         _candidates(
           context,
@@ -85,11 +138,17 @@ class _NewChatState extends ConsumerState<_NewChat> {
             leading: _avatar(c),
             onTap: _busy
                 ? null
-                : () => _run(
-                    () => ref
-                        .read(newChatControllerProvider(purpose).notifier)
-                        .openDirect(c.accountId),
-                  ),
+                : () {
+                    if (ref.read(scopeStateProvider).programId != program ||
+                        ref.read(sessionGenerationProvider) != session) {
+                      return;
+                    }
+                    _run(
+                      () => ref
+                          .read(newChatControllerProvider(purpose).notifier)
+                          .openDirect(c.accountId),
+                    );
+                  },
           ),
           footer: l.uiMessagesWhyCannotWrite,
         ),
@@ -102,6 +161,48 @@ class _NewChatState extends ConsumerState<_NewChat> {
     const purpose = ChatCandidatePurpose.group;
     final value = ref.watch(newChatControllerProvider(purpose));
     final name = _name.text.trim();
+    final sources = ref.watch(chatGroupSourcesProvider);
+    final options = sources.isLoading || sources.hasError
+        ? null
+        : sources.value;
+    final canSource = options?.canCreateSource == true;
+    final source = canSource ? _source : ChatSource.none;
+    final validDepartment =
+        options?.departments.any((d) => d.id == _departmentId) == true;
+    final validSource = source != ChatSource.department || validDepartment;
+    final program = ref.watch(scopeStateProvider).programId;
+    final session = ref.watch(sessionGenerationProvider);
+    final canSubmit =
+        !_busy &&
+        name.isNotEmpty &&
+        name.length <= 100 &&
+        validSource &&
+        (_source == ChatSource.none || canSource);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.submit?.value = canSubmit
+          ? () {
+              if (ref.read(scopeStateProvider).programId != program ||
+                  ref.read(sessionGenerationProvider) != session) {
+                return;
+              }
+              _run(
+                () => ref
+                    .read(newChatControllerProvider(purpose).notifier)
+                    .createGroup(
+                      GroupDraft(
+                        name: name,
+                        memberIds: _members,
+                        source: source,
+                        sourceDepartmentId: source == ChatSource.department
+                            ? _departmentId
+                            : null,
+                      ),
+                    ),
+              );
+            }
+          : null;
+    });
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -110,8 +211,31 @@ class _NewChatState extends ConsumerState<_NewChat> {
         NzTextField(
           label: l.uiMessagesGroupName,
           controller: _name,
+          maxLength: 100,
           onChanged: (_) => setState(() {}),
         ),
+        if (canSource)
+          ChatGroupSourceFields(
+            source: source,
+            departmentId: validDepartment ? _departmentId : null,
+            departments: options!.departments,
+            enabled: !_busy,
+            onChanged: (source, departmentId) {
+              if (ref.read(scopeStateProvider).programId != program ||
+                  ref.read(sessionGenerationProvider) != session) {
+                return;
+              }
+              setState(() {
+                _source = source;
+                _departmentId = departmentId;
+              });
+            },
+          ),
+        if (sources.error case final e?)
+          NzErrorState(
+            error: toApiError(e),
+            onRetry: () => ref.invalidate(chatGroupSourcesProvider),
+          ),
         Text(
           l.uiMessagesNewChatHint,
           style: context.text.monoSm.copyWith(color: context.colors.textFaint),
@@ -133,17 +257,6 @@ class _NewChatState extends ConsumerState<_NewChat> {
                   ),
           ),
         ),
-        NzButton.primary(
-          label: l.uiMessagesCreateGroup,
-          expand: true,
-          onPressed: _busy || name.isEmpty
-              ? null
-              : () => _run(
-                  () => ref
-                      .read(newChatControllerProvider(purpose).notifier)
-                      .createGroup(GroupDraft(name: name, memberIds: _members)),
-                ),
-        ),
       ],
     );
   }
@@ -157,6 +270,7 @@ class _NewChatState extends ConsumerState<_NewChat> {
   }) {
     final l = context.l10n;
     final note = context.text.caption.copyWith(color: context.colors.textMuted);
+    if (value.isLoading) return const NzLoader();
     if (value.error case final e?) {
       return NzErrorState(
         error: toApiError(e),

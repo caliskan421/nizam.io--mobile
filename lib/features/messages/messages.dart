@@ -8,7 +8,11 @@ export 'application/messages_nav_caption.dart'
         messagesNavCaptionProvider,
         refreshMessagesBadge;
 export 'application/messages_providers.dart'
-    show chatUnreadOverviewProvider, chatInboxSearchProvider;
+    show
+        chatUnreadOverviewProvider,
+        chatUnreadBadgesProvider,
+        chatUnreadSnapshotProvider,
+        chatInboxSearchProvider;
 export 'domain/chat.dart' show ChatProgramUnread, ChatInbox, Chat;
 export 'presentation/chat_page.dart' show ChatPage;
 export 'presentation/messages_page.dart' show MessagesPage;

@@ -1,6 +1,10 @@
 {
   "$comment": "Arşiv klasörleri, klasör ayrıntısı ve dosya önizleme metinleri (features/archive). ELLE yazılır; make gen ARB'ye birleştirir. Yer tutucu ({ }) yasak: sayılı cümleler parça parça yazılıp sunumda birleştirilir.",
   "texts": {
+    "ui.archive.pdf_preview_error": "PDF önizlenemedi. Dosya bozuk veya parola korumalı olabilir.",
+    "ui.archive.pdf_too_large": "Bu PDF önizleme için çok büyük. İndirerek açabilirsiniz.",
+    "ui.archive.image_preview_error": "Görsel önizlenemedi.",
+    "ui.archive.image_too_large": "Bu görsel önizleme için çok büyük. İndirerek açabilirsiniz.",
     "ui.archive.title": "Arşiv",
     "ui.archive.folder_title": "Klasör",
     "ui.archive.search": "Arşivde ara",

@@ -1,6 +1,6 @@
 # Mobil mesajlaşma — mekanizma ve UI bağlantı devri
 
-2026-11-11. Bu çalışma ekranları değiştirmez; mevcut `v0.12.0-api` sözleşmesindeki imkanları domain, repository ve controller katmanlarına taşır. Backend mesajlaşma kaynağı bu etiket ile incelenen backend HEAD arasında değişmemiştir; API pini yükseltilmemiştir.
+2026-11-11. İlk F64 çalışması `v0.12.0-api` imkanlarını domain, repository ve controller katmanlarına taşıdı. Kullanıcının sonraki isteğiyle güncel main ve onun `v0.15.0-api` pini üzerinden UI bağlantıları eklendi; bu ikinci adım API pinini veya backend'i değiştirmez. Güncel yürütme ve kalite durumu: [mesajlaşma UI](yurutme/mesajlasma-ui.md).
 
 ## Plan ve uygulama sınırı
 
@@ -21,22 +21,22 @@
 - **Anket ve dosya:** Anket tek/çoklu seçim, isimli sonuç, elle kapanış ve isteğe bağlı son tarih taşır. Son tarih UTC gönderilir; kapalı ankete oy kararı sunucudadır. Dosya multipart gönderilir; açıklama ve yanıt bağlamı korunur. İndirme byte akışı kullanır.
 - **Yarışlar ve sahiplik:** Aramada istek nesli ve sayfalama uçuşu izlenir; eski cevap yeni sorguyu ezmez. Paylaşılanlarda eşzamanlı sayfa çağrısı birleştirilir, tekrar referanslar ayıklanır ve tür değişiminde eski imleç taşınmaz. Oturum/program değişince eski zincirin yeni durumu değiştirmesi ve gecikmiş eylemin yeni kapsamla devam etmesi engellenir.
 
-## UI'a hazır çağrı yüzleri ve kalan bağlantılar
+## Çağrı yüzleri ve UI bağlantıları
 
-| Özellik | Hazır altyapı | Bir sonraki UI adımı |
+| Özellik | Altyapı | UI bağlantısı |
 |---|---|---|
-| Görev / koordinatörlük / arşiv dosyası paylaşımı | `ChatRefDraft`; `ChatRoomController.send(..., refs: ...)`; DTO `refs` aktarımı | Seçici ve taslak referans kartları; gönderimden önce kaldırma. Gelen kartlar zaten gösteriliyor. |
-| Kaynaklı grup kurma | `GroupDraft.source`, `sourceDepartmentId`; kaynağı da içeren işlem imzası | Yeni grup formunda elle/program/koordinatörlük seçimi; rol ve program bağına uygun seçenekler. |
-| Kaynak değiştirme / kapatma | `ChatMembersController.updateSource`; `Chat.source`, `sourceDepartmentId` | Grup bilgisinde kaynak etiketi ve değiştirme; kapatmanın üyeleri koruduğunu açıklama. |
-| Koordinatörlük bahsetmesi | `ChatMention.department`; gönderim ve tekrar destekli | Composer önerilerine seçili programa bağlı koordinatörlükleri ekleme. Düz `@metin` tek başına bahsetme değildir. |
-| Anket kapanış tarihi | `PollDraft.closesAt`; UTC DTO aktarımı, gelen kapanışın okunması | Tarih/saat seçimi, kullanıcıya gösterilecek saat dilimi ve kapandı durumu. |
-| Açıklamalı / yanıtlı ek | `sendAttachment(file, caption: ..., replyTo: ...)`; tekrar aynı içerikle | Seçim sonrası önizleme, açıklama alanı; mevcut yanıt bağlamını gönderime taşıma. |
-| Bütün sohbet geçmişinde arama | `chatInboxSearchProvider(query)`; repository her sayfada aynı `q` gönderir | Ana liste aramasını bu sağlayıcıya bağlama; yükleniyor/hata/boş sonuç ve `truncated` uyarısı. Mevcut yerel arama korunmuştur. |
-| Programlar arası rozet | `chatUnreadOverviewProvider`; `ChatProgramUnread` | Program seçicisinde her programın sayısı ve bahsetmesi; yazma/okundu/ön plana dönüş sonrası sağlayıcıyı yenileme. Otomatik arka plan aboneliği yok. |
-| Paylaşılan tür filtresi | `ChatSharedController.setKind`; `kind`, `busy`, `nextCursor` | Tümü/görev/koordinatörlük/dosya sekmeleri; yükleme sırasında tekrar düğmesi durumu. |
-| Sabit liste tamlığı | `pinnedPage`; `ChatRoom.pinsTruncated` | Sunucu listesinin kesildiği durumda uyarı. Sunucuda olmayan sonraki sayfa varmış gibi davranılmaz. |
+| Görev / koordinatörlük / arşiv dosyası paylaşımı | `ChatRefDraft`; `ChatRoomController.send(..., refs: ...)`; DTO `refs` aktarımı | Ekle menüsündeki gerçek kayıt seçicileri, kaldırılabilir taslak kartları ve gelen kartlar bağlı. Referansla gönderim boş metinde kayıt başlıklarını kullanır; en çok 10 referans seçilir. |
+| Kaynaklı grup kurma | `GroupDraft.source`, `sourceDepartmentId`; kaynağı da içeren işlem imzası | Yeni grup formunda elle/program/koordinatörlük seçimi; rol ve programa bağlı gerçek seçenekler. |
+| Kaynak değiştirme / kapatma | `ChatMembersController.updateSource`; `Chat.source`, `sourceDepartmentId` | Grup bilgisinde kaynak etiketi, yöneticiye değiştir/kapat eylemi ve mevcut üyeleri koruma açıklamalı onay bağlı. |
+| Koordinatörlük bahsetmesi | `ChatMention.department`; gönderim ve tekrar destekli | Composer önerilerinde seçili programa bağlı koordinatörlükler var. Düz `@metin` tek başına bahsetme değildir; öneriden seçilir. |
+| Anket kapanış tarihi | `PollDraft.closesAt`; UTC DTO aktarımı, gelen kapanışın okunması | Ortak takvim/saat seçimi ve gelecekte olma denetimi bağlı; cihazın yerel saatiyle seçim yapıldığı açıklanır. |
+| Açıklamalı / yanıtlı ek | `sendAttachment(file, caption: ..., replyTo: ...)`; tekrar aynı içerikle | Dosya seçimi sonrası önizleme/açıklama/yanıt alanı bağlı; iptal yazma isteği göndermez. |
+| Bütün sohbet geçmişinde arama | `chatInboxSearchProvider(query)`; repository her sayfada aynı `q` gönderir | Ana arama 300ms debounce ile sunucuya bağlı; yükleniyor/hata/boş/kesilmiş durumları var. Tarihçe eşleşmesi tekrar son mesaj metniyle elenmez. |
+| Programlar arası rozet | `chatUnreadOverviewProvider`, `chatUnreadBadgesProvider`; `ChatProgramUnread` | Program seçicisinde ve mevcut kapsam kartında sayı/bahsetme var; oturum sahipliği süzülür, açılış/okundu/yazma/ön plana dönüş yenilemesi bağlı. Arka plan aboneliği yok. |
+| Paylaşılan tür filtresi | `ChatSharedController.setKind`; `kind`, `busy`, `nextCursor` | Tümü/görev/koordinatörlük/dosya filtreleri bağlı; yeni türde imleç sıfırlanır ve uçuşta tekrar kapalıdır. |
+| Sabit liste tamlığı | `pinnedPage`; `ChatRoom.pinsTruncated` | Kesilme uyarısı sohbet ekranında gösterilir; sunucuda olmayan sonraki sayfa varmış gibi davranılmaz. |
 
-Yeni çağrı yüzleri mevcut ekranlara bağlanmadığı için yukarıdaki eksik seçim kontrolleri bu teslimle görünür hale gelmez. Temel mesaj, yanıt, düzenleme/silme, tepki, sabitleme, anket, ek indirme, üye yönetimi, mesajdan görev ve sohbet içi aramanın mevcut ekran bağlantıları korunur.
+UI bağlantıları telefon ve tablet için aynı mevcut kit/controller üzerinden yürür. Temel mesaj, yanıt, düzenleme/silme, tepki, sabitleme, anket, ek indirme, üye yönetimi, mesajdan görev ve sohbet içi aramanın mevcut ekran bağlantıları korunur. Kapalı uygulamaya native push bu bağlantıların parçası değildir; ayrıntı [UI yürütme notundadır](yurutme/mesajlasma-ui.md).
 
 ## Kalite kanıtı ve sınırları
 

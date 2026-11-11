@@ -8,6 +8,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../core/api/generated/clients/messaging_client.dart';
+import '../../../core/api/generated/clients/program_client.dart';
 import '../../../core/api/generated/models/add_chat_members_request.dart';
 import '../../../core/api/generated/models/chat.dart' as api;
 import '../../../core/api/generated/models/chat_auto_kind.dart';
@@ -84,6 +85,19 @@ class ApiChatRepository implements ChatRepository {
   }
 
   MessagingClient get _client => MessagingClient(_http);
+
+  @override
+  Future<ChatDepartments> programDepartments() async {
+    final response = await apiCall(ProgramClient(_http).listProgramDepartments);
+    return ChatDepartments(
+      items: [
+        for (final d in response.data.departments)
+          ChatDepartmentOption(id: d.departmentId, name: d.displayName),
+      ],
+      truncated:
+          response.response.headers.value('X-Result-Truncated') == 'true',
+    );
+  }
 
   @override
   Future<ChatInbox> loadInbox({

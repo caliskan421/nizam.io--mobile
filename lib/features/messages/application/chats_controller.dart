@@ -60,7 +60,10 @@ class ChatsController extends _$ChatsController {
   void _set(ChatInbox Function(ChatInbox) f) {
     if (!ref.mounted || !_owner.owns(ref)) return;
     final v = state.value;
-    if (v != null) state = AsyncData(f(v));
+    if (v != null) {
+      state = AsyncData(f(v));
+      ref.invalidate(chatUnreadSnapshotProvider);
+    }
   }
 
   void _onSignal(ChatSignal s) {
@@ -99,7 +102,10 @@ class ChatsController extends _$ChatsController {
     final inbox = await _repo.loadInbox(
       isCurrent: () => _isCurrent(owner, generation),
     );
-    if (_isCurrent(owner, generation)) state = AsyncData(inbox);
+    if (_isCurrent(owner, generation)) {
+      state = AsyncData(inbox);
+      ref.invalidate(chatUnreadSnapshotProvider);
+    }
   }
 
   /// Bütün sohbetleri sunucuda okundu sayar; başarıda yerel sayaçlar sıfırlanır.

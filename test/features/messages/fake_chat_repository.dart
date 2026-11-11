@@ -43,6 +43,11 @@ Chat chat(
     Chat(id: id, name: name, lastActivity: at(0), group: group, unread: unread);
 
 class FakeChatRepository implements ChatRepository {
+  ChatDepartments departments = ChatDepartments(items: const []);
+
+  @override
+  Future<ChatDepartments> programDepartments() async => departments;
+
   final calls = <String>[];
   ChatInbox inbox = ChatInbox(chats: [chat('c1', unread: 2)]);
   final inboxQueries = <String?>[];

@@ -9,16 +9,19 @@ import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../domain/chat.dart';
+import 'chat_compose_deadline.dart';
+import 'chat_compose_lifetime.dart';
 import 'messages_texts.dart';
 
 /// Ek menüsünün seçimi: galeriden fotoğraf, cihaz dosyası ya da anket.
-enum ChatAttachKind { photos, files, poll }
+enum ChatAttachKind { photos, files, poll, task, department, archive }
 
 /// Yazma alanındaki ek düğmesinin menüsü: görev ayrıntısındaki yüklemeyle aynı kaynak seçimi
 /// (Fotoğraflar / Dosyalar) ve (yalnız grupta) anket.
 Future<ChatAttachKind?> showAttachMenu(
   BuildContext context, {
   required bool group,
+  bool canShare = true,
 }) {
   final l = context.l10n;
   return NzBottomSheet.show<ChatAttachKind>(
@@ -28,6 +31,24 @@ Future<ChatAttachKind?> showAttachMenu(
     builder: (sheet) => Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        for (final item in [
+          (ChatAttachKind.task, l.uiMessagesComposeShareTask, NzIcons.tasks),
+          (
+            ChatAttachKind.department,
+            l.uiMessagesComposeShareDepartment,
+            NzIcons.coordinatorships,
+          ),
+          (
+            ChatAttachKind.archive,
+            l.uiMessagesComposeShareFile,
+            NzIcons.folder,
+          ),
+        ])
+          NzListTile(
+            title: item.$2,
+            leading: NzIcon(item.$3),
+            onTap: canShare ? () => Navigator.of(sheet).pop(item.$1) : null,
+          ),
         NzListTile(
           title: l.uiMessagesAttachPhotos,
           leading: const NzIcon(NzIcons.image),
@@ -35,6 +56,7 @@ Future<ChatAttachKind?> showAttachMenu(
         ),
         NzListTile(
           title: l.uiMessagesAttachFile,
+          subtitle: l.uiMessagesComposeDeviceFile,
           leading: const NzIcon(NzIcons.folder),
           onTap: () => Navigator.of(sheet).pop(ChatAttachKind.files),
         ),
@@ -53,15 +75,46 @@ Future<ChatAttachKind?> showAttachMenu(
 typedef ChatPollInput = ({String question, PollDraft poll});
 
 /// Anket oluştur: soru, 2–10 seçenek (ekle), tek/çoklu seçim. Geçerli taslak döner.
-Future<ChatPollInput?> showPollComposer(BuildContext context) =>
-    NzBottomSheet.show<ChatPollInput>(
-      context,
-      title: context.l10n.uiMessagesPollNew,
-      builder: (_) => const _PollComposer(),
-    );
+Future<ChatPollInput?> showPollComposer(BuildContext context) async {
+  final input = ValueNotifier<ChatPollInput?>(null);
+  return NzBottomSheet.show<ChatPollInput>(
+    context,
+    title: context.l10n.uiMessagesPollNew,
+    builder: (_) => ChatComposeLifetime(
+      onDispose: input.dispose,
+      child: _PollComposer(input: input),
+    ),
+    actions: (sheet) => [
+      NzButton.secondary(
+        label: sheet.l10n.uiMessagesCancel,
+        expand: true,
+        onPressed: () => Navigator.of(sheet).pop(),
+      ),
+      ValueListenableBuilder<ChatPollInput?>(
+        valueListenable: input,
+        builder: (_, value, _) => NzButton.primary(
+          label: sheet.l10n.uiMessagesSend,
+          expand: true,
+          onPressed: value == null
+              ? null
+              : () {
+                  final closes = value.poll.closesAt;
+                  if (closes != null && !closes.isAfter(DateTime.now())) {
+                    input.value = null;
+                    return;
+                  }
+                  Navigator.of(sheet).pop(value);
+                },
+        ),
+      ),
+    ],
+  );
+}
 
 class _PollComposer extends StatefulWidget {
-  const _PollComposer();
+  const _PollComposer({required this.input});
+
+  final ValueNotifier<ChatPollInput?> input;
 
   @override
   State<_PollComposer> createState() => _PollComposerState();
@@ -71,6 +124,21 @@ class _PollComposerState extends State<_PollComposer> {
   final _question = TextEditingController();
   final _options = [TextEditingController(), TextEditingController()];
   var _multi = false;
+  DateTime? _closesAt;
+
+  void _change(VoidCallback change) {
+    setState(change);
+    widget.input.value = _valid
+        ? (
+            question: _question.text.trim(),
+            poll: PollDraft(
+              options: _values,
+              multi: _multi,
+              closesAt: _closesAt,
+            ),
+          )
+        : null;
+  }
 
   @override
   void dispose() {
@@ -87,7 +155,9 @@ class _PollComposerState extends State<_PollComposer> {
   ];
 
   bool get _valid =>
-      _question.text.trim().isNotEmpty && PollDraft.valid(_values);
+      _question.text.trim().isNotEmpty &&
+      PollDraft.valid(_values) &&
+      (_closesAt == null || _closesAt!.isAfter(DateTime.now()));
 
   @override
   Widget build(BuildContext context) {
@@ -100,35 +170,26 @@ class _PollComposerState extends State<_PollComposer> {
         NzTextField(
           label: l.uiMessagesPollQuestion,
           controller: _question,
-          onChanged: (_) => setState(() {}),
+          onChanged: (_) => _change(() {}),
         ),
         for (var i = 0; i < _options.length; i++)
           NzTextField(
             label: '${l.uiMessagesPollOption} ${i + 1}',
             controller: _options[i],
-            onChanged: (_) => setState(() {}),
+            onChanged: (_) => _change(() {}),
           ),
         if (_options.length < PollDraft.maxOptions)
           NzButton.secondary(
             label: l.uiMessagesPollAddOption,
             onPressed: () =>
-                setState(() => _options.add(TextEditingController())),
+                _change(() => _options.add(TextEditingController())),
           ),
         NzSwitch(
           label: l.uiMessagesMultiChoice,
           value: _multi,
-          onChanged: (v) => setState(() => _multi = v),
+          onChanged: (v) => _change(() => _multi = v),
         ),
-        NzButton.primary(
-          label: l.uiMessagesSend,
-          expand: true,
-          onPressed: _valid
-              ? () => Navigator.of(context).pop((
-                  question: _question.text.trim(),
-                  poll: PollDraft(options: _values, multi: _multi),
-                ))
-              : null,
-        ),
+        ChatComposeDeadline(onChanged: (v) => _change(() => _closesAt = v)),
       ],
     );
   }

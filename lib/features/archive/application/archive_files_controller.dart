@@ -91,6 +91,7 @@ class ArchiveFilesController extends _$ArchiveFilesController {
   /// Sonraki sayfa; sürmekte olan istek varken ya da son sayfada bir şey yapmaz.
   Future<void> loadMore() async {
     final s = state.value;
+    final filter = ref.read(archiveFolderControllerProvider(code)).filter;
     final cursor = s?.nextCursor;
     if (s == null || cursor == null || s.loadingMore) return;
     state = AsyncData(s.copyWith(loadingMore: true, moreError: () => null));
@@ -98,7 +99,12 @@ class ArchiveFilesController extends _$ArchiveFilesController {
       final page = await _page(PageRequest(limit: pageSize, cursor: cursor));
       // Süzgeç bu arada değiştiyse liste baştan yüklenmiştir: eski sonuç atılır.
       final now = state.value;
-      if (!ref.mounted || now == null || now.nextCursor != cursor) return;
+      if (!ref.mounted ||
+          now == null ||
+          now.nextCursor != cursor ||
+          ref.read(archiveFolderControllerProvider(code)).filter != filter) {
+        return;
+      }
       state = AsyncData(
         now.copyWith(
           items: [...now.items, ...page.items],
@@ -108,7 +114,12 @@ class ArchiveFilesController extends _$ArchiveFilesController {
       );
     } on Object catch (e) {
       final now = state.value;
-      if (!ref.mounted || now == null || now.nextCursor != cursor) return;
+      if (!ref.mounted ||
+          now == null ||
+          now.nextCursor != cursor ||
+          ref.read(archiveFolderControllerProvider(code)).filter != filter) {
+        return;
+      }
       state = AsyncData(
         now.copyWith(loadingMore: false, moreError: () => toApiError(e)),
       );

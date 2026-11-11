@@ -1,6 +1,8 @@
 // ArchiveFilesController + klasör kaynakları: süzgeç ve departman başlığı isteğe, imleçli devam,
 // süzgeç değişince baştan yükleme, sonraki sayfa hatası; yöneticide görev ve satırlar klasöre
 // göre süzülür; sanal klasör kapsamın departmanıyla gider.
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/domain/page_slice.dart';
@@ -16,6 +18,21 @@ import '../archive_fixture.dart';
 Future<ArchiveFilesState> _files(ProviderContainer c, String code) {
   c.listen(archiveFilesControllerProvider(code), (_, _) {});
   return c.read(archiveFilesControllerProvider(code).future);
+}
+
+class _DelayedPage extends FakeArchiveRepository {
+  final delayed = Completer<PageSlice<RecordFile>>();
+  @override
+  Future<PageSlice<RecordFile>> archiveAttachments({
+    required String department,
+    ArchiveAttachmentFilter filter = const ArchiveAttachmentFilter(),
+    PageRequest page = const PageRequest(),
+  }) {
+    if (page.cursor == 'c2') return delayed.future;
+    return Future.value(
+      PageSlice(items: [archiveFile(filter.search ?? 'old')], nextCursor: 'c2'),
+    );
+  }
 }
 
 void main() {
@@ -57,6 +74,31 @@ void main() {
         ),
       );
       expect(repo.calls.last.$3, isNull, reason: 'imleç sıfırlanır');
+    },
+  );
+
+  test(
+    'eski sorgunun geciken sayfası aynı imleçli yeni sorguya eklenmez',
+    () async {
+      final repo = _DelayedPage();
+      final c = archiveContainer(repo);
+      await _files(c, 'd1');
+      final pending = c
+          .read(archiveFilesControllerProvider('d1').notifier)
+          .loadMore();
+      await Future<void>.delayed(Duration.zero);
+      c.read(archiveFolderControllerProvider('d1').notifier).setQuery('yeni');
+      await c.read(archiveFilesControllerProvider('d1').future);
+      repo.delayed.complete(PageSlice(items: [archiveFile('stale')]));
+      await pending;
+      expect(
+        c
+            .read(archiveFilesControllerProvider('d1'))
+            .value!
+            .items
+            .map((f) => f.id),
+        ['yeni'],
+      );
     },
   );
 

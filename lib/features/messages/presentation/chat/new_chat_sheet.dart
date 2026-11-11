@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/domain/turkish_collation.dart';
 import '../../../../core/errors/api_error.dart';
 import '../../../../core/errors/error_text.dart';
 import '../../../../core/providers.dart';
@@ -9,6 +10,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/inputs/nz_filter_choice.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
@@ -64,6 +66,7 @@ class _NewChat extends ConsumerStatefulWidget {
 
 class _NewChatState extends ConsumerState<_NewChat> {
   final _name = TextEditingController();
+  final _search = TextEditingController();
   final _members = <String>{};
   var _busy = false;
   var _source = ChatSource.none;
@@ -71,6 +74,7 @@ class _NewChatState extends ConsumerState<_NewChat> {
 
   void _reset() => setState(() {
     _name.clear();
+    _search.clear();
     _members.clear();
     _source = ChatSource.none;
     _departmentId = null;
@@ -79,6 +83,7 @@ class _NewChatState extends ConsumerState<_NewChat> {
   @override
   void dispose() {
     _name.dispose();
+    _search.dispose();
     widget.submit?.dispose();
     super.dispose();
   }
@@ -244,17 +249,15 @@ class _NewChatState extends ConsumerState<_NewChat> {
           context,
           value,
           purpose,
-          (c) => NzCheckbox(
+          (c) => NzFilterChoice(
             label: c.name,
-            value: _members.contains(c.accountId),
-            labelLeading: _avatar(c),
-            onChanged: _busy
-                ? null
-                : (on) => setState(
-                    () => on
-                        ? _members.add(c.accountId)
-                        : _members.remove(c.accountId),
-                  ),
+            selected: _members.contains(c.accountId),
+            onTap: () {
+              if (_busy) return;
+              setState(() {
+                if (!_members.add(c.accountId)) _members.remove(c.accountId);
+              });
+            },
           ),
         ),
       ],
@@ -284,7 +287,22 @@ class _NewChatState extends ConsumerState<_NewChat> {
       mainAxisSize: MainAxisSize.min,
       spacing: NizamioSpacing.space1,
       children: [
-        for (final c in list.items) row(c),
+        NzSearchField(
+          label: l.uiInputsSearch,
+          controller: _search,
+          onChanged: (_) => setState(() {}),
+        ),
+        if (widget.group)
+          NzFilterChoices(
+            children: [
+              for (final c in list.items)
+                if (trLower(c.name).contains(trLower(_search.text.trim())))
+                  row(c),
+            ],
+          )
+        else
+          for (final c in list.items)
+            if (trLower(c.name).contains(trLower(_search.text.trim()))) row(c),
         if (list.items.isEmpty) Text(l.uiMessagesNoCandidates, style: note),
         if (list.truncated) Text(l.uiMessagesCandidatesTruncated, style: note),
         if (footer != null) Text(footer, style: note),

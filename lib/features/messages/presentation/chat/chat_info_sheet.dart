@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 
+import '../../../../core/domain/turkish_collation.dart';
 import '../../../../core/errors/api_error.dart';
 import '../../../../core/errors/error_text.dart';
 import '../../../../core/providers.dart';
@@ -10,8 +10,8 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/inputs/nz_filter_choice.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
-import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
@@ -19,6 +19,7 @@ import '../../application/chat_members_controller.dart';
 import '../../application/chat_room_controller.dart';
 import '../../application/messages_providers.dart';
 import '../../domain/chat.dart';
+import 'chat_compose_lifetime.dart';
 import 'chat_group_source_info.dart';
 import 'messages_texts.dart';
 
@@ -35,7 +36,6 @@ Future<ChatInfoAction?> showChatInfo(
 }) => NzBottomSheet.show<ChatInfoAction>(
   context,
   title: context.l10n.uiMessagesInfo,
-  showHeader: false,
   builder: (_) => _ChatInfo(chatId),
 );
 
@@ -69,38 +69,6 @@ class _ChatInfo extends ConsumerWidget {
         ? null
         : members?.value?.member(me);
     void done(ChatInfoAction a) => Navigator.of(context).pop(a);
-    Widget act(IconData icon, String label, ChatInfoAction a, {Color? color}) =>
-        Expanded(
-          child: Material(
-            color: c.surfaceRaised,
-            borderRadius: BorderRadius.circular(NizamioRadius.group),
-            child: InkWell(
-              onTap: () => done(a),
-              borderRadius: BorderRadius.circular(NizamioRadius.group),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 4,
-                  vertical: 12,
-                ),
-                child: Column(
-                  children: [
-                    NzIcon(
-                      icon,
-                      size: NizamioSize.iconSizeSm,
-                      color: color ?? c.text,
-                    ),
-                    const Gap(6),
-                    Text(
-                      label,
-                      textAlign: TextAlign.center,
-                      style: t.caption.copyWith(color: color ?? c.text),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
     final sub = l.chatSubtitle(room, DateTime.now());
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -125,30 +93,47 @@ class _ChatInfo extends ConsumerWidget {
               ),
           ],
         ),
-        Row(
-          spacing: NizamioSpacing.space2,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            act(NzIcons.search, l.uiMessagesSearchChat, ChatInfoAction.search),
-            act(NzIcons.attach, l.uiMessagesShared, ChatInfoAction.shared),
+        NzMenuGroup(
+          rows: [
+            NzMenuRow(
+              icon: NzIcons.search,
+              label: l.uiMessagesSearchChat,
+              onTap: () => done(ChatInfoAction.search),
+            ),
+            NzMenuRow(
+              icon: NzIcons.attach,
+              label: l.uiMessagesShared,
+              onTap: () => done(ChatInfoAction.shared),
+            ),
             if (chat.canManage)
-              act(NzIcons.edit, l.uiMessagesRename, ChatInfoAction.rename),
+              NzMenuRow(
+                icon: NzIcons.edit,
+                label: l.uiMessagesRename,
+                onTap: () => done(ChatInfoAction.rename),
+              ),
           ],
         ),
         if (chat.group) ChatGroupSourceInfo(chat: chat),
         if (chat.group)
           _Members(chatId: chatId, chat: chat, me: me, value: members!),
-        if (chat.group && mine != null && !mine.fromSource)
-          NzButton.secondary(
-            label: l.uiMessagesLeaveGroup,
-            expand: true,
-            onPressed: () => done(ChatInfoAction.leave),
-          ),
-        if (chat.canManage)
-          NzButton.danger(
-            label: l.uiMessagesDeleteGroup,
-            expand: true,
-            onPressed: () => done(ChatInfoAction.delete),
+        if ((chat.group && mine != null && !mine.fromSource) || chat.canManage)
+          NzMenuGroup(
+            rows: [
+              if (chat.group && mine != null && !mine.fromSource)
+                NzMenuRow(
+                  icon: NzIcons.close,
+                  label: l.uiMessagesLeaveGroup,
+                  danger: true,
+                  onTap: () => done(ChatInfoAction.leave),
+                ),
+              if (chat.canManage)
+                NzMenuRow(
+                  icon: NzIcons.delete,
+                  label: l.uiMessagesDeleteGroup,
+                  danger: true,
+                  onTap: () => done(ChatInfoAction.delete),
+                ),
+            ],
           ),
       ],
     );
@@ -192,18 +177,19 @@ class _Members extends ConsumerWidget {
     final pick = await NzBottomSheet.show<int>(
       context,
       title: m.name,
-      compact: true,
-      builder: (sheet) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      builder: (sheet) => NzMenuGroup(
+        rows: [
           if (chat.canModerate)
-            NzListTile(
-              title: admin ? l.uiMessagesRevokeAdmin : l.uiMessagesMakeAdmin,
+            NzMenuRow(
+              icon: NzIcons.person,
+              label: admin ? l.uiMessagesRevokeAdmin : l.uiMessagesMakeAdmin,
               onTap: () => Navigator.of(sheet).pop(0),
             ),
           if (!m.fromSource)
-            NzListTile(
-              title: l.uiMessagesRemoveMember,
+            NzMenuRow(
+              icon: NzIcons.delete,
+              label: l.uiMessagesRemoveMember,
+              danger: true,
               onTap: () => Navigator.of(sheet).pop(1),
             ),
         ],
@@ -226,10 +212,26 @@ class _Members extends ConsumerWidget {
   Future<void> _add(BuildContext context, WidgetRef ref) async {
     final program = ref.read(scopeStateProvider).programId;
     final session = ref.read(sessionGenerationProvider);
+    final selected = ValueNotifier<Set<String>>({});
     final ids = await NzBottomSheet.show<Set<String>>(
       context,
       title: context.l10n.uiMessagesAddMembers,
-      builder: (_) => _AddMembers(chatId),
+      builder: (_) => _AddMembers(chatId, selected),
+      actions: (sheet) => [
+        NzButton.secondary(
+          label: sheet.l10n.uiMessagesCancel,
+          expand: true,
+          onPressed: () => Navigator.of(sheet).pop(),
+        ),
+        ValueListenableBuilder<Set<String>>(
+          valueListenable: selected,
+          builder: (_, ids, _) => NzButton.primary(
+            label: sheet.l10n.uiMessagesAdd,
+            expand: true,
+            onPressed: ids.isEmpty ? null : () => Navigator.of(sheet).pop(ids),
+          ),
+        ),
+      ],
     );
     if (!context.mounted ||
         ids == null ||
@@ -304,9 +306,10 @@ class _Members extends ConsumerWidget {
 
 /// Üye ekleme: gruba eklenebilecek adaylardan çoklu seçim.
 class _AddMembers extends ConsumerStatefulWidget {
-  const _AddMembers(this.chatId);
+  const _AddMembers(this.chatId, this.selected);
 
   final String chatId;
+  final ValueNotifier<Set<String>> selected;
 
   @override
   ConsumerState<_AddMembers> createState() => _AddMembersState();
@@ -314,6 +317,14 @@ class _AddMembers extends ConsumerStatefulWidget {
 
 class _AddMembersState extends ConsumerState<_AddMembers> {
   final _picked = <String>{};
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    widget.selected.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -337,25 +348,30 @@ class _AddMembersState extends ConsumerState<_AddMembers> {
         mainAxisSize: MainAxisSize.min,
         spacing: NizamioSpacing.space1,
         children: [
-          for (final c in list.items)
-            NzCheckbox(
-              label: c.name,
-              value: _picked.contains(c.accountId),
-              onChanged: (on) => setState(
-                () =>
-                    on ? _picked.add(c.accountId) : _picked.remove(c.accountId),
-              ),
-            ),
+          NzSearchField(
+            label: l.uiInputsSearch,
+            controller: _search,
+            onChanged: (_) => setState(() {}),
+          ),
+          NzFilterChoices(
+            children: [
+              for (final c in list.items)
+                if (trLower(c.name).contains(trLower(_search.text.trim())))
+                  NzFilterChoice(
+                    label: c.name,
+                    selected: _picked.contains(c.accountId),
+                    onTap: () => setState(() {
+                      if (!_picked.add(c.accountId)) {
+                        _picked.remove(c.accountId);
+                      }
+                      widget.selected.value = {..._picked};
+                    }),
+                  ),
+            ],
+          ),
           if (list.items.isEmpty) Text(l.uiMessagesNoCandidates, style: note),
           if (list.truncated)
             Text(l.uiMessagesCandidatesTruncated, style: note),
-          NzButton.primary(
-            label: l.uiMessagesAdd,
-            expand: true,
-            onPressed: _picked.isEmpty
-                ? null
-                : () => Navigator.of(context).pop({..._picked}),
-          ),
         ],
       ),
     );
@@ -363,53 +379,39 @@ class _AddMembersState extends ConsumerState<_AddMembers> {
 }
 
 /// Grup adı düzenleme (tek satır, en çok 100 karakter). Değişen ad döner.
-Future<String?> showRenameSheet(BuildContext context, String current) =>
-    NzBottomSheet.show<String>(
-      context,
-      title: context.l10n.uiMessagesRename,
-      builder: (_) => _Rename(current),
-    );
-
-class _Rename extends StatefulWidget {
-  const _Rename(this.current);
-
-  final String current;
-
-  @override
-  State<_Rename> createState() => _RenameState();
-}
-
-class _RenameState extends State<_Rename> {
-  late final _name = TextEditingController(text: widget.current);
-
-  @override
-  void dispose() {
-    _name.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final v = _name.text.trim();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      spacing: NizamioSpacing.space3,
-      children: [
-        NzTextField(
-          label: l.uiMessagesGroupName,
-          controller: _name,
-          onChanged: (_) => setState(() {}),
-        ),
-        NzButton.primary(
-          label: l.uiMessagesSave,
-          expand: true,
-          onPressed: v.isEmpty || v.length > 100 || v == widget.current
-              ? null
-              : () => Navigator.of(context).pop(v),
-        ),
-      ],
-    );
-  }
+Future<String?> showRenameSheet(BuildContext context, String current) async {
+  final name = TextEditingController(text: current);
+  final result = await NzBottomSheet.show<String>(
+    context,
+    title: context.l10n.uiMessagesRename,
+    builder: (_) => ChatComposeLifetime(
+      onDispose: name.dispose,
+      child: NzTextField(
+        label: context.l10n.uiMessagesGroupName,
+        controller: name,
+        maxLength: 100,
+      ),
+    ),
+    actions: (sheet) => [
+      NzButton.secondary(
+        label: sheet.l10n.uiMessagesCancel,
+        expand: true,
+        onPressed: () => Navigator.of(sheet).pop(),
+      ),
+      ValueListenableBuilder<TextEditingValue>(
+        valueListenable: name,
+        builder: (_, value, _) {
+          final text = value.text.trim();
+          return NzButton.primary(
+            label: sheet.l10n.uiMessagesSave,
+            expand: true,
+            onPressed: text.isEmpty || text.length > 100 || text == current
+                ? null
+                : () => Navigator.of(sheet).pop(text),
+          );
+        },
+      ),
+    ],
+  );
+  return result;
 }

@@ -5,7 +5,6 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
-import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../domain/chat.dart';
@@ -27,10 +26,8 @@ Future<ChatAttachKind?> showAttachMenu(
   return NzBottomSheet.show<ChatAttachKind>(
     context,
     title: l.uiMessagesAttach,
-    compact: true,
-    builder: (sheet) => Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
+    builder: (sheet) => NzMenuGroup(
+      rows: [
         for (final item in [
           (ChatAttachKind.task, l.uiMessagesComposeShareTask, NzIcons.tasks),
           (
@@ -44,26 +41,36 @@ Future<ChatAttachKind?> showAttachMenu(
             NzIcons.folder,
           ),
         ])
-          NzListTile(
-            title: item.$2,
-            leading: NzIcon(item.$3),
-            onTap: canShare ? () => Navigator.of(sheet).pop(item.$1) : null,
-          ),
-        NzListTile(
-          title: l.uiMessagesAttachPhotos,
-          leading: const NzIcon(NzIcons.image),
+          if (canShare)
+            NzMenuRow(
+              icon: item.$3,
+              label: item.$2,
+              onTap: () => Navigator.of(sheet).pop(item.$1),
+            )
+          else
+            Semantics(
+              enabled: false,
+              child: Opacity(
+                opacity: 0.38,
+                child: IgnorePointer(
+                  child: NzMenuRow(icon: item.$3, label: item.$2, onTap: () {}),
+                ),
+              ),
+            ),
+        NzMenuRow(
+          icon: NzIcons.image,
+          label: l.uiMessagesAttachPhotos,
           onTap: () => Navigator.of(sheet).pop(ChatAttachKind.photos),
         ),
-        NzListTile(
-          title: l.uiMessagesAttachFile,
-          subtitle: l.uiMessagesComposeDeviceFile,
-          leading: const NzIcon(NzIcons.folder),
+        NzMenuRow(
+          icon: NzIcons.folder,
+          label: l.uiMessagesAttachFile,
           onTap: () => Navigator.of(sheet).pop(ChatAttachKind.files),
         ),
         if (group)
-          NzListTile(
-            title: l.uiMessagesAttachPoll,
-            leading: const NzIcon(NzIcons.barChart),
+          NzMenuRow(
+            icon: NzIcons.barChart,
+            label: l.uiMessagesAttachPoll,
             onTap: () => Navigator.of(sheet).pop(ChatAttachKind.poll),
           ),
       ],

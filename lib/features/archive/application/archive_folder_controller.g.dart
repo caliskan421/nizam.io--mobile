@@ -66,7 +66,7 @@ final class ArchiveFolderControllerProvider
 }
 
 String _$archiveFolderControllerHash() =>
-    r'1b49dae8e82cf0318432e178d2a664daefa99fb6';
+    r'080cd38ccb2435dfc87be1b3dd4ff9bd3e35abb3';
 
 /// Klasör ayrıntısı görünüm komutları; klasör kodu başına ayrı durum. Ekran kapanınca sekme
 /// ve süzgeçler sıfırlanır. Sunucu eylemleri `ArchiveActionsController`'dadır.

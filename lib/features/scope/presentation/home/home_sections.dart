@@ -4,11 +4,11 @@ import 'package:gap/gap.dart';
 import '../../../../core/i18n/generated/app_localizations.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/layout/nz_uniform_grid.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
-import 'home_grid_layout.dart';
 import 'home_texts.dart';
 import 'home_wide.dart';
 

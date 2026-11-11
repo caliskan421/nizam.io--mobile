@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/domain/turkish_collation.dart';
+import '../../../core/errors/api_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
@@ -13,7 +16,7 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
-import '../../tasks/tasks.dart';
+import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../application/archive_actions_controller.dart';
 import '../application/archive_controller.dart';
 import '../application/archive_files_controller.dart';
@@ -22,6 +25,8 @@ import '../application/archive_folder_sources.dart';
 import '../application/archive_folders_controller.dart';
 import '../domain/archive.dart';
 import '../domain/records.dart';
+import 'archive/archive_filter_sheet.dart';
+import 'archive/archive_folder_grid.dart';
 import 'archive/archive_folder_parts.dart';
 import 'archive/archive_outcome.dart';
 import 'archive/archive_preview_sheet.dart';
@@ -139,8 +144,6 @@ class ArchiveFolderPage extends ConsumerWidget {
           ref.read(archiveControllerProvider.notifier).refresh(code: code),
       onRetry: retry,
       topBar: topBar,
-      // Görev klasörü satırları cam (NzFolder): giriş yalnız yükselir.
-      fadeContent: false,
       // Prototip: sekme hapları üst çubuğun altına yapışır (`position: sticky; top: 64px`).
       pinned: Padding(
         padding: const EdgeInsets.only(
@@ -159,22 +162,38 @@ class ArchiveFolderPage extends ConsumerWidget {
       ),
       afterKey: ValueKey(view.tab),
       after: [
-        const Gap(NizamioSpacing.space2),
+        Gap(
+          view.tab == ArchiveFolderTab.tasks
+              ? NizamioSpacing.space6
+              : NizamioSpacing.space2,
+        ),
         if (view.tab == ArchiveFolderTab.tasks)
           NzAsyncView<List<ArchiveTaskSummary>>(
             value: tasks,
             onRetry: () => ref.invalidate(archiveFolderTasksProvider(code)),
-            data: (all) => all.isEmpty
-                ? _Empty(l.uiArchiveNoFiles)
-                : Column(
-                    children: [
-                      for (var i = 0; i < all.length; i += 3)
-                        ArchiveTaskFolderRow(
-                          tasks: all.sublist(i, (i + 3).clamp(0, all.length)),
-                          onOpen: ctrl.openTask,
-                        ),
-                    ],
-                  ),
+            data: (all) {
+              final query = trLower(view.query.trim());
+              final matches = [
+                for (final task in all)
+                  if (query.isEmpty || trLower(task.title).contains(query))
+                    task,
+              ];
+              return matches.isEmpty
+                  ? _Empty(
+                      query.isEmpty
+                          ? l.uiArchiveNoFiles
+                          : l.uiArchiveEmptySearch,
+                    )
+                  : ArchiveFolderGrid(
+                      children: [
+                        for (final task in matches)
+                          ArchiveTaskFolderCard(
+                            task: task,
+                            onOpen: ctrl.openTask,
+                          ),
+                      ],
+                    );
+            },
           )
         else ...[
           _Filters(code: code, view: view),
@@ -206,54 +225,153 @@ class _Empty extends StatelessWidget {
   );
 }
 
-class _Header extends ConsumerWidget {
+class _Header extends ConsumerStatefulWidget {
   const _Header({required this.code, required this.folder});
-
   final String code;
   final ArchiveFolder folder;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_Header> createState() => _HeaderState();
+}
+
+class _HeaderState extends ConsumerState<_Header> {
+  late final _search = TextEditingController(
+    text: ref.read(archiveFolderControllerProvider(widget.code)).query,
+  );
+  final _focus = FocusNode();
+  late bool _open = _search.text.isNotEmpty;
+  var _submitted = false;
+
+  @override
+  void didUpdateWidget(_Header old) {
+    super.didUpdateWidget(old);
+    if (old.code != widget.code) {
+      _focus.unfocus();
+      _search.text = ref
+          .read(archiveFolderControllerProvider(widget.code))
+          .query;
+      _open = _search.text.isNotEmpty;
+    }
+  }
+
+  @override
+  void dispose() {
+    _search.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  void _close() {
+    if (!_open) return;
+    setState(() => _open = false);
+    _search.clear();
+    _focus.unfocus();
+    ref
+        .read(archiveFolderControllerProvider(widget.code).notifier)
+        .setQuery('');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    final t = context.text;
-    final busy = ref.watch(archiveActionsControllerProvider(code));
+    final busy = ref.watch(archiveActionsControllerProvider(widget.code));
+    final view = ref.watch(archiveFolderControllerProvider(widget.code));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Semantics(header: true, child: Text(folder.name, style: t.titleMd)),
-        const Gap(3),
-        Text(
-          l.files(folder.files),
-          style: t.caption.copyWith(color: c.textMuted),
-        ),
-        const Gap(NizamioSpacing.space4),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Sanal klasör ("Görevlerim") bir koordinatörlük değildir.
-            if (!folder.isVirtual) ...[
-              Expanded(
-                child: NzButton.secondary(
-                  label: l.uiArchiveCoordinatorship,
-                  icon: NzIcons.coordinatorships,
-                  expand: true,
-                  onPressed: () =>
-                      context.appNav.openCoordinatorship(folder.code),
-                ),
-              ),
-              const Gap(NizamioSpacing.space2),
-            ],
             Expanded(
-              child: NzButton.primary(
-                label: l.uiArchiveUploadShort,
-                icon: NzIcons.arrowUp,
-                expand: true,
-                onPressed: busy
-                    ? null
-                    : () => startArchiveUpload(context, ref, code),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      widget.folder.name,
+                      style: context.text.titleMd,
+                    ),
+                  ),
+                  const Gap(3),
+                  Text(
+                    l.files(widget.folder.files),
+                    style: context.text.caption.copyWith(color: c.textMuted),
+                  ),
+                ],
               ),
             ),
+            Semantics(
+              selected: _open,
+              child: NzIconButton.circle(
+                icon: NzIcons.search,
+                semanticLabel: l.uiArchiveSearch,
+                onPressed: () {
+                  if (_open) {
+                    _close();
+                  } else {
+                    setState(() => _open = true);
+                  }
+                },
+              ),
+            ),
+            NzIconButton.circle(
+              icon: NzIcons.filter,
+              semanticLabel: l.uiTasksFilters,
+              dot: view.hasFileFilters ? c.accentText : null,
+              onPressed: () {
+                if (_open) {
+                  _submitted = true;
+                  _focus.unfocus();
+                }
+                ref
+                    .read(archiveFolderControllerProvider(widget.code).notifier)
+                    .setTab(ArchiveFolderTab.files);
+                showArchiveFilterSheet(context, widget.code).whenComplete(() {
+                  _submitted = false;
+                });
+              },
+            ),
+            NzIconButton.circleAccent(
+              icon: NzIcons.arrowUp,
+              semanticLabel: l.uiArchiveUploadShort,
+              onPressed: busy
+                  ? null
+                  : () => startArchiveUpload(context, ref, widget.code),
+            ),
           ],
+        ),
+        NzReveal(
+          open: _open,
+          onOpened: _focus.requestFocus,
+          child: Padding(
+            padding: const EdgeInsets.only(top: NizamioSpacing.space4),
+            child: CallbackShortcuts(
+              bindings: {
+                const SingleActivator(LogicalKeyboardKey.escape): _close,
+              },
+              child: NzSearchField(
+                controller: _search,
+                focusNode: _focus,
+                label: l.uiArchiveSearch,
+                onChanged: ref
+                    .read(archiveFolderControllerProvider(widget.code).notifier)
+                    .setQuery,
+                onClear: () => ref
+                    .read(archiveFolderControllerProvider(widget.code).notifier)
+                    .setQuery(''),
+                onSubmitted: (_) => _submitted = true,
+                onDismiss: () {
+                  if (_submitted) {
+                    _submitted = false;
+                    return;
+                  }
+                  _close();
+                },
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -266,30 +384,6 @@ class _Filters extends ConsumerWidget {
 
   final String code;
   final ArchiveFolderViewState view;
-
-  void _uploaders(BuildContext context, WidgetRef ref, List<String> ids) {
-    final l = context.l10n;
-    final ctrl = ref.read(archiveFolderControllerProvider(code).notifier);
-    final catalog = ref.read(taskCatalogControllerProvider).value;
-    NzFlyoutMenu.show(
-      context,
-      semanticLabel: l.uiArchiveUploaderFilter,
-      entries: [
-        NzFlyoutSection(l.uiArchiveUploaderFilter),
-        NzFlyoutItem(
-          label: l.uiArchiveUploaderAll,
-          selected: view.uploader == null,
-          onSelected: () => ctrl.setUploader(null),
-        ),
-        for (final id in ids)
-          NzFlyoutItem(
-            label: catalog?.nameOf(id) ?? l.uiArchiveUploaderUnknown,
-            selected: view.uploader == id,
-            onSelected: () => ctrl.setUploader(id),
-          ),
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -304,36 +398,23 @@ class _Filters extends ConsumerWidget {
               ?.where((t) => t.workItemId == task)
               .firstOrNull
               ?.title;
-    final uploaders = ref.watch(archiveFolderUploadersProvider(code)).value;
-    final uploader = view.uploader;
-    final uploaderLabel = uploader == null
-        ? l.uiArchiveUploaderFilter
-        : ref.watch(taskCatalogControllerProvider).value?.nameOf(uploader) ??
-              l.uiArchiveUploaderUnknown;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ArchiveTagRail(selected: view.tag, onSelected: ctrl.setTag),
-        const Gap(NizamioSpacing.space2),
-        Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          children: [
-            ArchiveChip(
-              label: uploaderLabel,
-              on: uploader != null,
-              icon: NzIcons.chevronDown,
-              onTap: uploaders == null
-                  ? () {}
-                  : () => _uploaders(context, ref, uploaders),
-            ),
-            ArchiveChip(
-              label: l.sortLabel(view.sort),
-              on: false,
-              icon: NzIcons.swapVertical,
-              onTap: ctrl.cycleSort,
-            ),
-          ],
+        Align(
+          alignment: Alignment.centerRight,
+          child: NzSplitButton(
+            flexibleLabel: true,
+            label: l.sortLabel(view.sort),
+            semanticLabel: '${l.uiHomeSortChange}: ${l.sortLabel(view.sort)}',
+            onPressed: ctrl.cycleSort,
+            icon: NzIcons.chevronDown,
+            iconTurns: view.sort == ArchiveSort.name ? 0.5 : 0,
+            iconSemanticLabel: view.sort == ArchiveSort.name
+                ? l.uiHomeSortAscending
+                : l.uiHomeSortDescending,
+            onIconPressed: null,
+          ),
         ),
         if (task != null) ...[
           const Gap(NizamioSpacing.space3),
@@ -364,8 +445,15 @@ class _Files extends ConsumerWidget {
         t.workItemId: t.title,
     };
     final ctrl = ref.read(archiveFilesControllerProvider(code).notifier);
+    if (files.hasError && !files.isLoading) {
+      return NzErrorState(
+        error: toApiError(files.error!),
+        onRetry: () => ref.invalidate(archiveFilesControllerProvider(code)),
+      );
+    }
     return NzAsyncView<ArchiveFilesState>(
       value: files,
+      skeletonOnReload: true,
       onRetry: () => ref.invalidate(archiveFilesControllerProvider(code)),
       data: (s) {
         final list = s.items;

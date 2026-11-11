@@ -81,11 +81,10 @@ class ArchiveActionsController extends _$ArchiveActionsController {
         ),
       );
     }
+    final files = ref.read(archiveFilesControllerProvider(code));
+    if (files.isLoading || files.hasError) return _cancelled;
     final ids = [
-      for (final f
-          in ref.read(archiveFilesControllerProvider(code)).value?.items ??
-              const <RecordFile>[])
-        f.id,
+      for (final f in files.value?.items ?? const <RecordFile>[]) f.id,
     ];
     if (ids.isEmpty) return _cancelled;
     if (ids.length > RecordsDownloadTargets.maxSelection) {

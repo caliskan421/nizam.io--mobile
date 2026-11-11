@@ -125,7 +125,10 @@ void main() {
     ) async {
       final server = _Backend()..chats.role = 'admin';
       await _open(tester, server, width: width, scale: 2);
-      await tester.enterText(find.byType(TextField).first, 'Saha ekibi');
+      await tester.enterText(
+        find.widgetWithText(TextField, _l.uiMessagesGroupName),
+        'Saha ekibi',
+      );
       await _tap(tester, find.text(_l.uiMessagesGroupsSource));
       await _tap(tester, find.text(_l.uiMessagesGroupsDepartment));
       await _tap(tester, find.text(_l.uiMessagesGroupsPickDepartment));
@@ -155,7 +158,10 @@ void main() {
     (tester) async {
       final server = _Backend()..failCreate = true;
       await _open(tester, server);
-      await tester.enterText(find.byType(TextField).first, 'Saha');
+      await tester.enterText(
+        find.widgetWithText(TextField, _l.uiMessagesGroupName),
+        'Saha',
+      );
       await _tap(tester, find.text(_l.uiMessagesGroupsSource));
       await _tap(tester, find.text(_l.uiMessagesGroupsProgram));
       await _tap(tester, find.text(_l.uiMessagesCreateGroup));
@@ -194,7 +200,10 @@ void main() {
           },
         ];
       final h = await _open(tester, server);
-      await tester.enterText(find.byType(TextField).first, 'Saha');
+      await tester.enterText(
+        find.widgetWithText(TextField, _l.uiMessagesGroupName),
+        'Saha',
+      );
       await _tap(tester, find.text(_l.uiMessagesGroupsSource));
       await _tap(tester, find.text(_l.uiMessagesGroupsDepartment));
       await _tap(tester, find.text(_l.uiMessagesCreateGroup));
@@ -210,7 +219,10 @@ void main() {
       await settle(tester);
       expect(find.text(_l.uiMessagesGroupsManual), findsOneWidget);
       server.failCreate = false;
-      await tester.enterText(find.byType(TextField).first, 'Yeni saha');
+      await tester.enterText(
+        find.widgetWithText(TextField, _l.uiMessagesGroupName),
+        'Yeni saha',
+      );
       await _tap(tester, find.text(_l.uiMessagesCreateGroup));
       // Create isteğinde kaynak yokluğu sözleşmenin elle üyelik varsayılanıdır.
       expect(_body(server.creates.last)['source'], isNull);

@@ -64,7 +64,7 @@ final class ArchiveFilesControllerProvider
 }
 
 String _$archiveFilesControllerHash() =>
-    r'4b60e2d8d710f424b732a084b64d1fe50c21f423';
+    r'15375b6572b1ac24a79a28794663a82f3a2a1a97';
 
 /// Klasörün arşiv dosyaları (`archiveAttachments`, imleçli). Süzgeç ([ArchiveFolderController])
 /// değişince liste baştan yüklenir (eksen değişince eski imleç geçersizdir). Yöneticide uç dönem

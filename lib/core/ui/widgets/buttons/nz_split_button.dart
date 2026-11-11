@@ -29,7 +29,7 @@ class NzSplitButton extends StatelessWidget {
   /// Metinli parçanın okuyucu açıklaması (ör. "Sıralama ölçütünü değiştir: Gecikme").
   final String semanticLabel;
   final IconData icon;
-  final VoidCallback onIconPressed;
+  final VoidCallback? onIconPressed;
   final String iconSemanticLabel;
 
   /// İkonun tur cinsinden dönüşü (0.5 = 180°).
@@ -106,7 +106,7 @@ class _Segment extends StatelessWidget {
   });
 
   final String semanticLabel;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final BorderRadius radius;
   final double padding;
   final Widget child;
@@ -118,6 +118,7 @@ class _Segment extends StatelessWidget {
     return Semantics(
       container: true,
       button: true,
+      enabled: onPressed != null,
       label: semanticLabel,
       onTap: onPressed,
       excludeSemantics: true,
@@ -132,6 +133,7 @@ class _Segment extends StatelessWidget {
           child: Center(
             widthFactor: shrinkWrap ? 1 : null,
             child: NzPressable(
+              enabled: onPressed != null,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: c.secondaryFill,

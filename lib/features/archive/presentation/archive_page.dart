@@ -20,10 +20,12 @@ import '../application/archive_controller.dart';
 import '../application/archive_folders_controller.dart';
 import '../application/archive_providers.dart';
 import '../domain/archive.dart';
+import 'archive/archive_folder_card.dart';
+import 'archive/archive_folder_grid.dart';
 import 'archive/archive_outcome.dart';
 import 'archive/archive_texts.dart';
 
-/// Arşiv (prototip `archive`): başlık + ara + yükle, dosya/klasör özeti, 3 sütunlu klasörler
+/// Arşiv (prototip `archive`): başlık + ara + yükle, dosya/klasör özeti, klasör kartları
 /// (sunucunun klasör özeti) → klasör ayrıntısı. Alt menüde modül sekmesine yeniden dokunmak
 /// kısayol menüsünü açar. Görev bağlamı olmayan yükleme "yakında"dır.
 class ArchivePage extends ConsumerStatefulWidget {
@@ -124,8 +126,6 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
     void retry() => retryArchive(ref);
     return NzPage.feed(
       width: NzContentWidth.wide,
-      // Klasör ön yüzü cam (NzFolder): giriş yalnız yükselir.
-      fadeContent: false,
       onRefresh: _ctrl.refresh,
       onRetry: retry,
       topBar: const RootTopBar(),
@@ -212,33 +212,15 @@ class _Folders extends ConsumerWidget {
         ),
         const Gap(NizamioSpacing.space5),
         NzKicker('${l.uiArchiveFoldersTitle} · ${list.length}'),
-        const Gap(NizamioSpacing.space1),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final itemWidth =
-                ((constraints.maxWidth - 2 * NizamioSpacing.space3) / 3).clamp(
-                  0.0,
-                  160.0,
-                );
-            return Wrap(
-              spacing: NizamioSpacing.space3,
-              runSpacing: NizamioSpacing.space5,
-              children: [
-                for (final folder in list)
-                  SizedBox(
-                    width: itemWidth,
-                    child: NzFolder(
-                      name: folder.name,
-                      caption: folder.files > 0
-                          ? l.files(folder.files)
-                          : l.uiArchiveNoFiles,
-                      onTap: () =>
-                          context.appNav.openArchiveFolder(folder.code),
-                    ),
-                  ),
-              ],
-            );
-          },
+        const Gap(NizamioSpacing.space6),
+        ArchiveFolderGrid(
+          children: [
+            for (final folder in list)
+              ArchiveFolderCard(
+                folder: folder,
+                onTap: () => context.appNav.openArchiveFolder(folder.code),
+              ),
+          ],
         ),
         if (list.isEmpty)
           Padding(

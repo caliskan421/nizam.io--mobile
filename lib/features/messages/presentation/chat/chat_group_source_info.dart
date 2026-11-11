@@ -9,6 +9,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../application/chat_group_sources.dart';
 import '../../application/chat_members_controller.dart';
@@ -112,16 +113,29 @@ class _ChatGroupSourceInfoState extends ConsumerState<ChatGroupSourceInfo> {
               : groupSourceLabel(context, chat.source),
         ),
         if (chat.canModerate)
-          NzButton.secondary(
-            label: l.uiMessagesGroupsChangeSource,
-            expand: true,
-            onPressed: _busy ? null : _change,
-          ),
-        if (chat.canModerate && chat.source != ChatSource.none)
-          NzButton.secondary(
-            label: l.uiMessagesGroupsCloseSource,
-            expand: true,
-            onPressed: _busy ? null : () => _change(close: true),
+          Semantics(
+            enabled: !_busy,
+            child: IgnorePointer(
+              ignoring: _busy,
+              child: Opacity(
+                opacity: _busy ? 0.38 : 1,
+                child: NzMenuGroup(
+                  rows: [
+                    NzMenuRow(
+                      icon: NzIcons.edit,
+                      label: l.uiMessagesGroupsChangeSource,
+                      onTap: _change,
+                    ),
+                    if (chat.source != ChatSource.none)
+                      NzMenuRow(
+                        icon: NzIcons.close,
+                        label: l.uiMessagesGroupsCloseSource,
+                        onTap: () => _change(close: true),
+                      ),
+                  ],
+                ),
+              ),
+            ),
           ),
       ],
     );

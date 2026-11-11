@@ -17,7 +17,9 @@ final class ArchiveFolderViewState {
     this.tag,
     this.task,
     this.uploader,
+    this.mimeCategory,
     this.sort = ArchiveSort.recent,
+    this.query = '',
   });
 
   final ArchiveFolderTab tab;
@@ -28,17 +30,29 @@ final class ArchiveFolderViewState {
 
   /// Yükleyen süzgeci (hesap kimliği).
   final String? uploader;
+  final ArchiveMimeCategory? mimeCategory;
   final ArchiveSort sort;
+  final String query;
+
+  bool get hasFileFilters =>
+      tag != null || uploader != null || mimeCategory != null;
 
   /// Sıralama dışında süzgeç var mı (ZIP düğmesi görünen dosyaları indirir).
-  bool get filtered => tag != null || task != null || uploader != null;
+  bool get filtered =>
+      tag != null ||
+      task != null ||
+      uploader != null ||
+      mimeCategory != null ||
+      query.trim().isNotEmpty;
 
   /// Dosya listesinin sunucu süzgeci.
   ArchiveAttachmentFilter get filter => ArchiveAttachmentFilter(
     tag: tag,
     workItemId: task,
     uploaderId: uploader,
+    mimeCategory: mimeCategory,
     sort: sort,
+    search: query.trim().isEmpty ? null : query.trim(),
   );
 
   ArchiveFolderViewState copyWith({
@@ -46,13 +60,17 @@ final class ArchiveFolderViewState {
     RecordTag? Function()? tag,
     String? Function()? task,
     String? Function()? uploader,
+    ArchiveMimeCategory? Function()? mimeCategory,
     ArchiveSort? sort,
+    String? query,
   }) => ArchiveFolderViewState(
     tab: tab ?? this.tab,
     tag: tag == null ? this.tag : tag(),
     task: task == null ? this.task : task(),
     uploader: uploader == null ? this.uploader : uploader(),
+    mimeCategory: mimeCategory == null ? this.mimeCategory : mimeCategory(),
     sort: sort ?? this.sort,
+    query: query ?? this.query,
   );
 }
 
@@ -62,6 +80,8 @@ final class ArchiveFolderViewState {
 class ArchiveFolderController extends _$ArchiveFolderController {
   @override
   ArchiveFolderViewState build(String code) => const ArchiveFolderViewState();
+
+  void setQuery(String query) => state = state.copyWith(query: query);
 
   void setTab(ArchiveFolderTab t) => state = state.copyWith(tab: t);
 
@@ -77,6 +97,15 @@ class ArchiveFolderController extends _$ArchiveFolderController {
 
   void setUploader(String? accountId) =>
       state = state.copyWith(uploader: () => accountId);
+
+  void setMimeCategory(ArchiveMimeCategory? value) =>
+      state = state.copyWith(mimeCategory: () => value);
+
+  void clearFileFilters() => state = state.copyWith(
+    tag: () => null,
+    uploader: () => null,
+    mimeCategory: () => null,
+  );
 
   /// Son yükleme → Ada göre → Boyuta göre → …
   void cycleSort() => state = state.copyWith(

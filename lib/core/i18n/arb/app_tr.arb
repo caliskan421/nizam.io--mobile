@@ -1373,6 +1373,34 @@
   "@uiArchiveFilterAll": {
     "description": "ui.archive.filter_all"
   },
+  "uiArchiveFilterType": "Dosya tipi",
+  "@uiArchiveFilterType": {
+    "description": "ui.archive.filter_type"
+  },
+  "uiArchiveMimeDocument": "Belge",
+  "@uiArchiveMimeDocument": {
+    "description": "ui.archive.mime_document"
+  },
+  "uiArchiveMimeSpreadsheet": "Tablo",
+  "@uiArchiveMimeSpreadsheet": {
+    "description": "ui.archive.mime_spreadsheet"
+  },
+  "uiArchiveMimeImage": "Görsel",
+  "@uiArchiveMimeImage": {
+    "description": "ui.archive.mime_image"
+  },
+  "uiArchiveMimeArchive": "Arşiv",
+  "@uiArchiveMimeArchive": {
+    "description": "ui.archive.mime_archive"
+  },
+  "uiArchiveMimeText": "Metin",
+  "@uiArchiveMimeText": {
+    "description": "ui.archive.mime_text"
+  },
+  "uiArchiveShowFilesTail": "dosyayı göster",
+  "@uiArchiveShowFilesTail": {
+    "description": "ui.archive.show_files_tail"
+  },
   "uiArchiveTagFilter": "Etiket süzgeci",
   "@uiArchiveTagFilter": {
     "description": "ui.archive.tag_filter"

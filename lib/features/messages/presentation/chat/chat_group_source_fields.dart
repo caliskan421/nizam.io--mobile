@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
-import '../../../../core/ui/widgets/lists/lists.dart';
-import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/inputs/nz_filter_choice.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../domain/chat.dart';
@@ -70,14 +69,12 @@ class ChatGroupSourceFields extends StatelessWidget {
     final picked = await NzBottomSheet.show<ChatSource>(
       context,
       title: context.l10n.uiMessagesGroupsSource,
-      compact: true,
-      builder: (sheet) => Column(
-        mainAxisSize: MainAxisSize.min,
+      builder: (sheet) => NzFilterChoices(
         children: [
           for (final option in ChatSource.values)
-            NzListTile(
-              title: groupSourceLabel(context, option),
-              trailing: source == option ? const NzIcon(NzIcons.check) : null,
+            NzFilterChoice(
+              label: groupSourceLabel(context, option),
+              selected: source == option,
               onTap: () => Navigator.of(sheet).pop(option),
             ),
         ],
@@ -91,9 +88,7 @@ class ChatGroupSourceFields extends StatelessWidget {
     final picked = await NzBottomSheet.show<String>(
       context,
       title: context.l10n.uiMessagesGroupsPickDepartment,
-      compact: true,
-      builder: (sheet) => Column(
-        mainAxisSize: MainAxisSize.min,
+      builder: (sheet) => NzFilterChoices(
         children: [
           if (departments.isEmpty)
             Text(
@@ -101,11 +96,9 @@ class ChatGroupSourceFields extends StatelessWidget {
               style: context.text.caption,
             ),
           for (final d in departments)
-            NzListTile(
-              title: d.name,
-              trailing: departmentId == d.id
-                  ? const NzIcon(NzIcons.check)
-                  : null,
+            NzFilterChoice(
+              label: d.name,
+              selected: departmentId == d.id,
               onTap: () => Navigator.of(sheet).pop(d.id),
             ),
         ],

@@ -7,45 +7,26 @@ import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/records.dart';
+import 'archive_folder_card.dart';
 import 'archive_preview_sheet.dart';
 import 'archive_texts.dart';
 
-/// Görev klasörleri ızgarasının bir satırı (3 sütun, prototip `gap: 20px 10px`).
-class ArchiveTaskFolderRow extends StatelessWidget {
-  const ArchiveTaskFolderRow({
+/// Gerçek görev başlığı ve dosya sayısını ortak klasör yüzüyle sunar.
+class ArchiveTaskFolderCard extends StatelessWidget {
+  const ArchiveTaskFolderCard({
     super.key,
-    required this.tasks,
+    required this.task,
     required this.onOpen,
   });
-
-  final List<ArchiveTaskSummary> tasks;
+  final ArchiveTaskSummary task;
   final ValueChanged<String> onOpen;
 
   @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: NizamioSpacing.space5),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (var j = 0; j < 3; j++) ...[
-            if (j > 0) const Gap(NizamioSpacing.gapMd),
-            Expanded(
-              child: j < tasks.length
-                  ? NzFolder(
-                      small: true,
-                      name: tasks[j].title,
-                      caption: l.files(tasks[j].fileCount),
-                      onTap: () => onOpen(tasks[j].workItemId),
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => ArchiveFolderCardSurface(
+    title: task.title,
+    summary: context.l10n.files(task.fileCount),
+    onTap: () => onOpen(task.workItemId),
+  );
 }
 
 /// Süzgeç hapı (etiket rayı, yükleyen ve sıralama).

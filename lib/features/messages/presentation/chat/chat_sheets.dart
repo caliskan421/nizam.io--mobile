@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/widgets/lists/lists.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
@@ -59,31 +59,9 @@ Future<ChatAction?> showMessageActions(
   return NzBottomSheet.show<ChatAction>(
     context,
     title: l.uiMessagesMessageActions,
-    showHeader: false,
     builder: (sheet) {
       final c = sheet.colors;
-      final t = sheet.text;
       void done(ChatAction a) => Navigator.of(sheet).pop(a);
-      Widget quick(IconData icon, String label, ChatSimpleAction a) => Expanded(
-        child: Material(
-          color: c.surfaceRaised,
-          borderRadius: BorderRadius.circular(NizamioRadius.group),
-          child: InkWell(
-            onTap: () => done(ChatActSimple(a)),
-            borderRadius: BorderRadius.circular(NizamioRadius.group),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(4, 12, 4, 10),
-              child: Column(
-                children: [
-                  NzIcon(icon, size: NizamioSize.iconSizeSm, color: c.text),
-                  const Gap(6),
-                  Text(label, textAlign: TextAlign.center, style: t.caption),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
       final listRows = <(IconData, String, ChatSimpleAction, Color)>[
         if (failed && canRetry)
           (
@@ -174,64 +152,40 @@ Future<ChatAction?> showMessageActions(
                 ],
               ),
             ),
-          Row(
-            spacing: NizamioSpacing.space2,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          NzMenuGroup(
+            rows: [
               if (!failed)
-                quick(NzIcons.reply, l.uiMessagesReply, ChatSimpleAction.reply),
-              quick(NzIcons.copy, l.uiMessagesCopy, ChatSimpleAction.copy),
+                NzMenuRow(
+                  icon: NzIcons.reply,
+                  label: l.uiMessagesReply,
+                  onTap: () =>
+                      done(const ChatActSimple(ChatSimpleAction.reply)),
+                ),
+              NzMenuRow(
+                icon: NzIcons.copy,
+                label: l.uiMessagesCopy,
+                onTap: () => done(const ChatActSimple(ChatSimpleAction.copy)),
+              ),
               if (!failed && canPin)
-                quick(
-                  NzIcons.pin,
-                  message.pinned ? l.uiMessagesUnpin : l.uiMessagesPin,
-                  ChatSimpleAction.pin,
+                NzMenuRow(
+                  icon: NzIcons.pin,
+                  label: message.pinned ? l.uiMessagesUnpin : l.uiMessagesPin,
+                  onTap: () => done(const ChatActSimple(ChatSimpleAction.pin)),
                 ),
               if (!failed && canEdit)
-                quick(NzIcons.edit, l.uiMessagesEdit, ChatSimpleAction.edit),
+                NzMenuRow(
+                  icon: NzIcons.edit,
+                  label: l.uiMessagesEdit,
+                  onTap: () => done(const ChatActSimple(ChatSimpleAction.edit)),
+                ),
+              for (final row in listRows)
+                NzMenuRow(
+                  icon: row.$1,
+                  label: row.$2,
+                  danger: row.$4 == c.danger,
+                  onTap: () => done(ChatActSimple(row.$3)),
+                ),
             ],
-          ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(NizamioRadius.row),
-            child: ColoredBox(
-              color: c.surfaceRaised,
-              child: Column(
-                children: [
-                  for (var i = 0; i < listRows.length; i++)
-                    InkWell(
-                      onTap: () => done(ChatActSimple(listRows[i].$3)),
-                      child: Container(
-                        constraints: const BoxConstraints(minHeight: 50),
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        decoration: BoxDecoration(
-                          border: i > 0
-                              ? Border(top: BorderSide(color: c.border))
-                              : null,
-                        ),
-                        child: Row(
-                          children: [
-                            NzIcon(
-                              listRows[i].$1,
-                              size: NizamioSize.iconSizeSm,
-                              color: listRows[i].$4,
-                            ),
-                            const Gap(NizamioSpacing.space3),
-                            Expanded(
-                              child: Text(
-                                listRows[i].$2,
-                                style: t.list.copyWith(
-                                  color: listRows[i].$4,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
           ),
         ],
       );

@@ -2152,6 +2152,48 @@ abstract class AppLocalizations {
   /// **'Tümü'**
   String get uiArchiveFilterAll;
 
+  /// ui.archive.filter_type
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya tipi'**
+  String get uiArchiveFilterType;
+
+  /// ui.archive.mime_document
+  ///
+  /// In tr, this message translates to:
+  /// **'Belge'**
+  String get uiArchiveMimeDocument;
+
+  /// ui.archive.mime_spreadsheet
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo'**
+  String get uiArchiveMimeSpreadsheet;
+
+  /// ui.archive.mime_image
+  ///
+  /// In tr, this message translates to:
+  /// **'Görsel'**
+  String get uiArchiveMimeImage;
+
+  /// ui.archive.mime_archive
+  ///
+  /// In tr, this message translates to:
+  /// **'Arşiv'**
+  String get uiArchiveMimeArchive;
+
+  /// ui.archive.mime_text
+  ///
+  /// In tr, this message translates to:
+  /// **'Metin'**
+  String get uiArchiveMimeText;
+
+  /// ui.archive.show_files_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'dosyayı göster'**
+  String get uiArchiveShowFilesTail;
+
   /// ui.archive.tag_filter
   ///
   /// In tr, this message translates to:

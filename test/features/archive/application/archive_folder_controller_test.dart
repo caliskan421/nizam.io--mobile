@@ -34,7 +34,33 @@ void main() {
       ..cycleSort();
     expect(s().sort, ArchiveSort.recent);
     expect(s().filtered, isFalse);
+    ctrl.setQuery(' dosya ');
+    expect(s().filter.search, 'dosya');
+    expect(s().filtered, isTrue);
+    ctrl.setQuery('');
+    expect(s().filter.search, isNull);
+    expect(s().filtered, isFalse);
     ctrl.setTab(ArchiveFolderTab.tasks);
     expect(s().tab, ArchiveFolderTab.tasks);
+  });
+  test('dosya filtrelerini temizlemek görev ve aramayı korur', () {
+    final c = archiveContainer(FakeArchiveRepository());
+    final ctrl = _ctrl(c)
+      ..openTask('w1')
+      ..setQuery('rapor')
+      ..setTag(RecordTag.plan)
+      ..setUploader('u1')
+      ..setMimeCategory(ArchiveMimeCategory.tablo);
+    var state = c.read(archiveFolderControllerProvider('d1'));
+    expect(state.hasFileFilters, isTrue);
+    expect(state.filter.mimeCategory, ArchiveMimeCategory.tablo);
+    expect(state.filter.uploaderId, 'u1');
+    ctrl.clearFileFilters();
+    state = c.read(archiveFolderControllerProvider('d1'));
+    expect(state.hasFileFilters, isFalse);
+    expect(
+      state.filter,
+      const ArchiveAttachmentFilter(workItemId: 'w1', search: 'rapor'),
+    );
   });
 }

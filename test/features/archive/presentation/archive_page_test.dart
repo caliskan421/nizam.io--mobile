@@ -9,6 +9,8 @@ import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/core/ui/widgets/feedback/feedback.dart';
 import 'package:nizamio/features/archive/archive.dart';
+import 'package:nizamio/features/archive/domain/archive.dart';
+import 'package:nizamio/features/archive/presentation/archive/archive_folder_card.dart';
 
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
@@ -52,13 +54,78 @@ void main() {
     expect(find.text(_l.uiArchiveTitle), findsOneWidget);
     expect(find.text('3 dosya · 2 klasör'), findsOneWidget);
     expect(find.text('${_l.uiArchiveFoldersTitle} · 2'), findsOneWidget);
-    expect(find.text('3 dosya'), findsOneWidget);
-    expect(find.text(_l.uiArchiveNoFiles), findsOneWidget);
+    expect(find.text('3 dosya · 4 görev'), findsOneWidget);
+    expect(find.text('${_l.uiArchiveNoFiles} · 4 görev'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Altyapı, 3 dosya, 4 görev, 2,5 MB, 5 gün önce'),
+      findsOneWidget,
+    );
+    expect(find.text('grup'), findsNothing);
     // Koordinatör satırının departmanı başlık olarak gider.
     expect(repo.calls.single, ('folders', 'd1', null));
     await _tap(tester, find.text('Bilişim'));
     expect(nav.calls, ['folder:d2']);
   });
+
+  for (final (size, columns) in [
+    (const Size(320, 900), 1),
+    (const Size(390, 900), 2),
+    (const Size(1024, 1000), 4),
+  ]) {
+    testWidgets('klasör kartları görünür alana uyum sağlar: $size', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = size;
+      addTearDown(tester.view.reset);
+      if (size.width >= 1024) {
+        tester.platformDispatcher.textScaleFactorTestValue = 2;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      }
+      final repo = FakeArchiveRepository()
+        ..folders = [
+          for (var i = 0; i < 7; i++)
+            ArchiveFolder(
+              code: 'd$i',
+              name: i == 0
+                  ? 'Altyapı ve tesisat'
+                  : i == 1
+                  ? 'Klasör $i uzun koordinatörlük ismi'
+                  : 'Klasör $i',
+              files: i,
+            ),
+        ];
+      await _open(tester, repo: repo);
+      final heading = find.text('${_l.uiArchiveFoldersTitle} · 7');
+      final cards = find.byType(ArchiveFolderCard);
+      final headingRect = tester.getRect(heading);
+      final first = tester.getRect(cards.first);
+      for (var i = 0; i < 7; i++) {
+        final card = cards.at(i);
+        final rect = tester.getRect(card);
+        final folder = tester.widget<ArchiveFolderCard>(card).folder;
+        final title = find.descendant(
+          of: card,
+          matching: find.text(folder.name),
+        );
+        final meta = find
+            .descendant(of: card, matching: find.textContaining('görev'))
+            .first;
+        expect(rect.height, closeTo(first.height, .1));
+        expect(
+          tester.getTopLeft(meta).dy - tester.getRect(title).bottom,
+          inInclusiveRange(0, 3),
+        );
+      }
+      expect(first.left, closeTo(headingRect.left, .1));
+      expect(first.top - headingRect.bottom, greaterThanOrEqualTo(23));
+      expect(
+        tester.getTopLeft(cards.at(columns - 1)).dy,
+        closeTo(first.top, .1),
+      );
+      expect(tester.getTopLeft(cards.at(columns)).dy, greaterThan(first.top));
+    });
+  }
 
   testWidgets('arama süzer; eşleşme yoksa boş metni; geri dönüşte korunur', (
     tester,
@@ -113,7 +180,13 @@ void main() {
     expect(find.byType(NzErrorState), findsOneWidget);
   });
 
-  for (final (width, scale) in [(360.0, 1.0), (360.0, 2.0), (390.0, 2.0)]) {
+  for (final (width, scale) in [
+    (320.0, 2.0),
+    (360.0, 1.0),
+    (360.0, 2.0),
+    (390.0, 2.0),
+    (1024.0, 2.0),
+  ]) {
     for (final dark in [false, true]) {
       testWidgets(
         'taşma yok: ${width.toInt()} geniş, ${scale}x, ${dark ? 'koyu' : 'açık'}',

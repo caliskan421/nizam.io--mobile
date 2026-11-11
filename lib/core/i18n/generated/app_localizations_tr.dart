@@ -1169,6 +1169,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveFilterAll => 'Tümü';
 
   @override
+  String get uiArchiveFilterType => 'Dosya tipi';
+
+  @override
+  String get uiArchiveMimeDocument => 'Belge';
+
+  @override
+  String get uiArchiveMimeSpreadsheet => 'Tablo';
+
+  @override
+  String get uiArchiveMimeImage => 'Görsel';
+
+  @override
+  String get uiArchiveMimeArchive => 'Arşiv';
+
+  @override
+  String get uiArchiveMimeText => 'Metin';
+
+  @override
+  String get uiArchiveShowFilesTail => 'dosyayı göster';
+
+  @override
   String get uiArchiveTagFilter => 'Etiket süzgeci';
 
   @override

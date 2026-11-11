@@ -8,7 +8,6 @@ import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/network/connectivity_monitor.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/widgets/inputs/inputs.dart';
-import 'package:nizamio/core/ui/widgets/lists/lists.dart';
 import 'package:nizamio/features/messages/application/chat_controller.dart';
 import 'package:nizamio/features/messages/application/chat_group_sources.dart';
 import 'package:nizamio/features/messages/application/chat_share_candidates.dart';
@@ -134,10 +133,11 @@ void main() {
         await _tap(tester, find.text('Seçilebilir task-$i'));
       }
       await _tap(tester, find.bySemanticsLabel(_l.uiMessagesAttach).last);
-      final tile = tester.widget<NzListTile>(
-        find.widgetWithText(NzListTile, _l.uiMessagesComposeShareTask),
+      final disabled = find.ancestor(
+        of: find.text(_l.uiMessagesComposeShareTask),
+        matching: find.byType(IgnorePointer),
       );
-      expect(tile.onTap, isNull);
+      expect(tester.widget<IgnorePointer>(disabled.first).ignoring, isTrue);
       Navigator.of(tester.element(find.text(_l.uiMessagesComposeShareTask)))
           .pop();
       await settle(tester);

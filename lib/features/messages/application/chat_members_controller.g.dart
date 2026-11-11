@@ -69,7 +69,7 @@ final class ChatMembersControllerProvider
 }
 
 String _$chatMembersControllerHash() =>
-    r'717191cf66feb6ad2057d6615eb5d9920b543850';
+    r'37445d24c7bb0e8f36ac7e8f4c2bb6a1790343fa';
 
 /// Grup üyeleri ve grup ayarları (istemci akışları §10.1): üye listesi (yazıyor adları ve `@`
 /// bahsetme önerisi buradan çözülür), üye ekleme/çıkarma, gruptan ayrılma, yöneticilik, ad
@@ -198,7 +198,7 @@ final class ChatAddCandidatesProvider
   }
 }
 
-String _$chatAddCandidatesHash() => r'fd304b5c1345db6c222f96b35f2ae46af36a60fa';
+String _$chatAddCandidatesHash() => r'b8b96306a834bf7fc3dc120278f294e6648f1359';
 
 /// Gruba eklenebilecek kişiler (`purpose=group&chat_id`; ekleme kuralı sunucuda, K06).
 

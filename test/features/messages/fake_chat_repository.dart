@@ -45,6 +45,8 @@ Chat chat(
 class FakeChatRepository implements ChatRepository {
   final calls = <String>[];
   ChatInbox inbox = ChatInbox(chats: [chat('c1', unread: 2)]);
+  final inboxQueries = <String?>[];
+  List<ChatProgramUnread> unreadPrograms = [];
 
   /// Doluysa sıradaki `loadInbox` çağrıları sırayla bu tamamlayıcıların yanıtını bekler
   /// (FIFO; yanıt sırası testte elle belirlenir).
@@ -87,6 +89,7 @@ class FakeChatRepository implements ChatRepository {
 
   /// Sabit şeridi (sunucu sırası).
   List<ChatMessage> pinned = [];
+  bool pinsTruncated = false;
   ChatMembers memberList = ChatMembers(
     items: const [
       ChatMember(accountId: me, name: 'Ben', role: ChatMemberRole.admin),
@@ -103,6 +106,10 @@ class FakeChatRepository implements ChatRepository {
   final taskKeys = <String>[];
   final List<ApiError> taskErrors = [];
   final uploads = <(String, ChatUpload)>[];
+  final uploadCaptions = <String?>[];
+  final uploadReplies = <String?>[];
+  final sourceUpdates = <(ChatSource, String?)>[];
+  final sharedKinds = <ChatRefKind?>[];
 
   /// Arama sonuçları (artan seq; `before` süzer).
   List<ChatMessage> searchHits = [];
@@ -124,10 +131,23 @@ class FakeChatRepository implements ChatRepository {
   List<ChatMessage> _of(String id) => server[id] ?? const [];
 
   @override
-  Future<ChatInbox> loadInbox() async {
+  Future<ChatInbox> loadInbox({
+    String? query,
+    bool Function()? isCurrent,
+  }) async {
+    if (isCurrent != null && !isCurrent()) {
+      throw ApiError('client.session_ended');
+    }
     calls.add('loadInbox');
+    inboxQueries.add(query);
     if (inboxReplies.isNotEmpty) return inboxReplies.removeAt(0).future;
     return inbox;
+  }
+
+  @override
+  Future<List<ChatProgramUnread>> unreadOverview() async {
+    calls.add('unreadOverview');
+    return unreadPrograms;
   }
 
   @override
@@ -270,6 +290,24 @@ class FakeChatRepository implements ChatRepository {
   }
 
   @override
+  Future<Chat> updateSource(
+    String chatId,
+    ChatSource source, {
+    String? departmentId,
+  }) async {
+    sourceUpdates.add((source, departmentId));
+    await _write('source ${source.name}');
+    return Chat(
+      id: chatId,
+      name: 'Grup',
+      lastActivity: at(0),
+      group: true,
+      source: source,
+      sourceDepartmentId: departmentId,
+    );
+  }
+
+  @override
   Future<void> setReaction(
     String chatId,
     String messageId,
@@ -295,6 +333,10 @@ class FakeChatRepository implements ChatRepository {
   }
 
   @override
+  Future<ChatPinsPage> pinnedPage(String chatId) async =>
+      ChatPinsPage(items: await pins(chatId), truncated: pinsTruncated);
+
+  @override
   Future<void> vote(String chatId, String messageId, Set<int> options) async =>
       _write('vote $messageId ${(options.toList()..sort()).join(',')}');
 
@@ -308,8 +350,11 @@ class FakeChatRepository implements ChatRepository {
     String clientId,
     ChatUpload file, {
     String? replyTo,
+    String? caption,
   }) async {
     uploads.add((clientId, file));
+    uploadCaptions.add(caption);
+    uploadReplies.add(replyTo);
     await _write('attach $chatId');
     final list = server.putIfAbsent(chatId, () => []);
     final seq = (list.lastOrNull?.seq ?? 0) + 1;
@@ -319,7 +364,8 @@ class FakeChatRepository implements ChatRepository {
       seq: seq,
       senderId: me,
       at: at(seq),
-      text: '',
+      text: caption ?? '',
+      replyTo: replyTo == null ? null : ChatQuote(messageId: replyTo),
       attachments: [
         ChatAttachment(id: 'a$seq', fileName: file.name, sizeBytes: 1),
       ],
@@ -365,8 +411,13 @@ class FakeChatRepository implements ChatRepository {
   Future<void> deleteChat(String chatId) async => _write('deleteChat $chatId');
 
   @override
-  Future<ChatSharedPage> shared(String chatId, {String? cursor}) async {
+  Future<ChatSharedPage> shared(
+    String chatId, {
+    String? cursor,
+    ChatRefKind? kind,
+  }) async {
     calls.add('shared ${cursor ?? '-'}');
+    sharedKinds.add(kind);
     return sharedPages[cursor] ?? ChatSharedPage(items: const []);
   }
 

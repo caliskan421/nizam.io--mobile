@@ -30,20 +30,25 @@ import '../../../core/api/generated/models/chat_ref_summary.dart';
 import '../../../core/api/generated/models/chat_ref_summary_kind.dart';
 import '../../../core/api/generated/models/chat_role.dart';
 import '../../../core/api/generated/models/chat_shared_ref_kind.dart';
+import '../../../core/api/generated/models/chat_source.dart' as api;
 import '../../../core/api/generated/models/chat_summary.dart';
 import '../../../core/api/generated/models/create_group_chat_request.dart';
+import '../../../core/api/generated/models/create_group_chat_request_source.dart';
 import '../../../core/api/generated/models/create_task_from_chat_message_request.dart';
 import '../../../core/api/generated/models/edit_chat_message_request.dart';
+import '../../../core/api/generated/models/kind.dart';
 import '../../../core/api/generated/models/kind2.dart';
 import '../../../core/api/generated/models/mark_chat_read_request.dart';
 import '../../../core/api/generated/models/open_direct_chat_request.dart';
 import '../../../core/api/generated/models/poll.dart';
 import '../../../core/api/generated/models/poll2.dart';
 import '../../../core/api/generated/models/purpose.dart';
+import '../../../core/api/generated/models/refs.dart';
 import '../../../core/api/generated/models/send_chat_message_request.dart';
 import '../../../core/api/generated/models/set_chat_reaction_request.dart';
 import '../../../core/api/generated/models/set_chat_reaction_request_kind.dart';
 import '../../../core/api/generated/models/update_chat_request.dart';
+import '../../../core/api/generated/models/update_chat_request_source.dart';
 import '../../../core/api/generated/models/vote_chat_poll_request.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/http/file_download.dart';
@@ -81,15 +86,30 @@ class ApiChatRepository implements ChatRepository {
   MessagingClient get _client => MessagingClient(_http);
 
   @override
-  Future<ChatInbox> loadInbox() async {
+  Future<ChatInbox> loadInbox({
+    String? query,
+    bool Function()? isCurrent,
+  }) async {
+    void requireCurrent() {
+      if (isCurrent != null && !isCurrent()) {
+        throw ApiError(ClientErrorCode.sessionEnded);
+      }
+    }
+
     final client = _client;
     final chats = <Chat>[];
     final seen = <String>{};
     String? cursor;
     for (var page = 0; page < inboxMaxPages; page++) {
+      requireCurrent();
       final r = await apiCall(
-        () => client.listChats(limit: inboxPageSize, cursor: cursor),
+        () => client.listChats(
+          q: query == null || query.trim().isEmpty ? null : query.trim(),
+          limit: inboxPageSize,
+          cursor: cursor,
+        ),
       );
+      requireCurrent();
       chats.addAll(r.items.map(_chatOfSummary));
       cursor = r.nextCursor;
       if (cursor.isEmpty) return ChatInbox(chats: chats);
@@ -100,6 +120,20 @@ class ApiChatRepository implements ChatRepository {
 
   @override
   Future<void> markAllRead() => apiCall(_client.markAllChatsRead);
+
+  @override
+  Future<List<ChatProgramUnread>> unreadOverview() async {
+    final r = await apiCall(_client.getChatUnreadOverview);
+    return List.unmodifiable([
+      for (final p in r.items)
+        ChatProgramUnread(
+          programId: p.programId,
+          name: p.programName,
+          unreadChats: p.unreadChats,
+          mentioned: p.mentioned,
+        ),
+    ]);
+  }
 
   @override
   Future<Chat> getChat(String chatId) async =>
@@ -138,6 +172,12 @@ class ApiChatRepository implements ChatRepository {
                   ? null
                   : [for (final m in message.mentions) _mentionDtoOf(m)],
               poll: message.poll == null ? null : _pollDtoOf(message.poll!),
+              refs: message.refs.isEmpty
+                  ? null
+                  : [
+                      for (final r in message.refs)
+                        Refs(kind: _refKindOf(r.kind), targetId: r.targetId),
+                    ],
             ),
           ),
         ),
@@ -215,6 +255,27 @@ class ApiChatRepository implements ChatRepository {
         body: CreateGroupChatRequest(
           name: draft.name.trim(),
           memberAccountIds: draft.memberIds,
+          source: draft.source == ChatSource.none
+              ? null
+              : _createSourceOf(draft.source),
+          sourceDepartmentId: draft.sourceDepartmentId,
+        ),
+      ),
+    ),
+  );
+
+  @override
+  Future<Chat> updateSource(
+    String chatId,
+    ChatSource source, {
+    String? departmentId,
+  }) async => _chatOfDetail(
+    await apiCall(
+      () => _client.updateChat(
+        chatId: chatId,
+        body: UpdateChatRequest(
+          source: _updateSourceOf(source),
+          sourceDepartmentId: departmentId,
         ),
       ),
     ),
@@ -251,9 +312,16 @@ class ApiChatRepository implements ChatRepository {
   );
 
   @override
-  Future<List<ChatMessage>> pins(String chatId) async {
+  Future<List<ChatMessage>> pins(String chatId) async =>
+      (await pinnedPage(chatId)).items;
+
+  @override
+  Future<ChatPinsPage> pinnedPage(String chatId) async {
     final r = await apiCall(() => _client.listChatPins(chatId: chatId));
-    return [for (final m in r.items) _messageOf(m)];
+    return ChatPinsPage(
+      items: [for (final m in r.items) _messageOf(m)],
+      truncated: r.truncated,
+    );
   }
 
   @override
@@ -279,6 +347,7 @@ class ApiChatRepository implements ChatRepository {
     String clientId,
     ChatUpload file, {
     String? replyTo,
+    String? caption,
   }) async {
     final http = _http;
     return _messageOf(
@@ -292,6 +361,7 @@ class ApiChatRepository implements ChatRepository {
             filename: file.name,
             contentType: file.contentType,
             replyToMessageId: replyTo,
+            body: caption,
             extras: MessagingClient.sendChatAttachmentOpenapiExtras,
           ),
           api.ChatMessage.fromJson,
@@ -358,16 +428,20 @@ class ApiChatRepository implements ChatRepository {
   static const sharedPageSize = 50;
 
   @override
-  Future<ChatSharedPage> shared(String chatId, {String? cursor}) async =>
-      _sharedOf(
-        await apiCall(
-          () => _client.listChatRefs(
-            chatId: chatId,
-            cursor: cursor,
-            limit: sharedPageSize,
-          ),
-        ),
-      );
+  Future<ChatSharedPage> shared(
+    String chatId, {
+    String? cursor,
+    ChatRefKind? kind,
+  }) async => _sharedOf(
+    await apiCall(
+      () => _client.listChatRefs(
+        chatId: chatId,
+        cursor: cursor,
+        limit: sharedPageSize,
+        kind: kind == null ? null : _refKindOf(kind),
+      ),
+    ),
+  );
 
   @override
   Future<ChatRefCard> refCard(String refId) async =>

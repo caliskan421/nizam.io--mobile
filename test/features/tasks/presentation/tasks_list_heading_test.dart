@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_filter_choice.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_group_filter_chip.dart';
@@ -165,6 +166,7 @@ void main() {
     await tester.tap(find.text('Aç'));
     await tester.pumpAndSettle();
     expect(find.byType(TaskSegmented), findsOneWidget);
+    expect(find.text(AppLocalizationsTr().uiTasksGroupCoord), findsOneWidget);
     expect(find.byType(NzFilterChoice), findsNothing);
   });
 }

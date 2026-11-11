@@ -6,11 +6,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/widgets/inputs/inputs.dart';
+import 'package:nizamio/features/coordinatorships/application/coordinatorship_detail_controller.dart';
 import 'package:nizamio/features/coordinatorships/presentation/coord_archive_meetings_tabs.dart';
 import 'package:nizamio/features/coordinatorships/presentation/coord_general_tab.dart';
 import 'package:nizamio/features/coordinatorships/presentation/coord_people_sheet.dart';
 import 'package:nizamio/features/coordinatorships/presentation/coord_tasks_tab.dart';
 import 'package:nizamio/features/coordinatorships/presentation/coordinatorship_page.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
@@ -137,6 +139,24 @@ void main() {
     );
     expect(find.text(_l.uiCoordFormSave), findsNothing, reason: 'kapandı');
     expect(backend.unhandled, isEmpty);
+  });
+
+  testWidgets('görev filtresi sabit koordinatörlük seçimini göstermez', (
+    tester,
+  ) async {
+    final (h, _) = await _open(tester);
+    await _tap(tester, _tab(_l.uiCoordTabTasks));
+    final before = find.byType(TaskCardView).evaluate().length;
+    expect(before, greaterThan(0));
+    h
+        .read(coordinatorshipDetailControllerProvider(dAlt).notifier)
+        .toggleCoordinatorship('other');
+    await tester.pump();
+    expect(find.byType(TaskCardView), findsNWidgets(before));
+    await _tap(tester, find.bySemanticsLabel(_l.uiCoordFilter));
+    expect(find.text(_l.uiTasksGroupPeople), findsOneWidget);
+    expect(find.text(_l.uiTasksPriority), findsOneWidget);
+    expect(find.text(_l.uiTasksGroupCoord), findsNothing);
   });
 
   for (final width in [360.0, 390.0]) {

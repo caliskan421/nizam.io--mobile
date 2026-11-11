@@ -103,6 +103,7 @@ class TasksFilterSheetData {
     required this.onPerson,
     required this.onCoordinatorship,
     required this.onPriority,
+    this.showCoordinatorship = true,
   });
   final TaskFilter filter;
   final TaskFilterOptions? options;
@@ -112,6 +113,7 @@ class TasksFilterSheetData {
   final ValueChanged<String> onPerson;
   final ValueChanged<String> onCoordinatorship;
   final ValueChanged<TaskPriority> onPriority;
+  final bool showCoordinatorship;
 }
 
 class _FilterBody extends StatefulWidget {
@@ -171,7 +173,8 @@ class _FilterBodyState extends State<_FilterBody> {
                 ],
               ),
             ),
-            if (options.coordinatorships.isNotEmpty)
+            if (widget.data.showCoordinatorship &&
+                options.coordinatorships.isNotEmpty)
               NzFormRow(
                 label: l.uiTasksGroupCoord,
                 icon: NzIcons.coordinatorships,

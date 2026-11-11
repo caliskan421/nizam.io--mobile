@@ -35,11 +35,11 @@ class CoordTasksTab extends ConsumerWidget {
     final provider = coordinatorshipDetailControllerProvider(code);
     final view = ref.watch(provider);
     final commands = ref.read(provider.notifier);
+    final extra = _scopedExtra(view.extra);
     final all = coordSortedTasks(catalog.tasksOf(code));
     final list = [
       for (final task in all)
-        if (view.filter.matches(task) && view.extra.matches(task, catalog))
-          task,
+        if (view.filter.matches(task) && extra.matches(task, catalog)) task,
     ];
     return LayoutBuilder(
       builder: (context, box) {
@@ -77,7 +77,9 @@ class CoordTasksTab extends ConsumerWidget {
                 NzIconButton.circle(
                   icon: NzIcons.filter,
                   semanticLabel: l.uiCoordFilter,
-                  dot: view.filtered ? c.accentText : null,
+                  dot: view.filter != CoordTaskFilter.open || extra.hasExtra
+                      ? c.accentText
+                      : null,
                   onPressed: () => _showFilter(context, ref, code, all),
                 ),
                 const Gap(NizamioSpacing.space2),
@@ -92,11 +94,11 @@ class CoordTasksTab extends ConsumerWidget {
                 ),
               ],
             ),
-            if (view.extra.hasExtra)
+            if (extra.hasExtra)
               Padding(
                 padding: const EdgeInsets.only(top: NizamioSpacing.space2),
                 child: TaskFilterGroups(
-                  filter: view.extra,
+                  filter: extra,
                   catalog: catalog,
                   onEdit: (group) =>
                       _showFilter(context, ref, code, all, initialGroup: group),
@@ -168,14 +170,14 @@ void _showFilter(
     data: (ref) {
       final view = ref.watch(provider);
       final ctl = ref.read(provider.notifier);
+      final extra = _scopedExtra(view.extra);
       return TasksFilterSheetData(
-        filter: view.extra,
+        filter: extra,
+        showCoordinatorship: false,
         options: filterOptions(scoped),
         truncated: scoped.truncated,
         count: all
-            .where(
-              (t) => view.filter.matches(t) && view.extra.matches(t, scoped),
-            )
+            .where((t) => view.filter.matches(t) && extra.matches(t, scoped))
             .length,
         onClear: ctl.clearExtra,
         onPerson: ctl.togglePerson,
@@ -185,3 +187,7 @@ void _showFilter(
     },
   );
 }
+
+// Bu ekranda koordinatörlük zaten sabit; eski seçimler kapsamı daraltmaz.
+TaskFilter _scopedExtra(TaskFilter filter) =>
+    TaskFilter(people: filter.people, priorities: filter.priorities);

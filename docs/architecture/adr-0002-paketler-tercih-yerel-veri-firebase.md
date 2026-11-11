@@ -36,6 +36,13 @@ Native push etkinleştirildiğinde FCM cihaz kayıt tokenı yalnız FCM ve doğr
 sunucunun native kayıt mekanizmasında kullanılır; uygulama erişim/yenileme belirteçleri
 Firebase'e gönderilmez. Analytics ve diğer Firebase hizmetleri ayrıca açılmaz.
 
+Ürün sahibinin aynı günkü ek isteğiyle Remote Config sürüm/build tabanlı zorunlu ve
+isteğe bağlı güncelleme politikası ile push/Crashlytics/Analytics anahtarlarının
+[kapalı temeli](../yurutme/firebase-kurulum-ve-kontroller.md) hazırlanır. Backend
+asgari sürüm ve API uyum kapısı korunur; uzaktan ayarlar bu kapıyı gevşetemez.
+Politika anahtarları SDK toplamayı veya izinleri kendiliğinden açmaz. Doğrulanmış
+Firebase yapılandırması gelmeden başlatmama kararı geçerlidir.
+
 - Tema modu (sistem/açık/koyu) kalıcıdır: `ThemeModeController` (get_it) +
   `themeModeProvider` (Riverpod); `runApp`'ten önce yüklenir. Güvenlik açılış sırası
   (`startup`) tercihlere bağlı değildir.

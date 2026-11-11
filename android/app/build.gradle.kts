@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "io.nizamio.placeholder.nizamio"
+    namespace = "io.nizamio.mobile"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -15,9 +15,9 @@ android {
     }
 
     defaultConfig {
-        // YER TUTUCU uygulama kimliği (varsayılan: emülatör, imzasız). Gerçek kimlik ve
-        // imzalama bu altyapı çalışmasının dışındadır; README "Uygulama kimliği" bölümü.
-        applicationId = "io.nizamio.placeholder.nizamio"
+        // Ürün sahibi kabulü: prod io.nizamio.mobile, dev .dev ekiyle ayrılır.
+        // Mağaza imzalaması henüz tamamlanmadı; README "Uygulama kimliği" bölümü.
+        applicationId = "io.nizamio.mobile"
         // Asgari platform: Android 8.0 (API 26) — K-11 / D-0030.
         minSdk = 26
         targetSdk = flutter.targetSdkVersion

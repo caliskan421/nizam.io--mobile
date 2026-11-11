@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../core/config/flavor.dart';
+import '../../core/config/mobile_release_policy.dart';
+import '../../core/config/release_policy_provider.dart';
 import '../../core/network/connectivity_link.dart';
 import '../../core/network/connectivity_monitor.dart';
 import '../../core/notifications/push_notifications.dart';
@@ -51,12 +53,16 @@ class Composition {
     PreferenceStore? preferenceStore,
     ConnectivityLink? connectivityLink,
     PushNotifications? pushNotifications,
+    ReleasePolicySource? releasePolicySource,
   }) {
     final locator = GetIt.asNewInstance();
     // Native sözleşme ve Firebase dağıtım ayarları hazır olana kadar kapalı port.
     // Burada Firebase başlatılmaz veya sistem izin penceresi gösterilmez.
     locator.registerSingleton<PushNotifications>(
       pushNotifications ?? const DisabledPushNotifications(),
+    );
+    locator.registerSingleton<ReleasePolicySource>(
+      releasePolicySource ?? const DisabledReleasePolicySource(),
     );
     configureDependencies(
       locator,
@@ -115,6 +121,9 @@ class Composition {
       retry: (_, _) => null,
       overrides: [
         flavorProvider.overrideWithValue(flavor),
+        releasePolicySourceProvider.overrideWithValue(
+          locator<ReleasePolicySource>(),
+        ),
         pushNotificationsProvider.overrideWithValue(
           locator<PushNotifications>(),
         ),

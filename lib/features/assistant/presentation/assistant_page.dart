@@ -127,6 +127,8 @@ class _AssistantPageState extends ConsumerState<AssistantPage> {
                 ),
                 const Gap(8),
                 TextField(
+                  onTapOutside: (_) =>
+                      FocusManager.instance.primaryFocus?.unfocus(),
                   controller: _text,
                   enabled: !chat.busy,
                   minLines: 1,

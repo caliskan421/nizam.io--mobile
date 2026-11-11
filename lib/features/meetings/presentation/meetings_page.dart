@@ -137,6 +137,10 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
             child: NzSearchField(
               controller: _search,
               focusNode: _focus,
+              onDismiss: () {
+                if (ref.read(meetingsViewControllerProvider).searchOpen)
+                  _toggleSearch();
+              },
               label: l.uiMeetingsSearchLabel,
               hint: l.uiMeetingsSearchHint,
               onChanged: _view.setQuery,

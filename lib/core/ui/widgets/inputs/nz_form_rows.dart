@@ -428,6 +428,8 @@ class _InputRowState extends State<_InputRow> {
             const Gap(NizamioSpacing.gapMd),
             Expanded(
               child: TextField(
+                onTapOutside: (_) =>
+                    FocusManager.instance.primaryFocus?.unfocus(),
                 controller: row.controller,
                 focusNode: _focus,
                 onChanged: row.onChanged,

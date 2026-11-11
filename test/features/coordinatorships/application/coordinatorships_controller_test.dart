@@ -11,6 +11,40 @@ import '../../pilot_support.dart';
 import '../coord_backend.dart';
 
 void main() {
+  test('görev ve üye sayısı sıralaması yön değiştirebilir', () {
+    CoordinatorshipStats item(String name, int tasks, int members) =>
+        CoordinatorshipStats(
+          code: name,
+          name: name,
+          done: 0,
+          total: tasks,
+          late: 0,
+          leads: const [],
+          members: const [],
+          memberCount: members,
+        );
+    final items = [item('A', 5, 1), item('B', 2, 4), item('C', 3, 2)];
+    expect(
+      sortCoordinatorships(items, CoordinatorshipSort.tasks).map((c) => c.code),
+      ['A', 'C', 'B'],
+    );
+    expect(
+      sortCoordinatorships(
+        items,
+        CoordinatorshipSort.members,
+      ).map((c) => c.code),
+      ['B', 'C', 'A'],
+    );
+    expect(
+      sortCoordinatorships(
+        items,
+        CoordinatorshipSort.members,
+        descending: false,
+      ).map((c) => c.code),
+      ['A', 'C', 'B'],
+    );
+  });
+
   test('sunucu departmanları ve görevlerinden liste; ölçüt değişince yeniden sıralanır', () async {
     final backend = CoordBackend();
     final h = await pilotHarness(backend, signedIn: true);
@@ -19,7 +53,7 @@ void main() {
     c.listen(coordinatorshipListProvider, (_, _) {});
     expect(
       c.read(coordinatorshipsControllerProvider),
-      CoordinatorshipSort.name,
+      CoordinatorshipSort.tasks,
     );
     await c.read(taskCatalogControllerProvider.future);
     await c.read(serverCoordinatorshipStatsProvider.future);

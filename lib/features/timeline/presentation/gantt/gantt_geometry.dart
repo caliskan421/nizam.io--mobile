@@ -39,7 +39,7 @@ abstract final class GanttGeometry {
 
   /// Sol etiket sütunu (`LW`) ve satır yüksekliği.
   static const double labelWidth = 300;
-  static const double row = 40;
+  static const double row = 44;
 
   /// Etiket sütunu başlığı: yan 16, alt 8. Grup başlığı dolgusu sol 10 sağ 12; görev satırı sol 34
   /// sağ 12, kod sütunu 56, aralık 8.
@@ -146,6 +146,7 @@ abstract final class GanttGeometry {
   static double ppd(GanttZoom z) => switch (z) {
     GanttZoom.week => 28,
     GanttZoom.month => 10,
+    GanttZoom.monthly => 3,
   };
 
   /// Prototip `center`: `max(0, TD × ppd − (clientWidth − LW) × 0.4)`; kaydırma sınırında kesilir.
@@ -154,8 +155,9 @@ abstract final class GanttGeometry {
     required double ppd,
     required double viewport,
     double maxExtent = double.infinity,
+    double columnWidth = labelWidth,
   }) => math
-      .max(0.0, today * ppd - (viewport - labelWidth) * centerBias)
+      .max(0.0, today * ppd - (viewport - columnWidth) * centerBias)
       .clamp(0.0, math.max(0.0, maxExtent));
 
   /// Başlık çubuğun içine yazılır mı (`inside`).
@@ -232,17 +234,28 @@ final class GanttLayout {
     required this.view,
     required this.ppd,
     required this.width,
+    required this.labelWidth,
     required this.rows,
     required this.months,
     required this.ticks,
   });
 
-  factory GanttLayout.of(GanttView v) {
-    final ppd = GanttGeometry.ppd(v.state.zoom);
+  factory GanttLayout.of(
+    GanttView v, {
+    double labelWidth = GanttGeometry.labelWidth,
+    double viewportWidth = 0,
+    Set<String> expandedTasks = const {},
+  }) {
+    final ppd = math.max(
+      GanttGeometry.ppd(v.state.zoom),
+      math.max(0.0, viewportWidth - labelWidth) / v.days,
+    );
     final boxes = <GanttRowBox>[];
     var y = 0.0;
     for (final r in v.rows) {
       switch (r) {
+        case GanttSubtaskRow():
+          boxes.add(GanttRowBox(row: r, top: y));
         case GanttHeadRow():
           boxes.add(
             GanttRowBox(
@@ -289,6 +302,13 @@ final class GanttLayout {
           );
       }
       y += GanttGeometry.row;
+      if (r case GanttTaskRow(:final task)
+          when expandedTasks.contains(task.code)) {
+        for (final subtask in task.item.subtasks) {
+          boxes.add(GanttRowBox(row: GanttSubtaskRow(subtask), top: y));
+          y += GanttGeometry.row;
+        }
+      }
     }
     final y0 = DateTime.utc(v.year);
     int dayOf(DateTime d) => d.difference(y0).inDays;
@@ -296,6 +316,7 @@ final class GanttLayout {
       view: v,
       ppd: ppd,
       width: v.days * ppd,
+      labelWidth: labelWidth,
       rows: boxes,
       months: [
         for (var m = 1; m <= 12; m++)
@@ -311,8 +332,12 @@ final class GanttLayout {
       ticks: switch (v.state.zoom) {
         final z => [
           for (var d = 0; d < v.days; d++)
-            if (z == GanttZoom.week ||
-                DateTime.utc(v.year, 1, 1 + d).weekday == DateTime.monday)
+            if (switch (z) {
+              GanttZoom.week => true,
+              GanttZoom.month =>
+                DateTime.utc(v.year, 1, 1 + d).weekday == DateTime.monday,
+              GanttZoom.monthly => DateTime.utc(v.year, 1, 1 + d).day == 1,
+            })
               GanttTick(
                 day: d,
                 date: DateTime.utc(v.year, 1, 1 + d).day,
@@ -330,6 +355,7 @@ final class GanttLayout {
 
   /// Tarih alanı genişliği (`W = gün × ppd`).
   final double width;
+  final double labelWidth;
   final List<GanttRowBox> rows;
   final List<GanttMonth> months;
   final List<GanttTick> ticks;
@@ -338,13 +364,17 @@ final class GanttLayout {
   double get rowsHeight => rows.length * GanttGeometry.row;
 
   /// Toplam içerik genişliği (`TW = LW + W`).
-  double get totalWidth => GanttGeometry.labelWidth + width;
+  double get totalWidth => labelWidth + width;
 
   /// Bugün çizgisinin tarih alanındaki x'i (`TD × ppd`).
   double get todayX => view.today * ppd;
 
   /// Haftalık ızgara çizgilerinin x'leri (`background-size 7·ppd`, `position 4·ppd`: pazartesi).
   Iterable<double> get gridLines sync* {
+    if (view.state.zoom == GanttZoom.monthly) {
+      yield* months.map((month) => month.x);
+      return;
+    }
     final step = 7 * ppd;
     var x = (4 * ppd) % step;
     for (; x < width; x += step) {

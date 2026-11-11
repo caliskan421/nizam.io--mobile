@@ -48,5 +48,6 @@ class ApiCoordinatorshipStatsRepository
             ),
         ],
         members: const [],
+        memberCount: s.memberCount,
       );
 }

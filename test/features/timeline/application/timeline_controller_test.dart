@@ -189,6 +189,23 @@ void main() {
     },
   );
 
+  test(
+    'filtre penceresi temizlenince bütün koordinatörlükler geri gelir',
+    () async {
+      final (_, ctrl, view) = await _open();
+      ctrl
+        ..setStatus(TimelineStatusFilter.late)
+        ..togglePerson(pKadir)
+        ..togglePriority(TaskPriority.high)
+        ..clearSheetFilters();
+      expect(view().allSelected, isTrue);
+      expect(view().state.status, TimelineStatusFilter.all);
+      expect(view().state.people, isEmpty);
+      expect(view().state.priorities, isEmpty);
+      expect(view().shown, hasLength(9));
+    },
+  );
+
   test('durum, kişi, öncelik ve arama süzgeci; temizle durumu korur', () async {
     final (_, ctrl, view) = await _open();
     ctrl.setStatus(TimelineStatusFilter.late);

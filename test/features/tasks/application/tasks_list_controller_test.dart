@@ -120,13 +120,26 @@ void main() {
       TaskFilterGroup.priority,
     });
     expect(b.filter.query, isEmpty);
-    expect(
-      b.isGroupOpen(dEle, first: true),
-      isFalse,
-      reason: 'çevrilmiş ilk grup kapalı',
-    );
-    expect(b.isGroupOpen(dAlt, first: false), isFalse);
+    expect(b.isGroupOpen(dEle), isTrue);
+    expect(b.isGroupOpen(dAlt), isFalse);
   });
+
+  test(
+    'koordinatörlük sıralaması seçildiğinde bütün gruplar kapalı başlar',
+    () {
+      final c = _bare();
+      final p = tasksListControllerProvider(TaskView.all, '');
+      final ctl = c.read(p.notifier);
+      ctl.selectSort(TaskSort.coordinatorship);
+      expect(c.read(p).isGroupOpen(dEle), isFalse);
+      expect(c.read(p).isGroupOpen(dAlt), isFalse);
+      ctl.toggleGroup(dEle);
+      expect(c.read(p).isGroupOpen(dEle), isTrue);
+      ctl.selectSort(TaskSort.due);
+      ctl.selectSort(TaskSort.coordinatorship);
+      expect(c.read(p).isGroupOpen(dEle), isFalse);
+    },
+  );
 
   test('sonuç sunucu kataloğundan: görünüm, arama ve kişi süzgeci', () async {
     final c = await _container();

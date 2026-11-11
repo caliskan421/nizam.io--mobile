@@ -37,12 +37,11 @@ final class TasksListState {
   final bool searchOpen;
   final int limit;
 
-  /// Koordinatörlüğe göre listede varsayılanından (yalnız ilk grup açık) çevrilmiş gruplar.
+  /// Koordinatörlüğe göre listede kullanıcı tarafından açılmış gruplar.
   final Set<String> flippedGroups;
   final Set<TaskFilterGroup> openFilterGroups;
 
-  bool isGroupOpen(String code, {required bool first}) =>
-      flippedGroups.contains(code) ? !first : first;
+  bool isGroupOpen(String code) => flippedGroups.contains(code);
 
   TasksListState copyWith({
     TaskView? view,
@@ -150,6 +149,7 @@ class TasksListController extends _$TasksListController {
     state = state.copyWith(
       sort: s,
       descending: s.defaultDescending,
+      flippedGroups: s == TaskSort.coordinatorship ? {} : state.flippedGroups,
       limit: TasksListState.pageSize,
     );
   }

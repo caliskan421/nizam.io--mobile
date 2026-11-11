@@ -53,16 +53,14 @@ void main() {
 
   test('modül kökünde taban son açılan kimlik; hiç açılmamışsa yok', () {
     expect(baseEntryOf(Uri.parse('/archive'), _none), isNull);
-    expect(
-      baseEntryOf(Uri.parse('/archive'), (k) => 'ALT'),
-      const PaneEntry(PaneKind.folder, 'ALT'),
-    );
+    expect(baseEntryOf(Uri.parse('/archive'), (k) => 'ALT'), isNull);
     // Görevler ve Koordinatörlükler kökü son kaydı geri getirmez: liste tam genişlik.
     expect(baseEntryOf(Uri.parse('/tasks'), (k) => 'ALT-9'), isNull);
     expect(baseEntryOf(Uri.parse('/coordinatorships'), (k) => 'ALT'), isNull);
     expect(splitListFull(Uri.parse('/coordinatorships')), isTrue);
     expect(splitListFull(Uri.parse('/coordinatorships/ALT')), isFalse);
-    expect(splitListFull(Uri.parse('/archive')), isFalse);
+    expect(splitListFull(Uri.parse('/archive')), isTrue);
+    expect(splitListFull(Uri.parse('/archive/ALT')), isFalse);
     expect(splitListFull(Uri.parse('/tasks')), isTrue);
     expect(splitListFull(Uri.parse('/tasks?view=late')), isTrue);
     expect(splitListFull(Uri.parse('/tasks/ALT-9')), isFalse);

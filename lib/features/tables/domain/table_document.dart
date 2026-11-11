@@ -19,6 +19,20 @@ enum TableFieldType {
 
 enum TableArea { coord, personal, shared }
 
+const tableDemoUnits = <String>[
+  'DEMO-A',
+  'DEMO-B',
+  'DEMO-C',
+  'DEMO-D',
+  'DEMO-E',
+  'DEMO-F',
+  'DEMO-G',
+  'DEMO-H',
+  'DEMO-I',
+  'DEMO-J',
+  'DEMO-K',
+];
+
 enum TableAccess { off, view, edit, owner }
 
 enum TableTemplate {

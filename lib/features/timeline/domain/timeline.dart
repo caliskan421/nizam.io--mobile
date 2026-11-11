@@ -331,6 +331,22 @@ final class TimelineWeek {
   final bool late;
 }
 
+/// Filtrelenmiş görevlerden sezon şeridi yoğunluğu ve gecikmenin başladığı haftalar.
+List<TimelineWeek> timelineWeeks(Iterable<TimelineTask> tasks, int days) => [
+  for (var i = 0; i < (days / 7).ceil(); i++)
+    TimelineWeek(
+      count: tasks
+          .where((t) => t.range.start < i * 7 + 7 && t.extentEnd > i * 7)
+          .length,
+      late: tasks.any(
+        (t) =>
+            (t.late || t.doneLate) &&
+            t.range.end >= i * 7 &&
+            t.range.end < i * 7 + 7,
+      ),
+    ),
+];
+
 /// Seçili görevin kart özeti.
 @immutable
 final class TimelineSelection {

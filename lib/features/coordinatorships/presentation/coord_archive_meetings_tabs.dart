@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/errors/api_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
@@ -11,6 +12,7 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../archive/archive.dart';
 import '../../tasks/tasks.dart';
 import '../application/coordinatorship_detail_controller.dart';
 import '../domain/coordinatorship_board.dart';
@@ -21,17 +23,10 @@ import 'coord_widgets.dart';
 /// Arşiv bölümü (prototip `tArc`): dosya sayısı ve boyutu, tür dağılımı, son yüklenen beş
 /// dosya ve "Arşivde tümünü gör". Kaynak sunucu arşivi (bu birimin görevlerine bağlı dosyalar).
 class CoordArchiveTab extends ConsumerWidget {
-  const CoordArchiveTab({
-    super.key,
-    required this.code,
-    required this.folder,
-    required this.catalog,
-  });
+  const CoordArchiveTab({super.key, required this.code, required this.catalog});
 
   final String code;
 
-  /// Arşiv klasörü rotası.
-  final String folder;
   final TaskCatalog catalog;
 
   @override
@@ -39,6 +34,46 @@ class CoordArchiveTab extends ConsumerWidget {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
+    Future<void> openArchive() async {
+      try {
+        final folders = await ref.read(archiveFoldersControllerProvider.future);
+        if (!context.mounted) return;
+        final target =
+            folders.where((f) => f.code == code).firstOrNull ??
+            folders.where((f) => f.isVirtual).firstOrNull;
+        if (target == null) {
+          context.appNav.openArchive();
+        } else {
+          context.appNav.openArchiveFolder(target.code);
+        }
+      } on Object {
+        if (context.mounted) context.appNav.openArchive();
+      }
+    }
+
+    Future<void> openFile(CoordFile file) async {
+      try {
+        final folders = await ref.read(archiveFoldersControllerProvider.future);
+        if (!context.mounted) return;
+        final target =
+            folders.where((f) => f.code == code).firstOrNull ??
+            folders.where((f) => f.isVirtual).firstOrNull;
+        if (target == null) {
+          NzToast.show(context, l.uiArchiveEmptyFiles);
+          return;
+        }
+        await openArchiveFile(
+          context,
+          folderCode: target.code,
+          workItemId: file.workItemId,
+          fileId: file.id,
+          taskTitle: (id) => catalog.task(id)?.title,
+        );
+      } on Object catch (error) {
+        if (context.mounted) NzToast.error(context, toApiError(error));
+      }
+    }
+
     return NzAsyncView<List<CoordFile>>(
       value: ref.watch(coordinatorshipFilesProvider(code)),
       onRetry: () => ref.invalidate(coordinatorshipFilesProvider(code)),
@@ -121,11 +156,11 @@ class CoordArchiveTab extends ConsumerWidget {
                         l.coordBytes(f.sizeBytes),
                       ].nonNulls.join(' · '),
                       chevron: false,
-                      onTap: () => context.appNav.openTask(f.workItemId),
+                      onTap: () => openFile(f),
                     ),
                   if (files.isEmpty) CoordEmpty(l.uiCoordNoFiles),
                   CoordRow(
-                    onTap: () => context.appNav.openArchiveFolder(folder),
+                    onTap: openArchive,
                     semanticLabel: l.uiCoordAllInArchive,
                     minHeight: 48,
                     child: Center(

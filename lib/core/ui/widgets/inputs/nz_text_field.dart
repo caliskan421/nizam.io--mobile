@@ -181,6 +181,7 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
     final l = context.l10n;
     final errorTheme = Theme.of(context).inputDecorationTheme;
     final field = TextFormField(
+      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       controller: widget.controller,
       initialValue: widget.controller == null ? widget.initialValue : null,
       focusNode: widget.focusNode,

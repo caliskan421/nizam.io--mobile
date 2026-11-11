@@ -26,6 +26,7 @@ class NizamioApp extends ConsumerStatefulWidget {
 }
 
 class _NizamioAppState extends ConsumerState<NizamioApp> {
+  late final _keyboardObserver = _KeyboardObserver();
   late final ValueNotifier<AppPhase> _phase = ValueNotifier(
     ref.read(appPhaseProvider),
   );
@@ -37,6 +38,7 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(_keyboardObserver);
     _router.dispose();
     _phase.dispose();
     _mask.dispose();
@@ -45,6 +47,7 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
 
   @override
   Widget build(BuildContext context) {
+    _keyboardObserver.start();
     ref.listen(appPhaseProvider, (_, next) => _phase.value = next);
     return MaterialApp.router(
       title: 'NIZAM.IO',
@@ -73,5 +76,28 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
         ),
       ),
     );
+  }
+}
+
+class _KeyboardObserver with WidgetsBindingObserver {
+  bool _visible = false;
+  bool _started = false;
+
+  void start() {
+    if (_started) return;
+    _started = true;
+    _visible = WidgetsBinding.instance.platformDispatcher.views.any(
+      (view) => view.viewInsets.bottom > 0,
+    );
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeMetrics() {
+    final visible = WidgetsBinding.instance.platformDispatcher.views.any(
+      (view) => view.viewInsets.bottom > 0,
+    );
+    if (_visible && !visible) FocusManager.instance.primaryFocus?.unfocus();
+    _visible = visible;
   }
 }

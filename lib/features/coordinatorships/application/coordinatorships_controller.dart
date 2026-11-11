@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart'
-    show FutureProvider, Provider;
+    show FutureProvider, Notifier, NotifierProvider, Provider;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/domain/page_slice.dart';
@@ -33,6 +33,7 @@ final serverCoordinatorshipStatsProvider = FutureProvider((ref) async {
           name: server.name,
           done: server.done,
           total: server.total,
+          memberCount: server.memberCount,
           late: server.late,
           leads: server.leads,
           members:
@@ -52,7 +53,7 @@ final serverCoordinatorshipStatsProvider = FutureProvider((ref) async {
 @Riverpod(keepAlive: true)
 class CoordinatorshipsController extends _$CoordinatorshipsController {
   @override
-  CoordinatorshipSort build() => CoordinatorshipSort.name;
+  CoordinatorshipSort build() => CoordinatorshipSort.tasks;
 
   /// Katalog ve ekranın bağlı kaynakları; katalog yenilemesi raporu da geçersiz kılar.
   Future<void> refresh({String? code}) => refreshWithFeedback(
@@ -70,7 +71,24 @@ class CoordinatorshipsController extends _$CoordinatorshipsController {
     },
   );
 
-  void sortBy(CoordinatorshipSort sort) => state = sort;
+  void sortBy(CoordinatorshipSort sort) {
+    ref.read(coordinatorshipSortDescendingProvider.notifier).setFor(sort);
+    state = sort;
+  }
+}
+
+/// Sayfa içindeki sıralama yönü.
+final coordinatorshipSortDescendingProvider =
+    NotifierProvider<CoordinatorshipSortDescending, bool>(
+      CoordinatorshipSortDescending.new,
+    );
+
+class CoordinatorshipSortDescending extends Notifier<bool> {
+  @override
+  bool build() => true;
+  void flip() => state = !state;
+  void setFor(CoordinatorshipSort sort) =>
+      state = sort != CoordinatorshipSort.name;
 }
 
 /// Görev kataloğundan türetilmiş, seçili ölçütle sıralı koordinatörlük listesi. Eşzamanlı
@@ -78,7 +96,11 @@ class CoordinatorshipsController extends _$CoordinatorshipsController {
 @riverpod
 AsyncValue<List<CoordinatorshipStats>> coordinatorshipList(Ref ref) {
   final sort = ref.watch(coordinatorshipsControllerProvider);
+  final descending = ref.watch(coordinatorshipSortDescendingProvider);
   return ref
       .watch(serverCoordinatorshipStatsProvider)
-      .whenData((page) => sortCoordinatorships(page.items, sort));
+      .whenData(
+        (page) =>
+            sortCoordinatorships(page.items, sort, descending: descending),
+      );
 }

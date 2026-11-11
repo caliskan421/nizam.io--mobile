@@ -240,8 +240,10 @@ class _TimelineChartState extends State<TimelineChart> {
             Positioned.fill(
               child: SingleChildScrollView(
                 controller: v,
+                physics: const ClampingScrollPhysics(),
                 child: SingleChildScrollView(
                   controller: _h,
+                  physics: const ClampingScrollPhysics(),
                   scrollDirection: Axis.horizontal,
                   child: GestureDetector(
                     key: TimelineChart.canvasKey,

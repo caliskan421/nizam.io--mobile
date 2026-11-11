@@ -2,9 +2,39 @@ import '../../../core/i18n/generated/app_localizations.dart';
 import '../domain/table_document.dart';
 
 extension TableTexts on AppLocalizations {
+  String tableDemoPerson(String id) => switch (id) {
+    'demo-1' => 'Kadir Özbek',
+    'demo-2' => 'Reha Koçak',
+    'demo-3' => 'Ali Avcı',
+    'demo-4' => 'Abdullah Ateş',
+    _ => '$uiTablesDemoPerson ${id.split('-').last}',
+  };
+  String tableUnitCode(String id) => switch (id) {
+    'DEMO-A' => 'ALT',
+    'DEMO-B' => 'İDA',
+    'DEMO-C' => 'OPE',
+    'DEMO-D' => 'EĞİ',
+    'DEMO-E' => 'ELE',
+    'DEMO-F' => 'FUA',
+    'DEMO-G' => 'MEK',
+    'DEMO-H' => 'MİM',
+    'DEMO-I' => 'SAT',
+    'DEMO-J' => 'SİS',
+    'DEMO-K' => 'ULA',
+    _ => id,
+  };
   String tableUnit(String id) => switch (id) {
-    'DEMO-A' => uiTablesUnitA,
-    'DEMO-B' => uiTablesUnitB,
+    'DEMO-A' => 'Altyapı ve tesisat',
+    'DEMO-B' => 'İdari işler',
+    'DEMO-C' => 'Operasyon',
+    'DEMO-D' => 'Eğitim ve Arge',
+    'DEMO-E' => 'Elektrik ve enerji',
+    'DEMO-F' => 'Fuar',
+    'DEMO-G' => 'Mekanik sistemler',
+    'DEMO-H' => 'Mimari tasarım',
+    'DEMO-I' => 'Satış ve pazarlama',
+    'DEMO-J' => 'Sistem koordinatörlüğü',
+    'DEMO-K' => 'Ulaşım planlama',
     _ => '$uiTablesUnitSample $id',
   };
   String tableType(TableFieldType t) => switch (t) {

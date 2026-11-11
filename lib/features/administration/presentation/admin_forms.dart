@@ -63,6 +63,8 @@ class _AdminFormState extends State<_AdminForm> {
           children: [
             for (var i = 0; i < widget.fields.length; i++)
               TextFormField(
+                onTapOutside: (_) =>
+                    FocusManager.instance.primaryFocus?.unfocus(),
                 controller: _controllers[i],
                 obscureText: widget.fields[i].secret,
                 autocorrect: !widget.fields[i].secret,

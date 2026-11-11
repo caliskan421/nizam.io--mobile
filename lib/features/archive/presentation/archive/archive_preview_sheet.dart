@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:pdfrx/pdfrx.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
@@ -13,6 +14,7 @@ import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
 import '../../application/archive_actions_controller.dart';
 import '../../application/archive_files_controller.dart';
+import '../../application/archive_image_preview.dart';
 import '../../domain/archive.dart';
 import '../../domain/records.dart';
 import 'archive_outcome.dart';
@@ -57,6 +59,7 @@ Future<void> showArchivePreview(
   required String code,
   required String? Function(String workItemId) taskTitle,
   required String fileId,
+  RecordFile? initialFile,
 }) {
   final l = context.l10n;
   return NzBottomSheet.show<void>(
@@ -67,6 +70,7 @@ Future<void> showArchivePreview(
       code: code,
       taskTitle: taskTitle,
       initial: fileId,
+      initialFile: initialFile,
       host: context,
     ),
   );
@@ -77,18 +81,85 @@ class _Preview extends ConsumerStatefulWidget {
     required this.code,
     required this.taskTitle,
     required this.initial,
+    this.initialFile,
     required this.host,
   });
 
   final String code;
   final String? Function(String workItemId) taskTitle;
   final String initial;
+  final RecordFile? initialFile;
 
   /// Bildirimlerin gösterildiği sayfa bağlamı (alt sayfa kapandıktan sonra da geçerli).
   final BuildContext host;
 
   @override
   ConsumerState<_Preview> createState() => _PreviewState();
+}
+
+class _ArchiveDocument extends ConsumerWidget {
+  const _ArchiveDocument({required this.folder, required this.file});
+  final String folder;
+  final RecordFile file;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final pdf = file.kind == ArchiveFileKind.pdf;
+    final tooLarge = pdf ? l.uiArchivePdfTooLarge : l.uiArchiveImageTooLarge;
+    final failure = pdf
+        ? l.uiArchivePdfPreviewError
+        : l.uiArchiveImagePreviewError;
+    if (file.sizeBytes > archiveImagePreviewLimit) {
+      return Center(child: Text(tooLarge, textAlign: TextAlign.center));
+    }
+    final provider = archiveImagePreviewProvider((
+      folder: folder,
+      file: file.id,
+    ));
+    final value = ref.watch(provider);
+    Widget error(String message) => Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(message, textAlign: TextAlign.center),
+          if (value.error is! ArchiveImageTooLarge)
+            TextButton(
+              onPressed: () => ref.invalidate(provider),
+              child: Text(l.uiCommonRetry),
+            ),
+        ],
+      ),
+    );
+    return value.when(
+      loading: () => Center(
+        child: Semantics(
+          label: l.uiFeedbackLoading,
+          child: const CircularProgressIndicator(),
+        ),
+      ),
+      error: (e, _) => error(e is ArchiveImageTooLarge ? tooLarge : failure),
+      data: (bytes) => pdf
+          ? PdfViewer.data(
+              bytes,
+              key: ValueKey('pdf:${file.id}'),
+              sourceName: '$folder/${file.id}',
+              maxSizeToCacheOnMemory: archiveImagePreviewLimit,
+              params: PdfViewerParams(
+                backgroundColor: context.colors.surfaceRaised,
+                maxImageBytesCachedOnMemory: 24 * 1024 * 1024,
+                errorBannerBuilder: (_, _, _, _) => error(failure),
+              ),
+            )
+          : Image.memory(
+              bytes,
+              fit: BoxFit.contain,
+              cacheWidth: 1600,
+              gaplessPlayback: false,
+              errorBuilder: (_, _, _) => error(failure),
+            ),
+    );
+  }
 }
 
 class _PreviewState extends ConsumerState<_Preview> {
@@ -130,9 +201,13 @@ class _PreviewState extends ConsumerState<_Preview> {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final list =
+    final loaded =
         ref.watch(archiveFilesControllerProvider(widget.code)).value?.items ??
         const <RecordFile>[];
+    final initial = widget.initialFile;
+    final list = initial != null && !loaded.any((f) => f.id == initial.id)
+        ? [initial, ...loaded]
+        : loaded;
     final catalog = ref.watch(taskCatalogControllerProvider).value;
     final i = list.indexWhere((f) => f.id == _id);
     if (i < 0) return const SizedBox.shrink();
@@ -200,21 +275,28 @@ class _PreviewState extends ConsumerState<_Preview> {
                 borderRadius: BorderRadius.circular(NizamioRadius.group),
                 border: Border.all(color: c.border),
               ),
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: c.surface,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    l.kindShort(f.kind),
-                    style: t.monoSm.copyWith(color: c.textMuted),
-                  ),
-                ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(NizamioRadius.group),
+                child:
+                    f.kind == ArchiveFileKind.image ||
+                        f.kind == ArchiveFileKind.pdf
+                    ? _ArchiveDocument(folder: widget.code, file: f)
+                    : Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: c.surface,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            l.kindShort(f.kind),
+                            style: t.monoSm.copyWith(color: c.textMuted),
+                          ),
+                        ),
+                      ),
               ),
             ),
           ),

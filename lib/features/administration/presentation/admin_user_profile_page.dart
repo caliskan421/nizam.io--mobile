@@ -274,6 +274,7 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
           NzIconButton(
             icon: NzIcons.moreHorizontal,
             semanticLabel: l.uiUsersMoreActions,
+            focusBorder: false,
             onPressed: user == null
                 ? null
                 : () => showAdminUserProfileMenu(

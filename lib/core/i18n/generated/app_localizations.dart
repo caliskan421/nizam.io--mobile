@@ -2146,6 +2146,30 @@ abstract class AppLocalizations {
   /// **'Bu filtreyle eşleşen dosya yok.'**
   String get uiArchiveEmptyFiles;
 
+  /// Arşiv PDF önizlemesi başarısız olduğunda
+  ///
+  /// In tr, this message translates to:
+  /// **'PDF önizlenemedi. Dosya bozuk veya parola korumalı olabilir.'**
+  String get uiArchivePdfPreviewError;
+
+  /// PDF önizleme sınırını aştığında
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu PDF önizleme için çok büyük. İndirerek açabilirsiniz.'**
+  String get uiArchivePdfTooLarge;
+
+  /// Arşiv görseli yüklenemediğinde
+  ///
+  /// In tr, this message translates to:
+  /// **'Görsel önizlenemedi.'**
+  String get uiArchiveImagePreviewError;
+
+  /// Arşiv görseli önizleme sınırını aştığında
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu görsel önizleme için çok büyük. İndirerek açabilirsiniz.'**
+  String get uiArchiveImageTooLarge;
+
   /// ui.archive.preview
   ///
   /// In tr, this message translates to:
@@ -2680,6 +2704,18 @@ abstract class AppLocalizations {
   /// **'Koordinatörlük listesi'**
   String get uiCoordListLabel;
 
+  /// Koordinatörlük sıralama ölçütü
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev sayısı'**
+  String get uiCoordSortTasks;
+
+  /// Koordinatörlük sıralama ölçütü
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye sayısı'**
+  String get uiCoordSortMembers;
+
   /// ui.coord.sort_name
   ///
   /// In tr, this message translates to:
@@ -2689,13 +2725,13 @@ abstract class AppLocalizations {
   /// ui.coord.sort_late
   ///
   /// In tr, this message translates to:
-  /// **'Gecikmeye göre'**
+  /// **'Gecikme'**
   String get uiCoordSortLate;
 
   /// ui.coord.sort_progress
   ///
   /// In tr, this message translates to:
-  /// **'İlerlemeye göre'**
+  /// **'Tamamlanma'**
   String get uiCoordSortProgress;
 
   /// ui.coord.shortcuts
@@ -4047,6 +4083,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'beta'**
   String get uiHomeBeta;
+
+  /// Ana sayfa silinen görevler kısayolu
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinenler'**
+  String get uiHomeDeletedShortcut;
 
   /// ui.home.deleted_records
   ///
@@ -7810,6 +7852,12 @@ abstract class AppLocalizations {
   /// **'Gönder'**
   String get uiTasksSend;
 
+  /// Kullanılabilir görev durumu geçişi yokken gösterilen açıklama
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu görev için kullanabileceğiniz bir durum değişikliği yok.'**
+  String get uiTasksNoStatusTransitions;
+
   /// ui.tasks.sheet_status
   ///
   /// In tr, this message translates to:
@@ -9501,6 +9549,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Günlük'**
   String get uiTimelineGanttZoomDaily;
+
+  /// Tablet zaman çizelgesi aylık ölçek
+  ///
+  /// In tr, this message translates to:
+  /// **'Aylık'**
+  String get uiTimelineGanttZoomMonthly;
 
   /// ui.timeline.gantt_zoom_weekly
   ///

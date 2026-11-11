@@ -59,6 +59,7 @@ class HomePage extends ConsumerWidget {
         showHomeShortcuts(
           context,
           onQuickAction: (a) => _quickAction(context, a),
+          isAdmin: dashboard.greetingRole == TeamRole.admin,
         );
       });
     final programState = ref.watch(currentProgramControllerProvider);
@@ -117,7 +118,7 @@ class HomePage extends ConsumerWidget {
   void _quickAction(BuildContext context, HomeQuickAction a) => switch (a) {
     HomeQuickAction.history => context.appNav.openHistory(),
     HomeQuickAction.meeting => showMeetingSheet(context),
-    HomeQuickAction.invite => showInviteSheet(context),
+    HomeQuickAction.deleted => context.appNav.openDeletedTasks(),
     HomeQuickAction.report => _soon(
       context,
       quickActionLongLabel(context.l10n, a),
@@ -238,7 +239,10 @@ class _Feed extends ConsumerWidget {
               extras,
               ...truncated,
               const Gap(NizamioSpacing.gapXl),
-              HomeQuickActions(onAction: onQuickAction),
+              HomeQuickActions(
+                onAction: onQuickAction,
+                isAdmin: d.greetingRole == TeamRole.admin,
+              ),
               const Gap(NizamioSpacing.gapXl),
               if (narrowTeam != null) ...[
                 narrowTeam,
@@ -251,7 +255,10 @@ class _Feed extends ConsumerWidget {
           );
         }
         final wideTeam = team(wide: true);
-        final actions = HomeQuickActionsBar(onAction: onQuickAction);
+        final actions = HomeQuickActionsBar(
+          onAction: onQuickAction,
+          isAdmin: d.greetingRole == TeamRole.admin,
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

@@ -11,11 +11,13 @@ Future<void> showTableSheet(
   required String title,
   required WidgetBuilder builder,
   bool expandable = false,
+  String? description,
 }) {
   final lease = ref.read(tablesControllerProvider.notifier).lease;
   return NzBottomSheet.show<void>(
     context,
     title: title,
+    description: description,
     expandable: expandable,
     builder: (sheet) => Consumer(
       builder: (context, ref, _) {

@@ -132,20 +132,7 @@ TimelineView buildTimelineView(
         ]
       : const <TimelineGroup>[];
 
-  final weeks = [
-    for (var i = 0; i < (days / 7).ceil(); i++)
-      TimelineWeek(
-        count: shown
-            .where((t) => t.range.start < i * 7 + 7 && t.extentEnd > i * 7)
-            .length,
-        late: shown.any(
-          (t) =>
-              (t.late || t.doneLate) &&
-              t.range.end >= i * 7 &&
-              t.range.end < i * 7 + 7,
-        ),
-      ),
-  ];
+  final weeks = timelineWeeks(shown, days);
 
   final people = [
     for (final p in catalog.people)

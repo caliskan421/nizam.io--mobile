@@ -75,6 +75,9 @@ Future<bool> showNewTaskSheet(
         ? l.uiTasksNtDesc
         : l.uiTasksNoteTaskDesc,
     ok: l.uiTasksCreate,
+    initiallyExpanded:
+        MediaQuery.sizeOf(context).width < 600 &&
+        MediaQuery.sizeOf(context).height < 750,
     onOk: (sheet) async {
       final r = await container
           .read(newTaskFormControllerProvider.notifier)
@@ -187,11 +190,12 @@ Future<bool> _show(
   required String title,
   required String description,
   required String ok,
+  bool initiallyExpanded = false,
   required FutureOr<String?> Function(BuildContext sheet) onOk,
   required Widget Function(ValueNotifier<bool> expansion) body,
 }) async {
   // Sayfa içeriği kapanış canlandırması bitince bırakır; burada elle kapatılmaz.
-  final expansion = ValueNotifier(false);
+  final expansion = ValueNotifier(initiallyExpanded);
   String? toast;
   await NzBottomSheet.show<void>(
     context,

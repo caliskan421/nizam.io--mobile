@@ -9,6 +9,8 @@ Chat _chatOfSummary(ChatSummary s) => Chat(
   lastActivity: (s.lastMessageAt ?? s.createdAt).toLocal(),
   group: s.kind == ChatKind.group,
   general: s.autoKind == ChatAutoKind.general,
+  source: _sourceOf(s.source),
+  sourceDepartmentId: s.sourceDepartmentId,
   counterpartId: s.counterpartAccountId,
   unread: s.unreadCount,
   mention: s.mentioned,
@@ -27,6 +29,8 @@ Chat _chatOfDetail(api.Chat c) => Chat(
   lastActivity: (c.lastMessageAt ?? c.createdAt).toLocal(),
   group: c.kind == ChatKind.group,
   general: c.autoKind == ChatAutoKind.general,
+  source: _sourceOf(c.source),
+  sourceDepartmentId: c.sourceDepartmentId,
   counterpartId: c.counterpartAccountId,
   lastSeq: c.lastSeq,
   role: _role(c.role),
@@ -143,8 +147,36 @@ api.ChatMention _mentionDtoOf(ChatMention m) => api.ChatMention(
 );
 
 /// Anket taslağı → istek alanı.
-Poll _pollDtoOf(PollDraft p) =>
-    Poll(options: [for (final o in p.options) o.trim()], multi: p.multi);
+Poll _pollDtoOf(PollDraft p) => Poll(
+  options: [for (final o in p.options) o.trim()],
+  multi: p.multi,
+  closesAt: p.closesAt?.toUtc(),
+);
+
+ChatSource _sourceOf(api.ChatSource s) => switch (s) {
+  api.ChatSource.none => ChatSource.none,
+  api.ChatSource.department => ChatSource.department,
+  api.ChatSource.program => ChatSource.program,
+  api.ChatSource.$unknown => ChatSource.none,
+};
+
+CreateGroupChatRequestSource _createSourceOf(ChatSource s) => switch (s) {
+  ChatSource.none => CreateGroupChatRequestSource.none,
+  ChatSource.department => CreateGroupChatRequestSource.department,
+  ChatSource.program => CreateGroupChatRequestSource.program,
+};
+
+UpdateChatRequestSource _updateSourceOf(ChatSource s) => switch (s) {
+  ChatSource.none => UpdateChatRequestSource.none,
+  ChatSource.department => UpdateChatRequestSource.department,
+  ChatSource.program => UpdateChatRequestSource.program,
+};
+
+Kind _refKindOf(ChatRefKind k) => switch (k) {
+  ChatRefKind.task => Kind.task,
+  ChatRefKind.department => Kind.department,
+  ChatRefKind.file => Kind.file,
+};
 
 ChatRefKind? _messageRefKind(ChatMessageRefKind k) => switch (k) {
   ChatMessageRefKind.task => ChatRefKind.task,

@@ -16,6 +16,7 @@ final class ChatRoom {
     this.blocked = false,
     this.gone = false,
     List<ChatMessage> pins = const [],
+    this.pinsTruncated = false,
   }) : messages = List.unmodifiable(messages),
        pins = List.unmodifiable(pins);
 
@@ -40,6 +41,7 @@ final class ChatRoom {
 
   /// Sabit şeridi (`listChatPins`; en yeni sabit başta). Pencere dışındaki mesajı da taşır.
   final List<ChatMessage> pins;
+  final bool pinsTruncated;
 
   ChatMessage? message(String id) =>
       messages.where((m) => m.id == id).firstOrNull;
@@ -61,6 +63,7 @@ final class ChatRoom {
     bool? blocked,
     bool? gone,
     List<ChatMessage>? pins,
+    bool? pinsTruncated,
   }) => ChatRoom(
     chat: chat ?? this.chat,
     messages: messages ?? this.messages,
@@ -71,6 +74,7 @@ final class ChatRoom {
     blocked: blocked ?? this.blocked,
     gone: gone ?? this.gone,
     pins: pins ?? this.pins,
+    pinsTruncated: pinsTruncated ?? this.pinsTruncated,
   );
 
   /// Mesajı yerinde değiştirir (iyimser güncelleme); sabit şeridindeki kopyası da.
@@ -192,6 +196,7 @@ ChatMessage pendingMessage(
         : ChatPoll(
             multi: poll.multi,
             voters: 0,
+            closesAt: poll.closesAt,
             options: [for (final o in poll.options) ChatPollOption(o, 0)],
           ),
     attachments: [

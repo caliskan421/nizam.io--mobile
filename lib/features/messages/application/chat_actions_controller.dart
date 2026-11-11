@@ -3,7 +3,9 @@ import 'dart:collection';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/cache_owner.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../tasks/tasks.dart';
 import '../domain/chat.dart';
 import '../domain/chat_room.dart';
@@ -11,6 +13,8 @@ import 'chat_room_controller.dart';
 import 'messages_providers.dart';
 
 part 'chat_actions_controller.g.dart';
+
+const _actionsZone = #chatActionsEpoch;
 
 /// Mesaj eylemleri (istemci akışları §10.10): tepki, oy, sabitleme, anket bitirme ve indirmeler.
 /// Tepki ve oy iyimser uygulanır; aynı mesajdaki ardışık dokunuşlar [settle] süresince
@@ -31,9 +35,16 @@ class ChatActionsController extends _$ChatActionsController {
   final _reactions = HashMap<String, _Flight<ChatReaction?>>();
   final _votes = HashMap<String, _Flight<Set<int>>>();
   final _pinning = <String>{};
+  final _owner = CacheOwnership();
+  var _epoch = 0;
 
   @override
   int build(String chatId) {
+    _owner.markLoaded(ref, _owner.watch(ref));
+    _epoch++;
+    _reactions.clear();
+    _votes.clear();
+    _pinning.clear();
     ref.onDispose(() {
       for (final p in [..._reactions.values, ..._votes.values]) {
         p.cancel();
@@ -42,13 +53,40 @@ class ChatActionsController extends _$ChatActionsController {
     return 0;
   }
 
-  ChatRepository get _repo => ref.read(chatRepositoryProvider);
-  ChatRoomController get _room =>
-      ref.read(chatRoomControllerProvider(chatId).notifier);
-  ChatRoom? get _state => ref.read(chatRoomControllerProvider(chatId)).value;
+  bool get _active =>
+      ref.mounted &&
+      _owner.owns(ref) &&
+      (Zone.current[_actionsZone] == null ||
+          Zone.current[_actionsZone] == _epoch);
+  void _ensureCurrent() {
+    if (!_active) throw ApiError(ClientErrorCode.sessionEnded);
+  }
+
+  Future<T> _inScope<T>(Future<T> Function() op) {
+    _ensureCurrent();
+    return runZoned(op, zoneValues: {_actionsZone: _epoch});
+  }
+
+  ChatRepository get _repo {
+    _ensureCurrent();
+    return ref.read(chatRepositoryProvider);
+  }
+
+  ChatRoomController get _room {
+    _ensureCurrent();
+    return ref.read(chatRoomControllerProvider(chatId).notifier);
+  }
+
+  ChatRoom? get _state {
+    _ensureCurrent();
+    return ref.read(chatRoomControllerProvider(chatId)).value;
+  }
 
   /// Tepkiye dokunuş: aynı tür kaldırır, başka tür yerine geçer (kişi başına tek tepki).
-  Future<void> react(String messageId, ChatReaction kind) {
+  Future<void> react(String messageId, ChatReaction kind) =>
+      _inScope(() => _react(messageId, kind));
+
+  Future<void> _react(String messageId, ChatReaction kind) {
     final m = _state?.message(messageId);
     if (m == null || !m.onServer) return Future.value();
     final current = m.reactions.where((r) => r.mine).firstOrNull?.kind;
@@ -75,7 +113,10 @@ class ChatActionsController extends _$ChatActionsController {
 
   /// Anket seçeneğine dokunuş ([ChatPoll.toggled]); kapanmış ankete istek gitmez. 409
   /// `poll_closed`: anket kapandı gösterilir ve mesaj yeniden okunur.
-  Future<void> vote(String messageId, int option) {
+  Future<void> vote(String messageId, int option) =>
+      _inScope(() => _vote(messageId, option));
+
+  Future<void> _vote(String messageId, int option) {
     final me = ref.read(chatMeProvider);
     final m = _state?.message(messageId);
     final poll = m?.poll;
@@ -117,12 +158,15 @@ class ChatActionsController extends _$ChatActionsController {
   }
 
   /// Anketi bitirir (yalnız açan).
-  Future<void> closePoll(String messageId) async {
+  Future<void> closePoll(String messageId) =>
+      _inScope(() => _closePoll(messageId));
+
+  Future<void> _closePoll(String messageId) async {
     try {
       await _write(() => _repo.closePoll(chatId, messageId));
-      _closedLocally(messageId);
+      if (_active) _closedLocally(messageId);
     } on ApiError catch (e) {
-      if (e.code == _pollClosed) _closedLocally(messageId);
+      if (_active && e.code == _pollClosed) _closedLocally(messageId);
       rethrow;
     }
   }
@@ -137,7 +181,10 @@ class ChatActionsController extends _$ChatActionsController {
 
   /// Sabitler ya da kaldırır (birebirde iki taraf; grupta yönetici ya da kurucu). Uçuştayken
   /// ikinci dokunuş istek göndermez.
-  Future<void> togglePin(String messageId) async {
+  Future<void> togglePin(String messageId) =>
+      _inScope(() => _togglePin(messageId));
+
+  Future<void> _togglePin(String messageId) async {
     final m = _state?.message(messageId);
     if (m == null || !m.onServer || !_pinning.add(messageId)) return;
     final was = m.pinnedAt;
@@ -152,11 +199,15 @@ class ChatActionsController extends _$ChatActionsController {
             : _repo.unpin(chatId, messageId),
       );
     } on Object {
-      _room.patch(messageId, (x) => x.copyWith(pinnedAt: () => was));
+      if (_active) {
+        _room.patch(messageId, (x) => x.copyWith(pinnedAt: () => was));
+      }
       rethrow;
     } finally {
-      _pinning.remove(messageId);
-      await _room.reloadPins();
+      if (_active) {
+        _pinning.remove(messageId);
+        await _room.reloadPins();
+      }
     }
   }
 
@@ -171,11 +222,12 @@ class ChatActionsController extends _$ChatActionsController {
       .save(name, await _repo.downloadSharedFile(refId));
 
   Future<void> _write(Future<void> Function() op) async {
+    _ensureCurrent();
     state++;
     try {
       await op();
     } finally {
-      if (ref.mounted) state--;
+      if (_active) state--;
     }
   }
 
@@ -233,7 +285,7 @@ class ChatActionsController extends _$ChatActionsController {
     void Function(ApiError e)? onError,
   }) async {
     var uncertain = false;
-    while (ref.mounted && f.waiters.isNotEmpty) {
+    while (_active && f.waiters.isNotEmpty) {
       final waiters = f.waiters;
       f.waiters = [];
       final sending = f.desired;
@@ -255,16 +307,17 @@ class ChatActionsController extends _$ChatActionsController {
         // Geri alma yalnız istekten sonra dokunuş yoksa; varsa son istenen durum kalır.
         if (f.gen != gen) {
           uncertain = true;
-        } else if (ref.mounted) {
+        } else if (_active) {
           f.desired = f.confirmed;
           revert(f.confirmed);
         }
-        if (ref.mounted && e is ApiError) onError?.call(e);
+        if (_active && e is ApiError) onError?.call(e);
         for (final w in waiters) {
           w.completeError(e);
         }
       }
     }
+    if (!_active) f.cancel();
   }
 
   static const _pollClosed = 'messaging.poll_closed';

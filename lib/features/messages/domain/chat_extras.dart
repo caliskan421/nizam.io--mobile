@@ -62,6 +62,34 @@ const chatSearchPageSize = 30;
 /// Paylaşılan öğenin türü (§10.8 `refs`).
 enum ChatRefKind { task, department, file }
 
+/// Yeni mesajın paylaşım girdisi; kalıcı referans kimliğini sunucu üretir.
+@immutable
+final class ChatRefDraft {
+  const ChatRefDraft({required this.kind, required this.targetId});
+
+  final ChatRefKind kind;
+  final String targetId;
+}
+
+/// Dinamik üyelik kaynağı. Kaynağı kapatmak için açıkça [none] gönderilir.
+enum ChatSource { none, department, program }
+
+/// Programlar arası sayaç; bahsetme okunmamış sohbet sayısından ayrı korunur.
+@immutable
+final class ChatProgramUnread {
+  const ChatProgramUnread({
+    required this.programId,
+    required this.name,
+    required this.unreadChats,
+    required this.mentioned,
+  });
+
+  final String programId;
+  final String name;
+  final int unreadChats;
+  final bool mentioned;
+}
+
 /// Mesajdaki paylaşılan öğe (statik; kart [ChatRefCard] tekil okumayla dolar).
 @immutable
 final class ChatMessageRef {
@@ -132,6 +160,16 @@ final class ChatSharedPage {
   final String? nextCursor;
 }
 
+/// Sabit mesajların sunucu tavanıyla kesilip kesilmediğini koruyan sayfa.
+@immutable
+final class ChatPinsPage {
+  ChatPinsPage({required List<ChatMessage> items, this.truncated = false})
+    : items = List.unmodifiable(items);
+
+  final List<ChatMessage> items;
+  final bool truncated;
+}
+
 /// Sohbet üyesi (`listChatMembers`). [fromSource]: kaynaktan gelir; çıkarılamaz, ayrılamaz.
 @immutable
 final class ChatMember {
@@ -167,11 +205,15 @@ final class ChatMembers {
 /// Anket açma girdisi (soru mesaj gövdesidir; yalnız grupta, 2–10 tekil seçenek).
 @immutable
 final class PollDraft {
-  PollDraft({required Iterable<String> options, this.multi = false})
-    : options = List.unmodifiable(options);
+  PollDraft({
+    required Iterable<String> options,
+    this.multi = false,
+    this.closesAt,
+  }) : options = List.unmodifiable(options);
 
   final List<String> options;
   final bool multi;
+  final DateTime? closesAt;
 
   static const minOptions = 2;
   static const maxOptions = 10;

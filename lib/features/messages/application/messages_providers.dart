@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers.dart';
@@ -85,4 +86,29 @@ class ChatStreamHold extends _$ChatStreamHold {
     }
     return h.until.difference(now);
   }
+}
+
+/// Sunucuda bütün mesaj geçmişini tarayan gelen kutusu araması. Ana ekranın
+/// mevcut yerel filtresinden bağımsızdır; sorgu/program/oturum ayrı istek kimliğidir.
+@riverpod
+Future<ChatInbox> chatInboxSearch(Ref ref, String query) {
+  final session = ref.watch(sessionGenerationProvider);
+  final program = ref.watch(scopeStateProvider.select((s) => s.programId));
+  final q = query.trim();
+  return ref
+      .read(chatRepositoryProvider)
+      .loadInbox(
+        query: q.length > 100 ? q.substring(0, 100) : q,
+        isCurrent: () =>
+            ref.mounted &&
+            ref.read(sessionGenerationProvider) == session &&
+            ref.read(scopeStateProvider).programId == program,
+      );
+}
+
+/// Program seçicisindeki rozetlere hazır programlar arası okunmamış/bahsetme özeti.
+@riverpod
+Future<List<ChatProgramUnread>> chatUnreadOverview(Ref ref) {
+  ref.watch(sessionGenerationProvider);
+  return ref.read(chatRepositoryProvider).unreadOverview();
 }

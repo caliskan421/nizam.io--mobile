@@ -68,7 +68,7 @@ final class ChatSearchControllerProvider
 }
 
 String _$chatSearchControllerHash() =>
-    r'6c4c24bff7f8f69cec063faa149879bc95e11ff5';
+    r'a81371ebc0e7b50aceba4b0b18bdbdbde3254d0e';
 
 /// Sohbet içi arama (`listChatMessages?q=`, §10.10): sonuç en yeniden eskiye sayfa, sonraki sayfa
 /// `before=<en küçük seq>`. Sorgu en çok [maxQuery] karakter; Türkçe katlama sunucuda yok

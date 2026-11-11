@@ -22,11 +22,11 @@ import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../application/task_catalog_controller.dart';
 import '../application/task_detail_controller.dart';
 import '../application/task_details_controller.dart';
+import '../application/task_lifecycle_controller.dart';
 import '../domain/task_catalog.dart';
 import 'detail/detail_actions.dart';
 import 'detail/detail_subtasks.dart';
 import 'detail/detail_tabs.dart';
-import 'detail/task_dependencies.dart';
 import 'task_texts.dart';
 
 /// Görev ayrıntısı (prototip `detail`): üst çubukta kod + düzenle/diğer işlemler;
@@ -100,6 +100,7 @@ class TaskDetailPage extends ConsumerWidget {
     final details = ref.watch(taskDetailsProvider(code));
     return NzPage.feed(
       onRefresh: () async {
+        ref.invalidate(taskDependenciesProvider(code));
         ref.invalidate(taskDetailsProvider(code));
         try {
           await ref.read(taskDetailsProvider(code).future);
@@ -107,6 +108,7 @@ class TaskDetailPage extends ConsumerWidget {
           // Ayrıntı hatasını sayfadaki banner bildirir.
         }
       },
+      onRevisit: () => ref.invalidate(taskDependenciesProvider(code)),
       // Tablet sağ bölmesi (görev ayrıntısı: gap 20, başlık -8).
       paneLead: NizamioSpacing.space3,
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
@@ -159,7 +161,6 @@ class TaskDetailPage extends ConsumerWidget {
             const Gap(NizamioSpacing.space3),
           ],
           _Body(task: task, catalog: data, actions: actions),
-          TaskDependencies(code: code),
         ] else
           NzAsyncView<TaskCatalog>(
             value: catalog,
@@ -283,8 +284,7 @@ class _Body extends StatelessWidget {
                 semanticLabel:
                     '${l.uiTasksFlyStatus}: ${l.statusLabel(task.status)}',
                 leading: NzDot(color: statusTone(task.status).color(c)),
-                // Aktörün matriste hedefi yoksa (ör. tek başına yönetici) seçici kapalı.
-                onTap: actions.canChangeStatus ? actions.openStatus : null,
+                onTap: actions.openStatus,
               ),
             ),
             Expanded(

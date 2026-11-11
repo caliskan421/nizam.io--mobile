@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/cache_owner.dart';
+import '../../../core/providers.dart';
 import '../domain/chat.dart';
 import '../domain/chat_stream_policy.dart';
 import 'messages_providers.dart';
@@ -27,7 +28,7 @@ class ChatsController extends _$ChatsController {
 
   @override
   Future<ChatInbox> build() async {
-    _generation++;
+    final generation = ++_generation;
     final owner = _owner.watch(ref);
     ref.watch(chatMeProvider);
     final sub = ref.watch(chatSignalBusProvider).stream.listen(_onSignal);
@@ -36,7 +37,9 @@ class ChatsController extends _$ChatsController {
       _coalesce?.cancel();
       _coalesce = null;
     });
-    final inbox = await ref.read(chatRepositoryProvider).loadInbox();
+    final inbox = await ref
+        .read(chatRepositoryProvider)
+        .loadInbox(isCurrent: () => _isCurrent(owner, generation));
     _owner.markLoaded(ref, owner);
     return inbox;
   }
@@ -46,9 +49,21 @@ class ChatsController extends _$ChatsController {
 
   ChatRepository get _repo => ref.read(chatRepositoryProvider);
 
+  CacheOwner get _currentOwner => (
+    session: ref.read(sessionGenerationProvider),
+    program: ref.read(scopeStateProvider).programId,
+  );
+
+  bool _isCurrent(CacheOwner owner, int generation) =>
+      ref.mounted && owner == _currentOwner && generation == _generation;
+
   void _set(ChatInbox Function(ChatInbox) f) {
+    if (!ref.mounted || !_owner.owns(ref)) return;
     final v = state.value;
-    if (v != null) state = AsyncData(f(v));
+    if (v != null) {
+      state = AsyncData(f(v));
+      ref.invalidate(chatUnreadSnapshotProvider);
+    }
   }
 
   void _onSignal(ChatSignal s) {
@@ -83,14 +98,22 @@ class ChatsController extends _$ChatsController {
   Future<void> reload() async {
     if (state.value == null) return;
     final generation = ++_generation;
-    final inbox = await _repo.loadInbox();
-    if (ref.mounted && generation == _generation) state = AsyncData(inbox);
+    final owner = _currentOwner;
+    final inbox = await _repo.loadInbox(
+      isCurrent: () => _isCurrent(owner, generation),
+    );
+    if (_isCurrent(owner, generation)) {
+      state = AsyncData(inbox);
+      ref.invalidate(chatUnreadSnapshotProvider);
+    }
   }
 
   /// Bütün sohbetleri sunucuda okundu sayar; başarıda yerel sayaçlar sıfırlanır.
   Future<void> markAllRead() async {
+    final owner = _currentOwner;
+    final generation = _generation;
     await _repo.markAllRead();
-    if (!ref.mounted) return;
+    if (!_isCurrent(owner, generation)) return;
     _set((v) => v.mapChats((c) => c.copyWith(unread: 0, mention: false)));
   }
 

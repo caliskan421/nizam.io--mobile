@@ -25,17 +25,19 @@ class HomeQuickActionsBar extends StatelessWidget {
   const HomeQuickActionsBar({
     super.key,
     required this.onAction,
+    required this.isAdmin,
     this.compact = false,
   });
 
   final ValueChanged<HomeQuickAction> onAction;
+  final bool isAdmin;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    const actions = HomeQuickAction.values;
+    final actions = homeQuickActions(isAdmin: isAdmin);
     return NzCard.outlined(
       padding: const EdgeInsets.all(NizamioSpacing.space2),
       child: Row(

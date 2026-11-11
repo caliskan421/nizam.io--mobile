@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/errors/api_error.dart';
 import '../../../../core/errors/error_text.dart';
+import '../../../../core/providers.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
@@ -18,6 +19,7 @@ import '../../application/chat_members_controller.dart';
 import '../../application/chat_room_controller.dart';
 import '../../application/messages_providers.dart';
 import '../../domain/chat.dart';
+import 'chat_group_source_info.dart';
 import 'messages_texts.dart';
 
 /// Sohbet bilgisinin ekrana dönen seçimi (sayfa kapandıktan sonra ekran uygular).
@@ -47,14 +49,25 @@ class _ChatInfo extends ConsumerWidget {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final room = ref.watch(chatRoomControllerProvider(chatId)).value;
+    final roomValue = ref.watch(chatRoomControllerProvider(chatId));
+    if (roomValue.isLoading) return const NzLoader();
+    if (roomValue.error case final e?) {
+      return NzErrorState(
+        error: toApiError(e),
+        onRetry: () => ref.invalidate(chatRoomControllerProvider(chatId)),
+      );
+    }
+    final room = roomValue.value;
     if (room == null) return const NzLoader();
     final chat = room.chat;
     final me = ref.watch(chatMeProvider);
     final members = chat.group
         ? ref.watch(chatMembersControllerProvider(chatId))
         : null;
-    final mine = me == null ? null : members?.value?.member(me);
+    final mine =
+        me == null || members?.isLoading == true || members?.hasError == true
+        ? null
+        : members?.value?.member(me);
     void done(ChatInfoAction a) => Navigator.of(context).pop(a);
     Widget act(IconData icon, String label, ChatInfoAction a, {Color? color}) =>
         Expanded(
@@ -122,6 +135,7 @@ class _ChatInfo extends ConsumerWidget {
               act(NzIcons.edit, l.uiMessagesRename, ChatInfoAction.rename),
           ],
         ),
+        if (chat.group) ChatGroupSourceInfo(chat: chat),
         if (chat.group)
           _Members(chatId: chatId, chat: chat, me: me, value: members!),
         if (chat.group && mine != null && !mine.fromSource)
@@ -172,6 +186,8 @@ class _Members extends ConsumerWidget {
     ChatMember m,
   ) async {
     final l = context.l10n;
+    final program = ref.read(scopeStateProvider).programId;
+    final session = ref.read(sessionGenerationProvider);
     final admin = m.role == ChatMemberRole.admin;
     final pick = await NzBottomSheet.show<int>(
       context,
@@ -193,7 +209,12 @@ class _Members extends ConsumerWidget {
         ],
       ),
     );
-    if (!context.mounted || pick == null) return;
+    if (!context.mounted ||
+        pick == null ||
+        ref.read(scopeStateProvider).programId != program ||
+        ref.read(sessionGenerationProvider) != session) {
+      return;
+    }
     await _run(
       context,
       () => pick == 0
@@ -203,18 +224,27 @@ class _Members extends ConsumerWidget {
   }
 
   Future<void> _add(BuildContext context, WidgetRef ref) async {
+    final program = ref.read(scopeStateProvider).programId;
+    final session = ref.read(sessionGenerationProvider);
     final ids = await NzBottomSheet.show<Set<String>>(
       context,
       title: context.l10n.uiMessagesAddMembers,
       builder: (_) => _AddMembers(chatId),
     );
-    if (!context.mounted || ids == null || ids.isEmpty) return;
+    if (!context.mounted ||
+        ids == null ||
+        ids.isEmpty ||
+        ref.read(scopeStateProvider).programId != program ||
+        ref.read(sessionGenerationProvider) != session) {
+      return;
+    }
     await _run(context, () => _ctl(ref).add(ids));
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
+    if (value.isLoading) return const NzLoader();
     if (value.error case final e?) {
       return NzErrorState(
         error: toApiError(e),
@@ -289,6 +319,7 @@ class _AddMembersState extends ConsumerState<_AddMembers> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final value = ref.watch(chatAddCandidatesProvider(widget.chatId));
+    if (value.isLoading) return const NzLoader();
     if (value.error case final e?) {
       return NzErrorState(
         error: toApiError(e),

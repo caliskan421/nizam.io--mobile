@@ -10,6 +10,7 @@ extension GanttTexts on AppLocalizations {
   String ganttZoomLabel(GanttZoom z) => switch (z) {
     GanttZoom.week => uiTimelineGanttZoomDaily,
     GanttZoom.month => uiTimelineGanttZoomWeekly,
+    GanttZoom.monthly => uiTimelineGanttZoomMonthly,
   };
 
   /// "Tümü" / "Açık" / "Geciken · 15".

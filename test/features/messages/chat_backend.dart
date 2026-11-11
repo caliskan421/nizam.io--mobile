@@ -200,8 +200,19 @@ class ChatFixture {
     final key = '${r.method} ${r.path}';
     switch (key) {
       case 'GET /v1/chats':
+        final query = r.query['q']?.toLowerCase();
         return jsonResponse(200, {
-          'items': [for (final c in chats) _row(c)],
+          'items': [
+            for (final c in chats)
+              if (query == null ||
+                  '${c['name'] ?? ''} ${c['counterpart_name'] ?? ''}'
+                      .toLowerCase()
+                      .contains(query) ||
+                  (messages[c['chat_id']] ?? const []).any(
+                    (m) => (m['body']! as String).toLowerCase().contains(query),
+                  ))
+                _row(c),
+          ],
           'next_cursor': '',
         });
       case 'POST /v1/chats/read-all':

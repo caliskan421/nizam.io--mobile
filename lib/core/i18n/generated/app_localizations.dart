@@ -1936,6 +1936,30 @@ abstract class AppLocalizations {
   /// **'mobilde sonraki adımda eklenecek'**
   String get uiActivitySoonTail;
 
+  /// ui.archive.pdf_preview_error
+  ///
+  /// In tr, this message translates to:
+  /// **'PDF önizlenemedi. Dosya bozuk veya parola korumalı olabilir.'**
+  String get uiArchivePdfPreviewError;
+
+  /// ui.archive.pdf_too_large
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu PDF önizleme için çok büyük. İndirerek açabilirsiniz.'**
+  String get uiArchivePdfTooLarge;
+
+  /// ui.archive.image_preview_error
+  ///
+  /// In tr, this message translates to:
+  /// **'Görsel önizlenemedi.'**
+  String get uiArchiveImagePreviewError;
+
+  /// ui.archive.image_too_large
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu görsel önizleme için çok büyük. İndirerek açabilirsiniz.'**
+  String get uiArchiveImageTooLarge;
+
   /// ui.archive.title
   ///
   /// In tr, this message translates to:
@@ -2689,14 +2713,26 @@ abstract class AppLocalizations {
   /// ui.coord.sort_late
   ///
   /// In tr, this message translates to:
-  /// **'Gecikmeye göre'**
+  /// **'Gecikme'**
   String get uiCoordSortLate;
 
   /// ui.coord.sort_progress
   ///
   /// In tr, this message translates to:
-  /// **'İlerlemeye göre'**
+  /// **'Tamamlanma'**
   String get uiCoordSortProgress;
+
+  /// ui.coord.sort_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev sayısı'**
+  String get uiCoordSortTasks;
+
+  /// ui.coord.sort_members
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye sayısı'**
+  String get uiCoordSortMembers;
 
   /// ui.coord.shortcuts
   ///
@@ -3567,6 +3603,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'sn'**
   String get uiFeedbackSecondsUnit;
+
+  /// ui.home.deleted_shortcut
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinenler'**
+  String get uiHomeDeletedShortcut;
 
   /// ui.home.pending_heading
   ///
@@ -5944,6 +5986,228 @@ abstract class AppLocalizations {
   /// **'Mesaj bulunamadı.'**
   String get uiMessagesNotInWindow;
 
+  /// ui.messages_compose.share_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev paylaş'**
+  String get uiMessagesComposeShareTask;
+
+  /// ui.messages_compose.share_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük paylaş'**
+  String get uiMessagesComposeShareDepartment;
+
+  /// ui.messages_compose.share_file
+  ///
+  /// In tr, this message translates to:
+  /// **'Arşiv dosyası paylaş'**
+  String get uiMessagesComposeShareFile;
+
+  /// ui.messages_compose.share_description
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili programda erişebildiğin bir kaydı mesaja ekle.'**
+  String get uiMessagesComposeShareDescription;
+
+  /// ui.messages_compose.share_search
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt ara'**
+  String get uiMessagesComposeShareSearch;
+
+  /// ui.messages_compose.share_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşılabilecek kayıt bulunamadı.'**
+  String get uiMessagesComposeShareEmpty;
+
+  /// ui.messages_compose.partial
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste sınırlandırıldı. Görünen kayıtlar arasından seçim yapabilirsin.'**
+  String get uiMessagesComposePartial;
+
+  /// ui.messages_compose.more
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha fazla göster'**
+  String get uiMessagesComposeMore;
+
+  /// ui.messages_compose.remove
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşımı kaldır'**
+  String get uiMessagesComposeRemove;
+
+  /// ui.messages_compose.ref_limit
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir mesajda en fazla 10 kayıt paylaşabilirsin.'**
+  String get uiMessagesComposeRefLimit;
+
+  /// ui.messages_compose.device_file
+  ///
+  /// In tr, this message translates to:
+  /// **'Cihazdan yeni dosya yükle'**
+  String get uiMessagesComposeDeviceFile;
+
+  /// ui.messages_compose.attachment_preview
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosyayı gönder'**
+  String get uiMessagesComposeAttachmentPreview;
+
+  /// ui.messages_compose.caption
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıklama (isteğe bağlı)'**
+  String get uiMessagesComposeCaption;
+
+  /// ui.messages_compose.closes_at
+  ///
+  /// In tr, this message translates to:
+  /// **'Son tarih'**
+  String get uiMessagesComposeClosesAt;
+
+  /// ui.messages_compose.close_date
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapanış günü'**
+  String get uiMessagesComposeCloseDate;
+
+  /// ui.messages_compose.close_time
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapanış saati'**
+  String get uiMessagesComposeCloseTime;
+
+  /// ui.messages_compose.no_deadline
+  ///
+  /// In tr, this message translates to:
+  /// **'Elle kapatılana kadar açık'**
+  String get uiMessagesComposeNoDeadline;
+
+  /// ui.messages_compose.local_time
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih ve saat cihazının yerel saat dilimindedir.'**
+  String get uiMessagesComposeLocalTime;
+
+  /// ui.messages_compose.deadline_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapanış tarihi ve saati gelecekte olmalı.'**
+  String get uiMessagesComposeDeadlineInvalid;
+
+  /// ui.messages_compose.clear_deadline
+  ///
+  /// In tr, this message translates to:
+  /// **'Son tarihi kaldır'**
+  String get uiMessagesComposeClearDeadline;
+
+  /// ui.messages_compose.pins_truncated
+  ///
+  /// In tr, this message translates to:
+  /// **'Sabitlenen mesajların yalnız bir bölümü gösteriliyor.'**
+  String get uiMessagesComposePinsTruncated;
+
+  /// ui.messages_groups.source
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyelik kaynağı'**
+  String get uiMessagesGroupsSource;
+
+  /// ui.messages_groups.manual
+  ///
+  /// In tr, this message translates to:
+  /// **'Elle seçilen kişiler'**
+  String get uiMessagesGroupsManual;
+
+  /// ui.messages_groups.program
+  ///
+  /// In tr, this message translates to:
+  /// **'Programdaki herkes'**
+  String get uiMessagesGroupsProgram;
+
+  /// ui.messages_groups.department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük ekibi'**
+  String get uiMessagesGroupsDepartment;
+
+  /// ui.messages_groups.pick_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük seç'**
+  String get uiMessagesGroupsPickDepartment;
+
+  /// ui.messages_groups.source_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaynağın güncel üyeleri gruba kendiliğinden katılır. Elle kişi de ekleyebilirsin.'**
+  String get uiMessagesGroupsSourceHint;
+
+  /// ui.messages_groups.change_source
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaynağı değiştir'**
+  String get uiMessagesGroupsChangeSource;
+
+  /// ui.messages_groups.close_source
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaynağı kapat'**
+  String get uiMessagesGroupsCloseSource;
+
+  /// ui.messages_groups.close_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaynak kapatılınca mevcut üyeler grupta kalır ve elle yönetilir. Yeni ekip üyeleri gruba kendiliğinden katılmaz.'**
+  String get uiMessagesGroupsCloseConfirm;
+
+  /// ui.messages_groups.department_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük bilgisi şu anda kullanılamıyor.'**
+  String get uiMessagesGroupsDepartmentUnavailable;
+
+  /// ui.messages_groups.no_departments
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu programda seçilebilecek koordinatörlük yok.'**
+  String get uiMessagesGroupsNoDepartments;
+
+  /// ui.messages_lists.search_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Sohbet geçmişinde eşleşme bulunamadı.'**
+  String get uiMessagesListsSearchEmpty;
+
+  /// ui.messages_lists.search_truncated
+  ///
+  /// In tr, this message translates to:
+  /// **'Arama sonuçları sınırlı. Daha belirli bir ifade arayın.'**
+  String get uiMessagesListsSearchTruncated;
+
+  /// ui.messages_lists.shared_kind
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşılan öğe türü'**
+  String get uiMessagesListsSharedKind;
+
+  /// ui.messages_lists.mentioned
+  ///
+  /// In tr, this message translates to:
+  /// **'Bahsedildin'**
+  String get uiMessagesListsMentioned;
+
+  /// ui.messages_lists.unread_chats
+  ///
+  /// In tr, this message translates to:
+  /// **'okunmamış sohbet'**
+  String get uiMessagesListsUnreadChats;
+
   /// ui.notifications.title
   ///
   /// In tr, this message translates to:
@@ -6933,6 +7197,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Operasyon'**
   String get uiTablesUnitB;
+
+  /// ui.tasks.no_status_transitions
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu görev için kullanabileceğiniz bir durum değişikliği yok.'**
+  String get uiTasksNoStatusTransitions;
 
   /// ui.tasks.title
   ///
@@ -9507,6 +9777,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Haftalık'**
   String get uiTimelineGanttZoomWeekly;
+
+  /// ui.timeline.gantt_zoom_monthly
+  ///
+  /// In tr, this message translates to:
+  /// **'Aylık'**
+  String get uiTimelineGanttZoomMonthly;
 
   /// ui.timeline.gantt_all_coords
   ///

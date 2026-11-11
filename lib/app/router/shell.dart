@@ -379,6 +379,7 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
     // Ana sayfa/Görevler/Koordinatörlükler kökünde açık kayıt yoksa liste sağ bölmenin yerini de alır; kayıt açılınca 390'a
     // daralır. Ağaç iki durumda aynıdır (yalnız genişlik değişir): kabuk ve liste State'i kalır.
     final full = splitListFull(_uri);
+    final tableDetail = current == RailModule.tables && !full;
     final closes = listGoesFull(current);
     return NzAppNavScope(
       nav: _SplitAppNav(NzAppNavScope.of(context), _paneGo, _goModule),
@@ -389,17 +390,19 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
             DecoratedBox(
               key: const ValueKey('master'),
               decoration: BoxDecoration(
-                border: full
+                border: full || tableDetail
                     ? const Border()
                     : Border(right: BorderSide(color: c.border)),
               ),
               // Prototip bölmesi `box-sizing` içermez: 390 içerik + 1 px kenar (sağ 689).
               child: Padding(
                 padding: EdgeInsets.only(
-                  right: full ? 0 : NizamioSize.borderWidth,
+                  right: full || tableDetail ? 0 : NizamioSize.borderWidth,
                 ),
                 child: SizedBox(
-                  width: full
+                  width: tableDetail
+                      ? 0
+                      : full
                       ? MediaQuery.sizeOf(context).width -
                             NzTabletMetrics.railWidth
                       : NzTabletMetrics.masterWidth,
@@ -410,7 +413,7 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
                     child: NzPaneTransition(
                       key: ValueKey((current, full)),
                       motion: NzPaneMotion.rise,
-                      child: master,
+                      child: tableDetail ? const SizedBox.shrink() : master,
                     ),
                   ),
                 ),

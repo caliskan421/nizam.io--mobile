@@ -34,6 +34,8 @@ extension CoordTexts on AppLocalizations {
 
   String coordSortLabel(CoordinatorshipSort s) => switch (s) {
     CoordinatorshipSort.name => uiCoordSortName,
+    CoordinatorshipSort.tasks => uiCoordSortTasks,
+    CoordinatorshipSort.members => uiCoordSortMembers,
     CoordinatorshipSort.late => uiCoordSortLate,
     CoordinatorshipSort.progress => uiCoordSortProgress,
   };

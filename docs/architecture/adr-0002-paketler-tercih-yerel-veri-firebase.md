@@ -21,18 +21,42 @@ standartların şimdiden yerleşmesini istedi. Bu ADR hangi paketin hangi kurall
 | `drift` + `drift_flutter` (+ `drift_dev`) | İnternetsiz gösterim için yerel veri (platform.md kararı; sqflite değil). Kurulum (instance) başına ayrı dosya; farklı kuruluma yeniden bağlanmada dosya silinir (doğrulanabilir temizlik). Şema ve önbellek politikası ekran çalışmasıyla gelir; MOB-0'da yalnız paket. |
 | `path_provider` | drift dosyası ve indirme biletiyle dosya indirme için. |
 | `file_picker` (^13.1.0; kilitte 13.1.0 ve federe alt paketler 2026-10-18 öncesi sürümler) | **2026-11-01 F57, koordinatör kararı — görev kanıt yükleme akışı için.** Yalnız `UploadPicker` portunun gerçekleştirmesinde: `features/tasks/data/file_upload_picker.dart` (kesin dosya, sınır kuralı F1; dışa verilemez). Tek dosya, iki kaynak (`UploadOrigin`; yükleme formunda "Fotoğraflar" / "Dosyalar" seçimi, 2026-11-09 ürün sahibi isteği): **Dosyalar** `FileType.custom` + izinli uzantılar (`uploadExtensions`; iOS Dosyalar, Android SAF); **Fotoğraflar** `FileType.image` — iOS'ta `PHPickerViewController` (süreç dışı seçici, kitaplık izni istemez → `NSPhotoLibraryUsageDescription` eklenmedi), `DarwinOptions(assetRepresentationMode: compatible)` ile HEIC → JPEG; Android'de sistem görsel seçicisi (`GET_CONTENT image/*`, Manifest'e izin eklenmedi, dönüşüm yok). Galeri adı `normalizeUploadName` ile izinli yazıma gelir (`jpeg`/`JPG` → `jpg`, `PNG` → `png`); küme dışı tür (HEIC/WEBP) yerel tür ön denetiminde açık hatayla (`records.content_rejected`) reddedilir. Paket ağa çıkmaz; seçilen dosyanın içeriği yalnız içerik özeti için akışla okunur (`crypto` satırı), adı/yolu günlüğe yazılmaz; tür/boyut yerel ön denetimden geçer, yükleme yalnız mevcut `TaskWriteRepository.attachFile` yolundan. iOS en az 14.0 ister (proje 16.0). |
+| `pdfrx` (^2.12.0) | Arşiv PDF önizlemesi: doğrulanmış arşiv indirme akışından en çok 10 MB bellek içi veri; PDFium ile iOS/Android sayfa görüntüleme ve kaydırma. Harici bağlantı açma etkin değildir; yükleme veya çözümleme hatasında indirme kullanılabilir. |
 | `crypto` (^3.0.7; kilitte 3.0.7, önceden dolaylı bağımlılıktı — sürüm değişmedi) | **2026-11-09, koordinatör kararı — yükleme niyeti içerik özeti (Codex tur 3 N5).** Yalnız `features/tasks/data/upload_digest.dart` (kesin dosya, sınır kuralı F2; dışa verilemez): seçilen dosyanın SHA-256 özeti akışla (`sha256.startChunkedConversion` + `File.openRead()`, belleğe toplanmaz) **yalnız görev ve arşiv yükleme gönderiminde, tür/boyut ön denetimi geçtikten sonra** hesaplanır (Codex tur 4 N7–N9: sınır dışı dosya okunmaz; seçici içerik okumaz; sohbet eki özet hesaplamaz). Port `UploadDigest` (`uploadDigesterProvider`, `tasks_module.dart`'ta bağlanır); denetleyici kapanınca okuma akışı iptal edilir ve sonuç yok sayılır; okunamayan dosya `client.file_unreadable` olarak kullanıcıya gösterilir. Özet niyetle birlikte saklanır: sonucu bilinmeyen yüklemenin "yeniden dene"si özeti yeniden hesaplamaz. Arşiv ve görev ayrıntısı yüklemesi bu özeti işlem anahtarı imzasına ad/boyutla birlikte koyar: sunucu yükleme tekrarını gövde okumadan metadata'dan tanıdığından (istemci akışları §8) aynı ad/boyutlu farklı içerik eski anahtarla gitse yüklenmeden başarı sayılırdı. Özet ağa gönderilmez, günlüğe yazılmaz. |
-| `firebase_core`, `firebase_messaging`, `firebase_analytics`, `firebase_crashlytics`, `firebase_remote_config` | **Önceki kararı değiştirir:** platform.md'deki "çökme raporu SaaS yok (ADR-0003)" ve "analytics kapalı" mobil için kaldırıldı (ürün sahibi). Kurallar: SDK yalnız `lib/app/**` ve `core/telemetry/telemetry.dart` (kesin dosya, S6; A4/A5); Firebase'e belirteç, parola, sunucu adresi, kişisel veri veya sunucu hata gövdesi gönderilmez (günlük redaksiyonu aynen). **Başlatma yapılmaz:** Firebase projesi ve yapılandırma dosyaları (`google-services.json`, `GoogleService-Info.plist`) dağıtım/proje sahipliği kararına bağlıdır; o zamana kadar paketler bağlıdır ama `Firebase.initializeApp` çağrılmaz. |
+| `firebase_core`, `firebase_messaging`, `firebase_analytics`, `firebase_crashlytics`, `firebase_remote_config` | **Önceki kararı değiştirir:** platform.md'deki "çökme raporu SaaS yok (ADR-0003)" ve "analytics kapalı" mobil için kaldırıldı (ürün sahibi). Kurallar: SDK yalnız `lib/app/**` ve `core/telemetry/telemetry.dart` (kesin dosya, S6; A4/A5); Firebase'e uygulama erişim/yenileme belirteci, parola, sunucu adresi, kişisel veri veya sunucu hata gövdesi gönderilmez (günlük redaksiyonu aynen). Başlangıçta proje/yapılandırma bekleniyordu. **2026-11-11 dev istisnası:** ürün sahibinin sağladığı doğrulanmış dosyalarla yalnız dev Android/iOS'ta Core başlatılır ve Remote Config okunur. Prod kapalı; FCM otomatik kayıt ve Analytics/Crashlytics toplama kapalı kalır. |
 | `flutter_native_splash`, `flutter_launcher_icons` | Açılış ekranı ve simge. Simge (`assets/branding/icon*.png`) uygulama içi işaretle (`NzBrandMark`) aynıdır: üstten alta `primaryTop #D8F866 → primary #C8F53C` degrade, "N" Poppins SemiBold `#0B0B0B`, yazı/karo oranı 16/44 (Android uyarlanabilir simgede güvenli alana ölçekli; arka plan `icon_background.png`). Açılış görseli hâlâ **yer tutucu** (primary600 + "N"; KR-13 ile aynı ilke). Görseller değişince `make branding` çalıştırılır. |
 
 ## Sonuçlar
 
+2026-11-11 ürün sahibi native push altyapısının hazırlanmasını istedi.
+[İlk dilim ve etkinleştirme koşulları](../yurutme/native-push-altyapisi.md): platform
+portu, kapalı varsayılan, açık izin akışı ve Firebase Messaging adaptörü hazırlanır;
+Native push teslimi backend native sözleşmesi ve sağlayıcı ayarları gelene kadar kapalıdır.
+Native push etkinleştirildiğinde FCM cihaz kayıt tokenı yalnız FCM ve doğrulanmış
+sunucunun native kayıt mekanizmasında kullanılır; uygulama erişim/yenileme belirteçleri
+Firebase'e gönderilmez. Analytics ve diğer Firebase hizmetleri ayrıca açılmaz.
+
+Ürün sahibinin aynı günkü ek isteğiyle Remote Config sürüm/build tabanlı zorunlu ve
+isteğe bağlı güncelleme politikası ile push/Crashlytics/Analytics anahtarlarının
+[kapalı temeli](../yurutme/firebase-kurulum-ve-kontroller.md) hazırlanır. Backend
+asgari sürüm ve API uyum kapısı korunur; uzaktan ayarlar bu kapıyı gevşetemez.
+Politika anahtarları SDK toplamayı veya izinleri kendiliğinden açmaz. Doğrulanmış
+Firebase yapılandırması gelmeyen ortamlarda başlatmama kararı geçerlidir.
+
+Ürün sahibi daha sonra aynı gün dev JSON/plist dosyalarını sağladı. Proje
+`nizamio-mobile`, uygulama kimliği iki platformda `io.nizamio.mobile.dev` olarak
+doğrulandı. Yalnız bu flavor'da iki saniye sınırlı Core başlatması yapılır; başarılıysa
+ilk kareden sonra Remote Config okunur. Hata/süre aşımı giriş akışını engellemez.
+Bu istisna prod'u, push izin/token kaydını veya telemetry toplamayı açmaz. Native
+SDK'lar mevcut FlutterFire/SPM bağımlılıklarından gelir; SwiftUI configure veya ikinci
+bir native SDK kurulumu yapılmaz.
+
 - Tema modu (sistem/açık/koyu) kalıcıdır: `ThemeModeController` (get_it) +
   `themeModeProvider` (Riverpod); `runApp`'ten önce yüklenir. Güvenlik açılış sırası
   (`startup`) tercihlere bağlı değildir.
-- Firebase'in etkinleştirilmesi ayrı bir iş olarak kalır: proje + yapılandırma dosyaları →
-  `core/telemetry/` (başlatma, Crashlytics hata kancası, analytics olay şeması, Remote Config
-  varsayılanları) → izin/aydınlatma metni.
+- Dev Core/Remote Config bağlantısı `lib/app/config/` üzerinden kuruldu. Prod dosyaları,
+  Crashlytics hata kancası, Analytics olay şeması ve kullanıcı tercihleri ayrı işlerdir;
+  native push için backend sözleşmesi ve APNs/FCM teslim kanıtı gereklidir.
 - Yükseltme notu: `flutter_launcher_icons` iOS projesinde
   `ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS` değerini bozar; `make branding`
   bunu geri alır.

@@ -1,0 +1,26 @@
+{
+  "$comment": "Mesaj yazma, paylaşım ve anket akışları.",
+  "texts": {
+    "ui.messages_compose.share_task": "Görev paylaş",
+    "ui.messages_compose.share_department": "Koordinatörlük paylaş",
+    "ui.messages_compose.share_file": "Arşiv dosyası paylaş",
+    "ui.messages_compose.share_description": "Seçili programda erişebildiğin bir kaydı mesaja ekle.",
+    "ui.messages_compose.share_search": "Kayıt ara",
+    "ui.messages_compose.share_empty": "Paylaşılabilecek kayıt bulunamadı.",
+    "ui.messages_compose.partial": "Liste sınırlandırıldı. Görünen kayıtlar arasından seçim yapabilirsin.",
+    "ui.messages_compose.more": "Daha fazla göster",
+    "ui.messages_compose.remove": "Paylaşımı kaldır",
+    "ui.messages_compose.ref_limit": "Bir mesajda en fazla 10 kayıt paylaşabilirsin.",
+    "ui.messages_compose.device_file": "Cihazdan yeni dosya yükle",
+    "ui.messages_compose.attachment_preview": "Dosyayı gönder",
+    "ui.messages_compose.caption": "Açıklama (isteğe bağlı)",
+    "ui.messages_compose.closes_at": "Son tarih",
+    "ui.messages_compose.close_date": "Kapanış günü",
+    "ui.messages_compose.close_time": "Kapanış saati",
+    "ui.messages_compose.no_deadline": "Elle kapatılana kadar açık",
+    "ui.messages_compose.local_time": "Tarih ve saat cihazının yerel saat dilimindedir.",
+    "ui.messages_compose.deadline_invalid": "Kapanış tarihi ve saati gelecekte olmalı.",
+    "ui.messages_compose.clear_deadline": "Son tarihi kaldır",
+    "ui.messages_compose.pins_truncated": "Sabitlenen mesajların yalnız bir bölümü gösteriliyor."
+  }
+}

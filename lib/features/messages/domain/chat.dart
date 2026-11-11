@@ -187,6 +187,8 @@ final class Chat {
     this.role,
     this.peerOnline,
     this.peerLastSeen,
+    this.source = ChatSource.none,
+    this.sourceDepartmentId,
   });
 
   final String id;
@@ -210,6 +212,8 @@ final class Chat {
   final ChatMemberRole? role;
   final bool? peerOnline;
   final DateTime? peerLastSeen;
+  final ChatSource source;
+  final String? sourceDepartmentId;
 
   bool get isUnread => unread > 0 || mention;
 
@@ -237,6 +241,8 @@ final class Chat {
     role: role ?? this.role,
     peerOnline: peerOnline,
     peerLastSeen: peerLastSeen,
+    source: source,
+    sourceDepartmentId: sourceDepartmentId,
   );
 }
 
@@ -288,6 +294,7 @@ final class OutgoingMessage {
     required this.text,
     this.replyTo,
     this.mentions = const [],
+    this.refs = const [],
     this.poll,
   });
 
@@ -295,6 +302,9 @@ final class OutgoingMessage {
   final String text;
   final String? replyTo;
   final List<ChatMention> mentions;
+
+  /// Gönderilecek referanslar; sunucu kimliği henüz yoktur.
+  final List<ChatRefDraft> refs;
 
   /// Doluysa mesaj anket olarak açılır (soru = [text]).
   final PollDraft? poll;
@@ -328,13 +338,24 @@ final class ChatCandidates {
 /// Grup kurma taslağı. [signature] işlem anahtarının gövde imzasıdır (aynı gövde aynı anahtar).
 @immutable
 final class GroupDraft {
-  GroupDraft({required this.name, required Iterable<String> memberIds})
-    : memberIds = List.unmodifiable(memberIds.toSet().toList()..sort());
+  GroupDraft({
+    required this.name,
+    required Iterable<String> memberIds,
+    this.source = ChatSource.none,
+    this.sourceDepartmentId,
+  }) : memberIds = List.unmodifiable(memberIds.toSet().toList()..sort());
 
   final String name;
   final List<String> memberIds;
+  final ChatSource source;
+  final String? sourceDepartmentId;
 
-  String get signature => '${name.trim()}\u0000${memberIds.join(',')}';
+  String get signature => [
+    name.trim(),
+    source.name,
+    sourceDepartmentId ?? '',
+    ...memberIds,
+  ].map((s) => '${s.length}:$s').join();
 }
 
 /// Anlık akış sinyali: bağlantı açıldı (uzlaştırma zamanı) ya da içeriksiz olay.
@@ -377,8 +398,16 @@ final class ChatEvent extends ChatSignal {
 
 /// Mesajlaşma uçlarının domain portu (gerçekleştirme `data/`). Hatalar `ApiError`.
 abstract interface class ChatRepository {
+  /// Seçili programın tüm bağlı koordinatörlükleri (kişinin kendi ekipleriyle sınırlı değil).
+  Future<ChatDepartments> programDepartments();
+
   /// Seçili programın sohbetleri (imleçli sayfalar birleştirilir; tavanda [ChatInbox.truncated]).
-  Future<ChatInbox> loadInbox();
+  /// [isCurrent] her sayfa isteğinden önce sınanır; kapsam değişince eski imleçle yeni
+  /// programda istek kurulmaz. İlk okumayı başlatan oturum/program sahibi yakalanmalıdır.
+  Future<ChatInbox> loadInbox({String? query, bool Function()? isCurrent});
+
+  /// Program seçilmeden bütün erişilebilir programların sayaçları (S1).
+  Future<List<ChatProgramUnread>> unreadOverview();
 
   /// Görünür bütün sohbetleri okundu sayar.
   Future<void> markAllRead();
@@ -423,6 +452,13 @@ abstract interface class ChatRepository {
 
   Future<Chat> createGroup(GroupDraft draft, {required String requestKey});
 
+  /// [ChatSource.none] kaynağı kapatır; eksik alan PATCH'iyle karıştırılmaz.
+  Future<Chat> updateSource(
+    String chatId,
+    ChatSource source, {
+    String? departmentId,
+  });
+
   // --- Tepki, sabit, anket (§10.10) ---
 
   /// Kişi başına tek tepki; yenisi eskinin yerine geçer.
@@ -438,6 +474,9 @@ abstract interface class ChatRepository {
   /// Sabit şeridi (`pinned_at` azalan; imleçsiz).
   Future<List<ChatMessage>> pins(String chatId);
 
+  /// UI'a kesilme bilgisini de sunan sabit okuması.
+  Future<ChatPinsPage> pinnedPage(String chatId);
+
   /// Oy kümesi önceki oyun yerine geçer; boş küme oyu geri çeker.
   Future<void> vote(String chatId, String messageId, Set<int> options);
 
@@ -451,6 +490,7 @@ abstract interface class ChatRepository {
     String clientId,
     ChatUpload file, {
     String? replyTo,
+    String? caption,
   });
 
   /// Ekin baytları (akış; belleğe toplanmaz).
@@ -473,7 +513,11 @@ abstract interface class ChatRepository {
 
   // --- Paylaşılanlar, mesajdan görev, arama (§10.8–§10.10) ---
 
-  Future<ChatSharedPage> shared(String chatId, {String? cursor});
+  Future<ChatSharedPage> shared(
+    String chatId, {
+    String? cursor,
+    ChatRefKind? kind,
+  });
 
   Future<ChatRefCard> refCard(String refId);
 

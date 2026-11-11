@@ -89,6 +89,7 @@ void main() {
     expect(s.leads.single.name, 'Ayşe Kaya');
     expect(s.leads.single.role, PersonRole.coordinator);
     expect(s.members, isEmpty, reason: 'sunucu yalnız member_count verir');
+    expect(s.memberCount, 5);
     expect(slice.truncated, isFalse);
   });
 

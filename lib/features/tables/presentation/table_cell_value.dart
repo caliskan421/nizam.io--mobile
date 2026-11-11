@@ -34,7 +34,9 @@ class TableCellValue extends StatelessWidget {
         ),
       );
     }
-    if (value == null || value == '') {
+    if (value == null ||
+        value == '' ||
+        (value is List && (value as List).isEmpty)) {
       return Text(
         '—',
         style: context.text.bodySm.copyWith(color: context.colors.textMuted),
@@ -52,7 +54,7 @@ class TableCellValue extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.text.bodySm,
             ),
@@ -89,7 +91,7 @@ class TableCellValue extends StatelessWidget {
     }
     return Text(
       text,
-      maxLines: 2,
+      maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: context.text.bodySm,
     );

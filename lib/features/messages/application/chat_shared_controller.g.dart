@@ -60,7 +60,7 @@ final class ChatSharedControllerProvider
 }
 
 String _$chatSharedControllerHash() =>
-    r'96879cc67f990b031644475140060a69843e7dd2';
+    r'e980c5af00894335b7258ec56bd93d5a631bab2c';
 
 /// Paylaşılanlar (`listChatRefs`, en yeniden eskiye, imleçli; §10.8). Satır statiktir; kart
 /// [chatRefCardProvider] ile okunur. Biçimi geçerli ama bilinmeyen imleç (ör. imlecin mesajı
@@ -183,7 +183,7 @@ final class ChatRefCardProvider
   }
 }
 
-String _$chatRefCardHash() => r'2334669ff4efd2fee85e6437c7cb0c56473552b7';
+String _$chatRefCardHash() => r'82d1501d4132153cda7d1ef3cb743c666ab159ce';
 
 /// Referans kartı (`getChatRefSummary`): ekran açıkken önbellekte, sohbet yeniden açılınca
 /// yeniden okunur. 404 `ref_not_found` hata olarak döner (mesaj silinmiş ya da sohbette değilim).

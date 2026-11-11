@@ -65,6 +65,7 @@ class NzComposer extends StatelessWidget {
           maxHeight: maxInputHeight,
         ),
         child: TextField(
+          onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
           controller: controller,
           focusNode: focusNode,
           minLines: 1,

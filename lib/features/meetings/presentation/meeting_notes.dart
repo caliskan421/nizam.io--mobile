@@ -113,6 +113,8 @@ class _MeetingNotesState extends ConsumerState<MeetingNotes> {
                 spacing: NizamioSpacing.space2,
                 children: [
                   TextField(
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
                     controller: _draft,
                     minLines: 2,
                     maxLines: 6,

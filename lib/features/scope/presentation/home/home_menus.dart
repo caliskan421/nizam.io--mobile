@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/providers.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/layout/nz_pane.dart';
@@ -17,6 +19,7 @@ import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
 import '../../domain/program.dart';
 import '../program_badge.dart';
+import '../program_unread_badge.dart';
 import 'home_sections.dart';
 import 'home_texts.dart';
 
@@ -29,6 +32,7 @@ const _tabletBottom = 28.0;
 Future<void> showHomeShortcuts(
   BuildContext context, {
   required ValueChanged<HomeQuickAction> onQuickAction,
+  required bool isAdmin,
 }) {
   final l = context.l10n;
   return NzFlyoutMenu.show(
@@ -36,7 +40,7 @@ Future<void> showHomeShortcuts(
     semanticLabel: l.uiHomeShortcuts,
     entries: [
       NzFlyoutSection(l.uiHomeQuickActions),
-      for (final a in HomeQuickAction.values)
+      for (final a in homeQuickActions(isAdmin: isAdmin))
         NzFlyoutItem(
           label: quickActionLongLabel(l, a),
           icon: quickActionIcon(a),
@@ -327,7 +331,7 @@ Future<void> showHomeDrawer(
 }
 
 /// Çekmecedeki kapsam kartı: violet monogram karosu, program adı, alt satır, ↕ simgesi.
-class _SeasonCard extends StatelessWidget {
+class _SeasonCard extends ConsumerWidget {
   const _SeasonCard({
     required this.name,
     required this.caption,
@@ -343,7 +347,7 @@ class _SeasonCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     final t = context.text;
     return NzCard.filled(
@@ -377,6 +381,10 @@ class _SeasonCard extends StatelessWidget {
             ),
           ),
           const Gap(NizamioSpacing.space3),
+          if (ref.watch(scopeStateProvider).programId case final id?) ...[
+            ProgramUnreadBadge(programId: id),
+            const Gap(NizamioSpacing.space3),
+          ],
           NzIcon(
             NzIcons.unfold,
             size: NizamioSize.iconSizeSm,

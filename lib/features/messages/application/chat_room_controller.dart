@@ -3,6 +3,7 @@ import 'dart:collection';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/cache_owner.dart';
 import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
@@ -15,6 +16,8 @@ import 'messages_providers.dart';
 
 part 'chat_room_controller.g.dart';
 part 'chat_room_reconcile.dart';
+part 'chat_room_ownership.dart';
+part 'chat_room_presence.dart';
 
 /// Gönderimin ekrana dönen sonucu.
 enum ChatSendOutcome {
@@ -70,61 +73,89 @@ class ChatRoomController extends _$ChatRoomController {
   Future<void> _queue = Future<void>.value();
   var _readSeq = 0;
   DateTime? _lastTyping;
+  final _owner = CacheOwnership();
+  CacheOwner? _scope;
+  var _epoch = 0;
 
   @override
   Future<ChatRoom> build(String id) async {
-    final me = ref.watch(chatMeProvider);
-    final sub = ref.watch(chatSignalBusProvider).stream.listen(_onSignal);
-    ref.onDispose(() {
-      unawaited(sub.cancel());
-      _flush?.cancel();
-      _typingOff?.cancel();
-      _readLater?.cancel();
-      _readLater = null;
+    _scope = _owner.watch(ref);
+    _owner.markLoaded(ref, _scope!);
+    _epoch++;
+    return _inScope(() async {
+      final me = ref.watch(chatMeProvider);
+      final sub = ref.watch(chatSignalBusProvider).stream.listen(_onSignal);
+      ref.onDispose(() {
+        unawaited(sub.cancel());
+        _flush?.cancel();
+        _flush = null;
+        _typingOff?.cancel();
+        _typingOff = null;
+        _readLater?.cancel();
+        _readLater = null;
+      });
+      _readSeq = 0;
+      _booting = true;
+      _missed = false;
+      _dirtyAfter = _dirtyInfo = _dirtyPins = false;
+      _dirtyIds.clear();
+      _uploads.clear();
+      _outgoing.clear();
+      _lastTyping = null;
+      _queue = Future<void>.value();
+      // Okunmamış sayısı (ayırıcı) liste satırından gelir; liste okunamazsa ayırıcı yok.
+      final inbox = ref
+          .read(chatsControllerProvider.future)
+          .then<ChatInbox?>((v) => v, onError: (Object _) => null);
+      // Sabit şeridi okunamazsa şerit boş açılır (sonraki olay ya da yeniden bağlanma tazeler).
+      final pins = _repo
+          .pinnedPage(id)
+          .then<ChatPinsPage>(
+            (v) => v,
+            onError: (Object _) => ChatPinsPage(items: const []),
+          );
+      final r = await Future.wait<Object?>([
+        _repo.getChat(id),
+        _repo.listMessages(id, limit: pageSize),
+        inbox,
+        pins,
+      ], eagerError: true);
+      final detail = r[0]! as Chat;
+      final page = r[1]! as ChatHistoryPage;
+      final row = (r[2] as ChatInbox?)?.chat(id);
+      Timer.run(_booted);
+      return ChatRoom(
+        chat: row == null
+            ? detail
+            : detail.copyWith(unread: row.unread, mention: row.mention),
+        messages: page.messages,
+        peerReadSeq: page.peerReadSeq,
+        hasOlder: page.messages.length >= pageSize,
+        unreadMarker: unreadMarkerOf(page.messages, row?.unread ?? 0, me),
+        pins: (r[3]! as ChatPinsPage).items,
+        pinsTruncated: (r[3]! as ChatPinsPage).truncated,
+      );
     });
-    _readSeq = 0;
-    _booting = true;
-    _missed = false;
-    // Okunmamış sayısı (ayırıcı) liste satırından gelir; liste okunamazsa ayırıcı yok.
-    final inbox = ref
-        .read(chatsControllerProvider.future)
-        .then<ChatInbox?>((v) => v, onError: (Object _) => null);
-    // Sabit şeridi okunamazsa şerit boş açılır (sonraki olay ya da yeniden bağlanma tazeler).
-    final pins = _repo
-        .pins(id)
-        .then<List<ChatMessage>>(
-          (v) => v,
-          onError: (Object _) => const <ChatMessage>[],
-        );
-    final r = await Future.wait<Object?>([
-      _repo.getChat(id),
-      _repo.listMessages(id, limit: pageSize),
-      inbox,
-      pins,
-    ], eagerError: true);
-    final detail = r[0]! as Chat;
-    final page = r[1]! as ChatHistoryPage;
-    final row = (r[2] as ChatInbox?)?.chat(id);
-    Timer.run(_booted);
-    return ChatRoom(
-      chat: row == null
-          ? detail
-          : detail.copyWith(unread: row.unread, mention: row.mention),
-      messages: page.messages,
-      peerReadSeq: page.peerReadSeq,
-      hasOlder: page.messages.length >= pageSize,
-      unreadMarker: unreadMarkerOf(page.messages, row?.unread ?? 0, me),
-      pins: r[3]! as List<ChatMessage>,
-    );
   }
 
-  ChatRepository get _repo => ref.read(chatRepositoryProvider);
+  ChatRepository get _repo {
+    _ensureScope();
+    return ref.read(chatRepositoryProvider);
+  }
+
   ChatRoom? get _current => state.value;
+  String? get _me => ref.read(chatMeProvider);
+  String? _memberName(String account) =>
+      ref.read(chatMembersControllerProvider(id)).value?.name(account);
+  bool get _alive =>
+      ref.mounted &&
+      _owner.owns(ref) &&
+      (Zone.current[_scopeZone] == null || Zone.current[_scopeZone] == _epoch);
 
   /// Açılış bitti: okumalar sürerken sinyal geldiyse uzlaştırma bir kez koşar (oluşturma ve
   /// silme kaçmaz; okundu imleci uzlaştırmanın sonunda ilerler), gelmediyse okundu imleci ilerler.
   void _booted() {
-    if (!ref.mounted) return;
+    if (!_alive) return;
     _booting = false;
     if (!_missed) return unawaited(_markRead());
     _missed = false;
@@ -133,19 +164,23 @@ class ChatRoomController extends _$ChatRoomController {
 
   void _update(ChatRoom Function(ChatRoom) f) {
     final v = state.value;
-    if (v != null && ref.mounted) state = AsyncData(f(v));
+    if (v != null && _alive) state = AsyncData(f(v));
   }
 
   /// Ağ okumaları sırayla (uzlaştırma, eski sayfa); hata yutulur, görünür veri kalır.
   Future<void> _enqueue(Future<void> Function() op) {
-    final next = _queue.then((_) async {
-      if (!ref.mounted || state.value == null) return;
-      try {
-        await op();
-      } on Object {
-        // Sonraki olay ya da yeniden bağlanma tazeler.
-      }
-    });
+    if (!_alive) return Future<void>.value();
+    final epoch = _epoch;
+    final next = _queue.then(
+      (_) => runZoned(() async {
+        if (!_alive || state.value == null) return;
+        try {
+          await op();
+        } on Object {
+          // Sonraki olay ya da yeniden bağlanma tazeler.
+        }
+      }, zoneValues: {_scopeZone: epoch}),
+    );
     return _queue = next;
   }
 
@@ -218,10 +253,14 @@ class ChatRoomController extends _$ChatRoomController {
   }
 
   /// Sabit şeridini sunucudan yeniden okur (hata yutulur: eski şerit kalır).
-  Future<void> reloadPins() async {
+  Future<void> reloadPins() => _inScope(_reloadPins);
+
+  Future<void> _reloadPins() async {
     try {
-      final pins = await _repo.pins(id);
-      _update((r) => r.copyWith(pins: pins));
+      final pins = await _repo.pinnedPage(id);
+      _update(
+        (r) => r.copyWith(pins: pins.items, pinsTruncated: pins.truncated),
+      );
     } on Object {
       // Sonraki olay ya da yeniden bağlanma tazeler.
     }
@@ -235,29 +274,6 @@ class ChatRoomController extends _$ChatRoomController {
       ],
     ),
   );
-
-  void _typingFrom(String actor) {
-    final room = state.value;
-    if (room == null || actor == ref.read(chatMeProvider)) return;
-    // Grupta ad üye listesinden (§10.10), yoksa yüklü mesajlardan; çözülemeyen kişi gösterilmez.
-    final name = room.chat.group
-        ? ref.read(chatMembersControllerProvider(id)).value?.name(actor) ??
-              room.messages
-                  .where((m) => m.senderId == actor && m.senderName != null)
-                  .lastOrNull
-                  ?.senderName
-        : room.chat.name;
-    if (name == null || name.isEmpty) return;
-    _update((r) => r.copyWith(typing: () => name));
-    _typingOff?.cancel();
-    _typingOff = Timer(ChatStreamPolicy.typingShownFor, _clearTyping);
-  }
-
-  void _clearTyping() {
-    _typingOff?.cancel();
-    _typingOff = null;
-    _update((r) => r.copyWith(typing: () => null));
-  }
 
   /// Okundu imlecini sunucudaki son mesaja ilerletir (yalnız ön planda; geri gitmez).
   Future<void> _markRead() async {
@@ -282,11 +298,11 @@ class ChatRoomController extends _$ChatRoomController {
     _readSeq = last.seq!;
     try {
       await _repo.markRead(id, last.id);
-      if (ref.mounted) {
+      if (_alive) {
         ref.read(chatsControllerProvider.notifier).markedRead(id);
       }
     } on Object {
-      _readSeq = previous;
+      if (_alive) _readSeq = previous;
     }
   }
 
@@ -363,17 +379,28 @@ class ChatRoomController extends _$ChatRoomController {
     String text, {
     String? replyTo,
     List<ChatMention> mentions = const [],
+    List<ChatRefDraft> refs = const [],
     PollDraft? poll,
-  }) => _post(text: text, replyTo: replyTo, mentions: mentions, poll: poll);
+  }) => _post(
+    text: text,
+    replyTo: replyTo,
+    mentions: mentions,
+    refs: refs,
+    poll: poll,
+  );
 
   /// Ek mesajı (tek dosya): gönderim kuralları [send] ile aynıdır (aynı kimlikle tekrar).
-  Future<ChatSendOutcome> sendAttachment(ChatUpload file, {String? replyTo}) =>
-      _post(text: '', replyTo: replyTo, upload: file);
+  Future<ChatSendOutcome> sendAttachment(
+    ChatUpload file, {
+    String? replyTo,
+    String? caption,
+  }) => _post(text: caption ?? '', replyTo: replyTo, upload: file);
 
   Future<ChatSendOutcome> _post({
     required String text,
     String? replyTo,
     List<ChatMention> mentions = const [],
+    List<ChatRefDraft> refs = const [],
     PollDraft? poll,
     ChatUpload? upload,
   }) {
@@ -388,7 +415,8 @@ class ChatRoomController extends _$ChatRoomController {
       clientId: clientId,
       text: text,
       replyTo: replyTo,
-      mentions: mentions,
+      mentions: List.unmodifiable(mentions),
+      refs: List.unmodifiable(refs),
       poll: poll,
     );
     _outgoing[clientId] = out;
@@ -404,7 +432,7 @@ class ChatRoomController extends _$ChatRoomController {
         unreadMarker: () => null,
       ),
     );
-    return _deliver(local);
+    return _inScope(() => _deliver(local));
   }
 
   /// Gönderilemeyen mesajı AYNI istemci kimliği ve AYNI gövdeyle yeniden gönderir.
@@ -414,7 +442,7 @@ class ChatRoomController extends _$ChatRoomController {
       return Future.value(ChatSendOutcome.failed);
     }
     _setPending(clientId, ChatSendState.sending, null);
-    return _deliver(m);
+    return _inScope(() => _deliver(m));
   }
 
   /// Gönderilemeyen mesajı listeden atar.
@@ -457,13 +485,16 @@ class ChatRoomController extends _$ChatRoomController {
               local.clientId,
               upload,
               replyTo: local.replyTo?.messageId,
+              caption: _outgoing[local.clientId]?.text,
             )
           : await _repo.send(id, _outgoing[local.clientId]!);
+      if (!_alive) return ChatSendOutcome.failed;
       _uploads.remove(local.clientId);
       _outgoing.remove(local.clientId);
       _update((r) => r.copyWith(messages: mergeMessages(r.messages, [sent])));
       return ChatSendOutcome.sent;
     } on ApiError catch (e) {
+      if (!_alive) return ChatSendOutcome.failed;
       switch (e.code) {
         case 'messaging.message_deleted':
           discard(local.clientId);
@@ -497,7 +528,13 @@ class ChatRoomController extends _$ChatRoomController {
     String messageId,
     String text, {
     required int expectedRevision,
-  }) async {
+  }) => _inScope(() => _edit(messageId, text, expectedRevision));
+
+  Future<void> _edit(
+    String messageId,
+    String text,
+    int expectedRevision,
+  ) async {
     final m = state.value?.message(messageId);
     if (m == null || !m.onServer) {
       throw ApiError('messaging.message_not_found');
@@ -519,7 +556,9 @@ class ChatRoomController extends _$ChatRoomController {
   }
 
   /// Mesajı siler (gönderen; grupta yönetici). Zaten silinmişse yerelden kalkar.
-  Future<void> delete(String messageId) async {
+  Future<void> delete(String messageId) => _inScope(() => _delete(messageId));
+
+  Future<void> _delete(String messageId) async {
     try {
       await _repo.delete(id, messageId);
     } on ApiError catch (e) {
@@ -541,14 +580,6 @@ class ChatRoomController extends _$ChatRoomController {
     _lastTyping = now;
     if (!ref.read(chatSignalBudgetProvider).take(now)) return;
     unawaited(_typingSignal());
-  }
-
-  Future<void> _typingSignal() async {
-    try {
-      await _repo.typing(id);
-    } on Object {
-      // Yazıyor en iyi çabadır.
-    }
   }
 
   static const _invalidCursor = 'messaging.invalid_cursor';

@@ -13,10 +13,12 @@ import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/chat_controller.dart';
+import '../../application/chat_group_sources.dart';
 import '../../application/chat_members_controller.dart';
 import '../../application/messages_providers.dart';
 import '../../domain/chat.dart';
 import '../../domain/chat_room.dart';
+import '../../domain/chat_share_option.dart';
 import 'messages_texts.dart';
 
 /// Yazma alanı: taslağı ve yazma durumunu kendisi dinler; tuş vuruşu ve klavye kalkışı (her kare
@@ -33,6 +35,8 @@ class ChatComposerArea extends ConsumerWidget {
     required this.onSend,
     required this.onAttach,
     required this.onMention,
+    this.refs = const [],
+    this.onRemoveRef,
   });
 
   final ChatRoom room;
@@ -41,6 +45,8 @@ class ChatComposerArea extends ConsumerWidget {
   final VoidCallback onSend;
   final VoidCallback onAttach;
   final ValueChanged<MentionPick> onMention;
+  final List<ChatShareOption> refs;
+  final ValueChanged<ChatShareOption>? onRemoveRef;
 
   /// Gösterilen en çok öneri.
   static const maxSuggestions = 5;
@@ -50,11 +56,15 @@ class ChatComposerArea extends ConsumerWidget {
     ChatMembers? members,
     String? me,
     String all,
+    List<ChatDepartmentOption> departments,
   ) {
     final q = trLower(query);
     return [
       if (room.chat.canManage && trLower(all).startsWith(q))
         (label: all, mention: const ChatMention.all()),
+      for (final d in departments)
+        if (trLower(d.name).contains(q))
+          (label: d.name, mention: ChatMention.department(d.id)),
       for (final m in members?.items ?? const <ChatMember>[])
         if (m.accountId != me && trLower(m.name).contains(q))
           (label: m.name, mention: ChatMention.account(m.accountId)),
@@ -89,6 +99,12 @@ class ChatComposerArea extends ConsumerWidget {
     final members = room.chat.group
         ? ref.watch(chatMembersControllerProvider(room.chat.id)).value
         : null;
+    final sources = room.chat.group
+        ? ref.watch(chatGroupSourcesProvider)
+        : null;
+    final departments = sources == null || sources.isLoading || sources.hasError
+        ? const <ChatDepartmentOption>[]
+        : sources.value?.departments ?? const <ChatDepartmentOption>[];
     final ctxMsg = view.edit != null
         ? room.message(view.edit!)
         : view.reply != null
@@ -97,25 +113,40 @@ class ChatComposerArea extends ConsumerWidget {
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: draft,
       builder: (context, value, _) {
-        final query = members == null || view.edit != null
+        final query = !room.chat.group || view.edit != null
             ? null
             : mentionQuery(value.text);
         final picks = query == null
             ? const <MentionPick>[]
-            : _suggest(query, members, me, l.uiMessagesMentionAll);
+            : _suggest(query, members, me, l.uiMessagesMentionAll, departments);
         return MediaQuery.withClampedTextScaling(
           maxScaleFactor: 1.3,
           child: NzComposer(
             controller: draft,
             focusNode: focus,
             hint: l.uiMessagesMessageHint,
-            canSend: value.text.trim().isNotEmpty,
+            canSend:
+                value.text.trim().isNotEmpty ||
+                (view.edit == null && refs.isNotEmpty),
             onSend: onSend,
             sendLabel: l.uiMessagesSend,
             onAttach: onAttach,
             attachLabel: l.uiMessagesAttach,
             bottomInset: bottom,
             header: [
+              if (view.edit == null)
+                for (final item in refs)
+                  NzComposerContext(
+                    icon: switch (item.ref.kind) {
+                      ChatRefKind.task => NzIcons.tasks,
+                      ChatRefKind.department => NzIcons.coordinatorships,
+                      ChatRefKind.file => NzIcons.folder,
+                    },
+                    title: l.uiMessagesShared,
+                    text: item.label,
+                    cancelLabel: l.uiMessagesComposeRemove,
+                    onCancel: () => onRemoveRef?.call(item),
+                  ),
               if (picks.isNotEmpty)
                 Semantics(
                   container: true,

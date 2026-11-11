@@ -79,6 +79,14 @@ class TaskDetailActions {
     _listSheet(
       title: l.uiTasksSheetStatus,
       builder: (sheet) => [
+        if (targets.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(NizamioSpacing.space2),
+            child: Text(
+              l.uiTasksNoStatusTransitions,
+              style: context.text.bodySm.copyWith(color: c.textMuted),
+            ),
+          ),
         for (final s in TaskStatus.known)
           if (s == t.status || targets.contains(s))
             _ListOption(

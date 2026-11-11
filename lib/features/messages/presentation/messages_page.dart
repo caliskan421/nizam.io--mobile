@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -33,6 +35,7 @@ import 'chat/new_chat_sheet.dart';
 
 /// Mesajlar (prototip `messages`): başlık + ara + yeni mesaj, süzgeç hapları (Tümü, Okunmamış
 /// N, Gruplar, Kişiler), sohbet satırları → sohbet (seçili programın `listChats` sayfaları).
+/// Arama bütün sohbet geçmişini sunucuda tarar; haplar yalnız dönen sohbetleri süzer.
 /// Alt menüde modül sekmesine yeniden dokunmak kısayol menüsünü açar ("Tümünü okundu say"
 /// sunucuda uygular). Yeni mesaj birebir adaylarını ve grup kurmayı açar.
 class MessagesPage extends ConsumerStatefulWidget {
@@ -58,9 +61,31 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
     text: ref.read(messagesControllerProvider).query,
   );
   final _focus = FocusNode();
+  late String _serverQuery;
+  Timer? _searchDelay;
+
+  @override
+  void initState() {
+    super.initState();
+    _serverQuery = ref.read(messagesControllerProvider).query.trim();
+  }
+
+  void _setQuery(String query) {
+    _ctrl.setQuery(query);
+    _searchDelay?.cancel();
+    final next = query.trim();
+    if (next.isEmpty) {
+      setState(() => _serverQuery = '');
+      return;
+    }
+    _searchDelay = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) setState(() => _serverQuery = next);
+    });
+  }
 
   @override
   void dispose() {
+    _searchDelay?.cancel();
     _search.dispose();
     _focus.dispose();
     super.dispose();
@@ -73,6 +98,8 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
     _ctrl.toggleSearch();
     // Odak (klavye) açılış hareketi bitince NzReveal.onOpened ile gelir.
     if (!opening) {
+      _searchDelay?.cancel();
+      _serverQuery = '';
       _search.clear();
       _focus.unfocus();
     }
@@ -139,12 +166,33 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
     final view = ref.watch(messagesControllerProvider);
     ref.watch(chatsControllerProvider);
     // Başka hesabın/programın sohbetleri görünmez (yükleniyor ya da yalnız hata).
-    final inbox = ref.read(chatsControllerProvider.notifier).visible;
-    void retry() => ref.invalidate(chatsControllerProvider);
+    final searching = view.query.trim().isNotEmpty;
+    final search = searching && view.query.trim() == _serverQuery
+        ? ref.watch(chatInboxSearchProvider(_serverQuery))
+        : const AsyncLoading<ChatInbox>();
+    // Sorgu/kapsam değişiminde veya hatada Riverpod'un eski değerini gösterme.
+    final inbox = !searching
+        ? ref.read(chatsControllerProvider.notifier).visible
+        : search.isLoading
+        ? const AsyncLoading<ChatInbox>()
+        : search.hasError
+        ? AsyncError<ChatInbox>(search.error!, search.stackTrace!)
+        : search;
+    void retry() => searching
+        ? ref.invalidate(chatInboxSearchProvider(_serverQuery))
+        : ref.invalidate(chatsControllerProvider);
     final box = inbox.value;
     final page = NzPage.feed(
       onRetry: retry,
-      onRefresh: () => ref.read(chatsControllerProvider.notifier).reload(),
+      onRefresh: () async {
+        if (searching) {
+          await ref
+              .refresh(chatInboxSearchProvider(_serverQuery).future)
+              .then<void>((_) {});
+        } else {
+          await ref.read(chatsControllerProvider.notifier).reload();
+        }
+      },
       topBar: const RootTopBar(),
       children: [
         NzPageHeader(
@@ -173,24 +221,32 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
             child: NzSearchField(
               controller: _search,
               focusNode: _focus,
+              onDismiss: () {
+                if (ref.read(messagesControllerProvider).searchOpen &&
+                    _search.text.trim().isEmpty) {
+                  _toggleSearch();
+                }
+              },
               label: l.uiMessagesSearchHint,
               hint: l.uiMessagesSearchHint,
-              onChanged: _ctrl.setQuery,
-              onClear: () => _ctrl.setQuery(''),
+              onChanged: _setQuery,
             ),
           ),
         ),
         Gap(tablet ? _tabletFilterTop : NizamioSpacing.space3),
+        _filters(context, box?.unreadChats ?? 0, view),
+        Gap(tablet ? _tabletListTop : NizamioSpacing.space2),
         if (box == null)
           NzAsyncView<ChatInbox>(
             value: inbox,
             onRetry: retry,
+            loading: const NzLoader(),
             data: (_) => const SizedBox.shrink(),
           )
         else
           // Sohbet satırları ayrı akış öğeleridir (tembel kurulum; uzun kutuda yalnız
           // görünenler kurulur).
-          ..._list(context, box, view, tablet: tablet),
+          ..._list(context, box, view),
       ],
     );
     return ChatSyncScope(child: page);
@@ -199,67 +255,64 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
   List<Widget> _list(
     BuildContext context,
     ChatInbox inbox,
-    MessagesViewState view, {
-    required bool tablet,
-  }) {
+    MessagesViewState view,
+  ) {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final list = visibleChats(
-      inbox.chats,
-      filter: view.filter,
-      query: view.query,
-    );
-    final filters = [
-      (ChatFilter.all, l.uiMessagesFilterAll, 0),
-      (ChatFilter.unread, l.uiMessagesFilterUnread, inbox.unreadChats),
-      (ChatFilter.groups, l.uiMessagesFilterGroups, 0),
-      (ChatFilter.people, l.uiMessagesFilterPeople, 0),
-    ];
+    final list = visibleChats(inbox.chats, filter: view.filter);
     return [
-      Semantics(
-        container: true,
-        label: l.uiMessagesFilters,
-        // Prototip `.rp-wheel`: haplar kenar boşluğunun dışına taşarak kayar.
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          child: Row(
-            spacing: 6,
-            children: [
-              for (final (f, label, n) in filters)
-                _FilterPill(
-                  label: label,
-                  count: n,
-                  selected: view.filter == f,
-                  onTap: () => _ctrl.setFilter(f),
-                ),
-            ],
-          ),
-        ),
-      ),
-      Gap(tablet ? _tabletListTop : NizamioSpacing.space2),
       for (final (i, chat) in list.indexed)
         _ChatListRow(key: ValueKey(chat.id), chat: chat, index: i),
       if (list.isEmpty)
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: NizamioSpacing.space8),
-          child: Text(
-            l.uiMessagesEmpty,
-            textAlign: TextAlign.center,
-            style: t.caption.copyWith(color: c.textMuted),
-          ),
+        NzEmptyState(
+          title: view.query.trim().isEmpty || inbox.chats.isNotEmpty
+              ? l.uiMessagesEmpty
+              : l.uiMessagesListsSearchEmpty,
         ),
       if (inbox.truncated)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: NizamioSpacing.space4),
           child: Text(
-            l.uiMessagesListTruncated,
+            view.query.trim().isEmpty
+                ? l.uiMessagesListTruncated
+                : l.uiMessagesListsSearchTruncated,
             textAlign: TextAlign.center,
             style: t.caption.copyWith(color: c.textMuted),
           ),
         ),
     ];
+  }
+
+  Widget _filters(BuildContext context, int unread, MessagesViewState view) {
+    final l = context.l10n;
+    final filters = [
+      (ChatFilter.all, l.uiMessagesFilterAll, 0),
+      (ChatFilter.unread, l.uiMessagesFilterUnread, unread),
+      (ChatFilter.groups, l.uiMessagesFilterGroups, 0),
+      (ChatFilter.people, l.uiMessagesFilterPeople, 0),
+    ];
+    return Semantics(
+      container: true,
+      label: l.uiMessagesFilters,
+      // Prototip `.rp-wheel`: haplar kenar boşluğunun dışına taşarak kayar.
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        child: Row(
+          spacing: 6,
+          children: [
+            for (final (f, label, n) in filters)
+              _FilterPill(
+                label: label,
+                count: n,
+                selected: view.filter == f,
+                onTap: () => _ctrl.setFilter(f),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

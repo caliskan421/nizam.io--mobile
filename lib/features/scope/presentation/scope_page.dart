@@ -13,19 +13,33 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/lists/lists.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../identity/identity.dart';
+import '../../messages/messages.dart';
 import '../application/program_list_controller.dart';
 import '../application/scope_selection_controller.dart';
 import '../domain/program.dart';
 import 'program_badge.dart';
+import 'program_unread_badge.dart';
 
 /// Program (kapsam) seçimi (faz: `sessionOpen`). Seçim `ScopeController`'a yazılır; faz
 /// `scoped` olur ve yönlendirme faz makinesindedir — ekran kendisi gezinmez. Liste hatası
 /// (`program.not_authorized` dahil) `errorText(code)` ile gösterilir.
-class ScopePage extends ConsumerWidget {
+class ScopePage extends ConsumerStatefulWidget {
   const ScopePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ScopePage> createState() => _ScopePageState();
+}
+
+class _ScopePageState extends ConsumerState<ScopePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Seçicinin her açılışı güncel sayaç ister; program listesinden bağımsızdır.
+    ref.invalidate(chatUnreadSnapshotProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.listenErrors(scopeSelectionControllerProvider, context);
     final l = context.l10n;
     final programs = ref.watch(programListControllerProvider);
@@ -62,6 +76,7 @@ class ScopePage extends ConsumerWidget {
                   for (final program in slice.items)
                     NzListTile.navigation(
                       title: program.name,
+                      trailing: ProgramUnreadBadge(programId: program.id),
                       leading: ProgramBadge(
                         name: program.name,
                         shortName: program.shortName,

@@ -11,6 +11,7 @@ import 'package:nizamio/features/tasks/tasks.dart';
 import 'package:nizamio/features/timeline/domain/horizontal_timeline.dart';
 import 'package:nizamio/features/timeline/presentation/gantt/gantt_chart.dart';
 import 'package:nizamio/features/timeline/presentation/gantt/gantt_geometry.dart';
+import 'package:nizamio/features/timeline/presentation/gantt/gantt_painters.dart';
 
 final _today = DateTime(2026, 6, 15);
 
@@ -113,6 +114,14 @@ Offset? _visiblePoint(WidgetTester t, GanttLayout l, String code) {
 }
 
 void main() {
+  test('görev başlığı kaydırmada panelin dışında ve çubuğun içinde kalır', () {
+    const bar = Rect.fromLTWH(100, 20, 200, 22);
+    expect(ganttVisibleLabelBounds(bar, 0)!.left, 108);
+    final moved = ganttVisibleLabelBounds(bar, 180)!;
+    expect(moved.left, 188);
+    expect(moved.right, 292);
+    expect(ganttVisibleLabelBounds(bar, 300), isNull);
+  });
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
   group('yerleşim araması', () {

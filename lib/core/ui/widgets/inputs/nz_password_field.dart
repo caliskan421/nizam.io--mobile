@@ -117,6 +117,7 @@ class _NzPasswordFieldState extends State<NzPasswordField>
     final validator = widget.validator;
     final errorTheme = Theme.of(context).inputDecorationTheme;
     final field = TextFormField(
+      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       controller: widget.controller,
       focusNode: widget.focusNode,
       enabled: widget.enabled,

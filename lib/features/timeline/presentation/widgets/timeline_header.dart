@@ -335,11 +335,10 @@ class TimelineFloatingFilters extends StatelessWidget {
   const TimelineFloatingFilters({
     super.key,
     required this.view,
-    required this.onCoord,
     required this.onFilter,
   });
   final TimelineView view;
-  final VoidCallback onCoord, onFilter;
+  final VoidCallback onFilter;
   @override
   Widget build(BuildContext context) {
     Widget button(
@@ -404,25 +403,12 @@ class TimelineFloatingFilters extends StatelessWidget {
           ),
       ],
     );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        button(
-          Icons.business_outlined,
-          'Koordinatörlük seçimi',
-          onCoord,
-          view.coordOptions.where((o) => o.selected).length,
-          false,
-        ),
-        const Gap(10),
-        button(
-          NzIcons.filter,
-          'Filtreler',
-          onFilter,
-          view.state.filterCount,
-          true,
-        ),
-      ],
+    return button(
+      NzIcons.filter,
+      'Filtreler',
+      onFilter,
+      view.state.filterCount + (view.allSelected ? 0 : 1),
+      true,
     );
   }
 }

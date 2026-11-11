@@ -41,9 +41,9 @@ class TableCellEditor extends StatelessWidget {
         f.type == TableFieldType.unit ||
         f.type == TableFieldType.task) {
       final pool = switch (f.type) {
-        TableFieldType.person => ['demo-1', 'demo-2', 'demo-3'],
-        TableFieldType.unit => ['DEMO-A', 'DEMO-B'],
-        _ => ['demo-task-1', 'demo-task-2'],
+        TableFieldType.person => ['demo-1', 'demo-2', 'demo-3', 'demo-4'],
+        TableFieldType.unit => tableDemoUnits,
+        _ => ['demo-task-1', 'demo-task-2', 'demo-task-3'],
       };
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -152,17 +152,18 @@ PaneEntry? baseEntryOf(Uri uri, String? Function(PaneKind) lastId) {
   return id == null ? null : PaneEntry(kind, id);
 }
 
-/// Modül kökünde sağ bölme son açılan kaydı mı gösterir. Görevler ve Koordinatörlüklerde hayır:
+/// Modül kökünde sağ bölme son açılan kaydı mı gösterir. Tam genişlikli listelerde hayır:
 /// kökte liste tam genişliktir ([splitListFull]); kayıt yalnız dokunuşla açılır, kapanınca liste
 /// genişler. İşlem geçmişi kimliksizdir, yalnız `/home/history` ile açılır.
 bool restoresLastRecord(PaneKind kind) => switch (kind) {
   PaneKind.task ||
   PaneKind.coord ||
+  PaneKind.folder ||
   PaneKind.meeting ||
   PaneKind.history ||
   PaneKind.user ||
   PaneKind.table => false,
-  PaneKind.folder || PaneKind.chat => true,
+  PaneKind.chat => true,
 };
 
 /// Açık kayıt yokken listesi tam genişlik olan modüller (sağ bölme gizli). Ana sayfada
@@ -171,6 +172,7 @@ bool listGoesFull(RailModule? m) =>
     m == RailModule.home ||
     m == RailModule.tasks ||
     m == RailModule.coordinatorships ||
+    m == RailModule.archive ||
     m == RailModule.meetings ||
     m == RailModule.users ||
     m == RailModule.tables;

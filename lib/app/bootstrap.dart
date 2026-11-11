@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -13,6 +15,8 @@ import '../core/server/server_binding.dart';
 import '../core/session/session_state.dart';
 import '../features/identity/identity.dart';
 import 'app.dart';
+import 'config/firebase_services.dart';
+import 'config/release_policy_warmup.dart';
 import 'di/composition.dart';
 
 /// Uygulamayı verilen flavor ile başlatır. [devServer]: yalnız dev — kayıtlı bağ yoksa açılışta
@@ -29,10 +33,13 @@ Future<void> bootstrap(
   // istek yok (çevrimdışı açılış, gizlilik). OFL lisans metinleri lisans sayfasına eklenir.
   GoogleFonts.config.allowRuntimeFetching = false;
   LicenseRegistry.addLicense(_fontLicenses);
+  final firebaseServices = await initializeFirebaseServices(flavor);
   final composition = Composition.create(
     flavor: flavor,
     loginPrefill: flavor == Flavor.dev ? loginPrefill : null,
     connectivityLink: PlusConnectivityLink(),
+    pushNotifications: firebaseServices?.pushNotifications,
+    releasePolicySource: firebaseServices?.releasePolicySource,
   );
   // Tercihler runApp'ten önce (tema titreşimi yok). Güvenlik açılış sırası (startup) ayrıdır
   // ve tercihlere bağlı değildir; tercih okuma hatası sistem temasına düşer.
@@ -48,6 +55,11 @@ Future<void> bootstrap(
       child: const NizamioApp(),
     ),
   );
+  if (firebaseServices != null) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(warmReleasePolicy(composition.container));
+    });
+  }
   await startup(
     composition.container,
     devServer: flavor == Flavor.dev ? devServer : '',

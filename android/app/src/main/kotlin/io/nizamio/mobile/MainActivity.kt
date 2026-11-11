@@ -1,4 +1,4 @@
-package io.nizamio.placeholder.nizamio
+package io.nizamio.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

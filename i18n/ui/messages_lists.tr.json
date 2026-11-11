@@ -1,0 +1,10 @@
+{
+  "$comment": "Mesaj listesi, paylaşılan türleri ve program mesaj rozetleri.",
+  "texts": {
+    "ui.messages_lists.search_empty": "Sohbet geçmişinde eşleşme bulunamadı.",
+    "ui.messages_lists.search_truncated": "Arama sonuçları sınırlı. Daha belirli bir ifade arayın.",
+    "ui.messages_lists.shared_kind": "Paylaşılan öğe türü",
+    "ui.messages_lists.mentioned": "Bahsedildin",
+    "ui.messages_lists.unread_chats": "okunmamış sohbet"
+  }
+}

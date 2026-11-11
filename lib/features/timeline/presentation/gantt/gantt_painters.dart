@@ -61,6 +61,13 @@ class GanttBodyPainter extends CustomPainter {
     for (final b in layout.rows) {
       final row = Rect.fromLTWH(0, b.top, size.width, GanttGeometry.row);
       switch (b.row) {
+        case GanttSubtaskRow():
+          for (final x in grid) {
+            canvas.drawRect(
+              Rect.fromLTWH(x, b.top, NizamioSize.borderWidth, row.height),
+              p..color = c.border,
+            );
+          }
         case GanttHeadRow():
           canvas
             ..drawRect(row, p..color = c.surface)
@@ -149,6 +156,17 @@ final class GanttRing {
   int get hashCode => Object.hash(t, selected, previous, fromIn, fromOut);
 }
 
+/// Panelin altına geçen yazıyı, çubuğun görünen kısmında tutar.
+Rect? ganttVisibleLabelBounds(Rect bar, double scrollOffset) {
+  final left = math.max(
+    bar.left + GanttGeometry.barPad,
+    scrollOffset + GanttGeometry.barPad,
+  );
+  final right = bar.right - GanttGeometry.barPad;
+  if (left >= right) return null;
+  return Rect.fromLTRB(left, bar.top, right, bar.bottom);
+}
+
 /// Görev çubukları (tarih alanı koordinatı): yalnız [visible] satırları çizer — durum rengi,
 /// seçili halka ([ring] ile geçişli), sığan başlık çubuğun içinde, sığmayan çubuğun sağında.
 /// Okuyucu düğümleri de yalnız görünür çubuklar içindir ([semantics]; çağıran kurar).
@@ -161,8 +179,9 @@ class GanttBarsPainter extends CustomPainter {
     required this.outsideStyle,
     required this.textScaler,
     required this.ring,
+    required this.scroll,
     required this.semantics,
-  }) : super(repaint: ring.t);
+  }) : super(repaint: Listenable.merge([ring.t, scroll]));
 
   final GanttLayout layout;
 
@@ -173,6 +192,7 @@ class GanttBarsPainter extends CustomPainter {
   final TextStyle outsideStyle;
   final TextScaler textScaler;
   final GanttRing ring;
+  final ScrollController scroll;
   final List<CustomPainterSemantics> semantics;
 
   TextPainter _text(String s, TextStyle style, double maxWidth) => TextPainter(
@@ -203,20 +223,18 @@ class GanttBarsPainter extends CustomPainter {
         final shape = RRect.fromRectAndRadius(bar, radius);
         canvas.drawRRect(shape, p..color = ganttStatusColor(c, task.status));
         if (b.inside) {
-          final tp = _text(
-            task.item.title,
-            barStyle,
-            bar.width - 2 * GanttGeometry.barPad,
+          final bounds = ganttVisibleLabelBounds(
+            bar,
+            scroll.hasClients ? scroll.offset : 0,
           );
+          if (bounds == null) continue;
+          final tp = _text(task.item.title, barStyle, bounds.width);
           canvas
             ..save()
             ..clipRRect(shape);
           tp.paint(
             canvas,
-            Offset(
-              bar.left + GanttGeometry.barPad,
-              bar.top + (bar.height - tp.height) / 2,
-            ),
+            Offset(bounds.left, bar.top + (bar.height - tp.height) / 2),
           );
           canvas.restore();
         }
@@ -246,7 +264,8 @@ class GanttBarsPainter extends CustomPainter {
       old.barStyle != barStyle ||
       old.outsideStyle != outsideStyle ||
       old.textScaler != textScaler ||
-      old.ring != ring;
+      old.ring != ring ||
+      old.scroll != scroll;
 
   @override
   bool shouldRebuildSemantics(GanttBarsPainter oldDelegate) =>

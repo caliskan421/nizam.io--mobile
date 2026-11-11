@@ -377,3 +377,238 @@ abstract class _$ChatStreamHold
     return element.handleCreate(ref, build);
   }
 }
+
+/// Sunucuda bütün mesaj geçmişini tarayan gelen kutusu araması. Ana ekranın
+/// mevcut yerel filtresinden bağımsızdır; sorgu/program/oturum ayrı istek kimliğidir.
+
+@ProviderFor(chatInboxSearch)
+final chatInboxSearchProvider = ChatInboxSearchFamily._();
+
+/// Sunucuda bütün mesaj geçmişini tarayan gelen kutusu araması. Ana ekranın
+/// mevcut yerel filtresinden bağımsızdır; sorgu/program/oturum ayrı istek kimliğidir.
+
+final class ChatInboxSearchProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<ChatInbox>,
+          ChatInbox,
+          FutureOr<ChatInbox>
+        >
+    with $FutureModifier<ChatInbox>, $FutureProvider<ChatInbox> {
+  /// Sunucuda bütün mesaj geçmişini tarayan gelen kutusu araması. Ana ekranın
+  /// mevcut yerel filtresinden bağımsızdır; sorgu/program/oturum ayrı istek kimliğidir.
+  ChatInboxSearchProvider._({
+    required ChatInboxSearchFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'chatInboxSearchProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatInboxSearchHash();
+
+  @override
+  String toString() {
+    return r'chatInboxSearchProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<ChatInbox> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<ChatInbox> create(Ref ref) {
+    final argument = this.argument as String;
+    return chatInboxSearch(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ChatInboxSearchProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$chatInboxSearchHash() => r'020c780cd2eefe556cf541f04b9ef11f34dfa97b';
+
+/// Sunucuda bütün mesaj geçmişini tarayan gelen kutusu araması. Ana ekranın
+/// mevcut yerel filtresinden bağımsızdır; sorgu/program/oturum ayrı istek kimliğidir.
+
+final class ChatInboxSearchFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<ChatInbox>, String> {
+  ChatInboxSearchFamily._()
+    : super(
+        retry: null,
+        name: r'chatInboxSearchProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Sunucuda bütün mesaj geçmişini tarayan gelen kutusu araması. Ana ekranın
+  /// mevcut yerel filtresinden bağımsızdır; sorgu/program/oturum ayrı istek kimliğidir.
+
+  ChatInboxSearchProvider call(String query) =>
+      ChatInboxSearchProvider._(argument: query, from: this);
+
+  @override
+  String toString() => r'chatInboxSearchProvider';
+}
+
+/// Program seçicisindeki rozetlere hazır programlar arası okunmamış/bahsetme özeti.
+
+@ProviderFor(chatUnreadOverview)
+final chatUnreadOverviewProvider = ChatUnreadOverviewProvider._();
+
+/// Program seçicisindeki rozetlere hazır programlar arası okunmamış/bahsetme özeti.
+
+final class ChatUnreadOverviewProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<ChatProgramUnread>>,
+          List<ChatProgramUnread>,
+          FutureOr<List<ChatProgramUnread>>
+        >
+    with
+        $FutureModifier<List<ChatProgramUnread>>,
+        $FutureProvider<List<ChatProgramUnread>> {
+  /// Program seçicisindeki rozetlere hazır programlar arası okunmamış/bahsetme özeti.
+  ChatUnreadOverviewProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chatUnreadOverviewProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatUnreadOverviewHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<ChatProgramUnread>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<ChatProgramUnread>> create(Ref ref) {
+    return chatUnreadOverview(ref);
+  }
+}
+
+String _$chatUnreadOverviewHash() =>
+    r'87fe7674c62dea01d8275ee16aabaeaeeaebc298';
+
+/// Yanıtın oturum sahibi; eski hesabın rozeti yenileme sırasında gösterilmez.
+
+@ProviderFor(chatUnreadSnapshot)
+final chatUnreadSnapshotProvider = ChatUnreadSnapshotProvider._();
+
+/// Yanıtın oturum sahibi; eski hesabın rozeti yenileme sırasında gösterilmez.
+
+final class ChatUnreadSnapshotProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<({List<ChatProgramUnread> items, int session})>,
+          ({List<ChatProgramUnread> items, int session}),
+          FutureOr<({List<ChatProgramUnread> items, int session})>
+        >
+    with
+        $FutureModifier<({List<ChatProgramUnread> items, int session})>,
+        $FutureProvider<({List<ChatProgramUnread> items, int session})> {
+  /// Yanıtın oturum sahibi; eski hesabın rozeti yenileme sırasında gösterilmez.
+  ChatUnreadSnapshotProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chatUnreadSnapshotProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatUnreadSnapshotHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<({List<ChatProgramUnread> items, int session})>
+  $createElement($ProviderPointer pointer) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<({List<ChatProgramUnread> items, int session})> create(Ref ref) {
+    return chatUnreadSnapshot(ref);
+  }
+}
+
+String _$chatUnreadSnapshotHash() =>
+    r'ee941f3fae039546fde7454e8b7e94405e6da316';
+
+/// Senkron görünür yüz, Riverpod'un önceki async değerini sahiplikle süzer.
+
+@ProviderFor(chatUnreadBadges)
+final chatUnreadBadgesProvider = ChatUnreadBadgesProvider._();
+
+/// Senkron görünür yüz, Riverpod'un önceki async değerini sahiplikle süzer.
+
+final class ChatUnreadBadgesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<ChatProgramUnread>>,
+          AsyncValue<List<ChatProgramUnread>>,
+          AsyncValue<List<ChatProgramUnread>>
+        >
+    with $Provider<AsyncValue<List<ChatProgramUnread>>> {
+  /// Senkron görünür yüz, Riverpod'un önceki async değerini sahiplikle süzer.
+  ChatUnreadBadgesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chatUnreadBadgesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatUnreadBadgesHash();
+
+  @$internal
+  @override
+  $ProviderElement<AsyncValue<List<ChatProgramUnread>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AsyncValue<List<ChatProgramUnread>> create(Ref ref) {
+    return chatUnreadBadges(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<List<ChatProgramUnread>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<List<ChatProgramUnread>>>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$chatUnreadBadgesHash() => r'3af826ba307622d09424af22f4b7d01bca871f76';

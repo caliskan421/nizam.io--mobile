@@ -166,13 +166,23 @@ class HomeKpiGrid extends StatelessWidget {
 
 /// Hızlı işlem türü (kutucuk ve kısayol menüsü aynı listeyi kullanır). Görev açma Görevler
 /// sayfasının "+" düğmesindedir; işlem geçmişi buradan açılır (ayrı kartı yok).
-enum HomeQuickAction { history, meeting, invite, report }
+enum HomeQuickAction { history, meeting, deleted, report }
+
+List<HomeQuickAction> homeQuickActions({required bool isAdmin}) => [
+  for (final action in HomeQuickAction.values)
+    if (action != HomeQuickAction.deleted || isAdmin) action,
+];
 
 /// Hızlı işlemler: başlık + ayraçlı tek kart ([HomeQuickActionsBar]).
 class HomeQuickActions extends StatelessWidget {
-  const HomeQuickActions({super.key, required this.onAction});
+  const HomeQuickActions({
+    super.key,
+    required this.onAction,
+    required this.isAdmin,
+  });
 
   final ValueChanged<HomeQuickAction> onAction;
+  final bool isAdmin;
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +194,11 @@ class HomeQuickActions extends StatelessWidget {
         const Gap(NizamioSpacing.gapMd),
         // Geniş düzendeki tek kart (ayraçlı dört bölme); yükseklik içerikten.
         IntrinsicHeight(
-          child: HomeQuickActionsBar(onAction: onAction, compact: true),
+          child: HomeQuickActionsBar(
+            onAction: onAction,
+            compact: true,
+            isAdmin: isAdmin,
+          ),
         ),
       ],
     );
@@ -194,14 +208,14 @@ class HomeQuickActions extends StatelessWidget {
 IconData quickActionIcon(HomeQuickAction a) => switch (a) {
   HomeQuickAction.history => NzIcons.history,
   HomeQuickAction.meeting => NzIcons.video,
-  HomeQuickAction.invite => NzIcons.personAdd,
+  HomeQuickAction.deleted => NzIcons.delete,
   HomeQuickAction.report => NzIcons.document,
 };
 
 String quickActionLabel(AppLocalizations l, HomeQuickAction a) => switch (a) {
   HomeQuickAction.history => l.uiHomeHistoryTitle,
   HomeQuickAction.meeting => l.uiHomeQaMeeting,
-  HomeQuickAction.invite => l.uiHomeQaInvite,
+  HomeQuickAction.deleted => l.uiHomeDeletedShortcut,
   HomeQuickAction.report => l.uiHomeQaReport,
 };
 
@@ -210,7 +224,7 @@ String quickActionLongLabel(AppLocalizations l, HomeQuickAction a) =>
     switch (a) {
       HomeQuickAction.history => l.uiHomeHistoryOpen,
       HomeQuickAction.meeting => l.uiHomeQaMeetingLong,
-      HomeQuickAction.invite => l.uiHomeQaInviteLong,
+      HomeQuickAction.deleted => l.uiHomeDeletedRecords,
       HomeQuickAction.report => l.uiHomeQaReportLong,
     };
 

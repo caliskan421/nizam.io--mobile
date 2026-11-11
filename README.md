@@ -11,7 +11,7 @@ alanı okur) · get_it 9 (bileşim kökü) · Riverpod 3 (kod üretimli; reaktif
 (OpenAPI'den üretim) · flutter_secure_storage · intl/ARB · shared_preferences (gizli olmayan
 tercihler) · yazı tipleri uygulamayla gelir (pubspec `fonts:`; google_fonts 8 yalnız çalışma anı indirmeyi kapatır) · gap (boşluk standardı) · drift +
 path_provider (yerel veri) · Firebase (core, messaging, analytics, crashlytics, remote_config;
-başlatılmamış) · flutter_native_splash + flutter_launcher_icons (yer tutucu marka). Paket
+dev: Core/Remote Config bağlı, prod kapalı) · flutter_native_splash + flutter_launcher_icons (yer tutucu marka). Paket
 kararları: `docs/architecture/adr-0002-paketler-tercih-yerel-veri-firebase.md`. Asgari platform:
 iOS 16+, Android 8.0 (API 26)+. Responsive yerleşim ve yön: ADR-0003 karar 25,
 [docs/yurutme/responsive-altyapi.md](docs/yurutme/responsive-altyapi.md).
@@ -54,26 +54,29 @@ adres `http://10.0.2.2:18140`.
 
 ## Flavor'lar
 
-| Flavor | Giriş noktası | Android kimliği | Ağ |
+| Flavor | Giriş noktası | Android / iOS kimliği | Ağ |
 |---|---|---|---|
-| `dev` | `lib/main_dev.dart` | `…nizamio.dev` | yalnız `localhost`, `127.0.0.1`, `10.0.2.2` için düz http; diğer her yer https |
-| `prod` | `lib/main_prod.dart` | `…nizamio` | yalnız https; sistem CA'ları (pinning v1 dışı) |
+| `dev` | `lib/main_dev.dart` | `io.nizamio.mobile.dev` | yalnız `localhost`, `127.0.0.1`, `10.0.2.2` için düz http; diğer her yer https |
+| `prod` | `lib/main_prod.dart` | `io.nizamio.mobile` | yalnız https; sistem CA'ları (pinning v1 dışı) |
 
-Flavor derleme anında giriş noktasıyla seçilir; çalışma anında değişmez. Düz http yasağının
+Flavor derleme anında `--flavor` ve karşılık gelen giriş noktasıyla seçilir; çalışma anında değişmez. Düz http yasağının
 asıl kapısı Dart katmanıdır (`lib/core/server/`); Android ağ güvenlik yapılandırması
 (`android/app/src/<flavor>/res/xml/network_security_config.xml`) ikinci savunmadır.
-iOS'ta ayrı Xcode şeması yoktur (iOS derlemesi bu fazın CI'ında değildir); flavor yine
+iOS'ta `dev` / `prod` Xcode şemaları ve Debug/Profile/Release yapılandırmaları vardır; flavor yine
 giriş noktasıyla seçilir.
 
 Dev prototipi login ekranında açılır. Alanlar boşken **Giriş yap** örnek verili ana sayfayı
 açar; kimlik doğrulama isteği göndermez ve oturum oluşturmaz. Prod giriş doğrulaması korunur.
-iOS simülatörü: `flutter run -d <simulator-id> -t lib/main_dev.dart` (ayrı flavor şeması yok).
+iOS simülatörü: `flutter run -d <simulator-id> --flavor dev -t lib/main_dev.dart`.
 
 ## Uygulama kimliği ve imzalama
 
-`io.nizamio.placeholder.nizamio` (Android `applicationId`, iOS bundle id) **yer tutucudur**.
-Varsayılan "emülatör, imzasız"dır (ürün sahibi kararı bekliyor): gerçek kimlik, imzalama ve
-mağaza yayını bu altyapı çalışmasının dışındadır. `make build-prod-apk` yalnız `--obfuscate` derlemesini sınamak içindir ve
+Ürün sahibi 2026-11-11'de reverse-domain kimliğini kabul etti: Android `applicationId` ve
+iOS bundle ID prod için `io.nizamio.mobile`, dev için `io.nizamio.mobile.dev`.
+Android namespace `io.nizamio.mobile` olur. Eski iOS `Runner` şeması prod kimliğiyle
+uyumluluk için kalır; geliştirmede `--flavor dev` kullanılır. Firebase'e bu kimliklerle
+ayrı uygulama kaydı açılır; [kurulum ve kontroller](docs/yurutme/firebase-kurulum-ve-kontroller.md).
+İmzalama ve mağaza yayını henüz tamamlanmadı. `make build-prod-apk` yalnız `--obfuscate` derlemesini sınamak içindir ve
 Flutter şablonunun debug anahtarıyla imzalanır; dağıtılmaz.
 
 ## Dizin düzeni ve sınır kuralı

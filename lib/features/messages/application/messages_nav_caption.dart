@@ -4,6 +4,7 @@ import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../core/providers.dart';
 import 'chat_sync_controller.dart';
 import 'chats_controller.dart';
+import 'messages_providers.dart';
 
 part 'messages_nav_caption.g.dart';
 
@@ -29,6 +30,9 @@ int? messagesNavBadge(Ref ref) {
 /// tutuyorsa ([ChatSyncController] yaşıyor) akışın açılışı listeyi zaten tazeler, ikinci istek
 /// yok; değilse tek `listChats` okuması (hata yutulur, önceki sayı görünür).
 Future<void> refreshMessagesBadge(ProviderContainer container) async {
+  if (container.exists(chatUnreadSnapshotProvider)) {
+    container.invalidate(chatUnreadSnapshotProvider);
+  }
   if (!container.exists(chatsControllerProvider) ||
       container.exists(chatSyncControllerProvider)) {
     return;

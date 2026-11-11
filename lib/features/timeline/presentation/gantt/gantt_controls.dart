@@ -1,5 +1,8 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
@@ -7,7 +10,6 @@ import '../../../../core/ui/layout/nz_pane.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/navigation/navigation.dart';
-import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../tasks/tasks.dart';
 import '../../domain/horizontal_timeline.dart';
@@ -90,14 +92,16 @@ class GanttToolbar extends StatelessWidget {
   const GanttToolbar({
     super.key,
     required this.view,
-    required this.onCoord,
+    required this.layout,
+    required this.scroll,
     required this.onFilter,
     required this.onZoom,
     required this.onToday,
   });
 
   final GanttView view;
-  final VoidCallback onCoord;
+  final GanttLayout layout;
+  final ScrollController scroll;
   final VoidCallback onFilter;
   final ValueChanged<GanttZoom> onZoom;
   final VoidCallback onToday;
@@ -114,21 +118,23 @@ class GanttToolbar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _ToolButton(
-            icon: NzIcons.coordinatorships,
-            label: l.uiTimelineCoord,
-            count: view.state.coords.length,
-            onTap: onCoord,
-          ),
-          const Gap(NizamioSpacing.space2),
-          _ToolButton(
+          NzIconButton.circle(
             icon: NzIcons.filter,
-            label: l.uiTimelineFilters,
-            count: view.state.filter == GanttFilter.all ? 0 : 1,
-            accent: true,
-            onTap: onFilter,
+            semanticLabel: l.uiTimelineFilters,
+            dot:
+                view.state.filter == GanttFilter.all &&
+                    view.state.coords.isEmpty &&
+                    view.state.people.isEmpty &&
+                    view.state.priorities.isEmpty
+                ? null
+                : context.colors.accentText,
+            onPressed: onFilter,
           ),
-          const Spacer(),
+          const Gap(NizamioSpacing.space3),
+          Expanded(
+            child: _GanttSeasonStrip(layout: layout, scroll: scroll),
+          ),
+          const Gap(NizamioSpacing.space3),
           GanttSegments<GanttZoom>(
             label: l.uiTimelineScale,
             values: GanttZoom.values,
@@ -144,31 +150,166 @@ class GanttToolbar extends StatelessWidget {
   }
 }
 
-/// Araç satırı düğmesi (kapsül, Bugün düğmesiyle aynı ölçü): isteğe bağlı ikon ve sayı rozeti
-/// (telefondaki yüzen düğmelerin rozeti: filtrede vurgu, koordinatörlükte açık zemin).
-class _ToolButton extends StatelessWidget {
-  const _ToolButton({
-    required this.label,
-    required this.onTap,
-    this.icon,
-    this.count = 0,
-    this.accent = false,
-  });
-
-  final String label;
-  final VoidCallback onTap;
-  final IconData? icon;
-  final int count;
-  final bool accent;
+/// Yıllık görev yoğunluğu ve yatay çizelgenin görünen aralığı.
+class _GanttSeasonStrip extends StatelessWidget {
+  const _GanttSeasonStrip({required this.layout, required this.scroll});
+  final GanttLayout layout;
+  final ScrollController scroll;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final t = context.text;
-    final icon = this.icon;
+    return Semantics(
+      label: context.l10n.uiTimelineSeasonMap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: c.surfaceRaised.withValues(alpha: .94),
+          borderRadius: BorderRadius.circular(NizamioRadius.attach),
+          border: Border.all(color: c.border),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 6, 10, 4),
+          child: LayoutBuilder(
+            builder: (context, box) {
+              void at(Offset point) {
+                if (!scroll.hasClients || box.maxWidth <= 0) return;
+                final pos = scroll.position;
+                final fraction = (point.dx / box.maxWidth).clamp(0.0, 1.0);
+                final available = (pos.viewportDimension - layout.labelWidth)
+                    .clamp(0.0, double.infinity);
+                final target = fraction * layout.width - available / 2;
+                scroll.jumpTo(target.clamp(0.0, pos.maxScrollExtent));
+              }
+
+              return GestureDetector(
+                key: const ValueKey('gantt-season-strip'),
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (details) => at(details.localPosition),
+                onHorizontalDragStart: (details) => at(details.localPosition),
+                onHorizontalDragUpdate: (details) => at(details.localPosition),
+                child: CustomPaint(
+                  size: Size(box.maxWidth, 32),
+                  painter: _GanttStripPainter(
+                    layout: layout,
+                    scroll: scroll,
+                    colors: c,
+                    textStyle: context.text.monoSm,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GanttStripPainter extends CustomPainter {
+  _GanttStripPainter({
+    required this.layout,
+    required this.scroll,
+    required this.colors,
+    required this.textStyle,
+  }) : super(repaint: scroll);
+  final GanttLayout layout;
+  final ScrollController scroll;
+  final NizamioColors colors;
+  final TextStyle textStyle;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final weeks = layout.view.weeks;
+    final maxCount = weeks.fold<int>(1, (a, w) => a > w.count ? a : w.count);
+    final width = size.width / weeks.length;
+    for (var i = 0; i < weeks.length; i++) {
+      final week = weeks[i];
+      final h = week.count == 0
+          ? 2.0
+          : 3 + (week.count / maxCount * 15).roundToDouble();
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(
+            i * width,
+            22 - h,
+            (width - 1).clamp(0.5, double.infinity),
+            h,
+          ),
+          const Radius.circular(1),
+        ),
+        Paint()
+          ..color = week.late
+              ? colors.danger
+              : week.count > 0
+              ? colors.textFaint
+              : colors.text.withValues(alpha: .12),
+      );
+    }
+    final fmt = DateFormat('MMM', 'tr');
+    for (var m = 0; m < 12; m++) {
+      final tp = TextPainter(
+        text: TextSpan(
+          text: fmt.format(DateTime(layout.view.year, m + 1)).toLowerCase(),
+          style: textStyle.copyWith(
+            fontSize: 8,
+            height: 1.1,
+            color: colors.textFaint,
+          ),
+        ),
+        textDirection: ui.TextDirection.ltr,
+        maxLines: 1,
+      )..layout(maxWidth: size.width / 12);
+      tp.paint(canvas, Offset(m * size.width / 12, size.height - 9));
+    }
+    final pos = scroll.hasClients ? scroll.position : null;
+    final start = ((pos?.pixels ?? 0) / layout.width).clamp(0.0, 1.0);
+    final viewport =
+        ((pos?.viewportDimension ?? layout.labelWidth) - layout.labelWidth)
+            .clamp(0.0, layout.width);
+    final end = (start + viewport / layout.width).clamp(start, 1.0);
+    final rect = RRect.fromRectAndRadius(
+      Rect.fromLTRB(start * size.width, 0, end * size.width, 23),
+      const Radius.circular(4),
+    );
+    canvas.drawRRect(rect, Paint()..color = colors.text.withValues(alpha: .08));
+    canvas.drawRRect(
+      rect,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5
+        ..color = colors.text,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(
+        layout.view.today / layout.view.days * size.width,
+        0,
+        2,
+        23,
+      ),
+      Paint()..color = colors.primary,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_GanttStripPainter old) =>
+      old.layout != layout ||
+      old.colors != colors ||
+      old.textStyle != textStyle ||
+      old.scroll != scroll;
+}
+
+/// Çizelgeyi bugüne taşıyan kapsül düğme.
+class _ToolButton extends StatelessWidget {
+  const _ToolButton({required this.label, required this.onTap});
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
     return Semantics(
       button: true,
-      label: count > 0 ? '$label · $count' : label,
+      label: label,
       excludeSemantics: true,
       onTap: onTap,
       child: GestureDetector(
@@ -184,40 +325,8 @@ class _ToolButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(NizamioRadius.pill),
             border: Border.all(color: c.borderControl),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                NzIcon(icon, size: NizamioSize.iconSizeSm, color: c.text),
-                const Gap(NizamioSpacing.space2),
-              ],
-              Text(label, style: t.labelMd),
-              if (count > 0) ...[
-                const Gap(NizamioSpacing.space2),
-                Container(
-                  constraints: const BoxConstraints(
-                    minWidth: GanttGeometry.badge,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: NizamioSpacing.space1,
-                  ),
-                  alignment: Alignment.center,
-                  height: GanttGeometry.badge,
-                  decoration: BoxDecoration(
-                    color: accent ? c.primary : c.text,
-                    borderRadius: BorderRadius.circular(NizamioRadius.pill),
-                  ),
-                  child: Text(
-                    '$count',
-                    style: t.caption.copyWith(
-                      color: accent ? c.onPrimary : c.background,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
+          alignment: Alignment.center,
+          child: Text(label, style: context.text.labelMd),
         ),
       ),
     );
@@ -338,8 +447,12 @@ class GanttLegend extends StatelessWidget {
       ),
     );
     return Container(
-      height: GanttGeometry.legend,
-      padding: const EdgeInsets.symmetric(horizontal: GanttGeometry.legendPad),
+      height: GanttGeometry.legend + MediaQuery.paddingOf(context).bottom,
+      padding: EdgeInsets.only(
+        left: GanttGeometry.legendPad,
+        right: GanttGeometry.legendPad,
+        bottom: MediaQuery.paddingOf(context).bottom,
+      ),
       decoration: BoxDecoration(
         border: Border(top: BorderSide(color: c.border)),
       ),

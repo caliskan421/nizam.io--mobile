@@ -93,6 +93,7 @@
     "ui.timeline.gantt_filter": "Görev filtresi",
     "ui.timeline.gantt_zoom_daily": "Günlük",
     "ui.timeline.gantt_zoom_weekly": "Haftalık",
+    "ui.timeline.gantt_zoom_monthly": "Aylık",
     "ui.timeline.gantt_all_coords": "Tüm koordinatörlükler",
     "ui.timeline.gantt_all_coords_lc": "tüm koordinatörlükler",
     "ui.timeline.gantt_label_head": "koordinatörlük · görev",

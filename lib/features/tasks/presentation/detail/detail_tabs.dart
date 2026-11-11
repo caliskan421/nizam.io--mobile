@@ -15,6 +15,7 @@ import '../../domain/task_catalog.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 import 'detail_actions.dart';
+import 'task_dependencies.dart';
 
 /// Özet sekmesi: tanım listesi + "ilerleme" zaman çizgisi.
 class DetailSummary extends StatelessWidget {
@@ -120,15 +121,6 @@ class DetailSummary extends StatelessWidget {
           l.uiTasksDateRange,
           strong(TaskDates.range(task.start, task.due), mono: true),
         ),
-        row(
-          l.uiTasksEvidenceFile,
-          strong(
-            task.fileEntries.isEmpty
-                ? l.uiTasksNone
-                : '${task.fileEntries.length}',
-            mono: true,
-          ),
-        ),
         if (description.isNotEmpty) ...[
           const Gap(NizamioSpacing.space5),
           NzKicker(l.uiTasksDescription),
@@ -146,6 +138,8 @@ class DetailSummary extends StatelessWidget {
             danger: events[i].$4,
             last: i == events.length - 1,
           ),
+        const Gap(NizamioSpacing.space5),
+        TaskDependencies(code: task.code),
       ],
     );
   }
@@ -270,6 +264,7 @@ class _TitleInputState extends State<_TitleInput> {
 
   @override
   Widget build(BuildContext context) => TextField(
+    onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
     controller: _controller,
     focusNode: _focus,
     onChanged: widget.onChanged,

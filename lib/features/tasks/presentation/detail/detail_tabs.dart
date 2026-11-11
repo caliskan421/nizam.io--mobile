@@ -264,6 +264,7 @@ class _TitleInputState extends State<_TitleInput> {
 
   @override
   Widget build(BuildContext context) => TextField(
+    onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
     controller: _controller,
     focusNode: _focus,
     onChanged: widget.onChanged,

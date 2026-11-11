@@ -225,6 +225,9 @@ class _HorizontalTimelinePageState
                   child: NzSearchField(
                     controller: _search,
                     focusNode: _searchFocus,
+                    onDismiss: () {
+                      if (_searchOpen) _toggleSearch();
+                    },
                     label: context.l10n.uiTasksSearchHint,
                     hint: context.l10n.uiTasksSearchHint,
                     onChanged: ctrl.setQuery,

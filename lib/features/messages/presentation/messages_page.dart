@@ -173,6 +173,10 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
             child: NzSearchField(
               controller: _search,
               focusNode: _focus,
+              onDismiss: () {
+                if (ref.read(messagesControllerProvider).searchOpen)
+                  _toggleSearch();
+              },
               label: l.uiMessagesSearchHint,
               hint: l.uiMessagesSearchHint,
               onChanged: _ctrl.setQuery,

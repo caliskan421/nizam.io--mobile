@@ -302,6 +302,13 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                               child: NzSearchField(
                                 controller: _search,
                                 focusNode: _focus,
+                                onDismiss: () {
+                                  if (_searchOpen) {
+                                    setState(() => _searchOpen = false);
+                                    _search.clear();
+                                    ctrl.setQuery('');
+                                  }
+                                },
                                 label: l.uiTasksSearchHint,
                                 hint: l.uiTasksSearchHint,
                                 onChanged: ctrl.setQuery,

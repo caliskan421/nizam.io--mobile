@@ -20,6 +20,7 @@ class NzIconButton extends StatelessWidget {
     required this.onPressed,
     this.size = NzSize.md,
     this.dot,
+    this.focusBorder = true,
   }) : _variant = _IconVariant.plain;
 
   /// Cam daire (README `m-glassbtn`, yalnız üst çubuktaki menü): `glass-float` dolgu, bulanıklık,
@@ -31,6 +32,7 @@ class NzIconButton extends StatelessWidget {
     required this.onPressed,
   }) : size = NzSize.md,
        dot = null,
+       focusBorder = true,
        _variant = _IconVariant.glass;
 
   /// Sayfa başlığı dairesi (bundle.css `.m-circle`; prototip ara/filtre): 44 görsel, 48 dokunma,
@@ -43,6 +45,7 @@ class NzIconButton extends StatelessWidget {
     required this.onPressed,
     this.dot,
   }) : size = NzSize.md,
+       focusBorder = true,
        _variant = _IconVariant.circle;
 
   /// Vurgulu daire (`.m-circle--accent`): `accent` dolgu, `accent-ink` ikon. Sayfada yalnız
@@ -54,6 +57,7 @@ class NzIconButton extends StatelessWidget {
     required this.onPressed,
   }) : size = NzSize.md,
        dot = null,
+       focusBorder = true,
        _variant = _IconVariant.circleAccent;
 
   final IconData icon;
@@ -65,6 +69,7 @@ class NzIconButton extends StatelessWidget {
 
   /// Dikkat noktası rengi (null → yok).
   final Color? dot;
+  final bool focusBorder;
   final _IconVariant _variant;
 
   static const _disabledContentAlpha = 0.38;
@@ -107,7 +112,7 @@ class NzIconButton extends StatelessWidget {
             : null,
       ),
       side: WidgetStateProperty.resolveWith(
-        (s) => s.contains(WidgetState.focused)
+        (s) => focusBorder && s.contains(WidgetState.focused)
             ? BorderSide(color: c.focusRing, width: _focusWidth)
             : null,
       ),

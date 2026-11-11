@@ -239,6 +239,8 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
                       children: [
                         Expanded(
                           child: TextField(
+                            onTapOutside: (_) =>
+                                FocusManager.instance.primaryFocus?.unfocus(),
                             controller: _draft,
                             maxLength: 160,
                             onChanged: ctl.setAgendaDraft,
@@ -437,6 +439,7 @@ class _AgendaItemState extends State<_AgendaItem> {
         const Gap(NizamioSpacing.space3),
         Expanded(
           child: TextField(
+            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             controller: _controller,
             focusNode: _focus,
             maxLength: 160,

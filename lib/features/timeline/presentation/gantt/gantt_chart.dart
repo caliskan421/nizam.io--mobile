@@ -162,6 +162,7 @@ class _GanttChartState extends State<GanttChart> {
         return SingleChildScrollView(
           key: GanttChart.horizontalKey,
           controller: _h,
+          physics: const ClampingScrollPhysics(),
           scrollDirection: Axis.horizontal,
           child: SizedBox(
             width: l.totalWidth,
@@ -183,6 +184,7 @@ class _GanttChartState extends State<GanttChart> {
                   child: Scrollable(
                     key: GanttChart.verticalKey,
                     controller: _v,
+                    physics: const ClampingScrollPhysics(),
                     viewportBuilder: (context, offset) => Stack(
                       fit: StackFit.expand,
                       children: [

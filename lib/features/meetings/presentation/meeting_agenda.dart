@@ -200,6 +200,8 @@ class _MeetingAgendaState extends ConsumerState<MeetingAgenda> {
                   const Gap(NizamioSpacing.space2),
                   Expanded(
                     child: TextField(
+                      onTapOutside: (_) =>
+                          FocusManager.instance.primaryFocus?.unfocus(),
                       controller: _draft,
                       maxLength: agendaTitleMax,
                       textInputAction: TextInputAction.done,

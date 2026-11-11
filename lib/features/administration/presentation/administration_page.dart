@@ -232,6 +232,20 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
             child: NzSearchField(
               controller: _search,
               focusNode: _searchFocus,
+              onDismiss: () {
+                if (_searchOpen) {
+                  setState(() => _searchOpen = false);
+                  _searchDelay?.cancel();
+                  _search.clear();
+                  final now = ref.read(adminUserQueryProvider);
+                  update((
+                    search: '',
+                    role: now.role,
+                    sort: now.sort,
+                    direction: now.direction,
+                  ));
+                }
+              },
               label: l.uiUsersSearch,
               hint: l.uiUsersSearchHint,
               onChanged: (text) {

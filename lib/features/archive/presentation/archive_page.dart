@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/layout/nz_layout.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/page/nz_shell_events.dart';
@@ -122,6 +123,7 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
     final folders = ref.watch(archiveFoldersControllerProvider);
     void retry() => retryArchive(ref);
     return NzPage.feed(
+      width: NzContentWidth.wide,
       // Klasör ön yüzü cam (NzFolder): giriş yalnız yükselir.
       fadeContent: false,
       onRefresh: _ctrl.refresh,
@@ -154,6 +156,11 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
             child: NzSearchField(
               controller: _search,
               focusNode: _searchFocus,
+              onDismiss: () {
+                if (ref.read(archiveControllerProvider).searchOpen) {
+                  _toggleSearch();
+                }
+              },
               label: l.uiArchiveSearchHint,
               hint: l.uiArchiveSearchHint,
               onChanged: _ctrl.setQuery,
@@ -185,10 +192,6 @@ class _Folders extends ConsumerWidget {
     final t = context.text;
     final files = all.fold<int>(0, (s, f) => s + f.files);
     final list = visibleFolders(all, query: query);
-    final rows = <List<ArchiveFolder>>[
-      for (var i = 0; i < list.length; i += 3)
-        list.sublist(i, (i + 3).clamp(0, list.length)),
-    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -210,29 +213,33 @@ class _Folders extends ConsumerWidget {
         const Gap(NizamioSpacing.space5),
         NzKicker('${l.uiArchiveFoldersTitle} · ${list.length}'),
         const Gap(NizamioSpacing.space1),
-        for (final row in rows) ...[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (var i = 0; i < 3; i++) ...[
-                if (i > 0) const Gap(NizamioSpacing.space3),
-                Expanded(
-                  child: i < row.length
-                      ? NzFolder(
-                          name: row[i].name,
-                          caption: row[i].files > 0
-                              ? l.files(row[i].files)
-                              : l.uiArchiveNoFiles,
-                          onTap: () =>
-                              context.appNav.openArchiveFolder(row[i].code),
-                        )
-                      : const SizedBox.shrink(),
-                ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final itemWidth =
+                ((constraints.maxWidth - 2 * NizamioSpacing.space3) / 3).clamp(
+                  0.0,
+                  160.0,
+                );
+            return Wrap(
+              spacing: NizamioSpacing.space3,
+              runSpacing: NizamioSpacing.space5,
+              children: [
+                for (final folder in list)
+                  SizedBox(
+                    width: itemWidth,
+                    child: NzFolder(
+                      name: folder.name,
+                      caption: folder.files > 0
+                          ? l.files(folder.files)
+                          : l.uiArchiveNoFiles,
+                      onTap: () =>
+                          context.appNav.openArchiveFolder(folder.code),
+                    ),
+                  ),
               ],
-            ],
-          ),
-          const Gap(NizamioSpacing.space5),
-        ],
+            );
+          },
+        ),
         if (list.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(

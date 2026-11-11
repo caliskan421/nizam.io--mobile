@@ -5,6 +5,9 @@ import 'package:gap/gap.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../core/ui/widgets/lists/nz_menu_group.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../application/tables_controller.dart';
 import '../domain/table_document.dart';
@@ -19,25 +22,73 @@ Future<void> showRecentTables(
   ref,
   context,
   title: context.l10n.uiTablesRecentAction,
+  description: 'En son düzenlenen tablolar',
   builder: (sheet) => Consumer(
     builder: (context, ref, _) {
       final state = ref.watch(tablesControllerProvider);
       final l = context.l10n;
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      return NzMenuGroup(
+        rows: [
           for (final d in state.documents)
-            ListTile(
-              leading: const Icon(Icons.table_chart_outlined),
-              title: Text(d.title),
-              subtitle: Text(
-                '${l.tableArea(d.area)}${d.area == TableArea.coord ? ' · ${l.tableUnit(d.unit)}' : ''} · ${d.rows.length} ${l.uiTablesRow}',
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  ref.read(tablesControllerProvider.notifier).markOpened(d.id);
+                  Navigator.of(sheet).pop();
+                  onOpen(d.id);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: context.colors.background,
+                          border: Border.all(color: context.colors.border),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Center(
+                          child: NzIcon(NzIcons.sheets, size: 18),
+                        ),
+                      ),
+                      const Gap(12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              d.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.text.list,
+                            ),
+                            const Gap(2),
+                            Text(
+                              '${l.tableArea(d.area)}${d.area == TableArea.coord ? ' · ${l.tableUnit(d.unit)}' : ''} · ${d.rows.length} ${l.uiTablesRow}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.text.caption.copyWith(
+                                color: context.colors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      NzIcon(
+                        NzIcons.chevronRight,
+                        size: 16,
+                        color: context.colors.textFaint,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              onTap: () {
-                ref.read(tablesControllerProvider.notifier).markOpened(d.id);
-                Navigator.of(sheet).pop();
-                onOpen(d.id);
-              },
             ),
         ],
       );

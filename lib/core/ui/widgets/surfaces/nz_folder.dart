@@ -5,7 +5,6 @@ import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
-import '../buttons/nz_pressable.dart';
 
 /// Arşiv klasörü (tasarım sistemi `components/Folder`, bundle.css `.m-folder`): düz
 /// `folder-back` sekmeli arka kapak + üstten bulanık cam ön panel (`folder-front →
@@ -42,36 +41,35 @@ class NzFolder extends StatelessWidget {
       label: '$name, $caption',
       excludeSemantics: true,
       onTap: onTap,
-      child: NzPressable(
-        enabled: onTap != null,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(NizamioRadius.tile),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: NizamioSize.tap),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                NzFolderArt(size: size, frontTop: small ? 17 : 22),
-                Gap(small ? NizamioSpacing.space2 : NizamioSpacing.gapMd),
-                Text(
-                  name,
-                  maxLines: small ? 2 : 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: (small ? t.caption : t.bodyMd).copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+      child: InkWell(
+        onTap: onTap,
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        borderRadius: BorderRadius.circular(NizamioRadius.tile),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: NizamioSize.tap),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              NzFolderArt(size: size, frontTop: small ? 17 : 22),
+              Gap(small ? NizamioSpacing.space2 : NizamioSpacing.gapMd),
+              Text(
+                name,
+                maxLines: small ? 2 : 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: (small ? t.caption : t.bodyMd).copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-                Text(
-                  caption,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: t.monoSm.copyWith(color: c.textMuted),
-                ),
-              ],
-            ),
+              ),
+              Text(
+                caption,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: t.monoSm.copyWith(color: c.textMuted),
+              ),
+            ],
           ),
         ),
       ),

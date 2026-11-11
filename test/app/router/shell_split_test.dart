@@ -56,7 +56,7 @@ void main() {
   setUpFonts();
 
   testWidgets(
-    '1180×820: ray 100 + liste 390 (+1 kenar) + ayrıntı 689; kayıt yoksa "Bir kayıt seç"',
+    'Arşiv: kökte liste tam genişlik, klasör açılınca bölünür ve geri kapanır',
     (tester) async {
       final router = await _pump(tester, const Size(1180, 820));
       router.go('/archive');
@@ -66,6 +66,13 @@ void main() {
       final master = find.byWidgetPredicate(
         (w) => w is NzPaneScope && w.role == NzPaneRole.master,
       );
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
+      expect(find.byType(NzPickRecord).hitTestable(), findsNothing);
+      final list = tester.state(find.byType(ArchivePage));
+      tester.element(find.byType(ArchivePage)).appNav.openArchiveFolder('ALT');
+      await settle(tester);
+      expect(locationOf(router), '/archive/ALT');
+      expect(tester.state(find.byType(ArchivePage)), same(list));
       // Dıştaki sağ bölme bağlamı (sağ yığın içte kendi bağlamını verir).
       final detail = find
           .byWidgetPredicate(
@@ -78,22 +85,20 @@ void main() {
         _inPane(NzPaneRole.master, find.byType(ArchivePage)),
         findsOneWidget,
       );
-      // Kayıt hiç açılmamışsa sağda "Bir kayıt seç".
-      expect(
-        _inPane(NzPaneRole.detail, find.byType(NzPickRecord)),
-        findsOneWidget,
-      );
       expect(
         _inPane(NzPaneRole.detail, find.byType(ArchiveFolderPage)),
-        findsNothing,
+        findsOneWidget,
       );
-      // Tek ekranlık sağ yığında "Geri" yok.
-      expect(tester.widget<NzPaneScope>(detail).canBack, isFalse);
-      expect(_inPane(NzPaneRole.detail, _backIcon), findsNothing);
+      final back = _inPane(NzPaneRole.detail, _backIcon).hitTestable();
+      expect(back, findsOneWidget);
       expect(
         tester.widget<NzTabletRail>(find.byType(NzTabletRail)).currentIndex,
         RailModule.archive.index,
       );
+      await tester.tap(back.first);
+      await settle(tester);
+      expect(locationOf(router), '/archive');
+      expect(tester.getRect(master), const Rect.fromLTWH(100, 0, 1080, 820));
     },
   );
 
@@ -225,7 +230,7 @@ void main() {
       );
       expect(
         _inPane(NzPaneRole.detail, find.byType(NzPickRecord)),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         _inPane(NzPaneRole.detail, find.byType(ArchiveFolderPage)),
@@ -416,7 +421,7 @@ void main() {
     expect(tester.state(find.byType(MessagesPage)), same(list));
   });
 
-  testWidgets('modüle dönünce son açılan kayıt (prototip alt ekranı kalıcı)', (
+  testWidgets('arşive dönünce klasör kapanır ve liste tam genişler', (
     tester,
   ) async {
     final router = await _pump(tester, const Size(1180, 820));
@@ -426,15 +431,9 @@ void main() {
     await settle(tester);
     await tester.tap(_rail('Arşiv'));
     await settle(tester);
-    expect(locationOf(router), '/archive/ALT');
-    expect(
-      tester
-          .widget<ArchiveFolderPage>(
-            _inPane(NzPaneRole.detail, find.byType(ArchiveFolderPage)),
-          )
-          .code,
-      'ALT',
-    );
+    expect(locationOf(router), '/archive');
+    expect(find.byType(ArchiveFolderPage).hitTestable(), findsNothing);
+    expect(find.byType(ArchivePage).hitTestable(), findsOneWidget);
   });
 
   testWidgets('iz genişlik değişiminde korunur (tablet ↔ telefon)', (

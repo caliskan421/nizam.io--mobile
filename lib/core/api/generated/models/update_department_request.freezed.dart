@@ -17,7 +17,8 @@ T _$identity<T>(T value) => value;
 mixin _$UpdateDepartmentRequest {
 
  String? get name;/// Gönderilmezse ya da boşsa tür değişmez.
- UpdateDepartmentRequestKind? get kind; String? get code; String? get description;
+ UpdateDepartmentRequestKind? get kind;/// Verilmezse kod değişmez. Verilirse kırpılır ve büyük harfe çevrilir; sonuç `^[A-Z0-9]{2,10}$` olmalıdır (422 `organization.invalid_code`). Mevcut kod boş dizeyle boşaltılamaz (ORGANIZATION-K10).
+ String? get code; String? get description;
 /// Create a copy of UpdateDepartmentRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -225,6 +226,7 @@ class _UpdateDepartmentRequest implements UpdateDepartmentRequest {
 @override final  String? name;
 /// Gönderilmezse ya da boşsa tür değişmez.
 @override final  UpdateDepartmentRequestKind? kind;
+/// Verilmezse kod değişmez. Verilirse kırpılır ve büyük harfe çevrilir; sonuç `^[A-Z0-9]{2,10}$` olmalıdır (422 `organization.invalid_code`). Mevcut kod boş dizeyle boşaltılamaz (ORGANIZATION-K10).
 @override final  String? code;
 @override final  String? description;
 

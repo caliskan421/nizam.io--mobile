@@ -16,6 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UpdateWorkNoteRequest {
 
+/// Not içeriği. Sunucu baş/son boşluğu kırpar; sonuç boş olamaz, kontrol karakteri taşıyamaz ve en çok 10000 karakterdir (Unicode kod noktası/rune, kırpmadan sonra ölçülür); aksi 422 `work.input_invalid` (alan `content`).
  String get content;/// İstemcinin gördüğü not `edit_revision` değeri (ADR-0027). Eksikse 422 `work.input_invalid` + `work.revision_required`, pozitif değilse `work.revision_invalid`; bayatsa ve içerik farklıysa 409 `work.edit_conflict`. Tamsayı olmayan değer 422 `platform.body_invalid` (alan bilgisi yok).
 @JsonKey(name: 'expected_revision') int get expectedRevision;
 /// Create a copy of UpdateWorkNoteRequest
@@ -220,6 +221,7 @@ class _UpdateWorkNoteRequest implements UpdateWorkNoteRequest {
   const _UpdateWorkNoteRequest({required this.content, @JsonKey(name: 'expected_revision') required this.expectedRevision});
   factory _UpdateWorkNoteRequest.fromJson(Map<String, dynamic> json) => _$UpdateWorkNoteRequestFromJson(json);
 
+/// Not içeriği. Sunucu baş/son boşluğu kırpar; sonuç boş olamaz, kontrol karakteri taşıyamaz ve en çok 10000 karakterdir (Unicode kod noktası/rune, kırpmadan sonra ölçülür); aksi 422 `work.input_invalid` (alan `content`).
 @override final  String content;
 /// İstemcinin gördüğü not `edit_revision` değeri (ADR-0027). Eksikse 422 `work.input_invalid` + `work.revision_required`, pozitif değilse `work.revision_invalid`; bayatsa ve içerik farklıysa 409 `work.edit_conflict`. Tamsayı olmayan değer 422 `platform.body_invalid` (alan bilgisi yok).
 @override@JsonKey(name: 'expected_revision') final  int expectedRevision;

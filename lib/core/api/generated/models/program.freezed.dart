@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Program {
 
-@JsonKey(name: 'program_id') String get programId; String get name; int? get year; String? get description;/// Yalnız oluşturma yanıtında; yeni kayıt açıldıysa `true`.
+@JsonKey(name: 'program_id') String get programId; String get name;/// Dönemin kısa adı (PROGRAM-K46): 1–4 Unicode harf ya da rakam, kırpılmış, harf büyüklüğü korunur. Verilmemişse `null`; alan her cevapta bulunur.
+@JsonKey(name: 'short_name') String? get shortName;/// Dönem rozetinin palet anahtarı (PROGRAM-K46). Verilmemişse `null`; alan her cevapta bulunur.
+ ProgramColor? get color; int? get year; String? get description;/// Yalnız oluşturma yanıtında; yeni kayıt açıldıysa `true`.
  bool? get created;
 /// Create a copy of Program
 /// with the given fields replaced by the non-null parameter values.
@@ -31,20 +33,20 @@ $ProgramCopyWith<Program> get copyWith => _$ProgramCopyWithImpl<Program>(this as
 @override
 bool operator ==(Object other) {
   final _this = this as Program;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Program&&(identical(other.programId, _this.programId) || other.programId == _this.programId)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.year, _this.year) || other.year == _this.year)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.created, _this.created) || other.created == _this.created));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Program&&(identical(other.programId, _this.programId) || other.programId == _this.programId)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.shortName, _this.shortName) || other.shortName == _this.shortName)&&(identical(other.color, _this.color) || other.color == _this.color)&&(identical(other.year, _this.year) || other.year == _this.year)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.created, _this.created) || other.created == _this.created));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Program;
-  return Object.hash(runtimeType,_this.programId,_this.name,_this.year,_this.description,_this.created);
+  return Object.hash(runtimeType,_this.programId,_this.name,_this.shortName,_this.color,_this.year,_this.description,_this.created);
 }
 
 @override
 String toString() {
   final _this = this as Program;
-  return 'Program(programId: ${_this.programId}, name: ${_this.name}, year: ${_this.year}, description: ${_this.description}, created: ${_this.created})';
+  return 'Program(programId: ${_this.programId}, name: ${_this.name}, shortName: ${_this.shortName}, color: ${_this.color}, year: ${_this.year}, description: ${_this.description}, created: ${_this.created})';
 }
 
 
@@ -55,7 +57,7 @@ abstract mixin class $ProgramCopyWith<$Res>  {
   factory $ProgramCopyWith(Program value, $Res Function(Program) _then) = _$ProgramCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'program_id') String programId, String name, int? year, String? description, bool? created
+@JsonKey(name: 'program_id') String programId, String name,@JsonKey(name: 'short_name') String? shortName, ProgramColor? color, int? year, String? description, bool? created
 });
 
 
@@ -72,11 +74,13 @@ class _$ProgramCopyWithImpl<$Res>
 
 /// Create a copy of Program
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? programId = null,Object? name = null,Object? year = freezed,Object? description = freezed,Object? created = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? programId = null,Object? name = null,Object? shortName = freezed,Object? color = freezed,Object? year = freezed,Object? description = freezed,Object? created = freezed,}) {
   return _then(Program(
 programId: null == programId ? _self.programId : programId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,year: freezed == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
+as String,shortName: freezed == shortName ? _self.shortName : shortName // ignore: cast_nullable_to_non_nullable
+as String?,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
+as ProgramColor?,year: freezed == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,created: freezed == created ? _self.created : created // ignore: cast_nullable_to_non_nullable
 as bool?,
@@ -164,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'program_id')  String programId,  String name,  int? year,  String? description,  bool? created)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'program_id')  String programId,  String name, @JsonKey(name: 'short_name')  String? shortName,  ProgramColor? color,  int? year,  String? description,  bool? created)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Program() when $default != null:
-return $default(_that.programId,_that.name,_that.year,_that.description,_that.created);case _:
+return $default(_that.programId,_that.name,_that.shortName,_that.color,_that.year,_that.description,_that.created);case _:
   return orElse();
 
 }
@@ -185,10 +189,10 @@ return $default(_that.programId,_that.name,_that.year,_that.description,_that.cr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'program_id')  String programId,  String name,  int? year,  String? description,  bool? created)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'program_id')  String programId,  String name, @JsonKey(name: 'short_name')  String? shortName,  ProgramColor? color,  int? year,  String? description,  bool? created)  $default,) {final _that = this;
 switch (_that) {
 case _Program():
-return $default(_that.programId,_that.name,_that.year,_that.description,_that.created);case _:
+return $default(_that.programId,_that.name,_that.shortName,_that.color,_that.year,_that.description,_that.created);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +209,10 @@ return $default(_that.programId,_that.name,_that.year,_that.description,_that.cr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'program_id')  String programId,  String name,  int? year,  String? description,  bool? created)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'program_id')  String programId,  String name, @JsonKey(name: 'short_name')  String? shortName,  ProgramColor? color,  int? year,  String? description,  bool? created)?  $default,) {final _that = this;
 switch (_that) {
 case _Program() when $default != null:
-return $default(_that.programId,_that.name,_that.year,_that.description,_that.created);case _:
+return $default(_that.programId,_that.name,_that.shortName,_that.color,_that.year,_that.description,_that.created);case _:
   return null;
 
 }
@@ -220,11 +224,15 @@ return $default(_that.programId,_that.name,_that.year,_that.description,_that.cr
 @JsonSerializable()
 
 class _Program implements Program {
-  const _Program({@JsonKey(name: 'program_id') required this.programId, required this.name, this.year, this.description, this.created});
+  const _Program({@JsonKey(name: 'program_id') required this.programId, required this.name, @JsonKey(name: 'short_name') required this.shortName, required this.color, this.year, this.description, this.created});
   factory _Program.fromJson(Map<String, dynamic> json) => _$ProgramFromJson(json);
 
 @override@JsonKey(name: 'program_id') final  String programId;
 @override final  String name;
+/// Dönemin kısa adı (PROGRAM-K46): 1–4 Unicode harf ya da rakam, kırpılmış, harf büyüklüğü korunur. Verilmemişse `null`; alan her cevapta bulunur.
+@override@JsonKey(name: 'short_name') final  String? shortName;
+/// Dönem rozetinin palet anahtarı (PROGRAM-K46). Verilmemişse `null`; alan her cevapta bulunur.
+@override final  ProgramColor? color;
 @override final  int? year;
 @override final  String? description;
 /// Yalnız oluşturma yanıtında; yeni kayıt açıldıysa `true`.
@@ -243,18 +251,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Program&&(identical(other.programId, programId) || other.programId == programId)&&(identical(other.name, name) || other.name == name)&&(identical(other.year, year) || other.year == year)&&(identical(other.description, description) || other.description == description)&&(identical(other.created, created) || other.created == created));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Program&&(identical(other.programId, programId) || other.programId == programId)&&(identical(other.name, name) || other.name == name)&&(identical(other.shortName, shortName) || other.shortName == shortName)&&(identical(other.color, color) || other.color == color)&&(identical(other.year, year) || other.year == year)&&(identical(other.description, description) || other.description == description)&&(identical(other.created, created) || other.created == created));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,programId,name,year,description,created);
+    return Object.hash(runtimeType,programId,name,shortName,color,year,description,created);
 }
 
 @override
 String toString() {
-    return 'Program(programId: $programId, name: $name, year: $year, description: $description, created: $created)';
+    return 'Program(programId: $programId, name: $name, shortName: $shortName, color: $color, year: $year, description: $description, created: $created)';
 }
 
 
@@ -265,7 +273,7 @@ abstract mixin class _$ProgramCopyWith<$Res> implements $ProgramCopyWith<$Res> {
   factory _$ProgramCopyWith(_Program value, $Res Function(_Program) _then) = __$ProgramCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'program_id') String programId, String name, int? year, String? description, bool? created
+@JsonKey(name: 'program_id') String programId, String name,@JsonKey(name: 'short_name') String? shortName, ProgramColor? color, int? year, String? description, bool? created
 });
 
 
@@ -282,11 +290,13 @@ class __$ProgramCopyWithImpl<$Res>
 
 /// Create a copy of Program
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? programId = null,Object? name = null,Object? year = freezed,Object? description = freezed,Object? created = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? programId = null,Object? name = null,Object? shortName = freezed,Object? color = freezed,Object? year = freezed,Object? description = freezed,Object? created = freezed,}) {
   return _then(_Program(
 programId: null == programId ? _self.programId : programId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,year: freezed == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
+as String,shortName: freezed == shortName ? _self.shortName : shortName // ignore: cast_nullable_to_non_nullable
+as String?,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
+as ProgramColor?,year: freezed == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,created: freezed == created ? _self.created : created // ignore: cast_nullable_to_non_nullable
 as bool?,

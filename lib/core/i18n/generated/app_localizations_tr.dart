@@ -363,6 +363,14 @@ class AppLocalizationsTr extends AppLocalizations {
       'Departman bu programa bağlı değil.';
 
   @override
+  String get errOrganizationExistingDepartment =>
+      'Bu adda bir departman zaten var.';
+
+  @override
+  String get errOrganizationIdempotencyKeyReused =>
+      'Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.';
+
+  @override
   String get errOrganizationInputInvalid => 'Girilen bilgiler geçersiz.';
 
   @override
@@ -373,6 +381,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errOrganizationInvalidName => 'Ad geçersiz.';
+
+  @override
+  String get errOrganizationInvalidRequestKey => 'İşlem anahtarı geçersiz.';
 
   @override
   String get errOrganizationInvalidRole => 'Rol geçersiz.';
@@ -490,6 +501,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errProgramInputInvalid => 'Girilen bilgiler geçersiz.';
 
   @override
+  String get errProgramInvalidColor => 'Geçersiz renk seçimi.';
+
+  @override
   String get errProgramInvalidCopySource =>
       'Ekip kopyası için kaynak program geçersiz.';
 
@@ -505,6 +519,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errProgramInvalidName => 'Program adı geçersiz.';
+
+  @override
+  String get errProgramInvalidRequestKey => 'İşlem anahtarı geçersiz.';
+
+  @override
+  String get errProgramInvalidShortName =>
+      'Kısa ad 1–4 harf ya da rakam olmalıdır.';
 
   @override
   String get errProgramInvalidTransfer => 'Aktarım isteği geçersiz.';

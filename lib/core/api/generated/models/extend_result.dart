@@ -16,6 +16,12 @@ abstract class ExtendResult with _$ExtendResult {
     @DateOnlyConverter()
     @JsonKey(name: 'new_end_on')
     required DateTime newEndOn,
+
+    /// Uzatmanın yazdığı tarih sürümü; sonraki tarih yazımı bunu `expected_dates_revision` olarak okuma yapmadan gönderebilir. Tekrarda ilk uzatmanın değeridir (görevin bugünkü sürümü değil).
+    @JsonKey(name: 'dates_revision') required int datesRevision,
+
+    /// `true`: aynı `Idempotency-Key` + aynı istek; uzatma ikinci kez uygulanmadı, alanlar ilk uzatmanın sonucudur (WORK-K89).
+    required bool replayed,
   }) = _ExtendResult;
 
   factory ExtendResult.fromJson(Map<String, Object?> json) =>

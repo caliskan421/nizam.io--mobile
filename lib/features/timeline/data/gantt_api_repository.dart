@@ -29,7 +29,7 @@ class ApiGanttRepository implements GanttRepository {
   @override
   Future<GanttSchedule> coordinator() => apiCall(
     () async => _schedule(
-      await _client.coordinatorGantt(
+      (await _client.coordinatorGantt(
         extras: programId == null
             ? WorkClient.coordinatorGanttOpenapiExtras
             : withScope(
@@ -37,14 +37,14 @@ class ApiGanttRepository implements GanttRepository {
                 programId!,
                 departmentId ?? '',
               ),
-      ),
+      )).data,
     ),
   );
 
   @override
   Future<GanttSchedule> member() => apiCall(
     () async => _schedule(
-      await _client.memberGantt(
+      (await _client.memberGantt(
         extras: programId == null
             ? WorkClient.memberGanttOpenapiExtras
             : withScope(
@@ -52,14 +52,14 @@ class ApiGanttRepository implements GanttRepository {
                 programId!,
                 departmentId ?? '',
               ),
-      ),
+      )).data,
     ),
   );
 
   @override
   Future<GanttSchedule> admin({bool overdueOnly = false}) => apiCall(
     () async => _schedule(
-      await _client.adminGantt(
+      (await _client.adminGantt(
         overdue: overdueOnly ? overdueFlag : null,
         extras: programId == null
             ? WorkClient.adminGanttOpenapiExtras
@@ -68,7 +68,7 @@ class ApiGanttRepository implements GanttRepository {
                 programId!,
                 departmentId ?? '',
               ),
-      ),
+      )).data,
     ),
   );
 

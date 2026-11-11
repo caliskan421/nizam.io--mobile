@@ -23,6 +23,7 @@ class _WorkClient implements WorkClient {
   @override
   Future<WorkItemList> listProgramWorkItems({
     String? departmentId,
+    List<String>? assigneeAccountId,
     int? limit,
     String? cursor,
     Map<String, dynamic>? extras = WorkClient.listProgramWorkItemsOpenapiExtras,
@@ -31,6 +32,7 @@ class _WorkClient implements WorkClient {
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{
       r'department_id': departmentId,
+      r'assignee_account_id': assigneeAccountId,
       r'limit': limit,
       r'cursor': cursor,
     };
@@ -51,6 +53,43 @@ class _WorkClient implements WorkClient {
     late WorkItemList _value;
     try {
       _value = WorkItemList.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<ProgramWorkItemCounts> countProgramWorkItems({
+    String? departmentId,
+    List<String>? assigneeAccountId,
+    Map<String, dynamic>? extras =
+        WorkClient.countProgramWorkItemsOpenapiExtras,
+  }) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras ?? <String, dynamic>{});
+    final queryParameters = <String, dynamic>{
+      r'department_id': departmentId,
+      r'assignee_account_id': assigneeAccountId,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<ProgramWorkItemCounts>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/v1/program/work-items/counts',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late ProgramWorkItemCounts _value;
+    try {
+      _value = ProgramWorkItemCounts.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -832,7 +871,7 @@ class _WorkClient implements WorkClient {
   }
 
   @override
-  Future<Gantt> coordinatorGantt({
+  Future<HttpResponse<Gantt>> coordinatorGantt({
     Map<String, dynamic>? extras = WorkClient.coordinatorGanttOpenapiExtras,
   }) async {
     final _extra = <String, dynamic>{};
@@ -841,7 +880,7 @@ class _WorkClient implements WorkClient {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<Gantt>(
+    final _options = _setStreamType<HttpResponse<Gantt>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -859,11 +898,12 @@ class _WorkClient implements WorkClient {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
-    return _value;
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
-  Future<Gantt> memberGantt({
+  Future<HttpResponse<Gantt>> memberGantt({
     Map<String, dynamic>? extras = WorkClient.memberGanttOpenapiExtras,
   }) async {
     final _extra = <String, dynamic>{};
@@ -872,7 +912,7 @@ class _WorkClient implements WorkClient {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<Gantt>(
+    final _options = _setStreamType<HttpResponse<Gantt>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -890,20 +930,23 @@ class _WorkClient implements WorkClient {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
-    return _value;
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
   Future<ExtendResult> extendWorkItem({
     required String id,
     required ExtendRequest body,
+    String? idempotencyKey,
     Map<String, dynamic>? extras = WorkClient.extendWorkItemOpenapiExtras,
   }) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Idempotency-Key': idempotencyKey};
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _options = _setStreamType<ExtendResult>(
@@ -1028,7 +1071,7 @@ class _WorkClient implements WorkClient {
   }
 
   @override
-  Future<Gantt> adminGantt({
+  Future<HttpResponse<Gantt>> adminGantt({
     String? overdue,
     Map<String, dynamic>? extras = WorkClient.adminGanttOpenapiExtras,
   }) async {
@@ -1038,7 +1081,7 @@ class _WorkClient implements WorkClient {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<Gantt>(
+    final _options = _setStreamType<HttpResponse<Gantt>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -1056,19 +1099,22 @@ class _WorkClient implements WorkClient {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
-    return _value;
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   @override
   Future<DateChangeRequest> requestDateChange({
     required DateChangeRequestCreate body,
+    String? idempotencyKey,
     Map<String, dynamic>? extras = WorkClient.requestDateChangeOpenapiExtras,
   }) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Idempotency-Key': idempotencyKey};
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _options = _setStreamType<DateChangeRequest>(

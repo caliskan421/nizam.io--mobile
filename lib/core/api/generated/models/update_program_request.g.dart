@@ -12,6 +12,10 @@ _UpdateProgramRequest _$UpdateProgramRequestFromJson(
   name: json['name'] as String?,
   year: (json['year'] as num?)?.toInt(),
   description: json['description'] as String?,
+  shortName: json['short_name'] as String?,
+  color: json['color'] == null
+      ? null
+      : UpdateProgramRequestColor.fromJson(json['color'] as String),
 );
 
 Map<String, dynamic> _$UpdateProgramRequestToJson(
@@ -20,4 +24,19 @@ Map<String, dynamic> _$UpdateProgramRequestToJson(
   'name': ?instance.name,
   'year': ?instance.year,
   'description': ?instance.description,
+  'short_name': ?instance.shortName,
+  'color': ?_$UpdateProgramRequestColorEnumMap[instance.color],
+};
+
+const _$UpdateProgramRequestColorEnumMap = {
+  UpdateProgramRequestColor.violet: 'violet',
+  UpdateProgramRequestColor.gold: 'gold',
+  UpdateProgramRequestColor.blue: 'blue',
+  UpdateProgramRequestColor.teal: 'teal',
+  UpdateProgramRequestColor.green: 'green',
+  UpdateProgramRequestColor.orange: 'orange',
+  UpdateProgramRequestColor.red: 'red',
+  UpdateProgramRequestColor.slate: 'slate',
+  UpdateProgramRequestColor.valueNull: 'null',
+  UpdateProgramRequestColor.$unknown: r'$unknown',
 };

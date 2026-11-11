@@ -19,7 +19,14 @@ mixin _$WorkItem {
 @JsonKey(name: 'work_item_id') String get workItemId;@JsonKey(name: 'program_id') String get programId;@JsonKey(name: 'department_id') String get departmentId; String get title; WorkItemPriority get priority; WorkItemStatus get status;@JsonKey(name: 'assignee_account_ids') List<String> get assigneeAccountIds;/// Atananlar görünen adlarıyla; sıra `assignee_account_ids` ile aynıdır. `assignee_account_ids` geriye uyum için korunur.
  List<WorkItemAssignee> get assignees;/// Planlanan başlangıç günü (tarih kaydından; liste, oluşturma, güncelleme ve tekil uçta dolu).
 @DateOnlyConverter()@JsonKey(name: 'start_on') DateTime get startOn;/// Bitiş günü (tarih kaydından). Geç tamamlamada tamamlanma gününe itilmiş olabilir; özgün plan `planned_end_on`dadır.
-@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime get endOn;@JsonKey(name: 'is_overdue') bool get isOverdue;@JsonKey(name: 'days_overdue') int get daysOverdue;@JsonKey(name: 'is_completed_late') bool get isCompletedLate;@JsonKey(name: 'days_late') int get daysLate;@JsonKey(name: 'is_completed_early') bool get isCompletedEarly;@JsonKey(name: 'days_early') int get daysEarly;/// Tamamlanma kanıtı bayrağı (ADR-0024): açıkken onaya sunma, doğrudan tamamlama ve onay en az bir ek dosya ister.
+@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime get endOn;/// Açık görevin gecikmesi (WORK-K37): durum `tamamlandi` değilken bugün `end_on`'dan.
+/// sonraysa `true`. Bitiş günü boyunca gecikmiş değildir; gecikme ertesi günden.
+/// başlar. Gün sınırı kurulumun saat dilimidir (`GET /v1/instance/profile`.
+/// `timezone`), istemcinin yerel saati değil. Tamamlanmış görevde her zaman `false`.
+/// (geç tamamlama `is_completed_late`/`days_late` ile taşınır).
+///
+@JsonKey(name: 'is_overdue') bool get isOverdue;/// Açık görevde `bugün − end_on` gün farkı (gecikmiyorsa 0); tamamlanmış görevde her zaman 0. Gün sınırı kurulumun saat dilimidir.
+@JsonKey(name: 'days_overdue') int get daysOverdue;@JsonKey(name: 'is_completed_late') bool get isCompletedLate;@JsonKey(name: 'days_late') int get daysLate;@JsonKey(name: 'is_completed_early') bool get isCompletedEarly;@JsonKey(name: 'days_early') int get daysEarly;/// Tamamlanma kanıtı bayrağı (ADR-0024): açıkken onaya sunma, doğrudan tamamlama ve onay en az bir ek dosya ister.
 @JsonKey(name: 'completion_evidence_required') bool get completionEvidenceRequired;@JsonKey(name: 'subtask_counts') SubtaskCounts get subtaskCounts;/// Görevin bekleyen tarih talebi (WORK-K82). Her cevapta bulunur; `null` "bekleyen talep.
 /// yok ya da çağıran görmeye yetkili değil" demektir ve her uçta aynı anlamı taşır.
 /// Görev listeleri (`listProgramWorkItems`, `listWorkItems`), `getWorkItem`, oluşturma.
@@ -311,7 +318,14 @@ class _WorkItem implements WorkItem {
 @override@DateOnlyConverter()@JsonKey(name: 'start_on') final  DateTime startOn;
 /// Bitiş günü (tarih kaydından). Geç tamamlamada tamamlanma gününe itilmiş olabilir; özgün plan `planned_end_on`dadır.
 @override@DateOnlyConverter()@JsonKey(name: 'end_on') final  DateTime endOn;
+/// Açık görevin gecikmesi (WORK-K37): durum `tamamlandi` değilken bugün `end_on`'dan.
+/// sonraysa `true`. Bitiş günü boyunca gecikmiş değildir; gecikme ertesi günden.
+/// başlar. Gün sınırı kurulumun saat dilimidir (`GET /v1/instance/profile`.
+/// `timezone`), istemcinin yerel saati değil. Tamamlanmış görevde her zaman `false`.
+/// (geç tamamlama `is_completed_late`/`days_late` ile taşınır).
+///
 @override@JsonKey(name: 'is_overdue') final  bool isOverdue;
+/// Açık görevde `bugün − end_on` gün farkı (gecikmiyorsa 0); tamamlanmış görevde her zaman 0. Gün sınırı kurulumun saat dilimidir.
 @override@JsonKey(name: 'days_overdue') final  int daysOverdue;
 @override@JsonKey(name: 'is_completed_late') final  bool isCompletedLate;
 @override@JsonKey(name: 'days_late') final  int daysLate;

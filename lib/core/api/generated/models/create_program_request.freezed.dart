@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CreateProgramRequest {
 
- String get name; int? get year; String? get description;
+ String get name; int? get year; String? get description;/// İsteğe bağlı kısa ad (PROGRAM-K46): baştaki/sondaki boşluk kırpıldıktan SONRA 1–4 Unicode harf ya da rakam olmalıdır (ham değerin uzunluğu sınırlanmaz; ör. `" ABCD "` geçerlidir ve `ABCD` yazılır); harf büyüklüğü korunur. Yok ya da `null` = verilmemiş. Kural dışı değer `422 program.input_invalid` (`program.invalid_short_name`).
+@JsonKey(name: 'short_name') String? get shortName;/// İsteğe bağlı palet anahtarı (birebir). Yok ya da `null` = verilmemiş; başka değer `422 program.input_invalid` (`program.invalid_color`).
+ CreateProgramRequestColor? get color;
 /// Create a copy of CreateProgramRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +32,20 @@ $CreateProgramRequestCopyWith<CreateProgramRequest> get copyWith => _$CreateProg
 @override
 bool operator ==(Object other) {
   final _this = this as CreateProgramRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateProgramRequest&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.year, _this.year) || other.year == _this.year)&&(identical(other.description, _this.description) || other.description == _this.description));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateProgramRequest&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.year, _this.year) || other.year == _this.year)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.shortName, _this.shortName) || other.shortName == _this.shortName)&&(identical(other.color, _this.color) || other.color == _this.color));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CreateProgramRequest;
-  return Object.hash(runtimeType,_this.name,_this.year,_this.description);
+  return Object.hash(runtimeType,_this.name,_this.year,_this.description,_this.shortName,_this.color);
 }
 
 @override
 String toString() {
   final _this = this as CreateProgramRequest;
-  return 'CreateProgramRequest(name: ${_this.name}, year: ${_this.year}, description: ${_this.description})';
+  return 'CreateProgramRequest(name: ${_this.name}, year: ${_this.year}, description: ${_this.description}, shortName: ${_this.shortName}, color: ${_this.color})';
 }
 
 
@@ -54,7 +56,7 @@ abstract mixin class $CreateProgramRequestCopyWith<$Res>  {
   factory $CreateProgramRequestCopyWith(CreateProgramRequest value, $Res Function(CreateProgramRequest) _then) = _$CreateProgramRequestCopyWithImpl;
 @useResult
 $Res call({
- String name, int? year, String? description
+ String name, int? year, String? description,@JsonKey(name: 'short_name') String? shortName, CreateProgramRequestColor? color
 });
 
 
@@ -71,12 +73,14 @@ class _$CreateProgramRequestCopyWithImpl<$Res>
 
 /// Create a copy of CreateProgramRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? year = freezed,Object? description = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? year = freezed,Object? description = freezed,Object? shortName = freezed,Object? color = freezed,}) {
   return _then(CreateProgramRequest(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,year: freezed == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,shortName: freezed == shortName ? _self.shortName : shortName // ignore: cast_nullable_to_non_nullable
+as String?,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
+as CreateProgramRequestColor?,
   ));
 }
 
@@ -161,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  int? year,  String? description)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  int? year,  String? description, @JsonKey(name: 'short_name')  String? shortName,  CreateProgramRequestColor? color)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreateProgramRequest() when $default != null:
-return $default(_that.name,_that.year,_that.description);case _:
+return $default(_that.name,_that.year,_that.description,_that.shortName,_that.color);case _:
   return orElse();
 
 }
@@ -182,10 +186,10 @@ return $default(_that.name,_that.year,_that.description);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  int? year,  String? description)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  int? year,  String? description, @JsonKey(name: 'short_name')  String? shortName,  CreateProgramRequestColor? color)  $default,) {final _that = this;
 switch (_that) {
 case _CreateProgramRequest():
-return $default(_that.name,_that.year,_that.description);case _:
+return $default(_that.name,_that.year,_that.description,_that.shortName,_that.color);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +206,10 @@ return $default(_that.name,_that.year,_that.description);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  int? year,  String? description)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  int? year,  String? description, @JsonKey(name: 'short_name')  String? shortName,  CreateProgramRequestColor? color)?  $default,) {final _that = this;
 switch (_that) {
 case _CreateProgramRequest() when $default != null:
-return $default(_that.name,_that.year,_that.description);case _:
+return $default(_that.name,_that.year,_that.description,_that.shortName,_that.color);case _:
   return null;
 
 }
@@ -217,12 +221,16 @@ return $default(_that.name,_that.year,_that.description);case _:
 @JsonSerializable()
 
 class _CreateProgramRequest implements CreateProgramRequest {
-  const _CreateProgramRequest({required this.name, this.year, this.description});
+  const _CreateProgramRequest({required this.name, this.year, this.description, @JsonKey(name: 'short_name') this.shortName, this.color});
   factory _CreateProgramRequest.fromJson(Map<String, dynamic> json) => _$CreateProgramRequestFromJson(json);
 
 @override final  String name;
 @override final  int? year;
 @override final  String? description;
+/// İsteğe bağlı kısa ad (PROGRAM-K46): baştaki/sondaki boşluk kırpıldıktan SONRA 1–4 Unicode harf ya da rakam olmalıdır (ham değerin uzunluğu sınırlanmaz; ör. `" ABCD "` geçerlidir ve `ABCD` yazılır); harf büyüklüğü korunur. Yok ya da `null` = verilmemiş. Kural dışı değer `422 program.input_invalid` (`program.invalid_short_name`).
+@override@JsonKey(name: 'short_name') final  String? shortName;
+/// İsteğe bağlı palet anahtarı (birebir). Yok ya da `null` = verilmemiş; başka değer `422 program.input_invalid` (`program.invalid_color`).
+@override final  CreateProgramRequestColor? color;
 
 /// Create a copy of CreateProgramRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -237,18 +245,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateProgramRequest&&(identical(other.name, name) || other.name == name)&&(identical(other.year, year) || other.year == year)&&(identical(other.description, description) || other.description == description));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateProgramRequest&&(identical(other.name, name) || other.name == name)&&(identical(other.year, year) || other.year == year)&&(identical(other.description, description) || other.description == description)&&(identical(other.shortName, shortName) || other.shortName == shortName)&&(identical(other.color, color) || other.color == color));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,name,year,description);
+    return Object.hash(runtimeType,name,year,description,shortName,color);
 }
 
 @override
 String toString() {
-    return 'CreateProgramRequest(name: $name, year: $year, description: $description)';
+    return 'CreateProgramRequest(name: $name, year: $year, description: $description, shortName: $shortName, color: $color)';
 }
 
 
@@ -259,7 +267,7 @@ abstract mixin class _$CreateProgramRequestCopyWith<$Res> implements $CreateProg
   factory _$CreateProgramRequestCopyWith(_CreateProgramRequest value, $Res Function(_CreateProgramRequest) _then) = __$CreateProgramRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String name, int? year, String? description
+ String name, int? year, String? description,@JsonKey(name: 'short_name') String? shortName, CreateProgramRequestColor? color
 });
 
 
@@ -276,12 +284,14 @@ class __$CreateProgramRequestCopyWithImpl<$Res>
 
 /// Create a copy of CreateProgramRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? year = freezed,Object? description = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? year = freezed,Object? description = freezed,Object? shortName = freezed,Object? color = freezed,}) {
   return _then(_CreateProgramRequest(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,year: freezed == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,shortName: freezed == shortName ? _self.shortName : shortName // ignore: cast_nullable_to_non_nullable
+as String?,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
+as CreateProgramRequestColor?,
   ));
 }
 

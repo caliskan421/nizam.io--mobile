@@ -122,6 +122,14 @@ abstract class ReportingClient {
       };
 
   /// Yönetici dashboard özeti (seçili program).
+  ///
+  /// Yalnız şirket yöneticisi. Değerler istek anında hesaplanır (REPORTING-K02); alan.
+  /// anlamları `DashboardReport` ve `CoordinatorshipStat` şemalarındadır.
+  ///
+  /// Bu özet cevap `X-Result-Truncated` başlığını KOYMAZ ve gömülü `coordinatorship_stats`.
+  /// ile `overdue_tasks_list` dizilerini kesmez: diziler tam döner. 200 satır kesmesi.
+  /// yalnız ayrı alt liste uçlarındadır (`reportDashboardCoordinatorships`,.
+  /// `reportDashboardTasks`, `reportDashboardMeetings`; REPORTING-K03).
   @GET('/v1/reports/dashboard')
   Future<DashboardReport> reportDashboard({
     @Extras()

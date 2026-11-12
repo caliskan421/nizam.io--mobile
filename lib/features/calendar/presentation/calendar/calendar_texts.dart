@@ -49,6 +49,29 @@ extension CalendarTexts on AppLocalizations {
     CalendarKind.request => uiCalendarGroupRequests,
   };
 
+  /// Görev süzgeci düğmesi: "Bitecek" / "Başlayacak" / "Devam eden".
+  String edgeFilter(TaskEdge e) => switch (e) {
+    TaskEdge.end => uiCalendarFilterEnds,
+    TaskEdge.start => uiCalendarFilterStarts,
+    TaskEdge.ongoing => uiCalendarFilterOngoing,
+  };
+
+  /// Görev alt bölümü başlığı: "bu gün bitecek" / "bu gün başlayacak" / "devam eden".
+  String edgeSection(TaskEdge e) => switch (e) {
+    TaskEdge.end => uiCalendarSubEnds,
+    TaskEdge.start => uiCalendarSubStarts,
+    TaskEdge.ongoing => uiCalendarSubOngoing,
+  };
+
+  /// Görev satırının ilk parçası: "Bitiyor" / "Başlıyor" / "Sürüyor · bitiş 5 Kas".
+  String edgeLead(TaskEntry e) => switch (e.edge) {
+    TaskEdge.end => uiCalendarTaskEnds,
+    TaskEdge.start => uiCalendarTaskStarts,
+    TaskEdge.ongoing =>
+      '$uiCalendarTaskOngoing · $uiCalendarDueLc '
+          '${DateFormat('d MMM', 'tr').format(e.due ?? e.date)}',
+  };
+
   /// "14:00".
   String clock(MeetingEntry m) =>
       '${m.hour.toString().padLeft(2, '0')}:${m.minute.toString().padLeft(2, '0')}';

@@ -225,4 +225,38 @@ void main() {
     expect(ix.on(DateTime(2026, 11, 12)), isEmpty);
     expect(ix.groups(DateTime(2026, 10, 6)), isEmpty);
   });
+
+  test('süren görevler: başlangıç < gün < bitiş, bitmemiş, bitişe göre; uç günler dışarıda', () {
+    final ix = CalendarIndex.build(
+      const [],
+      _catalog([
+        _task(
+          'long',
+          start: DateTime(2026, 11, 1),
+          due: DateTime(2026, 11, 20),
+        ),
+        _task(
+          'short',
+          start: DateTime(2026, 11, 2),
+          due: DateTime(2026, 11, 8),
+        ),
+        _task(
+          'done',
+          start: DateTime(2026, 11, 1),
+          due: DateTime(2026, 11, 20),
+          status: TaskStatus.done,
+        ),
+        _task('edge', start: DateTime(2026, 11, 5), due: DateTime(2026, 11, 9)),
+      ]),
+    );
+    final run = ix.ongoing(DateTime(2026, 11, 5));
+    expect(run.map((e) => (e.code, e.edge, e.due)), [
+      ('short', TaskEdge.ongoing, DateTime(2026, 11, 8)),
+      ('long', TaskEdge.ongoing, DateTime(2026, 11, 20)),
+    ]);
+    // Süren görev hücre noktası ve sayısı üretmez.
+    expect(ix.count(DateTime(2026, 11, 3)), 0);
+    expect(ix.ongoing(DateTime(2026, 11, 1)), isEmpty);
+    expect(ix.ongoing(DateTime(2026, 11, 20)), isEmpty);
+  });
 }

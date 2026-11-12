@@ -67,4 +67,15 @@ void main() {
       expect(s().selectedOn(_today), _today);
     },
   );
+
+  test('görev süzgeci: varsayılan bitecek + başlayacak; seçim gün/ay/kip değişiminde kalır', () {
+    expect(s().taskEdges, {TaskEdge.end, TaskEdge.start});
+    ctrl().toggleTaskEdge(TaskEdge.ongoing);
+    ctrl().toggleTaskEdge(TaskEdge.start);
+    ctrl().pick(DateTime(2026, 10, 6));
+    ctrl().step(1, today: _today);
+    ctrl().toggleMode();
+    ctrl().goToday();
+    expect(s().taskEdges, {TaskEdge.end, TaskEdge.ongoing});
+  });
 }

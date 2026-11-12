@@ -13,11 +13,19 @@ final class CalendarViewState {
     this.selected,
     this.month,
     this.mode = CalendarMode.month,
+    this.taskEdges = defaultTaskEdges,
   });
+
+  /// Gün listesinde varsayılan görünen görev türleri: bitecek ve başlayacak (süren görevler
+  /// istenince açılır).
+  static const defaultTaskEdges = {TaskEdge.end, TaskEdge.start};
 
   final DateTime? selected;
   final DateTime? month;
   final CalendarMode mode;
+
+  /// Gün listesinde görünen görev türleri; gün ve ay değişiminde korunur.
+  final Set<TaskEdge> taskEdges;
 
   /// [today]'e göre çözülmüş seçili gün.
   DateTime selectedOn(DateTime today) => calendarDay(selected ?? today);
@@ -43,10 +51,12 @@ class CalendarController extends _$CalendarController {
     selected: calendarDay(day),
     month: calendarMonth(day),
     mode: state.mode,
+    taskEdges: state.taskEdges,
   );
 
   /// Bugüne döner (gün ve ay).
-  void goToday() => state = CalendarViewState(mode: state.mode);
+  void goToday() =>
+      state = CalendarViewState(mode: state.mode, taskEdges: state.taskEdges);
 
   /// Ay ↔ hafta.
   void toggleMode() => state = CalendarViewState(
@@ -55,6 +65,17 @@ class CalendarController extends _$CalendarController {
     mode: state.mode == CalendarMode.month
         ? CalendarMode.week
         : CalendarMode.month,
+    taskEdges: state.taskEdges,
+  );
+
+  /// Gün listesindeki görev türünü açar/kapatır (bitecek, başlayacak, süren).
+  void toggleTaskEdge(TaskEdge edge) => state = CalendarViewState(
+    selected: state.selected,
+    month: state.month,
+    mode: state.mode,
+    taskEdges: state.taskEdges.contains(edge)
+        ? ({...state.taskEdges}..remove(edge))
+        : {...state.taskEdges, edge},
   );
 
   /// Önceki/sonraki ([delta] −1/+1). Hafta kipinde seçili gün 7 gün kayar; ay kipinde ay
@@ -69,9 +90,14 @@ class CalendarController extends _$CalendarController {
     final next = DateTime(m.year, m.month + delta);
     final t = calendarDay(today);
     if (next == calendarMonth(t)) {
-      state = CalendarViewState(mode: state.mode);
+      state = CalendarViewState(mode: state.mode, taskEdges: state.taskEdges);
     } else {
-      state = CalendarViewState(selected: next, month: next, mode: state.mode);
+      state = CalendarViewState(
+        selected: next,
+        month: next,
+        mode: state.mode,
+        taskEdges: state.taskEdges,
+      );
     }
   }
 }

@@ -2632,6 +2632,60 @@ abstract class AppLocalizations {
   /// **'Başlıyor'**
   String get uiCalendarTaskStarts;
 
+  /// ui.calendar.task_ongoing
+  ///
+  /// In tr, this message translates to:
+  /// **'Sürüyor'**
+  String get uiCalendarTaskOngoing;
+
+  /// ui.calendar.due_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'bitiş'**
+  String get uiCalendarDueLc;
+
+  /// ui.calendar.task_filter
+  ///
+  /// In tr, this message translates to:
+  /// **'Gösterilen görevler'**
+  String get uiCalendarTaskFilter;
+
+  /// ui.calendar.filter_ends
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitecek'**
+  String get uiCalendarFilterEnds;
+
+  /// ui.calendar.filter_starts
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlayacak'**
+  String get uiCalendarFilterStarts;
+
+  /// ui.calendar.filter_ongoing
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam eden'**
+  String get uiCalendarFilterOngoing;
+
+  /// ui.calendar.sub_ends
+  ///
+  /// In tr, this message translates to:
+  /// **'bu gün bitecek'**
+  String get uiCalendarSubEnds;
+
+  /// ui.calendar.sub_starts
+  ///
+  /// In tr, this message translates to:
+  /// **'bu gün başlayacak'**
+  String get uiCalendarSubStarts;
+
+  /// ui.calendar.sub_ongoing
+  ///
+  /// In tr, this message translates to:
+  /// **'devam eden'**
+  String get uiCalendarSubOngoing;
+
   /// ui.calendar.late_lc
   ///
   /// In tr, this message translates to:

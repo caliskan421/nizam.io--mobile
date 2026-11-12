@@ -7,8 +7,9 @@ import '../../tasks/tasks.dart';
 /// tarih talebi).
 enum CalendarKind { meeting, task, request }
 
-/// Görev kaydının hangi ucu o güne düşer.
-enum TaskEdge { start, end }
+/// Görev kaydının o günle ilişkisi: bitiş ya da başlangıç o gün, ya da görev o gün sürüyor
+/// (başlangıçtan sonra, bitişten önce; yalnız istenince listelenir, hücre noktası olmaz).
+enum TaskEdge { end, start, ongoing }
 
 /// Ay ızgarası ya da yalnız seçili günün haftası.
 enum CalendarMode { month, week }
@@ -88,10 +89,14 @@ final class TaskEntry extends CalendarEntry {
     required this.assignees,
     required this.late,
     this.status,
+    this.due,
   });
 
   @override
   final DateTime date;
+
+  /// Görevin bitiş günü (süren görev satırında gösterilir).
+  final DateTime? due;
   final String code;
   final String title;
   final String coordinatorship;
@@ -141,7 +146,13 @@ typedef CalendarGroup = ({CalendarKind kind, List<CalendarEntry> entries});
 /// Günlere dağıtılmış kayıtlar ve verinin "bugün"ü.
 @immutable
 final class CalendarIndex {
-  const CalendarIndex._(this.today, this._catalog, this._byDay, this.truncated);
+  const CalendarIndex._(
+    this.today,
+    this._catalog,
+    this._byDay,
+    this.truncated,
+    this._spans,
+  );
 
   /// Görünür toplantılar + görev kataloğu: bitmemiş her görevin başlangıcı ve bitişi, bekleyen
   /// her tarih talebinin yeni bitişi. [meetingsTruncated]: toplantı listesi sayfa tavanında
@@ -155,6 +166,7 @@ final class CalendarIndex {
   }) {
     final today = calendarDay(catalog.today);
     final by = <DateTime, List<CalendarEntry>>{};
+    final spans = <TaskItem>[];
     void add(CalendarEntry e) =>
         (by[calendarDay(e.date)] ??= <CalendarEntry>[]).add(e);
     meetings
@@ -181,6 +193,7 @@ final class CalendarIndex {
         );
       }
       if (t.isDone) continue;
+      spans.add(t);
       final due = calendarDay(t.due);
       for (final (edge, day) in [
         (TaskEdge.end, due),
@@ -204,6 +217,7 @@ final class CalendarIndex {
       catalog,
       by,
       meetingsTruncated || catalog.truncated,
+      spans,
     );
   }
 
@@ -211,9 +225,11 @@ final class CalendarIndex {
   /// kaydı. Gecikme sunucunun olgusudur, yerel saatten yetki veya gecikme türetilmez.
   factory CalendarIndex.personTasks(TaskCatalog catalog, String accountId) {
     final by = <DateTime, List<CalendarEntry>>{};
-    for (final task in catalog.tasks.where(
-      (t) => t.assignees.contains(accountId),
-    )) {
+    final mine = [
+      for (final t in catalog.tasks)
+        if (t.assignees.contains(accountId)) t,
+    ];
+    for (final task in mine) {
       final start = calendarDay(task.start);
       final due = calendarDay(task.due);
       for (final (edge, date) in [
@@ -239,6 +255,10 @@ final class CalendarIndex {
       catalog,
       by,
       catalog.truncated,
+      [
+        for (final t in mine)
+          if (!t.isDone) t,
+      ],
     );
   }
 
@@ -249,6 +269,29 @@ final class CalendarIndex {
   final bool truncated;
   final TaskCatalog _catalog;
   final Map<DateTime, List<CalendarEntry>> _byDay;
+
+  /// Bitmemiş görevler (dizinin süzgeciyle): süren görev listesinin kaynağı.
+  final List<TaskItem> _spans;
+
+  /// [day]'de süren görevler (başlangıç < gün < bitiş; uç günler [on]'dadır), bitişe göre.
+  List<TaskEntry> ongoing(DateTime day) {
+    final d = calendarDay(day);
+    final list = [
+      for (final t in _spans)
+        if (calendarDay(t.start).isBefore(d) && d.isBefore(calendarDay(t.due)))
+          TaskEntry(
+            date: d,
+            code: t.code,
+            title: t.title,
+            coordinatorship: t.coordinatorship,
+            edge: TaskEdge.ongoing,
+            assignees: t.assignees,
+            late: calendarDay(t.due).isBefore(today),
+            due: calendarDay(t.due),
+          ),
+    ]..sort((a, b) => a.due!.compareTo(b.due!));
+    return list;
+  }
 
   /// Kişi adı (sunucunun verdiği ad dahil); bilinmiyorsa null (arayüz nötr etiket gösterir).
   String? personName(String id) => _catalog.nameOf(id);

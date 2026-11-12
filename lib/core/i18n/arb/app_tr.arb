@@ -1693,6 +1693,42 @@
   "@uiCalendarTaskStarts": {
     "description": "ui.calendar.task_starts"
   },
+  "uiCalendarTaskOngoing": "Sürüyor",
+  "@uiCalendarTaskOngoing": {
+    "description": "ui.calendar.task_ongoing"
+  },
+  "uiCalendarDueLc": "bitiş",
+  "@uiCalendarDueLc": {
+    "description": "ui.calendar.due_lc"
+  },
+  "uiCalendarTaskFilter": "Gösterilen görevler",
+  "@uiCalendarTaskFilter": {
+    "description": "ui.calendar.task_filter"
+  },
+  "uiCalendarFilterEnds": "Bitecek",
+  "@uiCalendarFilterEnds": {
+    "description": "ui.calendar.filter_ends"
+  },
+  "uiCalendarFilterStarts": "Başlayacak",
+  "@uiCalendarFilterStarts": {
+    "description": "ui.calendar.filter_starts"
+  },
+  "uiCalendarFilterOngoing": "Devam eden",
+  "@uiCalendarFilterOngoing": {
+    "description": "ui.calendar.filter_ongoing"
+  },
+  "uiCalendarSubEnds": "bu gün bitecek",
+  "@uiCalendarSubEnds": {
+    "description": "ui.calendar.sub_ends"
+  },
+  "uiCalendarSubStarts": "bu gün başlayacak",
+  "@uiCalendarSubStarts": {
+    "description": "ui.calendar.sub_starts"
+  },
+  "uiCalendarSubOngoing": "devam eden",
+  "@uiCalendarSubOngoing": {
+    "description": "ui.calendar.sub_ongoing"
+  },
   "uiCalendarLateLc": "gecikti",
   "@uiCalendarLateLc": {
     "description": "ui.calendar.late_lc"

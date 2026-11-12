@@ -1410,6 +1410,33 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarTaskStarts => 'Başlıyor';
 
   @override
+  String get uiCalendarTaskOngoing => 'Sürüyor';
+
+  @override
+  String get uiCalendarDueLc => 'bitiş';
+
+  @override
+  String get uiCalendarTaskFilter => 'Gösterilen görevler';
+
+  @override
+  String get uiCalendarFilterEnds => 'Bitecek';
+
+  @override
+  String get uiCalendarFilterStarts => 'Başlayacak';
+
+  @override
+  String get uiCalendarFilterOngoing => 'Devam eden';
+
+  @override
+  String get uiCalendarSubEnds => 'bu gün bitecek';
+
+  @override
+  String get uiCalendarSubStarts => 'bu gün başlayacak';
+
+  @override
+  String get uiCalendarSubOngoing => 'devam eden';
+
+  @override
   String get uiCalendarLateLc => 'gecikti';
 
   @override

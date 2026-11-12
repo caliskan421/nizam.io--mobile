@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
+import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
@@ -45,6 +46,25 @@ class CalendarDay extends ConsumerWidget {
     final rel = calendarDiff(day, index.today);
     final title = l.dayTitle(day);
     final groups = index.groups(day);
+    final dayTasks = index.on(day).whereType<TaskEntry>();
+    final tasks = {
+      TaskEdge.end: [...dayTasks.where((e) => e.edge == TaskEdge.end)],
+      TaskEdge.start: [...dayTasks.where((e) => e.edge == TaskEdge.start)],
+      TaskEdge.ongoing: index.ongoing(day),
+    };
+    Widget card(List<CalendarEntry> entries) => ClipRRect(
+      borderRadius: BorderRadius.circular(NizamioRadius.row),
+      child: ColoredBox(
+        color: c.surfaceRaised,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final (i, e) in entries.indexed)
+              _EntryRow(entry: e, first: i == 0, index: index),
+          ],
+        ),
+      ),
+    );
     return Semantics(
       label: title,
       container: true,
@@ -85,24 +105,24 @@ class CalendarDay extends ConsumerWidget {
                   ),
                 ],
               ),
-              for (final g in groups) ...[
-                const Gap(14),
-                NzKicker('${l.groupLabel(g.kind)} · ${g.entries.length}'),
-                const Gap(NizamioSpacing.space2),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(NizamioRadius.row),
-                  child: ColoredBox(
-                    color: c.surfaceRaised,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        for (final (i, e) in g.entries.indexed)
-                          _EntryRow(entry: e, first: i == 0, index: index),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              for (final g in groups)
+                if (g.kind == CalendarKind.meeting) ...[
+                  const Gap(14),
+                  NzKicker('${l.groupLabel(g.kind)} · ${g.entries.length}'),
+                  const Gap(NizamioSpacing.space2),
+                  card(g.entries),
+                ],
+              // Görevler toplantılardan sonra, taleplerden önce; süren görev varsa bölüm bitiş/
+              // başlangıç olmayan günde de görünür (süzgeç açılabilsin).
+              if (tasks.values.any((e) => e.isNotEmpty))
+                _TaskSection(tasks: tasks, card: card),
+              for (final g in groups)
+                if (g.kind == CalendarKind.request) ...[
+                  const Gap(14),
+                  NzKicker('${l.groupLabel(g.kind)} · ${g.entries.length}'),
+                  const Gap(NizamioSpacing.space2),
+                  card(g.entries),
+                ],
               if (groups.isEmpty) ...[
                 const Gap(14 + 28),
                 Text(
@@ -121,6 +141,141 @@ class CalendarDay extends ConsumerWidget {
                 const Gap(NizamioSpacing.space2),
               ],
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Görev bölümü: başlık + süzgeç (Bitecek / Başlayacak / Devam eden, sayılı; seçim
+/// denetleyicide, günler arasında korunur) ve seçili türlerin alt bölümleri.
+class _TaskSection extends ConsumerWidget {
+  const _TaskSection({required this.tasks, required this.card});
+
+  final Map<TaskEdge, List<TaskEntry>> tasks;
+  final Widget Function(List<CalendarEntry>) card;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final c = context.colors;
+    final edges = ref.watch(
+      calendarControllerProvider.select((v) => v.taskEdges),
+    );
+    final ctrl = ref.read(calendarControllerProvider.notifier);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Gap(14),
+        NzKicker(l.groupLabel(CalendarKind.task)),
+        const Gap(NizamioSpacing.space1),
+        Semantics(
+          label: l.uiCalendarTaskFilter,
+          container: true,
+          explicitChildNodes: true,
+          child: Wrap(
+            spacing: NizamioSpacing.space2,
+            children: [
+              for (final e in TaskEdge.values)
+                _EdgeChip(
+                  label: l.edgeFilter(e),
+                  count: tasks[e]!.length,
+                  selected: edges.contains(e),
+                  onTap: () => ctrl.toggleTaskEdge(e),
+                ),
+            ],
+          ),
+        ),
+        for (final e in TaskEdge.values)
+          if (edges.contains(e) && tasks[e]!.isNotEmpty) ...[
+            const Gap(NizamioSpacing.space2),
+            Padding(
+              padding: const EdgeInsets.only(left: NizamioSpacing.space1),
+              child: Text(
+                '${l.edgeSection(e)} · ${tasks[e]!.length}',
+                style: context.text.monoSm.copyWith(color: c.textFaint),
+              ),
+            ),
+            const Gap(NizamioSpacing.space1 + 2),
+            card(tasks[e]!),
+          ],
+      ],
+    );
+  }
+}
+
+/// Görev süzgeci hapı (36 görsel, 44 dokunma): seçili dolu (`text` zemin, ters yazı),
+/// seçilmemiş çerçeveli; etiket + mono sayı.
+class _EdgeChip extends StatelessWidget {
+  const _EdgeChip({
+    required this.label,
+    required this.count,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final int count;
+  final bool selected;
+  final VoidCallback onTap;
+
+  static const _fade = Duration(milliseconds: 200);
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    final ink = selected ? c.background : c.textMuted;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: '$label, $count',
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: (NizamioSize.tap - NizamioSize.controlSm) / 2,
+          ),
+          child: AnimatedContainer(
+            duration: NzMotion.of(context, _fade),
+            curve: Curves.ease,
+            height: NizamioSize.controlSm,
+            padding: const EdgeInsets.symmetric(
+              horizontal: NizamioSpacing.space3,
+            ),
+            decoration: BoxDecoration(
+              color: selected ? c.text : c.text.withValues(alpha: 0),
+              borderRadius: BorderRadius.circular(NizamioRadius.pill),
+              border: Border.all(
+                color: selected ? c.text : c.border,
+                width: NizamioSize.borderWidth,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: t.bodySm.copyWith(
+                    color: ink,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const Gap(NizamioSpacing.space1 + 2),
+                Text(
+                  '$count',
+                  style: t.monoSm.copyWith(
+                    color: selected
+                        ? c.background.withValues(alpha: 0.6)
+                        : c.textFaint,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -170,7 +325,7 @@ class _EntryRow extends StatelessWidget {
       TaskEntry() => (
         e.code,
         e.title,
-        '${e.edge == TaskEdge.end ? l.uiCalendarTaskEnds : l.uiCalendarTaskStarts}'
+        '${l.edgeLead(e)}'
             ' · ${e.status == null ? e.assignees.map((a) => index.personName(a) ?? l.uiTasksUnknownPerson).join(', ') : switch (e.status!) {
                     TaskStatus.todo => l.uiTasksStatusTodo,
                     TaskStatus.inProgress => l.uiTasksStatusDoing,

@@ -48,7 +48,7 @@ final class CalendarControllerProvider
 }
 
 String _$calendarControllerHash() =>
-    r'4f2aee98634400c03065714c4e7942717debb05c';
+    r'64199e09c889589dafebf5ba3bce4e9a6a5cad9d';
 
 /// Takvim komutları (prototip `S_cal`). Durum ekrandan uzun yaşar (modül değişiminde ve
 /// yeniden boyutlanmada seçili gün, ay ve kip korunur).

@@ -4,4 +4,5 @@ library;
 
 export 'application/activity_nav_caption.dart' show activityNavCaptionProvider;
 export 'application/activity_providers.dart' show activityLogRepositoryProvider;
+export 'presentation/activity_log_card.dart' show ActivityLogCard;
 export 'presentation/activity_page.dart' show ActivityPage;

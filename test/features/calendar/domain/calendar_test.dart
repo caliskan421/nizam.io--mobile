@@ -34,10 +34,11 @@ TaskItem _task(
   TaskStatus status = TaskStatus.inProgress,
   DateChangeRequest? request,
   List<String> assignees = const [],
+  String coordinatorship = 'd1',
 }) => TaskItem(
   code: code,
   title: 'Görev $code',
-  coordinatorship: 'd1',
+  coordinatorship: coordinatorship,
   status: status,
   priority: TaskPriority.medium,
   start: start,
@@ -55,6 +56,28 @@ TaskCatalog _catalog(List<TaskItem> tasks) => TaskCatalog(
 );
 
 void main() {
+  test('koordinatörlük takvimi diğer koordinatörlüğün görev ve toplantılarını dışlar', () {
+    final day = DateTime(2026, 11, 5);
+    final index = CalendarIndex.build(
+      [
+        _meeting('shared', day, depts: ['Altyapı', 'Mekanik']),
+        _meeting('other', day),
+      ],
+      _catalog([
+        _task('mine', start: day, due: day),
+        _task('other', start: day, due: day, coordinatorship: 'd0'),
+      ]),
+      coordinatorship: 'd1',
+    );
+    expect(index.on(day).whereType<MeetingEntry>().map((e) => e.id), [
+      'shared',
+    ]);
+    expect(index.on(day).whereType<TaskEntry>().map((e) => e.code), [
+      'mine',
+      'mine',
+    ]);
+  });
+
   test('profil takvimi tamamlanan görevi korur ve aynı gün başlangıç/bitişi tek kayıt yapar', () {
     final day = DateTime(2026, 11, 5);
     final task = _task(

@@ -64,6 +64,7 @@ abstract interface class DepartmentRepository {
     String departmentId, {
     required String accountId,
     required DepartmentRole role,
+    String? programId,
   });
 
   /// `PATCH /v1/departments/{id}/memberships/{accountId}`. Görev etkisi varsa sunucu

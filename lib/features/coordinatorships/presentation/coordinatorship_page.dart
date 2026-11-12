@@ -194,9 +194,6 @@ class CoordinatorshipPage extends ConsumerWidget {
     final l = context.l10n;
     final name = d.stats.name;
     final canManage = ref.read(canManageCoordinatorshipsProvider);
-    void toast(String m) {
-      if (context.mounted) NzToast.show(context, m);
-    }
 
     NzBottomSheet.show<void>(
       context,
@@ -230,17 +227,6 @@ class CoordinatorshipPage extends ConsumerWidget {
                   NzIcons.event,
                   l.uiCoordMenuMeeting,
                   () => showMeetingSheet(context, coordinatorship: code),
-                ),
-              ],
-            ),
-            const Gap(NizamioSpacing.gapMd),
-            NzMenuGroup(
-              rows: [
-                // Birleştirmenin sunucu ucu yok: yer tutucu.
-                row(
-                  NzIcons.merge,
-                  l.uiCoordMenuMerge,
-                  () => toast(l.uiCoordToastMerge),
                 ),
               ],
             ),

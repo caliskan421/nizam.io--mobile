@@ -20,7 +20,6 @@ import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/tasks/application/quick_forms_controller.dart';
 import 'package:nizamio/features/tasks/application/task_detail_controller.dart';
-import 'package:nizamio/features/tasks/application/task_details_controller.dart';
 import 'package:nizamio/features/tasks/presentation/task_texts.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 

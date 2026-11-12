@@ -13,7 +13,6 @@ import 'package:nizamio/core/errors/error_text.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/tasks/application/task_detail_controller.dart';
-import 'package:nizamio/features/tasks/application/task_details_controller.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../../support/fake_backend.dart';

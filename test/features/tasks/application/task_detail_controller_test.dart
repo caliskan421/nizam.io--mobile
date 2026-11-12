@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/tasks/application/task_detail_controller.dart';
-import 'package:nizamio/features/tasks/application/task_details_controller.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../../support/harness.dart';

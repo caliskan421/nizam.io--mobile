@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/providers.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
@@ -10,9 +11,10 @@ import '../../../core/ui/widgets/lists/lists.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
-import '../../tasks/tasks.dart';
+import '../../tasks/tasks.dart' show taskCatalogControllerProvider;
 import '../application/coordinatorship_detail_controller.dart';
 import '../domain/coordinatorship_board.dart';
+import 'coord_add_member_sheet.dart';
 import 'coord_detail_texts.dart';
 import 'coord_parts.dart';
 
@@ -29,6 +31,10 @@ class CoordMembersTab extends ConsumerWidget {
     final l = context.l10n;
     final leads = people.where((p) => p.lead).toList();
     final members = people.where((p) => !p.lead).toList();
+    final program = ref.watch(scopeStateProvider).programId;
+    final access = ref.watch(taskCatalogControllerProvider).value?.access;
+    final canAdd =
+        program != null && (access?.canCreateIn(program, code) ?? false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: NizamioSpacing.gapXl,
@@ -41,11 +47,12 @@ class CoordMembersTab extends ConsumerWidget {
             ),
           ),
           actions: [
-            NzIconButton.circle(
-              icon: NzIcons.personAdd,
-              semanticLabel: l.uiCoordAddMember,
-              onPressed: () => showInviteSheet(context, coordinatorship: code),
-            ),
+            if (canAdd)
+              NzIconButton.circle(
+                icon: NzIcons.personAdd,
+                semanticLabel: l.uiCoordAddMember,
+                onPressed: () => showCoordAddMemberSheet(context, code),
+              ),
           ],
         ),
         for (final (label, group) in [

@@ -19,7 +19,6 @@ import 'package:nizamio/features/scope/application/scope_providers.dart';
 import 'package:nizamio/features/scope/domain/home_dashboard.dart';
 import 'package:nizamio/features/scope/domain/home_dashboard_repository.dart';
 import 'package:nizamio/features/tasks/application/quick_forms_controller.dart';
-import 'package:nizamio/features/tasks/application/task_details_controller.dart';
 import 'package:nizamio/features/tasks/application/task_list_filter.dart';
 import 'package:nizamio/features/tasks/domain/task_details.dart';
 import 'package:nizamio/features/tasks/tasks.dart';

@@ -266,6 +266,9 @@ class CoordBackend extends PilotBackend {
               },
           ],
         });
+      case 'GET /v1/admin/deleted/meetings':
+        if (program != coordProgram) return _scopeMissing();
+        return jsonResponse(200, {'items': <Object>[], 'next_cursor': ''});
       case 'GET /v1/meetings':
         if (program != coordProgram) return _scopeMissing();
         return jsonResponse(200, {'items': meetings, 'next_cursor': ''});

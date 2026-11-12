@@ -71,7 +71,7 @@ final class TimelineControllerProvider
 }
 
 String _$timelineControllerHash() =>
-    r'285dd749310cb747ed2de14e55e6a5e19bb01b87';
+    r'760ed1024ea82ef459a869c80fcd46e62d6d48a8';
 
 /// Zaman çizelgesinin seçim, ölçek, süzgeç ve tarih taslağı bellekte tutulur. Kayıt,
 /// geri alma ve tarih talepleri sunucuya gider; sonuç katalog ve Gantt'tan yeniden okunur.

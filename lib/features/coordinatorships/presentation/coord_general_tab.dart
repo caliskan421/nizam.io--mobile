@@ -7,6 +7,8 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../activity/activity.dart';
+import '../../calendar/calendar.dart';
 import '../../tasks/tasks.dart';
 import '../application/coordinatorship_detail_controller.dart';
 import '../domain/coordinatorship_board.dart';
@@ -15,9 +17,7 @@ import 'coord_detail_texts.dart';
 import 'coord_general_cards.dart';
 import 'coord_parts.dart';
 
-/// Genel bölümü (prototip `.cd-genw`): dört özet kartı (Görevler, Ekip, Arşiv, Toplantı;
-/// dokununca bölüm), Akış ve İş yükü. Genişte özet kartları 4'lü. Prototipteki "Son
-/// hareketler" kartı yok: sunucuda koordinatörlük etkinlik akışı yoktur.
+/// Genel bölümü: eşit özet kartları, koordinatörlük takvimi, iş yükü ve işlem geçmişi.
 class CoordGeneralTab extends ConsumerWidget {
   const CoordGeneralTab({
     super.key,
@@ -69,10 +69,6 @@ class CoordGeneralTab extends ConsumerWidget {
         tone: c.accentText,
         label: l.uiCoordOvTeam,
         value: '${people.length}',
-        footer: Align(
-          alignment: Alignment.centerLeft,
-          child: NzAvatarStack(names: [for (final p in people) p.name], max: 4),
-        ),
         caption: l.coordLeadsMembers(
           leads.length,
           people.length - leads.length,
@@ -113,18 +109,6 @@ class CoordGeneralTab extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, box) {
         final wide = box.maxWidth >= coordWideWidth;
-        Widget row(List<Widget> items) => IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 10,
-            children: [for (final k in items) Expanded(child: k)],
-          ),
-        );
-        final flow = CoordFlowCard(
-          catalog: catalog,
-          tasks: tasks,
-          meetings: meetings ?? const [],
-        );
         final load = CoordLoadCard(
           code: code,
           catalog: catalog,
@@ -135,18 +119,25 @@ class CoordGeneralTab extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (wide)
-              row(cards)
-            else ...[
-              row(cards.sublist(0, 2)),
-              const Gap(10),
-              row(cards.sublist(2)),
-            ],
+            GridView.count(
+              crossAxisCount: wide ? 4 : 2,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              mainAxisExtent: 220 * MediaQuery.textScalerOf(context).scale(1),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              children: cards,
+            ),
             const Gap(22),
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: NizamioSpacing.space3,
-              children: [flow, load],
+              children: [
+                CoordinatorshipCalendar(code: code),
+                load,
+                const ActivityLogCard(),
+              ],
             ),
           ],
         );

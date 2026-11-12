@@ -1058,6 +1058,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiActivitySoonTail => 'mobilde sonraki adımda eklenecek';
 
   @override
+  String get uiActivityUnavailable => 'İşlem geçmişi kullanılamıyor';
+
+  @override
+  String get uiActivityUnsupported =>
+      'Bu sunucu sürümü işlem geçmişi okumayı desteklemiyor.';
+
+  @override
   String get uiArchivePdfPreviewError =>
       'PDF önizlenemedi. Dosya bozuk veya parola korumalı olabilir.';
 
@@ -1905,6 +1912,22 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordAllTeam => 'Tüm ekip';
+
+  @override
+  String get uiCoordAddMemberDesc =>
+      'Mevcut bir kişiyi seç veya yeni kişi oluştur. Diğer koordinatörlüklerdeki üyelikleri korunur.';
+
+  @override
+  String get uiCoordCreatePerson => 'Yeni kişi oluştur';
+
+  @override
+  String get uiCoordSearchPerson => 'Kişi veya koordinatörlük ara';
+
+  @override
+  String get uiCoordNoCandidates => 'Eklenebilecek kişi bulunamadı.';
+
+  @override
+  String get uiCoordMemberAdded => 'Üye eklendi';
 
   @override
   String get uiFeedbackLoading => 'Yükleniyor';

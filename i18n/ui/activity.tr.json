@@ -41,6 +41,8 @@
     "ui.activity.section_history": "işlem geçmişi",
     "ui.activity.fly_filter": "Kişi ve koordinatörlük filtresi",
     "ui.activity.fly_home": "Ana sayfaya dön",
-    "ui.activity.soon_tail": "mobilde sonraki adımda eklenecek"
+    "ui.activity.soon_tail": "mobilde sonraki adımda eklenecek",
+    "ui.activity.unavailable": "İşlem geçmişi kullanılamıyor",
+    "ui.activity.unsupported": "Bu sunucu sürümü işlem geçmişi okumayı desteklemiyor."
   }
 }

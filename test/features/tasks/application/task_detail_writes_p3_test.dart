@@ -11,8 +11,6 @@ import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/tasks/application/quick_forms_controller.dart';
 import 'package:nizamio/features/tasks/application/task_detail_controller.dart';
-import 'package:nizamio/features/tasks/application/task_details_controller.dart';
-import 'package:nizamio/features/tasks/application/tasks_providers.dart';
 import 'package:nizamio/features/tasks/domain/task_writes.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 

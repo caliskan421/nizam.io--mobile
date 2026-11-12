@@ -111,6 +111,7 @@ void main() {
         await tester.tap(find.bySemanticsLabel(_l.uiCoordMoreActions));
         await settle(tester);
         expect(find.text(_l.uiCoordMenuMeeting), findsOneWidget);
+        expect(find.text(_l.uiCoordMenuMerge), findsNothing);
         expect(
           find.text(_l.uiCoordMenuEdit),
           admin ? findsOneWidget : findsNothing,

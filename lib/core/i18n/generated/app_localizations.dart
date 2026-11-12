@@ -1936,6 +1936,18 @@ abstract class AppLocalizations {
   /// **'mobilde sonraki adımda eklenecek'**
   String get uiActivitySoonTail;
 
+  /// ui.activity.unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem geçmişi kullanılamıyor'**
+  String get uiActivityUnavailable;
+
+  /// ui.activity.unsupported
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sunucu sürümü işlem geçmişi okumayı desteklemiyor.'**
+  String get uiActivityUnsupported;
+
   /// ui.archive.pdf_preview_error
   ///
   /// In tr, this message translates to:
@@ -3615,6 +3627,36 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Tüm ekip'**
   String get uiCoordAllTeam;
+
+  /// ui.coord.add_member_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut bir kişiyi seç veya yeni kişi oluştur. Diğer koordinatörlüklerdeki üyelikleri korunur.'**
+  String get uiCoordAddMemberDesc;
+
+  /// ui.coord.create_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni kişi oluştur'**
+  String get uiCoordCreatePerson;
+
+  /// ui.coord.search_person
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi veya koordinatörlük ara'**
+  String get uiCoordSearchPerson;
+
+  /// ui.coord.no_candidates
+  ///
+  /// In tr, this message translates to:
+  /// **'Eklenebilecek kişi bulunamadı.'**
+  String get uiCoordNoCandidates;
+
+  /// ui.coord.member_added
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye eklendi'**
+  String get uiCoordMemberAdded;
 
   /// ui.feedback.loading
   ///

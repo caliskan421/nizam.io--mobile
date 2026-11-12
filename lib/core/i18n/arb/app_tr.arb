@@ -1229,6 +1229,14 @@
   "@uiActivitySoonTail": {
     "description": "ui.activity.soon_tail"
   },
+  "uiActivityUnavailable": "İşlem geçmişi kullanılamıyor",
+  "@uiActivityUnavailable": {
+    "description": "ui.activity.unavailable"
+  },
+  "uiActivityUnsupported": "Bu sunucu sürümü işlem geçmişi okumayı desteklemiyor.",
+  "@uiActivityUnsupported": {
+    "description": "ui.activity.unsupported"
+  },
   "uiArchivePdfPreviewError": "PDF önizlenemedi. Dosya bozuk veya parola korumalı olabilir.",
   "@uiArchivePdfPreviewError": {
     "description": "ui.archive.pdf_preview_error"
@@ -2348,6 +2356,26 @@
   "uiCoordAllTeam": "Tüm ekip",
   "@uiCoordAllTeam": {
     "description": "ui.coord.all_team"
+  },
+  "uiCoordAddMemberDesc": "Mevcut bir kişiyi seç veya yeni kişi oluştur. Diğer koordinatörlüklerdeki üyelikleri korunur.",
+  "@uiCoordAddMemberDesc": {
+    "description": "ui.coord.add_member_desc"
+  },
+  "uiCoordCreatePerson": "Yeni kişi oluştur",
+  "@uiCoordCreatePerson": {
+    "description": "ui.coord.create_person"
+  },
+  "uiCoordSearchPerson": "Kişi veya koordinatörlük ara",
+  "@uiCoordSearchPerson": {
+    "description": "ui.coord.search_person"
+  },
+  "uiCoordNoCandidates": "Eklenebilecek kişi bulunamadı.",
+  "@uiCoordNoCandidates": {
+    "description": "ui.coord.no_candidates"
+  },
+  "uiCoordMemberAdded": "Üye eklendi",
+  "@uiCoordMemberAdded": {
+    "description": "ui.coord.member_added"
   },
   "uiFeedbackLoading": "Yükleniyor",
   "@uiFeedbackLoading": {

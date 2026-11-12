@@ -4,4 +4,6 @@
 library;
 
 export 'presentation/calendar_page.dart' show CalendarEmptyDetail, CalendarPage;
+export 'presentation/coordinatorship_calendar.dart'
+    show CoordinatorshipCalendar;
 export 'presentation/person_task_calendar.dart' show PersonTaskCalendar;

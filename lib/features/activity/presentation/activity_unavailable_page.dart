@@ -28,9 +28,9 @@ class ActivityUnavailablePage extends StatelessWidget {
             ),
         ],
       ),
-      body: const NzEmptyState(
-        title: 'İşlem geçmişi kullanılamıyor',
-        message: 'Bu sunucu sürümü işlem geçmişi okumayı desteklemiyor.',
+      body: NzEmptyState(
+        title: context.l10n.uiActivityUnavailable,
+        message: context.l10n.uiActivityUnsupported,
         icon: NzIcons.history,
       ),
     );

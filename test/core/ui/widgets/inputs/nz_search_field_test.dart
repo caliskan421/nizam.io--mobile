@@ -79,6 +79,97 @@ void main() {
     expect(find.byTooltip('Aramayı temizle'), findsNothing);
   });
 
+  testWidgets('boş veya yalnız boşluk içeren ara eylemi alanı kapatır', (
+    tester,
+  ) async {
+    final focus = FocusNode();
+    final controller = TextEditingController();
+    addTearDown(focus.dispose);
+    addTearDown(controller.dispose);
+    for (final query in ['', '   ']) {
+      var dismissed = 0;
+      final submitted = <String>[];
+      await tester.pumpWidget(
+        testApp(
+          NzSearchField(
+            controller: controller,
+            focusNode: focus,
+            onDismiss: () => dismissed++,
+            onSubmitted: submitted.add,
+          ),
+        ),
+      );
+      await tester.enterText(find.byType(EditableText), query);
+      await tester.pump();
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump();
+      expect(focus.hasFocus, isFalse);
+      expect(dismissed, 1);
+      expect(submitted, isEmpty);
+    }
+  });
+
+  testWidgets('dolu ara eylemi mevcut submit ve dismiss sırasını korur', (
+    tester,
+  ) async {
+    final focus = FocusNode();
+    addTearDown(focus.dispose);
+    final events = <String>[];
+    await tester.pumpWidget(
+      testApp(
+        NzSearchField(
+          focusNode: focus,
+          onDismiss: () => events.add('dismiss'),
+          onSubmitted: events.add,
+        ),
+      ),
+    );
+    await tester.enterText(find.byType(EditableText), 'ada');
+    await tester.pump();
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pump();
+    expect(events, ['ada', 'dismiss']);
+  });
+
+  testWidgets('açık alanın arama düğmesine dokunmak yeniden açmaz', (
+    tester,
+  ) async {
+    final focus = FocusNode();
+    addTearDown(focus.dispose);
+    var open = true;
+    await tester.pumpWidget(
+      testApp(
+        StatefulBuilder(
+          builder: (context, setState) => Column(
+            children: [
+              TextButton(
+                onPressed: () => setState(() => open = !open),
+                child: const Text('Aramayı aç/kapat'),
+              ),
+              if (open)
+                NzSearchField(
+                  focusNode: focus,
+                  onDismiss: () => setState(() => open = false),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    final tap = await tester.startGesture(
+      tester.getCenter(find.text('Aramayı aç/kapat')),
+    );
+    // Gerçek dokunuşta down ve up arasında birden fazla kare geçebilir.
+    await tester.pump(const Duration(milliseconds: 100));
+    await tap.up();
+    await tester.pump();
+    expect(open, isFalse);
+    expect(focus.hasFocus, isFalse);
+    expect(find.byType(NzSearchField), findsNothing);
+  });
+
   testWidgets('dışarıdan denetleyici: dışarıdan değişiklik düğmeyi gösterir', (
     tester,
   ) async {

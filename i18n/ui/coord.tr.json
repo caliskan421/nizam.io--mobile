@@ -155,6 +155,11 @@
     "ui.coord.on_time": "zamanında",
     "ui.coord.finished_tail": "görev bitirdi",
     "ui.coord.no_load": "Bu birimde atanmış görev yok.",
-    "ui.coord.all_team": "Tüm ekip"
+    "ui.coord.all_team": "Tüm ekip",
+    "ui.coord.add_member_desc": "Mevcut bir kişiyi seç veya yeni kişi oluştur. Diğer koordinatörlüklerdeki üyelikleri korunur.",
+    "ui.coord.create_person": "Yeni kişi oluştur",
+    "ui.coord.search_person": "Kişi veya koordinatörlük ara",
+    "ui.coord.no_candidates": "Eklenebilecek kişi bulunamadı.",
+    "ui.coord.member_added": "Üye eklendi"
   }
 }

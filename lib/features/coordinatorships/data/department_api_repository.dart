@@ -217,6 +217,7 @@ class ApiDepartmentRepository implements DepartmentRepository {
     String departmentId, {
     required String accountId,
     required DepartmentRole role,
+    String? programId,
   }) async {
     final wireRole = switch (role) {
       DepartmentRole.coordinator => AssignMembershipRequestRole.koordinator,
@@ -227,6 +228,12 @@ class ApiDepartmentRepository implements DepartmentRepository {
       () => _client.assignMembership(
         id: departmentId,
         body: AssignMembershipRequest(accountId: accountId, role: wireRole),
+        extras: programId == null
+            ? OrganizationClient.assignMembershipOpenapiExtras
+            : withProgram(
+                OrganizationClient.assignMembershipOpenapiExtras,
+                programId,
+              ),
       ),
     );
     return Membership(

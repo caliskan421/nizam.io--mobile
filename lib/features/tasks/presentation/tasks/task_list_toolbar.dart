@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/nz_pressable.dart';
@@ -53,7 +54,7 @@ class TaskListToolbar extends StatelessWidget {
                       color: active > 0 ? c.text : c.surface,
                       border: Border.all(
                         color: active > 0
-                            ? Colors.transparent
+                            ? c.borderControl.withValues(alpha: 0)
                             : c.borderControl,
                       ),
                     ),
@@ -97,8 +98,8 @@ class TaskListToolbar extends StatelessWidget {
             ),
           ),
         ),
-        const Spacer(),
-        Flexible(
+        const Gap(12),
+        Expanded(
           child: Align(
             alignment: Alignment.centerRight,
             child: NzSplitButton(

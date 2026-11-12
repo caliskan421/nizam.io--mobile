@@ -49,6 +49,7 @@ class NzSearchField extends StatefulWidget {
 class _NzSearchFieldState extends State<NzSearchField> {
   TextEditingController? _own;
   bool _hadFocus = false;
+  bool _dismissedOnSubmit = false;
 
   @override
   void initState() {
@@ -68,10 +69,14 @@ class _NzSearchFieldState extends State<NzSearchField> {
 
   void _focusChanged() {
     final focused = widget.focusNode?.hasFocus == true;
+    if (focused) _dismissedOnSubmit = false;
     if (_hadFocus && !focused && widget.onDismiss != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && widget.focusNode?.hasFocus != true)
+        if (mounted &&
+            !_dismissedOnSubmit &&
+            widget.focusNode?.hasFocus != true) {
           widget.onDismiss?.call();
+        }
       });
     }
     _hadFocus = focused;
@@ -91,6 +96,16 @@ class _NzSearchFieldState extends State<NzSearchField> {
     _controller.clear();
     widget.onChanged?.call('');
     widget.onClear?.call();
+  }
+
+  void _submit(String query) {
+    if (query.trim().isEmpty && widget.onDismiss != null) {
+      _dismissedOnSubmit = true;
+      FocusManager.instance.primaryFocus?.unfocus();
+      widget.onDismiss?.call();
+      return;
+    }
+    widget.onSubmitted?.call(query);
   }
 
   @override
@@ -116,7 +131,10 @@ class _NzSearchFieldState extends State<NzSearchField> {
           builder: (context, value, _) => _labelled(
             widget.hint == null || widget.hint == label ? null : label,
             TextField(
-              onTapOutside: (_) =>
+              // Kapatma simgesinin pointer-down'ı alanı önce kapatırsa, aynı
+              // dokunuşun pointer-up'ı aramayı yeniden açar. Odağı tap sonunda bırak.
+              onTapOutside: (_) {},
+              onTapUpOutside: (_) =>
                   FocusManager.instance.primaryFocus?.unfocus(),
               controller: _controller,
               focusNode: widget.focusNode,
@@ -126,7 +144,7 @@ class _NzSearchFieldState extends State<NzSearchField> {
               keyboardType: TextInputType.text,
               autocorrect: false,
               onChanged: widget.onChanged,
-              onSubmitted: widget.onSubmitted,
+              onSubmitted: _submit,
               decoration: InputDecoration(
                 hintText: widget.hint ?? label,
                 filled: true,

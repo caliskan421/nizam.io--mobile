@@ -17,6 +17,7 @@ export 'application/tasks_providers.dart'
         taskListRepositoryProvider,
         taskDetailsRepositoryProvider,
         taskWriteRepositoryProvider,
+        taskTeamProvider,
         downloadSinkProvider,
         meetingPlannerProvider,
         meetingInviteesProvider,

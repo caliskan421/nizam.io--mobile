@@ -404,6 +404,10 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                         // Tarih sütunu etiketleri görünür alanın 40 px üstüne de
                         // çizilir; kırpılmazsa "Görevler" satırının üstüne taşar.
                         Positioned.fill(
+                          // Tam ekranda durum çubuğu gizlense de kamera boşluğu kalır.
+                          top: _phone && _full
+                              ? MediaQuery.viewPaddingOf(context).top
+                              : 0,
                           child: ClipRect(
                             child: MobileTimelineChart(
                               view: v,

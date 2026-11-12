@@ -2218,6 +2218,18 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeVersionPrefix => 'v';
 
   @override
+  String get uiHomeAppearance => 'görünüm';
+
+  @override
+  String get uiHomeThemeDark => 'Koyu';
+
+  @override
+  String get uiHomeThemeLight => 'Açık';
+
+  @override
+  String get uiHomeThemeSystem => 'Sistem';
+
+  @override
   String get uiIdentityLoginTitle => 'Giriş yap';
 
   @override

@@ -2757,6 +2757,22 @@
   "@uiHomeVersionPrefix": {
     "description": "ui.home.version_prefix"
   },
+  "uiHomeAppearance": "görünüm",
+  "@uiHomeAppearance": {
+    "description": "ui.home.appearance"
+  },
+  "uiHomeThemeDark": "Koyu",
+  "@uiHomeThemeDark": {
+    "description": "ui.home.theme_dark"
+  },
+  "uiHomeThemeLight": "Açık",
+  "@uiHomeThemeLight": {
+    "description": "ui.home.theme_light"
+  },
+  "uiHomeThemeSystem": "Sistem",
+  "@uiHomeThemeSystem": {
+    "description": "ui.home.theme_system"
+  },
   "uiIdentityLoginTitle": "Giriş yap",
   "@uiIdentityLoginTitle": {
     "description": "ui.identity.login_title"

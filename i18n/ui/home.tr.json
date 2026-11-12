@@ -90,6 +90,10 @@
     "ui.home.app_name": "NIZAM.IO",
     "ui.home.shift_days_tail": "gün",
     "ui.home.season_tail": "sezonu",
-    "ui.home.version_prefix": "v"
+    "ui.home.version_prefix": "v",
+    "ui.home.appearance": "görünüm",
+    "ui.home.theme_dark": "Koyu",
+    "ui.home.theme_light": "Açık",
+    "ui.home.theme_system": "Sistem"
   }
 }

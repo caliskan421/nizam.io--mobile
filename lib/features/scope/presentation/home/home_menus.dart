@@ -9,6 +9,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/layout/nz_pane.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
 import '../../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
@@ -316,6 +317,8 @@ Future<void> showHomeDrawer(
               ),
             ],
           ),
+          const Gap(NizamioSpacing.gapLg),
+          const _AppearanceSwitch(),
           if (version != null) ...[
             const Gap(NizamioSpacing.gapLg),
             Text(
@@ -328,6 +331,49 @@ Future<void> showHomeDrawer(
       );
     },
   );
+}
+
+/// Çekmece altındaki görünüm seçici: Koyu / Açık / Sistem; seçim kalıcı tema modudur.
+class _AppearanceSwitch extends ConsumerWidget {
+  const _AppearanceSwitch();
+
+  static const _modes = [ThemeMode.dark, ThemeMode.light, ThemeMode.system];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: NizamioSpacing.space3,
+          ),
+          child: Semantics(
+            header: true,
+            child: Text(
+              l.uiHomeAppearance,
+              style: context.text.monoSm.copyWith(
+                color: context.colors.textMuted,
+              ),
+            ),
+          ),
+        ),
+        const Gap(NizamioSpacing.space1),
+        NzPillTabs(
+          semanticLabel: l.uiHomeAppearance,
+          tabs: [
+            NzPillTab(label: l.uiHomeThemeDark, icon: NzIcons.darkMode),
+            NzPillTab(label: l.uiHomeThemeLight, icon: NzIcons.lightMode),
+            NzPillTab(label: l.uiHomeThemeSystem, icon: NzIcons.desktop),
+          ],
+          selected: _modes.indexOf(ref.watch(themeModeProvider)),
+          onSelected: (i) =>
+              ref.read(themeModeControllerProvider).set(_modes[i]),
+        ),
+      ],
+    );
+  }
 }
 
 /// Çekmecedeki kapsam kartı: violet monogram karosu, program adı, alt satır, ↕ simgesi.

@@ -4,19 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nizamio/app/router/router.dart';
 import 'package:nizamio/app/router/shell.dart';
 import 'package:nizamio/core/app_phase.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
+import 'package:nizamio/core/preferences/app_preferences.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/layout/nz_pane.dart';
 import 'package:nizamio/core/ui/page/nz_app_nav.dart';
 import 'package:nizamio/features/identity/identity.dart';
 import 'package:nizamio/features/messages/messages.dart';
-import 'package:nizamio/features/tasks/tasks.dart';
 import 'package:nizamio/features/tasks/application/tasks_list_controller.dart';
 import 'package:nizamio/features/tasks/domain/task_query.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
 import 'package:nizamio/features/timeline/timeline.dart';
 
 import '../../core/ui/widgets/feedback/feedback_test_support.dart';
+import '../../support/harness.dart';
 import 'router_test_support.dart';
 
 final _l = AppLocalizationsTr();
@@ -159,5 +163,31 @@ void main() {
     await tester.tap(find.text(_l.uiHomeCoordinatorships).last);
     await settle(tester);
     expect(locationOf(router), '/coordinatorships');
+  });
+
+  testWidgets('menü: görünüm seçici tema modunu kalıcı değiştirir', (
+    tester,
+  ) async {
+    final h = Harness();
+    addTearDown(h.dispose);
+    final phase = ValueNotifier(AppPhase.scoped);
+    addTearDown(phase.dispose);
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(400, 900);
+    addTearDown(tester.view.reset);
+    final router = createRouter(phase);
+    addTearDown(router.dispose);
+    await pumpRouterWidget(tester, router, harness: h);
+    await tester.tap(find.byIcon(Icons.menu_rounded));
+    await settle(tester);
+    await tester.scrollUntilVisible(
+      find.text(_l.uiHomeThemeLight),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text(_l.uiHomeThemeLight));
+    await settle(tester);
+    expect(h.read(themeModeProvider), ThemeMode.light);
+    expect(h.prefs.values[AppPreferences.themeModeKey], 'light');
   });
 }

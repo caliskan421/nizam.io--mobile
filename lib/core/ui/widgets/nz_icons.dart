@@ -28,6 +28,9 @@ abstract final class NzIcons {
   static const IconData clock = Icons.schedule_rounded;
   static const IconData close = Icons.close_rounded;
   static const IconData coordinatorships = Icons.apartment_rounded;
+  static const IconData darkMode = Icons.dark_mode_outlined;
+  static const IconData desktop = Icons.desktop_windows_outlined;
+  static const IconData lightMode = Icons.light_mode_outlined;
   static const IconData copy = Icons.content_copy_rounded;
   static const IconData delete = Icons.delete_outline_rounded;
   static const IconData document = Icons.description_outlined;

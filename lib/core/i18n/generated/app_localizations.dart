@@ -4228,6 +4228,30 @@ abstract class AppLocalizations {
   /// **'v'**
   String get uiHomeVersionPrefix;
 
+  /// ui.home.appearance
+  ///
+  /// In tr, this message translates to:
+  /// **'görünüm'**
+  String get uiHomeAppearance;
+
+  /// ui.home.theme_dark
+  ///
+  /// In tr, this message translates to:
+  /// **'Koyu'**
+  String get uiHomeThemeDark;
+
+  /// ui.home.theme_light
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık'**
+  String get uiHomeThemeLight;
+
+  /// ui.home.theme_system
+  ///
+  /// In tr, this message translates to:
+  /// **'Sistem'**
+  String get uiHomeThemeSystem;
+
   /// ui.identity.login_title
   ///
   /// In tr, this message translates to:

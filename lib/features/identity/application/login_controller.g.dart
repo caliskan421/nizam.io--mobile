@@ -42,7 +42,7 @@ final class LoginControllerProvider
   LoginController create() => LoginController();
 }
 
-String _$loginControllerHash() => r'8cda6e93283b685ea49d8d6daba354682f635139';
+String _$loginControllerHash() => r'8df5e1d0c5c8c4578444d5c2bde1c993edd0a4a6';
 
 /// Giriş gönderim durumu. Parola YALNIZ [submit] parametresidir: duruma, `toString`'e ve log'a
 /// girmez (durum `AsyncValue<void>`: yükleniyor / hata [ApiError] / bitti). Oturumun açılması

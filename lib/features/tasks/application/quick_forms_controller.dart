@@ -6,6 +6,8 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
 import '../../../core/server/write_compat.dart';
+import '../../../core/telemetry/error_report.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/chat_task_planner.dart';
 import '../domain/meeting_planner.dart';
 import '../domain/task_catalog.dart';
@@ -378,44 +380,47 @@ class NewTaskFormController extends _$NewTaskFormController {
     final note = f.note;
     final writes = ref.read(taskWriteRepositoryProvider);
     try {
-      String id;
-      final plan = NoteTaskPlan(
-        title: f.title.trim(),
-        start: f.start,
-        end: f.end,
-        priority: f.priority,
-        departmentId: dept,
-        assigneeIds: f.assignees,
-      );
-      if (source != null) {
-        final planner = ref.read(chatTaskPlannerProvider);
-        try {
-          id = await planner.convertMessage(
-            source,
-            plan,
-            requestKey: requestKey,
-          );
-        } on ApiError catch (e) {
-          // Nadir yarış: aynı anahtarla bir kez yeniden (200 ya da 201).
-          if (e.code != conflictRetryCode) rethrow;
-          id = await planner.convertMessage(
-            source,
-            plan,
-            requestKey: requestKey,
-          );
+      final id = await ReportContext.run(ReportOperation.taskWrite, () async {
+        String id;
+        final plan = NoteTaskPlan(
+          title: f.title.trim(),
+          start: f.start,
+          end: f.end,
+          priority: f.priority,
+          departmentId: dept,
+          assigneeIds: f.assignees,
+        );
+        if (source != null) {
+          final planner = ref.read(chatTaskPlannerProvider);
+          try {
+            id = await planner.convertMessage(
+              source,
+              plan,
+              requestKey: requestKey,
+            );
+          } on ApiError catch (e) {
+            // Nadir yarış: aynı anahtarla bir kez yeniden (200 ya da 201).
+            if (e.code != conflictRetryCode) rethrow;
+            id = await planner.convertMessage(
+              source,
+              plan,
+              requestKey: requestKey,
+            );
+          }
+        } else if (note != null) {
+          // Toplantı notundan görev: not göreve bağlanır (kanıt bayrağı yok).
+          id = await ref.read(meetingPlannerProvider).convertNote(note, plan);
+        } else {
+          try {
+            id = await writes.createWorkItem(draft, requestKey: requestKey);
+          } on ApiError catch (e) {
+            // Nadir yarış: aynı anahtarla bir kez yeniden (200 ya da 201).
+            if (e.code != conflictRetryCode) rethrow;
+            id = await writes.createWorkItem(draft, requestKey: requestKey);
+          }
         }
-      } else if (note != null) {
-        // Toplantı notundan görev: not göreve bağlanır (kanıt bayrağı yok).
-        id = await ref.read(meetingPlannerProvider).convertNote(note, plan);
-      } else {
-        try {
-          id = await writes.createWorkItem(draft, requestKey: requestKey);
-        } on ApiError catch (e) {
-          // Nadir yarış: aynı anahtarla bir kez yeniden (200 ya da 201).
-          if (e.code != conflictRetryCode) rethrow;
-          id = await writes.createWorkItem(draft, requestKey: requestKey);
-        }
-      }
+        return id;
+      });
       await store.reload();
       if (!ref.mounted) return null;
       final key =
@@ -427,7 +432,8 @@ class NewTaskFormController extends _$NewTaskFormController {
           id;
       state = _initial();
       return (code: key, notified: f.assignees.length);
-    } on Object catch (e) {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, fallbackOperation: ReportOperation.taskWrite);
       final err = toApiError(e);
       // Sonuç bilinmiyor (zaman aşımı, ağ, 5xx): görev açılmış olabilir. Taslak ve anahtar
       // korunur; "Oluştur" aynı anahtarla yeniden gönderir (ikinci görev açılmaz).

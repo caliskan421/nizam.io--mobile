@@ -9,6 +9,7 @@ import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../application/current_account_controller.dart';
+import 'crash_reports_card.dart';
 import 'sign_out_button.dart';
 
 /// Profil sekmesi: hesap e-postası (`GET /v1/me`) ve çıkış.
@@ -45,6 +46,7 @@ class ProfilePage extends ConsumerWidget {
             ),
           ),
           const Gap(NizamioSpacing.space6),
+          const CrashReportsCard(),
           const SignOutButton(),
         ],
       ),

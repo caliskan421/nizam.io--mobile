@@ -7,6 +7,8 @@ import '../api/generated/error_catalog.gen.dart';
 import '../api/generated/models/error_envelope.dart';
 import '../api/generated/models/field_error.dart';
 import '../i18n/generated/client_error_codes.gen.dart';
+import '../telemetry/error_report.dart';
+import '../telemetry/error_reporting.dart';
 
 /// Alan doğrulama hatası (sunucu zarfının `fields[]` öğesi; üretilmiş DTO'dan eşlenir —
 /// sınır kuralı A3). Alanlar DTO ile birebir; [message] sunucu metnidir ve kullanıcıya
@@ -144,14 +146,64 @@ ApiError _fromResponse(Response<Object?>? response) {
 /// Üretilmiş istemci çağrısını sarar: her hata [ApiError] olarak fırlatılır. 2xx gövdesi
 /// üretilmiş DTO'ya ayrıştırılamazsa (TypeError, FormatException, CheckedFromJsonException …)
 /// `client.invalid_response` olur — ayrıştırma hatası hiçbir zaman ham sızmaz (CX-Ö-01).
+///
+/// Hata ApiError'a çevrilmeden ÖNCE (özgün yığın ve tür elde) güvenle sınıflandırılıp
+/// raporlanır ([ErrorReporting]; onay kapalıyken hiçbir şey olmaz). Raporlananlar yalnız
+/// beklenmeyen sınıflardır: geçersiz yanıt (ayrıştırma hatası, zarfsız yanıt) ve 5xx.
+/// Doğrulama, yetki, yanlış parola, iptal, zaman aşımı, çevrimdışı ve TLS raporlanmaz. Özgün
+/// yığın dönüştürülmüş hataya taşınır; bu yüzden üst katmanlar tekrar raporlamaz.
 Future<T> apiCall<T>(Future<T> Function() call) async {
   try {
     return await call();
-  } on ApiError {
+  } on ApiError catch (e, st) {
+    // Elle kurulmuş beklenmeyen ApiError (ör. şemaya uymayan gövde) da sınıflandırılır;
+    // beklenen kodlar (doğrulama, yetki …) raporlanmaz.
+    reportApiFailure(e, st, e);
     rethrow;
-  } on DioException catch (e) {
-    throw toApiError(e);
-  } on Object {
-    throw ApiError(ClientErrorCode.invalidResponse);
+  } on DioException catch (e, st) {
+    final api = toApiError(e);
+    reportApiFailure(e.error ?? e, st, api);
+    Error.throwWithStackTrace(api, st);
+  } on Object catch (e, st) {
+    final api = ApiError(ClientErrorCode.invalidResponse);
+    reportApiFailure(e, st, api);
+    Error.throwWithStackTrace(api, st);
   }
+}
+
+/// [api] BEKLENMEYEN sınıftaysa (geçersiz yanıt ya da 5xx) [cause] + [stack] ile raporlar ve
+/// dönüştürülmüş [api] nesnesini aynı kökten sayar (tek rapor). Beklenen kodlar (doğrulama,
+/// yetki, çakışma, iptal, zaman aşımı, çevrimdışı, TLS) raporlanmaz. Hiç fırlatmaz.
+void reportApiFailure(
+  Object cause,
+  StackTrace stack,
+  ApiError api, {
+  ReportOperation? operation,
+}) {
+  final status = api.status;
+  final ReportKind kind;
+  if ((status ?? 0) >= 500) {
+    kind = ReportKind.serverError; // zarfsız 502 HTML'i de sunucu hatasıdır
+  } else if (api.code == ClientErrorCode.invalidResponse) {
+    kind = ReportKind.invalidResponse;
+  } else {
+    return;
+  }
+  ErrorReporting.report(
+    cause,
+    stack,
+    kind: kind,
+    operation: operation,
+    apiCode: api.code,
+    status: status,
+  );
+  if (!identical(cause, api)) ErrorReporting.markHandled(api);
+}
+
+/// `client.invalid_response` üretilen yerde (ApiError `apiCall` dışında elle kurulurken)
+/// kullanılır: hata raporlanmış olarak döner. `throw invalidResponseError()`.
+ApiError invalidResponseError() {
+  final e = ApiError(ClientErrorCode.invalidResponse);
+  reportApiFailure(e, StackTrace.current, e);
+  return e;
 }

@@ -7,6 +7,8 @@ import '../../../core/cache_owner.dart';
 import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
+import '../../../core/telemetry/error_report.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/chat.dart';
 import '../domain/chat_room.dart';
 import '../domain/chat_stream_policy.dart';
@@ -478,16 +480,22 @@ class ChatRoomController extends _$ChatRoomController {
   /// Gönderim (tekrarda AYNI gövde: metin, yanıt, bahsetme, anket ya da aynı dosya).
   Future<ChatSendOutcome> _deliver(ChatMessage local) async {
     final upload = _uploads[local.clientId];
+    final op = upload != null
+        ? ReportOperation.fileUpload
+        : ReportOperation.chatSend;
     try {
-      final sent = upload != null
-          ? await _repo.sendAttachment(
-              id,
-              local.clientId,
-              upload,
-              replyTo: local.replyTo?.messageId,
-              caption: _outgoing[local.clientId]?.text,
-            )
-          : await _repo.send(id, _outgoing[local.clientId]!);
+      final sent = await ReportContext.run(
+        op,
+        () => upload != null
+            ? _repo.sendAttachment(
+                id,
+                local.clientId,
+                upload,
+                replyTo: local.replyTo?.messageId,
+                caption: _outgoing[local.clientId]?.text,
+              )
+            : _repo.send(id, _outgoing[local.clientId]!),
+      );
       if (!_alive) return ChatSendOutcome.failed;
       _uploads.remove(local.clientId);
       _outgoing.remove(local.clientId);
@@ -518,6 +526,10 @@ class ChatRoomController extends _$ChatRoomController {
           _setPending(local.clientId, ChatSendState.failed, e.code);
           return ChatSendOutcome.failed;
       }
+    } on Object catch (e, st) {
+      // ApiError dışı (eşleme TypeError'ı, yerel durum hatası): önce raporlanır, yeniden fırlar.
+      reportUnexpected(e, st, operation: op);
+      rethrow;
     }
   }
 

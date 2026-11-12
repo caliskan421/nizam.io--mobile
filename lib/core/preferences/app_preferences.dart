@@ -28,7 +28,9 @@ class AppPreferences {
 
   final PreferenceStore _store;
   Future<void> _releasePolicyWrites = Future<void>.value();
+  Future<void> _consentWrites = Future<void>.value();
 
+  static const errorReportingKey = 'nizamio.pref.error_reporting.v1';
   static const themeModeKey = 'nizamio.pref.theme_mode';
   static const localeKey = 'nizamio.pref.locale';
   static const releasePolicyKey = 'nizamio.pref.release_policy.v1';
@@ -99,6 +101,56 @@ class AppPreferences {
       await write.timeout(const Duration(milliseconds: 500));
     } on Object {
       Log.warn('tercih: sürüm politikası yazılamadı');
+    }
+  }
+
+  /// Hata raporlama onayı. YALNIZ açıkça `true` yazılmışsa açıktır; kayıt yok, bozuk ya da
+  /// okunamıyorsa KAPALI (okunamayan tercih onay sayılmaz). Uzaktan ayar bunun yerine geçmez.
+  Future<bool> errorReportingConsent() async {
+    try {
+      final raw = await _store
+          .getString(errorReportingKey)
+          .timeout(const Duration(milliseconds: 500));
+      return raw == 'true';
+    } on Object {
+      Log.warn('tercih: hata raporlama onayı okunamadı; kapalı');
+      return false;
+    }
+  }
+
+  /// Onayı yazar; yazılabildiyse `true`. Yazılamadıysa `false` (çağıran açmaz). Yazıların
+  /// gerçek sırası korunur; geç biten eski yazı yenisinin üzerine yazamaz.
+  Future<bool> setErrorReportingConsent(bool value) async {
+    final write = _consentWrites.then(
+      (_) => _store.setString(errorReportingKey, value ? 'true' : 'false'),
+    );
+    _consentWrites = write.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    try {
+      await write.timeout(const Duration(milliseconds: 500));
+      return true;
+    } on Object {
+      Log.warn('tercih: hata raporlama onayı yazılamadı');
+      return false;
+    }
+  }
+
+  /// Eski `true` kaydını siler (okuma `null` → kapalı); [setErrorReportingConsent] yazılamadığında
+  /// ikinci ve SON yol. Başarılıysa `true`.
+  Future<bool> removeErrorReportingConsent() async {
+    final write = _consentWrites.then((_) => _store.remove(errorReportingKey));
+    _consentWrites = write.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    try {
+      await write.timeout(const Duration(milliseconds: 500));
+      return true;
+    } on Object {
+      Log.warn('tercih: hata raporlama onayı silinemedi');
+      return false;
     }
   }
 

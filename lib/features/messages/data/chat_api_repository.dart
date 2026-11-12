@@ -56,6 +56,9 @@ import '../../../core/http/file_download.dart';
 import '../../../core/http/file_upload.dart';
 import '../../../core/http/sse.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
+import '../../../core/telemetry/error_report.dart';
+import '../../../core/telemetry/error_reporting.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/chat.dart';
 import '../domain/chat_stream_policy.dart';
 
@@ -532,7 +535,7 @@ class ApiChatRepository implements ChatRepository {
         throw await streamApiError(e);
       }
       final body = response.data;
-      if (body == null) throw ApiError(ClientErrorCode.invalidResponse);
+      if (body == null) throw invalidResponseError();
       yield const ChatStreamOpened();
       try {
         await for (final raw in decodeSse(body.stream)) {
@@ -544,9 +547,12 @@ class ApiChatRepository implements ChatRepository {
         rethrow;
       } on DioException catch (e) {
         throw toApiError(e);
-      } on FormatException {
+      } on FormatException catch (e, st) {
+        _reportStream(e, st);
         throw ApiError(ClientErrorCode.invalidResponse);
-      } on Object {
+      } on Object catch (e, st) {
+        // Ağ/IO kopması beklenen durumdur (raporlanmaz); programlama hatası raporlanır.
+        reportUnexpected(e, st, operation: ReportOperation.chatStream);
         throw ApiError(ClientErrorCode.networkError);
       }
     } finally {
@@ -560,8 +566,19 @@ class ApiChatRepository implements ChatRepository {
     final json = sseJsonObject(data);
     try {
       return _eventOf(kind, api.ChatEvent.fromJson(json));
-    } on Object {
+    } on Object catch (e, st) {
+      _reportStream(e, st);
       throw ApiError(ClientErrorCode.invalidResponse);
     }
   }
+
+  /// SSE akışı ayrıştırma arızası (olay yükü yok, yalnız tür ve yığın). Bu yol `apiCall`
+  /// kullanmadığı için işlem bağlamı açıkça verilir.
+  static void _reportStream(Object e, StackTrace st) => ErrorReporting.report(
+    e,
+    st,
+    kind: ReportKind.invalidResponse,
+    operation: ReportOperation.chatStream,
+    apiCode: ClientErrorCode.invalidResponse,
+  );
 }

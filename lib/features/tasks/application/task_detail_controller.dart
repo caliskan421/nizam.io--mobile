@@ -6,6 +6,8 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
 import '../../../core/server/write_compat.dart';
+import '../../../core/telemetry/error_report.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_permissions.dart';
 import '../domain/task_writes.dart';
@@ -119,8 +121,9 @@ class TaskDetailController extends _$TaskDetailController
     final store = _store;
     try {
       try {
-        await call();
-      } on Object catch (e) {
+        await ReportContext.runIfNone(ReportOperation.taskWrite, call);
+      } on Object catch (e, st) {
+        reportUnexpected(e, st, fallbackOperation: ReportOperation.taskWrite);
         final err = toApiError(e);
         if (!ref.mounted || _writeContext() != context) {
           return WriteOutcome(WriteKind.failed, err);
@@ -544,9 +547,13 @@ class TaskDetailController extends _$TaskDetailController
     state = state.copyWith(busy: true);
     final sink = ref.read(downloadSinkProvider);
     try {
-      final bytes = await _writes.downloadFile(t, file.id);
-      return (WriteOutcome.done, await sink.save(file.name, bytes));
-    } on Object catch (e) {
+      return await ReportContext.run(ReportOperation.fileDownload, () async {
+        final bytes = await _writes.downloadFile(t, file.id);
+        return (WriteOutcome.done, await sink.save(file.name, bytes));
+      });
+    } on Object catch (e, st) {
+      // Yerel dosya/depolama arızası burada ApiError'a çevrilir: önce raporlanır.
+      reportUnexpected(e, st, operation: ReportOperation.fileDownload);
       return (WriteOutcome(WriteKind.failed, toApiError(e)), null);
     } finally {
       if (ref.mounted) state = state.copyWith(busy: false);

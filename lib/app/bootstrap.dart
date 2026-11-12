@@ -14,6 +14,9 @@ import '../core/preferences/theme_mode_controller.dart';
 import '../core/providers.dart';
 import '../core/server/server_binding.dart';
 import '../core/session/session_state.dart';
+import '../core/telemetry/error_report.dart';
+import '../core/telemetry/error_reporting.dart';
+import '../core/telemetry/error_reporting_controller.dart';
 import '../features/identity/identity.dart';
 import 'app.dart';
 import 'config/firebase_services.dart';
@@ -21,6 +24,7 @@ import 'config/native_release.dart';
 import 'config/release_policy_warmup.dart';
 import 'di/composition.dart';
 import 'di/preferences.dart';
+import 'telemetry/error_hooks.dart';
 
 /// Uygulamayı verilen flavor ile başlatır. [devServer]: yalnız dev — kayıtlı bağ yoksa açılışta
 /// bu adres doğrulanır (uygulama doğrudan giriş ekranında açılır). Composition root: somut bağlar burada ve
@@ -32,6 +36,29 @@ Future<void> bootstrap(
   LoginPrefill? loginPrefill,
 }) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Küresel hata kancaları ilk iş kurulur (yeni Zone açılmaz; runApp aynı bölgede).
+  // Raporlama onay kapısı kapalı olduğu sürece (varsayılan) hiçbir şey göndermez.
+  installErrorHooks();
+  try {
+    await _bootstrap(flavor, devServer: devServer, loginPrefill: loginPrefill);
+  } on Object catch (error, stack) {
+    // Açılış başarısızlığı: tek FATAL kategorisi. Onay henüz okunmadıysa kapı kapalıdır.
+    ErrorReporting.report(
+      error,
+      stack,
+      kind: ReportKind.startup,
+      operation: ReportOperation.startup,
+      fatal: true,
+    );
+    rethrow;
+  }
+}
+
+Future<void> _bootstrap(
+  Flavor flavor, {
+  required String devServer,
+  required LoginPrefill? loginPrefill,
+}) async {
   // Yazı tipleri yalnız uygulama varlıklarından (assets/fonts); çalışma anında Google'a
   // istek yok (çevrimdışı açılış, gizlilik). OFL lisans metinleri lisans sayfasına eklenir.
   GoogleFonts.config.allowRuntimeFetching = false;
@@ -49,6 +76,7 @@ Future<void> bootstrap(
     loginPrefill: flavor == Flavor.dev ? loginPrefill : null,
     connectivityLink: PlusConnectivityLink(),
     pushNotifications: firebaseServices?.pushNotifications,
+    errorReporter: firebaseServices?.errorReporter,
     releasePolicySource:
         firebaseServices?.releasePolicySource ??
         (flavor == Flavor.dev && release.platform != null
@@ -63,6 +91,11 @@ Future<void> bootstrap(
     composition.locator<ThemeModeController>(),
     composition.locator<LocaleController>(),
   );
+  // Hata raporlama: raporlayıcı yalnız zamanında başlayan Firebase'den gelir (geç sonuç
+  // atılır). Kayıtlı kullanıcı onayı okunur; yoksa/okunamazsa kapalı. Onay varsa önceki
+  // oturum raporları gönderilir, yoksa silinir. Kendi zaman sınırları var.
+  final reporting = composition.locator<ErrorReportingController>();
+  if (reporting.available) await reporting.load();
   runApp(
     UncontrolledProviderScope(
       container: composition.container,

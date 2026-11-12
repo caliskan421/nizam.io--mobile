@@ -23,6 +23,8 @@ import '../../core/storage/flutter_secure_store.dart';
 import '../../core/storage/preference_store.dart';
 import '../../core/storage/secure_store.dart';
 import '../../core/storage/shared_preference_store.dart';
+import '../../core/telemetry/error_reporting.dart';
+import '../../core/telemetry/error_reporting_controller.dart';
 
 /// Altyapı nesne grafiği (ADR-0001, D-0182): bütün altyapı tekilleri ve aralarındaki
 /// KABLOLAMA yalnız burada kaydedilir; ömür (tembel tekil, `dispose`) get_it'tedir.
@@ -49,6 +51,7 @@ void configureDependencies(
   AppPreferences? appPreferences,
   ConnectivityLink? connectivityLink,
   String? runningVersion,
+  ErrorReporter? errorReporter,
 }) {
   locator
     ..registerSingleton<Flavor>(flavor)
@@ -63,6 +66,13 @@ void configureDependencies(
     )
     ..registerLazySingleton<AppPreferences>(
       () => appPreferences ?? AppPreferences(locator<PreferenceStore>()),
+    )
+    ..registerLazySingleton<ErrorReportingController>(
+      () => ErrorReportingController(
+        locator<AppPreferences>(),
+        errorReporter ?? const NoopErrorReporter(),
+      ),
+      dispose: (c) => c.dispose(),
     )
     ..registerLazySingleton<ThemeModeController>(
       () => ThemeModeController(locator<AppPreferences>()),

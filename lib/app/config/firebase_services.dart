@@ -9,7 +9,9 @@ import '../../core/config/flavor.dart';
 import '../../core/config/mobile_release_policy.dart';
 import '../../core/notifications/push_notifications.dart';
 import '../../core/preferences/app_preferences.dart';
+import '../../core/telemetry/error_reporting.dart';
 import '../notifications/firebase_push_notifications.dart';
+import '../telemetry/crashlytics_error_reporter.dart';
 import 'firebase_release_policy_source.dart';
 
 /// Optional native adapters. Construction does not fetch policy, request push
@@ -18,10 +20,16 @@ final class FirebaseServices {
   const FirebaseServices({
     required this.pushNotifications,
     required this.releasePolicySource,
+    this.errorReporter = const NoopErrorReporter(),
   });
 
   final PushNotifications pushNotifications;
   final ReleasePolicySource releasePolicySource;
+
+  /// Başlatma sırasında ASLA toplamayı açmaz; açılış yalnız kullanıcı onayı okunup
+  /// bileşim kurulduktan sonra `ErrorReportingController` ile olur. Zaman aşımından sonra
+  /// biten başlatmanın sonucu atıldığı için bu port geç sonuçla açılamaz.
+  final ErrorReporter errorReporter;
 }
 
 /// Dev mobile only; unsupported targets return before any SDK access.
@@ -57,8 +65,10 @@ Future<FirebaseServices> _initializeNative(AppPreferences? preferences) async {
   // Native defaults are also disabled, including before initialization finishes.
   // Remote policy flags never grant consent or activate telemetry.
   await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(false);
-  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
+  final reporter = CrashlyticsErrorReporter(FirebaseCrashlytics.instance);
+  await reporter.disableCollection();
   return FirebaseServices(
+    errorReporter: reporter,
     pushNotifications: FirebasePushNotifications(
       messaging: FirebaseMessaging.instance,
     ),

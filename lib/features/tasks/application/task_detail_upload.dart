@@ -89,18 +89,21 @@ mixin _UploadFlow on _$TaskDetailController {
     }
     if (digest == null || stale()) return WriteOutcome.superseded;
     // Kilit bırakıldı; [_writeKeyed] onu arada `await` olmadan, aynı adımda yeniden kurar.
-    final r = await _writeKeyed(
-      _upload,
-      // Yol imzada yok (yeniden seçim aynı anahtar); özet var: farklı içerik yeni anahtar (§8).
-      '${f.name}|${f.sizeBytes}|$digest|${d.tag.name}|${d.subtask}',
-      (key) => _writes.attachFile(
-        t,
-        f,
-        d.tag,
-        subtaskId: d.subtask,
-        requestKey: key,
+    final r = await ReportContext.run(
+      ReportOperation.fileUpload,
+      () => _writeKeyed(
+        _upload,
+        // Yol imzada yok (yeniden seçim aynı anahtar); özet var: farklı içerik yeni anahtar (§8).
+        '${f.name}|${f.sizeBytes}|$digest|${d.tag.name}|${d.subtask}',
+        (key) => _writes.attachFile(
+          t,
+          f,
+          d.tag,
+          subtaskId: d.subtask,
+          requestKey: key,
+        ),
+        list: false,
       ),
-      list: false,
     );
     if (r.ok && !stale()) {
       state = state.copyWith(

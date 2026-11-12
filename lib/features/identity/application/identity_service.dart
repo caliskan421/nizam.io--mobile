@@ -52,7 +52,7 @@ class IdentityService {
     final refreshExpiresAt = r.refreshExpiresAt;
     if (access == null || refresh == null || refreshExpiresAt == null) {
       // Mobil sınıf seçilmediyse (web yanıtı) belirteç gövdede yoktur: kullanılmaz.
-      throw ApiError(ClientErrorCode.invalidResponse);
+      throw invalidResponseError();
     }
     await session.establish(
       TokenPair(

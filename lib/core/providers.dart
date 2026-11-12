@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show Provider;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'app_phase.dart';
@@ -13,6 +14,7 @@ import 'scope/scope_controller.dart';
 import 'server/server_binding.dart';
 import 'session/session_controller.dart';
 import 'session/session_state.dart';
+import 'telemetry/error_reporting_controller.dart';
 
 part 'providers.g.dart';
 
@@ -56,6 +58,12 @@ ConnectivityMonitor connectivityMonitor(Ref ref) =>
 @Riverpod(keepAlive: true)
 LocaleController localeController(Ref ref) =>
     _unbound('localeControllerProvider');
+
+/// Hata raporlama tercihi ve kapısı (varsayılan kapalı); bileşim kökünde bağlanır.
+/// Bağlı değilse `null`: arayüzde denetim gösterilmez, raporlama zaten kapalıdır.
+final errorReportingControllerProvider = Provider<ErrorReportingController?>(
+  (ref) => null,
+);
 
 T _listen<T>(Ref ref, ValueListenable<T> listenable) {
   void onChange() => ref.invalidateSelf();

@@ -186,8 +186,9 @@ bu çalışma yalnız hazırlanmış dev bağlantısına politika UI'sını ekle
 - Prod istemci dosyaları ve prod Firebase etkinleştirmesi.
 - Native push bayrağının oturum/izin/kayıt mekanizmasına bağlanması; bildirim kapsamı
   ve mesaj içeriği politikası backend'de. [Native push planı](native-push-altyapisi.md).
-- Crashlytics için redaksiyon ve kullanıcı tercihi; Analytics için kişisel veri içermeyen
-  onaylı olay şeması. Remote Config'te `true` yayınlamak bu kontrolleri atlamaz.
+- Crashlytics redaksiyonu ve kullanıcı tercihi artık [hata-takibi.md](hata-takibi.md)'de
+  (dev, varsayılan kapalı, yalnız onayla); Analytics için kişisel veri içermeyen
+  onaylı olay şeması hâlâ yok. Remote Config'te `true` yayınlamak bu kontrolleri atlamaz.
 
 Bu dilim Crashlytics hata kancası, Analytics olay gönderimi veya gerçek push teslimi
 eklemez. Remote Config'e erişim/yenileme belirteci, parola, sunucu adresi ve kişisel

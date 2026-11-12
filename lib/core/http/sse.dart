@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:meta/meta.dart';
 
 import '../errors/api_error.dart';
-import '../i18n/generated/client_error_codes.gen.dart';
 
 // `text/event-stream` (SSE) yanıtları için çekirdek yardımcılar. Üretilmiş istemci SSE ucunu
 // (`assistantChat`) tek seferlik `Future<String>` olarak verir; akış ham Dio ile
@@ -75,10 +74,10 @@ Map<String, Object?> sseJsonObject(String data) {
   try {
     decoded = jsonDecode(data);
   } on FormatException {
-    throw ApiError(ClientErrorCode.invalidResponse);
+    throw invalidResponseError();
   }
   if (decoded is Map<String, Object?>) return decoded;
-  throw ApiError(ClientErrorCode.invalidResponse);
+  throw invalidResponseError();
 }
 
 /// `ResponseType.stream` isteğinin hatasını [ApiError]'a çevirir. Akış isteğinde 2xx dışı
@@ -87,8 +86,12 @@ Map<String, Object?> sseJsonObject(String data) {
 /// [toApiError] kuralıyla (kod, durum, `request_id`, `fields[]`, `Retry-After`) eşlenir.
 /// Gövdesi akış olmayan hata (kapı reddi, ağ, TLS, zaman aşımı) [toApiError]'a gider.
 Future<ApiError> streamApiError(Object error) async {
-  if (error is! DioException) return toApiError(error);
-  return toApiError(await materializeStreamError(error));
+  final api = error is! DioException
+      ? toApiError(error)
+      : toApiError(await materializeStreamError(error));
+  // apiCall dışındaki akış yolu: geçersiz yanıt / 5xx burada raporlanır.
+  reportApiFailure(error, StackTrace.current, api);
+  return api;
 }
 
 /// Akış isteğinin hatasında okunmamış [ResponseBody] gövdeyi JSON'a çözer ve gövdesi çözülmüş

@@ -49,7 +49,7 @@ final class CoordinatorshipsControllerProvider
 }
 
 String _$coordinatorshipsControllerHash() =>
-    r'e5e3b239523abe2513aee5b97b1d1d88368622c7';
+    r'780d9da7f5ee10053c8fa4549d3ebf0a54ab3f7e';
 
 /// Koordinatörlük listesinin sıralama ölçütü (kısayol menüsünden değişir; sayfalar arası
 /// korunur).
@@ -128,4 +128,4 @@ final class CoordinatorshipListProvider
 }
 
 String _$coordinatorshipListHash() =>
-    r'30cd227aca5ece2da8054b68aeb9c0397559d810';
+    r'cf63eaa16d41ff0407f3b9549a8bc88e93f4b16f';

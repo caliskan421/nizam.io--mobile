@@ -50,7 +50,7 @@ Future<Stream<List<int>>> getBinaryStream(
     throw await streamApiError(e);
   }
   final body = r.data;
-  if (body == null) throw ApiError(ClientErrorCode.invalidResponse);
+  if (body == null) throw invalidResponseError();
   return body.stream.transform(
     StreamTransformer<Uint8List, List<int>>.fromHandlers(
       handleError: (_, _, sink) =>

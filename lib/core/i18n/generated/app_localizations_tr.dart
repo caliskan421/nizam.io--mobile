@@ -2235,6 +2235,24 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiIdentityProfileEmail => 'E-posta';
 
   @override
+  String get uiIdentityCrashReportsTitle => 'Hata raporları';
+
+  @override
+  String get uiIdentityCrashReportsSwitch => 'Hata raporlarını gönder';
+
+  @override
+  String get uiIdentityCrashReportsBody =>
+      'Açıkken, uygulama çöktüğünde veya beklenmeyen bir hata oluştuğunda teknik bir özet gönderilir: hata türü, işlem adı, kod izi, uygulama ve cihaz sürümü. Çökme izini cihazdaki Firebase bileşeni de toplar. E-posta, parola, mesaj ve dosya içeriği, sunucu adresi rapora konmaz. Varsayılan kapalıdır; istediğiniz an kapatabilirsiniz.';
+
+  @override
+  String get uiIdentityCrashReportsEnableFailed =>
+      'Hata raporları açılamadı; kapalı kaldı. Daha sonra tekrar deneyin.';
+
+  @override
+  String get uiIdentityCrashReportsRevokeNotPersisted =>
+      'Bu oturumda kapatıldı ama tercih kaydedilemedi. Uygulama yeniden açıldığında tekrar açık olabilir; lütfen tekrar kapatmayı deneyin.';
+
+  @override
   String get uiIdentitySignOut => 'Çıkış yap';
 
   @override

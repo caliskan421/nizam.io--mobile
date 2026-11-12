@@ -110,8 +110,6 @@ T decodeJsonObject<T>(
   Object? body,
   T Function(Map<String, dynamic> json) fromJson,
 ) {
-  if (body is! Map<String, dynamic>) {
-    throw ApiError(ClientErrorCode.invalidResponse);
-  }
+  if (body is! Map<String, dynamic>) throw invalidResponseError();
   return fromJson(body);
 }

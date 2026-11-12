@@ -20,6 +20,8 @@ import '../../core/server/server_binding.dart';
 import '../../core/session/session_controller.dart';
 import '../../core/storage/preference_store.dart';
 import '../../core/storage/secure_store.dart';
+import '../../core/telemetry/error_reporting.dart';
+import '../../core/telemetry/error_reporting_controller.dart';
 import '../../features/activity/activity_module.dart';
 import '../../features/administration/administration_module.dart';
 import '../../features/archive/archive_module.dart';
@@ -60,6 +62,7 @@ class Composition {
     PushNotifications? pushNotifications,
     ReleasePolicySource? releasePolicySource,
     RunningRelease? runningRelease,
+    ErrorReporter? errorReporter,
   }) {
     final locator = GetIt.asNewInstance();
     // Native sözleşme ve Firebase dağıtım ayarları hazır olana kadar kapalı port.
@@ -79,6 +82,7 @@ class Composition {
       appPreferences: appPreferences,
       connectivityLink: connectivityLink,
       runningVersion: runningRelease?.version,
+      errorReporter: errorReporter,
     );
     late final ProviderContainer container;
     // Feature modülleri yalnız buradan kaydedilir (sınır kuralı G2). Reaktif API istemcisi
@@ -146,6 +150,9 @@ class Composition {
         localeControllerProvider.overrideWithValue(locator<LocaleController>()),
         themeModeControllerProvider.overrideWithValue(
           locator<ThemeModeController>(),
+        ),
+        errorReportingControllerProvider.overrideWithValue(
+          locator<ErrorReportingController>(),
         ),
         connectivityMonitorProvider.overrideWithValue(
           locator<ConnectivityMonitor>(),

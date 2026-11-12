@@ -4264,6 +4264,36 @@ abstract class AppLocalizations {
   /// **'E-posta'**
   String get uiIdentityProfileEmail;
 
+  /// ui.identity.crash_reports_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Hata raporları'**
+  String get uiIdentityCrashReportsTitle;
+
+  /// ui.identity.crash_reports_switch
+  ///
+  /// In tr, this message translates to:
+  /// **'Hata raporlarını gönder'**
+  String get uiIdentityCrashReportsSwitch;
+
+  /// ui.identity.crash_reports_body
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıkken, uygulama çöktüğünde veya beklenmeyen bir hata oluştuğunda teknik bir özet gönderilir: hata türü, işlem adı, kod izi, uygulama ve cihaz sürümü. Çökme izini cihazdaki Firebase bileşeni de toplar. E-posta, parola, mesaj ve dosya içeriği, sunucu adresi rapora konmaz. Varsayılan kapalıdır; istediğiniz an kapatabilirsiniz.'**
+  String get uiIdentityCrashReportsBody;
+
+  /// ui.identity.crash_reports_enable_failed
+  ///
+  /// In tr, this message translates to:
+  /// **'Hata raporları açılamadı; kapalı kaldı. Daha sonra tekrar deneyin.'**
+  String get uiIdentityCrashReportsEnableFailed;
+
+  /// ui.identity.crash_reports_revoke_not_persisted
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu oturumda kapatıldı ama tercih kaydedilemedi. Uygulama yeniden açıldığında tekrar açık olabilir; lütfen tekrar kapatmayı deneyin.'**
+  String get uiIdentityCrashReportsRevokeNotPersisted;
+
   /// ui.identity.sign_out
   ///
   /// In tr, this message translates to:

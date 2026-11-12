@@ -172,6 +172,7 @@ bool restoresLastRecord(PaneKind kind) => switch (kind) {
 bool listGoesFull(RailModule? m) =>
     m == RailModule.home ||
     m == RailModule.tasks ||
+    m == RailModule.calendar ||
     m == RailModule.coordinatorships ||
     m == RailModule.archive ||
     m == RailModule.meetings ||

@@ -66,6 +66,9 @@ void main() {
     expect(splitListFull(Uri.parse('/tasks/ALT-9')), isFalse);
     expect(splitListFull(Uri.parse('/tasks?trail=coord%3AALT')), isFalse);
     expect(baseEntryOf(Uri.parse('/calendar'), _none), isNull);
+    // Takvim kökü tam genişlik (ızgara + seçili gün yan yana); kayıt açılınca daralır.
+    expect(splitListFull(Uri.parse('/calendar')), isTrue);
+    expect(splitListFull(Uri.parse('/calendar?trail=task%3AALT-5')), isFalse);
     // Ana sayfada geçmiş varsayılan açık değildir: kök boş, yalnız `/home/history` tabandır.
     expect(baseEntryOf(Uri.parse('/home'), _none), isNull);
     expect(

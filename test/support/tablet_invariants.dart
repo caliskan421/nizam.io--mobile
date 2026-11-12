@@ -38,16 +38,15 @@ void expectModuleRoot(TabletSession s, TabletModule m) {
     reason: '${m.name} listesi',
   );
   switch (m) {
-    case TabletModule.tasks || TabletModule.coordinatorships:
+    case TabletModule.tasks ||
+        TabletModule.calendar ||
+        TabletModule.coordinatorships:
       expect(
         s.pane(NzPaneRole.detail),
         findsNothing,
         reason: '${m.name}: açık kayıt yok → liste tam genişlik, sağ bölme yok',
       );
-    case TabletModule.home ||
-        TabletModule.calendar ||
-        TabletModule.archive ||
-        TabletModule.messages:
+    case TabletModule.home || TabletModule.archive || TabletModule.messages:
       expect(
         s.inPane(NzPaneRole.detail, find.byType(NzPickRecord)),
         findsOneWidget,

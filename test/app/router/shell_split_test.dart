@@ -291,35 +291,35 @@ void main() {
     },
   );
 
-  testWidgets('takvim: liste solda, sağda "Bir kayıt seç"; görev sağa itilir', (
-    tester,
-  ) async {
-    final router = await _pump(tester, const Size(1180, 820));
-    router.go('/home');
-    await settle(tester);
-    await tester.tap(_rail('Takvim'));
-    await settle(tester);
-    expect(locationOf(router), '/calendar');
-    expect(
-      _inPane(NzPaneRole.master, find.byType(CalendarPage)),
-      findsOneWidget,
-    );
-    expect(
-      _inPane(NzPaneRole.detail, find.byType(CalendarEmptyDetail)),
-      findsOneWidget,
-    );
-    final list = tester.state(find.byType(CalendarPage));
-    tester.element(find.byType(CalendarPage)).appNav.openTask('ALT-5');
-    await settle(tester);
-    expect(locationOf(router), '/calendar?trail=task%3AALT-5');
-    expect(tester.state(find.byType(CalendarPage)), same(list));
-    expect(find.byType(TaskDetailPage).hitTestable(), findsOneWidget);
-    // Sağ yığın iki ekran: "Geri" görünür ve izi kısaltır.
-    await tester.tap(_inPane(NzPaneRole.detail, _backIcon).hitTestable().first);
-    await settle(tester);
-    expect(locationOf(router), '/calendar');
-    expect(tester.state(find.byType(CalendarPage)), same(list));
-  });
+  testWidgets(
+    'takvim: kök tam genişlik; görev sağa itilir, geri tam genişliğe döner',
+    (tester) async {
+      final router = await _pump(tester, const Size(1180, 820));
+      router.go('/home');
+      await settle(tester);
+      await tester.tap(_rail('Takvim'));
+      await settle(tester);
+      expect(locationOf(router), '/calendar');
+      expect(
+        _inPane(NzPaneRole.master, find.byType(CalendarPage)),
+        findsOneWidget,
+      );
+      expect(find.byType(CalendarEmptyDetail).hitTestable(), findsNothing);
+      final list = tester.state(find.byType(CalendarPage));
+      tester.element(find.byType(CalendarPage)).appNav.openTask('ALT-5');
+      await settle(tester);
+      expect(locationOf(router), '/calendar?trail=task%3AALT-5');
+      expect(tester.state(find.byType(CalendarPage)), same(list));
+      expect(find.byType(TaskDetailPage).hitTestable(), findsOneWidget);
+      // "Geri" kaydı kapatır: kök yeniden tam genişlik.
+      await tester.tap(
+        _inPane(NzPaneRole.detail, _backIcon).hitTestable().first,
+      );
+      await settle(tester);
+      expect(locationOf(router), '/calendar');
+      expect(tester.state(find.byType(CalendarPage)), same(list));
+    },
+  );
 
   testWidgets(
     'modüller arası sağ yığın: koordinatörlük → klasör → görev; sol liste sabit, geri yığında',

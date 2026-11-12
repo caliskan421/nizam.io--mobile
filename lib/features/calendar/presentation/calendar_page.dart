@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../core/cache_owner.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/layout/nz_layout.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/theme/nz_motion.dart';
@@ -25,8 +26,14 @@ import 'calendar/calendar_grid.dart';
 /// ızgarası ve seçili günün kayıtları. Seçili gün, ay ve kip denetleyicide yaşar; pencere
 /// ölçüsüne bağlı değildir (yeniden boyutlanmada ve modül değişiminde korunur).
 ///
+/// Tablette açık kayıt yokken sayfa tam genişliktir; [calendarWideMinWidth] üstünde ızgara solda,
+/// seçili gün sağda yan yana durur.
+///
 /// "Toplantı planla" seçili günle ortak toplantı penceresini açar; [onPlanMeeting] verilirse
 /// (ör. tablet merkezi modal) onu çağırır.
+/// Izgara ve seçili günün yan yana durduğu en küçük içerik genişliği.
+const calendarWideMinWidth = 840.0;
+
 class CalendarPage extends ConsumerWidget {
   const CalendarPage({super.key, this.onPlanMeeting});
 
@@ -79,6 +86,7 @@ class CalendarPage extends ConsumerWidget {
     ]);
 
     return NzPage.feed(
+      width: NzContentWidth.wide,
       onRetry: retry,
       onRefresh: refresh,
       onRevisit: revisit,
@@ -90,24 +98,51 @@ class CalendarPage extends ConsumerWidget {
         NzAsyncView<CalendarIndex>(
           value: index,
           onRetry: retry,
-          data: (ix) => Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              CalendarGrid(index: ix),
-              // Kesik kaynak (toplantı listesi ya da katalog): boş gün gerçekte boş olmayabilir.
-              if (ix.truncated) ...[
-                const Gap(NizamioSpacing.space2),
-                Text(
-                  context.l10n.uiListsTruncated,
-                  textAlign: TextAlign.center,
-                  style: context.text.caption.copyWith(
-                    color: context.colors.textMuted,
+          data: (ix) => LayoutBuilder(
+            builder: (context, box) {
+              final grid = Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  CalendarGrid(index: ix),
+                  // Kesik kaynak (toplantı listesi ya da katalog): boş gün gerçekte boş
+                  // olmayabilir.
+                  if (ix.truncated) ...[
+                    const Gap(NizamioSpacing.space2),
+                    Text(
+                      context.l10n.uiListsTruncated,
+                      textAlign: TextAlign.center,
+                      style: context.text.caption.copyWith(
+                        color: context.colors.textMuted,
+                      ),
+                    ),
+                  ],
+                ],
+              );
+              if (box.maxWidth < calendarWideMinWidth) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    grid,
+                    const Gap(NizamioSpacing.space4),
+                    CalendarDay(index: ix, onPlanMeeting: plan),
+                  ],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: grid),
+                  const Gap(NizamioSpacing.space10),
+                  Expanded(
+                    child: CalendarDay(
+                      index: ix,
+                      onPlanMeeting: plan,
+                      divided: false,
+                    ),
                   ),
-                ),
-              ],
-              const Gap(NizamioSpacing.space4),
-              CalendarDay(index: ix, onPlanMeeting: plan),
-            ],
+                ],
+              );
+            },
           ),
         ),
       ],

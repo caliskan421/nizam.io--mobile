@@ -24,9 +24,13 @@ class CalendarDay extends ConsumerWidget {
     required this.index,
     this.onPlanMeeting,
     this.emptyMessage,
+    this.divided = true,
   });
 
   final CalendarIndex index;
+
+  /// Izgaranın altındaysa üst çizgi + boşluk; geniş düzende yan sütunda çizgisiz.
+  final bool divided;
   final VoidCallback? onPlanMeeting;
   final String? emptyMessage;
 
@@ -47,12 +51,17 @@ class CalendarDay extends ConsumerWidget {
       explicitChildNodes: true,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: c.border, width: NizamioSize.borderWidth),
-          ),
+          border: divided
+              ? Border(
+                  top: BorderSide(
+                    color: c.border,
+                    width: NizamioSize.borderWidth,
+                  ),
+                )
+              : null,
         ),
         child: Padding(
-          padding: const EdgeInsets.only(top: NizamioSpacing.space4),
+          padding: EdgeInsets.only(top: divided ? NizamioSpacing.space4 : 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

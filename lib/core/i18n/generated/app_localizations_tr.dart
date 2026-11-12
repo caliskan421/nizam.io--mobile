@@ -1422,9 +1422,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarLeadRequest => 'talep';
 
   @override
-  String get uiCalendarDueLc => 'bitiş';
-
-  @override
   String get uiCalendarTaskFilter => 'Gösterilen görevler';
 
   @override
@@ -1434,16 +1431,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarFilterStarts => 'Başlayacak';
 
   @override
-  String get uiCalendarFilterOngoing => 'Devam eden';
-
-  @override
   String get uiCalendarSubEnds => 'bu gün bitecek';
 
   @override
   String get uiCalendarSubStarts => 'bu gün başlayacak';
-
-  @override
-  String get uiCalendarSubOngoing => 'devam eden';
 
   @override
   String get uiCalendarLateLc => 'gecikti';
@@ -1462,6 +1453,21 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCalendarThisWeek => 'Bu hafta';
+
+  @override
+  String get uiCalendarLastWeek => 'Geçen hafta';
+
+  @override
+  String get uiCalendarNextWeekCard => 'Gelecek hafta';
+
+  @override
+  String get uiCalendarDoneLc => 'tamamlandı';
+
+  @override
+  String get uiCalendarMeetingLc => 'toplantı';
+
+  @override
+  String get uiCalendarPeriods => 'Dönem özeti';
 
   @override
   String get uiCalendarThisWeekEmpty => 'Bu hafta için kayıt yok.';

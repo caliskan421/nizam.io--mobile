@@ -149,6 +149,16 @@ typedef CalendarWeek = ({
   List<MeetingEntry> meetings,
 });
 
+/// Bir dönemin sayıları ([CalendarIndex.period]): bitişi düşen görev ([due]; [done] tamamlanan,
+/// [late] bitmemiş ve bugünden önce), başlangıcı düşen görev ([starts]), toplantı.
+typedef CalendarPeriod = ({
+  int due,
+  int done,
+  int late,
+  int starts,
+  int meetings,
+});
+
 /// Gün listesinin bir bölümü (toplantılar, görevler, talepler).
 typedef CalendarGroup = ({CalendarKind kind, List<CalendarEntry> entries});
 
@@ -160,7 +170,7 @@ final class CalendarIndex {
     this._catalog,
     this._byDay,
     this.truncated,
-    this._spans,
+    this._tasks,
   );
 
   /// Görünür toplantılar + görev kataloğu: bitmemiş her görevin başlangıcı ve bitişi, bekleyen
@@ -175,7 +185,7 @@ final class CalendarIndex {
   }) {
     final today = calendarDay(catalog.today);
     final by = <DateTime, List<CalendarEntry>>{};
-    final spans = <TaskItem>[];
+    final filtered = <TaskItem>[];
     void add(CalendarEntry e) =>
         (by[calendarDay(e.date)] ??= <CalendarEntry>[]).add(e);
     meetings
@@ -191,6 +201,7 @@ final class CalendarIndex {
         continue;
       }
       if (accountId != null && !t.assignees.contains(accountId)) continue;
+      filtered.add(t);
       if (t.dateRequest case final r? when r.isPending) {
         add(
           RequestEntry(
@@ -202,7 +213,6 @@ final class CalendarIndex {
         );
       }
       if (t.isDone) continue;
-      spans.add(t);
       final due = calendarDay(t.due);
       for (final (edge, day) in [
         (TaskEdge.end, due),
@@ -226,7 +236,7 @@ final class CalendarIndex {
       catalog,
       by,
       meetingsTruncated || catalog.truncated,
-      spans,
+      filtered,
     );
   }
 
@@ -264,10 +274,7 @@ final class CalendarIndex {
       catalog,
       by,
       catalog.truncated,
-      [
-        for (final t in mine)
-          if (!t.isDone) t,
-      ],
+      mine,
     );
   }
 
@@ -279,27 +286,37 @@ final class CalendarIndex {
   final TaskCatalog _catalog;
   final Map<DateTime, List<CalendarEntry>> _byDay;
 
-  /// Bitmemiş görevler (dizinin süzgeciyle): süren görev listesinin kaynağı.
-  final List<TaskItem> _spans;
+  /// Dizinin süzgecinden geçen bütün görevler (tamamlananlar dahil): hafta boyu süren
+  /// görevlerin ve dönem özetinin kaynağı.
+  final List<TaskItem> _tasks;
 
-  /// [day]'de süren görevler (başlangıç < gün < bitiş; uç günler [on]'dadır), bitişe göre.
-  List<TaskEntry> ongoing(DateTime day) {
-    final d = calendarDay(day);
-    final list = [
-      for (final t in _spans)
-        if (calendarDay(t.start).isBefore(d) && d.isBefore(calendarDay(t.due)))
-          TaskEntry(
-            date: d,
-            code: t.code,
-            title: t.title,
-            coordinatorship: t.coordinatorship,
-            edge: TaskEdge.ongoing,
-            assignees: t.assignees,
-            late: calendarDay(t.due).isBefore(today),
-            due: calendarDay(t.due),
-          ),
-    ]..sort((a, b) => a.due!.compareTo(b.due!));
-    return list;
+  /// [from]–[to] (dahil) özeti: bitişi düşen görevler (tamamlanan ve gecikmiş olanlarıyla),
+  /// başlangıcı düşen görevler ve toplantılar.
+  CalendarPeriod period(DateTime from, DateTime to) {
+    final a = calendarDay(from);
+    final b = calendarDay(to);
+    bool inRange(DateTime d) {
+      final x = calendarDay(d);
+      return !x.isBefore(a) && !x.isAfter(b);
+    }
+
+    final due = [
+      for (final t in _tasks)
+        if (inRange(t.due)) t,
+    ];
+    var meetings = 0;
+    for (final MapEntry(:key, :value) in _byDay.entries) {
+      if (inRange(key)) meetings += value.whereType<MeetingEntry>().length;
+    }
+    return (
+      due: due.length,
+      done: due.where((t) => t.isDone).length,
+      late: due
+          .where((t) => !t.isDone && calendarDay(t.due).isBefore(today))
+          .length,
+      starts: _tasks.where((t) => inRange(t.start)).length,
+      meetings: meetings,
+    );
   }
 
   /// Koordinatörlük adı (görev satırında kimlik yerine); bilinmiyorsa null.
@@ -324,8 +341,9 @@ final class CalendarIndex {
             : a.date.compareTo(b.date),
       );
     final ongoing = [
-      for (final t in _spans)
-        if (calendarDay(t.start).isBefore(first) &&
+      for (final t in _tasks)
+        if (!t.isDone &&
+            calendarDay(t.start).isBefore(first) &&
             last.isBefore(calendarDay(t.due)))
           TaskEntry(
             date: calendarDay(t.due),

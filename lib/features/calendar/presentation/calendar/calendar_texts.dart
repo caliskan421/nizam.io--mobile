@@ -49,18 +49,18 @@ extension CalendarTexts on AppLocalizations {
     CalendarKind.request => uiCalendarGroupRequests,
   };
 
-  /// Görev süzgeci düğmesi: "Bitecek" / "Başlayacak" / "Devam eden".
+  /// Görev süzgeci düğmesi: "Bitecek" / "Başlayacak" (süren görev yalnız "bu hafta"da).
   String edgeFilter(TaskEdge e) => switch (e) {
     TaskEdge.end => uiCalendarFilterEnds,
     TaskEdge.start => uiCalendarFilterStarts,
-    TaskEdge.ongoing => uiCalendarFilterOngoing,
+    TaskEdge.ongoing => uiCalendarStatOngoing,
   };
 
-  /// Görev alt bölümü başlığı: "bu gün bitecek" / "bu gün başlayacak" / "devam eden".
+  /// Görev alt bölümü başlığı: "bu gün bitecek" / "bu gün başlayacak".
   String edgeSection(TaskEdge e) => switch (e) {
     TaskEdge.end => uiCalendarSubEnds,
     TaskEdge.start => uiCalendarSubStarts,
-    TaskEdge.ongoing => uiCalendarSubOngoing,
+    TaskEdge.ongoing => uiCalendarWeekOngoing,
   };
 
   /// Gün listesi satırının mono öncüsü (görev kimliği yerine): "biter" / "başlar" / "sürer".
@@ -69,10 +69,6 @@ extension CalendarTexts on AppLocalizations {
     TaskEdge.start => uiCalendarLeadStart,
     TaskEdge.ongoing => uiCalendarLeadOngoing,
   };
-
-  /// Süren görevin bitişi: "bitiş 5 Kas".
-  String dueOn(TaskEntry e) =>
-      '$uiCalendarDueLc ${DateFormat('d MMM', 'tr').format(e.due ?? e.date)}';
 
   /// Kısa gün: "Sa 20".
   String shortDay(DateTime d) => '${weekdaysShort[d.weekday - 1]} ${d.day}';

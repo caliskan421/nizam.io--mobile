@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
-import 'package:nizamio/features/calendar/application/calendar_controller.dart';
 import 'package:nizamio/features/calendar/domain/calendar.dart';
 import 'package:nizamio/features/calendar/presentation/calendar/calendar_day.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
@@ -28,7 +27,7 @@ void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
   testWidgets(
-    'süren görevler varsayılan gizli; "Devam eden" açınca listelenir',
+    'gün süzgeci yalnız Bitecek/Başlayacak; süren görev günde listelenmez',
     (tester) async {
       final h = await real(
         tester,
@@ -56,17 +55,7 @@ void main() {
       );
       expect(find.text('Görev END'), findsOneWidget);
       expect(find.text('Görev RUN'), findsNothing);
-      expect(
-        find.bySemanticsLabel('${_l.uiCalendarFilterOngoing}, 1'),
-        findsOneWidget,
-      );
-      await tester.tap(find.text(_l.uiCalendarFilterOngoing));
-      await tester.pumpAndSettle();
-      expect(find.text('Görev RUN'), findsOneWidget);
-      expect(
-        h.read(calendarControllerProvider).taskEdges,
-        contains(TaskEdge.ongoing),
-      );
+      expect(find.text(_l.uiCalendarStatOngoing), findsNothing);
       // "Bitecek" kapatılınca bitiş satırı gizlenir.
       await tester.tap(find.text(_l.uiCalendarFilterEnds));
       await tester.pumpAndSettle();

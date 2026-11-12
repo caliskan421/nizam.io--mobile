@@ -50,7 +50,6 @@ class CalendarDay extends ConsumerWidget {
     final tasks = {
       TaskEdge.end: [...dayTasks.where((e) => e.edge == TaskEdge.end)],
       TaskEdge.start: [...dayTasks.where((e) => e.edge == TaskEdge.start)],
-      TaskEdge.ongoing: index.ongoing(day),
     };
     Widget card(List<CalendarEntry> entries) => ClipRRect(
       borderRadius: BorderRadius.circular(NizamioRadius.row),
@@ -169,7 +168,7 @@ class _TaskSection extends ConsumerWidget {
           child: Wrap(
             spacing: NizamioSpacing.space2,
             children: [
-              for (final e in TaskEdge.values)
+              for (final e in tasks.keys)
                 _EdgeChip(
                   label: l.edgeFilter(e),
                   count: tasks[e]!.length,
@@ -179,7 +178,7 @@ class _TaskSection extends ConsumerWidget {
             ],
           ),
         ),
-        for (final e in TaskEdge.values)
+        for (final e in tasks.keys)
           if (edges.contains(e) && tasks[e]!.isNotEmpty) ...[
             const Gap(NizamioSpacing.space2),
             Padding(
@@ -319,7 +318,6 @@ class _EntryRow extends StatelessWidget {
         e.title,
         [
           ?index.coordinatorshipName(e.coordinatorship),
-          if (e.edge == TaskEdge.ongoing) l.dueOn(e),
           if (e.status == null)
             e.assignees
                 .map((a) => index.personName(a) ?? l.uiTasksUnknownPerson)

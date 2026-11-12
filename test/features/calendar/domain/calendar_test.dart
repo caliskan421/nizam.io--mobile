@@ -226,39 +226,40 @@ void main() {
     expect(ix.groups(DateTime(2026, 10, 6)), isEmpty);
   });
 
-  test('süren görevler: başlangıç < gün < bitiş, bitmemiş, bitişe göre; uç günler dışarıda', () {
-    final ix = CalendarIndex.build(
-      const [],
-      _catalog([
-        _task(
-          'long',
-          start: DateTime(2026, 11, 1),
-          due: DateTime(2026, 11, 20),
-        ),
-        _task(
-          'short',
-          start: DateTime(2026, 11, 2),
-          due: DateTime(2026, 11, 8),
-        ),
-        _task(
-          'done',
-          start: DateTime(2026, 11, 1),
-          due: DateTime(2026, 11, 20),
-          status: TaskStatus.done,
-        ),
-        _task('edge', start: DateTime(2026, 11, 5), due: DateTime(2026, 11, 9)),
-      ]),
-    );
-    final run = ix.ongoing(DateTime(2026, 11, 5));
-    expect(run.map((e) => (e.code, e.edge, e.due)), [
-      ('short', TaskEdge.ongoing, DateTime(2026, 11, 8)),
-      ('long', TaskEdge.ongoing, DateTime(2026, 11, 20)),
-    ]);
-    // Süren görev hücre noktası ve sayısı üretmez.
-    expect(ix.count(DateTime(2026, 11, 3)), 0);
-    expect(ix.ongoing(DateTime(2026, 11, 1)), isEmpty);
-    expect(ix.ongoing(DateTime(2026, 11, 20)), isEmpty);
-  });
+  test(
+    'dönem özeti: bitişi düşen (tamamlanan/geciken), başlayan, toplantı',
+    () {
+      final ix = CalendarIndex.build(
+        [
+          _meeting('m1', DateTime(2026, 10, 27, 10)),
+          _meeting('m2', DateTime(2026, 11, 9, 10)),
+        ],
+        _catalog([
+          _task(
+            'done',
+            start: DateTime(2026, 10, 1),
+            due: DateTime(2026, 10, 28),
+            status: TaskStatus.done,
+          ),
+          _task(
+            'late',
+            start: DateTime(2026, 10, 1),
+            due: DateTime(2026, 10, 30),
+          ),
+          _task(
+            'new',
+            start: DateTime(2026, 10, 26),
+            due: DateTime(2026, 12, 1),
+          ),
+        ]),
+      );
+      // _today 5 Kasım: geçen hafta 26 Eki – 1 Kas.
+      final p = ix.period(DateTime(2026, 10, 26), DateTime(2026, 11, 1));
+      expect((p.due, p.done, p.late, p.starts, p.meetings), (2, 1, 1, 1, 1));
+      final none = ix.period(DateTime(2026, 11, 2), DateTime(2026, 11, 8));
+      expect((none.due, none.starts, none.meetings), (0, 0, 0));
+    },
+  );
 
   test('hafta: pazartesi–pazar; uçlar, hafta boyu süren görevler, toplantılar saatle', () {
     expect(weekOf(DateTime(2026, 10, 21, 9)), [

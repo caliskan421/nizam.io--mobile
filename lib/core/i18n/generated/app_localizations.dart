@@ -2656,12 +2656,6 @@ abstract class AppLocalizations {
   /// **'talep'**
   String get uiCalendarLeadRequest;
 
-  /// ui.calendar.due_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'bitiş'**
-  String get uiCalendarDueLc;
-
   /// ui.calendar.task_filter
   ///
   /// In tr, this message translates to:
@@ -2680,12 +2674,6 @@ abstract class AppLocalizations {
   /// **'Başlayacak'**
   String get uiCalendarFilterStarts;
 
-  /// ui.calendar.filter_ongoing
-  ///
-  /// In tr, this message translates to:
-  /// **'Devam eden'**
-  String get uiCalendarFilterOngoing;
-
   /// ui.calendar.sub_ends
   ///
   /// In tr, this message translates to:
@@ -2697,12 +2685,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'bu gün başlayacak'**
   String get uiCalendarSubStarts;
-
-  /// ui.calendar.sub_ongoing
-  ///
-  /// In tr, this message translates to:
-  /// **'devam eden'**
-  String get uiCalendarSubOngoing;
 
   /// ui.calendar.late_lc
   ///
@@ -2739,6 +2721,36 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu hafta'**
   String get uiCalendarThisWeek;
+
+  /// ui.calendar.last_week
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçen hafta'**
+  String get uiCalendarLastWeek;
+
+  /// ui.calendar.next_week_card
+  ///
+  /// In tr, this message translates to:
+  /// **'Gelecek hafta'**
+  String get uiCalendarNextWeekCard;
+
+  /// ui.calendar.done_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'tamamlandı'**
+  String get uiCalendarDoneLc;
+
+  /// ui.calendar.meeting_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'toplantı'**
+  String get uiCalendarMeetingLc;
+
+  /// ui.calendar.periods
+  ///
+  /// In tr, this message translates to:
+  /// **'Dönem özeti'**
+  String get uiCalendarPeriods;
 
   /// ui.calendar.this_week_empty
   ///

@@ -1709,10 +1709,6 @@
   "@uiCalendarLeadRequest": {
     "description": "ui.calendar.lead_request"
   },
-  "uiCalendarDueLc": "bitiş",
-  "@uiCalendarDueLc": {
-    "description": "ui.calendar.due_lc"
-  },
   "uiCalendarTaskFilter": "Gösterilen görevler",
   "@uiCalendarTaskFilter": {
     "description": "ui.calendar.task_filter"
@@ -1725,10 +1721,6 @@
   "@uiCalendarFilterStarts": {
     "description": "ui.calendar.filter_starts"
   },
-  "uiCalendarFilterOngoing": "Devam eden",
-  "@uiCalendarFilterOngoing": {
-    "description": "ui.calendar.filter_ongoing"
-  },
   "uiCalendarSubEnds": "bu gün bitecek",
   "@uiCalendarSubEnds": {
     "description": "ui.calendar.sub_ends"
@@ -1736,10 +1728,6 @@
   "uiCalendarSubStarts": "bu gün başlayacak",
   "@uiCalendarSubStarts": {
     "description": "ui.calendar.sub_starts"
-  },
-  "uiCalendarSubOngoing": "devam eden",
-  "@uiCalendarSubOngoing": {
-    "description": "ui.calendar.sub_ongoing"
   },
   "uiCalendarLateLc": "gecikti",
   "@uiCalendarLateLc": {
@@ -1764,6 +1752,26 @@
   "uiCalendarThisWeek": "Bu hafta",
   "@uiCalendarThisWeek": {
     "description": "ui.calendar.this_week"
+  },
+  "uiCalendarLastWeek": "Geçen hafta",
+  "@uiCalendarLastWeek": {
+    "description": "ui.calendar.last_week"
+  },
+  "uiCalendarNextWeekCard": "Gelecek hafta",
+  "@uiCalendarNextWeekCard": {
+    "description": "ui.calendar.next_week_card"
+  },
+  "uiCalendarDoneLc": "tamamlandı",
+  "@uiCalendarDoneLc": {
+    "description": "ui.calendar.done_lc"
+  },
+  "uiCalendarMeetingLc": "toplantı",
+  "@uiCalendarMeetingLc": {
+    "description": "ui.calendar.meeting_lc"
+  },
+  "uiCalendarPeriods": "Dönem özeti",
+  "@uiCalendarPeriods": {
+    "description": "ui.calendar.periods"
   },
   "uiCalendarThisWeekEmpty": "Bu hafta için kayıt yok.",
   "@uiCalendarThisWeekEmpty": {

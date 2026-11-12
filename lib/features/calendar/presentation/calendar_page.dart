@@ -22,6 +22,7 @@ import '../application/calendar_index_controller.dart';
 import '../domain/calendar.dart';
 import 'calendar/calendar_day.dart';
 import 'calendar/calendar_grid.dart';
+import 'calendar/calendar_periods.dart';
 import 'calendar/calendar_texts.dart';
 import 'calendar/calendar_week.dart';
 
@@ -187,6 +188,8 @@ class CalendarPage extends ConsumerWidget {
                     enter(1, CalendarDay(index: ix)),
                     const Gap(NizamioSpacing.gapLg),
                     enter(2, CalendarThisWeek(index: ix)),
+                    const Gap(NizamioSpacing.space8),
+                    enter(3, CalendarPeriods(index: ix)),
                   ],
                 );
               }
@@ -207,6 +210,8 @@ class CalendarPage extends ConsumerWidget {
                   ),
                   const Gap(NizamioSpacing.space8),
                   enter(2, CalendarThisWeek(index: ix)),
+                  const Gap(NizamioSpacing.space8),
+                  enter(3, CalendarPeriods(index: ix)),
                 ],
               );
             },

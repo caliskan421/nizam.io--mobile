@@ -2719,14 +2719,8 @@ abstract class AppLocalizations {
   /// ui.calendar.this_week_empty
   ///
   /// In tr, this message translates to:
-  /// **'Bu hafta için seçili türde kayıt yok.'**
+  /// **'Bu hafta için kayıt yok.'**
   String get uiCalendarThisWeekEmpty;
-
-  /// ui.calendar.this_week_filter
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu haftada gösterilenler'**
-  String get uiCalendarThisWeekFilter;
 
   /// ui.calendar.stat_ongoing
   ///

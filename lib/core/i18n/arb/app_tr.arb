@@ -1749,13 +1749,9 @@
   "@uiCalendarThisWeek": {
     "description": "ui.calendar.this_week"
   },
-  "uiCalendarThisWeekEmpty": "Bu hafta için seçili türde kayıt yok.",
+  "uiCalendarThisWeekEmpty": "Bu hafta için kayıt yok.",
   "@uiCalendarThisWeekEmpty": {
     "description": "ui.calendar.this_week_empty"
-  },
-  "uiCalendarThisWeekFilter": "Bu haftada gösterilenler",
-  "@uiCalendarThisWeekFilter": {
-    "description": "ui.calendar.this_week_filter"
   },
   "uiCalendarStatOngoing": "Devam",
   "@uiCalendarStatOngoing": {

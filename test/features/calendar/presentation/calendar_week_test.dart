@@ -1,10 +1,9 @@
-// CalendarThisWeek: sayaçlar haftanın sayılarını verir ve süzgeçtir ("Devam" varsayılan
-// kapalı, gün listesiyle ortak); bölümler gün sırasıyla, gecikende "gecikti".
+// CalendarThisWeek: sayaçlar haftanın sayılarını gösterir (dokunma yok); bütün bölümler —
+// devam edenler dahil — her zaman görünür; gecikende "gecikti".
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
-import 'package:nizamio/features/calendar/application/calendar_controller.dart';
 import 'package:nizamio/features/calendar/domain/calendar.dart';
 import 'package:nizamio/features/calendar/presentation/calendar/calendar_week.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
@@ -31,7 +30,7 @@ void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
   testWidgets(
-    'sayaçlar, bölümler, gecikti; "Devam" sayacı süren görevleri açar',
+    'sayaçlar, bölümler (devam edenler dahil), gecikti; gün süzgecinden bağımsız',
     (tester) async {
       final h = await real(
         tester,
@@ -66,17 +65,16 @@ void main() {
       expect(find.text('${_l.uiCalendarWeekEnds} · 2'), findsOneWidget);
       expect(find.text('Görev LATE'), findsOneWidget);
       expect(find.text(_l.uiCalendarLateLc), findsOneWidget);
-      expect(find.text('Görev SPAN'), findsNothing);
-      await tester.tap(find.text(_l.uiCalendarStatOngoing));
-      await tester.pumpAndSettle();
+      expect(find.text('${_l.uiCalendarWeekOngoing} · 1'), findsOneWidget);
       expect(find.text('Görev SPAN'), findsOneWidget);
       expect(
-        h.read(calendarControllerProvider).taskEdges,
-        contains(TaskEdge.ongoing),
+        find.bySemanticsLabel('${_l.uiCalendarStatOngoing}, 1'),
+        findsOneWidget,
       );
+      // Sayaç gösterge: dokunuş bölüm gizlemez.
       await tester.tap(find.text(_l.uiCalendarFilterEnds));
       await tester.pumpAndSettle();
-      expect(find.text('Görev LATE'), findsNothing);
+      expect(find.text('Görev LATE'), findsOneWidget);
     },
   );
 

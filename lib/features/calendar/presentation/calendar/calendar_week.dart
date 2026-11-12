@@ -1,26 +1,23 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
-import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
-import '../../application/calendar_controller.dart';
 import '../../domain/calendar.dart';
 import 'calendar_grid.dart';
 import 'calendar_texts.dart';
 
-/// "Bu hafta" (bugünün haftası, pazartesi–pazar): başlık + aralık, dört sayaçlı şerit
-/// (Bitecek, Başlayacak, Devam, Toplantı; her biri süzgeç — görev türleri gün listesiyle
-/// ortak, "Devam" varsayılan kapalı) ve açık türlerin bölümleri. Satır: solda gün (toplantıda
+/// "Bu hafta" (bugünün haftası, pazartesi–pazar): başlık + aralık, dört sayaçlı gösterge
+/// şeridi (Bitecek, Başlayacak, Devam, Toplantı) ve boş olmayan türlerin bölümleri (hepsi
+/// her zaman; gün listesinin süzgecinden bağımsız). Satır: solda gün (toplantıda
 /// saat, süren görevde bitiş), tür noktası, başlık + alt yazı, gecikmede "gecikti". Geniş
 /// alanda (tablet) bölümler en çok üç sütuna dengeli dağılır.
-class CalendarThisWeek extends ConsumerWidget {
+class CalendarThisWeek extends StatelessWidget {
   const CalendarThisWeek({super.key, required this.index});
 
   final CalendarIndex index;
@@ -31,21 +28,17 @@ class CalendarThisWeek extends ConsumerWidget {
   static const _gap = NizamioSpacing.space6;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final view = ref.watch(calendarControllerProvider);
-    final ctrl = ref.read(calendarControllerProvider.notifier);
     final days = weekOf(index.today);
     final w = index.week(index.today);
     final sections = <(String, List<CalendarEntry>)>[
-      if (view.taskEdges.contains(TaskEdge.end)) (l.uiCalendarWeekEnds, w.ends),
-      if (view.taskEdges.contains(TaskEdge.start))
-        (l.uiCalendarWeekStarts, w.starts),
-      if (view.taskEdges.contains(TaskEdge.ongoing))
-        (l.uiCalendarWeekOngoing, w.ongoing),
-      if (view.weekMeetings) (l.uiCalendarGroupMeetings, w.meetings),
+      (l.uiCalendarWeekEnds, w.ends),
+      (l.uiCalendarWeekStarts, w.starts),
+      (l.uiCalendarWeekOngoing, w.ongoing),
+      (l.uiCalendarGroupMeetings, w.meetings),
     ].where((s) => s.$2.isNotEmpty).toList();
     return Semantics(
       label: l.uiCalendarThisWeek,
@@ -73,30 +66,10 @@ class CalendarThisWeek extends ConsumerWidget {
           const Gap(NizamioSpacing.space3),
           _StatStrip(
             stats: [
-              (
-                l.uiCalendarFilterEnds,
-                w.ends.length,
-                view.taskEdges.contains(TaskEdge.end),
-                () => ctrl.toggleTaskEdge(TaskEdge.end),
-              ),
-              (
-                l.uiCalendarFilterStarts,
-                w.starts.length,
-                view.taskEdges.contains(TaskEdge.start),
-                () => ctrl.toggleTaskEdge(TaskEdge.start),
-              ),
-              (
-                l.uiCalendarStatOngoing,
-                w.ongoing.length,
-                view.taskEdges.contains(TaskEdge.ongoing),
-                () => ctrl.toggleTaskEdge(TaskEdge.ongoing),
-              ),
-              (
-                l.uiCalendarStatMeetings,
-                w.meetings.length,
-                view.weekMeetings,
-                ctrl.toggleWeekMeetings,
-              ),
+              (l.uiCalendarFilterEnds, w.ends.length),
+              (l.uiCalendarFilterStarts, w.starts.length),
+              (l.uiCalendarStatOngoing, w.ongoing.length),
+              (l.uiCalendarStatMeetings, w.meetings.length),
             ],
           ),
           if (sections.isEmpty) ...[
@@ -181,93 +154,72 @@ class CalendarThisWeek extends ConsumerWidget {
   }
 }
 
-typedef _Stat = (String label, int count, bool on, VoidCallback onTap);
+typedef _Stat = (String label, int count);
 
-/// Dört sayaç tek şeritte, aralarında ince çizgi; kapalı sayaç soluk.
+/// Dört sayaç tek şeritte, aralarında ince çizgi; yalnız gösterge (dokunma yok).
 class _StatStrip extends StatelessWidget {
   const _StatStrip({required this.stats});
 
   final List<_Stat> stats;
 
-  static const _fade = Duration(milliseconds: 200);
-
   @override
   Widget build(BuildContext context) {
-    final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    return Semantics(
-      label: l.uiCalendarThisWeekFilter,
-      container: true,
-      explicitChildNodes: true,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: c.surfaceRaised,
-          border: Border.all(color: c.border),
-          borderRadius: BorderRadius.circular(NizamioRadius.card),
-        ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final (i, (label, count, on, onTap)) in stats.indexed) ...[
-                if (i > 0)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: NizamioSpacing.space3,
-                    ),
-                    child: VerticalDivider(
-                      width: NizamioSize.borderWidth,
-                      thickness: NizamioSize.borderWidth,
-                      color: c.border,
-                    ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surfaceRaised,
+        border: Border.all(color: c.border),
+        borderRadius: BorderRadius.circular(NizamioRadius.card),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final (i, (label, count)) in stats.indexed) ...[
+              if (i > 0)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: NizamioSpacing.space3,
                   ),
-                Expanded(
-                  child: Semantics(
-                    button: true,
-                    selected: on,
-                    label: '$label, $count',
-                    excludeSemantics: true,
-                    onTap: onTap,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: onTap,
-                      child: AnimatedOpacity(
-                        opacity: on ? 1 : 0.38,
-                        duration: NzMotion.of(context, _fade),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: NizamioSpacing.space3,
-                            vertical: NizamioSpacing.gapMd,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '$count',
-                                style: t.titleSm.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                label,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: t.caption.copyWith(color: c.textMuted),
-                              ),
-                            ],
+                  child: VerticalDivider(
+                    width: NizamioSize.borderWidth,
+                    thickness: NizamioSize.borderWidth,
+                    color: c.border,
+                  ),
+                ),
+              Expanded(
+                child: Semantics(
+                  label: '$label, $count',
+                  excludeSemantics: true,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: NizamioSpacing.space3,
+                      vertical: NizamioSpacing.gapMd,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '$count',
+                          style: t.titleSm.copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
-                      ),
+                        Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: t.caption.copyWith(color: c.textMuted),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
+              ),
             ],
-          ),
+          ],
         ),
       ),
     );

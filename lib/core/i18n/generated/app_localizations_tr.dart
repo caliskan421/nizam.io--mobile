@@ -1452,10 +1452,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarThisWeek => 'Bu hafta';
 
   @override
-  String get uiCalendarThisWeekEmpty => 'Bu hafta için seçili türde kayıt yok.';
-
-  @override
-  String get uiCalendarThisWeekFilter => 'Bu haftada gösterilenler';
+  String get uiCalendarThisWeekEmpty => 'Bu hafta için kayıt yok.';
 
   @override
   String get uiCalendarStatOngoing => 'Devam';

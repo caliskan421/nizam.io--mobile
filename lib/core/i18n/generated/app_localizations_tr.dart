@@ -1410,6 +1410,18 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarTaskOngoing => 'Sürüyor';
 
   @override
+  String get uiCalendarLeadEnd => 'biter';
+
+  @override
+  String get uiCalendarLeadStart => 'başlar';
+
+  @override
+  String get uiCalendarLeadOngoing => 'sürer';
+
+  @override
+  String get uiCalendarLeadRequest => 'talep';
+
+  @override
   String get uiCalendarDueLc => 'bitiş';
 
   @override
@@ -4235,7 +4247,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksNotFound => 'Görev bulunamadı';
 
   @override
-  String get uiTasksDeletedTail => 'silinen kayıtlara taşındı';
+  String get uiTasksDeletedTitle => 'Görev silinen kayıtlara taşındı';
 
   @override
   String get uiTasksDeletedFilesKept => 'Kanıt dosyaları arşivde kaldı.';

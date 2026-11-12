@@ -29,7 +29,7 @@ class NzTaskCardDate {
 /// Görev kartı (tasarım `TaskCard`, bundle.css `.m-taskcard`; prototip Görevler listesi).
 /// Tamamen veri parametrelidir — hangi görevin gecikmiş/öncelikli olduğu ekranın kararıdır.
 ///
-/// Üst satır: mono [code] + [group] (caption, kesilir) + sağda durum ([statusLabel] +
+/// Üst satır: [group] (koordinatörlük, caption, kesilir) + sağda durum ([statusLabel] +
 /// [statusTone]). Başlık `m-card-title` en çok 2 satır. İç döşeme (`bg-raised`, köşe 12):
 /// [start], [end] (geçmişse `danger`), sağda öncelik ([priorityCaption] + çubuk + [priority]).
 /// İsteğe bağlı alt görev çubuğu ([subtaskProgress] 0–1 + [subtaskText] "2/3 alt görev").
@@ -42,7 +42,6 @@ class NzTaskCardDate {
 class NzTaskCard extends StatelessWidget {
   const NzTaskCard({
     super.key,
-    required this.code,
     required this.title,
     required this.statusLabel,
     required this.statusTone,
@@ -65,7 +64,6 @@ class NzTaskCard extends StatelessWidget {
     this.fill = false,
   });
 
-  final String code;
   final String? group;
   final String title;
   final String statusLabel;
@@ -212,8 +210,6 @@ class NzTaskCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Text(code, style: _mono12(context, c.textMuted)),
-                const Gap(NizamioSpacing.space2),
                 Expanded(
                   child: group == null
                       ? const SizedBox.shrink()

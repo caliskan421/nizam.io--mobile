@@ -340,7 +340,7 @@ class _NoteCardState extends ConsumerState<_NoteCard> {
                 icon: NzIcons.check,
                 label: [
                   l.uiMeetingsConverted,
-                  ?catalog?.task(task)?.displayCode,
+                  ?catalog?.task(task)?.title,
                 ].join(' · '),
                 accent: true,
                 onTap: () => context.appNav.openTask(task),

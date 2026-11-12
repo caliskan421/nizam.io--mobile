@@ -355,7 +355,8 @@ final class TaskItem {
   }) : id = id ?? code;
 
   /// Rota kimliği. Sunucuda insan okunur görev anahtarı yok (backend adayı B-03): [id]
-  /// (`work_item_id`) ile aynıdır; kullanıcıya [displayCode] gösterilir.
+  /// (`work_item_id`) ile aynıdır; arayüzde görev anahtarı gösterilmez (ürün sahibi,
+  /// 2026-11-12) — yerine başlık ya da koordinatörlük adı yazılır.
   final String code;
 
   /// Sunucu kimliği (`work_item_id`); verilmezse [code].
@@ -365,7 +366,7 @@ final class TaskItem {
   /// yoksa departmanın programdaki adı; sunucu kimliği kullanıcıya gösterilmez. null → [code].
   final String? shortCode;
 
-  /// Ekranda gösterilen görev anahtarı (departman etiketi; yoksa [code]).
+  /// Görev anahtarı (departman etiketi; yoksa [code]); arayüzde gösterilmez, yalnız arama.
   String get displayCode => shortCode ?? code;
   final String title;
 

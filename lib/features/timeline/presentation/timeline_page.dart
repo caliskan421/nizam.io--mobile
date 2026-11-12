@@ -573,7 +573,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               bottom: 66 + bottom,
               child: TimelineUndoSnack(
                 key: ValueKey(undo.serial),
-                title: l.undoTitle(undo),
+                title: l.undoTitle(undo, v),
                 from: l.rangeText(undo.from, v.year),
                 to: l.rangeText(undo.to, v.year),
                 delta: l.undoDelta(undo),

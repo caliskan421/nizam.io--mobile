@@ -47,8 +47,9 @@ void main() {
               as TimelineChartPainter)
           .layout;
 
+  // Okuyucu etiketi başlıkla başlar (kimlik gösterilmez): fikstürde `T<i>` → "Görev <i>,".
   bool hasNode(String code) => find.semantics
-      .byPredicate((n) => n.label.startsWith('$code '))
+      .byPredicate((n) => n.label.startsWith('Görev ${code.substring(1)},'))
       .tryEvaluate();
 
   group('dokunuş', () {
@@ -116,13 +117,15 @@ void main() {
       expect(hasNode('T0'), isTrue);
       expect(hasNode('T149'), isFalse);
       expect(
-        find.semantics.byPredicate((n) => n.label.startsWith('T')).evaluate(),
+        find.semantics
+            .byPredicate((n) => n.label.startsWith('Görev '))
+            .evaluate(),
         hasLength(lessThan(view.shown.length)),
       );
 
       // Okuyucu eylemi seçimi yapar.
       tester.semantics.tap(
-        find.semantics.byPredicate((n) => n.label.startsWith('T0 ')),
+        find.semantics.byPredicate((n) => n.label.startsWith('Görev 0,')),
       );
       expect(selected, 'T0');
 

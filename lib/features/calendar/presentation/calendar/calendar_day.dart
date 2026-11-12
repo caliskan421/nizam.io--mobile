@@ -315,23 +315,31 @@ class _EntryRow extends StatelessWidget {
         c.surfaceOverlay,
       ),
       TaskEntry() => (
-        e.code,
+        l.edgeLead(e),
         e.title,
-        '${l.edgeLead(e)}'
-            ' · ${e.status == null ? e.assignees.map((a) => index.personName(a) ?? l.uiTasksUnknownPerson).join(', ') : switch (e.status!) {
-                    TaskStatus.todo => l.uiTasksStatusTodo,
-                    TaskStatus.inProgress => l.uiTasksStatusDoing,
-                    TaskStatus.review => l.uiTasksStatusReview,
-                    TaskStatus.returned => l.uiTasksStatusReturned,
-                    TaskStatus.done => l.uiTasksStatusDone,
-                    TaskStatus.unknown => l.uiUsersUnknownStatus,
-                  }}',
+        [
+          ?index.coordinatorshipName(e.coordinatorship),
+          if (e.edge == TaskEdge.ongoing) l.dueOn(e),
+          if (e.status == null)
+            e.assignees
+                .map((a) => index.personName(a) ?? l.uiTasksUnknownPerson)
+                .join(', ')
+          else
+            switch (e.status!) {
+              TaskStatus.todo => l.uiTasksStatusTodo,
+              TaskStatus.inProgress => l.uiTasksStatusDoing,
+              TaskStatus.review => l.uiTasksStatusReview,
+              TaskStatus.returned => l.uiTasksStatusReturned,
+              TaskStatus.done => l.uiTasksStatusDone,
+              TaskStatus.unknown => l.uiUsersUnknownStatus,
+            },
+        ].where((s) => s.isNotEmpty).join(' · '),
         e.late ? l.uiCalendarLateLc : null,
         c.danger,
         c.danger.withValues(alpha: 0.16),
       ),
       RequestEntry() => (
-        e.code,
+        l.uiCalendarLeadRequest,
         e.title,
         l.requestSub(e),
         l.uiCalendarStatePending,

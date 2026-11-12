@@ -47,9 +47,8 @@ extension CoordTexts on AppLocalizations {
     DepartmentKind.unknown => null,
   };
 
-  /// "ALT-5 · Kadir Özbek".
-  String coordAttentionWho(AttentionItem a) =>
-      [a.label, ?a.assignee].join(' · ');
+  /// "Kadir Özbek" (görev kimliği gösterilmez).
+  String coordAttentionWho(AttentionItem a) => a.assignee ?? '';
 
   /// "98 gün gecikti".
   String coordDaysLate(AttentionItem a) =>

@@ -171,6 +171,9 @@ List<Widget> adminUserTaskPanelChildren(
           index: 0,
           child: AdminUserTaskRow(
             task: task,
+            coordinatorship: catalog
+                .coordinatorship(task.coordinatorship)
+                ?.name,
             today: catalog.today,
             first: i == 0,
             last: i == rows.length - 1,

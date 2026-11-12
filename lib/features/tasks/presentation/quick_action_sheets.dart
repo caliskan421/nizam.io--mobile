@@ -88,7 +88,7 @@ Future<bool> showNewTaskSheet(
           .read(newTaskFormControllerProvider.notifier)
           .submit();
       if (r == null) return null;
-      return '${r.code} ${l.uiTasksTCreatedTail} · '
+      return '“${r.title}” ${l.uiTasksTCreatedTail} · '
           '${r.notified} ${l.uiTasksTNotifiedTail}';
     },
     body: (expansion) => NewTaskFormBody(expansion: expansion),

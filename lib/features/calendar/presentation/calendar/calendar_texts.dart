@@ -63,14 +63,16 @@ extension CalendarTexts on AppLocalizations {
     TaskEdge.ongoing => uiCalendarSubOngoing,
   };
 
-  /// Görev satırının ilk parçası: "Bitiyor" / "Başlıyor" / "Sürüyor · bitiş 5 Kas".
+  /// Gün listesi satırının mono öncüsü (görev kimliği yerine): "biter" / "başlar" / "sürer".
   String edgeLead(TaskEntry e) => switch (e.edge) {
-    TaskEdge.end => uiCalendarTaskEnds,
-    TaskEdge.start => uiCalendarTaskStarts,
-    TaskEdge.ongoing =>
-      '$uiCalendarTaskOngoing · $uiCalendarDueLc '
-          '${DateFormat('d MMM', 'tr').format(e.due ?? e.date)}',
+    TaskEdge.end => uiCalendarLeadEnd,
+    TaskEdge.start => uiCalendarLeadStart,
+    TaskEdge.ongoing => uiCalendarLeadOngoing,
   };
+
+  /// Süren görevin bitişi: "bitiş 5 Kas".
+  String dueOn(TaskEntry e) =>
+      '$uiCalendarDueLc ${DateFormat('d MMM', 'tr').format(e.due ?? e.date)}';
 
   /// Kısa gün: "Sa 20".
   String shortDay(DateTime d) => '${weekdaysShort[d.weekday - 1]} ${d.day}';

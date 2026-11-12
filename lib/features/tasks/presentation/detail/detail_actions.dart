@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/domain/turkish_collation.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
@@ -112,7 +111,7 @@ class TaskDetailActions {
   }) async {
     final t = _task;
     if (t == null) return;
-    final key = t.displayCode;
+    final key = '“${t.title}”';
     final r = await _ctl.setStatus(
       s,
       reason: reason,
@@ -283,8 +282,7 @@ class TaskDetailActions {
     final c = context.colors;
     final p = _perms;
     _listSheet(
-      // Türkçe küçük harf (İDA-2 → ida-2; `toLowerCase` noktalı i üretir).
-      title: trLower(code),
+      title: t.title,
       builder: (sheet) => [
         if (p.canClaim(t))
           _ListOption(
@@ -318,15 +316,12 @@ class TaskDetailActions {
             leading: const NzIcon(NzIcons.copy, size: NizamioSize.iconSizeSm),
             onTap: () async {
               Navigator.of(sheet).pop();
-              final (r, newCode) = await _ctl.copy(l.uiTasksCopySuffix);
-              final key = newCode == null
-                  ? ''
-                  : _catalog?.task(newCode)?.displayCode ?? newCode;
+              final (r, _) = await _ctl.copy(l.uiTasksCopySuffix);
               _report(
                 r,
                 done:
-                    '$key ${l.uiTasksTCreatedTail} · ${t.title} '
-                    '${l.uiTasksCopySuffix}',
+                    '“${t.title} ${l.uiTasksCopySuffix}” '
+                    '${l.uiTasksTCreatedTail}',
               );
             },
           ),
@@ -436,10 +431,10 @@ class TaskDetailActions {
     final l = context.l10n;
     await _form(
       title: l.uiTasksEditTask,
-      description: '${_task?.displayCode ?? code} · ${l.uiTasksEditDescTail}',
+      description: l.uiTasksEditDescTail,
       ok: l.uiTasksSave,
       submit: _ctl.submitEdit,
-      success: () => '${_task?.displayCode ?? code} ${l.uiTasksTUpdatedTail}',
+      success: () => '“${_task?.title ?? ''}” ${l.uiTasksTUpdatedTail}',
       body: EditTaskForm(code: code),
     );
   }
@@ -488,9 +483,8 @@ class TaskDetailActions {
     final t = _task;
     if (t == null) return;
     final l = context.l10n;
-    final key = t.displayCode;
     _form(
-      title: '$key ${l.uiTasksDeleteQTail}',
+      title: '“${t.title}” ${l.uiTasksDeleteQTail}',
       description: l.uiTasksDeleteDesc,
       ok: l.uiTasksDeleteOk,
       danger: true,
@@ -590,8 +584,8 @@ class TaskDetailActions {
     _report(
       await _ctl.approveRequest(),
       done:
-          '${l.uiTasksTApproved} · ${_task?.displayCode ?? code} '
-          '${l.uiTasksTNewDue} ${TaskDates.full(r.due)}',
+          '${l.uiTasksTApproved} · ${l.uiTasksTNewDue} '
+          '${TaskDates.full(r.due)}',
     );
   }
 
@@ -688,7 +682,7 @@ class TaskDetailActions {
       _report(await _ctl.clearSubtaskDates(id));
 
   Future<void> removeSubtask(String id) async {
-    final key = _task?.displayCode ?? code;
+    final key = '“${_task?.title ?? ''}”';
     final (r, u) = await _ctl.removeSubtask(id);
     if (!context.mounted) return;
     final l = context.l10n;

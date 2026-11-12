@@ -28,6 +28,10 @@ class TaskDependencies extends ConsumerWidget {
     final task = catalog?.task(code);
     if (task == null || catalog == null) return const SizedBox.shrink();
     final canEdit = TaskPermissions.of(catalog.access, task).coordinator;
+    TaskItem? byId(String id) =>
+        catalog.tasks.where((t) => t.id == id).firstOrNull;
+    String? coordName(TaskItem? t) =>
+        t == null ? null : catalog.coordinatorship(t.coordinatorship)?.name;
     final busy = ref.watch(taskDependencyCommandProvider);
     Future<void> change({String? add, String? remove}) async {
       try {
@@ -113,9 +117,8 @@ class TaskDependencies extends ConsumerWidget {
                   for (final link in links.dependencies)
                     _DependencyRow(
                       today: catalog.today,
-                      task: catalog.tasks
-                          .where((t) => t.id == link.dependsOnId)
-                          .firstOrNull,
+                      task: byId(link.dependsOnId),
+                      coordinatorship: coordName(byId(link.dependsOnId)),
                       onRemove: canEdit && !busy
                           ? () => change(remove: link.id)
                           : null,
@@ -166,9 +169,8 @@ class TaskDependencies extends ConsumerWidget {
                   for (final link in links.dependents)
                     _DependencyRow(
                       today: catalog.today,
-                      task: catalog.tasks
-                          .where((t) => t.id == link.workItemId)
-                          .firstOrNull,
+                      task: byId(link.workItemId),
+                      coordinatorship: coordName(byId(link.workItemId)),
                     ),
                 ]),
               ],
@@ -182,10 +184,14 @@ class TaskDependencies extends ConsumerWidget {
 
 class _DependencyRow extends StatelessWidget {
   const _DependencyRow({
+    this.coordinatorship,
     required this.task,
     required this.today,
     this.onRemove,
   });
+
+  /// Koordinatörlük adı (alt satırın başı; görev kimliği gösterilmez).
+  final String? coordinatorship;
   final TaskItem? task;
   final DateTime today;
   final VoidCallback? onRemove;
@@ -252,7 +258,10 @@ class _DependencyRow extends StatelessWidget {
                         if (item != null) ...[
                           const Gap(2),
                           Text(
-                            '${item.displayCode} · ${l.statusLabel(item.status)}',
+                            [
+                              ?coordinatorship,
+                              l.statusLabel(item.status),
+                            ].join(' · '),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: context.text.caption.copyWith(

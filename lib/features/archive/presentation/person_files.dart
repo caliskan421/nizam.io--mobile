@@ -142,7 +142,7 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
         : 'FILE';
     final meta = task == null
         ? '${file.sizeMb.toStringAsFixed(1)} MB'
-        : '${task.displayCode} · ${task.title}';
+        : task.title;
     return Material(
       type: MaterialType.transparency,
       child: InkWell(

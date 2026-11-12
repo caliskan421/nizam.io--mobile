@@ -339,7 +339,6 @@ class TaskCardView extends StatelessWidget {
     );
     return NzTaskCard(
       fill: fill,
-      code: task.displayCode,
       group: showGroup
           ? catalog.coordinatorship(task.coordinatorship)?.name ??
                 task.coordinatorship
@@ -395,7 +394,6 @@ class TaskCardView extends StatelessWidget {
       ],
       onTap: onTap,
       semanticLabel: [
-        task.displayCode,
         task.title,
         l.statusLabel(task.status),
         if (late) l.lateBadge(task.overdueDays),

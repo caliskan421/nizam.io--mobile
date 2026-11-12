@@ -342,7 +342,7 @@ class UploadForm extends ConsumerWidget {
         const Gap(NizamioSpacing.space1),
         Text(
           '${catalog?.coordinatorship(task.coordinatorship)?.name ?? task.coordinatorship}'
-          ' / ${task.displayCode} · ${task.title}',
+          ' / ${task.title}',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: t.bodyMd,

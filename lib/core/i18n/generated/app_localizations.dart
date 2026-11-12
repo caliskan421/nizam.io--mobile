@@ -2632,6 +2632,30 @@ abstract class AppLocalizations {
   /// **'Sürüyor'**
   String get uiCalendarTaskOngoing;
 
+  /// ui.calendar.lead_end
+  ///
+  /// In tr, this message translates to:
+  /// **'biter'**
+  String get uiCalendarLeadEnd;
+
+  /// ui.calendar.lead_start
+  ///
+  /// In tr, this message translates to:
+  /// **'başlar'**
+  String get uiCalendarLeadStart;
+
+  /// ui.calendar.lead_ongoing
+  ///
+  /// In tr, this message translates to:
+  /// **'sürer'**
+  String get uiCalendarLeadOngoing;
+
+  /// ui.calendar.lead_request
+  ///
+  /// In tr, this message translates to:
+  /// **'talep'**
+  String get uiCalendarLeadRequest;
+
   /// ui.calendar.due_lc
   ///
   /// In tr, this message translates to:
@@ -8116,11 +8140,11 @@ abstract class AppLocalizations {
   /// **'Görev bulunamadı'**
   String get uiTasksNotFound;
 
-  /// ui.tasks.deleted_tail
+  /// ui.tasks.deleted_title
   ///
   /// In tr, this message translates to:
-  /// **'silinen kayıtlara taşındı'**
-  String get uiTasksDeletedTail;
+  /// **'Görev silinen kayıtlara taşındı'**
+  String get uiTasksDeletedTitle;
 
   /// ui.tasks.deleted_files_kept
   ///

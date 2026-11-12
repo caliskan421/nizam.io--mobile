@@ -77,10 +77,10 @@ extension TimelineTexts on AppLocalizations {
         '${late.isEmpty ? '' : ' · $late'}';
   }
 
-  /// Okuyucu etiketi: "ALT-5 Su deposu…, Devam ediyor, 16.06.2026 – 15.07.2026, 98 gün gecikmede".
+  /// Okuyucu etiketi: "Su deposu…, Devam ediyor, 16.06.2026 – 15.07.2026, 98 gün gecikmede".
   String barLabel(TimelineTask t, int year) {
     final late = lateText(t);
-    return '${t.code} ${t.item.title}, ${statusLabel(t.status)}, '
+    return '${t.item.title}, ${statusLabel(t.status)}, '
         '${fullDay(t.range.start, year)} – ${fullDay(t.range.end, year)}'
         '${late.isEmpty ? '' : ', $late'}';
   }
@@ -102,14 +102,21 @@ extension TimelineTexts on AppLocalizations {
         '${TimelineSelection.weeks(s.draft)} $uiTimelineWeekShort';
   }
 
-  /// Kayıt bildirimi: "ALT-7 3 gün ileri kaydırıldı" / "ALT-7 süresi 2 gün uzatıldı".
-  String undoTitle(TimelineUndo u) {
+  /// Kayıt bildirimi: "“Başlık” 3 gün ileri kaydırıldı" / "“Başlık” süresi 2 gün uzatıldı"
+  /// (başlık [v]'deki görevden; kimlik gösterilmez).
+  String undoTitle(TimelineUndo u, TimelineView v) {
+    final title = v.shown
+        .where((t) => t.code == u.code)
+        .firstOrNull
+        ?.item
+        .title;
+    final who = title == null ? '' : '“$title” ';
     if (u.isShift) {
-      return '${u.code} ${u.startDelta.abs()} '
+      return '$who${u.startDelta.abs()} '
           '${u.startDelta > 0 ? uiTimelineShiftedForward : uiTimelineShiftedBack}';
     }
     final dl = u.to.length - u.from.length;
-    return '${u.code} $uiTimelineDurationOf ${dl.abs()} '
+    return '$who$uiTimelineDurationOf ${dl.abs()} '
         '${dl > 0 ? uiTimelineExtended : uiTimelineShortened}';
   }
 

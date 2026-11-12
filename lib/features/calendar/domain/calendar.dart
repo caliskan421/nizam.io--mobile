@@ -302,6 +302,10 @@ final class CalendarIndex {
     return list;
   }
 
+  /// Koordinatörlük adı (görev satırında kimlik yerine); bilinmiyorsa null.
+  String? coordinatorshipName(String code) =>
+      _catalog.coordinatorship(code)?.name;
+
   /// Kişi adı (sunucunun verdiği ad dahil); bilinmiyorsa null (arayüz nötr etiket gösterir).
   String? personName(String id) => _catalog.nameOf(id);
 

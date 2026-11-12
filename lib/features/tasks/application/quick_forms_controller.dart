@@ -154,7 +154,7 @@ List<CoordinatorshipRef> newTaskCoordinatorships(Ref ref) {
 }
 
 /// Oluşturulan görevin özeti (sonuç bildirimi).
-typedef CreatedTask = ({String code, int notified});
+typedef CreatedTask = ({String title, int notified});
 
 /// İşlem anahtarı defterinde yeni görev eylemi.
 const _create = 'create';
@@ -390,7 +390,7 @@ class NewTaskFormController extends _$NewTaskFormController {
     final note = f.note;
     final writes = ref.read(taskWriteRepositoryProvider);
     try {
-      final id = await ReportContext.run(ReportOperation.taskWrite, () async {
+      await ReportContext.run(ReportOperation.taskWrite, () async {
         String id;
         final plan = NoteTaskPlan(
           title: f.title.trim(),
@@ -435,15 +435,8 @@ class NewTaskFormController extends _$NewTaskFormController {
       });
       await store.reload();
       if (!ref.mounted) return null;
-      final key =
-          ref
-              .read(taskCatalogControllerProvider)
-              .value
-              ?.task(id)
-              ?.displayCode ??
-          id;
       state = _initial();
-      return (code: key, notified: f.assignees.length);
+      return (title: f.title.trim(), notified: f.assignees.length);
     } on Object catch (e, st) {
       final err = toReportedApiError(
         e,

@@ -100,14 +100,10 @@ final class AttentionItem {
     required this.title,
     required this.assignee,
     required this.overdueDays,
-    String? label,
-  }) : label = label ?? code;
+  });
 
-  /// Anahtar (görev kimliği; gezinme).
+  /// Anahtar (görev kimliği; yalnız gezinme, ekranda gösterilmez).
   final String code;
-
-  /// Ekrandaki kısa anahtar ([TaskItem.displayCode]; kimlik gösterilmez).
-  final String label;
   final String title;
 
   /// İlk atananın adı (yoksa null).
@@ -189,7 +185,6 @@ final class CoordinatorshipDetail {
         for (final t in overdue)
           AttentionItem(
             code: t.code,
-            label: t.displayCode,
             title: t.title,
             assignee: t.assignees
                 .map(catalog.person)

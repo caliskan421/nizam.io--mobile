@@ -107,9 +107,9 @@ void main() {
     expect(d.department?.description, 'Su ve yapı işleri');
     // Geciken görevler sunucunun `days_overdue` değeriyle, en çok gecikenden; ekranda
     // kimlik değil departman kodu.
-    expect(d.attention.map((a) => (a.code, a.label, a.overdueDays)), [
-      (tAltLate30, 'ALT', 30),
-      (tAltLate12, 'ALT', 12),
+    expect(d.attention.map((a) => (a.code, a.overdueDays)), [
+      (tAltLate30, 30),
+      (tAltLate12, 12),
     ]);
     expect(d.attention.map((a) => a.assignee), ['Kadir Özbek', 'Ali Avcı']);
     expect(d.leads.map((m) => (m.name, m.lead)), [

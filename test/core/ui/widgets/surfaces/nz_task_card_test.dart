@@ -10,7 +10,6 @@ import 'package:nizamio/core/ui/widgets/surfaces/nz_task_card.dart';
 import '../feedback/feedback_test_support.dart';
 
 NzTaskCard _card({VoidCallback? onTap, bool sub = false}) => NzTaskCard(
-  code: 'ALT-5',
   group: 'Altyapı ve tesisat',
   title:
       'Su deposu temel betonunun yapılması ve uzun başlık iki satırda kesilir',
@@ -31,18 +30,15 @@ NzTaskCard _card({VoidCallback? onTap, bool sub = false}) => NzTaskCard(
   assigneeText: 'Kadir Özbek',
   badge: '98 gün gecikti',
   onTap: onTap,
-  semanticLabel: 'ALT-5 Su deposu',
+  semanticLabel: 'Su deposu',
 );
 
 void main() {
   setUpFonts();
 
-  testWidgets('içerik: kod, grup, durum, tarihler, öncelik, kişi, rozet', (
-    t,
-  ) async {
+  testWidgets('içerik: grup, durum, tarihler, öncelik, kişi, rozet', (t) async {
     await t.pumpWidget(testApp(SingleChildScrollView(child: _card(sub: true))));
     for (final s in [
-      'ALT-5',
       'Altyapı ve tesisat',
       'Devam ediyor',
       'başlangıç',
@@ -87,13 +83,13 @@ void main() {
     await t.pumpWidget(
       testApp(SingleChildScrollView(child: _card(onTap: () => n++))),
     );
-    await t.tap(find.text('ALT-5'));
+    await t.tap(find.text('Altyapı ve tesisat'));
     expect(n, 1);
     expect(
       t.widget<NzPressable>(find.byType(NzPressable)).scale,
       NizamioMotion.pressCard,
     );
-    expect(find.bySemanticsLabel('ALT-5 Su deposu'), findsOneWidget);
+    expect(find.bySemanticsLabel('Su deposu'), findsOneWidget);
     handle.dispose();
   });
 
@@ -132,7 +128,6 @@ void main() {
         const SizedBox(
           width: 360,
           child: NzTaskCard(
-            code: 'ALT-7',
             title: 'Hidrofor',
             statusLabel: 'Devam ediyor',
             statusTone: NzTone.progress,
@@ -162,7 +157,6 @@ void main() {
         const Column(
           children: [
             NzTaskCard(
-              code: 'A-1',
               title: 'Biten iş',
               statusLabel: 'Tamamlandı',
               statusTone: NzTone.done,
@@ -177,7 +171,6 @@ void main() {
         const Column(
           children: [
             NzTaskCard(
-              code: 'A-1',
               title: 'Biten iş',
               statusLabel: 'Tamamlandı',
               statusTone: NzTone.done,

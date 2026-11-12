@@ -100,7 +100,7 @@
     "ui.tasks.edit_task": "Görevi düzenle",
     "ui.tasks.more_actions": "Diğer işlemler",
     "ui.tasks.not_found": "Görev bulunamadı",
-    "ui.tasks.deleted_tail": "silinen kayıtlara taşındı",
+    "ui.tasks.deleted_title": "Görev silinen kayıtlara taşındı",
     "ui.tasks.deleted_files_kept": "Kanıt dosyaları arşivde kaldı.",
     "ui.tasks.request_date": "Tarih değişikliği iste",
     "ui.tasks.remind": "Atanana hatırlat",

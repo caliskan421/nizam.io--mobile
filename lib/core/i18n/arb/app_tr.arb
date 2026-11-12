@@ -1693,6 +1693,22 @@
   "@uiCalendarTaskOngoing": {
     "description": "ui.calendar.task_ongoing"
   },
+  "uiCalendarLeadEnd": "biter",
+  "@uiCalendarLeadEnd": {
+    "description": "ui.calendar.lead_end"
+  },
+  "uiCalendarLeadStart": "başlar",
+  "@uiCalendarLeadStart": {
+    "description": "ui.calendar.lead_start"
+  },
+  "uiCalendarLeadOngoing": "sürer",
+  "@uiCalendarLeadOngoing": {
+    "description": "ui.calendar.lead_ongoing"
+  },
+  "uiCalendarLeadRequest": "talep",
+  "@uiCalendarLeadRequest": {
+    "description": "ui.calendar.lead_request"
+  },
   "uiCalendarDueLc": "bitiş",
   "@uiCalendarDueLc": {
     "description": "ui.calendar.due_lc"
@@ -5349,9 +5365,9 @@
   "@uiTasksNotFound": {
     "description": "ui.tasks.not_found"
   },
-  "uiTasksDeletedTail": "silinen kayıtlara taşındı",
-  "@uiTasksDeletedTail": {
-    "description": "ui.tasks.deleted_tail"
+  "uiTasksDeletedTitle": "Görev silinen kayıtlara taşındı",
+  "@uiTasksDeletedTitle": {
+    "description": "ui.tasks.deleted_title"
   },
   "uiTasksDeletedFilesKept": "Kanıt dosyaları arşivde kaldı.",
   "@uiTasksDeletedFilesKept": {

@@ -49,7 +49,7 @@ class TaskDetailPage extends ConsumerWidget {
       final visible = ModalRoute.of(context)?.isCurrent ?? true;
       if (next?.tab != 1 || !visible) return;
       final task = ref.read(taskCatalogControllerProvider).value?.task(code);
-      final key = task?.displayCode ?? code;
+      final key = task?.title ?? l.uiTasksFlyThisTask;
       NzFlyoutMenu.show(
         context,
         semanticLabel: '$key · ${l.uiTasksFlyThisTask}',
@@ -113,7 +113,10 @@ class TaskDetailPage extends ConsumerWidget {
       paneLead: NizamioSpacing.space3,
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       topBar: NzTopBar.detail(
-        code: task?.displayCode ?? code,
+        // Görev kimliği gösterilmez; çubukta koordinatörlük adı.
+        code: task == null
+            ? null
+            : data?.coordinatorship(task.coordinatorship)?.name,
         actions: task == null
             ? const []
             : [
@@ -168,7 +171,7 @@ class TaskDetailPage extends ConsumerWidget {
             data: (_) => deleted
                 ? NzEmptyState(
                     icon: NzIcons.delete,
-                    title: '$code ${l.uiTasksDeletedTail}',
+                    title: l.uiTasksDeletedTitle,
                     message: l.uiTasksDeletedFilesKept,
                   )
                 : NzEmptyState(title: l.uiTasksNotFound),

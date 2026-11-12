@@ -270,7 +270,7 @@ class _WeekRow extends StatelessWidget {
         null,
         e.title,
         [
-          e.code,
+          ?index.coordinatorshipName(e.coordinatorship),
           ...e.assignees.map(
             (a) => index.personName(a) ?? l.uiTasksUnknownPerson,
           ),

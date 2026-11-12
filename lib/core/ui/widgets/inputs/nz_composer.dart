@@ -12,9 +12,9 @@ import '../surfaces/nz_glass.dart';
 
 /// Sohbetin altındaki yazma alanı (tasarım sistemi `components/Composer`, `.m-composer`):
 /// cam zemin (`glass-bar`, üstte `border-subtle`), solda ek düğmesi (açıkken 45° döner,
-/// `bg-overlay` zemin, `accent-text` ikon), kendiliğinden büyüyen metin alanı (40 → 128 px,
-/// 16 px yazı, `bg-raised`, köşe 20), sağda gönder (boşken `bg-raised` küçük, yazı olunca lime
-/// tam boy). [header] çubuğun üstündeki şeritlerdir (öneriler, ek paneli, atıf hapları, yanıt /
+/// `bg-overlay` zemin, `accent-text` ikon), kendiliğinden büyüyen hap metin alanı (48 → 128 px,
+/// 16 px yazı, `bg-raised`, içeride atıf düğmesi), sağda gönder (boşken `bg-raised`, yazı olunca
+/// lime). Daireler ve alan aynı asgari yüksekliği kullanır. [header] üstteki şeritlerdir (öneriler, atıf hapları, yanıt /
 /// düzenleme bağlamı). Donanım klavyesinde Enter gönderir, Shift+Enter yeni satır.
 /// [bottomInset] klavye ya da güvenli alan yüksekliğidir (sayfa `viewInsetsOf` ile verir).
 class NzComposer extends StatelessWidget {
@@ -27,6 +27,8 @@ class NzComposer extends StatelessWidget {
     required this.sendLabel,
     required this.onAttach,
     required this.attachLabel,
+    this.onReference,
+    this.referenceLabel,
     this.attachOpen = false,
     this.focusNode,
     this.header = const [],
@@ -40,6 +42,8 @@ class NzComposer extends StatelessWidget {
   final String sendLabel;
   final VoidCallback onAttach;
   final String attachLabel;
+  final VoidCallback? onReference;
+  final String? referenceLabel;
   final bool attachOpen;
   final FocusNode? focusNode;
   final List<Widget> header;
@@ -61,7 +65,7 @@ class NzComposer extends StatelessWidget {
       },
       child: ConstrainedBox(
         constraints: const BoxConstraints(
-          minHeight: NizamioSize.composer,
+          minHeight: NizamioSize.tap,
           maxHeight: maxInputHeight,
         ),
         child: TextField(
@@ -79,20 +83,27 @@ class NzComposer extends StatelessWidget {
             hintStyle: t.bodyLg.copyWith(color: c.textFaint),
             filled: true,
             fillColor: c.surfaceRaised,
+            suffixIcon: onReference == null
+                ? null
+                : IconButton(
+                    tooltip: referenceLabel,
+                    onPressed: onReference,
+                    icon: NzIcon(NzIcons.link, color: c.textMuted),
+                  ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: NizamioSpacing.space4,
               vertical: 9,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(NizamioSpacing.space5),
+              borderRadius: BorderRadius.circular(NizamioRadius.pill),
               borderSide: BorderSide(color: c.border),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(NizamioSpacing.space5),
+              borderRadius: BorderRadius.circular(NizamioRadius.pill),
               borderSide: BorderSide(color: c.border),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(NizamioSpacing.space5),
+              borderRadius: BorderRadius.circular(NizamioRadius.pill),
               borderSide: BorderSide(color: c.borderControl),
             ),
           ),
@@ -128,7 +139,7 @@ class NzComposer extends StatelessWidget {
                       duration: spring,
                       curve: NizamioMotion.easeSpring,
                       child: _Circle(
-                        fill: attachOpen ? c.surfaceOverlay : null,
+                        fill: attachOpen ? c.surfaceOverlay : c.surfaceRaised,
                         onTap: onAttach,
                         // Kaynak ek düğmesi ataçtır (`attach_file` yolu).
                         child: NzIcon(
@@ -172,7 +183,7 @@ class NzComposer extends StatelessWidget {
   }
 }
 
-/// 40 px görsel, 48 dokunma alanlı yuvarlak düğme.
+/// En az 48 px dokunma alanlı, ince kontrol kenarlı yuvarlak düğme.
 class _Circle extends StatelessWidget {
   const _Circle({required this.child, required this.onTap, this.fill});
 
@@ -184,19 +195,17 @@ class _Circle extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
     behavior: HitTestBehavior.opaque,
     onTap: onTap,
-    // 40 px görsel; dokunma alanı 44 (çubuk satırını büyütmeden).
-    child: Padding(
-      padding: const EdgeInsets.all(2),
-      child: SizedBox.square(
-        dimension: NizamioSize.composer,
-        child: Material(
-          type: MaterialType.circle,
-          color: fill ?? context.colors.surface.withValues(alpha: 0),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onTap,
-            child: Center(child: child),
-          ),
+    child: SizedBox.square(
+      dimension: NizamioSize.tap,
+      child: Material(
+        shape: CircleBorder(
+          side: BorderSide(color: context.colors.borderControl),
+        ),
+        color: fill ?? context.colors.surface.withValues(alpha: 0),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Center(child: child),
         ),
       ),
     ),

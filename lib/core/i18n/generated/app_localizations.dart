@@ -5515,8 +5515,14 @@ abstract class AppLocalizations {
   /// ui.messages.attach
   ///
   /// In tr, this message translates to:
-  /// **'Görev, koordinatörlük veya arşiv ekle'**
+  /// **'Fotoğraf, dosya veya anket ekle'**
   String get uiMessagesAttach;
+
+  /// ui.messages.reference
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev, koordinatörlük veya arşiv ekle'**
+  String get uiMessagesReference;
 
   /// ui.messages.cancel
   ///

@@ -57,6 +57,7 @@ abstract final class NzIcons {
   static const IconData inbox = Icons.inbox_outlined;
   static const IconData info = Icons.info_outline_rounded;
   static const IconData lineChart = Icons.show_chart_rounded;
+  static const IconData link = Icons.link_rounded;
   static const IconData list = Icons.list_rounded;
   static const IconData listBulleted = Icons.format_list_bulleted_rounded;
   static const IconData logout = Icons.logout_rounded;

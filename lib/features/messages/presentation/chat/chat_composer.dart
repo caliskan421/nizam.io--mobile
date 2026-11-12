@@ -34,6 +34,7 @@ class ChatComposerArea extends ConsumerWidget {
     required this.focus,
     required this.onSend,
     required this.onAttach,
+    required this.onReference,
     required this.onMention,
     this.refs = const [],
     this.onRemoveRef,
@@ -44,6 +45,7 @@ class ChatComposerArea extends ConsumerWidget {
   final FocusNode focus;
   final VoidCallback onSend;
   final VoidCallback onAttach;
+  final VoidCallback onReference;
   final ValueChanged<MentionPick> onMention;
   final List<ChatShareOption> refs;
   final ValueChanged<ChatShareOption>? onRemoveRef;
@@ -132,6 +134,8 @@ class ChatComposerArea extends ConsumerWidget {
             sendLabel: l.uiMessagesSend,
             onAttach: onAttach,
             attachLabel: l.uiMessagesAttach,
+            onReference: view.edit == null ? onReference : null,
+            referenceLabel: l.uiMessagesReference,
             bottomInset: bottom,
             header: [
               if (view.edit == null)

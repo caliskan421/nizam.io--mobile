@@ -33,8 +33,11 @@ Future<ChatComposeSelection?> chooseChatCompose(
   required bool Function() isCurrent,
   required String caption,
   ChatMessage? reply,
+  bool references = false,
 }) async {
-  final kind = await showAttachMenu(context, group: group, canShare: canShare);
+  final kind = await (references
+      ? showReferenceMenu(context, canShare: canShare)
+      : showAttachMenu(context, group: group));
   if (!context.mounted || !isCurrent() || kind == null) return null;
   switch (kind) {
     case ChatAttachKind.task ||

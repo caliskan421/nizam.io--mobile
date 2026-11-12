@@ -20,12 +20,43 @@ enum ChatAttachKind { photos, files, poll, task, department, archive }
 Future<ChatAttachKind?> showAttachMenu(
   BuildContext context, {
   required bool group,
-  bool canShare = true,
 }) {
   final l = context.l10n;
   return NzBottomSheet.show<ChatAttachKind>(
     context,
     title: l.uiMessagesAttach,
+    builder: (sheet) => NzMenuGroup(
+      rows: [
+        NzMenuRow(
+          icon: NzIcons.image,
+          label: l.uiMessagesAttachPhotos,
+          onTap: () => Navigator.of(sheet).pop(ChatAttachKind.photos),
+        ),
+        NzMenuRow(
+          icon: NzIcons.folder,
+          label: l.uiMessagesAttachFile,
+          onTap: () => Navigator.of(sheet).pop(ChatAttachKind.files),
+        ),
+        if (group)
+          NzMenuRow(
+            icon: NzIcons.barChart,
+            label: l.uiMessagesAttachPoll,
+            onTap: () => Navigator.of(sheet).pop(ChatAttachKind.poll),
+          ),
+      ],
+    ),
+  );
+}
+
+/// Metin alanının içindeki atıf düğmesi: yalnız var olan kayıtları paylaşır.
+Future<ChatAttachKind?> showReferenceMenu(
+  BuildContext context, {
+  required bool canShare,
+}) {
+  final l = context.l10n;
+  return NzBottomSheet.show<ChatAttachKind>(
+    context,
+    title: l.uiMessagesReference,
     builder: (sheet) => NzMenuGroup(
       rows: [
         for (final item in [
@@ -57,22 +88,6 @@ Future<ChatAttachKind?> showAttachMenu(
                 ),
               ),
             ),
-        NzMenuRow(
-          icon: NzIcons.image,
-          label: l.uiMessagesAttachPhotos,
-          onTap: () => Navigator.of(sheet).pop(ChatAttachKind.photos),
-        ),
-        NzMenuRow(
-          icon: NzIcons.folder,
-          label: l.uiMessagesAttachFile,
-          onTap: () => Navigator.of(sheet).pop(ChatAttachKind.files),
-        ),
-        if (group)
-          NzMenuRow(
-            icon: NzIcons.barChart,
-            label: l.uiMessagesAttachPoll,
-            onTap: () => Navigator.of(sheet).pop(ChatAttachKind.poll),
-          ),
       ],
     ),
   );

@@ -341,22 +341,26 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   /// Yazma alanının ek menüsü: fotoğraf / dosya (seçici; galeri adı seçicide normalleşir,
   /// izinli tür ön denetimi; içerik özeti yok) ya da anket (grupta). Seçici hatası ve okunamayan
   /// dosya (`client.file_unreadable`) bildirim olarak gösterilir.
-  Future<void> _attach(ChatRoom room) async {
+  Future<void> _attach(ChatRoom room, {bool references = false}) async {
     final session = ref.read(sessionGenerationProvider);
     final program = ref.read(scopeStateProvider).programId;
     final controller = _room;
     final caption = _draft.text;
     final view = ref.read(chatControllerProvider(widget.id));
+    if (references && view.edit != null) return;
     bool current() =>
         mounted &&
         ref.read(sessionGenerationProvider) == session &&
-        ref.read(scopeStateProvider).programId == program;
+        ref.read(scopeStateProvider).programId == program &&
+        (!references ||
+            ref.read(chatControllerProvider(widget.id)).edit == null);
     await _try(() async {
       final picker = ref.read(uploadPickerProvider);
       final input = await chooseChatCompose(
         context,
         group: room.chat.group,
         canShare: _refs.length < chatComposeMaxRefs,
+        references: references,
         pickerAvailable: picker.available,
         pick: picker.pick,
         onPickerMissing: () => _toast(context.l10n.uiMessagesPickerMissing),
@@ -582,6 +586,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               focus: _focus,
               onSend: () => unawaited(_send()),
               onAttach: () => unawaited(_attach(room)),
+              onReference: () => unawaited(_attach(room, references: true)),
               onMention: _mentions.add,
               refs: List.unmodifiable(_refs),
               onRemoveRef: (item) => setState(() => _refs.remove(item)),

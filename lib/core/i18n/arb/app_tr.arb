@@ -3613,9 +3613,13 @@
   "@uiMessagesSend": {
     "description": "ui.messages.send"
   },
-  "uiMessagesAttach": "Görev, koordinatörlük veya arşiv ekle",
+  "uiMessagesAttach": "Fotoğraf, dosya veya anket ekle",
   "@uiMessagesAttach": {
     "description": "ui.messages.attach"
+  },
+  "uiMessagesReference": "Görev, koordinatörlük veya arşiv ekle",
+  "@uiMessagesReference": {
+    "description": "ui.messages.reference"
   },
   "uiMessagesCancel": "Vazgeç",
   "@uiMessagesCancel": {

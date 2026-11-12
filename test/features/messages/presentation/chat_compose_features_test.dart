@@ -104,6 +104,11 @@ Future<void> _draft(WidgetTester tester, String text) async {
   await settle(tester);
 }
 
+Future<void> _reference(WidgetTester tester, String label) async {
+  await _tap(tester, find.byTooltip(_l.uiMessagesReference));
+  await _tap(tester, find.text(label));
+}
+
 Future<void> _attach(WidgetTester tester, String label) async {
   await _tap(tester, find.bySemanticsLabel(_l.uiMessagesAttach).last);
   await _tap(tester, find.text(label));
@@ -112,11 +117,49 @@ Future<void> _attach(WidgetTester tester, String label) async {
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
+  testWidgets('ataç ve atıf menüleri ayrı seçenekler açar', (tester) async {
+    await _open(tester);
+    await _tap(tester, find.bySemanticsLabel(_l.uiMessagesAttach).last);
+    expect(find.text(_l.uiMessagesAttachPhotos), findsOneWidget);
+    expect(find.text(_l.uiMessagesAttachFile), findsOneWidget);
+    expect(find.text(_l.uiMessagesAttachPoll), findsOneWidget);
+    expect(find.text(_l.uiMessagesComposeShareTask), findsNothing);
+    expect(find.text(_l.uiMessagesComposeShareDepartment), findsNothing);
+    expect(find.text(_l.uiMessagesComposeShareFile), findsNothing);
+    Navigator.of(tester.element(find.text(_l.uiMessagesAttachFile))).pop();
+    await settle(tester);
+    await _tap(tester, find.byTooltip(_l.uiMessagesReference));
+    expect(find.text(_l.uiMessagesComposeShareTask), findsOneWidget);
+    expect(find.text(_l.uiMessagesComposeShareDepartment), findsOneWidget);
+    expect(find.text(_l.uiMessagesComposeShareFile), findsOneWidget);
+    expect(find.text(_l.uiMessagesAttachPhotos), findsNothing);
+    expect(find.text(_l.uiMessagesAttachFile), findsNothing);
+    expect(find.text(_l.uiMessagesAttachPoll), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('seçici açıkken düzenlemeye geçilirse atıf taslağa eklenmez', (
+    tester,
+  ) async {
+    final (container, repo) = await _open(tester);
+    await _reference(tester, _l.uiMessagesComposeShareTask);
+    final view = container.read(chatControllerProvider('c1').notifier);
+    view.edit('m1', revision: 0);
+    await settle(tester);
+    await _tap(tester, find.text('Seçilebilir task'));
+    expect(find.byTooltip(_l.uiMessagesReference), findsNothing);
+    view.clearContext();
+    await _draft(tester, 'Yeni mesaj');
+    await _tap(tester, find.bySemanticsLabel(_l.uiMessagesSend).last);
+    expect(repo.sent.single.refs, isEmpty);
+    expect(repo.sent.single.text, 'Yeni mesaj');
+  });
+
   testWidgets(
     'yalnız paylaşım gönderiminde boş gövde yerine doğal başlık gider',
     (tester) async {
       final (_, repo) = await _open(tester);
-      await _attach(tester, _l.uiMessagesComposeShareTask);
+      await _reference(tester, _l.uiMessagesComposeShareTask);
       await _tap(tester, find.text('Seçilebilir task'));
       await _tap(tester, find.bySemanticsLabel(_l.uiMessagesSend).last);
       expect(repo.sent.single.text, 'Seçilebilir task');
@@ -129,10 +172,10 @@ void main() {
     (tester) async {
       final (_, repo) = await _open(tester, manyShares: true);
       for (var i = 0; i < chatComposeMaxRefs; i++) {
-        await _attach(tester, _l.uiMessagesComposeShareTask);
+        await _reference(tester, _l.uiMessagesComposeShareTask);
         await _tap(tester, find.text('Seçilebilir task-$i'));
       }
-      await _tap(tester, find.bySemanticsLabel(_l.uiMessagesAttach).last);
+      await _tap(tester, find.byTooltip(_l.uiMessagesReference));
       final disabled = find.ancestor(
         of: find.text(_l.uiMessagesComposeShareTask),
         matching: find.byType(IgnorePointer),
@@ -160,7 +203,7 @@ void main() {
         (ChatRefKind.department, _l.uiMessagesComposeShareDepartment),
         (ChatRefKind.file, _l.uiMessagesComposeShareFile),
       ]) {
-        await _attach(tester, entry.$2);
+        await _reference(tester, entry.$2);
         await _tap(tester, find.text('Seçilebilir ${entry.$1.name}'));
       }
       await _tap(tester, find.byTooltip(_l.uiMessagesComposeRemove).first);

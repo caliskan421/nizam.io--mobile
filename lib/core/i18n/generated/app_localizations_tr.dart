@@ -2880,7 +2880,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesSend => 'Gönder';
 
   @override
-  String get uiMessagesAttach => 'Görev, koordinatörlük veya arşiv ekle';
+  String get uiMessagesAttach => 'Fotoğraf, dosya veya anket ekle';
+
+  @override
+  String get uiMessagesReference => 'Görev, koordinatörlük veya arşiv ekle';
 
   @override
   String get uiMessagesCancel => 'Vazgeç';

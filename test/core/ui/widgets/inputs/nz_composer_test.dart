@@ -1,6 +1,7 @@
 // NzComposer / NzRefChip / NzComposerContext: gönder etkinliği, ek düğmesi dönüşü, üst
 // şeritler, kaldır/vazgeç dokunuşları, alt boşluk (klavye), 360 / 2.0.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_composer.dart';
 
@@ -16,6 +17,7 @@ void main() {
     addTearDown(c.dispose);
     var sent = 0;
     var attach = 0;
+    var references = 0;
     Widget build() => testApp(
       Align(
         alignment: Alignment.bottomCenter,
@@ -27,6 +29,8 @@ void main() {
           sendLabel: 'Gönder',
           onAttach: () => attach++,
           attachLabel: 'Ek',
+          onReference: () => references++,
+          referenceLabel: 'Atıf',
           bottomInset: 300,
         ),
       ),
@@ -40,9 +44,47 @@ void main() {
     expect(sent, 1);
     await t.tap(find.byIcon(Icons.attach_file_rounded));
     expect(attach, 1);
+    expect(references, 0);
+    await t.tap(find.byTooltip('Atıf'));
+    expect(references, 1);
+    expect(attach, 1);
     // Klavye boşluğu: çubuk alt kenardan en az 300 yukarıda.
     final bottom = t.getBottomLeft(find.byType(TextField)).dy;
     expect(bottom, lessThan(600 - 300));
+  });
+
+  testWidgets('Enter gönderir; Shift+Enter çok satırlı taslağı korur', (
+    t,
+  ) async {
+    final c = TextEditingController(text: 'Birinci\nİkinci');
+    final focus = FocusNode();
+    addTearDown(c.dispose);
+    addTearDown(focus.dispose);
+    var sent = 0;
+    await t.pumpWidget(
+      testApp(
+        NzComposer(
+          controller: c,
+          focusNode: focus,
+          hint: 'Mesaj',
+          canSend: true,
+          onSend: () => sent++,
+          sendLabel: 'Gönder',
+          onAttach: () {},
+          attachLabel: 'Ek',
+          onReference: () {},
+          referenceLabel: 'Atıf',
+        ),
+      ),
+    );
+    await t.tap(find.byType(TextField));
+    await t.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await t.sendKeyEvent(LogicalKeyboardKey.enter);
+    await t.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    expect(sent, 0);
+    expect(c.text, contains('\n'));
+    await t.sendKeyEvent(LogicalKeyboardKey.enter);
+    expect(sent, 1);
   });
 
   testWidgets('ek açık: 45° döner; başlık şeritleri, atıf hapı ve bağlam', (
@@ -116,6 +158,8 @@ void main() {
             sendLabel: 'Gönder',
             onAttach: () {},
             attachLabel: 'Ek',
+            onReference: () {},
+            referenceLabel: 'Atıf',
             header: [
               NzComposerContext(
                 icon: Icons.edit_outlined,

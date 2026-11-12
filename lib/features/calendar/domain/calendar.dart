@@ -140,9 +140,10 @@ final class RequestEntry extends CalendarEntry {
   CalendarKind get kind => CalendarKind.request;
 }
 
-/// Haftanın özeti: bitecek / başlayacak görevler (o hafta uçları), hafta boyunca süren
-/// görevler (hafta öncesi başlamış, hafta sonrası bitecek) ve toplantılar; gün sırasıyla.
-typedef CalendarWeek = ({
+/// Bir tarih aralığının kayıtları ([CalendarIndex.span]): bitişi aralıkta olan görevler
+/// (tamamlananlar [TaskEntry.status] `done` ile), başlangıcı aralıkta olanlar, aralık boyunca
+/// süren görevler (önce başlamış, sonra bitecek) ve toplantılar; tarih sırasıyla.
+typedef CalendarSpan = ({
   List<TaskEntry> ends,
   List<TaskEntry> starts,
   List<TaskEntry> ongoing,
@@ -290,9 +291,8 @@ final class CalendarIndex {
   /// görevlerin ve dönem özetinin kaynağı.
   final List<TaskItem> _tasks;
 
-  /// [from]–[to] (dahil) özeti: bitişi düşen görevler (tamamlanan ve gecikmiş olanlarıyla),
-  /// başlangıcı düşen görevler ve toplantılar.
-  CalendarPeriod period(DateTime from, DateTime to) {
+  /// [from]–[to] (dahil) kayıtları.
+  CalendarSpan span(DateTime from, DateTime to) {
     final a = calendarDay(from);
     final b = calendarDay(to);
     bool inRange(DateTime d) {
@@ -300,22 +300,59 @@ final class CalendarIndex {
       return !x.isBefore(a) && !x.isAfter(b);
     }
 
-    final due = [
-      for (final t in _tasks)
-        if (inRange(t.due)) t,
-    ];
-    var meetings = 0;
-    for (final MapEntry(:key, :value) in _byDay.entries) {
-      if (inRange(key)) meetings += value.whereType<MeetingEntry>().length;
-    }
+    TaskEntry entry(TaskItem t, TaskEdge edge, DateTime date) => TaskEntry(
+      date: calendarDay(date),
+      code: t.code,
+      title: t.title,
+      coordinatorship: t.coordinatorship,
+      edge: edge,
+      assignees: t.assignees,
+      late:
+          edge != TaskEdge.start &&
+          !t.isDone &&
+          calendarDay(t.due).isBefore(today),
+      status: t.isDone ? TaskStatus.done : null,
+      due: calendarDay(t.due),
+    );
+    int byDate(CalendarEntry x, CalendarEntry y) => x.date.compareTo(y.date);
+    final meetings =
+        [
+          for (final MapEntry(:key, :value) in _byDay.entries)
+            if (inRange(key)) ...value.whereType<MeetingEntry>(),
+        ]..sort(
+          (x, y) => x.date == y.date
+              ? x.minuteOfDay.compareTo(y.minuteOfDay)
+              : x.date.compareTo(y.date),
+        );
     return (
-      due: due.length,
-      done: due.where((t) => t.isDone).length,
-      late: due
-          .where((t) => !t.isDone && calendarDay(t.due).isBefore(today))
-          .length,
-      starts: _tasks.where((t) => inRange(t.start)).length,
+      ends: [
+        for (final t in _tasks)
+          if (inRange(t.due)) entry(t, TaskEdge.end, t.due),
+      ]..sort(byDate),
+      starts: [
+        for (final t in _tasks)
+          if (inRange(t.start)) entry(t, TaskEdge.start, t.start),
+      ]..sort(byDate),
+      ongoing: [
+        for (final t in _tasks)
+          if (!t.isDone &&
+              calendarDay(t.start).isBefore(a) &&
+              b.isBefore(calendarDay(t.due)))
+            entry(t, TaskEdge.ongoing, t.due),
+      ]..sort(byDate),
       meetings: meetings,
+    );
+  }
+
+  /// [from]–[to] (dahil) sayıları ([span]'den).
+  CalendarPeriod period(DateTime from, DateTime to) {
+    final s = span(from, to);
+    return (
+      due: s.ends.length,
+      done: s.ends.where((e) => e.status == TaskStatus.done).length,
+      late: s.ends.where((e) => e.late).length,
+      starts: s.starts.length,
+      meetings: s.meetings.length,
     );
   }
 
@@ -325,44 +362,6 @@ final class CalendarIndex {
 
   /// Kişi adı (sunucunun verdiği ad dahil); bilinmiyorsa null (arayüz nötr etiket gösterir).
   String? personName(String id) => _catalog.nameOf(id);
-
-  /// [day]'in haftası (pazartesi–pazar): uçlar gün sırasıyla, toplantılar gün + saatle, süren
-  /// görevler bitişe göre.
-  CalendarWeek week(DateTime day) {
-    final days = weekOf(day);
-    final first = days.first;
-    final last = days.last;
-    final all = [for (final d in days) ...on(d)];
-    final tasks = all.whereType<TaskEntry>();
-    final meetings = all.whereType<MeetingEntry>().toList()
-      ..sort(
-        (a, b) => a.date == b.date
-            ? a.minuteOfDay.compareTo(b.minuteOfDay)
-            : a.date.compareTo(b.date),
-      );
-    final ongoing = [
-      for (final t in _tasks)
-        if (!t.isDone &&
-            calendarDay(t.start).isBefore(first) &&
-            last.isBefore(calendarDay(t.due)))
-          TaskEntry(
-            date: calendarDay(t.due),
-            code: t.code,
-            title: t.title,
-            coordinatorship: t.coordinatorship,
-            edge: TaskEdge.ongoing,
-            assignees: t.assignees,
-            late: false,
-            due: calendarDay(t.due),
-          ),
-    ]..sort((a, b) => a.date.compareTo(b.date));
-    return (
-      ends: [...tasks.where((t) => t.edge == TaskEdge.end)],
-      starts: [...tasks.where((t) => t.edge == TaskEdge.start)],
-      ongoing: ongoing,
-      meetings: meetings,
-    );
-  }
 
   /// Günün bütün kayıtları.
   List<CalendarEntry> on(DateTime day) =>

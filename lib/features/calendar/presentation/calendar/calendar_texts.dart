@@ -53,14 +53,14 @@ extension CalendarTexts on AppLocalizations {
   String edgeFilter(TaskEdge e) => switch (e) {
     TaskEdge.end => uiCalendarFilterEnds,
     TaskEdge.start => uiCalendarFilterStarts,
-    TaskEdge.ongoing => uiCalendarStatOngoing,
+    TaskEdge.ongoing => uiCalendarSecOngoing,
   };
 
   /// Görev alt bölümü başlığı: "bu gün bitecek" / "bu gün başlayacak".
   String edgeSection(TaskEdge e) => switch (e) {
     TaskEdge.end => uiCalendarSubEnds,
     TaskEdge.start => uiCalendarSubStarts,
-    TaskEdge.ongoing => uiCalendarWeekOngoing,
+    TaskEdge.ongoing => uiCalendarSecOngoing,
   };
 
   /// Gün listesi satırının mono öncüsü (görev kimliği yerine): "biter" / "başlar" / "sürer".

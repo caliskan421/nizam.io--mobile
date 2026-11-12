@@ -1,10 +1,9 @@
 // CalendarPeriods: geçen hafta tamamlanan/bitişi düşen, bugün ve gelecek hafta toplamı;
-// dokunuş dönemin ilk gününü seçer.
+// dokunuş dönemin kayıtlarını pencerede açar (tamamlandı/gecikti rozeti, satır kaydı açar).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
-import 'package:nizamio/features/calendar/application/calendar_controller.dart';
 import 'package:nizamio/features/calendar/domain/calendar.dart';
 import 'package:nizamio/features/calendar/presentation/calendar/calendar_periods.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
@@ -35,7 +34,7 @@ TaskItem _task(
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets('sayılar ve dokunuşla dönem seçimi', (tester) async {
+  testWidgets('sayılar; dokunuş dönem penceresini açar', (tester) async {
     final h = await real(
       tester,
       () => pilotHarness(PilotBackend(), signedIn: true),
@@ -82,15 +81,14 @@ void main() {
       ),
       findsOneWidget,
     );
-    await tester.tap(find.text(_l.uiCalendarNextWeekCard));
-    expect(
-      h.read(calendarControllerProvider).selectedOn(_today),
-      DateTime(2026, 10, 26),
-    );
     await tester.tap(find.text(_l.uiCalendarLastWeek));
-    expect(
-      h.read(calendarControllerProvider).selectedOn(_today),
-      DateTime(2026, 10, 12),
-    );
+    await tester.pumpAndSettle();
+    expect(find.text('${_l.uiCalendarSecEnds} · 2'), findsOneWidget);
+    expect(find.text('Görev D'), findsOneWidget);
+    expect(find.text(_l.uiCalendarDoneLc), findsOneWidget);
+    expect(find.text('Görev L'), findsOneWidget);
+    expect(find.text(_l.uiCalendarLateLc), findsOneWidget);
+    // Bu dönemin dışındaki görev pencerede yok.
+    expect(find.text('Görev N'), findsNothing);
   });
 }

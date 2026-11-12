@@ -2716,17 +2716,35 @@ abstract class AppLocalizations {
   /// **'Toplantı planla'**
   String get uiCalendarPlan;
 
-  /// ui.calendar.this_week
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu hafta'**
-  String get uiCalendarThisWeek;
-
   /// ui.calendar.last_week
   ///
   /// In tr, this message translates to:
   /// **'Geçen hafta'**
   String get uiCalendarLastWeek;
+
+  /// ui.calendar.sec_ends
+  ///
+  /// In tr, this message translates to:
+  /// **'bitiş'**
+  String get uiCalendarSecEnds;
+
+  /// ui.calendar.sec_starts
+  ///
+  /// In tr, this message translates to:
+  /// **'başlangıç'**
+  String get uiCalendarSecStarts;
+
+  /// ui.calendar.sec_ongoing
+  ///
+  /// In tr, this message translates to:
+  /// **'devam edenler'**
+  String get uiCalendarSecOngoing;
+
+  /// ui.calendar.period_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu dönemde kayıt yok.'**
+  String get uiCalendarPeriodEmpty;
 
   /// ui.calendar.next_week_card
   ///
@@ -2751,42 +2769,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Dönem özeti'**
   String get uiCalendarPeriods;
-
-  /// ui.calendar.this_week_empty
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu hafta için kayıt yok.'**
-  String get uiCalendarThisWeekEmpty;
-
-  /// ui.calendar.stat_ongoing
-  ///
-  /// In tr, this message translates to:
-  /// **'Devam'**
-  String get uiCalendarStatOngoing;
-
-  /// ui.calendar.stat_meetings
-  ///
-  /// In tr, this message translates to:
-  /// **'Toplantı'**
-  String get uiCalendarStatMeetings;
-
-  /// ui.calendar.week_ends
-  ///
-  /// In tr, this message translates to:
-  /// **'bitecekler'**
-  String get uiCalendarWeekEnds;
-
-  /// ui.calendar.week_starts
-  ///
-  /// In tr, this message translates to:
-  /// **'başlayacaklar'**
-  String get uiCalendarWeekStarts;
-
-  /// ui.calendar.week_ongoing
-  ///
-  /// In tr, this message translates to:
-  /// **'devam edenler'**
-  String get uiCalendarWeekOngoing;
 
   /// ui.calendar.add
   ///

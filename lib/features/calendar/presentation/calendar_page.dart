@@ -24,7 +24,6 @@ import 'calendar/calendar_day.dart';
 import 'calendar/calendar_grid.dart';
 import 'calendar/calendar_periods.dart';
 import 'calendar/calendar_texts.dart';
-import 'calendar/calendar_week.dart';
 
 /// Takvim (prototip `calendar`): başlık + "Bugün" + "Seçili güne ekle" (toplantı ya da görev), ay/hafta
 /// ızgarası ve seçili günün kayıtları. Seçili gün, ay ve kip denetleyicide yaşar; pencere
@@ -187,9 +186,7 @@ class CalendarPage extends ConsumerWidget {
                     const Gap(NizamioSpacing.space4),
                     enter(1, CalendarDay(index: ix)),
                     const Gap(NizamioSpacing.gapLg),
-                    enter(2, CalendarThisWeek(index: ix)),
-                    const Gap(NizamioSpacing.space8),
-                    enter(3, CalendarPeriods(index: ix)),
+                    enter(2, CalendarPeriods(index: ix)),
                   ],
                 );
               }
@@ -209,9 +206,7 @@ class CalendarPage extends ConsumerWidget {
                     ],
                   ),
                   const Gap(NizamioSpacing.space8),
-                  enter(2, CalendarThisWeek(index: ix)),
-                  const Gap(NizamioSpacing.space8),
-                  enter(3, CalendarPeriods(index: ix)),
+                  enter(2, CalendarPeriods(index: ix)),
                 ],
               );
             },

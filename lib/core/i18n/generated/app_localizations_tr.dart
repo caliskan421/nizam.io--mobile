@@ -1452,10 +1452,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarPlan => 'Toplantı planla';
 
   @override
-  String get uiCalendarThisWeek => 'Bu hafta';
+  String get uiCalendarLastWeek => 'Geçen hafta';
 
   @override
-  String get uiCalendarLastWeek => 'Geçen hafta';
+  String get uiCalendarSecEnds => 'bitiş';
+
+  @override
+  String get uiCalendarSecStarts => 'başlangıç';
+
+  @override
+  String get uiCalendarSecOngoing => 'devam edenler';
+
+  @override
+  String get uiCalendarPeriodEmpty => 'Bu dönemde kayıt yok.';
 
   @override
   String get uiCalendarNextWeekCard => 'Gelecek hafta';
@@ -1468,24 +1477,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCalendarPeriods => 'Dönem özeti';
-
-  @override
-  String get uiCalendarThisWeekEmpty => 'Bu hafta için kayıt yok.';
-
-  @override
-  String get uiCalendarStatOngoing => 'Devam';
-
-  @override
-  String get uiCalendarStatMeetings => 'Toplantı';
-
-  @override
-  String get uiCalendarWeekEnds => 'bitecekler';
-
-  @override
-  String get uiCalendarWeekStarts => 'başlayacaklar';
-
-  @override
-  String get uiCalendarWeekOngoing => 'devam edenler';
 
   @override
   String get uiCalendarAdd => 'Seçili güne ekle';

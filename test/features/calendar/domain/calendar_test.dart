@@ -261,7 +261,7 @@ void main() {
     },
   );
 
-  test('hafta: pazartesi–pazar; uçlar, hafta boyu süren görevler, toplantılar saatle', () {
+  test('aralık: pazartesi–pazar; uçlar (tamamlanan dahil), boyunca süren, toplantılar saatle', () {
     expect(weekOf(DateTime(2026, 10, 21, 9)), [
       for (var d = 19; d <= 25; d++) DateTime(2026, 10, d),
     ]);
@@ -288,7 +288,8 @@ void main() {
         ),
       ]),
     );
-    final w = ix.week(DateTime(2026, 11, 5));
+    final week = weekOf(DateTime(2026, 11, 5));
+    final w = ix.span(week.first, week.last);
     expect(w.ends.map((e) => e.code), ['end']);
     expect(w.starts.map((e) => e.code), ['start']);
     expect(w.ongoing.map((e) => (e.code, e.due)), [

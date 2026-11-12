@@ -1749,13 +1749,25 @@
   "@uiCalendarPlan": {
     "description": "ui.calendar.plan"
   },
-  "uiCalendarThisWeek": "Bu hafta",
-  "@uiCalendarThisWeek": {
-    "description": "ui.calendar.this_week"
-  },
   "uiCalendarLastWeek": "Geçen hafta",
   "@uiCalendarLastWeek": {
     "description": "ui.calendar.last_week"
+  },
+  "uiCalendarSecEnds": "bitiş",
+  "@uiCalendarSecEnds": {
+    "description": "ui.calendar.sec_ends"
+  },
+  "uiCalendarSecStarts": "başlangıç",
+  "@uiCalendarSecStarts": {
+    "description": "ui.calendar.sec_starts"
+  },
+  "uiCalendarSecOngoing": "devam edenler",
+  "@uiCalendarSecOngoing": {
+    "description": "ui.calendar.sec_ongoing"
+  },
+  "uiCalendarPeriodEmpty": "Bu dönemde kayıt yok.",
+  "@uiCalendarPeriodEmpty": {
+    "description": "ui.calendar.period_empty"
   },
   "uiCalendarNextWeekCard": "Gelecek hafta",
   "@uiCalendarNextWeekCard": {
@@ -1772,30 +1784,6 @@
   "uiCalendarPeriods": "Dönem özeti",
   "@uiCalendarPeriods": {
     "description": "ui.calendar.periods"
-  },
-  "uiCalendarThisWeekEmpty": "Bu hafta için kayıt yok.",
-  "@uiCalendarThisWeekEmpty": {
-    "description": "ui.calendar.this_week_empty"
-  },
-  "uiCalendarStatOngoing": "Devam",
-  "@uiCalendarStatOngoing": {
-    "description": "ui.calendar.stat_ongoing"
-  },
-  "uiCalendarStatMeetings": "Toplantı",
-  "@uiCalendarStatMeetings": {
-    "description": "ui.calendar.stat_meetings"
-  },
-  "uiCalendarWeekEnds": "bitecekler",
-  "@uiCalendarWeekEnds": {
-    "description": "ui.calendar.week_ends"
-  },
-  "uiCalendarWeekStarts": "başlayacaklar",
-  "@uiCalendarWeekStarts": {
-    "description": "ui.calendar.week_starts"
-  },
-  "uiCalendarWeekOngoing": "devam edenler",
-  "@uiCalendarWeekOngoing": {
-    "description": "ui.calendar.week_ongoing"
   },
   "uiCalendarAdd": "Seçili güne ekle",
   "@uiCalendarAdd": {

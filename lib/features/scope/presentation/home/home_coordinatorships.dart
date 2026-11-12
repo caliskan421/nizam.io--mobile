@@ -146,11 +146,12 @@ class _CoordCard extends StatelessWidget {
         ? '${truncated ? '≥' : ''}${c.late} ${l.uiHomeLateLc}'
         : l.uiHomeNoLate;
     final percent = l.percent(c.donePercent / 100);
-    // Sunucu özeti kalan durumu onay ve iadeyi birlikte taşır; ayrıymış gibi renklendirilmez.
+    // Sunucu özeti kalan durumu onay ve iadeyi birlikte taşır (ayrı renklendirilemez); çoğu
+    // onaya sunulmuş görevdir, "Onay bekleyen" kartıyla aynı `warning` rengini alır.
     final segments = <(int, Color)>[
       (c.done, colors.taskDone),
       (c.inProgress, colors.inProgress),
-      (c.inReview, colors.info),
+      (c.inReview, colors.warning),
       (c.todo, colors.textFaint),
     ].where((entry) => entry.$1 > 0).toList();
     return Semantics(

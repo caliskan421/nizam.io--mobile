@@ -5,10 +5,13 @@ import 'package:get_it/get_it.dart';
 import '../../core/config/flavor.dart';
 import '../../core/config/mobile_release_policy.dart';
 import '../../core/config/release_policy_provider.dart';
+import '../../core/config/running_release.dart';
+import '../../core/config/update_store.dart';
 import '../../core/network/connectivity_link.dart';
 import '../../core/network/connectivity_monitor.dart';
 import '../../core/notifications/push_notifications.dart';
 import '../../core/notifications/push_providers.dart';
+import '../../core/preferences/app_preferences.dart';
 import '../../core/preferences/locale_controller.dart';
 import '../../core/preferences/theme_mode_controller.dart';
 import '../../core/providers.dart';
@@ -31,6 +34,7 @@ import '../../features/reports/reports_module.dart';
 import '../../features/scope/scope_module.dart';
 import '../../features/tasks/tasks_module.dart';
 import '../../features/timeline/timeline_module.dart';
+import '../config/native_update_store.dart';
 import 'dependencies.dart';
 
 /// Bileşim kökü: get_it nesne grafiği + onu Riverpod portlarına bağlayan ProviderContainer.
@@ -51,9 +55,11 @@ class Composition {
     SecureStore? secureStore,
     HttpClientAdapter? httpAdapter,
     PreferenceStore? preferenceStore,
+    AppPreferences? appPreferences,
     ConnectivityLink? connectivityLink,
     PushNotifications? pushNotifications,
     ReleasePolicySource? releasePolicySource,
+    RunningRelease? runningRelease,
   }) {
     final locator = GetIt.asNewInstance();
     // Native sözleşme ve Firebase dağıtım ayarları hazır olana kadar kapalı port.
@@ -70,7 +76,9 @@ class Composition {
       secureStore: secureStore,
       httpAdapter: httpAdapter,
       preferenceStore: preferenceStore,
+      appPreferences: appPreferences,
       connectivityLink: connectivityLink,
+      runningVersion: runningRelease?.version,
     );
     late final ProviderContainer container;
     // Feature modülleri yalnız buradan kaydedilir (sınır kuralı G2). Reaktif API istemcisi
@@ -121,6 +129,12 @@ class Composition {
       retry: (_, _) => null,
       overrides: [
         flavorProvider.overrideWithValue(flavor),
+        if (runningRelease != null) ...[
+          runningReleaseProvider.overrideWithValue(runningRelease),
+          updateStoreProvider.overrideWithValue(
+            NativeUpdateStore(runningRelease),
+          ),
+        ],
         releasePolicySourceProvider.overrideWithValue(
           locator<ReleasePolicySource>(),
         ),

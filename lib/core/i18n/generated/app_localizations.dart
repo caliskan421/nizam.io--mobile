@@ -6595,19 +6595,19 @@ abstract class AppLocalizations {
   /// ui.server.update_title
   ///
   /// In tr, this message translates to:
-  /// **'Güncelleme gerekli'**
+  /// **'Devam etmek için güncelle'**
   String get uiServerUpdateTitle;
 
   /// ui.server.update_message
   ///
   /// In tr, this message translates to:
-  /// **'Bu sunucu uygulamanın daha yeni bir sürümünü gerektiriyor. Giriş yapabilmek için uygulamayı güncelleyin.'**
+  /// **'Sunucuna bağlanmak için uygulamanın yeni sürümünü yükle.'**
   String get uiServerUpdateMessage;
 
   /// ui.server.update_api_message
   ///
   /// In tr, this message translates to:
-  /// **'Bu sunucunun API sürümü uygulamayla uyumlu değil. Giriş yapabilmek için uygulamayı güncelleyin ya da sunucu yöneticinize başvurun.'**
+  /// **'Uygulaman bu sunucuyla uyumlu değil. Yeni sürümü yükle veya yöneticinle iletişime geç.'**
   String get uiServerUpdateApiMessage;
 
   /// ui.server.update_server
@@ -6625,14 +6625,74 @@ abstract class AppLocalizations {
   /// ui.server.update_installed_version
   ///
   /// In tr, this message translates to:
-  /// **'Kurulu sürüm'**
+  /// **'Mevcut sürüm'**
   String get uiServerUpdateInstalledVersion;
 
   /// ui.server.update_recheck
   ///
   /// In tr, this message translates to:
-  /// **'Yeniden denetle'**
+  /// **'Yeniden kontrol et'**
   String get uiServerUpdateRecheck;
+
+  /// ui.server.update_remote_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulamayı kullanmaya devam etmek için yeni sürümü yükle.'**
+  String get uiServerUpdateRemoteMessage;
+
+  /// ui.server.update_optional_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni sürüm kullanıma hazır'**
+  String get uiServerUpdateOptionalTitle;
+
+  /// ui.server.update_optional_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni sürüme şimdi geçebilir veya mevcut sürümle devam edebilirsin.'**
+  String get uiServerUpdateOptionalMessage;
+
+  /// ui.server.update_store
+  ///
+  /// In tr, this message translates to:
+  /// **'Şimdi güncelle'**
+  String get uiServerUpdateStore;
+
+  /// ui.server.update_store_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Güncelleme bağlantısı henüz hazır değil. Daha sonra yeniden kontrol edebilirsin.'**
+  String get uiServerUpdateStoreUnavailable;
+
+  /// ui.server.update_store_failed
+  ///
+  /// In tr, this message translates to:
+  /// **'Mağaza açılamadı. Yeniden deneyebilirsin.'**
+  String get uiServerUpdateStoreFailed;
+
+  /// ui.server.update_later
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha sonra'**
+  String get uiServerUpdateLater;
+
+  /// ui.server.update_invalid_version
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulamanın sürümü doğrulanamadı. Uygulamayı yeniden aç veya yöneticinle iletişime geç.'**
+  String get uiServerUpdateInvalidVersion;
+
+  /// ui.server.update_policy_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Güncelleme bilgisi şu anda alınamıyor. Biraz sonra yeniden kontrol edebilirsin.'**
+  String get uiServerUpdatePolicyUnavailable;
+
+  /// ui.server.update_store_required_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Güncelleme bağlantısı henüz hazır değil. Yardım için yöneticinle iletişime geç.'**
+  String get uiServerUpdateStoreRequiredUnavailable;
 
   /// ui.tables.title
   ///

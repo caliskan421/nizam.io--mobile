@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/server/server_binding.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/extensions/ref_ext.dart';
-import '../../../core/ui/layout/layout.dart';
-import '../../../core/ui/page/nz_page.dart';
-import '../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../core/ui/page/nz_update_page.dart';
 import '../application/server_connect_controller.dart';
 
 /// Açık "güncelleme gerekli" ekranı (faz: `updateRequired`). Sunucunun asgari mobil sürümü
@@ -33,45 +30,22 @@ class UpdateRequiredPage extends ConsumerWidget {
       _ => null,
     };
     final busy = ref.watch(serverConnectControllerProvider).isLoading;
-    return NzPage(
-      title: l.uiServerUpdateTitle,
-      width: NzContentWidth.form,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: NizamioSpacing.space6),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              apiMismatch
-                  ? l.uiServerUpdateApiMessage
-                  : l.uiServerUpdateMessage,
-              style: context.text.bodyMd,
-            ),
-            if (address != null) ...[
-              const Gap(NizamioSpacing.space6),
-              _Fact(label: l.uiServerUpdateServer, value: '$address'),
-              if (binding is BindingUpdateRequired) ...[
-                _Fact(
-                  label: l.uiServerUpdateRequiredVersion,
-                  value: binding.minimumVersion,
-                ),
-                _Fact(
-                  label: l.uiServerUpdateInstalledVersion,
-                  value: binding.appVersion,
-                ),
-              ],
-              const Gap(NizamioSpacing.space6),
-              NzButton.secondary(
-                label: l.uiServerUpdateRecheck,
-                loading: busy,
-                expand: true,
-                onPressed: () => ref
-                    .read(serverConnectControllerProvider.notifier)
-                    .connect('$address'),
-              ),
-            ],
-          ],
-        ),
+    return PopScope(
+      canPop: false,
+      child: NzUpdatePage(
+        title: l.uiServerUpdateTitle,
+        message: apiMismatch
+            ? l.uiServerUpdateApiMessage
+            : l.uiServerUpdateMessage,
+        checking: busy,
+        onRecheck: address == null
+            ? null
+            : () => ref
+                  .read(serverConnectControllerProvider.notifier)
+                  .connect('$address'),
+        details: address == null
+            ? null
+            : _Fact(label: l.uiServerUpdateServer, value: '$address'),
       ),
     );
   }
@@ -93,11 +67,11 @@ class _Fact extends StatelessWidget {
         children: [
           Text(
             label,
-            style: context.text.bodyMd.copyWith(
+            style: context.text.caption.copyWith(
               color: context.colors.textMuted,
             ),
           ),
-          Text(value, style: context.text.labelLg),
+          Text(value, style: context.text.caption),
         ],
       ),
     ),

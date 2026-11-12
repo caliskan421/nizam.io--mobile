@@ -4333,15 +4333,15 @@
   "@uiServerConnect": {
     "description": "ui.server.connect"
   },
-  "uiServerUpdateTitle": "Güncelleme gerekli",
+  "uiServerUpdateTitle": "Devam etmek için güncelle",
   "@uiServerUpdateTitle": {
     "description": "ui.server.update_title"
   },
-  "uiServerUpdateMessage": "Bu sunucu uygulamanın daha yeni bir sürümünü gerektiriyor. Giriş yapabilmek için uygulamayı güncelleyin.",
+  "uiServerUpdateMessage": "Sunucuna bağlanmak için uygulamanın yeni sürümünü yükle.",
   "@uiServerUpdateMessage": {
     "description": "ui.server.update_message"
   },
-  "uiServerUpdateApiMessage": "Bu sunucunun API sürümü uygulamayla uyumlu değil. Giriş yapabilmek için uygulamayı güncelleyin ya da sunucu yöneticinize başvurun.",
+  "uiServerUpdateApiMessage": "Uygulaman bu sunucuyla uyumlu değil. Yeni sürümü yükle veya yöneticinle iletişime geç.",
   "@uiServerUpdateApiMessage": {
     "description": "ui.server.update_api_message"
   },
@@ -4353,13 +4353,53 @@
   "@uiServerUpdateRequiredVersion": {
     "description": "ui.server.update_required_version"
   },
-  "uiServerUpdateInstalledVersion": "Kurulu sürüm",
+  "uiServerUpdateInstalledVersion": "Mevcut sürüm",
   "@uiServerUpdateInstalledVersion": {
     "description": "ui.server.update_installed_version"
   },
-  "uiServerUpdateRecheck": "Yeniden denetle",
+  "uiServerUpdateRecheck": "Yeniden kontrol et",
   "@uiServerUpdateRecheck": {
     "description": "ui.server.update_recheck"
+  },
+  "uiServerUpdateRemoteMessage": "Uygulamayı kullanmaya devam etmek için yeni sürümü yükle.",
+  "@uiServerUpdateRemoteMessage": {
+    "description": "ui.server.update_remote_message"
+  },
+  "uiServerUpdateOptionalTitle": "Yeni sürüm kullanıma hazır",
+  "@uiServerUpdateOptionalTitle": {
+    "description": "ui.server.update_optional_title"
+  },
+  "uiServerUpdateOptionalMessage": "Yeni sürüme şimdi geçebilir veya mevcut sürümle devam edebilirsin.",
+  "@uiServerUpdateOptionalMessage": {
+    "description": "ui.server.update_optional_message"
+  },
+  "uiServerUpdateStore": "Şimdi güncelle",
+  "@uiServerUpdateStore": {
+    "description": "ui.server.update_store"
+  },
+  "uiServerUpdateStoreUnavailable": "Güncelleme bağlantısı henüz hazır değil. Daha sonra yeniden kontrol edebilirsin.",
+  "@uiServerUpdateStoreUnavailable": {
+    "description": "ui.server.update_store_unavailable"
+  },
+  "uiServerUpdateStoreFailed": "Mağaza açılamadı. Yeniden deneyebilirsin.",
+  "@uiServerUpdateStoreFailed": {
+    "description": "ui.server.update_store_failed"
+  },
+  "uiServerUpdateLater": "Daha sonra",
+  "@uiServerUpdateLater": {
+    "description": "ui.server.update_later"
+  },
+  "uiServerUpdateInvalidVersion": "Uygulamanın sürümü doğrulanamadı. Uygulamayı yeniden aç veya yöneticinle iletişime geç.",
+  "@uiServerUpdateInvalidVersion": {
+    "description": "ui.server.update_invalid_version"
+  },
+  "uiServerUpdatePolicyUnavailable": "Güncelleme bilgisi şu anda alınamıyor. Biraz sonra yeniden kontrol edebilirsin.",
+  "@uiServerUpdatePolicyUnavailable": {
+    "description": "ui.server.update_policy_unavailable"
+  },
+  "uiServerUpdateStoreRequiredUnavailable": "Güncelleme bağlantısı henüz hazır değil. Yardım için yöneticinle iletişime geç.",
+  "@uiServerUpdateStoreRequiredUnavailable": {
+    "description": "ui.server.update_store_required_unavailable"
   },
   "uiTablesTitle": "Tablolar",
   "@uiTablesTitle": {

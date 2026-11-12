@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/config/flavor.dart';
+import '../core/config/saved_release_policy_source.dart';
 import '../core/network/connectivity_link.dart';
 import '../core/preferences/locale_controller.dart';
 import '../core/preferences/theme_mode_controller.dart';
@@ -16,8 +17,10 @@ import '../core/session/session_state.dart';
 import '../features/identity/identity.dart';
 import 'app.dart';
 import 'config/firebase_services.dart';
+import 'config/native_release.dart';
 import 'config/release_policy_warmup.dart';
 import 'di/composition.dart';
+import 'di/preferences.dart';
 
 /// Uygulamayı verilen flavor ile başlatır. [devServer]: yalnız dev — kayıtlı bağ yoksa açılışta
 /// bu adres doğrulanır (uygulama doğrudan giriş ekranında açılır). Composition root: somut bağlar burada ve
@@ -33,13 +36,24 @@ Future<void> bootstrap(
   // istek yok (çevrimdışı açılış, gizlilik). OFL lisans metinleri lisans sayfasına eklenir.
   GoogleFonts.config.allowRuntimeFetching = false;
   LicenseRegistry.addLicense(_fontLicenses);
-  final firebaseServices = await initializeFirebaseServices(flavor);
+  final preferences = createAppPreferences();
+  final release = await readNativeRelease();
+  final firebaseServices = await initializeFirebaseServices(
+    flavor,
+    preferences: preferences,
+  );
   final composition = Composition.create(
     flavor: flavor,
+    runningRelease: release,
+    appPreferences: preferences,
     loginPrefill: flavor == Flavor.dev ? loginPrefill : null,
     connectivityLink: PlusConnectivityLink(),
     pushNotifications: firebaseServices?.pushNotifications,
-    releasePolicySource: firebaseServices?.releasePolicySource,
+    releasePolicySource:
+        firebaseServices?.releasePolicySource ??
+        (flavor == Flavor.dev && release.platform != null
+            ? SavedReleasePolicySource(preferences)
+            : null),
   );
   // Tercihler runApp'ten önce (tema titreşimi yok). Güvenlik açılış sırası (startup) ayrıdır
   // ve tercihlere bağlı değildir; tercih okuma hatası sistem temasına düşer.

@@ -46,7 +46,9 @@ void configureDependencies(
   SecureStore? secureStore,
   HttpClientAdapter? httpAdapter,
   PreferenceStore? preferenceStore,
+  AppPreferences? appPreferences,
   ConnectivityLink? connectivityLink,
+  String? runningVersion,
 }) {
   locator
     ..registerSingleton<Flavor>(flavor)
@@ -60,7 +62,7 @@ void configureDependencies(
       () => preferenceStore ?? SharedPreferenceStore(),
     )
     ..registerLazySingleton<AppPreferences>(
-      () => AppPreferences(locator<PreferenceStore>()),
+      () => appPreferences ?? AppPreferences(locator<PreferenceStore>()),
     )
     ..registerLazySingleton<ThemeModeController>(
       () => ThemeModeController(locator<AppPreferences>()),
@@ -80,6 +82,7 @@ void configureDependencies(
     ..registerLazySingleton<ServerBindingController>(
       () => ServerBindingController(
         flavor: flavor,
+        appVersionOverride: runningVersion,
         store: locator<SecureStore>(),
         adapter: httpAdapter,
       ),

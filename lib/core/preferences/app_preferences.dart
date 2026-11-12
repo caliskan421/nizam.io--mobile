@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
+import '../config/mobile_release_policy.dart';
 import '../logging/log.dart';
 import '../storage/preference_store.dart';
 
@@ -24,9 +27,11 @@ class AppPreferences {
   AppPreferences(this._store);
 
   final PreferenceStore _store;
+  Future<void> _releasePolicyWrites = Future<void>.value();
 
   static const themeModeKey = 'nizamio.pref.theme_mode';
   static const localeKey = 'nizamio.pref.locale';
+  static const releasePolicyKey = 'nizamio.pref.release_policy.v1';
 
   /// Desteklenen diller (altyapı; şimdilik yalnız Türkçe).
   static const supportedLocales = [Locale('tr')];
@@ -60,6 +65,40 @@ class AppPreferences {
       await _store.setString(pref.key, pref.encode(value));
     } on Object {
       Log.warn('tercih: yazılamadı (${pref.key})');
+    }
+  }
+
+  /// Validated non-personal policy. Mandatory floors do not expire offline:
+  /// a network failure or bad publication must not lift a previously accepted gate.
+  Future<MobileReleasePolicy?> releasePolicy() async {
+    try {
+      final raw = await _store
+          .getString(releasePolicyKey)
+          .timeout(const Duration(milliseconds: 500));
+      if (raw == null) return null;
+      return MobileReleasePolicy.fromRemoteConfig(
+        Map<String, Object?>.from(jsonDecode(raw) as Map),
+      );
+    } on Object {
+      // An unreadable/corrupt existing policy is not proof that no floor exists.
+      throw const FormatException('Stored release policy is unavailable');
+    }
+  }
+
+  Future<void> setReleasePolicy(MobileReleasePolicy policy) async {
+    final encoded = jsonEncode(policy.toValues());
+    final write = _releasePolicyWrites.then(
+      (_) => _store.setString(releasePolicyKey, encoded),
+    );
+    // Keep actual platform writes in order even when the caller times out.
+    _releasePolicyWrites = write.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    try {
+      await write.timeout(const Duration(milliseconds: 500));
+    } on Object {
+      Log.warn('tercih: sürüm politikası yazılamadı');
     }
   }
 

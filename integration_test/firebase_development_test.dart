@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:nizamio/app/config/firebase_release_policy_source.dart';
 import 'package:nizamio/app/config/firebase_services.dart';
 import 'package:nizamio/core/config/flavor.dart';
 
@@ -28,8 +30,36 @@ void main() {
       FirebaseRemoteConfig.instance.lastFetchStatus,
       RemoteConfigFetchStatus.success,
     );
-    // SDK kullanıma hazır; gerçek parametreler farklı olabilir. Kararın UI'ı
-    // kilitlemesi ve telemetry/push açması bu bağlantı testinin kapsamında değil.
-    expect(policy, isNotNull);
+    final sdk = FirebaseRemoteConfig.instance;
+    // Compare actual native payloads with the accepted policy, not a hardcoded
+    // console publication. These allowlisted values contain no user data.
+    final values = policy.toValues();
+    // Even an all-default publication must be accepted, not silently discarded
+    // as an invalid candidate and replaced by the disabled fallback.
+    final source = services.releasePolicySource as FirebaseReleasePolicySource;
+    expect(source.origin, ReleasePolicyOrigin.remote);
+    expect(
+      values['ios_recommended_version'],
+      sdk.getString('ios_recommended_version'),
+    );
+    expect(
+      sdk.settings.minimumFetchInterval,
+      kDebugMode ? const Duration(seconds: 30) : const Duration(hours: 12),
+    );
+    for (final key in const [
+      'native_push_enabled',
+      'crash_reporting_enabled',
+      'analytics_enabled',
+    ]) {
+      final native = sdk.getAll()[key];
+      expect(native, isNotNull);
+      expect(values[key], native!.asBool(), reason: 'Native $key roundtrip');
+      if (native.source == ValueSource.valueDefault) {
+        debugPrint(
+          'Firebase native default $key: ${native.asString()} (${native.source.name})',
+        );
+        expect(values[key], isFalse);
+      }
+    }
   });
 }

@@ -3,10 +3,22 @@ import 'package:nizamio/app/di/composition.dart';
 import 'package:nizamio/core/config/flavor.dart';
 import 'package:nizamio/core/config/mobile_release_policy.dart';
 import 'package:nizamio/core/config/release_policy_provider.dart';
+import 'package:nizamio/core/preferences/app_preferences.dart';
 import 'package:nizamio/core/storage/preference_store.dart';
 import 'package:nizamio/core/storage/secure_store.dart';
 
 void main() {
+  test('bootstrap typed preferences facade is reused by DI', () async {
+    final preferences = AppPreferences(MemoryPreferenceStore());
+    final composition = Composition.create(
+      flavor: Flavor.dev,
+      appPreferences: preferences,
+      secureStore: MemorySecureStore(),
+    );
+    addTearDown(composition.dispose);
+    expect(composition.locator<AppPreferences>(), same(preferences));
+  });
+
   test('kapalı varsayılan backend asgari sürümünü gevşetmez', () async {
     final composition = Composition.create(
       flavor: Flavor.prod,

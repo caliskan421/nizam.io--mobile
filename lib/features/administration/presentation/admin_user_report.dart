@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/errors/api_error.dart';
 import '../../../core/export/csv_writer.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../tasks/tasks.dart';
@@ -58,11 +59,13 @@ Future<void> exportAdminUserReport(
         session == ref.read(sessionGenerationProvider)) {
       NzToast.success(context, '${l.uiUsersExportSaved} $path');
     }
-  } on Object catch (e) {
+  } on Object catch (e, st) {
+    // Rapor, bağlam/kapsam korumasından ÖNCE.
+    final api = toReportedApiError(e, st, source: ReportSource.administration);
     if (context.mounted &&
         scope == ref.read(scopeStateProvider) &&
         session == ref.read(sessionGenerationProvider)) {
-      NzToast.error(context, toApiError(e));
+      NzToast.error(context, api);
     }
   }
 }

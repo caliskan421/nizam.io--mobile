@@ -8,6 +8,8 @@ import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
 import '../../../core/stale_clock.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../tasks/tasks.dart';
 import '../domain/meeting.dart';
 import '../domain/meeting_board.dart';
@@ -140,7 +142,8 @@ class MeetingsBoardController extends _$MeetingsBoardController {
     ref.invalidateSelf();
     try {
       await future;
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.meetings);
       if (shown) rethrow;
     }
   }
@@ -178,8 +181,8 @@ class MeetingsBoardController extends _$MeetingsBoardController {
   Future<ApiError?> restore(String id) async {
     try {
       await ref.read(meetingsRepositoryProvider).restoreMeeting(id);
-    } on Object catch (e) {
-      return toApiError(e);
+    } on Object catch (e, st) {
+      return toReportedApiError(e, st, source: ReportSource.meetings);
     }
     if (ref.mounted) ref.invalidateSelf();
     return null;
@@ -189,8 +192,8 @@ class MeetingsBoardController extends _$MeetingsBoardController {
   Future<ApiError?> purge(String id) async {
     try {
       await ref.read(meetingsRepositoryProvider).permanentDeleteMeeting(id);
-    } on Object catch (e) {
-      return toApiError(e);
+    } on Object catch (e, st) {
+      return toReportedApiError(e, st, source: ReportSource.meetings);
     }
     final board = state.value;
     if (ref.mounted && board != null) {

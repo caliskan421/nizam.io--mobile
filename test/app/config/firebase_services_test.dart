@@ -70,6 +70,13 @@ void main() {
     });
   }
 
+  test(
+    'error reporter defaults to an unavailable no-op (never auto-enabled)',
+    () {
+      expect(services.errorReporter.isAvailable, isFalse);
+    },
+  );
+
   test('synchronous and asynchronous SDK failures stay optional', () async {
     for (final initialize in <Future<FirebaseServices> Function()>[
       () => throw StateError('unavailable'),

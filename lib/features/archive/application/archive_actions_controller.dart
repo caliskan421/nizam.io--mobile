@@ -3,6 +3,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../tasks/tasks.dart';
 import '../domain/archive.dart';
 import '../domain/records.dart';
@@ -48,8 +50,9 @@ class ArchiveActionsController extends _$ArchiveActionsController {
     state = true;
     try {
       return await op();
-    } on Object catch (e) {
-      return (ok: false, error: toApiError(e), path: null);
+    } on Object catch (e, st) {
+      final error = toReportedApiError(e, st, source: ReportSource.archive);
+      return (ok: false, error: error, path: null);
     } finally {
       if (ref.mounted) state = false;
     }
@@ -190,12 +193,13 @@ class ArchiveActionsController extends _$ArchiveActionsController {
     try {
       try {
         await send();
-      } on ApiError catch (e) {
+      } on ApiError catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.archive);
         if (e.code != conflictRetryCode) rethrow;
         await send();
       }
-    } on Object catch (e) {
-      final err = toApiError(e);
+    } on Object catch (e, st) {
+      final err = toReportedApiError(e, st, source: ReportSource.archive);
       if (isOutcomeUnknown(err)) {
         _intent = i;
         throw ApiError(ClientErrorCode.outcomeUnknown, status: err.status);

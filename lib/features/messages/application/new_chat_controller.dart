@@ -4,6 +4,8 @@ import '../../../core/cache_owner.dart';
 import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/chat.dart';
 import 'chats_controller.dart';
 import 'messages_providers.dart';
@@ -48,7 +50,8 @@ class NewChatController extends _$NewChatController {
       Chat chat;
       try {
         chat = await _repo.createGroup(draft, requestKey: key);
-      } on ApiError catch (e) {
+      } on ApiError catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.messages);
         if (e.code != 'platform.conflict_retry') rethrow;
         _ensureCurrent(generation);
         chat = await _repo.createGroup(draft, requestKey: key);

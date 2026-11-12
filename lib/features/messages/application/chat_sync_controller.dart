@@ -6,6 +6,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/error_report.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/chat.dart';
 import '../domain/chat_stream_policy.dart';
 import 'messages_providers.dart';
@@ -71,9 +74,11 @@ class ChatSyncController extends _$ChatSyncController {
   ChatSyncStatus get _opening =>
       _held == null ? ChatSyncStatus.connecting : ChatSyncStatus.retrying;
 
+  DateTime _now() => ref.read(chatClockProvider)();
+
   Duration? get _held => ref
       .read(chatStreamHoldProvider.notifier)
-      .left(ref.read(chatMeProvider), DateTime.now());
+      .left(ref.read(chatMeProvider), _now());
 
   bool get _ready {
     final program = ref.read(scopeStateProvider).programId;
@@ -123,12 +128,20 @@ class ChatSyncController extends _$ChatSyncController {
             (s) {
               if (gen != _gen) return;
               if (s is ChatStreamOpened) {
-                openedAt = DateTime.now();
+                openedAt = _now();
                 _set(gen, ChatSyncStatus.live);
               }
               bus.add(s);
             },
-            onError: (Object e) {
+            onError: (Object e, StackTrace st) {
+              // ApiError dışı akış hatası aşağıda networkError sayılır: önce raporlanır
+              // (ApiError ve ağ kopması beklenen sınıftır, süzülür).
+              reportUnexpected(
+                e,
+                st,
+                source: ReportSource.messages,
+                operation: ReportOperation.chatStream,
+              );
               error = e;
               if (!done.isCompleted) done.complete();
             },
@@ -149,14 +162,12 @@ class ChatSyncController extends _$ChatSyncController {
         }
         final me = ref.read(chatMeProvider);
         if (api.retryAfter case final wait? when me != null) {
-          ref
-              .read(chatStreamHoldProvider.notifier)
-              .hold(me, DateTime.now().add(wait));
+          ref.read(chatStreamHoldProvider.notifier).hold(me, _now().add(wait));
         }
       }
       _failures = nextFailures(
         _failures,
-        lived: opened == null ? null : DateTime.now().difference(opened),
+        lived: opened == null ? null : _now().difference(opened),
       );
       if (_failures > ChatStreamPolicy.maxFailures) {
         return _set(gen, ChatSyncStatus.offline);

@@ -3,6 +3,7 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -41,6 +42,15 @@ android {
         }
         create("prod") {
             dimension = "env"
+            // Prod Firebase yapılandırması yok (google-services.json yok): yükleme görevleri
+            // `google_app_id` bulamayıp derlemeyi bozmasın. Prod etkinleşince bu blok kalkar.
+            (this as ExtensionAware).extensions
+                .configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension>(
+                    "firebaseCrashlytics",
+                ) {
+                    mappingFileUploadEnabled = false
+                    nativeSymbolUploadEnabled = false
+                }
         }
     }
 

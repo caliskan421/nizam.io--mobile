@@ -5,6 +5,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/task_catalog.dart';
 import 'task_catalog_controller.dart';
 import 'tasks_providers.dart';
@@ -127,7 +129,8 @@ Future<TaskListIds?> taskListPage(Ref ref) async {
     return TaskListIds([
       for (final t in page.tasks) t.code,
     ], truncated: page.truncated);
-  } on ApiError catch (e) {
+  } on ApiError catch (e, st) {
+    reportUnexpected(e, st, source: ReportSource.tasks);
     if (e.code != 'work.program_scope_invalid') rethrow;
     if (drop()) unawaited(store.reload());
     return null;

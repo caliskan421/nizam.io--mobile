@@ -20,7 +20,7 @@ final _l = AppLocalizationsTr();
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testScreens('sürümler görünür; giriş alanı yok; giriş isteği çıkmaz', (
+  testScreens('sürüm bilgisi görünmez; giriş alanı yok; giriş isteği çıkmaz', (
     tester,
     screen,
   ) async {
@@ -31,8 +31,8 @@ void main() {
     await pumpScreen(tester, h, const UpdateRequiredPage());
     expect(find.text(_l.uiServerUpdateTitle), findsWidgets);
     expect(find.text(_l.uiServerUpdateMessage), findsOneWidget);
-    expect(find.text('99.0.0'), findsOneWidget);
-    expect(find.text(_l.uiServerUpdateRequiredVersion), findsOneWidget);
+    expect(find.text('99.0.0'), findsNothing);
+    expect(find.text(_l.uiServerUpdateRequiredVersion), findsNothing);
     expect(find.byType(TextFormField), findsNothing);
     expect(h.backend.count('POST', '/v1/auth/login'), 0);
     expect(tester.takeException(), isNull);
@@ -44,7 +44,7 @@ void main() {
     await real(tester, () => h.read(serverBindingProvider).verify(testUrl));
     await pumpScreen(tester, h, const UpdateRequiredPage());
     final before = h.backend.count('GET', '/.well-known/nizamio-instance');
-    await tester.tap(find.text(_l.uiServerUpdateRecheck));
+    await tester.tap(find.text(_l.uiServerUpdateStore));
     await settle(tester);
     expect(h.backend.count('GET', '/.well-known/nizamio-instance'), before + 1);
   });
@@ -74,7 +74,7 @@ void main() {
           expect(find.text(_l.uiServerUpdateTitle), findsWidgets);
           expect(find.text(_l.uiServerUpdateApiMessage), findsOneWidget);
           expect(find.text(_l.uiServerUpdateMessage), findsNothing);
-          expect(find.text(_l.uiServerUpdateRecheck), findsOneWidget);
+          expect(find.text(_l.uiServerUpdateStore), findsOneWidget);
           expect(find.byType(TextFormField), findsNothing);
           await expectLater(
             h.identity.login(email: 'a@b.test', password: 'Gizli-Parola-1'),
@@ -106,7 +106,7 @@ void main() {
       await real(tester, () => h.read(serverBindingProvider).verify(testUrl));
       await pumpScreen(tester, h, const UpdateRequiredPage());
       final before = h.backend.count('GET', '/.well-known/nizamio-instance');
-      await tester.tap(find.text(_l.uiServerUpdateRecheck));
+      await tester.tap(find.text(_l.uiServerUpdateStore));
       await settle(tester);
       expect(
         h.backend.count('GET', '/.well-known/nizamio-instance'),

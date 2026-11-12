@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import '../storage/secure_store.dart';
+import '../telemetry/report_source.dart';
+import '../telemetry/unexpected_error.dart';
 import 'scope_controller.dart';
 
 /// Kapsamın ait olduğu oturum: hesap + sunucu kurulumu (ADR-0003 karar 20). Kayıt YALNIZ bu
@@ -66,7 +68,9 @@ class ScopeStore {
           departmentId: department as String?,
         ),
       );
-    } on FormatException {
+    } on FormatException catch (e, st) {
+      // Bozuk yerel kayıt gerçek bozulmadır: çağıran siler; sebep raporlanır (içerik değil).
+      reportUnexpected(e, st, source: ReportSource.scope);
       return null;
     }
   }

@@ -4,6 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/task_writes.dart';
 import 'quick_forms_controller.dart' show newTaskCoordinatorshipsProvider;
 import 'task_catalog_controller.dart';
@@ -193,9 +195,10 @@ class InviteFormController extends _$InviteFormController {
     state = f.copyWith(busy: true, error: () => null, failure: () => null);
     try {
       await ref.read(taskWriteRepositoryProvider).enrollMember(enrollment);
-    } on Object catch (e) {
+    } on Object catch (e, st) {
+      // Rapor/çeviri bayat-durum korumasından ÖNCE; yalnız durum yazımı koruma altında.
+      final error = toReportedApiError(e, st, source: ReportSource.tasks);
       if (!live()) return null;
-      final error = toApiError(e);
       // Teklif gönderilen e-postaya bağlıdır; taslağın e-postası bu arada değiştiyse
       // (A gönderilip B'ye düzenlendi) A'nın hesabı B taslağına yazılmaz.
       final current = state.email.trim() == email;

@@ -37,6 +37,14 @@ final class MobileReleasePolicy {
   final bool crashReportingEnabled;
   final bool analyticsEnabled;
 
+  Map<String, Object> toValues() => {
+    ..._android.toValues('android'),
+    ..._ios.toValues('ios'),
+    'native_push_enabled': nativePushEnabled,
+    'crash_reporting_enabled': crashReportingEnabled,
+    'analytics_enabled': analyticsEnabled,
+  };
+
   MobileUpdateRequirement evaluate({
     required MobileReleasePlatform platform,
     required String runningVersion,
@@ -62,6 +70,11 @@ final class MobileReleasePolicy {
     }
     return MobileUpdateRequirement.none;
   }
+}
+
+abstract interface class CachedReleasePolicySource
+    implements ReleasePolicySource {
+  Future<MobileReleasePolicy> readCached();
 }
 
 abstract interface class ReleasePolicySource {
@@ -93,6 +106,13 @@ final class _PlatformPolicy {
     }
     return _PlatformPolicy(minimum: minimum, recommended: recommended);
   }
+
+  Map<String, Object> toValues(String platform) => {
+    '${platform}_minimum_version': minimum.version?.toString() ?? '',
+    '${platform}_minimum_build': minimum.build,
+    '${platform}_recommended_version': recommended.version?.toString() ?? '',
+    '${platform}_recommended_build': recommended.build,
+  };
 
   final _ReleaseFloor minimum;
   final _ReleaseFloor recommended;

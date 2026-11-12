@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/errors/error_text.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_pane.dart';
@@ -132,7 +134,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final owner = _composeOwner;
     try {
       await op();
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.messages);
       if (mounted && _composeOwner == owner) _toast(errorText(context.l10n, e));
     }
   }
@@ -214,7 +217,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         if (!mounted || _composeOwner != owner) return;
         _view.clearContext();
         _draft.clear();
-      } on ApiError catch (e) {
+      } on ApiError catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.messages);
         if (!mounted || _composeOwner != owner) return;
         _toast(errorText(l, e));
         // Bayat sürüm: mesaj yeniden okundu ve sunucunun değeri görünüyor; taslak kalır. Yeniden
@@ -305,7 +309,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             try {
               await _room.delete(m.id);
               if (mounted) _toast(l.uiMessagesDeleted);
-            } on ApiError catch (e) {
+            } on ApiError catch (e, st) {
+              reportUnexpected(e, st, source: ReportSource.messages);
               if (mounted) _toast(errorText(l, e));
             }
           case ChatSimpleAction.retry:

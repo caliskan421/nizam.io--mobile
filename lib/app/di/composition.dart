@@ -5,10 +5,13 @@ import 'package:get_it/get_it.dart';
 import '../../core/config/flavor.dart';
 import '../../core/config/mobile_release_policy.dart';
 import '../../core/config/release_policy_provider.dart';
+import '../../core/config/running_release.dart';
+import '../../core/config/update_store.dart';
 import '../../core/network/connectivity_link.dart';
 import '../../core/network/connectivity_monitor.dart';
 import '../../core/notifications/push_notifications.dart';
 import '../../core/notifications/push_providers.dart';
+import '../../core/preferences/app_preferences.dart';
 import '../../core/preferences/locale_controller.dart';
 import '../../core/preferences/theme_mode_controller.dart';
 import '../../core/providers.dart';
@@ -17,6 +20,8 @@ import '../../core/server/server_binding.dart';
 import '../../core/session/session_controller.dart';
 import '../../core/storage/preference_store.dart';
 import '../../core/storage/secure_store.dart';
+import '../../core/telemetry/error_reporting.dart';
+import '../../core/telemetry/error_reporting_controller.dart';
 import '../../features/activity/activity_module.dart';
 import '../../features/administration/administration_module.dart';
 import '../../features/archive/archive_module.dart';
@@ -31,6 +36,8 @@ import '../../features/reports/reports_module.dart';
 import '../../features/scope/scope_module.dart';
 import '../../features/tasks/tasks_module.dart';
 import '../../features/timeline/timeline_module.dart';
+import '../config/native_update_store.dart';
+import '../telemetry/provider_error_observer.dart';
 import 'dependencies.dart';
 
 /// Bileşim kökü: get_it nesne grafiği + onu Riverpod portlarına bağlayan ProviderContainer.
@@ -51,9 +58,12 @@ class Composition {
     SecureStore? secureStore,
     HttpClientAdapter? httpAdapter,
     PreferenceStore? preferenceStore,
+    AppPreferences? appPreferences,
     ConnectivityLink? connectivityLink,
     PushNotifications? pushNotifications,
     ReleasePolicySource? releasePolicySource,
+    RunningRelease? runningRelease,
+    ErrorReporter? errorReporter,
   }) {
     final locator = GetIt.asNewInstance();
     // Native sözleşme ve Firebase dağıtım ayarları hazır olana kadar kapalı port.
@@ -70,7 +80,10 @@ class Composition {
       secureStore: secureStore,
       httpAdapter: httpAdapter,
       preferenceStore: preferenceStore,
+      appPreferences: appPreferences,
       connectivityLink: connectivityLink,
+      runningVersion: runningRelease?.version,
+      errorReporter: errorReporter,
     );
     late final ProviderContainer container;
     // Feature modülleri yalnız buradan kaydedilir (sınır kuralı G2). Reaktif API istemcisi
@@ -119,8 +132,16 @@ class Composition {
       // Otomatik yeniden deneme YOK (A3 / CLAUDE.md): Riverpod 3 varsayılanı hata veren
       // sağlayıcıyı kendiliğinden yeniden çalıştırır; yeniden deneme yalnız kullanıcı dokunuşuyla.
       retry: (_, _) => null,
+      // Beklenmeyen sağlayıcı hataları tek merkezden raporlanır (kapı kapalıyken etkisiz).
+      observers: const [ErrorReportingProviderObserver()],
       overrides: [
         flavorProvider.overrideWithValue(flavor),
+        if (runningRelease != null) ...[
+          runningReleaseProvider.overrideWithValue(runningRelease),
+          updateStoreProvider.overrideWithValue(
+            NativeUpdateStore(runningRelease),
+          ),
+        ],
         releasePolicySourceProvider.overrideWithValue(
           locator<ReleasePolicySource>(),
         ),
@@ -132,6 +153,9 @@ class Composition {
         localeControllerProvider.overrideWithValue(locator<LocaleController>()),
         themeModeControllerProvider.overrideWithValue(
           locator<ThemeModeController>(),
+        ),
+        errorReportingControllerProvider.overrideWithValue(
+          locator<ErrorReportingController>(),
         ),
         connectivityMonitorProvider.overrideWithValue(
           locator<ConnectivityMonitor>(),

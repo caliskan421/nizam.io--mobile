@@ -2258,6 +2258,24 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiIdentityProfileEmail => 'E-posta';
 
   @override
+  String get uiIdentityCrashReportsTitle => 'Hata raporları';
+
+  @override
+  String get uiIdentityCrashReportsSwitch => 'Hata raporlarını gönder';
+
+  @override
+  String get uiIdentityCrashReportsBody =>
+      'Açıkken, uygulama çöktüğünde veya beklenmeyen bir hata oluştuğunda teknik bir özet gönderilir: hata türü, işlem adı, kod izi, uygulama ve cihaz sürümü. Çökme izini cihazdaki Firebase bileşeni de toplar. E-posta, parola, mesaj ve dosya içeriği, sunucu adresi rapora konmaz. Varsayılan kapalıdır; istediğiniz an kapatabilirsiniz.';
+
+  @override
+  String get uiIdentityCrashReportsEnableFailed =>
+      'Hata raporları açılamadı; kapalı kaldı. Daha sonra tekrar deneyin.';
+
+  @override
+  String get uiIdentityCrashReportsRevokeNotPersisted =>
+      'Bu oturumda kapatıldı ama tercih kaydedilemedi. Uygulama yeniden açıldığında tekrar açık olabilir; lütfen tekrar kapatmayı deneyin.';
+
+  @override
   String get uiIdentitySignOut => 'Çıkış yap';
 
   @override
@@ -3480,15 +3498,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiServerConnect => 'Bağlan';
 
   @override
-  String get uiServerUpdateTitle => 'Güncelleme gerekli';
+  String get uiServerUpdateTitle => 'Devam etmek için güncelle';
 
   @override
   String get uiServerUpdateMessage =>
-      'Bu sunucu uygulamanın daha yeni bir sürümünü gerektiriyor. Giriş yapabilmek için uygulamayı güncelleyin.';
+      'Sunucuna bağlanmak için uygulamanın yeni sürümünü yükle.';
 
   @override
   String get uiServerUpdateApiMessage =>
-      'Bu sunucunun API sürümü uygulamayla uyumlu değil. Giriş yapabilmek için uygulamayı güncelleyin ya da sunucu yöneticinize başvurun.';
+      'Uygulaman bu sunucuyla uyumlu değil. Yeni sürümü yükle veya yöneticinle iletişime geç.';
 
   @override
   String get uiServerUpdateServer => 'Sunucu';
@@ -3497,10 +3515,47 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiServerUpdateRequiredVersion => 'Gerekli sürüm';
 
   @override
-  String get uiServerUpdateInstalledVersion => 'Kurulu sürüm';
+  String get uiServerUpdateInstalledVersion => 'Mevcut sürüm';
 
   @override
-  String get uiServerUpdateRecheck => 'Yeniden denetle';
+  String get uiServerUpdateRecheck => 'Yeniden kontrol et';
+
+  @override
+  String get uiServerUpdateRemoteMessage =>
+      'Uygulamayı kullanmaya devam etmek için yeni sürümü yükle.';
+
+  @override
+  String get uiServerUpdateOptionalTitle => 'Yeni sürüm kullanıma hazır';
+
+  @override
+  String get uiServerUpdateOptionalMessage =>
+      'Yeni sürüme şimdi geçebilir veya mevcut sürümle devam edebilirsin.';
+
+  @override
+  String get uiServerUpdateStore => 'Şimdi güncelle';
+
+  @override
+  String get uiServerUpdateStoreUnavailable =>
+      'Güncelleme bağlantısı henüz hazır değil. Daha sonra yeniden kontrol edebilirsin.';
+
+  @override
+  String get uiServerUpdateStoreFailed =>
+      'Mağaza açılamadı. Yeniden deneyebilirsin.';
+
+  @override
+  String get uiServerUpdateLater => 'Daha sonra';
+
+  @override
+  String get uiServerUpdateInvalidVersion =>
+      'Uygulamanın sürümü doğrulanamadı. Uygulamayı yeniden aç veya yöneticinle iletişime geç.';
+
+  @override
+  String get uiServerUpdatePolicyUnavailable =>
+      'Güncelleme bilgisi şu anda alınamıyor. Biraz sonra yeniden kontrol edebilirsin.';
+
+  @override
+  String get uiServerUpdateStoreRequiredUnavailable =>
+      'Güncelleme bağlantısı henüz hazır değil. Yardım için yöneticinle iletişime geç.';
 
   @override
   String get uiTablesTitle => 'Tablolar';

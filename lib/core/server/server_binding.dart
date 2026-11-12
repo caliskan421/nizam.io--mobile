@@ -12,6 +12,8 @@ import '../http/dio_factory.dart';
 import '../i18n/generated/client_error_codes.gen.dart';
 import '../logging/log.dart';
 import '../storage/secure_store.dart';
+import '../telemetry/report_source.dart';
+import '../telemetry/unexpected_error.dart';
 import 'semver.dart';
 import 'server_address.dart';
 
@@ -148,7 +150,8 @@ class ServerBindingController {
     final ServerAddress address;
     try {
       address = ServerAddress.parse(input, flavor);
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.server);
       return _state.value = BindingFailed(e);
     }
     _state.value = BindingVerifying(address);
@@ -172,7 +175,13 @@ class ServerBindingController {
       final minimum = SemVer.tryParse(profile.minimumMobileVersion);
       final current = SemVer.tryParse(_appVersion);
       if (minimum == null || current == null) {
-        return _fail(ApiError(ClientErrorCode.invalidResponse), address);
+        return _fail(
+          invalidResponseError(
+            source: ReportSource.server,
+            apiOperationId: 'instanceProfile',
+          ),
+          address,
+        );
       }
       if (current < minimum) {
         return _state.value = BindingUpdateRequired(
@@ -210,7 +219,8 @@ class ServerBindingController {
       );
       if (stale()) return _state.value;
       return _state.value = BindingVerified(info);
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.server);
       if (stale()) return _state.value;
       // NIZAM.IO olmayan bir sunucu keşif ucunda zarfsız/404 yanıt verir.
       final unrecognized =
@@ -221,7 +231,8 @@ class ServerBindingController {
             : e,
         address,
       );
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.server);
       if (stale()) return _state.value;
       // Güvenli depo (bağ kaydı) okunamadı/yazılamadı ya da yeniden bağlanma temizliği düştü:
       // bağ doğrulanmış SAYILMAZ (fail-closed).
@@ -240,7 +251,8 @@ class ServerBindingController {
     try {
       final m = jsonDecode(raw) as Map<String, Object?>;
       return (m['origin']! as String, m['instance_id']! as String);
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.server);
       return null;
     }
   }

@@ -126,20 +126,36 @@ void main() {
     },
   );
 
-  test('429: bekleme bitince ön plan döngüsünden sonra akış açılır', () async {
+  // Sahte zamanlayıcı + sahte saat birlikte ilerler (gerçek saat/bekleme yok): bekleme 299 ms'de
+  // sürer, 300 ms'de biter ve akış yalnız o zaman açılır.
+  testWidgets('429: bekleme bitince ön plan döngüsünden sonra akış açılır', (
+    tester,
+  ) async {
     final repo = FakeChatRepository();
     _rateLimited(repo, const Duration(milliseconds: 300));
-    final c = chatContainer(repo)
-      ..listen(chatSyncControllerProvider, (_, _) {});
-    await pumpEventQueue(times: 50);
+    var elapsed = Duration.zero;
+    final base = DateTime.utc(2026, 11, 12);
+    final c = chatContainer(
+      repo,
+      extra: [chatClockProvider.overrideWithValue(() => base.add(elapsed))],
+    )..listen(chatSyncControllerProvider, (_, _) {});
+    await tester.pump();
     c.read(chatForegroundProvider.notifier).set(false);
-    await pumpEventQueue();
+    await tester.pump();
     c.read(chatForegroundProvider.notifier).set(true);
-    await pumpEventQueue();
+    await tester.pump();
     expect(repo.connects, 1);
-    await Future<void>.delayed(const Duration(milliseconds: 400));
-    await pumpEventQueue();
-    expect(repo.connects, 2);
+    Future<void> advance(Duration d) async {
+      elapsed += d;
+      await tester.pump(d);
+    }
+
+    await advance(const Duration(milliseconds: 299));
+    expect(repo.connects, 1, reason: '299 ms: bekleme sürüyor');
+    expect(c.read(chatSyncControllerProvider), ChatSyncStatus.retrying);
+    await advance(const Duration(milliseconds: 1));
+    await tester.pump();
+    expect(repo.connects, 2, reason: '300 ms: bekleme bitti, akış açıldı');
   });
 
   test('arka plan kapatır, ön plan yeniden açar', () async {

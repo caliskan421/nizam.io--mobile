@@ -1,17 +1,60 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import '../../core/config/mobile_release_policy.dart';
+import '../../core/preferences/app_preferences.dart';
+import '../../core/telemetry/report_source.dart';
+import '../../core/telemetry/unexpected_error.dart';
 
 enum ReleasePolicyOrigin { defaults, cache, remote }
 
 /// Explicitly injected and dormant until [fetch] is requested by composition.
 /// Flags describe intent; this source never enables telemetry or messaging.
-final class FirebaseReleasePolicySource implements ReleasePolicySource {
-  FirebaseReleasePolicySource(this._remoteConfig);
+final class FirebaseReleasePolicySource implements CachedReleasePolicySource {
+  FirebaseReleasePolicySource(
+    this._remoteConfig, {
+    AppPreferences? preferences,
+    this.minimumFetchInterval = const Duration(hours: 12),
+  })
+    // The public named parameter intentionally hides the private field.
+    // ignore: prefer_initializing_formals
+    : _preferences = preferences;
+
+  final AppPreferences? _preferences;
+  final Duration minimumFetchInterval;
+  Future<void>? _cacheRead;
+
+  @override
+  Future<MobileReleasePolicy> readCached() async {
+    if (_hasGood) return _lastGood;
+    await (_cacheRead ??= _readCached());
+    if (_cacheFailed && !_hasGood) {
+      throw const FormatException('Stored release policy is unavailable');
+    }
+    return _lastGood;
+  }
+
+  Future<void> _readCached() async {
+    try {
+      final saved = await _preferences?.releasePolicy();
+      _cacheFailed = false;
+      if (saved != null) {
+        _lastGood = saved;
+        _hasGood = true;
+        _origin = ReleasePolicyOrigin.cache;
+      }
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.preferences);
+      _cacheFailed = true;
+      // Failed disk reads must be retried after a temporary platform failure.
+      _cacheRead = null;
+    }
+  }
 
   final FirebaseRemoteConfig _remoteConfig;
   MobileReleasePolicy _lastGood = const MobileReleasePolicy.disabled();
   bool _hasGood = false;
+  bool _cacheFailed = false;
+  Future<MobileReleasePolicy>? _inFlight;
   ReleasePolicyOrigin _origin = ReleasePolicyOrigin.defaults;
 
   /// SDK values after a successful fetch/activate call may still be cached;
@@ -33,7 +76,11 @@ final class FirebaseReleasePolicySource implements ReleasePolicySource {
   };
 
   @override
-  Future<MobileReleasePolicy> fetch() async {
+  Future<MobileReleasePolicy> fetch() =>
+      _inFlight ??= _fetch().whenComplete(() => _inFlight = null);
+
+  Future<MobileReleasePolicy> _fetch() async {
+    if (!_hasGood) await (_cacheRead ??= _readCached());
     try {
       await _remoteConfig.ensureInitialized();
       // Load activated persisted values before network access, including on the
@@ -49,7 +96,7 @@ final class FirebaseReleasePolicySource implements ReleasePolicySource {
       await _remoteConfig.setConfigSettings(
         RemoteConfigSettings(
           fetchTimeout: const Duration(seconds: 8),
-          minimumFetchInterval: const Duration(hours: 12),
+          minimumFetchInterval: minimumFetchInterval,
         ),
       );
       await _remoteConfig.fetchAndActivate();
@@ -58,6 +105,10 @@ final class FirebaseReleasePolicySource implements ReleasePolicySource {
       // Unavailable SDK, transport failure or invalid candidate: retain the
       // complete last valid policy, including any mandatory update floor.
     }
+    if (_cacheFailed && !_hasGood) {
+      throw const FormatException('No usable release policy');
+    }
+    if (_hasGood) await _preferences?.setReleasePolicy(_lastGood);
     return _lastGood;
   }
 
@@ -76,16 +127,21 @@ final class FirebaseReleasePolicySource implements ReleasePolicySource {
         }
         values[key] = int.parse(raw);
       } else {
-        if (raw != 'true' && raw != 'false') {
+        // Apple NSNumber defaults serialize booleans as UTF-8 "0"/"1".
+        // Validate before asBool(), which would turn arbitrary text into false.
+        if (raw != 'true' && raw != 'false' && raw != '0' && raw != '1') {
           throw const FormatException('Invalid release flag');
         }
-        values[key] = raw == 'true';
+        values[key] = value.asBool();
       }
     }
     if (values.isEmpty) return;
     final policy = MobileReleasePolicy.fromRemoteConfig(values);
     _lastGood = policy;
     _hasGood = true;
+    _cacheFailed = false;
     _origin = candidateOrigin;
+    // Persistence happens once after fetch, never concurrently for SDK cache
+    // and the newer remote candidate.
   }
 }

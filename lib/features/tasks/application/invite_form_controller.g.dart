@@ -42,7 +42,7 @@ final class InviteFormControllerProvider
 }
 
 String _$inviteFormControllerHash() =>
-    r'c76487c2ba96c24c1c085b86c8af38ab4792c963';
+    r'1aa4144e72de2109ab4e80399f3c3109fceaeb2a';
 
 abstract class _$InviteFormController extends $Notifier<InviteForm> {
   InviteForm build();

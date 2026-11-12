@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../application/chats_controller.dart';
@@ -25,11 +26,13 @@ Future<void> openPersonChat(BuildContext context, String accountId) async {
     }
     container.read(chatsControllerProvider.notifier).opened(chat);
     context.appNav.openChat(chat.id);
-  } on Object catch (e) {
+  } on Object catch (e, st) {
+    // Rapor, bağlam/kapsam korumasından ÖNCE.
+    final api = toReportedApiError(e, st, source: ReportSource.messages);
     if (context.mounted &&
         session == container.read(sessionGenerationProvider) &&
         program == container.read(scopeStateProvider).programId) {
-      NzToast.error(context, toApiError(e));
+      NzToast.error(context, api);
     }
   }
 }

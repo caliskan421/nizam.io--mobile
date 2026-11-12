@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../tasks/tasks.dart';
@@ -40,10 +41,14 @@ class _AdminTransferPanelState extends ConsumerState<AdminTransferPanel> {
     Future<void> run(Future<void> Function() call) async {
       try {
         await call();
-      } on Object catch (e) {
-        if (context.mounted) {
-          NzToast.error(context, toApiError(e));
-        }
+      } on Object catch (e, st) {
+        // Rapor, bağlam korumasından ÖNCE.
+        final api = toReportedApiError(
+          e,
+          st,
+          source: ReportSource.administration,
+        );
+        if (context.mounted) NzToast.error(context, api);
       }
     }
 

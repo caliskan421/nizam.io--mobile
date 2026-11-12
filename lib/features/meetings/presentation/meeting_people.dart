@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/domain/turkish_collation.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
@@ -245,7 +247,8 @@ class _MeetingPeopleState extends ConsumerState<MeetingPeople> {
     if (m.byPerson) {
       try {
         invitees = await ref.read(meetingInviteesProvider.future);
-      } on Object {
+      } on Object catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.meetings);
         invitees = null; // katalog ekipleri kalır; eksiklik aşağıda yazılır
       }
       if (!context.mounted) return;

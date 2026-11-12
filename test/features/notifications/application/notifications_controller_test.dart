@@ -6,10 +6,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/domain/page_slice.dart';
 import 'package:nizamio/core/errors/api_error.dart';
+import 'package:nizamio/core/telemetry/error_report.dart';
+import 'package:nizamio/core/telemetry/error_reporting.dart';
+import 'package:nizamio/core/telemetry/report_source.dart';
 import 'package:nizamio/features/notifications/application/notifications_controller.dart';
 import 'package:nizamio/features/notifications/application/notifications_providers.dart';
 import 'package:nizamio/features/notifications/domain/app_notification.dart';
 import 'package:nizamio/features/notifications/domain/notification_repository.dart';
+
+import '../../../support/fake_error_reporter.dart';
 
 AppNotification _n(String id, {bool read = false, String kind = 'work_item'}) =>
     AppNotification(
@@ -81,6 +86,22 @@ class _Repo implements NotificationRepository {
 
   @override
   Never pushPublicKey() => throw UnimplementedError();
+}
+
+/// `c2` sayfası kapı açılınca beklenmeyen (ApiError dışı) bir hatayla düşer.
+class _LateFailRepo extends _Repo {
+  final lateGate = Completer<void>();
+
+  @override
+  Future<NotificationFeed> list({
+    PageRequest page = const PageRequest(),
+  }) async {
+    if (page.cursor == 'c2') {
+      await lateGate.future;
+      throw StateError('sentinel');
+    }
+    return super.list(page: page);
+  }
 }
 
 ProviderContainer _container(_Repo repo) {
@@ -195,6 +216,30 @@ void main() {
         expect(_view(c).moreError, isNull);
       },
     );
+
+    test('bayat sonraki-sayfa sonucunda beklenmeyen (açık, apiCall dışı) hata '
+        'yine de TEK kez raporlanır; durum bayat hatayla ezilmez', () async {
+      final sdk = FakeErrorReporter();
+      ErrorReporting.reset();
+      ErrorReporting.attach(sdk).setEnabled(true);
+      addTearDown(ErrorReporting.reset);
+      final repo = _LateFailRepo()
+        ..pages[null] = _feed([_n('a')], next: 'c2')
+        ..pages['c2'] = _feed([_n('b')]);
+      final c = _container(repo);
+      await _open(c);
+      final ctl = c.read(notificationsControllerProvider.notifier);
+      final stale = ctl.loadMore(); // c2 okuması bekler
+      await pumpEventQueue();
+      await ctl.refresh(); // nesil değişti: bu sonuç bayat
+      repo.lateGate.complete();
+      await stale;
+      expect(sdk.reports, hasLength(1));
+      expect(sdk.reports.single.errorType, ReportErrorType.stateError);
+      expect(sdk.reports.single.source, ReportSource.notifications);
+      expect(_view(c).moreError, isNull, reason: 'bayat hata duruma yazılmaz');
+      expect(_view(c).items.map((n) => n.id), ['a']);
+    });
 
     test('yenileme ilk sayfayı yeniden okur, imleç sıfırlanır', () async {
       final repo = _Repo()

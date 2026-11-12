@@ -6,6 +6,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/cache_owner.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../tasks/tasks.dart';
 import '../domain/chat.dart';
 import '../domain/chat_room.dart';
@@ -303,7 +305,8 @@ class ChatActionsController extends _$ChatActionsController {
         for (final w in waiters) {
           w.complete();
         }
-      } on Object catch (e) {
+      } on Object catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.messages);
         // Geri alma yalnız istekten sonra dokunuş yoksa; varsa son istenen durum kalır.
         if (f.gen != gen) {
           uncertain = true;

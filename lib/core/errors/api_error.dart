@@ -1,12 +1,18 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderException;
 import 'package:meta/meta.dart';
 
 import '../api/generated/error_catalog.gen.dart';
 import '../api/generated/models/error_envelope.dart';
 import '../api/generated/models/field_error.dart';
 import '../i18n/generated/client_error_codes.gen.dart';
+import '../telemetry/api_call_scope.dart';
+import '../telemetry/error_report.dart';
+import '../telemetry/error_reporting.dart';
+import '../telemetry/provider_unwrap.dart';
+import '../telemetry/report_source.dart';
 
 /// Alan doğrulama hatası (sunucu zarfının `fields[]` öğesi; üretilmiş DTO'dan eşlenir —
 /// sınır kuralı A3). Alanlar DTO ile birebir; [message] sunucu metnidir ve kullanıcıya
@@ -75,6 +81,10 @@ const conflictRetryCode = 'platform.conflict_retry';
 /// Dio hatasını [ApiError]'a çevirir. TLS hatası AYRI koddur ve asla ağ hatasına
 /// indirgenmez/yutulmaz (ADR-0008, K-11).
 ApiError toApiError(Object error) {
+  if (error is ProviderException) {
+    // Bağımlılık sarmalayıcısı: asıl hataya göre çevrilir (sarmalayıcı kendi başına geçersiz yanıt değildir).
+    return toApiError(unwrapProviderException(error, StackTrace.empty).$1);
+  }
   if (error is ApiError) return error;
   if (error is! DioException) return ApiError(ClientErrorCode.invalidResponse);
   final inner = error.error;
@@ -144,14 +154,128 @@ ApiError _fromResponse(Response<Object?>? response) {
 /// Üretilmiş istemci çağrısını sarar: her hata [ApiError] olarak fırlatılır. 2xx gövdesi
 /// üretilmiş DTO'ya ayrıştırılamazsa (TypeError, FormatException, CheckedFromJsonException …)
 /// `client.invalid_response` olur — ayrıştırma hatası hiçbir zaman ham sızmaz (CX-Ö-01).
+///
+/// Hata ApiError'a çevrilmeden ÖNCE (özgün yığın ve tür elde) güvenle sınıflandırılıp
+/// raporlanır ([ErrorReporting]; onay kapalıyken hiçbir şey olmaz). Raporlananlar yalnız
+/// beklenmeyen sınıflardır: geçersiz yanıt (ayrıştırma hatası, zarfsız yanıt) ve 5xx.
+/// Doğrulama, yetki, yanlış parola, iptal, zaman aşımı, çevrimdışı ve TLS raporlanmaz. Özgün
+/// yığın dönüştürülmüş hataya taşınır; bu yüzden üst katmanlar tekrar raporlamaz.
+///
+/// İşlem kimliği: çağrı süresince giden isteğin DOĞRULANMIŞ operationId'si (üretilmiş
+/// `apiOperations`) [ApiCallScope] ile toplanır; kesin tek işlem yoksa (paralel istekler) `null`.
 Future<T> apiCall<T>(Future<T> Function() call) async {
+  final scope = ApiCallScope();
   try {
-    return await call();
-  } on ApiError {
+    return await ApiCallScope.run(scope, call);
+  } on ApiError catch (e, st) {
+    // Elle kurulmuş beklenmeyen ApiError (ör. şemaya uymayan gövde) da sınıflandırılır;
+    // beklenen kodlar (doğrulama, yetki …) raporlanmaz.
+    reportApiFailure(e, st, e, apiOperationId: scope.operationId);
     rethrow;
-  } on DioException catch (e) {
-    throw toApiError(e);
-  } on Object {
-    throw ApiError(ClientErrorCode.invalidResponse);
+  } on DioException catch (e, st) {
+    final api = toApiError(e);
+    final operationId =
+        ApiCallScope.ofRequest(e.requestOptions) ?? scope.operationId;
+    reportApiFailure(e.error ?? e, st, api, apiOperationId: operationId);
+    Error.throwWithStackTrace(api, st);
+  } on Object catch (e, st) {
+    final api = ApiError(ClientErrorCode.invalidResponse);
+    reportApiFailure(e, st, api, apiOperationId: scope.operationId);
+    Error.throwWithStackTrace(api, st);
   }
+}
+
+/// [api] BEKLENMEYEN sınıftaysa (geçersiz yanıt ya da 5xx) [cause] + [stack] ile raporlar ve
+/// dönüştürülmüş [api] nesnesini aynı kökten sayar (tek rapor). Beklenen kodlar (doğrulama,
+/// yetki, çakışma, iptal, zaman aşımı, çevrimdışı, TLS) raporlanmaz. Hiç fırlatmaz.
+void reportApiFailure(
+  Object cause,
+  StackTrace stack,
+  ApiError api, {
+  ReportOperation? operation,
+  ReportSource source = ReportSource.network,
+  String? apiOperationId,
+}) {
+  final status = api.status;
+  final ReportKind kind;
+  if ((status ?? 0) >= 500) {
+    kind = ReportKind.serverError; // zarfsız 502 HTML'i de sunucu hatasıdır
+  } else if (api.code == ClientErrorCode.invalidResponse) {
+    kind = ReportKind.invalidResponse;
+  } else {
+    return;
+  }
+  ErrorReporting.report(
+    cause,
+    stack,
+    kind: kind,
+    operation: operation,
+    source: source,
+    apiOperationId: apiOperationId,
+    apiCode: api.code,
+    status: status,
+  );
+  if (!identical(cause, api)) {
+    ErrorReporting.markHandled(api, stack);
+    ErrorReporting.markCreated(api); // bu olay için dönüştürülmüş yeni nesne
+  }
+}
+
+/// Katalogda 5xx görünen ama TEKNİK arıza olmayan, beklenen iş sınırı kodları (kullanıcıya ARB
+/// metniyle gösterilir): asistan tur/token sınırı ve kapasite doluluğu.
+const _expectedServerCodes = {
+  'assistant.limit_exceeded',
+  'assistant.capacity_full',
+};
+
+/// HTTP 200 SSE akışındaki sunucu `hata` OLAYI (`AssistantFailure` kodu): kod katalogda
+/// 5xx'e karşılık geliyorsa (`platform.internal`, `assistant.provider_unavailable` …) TEKNİK
+/// sunucu hatasıdır ve [ReportKind.streamServerError] olarak raporlanır; reddedilen / sınır /
+/// kota / yoğunluk gibi beklenen kodlar (4xx ya da katalog dışı) 0 rapor üretir. Gerçek HTTP
+/// yanıtı 200 olduğundan durum SINIFI uydurulmaz. Olay iletisi/yükü rapora girmez.
+void reportStreamEventFailure(
+  String code, {
+  ReportOperation? operation,
+  ReportSource source = ReportSource.network,
+  String? apiOperationId,
+}) {
+  final statuses = errorCatalog[code]?.statuses ?? const <int>[];
+  if (!statuses.any((s) => s >= 500) || _expectedServerCodes.contains(code)) {
+    return;
+  }
+  final api = ApiError(code);
+  ErrorReporting.report(
+    api,
+    StackTrace.current,
+    kind: ReportKind.streamServerError,
+    operation: operation,
+    source: source,
+    apiOperationId: apiOperationId,
+    apiCode: code,
+  );
+}
+
+/// `client.invalid_response` üretilen yerde (ApiError `apiCall` dışında elle kurulurken)
+/// kullanılır: hata raporlanmış olarak döner. `throw invalidResponseError()`. [cause]/[stack]
+/// verilirse asıl hata ve özgün yığın raporlanır (ör. ayrıştırma hatası); [apiOperationId]
+/// üretilmiş `apiOperations` listesindeki işlem kimliğidir (aksi halde rapora girmez).
+ApiError invalidResponseError({
+  Object? cause,
+  StackTrace? stack,
+  ReportOperation? operation,
+  ReportSource source = ReportSource.network,
+  String? apiOperationId,
+}) {
+  final e = ApiError(ClientErrorCode.invalidResponse);
+  reportApiFailure(
+    cause ?? e,
+    stack ?? StackTrace.current,
+    e,
+    operation: operation,
+    source: source,
+    apiOperationId: apiOperationId,
+  );
+  // Nesne burada yeni kuruldu: ilk yakalayan katman (apiCall/controller) aynı olaydır.
+  if (cause == null) ErrorReporting.markCreated(e);
+  return e;
 }

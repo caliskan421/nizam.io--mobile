@@ -90,8 +90,8 @@ void main() {
       expect(sseJsonObject('{"a":1}'), {'a': 1});
     });
 
-    test('nesne olmayan ya da bozuk JSON → invalid_response', () {
-      for (final bad in ['[1]', '"x"', '{bozuk']) {
+    test('nesne olmayan JSON → invalid_response', () {
+      for (final bad in ['[1]', '"x"']) {
         expect(
           () => sseJsonObject(bad),
           throwsA(
@@ -105,6 +105,22 @@ void main() {
         );
       }
     });
+
+    test(
+      'bozuk JSON: ayrıştırıcının asıl FormatException\'ı ve yığını korunur',
+      () {
+        Object? caught;
+        StackTrace? stack;
+        try {
+          sseJsonObject('{bozuk');
+        } on Object catch (e, st) {
+          caught = e;
+          stack = st;
+        }
+        expect(caught, isA<FormatException>());
+        expect(stack.toString(), contains('sseJsonObject'));
+      },
+    );
   });
 
   group('streamApiError', () {

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/errors/api_error.dart';
 import '../../../../core/providers.dart';
+import '../../../../core/telemetry/report_source.dart';
+import '../../../../core/telemetry/unexpected_error.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../tasks/tasks.dart';
@@ -151,8 +152,9 @@ class _GanttSelectionCardState extends ConsumerState<GanttSelectionCard> {
       if (saved && _current(owner)) {
         widget.onClose();
       }
-    } on Object catch (e) {
-      if (mounted && _current(owner)) NzToast.error(context, toApiError(e));
+    } on Object catch (e, st) {
+      final api = toReportedApiError(e, st, source: ReportSource.timeline);
+      if (mounted && _current(owner)) NzToast.error(context, api);
     } finally {
       if (_current(owner)) setState(() => _busy = false);
     }
@@ -171,8 +173,9 @@ class _GanttSelectionCardState extends ConsumerState<GanttSelectionCard> {
         TimelineRequestNoChange() => l.uiTimelineRequestNoChange,
         TimelineRequestSent(:final end) => l.requestSentText(end),
       });
-    } on Object catch (e) {
-      if (mounted && _current(owner)) NzToast.error(context, toApiError(e));
+    } on Object catch (e, st) {
+      final api = toReportedApiError(e, st, source: ReportSource.timeline);
+      if (mounted && _current(owner)) NzToast.error(context, api);
     } finally {
       if (_current(owner)) setState(() => _busy = false);
     }

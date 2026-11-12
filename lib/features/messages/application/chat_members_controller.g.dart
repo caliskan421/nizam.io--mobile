@@ -69,7 +69,7 @@ final class ChatMembersControllerProvider
 }
 
 String _$chatMembersControllerHash() =>
-    r'37445d24c7bb0e8f36ac7e8f4c2bb6a1790343fa';
+    r'2b83cf92c2b1f3516b713ff1efc3cf62436f4460';
 
 /// Grup üyeleri ve grup ayarları (istemci akışları §10.1): üye listesi (yazıyor adları ve `@`
 /// bahsetme önerisi buradan çözülür), üye ekleme/çıkarma, gruptan ayrılma, yöneticilik, ad

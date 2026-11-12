@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-import '../../../core/errors/api_error.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
@@ -46,7 +47,8 @@ class CoordArchiveTab extends ConsumerWidget {
         } else {
           context.appNav.openArchiveFolder(target.code);
         }
-      } on Object {
+      } on Object catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.coordinatorships);
         if (context.mounted) context.appNav.openArchive();
       }
     }
@@ -69,8 +71,14 @@ class CoordArchiveTab extends ConsumerWidget {
           fileId: file.id,
           taskTitle: (id) => catalog.task(id)?.title,
         );
-      } on Object catch (error) {
-        if (context.mounted) NzToast.error(context, toApiError(error));
+      } on Object catch (error, st) {
+        // Rapor, bağlam korumasından ÖNCE.
+        final api = toReportedApiError(
+          error,
+          st,
+          source: ReportSource.coordinatorships,
+        );
+        if (context.mounted) NzToast.error(context, api);
       }
     }
 

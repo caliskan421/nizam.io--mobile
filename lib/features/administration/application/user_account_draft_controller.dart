@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/expected_failure.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../coordinatorships/coordinatorships.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
@@ -228,7 +231,8 @@ class UserAccountDraftController extends Notifier<UserAccountDraft?> {
       check();
       try {
         await write(false);
-      } on ApiError catch (e) {
+      } on ApiError catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.administration);
         if (e.code != 'organization.confirmation_required') rethrow;
         check();
         if (!await confirmEffects()) throw const _SaveCancelled();
@@ -339,15 +343,22 @@ class UserAccountDraftController extends Notifier<UserAccountDraft?> {
     } on _SaveCancelled {
       if (current()) state = state!.copyWith(busy: false);
       return AccountSaveResult.cancelled;
-    } on Object catch (e) {
+    } on Object catch (e, st) {
+      // Rapor/çeviri durum korumasından ÖNCE: kapsam değişimi ya da dispose sonrası gelen
+      // beklenmeyen hata da raporlanır; yalnız durum yazımı koruma altındadır.
+      final api = toReportedApiError(
+        e,
+        st,
+        source: ReportSource.administration,
+      );
       if (current()) {
-        state = state!.copyWith(busy: false, error: () => toApiError(e));
+        state = state!.copyWith(busy: false, error: () => api);
       }
       return AccountSaveResult.failed;
     }
   }
 }
 
-class _SaveCancelled implements Exception {
+class _SaveCancelled implements Exception, ExpectedFailure {
   const _SaveCancelled();
 }

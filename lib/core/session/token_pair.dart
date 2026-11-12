@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
+import '../telemetry/report_source.dart';
+import '../telemetry/unexpected_error.dart';
+
 /// Mobil belirteç çifti (giriş/yenileme yanıtı gövdesinden). Yalnız [TokenStore] üzerinden
 /// güvenli depoya yazılır; [toString] belirteç içermez.
 @immutable
@@ -67,7 +70,9 @@ final class TokenPair {
         forcePasswordChange: m['force_password_change']! as bool,
         instanceId: m['instance_id']! as String,
       );
-    } on Object {
+    } on Object catch (e, st) {
+      // Bozuk saklı belirteç kaydı: oturum yok sayılır; yalnız tür/yığın raporlanır.
+      reportUnexpected(e, st, source: ReportSource.session);
       return null;
     }
   }

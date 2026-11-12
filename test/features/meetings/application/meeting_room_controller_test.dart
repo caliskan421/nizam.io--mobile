@@ -7,12 +7,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
+import 'package:nizamio/core/telemetry/error_reporting.dart';
 import 'package:nizamio/features/meetings/application/meeting_room_controller.dart';
 import 'package:nizamio/features/meetings/application/meetings_controller.dart';
 import 'package:nizamio/features/meetings/domain/meeting.dart';
 import 'package:nizamio/features/meetings/domain/meeting_board.dart';
 
 import '../../../support/fake_backend.dart';
+import '../../../support/fake_error_reporter.dart';
 import '../../../support/harness.dart';
 import '../../pilot_support.dart';
 import '../meetings_server.dart';
@@ -381,6 +383,41 @@ void main() {
       );
     },
   );
+
+  test('katılımcı ekleme: HER başarısız çağrı raporlanır (`first ??=` kısa devresi yok)', () async {
+    final sdk = FakeErrorReporter();
+    ErrorReporting.reset();
+    ErrorReporting.attach(sdk).setEnabled(true);
+    addTearDown(ErrorReporting.reset);
+    final s = MeetingsServer();
+    var n = 0;
+    s.overrides['POST /v1/meetings/m1/participants'] = () {
+      n++;
+      if (n == 1) return errorBody(500, 'platform.internal');
+      if (n == 2) {
+        return ResponseBody.fromString(
+          '<html>bad gateway</html>',
+          502,
+          headers: {
+            Headers.contentTypeHeader: ['text/html'],
+          },
+        );
+      }
+      return jsonResponse(201, {'meeting_id': 'm1', 'user_id': 'x'});
+    };
+    final (_, _, ctl) = await _open(s);
+    final r = await ctl.addParticipants(const [
+      MeetingParticipant(accountId: 'u1', fullName: 'Bir'),
+      MeetingParticipant(accountId: 'u2', fullName: 'İki'),
+      MeetingParticipant(accountId: 'u3', fullName: 'Üç'),
+    ]);
+    expect((r.added, r.failed), (1, 2));
+    // İki farklı teknik hata (500 platform.internal, 502 zarfsız): ikisi de raporlanır.
+    expect(sdk.reports.map((x) => x.apiCode).toSet(), {
+      'platform.internal',
+      'client.invalid_response',
+    });
+  });
 
   group('not silme: geri al süresi (F63 devri §4)', () {
     test(

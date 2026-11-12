@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/domain/page_slice.dart';
-import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/features/archive/application/archive_providers.dart';
@@ -60,7 +59,7 @@ class FakeArchiveRepository implements ArchiveRepository {
       ],
     ),
   };
-  ApiError? error;
+  Object? error;
   final List<ArchiveCall> calls = [];
 
   /// Yükleme çağrılarının işlem anahtarları ve dosya yolları (sırayla).

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/domain/page_slice.dart';
-import '../../../core/errors/api_error.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../application/archive_folder_sources.dart';
@@ -59,8 +60,10 @@ Future<void> openArchiveFile(
     if (context.mounted) {
       NzToast.show(context, context.l10n.uiArchiveEmptyFiles);
     }
-  } on Object catch (error) {
-    if (context.mounted) NzToast.error(context, toApiError(error));
+  } on Object catch (error, st) {
+    // Rapor, bağlam korumasından ÖNCE.
+    final api = toReportedApiError(error, st, source: ReportSource.archive);
+    if (context.mounted) NzToast.error(context, api);
   } finally {
     subscription.close();
   }

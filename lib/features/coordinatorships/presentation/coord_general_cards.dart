@@ -95,7 +95,10 @@ class CoordLoadCard extends ConsumerWidget {
     final t = context.text;
     final rows = coordLoad(tasks);
     final most = rows.fold(1, (a, r) => r.total > a ? r.total : a);
-    final done = c.taskDone;
+    // Koyu temada soluk lime (önceki görünüm); açık temada tamamlanma yeşili.
+    final done = Theme.of(context).brightness == Brightness.dark
+        ? Color.alphaBlend(c.primary.withValues(alpha: .45), c.surfaceOverlay)
+        : c.taskDone;
     final commands = ref.read(
       coordinatorshipDetailControllerProvider(code).notifier,
     );

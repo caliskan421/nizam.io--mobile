@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: docs/design/design sytem/tokens.json (blob 9f8496e30ad6) + design/mobile-tokens.json
+// Kaynak: docs/design/design sytem/tokens.json (blob 75d4a46f14e9) + design/mobile-tokens.json
 //
 // Değerler tasarım sistemi tokens.json'dan; rol eşlemesi ve mobil değerler design/mobile-tokens.json'dan.
 
@@ -251,7 +251,7 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     warning: Color(0xFFFFD166),
     onWarning: Color(0xFF0B0B0B),
     success: Color(0xFFC8F53C),
-    taskDone: Color(0xFF74C27A),
+    taskDone: Color(0xFFC8F53C),
     info: Color(0xFFA1A1A1),
     scrim: Color(0x8C000000),
     surfaceTop: Color(0xFF1C1C1C),

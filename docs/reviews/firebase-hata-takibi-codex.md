@@ -17,7 +17,7 @@ gönderim/geri alma yarışları, başarısız silme sonrası izin, kişisel yı
 | Android | `flutter build apk --debug --flavor dev -t lib/main_dev.dart --no-pub`: geçti |
 | Android, Firebase yapılandırması olmayan prod | `flutter build apk --debug --flavor prod -t lib/main_prod.dart --no-pub`: geçti |
 | iOS | `flutter build ios --simulator --debug --flavor dev -t lib/main_dev.dart --no-pub`: geçti |
-| Üretim | Son kaynaklardan `make gen` geçti; commit sonrası `make gen-check` kapanış kontrolüdür |
+| Üretim | `make gen` ve kod commit'i `c9e2163` üzerinde temiz ağaçta `make gen-check`: geçti (çıkış 0, yeniden üretim farkı yok) |
 | Fark temizliği | `git diff --check`: geçti |
 
 Genel `file_size_test` kırmızı: `detail_actions.dart` 750/742, `activity_page.dart` 585 ile artık

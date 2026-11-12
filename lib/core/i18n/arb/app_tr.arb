@@ -6197,6 +6197,14 @@
   "@uiTimelineTitle": {
     "description": "ui.timeline.title"
   },
+  "uiTimelineFullscreenHint": "Tam ekran · çıkmak için boş alana dokun",
+  "@uiTimelineFullscreenHint": {
+    "description": "ui.timeline.fullscreen_hint"
+  },
+  "uiTimelineFullscreenToggle": "Tam ekranı aç veya kapat",
+  "@uiTimelineFullscreenToggle": {
+    "description": "ui.timeline.fullscreen_toggle"
+  },
   "uiTimelineView": "Görünüm",
   "@uiTimelineView": {
     "description": "ui.timeline.view"
@@ -6369,7 +6377,7 @@
   "@uiTimelineStRequest": {
     "description": "ui.timeline.st_request"
   },
-  "uiTimelineLegendToday": "Yeşil çizgi bugünü gösterir; soldaki kutu bugünün tarihi.",
+  "uiTimelineLegendToday": "Yeşil çizgi bugünü gösterir; yeşil etiket bugünün tarihi.",
   "@uiTimelineLegendToday": {
     "description": "ui.timeline.legend_today"
   },
@@ -6473,13 +6481,29 @@
   "@uiTimelineWeekShort": {
     "description": "ui.timeline.week_short"
   },
-  "uiTimelineSave": "Tarihleri kaydet",
+  "uiTimelineSave": "Kaydet",
   "@uiTimelineSave": {
     "description": "ui.timeline.save"
   },
-  "uiTimelineSendRequest": "Talep olarak gönder",
+  "uiTimelineSendRequest": "Talep gönder",
   "@uiTimelineSendRequest": {
     "description": "ui.timeline.send_request"
+  },
+  "uiTimelineDates": "Tarihler",
+  "@uiTimelineDates": {
+    "description": "ui.timeline.dates"
+  },
+  "uiTimelineReset": "Sıfırla",
+  "@uiTimelineReset": {
+    "description": "ui.timeline.reset"
+  },
+  "uiTimelinePrevious": "önceki",
+  "@uiTimelinePrevious": {
+    "description": "ui.timeline.previous"
+  },
+  "uiTimelineRemindUnavailable": "Bu sunucu sürümü hatırlatma göndermeyi desteklemiyor.",
+  "@uiTimelineRemindUnavailable": {
+    "description": "ui.timeline.remind_unavailable"
   },
   "uiTimelineRemind": "Atanana hatırlat",
   "@uiTimelineRemind": {

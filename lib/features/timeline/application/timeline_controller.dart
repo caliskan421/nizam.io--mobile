@@ -104,6 +104,15 @@ class TimelineController extends _$TimelineController {
 
   void closeCoordMenu() => state = state.copyWith(coordMenuOpen: false);
 
+  /// Yatay mobil çizelgedeki grubu katlar/açar; gizlenen görevin taslağı kapanır.
+  void toggleGroup(String code) => state = _cleared(
+    state.copyWith(
+      closedGroups: state.closedGroups.contains(code)
+          ? (Set.of(state.closedGroups)..remove(code))
+          : {...state.closedGroups, code},
+    ),
+  );
+
   /// Seçimde varsa çıkarır, yoksa katalog sırasını koruyarak ekler.
   void toggleCoordinatorship(String code) {
     final cur = _coords();
@@ -196,6 +205,9 @@ class TimelineController extends _$TimelineController {
 
   void closeSelection() => state = _cleared(state);
 
+  /// Kayıtlı tarihlere döner; görev seçimi açık kalır.
+  void resetDraft() => state = state.copyWith(draft: () => null);
+
   DayRange? _current() {
     final c = _catalog;
     final code = state.selected;
@@ -206,13 +218,13 @@ class TimelineController extends _$TimelineController {
 
   DayRange? get _base => state.draft ?? _current();
 
-  /// Taslağı günceller; bitiş başlangıçtan sonra kalır (prototip `setD`).
+  /// Taslağı günceller; tek günlük görev dahil başlangıç ≤ bitiş (WORK-K08).
   void _setDraft({int? start, int? end}) {
     final b = _base;
     if (b == null) return;
     final s = start ?? b.start;
     var e = end ?? b.end;
-    if (e <= s) e = s + 1;
+    if (e < s) e = s;
     state = state.copyWith(draft: () => DayRange(s, e));
   }
 
@@ -226,22 +238,20 @@ class TimelineController extends _$TimelineController {
     if (c != null) _setDraft(end: seasonDay(date, c.today.year));
   }
 
-  /// Başlangıç ±1 gün (ileri giderken bitişin bir gün öncesinde durur).
+  /// Başlangıç ±1 gün (ileri giderken bitiş gününde durur).
   void nudgeStart(int days) {
     final b = _base;
     if (b == null) return;
     _setDraft(
-      start: days > 0 ? math.min(b.start + days, b.end - 1) : b.start + days,
+      start: days > 0 ? math.min(b.start + days, b.end) : b.start + days,
     );
   }
 
-  /// Bitiş ±1 gün (geri giderken başlangıcın bir gün sonrasında durur).
+  /// Bitiş ±1 gün (geri giderken başlangıç gününde durur).
   void nudgeEnd(int days) {
     final b = _base;
     if (b == null) return;
-    _setDraft(
-      end: days < 0 ? math.max(b.start + 1, b.end + days) : b.end + days,
-    );
+    _setDraft(end: days < 0 ? math.max(b.start, b.end + days) : b.end + days);
   }
 
   /// İki tarihi birlikte kaydırır ("tümünü kaydır", çubuğu sürükleme).

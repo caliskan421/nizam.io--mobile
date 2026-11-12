@@ -7,6 +7,7 @@ import 'package:gap/gap.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
+import '../../../core/providers.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/motion/page_content_entrance.dart';
@@ -24,7 +25,8 @@ import '../../tasks/tasks.dart';
 import '../application/timeline_controller.dart';
 import '../domain/timeline.dart';
 
-import 'chart/timeline_chart.dart';
+import 'mobile/mobile_timeline_actions.dart';
+import 'mobile/mobile_timeline_chart.dart';
 import 'timeline_texts.dart';
 import 'widgets/timeline_feedback.dart';
 import 'widgets/timeline_header.dart';
@@ -33,8 +35,8 @@ import 'widgets/timeline_sheets.dart';
 import 'widgets/timeline_zoom_controls.dart';
 
 /// Zaman çizelgesi (prototip `gantt`; kabuk dışı tam ekran, alt menü yok): kök üst çubuk,
-/// "Liste / Zaman çizelgesi" anahtarı, koordinatörlük seçici + Filtre, dikey Gantt (yapışkan
-/// tarih sütunu, ızgara, bugün çizgisi, görev çubukları, genel bakış), sezon şeridi ve "bugüne
+/// "Liste / Zaman çizelgesi" anahtarı, yüzen koordinatörlük/filtre/ölçek, yatay zaman ekseni
+/// (yapışkan tarih başlığı, gruplar, bugün çizgisi ve görev çubukları), sezon şeridi ve "bugüne
 /// dön"; çubuğa dokununca seçili görev kartı (tarih taslağı, kaydet/geri al, tarih talebi,
 /// hatırlat). Veri `taskCatalogControllerProvider`; ekran durumu [TimelineController].
 class TimelinePage extends ConsumerStatefulWidget {
@@ -50,9 +52,9 @@ class TimelinePage extends ConsumerStatefulWidget {
 }
 
 class _TimelinePageState extends ConsumerState<TimelinePage> {
-  /// Telefonda ekran tam ekran başlar (üst çubuk, başlık satırı ve arama kapalı; yalnız
-  /// çizelge); boş alana dokunmak açar/kapatır. Tablette kullanılmaz.
-  bool _full = true;
+  /// Telefonda boş çizelge alanına dokunmak başlıkları gizler/gösterir.
+  /// Tablette ana çizelge kendi sayfasında korunur.
+  bool _full = false;
   bool _started = false;
   bool _searchOpen = false;
   bool _hint = false;
@@ -61,13 +63,13 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
   final _focus = FocusNode();
   bool get _phone => MediaQuery.sizeOf(context).width < 600;
 
-  /// Telefonda bu ekran görünürken sistem durum çubuğu (saat, ağ, pil) gizlidir; alt sistem
+  /// Telefonda tam ekranken sistem durum çubuğu (saat, ağ, pil) gizlidir; alt sistem
   /// çubuğu (iOS ana ekran çizgisi, Android gezinme) kalır. Üstüne sayfa açılınca (örtülü rota
   /// TickerMode kapalı), tablete geçince ya da ekran kapanınca geri gelir.
   bool _statusHidden = false;
 
   void _syncStatusBar() {
-    final hide = _phone && TickerMode.valuesOf(context).enabled;
+    final hide = _phone && _full && TickerMode.valuesOf(context).enabled;
     if (hide == _statusHidden) return;
     _statusHidden = hide;
     _applyStatusBar(hidden: hide);
@@ -89,7 +91,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     // İlk açılışta "çıkmak için boş alana dokun" ipucu bir kez görünür (yalnız telefonda).
     if (!_started) {
       _started = true;
-      if (_phone) {
+      if (_phone && _full) {
         _hint = true;
         _hideHintLater();
       }
@@ -109,6 +111,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
       _full = !_full;
       _hint = _full;
     });
+    _syncStatusBar();
     _focus.unfocus();
     _hintTimer?.cancel();
     if (_full) _hideHintLater();
@@ -152,26 +155,48 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     if (!popped && mounted) context.appNav.openTasks();
   }
 
+  /// Bekleyen seçim/diyalog sonucu başka görev ya da kapsama uygulanmaz.
+  bool Function() _ownerGuard() {
+    final session = ref.read(sessionGenerationProvider);
+    final scope = ref.read(scopeStateProvider);
+    final selected = ref
+        .read(timelineControllerProvider(widget.coordinatorship))
+        .selected;
+    return () =>
+        mounted &&
+        ref.read(sessionGenerationProvider) == session &&
+        ref.read(scopeStateProvider) == scope &&
+        ref.read(timelineControllerProvider(widget.coordinatorship)).selected ==
+            selected;
+  }
+
   Future<void> _pick(TimelineView v, {required bool start}) async {
     final sel = v.selection;
     if (sel == null) return;
+    final owns = _ownerGuard();
     final day = start ? sel.draft.start : sel.draft.end;
-    final first = start ? 0 : sel.draft.start + 1;
+    final initialDate = seasonDate(day, v.year);
+    final first = start
+        ? DateTime(initialDate.year - 10)
+        : seasonDate(sel.draft.start, v.year);
     final picked = await showDatePicker(
       context: context,
-      initialDate: seasonDate(day, v.year),
-      firstDate: seasonDate(first, v.year),
-      lastDate: DateTime(v.year + 1, 12, 31),
+      initialDate: initialDate,
+      firstDate: first,
+      lastDate: start
+          ? seasonDate(sel.draft.end, v.year)
+          : DateTime(initialDate.year + 10, 12, 31),
     );
-    if (picked == null) return;
+    if (picked == null || picked == initialDate || !mounted || !owns()) return;
     start ? _ctrl.setDraftStart(picked) : _ctrl.setDraftEnd(picked);
   }
 
   Future<void> _request() async {
     final l = context.l10n;
+    final owns = _ownerGuard();
     try {
       final result = await _ctrl.requestDates();
-      if (!mounted) return;
+      if (!mounted || !owns()) return;
       switch (result) {
         case TimelineRequestPending():
           _say(l.uiTimelineRequestPending);
@@ -181,24 +206,28 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
           _say(l.requestSentText(end));
       }
     } on Object catch (e) {
-      if (mounted) NzToast.error(context, toApiError(e));
+      if (mounted && owns()) NzToast.error(context, toApiError(e));
     }
   }
 
   Future<void> _undo() async {
+    final owns = _ownerGuard();
     try {
       final code = await _ctrl.undo();
-      if (code != null && mounted) _say(context.l10n.uiTimelineUndoneTail);
+      if (code != null && mounted && owns()) {
+        _say(context.l10n.uiTimelineUndoneTail);
+      }
     } on Object catch (e) {
-      if (mounted) NzToast.error(context, toApiError(e));
+      if (mounted && owns()) NzToast.error(context, toApiError(e));
     }
   }
 
   Future<void> _save() async {
+    final owns = _ownerGuard();
     try {
       await _ctrl.save();
     } on Object catch (e) {
-      if (mounted) NzToast.error(context, toApiError(e));
+      if (mounted && owns()) NzToast.error(context, toApiError(e));
     }
   }
 
@@ -229,6 +258,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
       onRetry: () => ref.invalidate(taskCatalogControllerProvider),
       body: NzAsyncView<TimelineView>(
         value: view,
+        skeletonOnReload: true,
         onRetry: () => ref.invalidate(taskCatalogControllerProvider),
         data: (v) => _body(context, v, l),
       ),
@@ -375,12 +405,21 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                         // çizilir; kırpılmazsa "Görevler" satırının üstüne taşar.
                         Positioned.fill(
                           child: ClipRect(
-                            child: TimelineChart(
+                            child: MobileTimelineChart(
                               view: v,
                               onBlankTap: _toggleFull,
                               bottomInset: bottom,
                               onSelect: ctrl.select,
-                              onOverview: ctrl.openOverviewColumn,
+                              onToggleGroup: ctrl.toggleGroup,
+                              canDrag:
+                                  sel != null &&
+                                  TaskPermissions.of(
+                                    ref
+                                        .read(taskCatalogControllerProvider)
+                                        .value
+                                        ?.access,
+                                    sel.task.item,
+                                  ).canManageTask,
                               onDrag: ctrl.dragTo,
                             ),
                           ),
@@ -413,8 +452,14 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
             Positioned(
               right: 12,
               bottom: 74 + bottom,
-              child: TimelineFloatingFilters(
+              child: MobileTimelineActions(
                 view: v,
+                onScale: () => ctrl.setScale(
+                  TimelineScale.values[(v.state.scale.index + 1) %
+                      TimelineScale.values.length],
+                ),
+                onCoord: ctrl.toggleCoordMenu,
+                onLegend: () => showTimelineLegendSheet(context),
                 onFilter: () {
                   ctrl.closeCoordMenu();
                   showTimelineFilterSheet(
@@ -445,7 +490,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                   child: Padding(
                     padding: const EdgeInsets.all(10),
                     child: Text(
-                      'Tam ekran · çıkmak için boş alana dokun',
+                      l.uiTimelineFullscreenHint,
                       textAlign: TextAlign.center,
                       style: context.text.caption,
                     ),
@@ -472,9 +517,25 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                 onShift: ctrl.shiftDraft,
                 onSave: _save,
                 onRequest: _request,
-                onRemind: () => _say(
-                  '${l.uiTimelineReminded} · ${sel.assignees.join(', ')}',
-                ),
+                onReset: ctrl.resetDraft,
+                canEditDates:
+                    TaskPermissions.of(
+                      ref.read(taskCatalogControllerProvider).value?.access,
+                      sel.task.item,
+                    ).canManageTask ||
+                    TaskPermissions.of(
+                      ref.read(taskCatalogControllerProvider).value?.access,
+                      sel.task.item,
+                    ).canRequestDate,
+                canSave: TaskPermissions.of(
+                  ref.read(taskCatalogControllerProvider).value?.access,
+                  sel.task.item,
+                ).canManageTask,
+                canRequest: TaskPermissions.of(
+                  ref.read(taskCatalogControllerProvider).value?.access,
+                  sel.task.item,
+                ).canRequestDate,
+                onRemind: null,
               ),
             ),
           if (!_phone && sel == null && !v.state.coordMenuOpen)

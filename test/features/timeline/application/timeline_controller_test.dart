@@ -296,13 +296,44 @@ void main() {
 
       ctrl.setDraftEnd(seasonDate(cur.start - 10, view().year));
       final d = view().selection!.draft;
-      expect(d.end, d.start + 1, reason: 'bitiş başlangıcın önüne geçemez');
+      expect(d.end, d.start, reason: 'bitiş başlangıcın önüne geçemez');
 
       ctrl.setStatus(TimelineStatusFilter.open);
       expect(view().selection, isNull);
       expect(view().state.draft, isNull);
     },
   );
+
+  test(
+    'aynı gün başlangıç ve bitiş geçerlidir; ± sınırı tek güne iner',
+    () async {
+      final (_, ctrl, view) = await _open();
+      ctrl.select('wi-alt-2');
+      final start = view().selection!.current.start;
+      ctrl.setDraftEnd(seasonDate(start, view().year));
+      expect(view().selection!.draft, DayRange(start, start));
+      ctrl.nudgeEnd(-1);
+      expect(view().selection!.draft, DayRange(start, start));
+      ctrl.nudgeStart(1);
+      expect(view().selection!.draft, DayRange(start, start));
+      ctrl.setDraftEnd(seasonDate(start + 1, view().year));
+      ctrl.nudgeStart(1);
+      expect(view().selection!.draft, DayRange(start + 1, start + 1));
+    },
+  );
+
+  test('Sıfırla yalnız taslağı kaldırır ve seçili görevi açık tutar', () async {
+    final (_, ctrl, view) = await _open();
+    ctrl.select('wi-alt-2');
+    final current = view().selection!.current;
+    ctrl.nudgeEnd(5);
+    expect(view().selection!.changed, isTrue);
+    ctrl.resetDraft();
+    expect(view().state.selected, 'wi-alt-2');
+    expect(view().state.draft, isNull);
+    expect(view().selection!.draft, current);
+    expect(view().selection!.changed, isFalse);
+  });
 
   test('kaydet → geri alma kaydı; geri al önceki düzenlemeye döner', () async {
     final (_, ctrl, view) = await _open();

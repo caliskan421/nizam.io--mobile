@@ -4885,6 +4885,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTimelineTitle => 'Zaman çizelgesi';
 
   @override
+  String get uiTimelineFullscreenHint =>
+      'Tam ekran · çıkmak için boş alana dokun';
+
+  @override
+  String get uiTimelineFullscreenToggle => 'Tam ekranı aç veya kapat';
+
+  @override
   String get uiTimelineView => 'Görünüm';
 
   @override
@@ -5017,7 +5024,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTimelineLegendToday =>
-      'Yeşil çizgi bugünü gösterir; soldaki kutu bugünün tarihi.';
+      'Yeşil çizgi bugünü gösterir; yeşil etiket bugünün tarihi.';
 
   @override
   String get uiTimelineLegendStrip =>
@@ -5098,10 +5105,23 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTimelineWeekShort => 'hf';
 
   @override
-  String get uiTimelineSave => 'Tarihleri kaydet';
+  String get uiTimelineSave => 'Kaydet';
 
   @override
-  String get uiTimelineSendRequest => 'Talep olarak gönder';
+  String get uiTimelineSendRequest => 'Talep gönder';
+
+  @override
+  String get uiTimelineDates => 'Tarihler';
+
+  @override
+  String get uiTimelineReset => 'Sıfırla';
+
+  @override
+  String get uiTimelinePrevious => 'önceki';
+
+  @override
+  String get uiTimelineRemindUnavailable =>
+      'Bu sunucu sürümü hatırlatma göndermeyi desteklemiyor.';
 
   @override
   String get uiTimelineRemind => 'Atanana hatırlat';

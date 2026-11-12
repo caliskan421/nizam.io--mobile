@@ -9388,6 +9388,18 @@ abstract class AppLocalizations {
   /// **'Zaman çizelgesi'**
   String get uiTimelineTitle;
 
+  /// ui.timeline.fullscreen_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Tam ekran · çıkmak için boş alana dokun'**
+  String get uiTimelineFullscreenHint;
+
+  /// ui.timeline.fullscreen_toggle
+  ///
+  /// In tr, this message translates to:
+  /// **'Tam ekranı aç veya kapat'**
+  String get uiTimelineFullscreenToggle;
+
   /// ui.timeline.view
   ///
   /// In tr, this message translates to:
@@ -9649,7 +9661,7 @@ abstract class AppLocalizations {
   /// ui.timeline.legend_today
   ///
   /// In tr, this message translates to:
-  /// **'Yeşil çizgi bugünü gösterir; soldaki kutu bugünün tarihi.'**
+  /// **'Yeşil çizgi bugünü gösterir; yeşil etiket bugünün tarihi.'**
   String get uiTimelineLegendToday;
 
   /// ui.timeline.legend_strip
@@ -9805,14 +9817,38 @@ abstract class AppLocalizations {
   /// ui.timeline.save
   ///
   /// In tr, this message translates to:
-  /// **'Tarihleri kaydet'**
+  /// **'Kaydet'**
   String get uiTimelineSave;
 
   /// ui.timeline.send_request
   ///
   /// In tr, this message translates to:
-  /// **'Talep olarak gönder'**
+  /// **'Talep gönder'**
   String get uiTimelineSendRequest;
+
+  /// ui.timeline.dates
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarihler'**
+  String get uiTimelineDates;
+
+  /// ui.timeline.reset
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıfırla'**
+  String get uiTimelineReset;
+
+  /// ui.timeline.previous
+  ///
+  /// In tr, this message translates to:
+  /// **'önceki'**
+  String get uiTimelinePrevious;
+
+  /// ui.timeline.remind_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sunucu sürümü hatırlatma göndermeyi desteklemiyor.'**
+  String get uiTimelineRemindUnavailable;
 
   /// ui.timeline.remind
   ///

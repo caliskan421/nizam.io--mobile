@@ -1,23 +1,21 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/generated/tokens.gen.dart';
+import '../../../../core/errors/api_error.dart';
+import '../../../../core/providers.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
-import '../../../../core/ui/theme/nz_motion.dart';
-import '../../../../core/ui/widgets/buttons/buttons.dart';
-import '../../../../core/ui/widgets/nz_icon.dart';
-import '../../../../core/ui/widgets/nz_icons.dart';
+import '../../../../core/ui/widgets/feedback/nz_toast.dart';
+import '../../../tasks/tasks.dart';
+import '../../application/gantt_provider.dart';
+import '../../application/timeline_controller.dart';
 import '../../domain/horizontal_timeline.dart';
+import '../../domain/timeline.dart';
 import '../timeline_texts.dart';
-import 'gantt_geometry.dart';
-import 'gantt_painters.dart';
-import 'gantt_texts.dart';
+import '../widgets/timeline_selection_card.dart';
 
-/// Seçili görev kartı (prototip `role="region" aria-label="Seçili görev"`, 360): kod,
-/// koordinatörlük, kapat; başlık; durum / tarih / atanan kutusu; gecikme; "Görev ayrıntısını aç".
-class GanttSelectionCard extends StatelessWidget {
+/// Tablet çizelgesinin yalnız seçili görev yüzü. Çizelgenin süzgeç/ölçek durumuna
+/// dokunmadan telefonla aynı tarih taslağı ve sunucu komutlarını kullanır.
+class GanttSelectionCard extends ConsumerStatefulWidget {
   const GanttSelectionCard({
     super.key,
     required this.selection,
@@ -31,262 +29,200 @@ class GanttSelectionCard extends StatelessWidget {
   final VoidCallback onClose;
   final VoidCallback onOpen;
 
-  /// Kapat düğmesinin (32 × 32 dokunma alanı) anahtarı.
   static const closeKey = ValueKey('gantt-card-close');
 
   @override
+  ConsumerState<GanttSelectionCard> createState() => _GanttSelectionCardState();
+}
+
+typedef _SelectionOwner = ({
+  String code,
+  int session,
+  String? program,
+  String? department,
+  int operation,
+});
+
+class _GanttSelectionCardState extends ConsumerState<GanttSelectionCard> {
+  static const _scope = timelineAllCoordinatorships;
+  bool _busy = false;
+  bool _needsSelection = true;
+  int _operation = 0;
+
+  _SelectionOwner _owner() {
+    final scope = ref.read(scopeControllerProvider).current;
+    return (
+      code: widget.selection.task.code,
+      session: ref.read(sessionControllerProvider).generation,
+      program: scope.programId,
+      department: scope.departmentId,
+      operation: _operation,
+    );
+  }
+
+  bool _current(_SelectionOwner owner) => mounted && _owner() == owner;
+
+  void _resync() {
+    _operation++;
+    _busy = false;
+    _needsSelection = true;
+    _selectAfterFrame();
+  }
+
+  TimelineController get _ctrl =>
+      ref.read(timelineControllerProvider(_scope).notifier);
+
+  @override
+  void initState() {
+    super.initState();
+    _selectAfterFrame();
+  }
+
+  @override
+  void didUpdateWidget(GanttSelectionCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selection.task.code != widget.selection.task.code) {
+      _resync();
+    }
+  }
+
+  void _selectAfterFrame() {
+    final owner = _owner();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_current(owner) || !_needsSelection) return;
+      final catalog = ref.read(timelineCatalogProvider);
+      if (catalog.isLoading ||
+          catalog.hasError ||
+          catalog.value?.task(owner.code) == null) {
+        return;
+      }
+      _needsSelection = false;
+      _ctrl.select(owner.code);
+    });
+  }
+
+  void _close() {
+    _ctrl.closeSelection();
+    widget.onClose();
+  }
+
+  Future<void> _pick(TimelineView view, {required bool start}) async {
+    final selection = view.selection;
+    if (selection == null) return;
+    final owner = _owner();
+    final code = selection.task.code;
+    final session = ref.read(sessionControllerProvider).generation;
+    final scope = ref.read(scopeControllerProvider).current;
+    final ctrl = _ctrl;
+    final date = seasonDate(
+      start ? selection.draft.start : selection.draft.end,
+      view.year,
+    );
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: date,
+      firstDate: start
+          ? DateTime(date.year - 10)
+          : seasonDate(selection.draft.start, view.year),
+      lastDate: start
+          ? seasonDate(selection.draft.end, view.year)
+          : DateTime(date.year + 10, 12, 31),
+    );
+    if (!mounted || picked == null || picked == date || !_current(owner)) {
+      return;
+    }
+    final now = ref.read(scopeControllerProvider).current;
+    if (session != ref.read(sessionControllerProvider).generation ||
+        scope.programId != now.programId ||
+        scope.departmentId != now.departmentId ||
+        widget.selection.task.code != code ||
+        ref.read(timelineControllerProvider(_scope)).selected != code) {
+      return;
+    }
+    start ? ctrl.setDraftStart(picked) : ctrl.setDraftEnd(picked);
+  }
+
+  Future<void> _save() async {
+    if (_busy) return;
+    final owner = _owner();
+    setState(() => _busy = true);
+    try {
+      final saved = await _ctrl.save();
+      if (saved && _current(owner)) {
+        widget.onClose();
+      }
+    } on Object catch (e) {
+      if (mounted && _current(owner)) NzToast.error(context, toApiError(e));
+    } finally {
+      if (_current(owner)) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _request() async {
+    if (_busy) return;
+    final owner = _owner();
+    setState(() => _busy = true);
+    try {
+      final result = await _ctrl.requestDates();
+      if (!mounted || !_current(owner)) return;
+      final l = context.l10n;
+      NzToast.show(context, switch (result) {
+        TimelineRequestPending() => l.uiTimelineRequestPending,
+        TimelineRequestNoChange() => l.uiTimelineRequestNoChange,
+        TimelineRequestSent(:final end) => l.requestSentText(end),
+      });
+    } on Object catch (e) {
+      if (mounted && _current(owner)) NzToast.error(context, toApiError(e));
+    } finally {
+      if (_current(owner)) setState(() => _busy = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    final l = context.l10n;
-    final task = selection.task;
-    final key = t.monoSm.copyWith(
-      fontSize: GanttGeometry.cardKeySize,
-      color: c.textFaint,
+    ref.listen(sessionGenerationProvider, (_, _) => _resync());
+    ref.listen(scopeStateProvider, (previous, next) {
+      if (previous?.programId != next.programId ||
+          previous?.departmentId != next.departmentId) {
+        _resync();
+      }
+    });
+    ref.listen(timelineCatalogProvider, (_, next) {
+      if (_needsSelection && next.hasValue) _selectAfterFrame();
+    });
+    final value = ref.watch(timelineViewProvider(_scope));
+    final view = value.value;
+    final selection = view?.selection;
+    if (selection == null ||
+        selection.task.code != widget.selection.task.code ||
+        view == null) {
+      return const SizedBox.shrink();
+    }
+    final catalog = ref.watch(timelineCatalogProvider).value;
+    final permissions = TaskPermissions.of(
+      catalog?.access,
+      selection.task.item,
     );
-    final value = t.bodyMd.copyWith(fontSize: GanttGeometry.rowTitleSize);
-    Widget field(String k, Widget v) => Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(k, style: key),
-        const Gap(2),
-        v,
-      ],
-    );
-    final radius = BorderRadius.circular(GanttGeometry.cardRadius);
-    return Semantics(
-      container: true,
-      label: l.uiTimelineSelectedTask,
-      explicitChildNodes: true,
-      child: TweenAnimationBuilder<double>(
-        key: ValueKey(task.code),
-        tween: Tween(begin: 0, end: 1),
-        duration: NzMotion.of(context, GanttGeometry.cardDuration),
-        curve: NizamioMotion.easeSheet,
-        builder: (context, v, child) => Opacity(
-          opacity: v,
-          child: Transform.translate(
-            offset: Offset(0, (1 - v) * GanttGeometry.cardRise),
-            child: Transform.scale(
-              scale:
-                  GanttGeometry.cardRiseScale +
-                  (1 - GanttGeometry.cardRiseScale) * v,
-              child: child,
-            ),
-          ),
-        ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            boxShadow: context.shadows.sheet,
-          ),
-          child: ClipRRect(
-            borderRadius: radius,
-            child: BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: GanttGeometry.cardBlur,
-                sigmaY: GanttGeometry.cardBlur,
-              ),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: c.surface.withValues(alpha: GanttGeometry.cardAlpha),
-                  borderRadius: radius,
-                  border: Border.all(color: c.borderStrong),
-                ),
-                // Kenarlık içi (CSS `box-sizing: border-box`): içerik 1 px içeride.
-                child: Padding(
-                  padding: const EdgeInsets.all(NizamioSize.borderWidth),
-                  child: Stack(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(GanttGeometry.cardPad),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Kapat düğmesi CSS `margin: −6 −6 −6 0` ile akışta 26 × 20 yer
-                            // kaplar; görünür 32 × 32 düğme kartın üstünde ayrıca konumlanır.
-                            SizedBox(
-                              height:
-                                  GanttGeometry.cardClose +
-                                  2 * GanttGeometry.cardCloseInset,
-                              child: Row(
-                                children: [
-                                  Text(
-                                    task.code,
-                                    style: t.monoSm.copyWith(
-                                      fontSize: GanttGeometry.cardCodeSize,
-                                      color: c.textMuted,
-                                    ),
-                                  ),
-                                  const Gap(NizamioSpacing.space2),
-                                  Expanded(
-                                    child: Text(
-                                      selection.coordinatorshipName,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: t.caption.copyWith(
-                                        color: c.textMuted,
-                                      ),
-                                    ),
-                                  ),
-                                  // Satır yüksekliği 20 (üstteki SizedBox); düğmenin akıştaki eni 26.
-                                  const Gap(
-                                    GanttGeometry.cardClose +
-                                        GanttGeometry.cardCloseInset,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Gap(GanttGeometry.cardGap),
-                            Text(
-                              task.item.title,
-                              style: t.labelLg.copyWith(
-                                fontSize: GanttGeometry.cardTitleSize,
-                                height:
-                                    GanttGeometry.cardTitleLine /
-                                    GanttGeometry.cardTitleSize,
-                              ),
-                            ),
-                            const Gap(GanttGeometry.cardGap),
-                            DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: c.surfaceRaised,
-                                borderRadius: BorderRadius.circular(
-                                  GanttGeometry.cardInfoRadius,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(
-                                  GanttGeometry.cardInfoPad,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                          child: field(
-                                            l.uiTimelineGanttCardStatus,
-                                            Row(
-                                              children: [
-                                                SizedBox(
-                                                  width:
-                                                      GanttGeometry.statusDot,
-                                                  height:
-                                                      GanttGeometry.statusDot,
-                                                  child: DecoratedBox(
-                                                    decoration: BoxDecoration(
-                                                      color: ganttStatusColor(
-                                                        c,
-                                                        task.status,
-                                                      ),
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const Gap(
-                                                  GanttGeometry.chipGap,
-                                                ),
-                                                Flexible(
-                                                  child: Text(
-                                                    l.statusLabel(task.status),
-                                                    style: value,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        const Gap(GanttGeometry.cardInfoColGap),
-                                        Expanded(
-                                          child: field(
-                                            l.uiTimelineGanttCardDate,
-                                            Text(
-                                              l.ganttRange(task, year),
-                                              style: t.mono.copyWith(
-                                                fontSize:
-                                                    GanttGeometry.rowTitleSize,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const Gap(GanttGeometry.cardInfoRowGap),
-                                    field(
-                                      l.uiTimelineGanttCardAssignee,
-                                      Text(
-                                        l.ganttAssignees(selection),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: value,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            if (task.late) ...[
-                              const Gap(GanttGeometry.cardGap),
-                              Text(
-                                l.ganttLateDays(task),
-                                style: t.monoSm.copyWith(
-                                  fontSize: GanttGeometry.cardCodeSize,
-                                  color: c.danger,
-                                ),
-                              ),
-                            ],
-                            const Gap(GanttGeometry.cardGap),
-                            NzButton.primary(
-                              label: l.uiTimelineGanttOpenTask,
-                              onPressed: onOpen,
-                              expand: true,
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Görünür kaynak konumu: dolgu 16 − 6 = 10 üstten ve sağdan.
-                      Positioned(
-                        key: GanttSelectionCard.closeKey,
-                        top:
-                            GanttGeometry.cardPad +
-                            GanttGeometry.cardCloseInset,
-                        right:
-                            GanttGeometry.cardPad +
-                            GanttGeometry.cardCloseInset,
-                        width: GanttGeometry.cardClose,
-                        height: GanttGeometry.cardClose,
-                        child: Semantics(
-                          button: true,
-                          label: l.uiCommonClose,
-                          excludeSemantics: true,
-                          onTap: onClose,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: onClose,
-                            child: Center(
-                              child: NzIcon(
-                                NzIcons.close,
-                                size: NizamioSize.iconSizeSm,
-                                color: c.textMuted,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+    return TimelineSelectionCard(
+      selection: selection,
+      year: view.year,
+      bottomInset: 0,
+      maxHeight: MediaQuery.sizeOf(context).height * .8,
+      onOpen: widget.onOpen,
+      onClose: _close,
+      onNudgeStart: _ctrl.nudgeStart,
+      onNudgeEnd: _ctrl.nudgeEnd,
+      onPickStart: () => _pick(view, start: true),
+      onPickEnd: () => _pick(view, start: false),
+      onShift: _ctrl.shiftDraft,
+      onReset: _ctrl.resetDraft,
+      onSave: _save,
+      onRequest: _request,
+      onRemind: null,
+      canEditDates: permissions.canManageTask || permissions.canRequestDate,
+      canSave: permissions.canManageTask,
+      canRequest: permissions.canRequestDate,
+      busy: _busy,
     );
   }
 }

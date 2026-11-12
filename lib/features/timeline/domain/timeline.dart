@@ -25,7 +25,7 @@ int seasonDay(DateTime date, int year) => DateTime.utc(
 /// [seasonDay]'in tersi (yerel takvim günü).
 DateTime seasonDate(int day, int year) => DateTime(year, 1, 1 + day);
 
-/// Gün aralığı (başlangıç ve bitiş günü, `start < end`).
+/// Gün aralığı (başlangıç ve bitiş günü, `start ≤ end`; WORK-K08).
 @immutable
 final class DayRange {
   const DayRange(this.start, this.end);
@@ -125,6 +125,7 @@ final class TimelineState {
     this.undo,
     this.coordMenuOpen = false,
     this.startAll = false,
+    this.closedGroups = const {},
   });
 
   /// Seçili koordinatörlük kodları; null → kataloğun ilk koordinatörlüğü (ya da [startAll]
@@ -133,6 +134,7 @@ final class TimelineState {
 
   /// Açılışta bütün koordinatörlükler seçili (rota `coord=*`).
   final bool startAll;
+  final Set<String> closedGroups;
   final String query;
   final TimelineStatusFilter status;
   final TimelineScale scale;
@@ -177,6 +179,7 @@ final class TimelineState {
     ByTask<DateTime>? requests,
     TimelineUndo? Function()? undo,
     bool? coordMenuOpen,
+    Set<String>? closedGroups,
   }) => TimelineState(
     startAll: startAll,
     coordinatorships: coordinatorships ?? this.coordinatorships,
@@ -192,6 +195,7 @@ final class TimelineState {
     requests: requests ?? this.requests,
     undo: undo == null ? this.undo : undo(),
     coordMenuOpen: coordMenuOpen ?? this.coordMenuOpen,
+    closedGroups: closedGroups ?? this.closedGroups,
   );
 }
 

@@ -11,11 +11,10 @@ import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
 import '../../domain/timeline.dart';
 import '../timeline_texts.dart';
-import 'timeline_controls.dart';
+import 'timeline_selection_dates.dart';
 
-/// Seçili görev kartı (modal değil; çizelge üstünde, altta): görev kimliği ve adı, ayrıntıda aç,
-/// kapat; durum, gecikme, atananlar, kanıt; başlangıç/bitiş alanları (− / + ve tarih seçici),
-/// "tümünü kaydır", fark özeti, kaydet / talep gönder / hatırlat.
+/// Çizelgeyi görünür bırakan seçili görev: kimlik, tarihler ve gerçek tarih komutları.
+/// Telefon ve tablet aynı içerik/izin yüzünü kullanır; konumu çağıran belirler.
 class TimelineSelectionCard extends StatelessWidget {
   const TimelineSelectionCard({
     super.key,
@@ -33,6 +32,11 @@ class TimelineSelectionCard extends StatelessWidget {
     required this.onSave,
     required this.onRequest,
     required this.onRemind,
+    required this.onReset,
+    this.canEditDates = false,
+    this.canSave = false,
+    this.canRequest = false,
+    this.busy = false,
   });
 
   final TimelineSelection selection;
@@ -48,7 +52,12 @@ class TimelineSelectionCard extends StatelessWidget {
   final ValueChanged<int> onShift;
   final VoidCallback onSave;
   final VoidCallback onRequest;
-  final VoidCallback onRemind;
+  final VoidCallback? onRemind;
+  final VoidCallback onReset;
+  final bool canEditDates;
+  final bool canSave;
+  final bool canRequest;
+  final bool busy;
 
   static NzTone tone(TaskStatus s) => switch (s) {
     TaskStatus.todo => NzTone.neutral,
@@ -67,7 +76,7 @@ class TimelineSelectionCard extends StatelessWidget {
     final s = selection;
     final task = s.task;
     final late = l.lateText(task);
-    final delta = l.deltaText(s);
+    final editable = canEditDates && !busy;
     return Semantics(
       container: true,
       explicitChildNodes: true,
@@ -84,30 +93,21 @@ class TimelineSelectionCard extends StatelessWidget {
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: maxHeight),
           child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              NizamioSpacing.gutter,
-              6,
-              NizamioSpacing.gutter,
-              NizamioSpacing.space5 + bottomInset,
-            ),
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + bottomInset),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(
-                  child: DecoratedBox(
+                  child: Container(
+                    width: 36,
+                    height: 4,
                     decoration: BoxDecoration(
                       color: c.borderControl,
                       borderRadius: BorderRadius.circular(NizamioRadius.pill),
                     ),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints.tightFor(
-                        width: 36,
-                        height: 4,
-                      ),
-                    ),
                   ),
                 ),
-                const Gap(NizamioSpacing.space2),
+                const Gap(12),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -116,142 +116,103 @@ class TimelineSelectionCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            [
-                              task.code,
-                              s.coordinatorshipName,
-                              if (task.dependent) l.uiTimelineDependent,
-                            ].join(' · ').toUpperCase(),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: t.kicker.copyWith(color: c.textMuted),
-                          ),
-                          const Gap(NizamioSpacing.space1),
-                          Text(
                             task.item.title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: t.labelLg,
+                            style: t.titleSm.copyWith(
+                              fontSize: 19,
+                              height: 25 / 19,
+                            ),
+                          ),
+                          const Gap(8),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 2,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              NzStatusLabel(
+                                label: l.statusLabel(task.status),
+                                tone: tone(task.status),
+                              ),
+                              if (late.isNotEmpty)
+                                Text(
+                                  '· $late',
+                                  style: t.bodySm.copyWith(color: c.danger),
+                                ),
+                            ],
+                          ),
+                          const Gap(2),
+                          Text(
+                            '${s.assignees.isEmpty ? l.uiTimelineGanttUnassigned : s.assignees.join(', ')} · ${l.evidenceText(task.item.files)}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: t.caption.copyWith(color: c.textMuted),
                           ),
                         ],
                       ),
                     ),
-                    NzIconButton(
+                    _HeaderAction(
+                      icon: NzIcons.bell,
+                      label: onRemind == null
+                          ? l.uiTimelineRemindUnavailable
+                          : l.uiTimelineRemind,
+                      onTap: onRemind,
+                    ),
+                    _HeaderAction(
                       icon: NzIcons.openExternal,
-                      semanticLabel: l.uiTimelineOpenTask,
-                      onPressed: onOpen,
-                      size: NzSize.sm,
+                      label: l.uiTimelineOpenTask,
+                      onTap: onOpen,
                     ),
-                    NzIconButton(
+                    _HeaderAction(
                       icon: NzIcons.close,
-                      semanticLabel: l.uiCommonClose,
-                      onPressed: onClose,
-                      size: NzSize.sm,
+                      label: l.uiCommonClose,
+                      onTap: onClose,
                     ),
                   ],
                 ),
-                Wrap(
-                  spacing: NizamioSpacing.space3,
-                  runSpacing: NizamioSpacing.space1,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    NzStatusLabel(
-                      label: l.statusLabel(task.status),
-                      tone: tone(task.status),
-                    ),
-                    if (late.isNotEmpty)
-                      Text(
-                        late,
-                        style: t.labelMd.copyWith(
-                          color: c.danger,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    Text(
-                      '${s.assignees.join(', ')} · '
-                      '${l.evidenceText(task.item.files)}',
-                      style: t.caption.copyWith(color: c.textMuted),
-                    ),
-                  ],
-                ),
-                const Gap(NizamioSpacing.space3),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _DateField(
-                        label: l.uiTimelineStart,
-                        value: l.fullDay(s.draft.start, year),
-                        changed: s.startDelta != 0,
-                        late: false,
-                        onMinus: () => onNudgeStart(-1),
-                        onPlus: () => onNudgeStart(1),
-                        onPick: onPickStart,
-                      ),
-                    ),
-                    const Gap(NizamioSpacing.space2),
-                    Expanded(
-                      child: _DateField(
-                        label: l.uiTimelineEnd,
-                        value: l.fullDay(s.draft.end, year),
-                        changed: s.endDelta != 0,
-                        late: task.late,
-                        onMinus: () => onNudgeEnd(-1),
-                        onPlus: () => onNudgeEnd(1),
-                        onPick: onPickEnd,
-                      ),
-                    ),
-                  ],
-                ),
-                const Gap(NizamioSpacing.space2),
-                Wrap(
-                  spacing: 6,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  alignment: WrapAlignment.end,
-                  children: [
-                    Text(
-                      l.uiTimelineShiftAll.toUpperCase(),
-                      style: t.kicker.copyWith(color: c.textMuted),
-                    ),
-                    for (final (label, n) in [
-                      (l.uiTimelineShiftWeekBack, -7),
-                      (l.uiTimelineShiftDayBack, -1),
-                      (l.uiTimelineShiftDayForward, 1),
-                      (l.uiTimelineShiftWeekForward, 7),
-                    ])
-                      TimelineChip(
-                        label: label,
-                        mono: true,
-                        selected: false,
-                        onTap: () => onShift(n),
-                      ),
-                  ],
-                ),
-                if (delta.isNotEmpty) ...[
-                  const Gap(NizamioSpacing.space1),
-                  Text(delta, style: t.caption.copyWith(color: c.accentText)),
-                ],
-                const Gap(NizamioSpacing.space3),
+                const Gap(14),
                 Row(
                   children: [
+                    Expanded(child: NzKicker(l.uiTimelineDates)),
+                    if (s.changed)
+                      NzButton.ghost(
+                        label: l.uiTimelineReset,
+                        icon: NzIcons.redo,
+                        size: NzSize.sm,
+                        onPressed: busy ? null : onReset,
+                      ),
+                  ],
+                ),
+                const Gap(4),
+                TimelineSelectionDates(
+                  selection: s,
+                  year: year,
+                  editable: editable,
+                  onNudgeStart: onNudgeStart,
+                  onNudgeEnd: onNudgeEnd,
+                  onPickStart: onPickStart,
+                  onPickEnd: onPickEnd,
+                ),
+                const Gap(14),
+                Row(
+                  spacing: NizamioSpacing.space2,
+                  children: [
+                    Expanded(
+                      child: NzButton.secondary(
+                        label: l.uiTimelineSendRequest,
+                        expand: true,
+                        onPressed: canRequest && !busy ? onRequest : null,
+                      ),
+                    ),
                     Expanded(
                       child: NzButton.primary(
                         label: l.uiTimelineSave,
-                        size: NzSize.lg,
                         expand: true,
-                        onPressed: s.changed ? onSave : null,
+                        loading: busy,
+                        onPressed: canSave && s.changed && !busy
+                            ? onSave
+                            : null,
                       ),
-                    ),
-                    const Gap(NizamioSpacing.space2),
-                    _SquareAction(
-                      icon: NzIcons.eventAvailable,
-                      label: l.uiTimelineSendRequest,
-                      onTap: onRequest,
-                    ),
-                    const Gap(NizamioSpacing.space2),
-                    _SquareAction(
-                      icon: NzIcons.bell,
-                      label: l.uiTimelineRemind,
-                      onTap: onRemind,
                     ),
                   ],
                 ),
@@ -264,151 +225,37 @@ class TimelineSelectionCard extends StatelessWidget {
   }
 }
 
-class _DateField extends StatelessWidget {
-  const _DateField({
-    required this.label,
-    required this.value,
-    required this.changed,
-    required this.late,
-    required this.onMinus,
-    required this.onPlus,
-    required this.onPick,
-  });
-
-  final String label;
-  final String value;
-  final bool changed;
-  final bool late;
-  final VoidCallback onMinus;
-  final VoidCallback onPlus;
-  final VoidCallback onPick;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    final l = context.l10n;
-    final color = changed
-        ? c.accentText
-        : late
-        ? c.danger
-        : c.text;
-    final border = changed
-        ? c.accentText
-        : late
-        ? c.danger.withValues(alpha: 0.6)
-        : c.border;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label.toUpperCase(), style: t.kicker.copyWith(color: c.textMuted)),
-        const Gap(6),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: c.surfaceRaised,
-            borderRadius: BorderRadius.circular(NizamioRadius.tile),
-            border: Border.all(color: border),
-          ),
-          child: Row(
-            children: [
-              _Step(
-                icon: NzIcons.remove,
-                label: '$label ${l.uiTimelineDayBack}',
-                onTap: onMinus,
-              ),
-              Expanded(
-                child: TimelineTap(
-                  onTap: onPick,
-                  label: '$label $value',
-                  excludeSemantics: true,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minHeight: NizamioSize.tap,
-                    ),
-                    child: Center(
-                      child: Text(
-                        value,
-                        textAlign: TextAlign.center,
-                        style: t.mono.copyWith(
-                          color: color,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              _Step(
-                icon: NzIcons.add,
-                label: '$label ${l.uiTimelineDayForward}',
-                onTap: onPlus,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Step extends StatelessWidget {
-  const _Step({required this.icon, required this.label, required this.onTap});
+class _HeaderAction extends StatelessWidget {
+  const _HeaderAction({required this.icon, required this.label, this.onTap});
 
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => TimelineTap(
-    onTap: onTap,
-    label: label,
-    excludeSemantics: true,
-    child: SizedBox(
-      width: 36,
-      height: NizamioSize.tap,
-      child: NzIcon(
-        icon,
-        size: NizamioSize.iconSizeSm,
-        color: context.colors.text,
+  Widget build(BuildContext context) => Tooltip(
+    message: label,
+    child: Semantics(
+      button: true,
+      enabled: onTap != null,
+      label: label,
+      excludeSemantics: true,
+      child: InkResponse(
+        onTap: onTap,
+        radius: 20,
+        child: SizedBox.square(
+          dimension: 32,
+          child: Center(
+            child: NzIcon(
+              icon,
+              size: NizamioSize.iconSizeSm,
+              color: onTap == null
+                  ? context.colors.textFaint
+                  : context.colors.text,
+            ),
+          ),
+        ),
       ),
     ),
   );
-}
-
-class _SquareAction extends StatelessWidget {
-  const _SquareAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return Tooltip(
-      message: label,
-      child: TimelineTap(
-        onTap: onTap,
-        label: label,
-        excludeSemantics: true,
-        radius: NizamioRadius.attach,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: c.surfaceRaised,
-            borderRadius: BorderRadius.circular(NizamioRadius.attach),
-            border: Border.all(color: c.borderStrong),
-          ),
-          child: SizedBox(
-            width: 48,
-            height: NizamioSize.controlLg,
-            child: NzIcon(icon, size: NizamioSize.iconSizeSm, color: c.text),
-          ),
-        ),
-      ),
-    );
-  }
 }

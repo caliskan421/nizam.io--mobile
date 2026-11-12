@@ -26,7 +26,9 @@
   `dart analyze` sonucu: sorun yok.
 - `check_error_paths`: 1519 dosya, ihlal yok.
 - `git diff --check`: temiz.
-- Birleşik regresyon testlerinin sonucu teslim sırasında aşağıya kaydedilir.
+- App config/telemetry/router/composition, core config/telemetry/preferences/HTTP/
+  network/session/server/scope, timeline/coordinatorships/calendar/messages ve
+  hata yolu/sembol betiği testlerinde **925 geçti, 1 başarısız** (çıkış 1).
 - `release_policy_host_test.dart` içindeki “optional dismissal never dismisses a
   later mandatory policy” testi `Kapat` semantics düğmesini bulamıyor. Aynı test,
   Firebase dalının kendi çalışma ağacında da aynı biçimde başarısız oldu; test ve

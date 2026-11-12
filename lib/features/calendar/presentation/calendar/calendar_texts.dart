@@ -72,6 +72,12 @@ extension CalendarTexts on AppLocalizations {
           '${DateFormat('d MMM', 'tr').format(e.due ?? e.date)}',
   };
 
+  /// Tarih aralığı: "21 Eki – 4 Kas".
+  String dayRange(DateTime a, DateTime b) {
+    final f = DateFormat('d MMM', 'tr');
+    return '${f.format(a)} – ${f.format(b)}';
+  }
+
   /// "14:00".
   String clock(MeetingEntry m) =>
       '${m.hour.toString().padLeft(2, '0')}:${m.minute.toString().padLeft(2, '0')}';

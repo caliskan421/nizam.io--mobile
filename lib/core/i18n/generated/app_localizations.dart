@@ -2506,12 +2506,6 @@ abstract class AppLocalizations {
   /// **'Bugün'**
   String get uiCalendarToday;
 
-  /// ui.calendar.plan_meeting
-  ///
-  /// In tr, this message translates to:
-  /// **'Seçili güne toplantı planla'**
-  String get uiCalendarPlanMeeting;
-
   /// ui.calendar.grid
   ///
   /// In tr, this message translates to:
@@ -2715,6 +2709,36 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Toplantı planla'**
   String get uiCalendarPlan;
+
+  /// ui.calendar.add
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili güne ekle'**
+  String get uiCalendarAdd;
+
+  /// ui.calendar.add_day
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu güne ekle'**
+  String get uiCalendarAddDay;
+
+  /// ui.calendar.add_meeting_caption
+  ///
+  /// In tr, this message translates to:
+  /// **'saat, gündem ve katılımcılar'**
+  String get uiCalendarAddMeetingCaption;
+
+  /// ui.calendar.add_task_start
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu gün başlayan görev'**
+  String get uiCalendarAddTaskStart;
+
+  /// ui.calendar.add_task_due
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu güne kadar bitecek görev'**
+  String get uiCalendarAddTaskDue;
 
   /// ui.calendar.pick_title
   ///

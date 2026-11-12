@@ -24,9 +24,14 @@ class CalendarDay extends ConsumerWidget {
     super.key,
     required this.index,
     this.onPlanMeeting,
+    this.onAdd,
     this.emptyMessage,
     this.divided = true,
   });
+
+  /// Verilirse boş günün düğmesi "Bu güne ekle" olur ve bunu çağırır (toplantı + görev
+  /// menüsü); yoksa [onPlanMeeting] ile "Toplantı planla".
+  final VoidCallback? onAdd;
 
   final CalendarIndex index;
 
@@ -131,7 +136,14 @@ class CalendarDay extends ConsumerWidget {
                   style: t.bodyMd.copyWith(color: c.textMuted),
                 ),
                 const Gap(14),
-                if (onPlanMeeting != null)
+                if (onAdd != null)
+                  Center(
+                    child: NzButton.secondary(
+                      label: l.uiCalendarAddDay,
+                      onPressed: onAdd,
+                    ),
+                  )
+                else if (onPlanMeeting != null)
                   Center(
                     child: NzButton.secondary(
                       label: l.uiCalendarPlan,

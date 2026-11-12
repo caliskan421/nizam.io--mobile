@@ -205,7 +205,8 @@ class NewTaskFormController extends _$NewTaskFormController {
   /// seçimi geri alınır. [title] verilirse başlık onunla doldurulur (mesajı göreve
   /// dönüştür: metnin ilk 120 karakteri). [note] toplantı notundan görev açar (bkz.
   /// [NewTaskForm.note]); nottan açılmış taslağa nottan olmayan açılış boş taslakla başlar.
-  /// [chatMessage] sohbet mesajından görev açar (aynı kural).
+  /// [chatMessage] sohbet mesajından görev açar (aynı kural). [start] / [end] verilirse
+  /// tarih aralığı onlarla açılır (takvimden "bu gün başlayan" / "bu güne kadar bitecek").
   void prepare({
     String? coordinatorship,
     bool reset = true,
@@ -213,12 +214,20 @@ class NewTaskFormController extends _$NewTaskFormController {
     String? note,
     ChatTaskSource? chatMessage,
     String? initialAssignee,
+    DateTime? start,
+    DateTime? end,
   }) {
     var f = _cancelPick(state);
     if (!f.standalone || note != null || chatMessage != null) {
       f = _initial().copyWith(note: () => note, chatMessage: () => chatMessage);
     }
     if (title != null) f = f.copyWith(title: title);
+    if (start != null || end != null) {
+      final s = _day(start ?? f.start);
+      final e = _day(end ?? f.end);
+      final (a, b) = e.isBefore(s) ? (e, s) : (s, e);
+      f = f.copyWith(start: a, end: b, month: DateTime(a.year, a.month));
+    }
     // Hedefsiz sıfırlama (görev listesi) hesaplanan açılabilir varsayılana düşer.
     final target = coordinatorship ?? _defaultCoordinatorship();
     final team =

@@ -32,7 +32,8 @@ import 'task_texts.dart';
 /// [note] verilirse görev o toplantı notundan açılır (`convertNoteToTask`; not göreve bağlanır,
 /// kanıt satırı yoktur). [chatMessage] verilirse görev o sohbet mesajından açılır
 /// (`createTaskFromChatMessage`; açıklama mesaj gövdesi, kanıt satırı yok). Seçili kapsamda görev açma yetkisi yoksa ([canCreateTaskProvider])
-/// sayfa açılmaz. Görev açıldıysa true döner.
+/// sayfa açılmaz. [start] / [end] tarih aralığını önceden doldurur (takvim). Görev açıldıysa
+/// true döner.
 Future<bool> showNewTaskSheet(
   BuildContext context, {
   String? coordinatorship,
@@ -41,6 +42,8 @@ Future<bool> showNewTaskSheet(
   String? note,
   ChatTaskSource? chatMessage,
   String? initialAssignee,
+  DateTime? start,
+  DateTime? end,
 }) async {
   final container = ProviderScope.containerOf(context, listen: false);
   if (!container.read(canCreateTaskProvider)) return false;
@@ -60,6 +63,8 @@ Future<bool> showNewTaskSheet(
             : String.fromCharCodes(title.trim().runes.take(120)),
         note: note,
         chatMessage: chatMessage,
+        start: start,
+        end: end,
       );
   final l = context.l10n;
   return _show(

@@ -3,7 +3,6 @@
   "texts": {
     "ui.calendar.title": "Takvim",
     "ui.calendar.today": "Bugün",
-    "ui.calendar.plan_meeting": "Seçili güne toplantı planla",
     "ui.calendar.grid": "Takvim ızgarası",
     "ui.calendar.collapse": "Haftaya daralt",
     "ui.calendar.expand": "Aya genişlet",
@@ -38,6 +37,11 @@
     "ui.calendar.state_pending": "Onay bekliyor",
     "ui.calendar.empty": "Bu gün için planlanmış bir şey yok.",
     "ui.calendar.plan": "Toplantı planla",
+    "ui.calendar.add": "Seçili güne ekle",
+    "ui.calendar.add_day": "Bu güne ekle",
+    "ui.calendar.add_meeting_caption": "saat, gündem ve katılımcılar",
+    "ui.calendar.add_task_start": "Bu gün başlayan görev",
+    "ui.calendar.add_task_due": "Bu güne kadar bitecek görev",
     "ui.calendar.pick_title": "Bir kayıt seç",
     "ui.calendar.pick_body": "Soldaki listeden bir kayda dokun, ayrıntısı burada açılır."
   }

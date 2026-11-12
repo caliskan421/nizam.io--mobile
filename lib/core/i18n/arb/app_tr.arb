@@ -1609,10 +1609,6 @@
   "@uiCalendarToday": {
     "description": "ui.calendar.today"
   },
-  "uiCalendarPlanMeeting": "Seçili güne toplantı planla",
-  "@uiCalendarPlanMeeting": {
-    "description": "ui.calendar.plan_meeting"
-  },
   "uiCalendarGrid": "Takvim ızgarası",
   "@uiCalendarGrid": {
     "description": "ui.calendar.grid"
@@ -1748,6 +1744,26 @@
   "uiCalendarPlan": "Toplantı planla",
   "@uiCalendarPlan": {
     "description": "ui.calendar.plan"
+  },
+  "uiCalendarAdd": "Seçili güne ekle",
+  "@uiCalendarAdd": {
+    "description": "ui.calendar.add"
+  },
+  "uiCalendarAddDay": "Bu güne ekle",
+  "@uiCalendarAddDay": {
+    "description": "ui.calendar.add_day"
+  },
+  "uiCalendarAddMeetingCaption": "saat, gündem ve katılımcılar",
+  "@uiCalendarAddMeetingCaption": {
+    "description": "ui.calendar.add_meeting_caption"
+  },
+  "uiCalendarAddTaskStart": "Bu gün başlayan görev",
+  "@uiCalendarAddTaskStart": {
+    "description": "ui.calendar.add_task_start"
+  },
+  "uiCalendarAddTaskDue": "Bu güne kadar bitecek görev",
+  "@uiCalendarAddTaskDue": {
+    "description": "ui.calendar.add_task_due"
   },
   "uiCalendarPickTitle": "Bir kayıt seç",
   "@uiCalendarPickTitle": {

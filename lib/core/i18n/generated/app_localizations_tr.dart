@@ -1347,9 +1347,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarToday => 'Bugün';
 
   @override
-  String get uiCalendarPlanMeeting => 'Seçili güne toplantı planla';
-
-  @override
   String get uiCalendarGrid => 'Takvim ızgarası';
 
   @override
@@ -1450,6 +1447,21 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCalendarPlan => 'Toplantı planla';
+
+  @override
+  String get uiCalendarAdd => 'Seçili güne ekle';
+
+  @override
+  String get uiCalendarAddDay => 'Bu güne ekle';
+
+  @override
+  String get uiCalendarAddMeetingCaption => 'saat, gündem ve katılımcılar';
+
+  @override
+  String get uiCalendarAddTaskStart => 'Bu gün başlayan görev';
+
+  @override
+  String get uiCalendarAddTaskDue => 'Bu güne kadar bitecek görev';
 
   @override
   String get uiCalendarPickTitle => 'Bir kayıt seç';

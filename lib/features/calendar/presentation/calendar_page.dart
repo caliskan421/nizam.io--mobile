@@ -21,8 +21,9 @@ import '../application/calendar_index_controller.dart';
 import '../domain/calendar.dart';
 import 'calendar/calendar_day.dart';
 import 'calendar/calendar_grid.dart';
+import 'calendar/calendar_texts.dart';
 
-/// Takvim (prototip `calendar`): başlık + "Bugün" + "Seçili güne toplantı planla", ay/hafta
+/// Takvim (prototip `calendar`): başlık + "Bugün" + "Seçili güne ekle" (toplantı ya da görev), ay/hafta
 /// ızgarası ve seçili günün kayıtları. Seçili gün, ay ve kip denetleyicide yaşar; pencere
 /// ölçüsüne bağlı değildir (yeniden boyutlanmada ve modül değişiminde korunur).
 ///
@@ -31,6 +32,9 @@ import 'calendar/calendar_grid.dart';
 ///
 /// "Toplantı planla" seçili günle ortak toplantı penceresini açar; [onPlanMeeting] verilirse
 /// (ör. tablet merkezi modal) onu çağırır.
+/// Takvimden "bu gün başlayan görev"in varsayılan süresi (yeni görev formuyla aynı, 14 gün).
+const _taskSpanDays = 14;
+
 /// Izgara ve seçili günün yan yana durduğu en küçük içerik genişliği.
 const calendarWideMinWidth = 840.0;
 
@@ -58,6 +62,56 @@ class CalendarPage extends ConsumerWidget {
       } else {
         showMeetingSheet(context, date: day);
       }
+    }
+
+    // "+" ve boş günün "Bu güne ekle"si: seçili güne toplantı ya da görev (bu gün başlayan,
+    // bu güne kadar bitecek). Görev açma yetkisi yoksa doğrudan toplantı planlanır.
+    void add() {
+      final ix = index.value;
+      if (ix == null) return;
+      if (!ref.read(canCreateTaskProvider)) {
+        plan();
+        return;
+      }
+      final l = context.l10n;
+      final day = ref.read(calendarControllerProvider).selectedOn(ix.today);
+      final spanEnd = DateTime(day.year, day.month, day.day + _taskSpanDays);
+      final dueStart = day.isBefore(ix.today) ? day : ix.today;
+      NzFlyoutMenu.show(
+        context,
+        semanticLabel: l.uiCalendarAdd,
+        entries: [
+          NzFlyoutSection(l.dayTitle(day)),
+          NzFlyoutItem(
+            label: l.uiCalendarPlan,
+            caption: l.uiCalendarAddMeetingCaption,
+            icon: NzIcons.video,
+            onSelected: plan,
+          ),
+          NzFlyoutItem(
+            label: l.uiCalendarAddTaskStart,
+            caption: l.dayRange(day, spanEnd),
+            icon: NzIcons.tasks,
+            onSelected: () => showNewTaskSheet(
+              context,
+              resetTarget: true,
+              start: day,
+              end: spanEnd,
+            ),
+          ),
+          NzFlyoutItem(
+            label: l.uiCalendarAddTaskDue,
+            caption: l.dayRange(dueStart, day),
+            icon: NzIcons.flag,
+            onSelected: () => showNewTaskSheet(
+              context,
+              resetTarget: true,
+              start: dueStart,
+              end: day,
+            ),
+          ),
+        ],
+      );
     }
 
     // Yeniden deneme yalnız dokunuşla (A3): hata veren kaynak yeniden okunur.
@@ -92,7 +146,7 @@ class CalendarPage extends ConsumerWidget {
       onRevisit: revisit,
       topBar: const RootTopBar(),
       children: [
-        _Header(onPlan: plan),
+        _Header(onAdd: add),
         // Prototip: bölüm aralığı 16, ızgara -6.
         const Gap(NizamioSpacing.gapMd),
         NzAsyncView<CalendarIndex>(
@@ -124,7 +178,7 @@ class CalendarPage extends ConsumerWidget {
                   children: [
                     grid,
                     const Gap(NizamioSpacing.space4),
-                    CalendarDay(index: ix, onPlanMeeting: plan),
+                    CalendarDay(index: ix, onPlanMeeting: plan, onAdd: add),
                   ],
                 );
               }
@@ -137,6 +191,7 @@ class CalendarPage extends ConsumerWidget {
                     child: CalendarDay(
                       index: ix,
                       onPlanMeeting: plan,
+                      onAdd: add,
                       divided: false,
                     ),
                   ),
@@ -151,9 +206,9 @@ class CalendarPage extends ConsumerWidget {
 }
 
 class _Header extends ConsumerWidget {
-  const _Header({required this.onPlan});
+  const _Header({required this.onAdd});
 
-  final VoidCallback onPlan;
+  final VoidCallback onAdd;
 
   static const _fade = Duration(milliseconds: 250);
 
@@ -217,15 +272,15 @@ class _Header extends ConsumerWidget {
             const Gap(NizamioSpacing.space2),
             Semantics(
               button: true,
-              label: l.uiCalendarPlanMeeting,
+              label: l.uiCalendarAdd,
               excludeSemantics: true,
-              onTap: onPlan,
+              onTap: onAdd,
               child: Material(
                 color: c.primary,
                 shape: const CircleBorder(),
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
-                  onTap: onPlan,
+                  onTap: onAdd,
                   child: SizedBox.square(
                     dimension: NizamioSize.tap,
                     child: Center(

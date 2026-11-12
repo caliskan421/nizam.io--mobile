@@ -73,4 +73,36 @@ void main() {
       expect(find.text('Görev END'), findsNothing);
     },
   );
+
+  testWidgets('boş gün: "Bu güne ekle" verilen ekleme eylemini çağırır', (
+    tester,
+  ) async {
+    final h = await real(
+      tester,
+      () => pilotHarness(PilotBackend(), signedIn: true),
+    );
+    final ix = CalendarIndex.build(
+      const [],
+      TaskCatalog(
+        today: _today,
+        me: 'me',
+        tasks: const [],
+        people: const [],
+        coordinatorships: const [],
+      ),
+    );
+    var added = 0;
+    await pumpScreen(
+      tester,
+      h,
+      Scaffold(
+        body: SingleChildScrollView(
+          child: CalendarDay(index: ix, onAdd: () => added++),
+        ),
+      ),
+    );
+    expect(find.text(_l.uiCalendarPlan), findsNothing);
+    await tester.tap(find.text(_l.uiCalendarAddDay));
+    expect(added, 1);
+  });
 }

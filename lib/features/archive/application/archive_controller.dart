@@ -1,8 +1,9 @@
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../core/errors/api_error.dart';
 import '../../../core/refresh.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../tasks/tasks.dart';
 import 'archive_actions_controller.dart';
 import 'archive_files_controller.dart';
@@ -90,8 +91,9 @@ class ArchiveController extends _$ArchiveController {
           .downloadPeriodZip(department: scope.department);
       final path = await ref.read(downloadSinkProvider).save(name, bytes);
       return (ok: true, error: null, path: path);
-    } on Object catch (e) {
-      return (ok: false, error: toApiError(e), path: null);
+    } on Object catch (e, st) {
+      final error = toReportedApiError(e, st, source: ReportSource.archive);
+      return (ok: false, error: error, path: null);
     } finally {
       state = state.copyWith(busy: false);
     }

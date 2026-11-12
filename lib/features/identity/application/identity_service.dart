@@ -4,6 +4,8 @@ import '../../../core/server/server_binding.dart';
 import '../../../core/session/session_controller.dart';
 import '../../../core/session/session_state.dart';
 import '../../../core/session/token_pair.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../data/identity_repository.dart';
 import '../domain/current_account.dart';
 
@@ -123,7 +125,8 @@ class IdentityService {
   Future<void> logout() async {
     try {
       if (session.accessToken != null) await _repo().logout();
-    } on ApiError {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.identity);
       // Sunucu çıkışı başarısız olsa da yerel oturum kapanır.
     } finally {
       await session.clear();

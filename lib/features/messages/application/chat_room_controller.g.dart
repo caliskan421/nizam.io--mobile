@@ -72,7 +72,7 @@ final class ChatRoomControllerProvider
 }
 
 String _$chatRoomControllerHash() =>
-    r'0786c836284a15de233f229e58cb70464bfd75c8';
+    r'7c00e23a3408f433b11d2a32153f3b2bea54d9c4';
 
 /// Açık sohbet: bilgi + mesaj penceresi, gönderim/düzenleme/silme, okundu imleci ve akıştan
 /// gelen olayların uzlaştırılması (istemci akışları §10.2–§10.5), ek gönderimi ve sabit şeridi

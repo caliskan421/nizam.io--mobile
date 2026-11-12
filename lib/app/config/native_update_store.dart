@@ -3,6 +3,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/config/mobile_release_policy.dart';
 import '../../core/config/running_release.dart';
 import '../../core/config/update_store.dart';
+import '../../core/telemetry/report_source.dart';
+import '../../core/telemetry/unexpected_error.dart';
 
 /// Only a release build configuration can select a store, never remote payloads.
 final class NativeUpdateStore implements UpdateStore {
@@ -28,7 +30,9 @@ final class NativeUpdateStore implements UpdateStore {
     if (uri == null) return false;
     try {
       return await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } on Object {
+    } on Object catch (e, st) {
+      // Platform hizmeti (mağaza açma) başarısız: kullanıcı "açılamadı" görür; sebep raporlanır.
+      reportUnexpected(e, st, source: ReportSource.app);
       return false;
     }
   }

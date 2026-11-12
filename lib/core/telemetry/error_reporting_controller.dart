@@ -35,6 +35,15 @@ enum ReportingNotice {
 ///   [ReportingNotice.revokeNotPersisted]. Sonsuz yeniden deneme yoktur. Bekleyen raporlar silinir.
 /// - Kapı yalnız bu denetleyicinin bağı ([ErrorReportingBinding]) hâlâ geçerliyse
 ///   değişir: yerine başka bileşim bağlandıysa eski denetleyicinin geç sonuçları etkisizdir.
+/// - Onay yazı/okumaları DEPO bazında (tüm [AppPreferences] örnekleri arasında) tek şeritte
+///   sıralanır. Başlamış bir `true` yazısı iptal edilemez: bağı başkasına geçen/atılan
+///   denetleyicinin geç biten `true` yazısı depo sırasında `false`/silme ile geri alınır; daha
+///   yeni gerçek bir onay verme isteği varsa ezilmez. Yeni sahibin okuma ve yazıları eski yazının
+///   ARDINA girer.
+/// - Dürüst sınır (fail-closed): geri alma/iptal yazısı süresinde doğrulanamazsa kapı bu süreçte
+///   KAPALI kalır (hiçbir şey gönderilmez); sıradaki yazı yine çalışır, ama süreç ondan önce ölürse
+///   kayıtta `true` kalabilir ve sonraki açılış onaylı sayar. Bu durum yalnız
+///   [ReportingNotice.revokeNotPersisted] ile bildirilir, "kapatıldı" diye sunulmaz.
 /// - Raporlayıcı kullanılamıyorsa (prod, Firebase açılamadı, geç başlatma) hiçbir şey açılmaz.
 class ErrorReportingController {
   ErrorReportingController(
@@ -67,21 +76,38 @@ class ErrorReportingController {
   bool get available => _reporter.isAvailable;
 
   /// Açılışta kayıtlı onayı uygular. Hiçbir zaman fırlatmaz.
-  Future<void> load() => _enqueue(() async {
-    if (!_reporter.isAvailable || _disposed) return;
+  Future<void> load() {
+    // Nesil İSTEK anında alınır: sıradaki işe geçmeden gelen `set` (ör. geri alma) bu yüklemeyi
+    // bayatlatır; yükleme sonradan kapıyı açıp geri almayı ezemez.
     final gen = _gen;
+    return _enqueue(() => _load(gen));
+  }
+
+  Future<void> _load(int gen) async {
+    if (!_reporter.isAvailable || _disposed) return;
     _binding ??= ErrorReporting.attach(_reporter);
     final consent = await _prefs.errorReportingConsent();
-    if (gen != _gen) return; // okuma sürerken geri alma/yeni istek: GÖNDERME
+    // Her await SONRASI ve her SDK/tercih yan etkisi ÖNCESİ: istek nesli, bağ sahipliği ve
+    // dispose birlikte denetlenir (yerine başka denetleyici bağlandıysa eski yükleme etkisizdir).
+    if (!_current(gen)) return;
     if (consent) {
       await _bounded(
         _reporter.sendPending,
       ); // başarısızlık gizlilik sorunu değil
-      if (gen == _gen) _open();
+      if (_current(gen)) _open();
     } else {
-      _discardConfirmed = await _confirmed(_reporter.discardPending);
+      final confirmed = await _confirmed(_reporter.discardPending);
+      if (_current(gen)) _discardConfirmed = confirmed;
     }
-  });
+  }
+
+  /// Bu istek hâlâ geçerli mi: aynı nesil, bu denetleyici dispose edilmedi ve ortak
+  /// [ErrorReporting] bağı hâlâ bu denetleyicinin.
+  bool _current(int gen) =>
+      gen == _gen && !_disposed && (_binding?.active ?? false);
+
+  /// Tercih/silme yan etkisi için bağ sahipliği (bağ henüz kurulmadıysa sahiplik çatışması yok).
+  bool get _owned => !_disposed && (_binding?.active ?? true);
 
   /// Tercihi değiştirir; etkin durumu döner. Sonuç mesajı [notice]'tadır.
   Future<bool> set(bool want) {
@@ -89,6 +115,10 @@ class ErrorReportingController {
     final gen = ++_gen;
     notice.value = ReportingNotice.none;
     if (!want) _close(); // kapı eşzamanlı kapanır; sıradaki iş beklenmez
+    // Geri alma isteği anında (await/enqueue ÖNCESİ) ortak depo şeridi kilitlenir: SDK kapısında
+    // bekleyen eski yükleme ya da yeni bir denetleyicinin okuması `true` görmez. Yalnız geçerli
+    // sahip kilitler; bağı zaten başkasına geçmiş/atılmış denetleyici yeni sahibi kapatmaz.
+    final revoke = !want && _owned ? _prefs.beginErrorReportingRevoke() : null;
     return _enqueue(() async {
       if (want) {
         if (!_reporter.isAvailable || _disposed) {
@@ -96,16 +126,32 @@ class ErrorReportingController {
           return;
         }
         _binding ??= ErrorReporting.attach(_reporter);
+        if (!_current(gen)) return; // geri alındı / yerine başkası bağlandı
         if (!_discardConfirmed) {
-          _discardConfirmed = await _confirmed(_reporter.discardPending);
+          final confirmed = await _confirmed(_reporter.discardPending);
+          if (!_current(gen)) {
+            return; // arada geri alındı ya da bağ el değiştirdi
+          }
+          _discardConfirmed = confirmed;
         }
-        if (gen != _gen) return; // arada geri alındı
         if (!_discardConfirmed) {
           notice.value = ReportingNotice.enableFailed; // yazma ve açma YOK
           return;
         }
-        final written = await _prefs.setErrorReportingConsent(true);
-        if (gen != _gen) return; // arada geri alındı; geri alma `false` yazar
+        // Sahiplik/nesil depo sırasının İÇİNDE (fiziksel yazıdan önce ve sonra) sorulur: bayat
+        // `true` aynı sıra işinde geri alınır, yeni sahibin okuması onu hiç görmez.
+        final grant = _prefs.grantErrorReportingConsent(
+          isCurrent: () => _current(gen),
+        );
+        final written = await grant.written;
+        if (!_current(gen)) {
+          // Yalnız dar aralık: yazı geçerliyken tamamlandı, ardından (mikro görev aralığında) sahip
+          // değişti. Başlamış fiziksel yazı iptal edilemez; daha yeni gerçek onaya dokunulmaz.
+          if (written && !_owned) {
+            await _prefs.rollbackErrorReportingGrant(grant.ticket);
+          }
+          return;
+        }
         if (!written) {
           // Yazı gecikmeli tamamlanıp `true` bırakmasın: kapalıyı sırayla yaz.
           await _prefs.setErrorReportingConsent(false);
@@ -114,12 +160,24 @@ class ErrorReportingController {
         }
         _open();
       } else {
-        var persisted = await _prefs.setErrorReportingConsent(false);
-        persisted = persisted || await _prefs.removeErrorReportingConsent();
-        if (!persisted && gen == _gen) {
+        // Değiştirilmiş/atılmış denetleyici yeni bileşimin tercihlerine ya da SDK'sına dokunmaz.
+        // Sahiplik sonradan düşse bile kurulmuş kilit kapalı kalır (güvenli yön).
+        if (revoke == null || !_owned) return;
+        var persisted = await _prefs.setErrorReportingConsent(
+          false,
+          revokeTicket: revoke,
+        );
+        if (!persisted && _owned) {
+          persisted = await _prefs.removeErrorReportingConsent(
+            revokeTicket: revoke,
+          );
+        }
+        if (!persisted && gen == _gen && !_disposed) {
           notice.value = ReportingNotice.revokeNotPersisted;
         }
-        _discardConfirmed = await _confirmed(_reporter.discardPending);
+        if (!_owned) return;
+        final confirmed = await _confirmed(_reporter.discardPending);
+        if (_owned) _discardConfirmed = confirmed;
       }
     }).then((_) => state.value);
   }

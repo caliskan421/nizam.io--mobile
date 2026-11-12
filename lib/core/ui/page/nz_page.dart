@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart' show CupertinoSliverRefreshControl;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../errors/api_error.dart';
-
 import '../../network/connectivity_monitor.dart';
 import '../../providers.dart';
+import '../../telemetry/report_source.dart';
+import '../../telemetry/unexpected_error.dart';
 import '../../theme/generated/tokens.gen.dart';
 import '../extensions/context_ext.dart';
 import '../extensions/ref_ext.dart';
@@ -430,8 +430,8 @@ Future<void> _guardedRefresh(
 ) async {
   try {
     await onRefresh();
-  } on Object catch (e) {
-    final error = toApiError(e);
+  } on Object catch (e, st) {
+    final error = toReportedApiError(e, st, source: ReportSource.ui);
     if (sessionEndedErrorCodes.contains(error.code) || !context.mounted) return;
     NzToast.error(context, error);
   }

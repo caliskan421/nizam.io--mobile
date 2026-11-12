@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/cache_owner.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/chat.dart';
 import '../domain/chat_stream_policy.dart';
 import 'chat_room_controller.dart';
@@ -65,7 +67,8 @@ class ChatMembersController extends _$ChatMembersController {
     try {
       final members = await _repo.members(chatId);
       if (_active && generation == _generation) state = AsyncData(members);
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.messages);
       // Sonraki olay ya da yeniden bağlanma tazeler.
     }
   }

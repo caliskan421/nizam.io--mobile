@@ -3,14 +3,15 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../../core/telemetry/error_report.dart';
 import '../../core/telemetry/error_reporting.dart';
 
-/// Crashlytics'e giden istisna nesnesi: yalnız [ErrorReport.label] (ham hata iletisi yok).
-/// `toString` Crashlytics'in `exception` alanıdır.
+/// Crashlytics'e giden istisna nesnesi: yalnız [ErrorReport.label] ve sabit
+/// [ErrorReport.message] (ham hata iletisi yok). `toString` Crashlytics'in `exception` alanıdır.
 final class SanitizedReportException implements Exception {
-  const SanitizedReportException(this.label);
+  const SanitizedReportException(this.label, this.message);
   final String label;
+  final String message;
 
   @override
-  String toString() => label;
+  String toString() => '$label | $message';
 }
 
 /// Crashlytics gerçekleştirmesi. Yalnız [ErrorReport] alır; bu tür yalnız beyaz listeli
@@ -50,7 +51,7 @@ final class CrashlyticsErrorReporter implements ErrorReporter {
     try {
       _sdk
           .recordError(
-            SanitizedReportException(report.label),
+            SanitizedReportException(report.label, report.message),
             report.stack,
             fatal: report.fatal,
             printDetails: false,

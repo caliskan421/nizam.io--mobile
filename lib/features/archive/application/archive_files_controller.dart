@@ -4,6 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/records.dart';
 import 'archive_folder_controller.dart';
 import 'archive_folder_sources.dart';
@@ -112,7 +114,9 @@ class ArchiveFilesController extends _$ArchiveFilesController {
           loadingMore: false,
         ),
       );
-    } on Object catch (e) {
+    } on Object catch (e, st) {
+      // Rapor/çeviri bayat-durum korumasından ÖNCE; yalnız durum yazımı koruma altında.
+      final api = toReportedApiError(e, st, source: ReportSource.archive);
       final now = state.value;
       if (!ref.mounted ||
           now == null ||
@@ -120,9 +124,7 @@ class ArchiveFilesController extends _$ArchiveFilesController {
           ref.read(archiveFolderControllerProvider(code)).filter != filter) {
         return;
       }
-      state = AsyncData(
-        now.copyWith(loadingMore: false, moreError: () => toApiError(e)),
-      );
+      state = AsyncData(now.copyWith(loadingMore: false, moreError: () => api));
     }
   }
 }

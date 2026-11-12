@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/errors/api_error.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../application/report_pdf_controller.dart';
@@ -92,10 +93,14 @@ class ReportPdfButton extends ConsumerWidget {
               if (saved != null && context.mounted) {
                 NzToast.show(context, 'PDF kaydedildi: $saved');
               }
-            } on Object catch (e) {
-              if (context.mounted) {
-                NzToast.error(context, toApiError(e));
-              }
+            } on Object catch (e, st) {
+              // Rapor, bağlam korumasından ÖNCE (ekran kapanmış olsa da beklenmeyen hata raporlanır).
+              final api = toReportedApiError(
+                e,
+                st,
+                source: ReportSource.reports,
+              );
+              if (context.mounted) NzToast.error(context, api);
             }
           },
     child: Text(label),

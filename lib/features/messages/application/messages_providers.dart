@@ -52,6 +52,11 @@ Duration Function(int failures) chatReconnectDelay(Ref ref) {
   return (failures) => reconnectDelay(failures, random);
 }
 
+/// Sohbet akışı döngüsünün saati (429 `Retry-After` bitişi, akış ömrü). Varsayılan
+/// `DateTime.now`; testte sahte zamanlayıcıyla birlikte sahte saat verilir.
+@Riverpod(keepAlive: true)
+DateTime Function() chatClock(Ref ref) => DateTime.now;
+
 /// Uygulama ön planda mı: akış yalnız ön plandayken açıktır (yaşam döngüsünü sunum katmanındaki
 /// akış kapsamı yazar).
 @Riverpod(keepAlive: true)

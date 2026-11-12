@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/expected_failure.dart';
 import 'archive_folder_sources.dart';
 import 'archive_providers.dart';
 
@@ -32,6 +33,6 @@ final archiveImagePreviewProvider = FutureProvider.autoDispose
       return bytes.takeBytes();
     });
 
-class ArchiveImageTooLarge implements Exception {
+class ArchiveImageTooLarge implements Exception, ExpectedFailure {
   const ArchiveImageTooLarge();
 }

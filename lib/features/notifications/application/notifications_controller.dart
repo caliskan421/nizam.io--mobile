@@ -5,6 +5,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/app_notification.dart';
 import 'notifications_providers.dart';
 
@@ -24,7 +26,8 @@ class NotificationUnreadController extends _$NotificationUnreadController {
     ref.invalidateSelf();
     try {
       await future;
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.notifications);
       // Hata durumda (AsyncError) kalır; rozet önceki sayıyı gösterir.
     }
   }
@@ -104,7 +107,8 @@ class NotificationsController extends _$NotificationsController {
     ref.invalidateSelf();
     try {
       await future;
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.notifications);
       // Hata durumda (AsyncError) gösterilir.
     }
   }
@@ -145,14 +149,16 @@ class NotificationsController extends _$NotificationsController {
         ),
       );
       _unread()?.sync(feed.unreadCount);
-    } on Object catch (e) {
+    } on Object catch (e, st) {
+      // Rapor/çeviri bayat-durum korumasından ÖNCE; yalnız durum yazımı koruma altında.
+      final api = toReportedApiError(e, st, source: ReportSource.notifications);
       if (!ref.mounted || generation != _generation) return;
       final current = state.requireValue;
       state = AsyncData(
         NotificationsView(
           items: current.items,
           nextCursor: current.nextCursor,
-          moreError: toApiError(e),
+          moreError: api,
         ),
       );
     }
@@ -167,8 +173,8 @@ class NotificationsController extends _$NotificationsController {
     final unread = _unread();
     try {
       await ref.read(notificationRepositoryProvider).markRead(id);
-    } on Object catch (e) {
-      return toApiError(e);
+    } on Object catch (e, st) {
+      return toReportedApiError(e, st, source: ReportSource.notifications);
     } finally {
       _marking.remove(id);
     }
@@ -199,8 +205,8 @@ class NotificationsController extends _$NotificationsController {
     final unread = _unread();
     try {
       await ref.read(notificationRepositoryProvider).markAllRead();
-    } on Object catch (e) {
-      return toApiError(e);
+    } on Object catch (e, st) {
+      return toReportedApiError(e, st, source: ReportSource.notifications);
     }
     unread?.sync(0);
     final view = ref.mounted ? state.value : null;

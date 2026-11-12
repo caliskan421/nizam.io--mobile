@@ -5,6 +5,9 @@ import 'package:flutter/foundation.dart';
 import '../../core/errors/api_error.dart';
 import '../../core/telemetry/error_report.dart';
 import '../../core/telemetry/error_reporting.dart';
+import '../../core/telemetry/expected_failure.dart';
+import '../../core/telemetry/provider_unwrap.dart';
+import '../../core/telemetry/report_source.dart';
 
 Object? _active;
 
@@ -66,9 +69,29 @@ void Function() installErrorHooks({
 }
 
 void _reportGlobal(Object error, StackTrace stack, ReportKind kind) {
-  if (error is ApiError) {
-    reportApiFailure(error, stack, error);
+  // Küresel hatanın hangi kullanıcı işleminden geldiği bilinemez (kancalar kök bölgede
+  // çalışır): işlem AÇIKÇA `none`, kaynak `framework`/`uncaught` — sahte atıf yok.
+  final source = kind == ReportKind.framework
+      ? ReportSource.framework
+      : ReportSource.uncaught;
+  // Riverpod sarmalayıcısı asıl hata ve özgün yığına iner; beklenen hata 0 rapor.
+  final (root, rootStack) = unwrapProviderException(error, stack);
+  if (root is ExpectedFailure) return;
+  if (root is ApiError) {
+    reportApiFailure(
+      root,
+      rootStack,
+      root,
+      operation: ReportOperation.none,
+      source: source,
+    );
     return;
   }
-  ErrorReporting.report(error, stack, kind: kind);
+  ErrorReporting.report(
+    root,
+    rootStack,
+    kind: kind,
+    operation: ReportOperation.none,
+    source: source,
+  );
 }

@@ -55,7 +55,8 @@ extension _RoomHistory on ChatRoomController {
           chat: chat.copyWith(unread: r.chat.unread, mention: r.chat.mention),
         ),
       );
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.messages);
       // Sohbetten düştüm ya da sohbet silindi: sohbet kapanır (sonraki olaylar gelmez).
       if (e.status == 404 || e.status == 403) {
         _update((r) => r.copyWith(gone: true));
@@ -73,7 +74,8 @@ extension _RoomHistory on ChatRoomController {
       final ChatHistoryPage page;
       try {
         page = await _repo.listMessages(id, after: cursor, limit: limit);
-      } on ApiError catch (e) {
+      } on ApiError catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.messages);
         if (e.code == ChatRoomController._invalidCursor) return _reloadLatest();
         rethrow;
       }

@@ -5,6 +5,10 @@ import 'package:dio/dio.dart';
 import 'package:meta/meta.dart';
 
 import '../errors/api_error.dart';
+import '../i18n/generated/client_error_codes.gen.dart';
+import '../telemetry/api_call_scope.dart';
+import '../telemetry/error_report.dart' show ReportOperation;
+import '../telemetry/report_source.dart';
 
 // `text/event-stream` (SSE) yanıtları için çekirdek yardımcılar. Üretilmiş istemci SSE ucunu
 // (`assistantChat`) tek seferlik `Future<String>` olarak verir; akış ham Dio ile
@@ -67,17 +71,15 @@ Stream<SseEvent> decodeSse(Stream<List<int>> bytes) async* {
   }
 }
 
-/// SSE `data:` metnini JSON nesnesine çözer; nesne değilse ya da çözülemezse
-/// `client.invalid_response` [ApiError] fırlatır.
+/// SSE `data:` metnini JSON nesnesine çözer. Çözülemezse AYRIŞTIRICININ asıl [FormatException]'ı
+/// (tür ve özgün yığın korunarak) fırlar; nesne değilse `client.invalid_response` [ApiError].
+/// Hata BURADA raporlanmaz: çağıran (SSE olay çözücü) kendi kaynak/işlem bağlamıyla tek kez
+/// raporlar; olay yükü hiçbir koşulda rapora girmez (FormatException iletisi yükü içerebilir,
+/// rapor modeli iletiyi taşımaz).
 Map<String, Object?> sseJsonObject(String data) {
-  final Object? decoded;
-  try {
-    decoded = jsonDecode(data);
-  } on FormatException {
-    throw invalidResponseError();
-  }
+  final decoded = jsonDecode(data);
   if (decoded is Map<String, Object?>) return decoded;
-  throw invalidResponseError();
+  throw ApiError(ClientErrorCode.invalidResponse);
 }
 
 /// `ResponseType.stream` isteğinin hatasını [ApiError]'a çevirir. Akış isteğinde 2xx dışı
@@ -85,12 +87,31 @@ Map<String, Object?> sseJsonObject(String data) {
 /// `client.invalid_response` yazar. Burada gövde okunur, JSON zarfı çözülür ve normal
 /// [toApiError] kuralıyla (kod, durum, `request_id`, `fields[]`, `Retry-After`) eşlenir.
 /// Gövdesi akış olmayan hata (kapı reddi, ağ, TLS, zaman aşımı) [toApiError]'a gider.
-Future<ApiError> streamApiError(Object error) async {
+///
+/// [stack]: ÖZGÜN istek hatasının yığını (çağıranın `catch (e, st)`'i); gövde okuması bir
+/// `await` sonrasıdır, bu yüzden yığın burada yakalanamaz. Verilmezse yalnız çağrı yeri kullanılır.
+/// [operation]/[source]: semantik bağlam (sohbet akışı, asistan, raporlar …).
+Future<ApiError> streamApiError(
+  Object error, [
+  StackTrace? stack,
+  ReportOperation? operation,
+  ReportSource source = ReportSource.network,
+]) async {
+  final original = stack ?? StackTrace.current;
   final api = error is! DioException
       ? toApiError(error)
       : toApiError(await materializeStreamError(error));
   // apiCall dışındaki akış yolu: geçersiz yanıt / 5xx burada raporlanır.
-  reportApiFailure(error, StackTrace.current, api);
+  reportApiFailure(
+    error,
+    original,
+    api,
+    operation: operation,
+    source: source,
+    apiOperationId: error is DioException
+        ? ApiCallScope.ofRequest(error.requestOptions)
+        : null,
+  );
   return api;
 }
 

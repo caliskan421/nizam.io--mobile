@@ -47,7 +47,7 @@ final class NotificationUnreadControllerProvider
 }
 
 String _$notificationUnreadControllerHash() =>
-    r'20cbd1044613955104af957357058bf93a9e369c';
+    r'7e1fed1b9d96fd0e83ba2a22600a464837679958';
 
 /// Zil rozeti: okunmamış bildirim sayısı (`countUnreadNotifications`). Kabuğun üst çubuğu ve
 /// tablet rayı izledikçe yaşar. Zamanlayıcıyla yoklama YOK (v1: push yok, arka planda iş yok):
@@ -110,7 +110,7 @@ final class NotificationsControllerProvider
 }
 
 String _$notificationsControllerHash() =>
-    r'808fb3be3ff9a52213dd258fa995aad75127c57b';
+    r'347e6a6811a573195c62c164f12c0e6eed90e8ad';
 
 /// Bildirim listesi (`listNotifications`, en yeni önce, imleçli). Çan açıkken yaşar; her
 /// açılışta ilk sayfa yeniden okunur. Her liste yanıtının `unread_count`'u ve başarılı yazma

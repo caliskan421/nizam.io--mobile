@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../../../core/telemetry/expected_failure.dart';
+
 /// Kayıt türü (prototip tür filtresi: Görev, Dosya, Toplantı, Mesaj, Hesap).
 enum ActivityKind { task, file, meeting, message, account }
 
@@ -64,7 +66,7 @@ abstract interface class ActivityLogRepository {
 }
 
 /// Pinli sözleşmede işlem geçmişini okuyan bir uç yoktur.
-final class ActivityUnavailable implements Exception {
+final class ActivityUnavailable implements Exception, ExpectedFailure {
   const ActivityUnavailable();
 }
 

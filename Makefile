@@ -20,6 +20,8 @@ analyze:
 
 boundaries:
 	dart run tool/check_boundaries.dart
+	dart run tool/check_error_paths.dart
+	dart run tool/error_path_inventory.dart --check
 
 # Golden testleri (etiket `golden`, dart_test.yaml) birim koşumundan ayrıdır: referans yalnız
 # Linux'ta, sabit runner'da (CI `golden` işi) üretilir/doğrulanır (ADR-0003 karar 8).

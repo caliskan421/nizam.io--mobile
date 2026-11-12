@@ -1,5 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'telemetry/report_source.dart';
+import 'telemetry/unexpected_error.dart';
+
 /// Bayat veri saati: son başarılı okumadan beri geçen süre ve "yeniden ziyarette bayatsa
 /// arka planda tazele" kuralı. Controller alanı olarak tutulur (notifier yeniden kurulumlarda
 /// korunur); `build` başarıyla bitince [markFresh] çağrılır.
@@ -36,8 +39,10 @@ class StaleClock {
     }
     try {
       await refresh();
-    } on Object {
+    } on Object catch (e, st) {
       // Otomatik yol sessizdir: hata durumda, veri yerinde; sonraki deneme kullanıcıdan.
+      // Beklenmeyen hata yine de raporlanır (beklenen ApiError'lar süzülür).
+      reportUnexpected(e, st, source: ReportSource.app);
     }
   }
 }

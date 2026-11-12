@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../../../core/telemetry/expected_failure.dart';
+
 // YZ asistanı domain varlıkları (`/v1/assistant/*`, `v0.3.0-api`). Asistan salt okunurdur;
 // kişiler akışta `Üye-N` takma adıyla görünür, [AssistantNames] yalnız o soruda görülen takma
 // adların görünen adını taşır (e-posta ve hesap kimliği yok).
@@ -186,7 +188,7 @@ final class AssistantFailure extends AssistantEvent {
 /// diğer her hata `ApiError` olarak kalır. Arayüz bunu "asistan bu kurulumda kapalı" diye
 /// gösterir ve asistan girişini gizler.
 @immutable
-final class AssistantDisabled implements Exception {
+final class AssistantDisabled implements Exception, ExpectedFailure {
   const AssistantDisabled({this.requestId});
 
   /// Sunucu yanıtının istek kimliği (destek için).

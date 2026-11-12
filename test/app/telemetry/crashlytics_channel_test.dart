@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/app/telemetry/crashlytics_error_reporter.dart';
 import 'package:nizamio/core/telemetry/error_report.dart';
 import 'package:nizamio/core/telemetry/error_reporting.dart';
+import 'package:nizamio/core/telemetry/report_source.dart';
 
 const _p = 'dev.flutter.pigeon.';
 const _coreApi = '${_p}firebase_core_platform_interface.FirebaseCoreHostApi.';
@@ -111,59 +112,63 @@ void main() {
     'ali@example.com serbest metin',
   ];
 
-  test(
-    'native kanala giden istek: etiket, güvenli yığın, boş information/reason',
-    () async {
-      ErrorReporting.attach(CrashlyticsErrorReporter());
-      ErrorReporting.setEnabled(true);
-      ErrorReporting.report(
-        const FormatException('ali@example.com maaş.pdf'),
-        StackTrace.fromString(stack.join('\n')),
-        kind: ReportKind.serialization,
-        operation: ReportOperation.login,
-      );
-      await Future<void>.delayed(Duration.zero);
-      final r = recorded.single;
-      expect(r.exception, 'kind=serialization op=login type=format_exception');
-      expect(r.information, '');
-      expect(r.reason, isNull);
-      expect(r.fatal, isFalse);
-      expect(r.buildId, 'abcdef0123456789');
-      final frames = r.stackTraceElements;
-      expect(
-        frames.any((f) => f.file == 'package:nizamio/features/tasks/foo.dart'),
-        isTrue,
-      );
-      expect(
-        frames.any((f) => f.method.startsWith('#00 abs 000000b4b5c3f4f3')),
-        isTrue,
-        reason: 'AOT çerçevesi sembolleştirme için korunur',
-      );
-      final wire = [
-        r.exception,
-        r.information,
-        r.buildId,
-        for (final f in frames)
-          '${f.className} ${f.method} ${f.file} ${f.line}',
-      ].join('\n');
-      for (final leak in [
-        'ali@',
-        'ali.veli',
-        'maaş',
-        'sunucu',
-        'abc:',
-        'serbest',
-        'bordro',
-      ]) {
-        expect(wire, isNot(contains(leak)), reason: leak);
-      }
-      expect(
-        calls.where((c) => c != 'recordError'),
-        isEmpty,
-        reason: 'özel anahtar, kullanıcı kimliği, günlük çağrısı yok',
-      );
-    },
-  );
+  test('native kanala giden istek: etiket, güvenli yığın, boş information/reason', () async {
+    ErrorReporting.attach(CrashlyticsErrorReporter());
+    ErrorReporting.setEnabled(true);
+    ErrorReporting.report(
+      const FormatException('ali@example.com maaş.pdf'),
+      StackTrace.fromString(stack.join('\n')),
+      kind: ReportKind.serialization,
+      operation: ReportOperation.login,
+      source: ReportSource.identity,
+      apiOperationId: 'login',
+    );
+    await Future<void>.delayed(Duration.zero);
+    final r = recorded.single;
+    // Etiket + SABİT Türkçe açıklama (hata iletisi ya da kişisel metin DEĞİL).
+    expect(
+      r.exception,
+      'kind=serialization op=login src=identity api=login type=format_exception'
+      ' | Yerel veri ayrıştırılırken ya da eşlenirken tür/biçim hatası oluştu. '
+      'Biçim hatası.',
+    );
+    expect(r.information, '');
+    expect(r.reason, isNull);
+    expect(r.fatal, isFalse);
+    expect(r.buildId, 'abcdef0123456789');
+    final frames = r.stackTraceElements;
+    expect(
+      frames.any((f) => f.file == 'package:nizamio/features/tasks/foo.dart'),
+      isTrue,
+    );
+    expect(
+      frames.any((f) => f.method.startsWith('#00 abs 000000b4b5c3f4f3')),
+      isTrue,
+      reason: 'AOT çerçevesi sembolleştirme için korunur',
+    );
+    final wire = [
+      r.exception,
+      r.information,
+      r.buildId,
+      for (final f in frames) '${f.className} ${f.method} ${f.file} ${f.line}',
+    ].join('\n');
+    for (final leak in [
+      'ali@',
+      'ali.veli',
+      'maaş',
+      'sunucu',
+      'abc:',
+      'serbest',
+      'bordro',
+    ]) {
+      expect(wire, isNot(contains(leak)), reason: leak);
+    }
+    expect(
+      calls.where((c) => c != 'recordError'),
+      isEmpty,
+      reason: 'özel anahtar, kullanıcı kimliği, günlük çağrısı yok',
+    );
+  });
 
   // firebase_crashlytics-5.4.0/test/firebase_crashlytics_test.dart'taki GERÇEK SDK örnekleri
   // (satır başı boşlukları dahil): Android (virt var) ve iOS (virt yok).

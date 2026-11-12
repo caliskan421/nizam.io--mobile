@@ -66,7 +66,7 @@ final class ChatSyncControllerProvider
 }
 
 String _$chatSyncControllerHash() =>
-    r'8c203247a865fb5d2ec42d2116a3a341efd2dffe';
+    r'dbc8909a85260b5fd0d3a605b7535947e60cd642';
 
 /// Sohbet olay akışının (SSE `streamChatEvents`) TEK bağlantı döngüsü. Yalnız onu dinleyen bir
 /// mesaj ekranı varken ve uygulama ön plandayken açıktır (dinleyen kalmayınca kapanır: hesap

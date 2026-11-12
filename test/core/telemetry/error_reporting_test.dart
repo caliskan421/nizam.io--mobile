@@ -8,6 +8,7 @@ import 'package:nizamio/core/http/file_upload.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/telemetry/error_report.dart';
 import 'package:nizamio/core/telemetry/error_reporting.dart';
+import 'package:nizamio/core/telemetry/report_source.dart';
 import 'package:nizamio/core/telemetry/stack_sanitizer.dart';
 import 'package:nizamio/core/telemetry/unexpected_error.dart';
 
@@ -270,7 +271,8 @@ void main() {
         );
       } on ApiError catch (e, st) {
         caught = e;
-        reportUnexpected(e, st); // controller sınırı: aynı kök, tek rapor
+        // controller sınırı: aynı kök, tek rapor
+        reportUnexpected(e, st, source: ReportSource.tasks);
       }
       expect(caught, isA<ApiError>());
       expect(sdk.reports, hasLength(1));
@@ -367,12 +369,14 @@ void main() {
       reportUnexpected(
         StateError('a'),
         StackTrace.current,
+        source: ReportSource.tasks,
         fallbackOperation: ReportOperation.taskWrite,
       );
       ReportContext.run(ReportOperation.fileUpload, () {
         reportUnexpected(
           StateError('b'),
           StackTrace.fromString('#0 g (package:a/b.dart:1:1)'),
+          source: ReportSource.tasks,
           fallbackOperation: ReportOperation.taskWrite,
         );
       });
@@ -386,27 +390,34 @@ void main() {
       final error = StateError('x');
       final st = StackTrace.current;
       ErrorReporting.report(error, st, kind: ReportKind.unexpected);
-      reportUnexpected(error, st);
+      reportUnexpected(error, st, source: ReportSource.tasks);
       ErrorReporting.report(error, st, kind: ReportKind.uncaughtAsync);
       expect(sdk.reports, hasLength(1));
       expect(ErrorReporting.alreadyHandled(error), isTrue);
     });
 
     test('reportUnexpected: beklenen ağ/IO/zaman aşımı atlanır, 5xx Dio raporlanır', () {
-      reportUnexpected(ApiError('x.y'), StackTrace.current);
-      reportUnexpected(TimeoutException('t'), StackTrace.current);
-      reportUnexpected(const SocketException('x'), StackTrace.current);
+      const src = ReportSource.tasks;
+      reportUnexpected(ApiError('x.y'), StackTrace.current, source: src);
+      reportUnexpected(TimeoutException('t'), StackTrace.current, source: src);
+      reportUnexpected(
+        const SocketException('x'),
+        StackTrace.current,
+        source: src,
+      );
       expect(sdk.reports, isEmpty);
-      reportUnexpected(_http(502, null), StackTrace.current);
+      reportUnexpected(_http(502, null), StackTrace.current, source: src);
       expect(sdk.reports.single.kind, ReportKind.serverError);
       reportUnexpected(
         const FileSystemException('x'),
         StackTrace.fromString('#0 f (package:a/a.dart:1:1)'),
+        source: src,
       );
       expect(sdk.reports.last.kind, ReportKind.storage);
       reportUnexpected(
         const FormatException(),
         StackTrace.fromString('#0 h (package:a/c.dart:1:1)'),
+        source: src,
       );
       expect(sdk.reports.last.kind, ReportKind.serialization);
     });

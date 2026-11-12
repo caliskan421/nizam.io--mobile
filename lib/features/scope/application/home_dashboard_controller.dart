@@ -6,6 +6,8 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
 import '../../../core/stale_clock.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../tasks/tasks.dart';
 import '../domain/home_dashboard.dart';
 import 'scope_providers.dart';
@@ -161,6 +163,7 @@ class HomeDashboardController extends _$HomeDashboardController {
       try {
         await catalogStep(ref.read(taskCatalogControllerProvider.notifier));
       } on Object catch (e, s) {
+        reportUnexpected(e, s, source: ReportSource.scope);
         failure = e;
         trace = s;
       }
@@ -169,6 +172,7 @@ class HomeDashboardController extends _$HomeDashboardController {
     try {
       await future;
     } on Object catch (e, s) {
+      reportUnexpected(e, s, source: ReportSource.scope);
       failure ??= e;
       trace ??= s;
     }

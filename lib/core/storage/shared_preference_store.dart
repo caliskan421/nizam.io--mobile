@@ -6,7 +6,7 @@ import 'preference_store.dart';
 /// her okuma platform deposundan; çoklu izolat ve dış değişiklikte bayat değer yok).
 /// Platform örneği ilk kullanımda oluşturulur: bileşim kökü kurulurken (ve platform eklentisi
 /// olmayan testlerde) kanal gerekmez.
-class SharedPreferenceStore implements PreferenceStore {
+class SharedPreferenceStore implements PreferenceStore, PlatformBackedStore {
   SharedPreferenceStore([SharedPreferencesAsync? prefs]) : _given = prefs;
 
   final SharedPreferencesAsync? _given;

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
@@ -68,8 +69,14 @@ class AdminUserAccountOperations extends ConsumerWidget {
           }
         });
         if (context.mounted) NzToast.success(context, title);
-      } on Object catch (error) {
-        if (context.mounted) NzToast.error(context, toApiError(error));
+      } on Object catch (error, st) {
+        // Rapor, bağlam korumasından ÖNCE.
+        final api = toReportedApiError(
+          error,
+          st,
+          source: ReportSource.administration,
+        );
+        if (context.mounted) NzToast.error(context, api);
       }
     }
 
@@ -95,8 +102,14 @@ class AdminUserAccountOperations extends ConsumerWidget {
         if (!context.mounted) return;
         NzToast.success(context, l.uiUsersOpsDeleted);
         context.appNav.openUsers();
-      } on Object catch (error) {
-        if (context.mounted) NzToast.error(context, toApiError(error));
+      } on Object catch (error, st) {
+        // Rapor, bağlam korumasından ÖNCE.
+        final api = toReportedApiError(
+          error,
+          st,
+          source: ReportSource.administration,
+        );
+        if (context.mounted) NzToast.error(context, api);
       }
     }
 

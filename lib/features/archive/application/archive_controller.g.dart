@@ -44,7 +44,7 @@ final class ArchiveControllerProvider
   }
 }
 
-String _$archiveControllerHash() => r'f1b8217f66b7f6262b6e6de307ceb97440b3c423';
+String _$archiveControllerHash() => r'd7da2ca3dd8be43672773b484a08493f7d2d84a8';
 
 /// Arşiv ekranı komutları: yerel arama ve dönemin tam arşivi.
 

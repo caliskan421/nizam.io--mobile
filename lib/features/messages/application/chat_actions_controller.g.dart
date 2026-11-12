@@ -92,7 +92,7 @@ final class ChatActionsControllerProvider
 }
 
 String _$chatActionsControllerHash() =>
-    r'8d2f14cc2634c771b8f45f5b1331d5be03ced719';
+    r'156dda7c7cc038c398d355eb607eba2be7e92bc4';
 
 /// Mesaj eylemleri (istemci akışları §10.10): tepki, oy, sabitleme, anket bitirme ve indirmeler.
 /// Tepki ve oy iyimser uygulanır; aynı mesajdaki ardışık dokunuşlar [settle] süresince

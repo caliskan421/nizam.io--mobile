@@ -37,6 +37,7 @@ import '../../features/scope/scope_module.dart';
 import '../../features/tasks/tasks_module.dart';
 import '../../features/timeline/timeline_module.dart';
 import '../config/native_update_store.dart';
+import '../telemetry/provider_error_observer.dart';
 import 'dependencies.dart';
 
 /// Bileşim kökü: get_it nesne grafiği + onu Riverpod portlarına bağlayan ProviderContainer.
@@ -131,6 +132,8 @@ class Composition {
       // Otomatik yeniden deneme YOK (A3 / CLAUDE.md): Riverpod 3 varsayılanı hata veren
       // sağlayıcıyı kendiliğinden yeniden çalıştırır; yeniden deneme yalnız kullanıcı dokunuşuyla.
       retry: (_, _) => null,
+      // Beklenmeyen sağlayıcı hataları tek merkezden raporlanır (kapı kapalıyken etkisiz).
+      observers: const [ErrorReportingProviderObserver()],
       overrides: [
         flavorProvider.overrideWithValue(flavor),
         if (runningRelease != null) ...[

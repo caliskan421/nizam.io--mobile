@@ -1,5 +1,6 @@
 // Giriş akışı hata raporu: gerçek bileşim kökü + sahte sunucu; beklenen/beklenmeyen ayrımı.
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/app/telemetry/provider_error_observer.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/core/telemetry/error_report.dart';
@@ -72,5 +73,12 @@ void main() {
     expect((error! as ApiError).code, ClientErrorCode.invalidResponse);
     expect(sdk.reports.single.operation, ReportOperation.login);
     expect(sdk.reports.single.kind, ReportKind.invalidResponse);
+    // Gerçek bileşimde (Riverpod gözlemcisi bağlı): AsyncError durumu ikinci rapor üretmez ve
+    // API işlem kimliği üretilmiş apiOperations listesinden gelir.
+    expect(sdk.reports.single.apiOperationId, 'login');
+    expect(
+      h.container.observers.whereType<ErrorReportingProviderObserver>(),
+      hasLength(1),
+    );
   });
 }

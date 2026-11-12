@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../telemetry/report_source.dart';
+import '../telemetry/unexpected_error.dart';
 import 'push_notifications.dart';
 
 enum PushPlatform { android, ios }
@@ -69,12 +71,18 @@ final class PushRegistrationController {
     required this._repository,
     required this._platform,
   }) : _notifications = notifications {
-    _subscription = notifications.tokenChanges.listen((token) {
-      if (_owner == null || !_permitted || _disposed) return;
-      _tokenRevision++;
-      _token = token;
-      unawaited(_enqueue(_reconcile).catchError((Object _) {}));
-    }, onError: (Object error) => _publish(error: error));
+    _subscription = notifications.tokenChanges.listen(
+      (token) {
+        if (_owner == null || !_permitted || _disposed) return;
+        _tokenRevision++;
+        _token = token;
+        unawaited(_enqueue(_reconcile).catchError((Object _) {}));
+      },
+      onError: (Object error, StackTrace st) {
+        reportUnexpected(error, st, source: ReportSource.push);
+        _publish(error: error);
+      },
+    );
   }
 
   final PushNotifications _notifications;
@@ -190,9 +198,13 @@ final class PushRegistrationController {
   }
 
   Future<void> _enqueue(Future<void> Function() operation) {
-    final result = _tail.then((_) => operation()).catchError((Object error) {
+    final result = _tail.then((_) => operation()).catchError((
+      Object error,
+      StackTrace st,
+    ) {
+      reportUnexpected(error, st, source: ReportSource.push);
       _publish(error: error);
-      Error.throwWithStackTrace(error, StackTrace.current);
+      Error.throwWithStackTrace(error, st);
     });
     _tail = result.catchError((Object _) {});
     return result;

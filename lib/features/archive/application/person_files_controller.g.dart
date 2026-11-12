@@ -51,7 +51,7 @@ final class PersonFilesControllerProvider
 }
 
 String _$personFilesControllerHash() =>
-    r'21561dc7c79fec97fce0b964a17582faf6aa3d48';
+    r'5b897272dc31df223299df8377bd022f913c6e2e';
 
 final class PersonFilesControllerFamily extends $Family
     with

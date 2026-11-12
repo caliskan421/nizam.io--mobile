@@ -4,6 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/cache_owner.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/chat.dart';
 import '../domain/chat_stream_policy.dart';
 import 'messages_providers.dart';
@@ -88,7 +90,8 @@ class ChatsController extends _$ChatsController {
   Future<void> refresh() async {
     try {
       await reload();
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.messages);
       // Ağ/sunucu hatası: sonraki olay ya da yeniden bağlanma tazeler.
     }
   }

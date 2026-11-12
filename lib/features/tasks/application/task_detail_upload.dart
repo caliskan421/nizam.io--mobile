@@ -44,7 +44,8 @@ mixin _UploadFlow on _$TaskDetailController {
     final UploadSource? f;
     try {
       f = await picker.pick(origin);
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tasks);
       return WriteOutcome(WriteKind.failed, e);
     }
     final d = state.upload;
@@ -82,7 +83,8 @@ mixin _UploadFlow on _$TaskDetailController {
     final String? digest;
     try {
       digest = await _digests.of(ref, f, cancelled: stale);
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tasks);
       return WriteOutcome(WriteKind.failed, e);
     } finally {
       if (ref.mounted) state = state.copyWith(busy: false);

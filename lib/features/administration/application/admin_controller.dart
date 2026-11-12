@@ -5,6 +5,8 @@ import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
 import '../../../core/stale_clock.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../meetings/meetings.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
@@ -405,7 +407,8 @@ final adminUserProfileProvider = FutureProvider.autoDispose
         final user = await repo.readUser(id);
         if (!live()) throw ApiError('client.scope_changed');
         return user;
-      } on ApiError catch (e) {
+      } on ApiError catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.administration);
         if (!live()) throw ApiError('client.scope_changed');
         if (e.status == 404) return null;
         rethrow;

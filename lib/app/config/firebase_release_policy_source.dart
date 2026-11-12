@@ -2,6 +2,8 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import '../../core/config/mobile_release_policy.dart';
 import '../../core/preferences/app_preferences.dart';
+import '../../core/telemetry/report_source.dart';
+import '../../core/telemetry/unexpected_error.dart';
 
 enum ReleasePolicyOrigin { defaults, cache, remote }
 
@@ -40,7 +42,8 @@ final class FirebaseReleasePolicySource implements CachedReleasePolicySource {
         _hasGood = true;
         _origin = ReleasePolicyOrigin.cache;
       }
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.preferences);
       _cacheFailed = true;
       // Failed disk reads must be retried after a temporary platform failure.
       _cacheRead = null;

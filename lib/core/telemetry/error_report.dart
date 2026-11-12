@@ -6,7 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../api/generated/error_catalog.gen.dart';
+import '../api/generated/operations.gen.dart';
 import '../i18n/generated/client_error_codes.gen.dart';
+import 'report_message.dart';
+import 'report_source.dart';
 import 'stack_sanitizer.dart';
 
 /// Hata raporunun ait olduğu işlem. KAPALI küme: dinamik rota, sağlayıcı adı ya da serbest
@@ -21,6 +24,7 @@ enum ReportOperation {
   fileDownload('file_download'),
   chatSend('chat_send'),
   chatStream('chat_stream'),
+  assistantChat('assistant_chat'),
   localStorage('local_storage');
 
   const ReportOperation(this.code);
@@ -35,6 +39,10 @@ enum ReportKind {
 
   /// Sunucu 5xx döndü (yoğun hız sınırı altında).
   serverError('server_error'),
+
+  /// HTTP 2xx akış içinde sunucunun bildirdiği TEKNİK hata olayı (ör. SSE `hata`: katalogda
+  /// 5xx olan kod). Gerçek HTTP durumu yoktur; durum sınıfı raporlanmaz.
+  streamServerError('stream_server_error'),
 
   /// Yerel depolama/dosya sistemi arızası.
   storage('storage'),
@@ -107,6 +115,8 @@ String? _statusClass(int? status) {
 final class ErrorReport {
   const ErrorReport._({
     required this.operation,
+    required this.source,
+    required this.apiOperationId,
     required this.kind,
     required this.errorType,
     required this.stack,
@@ -123,11 +133,18 @@ final class ErrorReport {
     required ReportKind kind,
     required ReportErrorType errorType,
     required SanitizedStackTrace stack,
+    ReportSource source = ReportSource.unknown,
+    String? apiOperationId,
     String? apiCode,
     int? status,
     bool fatal = false,
   }) => ErrorReport._(
     operation: operation,
+    source: source,
+    apiOperationId:
+        apiOperationId != null && apiOperations.containsKey(apiOperationId)
+        ? apiOperationId
+        : null,
     kind: kind,
     errorType: errorType,
     stack: stack,
@@ -137,6 +154,13 @@ final class ErrorReport {
   );
 
   final ReportOperation operation;
+
+  /// Hatanın yakalandığı alan (kapalı küme); bkz. [ReportSource].
+  final ReportSource source;
+
+  /// Üretilmiş `apiOperations` listesinde doğrulanmış API işlem kimliği ya da `null`
+  /// (kesin tek işlem belirlenemediyse). İstek adresi/parametresi değildir.
+  final String? apiOperationId;
   final ReportKind kind;
   final ReportErrorType errorType;
 
@@ -150,9 +174,15 @@ final class ErrorReport {
   final SanitizedStackTrace stack;
   final bool fatal;
 
+  /// Sabit Türkçe teknik açıklama; kapalı kümelerden türetilir, ham hata iletisi içermez.
+  String get message =>
+      reportMessage(kind: kind, errorType: errorType, apiCode: apiCode);
+
   /// Gruplama ve konsolda okunur kısa etiket; ham veri içermez.
   String get label =>
-      'kind=${kind.code} op=${operation.code} type=${errorType.code}'
+      'kind=${kind.code} op=${operation.code} src=${source.code}'
+      '${apiOperationId == null ? '' : ' api=$apiOperationId'}'
+      ' type=${errorType.code}'
       '${apiCode == null ? '' : ' code=$apiCode'}'
       '${statusClass == null ? '' : ' status=$statusClass'}';
 }

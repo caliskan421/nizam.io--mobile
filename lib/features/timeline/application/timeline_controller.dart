@@ -6,6 +6,8 @@ import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
 import '../../../core/server/write_compat.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../tasks/tasks.dart';
 import '../domain/timeline.dart';
 import '../domain/timeline_view_builder.dart';
@@ -380,8 +382,8 @@ class TimelineController extends _$TimelineController {
         await ref
             .read(taskWriteRepositoryProvider)
             .requestDateChange(base, start, end, requestKey: key);
-      } on Object catch (e) {
-        final error = toApiError(e);
+      } on Object catch (e, st) {
+        final error = toReportedApiError(e, st, source: ReportSource.timeline);
         if (_valid(epoch) &&
             (error.code == 'work.edit_conflict' || isKeyReused(error))) {
           _requestKeys = _requestKeys.clear('date_request');
@@ -390,7 +392,8 @@ class TimelineController extends _$TimelineController {
           if (error.code == 'work.edit_conflict') {
             try {
               await ref.read(taskCatalogControllerProvider.notifier).reload();
-            } on Object {
+            } on Object catch (e, st) {
+              reportUnexpected(e, st, source: ReportSource.timeline);
               /* Hata asıl çakışma sonucunu gölgelemez. */
             }
             if (_valid(epoch)) state = _cleared(state);
@@ -405,7 +408,8 @@ class TimelineController extends _$TimelineController {
         try {
           await ref.read(taskCatalogControllerProvider.notifier).reload();
           if (_valid(epoch)) await ref.read(ganttScheduleProvider.future);
-        } on Object {
+        } on Object catch (e, st) {
+          reportUnexpected(e, st, source: ReportSource.timeline);
           /* Yazma sonucu başarıdır; okuma hatası kaynak durumunda kalır. */
         }
       }

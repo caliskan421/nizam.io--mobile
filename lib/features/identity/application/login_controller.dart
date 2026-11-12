@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/telemetry/error_report.dart';
+import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import 'identity_providers.dart';
 
@@ -28,7 +29,12 @@ class LoginController extends _$LoginController {
       } on Object catch (e, st) {
         // AsyncError'a çevrilmeden önce: beklenmeyen hata (geçersiz yanıt, eşleme
         // arızası) raporlanır; yanlış parola/doğrulama raporlanmaz.
-        reportUnexpected(e, st, operation: ReportOperation.login);
+        reportUnexpected(
+          e,
+          st,
+          operation: ReportOperation.login,
+          source: ReportSource.identity,
+        );
         rethrow;
       }
     });

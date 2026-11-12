@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../telemetry/error_report.dart';
 import '../telemetry/error_reporting.dart';
+import '../telemetry/report_source.dart';
 import 'secure_store.dart';
 
 /// flutter_secure_storage tabanlı depo. iOS: Keychain, yalnız bu cihaz ve ilk kilit
@@ -40,6 +41,7 @@ class FlutterSecureStore implements SecureStore {
         st,
         kind: ReportKind.storage,
         operation: ReportOperation.localStorage,
+        source: ReportSource.secureStorage,
       );
       rethrow;
     }

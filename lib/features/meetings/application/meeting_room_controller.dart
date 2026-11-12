@@ -8,6 +8,8 @@ import '../../../core/domain/page_slice.dart';
 import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../tasks/tasks.dart';
 import '../domain/meeting.dart';
 import '../domain/meeting_board.dart';
@@ -16,6 +18,7 @@ import '../domain/meetings_repository.dart';
 import 'meetings_controller.dart';
 import 'meetings_providers.dart';
 
+part 'meeting_room_agenda.dart';
 part 'meeting_room_controller.g.dart';
 
 /// Ayrıntı bölümleri (prototip segmentli sekmeler).
@@ -216,7 +219,8 @@ class MeetingRoomController extends _$MeetingRoomController {
     ref.invalidateSelf();
     try {
       await future;
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.meetings);
       if (shown) rethrow; // Veri yoksa hata görünümü yeterlidir.
     }
   }
@@ -251,68 +255,9 @@ class MeetingRoomController extends _$MeetingRoomController {
     for (final x in list) identical(x, old) ? next : x,
   ];
 
-  /// Gündem maddesini işaretler/kaldırır (iyimser).
-  Future<ApiError?> toggleAgenda(AgendaItem a) async {
-    final r = _room;
-    if (r == null) return null;
-    final now = DateTime.now();
-    final optimistic = AgendaItem(
-      id: a.id,
-      meetingId: a.meetingId,
-      title: a.title,
-      sortOrder: a.sortOrder,
-      isChecked: !a.isChecked,
-      createdAt: a.createdAt,
-      checkedAt: a.isChecked ? null : now,
-      checkedByAccountId: a.isChecked ? null : r.me,
-    );
-    _agenda(_replace(r.detail.agenda, a, optimistic));
-    try {
-      final saved = await _repo.updateAgendaItem(
-        a.id,
-        isChecked: optimistic.isChecked,
-      );
-      final cur = _room;
-      if (cur != null) _agenda(_replace(cur.detail.agenda, optimistic, saved));
-      return null;
-    } on Object catch (e) {
-      final cur = _room;
-      if (cur != null) _agenda(_replace(cur.detail.agenda, optimistic, a));
-      return toApiError(e);
-    }
-  }
-
-  /// Gündem maddesi ekler (1–300 karakter, toplantı başına en çok 50; sunucu denetler).
-  Future<ApiError?> addAgenda(String title) async {
-    final t = title.trim();
-    if (t.isEmpty || _room == null) return null;
-    try {
-      final item = await _repo.addAgendaItem(id, t);
-      final cur = _room;
-      if (cur != null) _agenda([...cur.detail.agenda, item]);
-      return null;
-    } on Object catch (e) {
-      return toApiError(e);
-    }
-  }
-
-  /// Gündem maddesini siler (silme kalıcıdır; iyimser).
-  Future<ApiError?> deleteAgenda(AgendaItem a) async {
-    final r = _room;
-    if (r == null) return null;
-    final before = r.detail.agenda;
-    _agenda([
-      for (final x in before)
-        if (!identical(x, a)) x,
-    ]);
-    try {
-      await _repo.deleteAgendaItem(a.id);
-      return null;
-    } on Object catch (e) {
-      _agenda(before);
-      return toApiError(e);
-    }
-  }
+  /// `catch` sınırı: raporla (beklenmeyen sınıf), arayüz hatasına çevir.
+  static ApiError _fail(Object e, StackTrace st) =>
+      toReportedApiError(e, st, source: ReportSource.meetings);
 
   /// Uçuştaki not ekleme isteğinin kimliği (işlem anahtarından ayrı; her uçuşa ayrı nesne).
   /// State'ten bağımsızdır: yenileme state'i yeniden kursa da kilit kalır;
@@ -341,8 +286,8 @@ class MeetingRoomController extends _$MeetingRoomController {
       _clearNoteKey(key);
       added = (cur) => [note, ...cur.notes];
       return const NoteAdded();
-    } on Object catch (e) {
-      final err = toApiError(e);
+    } on Object catch (e, st) {
+      final err = _fail(e, st);
       if (isKeyReused(err)) _clearNoteKey(key);
       return NoteFailed(err);
     } finally {
@@ -380,8 +325,8 @@ class MeetingRoomController extends _$MeetingRoomController {
       final cur = _room;
       if (cur != null) _notes(_replace(cur.notes, n, saved));
       return null;
-    } on Object catch (e) {
-      return toApiError(e);
+    } on Object catch (e, st) {
+      return _fail(e, st);
     }
   }
 
@@ -456,8 +401,8 @@ class MeetingRoomController extends _$MeetingRoomController {
     ApiError? error;
     try {
       await p.repo.deleteNote(noteId, programId: p.programId);
-    } on Object catch (e) {
-      error = toApiError(e);
+    } on Object catch (e, st) {
+      error = _fail(e, st);
     }
     _pendingDeletes.remove(p);
     if (ref.mounted) {
@@ -502,8 +447,8 @@ class MeetingRoomController extends _$MeetingRoomController {
         _put(cur.copyWith(detail: cur.detail.copyWith(conference: () => c)));
       }
       return null;
-    } on Object catch (e) {
-      return toApiError(e);
+    } on Object catch (e, st) {
+      return _fail(e, st);
     }
   }
 
@@ -514,14 +459,15 @@ class MeetingRoomController extends _$MeetingRoomController {
   Future<ApiError?> endConference() async {
     try {
       await _repo.endConference(id);
-    } on Object catch (e) {
-      return toApiError(e);
+    } on Object catch (e, st) {
+      return _fail(e, st);
     }
     try {
       final detail = await _repo.getMeeting(id);
       final cur = _room;
       if (cur != null) _put(cur.copyWith(detail: detail));
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.meetings);
       final cur = _room;
       final c = cur?.detail.conference;
       if (cur != null && c != null) {
@@ -557,9 +503,11 @@ class MeetingRoomController extends _$MeetingRoomController {
             ),
           );
         }
-      } on Object catch (e) {
+      } on Object catch (e, st) {
         failed++;
-        first ??= toApiError(e);
+        // Her catch raporlanır/çevrilir (`??=` kısa devresi sonraki hataları atlamasın).
+        final error = _fail(e, st);
+        first ??= error;
       }
     }
     return (added: added, failed: failed, error: first);
@@ -582,8 +530,8 @@ class MeetingRoomController extends _$MeetingRoomController {
         );
       }
       return null;
-    } on Object catch (e) {
-      return toApiError(e);
+    } on Object catch (e, st) {
+      return _fail(e, st);
     }
   }
 
@@ -591,8 +539,8 @@ class MeetingRoomController extends _$MeetingRoomController {
   Future<ApiError?> deleteMeeting() async {
     try {
       await _repo.deleteMeeting(id);
-    } on Object catch (e) {
-      return toApiError(e);
+    } on Object catch (e, st) {
+      return _fail(e, st);
     }
     ref.invalidate(meetingsBoardControllerProvider);
     return null;

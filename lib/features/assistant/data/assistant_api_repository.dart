@@ -25,6 +25,9 @@ import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/http/sse.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
+import '../../../core/telemetry/error_report.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/assistant.dart';
 import '../domain/assistant_repository.dart';
 
@@ -69,11 +72,18 @@ class ApiAssistantRepository implements AssistantRepository {
             extra: Map.of(AssistantClient.assistantChatOpenapiExtras),
           ),
         );
-      } on Object catch (e) {
-        throw _disabledOr(await streamApiError(e));
+      } on Object catch (e, st) {
+        throw _disabledOr(
+          await streamApiError(
+            e,
+            st,
+            ReportOperation.assistantChat,
+            ReportSource.assistant,
+          ),
+        );
       }
       final body = response.data;
-      if (body == null) throw ApiError(ClientErrorCode.invalidResponse);
+      if (body == null) throw _invalidStream(null, StackTrace.current);
       try {
         await for (final raw in decodeSse(body.stream)) {
           final event = _event(raw);
@@ -83,15 +93,30 @@ class ApiAssistantRepository implements AssistantRepository {
         }
       } on ApiError {
         rethrow;
-      } on DioException catch (e) {
+      } on DioException catch (e, st) {
+        // Gövde okunurken Dio hatası: ağ/zaman aşımı beklenir (0 rapor); `unknown` + TypeError
+        // gibi beklenmeyen iç hata özgün yığınla raporlanır.
+        reportUnexpected(
+          e,
+          st,
+          operation: ReportOperation.assistantChat,
+          source: ReportSource.assistant,
+        );
         throw toApiError(e);
-      } on FormatException {
-        throw ApiError(ClientErrorCode.invalidResponse);
-      } on Object {
+      } on FormatException catch (e, st) {
+        throw _invalidStream(e, st);
+      } on Object catch (e, st) {
+        // Ağ/IO kopması beklenen durumdur (raporlanmaz); programlama hatası raporlanır.
+        reportUnexpected(
+          e,
+          st,
+          operation: ReportOperation.assistantChat,
+          source: ReportSource.assistant,
+        );
         throw ApiError(ClientErrorCode.networkError);
       }
       // Akış `bitti`/`hata` olmadan kapandı: sözleşme ihlali (cevap yarım).
-      throw ApiError(ClientErrorCode.invalidResponse);
+      throw _invalidStream(null, StackTrace.current);
     } finally {
       // Dinleyici bıraktıysa ya da akış bittiyse bağlantı kapatılır (tamamlanmış istekte etkisiz).
       cancel.cancel();
@@ -128,7 +153,8 @@ class ApiAssistantRepository implements AssistantRepository {
   static Future<T> _call<T>(Future<T> Function() call) async {
     try {
       return await apiCall(call);
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.assistant);
       throw _disabledOr(e);
     }
   }
@@ -164,12 +190,22 @@ class ApiAssistantRepository implements AssistantRepository {
         'hata' => _failure(AssistantEventError.fromJson(sseJsonObject(e.data))),
         _ => null,
       };
-    } on ApiError {
-      rethrow;
-    } on Object {
-      throw ApiError(ClientErrorCode.invalidResponse);
+    } on Object catch (err, st) {
+      // sseJsonObject'in ApiError'u dahil: bu yol raporlar (olay yükü rapora girmez).
+      throw _invalidStream(err, st);
     }
   }
+
+  /// Bu yol `apiCall` kullanmadığı için işlem kimliği ve bağlam açıkça verilir. Olay yükü
+  /// rapora girmez; yalnız hata türü, sabit mesaj ve yığın.
+  static ApiError _invalidStream(Object? cause, StackTrace st) =>
+      invalidResponseError(
+        cause: cause,
+        stack: st,
+        operation: ReportOperation.assistantChat,
+        source: ReportSource.assistant,
+        apiOperationId: 'assistantChat',
+      );
 
   static AssistantToolUse _tool(AssistantEventTool t) => AssistantToolUse(
     tool: AssistantTool.fromWire(t.arac.json),
@@ -191,10 +227,18 @@ class ApiAssistantRepository implements AssistantRepository {
       AssistantUsage(inputTokens: u.girisToken, outputTokens: u.cikisToken);
 
   /// Sözleşmedeki dört kod dışında bir değer (yeni sunucu kodu) `platform.internal`'a düşer.
-  static AssistantFailure _failure(AssistantEventError e) => AssistantFailure(
-    code: e.kod.json ?? 'platform.internal',
-    message: e.mesaj,
-  );
+  static AssistantFailure _failure(AssistantEventError e) {
+    final code = e.kod.json ?? 'platform.internal';
+    // HTTP 200 akışındaki teknik sunucu hatası olayı (503/500 kataloğu) raporlanır; reddedilen,
+    // sınır ve kota kodları beklenendir (0 rapor). Olay iletisi (`mesaj`) rapora girmez.
+    reportStreamEventFailure(
+      code,
+      operation: ReportOperation.assistantChat,
+      source: ReportSource.assistant,
+      apiOperationId: 'assistantChat',
+    );
+    return AssistantFailure(code: code, message: e.mesaj);
+  }
 
   static AssistantConversation _conversation(api.AssistantConversation c) =>
       AssistantConversation(

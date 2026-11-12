@@ -132,7 +132,7 @@ final class TaskListPageProvider
   }
 }
 
-String _$taskListPageHash() => r'988bc37fa2b66c14cae4982709f8573a92a22305';
+String _$taskListPageHash() => r'6390a364b3f83a49a1a5a64d9c998b2094b29fd1';
 
 /// Görevler ekranının görünümü: süzgeç yoksa paylaşılan katalog (ek istek yok); süzgeç
 /// varsa katalogun satırları süzgeçli okumanın kimlik sırasıyla ([TaskCatalog.filtered]).

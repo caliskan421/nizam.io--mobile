@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart' show MissingPluginException;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/app/di/composition.dart';
 import 'package:nizamio/core/api/generated/clients/platform_client.dart';
@@ -12,8 +13,11 @@ import 'package:nizamio/core/network/connectivity_monitor.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/storage/preference_store.dart';
 import 'package:nizamio/core/storage/secure_store.dart';
+import 'package:nizamio/core/telemetry/error_reporting.dart';
+import 'package:nizamio/core/telemetry/report_source.dart';
 
 import '../../support/fake_backend.dart';
+import '../../support/fake_error_reporter.dart';
 import '../../support/harness.dart';
 
 class FakeLink implements ConnectivityLink {
@@ -34,11 +38,31 @@ class FakeLink implements ConnectivityLink {
 }
 
 class ThrowingLink implements ConnectivityLink {
-  @override
-  Future<bool> hasInterface() async => throw StateError('platform kanalı yok');
+  ThrowingLink({this.hasInterfaceError, this.streamError, this.cancelError});
+  final Object? hasInterfaceError;
+  final Object? streamError;
+  final Object? cancelError;
 
   @override
-  Stream<bool> get interfaceChanges => const Stream.empty();
+  Future<bool> hasInterface() => Future<bool>.error(
+    hasInterfaceError ?? MissingPluginException('kanal yok'),
+  );
+
+  @override
+  Stream<bool> get interfaceChanges {
+    // ignore: close_sinks
+    late final StreamController<bool> c;
+    c = StreamController<bool>(
+      onListen: () {
+        if (streamError != null) c.addError(streamError!);
+      },
+      onCancel: () {
+        final e = cancelError;
+        return e == null ? null : Future<void>.error(e);
+      },
+    );
+    return c.stream;
+  }
 }
 
 Future<ConnectivityMonitor> started(FakeLink link) async {
@@ -107,13 +131,83 @@ void main() {
       expect(m.state.value, ConnectivityState.offline);
     });
 
-    test('platform kanalı hatası yutulur; istek girdisi çalışır', () async {
-      final m = ConnectivityMonitor(ThrowingLink());
-      addTearDown(m.dispose);
+    test('platform kanalı YOK (MissingPluginException): rapor 0; istek girdisi çalışır', () async {
+      final sdk = FakeErrorReporter();
+      ErrorReporting.reset();
+      ErrorReporting.attach(sdk).setEnabled(true);
+      addTearDown(ErrorReporting.reset);
+      final m = ConnectivityMonitor(
+        ThrowingLink(streamError: MissingPluginException('kanal yok')),
+      );
       await m.start();
-      expect(m.state.value, ConnectivityState.unknown);
-      m.reportSuccess();
-      expect(m.state.value, ConnectivityState.online);
+      m.dispose();
+      await pumpEventQueue();
+      expect(sdk.reports, isEmpty);
+      final m2 = ConnectivityMonitor(ThrowingLink());
+      addTearDown(m2.dispose);
+      await m2.start();
+      expect(m2.state.value, ConnectivityState.unknown);
+      m2.reportSuccess();
+      expect(m2.state.value, ConnectivityState.online);
+      expect(sdk.reports, isEmpty);
+    });
+
+    group('teknik hata raporlanır, durum davranışı korunur', () {
+      late FakeErrorReporter sdk;
+      setUp(() {
+        sdk = FakeErrorReporter();
+        ErrorReporting.reset();
+        ErrorReporting.attach(sdk).setEnabled(true);
+      });
+      tearDown(ErrorReporting.reset);
+
+      test(
+        'akış TypeError (bozuk native olay) => rapor 1, durum bilinmiyor',
+        () async {
+          final m = ConnectivityMonitor(
+            ThrowingLink(
+              hasInterfaceError: MissingPluginException('x'),
+              streamError: TypeError(),
+            ),
+          );
+          addTearDown(m.dispose);
+          await m.start();
+          await pumpEventQueue();
+          expect(sdk.reports, hasLength(1));
+          expect(sdk.reports.single.source, ReportSource.network);
+          expect(m.state.value, ConnectivityState.unknown);
+          m.reportSuccess();
+          expect(m.state.value, ConnectivityState.online);
+        },
+      );
+
+      test('hasInterface StateError => rapor 1, durum bilinmiyor', () async {
+        final m = ConnectivityMonitor(
+          ThrowingLink(hasInterfaceError: StateError('beklenmeyen')),
+        );
+        addTearDown(m.dispose);
+        await m.start();
+        expect(sdk.reports, hasLength(1));
+        expect(sdk.reports.single.source, ReportSource.network);
+        expect(m.state.value, ConnectivityState.unknown);
+      });
+
+      test(
+        'abonelik iptali hatası (dispose) => rapor 1, dispose düşmez',
+        () async {
+          final m = ConnectivityMonitor(
+            ThrowingLink(
+              hasInterfaceError: MissingPluginException('x'),
+              cancelError: StateError('iptal'),
+            ),
+          );
+          await m.start();
+          expect(sdk.reports, isEmpty);
+          m.dispose();
+          await pumpEventQueue();
+          expect(sdk.reports, hasLength(1));
+        },
+      );
     });
 
     test('bağdaştırıcısız ve dispose sonrası güvenli', () async {

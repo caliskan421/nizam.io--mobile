@@ -2,6 +2,8 @@ import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/api_error.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/meeting_planner.dart';
 import '../domain/task_catalog.dart';
 import 'quick_forms_controller.dart' show toggled;
@@ -360,9 +362,11 @@ class MeetingFormController extends _$MeetingFormController {
       if (!ref.mounted) return null;
       state = _initial();
       return f.copyWith(created: created);
-    } on Object catch (e) {
+    } on Object catch (e, st) {
+      // Rapor/çeviri dispose korumasından ÖNCE; yalnız durum yazımı koruma altında.
+      final failure = toReportedApiError(e, st, source: ReportSource.tasks);
       if (ref.mounted) {
-        state = state.copyWith(busy: false, failure: () => toApiError(e));
+        state = state.copyWith(busy: false, failure: () => failure);
       }
       return null;
     }

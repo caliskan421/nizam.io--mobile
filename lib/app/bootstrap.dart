@@ -17,6 +17,7 @@ import '../core/session/session_state.dart';
 import '../core/telemetry/error_report.dart';
 import '../core/telemetry/error_reporting.dart';
 import '../core/telemetry/error_reporting_controller.dart';
+import '../core/telemetry/report_source.dart';
 import '../features/identity/identity.dart';
 import 'app.dart';
 import 'config/firebase_services.dart';
@@ -48,6 +49,7 @@ Future<void> bootstrap(
       stack,
       kind: ReportKind.startup,
       operation: ReportOperation.startup,
+      source: ReportSource.app,
       fatal: true,
     );
     rethrow;

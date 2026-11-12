@@ -5,8 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/motion/page_content_entrance.dart';
@@ -180,8 +181,10 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
         case TimelineRequestSent(:final end):
           _say(l.requestSentText(end));
       }
-    } on Object catch (e) {
-      if (mounted) NzToast.error(context, toApiError(e));
+    } on Object catch (e, st) {
+      // Rapor, bağlam korumasından ÖNCE.
+      final api = toReportedApiError(e, st, source: ReportSource.timeline);
+      if (mounted) NzToast.error(context, api);
     }
   }
 
@@ -189,16 +192,20 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     try {
       final code = await _ctrl.undo();
       if (code != null && mounted) _say(context.l10n.uiTimelineUndoneTail);
-    } on Object catch (e) {
-      if (mounted) NzToast.error(context, toApiError(e));
+    } on Object catch (e, st) {
+      // Rapor, bağlam korumasından ÖNCE.
+      final api = toReportedApiError(e, st, source: ReportSource.timeline);
+      if (mounted) NzToast.error(context, api);
     }
   }
 
   Future<void> _save() async {
     try {
       await _ctrl.save();
-    } on Object catch (e) {
-      if (mounted) NzToast.error(context, toApiError(e));
+    } on Object catch (e, st) {
+      // Rapor, bağlam korumasından ÖNCE.
+      final api = toReportedApiError(e, st, source: ReportSource.timeline);
+      if (mounted) NzToast.error(context, api);
     }
   }
 

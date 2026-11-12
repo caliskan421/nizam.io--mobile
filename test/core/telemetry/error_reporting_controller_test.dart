@@ -178,11 +178,12 @@ void main() {
     expect(await c.set(false), isFalse);
     expect(ErrorReporting.enabled, isFalse);
     expect(c.notice.value, ReportingNotice.revokeNotPersisted);
-    // Sonraki açılış gerçekten eski kaydı görür (iddia edilmez, bilinir):
+    // Aynı süreçte şerit kilitli: fiziksel bayat `true` okunmaz (yeniden başlatmada geri gelebilir,
+    // bu yüzden bildirim gösterilir).
     final next = ErrorReportingController(AppPreferences(store), sdk);
     addTearDown(next.dispose);
     await next.load();
-    expect(next.state.value, isTrue);
+    expect(next.state.value, isFalse);
   });
 
   test(
@@ -327,6 +328,71 @@ void main() {
       expect(newSdk.reports, hasLength(1));
       expect(sdk.reports, isEmpty);
     });
+
+    test('SDK send kapısında bekleyen eski load: set(false) ortak şeridi HEMEN kapatır', () async {
+      final shared = MemoryPreferenceStore()
+        ..values[AppPreferences.errorReportingKey] = 'true';
+      final gate = Completer<void>();
+      sdk.sdkGate = gate.future;
+      final old = ErrorReportingController(
+        AppPreferences(shared),
+        sdk,
+        sdkTimeout: const Duration(seconds: 5),
+      );
+      addTearDown(old.dispose);
+      final oldLoading = old.load();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(sdk.calls, ['send'], reason: 'eski load SDK kapısında');
+
+      final off = old.set(false); // kuyruk SDK kapısında takılı; await edilmez
+      expect(await AppPreferences(shared).errorReportingConsent(), isFalse);
+
+      final newSdk = FakeErrorReporter();
+      final fresh = ErrorReportingController(
+        AppPreferences(shared),
+        newSdk,
+        sdkTimeout: const Duration(milliseconds: 200),
+      );
+      addTearDown(fresh.dispose);
+      await fresh.load();
+      expect(newSdk.calls, ['discard'], reason: 'yeni load send çağırmaz');
+      expect(fresh.state.value, isFalse);
+
+      gate.complete(); // eski kuyruk çözülür; bayat false dalı sahiplik yüzünden atlanır
+      await Future.wait([oldLoading, off]);
+      expect(shared.values[AppPreferences.errorReportingKey], 'true');
+      expect(await AppPreferences(shared).errorReportingConsent(), isFalse);
+      expect(ErrorReporting.enabled, isFalse);
+      expect(newSdk.calls, ['discard']);
+    });
+
+    test(
+      'sahipliği zaten kaybolmuş eski set(false) yeni geçerli onayı kapatmaz',
+      () async {
+        final shared = MemoryPreferenceStore();
+        final old = ErrorReportingController(
+          AppPreferences(shared),
+          sdk,
+          sdkTimeout: const Duration(milliseconds: 200),
+        );
+        addTearDown(old.dispose);
+        await old.load();
+        final newSdk = FakeErrorReporter();
+        final fresh = ErrorReportingController(
+          AppPreferences(shared),
+          newSdk,
+          sdkTimeout: const Duration(milliseconds: 200),
+        );
+        addTearDown(fresh.dispose);
+        await fresh.load();
+        expect(await fresh.set(true), isTrue);
+
+        await old.set(false);
+        expect(shared.values[AppPreferences.errorReportingKey], 'true');
+        expect(await AppPreferences(shared).errorReportingConsent(), isTrue);
+        expect(ErrorReporting.enabled, isTrue);
+      },
+    );
   });
 }
 

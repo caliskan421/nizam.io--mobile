@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/error_report.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/assistant.dart';
 import '../domain/assistant_repository.dart';
 
@@ -75,8 +78,8 @@ class AssistantController extends Notifier<AssistantChatState> {
           messages: detail.messages,
         );
       }
-    } on Object catch (e) {
-      _error(e, epoch);
+    } on Object catch (e, st) {
+      _error(e, st, epoch);
     }
   }
 
@@ -93,8 +96,8 @@ class AssistantController extends Notifier<AssistantChatState> {
       if (!ref.mounted || epoch != _epoch) return;
       state = const AssistantChatState();
       ref.invalidate(assistantConversationsProvider);
-    } on Object catch (e) {
-      _error(e, epoch);
+    } on Object catch (e, st) {
+      _error(e, st, epoch);
     }
   }
 
@@ -150,7 +153,7 @@ class AssistantController extends Notifier<AssistantChatState> {
                 return;
               case AssistantFailure(:final code):
                 terminal = true;
-                _error(ApiError(code), epoch);
+                _error(ApiError(code), StackTrace.current, epoch);
                 return;
               default:
                 break;
@@ -163,12 +166,18 @@ class AssistantController extends Notifier<AssistantChatState> {
               sources: sources,
             );
           },
-          onError: (Object error) {
+          onError: (Object error, StackTrace st) {
             terminal = true;
-            _error(error, epoch);
+            _error(error, st, epoch);
           },
           onDone: () {
-            if (!terminal) _error(ApiError('client.network_error'), epoch);
+            if (!terminal) {
+              _error(
+                ApiError('client.network_error'),
+                StackTrace.current,
+                epoch,
+              );
+            }
           },
         );
   }
@@ -186,13 +195,23 @@ class AssistantController extends Notifier<AssistantChatState> {
     ref.invalidate(assistantConversationsProvider);
   }
 
-  void _error(Object error, int epoch) {
+  /// Beklenmeyen hata (eşleme TypeError'ı, akış dinleyici hatası) çevrilmeden ÖNCE raporlanır;
+  /// bayat (`epoch` eskimiş) sonuçta da hata kaybolmaz. Soru ve yanıt metni rapora girmez.
+  void _error(Object error, StackTrace st, int epoch) {
+    // Koşulsuz: AssistantDisabled beklenen sonuçtur (ExpectedFailure) ve rapor üretmez.
+    final reported = toReportedApiError(
+      error,
+      st,
+      source: ReportSource.assistant,
+      operation: ReportOperation.assistantChat,
+    );
+    final ApiError? api = error is AssistantDisabled ? null : reported;
     if (!ref.mounted || epoch != _epoch) return;
     state = AssistantChatState(
       conversationId: state.conversationId,
       messages: state.messages,
       answer: state.answer,
-      error: error is AssistantDisabled ? null : toApiError(error),
+      error: api,
       disabled: error is AssistantDisabled,
     );
   }

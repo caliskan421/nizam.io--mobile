@@ -7,6 +7,7 @@ import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
 import '../../../core/server/write_compat.dart';
 import '../../../core/telemetry/error_report.dart';
+import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/chat_task_planner.dart';
 import '../domain/meeting_planner.dart';
@@ -398,7 +399,8 @@ class NewTaskFormController extends _$NewTaskFormController {
               plan,
               requestKey: requestKey,
             );
-          } on ApiError catch (e) {
+          } on ApiError catch (e, st) {
+            reportUnexpected(e, st, source: ReportSource.tasks);
             // Nadir yarış: aynı anahtarla bir kez yeniden (200 ya da 201).
             if (e.code != conflictRetryCode) rethrow;
             id = await planner.convertMessage(
@@ -413,7 +415,8 @@ class NewTaskFormController extends _$NewTaskFormController {
         } else {
           try {
             id = await writes.createWorkItem(draft, requestKey: requestKey);
-          } on ApiError catch (e) {
+          } on ApiError catch (e, st) {
+            reportUnexpected(e, st, source: ReportSource.tasks);
             // Nadir yarış: aynı anahtarla bir kez yeniden (200 ya da 201).
             if (e.code != conflictRetryCode) rethrow;
             id = await writes.createWorkItem(draft, requestKey: requestKey);
@@ -433,8 +436,12 @@ class NewTaskFormController extends _$NewTaskFormController {
       state = _initial();
       return (code: key, notified: f.assignees.length);
     } on Object catch (e, st) {
-      reportUnexpected(e, st, fallbackOperation: ReportOperation.taskWrite);
-      final err = toApiError(e);
+      final err = toReportedApiError(
+        e,
+        st,
+        source: ReportSource.tasks,
+        fallbackOperation: ReportOperation.taskWrite,
+      );
       // Sonuç bilinmiyor (zaman aşımı, ağ, 5xx): görev açılmış olabilir. Taslak ve anahtar
       // korunur; "Oluştur" aynı anahtarla yeniden gönderir (ikinci görev açılmaz).
       if (isOutcomeUnknown(err)) {

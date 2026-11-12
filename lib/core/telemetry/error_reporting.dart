@@ -1,7 +1,23 @@
 import 'package:flutter/foundation.dart';
 
 import 'error_report.dart';
+import 'expected_failure.dart';
+import 'provider_unwrap.dart';
+import 'report_source.dart';
 import 'stack_sanitizer.dart';
+
+/// Bir hata olayının (yayılımının) kaydı: özgün yığın nesnesi + metni + zaman.
+final class _Event {
+  _Event(this.stack, this.at) : stackText = stack?.toString();
+  StackTrace? stack;
+  String? stackText;
+  final DateTime at;
+
+  /// Hata nesnesi bu olay için YENİ kuruldu/dönüştürüldü (ör. `invalidResponseError`,
+  /// `toReportedApiError` çıktısı): fırlatma yığını katmanlarda değişir (`throw e`); nesne
+  /// pencere içinde yığından bağımsız olarak aynı olay sayılır.
+  bool provisional = false;
+}
 
 /// Firebase'den bağımsız hata raporlama portu. Gerçek gerçekleştirme `app/telemetry`
 /// altındadır (S6); varsayılan [NoopErrorReporter] hiçbir şey göndermez.
@@ -74,7 +90,7 @@ abstract final class ErrorReporting {
   static Object? _owner;
   static bool _enabled = false;
   static bool _inReport = false;
-  static Expando<bool> _seen = Expando<bool>('reportedErrors');
+  static Expando<_Event> _seen = Expando<_Event>('reportedErrors');
   static final Map<String, DateTime> _lastByKey = {};
   static int _sent = 0;
 
@@ -108,25 +124,55 @@ abstract final class ErrorReporting {
     _enabled = false;
     _inReport = false;
     _lastByKey.clear();
-    _seen = Expando<bool>('reportedErrors');
+    _seen = Expando<_Event>('reportedErrors');
     _sent = 0;
     _clock = clock ?? DateTime.now;
   }
 
-  /// Bu hata nesnesi daha önce raporlandı/ele alındı mı (küresel kancalar tekrarlamasın).
-  static bool alreadyHandled(Object? error) {
+  /// Aynı OLAYIN (yayılım) tanınma penceresi: yığın nesnesi farklı ama metni aynı olan geç
+  /// gelen katman (ör. sağlayıcı gözlemcisi) bu süre içinde aynı olay sayılır. Hız sınırı
+  /// aralığından ([minInterval]) çok kısadır: aralık dolunca yeniden fırlatılan nesne YENİ olaydır.
+  static const eventWindow = Duration(seconds: 30);
+
+  /// Bu (hata nesnesi, yığın) çifti daha önce raporlandı/ele alındı mı (katmanlar ve küresel
+  /// kancalar aynı olayı tekrarlamasın). Dedup OLAY bazlıdır, nesne ömrü bazlı DEĞİL: aynı nesne
+  /// (ör. `const FormatException`) başka fırlatma noktasından ya da pencere dışında yeniden
+  /// fırlatılırsa yeni olaydır. [stack] verilmezse yalnız pencere içindeki kayıt sayılır.
+  static bool alreadyHandled(Object? error, [StackTrace? stack]) {
     if (error == null) return false;
+    final _Event? ev;
     try {
-      return _seen[error] ?? false;
+      ev = _seen[error];
     } on ArgumentError {
       return false; // Expando'ya konamayan değer (String, num …)
     }
+    if (ev == null) return false;
+    // Yaş ÖNCE: pencere dışında AYNI saklanan yığın nesnesi + aynı hata da YENİ olaydır
+    // (const/saklı yığınla yeniden fırlatılan hata sonsuza dek susturulmaz).
+    if (_clock().difference(ev.at) > eventWindow) return false;
+    if (stack != null && identical(stack, ev.stack)) return true;
+    if (stack == null) return true;
+    // Olaya özgü yeni nesne (yeni kurulan/dönüştürülen): katmanlar `throw e` ile yığını yeniler;
+    // pencere içinde aynı nesne = aynı olay (nesne yeniden kullanılmaz).
+    if (ev.provisional) return true;
+    return stack.toString() == ev.stackText;
   }
 
-  /// Dönüştürülmüş hata nesnesini (ör. ApiError) aynı kökten sayar: tekrar raporlanmaz.
-  static void markHandled(Object error) {
+  /// [error] az önce raporlandığı yerde YENİ kuruldu (fırlatma yığını henüz yok): sonraki ilk
+  /// yakalayan katman aynı olay sayılır ([alreadyHandled]).
+  static void markCreated(Object error) {
     try {
-      _seen[error] = true;
+      _seen[error]?.provisional = true;
+    } on ArgumentError {
+      // işaretlenemedi
+    }
+  }
+
+  /// Hata nesnesini bu olayın (yığın) parçası olarak işaretler. Dönüştürülmüş nesne (ör.
+  /// ApiError) özgün yığınla aynı olaya işaretlenir: tekrar raporlanmaz.
+  static void markHandled(Object error, [StackTrace? stack]) {
+    try {
+      _seen[error] = _Event(stack, _clock());
     } on ArgumentError {
       // işaretlenemedi
     }
@@ -140,6 +186,8 @@ abstract final class ErrorReporting {
     StackTrace stack, {
     required ReportKind kind,
     ReportOperation? operation,
+    ReportSource source = ReportSource.unknown,
+    String? apiOperationId,
     String? apiCode,
     int? status,
     bool fatal = false,
@@ -147,15 +195,19 @@ abstract final class ErrorReporting {
     if (!_enabled || _inReport) return;
     _inReport = true;
     try {
-      if (alreadyHandled(error)) return;
-      markHandled(
-        error,
-      ); // hız sınırına takılsa da aynı nesne bir daha ele alınmaz
+      // Riverpod bağımlılık sarmalayıcısı asıl hata ve özgün yığına indirilir.
+      final (root, rootStack) = unwrapProviderException(error, stack);
+      if (root is ExpectedFailure) return;
+      if (alreadyHandled(root, rootStack)) return;
+      // Hız sınırına takılsa da AYNI olay bir daha ele alınmaz (yeni olay/pencere dışı alınır).
+      markHandled(root, rootStack);
       final report = ErrorReport.create(
         operation: operation ?? ReportContext.current,
+        source: source,
+        apiOperationId: apiOperationId,
         kind: kind,
-        errorType: ReportErrorType.of(error),
-        stack: sanitizeStack(stack),
+        errorType: ReportErrorType.of(root),
+        stack: sanitizeStack(rootStack),
         apiCode: apiCode,
         status: status,
         fatal: fatal,

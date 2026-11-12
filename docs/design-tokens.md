@@ -127,9 +127,11 @@ içinde yorumlu sabittir. Golden referansları bu bileşenler için eskidir (Lin
 
 ## Açık kararlar (tasarım/ürün sahibi)
 
-1. **Kontrast:** açık temada `border-control` zemin üzerinde 2.75, yüzeyde 2.98 (README "3:1 üstü"
-   der); `gold` metin olarak 4.25 ve `on-gold`/`gold` 4.25 (< 4.5); `ink-faint`/`bg-raised` 4.34.
-   Değerler değiştirilmedi; `test/core/ui/theme/contrast_test.dart` bunları sabitler.
+1. **Kontrast:** açık tema paleti 2026-11-12'de soğuk nötr referansa (beyaz kart, doygun vurgu)
+   geçti. Eşik altı çiftler: `border-control` zeminde 1.51, yüzeyde 1.75 (README "3:1 üstü" der);
+   `gold` metin ve `on-gold`/`gold` 3.63; `danger` metin zeminde 3.60, yüzeyde 4.19 ve
+   `on-danger`/`danger` 4.19; `ink-faint` zeminde 3.98, `bg-raised`'de 4.17 (yüzeyde 4.63).
+   Değerler referanstan değiştirilmeden alındı; `test/core/ui/theme/contrast_test.dart` sabitler.
 2. **`info` rengi** tasarımda yok; nötr `ink-muted`'a bağlandı.
 3. **Hareket token'ları** `tokens.json`'a alınmalı mı — şimdilik `bundle.css`'ten pinle üretilir.
 4. **Kart görünümü:** uygulandı (ana sayfa, 2026-10-28): degrade + iç ışık + açık tema gölgesi

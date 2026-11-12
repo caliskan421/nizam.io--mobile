@@ -3,7 +3,7 @@
   "version": 1,
   "source": {
     "path": "docs/design/design sytem/tokens.json",
-    "blob": "294384a96186a9517878414784ad7d6e1f113ba3"
+    "blob": "9f8496e30ad6f493f5ac24b3532cb23f677db3ba"
   },
   "colors": {
     "background": "bg-base",
@@ -126,7 +126,7 @@
   "shadows": {
     "$comment": "Tasarım tokens.json'da olmayan gölgeler. card: prototip --shadow-card (açık tema .t-card); koyu temada kart dış gölgesi yok (prototip hesaplanmış stili: yalnız edge-light iç ışığı).",
     "card": {
-      "light": "0 1px 2px rgba(22,22,21,0.05), 0 6px 20px rgba(22,22,21,0.06)",
+      "light": "0 1px 2px rgba(18,19,22,0.05), 0 6px 18px rgba(18,19,22,0.06)",
       "dark": "none"
     }
   },

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -16,11 +18,17 @@ import 'calendar_texts.dart';
 /// "Bu hafta" (bugünün haftası, pazartesi–pazar): başlık + aralık, dört sayaçlı şerit
 /// (Bitecek, Başlayacak, Devam, Toplantı; her biri süzgeç — görev türleri gün listesiyle
 /// ortak, "Devam" varsayılan kapalı) ve açık türlerin bölümleri. Satır: solda gün (toplantıda
-/// saat, süren görevde bitiş), tür noktası, başlık + alt yazı, gecikmede "gecikti".
+/// saat, süren görevde bitiş), tür noktası, başlık + alt yazı, gecikmede "gecikti". Geniş
+/// alanda (tablet) bölümler en çok üç sütuna dengeli dağılır.
 class CalendarThisWeek extends ConsumerWidget {
   const CalendarThisWeek({super.key, required this.index});
 
   final CalendarIndex index;
+
+  /// Geniş alanda bölüm sütunu: en dar 300, en çok 3 sütun, aralık 24.
+  static const _minColumn = 300.0;
+  static const _maxColumns = 3;
+  static const _gap = NizamioSpacing.space6;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -99,28 +107,74 @@ class CalendarThisWeek extends ConsumerWidget {
               style: t.bodySm.copyWith(color: c.textMuted),
             ),
           ],
-          for (final (label, entries) in sections) ...[
-            const Gap(NizamioSpacing.gapLg),
-            NzKicker('$label · ${entries.length}'),
-            const Gap(NizamioSpacing.space2),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(NizamioRadius.card),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: c.surfaceRaised,
-                  border: Border.all(color: c.border),
-                  borderRadius: BorderRadius.circular(NizamioRadius.card),
-                ),
-                child: Column(
+          if (sections.isNotEmpty)
+            LayoutBuilder(
+              builder: (context, box) {
+                Widget section((String, List<CalendarEntry>) s) => Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (final (i, e) in entries.indexed)
-                      _WeekRow(entry: e, first: i == 0, index: index),
+                    const Gap(NizamioSpacing.gapLg),
+                    NzKicker('${s.$1} · ${s.$2.length}'),
+                    const Gap(NizamioSpacing.space2),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(NizamioRadius.card),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: c.surfaceRaised,
+                          border: Border.all(color: c.border),
+                          borderRadius: BorderRadius.circular(
+                            NizamioRadius.card,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (final (i, e) in s.$2.indexed)
+                              _WeekRow(entry: e, first: i == 0, index: index),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
-                ),
-              ),
+                );
+                final int n = ((box.maxWidth + _gap) / (_minColumn + _gap))
+                    .floor()
+                    .clamp(1, math.min(_maxColumns, sections.length));
+                if (n == 1) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [for (final s in sections) section(s)],
+                  );
+                }
+                // Bölümler sırayla en kısa sütuna (satır sayısı + başlık payı) yerleşir.
+                final columns = [for (var i = 0; i < n; i++) <int>[]];
+                final heights = List.filled(n, 0);
+                for (final (i, s) in sections.indexed) {
+                  var k = 0;
+                  for (var j = 1; j < n; j++) {
+                    if (heights[j] < heights[k]) k = j;
+                  }
+                  columns[k].add(i);
+                  heights[k] += s.$2.length + 1;
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (var k = 0; k < n; k++) ...[
+                      if (k > 0) const Gap(_gap),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (final i in columns[k]) section(sections[i]),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
-          ],
         ],
       ),
     );

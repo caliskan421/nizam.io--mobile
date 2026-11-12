@@ -79,4 +79,40 @@ void main() {
       expect(find.text('Görev LATE'), findsNothing);
     },
   );
+
+  testWidgets('geniş alanda bölümler yan yana sütunlarda', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1100, 900);
+    addTearDown(tester.view.reset);
+    final h = await real(
+      tester,
+      () => pilotHarness(PilotBackend(), signedIn: true),
+    );
+    final ix = CalendarIndex.build(
+      const [],
+      TaskCatalog(
+        today: _today,
+        me: 'me',
+        tasks: [
+          _task('FRI', DateTime(2026, 10, 1), DateTime(2026, 10, 23)),
+          _task('NEW', DateTime(2026, 10, 22), DateTime(2026, 11, 20)),
+        ],
+        people: const [],
+        coordinatorships: const [],
+      ),
+    );
+    await pumpScreen(
+      tester,
+      h,
+      Scaffold(
+        body: SingleChildScrollView(child: CalendarThisWeek(index: ix)),
+      ),
+    );
+    final ends = tester.getTopLeft(find.text('${_l.uiCalendarWeekEnds} · 1'));
+    final starts = tester.getTopLeft(
+      find.text('${_l.uiCalendarWeekStarts} · 1'),
+    );
+    expect(starts.dx, greaterThan(ends.dx));
+    expect(starts.dy, ends.dy);
+  });
 }

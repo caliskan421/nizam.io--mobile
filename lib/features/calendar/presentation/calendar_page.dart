@@ -193,32 +193,31 @@ class CalendarPage extends ConsumerWidget {
                   ],
                 );
               }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // Geniş: üstte ızgara | seçili gün, altında tam genişlik "bu hafta" (bölümleri
+              // genişliğe göre çok sütunlu).
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Sol sütun: ızgara + "bu hafta" (ızgaranın altındaki boşluk); sağda gün.
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        enter(0, grid),
-                        const Gap(NizamioSpacing.gapLg),
-                        enter(2, CalendarThisWeek(index: ix)),
-                      ],
-                    ),
-                  ),
-                  const Gap(NizamioSpacing.space10),
-                  Expanded(
-                    child: enter(
-                      1,
-                      CalendarDay(
-                        index: ix,
-                        onPlanMeeting: plan,
-                        onAdd: add,
-                        divided: false,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: enter(0, grid)),
+                      const Gap(NizamioSpacing.space10),
+                      Expanded(
+                        child: enter(
+                          1,
+                          CalendarDay(
+                            index: ix,
+                            onPlanMeeting: plan,
+                            onAdd: add,
+                            divided: false,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
+                  const Gap(NizamioSpacing.space8),
+                  enter(2, CalendarThisWeek(index: ix)),
                 ],
               );
             },

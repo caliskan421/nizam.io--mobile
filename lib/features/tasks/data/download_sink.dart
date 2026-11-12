@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../../core/telemetry/error_report.dart';
+import '../../../core/telemetry/error_reporting.dart';
 import '../domain/task_writes.dart';
 
 /// İndirilen görev dosyasını (akışla) uygulama belgeler klasörüne (`indirilenler/`) yazar (ADR-0002:
@@ -54,6 +56,22 @@ class FileDownloadSink implements DownloadSink {
   /// başka dosyaya dokunulmaz ve hata fırlar.
   @override
   Future<String> save(String name, Stream<List<int>> bytes) async {
+    try {
+      return await _save(name, bytes);
+    } on FileSystemException catch (e, st) {
+      // Yerel dosya sistemi arızası (kota, izin, disk): yalnız tür ve yığın raporlanır;
+      // ad ve yol rapora girmez.
+      ErrorReporting.report(
+        e,
+        st,
+        kind: ReportKind.storage,
+        operation: ReportOperation.fileDownload,
+      );
+      rethrow;
+    }
+  }
+
+  Future<String> _save(String name, Stream<List<int>> bytes) async {
     final base = await _root();
     final dir = Directory('${base.path}/indirilenler');
     final tmpRoot = Directory('${dir.path}/$tmpDirName');

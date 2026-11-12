@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/errors/api_error.dart';
 import '../../../../core/errors/error_text.dart';
 import '../../../../core/providers.dart';
+import '../../../../core/telemetry/report_source.dart';
+import '../../../../core/telemetry/unexpected_error.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
@@ -71,7 +73,8 @@ class _ChatGroupSourceInfoState extends ConsumerState<ChatGroupSourceInfo> {
     setState(() => _busy = true);
     try {
       await ctl.updateSource(pick.$1, departmentId: pick.$2);
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.messages);
       if (mounted) NzToast.show(context, errorText(context.l10n, e));
     } finally {
       if (mounted) setState(() => _busy = false);

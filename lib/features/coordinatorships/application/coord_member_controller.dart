@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../scope/scope.dart' show DepartmentRole;
 import '../../tasks/tasks.dart';
 import '../domain/department.dart';
@@ -157,9 +159,13 @@ class CoordMemberController extends Notifier<CoordMemberState> {
       if (!live()) return false;
       state = const CoordMemberState();
       return true;
-    } on Object catch (e) {
+    } on Object catch (e, st) {
+      final error = toReportedApiError(
+        e,
+        st,
+        source: ReportSource.coordinatorships,
+      );
       if (live()) {
-        final error = toApiError(e);
         state = CoordMemberState(selected: id, error: error);
         if (error.code == 'organization.membership_exists') {
           ref.invalidate(coordMemberCandidatesProvider(code));

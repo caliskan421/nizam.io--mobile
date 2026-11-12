@@ -8,7 +8,10 @@ import 'package:flutter/foundation.dart';
 import '../../core/config/flavor.dart';
 import '../../core/config/mobile_release_policy.dart';
 import '../../core/notifications/push_notifications.dart';
+import '../../core/preferences/app_preferences.dart';
+import '../../core/telemetry/error_reporting.dart';
 import '../notifications/firebase_push_notifications.dart';
+import '../telemetry/crashlytics_error_reporter.dart';
 import 'firebase_release_policy_source.dart';
 
 /// Optional native adapters. Construction does not fetch policy, request push
@@ -17,10 +20,16 @@ final class FirebaseServices {
   const FirebaseServices({
     required this.pushNotifications,
     required this.releasePolicySource,
+    this.errorReporter = const NoopErrorReporter(),
   });
 
   final PushNotifications pushNotifications;
   final ReleasePolicySource releasePolicySource;
+
+  /// Başlatma sırasında ASLA toplamayı açmaz; açılış yalnız kullanıcı onayı okunup
+  /// bileşim kurulduktan sonra `ErrorReportingController` ile olur. Zaman aşımından sonra
+  /// biten başlatmanın sonucu atıldığı için bu port geç sonuçla açılamaz.
+  final ErrorReporter errorReporter;
 }
 
 /// Dev mobile only; unsupported targets return before any SDK access.
@@ -29,6 +38,7 @@ final class FirebaseServices {
 /// discarded: composition retains disabled ports for the entire launch.
 Future<FirebaseServices?> initializeFirebaseServices(
   Flavor flavor, {
+  AppPreferences? preferences,
   Duration timeout = const Duration(seconds: 2),
   @visibleForTesting Future<FirebaseServices> Function()? initialize,
   @visibleForTesting bool? isWeb,
@@ -41,7 +51,8 @@ Future<FirebaseServices?> initializeFirebaseServices(
     return null;
   }
   try {
-    return await Future.sync(initialize ?? _initializeNative).timeout(timeout);
+    return await Future.sync(initialize ?? () => _initializeNative(preferences))
+        .timeout(timeout);
   } catch (_) {
     // Optional Firebase failure must not block server binding/login. Never log
     // SDK exception bodies (which can contain configuration or identifiers).
@@ -49,18 +60,24 @@ Future<FirebaseServices?> initializeFirebaseServices(
   }
 }
 
-Future<FirebaseServices> _initializeNative() async {
+Future<FirebaseServices> _initializeNative(AppPreferences? preferences) async {
   await Firebase.initializeApp();
   // Native defaults are also disabled, including before initialization finishes.
   // Remote policy flags never grant consent or activate telemetry.
   await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(false);
-  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
+  final reporter = CrashlyticsErrorReporter(FirebaseCrashlytics.instance);
+  await reporter.disableCollection();
   return FirebaseServices(
+    errorReporter: reporter,
     pushNotifications: FirebasePushNotifications(
       messaging: FirebaseMessaging.instance,
     ),
     releasePolicySource: FirebaseReleasePolicySource(
       FirebaseRemoteConfig.instance,
+      preferences: preferences,
+      minimumFetchInterval: kDebugMode
+          ? const Duration(seconds: 30)
+          : const Duration(hours: 12),
     ),
   );
 }

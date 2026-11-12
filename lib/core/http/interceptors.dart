@@ -9,6 +9,9 @@ import '../logging/log.dart';
 import '../scope/scope_controller.dart';
 import '../server/server_address.dart';
 import '../session/session_controller.dart';
+import '../telemetry/api_call_scope.dart';
+import '../telemetry/report_source.dart';
+import '../telemetry/unexpected_error.dart';
 import 'sse.dart';
 
 /// `options.extra` anahtarları.
@@ -190,6 +193,8 @@ class ApiGuardInterceptor extends Interceptor {
       }
     }
     options.extra[_opKey] = op;
+    // Hata raporu için çalışan `apiCall` kapsamına YALNIZ doğrulanmış işlem kimliği yazılır.
+    ApiCallScope.note(op.operationId);
     handler.next(options);
   }
 }
@@ -274,7 +279,8 @@ class AuthInterceptor extends Interceptor {
     if (session.accessTokenFor(instanceId) == null) return handler.next(err);
     try {
       await session.refresh(failedAccessToken: st.accessToken);
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.session);
       return handler.next(
         DioException(requestOptions: o, response: err.response, error: e),
       );

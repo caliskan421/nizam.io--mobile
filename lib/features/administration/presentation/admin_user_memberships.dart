@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
@@ -45,7 +47,8 @@ class AdminUserMemberships extends ConsumerWidget {
       try {
         try {
           await attempt(false);
-        } on ApiError catch (e) {
+        } on ApiError catch (e, st) {
+          reportUnexpected(e, st, source: ReportSource.administration);
           if (e.code != 'organization.confirmation_required' ||
               !context.mounted) {
             rethrow;
@@ -64,8 +67,14 @@ class AdminUserMemberships extends ConsumerWidget {
           await attempt(true);
         }
         if (context.mounted) NzToast.show(context, l.uiUsersSaved);
-      } on Object catch (e) {
-        if (context.mounted) NzToast.error(context, toApiError(e));
+      } on Object catch (e, st) {
+        // Rapor, bağlam korumasından ÖNCE.
+        final api = toReportedApiError(
+          e,
+          st,
+          source: ReportSource.administration,
+        );
+        if (context.mounted) NzToast.error(context, api);
       }
     }
 

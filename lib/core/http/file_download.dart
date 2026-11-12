@@ -6,6 +6,9 @@ import 'package:dio/dio.dart';
 import '../api/generated/clients/records_client.dart';
 import '../errors/api_error.dart';
 import '../i18n/generated/client_error_codes.gen.dart';
+import '../telemetry/error_reporting.dart';
+import '../telemetry/report_source.dart';
+import '../telemetry/unexpected_error.dart';
 import 'sse.dart';
 
 /// `downloadFile` (`GET /v1/files/{id}/download`) için AKIŞLI indirme: yanıt
@@ -46,15 +49,22 @@ Future<Stream<List<int>>> getBinaryStream(
         extra: Map.of(extras),
       ),
     );
-  } on DioException catch (e) {
-    throw await streamApiError(e);
+  } on DioException catch (e, st) {
+    throw await streamApiError(e, st);
   }
   final body = r.data;
-  if (body == null) throw ApiError(ClientErrorCode.invalidResponse);
+  if (body == null) throw invalidResponseError();
   return body.stream.transform(
     StreamTransformer<Uint8List, List<int>>.fromHandlers(
-      handleError: (_, _, sink) =>
-          sink.addError(ApiError(ClientErrorCode.networkError)),
+      handleError: (Object e, StackTrace st, EventSink<List<int>> sink) {
+        // Normal taşıma kopması (SocketException/IO/zaman aşımı) beklenir: yalnız `network_error`.
+        // StateError/TypeError gibi beklenmeyen hata ÖZGÜN hata ve yığınla raporlanır; arayüz
+        // ve yeniden deneme sözleşmesi aynı kalır (her durumda `network_error`).
+        reportUnexpected(e, st, source: ReportSource.network);
+        final api = ApiError(ClientErrorCode.networkError);
+        ErrorReporting.markHandled(api, st);
+        sink.addError(api, st);
+      },
     ),
   );
 }

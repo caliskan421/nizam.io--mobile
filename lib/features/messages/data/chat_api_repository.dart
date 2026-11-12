@@ -56,6 +56,9 @@ import '../../../core/http/file_download.dart';
 import '../../../core/http/file_upload.dart';
 import '../../../core/http/sse.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
+import '../../../core/telemetry/error_report.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/chat.dart';
 import '../domain/chat_stream_policy.dart';
 
@@ -528,11 +531,22 @@ class ApiChatRepository implements ChatRepository {
             extra: Map.of(MessagingClient.streamChatEventsOpenapiExtras),
           ),
         );
-      } on Object catch (e) {
-        throw await streamApiError(e);
+      } on Object catch (e, st) {
+        throw await streamApiError(
+          e,
+          st,
+          ReportOperation.chatStream,
+          ReportSource.messages,
+        );
       }
       final body = response.data;
-      if (body == null) throw ApiError(ClientErrorCode.invalidResponse);
+      if (body == null) {
+        throw invalidResponseError(
+          operation: ReportOperation.chatStream,
+          source: ReportSource.messages,
+          apiOperationId: 'streamChatEvents',
+        );
+      }
       yield const ChatStreamOpened();
       try {
         await for (final raw in decodeSse(body.stream)) {
@@ -542,12 +556,20 @@ class ApiChatRepository implements ChatRepository {
         }
       } on ApiError {
         rethrow;
-      } on DioException catch (e) {
-        throw toApiError(e);
-      } on FormatException {
-        throw ApiError(ClientErrorCode.invalidResponse);
-      } on Object {
-        throw ApiError(ClientErrorCode.networkError);
+      } on FormatException catch (e, st) {
+        throw _invalidStream(e, st);
+      } on Object catch (e, st) {
+        // Ağ/IO/Dio kopması beklenen durumdur (raporlanmaz); beklenmeyen iç hata özgün
+        // yığınla raporlanır. Dio hatası kendi koduna (zaman aşımı…) çevrilir.
+        reportUnexpected(
+          e,
+          st,
+          operation: ReportOperation.chatStream,
+          source: ReportSource.messages,
+        );
+        throw e is DioException
+            ? toApiError(e)
+            : ApiError(ClientErrorCode.networkError);
       }
     } finally {
       // Dinleyici bıraktıysa ya da akış bittiyse bağlantı kapatılır.
@@ -557,11 +579,22 @@ class ApiChatRepository implements ChatRepository {
 
   /// Olay yükü; şemaya uymayan yük (eksik/yanlış tipli alan) `client.invalid_response`.
   static ChatEvent _event(ChatEventKind kind, String data) {
-    final json = sseJsonObject(data);
     try {
-      return _eventOf(kind, api.ChatEvent.fromJson(json));
-    } on Object {
-      throw ApiError(ClientErrorCode.invalidResponse);
+      return _eventOf(kind, api.ChatEvent.fromJson(sseJsonObject(data)));
+    } on Object catch (e, st) {
+      // sseJsonObject'in ApiError'u dahil: bu yol raporlar (olay yükü rapora girmez).
+      throw _invalidStream(e, st);
     }
   }
+
+  /// SSE akışı ayrıştırma arızası (olay yükü yok, yalnız tür ve yığın). Bu yol `apiCall`
+  /// kullanmadığı için işlem bağlamı ve doğrulanmış API işlem kimliği açıkça verilir.
+  static ApiError _invalidStream(Object cause, StackTrace st) =>
+      invalidResponseError(
+        cause: cause,
+        stack: st,
+        operation: ReportOperation.chatStream,
+        source: ReportSource.messages,
+        apiOperationId: 'streamChatEvents',
+      );
 }

@@ -4,6 +4,8 @@ import '../../../core/cache_owner.dart';
 
 import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/records.dart';
 import 'archive_providers.dart';
 
@@ -77,13 +79,15 @@ class PersonFilesController extends _$PersonFilesController {
           department: before.department,
         ),
       );
-    } on Object catch (e) {
+    } on Object catch (e, st) {
+      // Rapor/çeviri bayat-durum korumasından ÖNCE; yalnız durum yazımı koruma altında.
+      final error = toReportedApiError(e, st, source: ReportSource.archive);
       if (!ref.mounted || generation != _generation) return;
       state = AsyncData(
         PersonFilesState(
           files: before.files,
           department: before.department,
-          error: toApiError(e),
+          error: error,
         ),
       );
     }

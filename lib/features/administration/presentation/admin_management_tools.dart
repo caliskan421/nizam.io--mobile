@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/errors/api_error.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../application/admin_controller.dart';
 import 'admin_deleted_records.dart';
@@ -21,10 +22,14 @@ class AdminManagementTools extends ConsumerWidget {
         if (context.mounted) {
           NzToast.show(context, 'İşlem tamamlandı.');
         }
-      } on Object catch (e) {
-        if (context.mounted) {
-          NzToast.error(context, toApiError(e));
-        }
+      } on Object catch (e, st) {
+        // Rapor, bağlam korumasından ÖNCE.
+        final api = toReportedApiError(
+          e,
+          st,
+          source: ReportSource.administration,
+        );
+        if (context.mounted) NzToast.error(context, api);
       }
     }
 

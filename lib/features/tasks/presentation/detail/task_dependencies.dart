@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/errors/api_error.dart';
+import '../../../../core/telemetry/report_source.dart';
+import '../../../../core/telemetry/unexpected_error.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
@@ -33,8 +34,10 @@ class TaskDependencies extends ConsumerWidget {
         await ref
             .read(taskDependencyCommandProvider.notifier)
             .change(code, addTaskId: add, removeEdgeId: remove);
-      } on Object catch (e) {
-        if (context.mounted) NzToast.error(context, toApiError(e));
+      } on Object catch (e, st) {
+        // Rapor, bağlam korumasından ÖNCE.
+        final api = toReportedApiError(e, st, source: ReportSource.tasks);
+        if (context.mounted) NzToast.error(context, api);
       }
     }
 

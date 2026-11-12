@@ -28,7 +28,8 @@ extension _RoomPresence on ChatRoomController {
   Future<void> _typingSignal() async {
     try {
       await _repo.typing(id);
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.messages);
       // Yazıyor en iyi çabadır.
     }
   }

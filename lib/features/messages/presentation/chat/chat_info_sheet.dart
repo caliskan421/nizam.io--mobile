@@ -5,6 +5,8 @@ import '../../../../core/domain/turkish_collation.dart';
 import '../../../../core/errors/api_error.dart';
 import '../../../../core/errors/error_text.dart';
 import '../../../../core/providers.dart';
+import '../../../../core/telemetry/report_source.dart';
+import '../../../../core/telemetry/unexpected_error.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
@@ -160,7 +162,8 @@ class _Members extends ConsumerWidget {
   Future<void> _run(BuildContext context, Future<void> Function() op) async {
     try {
       await op();
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.messages);
       if (context.mounted) NzToast.show(context, errorText(context.l10n, e));
     }
   }

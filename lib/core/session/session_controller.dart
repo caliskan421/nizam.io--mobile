@@ -3,6 +3,9 @@ import 'package:flutter/foundation.dart';
 import '../errors/api_error.dart';
 import '../i18n/generated/client_error_codes.gen.dart';
 import '../logging/log.dart';
+import '../telemetry/error_report.dart';
+import '../telemetry/report_source.dart';
+import '../telemetry/unexpected_error.dart';
 import 'refresh_grant.dart';
 import 'session_state.dart';
 import 'token_pair.dart';
@@ -101,7 +104,8 @@ class SessionController {
         return;
       }
       _set(pair, _active(pair));
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.session);
       Log.warn('oturum: güvenli depo okunamadı');
       _set(
         null,
@@ -207,7 +211,8 @@ class SessionController {
     final RefreshGrant r;
     try {
       r = await _refreshCall(p.refreshToken, p.instanceId);
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.session);
       _ensureCurrent(gen, p);
       if (e.status == 429) {
         Log.info('oturum: yenileme hız sınırında (429); belirteç korunur');
@@ -227,7 +232,13 @@ class SessionController {
       );
       await _end(ReauthReason.refreshAmbiguous);
       throw ApiError(ClientErrorCode.reauthRequired);
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(
+        e,
+        st,
+        source: ReportSource.session,
+        operation: ReportOperation.sessionRefresh,
+      );
       _ensureCurrent(gen, p);
       // Ayrıştırma vb. beklenmeyen hata: sunucu döndürmüş olabilir → belirsiz (CX-Ö-01).
       Log.warn('oturum: yenileme yanıtı işlenemedi; K-05 — tekrar deneme yok');
@@ -302,8 +313,9 @@ class SessionController {
       try {
         await op();
         return true;
-      } on Object {
+      } on Object catch (e, st) {
         // yerel depo hatası: ağ tekrarı yok, yalnız yerel yeniden deneme
+        reportUnexpected(e, st, source: ReportSource.session);
       }
     }
     return false;

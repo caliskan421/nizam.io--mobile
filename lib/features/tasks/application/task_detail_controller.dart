@@ -6,6 +6,9 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
 import '../../../core/server/write_compat.dart';
+import '../../../core/telemetry/error_report.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_permissions.dart';
 import '../domain/task_writes.dart';
@@ -18,6 +21,7 @@ part 'task_detail_controller.g.dart';
 part 'task_detail_state.dart';
 part 'task_detail_upload.dart';
 part 'task_detail_date_request.dart';
+part 'task_detail_edit_draft.dart';
 
 /// Sunucu 409'u: görev yeniden okunur, ileti gösterilir, otomatik tekrar YOK (istemci
 /// akışları §8). Kod listesi durum dışı 409'ları da kapsasın diye HTTP durumu da okunur.
@@ -71,7 +75,7 @@ WriteOutcome _rejected(String code) =>
 /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
 @riverpod
 class TaskDetailController extends _$TaskDetailController
-    with _UploadFlow, _DateRequestFlow {
+    with _UploadFlow, _DateRequestFlow, _EditDraftFlow {
   @override
   TaskDetailState build(String code) {
     ref.watch(sessionGenerationProvider);
@@ -119,9 +123,9 @@ class TaskDetailController extends _$TaskDetailController
     final store = _store;
     try {
       try {
-        await call();
-      } on Object catch (e) {
-        final err = toApiError(e);
+        await ReportContext.runIfNone(ReportOperation.taskWrite, call);
+      } on Object catch (e, st) {
+        final err = _fail(e, st, ReportOperation.taskWrite);
         if (!ref.mounted || _writeContext() != context) {
           return WriteOutcome(WriteKind.failed, err);
         }
@@ -155,8 +159,9 @@ class TaskDetailController extends _$TaskDetailController
       if (ref.mounted && _writeContext() == context) {
         try {
           await _reread(store, list: list);
-        } on Object {
-          // Yazma başarılıdır; yenileme hatası yazma sonucunu değiştirmez.
+        } on Object catch (e, st) {
+          // Yazma başarılıdır; yenileme hatası yazma sonucunu değiştirmez (raporlanır).
+          reportUnexpected(e, st, source: ReportSource.tasks);
         }
       }
       return WriteOutcome.done;
@@ -193,7 +198,8 @@ class TaskDetailController extends _$TaskDetailController
     final r = await _write(() async {
       try {
         await call(key);
-      } on ApiError catch (e) {
+      } on ApiError catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.tasks);
         if (e.code != conflictRetryCode) rethrow;
         if (!ref.mounted) throw ApiError(ClientErrorCode.sessionEnded);
         _ensureContext(context);
@@ -245,8 +251,9 @@ class TaskDetailController extends _$TaskDetailController
     final sub = ref.listen(taskDetailsProvider(code).future, (_, _) {});
     try {
       await sub.read();
-    } on Object {
-      // Ayrıntı hatası ekranda şeritle gösterilir.
+    } on Object catch (e, st) {
+      // Ayrıntı hatası ekranda şeritle gösterilir (ayrıca raporlanır).
+      reportUnexpected(e, st, source: ReportSource.tasks);
     } finally {
       sub.close();
     }
@@ -351,58 +358,21 @@ class TaskDetailController extends _$TaskDetailController
       }
       _openEditFrom(now);
       return WriteOutcome.done;
-    } on Object catch (e) {
-      return WriteOutcome(WriteKind.failed, toApiError(e));
+    } on Object catch (e, st) {
+      return WriteOutcome(WriteKind.failed, _fail(e, st));
     } finally {
       if (ref.mounted) state = state.copyWith(busy: false);
     }
   }
 
-  void _openEditFrom(TaskItem t) {
-    state = state.copyWith(
-      edit: () => TaskEditDraft(
-        title: t.title,
-        coordinatorship: t.coordinatorship,
-        assignees: [...t.assignees],
-        priority: t.priority,
-        start: t.start,
-        due: t.due,
-        evidenceRequired: t.evidenceRequired,
-        base: t,
-      ),
-      showErrors: false,
-    );
-  }
-
-  void updateEdit(TaskEditDraft d) => state = state.copyWith(edit: () => d);
-
-  /// Çakışan alan için kullanıcı seçimi (V3): [useServer] → sunucudaki değer, değilse
-  /// kullanıcının değeri kalır. Seçimden sonra gönderim yeni tabanın sürümüyle gider.
-  void resolveConflict(EditField f, {required bool useServer}) {
-    final d = state.edit;
-    final c = d?.conflicts[f];
-    if (d == null || c == null) return;
-    updateEdit(
-      d
-          .withValue(f, useServer ? c.server : c.local)
-          .copyWith(conflicts: {...d.conflicts}..remove(f)),
-    );
-  }
-
-  void editToggleAssignee(String id) {
-    final d = state.edit;
-    if (d == null) return;
-    updateEdit(
-      d.copyWith(
-        assignees: d.assignees.contains(id)
-            ? [
-                for (final a in d.assignees)
-                  if (a != id) a,
-              ]
-            : [...d.assignees, id],
-      ),
-    );
-  }
+  /// `catch` sınırı: raporla (beklenmeyen sınıf), arayüz hatasına çevir.
+  static ApiError _fail(Object e, StackTrace st, [ReportOperation? o]) =>
+      toReportedApiError(
+        e,
+        st,
+        source: ReportSource.tasks,
+        fallbackOperation: o,
+      );
 
   /// Kaydeder; eksik/geçersiz alan varsa hataları açar ([WriteKind.invalid]).
   ///
@@ -544,10 +514,14 @@ class TaskDetailController extends _$TaskDetailController
     state = state.copyWith(busy: true);
     final sink = ref.read(downloadSinkProvider);
     try {
-      final bytes = await _writes.downloadFile(t, file.id);
-      return (WriteOutcome.done, await sink.save(file.name, bytes));
-    } on Object catch (e) {
-      return (WriteOutcome(WriteKind.failed, toApiError(e)), null);
+      return await ReportContext.run(ReportOperation.fileDownload, () async {
+        final bytes = await _writes.downloadFile(t, file.id);
+        return (WriteOutcome.done, await sink.save(file.name, bytes));
+      });
+    } on Object catch (e, st) {
+      // Yerel dosya/depolama arızası burada ApiError'a çevrilir: önce raporlanır.
+      final err = _fail(e, st, ReportOperation.fileDownload);
+      return (WriteOutcome(WriteKind.failed, err), null);
     } finally {
       if (ref.mounted) state = state.copyWith(busy: false);
     }

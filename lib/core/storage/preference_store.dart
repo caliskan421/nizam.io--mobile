@@ -12,6 +12,11 @@ abstract interface class PreferenceStore {
   Future<void> remove(String key);
 }
 
+/// İşaret: aynı platform deposunu (shared_preferences) gösteren BİRDEN ÇOK örnek olabilir
+/// (her bileşim kendi deposunu kurar). Bunlar tek depo sayılır: onay yazı/okuma sırası
+/// örnekler arasında ortaktır (şerit anahtarı: tipin kendisi).
+abstract interface class PlatformBackedStore {}
+
 /// Bellek içi uygulama (testler, host VM entegrasyonu). [failAll]: her çağrı hata verir.
 class MemoryPreferenceStore implements PreferenceStore {
   final Map<String, String> values = {};

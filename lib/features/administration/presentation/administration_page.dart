@@ -5,8 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/domain/page_slice.dart';
-import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
@@ -384,8 +385,14 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
               onPressed: () async {
                 try {
                   await ctl.loadMore();
-                } on Object catch (e) {
-                  if (context.mounted) NzToast.error(context, toApiError(e));
+                } on Object catch (e, st) {
+                  // Rapor, bağlam korumasından ÖNCE.
+                  final api = toReportedApiError(
+                    e,
+                    st,
+                    source: ReportSource.administration,
+                  );
+                  if (context.mounted) NzToast.error(context, api);
                 }
               },
               child: Text(l.uiUsersMore),

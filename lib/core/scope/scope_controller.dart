@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 import '../logging/log.dart';
+import '../telemetry/report_source.dart';
+import '../telemetry/unexpected_error.dart';
 import 'scope_store.dart';
 
 /// Seçili kapsam. Örtük varsayılan kapsam yoktur (C-04): S2 uçlar program, S3 uçlar ek olarak
@@ -92,7 +94,8 @@ class ScopeController {
           Log.info('kapsam: kayıt bu oturuma ait değil ya da bozuk; siliniyor');
           await _delete();
         }
-      } on Object {
+      } on Object catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.scope);
         Log.warn('kapsam: kayıt okunamadı; seçim geri yüklenmedi');
         await _delete();
       }
@@ -135,8 +138,10 @@ class ScopeController {
       try {
         await op();
         return true;
-      } on Object {
-        // yerel depo hatası: yalnız yerel yeniden deneme
+      } on Object catch (e, st) {
+        // yerel depo hatası: yalnız yerel yeniden deneme (her deneme raporlanır; hız sınırı
+        // aynı yığını tekrarlamaz)
+        reportUnexpected(e, st, source: ReportSource.scope);
       }
     }
     return false;

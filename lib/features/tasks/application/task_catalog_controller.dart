@@ -6,6 +6,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/cache_owner.dart';
 import '../../../core/providers.dart';
 import '../../../core/stale_clock.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_details.dart';
 import 'tasks_providers.dart';
@@ -129,7 +131,8 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
   Future<void> reload() async {
     try {
       await refresh();
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tasks);
       // Hata durumda; çağıran yazmanın sonucunu bildirir.
     }
   }

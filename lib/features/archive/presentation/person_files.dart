@@ -5,6 +5,8 @@ import 'package:gap/gap.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/errors/error_text.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
@@ -49,8 +51,10 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
           session == ref.read(sessionGenerationProvider)) {
         NzToast.success(context, context.l10n.uiArchiveSaved);
       }
-    } on Object catch (e) {
-      if (mounted) NzToast.error(context, toApiError(e));
+    } on Object catch (e, st) {
+      // Rapor, bağlam korumasından ÖNCE.
+      final api = toReportedApiError(e, st, source: ReportSource.archive);
+      if (mounted) NzToast.error(context, api);
     } finally {
       if (mounted) setState(() => _downloading = false);
     }

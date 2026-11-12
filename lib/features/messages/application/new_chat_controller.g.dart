@@ -59,7 +59,7 @@ final class NewChatControllerProvider
   }
 }
 
-String _$newChatControllerHash() => r'c53f8b38b3f84a85aab7f5fbc33bd88ad23b4881';
+String _$newChatControllerHash() => r'9304aef367993aa08e6cb6c17d9234885a3a6c71';
 
 /// Yeni sohbet: aday listesi (`purpose` zorunlu; §10.6), birebir açma ve grup kurma. Grup
 /// kurma `Idempotency-Key` taşır: aynı taslak aynı anahtarla gider (sonucu bilinmeyen isteğin

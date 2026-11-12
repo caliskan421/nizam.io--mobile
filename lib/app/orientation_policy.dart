@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../core/logging/log.dart';
+import '../core/telemetry/report_source.dart';
+import '../core/telemetry/unexpected_error.dart';
 
 /// Yön kilidi eşiği (mantıksal dp). Fiziksel ekranın kısa kenarı bunun altındaysa cihaz
 /// telefondur ve dikey kilitlenir. Yerleşim sınıflarından (WindowClass) bilerek ayrıdır:
@@ -115,7 +117,8 @@ class _OrientationPolicyHostState extends State<OrientationPolicyHost>
     unawaited(
       SystemChrome.setPreferredOrientations(orientationsFor(policy)).then(
         (_) {},
-        onError: (Object _) {
+        onError: (Object error, StackTrace st) {
+          reportUnexpected(error, st, source: ReportSource.app);
           // Daha yeni bir istek varsa onun kaydı korunur.
           if (generation != _generation) return;
           _requested = null;

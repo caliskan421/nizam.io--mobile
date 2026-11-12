@@ -6,6 +6,8 @@ import 'package:gap/gap.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/errors/error_text.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_bleed.dart';
@@ -141,7 +143,8 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
     _ctrl.setFilter(ChatFilter.all);
     try {
       await ref.read(chatsControllerProvider.notifier).markAllRead();
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.messages);
       if (mounted) NzToast.show(context, errorText(context.l10n, e));
     }
   }

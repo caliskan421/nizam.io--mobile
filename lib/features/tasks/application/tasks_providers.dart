@@ -2,6 +2,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/chat_task_planner.dart';
 import '../domain/meeting_invitees.dart';
 import '../domain/meeting_planner.dart';
@@ -120,7 +122,8 @@ Future<MeetingInvitees> meetingInvitees(Ref ref) async {
         .read(meetingInviteeRepositoryProvider)
         .programPeople(anchor.departmentId);
     return pool.withTeams(own);
-  } on Object {
+  } on Object catch (e, st) {
+    reportUnexpected(e, st, source: ReportSource.tasks);
     // Havuz ek bilgidir: okunamazsa kendi ekipler kalır, eksiklik ekranda yazılır.
     return MeetingInvitees(groups: own, partial: true);
   }

@@ -6,6 +6,8 @@ import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../tasks/tasks.dart';
 import '../domain/department.dart';
 import 'coordinatorship_detail_controller.dart';
@@ -186,7 +188,8 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
         if (!_live(owner)) return false;
         try {
           await repo.restoreDepartment(program, _existingId!);
-        } on ApiError catch (error) {
+        } on ApiError catch (error, st) {
+          reportUnexpected(error, st, source: ReportSource.coordinatorships);
           if (error.code != 'organization.not_deleted') rethrow;
         }
         if (!_live(owner)) return false;
@@ -225,9 +228,14 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
         requestKey: key,
       );
       if (!_live(owner)) return false;
-    } on Object catch (e) {
+    } on Object catch (e, st) {
+      // Rapor/çeviri sahiplik korumasından ÖNCE; yalnız durum yazımı koruma altında.
+      final error = toReportedApiError(
+        e,
+        st,
+        source: ReportSource.coordinatorships,
+      );
       if (_live(owner)) {
-        final error = toApiError(e);
         if (error.code == 'organization.department_exists') {
           final ids = error.fields.where((f) => f.field == 'department_id');
           final deleted = error.fields.where((f) => f.field == 'deleted');
@@ -265,7 +273,8 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
     _keys = const RequestKeys();
     try {
       await _reload();
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.coordinatorships);
       /* Okuma durumu kendi sağlayıcısında görünür. */
     }
     return _live(owner);
@@ -308,15 +317,21 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
         if (!_live(owner)) return false;
         await repo.renameDepartmentLink(program, departmentId, draft.name);
       }
-    } on Object catch (e) {
-      if (_live(owner)) _fail(toApiError(e));
+    } on Object catch (e, st) {
+      final error = toReportedApiError(
+        e,
+        st,
+        source: ReportSource.coordinatorships,
+      );
+      if (_live(owner)) _fail(error);
       return false;
     }
     if (!_live(owner)) return false;
     state = CoordinatorshipFormState(pending: state.pending);
     try {
       await _reload();
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.coordinatorships);
       /* Okuma durumu kendi sağlayıcısında görünür. */
     }
     return _live(owner);

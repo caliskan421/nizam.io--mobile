@@ -196,6 +196,61 @@ final class ChatReconnectDelayProvider
 String _$chatReconnectDelayHash() =>
     r'07ad5da4d7f0dc1992421a4ef9d37599091c953a';
 
+/// Sohbet akışı döngüsünün saati (429 `Retry-After` bitişi, akış ömrü). Varsayılan
+/// `DateTime.now`; testte sahte zamanlayıcıyla birlikte sahte saat verilir.
+
+@ProviderFor(chatClock)
+final chatClockProvider = ChatClockProvider._();
+
+/// Sohbet akışı döngüsünün saati (429 `Retry-After` bitişi, akış ömrü). Varsayılan
+/// `DateTime.now`; testte sahte zamanlayıcıyla birlikte sahte saat verilir.
+
+final class ChatClockProvider
+    extends
+        $FunctionalProvider<
+          DateTime Function(),
+          DateTime Function(),
+          DateTime Function()
+        >
+    with $Provider<DateTime Function()> {
+  /// Sohbet akışı döngüsünün saati (429 `Retry-After` bitişi, akış ömrü). Varsayılan
+  /// `DateTime.now`; testte sahte zamanlayıcıyla birlikte sahte saat verilir.
+  ChatClockProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chatClockProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatClockHash();
+
+  @$internal
+  @override
+  $ProviderElement<DateTime Function()> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  DateTime Function() create(Ref ref) {
+    return chatClock(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DateTime Function() value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DateTime Function()>(value),
+    );
+  }
+}
+
+String _$chatClockHash() => r'6b06bc252fafd0890150108e76c17c27f9b37833';
+
 /// Uygulama ön planda mı: akış yalnız ön plandayken açıktır (yaşam döngüsünü sunum katmanındaki
 /// akış kapsamı yazar).
 

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/api_error.dart';
 import '../../../../core/errors/error_text.dart';
+import '../../../../core/telemetry/report_source.dart';
+import '../../../../core/telemetry/unexpected_error.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
@@ -41,7 +43,8 @@ class _SearchState extends ConsumerState<_Search> {
   Future<void> _run(Future<void> Function() op) async {
     try {
       await op();
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.messages);
       if (mounted) NzToast.show(context, errorText(context.l10n, e));
     }
   }
@@ -113,7 +116,8 @@ class _SharedState extends ConsumerState<_Shared> {
   Future<void> _run(Future<void> Function() operation) async {
     try {
       await operation();
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.messages);
       if (mounted) NzToast.show(context, errorText(context.l10n, e));
     }
   }

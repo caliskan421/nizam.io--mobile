@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show MissingPluginException;
 
 import '../errors/api_error.dart';
 import '../i18n/generated/client_error_codes.gen.dart';
+import '../telemetry/report_source.dart';
+import '../telemetry/unexpected_error.dart';
 import 'connectivity_link.dart';
 
 /// Sunucuya erişim durumu (A3b). "İnternet var" ölçütü sunucuya ulaşmaktır.
@@ -26,18 +29,30 @@ class ConnectivityMonitor {
   StreamSubscription<bool>? _sub;
   bool _disposed = false;
 
-  /// Arayüz ipucunu dinlemeye başlar. İdempotent; platform hatası yutulur (ipucu zorunlu
-  /// değildir, istek sonucu girdisi yine çalışır).
+  /// Arayüz ipucunu dinlemeye başlar. İdempotent. İpucu zorunlu değildir: hata olsa da durum
+  /// "bilinmiyor" kalır ve istek sonucu girdisi çalışır. YALNIZ platform kanalının hiç
+  /// bulunmaması ([MissingPluginException]: masaüstü, test) beklenen durumdur ve raporlanmaz;
+  /// kanalın bozuk olay verisi (`TypeError`), `StateError` vb. teknik hatadır ve raporlanır.
   Future<void> start() async {
     final link = _link;
     if (link == null || _sub != null || _disposed) return;
     try {
-      _sub = link.interfaceChanges.listen(_onInterface, onError: (Object _) {});
+      _sub = link.interfaceChanges.listen(_onInterface, onError: _reportLink);
       _onInterface(await link.hasInterface());
-    } on Object {
-      // Platform kanalı yok/başarısız: ipucu yok, durum "bilinmiyor" kalır.
+    } on Object catch (e, st) {
+      _reportLink(e, st);
     }
   }
+
+  /// Tek raporlama sahibi: kanal yokluğu hariç her hata `network` kaynağıyla raporlanır.
+  static void _reportLink(Object error, StackTrace stack) => reportUnexpected(
+    error,
+    stack,
+    source: ReportSource.network,
+    expected: _isChannelAbsent,
+  );
+
+  static bool _isChannelAbsent(Object error) => error is MissingPluginException;
 
   void _onInterface(bool hasInterface) {
     if (_disposed) return;
@@ -67,9 +82,9 @@ class ConnectivityMonitor {
   void dispose() {
     _disposed = true;
     try {
-      unawaited(_sub?.cancel().then((_) {}, onError: (Object _) {}));
-    } on Object {
-      // Platform kanalı yok: bırakılacak bir şey kalmadı.
+      unawaited(_sub?.cancel().then((_) {}, onError: _reportLink));
+    } on Object catch (e, st) {
+      _reportLink(e, st);
     }
     _sub = null;
     state.dispose();

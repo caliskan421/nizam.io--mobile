@@ -25,6 +25,7 @@
     "warning": "gold",
     "onWarning": "on-gold",
     "success": "accent-text",
+    "taskDone": "role-koord",
     "info": "ink-muted",
     "scrim": "scrim",
     "surfaceTop": "surface-top",
@@ -80,6 +81,7 @@
   },
   "$colorNotes": {
     "success": "Tasarım README 'tamam accent-text' der; ayrı başarı rengi yoktur.",
+    "taskDone": "Tamamlanan görevin rengi (durum noktası/etiketi, tamamlanma KPI'sı, ilerleme çubuğu, genel durum grafiği): ana sayfa ekip bölümündeki koordinatörlük kartıyla aynı yeşil (ürün sahibi, 2026-11-12).",
     "info": "Tasarımda bilgi rengi yoktur; nötr ikincil metne bağlandı (açık karar, docs/design-tokens.md).",
     "surfaceTop": "Kart/panel degradesinin üst durağı (README: kart surface-top → bg-surface); NzCard ve NzKpiTile.",
     "primaryTop": "Ana eylem düğmesinin üst degrade durağı (accent ile biter).",

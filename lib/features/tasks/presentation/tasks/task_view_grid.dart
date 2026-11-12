@@ -16,7 +16,7 @@ Color viewDot(TaskView v, NizamioColors c) => switch (v) {
   TaskView.inProgress => c.inProgress,
   TaskView.review || TaskView.dateRequest => c.warning,
   TaskView.notStarted => c.textFaint,
-  TaskView.done => c.accentText,
+  TaskView.done => c.taskDone,
 };
 
 /// Görünüm kutucukları: dar alanda 4×2 ("Tümü" iki sütun), geniş alanda (tablette tam

@@ -209,7 +209,7 @@ class CoordinatorshipCard extends StatelessWidget {
             ],
           ),
           const Gap(NizamioSpacing.gapMd),
-          NzProgressBar(value: s.ratio, color: c.accentText),
+          NzProgressBar(value: s.ratio, color: c.taskDone),
         ],
       ),
     );

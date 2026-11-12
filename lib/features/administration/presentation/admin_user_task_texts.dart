@@ -19,7 +19,7 @@ Color userTaskStatusColor(BuildContext context, TaskStatus status) =>
       TaskStatus.inProgress => context.colors.inProgress,
       TaskStatus.review => context.colors.warning,
       TaskStatus.returned => context.colors.danger,
-      TaskStatus.done => context.colors.accentText,
+      TaskStatus.done => context.colors.taskDone,
     };
 String userTaskFilterLabel(BuildContext context, UserTaskStatus status) =>
     switch (status) {

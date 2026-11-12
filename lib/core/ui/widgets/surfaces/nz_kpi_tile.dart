@@ -31,7 +31,7 @@ class NzKpiTile extends StatelessWidget {
 
   final IconData icon;
 
-  /// Anlam rengi (ikon ve çubuk): tamamlanan `accentText`, devam `inProgress`, gecikme `danger`,
+  /// Anlam rengi (ikon ve çubuk): tamamlanan `taskDone`, devam `inProgress`, gecikme `danger`,
   /// onay `warning`.
   final Color tone;
   final String label;

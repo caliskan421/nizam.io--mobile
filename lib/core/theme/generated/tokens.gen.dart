@@ -28,6 +28,7 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     required this.warning,
     required this.onWarning,
     required this.success,
+    required this.taskDone,
     required this.info,
     required this.scrim,
     required this.surfaceTop,
@@ -101,6 +102,7 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
   final Color warning;
   final Color onWarning;
   final Color success;
+  final Color taskDone;
   final Color info;
   final Color scrim;
   final Color surfaceTop;
@@ -174,6 +176,7 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     warning: Color(0xFFC27400),
     onWarning: Color(0xFFFFFFFF),
     success: Color(0xFF4F6E00),
+    taskDone: Color(0xFF74C27A),
     info: Color(0xFF555A63),
     scrim: Color(0x59121316),
     surfaceTop: Color(0xFFFFFFFF),
@@ -248,6 +251,7 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     warning: Color(0xFFFFD166),
     onWarning: Color(0xFF0B0B0B),
     success: Color(0xFFC8F53C),
+    taskDone: Color(0xFF74C27A),
     info: Color(0xFFA1A1A1),
     scrim: Color(0x8C000000),
     surfaceTop: Color(0xFF1C1C1C),
@@ -323,6 +327,7 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
     Color? warning,
     Color? onWarning,
     Color? success,
+    Color? taskDone,
     Color? info,
     Color? scrim,
     Color? surfaceTop,
@@ -396,6 +401,7 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       warning: warning ?? this.warning,
       onWarning: onWarning ?? this.onWarning,
       success: success ?? this.success,
+      taskDone: taskDone ?? this.taskDone,
       info: info ?? this.info,
       scrim: scrim ?? this.scrim,
       surfaceTop: surfaceTop ?? this.surfaceTop,
@@ -474,6 +480,7 @@ class NizamioColors extends ThemeExtension<NizamioColors> {
       warning: Color.lerp(warning, other.warning, t)!,
       onWarning: Color.lerp(onWarning, other.onWarning, t)!,
       success: Color.lerp(success, other.success, t)!,
+      taskDone: Color.lerp(taskDone, other.taskDone, t)!,
       info: Color.lerp(info, other.info, t)!,
       scrim: Color.lerp(scrim, other.scrim, t)!,
       surfaceTop: Color.lerp(surfaceTop, other.surfaceTop, t)!,

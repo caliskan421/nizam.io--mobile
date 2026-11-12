@@ -63,7 +63,7 @@ class _OverviewCard extends StatelessWidget {
       TaskStatus.unknown => l.uiTasksTagUnknown,
     };
     Color color(TaskStatus status) => switch (status) {
-      TaskStatus.done => c.accentText,
+      TaskStatus.done => c.taskDone,
       TaskStatus.review => c.warning,
       TaskStatus.inProgress => c.inProgress,
       TaskStatus.returned => c.danger,

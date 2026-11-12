@@ -56,7 +56,7 @@ class CoordGeneralTab extends ConsumerWidget {
         label: l.uiCoordTabTasks,
         value: '${pulse.total}',
         segments: [
-          NzBarSegment(pulse.done, c.primary),
+          NzBarSegment(pulse.done, c.taskDone),
           NzBarSegment(pulse.doing, c.inProgress),
           NzBarSegment(pulse.late, c.danger),
           NzBarSegment(pulse.todo, c.surfaceOverlay),

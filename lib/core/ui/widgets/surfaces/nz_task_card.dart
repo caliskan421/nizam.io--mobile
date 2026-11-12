@@ -114,7 +114,7 @@ class NzTaskCard extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: NzProgressBar(value: subtaskProgress, color: c.accentText),
+              child: NzProgressBar(value: subtaskProgress, color: c.taskDone),
             ),
             if (subtaskText != null) ...[
               const Gap(NizamioSpacing.gapMd),

@@ -42,7 +42,7 @@ final class TimelineInk {
     TaskStatus.inProgress => colors.inProgress,
     TaskStatus.review => colors.warning,
     TaskStatus.returned => colors.danger,
-    TaskStatus.done => colors.accentText,
+    TaskStatus.done => colors.taskDone,
     TaskStatus.unknown => colors.textFaint,
   };
 

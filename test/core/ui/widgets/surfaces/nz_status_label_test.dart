@@ -14,7 +14,7 @@ void main() {
       expect(NzTone.progress.color(c), c.inProgress);
       expect(NzTone.waiting.color(c), c.warning);
       expect(NzTone.danger.color(c), c.danger);
-      expect(NzTone.done.color(c), c.accentText);
+      expect(NzTone.done.color(c), c.taskDone);
       expect(NzTone.info.color(c), c.info);
     }
   });

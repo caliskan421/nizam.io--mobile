@@ -992,7 +992,7 @@ class _SubtaskLabel extends StatelessWidget {
                   ? Icons.check_box_rounded
                   : Icons.check_box_outline_blank_rounded,
               size: 18,
-              color: subtask.done ? c.accentText : c.textMuted,
+              color: subtask.done ? c.taskDone : c.textMuted,
             ),
             const Gap(10),
             Expanded(

@@ -148,7 +148,7 @@ class _CoordCard extends StatelessWidget {
     final percent = l.percent(c.donePercent / 100);
     // Sunucu özeti kalan durumu onay ve iadeyi birlikte taşır; ayrıymış gibi renklendirilmez.
     final segments = <(int, Color)>[
-      (c.done, colors.accentText),
+      (c.done, colors.taskDone),
       (c.inProgress, colors.inProgress),
       (c.inReview, colors.info),
       (c.todo, colors.textFaint),

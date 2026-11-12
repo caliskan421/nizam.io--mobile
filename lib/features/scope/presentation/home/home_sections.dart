@@ -124,7 +124,7 @@ class HomeKpiGrid extends StatelessWidget {
           tile(
             view: NzTaskView.done,
             icon: NzIcons.check,
-            tone: c.accentText,
+            tone: c.taskDone,
             label: l.uiHomeKpiDone,
             value: '${t.done}',
             progress: ratio(t.done, t.total),

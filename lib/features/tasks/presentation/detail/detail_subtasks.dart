@@ -107,7 +107,7 @@ class _DetailSubtasksState extends ConsumerState<DetailSubtasks> {
                 ),
                 curve: Curves.ease,
                 builder: (_, v, _) =>
-                    NzProgressBar(value: v, color: c.accentText),
+                    NzProgressBar(value: v, color: c.taskDone),
               ),
             ),
             const Gap(NizamioSpacing.gapMd),

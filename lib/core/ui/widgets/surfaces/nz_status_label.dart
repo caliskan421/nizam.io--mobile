@@ -32,7 +32,7 @@ enum NzTone {
     NzTone.progress => c.inProgress,
     NzTone.waiting => c.warning,
     NzTone.danger => c.danger,
-    NzTone.done => c.accentText,
+    NzTone.done => c.taskDone,
     NzTone.info => c.info,
   };
 }

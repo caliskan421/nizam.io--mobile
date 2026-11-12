@@ -19,6 +19,13 @@ import '../../support/fake_error_reporter.dart';
 const _key = AppPreferences.errorReportingKey;
 
 /// `true` yazısı kapıda bekler; hatalar ve okuma günlüğü ayarlanabilir.
+class _FakeValidity implements ErrorReportingGrantValidity {
+  bool current = true;
+
+  @override
+  bool get isCurrent => current;
+}
+
 class _Store extends MemoryPreferenceStore {
   Completer<void>? grantGate;
   Completer<void>? failingTrueGate; // tamamlanınca `true` yazısı HATA verir
@@ -205,11 +212,11 @@ void main() {
       'önce yeni load okuması yapılmaz', (tester) async {
     final store = _Store()..grantGate = Completer<void>();
     final prefs = AppPreferences(store);
-    var stale = false;
+    final validity = _FakeValidity();
     bool? written;
     unawaited(
       prefs
-          .grantErrorReportingConsent(isCurrent: () => !stale)
+          .grantErrorReportingConsent(validity: validity)
           .written
           .then((v) => written = v),
     );
@@ -217,7 +224,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 501));
     expect(written, isFalse, reason: 'çağıran 500 ms sonra bıraktı');
 
-    stale = true; // sahip değişti
+    validity.current = false; // sahip değişti
     bool? read;
     unawaited(prefs.errorReportingConsent().then((v) => read = v));
     await tester.pump(const Duration(milliseconds: 100));

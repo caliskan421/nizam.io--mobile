@@ -18,6 +18,18 @@ enum ReportingNotice {
   revokeNotPersisted,
 }
 
+/// Bir `set(true)` isteğinin canlı geçerliliği: nesil + dispose + bağ sahipliği HER okumada
+/// denetleyiciden taze okunur (anlık görüntü değil).
+class _GrantValidity implements ErrorReportingGrantValidity {
+  _GrantValidity(this._controller, this._gen);
+
+  final ErrorReportingController _controller;
+  final int _gen;
+
+  @override
+  bool get isCurrent => _controller._current(_gen);
+}
+
 /// Kullanıcının hata raporlama tercihi: bellek durumu + kalıcılık + Dart kapısı + SDK
 /// bekleyen rapor yaşam döngüsü.
 ///
@@ -115,9 +127,10 @@ class ErrorReportingController {
     final gen = ++_gen;
     notice.value = ReportingNotice.none;
     if (!want) _close(); // kapı eşzamanlı kapanır; sıradaki iş beklenmez
-    // Geri alma isteği anında (await/enqueue ÖNCESİ) ortak depo şeridi kilitlenir: SDK kapısında
-    // bekleyen eski yükleme ya da yeni bir denetleyicinin okuması `true` görmez. Yalnız geçerli
-    // sahip kilitler; bağı zaten başkasına geçmiş/atılmış denetleyici yeni sahibi kapatmaz.
+    // Geri alma isteği anında (await/enqueue ÖNCESİ) `false`/silme yazısı ortak depo şeridine
+    // ATOMİK ve İSTEKLİ sıralanır: SDK kapısında bekleyen eski yükleme atlansa, sahip değişse ya da
+    // süreç ölse de sağlıklı depoda `true` kalmaz. Yalnız çağrı anında geçerli sahip yazar; zaten
+    // bağı başkasına geçmiş/atılmış denetleyici yeni bileşimin tercihine dokunmaz.
     final revoke = !want && _owned ? _prefs.beginErrorReportingRevoke() : null;
     return _enqueue(() async {
       if (want) {
@@ -141,7 +154,7 @@ class ErrorReportingController {
         // Sahiplik/nesil depo sırasının İÇİNDE (fiziksel yazıdan önce ve sonra) sorulur: bayat
         // `true` aynı sıra işinde geri alınır, yeni sahibin okuması onu hiç görmez.
         final grant = _prefs.grantErrorReportingConsent(
-          isCurrent: () => _current(gen),
+          validity: _GrantValidity(this, gen),
         );
         final written = await grant.written;
         if (!_current(gen)) {
@@ -160,18 +173,10 @@ class ErrorReportingController {
         }
         _open();
       } else {
-        // Değiştirilmiş/atılmış denetleyici yeni bileşimin tercihlerine ya da SDK'sına dokunmaz.
-        // Sahiplik sonradan düşse bile kurulmuş kilit kapalı kalır (güvenli yön).
-        if (revoke == null || !_owned) return;
-        var persisted = await _prefs.setErrorReportingConsent(
-          false,
-          revokeTicket: revoke,
-        );
-        if (!persisted && _owned) {
-          persisted = await _prefs.removeErrorReportingConsent(
-            revokeTicket: revoke,
-          );
-        }
+        // Çağrı anında bayat/atılmış denetleyici yeni bileşimin tercihlerine ya da SDK'sına dokunmaz.
+        // Fiziksel yazı zaten sıradadır; sahiplik sonradan düşse de iptal edilmez (güvenli yön).
+        if (revoke == null) return;
+        final persisted = await revoke;
         if (!persisted && gen == _gen && !_disposed) {
           notice.value = ReportingNotice.revokeNotPersisted;
         }

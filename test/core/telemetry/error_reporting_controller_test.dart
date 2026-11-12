@@ -358,12 +358,111 @@ void main() {
       expect(newSdk.calls, ['discard'], reason: 'yeni load send çağırmaz');
       expect(fresh.state.value, isFalse);
 
-      gate.complete(); // eski kuyruk çözülür; bayat false dalı sahiplik yüzünden atlanır
+      // Kabul edilen geri alma fiziksel `false`'u kuyruk çözülmeden ve sahip değişse de yazdı.
+      expect(shared.values[AppPreferences.errorReportingKey], 'false');
+
+      gate.complete(); // eski kuyruk çözülür; SDK/UI işi sahiplik yüzünden atlanır
       await Future.wait([oldLoading, off]);
-      expect(shared.values[AppPreferences.errorReportingKey], 'true');
+      expect(shared.values[AppPreferences.errorReportingKey], 'false');
       expect(await AppPreferences(shared).errorReportingConsent(), isFalse);
       expect(ErrorReporting.enabled, isFalse);
       expect(newSdk.calls, ['discard']);
+      expect(sdk.calls, ['send'], reason: 'eski SDK ikinci kez dokunulmadı');
+
+      // Yeni süreç benzetimi: aynı fiziksel değer, bağımsız şerit (yeni depo nesnesi).
+      final reopenedStore = MemoryPreferenceStore()
+        ..values.addAll(shared.values);
+      final reopenSdk = FakeErrorReporter();
+      final reopened = ErrorReportingController(
+        AppPreferences(reopenedStore),
+        reopenSdk,
+        sdkTimeout: const Duration(milliseconds: 200),
+      );
+      addTearDown(reopened.dispose);
+      await reopened.load();
+      expect(reopenSdk.calls, isNot(contains('send')), reason: 'SEND 0');
+      expect(reopened.state.value, isFalse);
+    });
+
+    test(
+      'kabul edilen geri alma + dispose: SDK kapısı çözülünce depo false',
+      () async {
+        final shared = MemoryPreferenceStore()
+          ..values[AppPreferences.errorReportingKey] = 'true';
+        final gate = Completer<void>();
+        sdk.sdkGate = gate.future;
+        final old = ErrorReportingController(
+          AppPreferences(shared),
+          sdk,
+          sdkTimeout: const Duration(seconds: 5),
+        );
+        final oldLoading = old.load();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        final off = old.set(false);
+        old.dispose();
+        gate.complete();
+        await Future.wait([oldLoading, off]);
+        await pumpEventQueue();
+        expect(shared.values[AppPreferences.errorReportingKey], 'false');
+        expect(await AppPreferences(shared).errorReportingConsent(), isFalse);
+      },
+    );
+
+    test('geri alma sonrası verilen gerçek yeni onay korunur (eski geri alma ezmez)', () async {
+      final shared = MemoryPreferenceStore()
+        ..values[AppPreferences.errorReportingKey] = 'true';
+      final gate = Completer<void>();
+      sdk.sdkGate = gate.future;
+      final old = ErrorReportingController(
+        AppPreferences(shared),
+        sdk,
+        sdkTimeout: const Duration(seconds: 5),
+      );
+      addTearDown(old.dispose);
+      final oldLoading = old.load();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      final off = old.set(false);
+
+      final newSdk = FakeErrorReporter();
+      final fresh = ErrorReportingController(
+        AppPreferences(shared),
+        newSdk,
+        sdkTimeout: const Duration(milliseconds: 200),
+      );
+      addTearDown(fresh.dispose);
+      await fresh.load();
+      expect(await fresh.set(true), isTrue);
+
+      gate.complete();
+      await Future.wait([oldLoading, off]);
+      await pumpEventQueue();
+      expect(shared.values[AppPreferences.errorReportingKey], 'true');
+      expect(fresh.state.value, isTrue);
+      expect(ErrorReporting.enabled, isTrue);
+    });
+
+    test('çağrı anında zaten bayat eski set(false) hiç fiziksel yazı kuyruğa almaz', () async {
+      final shared = _CountingWriteStore()
+        ..values[AppPreferences.errorReportingKey] = 'true';
+      final old = ErrorReportingController(
+        AppPreferences(shared),
+        sdk,
+        sdkTimeout: const Duration(milliseconds: 200),
+      );
+      addTearDown(old.dispose);
+      await old.load();
+      final fresh = ErrorReportingController(
+        AppPreferences(shared),
+        FakeErrorReporter(),
+        sdkTimeout: const Duration(milliseconds: 200),
+      );
+      addTearDown(fresh.dispose);
+      await fresh.load(); // bağı devralır
+      shared.mutations = 0;
+
+      await old.set(false);
+      expect(shared.mutations, 0);
+      expect(shared.values[AppPreferences.errorReportingKey], 'true');
     });
 
     test(
@@ -394,6 +493,23 @@ void main() {
       },
     );
   });
+}
+
+/// Yazma/silme sayısını tutar.
+class _CountingWriteStore extends MemoryPreferenceStore {
+  var mutations = 0;
+
+  @override
+  Future<void> setString(String key, String value) {
+    mutations++;
+    return super.setString(key, value);
+  }
+
+  @override
+  Future<void> remove(String key) {
+    mutations++;
+    return super.remove(key);
+  }
 }
 
 /// Tercih OKUMASI [release] çağrılana dek bekler (okuma sürerken geri alma benzetimi).

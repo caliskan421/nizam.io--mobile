@@ -55,6 +55,19 @@ final class _ConsentLane {
 ///
 /// Okuma hatası varsayılana düşer (tercih kaybı uygulamayı durdurmaz); yazma hatası
 /// günlüğe yazılır ve yutulur.
+/// Bir onay verme isteğinin CANLI sahiplik/nesil geçerliliği. Sıra işi bunu fiziksel yazıdan
+/// ÖNCE ve SONRA okur; `false` ise istek bayattır (sahip değişti, geri alındı, atıldı).
+abstract interface class ErrorReportingGrantValidity {
+  bool get isCurrent;
+}
+
+class _AlwaysCurrentGrant implements ErrorReportingGrantValidity {
+  const _AlwaysCurrentGrant();
+
+  @override
+  bool get isCurrent => true;
+}
+
 class AppPreferences {
   AppPreferences(this._store);
 
@@ -176,22 +189,34 @@ class AppPreferences {
     }
   }
 
-  /// Kullanıcı geri alma isteği ANINDA (kuyruğa girmeden) ortak depo şeridini kilitler: okuma
-  /// kapalı döner. Fiziksel yazı ya da SDK yan etkisi DEĞİL, güvenli kapı durumudur. Dönen bilet
-  /// [setErrorReportingConsent]/[removeErrorReportingConsent]'e iletilir; kilit yalnız o bilet
-  /// hâlâ güncelse açık başarılı kapatma/silme ya da sonradan verilmiş geçerli onayla kalkar.
-  int beginErrorReportingRevoke() => _lane.beginRevoke();
+  /// Kullanıcı geri alma isteği ANINDA (çağıranın kuyruğuna/SDK işine girmeden): ortak depo
+  /// şeridini kilitler (okuma kapalı) VE `false` yazısını (olmazsa kaydı silmeyi) TEK atomik
+  /// fiziksel şerit işi olarak hemen sıraya alır. Böylece bekleyen eski bir yükleme/denetleyici
+  /// değişse, atılsa ya da süreç ölse de sağlıklı depoda kayıt `true` KALMAZ; sonradan kabul edilen
+  /// geçerli onay bu işin ARDINA girer, ezilmez. Dönen gelecek yalnız gecikme sınırlı (500 ms)
+  /// sonuçtur: `true` = `false` yazıldı ya da kayıt silindi; ikisi de olmazsa şerit kilitli kalır.
+  Future<bool> beginErrorReportingRevoke() {
+    final lane = _lane;
+    final gen = lane.beginRevoke(); // eşzamanlı: okuma kapalı
+    return _confirmConsentWrite(
+      _queueConsentWrite(() async {
+        await _revertToClosed(lane, gen);
+        return true;
+      }),
+      'kapatılamadı',
+    );
+  }
 
   /// Onayı yazar; yazılabildiyse (süresi içinde) `true`. Yazılamadıysa/süre aşıldıysa `false`
   /// (çağıran açmaz). Yazılar DEPO bazında (tüm [AppPreferences] örnekleri arasında) fiziksel
   /// bitiş sırasıyla işler; geç biten eski yazı sonradan istenmiş yazının üzerine yazamaz.
-  ///
-  /// [revokeTicket]: kullanıcı geri alma isteği anında [beginErrorReportingRevoke] ile kurulmuş
-  /// kilidin kimliği (çift artış olmaz; kilit zaten kuruludur).
-  Future<bool> setErrorReportingConsent(bool value, {int? revokeTicket}) {
-    if (value) return grantErrorReportingConsent(isCurrent: () => true).written;
+  Future<bool> setErrorReportingConsent(bool value) {
+    if (value) {
+      return grantErrorReportingConsent(validity: const _AlwaysCurrentGrant())
+          .written;
+    }
     final lane = _lane;
-    final gen = revokeTicket ?? lane.beginRevoke(); // eşzamanlı: okuma kapalı
+    final gen = lane.beginRevoke(); // eşzamanlı: okuma kapalı
     return _confirmConsentWrite(
       _queueConsentWrite(() async {
         await _store.setString(errorReportingKey, 'false');
@@ -205,23 +230,25 @@ class AppPreferences {
   /// Onay VERME yazısı: yazıyı sıraya alır; [ticket] bayat kalırsa [rollbackErrorReportingGrant]
   /// için kimliktir. Bilet ve yazı eşzamanlı alınır (arada başka istek giremez).
   ///
-  /// [isCurrent] sıra işinin İÇİNDE, fiziksel yazıdan ÖNCE ve SONRA sorulur (sahiplik/nesil).
+  /// [validity] `isCurrent` sıra işinin İÇİNDE, fiziksel yazıdan ÖNCE ve SONRA sorulur (sahiplik/nesil).
   /// Yazıdan önce bayatsa hiç yazılmaz. Yazıdan sonra bayatsa `false`/silme geri alması AYNI sıra
   /// işinde yapılır ve şerit ancak ondan sonra serbest kalır: sonradan gelen okuma bayat `true`'yu
   /// hiç göremez; sonradan sıralanan gerçek yeni onay geri almanın ARDINA girdiğinden ezilmez.
   /// [written] yalnız yazı geçerli sahip için kalıcılaştıysa `true` olur. 500 ms bekleme yalnız
   /// gecikme sınırıdır; gerçek yazı ve geri alma bitmeden şerit ilerlemez.
   ({int ticket, Future<bool> written}) grantErrorReportingConsent({
-    required bool Function() isCurrent,
+    required ErrorReportingGrantValidity validity,
   }) {
     final lane = _lane;
     final gen = lane.blockGen;
     final ticket = ++lane.seq;
     lane.lastGrant = ticket;
     final write = _queueConsentWrite(() async {
-      if (!isCurrent()) return false; // sıra gelince bayat: hiçbir şey yazılmaz
+      if (!validity.isCurrent) {
+        return false; // sıra gelince bayat: hiçbir şey yazılmaz
+      }
       await _store.setString(errorReportingKey, 'true');
-      if (isCurrent()) {
+      if (validity.isCurrent) {
         // Geçerli yeni onay kayıttaki bayat durumu aşar; sonradan istenmiş geri alma ezilmez.
         lane.clearIfCurrent(gen);
         return true;
@@ -270,21 +297,6 @@ class AppPreferences {
         return true;
       }),
       'geri alınamadı',
-    );
-  }
-
-  /// Eski `true` kaydını siler (okuma `null` → kapalı); [setErrorReportingConsent] yazılamadığında
-  /// ikinci ve SON yol. Başarılıysa `true`.
-  Future<bool> removeErrorReportingConsent({int? revokeTicket}) {
-    final lane = _lane;
-    final gen = revokeTicket ?? lane.beginRevoke();
-    return _confirmConsentWrite(
-      _queueConsentWrite(() async {
-        await _store.remove(errorReportingKey);
-        lane.clearIfCurrent(gen); // açık, başarılı silme
-        return true;
-      }),
-      'silinemedi',
     );
   }
 

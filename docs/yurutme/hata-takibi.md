@@ -1,14 +1,15 @@
 # Hata takibi (Crashlytics) — uygulama ve kabul
 
-Güncelleme (2026-11-12, "uygulama genelinde tamamlama"): hata yolu envanteri, `ReportSource`,
-doğrulanmış API işlem kimliği, sabit mesaj, Riverpod gözlemcisi ve kapsam kapısı eklendi (bkz.
-"Kapsam" ve `hata-takibi-kapsam.md`). Aşağıdaki durum satırı ÖNCEKİ aşamanın kabulüdür.
+Durum (2026-11-12): Sonnet uyguladı; Codex ve üç paralel alt ajan denetledi, bulunan açıklar
+düzeltildi. Son bağımsız koşumda **331 test** geçti; 129 el yazımı Dart dosyasının analizinde
+hata/uyarı yok (bir biçem bilgisi var). 1508 dosyada hata yolu kapısı temiz; 238 yolun sahibi
+[`hata-takibi-kapsam.md`](hata-takibi-kapsam.md) içinde dosya/işlev düzeyinde kayıtlıdır.
 
-Durum (2026-11-12): Sonnet uygulaması Codex denetiminden geçti; bağımsız hedefli koşumda
-532 test ve değişen 48 Dart dosyasının analizi yeşil. Android dev/prod debug APK ve iOS dev
-simülatör debug derlemeleri geçti. **Gerçek crash, konsol/metadata ve dağıtım sembol yükleme
-provası yapılmadı** (en sonda "Yapılmayanlar"). Prod Firebase kapalıdır; bu iş yalnız dev Firebase'e bağlıdır. Analytics
-açılmadı. Yeni paket/kilit değişikliği yok (`firebase_crashlytics` zaten bağımlılıktı).
+Gerçek iOS SDK ile nonfatal/native çökme, dört süreçte yerel kayıt/silme ve Firebase konsolu
+doğrulandı: **0.2.0 (2), iOS 27.2.0, iOS Simulator (iPhone)**. Konsolda temizlenmiş Türkçe
+mesaj, `<local>` yığını ve çözümlenmiş uygulama Swift çerçeveleri görüldü. Son derleme/üretim
+kanıtı ve kapsam dışı mevcut borçlar [Codex inceleme kaydındadır](../reviews/firebase-hata-takibi-codex.md).
+Yayın/CI kabulü verilmedi. Prod Firebase kapalı, Analytics kapalıdır; yeni paket/kilit değişikliği yok.
 
 ## SDK anlamı ve tasarım kararı (resmî belge: "Enable opt-in reporting")
 
@@ -90,12 +91,13 @@ kancalar `bootstrap` başında kurulur ve önceki kancaları çağırır.
   gerçek HTTP durumu 200 olduğundan durum sınıfı (`status=`) YOKTUR ve ileti "5xx" demez. İş sınırı
   kodları (`assistant.refused`, `limit_exceeded`, `capacity_full`, kota/yoğunluk) beklenen: 0 rapor.
   Olay iletisi (`mesaj`) rapora girmez.
-- **Rıza sahipliği:** `ErrorReportingController` her `await`tan sonra ve her SDK/tercih yan
-  etkisinden önce istek neslini, ortak bağ (`ErrorReportingBinding`) sahipliğini ve dispose'u
-  denetler; yerine başka bileşim bağlanmış/atılmış denetleyicinin geç `load`/`set`/`discard`
-  sonucu yeni tekil SDK'yı ya da tercihleri etkilemez (gerçek yan etki sayıları testte).
+- **Rıza sahipliği:** `ErrorReportingController` istek nesli, ortak bağ
+  (`ErrorReportingBinding`) ve dispose durumunu denetler. Çağrı anında bayat olan denetleyici
+  yeni tercih/SDK işi başlatmaz. Geçerli sahibin kabul edilmiş geri alma isteği ise hemen ortak
+  kalıcı kuyruğa girer; sonraki replacement/dispose bu isteği iptal etmez. SDK ve UI işleri
+  güncel sahiplik kontrollerinde kalır.
 - **İşlem bağlamı:** `ReportContext.run(op, …)` (Zone; eşzamanlı işlemler karışmaz). Native tarafa
-  özel anahtar/kullanıcı kimliği GÖNDERİLMEZ (süreç geneli oldukları için işlemleri karıştırırdı);
+  uygulama özel anahtar/kullanıcı kimliği EKLEMEZ (süreç geneli oldukları için işlemleri karıştırırdı);
   işlem sabiti `exception` etiketindedir (`kind=… op=… src=… api=… type=…`). Kapalı küme: `login,
   session_refresh, task_write, file_upload, file_download, chat_send, chat_stream, assistant_chat,
   local_storage, startup, none`. İç içe bağlamda dıştaki korunur (`runIfNone`; yükleme görev
@@ -118,6 +120,8 @@ kancalar `bootstrap` başında kurulur ve önceki kancaları çağırır.
   sabit Türkçe cümleleri birleştirir ve (kod beyaz listedeyse) kullanıcıya gösterilen genel hata
   iletisinin kaynağı olan yerel katalog metnini (`localizedErrorText`) ekler. Crashlytics
   `exception` alanı `"<etiket> | <mesaj>"`dır. Ham `toString`/`message`, sunucu iletisi, alan adı yok.
+  FlutterFire iOS SDK ayrıca kendi `flutter_error_exception` anahtarına aynı temizlenmiş
+  etiket/mesajı yazar; konsolda bu tek SDK anahtarı doğrulandı. Uygulama ayrıca custom key yazmaz.
 - **Yerel (native) çökme bağlamı:** BİLİNÇLİ OLARAK verilmez. Tek bir global özel anahtar eşzamanlı
   işlemlerden yalnız birini yanlış atfederdi; native çökmede "aktif işlem" kesin bilinemez. Gerekirse
   ileride yalnız sabit "aktif işlem sayısı/kümesi" özeti ve eşzamanlılık uyarısıyla düşünülür; şimdilik
@@ -165,7 +169,8 @@ başlıkları, `<asynchronous suspension>`. `file:`/mutlak yol/Windows yolu çer
 kalır, konum `<local>`'dir (dosya adı dahil EDİLMEZ). Tanınmayan her satır (URL, sorgu, yüzde-kodlu
 yol, serbest metin, pid/thread adı, sürüm satırı) atılır. Gönderilmez: ham hata iletisi,
 `FlutterErrorDetails` ayrıntısı, sunucu gövdesi/başlığı/adresi, belirteç/parola/FCM belirteci,
-kimlikler, kullanıcı içeriği, dosya adı/yolu, `reason`/`information`/özel anahtar/kullanıcı kimliği.
+kimlikler, kullanıcı içeriği, dosya adı/yolu, ham `reason`/`information` veya uygulama kullanıcı kimliği.
+SDK'nın otomatik `flutter_error_exception` alanı da yalnız temizlenmiş etiket/mesaj taşır.
 Genel `Log` çıkışı Crashlytics'e bağlı değildir.
 
 ## Onay (kullanıcı tercihi)
@@ -174,8 +179,9 @@ Genel `Log` çıkışı Crashlytics'e bağlı değildir.
   Config `crash_reporting_enabled` izin yerine geçmez ve okunmaz.
 - Gönderim (`sendUnsentReports`) yalnız tercih okunduktan SONRA ve istek hâlâ geçerliyse yapılır;
   okuma sürerken geri alma gelirse gönderilmez.
-- Açma: önce onaydan ÖNCEKİ cihaz raporlarının silindiği ONAYLANIR (`deleteUnsentReports` süresi içinde
-  başarıyla bitmiş olmalı). Açılıştaki silme hata/zaman aşımı verdiyse "açıkça yeniden deneme"
+- Açma: önce `deleteUnsentReports` isteği süresi içinde başarıyla kabul edilmelidir.
+  Native köprü tamamlanması fiziksel disk silmesinin atomik garantisi değildir; nominal silme
+  davranışı ayrı yeni süreçte `check_empty=false` ile sınandı. Açılıştaki silme hata/zaman aşımı verdiyse "açıkça yeniden deneme"
   yalnız kullanıcı açma eylemiyle olur; yine belirsizse tercih YAZILMAZ, kapı AÇILMAZ ve kullanıcıya
   bildirilir (aksi halde sonraki açılış onaydan önceki raporu gönderirdi). Sonra tercih yazılır
   (yazılamazsa açılmaz; kapalı yazılmaya çalışılır) → Dart kapısı açılır. Yazma gecikmeli bitip arada
@@ -183,7 +189,8 @@ Genel `Log` çıkışı Crashlytics'e bağlı değildir.
 - Kapıyı yalnız geçerli bağ ([`ErrorReportingBinding`]) değiştirir: yerine başka bileşim
   bağlandıysa eski denetleyicinin geç `load`/`set` sonuçları yeni kapıyı açıp kapatamaz.
 - Onay yazı şeridi (depo bazında, `AppPreferences`): onay VERME yazısı sıra işi içinde, fiziksel
-  yazıdan önce ve sonra sahiplik/nesli (`isCurrent`) sorar; yazıdan sonra bayatsa `false`/silme geri
+  yazıdan önce ve sonra tipli `ErrorReportingGrantValidity.isCurrent` üzerinden sahiplik/nesli sorar;
+  yazıdan sonra bayatsa `false`/silme geri
   alması AYNI sıra işinde yapılır, şerit ondan önce serbest kalmaz — yeni sahibin okuması bayat
   `true`'yu görmez. Geri alma `false` ve silme ikisi de düşerse şerit KİLİTLENİR: okuma kapalı,
   gönderim 0; açık başarılı `false`/silme ya da geçerli yeni onay yazısı kilidi kaldırır. Çağıranın
@@ -192,7 +199,9 @@ Genel `Log` çıkışı Crashlytics'e bağlı değildir.
   edilemez ve platform ack'i beklenir; kilit yalnız bu süreçte geçerlidir (süreç ölürse kayıtta bayat
   `true` kalabilir); geçerlik sorusu ile denetleyicinin devamı arasındaki mikro görev aralığında
   sahip değişirse yalnız bayat-sonrası dar geri alma yolu çalışır.
-- Geri alma: kapı hemen kapanır → `false` yazılır → olmazsa kayıt SİLİNİR → ikisi de olmazsa
+- Geri alma: kapı ve ortak şerit hemen kapanır; çağrı anında tek atomik `false` → gerekirse
+  `remove` işi kalıcı kuyruğa eklenir. SDK kuyruğu, replacement veya dispose bunu atlatamaz;
+  daha sonra kabul edilen yeni grant arkasına sıralanır. İki kalıcı işlem de olmazsa
   `revokeNotPersisted`: oturumda kapalı, ama **kalıcılık sağlanamadı** ve sonraki açılışta eski `true`
   geri gelebilir; arayüz bunu açıkça yazar ("başarıyla kapatıldı" denmez). Sonsuz yeniden deneme yok.
   Bekleyen raporlar silinir.
@@ -230,16 +239,17 @@ iddiası kurulmaz. Ek kimlik üretilmez, `setUserIdentifier` çağrılmaz.
   görevi çalıştı mı; iOS Archive çıktısında `Upload Crashlytics Symbols` günlüğü; konsolda "missing
   dSYM" uyarısı yok.
 
-## Gerçek cihaz provası (henüz koşulmadı)
+## Fiziksel cihaz / release provası (henüz koşulmadı)
 
 1. Dev release derlemesini gerçek cihaza kur: `flutter run --release --flavor dev -t lib/main_dev.dart`.
 2. Profil → "Hata raporlarını gönder" aç. **Nonfatal:** geçersiz yanıt veren sahte sunucuyla bir
    `apiCall` hatası üret; uygulamayı kapatıp yeniden aç → rapor `kind=invalid_response op=…` olarak
    konsolda (gecikme beklenir).
-3. **Native crash:** geçici (commit edilmeyen) bir düğmeyle `FirebaseCrashlytics.instance.crash()`;
-   yeniden aç → rapor gelir.
+3. **Native crash:** yalnız izole test cihazında test-only probe kullan; ürün koduna test düğmesi
+   ekleme. Yeniden açılışta onaylı gönderim ve konsol sonucunu ayrı doğrula.
 4. **Metadata:** raporun cihaz modeli/OS/uygulama sürümü/build alanlarını cihaz ayarlarıyla ve
-   `--build-name/--build-number` ile karşılaştır; Kullanıcı kimliği ve Özel anahtarlar boş olmalı.
+   `--build-name/--build-number` ile karşılaştır; uygulama kullanıcı kimliği eklememeli,
+   `flutter_error_exception` yalnız temizlenmiş yükü taşımalı.
 5. **Geri alma / onaysız:** anahtarı kapat, hata ve çökme üret, yeniden aç → rapor GELMEMELİ. Anahtar
    kapalıyken çökme üret, sonra aç → o çökme gönderilmemeli (açılışta silinir).
 
@@ -248,15 +258,17 @@ iddiası kurulmaz. Ek kimlik üretilmez, `setUserIdentifier` çağrılmaz.
 | Konu | Durum |
 |---|---|
 | Üretim | Son kaynaklardan `make gen` çalıştırıldı; elle üretilmiş çıktı yok. Temiz ağaçta `make gen-check` sonucu inceleme kaydındadır. |
-| Gerçek cihaz/simülatör crash+nonfatal provası, konsol ve metadata doğrulaması | Yapılmadı (cihazlar ve simülatörler ortamda var; prova henüz koşulmadı) |
+| iOS SDK / konsol | İzole simülatörde native ve nonfatal işlendi; sürüm/build, OS, cihaz, güvenli mesaj/anahtar/yığın doğrulandı. Fiziksel Android/iOS release provası yapılmadı. |
 | Android / iOS debug derlemeleri | Android dev ve Firebase yapılandırması bulunmayan prod APK; iOS dev simülatör: geçti. Release/arşiv/simge yükleme doğrulaması değildir. |
-| Genel depo kapıları | Tam verify/CI kabulü verilmedi. Genel boyut testindeki dört sorun başlangıç HEAD'iyle aynı dosyalarda; bu işte değişen 37 el yazımı Dart dosyası kendi tavanlarını geçmiyor. Ayrıntı: `docs/reviews/firebase-hata-takibi-codex.md`. |
+| Genel depo kapıları | Tam verify/CI kabulü verilmedi. Dört boyut borcu başlangıçla birebir aynı; değişen 129 el yazımı Dart dosyasında yeni tavan ihlali yok. API sızıntısı kontrolü geçti; mevcut 16 UI/D2 sınır borcu ayrı. |
 | Yazılamayan geri alma | Oturumda kapalı; sonraki açılışta eski `true` okunabilir — kullanıcıya bildirilir |
 | Kalıcı SDK `true` bayrağı olan cihaz (eski/harici) | Üretim geçişi koşulu: bulunmadığı doğrulanmalı (yukarıda); kabul edilmiş sınır DEĞİL |
 | Profil kartı widget testi | Yazılmadı; tercih mantığı denetleyici testlerinde, kart yalnız sunum |
 | Kanal testi kapsamı | Gerçek `firebase_core`/`firebase_crashlytics` Dart kodu + sahte pigeon kanalı; native SDK'nın kendisi değil. Yük (etiket + SABİT mesaj) `crashlytics_channel_test`te tam dizgi olarak doğrulanır |
-| Gerçek native SDK duman testi | `integration_test/crash_reporting_native_test.dart`: test-only AÇIK opt-in (`--dart-define=NIZAM_NATIVE_CRASH_SMOKE=true`; yoksa atlanır). Yalnız `await sdk.recordError(güvenli yük)` Future'ının tamamlandığını (= native köprü çağrıyı KABUL etti), toplamanın kapalı kaldığını (`automatic=false`) ve PackageInfo metadata'sını doğrular. "Yerelde yazıldı/silindi" İDDİA ETMEZ (resmî SDK raporları önceki oturumda/açılışta paketler; `checkForUnsentReports` süreçte bir kez true, ikinci false silme kanıtı değildir); `deleteUnsentReports`/`sendUnsentReports` çağırmaz. Bu oturumda **koşulmadı** |
-| Native yerel kanıt dizisi (manuel) | `integration_test/crash_reporting_native_probe.dart` (`_test` soneki yok: otomatik keşfe girmez; mod yoksa hiçbir şey yapmaz). `--dart-define=NIZAM_NATIVE_PROBE_MODE=` `record` → (yeniden açılan taze süreç) `check_pending` (true) → `delete` → (yeni taze süreç) `check_empty` (false). `send` (dev gönderim) ve `crash` (yalnız açık modda native test çökmesi; sabit güvenli günlük "armed") bulut kanıtıdır ve Firebase konsol oturumu gerektirir — **bulut erişimi henüz yok, doğrulanmadı**. Her mod tek taze süreçtir; `ErrorReportingController` kullanılmaz (önbellek kanıtını silmesin). `deleteUnsentReports` ACK'i fiziksel disk silme garantisi değildir; kanıt `check_empty`dir. Koordinatör yalnız İZOLE simülatör verisinde dener |
+| Gerçek native SDK duman testi | Açık `NIZAM_NATIVE_CRASH_SMOKE=true` ile geçti: gerçek `await recordError`, `automatic=false`, PackageInfo. Tek başına disk/teslim kanıtı sayılmadı. |
+| Native yerel kanıt dizisi | Probe ile dört ayrı süreçte `record` → `check_pending=true` → `delete` → `check_empty=false` geçti. `--no-uninstall` zorunlu; Flutter test varsayılanı uygulama verisini kaldırır. `record` ayrıca `NIZAM_NATIVE_PROBE_RECORD_DISCARD=true` ister ve eski sentetik raporları silerek SDK başlangıç kararını verir. Yalnız izole veride kullanılır. |
+| Native bulut kanıtı | `record_crash` aynı ikinci opt-in ile güvenli nonfatal + native çökme üretir. Derleme değişmeden UUID/dSYM snapshot'ı alınır; yerel kullanıcı önekleri anonimleştirilip UUID/DWARF doğrulanır, semboller yüklenir. Yeni süreçte `send`; 60sn yaşam süresi payı teslim garantisi değildir. Konsolda iki işlenmiş olay ayrıca görüldü. |
+| Önceki eksik sembol | Konsolda `C1659B9A-09CB-3AA4-AF88-7B2B80BF9ED9` için 1 işlenmemiş olay kaldı. Özgün ikili/dSYM mevcut derlemelerde ve indekste bulunamadı; uyarı gizlenmedi. Yeni doğrulanan olayların uygulama çerçeveleri çözümlendi; bazı simülatör sistem/Flutter çerçeveleri sembolsüzdür. |
 | Native çökme bağlamı | Verilmez (yukarıda gerekçe); çökme raporu yalnız SDK alanlarını taşır |
 | Kapsam kapısı sınırı | Ad/sözdizimi düzeyinde; tip çözümlemesi ve genel akış çözümlemesi yok. Cephe adını yerel/parametre olarak yeniden bildirmek (gölgeleme) E6 ihlalidir; yardımcı yalnız hatayı kendi parametresinden `catch` girişinde koşulsuz cepheye aktarıyorsa sayılır. Karmaşık bilinçli yollar (seçici `rethrow`, çok dallı akış) kapsamda DEĞİL: gerekçeli dar istisna ister |
 | Provider adı | Sağlayıcı hataları `src=provider` ile gelir; hangi sağlayıcı olduğu bilinçli olarak yoktur (dinamik ad/family sızıntısı riski) |

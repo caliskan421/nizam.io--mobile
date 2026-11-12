@@ -259,4 +259,15 @@ void main() {
     expect(ix.ongoing(DateTime(2026, 11, 1)), isEmpty);
     expect(ix.ongoing(DateTime(2026, 11, 20)), isEmpty);
   });
+
+  test(
+    'bu hafta: bugünden pazara (çarşamba → 5 gün, pazar → yalnız bugün)',
+    () {
+      final wed = weekAhead(DateTime(2026, 10, 21, 9));
+      expect(wed.first, DateTime(2026, 10, 21));
+      expect(wed.last, DateTime(2026, 10, 25));
+      expect(wed, hasLength(5));
+      expect(weekAhead(DateTime(2026, 10, 25)), [DateTime(2026, 10, 25)]);
+    },
+  );
 }

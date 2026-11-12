@@ -335,6 +335,15 @@ final class CalendarIndex {
   }
 }
 
+/// Bu haftanın kalan günleri: [today]'den pazara kadar (pazar günü yalnız bugün).
+List<DateTime> weekAhead(DateTime today) {
+  final t = calendarDay(today);
+  return [
+    for (var d = 0; d <= DateTime.sunday - t.weekday; d++)
+      DateTime(t.year, t.month, t.day + d),
+  ];
+}
+
 /// [month] ayının ızgarası: pazartesi başlayan haftalar, ayın dışındaki günler dahil
 /// (4–6 satır).
 List<List<DateTime>> monthWeeks(DateTime month) {

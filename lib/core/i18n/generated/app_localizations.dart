@@ -2710,6 +2710,30 @@ abstract class AppLocalizations {
   /// **'Toplantı planla'**
   String get uiCalendarPlan;
 
+  /// ui.calendar.week_ahead
+  ///
+  /// In tr, this message translates to:
+  /// **'bu hafta'**
+  String get uiCalendarWeekAhead;
+
+  /// ui.calendar.week_ahead_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu haftanın kalanında planlı bir şey yok.'**
+  String get uiCalendarWeekAheadEmpty;
+
+  /// ui.calendar.more_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'daha'**
+  String get uiCalendarMoreLc;
+
+  /// ui.calendar.request_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'tarih talebi'**
+  String get uiCalendarRequestLc;
+
   /// ui.calendar.add
   ///
   /// In tr, this message translates to:

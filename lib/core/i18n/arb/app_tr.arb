@@ -1745,6 +1745,22 @@
   "@uiCalendarPlan": {
     "description": "ui.calendar.plan"
   },
+  "uiCalendarWeekAhead": "bu hafta",
+  "@uiCalendarWeekAhead": {
+    "description": "ui.calendar.week_ahead"
+  },
+  "uiCalendarWeekAheadEmpty": "Bu haftanın kalanında planlı bir şey yok.",
+  "@uiCalendarWeekAheadEmpty": {
+    "description": "ui.calendar.week_ahead_empty"
+  },
+  "uiCalendarMoreLc": "daha",
+  "@uiCalendarMoreLc": {
+    "description": "ui.calendar.more_lc"
+  },
+  "uiCalendarRequestLc": "tarih talebi",
+  "@uiCalendarRequestLc": {
+    "description": "ui.calendar.request_lc"
+  },
   "uiCalendarAdd": "Seçili güne ekle",
   "@uiCalendarAdd": {
     "description": "ui.calendar.add"

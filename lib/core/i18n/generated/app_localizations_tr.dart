@@ -1449,6 +1449,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarPlan => 'Toplantı planla';
 
   @override
+  String get uiCalendarWeekAhead => 'bu hafta';
+
+  @override
+  String get uiCalendarWeekAheadEmpty =>
+      'Bu haftanın kalanında planlı bir şey yok.';
+
+  @override
+  String get uiCalendarMoreLc => 'daha';
+
+  @override
+  String get uiCalendarRequestLc => 'tarih talebi';
+
+  @override
   String get uiCalendarAdd => 'Seçili güne ekle';
 
   @override

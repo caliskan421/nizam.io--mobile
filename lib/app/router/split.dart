@@ -14,6 +14,7 @@ import '../../features/messages/messages.dart';
 import '../../features/scope/scope.dart';
 import '../../features/tables/tables.dart';
 import '../../features/tasks/tasks.dart';
+import 'pane_back_scope.dart';
 import 'routes.dart';
 
 // Tablet çift bölmesi (prototip `12-Tablet.dc.html` `Component`, satır 3796+): ray + liste
@@ -525,11 +526,10 @@ class _PaneStackState extends State<PaneStack> {
     final top = codes.length - 1;
     final pages = [widget.base, for (final e in _entries) paneEntryPage(e)];
     final hasTrail = _entries.isNotEmpty;
-    return PopScope(
-      canPop: !hasTrail,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && hasTrail) _back();
-      },
+    return PaneBackScope(
+      hasTrail: hasTrail,
+      owner: GoRouterState.of(context).uri.toString(),
+      onBack: _back,
       child: NzPaneScope(
         role: outer?.role,
         canBack: hasTrail || (outer?.canBack ?? false),

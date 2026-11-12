@@ -6,6 +6,7 @@ import '../../../core/cache_owner.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
+import '../../../core/ui/motion/page_content_entrance.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/theme/nz_motion.dart';
@@ -154,6 +155,10 @@ class CalendarPage extends ConsumerWidget {
           onRetry: retry,
           data: (ix) => LayoutBuilder(
             builder: (context, box) {
+              // İlk veri gelişinde ızgara ve gün listesi kademeli girer (iskelet animasyonsuz
+              // yer değiştirmesin). [replay] verinin bugünü: gün/ay seçimi yeniden oynatmaz.
+              Widget enter(int index, Widget child) =>
+                  NzEntrance(replay: ix.today, index: index, child: child);
               final grid = Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -176,23 +181,29 @@ class CalendarPage extends ConsumerWidget {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    grid,
+                    enter(0, grid),
                     const Gap(NizamioSpacing.space4),
-                    CalendarDay(index: ix, onPlanMeeting: plan, onAdd: add),
+                    enter(
+                      1,
+                      CalendarDay(index: ix, onPlanMeeting: plan, onAdd: add),
+                    ),
                   ],
                 );
               }
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: grid),
+                  Expanded(child: enter(0, grid)),
                   const Gap(NizamioSpacing.space10),
                   Expanded(
-                    child: CalendarDay(
-                      index: ix,
-                      onPlanMeeting: plan,
-                      onAdd: add,
-                      divided: false,
+                    child: enter(
+                      1,
+                      CalendarDay(
+                        index: ix,
+                        onPlanMeeting: plan,
+                        onAdd: add,
+                        divided: false,
+                      ),
                     ),
                   ),
                 ],

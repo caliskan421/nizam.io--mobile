@@ -1745,21 +1745,37 @@
   "@uiCalendarPlan": {
     "description": "ui.calendar.plan"
   },
-  "uiCalendarWeekAhead": "bu hafta",
-  "@uiCalendarWeekAhead": {
-    "description": "ui.calendar.week_ahead"
+  "uiCalendarThisWeek": "Bu hafta",
+  "@uiCalendarThisWeek": {
+    "description": "ui.calendar.this_week"
   },
-  "uiCalendarWeekAheadEmpty": "Bu haftanın kalanında planlı bir şey yok.",
-  "@uiCalendarWeekAheadEmpty": {
-    "description": "ui.calendar.week_ahead_empty"
+  "uiCalendarThisWeekEmpty": "Bu hafta için seçili türde kayıt yok.",
+  "@uiCalendarThisWeekEmpty": {
+    "description": "ui.calendar.this_week_empty"
   },
-  "uiCalendarMoreLc": "daha",
-  "@uiCalendarMoreLc": {
-    "description": "ui.calendar.more_lc"
+  "uiCalendarThisWeekFilter": "Bu haftada gösterilenler",
+  "@uiCalendarThisWeekFilter": {
+    "description": "ui.calendar.this_week_filter"
   },
-  "uiCalendarRequestLc": "tarih talebi",
-  "@uiCalendarRequestLc": {
-    "description": "ui.calendar.request_lc"
+  "uiCalendarStatOngoing": "Devam",
+  "@uiCalendarStatOngoing": {
+    "description": "ui.calendar.stat_ongoing"
+  },
+  "uiCalendarStatMeetings": "Toplantı",
+  "@uiCalendarStatMeetings": {
+    "description": "ui.calendar.stat_meetings"
+  },
+  "uiCalendarWeekEnds": "bitecekler",
+  "@uiCalendarWeekEnds": {
+    "description": "ui.calendar.week_ends"
+  },
+  "uiCalendarWeekStarts": "başlayacaklar",
+  "@uiCalendarWeekStarts": {
+    "description": "ui.calendar.week_starts"
+  },
+  "uiCalendarWeekOngoing": "devam edenler",
+  "@uiCalendarWeekOngoing": {
+    "description": "ui.calendar.week_ongoing"
   },
   "uiCalendarAdd": "Seçili güne ekle",
   "@uiCalendarAdd": {

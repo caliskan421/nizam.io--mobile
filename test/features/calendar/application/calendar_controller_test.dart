@@ -78,4 +78,13 @@ void main() {
     ctrl().goToday();
     expect(s().taskEdges, {TaskEdge.end, TaskEdge.ongoing});
   });
+
+  test('bu hafta toplantı süzgeci: varsayılan açık, değişimlerde korunur', () {
+    expect(s().weekMeetings, isTrue);
+    ctrl().toggleWeekMeetings();
+    ctrl().pick(DateTime(2026, 10, 6));
+    ctrl().toggleTaskEdge(TaskEdge.ongoing);
+    ctrl().goToday();
+    expect(s().weekMeetings, isFalse);
+  });
 }

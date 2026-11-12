@@ -14,6 +14,7 @@ final class CalendarViewState {
     this.month,
     this.mode = CalendarMode.month,
     this.taskEdges = defaultTaskEdges,
+    this.weekMeetings = true,
   });
 
   /// Gün listesinde varsayılan görünen görev türleri: bitecek ve başlayacak (süren görevler
@@ -24,8 +25,11 @@ final class CalendarViewState {
   final DateTime? month;
   final CalendarMode mode;
 
-  /// Gün listesinde görünen görev türleri; gün ve ay değişiminde korunur.
+  /// Gün listesinde ve "bu hafta"da görünen görev türleri; gün ve ay değişiminde korunur.
   final Set<TaskEdge> taskEdges;
+
+  /// "Bu hafta"da toplantılar görünür mü (sayaç süzgeci).
+  final bool weekMeetings;
 
   /// [today]'e göre çözülmüş seçili gün.
   DateTime selectedOn(DateTime today) => calendarDay(selected ?? today);
@@ -52,11 +56,15 @@ class CalendarController extends _$CalendarController {
     month: calendarMonth(day),
     mode: state.mode,
     taskEdges: state.taskEdges,
+    weekMeetings: state.weekMeetings,
   );
 
   /// Bugüne döner (gün ve ay).
-  void goToday() =>
-      state = CalendarViewState(mode: state.mode, taskEdges: state.taskEdges);
+  void goToday() => state = CalendarViewState(
+    mode: state.mode,
+    taskEdges: state.taskEdges,
+    weekMeetings: state.weekMeetings,
+  );
 
   /// Ay ↔ hafta.
   void toggleMode() => state = CalendarViewState(
@@ -66,6 +74,7 @@ class CalendarController extends _$CalendarController {
         ? CalendarMode.week
         : CalendarMode.month,
     taskEdges: state.taskEdges,
+    weekMeetings: state.weekMeetings,
   );
 
   /// Gün listesindeki görev türünü açar/kapatır (bitecek, başlayacak, süren).
@@ -76,6 +85,16 @@ class CalendarController extends _$CalendarController {
     taskEdges: state.taskEdges.contains(edge)
         ? ({...state.taskEdges}..remove(edge))
         : {...state.taskEdges, edge},
+    weekMeetings: state.weekMeetings,
+  );
+
+  /// "Bu hafta"da toplantıları açar/kapatır.
+  void toggleWeekMeetings() => state = CalendarViewState(
+    selected: state.selected,
+    month: state.month,
+    mode: state.mode,
+    taskEdges: state.taskEdges,
+    weekMeetings: !state.weekMeetings,
   );
 
   /// Önceki/sonraki ([delta] −1/+1). Hafta kipinde seçili gün 7 gün kayar; ay kipinde ay
@@ -90,13 +109,18 @@ class CalendarController extends _$CalendarController {
     final next = DateTime(m.year, m.month + delta);
     final t = calendarDay(today);
     if (next == calendarMonth(t)) {
-      state = CalendarViewState(mode: state.mode, taskEdges: state.taskEdges);
+      state = CalendarViewState(
+        mode: state.mode,
+        taskEdges: state.taskEdges,
+        weekMeetings: state.weekMeetings,
+      );
     } else {
       state = CalendarViewState(
         selected: next,
         month: next,
         mode: state.mode,
         taskEdges: state.taskEdges,
+        weekMeetings: state.weekMeetings,
       );
     }
   }

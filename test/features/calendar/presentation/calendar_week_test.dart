@@ -1,5 +1,5 @@
-// CalendarWeekAhead: yalnız kaydı olan günler, gün başına üç kayıt + "+N daha", gün bloğu
-// günü seçer, boş haftada kısa metin.
+// CalendarThisWeek: sayaçlar haftanın sayılarını verir ve süzgeçtir ("Devam" varsayılan
+// kapalı, gün listesiyle ortak); bölümler gün sırasıyla, gecikende "gecikti".
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,7 +13,7 @@ import '../../pilot_support.dart';
 
 final _l = AppLocalizationsTr();
 
-// Çarşamba: hafta 21–25 Ekim.
+// Çarşamba: hafta 19–25 Ekim.
 final _today = DateTime(2026, 10, 21);
 
 TaskItem _task(String code, DateTime start, DateTime due) => TaskItem(
@@ -27,60 +27,56 @@ TaskItem _task(String code, DateTime start, DateTime due) => TaskItem(
   assignees: const [],
 );
 
-CalendarIndex _index(List<TaskItem> tasks) => CalendarIndex.build(
-  const [],
-  TaskCatalog(
-    today: _today,
-    me: 'me',
-    tasks: tasks,
-    people: const [],
-    coordinatorships: const [],
-  ),
-);
-
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets('kaydı olan günler; fazlası "+N daha"; gün bloğu günü seçer', (
-    tester,
-  ) async {
-    final h = await real(
-      tester,
-      () => pilotHarness(PilotBackend(), signedIn: true),
-    );
-    final fri = DateTime(2026, 10, 23);
-    final ix = _index([
-      for (final c in ['A', 'B', 'C', 'D'])
-        _task(c, DateTime(2026, 10, 1), fri),
-      // Haftanın dışında: görünmez.
-      _task('X', DateTime(2026, 10, 1), DateTime(2026, 10, 28)),
-    ]);
-    await pumpScreen(
-      tester,
-      h,
-      Scaffold(
-        body: SingleChildScrollView(child: CalendarWeekAhead(index: ix)),
-      ),
-    );
-    expect(find.text('${_l.uiCalendarWeekAhead} · 4'), findsOneWidget);
-    expect(find.text('Görev A'), findsOneWidget);
-    expect(find.text('Görev D'), findsNothing);
-    expect(find.text('Görev X'), findsNothing);
-    expect(find.text('+1 ${_l.uiCalendarMoreLc}'), findsOneWidget);
-    await tester.tap(find.text('23'));
-    expect(h.read(calendarControllerProvider).selectedOn(_today), fri);
-  });
-
-  testWidgets('boş hafta kısa metin', (tester) async {
-    final h = await real(
-      tester,
-      () => pilotHarness(PilotBackend(), signedIn: true),
-    );
-    await pumpScreen(
-      tester,
-      h,
-      Scaffold(body: CalendarWeekAhead(index: _index(const []))),
-    );
-    expect(find.text(_l.uiCalendarWeekAheadEmpty), findsOneWidget);
-  });
+  testWidgets(
+    'sayaçlar, bölümler, gecikti; "Devam" sayacı süren görevleri açar',
+    (tester) async {
+      final h = await real(
+        tester,
+        () => pilotHarness(PilotBackend(), signedIn: true),
+      );
+      final ix = CalendarIndex.build(
+        const [],
+        TaskCatalog(
+          today: _today,
+          me: 'me',
+          tasks: [
+            _task('LATE', DateTime(2026, 10, 1), DateTime(2026, 10, 20)),
+            _task('FRI', DateTime(2026, 10, 1), DateTime(2026, 10, 23)),
+            _task('SPAN', DateTime(2026, 10, 1), DateTime(2026, 11, 20)),
+          ],
+          people: const [],
+          coordinatorships: const [],
+        ),
+      );
+      await pumpScreen(
+        tester,
+        h,
+        Scaffold(
+          body: SingleChildScrollView(child: CalendarThisWeek(index: ix)),
+        ),
+      );
+      expect(find.text('19–25 Eki'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel('${_l.uiCalendarFilterEnds}, 2'),
+        findsOneWidget,
+      );
+      expect(find.text('${_l.uiCalendarWeekEnds} · 2'), findsOneWidget);
+      expect(find.text('Görev LATE'), findsOneWidget);
+      expect(find.text(_l.uiCalendarLateLc), findsOneWidget);
+      expect(find.text('Görev SPAN'), findsNothing);
+      await tester.tap(find.text(_l.uiCalendarStatOngoing));
+      await tester.pumpAndSettle();
+      expect(find.text('Görev SPAN'), findsOneWidget);
+      expect(
+        h.read(calendarControllerProvider).taskEdges,
+        contains(TaskEdge.ongoing),
+      );
+      await tester.tap(find.text(_l.uiCalendarFilterEnds));
+      await tester.pumpAndSettle();
+      expect(find.text('Görev LATE'), findsNothing);
+    },
+  );
 }

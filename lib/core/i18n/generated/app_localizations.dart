@@ -2710,29 +2710,53 @@ abstract class AppLocalizations {
   /// **'Toplantı planla'**
   String get uiCalendarPlan;
 
-  /// ui.calendar.week_ahead
+  /// ui.calendar.this_week
   ///
   /// In tr, this message translates to:
-  /// **'bu hafta'**
-  String get uiCalendarWeekAhead;
+  /// **'Bu hafta'**
+  String get uiCalendarThisWeek;
 
-  /// ui.calendar.week_ahead_empty
+  /// ui.calendar.this_week_empty
   ///
   /// In tr, this message translates to:
-  /// **'Bu haftanın kalanında planlı bir şey yok.'**
-  String get uiCalendarWeekAheadEmpty;
+  /// **'Bu hafta için seçili türde kayıt yok.'**
+  String get uiCalendarThisWeekEmpty;
 
-  /// ui.calendar.more_lc
+  /// ui.calendar.this_week_filter
   ///
   /// In tr, this message translates to:
-  /// **'daha'**
-  String get uiCalendarMoreLc;
+  /// **'Bu haftada gösterilenler'**
+  String get uiCalendarThisWeekFilter;
 
-  /// ui.calendar.request_lc
+  /// ui.calendar.stat_ongoing
   ///
   /// In tr, this message translates to:
-  /// **'tarih talebi'**
-  String get uiCalendarRequestLc;
+  /// **'Devam'**
+  String get uiCalendarStatOngoing;
+
+  /// ui.calendar.stat_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı'**
+  String get uiCalendarStatMeetings;
+
+  /// ui.calendar.week_ends
+  ///
+  /// In tr, this message translates to:
+  /// **'bitecekler'**
+  String get uiCalendarWeekEnds;
+
+  /// ui.calendar.week_starts
+  ///
+  /// In tr, this message translates to:
+  /// **'başlayacaklar'**
+  String get uiCalendarWeekStarts;
+
+  /// ui.calendar.week_ongoing
+  ///
+  /// In tr, this message translates to:
+  /// **'devam edenler'**
+  String get uiCalendarWeekOngoing;
 
   /// ui.calendar.add
   ///

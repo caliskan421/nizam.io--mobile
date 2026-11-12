@@ -189,7 +189,7 @@ class CalendarPage extends ConsumerWidget {
                       CalendarDay(index: ix, onPlanMeeting: plan, onAdd: add),
                     ),
                     const Gap(NizamioSpacing.gapLg),
-                    enter(2, CalendarWeekAhead(index: ix)),
+                    enter(2, CalendarThisWeek(index: ix)),
                   ],
                 );
               }
@@ -203,7 +203,7 @@ class CalendarPage extends ConsumerWidget {
                       children: [
                         enter(0, grid),
                         const Gap(NizamioSpacing.gapLg),
-                        enter(2, CalendarWeekAhead(index: ix)),
+                        enter(2, CalendarThisWeek(index: ix)),
                       ],
                     ),
                   ),

@@ -260,14 +260,39 @@ void main() {
     expect(ix.ongoing(DateTime(2026, 11, 20)), isEmpty);
   });
 
-  test(
-    'bu hafta: bugünden pazara (çarşamba → 5 gün, pazar → yalnız bugün)',
-    () {
-      final wed = weekAhead(DateTime(2026, 10, 21, 9));
-      expect(wed.first, DateTime(2026, 10, 21));
-      expect(wed.last, DateTime(2026, 10, 25));
-      expect(wed, hasLength(5));
-      expect(weekAhead(DateTime(2026, 10, 25)), [DateTime(2026, 10, 25)]);
-    },
-  );
+  test('hafta: pazartesi–pazar; uçlar, hafta boyu süren görevler, toplantılar saatle', () {
+    expect(weekOf(DateTime(2026, 10, 21, 9)), [
+      for (var d = 19; d <= 25; d++) DateTime(2026, 10, d),
+    ]);
+    expect(weekOf(DateTime(2026, 11, 1)).first, DateTime(2026, 10, 26));
+    final ix = CalendarIndex.build(
+      [
+        _meeting('late', DateTime(2026, 11, 4, 15)),
+        _meeting('early', DateTime(2026, 11, 4, 9)),
+        _meeting('next', DateTime(2026, 11, 10, 9)),
+      ],
+      _catalog([
+        _task('end', start: DateTime(2026, 10, 1), due: DateTime(2026, 11, 6)),
+        _task(
+          'start',
+          start: DateTime(2026, 11, 3),
+          due: DateTime(2026, 12, 1),
+        ),
+        _task('span', start: DateTime(2026, 10, 1), due: DateTime(2026, 12, 1)),
+        _task(
+          'done',
+          start: DateTime(2026, 10, 1),
+          due: DateTime(2026, 12, 1),
+          status: TaskStatus.done,
+        ),
+      ]),
+    );
+    final w = ix.week(DateTime(2026, 11, 5));
+    expect(w.ends.map((e) => e.code), ['end']);
+    expect(w.starts.map((e) => e.code), ['start']);
+    expect(w.ongoing.map((e) => (e.code, e.due)), [
+      ('span', DateTime(2026, 12, 1)),
+    ]);
+    expect(w.meetings.map((m) => m.id), ['early', 'late']);
+  });
 }

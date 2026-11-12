@@ -72,6 +72,14 @@ extension CalendarTexts on AppLocalizations {
           '${DateFormat('d MMM', 'tr').format(e.due ?? e.date)}',
   };
 
+  /// Kısa gün: "Sa 20".
+  String shortDay(DateTime d) => '${weekdaysShort[d.weekday - 1]} ${d.day}';
+
+  /// Hafta aralığı: "19–25 Eki" (ay geçişinde "28 Eyl – 4 Eki").
+  String weekRange(DateTime first, DateTime last) => first.month == last.month
+      ? '${first.day}–${last.day} ${DateFormat('MMM', 'tr').format(last)}'
+      : dayRange(first, last);
+
   /// Tarih aralığı: "21 Eki – 4 Kas".
   String dayRange(DateTime a, DateTime b) {
     final f = DateFormat('d MMM', 'tr');

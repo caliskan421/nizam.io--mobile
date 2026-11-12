@@ -140,6 +140,15 @@ final class RequestEntry extends CalendarEntry {
   CalendarKind get kind => CalendarKind.request;
 }
 
+/// Haftanın özeti: bitecek / başlayacak görevler (o hafta uçları), hafta boyunca süren
+/// görevler (hafta öncesi başlamış, hafta sonrası bitecek) ve toplantılar; gün sırasıyla.
+typedef CalendarWeek = ({
+  List<TaskEntry> ends,
+  List<TaskEntry> starts,
+  List<TaskEntry> ongoing,
+  List<MeetingEntry> meetings,
+});
+
 /// Gün listesinin bir bölümü (toplantılar, görevler, talepler).
 typedef CalendarGroup = ({CalendarKind kind, List<CalendarEntry> entries});
 
@@ -296,6 +305,43 @@ final class CalendarIndex {
   /// Kişi adı (sunucunun verdiği ad dahil); bilinmiyorsa null (arayüz nötr etiket gösterir).
   String? personName(String id) => _catalog.nameOf(id);
 
+  /// [day]'in haftası (pazartesi–pazar): uçlar gün sırasıyla, toplantılar gün + saatle, süren
+  /// görevler bitişe göre.
+  CalendarWeek week(DateTime day) {
+    final days = weekOf(day);
+    final first = days.first;
+    final last = days.last;
+    final all = [for (final d in days) ...on(d)];
+    final tasks = all.whereType<TaskEntry>();
+    final meetings = all.whereType<MeetingEntry>().toList()
+      ..sort(
+        (a, b) => a.date == b.date
+            ? a.minuteOfDay.compareTo(b.minuteOfDay)
+            : a.date.compareTo(b.date),
+      );
+    final ongoing = [
+      for (final t in _spans)
+        if (calendarDay(t.start).isBefore(first) &&
+            last.isBefore(calendarDay(t.due)))
+          TaskEntry(
+            date: calendarDay(t.due),
+            code: t.code,
+            title: t.title,
+            coordinatorship: t.coordinatorship,
+            edge: TaskEdge.ongoing,
+            assignees: t.assignees,
+            late: false,
+            due: calendarDay(t.due),
+          ),
+    ]..sort((a, b) => a.date.compareTo(b.date));
+    return (
+      ends: [...tasks.where((t) => t.edge == TaskEdge.end)],
+      starts: [...tasks.where((t) => t.edge == TaskEdge.start)],
+      ongoing: ongoing,
+      meetings: meetings,
+    );
+  }
+
   /// Günün bütün kayıtları.
   List<CalendarEntry> on(DateTime day) =>
       _byDay[calendarDay(day)] ?? const <CalendarEntry>[];
@@ -335,12 +381,17 @@ final class CalendarIndex {
   }
 }
 
-/// Bu haftanın kalan günleri: [today]'den pazara kadar (pazar günü yalnız bugün).
-List<DateTime> weekAhead(DateTime today) {
-  final t = calendarDay(today);
+/// [day]'in haftası: pazartesiden pazara yedi gün.
+List<DateTime> weekOf(DateTime day) {
+  final d = calendarDay(day);
+  final monday = DateTime(
+    d.year,
+    d.month,
+    d.day - (d.weekday - DateTime.monday),
+  );
   return [
-    for (var d = 0; d <= DateTime.sunday - t.weekday; d++)
-      DateTime(t.year, t.month, t.day + d),
+    for (var i = 0; i < 7; i++)
+      DateTime(monday.year, monday.month, monday.day + i),
   ];
 }
 

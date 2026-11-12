@@ -87,7 +87,10 @@ class _Calendar extends ConsumerWidget {
                             .goToday(),
                 ),
               ),
-              CalendarDay(index: index),
+              CalendarDay(
+                index: index,
+                emptyMessage: context.l10n.uiCalendarEmpty,
+              ),
             ],
           );
         },

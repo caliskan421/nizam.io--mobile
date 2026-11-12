@@ -2758,12 +2758,6 @@ abstract class AppLocalizations {
   /// **'Seçili güne ekle'**
   String get uiCalendarAdd;
 
-  /// ui.calendar.add_day
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu güne ekle'**
-  String get uiCalendarAddDay;
-
   /// ui.calendar.add_meeting_caption
   ///
   /// In tr, this message translates to:

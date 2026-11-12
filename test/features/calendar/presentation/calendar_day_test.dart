@@ -74,7 +74,7 @@ void main() {
     },
   );
 
-  testWidgets('boş gün: "Bu güne ekle" verilen ekleme eylemini çağırır', (
+  testWidgets('boş gün: metin yalnız verilirse; ekleme düğmesi yok', (
     tester,
   ) async {
     final h = await real(
@@ -91,18 +91,24 @@ void main() {
         coordinatorships: const [],
       ),
     );
-    var added = 0;
+    await pumpScreen(
+      tester,
+      h,
+      Scaffold(
+        body: SingleChildScrollView(child: CalendarDay(index: ix)),
+      ),
+    );
+    expect(find.text(_l.uiCalendarEmpty), findsNothing);
+    expect(find.text(_l.uiCalendarPlan), findsNothing);
     await pumpScreen(
       tester,
       h,
       Scaffold(
         body: SingleChildScrollView(
-          child: CalendarDay(index: ix, onAdd: () => added++),
+          child: CalendarDay(index: ix, emptyMessage: _l.uiCalendarEmpty),
         ),
       ),
     );
-    expect(find.text(_l.uiCalendarPlan), findsNothing);
-    await tester.tap(find.text(_l.uiCalendarAddDay));
-    expect(added, 1);
+    expect(find.text(_l.uiCalendarEmpty), findsOneWidget);
   });
 }

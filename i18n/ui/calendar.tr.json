@@ -45,7 +45,6 @@
     "ui.calendar.week_starts": "başlayacaklar",
     "ui.calendar.week_ongoing": "devam edenler",
     "ui.calendar.add": "Seçili güne ekle",
-    "ui.calendar.add_day": "Bu güne ekle",
     "ui.calendar.add_meeting_caption": "saat, gündem ve katılımcılar",
     "ui.calendar.add_task_start": "Bu gün başlayan görev",
     "ui.calendar.add_task_due": "Bu güne kadar bitecek görev",

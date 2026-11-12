@@ -1473,9 +1473,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarAdd => 'Seçili güne ekle';
 
   @override
-  String get uiCalendarAddDay => 'Bu güne ekle';
-
-  @override
   String get uiCalendarAddMeetingCaption => 'saat, gündem ve katılımcılar';
 
   @override

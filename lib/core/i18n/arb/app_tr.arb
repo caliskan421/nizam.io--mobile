@@ -1777,10 +1777,6 @@
   "@uiCalendarAdd": {
     "description": "ui.calendar.add"
   },
-  "uiCalendarAddDay": "Bu güne ekle",
-  "@uiCalendarAddDay": {
-    "description": "ui.calendar.add_day"
-  },
   "uiCalendarAddMeetingCaption": "saat, gündem ve katılımcılar",
   "@uiCalendarAddMeetingCaption": {
     "description": "ui.calendar.add_meeting_caption"

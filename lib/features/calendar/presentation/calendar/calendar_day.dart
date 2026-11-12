@@ -17,27 +17,22 @@ import 'calendar_grid.dart';
 import 'calendar_texts.dart';
 
 /// Seçili gün (prototip "Seçili gün"): başlık + bugüne göre uzaklık, türlere göre bölümler
-/// (toplantılar, görevler, tarih talepleri); boş günde "Toplantı planla". Toplantı satırı
+/// (toplantılar, görevler, tarih talepleri); boş günde yalnız [emptyMessage] (verildiyse). Toplantı satırı
 /// toplantı ayrıntısını, görev ve talep satırı görev ayrıntısını açar.
 class CalendarDay extends ConsumerWidget {
   const CalendarDay({
     super.key,
     required this.index,
-    this.onPlanMeeting,
-    this.onAdd,
     this.emptyMessage,
     this.divided = true,
   });
-
-  /// Verilirse boş günün düğmesi "Bu güne ekle" olur ve bunu çağırır (toplantı + görev
-  /// menüsü); yoksa [onPlanMeeting] ile "Toplantı planla".
-  final VoidCallback? onAdd;
 
   final CalendarIndex index;
 
   /// Izgaranın altındaysa üst çizgi + boşluk; geniş düzende yan sütunda çizgisiz.
   final bool divided;
-  final VoidCallback? onPlanMeeting;
+
+  /// Boş günde gösterilen metin; null → boş günde liste altı boş kalır (ana takvim).
   final String? emptyMessage;
 
   @override
@@ -128,29 +123,14 @@ class CalendarDay extends ConsumerWidget {
                   const Gap(NizamioSpacing.space2),
                   card(g.entries),
                 ],
-              if (groups.isEmpty) ...[
+              if (groups.isEmpty && emptyMessage != null) ...[
                 const Gap(14 + 28),
                 Text(
-                  emptyMessage ?? l.uiCalendarEmpty,
+                  emptyMessage!,
                   textAlign: TextAlign.center,
                   style: t.bodyMd.copyWith(color: c.textMuted),
                 ),
-                const Gap(14),
-                if (onAdd != null)
-                  Center(
-                    child: NzButton.secondary(
-                      label: l.uiCalendarAddDay,
-                      onPressed: onAdd,
-                    ),
-                  )
-                else if (onPlanMeeting != null)
-                  Center(
-                    child: NzButton.secondary(
-                      label: l.uiCalendarPlan,
-                      onPressed: onPlanMeeting,
-                    ),
-                  ),
-                const Gap(NizamioSpacing.space2),
+                const Gap(NizamioSpacing.space4),
               ],
             ],
           ),

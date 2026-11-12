@@ -48,7 +48,7 @@ ve aşağıdaki native/yayın sınırları ayrıca geçerlidir.
 | Android dev Debug APK | `flutter build apk --debug --flavor dev -t lib/main_dev.dart --no-pub` geçti |
 | Android prod Debug APK | `flutter build apk --debug --flavor prod -t lib/main_prod.dart --no-pub` geçti |
 | iOS dev simülatör uygulaması | `flutter build ios --simulator --debug --flavor dev -t lib/main_dev.dart --no-pub` geçti |
-| Son temiz ağaçta kod üretimi | Son kaynak/probe kaydı sonrasında `make gen-check` sonucu aşağıya eklenecek |
+| Son temiz ağaçta kod üretimi | `396bb89` üzerinde `make gen-check` geçti, çıkış 0; yeniden üretim farkı ve izlenmeyen üretilmiş dosya yok |
 | Fark temizliği | `git diff --check` geçti |
 
 Önceki ilk aşamada 532 test ve native yapılandırma kontrolleri de geçmişti; bu sayı

@@ -518,7 +518,9 @@ class _SwipeDelete extends StatelessWidget {
           ),
         ),
       ),
-      child: child,
+      // Kaydırma eylemi satırın anlamsal düğümlerini tek düğüme katmasın: işaret kutusu ve
+      // satır (aç/kapat) ekran okuyucuda ayrı dokunulabilir kalır.
+      child: Semantics(container: true, explicitChildNodes: true, child: child),
     );
   }
 }

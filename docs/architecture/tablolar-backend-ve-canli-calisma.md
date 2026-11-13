@@ -241,7 +241,11 @@ sıraya dizilir.
    beklerken yeni işlem engellenmez, kendi anahtarıyla gider. Makbuz alındıktan sonraki yeniden
    okuma düşerse komut başarılı sayılır; hata raporlanır ve kalıcı "yeniden okuma gerekli"
    bayrağı sonraki yakalamada tabloyu yeniler. Komut makbuzuyla doğrulanan en yüksek sıradan
-   eski snapshot tabanı (ad, sütunlar, satırlar) geri almaz; atılır, bayrak kalır.
+   eski snapshot tabanı (ad, sütunlar, satırlar) geri almaz; atılır, bayrak kalır. Ters yön de
+   korunur: makbuzla gelen yerel metadata güncellemesi (ad, sütun adı/genişliği) yalnız makbuz
+   sırası uygulanmış snapshot sırasından yeniyse uygulanır (geciken makbuz daha yeni snapshot'ı
+   ezmez). İşlem nesnesi kendi başarı işleyicisini taşır: yeniden deneme de aynı sonucu işler
+   (silmede listeden düşme ve ekranın listeye dönmesi).
 
 ### 9.2 Çakışma
 

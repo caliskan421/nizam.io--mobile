@@ -271,17 +271,19 @@ class MeetingsServer {
     }
     if (r.method == 'PATCH' && r.path.startsWith('/v1/meeting-agenda/')) {
       final id = r.path.split('/').last;
-      final checked = body['is_checked'] == true;
       final row = agenda.firstWhere(
         (a) => a['agenda_item_id'] == id,
         orElse: () => agendaWire(id),
       );
+      final checked = body.containsKey('is_checked')
+          ? body['is_checked'] == true
+          : row['is_checked'] == true;
       return jsonResponse(
         200,
         agendaWire(
           id,
           order: row['sort_order']! as int,
-          title: row['title']! as String,
+          title: body['title'] as String? ?? row['title']! as String,
           checked: checked,
         ),
       );

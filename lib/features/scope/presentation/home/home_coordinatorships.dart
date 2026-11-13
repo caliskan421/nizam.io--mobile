@@ -6,6 +6,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/motion/page_content_entrance.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../../core/ui/widgets/feedback/nz_progress_bar.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../application/coordinatorship_query_controller.dart';
 import '../../domain/home_dashboard.dart';
@@ -148,12 +149,12 @@ class _CoordCard extends StatelessWidget {
     final percent = l.percent(c.donePercent / 100);
     // Sunucu özeti kalan durumu onay ve iadeyi birlikte taşır (ayrı renklendirilemez); çoğu
     // onaya sunulmuş görevdir, "Onay bekleyen" kartıyla aynı `warning` rengini alır.
-    final segments = <(int, Color)>[
-      (c.done, colors.taskDone),
-      (c.inProgress, colors.inProgress),
-      (c.inReview, colors.warning),
-      (c.todo, colors.textFaint),
-    ].where((entry) => entry.$1 > 0).toList();
+    final segments = [
+      NzBarSegment(c.done, colors.taskDone),
+      NzBarSegment(c.inProgress, colors.inProgress),
+      NzBarSegment(c.inReview, colors.warning),
+      NzBarSegment(c.todo, colors.textFaint),
+    ];
     return Semantics(
       button: true,
       label: '${c.name}. $percent. $count. $late',
@@ -195,37 +196,10 @@ class _CoordCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   const Gap(NizamioSpacing.space3),
-                  SizedBox(
+                  NzProgressBar.segments(
                     key: const ValueKey('coord-task-distribution'),
-                    height: 6,
-                    child: segments.isEmpty
-                        ? DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: colors.surfaceRaised,
-                              borderRadius: BorderRadius.circular(
-                                NizamioRadius.pill,
-                              ),
-                            ),
-                            child: const SizedBox(width: double.infinity),
-                          )
-                        : Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            spacing: 2,
-                            children: [
-                              for (final segment in segments)
-                                Expanded(
-                                  flex: segment.$1,
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      color: segment.$2,
-                                      borderRadius: BorderRadius.circular(
-                                        NizamioRadius.pill,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
+                    separated: true,
+                    segments: segments,
                   ),
                   const Gap(NizamioSpacing.space3),
                   Text.rich(

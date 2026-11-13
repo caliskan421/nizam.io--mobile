@@ -2939,6 +2939,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMeetingsLinkCopied => 'Bağlantı kopyalandı.';
 
   @override
+  String get uiMeetingsAgendaEdit => 'Maddeyi düzenle';
+
+  @override
   String get uiMessagesTitle => 'Mesajlar';
 
   @override

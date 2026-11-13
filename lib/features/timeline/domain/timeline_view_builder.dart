@@ -73,9 +73,7 @@ TimelineView buildTimelineView(
     for (final t in tasks)
       if (personOk(t) &&
           prioOk(t) &&
-          ('${t.item.title} ${t.item.displayCode} ${t.item.assignees.map(catalog.nameOf).join(' ')}')
-              .toLowerCase()
-              .contains(s.query.toLowerCase().trim()))
+          taskMatchesQuery(t.item, catalog, s.query))
         t,
   ];
   bool statusOk(TimelineTask t, TimelineStatusFilter f) => switch (f) {

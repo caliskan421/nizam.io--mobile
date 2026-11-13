@@ -4,6 +4,8 @@ import '../../../../core/providers.dart';
 import '../../application/gantt_provider.dart';
 import '../../application/horizontal_timeline_controller.dart';
 import '../../application/horizontal_timeline_view.dart';
+import '../../application/timeline_controller.dart';
+import '../../domain/timeline.dart';
 import 'gantt_geometry.dart';
 
 /// Yatay çizelgenin yerleşimi (tek girişli önbellek): katalog örneği ya da ekran durumu
@@ -24,12 +26,22 @@ final ganttLayoutProvider = Provider.autoDispose<GanttLayout?>((ref) {
   );
   if (catalog == null) return null;
   final state = ref.watch(horizontalTimelineControllerProvider);
+  // Seçim kartının tarih taslağı (+/-) ve kaydedilmiş düzenlemeler çubuğa anında yansır;
+  // taslak yalnız çizelgede hâlâ seçili görev içindir.
+  final (selected, draft, edits) = ref.watch(
+    timelineControllerProvider(timelineAllCoordinatorships)
+        .select((s) => (s.selected, s.draft, s.edits)),
+  );
   return GanttLayout.of(
     horizontalTimelineView(
       catalog,
       state,
       dependent:
           ref.watch(ganttScheduleProvider).value?.dependentIds ?? const {},
+      rangeOf: (code) =>
+          (draft != null && code == selected && code == state.selected)
+          ? draft
+          : edits[code],
     ),
   );
 });

@@ -5620,6 +5620,12 @@ abstract class AppLocalizations {
   /// **'Bağlantı kopyalandı.'**
   String get uiMeetingsLinkCopied;
 
+  /// ui.meetings.agenda_edit
+  ///
+  /// In tr, this message translates to:
+  /// **'Maddeyi düzenle'**
+  String get uiMeetingsAgendaEdit;
+
   /// ui.messages.title
   ///
   /// In tr, this message translates to:

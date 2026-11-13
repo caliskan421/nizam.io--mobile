@@ -3685,6 +3685,10 @@
   "@uiMeetingsLinkCopied": {
     "description": "ui.meetings.link_copied"
   },
+  "uiMeetingsAgendaEdit": "Maddeyi düzenle",
+  "@uiMeetingsAgendaEdit": {
+    "description": "ui.meetings.agenda_edit"
+  },
   "uiMessagesTitle": "Mesajlar",
   "@uiMessagesTitle": {
     "description": "ui.messages.title"

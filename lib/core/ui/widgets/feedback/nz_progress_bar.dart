@@ -22,14 +22,21 @@ class NzProgressBar extends StatelessWidget {
     required double this.value,
     required Color this.color,
     this.height,
-  }) : segments = const [];
+  }) : segments = const [],
+       separated = false;
 
-  /// Boş dilimler (pay 0) çizilmez.
-  const NzProgressBar.segments({super.key, required this.segments, this.height})
-    : value = null,
-      color = null;
+  /// Boş dilimler (pay 0) çizilmez. [separated]: her dilim ayrı yuvarlak uçlu parça
+  /// (ana sayfa koordinatörlük kartlarının durum çubuğu); boşken `surfaceRaised` ray.
+  const NzProgressBar.segments({
+    super.key,
+    required this.segments,
+    this.height,
+    this.separated = false,
+  }) : value = null,
+       color = null;
 
   final double? height;
+  final bool separated;
   final double? value;
   final Color? color;
   final List<NzBarSegment> segments;
@@ -64,6 +71,35 @@ class NzProgressBar extends StatelessWidget {
         if (s.weight > 0) s,
     ];
     final total = parts.fold<num>(0, (a, s) => a + s.weight);
+    int flex(NzBarSegment s) =>
+        (s.weight / total * 1000).round().clamp(1, 1000);
+    if (separated) {
+      final pill = BoxDecoration(
+        color: context.colors.surfaceRaised,
+        borderRadius: radius,
+      );
+      return ExcludeSemantics(
+        child: SizedBox(
+          height: height ?? NizamioSize.progressLg,
+          width: double.infinity,
+          child: total == 0
+              ? DecoratedBox(decoration: pill)
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: _segmentGap,
+                  children: [
+                    for (final s in parts)
+                      Expanded(
+                        flex: flex(s),
+                        child: DecoratedBox(
+                          decoration: pill.copyWith(color: s.color),
+                        ),
+                      ),
+                  ],
+                ),
+        ),
+      );
+    }
     return ExcludeSemantics(
       child: ClipRRect(
         borderRadius: radius,
@@ -78,7 +114,7 @@ class NzProgressBar extends StatelessWidget {
                   children: [
                     for (final s in parts)
                       Expanded(
-                        flex: (s.weight / total * 1000).round().clamp(1, 1000),
+                        flex: flex(s),
                         child: ColoredBox(color: s.color),
                       ),
                   ],

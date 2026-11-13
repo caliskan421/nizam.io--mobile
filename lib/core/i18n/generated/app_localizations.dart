@@ -8512,6 +8512,12 @@ abstract class AppLocalizations {
   /// **'Silinen alt görev geri alınamaz'**
   String get uiTasksSubDeleteDesc;
 
+  /// ui.tasks.assign_by_coord
+  ///
+  /// In tr, this message translates to:
+  /// **'Atamayı koordinatörlüğün koordinatörü yapar.'**
+  String get uiTasksAssignByCoord;
+
   /// ui.tasks.sub_add
   ///
   /// In tr, this message translates to:

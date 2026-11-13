@@ -5613,6 +5613,10 @@
   "@uiTasksSubDeleteDesc": {
     "description": "ui.tasks.sub_delete_desc"
   },
+  "uiTasksAssignByCoord": "Atamayı koordinatörlüğün koordinatörü yapar.",
+  "@uiTasksAssignByCoord": {
+    "description": "ui.tasks.assign_by_coord"
+  },
   "uiTasksSubAdd": "Alt görev ekle",
   "@uiTasksSubAdd": {
     "description": "ui.tasks.sub_add"

@@ -4436,6 +4436,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksSubDeleteDesc => 'Silinen alt görev geri alınamaz';
 
   @override
+  String get uiTasksAssignByCoord =>
+      'Atamayı koordinatörlüğün koordinatörü yapar.';
+
+  @override
   String get uiTasksSubAdd => 'Alt görev ekle';
 
   @override

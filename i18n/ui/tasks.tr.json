@@ -147,6 +147,7 @@
     "ui.tasks.sub_delete": "Alt görevi sil",
     "ui.tasks.sub_delete_q": "Alt görev silinsin mi?",
     "ui.tasks.sub_delete_desc": "Silinen alt görev geri alınamaz",
+    "ui.tasks.assign_by_coord": "Atamayı koordinatörlüğün koordinatörü yapar.",
     "ui.tasks.sub_add": "Alt görev ekle",
     "ui.tasks.needs_person": "kişi atanmalı",
     "ui.tasks.evidence_required_lc": "kanıt zorunlu",

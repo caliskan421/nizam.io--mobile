@@ -37,6 +37,7 @@ class ChatMessageList extends ConsumerStatefulWidget {
     required this.onVote,
     required this.onAttachment,
     required this.onSharedFile,
+    required this.onRetry,
   });
 
   final String chatId;
@@ -54,6 +55,9 @@ class ChatMessageList extends ConsumerStatefulWidget {
   final void Function(ChatMessage m, int option) onVote;
   final ValueChanged<ChatAttachment> onAttachment;
   final void Function(String refId, String name) onSharedFile;
+
+  /// Gönderilemeyen mesajın balon içi "Tekrar dene"si.
+  final ValueChanged<ChatMessage> onRetry;
 
   @override
   ConsumerState<ChatMessageList> createState() => _ChatMessageListState();
@@ -268,7 +272,8 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
                 if (mine) l.uiMessagesYou else name,
                 l.summaryOf(m),
                 l.time(m.at),
-                if (tick == ChatTick.failed) l.uiMessagesSendFailed,
+                if (tick == ChatTick.failed)
+                  '${l.uiMessagesSendFailed}: ${l.sendFailure(m.failure)}',
               ].where((s) => s.isNotEmpty).join(', '),
               senderName: chat.group && !mine && first ? name : null,
               senderColor: personColor(context, name),
@@ -289,10 +294,15 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
                     ),
               body: ChatMessageBody(
                 message: m,
-                onAttachment: m.onServer ? widget.onAttachment : (_) {},
+                onAttachment: m.onServer ? widget.onAttachment : null,
                 onSharedFile: widget.onSharedFile,
               ),
-              extra: m.poll == null
+              extra: tick == ChatTick.failed
+                  ? ChatSendFailureRow(
+                      failure: m.failure,
+                      onRetry: () => widget.onRetry(m),
+                    )
+                  : m.poll == null
                   ? null
                   : ChatPollView(
                       question: m.text,

@@ -498,10 +498,10 @@ class ChatRoomController extends _$ChatRoomController {
                 'messaging.file_rejected' ||
                 ClientErrorCode.fileUnreadable
             when upload != null:
-          // Dosya kabul edilmez ya da okunamaz (silinmiş): tekrar anlamsız, balon kalkar ve
-          // hata ekrana iletilir.
-          discard(local.clientId);
-          rethrow;
+          // Dosya kabul edilmez ya da okunamaz (silinmiş): balon "gönderilemedi" ve nedeniyle
+          // kalır (not 33); tekrar sunulmaz (`chatSendRetryable`), kullanıcı mesajı atar.
+          _setPending(local.clientId, ChatSendState.failed, e.code);
+          return ChatSendOutcome.failed;
         case 'messaging.idempotency_key_reused':
           _setPending(local.clientId, ChatSendState.failed, e.code);
           return ChatSendOutcome.rejected;

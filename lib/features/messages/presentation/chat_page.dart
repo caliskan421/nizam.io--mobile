@@ -272,7 +272,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       message: m,
       canEdit: mine && m.poll == null && m.attachments.isEmpty,
       canDelete: mine || room.chat.canModerate,
-      canRetry: m.failure != 'messaging.idempotency_key_reused',
       canPin: room.chat.canPin,
       // Mesajdan görev program rolüyle görünür (şirket yöneticisi ya da koordinatör; §10.9).
       canToTask: m.poll == null && ref.read(canCreateTaskProvider),
@@ -505,6 +504,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               onSharedFile: (refId, name) => unawaited(
                 _save(() => _acts.downloadShared(refId, name), name),
               ),
+              onRetry: (m) => unawaited(_room.retry(m.clientId)),
             ),
           ),
         ),

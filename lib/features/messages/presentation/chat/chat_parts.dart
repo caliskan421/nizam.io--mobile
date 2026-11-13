@@ -14,6 +14,8 @@ import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/chat.dart';
 import '../../domain/chat_room.dart';
+import '../../domain/chat_send_failure.dart';
+import 'chat_attachments.dart';
 import 'chat_refs.dart';
 import 'messages_texts.dart';
 
@@ -50,7 +52,8 @@ class ChatMeasureBox extends RenderProxyBox {
   }
 }
 
-/// Mesaj gövdesi: düz metin, ek adları (dokununca indirme) ve paylaşılan öğe kartları.
+/// Mesaj gövdesi: paylaşılan öğe kartları (alıntı gibi en üstte; not 30), ekler (fotoğraf küçük
+/// resim, dosya kartı; not 32) ve metin.
 class ChatMessageBody extends StatelessWidget {
   const ChatMessageBody({
     super.key,
@@ -60,51 +63,96 @@ class ChatMessageBody extends StatelessWidget {
   });
 
   final ChatMessage message;
-  final ValueChanged<ChatAttachment> onAttachment;
+
+  /// Ek dokunuşu (indirme); gönderilmekte olan mesajda null.
+  final ValueChanged<ChatAttachment>? onAttachment;
   final void Function(String refId, String name) onSharedFile;
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
     final t = context.text;
     final base = t.list.copyWith(fontWeight: FontWeight.w400, height: 21 / 15);
-    final file = t.mono.copyWith(
-      color: c.accentText,
-      fontWeight: FontWeight.w600,
-    );
+    final open = onAttachment;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       spacing: NizamioSpacing.space1,
       children: [
-        if (message.text.isNotEmpty) Text(message.text, style: base),
+        for (final r in message.refs)
+          ChatRefTile(
+            refId: r.refId,
+            kind: r.kind,
+            targetId: r.targetId,
+            onFile: onSharedFile,
+          ),
         for (final a in message.attachments)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ChatAttachmentView(
+              attachment: a,
+              onServer: message.onServer,
+              onTap: open == null ? null : () => open(a),
+            ),
+          ),
+        if (message.text.isNotEmpty) Text(message.text, style: base),
+      ],
+    );
+  }
+}
+
+/// Gönderilemeyen kendi mesajımın balon içi satırı (not 33): neden (boyut, tür, ağ, yetki…) ve
+/// tekrar anlamlıysa "Tekrar dene" ([onRetry]; aynı istemci kimliğiyle).
+class ChatSendFailureRow extends StatelessWidget {
+  const ChatSendFailureRow({
+    super.key,
+    required this.failure,
+    required this.onRetry,
+  });
+
+  final String? failure;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final t = context.text;
+    final retry = chatSendRetryable(failure);
+    return Row(
+      children: [
+        NzIcon(NzIcons.error, size: 14, color: c.danger),
+        const Gap(NizamioSpacing.space1),
+        Expanded(
+          child: Text(
+            l.sendFailure(failure),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: t.caption.copyWith(color: c.danger),
+          ),
+        ),
+        if (retry) ...[
+          const Gap(NizamioSpacing.space2),
           Semantics(
             button: true,
-            label: a.fileName,
+            label: l.uiMessagesTryAgain,
             excludeSemantics: true,
-            onTap: () => onAttachment(a),
+            onTap: onRetry,
             child: GestureDetector(
-              onTap: () => onAttachment(a),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  NzIcon(NzIcons.file, size: 13, color: c.accentText),
-                  const Gap(NizamioSpacing.space1),
-                  Flexible(
-                    child: Text(
-                      a.fileName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: file,
-                    ),
+              behavior: HitTestBehavior.opaque,
+              onTap: onRetry,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Text(
+                  l.uiMessagesTryAgain,
+                  style: t.caption.copyWith(
+                    color: c.accentText,
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
+                ),
               ),
             ),
           ),
-        for (final r in message.refs)
-          ChatRefTile(refId: r.refId, kind: r.kind, onFile: onSharedFile),
+        ],
       ],
     );
   }

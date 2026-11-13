@@ -11,7 +11,7 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | denetim akışı | 1 |
 | iletilir | 15 |
 | istisna | 59 |
-| rapor | 167 |
+| rapor | 166 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -144,7 +144,6 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/administration/application/admin_transfer_controller.dart` | `AdminTransferController.execute` | catch | iletilir | 1 |
 | `features/administration/application/user_account_draft_controller.dart` | `UserAccountDraftController.save` | catch | denetim akışı | 1 |
 | `features/administration/application/user_account_draft_controller.dart` | `UserAccountDraftController.save` | catch | rapor | 2 |
-| `features/administration/presentation/admin_deleted_records.dart` | `_AdminDeletedRecordsState.build` | catch | rapor | 1 |
 | `features/administration/presentation/admin_management_tools.dart` | `AdminManagementTools.build` | catch | rapor | 1 |
 | `features/administration/presentation/admin_program_actions.dart` | `AdminProgramActions.build` | catch | rapor | 1 |
 | `features/administration/presentation/admin_transfer_panel.dart` | `_AdminTransferPanelState.build` | catch | rapor | 1 |
@@ -152,9 +151,10 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/administration/presentation/admin_user_actions.dart` | `AdminUserActions.build` | catch | rapor | 1 |
 | `features/administration/presentation/admin_user_memberships.dart` | `AdminUserMemberships.build` | catch | rapor | 2 |
 | `features/administration/presentation/admin_user_profile_page.dart` | `_AdminUserProfilePageState.build` | asyncError | istisna | 2 |
-| `features/administration/presentation/admin_user_report.dart` | `exportAdminUserReport` | catch | rapor | 1 |
 | `features/administration/presentation/administration_page.dart` | `_AdministrationPageState.build` | asyncError | istisna | 1 |
 | `features/administration/presentation/administration_page.dart` | `_AdministrationPageState.build` | catch | rapor | 1 |
+| `features/administration/presentation/deleted/deleted_record_tabs.dart` | `DeletedTasksTab.build` | catch | rapor | 1 |
+| `features/administration/presentation/deleted/deleted_record_tabs.dart` | `_admin` | catch | rapor | 1 |
 | `features/archive/application/archive_actions_controller.dart` | `ArchiveActionsController._run` | catch | rapor | 1 |
 | `features/archive/application/archive_actions_controller.dart` | `ArchiveActionsController._send` | catch | rapor | 2 |
 | `features/archive/application/archive_controller.dart` | `ArchiveController.downloadAll` | catch | rapor | 1 |
@@ -184,6 +184,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/identity/application/password_change_controller.dart` | `PasswordChangeController.submit` | guard | istisna | 1 |
 | `features/meetings/application/meeting_room_agenda.dart` | `MeetingRoomAgenda.addAgenda` | catch | rapor | 1 |
 | `features/meetings/application/meeting_room_agenda.dart` | `MeetingRoomAgenda.deleteAgenda` | catch | rapor | 1 |
+| `features/meetings/application/meeting_room_agenda.dart` | `MeetingRoomAgenda.renameAgenda` | catch | rapor | 1 |
 | `features/meetings/application/meeting_room_agenda.dart` | `MeetingRoomAgenda.toggleAgenda` | catch | rapor | 1 |
 | `features/meetings/application/meeting_room_controller.dart` | `MeetingRoomController._commitDelete` | catch | rapor | 1 |
 | `features/meetings/application/meeting_room_controller.dart` | `MeetingRoomController.addNote` | catch | rapor | 1 |
@@ -232,9 +233,9 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/messages/presentation/chat/chat_group_source_info.dart` | `_ChatGroupSourceInfoState._change` | catch | rapor | 1 |
 | `features/messages/presentation/chat/chat_info_sheet.dart` | `_Members._run` | catch | rapor | 1 |
 | `features/messages/presentation/chat/new_chat_sheet.dart` | `_NewChatState._run` | catch | rapor | 1 |
-| `features/messages/presentation/chat_page.dart` | `_ChatPageState._actions` | catch | rapor | 1 |
 | `features/messages/presentation/chat_page.dart` | `_ChatPageState._send` | catch | rapor | 1 |
 | `features/messages/presentation/chat_page.dart` | `_ChatPageState._try` | catch | rapor | 1 |
+| `features/messages/presentation/chat_page_actions.dart` | `_ChatPageActions._actions` | catch | rapor | 1 |
 | `features/messages/presentation/messages_page.dart` | `_MessagesPageState._markAllRead` | catch | rapor | 1 |
 | `features/messages/presentation/messages_page.dart` | `_MessagesPageState.build` | asyncError | istisna | 1 |
 | `features/messages/presentation/open_person_chat.dart` | `openPersonChat` | catch | rapor | 1 |
@@ -272,7 +273,6 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/tasks/data/file_upload_picker.dart` | `FileUploadPicker.pick` | catch | istisna | 1 |
 | `features/tasks/data/task_catalog_api_repository.dart` | `ApiTaskCatalogRepository._teams` | catchError | istisna | 1 |
 | `features/tasks/data/upload_digest.dart` | `uploadDigest` | catch | istisna | 1 |
-| `features/tasks/presentation/deleted_tasks_page.dart` | `DeletedTasksPage.build` | catch | rapor | 2 |
 | `features/tasks/presentation/detail/task_dependencies.dart` | `TaskDependencies.build` | catch | rapor | 1 |
 | `features/tasks/presentation/task_detail_page.dart` | `TaskDetailPage.build` | catch | istisna | 1 |
 | `features/timeline/application/timeline_controller.dart` | `TimelineController.requestDates` | catch | rapor | 3 |

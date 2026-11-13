@@ -240,9 +240,13 @@ kataloğu yüklendikten sonra oluşmuş görevde katalog kimlik başına bir kez
 katalogda (sayfa tavanı) yeniden okuma görevi getirmeyebilir; `listProgramWorkItems` kimlik
 süzgeci taşımaz, `getWorkItem` (S3) görevin departman başlığını ister. Bu yüzden görev,
 çağıranın bu programdaki görünür departmanlarında — önce kendi ekip satırları, sonra katalog
-departmanları, en çok 20 — `getWorkItem` ile sırayla denenir: 404 sıradakine geçer, başka hata
-durur, bulunan görev kataloğa eklenir. Maliyet: görev başına en çok 20 tekil okuma, kimlik
-başına bir kez; kapsam/oturum değişirse iptal) —
+departmanları, en çok 20 — `getWorkItem` ile sırayla denenir: 404 sıradakine geçer, bulunan
+görev kataloğa eklenir. Kesin "bulunamadı" yalnız bütün adaylarda 404 (ya da 403) ile kaydedilir
+ve tekrar aranmaz; aday sınırı dolarsa ayrıntı ekranı `client.task_lookup_limit` metnini
+gösterir. Geçici hata (ağ, 5xx, 429) aramayı durdurur, kaydedilmez ve ayrıntı ekranında hata
+olarak görünür ("bulunamadı" değil); yeniden dene / aşağı çekme aramayı tekrarlar, 429'da
+`Retry-After` dolmadan istek atılmaz. Katalog yenilemesi ve kapsam değişimi kayıtları siler.
+Maliyet: görev başına en çok 20 tekil okuma; kapsam/oturum değişirse iptal) —
 ızgarada tekli hücreye dokunma ya da satır sayfasındaki rozet. Gizlenmiş ya da adı görünmeyen
 hedef açılmaz. Kişi (yönetim sayfası yalnız yöneticiye), departman (koordinatörlük kodu ile
 kimlik eşlemesi doğrulanmadı) ve dosya (görevsiz önizleme yok) yalnız gösterilir.

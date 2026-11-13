@@ -1822,6 +1822,12 @@ abstract class AppLocalizations {
   /// **'Oturum yenilendi; dosya gönderilmedi. Yüklemeyi yeniden deneyin.'**
   String get errClientSessionRefreshed;
 
+  /// client.task_lookup_limit
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev aranan departman sınırına ulaşıldı. Görev listesinden departman seçerek açın.'**
+  String get errClientTaskLookupLimit;
+
   /// client.timeout
   ///
   /// In tr, this message translates to:

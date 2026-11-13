@@ -164,7 +164,18 @@ class TaskDetailPage extends ConsumerWidget {
             const Gap(NizamioSpacing.space3),
           ],
           _Body(task: task, catalog: data, actions: actions),
-        ] else
+        ] else if (data != null &&
+            details.hasError &&
+            !details.isLoading &&
+            !deleted)
+          // Katalogda olmayan görevin araması geçici hatayla ya da aday sınırıyla bitti:
+          // "bulunamadı" değil; metin hatanın kendisi, yeniden dene aramayı tekrarlar.
+          NzBanner.danger(
+            message: errorText(l, toApiError(details.error!)),
+            actionLabel: l.uiCommonRetry,
+            onAction: () => ref.invalidate(taskDetailsProvider(code)),
+          )
+        else
           NzAsyncView<TaskCatalog>(
             value: catalog,
             onRetry: () => ref.invalidate(taskCatalogControllerProvider),

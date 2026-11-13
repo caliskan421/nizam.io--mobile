@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -11,7 +9,7 @@ part 'task_details_controller.g.dart';
 
 /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
-/// yoksa katalog bir kez yenilenir ([TaskCatalogController.refreshForMissing]); kaynak ayrıntı
+/// yoksa kimlikle çözümlenir ([TaskCatalogController.resolveMissing]); kaynak ayrıntı
 /// taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
 /// katalogdaki [TaskCatalog.access]'ten.
 ///
@@ -40,12 +38,11 @@ Future<void> taskDetails(Ref ref, String code) async {
   final catalog = await ref.read(taskCatalogControllerProvider.future);
   final task = catalog.task(code);
   if (task == null) {
-    // Bayat ya da kesik katalog: görev kimlikle çözümlenir (tam katalogda yeniden okuma, kesik
-    // katalogda görünür departmanlarda tekil okuma); görev gelince yukarıdaki dinleyici
-    // (yok → var) ayrıntıyı yeniden okutur.
-    unawaited(
-      ref.read(taskCatalogControllerProvider.notifier).refreshForMissing(code),
-    );
+    // Bayat ya da kesik katalog: görev kimlikle çözümlenir. Bulunursa kataloğa eklenir ve
+    // yukarıdaki dinleyici (yok → var) ayrıntıyı yeniden okutur; kesin "bulunamadı" sessizdir
+    // (ekran boş durumu gösterir); geçici hata ve aday sınırı bu sağlayıcının hatasıdır (ekran
+    // hata/sınır metnini gösterir, yenileme aramayı tekrarlar).
+    await ref.read(taskCatalogControllerProvider.notifier).resolveMissing(code);
     return;
   }
   final details = await ref

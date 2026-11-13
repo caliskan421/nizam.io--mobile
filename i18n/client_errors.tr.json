@@ -24,6 +24,7 @@
     "client.request_not_resent": "İstek tekrar gönderilemedi; işlemi yeniden başlatın.",
     "client.file_unreadable": "Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin.",
     "client.camera_permission_denied": "Kamera izni verilmedi. Fotoğraf çekmek için cihaz ayarlarından NIZAM.IO'ya kamera izni verin.",
-    "client.camera_unavailable": "Bu cihazda kullanılabilir bir kamera bulunamadı. Fotoğrafı galeriden ya da dosyalardan seçin."
+    "client.camera_unavailable": "Bu cihazda kullanılabilir bir kamera bulunamadı. Fotoğrafı galeriden ya da dosyalardan seçin.",
+    "client.task_lookup_limit": "Görev aranan departman sınırına ulaşıldı. Görev listesinden departman seçerek açın."
   }
 }

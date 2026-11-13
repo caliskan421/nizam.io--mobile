@@ -1010,6 +1010,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Oturum yenilendi; dosya gönderilmedi. Yüklemeyi yeniden deneyin.';
 
   @override
+  String get errClientTaskLookupLimit =>
+      'Görev aranan departman sınırına ulaşıldı. Görev listesinden departman seçerek açın.';
+
+  @override
   String get errClientTimeout =>
       'Sunucu zamanında yanıt vermedi. Biraz sonra yeniden deneyin.';
 

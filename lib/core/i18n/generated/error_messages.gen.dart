@@ -293,6 +293,7 @@ const localizedErrorCodes = <String>{
   'client.server_unrecognized',
   'client.session_ended',
   'client.session_refreshed',
+  'client.task_lookup_limit',
   'client.timeout',
   'client.tls_error',
   'client.unknown_operation',
@@ -879,6 +880,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errClientSessionEnded;
     case 'client.session_refreshed':
       return l.errClientSessionRefreshed;
+    case 'client.task_lookup_limit':
+      return l.errClientTaskLookupLimit;
     case 'client.timeout':
       return l.errClientTimeout;
     case 'client.tls_error':

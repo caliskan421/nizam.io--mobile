@@ -281,7 +281,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/tasks/application/meeting_form_controller.dart` | `MeetingFormController.submit` | catch | rapor | 1 |
 | `features/tasks/application/quick_forms_controller.dart` | `NewTaskFormController.submit` | catch | rapor | 3 |
 | `features/tasks/application/task_catalog_controller.dart` | `TaskCatalogController._probe` | catch | rapor | 1 |
-| `features/tasks/application/task_catalog_controller.dart` | `TaskCatalogController.refreshForMissing` | catch | rapor | 1 |
+| `features/tasks/application/task_catalog_controller.dart` | `TaskCatalogController._resolve` | catch | rapor | 1 |
 | `features/tasks/application/task_catalog_controller.dart` | `TaskCatalogController.reload` | catch | rapor | 1 |
 | `features/tasks/application/task_detail_controller.dart` | `TaskDetailController._reread` | catch | rapor | 1 |
 | `features/tasks/application/task_detail_controller.dart` | `TaskDetailController._writeKeyed` | catch | rapor | 1 |

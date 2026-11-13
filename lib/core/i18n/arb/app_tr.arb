@@ -1153,6 +1153,10 @@
   "@errClientSessionRefreshed": {
     "description": "client.session_refreshed"
   },
+  "errClientTaskLookupLimit": "Görev aranan departman sınırına ulaşıldı. Görev listesinden departman seçerek açın.",
+  "@errClientTaskLookupLimit": {
+    "description": "client.task_lookup_limit"
+  },
   "errClientTimeout": "Sunucu zamanında yanıt vermedi. Biraz sonra yeniden deneyin.",
   "@errClientTimeout": {
     "description": "client.timeout"

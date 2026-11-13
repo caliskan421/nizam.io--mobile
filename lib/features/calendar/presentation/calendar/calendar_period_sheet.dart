@@ -101,7 +101,8 @@ Future<void> showCalendarPeriodSheet(
   ).whenComplete(expanded.dispose);
 }
 
-/// Dönem satırı (en az 62): solda mono gün (toplantıda altında saat, süren görevde "→ bitiş"),
+/// Dönem satırı (en az 62): solda mono tarih "16 Kas" (toplantıda altında saat, süren görevde
+/// "→ bitiş"),
 /// tür noktası, başlık + alt yazı (görevde koordinatörlük · atananlar, toplantıda
 /// departmanlar), sağda "gecikti" ya da "tamamlandı" rozeti.
 class _PeriodRow extends StatelessWidget {
@@ -126,17 +127,12 @@ class _PeriodRow extends StatelessWidget {
     final c = context.colors;
     final t = context.text;
     final e = entry;
-    final (String day, String? time, String title, String sub) = switch (e) {
-      MeetingEntry() => (
-        l.shortDay(e.date),
-        l.clock(e),
-        e.title,
-        l.meetingSub(e),
-      ),
+    // Tek tarih biçimi ("16 Kas"); süren görevde bitişe "→" ile.
+    String day(DateTime d) => DateFormat('d MMM', 'tr').format(d);
+    final (String lead, String? time, String title, String sub) = switch (e) {
+      MeetingEntry() => (day(e.date), l.clock(e), e.title, l.meetingSub(e)),
       TaskEntry() => (
-        e.edge == TaskEdge.ongoing
-            ? '→ ${DateFormat('d MMM', 'tr').format(e.due ?? e.date)}'
-            : l.shortDay(e.date),
+        e.edge == TaskEdge.ongoing ? '→ ${day(e.due ?? e.date)}' : day(e.date),
         null,
         e.title,
         [
@@ -146,7 +142,7 @@ class _PeriodRow extends StatelessWidget {
           ),
         ].join(' · '),
       ),
-      RequestEntry() => (l.shortDay(e.date), null, e.title, l.requestSub(e)),
+      RequestEntry() => (day(e.date), null, e.title, l.requestSub(e)),
     };
     final (String, Color)? tag = switch (e) {
       TaskEntry(late: true) => (l.uiCalendarLateLc, c.danger),
@@ -187,7 +183,7 @@ class _PeriodRow extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(day, maxLines: 1, style: mono),
+                        Text(lead, maxLines: 1, style: mono),
                         if (time != null) Text(time, maxLines: 1, style: mono),
                       ],
                     ),

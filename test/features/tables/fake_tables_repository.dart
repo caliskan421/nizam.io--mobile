@@ -49,6 +49,15 @@ class FakeTablesRepository implements TablesRepository {
   /// Presence gönderim zamanları (gerçek saat; aralık ölçümü).
   final presenceAt = <DateTime>[];
 
+  /// Bir sonraki presence yanıtı bu tamamlayıcıyı bekler (uçuştaki istek).
+  Completer<void>? presenceGate;
+
+  /// Sıradaki presence hataları (ör. 429 + Retry-After).
+  final presenceErrors = <ApiError>[];
+
+  /// Sıradaki snapshot yanıtları bunlardan döner (geride kalan kopya / eski okuma).
+  final queuedSnapshots = <TableSnapshotPage>[];
+
   /// Açılan akışlar (test çerçeve/hata/kapanış iter).
   final streams = <StreamController<TableStreamEvent>>[];
 
@@ -179,6 +188,7 @@ class FakeTablesRepository implements TablesRepository {
   }) async {
     snapshots.add((scope, tableId, page.cursor));
     if (snapshotErrors.isNotEmpty) throw snapshotErrors.removeAt(0);
+    if (queuedSnapshots.isNotEmpty) return queuedSnapshots.removeAt(0);
     final t = _get(scope, tableId);
     final limit = page.limit ?? 100;
     final start = page.cursor == null ? 0 : int.parse(page.cursor!);
@@ -346,11 +356,6 @@ class FakeTablesRepository implements TablesRepository {
     int? limit,
   }) async {
     changesCalls.add(after);
-    final g = changesGate;
-    if (g != null) {
-      changesGate = null;
-      await g.future;
-    }
     if (changesErrors.isNotEmpty) throw changesErrors.removeAt(0);
     final t = _get(scope, tableId);
     final page = [
@@ -358,12 +363,19 @@ class FakeTablesRepository implements TablesRepository {
         if (e.seq > after) e,
     ].take(limit ?? 100).toList();
     final cursor = page.isEmpty ? after : page.last.seq;
-    return TableChangesPage(
+    final result = TableChangesPage(
       changes: page,
       cursor: cursor,
       sequence: t.meta.sequence,
       more: cursor < t.meta.sequence,
     );
+    // Yanıt o anki günlükten hesaplanır, teslimi kapıyı bekler (geciken yanıt).
+    final g = changesGate;
+    if (g != null) {
+      changesGate = null;
+      await g.future;
+    }
+    return result;
   }
 
   @override
@@ -383,6 +395,12 @@ class FakeTablesRepository implements TablesRepository {
   }) async {
     presence.add(('set', rowId, columnId));
     presenceAt.add(DateTime.now());
+    final g = presenceGate;
+    if (g != null) {
+      presenceGate = null;
+      await g.future;
+    }
+    if (presenceErrors.isNotEmpty) throw presenceErrors.removeAt(0);
   }
 
   @override

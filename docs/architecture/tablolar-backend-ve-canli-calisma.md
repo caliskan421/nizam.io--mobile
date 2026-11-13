@@ -34,10 +34,10 @@ deposuna göredir (`nizam.io--backend/`, dal `f64/ortak-calisma-faz3`). Kısaltm
 | `POST /v1/tables` | `{name, kind?: create_table}` + IK | 201/200 `TableResult` | bağlı |
 | `GET /v1/tables/{id}` | `cursor`, `limit`, `filter`×≤3, `sort`×≤2 | `TableSnapshot` | bağlı (filter/sort yok) |
 | `POST /v1/tables/{id}/operations` | `TableCommand` + IK | `TableResult` | bağlı (§4) |
-| `GET /v1/tables/{id}/changes` | `after` (zorunlu), `limit` | `TableChanges` | depo yöntemi |
-| `GET /v1/tables/{id}/stream` | — | `text/event-stream` | depo yöntemi |
-| `POST/DELETE /v1/tables/{id}/presence` | `{row_id, column_id}` (ikisi birlikte ya da ikisi boş) | 204 | depo yöntemi |
-| `GET /v1/tables/{id}/comments` | `row_id?`, `cursor?` (= `seq`), `limit` 1–50 | `TableCommentPage` | depo yöntemi |
+| `GET /v1/tables/{id}/changes` | `after` (zorunlu), `limit` | `TableChanges` | bağlı (yakalama) |
+| `GET /v1/tables/{id}/stream` | — | `text/event-stream` | bağlı (canlı döngü) |
+| `POST/DELETE /v1/tables/{id}/presence` | `{row_id, column_id}` (ikisi birlikte ya da ikisi boş) | 204 | bağlı |
+| `GET /v1/tables/{id}/comments` | `row_id?`, `cursor?` (= `seq`), `limit` 1–50 | `TableCommentPage` | bağlı (satır yorumları) |
 | `POST/GET …/attachments` | multipart `file` + `row_id`, `column_id`, `cell_version` | `TableResult` / dosya | yok |
 | `/v1/table-projects`, `/v1/table-copies`, `/v1/table-proposals…` | — | — | yok |
 
@@ -87,7 +87,7 @@ Kaynak: `internal/modules/tables/README.md:44-83`; rota sabitleri `adapter/http/
 | `set_cells` | cells[1..100] {row_id, column_id, value, version} | hücre | bağlı |
 | `undo_cells` | sequence (kendi set_cells'i, ≤1000 olay geride) | koşullu | bağlı |
 | `grant`, `revoke`, `set_team_role`, `set_template` (sahip) | … | — | depo var, ekran yok |
-| `add_comment`, `edit_comment`, `delete_comment` | … | — | depo var, ekran yok |
+| `add_comment`, `edit_comment`, `delete_comment` | … | — | ekleme/silme ekranda; düzenleme denetleyicide |
 | `set_project`, `move_table`, `propose_*`, `withdraw_proposal` | … | — | yok |
 
 - **Hücre CAS** (K-03, K-05): `version: 0` ilk yazım; sonraki yazım mevcut sürümü ister.
@@ -190,8 +190,12 @@ redo yok; dışa aktarım yok.
 | domain | `domain/tables_repository.dart` | port; her yöntem `TableScope` alır |
 | data | `data/table_api_repository.dart` (+ `table_mapping.dart` part) | üretilmiş `TablesClient`; kapsam istek başına `withScope`/`withProgram`; DTO ↔ domain; SSE ham akış (`decodeSse`) |
 | application | `tables_list_controller.dart` | iki alanın imleçli listesi; kişisel/paylaşılan ayrımı `owner_id` ile; oluşturma (anahtar defteri) |
-| application | `table_controller.dart`, `table_write_queue.dart`, `table_view.dart` | snapshot sayfaları, hücre yazımı, komutlar |
-| presentation | `presentation/*` | liste, ızgara, satır/sütun sayfaları |
+| application | `table_controller.dart` (+ `table_cell_writes.dart` part), `table_write_queue.dart`, `table_view.dart` | snapshot sayfaları, olay imleci ve `catchUp`, hücre yazımı, komutlar, yorum komutları |
+| application | `table_sync_controller.dart` | akış döngüsü (SSE), ipucu birleştirme, yeniden bağlanma, presence |
+| application | `table_comments_controller.dart` | satır yorum listesi; `commentsRevision` artınca yeniden okur |
+| application | `tables_providers.dart` | port + ön plan bayrağı, saat, yeniden bağlanma beklemesi, canlı zamanlama |
+| core | `lib/core/domain/stream_reconnect.dart` | sohbet ve tablo akışlarının ortak geri çekilme/hata kararı/sağlıklı bağlantı kuralları |
+| presentation | `presentation/*` | liste, ızgara, satır/sütun sayfaları; `table_live.dart` (canlı kapsam + durum/katılımcı çubuğu), `table_comments.dart` |
 | DI | `tables_module.dart` | get_it kaydı + Riverpod port bağlama |
 
 Üretim notları (`tool/gen/`): `TableCellValue` (skaler `oneOf`) ham JSON (`dynamic`) olarak
@@ -201,7 +205,7 @@ parametresiyle ad çakışmasından `TableCommentAuthor` bileşenine taşınır 
 
 Ekranda olmayan (gizlenen) backend yüzleri: paylaşım (grant/revoke — üye seçici yok), ekip
 rolü, şablon, kopya/taşıma/öneri, projeler, ekler, referans hücre düzenleme (kişi/departman/
-görev/dosya/tablo seçicileri), sütun tipi dönüştürme, filter/sort, yorumlar, presence. Mobil
+görev/dosya/tablo seçicileri), sütun tipi dönüştürme, filter/sort, yorum düzenleme. Mobil
 prototipin karşılıksız özellikleri kaldırıldı: birim (koordinatörlük) kutuları ve örnek
 birimler, hazır şablonlar, son açılanlar, kopyalama, tablo ilişkileri/geri bağlantılar,
 program/birim paylaşımı, sahte kişi/görev/dosya seçicileri, ızgarada yerel sıralama/arama/
@@ -209,7 +213,7 @@ program/birim paylaşımı, sahte kişi/görev/dosya seçicileri, ızgarada yere
 
 ## 9. Senkron algoritması
 
-### 9.1 Hücre yazımı (bugün)
+### 9.1 Hücre yazımı
 
 1. Düzenleme yerelde hemen görünür; `TableWriteQueue`'ya okunan sürüm (CAS tabanı) ile girer.
    Aynı hücrenin ardışık düzenlemesi tabanı koruyup değeri değiştirir.
@@ -230,29 +234,72 @@ bilinmeyen hata batch'i aynı anahtarla bekletir; kullanıcı "Yeniden dene" der
 `replayed` makbuzu döner, çift yazım olmaz). 429 batch'i `Retry-After` sonra kendiliğinden
 yollar (sunucu işlemedi).
 
-### 9.3 Canlı senkron (sonraki tur — tasarım)
+### 9.3 Canlı senkron (gerçekleşen)
 
 Referans istemci: backend `internal/modules/tables/integration/yakinsama_istemci_test.go:1-16,
 160-400`; protokol APIR:299-325, OA:6130-6140.
 
-1. Ekran açılınca **önce akış**, sonra snapshot (aradaki commit kaçmaz). Snapshot sayfaları
-   boyunca `table.sequence` sabit kalmalı; değişirse baştan. `cursor` = snapshot sırası.
-2. `ready`/`changed(s)`: `s ≤ cursor` ise yok say; değilse ~1 sn birleştir, `sync()`.
-3. `sync()`: `changes?after=cursor&limit=200` → 409 `replay_expired` ise tam snapshot;
-   403/404 ise ekran kapanır; yeni seq'lerin **hepsi `ownSequences`'te** ve yerelde eksiksiz
-   uygulanabilir türdeyse (metin/checkbox/tarih/telefon/e-posta set_cells, rename, resize)
-   yalnız `cursor` ilerler; aksi halde snapshot yeniden okunur. Sayı, referans, satır/sütun
-   ekleme/taşıma, convert, undo ve upload kendi yazımımız olsa da snapshot ister. Uçuşta yazım
-   varken gelen yabancı görünen seq için yazım bitene kadar beklenir. Yalnız yorum türleri →
-   yalnız `comments` yenilenir. `cursor` monotondur.
-4. Kopma: 0–5 sn jitter + üstel geri çekilme (≤60 sn, başarıda sıfır), görünüm ve `cursor`
-   korunur; 401 → belirteç yenile; 429 → `Retry-After`; 60 sn çerçevesiz bağlantı ölü.
-   Belirteç yenilemesinden sonra akış proaktif yeniden açılır. Arka plana geçişte akış ve
-   presence bırakılır, öne dönüşte akış → sync.
-5. Presence: ekranda seçili hücreyle POST, ~10 sn'de yenile, seçim değişince ≥1 sn aralık;
-   çıkışta DELETE. Presence yazma kovasından ~6/dk harcar.
-6. Yankı ayrımı backend'in söz verdiği bir sözleşme değildir; olayların tablo başına benzersiz
-   ve boşluksuz `seq` taşımasından (K-23) ve makbuz `sequence`'inden türetilir (açık #5).
+1. **Açılış:** `TableController` snapshot'ın ilk sayfasını okur, `cursor` = `table.sequence`.
+   Tablo yüklenince `TableSyncController` akışı açar; `ready` her zaman yakalamayı tetikler.
+   Referans istemcideki "önce akış, sonra snapshot" sırası yerine "snapshot, sonra akış +
+   `ready` ile yakalama" kullanılır: aradaki commit `changes?after=cursor` ile kapanır, sonuç
+   aynıdır. Çok sayfalı yeniden okumada sayfalar arasında `table.sequence` değişirse yürüyüş
+   baştan alınır (en çok 3 deneme).
+2. **İpucu:** `changed(s)` için `s ≤ cursor` ise yok sayılır; değilse 1 sn birleştirilir. Aynı
+   anda tek yakalama uçuştadır; uçuşta gelen ipuçları tek bekleyen yakalamada toplanır (okuma
+   kotası 600/dk).
+3. **`catchUp()`:** `changes?after=cursor&limit=200` sayfaları `more=false` olana dek okunur;
+   `cursor` yalnız `changes.cursor` ya da tutarlı snapshot sırasıyla ilerler (kendi makbuz
+   sırası imleci ilerletmez — aradaki yabancı olay atlanmasın). Yeni seq `ownSequences`'te
+   değilse ve yorum türü değilse snapshot yeniden okunur; yalnız yorum olayları
+   `commentsRevision`'ı artırır (açık yorum listesi yeniden okunur). 409 `replay_expired` →
+   tam yeniden yükleme; 403/404 → `accessLost` (salt okunur + şerit).
+4. **Kendi yankısı:** makbuz `sequence`'i `ownSequences`'e girer; bu seq'ler snapshot
+   okutmaz. Yapı değiştiren kendi komutlarımız zaten komut sonrası yeniden okuma yapar. Bilinen
+   sapma: kendi `number` yazımımızın sunucu normalizasyonu (`1e3`→`1000`) sonraki yeniden
+   okumaya kadar görünmez. Uçuşta yazım varken makbuzu gelmemiş kendi olayımız yabancı sayılır
+   (güvenli taraf: bir fazla yeniden okuma).
+5. **Bekleyen yazım ezilmez:** yeniden okuma sonucu üstüne kuyruktaki ve uçuştaki değerler
+   uygulanır; kuyruktaki hücrenin tabanı sunucuda değiştiyse hücre `conflicts`'e girer
+   (ızgarada işaret + şerit); gönderim 409 alınca §9.2 yakınsaması çalışır. Açık düzenleyici
+   (`TextField`) kendi yerel metnini korur.
+6. **Kopma:** EOF/ağ hatası/60 sn çerçevesiz (dio `receiveTimeout`) → `retrying`; bekleme
+   `reconnectDelay` (0–5 sn jitter + 1,2,4…≤60 sn; 10 sn yaşamış bağlantı sayacı sıfırlar),
+   6 ardışık başarısızlıktan sonra `offline`. 401/403/404/422 → `offline` (401'de kimlik
+   halkası belirteci zaten bir kez yeniledi); 429 → `Retry-After` bitene kadar açılmaz.
+   Belirteç yenilemesinde sunucu gözcüsü akışı ≤27 sn içinde keser; bu normal kopma olarak
+   yeniden bağlanır (proaktif yeniden açma kancası yok — açık #9).
+7. **Yaşam döngüsü:** `TableLiveScope` ekran görünürken (`TickerMode`) denetleyiciyi dinler;
+   uygulama arka plana geçince (`AppLifecycleListener`) akış kapanır ve presence silinir; öne
+   dönünce akış açılır, `ready` imleçten yakalar. Oturum/kapsam değişince akış yeniden kurulur.
+8. **Presence:** akış canlıyken hemen ve 10 sn'de bir `POST`; satır sayfası açılınca seçim
+   (satır + odak/ilk sütun) en az 1 sn arayla gönderilir, kapanınca seçim temizlenir; akış
+   kopunca yenileme durur, ekrandan çıkış/arka planda `DELETE`. `presence` çerçevesi tam
+   katılımcı listesidir; başlıkta avatar yığını, ipucunda ad + satır/sütun.
+9. **Durum göstergesi:** başlıkta `Canlı` / `Yeniden bağlanıyor` / `Çevrimdışı`.
+10. **Sayfa:** aşağı çekerek yenileme (bekleyen hücreler önce gider), silme sonrası liste
+    açılır (bölünmüş görünümde sağ bölme kapanır).
+
+**Ortak politika taşıması:** sohbetin genel yeniden bağlanma kuralları (`reconnectDelay`,
+`streamErrorAction`, `nextFailures`, eşikler) `lib/core/domain/stream_reconnect.dart`'a
+çıkarıldı; `messages/domain/chat_stream_policy.dart` bunları yeniden dışa verir, sohbete özgü
+sabitler orada kalır (davranış aynı, sohbet testleri değişmeden geçer). Döngüler ayrıdır:
+sohbetinki program genelinde tek akış + sinyal veri yolu, tablonunki tablo başına akış + yakalama
++ presence.
+
+**Yazma kovası hesabı (hesap başına 60/dk, ADR-0028):**
+
+| Kaynak | Normal | Tavan |
+|---|---|---|
+| Presence yenileme | 6/dk | 6/dk |
+| Presence seçim değişimi | satır sayfası açılışı başına 1–2 | 60/dk (1 sn aralık) |
+| Akış açılışı | ~0,2/dk (5 dk bütçe) | yeniden bağlanma sıklığı (geri çekilmeyle azalır) |
+| Hücre yazımı (`set_cells`) | düzenleme duraklaması başına 1 | ~60/dk (1 sn birleştirme, tek uçuş) |
+| Yorum / satır / sütun komutu | kullanıcı eylemi başına 1 | — |
+
+Sürekli düzenleme + presence + açık ikinci tablo kovayı aşabilir: hücre batch'i 429'da
+`Retry-After` sonra aynı gövde/anahtarla gider; presence 429'u (ya da `presence_throttled`)
+yalnız raporlanır ve sonraki turda düzelir. Presence için ayrı (sinyal) kova yoktur (açık #4).
 
 ## 10. Açıklar (kırmızılar)
 
@@ -268,4 +315,10 @@ Referans istemci: backend `internal/modules/tables/integration/yakinsama_istemci
 6. Büyük tabloda her yabancı değişiklikte tam snapshot okuma kovasını (600/dk) ve mobil
    veriyi tüketir; kısmi pencere tazeleme sözleşmesi yok.
 7. Presence tavanı aşımı 503 `stream_unavailable` döner (özgün kod değil).
+8. Kendi `number` yazımının sunucu normalizasyonu sonraki yeniden okumaya kadar görünmez.
+9. Belirteç yenilemesinden sonra akışı proaktif yeniden açan kanca yok; sunucu eski belirteçli
+   akışı ≤27 sn içinde kapatır ve döngü yeniden bağlanır (o arada eski oturumun presence kaydı
+   ≤30 sn "hayalet" görünebilir).
+10. Yorum düzenleme denetleyicide var, ekranda yok; tablo düzeyi yorum sözleşmede yok
+    (`add_comment` `row_id` ister).
 8. `tables.*` TR hata metinleri web pininde yok (`i18n/server_errors_ek.tr.json` geçici).

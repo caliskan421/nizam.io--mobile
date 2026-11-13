@@ -261,18 +261,37 @@ void main() {
     },
   );
 
-  test('O5b: sütun genişliği makbuzları ters sırada; farklı alan güncellemesi korunur', () async {
+  test('O5b: geciken sütun makbuzu (gerçekleşebilen sıra) genişliği ve şemayı geri almaz', () async {
+    // Sütun komutları şema CAS'ına bağlıdır (backend store.go:194): ikinci sütun komutu ancak
+    // ilk komutun şemasını gördükten sonra başarılı olur. Gerçekleşebilen sıra: ilk makbuz
+    // gecikir, araya snapshot girer (şema 2), ikinci komut şema 2 ile gider (sıra 3).
     final (c, n, repo) = await _open();
     final late = repo.responseGate = Completer<void>();
-    final first = n.resizeColumn('c1', 120); // sıra 2, gecikir
+    final first = n.resizeColumn('c1', 120); // sıra 2, şema 2; yanıt gecikir
     await pumpEventQueue();
-    await n.resizeColumn('c1', 300); // sıra 3
-    await n.renameColumn('c1', 'Yeni'); // farklı alan, sıra 4
+    await n.catchUp(); // snapshot sıra 2'yi (genişlik 120, şema 2) gösterir
+    await n.resizeColumn('c1', 300); // şema 2 ile gider: sıra 3, şema 3
     late.complete();
     await first;
     expect(_v(c).column('c1')!.width, 300);
-    expect(_v(c).column('c1')!.name, 'Yeni');
+    expect(_v(c).meta.schemaVersion, 3);
     await n.catchUp();
     expect(_v(c).column('c1')!.width, 300);
+  });
+
+  test('presence periyodik yenileme: aralıkla tekrar gönderilir', () async {
+    final (c, repo) = await _live(interval: const Duration(milliseconds: 1));
+    repo.streams.last.add(const TableStreamReady(1));
+    await pumpEventQueue();
+    // Olumlu doğrulama: periyodik zamanlayıcının en az iki kez daha göndermesi beklenir
+    // (sınırlı bekleme; yük altında yalnız uzar).
+    for (var i = 0; i < 500 && repo.presence.length < 3; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 2));
+    }
+    expect(repo.presence.length, greaterThanOrEqualTo(3));
+    expect(repo.presence.every((p) => p.$1 == 'set'), isTrue);
+    c.read(tablesForegroundProvider.notifier).set(false);
+    await pumpEventQueue();
+    expect(repo.presence.last.$1, 'leave');
   });
 }

@@ -342,6 +342,7 @@ class FakeTablesRepository implements TablesRepository {
       case ResizeColumn(id: final col, :final width):
         final i = t.columns.indexWhere((c) => c.id == col);
         t.columns[i] = t.columns[i].copyWith(width: width);
+        schema++; // backend: resize_column şema değişikliğidir (store.go:194)
       case RenameTable(:final name):
         t.meta = TableMeta(
           id: t.meta.id,

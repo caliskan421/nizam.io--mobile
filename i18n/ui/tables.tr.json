@@ -68,6 +68,16 @@
     "ui.tables.not_editable": "Bu sütun tipi mobilde henüz düzenlenemez.",
     "ui.tables.redacted": "Gizli",
     "ui.tables.type_fixed": "Sütun tipi oluşturulduktan sonra değiştirilemez.",
-    "ui.tables.empty_table": "Bu tabloda henüz satır yok"
+    "ui.tables.empty_table": "Bu tabloda henüz satır yok",
+    "ui.tables.comments": "Yorumlar",
+    "ui.tables.no_comments": "Henüz yorum yok",
+    "ui.tables.hidden_author": "Görünmeyen kişi",
+    "ui.tables.add_comment": "Yorum yaz",
+    "ui.tables.send": "Gönder",
+    "ui.tables.live": "Canlı",
+    "ui.tables.reconnecting": "Yeniden bağlanıyor",
+    "ui.tables.offline": "Çevrimdışı",
+    "ui.tables.here": "Tabloda",
+    "ui.tables.access_lost": "Bu tabloya erişiminiz kalmadı."
   }
 }

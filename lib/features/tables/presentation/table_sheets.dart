@@ -13,7 +13,9 @@ import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../application/table_controller.dart';
+import '../application/table_sync_controller.dart';
 import 'table_cell_editor.dart';
+import 'table_comments.dart';
 import 'table_sheet_host.dart';
 
 /// Sunucu komutunu çalıştırır; hata toast olarak gösterilir (oturum bitti sınıfı hariç).
@@ -83,6 +85,10 @@ Future<void> tableRow(
 }) async {
   final l = context.l10n;
   final provider = tableControllerProvider(id);
+  final sync = ref.read(tableSyncControllerProvider(id).notifier);
+  final first = ref.read(provider).value?.columns.firstOrNull?.id;
+  // Presence: başkaları bu satırı (odaklanılan hücreyi) düzenlediğimizi görür.
+  sync.select(rowId, focusColumn ?? first);
   await showTableSheet(
     ref,
     context,
@@ -118,6 +124,14 @@ Future<void> tableRow(
               ),
               const Gap(NizamioSpacing.space3),
             ],
+            if (focusColumn == null) ...[
+              TableRowComments(
+                tableId: id,
+                rowId: rowId,
+                canWrite: view.editable,
+              ),
+              const Gap(NizamioSpacing.space3),
+            ],
             if (view.editable && focusColumn == null)
               NzButton.danger(
                 label: l.uiTablesDelete,
@@ -143,5 +157,6 @@ Future<void> tableRow(
       },
     ),
   );
+  sync.select(null, null);
   if (context.mounted) await ref.read(provider.notifier).flush();
 }

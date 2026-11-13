@@ -7,6 +7,7 @@ import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/extensions/ref_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
+import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
@@ -20,6 +21,7 @@ import '../application/table_view.dart';
 import '../domain/table_models.dart';
 import 'table_cell_value.dart';
 import 'table_column_sheet.dart';
+import 'table_live.dart';
 import 'table_sheet_host.dart';
 import 'table_sheets.dart';
 import 'table_texts.dart';
@@ -70,10 +72,13 @@ class _TablePageState extends ConsumerState<TablePage> {
         top: false,
         left: false,
         right: false,
-        child: NzAsyncView<TableView>(
-          value: async,
-          onRetry: () => ref.invalidate(_provider),
-          data: (v) => _body(context, v),
+        child: TableLiveScope(
+          id: widget.id,
+          child: NzAsyncView<TableView>(
+            value: async,
+            onRetry: () => ref.invalidate(_provider),
+            data: (v) => _body(context, v),
+          ),
         ),
       ),
     );
@@ -89,7 +94,15 @@ class _TablePageState extends ConsumerState<TablePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l.tableSpace(d.meta.space), style: context.text.monoSm),
+              Row(
+                children: [
+                  Text(l.tableSpace(d.meta.space), style: context.text.monoSm),
+                  const Gap(NizamioSpacing.space3),
+                  Expanded(
+                    child: TableLiveBar(id: widget.id, view: d),
+                  ),
+                ],
+              ),
               const Gap(6),
               InkWell(
                 onTap: d.editable
@@ -137,7 +150,11 @@ class _TablePageState extends ConsumerState<TablePage> {
                   onAction: _controller.dismissConflicts,
                 ),
               ],
-              if (!d.editable)
+              if (d.accessLost) ...[
+                const Gap(NizamioSpacing.space2),
+                NzBanner.danger(message: l.uiTablesAccessLost),
+              ],
+              if (!d.editable && !d.accessLost)
                 Padding(
                   padding: const EdgeInsets.only(top: NizamioSpacing.space2),
                   child: Text(
@@ -245,32 +262,37 @@ class _TablePageState extends ConsumerState<TablePage> {
                             ),
                             child: Text(l.uiTablesEmptyTable),
                           )
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.zero,
-                            itemCount: rows.length + (d.hasMore ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              if (index == rows.length) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(
-                                    NizamioSpacing.space3,
-                                  ),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: NzButton.secondary(
-                                      label: l.uiTablesLoadMoreRows,
-                                      onPressed: d.loadingMore
-                                          ? null
-                                          : () => tableRun(
-                                              context,
-                                              _controller.loadMore,
-                                            ),
+                        : RefreshIndicator(
+                            onRefresh: () =>
+                                tableRun(context, _controller.refresh),
+                            child: ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              itemCount: rows.length + (d.hasMore ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (index == rows.length) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(
+                                      NizamioSpacing.space3,
                                     ),
-                                  ),
-                                );
-                              }
-                              return _row(context, d, index, widthOf);
-                            },
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: NzButton.secondary(
+                                        label: l.uiTablesLoadMoreRows,
+                                        onPressed: d.loadingMore
+                                            ? null
+                                            : () => tableRun(
+                                                context,
+                                                _controller.loadMore,
+                                              ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return _row(context, d, index, widthOf);
+                              },
+                            ),
                           ),
                   ),
                 ],

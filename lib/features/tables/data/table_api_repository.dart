@@ -45,6 +45,7 @@ import '../../../core/api/generated/models/table_undo_cells_command_kind.dart';
 import '../../../core/api/generated/models/template.dart';
 import '../../../core/domain/enum_parse.dart';
 import '../../../core/domain/page_slice.dart';
+import '../../../core/domain/stream_reconnect.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/http/interceptors.dart';
 import '../../../core/http/sse.dart';
@@ -67,10 +68,6 @@ class ApiTablesRepository implements TablesRepository {
   ApiTablesRepository(this._dio);
 
   final Dio? Function() _dio;
-
-  /// Akış boşta zaman aşımı: sunucu ~25 sn'de bir `: ping` yazar; 60 sn sessizlik ölü
-  /// bağlantıdır (sohbet akışıyla aynı eşik).
-  static const streamIdleTimeout = Duration(seconds: 60);
 
   Dio get _http {
     final d = _dio();
@@ -356,7 +353,7 @@ class ApiTablesRepository implements TablesRepository {
           cancelToken: cancel,
           options: Options(
             responseType: ResponseType.stream,
-            receiveTimeout: streamIdleTimeout,
+            receiveTimeout: StreamReconnect.idleTimeout,
             headers: {Headers.acceptHeader: 'text/event-stream'},
             // Kapı halkası `extra`'ya yazar; sabit harita kopyalanır.
             extra: personal

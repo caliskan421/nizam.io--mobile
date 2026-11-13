@@ -3982,6 +3982,36 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTablesEmptyTable => 'Bu tabloda henüz satır yok';
 
   @override
+  String get uiTablesComments => 'Yorumlar';
+
+  @override
+  String get uiTablesNoComments => 'Henüz yorum yok';
+
+  @override
+  String get uiTablesHiddenAuthor => 'Görünmeyen kişi';
+
+  @override
+  String get uiTablesAddComment => 'Yorum yaz';
+
+  @override
+  String get uiTablesSend => 'Gönder';
+
+  @override
+  String get uiTablesLive => 'Canlı';
+
+  @override
+  String get uiTablesReconnecting => 'Yeniden bağlanıyor';
+
+  @override
+  String get uiTablesOffline => 'Çevrimdışı';
+
+  @override
+  String get uiTablesHere => 'Tabloda';
+
+  @override
+  String get uiTablesAccessLost => 'Bu tabloya erişiminiz kalmadı.';
+
+  @override
   String get uiTasksNoStatusTransitions =>
       'Bu görev için kullanabileceğiniz bir durum değişikliği yok.';
 

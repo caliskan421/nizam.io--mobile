@@ -140,7 +140,8 @@ extension _TablePageActions on _TablePageState {
                 );
                 if (!yes || !mounted) return;
                 final ok = await tableRun(context, _controller.deleteTable);
-                if (ok && mounted) Navigator.of(context).maybePop();
+                // Silinen tablonun ekranı kalmaz: liste açılır (bölünmüş görünümde sağ bölme kapanır).
+                if (ok && mounted) context.appNav.openTables();
               },
             ),
         ],

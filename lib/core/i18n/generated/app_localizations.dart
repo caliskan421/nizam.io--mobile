@@ -7576,6 +7576,66 @@ abstract class AppLocalizations {
   /// **'Bu tabloda henüz satır yok'**
   String get uiTablesEmptyTable;
 
+  /// ui.tables.comments
+  ///
+  /// In tr, this message translates to:
+  /// **'Yorumlar'**
+  String get uiTablesComments;
+
+  /// ui.tables.no_comments
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz yorum yok'**
+  String get uiTablesNoComments;
+
+  /// ui.tables.hidden_author
+  ///
+  /// In tr, this message translates to:
+  /// **'Görünmeyen kişi'**
+  String get uiTablesHiddenAuthor;
+
+  /// ui.tables.add_comment
+  ///
+  /// In tr, this message translates to:
+  /// **'Yorum yaz'**
+  String get uiTablesAddComment;
+
+  /// ui.tables.send
+  ///
+  /// In tr, this message translates to:
+  /// **'Gönder'**
+  String get uiTablesSend;
+
+  /// ui.tables.live
+  ///
+  /// In tr, this message translates to:
+  /// **'Canlı'**
+  String get uiTablesLive;
+
+  /// ui.tables.reconnecting
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeniden bağlanıyor'**
+  String get uiTablesReconnecting;
+
+  /// ui.tables.offline
+  ///
+  /// In tr, this message translates to:
+  /// **'Çevrimdışı'**
+  String get uiTablesOffline;
+
+  /// ui.tables.here
+  ///
+  /// In tr, this message translates to:
+  /// **'Tabloda'**
+  String get uiTablesHere;
+
+  /// ui.tables.access_lost
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu tabloya erişiminiz kalmadı.'**
+  String get uiTablesAccessLost;
+
   /// ui.tasks.no_status_transitions
   ///
   /// In tr, this message translates to:

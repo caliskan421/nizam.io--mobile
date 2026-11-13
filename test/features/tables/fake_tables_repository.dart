@@ -11,6 +11,9 @@ import 'package:nizamio/features/tables/domain/tables_repository.dart';
 class FakeTable {
   FakeTable(this.meta);
   TableMeta meta;
+
+  /// Olay günlüğü (seq, tür); `changes` buradan okunur.
+  final events = <TableChangeEntry>[];
   final columns = <TableColumnSpec>[];
   final rows = <TableRowRef>[];
   final cells = <TableCellKey, TableCellData>{};
@@ -30,6 +33,19 @@ class FakeTablesRepository implements TablesRepository {
 
   /// Bir sonraki apply bu tamamlayıcıyı bekler (uçuştaki batch).
   Completer<void>? gate;
+
+  /// Açılan akışlar (test çerçeve/hata/kapanış iter).
+  final streams = <StreamController<TableStreamEvent>>[];
+
+  /// `changes` çağrıları (after) ve sıradaki changes hataları.
+  final changesCalls = <int>[];
+  final changesErrors = <ApiError>[];
+
+  /// Presence çağrıları: ('set', row, col) / ('leave', null, null).
+  final presence = <(String, String?, String?)>[];
+
+  /// Sıradaki akış açılış hataları.
+  final streamErrors = <ApiError>[];
 
   final _receipts = <String, (String, TableReceipt)>{};
   var _serial = 0;
@@ -79,6 +95,18 @@ class FakeTablesRepository implements TablesRepository {
     final old = t.cells[k] ?? TableCellData.empty;
     t.cells[k] = TableCellData(value: value, version: old.version + 1);
     t.meta = t.meta.copyWith(sequence: t.meta.sequence + 1);
+    t.events.add(
+      TableChangeEntry(seq: t.meta.sequence, kind: TableChangeKind.setCells),
+    );
+  }
+
+  /// Başkasının yorumu (yalnız olay; içerik testte gerekmez).
+  void foreignComment(String id) {
+    final t = tables[id]!;
+    t.meta = t.meta.copyWith(sequence: t.meta.sequence + 1);
+    t.events.add(
+      TableChangeEntry(seq: t.meta.sequence, kind: TableChangeKind.addComment),
+    );
   }
 
   FakeTable _get(TableScope scope, String id) {
@@ -262,6 +290,17 @@ class FakeTablesRepository implements TablesRepository {
       sequence: t.meta.sequence + 1,
       schemaVersion: schema,
     );
+    t.events.add(
+      TableChangeEntry(
+        seq: t.meta.sequence,
+        kind: switch (op) {
+          SetCells() => TableChangeKind.setCells,
+          AddRow() => TableChangeKind.addRow,
+          AddComment() => TableChangeKind.addComment,
+          _ => TableChangeKind.renameTable,
+        },
+      ),
+    );
     return TableReceipt(
       tableId: t.meta.id,
       sequence: t.meta.sequence,
@@ -278,7 +317,22 @@ class FakeTablesRepository implements TablesRepository {
     String tableId, {
     required int after,
     int? limit,
-  }) => throw UnimplementedError();
+  }) async {
+    changesCalls.add(after);
+    if (changesErrors.isNotEmpty) throw changesErrors.removeAt(0);
+    final t = _get(scope, tableId);
+    final page = [
+      for (final e in t.events)
+        if (e.seq > after) e,
+    ].take(limit ?? 100).toList();
+    final cursor = page.isEmpty ? after : page.last.seq;
+    return TableChangesPage(
+      changes: page,
+      cursor: cursor,
+      sequence: t.meta.sequence,
+      more: cursor < t.meta.sequence,
+    );
+  }
 
   @override
   Future<PageSlice<TableCommentItem>> comments(
@@ -286,7 +340,7 @@ class FakeTablesRepository implements TablesRepository {
     String tableId, {
     String? rowId,
     PageRequest page = const PageRequest(),
-  }) => throw UnimplementedError();
+  }) async => PageSlice(items: const []);
 
   @override
   Future<void> setPresence(
@@ -294,13 +348,19 @@ class FakeTablesRepository implements TablesRepository {
     String tableId, {
     String? rowId,
     String? columnId,
-  }) => throw UnimplementedError();
+  }) async => presence.add(('set', rowId, columnId));
 
   @override
-  Future<void> leavePresence(TableScope scope, String tableId) =>
-      throw UnimplementedError();
+  Future<void> leavePresence(TableScope scope, String tableId) async =>
+      presence.add(('leave', null, null));
 
   @override
-  Stream<TableStreamEvent> stream(TableScope scope, String tableId) =>
-      throw UnimplementedError();
+  Stream<TableStreamEvent> stream(TableScope scope, String tableId) {
+    if (streamErrors.isNotEmpty) {
+      return Stream.error(streamErrors.removeAt(0));
+    }
+    final c = StreamController<TableStreamEvent>();
+    streams.add(c);
+    return c.stream;
+  }
 }

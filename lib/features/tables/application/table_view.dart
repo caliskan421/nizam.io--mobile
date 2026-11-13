@@ -33,6 +33,8 @@ final class TableView {
     this.writeError,
     Set<TableCellKey> conflicts = const {},
     this.undoSequence,
+    this.commentsRevision = 0,
+    this.accessLost = false,
   }) : columns = List.unmodifiable(columns),
        rows = List.unmodifiable(rows),
        cells = Map.unmodifiable(cells),
@@ -80,8 +82,15 @@ final class TableView {
   /// Geri alınabilecek son kendi `set_cells` sırası.
   final int? undoSequence;
 
+  /// Yorum değişikliği sayacı: canlı akış ya da kendi yorum komutu yorum olayı görünce artar;
+  /// açık yorum listeleri buna göre yeniden okunur (snapshot yorum taşımaz, K-26).
+  final int commentsRevision;
+
+  /// Canlı senkronda tabloya erişim kaybı (changes 403/404): görünüm salt okunur kalır.
+  final bool accessLost;
+
   bool get isOwner => meta.ownedBy(accountId);
-  bool get editable => !readOnly;
+  bool get editable => !readOnly && !accessLost;
   bool get hasMore => nextCursor != null;
 
   TableCellData cell(String rowId, String columnId) =>
@@ -115,6 +124,8 @@ final class TableView {
     ApiError? Function()? writeError,
     Set<TableCellKey>? conflicts,
     int? Function()? undoSequence,
+    int? commentsRevision,
+    bool? accessLost,
   }) => TableView(
     meta: meta ?? this.meta,
     columns: columns ?? this.columns,
@@ -130,6 +141,8 @@ final class TableView {
     writeError: writeError == null ? this.writeError : writeError(),
     conflicts: conflicts ?? this.conflicts,
     undoSequence: undoSequence == null ? this.undoSequence : undoSequence(),
+    commentsRevision: commentsRevision ?? this.commentsRevision,
+    accessLost: accessLost ?? this.accessLost,
   );
 
   /// Yeni sayfa(lar)la birleştirir: satırlar eklenir, hücre/referans/ek haritaları birleşir.
@@ -147,5 +160,7 @@ final class TableView {
     writeError: writeError,
     conflicts: conflicts,
     undoSequence: undoSequence,
+    commentsRevision: commentsRevision,
+    accessLost: accessLost,
   );
 }

@@ -11,7 +11,7 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | denetim akışı | 1 |
 | iletilir | 17 |
 | istisna | 60 |
-| rapor | 179 |
+| rapor | 184 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -253,11 +253,16 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/scope/application/scope_selection_controller.dart` | `ScopeSelectionController.clear` | guard | istisna | 1 |
 | `features/scope/application/scope_selection_controller.dart` | `ScopeSelectionController.select` | guard | istisna | 1 |
 | `features/server/application/server_connect_controller.dart` | `ServerConnectController.connect` | guard | istisna | 1 |
+| `features/tables/application/table_cell_writes.dart` | `TableCellWrites._sendFailed` | catch | rapor | 1 |
+| `features/tables/application/table_cell_writes.dart` | `TableCellWrites._send` | catch | rapor | 1 |
 | `features/tables/application/table_controller.dart` | `TableController._command` | catch | rapor | 1 |
 | `features/tables/application/table_controller.dart` | `TableController._resolveScope` | catch | rapor | 1 |
-| `features/tables/application/table_controller.dart` | `TableController._sendFailed` | catch | rapor | 1 |
-| `features/tables/application/table_controller.dart` | `TableController._send` | catch | rapor | 1 |
+| `features/tables/application/table_controller.dart` | `TableController.catchUp` | catch | rapor | 1 |
 | `features/tables/application/table_controller.dart` | `TableController.loadMore` | catch | iletilir | 1 |
+| `features/tables/application/table_sync_controller.dart` | `TableSyncController._leavePresence` | catch | rapor | 1 |
+| `features/tables/application/table_sync_controller.dart` | `TableSyncController._run` | onError | rapor | 1 |
+| `features/tables/application/table_sync_controller.dart` | `TableSyncController._sendPresence` | catch | rapor | 1 |
+| `features/tables/application/table_sync_controller.dart` | `TableSyncController._sync` | catch | rapor | 1 |
 | `features/tables/application/tables_list_controller.dart` | `TablesListController.create` | catch | rapor | 1 |
 | `features/tables/application/tables_list_controller.dart` | `TablesListController.loadMore` | catch | rapor | 1 |
 | `features/tables/application/tables_list_controller.dart` | `TablesListController.refresh` | catch | rapor | 1 |

@@ -1,6 +1,7 @@
 // Tablolar controller testlerinin kapsayıcısı: sahte depo, etkin oturum ('me'), seçili
 // program + departman.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
@@ -13,6 +14,7 @@ ProviderContainer tablesContainer(
   FakeTablesRepository repo, {
   String? programId = 'p1',
   String? departmentId = 'd1',
+  List<Override> extra = const [],
 }) {
   final c = ProviderContainer(
     retry: (_, _) => null,
@@ -25,6 +27,7 @@ ProviderContainer tablesContainer(
       scopeStateProvider.overrideWithValue(
         ScopeSelection(programId: programId, departmentId: departmentId),
       ),
+      ...extra,
     ],
   );
   addTearDown(c.dispose);

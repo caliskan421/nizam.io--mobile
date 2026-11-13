@@ -4989,6 +4989,46 @@
   "@uiTablesEmptyTable": {
     "description": "ui.tables.empty_table"
   },
+  "uiTablesComments": "Yorumlar",
+  "@uiTablesComments": {
+    "description": "ui.tables.comments"
+  },
+  "uiTablesNoComments": "Henüz yorum yok",
+  "@uiTablesNoComments": {
+    "description": "ui.tables.no_comments"
+  },
+  "uiTablesHiddenAuthor": "Görünmeyen kişi",
+  "@uiTablesHiddenAuthor": {
+    "description": "ui.tables.hidden_author"
+  },
+  "uiTablesAddComment": "Yorum yaz",
+  "@uiTablesAddComment": {
+    "description": "ui.tables.add_comment"
+  },
+  "uiTablesSend": "Gönder",
+  "@uiTablesSend": {
+    "description": "ui.tables.send"
+  },
+  "uiTablesLive": "Canlı",
+  "@uiTablesLive": {
+    "description": "ui.tables.live"
+  },
+  "uiTablesReconnecting": "Yeniden bağlanıyor",
+  "@uiTablesReconnecting": {
+    "description": "ui.tables.reconnecting"
+  },
+  "uiTablesOffline": "Çevrimdışı",
+  "@uiTablesOffline": {
+    "description": "ui.tables.offline"
+  },
+  "uiTablesHere": "Tabloda",
+  "@uiTablesHere": {
+    "description": "ui.tables.here"
+  },
+  "uiTablesAccessLost": "Bu tabloya erişiminiz kalmadı.",
+  "@uiTablesAccessLost": {
+    "description": "ui.tables.access_lost"
+  },
   "uiTasksNoStatusTransitions": "Bu görev için kullanabileceğiniz bir durum değişikliği yok.",
   "@uiTasksNoStatusTransitions": {
     "description": "ui.tasks.no_status_transitions"

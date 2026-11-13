@@ -246,7 +246,13 @@ sıraya dizilir.
    adı ve genişliği) yalnız makbuz sırası hem uygulanmış snapshot sırasından hem de AYNI alana
    uygulanmış son makbuz sırasından yeniyse uygulanır: geciken makbuz daha yeni snapshot'ı ya
    da ters sırada dönen kendi daha yeni makbuzumuzu ezmez; farklı alanlar birbirini engellemez,
-   snapshot sırası yapay ilerletilmez. Yeniden adlandırma kaydı istek sürerken kilitlidir. İşlem nesnesi kendi başarı işleyicisini taşır: yeniden deneme de aynı sonucu işler
+   snapshot sırası yapay ilerletilmez (uygulanan snapshot sırasının altındaki alan kayıtları
+   budanır). Sütun komutları şema CAS'ına bağlı olduğundan (`resize_column` dahil, backend
+   `store.go:194`) aynı sütunda ters sıralı makbuz ancak araya snapshot girince oluşur ve
+   snapshot sırası korumasıyla kapanır; alan başına sıra asıl olarak şema dışı tablo adını
+   korur. Şema sürümü de monotondur: geciken makbuz daha yeni şemayı geri almaz. Yeniden
+   adlandırma kaydı istek sürerken kilitlidir; yanıt sayfa kapanırken gelirse yalnız sayfa
+   güncel rotaysa kapatılır. İşlem nesnesi kendi başarı işleyicisini taşır: yeniden deneme de aynı sonucu işler
    (silmede listeden düşme ve ekranın listeye dönmesi).
 
 ### 9.2 Çakışma

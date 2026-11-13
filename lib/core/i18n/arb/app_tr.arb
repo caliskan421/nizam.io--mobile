@@ -5605,6 +5605,14 @@
   "@uiTasksSubDelete": {
     "description": "ui.tasks.sub_delete"
   },
+  "uiTasksSubDeleteQ": "Alt görev silinsin mi?",
+  "@uiTasksSubDeleteQ": {
+    "description": "ui.tasks.sub_delete_q"
+  },
+  "uiTasksSubDeleteDesc": "Silinen alt görev geri alınamaz",
+  "@uiTasksSubDeleteDesc": {
+    "description": "ui.tasks.sub_delete_desc"
+  },
   "uiTasksSubAdd": "Alt görev ekle",
   "@uiTasksSubAdd": {
     "description": "ui.tasks.sub_add"

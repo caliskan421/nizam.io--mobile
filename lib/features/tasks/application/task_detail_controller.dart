@@ -690,8 +690,11 @@ class TaskDetailController extends _$TaskDetailController
     DateTime? end,
   ) async {
     final u = _sub(id);
-    if (u == null) return WriteOutcome.invalid;
+    final t = _task;
+    if (u == null || t == null) return WriteOutcome.invalid;
     if (u.start == start && u.end == end) return WriteOutcome.unchanged;
+    // Alt görev ana görevin başlangıcından önce başlayamaz (istemci kuralı).
+    if (start != null && _before(start, t.start)) return WriteOutcome.invalid;
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
     return _patchSub(id, SubtaskPatch(dates: (start: start, end: end)));
   }
@@ -717,6 +720,12 @@ class TaskDetailController extends _$TaskDetailController
 
   Future<WriteOutcome> clearSubtaskDates(String id) =>
       _setSubtaskDates(id, null, null);
+
+  static bool _before(DateTime a, DateTime b) => DateTime(
+    a.year,
+    a.month,
+    a.day,
+  ).isBefore(DateTime(b.year, b.month, b.day));
 
   /// Alt görevi kaldırır; sonuç ve kaldırılan (bildirim metni için).
   Future<(WriteOutcome, Subtask?)> removeSubtask(String id) async {

@@ -4430,6 +4430,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksSubDelete => 'Alt görevi sil';
 
   @override
+  String get uiTasksSubDeleteQ => 'Alt görev silinsin mi?';
+
+  @override
+  String get uiTasksSubDeleteDesc => 'Silinen alt görev geri alınamaz';
+
+  @override
   String get uiTasksSubAdd => 'Alt görev ekle';
 
   @override

@@ -8500,6 +8500,18 @@ abstract class AppLocalizations {
   /// **'Alt görevi sil'**
   String get uiTasksSubDelete;
 
+  /// ui.tasks.sub_delete_q
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görev silinsin mi?'**
+  String get uiTasksSubDeleteQ;
+
+  /// ui.tasks.sub_delete_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinen alt görev geri alınamaz'**
+  String get uiTasksSubDeleteDesc;
+
   /// ui.tasks.sub_add
   ///
   /// In tr, this message translates to:

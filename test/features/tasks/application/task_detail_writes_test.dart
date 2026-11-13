@@ -312,12 +312,28 @@ void main() {
       },
     );
 
+    test('alt görev ana görevin başlangıcından önce başlayamaz (istek yok)', () async {
+      final s = TaskDetailServer();
+      final (h, _, ctl) = await _open(s);
+      final before = h.backend.requests.length;
+      expect(
+        (await ctl.setSubtaskStart('s1', DateTime(2026, 10, 31))).kind,
+        WriteKind.invalid,
+      );
+      expect(
+        (await ctl.setSubtaskEnd('s2', DateTime(2026, 10, 30))).kind,
+        WriteKind.invalid,
+        reason: 'başlangıçsız alt görevde bitiş başlangıca da yazılır',
+      );
+      expect(h.backend.requests.length, before);
+    });
+
     test('kişi ve tarih: atama kaldırma boş dize; tarihler birlikte gider', () async {
       final s = TaskDetailServer()..assignees = ['u2', 'acc-1'];
       final (h, _, ctl) = await _open(s);
       await ctl.setSubtaskAssignee('s1', 'u2');
       await ctl.setSubtaskAssignee('s2', null);
-      await ctl.setSubtaskStart('s1', DateTime(2026, 10, 25));
+      await ctl.setSubtaskStart('s1', DateTime(2026, 11, 3));
       await ctl.clearSubtaskDates('s2');
       final bodies = [
         for (final r in h.backend.requests)
@@ -329,8 +345,8 @@ void main() {
           {'assignee_account_id': 'u2', 'expected_revision': 1},
           {'assignee_account_id': '', 'expected_revision': 1},
           {
-            'start_on': '2026-10-25',
-            'end_on': '2026-10-25',
+            'start_on': '2026-11-03',
+            'end_on': '2026-11-03',
             'expected_revision': 1,
           },
         ],

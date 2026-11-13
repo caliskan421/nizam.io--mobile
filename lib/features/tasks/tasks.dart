@@ -32,7 +32,7 @@ export 'domain/task_access.dart';
 export 'domain/task_catalog.dart';
 export 'domain/task_permissions.dart' show TaskPermissions;
 export 'domain/task_query.dart'
-    show TaskFilter, TaskFilterOptions, filterOptions;
+    show TaskFilter, TaskFilterOptions, filterOptions, taskMatchesQuery;
 export 'domain/task_writes.dart'
     show UploadOrigin, UploadSource, WorkItemPatch, TaskWriteRepository;
 export 'presentation/deleted_tasks_page.dart' show DeletedTasksPage;

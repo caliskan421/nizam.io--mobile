@@ -2,13 +2,21 @@ part of 'table_controller.dart';
 
 /// Sonucu bilinmeyen komut: işlem nesnesi ve anahtarı DEĞİŞMEZ; yalnız kendi yeniden
 /// denemesi aynı anahtarı kullanır.
+/// Makbuzla güncellenen metadata alanı (tablo adı; sütun kimliği bazında ad/genişlik).
+/// Tipli anahtar: alan başına uygulanmış en yüksek makbuz sırasının anahtarı.
+extension type const _MetaField._((int, String) _key) {
+  const _MetaField.tableName() : this._((0, ''));
+  _MetaField.columnName(String id) : this._((1, id));
+  _MetaField.columnWidth(String id) : this._((2, id));
+}
+
 final class _PendingCommand {
   _PendingCommand(this.op, this.key, {this.field, this.apply, this.done});
   final TableOperation op;
   final String key;
 
-  /// [apply]'ın yazdığı metadata alanı (`name`, `col:<id>:name`, `col:<id>:width`).
-  final String? field;
+  /// [apply]'ın yazdığı metadata alanı.
+  final _MetaField? field;
 
   /// Makbuzla gelen yerel görünüm güncellemesi (ad, sütun). YALNIZ makbuz sırası hem
   /// uygulanmış snapshot sırasından hem de aynı alana uygulanmış son makbuz sırasından yeniyse
@@ -37,7 +45,7 @@ extension TableCommands on TableController {
     TableOperation op, {
     bool reload = true,
     _PendingCommand? retry,
-    String? field,
+    _MetaField? field,
     void Function(TableReceipt r)? apply,
     void Function(TableReceipt r)? done,
   }) async {
@@ -76,7 +84,10 @@ extension TableCommands on TableController {
     ownSequences.add(r.sequence);
     if (generation == _generation && _mounted) {
       final field = pending.field;
-      final floor = math.max(_viewSequence, _fieldSequence[field] ?? 0);
+      final floor = math.max(
+        _viewSequence,
+        field == null ? 0 : (_fieldSequence[field] ?? 0),
+      );
       if (r.sequence > floor) {
         pending.apply?.call(r);
         if (field != null) _fieldSequence[field] = r.sequence;
@@ -88,7 +99,10 @@ extension TableCommands on TableController {
           uncertainCommands: _uncertain.length,
           meta: b.meta.copyWith(
             sequence: r.sequence > b.meta.sequence ? r.sequence : null,
-            schemaVersion: r.schemaVersion,
+            // Şema sürümü monotondur: geciken makbuz daha yeni şemayı geri almaz.
+            schemaVersion: r.schemaVersion > b.meta.schemaVersion
+                ? r.schemaVersion
+                : null,
           ),
         ),
       );
@@ -120,7 +134,7 @@ extension TableCommands on TableController {
     await _command(
       RenameTable(trimmed),
       reload: false,
-      field: 'name',
+      field: const _MetaField.tableName(),
       apply: (_) {
         _update((b) => b.copyWith(meta: b.meta.copyWith(name: trimmed)));
         _listOrNull?.renamed(_id, trimmed);
@@ -172,7 +186,7 @@ extension TableCommands on TableController {
     await _command(
       RenameColumn(id: columnId, name: trimmed, expectedSchema: _schema),
       reload: false,
-      field: 'col:$columnId:name',
+      field: _MetaField.columnName(columnId),
       apply: (_) => _patchColumn(columnId, (c) => c.copyWith(name: trimmed)),
     );
   }
@@ -181,7 +195,7 @@ extension TableCommands on TableController {
     await _command(
       ResizeColumn(id: columnId, width: width, expectedSchema: _schema),
       reload: false,
-      field: 'col:$columnId:width',
+      field: _MetaField.columnWidth(columnId),
       apply: (_) => _patchColumn(columnId, (c) => c.copyWith(width: width)),
     );
   }

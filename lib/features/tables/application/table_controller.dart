@@ -54,7 +54,7 @@ class TableController extends _$TableController {
   int _confirmedSequence = 0;
 
   /// Alan başına makbuzla uygulanmış en yüksek sıra (snapshot sırası yapay ilerletilmez).
-  final _fieldSequence = <String?, int>{};
+  final _fieldSequence = <_MetaField, int>{};
 
   /// Sonucu bilinmeyen komutlar: işlem nesnesi + anahtarı ([retryCommands] aynısını yollar).
   final _uncertain = <_PendingCommand>[];
@@ -256,6 +256,8 @@ class TableController extends _$TableController {
     }
     _needsReload = false;
     _viewSequence = sequence;
+    // Snapshot bu sıraya kadar her alanı içerir: altında kalan alan kayıtları gereksiz.
+    _fieldSequence.removeWhere((_, s) => s <= sequence);
     final skipped = sequence > _cursor;
     if (skipped) _cursor = sequence;
     final rows = {for (final r in next!.rows) r.id};

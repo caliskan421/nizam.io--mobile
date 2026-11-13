@@ -42,8 +42,18 @@ Future<void> tableRename(BuildContext context, WidgetRef ref, String id) async {
   final l = context.l10n;
   var name = view.meta.name;
   // Uçuş kilidi: istek sürerken kaydet kapalıdır (asıl koruma denetleyicide: alan başına
-  // makbuz sırası).
+  // makbuz sırası). Sayfa kapanırken (çıkış animasyonu dahil) gelen yanıt bırakılmış
+  // bildiriciye yazmaz ve başka rotayı kapatmaz: kapanış ayrı bayrakla izlenir, bildirici
+  // ancak sayfa kapalı VE istek bitmişken bırakılır; kapatma yalnız sayfa güncel rotayken.
   final busy = ValueNotifier(false);
+  var closed = false;
+  var inFlight = false;
+  void release() {
+    if (closed && !inFlight) busy.dispose();
+  }
+
+  bool current(BuildContext sheet) =>
+      !closed && (ModalRoute.of(sheet)?.isCurrent ?? false);
   await showTableSheet(
     ref,
     context,
@@ -58,9 +68,12 @@ Future<void> tableRename(BuildContext context, WidgetRef ref, String id) async {
               ? null
               : () async {
                   if (name.trim().isEmpty || name.trim() == view.meta.name) {
-                    Navigator.of(sheet).pop();
+                    if (sheet.mounted && current(sheet)) {
+                      Navigator.of(sheet).pop();
+                    }
                     return;
                   }
+                  inFlight = true;
                   busy.value = true;
                   final ok = await tableRun(
                     context,
@@ -68,9 +81,11 @@ Future<void> tableRename(BuildContext context, WidgetRef ref, String id) async {
                         .read(tableControllerProvider(id).notifier)
                         .rename(name),
                   );
-                  if (!sheet.mounted) return;
+                  inFlight = false;
+                  if (closed) return release();
                   busy.value = false;
-                  if (ok) Navigator.of(sheet).pop();
+                  if (!sheet.mounted) return;
+                  if (ok && current(sheet)) Navigator.of(sheet).pop();
                 },
         ),
       ),
@@ -86,7 +101,8 @@ Future<void> tableRename(BuildContext context, WidgetRef ref, String id) async {
       ],
     ),
   );
-  busy.dispose();
+  closed = true;
+  release();
 }
 
 /// Satır düzenleme: her sütun için düzenleyici; değişiklik yerelde hemen görünür ve

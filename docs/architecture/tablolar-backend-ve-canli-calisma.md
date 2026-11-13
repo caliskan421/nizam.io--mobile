@@ -203,12 +203,42 @@ redo yok; dışa aktarım yok.
 parametresiyle ad çakışmasından `TableCommentAuthor` bileşenine taşınır (`inline_names.dart`).
 
 Ekranda olmayan (gizlenen) backend yüzleri: paylaşım (grant/revoke — üye seçici yok), ekip
-rolü, şablon, kopya/taşıma/öneri, projeler, ekler, referans hücre düzenleme (kişi/departman/
-görev/dosya/tablo seçicileri), sütun tipi dönüştürme, filter/sort, yorum düzenleme. Mobil
+rolü, şablon, kopya/taşıma/öneri, projeler, ekler (yükleme), referans sütunu OLUŞTURMA
+(mevcut referans sütunlarına yazım var, §8.1), sütun tipi dönüştürme, filter/sort, yorum
+düzenleme. Mobil
 prototipin karşılıksız özellikleri kaldırıldı: birim (koordinatörlük) kutuları ve örnek
 birimler, hazır şablonlar, son açılanlar, kopyalama, tablo ilişkileri/geri bağlantılar,
 program/birim paylaşımı, sahte kişi/görev/dosya seçicileri, ızgarada yerel sıralama/arama/
 "tamamlanan" süzgeci.
+
+### 8.1 Referans hücreleri
+
+Görünürlük kuralı sahip modüldedir (backend ADR-0034); mobil her tür için kuralın karşılığı olan
+MEVCUT ucu aday kaynağı yapar (`TableReferenceSources`, `data/table_reference_api_repository.dart`).
+Uç ile kural birebir örtüşmediğinde sunucu yazımı 422 `tables.reference_unavailable` ile reddeder;
+değer geri alınır ve şeritte anlaşılır metin görünür.
+
+| Tür | Kural (backend) | Aday ucu | Fark / not |
+|---|---|---|---|
+| Kişi (koordinatörlük) | aktif hesap ve (yönetici ya da o departmanda canlı ekip satırı) | `listMembers` (`/v1/departments/{id}/members`, yalnız `active`) | uç yalnız yöneticiye ve o departmanın koordinatörüne açık; üyeye 403 → seçici hata gösterir. Ekip satırı olmayan yönetici listede yok |
+| Kişi (kişisel) | aktif hesap ve (yönetici ya da programda canlı ekip satırı) | `listMeetingParticipantCandidates` (imleçli) | uç yalnız yönetici/program koordinatörüne açık; ekip satırsız yönetici yok (GAP-223); devre dışı hesap listede olabilir → 422 |
+| Departman | yönetici: programa bağlı tüm canlı departmanlar; diğer: ekip satırı olduğu departmanlar | `me` + yöneticiye `listProgramDepartments`, diğerine `myDepartments` (bu program) | birebir (görev kataloğuyla aynı yol) |
+| Görev | tekil görev okuması (yönetici, koordinatör, atanmış üye) | `listProgramWorkItems` (imleçli, en çok 5×200) | birebir |
+| Dosya | indirme kuralı (yönetici, dosya departmanının koordinatörü, görevine atanmış üye) | görev seçilir → `listWorkItemFiles` (görevin program + departmanı) | yalnız görev dosyaları; görevsiz arşiv dosyası seçilemez |
+| Tablo | tables erişim kuralı, aynı program ve alan | `listTables` / `listPersonalTables` (tablonun kendi kapsamı, en çok 5×200) | kapsam içi |
+
+Yazım: tekli sütunda kimlik, çoklu sütunda 1–50 benzersiz kimlik (sıra korunur, boş seçim `null`)
+mevcut `set_cells` kuyruğundan (hücre CAS). Seçilen adayların adları yanıta kadar yerelde
+gösterilir; makbuzdan sonra adlar snapshot'tan yeniden okunur (makbuz içerik taşımaz). Gizlenmiş
+(redakte) hücre düz düzenlenmez; "gizli öğeler kaldırılacak" onayından sonra bilinçli tam
+değiştirme olarak yazılır (gizli öğeler korunamaz, istekte `redacted` yok). Ek sütunu yalnız
+yükleme ucuyla yazılır (mobilde yok).
+
+Gezinme: tablo referansı hedef tabloyu (`openTable`, aynı alan; erişim yoksa tablo ekranı
+`tables.not_found` metnini gösterir), görev referansı görev ayrıntısını (`openTask`) açar —
+ızgarada tekli hücreye dokunma ya da satır sayfasındaki rozet. Gizlenmiş ya da adı görünmeyen
+hedef açılmaz. Kişi (yönetim sayfası yalnız yöneticiye), departman (koordinatörlük kodu ile
+kimlik eşlemesi doğrulanmadı) ve dosya (görevsiz önizleme yok) yalnız gösterilir.
 
 ## 9. Senkron algoritması
 

@@ -5,10 +5,9 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/surfaces/nz_card.dart';
 import '../../domain/archive.dart';
-import 'archive_folder_preview.dart';
 import 'archive_texts.dart';
 
-/// Arşiv özeti: dosya sayısı sunucudan, ek metrikler geçici önizlemeden gelir.
+/// Arşiv klasörü kartı: yalnız klasör adı ve sunucudaki dosya sayısı.
 class ArchiveFolderCard extends StatelessWidget {
   const ArchiveFolderCard({
     super.key,
@@ -22,21 +21,9 @@ class ArchiveFolderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final files = folder.files > 0 ? l.files(folder.files) : l.uiArchiveNoFiles;
-    final preview = archiveFolderPreview(folder.name);
-    final tasks = '${preview.tasks} ${l.uiTasksTasksLc}';
-    final size = l.size(preview.bytes);
-    final when = switch (preview.daysAgo) {
-      0 => l.uiCalendarRelToday,
-      1 => l.uiCalendarRelYesterday,
-      final n => '$n ${l.uiCalendarRelBefore}',
-    };
     return ArchiveFolderCardSurface(
       title: folder.name,
-      summary: '$files · $tasks',
-      semanticLabel: '${folder.name}, $files, $tasks, $size, $when',
-      badge: preview.group ? l.uiMessagesGroup.toLowerCase() : null,
-      size: size,
-      date: when,
+      summary: files,
       onTap: onTap,
     );
   }

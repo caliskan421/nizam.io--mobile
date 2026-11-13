@@ -2456,6 +2456,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiInputsValidationMismatch => 'Değerler eşleşmiyor.';
 
   @override
+  String get uiInputsPasswordRepeat => 'Şifre tekrar';
+
+  @override
   String get uiInputsValidationMustAccept =>
       'Devam etmek için onaylamanız gerekir.';
 

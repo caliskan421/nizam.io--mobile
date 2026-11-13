@@ -49,7 +49,7 @@ class AdminManagementTools extends ConsumerWidget {
                 secret: true,
                 required: true,
               ),
-            ]);
+            ], confirmSecret: true);
             if (values == null || !context.mounted) {
               return;
             }

@@ -4690,6 +4690,12 @@ abstract class AppLocalizations {
   /// **'Değerler eşleşmiyor.'**
   String get uiInputsValidationMismatch;
 
+  /// ui.inputs.password_repeat
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre tekrar'**
+  String get uiInputsPasswordRepeat;
+
   /// ui.inputs.validation_must_accept
   ///
   /// In tr, this message translates to:

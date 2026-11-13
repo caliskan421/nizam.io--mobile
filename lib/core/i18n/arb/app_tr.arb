@@ -3065,6 +3065,10 @@
   "@uiInputsValidationMismatch": {
     "description": "ui.inputs.validation_mismatch"
   },
+  "uiInputsPasswordRepeat": "Şifre tekrar",
+  "@uiInputsPasswordRepeat": {
+    "description": "ui.inputs.password_repeat"
+  },
   "uiInputsValidationMustAccept": "Devam etmek için onaylamanız gerekir.",
   "@uiInputsValidationMustAccept": {
     "description": "ui.inputs.validation_must_accept"

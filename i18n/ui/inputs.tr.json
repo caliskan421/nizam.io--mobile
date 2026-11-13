@@ -12,6 +12,7 @@
     "ui.inputs.validation_too_short": "Değer çok kısa.",
     "ui.inputs.validation_too_long": "Değer çok uzun.",
     "ui.inputs.validation_mismatch": "Değerler eşleşmiyor.",
+    "ui.inputs.password_repeat": "Şifre tekrar",
     "ui.inputs.validation_must_accept": "Devam etmek için onaylamanız gerekir.",
     "ui.inputs.validation_must_choose": "Bir seçim yapın."
   }

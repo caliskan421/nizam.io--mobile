@@ -81,18 +81,29 @@ class CoordMembersTab extends ConsumerWidget {
 /// Kişi alt sayfası (prototip `isPerson`): avatar, ad, rol; açık/geciken sayıları; "Görevlerini
 /// gör" (Görevler bölümü kişi süzgeciyle) ve "Mesaj gönder". Rol değiştirme ve çıkarma bu
 /// ekranda yok (yönetim yüzü).
+///
+/// Şirket yöneticisinde kişiye basmak alt sayfa yerine tam kullanıcı ayrıntı sayfasını açar;
+/// kullanıcı okuma ucu (`/v1/admin/users/{id}`) yalnız yöneticiye açık olduğundan diğer
+/// rollerde alt sayfa kalır.
 Future<void> showCoordPersonSheet(
   BuildContext context,
   WidgetRef ref,
   String code,
   CoordPerson p,
-) {
+) async {
   final l = context.l10n;
   final nav = context.appNav;
+  final admin =
+      ref.read(taskCatalogControllerProvider).value?.access?.companyAdmin ??
+      false;
+  if (admin) {
+    nav.openUser(p.id);
+    return;
+  }
   final commands = ref.read(
     coordinatorshipDetailControllerProvider(code).notifier,
   );
-  return NzBottomSheet.show<void>(
+  await NzBottomSheet.show<void>(
     context,
     title: p.name,
     showHeader: false,

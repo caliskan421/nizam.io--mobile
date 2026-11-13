@@ -32,7 +32,7 @@ Future<void> showRecentTables(
         rows: [
           for (final d in state.documents)
             Material(
-              color: Colors.transparent,
+              type: MaterialType.transparency,
               child: InkWell(
                 onTap: () {
                   ref.read(tablesControllerProvider.notifier).markOpened(d.id);

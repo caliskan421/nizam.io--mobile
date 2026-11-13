@@ -210,7 +210,7 @@ class _CoordCard extends StatelessWidget {
                         const TextSpan(text: ' · '),
                         TextSpan(
                           text: late,
-                          style: TextStyle(
+                          style: t.bodySm.copyWith(
                             color: c.late > 0
                                 ? colors.danger
                                 : colors.textMuted,

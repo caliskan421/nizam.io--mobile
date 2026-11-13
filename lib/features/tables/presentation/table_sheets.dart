@@ -147,7 +147,7 @@ Future<void> tableFields(
           rows: [
             for (final f in d.fields)
               Material(
-                color: Colors.transparent,
+                type: MaterialType.transparency,
                 child: InkWell(
                   onTap: () {
                     Navigator.of(sheet).pop();

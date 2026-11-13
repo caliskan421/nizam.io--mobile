@@ -477,8 +477,7 @@ class _TablePageState extends ConsumerState<TablePage> {
                                                         ),
                                                       ),
                                                     ),
-                                                  if (d.editable)
-                                                    const SizedBox(width: 48),
+                                                  if (d.editable) const Gap(48),
                                                 ],
                                               );
                                             }
@@ -551,8 +550,7 @@ class _TablePageState extends ConsumerState<TablePage> {
                                                       ),
                                                     ),
                                                   ),
-                                                if (d.editable)
-                                                  const SizedBox(width: 48),
+                                                if (d.editable) const Gap(48),
                                               ],
                                             );
                                           },

@@ -43,8 +43,8 @@ class NzFolder extends StatelessWidget {
       onTap: onTap,
       child: InkWell(
         onTap: onTap,
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
+        splashColor: c.surface.withValues(alpha: 0),
+        highlightColor: c.surface.withValues(alpha: 0),
         borderRadius: BorderRadius.circular(NizamioRadius.tile),
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: NizamioSize.tap),

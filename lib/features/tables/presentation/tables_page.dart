@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/errors/api_error.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/extensions/ref_ext.dart';
@@ -185,7 +187,8 @@ class TablesPage extends ConsumerWidget {
                           .create(space, name);
                       if (sheet.mounted) Navigator.of(sheet).pop();
                       onOpenTable(id);
-                    } on ApiError catch (e) {
+                    } on ApiError catch (e, st) {
+                      reportUnexpected(e, st, source: ReportSource.tables);
                       if (context.mounted) NzToast.error(context, e);
                       update(() => busy = false);
                     }

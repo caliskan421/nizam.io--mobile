@@ -9,6 +9,8 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
 import '../../../core/session/session_state.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/table_models.dart';
 import '../domain/table_operation.dart';
 import '../domain/tables_repository.dart';
@@ -94,7 +96,8 @@ class TableController extends _$TableController {
       try {
         await _repo.snapshot(coord, id, page: const PageRequest(limit: 1));
         return coord;
-      } on ApiError catch (e) {
+      } on ApiError catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.tables);
         if (e.code != 'tables.not_found' || personal == null) rethrow;
       }
     }
@@ -282,7 +285,8 @@ class TableController extends _$TableController {
       if (generation != _generation || !ref.mounted) return false;
       _applyReceipt(batch, r);
       return true;
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tables);
       if (generation != _generation || !ref.mounted) return false;
       return _sendFailed(batch, e);
     }
@@ -342,8 +346,9 @@ class TableController extends _$TableController {
     );
     try {
       await _reload();
-    } on ApiError {
-      // Yeniden okuma da düştüyse görünüm eski kalır; hata zaten gösteriliyor.
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tables);
+      // Yeniden okuma da düştüyse görünüm eski kalır; ilk hata zaten gösteriliyor.
     }
     return !forbidden;
   }
@@ -415,7 +420,8 @@ class TableController extends _$TableController {
         if (reload) await _reload();
       }
       return r;
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tables);
       if (!isOutcomeUnknown(e)) _keys = _keys.clear(action);
       if (generation == _generation && ref.mounted) {
         if (e.code == 'tables.forbidden') {

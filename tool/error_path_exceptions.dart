@@ -242,6 +242,13 @@ const errorPathExceptions = <String, ErrorPathException>{
         'text/event-stream için ham Dio; hata `streamApiError` ile sınıflandırılır ve işlem '
         'kimliği isteğin doğrulanmış `openapi.operationId` (streamChatEvents) metaverisinden gelir.',
       ),
+  'features/tables/data/table_api_repository.dart::ApiTablesRepository.stream#rawDio':
+      ErrorPathException(
+        1,
+        'text/event-stream için ham Dio (üretilmiş istemci akışı okuyamaz); hata '
+        '`streamApiError` ile sınıflandırılır ve işlem kimliği isteğin doğrulanmış '
+        '`openapi.operationId` (streamTableChanges / streamPersonalTableChanges) metaverisinden gelir.',
+      ),
   'features/messages/presentation/messages_page.dart::_MessagesPageState.build#asyncError':
       ErrorPathException(
         1,

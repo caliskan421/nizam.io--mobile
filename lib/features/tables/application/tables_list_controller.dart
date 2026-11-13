@@ -227,7 +227,8 @@ class TablesListController extends _$TablesListController {
           ),
         ),
       );
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tables);
       if (!ref.mounted || generation != _generation) return;
       final now = state.value!;
       state = AsyncData(
@@ -259,7 +260,8 @@ class TablesListController extends _$TablesListController {
         await refresh();
       }
       return r.id ?? r.tableId;
-    } on ApiError catch (e) {
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tables);
       if (!isOutcomeUnknown(e)) _keys = _keys.clear(action);
       rethrow;
     }

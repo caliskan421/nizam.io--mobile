@@ -9,9 +9,9 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | Sahip | Yol sayısı |
 |---|---|
 | denetim akışı | 1 |
-| iletilir | 15 |
-| istisna | 59 |
-| rapor | 167 |
+| iletilir | 17 |
+| istisna | 60 |
+| rapor | 179 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -64,6 +64,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/scope/application/scope_selection_controller.dart::ScopeSelectionController.clear#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; AsyncError durumu providerDidFail ile raporlanır. |
 | `features/scope/application/scope_selection_controller.dart::ScopeSelectionController.select#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; AsyncError durumu providerDidFail ile raporlanır. |
 | `features/server/application/server_connect_controller.dart::ServerConnectController.connect#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; sunucu bağ doğrulama hatalarının beklenenleri (ApiError) süzülür, beklenmeyen providerDidFail ile raporlanır. |
+| `features/tables/data/table_api_repository.dart::ApiTablesRepository.stream#rawDio` | 1 | text/event-stream için ham Dio (üretilmiş istemci akışı okuyamaz); hata `streamApiError` ile sınıflandırılır ve işlem kimliği isteğin doğrulanmış `openapi.operationId` (streamTableChanges / streamPersonalTableChanges) metaverisinden gelir. |
 | `features/tasks/application/task_list_filter.dart::taskListCatalog#asyncError` | 1 | YENİDEN: kaynak sağlayıcı hatası aynı nesneyle taşınır. |
 | `features/tasks/data/download_sink.dart::FileDownloadSink._reserve#catch` | 1 | Özel oluşturma çakışması (ad dolu) FileSystemException ile gelir ve sıradaki kopya adına geçilir; ad dolu DEĞİLSE aynı hata koşulsuz kanıtla (typeSync) yeniden fırlatılır ve `save` çağıranı raporlar. Çakışma normal akıştır, yarışta tek sahip. |
 | `features/tasks/data/download_sink.dart::FileDownloadSink._save#catchError` | 3 | Hata sonrası geçici dosya temizliği (en iyi çaba). Asıl yerel dosya sistemi hatası `save` içinde FileSystemException olarak raporlanıp yeniden fırlatılır; temizlik hatası ikincil ve eyleme dönüşmez. |
@@ -252,6 +253,20 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/scope/application/scope_selection_controller.dart` | `ScopeSelectionController.clear` | guard | istisna | 1 |
 | `features/scope/application/scope_selection_controller.dart` | `ScopeSelectionController.select` | guard | istisna | 1 |
 | `features/server/application/server_connect_controller.dart` | `ServerConnectController.connect` | guard | istisna | 1 |
+| `features/tables/application/table_controller.dart` | `TableController._command` | catch | rapor | 1 |
+| `features/tables/application/table_controller.dart` | `TableController._resolveScope` | catch | rapor | 1 |
+| `features/tables/application/table_controller.dart` | `TableController._sendFailed` | catch | rapor | 1 |
+| `features/tables/application/table_controller.dart` | `TableController._send` | catch | rapor | 1 |
+| `features/tables/application/table_controller.dart` | `TableController.loadMore` | catch | iletilir | 1 |
+| `features/tables/application/tables_list_controller.dart` | `TablesListController.create` | catch | rapor | 1 |
+| `features/tables/application/tables_list_controller.dart` | `TablesListController.loadMore` | catch | rapor | 1 |
+| `features/tables/application/tables_list_controller.dart` | `TablesListController.refresh` | catch | rapor | 1 |
+| `features/tables/data/table_api_repository.dart` | `ApiTablesRepository._event` | catch | rapor | 1 |
+| `features/tables/data/table_api_repository.dart` | `ApiTablesRepository.stream` | catch | iletilir | 1 |
+| `features/tables/data/table_api_repository.dart` | `ApiTablesRepository.stream` | catch | rapor | 2 |
+| `features/tables/data/table_api_repository.dart` | `ApiTablesRepository.stream` | rawDio | istisna | 1 |
+| `features/tables/presentation/table_sheets.dart` | `tableRun` | catch | rapor | 1 |
+| `features/tables/presentation/tables_page.dart` | `TablesPage._create` | catch | rapor | 1 |
 | `features/tasks/application/invite_form_controller.dart` | `InviteFormController.submit` | catch | rapor | 1 |
 | `features/tasks/application/meeting_form_controller.dart` | `MeetingFormController.submit` | catch | rapor | 1 |
 | `features/tasks/application/quick_forms_controller.dart` | `NewTaskFormController.submit` | catch | rapor | 3 |

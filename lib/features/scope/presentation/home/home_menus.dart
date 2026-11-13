@@ -287,8 +287,7 @@ Future<void> showHomeDrawer(
                 NzIcons.coordinatorships,
                 l.uiHomeCoordinatorships,
               ),
-              if (greetingRole == TeamRole.admin)
-                row(HomeModule.season, NzIcons.flag, 'Raporlar'),
+              // Raporlar: rapor oluşturucu gelene dek gizli.
             ],
           ),
           const Gap(NizamioSpacing.space4),

@@ -11,11 +11,9 @@ import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
-import '../../../core/ui/widgets/buttons/nz_icon_button.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/nz_top_bar.dart';
-import '../../../core/ui/widgets/nz_icons.dart';
 import '../../archive/archive.dart';
 import '../../tasks/tasks.dart';
 import '../application/admin_controller.dart';
@@ -29,7 +27,6 @@ import 'admin_user_account_panel.dart';
 import 'admin_user_collapsed_title.dart';
 import 'admin_user_hero.dart';
 import 'admin_user_identity.dart';
-import 'admin_user_profile_menu.dart';
 import 'admin_user_related.dart';
 import 'admin_user_tasks_panel.dart';
 
@@ -265,27 +262,6 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
                 progress: _collapse,
                 geometryKey: _barKey,
               ),
-        actions: [
-          NzIconButton(
-            icon: NzIcons.edit,
-            semanticLabel: l.uiUsersEditAccount,
-            onPressed: user == null ? null : () => _selectTab(3),
-          ),
-          NzIconButton(
-            icon: NzIcons.moreHorizontal,
-            semanticLabel: l.uiUsersMoreActions,
-            focusBorder: false,
-            onPressed: user == null
-                ? null
-                : () => showAdminUserProfileMenu(
-                    context,
-                    ref,
-                    user: user,
-                    catalog: catalog!,
-                    onAccount: () => _selectTab(3),
-                  ),
-          ),
-        ],
       ),
       onRefresh: _refresh,
       onRevisit: () => unawaited(_clock.refreshIfStale(value, _refresh)),

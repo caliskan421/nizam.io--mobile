@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/layout/nz_uniform_grid.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
@@ -119,16 +120,8 @@ class CoordGeneralTab extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            GridView.count(
-              crossAxisCount: wide ? 4 : 2,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              mainAxisExtent: 220 * MediaQuery.textScalerOf(context).scale(1),
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.zero,
-              children: cards,
-            ),
+            // Kartlar içerik yüksekliğinde (sabit 220 yok); hepsi en uzununa eşitlenir.
+            UniformGrid(columns: wide ? 4 : 2, gap: 10, children: cards),
             const Gap(22),
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -115,12 +115,6 @@ class CoordArchiveTab extends ConsumerWidget {
                           style: t.caption.copyWith(color: c.textMuted),
                         ),
                       ),
-                      NzIconButton.circle(
-                        icon: NzIcons.upload,
-                        semanticLabel: l.uiCoordUpload,
-                        onPressed: () =>
-                            NzToast.show(context, l.uiCoordToastUpload),
-                      ),
                     ],
                   ),
                   NzProgressBar.segments(

@@ -9,6 +9,7 @@ export 'application/task_catalog_controller.dart'
         taskCatalogControllerProvider,
         canCreateTaskProvider;
 export 'application/task_details_controller.dart' show taskDetailsProvider;
+export 'application/task_lifecycle_controller.dart' show deletedTasksProvider;
 export 'application/tasks_list_controller.dart' show TaskFilterGroup;
 export 'application/tasks_nav_caption.dart' show tasksNavCaptionProvider;
 export 'application/tasks_providers.dart'
@@ -35,7 +36,7 @@ export 'domain/task_query.dart'
     show TaskFilter, TaskFilterOptions, filterOptions;
 export 'domain/task_writes.dart'
     show UploadOrigin, UploadSource, WorkItemPatch, TaskWriteRepository;
-export 'presentation/deleted_tasks_page.dart' show DeletedTasksPage;
+export 'domain/work_item.dart' show DeletedTask;
 export 'presentation/detail/detail_actions.dart' show showUploadOriginSheet;
 export 'presentation/quick_action_sheets.dart'
     show showInviteSheet, showMeetingSheet, showNewTaskSheet;

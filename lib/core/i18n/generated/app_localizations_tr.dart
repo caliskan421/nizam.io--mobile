@@ -4577,7 +4577,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksDeleteQTail => 'silinsin mi?';
 
   @override
-  String get uiTasksDeleteDesc => 'Silinen kayıtlardan geri alınabilir';
+  String get uiTasksDeleteDesc =>
+      'Silinen kayıtlardan geri alınabilir; bağımlılıkları geri gelmez';
 
   @override
   String get uiTasksDeleteBodyTail =>

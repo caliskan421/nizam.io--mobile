@@ -5801,7 +5801,7 @@
   "@uiTasksDeleteQTail": {
     "description": "ui.tasks.delete_q_tail"
   },
-  "uiTasksDeleteDesc": "Silinen kayıtlardan geri alınabilir",
+  "uiTasksDeleteDesc": "Silinen kayıtlardan geri alınabilir; bağımlılıkları geri gelmez",
   "@uiTasksDeleteDesc": {
     "description": "ui.tasks.delete_desc"
   },

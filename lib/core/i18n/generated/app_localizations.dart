@@ -8797,7 +8797,7 @@ abstract class AppLocalizations {
   /// ui.tasks.delete_desc
   ///
   /// In tr, this message translates to:
-  /// **'Silinen kayıtlardan geri alınabilir'**
+  /// **'Silinen kayıtlardan geri alınabilir; bağımlılıkları geri gelmez'**
   String get uiTasksDeleteDesc;
 
   /// ui.tasks.delete_body_tail

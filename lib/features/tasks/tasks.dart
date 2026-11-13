@@ -40,6 +40,7 @@ export 'presentation/detail/detail_actions.dart' show showUploadOriginSheet;
 export 'presentation/quick_action_sheets.dart'
     show showInviteSheet, showMeetingSheet, showNewTaskSheet;
 export 'presentation/task_detail_page.dart' show TaskDetailPage;
+export 'presentation/task_picker_sheet.dart' show showTaskPickerSheet;
 export 'presentation/task_widgets.dart' show TaskSegmented;
 export 'presentation/tasks/task_card_grid.dart' show TaskCardRow;
 export 'presentation/tasks/task_filter_groups.dart' show TaskFilterGroups;

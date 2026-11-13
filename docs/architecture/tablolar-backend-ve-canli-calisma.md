@@ -235,7 +235,9 @@ değiştirme olarak yazılır (gizli öğeler korunamaz, istekte `redacted` yok)
 yükleme ucuyla yazılır (mobilde yok).
 
 Gezinme: tablo referansı hedef tabloyu (`openTable`, aynı alan; erişim yoksa tablo ekranı
-`tables.not_found` metnini gösterir), görev referansı görev ayrıntısını (`openTask`) açar —
+`tables.not_found` metnini gösterir), görev referansı görev ayrıntısını (`openTask`) açar (görev
+kataloğu yüklendikten sonra oluşmuş görevde katalog kimlik başına bir kez yeniden okunur; kesik
+katalogda süzgeçli yol geçerlidir) —
 ızgarada tekli hücreye dokunma ya da satır sayfasındaki rozet. Gizlenmiş ya da adı görünmeyen
 hedef açılmaz. Kişi (yönetim sayfası yalnız yöneticiye), departman (koordinatörlük kodu ile
 kimlik eşlemesi doğrulanmadı) ve dosya (görevsiz önizleme yok) yalnız gösterilir.
@@ -291,7 +293,10 @@ aynıysa (çakışmayı başka hücre doğurdu) yeni anahtarla yeniden gider (is
 değiştiyse hücre `conflicts`'e girer, sunucu değeri görünür, şerit çıkar — aynı hücreye
 kuyrukta daha yeni düzenleme varsa o da düşer (yabancı sürüme taşınıp sessizce ezmez).
 Yeniden okumada tabanı sunucuda değişmiş her kuyruk öğesi de çakışma olarak işaretlenir.
-Çözümleme okuması düşerse batch (yeni anahtarla) bekletilir, kuyruk korunur, hata görünür;
+Çözümleme okuması düşerse batch (yeni anahtarla) bekletilir, kuyruk korunur, hata görünür
+(okuma 429 aldıysa `Retry-After` — yoksa 2 sn — sonra kendiliğinden yeniden denenir). Şeridin
+eylemi denetleyicinin "bekletilen batch" durumundan (`writesHeld`) türer: bekletilen varsa
+"yeniden dene", kalıcı retse (422 vb.; değer geri alındı) "kapat";
 gönderim hiçbir zaman yakalanmamış hata fırlatmaz.
 
 ### 9.3 Canlı senkron (gerçekleşen)

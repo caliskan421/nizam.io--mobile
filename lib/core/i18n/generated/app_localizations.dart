@@ -4690,6 +4690,12 @@ abstract class AppLocalizations {
   /// **'Değerler eşleşmiyor.'**
   String get uiInputsValidationMismatch;
 
+  /// ui.inputs.password_repeat
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre tekrar'**
+  String get uiInputsPasswordRepeat;
+
   /// ui.inputs.validation_must_accept
   ///
   /// In tr, this message translates to:
@@ -5601,6 +5607,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'kişi bağlıydı'**
   String get uiMeetingsConnectedWasTail;
+
+  /// ui.meetings.copy_link
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantıyı kopyala'**
+  String get uiMeetingsCopyLink;
+
+  /// ui.meetings.link_copied
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı kopyalandı.'**
+  String get uiMeetingsLinkCopied;
 
   /// ui.messages.title
   ///
@@ -8488,6 +8506,24 @@ abstract class AppLocalizations {
   /// **'Alt görevi sil'**
   String get uiTasksSubDelete;
 
+  /// ui.tasks.sub_delete_q
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görev silinsin mi?'**
+  String get uiTasksSubDeleteQ;
+
+  /// ui.tasks.sub_delete_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinen alt görev geri alınamaz'**
+  String get uiTasksSubDeleteDesc;
+
+  /// ui.tasks.assign_by_coord
+  ///
+  /// In tr, this message translates to:
+  /// **'Atamayı koordinatörlüğün koordinatörü yapar.'**
+  String get uiTasksAssignByCoord;
+
   /// ui.tasks.sub_add
   ///
   /// In tr, this message translates to:
@@ -9691,7 +9727,7 @@ abstract class AppLocalizations {
   /// ui.tasks.mt_place_hint
   ///
   /// In tr, this message translates to:
-  /// **'İsteğe bağlı · ör. toplantı salonu'**
+  /// **'İsteğe bağlı · ör. toplantı salonu ya da bağlantı'**
   String get uiTasksMtPlaceHint;
 
   /// ui.tasks.err_mt_place
@@ -11325,6 +11361,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Ad soyadı ve geçerli bir e-posta adresini kontrol edin.'**
   String get uiUsersDraftInvalid;
+
+  /// ui.users.draft_no_role
+  ///
+  /// In tr, this message translates to:
+  /// **'En az bir rol seçin: Admin ya da bir koordinatörlükte Koordinatör veya Üye.'**
+  String get uiUsersDraftNoRole;
 
   /// ui.users.draft_admin_unknown
   ///

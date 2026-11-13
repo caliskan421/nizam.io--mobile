@@ -312,20 +312,6 @@ class TaskDetailActions {
             },
           ),
           _ListOption(
-            label: l.uiTasksCopy,
-            leading: const NzIcon(NzIcons.copy, size: NizamioSize.iconSizeSm),
-            onTap: () async {
-              Navigator.of(sheet).pop();
-              final (r, _) = await _ctl.copy(l.uiTasksCopySuffix);
-              _report(
-                r,
-                done:
-                    '“${t.title} ${l.uiTasksCopySuffix}” '
-                    '${l.uiTasksTCreatedTail}',
-              );
-            },
-          ),
-          _ListOption(
             label: l.uiTasksDeleteTask,
             color: c.danger,
             leading: NzIcon(
@@ -601,15 +587,6 @@ class TaskDetailActions {
     );
   }
 
-  void remind() {
-    final t = _task;
-    if (t == null) return;
-    _say(
-      '${context.l10n.uiTasksTReminded} · '
-      '${t.assignees.map(_name).join(', ')}',
-    );
-  }
-
   // ---- alt görev, not ---------------------------------------------------------------------
 
   Future<void> toggleSubtask(String id) async =>
@@ -681,11 +658,19 @@ class TaskDetailActions {
   Future<void> clearSubtaskDates(String id) async =>
       _report(await _ctl.clearSubtaskDates(id));
 
+  /// Alt görev kalıcı silinir: önce "geri alınamaz" onayı.
   Future<void> removeSubtask(String id) async {
     final key = '“${_task?.title ?? ''}”';
+    final l = context.l10n;
+    final yes = await _confirm(
+      title: l.uiTasksSubDeleteQ,
+      description: l.uiTasksSubDeleteDesc,
+      ok: l.uiTasksDeleteOk,
+      danger: true,
+    );
+    if (!yes || !context.mounted) return;
     final (r, u) = await _ctl.removeSubtask(id);
     if (!context.mounted) return;
-    final l = context.l10n;
     _report(
       r,
       done: u == null

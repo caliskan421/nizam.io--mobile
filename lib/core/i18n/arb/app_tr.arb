@@ -3065,6 +3065,10 @@
   "@uiInputsValidationMismatch": {
     "description": "ui.inputs.validation_mismatch"
   },
+  "uiInputsPasswordRepeat": "Şifre tekrar",
+  "@uiInputsPasswordRepeat": {
+    "description": "ui.inputs.password_repeat"
+  },
   "uiInputsValidationMustAccept": "Devam etmek için onaylamanız gerekir.",
   "@uiInputsValidationMustAccept": {
     "description": "ui.inputs.validation_must_accept"
@@ -3672,6 +3676,14 @@
   "uiMeetingsConnectedWasTail": "kişi bağlıydı",
   "@uiMeetingsConnectedWasTail": {
     "description": "ui.meetings.connected_was_tail"
+  },
+  "uiMeetingsCopyLink": "Bağlantıyı kopyala",
+  "@uiMeetingsCopyLink": {
+    "description": "ui.meetings.copy_link"
+  },
+  "uiMeetingsLinkCopied": "Bağlantı kopyalandı.",
+  "@uiMeetingsLinkCopied": {
+    "description": "ui.meetings.link_copied"
   },
   "uiMessagesTitle": "Mesajlar",
   "@uiMessagesTitle": {
@@ -5597,6 +5609,18 @@
   "@uiTasksSubDelete": {
     "description": "ui.tasks.sub_delete"
   },
+  "uiTasksSubDeleteQ": "Alt görev silinsin mi?",
+  "@uiTasksSubDeleteQ": {
+    "description": "ui.tasks.sub_delete_q"
+  },
+  "uiTasksSubDeleteDesc": "Silinen alt görev geri alınamaz",
+  "@uiTasksSubDeleteDesc": {
+    "description": "ui.tasks.sub_delete_desc"
+  },
+  "uiTasksAssignByCoord": "Atamayı koordinatörlüğün koordinatörü yapar.",
+  "@uiTasksAssignByCoord": {
+    "description": "ui.tasks.assign_by_coord"
+  },
   "uiTasksSubAdd": "Alt görev ekle",
   "@uiTasksSubAdd": {
     "description": "ui.tasks.sub_add"
@@ -6397,7 +6421,7 @@
   "@uiTasksFieldPlace": {
     "description": "ui.tasks.field_place"
   },
-  "uiTasksMtPlaceHint": "İsteğe bağlı · ör. toplantı salonu",
+  "uiTasksMtPlaceHint": "İsteğe bağlı · ör. toplantı salonu ya da bağlantı",
   "@uiTasksMtPlaceHint": {
     "description": "ui.tasks.mt_place_hint"
   },
@@ -7488,6 +7512,10 @@
   "uiUsersDraftInvalid": "Ad soyadı ve geçerli bir e-posta adresini kontrol edin.",
   "@uiUsersDraftInvalid": {
     "description": "ui.users.draft_invalid"
+  },
+  "uiUsersDraftNoRole": "En az bir rol seçin: Admin ya da bir koordinatörlükte Koordinatör veya Üye.",
+  "@uiUsersDraftNoRole": {
+    "description": "ui.users.draft_no_role"
   },
   "uiUsersDraftAdminUnknown": "Yönetici yetkisi henüz doğrulanamadı.",
   "@uiUsersDraftAdminUnknown": {

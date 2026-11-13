@@ -290,6 +290,7 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
   static const _handleSize = Size(36, 4);
   // Başlık metni kapat düğmesiyle hizalı (prototip `padding-top: 6px`).
   static const _titleTop = 6.0;
+  static const _closeIcon = 26.0;
 
   static const _radius = BorderRadius.vertical(
     top: Radius.circular(NizamioRadius.sheet),
@@ -407,7 +408,8 @@ class _NzBottomSheetContentState extends State<NzBottomSheetContent> {
                       minWidth: NizamioSpacing.space12,
                       minHeight: NizamioSpacing.space12,
                     ),
-                    icon: const NzIcon(NzIcons.close),
+                    // Büyük kapat ikonu (iPad notu 36); dokunma alanı 48.
+                    icon: const NzIcon(NzIcons.close, size: _closeIcon),
                     onPressed: () => Navigator.of(context).maybePop(),
                   ),
               ],

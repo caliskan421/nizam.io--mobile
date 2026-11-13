@@ -398,6 +398,13 @@ class _Filters extends ConsumerWidget {
               ?.where((t) => t.workItemId == task)
               .firstOrNull
               ?.title;
+    final allLoaded = ref.watch(
+      archiveFilesControllerProvider(code)
+          .select((f) => f.value?.hasMore == false),
+    );
+    // Sunucu sırası: ada göre artan, son yükleme ve boyut azalan.
+    final ascending =
+        (view.sort == ArchiveSort.name) != (view.reversed && allLoaded);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -409,11 +416,12 @@ class _Filters extends ConsumerWidget {
             semanticLabel: '${l.uiHomeSortChange}: ${l.sortLabel(view.sort)}',
             onPressed: ctrl.cycleSort,
             icon: NzIcons.chevronDown,
-            iconTurns: view.sort == ArchiveSort.name ? 0.5 : 0,
-            iconSemanticLabel: view.sort == ArchiveSort.name
+            iconTurns: ascending ? 0.5 : 0,
+            iconSemanticLabel: ascending
                 ? l.uiHomeSortAscending
                 : l.uiHomeSortDescending,
-            onIconPressed: null,
+            // Sunucu yön almaz: ters çevirme bütün sayfalar yüklüyken istemcide yapılır.
+            onIconPressed: allLoaded ? ctrl.toggleDirection : null,
           ),
         ),
         if (task != null) ...[
@@ -456,7 +464,12 @@ class _Files extends ConsumerWidget {
       skeletonOnReload: true,
       onRetry: () => ref.invalidate(archiveFilesControllerProvider(code)),
       data: (s) {
-        final list = s.items;
+        final reversed =
+            !s.hasMore &&
+            ref.watch(
+              archiveFolderControllerProvider(code).select((v) => v.reversed),
+            );
+        final list = reversed ? s.items.reversed.toList() : s.items;
         final moreError = s.moreError;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

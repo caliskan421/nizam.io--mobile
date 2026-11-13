@@ -86,7 +86,7 @@ final class TableControllerProvider
   }
 }
 
-String _$tableControllerHash() => r'ba392267d0b5cc9497a27c1fe7dffb6adcb183e2';
+String _$tableControllerHash() => r'7ae4672c38fcf4a7347a7a67a4f5aa90452e2bdd';
 
 /// Tek tablonun ekranı: snapshot yükleme, olay günlüğünden yakalama ([catchUp]), hücre
 /// yazımı (`table_cell_writes.dart`) ve komutlar (`table_commands.dart`).

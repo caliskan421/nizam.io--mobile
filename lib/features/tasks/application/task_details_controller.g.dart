@@ -86,7 +86,7 @@ final class TaskDetailsProvider
   }
 }
 
-String _$taskDetailsHash() => r'35e0b2790cdadd81a9665beb584c0e5d927ae42a';
+String _$taskDetailsHash() => r'6d01616b7b7abc9d94b01b91b6f4c8c6f42bd78c';
 
 /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda

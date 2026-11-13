@@ -102,7 +102,7 @@ Future<void> showCalendarPeriodSheet(
 }
 
 /// Dönem satırı (en az 62): solda mono tarih "16 Kas" (toplantıda altında saat, süren görevde
-/// "→ bitiş"),
+/// bitiş tarihi),
 /// tür noktası, başlık + alt yazı (görevde koordinatörlük · atananlar, toplantıda
 /// departmanlar), sağda "gecikti" ya da "tamamlandı" rozeti.
 class _PeriodRow extends StatelessWidget {
@@ -127,12 +127,12 @@ class _PeriodRow extends StatelessWidget {
     final c = context.colors;
     final t = context.text;
     final e = entry;
-    // Tek tarih biçimi ("16 Kas"); süren görevde bitişe "→" ile.
+    // Tek tarih biçimi ("16 Kas"); süren görevde bitiş tarihi.
     String day(DateTime d) => DateFormat('d MMM', 'tr').format(d);
     final (String lead, String? time, String title, String sub) = switch (e) {
       MeetingEntry() => (day(e.date), l.clock(e), e.title, l.meetingSub(e)),
       TaskEntry() => (
-        e.edge == TaskEdge.ongoing ? '→ ${day(e.due ?? e.date)}' : day(e.date),
+        day(e.edge == TaskEdge.ongoing ? e.due ?? e.date : e.date),
         null,
         e.title,
         [

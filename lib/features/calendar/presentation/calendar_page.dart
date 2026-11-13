@@ -66,8 +66,9 @@ class CalendarPage extends ConsumerWidget {
       }
     }
 
-    // "+" ve boş günün "Bu güne ekle"si: seçili güne toplantı ya da görev (bu gün başlayan,
-    // bu güne kadar bitecek). Görev açma yetkisi yoksa doğrudan toplantı planlanır.
+    // "+" ve boş günün "Bu güne ekle"si: görev ya da toplantı. İkisi de seçili günü (gün
+    // seçilmemişse bugünü) varsayılan tarih alır; tarih formda değiştirilebilir. Görev açma
+    // yetkisi yoksa doğrudan toplantı planlanır.
     void add() {
       final ix = index.value;
       if (ix == null) return;
@@ -78,20 +79,13 @@ class CalendarPage extends ConsumerWidget {
       final l = context.l10n;
       final day = ref.read(calendarControllerProvider).selectedOn(ix.today);
       final spanEnd = DateTime(day.year, day.month, day.day + _taskSpanDays);
-      final dueStart = day.isBefore(ix.today) ? day : ix.today;
       NzFlyoutMenu.show(
         context,
         semanticLabel: l.uiCalendarAdd,
         entries: [
           NzFlyoutSection(l.dayTitle(day)),
           NzFlyoutItem(
-            label: l.uiCalendarPlan,
-            caption: l.uiCalendarAddMeetingCaption,
-            icon: NzIcons.video,
-            onSelected: plan,
-          ),
-          NzFlyoutItem(
-            label: l.uiCalendarAddTaskStart,
+            label: l.uiTasksNewTask,
             caption: l.dayRange(day, spanEnd),
             icon: NzIcons.tasks,
             onSelected: () => showNewTaskSheet(
@@ -102,15 +96,10 @@ class CalendarPage extends ConsumerWidget {
             ),
           ),
           NzFlyoutItem(
-            label: l.uiCalendarAddTaskDue,
-            caption: l.dayRange(dueStart, day),
-            icon: NzIcons.flag,
-            onSelected: () => showNewTaskSheet(
-              context,
-              resetTarget: true,
-              start: dueStart,
-              end: day,
-            ),
+            label: l.uiCalendarPlan,
+            caption: l.uiCalendarAddMeetingCaption,
+            icon: NzIcons.video,
+            onSelected: plan,
           ),
         ],
       );

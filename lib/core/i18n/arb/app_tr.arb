@@ -2521,7 +2521,7 @@
   "@uiFeedbackLoading": {
     "description": "ui.feedback.loading"
   },
-  "uiFeedbackOffline": "Çevrimdışısınız. Sunucuya ulaşılamıyor.",
+  "uiFeedbackOffline": "İnternete bağlı değilsiniz.",
   "@uiFeedbackOffline": {
     "description": "ui.feedback.offline"
   },
@@ -2536,6 +2536,18 @@
   "uiFeedbackSecondsUnit": "sn",
   "@uiFeedbackSecondsUnit": {
     "description": "ui.feedback.seconds_unit"
+  },
+  "uiFeedbackUnreachable": "Sunucuya ulaşılamıyor.",
+  "@uiFeedbackUnreachable": {
+    "description": "ui.feedback.unreachable"
+  },
+  "uiFeedbackStaleData": "Son yüklenen veriler gösteriliyor; bağlantı gelince sayfa kendiliğinden yenilenir.",
+  "@uiFeedbackStaleData": {
+    "description": "ui.feedback.stale_data"
+  },
+  "uiFeedbackConnectionWait": "Bağlantı gelince içerik kendiliğinden yüklenecek.",
+  "@uiFeedbackConnectionWait": {
+    "description": "ui.feedback.connection_wait"
   },
   "uiHomeOverviewTitle": "Genel durum",
   "@uiHomeOverviewTitle": {
@@ -4172,6 +4184,30 @@
   "uiMessagesNotInWindow": "Mesaj bulunamadı.",
   "@uiMessagesNotInWindow": {
     "description": "ui.messages.not_in_window"
+  },
+  "uiMessagesFailSize": "Dosya çok büyük",
+  "@uiMessagesFailSize": {
+    "description": "ui.messages.fail_size"
+  },
+  "uiMessagesFailType": "Dosya türü kabul edilmiyor",
+  "@uiMessagesFailType": {
+    "description": "ui.messages.fail_type"
+  },
+  "uiMessagesFailUnreadable": "Dosya okunamadı",
+  "@uiMessagesFailUnreadable": {
+    "description": "ui.messages.fail_unreadable"
+  },
+  "uiMessagesFailNetwork": "Bağlantı sorunu",
+  "@uiMessagesFailNetwork": {
+    "description": "ui.messages.fail_network"
+  },
+  "uiMessagesFailPermission": "Yetkiniz yok",
+  "@uiMessagesFailPermission": {
+    "description": "ui.messages.fail_permission"
+  },
+  "uiMessagesTryAgain": "Tekrar dene",
+  "@uiMessagesTryAgain": {
+    "description": "ui.messages.try_again"
   },
   "uiMessagesComposeShareTask": "Görev paylaş",
   "@uiMessagesComposeShareTask": {

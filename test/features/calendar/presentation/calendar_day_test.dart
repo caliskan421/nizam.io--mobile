@@ -56,10 +56,8 @@ void main() {
       expect(find.text('Görev END'), findsOneWidget);
       expect(find.text('Görev RUN'), findsNothing);
       expect(find.text(_l.uiCalendarSecOngoing), findsNothing);
-      // "Bitecek" kapatılınca bitiş satırı gizlenir.
-      await tester.tap(find.text(_l.uiCalendarFilterEnds));
-      await tester.pumpAndSettle();
-      expect(find.text('Görev END'), findsNothing);
+      // Süzgeç düğmesi yok.
+      expect(find.text(_l.uiCalendarFilterEnds), findsNothing);
     },
   );
 

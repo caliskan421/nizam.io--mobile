@@ -282,7 +282,8 @@ class _Body extends StatelessWidget {
                 semanticLabel:
                     '${l.uiTasksFlyStatus}: ${l.statusLabel(task.status)}',
                 leading: NzDot(color: statusTone(task.status).color(c)),
-                onTap: actions.openStatus,
+                // Geçiş yoksa seçici açılmaz, alan pasif görünür.
+                onTap: actions.canChangeStatus ? actions.openStatus : null,
               ),
             ),
             Expanded(
@@ -372,10 +373,10 @@ class _Picker extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: NizamioSize.controlMd),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: c.surface,
+              color: onTap == null ? c.surfaceRaised : c.surface,
               borderRadius: BorderRadius.circular(NizamioRadius.pill),
               border: Border.all(
-                color: c.borderControl,
+                color: onTap == null ? c.border : c.borderControl,
                 width: NizamioSize.borderWidth,
               ),
             ),
@@ -398,11 +399,12 @@ class _Picker extends StatelessWidget {
                       ),
                     ),
                   ),
-                  NzIcon(
-                    NzIcons.chevronDown,
-                    size: NizamioSize.iconSizeSm,
-                    color: c.textMuted,
-                  ),
+                  if (onTap != null)
+                    NzIcon(
+                      NzIcons.chevronDown,
+                      size: NizamioSize.iconSizeSm,
+                      color: c.textMuted,
+                    ),
                 ],
               ),
             ),

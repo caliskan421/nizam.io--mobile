@@ -339,6 +339,9 @@ class FakeTablesRepository implements TablesRepository {
         final i = t.columns.indexWhere((c) => c.id == col);
         t.columns[i] = t.columns[i].copyWith(name: name);
         schema++;
+      case ResizeColumn(id: final col, :final width):
+        final i = t.columns.indexWhere((c) => c.id == col);
+        t.columns[i] = t.columns[i].copyWith(width: width);
       case RenameTable(:final name):
         t.meta = TableMeta(
           id: t.meta.id,

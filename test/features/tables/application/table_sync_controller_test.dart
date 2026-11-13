@@ -24,11 +24,6 @@ const _coalesce = Duration.zero;
 
 Future<void> _settle() => pumpEventQueue();
 
-Future<void> _atLeast(Duration d) async {
-  await Future<void>.delayed(d);
-  await pumpEventQueue();
-}
-
 class _Live {
   _Live(this.repo, this.c, this.reconnects);
   final FakeTablesRepository repo;
@@ -50,6 +45,7 @@ class _Live {
 Future<_Live> _open({
   FakeTablesRepository? repo,
   Duration presenceInterval = const Duration(seconds: 10),
+  Duration presenceMinGap = const Duration(milliseconds: 40),
 }) async {
   final r = repo ?? (FakeTablesRepository()..add('t1', rows: 3));
   final delays = <int>[];
@@ -59,7 +55,7 @@ Future<_Live> _open({
       tableLiveTimingProvider.overrideWithValue((
         coalesce: _coalesce,
         presenceInterval: presenceInterval,
-        presenceMinGap: const Duration(milliseconds: 40),
+        presenceMinGap: presenceMinGap,
       )),
       tableReconnectDelayProvider.overrideWithValue((failures) {
         delays.add(failures);
@@ -244,44 +240,36 @@ void main() {
     },
   );
 
-  test(
-    'presence: bağlanınca ve aralıkla yenilenir; seçim en az aralıkla gider',
-    () async {
-      final s = await _open(presenceInterval: const Duration(milliseconds: 60));
-      // Seçim, açılış gönderiminden hemen sonra (aralık dolmadan) yapılır.
-      s.stream.add(TableStreamReady(s.view.meta.sequence));
-      await _settle();
-      final sync = s.c.read(tableSyncControllerProvider('t1').notifier);
-      final sets = s.repo.presence.where((p) => p.$1 == 'set').length;
-      expect(sets, greaterThanOrEqualTo(1));
-      sync.select('r1', 'c1'); // son gönderimden 40 ms geçmedi → ertelenir
-      sync.select('r2', 'c1'); // aynı ertelemede son seçim gider
-      // Yalnız olumlu doğrulama için en az aralık kadar beklenir (yük altında uzaması sonucu
-      // değiştirmez: daha çok periyodik gönderim olur, r1 yine gitmez).
-      await _atLeast(const Duration(milliseconds: 50));
-      expect(s.repo.presence.where((p) => p.$2 == 'r2'), isNotEmpty);
-      // Ertelemede yalnız son seçim gider (r1 hiç gönderilmez).
-      expect(s.repo.presence.where((p) => p.$2 == 'r1'), isEmpty);
-      await _atLeast(const Duration(milliseconds: 130));
-      expect(
-        s.repo.presence.where((p) => p.$1 == 'set').length,
-        greaterThan(sets + 1),
-      );
-      s.stream.add(
-        TablePresenceUpdate(const [
-          TableParticipant(
-            key: 'k',
-            accountId: 'a2',
-            name: 'Ali',
-            rowId: 'r1',
-            columnId: 'c1',
-          ),
-        ]),
-      );
-      await _settle();
-      expect(s.live.participants.single.name, 'Ali');
-    },
-  );
+  test('presence: uçuştaki gönderim varken seçimler tek bekleyende birleşir; katılımcı listesi', () async {
+    // Uçuş kapısıyla deterministik: açılış gönderimi uçuştayken iki seçim yapılır; yalnız
+    // sonuncusu (r2) tek bekleyen olarak gider, r1 hiç gitmez. Aralık sıfır, periyot uzun.
+    final s = await _open(presenceMinGap: Duration.zero);
+    final gate = s.repo.presenceGate = Completer<void>();
+    s.stream.add(TableStreamReady(s.view.meta.sequence));
+    await _settle();
+    expect(s.repo.presence, hasLength(1));
+    s.c.read(tableSyncControllerProvider('t1').notifier)
+      ..select('r1', 'c1')
+      ..select('r2', 'c1');
+    await _settle();
+    expect(s.repo.presence, hasLength(1));
+    gate.complete();
+    await _settle();
+    expect(s.repo.presence.map((p) => p.$2), [null, 'r2']);
+    s.stream.add(
+      TablePresenceUpdate(const [
+        TableParticipant(
+          key: 'k',
+          accountId: 'a2',
+          name: 'Ali',
+          rowId: 'r1',
+          columnId: 'c1',
+        ),
+      ]),
+    );
+    await _settle();
+    expect(s.live.participants.single.name, 'Ali');
+  });
 
   test(
     'yabancı yenileme bekleyen yazımı ezmez; aynı hücre çakışma işaretlenir',

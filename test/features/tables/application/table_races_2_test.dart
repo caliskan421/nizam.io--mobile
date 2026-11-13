@@ -243,4 +243,36 @@ void main() {
     expect(_v(c).deleted, isTrue);
     expect(_v(c).uncertainCommands, 0);
   });
+
+  test(
+    'O5a: kendi ad makbuzları ters sırada gelirse eski olan yeniyi geri almaz',
+    () async {
+      final (c, n, repo) = await _open();
+      final late = repo.responseGate = Completer<void>();
+      final first = n.rename('A'); // sunucuda sıra 2, yanıt gecikir
+      await pumpEventQueue();
+      await n.rename('B'); // sıra 3, önce döner
+      expect(_v(c).meta.name, 'B');
+      late.complete();
+      await first;
+      expect(_v(c).meta.name, 'B');
+      await n.catchUp();
+      expect(_v(c).meta.name, 'B');
+    },
+  );
+
+  test('O5b: sütun genişliği makbuzları ters sırada; farklı alan güncellemesi korunur', () async {
+    final (c, n, repo) = await _open();
+    final late = repo.responseGate = Completer<void>();
+    final first = n.resizeColumn('c1', 120); // sıra 2, gecikir
+    await pumpEventQueue();
+    await n.resizeColumn('c1', 300); // sıra 3
+    await n.renameColumn('c1', 'Yeni'); // farklı alan, sıra 4
+    late.complete();
+    await first;
+    expect(_v(c).column('c1')!.width, 300);
+    expect(_v(c).column('c1')!.name, 'Yeni');
+    await n.catchUp();
+    expect(_v(c).column('c1')!.width, 300);
+  });
 }

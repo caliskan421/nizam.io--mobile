@@ -7500,5 +7500,9 @@
   "uiUsersDraftSelfConflict": "Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.",
   "@uiUsersDraftSelfConflict": {
     "description": "ui.users.draft_self_conflict"
+  },
+  "uiMeetingsAgendaEdit": "Maddeyi düzenle",
+  "@uiMeetingsAgendaEdit": {
+    "description": "ui.meetings.agenda_edit"
   }
 }

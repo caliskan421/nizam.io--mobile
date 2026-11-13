@@ -171,6 +171,9 @@ class _MeetingAgendaState extends ConsumerState<MeetingAgenda> {
                         ? who(a.checkedByAccountId!)
                         : null,
                     onToggle: manage ? () => _toggle(a) : null,
+                    onRename: manage
+                        ? (title) => widget.actions.renameAgenda(a, title)
+                        : null,
                     onDelete: manage
                         ? () => widget.actions.deleteAgenda(a)
                         : null,
@@ -272,18 +275,21 @@ class _Divided extends StatelessWidget {
 }
 
 /// Gündem satırı: yuvarlak işaret, başlık (işaretliyse üstü çizili, soluk), işaretleyen ve saat,
-/// sil düğmesi. [onToggle]/[onDelete] null → salt okunur.
+/// sil düğmesi. Başlığa dokunmak satır içinde düzenler ([onRename]). [onToggle]/[onRename]/
+/// [onDelete] null → salt okunur.
 class _AgendaRow extends StatelessWidget {
   const _AgendaRow({
     required this.item,
     required this.by,
     required this.onToggle,
+    required this.onRename,
     required this.onDelete,
   });
 
   final AgendaItem item;
   final String? by;
   final VoidCallback? onToggle;
+  final Future<bool> Function(String title)? onRename;
   final VoidCallback? onDelete;
 
   @override
@@ -311,10 +317,9 @@ class _AgendaRow extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
-                child: NzStrikeText(
-                  text: a.title,
-                  done: done,
-                  color: done ? c.textMuted : c.text,
+                child: _AgendaTitle(
+                  item: a,
+                  onRename: onRename,
                   style: t.bodyLg.copyWith(fontSize: 15, height: 22 / 15),
                 ),
               ),
@@ -386,6 +391,115 @@ class _AgendaRow extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Gündem başlığı: dokununca aynı yerde metin alanına döner (Enter ya da dışarı dokunma
+/// kaydeder; boş/aynı başlık kaydedilmez). Kayıt başarısızsa alan açık kalır.
+class _AgendaTitle extends StatefulWidget {
+  const _AgendaTitle({
+    required this.item,
+    required this.onRename,
+    required this.style,
+  });
+
+  final AgendaItem item;
+  final Future<bool> Function(String title)? onRename;
+  final TextStyle style;
+
+  @override
+  State<_AgendaTitle> createState() => _AgendaTitleState();
+}
+
+class _AgendaTitleState extends State<_AgendaTitle> {
+  final _text = TextEditingController();
+  final _focus = FocusNode();
+  var _editing = false;
+  var _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() {
+      if (!_focus.hasFocus && _editing) _commit();
+    });
+  }
+
+  @override
+  void dispose() {
+    _text.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  void _start() {
+    _text
+      ..text = widget.item.title
+      ..selection = TextSelection.collapsed(offset: widget.item.title.length);
+    setState(() => _editing = true);
+    _focus.requestFocus();
+  }
+
+  Future<void> _commit() async {
+    final rename = widget.onRename;
+    final title = _text.text.trim();
+    if (_saving || rename == null) return;
+    if (title.isEmpty || title == widget.item.title) {
+      setState(() => _editing = false);
+      return;
+    }
+    setState(() => _saving = true);
+    final ok = await rename(title);
+    if (!mounted) return;
+    setState(() {
+      _saving = false;
+      _editing = !ok;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final a = widget.item;
+    if (_editing) {
+      return TextField(
+        controller: _text,
+        focusNode: _focus,
+        enabled: !_saving,
+        maxLength: agendaTitleMax,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (_) => _commit(),
+        onTapOutside: (_) => _focus.unfocus(),
+        style: widget.style.copyWith(color: c.text),
+        decoration: InputDecoration(
+          isDense: true,
+          counterText: '',
+          filled: false,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
+          semanticCounterText: '',
+          hintText: context.l10n.uiMeetingsAgendaEdit,
+        ),
+      );
+    }
+    final text = NzStrikeText(
+      text: a.title,
+      done: a.isChecked,
+      color: a.isChecked ? c.textMuted : c.text,
+      style: widget.style,
+    );
+    if (widget.onRename == null) return text;
+    return Semantics(
+      button: true,
+      hint: context.l10n.uiMeetingsAgendaEdit,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _start,
+        child: text,
       ),
     );
   }

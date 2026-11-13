@@ -5912,4 +5912,7 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiUsersDraftSelfConflict =>
       'Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.';
+
+  @override
+  String get uiMeetingsAgendaEdit => 'Maddeyi düzenle';
 }

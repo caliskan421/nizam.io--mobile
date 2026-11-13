@@ -149,6 +149,7 @@
     "ui.meetings.pool_partial": "Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.",
     "ui.meetings.undo": "Geri al",
     "ui.meetings.seen_ago_tail": "dk önce",
-    "ui.meetings.connected_was_tail": "kişi bağlıydı"
+    "ui.meetings.connected_was_tail": "kişi bağlıydı",
+    "ui.meetings.agenda_edit": "Maddeyi düzenle"
   }
 }

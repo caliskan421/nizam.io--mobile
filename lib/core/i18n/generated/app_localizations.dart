@@ -11343,6 +11343,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.'**
   String get uiUsersDraftSelfConflict;
+
+  /// ui.meetings.agenda_edit
+  ///
+  /// In tr, this message translates to:
+  /// **'Maddeyi düzenle'**
+  String get uiMeetingsAgendaEdit;
 }
 
 class _AppLocalizationsDelegate

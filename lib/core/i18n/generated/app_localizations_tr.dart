@@ -2052,7 +2052,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiFeedbackLoading => 'Yükleniyor';
 
   @override
-  String get uiFeedbackOffline => 'Çevrimdışısınız. Sunucuya ulaşılamıyor.';
+  String get uiFeedbackOffline => 'İnternete bağlı değilsiniz.';
 
   @override
   String get uiFeedbackErrorTitle => 'Bir sorun oluştu';
@@ -2062,6 +2062,17 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiFeedbackSecondsUnit => 'sn';
+
+  @override
+  String get uiFeedbackUnreachable => 'Sunucuya ulaşılamıyor.';
+
+  @override
+  String get uiFeedbackStaleData =>
+      'Son yüklenen veriler gösteriliyor; bağlantı gelince sayfa kendiliğinden yenilenir.';
+
+  @override
+  String get uiFeedbackConnectionWait =>
+      'Bağlantı gelince içerik kendiliğinden yüklenecek.';
 
   @override
   String get uiHomeOverviewTitle => 'Genel durum';
@@ -3333,6 +3344,24 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMessagesNotInWindow => 'Mesaj bulunamadı.';
+
+  @override
+  String get uiMessagesFailSize => 'Dosya çok büyük';
+
+  @override
+  String get uiMessagesFailType => 'Dosya türü kabul edilmiyor';
+
+  @override
+  String get uiMessagesFailUnreadable => 'Dosya okunamadı';
+
+  @override
+  String get uiMessagesFailNetwork => 'Bağlantı sorunu';
+
+  @override
+  String get uiMessagesFailPermission => 'Yetkiniz yok';
+
+  @override
+  String get uiMessagesTryAgain => 'Tekrar dene';
 
   @override
   String get uiMessagesComposeShareTask => 'Görev paylaş';

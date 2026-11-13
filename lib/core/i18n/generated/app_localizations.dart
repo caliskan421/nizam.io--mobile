@@ -3901,7 +3901,7 @@ abstract class AppLocalizations {
   /// ui.feedback.offline
   ///
   /// In tr, this message translates to:
-  /// **'Çevrimdışısınız. Sunucuya ulaşılamıyor.'**
+  /// **'İnternete bağlı değilsiniz.'**
   String get uiFeedbackOffline;
 
   /// ui.feedback.error_title
@@ -3921,6 +3921,24 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'sn'**
   String get uiFeedbackSecondsUnit;
+
+  /// ui.feedback.unreachable
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucuya ulaşılamıyor.'**
+  String get uiFeedbackUnreachable;
+
+  /// ui.feedback.stale_data
+  ///
+  /// In tr, this message translates to:
+  /// **'Son yüklenen veriler gösteriliyor; bağlantı gelince sayfa kendiliğinden yenilenir.'**
+  String get uiFeedbackStaleData;
+
+  /// ui.feedback.connection_wait
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı gelince içerik kendiliğinden yüklenecek.'**
+  String get uiFeedbackConnectionWait;
 
   /// ui.home.overview_title
   ///
@@ -6399,6 +6417,42 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Mesaj bulunamadı.'**
   String get uiMessagesNotInWindow;
+
+  /// ui.messages.fail_size
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya çok büyük'**
+  String get uiMessagesFailSize;
+
+  /// ui.messages.fail_type
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya türü kabul edilmiyor'**
+  String get uiMessagesFailType;
+
+  /// ui.messages.fail_unreadable
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya okunamadı'**
+  String get uiMessagesFailUnreadable;
+
+  /// ui.messages.fail_network
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı sorunu'**
+  String get uiMessagesFailNetwork;
+
+  /// ui.messages.fail_permission
+  ///
+  /// In tr, this message translates to:
+  /// **'Yetkiniz yok'**
+  String get uiMessagesFailPermission;
+
+  /// ui.messages.try_again
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrar dene'**
+  String get uiMessagesTryAgain;
 
   /// ui.messages_compose.share_task
   ///

@@ -46,12 +46,18 @@ final class ChatAttachment {
     required this.fileName,
     required this.sizeBytes,
     this.contentType = '',
+    this.localPath,
   });
 
   final String id;
   final String fileName;
   final int sizeBytes;
   final String contentType;
+
+  /// Gönderilmekte olan ekin cihazdaki yolu (küçük resim indirmeden gösterilir).
+  final String? localPath;
+
+  bool get isImage => contentType.startsWith('image/');
 }
 
 /// Kendi mesajımın istemci durumu: gönderiliyor, gönderilemedi (sonuç bilinmiyor ya da

@@ -1538,12 +1538,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarAddMeetingCaption => 'saat, gündem ve katılımcılar';
 
   @override
-  String get uiCalendarAddTaskStart => 'Bu gün başlayan görev';
-
-  @override
-  String get uiCalendarAddTaskDue => 'Bu güne kadar bitecek görev';
-
-  @override
   String get uiCalendarPickTitle => 'Bir kayıt seç';
 
   @override
@@ -1973,9 +1967,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordTabTasks => 'Görevler';
 
   @override
-  String get uiCoordToastUpload => 'Dosya yükleme görev ayrıntısından yapılır';
-
-  @override
   String get uiCoordToday => 'bugün';
 
   @override
@@ -1983,9 +1974,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordUpcomingTail => 'yaklaşan';
-
-  @override
-  String get uiCoordUpload => 'Dosya yükle';
 
   @override
   String get uiCoordFlow => 'Akış';
@@ -4350,9 +4338,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksRequestDate => 'Tarih değişikliği iste';
 
   @override
-  String get uiTasksRemind => 'Atanana hatırlat';
-
-  @override
   String get uiTasksUpload => 'Kanıt yükle';
 
   @override
@@ -4535,12 +4520,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksOpenSubsTail => 'alt görev açık';
 
   @override
-  String get uiTasksCopy => 'Kopyala';
-
-  @override
-  String get uiTasksCopySuffix => '(kopya)';
-
-  @override
   String get uiTasksDeleteTask => 'Görevi sil';
 
   @override
@@ -4670,9 +4649,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiTasksTPendingExists =>
       'Bu görev için zaten bekleyen bir talep var';
-
-  @override
-  String get uiTasksTReminded => 'Hatırlatma gönderildi';
 
   @override
   String get uiTasksTApproved => 'Talep onaylandı';
@@ -5596,10 +5572,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiUsersNotFound => 'Kullanıcı bulunamadı veya erişiminiz yok.';
 
   @override
-  String get uiUsersScopeNote =>
-      'Görev özeti yalnız seçili programdaki erişebildiğiniz görevleri kapsar.';
-
-  @override
   String get uiUsersOpen => 'açık';
 
   @override
@@ -5697,12 +5669,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiUsersExportLoaded =>
       'Yüklenmiş ve süzülmüş satırları CSV olarak kaydet';
-
-  @override
-  String get uiUsersExportName => 'Ad soyad';
-
-  @override
-  String get uiUsersExportSaved => 'CSV kaydedildi:';
 
   @override
   String get uiUsersDistribution => 'Durum dağılımı';
@@ -5836,37 +5802,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiUsersAssign => 'Görev ata';
-
-  @override
-  String get uiUsersEditAccount => 'Hesap ve rolleri düzenle';
-
-  @override
-  String get uiUsersMoreActions => 'Diğer işlemler';
-
-  @override
-  String get uiUsersPersonalReport => 'Görev raporu (CSV)';
-
-  @override
-  String get uiUsersPersonalReportNote =>
-      'Seçili programda erişebildiğiniz görevlerin özeti';
-
-  @override
-  String get uiUsersAccountAndRoles => 'Hesap ve roller';
-
-  @override
-  String get uiUsersSendMessage => 'Mesaj gönder';
-
-  @override
-  String get uiUsersReportScope => 'Kapsam';
-
-  @override
-  String get uiUsersReportTask => 'Görev';
-
-  @override
-  String get uiUsersReportStatus => 'Durum';
-
-  @override
-  String get uiUsersReportDue => 'Bitiş';
 
   @override
   String get uiUsersTaskNoDay => 'Bu gün için görevi yok.';

@@ -1861,14 +1861,6 @@
   "@uiCalendarAddMeetingCaption": {
     "description": "ui.calendar.add_meeting_caption"
   },
-  "uiCalendarAddTaskStart": "Bu gün başlayan görev",
-  "@uiCalendarAddTaskStart": {
-    "description": "ui.calendar.add_task_start"
-  },
-  "uiCalendarAddTaskDue": "Bu güne kadar bitecek görev",
-  "@uiCalendarAddTaskDue": {
-    "description": "ui.calendar.add_task_due"
-  },
   "uiCalendarPickTitle": "Bir kayıt seç",
   "@uiCalendarPickTitle": {
     "description": "ui.calendar.pick_title"
@@ -2433,10 +2425,6 @@
   "@uiCoordTabTasks": {
     "description": "ui.coord.tab_tasks"
   },
-  "uiCoordToastUpload": "Dosya yükleme görev ayrıntısından yapılır",
-  "@uiCoordToastUpload": {
-    "description": "ui.coord.toast_upload"
-  },
   "uiCoordToday": "bugün",
   "@uiCoordToday": {
     "description": "ui.coord.today"
@@ -2448,10 +2436,6 @@
   "uiCoordUpcomingTail": "yaklaşan",
   "@uiCoordUpcomingTail": {
     "description": "ui.coord.upcoming_tail"
-  },
-  "uiCoordUpload": "Dosya yükle",
-  "@uiCoordUpload": {
-    "description": "ui.coord.upload"
   },
   "uiCoordFlow": "Akış",
   "@uiCoordFlow": {
@@ -5497,10 +5481,6 @@
   "@uiTasksRequestDate": {
     "description": "ui.tasks.request_date"
   },
-  "uiTasksRemind": "Atanana hatırlat",
-  "@uiTasksRemind": {
-    "description": "ui.tasks.remind"
-  },
   "uiTasksUpload": "Kanıt yükle",
   "@uiTasksUpload": {
     "description": "ui.tasks.upload"
@@ -5741,14 +5721,6 @@
   "@uiTasksOpenSubsTail": {
     "description": "ui.tasks.open_subs_tail"
   },
-  "uiTasksCopy": "Kopyala",
-  "@uiTasksCopy": {
-    "description": "ui.tasks.copy"
-  },
-  "uiTasksCopySuffix": "(kopya)",
-  "@uiTasksCopySuffix": {
-    "description": "ui.tasks.copy_suffix"
-  },
   "uiTasksDeleteTask": "Görevi sil",
   "@uiTasksDeleteTask": {
     "description": "ui.tasks.delete_task"
@@ -5916,10 +5888,6 @@
   "uiTasksTPendingExists": "Bu görev için zaten bekleyen bir talep var",
   "@uiTasksTPendingExists": {
     "description": "ui.tasks.t_pending_exists"
-  },
-  "uiTasksTReminded": "Hatırlatma gönderildi",
-  "@uiTasksTReminded": {
-    "description": "ui.tasks.t_reminded"
   },
   "uiTasksTApproved": "Talep onaylandı",
   "@uiTasksTApproved": {
@@ -7105,10 +7073,6 @@
   "@uiUsersNotFound": {
     "description": "ui.users.not_found"
   },
-  "uiUsersScopeNote": "Görev özeti yalnız seçili programdaki erişebildiğiniz görevleri kapsar.",
-  "@uiUsersScopeNote": {
-    "description": "ui.users.scope_note"
-  },
   "uiUsersOpen": "açık",
   "@uiUsersOpen": {
     "description": "ui.users.open"
@@ -7232,14 +7196,6 @@
   "uiUsersExportLoaded": "Yüklenmiş ve süzülmüş satırları CSV olarak kaydet",
   "@uiUsersExportLoaded": {
     "description": "ui.users.export_loaded"
-  },
-  "uiUsersExportName": "Ad soyad",
-  "@uiUsersExportName": {
-    "description": "ui.users.export_name"
-  },
-  "uiUsersExportSaved": "CSV kaydedildi:",
-  "@uiUsersExportSaved": {
-    "description": "ui.users.export_saved"
   },
   "uiUsersDistribution": "Durum dağılımı",
   "@uiUsersDistribution": {
@@ -7412,46 +7368,6 @@
   "uiUsersAssign": "Görev ata",
   "@uiUsersAssign": {
     "description": "ui.users.assign"
-  },
-  "uiUsersEditAccount": "Hesap ve rolleri düzenle",
-  "@uiUsersEditAccount": {
-    "description": "ui.users.edit_account"
-  },
-  "uiUsersMoreActions": "Diğer işlemler",
-  "@uiUsersMoreActions": {
-    "description": "ui.users.more_actions"
-  },
-  "uiUsersPersonalReport": "Görev raporu (CSV)",
-  "@uiUsersPersonalReport": {
-    "description": "ui.users.personal_report"
-  },
-  "uiUsersPersonalReportNote": "Seçili programda erişebildiğiniz görevlerin özeti",
-  "@uiUsersPersonalReportNote": {
-    "description": "ui.users.personal_report_note"
-  },
-  "uiUsersAccountAndRoles": "Hesap ve roller",
-  "@uiUsersAccountAndRoles": {
-    "description": "ui.users.account_and_roles"
-  },
-  "uiUsersSendMessage": "Mesaj gönder",
-  "@uiUsersSendMessage": {
-    "description": "ui.users.send_message"
-  },
-  "uiUsersReportScope": "Kapsam",
-  "@uiUsersReportScope": {
-    "description": "ui.users.report_scope"
-  },
-  "uiUsersReportTask": "Görev",
-  "@uiUsersReportTask": {
-    "description": "ui.users.report_task"
-  },
-  "uiUsersReportStatus": "Durum",
-  "@uiUsersReportStatus": {
-    "description": "ui.users.report_status"
-  },
-  "uiUsersReportDue": "Bitiş",
-  "@uiUsersReportDue": {
-    "description": "ui.users.report_due"
   },
   "uiUsersTaskNoDay": "Bu gün için görevi yok.",
   "@uiUsersTaskNoDay": {

@@ -2884,18 +2884,6 @@ abstract class AppLocalizations {
   /// **'saat, gündem ve katılımcılar'**
   String get uiCalendarAddMeetingCaption;
 
-  /// ui.calendar.add_task_start
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu gün başlayan görev'**
-  String get uiCalendarAddTaskStart;
-
-  /// ui.calendar.add_task_due
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu güne kadar bitecek görev'**
-  String get uiCalendarAddTaskDue;
-
   /// ui.calendar.pick_title
   ///
   /// In tr, this message translates to:
@@ -3742,12 +3730,6 @@ abstract class AppLocalizations {
   /// **'Görevler'**
   String get uiCoordTabTasks;
 
-  /// ui.coord.toast_upload
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya yükleme görev ayrıntısından yapılır'**
-  String get uiCoordToastUpload;
-
   /// ui.coord.today
   ///
   /// In tr, this message translates to:
@@ -3765,12 +3747,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'yaklaşan'**
   String get uiCoordUpcomingTail;
-
-  /// ui.coord.upload
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya yükle'**
-  String get uiCoordUpload;
 
   /// ui.coord.flow
   ///
@@ -8338,12 +8314,6 @@ abstract class AppLocalizations {
   /// **'Tarih değişikliği iste'**
   String get uiTasksRequestDate;
 
-  /// ui.tasks.remind
-  ///
-  /// In tr, this message translates to:
-  /// **'Atanana hatırlat'**
-  String get uiTasksRemind;
-
   /// ui.tasks.upload
   ///
   /// In tr, this message translates to:
@@ -8704,18 +8674,6 @@ abstract class AppLocalizations {
   /// **'alt görev açık'**
   String get uiTasksOpenSubsTail;
 
-  /// ui.tasks.copy
-  ///
-  /// In tr, this message translates to:
-  /// **'Kopyala'**
-  String get uiTasksCopy;
-
-  /// ui.tasks.copy_suffix
-  ///
-  /// In tr, this message translates to:
-  /// **'(kopya)'**
-  String get uiTasksCopySuffix;
-
   /// ui.tasks.delete_task
   ///
   /// In tr, this message translates to:
@@ -8967,12 +8925,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu görev için zaten bekleyen bir talep var'**
   String get uiTasksTPendingExists;
-
-  /// ui.tasks.t_reminded
-  ///
-  /// In tr, this message translates to:
-  /// **'Hatırlatma gönderildi'**
-  String get uiTasksTReminded;
 
   /// ui.tasks.t_approved
   ///
@@ -10750,12 +10702,6 @@ abstract class AppLocalizations {
   /// **'Kullanıcı bulunamadı veya erişiminiz yok.'**
   String get uiUsersNotFound;
 
-  /// ui.users.scope_note
-  ///
-  /// In tr, this message translates to:
-  /// **'Görev özeti yalnız seçili programdaki erişebildiğiniz görevleri kapsar.'**
-  String get uiUsersScopeNote;
-
   /// ui.users.open
   ///
   /// In tr, this message translates to:
@@ -10941,18 +10887,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Yüklenmiş ve süzülmüş satırları CSV olarak kaydet'**
   String get uiUsersExportLoaded;
-
-  /// ui.users.export_name
-  ///
-  /// In tr, this message translates to:
-  /// **'Ad soyad'**
-  String get uiUsersExportName;
-
-  /// ui.users.export_saved
-  ///
-  /// In tr, this message translates to:
-  /// **'CSV kaydedildi:'**
-  String get uiUsersExportSaved;
 
   /// ui.users.distribution
   ///
@@ -11211,66 +11145,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Görev ata'**
   String get uiUsersAssign;
-
-  /// ui.users.edit_account
-  ///
-  /// In tr, this message translates to:
-  /// **'Hesap ve rolleri düzenle'**
-  String get uiUsersEditAccount;
-
-  /// ui.users.more_actions
-  ///
-  /// In tr, this message translates to:
-  /// **'Diğer işlemler'**
-  String get uiUsersMoreActions;
-
-  /// ui.users.personal_report
-  ///
-  /// In tr, this message translates to:
-  /// **'Görev raporu (CSV)'**
-  String get uiUsersPersonalReport;
-
-  /// ui.users.personal_report_note
-  ///
-  /// In tr, this message translates to:
-  /// **'Seçili programda erişebildiğiniz görevlerin özeti'**
-  String get uiUsersPersonalReportNote;
-
-  /// ui.users.account_and_roles
-  ///
-  /// In tr, this message translates to:
-  /// **'Hesap ve roller'**
-  String get uiUsersAccountAndRoles;
-
-  /// ui.users.send_message
-  ///
-  /// In tr, this message translates to:
-  /// **'Mesaj gönder'**
-  String get uiUsersSendMessage;
-
-  /// ui.users.report_scope
-  ///
-  /// In tr, this message translates to:
-  /// **'Kapsam'**
-  String get uiUsersReportScope;
-
-  /// ui.users.report_task
-  ///
-  /// In tr, this message translates to:
-  /// **'Görev'**
-  String get uiUsersReportTask;
-
-  /// ui.users.report_status
-  ///
-  /// In tr, this message translates to:
-  /// **'Durum'**
-  String get uiUsersReportStatus;
-
-  /// ui.users.report_due
-  ///
-  /// In tr, this message translates to:
-  /// **'Bitiş'**
-  String get uiUsersReportDue;
 
   /// ui.users.task_no_day
   ///

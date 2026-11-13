@@ -53,7 +53,6 @@ bool _rereadAfter(ApiError e) => _isConflict(e) || _isForbidden(e);
 const _note = 'note';
 const _subtask = 'subtask';
 const _upload = 'upload';
-const _copy = 'copy';
 
 /// Bayat düzenleme sürümü (ADR-0027).
 const _editConflict = 'work.edit_conflict';
@@ -538,7 +537,7 @@ class TaskDetailController extends _$TaskDetailController
     );
   }
 
-  // ---- sil, kopyala ---------------------------------------------------------------------
+  // ---- sil ---------------------------------------------------------------------------
 
   /// Görevi siler: yumuşak silme (yönetici ya da koordinatör) + katalog yeniden okunur; geri
   /// alma yok (silinen görevler yönetici yüzündedir).
@@ -548,37 +547,6 @@ class TaskDetailController extends _$TaskDetailController
     final r = await _write(() => _writes.deleteWorkItem(t), list: true);
     if (r.ok && ref.mounted) state = state.copyWith(deleted: () => t);
     return r;
-  }
-
-  /// Görevin kopyasını oluşturur; yeni görevin sunucu kimliğini döner. `createWorkItem`: aynı departman, başlık + [suffix], tarihler, öncelik, kanıt
-  /// bayrağı; sunucu tek atanan aldığından ilk atanan (yoksa atamasız). Katalog yeniden okunur.
-  Future<(WriteOutcome, String?)> copy(String suffix) async {
-    final t = _task;
-    final c = _catalog;
-    if (t == null || c == null) return (WriteOutcome.invalid, null);
-    final dept = t.departmentId;
-    final program = t.programId;
-    if (dept == null || program == null || !permissions.canManageTask) {
-      return (WriteOutcome.invalid, null);
-    }
-    String? id;
-    final draft = WorkItemDraft(
-      programId: program,
-      departmentId: dept,
-      title: '${t.title} $suffix',
-      start: t.start,
-      end: t.due,
-      priority: t.priority == TaskPriority.unknown ? null : t.priority,
-      assignee: t.assignees.firstOrNull,
-      evidenceRequired: t.evidenceRequired,
-    );
-    final r = await _writeKeyed(
-      _copy,
-      draft.signature,
-      (key) async => id = await _writes.createWorkItem(draft, requestKey: key),
-      list: true,
-    );
-    return (r, r.ok ? id : null);
   }
 
   // ---- alt görevler ---------------------------------------------------------------------

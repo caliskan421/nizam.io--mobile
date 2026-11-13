@@ -1467,6 +1467,36 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarPeriodEmpty => 'Bu dönemde kayıt yok.';
 
   @override
+  String get uiCalendarLegendDone => 'Tamamlanan';
+
+  @override
+  String get uiCalendarLegendLate => 'Geciken';
+
+  @override
+  String get uiCalendarLegendEnds => 'Bitecek';
+
+  @override
+  String get uiCalendarLegendStarts => 'Başlayacak';
+
+  @override
+  String get uiCalendarLegendStarted => 'Başlayan';
+
+  @override
+  String get uiCalendarLegendOngoing => 'Devam eden';
+
+  @override
+  String get uiCalendarLegendMeetings => 'Toplantı';
+
+  @override
+  String get uiCalendarRingDone => 'tamamlandı';
+
+  @override
+  String get uiCalendarRingRecords => 'kayıt';
+
+  @override
+  String get uiCalendarRingNoDue => 'bitiş yok';
+
+  @override
   String get uiCalendarNextWeekCard => 'Gelecek hafta';
 
   @override

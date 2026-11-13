@@ -2746,6 +2746,66 @@ abstract class AppLocalizations {
   /// **'Bu dönemde kayıt yok.'**
   String get uiCalendarPeriodEmpty;
 
+  /// ui.calendar.legend_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanan'**
+  String get uiCalendarLegendDone;
+
+  /// ui.calendar.legend_late
+  ///
+  /// In tr, this message translates to:
+  /// **'Geciken'**
+  String get uiCalendarLegendLate;
+
+  /// ui.calendar.legend_ends
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitecek'**
+  String get uiCalendarLegendEnds;
+
+  /// ui.calendar.legend_starts
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlayacak'**
+  String get uiCalendarLegendStarts;
+
+  /// ui.calendar.legend_started
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlayan'**
+  String get uiCalendarLegendStarted;
+
+  /// ui.calendar.legend_ongoing
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam eden'**
+  String get uiCalendarLegendOngoing;
+
+  /// ui.calendar.legend_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı'**
+  String get uiCalendarLegendMeetings;
+
+  /// ui.calendar.ring_done
+  ///
+  /// In tr, this message translates to:
+  /// **'tamamlandı'**
+  String get uiCalendarRingDone;
+
+  /// ui.calendar.ring_records
+  ///
+  /// In tr, this message translates to:
+  /// **'kayıt'**
+  String get uiCalendarRingRecords;
+
+  /// ui.calendar.ring_no_due
+  ///
+  /// In tr, this message translates to:
+  /// **'bitiş yok'**
+  String get uiCalendarRingNoDue;
+
   /// ui.calendar.next_week_card
   ///
   /// In tr, this message translates to:

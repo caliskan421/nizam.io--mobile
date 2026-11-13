@@ -1769,6 +1769,46 @@
   "@uiCalendarPeriodEmpty": {
     "description": "ui.calendar.period_empty"
   },
+  "uiCalendarLegendDone": "Tamamlanan",
+  "@uiCalendarLegendDone": {
+    "description": "ui.calendar.legend_done"
+  },
+  "uiCalendarLegendLate": "Geciken",
+  "@uiCalendarLegendLate": {
+    "description": "ui.calendar.legend_late"
+  },
+  "uiCalendarLegendEnds": "Bitecek",
+  "@uiCalendarLegendEnds": {
+    "description": "ui.calendar.legend_ends"
+  },
+  "uiCalendarLegendStarts": "Başlayacak",
+  "@uiCalendarLegendStarts": {
+    "description": "ui.calendar.legend_starts"
+  },
+  "uiCalendarLegendStarted": "Başlayan",
+  "@uiCalendarLegendStarted": {
+    "description": "ui.calendar.legend_started"
+  },
+  "uiCalendarLegendOngoing": "Devam eden",
+  "@uiCalendarLegendOngoing": {
+    "description": "ui.calendar.legend_ongoing"
+  },
+  "uiCalendarLegendMeetings": "Toplantı",
+  "@uiCalendarLegendMeetings": {
+    "description": "ui.calendar.legend_meetings"
+  },
+  "uiCalendarRingDone": "tamamlandı",
+  "@uiCalendarRingDone": {
+    "description": "ui.calendar.ring_done"
+  },
+  "uiCalendarRingRecords": "kayıt",
+  "@uiCalendarRingRecords": {
+    "description": "ui.calendar.ring_records"
+  },
+  "uiCalendarRingNoDue": "bitiş yok",
+  "@uiCalendarRingNoDue": {
+    "description": "ui.calendar.ring_no_due"
+  },
   "uiCalendarNextWeekCard": "Gelecek hafta",
   "@uiCalendarNextWeekCard": {
     "description": "ui.calendar.next_week_card"

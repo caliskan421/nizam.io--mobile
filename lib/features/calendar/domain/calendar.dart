@@ -151,12 +151,14 @@ typedef CalendarSpan = ({
 });
 
 /// Bir dönemin sayıları ([CalendarIndex.period]): bitişi düşen görev ([due]; [done] tamamlanan,
-/// [late] bitmemiş ve bugünden önce), başlangıcı düşen görev ([starts]), toplantı.
+/// [late] bitmemiş ve bugünden önce), başlangıcı düşen görev ([starts]), dönem boyunca süren
+/// görev ([ongoing]), toplantı.
 typedef CalendarPeriod = ({
   int due,
   int done,
   int late,
   int starts,
+  int ongoing,
   int meetings,
 });
 
@@ -352,6 +354,7 @@ final class CalendarIndex {
       done: s.ends.where((e) => e.status == TaskStatus.done).length,
       late: s.ends.where((e) => e.late).length,
       starts: s.starts.length,
+      ongoing: s.ongoing.length,
       meetings: s.meetings.length,
     );
   }

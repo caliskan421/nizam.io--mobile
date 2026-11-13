@@ -215,7 +215,16 @@ class FakeTablesRepository implements TablesRepository {
     PageRequest page = const PageRequest(),
   }) async {
     snapshots.add((scope, tableId, page.cursor));
-    if (snapshotErrors.isNotEmpty) throw snapshotErrors.removeAt(0);
+    if (snapshotErrors.isNotEmpty) {
+      final e = snapshotErrors.removeAt(0);
+      // Kapı varsa hata da gecikir (geciken hata yanıtı).
+      final g = snapshotGate;
+      if (g != null) {
+        snapshotGate = null;
+        await g.future;
+      }
+      throw e;
+    }
     if (queuedSnapshots.isNotEmpty) return queuedSnapshots.removeAt(0);
     final t = _get(scope, tableId);
     final limit = page.limit ?? 100;

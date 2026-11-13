@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/cache_owner.dart';
+import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
 import '../../../core/stale_clock.dart';
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
+import '../domain/task_access.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_details.dart';
 import 'tasks_providers.dart';
@@ -148,17 +150,69 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
   }
 
   /// [code] yüklü katalogda yok (ör. katalog yüklendikten sonra oluşturulup başka ekrandan —
-  /// tablo referansı — açılan görev): katalog bu sahip için kimlik başına BİR KEZ yeniden
-  /// okunur (görev listesi programın görünür görevlerinin tamamıdır). Yine yoksa erişim yok ya
-  /// da silinmiş sayılır; döngü olmaz. Okuma hatası durumda kalır (yutulur).
+  /// tablo referansı — açılan görev). Kimlik başına BİR KEZ:
+  /// - tam katalogda katalog yeniden okunur (liste programın görünür görevlerinin tamamıdır);
+  /// - kesik katalogda (sayfa tavanı) yeniden okuma görevi getirmeyebilir ve görev listesi
+  ///   kimlikle süzülemez (`listProgramWorkItems` yalnız departman/atanan süzgeci taşır);
+  ///   tekil okuma (`getWorkItem`, S3) görevin departman başlığını ister. Görev, çağıranın bu
+  ///   programdaki görünür departmanlarında (önce kendi ekip satırları, sonra katalog
+  ///   departmanları; en çok [maxDepartmentProbes]) kimlikle sırayla denenir: 404 → sıradaki;
+  ///   bulununca kataloğa eklenir; 403 ya da başka hata → durur (görünmüyor). Kapsam/oturum
+  ///   değişirse arama iptal olur.
+  /// Süzgeçli okumayla gelmiş görev bu yoldan geçmez. Hata durumda kalır (yutulur).
   Future<void> refreshForMissing(String code) async {
     if (_upserted.contains(code) || !_missed.add(code) || state.isLoading) {
       return;
     }
+    final c = _catalog;
     try {
-      await refresh();
+      if (c != null && c.truncated) {
+        await _probe(code, c);
+      } else {
+        await refresh();
+      }
     } on Object catch (e, st) {
       reportUnexpected(e, st, source: ReportSource.tasks);
+    }
+  }
+
+  /// Kesik katalogda görev başına denenecek en çok departman (her biri bir `getWorkItem`).
+  static const maxDepartmentProbes = 20;
+
+  Future<void> _probe(String code, TaskCatalog c) async {
+    final program = ref.read(scopeStateProvider).programId;
+    if (program == null || program.isEmpty) return;
+    final owner = _owner;
+    final since = _generation;
+    final departments = <String>{
+      for (final s in c.access?.seatsIn(program) ?? const <TeamSeat>[])
+        s.departmentId,
+      for (final d in c.departments) d.id,
+    }.take(maxDepartmentProbes);
+    final details = ref.read(taskDetailsRepositoryProvider);
+    for (final department in departments) {
+      final probe = TaskItem(
+        code: code,
+        title: '',
+        coordinatorship: department,
+        departmentId: department,
+        programId: program,
+        status: TaskStatus.todo,
+        priority: TaskPriority.medium,
+        start: c.today,
+        due: c.today,
+        assignees: const [],
+      );
+      try {
+        final item = await details.loadItem(probe);
+        if (!ref.mounted || _owner != owner) return;
+        upsert([item], since: since);
+        return;
+      } on ApiError catch (e, st) {
+        reportUnexpected(e, st, source: ReportSource.tasks);
+        if (!ref.mounted || _owner != owner) return;
+        if (e.status != 404) return;
+      }
     }
   }
 

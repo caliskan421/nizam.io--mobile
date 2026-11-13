@@ -249,10 +249,14 @@ extension TableCellWrites on TableController {
   /// yeni düzenlemeler dahil — çakışma olarak bildirilir. Okuma düşerse batch yeni anahtarla
   /// bekletilir, kuyruk dokunulmaz, hata görünür.
   Future<bool> _resolveConflict(_Batch batch) async {
+    // Okuma beklerken oturum/kapsam yeniden kurulduysa (nesil değişti) ya da sağlayıcı
+    // bırakıldıysa eski batch geri konmaz, zamanlayıcı kurulmaz.
+    final generation = _generation;
     try {
       await _reload();
     } on ApiError catch (e, st) {
       reportUnexpected(e, st, source: ReportSource.tables);
+      if (generation != _generation || !_mounted) return false;
       _batch = _Batch(batch.cells, newRequestKey());
       _batchHeld = true;
       _update((b) => b.copyWith(writeError: () => e));
@@ -263,6 +267,7 @@ extension TableCellWrites on TableController {
       }
       return false;
     }
+    if (generation != _generation || !_mounted) return false;
     final v = _base!;
     final conflicts = {...v.conflicts};
     final again = <TableCellWrite>[];
@@ -286,10 +291,13 @@ extension TableCellWrites on TableController {
 
   /// Batch'i bekletir; `Retry-After` (yoksa 2 sn) sonra kendiliğinden yeniden gönderir.
   void _holdUntilRetryAfter(ApiError e) {
+    if (!_mounted) return;
+    final generation = _generation;
     _batchHeld = true;
     _hold?.cancel();
     _hold = Timer(e.retryAfter ?? const Duration(seconds: 2), () {
       _hold = null;
+      if (generation != _generation || !_mounted) return;
       _batchHeld = false;
       unawaited(flush());
     });

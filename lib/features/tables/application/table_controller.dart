@@ -95,6 +95,8 @@ class TableController extends _$TableController {
     _queue.clear();
     _batch = null;
     _batchHeld = false;
+    _hold?.cancel();
+    _hold = null;
     _needsReload = false;
     _reloadTail = Future.value();
     ownSequences.clear();

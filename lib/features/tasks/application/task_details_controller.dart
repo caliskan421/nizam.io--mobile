@@ -40,16 +40,12 @@ Future<void> taskDetails(Ref ref, String code) async {
   final catalog = await ref.read(taskCatalogControllerProvider.future);
   final task = catalog.task(code);
   if (task == null) {
-    // Bayat katalog: görev sonradan oluşmuş olabilir; katalog bir kez yenilenir, görev gelince
-    // yukarıdaki dinleyici (yok → var) ayrıntıyı yeniden okutur. Kesik katalogda yeniden okuma
-    // görevi getirmeyebilir; orada süzgeçli sayfa yolu geçerlidir (yenileme yapılmaz).
-    if (!catalog.truncated) {
-      unawaited(
-        ref
-            .read(taskCatalogControllerProvider.notifier)
-            .refreshForMissing(code),
-      );
-    }
+    // Bayat ya da kesik katalog: görev kimlikle çözümlenir (tam katalogda yeniden okuma, kesik
+    // katalogda görünür departmanlarda tekil okuma); görev gelince yukarıdaki dinleyici
+    // (yok → var) ayrıntıyı yeniden okutur.
+    unawaited(
+      ref.read(taskCatalogControllerProvider.notifier).refreshForMissing(code),
+    );
     return;
   }
   final details = await ref

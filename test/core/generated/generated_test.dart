@@ -122,10 +122,10 @@ void main() {
 
   group('tasarım token\'ları', () {
     test('roller tasarım kaynağından ARGB olarak çözülmüş', () {
-      // accent (#c8f53c) iki modda aynı; scrim CSS #16161566 → ARGB 0x66161615.
-      expect(NizamioColors.light.primary, const Color(0xFFC8F53C));
-      expect(NizamioColors.dark.primary, NizamioColors.light.primary);
-      expect(NizamioColors.light.scrim, const Color(0x66161615));
+      // accent tasarım kaynağında koyu #c8f53c, açık #cbe83c; scrim CSS #12131659 → ARGB 0x59121316.
+      expect(NizamioColors.light.primary, const Color(0xFFCBE83C));
+      expect(NizamioColors.dark.primary, const Color(0xFFC8F53C));
+      expect(NizamioColors.light.scrim, const Color(0x59121316));
       expect(NizamioColors.dark.scrim, const Color(0x8C000000));
     });
     test('ThemeExtension lerp/copyWith', () {

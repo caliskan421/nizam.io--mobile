@@ -107,8 +107,8 @@ void main() {
     events.add(_optional);
     await pump(tester, events.stream);
     expect(find.text('Daha sonra'), findsOneWidget);
-    expect(find.bySemanticsLabel('Kapat'), findsOneWidget);
-    await tester.tap(find.bySemanticsLabel('Kapat'));
+    // İsteğe bağlı öneride tek kapatma yolu "Daha sonra"dır (ayrı kapat simgesi yok).
+    await tester.tap(find.text('Daha sonra'));
     await tester.pumpAndSettle();
     expect(find.text('protected content'), findsOneWidget);
     events.add(_required);

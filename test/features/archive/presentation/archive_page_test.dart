@@ -1,5 +1,5 @@
 // ArchivePage (sunucu verisi, sahte depo): özet ve klasörler, arama, klasör → ayrıntı, yükleme
-// tostu, kısayol menüsü (tam arşiv yalnız yöneticide), hata görünümü, dar ekran / 2.0 / koyu.
+// görev seçimi, kısayol menüsü (tam arşiv yalnız yöneticide), hata görünümü, dar ekran / 2.0 / koyu.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -52,7 +52,8 @@ void main() {
     final repo = FakeArchiveRepository();
     final (_, nav, _) = await _open(tester, repo: repo);
     expect(find.text(_l.uiArchiveTitle), findsOneWidget);
-    expect(find.text('3 dosya · 2 klasör'), findsOneWidget);
+    expect(find.text(_l.uiArchiveSummaryFiles), findsOneWidget);
+    expect(find.text('2 ${_l.uiArchiveFoldersLc}'), findsOneWidget);
     expect(find.text('${_l.uiArchiveFoldersTitle} · 2'), findsOneWidget);
     // Kartta yalnız klasör adı ve dosya sayısı (örnek veri yok).
     expect(find.text('3 dosya'), findsOneWidget);
@@ -60,7 +61,7 @@ void main() {
     expect(find.bySemanticsLabel('Altyapı, 3 dosya'), findsOneWidget);
     expect(find.text('grup'), findsNothing);
     // Koordinatör satırının departmanı başlık olarak gider.
-    expect(repo.calls.single, ('folders', 'd1', null));
+    expect(repo.calls.first, ('folders', 'd1', null));
     await _tap(tester, find.text('Bilişim'));
     expect(nav.calls, ['folder:d2']);
   });
@@ -146,12 +147,13 @@ void main() {
     expect(find.text(_l.uiArchiveEmptySearch), findsOneWidget);
   });
 
-  testWidgets('yükleme görev bağlamı yok → yakında; kısayollar (koordinatör)', (
+  testWidgets('yüklenecek görev yoksa bilgi; kısayollar (koordinatör)', (
     tester,
   ) async {
     final (h, nav, _) = await _open(tester);
     await _tap(tester, find.byIcon(Icons.arrow_upward_rounded));
-    expect(find.text(_l.uiArchiveUploadSoon), findsOneWidget);
+    // Pilot kataloğunda görev yok: görev seçici açılmaz, bilgi verilir.
+    expect(find.text(_l.uiArchiveUploadNoTask), findsOneWidget);
     h.read(shellReselectEventsProvider.notifier).fire(ArchivePage.shellTab);
     await settle(tester);
     expect(find.text(_l.uiArchiveGoCoordinatorships), findsOneWidget);

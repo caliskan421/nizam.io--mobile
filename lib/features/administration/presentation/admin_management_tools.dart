@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
+import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../application/admin_controller.dart';
-import 'admin_deleted_records.dart';
 import 'admin_forms.dart';
 import 'admin_program_actions.dart';
 import 'admin_transfer_panel.dart';
@@ -82,7 +82,10 @@ class AdminManagementTools extends ConsumerWidget {
           },
           child: const Text('Bütün giriş kilitlerini kaldır'),
         ),
-        const AdminDeletedRecords(),
+        TextButton(
+          onPressed: context.appNav.openDeletedTasks,
+          child: const Text('Silinenler'),
+        ),
       ],
     );
   }

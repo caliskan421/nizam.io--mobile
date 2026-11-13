@@ -199,7 +199,7 @@
     "ui.tasks.tag_unknown": "Diğer",
     "ui.tasks.upload_ok": "Yükle",
     "ui.tasks.delete_q_tail": "silinsin mi?",
-    "ui.tasks.delete_desc": "Silinen kayıtlardan geri alınabilir",
+    "ui.tasks.delete_desc": "Silinen kayıtlardan geri alınabilir; bağımlılıkları geri gelmez",
     "ui.tasks.delete_body_tail": "silinen kayıtlara taşınır. Kanıt dosyaları arşivde kalır.",
     "ui.tasks.delete_ok": "Sil",
     "ui.tasks.t_created_tail": "oluşturuldu",

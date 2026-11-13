@@ -11,7 +11,6 @@
     "ui.archive.search_hint": "Klasör adı",
     "ui.archive.upload": "Dosya yükle",
     "ui.archive.upload_short": "Yükle",
-    "ui.archive.upload_soon": "Dosya yükleme sonraki adımda tasarlanacak",
     "ui.archive.storage": "Depolama",
     "ui.archive.mb": "MB",
     "ui.archive.kb": "KB",
@@ -57,10 +56,8 @@
     "ui.archive.uploader_unknown": "Bilinmeyen kişi",
     "ui.archive.download": "İndir",
     "ui.archive.downloading": "indiriliyor",
-    "ui.archive.retag": "Etiketi değiştir",
     "ui.archive.move": "Başka klasöre taşı",
     "ui.archive.delete": "Dosyayı sil",
-    "ui.archive.retag_soon": "Etiket seçimi sonraki adımda tasarlanacak",
     "ui.archive.move_soon": "Klasör seçimi sonraki adımda tasarlanacak",
     "ui.archive.deleted": "Dosya silindi",
     "ui.archive.kind_image": "Resim",
@@ -90,6 +87,13 @@
     "ui.archive.upload_no_task": "Bu klasörde dosya yüklenecek görev yok",
     "ui.archive.uploaded": "Dosya yüklendi",
     "ui.archive.picker_missing": "Bu sürümde dosya seçici yok",
-    "ui.archive.folder_missing": "Klasör bulunamadı"
+    "ui.archive.folder_missing": "Klasör bulunamadı",
+    "ui.archive.fullscreen": "Tam ekranda aç",
+    "ui.archive.summary_files": "Dosya",
+    "ui.archive.summary_size": "Toplam boyut",
+    "ui.archive.summary_kinds": "Tür dağılımı",
+    "ui.archive.summary_partial": "Kısmi sayım; arşiv çok büyük",
+    "ui.archive.summary_no_files": "Henüz dosya yok",
+    "ui.archive.upload_task_desc": "Dosya seçtiğiniz göreve yüklenir"
   }
 }

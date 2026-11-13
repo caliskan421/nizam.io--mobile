@@ -25,12 +25,13 @@ import 'transitions.dart';
 
 part 'routes.g.dart';
 
+/// Silinenler (görev, toplantı, koordinatörlük, kullanıcı sekmeleri; yalnız yönetici).
 @TypedGoRoute<DeletedTasksRoute>(path: '/deleted-tasks')
 class DeletedTasksRoute extends NzRouteData with $DeletedTasksRoute {
   const DeletedTasksRoute();
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      const DeletedTasksPage();
+      const DeletedRecordsPage();
 }
 
 /// Eski yönetim bağlantıları kullanıcı modülüne açılır.

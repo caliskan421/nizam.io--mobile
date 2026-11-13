@@ -215,24 +215,37 @@ program/birim paylaşımı, sahte kişi/görev/dosya seçicileri, ızgarada yere
 
 ### 9.1 Hücre yazımı
 
-1. Düzenleme yerelde hemen görünür; `TableWriteQueue`'ya okunan sürüm (CAS tabanı) ile girer.
-   Aynı hücrenin ardışık düzenlemesi tabanı koruyup değeri değiştirir.
-2. 1 sn sessizlik (ya da 100 hücre) → tek `set_cells`. Aynı anda tek batch uçuştadır;
-   bu, hücre yazımını 60/dk yazma kovasının altında tutar.
-3. Başarı: makbuzdaki yeni sürümler yazılır; uçuştayken yeniden düzenlenen hücrenin tabanı
-   yeni sürüme taşınır; makbuz `sequence`'i `ownSequences`'e ve geri alma adayına eklenir.
-4. Komutlar (satır/sütun/ad) önce bekleyen hücreleri gönderir; yapı değiştiren komut sonrası
-   tablo yeniden okunur, ad/genişlik yerelde uygulanır.
+Görünüm iki katmandır: sunucudan türeyen **taban** (snapshot + kendi makbuzlarımız) ve üstüne
+uygulanan bekleyen/uçuştaki düzenlemeler. Taban monotondur: uygulanmış snapshot'tan eski
+sıradaki snapshot atılır; snapshot ya da makbuz bir hücreyi daha küçük sürüme geri almaz
+(geciken kendi makbuzumuz, araya giren yabancı değeri ezmez). Snapshot okumaları tek zincirde
+sıraya dizilir.
+
+1. Düzenleme yerelde hemen görünür; `TableWriteQueue`'ya CAS tabanıyla girer: okunan sürüm,
+   hücre gönderilen batch'teyse o batch öğesinin tabanı. Aynı hücrenin ardışık düzenlemesi
+   tabanı koruyup değeri değiştirir.
+2. 1 sn sessizlik (ya da 100 hücre) → tek `set_cells`. Aynı anda tek batch vardır; gövdesi ve
+   işlem anahtarı değişmezdir. Yeni düzenlemeler kuyrukta onun arkasında bekler.
+3. Başarı: makbuzdaki yeni sürüm görünümdekinden büyükse yazılır; yalnız bu durumda kuyruktaki
+   aynı hücrenin tabanı yeni sürüme taşınır (taban yalnız KENDİ başarılı makbuzumuzla taşınır).
+4. Sonucu bilinmeyen hata (zaman aşımı/ağ/5xx): batch AYNI gövde+anahtarla bekletilir, şerit
+   çıkar; "Yeniden dene" aynısını yollar (sunucu yazdıysa `replayed` döner, çift yazım olmaz),
+   sonra kuyruktakiler ayrı batch'le gider. 429: aynı batch `Retry-After` sonra kendiliğinden.
+5. Komutlar (satır/sütun/ad/yorum) önce bekleyen hücreleri gönderir. İşlem anahtarı kullanıcı
+   işlemi başınadır (defter yuvası komutun gövde imzası): sonucu bilinmeyen komutun anahtarı
+   araya giren başka komutla kaybolmaz, aynı işlem yeniden denenince aynı anahtar gider (tek
+   kayıt). Makbuz alındıktan sonraki yeniden okuma düşerse komut başarılı sayılır; hata
+   raporlanır ve kalıcı "yeniden okuma gerekli" bayrağı sonraki yakalamada tabloyu yeniler.
 
 ### 9.2 Çakışma
 
-409 `cell_conflict` → tablo yeniden okunur. Batch'teki her hücre için: sunucu sürümü okunan
-sürümle aynıysa (çakışmayı başka hücre doğurdu) yeniden kuyruğa girer — gövde değiştiği için
-yeni anahtarla gider; sunucu değeri istenenle aynıysa iş bitmiştir; aksi halde hücre
-`conflicts` kümesine girer, sunucu değeri gösterilir, kullanıcıya şerit çıkar. Sonucu
-bilinmeyen hata batch'i aynı anahtarla bekletir; kullanıcı "Yeniden dene" der (sunucu yazdıysa
-`replayed` makbuzu döner, çift yazım olmaz). 429 batch'i `Retry-After` sonra kendiliğinden
-yollar (sunucu işlemedi).
+409 `cell_conflict` → tablo yeniden okunur. Batch'teki her hücre için: sunucu sürümü tabanla
+aynıysa (çakışmayı başka hücre doğurdu) yeni anahtarla yeniden gider (istek reddedilmişti);
+değiştiyse hücre `conflicts`'e girer, sunucu değeri görünür, şerit çıkar — aynı hücreye
+kuyrukta daha yeni düzenleme varsa o da düşer (yabancı sürüme taşınıp sessizce ezmez).
+Yeniden okumada tabanı sunucuda değişmiş her kuyruk öğesi de çakışma olarak işaretlenir.
+Çözümleme okuması düşerse batch (yeni anahtarla) bekletilir, kuyruk korunur, hata görünür;
+gönderim hiçbir zaman yakalanmamış hata fırlatmaz.
 
 ### 9.3 Canlı senkron (gerçekleşen)
 
@@ -249,8 +262,10 @@ Referans istemci: backend `internal/modules/tables/integration/yakinsama_istemci
    anda tek yakalama uçuştadır; uçuşta gelen ipuçları tek bekleyen yakalamada toplanır (okuma
    kotası 600/dk).
 3. **`catchUp()`:** `changes?after=cursor&limit=200` sayfaları `more=false` olana dek okunur;
-   `cursor` yalnız `changes.cursor` ya da tutarlı snapshot sırasıyla ilerler (kendi makbuz
-   sırası imleci ilerletmez — aradaki yabancı olay atlanmasın). Yeni seq `ownSequences`'te
+   imleç ancak gereken yeniden okuma ve yorum güncellemesi BAŞARIYLA bitince ilerler (okuma ya
+   da sonraki sayfa düşerse imleç yerinde kalır, aynı olaylar yeniden işlenir); tutarlı
+   snapshot uygulanınca da sırasına ilerler ve atlanan aralıkta yorum olayı olabileceği için
+   açık yorum listeleri yenilenir. Kendi makbuz sırası imleci ilerletmez. Yeni seq `ownSequences`'te
    değilse ve yorum türü değilse snapshot yeniden okunur; yalnız yorum olayları
    `commentsRevision`'ı artırır (açık yorum listesi yeniden okunur). 409 `replay_expired` →
    tam yeniden yükleme; 403/404 → `accessLost` (salt okunur + şerit).
@@ -269,11 +284,16 @@ Referans istemci: backend `internal/modules/tables/integration/yakinsama_istemci
    halkası belirteci zaten bir kez yeniledi); 429 → `Retry-After` bitene kadar açılmaz.
    Belirteç yenilemesinde sunucu gözcüsü akışı ≤27 sn içinde keser; bu normal kopma olarak
    yeniden bağlanır (proaktif yeniden açma kancası yok — açık #9).
-7. **Yaşam döngüsü:** `TableLiveScope` ekran görünürken (`TickerMode`) denetleyiciyi dinler;
+7. **Yaşam döngüsü:** tek görünürlük kararı `tableLiveVisible` (`TickerMode`); kapsam ve
+   durum çubuğu (`TableLiveBar`) yalnız görünürken dinler, gizli ekran akışı açık tutmaz.
+   Durdurma nesli artırır: uçuştaki yakalama bitince bekleyen yakalama kurulmaz.
+   `TableLiveScope` ekran görünürken denetleyiciyi dinler;
    uygulama arka plana geçince (`AppLifecycleListener`) akış kapanır ve presence silinir; öne
    dönünce akış açılır, `ready` imleçten yakalar. Oturum/kapsam değişince akış yeniden kurulur.
 8. **Presence:** akış canlıyken hemen ve 10 sn'de bir `POST`; satır sayfası açılınca seçim
-   (satır + odak/ilk sütun) en az 1 sn arayla gönderilir, kapanınca seçim temizlenir; akış
+   (satır + odak/ilk sütun). Bütün gönderimler tek kapıdan geçer: aynı anda tek istek, son
+   gönderimden en az 1 sn, 429 `Retry-After` süresince yok; erken istek en erken ana ertelenir
+   ve o andaki seçimi taşır, kapanınca seçim temizlenir; akış
    kopunca yenileme durur, ekrandan çıkış/arka planda `DELETE`. `presence` çerçevesi tam
    katılımcı listesidir; başlıkta avatar yığını, ipucunda ad + satır/sütun.
 9. **Durum göstergesi:** başlıkta `Canlı` / `Yeniden bağlanıyor` / `Çevrimdışı`.
@@ -299,7 +319,7 @@ sohbetinki program genelinde tek akış + sinyal veri yolu, tablonunki tablo ba�
 
 Sürekli düzenleme + presence + açık ikinci tablo kovayı aşabilir: hücre batch'i 429'da
 `Retry-After` sonra aynı gövde/anahtarla gider; presence 429'u (ya da `presence_throttled`)
-yalnız raporlanır ve sonraki turda düzelir. Presence için ayrı (sinyal) kova yoktur (açık #4).
+`Retry-After` süresince sonraki gönderimleri bekletir. Presence için ayrı (sinyal) kova yoktur (açık #4).
 
 ## 10. Açıklar (kırmızılar)
 

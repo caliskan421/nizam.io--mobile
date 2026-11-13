@@ -236,8 +236,13 @@ yükleme ucuyla yazılır (mobilde yok).
 
 Gezinme: tablo referansı hedef tabloyu (`openTable`, aynı alan; erişim yoksa tablo ekranı
 `tables.not_found` metnini gösterir), görev referansı görev ayrıntısını (`openTask`) açar (görev
-kataloğu yüklendikten sonra oluşmuş görevde katalog kimlik başına bir kez yeniden okunur; kesik
-katalogda süzgeçli yol geçerlidir) —
+kataloğu yüklendikten sonra oluşmuş görevde katalog kimlik başına bir kez yeniden okunur. Kesik
+katalogda (sayfa tavanı) yeniden okuma görevi getirmeyebilir; `listProgramWorkItems` kimlik
+süzgeci taşımaz, `getWorkItem` (S3) görevin departman başlığını ister. Bu yüzden görev,
+çağıranın bu programdaki görünür departmanlarında — önce kendi ekip satırları, sonra katalog
+departmanları, en çok 20 — `getWorkItem` ile sırayla denenir: 404 sıradakine geçer, başka hata
+durur, bulunan görev kataloğa eklenir. Maliyet: görev başına en çok 20 tekil okuma, kimlik
+başına bir kez; kapsam/oturum değişirse iptal) —
 ızgarada tekli hücreye dokunma ya da satır sayfasındaki rozet. Gizlenmiş ya da adı görünmeyen
 hedef açılmaz. Kişi (yönetim sayfası yalnız yöneticiye), departman (koordinatörlük kodu ile
 kimlik eşlemesi doğrulanmadı) ve dosya (görevsiz önizleme yok) yalnız gösterilir.
@@ -294,7 +299,9 @@ değiştiyse hücre `conflicts`'e girer, sunucu değeri görünür, şerit çık
 kuyrukta daha yeni düzenleme varsa o da düşer (yabancı sürüme taşınıp sessizce ezmez).
 Yeniden okumada tabanı sunucuda değişmiş her kuyruk öğesi de çakışma olarak işaretlenir.
 Çözümleme okuması düşerse batch (yeni anahtarla) bekletilir, kuyruk korunur, hata görünür
-(okuma 429 aldıysa `Retry-After` — yoksa 2 sn — sonra kendiliğinden yeniden denenir). Şeridin
+(okuma 429 aldıysa `Retry-After` — yoksa 2 sn — sonra kendiliğinden yeniden denenir). Okuma
+beklerken oturum/kapsam yeniden kurulursa ya da ekran bırakılırsa devam ve zamanlayıcı
+başladıkları nesille korunur: eski batch geri konmaz, gönderim yapılmaz. Şeridin
 eylemi denetleyicinin "bekletilen batch" durumundan (`writesHeld`) türer: bekletilen varsa
 "yeniden dene", kalıcı retse (422 vb.; değer geri alındı) "kapat";
 gönderim hiçbir zaman yakalanmamış hata fırlatmaz.

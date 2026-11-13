@@ -144,7 +144,7 @@ Future<void> main(List<String> args) async {
   for (final h in hoisted) {
     stdout.writeln('gen: satır içi nesne bileşene taşındı (ad çakışması): $h');
   }
-  final (parserSpec, unions) = inlineScalarUnions(hoistedSpec);
+  final (parserSpec, unions, rawProps) = inlineScalarUnions(hoistedSpec);
   for (final u in unions) {
     stdout.writeln('gen: skaler oneOf bileşeni ham JSON değerine indi: $u');
   }
@@ -191,7 +191,10 @@ swagger_parser:
       (f) => f.path.endsWith('.dart'),
     )) {
       final src = f.readAsStringSync();
-      var masked = annotateDateOnly(maskSensitiveModels(src), dateNames);
+      var masked = keepNullRawFields(
+        annotateDateOnly(maskSensitiveModels(src), dateNames),
+        rawProps,
+      );
       if (p.basename(f.path) == 'update_program_request.dart') {
         masked = rewriteProgramPatch(masked);
       }

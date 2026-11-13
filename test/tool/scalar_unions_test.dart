@@ -38,8 +38,9 @@ components:
 
 void main() {
   test('skaler birlik bileşeni kaldırılır, başvurusu tipsiz şemaya iner', () {
-    final (out, inlined) = inlineScalarUnions(_spec);
+    final (out, inlined, props) = inlineScalarUnions(_spec);
     expect(inlined, ['CellValue']);
+    expect(props, {'value'});
     final spec = jsonDecode(out) as Map<String, Object?>;
     final schemas =
         (spec['components']! as Map<String, Object?>)['schemas']!
@@ -61,8 +62,24 @@ components:
     A:
       type: object
 ''';
-    final (out, inlined) = inlineScalarUnions(plain);
+    final (out, inlined, _) = inlineScalarUnions(plain);
     expect(inlined, isEmpty);
     expect(out, plain);
+  });
+
+  test('zorunlu ham alan null olarak da gövdeye yazılır', () {
+    const src = '''
+  const factory Cell({
+    required dynamic value,
+    dynamic other,
+  }) = _Cell;
+''';
+    final out = keepNullRawFields(src, {'value'});
+    expect(
+      out,
+      contains('@JsonKey(includeIfNull: true) required dynamic value,'),
+    );
+    expect(out, contains('    dynamic other,'));
+    expect(keepNullRawFields(src, const {}), src);
   });
 }

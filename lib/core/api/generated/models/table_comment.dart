@@ -4,7 +4,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'author.dart';
+import 'table_comment_author.dart';
 
 part 'table_comment.freezed.dart';
 part 'table_comment.g.dart';
@@ -18,9 +18,7 @@ abstract class TableComment with _$TableComment {
 
     /// Yalnız satıra bağlı yorumda `null`.
     @JsonKey(name: 'column_id') required String? columnId,
-
-    /// Yazar okuyana görünmüyorsa `null` (kimlik/e-posta yok).
-    required Author? author,
+    required TableCommentAuthor? author,
 
     /// Yorum okuyanındır (yazar görünmese de doludur).
     required bool mine,

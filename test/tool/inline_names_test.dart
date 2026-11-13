@@ -68,4 +68,31 @@ components:
     expect(moved, isEmpty);
     expect(identical(out, plain), isTrue);
   });
+
+  test('satır içi enum parametre adıyla çakışan nesne de taşınır', () {
+    const spec = '''
+openapi: 3.0.3
+paths:
+  /notes:
+    get:
+      parameters:
+        - name: author
+          in: query
+          schema:
+            type: string
+            enum: [me]
+components:
+  schemas:
+    Comment:
+      type: object
+      properties:
+        author:
+          type: object
+          properties:
+            name:
+              type: string
+''';
+    final (_, moved) = hoistCollidingInlineObjects(spec);
+    expect(moved, ['Comment.author → CommentAuthor']);
+  });
 }

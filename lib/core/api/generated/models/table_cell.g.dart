@@ -18,7 +18,7 @@ Map<String, dynamic> _$TableCellToJson(_TableCell instance) =>
     <String, dynamic>{
       'row_id': instance.rowId,
       'column_id': instance.columnId,
-      'value': ?instance.value,
+      'value': instance.value,
       'version': instance.version,
       'redacted': ?instance.redacted,
     };

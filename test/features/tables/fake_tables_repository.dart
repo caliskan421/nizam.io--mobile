@@ -34,6 +34,21 @@ class FakeTablesRepository implements TablesRepository {
   /// Bir sonraki apply bu tamamlayıcıyı bekler (uçuştaki batch).
   Completer<void>? gate;
 
+  /// Bir sonraki apply sunucuda HEMEN işlenir, yanıtı bu tamamlayıcıyı bekler (geciken makbuz).
+  Completer<void>? responseGate;
+
+  /// Bir sonraki snapshot o anki durumu okur, yanıtı bu tamamlayıcıyı bekler (geciken snapshot).
+  Completer<void>? snapshotGate;
+
+  /// Bir sonraki changes yanıtı bu tamamlayıcıyı bekler.
+  Completer<void>? changesGate;
+
+  /// Sıradaki snapshot hataları.
+  final snapshotErrors = <ApiError>[];
+
+  /// Presence gönderim zamanları (gerçek saat; aralık ölçümü).
+  final presenceAt = <DateTime>[];
+
   /// Açılan akışlar (test çerçeve/hata/kapanış iter).
   final streams = <StreamController<TableStreamEvent>>[];
 
@@ -163,14 +178,15 @@ class FakeTablesRepository implements TablesRepository {
     PageRequest page = const PageRequest(),
   }) async {
     snapshots.add((scope, tableId, page.cursor));
+    if (snapshotErrors.isNotEmpty) throw snapshotErrors.removeAt(0);
     final t = _get(scope, tableId);
     final limit = page.limit ?? 100;
     final start = page.cursor == null ? 0 : int.parse(page.cursor!);
     final rows = t.rows.skip(start).take(limit).toList();
     final end = start + rows.length;
-    return TableSnapshotPage(
+    final result = TableSnapshotPage(
       meta: t.meta,
-      columns: t.columns,
+      columns: [...t.columns],
       rows: rows,
       cells: {
         for (final e in t.cells.entries)
@@ -178,6 +194,12 @@ class FakeTablesRepository implements TablesRepository {
       },
       nextCursor: end < t.rows.length ? '$end' : null,
     );
+    final g = snapshotGate;
+    if (g != null) {
+      snapshotGate = null;
+      await g.future;
+    }
+    return result;
   }
 
   bool _rowOf(TableCellKey k, String row, FakeTable t) =>
@@ -215,6 +237,11 @@ class FakeTablesRepository implements TablesRepository {
     final t = _get(scope, tableId);
     final receipt = _execute(t, operation);
     _receipts[requestKey] = (operation.signature, receipt);
+    final rg = responseGate;
+    if (rg != null) {
+      responseGate = null;
+      await rg.future;
+    }
     if (loseNextResponses > 0) {
       loseNextResponses--;
       throw ApiError('client.timeout');
@@ -319,6 +346,11 @@ class FakeTablesRepository implements TablesRepository {
     int? limit,
   }) async {
     changesCalls.add(after);
+    final g = changesGate;
+    if (g != null) {
+      changesGate = null;
+      await g.future;
+    }
     if (changesErrors.isNotEmpty) throw changesErrors.removeAt(0);
     final t = _get(scope, tableId);
     final page = [
@@ -348,7 +380,10 @@ class FakeTablesRepository implements TablesRepository {
     String tableId, {
     String? rowId,
     String? columnId,
-  }) async => presence.add(('set', rowId, columnId));
+  }) async {
+    presence.add(('set', rowId, columnId));
+    presenceAt.add(DateTime.now());
+  }
 
   @override
   Future<void> leavePresence(TableScope scope, String tableId) async =>

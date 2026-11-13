@@ -1,11 +1,36 @@
 {
-  "$comment": "Web pininde (api-pin.json web.commit) HENÜZ metni olmayan SUNUCU kodlarının geçici TR metinleri. ELLE yazılır. Yalnız katalogdaki ve web'de olmayan kodlar girer; web metni eklenip pin ilerleyince make gen aynı kodun burada kalmasını hata sayar (satır silinir). Anlamlar: backend modül README'leri (identity K50/K52/K56, records K07, assistant, collaboration konferans) ve docs/api/README.",
+  "$comment": "Web pininde (api-pin.json web.commit) HENÜZ metni olmayan SUNUCU kodlarının geçici TR metinleri. ELLE yazılır. Yalnız katalogdaki ve web'de olmayan kodlar girer; web metni eklenip pin ilerleyince make gen aynı kodun burada kalmasını hata sayar (satır silinir). Anlamlar: backend modül README'leri (identity K50/K52/K56, records K07, assistant, collaboration konferans) ve docs/api/README; tablolar (backend internal/modules/tables/README.md §3 TABLES-K01…K27, docs/api/error-codes.json).",
   "codes": {
     "organization.existing_department": "Bu adda bir departman zaten var.",
     "organization.idempotency_key_reused": "Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.",
     "organization.invalid_request_key": "İşlem anahtarı geçersiz.",
     "program.invalid_request_key": "İşlem anahtarı geçersiz.",
     "program.invalid_short_name": "Kısa ad 1–4 harf ya da rakam olmalıdır.",
-    "program.invalid_color": "Geçersiz renk seçimi."
+    "program.invalid_color": "Geçersiz renk seçimi.",
+    "tables.attachment_limit_reached": "Bu tablonun ek sınırına ulaşıldı.",
+    "tables.attachment_rejected": "Bu dosya türü tabloya eklenemez.",
+    "tables.attachment_too_large": "Dosya izin verilen boyuttan büyük.",
+    "tables.cell_conflict": "Bu hücre siz düzenlerken değişti. Güncel değeri kontrol edip yeniden deneyin.",
+    "tables.conversion_lossy": "Sütun türü değişirse bazı hücrelerdeki değerler kaybolur.",
+    "tables.cursor_stale": "Tablo bu arada değişti. Liste yeniden yüklenmeli.",
+    "tables.forbidden": "Bu tabloda bu işlem için yetkiniz yok.",
+    "tables.idempotency_key_reused": "Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.",
+    "tables.input_invalid": "Girilen bilgiler geçersiz.",
+    "tables.limit_reached": "Tablo sınırına ulaşıldı.",
+    "tables.not_found": "Tablo bulunamadı ya da erişiminiz yok.",
+    "tables.presence_throttled": "Çok sık güncelleme gönderildi. Biraz sonra yeniden deneyin.",
+    "tables.proposal_decided": "Bu öneri zaten sonuçlandırılmış.",
+    "tables.proposal_pending": "Bu tablo için bekleyen bir öneri var.",
+    "tables.proposal_stale": "Öneri artık geçerli değil.",
+    "tables.query_too_broad": "Süzgeç çok geniş. Daha dar bir koşul seçin.",
+    "tables.reference_unavailable": "Seçilen kayıt kullanılamıyor.",
+    "tables.replay_expired": "Değişiklik geçmişi artık okunamıyor. Tablo yeniden yükleniyor.",
+    "tables.request_key_invalid": "İşlem anahtarı geçersiz.",
+    "tables.request_key_required": "İşlem anahtarı eksik.",
+    "tables.schema_conflict": "Sütunlar siz düzenlerken değişti. Tabloyu yenileyip yeniden deneyin.",
+    "tables.source_changed": "Kaynak tablo kopyalama sırasında değişti. Yeniden deneyin.",
+    "tables.stream_unavailable": "Canlı güncelleme şu an kullanılamıyor.",
+    "tables.undo_conflict": "Geri alınacak değişiklik kalmadı; hücreler bu arada değişmiş.",
+    "tables.undo_expired": "Bu değişiklik artık geri alınamaz."
   }
 }

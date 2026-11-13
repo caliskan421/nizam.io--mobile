@@ -1270,6 +1270,156 @@ abstract class AppLocalizations {
   /// **'Dosya deposuna geçici olarak erişilemiyor; yeniden deneyin.'**
   String get errStorageTransient;
 
+  /// tables.attachment_limit_reached
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu tablonun ek sınırına ulaşıldı.'**
+  String get errTablesAttachmentLimitReached;
+
+  /// tables.attachment_rejected
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu dosya türü tabloya eklenemez.'**
+  String get errTablesAttachmentRejected;
+
+  /// tables.attachment_too_large
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya izin verilen boyuttan büyük.'**
+  String get errTablesAttachmentTooLarge;
+
+  /// tables.cell_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hücre siz düzenlerken değişti. Güncel değeri kontrol edip yeniden deneyin.'**
+  String get errTablesCellConflict;
+
+  /// tables.conversion_lossy
+  ///
+  /// In tr, this message translates to:
+  /// **'Sütun türü değişirse bazı hücrelerdeki değerler kaybolur.'**
+  String get errTablesConversionLossy;
+
+  /// tables.cursor_stale
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo bu arada değişti. Liste yeniden yüklenmeli.'**
+  String get errTablesCursorStale;
+
+  /// tables.forbidden
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu tabloda bu işlem için yetkiniz yok.'**
+  String get errTablesForbidden;
+
+  /// tables.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.'**
+  String get errTablesIdempotencyKeyReused;
+
+  /// tables.input_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Girilen bilgiler geçersiz.'**
+  String get errTablesInputInvalid;
+
+  /// tables.limit_reached
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo sınırına ulaşıldı.'**
+  String get errTablesLimitReached;
+
+  /// tables.not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo bulunamadı ya da erişiminiz yok.'**
+  String get errTablesNotFound;
+
+  /// tables.presence_throttled
+  ///
+  /// In tr, this message translates to:
+  /// **'Çok sık güncelleme gönderildi. Biraz sonra yeniden deneyin.'**
+  String get errTablesPresenceThrottled;
+
+  /// tables.proposal_decided
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu öneri zaten sonuçlandırılmış.'**
+  String get errTablesProposalDecided;
+
+  /// tables.proposal_pending
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu tablo için bekleyen bir öneri var.'**
+  String get errTablesProposalPending;
+
+  /// tables.proposal_stale
+  ///
+  /// In tr, this message translates to:
+  /// **'Öneri artık geçerli değil.'**
+  String get errTablesProposalStale;
+
+  /// tables.query_too_broad
+  ///
+  /// In tr, this message translates to:
+  /// **'Süzgeç çok geniş. Daha dar bir koşul seçin.'**
+  String get errTablesQueryTooBroad;
+
+  /// tables.reference_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçilen kayıt kullanılamıyor.'**
+  String get errTablesReferenceUnavailable;
+
+  /// tables.replay_expired
+  ///
+  /// In tr, this message translates to:
+  /// **'Değişiklik geçmişi artık okunamıyor. Tablo yeniden yükleniyor.'**
+  String get errTablesReplayExpired;
+
+  /// tables.request_key_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem anahtarı geçersiz.'**
+  String get errTablesRequestKeyInvalid;
+
+  /// tables.request_key_required
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem anahtarı eksik.'**
+  String get errTablesRequestKeyRequired;
+
+  /// tables.schema_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Sütunlar siz düzenlerken değişti. Tabloyu yenileyip yeniden deneyin.'**
+  String get errTablesSchemaConflict;
+
+  /// tables.source_changed
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaynak tablo kopyalama sırasında değişti. Yeniden deneyin.'**
+  String get errTablesSourceChanged;
+
+  /// tables.stream_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Canlı güncelleme şu an kullanılamıyor.'**
+  String get errTablesStreamUnavailable;
+
+  /// tables.undo_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri alınacak değişiklik kalmadı; hücreler bu arada değişmiş.'**
+  String get errTablesUndoConflict;
+
+  /// tables.undo_expired
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu değişiklik artık geri alınamaz.'**
+  String get errTablesUndoExpired;
+
   /// work.assignee_not_member
   ///
   /// In tr, this message translates to:

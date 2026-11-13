@@ -201,6 +201,31 @@ const localizedErrorCodes = <String>{
   'storage.permanent',
   'storage.quota',
   'storage.transient',
+  'tables.attachment_limit_reached',
+  'tables.attachment_rejected',
+  'tables.attachment_too_large',
+  'tables.cell_conflict',
+  'tables.conversion_lossy',
+  'tables.cursor_stale',
+  'tables.forbidden',
+  'tables.idempotency_key_reused',
+  'tables.input_invalid',
+  'tables.limit_reached',
+  'tables.not_found',
+  'tables.presence_throttled',
+  'tables.proposal_decided',
+  'tables.proposal_pending',
+  'tables.proposal_stale',
+  'tables.query_too_broad',
+  'tables.reference_unavailable',
+  'tables.replay_expired',
+  'tables.request_key_invalid',
+  'tables.request_key_required',
+  'tables.schema_conflict',
+  'tables.source_changed',
+  'tables.stream_unavailable',
+  'tables.undo_conflict',
+  'tables.undo_expired',
   'work.assignee_not_member',
   'work.assignment_duplicate',
   'work.attachment_required',
@@ -670,6 +695,56 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errStorageQuota;
     case 'storage.transient':
       return l.errStorageTransient;
+    case 'tables.attachment_limit_reached':
+      return l.errTablesAttachmentLimitReached;
+    case 'tables.attachment_rejected':
+      return l.errTablesAttachmentRejected;
+    case 'tables.attachment_too_large':
+      return l.errTablesAttachmentTooLarge;
+    case 'tables.cell_conflict':
+      return l.errTablesCellConflict;
+    case 'tables.conversion_lossy':
+      return l.errTablesConversionLossy;
+    case 'tables.cursor_stale':
+      return l.errTablesCursorStale;
+    case 'tables.forbidden':
+      return l.errTablesForbidden;
+    case 'tables.idempotency_key_reused':
+      return l.errTablesIdempotencyKeyReused;
+    case 'tables.input_invalid':
+      return l.errTablesInputInvalid;
+    case 'tables.limit_reached':
+      return l.errTablesLimitReached;
+    case 'tables.not_found':
+      return l.errTablesNotFound;
+    case 'tables.presence_throttled':
+      return l.errTablesPresenceThrottled;
+    case 'tables.proposal_decided':
+      return l.errTablesProposalDecided;
+    case 'tables.proposal_pending':
+      return l.errTablesProposalPending;
+    case 'tables.proposal_stale':
+      return l.errTablesProposalStale;
+    case 'tables.query_too_broad':
+      return l.errTablesQueryTooBroad;
+    case 'tables.reference_unavailable':
+      return l.errTablesReferenceUnavailable;
+    case 'tables.replay_expired':
+      return l.errTablesReplayExpired;
+    case 'tables.request_key_invalid':
+      return l.errTablesRequestKeyInvalid;
+    case 'tables.request_key_required':
+      return l.errTablesRequestKeyRequired;
+    case 'tables.schema_conflict':
+      return l.errTablesSchemaConflict;
+    case 'tables.source_changed':
+      return l.errTablesSourceChanged;
+    case 'tables.stream_unavailable':
+      return l.errTablesStreamUnavailable;
+    case 'tables.undo_conflict':
+      return l.errTablesUndoConflict;
+    case 'tables.undo_expired':
+      return l.errTablesUndoExpired;
     case 'work.assignee_not_member':
       return l.errWorkAssigneeNotMember;
     case 'work.assignment_duplicate':

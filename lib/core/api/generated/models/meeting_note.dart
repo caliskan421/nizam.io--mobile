@@ -22,6 +22,10 @@ abstract class MeetingNote with _$MeetingNote {
     required String content,
     @JsonKey(name: 'converted_to_work_item_id')
     required String? convertedToWorkItemId,
+
+    /// Nottan açılan görevin dönüşüm anındaki hedef departmanı (COLLABORATION-K82). Görev toplantının programı (`X-Nizamio-Program`) ve bu departman (`X-Nizamio-Department`) ile `getWorkItem`'dan açılır; erişim work'ün kendi yetkisidir. Dönüşmemiş notta ve alan eklenmeden önce dönüşmüş notta null; görev sonradan aktarılırsa kopya bayatlar (GAP-222).
+    @JsonKey(name: 'converted_work_item_department_id')
+    required String? convertedWorkItemDepartmentId,
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'updated_at') required DateTime updatedAt,
 

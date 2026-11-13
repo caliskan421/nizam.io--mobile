@@ -16,6 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UpdateAgendaItemRequest {
 
+/// Verilirse eklemedeki kuralla aynı: düz metne indirilip kırpıldıktan sonra 1–300 karakter (Unicode kod noktası).
  String? get title;@JsonKey(name: 'is_checked') bool? get isChecked;
 /// Create a copy of UpdateAgendaItemRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -219,6 +220,7 @@ class _UpdateAgendaItemRequest implements UpdateAgendaItemRequest {
   const _UpdateAgendaItemRequest({this.title, @JsonKey(name: 'is_checked') this.isChecked});
   factory _UpdateAgendaItemRequest.fromJson(Map<String, dynamic> json) => _$UpdateAgendaItemRequestFromJson(json);
 
+/// Verilirse eklemedeki kuralla aynı: düz metne indirilip kırpıldıktan sonra 1–300 karakter (Unicode kod noktası).
 @override final  String? title;
 @override@JsonKey(name: 'is_checked') final  bool? isChecked;
 

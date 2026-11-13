@@ -683,6 +683,95 @@ class AppLocalizationsTr extends AppLocalizations {
       'Dosya deposuna geçici olarak erişilemiyor; yeniden deneyin.';
 
   @override
+  String get errTablesAttachmentLimitReached =>
+      'Bu tablonun ek sınırına ulaşıldı.';
+
+  @override
+  String get errTablesAttachmentRejected => 'Bu dosya türü tabloya eklenemez.';
+
+  @override
+  String get errTablesAttachmentTooLarge =>
+      'Dosya izin verilen boyuttan büyük.';
+
+  @override
+  String get errTablesCellConflict =>
+      'Bu hücre siz düzenlerken değişti. Güncel değeri kontrol edip yeniden deneyin.';
+
+  @override
+  String get errTablesConversionLossy =>
+      'Sütun türü değişirse bazı hücrelerdeki değerler kaybolur.';
+
+  @override
+  String get errTablesCursorStale =>
+      'Tablo bu arada değişti. Liste yeniden yüklenmeli.';
+
+  @override
+  String get errTablesForbidden => 'Bu tabloda bu işlem için yetkiniz yok.';
+
+  @override
+  String get errTablesIdempotencyKeyReused =>
+      'Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.';
+
+  @override
+  String get errTablesInputInvalid => 'Girilen bilgiler geçersiz.';
+
+  @override
+  String get errTablesLimitReached => 'Tablo sınırına ulaşıldı.';
+
+  @override
+  String get errTablesNotFound => 'Tablo bulunamadı ya da erişiminiz yok.';
+
+  @override
+  String get errTablesPresenceThrottled =>
+      'Çok sık güncelleme gönderildi. Biraz sonra yeniden deneyin.';
+
+  @override
+  String get errTablesProposalDecided => 'Bu öneri zaten sonuçlandırılmış.';
+
+  @override
+  String get errTablesProposalPending =>
+      'Bu tablo için bekleyen bir öneri var.';
+
+  @override
+  String get errTablesProposalStale => 'Öneri artık geçerli değil.';
+
+  @override
+  String get errTablesQueryTooBroad =>
+      'Süzgeç çok geniş. Daha dar bir koşul seçin.';
+
+  @override
+  String get errTablesReferenceUnavailable => 'Seçilen kayıt kullanılamıyor.';
+
+  @override
+  String get errTablesReplayExpired =>
+      'Değişiklik geçmişi artık okunamıyor. Tablo yeniden yükleniyor.';
+
+  @override
+  String get errTablesRequestKeyInvalid => 'İşlem anahtarı geçersiz.';
+
+  @override
+  String get errTablesRequestKeyRequired => 'İşlem anahtarı eksik.';
+
+  @override
+  String get errTablesSchemaConflict =>
+      'Sütunlar siz düzenlerken değişti. Tabloyu yenileyip yeniden deneyin.';
+
+  @override
+  String get errTablesSourceChanged =>
+      'Kaynak tablo kopyalama sırasında değişti. Yeniden deneyin.';
+
+  @override
+  String get errTablesStreamUnavailable =>
+      'Canlı güncelleme şu an kullanılamıyor.';
+
+  @override
+  String get errTablesUndoConflict =>
+      'Geri alınacak değişiklik kalmadı; hücreler bu arada değişmiş.';
+
+  @override
+  String get errTablesUndoExpired => 'Bu değişiklik artık geri alınamaz.';
+
+  @override
   String get errWorkAssigneeNotMember =>
       'Atanan kişi bu departmanın üyesi değil.';
 

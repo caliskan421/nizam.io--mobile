@@ -18,6 +18,7 @@ _MeetingDetail _$MeetingDetailFromJson(
   membersIncluded: json['members_included'] as bool,
   inviteMode: MeetingInviteMode.fromJson(json['invite_mode'] as String),
   createdByAccountId: json['created_by_account_id'] as String,
+  createdByFullName: json['created_by_full_name'] as String?,
   createdByRole: MeetingCreatedByRole.fromJson(
     json['created_by_role'] as String,
   ),
@@ -65,6 +66,7 @@ Map<String, dynamic> _$MeetingDetailToJson(_MeetingDetail instance) =>
       'members_included': instance.membersIncluded,
       'invite_mode': _$MeetingInviteModeEnumMap[instance.inviteMode]!,
       'created_by_account_id': instance.createdByAccountId,
+      'created_by_full_name': ?instance.createdByFullName,
       'created_by_role': _$MeetingCreatedByRoleEnumMap[instance.createdByRole]!,
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),

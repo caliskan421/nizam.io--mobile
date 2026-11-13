@@ -17,6 +17,9 @@ abstract class AgendaItem with _$AgendaItem {
     @JsonKey(name: 'is_checked') required bool isChecked,
     @JsonKey(name: 'checked_at') required DateTime? checkedAt,
     @JsonKey(name: 'checked_by_account_id') required String? checkedByAccountId,
+
+    /// İşaretleyen hesabın bugünkü görünen adı (COLLABORATION-K81); işaretsiz maddede ya da hesap çözülemezse null. Ekleme, PATCH, gündem listesi ve detay aynı değeri taşır.
+    @JsonKey(name: 'checked_by_full_name') required String? checkedByFullName,
     @JsonKey(name: 'created_at') required DateTime createdAt,
   }) = _AgendaItem;
 

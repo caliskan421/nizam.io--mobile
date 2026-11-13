@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MeetingNoteList {
 
- List<MeetingNote> get items;@JsonKey(name: 'next_cursor') String get nextCursor;
+ List<MeetingNote> get items;@JsonKey(name: 'next_cursor') String get nextCursor;/// İstekteki süzgeçlere (`converted`, `author`) uyan notların sayısı (COLLABORATION-K80); imleçten bağımsızdır, her sayfada aynıdır. Detaydaki `notes` süzgeçsizdir (`total == counts.all`).
+ int get total; MeetingNoteCounts get counts;
 /// Create a copy of MeetingNoteList
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $MeetingNoteListCopyWith<MeetingNoteList> get copyWith => _$MeetingNoteListCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as MeetingNoteList;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MeetingNoteList&&const DeepCollectionEquality().equals(other.items, _this.items)&&(identical(other.nextCursor, _this.nextCursor) || other.nextCursor == _this.nextCursor));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MeetingNoteList&&const DeepCollectionEquality().equals(other.items, _this.items)&&(identical(other.nextCursor, _this.nextCursor) || other.nextCursor == _this.nextCursor)&&(identical(other.total, _this.total) || other.total == _this.total)&&(identical(other.counts, _this.counts) || other.counts == _this.counts));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MeetingNoteList;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.items),_this.nextCursor);
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.items),_this.nextCursor,_this.total,_this.counts);
 }
 
 @override
 String toString() {
   final _this = this as MeetingNoteList;
-  return 'MeetingNoteList(items: ${_this.items}, nextCursor: ${_this.nextCursor})';
+  return 'MeetingNoteList(items: ${_this.items}, nextCursor: ${_this.nextCursor}, total: ${_this.total}, counts: ${_this.counts})';
 }
 
 
@@ -54,11 +55,11 @@ abstract mixin class $MeetingNoteListCopyWith<$Res>  {
   factory $MeetingNoteListCopyWith(MeetingNoteList value, $Res Function(MeetingNoteList) _then) = _$MeetingNoteListCopyWithImpl;
 @useResult
 $Res call({
- List<MeetingNote> items,@JsonKey(name: 'next_cursor') String nextCursor
+ List<MeetingNote> items,@JsonKey(name: 'next_cursor') String nextCursor, int total, MeetingNoteCounts counts
 });
 
 
-
+$MeetingNoteCountsCopyWith<$Res> get counts;
 
 }
 /// @nodoc
@@ -71,14 +72,25 @@ class _$MeetingNoteListCopyWithImpl<$Res>
 
 /// Create a copy of MeetingNoteList
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? items = null,Object? nextCursor = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? items = null,Object? nextCursor = null,Object? total = null,Object? counts = null,}) {
   return _then(MeetingNoteList(
 items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<MeetingNote>,nextCursor: null == nextCursor ? _self.nextCursor : nextCursor // ignore: cast_nullable_to_non_nullable
-as String,
+as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as int,counts: null == counts ? _self.counts : counts // ignore: cast_nullable_to_non_nullable
+as MeetingNoteCounts,
   ));
 }
-
+/// Create a copy of MeetingNoteList
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MeetingNoteCountsCopyWith<$Res> get counts {
+  
+  return $MeetingNoteCountsCopyWith<$Res>(_self.counts, (value) {
+    return _then(_self.copyWith(counts: value));
+  });
+}
 }
 
 
@@ -160,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<MeetingNote> items, @JsonKey(name: 'next_cursor')  String nextCursor)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<MeetingNote> items, @JsonKey(name: 'next_cursor')  String nextCursor,  int total,  MeetingNoteCounts counts)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MeetingNoteList() when $default != null:
-return $default(_that.items,_that.nextCursor);case _:
+return $default(_that.items,_that.nextCursor,_that.total,_that.counts);case _:
   return orElse();
 
 }
@@ -181,10 +193,10 @@ return $default(_that.items,_that.nextCursor);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<MeetingNote> items, @JsonKey(name: 'next_cursor')  String nextCursor)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<MeetingNote> items, @JsonKey(name: 'next_cursor')  String nextCursor,  int total,  MeetingNoteCounts counts)  $default,) {final _that = this;
 switch (_that) {
 case _MeetingNoteList():
-return $default(_that.items,_that.nextCursor);case _:
+return $default(_that.items,_that.nextCursor,_that.total,_that.counts);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +213,10 @@ return $default(_that.items,_that.nextCursor);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<MeetingNote> items, @JsonKey(name: 'next_cursor')  String nextCursor)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<MeetingNote> items, @JsonKey(name: 'next_cursor')  String nextCursor,  int total,  MeetingNoteCounts counts)?  $default,) {final _that = this;
 switch (_that) {
 case _MeetingNoteList() when $default != null:
-return $default(_that.items,_that.nextCursor);case _:
+return $default(_that.items,_that.nextCursor,_that.total,_that.counts);case _:
   return null;
 
 }
@@ -216,7 +228,7 @@ return $default(_that.items,_that.nextCursor);case _:
 @JsonSerializable()
 
 class _MeetingNoteList implements MeetingNoteList {
-  const _MeetingNoteList({required  List<MeetingNote> items, @JsonKey(name: 'next_cursor') required this.nextCursor}): _items = items;
+  const _MeetingNoteList({required  List<MeetingNote> items, @JsonKey(name: 'next_cursor') required this.nextCursor, required this.total, required this.counts}): _items = items;
   factory _MeetingNoteList.fromJson(Map<String, dynamic> json) => _$MeetingNoteListFromJson(json);
 
  final  List<MeetingNote> _items;
@@ -227,6 +239,9 @@ class _MeetingNoteList implements MeetingNoteList {
 }
 
 @override@JsonKey(name: 'next_cursor') final  String nextCursor;
+/// İstekteki süzgeçlere (`converted`, `author`) uyan notların sayısı (COLLABORATION-K80); imleçten bağımsızdır, her sayfada aynıdır. Detaydaki `notes` süzgeçsizdir (`total == counts.all`).
+@override final  int total;
+@override final  MeetingNoteCounts counts;
 
 /// Create a copy of MeetingNoteList
 /// with the given fields replaced by the non-null parameter values.
@@ -241,18 +256,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MeetingNoteList&&const DeepCollectionEquality().equals(other.items, _items)&&(identical(other.nextCursor, nextCursor) || other.nextCursor == nextCursor));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MeetingNoteList&&const DeepCollectionEquality().equals(other.items, _items)&&(identical(other.nextCursor, nextCursor) || other.nextCursor == nextCursor)&&(identical(other.total, total) || other.total == total)&&(identical(other.counts, counts) || other.counts == counts));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),nextCursor);
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),nextCursor,total,counts);
 }
 
 @override
 String toString() {
-    return 'MeetingNoteList(items: $items, nextCursor: $nextCursor)';
+    return 'MeetingNoteList(items: $items, nextCursor: $nextCursor, total: $total, counts: $counts)';
 }
 
 
@@ -263,11 +278,11 @@ abstract mixin class _$MeetingNoteListCopyWith<$Res> implements $MeetingNoteList
   factory _$MeetingNoteListCopyWith(_MeetingNoteList value, $Res Function(_MeetingNoteList) _then) = __$MeetingNoteListCopyWithImpl;
 @override @useResult
 $Res call({
- List<MeetingNote> items,@JsonKey(name: 'next_cursor') String nextCursor
+ List<MeetingNote> items,@JsonKey(name: 'next_cursor') String nextCursor, int total, MeetingNoteCounts counts
 });
 
 
-
+@override $MeetingNoteCountsCopyWith<$Res> get counts;
 
 }
 /// @nodoc
@@ -280,15 +295,26 @@ class __$MeetingNoteListCopyWithImpl<$Res>
 
 /// Create a copy of MeetingNoteList
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? items = null,Object? nextCursor = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? items = null,Object? nextCursor = null,Object? total = null,Object? counts = null,}) {
   return _then(_MeetingNoteList(
 items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
 as List<MeetingNote>,nextCursor: null == nextCursor ? _self.nextCursor : nextCursor // ignore: cast_nullable_to_non_nullable
-as String,
+as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as int,counts: null == counts ? _self.counts : counts // ignore: cast_nullable_to_non_nullable
+as MeetingNoteCounts,
   ));
 }
 
-
+/// Create a copy of MeetingNoteList
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MeetingNoteCountsCopyWith<$Res> get counts {
+  
+  return $MeetingNoteCountsCopyWith<$Res>(_self.counts, (value) {
+    return _then(_self.copyWith(counts: value));
+  });
+}
 }
 
 // dart format on

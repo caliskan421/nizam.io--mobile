@@ -16,6 +16,7 @@ _AgendaItem _$AgendaItemFromJson(Map<String, dynamic> json) => _AgendaItem(
       ? null
       : DateTime.parse(json['checked_at'] as String),
   checkedByAccountId: json['checked_by_account_id'] as String?,
+  checkedByFullName: json['checked_by_full_name'] as String?,
   createdAt: DateTime.parse(json['created_at'] as String),
 );
 
@@ -28,5 +29,6 @@ Map<String, dynamic> _$AgendaItemToJson(_AgendaItem instance) =>
       'is_checked': instance.isChecked,
       'checked_at': ?instance.checkedAt?.toIso8601String(),
       'checked_by_account_id': ?instance.checkedByAccountId,
+      'checked_by_full_name': ?instance.checkedByFullName,
       'created_at': instance.createdAt.toIso8601String(),
     };

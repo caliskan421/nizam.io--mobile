@@ -11,6 +11,7 @@ part 'update_meeting_request.g.dart';
 @Freezed()
 abstract class UpdateMeetingRequest with _$UpdateMeetingRequest {
   const factory UpdateMeetingRequest({
+    /// Verilirse kuruluştaki kuralla aynı: düz metne indirilip kırpıldıktan sonra 1–255 karakter (Unicode kod noktası); aksi 422 `collaboration.input_invalid` (alan `title`).
     String? title,
 
     /// Verilirse kuruluştaki kuralla aynı: geçmiş gün olamaz.

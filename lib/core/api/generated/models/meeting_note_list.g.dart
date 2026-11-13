@@ -12,10 +12,16 @@ _MeetingNoteList _$MeetingNoteListFromJson(Map<String, dynamic> json) =>
           .map((e) => MeetingNote.fromJson(e as Map<String, dynamic>))
           .toList(),
       nextCursor: json['next_cursor'] as String,
+      total: (json['total'] as num).toInt(),
+      counts: MeetingNoteCounts.fromJson(
+        json['counts'] as Map<String, dynamic>,
+      ),
     );
 
 Map<String, dynamic> _$MeetingNoteListToJson(_MeetingNoteList instance) =>
     <String, dynamic>{
       'items': instance.items.map((e) => e.toJson()).toList(),
       'next_cursor': instance.nextCursor,
+      'total': instance.total,
+      'counts': instance.counts.toJson(),
     };

@@ -53,6 +53,9 @@ class TableController extends _$TableController {
   /// (metadata: ad, sütunlar, satırlar) geri alamaz; atılır ve taze okuma gereksinimi kalır.
   int _confirmedSequence = 0;
 
+  /// Alan başına makbuzla uygulanmış en yüksek sıra (snapshot sırası yapay ilerletilmez).
+  final _fieldSequence = <String?, int>{};
+
   /// Sonucu bilinmeyen komutlar: işlem nesnesi + anahtarı ([retryCommands] aynısını yollar).
   final _uncertain = <_PendingCommand>[];
 
@@ -87,6 +90,7 @@ class TableController extends _$TableController {
     ++_generation;
     _uncertain.clear();
     _confirmedSequence = 0;
+    _fieldSequence.clear();
     _queue.clear();
     _batch = null;
     _batchHeld = false;

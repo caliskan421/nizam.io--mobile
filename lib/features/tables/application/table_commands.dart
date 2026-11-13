@@ -3,13 +3,17 @@ part of 'table_controller.dart';
 /// Sonucu bilinmeyen komut: işlem nesnesi ve anahtarı DEĞİŞMEZ; yalnız kendi yeniden
 /// denemesi aynı anahtarı kullanır.
 final class _PendingCommand {
-  _PendingCommand(this.op, this.key, {this.apply, this.done});
+  _PendingCommand(this.op, this.key, {this.field, this.apply, this.done});
   final TableOperation op;
   final String key;
 
-  /// Makbuzla gelen yerel görünüm güncellemesi (ad, sütun). YALNIZ makbuz sırası uygulanmış
-  /// snapshot sırasından yeniyse çalışır: daha yeni snapshot bu değişikliği (ve sonrasını)
-  /// zaten içerir, geciken makbuz onu geri ezmez.
+  /// [apply]'ın yazdığı metadata alanı (`name`, `col:<id>:name`, `col:<id>:width`).
+  final String? field;
+
+  /// Makbuzla gelen yerel görünüm güncellemesi (ad, sütun). YALNIZ makbuz sırası hem
+  /// uygulanmış snapshot sırasından hem de aynı alana uygulanmış son makbuz sırasından yeniyse
+  /// çalışır: geciken makbuz daha yeni snapshot'ı ya da aynı alandaki daha yeni kendi
+  /// makbuzumuzu geri ezmez; farklı alanların güncellemeleri birbirini engellemez.
   final void Function(TableReceipt r)? apply;
 
   /// Her başarıda çalışan sonuç işlemi (liste güncellemesi, silindi işareti); ilk deneme ve
@@ -33,12 +37,20 @@ extension TableCommands on TableController {
     TableOperation op, {
     bool reload = true,
     _PendingCommand? retry,
+    String? field,
     void Function(TableReceipt r)? apply,
     void Function(TableReceipt r)? done,
   }) async {
     await flush();
     final pending =
-        retry ?? _PendingCommand(op, newRequestKey(), apply: apply, done: done);
+        retry ??
+        _PendingCommand(
+          op,
+          newRequestKey(),
+          field: field,
+          apply: apply,
+          done: done,
+        );
     final generation = _generation;
     final TableReceipt r;
     try {
@@ -63,7 +75,12 @@ extension TableCommands on TableController {
     _uncertain.remove(pending);
     ownSequences.add(r.sequence);
     if (generation == _generation && _mounted) {
-      if (r.sequence > _viewSequence) pending.apply?.call(r);
+      final field = pending.field;
+      final floor = math.max(_viewSequence, _fieldSequence[field] ?? 0);
+      if (r.sequence > floor) {
+        pending.apply?.call(r);
+        if (field != null) _fieldSequence[field] = r.sequence;
+      }
       pending.done?.call(r);
       if (r.sequence > _confirmedSequence) _confirmedSequence = r.sequence;
       _update(
@@ -103,6 +120,7 @@ extension TableCommands on TableController {
     await _command(
       RenameTable(trimmed),
       reload: false,
+      field: 'name',
       apply: (_) {
         _update((b) => b.copyWith(meta: b.meta.copyWith(name: trimmed)));
         _listOrNull?.renamed(_id, trimmed);
@@ -154,6 +172,7 @@ extension TableCommands on TableController {
     await _command(
       RenameColumn(id: columnId, name: trimmed, expectedSchema: _schema),
       reload: false,
+      field: 'col:$columnId:name',
       apply: (_) => _patchColumn(columnId, (c) => c.copyWith(name: trimmed)),
     );
   }
@@ -162,6 +181,7 @@ extension TableCommands on TableController {
     await _command(
       ResizeColumn(id: columnId, width: width, expectedSchema: _schema),
       reload: false,
+      field: 'col:$columnId:width',
       apply: (_) => _patchColumn(columnId, (c) => c.copyWith(width: width)),
     );
   }

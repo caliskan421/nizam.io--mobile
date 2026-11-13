@@ -41,24 +41,38 @@ Future<void> tableRename(BuildContext context, WidgetRef ref, String id) async {
   if (view == null) return;
   final l = context.l10n;
   var name = view.meta.name;
+  // Uçuş kilidi: istek sürerken kaydet kapalıdır (asıl koruma denetleyicide: alan başına
+  // makbuz sırası).
+  final busy = ValueNotifier(false);
   await showTableSheet(
     ref,
     context,
     title: l.uiTablesRename,
     actions: (sheet) => [
-      NzButton.primary(
-        label: l.uiTablesSave,
-        onPressed: () async {
-          if (name.trim().isEmpty || name.trim() == view.meta.name) {
-            Navigator.of(sheet).pop();
-            return;
-          }
-          final ok = await tableRun(
-            context,
-            () => ref.read(tableControllerProvider(id).notifier).rename(name),
-          );
-          if (ok && sheet.mounted) Navigator.of(sheet).pop();
-        },
+      ValueListenableBuilder<bool>(
+        valueListenable: busy,
+        builder: (context, saving, _) => NzButton.primary(
+          label: l.uiTablesSave,
+          loading: saving,
+          onPressed: saving
+              ? null
+              : () async {
+                  if (name.trim().isEmpty || name.trim() == view.meta.name) {
+                    Navigator.of(sheet).pop();
+                    return;
+                  }
+                  busy.value = true;
+                  final ok = await tableRun(
+                    context,
+                    () => ref
+                        .read(tableControllerProvider(id).notifier)
+                        .rename(name),
+                  );
+                  if (!sheet.mounted) return;
+                  busy.value = false;
+                  if (ok) Navigator.of(sheet).pop();
+                },
+        ),
       ),
     ],
     builder: (sheet) => Column(
@@ -72,6 +86,7 @@ Future<void> tableRename(BuildContext context, WidgetRef ref, String id) async {
       ],
     ),
   );
+  busy.dispose();
 }
 
 /// Satır düzenleme: her sütun için düzenleyici; değişiklik yerelde hemen görünür ve

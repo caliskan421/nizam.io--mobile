@@ -205,8 +205,10 @@ class TablesController extends Notifier<TablesState> {
         original.rows.length != 2 ||
         original.rows.first.cells[const TableFieldId('name')] !=
             'Örnek hazırlık' ||
-        original.rows.last.cells[const TableFieldId('name')] != 'Örnek kontrol')
+        original.rows.last.cells[const TableFieldId('name')] !=
+            'Örnek kontrol') {
       return;
+    }
     TableRecord row(
       String id,
       String name,

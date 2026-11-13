@@ -248,7 +248,9 @@ class _PeriodCard extends StatelessWidget {
                           for (final (label, n, color, hollow) in p.legend)
                             Row(
                               children: [
-                                DecoratedBox(
+                                Container(
+                                  width: _dot,
+                                  height: _dot,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: hollow ? null : color,
@@ -256,7 +258,6 @@ class _PeriodCard extends StatelessWidget {
                                         ? Border.all(color: color, width: 1.5)
                                         : null,
                                   ),
-                                  child: const SizedBox.square(dimension: _dot),
                                 ),
                                 const Gap(NizamioSpacing.space2),
                                 Expanded(

@@ -138,8 +138,9 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
               controller: _search,
               focusNode: _focus,
               onDismiss: () {
-                if (ref.read(meetingsViewControllerProvider).searchOpen)
+                if (ref.read(meetingsViewControllerProvider).searchOpen) {
                   _toggleSearch();
+                }
               },
               label: l.uiMeetingsSearchLabel,
               hint: l.uiMeetingsSearchHint,

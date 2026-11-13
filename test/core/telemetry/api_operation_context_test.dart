@@ -29,8 +29,9 @@ void main() {
     onProfile = discoveryHandler;
     h = Harness(
       handler: (r) {
-        if (r.path == '/v1/auth/login')
+        if (r.path == '/v1/auth/login') {
           return jsonResponse(200, loginBody('1'));
+        }
         if (r.path == '/v1/me') return onMe(r);
         if (r.path == '/v1/instance/profile') return onProfile(r);
         return discoveryHandler(r);

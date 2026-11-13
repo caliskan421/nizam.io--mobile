@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/domain/stream_reconnect.dart';
+import '../domain/table_reference_sources.dart';
 import '../domain/tables_repository.dart';
 
 part 'tables_providers.g.dart';
@@ -13,6 +14,13 @@ part 'tables_providers.g.dart';
 TablesRepository tablesRepository(Ref ref) => throw UnimplementedError(
   'tablesRepositoryProvider bileşim kökünde (lib/app/di) bağlanır',
 );
+
+/// PORT: referans hedef adayları (`tables_module.dart`'ta bağlanır).
+@Riverpod(keepAlive: true)
+TableReferenceSources tableReferenceSources(Ref ref) =>
+    throw UnimplementedError(
+      'tableReferenceSourcesProvider bileşim kökünde (lib/app/di) bağlanır',
+    );
 
 /// Uygulama ön planda mı: tablo akışı ve presence yalnız ön plandayken açıktır (yaşam
 /// döngüsünü sunum katmanındaki `TableLiveScope` yazar).

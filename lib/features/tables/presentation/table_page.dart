@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/errors/api_error.dart';
+import '../../../core/errors/error_text.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/extensions/ref_ext.dart';
@@ -19,9 +21,11 @@ import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../application/table_controller.dart';
 import '../application/table_view.dart';
 import '../domain/table_models.dart';
+import '../domain/table_reference_sources.dart';
 import 'table_cell_value.dart';
 import 'table_column_sheet.dart';
 import 'table_live.dart';
+import 'table_reference_field.dart';
 import 'table_sheet_host.dart';
 import 'table_sheets.dart';
 import 'table_texts.dart';
@@ -141,13 +145,22 @@ class _TablePageState extends ConsumerState<TablePage> {
                     ),
                 ],
               ),
-              if (d.writeError != null) ...[
+              if (d.writeError case final e?) ...[
                 const Gap(NizamioSpacing.space2),
-                NzBanner.danger(
-                  message: l.uiTablesSaveFailed,
-                  actionLabel: l.uiTablesRetry,
-                  onAction: _controller.retryWrites,
-                ),
+                // Sonucu bilinmeyen gönderim yeniden denenir; kalıcı ret (ör. seçilen kayıt
+                // kullanılamıyor) anlaşılır metinle gösterilir, değer geri alınmıştır.
+                if (isOutcomeUnknown(e))
+                  NzBanner.danger(
+                    message: l.uiTablesSaveFailed,
+                    actionLabel: l.uiTablesRetry,
+                    onAction: _controller.retryWrites,
+                  )
+                else
+                  NzBanner.danger(
+                    message: errorText(l, e),
+                    actionLabel: l.uiTablesDismiss,
+                    onAction: _controller.dismissWriteError,
+                  ),
               ],
               if (d.uncertainCommands > 0) ...[
                 const Gap(NizamioSpacing.space2),
@@ -348,7 +361,8 @@ class _TablePageState extends ConsumerState<TablePage> {
                     : null,
               ),
               child: InkWell(
-                onTap: () => tableRow(
+                onTap: () => _cellTap(d, row.id, c),
+                onLongPress: () => tableRow(
                   context,
                   ref,
                   widget.id,

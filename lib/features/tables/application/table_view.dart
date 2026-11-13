@@ -14,6 +14,25 @@ const editableColumnKinds = {
   TableColumnKind.checkbox,
 };
 
+/// Seçiciyle yazılan referans tipleri (ek sütunu yalnız yükleme ucuyla yazılır; mobilde yok).
+const referenceColumnKinds = {
+  TableColumnKind.tableReference,
+  TableColumnKind.personReference,
+  TableColumnKind.departmentReference,
+  TableColumnKind.taskReference,
+  TableColumnKind.fileReference,
+};
+
+/// Referans sütun tipinin görünen ad grubu (snapshot `references` haritası).
+TableRefKind? tableRefKindOf(TableColumnKind kind) => switch (kind) {
+  TableColumnKind.personReference => TableRefKind.people,
+  TableColumnKind.departmentReference => TableRefKind.departments,
+  TableColumnKind.taskReference => TableRefKind.tasks,
+  TableColumnKind.fileReference => TableRefKind.files,
+  TableColumnKind.tableReference => TableRefKind.tables,
+  _ => null,
+};
+
 /// Tablo ekranının durumu: yüklenen snapshot sayfaları + yerel (henüz gönderilmemiş ya da
 /// uçuştaki) hücre düzenlemeleri.
 @immutable
@@ -109,14 +128,7 @@ final class TableView {
 
   /// Referans kimliğinin görünen adı (yoksa null).
   String? referenceName(TableColumnKind kind, String id) {
-    final group = switch (kind) {
-      TableColumnKind.personReference => TableRefKind.people,
-      TableColumnKind.departmentReference => TableRefKind.departments,
-      TableColumnKind.taskReference => TableRefKind.tasks,
-      TableColumnKind.fileReference => TableRefKind.files,
-      TableColumnKind.tableReference => TableRefKind.tables,
-      _ => null,
-    };
+    final group = tableRefKindOf(kind);
     return group == null ? null : references[TableRefKey(group, id)];
   }
 
@@ -125,6 +137,7 @@ final class TableView {
     List<TableColumnSpec>? columns,
     List<TableRowRef>? rows,
     Map<TableCellKey, TableCellData>? cells,
+    Map<TableRefKey, String>? references,
     String? Function()? nextCursor,
     bool? loadingMore,
     bool? readOnly,
@@ -141,7 +154,7 @@ final class TableView {
     columns: columns ?? this.columns,
     rows: rows ?? this.rows,
     cells: cells ?? this.cells,
-    references: references,
+    references: references ?? this.references,
     attachments: attachments,
     accountId: accountId,
     nextCursor: nextCursor == null ? this.nextCursor : nextCursor(),

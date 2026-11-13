@@ -7642,6 +7642,42 @@ abstract class AppLocalizations {
   /// **'Bir işlemin sonucu bilinmiyor. Yeniden denerseniz aynı işlem tekrarlanmaz.'**
   String get uiTablesCommandUnknown;
 
+  /// ui.tables.pick
+  ///
+  /// In tr, this message translates to:
+  /// **'Seç'**
+  String get uiTablesPick;
+
+  /// ui.tables.pick_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Önce görevi seçin'**
+  String get uiTablesPickTask;
+
+  /// ui.tables.replace
+  ///
+  /// In tr, this message translates to:
+  /// **'Değiştir'**
+  String get uiTablesReplace;
+
+  /// ui.tables.replace_hidden
+  ///
+  /// In tr, this message translates to:
+  /// **'Gizli öğeler kaldırılacak'**
+  String get uiTablesReplaceHidden;
+
+  /// ui.tables.replace_hidden_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hücrede göremediğiniz öğeler var. Yeni seçim kaydedilince bu gizli öğeler hücreden kaldırılır.'**
+  String get uiTablesReplaceHiddenMessage;
+
+  /// ui.tables.hidden_items
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hücrede göremediğiniz öğeler var.'**
+  String get uiTablesHiddenItems;
+
   /// ui.tasks.no_status_transitions
   ///
   /// In tr, this message translates to:

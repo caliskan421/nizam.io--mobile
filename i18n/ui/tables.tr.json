@@ -79,6 +79,12 @@
     "ui.tables.offline": "Çevrimdışı",
     "ui.tables.here": "Tabloda",
     "ui.tables.access_lost": "Bu tabloya erişiminiz kalmadı.",
-    "ui.tables.command_unknown": "Bir işlemin sonucu bilinmiyor. Yeniden denerseniz aynı işlem tekrarlanmaz."
+    "ui.tables.command_unknown": "Bir işlemin sonucu bilinmiyor. Yeniden denerseniz aynı işlem tekrarlanmaz.",
+    "ui.tables.pick": "Seç",
+    "ui.tables.pick_task": "Önce görevi seçin",
+    "ui.tables.replace": "Değiştir",
+    "ui.tables.replace_hidden": "Gizli öğeler kaldırılacak",
+    "ui.tables.replace_hidden_message": "Bu hücrede göremediğiniz öğeler var. Yeni seçim kaydedilince bu gizli öğeler hücreden kaldırılır.",
+    "ui.tables.hidden_items": "Bu hücrede göremediğiniz öğeler var."
   }
 }

@@ -4016,6 +4016,25 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bir işlemin sonucu bilinmiyor. Yeniden denerseniz aynı işlem tekrarlanmaz.';
 
   @override
+  String get uiTablesPick => 'Seç';
+
+  @override
+  String get uiTablesPickTask => 'Önce görevi seçin';
+
+  @override
+  String get uiTablesReplace => 'Değiştir';
+
+  @override
+  String get uiTablesReplaceHidden => 'Gizli öğeler kaldırılacak';
+
+  @override
+  String get uiTablesReplaceHiddenMessage =>
+      'Bu hücrede göremediğiniz öğeler var. Yeni seçim kaydedilince bu gizli öğeler hücreden kaldırılır.';
+
+  @override
+  String get uiTablesHiddenItems => 'Bu hücrede göremediğiniz öğeler var.';
+
+  @override
   String get uiTasksNoStatusTransitions =>
       'Bu görev için kullanabileceğiniz bir durum değişikliği yok.';
 

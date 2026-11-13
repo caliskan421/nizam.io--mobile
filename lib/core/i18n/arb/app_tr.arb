@@ -5033,6 +5033,30 @@
   "@uiTablesCommandUnknown": {
     "description": "ui.tables.command_unknown"
   },
+  "uiTablesPick": "Seç",
+  "@uiTablesPick": {
+    "description": "ui.tables.pick"
+  },
+  "uiTablesPickTask": "Önce görevi seçin",
+  "@uiTablesPickTask": {
+    "description": "ui.tables.pick_task"
+  },
+  "uiTablesReplace": "Değiştir",
+  "@uiTablesReplace": {
+    "description": "ui.tables.replace"
+  },
+  "uiTablesReplaceHidden": "Gizli öğeler kaldırılacak",
+  "@uiTablesReplaceHidden": {
+    "description": "ui.tables.replace_hidden"
+  },
+  "uiTablesReplaceHiddenMessage": "Bu hücrede göremediğiniz öğeler var. Yeni seçim kaydedilince bu gizli öğeler hücreden kaldırılır.",
+  "@uiTablesReplaceHiddenMessage": {
+    "description": "ui.tables.replace_hidden_message"
+  },
+  "uiTablesHiddenItems": "Bu hücrede göremediğiniz öğeler var.",
+  "@uiTablesHiddenItems": {
+    "description": "ui.tables.hidden_items"
+  },
   "uiTasksNoStatusTransitions": "Bu görev için kullanabileceğiniz bir durum değişikliği yok.",
   "@uiTasksNoStatusTransitions": {
     "description": "ui.tasks.no_status_transitions"

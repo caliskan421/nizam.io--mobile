@@ -14,8 +14,10 @@ import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../application/table_controller.dart';
 import '../application/table_sync_controller.dart';
+import '../application/table_view.dart';
 import 'table_cell_editor.dart';
 import 'table_comments.dart';
+import 'table_reference_field.dart';
 import 'table_sheet_host.dart';
 
 /// Sunucu komutunu çalıştırır; hata toast olarak gösterilir (oturum bitti sınıfı hariç).
@@ -145,14 +147,24 @@ Future<void> tableRow(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             for (final c in columns) ...[
-              TableCellEditor(
-                key: ValueKey('$id:$rowId:${c.id}'),
-                view: view,
-                column: c,
-                data: view.cell(rowId, c.id),
-                onChanged: (v) =>
-                    ref.read(provider.notifier).editCell(rowId, c.id, v),
-              ),
+              if (referenceColumnKinds.contains(c.kind))
+                TableReferenceField(
+                  key: ValueKey('$id:$rowId:${c.id}:ref'),
+                  tableId: id,
+                  view: view,
+                  rowId: rowId,
+                  column: c,
+                  data: view.cell(rowId, c.id),
+                )
+              else
+                TableCellEditor(
+                  key: ValueKey('$id:$rowId:${c.id}'),
+                  view: view,
+                  column: c,
+                  data: view.cell(rowId, c.id),
+                  onChanged: (v) =>
+                      ref.read(provider.notifier).editCell(rowId, c.id, v),
+                ),
               const Gap(NizamioSpacing.space3),
             ],
             if (focusColumn == null) ...[

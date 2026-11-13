@@ -29,13 +29,65 @@ final class _Batch {
 extension TableCellWrites on TableController {
   /// Hücre düzenlemesi. Salt okunur tabloda, düzenlenemeyen tipte ya da gizlenmiş
   /// (redakte) hücrede bir şey yapmaz (redakte değer körlemesine geri yazılamaz, K-14).
-  void editCell(String rowId, String columnId, Object? value) {
+  void editCell(String rowId, String columnId, Object? value) =>
+      _write(rowId, columnId, value, kinds: editableColumnKinds);
+
+  /// Referans hücresi seçimi: tekli sütunda kimlik, çoklu sütunda benzersiz kimlik listesi
+  /// (sıra korunur; boş liste → `null`). Seçilen adayların adları sunucu yanıtına kadar yerelde
+  /// gösterilir; makbuzdan sonra adlar snapshot'tan yeniden okunur. Gizlenmiş hücre yalnız
+  /// [replaceRedacted] ile (kullanıcı "gizli öğeler kaldırılacak" uyarısını onayladıktan
+  /// sonra) bilinçli tam değiştirme olarak yazılır; istekte `redacted` gönderilmez.
+  void editReference(
+    String rowId,
+    String columnId,
+    Object? value, {
+    required List<TableRefCandidate> picked,
+    bool replaceRedacted = false,
+  }) {
+    final column = _base?.column(columnId);
+    final group = column == null ? null : tableRefKindOf(column.kind);
+    if (group == null) return;
+    final normalized = switch (value) {
+      final List<Object?> l when l.isEmpty => null,
+      final List<Object?> l => [
+        ...{
+          for (final e in l)
+            if (e is String && e.isNotEmpty) e,
+        },
+      ],
+      _ => value,
+    };
+    final wrote = _write(
+      rowId,
+      columnId,
+      normalized is List && normalized.isEmpty ? null : normalized,
+      kinds: referenceColumnKinds,
+      allowRedacted: replaceRedacted,
+    );
+    if (!wrote || picked.isEmpty) return;
+    _update(
+      (b) => b.copyWith(
+        references: {
+          ...b.references,
+          for (final c in picked) TableRefKey(group, c.id): c.name,
+        },
+      ),
+    );
+  }
+
+  bool _write(
+    String rowId,
+    String columnId,
+    Object? value, {
+    required Set<TableColumnKind> kinds,
+    bool allowRedacted = false,
+  }) {
     final v = _base;
-    if (v == null || !v.editable) return;
+    if (v == null || !v.editable) return false;
     final column = v.column(columnId);
-    if (column == null || !editableColumnKinds.contains(column.kind)) return;
+    if (column == null || !kinds.contains(column.kind)) return false;
     final current = v.cell(rowId, columnId);
-    if (current.redacted) return;
+    if (current.redacted && !allowRedacted) return false;
     final key = TableCellKey(rowId, columnId);
     _queue.put(
       TableCellWrite(
@@ -56,6 +108,12 @@ extension TableCellWrites on TableController {
         () => unawaited(flush()),
       );
     }
+    return true;
+  }
+
+  /// Kalıcı (yeniden denemesi olmayan) yazım hatasının bildirimini kapatır.
+  void dismissWriteError() {
+    if (!_batchHeld) _update((b) => b.copyWith(writeError: () => null));
   }
 
   /// Bekleyen hücreleri gönderir. Gönderim sürüyorsa onun bitişini bekler (komut uçuştaki
@@ -119,6 +177,14 @@ extension TableCellWrites on TableController {
   /// yabancı değişikliği taşıyan snapshot girdi) eski makbuz uygulanmaz.
   void _applyReceipt(_Batch batch, TableReceipt r) {
     ownSequences.add(r.sequence);
+    // Referans yazımının görünen adı yalnız snapshot'ta (makbuz içerik taşımaz): yeniden okunur.
+    final base = _base;
+    if (base != null &&
+        batch.cells.any(
+          (w) => referenceColumnKinds.contains(base.column(w.columnId)?.kind),
+        )) {
+      unawaited(_sideRead());
+    }
     _update((b) {
       final cells = Map.of(b.cells);
       final conflicts = {...b.conflicts};

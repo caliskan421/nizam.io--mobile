@@ -147,4 +147,21 @@ extension _TablePageActions on _TablePageState {
       ),
     );
   }
+
+  /// Hücreye dokunma: tekli tablo/görev referansı hedefi açar (görünür ise); diğer hücreler
+  /// satır sayfasını o sütuna odaklı açar. Uzun basma her zaman satır sayfasıdır.
+  void _cellTap(TableView d, String rowId, TableColumnSpec c) {
+    final value = d.cell(rowId, c.id).value;
+    if (!c.multiple &&
+        value is String &&
+        tableRefTarget(
+          c.kind,
+          value,
+          visible: d.referenceName(c.kind, value) != null,
+        ) is! NoTarget) {
+      openTableReference(context, d, c.kind, value);
+      return;
+    }
+    tableRow(context, ref, widget.id, rowId, focusColumn: c.id);
+  }
 }

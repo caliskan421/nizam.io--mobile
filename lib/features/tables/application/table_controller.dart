@@ -14,6 +14,7 @@ import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/table_models.dart';
 import '../domain/table_operation.dart';
+import '../domain/table_reference_sources.dart';
 import '../domain/tables_repository.dart';
 import 'table_view.dart';
 import 'table_write_queue.dart';
@@ -220,20 +221,24 @@ class TableController extends _$TableController {
   /// artar. Tabanı sunucuda değişmiş bekleyen düzenleme çakışma olarak işaretlenir.
   Future<void> _readSnapshot({int? minRows}) async {
     final generation = _generation;
+    // Ref yalnız başta okunur: arka planda süren okuma sağlayıcı bırakıldıktan sonra ref'e
+    // dokunmaz.
+    final account = _accountId;
+    final repo = _repo;
     final want = minRows ?? _base?.rows.length ?? 0;
     TableView? next;
     var sequence = 0;
     for (var attempt = 0; attempt < 3 && next == null; attempt++) {
-      var page = await _repo.snapshot(
+      var page = await repo.snapshot(
         _scope,
         _id,
         page: const PageRequest(limit: pageSize),
       );
       sequence = page.meta.sequence;
-      var walk = TableView.fromPage(page, _accountId);
+      var walk = TableView.fromPage(page, account);
       var stable = true;
       while (walk.rows.length < want && page.nextCursor != null) {
-        page = await _repo.snapshot(
+        page = await repo.snapshot(
           _scope,
           _id,
           page: PageRequest(limit: pageSize, cursor: page.nextCursor),

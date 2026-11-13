@@ -62,6 +62,59 @@ final class TablesRepositoryProvider
 
 String _$tablesRepositoryHash() => r'c716a008d474409e848565686240ea825f00cccc';
 
+/// PORT: referans hedef adayları (`tables_module.dart`'ta bağlanır).
+
+@ProviderFor(tableReferenceSources)
+final tableReferenceSourcesProvider = TableReferenceSourcesProvider._();
+
+/// PORT: referans hedef adayları (`tables_module.dart`'ta bağlanır).
+
+final class TableReferenceSourcesProvider
+    extends
+        $FunctionalProvider<
+          TableReferenceSources,
+          TableReferenceSources,
+          TableReferenceSources
+        >
+    with $Provider<TableReferenceSources> {
+  /// PORT: referans hedef adayları (`tables_module.dart`'ta bağlanır).
+  TableReferenceSourcesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tableReferenceSourcesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tableReferenceSourcesHash();
+
+  @$internal
+  @override
+  $ProviderElement<TableReferenceSources> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  TableReferenceSources create(Ref ref) {
+    return tableReferenceSources(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TableReferenceSources value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TableReferenceSources>(value),
+    );
+  }
+}
+
+String _$tableReferenceSourcesHash() =>
+    r'16642abf9d5164162c8afa11b9c70bd84342ce35';
+
 /// Uygulama ön planda mı: tablo akışı ve presence yalnız ön plandayken açıktır (yaşam
 /// döngüsünü sunum katmanındaki `TableLiveScope` yazar).
 

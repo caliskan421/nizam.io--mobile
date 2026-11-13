@@ -226,16 +226,22 @@ sıraya dizilir.
    tabanı koruyup değeri değiştirir.
 2. 1 sn sessizlik (ya da 100 hücre) → tek `set_cells`. Aynı anda tek batch vardır; gövdesi ve
    işlem anahtarı değişmezdir. Yeni düzenlemeler kuyrukta onun arkasında bekler.
-3. Başarı: makbuzdaki yeni sürüm görünümdekinden büyükse yazılır; yalnız bu durumda kuyruktaki
-   aynı hücrenin tabanı yeni sürüme taşınır (taban yalnız KENDİ başarılı makbuzumuzla taşınır).
+3. Başarı: makbuzdaki yeni sürüm görünümdekinden büyükse değer yazılır. Görünüm aynı sürümü
+   zaten gösteriyorsa (snapshot kendi yazımımızı makbuzdan önce görmüş) bu da kendi başarımızdır:
+   kuyruktaki aynı hücrenin tabanı makbuz sürümüne taşınır ve yanlış çakışma işareti kalkar.
+   Görünümdeki sürüm daha yüksekse (yabancı yazım) taban taşınmaz. Taban yalnız KENDİ başarılı
+   makbuzumuzla taşınır.
 4. Sonucu bilinmeyen hata (zaman aşımı/ağ/5xx): batch AYNI gövde+anahtarla bekletilir, şerit
    çıkar; "Yeniden dene" aynısını yollar (sunucu yazdıysa `replayed` döner, çift yazım olmaz),
    sonra kuyruktakiler ayrı batch'le gider. 429: aynı batch `Retry-After` sonra kendiliğinden.
-5. Komutlar (satır/sütun/ad/yorum) önce bekleyen hücreleri gönderir. İşlem anahtarı kullanıcı
-   işlemi başınadır (defter yuvası komutun gövde imzası): sonucu bilinmeyen komutun anahtarı
-   araya giren başka komutla kaybolmaz, aynı işlem yeniden denenince aynı anahtar gider (tek
-   kayıt). Makbuz alındıktan sonraki yeniden okuma düşerse komut başarılı sayılır; hata
-   raporlanır ve kalıcı "yeniden okuma gerekli" bayrağı sonraki yakalamada tabloyu yeniler.
+5. Komutlar (satır/sütun/ad/yorum) önce bekleyen hücreleri gönderir. Her yeni kullanıcı işlemi
+   YENİ işlem anahtarı alır (iki ayrı "satır ekle" iki ayrı kayıttır). Sonucu bilinmeyen komut
+   işlem nesnesi + anahtarıyla bekletilir ve şeritte "Yeniden dene" sunulur; yeniden deneme
+   aynı nesneyi ve anahtarı yollar (sunucu yazdıysa `replayed`, kayıt tek kalır). Belirsiz komut
+   beklerken yeni işlem engellenmez, kendi anahtarıyla gider. Makbuz alındıktan sonraki yeniden
+   okuma düşerse komut başarılı sayılır; hata raporlanır ve kalıcı "yeniden okuma gerekli"
+   bayrağı sonraki yakalamada tabloyu yeniler. Komut makbuzuyla doğrulanan en yüksek sıradan
+   eski snapshot tabanı (ad, sütunlar, satırlar) geri almaz; atılır, bayrak kalır.
 
 ### 9.2 Çakışma
 
@@ -258,9 +264,11 @@ Referans istemci: backend `internal/modules/tables/integration/yakinsama_istemci
    `ready` ile yakalama" kullanılır: aradaki commit `changes?after=cursor` ile kapanır, sonuç
    aynıdır. Çok sayfalı yeniden okumada sayfalar arasında `table.sequence` değişirse yürüyüş
    baştan alınır (en çok 3 deneme).
-2. **İpucu:** `changed(s)` için `s ≤ cursor` ise yok sayılır; değilse 1 sn birleştirilir. Aynı
-   anda tek yakalama uçuştadır; uçuşta gelen ipuçları tek bekleyen yakalamada toplanır (okuma
-   kotası 600/dk).
+2. **İpucu:** `changed(s)` için `s ≤ cursor` ise yok sayılır; değilse 1 sn birleştirilir. Nesil
+   başına tek yakalama uçuştadır; uçuşta gelen ipuçları tek bekleyen yakalamada toplanır (okuma
+   kotası 600/dk). Uçuş ve bekleyen talep nesle bağlıdır: arka plan/ön plan geçişinden sonra eski
+   neslin uçuşu, yeni bağlantının `ready` yakalamasını tüketmez (backend aynı sıra için yeniden
+   `changed` üretmez, `stream.go:132,162-170`).
 3. **`catchUp()`:** `changes?after=cursor&limit=200` sayfaları `more=false` olana dek okunur;
    imleç ancak gereken yeniden okuma ve yorum güncellemesi BAŞARIYLA bitince ilerler (okuma ya
    da sonraki sayfa düşerse imleç yerinde kalır, aynı olaylar yeniden işlenir); tutarlı

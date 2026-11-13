@@ -12,6 +12,7 @@ import '../../../tasks/tasks.dart';
 import '../../domain/timeline.dart';
 import '../timeline_texts.dart';
 import 'timeline_selection_dates.dart';
+import 'timeline_selection_subtasks.dart';
 
 /// Çizelgeyi görünür bırakan seçili görev: kimlik, tarihler ve gerçek tarih komutları.
 /// Telefon ve tablet aynı içerik/izin yüzünü kullanır; konumu çağıran belirler.
@@ -193,6 +194,7 @@ class TimelineSelectionCard extends StatelessWidget {
                   onPickStart: onPickStart,
                   onPickEnd: onPickEnd,
                 ),
+                TimelineSelectionSubtasks(task: task.item),
                 const Gap(14),
                 Row(
                   spacing: NizamioSpacing.space2,

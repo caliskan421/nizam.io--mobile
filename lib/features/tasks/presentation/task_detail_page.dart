@@ -63,11 +63,6 @@ class TaskDetailPage extends ConsumerWidget {
                 icon: NzIcons.checkCircle,
                 onSelected: actions.openStatus,
               ),
-            NzFlyoutItem(
-              label: l.uiTasksRemind,
-              icon: NzIcons.bell,
-              onSelected: actions.remind,
-            ),
             if (actions.canManageTask)
               NzFlyoutItem(
                 label: l.uiTasksEditTask,
@@ -313,12 +308,6 @@ class _Body extends StatelessWidget {
               ),
               const Gap(NizamioSpacing.space2),
             ],
-            NzIconButton.circle(
-              icon: NzIcons.bell,
-              semanticLabel: l.uiTasksRemind,
-              onPressed: actions.remind,
-            ),
-            const Gap(NizamioSpacing.space2),
             Expanded(
               child: NzButton.primary(
                 label: l.uiTasksUpload,

@@ -312,20 +312,6 @@ class TaskDetailActions {
             },
           ),
           _ListOption(
-            label: l.uiTasksCopy,
-            leading: const NzIcon(NzIcons.copy, size: NizamioSize.iconSizeSm),
-            onTap: () async {
-              Navigator.of(sheet).pop();
-              final (r, _) = await _ctl.copy(l.uiTasksCopySuffix);
-              _report(
-                r,
-                done:
-                    '“${t.title} ${l.uiTasksCopySuffix}” '
-                    '${l.uiTasksTCreatedTail}',
-              );
-            },
-          ),
-          _ListOption(
             label: l.uiTasksDeleteTask,
             color: c.danger,
             leading: NzIcon(
@@ -598,15 +584,6 @@ class TaskDetailActions {
       done:
           '${l.uiTasksTRejected} · '
           '${r.by == null ? '' : _name(r.by!)} ${l.uiTasksTInformed}',
-    );
-  }
-
-  void remind() {
-    final t = _task;
-    if (t == null) return;
-    _say(
-      '${context.l10n.uiTasksTReminded} · '
-      '${t.assignees.map(_name).join(', ')}',
     );
   }
 

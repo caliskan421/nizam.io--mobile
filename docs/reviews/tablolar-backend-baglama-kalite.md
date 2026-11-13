@@ -34,8 +34,8 @@ Her düzeltme önce-kırmızı testle geldi; korumalar M1–M8 mutasyonlarıyla 
 
 ## Birleşmeden önce (kırmızı)
 
-1. **Pin geçici:** `api-pin.json` `backendTag` = `f64-faz3-onizleme`, yalnız yerel bir backend klonunda bulunan önizleme etiketidir (backend `f64/ortak-calisma-faz3` ucu). CI bu etiketi çözemez. Backend tablolar Faz3'ü içeren gerçek `v*-api` etiketi çıkınca pin ona çevrilir, `make gen` koşulur, fark incelenir. Yerel yeniden üretim: backend deposunun ayrı bir klonunda `git tag f64-faz3-onizleme <faz3 ucu>` ve `NIZAMIO_BACKEND_DIR=<klon> make gen`.
-2. **CI koşulmadı:** mobil CI kota kuralı ve geçici pin nedeniyle; commitler `[skip ci]`.
+1. **Pin — kapandı (2026-11-14):** `api-pin.json` `backendTag` = `v0.18.0-api` (yayımlı backend etiketi, tablolar Faz3 dahil). `make gen` koşuldu; fark yalnız asistan açıklamaları ve hata kataloğu başlığı, tablolar üretilmiş kodu değişmedi. Önizleme etiketi ve yerel klon talimatı artık gereksiz.
+2. **CI koşulmadı:** mobil CI kota kuralı nedeniyle; commitler `[skip ci]`.
 3. **Gerçek sunucuyla iki istemcili uçtan uca koşum yapılmadı;** doğrulama sahte backend ve backend sözleşmesi üzerinden.
 4. `tables.*` TR hata metinleri web pininde yok; geçici olarak `i18n/server_errors_ek.tr.json`'da.
 

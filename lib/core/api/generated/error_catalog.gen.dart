@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket f64-faz3-onizleme (22f1ca6e84b785a3e904b63d729b4b44a119935b) — docs/api/error-codes.json
+// Kaynak: nizam.io--backend etiket v0.18.0-api (3b9d0446190bf57bf58c9ac5e4d777bcef3dfe57) — docs/api/error-codes.json
 
 import '../api_meta.dart';
 

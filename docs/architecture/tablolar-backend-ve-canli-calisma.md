@@ -6,12 +6,11 @@ deposuna göredir (`nizam.io--backend/`, dal `f64/ortak-calisma-faz3`). Kısaltm
 **K-NN** = `internal/modules/tables/README.md` §3 kuralı `TABLES-KNN`; **OA** =
 `docs/api/openapi.yaml`; **APIR** = `docs/api/README.md`.
 
-> **Kırmızı — pin geçicidir.** `api-pin.json` `backendTag` = `f64-faz3-onizleme`: backend
-> deposunda değil, yerel bir önizleme klonunda konmuş etikettir (dal
-> `f64/ortak-calisma-faz3`'ün ucu). Canlı ortak çalışma uçları (changes, stream, presence,
-> comments, undo) yayımlı hiçbir `v*-api` etiketinde yok; son yayımlı `v0.17.0-api` yalnız
-> çekirdek CRUD'u taşır. Birleşmeden önce pin backend'in gerçek etiketine çevrilir ve
-> `make gen` yeniden koşulur; CI (`.backend/` klonu) bu önizleme etiketini bulamaz.
+> **Pin (kapandı):** `api-pin.json` `backendTag` = `v0.18.0-api` — backend'in tablolar
+> Faz3'ünü (changes, stream, presence, comments, undo) içeren yayımlı etiketi. Önceki geçici
+> önizleme etiketine göre sözleşme farkı yalnız asistan açıklamaları ve hata listesindedir;
+> tablolar üretilmiş kodu değişmedi. `tables.*` TR metinleri web pininde henüz olmadığından
+> `i18n/server_errors_ek.tr.json`'da kalır.
 
 ## 1. Ortak kurallar
 
@@ -343,8 +342,7 @@ Sürekli düzenleme + presence + açık ikinci tablo kovayı aşabilir: hücre b
 
 ## 10. Açıklar (kırmızılar)
 
-1. **Pin:** `f64-faz3-onizleme` yerel önizleme etiketi; backend gerçek `v*-api` etiketi
-   gelmeden birleşme yok; CI bu etiketi çözemez.
+1. **Pin:** kapandı — `v0.18.0-api` (yayımlı etiket; CI çözebilir).
 2. Tablo akışı için ayrı istemci rehberi yok; sohbet rehberi (`docs/api/istemci-akislari.md:
    643-708`) kıyasla uygulanır. Kapanış nedeni bildirilmez.
 3. Çağıranın tablo rolü (editor/viewer) yanıtta yok; mobil 403'te salt okunura geçer.

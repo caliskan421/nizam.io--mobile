@@ -8,6 +8,9 @@ import 'package:nizamio/core/i18n/generated/app_localizations.dart';
 import 'package:nizamio/core/network/connectivity_monitor.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
+import 'package:nizamio/core/session/session_controller.dart';
+import 'package:nizamio/core/session/token_store.dart';
+import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/core/ui/theme/app_theme.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 import 'package:nizamio/features/timeline/application/gantt_provider.dart';
@@ -130,6 +133,16 @@ void main() {
         ),
         scopeStateProvider.overrideWithValue(
           const ScopeSelection(programId: 'p1'),
+        ),
+        // Yerleşim seçim kartının tarih taslağını izler; denetleyici oturum neslini okur.
+        scopeControllerProvider.overrideWithValue(
+          ScopeController()..selectProgram('p1'),
+        ),
+        sessionControllerProvider.overrideWithValue(
+          SessionController(
+            TokenStore(MemorySecureStore()),
+            (_, _) => throw StateError('yok'),
+          ),
         ),
         taskCatalogControllerProvider.overrideWith(() => _Catalog(_catalog())),
         canCreateTaskProvider.overrideWithValue(false),

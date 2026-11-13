@@ -55,8 +55,9 @@ void main() {
     expect(find.text(_l.uiArchiveSummaryFiles), findsOneWidget);
     expect(find.text('2 ${_l.uiArchiveFoldersLc}'), findsOneWidget);
     expect(find.text('${_l.uiArchiveFoldersTitle} · 2'), findsOneWidget);
-    // Kartta yalnız klasör adı ve dosya sayısı (örnek veri yok).
-    expect(find.text('3 dosya'), findsOneWidget);
+    // Kartta yalnız klasör adı ve dosya sayısı (örnek veri yok); aynı metin özetteki boyut
+    // kutucuğunun alt yazısında da var (toplam 3 dosya).
+    expect(find.text('3 dosya'), findsNWidgets(2));
     expect(find.text(_l.uiArchiveNoFiles), findsOneWidget);
     expect(find.bySemanticsLabel('Altyapı, 3 dosya'), findsOneWidget);
     expect(find.text('grup'), findsNothing);

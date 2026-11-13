@@ -2,6 +2,7 @@
 // tema + yerelleştirme sarmalayıcısı.
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations.dart';
 import 'package:nizamio/core/ui/theme/app_theme.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
@@ -44,15 +45,19 @@ TimelineView timelineViewOf(
   TimelineState state = const TimelineState(startAll: true),
 ]) => buildTimelineView(catalog, state);
 
-Widget timelineApp(Widget child) => MaterialApp(
-  theme: AppTheme.light(),
-  locale: const Locale('tr'),
-  supportedLocales: AppLocalizations.supportedLocales,
-  localizationsDelegates: const [
-    AppLocalizations.delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-  ],
-  home: Scaffold(body: child),
+/// Seçim kartı alt görevler için ayrıntıyı okur; burada sunucu yok → okuma boş geçer.
+Widget timelineApp(Widget child) => ProviderScope(
+  overrides: [taskDetailsProvider.overrideWith((ref, code) async {})],
+  child: MaterialApp(
+    theme: AppTheme.light(),
+    locale: const Locale('tr'),
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    home: Scaffold(body: child),
+  ),
 );

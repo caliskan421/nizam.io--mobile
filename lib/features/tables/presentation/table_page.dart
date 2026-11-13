@@ -147,11 +147,14 @@ class _TablePageState extends ConsumerState<TablePage> {
               ),
               if (d.writeError case final e?) ...[
                 const Gap(NizamioSpacing.space2),
-                // Sonucu bilinmeyen gönderim yeniden denenir; kalıcı ret (ör. seçilen kayıt
-                // kullanılamıyor) anlaşılır metinle gösterilir, değer geri alınmıştır.
-                if (isOutcomeUnknown(e))
+                // Eylem denetleyicinin durumundan: bekletilen batch varsa yeniden dene (sonucu
+                // bilinmeyen, 429, çözümleme okuması düşen); kalıcı retse (ör. seçilen kayıt
+                // kullanılamıyor; değer geri alındı) anlaşılır metin + kapat.
+                if (d.writeNotice == TableWriteNotice.retry)
                   NzBanner.danger(
-                    message: l.uiTablesSaveFailed,
+                    message: isOutcomeUnknown(e)
+                        ? l.uiTablesSaveFailed
+                        : errorText(l, e),
                     actionLabel: l.uiTablesRetry,
                     onAction: _controller.retryWrites,
                   )

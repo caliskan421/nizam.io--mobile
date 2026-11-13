@@ -173,6 +173,7 @@ class TableController extends _$TableController {
     return v.copyWith(
       cells: cells,
       pendingWrites: _queue.length + (_batch?.cells.length ?? 0),
+      writesHeld: _batch != null && _batchHeld,
     );
   }
 

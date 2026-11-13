@@ -11,7 +11,7 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | denetim akışı | 1 |
 | iletilir | 16 |
 | istisna | 61 |
-| rapor | 188 |
+| rapor | 189 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -280,6 +280,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/tasks/application/invite_form_controller.dart` | `InviteFormController.submit` | catch | rapor | 1 |
 | `features/tasks/application/meeting_form_controller.dart` | `MeetingFormController.submit` | catch | rapor | 1 |
 | `features/tasks/application/quick_forms_controller.dart` | `NewTaskFormController.submit` | catch | rapor | 3 |
+| `features/tasks/application/task_catalog_controller.dart` | `TaskCatalogController.refreshForMissing` | catch | rapor | 1 |
 | `features/tasks/application/task_catalog_controller.dart` | `TaskCatalogController.reload` | catch | rapor | 1 |
 | `features/tasks/application/task_detail_controller.dart` | `TaskDetailController._reread` | catch | rapor | 1 |
 | `features/tasks/application/task_detail_controller.dart` | `TaskDetailController._writeKeyed` | catch | rapor | 1 |

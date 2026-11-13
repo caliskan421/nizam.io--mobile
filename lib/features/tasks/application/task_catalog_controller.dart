@@ -41,6 +41,8 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
     if (_owner != owner) {
       _owner = owner;
       _touched.clear();
+      _missed.clear();
+      _upserted.clear();
       _generation++;
       _namesAt = 0;
       _clock = StaleClock();
@@ -72,6 +74,13 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
   int _generation = 0;
   final _touched = HashMap<String, int>();
 
+  /// Katalogda bulunmadığı için yeniden okuma tetiklemiş görev kimlikleri (sahip başına bir kez).
+  final _missed = <String>{};
+
+  /// Süzgeçli okumayla kataloğa eklenmiş görevler: yeniden okumada katalogdan düşmeleri
+  /// beklenir, geri gelişleri süzgeçli yoldandır ([refreshForMissing] onları yenilemez).
+  final _upserted = <String>{};
+
   void _touch(String code) => _touched[code] = ++_generation;
 
   // Ad nesli: [applyDetails] yeni adlar getirdiğinde işaretlenir; [upsert] okuma başladıktan
@@ -96,6 +105,7 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
   }) {
     final c = _catalog;
     if (c == null || items.isEmpty) return;
+    _upserted.addAll(items.map((i) => i.code));
     final fresh = {
       for (final i in items)
         if ((_touched[i.code] ?? 0) <= since) i.code: i,
@@ -134,6 +144,21 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
     } on Object catch (e, st) {
       reportUnexpected(e, st, source: ReportSource.tasks);
       // Hata durumda; çağıran yazmanın sonucunu bildirir.
+    }
+  }
+
+  /// [code] yüklü katalogda yok (ör. katalog yüklendikten sonra oluşturulup başka ekrandan —
+  /// tablo referansı — açılan görev): katalog bu sahip için kimlik başına BİR KEZ yeniden
+  /// okunur (görev listesi programın görünür görevlerinin tamamıdır). Yine yoksa erişim yok ya
+  /// da silinmiş sayılır; döngü olmaz. Okuma hatası durumda kalır (yutulur).
+  Future<void> refreshForMissing(String code) async {
+    if (_upserted.contains(code) || !_missed.add(code) || state.isLoading) {
+      return;
+    }
+    try {
+      await refresh();
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tasks);
     }
   }
 

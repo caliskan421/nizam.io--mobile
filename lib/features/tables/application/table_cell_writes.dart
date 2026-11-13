@@ -148,6 +148,8 @@ extension TableCellWrites on TableController {
   /// Bekletilen (sonucu bilinmeyen ya da çözümü yarım kalan) gönderimi kullanıcı isteğiyle
   /// yineler.
   Future<void> retryWrites() async {
+    _hold?.cancel();
+    _hold = null;
     _batchHeld = false;
     _update((b) => b.copyWith(writeError: () => null));
     await flush();
@@ -218,13 +220,7 @@ extension TableCellWrites on TableController {
     if (e.code == 'tables.cell_conflict') return _resolveConflict(batch);
     if (e.code == 'platform.rate_limited' || e.status == 429) {
       // Sunucu işlemedi: aynı gövde+anahtar Retry-After sonra kendiliğinden gider.
-      _batchHeld = true;
-      _hold?.cancel();
-      _hold = Timer(e.retryAfter ?? const Duration(seconds: 2), () {
-        _hold = null;
-        _batchHeld = false;
-        unawaited(flush());
-      });
+      _holdUntilRetryAfter(e);
       return false;
     }
     if (isOutcomeUnknown(e)) {
@@ -260,6 +256,11 @@ extension TableCellWrites on TableController {
       _batch = _Batch(batch.cells, newRequestKey());
       _batchHeld = true;
       _update((b) => b.copyWith(writeError: () => e));
+      // Okuma 429 aldıysa Retry-After sonra kendiliğinden yeniden denenir; diğer hatalarda
+      // şerit "yeniden dene" sunar (bekletilen batch görünümde `writesHeld`).
+      if (e.code == 'platform.rate_limited' || e.status == 429) {
+        _holdUntilRetryAfter(e);
+      }
       return false;
     }
     final v = _base!;
@@ -281,6 +282,17 @@ extension TableCellWrites on TableController {
     _queue.restore(again);
     _update((b) => b.copyWith(conflicts: conflicts));
     return true;
+  }
+
+  /// Batch'i bekletir; `Retry-After` (yoksa 2 sn) sonra kendiliğinden yeniden gönderir.
+  void _holdUntilRetryAfter(ApiError e) {
+    _batchHeld = true;
+    _hold?.cancel();
+    _hold = Timer(e.retryAfter ?? const Duration(seconds: 2), () {
+      _hold = null;
+      _batchHeld = false;
+      unawaited(flush());
+    });
   }
 
   bool _sameValue(Object? a, Object? b) {

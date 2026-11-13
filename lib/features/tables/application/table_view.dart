@@ -56,6 +56,7 @@ final class TableView {
     this.accessLost = false,
     this.uncertainCommands = 0,
     this.deleted = false,
+    this.writesHeld = false,
   }) : columns = List.unmodifiable(columns),
        rows = List.unmodifiable(rows),
        cells = Map.unmodifiable(cells),
@@ -110,6 +111,17 @@ final class TableView {
   /// Tablo bu oturumda silindi (ekran listeye döner).
   final bool deleted;
 
+  /// Gönderilmiş bir hücre batch'i bekletiliyor (sonucu bilinmiyor, 429 ya da çakışma
+  /// çözümleme okuması düştü): kuyruk onun arkasında durur, kullanıcı yeniden deneyebilir.
+  final bool writesHeld;
+
+  /// Yazım şeridinin eylemi: bekletilen batch varsa "yeniden dene", kalıcı retse "kapat".
+  TableWriteNotice get writeNotice => writeError == null
+      ? TableWriteNotice.none
+      : writesHeld
+      ? TableWriteNotice.retry
+      : TableWriteNotice.dismiss;
+
   /// Sonucu bilinmeyen (yeniden denenebilir) komut sayısı.
   final int uncertainCommands;
 
@@ -149,6 +161,7 @@ final class TableView {
     bool? accessLost,
     int? uncertainCommands,
     bool? deleted,
+    bool? writesHeld,
   }) => TableView(
     meta: meta ?? this.meta,
     columns: columns ?? this.columns,
@@ -168,6 +181,7 @@ final class TableView {
     accessLost: accessLost ?? this.accessLost,
     uncertainCommands: uncertainCommands ?? this.uncertainCommands,
     deleted: deleted ?? this.deleted,
+    writesHeld: writesHeld ?? this.writesHeld,
   );
 
   /// Yeni sayfa(lar)la birleştirir: satırlar eklenir, hücre/referans/ek haritaları birleşir.
@@ -189,5 +203,8 @@ final class TableView {
     accessLost: accessLost,
     uncertainCommands: uncertainCommands,
     deleted: deleted,
+    writesHeld: writesHeld,
   );
 }
+
+enum TableWriteNotice { none, retry, dismiss }

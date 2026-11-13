@@ -7509,6 +7509,10 @@
   "@uiUsersDraftInvalid": {
     "description": "ui.users.draft_invalid"
   },
+  "uiUsersDraftNoRole": "En az bir rol seçin: Admin ya da bir koordinatörlükte Koordinatör veya Üye.",
+  "@uiUsersDraftNoRole": {
+    "description": "ui.users.draft_no_role"
+  },
   "uiUsersDraftAdminUnknown": "Yönetici yetkisi henüz doğrulanamadı.",
   "@uiUsersDraftAdminUnknown": {
     "description": "ui.users.draft_admin_unknown"

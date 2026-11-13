@@ -123,7 +123,7 @@ class AdminUserAccountDock extends StatelessWidget {
                 size: NzSize.sm,
                 radius: NizamioRadius.pill,
                 loading: draft.busy,
-                onPressed: draft.busy || !draft.valid ? null : onSave,
+                onPressed: draft.busy || !draft.savable ? null : onSave,
               ),
             ),
           ),

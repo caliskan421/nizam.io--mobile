@@ -11356,6 +11356,12 @@ abstract class AppLocalizations {
   /// **'Ad soyadı ve geçerli bir e-posta adresini kontrol edin.'**
   String get uiUsersDraftInvalid;
 
+  /// ui.users.draft_no_role
+  ///
+  /// In tr, this message translates to:
+  /// **'En az bir rol seçin: Admin ya da bir koordinatörlükte Koordinatör veya Üye.'**
+  String get uiUsersDraftNoRole;
+
   /// ui.users.draft_admin_unknown
   ///
   /// In tr, this message translates to:

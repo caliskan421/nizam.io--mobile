@@ -149,6 +149,7 @@
     "ui.users.draft_add_department": "Koordinatörlük ekle",
     "ui.users.draft_selected": "seçili",
     "ui.users.draft_invalid": "Ad soyadı ve geçerli bir e-posta adresini kontrol edin.",
+    "ui.users.draft_no_role": "En az bir rol seçin: Admin ya da bir koordinatörlükte Koordinatör veya Üye.",
     "ui.users.draft_admin_unknown": "Yönetici yetkisi henüz doğrulanamadı.",
     "ui.users.draft_role_scope": "Admin şirket genelidir. Koordinatör ve Üye seçimi bu programdaki seçili koordinatörlüklere uygulanır.",
     "ui.users.draft_self_conflict": "Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin."

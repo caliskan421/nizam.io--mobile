@@ -5919,6 +5919,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Ad soyadı ve geçerli bir e-posta adresini kontrol edin.';
 
   @override
+  String get uiUsersDraftNoRole =>
+      'En az bir rol seçin: Admin ya da bir koordinatörlükte Koordinatör veya Üye.';
+
+  @override
   String get uiUsersDraftAdminUnknown =>
       'Yönetici yetkisi henüz doğrulanamadı.';
 

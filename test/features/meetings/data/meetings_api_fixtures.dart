@@ -59,3 +59,11 @@ Map<String, Object?> _conference({String status = 'live'}) => {
 };
 
 const _effects = {'failed_messages': 2, 'event_failed': true};
+
+/// Not sayfası gövdesi (faz3 sözleşmesi `total` + `counts` zorunlu).
+Map<String, Object?> _notes(List<Object?> items, String cursor) => {
+  'items': items,
+  'next_cursor': cursor,
+  'total': items.length,
+  'counts': {'all': items.length, 'converted': 0, 'mine': 0},
+};

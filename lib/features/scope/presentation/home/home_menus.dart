@@ -219,7 +219,6 @@ Future<void> showHomeDrawer(
                 NzIconButton(
                   icon: NzIcons.close,
                   semanticLabel: l.uiCommonClose,
-                  size: NzSize.sm,
                   onPressed: () => Navigator.of(sheet).pop(),
                 ),
             ],

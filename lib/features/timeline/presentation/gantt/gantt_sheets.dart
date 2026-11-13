@@ -7,6 +7,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/inputs/nz_filter_choice.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
@@ -26,6 +27,7 @@ Future<void> showGanttFilterSheet(BuildContext context) =>
         Consumer(
           builder: (context, ref, _) => NzButton.secondary(
             label: context.l10n.uiTasksClear,
+            expand: true,
             onPressed: ref
                 .read(horizontalTimelineControllerProvider.notifier)
                 .clearFilters,
@@ -40,6 +42,7 @@ Future<void> showGanttFilterSheet(BuildContext context) =>
                 : horizontalTimelineView(catalog, state).visible;
             return NzButton.primary(
               label: context.l10n.showTasks(count),
+              expand: true,
               onPressed: () => Navigator.of(sheet).maybePop(),
             );
           },
@@ -48,11 +51,20 @@ Future<void> showGanttFilterSheet(BuildContext context) =>
       builder: (_) => const _FilterBody(),
     );
 
-class _FilterBody extends ConsumerWidget {
+/// Görevler filtresiyle aynı gövde: durum rayı, ardından açılır Kişi / Koordinatörlük satırları
+/// ve öncelik ([NzFormRows]).
+class _FilterBody extends ConsumerStatefulWidget {
   const _FilterBody();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_FilterBody> createState() => _FilterBodyState();
+}
+
+class _FilterBodyState extends ConsumerState<_FilterBody> {
+  int? _open;
+
+  @override
+  Widget build(BuildContext context) {
     final catalog = ref.watch(timelineCatalogProvider).value;
     if (catalog == null) return const SizedBox.shrink();
     final state = ref.watch(horizontalTimelineControllerProvider);
@@ -60,34 +72,8 @@ class _FilterBody extends ConsumerWidget {
     final view = horizontalTimelineView(catalog, state);
     final l = context.l10n;
     final c = context.colors;
-    Widget option(
-      String label,
-      String count,
-      bool selected,
-      VoidCallback toggle,
-    ) => NzFilterChoice(
-      label: label,
-      count: count,
-      selected: selected,
-      onTap: toggle,
-    );
-    Widget group(String label, int selected, List<Widget> rows) =>
-        ExpansionTile(
-          tilePadding: EdgeInsets.zero,
-          title: Text(
-            label,
-            style: context.text.list.copyWith(fontWeight: FontWeight.w600),
-          ),
-          subtitle: Text(
-            selected == 0
-                ? l.uiTasksAllLc
-                : '$selected ${l.uiTasksSelectedTail}',
-            style: context.text.caption.copyWith(
-              color: selected == 0 ? c.textFaint : c.accentText,
-            ),
-          ),
-          children: [NzFilterChoices(children: rows)],
-        );
+    String selection(int count) =>
+        count == 0 ? l.uiTasksAllLc : '$count ${l.uiTasksSelectedTail}';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -105,26 +91,47 @@ class _FilterBody extends ConsumerWidget {
               NzFilterOption(label: l.ganttFilterLabel(f, view.lateAll)),
           ],
         ),
-        group(l.uiTasksGroupPeople, state.people.length, [
-          for (final person in catalog.people)
-            option(
-              person.name,
-              '${catalog.tasks.where((t) => t.assignees.contains(person.id)).length}',
-              state.people.contains(person.id),
-              () => ctl.togglePerson(person.id),
-            ),
-        ]),
-        group(l.uiTasksGroupCoord, state.coords.length, [
-          for (final coord in catalog.coordinatorships)
-            option(
-              coord.name,
-              '${catalog.tasks.where((t) => t.coordinatorship == coord.code).length}',
-              state.coords.contains(coord.code),
-              () => ctl.toggleCoord(coord.code),
-            ),
-        ]),
+        const Gap(NizamioSpacing.space4),
         NzFormRows(
+          expandedIndex: _open,
+          onToggle: (i) => setState(() => _open = _open == i ? null : i),
           rows: [
+            NzFormRow(
+              label: l.uiTasksGroupPeople,
+              icon: NzIcons.person,
+              value: selection(state.people.length),
+              valueSet: state.people.isNotEmpty,
+              content: NzFilterChoices(
+                children: [
+                  for (final person in catalog.people)
+                    NzFilterChoice(
+                      label: person.name,
+                      count:
+                          '${catalog.tasks.where((t) => t.assignees.contains(person.id)).length}',
+                      selected: state.people.contains(person.id),
+                      onTap: () => ctl.togglePerson(person.id),
+                    ),
+                ],
+              ),
+            ),
+            NzFormRow(
+              label: l.uiTasksGroupCoord,
+              icon: NzIcons.coordinatorships,
+              value: selection(state.coords.length),
+              valueSet: state.coords.isNotEmpty,
+              content: NzFilterChoices(
+                children: [
+                  for (final coord in catalog.coordinatorships)
+                    NzFilterChoice(
+                      label: coord.name,
+                      count:
+                          '${catalog.tasks.where((t) => t.coordinatorship == coord.code).length}',
+                      selected: state.coords.contains(coord.code),
+                      onTap: () => ctl.toggleCoord(coord.code),
+                    ),
+                ],
+              ),
+            ),
             NzFormRow.custom(
               label: l.uiTasksPriority,
               leading: const NzPriorityBars(level: 2),

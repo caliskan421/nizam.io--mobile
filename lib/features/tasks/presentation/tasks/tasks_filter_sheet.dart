@@ -60,10 +60,6 @@ Future<void> showSharedTasksFilterSheet(
   return NzBottomSheet.show<void>(
     context,
     title: l.uiTasksFilters,
-    headerAction: Consumer(
-      builder: (_, ref, _) =>
-          TaskLink(label: l.uiTasksClearAll, onTap: data(ref).onClear),
-    ),
     actions: (sheet) => [
       Consumer(
         builder: (_, ref, _) => NzButton.secondary(

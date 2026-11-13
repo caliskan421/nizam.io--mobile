@@ -116,7 +116,8 @@ void main() {
       );
       await tester.tap(find.text(_l.uiCalendarLastWeek));
       await tester.pumpAndSettle();
-      expect(find.text('${_l.uiCalendarSecEnds} · 2'), findsOneWidget);
+      // Açılır satırlar: ilk bölüm (Bitiş) açık başlar, sağda sayısı.
+    expect(find.text(_l.uiCalendarSecEnds), findsOneWidget);
       expect(find.text('Görev D'), findsOneWidget);
       // Karttaki halka da "tamamlandı" yazar; rozet pencerenin içinde aranır.
       expect(

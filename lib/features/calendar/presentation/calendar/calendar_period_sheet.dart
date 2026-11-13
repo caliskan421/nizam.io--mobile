@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
+import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
@@ -13,7 +15,8 @@ import 'calendar_grid.dart';
 import 'calendar_texts.dart';
 
 /// Dönem kartının penceresi (telefonda genişletilebilir alt sayfa, tablette ortada modal): [from]–[to]
-/// aralığının bölümleri — bitiş, başlangıç, devam edenler, toplantılar (boş bölüm yok).
+/// aralığının bölümleri — bitiş, başlangıç, devam edenler, toplantılar (boş bölüm yok) —
+/// görev ekle formundaki açılır satırlarla ([NzFormRows]; sağda sayı, tek bölüm açık).
 /// Satıra dokunmak pencereyi kapatıp kaydı açar.
 Future<void> showCalendarPeriodSheet(
   BuildContext context, {
@@ -25,12 +28,14 @@ Future<void> showCalendarPeriodSheet(
   final l = context.l10n;
   final nav = context.appNav;
   final s = index.span(from, to);
-  final sections = <(String, List<CalendarEntry>)>[
-    (l.uiCalendarSecEnds, s.ends),
-    (l.uiCalendarSecStarts, s.starts),
-    (l.uiCalendarSecOngoing, s.ongoing),
-    (l.uiCalendarGroupMeetings, s.meetings),
-  ].where((x) => x.$2.isNotEmpty).toList();
+  final sections = <(String, IconData, List<CalendarEntry>)>[
+    (l.uiCalendarSecEnds, NzIcons.flag, s.ends),
+    (l.uiCalendarSecStarts, NzIcons.tasks, s.starts),
+    (l.uiCalendarSecOngoing, NzIcons.clock, s.ongoing),
+    (l.uiCalendarSecMeetings, NzIcons.video, s.meetings),
+  ].where((x) => x.$3.isNotEmpty).toList();
+  // Görev ekle formundaki açılır satırlar: aynı anda tek bölüm açık; ilk bölüm açık başlar.
+  final expanded = ValueNotifier<int?>(sections.isEmpty ? null : 0);
   return NzBottomSheet.show<void>(
     context,
     title: title,
@@ -61,41 +66,39 @@ Future<void> showCalendarPeriodSheet(
           ),
         );
       }
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final (i, (label, entries)) in sections.indexed) ...[
-            if (i > 0) const Gap(NizamioSpacing.gapLg),
-            NzKicker('$label · ${entries.length}'),
-            const Gap(NizamioSpacing.space2),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(NizamioRadius.card),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: c.surfaceRaised,
-                  border: Border.all(color: c.border),
-                  borderRadius: BorderRadius.circular(NizamioRadius.card),
+      return ValueListenableBuilder<int?>(
+        valueListenable: expanded,
+        builder: (context, open_, _) => Padding(
+          padding: const EdgeInsets.only(bottom: NizamioSpacing.space2),
+          child: NzFormRows(
+            expandedIndex: open_,
+            onToggle: (i) => expanded.value = open_ == i ? null : i,
+            rows: [
+              for (final (label, icon, entries) in sections)
+                NzFormRow(
+                  label: label,
+                  icon: icon,
+                  value: '${entries.length}',
+                  valueSet: true,
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (final (j, e) in entries.indexed)
+                        _PeriodRow(
+                          entry: e,
+                          first: j == 0,
+                          index: index,
+                          onOpen: () => open(e),
+                        ),
+                    ],
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (final (j, e) in entries.indexed)
-                      _PeriodRow(
-                        entry: e,
-                        first: j == 0,
-                        index: index,
-                        onOpen: () => open(e),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-          const Gap(NizamioSpacing.space2),
-        ],
+            ],
+          ),
+        ),
       );
     },
-  );
+  ).whenComplete(expanded.dispose);
 }
 
 /// Dönem satırı (en az 62): solda mono gün (toplantıda altında saat, süren görevde "→ bitiş"),

@@ -1753,17 +1753,21 @@
   "@uiCalendarLastWeek": {
     "description": "ui.calendar.last_week"
   },
-  "uiCalendarSecEnds": "bitiş",
+  "uiCalendarSecEnds": "Bitiş",
   "@uiCalendarSecEnds": {
     "description": "ui.calendar.sec_ends"
   },
-  "uiCalendarSecStarts": "başlangıç",
+  "uiCalendarSecStarts": "Başlangıç",
   "@uiCalendarSecStarts": {
     "description": "ui.calendar.sec_starts"
   },
-  "uiCalendarSecOngoing": "devam edenler",
+  "uiCalendarSecOngoing": "Devam edenler",
   "@uiCalendarSecOngoing": {
     "description": "ui.calendar.sec_ongoing"
+  },
+  "uiCalendarSecMeetings": "Toplantılar",
+  "@uiCalendarSecMeetings": {
+    "description": "ui.calendar.sec_meetings"
   },
   "uiCalendarPeriodEmpty": "Bu dönemde kayıt yok.",
   "@uiCalendarPeriodEmpty": {

@@ -1455,13 +1455,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCalendarLastWeek => 'Geçen hafta';
 
   @override
-  String get uiCalendarSecEnds => 'bitiş';
+  String get uiCalendarSecEnds => 'Bitiş';
 
   @override
-  String get uiCalendarSecStarts => 'başlangıç';
+  String get uiCalendarSecStarts => 'Başlangıç';
 
   @override
-  String get uiCalendarSecOngoing => 'devam edenler';
+  String get uiCalendarSecOngoing => 'Devam edenler';
+
+  @override
+  String get uiCalendarSecMeetings => 'Toplantılar';
 
   @override
   String get uiCalendarPeriodEmpty => 'Bu dönemde kayıt yok.';

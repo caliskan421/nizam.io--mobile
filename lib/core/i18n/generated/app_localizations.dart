@@ -2725,20 +2725,26 @@ abstract class AppLocalizations {
   /// ui.calendar.sec_ends
   ///
   /// In tr, this message translates to:
-  /// **'bitiş'**
+  /// **'Bitiş'**
   String get uiCalendarSecEnds;
 
   /// ui.calendar.sec_starts
   ///
   /// In tr, this message translates to:
-  /// **'başlangıç'**
+  /// **'Başlangıç'**
   String get uiCalendarSecStarts;
 
   /// ui.calendar.sec_ongoing
   ///
   /// In tr, this message translates to:
-  /// **'devam edenler'**
+  /// **'Devam edenler'**
   String get uiCalendarSecOngoing;
+
+  /// ui.calendar.sec_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantılar'**
+  String get uiCalendarSecMeetings;
 
   /// ui.calendar.period_empty
   ///

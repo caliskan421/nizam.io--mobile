@@ -12,7 +12,7 @@ import '../../domain/calendar.dart';
 import 'calendar_grid.dart';
 import 'calendar_texts.dart';
 
-/// Dönem kartının penceresi (telefonda alt sayfa, tablette ortada modal): [from]–[to]
+/// Dönem kartının penceresi (telefonda genişletilebilir alt sayfa, tablette ortada modal): [from]–[to]
 /// aralığının bölümleri — bitiş, başlangıç, devam edenler, toplantılar (boş bölüm yok).
 /// Satıra dokunmak pencereyi kapatıp kaydı açar.
 Future<void> showCalendarPeriodSheet(
@@ -35,6 +35,8 @@ Future<void> showCalendarPeriodSheet(
     context,
     title: title,
     description: from == to ? l.dayTitle(from) : l.weekRange(from, to),
+    // Görev ekle ve diğer form sayfalarıyla aynı: tutamak genişlet/daralt düğmesidir.
+    expandable: true,
     builder: (sheet) {
       void open(CalendarEntry e) {
         Navigator.of(sheet).pop();

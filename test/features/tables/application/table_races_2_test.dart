@@ -240,5 +240,7 @@ void main() {
     expect(c.read(tablesListControllerProvider).value!.find('t1'), isNotNull);
     await n.retryCommands();
     expect(c.read(tablesListControllerProvider).value!.find('t1'), isNull);
+    expect(_v(c).deleted, isTrue);
+    expect(_v(c).uncertainCommands, 0);
   });
 }

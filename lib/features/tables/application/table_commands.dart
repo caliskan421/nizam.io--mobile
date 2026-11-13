@@ -3,9 +3,18 @@ part of 'table_controller.dart';
 /// Sonucu bilinmeyen komut: işlem nesnesi ve anahtarı DEĞİŞMEZ; yalnız kendi yeniden
 /// denemesi aynı anahtarı kullanır.
 final class _PendingCommand {
-  _PendingCommand(this.op, this.key);
+  _PendingCommand(this.op, this.key, {this.apply, this.done});
   final TableOperation op;
   final String key;
+
+  /// Makbuzla gelen yerel görünüm güncellemesi (ad, sütun). YALNIZ makbuz sırası uygulanmış
+  /// snapshot sırasından yeniyse çalışır: daha yeni snapshot bu değişikliği (ve sonrasını)
+  /// zaten içerir, geciken makbuz onu geri ezmez.
+  final void Function(TableReceipt r)? apply;
+
+  /// Her başarıda çalışan sonuç işlemi (liste güncellemesi, silindi işareti); ilk deneme ve
+  /// [TableCommands.retryCommands] aynı işleyiciyi kullanır.
+  final void Function(TableReceipt r)? done;
 }
 
 /// Tablo komutları. Her yeni kullanıcı işlemi YENİ işlem anahtarı alır (aynı gövdeli iki
@@ -24,9 +33,12 @@ extension TableCommands on TableController {
     TableOperation op, {
     bool reload = true,
     _PendingCommand? retry,
+    void Function(TableReceipt r)? apply,
+    void Function(TableReceipt r)? done,
   }) async {
     await flush();
-    final pending = retry ?? _PendingCommand(op, newRequestKey());
+    final pending =
+        retry ?? _PendingCommand(op, newRequestKey(), apply: apply, done: done);
     final generation = _generation;
     final TableReceipt r;
     try {
@@ -51,6 +63,8 @@ extension TableCommands on TableController {
     _uncertain.remove(pending);
     ownSequences.add(r.sequence);
     if (generation == _generation && _mounted) {
+      if (r.sequence > _viewSequence) pending.apply?.call(r);
+      pending.done?.call(r);
       if (r.sequence > _confirmedSequence) _confirmedSequence = r.sequence;
       _update(
         (b) => b.copyWith(
@@ -70,7 +84,7 @@ extension TableCommands on TableController {
   /// fırlar (kalanlar bekler).
   Future<void> retryCommands() async {
     for (final p in [..._uncertain]) {
-      await _command(p.op, retry: p);
+      await _command(p.op, retry: p, reload: p.op is! DeleteTable);
     }
   }
 
@@ -86,16 +100,28 @@ extension TableCommands on TableController {
 
   Future<void> rename(String name) async {
     final trimmed = name.trim();
-    await _command(RenameTable(trimmed), reload: false);
-    _update((b) => b.copyWith(meta: b.meta.copyWith(name: trimmed)));
-    _listOrNull?.renamed(_id, trimmed);
+    await _command(
+      RenameTable(trimmed),
+      reload: false,
+      apply: (_) {
+        _update((b) => b.copyWith(meta: b.meta.copyWith(name: trimmed)));
+        _listOrNull?.renamed(_id, trimmed);
+      },
+    );
   }
 
-  /// Yalnız sahip; başarıda listeden düşer.
+  /// Yalnız sahip; başarıda (yeniden deneme dahil) listeden düşer ve görünüm "silindi" olur
+  /// (ekran listeye döner).
   Future<void> deleteTable() async {
     _queue.clear();
-    await _command(const DeleteTable(), reload: false);
-    _listOrNull?.removed(_id);
+    await _command(
+      const DeleteTable(),
+      reload: false,
+      done: (_) {
+        _listOrNull?.removed(_id);
+        _update((b) => b.copyWith(deleted: true));
+      },
+    );
   }
 
   /// Yeni satır (kimliği sunucu üretir) ve kimliği.
@@ -128,14 +154,7 @@ extension TableCommands on TableController {
     await _command(
       RenameColumn(id: columnId, name: trimmed, expectedSchema: _schema),
       reload: false,
-    );
-    _update(
-      (b) => b.copyWith(
-        columns: [
-          for (final c in b.columns)
-            c.id == columnId ? c.copyWith(name: trimmed) : c,
-        ],
-      ),
+      apply: (_) => _patchColumn(columnId, (c) => c.copyWith(name: trimmed)),
     );
   }
 
@@ -143,16 +162,18 @@ extension TableCommands on TableController {
     await _command(
       ResizeColumn(id: columnId, width: width, expectedSchema: _schema),
       reload: false,
-    );
-    _update(
-      (b) => b.copyWith(
-        columns: [
-          for (final c in b.columns)
-            c.id == columnId ? c.copyWith(width: width) : c,
-        ],
-      ),
+      apply: (_) => _patchColumn(columnId, (c) => c.copyWith(width: width)),
     );
   }
+
+  void _patchColumn(
+    String columnId,
+    TableColumnSpec Function(TableColumnSpec c) change,
+  ) => _update(
+    (b) => b.copyWith(
+      columns: [for (final c in b.columns) c.id == columnId ? change(c) : c],
+    ),
+  );
 
   Future<void> deleteColumn(String columnId) async {
     _queue.removeWhere((w) => w.columnId == columnId);

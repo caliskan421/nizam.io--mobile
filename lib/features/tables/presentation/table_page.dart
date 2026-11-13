@@ -55,6 +55,13 @@ class _TablePageState extends ConsumerState<TablePage> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     ref.listenErrors(_provider, context);
+    // Silme (ilk deneme ya da yeniden deneme) başarılı: ekran listeye döner; bölünmüş
+    // görünümde sağ bölme kapanır.
+    ref.listen(_provider, (prev, next) {
+      if ((next.value?.deleted ?? false) && !(prev?.value?.deleted ?? false)) {
+        context.appNav.openTables();
+      }
+    });
     final async = ref.watch(_provider);
     final view = async.value;
     return NzPage.fill(

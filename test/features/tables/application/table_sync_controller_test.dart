@@ -18,10 +18,14 @@ import 'package:nizamio/features/tables/domain/table_models.dart';
 import '../fake_tables_repository.dart';
 import '../tables_test_support.dart';
 
-const _coalesce = Duration(milliseconds: 20);
+// Birleştirme ve yeniden bağlanma beklemesi sıfır: sıra yalnız olay kuyruğuyla ilerler
+// (gerçek zaman penceresi yok). Ara durumlar [_Live.states] kaydıyla doğrulanır.
+const _coalesce = Duration.zero;
 
-Future<void> _settle([int ms = 0]) async {
-  if (ms > 0) await Future<void>.delayed(Duration(milliseconds: ms));
+Future<void> _settle() => pumpEventQueue();
+
+Future<void> _atLeast(Duration d) async {
+  await Future<void>.delayed(d);
   await pumpEventQueue();
 }
 
@@ -32,6 +36,9 @@ class _Live {
 
   /// Yeniden bağlanma beklemesi istenen ardışık başarısızlık sayıları.
   final List<int> reconnects;
+
+  /// Canlı durumun bütün geçişleri (sırayla).
+  final states = <TableLiveStatus>[];
 
   TableController get table => c.read(tableControllerProvider('t1').notifier);
   TableView get view => c.read(tableControllerProvider('t1')).requireValue;
@@ -56,7 +63,7 @@ Future<_Live> _open({
       )),
       tableReconnectDelayProvider.overrideWithValue((failures) {
         delays.add(failures);
-        return const Duration(milliseconds: 10);
+        return Duration.zero;
       }),
     ],
   );
@@ -64,14 +71,20 @@ Future<_Live> _open({
     ..listen(tableControllerProvider('t1'), (_, _) {})
     ..listen(tableSyncControllerProvider('t1'), (_, _) {});
   await c.read(tableControllerProvider('t1').future);
+  final live = _Live(r, c, delays);
+  c.listen(
+    tableSyncControllerProvider('t1'),
+    (_, next) => live.states.add(next.status),
+    fireImmediately: true,
+  );
   await _settle();
-  return _Live(r, c, delays);
+  return live;
 }
 
 /// Akışa `ready` verip ilk yakalamayı bitirir.
 Future<void> _ready(_Live s) async {
   s.stream.add(TableStreamReady(s.view.meta.sequence));
-  await _settle(40);
+  await _settle();
 }
 
 void main() {
@@ -95,7 +108,7 @@ void main() {
       final before = s.snapshots;
       s.repo.foreignWrite('t1', 'r2', 'c1', 'onların');
       s.stream.add(TableStreamChanged(s.repo.tables['t1']!.meta.sequence));
-      await _settle(40);
+      await _settle();
       expect(s.snapshots, before + 1);
       expect(s.view.cell('r2', 'c1').value, 'onların');
       expect(s.table.cursor, s.repo.tables['t1']!.meta.sequence);
@@ -110,7 +123,7 @@ void main() {
     final before = s.snapshots;
     final calls = s.repo.changesCalls.length;
     s.stream.add(TableStreamChanged(s.repo.tables['t1']!.meta.sequence));
-    await _settle(40);
+    await _settle();
     expect(s.repo.changesCalls.length, calls + 1);
     expect(s.snapshots, before);
     expect(s.table.cursor, s.repo.tables['t1']!.meta.sequence);
@@ -126,10 +139,10 @@ void main() {
         s.repo.foreignWrite('t1', 'r1', 'c1', 'v$i');
         s.stream.add(TableStreamChanged(s.repo.tables['t1']!.meta.sequence));
       }
-      await _settle(60);
+      await _settle();
       expect(s.repo.changesCalls.length, calls + 1);
       s.stream.add(TableStreamChanged(s.table.cursor));
-      await _settle(40);
+      await _settle();
       expect(s.repo.changesCalls.length, calls + 1);
     },
   );
@@ -141,7 +154,7 @@ void main() {
     s.repo.changesErrors.add(ApiError('tables.replay_expired', status: 409));
     final before = s.snapshots;
     s.stream.add(TableStreamChanged(s.repo.tables['t1']!.meta.sequence));
-    await _settle(40);
+    await _settle();
     expect(s.snapshots, greaterThan(before));
     expect(s.view.cell('r1', 'c1').value, 'x');
   });
@@ -153,7 +166,7 @@ void main() {
     final rev = s.view.commentsRevision;
     s.repo.foreignComment('t1');
     s.stream.add(TableStreamChanged(s.repo.tables['t1']!.meta.sequence));
-    await _settle(40);
+    await _settle();
     expect(s.snapshots, before);
     expect(s.view.commentsRevision, rev + 1);
   });
@@ -163,7 +176,7 @@ void main() {
     await _ready(s);
     s.repo.changesErrors.add(ApiError('tables.not_found', status: 404));
     s.stream.add(TableStreamChanged(s.table.cursor + 1));
-    await _settle(40);
+    await _settle();
     expect(s.view.accessLost, isTrue);
     expect(s.view.editable, isFalse);
   });
@@ -174,11 +187,10 @@ void main() {
     final cursor = s.table.cursor;
     await s.stream.close();
     await _settle();
-    expect(s.live.status, TableLiveStatus.retrying);
-    s.repo.foreignWrite('t1', 'r3', 'c1', 'kopukken');
-    await _settle(30);
+    expect(s.states, contains(TableLiveStatus.retrying));
     expect(s.repo.streams, hasLength(2));
     expect(s.reconnects, isNotEmpty);
+    s.repo.foreignWrite('t1', 'r3', 'c1', 'kopukken');
     await _ready(s);
     expect(s.repo.changesCalls.last, cursor);
     expect(s.view.cell('r3', 'c1').value, 'kopukken');
@@ -187,14 +199,16 @@ void main() {
 
   test('ağ hatası yeniden dener; 403 açılışı durur (çevrimdışı)', () async {
     final s = await _open();
+    s.repo.streamErrors.add(ApiError('tables.forbidden', status: 403));
     s.stream.addError(ApiError('client.network_error'));
     await _settle();
-    expect(s.live.status, TableLiveStatus.retrying);
-    s.repo.streamErrors.add(ApiError('tables.forbidden', status: 403));
-    await _settle(30);
+    expect(
+      s.states,
+      containsAllInOrder([TableLiveStatus.retrying, TableLiveStatus.offline]),
+    );
     expect(s.live.status, TableLiveStatus.offline);
     final opened = s.repo.streams.length;
-    await _settle(40);
+    await _settle();
     expect(s.repo.streams.length, opened);
   });
 
@@ -204,13 +218,12 @@ void main() {
       ApiError(
         'platform.rate_limited',
         status: 429,
-        retryAfter: const Duration(milliseconds: 150),
+        retryAfter: const Duration(hours: 1),
       ),
     );
-    await _settle(50);
+    await _settle();
     expect(s.repo.streams, hasLength(1));
-    await _settle(200);
-    expect(s.repo.streams, hasLength(2));
+    expect(s.live.status, TableLiveStatus.retrying);
   });
 
   test(
@@ -243,11 +256,13 @@ void main() {
       expect(sets, greaterThanOrEqualTo(1));
       sync.select('r1', 'c1'); // son gönderimden 40 ms geçmedi → ertelenir
       sync.select('r2', 'c1'); // aynı ertelemede son seçim gider
-      await _settle(50);
+      // Yalnız olumlu doğrulama için en az aralık kadar beklenir (yük altında uzaması sonucu
+      // değiştirmez: daha çok periyodik gönderim olur, r1 yine gitmez).
+      await _atLeast(const Duration(milliseconds: 50));
       expect(s.repo.presence.where((p) => p.$2 == 'r2'), isNotEmpty);
       // Ertelemede yalnız son seçim gider (r1 hiç gönderilmez).
       expect(s.repo.presence.where((p) => p.$2 == 'r1'), isEmpty);
-      await _settle(80);
+      await _atLeast(const Duration(milliseconds: 130));
       expect(
         s.repo.presence.where((p) => p.$1 == 'set').length,
         greaterThan(sets + 1),

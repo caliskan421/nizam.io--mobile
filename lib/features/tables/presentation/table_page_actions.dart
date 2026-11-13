@@ -139,9 +139,8 @@ extension _TablePageActions on _TablePageState {
                   tone: NzDialogTone.destructive,
                 );
                 if (!yes || !mounted) return;
-                final ok = await tableRun(context, _controller.deleteTable);
-                // Silinen tablonun ekranı kalmaz: liste açılır (bölünmüş görünümde sağ bölme kapanır).
-                if (ok && mounted) context.appNav.openTables();
+                // Başarıda ekran listeye döner (`TablePage` silindi dinleyicisi).
+                await tableRun(context, _controller.deleteTable);
               },
             ),
         ],

@@ -36,6 +36,7 @@ final class TableView {
     this.commentsRevision = 0,
     this.accessLost = false,
     this.uncertainCommands = 0,
+    this.deleted = false,
   }) : columns = List.unmodifiable(columns),
        rows = List.unmodifiable(rows),
        cells = Map.unmodifiable(cells),
@@ -87,6 +88,9 @@ final class TableView {
   /// açık yorum listeleri buna göre yeniden okunur (snapshot yorum taşımaz, K-26).
   final int commentsRevision;
 
+  /// Tablo bu oturumda silindi (ekran listeye döner).
+  final bool deleted;
+
   /// Sonucu bilinmeyen (yeniden denenebilir) komut sayısı.
   final int uncertainCommands;
 
@@ -94,7 +98,7 @@ final class TableView {
   final bool accessLost;
 
   bool get isOwner => meta.ownedBy(accountId);
-  bool get editable => !readOnly && !accessLost;
+  bool get editable => !readOnly && !accessLost && !deleted;
   bool get hasMore => nextCursor != null;
 
   TableCellData cell(String rowId, String columnId) =>
@@ -131,6 +135,7 @@ final class TableView {
     int? commentsRevision,
     bool? accessLost,
     int? uncertainCommands,
+    bool? deleted,
   }) => TableView(
     meta: meta ?? this.meta,
     columns: columns ?? this.columns,
@@ -149,6 +154,7 @@ final class TableView {
     commentsRevision: commentsRevision ?? this.commentsRevision,
     accessLost: accessLost ?? this.accessLost,
     uncertainCommands: uncertainCommands ?? this.uncertainCommands,
+    deleted: deleted ?? this.deleted,
   );
 
   /// Yeni sayfa(lar)la birleştirir: satırlar eklenir, hücre/referans/ek haritaları birleşir.
@@ -169,5 +175,6 @@ final class TableView {
     commentsRevision: commentsRevision,
     accessLost: accessLost,
     uncertainCommands: uncertainCommands,
+    deleted: deleted,
   );
 }

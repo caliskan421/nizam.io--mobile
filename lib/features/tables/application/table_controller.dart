@@ -282,6 +282,7 @@ class TableController extends _$TableController {
       commentsRevision: base.commentsRevision + (skipped ? 1 : 0),
       accessLost: base.accessLost,
       uncertainCommands: base.uncertainCommands,
+      deleted: base.deleted,
     );
     _publish();
   }

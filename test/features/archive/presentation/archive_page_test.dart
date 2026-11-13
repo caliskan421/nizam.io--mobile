@@ -54,12 +54,10 @@ void main() {
     expect(find.text(_l.uiArchiveTitle), findsOneWidget);
     expect(find.text('3 dosya · 2 klasör'), findsOneWidget);
     expect(find.text('${_l.uiArchiveFoldersTitle} · 2'), findsOneWidget);
-    expect(find.text('3 dosya · 4 görev'), findsOneWidget);
-    expect(find.text('${_l.uiArchiveNoFiles} · 4 görev'), findsOneWidget);
-    expect(
-      find.bySemanticsLabel('Altyapı, 3 dosya, 4 görev, 2,5 MB, 5 gün önce'),
-      findsOneWidget,
-    );
+    // Kartta yalnız klasör adı ve dosya sayısı (örnek veri yok).
+    expect(find.text('3 dosya'), findsOneWidget);
+    expect(find.text(_l.uiArchiveNoFiles), findsOneWidget);
+    expect(find.bySemanticsLabel('Altyapı, 3 dosya'), findsOneWidget);
     expect(find.text('grup'), findsNothing);
     // Koordinatör satırının departmanı başlık olarak gider.
     expect(repo.calls.single, ('folders', 'd1', null));
@@ -108,9 +106,12 @@ void main() {
           of: card,
           matching: find.text(folder.name),
         );
-        final meta = find
-            .descendant(of: card, matching: find.textContaining('görev'))
-            .first;
+        final meta = find.descendant(
+          of: card,
+          matching: find.text(
+            folder.files > 0 ? '${folder.files} dosya' : _l.uiArchiveNoFiles,
+          ),
+        );
         expect(rect.height, closeTo(first.height, .1));
         expect(
           tester.getTopLeft(meta).dy - tester.getRect(title).bottom,

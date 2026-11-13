@@ -44,11 +44,17 @@ class TableController extends _$TableController {
   late TableScope _scope;
   late String _id;
   int _generation = 0;
-  RequestKeys _keys = const RequestKeys();
   TableView? _base;
   int _viewSequence = 0;
   Future<void> _reloadTail = Future.value();
   bool _needsReload = false;
+
+  /// Kendi komut makbuzlarıyla doğrulanmış en yüksek sıra: daha eski snapshot tabanı
+  /// (metadata: ad, sütunlar, satırlar) geri alamaz; atılır ve taze okuma gereksinimi kalır.
+  int _confirmedSequence = 0;
+
+  /// Sonucu bilinmeyen komutlar: işlem nesnesi + anahtarı ([retryCommands] aynısını yollar).
+  final _uncertain = <_PendingCommand>[];
 
   final _queue = TableWriteQueue();
   _Batch? _batch;
@@ -79,7 +85,8 @@ class TableController extends _$TableController {
     });
     _id = id;
     ++_generation;
-    _keys = const RequestKeys();
+    _uncertain.clear();
+    _confirmedSequence = 0;
     _queue.clear();
     _batch = null;
     _batchHeld = false;
@@ -238,6 +245,12 @@ class TableController extends _$TableController {
     if (generation != _generation || !ref.mounted) return;
     final base = _base;
     if (base == null || sequence < _viewSequence) return;
+    if (sequence < _confirmedSequence) {
+      // Kendi doğrulanmış komutumuzdan eski: tabanı geri almaz, taze okuma gerekir.
+      _needsReload = true;
+      return;
+    }
+    _needsReload = false;
     _viewSequence = sequence;
     final skipped = sequence > _cursor;
     if (skipped) _cursor = sequence;
@@ -255,6 +268,8 @@ class TableController extends _$TableController {
     }
     final conflicts = {...base.conflicts};
     for (final w in _queue.pending) {
+      // Uçuştaki batch'teki hücre: karar makbuzla verilir (kendi yazımımız olabilir).
+      if (_batch?.has(w.key) ?? false) continue;
       final server = cells[w.key] ?? TableCellData.empty;
       if (server.version != w.version) conflicts.add(w.key);
     }
@@ -266,6 +281,7 @@ class TableController extends _$TableController {
       undoSequence: () => base.undoSequence,
       commentsRevision: base.commentsRevision + (skipped ? 1 : 0),
       accessLost: base.accessLost,
+      uncertainCommands: base.uncertainCommands,
     );
     _publish();
   }
@@ -312,7 +328,6 @@ class TableController extends _$TableController {
       if (generation != _generation || !ref.mounted) return false;
       if (e.code == 'tables.replay_expired') {
         await _reload();
-        _needsReload = false;
         _bumpComments();
         return true;
       }
@@ -322,9 +337,10 @@ class TableController extends _$TableController {
       }
       rethrow;
     }
-    if (reload) {
-      await _reload();
-      _needsReload = false;
+    if (reload) await _reload();
+    if (_needsReload) {
+      // Okuma eski bir snapshot döndü (doğrulanmış komutun gerisinde): imleç ilerlemez.
+      return false;
     }
     if (generation != _generation || !ref.mounted) return false;
     if (comments) _bumpComments();
@@ -339,6 +355,5 @@ class TableController extends _$TableController {
   Future<void> refresh() async {
     await flush();
     await _reload();
-    _needsReload = false;
   }
 }

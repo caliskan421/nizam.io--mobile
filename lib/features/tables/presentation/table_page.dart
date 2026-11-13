@@ -142,6 +142,14 @@ class _TablePageState extends ConsumerState<TablePage> {
                   onAction: _controller.retryWrites,
                 ),
               ],
+              if (d.uncertainCommands > 0) ...[
+                const Gap(NizamioSpacing.space2),
+                NzBanner.warning(
+                  message: l.uiTablesCommandUnknown,
+                  actionLabel: l.uiTablesRetry,
+                  onAction: () => tableRun(context, _controller.retryCommands),
+                ),
+              ],
               if (d.conflicts.isNotEmpty) ...[
                 const Gap(NizamioSpacing.space2),
                 NzBanner.warning(

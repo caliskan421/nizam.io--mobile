@@ -35,6 +35,7 @@ final class TableView {
     this.undoSequence,
     this.commentsRevision = 0,
     this.accessLost = false,
+    this.uncertainCommands = 0,
   }) : columns = List.unmodifiable(columns),
        rows = List.unmodifiable(rows),
        cells = Map.unmodifiable(cells),
@@ -86,6 +87,9 @@ final class TableView {
   /// açık yorum listeleri buna göre yeniden okunur (snapshot yorum taşımaz, K-26).
   final int commentsRevision;
 
+  /// Sonucu bilinmeyen (yeniden denenebilir) komut sayısı.
+  final int uncertainCommands;
+
   /// Canlı senkronda tabloya erişim kaybı (changes 403/404): görünüm salt okunur kalır.
   final bool accessLost;
 
@@ -126,6 +130,7 @@ final class TableView {
     int? Function()? undoSequence,
     int? commentsRevision,
     bool? accessLost,
+    int? uncertainCommands,
   }) => TableView(
     meta: meta ?? this.meta,
     columns: columns ?? this.columns,
@@ -143,6 +148,7 @@ final class TableView {
     undoSequence: undoSequence == null ? this.undoSequence : undoSequence(),
     commentsRevision: commentsRevision ?? this.commentsRevision,
     accessLost: accessLost ?? this.accessLost,
+    uncertainCommands: uncertainCommands ?? this.uncertainCommands,
   );
 
   /// Yeni sayfa(lar)la birleştirir: satırlar eklenir, hücre/referans/ek haritaları birleşir.
@@ -162,5 +168,6 @@ final class TableView {
     undoSequence: undoSequence,
     commentsRevision: commentsRevision,
     accessLost: accessLost,
+    uncertainCommands: uncertainCommands,
   );
 }

@@ -1,29 +1,45 @@
 part of 'table_controller.dart';
 
-/// Tablo komutları. İşlem anahtarı KULLANICI İŞLEMİ başınadır: defter yuvası komutun gövde
-/// imzasıdır (`op:<imza>`), bu yüzden sonucu bilinmeyen bir komutun anahtarı araya giren
-/// başka komutla kaybolmaz; aynı işlem yeniden denenince aynı anahtar gider (sunucu tekrarı
-/// `replayed` makbuzla döner, kayıt tek kalır). Makbuz alındıktan sonraki yan okuma (yeniden
-/// okuma) düşerse komut başarılı sayılır; yan okuma hatası raporlanır ve sonraki yakalama
-/// tabloyu yeniden okur ([TableController._needsReload]).
+/// Sonucu bilinmeyen komut: işlem nesnesi ve anahtarı DEĞİŞMEZ; yalnız kendi yeniden
+/// denemesi aynı anahtarı kullanır.
+final class _PendingCommand {
+  _PendingCommand(this.op, this.key);
+  final TableOperation op;
+  final String key;
+}
+
+/// Tablo komutları. Her yeni kullanıcı işlemi YENİ işlem anahtarı alır (aynı gövdeli iki
+/// ayrı işlem — ör. iki "satır ekle" — iki ayrı kayıttır). Sonucu bilinmeyen komut
+/// [TableView.uncertainCommands] olarak bekletilir; "yeniden dene" ([retryCommands]) aynı
+/// işlem nesnesini ve anahtarını yollar (sunucu yazdıysa `replayed` makbuz döner, kayıt tek
+/// kalır). Belirsiz komut beklerken yeni işlem engellenmez; kendi anahtarıyla gider. Makbuz
+/// alındıktan sonraki yan okuma düşerse komut başarılı sayılır; sonraki yakalama tabloyu
+/// yeniden okur ([TableController._needsReload]).
 extension TableCommands on TableController {
   int get _schema => _base!.meta.schemaVersion;
 
   /// Komutu gönderir (önce bekleyen hücreler). Yazım hatası fırlar; 403 tabloyu salt okunur
   /// yapar, 409 `tables.schema_conflict` tabloyu yeniden okutur.
-  Future<TableReceipt> _command(TableOperation op, {bool reload = true}) async {
+  Future<TableReceipt> _command(
+    TableOperation op, {
+    bool reload = true,
+    _PendingCommand? retry,
+  }) async {
     await flush();
-    final action = 'op:${op.signature}';
-    final (keys, key) = _keys.keyFor(action, op.signature);
-    _keys = keys;
+    final pending = retry ?? _PendingCommand(op, newRequestKey());
     final generation = _generation;
     final TableReceipt r;
     try {
-      r = await _repo.apply(_scope, _id, op, requestKey: key);
+      r = await _repo.apply(_scope, _id, pending.op, requestKey: pending.key);
     } on ApiError catch (e, st) {
       reportUnexpected(e, st, source: ReportSource.tables);
-      if (!isOutcomeUnknown(e)) _keys = _keys.clear(action);
       if (generation == _generation && _mounted) {
+        if (isOutcomeUnknown(e)) {
+          if (!_uncertain.contains(pending)) _uncertain.add(pending);
+        } else {
+          _uncertain.remove(pending);
+        }
+        _update((b) => b.copyWith(uncertainCommands: _uncertain.length));
         if (e.code == 'tables.forbidden') {
           _update((b) => b.copyWith(readOnly: true));
         } else if (e.code == 'tables.schema_conflict') {
@@ -32,11 +48,13 @@ extension TableCommands on TableController {
       }
       rethrow;
     }
-    _keys = _keys.clear(action);
+    _uncertain.remove(pending);
     ownSequences.add(r.sequence);
     if (generation == _generation && _mounted) {
+      if (r.sequence > _confirmedSequence) _confirmedSequence = r.sequence;
       _update(
         (b) => b.copyWith(
+          uncertainCommands: _uncertain.length,
           meta: b.meta.copyWith(
             sequence: r.sequence > b.meta.sequence ? r.sequence : null,
             schemaVersion: r.schemaVersion,
@@ -46,6 +64,14 @@ extension TableCommands on TableController {
       if (reload) await _sideRead();
     }
     return r;
+  }
+
+  /// Sonucu bilinmeyen komutları AYNI işlem nesnesi ve anahtarla yeniden yollar. İlk hata
+  /// fırlar (kalanlar bekler).
+  Future<void> retryCommands() async {
+    for (final p in [..._uncertain]) {
+      await _command(p.op, retry: p);
+    }
   }
 
   /// Makbuz sonrası yeniden okuma: düşerse yazım hatası gibi sunulmaz; kalıcı bayrak kalır.

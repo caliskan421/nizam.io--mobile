@@ -4012,6 +4012,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTablesAccessLost => 'Bu tabloya erişiminiz kalmadı.';
 
   @override
+  String get uiTablesCommandUnknown =>
+      'Bir işlemin sonucu bilinmiyor. Yeniden denerseniz aynı işlem tekrarlanmaz.';
+
+  @override
   String get uiTasksNoStatusTransitions =>
       'Bu görev için kullanabileceğiniz bir durum değişikliği yok.';
 

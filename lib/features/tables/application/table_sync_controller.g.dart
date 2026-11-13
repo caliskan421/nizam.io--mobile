@@ -95,7 +95,7 @@ final class TableSyncControllerProvider
 }
 
 String _$tableSyncControllerHash() =>
-    r'aeb10b1c83f1d6653086c0c411d3f0605ed57c05';
+    r'30b68ef5945dae0b13fe33c14968c03783803e02';
 
 /// Tablo akışının (SSE `streamTableChanges`) TEK bağlantı döngüsü ve presence. Ekran
 /// görünürken ve uygulama ön plandayken açıktır.

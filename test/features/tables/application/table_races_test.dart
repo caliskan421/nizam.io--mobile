@@ -119,23 +119,22 @@ void main() {
     expect(_v(c).rows.map((r) => r.id), contains(row));
   });
 
-  test(
-    '4b: belirsiz komut başka komut araya girse de aynı anahtarla tek kayıt',
-    () async {
-      final (_, n, repo) = await _open();
-      repo.loseNextResponses = 1;
-      await expectLater(n.addRow(), throwsA(isA<ApiError>()));
-      await n.rename('Yeni ad');
-      await n.addRow();
-      final adds = [
-        for (final (k, op) in repo.applied)
-          if (op is AddRow) k,
-      ];
-      expect(adds, hasLength(2));
-      expect(adds.first, adds.last);
-      expect(repo.tables['t1']!.rows, hasLength(4));
-    },
-  );
+  test('4b: belirsiz komut araya başka komut girse de yeniden dene aynı anahtar, tek kayıt', () async {
+    final (c, n, repo) = await _open();
+    repo.loseNextResponses = 1;
+    await expectLater(n.addRow(), throwsA(isA<ApiError>()));
+    expect(_v(c).uncertainCommands, 1);
+    await n.rename('Yeni ad');
+    await n.retryCommands();
+    final adds = [
+      for (final (k, op) in repo.applied)
+        if (op is AddRow) k,
+    ];
+    expect(adds, hasLength(2));
+    expect(adds.first, adds.last);
+    expect(repo.tables['t1']!.rows, hasLength(4));
+    expect(_v(c).uncertainCommands, 0);
+  });
 
   test('5: çakışma okuması düşerse batch ve diğer yazımlar korunur, hata yakalanır', () async {
     final (c, n, repo) = await _open();
@@ -221,8 +220,6 @@ void main() {
         final calls = repo.changesCalls.length;
         c.read(tablesForegroundProvider.notifier).set(false);
         hold.complete();
-        await pumpEventQueue();
-        await Future<void>.delayed(const Duration(milliseconds: 30));
         await pumpEventQueue();
         expect(repo.changesCalls.length, calls);
       },

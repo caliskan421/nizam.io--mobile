@@ -121,16 +121,24 @@ extension TableCellWrites on TableController {
     ownSequences.add(r.sequence);
     _update((b) {
       final cells = Map.of(b.cells);
+      final conflicts = {...b.conflicts};
       for (final w in batch.cells) {
         final version = r.cellVersions[w.key] ?? w.version + 1;
         final current = cells[w.key]?.version ?? 0;
         if (version > current) {
           cells[w.key] = TableCellData(value: w.value, version: version);
+        }
+        if (version >= current) {
+          // Kendi başarımız (snapshot onu aynı sürümle önce görmüş olabilir): arkadaki
+          // düzenlemenin tabanı ilerler, yanlış çakışma işareti kalkar. Daha yüksek yabancı
+          // sürüm korunur (taban taşınmaz → gönderimde çakışma).
           _queue.rebase(w.key, version);
+          conflicts.remove(w.key);
         }
       }
       return b.copyWith(
         cells: cells,
+        conflicts: conflicts,
         meta: b.meta.copyWith(
           sequence: r.sequence > b.meta.sequence ? r.sequence : null,
         ),

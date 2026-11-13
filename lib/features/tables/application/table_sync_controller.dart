@@ -79,8 +79,11 @@ class TableSyncController extends _$TableSyncController {
   DateTime? _holdUntil;
 
   Timer? _coalesceTimer;
-  bool _syncing = false;
-  bool _again = false;
+
+  /// Uçuştaki yakalamanın nesli; bekleyen yakalama talebinin nesli. İkisi de nesle bağlıdır:
+  /// eski neslin uçuşu yeni neslin (`ready`) talebini tüketmez.
+  int? _syncingGen;
+  int? _againGen;
 
   Timer? _presenceTimer;
   Timer? _presenceLater;
@@ -248,22 +251,22 @@ class TableSyncController extends _$TableSyncController {
   /// bekleyen işaretlenir.
   void _hint(int sequence, {bool force = false}) {
     if (!force && sequence <= _table.cursor) return;
-    if (_syncing) {
-      _again = true;
+    final gen = _gen;
+    if (_syncingGen == gen) {
+      _againGen = gen;
       return;
     }
-    final gen = _gen;
     _coalesceTimer ??= Timer(_timing.coalesce, () {
       _coalesceTimer = null;
       if (gen == _gen) unawaited(_sync(gen));
     });
   }
 
-  /// Tek uçuşlu yakalama. Bu arada akış durdurulduysa (nesil değişti) bekleyen yakalama
-  /// kurulmaz.
+  /// Nesil başına tek uçuşlu yakalama. Bu arada akış durdurulduysa (nesil değişti) bekleyen
+  /// yakalama kurulmaz; yeni neslin talebi kendi yakalamasını kurar.
   Future<void> _sync(int gen) async {
     if (!ref.mounted) return;
-    _syncing = true;
+    _syncingGen = gen;
     try {
       await _table.catchUp();
     } on Object catch (e, st) {
@@ -271,11 +274,12 @@ class TableSyncController extends _$TableSyncController {
       // aynı olayları yeniden işler.
       reportUnexpected(e, st, source: ReportSource.tables);
     } finally {
-      _syncing = false;
+      if (_syncingGen == gen) _syncingGen = null;
     }
-    final again = _again;
-    _again = false;
-    if (again && gen == _gen && ref.mounted) _hint(0, force: true);
+    if (_againGen == gen && gen == _gen && ref.mounted) {
+      _againGen = null;
+      _hint(0, force: true);
+    }
   }
 
   // ---------------------------------------------------------------- presence

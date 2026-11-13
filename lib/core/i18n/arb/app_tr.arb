@@ -5029,6 +5029,10 @@
   "@uiTablesAccessLost": {
     "description": "ui.tables.access_lost"
   },
+  "uiTablesCommandUnknown": "Bir işlemin sonucu bilinmiyor. Yeniden denerseniz aynı işlem tekrarlanmaz.",
+  "@uiTablesCommandUnknown": {
+    "description": "ui.tables.command_unknown"
+  },
   "uiTasksNoStatusTransitions": "Bu görev için kullanabileceğiniz bir durum değişikliği yok.",
   "@uiTasksNoStatusTransitions": {
     "description": "ui.tasks.no_status_transitions"

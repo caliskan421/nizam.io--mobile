@@ -7636,6 +7636,12 @@ abstract class AppLocalizations {
   /// **'Bu tabloya erişiminiz kalmadı.'**
   String get uiTablesAccessLost;
 
+  /// ui.tables.command_unknown
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir işlemin sonucu bilinmiyor. Yeniden denerseniz aynı işlem tekrarlanmaz.'**
+  String get uiTablesCommandUnknown;
+
   /// ui.tasks.no_status_transitions
   ///
   /// In tr, this message translates to:

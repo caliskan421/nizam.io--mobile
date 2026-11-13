@@ -209,7 +209,16 @@ class CoordinatorshipCard extends StatelessWidget {
             ],
           ),
           const Gap(NizamioSpacing.gapMd),
-          NzProgressBar(value: s.ratio, color: c.taskDone),
+          // Ana sayfa koordinatörlük kartıyla aynı çok renkli durum çubuğu.
+          NzProgressBar.segments(
+            separated: true,
+            segments: [
+              NzBarSegment(s.done, c.taskDone),
+              NzBarSegment(s.inProgress, c.inProgress),
+              NzBarSegment(s.inReview, c.warning),
+              NzBarSegment(s.todo, c.textFaint),
+            ],
+          ),
         ],
       ),
     );

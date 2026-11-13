@@ -1,6 +1,7 @@
 part of 'table_page.dart';
 
 extension _TablePageActions on _TablePageState {
+  /// Izgara satırı; ilk hücre (#) yatay kaydırmada solda sabit kalır.
   Widget _gridLine(
     BuildContext context, {
     required List<Widget> children,
@@ -60,39 +61,23 @@ extension _TablePageActions on _TablePageState {
     );
   }
 
-  IconData _fieldIcon(TableFieldType type) => switch (type) {
-    TableFieldType.text => Icons.short_text,
-    TableFieldType.number => Icons.tag,
-    TableFieldType.date => Icons.calendar_today_outlined,
-    TableFieldType.phone => Icons.phone_outlined,
-    TableFieldType.email => Icons.mail_outline,
-    TableFieldType.person => Icons.person_outline,
-    TableFieldType.unit => Icons.account_tree_outlined,
-    TableFieldType.task => Icons.checklist,
-    TableFieldType.link => Icons.link,
-    TableFieldType.file => Icons.attach_file,
-    TableFieldType.todo => Icons.check_box_outlined,
+  IconData _kindIcon(TableColumnKind kind) => switch (kind) {
+    TableColumnKind.text => Icons.short_text,
+    TableColumnKind.number => Icons.tag,
+    TableColumnKind.date => Icons.calendar_today_outlined,
+    TableColumnKind.phone => Icons.phone_outlined,
+    TableColumnKind.email => Icons.mail_outline,
+    TableColumnKind.checkbox => Icons.check_box_outlined,
+    TableColumnKind.personReference => Icons.person_outline,
+    TableColumnKind.departmentReference => Icons.account_tree_outlined,
+    TableColumnKind.taskReference => Icons.checklist,
+    TableColumnKind.fileReference => Icons.description_outlined,
+    TableColumnKind.tableReference => Icons.link,
+    TableColumnKind.attachment => Icons.attach_file,
+    TableColumnKind.unknown => Icons.help_outline,
   };
 
-  String _summary(TableDocument d, TableField f) {
-    final values = d.rows
-        .map((r) => r.cells[TableFieldId(f.id)])
-        .where((v) => v != null && v != '' && (v is! List || v.isNotEmpty))
-        .toList();
-    if (f.type == TableFieldType.number) {
-      return '${values.fold<num>(0, (sum, v) => sum + (num.tryParse('$v') ?? 0))}';
-    }
-    if (f.type == TableFieldType.todo) {
-      return '${values.where((v) => v == true).length} / ${d.rows.length}';
-    }
-    if (f.type == TableFieldType.person) return '${values.toSet().length} kişi';
-    if (f.type == TableFieldType.file) {
-      return '${values.fold<int>(0, (sum, value) => sum + (value is List ? value.length : 1))} dosya';
-    }
-    return '${values.length}';
-  }
-
-  Future<void> _options(TableDocument d) async {
+  Future<void> _options(TableView d) async {
     final l = context.l10n;
     await showTableSheet(
       ref,
@@ -104,50 +89,46 @@ extension _TablePageActions on _TablePageState {
             icon: NzIcons.copy,
             label: l.uiTablesCopyLink,
             onTap: () async {
-              await Clipboard.setData(ClipboardData(text: '/tables/${d.id}'));
+              await Clipboard.setData(
+                ClipboardData(text: '/tables/${d.meta.id}'),
+              );
               if (sheet.mounted) Navigator.of(sheet).pop();
               if (mounted) NzToast.show(context, l.uiTablesLinkCopied);
             },
           ),
-
           if (d.editable)
             NzMenuRow(
               icon: NzIcons.edit,
               label: l.uiTablesRename,
               onTap: () {
                 Navigator.of(sheet).pop();
-                tableRename(context, ref, d.id);
+                tableRename(context, ref, widget.id);
               },
             ),
-          NzMenuRow(
-            icon: NzIcons.folderMove,
-            label: l.uiTablesCopyTo,
-            onTap: () {
-              Navigator.of(sheet).pop();
-              showCopyTable(context, ref, d.id, widget.onOpenTable);
-            },
-          ),
-          for (final empty in [false, true])
+          if (d.editable && d.undoSequence != null)
             NzMenuRow(
-              icon: NzIcons.copy,
-              label: empty ? l.uiTablesDuplicateEmpty : l.uiTablesDuplicate,
-              onTap: () {
-                final id = _controller.duplicate(
-                  d.id,
-                  empty: empty,
-                  suffix: empty ? l.uiTablesEmptySuffix : l.uiTablesCopySuffix,
-                );
+              icon: Icons.undo,
+              label: l.uiTablesUndo,
+              onTap: () async {
                 Navigator.of(sheet).pop();
-                if (id != null) widget.onOpenTable?.call(id);
+                var skipped = 0;
+                final ok = await tableRun(context, () async {
+                  skipped = await _controller.undoLast();
+                });
+                if (ok && mounted) {
+                  NzToast.show(
+                    context,
+                    skipped > 0 ? l.uiTablesUndoSkipped : l.uiTablesUndoDone,
+                  );
+                }
               },
             ),
-          if (d.canShare)
+          if (d.isOwner)
             NzMenuRow(
               icon: NzIcons.delete,
               label: l.uiTablesDelete,
               danger: true,
               onTap: () async {
-                final lease = _controller.lease;
                 Navigator.of(sheet).pop();
                 final yes = await NzDialog.confirm(
                   context,
@@ -157,9 +138,9 @@ extension _TablePageActions on _TablePageState {
                   cancelLabel: l.uiTablesCancel,
                   tone: NzDialogTone.destructive,
                 );
-                if (yes && mounted && identical(lease, _controller.lease)) {
-                  _controller.delete(d.id);
-                }
+                if (!yes || !mounted) return;
+                final ok = await tableRun(context, _controller.deleteTable);
+                if (ok && mounted) Navigator.of(context).maybePop();
               },
             ),
         ],

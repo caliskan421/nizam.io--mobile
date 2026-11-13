@@ -30,6 +30,7 @@ enum ReportSource {
   timeline('timeline'),
   activity('activity'),
   calendar('calendar'),
+  tables('tables'),
 
   /// Riverpod gözlemcisi: sağlayıcı build/future/stream hatası; hangi sağlayıcı olduğu
   /// BİLİNMEZ ve rapora girmez.

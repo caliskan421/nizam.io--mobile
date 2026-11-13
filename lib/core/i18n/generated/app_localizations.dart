@@ -7198,24 +7198,6 @@ abstract class AppLocalizations {
   /// **'Paylaşılan'**
   String get uiTablesShared;
 
-  /// ui.tables.all
-  ///
-  /// In tr, this message translates to:
-  /// **'Tümü'**
-  String get uiTablesAll;
-
-  /// ui.tables.open
-  ///
-  /// In tr, this message translates to:
-  /// **'Açık'**
-  String get uiTablesOpen;
-
-  /// ui.tables.done
-  ///
-  /// In tr, this message translates to:
-  /// **'Tamamlanan'**
-  String get uiTablesDone;
-
   /// ui.tables.empty
   ///
   /// In tr, this message translates to:
@@ -7233,54 +7215,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Tablo adı'**
   String get uiTablesName;
-
-  /// ui.tables.template
-  ///
-  /// In tr, this message translates to:
-  /// **'Şablon'**
-  String get uiTablesTemplate;
-
-  /// ui.tables.blank
-  ///
-  /// In tr, this message translates to:
-  /// **'Boş tablo'**
-  String get uiTablesBlank;
-
-  /// ui.tables.task_list
-  ///
-  /// In tr, this message translates to:
-  /// **'Görev listesi'**
-  String get uiTablesTaskList;
-
-  /// ui.tables.event_plan
-  ///
-  /// In tr, this message translates to:
-  /// **'Etkinlik planı'**
-  String get uiTablesEventPlan;
-
-  /// ui.tables.action_list
-  ///
-  /// In tr, this message translates to:
-  /// **'Aksiyon listesi'**
-  String get uiTablesActionList;
-
-  /// ui.tables.supplier_list
-  ///
-  /// In tr, this message translates to:
-  /// **'Tedarikçi listesi'**
-  String get uiTablesSupplierList;
-
-  /// ui.tables.volunteer_list
-  ///
-  /// In tr, this message translates to:
-  /// **'Gönüllü listesi'**
-  String get uiTablesVolunteerList;
-
-  /// ui.tables.inventory
-  ///
-  /// In tr, this message translates to:
-  /// **'Envanter'**
-  String get uiTablesInventory;
 
   /// ui.tables.create
   ///
@@ -7324,18 +7258,6 @@ abstract class AppLocalizations {
   /// **'Sütun ekle'**
   String get uiTablesNewColumn;
 
-  /// ui.tables.fields
-  ///
-  /// In tr, this message translates to:
-  /// **'Alanlar'**
-  String get uiTablesFields;
-
-  /// ui.tables.share
-  ///
-  /// In tr, this message translates to:
-  /// **'Paylaş'**
-  String get uiTablesShare;
-
   /// ui.tables.options
   ///
   /// In tr, this message translates to:
@@ -7347,18 +7269,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Yeniden adlandır'**
   String get uiTablesRename;
-
-  /// ui.tables.duplicate
-  ///
-  /// In tr, this message translates to:
-  /// **'Kopya oluştur'**
-  String get uiTablesDuplicate;
-
-  /// ui.tables.duplicate_empty
-  ///
-  /// In tr, this message translates to:
-  /// **'Boş kopya oluştur'**
-  String get uiTablesDuplicateEmpty;
 
   /// ui.tables.delete
   ///
@@ -7387,20 +7297,26 @@ abstract class AppLocalizations {
   /// ui.tables.delete_message
   ///
   /// In tr, this message translates to:
-  /// **'Bu işlem örnek veriyi bu oturumdan kaldırır.'**
+  /// **'Tablo, erişimi olan herkes için silinir.'**
   String get uiTablesDeleteMessage;
+
+  /// ui.tables.delete_row_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Satırdaki hücreler ve yorumlar da silinir.'**
+  String get uiTablesDeleteRowMessage;
+
+  /// ui.tables.delete_column_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Sütundaki bütün hücreler silinir.'**
+  String get uiTablesDeleteColumnMessage;
 
   /// ui.tables.readonly
   ///
   /// In tr, this message translates to:
   /// **'Yalnızca görüntüleme'**
   String get uiTablesReadonly;
-
-  /// ui.tables.editable
-  ///
-  /// In tr, this message translates to:
-  /// **'Düzenleme erişimi'**
-  String get uiTablesEditable;
 
   /// ui.tables.text
   ///
@@ -7432,17 +7348,23 @@ abstract class AppLocalizations {
   /// **'E-posta'**
   String get uiTablesEmail;
 
+  /// ui.tables.checkbox
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay kutusu'**
+  String get uiTablesCheckbox;
+
   /// ui.tables.person
   ///
   /// In tr, this message translates to:
   /// **'Kişi'**
   String get uiTablesPerson;
 
-  /// ui.tables.unit
+  /// ui.tables.department
   ///
   /// In tr, this message translates to:
-  /// **'Koordinatörlük'**
-  String get uiTablesUnit;
+  /// **'Departman'**
+  String get uiTablesDepartment;
 
   /// ui.tables.task
   ///
@@ -7462,11 +7384,11 @@ abstract class AppLocalizations {
   /// **'Dosya'**
   String get uiTablesFile;
 
-  /// ui.tables.todo
+  /// ui.tables.attachment_kind
   ///
   /// In tr, this message translates to:
-  /// **'Yapıldı'**
-  String get uiTablesTodo;
+  /// **'Ek'**
+  String get uiTablesAttachmentKind;
 
   /// ui.tables.edit_row
   ///
@@ -7492,95 +7414,17 @@ abstract class AppLocalizations {
   /// **'Sağa taşı'**
   String get uiTablesMoveRight;
 
-  /// ui.tables.sort_asc
-  ///
-  /// In tr, this message translates to:
-  /// **'Artan sırala'**
-  String get uiTablesSortAsc;
-
-  /// ui.tables.sort_desc
-  ///
-  /// In tr, this message translates to:
-  /// **'Azalan sırala'**
-  String get uiTablesSortDesc;
-
-  /// ui.tables.sort_none
-  ///
-  /// In tr, this message translates to:
-  /// **'Sıralamayı kaldır'**
-  String get uiTablesSortNone;
-
-  /// ui.tables.program_access
-  ///
-  /// In tr, this message translates to:
-  /// **'Program erişimi'**
-  String get uiTablesProgramAccess;
-
-  /// ui.tables.off
-  ///
-  /// In tr, this message translates to:
-  /// **'Kapalı'**
-  String get uiTablesOff;
-
-  /// ui.tables.view
-  ///
-  /// In tr, this message translates to:
-  /// **'Görür'**
-  String get uiTablesView;
-
-  /// ui.tables.edit
-  ///
-  /// In tr, this message translates to:
-  /// **'Düzenler'**
-  String get uiTablesEdit;
-
   /// ui.tables.owner
   ///
   /// In tr, this message translates to:
   /// **'Sahip'**
   String get uiTablesOwner;
 
-  /// ui.tables.add_person
+  /// ui.tables.mine
   ///
   /// In tr, this message translates to:
-  /// **'Demo kişi ekle'**
-  String get uiTablesAddPerson;
-
-  /// ui.tables.remove_person
-  ///
-  /// In tr, this message translates to:
-  /// **'Erişimi kaldır'**
-  String get uiTablesRemovePerson;
-
-  /// ui.tables.demo_person
-  ///
-  /// In tr, this message translates to:
-  /// **'Demo üye'**
-  String get uiTablesDemoPerson;
-
-  /// ui.tables.demo_notice
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu çalışma alanı yalnızca oturumluk örnek veridir.'**
-  String get uiTablesDemoNotice;
-
-  /// ui.tables.attachment
-  ///
-  /// In tr, this message translates to:
-  /// **'Örnek ek ekle'**
-  String get uiTablesAttachment;
-
-  /// ui.tables.linked_table
-  ///
-  /// In tr, this message translates to:
-  /// **'Bağlı tablo'**
-  String get uiTablesLinkedTable;
-
-  /// ui.tables.summary
-  ///
-  /// In tr, this message translates to:
-  /// **'Özet'**
-  String get uiTablesSummary;
+  /// **'Sizin tablonuz'**
+  String get uiTablesMine;
 
   /// ui.tables.clear
   ///
@@ -7594,65 +7438,29 @@ abstract class AppLocalizations {
   /// **'Tablo bulunamadı'**
   String get uiTablesTableMissing;
 
-  /// ui.tables.grid
-  ///
-  /// In tr, this message translates to:
-  /// **'Tablo görünümü'**
-  String get uiTablesGrid;
-
-  /// ui.tables.copy_suffix
-  ///
-  /// In tr, this message translates to:
-  /// **'(kopya)'**
-  String get uiTablesCopySuffix;
-
-  /// ui.tables.empty_suffix
-  ///
-  /// In tr, this message translates to:
-  /// **'(boş)'**
-  String get uiTablesEmptySuffix;
-
-  /// ui.tables.task_sample
-  ///
-  /// In tr, this message translates to:
-  /// **'Örnek görev'**
-  String get uiTablesTaskSample;
-
-  /// ui.tables.unit_sample
-  ///
-  /// In tr, this message translates to:
-  /// **'Demo koordinatörlük'**
-  String get uiTablesUnitSample;
-
   /// ui.tables.field_name
   ///
   /// In tr, this message translates to:
-  /// **'Alan adı'**
+  /// **'Sütun adı'**
   String get uiTablesFieldName;
+
+  /// ui.tables.column_type
+  ///
+  /// In tr, this message translates to:
+  /// **'Sütun tipi'**
+  String get uiTablesColumnType;
+
+  /// ui.tables.width
+  ///
+  /// In tr, this message translates to:
+  /// **'Genişlik'**
+  String get uiTablesWidth;
 
   /// ui.tables.name_required
   ///
   /// In tr, this message translates to:
   /// **'Ad boş bırakılamaz'**
   String get uiTablesNameRequired;
-
-  /// ui.tables.new_record
-  ///
-  /// In tr, this message translates to:
-  /// **'Yeni kayıt'**
-  String get uiTablesNewRecord;
-
-  /// ui.tables.recent
-  ///
-  /// In tr, this message translates to:
-  /// **'Son kullanılanlar'**
-  String get uiTablesRecent;
-
-  /// ui.tables.back_areas
-  ///
-  /// In tr, this message translates to:
-  /// **'Koordinatörlüklere dön'**
-  String get uiTablesBackAreas;
 
   /// ui.tables.copy_link
   ///
@@ -7666,113 +7474,107 @@ abstract class AppLocalizations {
   /// **'Tablo bağlantısı kopyalandı'**
   String get uiTablesLinkCopied;
 
-  /// ui.tables.person_search
+  /// ui.tables.space
   ///
   /// In tr, this message translates to:
-  /// **'Demo kişilerde ara'**
-  String get uiTablesPersonSearch;
+  /// **'Konum'**
+  String get uiTablesSpace;
 
-  /// ui.tables.place
+  /// ui.tables.need_department
   ///
   /// In tr, this message translates to:
-  /// **'Yer'**
-  String get uiTablesPlace;
+  /// **'Koordinatörlük tablolarını görmek için bir koordinatörlük seçin.'**
+  String get uiTablesNeedDepartment;
 
-  /// ui.tables.approved
+  /// ui.tables.load_more
   ///
   /// In tr, this message translates to:
-  /// **'Onaylandı'**
-  String get uiTablesApproved;
+  /// **'Daha fazla yükle'**
+  String get uiTablesLoadMore;
 
-  /// ui.tables.company
+  /// ui.tables.load_more_rows
   ///
   /// In tr, this message translates to:
-  /// **'Firma'**
-  String get uiTablesCompany;
+  /// **'Daha fazla satır yükle'**
+  String get uiTablesLoadMoreRows;
 
-  /// ui.tables.full_name
+  /// ui.tables.conflict
   ///
   /// In tr, this message translates to:
-  /// **'Ad soyad'**
-  String get uiTablesFullName;
+  /// **'Bazı hücreler siz düzenlerken değişti; güncel değerler gösteriliyor.'**
+  String get uiTablesConflict;
 
-  /// ui.tables.material
+  /// ui.tables.dismiss
   ///
   /// In tr, this message translates to:
-  /// **'Malzeme'**
-  String get uiTablesMaterial;
+  /// **'Tamam'**
+  String get uiTablesDismiss;
 
-  /// ui.tables.offer
+  /// ui.tables.saving
   ///
   /// In tr, this message translates to:
-  /// **'Teklif'**
-  String get uiTablesOffer;
+  /// **'Kaydediliyor…'**
+  String get uiTablesSaving;
 
-  /// ui.tables.action
+  /// ui.tables.saved
   ///
   /// In tr, this message translates to:
-  /// **'Aksiyon'**
-  String get uiTablesAction;
+  /// **'Kaydedildi'**
+  String get uiTablesSaved;
 
-  /// ui.tables.activity
+  /// ui.tables.save_failed
   ///
   /// In tr, this message translates to:
-  /// **'Etkinlik'**
-  String get uiTablesActivity;
+  /// **'Değişiklikler kaydedilemedi.'**
+  String get uiTablesSaveFailed;
 
-  /// ui.tables.due_date
+  /// ui.tables.retry
   ///
   /// In tr, this message translates to:
-  /// **'Son tarih'**
-  String get uiTablesDueDate;
+  /// **'Yeniden dene'**
+  String get uiTablesRetry;
 
-  /// ui.tables.copy_to
+  /// ui.tables.undo
   ///
   /// In tr, this message translates to:
-  /// **'Başka alana kopyala'**
-  String get uiTablesCopyTo;
+  /// **'Son hücre değişikliğini geri al'**
+  String get uiTablesUndo;
 
-  /// ui.tables.destination
+  /// ui.tables.undo_done
   ///
   /// In tr, this message translates to:
-  /// **'Kopyanın konumu'**
-  String get uiTablesDestination;
+  /// **'Değişiklik geri alındı'**
+  String get uiTablesUndoDone;
 
-  /// ui.tables.related
+  /// ui.tables.undo_skipped
   ///
   /// In tr, this message translates to:
-  /// **'Bağlı tablolar'**
-  String get uiTablesRelated;
+  /// **'Bazı hücreler bu arada değiştiği için geri alınamadı.'**
+  String get uiTablesUndoSkipped;
 
-  /// ui.tables.backlinks
+  /// ui.tables.not_editable
   ///
   /// In tr, this message translates to:
-  /// **'Bu tabloya bağlananlar'**
-  String get uiTablesBacklinks;
+  /// **'Bu sütun tipi mobilde henüz düzenlenemez.'**
+  String get uiTablesNotEditable;
 
-  /// ui.tables.links
+  /// ui.tables.redacted
   ///
   /// In tr, this message translates to:
-  /// **'bağlantı'**
-  String get uiTablesLinks;
+  /// **'Gizli'**
+  String get uiTablesRedacted;
 
-  /// ui.tables.recent_action
+  /// ui.tables.type_fixed
   ///
   /// In tr, this message translates to:
-  /// **'Son çalıştıkların'**
-  String get uiTablesRecentAction;
+  /// **'Sütun tipi oluşturulduktan sonra değiştirilemez.'**
+  String get uiTablesTypeFixed;
 
-  /// ui.tables.unit_a
+  /// ui.tables.empty_table
   ///
   /// In tr, this message translates to:
-  /// **'Atölye'**
-  String get uiTablesUnitA;
-
-  /// ui.tables.unit_b
-  ///
-  /// In tr, this message translates to:
-  /// **'Operasyon'**
-  String get uiTablesUnitB;
+  /// **'Bu tabloda henüz satır yok'**
+  String get uiTablesEmptyTable;
 
   /// ui.tasks.no_status_transitions
   ///

@@ -4737,18 +4737,6 @@
   "@uiTablesShared": {
     "description": "ui.tables.shared"
   },
-  "uiTablesAll": "Tümü",
-  "@uiTablesAll": {
-    "description": "ui.tables.all"
-  },
-  "uiTablesOpen": "Açık",
-  "@uiTablesOpen": {
-    "description": "ui.tables.open"
-  },
-  "uiTablesDone": "Tamamlanan",
-  "@uiTablesDone": {
-    "description": "ui.tables.done"
-  },
   "uiTablesEmpty": "Henüz tablo yok",
   "@uiTablesEmpty": {
     "description": "ui.tables.empty"
@@ -4760,38 +4748,6 @@
   "uiTablesName": "Tablo adı",
   "@uiTablesName": {
     "description": "ui.tables.name"
-  },
-  "uiTablesTemplate": "Şablon",
-  "@uiTablesTemplate": {
-    "description": "ui.tables.template"
-  },
-  "uiTablesBlank": "Boş tablo",
-  "@uiTablesBlank": {
-    "description": "ui.tables.blank"
-  },
-  "uiTablesTaskList": "Görev listesi",
-  "@uiTablesTaskList": {
-    "description": "ui.tables.task_list"
-  },
-  "uiTablesEventPlan": "Etkinlik planı",
-  "@uiTablesEventPlan": {
-    "description": "ui.tables.event_plan"
-  },
-  "uiTablesActionList": "Aksiyon listesi",
-  "@uiTablesActionList": {
-    "description": "ui.tables.action_list"
-  },
-  "uiTablesSupplierList": "Tedarikçi listesi",
-  "@uiTablesSupplierList": {
-    "description": "ui.tables.supplier_list"
-  },
-  "uiTablesVolunteerList": "Gönüllü listesi",
-  "@uiTablesVolunteerList": {
-    "description": "ui.tables.volunteer_list"
-  },
-  "uiTablesInventory": "Envanter",
-  "@uiTablesInventory": {
-    "description": "ui.tables.inventory"
   },
   "uiTablesCreate": "Oluştur",
   "@uiTablesCreate": {
@@ -4821,14 +4777,6 @@
   "@uiTablesNewColumn": {
     "description": "ui.tables.new_column"
   },
-  "uiTablesFields": "Alanlar",
-  "@uiTablesFields": {
-    "description": "ui.tables.fields"
-  },
-  "uiTablesShare": "Paylaş",
-  "@uiTablesShare": {
-    "description": "ui.tables.share"
-  },
   "uiTablesOptions": "Tablo işlemleri",
   "@uiTablesOptions": {
     "description": "ui.tables.options"
@@ -4836,14 +4784,6 @@
   "uiTablesRename": "Yeniden adlandır",
   "@uiTablesRename": {
     "description": "ui.tables.rename"
-  },
-  "uiTablesDuplicate": "Kopya oluştur",
-  "@uiTablesDuplicate": {
-    "description": "ui.tables.duplicate"
-  },
-  "uiTablesDuplicateEmpty": "Boş kopya oluştur",
-  "@uiTablesDuplicateEmpty": {
-    "description": "ui.tables.duplicate_empty"
   },
   "uiTablesDelete": "Sil",
   "@uiTablesDelete": {
@@ -4861,17 +4801,21 @@
   "@uiTablesDeleteColumn": {
     "description": "ui.tables.delete_column"
   },
-  "uiTablesDeleteMessage": "Bu işlem örnek veriyi bu oturumdan kaldırır.",
+  "uiTablesDeleteMessage": "Tablo, erişimi olan herkes için silinir.",
   "@uiTablesDeleteMessage": {
     "description": "ui.tables.delete_message"
+  },
+  "uiTablesDeleteRowMessage": "Satırdaki hücreler ve yorumlar da silinir.",
+  "@uiTablesDeleteRowMessage": {
+    "description": "ui.tables.delete_row_message"
+  },
+  "uiTablesDeleteColumnMessage": "Sütundaki bütün hücreler silinir.",
+  "@uiTablesDeleteColumnMessage": {
+    "description": "ui.tables.delete_column_message"
   },
   "uiTablesReadonly": "Yalnızca görüntüleme",
   "@uiTablesReadonly": {
     "description": "ui.tables.readonly"
-  },
-  "uiTablesEditable": "Düzenleme erişimi",
-  "@uiTablesEditable": {
-    "description": "ui.tables.editable"
   },
   "uiTablesText": "Metin",
   "@uiTablesText": {
@@ -4893,13 +4837,17 @@
   "@uiTablesEmail": {
     "description": "ui.tables.email"
   },
+  "uiTablesCheckbox": "Onay kutusu",
+  "@uiTablesCheckbox": {
+    "description": "ui.tables.checkbox"
+  },
   "uiTablesPerson": "Kişi",
   "@uiTablesPerson": {
     "description": "ui.tables.person"
   },
-  "uiTablesUnit": "Koordinatörlük",
-  "@uiTablesUnit": {
-    "description": "ui.tables.unit"
+  "uiTablesDepartment": "Departman",
+  "@uiTablesDepartment": {
+    "description": "ui.tables.department"
   },
   "uiTablesTask": "Görev",
   "@uiTablesTask": {
@@ -4913,9 +4861,9 @@
   "@uiTablesFile": {
     "description": "ui.tables.file"
   },
-  "uiTablesTodo": "Yapıldı",
-  "@uiTablesTodo": {
-    "description": "ui.tables.todo"
+  "uiTablesAttachmentKind": "Ek",
+  "@uiTablesAttachmentKind": {
+    "description": "ui.tables.attachment_kind"
   },
   "uiTablesEditRow": "Satırı düzenle",
   "@uiTablesEditRow": {
@@ -4933,65 +4881,13 @@
   "@uiTablesMoveRight": {
     "description": "ui.tables.move_right"
   },
-  "uiTablesSortAsc": "Artan sırala",
-  "@uiTablesSortAsc": {
-    "description": "ui.tables.sort_asc"
-  },
-  "uiTablesSortDesc": "Azalan sırala",
-  "@uiTablesSortDesc": {
-    "description": "ui.tables.sort_desc"
-  },
-  "uiTablesSortNone": "Sıralamayı kaldır",
-  "@uiTablesSortNone": {
-    "description": "ui.tables.sort_none"
-  },
-  "uiTablesProgramAccess": "Program erişimi",
-  "@uiTablesProgramAccess": {
-    "description": "ui.tables.program_access"
-  },
-  "uiTablesOff": "Kapalı",
-  "@uiTablesOff": {
-    "description": "ui.tables.off"
-  },
-  "uiTablesView": "Görür",
-  "@uiTablesView": {
-    "description": "ui.tables.view"
-  },
-  "uiTablesEdit": "Düzenler",
-  "@uiTablesEdit": {
-    "description": "ui.tables.edit"
-  },
   "uiTablesOwner": "Sahip",
   "@uiTablesOwner": {
     "description": "ui.tables.owner"
   },
-  "uiTablesAddPerson": "Demo kişi ekle",
-  "@uiTablesAddPerson": {
-    "description": "ui.tables.add_person"
-  },
-  "uiTablesRemovePerson": "Erişimi kaldır",
-  "@uiTablesRemovePerson": {
-    "description": "ui.tables.remove_person"
-  },
-  "uiTablesDemoPerson": "Demo üye",
-  "@uiTablesDemoPerson": {
-    "description": "ui.tables.demo_person"
-  },
-  "uiTablesDemoNotice": "Bu çalışma alanı yalnızca oturumluk örnek veridir.",
-  "@uiTablesDemoNotice": {
-    "description": "ui.tables.demo_notice"
-  },
-  "uiTablesAttachment": "Örnek ek ekle",
-  "@uiTablesAttachment": {
-    "description": "ui.tables.attachment"
-  },
-  "uiTablesLinkedTable": "Bağlı tablo",
-  "@uiTablesLinkedTable": {
-    "description": "ui.tables.linked_table"
-  },
-  "uiTablesSummary": "Özet",
-  "@uiTablesSummary": {
-    "description": "ui.tables.summary"
+  "uiTablesMine": "Sizin tablonuz",
+  "@uiTablesMine": {
+    "description": "ui.tables.mine"
   },
   "uiTablesClear": "Temizle",
   "@uiTablesClear": {
@@ -5001,45 +4897,21 @@
   "@uiTablesTableMissing": {
     "description": "ui.tables.table_missing"
   },
-  "uiTablesGrid": "Tablo görünümü",
-  "@uiTablesGrid": {
-    "description": "ui.tables.grid"
-  },
-  "uiTablesCopySuffix": "(kopya)",
-  "@uiTablesCopySuffix": {
-    "description": "ui.tables.copy_suffix"
-  },
-  "uiTablesEmptySuffix": "(boş)",
-  "@uiTablesEmptySuffix": {
-    "description": "ui.tables.empty_suffix"
-  },
-  "uiTablesTaskSample": "Örnek görev",
-  "@uiTablesTaskSample": {
-    "description": "ui.tables.task_sample"
-  },
-  "uiTablesUnitSample": "Demo koordinatörlük",
-  "@uiTablesUnitSample": {
-    "description": "ui.tables.unit_sample"
-  },
-  "uiTablesFieldName": "Alan adı",
+  "uiTablesFieldName": "Sütun adı",
   "@uiTablesFieldName": {
     "description": "ui.tables.field_name"
+  },
+  "uiTablesColumnType": "Sütun tipi",
+  "@uiTablesColumnType": {
+    "description": "ui.tables.column_type"
+  },
+  "uiTablesWidth": "Genişlik",
+  "@uiTablesWidth": {
+    "description": "ui.tables.width"
   },
   "uiTablesNameRequired": "Ad boş bırakılamaz",
   "@uiTablesNameRequired": {
     "description": "ui.tables.name_required"
-  },
-  "uiTablesNewRecord": "Yeni kayıt",
-  "@uiTablesNewRecord": {
-    "description": "ui.tables.new_record"
-  },
-  "uiTablesRecent": "Son kullanılanlar",
-  "@uiTablesRecent": {
-    "description": "ui.tables.recent"
-  },
-  "uiTablesBackAreas": "Koordinatörlüklere dön",
-  "@uiTablesBackAreas": {
-    "description": "ui.tables.back_areas"
   },
   "uiTablesCopyLink": "Bağlantıyı kopyala",
   "@uiTablesCopyLink": {
@@ -5049,77 +4921,73 @@
   "@uiTablesLinkCopied": {
     "description": "ui.tables.link_copied"
   },
-  "uiTablesPersonSearch": "Demo kişilerde ara",
-  "@uiTablesPersonSearch": {
-    "description": "ui.tables.person_search"
+  "uiTablesSpace": "Konum",
+  "@uiTablesSpace": {
+    "description": "ui.tables.space"
   },
-  "uiTablesPlace": "Yer",
-  "@uiTablesPlace": {
-    "description": "ui.tables.place"
+  "uiTablesNeedDepartment": "Koordinatörlük tablolarını görmek için bir koordinatörlük seçin.",
+  "@uiTablesNeedDepartment": {
+    "description": "ui.tables.need_department"
   },
-  "uiTablesApproved": "Onaylandı",
-  "@uiTablesApproved": {
-    "description": "ui.tables.approved"
+  "uiTablesLoadMore": "Daha fazla yükle",
+  "@uiTablesLoadMore": {
+    "description": "ui.tables.load_more"
   },
-  "uiTablesCompany": "Firma",
-  "@uiTablesCompany": {
-    "description": "ui.tables.company"
+  "uiTablesLoadMoreRows": "Daha fazla satır yükle",
+  "@uiTablesLoadMoreRows": {
+    "description": "ui.tables.load_more_rows"
   },
-  "uiTablesFullName": "Ad soyad",
-  "@uiTablesFullName": {
-    "description": "ui.tables.full_name"
+  "uiTablesConflict": "Bazı hücreler siz düzenlerken değişti; güncel değerler gösteriliyor.",
+  "@uiTablesConflict": {
+    "description": "ui.tables.conflict"
   },
-  "uiTablesMaterial": "Malzeme",
-  "@uiTablesMaterial": {
-    "description": "ui.tables.material"
+  "uiTablesDismiss": "Tamam",
+  "@uiTablesDismiss": {
+    "description": "ui.tables.dismiss"
   },
-  "uiTablesOffer": "Teklif",
-  "@uiTablesOffer": {
-    "description": "ui.tables.offer"
+  "uiTablesSaving": "Kaydediliyor…",
+  "@uiTablesSaving": {
+    "description": "ui.tables.saving"
   },
-  "uiTablesAction": "Aksiyon",
-  "@uiTablesAction": {
-    "description": "ui.tables.action"
+  "uiTablesSaved": "Kaydedildi",
+  "@uiTablesSaved": {
+    "description": "ui.tables.saved"
   },
-  "uiTablesActivity": "Etkinlik",
-  "@uiTablesActivity": {
-    "description": "ui.tables.activity"
+  "uiTablesSaveFailed": "Değişiklikler kaydedilemedi.",
+  "@uiTablesSaveFailed": {
+    "description": "ui.tables.save_failed"
   },
-  "uiTablesDueDate": "Son tarih",
-  "@uiTablesDueDate": {
-    "description": "ui.tables.due_date"
+  "uiTablesRetry": "Yeniden dene",
+  "@uiTablesRetry": {
+    "description": "ui.tables.retry"
   },
-  "uiTablesCopyTo": "Başka alana kopyala",
-  "@uiTablesCopyTo": {
-    "description": "ui.tables.copy_to"
+  "uiTablesUndo": "Son hücre değişikliğini geri al",
+  "@uiTablesUndo": {
+    "description": "ui.tables.undo"
   },
-  "uiTablesDestination": "Kopyanın konumu",
-  "@uiTablesDestination": {
-    "description": "ui.tables.destination"
+  "uiTablesUndoDone": "Değişiklik geri alındı",
+  "@uiTablesUndoDone": {
+    "description": "ui.tables.undo_done"
   },
-  "uiTablesRelated": "Bağlı tablolar",
-  "@uiTablesRelated": {
-    "description": "ui.tables.related"
+  "uiTablesUndoSkipped": "Bazı hücreler bu arada değiştiği için geri alınamadı.",
+  "@uiTablesUndoSkipped": {
+    "description": "ui.tables.undo_skipped"
   },
-  "uiTablesBacklinks": "Bu tabloya bağlananlar",
-  "@uiTablesBacklinks": {
-    "description": "ui.tables.backlinks"
+  "uiTablesNotEditable": "Bu sütun tipi mobilde henüz düzenlenemez.",
+  "@uiTablesNotEditable": {
+    "description": "ui.tables.not_editable"
   },
-  "uiTablesLinks": "bağlantı",
-  "@uiTablesLinks": {
-    "description": "ui.tables.links"
+  "uiTablesRedacted": "Gizli",
+  "@uiTablesRedacted": {
+    "description": "ui.tables.redacted"
   },
-  "uiTablesRecentAction": "Son çalıştıkların",
-  "@uiTablesRecentAction": {
-    "description": "ui.tables.recent_action"
+  "uiTablesTypeFixed": "Sütun tipi oluşturulduktan sonra değiştirilemez.",
+  "@uiTablesTypeFixed": {
+    "description": "ui.tables.type_fixed"
   },
-  "uiTablesUnitA": "Atölye",
-  "@uiTablesUnitA": {
-    "description": "ui.tables.unit_a"
-  },
-  "uiTablesUnitB": "Operasyon",
-  "@uiTablesUnitB": {
-    "description": "ui.tables.unit_b"
+  "uiTablesEmptyTable": "Bu tabloda henüz satır yok",
+  "@uiTablesEmptyTable": {
+    "description": "ui.tables.empty_table"
   },
   "uiTasksNoStatusTransitions": "Bu görev için kullanabileceğiniz bir durum değişikliği yok.",
   "@uiTasksNoStatusTransitions": {

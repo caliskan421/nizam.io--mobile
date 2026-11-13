@@ -24,6 +24,7 @@ enum ReportOperation {
   fileDownload('file_download'),
   chatSend('chat_send'),
   chatStream('chat_stream'),
+  tableStream('table_stream'),
   assistantChat('assistant_chat'),
   localStorage('local_storage');
 

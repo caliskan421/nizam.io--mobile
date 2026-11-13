@@ -3787,15 +3787,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTablesShared => 'Paylaşılan';
 
   @override
-  String get uiTablesAll => 'Tümü';
-
-  @override
-  String get uiTablesOpen => 'Açık';
-
-  @override
-  String get uiTablesDone => 'Tamamlanan';
-
-  @override
   String get uiTablesEmpty => 'Henüz tablo yok';
 
   @override
@@ -3803,30 +3794,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTablesName => 'Tablo adı';
-
-  @override
-  String get uiTablesTemplate => 'Şablon';
-
-  @override
-  String get uiTablesBlank => 'Boş tablo';
-
-  @override
-  String get uiTablesTaskList => 'Görev listesi';
-
-  @override
-  String get uiTablesEventPlan => 'Etkinlik planı';
-
-  @override
-  String get uiTablesActionList => 'Aksiyon listesi';
-
-  @override
-  String get uiTablesSupplierList => 'Tedarikçi listesi';
-
-  @override
-  String get uiTablesVolunteerList => 'Gönüllü listesi';
-
-  @override
-  String get uiTablesInventory => 'Envanter';
 
   @override
   String get uiTablesCreate => 'Oluştur';
@@ -3850,22 +3817,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTablesNewColumn => 'Sütun ekle';
 
   @override
-  String get uiTablesFields => 'Alanlar';
-
-  @override
-  String get uiTablesShare => 'Paylaş';
-
-  @override
   String get uiTablesOptions => 'Tablo işlemleri';
 
   @override
   String get uiTablesRename => 'Yeniden adlandır';
-
-  @override
-  String get uiTablesDuplicate => 'Kopya oluştur';
-
-  @override
-  String get uiTablesDuplicateEmpty => 'Boş kopya oluştur';
 
   @override
   String get uiTablesDelete => 'Sil';
@@ -3881,13 +3836,17 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTablesDeleteMessage =>
-      'Bu işlem örnek veriyi bu oturumdan kaldırır.';
+      'Tablo, erişimi olan herkes için silinir.';
+
+  @override
+  String get uiTablesDeleteRowMessage =>
+      'Satırdaki hücreler ve yorumlar da silinir.';
+
+  @override
+  String get uiTablesDeleteColumnMessage => 'Sütundaki bütün hücreler silinir.';
 
   @override
   String get uiTablesReadonly => 'Yalnızca görüntüleme';
-
-  @override
-  String get uiTablesEditable => 'Düzenleme erişimi';
 
   @override
   String get uiTablesText => 'Metin';
@@ -3905,10 +3864,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTablesEmail => 'E-posta';
 
   @override
+  String get uiTablesCheckbox => 'Onay kutusu';
+
+  @override
   String get uiTablesPerson => 'Kişi';
 
   @override
-  String get uiTablesUnit => 'Koordinatörlük';
+  String get uiTablesDepartment => 'Departman';
 
   @override
   String get uiTablesTask => 'Görev';
@@ -3920,7 +3882,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTablesFile => 'Dosya';
 
   @override
-  String get uiTablesTodo => 'Yapıldı';
+  String get uiTablesAttachmentKind => 'Ek';
 
   @override
   String get uiTablesEditRow => 'Satırı düzenle';
@@ -3935,50 +3897,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTablesMoveRight => 'Sağa taşı';
 
   @override
-  String get uiTablesSortAsc => 'Artan sırala';
-
-  @override
-  String get uiTablesSortDesc => 'Azalan sırala';
-
-  @override
-  String get uiTablesSortNone => 'Sıralamayı kaldır';
-
-  @override
-  String get uiTablesProgramAccess => 'Program erişimi';
-
-  @override
-  String get uiTablesOff => 'Kapalı';
-
-  @override
-  String get uiTablesView => 'Görür';
-
-  @override
-  String get uiTablesEdit => 'Düzenler';
-
-  @override
   String get uiTablesOwner => 'Sahip';
 
   @override
-  String get uiTablesAddPerson => 'Demo kişi ekle';
-
-  @override
-  String get uiTablesRemovePerson => 'Erişimi kaldır';
-
-  @override
-  String get uiTablesDemoPerson => 'Demo üye';
-
-  @override
-  String get uiTablesDemoNotice =>
-      'Bu çalışma alanı yalnızca oturumluk örnek veridir.';
-
-  @override
-  String get uiTablesAttachment => 'Örnek ek ekle';
-
-  @override
-  String get uiTablesLinkedTable => 'Bağlı tablo';
-
-  @override
-  String get uiTablesSummary => 'Özet';
+  String get uiTablesMine => 'Sizin tablonuz';
 
   @override
   String get uiTablesClear => 'Temizle';
@@ -3987,34 +3909,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTablesTableMissing => 'Tablo bulunamadı';
 
   @override
-  String get uiTablesGrid => 'Tablo görünümü';
+  String get uiTablesFieldName => 'Sütun adı';
 
   @override
-  String get uiTablesCopySuffix => '(kopya)';
+  String get uiTablesColumnType => 'Sütun tipi';
 
   @override
-  String get uiTablesEmptySuffix => '(boş)';
-
-  @override
-  String get uiTablesTaskSample => 'Örnek görev';
-
-  @override
-  String get uiTablesUnitSample => 'Demo koordinatörlük';
-
-  @override
-  String get uiTablesFieldName => 'Alan adı';
+  String get uiTablesWidth => 'Genişlik';
 
   @override
   String get uiTablesNameRequired => 'Ad boş bırakılamaz';
-
-  @override
-  String get uiTablesNewRecord => 'Yeni kayıt';
-
-  @override
-  String get uiTablesRecent => 'Son kullanılanlar';
-
-  @override
-  String get uiTablesBackAreas => 'Koordinatörlüklere dön';
 
   @override
   String get uiTablesCopyLink => 'Bağlantıyı kopyala';
@@ -4023,58 +3927,59 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTablesLinkCopied => 'Tablo bağlantısı kopyalandı';
 
   @override
-  String get uiTablesPersonSearch => 'Demo kişilerde ara';
+  String get uiTablesSpace => 'Konum';
 
   @override
-  String get uiTablesPlace => 'Yer';
+  String get uiTablesNeedDepartment =>
+      'Koordinatörlük tablolarını görmek için bir koordinatörlük seçin.';
 
   @override
-  String get uiTablesApproved => 'Onaylandı';
+  String get uiTablesLoadMore => 'Daha fazla yükle';
 
   @override
-  String get uiTablesCompany => 'Firma';
+  String get uiTablesLoadMoreRows => 'Daha fazla satır yükle';
 
   @override
-  String get uiTablesFullName => 'Ad soyad';
+  String get uiTablesConflict =>
+      'Bazı hücreler siz düzenlerken değişti; güncel değerler gösteriliyor.';
 
   @override
-  String get uiTablesMaterial => 'Malzeme';
+  String get uiTablesDismiss => 'Tamam';
 
   @override
-  String get uiTablesOffer => 'Teklif';
+  String get uiTablesSaving => 'Kaydediliyor…';
 
   @override
-  String get uiTablesAction => 'Aksiyon';
+  String get uiTablesSaved => 'Kaydedildi';
 
   @override
-  String get uiTablesActivity => 'Etkinlik';
+  String get uiTablesSaveFailed => 'Değişiklikler kaydedilemedi.';
 
   @override
-  String get uiTablesDueDate => 'Son tarih';
+  String get uiTablesRetry => 'Yeniden dene';
 
   @override
-  String get uiTablesCopyTo => 'Başka alana kopyala';
+  String get uiTablesUndo => 'Son hücre değişikliğini geri al';
 
   @override
-  String get uiTablesDestination => 'Kopyanın konumu';
+  String get uiTablesUndoDone => 'Değişiklik geri alındı';
 
   @override
-  String get uiTablesRelated => 'Bağlı tablolar';
+  String get uiTablesUndoSkipped =>
+      'Bazı hücreler bu arada değiştiği için geri alınamadı.';
 
   @override
-  String get uiTablesBacklinks => 'Bu tabloya bağlananlar';
+  String get uiTablesNotEditable => 'Bu sütun tipi mobilde henüz düzenlenemez.';
 
   @override
-  String get uiTablesLinks => 'bağlantı';
+  String get uiTablesRedacted => 'Gizli';
 
   @override
-  String get uiTablesRecentAction => 'Son çalıştıkların';
+  String get uiTablesTypeFixed =>
+      'Sütun tipi oluşturulduktan sonra değiştirilemez.';
 
   @override
-  String get uiTablesUnitA => 'Atölye';
-
-  @override
-  String get uiTablesUnitB => 'Operasyon';
+  String get uiTablesEmptyTable => 'Bu tabloda henüz satır yok';
 
   @override
   String get uiTasksNoStatusTransitions =>

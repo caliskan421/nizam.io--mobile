@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers.dart';
 import '../../../core/ui/widgets/overlays/nz_bottom_sheet.dart';
-import '../application/tables_controller.dart';
 
-/// Açık taslağın eski hesap veya kapsam verisini göstermesini engeller.
+/// Alt sayfa; oturum nesli ya da kapsam açıldıktan sonra değişirse içerik ve eylemler
+/// gizlenir (önceki hesabın/kapsamın verisi üzerinde işlem yapılmaz).
 Future<void> showTableSheet(
   WidgetRef ref,
   BuildContext context, {
@@ -14,7 +15,11 @@ Future<void> showTableSheet(
   String? description,
   NzSheetActionsBuilder? actions,
 }) {
-  final lease = ref.read(tablesControllerProvider.notifier).lease;
+  final generation = ref.read(sessionGenerationProvider);
+  final scope = ref.read(scopeStateProvider);
+  bool same(WidgetRef r) =>
+      r.watch(sessionGenerationProvider) == generation &&
+      r.watch(scopeStateProvider) == scope;
   return NzBottomSheet.show<void>(
     context,
     title: title,
@@ -25,28 +30,13 @@ Future<void> showTableSheet(
         : (sheet) => [
             for (final action in actions(sheet))
               Consumer(
-                builder: (context, ref, _) {
-                  ref.watch(tablesControllerProvider);
-                  return identical(
-                        lease,
-                        ref.read(tablesControllerProvider.notifier).lease,
-                      )
-                      ? action
-                      : const SizedBox.shrink();
-                },
+                builder: (context, ref, _) =>
+                    same(ref) ? action : const SizedBox.shrink(),
               ),
           ],
     builder: (sheet) => Consumer(
-      builder: (context, ref, _) {
-        ref.watch(tablesControllerProvider);
-        if (!identical(
-          lease,
-          ref.read(tablesControllerProvider.notifier).lease,
-        )) {
-          return const SizedBox.shrink();
-        }
-        return builder(context);
-      },
+      builder: (context, ref, _) =>
+          same(ref) ? builder(context) : const SizedBox.shrink(),
     ),
   );
 }

@@ -8,17 +8,11 @@ import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/nz_page_header.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
-import '../application/tables_controller.dart';
+import '../application/tables_list_controller.dart';
 
 class TablesHeader extends ConsumerStatefulWidget {
-  const TablesHeader({
-    super.key,
-    required this.onRecent,
-    required this.onCreate,
-    required this.count,
-  });
-  final VoidCallback onRecent;
-  final VoidCallback onCreate;
+  const TablesHeader({super.key, required this.onCreate, required this.count});
+  final VoidCallback? onCreate;
   final int count;
 
   @override
@@ -27,7 +21,7 @@ class TablesHeader extends ConsumerStatefulWidget {
 
 class _TablesHeaderState extends ConsumerState<TablesHeader> {
   late final _search = TextEditingController(
-    text: ref.read(tablesControllerProvider).query,
+    text: ref.read(tablesFilterControllerProvider).query,
   );
   final _searchFocus = FocusNode();
   late bool _searchOpen = _search.text.isNotEmpty;
@@ -46,7 +40,7 @@ class _TablesHeaderState extends ConsumerState<TablesHeader> {
       children: [
         NzPageHeader(
           title: l.uiTablesTitle,
-          subtitle: '${widget.count} tablo',
+          subtitle: '${widget.count} ${l.uiTablesTitle.toLowerCase()}',
           actions: [
             Semantics(
               selected: _searchOpen,
@@ -58,15 +52,12 @@ class _TablesHeaderState extends ConsumerState<TablesHeader> {
                   if (!_searchOpen) {
                     _search.clear();
                     _searchFocus.unfocus();
-                    ref.read(tablesControllerProvider.notifier).setQuery('');
+                    ref
+                        .read(tablesFilterControllerProvider.notifier)
+                        .setQuery('');
                   }
                 },
               ),
-            ),
-            NzIconButton.circle(
-              icon: Icons.history,
-              semanticLabel: l.uiTablesRecentAction,
-              onPressed: widget.onRecent,
             ),
             NzIconButton.circleAccent(
               icon: Icons.add,
@@ -87,11 +78,15 @@ class _TablesHeaderState extends ConsumerState<TablesHeader> {
                 if (_searchOpen) {
                   setState(() => _searchOpen = false);
                   _search.clear();
-                  ref.read(tablesControllerProvider.notifier).setQuery('');
+                  ref
+                      .read(tablesFilterControllerProvider.notifier)
+                      .setQuery('');
                 }
               },
               label: l.uiTablesSearch,
-              onChanged: ref.read(tablesControllerProvider.notifier).setQuery,
+              onChanged: ref
+                  .read(tablesFilterControllerProvider.notifier)
+                  .setQuery,
             ),
           ),
         ),

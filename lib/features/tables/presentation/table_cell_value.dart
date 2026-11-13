@@ -1,92 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 
-import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/inputs/nz_check_circle.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
-import '../domain/table_document.dart';
-import 'table_sheets.dart' show tableCellText;
+import '../application/table_view.dart';
+import '../domain/table_models.dart';
+import 'table_texts.dart';
 
-/// Alanın türü yalnız başlıkta değil satır değerinde de görünür.
+/// Izgarada hücre gösterimi. Onay kutusu doğrudan değiştirilebilir ([onToggle]).
 class TableCellValue extends StatelessWidget {
   const TableCellValue({
     super.key,
-    required this.field,
-    required this.value,
-    required this.documents,
+    required this.view,
+    required this.column,
+    required this.data,
     this.onToggle,
   });
-  final TableField field;
-  final Object? value;
-  final List<TableDocument> documents;
+  final TableView view;
+  final TableColumnSpec column;
+  final TableCellData data;
   final VoidCallback? onToggle;
+
   @override
   Widget build(BuildContext context) {
-    final text = tableCellText(context, field, value, documents);
-    if (field.type == TableFieldType.todo) {
+    final l = context.l10n;
+    if (column.kind == TableColumnKind.checkbox) {
       return Align(
         alignment: Alignment.centerLeft,
         child: NzCheckCircle(
-          value: value == true,
-          label: field.name,
+          value: data.value == true,
+          label: column.name,
           onChanged: onToggle,
         ),
       );
     }
-    if (value == null ||
-        value == '' ||
-        (value is List && (value as List).isEmpty)) {
+    final text = l.tableCellText(view, column, data);
+    if (data.isEmpty && !data.redacted) {
       return Text(
-        '—',
+        text,
         style: context.text.bodySm.copyWith(color: context.colors.textMuted),
       );
     }
-    if (field.type == TableFieldType.person) {
-      return Row(
-        children: [
-          NzAvatar.initials(
-            name: text,
-            extent: NzAvatarSize.sm,
-            tone: NzAvatar.toneOf(text),
-          ),
-          const Gap(NizamioSpacing.space2),
-          Expanded(
-            child: Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.text.bodySm,
-            ),
-          ),
-        ],
-      );
-    }
-    if (field.type == TableFieldType.unit) {
+    final icon = switch (column.kind) {
+      TableColumnKind.personReference => Icons.person_outline,
+      TableColumnKind.departmentReference => Icons.account_tree_outlined,
+      TableColumnKind.taskReference => Icons.task_alt,
+      TableColumnKind.fileReference => Icons.description_outlined,
+      TableColumnKind.tableReference => Icons.link,
+      TableColumnKind.attachment => Icons.attach_file,
+      _ => null,
+    };
+    if (icon != null) {
       return Align(
         alignment: Alignment.centerLeft,
-        child: NzBadge.neutral(
-          label: text,
-          leading: Icons.account_tree_outlined,
-        ),
-      );
-    }
-    if (field.type == TableFieldType.link) {
-      return Align(
-        alignment: Alignment.centerLeft,
-        child: NzBadge.info(label: text, leading: Icons.link),
-      );
-    }
-    if (field.type == TableFieldType.task) {
-      return Align(
-        alignment: Alignment.centerLeft,
-        child: NzBadge.neutral(label: text, leading: Icons.task_alt),
-      );
-    }
-    if (field.type == TableFieldType.file) {
-      return Align(
-        alignment: Alignment.centerLeft,
-        child: NzBadge.neutral(label: text, leading: Icons.attach_file),
+        child: NzBadge.neutral(label: text, leading: icon),
       );
     }
     return Text(

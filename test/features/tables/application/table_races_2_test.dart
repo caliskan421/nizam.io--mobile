@@ -13,6 +13,7 @@ import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/features/tables/application/table_controller.dart';
 import 'package:nizamio/features/tables/application/table_sync_controller.dart';
 import 'package:nizamio/features/tables/application/table_view.dart';
+import 'package:nizamio/features/tables/application/tables_list_controller.dart';
 import 'package:nizamio/features/tables/application/tables_providers.dart';
 import 'package:nizamio/features/tables/domain/table_models.dart';
 import 'package:nizamio/features/tables/domain/table_operation.dart';
@@ -200,5 +201,44 @@ void main() {
       ),
     );
     expect(c.exists(tableSyncControllerProvider('t1')), isFalse);
+  });
+
+  test(
+    'O1a: geciken ad makbuzu daha yeni snapshot\'taki adı geri ezmez',
+    () async {
+      final (c, n, repo) = await _open();
+      final late = repo.responseGate = Completer<void>();
+      final renaming = n.rename('Benim');
+      await pumpEventQueue();
+      repo.foreignRename('t1', 'Onların');
+      await n.catchUp();
+      expect(_v(c).meta.name, 'Onların');
+      late.complete();
+      await renaming;
+      expect(_v(c).meta.name, 'Onların');
+    },
+  );
+
+  test('O1b: geciken sütun makbuzu daha yeni snapshot\'taki sütun adını geri ezmez', () async {
+    final (c, n, repo) = await _open();
+    final late = repo.responseGate = Completer<void>();
+    final renaming = n.renameColumn('c1', 'Benim');
+    await pumpEventQueue();
+    repo.foreignRename('t1', 'Onların', columnId: 'c1');
+    await n.catchUp();
+    late.complete();
+    await renaming;
+    expect(_v(c).column('c1')!.name, 'Onların');
+  });
+
+  test('O2: belirsiz silme yeniden denenince listeden düşer', () async {
+    final (c, n, repo) = await _open();
+    c.listen(tablesListControllerProvider, (_, _) {});
+    await c.read(tablesListControllerProvider.future);
+    repo.loseNextResponses = 1;
+    await expectLater(n.deleteTable(), throwsA(isA<ApiError>()));
+    expect(c.read(tablesListControllerProvider).value!.find('t1'), isNotNull);
+    await n.retryCommands();
+    expect(c.read(tablesListControllerProvider).value!.find('t1'), isNull);
   });
 }

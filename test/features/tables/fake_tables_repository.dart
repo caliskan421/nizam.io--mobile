@@ -124,6 +124,34 @@ class FakeTablesRepository implements TablesRepository {
     );
   }
 
+  /// Başkasının tablo/sütun yeniden adlandırması (sıra ve olay artar).
+  void foreignRename(String id, String name, {String? columnId}) {
+    final t = tables[id]!;
+    if (columnId == null) {
+      t.meta = TableMeta(
+        id: t.meta.id,
+        ownerId: t.meta.ownerId,
+        name: name,
+        scope: t.meta.scope,
+        schemaVersion: t.meta.schemaVersion,
+        sequence: t.meta.sequence,
+      );
+    } else {
+      final i = t.columns.indexWhere((c) => c.id == columnId);
+      t.columns[i] = t.columns[i].copyWith(name: name);
+      t.meta = t.meta.copyWith(schemaVersion: t.meta.schemaVersion + 1);
+    }
+    t.meta = t.meta.copyWith(sequence: t.meta.sequence + 1);
+    t.events.add(
+      TableChangeEntry(
+        seq: t.meta.sequence,
+        kind: columnId == null
+            ? TableChangeKind.renameTable
+            : TableChangeKind.renameColumn,
+      ),
+    );
+  }
+
   /// Başkasının yorumu (yalnız olay; içerik testte gerekmez).
   void foreignComment(String id) {
     final t = tables[id]!;

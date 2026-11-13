@@ -68,7 +68,7 @@ Map<String, Object?> _meeting({
   'created_at': _t,
   'updated_at': _t,
   'departments': [
-    {'department_id': 'd1', 'department_name': 'Mekanik'},
+    {'department_id': 'd1', 'department_name': 'Mekanik', 'deleted': false},
   ],
 };
 
@@ -81,7 +81,12 @@ Map<String, Object?> _detail({
   'viewer_role': 'coordinator',
   'participants': participants,
   'agenda': <Object?>[],
-  'notes': {'items': <Object?>[], 'next_cursor': ''},
+  'notes': {
+    'items': <Object?>[],
+    'next_cursor': '',
+    'total': 0,
+    'counts': {'all': 0, 'converted': 0, 'mine': 0},
+  },
   'conference': conference,
   'last_conference': last,
   'conference_available': true,

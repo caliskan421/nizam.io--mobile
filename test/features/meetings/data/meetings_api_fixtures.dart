@@ -21,8 +21,8 @@ Map<String, Object?> _meeting({
   'created_at': _t,
   'updated_at': _t,
   'departments': [
-    {'department_id': 'd1', 'department_name': 'Mekanik'},
-    {'department_id': 'd2', 'department_name': 'Yazılım'},
+    {'department_id': 'd1', 'department_name': 'Mekanik', 'deleted': false},
+    {'department_id': 'd2', 'department_name': 'Yazılım', 'deleted': false},
   ],
 };
 

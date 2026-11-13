@@ -37,7 +37,7 @@ Map<String, Object?> meetingWire({
   'updated_at': _t,
   'departments': [
     for (final d in departments)
-      {'department_id': d, 'department_name': 'Ad $d'},
+      {'department_id': d, 'department_name': 'Ad $d', 'deleted': false},
   ],
   'deleted_at': deletedAt,
   'summary': ?summary,
@@ -225,10 +225,25 @@ class MeetingsServer {
           'notes': {
             'items': notes,
             'next_cursor': moreNotes.isEmpty ? '' : 'n2',
+            'total': notes.length + moreNotes.length,
+            'counts': {
+              'all': notes.length + moreNotes.length,
+              'converted': 0,
+              'mine': 0,
+            },
           },
         });
       case 'GET /v1/meetings/m1/notes':
-        return jsonResponse(200, {'items': moreNotes, 'next_cursor': ''});
+        return jsonResponse(200, {
+          'items': moreNotes,
+          'next_cursor': '',
+          'total': notes.length + moreNotes.length,
+          'counts': {
+            'all': notes.length + moreNotes.length,
+            'converted': 0,
+            'mine': 0,
+          },
+        });
       case 'POST /v1/meetings/m1/agenda':
         return jsonResponse(
           201,

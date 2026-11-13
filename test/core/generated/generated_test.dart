@@ -69,8 +69,8 @@ void main() {
   });
 
   group('operasyon → kapsam sınıfı haritası (spec\'ten)', () {
-    test('v0.15.0-api: 189 işlem; API sürümü v1', () {
-      expect(apiOperations, hasLength(189));
+    test('f64-faz3-onizleme: 220 işlem; API sürümü v1', () {
+      expect(apiOperations, hasLength(220));
       expect(apiVersion, 'v1');
     });
 
@@ -96,6 +96,9 @@ void main() {
 
     test('örnekler', () {
       expect(apiOperations['readProgram']!.scope, ScopeClass.s2);
+      expect(apiOperations['getTable']!.scope, ScopeClass.s3);
+      expect(apiOperations['getPersonalTable']!.scope, ScopeClass.s2);
+      expect(apiOperations['setTablePresence']!.csrf, isTrue);
       expect(apiOperations['login']!.auth, isFalse);
       expect(apiOperations['me']!.scope, ScopeClass.s1);
       expect(apiOperations['refresh']!.csrf, isTrue);

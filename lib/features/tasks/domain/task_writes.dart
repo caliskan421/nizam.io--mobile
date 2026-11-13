@@ -197,8 +197,9 @@ final class TeamMember {
   final bool coordinator;
 }
 
-/// Seçicinin kaynağı: cihaz dosyaları (Dosyalar / SAF) ya da fotoğraflar (galeri).
-enum UploadOrigin { files, photos }
+/// Seçicinin kaynağı: cihaz dosyaları (Dosyalar / SAF), fotoğraflar (galeri) ya da kamerayla
+/// o an çekilen fotoğraf.
+enum UploadOrigin { files, photos, camera }
 
 /// Sistem dosya seçicisi portu. [pick] null → kullanıcı vazgeçti.
 abstract interface class UploadPicker {

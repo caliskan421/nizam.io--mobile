@@ -249,6 +249,8 @@ const localizedErrorCodes = <String>{
   'work.subtasks_open',
   'work.transfer_active',
   'work.transition_not_allowed',
+  'client.camera_permission_denied',
+  'client.camera_unavailable',
   'client.file_unreadable',
   'client.insecure_server',
   'client.invalid_response',
@@ -764,6 +766,10 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errWorkTransferActive;
     case 'work.transition_not_allowed':
       return l.errWorkTransitionNotAllowed;
+    case 'client.camera_permission_denied':
+      return l.errClientCameraPermissionDenied;
+    case 'client.camera_unavailable':
+      return l.errClientCameraUnavailable;
     case 'client.file_unreadable':
       return l.errClientFileUnreadable;
     case 'client.insecure_server':

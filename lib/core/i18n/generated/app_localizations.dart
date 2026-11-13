@@ -1558,6 +1558,18 @@ abstract class AppLocalizations {
   /// **'Bu durum geçişine izin verilmiyor.'**
   String get errWorkTransitionNotAllowed;
 
+  /// client.camera_permission_denied
+  ///
+  /// In tr, this message translates to:
+  /// **'Kamera izni verilmedi. Fotoğraf çekmek için cihaz ayarlarından NIZAM.IO\'ya kamera izni verin.'**
+  String get errClientCameraPermissionDenied;
+
+  /// client.camera_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu cihazda kullanılabilir bir kamera bulunamadı. Fotoğrafı galeriden ya da dosyalardan seçin.'**
+  String get errClientCameraUnavailable;
+
   /// client.file_unreadable
   ///
   /// In tr, this message translates to:
@@ -6088,6 +6100,12 @@ abstract class AppLocalizations {
   /// **'Fotoğraflar'**
   String get uiMessagesAttachPhotos;
 
+  /// ui.messages.attach_camera
+  ///
+  /// In tr, this message translates to:
+  /// **'Kamera'**
+  String get uiMessagesAttachCamera;
+
   /// ui.messages.attach_file
   ///
   /// In tr, this message translates to:
@@ -9435,6 +9453,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Fotoğraflar'**
   String get uiTasksPickPhotos;
+
+  /// ui.tasks.pick_camera
+  ///
+  /// In tr, this message translates to:
+  /// **'Kamera'**
+  String get uiTasksPickCamera;
 
   /// ui.tasks.pick_files
   ///

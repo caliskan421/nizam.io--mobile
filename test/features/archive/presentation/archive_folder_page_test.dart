@@ -310,6 +310,27 @@ void main() {
     expect(find.text(_l.uiArchiveUploaded), findsOneWidget);
   });
 
+  testWidgets('yükle: kaynak sayfasında Kamera seçimi kameraya geçer', (
+    tester,
+  ) async {
+    final repo = FakeArchiveRepository();
+    final picker = FakePicker(
+      const UploadSource(
+        path: '/tmp/c.jpg',
+        name: 'IMG_20260307_090504.jpg',
+        sizeBytes: 9,
+      ),
+    );
+    await _open(tester, repo: repo, picker: picker);
+    await _tap(tester, find.bySemanticsLabel(_l.uiArchiveUploadShort));
+    await _tap(tester, find.text('Rapor').last);
+    await _tap(tester, find.text(_l.uiArchiveTagPlan).last);
+    await _tap(tester, find.text(_l.uiTasksPickCamera));
+    expect(picker.origins, [UploadOrigin.camera]);
+    final attach = repo.calls.where((c) => c.$1 == 'attach').single;
+    expect(attach.$3, ('w2', RecordTag.plan, 'IMG_20260307_090504.jpg'));
+  });
+
   testWidgets('sanal klasörde koordinatörlük eylemi görünmez', (tester) async {
     final repo = FakeArchiveRepository()
       ..folders = const [

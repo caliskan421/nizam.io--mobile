@@ -292,9 +292,11 @@ const errorPathExceptions = <String, ErrorPathException>{
   'features/tasks/data/file_upload_picker.dart::FileUploadPicker.pick#catch':
       ErrorPathException(
         1,
-        'Platform dosya seçicisinin hatası kullanıcı eylemidir (izin reddi, bulut dosyası '
-        'indirilemedi); kullanıcıya client.file_unreadable gösterilir. Raporlanırsa her izin '
-        'reddi rapor fırtınası olur; dosya adı/yolu zaten rapora giremez.',
+        'Platform dosya seçicisinin ya da kameranın hatası kullanıcı eylemi/cihaz durumudur '
+        '(izin reddi, kamera yok, bulut dosyası indirilemedi); kullanıcıya '
+        'client.camera_permission_denied, client.camera_unavailable ya da '
+        'client.file_unreadable gösterilir. Raporlanırsa her izin reddi rapor fırtınası olur; '
+        'dosya adı/yolu zaten rapora giremez.',
       ),
   'features/tasks/data/task_catalog_api_repository.dart::ApiTaskCatalogRepository._teams#catchError':
       ErrorPathException(

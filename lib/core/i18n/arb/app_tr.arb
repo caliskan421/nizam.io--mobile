@@ -977,6 +977,14 @@
   "@errWorkTransitionNotAllowed": {
     "description": "work.transition_not_allowed"
   },
+  "errClientCameraPermissionDenied": "Kamera izni verilmedi. Fotoğraf çekmek için cihaz ayarlarından NIZAM.IO'ya kamera izni verin.",
+  "@errClientCameraPermissionDenied": {
+    "description": "client.camera_permission_denied"
+  },
+  "errClientCameraUnavailable": "Bu cihazda kullanılabilir bir kamera bulunamadı. Fotoğrafı galeriden ya da dosyalardan seçin.",
+  "@errClientCameraUnavailable": {
+    "description": "client.camera_unavailable"
+  },
   "errClientFileUnreadable": "Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin.",
   "@errClientFileUnreadable": {
     "description": "client.file_unreadable"
@@ -3997,6 +4005,10 @@
   "@uiMessagesAttachPhotos": {
     "description": "ui.messages.attach_photos"
   },
+  "uiMessagesAttachCamera": "Kamera",
+  "@uiMessagesAttachCamera": {
+    "description": "ui.messages.attach_camera"
+  },
   "uiMessagesAttachFile": "Dosyalar",
   "@uiMessagesAttachFile": {
     "description": "ui.messages.attach_file"
@@ -6228,6 +6240,10 @@
   "uiTasksPickPhotos": "Fotoğraflar",
   "@uiTasksPickPhotos": {
     "description": "ui.tasks.pick_photos"
+  },
+  "uiTasksPickCamera": "Kamera",
+  "@uiTasksPickCamera": {
+    "description": "ui.tasks.pick_camera"
   },
   "uiTasksPickFiles": "Dosyalar",
   "@uiTasksPickFiles": {

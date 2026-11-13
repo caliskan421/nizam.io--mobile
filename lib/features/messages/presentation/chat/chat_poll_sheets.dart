@@ -12,11 +12,11 @@ import 'chat_compose_deadline.dart';
 import 'chat_compose_lifetime.dart';
 import 'messages_texts.dart';
 
-/// Ek menüsünün seçimi: galeriden fotoğraf, cihaz dosyası ya da anket.
-enum ChatAttachKind { photos, files, poll, task, department, archive }
+/// Ek menüsünün seçimi: galeriden fotoğraf, kamerayla çekim, cihaz dosyası ya da anket.
+enum ChatAttachKind { photos, camera, files, poll, task, department, archive }
 
 /// Yazma alanındaki ek düğmesinin menüsü: görev ayrıntısındaki yüklemeyle aynı kaynak seçimi
-/// (Fotoğraflar / Dosyalar) ve (yalnız grupta) anket.
+/// (Fotoğraflar / Kamera / Dosyalar) ve (yalnız grupta) anket.
 Future<ChatAttachKind?> showAttachMenu(
   BuildContext context, {
   required bool group,
@@ -31,6 +31,11 @@ Future<ChatAttachKind?> showAttachMenu(
           icon: NzIcons.image,
           label: l.uiMessagesAttachPhotos,
           onTap: () => Navigator.of(sheet).pop(ChatAttachKind.photos),
+        ),
+        NzMenuRow(
+          icon: NzIcons.camera,
+          label: l.uiMessagesAttachCamera,
+          onTap: () => Navigator.of(sheet).pop(ChatAttachKind.camera),
         ),
         NzMenuRow(
           icon: NzIcons.folder,

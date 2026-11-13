@@ -134,6 +134,34 @@ void main() {
       ));
     });
 
+    test('kamera: kaynak seçiciye geçer; vazgeçme istek atmaz, izin reddi açık hata', () async {
+      final repo = FakeArchiveRepository();
+      final picker = _CameraPicker(src('IMG_20260307_090504.jpg'));
+      final c = archiveContainer(repo, picker: picker);
+      final ctrl = _ctrl(c);
+      Future<ArchiveOutcome> shoot() => ctrl.upload(
+        workItemId: 'w2',
+        tag: RecordTag.plan,
+        origin: UploadOrigin.camera,
+      );
+      expect((await shoot()).ok, isTrue);
+      expect(repo.calls.where((x) => x.$1 == 'attach').single.$3, (
+        'w2',
+        RecordTag.plan,
+        'IMG_20260307_090504.jpg',
+      ));
+      picker.next = null;
+      final cancelled = await shoot();
+      expect((cancelled.ok, cancelled.error), (false, null));
+      picker.error = ApiError(ClientErrorCode.cameraPermissionDenied);
+      expect(
+        (await shoot()).error?.code,
+        ClientErrorCode.cameraPermissionDenied,
+      );
+      expect(picker.origins.toSet(), {UploadOrigin.camera});
+      expect(repo.calls.where((x) => x.$1 == 'attach'), hasLength(1));
+    });
+
     test('vazgeçme: istek yok', () async {
       final repo = FakeArchiveRepository();
       final c = archiveContainer(repo, picker: FakePicker());
@@ -458,5 +486,23 @@ class _CountingDigest {
     final stop = this.cancelled = cancelled();
     if (stop) return null;
     return inner(path, cancelled: cancelled);
+  }
+}
+
+final class _CameraPicker implements UploadPicker {
+  _CameraPicker(this.next);
+
+  UploadSource? next;
+  ApiError? error;
+  final origins = <UploadOrigin>[];
+
+  @override
+  bool get available => true;
+
+  @override
+  Future<UploadSource?> pick(UploadOrigin origin) async {
+    origins.add(origin);
+    if (error case final e?) throw e;
+    return next;
   }
 }

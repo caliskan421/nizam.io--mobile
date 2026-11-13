@@ -22,6 +22,8 @@
     "client.server_outdated": "Sunucu bu uygulama sürümü için güncellenmeli; değişiklik gönderilmedi.",
     "client.outcome_unknown": "Gönderildi mi bilinmiyor. Aynı isteği yeniden deneyin; kayıt iki kez oluşmaz.",
     "client.request_not_resent": "İstek tekrar gönderilemedi; işlemi yeniden başlatın.",
-    "client.file_unreadable": "Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin."
+    "client.file_unreadable": "Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin.",
+    "client.camera_permission_denied": "Kamera izni verilmedi. Fotoğraf çekmek için cihaz ayarlarından NIZAM.IO'ya kamera izni verin.",
+    "client.camera_unavailable": "Bu cihazda kullanılabilir bir kamera bulunamadı. Fotoğrafı galeriden ya da dosyalardan seçin."
   }
 }

@@ -225,6 +225,23 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('ek: kamera kaynağı seçiciye geçer; izin reddi bildirilir', (
+    tester,
+  ) async {
+    final (h, backend) = await _open(tester);
+    final picker = _Picker()
+      ..error = ApiError(ClientErrorCode.cameraPermissionDenied);
+    h.composition.locator
+      ..unregister<UploadPicker>()
+      ..registerSingleton<UploadPicker>(picker);
+    final before = backend.chats.messages['koord']!.length;
+    await _tap(tester, find.bySemanticsLabel(_l.uiMessagesAttach).last);
+    await _tap(tester, find.text(_l.uiMessagesAttachCamera));
+    expect(picker.origins, [UploadOrigin.camera]);
+    expect(find.text(_l.errClientCameraPermissionDenied), findsOneWidget);
+    expect(backend.chats.messages['koord']!.length, before);
+  });
+
   testWidgets('grup yöneticisi: ad, üye ekleme ve yöneticilik', (tester) async {
     final backend0 = ChatBackend()..chats.role = 'admin';
     final (_, backend) = await _open(tester, server: backend0);

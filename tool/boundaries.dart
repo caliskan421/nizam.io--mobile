@@ -28,8 +28,8 @@
 //       (kesin dosya; aynı dizinde ikinci bir bağdaştırıcı yok — gizli veri SecureStore'a, S1).
 //   S6  firebase_* yalnız `lib/app/**` ve `lib/core/telemetry/telemetry.dart` içinde (kesin
 //       dosya; başlatma ve telemetri tek yerden).
-//   F1  file_picker YALNIZ `lib/features/tasks/data/file_upload_picker.dart` (`UploadPicker`
-//       gerçekleştirmesi, F57); F2 crypto YALNIZ `…/tasks/data/upload_digest.dart` (görev/arşiv
+//   F1  file_picker, F3 image_picker (kamera) YALNIZ `…/tasks/data/file_upload_picker.dart`
+//       (`UploadPicker`, F57; `soleHomes`); F2 crypto YALNIZ `…/upload_digest.dart` (yükleme
 //       gönderiminde, ön denetimden sonra içerik özeti). Kesin dosya, dışa verilemez (ADR-0002).
 //   S7  Ham tercih deposu (`core/storage/preference_store.dart`,
 //       `shared_preference_store.dart`) yalnız bu iki dosya,
@@ -99,10 +99,10 @@ import 'package:path/path.dart' as p;
 /// Paket adı (pubspec `name`).
 const packageName = 'nizamio';
 
-/// F1/F2: tek izinli dosyalı paketler → (kural, lib göreli dosya); dışa verilemezler.
 const soleHomes = {
   'package:file_picker': ('F1', 'features/tasks/data/file_upload_picker.dart'),
   'package:crypto': ('F2', 'features/tasks/data/upload_digest.dart'),
+  'package:image_picker': ('F3', 'features/tasks/data/file_upload_picker.dart'),
 };
 
 /// Üretilmiş API kodu (DTO yalnız burada).

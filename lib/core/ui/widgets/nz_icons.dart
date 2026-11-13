@@ -17,6 +17,7 @@ abstract final class NzIcons {
   static const IconData calendar = Icons.calendar_today_outlined;
   static const IconData calendarFilled = Icons.calendar_today_rounded;
   static const IconData calendarMonth = Icons.calendar_month_outlined;
+  static const IconData camera = Icons.photo_camera_outlined;
   static const IconData check = Icons.check_rounded;
   static const IconData checkAll = Icons.done_all_rounded;
   static const IconData checkCircle = Icons.check_circle_outline_rounded;

@@ -3,6 +3,8 @@
 
 /// İstemcinin ürettiği kararlı hata kodları ('client.' önekli; sunucu kataloğunda yok).
 abstract final class ClientErrorCode {
+  static const cameraPermissionDenied = 'client.camera_permission_denied';
+  static const cameraUnavailable = 'client.camera_unavailable';
   static const fileUnreadable = 'client.file_unreadable';
   static const insecureServer = 'client.insecure_server';
   static const invalidResponse = 'client.invalid_response';
@@ -27,6 +29,8 @@ abstract final class ClientErrorCode {
   static const updateRequired = 'client.update_required';
 
   static const all = <String>{
+    cameraPermissionDenied,
+    cameraUnavailable,
     fileUnreadable,
     insecureServer,
     invalidResponse,

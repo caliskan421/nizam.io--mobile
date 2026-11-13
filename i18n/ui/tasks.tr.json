@@ -306,6 +306,7 @@
     "ui.tasks.t_file_deleted": "Dosya silindi",
     "ui.tasks.pick_file_action": "Dosya seç",
     "ui.tasks.pick_photos": "Fotoğraflar",
+    "ui.tasks.pick_camera": "Kamera",
     "ui.tasks.pick_files": "Dosyalar",
     "ui.tasks.picker_missing": "Bu sürümde dosya seçici yok",
     "ui.tasks.err_pick_file": "Yüklemek için bir dosya seç",

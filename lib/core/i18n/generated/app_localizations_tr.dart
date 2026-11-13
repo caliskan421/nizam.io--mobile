@@ -849,6 +849,14 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu durum geçişine izin verilmiyor.';
 
   @override
+  String get errClientCameraPermissionDenied =>
+      'Kamera izni verilmedi. Fotoğraf çekmek için cihaz ayarlarından NIZAM.IO\'ya kamera izni verin.';
+
+  @override
+  String get errClientCameraUnavailable =>
+      'Bu cihazda kullanılabilir bir kamera bulunamadı. Fotoğrafı galeriden ya da dosyalardan seçin.';
+
+  @override
   String get errClientFileUnreadable =>
       'Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin.';
 
@@ -3174,6 +3182,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMessagesAttachPhotos => 'Fotoğraflar';
 
   @override
+  String get uiMessagesAttachCamera => 'Kamera';
+
+  @override
   String get uiMessagesAttachFile => 'Dosyalar';
 
   @override
@@ -4907,6 +4918,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksPickPhotos => 'Fotoğraflar';
+
+  @override
+  String get uiTasksPickCamera => 'Kamera';
 
   @override
   String get uiTasksPickFiles => 'Dosyalar';

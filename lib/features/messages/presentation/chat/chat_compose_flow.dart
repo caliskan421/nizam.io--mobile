@@ -56,16 +56,16 @@ Future<ChatComposeSelection?> chooseChatCompose(
       return isCurrent() && poll != null
           ? ChatComposeSelection(poll: poll)
           : null;
-    case ChatAttachKind.photos || ChatAttachKind.files:
+    case ChatAttachKind.photos || ChatAttachKind.camera || ChatAttachKind.files:
       if (!pickerAvailable) {
         onPickerMissing();
         return null;
       }
-      final source = await pick(
-        kind == ChatAttachKind.photos
-            ? UploadOrigin.photos
-            : UploadOrigin.files,
-      );
+      final source = await pick(switch (kind) {
+        ChatAttachKind.photos => UploadOrigin.photos,
+        ChatAttachKind.camera => UploadOrigin.camera,
+        _ => UploadOrigin.files,
+      });
       if (source == null || !context.mounted || !isCurrent()) return null;
       final type = source.contentType;
       if (type == null) throw ApiError('messaging.file_rejected');

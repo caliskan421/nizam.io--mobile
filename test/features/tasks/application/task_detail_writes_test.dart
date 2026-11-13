@@ -312,21 +312,24 @@ void main() {
       },
     );
 
-    test('alt görev ana görevin başlangıcından önce başlayamaz (istek yok)', () async {
-      final s = TaskDetailServer();
-      final (h, _, ctl) = await _open(s);
-      final before = h.backend.requests.length;
-      expect(
-        (await ctl.setSubtaskStart('s1', DateTime(2026, 10, 31))).kind,
-        WriteKind.invalid,
-      );
-      expect(
-        (await ctl.setSubtaskEnd('s2', DateTime(2026, 10, 30))).kind,
-        WriteKind.invalid,
-        reason: 'başlangıçsız alt görevde bitiş başlangıca da yazılır',
-      );
-      expect(h.backend.requests.length, before);
-    });
+    test(
+      'alt görev ana görevin başlangıcından önce başlayamaz (istek yok)',
+      () async {
+        final s = TaskDetailServer();
+        final (h, _, ctl) = await _open(s);
+        final before = h.backend.requests.length;
+        expect(
+          (await ctl.setSubtaskStart('s1', DateTime(2026, 10, 31))).kind,
+          WriteKind.invalid,
+        );
+        expect(
+          (await ctl.setSubtaskEnd('s2', DateTime(2026, 10, 30))).kind,
+          WriteKind.invalid,
+          reason: 'başlangıçsız alt görevde bitiş başlangıca da yazılır',
+        );
+        expect(h.backend.requests.length, before);
+      },
+    );
 
     test('kişi ve tarih: atama kaldırma boş dize; tarihler birlikte gider', () async {
       final s = TaskDetailServer()..assignees = ['u2', 'acc-1'];

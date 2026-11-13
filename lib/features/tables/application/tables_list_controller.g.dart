@@ -94,7 +94,7 @@ final class TablesListControllerProvider
 }
 
 String _$tablesListControllerHash() =>
-    r'be0b6e74591a45f4c00ceaa0926a14b92ba791c5';
+    r'257b3b8336811a92e16e4aa5b82f7853627e92a2';
 
 /// Seçili kapsamın tablo listeleri (`listTables` S3 + `listPersonalTables` S2). Oturum nesli
 /// ya da kapsam değişince yeniden kurulur (önceki hesabın/programın verisi görünmez).

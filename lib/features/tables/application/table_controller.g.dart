@@ -83,7 +83,7 @@ final class TableControllerProvider
   }
 }
 
-String _$tableControllerHash() => r'0dca328d91ec270d1045989221b783ad1011afca';
+String _$tableControllerHash() => r'f814781f315d40d496abf3eef94adc533c63c2b9';
 
 /// Tek tablonun ekranı: snapshot yükleme, hücre yazımı (CAS + birleştirme) ve komutlar.
 ///

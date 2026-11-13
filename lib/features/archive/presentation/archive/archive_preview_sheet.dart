@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:pdfrx/pdfrx.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
@@ -14,9 +14,10 @@ import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
 import '../../application/archive_actions_controller.dart';
 import '../../application/archive_files_controller.dart';
-import '../../application/archive_image_preview.dart';
 import '../../domain/archive.dart';
 import '../../domain/records.dart';
+import 'archive_document_view.dart';
+import 'archive_fullscreen_preview.dart';
 import 'archive_outcome.dart';
 import 'archive_texts.dart';
 
@@ -50,9 +51,10 @@ class ArchiveKindTile extends StatelessWidget {
   }
 }
 
-/// Dosya önizleme alt sayfası: sıra (n / N) + önceki/sonraki, tür alanı, ad + tür/boyut,
-/// bilgi satırları (görev, etiket, yükleyen), İndir + etiket / taşı (yakında) / sil (yalnız
-/// yükleyene). Liste klasörün yüklenmiş, süzgeçten geçmiş dosyalarıdır; silme sunucuda
+/// Dosya önizleme alt sayfası: sıra (n / N) + önceki/sonraki, tür alanı (yana kaydırınca
+/// önceki/sonraki dosya, dokununca tam ekran ve yakınlaştırma), ad + tür/boyut, bilgi satırları
+/// (görev satırı görevi açar; etiket, yükleyen), İndir + taşı (yakında) / sil (yalnız
+/// yükleyene). Etiket değiştirme ucu yok (backend bekliyor); düğmesi gösterilmez. Liste klasörün yüklenmiş, süzgeçten geçmiş dosyalarıdır; silme sunucuda
 /// yapılır ve sayfayı kapatır. Sunucu yükleme zamanı vermez (tarih satırı yok).
 Future<void> showArchivePreview(
   BuildContext context, {
@@ -97,71 +99,6 @@ class _Preview extends ConsumerStatefulWidget {
   ConsumerState<_Preview> createState() => _PreviewState();
 }
 
-class _ArchiveDocument extends ConsumerWidget {
-  const _ArchiveDocument({required this.folder, required this.file});
-  final String folder;
-  final RecordFile file;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final pdf = file.kind == ArchiveFileKind.pdf;
-    final tooLarge = pdf ? l.uiArchivePdfTooLarge : l.uiArchiveImageTooLarge;
-    final failure = pdf
-        ? l.uiArchivePdfPreviewError
-        : l.uiArchiveImagePreviewError;
-    if (file.sizeBytes > archiveImagePreviewLimit) {
-      return Center(child: Text(tooLarge, textAlign: TextAlign.center));
-    }
-    final provider = archiveImagePreviewProvider((
-      folder: folder,
-      file: file.id,
-    ));
-    final value = ref.watch(provider);
-    Widget error(String message) => Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(message, textAlign: TextAlign.center),
-          if (value.error is! ArchiveImageTooLarge)
-            TextButton(
-              onPressed: () => ref.invalidate(provider),
-              child: Text(l.uiCommonRetry),
-            ),
-        ],
-      ),
-    );
-    return value.when(
-      loading: () => Center(
-        child: Semantics(
-          label: l.uiFeedbackLoading,
-          child: const CircularProgressIndicator(),
-        ),
-      ),
-      error: (e, _) => error(e is ArchiveImageTooLarge ? tooLarge : failure),
-      data: (bytes) => pdf
-          ? PdfViewer.data(
-              bytes,
-              key: ValueKey('pdf:${file.id}'),
-              sourceName: '$folder/${file.id}',
-              maxSizeToCacheOnMemory: archiveImagePreviewLimit,
-              params: PdfViewerParams(
-                backgroundColor: context.colors.surfaceRaised,
-                maxImageBytesCachedOnMemory: 24 * 1024 * 1024,
-                errorBannerBuilder: (_, _, _, _) => error(failure),
-              ),
-            )
-          : Image.memory(
-              bytes,
-              fit: BoxFit.contain,
-              cacheWidth: 1600,
-              gaplessPlayback: false,
-              errorBuilder: (_, _, _) => error(failure),
-            ),
-    );
-  }
-}
-
 class _PreviewState extends ConsumerState<_Preview> {
   late String _id = widget.initial;
 
@@ -177,6 +114,19 @@ class _PreviewState extends ConsumerState<_Preview> {
     _toast('${f.displayName} ${l.uiArchiveDownloading}');
     final r = await _ctrl.downloadFile(f);
     if (widget.host.mounted) showArchiveOutcome(widget.host, r);
+  }
+
+  /// Yana kaydırmanın dosya değiştirdiği en düşük hız (px/sn).
+  static const _swipeVelocity = 250.0;
+
+  Future<void> _fullscreen(List<RecordFile> list, RecordFile f) async {
+    final last = await showArchiveFullscreen(
+      context,
+      folder: widget.code,
+      files: list,
+      initial: f.id,
+    );
+    if (last != null && mounted) setState(() => _id = last);
   }
 
   Future<void> _delete(RecordFile f) async {
@@ -236,13 +186,28 @@ class _PreviewState extends ConsumerState<_Preview> {
     );
     final uploader = f.uploaderId;
     final title = widget.taskTitle(f.workItemId);
-    final facts = <(String, String, Color?)>[
-      if (title != null) (l.uiArchiveFactTask, l.short(title), null),
-      (l.uiArchiveFactTag, l.tagLabel(f.tag), c.tag(f.tag)),
+    final task = catalog?.task(f.workItemId);
+    void openTask() {
+      final code = task?.code;
+      if (code == null) return;
+      Navigator.of(context).pop();
+      if (widget.host.mounted) widget.host.appNav.openTask(code);
+    }
+
+    final facts = <(String, String, Color?, VoidCallback?)>[
+      if (title != null)
+        (
+          l.uiArchiveFactTask,
+          l.short(title),
+          null,
+          task == null ? null : openTask,
+        ),
+      (l.uiArchiveFactTag, l.tagLabel(f.tag), c.tag(f.tag), null),
       (
         l.uiArchiveFactBy,
         (uploader == null ? null : catalog?.nameOf(uploader)) ??
             l.uiArchiveUploaderUnknown,
+        null,
         null,
       ),
     ];
@@ -267,36 +232,46 @@ class _PreviewState extends ConsumerState<_Preview> {
         Semantics(
           image: true,
           label: l.uiArchivePreviewArea,
-          child: AspectRatio(
-            aspectRatio: 4 / 3,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: c.surfaceRaised,
-                borderRadius: BorderRadius.circular(NizamioRadius.group),
-                border: Border.all(color: c.border),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(NizamioRadius.group),
-                child:
-                    f.kind == ArchiveFileKind.image ||
-                        f.kind == ArchiveFileKind.pdf
-                    ? _ArchiveDocument(folder: widget.code, file: f)
-                    : Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: c.surface,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            l.kindShort(f.kind),
-                            style: t.monoSm.copyWith(color: c.textMuted),
+          onTapHint: l.uiArchiveFullscreen,
+          child: GestureDetector(
+            onTap: () => _fullscreen(list, f),
+            onHorizontalDragEnd: list.length < 2
+                ? null
+                : (d) {
+                    final v = d.primaryVelocity ?? 0;
+                    if (v.abs() > _swipeVelocity) go(v < 0 ? 1 : -1);
+                  },
+            child: AspectRatio(
+              aspectRatio: 4 / 3,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: c.surfaceRaised,
+                  borderRadius: BorderRadius.circular(NizamioRadius.group),
+                  border: Border.all(color: c.border),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(NizamioRadius.group),
+                  child:
+                      f.kind == ArchiveFileKind.image ||
+                          f.kind == ArchiveFileKind.pdf
+                      ? ArchiveDocumentView(folder: widget.code, file: f)
+                      : Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: c.surface,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              l.kindShort(f.kind),
+                              style: t.monoSm.copyWith(color: c.textMuted),
+                            ),
                           ),
                         ),
-                      ),
+                ),
               ),
             ),
           ),
@@ -316,47 +291,58 @@ class _PreviewState extends ConsumerState<_Preview> {
             child: Column(
               children: [
                 for (var k = 0; k < facts.length; k++)
-                  Container(
-                    constraints: const BoxConstraints(
-                      minHeight: NizamioSize.tap,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      border: k > 0
-                          ? Border(top: BorderSide(color: c.border))
-                          : null,
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          facts[k].$1,
-                          style: t.bodyMd.copyWith(color: c.textMuted),
-                        ),
-                        const Gap(NizamioSpacing.space3),
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              if (facts[k].$3 case final dot?) ...[
-                                NzDot(color: dot, size: 7),
-                                const Gap(6),
-                              ],
-                              Flexible(
-                                child: Text(
-                                  facts[k].$2,
-                                  textAlign: TextAlign.right,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: t.bodyMd,
-                                ),
-                              ),
-                            ],
+                  InkWell(
+                    onTap: facts[k].$4,
+                    child: Container(
+                      constraints: const BoxConstraints(
+                        minHeight: NizamioSize.tap,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        border: k > 0
+                            ? Border(top: BorderSide(color: c.border))
+                            : null,
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            facts[k].$1,
+                            style: t.bodyMd.copyWith(color: c.textMuted),
                           ),
-                        ),
-                      ],
+                          const Gap(NizamioSpacing.space3),
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                if (facts[k].$3 case final dot?) ...[
+                                  NzDot(color: dot, size: 7),
+                                  const Gap(6),
+                                ],
+                                Flexible(
+                                  child: Text(
+                                    facts[k].$2,
+                                    textAlign: TextAlign.right,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: t.bodyMd,
+                                  ),
+                                ),
+                                if (facts[k].$4 != null) ...[
+                                  const Gap(NizamioSpacing.space1),
+                                  NzIcon(
+                                    NzIcons.chevronRight,
+                                    size: NizamioSize.iconSizeSm,
+                                    color: c.textMuted,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
               ],
@@ -375,11 +361,6 @@ class _PreviewState extends ConsumerState<_Preview> {
               ),
             ),
             const Gap(NizamioSpacing.space1),
-            NzIconButton.circle(
-              icon: NzIcons.tag,
-              semanticLabel: l.uiArchiveRetag,
-              onPressed: () => _toast(l.uiArchiveRetagSoon),
-            ),
             NzIconButton.circle(
               icon: NzIcons.folderMove,
               semanticLabel: l.uiArchiveMove,

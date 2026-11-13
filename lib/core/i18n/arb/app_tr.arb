@@ -1285,10 +1285,6 @@
   "@uiArchiveUploadShort": {
     "description": "ui.archive.upload_short"
   },
-  "uiArchiveUploadSoon": "Dosya yükleme sonraki adımda tasarlanacak",
-  "@uiArchiveUploadSoon": {
-    "description": "ui.archive.upload_soon"
-  },
   "uiArchiveStorage": "Depolama",
   "@uiArchiveStorage": {
     "description": "ui.archive.storage"
@@ -1469,10 +1465,6 @@
   "@uiArchiveDownloading": {
     "description": "ui.archive.downloading"
   },
-  "uiArchiveRetag": "Etiketi değiştir",
-  "@uiArchiveRetag": {
-    "description": "ui.archive.retag"
-  },
   "uiArchiveMove": "Başka klasöre taşı",
   "@uiArchiveMove": {
     "description": "ui.archive.move"
@@ -1480,10 +1472,6 @@
   "uiArchiveDelete": "Dosyayı sil",
   "@uiArchiveDelete": {
     "description": "ui.archive.delete"
-  },
-  "uiArchiveRetagSoon": "Etiket seçimi sonraki adımda tasarlanacak",
-  "@uiArchiveRetagSoon": {
-    "description": "ui.archive.retag_soon"
   },
   "uiArchiveMoveSoon": "Klasör seçimi sonraki adımda tasarlanacak",
   "@uiArchiveMoveSoon": {
@@ -1604,6 +1592,34 @@
   "uiArchiveFolderMissing": "Klasör bulunamadı",
   "@uiArchiveFolderMissing": {
     "description": "ui.archive.folder_missing"
+  },
+  "uiArchiveFullscreen": "Tam ekranda aç",
+  "@uiArchiveFullscreen": {
+    "description": "ui.archive.fullscreen"
+  },
+  "uiArchiveSummaryFiles": "Dosya",
+  "@uiArchiveSummaryFiles": {
+    "description": "ui.archive.summary_files"
+  },
+  "uiArchiveSummarySize": "Toplam boyut",
+  "@uiArchiveSummarySize": {
+    "description": "ui.archive.summary_size"
+  },
+  "uiArchiveSummaryKinds": "Tür dağılımı",
+  "@uiArchiveSummaryKinds": {
+    "description": "ui.archive.summary_kinds"
+  },
+  "uiArchiveSummaryPartial": "Kısmi sayım; arşiv çok büyük",
+  "@uiArchiveSummaryPartial": {
+    "description": "ui.archive.summary_partial"
+  },
+  "uiArchiveSummaryNoFiles": "Henüz dosya yok",
+  "@uiArchiveSummaryNoFiles": {
+    "description": "ui.archive.summary_no_files"
+  },
+  "uiArchiveUploadTaskDesc": "Dosya seçtiğiniz göreve yüklenir",
+  "@uiArchiveUploadTaskDesc": {
+    "description": "ui.archive.upload_task_desc"
   },
   "uiButtonsBusy": "Meşgul",
   "@uiButtonsBusy": {

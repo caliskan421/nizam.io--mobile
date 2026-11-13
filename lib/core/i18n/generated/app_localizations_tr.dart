@@ -1106,9 +1106,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveUploadShort => 'Yükle';
 
   @override
-  String get uiArchiveUploadSoon => 'Dosya yükleme sonraki adımda tasarlanacak';
-
-  @override
   String get uiArchiveStorage => 'Depolama';
 
   @override
@@ -1244,16 +1241,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveDownloading => 'indiriliyor';
 
   @override
-  String get uiArchiveRetag => 'Etiketi değiştir';
-
-  @override
   String get uiArchiveMove => 'Başka klasöre taşı';
 
   @override
   String get uiArchiveDelete => 'Dosyayı sil';
-
-  @override
-  String get uiArchiveRetagSoon => 'Etiket seçimi sonraki adımda tasarlanacak';
 
   @override
   String get uiArchiveMoveSoon => 'Klasör seçimi sonraki adımda tasarlanacak';
@@ -1344,6 +1335,27 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiArchiveFolderMissing => 'Klasör bulunamadı';
+
+  @override
+  String get uiArchiveFullscreen => 'Tam ekranda aç';
+
+  @override
+  String get uiArchiveSummaryFiles => 'Dosya';
+
+  @override
+  String get uiArchiveSummarySize => 'Toplam boyut';
+
+  @override
+  String get uiArchiveSummaryKinds => 'Tür dağılımı';
+
+  @override
+  String get uiArchiveSummaryPartial => 'Kısmi sayım; arşiv çok büyük';
+
+  @override
+  String get uiArchiveSummaryNoFiles => 'Henüz dosya yok';
+
+  @override
+  String get uiArchiveUploadTaskDesc => 'Dosya seçtiğiniz göreve yüklenir';
 
   @override
   String get uiButtonsBusy => 'Meşgul';

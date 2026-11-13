@@ -2020,12 +2020,6 @@ abstract class AppLocalizations {
   /// **'Yükle'**
   String get uiArchiveUploadShort;
 
-  /// ui.archive.upload_soon
-  ///
-  /// In tr, this message translates to:
-  /// **'Dosya yükleme sonraki adımda tasarlanacak'**
-  String get uiArchiveUploadSoon;
-
   /// ui.archive.storage
   ///
   /// In tr, this message translates to:
@@ -2296,12 +2290,6 @@ abstract class AppLocalizations {
   /// **'indiriliyor'**
   String get uiArchiveDownloading;
 
-  /// ui.archive.retag
-  ///
-  /// In tr, this message translates to:
-  /// **'Etiketi değiştir'**
-  String get uiArchiveRetag;
-
   /// ui.archive.move
   ///
   /// In tr, this message translates to:
@@ -2313,12 +2301,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Dosyayı sil'**
   String get uiArchiveDelete;
-
-  /// ui.archive.retag_soon
-  ///
-  /// In tr, this message translates to:
-  /// **'Etiket seçimi sonraki adımda tasarlanacak'**
-  String get uiArchiveRetagSoon;
 
   /// ui.archive.move_soon
   ///
@@ -2499,6 +2481,48 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Klasör bulunamadı'**
   String get uiArchiveFolderMissing;
+
+  /// ui.archive.fullscreen
+  ///
+  /// In tr, this message translates to:
+  /// **'Tam ekranda aç'**
+  String get uiArchiveFullscreen;
+
+  /// ui.archive.summary_files
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya'**
+  String get uiArchiveSummaryFiles;
+
+  /// ui.archive.summary_size
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplam boyut'**
+  String get uiArchiveSummarySize;
+
+  /// ui.archive.summary_kinds
+  ///
+  /// In tr, this message translates to:
+  /// **'Tür dağılımı'**
+  String get uiArchiveSummaryKinds;
+
+  /// ui.archive.summary_partial
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısmi sayım; arşiv çok büyük'**
+  String get uiArchiveSummaryPartial;
+
+  /// ui.archive.summary_no_files
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz dosya yok'**
+  String get uiArchiveSummaryNoFiles;
+
+  /// ui.archive.upload_task_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya seçtiğiniz göreve yüklenir'**
+  String get uiArchiveUploadTaskDesc;
 
   /// ui.buttons.busy
   ///

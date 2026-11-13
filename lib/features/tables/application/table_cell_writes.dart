@@ -1,37 +1,51 @@
 part of 'table_controller.dart';
 
-const _setCellsAction = 'set_cells';
+/// Gönderilen (uçuştaki ya da bekletilen) `set_cells` batch'i: gövdesi ve işlem anahtarı
+/// DEĞİŞMEZ. Sonucu bilinmeyen gönderim aynı gövde+anahtarla yinelenir (sunucu yazdıysa
+/// `replayed` makbuz döner); yeni düzenlemeler kuyrukta bunun arkasında bekler.
+final class _Batch {
+  _Batch(List<TableCellWrite> cells, this.key)
+    : cells = List.unmodifiable(cells);
+  final List<TableCellWrite> cells;
+  final String key;
+  bool has(TableCellKey k) => cells.any((w) => w.key == k);
+  TableCellWrite? of(TableCellKey k) =>
+      cells.where((w) => w.key == k).firstOrNull;
+}
 
 /// Hücre yazımı: düzenleme yerelde hemen görünür, [TableWriteQueue]'da birleşir ve
 /// [TableController.writeDebounce] sessizlikten sonra (ya da 100 hücre dolunca) tek
-/// `set_cells` ile gider. Aynı anda tek batch uçuştadır. 409 `tables.cell_conflict` bütün
-/// batch'i geri aldırır: tablo yeniden okunur; sunucu sürümü okunan sürümle aynı kalan
-/// hücreler (çakışmayı başka hücre doğurdu) yeni anahtarla yeniden gönderilir, başkasının
-/// değiştirdiği hücreler [TableView.conflicts]'e girer ve sunucu değeri gösterilir. Sonucu
-/// bilinmeyen hata (zaman aşımı/ağ/5xx) batch'i kuyrukta AYNI anahtarla bekletir
-/// ([retryWrites]).
+/// `set_cells` ile gider. Aynı anda tek batch vardır ([_Batch]).
+///
+/// CAS tabanı: kuyruğa giren düzenleme hücrenin OKUNAN sürümünü taşır; hücre batch'teyse
+/// batch öğesinin tabanını. Taban yalnız KENDİ başarılı makbuzumuzla taşınır; çakışma
+/// sonrası yabancı sürüme asla taşınmaz (başkasının değeri sessizce ezilmez).
+///
+/// 409 `tables.cell_conflict` → tablo yeniden okunur; sunucu sürümü tabanla aynı kalan
+/// hücreler yeni anahtarla yeniden gider, başkasının değiştirdiği hücreler (batch'teki ve
+/// kuyruktaki) [TableView.conflicts]'e girer, sunucu değeri görünür. Çözümleme okuması düşerse
+/// batch korunur ve [retryWrites] beklenir. Sonucu bilinmeyen hata ve 429 batch'i aynı
+/// gövde+anahtarla tutar. Gönderim hiçbir zaman fırlatmaz; sonuç görünümdedir.
 extension TableCellWrites on TableController {
   /// Hücre düzenlemesi. Salt okunur tabloda, düzenlenemeyen tipte ya da gizlenmiş
   /// (redakte) hücrede bir şey yapmaz (redakte değer körlemesine geri yazılamaz, K-14).
   void editCell(String rowId, String columnId, Object? value) {
-    final v = _view;
-    if (v == null || v.readOnly) return;
+    final v = _base;
+    if (v == null || !v.editable) return;
     final column = v.column(columnId);
     if (column == null || !editableColumnKinds.contains(column.kind)) return;
     final current = v.cell(rowId, columnId);
     if (current.redacted) return;
     final key = TableCellKey(rowId, columnId);
-    final inflight = _inflight?.any((w) => w.key == key) ?? false;
     _queue.put(
       TableCellWrite(
         rowId: rowId,
         columnId: columnId,
         value: value,
-        // Uçuştaki aynı hücrenin tabanı makbuzla taşınır (rebase).
-        version: inflight ? -1 : current.version,
+        version: _batch?.of(key)?.version ?? current.version,
       ),
     );
-    _set(_overlay(v.copyWith(conflicts: {...v.conflicts}..remove(key))));
+    _update((b) => b.copyWith(conflicts: {...b.conflicts}..remove(key)));
     _alive ??= _keepAlive();
     if (_queue.length >= TableWriteQueue.maxBatch) {
       unawaited(flush());
@@ -44,60 +58,54 @@ extension TableCellWrites on TableController {
     }
   }
 
-  /// Bekleyen hücreleri hemen gönderir (ekrandan çıkarken, komuttan önce). Gönderim
-  /// sürüyorsa onun bitişini bekler (komut uçuştaki hücre yazımını geçmez). Hata
-  /// fırlatmaz; sonuç [TableView.writeError] ve [TableView.conflicts]'tedir.
+  /// Bekleyen hücreleri gönderir. Gönderim sürüyorsa onun bitişini bekler (komut uçuştaki
+  /// hücre yazımını geçmez). Hiç fırlatmaz.
   Future<void> flush() {
     _debounce?.cancel();
     return _flushing ??= _drain().whenComplete(() => _flushing = null);
   }
 
   Future<void> _drain() async {
-    if (_hold != null) return;
-    while (_queue.isNotEmpty && _mounted && _hold == null) {
-      final batch = _queue.take();
-      if (batch.any((w) => w.version < 0)) {
-        // Tabanı uçuştaki yanıtı bekleyen öğe kalmışsa (olmamalı) güncel sürümle gider.
-        final v = _view!;
-        for (var i = 0; i < batch.length; i++) {
-          final w = batch[i];
-          if (w.version >= 0) continue;
-          batch[i] = TableCellWrite(
-            rowId: w.rowId,
-            columnId: w.columnId,
-            value: w.value,
-            version: v.cells[w.key]?.version ?? 0,
-          );
+    try {
+      while (_mounted) {
+        if (_batch == null) {
+          if (_queue.isEmpty) break;
+          _batch = _Batch(_queue.take(), newRequestKey());
+        } else if (_batchHeld) {
+          break;
         }
+        if (!await _send(_batch!)) break;
       }
-      _inflight = batch;
-      final ok = await _send(batch);
-      _inflight = null;
-      if (!ok) break;
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tables);
+      _update((b) => b.copyWith(writeError: () => toApiError(e)));
     }
-    if (_mounted && _view != null) _set(_overlay(_view!));
-    if (_queue.isEmpty && _inflight == null) {
+    _publish();
+    if (_queue.isEmpty && _batch == null) {
       _alive?.close();
       _alive = null;
     }
   }
 
-  /// Sonucu bilinmeyen gönderimi kullanıcı isteğiyle yineler (AYNI işlem anahtarı).
+  /// Bekletilen (sonucu bilinmeyen ya da çözümü yarım kalan) gönderimi kullanıcı isteğiyle
+  /// yineler.
   Future<void> retryWrites() async {
-    final v = _view;
-    if (v != null) _set(v.copyWith(writeError: () => null));
+    _batchHeld = false;
+    _update((b) => b.copyWith(writeError: () => null));
     await flush();
   }
 
-  Future<bool> _send(List<TableCellWrite> batch) async {
-    final op = SetCells(batch);
-    final (keys, key) = _keys.keyFor(_setCellsAction, op.signature);
-    _keys = keys;
+  Future<bool> _send(_Batch batch) async {
     final generation = _generation;
     try {
-      final r = await _repo.apply(_scope, _id, op, requestKey: key);
-      _keys = _keys.clear(_setCellsAction);
+      final r = await _repo.apply(
+        _scope,
+        _id,
+        SetCells(batch.cells),
+        requestKey: batch.key,
+      );
       if (generation != _generation || !_mounted) return false;
+      _batch = null;
       _applyReceipt(batch, r);
       return true;
     } on ApiError catch (e, st) {
@@ -107,86 +115,98 @@ extension TableCellWrites on TableController {
     }
   }
 
-  void _applyReceipt(List<TableCellWrite> batch, TableReceipt r) {
+  /// Makbuz: yazılan hücrelerin YENİ sürümü. Görünümdeki sürüm zaten daha büyükse (araya
+  /// yabancı değişikliği taşıyan snapshot girdi) eski makbuz uygulanmaz.
+  void _applyReceipt(_Batch batch, TableReceipt r) {
     ownSequences.add(r.sequence);
-    final v = _view!;
-    final cells = Map.of(v.cells);
-    for (final w in batch) {
-      final version = r.cellVersions[w.key] ?? w.version + 1;
-      cells[w.key] = TableCellData(value: w.value, version: version);
-      _queue.rebase(w.key, version);
-    }
-    _set(
-      _overlay(
-        v.copyWith(
-          cells: cells,
-          meta: v.meta.copyWith(
-            sequence: r.sequence > v.meta.sequence ? r.sequence : null,
-          ),
-          writeError: () => null,
-          undoSequence: () => r.sequence,
+    _update((b) {
+      final cells = Map.of(b.cells);
+      for (final w in batch.cells) {
+        final version = r.cellVersions[w.key] ?? w.version + 1;
+        final current = cells[w.key]?.version ?? 0;
+        if (version > current) {
+          cells[w.key] = TableCellData(value: w.value, version: version);
+          _queue.rebase(w.key, version);
+        }
+      }
+      return b.copyWith(
+        cells: cells,
+        meta: b.meta.copyWith(
+          sequence: r.sequence > b.meta.sequence ? r.sequence : null,
         ),
-      ),
-    );
+        writeError: () => null,
+        undoSequence: () => r.sequence,
+      );
+    });
   }
 
-  Future<bool> _sendFailed(List<TableCellWrite> batch, ApiError e) async {
-    // Batch ya kuyruğa döner ya da düşer; artık uçuşta değildir (görünüm üstüne binmez).
-    _inflight = null;
-    if (e.code == 'tables.cell_conflict') {
-      _keys = _keys.clear(_setCellsAction);
-      await _resolveConflict(batch);
-      return true;
-    }
+  Future<bool> _sendFailed(_Batch batch, ApiError e) async {
+    if (e.code == 'tables.cell_conflict') return _resolveConflict(batch);
     if (e.code == 'platform.rate_limited' || e.status == 429) {
-      // Sunucu işlemedi: aynı gövde Retry-After sonra kendiliğinden gider.
-      _queue.restore(batch);
+      // Sunucu işlemedi: aynı gövde+anahtar Retry-After sonra kendiliğinden gider.
+      _batchHeld = true;
+      _hold?.cancel();
       _hold = Timer(e.retryAfter ?? const Duration(seconds: 2), () {
         _hold = null;
+        _batchHeld = false;
         unawaited(flush());
       });
       return false;
     }
     if (isOutcomeUnknown(e)) {
-      _queue.restore(batch);
-      _set(_overlay(_view!.copyWith(writeError: () => e)));
+      _batchHeld = true;
+      _update((b) => b.copyWith(writeError: () => e));
       return false;
     }
-    _keys = _keys.clear(_setCellsAction);
     // Kalıcı ret (422/403/404/409 diğer): batch düşer, sunucu değeri geri gelir.
+    _batch = null;
     final forbidden = e.code == 'tables.forbidden';
     if (forbidden) _queue.clear();
-    _set(
-      _view!.copyWith(readOnly: forbidden ? true : null, writeError: () => e),
+    _update(
+      (b) => b.copyWith(readOnly: forbidden ? true : null, writeError: () => e),
     );
     try {
       await _reload();
-    } on ApiError catch (e, st) {
-      reportUnexpected(e, st, source: ReportSource.tables);
-      // Yeniden okuma da düştüyse görünüm eski kalır; ilk hata zaten gösteriliyor.
+    } on ApiError catch (re, st) {
+      reportUnexpected(re, st, source: ReportSource.tables);
+      _needsReload = true;
     }
     return !forbidden;
   }
 
-  /// Bayat sürüm: tablo yeniden okunur; tabanı değişmeyen hücreler yeniden kuyruğa,
-  /// başkasının değiştirdiği hücreler çakışma olarak bildirilir (sunucu değeri kalır).
-  Future<void> _resolveConflict(List<TableCellWrite> batch) async {
-    await _reload();
-    final v = _view;
-    if (v == null) return;
+  /// Bayat sürüm: tablo yeniden okunur; tabanı değişmeyen hücreler yeniden gönderilir (yeni
+  /// anahtar: önceki istek reddedildi), başkasının değiştirdiği hücreler — kuyruktaki daha
+  /// yeni düzenlemeler dahil — çakışma olarak bildirilir. Okuma düşerse batch yeni anahtarla
+  /// bekletilir, kuyruk dokunulmaz, hata görünür.
+  Future<bool> _resolveConflict(_Batch batch) async {
+    try {
+      await _reload();
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tables);
+      _batch = _Batch(batch.cells, newRequestKey());
+      _batchHeld = true;
+      _update((b) => b.copyWith(writeError: () => e));
+      return false;
+    }
+    final v = _base!;
     final conflicts = {...v.conflicts};
     final again = <TableCellWrite>[];
-    for (final w in batch) {
-      if (_queue[w.key] != null) continue; // daha yeni düzenleme zaten bekliyor
+    for (final w in batch.cells) {
       final server = v.cells[w.key] ?? TableCellData.empty;
+      final newer = _queue[w.key];
       if (server.version == w.version) {
-        again.add(w);
-      } else if (!_sameValue(server.value, w.value)) {
-        conflicts.add(w.key);
+        if (newer == null) again.add(w);
+      } else {
+        if (newer != null) _queue.removeWhere((q) => q.key == w.key);
+        if (!_sameValue(server.value, newer?.value ?? w.value)) {
+          conflicts.add(w.key);
+        }
       }
     }
+    _batch = null;
     _queue.restore(again);
-    _set(_overlay(v.copyWith(conflicts: conflicts)));
+    _update((b) => b.copyWith(conflicts: conflicts));
+    return true;
   }
 
   bool _sameValue(Object? a, Object? b) {
@@ -197,13 +217,9 @@ extension TableCellWrites on TableController {
       }
       return true;
     }
-    if (a is num && b is num) return a == b;
     return a == b;
   }
 
   /// Çakışma bildirimini kapatır.
-  void dismissConflicts() {
-    final v = _view;
-    if (v != null && v.conflicts.isNotEmpty) _set(v.copyWith(conflicts: {}));
-  }
+  void dismissConflicts() => _update((b) => b.copyWith(conflicts: {}));
 }

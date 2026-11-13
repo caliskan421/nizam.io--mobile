@@ -242,6 +242,12 @@ const errorPathExceptions = <String, ErrorPathException>{
         'text/event-stream için ham Dio; hata `streamApiError` ile sınıflandırılır ve işlem '
         'kimliği isteğin doğrulanmış `openapi.operationId` (streamChatEvents) metaverisinden gelir.',
       ),
+  'features/tables/application/table_controller.dart::TableController._reload#onError':
+      ErrorPathException(
+        1,
+        'KUYRUK: snapshot okuma zincirinin sürmesi için ayrılmış kol; aynı hata `run` geleceğiyle '
+        'çağırana (yakalama, komut yan okuması, çakışma çözümü) gider ve orada raporlanır.',
+      ),
   'features/tables/data/table_api_repository.dart::ApiTablesRepository.stream#rawDio':
       ErrorPathException(
         1,

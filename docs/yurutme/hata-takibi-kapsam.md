@@ -9,9 +9,9 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | Sahip | Yol sayısı |
 |---|---|
 | denetim akışı | 1 |
-| iletilir | 17 |
-| istisna | 60 |
-| rapor | 184 |
+| iletilir | 16 |
+| istisna | 61 |
+| rapor | 188 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -64,6 +64,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/scope/application/scope_selection_controller.dart::ScopeSelectionController.clear#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; AsyncError durumu providerDidFail ile raporlanır. |
 | `features/scope/application/scope_selection_controller.dart::ScopeSelectionController.select#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; AsyncError durumu providerDidFail ile raporlanır. |
 | `features/server/application/server_connect_controller.dart::ServerConnectController.connect#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; sunucu bağ doğrulama hatalarının beklenenleri (ApiError) süzülür, beklenmeyen providerDidFail ile raporlanır. |
+| `features/tables/application/table_controller.dart::TableController._reload#onError` | 1 | KUYRUK: snapshot okuma zincirinin sürmesi için ayrılmış kol; aynı hata `run` geleceğiyle çağırana (yakalama, komut yan okuması, çakışma çözümü) gider ve orada raporlanır. |
 | `features/tables/data/table_api_repository.dart::ApiTablesRepository.stream#rawDio` | 1 | text/event-stream için ham Dio (üretilmiş istemci akışı okuyamaz); hata `streamApiError` ile sınıflandırılır ve işlem kimliği isteğin doğrulanmış `openapi.operationId` (streamTableChanges / streamPersonalTableChanges) metaverisinden gelir. |
 | `features/tasks/application/task_list_filter.dart::taskListCatalog#asyncError` | 1 | YENİDEN: kaynak sağlayıcı hatası aynı nesneyle taşınır. |
 | `features/tasks/data/download_sink.dart::FileDownloadSink._reserve#catch` | 1 | Özel oluşturma çakışması (ad dolu) FileSystemException ile gelir ve sıradaki kopya adına geçilir; ad dolu DEĞİLSE aynı hata koşulsuz kanıtla (typeSync) yeniden fırlatılır ve `save` çağıranı raporlar. Çakışma normal akıştır, yarışta tek sahip. |
@@ -253,12 +254,16 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/scope/application/scope_selection_controller.dart` | `ScopeSelectionController.clear` | guard | istisna | 1 |
 | `features/scope/application/scope_selection_controller.dart` | `ScopeSelectionController.select` | guard | istisna | 1 |
 | `features/server/application/server_connect_controller.dart` | `ServerConnectController.connect` | guard | istisna | 1 |
+| `features/tables/application/table_cell_writes.dart` | `TableCellWrites._drain` | catch | rapor | 1 |
+| `features/tables/application/table_cell_writes.dart` | `TableCellWrites._resolveConflict` | catch | rapor | 1 |
 | `features/tables/application/table_cell_writes.dart` | `TableCellWrites._sendFailed` | catch | rapor | 1 |
 | `features/tables/application/table_cell_writes.dart` | `TableCellWrites._send` | catch | rapor | 1 |
-| `features/tables/application/table_controller.dart` | `TableController._command` | catch | rapor | 1 |
+| `features/tables/application/table_commands.dart` | `TableCommands._command` | catch | rapor | 1 |
+| `features/tables/application/table_commands.dart` | `TableCommands._sideRead` | catch | rapor | 1 |
+| `features/tables/application/table_controller.dart` | `TableController._reload` | onError | istisna | 1 |
 | `features/tables/application/table_controller.dart` | `TableController._resolveScope` | catch | rapor | 1 |
 | `features/tables/application/table_controller.dart` | `TableController.catchUp` | catch | rapor | 1 |
-| `features/tables/application/table_controller.dart` | `TableController.loadMore` | catch | iletilir | 1 |
+| `features/tables/application/table_controller.dart` | `TableController.loadMore` | catch | rapor | 1 |
 | `features/tables/application/table_sync_controller.dart` | `TableSyncController._leavePresence` | catch | rapor | 1 |
 | `features/tables/application/table_sync_controller.dart` | `TableSyncController._run` | onError | rapor | 1 |
 | `features/tables/application/table_sync_controller.dart` | `TableSyncController._sendPresence` | catch | rapor | 1 |

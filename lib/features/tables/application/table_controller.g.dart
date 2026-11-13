@@ -8,30 +8,48 @@ part of 'table_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Tek tablonun ekranı: snapshot yükleme, hücre yazımı (CAS + birleştirme; parça dosya
-/// `table_cell_writes.dart`), komutlar ve olay günlüğünden yakalama ([catchUp]).
+/// Tek tablonun ekranı: snapshot yükleme, olay günlüğünden yakalama ([catchUp]), hücre
+/// yazımı (`table_cell_writes.dart`) ve komutlar (`table_commands.dart`).
 ///
-/// Olay imleci [cursor]: yalnız tutarlı bir snapshot'ın `table.sequence`'i ya da başarılı
-/// `changes` yanıtının `cursor`'ı ile ilerler; kendi makbuzlarımız imleci ilerletmez (aradaki
-/// yabancı olay atlanmasın). Akış döngüsü `table_sync_controller.dart`'tadır.
+/// Görünüm iki katmandır: sunucudan türeyen taban [_base] (snapshot + kendi makbuzlarımız) ve
+/// üstüne uygulanan bekleyen/uçuştaki hücre düzenlemeleri. Taban monotondur: daha eski bir
+/// snapshot (sırası uygulanmış snapshot'tan küçük) uygulanmaz; snapshot ya da makbuz bir hücreyi
+/// daha küçük sürüme geri almaz. Snapshot okumaları sıraya dizilir (tek zincir).
+///
+/// Olay imleci [cursor]: yalnız changes sayfalarının gerektirdiği yeniden okuma/yorum
+/// güncellemesi BAŞARIYLA bitince ya da tutarlı snapshot uygulanınca ilerler; kendi
+/// makbuzlarımız imleci ilerletmez. Komut sonrası yan okuma düşerse [_needsReload] kalıcıdır;
+/// sonraki yakalama tabloyu yeniden okur.
 
 @ProviderFor(TableController)
 final tableControllerProvider = TableControllerFamily._();
 
-/// Tek tablonun ekranı: snapshot yükleme, hücre yazımı (CAS + birleştirme; parça dosya
-/// `table_cell_writes.dart`), komutlar ve olay günlüğünden yakalama ([catchUp]).
+/// Tek tablonun ekranı: snapshot yükleme, olay günlüğünden yakalama ([catchUp]), hücre
+/// yazımı (`table_cell_writes.dart`) ve komutlar (`table_commands.dart`).
 ///
-/// Olay imleci [cursor]: yalnız tutarlı bir snapshot'ın `table.sequence`'i ya da başarılı
-/// `changes` yanıtının `cursor`'ı ile ilerler; kendi makbuzlarımız imleci ilerletmez (aradaki
-/// yabancı olay atlanmasın). Akış döngüsü `table_sync_controller.dart`'tadır.
+/// Görünüm iki katmandır: sunucudan türeyen taban [_base] (snapshot + kendi makbuzlarımız) ve
+/// üstüne uygulanan bekleyen/uçuştaki hücre düzenlemeleri. Taban monotondur: daha eski bir
+/// snapshot (sırası uygulanmış snapshot'tan küçük) uygulanmaz; snapshot ya da makbuz bir hücreyi
+/// daha küçük sürüme geri almaz. Snapshot okumaları sıraya dizilir (tek zincir).
+///
+/// Olay imleci [cursor]: yalnız changes sayfalarının gerektirdiği yeniden okuma/yorum
+/// güncellemesi BAŞARIYLA bitince ya da tutarlı snapshot uygulanınca ilerler; kendi
+/// makbuzlarımız imleci ilerletmez. Komut sonrası yan okuma düşerse [_needsReload] kalıcıdır;
+/// sonraki yakalama tabloyu yeniden okur.
 final class TableControllerProvider
     extends $AsyncNotifierProvider<TableController, TableView> {
-  /// Tek tablonun ekranı: snapshot yükleme, hücre yazımı (CAS + birleştirme; parça dosya
-  /// `table_cell_writes.dart`), komutlar ve olay günlüğünden yakalama ([catchUp]).
+  /// Tek tablonun ekranı: snapshot yükleme, olay günlüğünden yakalama ([catchUp]), hücre
+  /// yazımı (`table_cell_writes.dart`) ve komutlar (`table_commands.dart`).
   ///
-  /// Olay imleci [cursor]: yalnız tutarlı bir snapshot'ın `table.sequence`'i ya da başarılı
-  /// `changes` yanıtının `cursor`'ı ile ilerler; kendi makbuzlarımız imleci ilerletmez (aradaki
-  /// yabancı olay atlanmasın). Akış döngüsü `table_sync_controller.dart`'tadır.
+  /// Görünüm iki katmandır: sunucudan türeyen taban [_base] (snapshot + kendi makbuzlarımız) ve
+  /// üstüne uygulanan bekleyen/uçuştaki hücre düzenlemeleri. Taban monotondur: daha eski bir
+  /// snapshot (sırası uygulanmış snapshot'tan küçük) uygulanmaz; snapshot ya da makbuz bir hücreyi
+  /// daha küçük sürüme geri almaz. Snapshot okumaları sıraya dizilir (tek zincir).
+  ///
+  /// Olay imleci [cursor]: yalnız changes sayfalarının gerektirdiği yeniden okuma/yorum
+  /// güncellemesi BAŞARIYLA bitince ya da tutarlı snapshot uygulanınca ilerler; kendi
+  /// makbuzlarımız imleci ilerletmez. Komut sonrası yan okuma düşerse [_needsReload] kalıcıdır;
+  /// sonraki yakalama tabloyu yeniden okur.
   TableControllerProvider._({
     required TableControllerFamily super.from,
     required String super.argument,
@@ -68,14 +86,20 @@ final class TableControllerProvider
   }
 }
 
-String _$tableControllerHash() => r'bea2fabe416ecd9ad69b5da5a94ce3080197b2e9';
+String _$tableControllerHash() => r'c86c2899802506313bf12aa420cfd069d6e4cea6';
 
-/// Tek tablonun ekranı: snapshot yükleme, hücre yazımı (CAS + birleştirme; parça dosya
-/// `table_cell_writes.dart`), komutlar ve olay günlüğünden yakalama ([catchUp]).
+/// Tek tablonun ekranı: snapshot yükleme, olay günlüğünden yakalama ([catchUp]), hücre
+/// yazımı (`table_cell_writes.dart`) ve komutlar (`table_commands.dart`).
 ///
-/// Olay imleci [cursor]: yalnız tutarlı bir snapshot'ın `table.sequence`'i ya da başarılı
-/// `changes` yanıtının `cursor`'ı ile ilerler; kendi makbuzlarımız imleci ilerletmez (aradaki
-/// yabancı olay atlanmasın). Akış döngüsü `table_sync_controller.dart`'tadır.
+/// Görünüm iki katmandır: sunucudan türeyen taban [_base] (snapshot + kendi makbuzlarımız) ve
+/// üstüne uygulanan bekleyen/uçuştaki hücre düzenlemeleri. Taban monotondur: daha eski bir
+/// snapshot (sırası uygulanmış snapshot'tan küçük) uygulanmaz; snapshot ya da makbuz bir hücreyi
+/// daha küçük sürüme geri almaz. Snapshot okumaları sıraya dizilir (tek zincir).
+///
+/// Olay imleci [cursor]: yalnız changes sayfalarının gerektirdiği yeniden okuma/yorum
+/// güncellemesi BAŞARIYLA bitince ya da tutarlı snapshot uygulanınca ilerler; kendi
+/// makbuzlarımız imleci ilerletmez. Komut sonrası yan okuma düşerse [_needsReload] kalıcıdır;
+/// sonraki yakalama tabloyu yeniden okur.
 
 final class TableControllerFamily extends $Family
     with
@@ -95,12 +119,18 @@ final class TableControllerFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Tek tablonun ekranı: snapshot yükleme, hücre yazımı (CAS + birleştirme; parça dosya
-  /// `table_cell_writes.dart`), komutlar ve olay günlüğünden yakalama ([catchUp]).
+  /// Tek tablonun ekranı: snapshot yükleme, olay günlüğünden yakalama ([catchUp]), hücre
+  /// yazımı (`table_cell_writes.dart`) ve komutlar (`table_commands.dart`).
   ///
-  /// Olay imleci [cursor]: yalnız tutarlı bir snapshot'ın `table.sequence`'i ya da başarılı
-  /// `changes` yanıtının `cursor`'ı ile ilerler; kendi makbuzlarımız imleci ilerletmez (aradaki
-  /// yabancı olay atlanmasın). Akış döngüsü `table_sync_controller.dart`'tadır.
+  /// Görünüm iki katmandır: sunucudan türeyen taban [_base] (snapshot + kendi makbuzlarımız) ve
+  /// üstüne uygulanan bekleyen/uçuştaki hücre düzenlemeleri. Taban monotondur: daha eski bir
+  /// snapshot (sırası uygulanmış snapshot'tan küçük) uygulanmaz; snapshot ya da makbuz bir hücreyi
+  /// daha küçük sürüme geri almaz. Snapshot okumaları sıraya dizilir (tek zincir).
+  ///
+  /// Olay imleci [cursor]: yalnız changes sayfalarının gerektirdiği yeniden okuma/yorum
+  /// güncellemesi BAŞARIYLA bitince ya da tutarlı snapshot uygulanınca ilerler; kendi
+  /// makbuzlarımız imleci ilerletmez. Komut sonrası yan okuma düşerse [_needsReload] kalıcıdır;
+  /// sonraki yakalama tabloyu yeniden okur.
 
   TableControllerProvider call(String id) =>
       TableControllerProvider._(argument: id, from: this);
@@ -109,12 +139,18 @@ final class TableControllerFamily extends $Family
   String toString() => r'tableControllerProvider';
 }
 
-/// Tek tablonun ekranı: snapshot yükleme, hücre yazımı (CAS + birleştirme; parça dosya
-/// `table_cell_writes.dart`), komutlar ve olay günlüğünden yakalama ([catchUp]).
+/// Tek tablonun ekranı: snapshot yükleme, olay günlüğünden yakalama ([catchUp]), hücre
+/// yazımı (`table_cell_writes.dart`) ve komutlar (`table_commands.dart`).
 ///
-/// Olay imleci [cursor]: yalnız tutarlı bir snapshot'ın `table.sequence`'i ya da başarılı
-/// `changes` yanıtının `cursor`'ı ile ilerler; kendi makbuzlarımız imleci ilerletmez (aradaki
-/// yabancı olay atlanmasın). Akış döngüsü `table_sync_controller.dart`'tadır.
+/// Görünüm iki katmandır: sunucudan türeyen taban [_base] (snapshot + kendi makbuzlarımız) ve
+/// üstüne uygulanan bekleyen/uçuştaki hücre düzenlemeleri. Taban monotondur: daha eski bir
+/// snapshot (sırası uygulanmış snapshot'tan küçük) uygulanmaz; snapshot ya da makbuz bir hücreyi
+/// daha küçük sürüme geri almaz. Snapshot okumaları sıraya dizilir (tek zincir).
+///
+/// Olay imleci [cursor]: yalnız changes sayfalarının gerektirdiği yeniden okuma/yorum
+/// güncellemesi BAŞARIYLA bitince ya da tutarlı snapshot uygulanınca ilerler; kendi
+/// makbuzlarımız imleci ilerletmez. Komut sonrası yan okuma düşerse [_needsReload] kalıcıdır;
+/// sonraki yakalama tabloyu yeniden okur.
 
 abstract class _$TableController extends $AsyncNotifier<TableView> {
   late final _$args = ref.$arg as String;

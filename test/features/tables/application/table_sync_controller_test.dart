@@ -235,7 +235,9 @@ void main() {
     'presence: bağlanınca ve aralıkla yenilenir; seçim en az aralıkla gider',
     () async {
       final s = await _open(presenceInterval: const Duration(milliseconds: 60));
-      await _ready(s);
+      // Seçim, açılış gönderiminden hemen sonra (aralık dolmadan) yapılır.
+      s.stream.add(TableStreamReady(s.view.meta.sequence));
+      await _settle();
       final sync = s.c.read(tableSyncControllerProvider('t1').notifier);
       final sets = s.repo.presence.where((p) => p.$1 == 'set').length;
       expect(sets, greaterThanOrEqualTo(1));
@@ -243,6 +245,8 @@ void main() {
       sync.select('r2', 'c1'); // aynı ertelemede son seçim gider
       await _settle(50);
       expect(s.repo.presence.where((p) => p.$2 == 'r2'), isNotEmpty);
+      // Ertelemede yalnız son seçim gider (r1 hiç gönderilmez).
+      expect(s.repo.presence.where((p) => p.$2 == 'r1'), isEmpty);
       await _settle(80);
       expect(
         s.repo.presence.where((p) => p.$1 == 'set').length,

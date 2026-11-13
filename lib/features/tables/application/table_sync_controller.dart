@@ -64,7 +64,8 @@ final class TableLiveState {
 /// - Kopma: 0–5 sn jitter + üstel geri çekilme (≤60 sn; `core/domain/stream_reconnect`);
 ///   401/403/404/422 durur, 429 `Retry-After` bekler. Sunucu kapanışı (5 dk bütçe, erişim
 ///   commit'i, belirteç yenilemesi sonrası gözcü) neden bildirmez: normal yeniden bağlanmadır.
-/// - Presence: bağlıyken 10 sn'de bir ve seçim değişince (en az 1 sn arayla) `POST …/presence`; kapanışta `DELETE`.
+/// - Presence: bağlıyken 10 sn'de bir ve seçim değişince; hepsi tek kapıdan (tek uçuş,
+///   en az 1 sn aralık, 429 `Retry-After`) `POST …/presence`; kapanışta `DELETE`.
 @riverpod
 class TableSyncController extends _$TableSyncController {
   TableLiveTiming get _timing => ref.read(tableLiveTimingProvider);
@@ -85,6 +86,9 @@ class TableSyncController extends _$TableSyncController {
   Timer? _presenceLater;
   DateTime? _presenceSent;
   bool _presenceOn = false;
+  bool _presenceInFlight = false;
+  bool _presenceDirty = false;
+  DateTime? _presenceBlockedUntil;
   ({String rowId, String columnId})? _selection;
 
   // Kapanışta (onDispose) ref okunamaz: presence silme bunlarla yapılır.
@@ -240,34 +244,38 @@ class TableSyncController extends _$TableSyncController {
   // ---------------------------------------------------------------- yakalama
 
   /// Sıra ipucu. Tüketilmiş imleçten büyük değilse (çift/eski ipucu) bir şey yapmaz;
-  /// `ready` her zaman yakalar (kopukken kaçan olay olabilir).
+  /// `ready` her zaman yakalar (kopukken kaçan olay olabilir). Uçuşta yakalama varsa tek
+  /// bekleyen işaretlenir.
   void _hint(int sequence, {bool force = false}) {
     if (!force && sequence <= _table.cursor) return;
     if (_syncing) {
       _again = true;
       return;
     }
+    final gen = _gen;
     _coalesceTimer ??= Timer(_timing.coalesce, () {
       _coalesceTimer = null;
-      unawaited(_sync());
+      if (gen == _gen) unawaited(_sync(gen));
     });
   }
 
-  Future<void> _sync() async {
+  /// Tek uçuşlu yakalama. Bu arada akış durdurulduysa (nesil değişti) bekleyen yakalama
+  /// kurulmaz.
+  Future<void> _sync(int gen) async {
     if (!ref.mounted) return;
     _syncing = true;
     try {
       await _table.catchUp();
     } on Object catch (e, st) {
-      // Yakalama düştü (ağ vb.): sonraki ipucu ya da yeniden bağlanma yeniden dener.
+      // Yakalama düştü (ağ vb.): imleç ilerlemedi; sonraki ipucu ya da yeniden bağlanma
+      // aynı olayları yeniden işler.
       reportUnexpected(e, st, source: ReportSource.tables);
     } finally {
       _syncing = false;
     }
-    if (_again && ref.mounted) {
-      _again = false;
-      _hint(0, force: true);
-    }
+    final again = _again;
+    _again = false;
+    if (again && gen == _gen && ref.mounted) _hint(0, force: true);
   }
 
   // ---------------------------------------------------------------- presence
@@ -279,27 +287,16 @@ class TableSyncController extends _$TableSyncController {
         : (rowId: rowId, columnId: columnId);
     if (next == _selection) return;
     _selection = next;
-    if (!_presenceOn) return;
-    final last = _presenceSent;
-    final now = _now();
-    if (last == null || now.difference(last) >= _timing.presenceMinGap) {
-      unawaited(_sendPresence());
-    } else {
-      _presenceLater?.cancel();
-      _presenceLater = Timer(
-        _timing.presenceMinGap - now.difference(last),
-        () => unawaited(_sendPresence()),
-      );
-    }
+    _requestPresence();
   }
 
   void _presenceOnStart() {
     if (_presenceOn) return;
     _presenceOn = true;
-    unawaited(_sendPresence());
+    _requestPresence();
     _presenceTimer = Timer.periodic(
       _timing.presenceInterval,
-      (_) => unawaited(_sendPresence()),
+      (_) => _requestPresence(),
     );
   }
 
@@ -308,19 +305,44 @@ class TableSyncController extends _$TableSyncController {
     _presenceTimer = null;
     _presenceLater?.cancel();
     _presenceLater = null;
+    _presenceDirty = false;
     final wasOn = _presenceOn && _presenceSent != null;
     _presenceOn = false;
-    _presenceSent = null;
     if (leave && wasOn) unawaited(_leavePresence());
   }
 
-  Future<void> _sendPresence() async {
+  /// Bütün presence gönderimlerinin (açılış, periyodik, seçim) TEK kapısı: aynı anda tek
+  /// istek; son gönderimden en az `presenceMinGap`; 429 `Retry-After` süresince gönderim yok.
+  /// Erken istek en erken ana ertelenir ve o andaki seçimi taşır.
+  void _requestPresence() {
     if (!_presenceOn || !ref.mounted) return;
-    _presenceSent = _now();
-    final sel = _selection;
+    if (_presenceInFlight) {
+      _presenceDirty = true;
+      return;
+    }
+    if (_presenceLater != null) return;
+    final now = _now();
+    final last = _presenceSent;
+    var at = last == null ? now : last.add(_timing.presenceMinGap);
+    final blocked = _presenceBlockedUntil;
+    if (blocked != null && blocked.isAfter(at)) at = blocked;
+    if (at.isAfter(now)) {
+      _presenceLater = Timer(at.difference(now), () {
+        _presenceLater = null;
+        _requestPresence();
+      });
+      return;
+    }
+    unawaited(_sendPresence());
+  }
+
+  Future<void> _sendPresence() async {
     final repo = _repo;
     final scope = _scope;
     if (repo == null || scope == null) return;
+    _presenceInFlight = true;
+    _presenceSent = _now();
+    final sel = _selection;
     try {
       await repo.setPresence(
         scope,
@@ -329,8 +351,17 @@ class TableSyncController extends _$TableSyncController {
         columnId: sel?.columnId,
       );
     } on Object catch (e, st) {
-      // Presence yakınsama kaynağı değildir: hata yalnız raporlanır; 429 sonraki turda düzelir.
+      // Presence yakınsama kaynağı değildir: hata raporlanır; 429 sonraki gönderimi bekletir.
       reportUnexpected(e, st, source: ReportSource.tables);
+      if (e is ApiError && e.retryAfter != null) {
+        _presenceBlockedUntil = _now().add(e.retryAfter!);
+      }
+    } finally {
+      _presenceInFlight = false;
+    }
+    if (_presenceDirty) {
+      _presenceDirty = false;
+      _requestPresence();
     }
   }
 

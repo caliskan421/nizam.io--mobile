@@ -42,12 +42,17 @@ class _TableLiveScopeState extends ConsumerState<TableLiveScope> {
 
   @override
   Widget build(BuildContext context) {
-    if (TickerMode.valuesOf(context).enabled) {
+    if (tableLiveVisible(context)) {
       ref.watch(tableSyncControllerProvider(widget.id));
     }
     return widget.child;
   }
 }
+
+/// Canlı akışın TEK görünürlük kararı: ekran görünür (kabuğun gizli bölmesinde `TickerMode`
+/// kapalıdır). Akışı dinleyen her parça buna uyar; gizli ekran akışı açık tutmaz.
+bool tableLiveVisible(BuildContext context) =>
+    TickerMode.valuesOf(context).enabled;
 
 /// Bağlantı durumu ve tablodaki diğer kişiler (seçili hücreleri varsa satır/sütun adıyla).
 class TableLiveBar extends ConsumerWidget {
@@ -58,6 +63,7 @@ class TableLiveBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
+    if (!tableLiveVisible(context)) return const SizedBox.shrink();
     final live = ref.watch(tableSyncControllerProvider(id));
     final status = switch (live.status) {
       TableLiveStatus.live => NzBadge.success(label: l.uiTablesLive),

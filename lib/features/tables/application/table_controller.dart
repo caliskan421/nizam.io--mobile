@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter_riverpod/misc.dart' show KeepAliveLink;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -20,14 +21,21 @@ import 'tables_list_controller.dart';
 import 'tables_providers.dart';
 
 part 'table_cell_writes.dart';
+part 'table_commands.dart';
 part 'table_controller.g.dart';
 
-/// Tek tablonun ekranı: snapshot yükleme, hücre yazımı (CAS + birleştirme; parça dosya
-/// `table_cell_writes.dart`), komutlar ve olay günlüğünden yakalama ([catchUp]).
+/// Tek tablonun ekranı: snapshot yükleme, olay günlüğünden yakalama ([catchUp]), hücre
+/// yazımı (`table_cell_writes.dart`) ve komutlar (`table_commands.dart`).
 ///
-/// Olay imleci [cursor]: yalnız tutarlı bir snapshot'ın `table.sequence`'i ya da başarılı
-/// `changes` yanıtının `cursor`'ı ile ilerler; kendi makbuzlarımız imleci ilerletmez (aradaki
-/// yabancı olay atlanmasın). Akış döngüsü `table_sync_controller.dart`'tadır.
+/// Görünüm iki katmandır: sunucudan türeyen taban [_base] (snapshot + kendi makbuzlarımız) ve
+/// üstüne uygulanan bekleyen/uçuştaki hücre düzenlemeleri. Taban monotondur: daha eski bir
+/// snapshot (sırası uygulanmış snapshot'tan küçük) uygulanmaz; snapshot ya da makbuz bir hücreyi
+/// daha küçük sürüme geri almaz. Snapshot okumaları sıraya dizilir (tek zincir).
+///
+/// Olay imleci [cursor]: yalnız changes sayfalarının gerektirdiği yeniden okuma/yorum
+/// güncellemesi BAŞARIYLA bitince ya da tutarlı snapshot uygulanınca ilerler; kendi
+/// makbuzlarımız imleci ilerletmez. Komut sonrası yan okuma düşerse [_needsReload] kalıcıdır;
+/// sonraki yakalama tabloyu yeniden okur.
 @riverpod
 class TableController extends _$TableController {
   static const pageSize = 200;
@@ -37,8 +45,14 @@ class TableController extends _$TableController {
   late String _id;
   int _generation = 0;
   RequestKeys _keys = const RequestKeys();
+  TableView? _base;
+  int _viewSequence = 0;
+  Future<void> _reloadTail = Future.value();
+  bool _needsReload = false;
+
   final _queue = TableWriteQueue();
-  List<TableCellWrite>? _inflight;
+  _Batch? _batch;
+  bool _batchHeld = false;
   Timer? _debounce;
   Timer? _hold;
   KeepAliveLink? _alive;
@@ -67,7 +81,10 @@ class TableController extends _$TableController {
     ++_generation;
     _keys = const RequestKeys();
     _queue.clear();
-    _inflight = null;
+    _batch = null;
+    _batchHeld = false;
+    _needsReload = false;
+    _reloadTail = Future.value();
     ownSequences.clear();
     _scope = await _resolveScope(id);
     final page = await _repo.snapshot(
@@ -76,7 +93,9 @@ class TableController extends _$TableController {
       page: const PageRequest(limit: pageSize),
     );
     _cursor = page.meta.sequence;
-    return TableView.fromPage(page, _accountId);
+    _viewSequence = page.meta.sequence;
+    final base = _base = TableView.fromPage(page, _accountId);
+    return base;
   }
 
   TablesRepository get _repo => ref.read(tablesRepositoryProvider);
@@ -111,25 +130,49 @@ class TableController extends _$TableController {
     return personal;
   }
 
-  TableView? get _view => state.value;
-
-  // `ref` korumalıdır; parça dosyadaki uzantı bu iki kapıdan erişir.
+  // `ref` korumalıdır; parça dosyalardaki uzantılar bu kapılardan erişir.
   bool get _mounted => ref.mounted;
   KeepAliveLink _keepAlive() => ref.keepAlive();
+  TablesListController? get _listOrNull =>
+      ref.exists(tablesListControllerProvider)
+      ? ref.read(tablesListControllerProvider.notifier)
+      : null;
 
-  void _set(TableView v) {
-    if (ref.mounted) state = AsyncData(v);
+  /// Tabanı değiştirip görünümü (taban + bekleyen düzenlemeler) yayımlar.
+  void _update(TableView Function(TableView base) change) {
+    final b = _base;
+    if (b == null || !ref.mounted) return;
+    _base = change(b);
+    _publish();
+  }
+
+  void _publish() {
+    final b = _base;
+    if (b != null && ref.mounted) state = AsyncData(_overlay(b));
+  }
+
+  /// Bekleyen ve uçuştaki düzenlemeleri tabanın üstüne uygular.
+  TableView _overlay(TableView v) {
+    final cells = Map.of(v.cells);
+    for (final w in [...?_batch?.cells, ..._queue.pending]) {
+      final server = cells[w.key] ?? TableCellData.empty;
+      cells[w.key] = TableCellData(value: w.value, version: server.version);
+    }
+    return v.copyWith(
+      cells: cells,
+      pendingWrites: _queue.length + (_batch?.cells.length ?? 0),
+    );
   }
 
   // ---------------------------------------------------------------- okuma
 
-  /// Sonraki satır sayfası. Tablo bu arada başkası tarafından değiştiyse (sayfanın sırası
-  /// bildiğimizden büyük) tutarlılık için baştan okunur.
+  /// Sonraki satır sayfası. Tablo bu arada değiştiyse (sayfanın sırası uygulanmış
+  /// snapshot'tan büyük) tutarlılık için baştan okunur.
   Future<void> loadMore() async {
-    final v = _view;
+    final v = _base;
     if (v == null || !v.hasMore || v.loadingMore) return;
     final generation = _generation;
-    _set(v.copyWith(loadingMore: true));
+    _update((b) => b.copyWith(loadingMore: true));
     try {
       final page = await _repo.snapshot(
         _scope,
@@ -137,27 +180,36 @@ class TableController extends _$TableController {
         page: PageRequest(limit: pageSize, cursor: v.nextCursor),
       );
       if (generation != _generation || !ref.mounted) return;
-      final now = _view!;
-      if (page.meta.sequence > now.meta.sequence) {
-        await _reload(minRows: now.rows.length + page.rows.length);
+      if (page.meta.sequence != _viewSequence) {
+        _update((b) => b.copyWith(loadingMore: false));
+        await _reload(minRows: v.rows.length + page.rows.length);
         return;
       }
-      _set(_overlay(now.appendPage(page)));
-    } on ApiError {
+      _update((b) => b.appendPage(page).copyWith(loadingMore: false));
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tables);
       if (generation == _generation && ref.mounted) {
-        _set(_view!.copyWith(loadingMore: false));
+        _update((b) => b.copyWith(loadingMore: false));
       }
       rethrow;
     }
   }
 
-  /// Tabloyu yeniden okur (en az [minRows] satıra kadar sayfa yürür). Sayfalar boyunca
-  /// `table.sequence` değişirse (arada commit) yürüyüş baştan alınır (en çok 3 kez); imleç
-  /// tutarlı snapshot'ın sırasına ilerler. Bekleyen yerel düzenlemeler sonucun üstüne
-  /// yeniden uygulanır; tabanı sunucuda değişmiş bekleyen hücre çakışma olarak işaretlenir.
-  Future<void> _reload({int? minRows}) async {
+  /// Snapshot okumalarını sıraya dizer (eski okuma yeni okumadan sonra bitemez).
+  Future<void> _reload({int? minRows}) {
+    final run = _reloadTail.then((_) => _readSnapshot(minRows: minRows));
+    _reloadTail = run.then<void>((_) {}, onError: (Object _) {});
+    return run;
+  }
+
+  /// Tabloyu yeniden okur (en az [minRows] satıra kadar). Sayfalar boyunca `table.sequence`
+  /// değişirse yürüyüş baştan alınır (en çok 3 kez). Uygulanmış snapshot'tan eski sonuç
+  /// atılır; hücre sürümü geri gitmez (sonradan gelmiş kendi makbuzumuz korunur). İmleç
+  /// snapshot sırasına ilerler; atlanan aralıkta yorum olayı olabileceği için yorum sayacı
+  /// artar. Tabanı sunucuda değişmiş bekleyen düzenleme çakışma olarak işaretlenir.
+  Future<void> _readSnapshot({int? minRows}) async {
     final generation = _generation;
-    final want = minRows ?? _view?.rows.length ?? 0;
+    final want = minRows ?? _base?.rows.length ?? 0;
     TableView? next;
     var sequence = 0;
     for (var attempt = 0; attempt < 3 && next == null; attempt++) {
@@ -184,48 +236,65 @@ class TableController extends _$TableController {
       if (stable || attempt == 2) next = walk;
     }
     if (generation != _generation || !ref.mounted) return;
-    if (sequence > _cursor) _cursor = sequence;
-    final base = _view;
-    final conflicts = {...?base?.conflicts};
-    for (final w in _queue.pending) {
-      final server = next!.cells[w.key] ?? TableCellData.empty;
-      if (w.version >= 0 && server.version != w.version) conflicts.add(w.key);
+    final base = _base;
+    if (base == null || sequence < _viewSequence) return;
+    _viewSequence = sequence;
+    final skipped = sequence > _cursor;
+    if (skipped) _cursor = sequence;
+    final rows = {for (final r in next!.rows) r.id};
+    final cols = {for (final c in next.columns) c.id};
+    final cells = Map.of(next.cells);
+    for (final e in base.cells.entries) {
+      final fresh = cells[e.key];
+      final keep =
+          e.value.version > (fresh?.version ?? 0) &&
+          base.rows.any(
+            (r) => rows.contains(r.id) && _isRowOf(e.key, r.id, cols),
+          );
+      if (keep) cells[e.key] = e.value;
     }
-    _set(
-      _overlay(
-        next!.copyWith(
-          readOnly: base?.readOnly,
-          conflicts: conflicts,
-          writeError: () => base?.writeError,
-          undoSequence: () => base?.undoSequence,
-          commentsRevision: base?.commentsRevision,
-          accessLost: base?.accessLost,
-        ),
-      ),
+    final conflicts = {...base.conflicts};
+    for (final w in _queue.pending) {
+      final server = cells[w.key] ?? TableCellData.empty;
+      if (server.version != w.version) conflicts.add(w.key);
+    }
+    _base = next.copyWith(
+      cells: cells,
+      readOnly: base.readOnly,
+      conflicts: conflicts,
+      writeError: () => base.writeError,
+      undoSequence: () => base.undoSequence,
+      commentsRevision: base.commentsRevision + (skipped ? 1 : 0),
+      accessLost: base.accessLost,
     );
+    _publish();
   }
 
+  static bool _isRowOf(TableCellKey key, String row, Set<String> cols) =>
+      cols.any((c) => key == TableCellKey(row, c));
+
   /// Olay günlüğünden yakalama (`GET …/changes?after=cursor`). Yeni olayların hepsi kendi
-  /// makbuzlarımızsa snapshot okunmaz (yankı); yabancı yapı/hücre olayı varsa tablo yeniden
-  /// okunur; yorum olayları yalnız [TableView.commentsRevision]'ı artırır. Uçuşta hücre
-  /// yazımı varken makbuzu gelmemiş kendi olayımız yabancı sayılır (güvenli taraf: yeniden
-  /// okuma bekleyen düzenlemeleri ezmez). 409 `tables.replay_expired` → tam yeniden yükleme;
-  /// 403/404 → erişim kaybı. Döner: yeniden okuma yapıldı mı.
+  /// makbuzlarımızsa snapshot okunmaz (yankı); yabancı yapı/hücre olayı varsa (ya da önceki
+  /// yan okuma düşmüşse) tablo yeniden okunur; yorum olayları yorum sayacını artırır. İmleç
+  /// yalnız bu güncellemeler başarıyla bitince ilerler: okuma düşerse hata fırlar, imleç yerinde
+  /// kalır, sonraki yakalama aynı olayları yeniden işler. 409 `tables.replay_expired` → tam
+  /// yeniden yükleme; 403/404 → erişim kaybı. Döner: yeniden okuma yapıldı mı.
   Future<bool> catchUp() async {
     final generation = _generation;
-    var reload = false;
+    var target = _cursor;
+    var reload = _needsReload;
     var comments = false;
     try {
       while (true) {
         final page = await _repo.changes(
           _scope,
           _id,
-          after: _cursor,
+          after: target,
           limit: pageSize,
         );
         if (generation != _generation || !ref.mounted) return false;
         for (final e in page.changes) {
-          if (e.seq <= _cursor) continue;
+          if (e.seq <= target) continue;
           switch (e.kind) {
             case TableChangeKind.addComment ||
                 TableChangeKind.editComment ||
@@ -235,7 +304,7 @@ class TableController extends _$TableController {
               if (!ownSequences.contains(e.seq)) reload = true;
           }
         }
-        if (page.cursor > _cursor) _cursor = page.cursor;
+        if (page.cursor > target) target = page.cursor;
         if (!page.more || page.changes.isEmpty) break;
       }
     } on ApiError catch (e, st) {
@@ -243,207 +312,33 @@ class TableController extends _$TableController {
       if (generation != _generation || !ref.mounted) return false;
       if (e.code == 'tables.replay_expired') {
         await _reload();
+        _needsReload = false;
         _bumpComments();
         return true;
       }
       if (e.code == 'tables.not_found' || e.code == 'tables.forbidden') {
-        final v = _view;
-        if (v != null) _set(v.copyWith(accessLost: true));
+        _update((b) => b.copyWith(accessLost: true));
         return false;
       }
       rethrow;
     }
-    if (reload) await _reload();
+    if (reload) {
+      await _reload();
+      _needsReload = false;
+    }
+    if (generation != _generation || !ref.mounted) return false;
     if (comments) _bumpComments();
+    _cursor = math.max(_cursor, target);
     return reload;
   }
 
-  void _bumpComments() {
-    final v = _view;
-    if (v != null) _set(v.copyWith(commentsRevision: v.commentsRevision + 1));
-  }
-
-  /// Bekleyen ve uçuştaki düzenlemeleri görünümün üstüne uygular.
-  TableView _overlay(TableView v) {
-    final cells = Map.of(v.cells);
-    for (final w in [...?_inflight, ..._queue.pending]) {
-      final server = cells[w.key] ?? TableCellData.empty;
-      cells[w.key] = TableCellData(value: w.value, version: server.version);
-    }
-    return v.copyWith(
-      cells: cells,
-      pendingWrites: _queue.length + (_inflight?.length ?? 0),
-    );
-  }
+  void _bumpComments() =>
+      _update((b) => b.copyWith(commentsRevision: b.commentsRevision + 1));
 
   /// Ekranın tazelemesi (yenileme hareketi): bekleyen yazımlar önce gönderilir.
   Future<void> refresh() async {
     await flush();
     await _reload();
-  }
-
-  // ---------------------------------------------------------------- komutlar
-
-  /// Komutu gönderir (önce bekleyen hücreler). Hata fırlar; sonucu bilinmeyen hatada aynı
-  /// komutun yeniden denenmesi aynı anahtarı kullanır. 403 tabloyu salt okunur yapar,
-  /// 409 `tables.schema_conflict` sütunları yeniden okutur.
-  Future<TableReceipt> _command(TableOperation op, {bool reload = true}) async {
-    await flush();
-    const action = 'op';
-    final (keys, key) = _keys.keyFor(action, op.signature);
-    _keys = keys;
-    final generation = _generation;
-    try {
-      final r = await _repo.apply(_scope, _id, op, requestKey: key);
-      _keys = _keys.clear(action);
-      ownSequences.add(r.sequence);
-      if (generation == _generation && ref.mounted) {
-        final v = _view!;
-        _set(
-          v.copyWith(
-            meta: v.meta.copyWith(
-              sequence: r.sequence > v.meta.sequence ? r.sequence : null,
-              schemaVersion: r.schemaVersion,
-            ),
-          ),
-        );
-        if (reload) await _reload();
-      }
-      return r;
-    } on ApiError catch (e, st) {
-      reportUnexpected(e, st, source: ReportSource.tables);
-      if (!isOutcomeUnknown(e)) _keys = _keys.clear(action);
-      if (generation == _generation && ref.mounted) {
-        if (e.code == 'tables.forbidden') {
-          _set(_view!.copyWith(readOnly: true));
-        } else if (e.code == 'tables.schema_conflict') {
-          await _reload();
-        }
-      }
-      rethrow;
-    }
-  }
-
-  int get _schema => _view!.meta.schemaVersion;
-
-  Future<void> rename(String name) async {
-    final trimmed = name.trim();
-    await _command(RenameTable(trimmed), reload: false);
-    final v = _view;
-    if (v != null) _set(v.copyWith(meta: v.meta.copyWith(name: trimmed)));
-    if (ref.exists(tablesListControllerProvider)) {
-      ref.read(tablesListControllerProvider.notifier).renamed(_id, trimmed);
-    }
-  }
-
-  /// Yalnız sahip; başarıda listeden düşer.
-  Future<void> deleteTable() async {
-    _queue.clear();
-    await _command(const DeleteTable(), reload: false);
-    if (ref.exists(tablesListControllerProvider)) {
-      ref.read(tablesListControllerProvider.notifier).removed(_id);
-    }
-  }
-
-  /// Yeni satır (kimliği sunucu üretir) ve kimliği.
-  Future<String?> addRow() async => (await _command(const AddRow())).id;
-
-  Future<void> deleteRow(String rowId) async {
-    _queue.removeWhere((w) => w.rowId == rowId);
-    await _command(DeleteRow(rowId));
-  }
-
-  Future<void> moveRow(String rowId, {String? afterId}) =>
-      _command(MoveRow(id: rowId, afterId: afterId));
-
-  /// Varsayılan genişlik 200 px (40–1200).
-  Future<String?> addColumn(
-    String name,
-    TableColumnKind kind, {
-    int width = 200,
-  }) async => (await _command(
-    AddColumn(
-      name: name.trim(),
-      kind: kind,
-      width: width,
-      expectedSchema: _schema,
-    ),
-  )).id;
-
-  Future<void> renameColumn(String columnId, String name) async {
-    final trimmed = name.trim();
-    await _command(
-      RenameColumn(id: columnId, name: trimmed, expectedSchema: _schema),
-      reload: false,
-    );
-    final v = _view;
-    if (v == null) return;
-    _set(
-      v.copyWith(
-        columns: [
-          for (final c in v.columns)
-            c.id == columnId ? c.copyWith(name: trimmed) : c,
-        ],
-      ),
-    );
-  }
-
-  Future<void> resizeColumn(String columnId, int width) async {
-    await _command(
-      ResizeColumn(id: columnId, width: width, expectedSchema: _schema),
-      reload: false,
-    );
-    final v = _view;
-    if (v == null) return;
-    _set(
-      v.copyWith(
-        columns: [
-          for (final c in v.columns)
-            c.id == columnId ? c.copyWith(width: width) : c,
-        ],
-      ),
-    );
-  }
-
-  Future<void> deleteColumn(String columnId) async {
-    _queue.removeWhere((w) => w.columnId == columnId);
-    await _command(DeleteColumn(id: columnId, expectedSchema: _schema));
-  }
-
-  /// [afterId] null → ilk sıraya.
-  Future<void> moveColumn(String columnId, {String? afterId}) => _command(
-    MoveColumn(id: columnId, afterId: afterId, expectedSchema: _schema),
-  );
-
-  /// Satıra (ya da hücreye) yorum ekler; açık yorum listeleri yenilenir.
-  Future<void> addComment(String rowId, String body, {String? columnId}) async {
-    await _command(
-      AddComment(rowId: rowId, body: body.trim(), columnId: columnId),
-      reload: false,
-    );
-    _bumpComments();
-  }
-
-  Future<void> editComment(String commentId, String body) async {
-    await _command(
-      EditComment(id: commentId, body: body.trim()),
-      reload: false,
-    );
-    _bumpComments();
-  }
-
-  Future<void> deleteComment(String commentId) async {
-    await _command(DeleteComment(commentId), reload: false);
-    _bumpComments();
-  }
-
-  /// Son kendi hücre yazımını koşullu geri alır; geri alınamayan hücre sayısını döner.
-  Future<int> undoLast() async {
-    final seq = _view?.undoSequence;
-    if (seq == null) return 0;
-    final r = await _command(UndoCells(seq));
-    final v = _view;
-    if (v != null) _set(v.copyWith(undoSequence: () => null));
-    return r.skipped.length;
+    _needsReload = false;
   }
 }

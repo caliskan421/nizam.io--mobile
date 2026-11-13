@@ -18,7 +18,8 @@ part of 'table_sync_controller.dart';
 /// - Kopma: 0–5 sn jitter + üstel geri çekilme (≤60 sn; `core/domain/stream_reconnect`);
 ///   401/403/404/422 durur, 429 `Retry-After` bekler. Sunucu kapanışı (5 dk bütçe, erişim
 ///   commit'i, belirteç yenilemesi sonrası gözcü) neden bildirmez: normal yeniden bağlanmadır.
-/// - Presence: bağlıyken 10 sn'de bir ve seçim değişince (en az 1 sn arayla) `POST …/presence`; kapanışta `DELETE`.
+/// - Presence: bağlıyken 10 sn'de bir ve seçim değişince; hepsi tek kapıdan (tek uçuş,
+///   en az 1 sn aralık, 429 `Retry-After`) `POST …/presence`; kapanışta `DELETE`.
 
 @ProviderFor(TableSyncController)
 final tableSyncControllerProvider = TableSyncControllerFamily._();
@@ -33,7 +34,8 @@ final tableSyncControllerProvider = TableSyncControllerFamily._();
 /// - Kopma: 0–5 sn jitter + üstel geri çekilme (≤60 sn; `core/domain/stream_reconnect`);
 ///   401/403/404/422 durur, 429 `Retry-After` bekler. Sunucu kapanışı (5 dk bütçe, erişim
 ///   commit'i, belirteç yenilemesi sonrası gözcü) neden bildirmez: normal yeniden bağlanmadır.
-/// - Presence: bağlıyken 10 sn'de bir ve seçim değişince (en az 1 sn arayla) `POST …/presence`; kapanışta `DELETE`.
+/// - Presence: bağlıyken 10 sn'de bir ve seçim değişince; hepsi tek kapıdan (tek uçuş,
+///   en az 1 sn aralık, 429 `Retry-After`) `POST …/presence`; kapanışta `DELETE`.
 final class TableSyncControllerProvider
     extends $NotifierProvider<TableSyncController, TableLiveState> {
   /// Tablo akışının (SSE `streamTableChanges`) TEK bağlantı döngüsü ve presence. Ekran
@@ -46,7 +48,8 @@ final class TableSyncControllerProvider
   /// - Kopma: 0–5 sn jitter + üstel geri çekilme (≤60 sn; `core/domain/stream_reconnect`);
   ///   401/403/404/422 durur, 429 `Retry-After` bekler. Sunucu kapanışı (5 dk bütçe, erişim
   ///   commit'i, belirteç yenilemesi sonrası gözcü) neden bildirmez: normal yeniden bağlanmadır.
-  /// - Presence: bağlıyken 10 sn'de bir ve seçim değişince (en az 1 sn arayla) `POST …/presence`; kapanışta `DELETE`.
+  /// - Presence: bağlıyken 10 sn'de bir ve seçim değişince; hepsi tek kapıdan (tek uçuş,
+  ///   en az 1 sn aralık, 429 `Retry-After`) `POST …/presence`; kapanışta `DELETE`.
   TableSyncControllerProvider._({
     required TableSyncControllerFamily super.from,
     required String super.argument,
@@ -92,7 +95,7 @@ final class TableSyncControllerProvider
 }
 
 String _$tableSyncControllerHash() =>
-    r'15030ec950720afe41f7786dd1ceb9e03a1b7399';
+    r'aeb10b1c83f1d6653086c0c411d3f0605ed57c05';
 
 /// Tablo akışının (SSE `streamTableChanges`) TEK bağlantı döngüsü ve presence. Ekran
 /// görünürken ve uygulama ön plandayken açıktır.
@@ -104,7 +107,8 @@ String _$tableSyncControllerHash() =>
 /// - Kopma: 0–5 sn jitter + üstel geri çekilme (≤60 sn; `core/domain/stream_reconnect`);
 ///   401/403/404/422 durur, 429 `Retry-After` bekler. Sunucu kapanışı (5 dk bütçe, erişim
 ///   commit'i, belirteç yenilemesi sonrası gözcü) neden bildirmez: normal yeniden bağlanmadır.
-/// - Presence: bağlıyken 10 sn'de bir ve seçim değişince (en az 1 sn arayla) `POST …/presence`; kapanışta `DELETE`.
+/// - Presence: bağlıyken 10 sn'de bir ve seçim değişince; hepsi tek kapıdan (tek uçuş,
+///   en az 1 sn aralık, 429 `Retry-After`) `POST …/presence`; kapanışta `DELETE`.
 
 final class TableSyncControllerFamily extends $Family
     with
@@ -134,7 +138,8 @@ final class TableSyncControllerFamily extends $Family
   /// - Kopma: 0–5 sn jitter + üstel geri çekilme (≤60 sn; `core/domain/stream_reconnect`);
   ///   401/403/404/422 durur, 429 `Retry-After` bekler. Sunucu kapanışı (5 dk bütçe, erişim
   ///   commit'i, belirteç yenilemesi sonrası gözcü) neden bildirmez: normal yeniden bağlanmadır.
-  /// - Presence: bağlıyken 10 sn'de bir ve seçim değişince (en az 1 sn arayla) `POST …/presence`; kapanışta `DELETE`.
+  /// - Presence: bağlıyken 10 sn'de bir ve seçim değişince; hepsi tek kapıdan (tek uçuş,
+  ///   en az 1 sn aralık, 429 `Retry-After`) `POST …/presence`; kapanışta `DELETE`.
 
   TableSyncControllerProvider call(String id) =>
       TableSyncControllerProvider._(argument: id, from: this);
@@ -153,7 +158,8 @@ final class TableSyncControllerFamily extends $Family
 /// - Kopma: 0–5 sn jitter + üstel geri çekilme (≤60 sn; `core/domain/stream_reconnect`);
 ///   401/403/404/422 durur, 429 `Retry-After` bekler. Sunucu kapanışı (5 dk bütçe, erişim
 ///   commit'i, belirteç yenilemesi sonrası gözcü) neden bildirmez: normal yeniden bağlanmadır.
-/// - Presence: bağlıyken 10 sn'de bir ve seçim değişince (en az 1 sn arayla) `POST …/presence`; kapanışta `DELETE`.
+/// - Presence: bağlıyken 10 sn'de bir ve seçim değişince; hepsi tek kapıdan (tek uçuş,
+///   en az 1 sn aralık, 429 `Retry-After`) `POST …/presence`; kapanışta `DELETE`.
 
 abstract class _$TableSyncController extends $Notifier<TableLiveState> {
   late final _$args = ref.$arg as String;

@@ -87,11 +87,8 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
                     : '${f.coordinatorships.length} ${l.uiTasksCoordsLc}') +
                 (f.allMembers ? ' · ${l.uiTasksWithMembers}' : '');
     } else {
-      who = f.people.isEmpty
-          ? null
-          : f.people.length == 1
-          ? name(f.people.first)
-          : '${name(f.people.first).split(' ').first} +${f.people.length - 1}';
+      // Seçili kişiler satırda yazılmaz (iPad notu 3); seçim açılan listede görünür.
+      who = f.people.isEmpty ? null : '';
     }
     if (_draft.text != f.agendaDraft) _draft.text = f.agendaDraft;
     final error = f.error;
@@ -163,8 +160,11 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (!editing) ...[
-                      TaskSegmented(
-                        labels: [l.uiTasksGroupCoord, l.uiTasksModePeople],
+                      NzPillTabs(
+                        tabs: [
+                          NzPillTab(label: l.uiTasksGroupCoord),
+                          NzPillTab(label: l.uiTasksModePeople),
+                        ],
                         selected: f.mode.index,
                         onSelected: (i) => ctl.setMode(MeetingMode.values[i]),
                       ),

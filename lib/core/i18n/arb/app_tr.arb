@@ -3673,6 +3673,14 @@
   "@uiMeetingsConnectedWasTail": {
     "description": "ui.meetings.connected_was_tail"
   },
+  "uiMeetingsCopyLink": "Bağlantıyı kopyala",
+  "@uiMeetingsCopyLink": {
+    "description": "ui.meetings.copy_link"
+  },
+  "uiMeetingsLinkCopied": "Bağlantı kopyalandı.",
+  "@uiMeetingsLinkCopied": {
+    "description": "ui.meetings.link_copied"
+  },
   "uiMessagesTitle": "Mesajlar",
   "@uiMessagesTitle": {
     "description": "ui.messages.title"
@@ -6397,7 +6405,7 @@
   "@uiTasksFieldPlace": {
     "description": "ui.tasks.field_place"
   },
-  "uiTasksMtPlaceHint": "İsteğe bağlı · ör. toplantı salonu",
+  "uiTasksMtPlaceHint": "İsteğe bağlı · ör. toplantı salonu ya da bağlantı",
   "@uiTasksMtPlaceHint": {
     "description": "ui.tasks.mt_place_hint"
   },

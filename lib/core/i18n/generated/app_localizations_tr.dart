@@ -2930,6 +2930,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMeetingsConnectedWasTail => 'kişi bağlıydı';
 
   @override
+  String get uiMeetingsCopyLink => 'Bağlantıyı kopyala';
+
+  @override
+  String get uiMeetingsLinkCopied => 'Bağlantı kopyalandı.';
+
+  @override
   String get uiMessagesTitle => 'Mesajlar';
 
   @override
@@ -5046,7 +5052,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksFieldPlace => 'Yer';
 
   @override
-  String get uiTasksMtPlaceHint => 'İsteğe bağlı · ör. toplantı salonu';
+  String get uiTasksMtPlaceHint =>
+      'İsteğe bağlı · ör. toplantı salonu ya da bağlantı';
 
   @override
   String get uiTasksErrMtPlace => 'Yer en çok 200 karakter olabilir.';

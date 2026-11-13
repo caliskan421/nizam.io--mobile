@@ -5602,6 +5602,18 @@ abstract class AppLocalizations {
   /// **'kişi bağlıydı'**
   String get uiMeetingsConnectedWasTail;
 
+  /// ui.meetings.copy_link
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantıyı kopyala'**
+  String get uiMeetingsCopyLink;
+
+  /// ui.meetings.link_copied
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı kopyalandı.'**
+  String get uiMeetingsLinkCopied;
+
   /// ui.messages.title
   ///
   /// In tr, this message translates to:
@@ -9691,7 +9703,7 @@ abstract class AppLocalizations {
   /// ui.tasks.mt_place_hint
   ///
   /// In tr, this message translates to:
-  /// **'İsteğe bağlı · ör. toplantı salonu'**
+  /// **'İsteğe bağlı · ör. toplantı salonu ya da bağlantı'**
   String get uiTasksMtPlaceHint;
 
   /// ui.tasks.err_mt_place

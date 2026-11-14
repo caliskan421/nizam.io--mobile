@@ -16,6 +16,7 @@ import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
+import '../../tasks/tasks.dart' show effectiveAccessProvider;
 import '../application/archive_controller.dart';
 import '../application/archive_folders_controller.dart';
 import '../application/archive_providers.dart';
@@ -23,6 +24,7 @@ import '../domain/archive.dart';
 import 'archive/archive_folder_card.dart';
 import 'archive/archive_folder_grid.dart';
 import 'archive/archive_outcome.dart';
+import 'archive/archive_role_views.dart';
 import 'archive/archive_summary_cards.dart';
 import 'archive/archive_upload.dart';
 
@@ -100,12 +102,15 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
           icon: NzIcons.search,
           onSelected: _toggleSearch,
         ),
-        NzFlyoutSection(l.uiArchiveSectionGo),
-        NzFlyoutItem(
-          label: l.uiArchiveGoCoordinatorships,
-          icon: NzIcons.coordinatorships,
-          onSelected: context.appNav.openCoordinatorships,
-        ),
+        // Koordinatörlükler listesi yalnız yönetici görünümünün menüsünde.
+        if (ref.read(effectiveAccessProvider).seesAllDepartments) ...[
+          NzFlyoutSection(l.uiArchiveSectionGo),
+          NzFlyoutItem(
+            label: l.uiArchiveGoCoordinatorships,
+            icon: NzIcons.coordinatorships,
+            onSelected: context.appNav.openCoordinatorships,
+          ),
+        ],
       ],
     );
   }
@@ -124,6 +129,7 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
       archiveControllerProvider.select((v) => v.searchOpen),
     );
     final folders = ref.watch(archiveFoldersControllerProvider);
+    final member = ref.watch(effectiveAccessProvider).isMemberView;
     void retry() => retryArchive(ref);
     return NzPage.feed(
       width: NzContentWidth.wide,
@@ -132,7 +138,8 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
       topBar: const RootTopBar(),
       children: [
         NzPageHeader(
-          title: l.uiArchiveTitle,
+          // Üye menüsünde "Dosyalarım" (aynı modül).
+          title: member ? l.uiArchiveMyFiles : l.uiArchiveTitle,
           actions: [
             Semantics(
               selected: searchOpen,
@@ -187,6 +194,14 @@ class _Folders extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final view = ref.watch(effectiveAccessProvider);
+    // Koordinatör: koordinatörlük klasörünün düz görev klasörü listesi.
+    if (view.isCoordinatorView) {
+      final own =
+          all.where((f) => f.code == view.departmentId).firstOrNull ??
+          all.where((f) => !f.isVirtual).firstOrNull;
+      if (own != null) return ArchiveTaskFolderList(folder: own);
+    }
     final query = ref.watch(archiveControllerProvider.select((v) => v.query));
     final l = context.l10n;
     final c = context.colors;
@@ -196,6 +211,11 @@ class _Folders extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Üye: önce kendi yüklediği dosyalar, sonra görev klasörü (sanal "Görevlerim").
+        if (view.isMemberView) ...[
+          const ArchiveMyFiles(),
+          const Gap(NizamioSpacing.space6),
+        ],
         ArchiveSummaryCards(files: files, folders: all.length),
         const Gap(NizamioSpacing.space5),
         NzKicker('${l.uiArchiveFoldersTitle} · ${list.length}'),

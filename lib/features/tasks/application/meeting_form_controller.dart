@@ -29,12 +29,12 @@ enum MeetingError { title, past, place, coordinatorships, people, owner }
 const meetingPlaceMax = 200;
 
 /// Kişi kipinde seçilebilen sahip koordinatörlükler (K73): yönetici görünümü ([admin],
-/// `EffectiveAccess.isAdminView`; verilmezse sunucu bayrağı) her birini, koordinatör yalnız
-/// kendi koordinatörlüklerini seçer.
+/// `EffectiveAccess.isAdminView`) her birini, koordinatör yalnız kendi koordinatörlüklerini
+/// seçer.
 List<CoordinatorshipRef> meetingOwnerChoices(
   TaskCatalog catalog, {
-  bool? admin,
-}) => admin ?? catalog.access?.companyAdmin ?? false
+  required bool admin,
+}) => admin
     ? catalog.coordinatorships
     : [
         for (final c in catalog.coordinatorships)

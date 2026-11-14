@@ -149,8 +149,10 @@ void main() {
     }
     // Kapsam değiştirme çekmecede (telefonda üst çubuk menü dairesi, tablette ray).
     await _openMenu(tester, screen);
-    // Sezon kartı (program adı) kapsam seçimine döner.
-    await tester.tap(find.bySemanticsLabel(RegExp('^Program Bir, ')));
+    // Üçlü seçicinin program kartı ("program, Program Bir") kapsam seçimine döner.
+    await tester.tap(
+      find.bySemanticsLabel('${_l.uiHomePickerProgram}, Program Bir'),
+    );
     await settle(tester);
     expect(h.read(appPhaseProvider), AppPhase.sessionOpen);
     expect(find.text(_l.uiScopeIntro), findsOneWidget);

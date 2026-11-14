@@ -257,7 +257,10 @@ class CoordMeetingsTab extends ConsumerWidget {
                 style: t.bodySm.copyWith(color: c.textMuted),
               ),
               actions: [
-                if (ref.watch(coordManagesTeamProvider(code)))
+                if (ref.watch(coordManagesTeamProvider(code)) &&
+                    ref.watch(
+                      effectiveAccessProvider.select((a) => a.canCreateMeeting),
+                    ))
                   NzIconButton.circle(
                     icon: NzIcons.add,
                     semanticLabel: l.uiCoordMenuMeeting,

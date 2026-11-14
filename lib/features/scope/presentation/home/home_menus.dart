@@ -33,7 +33,7 @@ const _tabletBottom = 28.0;
 Future<void> showHomeShortcuts(
   BuildContext context, {
   required ValueChanged<HomeQuickAction> onQuickAction,
-  required bool isAdmin,
+  required List<HomeQuickAction> actions,
 }) {
   final l = context.l10n;
   return NzFlyoutMenu.show(
@@ -41,7 +41,7 @@ Future<void> showHomeShortcuts(
     semanticLabel: l.uiHomeShortcuts,
     entries: [
       NzFlyoutSection(l.uiHomeQuickActions),
-      for (final a in homeQuickActions(isAdmin: isAdmin))
+      for (final a in actions)
         NzFlyoutItem(
           label: quickActionLongLabel(l, a),
           icon: quickActionIcon(a),

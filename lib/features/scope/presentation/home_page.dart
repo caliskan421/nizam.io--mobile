@@ -57,10 +57,16 @@ class HomePage extends ConsumerWidget {
         // Yalnız görünen sayfa (yığının tepesi) kendi kısayol menüsünü açar.
         final visible = ModalRoute.of(context)?.isCurrent ?? true;
         if (next?.tab != shellTab || dashboard == null || !visible) return;
+        final access = ref.read(effectiveAccessProvider);
+        final actions = homeQuickActions(
+          isAdmin: access.canAdminister,
+          canMeet: access.canCreateMeeting,
+        );
+        if (actions.isEmpty) return;
         showHomeShortcuts(
           context,
           onQuickAction: (a) => _quickAction(context, a),
-          isAdmin: ref.read(effectiveAccessProvider).canAdminister,
+          actions: actions,
         );
       });
     final programState = ref.watch(currentProgramControllerProvider);
@@ -140,6 +146,17 @@ class _Feed extends ConsumerWidget {
     // Bölümler etkin görünümden seçilir (yönetici kuyrukları, koordinatör bölümleri).
     final access = ref.watch(effectiveAccessProvider);
     final isAdmin = access.canAdminister;
+    // Etkin rolün açabildikleri; boşsa (üye görünümü) bölüm çizilmez.
+    final actions = homeQuickActions(
+      isAdmin: isAdmin,
+      canMeet: access.canCreateMeeting,
+    );
+    final quick = [
+      if (actions.isNotEmpty) ...[
+        HomeQuickActions(onAction: onQuickAction, actions: actions),
+        const Gap(NizamioSpacing.gapXl),
+      ],
+    ];
     final nav = context.appNav;
     // Tarih satırı görev kataloğunun "bugün"üdür. Katalog yokken cihaz saati.
     final now =
@@ -214,8 +231,7 @@ class _Feed extends ConsumerWidget {
               const Gap(NizamioSpacing.gapXl),
               HomeCoordinatorFeed(wide: wide),
               const Gap(NizamioSpacing.gapXl),
-              HomeQuickActions(onAction: onQuickAction, isAdmin: isAdmin),
-              const Gap(NizamioSpacing.gapXl),
+              ...quick,
               footer,
             ],
           );
@@ -232,8 +248,7 @@ class _Feed extends ConsumerWidget {
               kpis,
               ...truncated,
               const Gap(NizamioSpacing.gapXl),
-              HomeQuickActions(onAction: onQuickAction, isAdmin: isAdmin),
-              const Gap(NizamioSpacing.gapXl),
+              ...quick,
               if (narrowTeam != null) ...[
                 narrowTeam,
                 const Gap(NizamioSpacing.gapXl),
@@ -245,10 +260,9 @@ class _Feed extends ConsumerWidget {
           );
         }
         final wideTeam = team(wide: true);
-        final actions = HomeQuickActionsBar(
-          onAction: onQuickAction,
-          isAdmin: isAdmin,
-        );
+        final bar = actions.isEmpty
+            ? null
+            : HomeQuickActionsBar(onAction: onQuickAction, actions: actions);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -259,35 +273,38 @@ class _Feed extends ConsumerWidget {
             kpis,
             ...truncated,
             const Gap(NizamioSpacing.gapXl),
-            Row(
-              children: [
-                Expanded(child: NzKicker(context.l10n.uiHomeQuickActions)),
-                if (d.team case final t?) ...[
-                  const Gap(homeWideGap),
-                  Expanded(
-                    child: NzKicker(
-                      context.l10n.uiHomeTeam,
-                      trailing: context.l10n.teamSummary(d, t),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            const Gap(NizamioSpacing.gapMd),
-            // Hızlı işlemler ile ekip aynı boyda (kısa olan uzar).
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+            if (bar != null || wideTeam != null) ...[
+              Row(
                 children: [
-                  Expanded(child: actions),
-                  if (wideTeam != null) ...[
-                    const Gap(homeWideGap),
-                    Expanded(child: wideTeam),
+                  if (bar != null)
+                    Expanded(child: NzKicker(context.l10n.uiHomeQuickActions)),
+                  if (d.team case final t? when wideTeam != null) ...[
+                    if (bar != null) const Gap(homeWideGap),
+                    Expanded(
+                      child: NzKicker(
+                        context.l10n.uiHomeTeam,
+                        trailing: context.l10n.teamSummary(d, t),
+                      ),
+                    ),
                   ],
                 ],
               ),
-            ),
-            const Gap(NizamioSpacing.gapXl),
+              const Gap(NizamioSpacing.gapMd),
+              // Hızlı işlemler ile ekip aynı boyda (kısa olan uzar).
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (bar != null) Expanded(child: bar),
+                    if (wideTeam != null) ...[
+                      if (bar != null) const Gap(homeWideGap),
+                      Expanded(child: wideTeam),
+                    ],
+                  ],
+                ),
+              ),
+              const Gap(NizamioSpacing.gapXl),
+            ],
             const Gap(NizamioSpacing.gapXl),
             coords,
             const Gap(NizamioSpacing.gapXl),

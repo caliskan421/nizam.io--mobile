@@ -201,6 +201,7 @@ class CoordinatorshipPage extends ConsumerWidget {
     final name = d.stats.name;
     final canManage = ref.read(canManageCoordinatorshipsProvider);
     final managesTeam = ref.read(coordManagesTeamProvider(code));
+    final canMeet = ref.read(effectiveAccessProvider).canCreateMeeting;
 
     NzBottomSheet.show<void>(
       context,
@@ -230,8 +231,9 @@ class CoordinatorshipPage extends ConsumerWidget {
                       showCoordinatorshipForm(context, ref, detail: d);
                     }
                   }),
-                // Toplantı planla: yönetici ya da bu birimin koordinatörü (MEETINGS README).
-                if (managesTeam)
+                // Toplantı planla: yönetici ya da bu birimin koordinatörü (MEETINGS README),
+                // etkin rol toplantı açabiliyorsa.
+                if (managesTeam && canMeet)
                   row(
                     NzIcons.event,
                     l.uiCoordMenuMeeting,

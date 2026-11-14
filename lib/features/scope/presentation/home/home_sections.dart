@@ -169,11 +169,18 @@ class HomeKpiGrid extends StatelessWidget {
 enum HomeQuickAction { history, meeting, deleted, report }
 
 /// Rapor telefonda üretilmez: rapor oluşturucu gelene dek kısayolu gizlidir. İşlem geçmişi ve
-/// silinenler yalnız şirket yöneticisine (AUDIT-K10).
-List<HomeQuickAction> homeQuickActions({required bool isAdmin}) => [
+/// silinenler yalnız şirket yöneticisine (AUDIT-K10); toplantı yalnız açabilen etkin role
+/// ([EffectiveAccess.canCreateMeeting]). Liste boşsa bölüm çizilmez.
+List<HomeQuickAction> homeQuickActions({
+  required bool isAdmin,
+  required bool canMeet,
+}) => [
   for (final action in HomeQuickAction.values)
-    if (action != HomeQuickAction.report &&
-        (action == HomeQuickAction.meeting || isAdmin))
+    if (switch (action) {
+      HomeQuickAction.report => false,
+      HomeQuickAction.meeting => canMeet,
+      HomeQuickAction.history || HomeQuickAction.deleted => isAdmin,
+    })
       action,
 ];
 
@@ -182,11 +189,13 @@ class HomeQuickActions extends StatelessWidget {
   const HomeQuickActions({
     super.key,
     required this.onAction,
-    required this.isAdmin,
+    required this.actions,
   });
 
   final ValueChanged<HomeQuickAction> onAction;
-  final bool isAdmin;
+
+  /// [homeQuickActions] sonucu (boş olmamalı).
+  final List<HomeQuickAction> actions;
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +210,7 @@ class HomeQuickActions extends StatelessWidget {
           child: HomeQuickActionsBar(
             onAction: onAction,
             compact: true,
-            isAdmin: isAdmin,
+            actions: actions,
           ),
         ),
       ],

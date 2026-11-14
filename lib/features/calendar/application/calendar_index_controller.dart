@@ -15,7 +15,7 @@ part 'calendar_index_controller.g.dart';
 /// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
 /// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır. Koordinatör ve Üye
 /// görünümünde yalnız etkin koordinatörlüğün kayıtları ([calendarScope]); görev bitişleri
-/// katalogdan türetilir (takvim ucu yok).
+/// katalogdan türetilir (takvim ucu yok). Üye görünümünde tarih talebi bölümü yoktur.
 @Riverpod(keepAlive: true)
 Future<CalendarIndex> calendarIndex(Ref ref) async {
   final meetings = ref.watch(meetingsBoardControllerProvider.future);
@@ -29,6 +29,7 @@ Future<CalendarIndex> calendarIndex(Ref ref) async {
     board.visible,
     tasks,
     meetingsTruncated: board.truncated,
+    requests: !view.isMemberView,
     coordinatorship: calendarScope(
       known: view.known,
       seesAll: view.seesAllDepartments,

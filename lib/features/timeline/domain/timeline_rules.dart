@@ -7,8 +7,8 @@ import 'timeline.dart';
 // aynı kuralları buradan okur; arayüz yalnız sonucu gösterir, yetkiyi sunucu denetler.
 
 /// Koordinatörün onaysız ileri alabileceği en çok gün (prototip `RULE_D`). Fazlası ya da
-/// başlangıç değişikliği tarih talebine gider (`RULE_R`).
-const timelineDirectDays = 7;
+/// başlangıç değişikliği tarih talebine gider (`RULE_R`). Tek kaynak görevlerdeki ürün kuralı.
+const timelineDirectDays = maxDirectExtendDays;
 
 /// Tarih talebi gerekçesinin en kısa boyu (prototip `whyOk`).
 const timelineReasonMin = 3;

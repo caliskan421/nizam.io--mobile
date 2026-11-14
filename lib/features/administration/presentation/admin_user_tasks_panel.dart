@@ -11,7 +11,9 @@ import '../../../core/ui/widgets/nz_icons.dart';
 import '../../calendar/calendar.dart';
 import '../../tasks/tasks.dart';
 import '../application/admin_user_task_panel_controller.dart';
+import '../application/team_controller.dart';
 import '../domain/admin_user_tasks.dart';
+import '../domain/team_view.dart';
 import 'admin_user_task_filter_sheet.dart';
 import 'admin_user_task_row.dart';
 import 'admin_user_task_summary.dart';
@@ -34,6 +36,8 @@ List<Widget> adminUserTaskPanelChildren(
   final shown = state.select(tasks);
   final c = context.colors;
   final l = context.l10n;
+  // Ekibim tek koordinatörlüğe bakar: satırda koordinatörlük adı yerine görev kodu.
+  final team = ref.watch(teamSourceProvider) != TeamSource.directory;
   final result = <Widget>[
     AdminUserTaskSummary(tasks: tasks, truncated: catalog.truncated),
     const Gap(12),
@@ -174,6 +178,7 @@ List<Widget> adminUserTaskPanelChildren(
             coordinatorship: catalog
                 .coordinatorship(task.coordinatorship)
                 ?.name,
+            showCode: team,
             today: catalog.today,
             first: i == 0,
             last: i == rows.length - 1,

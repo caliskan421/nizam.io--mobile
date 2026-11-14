@@ -12,7 +12,7 @@ import '../../../core/ui/widgets/buttons/nz_icon_button.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
-import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
+import '../../../core/ui/widgets/surfaces/nz_kicker.dart';
 import '../../coordinatorships/coordinatorships.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
@@ -22,7 +22,8 @@ import '../domain/team_view.dart';
 import 'admin_user_list_row.dart';
 
 /// Kullanıcılar sayfasının koordinatör/üye yüzü ("Ekibim", prototip `users` koordinatör dalı):
-/// başlık + "koordinatörlük · n kişi", ara, "Ekibe kişi ekle" (yalnız koordinatör), üç öğeli
+/// başlık + "koordinatörlük · n kişi", sağda "+" (yalnız ekip yönetme hakkı), her zaman açık
+/// arama, üç öğeli
 /// rol bölücü (CSV ve koordinatörlük süzgeci yok), yönetici dizininin satır bileşeni
 /// ([AdminUserListRow]). On satırdan sonrası "Tümünü göster (n)". Üye görünümünde liste
 /// türetilmiştir ve salt okunurdur.
@@ -40,7 +41,6 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
   static const _collapsedRows = 10;
   final _search = TextEditingController();
   final _searchFocus = FocusNode();
-  bool _searchOpen = false;
   bool _showAll = false;
   String _query = '';
   AdminUserRoleFilter _role = AdminUserRoleFilter.all;
@@ -52,13 +52,10 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
     super.dispose();
   }
 
-  void _closeSearch() {
+  void _clearSearch() {
     _search.clear();
     _searchFocus.unfocus();
-    setState(() {
-      _searchOpen = false;
-      _query = '';
-    });
+    setState(() => _query = '');
   }
 
   void _retry() {
@@ -85,7 +82,7 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
     final department = view.departmentId;
     final team = roster.value;
     ref.listen(scopeStateProvider, (_, _) {
-      if (_searchOpen) _closeSearch();
+      if (_query.isNotEmpty) _clearSearch();
       setState(() => _showAll = false);
     });
     final caption = [
@@ -123,42 +120,25 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
                 ],
               ),
             ),
-            const Gap(NizamioSpacing.space1),
-            Semantics(
-              selected: _searchOpen,
-              child: NzIconButton.circle(
-                icon: NzIcons.search,
-                semanticLabel: l.uiUsersSearch,
-                onPressed: () => _searchOpen
-                    ? _closeSearch()
-                    : setState(() => _searchOpen = true),
-              ),
-            ),
             if (source.canAddMembers && department != null) ...[
               const Gap(NizamioSpacing.space1),
               NzIconButton.circleAccent(
-                icon: NzIcons.personAdd,
+                icon: NzIcons.add,
                 semanticLabel: l.uiUsersTeamAdd,
                 onPressed: () => showCoordAddMemberSheet(context, department),
               ),
             ],
           ],
         ),
-        NzReveal(
-          open: _searchOpen,
-          onOpened: _searchFocus.requestFocus,
-          child: Padding(
-            padding: const EdgeInsets.only(top: NizamioSpacing.space5),
-            child: NzSearchField(
-              controller: _search,
-              focusNode: _searchFocus,
-              onDismiss: _closeSearch,
-              label: l.uiUsersSearch,
-              hint: l.uiUsersTeamSearchHint,
-              onChanged: (text) => setState(() => _query = text),
-              onClear: () => setState(() => _query = ''),
-            ),
-          ),
+        const Gap(NizamioSpacing.space5),
+        NzSearchField(
+          controller: _search,
+          focusNode: _searchFocus,
+          onDismiss: _clearSearch,
+          label: l.uiUsersSearch,
+          hint: l.uiUsersTeamSearchHint,
+          onChanged: (text) => setState(() => _query = text),
+          onClear: () => setState(() => _query = ''),
         ),
         const Gap(NizamioSpacing.gapLg),
         NzPillTabs(
@@ -215,6 +195,10 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
                     NzBanner.warning(message: l.uiUsersDirectoryPartial),
                     const Gap(NizamioSpacing.space3),
                   ],
+                  if (shown.isNotEmpty) ...[
+                    NzKicker('${shown.length} ${l.uiUsersTeamPeople}'),
+                    const Gap(NizamioSpacing.space2),
+                  ],
                   if (shown.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -251,7 +235,8 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
   }
 }
 
-/// Ekip satırı: yönetici dizininin satırı; alt yazı "rol (sen) · n açık görev · m gecikmede".
+/// Ekip satırı: yönetici dizininin satırı; ad "(sen)" ekli, alt yazı "rol · n açık görev ·
+/// m gecikmede" (gecikme varsa yük kısmı uyarı renginde, yoksa gecikme gizli).
 class _TeamRow extends StatelessWidget {
   const _TeamRow({
     super.key,
@@ -276,13 +261,16 @@ class _TeamRow extends StatelessWidget {
     final c = context.colors;
     final role = person.lead ? l.uiUsersCoordinator : l.uiUsersMember;
     final load = this.load;
+    final detail = [
+      if (load != null) '${load.open} ${l.uiUsersTeamOpen}',
+      if (load != null && load.late > 0) '${load.late} ${l.uiUsersTeamLate}',
+    ].join(' · ');
     return AdminUserListRow(
       name: person.name,
-      roles: self ? '$role (${l.uiUsersTeamYou})' : role,
-      departments: load == null
-          ? ''
-          : '${load.open} ${l.uiUsersTeamOpen} · '
-                '${load.late} ${l.uiUsersTeamLate}',
+      nameSuffix: self ? '(${l.uiUsersTeamYou})' : null,
+      roles: role,
+      departments: detail,
+      detailAlert: load != null && load.late > 0,
       avatarColor: person.lead ? c.avatar1 : c.roleMember,
       avatarForeground: c.onAvatar,
       first: first,

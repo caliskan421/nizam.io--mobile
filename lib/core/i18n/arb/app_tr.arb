@@ -2081,6 +2081,14 @@
   "@uiArchiveEmptyTaskFolders": {
     "description": "ui.archive.empty_task_folders"
   },
+  "uiArchiveAssignedOnly": "yalnız sana atananlar",
+  "@uiArchiveAssignedOnly": {
+    "description": "ui.archive.assigned_only"
+  },
+  "uiArchiveEmptyAssigned": "Sana atanan görevlerde henüz dosya yok.",
+  "@uiArchiveEmptyAssigned": {
+    "description": "ui.archive.empty_assigned"
+  },
   "uiButtonsBusy": "Meşgul",
   "@uiButtonsBusy": {
     "description": "ui.buttons.busy"

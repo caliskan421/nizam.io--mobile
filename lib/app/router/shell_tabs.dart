@@ -72,7 +72,7 @@ ShellModule? moduleOf(String location) {
 }
 
 /// Yuvanın modülü: son girilen modül etkin rolün menüsündeyse o, değilse rolün varsayılanı
-/// ([defaultSlotFor]; Koordinatör ve Üye → Ekibim, Yönetici → Koordinatörlükler). Yuva adayları
+/// ([defaultSlotFor]; Koordinatör → Ekibim, Üye → Mesajlar, Yönetici → Koordinatörlükler). Yuva adayları
 /// menü tanımından süzülür ([slotModulesFor]).
 ShellModule shellSlotFor(ShellModule? last, EffectiveRole? role) {
   final allowed = {for (final m in slotModulesFor(role)) ?_shellModuleOf(m)};

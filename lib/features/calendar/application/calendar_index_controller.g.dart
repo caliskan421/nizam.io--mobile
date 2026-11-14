@@ -15,7 +15,7 @@ part of 'calendar_index_controller.dart';
 /// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
 /// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır. Koordinatör ve Üye
 /// görünümünde yalnız etkin koordinatörlüğün kayıtları ([calendarScope]); görev bitişleri
-/// katalogdan türetilir (takvim ucu yok).
+/// katalogdan türetilir (takvim ucu yok). Üye görünümünde tarih talebi bölümü yoktur.
 
 @ProviderFor(calendarIndex)
 final calendarIndexProvider = CalendarIndexProvider._();
@@ -27,7 +27,7 @@ final calendarIndexProvider = CalendarIndexProvider._();
 /// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
 /// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır. Koordinatör ve Üye
 /// görünümünde yalnız etkin koordinatörlüğün kayıtları ([calendarScope]); görev bitişleri
-/// katalogdan türetilir (takvim ucu yok).
+/// katalogdan türetilir (takvim ucu yok). Üye görünümünde tarih talebi bölümü yoktur.
 
 final class CalendarIndexProvider
     extends
@@ -44,7 +44,7 @@ final class CalendarIndexProvider
   /// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
   /// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır. Koordinatör ve Üye
   /// görünümünde yalnız etkin koordinatörlüğün kayıtları ([calendarScope]); görev bitişleri
-  /// katalogdan türetilir (takvim ucu yok).
+  /// katalogdan türetilir (takvim ucu yok). Üye görünümünde tarih talebi bölümü yoktur.
   CalendarIndexProvider._()
     : super(
         from: null,
@@ -71,4 +71,4 @@ final class CalendarIndexProvider
   }
 }
 
-String _$calendarIndexHash() => r'ac9e3d27ebd3ae04c26cc0bb60d505dbce12c7d9';
+String _$calendarIndexHash() => r'021e1d0f8f21d4f494871f436426acfca06c5911';

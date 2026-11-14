@@ -1719,6 +1719,13 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu aramayla eşleşen görev klasörü yok.';
 
   @override
+  String get uiArchiveAssignedOnly => 'yalnız sana atananlar';
+
+  @override
+  String get uiArchiveEmptyAssigned =>
+      'Sana atanan görevlerde henüz dosya yok.';
+
+  @override
   String get uiButtonsBusy => 'Meşgul';
 
   @override

@@ -193,6 +193,29 @@ void main() {
     expect(ix.today, DateTime(2026, 11, 5));
   });
 
+  test('üye görünümü (requests: false): talep bölümü hiç kurulmaz', () {
+    final day = DateTime(2026, 11, 10);
+    final ix = CalendarIndex.build(
+      const [],
+      _catalog([
+        _task(
+          'w3',
+          start: DateTime(2026, 11, 3),
+          due: DateTime(2026, 11, 4),
+          request: DateChangeRequest(
+            id: 'r1',
+            oldDue: DateTime(2026, 11, 4),
+            start: DateTime(2026, 11, 3),
+            due: day,
+          ),
+        ),
+      ]),
+      requests: false,
+    );
+    expect(ix.groups(day), isEmpty);
+    expect(ix.kinds(day), isNot(contains(CalendarKind.request)));
+  });
+
   test('görev başlangıcı eşiksiz düşer; biten görev ve sonuçlanmış talep düşmez; gecikme', () {
     final ix = CalendarIndex.build(
       const [],

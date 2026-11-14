@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/widgets/buttons/nz_icon_button.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/nz_avatar.dart';
@@ -24,7 +25,13 @@ class AdminUserListRow extends StatelessWidget {
     required this.onQuick,
     this.nameSuffix,
     this.detailAlert = false,
+    this.action,
   });
+
+  /// Satır sonunda şerit yerine çizilen ikincil eylem (Ekibim üye görünümü: "Mesaj").
+  /// Ekran okuyucuda satırın özel eylemidir.
+  final ({IconData icon, String label, VoidCallback onPressed})? action;
+
   final String name;
 
   /// Adın ardına eklenen kısa ek (Ekibim: "(sen)"); baş harflere katılmaz.
@@ -67,6 +74,8 @@ class AdminUserListRow extends StatelessWidget {
       hint: context.l10n.uiUsersRowHint,
       customSemanticsActions: {
         CustomSemanticsAction(label: context.l10n.uiUsersQuickActions): onQuick,
+        if (action case final a?)
+          CustomSemanticsAction(label: a.label): a.onPressed,
       },
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -190,11 +199,18 @@ class AdminUserListRow extends StatelessWidget {
                               ),
                             ),
                             const Gap(_gap),
-                            NzIcon(
-                              NzIcons.chevronRight,
-                              size: NizamioSize.iconSizeSm,
-                              color: c.textFaint,
-                            ),
+                            if (action case final a?)
+                              NzIconButton.circle(
+                                icon: a.icon,
+                                semanticLabel: a.label,
+                                onPressed: a.onPressed,
+                              )
+                            else
+                              NzIcon(
+                                NzIcons.chevronRight,
+                                size: NizamioSize.iconSizeSm,
+                                color: c.textFaint,
+                              ),
                           ],
                         ),
                       ),

@@ -162,6 +162,7 @@ class ApiDepartmentRepository implements DepartmentRepository {
     String programId,
     String departmentId, {
     String? displayName,
+    String? copyMembersFromProgramId,
     String? requestKey,
   }) async => _link(
     await apiCall(
@@ -170,6 +171,7 @@ class ApiDepartmentRepository implements DepartmentRepository {
         body: LinkDepartmentRequest(
           departmentId: departmentId,
           displayName: displayName,
+          copyMembersFromProgramId: copyMembersFromProgramId,
         ),
         extras: withProgram(
           ProgramClient.linkDepartmentOpenapiExtras,

@@ -1994,6 +1994,40 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordFormKind => 'Tür';
 
   @override
+  String get uiCoordFormDesc =>
+      'Yeni koordinatörlük oluşturulur ve seçili programa bağlanır.';
+
+  @override
+  String get uiCoordFormEditDesc =>
+      'Ad yalnız bu programda değişir; tür, kod ve açıklama bütün programlarda geçerlidir.';
+
+  @override
+  String get uiCoordFormNameHint => 'Örn. Altyapı ve Tesisat';
+
+  @override
+  String get uiCoordFormCode => 'Kısa kod';
+
+  @override
+  String get uiCoordFormCodeHint => 'Örn. ALT';
+
+  @override
+  String get uiCoordFormCodeHelper =>
+      'İsteğe bağlı; 2–10 harf ya da rakam (A–Z, 0–9). Şirkette tekildir.';
+
+  @override
+  String get uiCoordFormCancel => 'Vazgeç';
+
+  @override
+  String get uiCoordFormCopyTeam => 'Ekibi kopyala';
+
+  @override
+  String get uiCoordFormCopyNone => 'Kopyalama';
+
+  @override
+  String get uiCoordFormCopyCaption =>
+      'Seçilen programdaki ekip rolleriyle bu programa kopyalanır.';
+
+  @override
   String get uiCoordFormDescription => 'Açıklama';
 
   @override

@@ -121,7 +121,7 @@ final class CoordinatorshipFormControllerProvider
 }
 
 String _$coordinatorshipFormControllerHash() =>
-    r'0837ec0b062af081edf882139eb5214d1d12b94a';
+    r'322c3b8402f28a7fcbd630715a0262d4c2b53398';
 
 /// Koordinatörlük ekle / bilgileri düzenle komutları. Uygulama ömrünce yaşar: oluşturulup
 /// bağlanamamış departman ([CoordinatorshipFormState.pending]) form kapanıp açılsa da

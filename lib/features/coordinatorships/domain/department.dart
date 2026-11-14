@@ -24,6 +24,20 @@ enum DepartmentKind {
   }
 }
 
+/// Departman kısa kodu kuralı (ORGANIZATION-K10): sunucu baş/son boşluğu kırpar ve büyük harfe
+/// çevirir; sonuç `^[A-Z0-9]{2,10}$` olmalıdır (aksi 422, alan kodu `organization.invalid_code`).
+/// Kod isteğe bağlıdır ve şirkette tekildir (409 `organization.department_code_conflict`).
+abstract final class DepartmentCode {
+  static final _pattern = RegExp(r'^[A-Z0-9]{2,10}$');
+
+  /// Sunucunun uyguladığı biçim: kırpılmış, büyük harf.
+  static String normalize(String raw) => raw.trim().toUpperCase();
+
+  /// [raw] boşsa kod yok sayılır (geçerli); doluysa biçime uymalıdır.
+  static bool isValid(String raw) =>
+      raw.trim().isEmpty || _pattern.hasMatch(normalize(raw));
+}
+
 /// Departman üyeliğinin durumu (`RosterMember.status`).
 enum MemberStatus { active, deleted, unknown }
 

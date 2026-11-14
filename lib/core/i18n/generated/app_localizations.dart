@@ -3760,6 +3760,66 @@ abstract class AppLocalizations {
   /// **'Tür'**
   String get uiCoordFormKind;
 
+  /// ui.coord.form_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni koordinatörlük oluşturulur ve seçili programa bağlanır.'**
+  String get uiCoordFormDesc;
+
+  /// ui.coord.form_edit_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad yalnız bu programda değişir; tür, kod ve açıklama bütün programlarda geçerlidir.'**
+  String get uiCoordFormEditDesc;
+
+  /// ui.coord.form_name_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn. Altyapı ve Tesisat'**
+  String get uiCoordFormNameHint;
+
+  /// ui.coord.form_code
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa kod'**
+  String get uiCoordFormCode;
+
+  /// ui.coord.form_code_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn. ALT'**
+  String get uiCoordFormCodeHint;
+
+  /// ui.coord.form_code_helper
+  ///
+  /// In tr, this message translates to:
+  /// **'İsteğe bağlı; 2–10 harf ya da rakam (A–Z, 0–9). Şirkette tekildir.'**
+  String get uiCoordFormCodeHelper;
+
+  /// ui.coord.form_cancel
+  ///
+  /// In tr, this message translates to:
+  /// **'Vazgeç'**
+  String get uiCoordFormCancel;
+
+  /// ui.coord.form_copy_team
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekibi kopyala'**
+  String get uiCoordFormCopyTeam;
+
+  /// ui.coord.form_copy_none
+  ///
+  /// In tr, this message translates to:
+  /// **'Kopyalama'**
+  String get uiCoordFormCopyNone;
+
+  /// ui.coord.form_copy_caption
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçilen programdaki ekip rolleriyle bu programa kopyalanır.'**
+  String get uiCoordFormCopyCaption;
+
   /// ui.coord.form_description
   ///
   /// In tr, this message translates to:

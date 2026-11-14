@@ -70,6 +70,15 @@ class CoordinatorshipsPage extends ConsumerWidget {
               NzPageHeader(
                 title: context.l10n.uiCoordTitle,
                 subtitle: context.l10n.coordListSubtitle(items),
+                actions: [
+                  // Koordinatörlük ekleme yalnız şirket yöneticisinin yüzüdür.
+                  if (ref.watch(canManageCoordinatorshipsProvider))
+                    NzIconButton.circleAccent(
+                      icon: NzIcons.add,
+                      semanticLabel: context.l10n.uiCoordFlyAdd,
+                      onPressed: () => showCoordinatorshipForm(context, ref),
+                    ),
+                ],
               ),
               const Gap(NizamioSpacing.space5),
               Align(

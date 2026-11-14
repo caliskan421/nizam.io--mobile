@@ -2445,6 +2445,46 @@
   "@uiCoordFormKind": {
     "description": "ui.coord.form_kind"
   },
+  "uiCoordFormDesc": "Yeni koordinatörlük oluşturulur ve seçili programa bağlanır.",
+  "@uiCoordFormDesc": {
+    "description": "ui.coord.form_desc"
+  },
+  "uiCoordFormEditDesc": "Ad yalnız bu programda değişir; tür, kod ve açıklama bütün programlarda geçerlidir.",
+  "@uiCoordFormEditDesc": {
+    "description": "ui.coord.form_edit_desc"
+  },
+  "uiCoordFormNameHint": "Örn. Altyapı ve Tesisat",
+  "@uiCoordFormNameHint": {
+    "description": "ui.coord.form_name_hint"
+  },
+  "uiCoordFormCode": "Kısa kod",
+  "@uiCoordFormCode": {
+    "description": "ui.coord.form_code"
+  },
+  "uiCoordFormCodeHint": "Örn. ALT",
+  "@uiCoordFormCodeHint": {
+    "description": "ui.coord.form_code_hint"
+  },
+  "uiCoordFormCodeHelper": "İsteğe bağlı; 2–10 harf ya da rakam (A–Z, 0–9). Şirkette tekildir.",
+  "@uiCoordFormCodeHelper": {
+    "description": "ui.coord.form_code_helper"
+  },
+  "uiCoordFormCancel": "Vazgeç",
+  "@uiCoordFormCancel": {
+    "description": "ui.coord.form_cancel"
+  },
+  "uiCoordFormCopyTeam": "Ekibi kopyala",
+  "@uiCoordFormCopyTeam": {
+    "description": "ui.coord.form_copy_team"
+  },
+  "uiCoordFormCopyNone": "Kopyalama",
+  "@uiCoordFormCopyNone": {
+    "description": "ui.coord.form_copy_none"
+  },
+  "uiCoordFormCopyCaption": "Seçilen programdaki ekip rolleriyle bu programa kopyalanır.",
+  "@uiCoordFormCopyCaption": {
+    "description": "ui.coord.form_copy_caption"
+  },
   "uiCoordFormDescription": "Açıklama",
   "@uiCoordFormDescription": {
     "description": "ui.coord.form_description"

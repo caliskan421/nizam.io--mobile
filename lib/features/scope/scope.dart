@@ -9,6 +9,8 @@ export 'application/home_dashboard_controller.dart'
         homeDashboardControllerProvider,
         homePendingProvider,
         homeUnreadProvider;
+export 'application/program_list_controller.dart'
+    show programListControllerProvider;
 export 'application/scope_providers.dart'
     show homeDashboardRepositoryProvider, scopeServiceProvider;
 export 'application/scope_selection_controller.dart'

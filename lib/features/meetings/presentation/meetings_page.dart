@@ -159,7 +159,7 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
                 onPressed: _starting ? null : () => _instant(instantDept),
               ),
             // Toplantı açma yönetici ve koordinatör yüzüdür (üye hayır; COLLABORATION).
-            if (access.canCreateMeeting || !access.known)
+            if (access.canCreateMeeting)
               NzIconButton.circleAccent(
                 icon: NzIcons.add,
                 semanticLabel: l.uiMeetingsNew,

@@ -1015,7 +1015,8 @@ void main() {
         );
       }
       int count(String rule) => raw.where((v) => v.rule == rule).length;
-      // tokens.gen.dart 158 (72 rol × 2 mod; `taskDone` dahil + 12 tasarım gölgesi + 2 mobil kart gölgesi
+      // tokens.gen.dart 158 (72 rol × 2 mod; `taskDone` dahil: açık 0xFF74C27A + koyu 0xFFC8F53C = 2 tanım,
+      // jeton dosyasının pinidir, borç değil; + 12 tasarım gölgesi + 2 mobil kart gölgesi
       // katmanı; ADR-0003 karar 24, ana sayfa + prototip ekran rolleri) + privacy_mask.dart 1.
       expect(
         count('U2'),

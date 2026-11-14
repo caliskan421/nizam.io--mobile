@@ -94,6 +94,8 @@
     "ui.archive.summary_kinds": "Tür dağılımı",
     "ui.archive.summary_partial": "Kısmi sayım; arşiv çok büyük",
     "ui.archive.summary_no_files": "Henüz dosya yok",
-    "ui.archive.upload_task_desc": "Dosya seçtiğiniz göreve yüklenir"
+    "ui.archive.upload_task_desc": "Dosya seçtiğiniz göreve yüklenir",
+    "ui.archive.retag": "Etiketi değiştir",
+    "ui.archive.retagged": "Etiket değiştirildi"
   }
 }

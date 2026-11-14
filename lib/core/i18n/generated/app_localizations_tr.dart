@@ -1463,6 +1463,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveUploadTaskDesc => 'Dosya seçtiğiniz göreve yüklenir';
 
   @override
+  String get uiArchiveRetag => 'Etiketi değiştir';
+
+  @override
+  String get uiArchiveRetagged => 'Etiket değiştirildi';
+
+  @override
   String get uiButtonsBusy => 'Meşgul';
 
   @override

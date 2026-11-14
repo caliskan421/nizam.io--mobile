@@ -2704,6 +2704,18 @@ abstract class AppLocalizations {
   /// **'Dosya seçtiğiniz göreve yüklenir'**
   String get uiArchiveUploadTaskDesc;
 
+  /// ui.archive.retag
+  ///
+  /// In tr, this message translates to:
+  /// **'Etiketi değiştir'**
+  String get uiArchiveRetag;
+
+  /// ui.archive.retagged
+  ///
+  /// In tr, this message translates to:
+  /// **'Etiket değiştirildi'**
+  String get uiArchiveRetagged;
+
   /// ui.buttons.busy
   ///
   /// In tr, this message translates to:

@@ -5,6 +5,8 @@ import '../../../core/api/generated/models/archive_folder.dart' as api;
 import '../../../core/api/generated/models/archive_task.dart' as api;
 import '../../../core/api/generated/models/file_list_item.dart' as api;
 import '../../../core/api/generated/models/file_record.dart' as api;
+import '../../../core/api/generated/models/retag_file_request.dart';
+import '../../../core/api/generated/models/retag_file_request_tag.dart';
 import '../../../core/api/generated/models/tag.dart';
 import '../../../core/domain/enum_parse.dart';
 import '../../../core/domain/page_slice.dart';
@@ -165,6 +167,21 @@ class ApiRecordsRepository implements ArchiveRepository {
           ),
         ),
       );
+
+  @override
+  Future<void> retagFile(
+    String fileId,
+    RecordTag tag, {
+    required String department,
+  }) => apiCall(
+    () => _client.retagFile(
+      id: fileId,
+      body: RetagFileRequest(
+        tag: RetagFileRequestTag.fromJson(_tagOut(tag).json!),
+      ),
+      extras: withDepartment(RecordsClient.retagFileOpenapiExtras, department),
+    ),
+  );
 
   @override
   Future<Stream<List<int>>> downloadFile(

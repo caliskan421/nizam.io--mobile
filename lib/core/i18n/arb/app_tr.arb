@@ -1741,6 +1741,14 @@
   "@uiArchiveUploadTaskDesc": {
     "description": "ui.archive.upload_task_desc"
   },
+  "uiArchiveRetag": "Etiketi değiştir",
+  "@uiArchiveRetag": {
+    "description": "ui.archive.retag"
+  },
+  "uiArchiveRetagged": "Etiket değiştirildi",
+  "@uiArchiveRetagged": {
+    "description": "ui.archive.retagged"
+  },
   "uiButtonsBusy": "Meşgul",
   "@uiButtonsBusy": {
     "description": "ui.buttons.busy"

@@ -7,6 +7,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
+import '../../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
@@ -53,9 +54,9 @@ class ArchiveKindTile extends StatelessWidget {
 
 /// Dosya önizleme alt sayfası: sıra (n / N) + önceki/sonraki, tür alanı (yana kaydırınca
 /// önceki/sonraki dosya, dokununca tam ekran ve yakınlaştırma), ad + tür/boyut, bilgi satırları
-/// (görev satırı görevi açar; etiket, yükleyen), İndir + taşı (yakında) / sil (yalnız
-/// yükleyene). Etiket değiştirme ucu yok (backend bekliyor); düğmesi gösterilmez. Liste klasörün yüklenmiş, süzgeçten geçmiş dosyalarıdır; silme sunucuda
-/// yapılır ve sayfayı kapatır. Sunucu yükleme zamanı vermez (tarih satırı yok).
+/// (görev satırı görevi açar; etiket satırı yetkiliye etiket seçici açar — `retagFile`, yönetici,
+/// görevin koordinatörü ya da yükleyen), İndir + taşı (yakında) / sil (yalnız yükleyene). Liste
+/// klasörün yüklenmiş, süzgeçten geçmiş dosyalarıdır; silme sunucuda yapılır ve sayfayı kapatır. Sunucu yükleme zamanı vermez (tarih satırı yok).
 Future<void> showArchivePreview(
   BuildContext context, {
   required String code,
@@ -114,6 +115,34 @@ class _PreviewState extends ConsumerState<_Preview> {
     _toast('${f.displayName} ${l.uiArchiveDownloading}');
     final r = await _ctrl.downloadFile(f);
     if (widget.host.mounted) showArchiveOutcome(widget.host, r);
+  }
+
+  /// Etiket seçici (kapalı küme); seçim sunucuda değişir, listeler yeniden okunur.
+  void _retag(RecordFile f) {
+    final l = context.l10n;
+    final c = context.colors;
+    NzFlyoutMenu.show(
+      context,
+      semanticLabel: l.uiArchiveRetag,
+      entries: [
+        NzFlyoutSection(l.uiArchiveRetag),
+        for (final tag in archiveTags)
+          NzFlyoutItem(
+            label: l.tagLabel(tag),
+            dot: c.tag(tag),
+            onSelected: () async {
+              final r = await _ctrl.retagFile(f, tag);
+              if (widget.host.mounted) {
+                showArchiveOutcome(
+                  widget.host,
+                  r,
+                  success: l.uiArchiveRetagged,
+                );
+              }
+            },
+          ),
+      ],
+    );
   }
 
   /// Yana kaydırmanın dosya değiştirdiği en düşük hız (px/sn).
@@ -194,6 +223,12 @@ class _PreviewState extends ConsumerState<_Preview> {
       if (widget.host.mounted) widget.host.appNav.openTask(code);
     }
 
+    final mine = uploader != null && uploader == catalog?.me;
+    final perms = task == null
+        ? null
+        : TaskPermissions.of(catalog?.access, task);
+    final canRetag =
+        mine || (perms?.admin ?? false) || (perms?.coordinator ?? false);
     final facts = <(String, String, Color?, VoidCallback?)>[
       if (title != null)
         (
@@ -202,7 +237,12 @@ class _PreviewState extends ConsumerState<_Preview> {
           null,
           task == null ? null : openTask,
         ),
-      (l.uiArchiveFactTag, l.tagLabel(f.tag), c.tag(f.tag), null),
+      (
+        l.uiArchiveFactTag,
+        l.tagLabel(f.tag),
+        c.tag(f.tag),
+        canRetag ? () => _retag(f) : null,
+      ),
       (
         l.uiArchiveFactBy,
         (uploader == null ? null : catalog?.nameOf(uploader)) ??
@@ -211,7 +251,6 @@ class _PreviewState extends ConsumerState<_Preview> {
         null,
       ),
     ];
-    final mine = uploader != null && uploader == catalog?.me;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,

@@ -16,8 +16,8 @@ import 'module_menu_texts.dart';
 /// çipler, onay bekleyenler (İade / Onayla), atanmamış (Üstlen / Ata), ekip yükü, yaklaşan
 /// toplantılar, tarih taleplerim. Kaynak etkin koordinatörlüğün görevleri
 /// ([coordinatorBoardProvider]); ayrı sayfa değil, ana sayfanın koordinatör görünümüdür.
-/// Sıra prototip gibi: özet + hızlı işlemler ([quick]), onay bekleyenler + atanmamış, sonra
-/// ekip yükü, toplantılar, tarih talepleri. Geniş düzende her çift yan yana.
+/// Geniş düzen: özet + hızlı işlemler ([quick]); onay bekleyenler tam genişlik; atanmamış +
+/// tarih taleplerim; ekip yükü + yaklaşan toplantılar. Dar düzende tek sütun.
 class HomeCoordinatorFeed extends ConsumerWidget {
   const HomeCoordinatorFeed({super.key, required this.wide, this.quick});
 
@@ -40,17 +40,7 @@ class HomeCoordinatorFeed extends ConsumerWidget {
     }
     final l = context.l10n;
     final summary = HomeCoordinatorSummary(board: board);
-    final quick = this.quick;
-    final quickSection = quick == null
-        ? null
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              NzSectionHeader(l.uiHomeQuickActionsTitle),
-              const Gap(NizamioSpacing.gapMd),
-              IntrinsicHeight(child: quick),
-            ],
-          );
+    final quickSection = quick;
     final queue = HomeSectionFrame(
       title: l.uiHomeQueueTitle,
       count: board.queue.length,
@@ -61,12 +51,13 @@ class HomeCoordinatorFeed extends ConsumerWidget {
       table: (l.uiHomeTableTask, l.uiHomeTableDue),
       children: [
         for (final t in board.queue.take(rowsPerSection))
-          TaskQueueRow(task: t, today: today, flat: true),
+          TaskQueueRow(task: t, today: today, flat: true, inline: wide),
       ],
     );
     final Widget? unassigned = board.unassigned.isEmpty
         ? null
         : HomeSectionFrame(
+            fill: wide,
             title: l.uiHomeUnassignedTitle,
             count: board.unassigned.length,
             onAll: board.unassigned.length > rowsPerSection
@@ -79,9 +70,9 @@ class HomeCoordinatorFeed extends ConsumerWidget {
             ],
           );
     final rest = [
-      HomeTeamLoad(board: board),
-      const HomeUpcomingMeetings(),
-      const HomeMyDateRequests(),
+      HomeTeamLoad(board: board, fill: wide),
+      HomeUpcomingMeetings(fill: wide),
+      HomeMyDateRequests(fill: wide),
     ];
     if (!wide) {
       return Column(
@@ -97,28 +88,36 @@ class HomeCoordinatorFeed extends ConsumerWidget {
         ],
       );
     }
-    Widget pair(Widget a, Widget? b, {int flexA = 1, int flexB = 1}) => Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(flex: flexA, child: a),
-        const Gap(homeWideGap),
-        Expanded(flex: flexB, child: b ?? const SizedBox.shrink()),
-      ],
-    );
+    // Yan yana iki öğe aynı yükseklikte (veri az/boş olsa da); kartlar `fill` ile uzar.
+    Widget pair(Widget a, Widget? b, {int flexA = 1, int flexB = 1}) =>
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(flex: flexA, child: a),
+              const Gap(homeWideGap),
+              Expanded(flex: flexB, child: b ?? const SizedBox.shrink()),
+            ],
+          ),
+        );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Özet geniş, hızlı işlemler dar (prototip ~ 3:2); ikisi üstten hizalı.
+        // Özet geniş, hızlı işlemler 2×2 kare dokunaç (4:1); ikisi aynı yükseklikte.
         if (quickSection == null)
           summary
         else
-          pair(summary, quickSection, flexA: 3, flexB: 2),
+          pair(summary, quickSection, flexA: 4, flexB: 1),
         const Gap(NizamioSpacing.gapXl),
-        pair(queue, unassigned),
+        queue,
+        const Gap(NizamioSpacing.gapXl),
+        // Atanmamış yoksa tarih talepleri sola oturur; sağda boş sütun kalmaz.
+        if (unassigned == null)
+          pair(rest[2], null)
+        else
+          pair(unassigned, rest[2]),
         const Gap(NizamioSpacing.gapXl),
         pair(rest[0], rest[1]),
-        const Gap(NizamioSpacing.gapXl),
-        pair(rest[2], null),
       ],
     );
   }
@@ -139,6 +138,7 @@ class HomeSectionFrame extends StatelessWidget {
     this.table,
     this.below,
     this.allLabel,
+    this.fill = false,
   });
 
   final String title;
@@ -152,12 +152,33 @@ class HomeSectionFrame extends StatelessWidget {
   /// "Tümü" yerine bağlantı metni (ör. "Takvim").
   final String? allLabel;
 
+  /// Verilen yüksekliği kartla doldurur (yan yana çiftte iki kart aynı boyda; içerik üstten).
+  /// Yalnız sınırlı yükseklikte (çiftin `IntrinsicHeight` satırı) açılır.
+  final bool fill;
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
     final empty = this.empty;
     final table = this.table;
+    final card = children.isEmpty && empty != null
+        ? NzTableCard(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(NizamioSpacing.space4),
+                child: Text(
+                  empty,
+                  style: context.text.bodyMd.copyWith(color: c.textMuted),
+                ),
+              ),
+            ],
+          )
+        : NzTableCard(
+            leading: table?.$1,
+            trailing: table?.$2,
+            children: children,
+          );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -169,24 +190,7 @@ class HomeSectionFrame extends StatelessWidget {
         ),
         const Gap(NizamioSpacing.gapMd),
         if (below case final w?) ...[w, const Gap(NizamioSpacing.gapMd)],
-        if (children.isEmpty && empty != null)
-          NzTableCard(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(NizamioSpacing.space4),
-                child: Text(
-                  empty,
-                  style: context.text.bodyMd.copyWith(color: c.textMuted),
-                ),
-              ),
-            ],
-          )
-        else
-          NzTableCard(
-            leading: table?.$1,
-            trailing: table?.$2,
-            children: children,
-          ),
+        if (fill) Expanded(child: card) else card,
       ],
     );
   }

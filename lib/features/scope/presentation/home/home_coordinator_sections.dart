@@ -78,6 +78,8 @@ class HomeCoordinatorSummary extends ConsumerWidget {
       size: NzSize.lg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        // Çift yüksekliği eşitlenince (tablet) başlık üstte, gövde altta durur.
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             board.departmentName,
@@ -85,41 +87,53 @@ class HomeCoordinatorSummary extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
             style: t.titleSm,
           ),
-          const Gap(NizamioSpacing.space3),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('%$pct', style: t.displayLg),
               const Gap(NizamioSpacing.space3),
-              Expanded(
-                child: Text(
-                  '${s.done} / $more${s.total} ${l.uiHomeCoordDoneTail}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: t.bodySm.copyWith(color: c.textMuted),
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  // Gap/SizedBox değil: baseline satırı `IntrinsicHeight` içinde (çift yükseklik
+                  // eşitleme); Gap dry-baseline'ı hesaplayamaz, boşluk Padding ile verilir.
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      end: NizamioSpacing.space3,
+                    ),
+                    child: Text('%$pct', style: t.displayLg),
+                  ),
+                  Expanded(
+                    child: Text(
+                      '${s.done} / $more${s.total} ${l.uiHomeCoordDoneTail}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: t.bodySm.copyWith(color: c.textMuted),
+                    ),
+                  ),
+                ],
               ),
+              const Gap(NizamioSpacing.space4),
+              NzProgressBar.segments(
+                segments: [
+                  NzBarSegment(s.done, c.taskDone),
+                  NzBarSegment(s.review, c.warning),
+                  NzBarSegment(s.inProgress, c.inProgress),
+                  NzBarSegment(s.returned, c.danger),
+                  NzBarSegment(s.todo, c.textFaint),
+                ],
+              ),
+              if (chips.isNotEmpty) ...[
+                const Gap(NizamioSpacing.space4),
+                Wrap(
+                  spacing: NizamioSpacing.space2,
+                  runSpacing: NizamioSpacing.space2,
+                  children: chips,
+                ),
+              ],
             ],
           ),
-          const Gap(NizamioSpacing.space4),
-          NzProgressBar.segments(
-            segments: [
-              NzBarSegment(s.done, c.taskDone),
-              NzBarSegment(s.review, c.warning),
-              NzBarSegment(s.inProgress, c.inProgress),
-              NzBarSegment(s.returned, c.danger),
-              NzBarSegment(s.todo, c.textFaint),
-            ],
-          ),
-          if (chips.isNotEmpty) ...[
-            const Gap(NizamioSpacing.space4),
-            Wrap(
-              spacing: NizamioSpacing.space2,
-              runSpacing: NizamioSpacing.space2,
-              children: chips,
-            ),
-          ],
         ],
       ),
     );
@@ -131,9 +145,12 @@ class HomeCoordinatorSummary extends ConsumerWidget {
 /// göre ölçeklenir (kalanı iz rengi). Backend koordinatöre yük ucu açmaz; sayım görünen
 /// görevlerden ([CoordinatorBoard.load], [CoordinatorBoard.tasks]).
 class HomeTeamLoad extends ConsumerWidget {
-  const HomeTeamLoad({super.key, required this.board});
+  const HomeTeamLoad({super.key, required this.board, this.fill = false});
 
   final CoordinatorBoard board;
+
+  /// Bkz. [HomeSectionFrame.fill].
+  final bool fill;
 
   static const maxRows = 6;
 
@@ -179,6 +196,7 @@ class HomeTeamLoad extends ConsumerWidget {
       ],
     );
     return HomeSectionFrame(
+      fill: fill,
       title: l.uiHomeLoadTitle,
       count: rows.length,
       onAll: context.appNav.openUsers,
@@ -216,7 +234,10 @@ class HomeTeamLoad extends ConsumerWidget {
 /// Yaklaşan toplantılar (en çok 3; toplantılar modülünün görünür listesinden). Canlı
 /// konferansı olan toplantı başlangıcı geçmiş olsa da listede kalır.
 class HomeUpcomingMeetings extends ConsumerWidget {
-  const HomeUpcomingMeetings({super.key});
+  const HomeUpcomingMeetings({super.key, this.fill = false});
+
+  /// Bkz. [HomeSectionFrame.fill].
+  final bool fill;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -234,6 +255,7 @@ class HomeUpcomingMeetings extends ConsumerWidget {
             if (isLive(m) || !m.meetingDate.toLocal().isBefore(now)) m,
         ]..sort((a, z) => a.meetingDate.compareTo(z.meetingDate));
         return HomeSectionFrame(
+          fill: fill,
           title: l.uiHomeMeetingsTitle,
           count: next.length,
           onAll: nav.openMeetings,
@@ -397,7 +419,10 @@ class HomeDateBox extends StatelessWidget {
 
 /// Tarih taleplerim (en çok 3; durum hapıyla, düz satır).
 class HomeMyDateRequests extends ConsumerWidget {
-  const HomeMyDateRequests({super.key});
+  const HomeMyDateRequests({super.key, this.fill = false});
+
+  /// Bkz. [HomeSectionFrame.fill].
+  final bool fill;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -408,6 +433,7 @@ class HomeMyDateRequests extends ConsumerWidget {
       onRetry: () => ref.invalidate(myDateRequestsProvider),
       loading: const NzSkeleton.block(height: 96),
       data: (all) => HomeSectionFrame(
+        fill: fill,
         title: l.uiHomeRequestsTitle,
         count: all.length,
         onAll: all.isEmpty ? null : () => showDateRequestsSheet(context),

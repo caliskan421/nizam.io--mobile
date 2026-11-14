@@ -27,9 +27,17 @@ class HomeQuickActionsBar extends StatelessWidget {
     required this.onAction,
     required this.actions,
     this.compact = false,
+    this.title,
+    this.columns = 0,
   });
 
   final ValueChanged<HomeQuickAction> onAction;
+
+  /// Izgara kipinde ([columns] > 0) kartın içinde çizilen başlık; satır kipinde başlık çağıranda.
+  final String? title;
+
+  /// 0 → tek satırda eşit bölmeler; >0 → o kadar sütunlu ızgara (koordinatör: 2×2, kareye yakın).
+  final int columns;
 
   /// [homeQuickActions] sonucu.
   final List<HomeQuickAction> actions;
@@ -39,8 +47,49 @@ class HomeQuickActionsBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    return NzCard.outlined(
-      padding: const EdgeInsets.all(NizamioSpacing.space2),
+    final title = this.title;
+    if (columns > 0) {
+      // Izgara (koordinatör, tablet): başlık kartın içinde, kare dokunaçlar; ayraç yok.
+      Widget cell(int j) => Expanded(
+        child: j < actions.length
+            ? _QuickTile(
+                icon: quickActionIcon(actions[j]),
+                label: quickActionLabel(l, actions[j]),
+                onPressed: () => onAction(actions[j]),
+              )
+            : const SizedBox.shrink(),
+      );
+      return NzCard.outlined(
+        padding: const EdgeInsets.all(NizamioSpacing.space3),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (title != null) ...[
+              Text(
+                title,
+                style: context.text.titleSm.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Gap(NizamioSpacing.space3),
+            ],
+            for (var i = 0; i < actions.length; i += columns) ...[
+              if (i > 0) const Gap(NizamioSpacing.space2),
+              Row(
+                children: [
+                  for (var j = i; j < i + columns; j++) ...[
+                    if (j > i) const Gap(NizamioSpacing.space2),
+                    cell(j),
+                  ],
+                ],
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+    final row = IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -66,6 +115,75 @@ class HomeQuickActionsBar extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+    return NzCard.outlined(
+      padding: const EdgeInsets.all(NizamioSpacing.space2),
+      child: row,
+    );
+  }
+}
+
+/// Izgara dokunacı: kare, ince kenarlıklı; simge sol üstte, etiket sol altta (kalın).
+class _QuickTile extends StatelessWidget {
+  const _QuickTile({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final radius = BorderRadius.circular(NizamioRadius.tile);
+    return Semantics(
+      container: true,
+      button: true,
+      label: label,
+      onTap: onPressed,
+      excludeSemantics: true,
+      child: NzPressable(
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: Material(
+            color: c.surfaceOverlay,
+            shape: RoundedRectangleBorder(
+              borderRadius: radius,
+              side: BorderSide(color: c.border, width: NizamioSize.borderWidth),
+            ),
+            child: InkWell(
+              onTap: onPressed,
+              borderRadius: radius,
+              splashFactory: NoSplash.splashFactory,
+              child: Padding(
+                padding: const EdgeInsets.all(NizamioSpacing.space3),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    NzIcon(
+                      icon,
+                      size: NizamioSize.iconSizeSm,
+                      color: c.textMuted,
+                    ),
+                    Text(
+                      label,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.text.list.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

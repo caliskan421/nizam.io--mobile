@@ -22,19 +22,24 @@ import 'coordinator_texts.dart';
 import 'task_decision_flows.dart';
 
 /// Onay kuyruğu satırı (ana sayfa, görev listesi bandı, kuyruk kaplaması aynı bileşen):
-/// [NzQueueRow] + karar akışları. [flat] (ana sayfa tablo kartı): alt satır görev kodu, sağda
-/// bitiş tarihi (teslim zamanı backend'de yok, gösterilmez).
+/// [NzQueueRow] + karar akışları. [flat] (ana sayfa tablo kartı): başlığın altında gri
+/// koordinatörlük adı (görev kodu gösterilmez), sağda bitiş tarihi (teslim zamanı backend'de
+/// yok, gösterilmez).
 class TaskQueueRow extends ConsumerWidget {
   const TaskQueueRow({
     super.key,
     required this.task,
     required this.today,
     this.flat = false,
+    this.inline = false,
   });
 
   final TaskItem task;
   final DateTime today;
   final bool flat;
+
+  /// [flat] ve geniş düzen: bkz. [NzQueueRow.inline].
+  final bool inline;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,10 +49,19 @@ class TaskQueueRow extends ConsumerWidget {
     final subLine = subs == 0
         ? null
         : l.subtaskLine(task.subtaskDoneTotal, subs);
+    final coordName = flat
+        ? ref
+              .watch(taskCatalogControllerProvider)
+              .value
+              ?.coordinatorship(task.coordinatorship)
+              ?.name
+        : null;
     return NzQueueRow(
       title: task.title,
-      meta: flat ? [task.code, ?subLine].join(' · ') : subLine,
+      subtitle: coordName,
+      meta: subLine,
       flat: flat,
+      inline: inline,
       dueDate: flat ? DateFormat('d MMM', 'tr').format(task.due) : null,
       dueText: l.dueLine(task, today),
       dueDanger: isTaskLate(task),

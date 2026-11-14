@@ -169,10 +169,11 @@ class HomeKpiGrid extends StatelessWidget {
 /// görünümünde görev açma Görevler sayfasının "+" düğmesindedir).
 enum HomeQuickAction { history, meeting, deleted, report, newTask, member }
 
-/// Rapor telefonda üretilmez: rapor oluşturucu gelene dek kısayolu gizlidir. İşlem geçmişi ve
+/// Rapor telefonda üretilmez: rapor oluşturucu gelene dek yönetici/üye görünümünde gizlidir;
+/// koordinatör görünümünde kısayol vardır ve "yakında" bildirimi gösterir. İşlem geçmişi ve
 /// silinenler yalnız şirket yöneticisine (AUDIT-K10); toplantı yalnız açabilen etkin role
 /// ([EffectiveAccess.canCreateMeeting]). [coordinator] (koordinatör görünümü) prototip sırasını
-/// kullanır: Yeni görev ([canCreateTask]), Toplantı, Üye ekle ([canManageTeam]). Liste boşsa
+/// kullanır: Yeni görev ([canCreateTask]), Toplantı, Üye ekle ([canManageTeam]), Rapor. Liste boşsa
 /// bölüm çizilmez.
 List<HomeQuickAction> homeQuickActions({
   required bool isAdmin,
@@ -186,6 +187,7 @@ List<HomeQuickAction> homeQuickActions({
         if (canMeet) HomeQuickAction.meeting,
         if (canManageTeam) HomeQuickAction.member,
         if (isAdmin) HomeQuickAction.history,
+        HomeQuickAction.report,
       ]
     : [
         for (final action in HomeQuickAction.values)

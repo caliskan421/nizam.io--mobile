@@ -84,7 +84,8 @@ final class UpcomingItem {
 }
 
 /// Önümüzdeki [days] günün (bugün dahil) toplantıları ve bitmemiş görev bitişleri, zamana göre;
-/// en çok [limit]. Başlamış toplantı ([now] öncesi) yalnız [live] ise kalır. Geçmiş bitişler
+/// en çok [limit]. Bugünün saati geçmiş toplantısı da kalır (toplantılar sayfasının "Yaklaşan"
+/// sekmesi gibi: başlamamışsa "bekliyor"); önceki günün toplantısı yalnız [live] ise. Geçmiş bitişler
 /// (gecikenler) yaklaşan değildir; odak ve Görevlerim bölümünde görünür.
 List<UpcomingItem> memberUpcoming(
   Iterable<TaskItem> tasks,
@@ -100,7 +101,7 @@ List<UpcomingItem> memberUpcoming(
   final items = <UpcomingItem>[
     for (final m in meetings)
       if (m.meetingDate.toLocal() case final at
-          when (!at.isBefore(now) || (live?.call(m) ?? false)) &&
+          when (!at.isBefore(start) || (live?.call(m) ?? false)) &&
               at.isBefore(end))
         UpcomingItem.meeting(m, at),
     for (final t in tasks)

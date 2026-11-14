@@ -98,7 +98,8 @@ void main() {
     final today = DateTime(2026, 11, 14);
     final now = DateTime(2026, 11, 14, 12);
 
-    test('7 gün içindeki toplantılar ve açık bitişler zaman sırasıyla', () {
+    test('7 gün içindeki toplantılar (bugünün saati geçmişi dahil) ve açık bitişler zaman '
+        'sırasıyla', () {
       final items = memberUpcoming(
         [
           _t('t-today', due: 14),
@@ -108,6 +109,7 @@ void main() {
           _t('t-far', due: 21),
         ],
         [
+          _m('m-yesterday', DateTime(2026, 11, 13, 9)),
           _m('m-past', DateTime(2026, 11, 14, 9)),
           _m('m-15', DateTime(2026, 11, 15, 10)),
           _m('m-far', DateTime(2026, 11, 22, 10)),
@@ -118,12 +120,12 @@ void main() {
       );
       expect(
         [for (final x in items) x.task?.code ?? x.meeting?.id],
-        ['t-today', 'm-15', 't-17'],
+        ['t-today', 'm-past', 'm-15', 't-17'],
       );
     });
 
-    test('canlı toplantı başlamış olsa da kalır; en çok limit kadar', () {
-      final live = _m('live', DateTime(2026, 11, 14, 11));
+    test('önceki günden canlı toplantı kalır; en çok limit kadar', () {
+      final live = _m('live', DateTime(2026, 11, 13, 23));
       final items = memberUpcoming(
         [for (var d = 14; d < 20; d++) _t('t$d', due: d)],
         [live],
@@ -133,8 +135,8 @@ void main() {
       );
       expect(items, hasLength(4));
       expect(items.map((x) => x.meeting?.id ?? x.task?.code), [
-        't14',
         'live',
+        't14',
         't15',
         't16',
       ]);

@@ -227,9 +227,9 @@ class HomeTeamLoad extends ConsumerWidget {
   }
 }
 
-/// Yaklaşan toplantılar (en çok 3; toplantılar modülünün görünür listesinden): toplantılar
-/// sayfasındaki kartın aynısı ([MeetingCard]); boşsa boş metinli kart. Canlı konferansı olan
-/// toplantı başlangıcı geçmiş olsa da listede kalır.
+/// Yaklaşan toplantılar (en çok 3; toplantılar sayfasının "Yaklaşan" sekmesi): o sayfadaki
+/// kartın aynısı ([MeetingCard]); boşsa boş metinli kart. Canlı konferansı olan toplantı önceki
+/// günden olsa da listede kalır.
 class HomeUpcomingMeetings extends ConsumerWidget {
   const HomeUpcomingMeetings({super.key});
 
@@ -243,11 +243,18 @@ class HomeUpcomingMeetings extends ConsumerWidget {
       onRetry: () => ref.invalidate(meetingsBoardControllerProvider),
       loading: const NzSkeleton.block(height: 120),
       data: (b) {
+        // Toplantılar sayfasının "Yaklaşan" sekmesiyle aynı küme: bugün ve sonrası (saati geçmiş
+        // ama başlamamış "bekliyor" dahil); önceki günden sürüp giden canlı toplantı başta.
         final now = DateTime.now();
+        final upcoming = b.of(
+          MeetingsTab.upcoming,
+          DateTime(now.year, now.month, now.day),
+        );
         final next = [
           for (final m in b.visible)
-            if (isLive(m) || !m.meetingDate.toLocal().isBefore(now)) m,
-        ]..sort((a, z) => a.meetingDate.compareTo(z.meetingDate));
+            if (isLive(m) && !upcoming.contains(m)) m,
+          ...upcoming,
+        ];
         if (next.isEmpty) {
           return HomeSectionFrame(
             title: l.uiHomeMeetingsTitle,

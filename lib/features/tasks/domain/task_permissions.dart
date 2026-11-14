@@ -9,6 +9,19 @@ import 'work_item.dart';
 /// (`PATCH …/own-status`).
 enum StatusEndpoint { transition, ownStatus }
 
+/// Kendi görevi koordinatörünün kümesi; şirket yöneticisi aktörü de aynısını kullanır (ADR-0041).
+const _coordinatorUnion = <TaskStatus, List<TaskStatus>>{
+  TaskStatus.todo: [TaskStatus.inProgress, TaskStatus.done],
+  TaskStatus.inProgress: [TaskStatus.todo, TaskStatus.review, TaskStatus.done],
+  TaskStatus.review: [TaskStatus.done, TaskStatus.returned],
+  TaskStatus.returned: [
+    TaskStatus.todo,
+    TaskStatus.inProgress,
+    TaskStatus.done,
+  ],
+  TaskStatus.done: [TaskStatus.inProgress],
+};
+
 /// Aktör × durum geçiş matrisi: backend `work/domain/transition.go` (WORK-K12) ile birebir,
 /// elle yazılır (istemci akışları §5). İstemci yalnız buradaki hedefleri gösterir; karar yine
 /// sunucudadır (matris dışı hedef 409 `work.transition_not_allowed`).
@@ -31,21 +44,8 @@ const Map<TransitionActor, Map<TaskStatus, List<TaskStatus>>> statusMatrix = {
     ],
     TaskStatus.done: [TaskStatus.inProgress],
   },
-  TransitionActor.coordinatorOwnTask: {
-    TaskStatus.todo: [TaskStatus.inProgress, TaskStatus.done],
-    TaskStatus.inProgress: [
-      TaskStatus.todo,
-      TaskStatus.review,
-      TaskStatus.done,
-    ],
-    TaskStatus.review: [TaskStatus.done, TaskStatus.returned],
-    TaskStatus.returned: [
-      TaskStatus.todo,
-      TaskStatus.inProgress,
-      TaskStatus.done,
-    ],
-    TaskStatus.done: [TaskStatus.inProgress],
-  },
+  TransitionActor.coordinatorOwnTask: _coordinatorUnion,
+  TransitionActor.companyAdmin: _coordinatorUnion,
 };
 
 /// Geri alma gerekçesinin asgari uzunluğu (sunucu `reasonMinLen`; sunucu bayt sayar, istemci
@@ -116,18 +116,20 @@ final class TaskPermissions {
   /// Kapsamda herhangi bir ekip satırı.
   bool get _seat => coordinator || member;
 
-  /// Geçiş aktörü (WORK-K11): koordinatör + atanmış → kendi görevi; koordinatör → koordinatör;
-  /// yalnız atanmış üye → üye. Şirket yöneticiliği tek başına aktör değildir (null).
+  /// Geçiş aktörü (WORK-K11, backend `resolveActor`): koordinatör + atanmış → kendi görevi;
+  /// koordinatör → koordinatör; departmanda koordinatör olmayan şirket yöneticisi → yönetici
+  /// (ADR-0041; üye satırı olsa da); yalnız atanmış üye → üye.
   TransitionActor? get actor => switch (this) {
     _ when coordinator && assigned => TransitionActor.coordinatorOwnTask,
     _ when coordinator => TransitionActor.coordinator,
+    _ when admin => TransitionActor.companyAdmin,
     _ when member && assigned => TransitionActor.member,
     _ => null,
   };
 
-  /// Durum geçişinin ucu: kapsam koordinatörü (yönetici + koordinatör dahil) `transitions`,
-  /// yalnız atanmış üye `own-status`; aktör yoksa null.
-  StatusEndpoint? get statusEndpoint => coordinator
+  /// Durum geçişinin ucu: kapsam koordinatörü ve şirket yöneticisi `transitions`, yalnız
+  /// atanmış üye `own-status`; aktör yoksa null.
+  StatusEndpoint? get statusEndpoint => coordinator || admin
       ? StatusEndpoint.transition
       : actor == TransitionActor.member
       ? StatusEndpoint.ownStatus

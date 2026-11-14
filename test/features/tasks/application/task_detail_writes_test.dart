@@ -100,20 +100,22 @@ void main() {
       expect(h.backend.count('POST', '/v1/work-items/w1/transitions'), 0);
     });
 
-    test('matris dışı hedef ve aktörsüz yönetici: istek yok', () async {
-      final s = TaskDetailServer()
-        ..role = 'uye'
-        ..assignees = ['acc-1'];
-      final (h, _, ctl) = await _open(s);
-      expect((await ctl.setStatus(TaskStatus.done)).kind, WriteKind.invalid);
-      expect(h.backend.requests, isEmpty);
+    test(
+      'matris dışı hedef: istek yok; yönetici aktörü transitions ile geçirir',
+      () async {
+        final s = TaskDetailServer()
+          ..role = 'uye'
+          ..assignees = ['acc-1'];
+        final (h, _, ctl) = await _open(s);
+        expect((await ctl.setStatus(TaskStatus.done)).kind, WriteKind.invalid);
+        expect(h.backend.requests, isEmpty);
 
-      final a = TaskDetailServer()..admin = true;
-      final (h2, _, ctl2) = await _open(a..role = 'yok');
-      expect(ctl2.permissions.statusTargets(TaskStatus.inProgress), isEmpty);
-      expect((await ctl2.setStatus(TaskStatus.done)).kind, WriteKind.invalid);
-      expect(h2.backend.requests, isEmpty);
-    });
+        final a = TaskDetailServer()..admin = true;
+        final (h2, _, ctl2) = await _open(a..role = 'yok');
+        expect((await ctl2.setStatus(TaskStatus.done)).ok, isTrue);
+        expect(h2.backend.count('POST', '/v1/work-items/w1/transitions'), 1);
+      },
+    );
 
     test(
       'tamamlandı çıkışı ≥3 karakter gerekçe ister; gerekçe gövdede',

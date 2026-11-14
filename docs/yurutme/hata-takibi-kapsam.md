@@ -11,7 +11,7 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | denetim akışı | 1 |
 | iletilir | 15 |
 | istisna | 59 |
-| rapor | 166 |
+| rapor | 169 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -136,6 +136,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `core/storage/flutter_secure_store.dart` | `FlutterSecureStore._guard` | catch | rapor | 1 |
 | `core/ui/page/nz_page.dart` | `_guardedRefresh` | catch | rapor | 1 |
 | `features/activity/application/activity_query_controller.dart` | `activityView` | asyncError | istisna | 1 |
+| `features/activity/data/audit_api_repository.dart` | `ApiActivityLogRepository.load` | catch | rapor | 1 |
 | `features/administration/application/admin_controller.dart` | `<top>` | catch | rapor | 1 |
 | `features/administration/application/admin_controller.dart` | `AdminUsersController.build` | catch | iletilir | 1 |
 | `features/administration/application/admin_controller.dart` | `AdminUsersController.loadMore` | asyncError | istisna | 1 |
@@ -238,7 +239,9 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/messages/presentation/chat_page_actions.dart` | `_ChatPageActions._actions` | catch | rapor | 1 |
 | `features/messages/presentation/messages_page.dart` | `_MessagesPageState._markAllRead` | catch | rapor | 1 |
 | `features/messages/presentation/messages_page.dart` | `_MessagesPageState.build` | asyncError | istisna | 1 |
+| `features/messages/presentation/open_department_chat.dart` | `openDepartmentChat` | catch | rapor | 1 |
 | `features/messages/presentation/open_person_chat.dart` | `openPersonChat` | catch | rapor | 1 |
+| `features/notifications/application/notification_preferences_controller.dart` | `NotificationPreferencesController.setMuted` | catch | rapor | 1 |
 | `features/notifications/application/notifications_controller.dart` | `NotificationUnreadController.refresh` | catch | rapor | 1 |
 | `features/notifications/application/notifications_controller.dart` | `NotificationsController.loadMore` | catch | rapor | 1 |
 | `features/notifications/application/notifications_controller.dart` | `NotificationsController.markAllRead` | catch | rapor | 1 |

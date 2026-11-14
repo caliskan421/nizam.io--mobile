@@ -5,6 +5,8 @@ import '../../../core/api/generated/models/audit_entry.dart' as api;
 import '../../../core/api/generated/models/audit_entry_outcome.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/activity_log.dart';
 
 /// İşlem geçmişi (`GET /v1/audit/entries`, S1; AUDIT-K10): yalnız şirket yöneticisi okur.
@@ -47,14 +49,16 @@ class ApiActivityLogRepository implements ActivityLogRepository {
         }.toList(),
         coordinatorships: {for (final e in entries) ?e.departmentId}.toList(),
       );
-    } on ApiError catch (e) {
-      if (e.code == 'audit.not_authorized' || e.status == 403) {
-        throw const ActivityUnavailable();
-      }
-      rethrow;
+    } on ApiError catch (e, st) {
+      // 4xx (yetkisizlik dahil) rapor üretmez; yalnız 5xx/geçersiz yanıt raporlanır.
+      reportUnexpected(e, st, source: ReportSource.activity);
+      throw _closed(e) ? const ActivityUnavailable() : e;
     }
   }
 }
+
+/// İşlem geçmişi bu hesaba kapalı (AUDIT-K10: yalnız şirket yöneticisi).
+bool _closed(ApiError e) => e.code == 'audit.not_authorized' || e.status == 403;
 
 /// `AuditEntry` → [ActivityEntry]: tür eylem kodunun modül önekinden; hedef görev kimliği
 /// sunumda katalogla "KOD · başlık"a çözülür (burada boş); aktörsüz (sistem) kayıtta kimlik ve

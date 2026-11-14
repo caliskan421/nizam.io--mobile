@@ -161,7 +161,8 @@ Future<void> startup(
       await container.read(identityServiceProvider).logout();
     }
   }
+  // Seçim bellekten bırakılır; kayıt kalır ve aynı hesap + kurulumla girişte geri yüklenir.
   final scope = container.read(scopeControllerProvider);
-  scope.clear();
+  scope.suspend();
   await scope.settled;
 }

@@ -114,7 +114,15 @@ class ScopeController {
     return true;
   }
 
-  /// Seçimi bellekten siler ve kayıtlı seçimi siler (sıralı kuyruk, nesil artar).
+  /// Seçimi YALNIZ bellekten bırakır; kayıtlı seçim kalır (oturum bitti ya da uygulama açıldı:
+  /// aynı hesap + kurulumla tekrar girişte [restore] son görünümü geri getirir). Kuyruktaki
+  /// yazımlar kendi anlık görüntüsüyle (sahip + seçim) biter, bu yüzden son seçim kaybolmaz.
+  void suspend() {
+    _state.value = const ScopeSelection();
+  }
+
+  /// Seçimi bellekten siler ve kayıtlı seçimi siler (sıralı kuyruk, nesil artar). Açık eylem
+  /// ("kapsamı değiştir"), sunucu değişimi ve program silinmesi için; çıkış/açılış [suspend].
   void clear() {
     _generation++;
     _state.value = const ScopeSelection();
@@ -155,10 +163,11 @@ class ScopeController {
     final owner = _owner?.call();
     if (store == null || owner == null) return;
     final gen = _generation;
+    final sel = _state
+        .value; // anlık görüntü: çıkış sonrası boşalan bellek yazımı bozmaz
     _enqueue(() async {
-      // Kuyrukta beklerken çıkış/yeniden bağlanma olduysa yazılmaz.
+      // Kuyrukta beklerken kapsamı değiştir/yeniden bağlanma ([clear]) olduysa yazılmaz.
       if (gen != _generation) return;
-      final sel = _state.value;
       if (!sel.hasProgram) return;
       if (!await _attempt(() => store.save(owner, sel))) {
         Log.warn('kapsam: seçim kalıcılaştırılamadı; yalnız bellekte');

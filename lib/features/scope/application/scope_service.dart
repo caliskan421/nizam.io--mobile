@@ -2,6 +2,7 @@ import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/scope/scope_controller.dart';
+import '../../../core/scope/scope_store.dart';
 import '../../../core/server/server_binding.dart';
 import '../../../core/session/session_controller.dart';
 import '../../../core/session/session_state.dart';
@@ -10,7 +11,7 @@ import '../domain/program.dart';
 
 /// Kapsam (program) servisi. Kapsam kimliğini taşıyan tek yer core [ScopeController]'dır; bu
 /// servis programları okur, seçimi ona yazar ve kapsamdaki programı S2 ucundan okur (kapsam
-/// başlığının isteğe girdiğinin kanıtı). Seçim yalnız bellektedir (ADR-0003 karar 20).
+/// başlığının isteğe girdiğinin kanıtı). Son seçim güvenli depoda kalır ve girişte geri yüklenir ([restoreLast], ADR-0003 karar 20).
 class ScopeService {
   ScopeService({
     required this.binding,
@@ -50,6 +51,34 @@ class ScopeService {
       throw ApiError(ClientErrorCode.notSignedIn);
     }
     scope.selectProgram(programId);
+  }
+
+  /// Girişten sonra aynı hesap + kurulumun SON görünümünü (program, rol, koordinatörlük) geri
+  /// yükler. Etkin oturum, doğrulanmış bağ ve seçimsizlik gerekir. Kayıtlı program artık
+  /// kullanıcının programları arasında değilse kayıt silinir; liste okunamazsa seçim bırakılır
+  /// (kayıt kalır). Hata fırlatmaz.
+  Future<void> restoreLast() async {
+    final s = session.state.value;
+    final b = binding.current;
+    if (s is! SessionActive ||
+        s.forcePasswordChange ||
+        b is! BindingVerified ||
+        scope.current.hasProgram) {
+      return;
+    }
+    final generation = session.generation;
+    final owner = ScopeOwner(
+      accountId: s.accountId,
+      instanceId: b.info.instanceId,
+    );
+    if (!await scope.restore(owner) || session.generation != generation) return;
+    final id = scope.current.programId;
+    try {
+      final slice = await programs();
+      if (!slice.items.any((p) => p.id == id)) scope.clear();
+    } on Object {
+      if (session.generation == generation) scope.suspend();
+    }
   }
 
   /// Seçimi kaldırır; faz `sessionOpen`'a döner.

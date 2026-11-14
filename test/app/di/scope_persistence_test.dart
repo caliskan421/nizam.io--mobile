@@ -1,6 +1,7 @@
 // Son seçili kapsamın kalıcılığı: bileşim kökü kablosu (ADR-0003 karar 20, W62). Seçim güvenli
-// depoya hesap + kurulum adına yazılır; oturum etkin olmaktan çıkınca ya da sunucu yeniden
-// bağlanınca silinir; çıkıştan sonra depoya eski seçim geri yazılamaz.
+// depoya hesap + kurulum adına yazılır. Çıkış / açılış seçimi bellekten bırakır, kayıt KALIR ve
+// aynı hesap + kurulumla girişte geri yüklenir; kayıt yalnız sunucu yeniden bağlanınca,
+// "kapsamı değiştir"de ve program artık erişilemezken silinir.
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/app/bootstrap.dart';
@@ -18,6 +19,7 @@ import '../../support/harness.dart';
 
 String instance = 'inst-1';
 bool refreshRejected = false;
+List<String> programIds = ['p-1'];
 
 Future<ResponseBody> handler(Seen r) async {
   switch ('${r.method} ${r.path}') {
@@ -35,6 +37,12 @@ Future<ResponseBody> handler(Seen r) async {
       return jsonResponse(200, loginBody('1'));
     case 'POST /v1/auth/logout':
       return ResponseBody.fromString('', 204);
+    case 'GET /v1/programs':
+      return jsonResponse(200, {
+        'programs': [
+          for (final id in programIds) {'program_id': id, 'name': id},
+        ],
+      });
     case 'POST /v1/auth/refresh':
       return refreshRejected
           ? envelope(401, 'identity.invalid_refresh_token')
@@ -58,6 +66,7 @@ void main() {
   setUp(() {
     instance = 'inst-1';
     refreshRejected = false;
+    programIds = ['p-1'];
     store = GatedSecureStore();
   });
 
@@ -82,17 +91,57 @@ void main() {
     expect(store.values.containsKey(ScopeStore.key), isFalse);
   });
 
-  test('çıkış kayıtlı seçimi siler', () async {
+  test(
+    'çıkış seçimi bellekten bırakır, kayıt kalır; tekrar girişte geri yüklenir',
+    () async {
+      final h = await loggedIn(store);
+      addTearDown(h.dispose);
+      scopeOf(h).selectProgram('p-1');
+      await scopeOf(h).settled;
+      await h.identity.logout();
+      await scopeOf(h).settled;
+      expect(h.read(scopeStateProvider).hasProgram, isFalse);
+      expect(store.values.containsKey(ScopeStore.key), isTrue);
+
+      await h.identity.login(email: 'a@b.test', password: 'p');
+      await pumpEventQueue();
+      await scopeOf(h).settled;
+      expect(h.read(scopeStateProvider).programId, 'p-1');
+    },
+  );
+
+  test('girişte kayıtlı program artık erişilemezse kayıt silinir', () async {
     final h = await loggedIn(store);
     addTearDown(h.dispose);
     scopeOf(h).selectProgram('p-1');
     await scopeOf(h).settled;
     await h.identity.logout();
+    programIds = ['p-9'];
+    await h.identity.login(email: 'a@b.test', password: 'p');
+    await pumpEventQueue();
     await scopeOf(h).settled;
+    expect(h.read(scopeStateProvider).hasProgram, isFalse);
     expect(store.values.containsKey(ScopeStore.key), isFalse);
   });
 
-  test('yeniden giriş gerekli kayıtlı seçimi siler', () async {
+  test('başka hesap girişinde kayıt uygulanmaz ve silinir', () async {
+    final h = await loggedIn(store);
+    addTearDown(h.dispose);
+    scopeOf(h).selectProgram('p-1');
+    await scopeOf(h).settled;
+    await h.identity.logout();
+    await ScopeStore(store).save(
+      const ScopeOwner(accountId: 'baska', instanceId: 'inst-1'),
+      const ScopeSelection(programId: 'p-1'),
+    );
+    await h.identity.login(email: 'a@b.test', password: 'p');
+    await pumpEventQueue();
+    await scopeOf(h).settled;
+    expect(h.read(scopeStateProvider).hasProgram, isFalse);
+    expect(store.values.containsKey(ScopeStore.key), isFalse);
+  });
+
+  test('yeniden giriş gerekli: kayıt kalır', () async {
     final h = await loggedIn(store);
     addTearDown(h.dispose);
     scopeOf(h).selectProgram('p-1');
@@ -104,7 +153,7 @@ void main() {
     );
     expect(h.read(sessionStateProvider), isA<SessionReauthRequired>());
     await scopeOf(h).settled;
-    expect(store.values.containsKey(ScopeStore.key), isFalse);
+    expect(store.values.containsKey(ScopeStore.key), isTrue);
   });
 
   test('farklı kuruluma yeniden bağlanma kayıtlı seçimi siler', () async {
@@ -119,20 +168,23 @@ void main() {
     expect(store.values.containsKey(TokenStore.key), isFalse);
   });
 
-  test('yarış: seçim yazımı sürerken çıkış → depoda kayıt kalmaz', () async {
-    final h = await loggedIn(store);
-    addTearDown(h.dispose);
-    store.holdWrites(ScopeStore.key);
-    scopeOf(h).selectProgram('p-1');
-    await Future<void>.delayed(Duration.zero);
-    await h.identity.logout();
-    store.release();
-    await scopeOf(h).settled;
-    expect(store.values.containsKey(ScopeStore.key), isFalse);
-    expect(h.read(scopeStateProvider).hasProgram, isFalse);
-  });
+  test(
+    'yarış: seçim yazımı sürerken çıkış → son seçim yine de kaydedilir',
+    () async {
+      final h = await loggedIn(store);
+      addTearDown(h.dispose);
+      store.holdWrites(ScopeStore.key);
+      scopeOf(h).selectProgram('p-1');
+      await Future<void>.delayed(Duration.zero);
+      await h.identity.logout();
+      store.release();
+      await scopeOf(h).settled;
+      expect(store.values.containsKey(ScopeStore.key), isTrue);
+      expect(h.read(scopeStateProvider).hasProgram, isFalse);
+    },
+  );
 
-  test('seçim → kapat → aç: her açılış girişle başlar; oturum ve kapsam geri yüklenmez', () async {
+  test('seçim → kapat → aç: her açılış girişle başlar; kapsam girişten sonra geri yüklenir', () async {
     final h = await loggedIn(store);
     scopeOf(h).selectProgram('p-1');
     await scopeOf(h).settled;
@@ -147,7 +199,7 @@ void main() {
     await startup(c.container);
     expect(c.container.read(sessionStateProvider), isA<SessionNone>());
     expect(c.container.read(scopeStateProvider).hasProgram, isFalse);
-    expect(store.values.containsKey(ScopeStore.key), isFalse);
+    expect(store.values.containsKey(ScopeStore.key), isTrue);
   });
 
   test('depo yazma hatası: seçim bellekte çalışır', () async {

@@ -102,20 +102,23 @@ void main() {
     },
   );
 
-  test('kayıtlı kapsam açılışta uygulanmaz, silinir', () async {
-    final store = await seeded('inst-1');
-    await ScopeStore(store).save(
-      const ScopeOwner(accountId: 'acc-1', instanceId: 'inst-1'),
-      const ScopeSelection(programId: 'p-1', departmentId: 'd-1'),
-    );
-    final comp = compose(store, FakeBackend(instance('inst-1')));
-    addTearDown(comp.dispose);
-    final c = comp.container;
-    await startup(c);
-    expect(c.read(scopeStateProvider).hasProgram, isFalse);
-    expect(c.read(appPhaseProvider), AppPhase.serverVerified);
-    expect(store.values.containsKey(ScopeStore.key), isFalse);
-  });
+  test(
+    'kayıtlı kapsam açılışta uygulanmaz, kayıt kalır (girişte geri yüklenir)',
+    () async {
+      final store = await seeded('inst-1');
+      await ScopeStore(store).save(
+        const ScopeOwner(accountId: 'acc-1', instanceId: 'inst-1'),
+        const ScopeSelection(programId: 'p-1', departmentId: 'd-1'),
+      );
+      final comp = compose(store, FakeBackend(instance('inst-1')));
+      addTearDown(comp.dispose);
+      final c = comp.container;
+      await startup(c);
+      expect(c.read(scopeStateProvider).hasProgram, isFalse);
+      expect(c.read(appPhaseProvider), AppPhase.serverVerified);
+      expect(store.values.containsKey(ScopeStore.key), isTrue);
+    },
+  );
 
   test(
     'yarım kalmış yenileme işareti: yeniden giriş, kapsam kaydı silinir',

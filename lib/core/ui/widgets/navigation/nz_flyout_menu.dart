@@ -56,16 +56,23 @@ class NzFlyoutItem extends NzFlyoutEntry {
 /// Alt menüden açılan cam kısayol menüsü (README `m-flyout`): `glass-menu`, köşe
 /// `m-r-flyout`, arkada `scrim-soft`; kapsülün üstünden büyüyerek (`easeSpring`) açılır,
 /// `easeExit` ile kapanır. Satır seçilince menü kapanır, sonra eylem çalışır.
+/// [anchor] (genel koordinatta dikdörtgen, ör. sohbetin yazma alanı) verilirse menü onun hemen
+/// üstünde açılır; [alignEnd] sağ kenara yaslar (büyüme de o köşeden).
 abstract final class NzFlyoutMenu {
   static Future<void> show(
     BuildContext context, {
     required String semanticLabel,
     required List<NzFlyoutEntry> entries,
+    Rect? anchor,
+    bool alignEnd = false,
   }) {
     final navigator = Navigator.of(context, rootNavigator: true);
     // Kök Navigator bağlamı: kabuğun `extendBody` dolgusu (menü yüksekliği) burada yoktur;
     // yalnız cihazın alt güvenli alanı vardır.
-    final reserved = NzFloatingNav.reservedHeight(navigator.context);
+    final reserved = anchor == null
+        ? NzFloatingNav.reservedHeight(navigator.context)
+        : MediaQuery.sizeOf(navigator.context).height - anchor.top;
+    final corner = alignEnd ? Alignment.bottomRight : Alignment.bottomLeft;
     return navigator.push(
       PageRouteBuilder<void>(
         opaque: false,
@@ -78,6 +85,7 @@ abstract final class NzFlyoutMenu {
           semanticLabel: semanticLabel,
           entries: entries,
           bottom: reserved + NizamioSpacing.space3,
+          alignment: corner,
         ),
         transitionsBuilder: (_, animation, _, child) {
           final curved = CurvedAnimation(
@@ -93,7 +101,7 @@ abstract final class NzFlyoutMenu {
             ),
             child: ScaleTransition(
               scale: Tween<double>(begin: 0.6, end: 1).animate(curved),
-              alignment: Alignment.bottomLeft,
+              alignment: corner,
               child: child,
             ),
           );
@@ -108,11 +116,13 @@ class _FlyoutPanel extends StatelessWidget {
     required this.semanticLabel,
     required this.entries,
     required this.bottom,
+    required this.alignment,
   });
 
   final String semanticLabel;
   final List<NzFlyoutEntry> entries;
   final double bottom;
+  final Alignment alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +135,7 @@ class _FlyoutPanel extends StatelessWidget {
         bottom,
       ),
       child: Align(
-        alignment: Alignment.bottomLeft,
+        alignment: alignment,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: NizamioSize.flyoutWidth),
           child: Semantics(

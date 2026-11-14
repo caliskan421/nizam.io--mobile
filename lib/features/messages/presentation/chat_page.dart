@@ -266,6 +266,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   /// Yazma alanının ek menüsü: fotoğraf / dosya (seçici; galeri adı seçicide normalleşir,
   /// izinli tür ön denetimi; içerik özeti yok) ya da anket (grupta). Seçici hatası ve okunamayan
   /// dosya (`client.file_unreadable`) bildirim olarak gösterilir.
+  /// Yazma alanının genel dikdörtgeni (ek menüsü onun üstünde açılır).
+  final _composerKey = GlobalKey();
+  Rect? _composerRect() {
+    final box = _composerKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
+  }
+
   Future<void> _attach(ChatRoom room, {bool references = false}) async {
     final session = ref.read(sessionGenerationProvider);
     final program = ref.read(scopeStateProvider).programId;
@@ -292,6 +300,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         isCurrent: current,
         caption: caption,
         reply: view.reply == null ? null : room.message(view.reply!),
+        anchor: _composerRect(),
       );
       if (!mounted || !current() || input == null) return;
       if (input.share case final item?) {
@@ -416,6 +425,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               composerH: _composerH,
               onJump: (id) => unawaited(_jumpTo(id)),
               onActions: (room, m) => unawaited(_actions(room, m)),
+              // Kaydırarak yanıt: eylem menüsündeki "Yanıtla" ile aynı.
+              onReply: (m) {
+                if (ref.read(chatControllerProvider(widget.id)).edit != null) {
+                  return;
+                }
+                _view.reply(m.id);
+                _focus.requestFocus();
+              },
               onReact: (m, kind) =>
                   unawaited(_try(() => _acts.react(m.id, kind))),
               onVote: (m, i) => unawaited(_try(() => _acts.vote(m.id, i))),
@@ -503,6 +520,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           right: 0,
           bottom: 0,
           child: ChatMeasure(
+            key: _composerKey,
             onSize: (s) {
               if (mounted) _composerH.value = s.height;
             },

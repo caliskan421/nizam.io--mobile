@@ -175,15 +175,11 @@ void main() {
         await _reference(tester, _l.uiMessagesComposeShareTask);
         await _tap(tester, find.text('Seçilebilir task-$i'));
       }
+      // Sınır dolunca atıf menüsünde seçenek yok, yalnız sınır uyarısı.
       await _tap(tester, find.byTooltip(_l.uiMessagesReference));
-      final disabled = find.ancestor(
-        of: find.text(_l.uiMessagesComposeShareTask),
-        matching: find.byType(IgnorePointer),
-      );
-      expect(tester.widget<IgnorePointer>(disabled.first).ignoring, isTrue);
-      Navigator.of(tester.element(find.text(_l.uiMessagesComposeShareTask)))
-          .pop();
-      await settle(tester);
+      expect(find.text(_l.uiMessagesComposeShareTask), findsNothing);
+      expect(find.text(_l.uiMessagesComposeRefLimit), findsOneWidget);
+      await _tap(tester, find.text(_l.uiMessagesComposeRefLimit));
       await _tap(tester, find.bySemanticsLabel(_l.uiMessagesSend).last);
       expect(repo.sent.single.refs, hasLength(chatComposeMaxRefs));
       expect(

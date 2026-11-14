@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
+import '../../application/effective_access.dart';
 import '../../application/invite_form_controller.dart';
 import '../../application/quick_forms_controller.dart';
 import '../../application/task_catalog_controller.dart';
@@ -47,7 +48,7 @@ class _InviteFormBodyState extends ConsumerState<InviteFormBody> {
     final f = ref.watch(inviteFormControllerProvider);
     final ctl = ref.read(inviteFormControllerProvider.notifier);
     final catalog = ref.watch(taskCatalogControllerProvider).value;
-    final admin = catalog?.access?.companyAdmin ?? false;
+    final admin = ref.watch(effectiveAccessProvider).isAdminView;
     final coords = ref.watch(newTaskCoordinatorshipsProvider);
     final picked = f.coordinatorship;
     final value = picked == null

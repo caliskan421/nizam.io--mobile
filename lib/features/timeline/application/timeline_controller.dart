@@ -5,37 +5,20 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/domain/request_key.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
+import '../../../core/scope/scope_controller.dart';
 import '../../../core/server/write_compat.dart';
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import '../../tasks/tasks.dart';
 import '../domain/timeline.dart';
+import '../domain/timeline_rules.dart';
 import '../domain/timeline_view_builder.dart';
 import 'gantt_provider.dart';
+import 'timeline_request_result.dart';
+
+export 'timeline_request_result.dart';
 
 part 'timeline_controller.g.dart';
-
-/// Tarih talebi gönderme sonucu (prototip `request`).
-sealed class TimelineRequestResult {
-  const TimelineRequestResult();
-}
-
-/// Görevin zaten bekleyen bir talebi var.
-final class TimelineRequestPending extends TimelineRequestResult {
-  const TimelineRequestPending();
-}
-
-/// Taslakta değişiklik yok.
-final class TimelineRequestNoChange extends TimelineRequestResult {
-  const TimelineRequestNoChange();
-}
-
-/// Talep kaydedildi; [end] istenen yeni bitiş.
-final class TimelineRequestSent extends TimelineRequestResult {
-  const TimelineRequestSent(this.end);
-
-  final DateTime end;
-}
 
 /// Zaman çizelgesinin seçim, ölçek, süzgeç ve tarih taslağı bellekte tutulur. Kayıt,
 /// geri alma ve tarih talepleri sunucuya gider; sonuç katalog ve Gantt'tan yeniden okunur.
@@ -47,17 +30,17 @@ class TimelineController extends _$TimelineController {
   bool _busy = false;
   int _epoch = 0;
   int _ownerSession = 0;
-  String? _ownerProgram;
-  String? _ownerDepartment;
+  ScopeSelection? _ownerScope;
   RequestKeys _requestKeys = const RequestKeys();
   TaskItem? _requestBase;
   String? _requestBody;
   bool _valid(int epoch) {
     if (!ref.mounted || epoch != _epoch) return false;
     final scope = ref.read(scopeControllerProvider).current;
+    final owner = _ownerScope;
     return ref.read(sessionControllerProvider).generation == _ownerSession &&
-        scope.programId == _ownerProgram &&
-        scope.departmentId == _ownerDepartment;
+        owner != null &&
+        scope.sameView(owner);
   }
 
   @override
@@ -65,9 +48,7 @@ class TimelineController extends _$TimelineController {
     ref.watch(sessionGenerationProvider);
     ref.watch(scopeStateProvider);
     _ownerSession = ref.read(sessionControllerProvider).generation;
-    final scope = ref.read(scopeControllerProvider).current;
-    _ownerProgram = scope.programId;
-    _ownerDepartment = scope.departmentId;
+    _ownerScope = ref.read(scopeControllerProvider).current;
     _epoch++;
     _baseTask = null;
     _busy = false;
@@ -87,6 +68,10 @@ class TimelineController extends _$TimelineController {
 
   TaskCatalog? get _catalog => ref.read(timelineCatalogProvider).value;
 
+  /// Görev başı yetki etkin görünümle (ham katalog erişimi değil).
+  TaskPermissions _permissions(TaskItem task) =>
+      _catalog.permissionsIn(ref.read(scopeStateProvider), task);
+
   List<String> _coords() {
     final c = _catalog;
     return c == null
@@ -99,8 +84,11 @@ class TimelineController extends _$TimelineController {
 
   // --- koordinatörlük seçici ---
 
-  void toggleCoordMenu() =>
-      state = state.copyWith(coordMenuOpen: !state.coordMenuOpen);
+  /// Kilitli görünümde (Koordinatör/Üye) seçici yok: koordinatörlük kenar çubuğundan seçilir.
+  void toggleCoordMenu() {
+    if (ref.read(timelineLensProvider).locked) return;
+    state = state.copyWith(coordMenuOpen: !state.coordMenuOpen);
+  }
 
   void setQuery(String query) => state = _cleared(state.copyWith(query: query));
 
@@ -280,9 +268,16 @@ class TimelineController extends _$TimelineController {
     }
     var task = _baseTask;
     if (task == null || _busy) return false;
-    if (!TaskPermissions.of(_catalog?.access, task).canManageTask) {
+    if (!_permissions(task).canManageTask) {
       throw ApiError('work.not_authorized');
     }
+    final change = TimelineDateChange.of(
+      cur,
+      draft,
+      directRule: ref.read(timelineLensProvider).directRule,
+    );
+    // 7 günü aşan ya da başlangıcı değiştiren taslak talep formuna gider (kayıt yok).
+    if (change is TimelineRequest) return false;
     final year = _catalog!.today.year;
     if (task.datesRevision == null) {
       _busy = true;
@@ -297,7 +292,11 @@ class TimelineController extends _$TimelineController {
         if (_valid(epoch)) _busy = false;
       }
     }
-    await _writeDates(task, draft, year);
+    if (change is TimelineExtend) {
+      await _extend(task, change.days);
+    } else {
+      await _writeDates(task, draft, year);
+    }
     if (!_valid(epoch) || !identical(state, snapshot)) return true;
     state = _cleared(
       state.copyWith(
@@ -349,8 +348,9 @@ class TimelineController extends _$TimelineController {
 
   void dismissUndo() => state = state.copyWith(undo: () => null);
 
-  /// Taslaktaki bitişi tarih talebi olarak gönderir (prototip `request`).
-  Future<TimelineRequestResult> requestDates() async {
+  /// Taslaktaki bitişi tarih talebi olarak gönderir (prototip `request`); [reason] yönetici
+  /// için gerekçe (koordinatör formunda en az [timelineReasonMin] karakter).
+  Future<TimelineRequestResult> requestDates({String? reason}) async {
     final epoch = _epoch;
     final snapshot = state;
     final code = state.selected;
@@ -364,10 +364,14 @@ class TimelineController extends _$TimelineController {
     final end = seasonDate(draft.end, c.today.year);
     final task = c.task(code);
     if (task == null || _busy) return const TimelineRequestNoChange();
-    if (!TaskPermissions.of(c.access, task).canRequestDate) {
+    if (!_permissions(task).canRequestDate) {
       throw ApiError('work.not_authorized');
     }
     if (task.hasPendingRequest) return const TimelineRequestPending();
+    if (ref.read(timelineLensProvider).directRule &&
+        (reason ?? '').trim().length < timelineReasonMin) {
+      return const TimelineRequestNeedsReason();
+    }
     final baseTask = _baseTask;
     if (!serverSupportsVersionedWrites(ref.read(bindingStateProvider)) ||
         baseTask?.datesRevision == null) {
@@ -391,7 +395,15 @@ class TimelineController extends _$TimelineController {
       try {
         await ref
             .read(taskWriteRepositoryProvider)
-            .requestDateChange(base, start, end, requestKey: key);
+            .requestDateChange(
+              base,
+              start,
+              end,
+              requestKey: key,
+              reason: reason == null || reason.trim().isEmpty
+                  ? null
+                  : reason.trim(),
+            );
       } on Object catch (e, st) {
         final error = toReportedApiError(e, st, source: ReportSource.timeline);
         if (_valid(epoch) &&
@@ -431,6 +443,75 @@ class TimelineController extends _$TimelineController {
     }
     state = state.copyWith(draft: () => null);
     return TimelineRequestSent(end);
+  }
+
+  /// "Süre uzat +7": taslak bitişi kayıtlı bitişten [timelineDirectDays] gün ileri.
+  void extendDraft() {
+    final cur = _current();
+    if (cur == null) return;
+    state = state.copyWith(
+      draft: () => DayRange(cur.start, cur.end + timelineDirectDays),
+    );
+  }
+
+  /// "Bitişi bugüne çek" (WORK-K43); koşul [canPullEndToToday]. Seçim kapanır.
+  Future<bool> pullEndToToday() async {
+    final epoch = _epoch;
+    final code = state.selected;
+    final c = _catalog;
+    final task = code == null ? null : c?.task(code);
+    if (task == null || c == null || _busy) return false;
+    if (!_permissions(task).canManageTask) {
+      throw ApiError('work.not_authorized');
+    }
+    if (!canPullEndToToday(task, c.today)) return false;
+    _busy = true;
+    try {
+      await ref.read(timelineDateRepositoryProvider).pullEndDate(task);
+      await _reload(epoch);
+    } finally {
+      if (_valid(epoch)) _busy = false;
+    }
+    if (_valid(epoch)) state = _cleared(state);
+    return true;
+  }
+
+  Future<void> _extend(TaskItem task, int days) async {
+    final epoch = _epoch;
+    final body = '${task.id}|$days|${task.datesRevision}';
+    final (keys, key) = _requestKeys.keyFor('extend', body);
+    _requestKeys = keys;
+    _busy = true;
+    try {
+      try {
+        await ref
+            .read(timelineDateRepositoryProvider)
+            .extend(task, days, requestKey: key);
+      } on Object catch (e, st) {
+        final error = toReportedApiError(e, st, source: ReportSource.timeline);
+        // Belirsiz sonuç (ağ/zaman aşımı) aynı anahtarla yeniden denenir; kesin ret anahtarı
+        // bırakır.
+        if (_valid(epoch) && !isOutcomeUnknown(error)) {
+          _requestKeys = _requestKeys.clear('extend');
+        }
+        rethrow;
+      }
+      if (_valid(epoch)) _requestKeys = _requestKeys.clear('extend');
+      await _reload(epoch);
+    } finally {
+      if (_valid(epoch)) _busy = false;
+    }
+  }
+
+  Future<void> _reload(int epoch) async {
+    if (!_valid(epoch)) return;
+    try {
+      await ref.read(taskCatalogControllerProvider.notifier).reload();
+      if (_valid(epoch)) await ref.read(ganttScheduleProvider.future);
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.timeline);
+      /* Yazma sonucu başarıdır; okuma hatası kaynak durumunda kalır. */
+    }
   }
 
   Future<void> _writeDates(TaskItem task, DayRange range, int year) async {
@@ -477,6 +558,7 @@ AsyncValue<TimelineView> timelineView(Ref ref, String? coordinatorship) {
         (c) => buildTimelineView(
           c,
           state,
+          lens: ref.watch(timelineLensProvider),
           dependent:
               ref.watch(ganttScheduleProvider).value?.dependentIds ?? const {},
         ),

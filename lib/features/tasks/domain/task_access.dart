@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../../core/domain/effective_role.dart';
 import 'task_catalog.dart';
 
 /// Ekip satırındaki rol (`/v1/me/departments` `role`): `koordinator` / `uye`. Rol program ×
@@ -98,14 +99,57 @@ final class TaskAccess {
         (s) => s.programId == programId && s.role == SeatRole.coordinator,
       );
 
-  /// Programdaki birincil departman (ana sayfa özeti): ilk koordinatörlük, yoksa ilk ekip
-  /// satırı; satır yoksa null.
-  String? primaryDepartmentIn(String programId) {
-    final seats = seatsIn(programId);
-    return (seats.where((s) => s.role == SeatRole.coordinator).firstOrNull ??
-            seats.firstOrNull)
-        ?.departmentId;
-  }
+  /// [programId] programında seçilebilir etkin görünüm hakları (seçim denetimi ve varsayılan
+  /// türetme: [ScopeGrants.resolve]). Tanımsız satır rolü ([SeatRole.unknown]) hak vermez.
+  ScopeGrants grantsIn(String programId) => ScopeGrants(
+    admin: companyAdmin,
+    seats: [
+      for (final s in seatsIn(programId))
+        if (_effective(s.role) case final role?)
+          (departmentId: s.departmentId, role: role),
+    ],
+  );
+
+  /// [programId] programında seçilebilir roller (Yönetici, Koordinatör, Üye sırasıyla).
+  List<EffectiveRole> rolesIn(String programId) => grantsIn(programId).roles;
+
+  /// [programId] programında [role] rolüyle seçilebilen koordinatörlükler (ad dahil ekip
+  /// satırı; yöneticide boş).
+  List<TeamSeat> departmentsFor(String programId, EffectiveRole role) =>
+      role == EffectiveRole.admin
+      ? const []
+      : [
+          for (final s in seatsIn(programId))
+            if (_effective(s.role) == role) s,
+        ];
+
+  static EffectiveRole? _effective(SeatRole r) => switch (r) {
+    SeatRole.coordinator => EffectiveRole.coordinator,
+    SeatRole.member => EffectiveRole.member,
+    SeatRole.unknown => null,
+  };
+
+  /// Etkin görünüme izdüşüm: arayüz yalnız seçili rolün hak verdiği eylemleri gösterir
+  /// (yetkiyi genişletmez). Yönetici olmayan görünümde yönetici bayrağı düşer; Üye görünümünde
+  /// [programId] programındaki koordinatör satırları üye sayılır. Yönetici ve Koordinatör
+  /// görünümünde satırlar olduğu gibi kalır.
+  TaskAccess viewAs(String programId, EffectiveRole role) => TaskAccess(
+    accountId: accountId,
+    companyAdmin: companyAdmin && role == EffectiveRole.admin,
+    seats: [
+      for (final s in seats)
+        role == EffectiveRole.member &&
+                s.programId == programId &&
+                s.role == SeatRole.coordinator
+            ? TeamSeat(
+                programId: s.programId,
+                departmentId: s.departmentId,
+                departmentName: s.departmentName,
+                role: SeatRole.member,
+              )
+            : s,
+    ],
+  );
 
   /// Departman ekibini (`listMembers`, görev ataması adayları) okuyabilir mi: yönetici ya da
   /// o departmanın koordinatörü; üye 403 alır → çağrılmaz.

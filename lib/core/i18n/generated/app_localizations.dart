@@ -3190,6 +3190,30 @@ abstract class AppLocalizations {
   /// **'Etiket değiştirildi'**
   String get uiArchiveRetagged;
 
+  /// ui.archive.my_files
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosyalarım'**
+  String get uiArchiveMyFiles;
+
+  /// ui.archive.my_files_caption
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüklediğin dosyalar'**
+  String get uiArchiveMyFilesCaption;
+
+  /// ui.archive.task_folders
+  ///
+  /// In tr, this message translates to:
+  /// **'görev klasörleri'**
+  String get uiArchiveTaskFolders;
+
+  /// ui.archive.empty_task_folders
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu aramayla eşleşen görev klasörü yok.'**
+  String get uiArchiveEmptyTaskFolders;
+
   /// ui.buttons.busy
   ///
   /// In tr, this message translates to:
@@ -4378,12 +4402,6 @@ abstract class AppLocalizations {
   /// **'Arşiv'**
   String get uiCoordTabArchive;
 
-  /// ui.coord.tab_meetings
-  ///
-  /// In tr, this message translates to:
-  /// **'Toplantı'**
-  String get uiCoordTabMeetings;
-
   /// ui.coord.tab_members
   ///
   /// In tr, this message translates to:
@@ -4533,6 +4551,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Üye eklendi'**
   String get uiCoordMemberAdded;
+
+  /// ui.coord.tab_calendar
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvim'**
+  String get uiCoordTabCalendar;
 
   /// ui.feedback.loading
   ///
@@ -5110,12 +5134,6 @@ abstract class AppLocalizations {
   /// **'gün'**
   String get uiHomeShiftDaysTail;
 
-  /// ui.home.season_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'sezonu'**
-  String get uiHomeSeasonTail;
-
   /// ui.home.version_prefix
   ///
   /// In tr, this message translates to:
@@ -5145,6 +5163,234 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Sistem'**
   String get uiHomeThemeSystem;
+
+  /// ui.home.group_team
+  ///
+  /// In tr, this message translates to:
+  /// **'ekip'**
+  String get uiHomeGroupTeam;
+
+  /// ui.home.module_my_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevlerim'**
+  String get uiHomeModuleMyTasks;
+
+  /// ui.home.module_my_timeline
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman çizelgem'**
+  String get uiHomeModuleMyTimeline;
+
+  /// ui.home.module_my_files
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosyalarım'**
+  String get uiHomeModuleMyFiles;
+
+  /// ui.home.module_team
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekibim'**
+  String get uiHomeModuleTeam;
+
+  /// ui.home.module_assistant
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistan'**
+  String get uiHomeModuleAssistant;
+
+  /// ui.home.picker_program
+  ///
+  /// In tr, this message translates to:
+  /// **'program'**
+  String get uiHomePickerProgram;
+
+  /// ui.home.picker_role
+  ///
+  /// In tr, this message translates to:
+  /// **'rol'**
+  String get uiHomePickerRole;
+
+  /// ui.home.picker_department
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlük'**
+  String get uiHomePickerDepartment;
+
+  /// ui.home.view_role_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetici'**
+  String get uiHomeViewRoleAdmin;
+
+  /// ui.home.role_admin_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm programı yönetir'**
+  String get uiHomeRoleAdminDesc;
+
+  /// ui.home.role_coordinator_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendi koordinatörlüğünü yönetir'**
+  String get uiHomeRoleCoordinatorDesc;
+
+  /// ui.home.role_member_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Yalnız atanan görevleri görür'**
+  String get uiHomeRoleMemberDesc;
+
+  /// ui.home.pick_role
+  ///
+  /// In tr, this message translates to:
+  /// **'Rolünü seç'**
+  String get uiHomePickRole;
+
+  /// ui.home.pick_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük seç'**
+  String get uiHomePickDepartment;
+
+  /// ui.home.admin_scope_note
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetici tüm koordinatörlükleri görür. Bir koordinatörlüğün gözünden bakmak için rolünü değiştir.'**
+  String get uiHomeAdminScopeNote;
+
+  /// ui.home.coord_done_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görev bitti'**
+  String get uiHomeCoordDoneTail;
+
+  /// ui.home.chip_late
+  ///
+  /// In tr, this message translates to:
+  /// **'geciken'**
+  String get uiHomeChipLate;
+
+  /// ui.home.chip_review
+  ///
+  /// In tr, this message translates to:
+  /// **'onayında'**
+  String get uiHomeChipReview;
+
+  /// ui.home.chip_returned
+  ///
+  /// In tr, this message translates to:
+  /// **'iade'**
+  String get uiHomeChipReturned;
+
+  /// ui.home.chip_unassigned
+  ///
+  /// In tr, this message translates to:
+  /// **'atanmamış'**
+  String get uiHomeChipUnassigned;
+
+  /// ui.home.chip_requests
+  ///
+  /// In tr, this message translates to:
+  /// **'tarih talebi yöneticide'**
+  String get uiHomeChipRequests;
+
+  /// ui.home.queue_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekleyenler'**
+  String get uiHomeQueueTitle;
+
+  /// ui.home.see_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get uiHomeSeeAll;
+
+  /// ui.home.queue_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekleyen iş yok.'**
+  String get uiHomeQueueEmpty;
+
+  /// ui.home.unassigned_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Atanmamış'**
+  String get uiHomeUnassignedTitle;
+
+  /// ui.home.load_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekip yükü'**
+  String get uiHomeLoadTitle;
+
+  /// ui.home.load_open_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'açık'**
+  String get uiHomeLoadOpenTail;
+
+  /// ui.home.load_late_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'geç'**
+  String get uiHomeLoadLateTail;
+
+  /// ui.home.load_doing
+  ///
+  /// In tr, this message translates to:
+  /// **'devam'**
+  String get uiHomeLoadDoing;
+
+  /// ui.home.load_review
+  ///
+  /// In tr, this message translates to:
+  /// **'onayda'**
+  String get uiHomeLoadReview;
+
+  /// ui.home.load_late
+  ///
+  /// In tr, this message translates to:
+  /// **'geciken'**
+  String get uiHomeLoadLate;
+
+  /// ui.home.load_returned
+  ///
+  /// In tr, this message translates to:
+  /// **'iade'**
+  String get uiHomeLoadReturned;
+
+  /// ui.home.load_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekipte açık görev yok.'**
+  String get uiHomeLoadEmpty;
+
+  /// ui.home.meetings_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Yaklaşan toplantılar'**
+  String get uiHomeMeetingsTitle;
+
+  /// ui.home.meetings_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Yaklaşan toplantın yok.'**
+  String get uiHomeMeetingsEmpty;
+
+  /// ui.home.requests_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih taleplerim'**
+  String get uiHomeRequestsTitle;
+
+  /// ui.home.requests_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talebin yok.'**
+  String get uiHomeRequestsEmpty;
 
   /// ui.identity.login_title
   ///
@@ -6309,6 +6555,54 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Maddeyi düzenle'**
   String get uiMeetingsAgendaEdit;
+
+  /// ui.meetings.scope_upcoming
+  ///
+  /// In tr, this message translates to:
+  /// **'yaklaşan'**
+  String get uiMeetingsScopeUpcoming;
+
+  /// ui.meetings.scope_past
+  ///
+  /// In tr, this message translates to:
+  /// **'geçmiş'**
+  String get uiMeetingsScopePast;
+
+  /// ui.meetings.scope_coord_note
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatör olarak birimlerinin dahil olduğu toplantıları görüyorsun'**
+  String get uiMeetingsScopeCoordNote;
+
+  /// ui.meetings.scope_member_note
+  ///
+  /// In tr, this message translates to:
+  /// **'üye olarak birimlerinin dahil olduğu toplantıları görüyorsun'**
+  String get uiMeetingsScopeMemberNote;
+
+  /// ui.meetings.unit_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Birim'**
+  String get uiMeetingsUnitLabel;
+
+  /// ui.meetings.unit_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get uiMeetingsUnitAll;
+
+  /// ui.meetings.instant
+  ///
+  /// In tr, this message translates to:
+  /// **'Anlık toplantı'**
+  String get uiMeetingsInstant;
+
+  /// ui.meetings.instant_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Anlık toplantı'**
+  String get uiMeetingsInstantTitle;
 
   /// ui.messages.title
   ///
@@ -10558,6 +10852,510 @@ abstract class AppLocalizations {
   /// **'Hatırlatma gönderildi'**
   String get uiTasksTReminded;
 
+  /// ui.tasks.view_unassigned
+  ///
+  /// In tr, this message translates to:
+  /// **'Atanmamış'**
+  String get uiTasksViewUnassigned;
+
+  /// ui.tasks.list_unassigned
+  ///
+  /// In tr, this message translates to:
+  /// **'atanmamış görevler'**
+  String get uiTasksListUnassigned;
+
+  /// ui.tasks.sort_status
+  ///
+  /// In tr, this message translates to:
+  /// **'Duruma göre'**
+  String get uiTasksSortStatus;
+
+  /// ui.tasks.sort_status_short
+  ///
+  /// In tr, this message translates to:
+  /// **'Durum'**
+  String get uiTasksSortStatusShort;
+
+  /// ui.tasks.group_review
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekleyen'**
+  String get uiTasksGroupReview;
+
+  /// ui.tasks.group_review_sub
+  ///
+  /// In tr, this message translates to:
+  /// **'incele ve karar ver'**
+  String get uiTasksGroupReviewSub;
+
+  /// ui.tasks.group_unassigned
+  ///
+  /// In tr, this message translates to:
+  /// **'Atanmamış'**
+  String get uiTasksGroupUnassigned;
+
+  /// ui.tasks.group_unassigned_sub
+  ///
+  /// In tr, this message translates to:
+  /// **'sorumlu bekliyor'**
+  String get uiTasksGroupUnassignedSub;
+
+  /// ui.tasks.group_doing
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam ediyor'**
+  String get uiTasksGroupDoing;
+
+  /// ui.tasks.group_returned
+  ///
+  /// In tr, this message translates to:
+  /// **'İade edildi'**
+  String get uiTasksGroupReturned;
+
+  /// ui.tasks.group_returned_sub
+  ///
+  /// In tr, this message translates to:
+  /// **'atanan yeniden gönderecek'**
+  String get uiTasksGroupReturnedSub;
+
+  /// ui.tasks.group_todo
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlamadı'**
+  String get uiTasksGroupTodo;
+
+  /// ui.tasks.group_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlandı'**
+  String get uiTasksGroupDone;
+
+  /// ui.tasks.group_other
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer'**
+  String get uiTasksGroupOther;
+
+  /// ui.tasks.scope_open_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'açık'**
+  String get uiTasksScopeOpenLc;
+
+  /// ui.tasks.scope_only_head
+  ///
+  /// In tr, this message translates to:
+  /// **'yalnız'**
+  String get uiTasksScopeOnlyHead;
+
+  /// ui.tasks.scope_only_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görevlerini görüyorsun'**
+  String get uiTasksScopeOnlyTail;
+
+  /// ui.tasks.queue_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekleyenler'**
+  String get uiTasksQueueTitle;
+
+  /// ui.tasks.queue_band_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görev onayını bekliyor'**
+  String get uiTasksQueueBandTail;
+
+  /// ui.tasks.queue_review
+  ///
+  /// In tr, this message translates to:
+  /// **'İncele'**
+  String get uiTasksQueueReview;
+
+  /// ui.tasks.queue_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay bekleyen görev kalmadı.'**
+  String get uiTasksQueueEmpty;
+
+  /// ui.tasks.requests_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talepleri'**
+  String get uiTasksRequestsTitle;
+
+  /// ui.tasks.requests_active_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'aktif'**
+  String get uiTasksRequestsActiveLc;
+
+  /// ui.tasks.requests_total_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'talep'**
+  String get uiTasksRequestsTotalLc;
+
+  /// ui.tasks.requests_tab_active
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif'**
+  String get uiTasksRequestsTabActive;
+
+  /// ui.tasks.requests_tab_approved
+  ///
+  /// In tr, this message translates to:
+  /// **'Kabul edildi'**
+  String get uiTasksRequestsTabApproved;
+
+  /// ui.tasks.requests_tab_rejected
+  ///
+  /// In tr, this message translates to:
+  /// **'Reddedildi'**
+  String get uiTasksRequestsTabRejected;
+
+  /// ui.tasks.requests_empty_active
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif tarih talebin yok.'**
+  String get uiTasksRequestsEmptyActive;
+
+  /// ui.tasks.requests_empty_approved
+  ///
+  /// In tr, this message translates to:
+  /// **'Kabul edilen tarih talebin yok.'**
+  String get uiTasksRequestsEmptyApproved;
+
+  /// ui.tasks.requests_empty_rejected
+  ///
+  /// In tr, this message translates to:
+  /// **'Reddedilen tarih talebin yok.'**
+  String get uiTasksRequestsEmptyRejected;
+
+  /// ui.tasks.request_state_pending
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekliyor'**
+  String get uiTasksRequestStatePending;
+
+  /// ui.tasks.request_waiting_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Yöneticide bekliyor'**
+  String get uiTasksRequestWaitingAdmin;
+
+  /// ui.tasks.request_waiting_note
+  ///
+  /// In tr, this message translates to:
+  /// **'Karar gelene kadar mevcut tarihler geçerli.'**
+  String get uiTasksRequestWaitingNote;
+
+  /// ui.tasks.request_goes_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Talep yöneticiye gider; sebep zorunludur.'**
+  String get uiTasksRequestGoesAdmin;
+
+  /// ui.tasks.err_reason_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Sebep gerekli.'**
+  String get uiTasksErrReasonRequired;
+
+  /// ui.tasks.unassigned_waiting
+  ///
+  /// In tr, this message translates to:
+  /// **'Sorumlu bekliyor'**
+  String get uiTasksUnassignedWaiting;
+
+  /// ui.tasks.unassigned_rule
+  ///
+  /// In tr, this message translates to:
+  /// **'Atanmamış görevler sorumlu atanana kadar başlatılamaz.'**
+  String get uiTasksUnassignedRule;
+
+  /// ui.tasks.assign
+  ///
+  /// In tr, this message translates to:
+  /// **'Ata'**
+  String get uiTasksAssign;
+
+  /// ui.tasks.assign_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Sorumlu ata'**
+  String get uiTasksAssignTitle;
+
+  /// ui.tasks.assign_note
+  ///
+  /// In tr, this message translates to:
+  /// **'Havuz bu koordinatörlüğün ekibidir; atanan kişiye bildirim gider.'**
+  String get uiTasksAssignNote;
+
+  /// ui.tasks.assign_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Atanabilecek kişi yok.'**
+  String get uiTasksAssignEmpty;
+
+  /// ui.tasks.t_assigned_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kişisine atandı'**
+  String get uiTasksTAssignedTail;
+
+  /// ui.tasks.decision_kicker
+  ///
+  /// In tr, this message translates to:
+  /// **'Karar bekliyor'**
+  String get uiTasksDecisionKicker;
+
+  /// ui.tasks.decision_submitted
+  ///
+  /// In tr, this message translates to:
+  /// **'Onaya sunuldu'**
+  String get uiTasksDecisionSubmitted;
+
+  /// ui.tasks.decision_files_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kanıt dosyası'**
+  String get uiTasksDecisionFilesTail;
+
+  /// ui.tasks.decision_subs_head
+  ///
+  /// In tr, this message translates to:
+  /// **'alt görevler'**
+  String get uiTasksDecisionSubsHead;
+
+  /// ui.tasks.decision_no_evidence
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt dosyası yüklenmemiş. Onaylamadan önce ekipten kanıt iste ya da iade et.'**
+  String get uiTasksDecisionNoEvidence;
+
+  /// ui.tasks.decision_foot
+  ///
+  /// In tr, this message translates to:
+  /// **'Onaylanınca atananlar bilgilendirilir. İade için sebep yazman gerekir.'**
+  String get uiTasksDecisionFoot;
+
+  /// ui.tasks.return
+  ///
+  /// In tr, this message translates to:
+  /// **'İade et'**
+  String get uiTasksReturn;
+
+  /// ui.tasks.return_reason_label
+  ///
+  /// In tr, this message translates to:
+  /// **'İade sebebi · zorunlu'**
+  String get uiTasksReturnReasonLabel;
+
+  /// ui.tasks.return_reason_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Neyin eksik olduğunu ve nasıl düzeltileceğini yaz…'**
+  String get uiTasksReturnReasonHint;
+
+  /// ui.tasks.return_info
+  ///
+  /// In tr, this message translates to:
+  /// **'Atananlar düzeltip yeniden gönderir. Sebep görevde not olarak görünür.'**
+  String get uiTasksReturnInfo;
+
+  /// ui.tasks.return_note_head
+  ///
+  /// In tr, this message translates to:
+  /// **'İade sebebi'**
+  String get uiTasksReturnNoteHead;
+
+  /// ui.tasks.approve_note_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay notu · isteğe bağlı'**
+  String get uiTasksApproveNoteLabel;
+
+  /// ui.tasks.approve_note_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekibe iletmek istediğin bir not…'**
+  String get uiTasksApproveNoteHint;
+
+  /// ui.tasks.approve_note_head
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay notu'**
+  String get uiTasksApproveNoteHead;
+
+  /// ui.tasks.approve_no_evidence
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt dosyası yok; onaylarsan görev kanıtsız kapanır.'**
+  String get uiTasksApproveNoEvidence;
+
+  /// ui.tasks.approve_info
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay görevi tamamlar; geri almak gerekçe ister.'**
+  String get uiTasksApproveInfo;
+
+  /// ui.tasks.approve_pull
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş tarihini bugüne çek'**
+  String get uiTasksApprovePull;
+
+  /// ui.tasks.approve_pull_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev erken bitti: bitiş bugüne çekilir, plan bitişi saklanır.'**
+  String get uiTasksApprovePullDesc;
+
+  /// ui.tasks.cmp_plan
+  ///
+  /// In tr, this message translates to:
+  /// **'Plan'**
+  String get uiTasksCmpPlan;
+
+  /// ui.tasks.cmp_end
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş'**
+  String get uiTasksCmpEnd;
+
+  /// ui.tasks.cmp_now
+  ///
+  /// In tr, this message translates to:
+  /// **'Şu an'**
+  String get uiTasksCmpNow;
+
+  /// ui.tasks.cmp_new_end
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni bitiş'**
+  String get uiTasksCmpNewEnd;
+
+  /// ui.tasks.cmp_result
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonuç'**
+  String get uiTasksCmpResult;
+
+  /// ui.tasks.result_on_time
+  ///
+  /// In tr, this message translates to:
+  /// **'Zamanında'**
+  String get uiTasksResultOnTime;
+
+  /// ui.tasks.result_late_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gün geç'**
+  String get uiTasksResultLateTail;
+
+  /// ui.tasks.result_early_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gün erken'**
+  String get uiTasksResultEarlyTail;
+
+  /// ui.tasks.info_assignees
+  ///
+  /// In tr, this message translates to:
+  /// **'Sorumlu'**
+  String get uiTasksInfoAssignees;
+
+  /// ui.tasks.info_evidence
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt'**
+  String get uiTasksInfoEvidence;
+
+  /// ui.tasks.info_subtasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görevler'**
+  String get uiTasksInfoSubtasks;
+
+  /// ui.tasks.files_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'dosya'**
+  String get uiTasksFilesLc;
+
+  /// ui.tasks.t_approved_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'onaylandı'**
+  String get uiTasksTApprovedTail;
+
+  /// ui.tasks.t_returned_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'iade edildi'**
+  String get uiTasksTReturnedTail;
+
+  /// ui.tasks.extend
+  ///
+  /// In tr, this message translates to:
+  /// **'Süre uzat'**
+  String get uiTasksExtend;
+
+  /// ui.tasks.extend_caption
+  ///
+  /// In tr, this message translates to:
+  /// **'7 güne kadar · onay gerekmez'**
+  String get uiTasksExtendCaption;
+
+  /// ui.tasks.extend_info
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay gerekmez; atananlar ve yönetici bilgilendirilir. Bir seferde en çok 7 gün uzatabilirsin.'**
+  String get uiTasksExtendInfo;
+
+  /// ui.tasks.extend_more
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha fazlası için tarih talebi gönder'**
+  String get uiTasksExtendMore;
+
+  /// ui.tasks.extend_ok
+  ///
+  /// In tr, this message translates to:
+  /// **'Uzat'**
+  String get uiTasksExtendOk;
+
+  /// ui.tasks.t_extended
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş uzatıldı'**
+  String get uiTasksTExtended;
+
+  /// ui.tasks.lock_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağımlılık bekleniyor'**
+  String get uiTasksLockTitle;
+
+  /// ui.tasks.lock_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'bitmeden bu görev başlatılamaz.'**
+  String get uiTasksLockTail;
+
+  /// ui.tasks.lock_badge
+  ///
+  /// In tr, this message translates to:
+  /// **'Kilitli'**
+  String get uiTasksLockBadge;
+
+  /// ui.tasks.days_left_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gün kaldı'**
+  String get uiTasksDaysLeftTail;
+
   /// ui.timeline.title
   ///
   /// In tr, this message translates to:
@@ -11229,6 +12027,120 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Görev ayrıntısını aç'**
   String get uiTimelineGanttOpenTask;
+
+  /// ui.timeline.tabs_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev kümesi'**
+  String get uiTimelineTabsLabel;
+
+  /// ui.timeline.tab_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlüğün görevleri'**
+  String get uiTimelineTabDepartment;
+
+  /// ui.timeline.tab_mine
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevlerim'**
+  String get uiTimelineTabMine;
+
+  /// ui.timeline.my_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman çizelgem'**
+  String get uiTimelineMyTitle;
+
+  /// ui.timeline.group_open
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık görevler'**
+  String get uiTimelineGroupOpen;
+
+  /// ui.timeline.group_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanan'**
+  String get uiTimelineGroupDone;
+
+  /// ui.timeline.rule_direct
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitişi en çok 7 gün ileri alırsın; hemen uygulanır, sorumlu üyeye bildirim gider.'**
+  String get uiTimelineRuleDirect;
+
+  /// ui.timeline.rule_request
+  ///
+  /// In tr, this message translates to:
+  /// **'7 günü aşan ya da başlangıcı değiştiren her değişiklik yönetici onayına gider; karar gelene kadar eski tarih geçerlidir.'**
+  String get uiTimelineRuleRequest;
+
+  /// ui.timeline.extend_seven
+  ///
+  /// In tr, this message translates to:
+  /// **'Süre uzat +7'**
+  String get uiTimelineExtendSeven;
+
+  /// ui.timeline.extend_go
+  ///
+  /// In tr, this message translates to:
+  /// **'Süre uzat ·'**
+  String get uiTimelineExtendGo;
+
+  /// ui.timeline.extend_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Süre uzatıldı · sorumluya bildirim gitti'**
+  String get uiTimelineExtendDone;
+
+  /// ui.timeline.pull_today
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitişi bugüne çek'**
+  String get uiTimelinePullToday;
+
+  /// ui.timeline.pulled
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş bugüne çekildi · plan saklandı'**
+  String get uiTimelinePulled;
+
+  /// ui.timeline.request_go
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talebi gönder'**
+  String get uiTimelineRequestGo;
+
+  /// ui.timeline.reason_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Talep gerekçesi'**
+  String get uiTimelineReasonLabel;
+
+  /// ui.timeline.reason_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetici bu gerekçeyi görür; karar gelene kadar eski tarih geçerli.'**
+  String get uiTimelineReasonHint;
+
+  /// ui.timeline.reason_needed
+  ///
+  /// In tr, this message translates to:
+  /// **'Talep için gerekçe yaz (en az 3 karakter)'**
+  String get uiTimelineReasonNeeded;
+
+  /// ui.timeline.pending_head
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talebi bekliyor · yeni bitiş'**
+  String get uiTimelinePendingHead;
+
+  /// ui.timeline.pending_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'yöneticide bekliyor'**
+  String get uiTimelinePendingTail;
 
   /// ui.user_account_fields.heading
   ///
@@ -12105,6 +13017,114 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.'**
   String get uiUsersDraftSelfConflict;
+
+  /// ui.users.team_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekibim'**
+  String get uiUsersTeamTitle;
+
+  /// ui.users.team_people
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi'**
+  String get uiUsersTeamPeople;
+
+  /// ui.users.team_add
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekibe kişi ekle'**
+  String get uiUsersTeamAdd;
+
+  /// ui.users.team_search_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad ara'**
+  String get uiUsersTeamSearchHint;
+
+  /// ui.users.team_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Eşleşen kullanıcı yok.'**
+  String get uiUsersTeamEmpty;
+
+  /// ui.users.team_show_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü göster'**
+  String get uiUsersTeamShowAll;
+
+  /// ui.users.team_you
+  ///
+  /// In tr, this message translates to:
+  /// **'sen'**
+  String get uiUsersTeamYou;
+
+  /// ui.users.team_open
+  ///
+  /// In tr, this message translates to:
+  /// **'açık görev'**
+  String get uiUsersTeamOpen;
+
+  /// ui.users.team_late
+  ///
+  /// In tr, this message translates to:
+  /// **'gecikmede'**
+  String get uiUsersTeamLate;
+
+  /// ui.users.team_derived
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekip, koordinatörlüğün sohbet grubundan gösterilir; salt okunur.'**
+  String get uiUsersTeamDerived;
+
+  /// ui.users.team_unavailable_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekip listesi gösterilemiyor'**
+  String get uiUsersTeamUnavailableTitle;
+
+  /// ui.users.team_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyenin ekip listesini okuyabileceği bir sunucu kaynağı yok: backend bekliyor.'**
+  String get uiUsersTeamUnavailable;
+
+  /// ui.users.team_no_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu görünümde seçili koordinatörlük yok. Kenar çubuğundan koordinatörlük seç.'**
+  String get uiUsersTeamNoDepartment;
+
+  /// ui.users.team_remove
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekipten çıkar'**
+  String get uiUsersTeamRemove;
+
+  /// ui.users.team_remove_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı silinmez; diğer koordinatörlüklerdeki yeri değişmez.'**
+  String get uiUsersTeamRemoveConfirm;
+
+  /// ui.users.team_remove_effects
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişinin bu koordinatörlükteki görev atamaları kalkacak. Yine de ekipten çıkarılsın mı?'**
+  String get uiUsersTeamRemoveEffects;
+
+  /// ui.users.team_removed
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi ekipten çıkarıldı.'**
+  String get uiUsersTeamRemoved;
+
+  /// ui.users.team_lead_note
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör ataması yönetici işidir; sen ve diğer koordinatörler bu listeden çıkarılamazsınız.'**
+  String get uiUsersTeamLeadNote;
 }
 
 class _AppLocalizationsDelegate

@@ -66,19 +66,35 @@ class CalendarPage extends ConsumerWidget {
       }
     }
 
-    // "+" ve boş günün "Bu güne ekle"si: görev ya da toplantı. İkisi de seçili günü (gün
-    // seçilmemişse bugünü) varsayılan tarih alır; tarih formda değiştirilebilir. Görev açma
-    // yetkisi yoksa doğrudan toplantı planlanır.
+    // Etkin görünüm arayüzü süzer: yalnız etkin rolün açabildiği kayıtlar sunulur.
+    final canTask = ref.watch(canCreateTaskProvider);
+    final canMeet = ref.watch(
+      effectiveAccessProvider.select((a) => a.canCreateMeeting),
+    );
+
+    // "+": görev ya da toplantı. İkisi de seçili günü (gün seçilmemişse bugünü) varsayılan
+    // tarih alır; tarih formda değiştirilebilir. Yalnız biri açılabiliyorsa doğrudan o açılır;
+    // hiçbiri açılamıyorsa "+" gizlidir.
     void add() {
       final ix = index.value;
       if (ix == null) return;
-      if (!ref.read(canCreateTaskProvider)) {
+      if (!canTask) {
         plan();
         return;
       }
       final l = context.l10n;
       final day = ref.read(calendarControllerProvider).selectedOn(ix.today);
       final spanEnd = DateTime(day.year, day.month, day.day + _taskSpanDays);
+      void newTask() => showNewTaskSheet(
+        context,
+        resetTarget: true,
+        start: day,
+        end: spanEnd,
+      );
+      if (!canMeet) {
+        newTask();
+        return;
+      }
       NzFlyoutMenu.show(
         context,
         semanticLabel: l.uiCalendarAdd,
@@ -88,12 +104,7 @@ class CalendarPage extends ConsumerWidget {
             label: l.uiTasksNewTask,
             caption: l.dayRange(day, spanEnd),
             icon: NzIcons.tasks,
-            onSelected: () => showNewTaskSheet(
-              context,
-              resetTarget: true,
-              start: day,
-              end: spanEnd,
-            ),
+            onSelected: newTask,
           ),
           NzFlyoutItem(
             label: l.uiCalendarPlan,
@@ -137,7 +148,7 @@ class CalendarPage extends ConsumerWidget {
       onRevisit: revisit,
       topBar: const RootTopBar(),
       children: [
-        _Header(onAdd: add),
+        _Header(onAdd: canTask || canMeet ? add : null),
         // Prototip: bölüm aralığı 16, ızgara -6.
         const Gap(NizamioSpacing.gapMd),
         NzAsyncView<CalendarIndex>(
@@ -209,7 +220,8 @@ class CalendarPage extends ConsumerWidget {
 class _Header extends ConsumerWidget {
   const _Header({required this.onAdd});
 
-  final VoidCallback onAdd;
+  /// `null`: etkin rol ne görev ne toplantı açabilir; "+" gizli.
+  final VoidCallback? onAdd;
 
   static const _fade = Duration(milliseconds: 250);
 
@@ -270,31 +282,33 @@ class _Header extends ConsumerWidget {
                 ),
               ),
             ),
-            const Gap(NizamioSpacing.space2),
-            Semantics(
-              button: true,
-              label: l.uiCalendarAdd,
-              excludeSemantics: true,
-              onTap: onAdd,
-              child: Material(
-                color: c.primary,
-                shape: const CircleBorder(),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: onAdd,
-                  child: SizedBox.square(
-                    dimension: NizamioSize.tap,
-                    child: Center(
-                      child: NzIcon(
-                        NzIcons.add,
-                        size: NizamioSize.iconSizeSm,
-                        color: c.onPrimary,
+            if (onAdd case final onAdd?) ...[
+              const Gap(NizamioSpacing.space2),
+              Semantics(
+                button: true,
+                label: l.uiCalendarAdd,
+                excludeSemantics: true,
+                onTap: onAdd,
+                child: Material(
+                  color: c.primary,
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: onAdd,
+                    child: SizedBox.square(
+                      dimension: NizamioSize.tap,
+                      child: Center(
+                        child: NzIcon(
+                          NzIcons.add,
+                          size: NizamioSize.iconSizeSm,
+                          color: c.onPrimary,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ],

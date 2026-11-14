@@ -398,7 +398,12 @@ final class TimelineView {
     required this.weeks,
     required this.selection,
     required this.overviewGroups,
+    this.locked = false,
   });
+
+  /// Tek koordinatörlüğe kilitli görünüm (Koordinatör/Üye): koordinatörlük seçici yok, gruplar
+  /// durum başlıkları.
+  final bool locked;
 
   final int year;
 

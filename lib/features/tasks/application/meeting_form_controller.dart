@@ -28,10 +28,13 @@ enum MeetingError { title, past, place, coordinatorships, people, owner }
 /// Yerin en çok uzunluğu (COLLABORATION-K76).
 const meetingPlaceMax = 200;
 
-/// Kişi kipinde seçilebilen sahip koordinatörlükler (K73): yönetici her birini, koordinatör
-/// yalnız kendi koordinatörlüklerini seçer.
-List<CoordinatorshipRef> meetingOwnerChoices(TaskCatalog catalog) =>
-    catalog.access?.companyAdmin ?? false
+/// Kişi kipinde seçilebilen sahip koordinatörlükler (K73): yönetici görünümü ([admin],
+/// `EffectiveAccess.isAdminView`) her birini, koordinatör yalnız kendi koordinatörlüklerini
+/// seçer.
+List<CoordinatorshipRef> meetingOwnerChoices(
+  TaskCatalog catalog, {
+  required bool admin,
+}) => admin
     ? catalog.coordinatorships
     : [
         for (final c in catalog.coordinatorships)

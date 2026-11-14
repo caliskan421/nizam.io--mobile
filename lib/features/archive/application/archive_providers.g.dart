@@ -60,20 +60,22 @@ final class ArchiveRepositoryProvider
 
 String _$archiveRepositoryHash() => r'5b952ae7568e20c4e616e6ec337c9ec5b15b0b77';
 
-/// Arşiv isteklerinin kapsamı: rol görev kataloğunun erişim bilgisinden (`/v1/me` +
-/// `/v1/me/departments`) okunur. Departman: programdaki ilk koordinatörlük, yoksa ilk ekip
-/// satırı; ekip satırı olmayan yöneticide programın ilk departmanı. Hiçbiri yoksa
-/// `client.scope_missing` (istek gönderilmez). Katalog yalnız bu iki değer değişince yeniden
-/// hesaplatır (görev yazmaları arşivi yeniden okutmaz).
+/// Arşiv isteklerinin kapsamı: etkin görünümden (`effectiveAccessProvider`; rol ve
+/// koordinatörlük seçimi, yoksa varsayılanı). Departman: Koordinatör/Üye görünümünde seçili
+/// koordinatörlük; yönetici görünümünde (tüm koordinatörlükler) programın ilk departmanı, yoksa
+/// yöneticinin bu programdaki ilk ekip satırı. Hiçbiri
+/// yoksa `client.scope_missing` (istek gönderilmez). Yalnız bu iki değer değişince yeniden
+/// hesaplanır (görev yazmaları arşivi yeniden okutmaz).
 
 @ProviderFor(archiveScope)
 final archiveScopeProvider = ArchiveScopeProvider._();
 
-/// Arşiv isteklerinin kapsamı: rol görev kataloğunun erişim bilgisinden (`/v1/me` +
-/// `/v1/me/departments`) okunur. Departman: programdaki ilk koordinatörlük, yoksa ilk ekip
-/// satırı; ekip satırı olmayan yöneticide programın ilk departmanı. Hiçbiri yoksa
-/// `client.scope_missing` (istek gönderilmez). Katalog yalnız bu iki değer değişince yeniden
-/// hesaplatır (görev yazmaları arşivi yeniden okutmaz).
+/// Arşiv isteklerinin kapsamı: etkin görünümden (`effectiveAccessProvider`; rol ve
+/// koordinatörlük seçimi, yoksa varsayılanı). Departman: Koordinatör/Üye görünümünde seçili
+/// koordinatörlük; yönetici görünümünde (tüm koordinatörlükler) programın ilk departmanı, yoksa
+/// yöneticinin bu programdaki ilk ekip satırı. Hiçbiri
+/// yoksa `client.scope_missing` (istek gönderilmez). Yalnız bu iki değer değişince yeniden
+/// hesaplanır (görev yazmaları arşivi yeniden okutmaz).
 
 final class ArchiveScopeProvider
     extends
@@ -83,11 +85,12 @@ final class ArchiveScopeProvider
           FutureOr<ArchiveScope>
         >
     with $FutureModifier<ArchiveScope>, $FutureProvider<ArchiveScope> {
-  /// Arşiv isteklerinin kapsamı: rol görev kataloğunun erişim bilgisinden (`/v1/me` +
-  /// `/v1/me/departments`) okunur. Departman: programdaki ilk koordinatörlük, yoksa ilk ekip
-  /// satırı; ekip satırı olmayan yöneticide programın ilk departmanı. Hiçbiri yoksa
-  /// `client.scope_missing` (istek gönderilmez). Katalog yalnız bu iki değer değişince yeniden
-  /// hesaplatır (görev yazmaları arşivi yeniden okutmaz).
+  /// Arşiv isteklerinin kapsamı: etkin görünümden (`effectiveAccessProvider`; rol ve
+  /// koordinatörlük seçimi, yoksa varsayılanı). Departman: Koordinatör/Üye görünümünde seçili
+  /// koordinatörlük; yönetici görünümünde (tüm koordinatörlükler) programın ilk departmanı, yoksa
+  /// yöneticinin bu programdaki ilk ekip satırı. Hiçbiri
+  /// yoksa `client.scope_missing` (istek gönderilmez). Yalnız bu iki değer değişince yeniden
+  /// hesaplanır (görev yazmaları arşivi yeniden okutmaz).
   ArchiveScopeProvider._()
     : super(
         from: null,
@@ -114,4 +117,4 @@ final class ArchiveScopeProvider
   }
 }
 
-String _$archiveScopeHash() => r'dc13f3ad83c9e139e36f1457d5016e80514025d8';
+String _$archiveScopeHash() => r'99ea5fdec8aafbda93849d372753291c2821a6ae';

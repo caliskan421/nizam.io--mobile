@@ -23,6 +23,7 @@ import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
+import '../application/gantt_provider.dart';
 import '../application/timeline_controller.dart';
 import '../domain/timeline.dart';
 
@@ -31,8 +32,9 @@ import 'mobile/mobile_timeline_chart.dart';
 import 'timeline_texts.dart';
 import 'widgets/timeline_feedback.dart';
 import 'widgets/timeline_header.dart';
-import 'widgets/timeline_selection_card.dart';
+import 'widgets/timeline_selection_host.dart';
 import 'widgets/timeline_sheets.dart';
+import 'widgets/timeline_tabs.dart';
 import 'widgets/timeline_zoom_controls.dart';
 
 /// Zaman çizelgesi (prototip `gantt`; kabuk dışı tam ekran, alt menü yok): kök üst çubuk,
@@ -192,27 +194,6 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     start ? _ctrl.setDraftStart(picked) : _ctrl.setDraftEnd(picked);
   }
 
-  Future<void> _request() async {
-    final l = context.l10n;
-    final owns = _ownerGuard();
-    try {
-      final result = await _ctrl.requestDates();
-      if (!mounted || !owns()) return;
-      switch (result) {
-        case TimelineRequestPending():
-          _say(l.uiTimelineRequestPending);
-        case TimelineRequestNoChange():
-          _say(l.uiTimelineRequestNoChange);
-        case TimelineRequestSent(:final end):
-          _say(l.requestSentText(end));
-      }
-    } on Object catch (e, st) {
-      // Rapor, bağlam korumasından ÖNCE.
-      final api = toReportedApiError(e, st, source: ReportSource.timeline);
-      if (mounted && owns()) NzToast.error(context, api);
-    }
-  }
-
   Future<void> _undo() async {
     final owns = _ownerGuard();
     try {
@@ -220,17 +201,6 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
       if (code != null && mounted && owns()) {
         _say(context.l10n.uiTimelineUndoneTail);
       }
-    } on Object catch (e, st) {
-      // Rapor, bağlam korumasından ÖNCE.
-      final api = toReportedApiError(e, st, source: ReportSource.timeline);
-      if (mounted && owns()) NzToast.error(context, api);
-    }
-  }
-
-  Future<void> _save() async {
-    final owns = _ownerGuard();
-    try {
-      await _ctrl.save();
     } on Object catch (e, st) {
       // Rapor, bağlam korumasından ÖNCE.
       final api = toReportedApiError(e, st, source: ReportSource.timeline);
@@ -298,7 +268,10 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           NzPageHeader(
-                            title: l.uiTasksTitle,
+                            title:
+                                ref.watch(effectiveAccessProvider).isMemberView
+                                ? l.uiTimelineMyTitle
+                                : l.uiTasksTitle,
                             actions: [
                               TasksModeToggle(
                                 selected: 1,
@@ -353,6 +326,11 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                               ),
                             ),
                           ),
+                          const TimelineTabs(
+                            padding: EdgeInsets.only(
+                              top: NizamioSpacing.space4,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -376,6 +354,14 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                         icon: NzIcons.timeline,
                       ),
                     ],
+                  ),
+                ),
+                const TimelineTabs(
+                  padding: EdgeInsets.fromLTRB(
+                    NizamioSpacing.gutter,
+                    NizamioSpacing.space3,
+                    NizamioSpacing.gutter,
+                    0,
                   ),
                 ),
                 const Gap(NizamioSpacing.space3),
@@ -424,13 +410,20 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                               onToggleGroup: ctrl.toggleGroup,
                               canDrag:
                                   sel != null &&
-                                  TaskPermissions.of(
-                                    ref
-                                        .read(taskCatalogControllerProvider)
-                                        .value
-                                        ?.access,
-                                    sel.task.item,
-                                  ).canManageTask,
+                                  ref
+                                      .watch(timelineCatalogProvider)
+                                      .value
+                                      .permissionsIn(
+                                        ref.watch(scopeStateProvider),
+                                        sel.task.item,
+                                      )
+                                      .canManageTask,
+                              links:
+                                  ref
+                                      .watch(ganttScheduleProvider)
+                                      .value
+                                      ?.links ??
+                                  const [],
                               onDrag: ctrl.dragTo,
                             ),
                           ),
@@ -514,39 +507,17 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               left: 0,
               right: 0,
               bottom: 0,
-              child: TimelineSelectionCard(
+              child: TimelineSelectionHost(
+                scope: widget.coordinatorship,
                 selection: sel,
                 year: v.year,
                 bottomInset: bottom,
                 maxHeight: box.maxHeight * 0.8,
                 onOpen: () => context.appNav.openTask(sel.task.code),
                 onClose: ctrl.closeSelection,
-                onNudgeStart: ctrl.nudgeStart,
-                onNudgeEnd: ctrl.nudgeEnd,
                 onPickStart: () => _pick(v, start: true),
                 onPickEnd: () => _pick(v, start: false),
-                onShift: ctrl.shiftDraft,
-                onSave: _save,
-                onRequest: _request,
-                onReset: ctrl.resetDraft,
-                canEditDates:
-                    TaskPermissions.of(
-                      ref.read(taskCatalogControllerProvider).value?.access,
-                      sel.task.item,
-                    ).canManageTask ||
-                    TaskPermissions.of(
-                      ref.read(taskCatalogControllerProvider).value?.access,
-                      sel.task.item,
-                    ).canRequestDate,
-                canSave: TaskPermissions.of(
-                  ref.read(taskCatalogControllerProvider).value?.access,
-                  sel.task.item,
-                ).canManageTask,
-                canRequest: TaskPermissions.of(
-                  ref.read(taskCatalogControllerProvider).value?.access,
-                  sel.task.item,
-                ).canRequestDate,
-                onRemind: null,
+                onMessage: _say,
               ),
             ),
           if (!_phone && sel == null && !v.state.coordMenuOpen)

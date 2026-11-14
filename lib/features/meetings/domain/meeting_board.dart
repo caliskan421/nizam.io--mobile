@@ -118,6 +118,15 @@ List<Meeting> searchMeetings(
   ];
 }
 
+/// Birim süzgeci (prototip "Tümü / ALT"): [unit] null → hepsi; dolu → bağlı departmanları
+/// arasında [unit] olan toplantılar (sahip ya da davetli).
+List<Meeting> meetingsOfUnit(List<Meeting> list, String? unit) => unit == null
+    ? list
+    : [
+        for (final m in list)
+          if (m.departments.any((d) => d.id == unit)) m,
+      ];
+
 /// Sıralı listeyi ardışık gruplara böler.
 List<MeetingGroup> groupMeetings(
   List<Meeting> sorted,

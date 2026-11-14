@@ -265,7 +265,7 @@ void main() {
         final (h, c, ctl) = await _open(s);
         s.writes['POST /v1/date-change-requests'] = () =>
             envelope(409, 'work.date_request_pending_exists');
-        ctl.openDateRequest();
+        openWithReason(ctl, c);
         final r = await ctl.submitDateRequest();
         expect(r.error!.code, 'work.date_request_pending_exists');
         expect(h.backend.count('POST', '/v1/date-change-requests'), 1);

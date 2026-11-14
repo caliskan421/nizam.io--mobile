@@ -31,8 +31,9 @@ import 'routes.dart';
 //   genişlemede aynı görev/sohbet State'i ve iz korunur.
 // İkinci veri yolu yoktur: iki bölme aynı controller'ları okur.
 
-/// Tablet rayının modülleri (prototip `RAIL`, sıra birebir). [meetings] rayda çizilmez (çekmeceden
-/// girilir; prototip rayında yok) ama çift bölme kuralları için modüldür; hep sonda kalır.
+/// Tablet rayının ve çift bölmenin modülleri. Rayda hangilerinin hangi sırayla çizildiği etkin
+/// rolün menü tanımından gelir (`railModulesFor`, scope açık yüzü); yönetici rayı prototip
+/// `RAIL` sırasıdır (ilk altı), Toplantılar/Kullanıcılar/Tablolar onda çekmeceden girilir.
 enum RailModule {
   home,
   tasks,
@@ -42,10 +43,7 @@ enum RailModule {
   messages,
   meetings,
   users,
-  tables;
-
-  /// Raydaki sırası; rayda yoksa null.
-  int? get railIndex => index >= meetings.index ? null : index;
+  tables,
 }
 
 /// Konumdan ray modülü (kabuk dışı konumda null).

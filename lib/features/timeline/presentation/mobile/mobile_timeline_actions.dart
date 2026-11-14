@@ -93,13 +93,16 @@ class MobileTimelineActions extends StatelessWidget {
           onScale,
           onLongPress: onLegend,
         ),
-        const Gap(10),
-        button(
-          const NzIcon(NzIcons.coordinatorships),
-          '${l.uiTimelineCoord} · ${l.coordSummary(view)}',
-          onCoord,
-          count: view.allSelected ? 0 : view.selectedCoordinatorships.length,
-        ),
+        // Kilitli görünümde koordinatörlük kenar çubuğundaki seçimdir.
+        if (!view.locked) ...[
+          const Gap(10),
+          button(
+            const NzIcon(NzIcons.coordinatorships),
+            '${l.uiTimelineCoord} · ${l.coordSummary(view)}',
+            onCoord,
+            count: view.allSelected ? 0 : view.selectedCoordinatorships.length,
+          ),
+        ],
         const Gap(10),
         button(
           const NzIcon(NzIcons.filter),

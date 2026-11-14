@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/i18n/generated/app_localizations.dart';
 import '../../core/theme/generated/tokens.gen.dart';
 import '../../core/ui/extensions/context_ext.dart';
 import '../../core/ui/layout/layout.dart';
@@ -13,144 +12,13 @@ import '../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../core/ui/widgets/navigation/nz_floating_nav.dart';
 import '../../core/ui/widgets/navigation/nz_tablet_rail.dart';
 import '../../core/ui/widgets/nz_icons.dart';
-import '../../features/activity/activity.dart';
-import '../../features/administration/administration.dart';
-import '../../features/archive/archive.dart';
-import '../../features/coordinatorships/coordinatorships.dart';
-import '../../features/meetings/meetings.dart';
-import '../../features/messages/messages.dart';
 import '../../features/tasks/tasks.dart';
 import 'app_tablet_rail.dart';
 import 'routes.dart';
+import 'shell_tabs.dart';
 import 'split.dart';
 
-/// Alt menünün üçüncü öğesi: son girilen modül (README "Gezinme"). Üçü aynı kabuk dalındadır.
-enum ShellModule {
-  coordinatorships,
-  archive,
-  messages,
-  calendar,
-  meetings,
-  users,
-  tables,
-}
-
-/// Alt menü öğesinin görünümü (simge, etiket, etkinken alt yazı).
-@immutable
-class NzShellTab {
-  const NzShellTab({
-    required this.icon,
-    required this.selectedIcon,
-    required this.label,
-    this.caption,
-    this.wide = false,
-  });
-
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
-  final String? caption;
-
-  /// Uzun etiket (Koordinatörlükler): etkinken kapsül öğesi genişler.
-  final bool wide;
-}
-
-/// Konumdan modül (modül dalı dışında null).
-ShellModule? moduleOf(String location) {
-  if (location.startsWith(const CoordinatorshipsRoute().location)) {
-    return ShellModule.coordinatorships;
-  }
-  if (location.startsWith(const ArchiveRoute().location)) {
-    return ShellModule.archive;
-  }
-  if (location.startsWith(const MessagesRoute().location)) {
-    return ShellModule.messages;
-  }
-  if (location.startsWith(const CalendarRoute().location)) {
-    return ShellModule.calendar;
-  }
-  if (location.startsWith(const MeetingsRoute().location)) {
-    return ShellModule.meetings;
-  }
-  if (location.startsWith(const UsersRoute().location)) {
-    return ShellModule.users;
-  }
-  if (location.startsWith(const TablesRoute().location)) {
-    return ShellModule.tables;
-  }
-  return null;
-}
-
-/// Kabuk sekmeleri (sıra `routes.dart` dal sırasıyla birebir). Etiket ve alt yazı konuma ve
-/// modüllerin özet sağlayıcılarına göre.
-List<NzShellTab> shellTabsFor(
-  AppLocalizations l, {
-  required String location,
-  required ShellModule module,
-  required WidgetRef ref,
-}) {
-  final inHistory = location.startsWith(const HistoryRoute().location);
-  // Her zaman izlenir: işlem geçmişi kayıtları kabukla birlikte yüklenir (keepAlive), sayfaya
-  // ilk girişte liste ilk karede dolu gelir (yükleniyor karesi/titreme yok).
-  final historyCaption = ref.watch(activityNavCaptionProvider);
-  return [
-    NzShellTab(
-      icon: NzIcons.home,
-      selectedIcon: NzIcons.homeFilled,
-      label: inHistory ? l.uiRouterTabHistory : l.uiRouterTabHome,
-      caption: inHistory ? historyCaption : l.uiRouterTabHomeCaption,
-    ),
-    NzShellTab(
-      icon: NzIcons.tasks,
-      selectedIcon: NzIcons.tasks,
-      label: l.uiRouterTabTasks,
-      caption: ref.watch(tasksNavCaptionProvider),
-    ),
-    switch (module) {
-      ShellModule.users => NzShellTab(
-        icon: NzIcons.group,
-        selectedIcon: NzIcons.group,
-        label: l.uiHomeModuleUsers,
-        caption: ref.watch(adminUsersNavCaptionProvider),
-      ),
-      ShellModule.tables => NzShellTab(
-        icon: NzIcons.sheets,
-        selectedIcon: NzIcons.sheets,
-        label: l.uiHomeModuleSheets,
-      ),
-      ShellModule.coordinatorships => NzShellTab(
-        icon: NzIcons.coordinatorships,
-        selectedIcon: NzIcons.coordinatorships,
-        label: l.uiRouterTabCoordinatorships,
-        caption: ref.watch(coordinatorshipsNavCaptionProvider),
-        wide: true,
-      ),
-      ShellModule.archive => NzShellTab(
-        icon: NzIcons.folder,
-        selectedIcon: NzIcons.folderFilled,
-        label: l.uiRouterTabArchive,
-        caption: ref.watch(archiveNavCaptionProvider),
-      ),
-      ShellModule.messages => NzShellTab(
-        icon: NzIcons.messages,
-        selectedIcon: NzIcons.messagesFilled,
-        label: l.uiRouterTabMessages,
-        caption: ref.watch(messagesNavCaptionProvider),
-      ),
-      ShellModule.calendar => NzShellTab(
-        icon: NzIcons.calendar,
-        selectedIcon: NzIcons.calendarFilled,
-        label: l.uiHomeModuleCalendar,
-      ),
-      ShellModule.meetings => NzShellTab(
-        icon: NzIcons.event,
-        selectedIcon: NzIcons.event,
-        label: l.uiHomeModuleMeetings,
-        caption: ref.watch(meetingsNavCaptionProvider),
-      ),
-    },
-  ];
-}
+export 'shell_tabs.dart';
 
 /// Yalnız `scoped` fazında kurulan kabuk. Pencere genişliğine göre (A2, ADR-0003 karar 25–26):
 /// compact → yüzen cam alt menü ([NzFloatingNav], üç öğe, içerik altından geçer); medium →
@@ -179,8 +47,8 @@ class NzAdaptiveShell extends ConsumerStatefulWidget {
 }
 
 class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
-  /// Son girilen modül (başlangıçta Koordinatörlükler, prototip varsayılanı).
-  var _module = ShellModule.coordinatorships;
+  /// Son girilen modül (yok → etkin rolün varsayılan yuvası, [shellSlotFor]).
+  ShellModule? _module;
 
   /// Görevler kökünün son açılış süzgeci (sol bölmedeki liste, alt rotada da aynı kalır).
   var _tasksRoot = const TasksRoute();
@@ -308,11 +176,14 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
     if (NzTabletMetrics.railAt(width)) {
       return _tablet(context, split: NzTabletMetrics.splitsAt(width));
     }
+    final view = ref.watch(effectiveAccessProvider);
+    final role = view.known ? view.role : null;
     final tabs = shellTabsFor(
       context.l10n,
       location: _location,
-      module: _module,
+      module: shellSlotFor(_module, role),
       ref: ref,
+      role: role,
     );
     // Tabletten daralınca sağ bölmedeki sohbet (`/messages/:id`) tam ekran kalır.
     final chat = _location.startsWith('${const MessagesRoute().location}/');

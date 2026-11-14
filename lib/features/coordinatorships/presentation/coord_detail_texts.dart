@@ -11,7 +11,7 @@ extension CoordDetailTexts on AppLocalizations {
     CoordinatorshipTab.tasks => uiCoordTabTasks,
     CoordinatorshipTab.members => uiCoordTabMembers,
     CoordinatorshipTab.archive => uiCoordTabArchive,
-    CoordinatorshipTab.meetings => uiCoordTabMeetings,
+    CoordinatorshipTab.calendar => uiCoordTabCalendar,
   };
 
   String coordFilterLabel(CoordTaskFilter f) => switch (f) {

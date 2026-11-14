@@ -1706,6 +1706,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveRetagged => 'Etiket değiştirildi';
 
   @override
+  String get uiArchiveMyFiles => 'Dosyalarım';
+
+  @override
+  String get uiArchiveMyFilesCaption => 'Yüklediğin dosyalar';
+
+  @override
+  String get uiArchiveTaskFolders => 'görev klasörleri';
+
+  @override
+  String get uiArchiveEmptyTaskFolders =>
+      'Bu aramayla eşleşen görev klasörü yok.';
+
+  @override
   String get uiButtonsBusy => 'Meşgul';
 
   @override
@@ -2306,9 +2319,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordTabArchive => 'Arşiv';
 
   @override
-  String get uiCoordTabMeetings => 'Toplantı';
-
-  @override
   String get uiCoordTabMembers => 'Üyeler';
 
   @override
@@ -2383,6 +2393,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordMemberAdded => 'Üye eklendi';
+
+  @override
+  String get uiCoordTabCalendar => 'Takvim';
 
   @override
   String get uiFeedbackLoading => 'Yükleniyor';
@@ -2678,9 +2691,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeShiftDaysTail => 'gün';
 
   @override
-  String get uiHomeSeasonTail => 'sezonu';
-
-  @override
   String get uiHomeVersionPrefix => 'v';
 
   @override
@@ -2694,6 +2704,121 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiHomeThemeSystem => 'Sistem';
+
+  @override
+  String get uiHomeGroupTeam => 'ekip';
+
+  @override
+  String get uiHomeModuleMyTasks => 'Görevlerim';
+
+  @override
+  String get uiHomeModuleMyTimeline => 'Zaman çizelgem';
+
+  @override
+  String get uiHomeModuleMyFiles => 'Dosyalarım';
+
+  @override
+  String get uiHomeModuleTeam => 'Ekibim';
+
+  @override
+  String get uiHomeModuleAssistant => 'Asistan';
+
+  @override
+  String get uiHomePickerProgram => 'program';
+
+  @override
+  String get uiHomePickerRole => 'rol';
+
+  @override
+  String get uiHomePickerDepartment => 'koordinatörlük';
+
+  @override
+  String get uiHomeViewRoleAdmin => 'Yönetici';
+
+  @override
+  String get uiHomeRoleAdminDesc => 'Tüm programı yönetir';
+
+  @override
+  String get uiHomeRoleCoordinatorDesc => 'Kendi koordinatörlüğünü yönetir';
+
+  @override
+  String get uiHomeRoleMemberDesc => 'Yalnız atanan görevleri görür';
+
+  @override
+  String get uiHomePickRole => 'Rolünü seç';
+
+  @override
+  String get uiHomePickDepartment => 'Koordinatörlük seç';
+
+  @override
+  String get uiHomeAdminScopeNote =>
+      'Yönetici tüm koordinatörlükleri görür. Bir koordinatörlüğün gözünden bakmak için rolünü değiştir.';
+
+  @override
+  String get uiHomeCoordDoneTail => 'görev bitti';
+
+  @override
+  String get uiHomeChipLate => 'geciken';
+
+  @override
+  String get uiHomeChipReview => 'onayında';
+
+  @override
+  String get uiHomeChipReturned => 'iade';
+
+  @override
+  String get uiHomeChipUnassigned => 'atanmamış';
+
+  @override
+  String get uiHomeChipRequests => 'tarih talebi yöneticide';
+
+  @override
+  String get uiHomeQueueTitle => 'Onay bekleyenler';
+
+  @override
+  String get uiHomeSeeAll => 'Tümü';
+
+  @override
+  String get uiHomeQueueEmpty => 'Onay bekleyen iş yok.';
+
+  @override
+  String get uiHomeUnassignedTitle => 'Atanmamış';
+
+  @override
+  String get uiHomeLoadTitle => 'Ekip yükü';
+
+  @override
+  String get uiHomeLoadOpenTail => 'açık';
+
+  @override
+  String get uiHomeLoadLateTail => 'geç';
+
+  @override
+  String get uiHomeLoadDoing => 'devam';
+
+  @override
+  String get uiHomeLoadReview => 'onayda';
+
+  @override
+  String get uiHomeLoadLate => 'geciken';
+
+  @override
+  String get uiHomeLoadReturned => 'iade';
+
+  @override
+  String get uiHomeLoadEmpty => 'Ekipte açık görev yok.';
+
+  @override
+  String get uiHomeMeetingsTitle => 'Yaklaşan toplantılar';
+
+  @override
+  String get uiHomeMeetingsEmpty => 'Yaklaşan toplantın yok.';
+
+  @override
+  String get uiHomeRequestsTitle => 'Tarih taleplerim';
+
+  @override
+  String get uiHomeRequestsEmpty => 'Tarih talebin yok.';
 
   @override
   String get uiIdentityLoginTitle => 'Giriş yap';
@@ -3299,6 +3424,32 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMeetingsAgendaEdit => 'Maddeyi düzenle';
+
+  @override
+  String get uiMeetingsScopeUpcoming => 'yaklaşan';
+
+  @override
+  String get uiMeetingsScopePast => 'geçmiş';
+
+  @override
+  String get uiMeetingsScopeCoordNote =>
+      'koordinatör olarak birimlerinin dahil olduğu toplantıları görüyorsun';
+
+  @override
+  String get uiMeetingsScopeMemberNote =>
+      'üye olarak birimlerinin dahil olduğu toplantıları görüyorsun';
+
+  @override
+  String get uiMeetingsUnitLabel => 'Birim';
+
+  @override
+  String get uiMeetingsUnitAll => 'Tümü';
+
+  @override
+  String get uiMeetingsInstant => 'Anlık toplantı';
+
+  @override
+  String get uiMeetingsInstantTitle => 'Anlık toplantı';
 
   @override
   String get uiMessagesTitle => 'Mesajlar';
@@ -5503,6 +5654,270 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksTReminded => 'Hatırlatma gönderildi';
 
   @override
+  String get uiTasksViewUnassigned => 'Atanmamış';
+
+  @override
+  String get uiTasksListUnassigned => 'atanmamış görevler';
+
+  @override
+  String get uiTasksSortStatus => 'Duruma göre';
+
+  @override
+  String get uiTasksSortStatusShort => 'Durum';
+
+  @override
+  String get uiTasksGroupReview => 'Onay bekleyen';
+
+  @override
+  String get uiTasksGroupReviewSub => 'incele ve karar ver';
+
+  @override
+  String get uiTasksGroupUnassigned => 'Atanmamış';
+
+  @override
+  String get uiTasksGroupUnassignedSub => 'sorumlu bekliyor';
+
+  @override
+  String get uiTasksGroupDoing => 'Devam ediyor';
+
+  @override
+  String get uiTasksGroupReturned => 'İade edildi';
+
+  @override
+  String get uiTasksGroupReturnedSub => 'atanan yeniden gönderecek';
+
+  @override
+  String get uiTasksGroupTodo => 'Başlamadı';
+
+  @override
+  String get uiTasksGroupDone => 'Tamamlandı';
+
+  @override
+  String get uiTasksGroupOther => 'Diğer';
+
+  @override
+  String get uiTasksScopeOpenLc => 'açık';
+
+  @override
+  String get uiTasksScopeOnlyHead => 'yalnız';
+
+  @override
+  String get uiTasksScopeOnlyTail => 'görevlerini görüyorsun';
+
+  @override
+  String get uiTasksQueueTitle => 'Onay bekleyenler';
+
+  @override
+  String get uiTasksQueueBandTail => 'görev onayını bekliyor';
+
+  @override
+  String get uiTasksQueueReview => 'İncele';
+
+  @override
+  String get uiTasksQueueEmpty => 'Onay bekleyen görev kalmadı.';
+
+  @override
+  String get uiTasksRequestsTitle => 'Tarih talepleri';
+
+  @override
+  String get uiTasksRequestsActiveLc => 'aktif';
+
+  @override
+  String get uiTasksRequestsTotalLc => 'talep';
+
+  @override
+  String get uiTasksRequestsTabActive => 'Aktif';
+
+  @override
+  String get uiTasksRequestsTabApproved => 'Kabul edildi';
+
+  @override
+  String get uiTasksRequestsTabRejected => 'Reddedildi';
+
+  @override
+  String get uiTasksRequestsEmptyActive => 'Aktif tarih talebin yok.';
+
+  @override
+  String get uiTasksRequestsEmptyApproved => 'Kabul edilen tarih talebin yok.';
+
+  @override
+  String get uiTasksRequestsEmptyRejected => 'Reddedilen tarih talebin yok.';
+
+  @override
+  String get uiTasksRequestStatePending => 'Bekliyor';
+
+  @override
+  String get uiTasksRequestWaitingAdmin => 'Yöneticide bekliyor';
+
+  @override
+  String get uiTasksRequestWaitingNote =>
+      'Karar gelene kadar mevcut tarihler geçerli.';
+
+  @override
+  String get uiTasksRequestGoesAdmin =>
+      'Talep yöneticiye gider; sebep zorunludur.';
+
+  @override
+  String get uiTasksErrReasonRequired => 'Sebep gerekli.';
+
+  @override
+  String get uiTasksUnassignedWaiting => 'Sorumlu bekliyor';
+
+  @override
+  String get uiTasksUnassignedRule =>
+      'Atanmamış görevler sorumlu atanana kadar başlatılamaz.';
+
+  @override
+  String get uiTasksAssign => 'Ata';
+
+  @override
+  String get uiTasksAssignTitle => 'Sorumlu ata';
+
+  @override
+  String get uiTasksAssignNote =>
+      'Havuz bu koordinatörlüğün ekibidir; atanan kişiye bildirim gider.';
+
+  @override
+  String get uiTasksAssignEmpty => 'Atanabilecek kişi yok.';
+
+  @override
+  String get uiTasksTAssignedTail => 'kişisine atandı';
+
+  @override
+  String get uiTasksDecisionKicker => 'Karar bekliyor';
+
+  @override
+  String get uiTasksDecisionSubmitted => 'Onaya sunuldu';
+
+  @override
+  String get uiTasksDecisionFilesTail => 'kanıt dosyası';
+
+  @override
+  String get uiTasksDecisionSubsHead => 'alt görevler';
+
+  @override
+  String get uiTasksDecisionNoEvidence =>
+      'Kanıt dosyası yüklenmemiş. Onaylamadan önce ekipten kanıt iste ya da iade et.';
+
+  @override
+  String get uiTasksDecisionFoot =>
+      'Onaylanınca atananlar bilgilendirilir. İade için sebep yazman gerekir.';
+
+  @override
+  String get uiTasksReturn => 'İade et';
+
+  @override
+  String get uiTasksReturnReasonLabel => 'İade sebebi · zorunlu';
+
+  @override
+  String get uiTasksReturnReasonHint =>
+      'Neyin eksik olduğunu ve nasıl düzeltileceğini yaz…';
+
+  @override
+  String get uiTasksReturnInfo =>
+      'Atananlar düzeltip yeniden gönderir. Sebep görevde not olarak görünür.';
+
+  @override
+  String get uiTasksReturnNoteHead => 'İade sebebi';
+
+  @override
+  String get uiTasksApproveNoteLabel => 'Onay notu · isteğe bağlı';
+
+  @override
+  String get uiTasksApproveNoteHint => 'Ekibe iletmek istediğin bir not…';
+
+  @override
+  String get uiTasksApproveNoteHead => 'Onay notu';
+
+  @override
+  String get uiTasksApproveNoEvidence =>
+      'Kanıt dosyası yok; onaylarsan görev kanıtsız kapanır.';
+
+  @override
+  String get uiTasksApproveInfo =>
+      'Onay görevi tamamlar; geri almak gerekçe ister.';
+
+  @override
+  String get uiTasksApprovePull => 'Bitiş tarihini bugüne çek';
+
+  @override
+  String get uiTasksApprovePullDesc =>
+      'Görev erken bitti: bitiş bugüne çekilir, plan bitişi saklanır.';
+
+  @override
+  String get uiTasksCmpPlan => 'Plan';
+
+  @override
+  String get uiTasksCmpEnd => 'Bitiş';
+
+  @override
+  String get uiTasksCmpNow => 'Şu an';
+
+  @override
+  String get uiTasksCmpNewEnd => 'Yeni bitiş';
+
+  @override
+  String get uiTasksCmpResult => 'Sonuç';
+
+  @override
+  String get uiTasksResultOnTime => 'Zamanında';
+
+  @override
+  String get uiTasksResultLateTail => 'gün geç';
+
+  @override
+  String get uiTasksResultEarlyTail => 'gün erken';
+
+  @override
+  String get uiTasksInfoAssignees => 'Sorumlu';
+
+  @override
+  String get uiTasksInfoEvidence => 'Kanıt';
+
+  @override
+  String get uiTasksInfoSubtasks => 'Alt görevler';
+
+  @override
+  String get uiTasksFilesLc => 'dosya';
+
+  @override
+  String get uiTasksTApprovedTail => 'onaylandı';
+
+  @override
+  String get uiTasksTReturnedTail => 'iade edildi';
+
+  @override
+  String get uiTasksExtend => 'Süre uzat';
+
+  @override
+  String get uiTasksExtendCaption => '7 güne kadar · onay gerekmez';
+
+  @override
+  String get uiTasksExtendInfo =>
+      'Onay gerekmez; atananlar ve yönetici bilgilendirilir. Bir seferde en çok 7 gün uzatabilirsin.';
+
+  @override
+  String get uiTasksExtendMore => 'Daha fazlası için tarih talebi gönder';
+
+  @override
+  String get uiTasksExtendOk => 'Uzat';
+
+  @override
+  String get uiTasksTExtended => 'Bitiş uzatıldı';
+
+  @override
+  String get uiTasksLockTitle => 'Bağımlılık bekleniyor';
+
+  @override
+  String get uiTasksLockTail => 'bitmeden bu görev başlatılamaz.';
+
+  @override
+  String get uiTasksLockBadge => 'Kilitli';
+
+  @override
+  String get uiTasksDaysLeftTail => 'gün kaldı';
+
+  @override
   String get uiTimelineTitle => 'Zaman çizelgesi';
 
   @override
@@ -5847,6 +6262,67 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTimelineGanttOpenTask => 'Görev ayrıntısını aç';
+
+  @override
+  String get uiTimelineTabsLabel => 'Görev kümesi';
+
+  @override
+  String get uiTimelineTabDepartment => 'Koordinatörlüğün görevleri';
+
+  @override
+  String get uiTimelineTabMine => 'Görevlerim';
+
+  @override
+  String get uiTimelineMyTitle => 'Zaman çizelgem';
+
+  @override
+  String get uiTimelineGroupOpen => 'Açık görevler';
+
+  @override
+  String get uiTimelineGroupDone => 'Tamamlanan';
+
+  @override
+  String get uiTimelineRuleDirect =>
+      'Bitişi en çok 7 gün ileri alırsın; hemen uygulanır, sorumlu üyeye bildirim gider.';
+
+  @override
+  String get uiTimelineRuleRequest =>
+      '7 günü aşan ya da başlangıcı değiştiren her değişiklik yönetici onayına gider; karar gelene kadar eski tarih geçerlidir.';
+
+  @override
+  String get uiTimelineExtendSeven => 'Süre uzat +7';
+
+  @override
+  String get uiTimelineExtendGo => 'Süre uzat ·';
+
+  @override
+  String get uiTimelineExtendDone => 'Süre uzatıldı · sorumluya bildirim gitti';
+
+  @override
+  String get uiTimelinePullToday => 'Bitişi bugüne çek';
+
+  @override
+  String get uiTimelinePulled => 'Bitiş bugüne çekildi · plan saklandı';
+
+  @override
+  String get uiTimelineRequestGo => 'Tarih talebi gönder';
+
+  @override
+  String get uiTimelineReasonLabel => 'Talep gerekçesi';
+
+  @override
+  String get uiTimelineReasonHint =>
+      'Yönetici bu gerekçeyi görür; karar gelene kadar eski tarih geçerli.';
+
+  @override
+  String get uiTimelineReasonNeeded =>
+      'Talep için gerekçe yaz (en az 3 karakter)';
+
+  @override
+  String get uiTimelinePendingHead => 'Tarih talebi bekliyor · yeni bitiş';
+
+  @override
+  String get uiTimelinePendingTail => 'yöneticide bekliyor';
 
   @override
   String get uiUserAccountFieldsHeading => 'hesap bilgileri';
@@ -6312,4 +6788,64 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiUsersDraftSelfConflict =>
       'Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.';
+
+  @override
+  String get uiUsersTeamTitle => 'Ekibim';
+
+  @override
+  String get uiUsersTeamPeople => 'kişi';
+
+  @override
+  String get uiUsersTeamAdd => 'Ekibe kişi ekle';
+
+  @override
+  String get uiUsersTeamSearchHint => 'Ad ara';
+
+  @override
+  String get uiUsersTeamEmpty => 'Eşleşen kullanıcı yok.';
+
+  @override
+  String get uiUsersTeamShowAll => 'Tümünü göster';
+
+  @override
+  String get uiUsersTeamYou => 'sen';
+
+  @override
+  String get uiUsersTeamOpen => 'açık görev';
+
+  @override
+  String get uiUsersTeamLate => 'gecikmede';
+
+  @override
+  String get uiUsersTeamDerived =>
+      'Ekip, koordinatörlüğün sohbet grubundan gösterilir; salt okunur.';
+
+  @override
+  String get uiUsersTeamUnavailableTitle => 'Ekip listesi gösterilemiyor';
+
+  @override
+  String get uiUsersTeamUnavailable =>
+      'Üyenin ekip listesini okuyabileceği bir sunucu kaynağı yok: backend bekliyor.';
+
+  @override
+  String get uiUsersTeamNoDepartment =>
+      'Bu görünümde seçili koordinatörlük yok. Kenar çubuğundan koordinatörlük seç.';
+
+  @override
+  String get uiUsersTeamRemove => 'Ekipten çıkar';
+
+  @override
+  String get uiUsersTeamRemoveConfirm =>
+      'Hesabı silinmez; diğer koordinatörlüklerdeki yeri değişmez.';
+
+  @override
+  String get uiUsersTeamRemoveEffects =>
+      'Kişinin bu koordinatörlükteki görev atamaları kalkacak. Yine de ekipten çıkarılsın mı?';
+
+  @override
+  String get uiUsersTeamRemoved => 'Kişi ekipten çıkarıldı.';
+
+  @override
+  String get uiUsersTeamLeadNote =>
+      'Koordinatör ataması yönetici işidir; sen ve diğer koordinatörler bu listeden çıkarılamazsınız.';
 }

@@ -49,6 +49,7 @@ extension TaskTexts on AppLocalizations {
     TaskView.dateRequest => uiTasksViewRequest,
     TaskView.notStarted => uiTasksViewTodo,
     TaskView.done => uiTasksViewDone,
+    TaskView.unassigned => uiTasksViewUnassigned,
   };
 
   String viewListTitle(TaskView v) => switch (v) {
@@ -59,6 +60,7 @@ extension TaskTexts on AppLocalizations {
     TaskView.dateRequest => uiTasksListRequest,
     TaskView.notStarted => uiTasksListTodo,
     TaskView.done => uiTasksListDone,
+    TaskView.unassigned => uiTasksListUnassigned,
   };
 
   String sortLabel(TaskSort s) => switch (s) {
@@ -66,6 +68,7 @@ extension TaskTexts on AppLocalizations {
     TaskSort.due => uiTasksSortDue,
     TaskSort.start => uiTasksSortStart,
     TaskSort.coordinatorship => uiTasksSortCoord,
+    TaskSort.status => uiTasksSortStatus,
   };
 
   String sortShort(TaskSort s) => switch (s) {
@@ -73,6 +76,7 @@ extension TaskTexts on AppLocalizations {
     TaskSort.due => uiTasksSortDueShort,
     TaskSort.start => uiTasksSortStartShort,
     TaskSort.coordinatorship => uiTasksSortCoordShort,
+    TaskSort.status => uiTasksSortStatusShort,
   };
 
   String sortDirection(TaskSort s, {required bool descending}) =>
@@ -83,7 +87,7 @@ extension TaskTexts on AppLocalizations {
         (TaskSort.due, true) => uiTasksDirDueDesc,
         (TaskSort.start, false) => uiTasksDirStartAsc,
         (TaskSort.start, true) => uiTasksDirStartDesc,
-        (TaskSort.coordinatorship, _) => '',
+        (TaskSort.coordinatorship || TaskSort.status, _) => '',
       };
 
   String tagLabel(EvidenceTag t) => switch (t) {

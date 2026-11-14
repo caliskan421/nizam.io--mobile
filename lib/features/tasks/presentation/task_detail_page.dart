@@ -25,6 +25,7 @@ import '../application/task_details_controller.dart';
 import '../application/task_lifecycle_controller.dart';
 import '../domain/task_catalog.dart';
 import 'detail/detail_actions.dart';
+import 'detail/detail_decision.dart';
 import 'detail/detail_subtasks.dart';
 import 'detail/detail_tabs.dart';
 import 'task_texts.dart';
@@ -335,6 +336,8 @@ class _Body extends StatelessWidget {
             ),
           ],
         ),
+        // Koordinatör: karar bloğu (onay bekleyen) ve bağımlılık kilidi.
+        DetailDecisionSection(task: task, catalog: catalog),
         // Bekleyen talep kararıyla; reddedilen talep ret gerekçesiyle (salt okunur) görünür.
         if (req != null &&
             (req.isPending ||
@@ -352,6 +355,7 @@ class _Body extends StatelessWidget {
             onApprove: actions.canReviewDate && req.isPending
                 ? actions.approveRequest
                 : null,
+            waiting: !actions.canReviewDate && req.isPending,
           ),
         ],
         // Sekme şeridi kaynakta `gap 20` + `margin-top: -6px` (tablet).
@@ -445,8 +449,11 @@ class _RequestCard extends StatelessWidget {
     required this.by,
     required this.onReject,
     required this.onApprove,
+    this.waiting = false,
   });
 
+  /// Talep yöneticide bekliyor (salt okunur; kendi talebinde karar düğmesi yok).
+  final bool waiting;
   final DateChangeRequest request;
   final String by;
 
@@ -548,6 +555,11 @@ class _RequestCard extends StatelessWidget {
                 Text(
                   '${l.uiTasksRejectReasonLabel}: ${r.reviewReason}',
                   style: t.caption.copyWith(color: c.danger),
+                ),
+              if (waiting)
+                Text(
+                  '${l.uiTasksRequestWaitingAdmin} · ${l.uiTasksRequestWaitingNote}',
+                  style: t.caption.copyWith(color: c.warning),
                 ),
               if (onReject != null && onApprove != null)
                 Row(

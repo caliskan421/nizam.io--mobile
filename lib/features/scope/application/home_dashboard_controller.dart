@@ -27,13 +27,12 @@ final homePendingProvider = FutureProvider.autoDispose<PendingOverview?>((
     if (!ref.mounted) return false;
     final current = ref.read(scopeControllerProvider).current;
     return session == ref.read(sessionControllerProvider).generation &&
-        current.programId == scope.programId &&
-        current.departmentId == scope.departmentId;
+        current.sameView(scope);
   }
 
   final catalog = await ref.watch(taskCatalogControllerProvider.future);
   if (!live()) throw ApiError('client.scope_changed');
-  if (catalog.access?.companyAdmin != true) return null;
+  if (!catalog.viewIn(scope).canAdminister) return null;
   final result = await ref.read(homeDashboardRepositoryProvider).loadPending();
   if (!live()) throw ApiError('client.scope_changed');
   return result;
@@ -48,13 +47,12 @@ final homeUnreadProvider = FutureProvider.autoDispose<int?>((ref) async {
     if (!ref.mounted) return false;
     final current = ref.read(scopeControllerProvider).current;
     return session == ref.read(sessionControllerProvider).generation &&
-        current.programId == scope.programId &&
-        current.departmentId == scope.departmentId;
+        current.sameView(scope);
   }
 
   final catalog = await ref.watch(taskCatalogControllerProvider.future);
   if (!live()) throw ApiError('client.scope_changed');
-  if (catalog.access?.companyAdmin != true) return null;
+  if (!catalog.viewIn(scope).canAdminister) return null;
   final result = await ref.read(homeDashboardRepositoryProvider).loadUnread();
   if (!live()) throw ApiError('client.scope_changed');
   return result;
@@ -63,22 +61,21 @@ final homeUnreadProvider = FutureProvider.autoDispose<int?>((ref) async {
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).
 ///
-/// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-/// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
-/// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
+/// Etkin rol → kaynak (etkin görünüm `EffectiveAccess`; erişim görev kataloğunda):
+/// - yönetici görünümü: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - koordinatör/üye görünümü: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
 /// Katalog okunamazsa rol bilinmez: yönetici rapor uçlarına düşülmez, katalog hatası özetin
 /// hatası olarak gösterilir (yeniden dene dokunuşla). Katalog süzgeçsiz program listesidir
-/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan hesapta özetin
-/// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
-/// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
-/// ek istek gönderilmez.
+/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan görünümde özetin
+/// departmanı etkin koordinatörlüktür (seçim, yoksa varsayılanı: ilk koordinatörlük, yoksa ilk
+/// ekip satırı); hiçbiri yoksa özet `client.scope_missing` hatasıdır — ek istek gönderilmez.
 ///
 /// Önbellek / yenileme: özet uygulama ömrünce bellekte kalır ve okunduğu sahibe (oturum nesli +
-/// program, [CacheOwnership]) bağlıdır; ekran [visible] durumunu gösterir: başka hesap, kurulum
-/// ya da program için okunmuş özet görünmez (yükleniyor ya da yalnız hata). [refresh] (aşağı
-/// çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
+/// program + rol + koordinatörlük, [CacheOwnership]) bağlıdır; ekran [visible] durumunu
+/// gösterir: başka hesap, kurulum, program ya da görünüm için okunmuş özet görünmez
+/// (yükleniyor ya da yalnız hata). [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
 /// okur (`invalidateSelf` → `isRefreshing`, `value` korunur).
 @Riverpod(keepAlive: true)
 class HomeDashboardController extends _$HomeDashboardController {
@@ -87,7 +84,6 @@ class HomeDashboardController extends _$HomeDashboardController {
 
   /// Durumdaki özetin sahibi (notifier yeniden kurulumlarda korunur).
   final _owner = CacheOwnership();
-  ({int session, String? program, String? department})? _realOwner;
 
   @override
   Future<HomeDashboard> build() async {
@@ -99,36 +95,19 @@ class HomeDashboardController extends _$HomeDashboardController {
       if (!buildRef.mounted) return false;
       final current = buildRef.read(scopeControllerProvider).current;
       return session == buildRef.read(sessionControllerProvider).generation &&
-          scope.programId == current.programId &&
-          scope.departmentId == current.departmentId;
+          scope.sameView(current);
     }
 
     final dashboard = await _load(live);
     if (live()) {
       _owner.markLoaded(buildRef, owner);
-      _realOwner = (
-        session: session,
-        program: scope.programId,
-        department: scope.departmentId,
-      );
       _clock.markFresh();
     }
     return dashboard;
   }
 
   /// Ekranın gösterebileceği durum (bkz. [CacheOwnership.visible]); çağıran sağlayıcıyı izler.
-  AsyncValue<HomeDashboard> get visible {
-    final scope = ref.read(scopeControllerProvider).current;
-    final current = (
-      session: ref.read(sessionControllerProvider).generation,
-      program: scope.programId,
-      department: scope.departmentId,
-    );
-    return CacheOwnership.ownedOnly(
-      _owner.visible(ref, state),
-      owned: current == _realOwner,
-    );
-  }
+  AsyncValue<HomeDashboard> get visible => _owner.visible(ref, state);
 
   /// Kullanıcı yenilemesi: sunucu kapsamında rol kaynağı olan görev kataloğu ve özet yeniden
   /// okunur, ikisi de bitince döner. Hata FIRLATILIR (ortak yenileme kabuğu bildirir); önceki
@@ -182,8 +161,7 @@ class HomeDashboardController extends _$HomeDashboardController {
   Future<HomeDashboard> _load(bool Function() live) async {
     final scope = ref.watch(scopeStateProvider);
     final repo = ref.read(homeDashboardRepositoryProvider);
-    final program = scope.programId;
-    if (!scope.hasProgram || program == null) {
+    if (!scope.hasProgram) {
       throw ApiError(ClientErrorCode.scopeMissing);
     }
 
@@ -204,20 +182,19 @@ class HomeDashboardController extends _$HomeDashboardController {
       rethrow;
     }
     if (!live()) throw ApiError(ClientErrorCode.scopeChanged);
-    final access = catalog.access;
-    if (access == null) throw ApiError(ClientErrorCode.scopeMissing);
-    if (access.companyAdmin) {
+    if (catalog.access == null) throw ApiError(ClientErrorCode.scopeMissing);
+    final view = catalog.viewIn(scope);
+    if (view.isAdminView) {
       final dashboard = await repo.load();
       if (!live()) throw ApiError(ClientErrorCode.scopeChanged);
       return dashboard;
     }
 
     followCatalog();
-    // Özetin departmanı (görevler ekranının süzgecinden bağımsız): programdaki ilk
-    // koordinatörlük, yoksa ilk ekip satırı.
-    final dept = access.primaryDepartmentIn(program);
+    // Özetin departmanı etkin koordinatörlüktür (görevler ekranının süzgecinden bağımsız).
+    final dept = view.departmentId;
     if (dept == null) throw ApiError(ClientErrorCode.scopeMissing);
-    final coordinator = access.coordinatesIn(program, dept);
+    final coordinator = view.isCoordinatorView;
     final extras = await repo.loadTeamExtras(
       departmentId: dept,
       coordinator: coordinator,

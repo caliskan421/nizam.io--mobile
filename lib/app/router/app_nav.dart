@@ -142,13 +142,15 @@ class GoRouterAppNav implements NzAppNav {
     final brand = displayBrand(_ref.read(flavorProvider));
     final l = context.l10n;
     final location = _location;
+    final view = _ref.read(effectiveAccessProvider);
     final current = switch (moduleOf(location)) {
       ShellModule.coordinatorships => HomeModule.coordinatorships,
       ShellModule.archive => HomeModule.archive,
       ShellModule.messages => HomeModule.messages,
       ShellModule.calendar => HomeModule.calendar,
       ShellModule.meetings => HomeModule.meetings,
-      ShellModule.users => HomeModule.users,
+      ShellModule.users =>
+        view.known && !view.isAdminView ? HomeModule.team : HomeModule.users,
       ShellModule.tables => HomeModule.sheets,
       null =>
         // Zaman çizelgesi görevler modülünün parçasıdır (prototip `ON.tasks`).
@@ -170,9 +172,6 @@ class GoRouterAppNav implements NzAppNav {
           (selection.hasProgram ? null : dashboard?.demoProgramName),
       programShortName: program?.shortName,
       programColor: program?.color,
-      programYear:
-          program?.year ??
-          (selection.hasProgram ? null : dashboard?.demoProgramYear),
       version: brand.version,
       productName: brand.name,
       counts: dashboard == null
@@ -187,6 +186,11 @@ class GoRouterAppNav implements NzAppNav {
       onProfile: openProfile,
       onChangeScope: () =>
           _ref.read(scopeSelectionControllerProvider.notifier).clear(),
+      // Rol/koordinatörlük değişti: kabuk kalır, ana sayfaya dönülür, yeni görünüm bildirilir.
+      onViewChanged: (caption) {
+        openHome();
+        if (context.mounted) NzToast.show(context, caption);
+      },
       onSignOut: () => confirmSignOut(context, _ref),
       onModule: (m) {
         switch (m) {
@@ -206,8 +210,10 @@ class GoRouterAppNav implements NzAppNav {
             openMeetings();
           case HomeModule.season:
             _router.push(const ReportsRoute().location);
-          case HomeModule.users:
+          case HomeModule.users || HomeModule.team:
             openUsers();
+          case HomeModule.timeline:
+            openTimeline();
           case HomeModule.sheets:
             openTables();
           case HomeModule.deleted:
@@ -217,31 +223,10 @@ class GoRouterAppNav implements NzAppNav {
           default:
             NzToast.show(
               context,
-              '${_moduleLabel(context, m)} ${l.uiHomeSoonTail}',
+              '${l.homeModuleLabel(m)} ${l.uiHomeSoonTail}',
             );
         }
       },
     );
-  }
-
-  static String _moduleLabel(BuildContext context, HomeModule m) {
-    final l = context.l10n;
-    return switch (m) {
-      HomeModule.home => l.uiHomeModuleHome,
-      HomeModule.tasks => l.uiHomeModuleTasks,
-      HomeModule.calendar => l.uiHomeModuleCalendar,
-      HomeModule.memory => l.uiHomeModuleMemory,
-      HomeModule.archive => l.uiHomeModuleArchive,
-      HomeModule.meetings => l.uiHomeModuleMeetings,
-      HomeModule.messages => l.uiHomeModuleMessages,
-      HomeModule.sheets => l.uiHomeModuleSheets,
-      HomeModule.users => l.uiHomeModuleUsers,
-      HomeModule.coordinatorships => l.uiHomeCoordinatorships,
-      HomeModule.season => l.uiHomeModuleSeason,
-      HomeModule.simulation => l.uiHomeModuleSimulation,
-      HomeModule.deleted => l.uiHomeDeletedRecords,
-      HomeModule.help => l.uiHomeHelp,
-      HomeModule.assistant => 'Asistan',
-    };
   }
 }

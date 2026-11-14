@@ -11,22 +11,21 @@ part of 'home_dashboard_controller.dart';
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).
 ///
-/// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-/// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
-/// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
+/// Etkin rol → kaynak (etkin görünüm `EffectiveAccess`; erişim görev kataloğunda):
+/// - yönetici görünümü: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - koordinatör/üye görünümü: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
 /// Katalog okunamazsa rol bilinmez: yönetici rapor uçlarına düşülmez, katalog hatası özetin
 /// hatası olarak gösterilir (yeniden dene dokunuşla). Katalog süzgeçsiz program listesidir
-/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan hesapta özetin
-/// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
-/// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
-/// ek istek gönderilmez.
+/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan görünümde özetin
+/// departmanı etkin koordinatörlüktür (seçim, yoksa varsayılanı: ilk koordinatörlük, yoksa ilk
+/// ekip satırı); hiçbiri yoksa özet `client.scope_missing` hatasıdır — ek istek gönderilmez.
 ///
 /// Önbellek / yenileme: özet uygulama ömrünce bellekte kalır ve okunduğu sahibe (oturum nesli +
-/// program, [CacheOwnership]) bağlıdır; ekran [visible] durumunu gösterir: başka hesap, kurulum
-/// ya da program için okunmuş özet görünmez (yükleniyor ya da yalnız hata). [refresh] (aşağı
-/// çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
+/// program + rol + koordinatörlük, [CacheOwnership]) bağlıdır; ekran [visible] durumunu
+/// gösterir: başka hesap, kurulum, program ya da görünüm için okunmuş özet görünmez
+/// (yükleniyor ya da yalnız hata). [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
 /// okur (`invalidateSelf` → `isRefreshing`, `value` korunur).
 
 @ProviderFor(HomeDashboardController)
@@ -35,44 +34,42 @@ final homeDashboardControllerProvider = HomeDashboardControllerProvider._();
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).
 ///
-/// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-/// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
-/// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
+/// Etkin rol → kaynak (etkin görünüm `EffectiveAccess`; erişim görev kataloğunda):
+/// - yönetici görünümü: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - koordinatör/üye görünümü: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
 /// Katalog okunamazsa rol bilinmez: yönetici rapor uçlarına düşülmez, katalog hatası özetin
 /// hatası olarak gösterilir (yeniden dene dokunuşla). Katalog süzgeçsiz program listesidir
-/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan hesapta özetin
-/// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
-/// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
-/// ek istek gönderilmez.
+/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan görünümde özetin
+/// departmanı etkin koordinatörlüktür (seçim, yoksa varsayılanı: ilk koordinatörlük, yoksa ilk
+/// ekip satırı); hiçbiri yoksa özet `client.scope_missing` hatasıdır — ek istek gönderilmez.
 ///
 /// Önbellek / yenileme: özet uygulama ömrünce bellekte kalır ve okunduğu sahibe (oturum nesli +
-/// program, [CacheOwnership]) bağlıdır; ekran [visible] durumunu gösterir: başka hesap, kurulum
-/// ya da program için okunmuş özet görünmez (yükleniyor ya da yalnız hata). [refresh] (aşağı
-/// çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
+/// program + rol + koordinatörlük, [CacheOwnership]) bağlıdır; ekran [visible] durumunu
+/// gösterir: başka hesap, kurulum, program ya da görünüm için okunmuş özet görünmez
+/// (yükleniyor ya da yalnız hata). [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
 /// okur (`invalidateSelf` → `isRefreshing`, `value` korunur).
 final class HomeDashboardControllerProvider
     extends $AsyncNotifierProvider<HomeDashboardController, HomeDashboard> {
   /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
   /// dokunuşuyla (`ref.invalidate`).
   ///
-  /// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-  /// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
-  /// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
+  /// Etkin rol → kaynak (etkin görünüm `EffectiveAccess`; erişim görev kataloğunda):
+  /// - yönetici görünümü: [HomeDashboardRepository.load] (pano/rapor uçları);
+  /// - koordinatör/üye görünümü: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
   ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
   ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
   /// Katalog okunamazsa rol bilinmez: yönetici rapor uçlarına düşülmez, katalog hatası özetin
   /// hatası olarak gösterilir (yeniden dene dokunuşla). Katalog süzgeçsiz program listesidir
-  /// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan hesapta özetin
-  /// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
-  /// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
-  /// ek istek gönderilmez.
+  /// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan görünümde özetin
+  /// departmanı etkin koordinatörlüktür (seçim, yoksa varsayılanı: ilk koordinatörlük, yoksa ilk
+  /// ekip satırı); hiçbiri yoksa özet `client.scope_missing` hatasıdır — ek istek gönderilmez.
   ///
   /// Önbellek / yenileme: özet uygulama ömrünce bellekte kalır ve okunduğu sahibe (oturum nesli +
-  /// program, [CacheOwnership]) bağlıdır; ekran [visible] durumunu gösterir: başka hesap, kurulum
-  /// ya da program için okunmuş özet görünmez (yükleniyor ya da yalnız hata). [refresh] (aşağı
-  /// çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
+  /// program + rol + koordinatörlük, [CacheOwnership]) bağlıdır; ekran [visible] durumunu
+  /// gösterir: başka hesap, kurulum, program ya da görünüm için okunmuş özet görünmez
+  /// (yükleniyor ya da yalnız hata). [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
   /// okur (`invalidateSelf` → `isRefreshing`, `value` korunur).
   HomeDashboardControllerProvider._()
     : super(
@@ -94,27 +91,26 @@ final class HomeDashboardControllerProvider
 }
 
 String _$homeDashboardControllerHash() =>
-    r'5c6bfc585ef9cb0f7082f13fee7de78676f7d252';
+    r'b41ed94d010dcfbf658d497558365908790d9100';
 
 /// Ana sayfa özeti. Seçili kapsam değişince yeniden okunur; yeniden yükleme yalnız kullanıcı
 /// dokunuşuyla (`ref.invalidate`).
 ///
-/// Rol → kaynak (rol türetme `TaskAccess`, görev kataloğunda):
-/// - şirket yöneticisi: [HomeDashboardRepository.load] (pano/rapor uçları);
-/// - koordinatör/üye: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
+/// Etkin rol → kaynak (etkin görünüm `EffectiveAccess`; erişim görev kataloğunda):
+/// - yönetici görünümü: [HomeDashboardRepository.load] (pano/rapor uçları);
+/// - koordinatör/üye görünümü: yönetici uçları ÇAĞRILMAZ; özet yüklenmiş görev kataloğundan sayılır
 ///   ([teamDashboard]) + okunmamış sayısı ve (koordinatörde) kendi tarih talepleri. Katalog
 ///   yeniden kurulunca (yüklemeye geçiş) özet de yeniden kurulur.
 /// Katalog okunamazsa rol bilinmez: yönetici rapor uçlarına düşülmez, katalog hatası özetin
 /// hatası olarak gösterilir (yeniden dene dokunuşla). Katalog süzgeçsiz program listesidir
-/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan hesapta özetin
-/// departmanı programdaki ilk koordinatörlük, yoksa ilk ekip satırıdır
-/// ([TaskAccess.primaryDepartmentIn]); hiçbiri yoksa özet `client.scope_missing` hatasıdır —
-/// ek istek gönderilmez.
+/// (görevler ekranının departman süzgeci özete yansımaz). Yönetici olmayan görünümde özetin
+/// departmanı etkin koordinatörlüktür (seçim, yoksa varsayılanı: ilk koordinatörlük, yoksa ilk
+/// ekip satırı); hiçbiri yoksa özet `client.scope_missing` hatasıdır — ek istek gönderilmez.
 ///
 /// Önbellek / yenileme: özet uygulama ömrünce bellekte kalır ve okunduğu sahibe (oturum nesli +
-/// program, [CacheOwnership]) bağlıdır; ekran [visible] durumunu gösterir: başka hesap, kurulum
-/// ya da program için okunmuş özet görünmez (yükleniyor ya da yalnız hata). [refresh] (aşağı
-/// çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
+/// program + rol + koordinatörlük, [CacheOwnership]) bağlıdır; ekran [visible] durumunu
+/// gösterir: başka hesap, kurulum, program ya da görünüm için okunmuş özet görünmez
+/// (yükleniyor ya da yalnız hata). [refresh] (aşağı çekerek) ve [refreshIfStale] (sekmeye/ön plana dönüş) önceki özeti durumda tutarak yeniden
 /// okur (`invalidateSelf` → `isRefreshing`, `value` korunur).
 
 abstract class _$HomeDashboardController extends $AsyncNotifier<HomeDashboard> {

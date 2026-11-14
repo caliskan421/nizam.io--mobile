@@ -133,7 +133,6 @@
     "ui.coord.st_review": "Onay bekleyen",
     "ui.coord.st_todo": "Başlamadı",
     "ui.coord.tab_archive": "Arşiv",
-    "ui.coord.tab_meetings": "Toplantı",
     "ui.coord.tab_members": "Üyeler",
     "ui.coord.tab_tasks": "Görevler",
     "ui.coord.today": "bugün",
@@ -158,6 +157,7 @@
     "ui.coord.create_person": "Yeni kişi oluştur",
     "ui.coord.search_person": "Kişi veya koordinatörlük ara",
     "ui.coord.no_candidates": "Eklenebilecek kişi bulunamadı.",
-    "ui.coord.member_added": "Üye eklendi"
+    "ui.coord.member_added": "Üye eklendi",
+    "ui.coord.tab_calendar": "Takvim"
   }
 }

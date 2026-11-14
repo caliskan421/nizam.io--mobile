@@ -29,7 +29,7 @@ final coordMemberCandidatesProvider = FutureProvider.autoDispose
       }
       final repo = ref.read(departmentRepositoryProvider);
       PageSlice<AssignableAccount> result;
-      if (!(catalog.access?.companyAdmin ?? false)) {
+      if (!catalog.viewIn(scope).isAdminView) {
         result = await repo.listAssignable(code);
       } else {
         final groups = catalog.coordinatorships;

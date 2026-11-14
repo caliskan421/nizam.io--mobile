@@ -20,6 +20,7 @@ import 'gantt/gantt_geometry.dart';
 import 'gantt/gantt_layout_provider.dart';
 import 'gantt/gantt_selection_card.dart';
 import 'gantt/gantt_sheets.dart';
+import 'widgets/timeline_tabs.dart';
 
 /// Tablet yatay zaman çizelgesi (prototip `S_hgantt`, "Yatay zaman çizelgesi · tam genişlik"):
 /// "Görevler" başlığı (sayı satırı, Liste / Zaman çizelgesi anahtarı, ara, yeni görev), araç
@@ -212,6 +213,14 @@ class _HorizontalTimelinePageState
                     ? () => showNewTaskSheet(context, resetTarget: true)
                     : null,
               ),
+              const TimelineTabs(
+                padding: EdgeInsets.fromLTRB(
+                  GanttGeometry.headerPadRight,
+                  0,
+                  GanttGeometry.headerPadRight,
+                  NizamioSpacing.space3,
+                ),
+              ),
               NzReveal(
                 open: _searchOpen,
                 onOpened: _searchFocus.requestFocus,
@@ -290,6 +299,12 @@ class _HorizontalTimelinePageState
                                       center: _center,
                                       onToggleGroup: ctrl.toggleGroup,
                                       onPick: ctrl.pick,
+                                      links:
+                                          ref
+                                              .watch(ganttScheduleProvider)
+                                              .value
+                                              ?.links ??
+                                          const [],
                                     )
                                   : const SizedBox.expand(),
                             ),

@@ -14,9 +14,12 @@ import 'coord_texts.dart';
 /// Kimlik (prototip `.cd-hero`): kod kutucuğu, ad, alt satır (departman türü · koordinatörler) ve
 /// "Görev ata" / "Mesaj". Genişte düğmeler sol yarıda (prototip iki sütunlu kimlik).
 class CoordHero extends StatelessWidget {
-  const CoordHero({super.key, required this.detail});
+  const CoordHero({super.key, required this.detail, this.canAssign = true});
 
   final CoordinatorshipDetail detail;
+
+  /// "Görev ata" görünür mü (ekibi yöneten görünüm).
+  final bool canAssign;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +28,13 @@ class CoordHero extends StatelessWidget {
     final t = context.text;
     final d = detail;
     final tag = d.stats.shortCode;
+    final message = NzButton.secondary(
+      label: l.uiCoordMessage,
+      icon: NzIcons.messages,
+      expand: !canAssign,
+      // Koordinatörlüğün kendiliğinden kurulan grubu (yoksa kutu).
+      onPressed: () => openDepartmentChat(context, d.stats.code),
+    );
     final kind = switch (d.department) {
       final dep? => l.coordKind(dep.kind),
       null => null,
@@ -103,23 +113,20 @@ class CoordHero extends StatelessWidget {
               child: Row(
                 spacing: NizamioSpacing.space2,
                 children: [
-                  Expanded(
-                    child: NzButton.primary(
-                      label: l.uiCoordAssignTask,
-                      icon: NzIcons.add,
-                      expand: true,
-                      onPressed: () => showNewTaskSheet(
-                        context,
-                        coordinatorship: d.stats.code,
+                  // Görev ata yalnız ekibi yöneten görünümde (yönetici ya da koordinatör).
+                  if (canAssign)
+                    Expanded(
+                      child: NzButton.primary(
+                        label: l.uiCoordAssignTask,
+                        icon: NzIcons.add,
+                        expand: true,
+                        onPressed: () => showNewTaskSheet(
+                          context,
+                          coordinatorship: d.stats.code,
+                        ),
                       ),
                     ),
-                  ),
-                  NzButton.secondary(
-                    label: l.uiCoordMessage,
-                    icon: NzIcons.messages,
-                    // Koordinatörlüğün kendiliğinden kurulan grubu (yoksa kutu).
-                    onPressed: () => openDepartmentChat(context, d.stats.code),
-                  ),
+                  if (canAssign) message else Expanded(child: message),
                 ],
               ),
             ),

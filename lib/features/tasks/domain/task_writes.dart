@@ -273,13 +273,15 @@ final class MemberEnrollment {
 /// yerel durumu değiştirmek için kullanılmaz (iyimser güncelleme yok; çağıran yeniden okur).
 /// Hatalar `ApiError` olarak fırlar.
 abstract interface class TaskWriteRepository {
-  /// [via] ucuyla durum geçişi; [closeSubtasks] yalnız `tamamlandi` hedefinde.
+  /// [via] ucuyla durum geçişi; [closeSubtasks] yalnız `tamamlandi` hedefinde. [pullEndDate]:
+  /// erken onayda bitişi bugüne çek (`pull_end_date`; geç onayda sunucu kendisi iter).
   Future<void> changeStatus(
     TaskItem task,
     StatusEndpoint via,
     TaskStatus to, {
     String? reason,
     bool closeSubtasks = false,
+    bool pullEndDate = false,
   });
 
   /// [requestKey]: işlem anahtarı (`Idempotency-Key`, ADR-0027); aynı eylemin tekrarı aynı
@@ -374,6 +376,16 @@ abstract interface class TaskWriteRepository {
 
   /// İncelenmiş talebi siler (şirket yöneticisi, S1).
   Future<void> deleteDateChange(String requestId);
+
+  /// Çağıranın [departmentId] departmanındaki tarih talepleri (`GET …/mine`, S3; koordinatör).
+  Future<List<DateChangeRequest>> listMyDateRequests(
+    String programId,
+    String departmentId,
+  );
+
+  /// Bitişi [days] gün uzatır (`POST …/extend`, S3; koordinatör ya da yönetici); okunan tarih
+  /// sürümü `expected_dates_revision`, [requestKey] işlem anahtarı. Bağımlılar zincirle ötelenir.
+  Future<void> extend(TaskItem task, int days, {required String requestKey});
 
   // ---- dosya (records, S3, görevin departmanı) -----------------------------------------
 

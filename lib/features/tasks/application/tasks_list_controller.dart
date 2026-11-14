@@ -1,10 +1,11 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart'
-    show ProviderListenableSelect;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../domain/coordinator_board.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_query.dart';
+import 'effective_access.dart';
 import 'task_list_filter.dart';
 
 part 'tasks_list_controller.g.dart';
@@ -18,6 +19,7 @@ final class TasksListState {
   const TasksListState({
     this.view = TaskView.all,
     this.sort = TaskSort.due,
+    this.sortPicked = false,
     this.descending = false,
     this.filter = const TaskFilter(),
     this.searchOpen = false,
@@ -31,7 +33,11 @@ final class TasksListState {
   static const pageSize = 12;
 
   final TaskView view;
+
+  /// Kullanıcının seçtiği ölçüt; [sortPicked] false iken rolün varsayılanı geçerlidir
+  /// ([resolveTaskSort]: koordinatörde duruma göre).
   final TaskSort sort;
+  final bool sortPicked;
   final bool descending;
   final TaskFilter filter;
   final bool searchOpen;
@@ -46,6 +52,7 @@ final class TasksListState {
   TasksListState copyWith({
     TaskView? view,
     TaskSort? sort,
+    bool? sortPicked,
     bool? descending,
     TaskFilter? filter,
     bool? searchOpen,
@@ -55,6 +62,7 @@ final class TasksListState {
   }) => TasksListState(
     view: view ?? this.view,
     sort: sort ?? this.sort,
+    sortPicked: sortPicked ?? this.sortPicked,
     descending: descending ?? this.descending,
     filter: filter ?? this.filter,
     searchOpen: searchOpen ?? this.searchOpen,
@@ -69,6 +77,7 @@ final class TasksListState {
 /// açık bölümleri kalır).
 typedef TasksListPrefs = ({
   TaskSort sort,
+  bool sortPicked,
   bool descending,
   Set<String> flippedGroups,
   Set<TaskFilterGroup> openFilterGroups,
@@ -81,6 +90,7 @@ class TasksListPrefsStore extends _$TasksListPrefsStore {
   @override
   TasksListPrefs build() => (
     sort: TaskSort.due,
+    sortPicked: false,
     descending: false,
     flippedGroups: const <String>{},
     openFilterGroups: const {TaskFilterGroup.people},
@@ -88,6 +98,7 @@ class TasksListPrefsStore extends _$TasksListPrefsStore {
 
   void save(TasksListState s) => state = (
     sort: s.sort,
+    sortPicked: s.sortPicked,
     descending: s.descending,
     flippedGroups: s.flippedGroups,
     openFilterGroups: s.openFilterGroups,
@@ -106,6 +117,7 @@ class TasksListController extends _$TasksListController {
     return TasksListState(
       view: view,
       sort: prefs.sort,
+      sortPicked: prefs.sortPicked,
       descending: prefs.descending,
       flippedGroups: prefs.flippedGroups,
       openFilterGroups: prefs.openFilterGroups,
@@ -139,20 +151,37 @@ class TasksListController extends _$TasksListController {
   void selectView(TaskView v) =>
       state = state.copyWith(view: v, limit: TasksListState.pageSize);
 
-  /// Sıralama düğmesinin etiketi: sıradaki ölçüte geçer (varsayılan yön).
-  void cycleSort() {
-    const all = TaskSort.values;
-    selectSort(all[(all.indexOf(state.sort) + 1) % all.length]);
+  /// Geçerli ölçüt: [coordinator] görünümünün seçenekleri ve varsayılanıyla
+  /// ([resolveTaskSort]). Rol çağırandan gelir (denetleyici erişim okumaz).
+  TaskSort currentSortFor({required bool coordinator}) => resolveTaskSort(
+    state.sort,
+    picked: state.sortPicked,
+    coordinator: coordinator,
+  );
+
+  /// Sıralama düğmesinin etiketi: rolün sıradaki ölçütüne geçer (varsayılan yön).
+  void cycleSort({bool coordinator = false}) {
+    final all = taskSortsFor(coordinator: coordinator);
+    final cur = currentSortFor(coordinator: coordinator);
+    selectSort(
+      all[(all.indexOf(cur) + 1) % all.length],
+      coordinator: coordinator,
+    );
   }
 
-  /// Sıralama düğmesinin oku: tarihli ölçütte yönü çevirir; koordinatörlük yönsüzdür.
-  void flipDirection() => selectSort(state.sort);
+  /// Sıralama düğmesinin oku: tarihli ölçütte yönü çevirir; gruplu ölçüt yönsüzdür.
+  void flipDirection({bool coordinator = false}) => selectSort(
+    currentSortFor(coordinator: coordinator),
+    coordinator: coordinator,
+  );
 
   /// Seçili olmayan ölçüt → seçer (varsayılan yön); seçili tarihli ölçüt → yönü çevirir.
-  void selectSort(TaskSort s) {
-    if (s == state.sort) {
+  void selectSort(TaskSort s, {bool coordinator = false}) {
+    if (s == currentSortFor(coordinator: coordinator)) {
       if (!s.dated) return;
       state = state.copyWith(
+        sort: s,
+        sortPicked: true,
         descending: !state.descending,
         limit: TasksListState.pageSize,
       );
@@ -160,8 +189,9 @@ class TasksListController extends _$TasksListController {
     }
     state = state.copyWith(
       sort: s,
+      sortPicked: true,
       descending: s.defaultDescending,
-      flippedGroups: s == TaskSort.coordinatorship ? {} : state.flippedGroups,
+      flippedGroups: s.grouped ? {} : state.flippedGroups,
       limit: TasksListState.pageSize,
     );
   }
@@ -249,24 +279,48 @@ class TasksListController extends _$TasksListController {
 /// Seçili görünümün süzülmüş/sıralı listesi ve görünüm sayıları; yalnız sorguyu etkileyen
 /// alanlar (görünüm, sıralama, yön, süzgeç) ya da katalog değişince yeniden hesaplanır
 /// (arama alanını açmak, sayfalamak, grup açmak hesaplamaz). Katalog yokken null.
+///
+/// Etkin görünüm süzer ([scopedTasks]): Koordinatör/Üye görünümünde yalnız etkin
+/// koordinatörlüğün görevleri (Üye'de ayrıca kendine atananlar); sıralama rolün varsayılanıyla
+/// ([resolveTaskSort]). Durum ve gecikme süzgeci sunucuda yok: istemcide süzülür.
 @riverpod
 TaskQueryResult? tasksListResult(Ref ref, TaskView view, String people) {
-  final catalog = ref.watch(taskListCatalogProvider).value;
+  final catalog = ref.watch(taskListScopedCatalogProvider);
+  final coordinator = ref.watch(
+    effectiveAccessProvider.select((a) => a.isCoordinatorView),
+  );
   final q = ref.watch(
     tasksListControllerProvider(
       view,
       people,
-    ).select((s) => (s.view, s.sort, s.descending, s.filter)),
+    ).select((s) => (s.view, s.sort, s.sortPicked, s.descending, s.filter)),
   );
   if (catalog == null) return null;
   return queryTasks(
     catalog,
     view: q.$1,
-    sort: q.$2,
-    descending: q.$3,
-    filter: q.$4,
+    sort: resolveTaskSort(q.$2, picked: q.$3, coordinator: coordinator),
+    descending: q.$4,
+    filter: q.$5,
   );
 }
+
+/// Görevler ekranının kataloğu etkin görünümle süzülmüş hâli ([scopedTasks]); katalog yokken
+/// null. Liste, onay bandı ve sayılar aynı kümeyi okur.
+final taskListScopedCatalogProvider = Provider.autoDispose<TaskCatalog?>((ref) {
+  final catalog = ref.watch(taskListCatalogProvider).value;
+  final view = ref.watch(effectiveAccessProvider);
+  if (catalog == null) return null;
+  if (!view.known || view.seesAllDepartments) return catalog;
+  return catalog.withTasks(
+    scopedTasks(
+      catalog.tasks,
+      role: view.role,
+      departmentId: view.departmentId,
+      me: catalog.me,
+    ),
+  );
+});
 
 /// [list] denetleyicisinin aynı başlangıç süzgeçli sonuç sağlayıcısı.
 TasksListResultProvider tasksListResultOf(TasksListControllerProvider list) {

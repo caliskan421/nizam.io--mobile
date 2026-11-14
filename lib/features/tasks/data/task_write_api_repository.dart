@@ -9,6 +9,7 @@ import '../../../core/api/generated/models/create_user_request.dart';
 import '../../../core/api/generated/models/create_work_item_request.dart';
 import '../../../core/api/generated/models/create_work_item_request_priority.dart';
 import '../../../core/api/generated/models/date_change_request_create.dart';
+import '../../../core/api/generated/models/extend_request.dart';
 import '../../../core/api/generated/models/rename_file_request.dart';
 import '../../../core/api/generated/models/review_request.dart';
 import '../../../core/api/generated/models/review_request_decision.dart';
@@ -62,11 +63,13 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     TaskStatus to, {
     String? reason,
     bool closeSubtasks = false,
+    bool pullEndDate = false,
   }) {
     final body = TransitionRequest(
       to: TransitionRequestTo.fromJson(taskStatusToWire(to)),
       reason: reason,
       closeSubtasks: closeSubtasks ? true : null,
+      pullEndDate: pullEndDate ? true : null,
     );
     return apiCall(
       () => switch (via) {
@@ -508,6 +511,51 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
 
   /// Görevin KENDİ kapsamı (program, departman); eksik değer '' → kapı
   /// `client.scope_missing` ile reddeder (seçili kapsama düşülmez).
+  @override
+  Future<List<DateChangeRequest>> listMyDateRequests(
+    String programId,
+    String departmentId,
+  ) async => [
+    for (final r in (await apiCall(
+      () => _client.myDateChangeRequests(
+        extras: withScope(
+          WorkClient.myDateChangeRequestsOpenapiExtras,
+          programId,
+          departmentId,
+        ),
+      ),
+    )).requests)
+      DateChangeRequest(
+        id: r.requestId,
+        workItemId: r.workItemId,
+        oldStart: r.oldStartOn,
+        oldDue: r.oldEndOn,
+        start: r.newStartOn,
+        due: r.newEndOn,
+        reason: r.reason ?? '',
+        reviewReason: r.reviewReason ?? '',
+        state: dateRequestState(r.status.json),
+      ),
+  ];
+
+  @override
+  Future<void> extend(TaskItem task, int days, {required String requestKey}) =>
+      apiCall(
+        () => _client.extendWorkItem(
+          id: task.id,
+          body: ExtendRequest(
+            days: days,
+            expectedDatesRevision: task.datesRevision,
+          ),
+          idempotencyKey: requestKey,
+          extras: withScope(
+            WorkClient.extendWorkItemOpenapiExtras,
+            _program(task),
+            _dept(task),
+          ),
+        ),
+      );
+
   static String _program(TaskItem task) => task.programId ?? '';
   static String _dept(TaskItem task) => task.departmentId ?? '';
 

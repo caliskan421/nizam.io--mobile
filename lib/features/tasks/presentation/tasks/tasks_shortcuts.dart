@@ -4,9 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
+import '../../application/effective_access.dart';
 import '../../application/task_list_filter.dart';
 import '../../application/tasks_list_controller.dart';
-import '../../domain/task_query.dart';
+import '../../domain/coordinator_board.dart';
 import '../task_texts.dart';
 import 'task_view_grid.dart';
 
@@ -30,12 +31,13 @@ Future<void> showTasksShortcuts(
   final truncated =
       container.read(taskListCatalogProvider).value?.truncated ?? false;
   if (r == null) return Future.value();
+  final coordinator = container.read(effectiveAccessProvider).isCoordinatorView;
   return NzFlyoutMenu.show(
     context,
     semanticLabel: l.uiTasksShortcuts,
     entries: [
       NzFlyoutSection(l.uiTasksFlyView),
-      for (final v in TaskView.values)
+      for (final v in taskViewsFor(coordinator: coordinator))
         NzFlyoutItem(
           label: l.viewLabel(v),
           dot: viewDot(v, c),
@@ -44,12 +46,12 @@ Future<void> showTasksShortcuts(
           onSelected: () => ctl.selectView(v),
         ),
       NzFlyoutSection(l.uiTasksFlySort),
-      for (final s in TaskSort.values)
+      for (final s in taskSortsFor(coordinator: coordinator))
         NzFlyoutItem(
           label: l.sortShort(s),
           icon: NzIcons.swapVertical,
-          selected: s == state.sort,
-          onSelected: () => ctl.selectSort(s),
+          selected: s == ctl.currentSortFor(coordinator: coordinator),
+          onSelected: () => ctl.selectSort(s, coordinator: coordinator),
         ),
       NzFlyoutSection(l.uiTasksFlyTasks),
       if (onNewTask != null)

@@ -114,24 +114,26 @@ class _FilterBodyState extends ConsumerState<_FilterBody> {
                 ],
               ),
             ),
-            NzFormRow(
-              label: l.uiTasksGroupCoord,
-              icon: NzIcons.coordinatorships,
-              value: selection(state.coords.length),
-              valueSet: state.coords.isNotEmpty,
-              content: NzFilterChoices(
-                children: [
-                  for (final coord in catalog.coordinatorships)
-                    NzFilterChoice(
-                      label: coord.name,
-                      count:
-                          '${catalog.tasks.where((t) => t.coordinatorship == coord.code).length}',
-                      selected: state.coords.contains(coord.code),
-                      onTap: () => ctl.toggleCoord(coord.code),
-                    ),
-                ],
+            // Kilitli görünümde (Koordinatör/Üye) koordinatörlük kenar çubuğundan seçilir.
+            if (!ref.watch(timelineLensProvider).locked)
+              NzFormRow(
+                label: l.uiTasksGroupCoord,
+                icon: NzIcons.coordinatorships,
+                value: selection(state.coords.length),
+                valueSet: state.coords.isNotEmpty,
+                content: NzFilterChoices(
+                  children: [
+                    for (final coord in catalog.coordinatorships)
+                      NzFilterChoice(
+                        label: coord.name,
+                        count:
+                            '${catalog.tasks.where((t) => t.coordinatorship == coord.code).length}',
+                        selected: state.coords.contains(coord.code),
+                        onTap: () => ctl.toggleCoord(coord.code),
+                      ),
+                  ],
+                ),
               ),
-            ),
             NzFormRow.custom(
               label: l.uiTasksPriority,
               leading: const NzPriorityBars(level: 2),

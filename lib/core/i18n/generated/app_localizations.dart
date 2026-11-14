@@ -10900,6 +10900,174 @@ abstract class AppLocalizations {
   /// **'atanmamış görevler'**
   String get uiTasksListUnassigned;
 
+  /// ui.tasks.view_returned
+  ///
+  /// In tr, this message translates to:
+  /// **'İade'**
+  String get uiTasksViewReturned;
+
+  /// ui.tasks.list_returned
+  ///
+  /// In tr, this message translates to:
+  /// **'iade edilenler'**
+  String get uiTasksListReturned;
+
+  /// ui.tasks.card_assigned_by
+  ///
+  /// In tr, this message translates to:
+  /// **'Atayan'**
+  String get uiTasksCardAssignedBy;
+
+  /// ui.tasks.member_scope_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'yalnız sana atananlar'**
+  String get uiTasksMemberScopeHint;
+
+  /// ui.tasks.member_status_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu görevde yalnız sana açık adımlar gösteriliyor.'**
+  String get uiTasksMemberStatusDesc;
+
+  /// ui.tasks.member_no_transitions
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu aşamada senin için yapılacak durum değişikliği yok; koordinatörün kararı bekleniyor.'**
+  String get uiTasksMemberNoTransitions;
+
+  /// ui.tasks.submit_option
+  ///
+  /// In tr, this message translates to:
+  /// **'Onaya sun'**
+  String get uiTasksSubmitOption;
+
+  /// ui.tasks.submit_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlandı bildir'**
+  String get uiTasksSubmitTitle;
+
+  /// ui.tasks.submit_desc_head
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get uiTasksSubmitDescHead;
+
+  /// ui.tasks.submit_desc_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'onayına gider. Onaylanmazsa iade edilir.'**
+  String get uiTasksSubmitDescTail;
+
+  /// ui.tasks.submit_desc_fallback
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörün'**
+  String get uiTasksSubmitDescFallback;
+
+  /// ui.tasks.submit_late_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'gün geç tamamlanıyor. Gecikme görevin kaydında kalır.'**
+  String get uiTasksSubmitLateTail;
+
+  /// ui.tasks.submit_note_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Not (isteğe bağlı)'**
+  String get uiTasksSubmitNoteLabel;
+
+  /// ui.tasks.submit_note_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatöre iletmek istediğin bir not'**
+  String get uiTasksSubmitNoteHint;
+
+  /// ui.tasks.submit_note_head
+  ///
+  /// In tr, this message translates to:
+  /// **'Onaya sunma notu'**
+  String get uiTasksSubmitNoteHead;
+
+  /// ui.tasks.submit_info
+  ///
+  /// In tr, this message translates to:
+  /// **'Gönderilince görev “Onay bekliyor” olur.'**
+  String get uiTasksSubmitInfo;
+
+  /// ui.tasks.submit_ok
+  ///
+  /// In tr, this message translates to:
+  /// **'Onaya gönder'**
+  String get uiTasksSubmitOk;
+
+  /// ui.tasks.submit_need_evidence
+  ///
+  /// In tr, this message translates to:
+  /// **'Onaya göndermek için en az 1 kanıt dosyası gerekir.'**
+  String get uiTasksSubmitNeedEvidence;
+
+  /// ui.tasks.t_submitted_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'onaya gönderildi.'**
+  String get uiTasksTSubmittedTail;
+
+  /// ui.tasks.t_started_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'başlatıldı.'**
+  String get uiTasksTStartedTail;
+
+  /// ui.tasks.start_locked
+  ///
+  /// In tr, this message translates to:
+  /// **'Ön görev bitmeden başlatılamaz.'**
+  String get uiTasksStartLocked;
+
+  /// ui.tasks.band_doing
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitince kanıtı ekleyip onaya sun.'**
+  String get uiTasksBandDoing;
+
+  /// ui.tasks.band_evidence_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'kanıt dosyası'**
+  String get uiTasksBandEvidenceTail;
+
+  /// ui.tasks.band_returned
+  ///
+  /// In tr, this message translates to:
+  /// **'İade edildi'**
+  String get uiTasksBandReturned;
+
+  /// ui.tasks.band_fix
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzeltmeye başla'**
+  String get uiTasksBandFix;
+
+  /// ui.tasks.band_review
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörün onayını bekliyor'**
+  String get uiTasksBandReview;
+
+  /// ui.tasks.band_todo
+  ///
+  /// In tr, this message translates to:
+  /// **'Hazır olduğunda başla; görev “Devam ediyor” olur.'**
+  String get uiTasksBandTodo;
+
+  /// ui.tasks.band_start
+  ///
+  /// In tr, this message translates to:
+  /// **'Başla'**
+  String get uiTasksBandStart;
+
   /// ui.tasks.sort_status
   ///
   /// In tr, this message translates to:

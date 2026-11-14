@@ -44,6 +44,7 @@ extension TaskTexts on AppLocalizations {
   String viewLabel(TaskView v) => switch (v) {
     TaskView.all => uiTasksViewAll,
     TaskView.late => uiTasksViewLate,
+    TaskView.returned => uiTasksViewReturned,
     TaskView.inProgress => uiTasksViewDoing,
     TaskView.review => uiTasksViewReview,
     TaskView.dateRequest => uiTasksViewRequest,
@@ -55,6 +56,7 @@ extension TaskTexts on AppLocalizations {
   String viewListTitle(TaskView v) => switch (v) {
     TaskView.all => uiTasksListAll,
     TaskView.late => uiTasksListLate,
+    TaskView.returned => uiTasksListReturned,
     TaskView.inProgress => uiTasksListDoing,
     TaskView.review => uiTasksListReview,
     TaskView.dateRequest => uiTasksListRequest,

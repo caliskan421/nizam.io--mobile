@@ -5,6 +5,9 @@ import 'package:flutter/widgets.dart';
 enum NzTaskView {
   all,
   late,
+
+  /// İade edilenler (üye görünümü).
+  returned,
   inProgress,
   review,
   dateRequest,

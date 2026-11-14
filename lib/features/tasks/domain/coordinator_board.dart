@@ -191,27 +191,39 @@ CoordinatorSummary summarizeTasks(Iterable<TaskItem> tasks) {
   );
 }
 
-/// Görev listesi görünüm kutucukları: koordinatörde "Atanmamış" var, "Tarih talebi" yok
-/// (talepler ayrı satırda); diğer görünümlerde bugünkü küme.
-List<TaskView> taskViewsFor({required bool coordinator}) => coordinator
-    ? const [
-        TaskView.all,
-        TaskView.late,
-        TaskView.review,
-        TaskView.unassigned,
-        TaskView.inProgress,
-        TaskView.notStarted,
-        TaskView.done,
-      ]
-    : const [
-        TaskView.all,
-        TaskView.late,
-        TaskView.inProgress,
-        TaskView.review,
-        TaskView.dateRequest,
-        TaskView.notStarted,
-        TaskView.done,
-      ];
+/// Görev listesi görünüm kutucukları etkin role göre ([role] null → erişim bilinmiyor,
+/// yönetici kümesi): koordinatörde "Atanmamış" var, "Tarih talebi" yok (talepler ayrı
+/// satırda); üyede "İade" ayrı, "Tarih talebi" ve "Atanmamış" yok (üye talep göremez);
+/// yöneticide bugünkü küme.
+List<TaskView> taskViewsFor({required EffectiveRole? role}) => switch (role) {
+  EffectiveRole.coordinator => const [
+    TaskView.all,
+    TaskView.late,
+    TaskView.review,
+    TaskView.unassigned,
+    TaskView.inProgress,
+    TaskView.notStarted,
+    TaskView.done,
+  ],
+  EffectiveRole.member => const [
+    TaskView.all,
+    TaskView.late,
+    TaskView.returned,
+    TaskView.inProgress,
+    TaskView.review,
+    TaskView.notStarted,
+    TaskView.done,
+  ],
+  _ => const [
+    TaskView.all,
+    TaskView.late,
+    TaskView.inProgress,
+    TaskView.review,
+    TaskView.dateRequest,
+    TaskView.notStarted,
+    TaskView.done,
+  ],
+};
 
 /// Sıralama seçenekleri: koordinatörde duruma göre (varsayılan) var, koordinatörlüğe göre
 /// yok (tek koordinatörlük görünür).

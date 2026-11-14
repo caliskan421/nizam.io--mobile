@@ -5678,6 +5678,96 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksListUnassigned => 'atanmamış görevler';
 
   @override
+  String get uiTasksViewReturned => 'İade';
+
+  @override
+  String get uiTasksListReturned => 'iade edilenler';
+
+  @override
+  String get uiTasksCardAssignedBy => 'Atayan';
+
+  @override
+  String get uiTasksMemberScopeHint => 'yalnız sana atananlar';
+
+  @override
+  String get uiTasksMemberStatusDesc =>
+      'Bu görevde yalnız sana açık adımlar gösteriliyor.';
+
+  @override
+  String get uiTasksMemberNoTransitions =>
+      'Bu aşamada senin için yapılacak durum değişikliği yok; koordinatörün kararı bekleniyor.';
+
+  @override
+  String get uiTasksSubmitOption => 'Onaya sun';
+
+  @override
+  String get uiTasksSubmitTitle => 'Tamamlandı bildir';
+
+  @override
+  String get uiTasksSubmitDescHead => 'Görev';
+
+  @override
+  String get uiTasksSubmitDescTail =>
+      'onayına gider. Onaylanmazsa iade edilir.';
+
+  @override
+  String get uiTasksSubmitDescFallback => 'koordinatörün';
+
+  @override
+  String get uiTasksSubmitLateTail =>
+      'gün geç tamamlanıyor. Gecikme görevin kaydında kalır.';
+
+  @override
+  String get uiTasksSubmitNoteLabel => 'Not (isteğe bağlı)';
+
+  @override
+  String get uiTasksSubmitNoteHint => 'Koordinatöre iletmek istediğin bir not';
+
+  @override
+  String get uiTasksSubmitNoteHead => 'Onaya sunma notu';
+
+  @override
+  String get uiTasksSubmitInfo => 'Gönderilince görev “Onay bekliyor” olur.';
+
+  @override
+  String get uiTasksSubmitOk => 'Onaya gönder';
+
+  @override
+  String get uiTasksSubmitNeedEvidence =>
+      'Onaya göndermek için en az 1 kanıt dosyası gerekir.';
+
+  @override
+  String get uiTasksTSubmittedTail => 'onaya gönderildi.';
+
+  @override
+  String get uiTasksTStartedTail => 'başlatıldı.';
+
+  @override
+  String get uiTasksStartLocked => 'Ön görev bitmeden başlatılamaz.';
+
+  @override
+  String get uiTasksBandDoing => 'Bitince kanıtı ekleyip onaya sun.';
+
+  @override
+  String get uiTasksBandEvidenceTail => 'kanıt dosyası';
+
+  @override
+  String get uiTasksBandReturned => 'İade edildi';
+
+  @override
+  String get uiTasksBandFix => 'Düzeltmeye başla';
+
+  @override
+  String get uiTasksBandReview => 'Koordinatörün onayını bekliyor';
+
+  @override
+  String get uiTasksBandTodo =>
+      'Hazır olduğunda başla; görev “Devam ediyor” olur.';
+
+  @override
+  String get uiTasksBandStart => 'Başla';
+
+  @override
   String get uiTasksSortStatus => 'Duruma göre';
 
   @override

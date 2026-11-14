@@ -40,6 +40,7 @@ List<Widget> tasksListChildren(
   TaskSort? sortOverride,
   List<TaskView>? views,
   bool coordinator = false,
+  bool member = false,
   int columns = 1,
 }) {
   final l = context.l10n;
@@ -95,6 +96,7 @@ List<Widget> tasksListChildren(
             showGroup: sort != TaskSort.coordinatorship,
             onTap: () => onOpen(task.code),
             fill: columns > 1,
+            member: member,
           );
     final key = ValueKey('task:${task.code}');
     final child = NzEntrance(
@@ -212,12 +214,17 @@ List<Widget> tasksListChildren(
       ),
     ],
     Text(
-      sort == TaskSort.coordinatorship
-          ? l.groupedCountLine(list.length, r.groups.length)
-          : l.countLine(
-              state.limit < list.length ? state.limit : list.length,
-              list.length,
-            ),
+      [
+        if (sort == TaskSort.coordinatorship)
+          l.groupedCountLine(list.length, r.groups.length)
+        else
+          l.countLine(
+            state.limit < list.length ? state.limit : list.length,
+            list.length,
+          ),
+        // Üye listesi yalnız kendine atananlardır (sunucu kümesi).
+        if (member) l.uiTasksMemberScopeHint,
+      ].join(' · '),
       textAlign: TextAlign.center,
       style: t.caption.copyWith(color: c.textMuted),
     ),
@@ -330,6 +337,7 @@ class TaskCardView extends StatelessWidget {
     required this.onTap,
     this.showGroup = true,
     this.fill = false,
+    this.member = false,
   });
 
   final TaskItem task;
@@ -340,15 +348,21 @@ class TaskCardView extends StatelessWidget {
   /// Izgara satırında satır boyuna uzar ([NzTaskCard.fill]).
   final bool fill;
 
+  /// Üye görünümü: atanan (kendisi) yerine "Atayan · Ad" (oluşturan; bilinmiyorsa alan yok).
+  final bool member;
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final names = [
-      for (final a in task.assignees)
-        catalog.nameOf(a) ?? l.uiTasksUnknownPerson,
-    ];
+    final creator = task.creator;
+    final names = member
+        ? [?(creator == null ? null : catalog.nameOf(creator))]
+        : [
+            for (final a in task.assignees)
+              catalog.nameOf(a) ?? l.uiTasksUnknownPerson,
+          ];
     final late = !task.isDone && task.isOverdue;
     final req = task.dateRequest;
     final subTotal = task.subtaskTotal;
@@ -391,6 +405,8 @@ class TaskCardView extends StatelessWidget {
       assignees: names.take(3).toList(),
       assigneeText: names.isEmpty
           ? null
+          : member
+          ? '${l.uiTasksCardAssignedBy} · ${names.first}'
           : names.length > 1
           ? '${names.first} +${names.length - 1}'
           : names.first,

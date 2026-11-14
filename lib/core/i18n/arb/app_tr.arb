@@ -6597,6 +6597,14 @@
   "@uiTasksSubEvidenceNeeded": {
     "description": "ui.tasks.sub_evidence_needed"
   },
+  "uiTasksRemind": "Şimdi hatırlat",
+  "@uiTasksRemind": {
+    "description": "ui.tasks.remind"
+  },
+  "uiTasksTReminded": "Hatırlatma gönderildi",
+  "@uiTasksTReminded": {
+    "description": "ui.tasks.t_reminded"
+  },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {
     "description": "ui.timeline.title"

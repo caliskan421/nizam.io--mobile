@@ -419,6 +419,18 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
   );
 
   @override
+  Future<int> remind(TaskItem task) async => (await apiCall(
+    () => _client.remindWorkItem(
+      id: task.id,
+      extras: withScope(
+        WorkClient.remindWorkItemOpenapiExtras,
+        _program(task),
+        _dept(task),
+      ),
+    ),
+  )).recipientCount;
+
+  @override
   Future<void> deleteDateChange(String requestId) =>
       apiCall(() => _client.deleteDateChangeRequest(id: requestId));
 

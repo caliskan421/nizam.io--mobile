@@ -22,6 +22,7 @@ part 'task_detail_state.dart';
 part 'task_detail_upload.dart';
 part 'task_detail_date_request.dart';
 part 'task_detail_edit_draft.dart';
+part 'task_detail_remind.dart';
 
 /// Sunucu 409'u: görev yeniden okunur, ileti gösterilir, otomatik tekrar YOK (istemci
 /// akışları §8). Kod listesi durum dışı 409'ları da kapsasın diye HTTP durumu da okunur.
@@ -74,7 +75,7 @@ WriteOutcome _rejected(String code) =>
 /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
 @riverpod
 class TaskDetailController extends _$TaskDetailController
-    with _UploadFlow, _DateRequestFlow, _EditDraftFlow {
+    with _UploadFlow, _DateRequestFlow, _EditDraftFlow, _RemindFlow {
   @override
   TaskDetailState build(String code) {
     ref.watch(sessionGenerationProvider);

@@ -351,6 +351,8 @@
     "ui.tasks.t_meeting_open": "Toplantıyı aç",
     "ui.tasks.reject_reason_hint": "Ret gerekçesi talep edene bildirilir.",
     "ui.tasks.reject_reason_label": "Ret gerekçesi",
-    "ui.tasks.sub_evidence_needed": "Kanıt gerekli"
+    "ui.tasks.sub_evidence_needed": "Kanıt gerekli",
+    "ui.tasks.remind": "Şimdi hatırlat",
+    "ui.tasks.t_reminded": "Hatırlatma gönderildi"
   }
 }

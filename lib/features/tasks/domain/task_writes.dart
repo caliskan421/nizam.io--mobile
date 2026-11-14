@@ -369,6 +369,9 @@ abstract interface class TaskWriteRepository {
     String? reason,
   });
 
+  /// Atananlara anlık hatırlatma (`POST …/remind`, S3); kuyruğa alınan alıcı sayısı döner.
+  Future<int> remind(TaskItem task);
+
   /// İncelenmiş talebi siler (şirket yöneticisi, S1).
   Future<void> deleteDateChange(String requestId);
 

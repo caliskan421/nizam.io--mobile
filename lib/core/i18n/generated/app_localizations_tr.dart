@@ -5217,6 +5217,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksSubEvidenceNeeded => 'Kanıt gerekli';
 
   @override
+  String get uiTasksRemind => 'Şimdi hatırlat';
+
+  @override
+  String get uiTasksTReminded => 'Hatırlatma gönderildi';
+
+  @override
   String get uiTimelineTitle => 'Zaman çizelgesi';
 
   @override

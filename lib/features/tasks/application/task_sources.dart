@@ -208,6 +208,9 @@ final class TaskWriteSource implements TaskWriteRepository {
   }) async => _s.reviewDateChange(requestId, approve: approve, reason: reason);
 
   @override
+  Future<int> remind(TaskItem task) => _s.remind(task);
+
+  @override
   Future<void> deleteDateChange(String requestId) async =>
       _s.deleteDateChange(requestId);
 

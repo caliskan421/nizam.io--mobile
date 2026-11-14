@@ -22,6 +22,7 @@ import 'detail_forms.dart';
 import 'subtask_create_sheet.dart';
 
 part 'detail_list_option.dart';
+part 'detail_request_actions.dart';
 part 'upload_origin_sheet.dart';
 
 /// Ayrıntı ekranının eylemleri: denetleyici komutu + prototipteki sonuç bildirimi ve alt
@@ -560,40 +561,6 @@ class TaskDetailActions {
     );
     if (!yes || !context.mounted) return;
     _report(await _ctl.deleteFile(f), done: l.uiTasksTFileDeleted);
-  }
-
-  // ---- talep, hatırlatma, silme ------------------------------------------------------------
-
-  Future<void> approveRequest() async {
-    final r = _task?.dateRequest;
-    if (r == null) return;
-    final l = context.l10n;
-    _report(
-      await _ctl.approveRequest(),
-      done:
-          '${l.uiTasksTApproved} · ${l.uiTasksTNewDue} '
-          '${TaskDates.full(r.due)}',
-    );
-  }
-
-  Future<void> rejectRequest() async {
-    final r = _task?.dateRequest;
-    if (r == null) return;
-    final l = context.l10n;
-    final reason = await _askText(
-      title: l.uiTasksReject,
-      description: l.uiTasksRejectReasonHint,
-      label: l.uiTasksRejectReasonLabel,
-      ok: l.uiTasksReject,
-      valid: (v) => v.length <= 500,
-    );
-    if (reason == null || !context.mounted) return;
-    _report(
-      await _ctl.rejectRequest(reason),
-      done:
-          '${l.uiTasksTRejected} · '
-          '${r.by == null ? '' : _name(r.by!)} ${l.uiTasksTInformed}',
-    );
   }
 
   // ---- alt görev, not ---------------------------------------------------------------------

@@ -63,6 +63,12 @@ class TaskDetailPage extends ConsumerWidget {
                 icon: NzIcons.checkCircle,
                 onSelected: actions.openStatus,
               ),
+            if (actions.canRemind)
+              NzFlyoutItem(
+                label: l.uiTasksRemind,
+                icon: NzIcons.bell,
+                onSelected: actions.remind,
+              ),
             if (actions.canManageTask)
               NzFlyoutItem(
                 label: l.uiTasksEditTask,
@@ -306,6 +312,15 @@ class _Body extends StatelessWidget {
                 icon: NzIcons.event,
                 semanticLabel: l.uiTasksRequestDate,
                 onPressed: actions.openDateRequest,
+              ),
+              const Gap(NizamioSpacing.space2),
+            ],
+            // Gerçek hatırlatma (WORK-K90): koordinatör ya da şirket yöneticisi.
+            if (actions.canRemind) ...[
+              NzIconButton.circle(
+                icon: NzIcons.bell,
+                semanticLabel: l.uiTasksRemind,
+                onPressed: actions.remind,
               ),
               const Gap(NizamioSpacing.space2),
             ],

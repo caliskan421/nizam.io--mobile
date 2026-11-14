@@ -9988,6 +9988,18 @@ abstract class AppLocalizations {
   /// **'Kanıt gerekli'**
   String get uiTasksSubEvidenceNeeded;
 
+  /// ui.tasks.remind
+  ///
+  /// In tr, this message translates to:
+  /// **'Şimdi hatırlat'**
+  String get uiTasksRemind;
+
+  /// ui.tasks.t_reminded
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatma gönderildi'**
+  String get uiTasksTReminded;
+
   /// ui.timeline.title
   ///
   /// In tr, this message translates to:

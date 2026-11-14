@@ -172,6 +172,9 @@ final class TaskPermissions {
   /// koordinatör (WORK-K27).
   bool get canManageTask => admin || coordinator;
 
+  /// "Şimdi hatırlat" (WORK-K90): koordinatör ya da şirket yöneticisi.
+  bool get canRemind => admin || coordinator;
+
   /// Atama ekle/kaldır: YALNIZ kapsam koordinatörü (WORK-K10; yönetici tek başına hayır).
   bool get canAssign => coordinator;
 

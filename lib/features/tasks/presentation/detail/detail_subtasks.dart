@@ -10,6 +10,7 @@ import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/task_detail_controller.dart';
@@ -134,34 +135,42 @@ class _DetailSubtasksState extends ConsumerState<DetailSubtasks> {
                     key: ValueKey(u.id),
                     order: _hold.order,
                     area: _area,
-                    child: _SubtaskRow(
-                      sub: u,
-                      done: _done(u),
-                      // Uçuştaki işarette tamamlayan: oturumdaki hesap.
-                      doneBy: !_done(u)
-                          ? null
-                          : _pending.contains(u.id)
-                          ? name(catalog.me)
-                          : u.doneBy == null
-                          ? null
-                          : name(u.doneBy!),
-                      first: i == 0,
-                      catalog: catalog,
-                      team: team,
-                      open: openSubs.contains(u.id),
-                      manage: manage,
-                      onCheck: perms.canToggleSubtask(u)
-                          ? () => _toggle(u)
-                          : null,
-                      onCheckBlocked: () =>
-                          NzToast.show(context, l.uiTasksSubCheckBlocked),
-                      onOpen: () => ctl.toggleSubtaskOpen(u.id),
-                      onRename: () => actions.renameSubtask(u),
-                      onAssignee: (v) => actions.setSubtaskAssignee(u.id, v),
-                      onStart: (v) => actions.setSubtaskStart(u.id, v),
-                      onEnd: (v) => actions.setSubtaskEnd(u.id, v),
-                      onClearDates: () => actions.clearSubtaskDates(u.id),
+                    child: _SwipeDelete(
+                      id: u.id,
+                      enabled: manage,
+                      label: l.uiTasksSubDelete,
                       onDelete: () => actions.removeSubtask(u.id),
+                      child: _SubtaskRow(
+                        sub: u,
+                        done: _done(u),
+                        // Uçuştaki işarette tamamlayan: oturumdaki hesap.
+                        doneBy: !_done(u)
+                            ? null
+                            : _pending.contains(u.id)
+                            ? name(catalog.me)
+                            : u.doneBy == null
+                            ? null
+                            : name(u.doneBy!),
+                        first: i == 0,
+                        taskStart: task.start,
+                        catalog: catalog,
+                        team: team,
+                        open: openSubs.contains(u.id),
+                        manage: manage,
+                        onCheck: perms.canToggleSubtask(u)
+                            ? () => _toggle(u)
+                            : null,
+                        onCheckBlocked: () =>
+                            NzToast.show(context, l.uiTasksSubCheckBlocked),
+                        onOpen: () => ctl.toggleSubtaskOpen(u.id),
+                        onRename: () => actions.renameSubtask(u),
+                        onAssignee: (v) => actions.setSubtaskAssignee(u.id, v),
+                        onStart: (v) => actions.setSubtaskStart(u.id, v),
+                        onEnd: (v) => actions.setSubtaskEnd(u.id, v),
+                        onClearDates: () => actions.clearSubtaskDates(u.id),
+                        onEvidence: (v) => actions.setSubtaskEvidence(u.id, v),
+                        onDelete: () => actions.removeSubtask(u.id),
+                      ),
                     ),
                   ),
               ],
@@ -189,6 +198,7 @@ class _SubtaskRow extends StatelessWidget {
     required this.done,
     required this.doneBy,
     required this.first,
+    required this.taskStart,
     required this.catalog,
     required this.team,
     required this.open,
@@ -201,6 +211,7 @@ class _SubtaskRow extends StatelessWidget {
     required this.onStart,
     required this.onEnd,
     required this.onClearDates,
+    required this.onEvidence,
     required this.onDelete,
   });
 
@@ -214,6 +225,9 @@ class _SubtaskRow extends StatelessWidget {
 
   /// İlk satır (üst çizgi yok).
   final bool first;
+
+  /// Ana görevin başlangıcı: alt görev tarihi bundan önce seçilemez.
+  final DateTime taskStart;
   final TaskCatalog catalog;
   final List<String> team;
   final bool open;
@@ -232,6 +246,9 @@ class _SubtaskRow extends StatelessWidget {
   final ValueChanged<DateTime?> onStart;
   final ValueChanged<DateTime?> onEnd;
   final VoidCallback onClearDates;
+
+  /// Kanıt bayrağı (zorunlu/opsiyonel; WORK-K70).
+  final ValueChanged<bool> onEvidence;
   final VoidCallback onDelete;
 
   @override
@@ -250,7 +267,10 @@ class _SubtaskRow extends StatelessWidget {
     final bits = [
       if (u.assignee case final a?) name(a).split(' ').first,
       if (dates.isNotEmpty) dates,
-      if (u.evidence != null) l.uiTasksOneEvidence,
+      if (u.evidence != null)
+        l.uiTasksOneEvidence
+      else if (u.evidenceRequired)
+        l.uiTasksSubEvidenceNeeded,
       if (u.missingAssignee) l.uiTasksNeedsPerson,
     ];
     final missing = u.missingAssignee;
@@ -366,21 +386,25 @@ class _SubtaskRow extends StatelessWidget {
                   if (manage) ...[
                     field(
                       l.uiTasksSubPerson,
-                      NzSelect<String>(
-                        label: l.uiTasksSubPerson,
-                        value: u.assignee ?? '',
-                        items: [
-                          NzSelectItem(
-                            value: '',
-                            label: u.assigneeRequired
-                                ? l.uiTasksPickPerson
-                                : l.uiTasksNoPerson,
-                          ),
+                      // Kişi seçimi görev formlarındaki çiplerle; seçili çipe dokunuş
+                      // kaldırır (kişi zorunlu değilse).
+                      Wrap(
+                        spacing: NizamioSpacing.space2,
+                        runSpacing: NizamioSpacing.space2,
+                        children: [
                           for (final id in {...team, ?u.assignee})
-                            NzSelectItem(value: id, label: name(id)),
+                            TaskChip(
+                              label: name(id),
+                              selected: u.assignee == id,
+                              onTap: () {
+                                if (u.assignee != id) {
+                                  onAssignee(id);
+                                } else if (!u.assigneeRequired) {
+                                  onAssignee(null);
+                                }
+                              },
+                            ),
                         ],
-                        onChanged: (v) =>
-                            onAssignee(v == null || v.isEmpty ? null : v),
                       ),
                     ),
                     field(
@@ -397,6 +421,7 @@ class _SubtaskRow extends StatelessWidget {
                                 child: TaskDateField(
                                   label: l.uiTasksStart,
                                   value: u.start,
+                                  firstDate: taskStart,
                                   onChanged: onStart,
                                 ),
                               ),
@@ -404,7 +429,7 @@ class _SubtaskRow extends StatelessWidget {
                                 child: TaskDateField(
                                   label: l.uiTasksDue,
                                   value: u.end,
-                                  firstDate: u.start,
+                                  firstDate: u.start ?? taskStart,
                                   onChanged: onEnd,
                                 ),
                               ),
@@ -438,6 +463,22 @@ class _SubtaskRow extends StatelessWidget {
                       ),
                     ),
                   if (manage)
+                    field(
+                      l.uiTasksEvidenceFile,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (final v in const [true, false])
+                            TaskCheckRow(
+                              label: v ? l.uiTasksRequired : l.uiTasksOptional,
+                              radio: true,
+                              selected: u.evidenceRequired == v,
+                              onTap: () => onEvidence(v),
+                            ),
+                        ],
+                      ),
+                    ),
+                  if (manage)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       spacing: NizamioSpacing.space3,
@@ -456,6 +497,54 @@ class _SubtaskRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Yönetene satırı sola kaydırarak silme. Silme onayı ve yazma [onDelete]'dedir; satır
+/// kendisi kapanmaz (liste sunucu yanıtıyla güncellenir, iptal/hata satırı geri getirir).
+class _SwipeDelete extends StatelessWidget {
+  const _SwipeDelete({
+    required this.id,
+    required this.enabled,
+    required this.label,
+    required this.onDelete,
+    required this.child,
+  });
+
+  final String id;
+  final bool enabled;
+  final String label;
+  final Future<void> Function() onDelete;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!enabled) return child;
+    final c = context.colors;
+    return Dismissible(
+      key: ValueKey('swipe-$id'),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (_) async {
+        await onDelete();
+        return false;
+      },
+      background: ColoredBox(
+        color: c.danger,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(right: NizamioSpacing.space4),
+            child: Semantics(
+              label: label,
+              child: NzIcon(NzIcons.delete, color: c.onDanger),
+            ),
+          ),
+        ),
+      ),
+      // Kaydırma eylemi satırın anlamsal düğümlerini tek düğüme katmasın: işaret kutusu ve
+      // satır (aç/kapat) ekran okuyucuda ayrı dokunulabilir kalır.
+      child: Semantics(container: true, explicitChildNodes: true, child: child),
     );
   }
 }

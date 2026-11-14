@@ -16,6 +16,9 @@ abstract class WorkItemSubtask with _$WorkItemSubtask {
     @JsonKey(name: 'work_item_id') required String workItemId,
     required String title,
     required bool done,
+
+    /// Açıksa alt görev bağlı dosya olmadan kapatılamaz (WORK-K70).
+    @JsonKey(name: 'evidence_required') required bool evidenceRequired,
     @JsonKey(name: 'created_by_account_id') required String createdByAccountId,
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'updated_at') required DateTime updatedAt,

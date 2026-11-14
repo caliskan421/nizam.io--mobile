@@ -203,7 +203,8 @@ void main() {
     expect(repo.filters.last.mimeCategory, ArchiveMimeCategory.tablo);
     expect(repo.filters.last.workItemId, 'w1');
     expect(repo.filters.last.search, 'rapor');
-    await _tap(tester, find.text(_l.uiTasksClearAll));
+    // Üstteki "Tümünü temizle" kalktı (iPad 34-35); temizleme alttaki "Temizle" düğmesinde.
+    await _tap(tester, find.text(_l.uiTasksClear));
     expect(repo.filters.last.mimeCategory, isNull);
     expect(repo.filters.last.workItemId, 'w1');
     expect(repo.filters.last.search, 'rapor');

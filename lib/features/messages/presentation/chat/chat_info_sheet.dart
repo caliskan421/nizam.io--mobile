@@ -118,7 +118,7 @@ class _ChatInfo extends ConsumerWidget {
         if (chat.group) ChatGroupSourceInfo(chat: chat),
         if (chat.group)
           _Members(chatId: chatId, chat: chat, me: me, value: members!),
-        if ((chat.group && mine != null && !mine.fromSource) || chat.canManage)
+        if ((chat.group && mine != null && !mine.fromSource) || chat.canDelete)
           NzMenuGroup(
             rows: [
               if (chat.group && mine != null && !mine.fromSource)
@@ -128,7 +128,7 @@ class _ChatInfo extends ConsumerWidget {
                   danger: true,
                   onTap: () => done(ChatInfoAction.leave),
                 ),
-              if (chat.canManage)
+              if (chat.canDelete)
                 NzMenuRow(
                   icon: NzIcons.delete,
                   label: l.uiMessagesDeleteGroup,

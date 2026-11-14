@@ -13,6 +13,7 @@
     "ui.notifications.type_work_item_transitioned": "Görevin durumu değişti",
     "ui.notifications.type_work_item_assignment_changed": "Görevin atamaları değişti",
     "ui.notifications.type_work_item_date_changed": "Görevin tarihleri değişti",
+    "ui.notifications.type_work_task_reminder": "Görev için hatırlatma",
     "ui.notifications.type_work_date_change_requested": "Tarih değişikliği talep edildi",
     "ui.notifications.type_work_date_change_reviewed": "Tarih talebi yanıtlandı",
     "ui.notifications.type_collaboration_message_sent": "Yeni mesaj",
@@ -22,6 +23,17 @@
     "ui.notifications.type_membership_removed": "Koordinatörlükten üye çıkarıldı",
     "ui.notifications.type_membership_role_changed": "Koordinatörlükte rol değişti",
     "ui.notifications.type_program_transfer_completed": "Program aktarımı tamamlandı",
-    "ui.notifications.type_unknown": "Yeni bildirim"
+    "ui.notifications.type_unknown": "Yeni bildirim",
+    "ui.notifications.group_tasks": "Görevler",
+    "ui.notifications.group_date_requests": "Tarih talepleri",
+    "ui.notifications.group_meetings": "Toplantılar",
+    "ui.notifications.group_team": "Ekip",
+    "ui.notifications.group_other": "Diğer",
+    "ui.notifications.pref_title": "Bildirim tercihleri",
+    "ui.notifications.pref_intro": "Anlık bildirim gönderimini gruplara göre aç ya da kapat. Uygulama içi bildirimler her zaman görünür.",
+    "ui.notifications.pref_tasks": "Görevler",
+    "ui.notifications.pref_messages": "Mesajlar",
+    "ui.notifications.pref_meetings": "Toplantılar",
+    "ui.notifications.pref_system": "Sistem"
   }
 }

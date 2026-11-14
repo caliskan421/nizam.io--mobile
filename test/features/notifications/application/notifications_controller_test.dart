@@ -86,6 +86,13 @@ class _Repo implements NotificationRepository {
 
   @override
   Never pushPublicKey() => throw UnimplementedError();
+
+  @override
+  Never preferences() => throw UnimplementedError();
+
+  @override
+  Never updatePreferences(Map<Object?, bool> changes) =>
+      throw UnimplementedError();
 }
 
 /// `c2` sayfası kapı açılınca beklenmeyen (ApiError dışı) bir hatayla düşer.

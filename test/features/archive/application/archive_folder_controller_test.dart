@@ -34,6 +34,16 @@ void main() {
       ..cycleSort();
     expect(s().sort, ArchiveSort.recent);
     expect(s().filtered, isFalse);
+    // Yön yalnız istemcide: süzgeç (sunucu isteği) değişmez; eksen değişince sıfırlanır.
+    final before = s().filter;
+    ctrl.toggleDirection();
+    expect(s().reversed, isTrue);
+    expect(s().filter, before);
+    ctrl.cycleSort();
+    expect(s().reversed, isFalse);
+    ctrl
+      ..cycleSort()
+      ..cycleSort();
     ctrl.setQuery(' dosya ');
     expect(s().filter.search, 'dosya');
     expect(s().filtered, isTrue);

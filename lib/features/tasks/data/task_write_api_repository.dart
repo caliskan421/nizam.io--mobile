@@ -150,11 +150,15 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     TaskItem task,
     String title, {
     required String requestKey,
+    bool evidenceRequired = false,
   }) => apiCall(
     () => _client.createWorkItemSubtask(
       id: task.id,
       idempotencyKey: requestKey,
-      body: CreateSubtaskRequest(title: title),
+      body: CreateSubtaskRequest(
+        title: title,
+        evidenceRequired: evidenceRequired ? true : null,
+      ),
       extras: withScope(
         WorkClient.createWorkItemSubtaskOpenapiExtras,
         _program(task),
@@ -179,6 +183,7 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
       startOn: dates == null ? null : _day(dates.start),
       endOn: dates == null ? null : _day(dates.end),
       done: patch.done,
+      evidenceRequired: patch.evidenceRequired,
       expectedRevision: patch.expectedRevision,
     );
     return apiCall(
@@ -397,17 +402,33 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
   );
 
   @override
-  Future<void> reviewDateChange(String requestId, {required bool approve}) =>
-      apiCall(
-        () => _client.reviewDateChangeRequest(
-          id: requestId,
-          body: ReviewRequest(
-            decision: approve
-                ? ReviewRequestDecision.approved
-                : ReviewRequestDecision.rejected,
-          ),
-        ),
-      );
+  Future<void> reviewDateChange(
+    String requestId, {
+    required bool approve,
+    String? reason,
+  }) => apiCall(
+    () => _client.reviewDateChangeRequest(
+      id: requestId,
+      body: ReviewRequest(
+        decision: approve
+            ? ReviewRequestDecision.approved
+            : ReviewRequestDecision.rejected,
+        reason: reason,
+      ),
+    ),
+  );
+
+  @override
+  Future<int> remind(TaskItem task) async => (await apiCall(
+    () => _client.remindWorkItem(
+      id: task.id,
+      extras: withScope(
+        WorkClient.remindWorkItemOpenapiExtras,
+        _program(task),
+        _dept(task),
+      ),
+    ),
+  )).recipientCount;
 
   @override
   Future<void> deleteDateChange(String requestId) =>

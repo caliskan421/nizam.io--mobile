@@ -48,7 +48,7 @@ class TablesUnitTile extends StatelessWidget {
             if (count >= 2) layer(5, c.surfaceRaised),
             Positioned.fill(
               child: Material(
-                color: empty ? Colors.transparent : c.surface,
+                color: empty ? c.surface.withValues(alpha: 0) : c.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: radius,
                   side: empty ? BorderSide.none : BorderSide(color: c.border),
@@ -60,11 +60,7 @@ class TablesUnitTile extends StatelessWidget {
                     painter: _TableTilePainter(
                       grid: c.text.withValues(alpha: .06),
                       border: c.border,
-                      tint: Color.lerp(
-                        c.surfaceRaised,
-                        const Color(0xff74c27a),
-                        .26,
-                      )!,
+                      tint: Color.lerp(c.surfaceRaised, c.success, .26)!,
                       surface: c.surface,
                       empty: empty,
                     ),

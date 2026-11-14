@@ -95,11 +95,20 @@ void main() {
       expect(p.statusTargets(TaskStatus.inProgress), isEmpty);
     });
 
-    test('şirket yöneticisi tek başına aktör değildir (atanmış olsa da)', () {
-      final p = _p(_access(admin: true), assigned: true);
-      expect(p.actor, isNull);
-      expect(p.statusEndpoint, isNull);
-      expect(p.statusTargets(TaskStatus.inProgress), isEmpty);
+    test('şirket yöneticisi aktördür (ADR-0041; üye satırı olsa da)', () {
+      for (final p in [
+        _p(_access(admin: true)),
+        _p(_access(admin: true, role: SeatRole.member), assigned: true),
+      ]) {
+        expect(p.actor, TransitionActor.companyAdmin);
+        expect(p.statusEndpoint, StatusEndpoint.transition);
+        expect(p.statusTargets(TaskStatus.inProgress), [
+          TaskStatus.todo,
+          TaskStatus.review,
+          TaskStatus.done,
+        ]);
+        expect(p.statusTargets(TaskStatus.done), [TaskStatus.inProgress]);
+      }
     });
 
     test(

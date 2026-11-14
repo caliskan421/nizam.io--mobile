@@ -4,5 +4,7 @@ library;
 
 export 'application/notifications_controller.dart'
     show notificationUnreadControllerProvider;
+export 'presentation/notification_preferences_card.dart'
+    show NotificationPreferencesCard;
 export 'presentation/notifications_sheet.dart'
     show showNotifications, watchNotificationBell;

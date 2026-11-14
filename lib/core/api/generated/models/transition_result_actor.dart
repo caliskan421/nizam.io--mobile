@@ -4,6 +4,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+/// Hesaplanan aktör. `sirket_yoneticisi`, görevin departmanında koordinatör olmayan şirket yöneticisidir (ADR-0041; koordinatör ∪ kendi görevi koordinatörü kümesi).
 @JsonEnum()
 enum TransitionResultActor {
   @JsonValue('uye')
@@ -12,6 +13,8 @@ enum TransitionResultActor {
   koordinator('koordinator'),
   @JsonValue('koordinator_kendi_gorevi')
   koordinatorKendiGorevi('koordinator_kendi_gorevi'),
+  @JsonValue('sirket_yoneticisi')
+  sirketYoneticisi('sirket_yoneticisi'),
 
   /// Default value for all unparsed values, allows backward compatibility when adding new values on the backend.
   $unknown(null);

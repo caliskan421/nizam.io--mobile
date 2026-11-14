@@ -85,9 +85,10 @@ void main() {
     tester,
   ) async {
     await pumpSheet(tester, _variants);
+    // Gösterge accentText ile çizilir (açık temada okunur lime; koyuda accent ile aynı).
     await expectSheetPixels(tester, [
-      NizamioColors.light.primary,
-      NizamioColors.dark.primary,
+      NizamioColors.light.accentText,
+      NizamioColors.dark.accentText,
     ]);
   });
 

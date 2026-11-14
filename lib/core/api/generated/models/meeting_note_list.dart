@@ -5,6 +5,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'meeting_note.dart';
+import 'meeting_note_counts.dart';
 
 part 'meeting_note_list.freezed.dart';
 part 'meeting_note_list.g.dart';
@@ -14,6 +15,10 @@ abstract class MeetingNoteList with _$MeetingNoteList {
   const factory MeetingNoteList({
     required List<MeetingNote> items,
     @JsonKey(name: 'next_cursor') required String nextCursor,
+
+    /// İstekteki süzgeçlere (`converted`, `author`) uyan notların sayısı (COLLABORATION-K80); imleçten bağımsızdır, her sayfada aynıdır. Detaydaki `notes` süzgeçsizdir (`total == counts.all`).
+    required int total,
+    required MeetingNoteCounts counts,
   }) = _MeetingNoteList;
 
   factory MeetingNoteList.fromJson(Map<String, Object?> json) =>

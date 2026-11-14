@@ -23,11 +23,12 @@ import '../domain/archive.dart';
 import 'archive/archive_folder_card.dart';
 import 'archive/archive_folder_grid.dart';
 import 'archive/archive_outcome.dart';
-import 'archive/archive_texts.dart';
+import 'archive/archive_summary_cards.dart';
+import 'archive/archive_upload.dart';
 
 /// Arşiv (prototip `archive`): başlık + ara + yükle, dosya/klasör özeti, klasör kartları
 /// (sunucunun klasör özeti) → klasör ayrıntısı. Alt menüde modül sekmesine yeniden dokunmak
-/// kısayol menüsünü açar. Görev bağlamı olmayan yükleme "yakında"dır.
+/// kısayol menüsünü açar. Yükleme önce görev seçtirir, sonra dosya ([startArchiveRootUpload]).
 class ArchivePage extends ConsumerStatefulWidget {
   const ArchivePage({super.key});
 
@@ -85,7 +86,7 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
           label: l.uiArchiveUpload,
           icon: NzIcons.upload,
           accent: true,
-          onSelected: () => _toast(l.uiArchiveUploadSoon),
+          onSelected: () => startArchiveRootUpload(context, ref),
         ),
         // Dönemin tam arşivi yalnız şirket yöneticisine açıktır (RECORDS-K24).
         if (admin)
@@ -144,7 +145,7 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
             NzIconButton.circleAccent(
               icon: NzIcons.arrowUp,
               semanticLabel: l.uiArchiveUpload,
-              onPressed: () => _toast(l.uiArchiveUploadSoon),
+              onPressed: () => startArchiveRootUpload(context, ref),
             ),
           ],
         ),
@@ -195,21 +196,7 @@ class _Folders extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Semantics(
-          label: l.uiArchiveStorage,
-          container: true,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: c.surfaceRaised,
-              borderRadius: BorderRadius.circular(NizamioRadius.row),
-            ),
-            child: Text(
-              l.storageCaption(files, all.length),
-              style: t.bodyMd.copyWith(color: c.textMuted),
-            ),
-          ),
-        ),
+        ArchiveSummaryCards(files: files, folders: all.length),
         const Gap(NizamioSpacing.space5),
         NzKicker('${l.uiArchiveFoldersTitle} · ${list.length}'),
         const Gap(NizamioSpacing.space6),

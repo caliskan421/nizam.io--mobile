@@ -16,6 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AgendaItemRequest {
 
+/// Madde başlığı. Sunucu düz metne indirir ve kırpar; sonuç boş olamaz, kontrol karakteri taşıyamaz ve en çok 300 karakterdir (Unicode kod noktası, düz metne indirildikten sonra); aksi 422 `collaboration.input_invalid` (alan `title`). Toplantı başına en çok 50 madde; aşım 422 `collaboration.agenda_limit_reached` (COLLABORATION-K24).
  String get title;
 /// Create a copy of AgendaItemRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -218,6 +219,7 @@ class _AgendaItemRequest implements AgendaItemRequest {
   const _AgendaItemRequest({required this.title});
   factory _AgendaItemRequest.fromJson(Map<String, dynamic> json) => _$AgendaItemRequestFromJson(json);
 
+/// Madde başlığı. Sunucu düz metne indirir ve kırpar; sonuç boş olamaz, kontrol karakteri taşıyamaz ve en çok 300 karakterdir (Unicode kod noktası, düz metne indirildikten sonra); aksi 422 `collaboration.input_invalid` (alan `title`). Toplantı başına en çok 50 madde; aşım 422 `collaboration.agenda_limit_reached` (COLLABORATION-K24).
 @override final  String title;
 
 /// Create a copy of AgendaItemRequest

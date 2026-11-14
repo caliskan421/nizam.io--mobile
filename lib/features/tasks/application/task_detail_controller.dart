@@ -9,6 +9,7 @@ import '../../../core/server/write_compat.dart';
 import '../../../core/telemetry/error_report.dart';
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
+import '../domain/pending_subtask.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_permissions.dart';
 import '../domain/task_writes.dart';
@@ -22,6 +23,7 @@ part 'task_detail_state.dart';
 part 'task_detail_upload.dart';
 part 'task_detail_date_request.dart';
 part 'task_detail_edit_draft.dart';
+part 'task_detail_remind.dart';
 
 /// Sunucu 409'u: görev yeniden okunur, ileti gösterilir, otomatik tekrar YOK (istemci
 /// akışları §8). Kod listesi durum dışı 409'ları da kapsasın diye HTTP durumu da okunur.
@@ -53,7 +55,6 @@ bool _rereadAfter(ApiError e) => _isConflict(e) || _isForbidden(e);
 const _note = 'note';
 const _subtask = 'subtask';
 const _upload = 'upload';
-const _copy = 'copy';
 
 /// Bayat düzenleme sürümü (ADR-0027).
 const _editConflict = 'work.edit_conflict';
@@ -75,7 +76,7 @@ WriteOutcome _rejected(String code) =>
 /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
 @riverpod
 class TaskDetailController extends _$TaskDetailController
-    with _UploadFlow, _DateRequestFlow, _EditDraftFlow {
+    with _UploadFlow, _DateRequestFlow, _EditDraftFlow, _RemindFlow {
   @override
   TaskDetailState build(String code) {
     ref.watch(sessionGenerationProvider);
@@ -110,6 +111,7 @@ class TaskDetailController extends _$TaskDetailController
   /// Yeniden okuma varsayılan olarak YALNIZ kalemdir: ayrıntı (`getWorkItem` + alt görev / not /
   /// dosya) okunur ve katalogdaki kalemin yerine geçer ([TaskCatalogController.applyDetails]).
   /// [list]: görev kümesi değişti (oluşturma, silme, zincirli tarih onayı) → liste de okunur.
+  @override
   Future<WriteOutcome> _write(
     Future<void> Function() call, {
     required bool list,
@@ -214,8 +216,9 @@ class TaskDetailController extends _$TaskDetailController
     return r;
   }
 
-  /// Gönderilemeyen yeni alt görevin adı (sonuç bilinmiyor / hata; diyalog bununla açılır).
-  String? get pendingSubtaskTitle => state.keys.pendingBody(_subtask);
+  /// Gönderilemeyen yeni alt görev (ad + kanıt; diyalog bununla açılır → aynı gövde, aynı anahtar).
+  ({String title, bool evidenceRequired})? get pendingSubtask =>
+      parsePendingSubtask(state.keys.pendingBody(_subtask));
 
   /// Çok adımlı yazmanın başladığı bağlam: oturum nesli + seçili kapsam (program, departman).
   @override
@@ -302,38 +305,6 @@ class TaskDetailController extends _$TaskDetailController
       () => _writes.updateWorkItem(t, WorkItemPatch.diff(t, priority: p)),
       list: false,
     );
-  }
-
-  // ---- tarih talebi ---------------------------------------------------------------------
-
-  /// Bekleyen talebi onaylar (yalnız şirket yöneticisi). Onay bağımlı görevleri zincirle
-  /// öteleyebilir → liste de yeniden okunur; ret yalnız kalemi etkiler.
-  Future<WriteOutcome> approveRequest() => _review(approve: true);
-
-  Future<WriteOutcome> rejectRequest() => _review(approve: false);
-
-  Future<WriteOutcome> _review({required bool approve}) async {
-    final t = _task;
-    final r = t?.dateRequest;
-    if (t == null || r == null || !r.isPending) return WriteOutcome.invalid;
-    final id = r.id;
-    if (id == null || !permissions.canReviewDate) return WriteOutcome.invalid;
-    return _write(
-      () => _writes.reviewDateChange(id, approve: approve),
-      list: approve,
-    );
-  }
-
-  /// İncelenmiş talebi siler (yalnız şirket yöneticisi; bekleyen silinemez).
-  Future<WriteOutcome> deleteDateRequest() async {
-    final t = _task;
-    final r = t?.dateRequest;
-    if (t == null || r == null) return WriteOutcome.invalid;
-    final id = r.id;
-    if (id == null || !permissions.canDeleteDateRequest(r)) {
-      return WriteOutcome.invalid;
-    }
-    return _write(() => _writes.deleteDateChange(id), list: false);
   }
 
   // ---- düzenle --------------------------------------------------------------------------
@@ -538,7 +509,7 @@ class TaskDetailController extends _$TaskDetailController
     );
   }
 
-  // ---- sil, kopyala ---------------------------------------------------------------------
+  // ---- sil ---------------------------------------------------------------------------
 
   /// Görevi siler: yumuşak silme (yönetici ya da koordinatör) + katalog yeniden okunur; geri
   /// alma yok (silinen görevler yönetici yüzündedir).
@@ -548,37 +519,6 @@ class TaskDetailController extends _$TaskDetailController
     final r = await _write(() => _writes.deleteWorkItem(t), list: true);
     if (r.ok && ref.mounted) state = state.copyWith(deleted: () => t);
     return r;
-  }
-
-  /// Görevin kopyasını oluşturur; yeni görevin sunucu kimliğini döner. `createWorkItem`: aynı departman, başlık + [suffix], tarihler, öncelik, kanıt
-  /// bayrağı; sunucu tek atanan aldığından ilk atanan (yoksa atamasız). Katalog yeniden okunur.
-  Future<(WriteOutcome, String?)> copy(String suffix) async {
-    final t = _task;
-    final c = _catalog;
-    if (t == null || c == null) return (WriteOutcome.invalid, null);
-    final dept = t.departmentId;
-    final program = t.programId;
-    if (dept == null || program == null || !permissions.canManageTask) {
-      return (WriteOutcome.invalid, null);
-    }
-    String? id;
-    final draft = WorkItemDraft(
-      programId: program,
-      departmentId: dept,
-      title: '${t.title} $suffix',
-      start: t.start,
-      end: t.due,
-      priority: t.priority == TaskPriority.unknown ? null : t.priority,
-      assignee: t.assignees.firstOrNull,
-      evidenceRequired: t.evidenceRequired,
-    );
-    final r = await _writeKeyed(
-      _copy,
-      draft.signature,
-      (key) async => id = await _writes.createWorkItem(draft, requestKey: key),
-      list: true,
-    );
-    return (r, r.ok ? id : null);
   }
 
   // ---- alt görevler ---------------------------------------------------------------------
@@ -594,7 +534,10 @@ class TaskDetailController extends _$TaskDetailController
     final u = _sub(id);
     if (t == null || u == null) return Future.value(WriteOutcome.invalid);
     final versioned =
-        patch.title != null || patch.assignee != null || patch.dates != null;
+        patch.title != null ||
+        patch.assignee != null ||
+        patch.dates != null ||
+        patch.evidenceRequired != null;
     final rev = u.editRevision;
     if (versioned && rev == null) {
       return Future.value(_rejected(ClientErrorCode.serverOutdated));
@@ -604,18 +547,33 @@ class TaskDetailController extends _$TaskDetailController
       assignee: patch.assignee,
       dates: patch.dates,
       done: patch.done,
+      evidenceRequired: patch.evidenceRequired,
       expectedRevision: versioned ? rev : null,
     );
     return _write(() => _writes.updateSubtask(t, id, body), list: false);
   }
 
-  /// İşaretler/kaldırır. Alt görevde kanıt bayrağı yok (ADR-0024): kanıt kapısı görev
-  /// seviyesindedir ([TaskItem.evidenceRequired]). Yetki [TaskPermissions.canToggleSubtask].
+  /// İşaretler/kaldırır. Yetki [TaskPermissions.canToggleSubtask]. Kanıt bayraklı alt görev
+  /// bağlı dosya olmadan kapatılmaz (yerel ön denetim; sunucu kodu WORK-K70).
   Future<WriteOutcome> toggleSubtask(String id) async {
     final u = _sub(id);
     if (u == null) return WriteOutcome.invalid;
     if (!permissions.canToggleSubtask(u)) return WriteOutcome.invalid;
+    if (!u.done && u.evidenceRequired && u.evidence == null) {
+      return _rejected('work.subtask_attachment_required');
+    }
     return _patchSub(id, SubtaskPatch(done: !u.done));
+  }
+
+  /// Kanıt bayrağını değiştirir (yönetici ya da koordinatör; sürümlü).
+  Future<WriteOutcome> setSubtaskEvidence(String id, {required bool value}) {
+    final u = _sub(id);
+    if (u == null || !permissions.canManageSubtasks) {
+      return Future.value(WriteOutcome.invalid);
+    }
+    return u.evidenceRequired == value
+        ? Future.value(WriteOutcome.unchanged)
+        : _patchSub(id, SubtaskPatch(evidenceRequired: value));
   }
 
   void toggleSubtaskOpen(String id) {
@@ -626,15 +584,23 @@ class TaskDetailController extends _$TaskDetailController
 
   /// [title] başlıklı alt görev açar (yönetici ya da koordinatör; tamamlanmış
   /// görevde 409 `work.item_completed`, tavan 50 → 409 `work.subtask_limit_reached`).
-  Future<WriteOutcome> createSubtask(String title) async {
+  Future<WriteOutcome> createSubtask(
+    String title, {
+    bool evidenceRequired = false,
+  }) async {
     final t = _task;
     final name = title.trim();
     if (t == null || name.isEmpty) return WriteOutcome.invalid;
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
     return _writeKeyed(
       _subtask,
-      name,
-      (key) => _writes.createSubtask(t, name, requestKey: key),
+      '$name|$evidenceRequired',
+      (key) => _writes.createSubtask(
+        t,
+        name,
+        requestKey: key,
+        evidenceRequired: evidenceRequired,
+      ),
       list: false,
     );
   }
@@ -690,8 +656,11 @@ class TaskDetailController extends _$TaskDetailController
     DateTime? end,
   ) async {
     final u = _sub(id);
-    if (u == null) return WriteOutcome.invalid;
+    final t = _task;
+    if (u == null || t == null) return WriteOutcome.invalid;
     if (u.start == start && u.end == end) return WriteOutcome.unchanged;
+    // Alt görev ana görevin başlangıcından önce başlayamaz (istemci kuralı).
+    if (start != null && _before(start, t.start)) return WriteOutcome.invalid;
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
     return _patchSub(id, SubtaskPatch(dates: (start: start, end: end)));
   }
@@ -717,6 +686,12 @@ class TaskDetailController extends _$TaskDetailController
 
   Future<WriteOutcome> clearSubtaskDates(String id) =>
       _setSubtaskDates(id, null, null);
+
+  static bool _before(DateTime a, DateTime b) => DateTime(
+    a.year,
+    a.month,
+    a.day,
+  ).isBefore(DateTime(b.year, b.month, b.day));
 
   /// Alt görevi kaldırır; sonuç ve kaldırılan (bildirim metni için).
   Future<(WriteOutcome, Subtask?)> removeSubtask(String id) async {

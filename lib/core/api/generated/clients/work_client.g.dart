@@ -633,6 +633,38 @@ class _WorkClient implements WorkClient {
   }
 
   @override
+  Future<RemindResult> remindWorkItem({
+    required String id,
+    Map<String, dynamic>? extras = WorkClient.remindWorkItemOpenapiExtras,
+  }) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras ?? <String, dynamic>{});
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<RemindResult>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/v1/work-items/${id}/remind',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late RemindResult _value;
+    try {
+      _value = RemindResult.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<WorkItemSubtaskList> listWorkItemSubtasks({
     required String id,
     Map<String, dynamic>? extras = WorkClient.listWorkItemSubtasksOpenapiExtras,

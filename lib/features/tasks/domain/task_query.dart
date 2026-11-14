@@ -91,17 +91,28 @@ final class TaskFilter {
       return false;
     }
     if (people.isNotEmpty && !t.assignees.any(people.contains)) return false;
-    final q = trLower(query.trim());
-    if (q.isEmpty) return true;
-    final hay = trLower(
-      [
-        t.title,
-        t.code,
-        for (final a in t.assignees) c.nameOf(a) ?? '',
-      ].join(' '),
-    );
-    return hay.contains(q);
+    return taskMatchesQuery(t, c, query);
   }
+}
+
+/// Görev listesi ve zaman çizelgelerinin ortak metin araması: başlık, görev kodu (iç ve
+/// kısa), atanan kişi adları ve koordinatörlük adı/etiketi; Türkçe küçük harf (`trLower`). Boş sorgu her görevi tutar.
+bool taskMatchesQuery(TaskItem t, TaskCatalog c, String query) {
+  final q = trLower(query.trim());
+  if (q.isEmpty) return true;
+  final hay = trLower(
+    [
+      t.title,
+      t.code,
+      t.displayCode,
+      for (final a in t.assignees) c.nameOf(a) ?? '',
+      if (c.coordinatorship(t.coordinatorship) case final co?) ...[
+        co.name,
+        co.label,
+      ],
+    ].join(' '),
+  );
+  return hay.contains(q);
 }
 
 /// Koordinatörlük grubu (koordinatörlüğe göre sıralı liste).

@@ -20,10 +20,6 @@ extension ArchiveTexts on AppLocalizations {
 
   String files(int n) => '$n $uiArchiveFilesLc';
 
-  /// "227 dosya · 11 klasör".
-  String storageCaption(int files, int folders) =>
-      '$files $uiArchiveFilesLc · $folders $uiArchiveFoldersLc';
-
   String sortLabel(ArchiveSort s) => switch (s) {
     ArchiveSort.recent => uiArchiveSortRecent,
     ArchiveSort.name => uiArchiveSortName,

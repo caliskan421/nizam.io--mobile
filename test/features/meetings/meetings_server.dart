@@ -37,7 +37,7 @@ Map<String, Object?> meetingWire({
   'updated_at': _t,
   'departments': [
     for (final d in departments)
-      {'department_id': d, 'department_name': 'Ad $d'},
+      {'department_id': d, 'department_name': 'Ad $d', 'deleted': false},
   ],
   'deleted_at': deletedAt,
   'summary': ?summary,
@@ -225,10 +225,17 @@ class MeetingsServer {
           'notes': {
             'items': notes,
             'next_cursor': moreNotes.isEmpty ? '' : 'n2',
+            'total': notes.length + moreNotes.length,
+            'counts': {'all': 0, 'converted': 0, 'mine': 0},
           },
         });
       case 'GET /v1/meetings/m1/notes':
-        return jsonResponse(200, {'items': moreNotes, 'next_cursor': ''});
+        return jsonResponse(200, {
+          'items': moreNotes,
+          'next_cursor': '',
+          'total': notes.length + moreNotes.length,
+          'counts': {'all': 0, 'converted': 0, 'mine': 0},
+        });
       case 'POST /v1/meetings/m1/agenda':
         return jsonResponse(
           201,
@@ -271,17 +278,19 @@ class MeetingsServer {
     }
     if (r.method == 'PATCH' && r.path.startsWith('/v1/meeting-agenda/')) {
       final id = r.path.split('/').last;
-      final checked = body['is_checked'] == true;
       final row = agenda.firstWhere(
         (a) => a['agenda_item_id'] == id,
         orElse: () => agendaWire(id),
       );
+      final checked = body.containsKey('is_checked')
+          ? body['is_checked'] == true
+          : row['is_checked'] == true;
       return jsonResponse(
         200,
         agendaWire(
           id,
           order: row['sort_order']! as int,
-          title: row['title']! as String,
+          title: body['title'] as String? ?? row['title']! as String,
           checked: checked,
         ),
       );

@@ -121,6 +121,8 @@ class PilotBackend {
           );
         }
         return jsonResponse(200, {'revoked_sessions': 2});
+      case 'GET /v1/notifications/preferences':
+        return jsonResponse(200, {'preferences': <Object>[]});
       case 'GET /v1/programs':
         final err = programsError;
         if (err != null) return errorBody(403, err);

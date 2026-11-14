@@ -16,15 +16,19 @@ import '../widgets/feedback/nz_banner.dart';
 import '../widgets/feedback/nz_loader.dart';
 import '../widgets/feedback/nz_toast.dart';
 import '../widgets/surfaces/nz_glass.dart';
+import 'nz_connection_scope.dart';
 
 /// Her ekranın kabuğu (U6: features presentation'da Scaffold yasağının tek karşılığı).
 ///
 /// Scaffold + SafeArea + [NzTextScaleLimit] + yatay `pagePadding` + [NzContentWidth] azami
-/// genişliği (ortalanır) + bağlantı çevrimdışıyken gövdenin üstünde [NzBanner.offline] +
+/// genişliği (ortalanır) + bağlantı yokken gövdenin üstünde [NzBanner.offline] (internet yok ya
+/// da sunucuya ulaşılamıyor; son veri yerinde kalır) +
 /// [loading] iken dokunmayı kesen [NzLoader] örtüsü. Kendi Overlay'i yoktur: şerit ve örtü
 /// sayfa ağacının parçasıdır, `MaterialApp.builder`'daki PrivacyMask'ın altında kalır.
 ///
-/// [onRetry] yalnız kullanıcı dokunuşuyla çalışır (çevrimiçine dönüşte otomatik deneme yok).
+/// Bağlantı geri gelince ([connectionRestored]) sayfa bir kez kendiliğinden yenilenir: [onRetry],
+/// yoksa [onRefresh] (not 47; döngü yok). Gövde [NzConnectionScope] altındadır; hata görünümü
+/// bağlantı tasarımını oradan okur.
 class NzPage extends ConsumerWidget {
   const NzPage({
     super.key,
@@ -211,8 +215,24 @@ class NzPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final offline =
-        ref.watch(connectivityStateProvider) == ConnectivityState.offline;
+    final connection = ref.watch(connectivityStateProvider);
+    ref.listen(connectivityStateProvider, (before, now) {
+      if (!connectionRestored(before, now)) return;
+      if (onRetry case final retry?) return retry();
+      onRefresh?.call().ignore();
+    });
+    return NzConnectionScope(
+      state: connection,
+      child: _page(context, connection),
+    );
+  }
+
+  Widget _page(BuildContext context, ConnectivityState connection) {
+    final offline = connection.isDown;
+    final banner = NzBanner.offline(
+      onAction: onRetry,
+      unreachable: connection == ConnectivityState.unreachable,
+    );
     if (_bare) {
       return NzTextScaleLimit(
         child: Scaffold(resizeToAvoidBottomInset: false, body: body),
@@ -226,8 +246,7 @@ class NzPage extends ConsumerWidget {
             physics: const NeverScrollableScrollPhysics(),
             slivers: [
               topBar,
-              if (offline)
-                SliverToBoxAdapter(child: NzBanner.offline(onAction: onRetry)),
+              if (offline) SliverToBoxAdapter(child: banner),
               SliverFillRemaining(
                 hasScrollBody: true,
                 child: PageContentEntrance(
@@ -293,10 +312,7 @@ class NzPage extends ConsumerWidget {
                           fade: fadeContent,
                           child: SliverMainAxisGroup(
                             slivers: [
-                              if (offline)
-                                SliverToBoxAdapter(
-                                  child: NzBanner.offline(onAction: onRetry),
-                                ),
+                              if (offline) SliverToBoxAdapter(child: banner),
                               SliverPadding(
                                 padding: EdgeInsets.fromLTRB(
                                   side,
@@ -381,7 +397,7 @@ class NzPage extends ConsumerWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (offline) NzBanner.offline(onAction: onRetry),
+                    if (offline) banner,
                     Expanded(
                       // Dolgu ve azami genişlik pencereye değil, gövdeye ayrılan alana göre.
                       child: LayoutBuilder(

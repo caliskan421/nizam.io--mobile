@@ -237,6 +237,15 @@ void main() {
     );
   });
 
+  test('retagFile → PATCH /tag, departman başlığı, gövdede etiket', () async {
+    final (repo, a) = _repo((_) => _json(_record(tag: 'sonuc')));
+    await repo.retagFile('f1', RecordTag.sonuc, department: _d);
+    final o = a.seen.single;
+    expect('${o.method} ${o.uri.path}', 'PATCH /v1/files/f1/tag');
+    expect(_dept(o), _d);
+    expect(jsonDecode(jsonEncode(o.data)), {'tag': 'sonuc'});
+  });
+
   group('archiveAttachments', () {
     test('süzgeçler sorguya, imleç dilime', () async {
       final (repo, a) = _repo(

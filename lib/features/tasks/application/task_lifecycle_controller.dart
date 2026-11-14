@@ -89,6 +89,38 @@ class DeletedTasksController extends AsyncNotifier<PageSlice<DeletedTask>> {
       _busy = false;
     }
   }
+
+  /// Silinmiş görevi kalıcı siler (`permanentDeleteWorkItem`); satır listeden düşer. Silinen
+  /// dosya sayısı döner. Sürmekte olan işlem varken null (istek gönderilmez).
+  Future<int?> purge(DeletedTask task) async {
+    if (_busy) return null;
+    _busy = true;
+    final session = ref.read(sessionGenerationProvider);
+    final scope = ref.read(scopeStateProvider);
+    try {
+      final files = await ref
+          .read(deletedTasksRepositoryProvider)
+          .purge(task.id);
+      final old = state.value;
+      if (ref.mounted &&
+          old != null &&
+          session == ref.read(sessionGenerationProvider) &&
+          scope == ref.read(scopeStateProvider)) {
+        state = AsyncData(
+          PageSlice(
+            items: [
+              for (final t in old.items)
+                if (t.id != task.id) t,
+            ],
+            nextCursor: old.nextCursor,
+          ),
+        );
+      }
+      return files;
+    } finally {
+      _busy = false;
+    }
+  }
 }
 
 final taskDependencyCommandProvider =

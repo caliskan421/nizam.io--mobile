@@ -69,7 +69,7 @@ final class ArchiveActionsControllerProvider
 }
 
 String _$archiveActionsControllerHash() =>
-    r'8d030dc34b157d048da7f5d0035581c49d5e76b0';
+    r'e4f4dd2cc28fb6a4a00d0b69e3044801f51f030f';
 
 /// Klasörün sunucu eylemleri (indirme, ZIP, yükleme, silme); durum: eylem sürüyor mu (çift
 /// dokunuş tek istek). Yazmadan sonra etkilenen listeler yeniden okunur (iyimser güncelleme

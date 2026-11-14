@@ -171,6 +171,10 @@ enum TransitionActor {
 
   /// `koordinator_kendi_gorevi`: koordinatör kendi atandığı görevde.
   coordinatorOwnTask,
+
+  /// `sirket_yoneticisi`: görevin departmanında koordinatör olmayan şirket yöneticisi
+  /// (ADR-0041; kümesi kendi görevi koordinatörününkiyle aynı, işlem kaydına "yönetici olarak").
+  companyAdmin,
   unknown,
 }
 

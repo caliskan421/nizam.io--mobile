@@ -23,6 +23,7 @@ class _CollaborationClient implements CollaborationClient {
   @override
   Future<MeetingCreated> createMeeting({
     required CreateMeetingRequest body,
+    String? idempotencyKey,
     Map<String, dynamic>? extras =
         CollaborationClient.createMeetingOpenapiExtras,
   }) async {
@@ -30,7 +31,8 @@ class _CollaborationClient implements CollaborationClient {
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Idempotency-Key': idempotencyKey};
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _options = _setStreamType<MeetingCreated>(
@@ -56,6 +58,8 @@ class _CollaborationClient implements CollaborationClient {
 
   @override
   Future<MeetingList> listMeetings({
+    WhenEnum? whenEnum,
+    Sort? sort,
     String? departmentId,
     DateTime? from,
     DateTime? to,
@@ -67,6 +71,8 @@ class _CollaborationClient implements CollaborationClient {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{
+      r'when': whenEnum,
+      r'sort': sort,
       r'department_id': departmentId,
       r'from': from?.toIso8601String(),
       r'to': to?.toIso8601String(),
@@ -238,6 +244,45 @@ class _CollaborationClient implements CollaborationClient {
   }
 
   @override
+  Future<MeetingCandidateList> listMeetingParticipantCandidates({
+    String? meetingId,
+    int? limit,
+    String? cursor,
+    Map<String, dynamic>? extras =
+        CollaborationClient.listMeetingParticipantCandidatesOpenapiExtras,
+  }) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras ?? <String, dynamic>{});
+    final queryParameters = <String, dynamic>{
+      r'meeting_id': meetingId,
+      r'limit': limit,
+      r'cursor': cursor,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<MeetingCandidateList>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/v1/meetings/participant-candidates',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late MeetingCandidateList _value;
+    try {
+      _value = MeetingCandidateList.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<MeetingDetail> getMeeting({
     required String id,
     Map<String, dynamic>? extras = CollaborationClient.getMeetingOpenapiExtras,
@@ -333,6 +378,7 @@ class _CollaborationClient implements CollaborationClient {
   Future<ParticipantResult> addMeetingParticipant({
     required String id,
     required ParticipantRequest body,
+    String? idempotencyKey,
     Map<String, dynamic>? extras =
         CollaborationClient.addMeetingParticipantOpenapiExtras,
   }) async {
@@ -340,7 +386,8 @@ class _CollaborationClient implements CollaborationClient {
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Idempotency-Key': idempotencyKey};
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _options = _setStreamType<ParticipantResult>(
@@ -487,6 +534,7 @@ class _CollaborationClient implements CollaborationClient {
   Future<AgendaItem> addAgendaItem({
     required String id,
     required AgendaItemRequest body,
+    String? idempotencyKey,
     Map<String, dynamic>? extras =
         CollaborationClient.addAgendaItemOpenapiExtras,
   }) async {
@@ -494,7 +542,8 @@ class _CollaborationClient implements CollaborationClient {
     _extra.addAll(extras ?? <String, dynamic>{});
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Idempotency-Key': idempotencyKey};
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _options = _setStreamType<AgendaItem>(
@@ -652,6 +701,8 @@ class _CollaborationClient implements CollaborationClient {
     required String id,
     int? limit,
     String? cursor,
+    Converted? converted,
+    Author? author,
     Map<String, dynamic>? extras =
         CollaborationClient.listMeetingNotesOpenapiExtras,
   }) async {
@@ -660,6 +711,8 @@ class _CollaborationClient implements CollaborationClient {
     final queryParameters = <String, dynamic>{
       r'limit': limit,
       r'cursor': cursor,
+      r'converted': converted,
+      r'author': author,
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};

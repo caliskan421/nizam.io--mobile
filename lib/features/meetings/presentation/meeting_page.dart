@@ -262,6 +262,12 @@ class MeetingActions {
   Future<void> toggleAgenda(AgendaItem a) async =>
       report(await _ctl.toggleAgenda(a));
 
+  Future<bool> renameAgenda(AgendaItem a, String title) async {
+    final e = await _ctl.renameAgenda(a, title);
+    report(e);
+    return e == null;
+  }
+
   Future<bool> addAgenda(String title) async {
     final e = await _ctl.addAgenda(title);
     report(e);

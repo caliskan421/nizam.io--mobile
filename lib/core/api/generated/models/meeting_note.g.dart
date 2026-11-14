@@ -16,24 +16,28 @@ _MeetingNote _$MeetingNoteFromJson(Map<String, dynamic> json) => _MeetingNote(
       : MeetingNoteAuthorRole.fromJson(json['author_role'] as String),
   content: json['content'] as String,
   convertedToWorkItemId: json['converted_to_work_item_id'] as String?,
+  convertedWorkItemDepartmentId:
+      json['converted_work_item_department_id'] as String?,
   createdAt: DateTime.parse(json['created_at'] as String),
   updatedAt: DateTime.parse(json['updated_at'] as String),
   editRevision: (json['edit_revision'] as num).toInt(),
 );
 
-Map<String, dynamic> _$MeetingNoteToJson(_MeetingNote instance) =>
-    <String, dynamic>{
-      'note_id': instance.noteId,
-      'meeting_id': instance.meetingId,
-      'author_account_id': ?instance.authorAccountId,
-      'author_name': instance.authorName,
-      'author_role': ?_$MeetingNoteAuthorRoleEnumMap[instance.authorRole],
-      'content': instance.content,
-      'converted_to_work_item_id': ?instance.convertedToWorkItemId,
-      'created_at': instance.createdAt.toIso8601String(),
-      'updated_at': instance.updatedAt.toIso8601String(),
-      'edit_revision': instance.editRevision,
-    };
+Map<String, dynamic> _$MeetingNoteToJson(
+  _MeetingNote instance,
+) => <String, dynamic>{
+  'note_id': instance.noteId,
+  'meeting_id': instance.meetingId,
+  'author_account_id': ?instance.authorAccountId,
+  'author_name': instance.authorName,
+  'author_role': ?_$MeetingNoteAuthorRoleEnumMap[instance.authorRole],
+  'content': instance.content,
+  'converted_to_work_item_id': ?instance.convertedToWorkItemId,
+  'converted_work_item_department_id': ?instance.convertedWorkItemDepartmentId,
+  'created_at': instance.createdAt.toIso8601String(),
+  'updated_at': instance.updatedAt.toIso8601String(),
+  'edit_revision': instance.editRevision,
+};
 
 const _$MeetingNoteAuthorRoleEnumMap = {
   MeetingNoteAuthorRole.admin: 'admin',

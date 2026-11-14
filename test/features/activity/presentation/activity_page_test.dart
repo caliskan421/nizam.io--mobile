@@ -120,7 +120,7 @@ void main() {
   ) async {
     await _open(tester);
     final rows = find.byWidgetPredicate(
-      (w) => w.runtimeType.toString() == '_EntryRow',
+      (w) => w.runtimeType.toString() == 'ActivityEntryRow',
     );
     // 30 kayıt gösterilir; ilk karede yalnız ekrana (+ önbellek bölgesine) düşenler kurulur.
     expect(rows.evaluate().length, inExclusiveRange(1, 30));

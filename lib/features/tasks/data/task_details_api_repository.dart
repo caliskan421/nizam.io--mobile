@@ -156,6 +156,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
               start: request.newStartOn,
               due: request.newEndOn,
               reason: request.reason ?? '',
+              reviewReason: request.reviewReason ?? '',
               state: dateRequestState(request.status.json),
             ),
     );
@@ -209,6 +210,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
     doneBy: s.doneByAccountId,
     createdBy: s.createdByAccountId,
     editRevision: s.editRevision,
+    evidenceRequired: s.evidenceRequired,
     start: s.startOn,
     end: s.endOn,
     evidence: files

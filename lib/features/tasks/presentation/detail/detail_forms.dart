@@ -56,8 +56,8 @@ class _EditTaskFormState extends ConsumerState<EditTaskForm> {
   }
 }
 
-/// Sunucu görevinin düzenleme gövdesi: başlık, atanan (yalnız koordinatör; ekipten),
-/// öncelik, tarihler, kanıt zorunluluğu.
+/// Sunucu görevinin düzenleme gövdesi: başlık, koordinatörlük (salt okunur), atanan (yalnız
+/// koordinatör seçer; ekipten), tarihler, öncelik, kanıt zorunluluğu (zorunlu/opsiyonel).
 class _ServerEditBody extends ConsumerWidget {
   const _ServerEditBody({required this.code, required this.title});
 
@@ -73,7 +73,8 @@ class _ServerEditBody extends ConsumerWidget {
     final s = ref.watch(p);
     final ctl = ref.read(p.notifier);
     final d = s.edit;
-    final task = ref.watch(taskCatalogControllerProvider).value?.task(code);
+    final catalog = ref.watch(taskCatalogControllerProvider).value;
+    final task = catalog?.task(code);
     if (d == null || task == null) return const SizedBox.shrink();
     final dept = task.departmentId;
     final assign = ctl.permissions.canAssign && dept != null;
@@ -97,20 +98,58 @@ class _ServerEditBody extends ConsumerWidget {
           const Gap(NizamioSpacing.space1),
           TaskFormError(l.uiTasksErrTitleEmpty),
         ],
-        if (assign) ...[
-          const Gap(NizamioSpacing.space4),
-          TaskFieldLabel(
-            l.uiTasksAssignee,
-            trailing: Text(
-              '${d.assignees.length}',
-              style: t.monoSm.copyWith(color: c.textMuted),
-            ),
+        // Yeni görev formuyla aynı sıra: koordinatörlük, atanan, tarih, öncelik, kanıt.
+        const Gap(NizamioSpacing.space4),
+        TaskFieldLabel(l.uiTasksFieldCoord),
+        Text(
+          catalog?.coordinatorship(task.coordinatorship)?.name ??
+              task.coordinatorship,
+          style: t.bodyMd.copyWith(color: c.textMuted),
+        ),
+        const Gap(NizamioSpacing.space4),
+        TaskFieldLabel(
+          l.uiTasksAssignee,
+          trailing: Text(
+            '${d.assignees.length}',
+            style: t.monoSm.copyWith(color: c.textMuted),
           ),
+        ),
+        if (assign)
           TeamPicker(
             departmentId: dept,
             selected: d.assignees,
             onToggle: ctl.editToggleAssignee,
+          )
+        else ...[
+          // Atamayı yalnız kapsam koordinatörü yapar (WORK-K10); diğerine salt okunur.
+          Text(
+            d.assignees.isEmpty
+                ? l.uiTasksNoPerson
+                : d.assignees
+                      .map(
+                        (id) => catalog?.nameOf(id) ?? l.uiTasksUnknownPerson,
+                      )
+                      .join(', '),
+            style: t.bodyMd,
           ),
+          const Gap(NizamioSpacing.space1),
+          Text(
+            l.uiTasksAssignByCoord,
+            style: t.caption.copyWith(color: c.textMuted),
+          ),
+        ],
+        const Gap(NizamioSpacing.space4),
+        _DatePair(
+          startLabel: l.uiTasksStart,
+          endLabel: l.uiTasksDue,
+          start: d.start,
+          end: d.due,
+          onStart: (v) => ctl.updateEdit(d.copyWith(start: v)),
+          onEnd: (v) => ctl.updateEdit(d.copyWith(due: v)),
+        ),
+        if (d.datesInvalid) ...[
+          const Gap(NizamioSpacing.space1),
+          TaskFormError(l.uiTasksErrDates),
         ],
         const Gap(NizamioSpacing.space4),
         TaskFieldLabel(l.uiTasksPriority),
@@ -125,26 +164,14 @@ class _ServerEditBody extends ConsumerWidget {
           ),
         ),
         const Gap(NizamioSpacing.space4),
-        _DatePair(
-          startLabel: l.uiTasksStart,
-          endLabel: l.uiTasksDue,
-          start: d.start,
-          end: d.due,
-          onStart: (v) => ctl.updateEdit(d.copyWith(start: v)),
-          onEnd: (v) => ctl.updateEdit(d.copyWith(due: v)),
-        ),
-        if (d.datesInvalid) ...[
-          const Gap(NizamioSpacing.space1),
-          TaskFormError(l.uiTasksErrDates),
-        ],
-        const Gap(NizamioSpacing.space3),
-        TaskCheckRow(
-          label: l.uiTasksEvidenceRequired,
-          square: true,
-          selected: d.evidenceRequired,
-          onTap: () =>
-              ctl.updateEdit(d.copyWith(evidenceRequired: !d.evidenceRequired)),
-        ),
+        TaskFieldLabel(l.uiTasksEvidenceFile),
+        for (final required in const [true, false])
+          TaskCheckRow(
+            label: required ? l.uiTasksRequired : l.uiTasksOptional,
+            radio: true,
+            selected: d.evidenceRequired == required,
+            onTap: () => ctl.updateEdit(d.copyWith(evidenceRequired: required)),
+          ),
       ],
     );
   }

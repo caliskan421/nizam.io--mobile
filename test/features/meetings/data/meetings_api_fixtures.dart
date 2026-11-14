@@ -21,8 +21,8 @@ Map<String, Object?> _meeting({
   'created_at': _t,
   'updated_at': _t,
   'departments': [
-    {'department_id': 'd1', 'department_name': 'Mekanik'},
-    {'department_id': 'd2', 'department_name': 'Yazılım'},
+    {'department_id': 'd1', 'department_name': 'Mekanik', 'deleted': false},
+    {'department_id': 'd2', 'department_name': 'Yazılım', 'deleted': false},
   ],
 };
 
@@ -59,3 +59,11 @@ Map<String, Object?> _conference({String status = 'live'}) => {
 };
 
 const _effects = {'failed_messages': 2, 'event_failed': true};
+
+/// Not sayfası (v0.19.0-api: `total` + `counts` zorunlu).
+Map<String, Object?> noteListWire(List<Object?> items, [String next = '']) => {
+  'items': items,
+  'next_cursor': next,
+  'total': items.length,
+  'counts': {'all': items.length, 'converted': 0, 'mine': 0},
+};

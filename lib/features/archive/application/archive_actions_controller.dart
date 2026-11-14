@@ -116,6 +116,17 @@ class ArchiveActionsController extends _$ArchiveActionsController {
     return (ok: true, error: null, path: null);
   });
 
+  /// Etiketi değiştirir; aynı etiket ya da bilinmeyen değer istek göndermez (vazgeçme).
+  /// Başarıda listeler yeniden okunur.
+  Future<ArchiveOutcome> retagFile(RecordFile file, RecordTag tag) =>
+      _run(() async {
+        if (tag == file.tag || tag == RecordTag.unknown) return _cancelled;
+        final ctx = await _context();
+        await _repo.retagFile(file.id, tag, department: ctx.department);
+        _reload();
+        return (ok: true, error: null, path: null);
+      });
+
   /// Sistem dosya seçicisi bu kurulumda var mı.
   ArchiveUploadStart get uploadStart => ref.read(uploadPickerProvider).available
       ? ArchiveUploadStart.ready

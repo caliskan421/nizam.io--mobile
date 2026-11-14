@@ -148,6 +148,7 @@ Map<String, Object> _bodies() => {
         'work_item_id': 'w1',
         'title': 'Pompa',
         'done': true,
+        'evidence_required': false,
         'created_by_account_id': 'u1',
         'created_at': '2026-07-02T08:00:00Z',
         'updated_at': '2026-07-03T08:00:00Z',
@@ -165,6 +166,7 @@ Map<String, Object> _bodies() => {
         'work_item_id': 'w1',
         'title': 'Test',
         'done': false,
+        'evidence_required': false,
         'created_by_account_id': 'u1',
         'created_at': '2026-07-02T08:00:00Z',
         'updated_at': '2026-07-02T08:00:00Z',
@@ -215,6 +217,7 @@ Map<String, Object> _bodies() => {
         'old_end_on': '2026-09-20',
         'new_end_on': '2026-11-10',
         'reason': 'Gecikme',
+        'review_reason': 'Önce bağımlılık',
       },
     ],
     'total': 2,
@@ -276,6 +279,7 @@ void main() {
     expect(r.oldDue, DateTime(2026, 9, 20));
     expect(r.due, DateTime(2026, 11, 10));
     expect(r.reason, 'Gecikme');
+    expect(r.reviewReason, 'Önce bağımlılık');
     expect(r.isPending, isTrue);
   });
 

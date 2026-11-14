@@ -377,10 +377,13 @@ HashMap<String, int> taskNumbers(List<TaskItem> tasks) {
 /// Prototip `S_hgantt.renderVals` mantığı: süzgeç, gruplama (başlangıca göre kararlı sıra),
 /// kapalı gruplar, sayılar, çipler ve seçili kart. Girdi, Gantt görünür görev kümesi ve
 /// katalog metaverisinin birleşimidir; bağımlılıklar Gantt bağlantılarından gelir.
+/// [rangeOf] bir görevin kayıtlı tarihinin yerine çizilecek aralığı verir (kaydedilmiş
+/// düzenleme ya da seçili görevin +/- taslağı); null → katalogdaki başlangıç/bitiş.
 GanttView buildGanttView(
   TaskCatalog catalog,
   GanttState s, {
   Set<String> dependent = const {},
+  DayRange? Function(String code)? rangeOf,
 }) {
   final year = catalog.today.year;
   final today = seasonDay(catalog.today, year);
@@ -391,10 +394,9 @@ GanttView buildGanttView(
       GanttTask(
         TimelineTask(
           item: item,
-          range: DayRange(
-            seasonDay(item.start, year),
-            seasonDay(item.due, year),
-          ),
+          range:
+              rangeOf?.call(item.code) ??
+              DayRange(seasonDay(item.start, year), seasonDay(item.due, year)),
           doneAt: item.completedAt == null
               ? null
               : seasonDay(item.completedAt!, year),
@@ -414,16 +416,7 @@ GanttView buildGanttView(
   };
   bool coordOk(GanttTask t) =>
       s.coords.isEmpty || s.coords.contains(t.item.coordinatorship);
-  final q = s.query.trim().toLowerCase();
-  bool queryOk(GanttTask t) {
-    if (q.isEmpty) return true;
-    bool has(String? s) => s != null && s.toLowerCase().contains(q);
-    final c = catalog.coordinatorship(t.item.coordinatorship);
-    return has(t.item.title) ||
-        has(c?.label) ||
-        has(c?.name) ||
-        t.item.assignees.any((id) => has(catalog.nameOf(id)));
-  }
+  bool queryOk(GanttTask t) => taskMatchesQuery(t.item, catalog, s.query);
 
   final visible = [
     for (final t in tasks)

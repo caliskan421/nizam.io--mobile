@@ -298,11 +298,15 @@ class TablesPage extends ConsumerWidget {
                     color: context.colors.surfaceRaised,
                   ),
                   child: ShaderMask(
-                    shaderCallback: (bounds) => const LinearGradient(
+                    shaderCallback: (bounds) => LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Colors.white, Colors.white, Colors.transparent],
-                      stops: [0, .62, 1],
+                      colors: [
+                        context.colors.text,
+                        context.colors.text,
+                        context.colors.text.withValues(alpha: 0),
+                      ],
+                      stops: const [0, .62, 1],
                     ).createShader(bounds),
                     blendMode: BlendMode.dstIn,
                     child: Column(

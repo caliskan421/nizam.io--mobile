@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TransitionResult {
 
-@JsonKey(name: 'work_item_id') String get workItemId; String get from; String get to; TransitionResultActor get actor;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? get endOn;
+@JsonKey(name: 'work_item_id') String get workItemId; String get from; String get to;/// Hesaplanan aktör. `sirket_yoneticisi`, görevin departmanında koordinatör olmayan şirket yöneticisidir (ADR-0041; koordinatör ∪ kendi görevi koordinatörü kümesi).
+ TransitionResultActor get actor;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? get endOn;
 /// Create a copy of TransitionResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -225,6 +226,7 @@ class _TransitionResult implements TransitionResult {
 @override@JsonKey(name: 'work_item_id') final  String workItemId;
 @override final  String from;
 @override final  String to;
+/// Hesaplanan aktör. `sirket_yoneticisi`, görevin departmanında koordinatör olmayan şirket yöneticisidir (ADR-0041; koordinatör ∪ kendi görevi koordinatörü kümesi).
 @override final  TransitionResultActor actor;
 @override@DateOnlyConverter()@JsonKey(name: 'end_on') final  DateTime? endOn;
 

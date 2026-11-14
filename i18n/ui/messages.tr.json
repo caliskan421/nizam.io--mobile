@@ -125,6 +125,12 @@
     "ui.messages.search_in_chat_hint": "Mesaj metni",
     "ui.messages.search_empty": "Eşleşen mesaj yok.",
     "ui.messages.search_more": "Daha eski sonuçlar",
-    "ui.messages.not_in_window": "Mesaj bulunamadı."
+    "ui.messages.not_in_window": "Mesaj bulunamadı.",
+    "ui.messages.fail_size": "Dosya çok büyük",
+    "ui.messages.fail_type": "Dosya türü kabul edilmiyor",
+    "ui.messages.fail_unreadable": "Dosya okunamadı",
+    "ui.messages.fail_network": "Bağlantı sorunu",
+    "ui.messages.fail_permission": "Yetkiniz yok",
+    "ui.messages.try_again": "Tekrar dene"
   }
 }

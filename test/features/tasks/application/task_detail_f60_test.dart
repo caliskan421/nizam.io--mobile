@@ -127,6 +127,7 @@ class _Server {
               'work_item_id': 'w1',
               'title': subTitle,
               'done': false,
+              'evidence_required': false,
               'created_by_account_id': 'acc-1',
               'created_at': '2026-10-02T08:00:00Z',
               'updated_at': '2026-10-02T08:00:00Z',
@@ -178,6 +179,7 @@ class _Server {
         'work_item_id': 'w1',
         'title': subTitle,
         'done': false,
+        'evidence_required': false,
         'created_by_account_id': 'acc-1',
         'created_at': '2026-10-02T08:00:00Z',
         'updated_at': '2026-10-02T08:00:00Z',
@@ -410,7 +412,7 @@ void main() {
       s.queued['POST /v1/work-items/w1/subtasks'] = [() => timeout(null)];
       final r = await ctl.createSubtask('Vana');
       expect(r.kind, WriteKind.unknown);
-      expect(ctl.pendingSubtaskTitle, 'Vana', reason: 'diyalog adla açılır');
+      expect(ctl.pendingSubtask?.title, 'Vana', reason: 'diyalog adla açılır');
       expect(h.backend.count('POST', '/v1/work-items/w1/subtasks'), 1);
     });
 

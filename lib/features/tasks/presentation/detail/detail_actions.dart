@@ -19,8 +19,10 @@ import '../../domain/task_writes.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 import 'detail_forms.dart';
+import 'subtask_create_sheet.dart';
 
 part 'detail_list_option.dart';
+part 'detail_request_actions.dart';
 part 'upload_origin_sheet.dart';
 
 /// Ayrıntı ekranının eylemleri: denetleyici komutu + prototipteki sonuç bildirimi ve alt
@@ -312,20 +314,6 @@ class TaskDetailActions {
             },
           ),
           _ListOption(
-            label: l.uiTasksCopy,
-            leading: const NzIcon(NzIcons.copy, size: NizamioSize.iconSizeSm),
-            onTap: () async {
-              Navigator.of(sheet).pop();
-              final (r, _) = await _ctl.copy(l.uiTasksCopySuffix);
-              _report(
-                r,
-                done:
-                    '“${t.title} ${l.uiTasksCopySuffix}” '
-                    '${l.uiTasksTCreatedTail}',
-              );
-            },
-          ),
-          _ListOption(
             label: l.uiTasksDeleteTask,
             color: c.danger,
             leading: NzIcon(
@@ -575,60 +563,30 @@ class TaskDetailActions {
     _report(await _ctl.deleteFile(f), done: l.uiTasksTFileDeleted);
   }
 
-  // ---- talep, hatırlatma, silme ------------------------------------------------------------
-
-  Future<void> approveRequest() async {
-    final r = _task?.dateRequest;
-    if (r == null) return;
-    final l = context.l10n;
-    _report(
-      await _ctl.approveRequest(),
-      done:
-          '${l.uiTasksTApproved} · ${l.uiTasksTNewDue} '
-          '${TaskDates.full(r.due)}',
-    );
-  }
-
-  Future<void> rejectRequest() async {
-    final r = _task?.dateRequest;
-    if (r == null) return;
-    final l = context.l10n;
-    _report(
-      await _ctl.rejectRequest(),
-      done:
-          '${l.uiTasksTRejected} · '
-          '${r.by == null ? '' : _name(r.by!)} ${l.uiTasksTInformed}',
-    );
-  }
-
-  void remind() {
-    final t = _task;
-    if (t == null) return;
-    _say(
-      '${context.l10n.uiTasksTReminded} · '
-      '${t.assignees.map(_name).join(', ')}',
-    );
-  }
-
   // ---- alt görev, not ---------------------------------------------------------------------
 
   Future<void> toggleSubtask(String id) async =>
       _report(await _ctl.toggleSubtask(id));
 
-  /// Alt görev ekle: başlık alt sayfası → oluştur.
+  /// Alt görev ekle: başlık + kanıt radyosu → oluştur. S12: sonucu bilinmeyen eklemenin adı
+  /// geri gelir (aynı gövde → aynı anahtar).
   Future<void> addSubtask() async {
-    final l = context.l10n;
-    final title = await _askText(
-      title: l.uiTasksSubAdd,
-      description: l.uiTasksSubsHint,
-      label: l.uiTasksSubName,
-      ok: l.uiTasksCreate,
-      // S12: sonucu bilinmeyen/başarısız eklemenin adı geri gelir (aynı ad → aynı anahtar).
-      initial: _ctl.pendingSubtaskTitle ?? '',
+    final pending = _ctl.pendingSubtask;
+    final r = await askNewSubtask(
+      context,
+      initial: pending?.title ?? '',
+      initialEvidence: pending?.evidenceRequired ?? false,
     );
-    if (title == null || !context.mounted) return;
-    _report(await _ctl.createSubtask(title), done: l.uiTasksTSubAdded);
+    if (r == null || !context.mounted) return;
+    final done = context.l10n.uiTasksTSubAdded;
+    _report(
+      await _ctl.createSubtask(r.title, evidenceRequired: r.evidenceRequired),
+      done: done,
+    );
   }
+
+  Future<void> setSubtaskEvidence(String id, bool v) async =>
+      _report(await _ctl.setSubtaskEvidence(id, value: v));
 
   /// Alt görev adı: gönderilemeyen ad state'te kalır ve diyalog onunla açılır (S12); 409
   /// `work.edit_conflict`'te sunucudaki ad ile sizinki arasında seçim (V3).
@@ -681,11 +639,19 @@ class TaskDetailActions {
   Future<void> clearSubtaskDates(String id) async =>
       _report(await _ctl.clearSubtaskDates(id));
 
+  /// Alt görev kalıcı silinir: önce "geri alınamaz" onayı.
   Future<void> removeSubtask(String id) async {
     final key = '“${_task?.title ?? ''}”';
+    final l = context.l10n;
+    final yes = await _confirm(
+      title: l.uiTasksSubDeleteQ,
+      description: l.uiTasksSubDeleteDesc,
+      ok: l.uiTasksDeleteOk,
+      danger: true,
+    );
+    if (!yes || !context.mounted) return;
     final (r, u) = await _ctl.removeSubtask(id);
     if (!context.mounted) return;
-    final l = context.l10n;
     _report(
       r,
       done: u == null

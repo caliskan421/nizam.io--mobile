@@ -33,6 +33,8 @@ final serverCoordinatorshipStatsProvider = FutureProvider((ref) async {
           name: server.name,
           done: server.done,
           total: server.total,
+          inProgress: server.inProgress,
+          todo: server.todo,
           memberCount: server.memberCount,
           late: server.late,
           leads: server.leads,

@@ -17,7 +17,9 @@ T _$identity<T>(T value) => value;
 mixin _$MeetingDepartment {
 
 @JsonKey(name: 'department_id') String get departmentId;/// Bağ kurulduğu andaki departman adı.
-@JsonKey(name: 'department_name') String get departmentName;
+@JsonKey(name: 'department_name') String get departmentName;/// Departman kodunun bağ kurulduğu andaki kopyası (COLLABORATION-K81); organization'da kod sonradan değişse de değişmez, yönetici departman setini yeniden yazınca adla birlikte tazelenir. Kodsuz departmanda ve kopya tutulmadan önce kurulmuş bağda null.
+@JsonKey(name: 'department_code') String? get departmentCode;/// Departman okuma anında silinmiş mi (COLLABORATION-K81). Kopya değil güncel olgudur; silinmiş departmanın adı ve kodu kopyadan görünmeye devam eder.
+ bool get deleted;
 /// Create a copy of MeetingDepartment
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,20 +33,20 @@ $MeetingDepartmentCopyWith<MeetingDepartment> get copyWith => _$MeetingDepartmen
 @override
 bool operator ==(Object other) {
   final _this = this as MeetingDepartment;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MeetingDepartment&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.departmentName, _this.departmentName) || other.departmentName == _this.departmentName));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MeetingDepartment&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.departmentName, _this.departmentName) || other.departmentName == _this.departmentName)&&(identical(other.departmentCode, _this.departmentCode) || other.departmentCode == _this.departmentCode)&&(identical(other.deleted, _this.deleted) || other.deleted == _this.deleted));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MeetingDepartment;
-  return Object.hash(runtimeType,_this.departmentId,_this.departmentName);
+  return Object.hash(runtimeType,_this.departmentId,_this.departmentName,_this.departmentCode,_this.deleted);
 }
 
 @override
 String toString() {
   final _this = this as MeetingDepartment;
-  return 'MeetingDepartment(departmentId: ${_this.departmentId}, departmentName: ${_this.departmentName})';
+  return 'MeetingDepartment(departmentId: ${_this.departmentId}, departmentName: ${_this.departmentName}, departmentCode: ${_this.departmentCode}, deleted: ${_this.deleted})';
 }
 
 
@@ -55,7 +57,7 @@ abstract mixin class $MeetingDepartmentCopyWith<$Res>  {
   factory $MeetingDepartmentCopyWith(MeetingDepartment value, $Res Function(MeetingDepartment) _then) = _$MeetingDepartmentCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'department_name') String departmentName
+@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'department_name') String departmentName,@JsonKey(name: 'department_code') String? departmentCode, bool deleted
 });
 
 
@@ -72,11 +74,13 @@ class _$MeetingDepartmentCopyWithImpl<$Res>
 
 /// Create a copy of MeetingDepartment
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? departmentId = null,Object? departmentName = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? departmentId = null,Object? departmentName = null,Object? departmentCode = freezed,Object? deleted = null,}) {
   return _then(MeetingDepartment(
 departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
 as String,departmentName: null == departmentName ? _self.departmentName : departmentName // ignore: cast_nullable_to_non_nullable
-as String,
+as String,departmentCode: freezed == departmentCode ? _self.departmentCode : departmentCode // ignore: cast_nullable_to_non_nullable
+as String?,deleted: null == deleted ? _self.deleted : deleted // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -161,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName, @JsonKey(name: 'department_code')  String? departmentCode,  bool deleted)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MeetingDepartment() when $default != null:
-return $default(_that.departmentId,_that.departmentName);case _:
+return $default(_that.departmentId,_that.departmentName,_that.departmentCode,_that.deleted);case _:
   return orElse();
 
 }
@@ -182,10 +186,10 @@ return $default(_that.departmentId,_that.departmentName);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName, @JsonKey(name: 'department_code')  String? departmentCode,  bool deleted)  $default,) {final _that = this;
 switch (_that) {
 case _MeetingDepartment():
-return $default(_that.departmentId,_that.departmentName);case _:
+return $default(_that.departmentId,_that.departmentName,_that.departmentCode,_that.deleted);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +206,10 @@ return $default(_that.departmentId,_that.departmentName);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'department_id')  String departmentId, @JsonKey(name: 'department_name')  String departmentName, @JsonKey(name: 'department_code')  String? departmentCode,  bool deleted)?  $default,) {final _that = this;
 switch (_that) {
 case _MeetingDepartment() when $default != null:
-return $default(_that.departmentId,_that.departmentName);case _:
+return $default(_that.departmentId,_that.departmentName,_that.departmentCode,_that.deleted);case _:
   return null;
 
 }
@@ -217,12 +221,16 @@ return $default(_that.departmentId,_that.departmentName);case _:
 @JsonSerializable()
 
 class _MeetingDepartment implements MeetingDepartment {
-  const _MeetingDepartment({@JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'department_name') required this.departmentName});
+  const _MeetingDepartment({@JsonKey(name: 'department_id') required this.departmentId, @JsonKey(name: 'department_name') required this.departmentName, @JsonKey(name: 'department_code') required this.departmentCode, required this.deleted});
   factory _MeetingDepartment.fromJson(Map<String, dynamic> json) => _$MeetingDepartmentFromJson(json);
 
 @override@JsonKey(name: 'department_id') final  String departmentId;
 /// Bağ kurulduğu andaki departman adı.
 @override@JsonKey(name: 'department_name') final  String departmentName;
+/// Departman kodunun bağ kurulduğu andaki kopyası (COLLABORATION-K81); organization'da kod sonradan değişse de değişmez, yönetici departman setini yeniden yazınca adla birlikte tazelenir. Kodsuz departmanda ve kopya tutulmadan önce kurulmuş bağda null.
+@override@JsonKey(name: 'department_code') final  String? departmentCode;
+/// Departman okuma anında silinmiş mi (COLLABORATION-K81). Kopya değil güncel olgudur; silinmiş departmanın adı ve kodu kopyadan görünmeye devam eder.
+@override final  bool deleted;
 
 /// Create a copy of MeetingDepartment
 /// with the given fields replaced by the non-null parameter values.
@@ -237,18 +245,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MeetingDepartment&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.departmentName, departmentName) || other.departmentName == departmentName));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MeetingDepartment&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.departmentName, departmentName) || other.departmentName == departmentName)&&(identical(other.departmentCode, departmentCode) || other.departmentCode == departmentCode)&&(identical(other.deleted, deleted) || other.deleted == deleted));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,departmentId,departmentName);
+    return Object.hash(runtimeType,departmentId,departmentName,departmentCode,deleted);
 }
 
 @override
 String toString() {
-    return 'MeetingDepartment(departmentId: $departmentId, departmentName: $departmentName)';
+    return 'MeetingDepartment(departmentId: $departmentId, departmentName: $departmentName, departmentCode: $departmentCode, deleted: $deleted)';
 }
 
 
@@ -259,7 +267,7 @@ abstract mixin class _$MeetingDepartmentCopyWith<$Res> implements $MeetingDepart
   factory _$MeetingDepartmentCopyWith(_MeetingDepartment value, $Res Function(_MeetingDepartment) _then) = __$MeetingDepartmentCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'department_name') String departmentName
+@JsonKey(name: 'department_id') String departmentId,@JsonKey(name: 'department_name') String departmentName,@JsonKey(name: 'department_code') String? departmentCode, bool deleted
 });
 
 
@@ -276,11 +284,13 @@ class __$MeetingDepartmentCopyWithImpl<$Res>
 
 /// Create a copy of MeetingDepartment
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? departmentId = null,Object? departmentName = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? departmentId = null,Object? departmentName = null,Object? departmentCode = freezed,Object? deleted = null,}) {
   return _then(_MeetingDepartment(
 departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
 as String,departmentName: null == departmentName ? _self.departmentName : departmentName // ignore: cast_nullable_to_non_nullable
-as String,
+as String,departmentCode: freezed == departmentCode ? _self.departmentCode : departmentCode // ignore: cast_nullable_to_non_nullable
+as String?,deleted: null == deleted ? _self.deleted : deleted // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

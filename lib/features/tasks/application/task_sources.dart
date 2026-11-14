@@ -131,7 +131,13 @@ final class TaskWriteSource implements TaskWriteRepository {
     TaskItem task,
     String title, {
     required String requestKey,
-  }) async => _s.createSubtask(task, title, requestKey: requestKey);
+    bool evidenceRequired = false,
+  }) async => _s.createSubtask(
+    task,
+    title,
+    requestKey: requestKey,
+    evidenceRequired: evidenceRequired,
+  );
 
   @override
   Future<void> updateSubtask(
@@ -198,7 +204,11 @@ final class TaskWriteSource implements TaskWriteRepository {
   Future<void> reviewDateChange(
     String requestId, {
     required bool approve,
-  }) async => _s.reviewDateChange(requestId, approve: approve);
+    String? reason,
+  }) async => _s.reviewDateChange(requestId, approve: approve, reason: reason);
+
+  @override
+  Future<int> remind(TaskItem task) => _s.remind(task);
 
   @override
   Future<void> deleteDateChange(String requestId) async =>

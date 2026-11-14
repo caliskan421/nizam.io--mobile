@@ -16,6 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UpdateMeetingRequest {
 
+/// Verilirse kuruluştaki kuralla aynı: düz metne indirilip kırpıldıktan sonra 1–255 karakter (Unicode kod noktası); aksi 422 `collaboration.input_invalid` (alan `title`).
  String? get title;/// Verilirse kuruluştaki kuralla aynı: geçmiş gün olamaz.
 @JsonKey(name: 'meeting_date') String? get meetingDate;/// Alan yoksa yer değişmez; `null` ya da boş dizge yeri kaldırır; değer kuruluştaki kuralla doğrulanır (COLLABORATION-K76).
  String? get place;@JsonKey(name: 'department_ids') List<String>? get departmentIds;@JsonKey(name: 'members_included') bool? get membersIncluded;
@@ -224,6 +225,7 @@ class _UpdateMeetingRequest implements UpdateMeetingRequest {
   const _UpdateMeetingRequest({this.title, @JsonKey(name: 'meeting_date') this.meetingDate, this.place, @JsonKey(name: 'department_ids')  List<String>? departmentIds, @JsonKey(name: 'members_included') this.membersIncluded}): _departmentIds = departmentIds;
   factory _UpdateMeetingRequest.fromJson(Map<String, dynamic> json) => _$UpdateMeetingRequestFromJson(json);
 
+/// Verilirse kuruluştaki kuralla aynı: düz metne indirilip kırpıldıktan sonra 1–255 karakter (Unicode kod noktası); aksi 422 `collaboration.input_invalid` (alan `title`).
 @override final  String? title;
 /// Verilirse kuruluştaki kuralla aynı: geçmiş gün olamaz.
 @override@JsonKey(name: 'meeting_date') final  String? meetingDate;

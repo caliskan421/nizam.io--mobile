@@ -53,9 +53,12 @@ abstract class AssistantClient {
   /// Yalnız `NIZAMIO_ASSISTANT_ENABLED=true` iken kayıtlıdır; bayrak kapalıyken yol tanımsızdır ve `404 platform.route_not_found` döner.
   ///
   /// Cevap `text/event-stream` akışıdır; her olay `event: <ad>` ve tek satır.
-  /// `data: <JSON>` taşır (şemalar `AssistantEvent*`). Olay sırası: `metin` parçaları.
-  /// ve `arac`/`gorunum` olayları dönüşümlü; başarıda kapanış `adlar` (varsa),.
-  /// `kaynaklar`, `kullanim`, `bitti`.
+  /// `data: <JSON>` taşır (şemalar `AssistantEvent*`). Araç ilerleme olayları.
+  /// cevap hazırlanırken gelebilir. Gerçek sağlayıcılarda konu kapısı ve cevap.
+  /// denetimi zorunludur; `metin` yalnız denetimden geçen son cevabı taşır,.
+  /// denetlenmemiş taslak gönderilmez. Başarıda kapanış `adlar` (varsa),.
+  /// `kaynaklar`, `kullanim`, `bitti`. Kapsam seçili programın görev, departman,.
+  /// iş yükü ve toplantı verileridir; genel ürün desteği dahil değildir.
   ///
   /// Akış BAŞLAMADAN doğan hata (kapsam, kota, kapasite, sohbet sahipliği, ilk.
   /// model çağrısının arızası) normal hata zarfıyla döner. Akış başladıktan.
@@ -85,7 +88,8 @@ abstract class AssistantClient {
   /// Sohbet ve görünür mesajları (kullanıcı soruları ve asistan cevapları).
   ///
   /// Yalnız `NIZAMIO_ASSISTANT_ENABLED=true` iken kayıtlıdır; bayrak kapalıyken yol tanımsızdır ve `404 platform.route_not_found` döner. Başkasının ya da başka programın sohbeti `assistant.not_found` alır.
-  /// (varlık sızmaz). Araç sonuçları ve takma ad tablosu dönmez.
+  /// (varlık sızmaz). Araç sonuçları, araç çağrısı sırasındaki ara taslaklar.
+  /// ve takma ad tablosu dönmez; görünür asistan mesajları son cevaplardır.
   @GET('/v1/assistant/conversations/{id}')
   Future<AssistantConversationDetail> assistantConversation({
     @Path('id') required String id,

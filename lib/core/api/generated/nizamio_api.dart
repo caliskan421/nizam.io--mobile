@@ -4,8 +4,10 @@
 
 import 'package:dio/dio.dart';
 
+import 'clients/tables_client.dart';
 import 'clients/platform_client.dart';
 import 'clients/identity_client.dart';
+import 'clients/audit_client.dart';
 import 'clients/organization_client.dart';
 import 'clients/program_client.dart';
 import 'clients/work_client.dart';
@@ -58,8 +60,10 @@ class NizamioApi {
 
   static String get version => 'v1';
 
+  TablesClient? _tables;
   PlatformClient? _platform;
   IdentityClient? _identity;
+  AuditClient? _audit;
   OrganizationClient? _organization;
   ProgramClient? _program;
   WorkClient? _work;
@@ -70,11 +74,15 @@ class NizamioApi {
   ReportingClient? _reporting;
   AssistantClient? _assistant;
 
+  TablesClient get tables => _tables ??= TablesClient(_dio, baseUrl: _baseUrl);
+
   PlatformClient get platform =>
       _platform ??= PlatformClient(_dio, baseUrl: _baseUrl);
 
   IdentityClient get identity =>
       _identity ??= IdentityClient(_dio, baseUrl: _baseUrl);
+
+  AuditClient get audit => _audit ??= AuditClient(_dio, baseUrl: _baseUrl);
 
   OrganizationClient get organization =>
       _organization ??= OrganizationClient(_dio, baseUrl: _baseUrl);

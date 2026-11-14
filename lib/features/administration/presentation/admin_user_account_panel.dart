@@ -193,13 +193,14 @@ class _AccountPanelState extends ConsumerState<AdminUserAccountPanel> {
                           (t) => t.role == DepartmentRole.member,
                         ),
                         d.busy,
+                        d.hasRole,
                       ),
               ),
             );
             if (draft == null) return const SizedBox.shrink();
             final coordinator = draft.$2;
             final member = draft.$3;
-            return LayoutBuilder(
+            final roles = LayoutBuilder(
               builder: (context, constraints) {
                 final choices = Row(
                   children: [
@@ -252,6 +253,20 @@ class _AccountPanelState extends ConsumerState<AdminUserAccountPanel> {
                   ),
                 );
               },
+            );
+            if (draft.$5) return roles;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                roles,
+                Padding(
+                  padding: const EdgeInsets.only(top: NizamioSpacing.space1),
+                  child: Text(
+                    l.uiUsersDraftNoRole,
+                    style: context.text.caption.copyWith(color: c.danger),
+                  ),
+                ),
+              ],
             );
           },
         ),

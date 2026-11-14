@@ -30,6 +30,9 @@ abstract class MeetingRevised with _$MeetingRevised {
     /// Davet kipi (COLLABORATION-K73, K74). `coordinatorship`: bağlı departmanların koordinatörleri ve `members_included` ise üyeleri erişir. `person`: departman bağı erişim vermez; yönetici ve sahip departmanı hâlâ koordine eden oluşturan yönetir (koordinatörlüğü düşen oluşturan katılımcıysa üye düzeyindedir, değilse toplantıyı görmez). İki kipte de katılımcı üye düzeyinde görür. Kuruluşta seçilir, değişmez.
     @JsonKey(name: 'invite_mode') required MeetingInviteMode inviteMode,
     @JsonKey(name: 'created_by_account_id') required String createdByAccountId,
+
+    /// Toplantıyı açan hesabın bugünkü görünen adı (COLLABORATION-K81); bütün toplantı görüntülerinde (kuruluş, güncelleme, liste, detay, silinenler) aynıdır. Hesap çözülemezse null.
+    @JsonKey(name: 'created_by_full_name') required String? createdByFullName,
     @JsonKey(name: 'created_by_role')
     required MeetingCreatedByRole createdByRole,
     @JsonKey(name: 'created_at') required DateTime createdAt,

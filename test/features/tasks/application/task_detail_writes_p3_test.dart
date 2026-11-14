@@ -170,7 +170,7 @@ void main() {
       expect(c.read(taskDetailControllerProvider('w1')).edit, isNotNull);
     });
 
-    test('üye: düzenle/öncelik/sil/kopyala istek göndermez', () async {
+    test('üye: düzenle/öncelik/sil istek göndermez', () async {
       final s = _Server()
         ..role = 'uye'
         ..assignees = ['acc-1'];
@@ -180,7 +180,6 @@ void main() {
         WriteKind.invalid,
       );
       expect((await ctl.delete()).kind, WriteKind.invalid);
-      expect((await ctl.copy('(kopya)')).$1.kind, WriteKind.invalid);
       await ctl.openEdit();
       expect((await ctl.submitEdit()).kind, WriteKind.invalid);
       expect(h.backend.requests, isEmpty);
@@ -214,22 +213,6 @@ void main() {
       expect(_log(h), contains('GET /v1/program/work-items'));
       expect(c.read(taskDetailControllerProvider('w1')).deleted, isNotNull);
     });
-
-    test(
-      'kopyala: createWorkItem (aynı departman, ilk atanan); sunucu kimliği',
-      () async {
-        final s = _Server();
-        final (h, _, ctl) = await _open(s);
-        s.extraItems = [_item('w2')];
-        final (r, id) = await ctl.copy('(kopya)');
-        expect(r.ok, isTrue);
-        expect(id, 'w2');
-        final post = _only(h, 'POST', '/v1/work-items');
-        expect(post.header('X-Nizamio-Department'), 'd1');
-        expect((post.body! as Map)['title'], 'Hidrofor kurulumu (kopya)');
-        expect((post.body! as Map)['assignee_account_id'], 'u2');
-      },
-    );
   });
 
   group('atama: üstlen / bırak', () {
@@ -312,15 +295,15 @@ void main() {
         ..role = 'yok'
         ..pendingRequest = _request();
       final (h, _, ctl) = await _open(s);
+      expect((await ctl.rejectRequest('  ')).kind, WriteKind.invalid);
       expect((await ctl.approveRequest()).ok, isTrue);
       final post = _only(h, 'POST', '/v1/date-change-requests/r1/review');
       expect(post.body, {'decision': 'approved'});
       expect(post.header('X-Nizamio-Department'), isNull);
       expect(_log(h), contains('GET /v1/program/work-items'));
-
       final k = _Server()..pendingRequest = _request();
       final (h2, _, ctl2) = await _open(k);
-      expect((await ctl2.rejectRequest()).kind, WriteKind.invalid);
+      expect((await ctl2.rejectRequest('Gerekçe')).kind, WriteKind.invalid);
       expect(h2.backend.requests, isEmpty);
     });
   });

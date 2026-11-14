@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:meta/meta.dart';
 
 import '../../../core/domain/turkish_collation.dart';
@@ -22,6 +24,8 @@ final class CoordinatorshipStats {
     required this.members,
     this.shortCode,
     this.memberCount,
+    this.inProgress = 0,
+    this.todo = 0,
   });
 
   /// Anahtar: `department_id` (kullanıcıya gösterilmez; ekranda [shortCode]).
@@ -35,6 +39,12 @@ final class CoordinatorshipStats {
 
   /// Geciken (bitişi geçmiş, tamamlanmamış) görev sayısı.
   final int late;
+
+  /// Durum dağılımı (ana sayfa kartıyla aynı): devam eden ve başlamamış görevler; kalan
+  /// açık görevler onay/iade ([inReview]).
+  final int inProgress;
+  final int todo;
+  int get inReview => math.max(0, total - done - inProgress - todo);
   final List<Person> leads;
 
   /// Katalogdaki üye kişiler.
@@ -62,6 +72,8 @@ CoordinatorshipStats _stats(TaskCatalog catalog, CoordinatorshipRef c) {
     shortCode: c.shortCode,
     done: tasks.where((t) => t.status == TaskStatus.done).length,
     total: tasks.length,
+    inProgress: tasks.where((t) => t.status == TaskStatus.inProgress).length,
+    todo: tasks.where((t) => t.status == TaskStatus.todo).length,
     late: tasks.where((t) => t.isOverdue).length,
     leads: [...c.leads.map(catalog.person).nonNulls],
     members: [...c.members.map(catalog.person).nonNulls],

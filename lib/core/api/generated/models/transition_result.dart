@@ -17,6 +17,8 @@ abstract class TransitionResult with _$TransitionResult {
     @JsonKey(name: 'work_item_id') required String workItemId,
     required String from,
     required String to,
+
+    /// Hesaplanan aktör. `sirket_yoneticisi`, görevin departmanında koordinatör olmayan şirket yöneticisidir (ADR-0041; koordinatör ∪ kendi görevi koordinatörü kümesi).
     required TransitionResultActor actor,
     @DateOnlyConverter() @JsonKey(name: 'end_on') DateTime? endOn,
   }) = _TransitionResult;

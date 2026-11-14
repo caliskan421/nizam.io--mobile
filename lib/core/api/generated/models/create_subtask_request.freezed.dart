@@ -19,7 +19,8 @@ mixin _$CreateSubtaskRequest {
 /// 1–300 karakter (kırpılarak), kontrol karakteri yok.
  String get title;/// Opsiyonel; yalnız ana göreve atanmış hesap (aksi 422 `work.subtask_assignee_not_assigned`).
 @JsonKey(name: 'assignee_account_id') String? get assigneeAccountId;/// Opsiyonel; `end_on` ile birlikte verilir. Yalnız bilgidir (Gantt, bağımlılık ve gecikmeye girmez).
-@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? get startOn;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? get endOn;
+@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? get startOn;@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? get endOn;/// Opsiyonel (varsayılan false). Açıksa alt görev, kendisine bağlı en az bir dosya olmadan kapatılamaz (422 `work.subtask_attachment_required`; WORK-K70).
+@JsonKey(name: 'evidence_required') bool? get evidenceRequired;
 /// Create a copy of CreateSubtaskRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -33,20 +34,20 @@ $CreateSubtaskRequestCopyWith<CreateSubtaskRequest> get copyWith => _$CreateSubt
 @override
 bool operator ==(Object other) {
   final _this = this as CreateSubtaskRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateSubtaskRequest&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.assigneeAccountId, _this.assigneeAccountId) || other.assigneeAccountId == _this.assigneeAccountId)&&(identical(other.startOn, _this.startOn) || other.startOn == _this.startOn)&&(identical(other.endOn, _this.endOn) || other.endOn == _this.endOn));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateSubtaskRequest&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.assigneeAccountId, _this.assigneeAccountId) || other.assigneeAccountId == _this.assigneeAccountId)&&(identical(other.startOn, _this.startOn) || other.startOn == _this.startOn)&&(identical(other.endOn, _this.endOn) || other.endOn == _this.endOn)&&(identical(other.evidenceRequired, _this.evidenceRequired) || other.evidenceRequired == _this.evidenceRequired));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CreateSubtaskRequest;
-  return Object.hash(runtimeType,_this.title,_this.assigneeAccountId,_this.startOn,_this.endOn);
+  return Object.hash(runtimeType,_this.title,_this.assigneeAccountId,_this.startOn,_this.endOn,_this.evidenceRequired);
 }
 
 @override
 String toString() {
   final _this = this as CreateSubtaskRequest;
-  return 'CreateSubtaskRequest(title: ${_this.title}, assigneeAccountId: ${_this.assigneeAccountId}, startOn: ${_this.startOn}, endOn: ${_this.endOn})';
+  return 'CreateSubtaskRequest(title: ${_this.title}, assigneeAccountId: ${_this.assigneeAccountId}, startOn: ${_this.startOn}, endOn: ${_this.endOn}, evidenceRequired: ${_this.evidenceRequired})';
 }
 
 
@@ -57,7 +58,7 @@ abstract mixin class $CreateSubtaskRequestCopyWith<$Res>  {
   factory $CreateSubtaskRequestCopyWith(CreateSubtaskRequest value, $Res Function(CreateSubtaskRequest) _then) = _$CreateSubtaskRequestCopyWithImpl;
 @useResult
 $Res call({
- String title,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn
+ String title,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn,@JsonKey(name: 'evidence_required') bool? evidenceRequired
 });
 
 
@@ -74,13 +75,14 @@ class _$CreateSubtaskRequestCopyWithImpl<$Res>
 
 /// Create a copy of CreateSubtaskRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? title = null,Object? assigneeAccountId = freezed,Object? startOn = freezed,Object? endOn = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? title = null,Object? assigneeAccountId = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? evidenceRequired = freezed,}) {
   return _then(CreateSubtaskRequest(
 title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,assigneeAccountId: freezed == assigneeAccountId ? _self.assigneeAccountId : assigneeAccountId // ignore: cast_nullable_to_non_nullable
 as String?,startOn: freezed == startOn ? _self.startOn : startOn // ignore: cast_nullable_to_non_nullable
 as DateTime?,endOn: freezed == endOn ? _self.endOn : endOn // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,evidenceRequired: freezed == evidenceRequired ? _self.evidenceRequired : evidenceRequired // ignore: cast_nullable_to_non_nullable
+as bool?,
   ));
 }
 
@@ -165,10 +167,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @JsonKey(name: 'evidence_required')  bool? evidenceRequired)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreateSubtaskRequest() when $default != null:
-return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn);case _:
+return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.evidenceRequired);case _:
   return orElse();
 
 }
@@ -186,10 +188,10 @@ return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @JsonKey(name: 'evidence_required')  bool? evidenceRequired)  $default,) {final _that = this;
 switch (_that) {
 case _CreateSubtaskRequest():
-return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn);case _:
+return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.evidenceRequired);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +208,10 @@ return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title, @JsonKey(name: 'assignee_account_id')  String? assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on')  DateTime? startOn, @DateOnlyConverter()@JsonKey(name: 'end_on')  DateTime? endOn, @JsonKey(name: 'evidence_required')  bool? evidenceRequired)?  $default,) {final _that = this;
 switch (_that) {
 case _CreateSubtaskRequest() when $default != null:
-return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn);case _:
+return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn,_that.evidenceRequired);case _:
   return null;
 
 }
@@ -221,7 +223,7 @@ return $default(_that.title,_that.assigneeAccountId,_that.startOn,_that.endOn);c
 @JsonSerializable()
 
 class _CreateSubtaskRequest implements CreateSubtaskRequest {
-  const _CreateSubtaskRequest({required this.title, @JsonKey(name: 'assignee_account_id') this.assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on') this.startOn, @DateOnlyConverter()@JsonKey(name: 'end_on') this.endOn});
+  const _CreateSubtaskRequest({required this.title, @JsonKey(name: 'assignee_account_id') this.assigneeAccountId, @DateOnlyConverter()@JsonKey(name: 'start_on') this.startOn, @DateOnlyConverter()@JsonKey(name: 'end_on') this.endOn, @JsonKey(name: 'evidence_required') this.evidenceRequired});
   factory _CreateSubtaskRequest.fromJson(Map<String, dynamic> json) => _$CreateSubtaskRequestFromJson(json);
 
 /// 1–300 karakter (kırpılarak), kontrol karakteri yok.
@@ -231,6 +233,8 @@ class _CreateSubtaskRequest implements CreateSubtaskRequest {
 /// Opsiyonel; `end_on` ile birlikte verilir. Yalnız bilgidir (Gantt, bağımlılık ve gecikmeye girmez).
 @override@DateOnlyConverter()@JsonKey(name: 'start_on') final  DateTime? startOn;
 @override@DateOnlyConverter()@JsonKey(name: 'end_on') final  DateTime? endOn;
+/// Opsiyonel (varsayılan false). Açıksa alt görev, kendisine bağlı en az bir dosya olmadan kapatılamaz (422 `work.subtask_attachment_required`; WORK-K70).
+@override@JsonKey(name: 'evidence_required') final  bool? evidenceRequired;
 
 /// Create a copy of CreateSubtaskRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -245,18 +249,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateSubtaskRequest&&(identical(other.title, title) || other.title == title)&&(identical(other.assigneeAccountId, assigneeAccountId) || other.assigneeAccountId == assigneeAccountId)&&(identical(other.startOn, startOn) || other.startOn == startOn)&&(identical(other.endOn, endOn) || other.endOn == endOn));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateSubtaskRequest&&(identical(other.title, title) || other.title == title)&&(identical(other.assigneeAccountId, assigneeAccountId) || other.assigneeAccountId == assigneeAccountId)&&(identical(other.startOn, startOn) || other.startOn == startOn)&&(identical(other.endOn, endOn) || other.endOn == endOn)&&(identical(other.evidenceRequired, evidenceRequired) || other.evidenceRequired == evidenceRequired));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,title,assigneeAccountId,startOn,endOn);
+    return Object.hash(runtimeType,title,assigneeAccountId,startOn,endOn,evidenceRequired);
 }
 
 @override
 String toString() {
-    return 'CreateSubtaskRequest(title: $title, assigneeAccountId: $assigneeAccountId, startOn: $startOn, endOn: $endOn)';
+    return 'CreateSubtaskRequest(title: $title, assigneeAccountId: $assigneeAccountId, startOn: $startOn, endOn: $endOn, evidenceRequired: $evidenceRequired)';
 }
 
 
@@ -267,7 +271,7 @@ abstract mixin class _$CreateSubtaskRequestCopyWith<$Res> implements $CreateSubt
   factory _$CreateSubtaskRequestCopyWith(_CreateSubtaskRequest value, $Res Function(_CreateSubtaskRequest) _then) = __$CreateSubtaskRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String title,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn
+ String title,@JsonKey(name: 'assignee_account_id') String? assigneeAccountId,@DateOnlyConverter()@JsonKey(name: 'start_on') DateTime? startOn,@DateOnlyConverter()@JsonKey(name: 'end_on') DateTime? endOn,@JsonKey(name: 'evidence_required') bool? evidenceRequired
 });
 
 
@@ -284,13 +288,14 @@ class __$CreateSubtaskRequestCopyWithImpl<$Res>
 
 /// Create a copy of CreateSubtaskRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? title = null,Object? assigneeAccountId = freezed,Object? startOn = freezed,Object? endOn = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? title = null,Object? assigneeAccountId = freezed,Object? startOn = freezed,Object? endOn = freezed,Object? evidenceRequired = freezed,}) {
   return _then(_CreateSubtaskRequest(
 title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,assigneeAccountId: freezed == assigneeAccountId ? _self.assigneeAccountId : assigneeAccountId // ignore: cast_nullable_to_non_nullable
 as String?,startOn: freezed == startOn ? _self.startOn : startOn // ignore: cast_nullable_to_non_nullable
 as DateTime?,endOn: freezed == endOn ? _self.endOn : endOn // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,evidenceRequired: freezed == evidenceRequired ? _self.evidenceRequired : evidenceRequired // ignore: cast_nullable_to_non_nullable
+as bool?,
   ));
 }
 

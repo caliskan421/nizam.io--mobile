@@ -10,6 +10,7 @@ part 'update_agenda_item_request.g.dart';
 @Freezed()
 abstract class UpdateAgendaItemRequest with _$UpdateAgendaItemRequest {
   const factory UpdateAgendaItemRequest({
+    /// Verilirse eklemedeki kuralla aynı: düz metne indirilip kırpıldıktan sonra 1–300 karakter (Unicode kod noktası).
     String? title,
     @JsonKey(name: 'is_checked') bool? isChecked,
   }) = _UpdateAgendaItemRequest;

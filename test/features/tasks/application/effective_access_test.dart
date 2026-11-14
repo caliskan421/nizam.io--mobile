@@ -67,6 +67,7 @@ void main() {
       (v.canAdminister, v.canManageTeam, v.canApprove, v.canCreateTask),
       (false, false, false, false),
     );
+    expect(v.canCreateMeeting, isFalse);
     final view = v.viewAccess!;
     expect(view.companyAdmin, isFalse);
     expect(view.coordinatesIn('p1', 'MEK'), isFalse, reason: 'üye sayılır');
@@ -83,6 +84,7 @@ void main() {
       (true, true, true, true),
     );
     expect((v.canAdminister, v.canReviewDateRequests), (false, false));
+    expect((v.canCreateTask, v.canCreateMeeting), (true, true));
     final forged = EffectiveAccess.of(
       a,
       const ScopeSelection(
@@ -106,8 +108,8 @@ void main() {
     expect(v.known, isFalse);
     expect(v.role, EffectiveRole.admin);
     expect(
-      (v.isAdminView, v.canAdminister, v.canCreateTask),
-      (false, false, false),
+      (v.isAdminView, v.canAdminister, v.canCreateTask, v.canCreateMeeting),
+      (false, false, false, false),
     );
     expect(v.viewAccess, isNull);
   });

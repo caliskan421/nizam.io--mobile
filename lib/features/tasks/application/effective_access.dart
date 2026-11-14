@@ -120,6 +120,10 @@ final class EffectiveAccess {
   /// Yeni görev aç (yönetici ya da koordinatör; üye hayır — WORK-K05).
   bool get canCreateTask => isAdminView || isCoordinatorView;
 
+  /// Toplantı aç (yönetici ya da koordinatör; üye hayır — COLLABORATION). Rol kümesi
+  /// [canCreateTask] ile bugün aynıdır; ayrı bayrak, iki kuralın ayrı evrilebilmesi için.
+  bool get canCreateMeeting => isAdminView || isCoordinatorView;
+
   /// Tarih talebi aç (yalnız koordinatör).
   bool get canRequestDate => isCoordinatorView || (isAdminView && _coordinates);
 

@@ -98,14 +98,22 @@ Future<void> showHomeDrawer(
         }
 
         Widget? trailing(HomeModule m) => switch (m) {
-          HomeModule.tasks when counts != null => Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: NizamioSpacing.space1,
-            children: [
-              NzCountPill.warning(counts.tasksAwaitingApproval),
-              NzCountPill.danger(counts.lateTasks),
-            ],
-          ),
+          HomeModule.tasks when counts != null => switch (taskBadgesFor(
+            role,
+            awaitingApproval: counts.tasksAwaitingApproval,
+            late: counts.lateTasks,
+          )) {
+            (awaitingApproval: null, late: null) => null,
+            (:final awaitingApproval, :final late) => Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: NizamioSpacing.space1,
+              children: [
+                if (awaitingApproval != null)
+                  NzCountPill.warning(awaitingApproval),
+                if (late != null) NzCountPill.danger(late),
+              ],
+            ),
+          },
           HomeModule.messages => switch (counts?.unreadMessages) {
             final n? => NzCountPill.neutral(n),
             null => null,

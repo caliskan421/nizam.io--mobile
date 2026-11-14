@@ -150,9 +150,20 @@ const _slotCandidates = {
 Set<HomeModule> slotModulesFor(EffectiveRole? role) =>
     menuModulesOf(role).intersection(_slotCandidates);
 
-/// Yuvanın varsayılanı (henüz modül girilmemişken): Koordinatör ve Üye → Ekibim; Yönetici (ve
-/// bilinmeyen) → Koordinatörlükler (prototip varsayılanı).
+/// Yuvanın varsayılanı (henüz modül girilmemişken): Koordinatör → Ekibim; Üye → Mesajlar;
+/// Yönetici (ve bilinmeyen) → Koordinatörlükler (prototip varsayılanı).
 HomeModule defaultSlotFor(EffectiveRole? role) => switch (role) {
-  EffectiveRole.coordinator || EffectiveRole.member => HomeModule.team,
+  EffectiveRole.coordinator => HomeModule.team,
+  EffectiveRole.member => HomeModule.messages,
   EffectiveRole.admin || null => HomeModule.coordinatorships,
 };
+
+/// Çekmecede "Görevler" yanındaki sayı rozetleri (`null` → çizilmez). Üyede onay rozeti yoktur
+/// ve geciken 0 ise o da çizilmez (prototip `b2: rpIsK ? … : ''`); diğer rollerde ikisi de durur.
+({int? awaitingApproval, int? late}) taskBadgesFor(
+  EffectiveRole? role, {
+  required int awaitingApproval,
+  required int late,
+}) => role == EffectiveRole.member
+    ? (awaitingApproval: null, late: late > 0 ? late : null)
+    : (awaitingApproval: awaitingApproval, late: late);

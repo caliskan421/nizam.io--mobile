@@ -99,7 +99,7 @@ void main() {
 
   test('alt kapsül yuvası: varsayılan ve adaylar', () {
     expect(defaultSlotFor(EffectiveRole.coordinator), HomeModule.team);
-    expect(defaultSlotFor(EffectiveRole.member), HomeModule.team);
+    expect(defaultSlotFor(EffectiveRole.member), HomeModule.messages);
     expect(defaultSlotFor(EffectiveRole.admin), HomeModule.coordinatorships);
     expect(defaultSlotFor(null), HomeModule.coordinatorships);
     for (final r in [null, ...EffectiveRole.values]) {
@@ -109,6 +109,21 @@ void main() {
     expect(
       slotModulesFor(EffectiveRole.coordinator),
       isNot(contains(HomeModule.coordinatorships)),
+    );
+  });
+
+  test('çekmece görev rozetleri: üyede yalnız geciken, 0 ise yok', () {
+    expect(taskBadgesFor(EffectiveRole.member, awaitingApproval: 3, late: 2), (
+      awaitingApproval: null,
+      late: 2,
+    ));
+    expect(taskBadgesFor(EffectiveRole.member, awaitingApproval: 3, late: 0), (
+      awaitingApproval: null,
+      late: null,
+    ));
+    expect(
+      taskBadgesFor(EffectiveRole.coordinator, awaitingApproval: 0, late: 0),
+      (awaitingApproval: 0, late: 0),
     );
   });
 }

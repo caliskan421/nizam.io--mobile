@@ -153,9 +153,11 @@ class GoRouterAppNav implements NzAppNav {
         view.known && !view.isAdminView ? HomeModule.team : HomeModule.users,
       ShellModule.tables => HomeModule.sheets,
       null =>
-        // Zaman çizelgesi görevler modülünün parçasıdır (prototip `ON.tasks`).
-        location.startsWith(const TasksRoute().location) ||
-                location.startsWith(const TimelineRoute().location)
+        // Zaman çizelgesi görevler modülünün parçasıdır (prototip `ON.tasks`); üye menüsünde
+        // ise ayrı "Zaman çizelgem" öğesidir.
+        location.startsWith(const TimelineRoute().location)
+            ? (view.isMemberView ? HomeModule.timeline : HomeModule.tasks)
+            : location.startsWith(const TasksRoute().location)
             ? HomeModule.tasks
             : location.startsWith(const HomeRoute().location)
             ? HomeModule.home

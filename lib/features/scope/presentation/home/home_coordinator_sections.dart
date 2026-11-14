@@ -12,7 +12,6 @@ import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/nz_glyph.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
-import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../meetings/meetings.dart';
 import '../../../tasks/tasks.dart';
@@ -235,10 +234,12 @@ class _PendingRowTile extends StatelessWidget {
   }
 }
 
-/// Ekip yükü (sabit boy; ekip büyüdükçe uzamaz): üstte ekip toplamları (kişi, açık, geciken);
-/// altta en yoğun üç kişi tam genişlik satırlarda (baş harfler, ad, sağda "5 açık · 2 geç");
-/// kalanlar "+N kişi daha · Ekibim" bağlantısıyla. Satır kişinin görevlerini açar. Backend koordinatöre yük ucu açmaz; sayım görünen görevlerden
-/// ([CoordinatorBoard.load]).
+/// Ekip yükü (sabit boy; ekip büyüdükçe uzamaz): üstte tek satır toplamlar ("3 kişi 6 açık
+/// 4 geç"); altında en yoğun üç kişi: ad, sağda "5 açık · 4 geç" (gecikmede kırmızı) ve
+/// kişinin görev dağılımı ayrık parçalı şeritte (tamamlanan, devam, onayda, iade, başlamadı,
+/// geciken; geciken durumundan bağımsız). Kalanlar "+N kişi daha · Ekibim" bağlantısıyla; satır
+/// kişinin görevlerini açar. Backend koordinatöre yük ucu açmaz; sayım görünen görevlerden
+/// ([CoordinatorBoard.load], [CoordinatorBoard.tasks]).
 class HomeTeamLoad extends ConsumerWidget {
   const HomeTeamLoad({super.key, required this.board, this.fill = false});
 
@@ -266,16 +267,41 @@ class HomeTeamLoad extends ConsumerWidget {
         });
     final open = loaded.fold(0, (n, p) => n + p.open);
     final late = loaded.fold(0, (n, p) => n + p.late);
-    Widget stat(String value, String label, {bool danger = false}) => Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          value,
-          style: t.titleMd.copyWith(color: danger ? c.danger : c.text),
-        ),
-        Text(label, style: t.caption.copyWith(color: c.textMuted)),
-      ],
+    Widget stat(int n, String label, {bool danger = false}) => Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: '$n',
+            style: t.titleMd.copyWith(color: danger ? c.danger : c.text),
+          ),
+          TextSpan(
+            text: ' $label',
+            style: t.bodyMd.copyWith(color: c.textMuted),
+          ),
+        ],
+      ),
     );
+    List<NzBarSegment> segments(String id) {
+      final mine = [
+        for (final task in board.tasks)
+          if (task.assignees.contains(id)) task,
+      ];
+      final lateTasks = mine.where(isTaskLate).length;
+      int count(TaskStatus s) =>
+          mine.where((x) => !isTaskLate(x) && x.status == s).length;
+      return [
+        NzBarSegment(count(TaskStatus.done), c.taskDone),
+        NzBarSegment(count(TaskStatus.inProgress), c.inProgress),
+        NzBarSegment(count(TaskStatus.review), c.warning),
+        NzBarSegment(
+          count(TaskStatus.returned),
+          c.danger.withValues(alpha: .5),
+        ),
+        NzBarSegment(count(TaskStatus.todo), c.textFaint),
+        NzBarSegment(lateTasks, c.danger),
+      ];
+    }
+
     Widget person(TeamLoad p) {
       final name = catalog?.nameOf(p.personId) ?? l.uiTasksUnknownPerson;
       final caption =
@@ -289,50 +315,55 @@ class HomeTeamLoad extends ConsumerWidget {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => nav.openTasks(people: [p.personId]),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: c.surfaceOverlay,
-                borderRadius: BorderRadius.circular(NizamioRadius.tile),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: NizamioSpacing.space3,
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(NizamioSpacing.space2),
-                child: Row(
-                  children: [
-                    NzAvatar.initials(name: name, size: NzSize.sm),
-                    const Gap(NizamioSpacing.space2),
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: t.bodyMd.copyWith(
-                                fontWeight: FontWeight.w500,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: t.list.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
-                          ),
-                          if (p.personId == catalog?.me) ...[
-                            const Gap(NizamioSpacing.space2),
-                            Text(
-                              l.uiUsersTeamYou,
-                              style: t.monoSm.copyWith(color: c.textMuted),
-                            ),
+                            if (p.personId == catalog?.me) ...[
+                              const Gap(NizamioSpacing.space2),
+                              Text(
+                                l.uiUsersTeamYou,
+                                style: t.monoSm.copyWith(color: c.textMuted),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                    const Gap(NizamioSpacing.space2),
-                    Text(
-                      caption,
-                      maxLines: 1,
-                      style: t.monoSm.copyWith(
-                        color: p.late > 0 ? c.danger : c.textMuted,
+                      const Gap(NizamioSpacing.space2),
+                      Text(
+                        caption,
+                        maxLines: 1,
+                        style: t.mono.copyWith(
+                          color: p.late > 0 ? c.danger : c.textMuted,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                  const Gap(NizamioSpacing.space2),
+                  NzProgressBar.segments(
+                    separated: true,
+                    height: 8,
+                    segments: segments(p.personId),
+                  ),
+                ],
               ),
             ),
           ),
@@ -347,24 +378,17 @@ class HomeTeamLoad extends ConsumerWidget {
         : Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
+              Wrap(
+                spacing: NizamioSpacing.space5,
+                runSpacing: NizamioSpacing.space1,
                 children: [
-                  Expanded(child: stat('${loaded.length}', l.uiHomeLoadPeople)),
-                  Expanded(child: stat('$open', l.uiHomeLoadOpenTail)),
-                  Expanded(
-                    child: stat(
-                      '$late',
-                      l.uiHomeLoadLateTail,
-                      danger: late > 0,
-                    ),
-                  ),
+                  stat(loaded.length, l.uiHomeLoadPeople),
+                  stat(open, l.uiHomeLoadOpenTail),
+                  stat(late, l.uiHomeLoadLateTail, danger: late > 0),
                 ],
               ),
               const Gap(NizamioSpacing.space3),
-              for (final (i, p) in top.indexed) ...[
-                if (i > 0) const Gap(NizamioSpacing.space2),
-                person(p),
-              ],
+              for (final p in top) person(p),
             ],
           );
     final link = Semantics(
@@ -373,7 +397,7 @@ class HomeTeamLoad extends ConsumerWidget {
         behavior: HitTestBehavior.opaque,
         onTap: nav.openUsers,
         child: Padding(
-          padding: const EdgeInsets.only(top: NizamioSpacing.space3),
+          padding: const EdgeInsets.only(top: NizamioSpacing.space2),
           child: Row(
             children: [
               Expanded(

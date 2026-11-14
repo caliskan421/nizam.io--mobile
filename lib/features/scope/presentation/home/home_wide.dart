@@ -301,8 +301,11 @@ class HomeTeamTile extends StatelessWidget {
     required this.label,
     this.onTap,
     this.compact = false,
+    this.prefix = '',
   });
 
+  /// Sayının önüne (kesik listede "≥").
+  final String prefix;
   final Color dot;
   final Color bar;
   final int count;
@@ -321,8 +324,8 @@ class HomeTeamTile extends StatelessWidget {
       ),
       onTap: onTap,
       semanticLabel: onTap == null
-          ? '$count $label'
-          : '$count $label. ${l.uiHomeOpenList}',
+          ? '$prefix$count $label'
+          : '$prefix$count $label. ${l.uiHomeOpenList}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -331,7 +334,11 @@ class HomeTeamTile extends StatelessWidget {
             child: const Padding(padding: EdgeInsets.all(NizamioSize.dot / 2)),
           ),
           Gap(compact ? NizamioSpacing.space1 : NizamioSpacing.space2),
-          Text('$count', maxLines: 1, style: compact ? t.titleMd : t.titleLg),
+          Text(
+            '$prefix$count',
+            maxLines: 1,
+            style: compact ? t.titleMd : t.titleLg,
+          ),
           Text(
             label,
             maxLines: compact ? 2 : 1,

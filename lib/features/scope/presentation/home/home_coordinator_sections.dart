@@ -9,13 +9,16 @@ import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/state/nz_async_view.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
-import '../../../../core/ui/widgets/feedback/nz_load_strip.dart';
 import '../../../../core/ui/widgets/nz_glyph.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
+import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../meetings/meetings.dart';
 import '../../../tasks/tasks.dart';
 import 'home_coordinator.dart';
 import 'home_texts.dart';
+import 'home_wide.dart';
 
 /// Koordinatör özet kutuları (yönetici ana sayfasının dili): gecikme, onay bekleyen,
 /// tamamlanma (yüzde), devam eden. Dokunma görev listesini ilgili görünümle açar.
@@ -85,117 +88,256 @@ List<Widget> homeCoordinatorKpis(
   ];
 }
 
-/// Bekleyen işler (tek kart, sekmeli): onay bekleyenler (İade / Onayla), atanmamış (Üstlen /
-/// Ata) ve bekleyen tarih taleplerim; sekme başına en çok [HomeCoordinatorFeed.rowsPerSection]
-/// satır. "Tümü" seçili sekmenin tam listesini açar. [fill]: bkz. [HomeSectionFrame.fill].
-class HomePendingWork extends ConsumerStatefulWidget {
+/// Bekleyen işler (yönetici "Ekip" kutularının dili): onay bekleyen, atanmamış ve bekleyen
+/// tarih talebi sayısı; içerik gösterilmez, kutu ilgili listeye götürür (onay kuyruğu, görev
+/// listesi atanmamış görünümü, tarih talepleri). Çubuk açık görevlere oranıdır. Dar düzende
+/// üç kutu yan yana; [fill] (tablet, ekip yüküyle yan yana çift): üç yatay kutu alt alta,
+/// verilen yüksekliği eşit böler.
+class HomePendingWork extends ConsumerWidget {
   const HomePendingWork({
     super.key,
     required this.board,
-    required this.today,
+    this.compact = false,
     this.fill = false,
   });
 
   final CoordinatorBoard board;
-  final DateTime today;
+  final bool compact;
   final bool fill;
 
   @override
-  ConsumerState<HomePendingWork> createState() => _HomePendingWorkState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final c = context.colors;
+    final requests = (ref.watch(myDateRequestsProvider).value ?? const [])
+        .where((r) => r.isPending)
+        .length;
+    final open = board.summary.total - board.summary.done;
+    final more = board.truncated ? '≥' : '';
+    final items = [
+      (
+        c.warning,
+        board.queue.length,
+        l.uiHomePendingReview,
+        () => showReviewQueueSheet(context),
+      ),
+      (
+        c.info,
+        board.unassigned.length,
+        l.uiHomeUnassignedTitle,
+        () => context.appNav.openTasks(view: NzTaskView.unassigned),
+      ),
+      (
+        c.inProgress,
+        requests,
+        l.uiHomeKpiDateRequest,
+        () => showDateRequestsSheet(context),
+      ),
+    ];
+    final Widget tiles = fill
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: NizamioSpacing.gapMd,
+            children: [
+              for (final (color, n, label, onTap) in items)
+                Expanded(
+                  child: _PendingRowTile(
+                    color: color,
+                    count: '$more$n',
+                    label: label,
+                    progress: open == 0 ? 0 : n / open,
+                    onTap: onTap,
+                  ),
+                ),
+            ],
+          )
+        : IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: NizamioSpacing.gapMd,
+              children: [
+                for (final (color, n, label, onTap) in items)
+                  Expanded(
+                    child: HomeTeamTile(
+                      dot: color,
+                      bar: color,
+                      count: n,
+                      prefix: more,
+                      total: open,
+                      label: label,
+                      compact: compact,
+                      onTap: onTap,
+                    ),
+                  ),
+              ],
+            ),
+          );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        NzKicker(l.uiHomePendingTitle),
+        const Gap(NizamioSpacing.gapMd),
+        if (fill) Expanded(child: tiles) else tiles,
+      ],
+    );
+  }
 }
 
-class _HomePendingWorkState extends ConsumerState<HomePendingWork> {
-  var _tab = 0;
+/// Bekleyen iş kutusunun yatay hâli (tablet): solda nokta ve etiket, sağda sayı, altta oran
+/// çubuğu; dokunma ilgili listeye götürür.
+class _PendingRowTile extends StatelessWidget {
+  const _PendingRowTile({
+    required this.color,
+    required this.count,
+    required this.label,
+    required this.progress,
+    required this.onTap,
+  });
+
+  final Color color;
+  final String count;
+  final String label;
+  final double progress;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final t = context.text;
+    return NzCard.outlined(
+      padding: const EdgeInsets.all(NizamioSpacing.rowPad),
+      onTap: onTap,
+      semanticLabel: '$count $label. ${l.uiHomeOpenList}',
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              NzDot(color: color),
+              const Gap(NizamioSpacing.space2),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: t.bodyMd.copyWith(color: context.colors.textMuted),
+                ),
+              ),
+              Text(count, style: t.titleMd),
+            ],
+          ),
+          const Gap(NizamioSpacing.space2),
+          NzProgressBar(value: progress, color: color),
+        ],
+      ),
+    );
+  }
+}
+
+/// Ekip yükü (sabit boy; ekip büyüdükçe uzamaz): üstte ekip toplamları (kişi, açık, geciken),
+/// tek parçalı durum şeridi ve açıklaması; altta en yüklü dört kişi küçük kutularda (baş
+/// harfler, ad, "5 açık · 2 geç"); kalanlar "+N kişi · Ekibim" bağlantısıyla. Kutu kişinin
+/// görevlerini açar. Backend koordinatöre yük ucu açmaz; sayım görünen görevlerden
+/// ([CoordinatorBoard.load]).
+class HomeTeamLoad extends ConsumerWidget {
+  const HomeTeamLoad({super.key, required this.board, this.fill = false});
+
+  final CoordinatorBoard board;
+
+  /// Verilen yüksekliği kartla doldurur (yan yana çift).
+  final bool fill;
+
+  static const shown = 4;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final board = widget.board;
-    final today = widget.today;
+    final nav = context.appNav;
     final catalog = ref.watch(taskCatalogControllerProvider).value;
-    final requests = [
-      for (final r
-          in ref.watch(myDateRequestsProvider).value ??
-              const <DateChangeRequest>[])
-        if (r.isPending) r,
-    ];
-    const n = HomeCoordinatorFeed.rowsPerSection;
-    final tabs = [
-      (l.uiHomePendingReview, board.queue.length),
-      (l.uiHomeUnassignedTitle, board.unassigned.length),
-      (l.uiHomeKpiDateRequest, requests.length),
-    ];
-    final (rows, empty, all) = switch (_tab) {
-      0 => (
+    final loaded =
         [
-          for (final task in board.queue.take(n))
-            TaskQueueRow(task: task, today: today, flat: true),
-        ],
-        l.uiHomeQueueEmpty,
-        board.queue.length > n ? () => showReviewQueueSheet(context) : null,
-      ),
-      1 => (
-        [
-          for (final task in board.unassigned.take(n))
-            TaskUnassignedRow(task: task, today: today, flat: true),
-        ],
-        l.uiHomeUnassignedEmpty,
-        board.unassigned.isEmpty
-            ? null
-            : () => context.appNav.openTasks(view: NzTaskView.unassigned),
-      ),
-      _ => (
-        [
-          for (final r in requests.take(n))
-            DateRequestRow(
-              request: r,
-              title: catalog?.task(r.workItemId ?? '')?.title,
-              flat: true,
-            ),
-        ],
-        l.uiHomeRequestsEmpty,
-        () => showDateRequestsSheet(context),
-      ),
-    };
-    Widget tab(int i) {
-      final (label, count) = tabs[i];
-      final on = i == _tab;
+          for (final p in board.load)
+            if (p.open > 0) p,
+        ]..sort((a, b) {
+          final o = b.open.compareTo(a.open);
+          return o != 0 ? o : b.late.compareTo(a.late);
+        });
+    final open = loaded.fold(0, (n, p) => n + p.open);
+    final late = loaded.fold(0, (n, p) => n + p.late);
+    final review = loaded.fold(0, (n, p) => n + p.review);
+    final returned = loaded.fold(0, (n, p) => n + p.returned);
+    final doing = loaded.fold(0, (n, p) => n + p.inProgress);
+    final returnedColor = c.danger.withValues(alpha: 0.5);
+    Widget stat(String value, String label, {bool danger = false}) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: t.titleMd.copyWith(color: danger ? c.danger : c.text),
+        ),
+        Text(label, style: t.caption.copyWith(color: c.textMuted)),
+      ],
+    );
+    Widget legend(Color color, String label, int n) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        NzDot(color: color),
+        const Gap(NizamioSpacing.space1),
+        Text('$label $n', style: t.caption.copyWith(color: c.textMuted)),
+      ],
+    );
+    Widget person(TeamLoad p) {
+      final name = catalog?.nameOf(p.personId) ?? l.uiTasksUnknownPerson;
+      final caption =
+          '${p.open} ${l.uiHomeLoadOpenTail}'
+          '${p.late > 0 ? ' · ${p.late} ${l.uiHomeLoadLateTail}' : ''}';
       return Semantics(
         button: true,
-        selected: on,
-        label: '$label $count',
+        label: '$name, $caption',
         excludeSemantics: true,
         child: NzPressable(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () => setState(() => _tab = i),
+            onTap: () => nav.openTasks(people: [p.personId]),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: on ? c.surfaceOverlay : null,
-                borderRadius: BorderRadius.circular(NizamioRadius.pill),
+                color: c.surfaceOverlay,
+                borderRadius: BorderRadius.circular(NizamioRadius.tile),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: NizamioSpacing.space3,
-                  vertical: NizamioSpacing.space2,
-                ),
+                padding: const EdgeInsets.all(NizamioSpacing.space2),
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      label,
-                      style: t.list.copyWith(
-                        fontWeight: on ? FontWeight.w600 : FontWeight.w500,
-                        color: on ? c.text : c.textMuted,
+                    NzAvatar.initials(name: name, size: NzSize.sm),
+                    const Gap(NizamioSpacing.space2),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            p.personId == catalog?.me
+                                ? '$name (${l.uiUsersTeamYou})'
+                                : name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: t.bodyMd.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            caption,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: t.monoSm.copyWith(
+                              color: p.late > 0 ? c.danger : c.textMuted,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const Gap(NizamioSpacing.space2),
-                    if (on && count > 0)
-                      NzCountPill.warning(count)
-                    else
-                      NzCountPill.neutral(count),
                   ],
                 ),
               ),
@@ -205,130 +347,103 @@ class _HomePendingWorkState extends ConsumerState<HomePendingWork> {
       );
     }
 
-    final card = NzTableCard(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(NizamioSpacing.space2),
-          // Wrap: dar ekranda alt satıra akar; yan yana çiftin `IntrinsicHeight`'ında ölçülür.
-          child: Wrap(
-            spacing: NizamioSpacing.space1,
-            runSpacing: NizamioSpacing.space1,
-            children: [for (var i = 0; i < tabs.length; i++) tab(i)],
+    final top = loaded.take(shown).toList();
+    final rest = loaded.length - top.length;
+    final body = loaded.isEmpty
+        ? Text(l.uiHomeLoadEmpty, style: t.bodyMd.copyWith(color: c.textMuted))
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(child: stat('${loaded.length}', l.uiHomeLoadPeople)),
+                  Expanded(child: stat('$open', l.uiHomeLoadOpenTail)),
+                  Expanded(
+                    child: stat(
+                      '$late',
+                      l.uiHomeLoadLateTail,
+                      danger: late > 0,
+                    ),
+                  ),
+                ],
+              ),
+              const Gap(NizamioSpacing.space3),
+              NzProgressBar.segments(
+                segments: [
+                  NzBarSegment(doing, c.inProgress),
+                  NzBarSegment(review, c.warning),
+                  NzBarSegment(returned, returnedColor),
+                  NzBarSegment(open - doing - review - returned, c.textFaint),
+                ],
+              ),
+              const Gap(NizamioSpacing.space2),
+              Wrap(
+                spacing: NizamioSpacing.space3,
+                runSpacing: NizamioSpacing.space1,
+                children: [
+                  legend(c.inProgress, l.uiHomeLoadDoing, doing),
+                  legend(c.warning, l.uiHomeLoadReview, review),
+                  legend(returnedColor, l.uiHomeLoadReturned, returned),
+                ],
+              ),
+              const Gap(NizamioSpacing.space3),
+              for (var i = 0; i < top.length; i += 2) ...[
+                if (i > 0) const Gap(NizamioSpacing.space2),
+                Row(
+                  children: [
+                    Expanded(child: person(top[i])),
+                    const Gap(NizamioSpacing.space2),
+                    Expanded(
+                      child: i + 1 < top.length
+                          ? person(top[i + 1])
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          );
+    final link = Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: nav.openUsers,
+        child: Padding(
+          padding: const EdgeInsets.only(top: NizamioSpacing.space3),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  rest > 0 ? '+$rest ${l.uiHomeLoadMorePeople}' : '',
+                  style: t.caption.copyWith(color: c.textMuted),
+                ),
+              ),
+              Text(
+                l.uiHomeModuleTeam,
+                style: t.bodyMd.copyWith(color: c.textMuted),
+              ),
+              NzIcon(
+                NzIcons.chevronRight,
+                size: NizamioSize.iconSizeSm,
+                color: c.textMuted,
+              ),
+            ],
           ),
         ),
-        if (rows.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(NizamioSpacing.space4),
-            child: Text(empty, style: t.bodyMd.copyWith(color: c.textMuted)),
-          )
-        else
-          ...rows,
-      ],
+      ),
+    );
+    final card = NzCard.outlined(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [body, if (fill) const Spacer(), link],
+      ),
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        NzSectionHeader(
-          l.uiHomePendingTitle,
-          onAll: all,
-          allLabel: l.uiHomeSeeAll,
-        ),
+        NzKicker(l.uiHomeLoadTitle),
         const Gap(NizamioSpacing.gapMd),
-        if (widget.fill) Expanded(child: card) else card,
-      ],
-    );
-  }
-}
-
-/// Ekip yükü: kişi başına açık görev şeridi ve "n açık · m geç". Şerit parçaları ayrıktır:
-/// geciken (durumdan bağımsız), sonra devam, onayda, iade, başlamadı; şerit boyu en yüklü kişiye
-/// göre ölçeklenir (kalanı iz rengi). Backend koordinatöre yük ucu açmaz; sayım görünen
-/// görevlerden ([CoordinatorBoard.load], [CoordinatorBoard.tasks]).
-class HomeTeamLoad extends ConsumerWidget {
-  const HomeTeamLoad({super.key, required this.board, this.fill = false});
-
-  final CoordinatorBoard board;
-
-  /// Bkz. [HomeSectionFrame.fill].
-  final bool fill;
-
-  static const maxRows = 6;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final c = context.colors;
-    final catalog = ref.watch(taskCatalogControllerProvider).value;
-    final rows = [
-      for (final p in board.load)
-        if (p.open > 0) p,
-    ].take(maxRows).toList();
-    // İade: geciken kırmızısının koyu tonu (prototip `.ld-back`).
-    final returnedColor = c.danger.withValues(alpha: 0.5);
-    final widest = rows.fold(0, (m, p) => p.open > m ? p.open : m);
-    List<NzBarSegment> segments(String id, int open) {
-      final mine = [
-        for (final t in board.tasks)
-          if (!t.isDone && t.assignees.contains(id)) t,
-      ];
-      final late = mine.where(isTaskLate).length;
-      int count(TaskStatus s) =>
-          mine.where((t) => !isTaskLate(t) && t.status == s).length;
-      final doing = count(TaskStatus.inProgress);
-      final review = count(TaskStatus.review);
-      final returned = count(TaskStatus.returned);
-      return [
-        NzBarSegment(doing, c.inProgress),
-        NzBarSegment(review, c.warning),
-        NzBarSegment(late, c.danger),
-        NzBarSegment(returned, returnedColor),
-        NzBarSegment(open - late - doing - review - returned, c.textFaint),
-        NzBarSegment(widest - open, c.surfaceOverlay),
-      ];
-    }
-
-    Widget legend(Color color, String label) => Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        NzDot(color: color),
-        const Gap(NizamioSpacing.space2),
-        Text(label, style: context.text.bodySm.copyWith(color: c.textMuted)),
-      ],
-    );
-    return HomeSectionFrame(
-      fill: fill,
-      title: l.uiHomeLoadTitle,
-      count: rows.length,
-      onAll: context.appNav.openUsers,
-      allLabel: l.uiHomeModuleTeam,
-      empty: l.uiHomeLoadEmpty,
-      children: [
-        for (final p in rows)
-          NzLoadRow(
-            name: catalog?.nameOf(p.personId) ?? l.uiTasksUnknownPerson,
-            selfLabel: p.personId == catalog?.me ? l.uiUsersTeamYou : null,
-            caption:
-                '${p.open} ${l.uiHomeLoadOpenTail}'
-                '${p.late > 0 ? ' · ${p.late} ${l.uiHomeLoadLateTail}' : ''}',
-            captionDanger: p.late > 0,
-            segments: segments(p.personId, p.open),
-            // Hızlı erişim: kişinin görevleri.
-            onTap: () => context.appNav.openTasks(people: [p.personId]),
-          ),
-        if (rows.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.all(NizamioSpacing.space4),
-            child: Wrap(
-              spacing: NizamioSpacing.space4,
-              runSpacing: NizamioSpacing.space1,
-              children: [
-                legend(c.inProgress, l.uiHomeLoadDoing),
-                legend(c.warning, l.uiHomeLoadReview),
-                legend(c.danger, l.uiHomeChipLate),
-                legend(returnedColor, l.uiHomeLoadReturned),
-              ],
-            ),
-          ),
+        if (fill) Expanded(child: card) else card,
       ],
     );
   }

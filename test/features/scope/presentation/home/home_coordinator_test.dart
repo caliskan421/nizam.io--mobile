@@ -65,8 +65,8 @@ void main() {
   setUpFonts();
 
   testScreens(
-    'koordinatör ana sayfası taşmadan çizilir; bekleyen işler sekmeleri '
-    'değişir',
+    'koordinatör ana sayfası taşmadan çizilir; bekleyen işler ve ekip yükü '
+    'listeye yönlendirir',
     (tester, screen) async {
       final board = CoordinatorBoard(
         departmentId: 'd1',
@@ -75,6 +75,7 @@ void main() {
         truncated: false,
       );
       final wide = screen.size.width >= homeWideMinWidth;
+      final nav = RecordingAppNav();
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -89,7 +90,7 @@ void main() {
           ],
           child: testApp(
             NzAppNavScope(
-              nav: RecordingAppNav(),
+              nav: nav,
               child: SingleChildScrollView(
                 child: HomeCoordinatorFeed(
                   wide: wide,
@@ -114,13 +115,17 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.text('Altyapı ve tesisat'), findsOneWidget);
+      // Bekleyen işler yalnız sayı ve yönlendirme; görev satırı listelenmez.
       expect(find.text('Bekleyen işler'), findsOneWidget);
-      expect(find.text('Görev a'), findsOneWidget);
-      expect(find.text('Görev c'), findsNothing);
-      await tester.tap(find.bySemanticsLabel('Atanmamış 1'));
-      await tester.pumpAndSettle();
-      expect(find.text('Görev c'), findsOneWidget);
       expect(find.text('Görev a'), findsNothing);
+      // Ekip yükü kişi kutusu.
+      expect(find.text('Ayşe Kaya (sen)'), findsOneWidget);
+      for (final label in [RegExp('^1 Atanmamış'), RegExp('^Ayşe Kaya,')]) {
+        await tester.ensureVisible(find.bySemanticsLabel(label));
+        await tester.pumpAndSettle();
+        await tester.tap(find.bySemanticsLabel(label));
+      }
+      expect(nav.calls, ['tasks:unassigned', 'tasks:p1']);
       expect(tester.takeException(), isNull);
     },
   );

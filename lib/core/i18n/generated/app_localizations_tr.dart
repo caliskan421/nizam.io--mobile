@@ -2826,6 +2826,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeLoadTitle => 'Ekip yükü';
 
   @override
+  String get uiHomeLoadPeople => 'kişi';
+
+  @override
+  String get uiHomeLoadMorePeople => 'kişi daha';
+
+  @override
   String get uiHomeLoadOpenTail => 'açık';
 
   @override

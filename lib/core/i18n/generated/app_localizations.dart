@@ -5392,6 +5392,18 @@ abstract class AppLocalizations {
   /// **'Ekip yükü'**
   String get uiHomeLoadTitle;
 
+  /// ui.home.load_people
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi'**
+  String get uiHomeLoadPeople;
+
+  /// ui.home.load_more_people
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi daha'**
+  String get uiHomeLoadMorePeople;
+
   /// ui.home.load_open_tail
   ///
   /// In tr, this message translates to:

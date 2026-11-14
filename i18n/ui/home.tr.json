@@ -119,6 +119,8 @@
     "ui.home.queue_empty": "Onay bekleyen iş yok.",
     "ui.home.unassigned_title": "Atanmamış",
     "ui.home.load_title": "Ekip yükü",
+    "ui.home.load_people": "kişi",
+    "ui.home.load_more_people": "kişi daha",
     "ui.home.load_open_tail": "açık",
     "ui.home.load_late_tail": "geç",
     "ui.home.load_doing": "devam",

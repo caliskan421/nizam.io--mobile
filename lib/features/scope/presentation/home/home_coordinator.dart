@@ -16,7 +16,7 @@ import 'module_menu_texts.dart';
 /// Ana sayfanın koordinatör bölümleri; yönetici ana sayfasının dili (genel durum halkası, özet
 /// kutuları) etkin koordinatörlüğün görevleriyle ([coordinatorBoardProvider]). Dar düzen tek
 /// sütun: genel durum (koordinatörlük adı), hızlı işlemler, 2×2 özet kutusu, bekleyen işler
-/// (onay / atanmamış / tarih talebi sekmeleri), ekip yükü, yaklaşan toplantılar. Geniş düzen:
+/// (onay / atanmamış / tarih talebi kutuları), ekip yükü, yaklaşan toplantılar. Geniş düzen:
 /// genel durum + 2×2 hızlı işlemler; dört özet kutusu tek satır; bekleyen işler + ekip yükü
 /// (aynı yükseklik); yaklaşan toplantılar.
 class HomeCoordinatorFeed extends ConsumerWidget {
@@ -59,7 +59,7 @@ class HomeCoordinatorFeed extends ConsumerWidget {
             overview,
             ?quick,
             kpis,
-            HomePendingWork(board: board, today: today),
+            HomePendingWork(board: board, compact: true),
             HomeTeamLoad(board: board),
             meetings,
           ].indexed) ...[if (i > 0) const Gap(NizamioSpacing.gapXl), w],
@@ -89,10 +89,8 @@ class HomeCoordinatorFeed extends ConsumerWidget {
         kpis,
         const Gap(NizamioSpacing.gapXl),
         pair(
-          HomePendingWork(board: board, today: today, fill: true),
+          HomePendingWork(board: board, fill: true),
           HomeTeamLoad(board: board, fill: true),
-          flexA: 3,
-          flexB: 2,
         ),
         const Gap(NizamioSpacing.gapXl),
         meetings,

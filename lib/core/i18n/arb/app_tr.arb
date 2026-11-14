@@ -3533,6 +3533,14 @@
   "@uiHomeLoadTitle": {
     "description": "ui.home.load_title"
   },
+  "uiHomeLoadPeople": "kişi",
+  "@uiHomeLoadPeople": {
+    "description": "ui.home.load_people"
+  },
+  "uiHomeLoadMorePeople": "kişi daha",
+  "@uiHomeLoadMorePeople": {
+    "description": "ui.home.load_more_people"
+  },
   "uiHomeLoadOpenTail": "açık",
   "@uiHomeLoadOpenTail": {
     "description": "ui.home.load_open_tail"

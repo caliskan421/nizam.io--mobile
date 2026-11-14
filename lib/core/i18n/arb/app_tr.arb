@@ -3093,6 +3093,10 @@
   "@uiHomeQuickActions": {
     "description": "ui.home.quick_actions"
   },
+  "uiHomeQuickActionsTitle": "Hızlı işlemler",
+  "@uiHomeQuickActionsTitle": {
+    "description": "ui.home.quick_actions_title"
+  },
   "uiHomeQaTask": "Yeni görev",
   "@uiHomeQaTask": {
     "description": "ui.home.qa_task"

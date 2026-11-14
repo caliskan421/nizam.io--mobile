@@ -46,7 +46,7 @@ class HomeCoordinatorFeed extends ConsumerWidget {
         : Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              NzSectionHeader(l.uiHomeQuickActions),
+              NzSectionHeader(l.uiHomeQuickActionsTitle),
               const Gap(NizamioSpacing.gapMd),
               IntrinsicHeight(child: quick),
             ],
@@ -124,8 +124,9 @@ class HomeCoordinatorFeed extends ConsumerWidget {
   }
 }
 
-/// Bölüm iskeleti: [NzSectionHeader] (başlık, sayı, "Tümü ›"), satırlar ve boş metni.
-/// [table] verilirse satırlar tek [NzTableCard] içinde (sütun adları; ikisi null → şeritsiz).
+/// Bölüm iskeleti: [NzSectionHeader] (başlık, sayı, "Tümü ›") ve tek [NzTableCard] içinde
+/// ayraçlı satırlar (satırlar kendi dolgusunu taşır); boşsa boş metni de kart içinde. [table]
+/// sütun adlarıdır (verilmezse şeritsiz).
 class HomeSectionFrame extends StatelessWidget {
   const HomeSectionFrame({
     super.key,
@@ -161,14 +162,23 @@ class HomeSectionFrame extends StatelessWidget {
         ),
         const Gap(NizamioSpacing.gapMd),
         if (children.isEmpty && empty != null)
-          Text(empty, style: context.text.bodySm.copyWith(color: c.textMuted))
-        else if (table != null)
-          NzTableCard(leading: table.$1, trailing: table.$2, children: children)
+          NzTableCard(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(NizamioSpacing.space4),
+                child: Text(
+                  empty,
+                  style: context.text.bodyMd.copyWith(color: c.textMuted),
+                ),
+              ),
+            ],
+          )
         else
-          for (final (i, w) in children.indexed) ...[
-            if (i > 0) const Gap(NizamioSpacing.space2),
-            w,
-          ],
+          NzTableCard(
+            leading: table?.$1,
+            trailing: table?.$2,
+            children: children,
+          ),
       ],
     );
   }

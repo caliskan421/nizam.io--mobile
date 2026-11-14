@@ -4732,6 +4732,12 @@ abstract class AppLocalizations {
   /// **'hızlı işlemler'**
   String get uiHomeQuickActions;
 
+  /// ui.home.quick_actions_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Hızlı işlemler'**
+  String get uiHomeQuickActionsTitle;
+
   /// ui.home.qa_task
   ///
   /// In tr, this message translates to:

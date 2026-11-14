@@ -244,8 +244,6 @@ class _Feed extends ConsumerWidget {
                         compact: !wide,
                       ),
               ),
-              const Gap(NizamioSpacing.gapXl),
-              footer,
             ],
           );
         }

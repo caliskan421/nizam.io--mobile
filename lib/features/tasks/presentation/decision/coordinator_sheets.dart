@@ -206,11 +206,22 @@ class _DateRequestsBodyState extends ConsumerState<_DateRequestsBody> {
 }
 
 /// Tarih talebi satırı (ana sayfa "Tarih taleplerim" ve talepler kaplaması): görev, eski →
-/// yeni bitiş, durum rozeti; bekleyen talepte "Yöneticide bekliyor" (salt okunur).
+/// yeni bitiş, durum rozeti; bekleyen talepte "Yöneticide bekliyor" (salt okunur). [flat]:
+/// kartsız, tek satır başlık + "KOD  10 Eyl → 31 Eki" ([NzTableCard] içinde ana sayfa satırı).
 class DateRequestRow extends StatelessWidget {
-  const DateRequestRow({super.key, required this.request, this.title});
+  const DateRequestRow({
+    super.key,
+    required this.request,
+    this.title,
+    this.code,
+    this.flat = false,
+  });
 
   final DateChangeRequest request;
+
+  /// Görevin kısa etiketi (koordinatörlük kodu; yalnız [flat]'te gösterilir).
+  final String? code;
+  final bool flat;
 
   /// Görev başlığı (katalogda görünüyorsa).
   final String? title;
@@ -234,6 +245,43 @@ class DateRequestRow extends StatelessWidget {
         r.reviewReason,
       _ => null,
     };
+    if (flat) {
+      return InkWell(
+        onTap: id == null ? null : () => context.appNav.openTask(id),
+        child: Padding(
+          padding: const EdgeInsets.all(NizamioSpacing.space4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title ?? l.uiTasksDetailTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: t.bodyLg.copyWith(fontWeight: FontWeight.w500),
+                    ),
+                    const Gap(NizamioSpacing.space1),
+                    Text(
+                      [
+                        ?code,
+                        '${TaskDates.short(r.oldDue)} → ${TaskDates.short(r.due)}',
+                      ].join('  '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: t.bodyMd.copyWith(color: c.textMuted),
+                    ),
+                  ],
+                ),
+              ),
+              const Gap(NizamioSpacing.space2),
+              badge,
+            ],
+          ),
+        ),
+      );
+    }
     return NzCard.outlined(
       size: NzSize.sm,
       onTap: id == null ? null : () => context.appNav.openTask(id),

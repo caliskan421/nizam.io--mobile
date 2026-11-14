@@ -32,22 +32,29 @@ class NzSectionHeader extends StatelessWidget {
     final onAll = this.onAll;
     return Row(
       children: [
-        Flexible(
-          child: Semantics(
-            header: true,
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: t.titleSm,
-            ),
+        // Başlık + sayı kalan genişliği alır; "Tümü ›" doğal genişliğinde (başlık yarıda
+        // kesilmez).
+        Expanded(
+          child: Row(
+            children: [
+              Flexible(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: t.titleSm.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+              if (count != null) ...[
+                const Gap(NizamioSpacing.space2),
+                NzCountPill.neutral(count),
+              ],
+            ],
           ),
         ),
-        if (count != null) ...[
-          const Gap(NizamioSpacing.space2),
-          NzCountPill.neutral(count),
-        ],
-        const Spacer(),
         if (onAll != null)
           Semantics(
             button: true,

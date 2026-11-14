@@ -2489,6 +2489,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeQuickActions => 'hızlı işlemler';
 
   @override
+  String get uiHomeQuickActionsTitle => 'Hızlı işlemler';
+
+  @override
   String get uiHomeQaTask => 'Yeni görev';
 
   @override

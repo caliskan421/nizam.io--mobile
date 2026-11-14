@@ -352,16 +352,17 @@ class NzPage extends ConsumerWidget {
                   ),
                 ],
               );
-              final scroll = pane == NzPaneRole.master
-                  ? Padding(
-                      padding: EdgeInsets.only(top: safe.top),
-                      child: MediaQuery.removePadding(
-                        context: context,
-                        removeTop: true,
-                        child: ClipRect(child: scrollView),
-                      ),
-                    )
-                  : scrollView;
+              // Ağaç yapısı bölme rolünden bağımsız aynı kalır: telefon ↔ tablet geçişinde
+              // kaydırma State'i (konum, arama) korunur; yalnız dolgu değişir.
+              final master = pane == NzPaneRole.master;
+              final scroll = Padding(
+                padding: EdgeInsets.only(top: master ? safe.top : 0),
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: master,
+                  child: ClipRect(child: scrollView),
+                ),
+              );
               // Material gösterge cam üst çubuğun altından iner (çubuk kaydırma görünümünün
               // içindedir; yüksekliği NzTopBar ile aynı: güvenli alan + space2 + appbar).
               final content = refresh == null || cupertino

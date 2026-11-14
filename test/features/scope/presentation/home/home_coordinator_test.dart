@@ -119,7 +119,8 @@ void main() {
       expect(find.text('Bekleyen işler'), findsOneWidget);
       expect(find.text('Görev a'), findsNothing);
       // Ekip yükü kişi kutusu.
-      expect(find.text('Ayşe Kaya (sen)'), findsOneWidget);
+      expect(find.text('Ayşe Kaya'), findsOneWidget);
+      expect(find.text('sen'), findsOneWidget);
       for (final label in [RegExp('^1 Atanmamış'), RegExp('^Ayşe Kaya,')]) {
         await tester.ensureVisible(find.bySemanticsLabel(label));
         await tester.pumpAndSettle();

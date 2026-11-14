@@ -235,10 +235,9 @@ class _PendingRowTile extends StatelessWidget {
   }
 }
 
-/// Ekip yükü (sabit boy; ekip büyüdükçe uzamaz): üstte ekip toplamları (kişi, açık, geciken),
-/// tek parçalı durum şeridi ve açıklaması; altta en yüklü dört kişi küçük kutularda (baş
-/// harfler, ad, "5 açık · 2 geç"); kalanlar "+N kişi · Ekibim" bağlantısıyla. Kutu kişinin
-/// görevlerini açar. Backend koordinatöre yük ucu açmaz; sayım görünen görevlerden
+/// Ekip yükü (sabit boy; ekip büyüdükçe uzamaz): üstte ekip toplamları (kişi, açık, geciken);
+/// altta en yoğun üç kişi tam genişlik satırlarda (baş harfler, ad, sağda "5 açık · 2 geç");
+/// kalanlar "+N kişi daha · Ekibim" bağlantısıyla. Satır kişinin görevlerini açar. Backend koordinatöre yük ucu açmaz; sayım görünen görevlerden
 /// ([CoordinatorBoard.load]).
 class HomeTeamLoad extends ConsumerWidget {
   const HomeTeamLoad({super.key, required this.board, this.fill = false});
@@ -248,7 +247,7 @@ class HomeTeamLoad extends ConsumerWidget {
   /// Verilen yüksekliği kartla doldurur (yan yana çift).
   final bool fill;
 
-  static const shown = 4;
+  static const shown = 3;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -267,10 +266,6 @@ class HomeTeamLoad extends ConsumerWidget {
         });
     final open = loaded.fold(0, (n, p) => n + p.open);
     final late = loaded.fold(0, (n, p) => n + p.late);
-    final review = loaded.fold(0, (n, p) => n + p.review);
-    final returned = loaded.fold(0, (n, p) => n + p.returned);
-    final doing = loaded.fold(0, (n, p) => n + p.inProgress);
-    final returnedColor = c.danger.withValues(alpha: 0.5);
     Widget stat(String value, String label, {bool danger = false}) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -279,14 +274,6 @@ class HomeTeamLoad extends ConsumerWidget {
           style: t.titleMd.copyWith(color: danger ? c.danger : c.text),
         ),
         Text(label, style: t.caption.copyWith(color: c.textMuted)),
-      ],
-    );
-    Widget legend(Color color, String label, int n) => Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        NzDot(color: color),
-        const Gap(NizamioSpacing.space1),
-        Text('$label $n', style: t.caption.copyWith(color: c.textMuted)),
       ],
     );
     Widget person(TeamLoad p) {
@@ -314,28 +301,34 @@ class HomeTeamLoad extends ConsumerWidget {
                     NzAvatar.initials(name: name, size: NzSize.sm),
                     const Gap(NizamioSpacing.space2),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Text(
-                            p.personId == catalog?.me
-                                ? '$name (${l.uiUsersTeamYou})'
-                                : name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: t.bodyMd.copyWith(
-                              fontWeight: FontWeight.w500,
+                          Flexible(
+                            child: Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: t.bodyMd.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
-                          Text(
-                            caption,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: t.monoSm.copyWith(
-                              color: p.late > 0 ? c.danger : c.textMuted,
+                          if (p.personId == catalog?.me) ...[
+                            const Gap(NizamioSpacing.space2),
+                            Text(
+                              l.uiUsersTeamYou,
+                              style: t.monoSm.copyWith(color: c.textMuted),
                             ),
-                          ),
+                          ],
                         ],
+                      ),
+                    ),
+                    const Gap(NizamioSpacing.space2),
+                    Text(
+                      caption,
+                      maxLines: 1,
+                      style: t.monoSm.copyWith(
+                        color: p.late > 0 ? c.danger : c.textMuted,
                       ),
                     ),
                   ],
@@ -368,38 +361,9 @@ class HomeTeamLoad extends ConsumerWidget {
                 ],
               ),
               const Gap(NizamioSpacing.space3),
-              NzProgressBar.segments(
-                segments: [
-                  NzBarSegment(doing, c.inProgress),
-                  NzBarSegment(review, c.warning),
-                  NzBarSegment(returned, returnedColor),
-                  NzBarSegment(open - doing - review - returned, c.textFaint),
-                ],
-              ),
-              const Gap(NizamioSpacing.space2),
-              Wrap(
-                spacing: NizamioSpacing.space3,
-                runSpacing: NizamioSpacing.space1,
-                children: [
-                  legend(c.inProgress, l.uiHomeLoadDoing, doing),
-                  legend(c.warning, l.uiHomeLoadReview, review),
-                  legend(returnedColor, l.uiHomeLoadReturned, returned),
-                ],
-              ),
-              const Gap(NizamioSpacing.space3),
-              for (var i = 0; i < top.length; i += 2) ...[
+              for (final (i, p) in top.indexed) ...[
                 if (i > 0) const Gap(NizamioSpacing.space2),
-                Row(
-                  children: [
-                    Expanded(child: person(top[i])),
-                    const Gap(NizamioSpacing.space2),
-                    Expanded(
-                      child: i + 1 < top.length
-                          ? person(top[i + 1])
-                          : const SizedBox.shrink(),
-                    ),
-                  ],
-                ),
+                person(p),
               ],
             ],
           );

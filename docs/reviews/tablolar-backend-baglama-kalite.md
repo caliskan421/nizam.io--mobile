@@ -15,18 +15,28 @@
 | 3 | UYGUN DEĞİL | YÜKSEK yok; geciken metadata makbuzu, silme tekrarının başarı işleyicisi (2 ORTA) |
 | 4 | UYGUN DEĞİL | ters sırada dönen kendi metadata makbuzları (1 ORTA) |
 | 5 | KOŞULLU UYGUN | 4 DÜŞÜK + tanığın bulduğu D2 sınır ihlali |
-| 6 | **KOŞULLU UYGUN** | hepsi kapandı, yeni bulgu yok; koşul güncel test kanıtı → tanık son tur ile sağlandı |
+| 6 | KOŞULLU UYGUN | hepsi kapandı, yeni bulgu yok; koşul güncel test kanıtı → tanık son tur ile sağlandı |
 
-Her düzeltme önce-kırmızı testle geldi; korumalar M1–M8 mutasyonlarıyla (patch + komut + assertion) kırmızı gösterildi, tanık M1/M4–M7'yi bağımsız tekrarladı.
+**Ek kapsam (2026-11-14): referans hücreleri.** Pin `v0.18.0-api`; 5 referans tipi (tablo/kişi/departman/görev/dosya) tekli ve çoklu yazım, aday seçicileri (mevcut görünürlük uçları), `tables.reference_unavailable` geri alma, redakte hücrede onaylı tam değiştirme, tablo ve görev referansından gezinme; görev ayrıntısında katalog dışı kimlik araması (görünür departmanlarda en çok 20 `getWorkItem`, geçici hata/429/`work.not_assigned` ayrımı).
+
+| Tur | Hüküm | Özet |
+|---|---|---|
+| 7 | UYGUN DEĞİL | 2 ORTA: 409→snapshot 429'da bekletilen yazımın kilitlenmesi; bayat katalogda görev referansının açılmaması |
+| 8 | UYGUN DEĞİL | kuyruk kilidi kapandı; çözüm okumasında nesil koruması eksik, kesik katalog yolu açık (2 ORTA) |
+| 9 | UYGUN DEĞİL | nesil koruması kapandı; geçici arama hatasının kalıcı "bulunamadı" bırakması (1 ORTA) + 20 sınırı açıklaması (DÜŞÜK) |
+| 10 | KOŞULLU UYGUN | uçuştaki aramanın sahip değişiminde paylaşılması (DÜŞÜK) |
+| 11 | **UYGUN** | kapandı; 403 yalnız `work.not_assigned` kesin. Not: dar fark incelemesi, 7 exec (KAPI §13 ~10 eşiğinin altında; önceki turlar eşiği geçti) |
+
+Her düzeltme önce-kırmızı testle geldi; korumalar M1–M8, R1–R4 ve tur 9–12 mutasyonlarıyla (patch + komut + assertion) kırmızı gösterildi, tanık M1/M4–M7 ve R1/R4'ü bağımsız tekrarladı. Tek istisna: referans testlerinin önce-kırmızı commit'i kendi başına derlenmez (bisect'te atlanmalı); sonraki önce-kırmızı kanıtları yalnız yerel kayıtta.
 
 ## Son tanık koşumu (HEAD = bu belgenin bir önceki commit'i)
 
 | Kontrol | Sonuç |
 |---|---|
 | `flutter analyze --fatal-infos` | temiz |
-| `test/features/tables` | 80/80, tam koşumla eşzamanlı 3 koşu |
-| `test/features/messages` | 170/170 |
-| `flutter test test/ --exclude-tags golden` | 2866 geçti / 12 düştü; 12'si tabanda da düşen aynı adlar |
+| `test/features/tables` | 102/102, tam koşumla eşzamanlı 2 koşu |
+| `test/features/tasks`, `messages` | 282/282, 170/170 |
+| `flutter test test/ --exclude-tags golden` | 2897 geçti / 12 düştü; 12 ad tabanla tek tek eşleşti |
 | `file_size` | tabanla aynı 5 dosya |
 | `check_boundaries` | 8 ihlal, tabanla aynı küme; tablolarda yok |
 | `check_error_paths`, envanter | ihlal yok, güncel |
@@ -41,4 +51,4 @@ Her düzeltme önce-kırmızı testle geldi; korumalar M1–M8 mutasyonlarıyla 
 
 ## Bilinen sınırlar (tasarım belgesinde ayrıntılı)
 
-Belirteç yenilemesi sonrası akış normal kopma yoluyla (≤27 sn) yeniden açılır; kendi `number` yazımının sunucu normalizasyonu sonraki okumada görünür; belirsiz komut kaydı ekran denetleyicisi ömrü boyunca tutulur; çağıranın rolü yanıtta yok (ilk 403'te salt okunur); yankı ayrımı sözleşme alanlarından türetilmiştir. Kapsam dışı: paylaşım/ekip rolü/şablon/proje/ek ekranları, referans hücre yazımı (seçiciler) ve referanstan hedef tabloya gezinme, yorum düzenleme ekranı.
+Belirteç yenilemesi sonrası akış normal kopma yoluyla (≤27 sn) yeniden açılır; kendi `number` yazımının sunucu normalizasyonu sonraki okumada görünür; belirsiz komut kaydı ekran denetleyicisi ömrü boyunca tutulur; çağıranın rolü yanıtta yok (ilk 403'te salt okunur); yankı ayrımı sözleşme alanlarından türetilmiştir. Referans sınırları: kişi seçicisi uç yetkisi nedeniyle yalnız yönetici/koordinatöre açık; görevsiz arşiv dosyası seçilemez; kişi/departman/dosya referansı yalnız gösterilir; mobilde referans sütunu oluşturulmaz. Kapsam dışı: paylaşım/ekip rolü/şablon/proje/ek ekranları, yorum düzenleme ekranı.

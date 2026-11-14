@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/telemetry/report_source.dart';
+import '../../../../core/telemetry/unexpected_error.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/state/nz_async_view.dart';
@@ -451,7 +453,9 @@ class TaskDecisionFlows {
     try {
       await ref.read(p.future);
       return _task?.fileEntries.length;
-    } on Object {
+    } on Object catch (e, st) {
+      // Okuma hatası raporlanır; karar sunucuya kalır (409 toast olarak görünür).
+      toReportedApiError(e, st, source: ReportSource.tasks);
       return null;
     } finally {
       sub.close();

@@ -11,7 +11,7 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | denetim akışı | 1 |
 | iletilir | 15 |
 | istisna | 59 |
-| rapor | 173 |
+| rapor | 174 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -280,6 +280,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/tasks/data/file_upload_picker.dart` | `FileUploadPicker.pick` | catch | istisna | 1 |
 | `features/tasks/data/task_catalog_api_repository.dart` | `ApiTaskCatalogRepository._teams` | catchError | istisna | 1 |
 | `features/tasks/data/upload_digest.dart` | `uploadDigest` | catch | istisna | 1 |
+| `features/tasks/presentation/decision/task_decision_flows.dart` | `TaskDecisionFlows._readFiles` | catch | rapor | 1 |
 | `features/tasks/presentation/detail/task_dependencies.dart` | `TaskDependencies.build` | catch | rapor | 1 |
 | `features/tasks/presentation/task_detail_page.dart` | `TaskDetailPage.build` | catch | istisna | 1 |
 | `features/timeline/application/timeline_controller.dart` | `TimelineController._extend` | catch | rapor | 1 |

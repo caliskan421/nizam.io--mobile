@@ -48,7 +48,20 @@ Her açılış girişle başlar (kayıtlı oturum sunucuda kapatılır); çıkı
 Yerel geliştirme backend'i (örnek verili): `../program/araclar/agir-is.sh "mobil dev backend" -- test_integration/backend/dev-up.sh`
 — `up.sh` (pin etiketi, `127.0.0.1:18140`) ve ardından `seed_dev.py`: prototip kataloğu (16 kişi, 11 koordinatörlük,
 76 görev, dosya/not/alt görev, mesaj, toplantı) yalnız API ile basılır; tarihler bugüne kaydırılır. Giriş
-`admin@nizam.local` (dev ön dolgusu), diğerleri `<ad.soyad>@nizam.local`, aynı parola. Baştan kurmak: `down.sh`
+`admin@nizam.local` (dev ön dolgusu), diğerleri `<ad.soyad>@nizam.local`, aynı parola. İkinci program
+(İstanbul Teknofest 2027; 6 koordinatörlük, her durumdan görev, alt görev, tarih talebi), farklı tür/boyda arşiv
+dosyaları (bütün etiketler), iki programda tablolar (her sütun türü, paylaşımlı), silinenler (görev, toplantı,
+görevleriyle silinen koordinatörlük, `deniz.arslan@`), grup sohbetleri ve anketler de basılır. Rol tanıkları:
+
+| Hesap | Roller |
+|---|---|
+| `admin@nizam.local` | şirket yöneticisi + Şanlıurfa'da SİS koordinatörü + OPE üyesi |
+| `kadir.ozbek@nizam.local` | Şanlıurfa'da ALT koordinatörü, İstanbul'da ALT üyesi |
+| `gokce.nur.usta@nizam.local` | Şanlıurfa'da EĞİ üyesi, İstanbul'da LOJ koordinatörü + ALT üyesi |
+| `abdullah.ates@nizam.local` | saf koordinatör (yalnız Şanlıurfa ALT) |
+| `bahar.kilic@nizam.local` | saf üye (yalnız Şanlıurfa İDA) |
+
+Baştan kurmak: `down.sh`
 sonra yeniden `dev-up.sh`. `make integration` boş kurulum bekler: önce `down.sh` + `up.sh`. Android emülatöründen
 adres `http://10.0.2.2:18140`.
 

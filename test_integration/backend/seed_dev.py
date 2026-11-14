@@ -11,6 +11,9 @@ Tarihler: örnek kataloğun "bugün"ü 2026-10-21'dir. Bütün tarihler sunucunu
 Hesaplar: `ma` = ilk yönetici (up.sh'in açtığı hesap; adı güncellenir). Diğerleri
 <ad.soyad>@nizam.local, hepsi aynı geliştirme parolasıyla (sır değildir; atılabilir veritabanı).
 
+Genişletme (`extend`): ikinci program, çoklu rol tanıkları, büyük arşiv dosyaları, tablolar, silinenler,
+grup sohbetleri/anketler; her bölüm `== ...: N` özet satırı basar. Tanık hesaplar README'dedir.
+
 Kullanım: dev-up.sh (up.sh + bu betik). Yalnız boş kurulumda koşar (program varsa durur).
 Ortam: NIZAMIO_IT_BACKEND (varsayılan http://127.0.0.1:18140), NIZAMIO_IT_ADMIN_EMAIL,
 NIZAMIO_IT_ADMIN_PASSWORD (dev girişinin varsayılanları).
@@ -19,13 +22,16 @@ import datetime as dt
 import io
 import json
 import os
+import random
 import re
+import struct
 import sys
 import time
 import urllib.error
 import urllib.request
 import uuid
 import zipfile
+import zlib
 
 BASE = os.environ.get('NIZAMIO_IT_BACKEND', 'http://127.0.0.1:18140')
 ADMIN_EMAIL = os.environ.get('NIZAMIO_IT_ADMIN_EMAIL', 'admin@nizam.local')
@@ -34,7 +40,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 TASKS_DART = os.path.join(ROOT, 'test_integration/backend/seed_task_data.txt')
 SAMPLE_TODAY = dt.date(2026, 10, 21)
 
-PROGRAM = {'name': 'Şanlıurfa Teknofest', 'year': 2026,
+PROGRAM = {'name': 'Şanlıurfa Teknofest', 'year': 2026, 'short_name': 'URFA', 'color': 'violet',
            'description': 'Teknofest Şanlıurfa 2026 saha kurulumu ve organizasyonu.'}
 
 # Kişi kodu → ad (örnek katalog `_people`); `ma` ilk yöneticidir, `my` de şirket yöneticisi.
@@ -234,25 +240,90 @@ def parse_catalog():
     return people, coords, tasks
 
 
-def sample_file(name):
+def sample_file(name, size=0):
+    """Uzantısına uygun, açılabilir örnek dosya; `size` bayta yakın (arşivde farklı boylar)."""
+    rnd = random.Random(f'{name}:{size}')
     ext = name.rsplit('.', 1)[1]
-    if ext == 'pdf':
-        return b'%PDF-1.4\n% NIZAM.IO ornek dosya\n%%EOF\n'
-    if ext == 'png':
-        return bytes.fromhex('89504e470d0a1a0a0000000d4948445200000001000000010806000000'
-                             '1f15c4890000000d49444154789c6360000002000154a24f5d0000000049454e44ae426082')
+    if ext == 'png':  # gürültülü RGB görüntü: sıkışmaz, boyu en × boy × 3'e yakındır
+        side = max(8, int((size / 3) ** 0.5))
+        rows = b''.join(b'\0' + rnd.randbytes(side * 3) for _ in range(side))
+        chunk = lambda t, b: struct.pack('>I', len(b)) + t + b + struct.pack('>I', zlib.crc32(t + b))  # noqa: E731
+        return (b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', side, side, 8, 2, 0, 0, 0))
+                + chunk(b'IDAT', zlib.compress(rows, 1)) + chunk(b'IEND', b''))
+    words = ['saha', 'kurulum', 'teslim', 'malzeme', 'ekip', 'program', 'rapor', 'plan', 'kontrol',
+             'tutanak', 'tedarik', 'güvenlik', 'enerji', 'su', 'çadır', 'basın', 'ölçüm', 'onay']
+    lines = [' '.join(rnd.choice(words) for _ in range(12)) for _ in range(max(1, size // 90))]
+    if ext == 'pdf':  # tek sayfalı geçerli PDF; boy, sayfaya bağlanmamış ek akışla tamamlanır
+        text = 'BT /F1 14 Tf 72 760 Td (NIZAM.IO ornek belge) Tj ET'.encode()
+        pad = '\n'.join(lines).encode()
+        objs = [b'<< /Type /Catalog /Pages 2 0 R >>',
+                b'<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+                b'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R '
+                b'/Resources << /Font << /F1 5 0 R >> >> >>',
+                b'<< /Length %d >>stream\n' % len(text) + text + b'\nendstream',
+                b'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+                b'<< /Length %d >>stream\n' % len(pad) + pad + b'\nendstream']
+        out, offs = bytearray(b'%PDF-1.4\n'), []
+        for i, o in enumerate(objs, 1):
+            offs.append(len(out))
+            out += b'%d 0 obj\n' % i + o + b'\nendobj\n'
+        xref = len(out)
+        out += b'xref\n0 %d\n0000000000 65535 f \n' % (len(objs) + 1)
+        out += b''.join(b'%010d 00000 n \n' % o for o in offs)
+        out += b'trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n' % (len(objs) + 1, xref)
+        return bytes(out)
+    esc = lambda t: t.replace('&', '&amp;').replace('<', '&lt;')  # noqa: E731
     buf = io.BytesIO()
-    with zipfile.ZipFile(buf, 'w') as z:
-        z.writestr('[Content_Types].xml', '<?xml version="1.0"?><Types/>')
-        z.writestr('ornek.txt', 'NIZAM.IO ornek dosya')
+    with zipfile.ZipFile(buf, 'w', zipfile.ZIP_STORED) as z:  # sıkıştırmasız: boy satır sayısıyla gelir
+        rels = ('<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/'
+                'package/2006/relationships"><Relationship Id="r1" Type="http://schemas.openxmlformats.org/'
+                'officeDocument/2006/relationships/officeDocument" Target="%s"/></Relationships>')
+        if ext == 'docx':
+            z.writestr('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://'
+                       'schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" '
+                       'ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default '
+                       'Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" '
+                       'ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.'
+                       'main+xml"/></Types>')
+            z.writestr('_rels/.rels', rels % 'word/document.xml')
+            body = ''.join(f'<w:p><w:r><w:t>{esc(t)}</w:t></w:r></w:p>' for t in lines)
+            z.writestr('word/document.xml', '<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="http://'
+                       'schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' + body
+                       + '</w:body></w:document>')
+        else:
+            z.writestr('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://'
+                       'schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" '
+                       'ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default '
+                       'Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" '
+                       'ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+                       '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.'
+                       'openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>')
+            z.writestr('_rels/.rels', rels % 'xl/workbook.xml')
+            z.writestr('xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://'
+                       'schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.'
+                       'openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Sayfa1" '
+                       'sheetId="1" r:id="r1"/></sheets></workbook>')
+            z.writestr('xl/_rels/workbook.xml.rels', (rels % 'worksheets/sheet1.xml').replace(
+                'officeDocument"', 'worksheet"'))
+            rows = ''.join(f'<row r="{i}"><c r="A{i}" t="inlineStr"><is><t>{esc(t)}</t></is></c>'
+                           f'<c r="B{i}"><v>{rnd.randint(1, 5000)}</v></c></row>'
+                           for i, t in enumerate(lines, 1))
+            z.writestr('xl/worksheets/sheet1.xml', '<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns='
+                       '"http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>' + rows
+                       + '</sheetData></worksheet>')
     return buf.getvalue()
 
 
-def multipart(filename):
+def file_size(key):
+    """Dosyaya kararlı, 40–650 KB arası boy (arşivde boy çeşitliliği)."""
+    return random.Random(key).randint(40, 650) * 1024
+
+
+def multipart(filename, size=0):
     b = uuid.uuid4().hex
     head = (f'--{b}\r\nContent-Disposition: form-data; name="file"; filename="{filename}"\r\n'
             f'Content-Type: {MIME[filename.rsplit(".", 1)[1]]}\r\n\r\n').encode()
-    return head + sample_file(filename) + f'\r\n--{b}--\r\n'.encode(), f'multipart/form-data; boundary={b}'
+    return head + sample_file(filename, size) + f'\r\n--{b}--\r\n'.encode(), f'multipart/form-data; boundary={b}'
 
 
 def main():
@@ -313,7 +384,7 @@ def main():
         return next((p for (c, p), r in role.items() if c == code and r == 'koordinator'), None)
 
     # Görevler.
-    ids, problems = {}, []
+    ids, problems, p1_files = {}, [], {}
     for t in tasks:
         code, D = t['coord'], dept[t['coord']]
         creator = t['creator'] if role.get((code, t['creator'])) == 'koordinator' else 'ma'
@@ -349,9 +420,11 @@ def main():
             if t['status'] != 'baslanmadi':
                 move(worker, wid, prog, D, 'devam_ediyor')
             for i in range(files):
-                raw, ctype = multipart(FILE_NAMES[i % len(FILE_NAMES)])
-                sessions[uploader].call('POST', f'/v1/work-items/{wid}/files?tag={TAGS[i % len(TAGS)]}',
-                            raw=raw, ctype=ctype, program=prog, dept=D)
+                fname = FILE_NAMES[i % len(FILE_NAMES)]
+                raw, ctype = multipart(fname, file_size(f'{t["code"]}:{i}'))
+                f = sessions[uploader].call('POST', f'/v1/work-items/{wid}/files?tag={TAGS[i % len(TAGS)]}',
+                                            raw=raw, ctype=ctype, program=prog, dept=D)
+                p1_files.setdefault((1, code), []).append(f['file_id'])
             for i in range(t['notes']):
                 worker.call('POST', f'/v1/work-items/{wid}/notes',
                             {'content': NOTES[i % len(NOTES)]}, program=prog, dept=D)
@@ -413,6 +486,10 @@ def main():
             problems.append(f'toplantı {title}: {e}')
     print(f'== toplantılar: {made} (geçmişte kalan {skipped} atlandı)')
 
+    ctx = {'admin': admin, 'sessions': sessions, 'acc': acc, 'prog': prog, 'dept': dept, 'role': role,
+           'ids': ids, 'files': p1_files, 'problems': problems, 'today': today}
+    extend(ctx)
+
     if problems:
         print(f'\n!! {len(problems)} adım uygulanamadı:')
         for p in problems:
@@ -445,6 +522,441 @@ def finish(target, wid, prog, D, worker, lead):
         move(lead, wid, prog, D, 'iade_edildi', reason='Teslim tutanağı eksik; imzalı halini ekleyin.')
     else:
         move(lead, wid, prog, D, 'tamamlandi')
+
+
+# ---------------------------------------------------------------------------------------------
+# Genişletme: ikinci program, çoklu rol tanıkları, silinenler, tablolar, grup sohbetleri.
+# Rol tanıkları (README): admin@ = yönetici + SİS koordinatörü + OPE üyesi (1. program);
+# kadir.ozbek@ = 1. programda ALT koordinatörü, 2. programda ALT üyesi; gokce.nur.usta@ = 1.'de
+# EĞİ üyesi, 2.'de LOJ koordinatörü + ALT üyesi; abdullah.ates@ = saf koordinatör; bahar.kilic@ = saf üye.
+# Bu ikisi 2. programa ve 2. programın görevlerine KONULMAZ.
+# ---------------------------------------------------------------------------------------------
+
+PROGRAM2 = {'name': 'İstanbul Teknofest 2027', 'year': 2027, 'short_name': 'İST', 'color': 'teal',
+            'description': 'Teknofest İstanbul 2027 hazırlıkları: saha, lojistik, güvenlik ve basın.'}
+
+# Yeni koordinatörlükler (katalog geneli; ASCII kod). `GEC` ve `ESK` tohumda silinir.
+NEW_DEPTS = {
+    'LOJ': ('Lojistik ve tedarik', 'Malzeme, araç ve depo planlaması; tedarikçi sözleşmeleri.'),
+    'GUV': ('Güvenlik ve sağlık', 'Saha güvenliği, ilk yardım ve tahliye planları.'),
+    'BAS': ('Basın ve medya', 'Akreditasyon, basın bültenleri ve sosyal medya.'),
+    'GEC': ('Geçici çalıştay ekibi', 'Tek seferlik çalıştay; departmanla birlikte silinir.'),
+    'ESK': ('Eski kurulum ekibi', 'Önceki kurulumdan kalan iş; departmanla birlikte silinir.'),
+}
+
+# 2. programın ekibi: kod → (koordinatör, üyeler). ALT ve OPE 1. programdaki koordinatörlüklerdir.
+TEAM2 = {
+    'ALT': ('av', ['ko', 'gn']),
+    'OPE': ('yc', ['mk']),
+    'LOJ': ('gn', ['mey', 'rk']),
+    'GUV': ('so', ['oh', 'mey']),
+    'BAS': ('bc', ['eo', 'ss']),
+    'GEC': ('eo', ['ss']),
+}
+
+# 2. program görevleri: (koordinatörlük, başlık, durum, öncelik, başlangıç, bitiş [bugüne gün],
+#  atananlar, kanıt zorunlu, dosya, not, tamamlanma [gün|None]). Bitişi geçmiş açık görev gecikmiştir.
+TASKS2 = [
+    ('ALT', 'İstanbul saha su hattı keşfi', 'tamamlandi', 'yuksek', -30, -10, ['ko'], True, 2, 1, -12),
+    ('ALT', 'Yangın hidrantlarının yerleşimi', 'onaya_sunuldu', 'acil', -20, 5, ['ko'], True, 2, 0, None),
+    ('ALT', 'Atıksu bağlantı projesi', 'iade_edildi', 'orta', -15, 3, ['gn'], True, 1, 1, None),
+    ('ALT', 'Hidrofor odası ölçümleri', 'devam_ediyor', 'yuksek', -25, -4, ['ko'], False, 0, 2, None),
+    ('ALT', 'Sondaj noktalarının işaretlenmesi', 'baslanmadi', 'dusuk', 2, 14, ['gn'], False, 0, 0, None),
+    ('ALT', 'Altyapı keşif raporu', 'tamamlandi', 'orta', -18, -6, ['av'], False, 1, 0, -7),
+    ('OPE', 'Ziyaretçi giriş akışı', 'devam_ediyor', 'orta', -10, 10, ['mk'], False, 0, 2, None),
+    ('OPE', 'Vardiya çizelgesi 2027', 'onaya_sunuldu', 'yuksek', -12, 2, ['mk'], True, 1, 0, None),
+    ('OPE', 'Acil durum tatbikatı planı', 'baslanmadi', 'acil', -8, -1, ['mk'], False, 0, 0, None),
+    ('OPE', 'Gönüllü yaka kartları', 'tamamlandi', 'orta', -20, -5, ['mk'], True, 3, 0, -3),
+    ('LOJ', 'Çadır ve platform kiralama', 'devam_ediyor', 'yuksek', -14, 6, ['mey', 'rk'], True, 2, 1, None),
+    ('LOJ', 'Jeneratör sevkiyatı', 'iade_edildi', 'acil', -9, 4, ['rk'], True, 1, 0, None),
+    ('LOJ', 'Depo alanı yerleşimi', 'onaya_sunuldu', 'orta', -6, 8, ['mey'], False, 0, 1, None),
+    ('LOJ', 'Forklift operatör ataması', 'devam_ediyor', 'orta', -30, -7, ['rk'], False, 0, 0, None),
+    ('LOJ', 'Tedarikçi sözleşmeleri', 'tamamlandi', 'yuksek', -35, -15, ['mey'], True, 4, 2, -16),
+    ('LOJ', 'Malzeme sayımı', 'baslanmadi', 'dusuk', 5, 20, ['mey', 'rk'], False, 0, 0, None),
+    ('GUV', 'Güvenlik kulübesi kurulumu', 'devam_ediyor', 'orta', -5, 12, ['oh'], False, 0, 0, None),
+    ('GUV', 'İlk yardım istasyonları', 'onaya_sunuldu', 'yuksek', -10, 1, ['mey'], True, 2, 0, None),
+    ('GUV', 'Tahliye planı onayı', 'iade_edildi', 'acil', -12, 2, ['oh'], True, 1, 1, None),
+    ('GUV', 'Kamera kayıt sistemi', 'baslanmadi', 'orta', 3, 25, [], False, 0, 0, None),
+    ('BAS', 'Basın bülteni taslağı', 'tamamlandi', 'orta', -15, -2, ['eo'], True, 2, 0, -2),
+    ('BAS', 'Akreditasyon kartları', 'devam_ediyor', 'yuksek', -7, 7, ['ss'], True, 1, 0, None),
+    ('BAS', 'Sosyal medya takvimi', 'onaya_sunuldu', 'dusuk', -4, 9, ['eo'], False, 0, 1, None),
+    ('BAS', 'Fotoğraf arşivi', 'devam_ediyor', 'orta', -20, -3, ['ss'], False, 3, 0, None),
+    ('GEC', 'Çalıştay salon düzeni', 'devam_ediyor', 'orta', -3, 10, ['ss'], False, 1, 0, None),
+    ('GEC', 'Çalıştay katılımcı listesi', 'baslanmadi', 'dusuk', 1, 12, ['ss'], False, 0, 0, None),
+    ('GEC', 'Çalıştay afişi', 'tamamlandi', 'orta', -10, -2, ['eo'], False, 0, 0, -3),
+]
+# 1. programda silinecek koordinatörlüğün görevleri (koordinatör oh, üye so).
+TASKS_ESK = [
+    ('ESK', 'Eski kurulum envanteri', 'devam_ediyor', 'orta', -6, 6, ['so'], False, 1, 0, None),
+    ('ESK', 'Eski depo boşaltma', 'baslanmadi', 'dusuk', 2, 9, ['so'], False, 0, 0, None),
+]
+# Tek tek silinen görevler: (program, koordinatörlük, başlık, atanan).
+DELETED_TASKS = [(1, 'ALT', 'Mükerrer: hidrofor teklif karşılaştırması', 'ko'),
+                 (2, 'LOJ', 'Eski tabela siparişi (iptal)', 'rk'),
+                 (2, 'GUV', 'Mükerrer kayıt: kamera keşfi', 'oh')]
+
+SUBTASKS2 = {
+    'Yangın hidrantlarının yerleşimi': [('Hidrant konum çizimi', 'ko', True), ('İtfaiye onayı', 'ko', False)],
+    'Çadır ve platform kiralama': [('Çadır teklifleri', 'mey', True), ('Platform ölçüleri', 'rk', False),
+                                   ('Kiralama sözleşmesi', 'mey', False)],
+}
+# Tarih talebini yalnız görevin koordinatörü açar (WORK-K38).
+DATE_REQUESTS2 = [('Ziyaretçi giriş akışı', 'yc', 17, 'Turnike tedarikçisi teslimi bir hafta erteledi.'),
+                  ('Güvenlik kulübesi kurulumu', 'so', 20, 'Zemin betonu kurumadan kulübe yerleştirilemiyor.'),
+                  ('Forklift operatör ataması', 'gn', 5, 'Sertifikalı operatör ancak gelecek hafta katılabiliyor.')]
+
+MEETINGS2 = [  # (gün, saat, dakika, başlık, sahip koordinatörlükler [boş = genel], gündem)
+    (1, 10, 0, 'İstanbul hazırlık toplantısı', [], ['Program takvimi', 'Koordinatörlük sorumlulukları']),
+    (3, 14, 0, 'Lojistik ve güvenlik', ['LOJ', 'GUV'], ['Depo güvenliği', 'Araç giriş izinleri']),
+    (6, 11, 0, 'Basın planı', ['BAS'], ['Akreditasyon süreci', 'Basın bülteni takvimi']),
+    (9, 10, 0, 'Saha turu', ['ALT', 'LOJ'], ['Su hattı güzergâhı', 'Çadır alanları']),
+]
+DELETED_MEETINGS = [(2, 4, 15, 0, 'İptal: tedarikçi sunumu', ['LOJ'], ['Teklif sunumları']),
+                    (1, 5, 16, 0, 'İptal: eski kurulum brifingi', ['ALT'], ['Envanter devri'])]
+
+# Tablolar: (program, koordinatörlük, sahip, ad, ekip rolü, [(hesap, rol)] paylaşımlar).
+TABLES = [(1, 'ALT', 'aa', 'Malzeme takip listesi', 'viewer', [('ko', 'editor'), ('av', 'viewer')]),
+          (1, 'OPE', 'yc', 'Vardiya çizelgesi', 'editor', []),
+          (2, 'LOJ', 'gn', 'Araç listesi', 'none', [('rk', 'viewer')]),
+          (2, 'LOJ', 'gn', 'Tedarik planı', 'viewer', [('mey', 'editor'), ('rk', 'viewer')]),
+          (2, 'BAS', 'bc', 'Basın akreditasyon listesi', 'viewer', [('eo', 'editor')])]
+
+
+def make_tasks(ctx, P, prog, spec, extra_roles):
+    """Görev tanımlarını sunucu geçişleriyle basar; başlık → kimlik döner."""
+    S, acc, dept, problems = ctx['sessions'], ctx['acc'], ctx['dept'], ctx['problems']
+    off = lambda n: (ctx['today'] + dt.timedelta(days=n)).isoformat()  # noqa: E731
+    out = {}
+    for code, title, status, prio, start, end, people, ev, files, notes, done in spec:
+        lead, D = extra_roles[code][0], dept[code]
+        body = {'title': title, 'priority': prio, 'start_on': off(start), 'end_on': off(end),
+                'completion_evidence_required': ev}
+        if people:
+            body['assignee_account_id'] = acc[people[0]]
+        try:
+            wid = S[lead].call('POST', '/v1/work-items', body, program=prog, dept=D)['work_item_id']
+            out[title] = wid
+            ctx.setdefault('tasks', {}).setdefault((P, code), []).append(wid)
+            if len(people) > 1:
+                S[lead].call('POST', f'/v1/work-items/{wid}/assignments',
+                             {'account_ids': [acc[p] for p in people[1:]]}, program=prog, dept=D)
+            worker = S[people[0]] if people else S[lead]
+            if status != 'baslanmadi':
+                move(worker, wid, prog, D, 'devam_ediyor')
+            for i in range(files):
+                upload(ctx, P, worker, prog, code, wid, f'{P}:{title}:{i}')
+            for i in range(notes):
+                worker.call('POST', f'/v1/work-items/{wid}/notes', {'content': NOTES[i % len(NOTES)]},
+                            program=prog, dept=D)
+            finish(status, wid, prog, D, worker, S[lead])
+            if status == 'tamamlandi' and done is not None:
+                ctx['admin'].call('PATCH', f'/v1/work-items/{wid}/completion-date',
+                                  {'completed_on': off(done)}, program=prog, dept=D)
+        except (ApiError, RuntimeError) as e:
+            problems.append(f'P{P} görev {title} → {status}: {e}')
+    return out
+
+
+def upload(ctx, P, s, prog, code, wid, key, subtask=None):
+    """Göreve arşiv dosyası yükler; etiketler ve türler sırayla dönerek hepsine dağılır."""
+    n = ctx.setdefault('upload_n', 0)
+    ctx['upload_n'] = n + 1
+    fname = FILE_NAMES[n % len(FILE_NAMES)].replace('.', f'_{n + 1}.')
+    size = file_size(key)
+    raw, ctype = multipart(fname, size)
+    q = f'?tag={TAGS[n % len(TAGS)]}' + (f'&subtask_id={subtask}' if subtask else '')
+    f = s.call('POST', f'/v1/work-items/{wid}/files{q}', raw=raw, ctype=ctype, program=prog,
+               dept=ctx['dept'][code])
+    ctx['files'].setdefault((P, code), []).append(f['file_id'])
+    ctx['bytes'] = ctx.get('bytes', 0) + f['size_bytes']
+    return f['file_id']
+
+
+def extend(ctx):
+    admin, S, acc, dept, problems = ctx['admin'], ctx['sessions'], ctx['acc'], ctx['dept'], ctx['problems']
+    prog1, today = ctx['prog'], ctx['today']
+    off = lambda n: (today + dt.timedelta(days=n)).isoformat()  # noqa: E731
+
+    # İkinci program, yeni koordinatörlükler, ekip.
+    prog2 = admin.call('POST', '/v1/programs', PROGRAM2)['program_id']
+    ctx['prog2'] = prog2
+    for code, (name, about) in NEW_DEPTS.items():
+        dept[code] = admin.call('POST', '/v1/departments', {
+            'name': name, 'kind': 'koordinatorluk', 'code': code, 'description': about})['department_id']
+    links = 0
+    for code, (lead, members) in TEAM2.items():
+        admin.call('POST', '/v1/program/departments', {'department_id': dept[code]}, program=prog2)
+        for p, r in [(lead, 'koordinator')] + [(m, 'uye') for m in members]:
+            admin.call('POST', f'/v1/departments/{dept[code]}/memberships',
+                       {'account_id': acc[p], 'role': r}, program=prog2)
+            links += 1
+    admin.call('POST', '/v1/program/departments', {'department_id': dept['ESK']}, program=prog1)
+    for p, r in [('oh', 'koordinator'), ('so', 'uye')]:
+        admin.call('POST', f'/v1/departments/{dept["ESK"]}/memberships',
+                   {'account_id': acc[p], 'role': r}, program=prog1)
+    print(f'== 2. program: {PROGRAM2["name"]} · {len(TEAM2)} koordinatörlük · {links} üyelik')
+
+    # Rol tanıkları: hesabın kendi gözünden bütün programlardaki rolleri.
+    for code in ('ma', 'ko', 'gn', 'aa', 'bk'):
+        rows = S[code].call('GET', '/v1/me/departments')['departments']
+        roles = sorted({f"{r['program_name']}:{r['display_name']}:{r['role']}" for r in rows})
+        print(f'   {S[code].email}: {"; ".join(roles)}')
+    print('== rol tanıkları: 5')
+
+    # 2. program görevleri, alt görevler (dosyalı), tarih talepleri.
+    t2 = make_tasks(ctx, 2, prog2, TASKS2, TEAM2)
+    print(f'== 2. program görevleri: {len(t2)}')
+    subs = 0
+    for title, items in SUBTASKS2.items():
+        code = next(t[0] for t in TASKS2 if t[1] == title)
+        lead, D = S[TEAM2[code][0]], dept[code]
+        for i, (stitle, person, done) in enumerate(items):
+            try:
+                st = lead.call('POST', f'/v1/work-items/{t2[title]}/subtasks',
+                               {'title': stitle, 'assignee_account_id': acc[person]}, program=prog2, dept=D)
+                if i == 0:
+                    upload(ctx, 2, S[person], prog2, code, t2[title], f'sub:{stitle}', st['subtask_id'])
+                if done:
+                    lead.call('PATCH', f'/v1/work-items/{t2[title]}/subtasks/{st["subtask_id"]}',
+                              {'done': True}, program=prog2, dept=D)
+                subs += 1
+            except (ApiError, KeyError) as e:
+                problems.append(f'alt görev {stitle}: {e}')
+    reqs = 0
+    for title, person, new_end, reason in DATE_REQUESTS2:
+        t = next(t for t in TASKS2 if t[1] == title)
+        try:
+            S[person].call('POST', '/v1/date-change-requests', {
+                'work_item_id': t2[title], 'new_start_on': off(t[4]), 'new_end_on': off(new_end),
+                'reason': reason}, program=prog2, dept=dept[t[0]])
+            reqs += 1
+        except (ApiError, KeyError) as e:
+            problems.append(f'tarih talebi {title}: {e}')
+    print(f'== 2. program alt görevleri: {subs} · tarih talepleri: {reqs}')
+    print(f'== arşiv: {ctx["upload_n"]} yeni dosya · {ctx["bytes"] // 1024} KB · '
+          f'etiketler {len(TAGS)} · türler {len(MIME)}')
+
+    # Toplantılar (2. program).
+    made = 0
+    for day, hh, mm, title, codes, agenda in MEETINGS2:
+        if meeting(ctx, prog2, day, hh, mm, title, codes, agenda):
+            made += 1
+    print(f'== 2. program toplantıları: {made}')
+
+    # Tablolar (her alan türü, ekip ve kişi paylaşımı, proje).
+    print(f'== tablolar: {tables(ctx)}')
+
+    # Grup sohbetleri ve anketler.
+    print(f'== grup sohbetleri: {groups(ctx)}')
+
+    # Silinenler: görev, toplantı, koordinatörlük (görevleriyle), kullanıcı.
+    esk = make_tasks(ctx, 1, prog1, TASKS_ESK, {'ESK': ('oh', ['so'])})
+    progs = {1: prog1, 2: prog2}
+    del_tasks = 0
+    for P, code, title, person in DELETED_TASKS:
+        try:
+            lead = TEAM2[code][0] if P == 2 else 'aa'
+            wid = S[lead].call('POST', '/v1/work-items', {
+                'title': title, 'start_on': off(-3), 'end_on': off(7), 'assignee_account_id': acc[person],
+                'completion_evidence_required': False}, program=progs[P], dept=dept[code])['work_item_id']
+            admin.call('DELETE', f'/v1/work-items/{wid}', program=progs[P], dept=dept[code])
+            del_tasks += 1
+        except ApiError as e:
+            problems.append(f'silinen görev {title}: {e}')
+    del_meet = 0
+    for P, day, hh, mm, title, codes, agenda in DELETED_MEETINGS:
+        mid = meeting(ctx, progs[P], day, hh, mm, title, codes, agenda)
+        if mid:
+            try:
+                admin.call('DELETE', f'/v1/meetings/{mid}', program=progs[P])
+                del_meet += 1
+            except ApiError as e:
+                problems.append(f'silinen toplantı {title}: {e}')
+    with_dept = 0
+    for code in ('GEC', 'ESK'):
+        try:
+            with_dept += admin.call('DELETE', f'/v1/departments/{dept[code]}')['work_items_deleted']
+        except ApiError as e:
+            problems.append(f'silinen koordinatörlük {code}: {e}')
+    del_acc = 0
+    try:
+        r = admin.call('POST', '/v1/admin/accounts', {
+            'email': 'deniz.arslan@nizam.local', 'full_name': 'Deniz Arslan', 'password': PASSWORD,
+            'force_password_change': False})
+        admin.call('POST', f'/v1/departments/{dept["LOJ"]}/memberships',
+                   {'account_id': r['account_id'], 'role': 'uye'}, program=prog2)
+        admin.call('DELETE', f'/v1/admin/accounts/{r["account_id"]}')
+        del_acc = 1
+    except ApiError as e:
+        problems.append(f'silinen kullanıcı: {e}')
+    print(f'== silinenler: {del_tasks} görev · {del_meet} toplantı · 2 koordinatörlük '
+          f'({with_dept} görevle; ESK {len(esk)}) · {del_acc} kullanıcı')
+
+    # Bildirimler: atama, onaya sunma, iade olaylarından üretilenler.
+    counts = {}
+    for code in ('ma', 'ko', 'gn', 'mey', 'aa', 'bk', 'av', 'bc'):
+        counts[S[code].email] = S[code].call('GET', '/v1/notifications/unread-count')['count']
+    print(f'== bildirimler (okunmamış): {sum(counts.values())} · '
+          + ', '.join(f'{e.split("@")[0]} {n}' for e, n in counts.items()))
+
+
+def meeting(ctx, prog, day, hh, mm, title, codes, agenda):
+    """Toplantı açar; sahip koordinatörlüklerin (genelde programın bütün) koordinatörleri katılır."""
+    S, acc, dept = ctx['sessions'], ctx['acc'], ctx['dept']
+    when = ctx['today'] + dt.timedelta(days=day)
+    if prog == ctx['prog']:
+        owners = codes or ['SİS']
+        leads = {p for (c, p), r in ctx['role'].items() if r == 'koordinator' and (not codes or c in codes)}
+    else:
+        owners = codes or ['OPE']
+        leads = {TEAM2[c][0] for c in (codes or [c for c in TEAM2 if c != 'GEC'])}
+    try:
+        return ctx['admin'].call('POST', '/v1/meetings', {
+            'title': title, 'meeting_date': f'{when.isoformat()}T{hh:02d}:{mm:02d}:00',
+            'department_ids': [dept[c] for c in owners],
+            'participant_ids': [acc[p] for p in sorted(leads - {'ma'})],
+            'members_included': bool(codes), 'agenda_items': agenda}, program=prog)['meeting']['meeting_id']
+    except ApiError as e:
+        ctx['problems'].append(f'toplantı {title}: {e}')
+        return None
+
+
+def tables(ctx):
+    """Her sütun türünü taşıyan tablolar; ekip rolü ve kişi paylaşımları. Basılan tablo sayısı döner."""
+    S, acc, dept, problems = ctx['sessions'], ctx['acc'], ctx['dept'], ctx['problems']
+    progs = {1: ctx['prog'], 2: ctx['prog2']}
+    made, by_dept = 0, {}
+    for P, code, owner, name, team_role, grants in TABLES:
+        s, prog, D = S[owner], progs[P], dept[code]
+        op = lambda body: s.call('POST', f'/v1/tables/{tid}/operations', body, program=prog, dept=D)  # noqa: E731
+        try:
+            r = s.call('POST', '/v1/tables', {'name': name}, program=prog, dept=D)
+            tid, schema = r['table_id'], r['schema_version']
+            team = sorted({p for (c, p) in ctx['role'] if c == code} if P == 1
+                          else {TEAM2[code][0], *TEAM2[code][1]})
+            p1_tasks = [w for c, w in ctx['ids'].items() if c.split('-')[0] == code]
+            refs = {'person_reference': acc[team[0]], 'department_reference': D,
+                    'task_reference': (p1_tasks if P == 1 else ctx['tasks'].get((P, code), [None]))[0],
+                    'file_reference': (ctx['files'].get((P, code)) or [None])[0],
+                    'table_reference': by_dept.get((P, code))}
+            cols = [('Kalem', 'text', False), ('Miktar', 'number', False), ('Telefon', 'phone', False),
+                    ('E-posta', 'email', False), ('Tarih', 'date', False), ('Tamam', 'checkbox', False),
+                    ('Sorumlu', 'person_reference', False), ('Ekip', 'person_reference', True),
+                    ('Koordinatörlük', 'department_reference', False), ('Görev', 'task_reference', False),
+                    ('Dosya', 'file_reference', False), ('Bağlı tablo', 'table_reference', False),
+                    ('Ek', 'attachment', False)]
+            col_id = {}
+            for cname, ctype, multi in cols:
+                body = {'kind': 'add_column', 'name': cname, 'type': ctype, 'width': 160,
+                        'expected_schema': schema}
+                if multi:
+                    body['multiple'] = True
+                r = op(body)
+                col_id[ctype + ('*' if multi else '')], schema = r['id'], r['schema_version']
+            rnd = random.Random(name)
+            for i in range(5):
+                row = op({'kind': 'add_row'})['id']
+                vals = {'text': f'{name.split()[0]} kalemi {i + 1}', 'number': rnd.randint(1, 400),
+                        'phone': f'+90 532 {rnd.randint(100, 999)} {rnd.randint(10, 99)} {rnd.randint(10, 99)}',
+                        'email': f'tedarik{i + 1}@ornek.com.tr',
+                        'date': (ctx['today'] + dt.timedelta(days=rnd.randint(-10, 30))).isoformat(),
+                        'checkbox': i % 2 == 0, 'person_reference': acc[team[i % len(team)]],
+                        'person_reference*': [acc[p] for p in team[:2]]}
+                if i < 3:  # referanslar ilk satırlarda; kalan satırlar boş hücre gösterir
+                    vals.update({k: v for k, v in refs.items() if v})
+                op({'kind': 'set_cells', 'cells': [
+                    {'row_id': row, 'column_id': col_id[k], 'value': v, 'version': 0} for k, v in vals.items()]})
+                if i < 2:
+                    fname = ['Teklif_karsilastirma.xlsx', 'Saha_fotografi.png'][i]
+                    raw, ctype = multipart(fname, file_size(f'tbl:{name}:{i}') // 2)
+                    s.call('POST', f'/v1/tables/{tid}/attachments?row_id={row}&column_id={col_id["attachment"]}'
+                           f'&cell_version=0', raw=raw, ctype=ctype, program=prog, dept=D)
+            op({'kind': 'set_team_role', 'role': team_role})
+            for p, role in grants:
+                op({'kind': 'grant', 'account_id': acc[p], 'role': role})
+            op({'kind': 'add_comment', 'row_id': row, 'body': 'Bu satırın teslim tarihi netleşmeli.'})
+            by_dept[(P, code)] = tid
+            made += 1
+        except (ApiError, KeyError) as e:
+            problems.append(f'tablo {name}: {e}')
+    try:  # 2. programda proje: Tedarik planı projeye bağlanır
+        s, prog, D = S['gn'], ctx['prog2'], dept['LOJ']
+        pid = s.call('POST', '/v1/table-projects', {'kind': 'create_project', 'name': 'İstanbul lojistik'},
+                     program=prog, dept=D)['id']
+        s.call('POST', f'/v1/tables/{by_dept[(2, "LOJ")]}/operations', {'kind': 'set_project', 'project_id': pid},
+               program=prog, dept=D)
+    except (ApiError, KeyError) as e:
+        problems.append(f'tablo projesi: {e}')
+    return made
+
+
+def groups(ctx):
+    """Koordinatörlük otomatik grubu, Genel grup ve elle kurulan gruplar; mesaj, yanıt, anket, oy."""
+    S, acc, dept, problems = ctx['sessions'], ctx['acc'], ctx['dept'], ctx['problems']
+    msgs = polls = votes = made = 0
+    closes = (ctx['today'] + dt.timedelta(days=5)).isoformat() + 'T18:00:00Z'
+
+    def send(code, prog, chat, body, **extra):
+        nonlocal msgs
+        r = S[code].call('POST', f'/v1/chats/{chat}/messages',
+                         {'client_message_id': str(uuid.uuid4()), 'body': body, **extra}, program=prog)
+        msgs += 1
+        return r['message_id']
+
+    def poll(code, prog, chat, question, options, multi, ballots):
+        nonlocal polls, votes
+        mid = send(code, prog, chat, question, poll={'options': options, 'multi': multi, 'closes_at': closes})
+        polls += 1
+        for voter, idx in ballots:
+            S[voter].call('PUT', f'/v1/chats/{chat}/messages/{mid}/vote', {'option_indexes': idx}, program=prog)
+            votes += 1
+
+    def auto(code, prog, kind, dept_id=None):
+        items = S[code].call('GET', '/v1/chats', program=prog)['items']
+        return next(c['chat_id'] for c in items
+                    if c.get('auto_kind') == kind and (dept_id is None or c.get('auto_department_id') == dept_id))
+
+    p1, p2 = ctx['prog'], ctx['prog2']
+    steps = [
+        ('2. program LOJ otomatik grubu', lambda: (
+            lambda chat: (
+                send('gn', p2, chat, 'Sevkiyat takvimi güncellendi; çadırlar salı günü sahada.',
+                     mentions=[{'kind': 'account', 'target_id': acc['mey']}]),
+                send('mey', p2, chat, 'Depo alanını pazartesi boşaltıyoruz, forklift lazım.'),
+                poll('gn', p2, chat, 'Depo sayımı hangi gün yapılsın?', ['Pazartesi', 'Çarşamba', 'Cuma'],
+                     False, [('mey', [1]), ('rk', [2])])))(auto('gn', p2, 'department', dept['LOJ']))),
+        ('2. program Genel grubu', lambda: send(
+            'ma', p2, auto('ma', p2, 'general'),
+            'İstanbul 2027 programı açıldı; koordinatörlükler görev planlarını bu hafta girsin.')),
+        ('2. program elle grup', lambda: (
+            lambda chat: (
+                send('bc', p2, chat, 'Basın toplantısı hazırlıklarını burada konuşalım.'),
+                poll('bc', p2, chat, 'Basın toplantısı için hangi materyaller hazırlansın?',
+                     ['Bülten', 'Fotoğraf seti', 'Video', 'Sunum'], True,
+                     [('eo', [0, 1]), ('ss', [1, 3]), ('yc', [0])])))(
+                S['bc'].call('POST', '/v1/chats/groups', {
+                    'name': 'Basın ve akreditasyon', 'source': 'none',
+                    'member_account_ids': [acc[p] for p in ('eo', 'ss', 'yc')]}, program=p2)['chat_id'])),
+        ('1. program ALT otomatik grubu', lambda: (
+            lambda chat: send('ko', p1, chat, 'Basınç testini cuma yapabiliriz.',
+                              reply_to_message_id=send('aa', p1, chat, 'Hidrofor teslimi için son durum nedir?')))(
+                auto('aa', p1, 'department', dept['ALT']))),
+        ('1. program elle grup', lambda: (
+            lambda chat: (
+                send('ma', p1, chat, 'Saha teslim tutanağı için ekip burada.'),
+                poll('ma', p1, chat, 'Saha teslim günü hangisi olsun?', ['Perşembe', 'Cuma'], False,
+                     [('aa', [0]), ('ko', [1]), ('yc', [0])])))(
+                S['ma'].call('POST', '/v1/chats/groups', {
+                    'name': 'Saha teslim ekibi', 'source': 'none',
+                    'member_account_ids': [acc[p] for p in ('aa', 'ko', 'yc', 'rk')]}, program=p1)['chat_id'])),
+    ]
+    for label, fn in steps:
+        try:
+            fn()
+            made += 1
+        except (ApiError, StopIteration, KeyError) as e:
+            problems.append(f'grup {label}: {e!r}')
+    return f'{made} · mesaj {msgs} · anket {polls} · oy {votes}'
 
 
 if __name__ == '__main__':

@@ -64,12 +64,13 @@ export 'presentation/decision/coordinator_sheets.dart'
         showReviewQueueSheet;
 export 'presentation/decision/task_decision_flows.dart' show TaskDecisionFlows;
 export 'presentation/detail/detail_actions.dart' show showUploadOriginSheet;
+export 'presentation/quick/quick_parts.dart' show QuickPane;
 export 'presentation/quick_action_sheets.dart'
     show showInviteSheet, showMeetingSheet, showNewTaskSheet;
 export 'presentation/task_detail_page.dart' show TaskDetailPage;
 export 'presentation/task_picker_sheet.dart' show showTaskPickerSheet;
 export 'presentation/task_texts.dart' show statusTone;
-export 'presentation/task_widgets.dart' show TaskSegmented;
+export 'presentation/task_widgets.dart' show TaskCheckRow, TaskSegmented;
 export 'presentation/tasks/task_card_grid.dart' show TaskCardRow;
 export 'presentation/tasks/task_filter_groups.dart' show TaskFilterGroups;
 export 'presentation/tasks/tasks_filter_sheet.dart'

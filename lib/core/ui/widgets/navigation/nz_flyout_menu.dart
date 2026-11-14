@@ -57,7 +57,8 @@ class NzFlyoutItem extends NzFlyoutEntry {
 /// `m-r-flyout`, arkada `scrim-soft`; kapsülün üstünden büyüyerek (`easeSpring`) açılır,
 /// `easeExit` ile kapanır. Satır seçilince menü kapanır, sonra eylem çalışır.
 /// [anchor] (genel koordinatta dikdörtgen, ör. sohbetin yazma alanı) verilirse menü onun hemen
-/// üstünde açılır; [alignEnd] sağ kenara yaslar (büyüme de o köşeden).
+/// üstünde ([below] ise altında) ve yatayda onun kenarında açılır; [alignEnd] sağ kenara
+/// yaslar (büyüme de o köşeden).
 abstract final class NzFlyoutMenu {
   static Future<void> show(
     BuildContext context, {
@@ -65,14 +66,28 @@ abstract final class NzFlyoutMenu {
     required List<NzFlyoutEntry> entries,
     Rect? anchor,
     bool alignEnd = false,
+    bool below = false,
   }) {
     final navigator = Navigator.of(context, rootNavigator: true);
     // Kök Navigator bağlamı: kabuğun `extendBody` dolgusu (menü yüksekliği) burada yoktur;
     // yalnız cihazın alt güvenli alanı vardır.
+    final screen = MediaQuery.sizeOf(navigator.context);
+    final down = below && anchor != null;
     final reserved = anchor == null
         ? NzFloatingNav.reservedHeight(navigator.context)
-        : MediaQuery.sizeOf(navigator.context).height - anchor.top;
-    final corner = alignEnd ? Alignment.bottomRight : Alignment.bottomLeft;
+        : down
+        ? MediaQuery.paddingOf(navigator.context).bottom
+        : screen.height - anchor.top;
+    final corner = switch ((down, alignEnd)) {
+      (true, true) => Alignment.topRight,
+      (true, false) => Alignment.topLeft,
+      (false, true) => Alignment.bottomRight,
+      (false, false) => Alignment.bottomLeft,
+    };
+    // Bağlantıda yatay kenar bağlantının kenarıdır.
+    final left = anchor == null || alignEnd ? null : anchor.left;
+    final right = anchor == null || !alignEnd ? null : screen.width - anchor.right;
+    final top = down ? anchor.bottom + NizamioSpacing.space2 : null;
     return navigator.push(
       PageRouteBuilder<void>(
         opaque: false,
@@ -86,6 +101,9 @@ abstract final class NzFlyoutMenu {
           entries: entries,
           bottom: reserved + NizamioSpacing.space3,
           alignment: corner,
+          left: left,
+          right: right,
+          top: top,
         ),
         transitionsBuilder: (_, animation, _, child) {
           final curved = CurvedAnimation(
@@ -117,21 +135,28 @@ class _FlyoutPanel extends StatelessWidget {
     required this.entries,
     required this.bottom,
     required this.alignment,
+    this.left,
+    this.right,
+    this.top,
   });
 
   final String semanticLabel;
   final List<NzFlyoutEntry> entries;
   final double bottom;
   final Alignment alignment;
+  final double? left;
+  final double? right;
+  final double? top;
 
   @override
   Widget build(BuildContext context) {
-    final top = MediaQuery.paddingOf(context).top + NizamioSize.appbar;
+    final top =
+        this.top ?? MediaQuery.paddingOf(context).top + NizamioSize.appbar;
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        NizamioSpacing.gutter,
+        left ?? NizamioSpacing.gutter,
         top,
-        NizamioSpacing.gutter,
+        right ?? NizamioSpacing.gutter,
         bottom,
       ),
       child: Align(

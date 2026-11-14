@@ -70,6 +70,7 @@ Future<void> showHomeDrawer(
   required ValueChanged<HomeModule> onModule,
   required VoidCallback onProfile,
   required VoidCallback onChangeScope,
+  required ValueChanged<String> onSelectProgram,
   required ValueChanged<String> onViewChanged,
   required VoidCallback onSignOut,
 }) {
@@ -157,6 +158,7 @@ Future<void> showHomeDrawer(
               programShortName: programShortName,
               programColor: programColor,
               onChangeScope: () => close(onChangeScope),
+              onSelectProgram: (id) => close(() => onSelectProgram(id)),
               onViewChanged: (caption) => close(() => onViewChanged(caption)),
             ),
             for (final g in groups) ...[

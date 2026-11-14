@@ -18,16 +18,7 @@ class ProgramBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final (fill, ink) = switch (color) {
-      ProgramColor.gold => (c.warning, c.onWarning),
-      ProgramColor.blue => (c.programBlue, c.onProgramColor),
-      ProgramColor.teal => (c.programTeal, c.onProgramColor),
-      ProgramColor.green => (c.programGreen, c.onProgramColor),
-      ProgramColor.orange => (c.programOrange, c.onProgramColor),
-      ProgramColor.red => (c.programRed, c.onProgramColor),
-      ProgramColor.slate => (c.programSlate, c.onProgramColor),
-      _ => (c.inProgress, c.onInProgress),
-    };
+    final (fill, ink) = programColors(c, color);
     final trimmed = name.trim();
     final label = shortName?.trim();
     final text = label != null && label.isNotEmpty
@@ -59,3 +50,16 @@ class ProgramBadge extends StatelessWidget {
     );
   }
 }
+
+/// Program renginin dolgu ve yazı tonu (rozet, seçici menüsündeki nokta).
+(Color, Color) programColors(NizamioColors c, ProgramColor? color) =>
+    switch (color) {
+      ProgramColor.gold => (c.warning, c.onWarning),
+      ProgramColor.blue => (c.programBlue, c.onProgramColor),
+      ProgramColor.teal => (c.programTeal, c.onProgramColor),
+      ProgramColor.green => (c.programGreen, c.onProgramColor),
+      ProgramColor.orange => (c.programOrange, c.onProgramColor),
+      ProgramColor.red => (c.programRed, c.onProgramColor),
+      ProgramColor.slate => (c.programSlate, c.onProgramColor),
+      _ => (c.inProgress, c.onInProgress),
+    };

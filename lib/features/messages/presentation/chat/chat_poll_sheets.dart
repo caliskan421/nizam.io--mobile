@@ -33,7 +33,6 @@ Future<ChatAttachKind?> showAttachMenu(
     semanticLabel: l.uiMessagesAttach,
     anchor: anchor,
     entries: [
-      NzFlyoutSection(l.uiMessagesAttach),
       item(ChatAttachKind.photos, l.uiMessagesAttachPhotos, NzIcons.image),
       item(ChatAttachKind.camera, l.uiMessagesAttachCamera, NzIcons.camera),
       item(ChatAttachKind.files, l.uiMessagesAttachFile, NzIcons.folder),
@@ -59,7 +58,6 @@ Future<ChatAttachKind?> showReferenceMenu(
     anchor: anchor,
     alignEnd: true,
     entries: [
-      NzFlyoutSection(l.uiMessagesReference),
       if (canShare)
         for (final (kind, label, icon) in [
           (ChatAttachKind.task, l.uiMessagesComposeShareTask, NzIcons.tasks),

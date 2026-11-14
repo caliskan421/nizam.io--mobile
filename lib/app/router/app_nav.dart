@@ -188,6 +188,9 @@ class GoRouterAppNav implements NzAppNav {
       onProfile: openProfile,
       onChangeScope: () =>
           _ref.read(scopeSelectionControllerProvider.notifier).clear(),
+      // Kenar çubuğu program menüsü: seçilen programa doğrudan geçer.
+      onSelectProgram: (id) =>
+          _ref.read(scopeSelectionControllerProvider.notifier).select(id),
       // Rol/koordinatörlük değişti: kabuk kalır, ana sayfaya dönülür, yeni görünüm bildirilir.
       onViewChanged: (caption) {
         openHome();

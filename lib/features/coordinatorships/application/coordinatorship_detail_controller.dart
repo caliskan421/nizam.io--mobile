@@ -1,4 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart' show FutureProvider;
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show FutureProvider, Provider;
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -13,8 +14,16 @@ import 'coordinatorships_providers.dart';
 
 part 'coordinatorship_detail_controller.g.dart';
 
-/// Ayrıntı bölümleri (prototip segmentli sekmeler).
-enum CoordinatorshipTab { general, tasks, members, archive, meetings }
+/// Ayrıntı bölümleri (prototip `cdetail` sekmeleri): Genel, Görevler, Üyeler, Arşiv, Takvim.
+enum CoordinatorshipTab { general, tasks, members, archive, calendar }
+
+/// Görünümün sekme kümesi. Üyeler bölümü ekibi okuyabilen görünümde vardır (yönetici ya da
+/// koordinatör; `GET /v1/departments/{id}/members` üyeye kapalı) — [readsTeam] `false` ise
+/// bölüm yoktur (boş liste yerine).
+List<CoordinatorshipTab> coordinatorshipTabs({required bool readsTeam}) => [
+  for (final t in CoordinatorshipTab.values)
+    if (t != CoordinatorshipTab.members || readsTeam) t,
+];
 
 /// Ayrıntı ekranının görünüm durumu: bölüm, görev süzgeci (durum + kişi), açılır alanlar.
 @immutable
@@ -125,6 +134,22 @@ class CoordinatorshipDetailController
 
   void togglePast() => state = state.copyWith(pastOpen: !state.pastOpen);
 }
+
+/// Etkin görünüm [code] koordinatörlüğünün ekibini yönetir mi: yönetici görünümü her
+/// koordinatörlükte; koordinatör görünümü yalnız koordinatörü olduğu koordinatörlükte (derin
+/// bağlantıyla başka birime gelse de); üye görünümü (yönetici dahil) hayır. Üyeler bölümü,
+/// "Üye ekle", "Görev ata" ve "Toplantı planla" bununla açılır; sunucu yine denetler.
+final coordManagesTeamProvider = Provider.autoDispose.family<bool, String>((
+  ref,
+  code,
+) {
+  final view = ref.watch(effectiveAccessProvider);
+  final program = view.programId;
+  return view.isAdminView ||
+      (view.isCoordinatorView &&
+          program != null &&
+          (view.access?.coordinatesIn(program, code) ?? false));
+});
 
 typedef ProgramDepartmentResult = ({
   int session,

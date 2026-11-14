@@ -87,7 +87,7 @@ List<(String, Type)> get _tabs => [
   (_l.uiCoordTabTasks, CoordTasksTab),
   (_l.uiCoordTabMembers, CoordMembersTab),
   (_l.uiCoordTabArchive, CoordArchiveTab),
-  (_l.uiCoordTabMeetings, CoordMeetingsTab),
+  (_l.uiCoordTabCalendar, CoordCalendarTab),
   (_l.uiCoordTabGeneral, CoordGeneralTab),
 ];
 

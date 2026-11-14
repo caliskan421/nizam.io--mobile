@@ -28,6 +28,22 @@ Future<void> _ready(ProviderContainer c) async {
 }
 
 void main() {
+  test('sekme kümesi: Üyeler yalnız ekibi okuyan görünümde; Takvim son', () {
+    expect(coordinatorshipTabs(readsTeam: true), [
+      CoordinatorshipTab.general,
+      CoordinatorshipTab.tasks,
+      CoordinatorshipTab.members,
+      CoordinatorshipTab.archive,
+      CoordinatorshipTab.calendar,
+    ]);
+    expect(coordinatorshipTabs(readsTeam: false), [
+      CoordinatorshipTab.general,
+      CoordinatorshipTab.tasks,
+      CoordinatorshipTab.archive,
+      CoordinatorshipTab.calendar,
+    ]);
+  });
+
   test('yenileme hatası önceki ayrıntıyı göstermez', () async {
     final backend = CoordBackend();
     final h = await pilotHarness(backend, signedIn: true);

@@ -60,6 +60,11 @@ abstract final class NzGlyphs {
   /// yeni-ekle
   static const add = NzGlyph('M12 5v14M5 12h14');
 
+  /// ekip-kullanicilar
+  static const team = NzGlyph(
+    'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 7.5M22 21a7 7 0 0 0-4-6.3',
+  );
+
   /// uye-ekle
   static const personAdd = NzGlyph(
     'M15 19a6 6 0 0 0-12 0M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8v6M16 11h6',

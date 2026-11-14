@@ -252,6 +252,7 @@ class _Feed extends ConsumerWidget {
                         actions: actions,
                         title: context.l10n.uiHomeQuickActionsTitle,
                         columns: 2,
+                        tileAspect: null,
                       )
                     : HomeQuickActions(
                         onAction: onQuickAction,

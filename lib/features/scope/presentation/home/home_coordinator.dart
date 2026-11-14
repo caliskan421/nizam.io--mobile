@@ -9,21 +9,23 @@ import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
 import 'home_coordinator_sections.dart';
+import 'home_overview.dart';
+import 'home_sections.dart';
 import 'home_wide.dart';
 import 'module_menu_texts.dart';
 
-/// Ana sayfanın koordinatör bölümleri (prototip `home`, `hm.isK`): koordinatörlük özeti +
-/// çipler, onay bekleyenler (İade / Onayla), atanmamış (Üstlen / Ata), ekip yükü, yaklaşan
-/// toplantılar, tarih taleplerim. Kaynak etkin koordinatörlüğün görevleri
-/// ([coordinatorBoardProvider]); ayrı sayfa değil, ana sayfanın koordinatör görünümüdür.
-/// Geniş düzen: özet + hızlı işlemler ([quick]); onay bekleyenler tam genişlik; atanmamış +
-/// tarih taleplerim; ekip yükü + yaklaşan toplantılar. Dar düzende tek sütun.
+/// Ana sayfanın koordinatör bölümleri; yönetici ana sayfasının dili (genel durum halkası, özet
+/// kutuları, ekip kutuları) etkin koordinatörlüğün görevleriyle ([coordinatorBoardProvider]).
+/// Dar düzen tek sütun: genel durum (koordinatörlük adı), hızlı işlemler, 2×3 özet kutusu, onay
+/// bekleyenler, atanmamış, ekip yükü, yaklaşan toplantılar (toplantı kartları), tarih taleplerim.
+/// Geniş düzen: genel durum + 2×2 hızlı işlemler; dört özet kutusu; tamamlanma ve devam + ekip;
+/// onay bekleyenler; atanmamış + tarih taleplerim; ekip yükü; yaklaşan toplantılar.
 class HomeCoordinatorFeed extends ConsumerWidget {
   const HomeCoordinatorFeed({super.key, required this.wide, this.quick});
 
   final bool wide;
 
-  /// Hızlı işlemler kartı (boşsa null; bölüm çizilmez).
+  /// Hızlı işlemler (boşsa null; bölüm çizilmez). Geniş düzende 2×2 kart, darda tek satır.
   final Widget? quick;
 
   /// Bölüm başına gösterilen satır.
@@ -35,12 +37,30 @@ class HomeCoordinatorFeed extends ConsumerWidget {
     final today = ref.watch(
       taskCatalogControllerProvider.select((s) => s.value?.today),
     );
+    final coord = ref.watch(
+      taskCatalogControllerProvider.select(
+        (s) =>
+            board == null ? null : s.value?.coordinatorship(board.departmentId),
+      ),
+    );
     if (board == null || today == null) {
       return const NzSkeleton.block(height: 190);
     }
     final l = context.l10n;
-    final summary = HomeCoordinatorSummary(board: board);
-    final quickSection = quick;
+    final pending = (ref.watch(myDateRequestsProvider).value ?? const [])
+        .where((r) => r.isPending)
+        .length;
+    final overview = HomeOverview(
+      statuses: [for (final t in board.tasks) t.status],
+      truncated: board.truncated,
+      title: board.departmentName,
+      legendGrid: wide && quick != null,
+    );
+    final kpis = homeCoordinatorKpis(
+      context,
+      board: board,
+      pendingRequests: pending,
+    );
     final queue = HomeSectionFrame(
       title: l.uiHomeQueueTitle,
       count: board.queue.length,
@@ -54,10 +74,10 @@ class HomeCoordinatorFeed extends ConsumerWidget {
           TaskQueueRow(task: t, today: today, flat: true, inline: wide),
       ],
     );
-    final Widget? unassigned = board.unassigned.isEmpty
+    Widget? unassigned({bool fill = false}) => board.unassigned.isEmpty
         ? null
         : HomeSectionFrame(
-            fill: wide,
+            fill: fill,
             title: l.uiHomeUnassignedTitle,
             count: board.unassigned.length,
             onAll: board.unassigned.length > rowsPerSection
@@ -69,21 +89,20 @@ class HomeCoordinatorFeed extends ConsumerWidget {
                 TaskUnassignedRow(task: t, today: today, flat: true),
             ],
           );
-    final rest = [
-      HomeTeamLoad(board: board, fill: wide),
-      HomeUpcomingMeetings(fill: wide),
-      HomeMyDateRequests(fill: wide),
-    ];
+    const meetings = HomeUpcomingMeetings();
     if (!wide) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (final (i, w) in [
-            summary,
-            ?quickSection,
+            overview,
+            ?quick,
+            HomeGrid(columns: 2, gap: NizamioSpacing.gapMd, children: kpis),
             queue,
-            ?unassigned,
-            ...rest,
+            ?unassigned(),
+            HomeTeamLoad(board: board),
+            meetings,
+            const HomeMyDateRequests(),
           ].indexed) ...[if (i > 0) const Gap(NizamioSpacing.gapXl), w],
         ],
       );
@@ -100,24 +119,79 @@ class HomeCoordinatorFeed extends ConsumerWidget {
             ],
           ),
         );
+    final team = homeCoordinatorTeamTiles(context, coord);
+    // Özet kutuları yöneticideki gibi 4 sütun: ilk dördü üst satır; tamamlanma ve devam alt
+    // satırın solunda, ekip sağda ("Ekip" başlığı + kutular kutularla aynı yükseklikte).
+    final lower = LayoutBuilder(
+      builder: (context, box) {
+        const g = NizamioSpacing.gapMd;
+        final col = (box.maxWidth - 3 * g) / 4;
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(width: col, child: kpis[4]),
+              const Gap(g),
+              SizedBox(width: col, child: kpis[5]),
+              const Gap(g),
+              SizedBox(
+                width: 2 * col + g,
+                child: team.isEmpty
+                    ? null
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          NzKicker(l.uiHomeTeam),
+                          const Gap(NizamioSpacing.gapMd),
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              spacing: g,
+                              children: [
+                                for (final w in team) Expanded(child: w),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    final open = unassigned(fill: true);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Özet geniş, hızlı işlemler 2×2 kare dokunaç (4:1); ikisi aynı yükseklikte.
-        if (quickSection == null)
-          summary
+        if (quick case final q?)
+          pair(overview, q, flexA: 5, flexB: 3)
         else
-          pair(summary, quickSection, flexA: 4, flexB: 1),
+          overview,
+        const Gap(NizamioSpacing.gapXl),
+        HomeGrid(
+          columns: 4,
+          gap: NizamioSpacing.gapMd,
+          children: kpis.take(4).toList(),
+        ),
+        const Gap(NizamioSpacing.gapXl),
+        lower,
         const Gap(NizamioSpacing.gapXl),
         queue,
         const Gap(NizamioSpacing.gapXl),
-        // Atanmamış yoksa tarih talepleri sola oturur; sağda boş sütun kalmaz.
-        if (unassigned == null)
-          pair(rest[2], null)
-        else
-          pair(unassigned, rest[2]),
+        // Atanmamış yoksa tarih talepleri ekip yüküyle yan yana.
+        if (open == null)
+          pair(
+            HomeTeamLoad(board: board, fill: true),
+            const HomeMyDateRequests(fill: true),
+          )
+        else ...[
+          pair(open, const HomeMyDateRequests(fill: true)),
+          const Gap(NizamioSpacing.gapXl),
+          HomeTeamLoad(board: board),
+        ],
         const Gap(NizamioSpacing.gapXl),
-        pair(rest[0], rest[1]),
+        meetings,
       ],
     );
   }

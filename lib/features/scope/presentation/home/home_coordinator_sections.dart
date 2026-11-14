@@ -9,135 +9,129 @@ import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/state/nz_async_view.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/feedback/nz_load_strip.dart';
-import '../../../../core/ui/widgets/nz_size.dart';
+import '../../../../core/ui/widgets/nz_glyph.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../meetings/meetings.dart';
 import '../../../tasks/tasks.dart';
 import 'home_coordinator.dart';
+import 'home_texts.dart';
+import 'home_wide.dart';
 
-/// Koordinatörlük özeti: ad, tamamlanma yüzdesi, "9 / 17 görev bitti", beş renkli durum
-/// şeridi ve tıklanır çipler (geciken, onayında, iade, atanmamış, tarih talebi yöneticide; 0
-/// olanlar gizli). Çipler görev listesini ilgili görünümle açar.
-class HomeCoordinatorSummary extends ConsumerWidget {
-  const HomeCoordinatorSummary({super.key, required this.board});
+/// Koordinatör özet kutuları (yönetici ana sayfasının dili ve sırası): gecikme, bekleyen tarih
+/// taleplerim (talep sayfası), atanmamış, onay bekleyen, tamamlanma (yüzde), devam eden.
+/// Dokunma görev listesini ilgili görünümle açar.
+List<Widget> homeCoordinatorKpis(
+  BuildContext context, {
+  required CoordinatorBoard board,
+  required int pendingRequests,
+}) {
+  final l = context.l10n;
+  final c = context.colors;
+  final nav = context.appNav;
+  final s = board.summary;
+  final more = board.truncated ? '≥' : '';
+  final open = s.total - s.done;
+  double ratio(int a, int b) => b == 0 ? 0 : a / b;
+  Widget tile(
+    NzGlyph glyph,
+    Color tone,
+    String label,
+    String value,
+    double progress,
+    VoidCallback onTap, {
+    bool danger = false,
+  }) => NzKpiTile(
+    glyph: glyph,
+    tone: tone,
+    label: label,
+    value: value,
+    valueColor: danger ? c.danger : null,
+    progress: progress,
+    onTap: onTap,
+    semanticLabel: '$label: $value. ${l.uiHomeOpenList}',
+  );
+  return [
+    tile(
+      NzGlyphs.late,
+      c.danger,
+      l.uiHomeKpiLate,
+      '$more${s.late}',
+      ratio(s.late, open),
+      () => nav.openTasks(view: NzTaskView.late),
+      danger: true,
+    ),
+    tile(
+      NzGlyphs.dateRequest,
+      c.warning,
+      l.uiHomeRequestsTitle,
+      '$pendingRequests',
+      ratio(pendingRequests, open),
+      () => showDateRequestsSheet(context),
+    ),
+    tile(
+      NzGlyphs.personAdd,
+      c.info,
+      l.uiHomeUnassignedTitle,
+      '$more${s.unassigned}',
+      ratio(s.unassigned, open),
+      () => nav.openTasks(view: NzTaskView.unassigned),
+    ),
+    tile(
+      NzGlyphs.review,
+      c.warning,
+      l.uiHomeKpiReview,
+      '$more${s.review}',
+      ratio(s.review, open),
+      () => nav.openTasks(view: NzTaskView.review),
+    ),
+    tile(
+      NzGlyphs.done,
+      c.taskDone,
+      l.uiHomeKpiDone,
+      l.percent(ratio(s.done, s.total)),
+      ratio(s.done, s.total),
+      () => nav.openTasks(view: NzTaskView.done),
+    ),
+    tile(
+      NzGlyphs.inProgress,
+      c.inProgress,
+      l.uiHomeKpiDoing,
+      '$more${s.inProgress}',
+      ratio(s.inProgress, s.total),
+      () => nav.openTasks(view: NzTaskView.inProgress),
+    ),
+  ];
+}
 
-  final CoordinatorBoard board;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final c = context.colors;
-    final t = context.text;
-    final nav = context.appNav;
-    final s = board.summary;
-    final pending = (ref.watch(myDateRequestsProvider).value ?? const [])
-        .where((r) => r.isPending)
-        .length;
-    final pct = s.total == 0 ? 0 : (s.done * 100 / s.total).round();
-    final more = board.truncated ? '≥' : '';
-    Widget chip(int n, String label, Color color, VoidCallback onTap) =>
-        NzDotChip(color: color, count: '$more$n', label: label, onTap: onTap);
-    final chips = [
-      if (s.late > 0)
-        chip(
-          s.late,
-          l.uiHomeChipLate,
-          c.danger,
-          () => nav.openTasks(view: NzTaskView.late),
-        ),
-      if (s.review > 0)
-        chip(
-          s.review,
-          l.uiHomeChipReview,
-          c.warning,
-          () => nav.openTasks(view: NzTaskView.review),
-        ),
-      if (s.returned > 0)
-        chip(
-          s.returned,
-          l.uiHomeChipReturned,
-          c.danger,
-          () => nav.openTasks(view: NzTaskView.inProgress),
-        ),
-      if (s.unassigned > 0)
-        chip(
-          s.unassigned,
-          l.uiHomeChipUnassigned,
-          c.warning,
-          () => nav.openTasks(view: NzTaskView.unassigned),
-        ),
-      if (pending > 0)
-        chip(
-          pending,
-          l.uiHomeChipRequests,
-          c.inProgress,
-          () => showDateRequestsSheet(context),
-        ),
-    ];
-    return NzCard.outlined(
-      size: NzSize.lg,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        // Çift yüksekliği eşitlenince (tablet) başlık üstte, gövde altta durur.
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            board.departmentName,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: t.titleSm,
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Gap(NizamioSpacing.space3),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  // Gap/SizedBox değil: baseline satırı `IntrinsicHeight` içinde (çift yükseklik
-                  // eşitleme); Gap dry-baseline'ı hesaplayamaz, boşluk Padding ile verilir.
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(
-                      end: NizamioSpacing.space3,
-                    ),
-                    child: Text('%$pct', style: t.displayLg),
-                  ),
-                  Expanded(
-                    child: Text(
-                      '${s.done} / $more${s.total} ${l.uiHomeCoordDoneTail}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.bodySm.copyWith(color: c.textMuted),
-                    ),
-                  ),
-                ],
-              ),
-              const Gap(NizamioSpacing.space4),
-              NzProgressBar.segments(
-                segments: [
-                  NzBarSegment(s.done, c.taskDone),
-                  NzBarSegment(s.review, c.warning),
-                  NzBarSegment(s.inProgress, c.inProgress),
-                  NzBarSegment(s.returned, c.danger),
-                  NzBarSegment(s.todo, c.textFaint),
-                ],
-              ),
-              if (chips.isNotEmpty) ...[
-                const Gap(NizamioSpacing.space4),
-                Wrap(
-                  spacing: NizamioSpacing.space2,
-                  runSpacing: NizamioSpacing.space2,
-                  children: chips,
-                ),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+/// Koordinatörlüğün ekibi (tablet, yönetici "Ekip" kutularının dili): koordinatör ve üye
+/// sayısı; dokunma görev listesini o kişilerle süzer. Ekip bilinmiyorsa boş.
+List<Widget> homeCoordinatorTeamTiles(
+  BuildContext context,
+  CoordinatorshipRef? coord,
+) {
+  if (coord == null) return const [];
+  final l = context.l10n;
+  final c = context.colors;
+  final nav = context.appNav;
+  final total = coord.leads.length + coord.members.length;
+  return [
+    HomeTeamTile(
+      dot: c.roleCoordinator,
+      bar: c.roleCoordinator,
+      count: coord.leads.length,
+      total: total,
+      label: l.uiHomeRoleCoordinator,
+      onTap: () => nav.openTasks(people: coord.leads),
+    ),
+    HomeTeamTile(
+      dot: c.roleMember,
+      bar: c.roleMember,
+      count: coord.members.length,
+      total: total,
+      label: l.uiHomeRoleMember,
+      onTap: () => nav.openTasks(people: coord.members),
+    ),
+  ];
 }
 
 /// Ekip yükü: kişi başına açık görev şeridi ve "n açık · m geç". Şerit parçaları ayrıktır:
@@ -211,6 +205,8 @@ class HomeTeamLoad extends ConsumerWidget {
                 '${p.late > 0 ? ' · ${p.late} ${l.uiHomeLoadLateTail}' : ''}',
             captionDanger: p.late > 0,
             segments: segments(p.personId, p.open),
+            // Hızlı erişim: kişinin görevleri.
+            onTap: () => context.appNav.openTasks(people: [p.personId]),
           ),
         if (rows.isNotEmpty)
           Padding(
@@ -231,13 +227,11 @@ class HomeTeamLoad extends ConsumerWidget {
   }
 }
 
-/// Yaklaşan toplantılar (en çok 3; toplantılar modülünün görünür listesinden). Canlı
-/// konferansı olan toplantı başlangıcı geçmiş olsa da listede kalır.
+/// Yaklaşan toplantılar (en çok 3; toplantılar modülünün görünür listesinden): toplantılar
+/// sayfasındaki kartın aynısı ([MeetingCard]); boşsa boş metinli kart. Canlı konferansı olan
+/// toplantı başlangıcı geçmiş olsa da listede kalır.
 class HomeUpcomingMeetings extends ConsumerWidget {
-  const HomeUpcomingMeetings({super.key, this.fill = false});
-
-  /// Bkz. [HomeSectionFrame.fill].
-  final bool fill;
+  const HomeUpcomingMeetings({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -254,24 +248,34 @@ class HomeUpcomingMeetings extends ConsumerWidget {
           for (final m in b.visible)
             if (isLive(m) || !m.meetingDate.toLocal().isBefore(now)) m,
         ]..sort((a, z) => a.meetingDate.compareTo(z.meetingDate));
-        return HomeSectionFrame(
-          fill: fill,
-          title: l.uiHomeMeetingsTitle,
-          count: next.length,
-          onAll: nav.openMeetings,
-          empty: l.uiHomeMeetingsEmpty,
+        if (next.isEmpty) {
+          return HomeSectionFrame(
+            title: l.uiHomeMeetingsTitle,
+            count: 0,
+            onAll: nav.openMeetings,
+            empty: l.uiHomeMeetingsEmpty,
+            children: const [],
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (final m in next.take(HomeCoordinatorFeed.rowsPerSection))
-              HomeMeetingRow(
+            NzSectionHeader(
+              l.uiHomeMeetingsTitle,
+              count: next.length,
+              onAll: nav.openMeetings,
+              allLabel: l.uiHomeSeeAll,
+            ),
+            const Gap(NizamioSpacing.gapMd),
+            for (final (i, m)
+                in next.take(HomeCoordinatorFeed.rowsPerSection).indexed) ...[
+              if (i > 0) const Gap(NizamioSpacing.gapMd),
+              MeetingCard(
                 meeting: m,
-                now: now,
-                live: isLive(m),
-                codes: [
-                  for (final d in m.departments)
-                    catalog?.coordinatorship(d.id)?.label ?? d.name,
-                ],
+                catalog: catalog,
                 onTap: () => nav.openMeeting(m.id),
               ),
+            ],
           ],
         );
       },

@@ -30,36 +30,68 @@ const _order = [
   TaskStatus.unknown,
 ];
 
-/// Genel durum kartı. [legendGrid] (yönetici tableti, hızlı işlemlerle aynı satır): halka ve
-/// 2×2 açıklama; düzen ölçüye bakmadan kurulur, satırın `IntrinsicHeight`'ında ölçülebilir.
-/// Verilmezse genişliğe göre seçilir (≥720 tek satır açıklama, dar ekranda liste).
+/// Genel durum kartı. [legendGrid] (tablet, hızlı işlemlerle aynı satır): halka ve 2×2
+/// açıklama; düzen ölçüye bakmadan kurulur, satırın `IntrinsicHeight`'ında ölçülebilir.
+/// Verilmezse genişliğe göre seçilir (≥720 tek satır açıklama, dar ekranda liste). Kaynak
+/// görev kataloğudur; [statuses] verilirse o küme (koordinatörlük) ve başlık [title].
 class HomeOverview extends ConsumerWidget {
-  const HomeOverview({super.key, this.legendGrid = false});
+  const HomeOverview({
+    super.key,
+    this.legendGrid = false,
+    this.statuses,
+    this.truncated = false,
+    this.title,
+  });
 
   final bool legendGrid;
+  final List<TaskStatus>? statuses;
+  final bool truncated;
+
+  /// null → "Genel durum".
+  final String? title;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => NzAsyncView<TaskCatalog>(
-    value: ref.watch(taskCatalogControllerProvider),
-    skeletonOnReload: true,
-    loading: const NzSkeleton.block(height: 190),
-    onRetry: () => ref.invalidate(taskCatalogControllerProvider),
-    data: (catalog) => _OverviewCard(catalog: catalog, legendGrid: legendGrid),
-  );
+  Widget build(BuildContext context, WidgetRef ref) => switch (statuses) {
+    final given? => _OverviewCard(
+      statuses: given,
+      truncated: truncated,
+      legendGrid: legendGrid,
+      title: title,
+    ),
+    null => NzAsyncView<TaskCatalog>(
+      value: ref.watch(taskCatalogControllerProvider),
+      skeletonOnReload: true,
+      loading: const NzSkeleton.block(height: 190),
+      onRetry: () => ref.invalidate(taskCatalogControllerProvider),
+      data: (catalog) => _OverviewCard(
+        statuses: [for (final t in catalog.tasks) t.status],
+        truncated: catalog.truncated,
+        legendGrid: legendGrid,
+        title: title,
+      ),
+    ),
+  };
 }
 
 class _OverviewCard extends StatelessWidget {
-  const _OverviewCard({required this.catalog, required this.legendGrid});
-  final TaskCatalog catalog;
+  const _OverviewCard({
+    required this.statuses,
+    required this.truncated,
+    required this.legendGrid,
+    required this.title,
+  });
+  final List<TaskStatus> statuses;
+  final bool truncated;
   final bool legendGrid;
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final counts = homeOverviewCounts(catalog.tasks.map((task) => task.status));
-    final total = catalog.tasks.length;
+    final counts = homeOverviewCounts(statuses);
+    final total = statuses.length;
     String label(TaskStatus status) => switch (status) {
       TaskStatus.done => l.uiTasksStatusDone,
       TaskStatus.review => l.uiTasksStatusReview,
@@ -83,7 +115,7 @@ class _OverviewCard extends StatelessWidget {
         if (counts[s]! > 0) s,
     ];
     final semantics =
-        '${catalog.truncated ? '≥' : ''}$total ${l.uiHomeTasksLc}: '
+        '${truncated ? '≥' : ''}$total ${l.uiHomeTasksLc}: '
         '${[for (final s in visible) '${label(s)} ${counts[s]}, %${percent(s)}'].join('; ')}';
     final open = context.appNav.openTasks;
     Widget card(bool wide) {
@@ -250,7 +282,7 @@ class _OverviewCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '${catalog.truncated ? '≥' : ''}$total',
+                      '${truncated ? '≥' : ''}$total',
                       style: t.titleLg.copyWith(
                         fontSize: 30,
                         fontWeight: FontWeight.w600,
@@ -283,7 +315,9 @@ class _OverviewCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                l.uiHomeOverviewTitle,
+                title ?? l.uiHomeOverviewTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: t.bodyMd.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -315,7 +349,7 @@ class _OverviewCard extends StatelessWidget {
                   ),
                 ],
               ),
-              if (catalog.truncated) ...[
+              if (truncated) ...[
                 const Gap(12),
                 Text(
                   l.uiListsTruncated,

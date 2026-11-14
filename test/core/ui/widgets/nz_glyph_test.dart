@@ -18,6 +18,7 @@ void main() {
       NzGlyphs.report,
       NzGlyphs.add,
       NzGlyphs.personAdd,
+      NzGlyphs.team,
     ]) {
       // Çizilen noktalar (kontrol noktaları değil) kutunun içinde.
       const box = Rect.fromLTRB(-.5, -.5, 24.5, 24.5);

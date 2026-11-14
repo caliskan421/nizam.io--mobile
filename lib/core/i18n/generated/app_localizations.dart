@@ -5110,12 +5110,6 @@ abstract class AppLocalizations {
   /// **'gün'**
   String get uiHomeShiftDaysTail;
 
-  /// ui.home.season_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'sezonu'**
-  String get uiHomeSeasonTail;
-
   /// ui.home.version_prefix
   ///
   /// In tr, this message translates to:
@@ -5145,6 +5139,102 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Sistem'**
   String get uiHomeThemeSystem;
+
+  /// ui.home.group_team
+  ///
+  /// In tr, this message translates to:
+  /// **'ekip'**
+  String get uiHomeGroupTeam;
+
+  /// ui.home.module_my_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevlerim'**
+  String get uiHomeModuleMyTasks;
+
+  /// ui.home.module_my_timeline
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman çizelgem'**
+  String get uiHomeModuleMyTimeline;
+
+  /// ui.home.module_my_files
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosyalarım'**
+  String get uiHomeModuleMyFiles;
+
+  /// ui.home.module_team
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekibim'**
+  String get uiHomeModuleTeam;
+
+  /// ui.home.module_assistant
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistan'**
+  String get uiHomeModuleAssistant;
+
+  /// ui.home.picker_program
+  ///
+  /// In tr, this message translates to:
+  /// **'program'**
+  String get uiHomePickerProgram;
+
+  /// ui.home.picker_role
+  ///
+  /// In tr, this message translates to:
+  /// **'rol'**
+  String get uiHomePickerRole;
+
+  /// ui.home.picker_department
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlük'**
+  String get uiHomePickerDepartment;
+
+  /// ui.home.view_role_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetici'**
+  String get uiHomeViewRoleAdmin;
+
+  /// ui.home.role_admin_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm programı yönetir'**
+  String get uiHomeRoleAdminDesc;
+
+  /// ui.home.role_coordinator_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendi koordinatörlüğünü yönetir'**
+  String get uiHomeRoleCoordinatorDesc;
+
+  /// ui.home.role_member_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Yalnız atanan görevleri görür'**
+  String get uiHomeRoleMemberDesc;
+
+  /// ui.home.pick_role
+  ///
+  /// In tr, this message translates to:
+  /// **'Rolünü seç'**
+  String get uiHomePickRole;
+
+  /// ui.home.pick_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük seç'**
+  String get uiHomePickDepartment;
+
+  /// ui.home.admin_scope_note
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetici tüm koordinatörlükleri görür. Bir koordinatörlüğün gözünden bakmak için rolünü değiştir.'**
+  String get uiHomeAdminScopeNote;
 
   /// ui.identity.login_title
   ///

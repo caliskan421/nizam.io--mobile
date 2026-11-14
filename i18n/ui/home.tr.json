@@ -89,11 +89,26 @@
     "ui.home.soon_tail": "mobilde sonraki adımda eklenecek",
     "ui.home.app_name": "NIZAM.IO",
     "ui.home.shift_days_tail": "gün",
-    "ui.home.season_tail": "sezonu",
     "ui.home.version_prefix": "v",
     "ui.home.appearance": "görünüm",
     "ui.home.theme_dark": "Koyu",
     "ui.home.theme_light": "Açık",
-    "ui.home.theme_system": "Sistem"
+    "ui.home.theme_system": "Sistem",
+    "ui.home.group_team": "ekip",
+    "ui.home.module_my_tasks": "Görevlerim",
+    "ui.home.module_my_timeline": "Zaman çizelgem",
+    "ui.home.module_my_files": "Dosyalarım",
+    "ui.home.module_team": "Ekibim",
+    "ui.home.module_assistant": "Asistan",
+    "ui.home.picker_program": "program",
+    "ui.home.picker_role": "rol",
+    "ui.home.picker_department": "koordinatörlük",
+    "ui.home.view_role_admin": "Yönetici",
+    "ui.home.role_admin_desc": "Tüm programı yönetir",
+    "ui.home.role_coordinator_desc": "Kendi koordinatörlüğünü yönetir",
+    "ui.home.role_member_desc": "Yalnız atanan görevleri görür",
+    "ui.home.pick_role": "Rolünü seç",
+    "ui.home.pick_department": "Koordinatörlük seç",
+    "ui.home.admin_scope_note": "Yönetici tüm koordinatörlükleri görür. Bir koordinatörlüğün gözünden bakmak için rolünü değiştir."
   }
 }

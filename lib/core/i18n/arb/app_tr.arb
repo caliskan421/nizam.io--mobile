@@ -3345,10 +3345,6 @@
   "@uiHomeShiftDaysTail": {
     "description": "ui.home.shift_days_tail"
   },
-  "uiHomeSeasonTail": "sezonu",
-  "@uiHomeSeasonTail": {
-    "description": "ui.home.season_tail"
-  },
   "uiHomeVersionPrefix": "v",
   "@uiHomeVersionPrefix": {
     "description": "ui.home.version_prefix"
@@ -3368,6 +3364,70 @@
   "uiHomeThemeSystem": "Sistem",
   "@uiHomeThemeSystem": {
     "description": "ui.home.theme_system"
+  },
+  "uiHomeGroupTeam": "ekip",
+  "@uiHomeGroupTeam": {
+    "description": "ui.home.group_team"
+  },
+  "uiHomeModuleMyTasks": "Görevlerim",
+  "@uiHomeModuleMyTasks": {
+    "description": "ui.home.module_my_tasks"
+  },
+  "uiHomeModuleMyTimeline": "Zaman çizelgem",
+  "@uiHomeModuleMyTimeline": {
+    "description": "ui.home.module_my_timeline"
+  },
+  "uiHomeModuleMyFiles": "Dosyalarım",
+  "@uiHomeModuleMyFiles": {
+    "description": "ui.home.module_my_files"
+  },
+  "uiHomeModuleTeam": "Ekibim",
+  "@uiHomeModuleTeam": {
+    "description": "ui.home.module_team"
+  },
+  "uiHomeModuleAssistant": "Asistan",
+  "@uiHomeModuleAssistant": {
+    "description": "ui.home.module_assistant"
+  },
+  "uiHomePickerProgram": "program",
+  "@uiHomePickerProgram": {
+    "description": "ui.home.picker_program"
+  },
+  "uiHomePickerRole": "rol",
+  "@uiHomePickerRole": {
+    "description": "ui.home.picker_role"
+  },
+  "uiHomePickerDepartment": "koordinatörlük",
+  "@uiHomePickerDepartment": {
+    "description": "ui.home.picker_department"
+  },
+  "uiHomeViewRoleAdmin": "Yönetici",
+  "@uiHomeViewRoleAdmin": {
+    "description": "ui.home.view_role_admin"
+  },
+  "uiHomeRoleAdminDesc": "Tüm programı yönetir",
+  "@uiHomeRoleAdminDesc": {
+    "description": "ui.home.role_admin_desc"
+  },
+  "uiHomeRoleCoordinatorDesc": "Kendi koordinatörlüğünü yönetir",
+  "@uiHomeRoleCoordinatorDesc": {
+    "description": "ui.home.role_coordinator_desc"
+  },
+  "uiHomeRoleMemberDesc": "Yalnız atanan görevleri görür",
+  "@uiHomeRoleMemberDesc": {
+    "description": "ui.home.role_member_desc"
+  },
+  "uiHomePickRole": "Rolünü seç",
+  "@uiHomePickRole": {
+    "description": "ui.home.pick_role"
+  },
+  "uiHomePickDepartment": "Koordinatörlük seç",
+  "@uiHomePickDepartment": {
+    "description": "ui.home.pick_department"
+  },
+  "uiHomeAdminScopeNote": "Yönetici tüm koordinatörlükleri görür. Bir koordinatörlüğün gözünden bakmak için rolünü değiştir.",
+  "@uiHomeAdminScopeNote": {
+    "description": "ui.home.admin_scope_note"
   },
   "uiIdentityLoginTitle": "Giriş yap",
   "@uiIdentityLoginTitle": {

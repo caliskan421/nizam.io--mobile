@@ -8,21 +8,21 @@ import '../../../../core/providers.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/layout/nz_pane.dart';
-import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
 import '../../../../core/ui/widgets/navigation/navigation.dart';
-import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../../tasks/tasks.dart';
 import '../../domain/home_dashboard.dart';
+import '../../domain/module_menu.dart';
 import '../../domain/program.dart';
-import '../program_badge.dart';
-import '../program_unread_badge.dart';
+import 'home_drawer_header.dart';
 import 'home_sections.dart';
-import 'home_texts.dart';
+import 'module_menu_texts.dart';
+import 'scope_switcher.dart';
 
 // Tablet çekmecesi iç dolgusu (kaynak `aside`): üst 52, alt 28.
 const _tabletTop = 52.0;
@@ -51,27 +51,10 @@ Future<void> showHomeShortcuts(
   );
 }
 
-/// Çekmece satırının hedefi (ekranı olmayanlar yer tutucuya düşer).
-enum HomeModule {
-  home,
-  tasks,
-  calendar,
-  memory,
-  archive,
-  meetings,
-  messages,
-  sheets,
-  users,
-  coordinatorships,
-  season,
-  simulation,
-  deleted,
-  help,
-  assistant,
-}
-
-/// Sağdan açılan uygulama çekmecesi: hesap, kapsam (program) değiştirme, tüm modüller, çıkış.
-/// Kök sayfaların menü dairesinden (`NzAppNav.openMenu`) açılır; [current] bulunulan modül.
+/// Sağdan açılan uygulama çekmecesi: hesap, üçlü seçici (program × rol × koordinatörlük,
+/// [ScopeSwitcher]), etkin rolün modülleri ([modulesFor]; tek tanım), çıkış. Kök sayfaların
+/// menü dairesinden (`NzAppNav.openMenu`) açılır; [current] bulunulan modül. Rol ya da
+/// koordinatörlük değişince çekmece kapanır ve [onViewChanged] yeni görünüm başlığıyla çağrılır.
 Future<void> showHomeDrawer(
   BuildContext context, {
   required HomeModule? current,
@@ -80,7 +63,6 @@ Future<void> showHomeDrawer(
   required ModuleCounts? counts,
   TeamRole? greetingRole,
   String? greetingEmail,
-  int? programYear,
   String? programShortName,
   ProgramColor? programColor,
   String? version,
@@ -88,246 +70,130 @@ Future<void> showHomeDrawer(
   required ValueChanged<HomeModule> onModule,
   required VoidCallback onProfile,
   required VoidCallback onChangeScope,
+  required ValueChanged<String> onViewChanged,
   required VoidCallback onSignOut,
 }) {
   final l = context.l10n;
   return NzSideSheet.show<void>(
     context,
     semanticLabel: l.uiHomeMenu,
-    builder: (sheet) {
-      final c = sheet.colors;
-      // Prototip başlığı: "Admin · e-posta"; bilinmiyorsa profil bağlantısının adı.
-      final roleLabel = switch (greetingRole) {
-        TeamRole.admin => l.uiHomeRoleAdmin,
-        TeamRole.coordinator => l.uiHomeRoleCoordinator,
-        TeamRole.member => l.uiHomeRoleMember,
-        null => null,
-      };
-      final accountCaption = [?roleLabel, ?greetingEmail].join(' · ');
-      void close(VoidCallback then) {
-        Navigator.of(sheet).pop();
-        then();
-      }
+    builder: (sheet) => Consumer(
+      builder: (sheet, ref, _) {
+        final c = sheet.colors;
+        final view = ref.watch(effectiveAccessProvider);
+        final role = view.known ? view.role : null;
+        // Başlık: "Rol · Koordinatörlük"; erişim bilinmiyorsa eski "Admin · e-posta".
+        final legacyRole = switch (greetingRole) {
+          TeamRole.admin => l.uiHomeRoleAdmin,
+          TeamRole.coordinator => l.uiHomeRoleCoordinator,
+          TeamRole.member => l.uiHomeRoleMember,
+          null => null,
+        };
+        final accountCaption = view.known
+            ? l.viewCaption(view)
+            : [?legacyRole, ?greetingEmail].join(' · ');
+        void close(VoidCallback then) {
+          Navigator.of(sheet).pop();
+          then();
+        }
 
-      Widget? count(int? n, {Color? fill, Color? ink}) => n == null
-          ? null
-          : DecoratedBox(
-              decoration: BoxDecoration(
-                color: fill ?? c.surfaceOverlay,
-                borderRadius: BorderRadius.circular(NizamioRadius.pill),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: NizamioSpacing.space2,
-                  vertical: NizamioSpacing.space1 / 2,
-                ),
-                child: Text(
-                  '$n',
-                  style: sheet.text.monoSm.copyWith(
-                    color: ink ?? c.text,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            );
-      NzMenuRow row(
-        HomeModule m,
-        IconData icon,
-        String label, {
-        Widget? trailing,
-      }) => NzMenuRow(
-        icon: icon,
-        label: label,
-        current: m == current,
-        trailing: trailing,
-        onTap: () => close(() => onModule(m)),
-      );
-
-      // Tablet (kaynak `aside` `padding: 52px 14px 28px`; durum çubuğu payı dahil 52).
-      final tablet = NzTabletMetrics.tabletVisualAt(
-        MediaQuery.sizeOf(context).width,
-      );
-      // Çekmece güvenli alanı tüketmez: liste durum çubuğunun altına kadar kayar, açılışta
-      // içerik güvenli alanın altında başlar.
-      final safe = MediaQuery.paddingOf(sheet);
-      return ListView(
-        padding: EdgeInsets.fromLTRB(
-          NizamioSpacing.rowPad,
-          safe.top +
-              (tablet
-                  ? math.max(NizamioSpacing.space4, _tabletTop - safe.top)
-                  : NizamioSpacing.space4),
-          NizamioSpacing.rowPad,
-          safe.bottom + (tablet ? _tabletBottom : NizamioSpacing.space6),
-        ),
-        children: [
-          Row(
+        Widget? trailing(HomeModule m) => switch (m) {
+          HomeModule.tasks when counts != null => Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: NizamioSpacing.space1,
             children: [
-              Expanded(
-                child: Semantics(
-                  button: true,
-                  label: '$greetingName, ${l.uiHomeProfile}',
-                  hint: accountCaption.isEmpty ? null : accountCaption,
-                  excludeSemantics: true,
-                  child: InkWell(
-                    onTap: () => close(onProfile),
-                    borderRadius: BorderRadius.circular(NizamioRadius.group),
-                    child: Padding(
-                      padding: const EdgeInsets.all(NizamioSpacing.space1),
-                      child: Row(
-                        children: [
-                          if (tablet)
-                            _TabletAvatar(name: greetingName)
-                          else
-                            NzAvatar.initials(name: greetingName),
-                          const Gap(NizamioSpacing.space3),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  greetingName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: sheet.text.labelLg,
-                                ),
-                                Text(
-                                  accountCaption.isEmpty
-                                      ? l.uiHomeProfile
-                                      : accountCaption,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: sheet.text.caption.copyWith(
-                                    color: c.textMuted,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              if (tablet)
-                _TabletClose(
-                  label: l.uiCommonClose,
-                  onTap: () => Navigator.of(sheet).pop(),
-                )
-              else
-                NzIconButton(
-                  icon: NzIcons.close,
-                  semanticLabel: l.uiCommonClose,
-                  onPressed: () => Navigator.of(sheet).pop(),
-                ),
+              NzCountPill.warning(counts.tasksAwaitingApproval),
+              NzCountPill.danger(counts.lateTasks),
             ],
           ),
-          const Gap(NizamioSpacing.gapLg),
-          // Kapsam (program) kartı (prototip sezon düğmesi: violet monogram, ad, "2026 sezonu",
-          // ↕); dokunuş mevcut kapsam değiştirme akışına bağlı.
-          _SeasonCard(
-            name: programName ?? l.uiScopeHomeChange,
-            shortName: programShortName,
-            color: programColor,
-            caption: l.seasonCaption(programYear, l.uiScopeHomeChange),
-            onTap: () => close(onChangeScope),
+          HomeModule.messages => switch (counts?.unreadMessages) {
+            final n? => NzCountPill.neutral(n),
+            null => null,
+          },
+          HomeModule.simulation => NzBadge.neutral(
+            label: l.uiHomeBeta,
+            size: NzSize.sm,
           ),
-          const Gap(NizamioSpacing.gapLg),
-          NzMenuGroup(
-            label: l.uiHomeGroupTracking,
-            rows: [
-              row(HomeModule.home, NzIcons.home, l.uiHomeModuleHome),
-              row(
-                HomeModule.tasks,
-                NzIcons.tasks,
-                l.uiHomeModuleTasks,
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: NizamioSpacing.space1,
-                  children: [
-                    ?count(counts?.tasksAwaitingApproval, ink: c.warning),
-                    ?count(counts?.lateTasks, fill: c.danger, ink: c.onDanger),
-                  ],
-                ),
-              ),
-              row(
-                HomeModule.calendar,
-                NzIcons.calendarMonth,
-                l.uiHomeModuleCalendar,
-              ),
-            ],
+          _ => null,
+        };
+
+        // Tablet (kaynak `aside` `padding: 52px 14px 28px`; durum çubuğu payı dahil 52).
+        final tablet = NzTabletMetrics.tabletVisualAt(
+          MediaQuery.sizeOf(context).width,
+        );
+        // Çekmece güvenli alanı tüketmez: liste durum çubuğunun altına kadar kayar, açılışta
+        // içerik güvenli alanın altında başlar.
+        final safe = MediaQuery.paddingOf(sheet);
+        final groups = modulesFor(role);
+        return ListView(
+          padding: EdgeInsets.fromLTRB(
+            NizamioSpacing.rowPad,
+            safe.top +
+                (tablet
+                    ? math.max(NizamioSpacing.space4, _tabletTop - safe.top)
+                    : NizamioSpacing.space4),
+            NizamioSpacing.rowPad,
+            safe.bottom + (tablet ? _tabletBottom : NizamioSpacing.space6),
           ),
-          const Gap(NizamioSpacing.space4),
-          NzMenuGroup(
-            label: l.uiHomeGroupContent,
-            rows: [
-              row(HomeModule.memory, NzIcons.idea, l.uiHomeModuleMemory),
-              row(HomeModule.assistant, NzIcons.idea, 'Asistan'),
-              row(HomeModule.archive, NzIcons.folder, l.uiHomeModuleArchive),
-              row(HomeModule.meetings, NzIcons.video, l.uiHomeModuleMeetings),
-              row(
-                HomeModule.messages,
-                NzIcons.mail,
-                l.uiHomeModuleMessages,
-                trailing: count(counts?.unreadMessages),
-              ),
-              row(HomeModule.sheets, NzIcons.sheets, l.uiHomeModuleSheets),
-            ],
-          ),
-          const Gap(NizamioSpacing.space4),
-          NzMenuGroup(
-            label: l.uiHomeGroupAdmin,
-            rows: [
-              if (greetingRole == TeamRole.admin)
-                row(HomeModule.users, NzIcons.group, l.uiHomeModuleUsers),
-              row(
-                HomeModule.coordinatorships,
-                NzIcons.coordinatorships,
-                l.uiHomeCoordinatorships,
-              ),
-              // Raporlar: rapor oluşturucu gelene dek gizli.
-            ],
-          ),
-          const Gap(NizamioSpacing.space4),
-          NzMenuGroup(
-            label: l.uiHomeGroupLab,
-            rows: [
-              row(
-                HomeModule.simulation,
-                NzIcons.science,
-                l.uiHomeModuleSimulation,
-                trailing: NzBadge.neutral(label: l.uiHomeBeta, size: NzSize.sm),
-              ),
-            ],
-          ),
-          const Gap(NizamioSpacing.gapLg),
-          NzMenuGroup(
-            rows: [
-              if (greetingRole == TeamRole.admin)
-                row(HomeModule.deleted, NzIcons.delete, l.uiHomeDeletedRecords),
-              row(HomeModule.help, NzIcons.help, l.uiHomeHelp),
-              NzMenuRow(
-                icon: NzIcons.logout,
-                label: l.uiIdentitySignOut,
-                danger: true,
-                onTap: () => close(onSignOut),
-              ),
-            ],
-          ),
-          const Gap(NizamioSpacing.gapLg),
-          const _AppearanceSwitch(),
-          if (version != null) ...[
-            const Gap(NizamioSpacing.gapLg),
-            Text(
-              '${productName ?? l.uiHomeAppName} ${l.uiHomeVersionPrefix}$version',
-              textAlign: TextAlign.center,
-              style: sheet.text.monoSm.copyWith(color: c.textFaint),
+          children: [
+            HomeDrawerHeader(
+              name: greetingName,
+              caption: accountCaption,
+              tablet: tablet,
+              onProfile: () => close(onProfile),
+              onClose: () => Navigator.of(sheet).pop(),
             ),
+            const Gap(NizamioSpacing.gapLg),
+            ScopeSwitcher(
+              programName: programName ?? l.uiScopeHomeChange,
+              programShortName: programShortName,
+              programColor: programColor,
+              onChangeScope: () => close(onChangeScope),
+              onViewChanged: (caption) => close(() => onViewChanged(caption)),
+            ),
+            for (final g in groups) ...[
+              Gap(
+                g.kind == ModuleGroupKind.footer
+                    ? NizamioSpacing.gapLg
+                    : g == groups.first
+                    ? NizamioSpacing.gapLg
+                    : NizamioSpacing.space4,
+              ),
+              NzMenuGroup(
+                label: l.moduleGroupLabel(g.kind),
+                rows: [
+                  for (final m in g.modules)
+                    NzMenuRow(
+                      icon: homeModuleIcon(m),
+                      label: l.homeModuleLabel(m, role),
+                      current: m == current,
+                      trailing: trailing(m),
+                      onTap: () => close(() => onModule(m)),
+                    ),
+                  if (g.kind == ModuleGroupKind.footer)
+                    NzMenuRow(
+                      icon: NzIcons.logout,
+                      label: l.uiIdentitySignOut,
+                      danger: true,
+                      onTap: () => close(onSignOut),
+                    ),
+                ],
+              ),
+            ],
+            const Gap(NizamioSpacing.gapLg),
+            const _AppearanceSwitch(),
+            if (version != null) ...[
+              const Gap(NizamioSpacing.gapLg),
+              Text(
+                '${productName ?? l.uiHomeAppName} ${l.uiHomeVersionPrefix}$version',
+                textAlign: TextAlign.center,
+                style: sheet.text.monoSm.copyWith(color: c.textFaint),
+              ),
+            ],
           ],
-        ],
-      );
-    },
+        );
+      },
+    ),
   );
 }
 
@@ -370,150 +236,6 @@ class _AppearanceSwitch extends ConsumerWidget {
               ref.read(themeModeControllerProvider).set(_modes[i]),
         ),
       ],
-    );
-  }
-}
-
-/// Çekmecedeki kapsam kartı: violet monogram karosu, program adı, alt satır, ↕ simgesi.
-class _SeasonCard extends ConsumerWidget {
-  const _SeasonCard({
-    required this.name,
-    required this.caption,
-    this.shortName,
-    this.color,
-    required this.onTap,
-  });
-
-  final String name;
-  final String caption;
-  final String? shortName;
-  final ProgramColor? color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final c = context.colors;
-    final t = context.text;
-    return NzCard.filled(
-      padding: const EdgeInsets.symmetric(
-        horizontal: NizamioSpacing.space3,
-        vertical: NizamioSpacing.gapMd,
-      ),
-      onTap: onTap,
-      semanticLabel: '$name, $caption',
-      child: Row(
-        children: [
-          ProgramBadge(name: name, shortName: shortName, color: color),
-          const Gap(NizamioSpacing.space3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: t.bodyMd.copyWith(fontWeight: FontWeight.w600),
-                ),
-                Text(
-                  caption,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: t.caption.copyWith(color: c.textMuted),
-                ),
-              ],
-            ),
-          ),
-          const Gap(NizamioSpacing.space3),
-          if (ref.watch(scopeStateProvider).programId case final id?) ...[
-            ProgramUnreadBadge(programId: id),
-            const Gap(NizamioSpacing.space3),
-          ],
-          NzIcon(
-            NzIcons.unfold,
-            size: NizamioSize.iconSizeSm,
-            color: c.textFaint,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Tablet çekmecesi hesap avatarı (kaynak `rp-av` 44 / 15: `bg-overlay` daire, `ink` baş harf).
-class _TabletAvatar extends StatelessWidget {
-  const _TabletAvatar({required this.name});
-
-  final String name;
-
-  static const _extent = 44.0;
-  static const _fontSize = 15.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
-    final initials = words.isEmpty
-        ? ''
-        : words.take(2).map((w) => w.characters.first).join().toUpperCase();
-    return ExcludeSemantics(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: c.surfaceOverlay,
-          shape: BoxShape.circle,
-        ),
-        child: SizedBox.square(
-          dimension: _extent,
-          child: Center(
-            child: Text(
-              initials,
-              style: context.text.labelLg.copyWith(
-                fontSize: _fontSize,
-                color: c.text,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Tablet çekmecesi kapat düğmesi (kaynak 36 `bg-overlay` daire, 16 X).
-class _TabletClose extends StatelessWidget {
-  const _TabletClose({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return Semantics(
-      button: true,
-      label: label,
-      excludeSemantics: true,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: c.surfaceOverlay,
-            shape: BoxShape.circle,
-          ),
-          child: SizedBox.square(
-            dimension: NizamioSize.controlSm,
-            child: Center(
-              child: NzIcon(
-                NzIcons.close,
-                size: NizamioSize.iconSizeSm,
-                color: c.text,
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

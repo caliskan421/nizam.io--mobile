@@ -15,10 +15,22 @@ export 'application/scope_selection_controller.dart'
     show scopeSelectionControllerProvider;
 export 'application/scope_service.dart' show ScopeService;
 export 'domain/home_dashboard.dart' show HomeDashboard, ModuleCounts, TeamRole;
+export 'domain/module_menu.dart'
+    show
+        HomeModule,
+        ModuleGroup,
+        ModuleGroupKind,
+        defaultSlotFor,
+        menuModulesOf,
+        modulesFor,
+        railModulesFor,
+        slotModulesFor;
 export 'domain/my_department.dart' show DepartmentRole, MyDepartment;
 export 'domain/program.dart'
     show Program, ProgramColor, ProgramField, ProgramDepartmentLink;
-export 'presentation/home/home_menus.dart' show HomeModule, showHomeDrawer;
+export 'presentation/home/home_menus.dart' show showHomeDrawer;
+export 'presentation/home/module_menu_texts.dart'
+    show ModuleMenuTexts, effectiveRoleColor, homeModuleIcon;
 export 'presentation/home_page.dart' show HomePage;
 export 'presentation/root_top_bar.dart' show RootTopBar;
 export 'presentation/scope_page.dart' show ScopePage;

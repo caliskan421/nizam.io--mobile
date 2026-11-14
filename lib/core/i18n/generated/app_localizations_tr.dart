@@ -2678,9 +2678,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeShiftDaysTail => 'gün';
 
   @override
-  String get uiHomeSeasonTail => 'sezonu';
-
-  @override
   String get uiHomeVersionPrefix => 'v';
 
   @override
@@ -2694,6 +2691,55 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiHomeThemeSystem => 'Sistem';
+
+  @override
+  String get uiHomeGroupTeam => 'ekip';
+
+  @override
+  String get uiHomeModuleMyTasks => 'Görevlerim';
+
+  @override
+  String get uiHomeModuleMyTimeline => 'Zaman çizelgem';
+
+  @override
+  String get uiHomeModuleMyFiles => 'Dosyalarım';
+
+  @override
+  String get uiHomeModuleTeam => 'Ekibim';
+
+  @override
+  String get uiHomeModuleAssistant => 'Asistan';
+
+  @override
+  String get uiHomePickerProgram => 'program';
+
+  @override
+  String get uiHomePickerRole => 'rol';
+
+  @override
+  String get uiHomePickerDepartment => 'koordinatörlük';
+
+  @override
+  String get uiHomeViewRoleAdmin => 'Yönetici';
+
+  @override
+  String get uiHomeRoleAdminDesc => 'Tüm programı yönetir';
+
+  @override
+  String get uiHomeRoleCoordinatorDesc => 'Kendi koordinatörlüğünü yönetir';
+
+  @override
+  String get uiHomeRoleMemberDesc => 'Yalnız atanan görevleri görür';
+
+  @override
+  String get uiHomePickRole => 'Rolünü seç';
+
+  @override
+  String get uiHomePickDepartment => 'Koordinatörlük seç';
+
+  @override
+  String get uiHomeAdminScopeNote =>
+      'Yönetici tüm koordinatörlükleri görür. Bir koordinatörlüğün gözünden bakmak için rolünü değiştir.';
 
   @override
   String get uiIdentityLoginTitle => 'Giriş yap';

@@ -76,10 +76,6 @@ extension HomeTexts on AppLocalizations {
     CoordinatorshipSort.name => uiHomeSortName,
   };
 
-  /// Çekmecedeki sezon kartının alt satırı: "2026 sezonu" (yıl yoksa kapsam değiştirme).
-  String seasonCaption(int? year, String fallback) =>
-      year == null ? fallback : '$year $uiHomeSeasonTail';
-
   /// "Takvim mobilde sonraki adımda eklenecek".
   String soon(String what) => '$what $uiHomeSoonTail';
 }

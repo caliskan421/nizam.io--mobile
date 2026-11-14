@@ -2839,6 +2839,55 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeTableDue => 'Bitiş';
 
   @override
+  String get uiHomeMemberFocusKicker => 'sıradaki işin';
+
+  @override
+  String get uiHomeMemberFocusEmpty =>
+      'Şu an üzerinde çalışman gereken iş yok. Yeni görev atanınca burada görürsün.';
+
+  @override
+  String get uiHomeMemberEvidence => 'Kanıt yükle';
+
+  @override
+  String get uiHomeMemberDueToday => 'Bugün bitiyor';
+
+  @override
+  String get uiHomeMemberPriorityTail => 'öncelik';
+
+  @override
+  String get uiHomeMemberReturnedKicker => 'iade edildi';
+
+  @override
+  String get uiHomeMemberFix => 'Düzelt';
+
+  @override
+  String get uiHomeMemberTasksTitle => 'Görevlerim';
+
+  @override
+  String get uiHomeMemberTasksEmpty => 'Açık görevin yok.';
+
+  @override
+  String get uiHomeMemberStatTotal => 'toplam';
+
+  @override
+  String get uiHomeMemberStatLate => 'geciken';
+
+  @override
+  String get uiHomeMemberStatReview => 'onayda';
+
+  @override
+  String get uiHomeMemberStatDone => 'biten';
+
+  @override
+  String get uiHomeMemberUpcomingTitle => 'Yaklaşanlar';
+
+  @override
+  String get uiHomeMemberUpcomingEmpty => 'Önümüzdeki 7 günde bir şey yok.';
+
+  @override
+  String get uiHomeMemberTagDue => 'Son tarih';
+
+  @override
   String get uiIdentityLoginTitle => 'Giriş yap';
 
   @override

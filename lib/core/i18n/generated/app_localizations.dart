@@ -5428,6 +5428,102 @@ abstract class AppLocalizations {
   /// **'Bitiş'**
   String get uiHomeTableDue;
 
+  /// ui.home.member_focus_kicker
+  ///
+  /// In tr, this message translates to:
+  /// **'sıradaki işin'**
+  String get uiHomeMemberFocusKicker;
+
+  /// ui.home.member_focus_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Şu an üzerinde çalışman gereken iş yok. Yeni görev atanınca burada görürsün.'**
+  String get uiHomeMemberFocusEmpty;
+
+  /// ui.home.member_evidence
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt yükle'**
+  String get uiHomeMemberEvidence;
+
+  /// ui.home.member_due_today
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün bitiyor'**
+  String get uiHomeMemberDueToday;
+
+  /// ui.home.member_priority_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'öncelik'**
+  String get uiHomeMemberPriorityTail;
+
+  /// ui.home.member_returned_kicker
+  ///
+  /// In tr, this message translates to:
+  /// **'iade edildi'**
+  String get uiHomeMemberReturnedKicker;
+
+  /// ui.home.member_fix
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzelt'**
+  String get uiHomeMemberFix;
+
+  /// ui.home.member_tasks_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevlerim'**
+  String get uiHomeMemberTasksTitle;
+
+  /// ui.home.member_tasks_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık görevin yok.'**
+  String get uiHomeMemberTasksEmpty;
+
+  /// ui.home.member_stat_total
+  ///
+  /// In tr, this message translates to:
+  /// **'toplam'**
+  String get uiHomeMemberStatTotal;
+
+  /// ui.home.member_stat_late
+  ///
+  /// In tr, this message translates to:
+  /// **'geciken'**
+  String get uiHomeMemberStatLate;
+
+  /// ui.home.member_stat_review
+  ///
+  /// In tr, this message translates to:
+  /// **'onayda'**
+  String get uiHomeMemberStatReview;
+
+  /// ui.home.member_stat_done
+  ///
+  /// In tr, this message translates to:
+  /// **'biten'**
+  String get uiHomeMemberStatDone;
+
+  /// ui.home.member_upcoming_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Yaklaşanlar'**
+  String get uiHomeMemberUpcomingTitle;
+
+  /// ui.home.member_upcoming_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Önümüzdeki 7 günde bir şey yok.'**
+  String get uiHomeMemberUpcomingEmpty;
+
+  /// ui.home.member_tag_due
+  ///
+  /// In tr, this message translates to:
+  /// **'Son tarih'**
+  String get uiHomeMemberTagDue;
+
   /// ui.identity.login_title
   ///
   /// In tr, this message translates to:

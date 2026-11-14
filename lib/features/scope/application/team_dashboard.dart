@@ -1,3 +1,4 @@
+import '../../../core/domain/effective_role.dart';
 import '../../tasks/tasks.dart';
 import '../domain/home_dashboard.dart';
 
@@ -9,14 +10,23 @@ import '../domain/home_dashboard.dart';
 /// kutu gizli). Bekleyen işler: koordinatörde onaya sunulanlar ve kendi bekleyen tarih
 /// talepleri; üyede yok. Gecikme sunucu bayrağıdır ([TaskItem.lateness]). Onay bekleyen sayısı
 /// tek kaynaktır (görünen `review` görevleri) — KPI ve kısayol rozeti aynı sayıyı gösterir.
-/// Kesik katalogda ([TaskCatalog.truncated]) özet uyarı bayrağını taşır.
+/// Kesik katalogda ([TaskCatalog.truncated]) özet uyarı bayrağını taşır. Üyede sayım görev
+/// listesiyle aynı kümedendir ([scopedTasks]: etkin koordinatörlükte kendine atananlar); çok
+/// koordinatörlüklü üyede rozet ile liste aynı sayar. Koordinatörde katalogun tamamı.
 HomeDashboard teamDashboard(
   TaskCatalog catalog,
   TeamDashboardExtras extras, {
   required bool coordinator,
   required String? departmentId,
 }) {
-  final tasks = catalog.tasks;
+  final tasks = coordinator
+      ? catalog.tasks
+      : scopedTasks(
+          catalog.tasks,
+          role: EffectiveRole.member,
+          departmentId: departmentId,
+          me: catalog.me,
+        );
   bool late(TaskItem t) => t.lateness?.isOverdue ?? t.isOverdue;
   int count(bool Function(TaskItem t) test) => tasks.where(test).length;
 

@@ -126,7 +126,8 @@ class HomeCoordinatorFeed extends ConsumerWidget {
 
 /// Bölüm iskeleti: [NzSectionHeader] (başlık, sayı, "Tümü ›") ve tek [NzTableCard] içinde
 /// ayraçlı satırlar (satırlar kendi dolgusunu taşır); boşsa boş metni de kart içinde. [table]
-/// sütun adlarıdır (verilmezse şeritsiz).
+/// sütun adlarıdır (verilmezse şeritsiz). [below] başlık ile kart arasına girer (üyede
+/// istatistik şeridi).
 class HomeSectionFrame extends StatelessWidget {
   const HomeSectionFrame({
     super.key,
@@ -136,6 +137,8 @@ class HomeSectionFrame extends StatelessWidget {
     this.onAll,
     this.empty,
     this.table,
+    this.below,
+    this.allLabel,
   });
 
   final String title;
@@ -144,6 +147,10 @@ class HomeSectionFrame extends StatelessWidget {
   final VoidCallback? onAll;
   final String? empty;
   final (String?, String?)? table;
+  final Widget? below;
+
+  /// "Tümü" yerine bağlantı metni (ör. "Takvim").
+  final String? allLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -158,9 +165,10 @@ class HomeSectionFrame extends StatelessWidget {
           title,
           count: count,
           onAll: onAll,
-          allLabel: l.uiHomeSeeAll,
+          allLabel: allLabel ?? l.uiHomeSeeAll,
         ),
         const Gap(NizamioSpacing.gapMd),
+        if (below case final w?) ...[w, const Gap(NizamioSpacing.gapMd)],
         if (children.isEmpty && empty != null)
           NzTableCard(
             children: [

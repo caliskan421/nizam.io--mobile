@@ -3557,6 +3557,70 @@
   "@uiHomeTableDue": {
     "description": "ui.home.table_due"
   },
+  "uiHomeMemberFocusKicker": "sıradaki işin",
+  "@uiHomeMemberFocusKicker": {
+    "description": "ui.home.member_focus_kicker"
+  },
+  "uiHomeMemberFocusEmpty": "Şu an üzerinde çalışman gereken iş yok. Yeni görev atanınca burada görürsün.",
+  "@uiHomeMemberFocusEmpty": {
+    "description": "ui.home.member_focus_empty"
+  },
+  "uiHomeMemberEvidence": "Kanıt yükle",
+  "@uiHomeMemberEvidence": {
+    "description": "ui.home.member_evidence"
+  },
+  "uiHomeMemberDueToday": "Bugün bitiyor",
+  "@uiHomeMemberDueToday": {
+    "description": "ui.home.member_due_today"
+  },
+  "uiHomeMemberPriorityTail": "öncelik",
+  "@uiHomeMemberPriorityTail": {
+    "description": "ui.home.member_priority_tail"
+  },
+  "uiHomeMemberReturnedKicker": "iade edildi",
+  "@uiHomeMemberReturnedKicker": {
+    "description": "ui.home.member_returned_kicker"
+  },
+  "uiHomeMemberFix": "Düzelt",
+  "@uiHomeMemberFix": {
+    "description": "ui.home.member_fix"
+  },
+  "uiHomeMemberTasksTitle": "Görevlerim",
+  "@uiHomeMemberTasksTitle": {
+    "description": "ui.home.member_tasks_title"
+  },
+  "uiHomeMemberTasksEmpty": "Açık görevin yok.",
+  "@uiHomeMemberTasksEmpty": {
+    "description": "ui.home.member_tasks_empty"
+  },
+  "uiHomeMemberStatTotal": "toplam",
+  "@uiHomeMemberStatTotal": {
+    "description": "ui.home.member_stat_total"
+  },
+  "uiHomeMemberStatLate": "geciken",
+  "@uiHomeMemberStatLate": {
+    "description": "ui.home.member_stat_late"
+  },
+  "uiHomeMemberStatReview": "onayda",
+  "@uiHomeMemberStatReview": {
+    "description": "ui.home.member_stat_review"
+  },
+  "uiHomeMemberStatDone": "biten",
+  "@uiHomeMemberStatDone": {
+    "description": "ui.home.member_stat_done"
+  },
+  "uiHomeMemberUpcomingTitle": "Yaklaşanlar",
+  "@uiHomeMemberUpcomingTitle": {
+    "description": "ui.home.member_upcoming_title"
+  },
+  "uiHomeMemberUpcomingEmpty": "Önümüzdeki 7 günde bir şey yok.",
+  "@uiHomeMemberUpcomingEmpty": {
+    "description": "ui.home.member_upcoming_empty"
+  },
+  "uiHomeMemberTagDue": "Son tarih",
+  "@uiHomeMemberTagDue": {
+    "description": "ui.home.member_tag_due"
+  },
   "uiIdentityLoginTitle": "Giriş yap",
   "@uiIdentityLoginTitle": {
     "description": "ui.identity.login_title"

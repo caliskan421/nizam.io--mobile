@@ -557,6 +557,6 @@ Map<String, Object?> _meeting(
   'created_at': '2026-11-01T17:28:17Z',
   'updated_at': '2026-11-01T17:28:17Z',
   'departments': [
-    for (final d in departments) {'department_id': d, 'department_name': d},
+    for (final d in departments) {'department_id': d, 'department_name': d, 'deleted': false},
   ],
 };

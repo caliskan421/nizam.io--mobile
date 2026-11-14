@@ -252,6 +252,8 @@ void main() {
           'notes': {
             'items': [_note(role: null)],
             'next_cursor': 'n2',
+            'total': 2,
+            'counts': {'all': 0, 'converted': 0, 'mine': 0},
           },
           'conference': null,
           'conference_available': false,
@@ -284,7 +286,12 @@ void main() {
           'viewer_role': 'admin',
           'participants': <Object?>[],
           'agenda': <Object?>[],
-          'notes': {'items': <Object?>[], 'next_cursor': ''},
+          'notes': {
+            'items': <Object?>[],
+            'next_cursor': '',
+            'total': 0,
+            'counts': {'all': 0, 'converted': 0, 'mine': 0},
+          },
           'conference': _conference(status: 'yeni_durum'),
           'conference_available': true,
         }),
@@ -396,6 +403,8 @@ void main() {
           return _json({
             'items': [_note(), _note(role: 'boss')],
             'next_cursor': 'c9',
+            'total': 2,
+            'counts': {'all': 0, 'converted': 0, 'mine': 0},
           });
         }
         return _json(_note(role: 'coordinator'));

@@ -3901,6 +3901,40 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiNotificationsTypeUnknown => 'Yeni bildirim';
 
   @override
+  String get uiNotificationsGroupTasks => 'Görevler';
+
+  @override
+  String get uiNotificationsGroupDateRequests => 'Tarih talepleri';
+
+  @override
+  String get uiNotificationsGroupMeetings => 'Toplantılar';
+
+  @override
+  String get uiNotificationsGroupTeam => 'Ekip';
+
+  @override
+  String get uiNotificationsGroupOther => 'Diğer';
+
+  @override
+  String get uiNotificationsPrefTitle => 'Bildirim tercihleri';
+
+  @override
+  String get uiNotificationsPrefIntro =>
+      'Anlık bildirim gönderimini gruplara göre aç ya da kapat. Uygulama içi bildirimler her zaman görünür.';
+
+  @override
+  String get uiNotificationsPrefTasks => 'Görevler';
+
+  @override
+  String get uiNotificationsPrefMessages => 'Mesajlar';
+
+  @override
+  String get uiNotificationsPrefMeetings => 'Toplantılar';
+
+  @override
+  String get uiNotificationsPrefSystem => 'Sistem';
+
+  @override
   String get uiRouterTabHome => 'Ana sayfa';
 
   @override

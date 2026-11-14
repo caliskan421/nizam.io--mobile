@@ -1,5 +1,6 @@
 import '../../../core/domain/page_slice.dart';
 import 'app_notification.dart';
+import 'notification_preferences.dart';
 
 /// Uygulama içi bildirimler ve (web) push aboneliği (backend `notifications` modülü; bütün
 /// uçlar S1: kapsam başlığı gönderilmez). Gerçekleştirme
@@ -35,4 +36,12 @@ abstract interface class NotificationRepository {
 
   /// `GET /v1/notifications/vapid-public-key`.
   Future<PushPublicKeyInfo> pushPublicKey();
+
+  /// `GET /v1/notifications/preferences` — dört grubun `push_muted` değeri.
+  Future<NotificationPreferences> preferences();
+
+  /// `PUT /v1/notifications/preferences` — yalnız [changes] grupları yazılır; güncel küme döner.
+  Future<NotificationPreferences> updatePreferences(
+    NotificationPreferences changes,
+  );
 }

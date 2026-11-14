@@ -7450,6 +7450,72 @@ abstract class AppLocalizations {
   /// **'Yeni bildirim'**
   String get uiNotificationsTypeUnknown;
 
+  /// ui.notifications.group_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler'**
+  String get uiNotificationsGroupTasks;
+
+  /// ui.notifications.group_date_requests
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talepleri'**
+  String get uiNotificationsGroupDateRequests;
+
+  /// ui.notifications.group_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantılar'**
+  String get uiNotificationsGroupMeetings;
+
+  /// ui.notifications.group_team
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekip'**
+  String get uiNotificationsGroupTeam;
+
+  /// ui.notifications.group_other
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer'**
+  String get uiNotificationsGroupOther;
+
+  /// ui.notifications.pref_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirim tercihleri'**
+  String get uiNotificationsPrefTitle;
+
+  /// ui.notifications.pref_intro
+  ///
+  /// In tr, this message translates to:
+  /// **'Anlık bildirim gönderimini gruplara göre aç ya da kapat. Uygulama içi bildirimler her zaman görünür.'**
+  String get uiNotificationsPrefIntro;
+
+  /// ui.notifications.pref_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler'**
+  String get uiNotificationsPrefTasks;
+
+  /// ui.notifications.pref_messages
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesajlar'**
+  String get uiNotificationsPrefMessages;
+
+  /// ui.notifications.pref_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantılar'**
+  String get uiNotificationsPrefMeetings;
+
+  /// ui.notifications.pref_system
+  ///
+  /// In tr, this message translates to:
+  /// **'Sistem'**
+  String get uiNotificationsPrefSystem;
+
   /// ui.router.tab_home
   ///
   /// In tr, this message translates to:

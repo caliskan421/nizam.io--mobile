@@ -4905,6 +4905,50 @@
   "@uiNotificationsTypeUnknown": {
     "description": "ui.notifications.type_unknown"
   },
+  "uiNotificationsGroupTasks": "Görevler",
+  "@uiNotificationsGroupTasks": {
+    "description": "ui.notifications.group_tasks"
+  },
+  "uiNotificationsGroupDateRequests": "Tarih talepleri",
+  "@uiNotificationsGroupDateRequests": {
+    "description": "ui.notifications.group_date_requests"
+  },
+  "uiNotificationsGroupMeetings": "Toplantılar",
+  "@uiNotificationsGroupMeetings": {
+    "description": "ui.notifications.group_meetings"
+  },
+  "uiNotificationsGroupTeam": "Ekip",
+  "@uiNotificationsGroupTeam": {
+    "description": "ui.notifications.group_team"
+  },
+  "uiNotificationsGroupOther": "Diğer",
+  "@uiNotificationsGroupOther": {
+    "description": "ui.notifications.group_other"
+  },
+  "uiNotificationsPrefTitle": "Bildirim tercihleri",
+  "@uiNotificationsPrefTitle": {
+    "description": "ui.notifications.pref_title"
+  },
+  "uiNotificationsPrefIntro": "Anlık bildirim gönderimini gruplara göre aç ya da kapat. Uygulama içi bildirimler her zaman görünür.",
+  "@uiNotificationsPrefIntro": {
+    "description": "ui.notifications.pref_intro"
+  },
+  "uiNotificationsPrefTasks": "Görevler",
+  "@uiNotificationsPrefTasks": {
+    "description": "ui.notifications.pref_tasks"
+  },
+  "uiNotificationsPrefMessages": "Mesajlar",
+  "@uiNotificationsPrefMessages": {
+    "description": "ui.notifications.pref_messages"
+  },
+  "uiNotificationsPrefMeetings": "Toplantılar",
+  "@uiNotificationsPrefMeetings": {
+    "description": "ui.notifications.pref_meetings"
+  },
+  "uiNotificationsPrefSystem": "Sistem",
+  "@uiNotificationsPrefSystem": {
+    "description": "ui.notifications.pref_system"
+  },
   "uiRouterTabHome": "Ana sayfa",
   "@uiRouterTabHome": {
     "description": "ui.router.tab_home"

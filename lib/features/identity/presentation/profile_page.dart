@@ -8,6 +8,7 @@ import '../../../core/ui/layout/layout.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../notifications/notifications.dart';
 import '../application/current_account_controller.dart';
 import 'crash_reports_card.dart';
 import 'sign_out_button.dart';
@@ -46,6 +47,7 @@ class ProfilePage extends ConsumerWidget {
             ),
           ),
           const Gap(NizamioSpacing.space6),
+          const NotificationPreferencesCard(),
           const CrashReportsCard(),
           const SignOutButton(),
         ],

@@ -11,7 +11,7 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | denetim akışı | 1 |
 | iletilir | 15 |
 | istisna | 59 |
-| rapor | 170 |
+| rapor | 173 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -157,6 +157,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/administration/presentation/administration_page.dart` | `_AdministrationPageState.build` | catch | rapor | 1 |
 | `features/administration/presentation/deleted/deleted_record_tabs.dart` | `DeletedTasksTab.build` | catch | rapor | 1 |
 | `features/administration/presentation/deleted/deleted_record_tabs.dart` | `_admin` | catch | rapor | 1 |
+| `features/administration/presentation/team_member_actions.dart` | `TeamRemoveAction._remove` | catch | rapor | 2 |
 | `features/archive/application/archive_actions_controller.dart` | `ArchiveActionsController._run` | catch | rapor | 1 |
 | `features/archive/application/archive_actions_controller.dart` | `ArchiveActionsController._send` | catch | rapor | 2 |
 | `features/archive/application/archive_controller.dart` | `ArchiveController.downloadAll` | catch | rapor | 1 |
@@ -200,7 +201,9 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.purge` | catch | rapor | 1 |
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.refresh` | catch | rapor | 1 |
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.restore` | catch | rapor | 1 |
+| `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.startInstant` | catch | rapor | 1 |
 | `features/meetings/presentation/meeting_people.dart` | `_MeetingPeopleState._showAdd` | catch | rapor | 1 |
+| `features/meetings/presentation/meetings_page.dart` | `_MeetingsPageState._instant` | catch | rapor | 1 |
 | `features/messages/application/chat_actions_controller.dart` | `ChatActionsController._closePoll` | catch | iletilir | 1 |
 | `features/messages/application/chat_actions_controller.dart` | `ChatActionsController._fly` | catch | rapor | 1 |
 | `features/messages/application/chat_actions_controller.dart` | `ChatActionsController._queue` | onError | istisna | 1 |
@@ -279,9 +282,8 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/tasks/data/upload_digest.dart` | `uploadDigest` | catch | istisna | 1 |
 | `features/tasks/presentation/detail/task_dependencies.dart` | `TaskDependencies.build` | catch | rapor | 1 |
 | `features/tasks/presentation/task_detail_page.dart` | `TaskDetailPage.build` | catch | istisna | 1 |
+| `features/timeline/application/timeline_controller.dart` | `TimelineController._extend` | catch | rapor | 1 |
+| `features/timeline/application/timeline_controller.dart` | `TimelineController._reload` | catch | rapor | 1 |
 | `features/timeline/application/timeline_controller.dart` | `TimelineController.requestDates` | catch | rapor | 3 |
-| `features/timeline/presentation/gantt/gantt_selection_card.dart` | `_GanttSelectionCardState._request` | catch | rapor | 1 |
-| `features/timeline/presentation/gantt/gantt_selection_card.dart` | `_GanttSelectionCardState._save` | catch | rapor | 1 |
-| `features/timeline/presentation/timeline_page.dart` | `_TimelinePageState._request` | catch | rapor | 1 |
-| `features/timeline/presentation/timeline_page.dart` | `_TimelinePageState._save` | catch | rapor | 1 |
 | `features/timeline/presentation/timeline_page.dart` | `_TimelinePageState._undo` | catch | rapor | 1 |
+| `features/timeline/presentation/widgets/timeline_selection_host.dart` | `_TimelineSelectionHostState._run` | catch | rapor | 1 |

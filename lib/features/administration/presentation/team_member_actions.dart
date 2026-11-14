@@ -80,7 +80,9 @@ class TeamRemoveAction extends ConsumerWidget {
     try {
       try {
         await commands.remove(accountId);
-      } on ApiError catch (e) {
+      } on ApiError catch (e, st) {
+        // Rapor girişte koşulsuz (beklenen 409 süzülür); onay isteği değilse iletilir.
+        reportUnexpected(e, st, source: ReportSource.administration);
         if (e.code != 'organization.confirmation_required' || !current()) {
           rethrow;
         }

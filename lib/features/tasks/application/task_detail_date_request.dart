@@ -47,6 +47,11 @@ mixin _DateRequestFlow on _$TaskDetailController {
         !permissions.canRequestDate) {
       return WriteOutcome.invalid;
     }
+    // Sebep zorunlu (ürün kuralı; sunucuda isteğe bağlı): hata formda gösterilir.
+    if (!isValidDecisionReason(d.reason)) {
+      state = state.copyWith(showErrors: true);
+      return WriteOutcome.invalid;
+    }
     final base = _dateBase;
     if (base?.datesRevision == null) {
       return _rejected(ClientErrorCode.serverOutdated);
@@ -63,7 +68,7 @@ mixin _DateRequestFlow on _$TaskDetailController {
         d.start,
         d.due,
         requestKey: key,
-        reason: reason.isEmpty ? null : reason,
+        reason: reason,
       ),
       list: false,
     );

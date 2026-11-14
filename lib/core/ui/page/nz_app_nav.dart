@@ -2,7 +2,16 @@ import 'package:flutter/widgets.dart';
 
 /// Görev listesinin açılış görünümü (ana sayfa özet kutuları, çekmece rozetleri). Görünüm
 /// adıdır; hangi görevin hangi görünüme düştüğünü görevler ekranı belirler.
-enum NzTaskView { all, late, inProgress, review, dateRequest, notStarted, done }
+enum NzTaskView {
+  all,
+  late,
+  inProgress,
+  review,
+  dateRequest,
+  notStarted,
+  done,
+  unassigned,
+}
 
 /// Ekranlar arası gezinme niyetleri (feature'lar birbirinin rotasını bilmez; rota tanımları
 /// `app/router`'dadır, B2). Yalnız kimlik taşır (N1). Gerçekleştirme uygulama kökünde

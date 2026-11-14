@@ -15,10 +15,8 @@ part of 'task_detail_controller.dart';
 /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
 /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
 /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
-/// görünürlüğü [permissions]'tan (işlem bazlı olgular).
-///
-/// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
+/// görünürlüğü [permissions]'tan. P3 yazmaları (öncelik, düzenle, atama, üstlen, tarih talebi,
+/// dosya) ve koordinatör kararları (onay, iade, süre uzatma) da aynı kapıdan gider.
 
 @ProviderFor(TaskDetailController)
 final taskDetailControllerProvider = TaskDetailControllerFamily._();
@@ -30,10 +28,8 @@ final taskDetailControllerProvider = TaskDetailControllerFamily._();
 /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
 /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
 /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
-/// görünürlüğü [permissions]'tan (işlem bazlı olgular).
-///
-/// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
+/// görünürlüğü [permissions]'tan. P3 yazmaları (öncelik, düzenle, atama, üstlen, tarih talebi,
+/// dosya) ve koordinatör kararları (onay, iade, süre uzatma) da aynı kapıdan gider.
 final class TaskDetailControllerProvider
     extends $NotifierProvider<TaskDetailController, TaskDetailState> {
   /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
@@ -43,10 +39,8 @@ final class TaskDetailControllerProvider
   /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
   /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
   /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
-  /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
-  ///
-  /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-  /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
+  /// görünürlüğü [permissions]'tan. P3 yazmaları (öncelik, düzenle, atama, üstlen, tarih talebi,
+  /// dosya) ve koordinatör kararları (onay, iade, süre uzatma) da aynı kapıdan gider.
   TaskDetailControllerProvider._({
     required TaskDetailControllerFamily super.from,
     required String super.argument,
@@ -92,7 +86,7 @@ final class TaskDetailControllerProvider
 }
 
 String _$taskDetailControllerHash() =>
-    r'778b33ce051a5d805c04005bfb4fd2d10d067dff';
+    r'ae6fa91df36fd9279123670a2ce96e8f5893c51c';
 
 /// Görev ayrıntısı denetleyicisi (prototip `S_detail`).
 ///
@@ -101,10 +95,8 @@ String _$taskDetailControllerHash() =>
 /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
 /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
 /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
-/// görünürlüğü [permissions]'tan (işlem bazlı olgular).
-///
-/// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
+/// görünürlüğü [permissions]'tan. P3 yazmaları (öncelik, düzenle, atama, üstlen, tarih talebi,
+/// dosya) ve koordinatör kararları (onay, iade, süre uzatma) da aynı kapıdan gider.
 
 final class TaskDetailControllerFamily extends $Family
     with
@@ -131,10 +123,8 @@ final class TaskDetailControllerFamily extends $Family
   /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
   /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
   /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
-  /// görünürlüğü [permissions]'tan (işlem bazlı olgular).
-  ///
-  /// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-  /// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
+  /// görünürlüğü [permissions]'tan. P3 yazmaları (öncelik, düzenle, atama, üstlen, tarih talebi,
+  /// dosya) ve koordinatör kararları (onay, iade, süre uzatma) da aynı kapıdan gider.
 
   TaskDetailControllerProvider call(String code) =>
       TaskDetailControllerProvider._(argument: code, from: this);
@@ -150,10 +140,8 @@ final class TaskDetailControllerFamily extends $Family
 /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
 /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
 /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
-/// görünürlüğü [permissions]'tan (işlem bazlı olgular).
-///
-/// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
+/// görünürlüğü [permissions]'tan. P3 yazmaları (öncelik, düzenle, atama, üstlen, tarih talebi,
+/// dosya) ve koordinatör kararları (onay, iade, süre uzatma) da aynı kapıdan gider.
 
 abstract class _$TaskDetailController extends $Notifier<TaskDetailState> {
   late final _$args = ref.$arg as String;

@@ -13,7 +13,10 @@ enum TaskView {
   review,
   dateRequest,
   notStarted,
-  done;
+  done,
+
+  /// Atanmamış açık görevler (koordinatör görünümü; sorumlu bekliyor).
+  unassigned;
 
   bool matches(TaskItem t) => switch (this) {
     TaskView.all => true,
@@ -24,7 +27,44 @@ enum TaskView {
     TaskView.dateRequest => t.hasPendingRequest,
     TaskView.notStarted => t.status == TaskStatus.todo,
     TaskView.done => t.isDone,
+    TaskView.unassigned =>
+      !t.isDone && t.status != TaskStatus.unknown && t.assignees.isEmpty,
   };
+}
+
+/// Duruma göre gruplu listenin grupları (koordinatör sırası): onay bekleyen, atanmamış, devam,
+/// iade, başlamadı, tamamlandı; tanımsız durum en sonda.
+enum TaskStatusGroup {
+  review,
+  unassigned,
+  inProgress,
+  returned,
+  todo,
+  done,
+  other;
+
+  /// Görevin grubu: atanmamış açık görev durumundan önce gelir (onaydaki hariç).
+  static TaskStatusGroup of(TaskItem t) {
+    if (t.status == TaskStatus.review) return review;
+    if (TaskView.unassigned.matches(t)) return unassigned;
+    return switch (t.status) {
+      TaskStatus.inProgress => inProgress,
+      TaskStatus.returned => returned,
+      TaskStatus.todo => todo,
+      TaskStatus.done => done,
+      TaskStatus.review || TaskStatus.unknown => other,
+    };
+  }
+
+  /// [TaskGroup.coordinatorship] alanındaki grup anahtarı (`status:<ad>`).
+  String get key => '$_prefix$name';
+
+  /// Anahtarın grubu; durum grubu değilse null.
+  static TaskStatusGroup? fromKey(String key) => key.startsWith(_prefix)
+      ? values.where((g) => g.name == key.substring(_prefix.length)).firstOrNull
+      : null;
+
+  static const _prefix = 'status:';
 }
 
 /// Sıralama ölçütü; [defaultDescending] ölçüt seçildiğindeki yön.
@@ -32,14 +72,21 @@ enum TaskSort {
   created(defaultDescending: true),
   due(defaultDescending: false),
   start(defaultDescending: false),
-  coordinatorship(defaultDescending: false);
+  coordinatorship(defaultDescending: false),
+
+  /// Duruma göre gruplu (koordinatör varsayılanı; [TaskStatusGroup] sırası).
+  status(defaultDescending: false);
 
   const TaskSort({required this.defaultDescending});
 
   final bool defaultDescending;
 
-  /// Koordinatörlük sıralaması yönsüzdür (gruplu liste).
-  bool get dated => this != TaskSort.coordinatorship;
+  /// Koordinatörlük ve durum sıralaması yönsüzdür (gruplu liste).
+  bool get dated => !grouped;
+
+  /// Gruplu liste ([TaskQueryResult.groups] dolu).
+  bool get grouped =>
+      this == TaskSort.coordinatorship || this == TaskSort.status;
 }
 
 /// Liste süzgeci (kişi, koordinatörlük, öncelik; aynı grupta "veya", gruplar arası "ve") ve
@@ -115,11 +162,13 @@ bool taskMatchesQuery(TaskItem t, TaskCatalog c, String query) {
   return hay.contains(q);
 }
 
-/// Koordinatörlük grubu (koordinatörlüğe göre sıralı liste).
+/// Liste grubu: koordinatörlüğe göre sıralamada koordinatörlük, duruma göre sıralamada durum
+/// grubu ([TaskStatusGroup.key]).
 @immutable
 final class TaskGroup {
   const TaskGroup(this.coordinatorship, this.tasks);
 
+  /// Grup anahtarı: koordinatörlük kimliği ya da [TaskStatusGroup.key].
   final String coordinatorship;
   final List<TaskItem> tasks;
 }
@@ -139,7 +188,7 @@ final class TaskQueryResult {
   /// Seçili görünümün görevleri (sıralı).
   final List<TaskItem> tasks;
 
-  /// Koordinatörlüğe göre sıralamada gruplar (diğer sıralamalarda boş).
+  /// Gruplu sıralamada gruplar (koordinatörlük ya da durum; diğer sıralamalarda boş).
   final List<TaskGroup> groups;
 }
 
@@ -177,18 +226,22 @@ TaskQueryResult queryTasks(
       trCompare(name(a), name(b)),
       () => _or(doneLast(a, b), () => a.due.compareTo(b.due)),
     ),
+    TaskSort.status => _or(
+      TaskStatusGroup.of(a).index - TaskStatusGroup.of(b).index,
+      () => a.due.compareTo(b.due),
+    ),
   };
   final list = _stableSort(base.where(view.matches).toList(), cmp);
   final groups = <TaskGroup>[];
-  if (sort == TaskSort.coordinatorship) {
+  if (sort.grouped) {
+    String key(TaskItem t) =>
+        sort == TaskSort.status ? TaskStatusGroup.of(t).key : t.coordinatorship;
     var run = <TaskItem>[];
     for (var i = 0; i < list.length; i++) {
       run.add(list[i]);
-      final last =
-          i == list.length - 1 ||
-          list[i + 1].coordinatorship != list[i].coordinatorship;
+      final last = i == list.length - 1 || key(list[i + 1]) != key(list[i]);
       if (last) {
-        groups.add(TaskGroup(list[i].coordinatorship, run));
+        groups.add(TaskGroup(key(list[i]), run));
         run = <TaskItem>[];
       }
     }

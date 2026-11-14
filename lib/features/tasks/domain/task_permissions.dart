@@ -172,6 +172,19 @@ final class TaskPermissions {
   /// koordinatör (WORK-K27).
   bool get canManageTask => admin || coordinator;
 
+  /// Onaya sunulan görevde karar (Onayla / İade et): aktörün matrisinde `onaya_sunuldu`'dan
+  /// hem `tamamlandi` hem `iade_edildi` var (kapsam koordinatörü ya da yönetici; WORK-K14).
+  bool canDecide(TaskItem task) {
+    if (task.status != TaskStatus.review) return false;
+    final targets = statusTargets(TaskStatus.review);
+    return targets.contains(TaskStatus.done) &&
+        targets.contains(TaskStatus.returned);
+  }
+
+  /// Doğrudan süre uzatma (`…/extend`, WORK-K27/K40): yönetici ya da koordinatör, bitmemiş
+  /// görevde.
+  bool canExtend(TaskItem task) => canManageTask && !task.isDone;
+
   /// "Şimdi hatırlat" (WORK-K90): koordinatör ya da şirket yöneticisi.
   bool get canRemind => admin || coordinator;
 

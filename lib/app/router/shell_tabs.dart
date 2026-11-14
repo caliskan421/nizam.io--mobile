@@ -80,6 +80,17 @@ ShellModule shellSlotFor(ShellModule? last, EffectiveRole? role) {
   return _shellModuleOf(defaultSlotFor(role)) ?? ShellModule.coordinatorships;
 }
 
+/// Modülün kök konumu (alt kapsül yuvasına dokunuş, dal henüz o modüle girmemişse).
+String shellModuleRoot(ShellModule m) => switch (m) {
+  ShellModule.coordinatorships => const CoordinatorshipsRoute().location,
+  ShellModule.archive => const ArchiveRoute().location,
+  ShellModule.messages => const MessagesRoute().location,
+  ShellModule.calendar => const CalendarRoute().location,
+  ShellModule.meetings => const MeetingsRoute().location,
+  ShellModule.users => const UsersRoute().location,
+  ShellModule.tables => const TablesRoute().location,
+};
+
 ShellModule? _shellModuleOf(HomeModule m) => switch (m) {
   HomeModule.coordinatorships => ShellModule.coordinatorships,
   HomeModule.archive => ShellModule.archive,

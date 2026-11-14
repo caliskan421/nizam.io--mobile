@@ -110,8 +110,21 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
       ref.read(shellReselectEventsProvider.notifier).fire(index);
       return;
     }
+    // Modül dalı (yuva): dal, kapsülün gösterdiği modülde değilse (ör. Koordinatör/Üye
+    // varsayılanı Ekibim, dalın ilk rotası Koordinatörlükler) doğrudan o modülün köküne gidilir.
+    if (index == _modulesBranch) {
+      final view = ref.read(effectiveAccessProvider);
+      final slot = shellSlotFor(_module, view.known ? view.role : null);
+      if (slot != _module) {
+        GoRouter.of(context).go(shellModuleRoot(slot));
+        return;
+      }
+    }
     _shell.goBranch(index);
   }
+
+  /// Kabuk dal sırası `routes.dart` ile birebir: ana sayfa, görevler, modüller.
+  static const _modulesBranch = 2;
 
   /// Ray seçimi (prototip `tgo`): başka modül → modül kökü (liste başa, sağ bölme modülün
   /// tabanı); aynı modül → çift bölmede sağ yığın derinse tabana döner, değilse bir şey olmaz;

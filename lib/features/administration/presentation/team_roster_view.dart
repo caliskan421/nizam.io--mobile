@@ -8,12 +8,11 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
-import '../../../core/ui/widgets/buttons/nz_icon_button.dart';
+import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
-import '../../../core/ui/widgets/surfaces/nz_kicker.dart';
-import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
+import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../coordinatorships/coordinatorships.dart';
 import '../../messages/messages.dart';
 import '../../scope/scope.dart';
@@ -24,10 +23,9 @@ import '../domain/team_view.dart';
 import 'admin_user_list_row.dart';
 
 /// Kullanıcılar sayfasının koordinatör/üye yüzü ("Ekibim", prototip `users` koordinatör dalı):
-/// başlık + "koordinatörlük · n kişi", sağda "+" (yalnız ekip yönetme hakkı), her zaman açık
-/// arama, üç öğeli
-/// rol bölücü (CSV ve koordinatörlük süzgeci yok), yönetici dizininin satır bileşeni
-/// ([AdminUserListRow]). On satırdan sonrası "Tümünü göster (n)". Üye görünümünde liste
+/// başlık, sağda arama simgesi ve "+" (yalnız ekip yönetme hakkı), açılır arama,
+/// üç öğeli rol bölücü (CSV ve koordinatörlük süzgeci yok). Koordinatörde yönetici dizininin
+/// satır bileşeni ([AdminUserListRow]); üyede ad ve rol rozeti. On satırdan sonrası "Tümünü göster (n)". Üye görünümünde liste
 /// türetilmiştir ve salt okunurdur; satır sonunda kişiyle sohbet açan mesaj düğmesi vardır
 /// (kendi satırı hariç).
 class TeamRosterView extends ConsumerStatefulWidget {
@@ -97,10 +95,6 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
       if (_query.isNotEmpty) _clearSearch();
       setState(() => _showAll = false);
     });
-    final caption = [
-      ?view.departmentName,
-      '${team?.people.length ?? '—'} ${l.uiUsersTeamPeople}',
-    ].join(' · ');
 
     return NzPage.feed(
       width: NzContentWidth.wide,
@@ -112,24 +106,9 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Semantics(
-                    header: true,
-                    child: Text(
-                      l.uiUsersTeamTitle,
-                      style: context.text.titleLg,
-                    ),
-                  ),
-                  const Gap(NizamioSpacing.space1 / 2),
-                  Text(
-                    caption,
-                    style: context.text.caption.copyWith(
-                      color: context.colors.textMuted,
-                    ),
-                  ),
-                ],
+              child: Semantics(
+                header: true,
+                child: Text(l.uiUsersTeamTitle, style: context.text.titleLg),
               ),
             ),
             const Gap(NizamioSpacing.space1),
@@ -224,10 +203,6 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
                     NzBanner.warning(message: l.uiUsersDirectoryPartial),
                     const Gap(NizamioSpacing.space3),
                   ],
-                  if (shown.isNotEmpty) ...[
-                    NzKicker('${shown.length} ${l.uiUsersTeamPeople}'),
-                    const Gap(NizamioSpacing.space2),
-                  ],
                   if (shown.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -299,6 +274,41 @@ class _TeamRow extends StatelessWidget {
       if (load != null) '${load.open} ${l.uiUsersTeamOpen}',
       if (load != null && load.late > 0) '${load.late} ${l.uiUsersTeamLate}',
     ].join(' · ');
+    if (message) {
+      return NzPressable(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onOpen,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: NizamioSpacing.space3,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    self ? '${person.name} (${l.uiUsersTeamYou})' : person.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.text.bodyMd,
+                  ),
+                ),
+                const Gap(NizamioSpacing.space2),
+                Flexible(child: NzBadge.neutral(label: role)),
+                if (!self) ...[
+                  const Gap(NizamioSpacing.space2),
+                  NzIconButton(
+                    icon: NzIcons.messages,
+                    semanticLabel: l.uiUsersMessage,
+                    onPressed: () => openPersonChat(context, person.accountId),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     return AdminUserListRow(
       name: person.name,
       nameSuffix: self ? '(${l.uiUsersTeamYou})' : null,

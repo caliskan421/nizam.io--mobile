@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../../core/ui/widgets/nz_glyph.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/task_detail_controller.dart';
 import '../../domain/member_flow.dart';
@@ -55,8 +56,21 @@ class DetailMemberBand extends ConsumerWidget {
         children: children,
       ),
     );
-    Widget note(String text) =>
-        Text(text, style: t.bodySm.copyWith(color: c.textMuted));
+    Widget note(String text, {NzGlyph? glyph, Color? color}) => Row(
+      children: [
+        if (glyph != null) ...[
+          NzGlyphIcon(
+            glyph,
+            size: NizamioSize.iconSizeSm,
+            color: color ?? c.textMuted,
+          ),
+          const Gap(NizamioSpacing.space2),
+        ],
+        Expanded(
+          child: Text(text, style: t.bodySm.copyWith(color: c.textMuted)),
+        ),
+      ],
+    );
     Widget action(String label, VoidCallback? onPressed) => Padding(
       padding: const EdgeInsets.only(top: NizamioSpacing.space3),
       child: NzButton.primary(
@@ -69,7 +83,7 @@ class DetailMemberBand extends ConsumerWidget {
     switch (step) {
       case MemberStep.start when startable:
         return card([
-          note(l.uiTasksBandTodo),
+          note(l.uiTasksBandTodo, glyph: NzGlyphs.notStarted),
           // Kilitliyken düğme pasif (sebep üstteki kilit bandında).
           action(l.uiTasksBandStart, blocking > 0 ? null : flows.start),
         ]);
@@ -82,6 +96,7 @@ class DetailMemberBand extends ConsumerWidget {
               l.uiTasksBandDoing,
               if (n != null) '$n ${l.uiTasksBandEvidenceTail}',
             ].join(' · '),
+            glyph: NzGlyphs.inProgress,
           ),
           action(
             l.uiTasksSubmitTitle,
@@ -93,7 +108,11 @@ class DetailMemberBand extends ConsumerWidget {
       case MemberStep.fix:
         final why = lastNote(task.noteEntries, me: catalog.me);
         return card([
-          NzStatusLabel(label: l.uiTasksBandReturned, tone: NzTone.danger),
+          note(
+            l.uiTasksBandReturned,
+            glyph: NzGlyphs.returned,
+            color: c.danger,
+          ),
           if (why != null) ...[
             const Gap(NizamioSpacing.space2),
             Text(why.text, style: t.bodySm),
@@ -108,7 +127,7 @@ class DetailMemberBand extends ConsumerWidget {
           head: l.uiTasksSubmitNoteHead,
         );
         return card([
-          NzStatusLabel(label: l.uiTasksBandReview, tone: NzTone.waiting),
+          note(l.uiTasksBandReview, glyph: NzGlyphs.review, color: c.warning),
           if (sent != null) ...[
             const Gap(NizamioSpacing.space2),
             note(sent.text),

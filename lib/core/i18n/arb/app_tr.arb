@@ -8897,7 +8897,7 @@
   "@uiUsersTeamUnavailableTitle": {
     "description": "ui.users.team_unavailable_title"
   },
-  "uiUsersTeamUnavailable": "Üyenin ekip listesini okuyabileceği bir sunucu kaynağı yok: backend bekliyor.",
+  "uiUsersTeamUnavailable": "Koordinatörlüğün sohbet grubu kurulunca ekip burada görünür.",
   "@uiUsersTeamUnavailable": {
     "description": "ui.users.team_unavailable"
   },

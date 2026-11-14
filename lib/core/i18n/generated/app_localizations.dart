@@ -13441,7 +13441,7 @@ abstract class AppLocalizations {
   /// ui.users.team_unavailable
   ///
   /// In tr, this message translates to:
-  /// **'Üyenin ekip listesini okuyabileceği bir sunucu kaynağı yok: backend bekliyor.'**
+  /// **'Koordinatörlüğün sohbet grubu kurulunca ekip burada görünür.'**
   String get uiUsersTeamUnavailable;
 
   /// ui.users.team_no_department

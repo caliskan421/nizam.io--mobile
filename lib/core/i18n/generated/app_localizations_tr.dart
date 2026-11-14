@@ -7014,7 +7014,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiUsersTeamUnavailable =>
-      'Üyenin ekip listesini okuyabileceği bir sunucu kaynağı yok: backend bekliyor.';
+      'Koordinatörlüğün sohbet grubu kurulunca ekip burada görünür.';
 
   @override
   String get uiUsersTeamNoDepartment =>

@@ -150,7 +150,7 @@
     "ui.users.team_late": "gecikmede",
     "ui.users.team_derived": "Ekip, koordinatörlüğün sohbet grubundan gösterilir; salt okunur.",
     "ui.users.team_unavailable_title": "Ekip listesi gösterilemiyor",
-    "ui.users.team_unavailable": "Üyenin ekip listesini okuyabileceği bir sunucu kaynağı yok: backend bekliyor.",
+    "ui.users.team_unavailable": "Koordinatörlüğün sohbet grubu kurulunca ekip burada görünür.",
     "ui.users.team_no_department": "Bu görünümde seçili koordinatörlük yok. Kenar çubuğundan koordinatörlük seç.",
     "ui.users.team_remove": "Ekipten çıkar",
     "ui.users.team_remove_confirm": "Hesabı silinmez; diğer koordinatörlüklerdeki yeri değişmez.",

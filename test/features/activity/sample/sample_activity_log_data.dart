@@ -21,7 +21,12 @@ ActivityEntry _e(
   target: target,
   actorId: actorId,
   actorName: actorName,
+  // Görev hedefli örnekte ("ALT-16 · …") konu görevdir; kimlik olarak örnek kod kullanılır.
+  subjectKind: _taskKey.hasMatch(target) ? 'work_item' : null,
+  subjectId: _taskKey.firstMatch(target)?.group(1),
 );
+
+final _taskKey = RegExp(r'^([A-ZÇĞİÖŞÜ]{3}-\d+)');
 
 final _entries = <ActivityEntry>[
   _e(

@@ -7390,6 +7390,12 @@ abstract class AppLocalizations {
   /// **'Görevin tarihleri değişti'**
   String get uiNotificationsTypeWorkItemDateChanged;
 
+  /// ui.notifications.type_work_task_reminder
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev için hatırlatma'**
+  String get uiNotificationsTypeWorkTaskReminder;
+
   /// ui.notifications.type_work_date_change_requested
   ///
   /// In tr, this message translates to:

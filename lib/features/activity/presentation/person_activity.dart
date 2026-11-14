@@ -51,8 +51,8 @@ class PersonActivity extends ConsumerWidget {
               ActivityEntryRow(
                 entry: e,
                 divided: i < shown.length - 1,
-                onTap: switch (taskCodeOf(e)) {
-                  final code? => () => context.appNav.openTask(code),
+                onTap: switch (taskIdOf(e)) {
+                  final id? => () => context.appNav.openTask(id),
                   null => null,
                 },
               ),

@@ -138,7 +138,10 @@ class _Row extends ConsumerWidget {
     final ctl = ref.read(notificationsControllerProvider.notifier);
     ApiError? error;
     for (final id in b.unreadIds) {
-      error ??= await ctl.markRead(id);
+      final e = await ctl.markRead(
+        id,
+      ); // her biri gönderilir; yalnız ilk hata saklanır
+      error ??= e;
     }
     if (!context.mounted) return;
     if (error != null) NzToast.error(context, error);

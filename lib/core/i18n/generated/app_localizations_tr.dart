@@ -3864,6 +3864,9 @@ class AppLocalizationsTr extends AppLocalizations {
       'Görevin tarihleri değişti';
 
   @override
+  String get uiNotificationsTypeWorkTaskReminder => 'Görev için hatırlatma';
+
+  @override
   String get uiNotificationsTypeWorkDateChangeRequested =>
       'Tarih değişikliği talep edildi';
 

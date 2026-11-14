@@ -11,7 +11,8 @@ NotificationGroup notificationGroupOf(NotificationType t) => switch (t) {
   NotificationType.workItemCreated ||
   NotificationType.workItemTransitioned ||
   NotificationType.workItemAssignmentChanged ||
-  NotificationType.workItemDateChanged => NotificationGroup.tasks,
+  NotificationType.workItemDateChanged ||
+  NotificationType.workTaskReminder => NotificationGroup.tasks,
   NotificationType.workDateChangeRequested ||
   NotificationType.workDateChangeReviewed => NotificationGroup.dateRequests,
   NotificationType.collaborationMessageSent ||

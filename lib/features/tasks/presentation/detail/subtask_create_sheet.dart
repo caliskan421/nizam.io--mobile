@@ -8,14 +8,16 @@ import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../task_widgets.dart';
 
 /// Yeni alt görev alt sayfası: başlık + kanıt dosyası zorunlu/opsiyonel radyosu (görev
-/// eklemedeki gibi; WORK-K70). Vazgeç/kapatma → null. [initial]: gönderilemeyen önceki ad.
+/// eklemedeki gibi; WORK-K70). Vazgeç/kapatma → null. [initial]/[initialEvidence]:
+/// gönderilemeyen önceki ad ve kanıt seçimi (aynı gövde yeniden gönderilir).
 Future<({String title, bool evidenceRequired})?> askNewSubtask(
   BuildContext context, {
   String initial = '',
+  bool initialEvidence = false,
 }) async {
   final l = context.l10n;
   final controller = TextEditingController(text: initial);
-  final evidence = ValueNotifier(false);
+  final evidence = ValueNotifier(initialEvidence);
   ({String title, bool evidenceRequired})? result;
   await NzBottomSheet.show<void>(
     context,

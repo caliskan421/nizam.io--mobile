@@ -571,9 +571,11 @@ class TaskDetailActions {
   /// Alt görev ekle: başlık + kanıt radyosu → oluştur. S12: sonucu bilinmeyen eklemenin adı
   /// geri gelir (aynı gövde → aynı anahtar).
   Future<void> addSubtask() async {
+    final pending = _ctl.pendingSubtask;
     final r = await askNewSubtask(
       context,
-      initial: _ctl.pendingSubtaskTitle ?? '',
+      initial: pending?.title ?? '',
+      initialEvidence: pending?.evidenceRequired ?? false,
     );
     if (r == null || !context.mounted) return;
     final done = context.l10n.uiTasksTSubAdded;

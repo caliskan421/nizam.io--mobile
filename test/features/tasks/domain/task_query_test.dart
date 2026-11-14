@@ -1,5 +1,5 @@
 // Ortak görev araması (liste, telefon ve tablet zaman çizelgesi): başlık, görev kodu ve
-// atanan adı; Türkçe küçük harf.
+// atanan adı, koordinatörlük adı; Türkçe küçük harf.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/features/tasks/domain/task_catalog.dart';
 import 'package:nizamio/features/tasks/domain/task_query.dart';
@@ -23,7 +23,14 @@ final _catalog = TaskCatalog(
   me: 'u1',
   tasks: [_task],
   people: const [],
-  coordinatorships: const [],
+  coordinatorships: const [
+    CoordinatorshipRef(
+      code: 'd1',
+      name: 'Mekanik İşler',
+      leads: [],
+      members: [],
+    ),
+  ],
   names: const [PersonName('u1', 'İpek Şahin')],
 );
 
@@ -43,6 +50,8 @@ void main() {
   });
 
   test('atanan kişi adı eşleşir (İ → i)', () => expect(_m('ipek'), isTrue));
+
+  test('koordinatörlük adı eşleşir', () => expect(_m('mekanik'), isTrue));
 
   test('eşleşmeyen sorgu görevi düşürür', () => expect(_m('boru'), isFalse));
 }

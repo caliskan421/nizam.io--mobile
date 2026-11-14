@@ -10,7 +10,7 @@ import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/activity_log.dart';
 
 /// İşlem geçmişi (`GET /v1/audit/entries`, S1; AUDIT-K10): yalnız şirket yöneticisi okur.
-/// Tek sayfa ([pageSize] kayıt, yeniden eskiye) okunur; süzgeç ve "daha fazla göster" istemcide.
+/// Sayfa sayfa ([pageSize] kayıt, yeniden eskiye, `next_cursor`) okunur; süzgeç istemcide.
 /// 403 `audit.not_authorized` → [ActivityUnavailable] (bölüm kapalı; hata sayılmaz).
 class ApiActivityLogRepository implements ActivityLogRepository {
   /// [dio]: doğrulanmış bağın güncel API istemcisi; bağ yoksa null →
@@ -31,12 +31,13 @@ class ApiActivityLogRepository implements ActivityLogRepository {
   }
 
   @override
-  Future<ActivityLog> load({String? actorAccountId}) async {
+  Future<ActivityLog> load({String? actorAccountId, String? cursor}) async {
     try {
       final r = await apiCall(
         () => _client.listAuditEntries(
           limit: pageSize,
           actorAccountId: actorAccountId,
+          cursor: cursor,
         ),
       );
       final entries = [for (final e in r.entries) _entryOf(e)];
@@ -48,6 +49,7 @@ class ApiActivityLogRepository implements ActivityLogRepository {
             if (e.actorId.isNotEmpty) e.actorId,
         }.toList(),
         coordinatorships: {for (final e in entries) ?e.departmentId}.toList(),
+        nextCursor: r.nextCursor,
       );
     } on ApiError catch (e, st) {
       // 4xx (yetkisizlik dahil) rapor üretmez; yalnız 5xx/geçersiz yanıt raporlanır.

@@ -13,6 +13,7 @@
     "ui.notifications.type_work_item_transitioned": "Görevin durumu değişti",
     "ui.notifications.type_work_item_assignment_changed": "Görevin atamaları değişti",
     "ui.notifications.type_work_item_date_changed": "Görevin tarihleri değişti",
+    "ui.notifications.type_work_task_reminder": "Görev için hatırlatma",
     "ui.notifications.type_work_date_change_requested": "Tarih değişikliği talep edildi",
     "ui.notifications.type_work_date_change_reviewed": "Tarih talebi yanıtlandı",
     "ui.notifications.type_collaboration_message_sent": "Yeni mesaj",

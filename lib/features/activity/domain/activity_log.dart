@@ -92,6 +92,7 @@ final class ActivityLog {
     required List<ActivityEntry> entries,
     required List<String> people,
     required List<String> coordinatorships,
+    this.nextCursor,
   }) : entries = List.unmodifiable(entries),
        people = List.unmodifiable(people),
        coordinatorships = List.unmodifiable(coordinatorships);
@@ -104,12 +105,25 @@ final class ActivityLog {
 
   /// Filtrede önerilen koordinatörlük kodları.
   final List<String> coordinatorships;
+
+  /// Sunucuda daha eski kayıt varsa sonraki sayfanın imleci; yoksa null.
+  final String? nextCursor;
+
+  /// [page]'i bu kümenin sonuna ekler (daha eski kayıtlar); imleç [page]'inkidir.
+  ActivityLog append(ActivityLog page) => ActivityLog(
+    today: today,
+    entries: [...entries, ...page.entries],
+    people: {...people, ...page.people}.toList(),
+    coordinatorships: {...coordinatorships, ...page.coordinatorships}.toList(),
+    nextCursor: page.nextCursor,
+  );
 }
 
 /// İşlem geçmişinin kaynağı (domain portu; gerçekleştirme `data/`, `GET /v1/audit/entries`).
 abstract interface class ActivityLogRepository {
   /// Son kayıtlar (yeniden eskiye); [actorAccountId] verilirse yalnız o kişinin işlemleri.
-  Future<ActivityLog> load({String? actorAccountId});
+  /// [cursor] önceki sayfanın [ActivityLog.nextCursor] değeridir.
+  Future<ActivityLog> load({String? actorAccountId, String? cursor});
 }
 
 /// İşlem geçmişi bu hesaba kapalı (yalnız şirket yöneticisi okur; 403 `audit.not_authorized`).

@@ -4865,6 +4865,10 @@
   "@uiNotificationsTypeWorkItemDateChanged": {
     "description": "ui.notifications.type_work_item_date_changed"
   },
+  "uiNotificationsTypeWorkTaskReminder": "Görev için hatırlatma",
+  "@uiNotificationsTypeWorkTaskReminder": {
+    "description": "ui.notifications.type_work_task_reminder"
+  },
   "uiNotificationsTypeWorkDateChangeRequested": "Tarih değişikliği talep edildi",
   "@uiNotificationsTypeWorkDateChangeRequested": {
     "description": "ui.notifications.type_work_date_change_requested"

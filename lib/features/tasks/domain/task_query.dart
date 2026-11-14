@@ -96,7 +96,7 @@ final class TaskFilter {
 }
 
 /// Görev listesi ve zaman çizelgelerinin ortak metin araması: başlık, görev kodu (iç ve
-/// kısa) ve atanan kişi adları; Türkçe küçük harf (`trLower`). Boş sorgu her görevi tutar.
+/// kısa), atanan kişi adları ve koordinatörlük adı/etiketi; Türkçe küçük harf (`trLower`). Boş sorgu her görevi tutar.
 bool taskMatchesQuery(TaskItem t, TaskCatalog c, String query) {
   final q = trLower(query.trim());
   if (q.isEmpty) return true;
@@ -106,6 +106,10 @@ bool taskMatchesQuery(TaskItem t, TaskCatalog c, String query) {
       t.code,
       t.displayCode,
       for (final a in t.assignees) c.nameOf(a) ?? '',
+      if (c.coordinatorship(t.coordinatorship) case final co?) ...[
+        co.name,
+        co.label,
+      ],
     ].join(' '),
   );
   return hay.contains(q);

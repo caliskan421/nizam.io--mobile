@@ -120,7 +120,8 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     final c = context.colors;
     final t = context.text;
     final commands = ref.read(activityQueryControllerProvider.notifier);
-    final today = ref.read(activityLogControllerProvider).value?.today;
+    final log = ref.read(activityLogControllerProvider).value;
+    final today = log?.today;
     return [
       _Controls(
         view: v,
@@ -140,8 +141,8 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
             key: ObjectKey(e),
             entry: e,
             divided: j < day.entries.length - 1,
-            onTap: switch (taskCodeOf(e)) {
-              final code? => () => context.appNav.openTask(code),
+            onTap: switch (taskIdOf(e)) {
+              final id? => () => context.appNav.openTask(id),
               null => null,
             },
           ),
@@ -153,11 +154,17 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
           onAction: commands.clearAll,
         ),
       const Gap(NizamioSpacing.space4),
-      if (v.canShowMore) ...[
+      if (v.canShowMore || (log?.nextCursor != null)) ...[
         NzButton.secondary(
           label: l.uiActivityMore,
           expand: true,
-          onPressed: commands.showMore,
+          onPressed: () async {
+            // Yerel küme bittiyse sunucudan sonraki (daha eski) sayfa okunur.
+            if (!v.canShowMore) {
+              await ref.read(activityLogControllerProvider.notifier).loadMore();
+            }
+            commands.showMore();
+          },
         ),
         const Gap(NizamioSpacing.gapMd),
       ],

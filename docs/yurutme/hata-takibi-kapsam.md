@@ -11,7 +11,7 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | denetim akışı | 1 |
 | iletilir | 15 |
 | istisna | 59 |
-| rapor | 169 |
+| rapor | 170 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -135,6 +135,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `core/stale_clock.dart` | `StaleClock.refreshIfStale` | catch | rapor | 1 |
 | `core/storage/flutter_secure_store.dart` | `FlutterSecureStore._guard` | catch | rapor | 1 |
 | `core/ui/page/nz_page.dart` | `_guardedRefresh` | catch | rapor | 1 |
+| `features/activity/application/activity_log_controller.dart` | `ActivityLogController.loadMore` | catch | rapor | 1 |
 | `features/activity/application/activity_query_controller.dart` | `activityView` | asyncError | istisna | 1 |
 | `features/activity/data/audit_api_repository.dart` | `ApiActivityLogRepository.load` | catch | rapor | 1 |
 | `features/administration/application/admin_controller.dart` | `<top>` | catch | rapor | 1 |

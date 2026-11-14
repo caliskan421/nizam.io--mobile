@@ -9,6 +9,7 @@ import '../../../core/server/write_compat.dart';
 import '../../../core/telemetry/error_report.dart';
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
+import '../domain/pending_subtask.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_permissions.dart';
 import '../domain/task_writes.dart';
@@ -215,11 +216,9 @@ class TaskDetailController extends _$TaskDetailController
     return r;
   }
 
-  /// Gönderilemeyen yeni alt görevin adı (sonuç bilinmiyor / hata; diyalog bununla açılır).
-  String? get pendingSubtaskTitle {
-    final b = state.keys.pendingBody(_subtask); // gövde: `ad|kanıt bayrağı`
-    return b?.replaceFirst(RegExp(r'\|(true|false)$'), '');
-  }
+  /// Gönderilemeyen yeni alt görev (ad + kanıt; diyalog bununla açılır → aynı gövde, aynı anahtar).
+  ({String title, bool evidenceRequired})? get pendingSubtask =>
+      parsePendingSubtask(state.keys.pendingBody(_subtask));
 
   /// Çok adımlı yazmanın başladığı bağlam: oturum nesli + seçili kapsam (program, departman).
   @override

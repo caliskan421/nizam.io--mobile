@@ -2,6 +2,7 @@
 // bileşim kökünde yönetici olmayana 403 → ActivityUnavailable, alt yazı yok.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/activity/activity.dart';
 import 'package:nizamio/features/activity/application/activity_log_controller.dart';
 import 'package:nizamio/features/activity/domain/activity_log.dart';
@@ -12,7 +13,7 @@ import '../../pilot_support.dart';
 final class _UnavailableLog implements ActivityLogRepository {
   int reads = 0;
   @override
-  Future<ActivityLog> load({String? actorAccountId}) async {
+  Future<ActivityLog> load({String? actorAccountId, String? cursor}) async {
     reads++;
     throw const ActivityUnavailable();
   }
@@ -23,7 +24,10 @@ void main() {
     final repo = _UnavailableLog();
     final c = ProviderContainer(
       retry: (_, _) => null,
-      overrides: [activityLogRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        activityLogRepositoryProvider.overrideWithValue(repo),
+        sessionGenerationProvider.overrideWith((ref) => 1),
+      ],
     );
     addTearDown(c.dispose);
     c.listen(activityLogControllerProvider, (_, _) {});

@@ -18,6 +18,7 @@ extension NotificationsTexts on AppLocalizations {
       uiNotificationsTypeWorkItemAssignmentChanged,
     NotificationType.workItemDateChanged =>
       uiNotificationsTypeWorkItemDateChanged,
+    NotificationType.workTaskReminder => uiNotificationsTypeWorkTaskReminder,
     NotificationType.workDateChangeRequested =>
       uiNotificationsTypeWorkDateChangeRequested,
     NotificationType.workDateChangeReviewed =>

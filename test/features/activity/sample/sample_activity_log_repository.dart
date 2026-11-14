@@ -6,13 +6,14 @@ part 'sample_activity_log_data.dart';
 /// testleri bileşim köküne açıkça enjekte eder ([useActivityFixture]); uygulama kullanmaz.
 final class SampleActivityLogRepository implements ActivityLogRepository {
   @override
-  Future<ActivityLog> load({String? actorAccountId}) async => ActivityLog(
-    today: _today,
-    entries: [
-      for (final e in _entries)
-        if (actorAccountId == null || e.actorId == actorAccountId) e,
-    ],
-    people: _people,
-    coordinatorships: _coordinatorships,
-  );
+  Future<ActivityLog> load({String? actorAccountId, String? cursor}) async =>
+      ActivityLog(
+        today: _today,
+        entries: [
+          for (final e in _entries)
+            if (actorAccountId == null || e.actorId == actorAccountId) e,
+        ],
+        people: _people,
+        coordinatorships: _coordinatorships,
+      );
 }

@@ -81,7 +81,7 @@ class ArchiveTaskFolderList extends ConsumerWidget {
                         l.files(t.fileCount),
                       ].join(' · '),
                       trailing: switch (catalog?.task(t.workItemId)?.status) {
-                        final s? => NzDot(color: _tone(s).color(c)),
+                        final s? => NzDot(color: statusTone(s).color(c)),
                         null => null,
                       },
                       onTap: () {
@@ -100,15 +100,6 @@ class ArchiveTaskFolderList extends ConsumerWidget {
       },
     );
   }
-
-  /// Görev durumunun nokta tonu (görev listesindeki tonlarla aynı).
-  static NzTone _tone(TaskStatus s) => switch (s) {
-    TaskStatus.inProgress => NzTone.progress,
-    TaskStatus.review => NzTone.waiting,
-    TaskStatus.returned => NzTone.danger,
-    TaskStatus.done => NzTone.done,
-    TaskStatus.todo || TaskStatus.unknown => NzTone.neutral,
-  };
 }
 
 /// Üye görünümünün "Dosyalarım" bölümü: kendi yüklediği dosyalar (`archiveAttachments`

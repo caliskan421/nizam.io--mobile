@@ -75,15 +75,6 @@ class TimelineSelectionCard extends StatelessWidget {
   final bool canRequest;
   final bool busy;
 
-  static NzTone tone(TaskStatus s) => switch (s) {
-    TaskStatus.todo => NzTone.neutral,
-    TaskStatus.inProgress => NzTone.progress,
-    TaskStatus.review => NzTone.waiting,
-    TaskStatus.returned => NzTone.danger,
-    TaskStatus.done => NzTone.done,
-    TaskStatus.unknown => NzTone.neutral,
-  };
-
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -148,7 +139,7 @@ class TimelineSelectionCard extends StatelessWidget {
                             children: [
                               NzStatusLabel(
                                 label: l.statusLabel(task.status),
-                                tone: tone(task.status),
+                                tone: statusTone(task.status),
                               ),
                               if (late.isNotEmpty)
                                 Text(

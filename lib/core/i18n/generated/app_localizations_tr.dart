@@ -5888,49 +5888,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksBandStart => 'Başla';
 
   @override
-  String get uiTasksSortStatus => 'Duruma göre';
+  String get uiTasksSortPerson => 'Kişiye göre';
 
   @override
-  String get uiTasksSortStatusShort => 'Durum';
-
-  @override
-  String get uiTasksGroupReview => 'Onay bekleyen';
-
-  @override
-  String get uiTasksGroupReviewSub => 'incele ve karar ver';
+  String get uiTasksSortPersonShort => 'Kişi';
 
   @override
   String get uiTasksGroupUnassigned => 'Atanmamış';
 
   @override
-  String get uiTasksGroupUnassignedSub => 'sorumlu bekliyor';
-
-  @override
-  String get uiTasksGroupDoing => 'Devam ediyor';
-
-  @override
-  String get uiTasksGroupReturned => 'İade edildi';
-
-  @override
-  String get uiTasksGroupReturnedSub => 'atanan yeniden gönderecek';
-
-  @override
-  String get uiTasksGroupTodo => 'Başlamadı';
-
-  @override
-  String get uiTasksGroupDone => 'Tamamlandı';
-
-  @override
   String get uiTasksGroupOther => 'Diğer';
-
-  @override
-  String get uiTasksScopeOpenLc => 'açık';
-
-  @override
-  String get uiTasksScopeOnlyHead => 'yalnız';
-
-  @override
-  String get uiTasksScopeOnlyTail => 'görevlerini görüyorsun';
 
   @override
   String get uiTasksQueueTitle => 'Onay bekleyenler';

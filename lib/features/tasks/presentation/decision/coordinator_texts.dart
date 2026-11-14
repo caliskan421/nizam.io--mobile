@@ -1,7 +1,6 @@
 import '../../../../core/i18n/generated/app_localizations.dart';
 import '../../domain/coordinator_board.dart';
 import '../../domain/task_catalog.dart';
-import '../../domain/task_query.dart';
 
 /// Koordinatör görünümünün sayılı cümleleri (UI metin kaynağı yer tutucu kabul etmez; parçalar
 /// burada birleşir).
@@ -29,41 +28,12 @@ extension CoordinatorTexts on AppLocalizations {
     return uiTasksResultOnTime;
   }
 
-  String statusGroupLabel(TaskStatusGroup g) => switch (g) {
-    TaskStatusGroup.review => uiTasksGroupReview,
-    TaskStatusGroup.unassigned => uiTasksGroupUnassigned,
-    TaskStatusGroup.inProgress => uiTasksGroupDoing,
-    TaskStatusGroup.returned => uiTasksGroupReturned,
-    TaskStatusGroup.todo => uiTasksGroupTodo,
-    TaskStatusGroup.done => uiTasksGroupDone,
-    TaskStatusGroup.other => uiTasksGroupOther,
-  };
-
-  /// Grup başlığının alt yazısı (yoksa null).
-  String? statusGroupHint(TaskStatusGroup g) => switch (g) {
-    TaskStatusGroup.review => uiTasksGroupReviewSub,
-    TaskStatusGroup.unassigned => uiTasksGroupUnassignedSub,
-    TaskStatusGroup.returned => uiTasksGroupReturnedSub,
-    _ => null,
-  };
-
   String requestStateLabel(DateRequestState s) => switch (s) {
     DateRequestState.pending => uiTasksRequestStatePending,
     DateRequestState.approved => uiTasksRequestsTabApproved,
     DateRequestState.rejected => uiTasksRequestsTabRejected,
     DateRequestState.unknown => uiTasksGroupOther,
   };
-
-  /// Kapsam satırı: "Altyapı ve tesisat · 17 görev · 8 açık · yalnız ALT görevlerini
-  /// görüyorsun".
-  String scopeLine({
-    required String department,
-    required String label,
-    required int total,
-    required int open,
-  }) =>
-      '$department · $total $uiTasksTasksLc · $open $uiTasksScopeOpenLc · '
-      '$uiTasksScopeOnlyHead $label $uiTasksScopeOnlyTail';
 
   /// "1 aktif · 3 talep".
   String requestsLine(int active, int total) =>

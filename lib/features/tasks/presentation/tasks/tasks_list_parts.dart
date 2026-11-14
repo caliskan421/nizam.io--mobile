@@ -15,7 +15,6 @@ import '../../application/tasks_list_controller.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_query.dart';
 import '../decision/coordinator_sheets.dart';
-import '../decision/coordinator_texts.dart';
 import '../task_texts.dart';
 import 'task_card_grid.dart';
 import 'task_filter_groups.dart';
@@ -115,9 +114,9 @@ List<Widget> tasksListChildren(
   if (byCoord) {
     for (var gi = 0; gi < r.groups.length; gi++) {
       final g = r.groups[gi];
-      // Durum grupları açık başlar (dokunuş kapatır); koordinatörlük grupları kapalı.
-      final status = TaskStatusGroup.fromKey(g.coordinatorship);
-      final open = status == null
+      // Kişi grupları açık başlar (dokunuş kapatır); koordinatörlük grupları kapalı.
+      final person = TaskPersonGroup.personOf(g.coordinatorship);
+      final open = person == null
           ? state.isGroupOpen(g.coordinatorship)
           : !state.isGroupOpen(g.coordinatorship);
       flush();
@@ -127,13 +126,14 @@ List<Widget> tasksListChildren(
           _GroupHead(
             group: g,
             truncated: catalog.truncated,
-            name: status != null
-                ? l.statusGroupLabel(status)
-                : catalog.coordinatorship(g.coordinatorship)?.name ??
-                      g.coordinatorship,
-            code: status != null
-                ? l.statusGroupHint(status) ?? ''
-                : _groupCode(catalog, g.coordinatorship),
+            name: switch (person) {
+              null =>
+                catalog.coordinatorship(g.coordinatorship)?.name ??
+                    g.coordinatorship,
+              '' => l.uiTasksGroupUnassigned,
+              final id => catalog.nameOf(id) ?? l.uiTasksUnknownPerson,
+            },
+            code: person != null ? '' : _groupCode(catalog, g.coordinatorship),
             open: open,
             onTap: () => ctl.toggleGroup(g.coordinatorship),
           ),

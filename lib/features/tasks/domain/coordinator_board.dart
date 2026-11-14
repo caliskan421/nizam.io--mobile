@@ -225,10 +225,10 @@ List<TaskView> taskViewsFor({required EffectiveRole? role}) => switch (role) {
   ],
 };
 
-/// Sıralama seçenekleri: koordinatörde duruma göre (varsayılan) var, koordinatörlüğe göre
+/// Sıralama seçenekleri: koordinatörde kişiye göre (varsayılan) var, koordinatörlüğe göre
 /// yok (tek koordinatörlük görünür).
 List<TaskSort> taskSortsFor({required bool coordinator}) => coordinator
-    ? const [TaskSort.status, TaskSort.created, TaskSort.due, TaskSort.start]
+    ? const [TaskSort.person, TaskSort.created, TaskSort.due, TaskSort.start]
     : const [
         TaskSort.created,
         TaskSort.due,
@@ -237,14 +237,14 @@ List<TaskSort> taskSortsFor({required bool coordinator}) => coordinator
       ];
 
 /// Geçerli sıralama: kullanıcı seçmediyse ([picked] false) rolün varsayılanı (koordinatörde
-/// duruma göre, diğerlerinde bitiş); seçtiği ölçüt rolde yoksa rolün ilk seçeneği.
+/// kişiye göre, diğerlerinde bitiş); seçtiği ölçüt rolde yoksa rolün ilk seçeneği.
 TaskSort resolveTaskSort(
   TaskSort chosen, {
   required bool picked,
   required bool coordinator,
 }) {
   final options = taskSortsFor(coordinator: coordinator);
-  if (!picked) return coordinator ? TaskSort.status : TaskSort.due;
+  if (!picked) return coordinator ? TaskSort.person : TaskSort.due;
   return options.contains(chosen) ? chosen : options.first;
 }
 

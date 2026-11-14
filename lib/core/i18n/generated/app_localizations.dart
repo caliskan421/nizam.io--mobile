@@ -11296,29 +11296,17 @@ abstract class AppLocalizations {
   /// **'Başla'**
   String get uiTasksBandStart;
 
-  /// ui.tasks.sort_status
+  /// ui.tasks.sort_person
   ///
   /// In tr, this message translates to:
-  /// **'Duruma göre'**
-  String get uiTasksSortStatus;
+  /// **'Kişiye göre'**
+  String get uiTasksSortPerson;
 
-  /// ui.tasks.sort_status_short
+  /// ui.tasks.sort_person_short
   ///
   /// In tr, this message translates to:
-  /// **'Durum'**
-  String get uiTasksSortStatusShort;
-
-  /// ui.tasks.group_review
-  ///
-  /// In tr, this message translates to:
-  /// **'Onay bekleyen'**
-  String get uiTasksGroupReview;
-
-  /// ui.tasks.group_review_sub
-  ///
-  /// In tr, this message translates to:
-  /// **'incele ve karar ver'**
-  String get uiTasksGroupReviewSub;
+  /// **'Kişi'**
+  String get uiTasksSortPersonShort;
 
   /// ui.tasks.group_unassigned
   ///
@@ -11326,65 +11314,11 @@ abstract class AppLocalizations {
   /// **'Atanmamış'**
   String get uiTasksGroupUnassigned;
 
-  /// ui.tasks.group_unassigned_sub
-  ///
-  /// In tr, this message translates to:
-  /// **'sorumlu bekliyor'**
-  String get uiTasksGroupUnassignedSub;
-
-  /// ui.tasks.group_doing
-  ///
-  /// In tr, this message translates to:
-  /// **'Devam ediyor'**
-  String get uiTasksGroupDoing;
-
-  /// ui.tasks.group_returned
-  ///
-  /// In tr, this message translates to:
-  /// **'İade edildi'**
-  String get uiTasksGroupReturned;
-
-  /// ui.tasks.group_returned_sub
-  ///
-  /// In tr, this message translates to:
-  /// **'atanan yeniden gönderecek'**
-  String get uiTasksGroupReturnedSub;
-
-  /// ui.tasks.group_todo
-  ///
-  /// In tr, this message translates to:
-  /// **'Başlamadı'**
-  String get uiTasksGroupTodo;
-
-  /// ui.tasks.group_done
-  ///
-  /// In tr, this message translates to:
-  /// **'Tamamlandı'**
-  String get uiTasksGroupDone;
-
   /// ui.tasks.group_other
   ///
   /// In tr, this message translates to:
   /// **'Diğer'**
   String get uiTasksGroupOther;
-
-  /// ui.tasks.scope_open_lc
-  ///
-  /// In tr, this message translates to:
-  /// **'açık'**
-  String get uiTasksScopeOpenLc;
-
-  /// ui.tasks.scope_only_head
-  ///
-  /// In tr, this message translates to:
-  /// **'yalnız'**
-  String get uiTasksScopeOnlyHead;
-
-  /// ui.tasks.scope_only_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'görevlerini görüyorsun'**
-  String get uiTasksScopeOnlyTail;
 
   /// ui.tasks.queue_title
   ///

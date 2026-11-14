@@ -7469,65 +7469,21 @@
   "@uiTasksBandStart": {
     "description": "ui.tasks.band_start"
   },
-  "uiTasksSortStatus": "Duruma göre",
-  "@uiTasksSortStatus": {
-    "description": "ui.tasks.sort_status"
+  "uiTasksSortPerson": "Kişiye göre",
+  "@uiTasksSortPerson": {
+    "description": "ui.tasks.sort_person"
   },
-  "uiTasksSortStatusShort": "Durum",
-  "@uiTasksSortStatusShort": {
-    "description": "ui.tasks.sort_status_short"
-  },
-  "uiTasksGroupReview": "Onay bekleyen",
-  "@uiTasksGroupReview": {
-    "description": "ui.tasks.group_review"
-  },
-  "uiTasksGroupReviewSub": "incele ve karar ver",
-  "@uiTasksGroupReviewSub": {
-    "description": "ui.tasks.group_review_sub"
+  "uiTasksSortPersonShort": "Kişi",
+  "@uiTasksSortPersonShort": {
+    "description": "ui.tasks.sort_person_short"
   },
   "uiTasksGroupUnassigned": "Atanmamış",
   "@uiTasksGroupUnassigned": {
     "description": "ui.tasks.group_unassigned"
   },
-  "uiTasksGroupUnassignedSub": "sorumlu bekliyor",
-  "@uiTasksGroupUnassignedSub": {
-    "description": "ui.tasks.group_unassigned_sub"
-  },
-  "uiTasksGroupDoing": "Devam ediyor",
-  "@uiTasksGroupDoing": {
-    "description": "ui.tasks.group_doing"
-  },
-  "uiTasksGroupReturned": "İade edildi",
-  "@uiTasksGroupReturned": {
-    "description": "ui.tasks.group_returned"
-  },
-  "uiTasksGroupReturnedSub": "atanan yeniden gönderecek",
-  "@uiTasksGroupReturnedSub": {
-    "description": "ui.tasks.group_returned_sub"
-  },
-  "uiTasksGroupTodo": "Başlamadı",
-  "@uiTasksGroupTodo": {
-    "description": "ui.tasks.group_todo"
-  },
-  "uiTasksGroupDone": "Tamamlandı",
-  "@uiTasksGroupDone": {
-    "description": "ui.tasks.group_done"
-  },
   "uiTasksGroupOther": "Diğer",
   "@uiTasksGroupOther": {
     "description": "ui.tasks.group_other"
-  },
-  "uiTasksScopeOpenLc": "açık",
-  "@uiTasksScopeOpenLc": {
-    "description": "ui.tasks.scope_open_lc"
-  },
-  "uiTasksScopeOnlyHead": "yalnız",
-  "@uiTasksScopeOnlyHead": {
-    "description": "ui.tasks.scope_only_head"
-  },
-  "uiTasksScopeOnlyTail": "görevlerini görüyorsun",
-  "@uiTasksScopeOnlyTail": {
-    "description": "ui.tasks.scope_only_tail"
   },
   "uiTasksQueueTitle": "Onay bekleyenler",
   "@uiTasksQueueTitle": {

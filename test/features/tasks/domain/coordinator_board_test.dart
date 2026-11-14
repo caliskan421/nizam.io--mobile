@@ -166,10 +166,10 @@ void main() {
         TaskView.done,
       ]);
     });
-    test('koordinatör varsayılanı duruma göre; seçilen ölçüt korunur', () {
+    test('koordinatör varsayılanı kişiye göre; seçilen ölçüt korunur', () {
       expect(
         resolveTaskSort(TaskSort.due, picked: false, coordinator: true),
-        TaskSort.status,
+        TaskSort.person,
       );
       expect(
         resolveTaskSort(TaskSort.due, picked: false, coordinator: false),
@@ -186,46 +186,52 @@ void main() {
           picked: true,
           coordinator: true,
         ),
-        TaskSort.status,
+        TaskSort.person,
       );
       expect(
-        resolveTaskSort(TaskSort.status, picked: true, coordinator: false),
+        resolveTaskSort(TaskSort.person, picked: true, coordinator: false),
         TaskSort.created,
       );
     });
-    test('duruma göre gruplu liste koordinatör sırasıyla', () {
+    test('kişiye göre gruplu liste: kişiler ada göre, atanmamış sonda; içerde durum', () {
       final catalog = TaskCatalog(
         today: DateTime(2026, 10, 21),
         me: 'me',
-        people: const [],
+        people: const [
+          Person(id: 'z', name: 'Zeynep Ak', role: PersonRole.member),
+          Person(id: 'a', name: 'Ali Avcı', role: PersonRole.member),
+        ],
         coordinatorships: const [],
         tasks: [
-          _t('done', status: TaskStatus.done),
-          _t('todo', status: TaskStatus.todo),
+          _t('z-done', status: TaskStatus.done, assignees: const ['z']),
           _t('free', status: TaskStatus.todo, assignees: const []),
-          _t('back', status: TaskStatus.returned),
-          _t('rev', status: TaskStatus.review),
+          _t('a-todo', status: TaskStatus.todo, assignees: const ['a']),
+          _t('z-rev', status: TaskStatus.review, assignees: const ['z']),
+          _t('a-rev', status: TaskStatus.review, assignees: const ['a', 'z']),
         ],
       );
       final r = queryTasks(
         catalog,
         view: TaskView.all,
-        sort: TaskSort.status,
+        sort: TaskSort.person,
         descending: false,
         filter: const TaskFilter(),
       );
       expect(
-        [for (final g in r.groups) TaskStatusGroup.fromKey(g.coordinatorship)],
+        [for (final g in r.groups) TaskPersonGroup.personOf(g.coordinatorship)],
+        ['a', 'z', ''],
+      );
+      expect(
         [
-          TaskStatusGroup.review,
-          TaskStatusGroup.unassigned,
-          TaskStatusGroup.returned,
-          TaskStatusGroup.todo,
-          TaskStatusGroup.done,
+          for (final g in r.groups) [for (final t in g.tasks) t.code],
+        ],
+        [
+          ['a-rev', 'a-todo'],
+          ['z-rev', 'z-done'],
+          ['free'],
         ],
       );
-      expect(r.counts[TaskView.unassigned], 1);
-      expect(TaskStatusGroup.fromKey('d1'), isNull);
+      expect(TaskPersonGroup.personOf('d1'), isNull);
     });
   });
 

@@ -70,7 +70,7 @@ extension TaskTexts on AppLocalizations {
     TaskSort.due => uiTasksSortDue,
     TaskSort.start => uiTasksSortStart,
     TaskSort.coordinatorship => uiTasksSortCoord,
-    TaskSort.status => uiTasksSortStatus,
+    TaskSort.person => uiTasksSortPerson,
   };
 
   String sortShort(TaskSort s) => switch (s) {
@@ -78,7 +78,7 @@ extension TaskTexts on AppLocalizations {
     TaskSort.due => uiTasksSortDueShort,
     TaskSort.start => uiTasksSortStartShort,
     TaskSort.coordinatorship => uiTasksSortCoordShort,
-    TaskSort.status => uiTasksSortStatusShort,
+    TaskSort.person => uiTasksSortPersonShort,
   };
 
   String sortDirection(TaskSort s, {required bool descending}) =>
@@ -89,7 +89,7 @@ extension TaskTexts on AppLocalizations {
         (TaskSort.due, true) => uiTasksDirDueDesc,
         (TaskSort.start, false) => uiTasksDirStartAsc,
         (TaskSort.start, true) => uiTasksDirStartDesc,
-        (TaskSort.coordinatorship || TaskSort.status, _) => '',
+        (TaskSort.coordinatorship || TaskSort.person, _) => '',
       };
 
   String tagLabel(EvidenceTag t) => switch (t) {

@@ -48,7 +48,7 @@ void main() {
     await tester.tap(find.text(l.uiCoordCreatePerson));
     await settle(tester);
     expect(find.text(l.uiTasksIvTitle), findsOneWidget);
-    expect(find.text(l.uiTasksIvEmail), findsOneWidget);
+    expect(find.text(l.uiTasksIvEmailHint), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

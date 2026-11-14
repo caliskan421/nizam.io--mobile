@@ -504,6 +504,7 @@ class _DetailNotesState extends ConsumerState<DetailNotes> {
                 child: NzTextField(
                   label: l.uiTasksNoteHint,
                   hint: l.uiTasksNoteHint,
+                  labelAbove: false,
                   controller: _controller,
                   onChanged: ctl.setNoteDraft,
                   onSubmitted: (_) => actions.sendNote(),

@@ -82,6 +82,7 @@ class _QuickTitleFieldState extends State<QuickTitleField> {
   Widget build(BuildContext context) => NzTextField(
     label: widget.label,
     hint: widget.hint,
+    labelAbove: false,
     controller: _controller,
     onChanged: widget.onChanged,
     maxLength: widget.maxLength,

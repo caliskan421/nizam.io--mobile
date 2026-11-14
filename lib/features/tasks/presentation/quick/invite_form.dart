@@ -72,6 +72,7 @@ class _InviteFormBodyState extends ConsumerState<InviteFormBody> {
         NzTextField.email(
           label: l.uiTasksIvEmail,
           hint: l.uiTasksIvEmailHint,
+          labelAbove: false,
           controller: _email,
           onChanged: ctl.setEmail,
         ),

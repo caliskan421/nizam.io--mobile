@@ -35,6 +35,7 @@ class _TableShareCandidatesState extends ConsumerState<TableShareCandidates> {
       children: [
         NzTextField(
           label: l.uiTablesPersonSearch,
+          labelAbove: false,
           onChanged: (v) => setState(() => _query = v),
         ),
         const Gap(NizamioSpacing.space3),

@@ -35,7 +35,7 @@ class NzTextField extends StatefulWidget {
     this.enabled = true,
     this.readOnly = false,
     this.size = NzSize.md,
-    this.labelAbove = false,
+    this.labelAbove = true,
     this.leading,
     this.trailing,
     this.textInputAction = TextInputAction.next,
@@ -61,7 +61,7 @@ class NzTextField extends StatefulWidget {
     this.enabled = true,
     this.readOnly = false,
     this.size = NzSize.md,
-    this.labelAbove = false,
+    this.labelAbove = true,
     this.leading,
     this.trailing,
     this.textInputAction = TextInputAction.next,
@@ -86,7 +86,7 @@ class NzTextField extends StatefulWidget {
     this.enabled = true,
     this.readOnly = false,
     this.size = NzSize.md,
-    this.labelAbove = false,
+    this.labelAbove = true,
     this.leading,
     this.trailing,
     this.focusNode,
@@ -113,7 +113,7 @@ class NzTextField extends StatefulWidget {
     this.enabled = true,
     this.readOnly = false,
     this.size = NzSize.md,
-    this.labelAbove = false,
+    this.labelAbove = true,
     this.leading,
     this.trailing,
     this.textInputAction = TextInputAction.next,
@@ -141,8 +141,10 @@ class NzTextField extends StatefulWidget {
   final bool readOnly;
   final NzSize size;
 
-  /// true → etiket kutunun içinde yüzmez, üstünde durur (prototip `.t-label`: 13/600, altında
-  /// 8 boşluk; giriş ekranı). Okuyucuda etiket alanla birleşir.
+  /// true (varsayılan) → etiket alanın üstünde (prototip `rp-field` / `.t-label`: 13/600,
+  /// altında 8 boşluk); okuyucuda etiket alanla birleşir. false → etiket görünmez, okuyucu
+  /// etiketidir; kutuda [hint] (yoksa etiket) yer tutucu olur (prototip hızlı formlar, arama,
+  /// satır içi girdiler). Material'in kutu içinde yüzen etiketi kullanılmaz.
   final bool labelAbove;
 
   /// Girdinin başında (ör. simge).
@@ -206,8 +208,8 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
       maxLines: multiline ? 6 : 1,
       maxLength: widget.maxLength,
       decoration: InputDecoration(
-        labelText: widget.labelAbove ? null : widget.label,
-        hintText: widget.hint,
+        // Yüzen (Material) etiket yok: etiket ya üstte ya yer tutucu (prototip).
+        hintText: widget.labelAbove ? widget.hint : widget.hint ?? widget.label,
         helperText: widget.helper,
         helperMaxLines: 4,
         errorMaxLines: 4,
@@ -234,7 +236,7 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
     );
     return widget.labelAbove
         ? NzFieldLabelAbove(label: widget.label, child: field)
-        : field;
+        : Semantics(label: widget.label, child: field);
   }
 }
 

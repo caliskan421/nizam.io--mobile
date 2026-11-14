@@ -87,6 +87,7 @@ class _SharePickerState extends ConsumerState<_SharePicker> {
       children: [
         NzTextField(
           label: l.uiMessagesComposeShareSearch,
+          labelAbove: false,
           controller: _search,
           onChanged: (_) => setState(() {
             _previous.clear();

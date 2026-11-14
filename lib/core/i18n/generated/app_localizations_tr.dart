@@ -2938,19 +2938,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeMemberTasksEmpty => 'Açık görevin yok.';
 
   @override
-  String get uiHomeMemberStatTotal => 'toplam';
-
-  @override
-  String get uiHomeMemberStatLate => 'geciken';
-
-  @override
-  String get uiHomeMemberStatReview => 'onayda';
-
-  @override
-  String get uiHomeMemberStatDone => 'biten';
-
-  @override
   String get uiHomeMemberUpcomingTitle => 'Yaklaşanlar';
+
+  @override
+  String get uiHomeMemberUpcomingMeetings => 'Toplantılar';
+
+  @override
+  String get uiHomeMemberUpcomingDues => 'Son tarihler';
 
   @override
   String get uiHomeMemberUpcomingEmpty => 'Önümüzdeki 7 günde bir şey yok.';

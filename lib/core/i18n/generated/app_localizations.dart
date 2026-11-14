@@ -5614,35 +5614,23 @@ abstract class AppLocalizations {
   /// **'Açık görevin yok.'**
   String get uiHomeMemberTasksEmpty;
 
-  /// ui.home.member_stat_total
-  ///
-  /// In tr, this message translates to:
-  /// **'toplam'**
-  String get uiHomeMemberStatTotal;
-
-  /// ui.home.member_stat_late
-  ///
-  /// In tr, this message translates to:
-  /// **'geciken'**
-  String get uiHomeMemberStatLate;
-
-  /// ui.home.member_stat_review
-  ///
-  /// In tr, this message translates to:
-  /// **'onayda'**
-  String get uiHomeMemberStatReview;
-
-  /// ui.home.member_stat_done
-  ///
-  /// In tr, this message translates to:
-  /// **'biten'**
-  String get uiHomeMemberStatDone;
-
   /// ui.home.member_upcoming_title
   ///
   /// In tr, this message translates to:
   /// **'Yaklaşanlar'**
   String get uiHomeMemberUpcomingTitle;
+
+  /// ui.home.member_upcoming_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantılar'**
+  String get uiHomeMemberUpcomingMeetings;
+
+  /// ui.home.member_upcoming_dues
+  ///
+  /// In tr, this message translates to:
+  /// **'Son tarihler'**
+  String get uiHomeMemberUpcomingDues;
 
   /// ui.home.member_upcoming_empty
   ///

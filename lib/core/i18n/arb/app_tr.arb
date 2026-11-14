@@ -3681,25 +3681,17 @@
   "@uiHomeMemberTasksEmpty": {
     "description": "ui.home.member_tasks_empty"
   },
-  "uiHomeMemberStatTotal": "toplam",
-  "@uiHomeMemberStatTotal": {
-    "description": "ui.home.member_stat_total"
-  },
-  "uiHomeMemberStatLate": "geciken",
-  "@uiHomeMemberStatLate": {
-    "description": "ui.home.member_stat_late"
-  },
-  "uiHomeMemberStatReview": "onayda",
-  "@uiHomeMemberStatReview": {
-    "description": "ui.home.member_stat_review"
-  },
-  "uiHomeMemberStatDone": "biten",
-  "@uiHomeMemberStatDone": {
-    "description": "ui.home.member_stat_done"
-  },
   "uiHomeMemberUpcomingTitle": "Yaklaşanlar",
   "@uiHomeMemberUpcomingTitle": {
     "description": "ui.home.member_upcoming_title"
+  },
+  "uiHomeMemberUpcomingMeetings": "Toplantılar",
+  "@uiHomeMemberUpcomingMeetings": {
+    "description": "ui.home.member_upcoming_meetings"
+  },
+  "uiHomeMemberUpcomingDues": "Son tarihler",
+  "@uiHomeMemberUpcomingDues": {
+    "description": "ui.home.member_upcoming_dues"
   },
   "uiHomeMemberUpcomingEmpty": "Önümüzdeki 7 günde bir şey yok.",
   "@uiHomeMemberUpcomingEmpty": {

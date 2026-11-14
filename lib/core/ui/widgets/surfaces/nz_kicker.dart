@@ -55,16 +55,21 @@ class NzKicker extends StatelessWidget {
       textBaseline: TextBaseline.alphabetic,
       children: [
         Flexible(child: kicker),
-        if (trailing != null) ...[
-          const Gap(NizamioSpacing.space3),
+        // Gap değil Padding: taban çizgisi hizalı satır `IntrinsicHeight` içinde ölçülürken
+        // Gap kuru taban çizgisini hesaplayamaz.
+        if (trailing != null)
           Flexible(
-            child: Text(
-              trailing,
-              textAlign: TextAlign.end,
-              style: context.text.caption.copyWith(color: c.textMuted),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.only(
+                start: NizamioSpacing.space3,
+              ),
+              child: Text(
+                trailing,
+                textAlign: TextAlign.end,
+                style: context.text.caption.copyWith(color: c.textMuted),
+              ),
             ),
           ),
-        ],
       ],
     );
   }

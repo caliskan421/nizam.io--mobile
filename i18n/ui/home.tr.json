@@ -146,11 +146,9 @@
     "ui.home.member_fix": "Düzelt",
     "ui.home.member_tasks_title": "Görevlerim",
     "ui.home.member_tasks_empty": "Açık görevin yok.",
-    "ui.home.member_stat_total": "toplam",
-    "ui.home.member_stat_late": "geciken",
-    "ui.home.member_stat_review": "onayda",
-    "ui.home.member_stat_done": "biten",
     "ui.home.member_upcoming_title": "Yaklaşanlar",
+    "ui.home.member_upcoming_meetings": "Toplantılar",
+    "ui.home.member_upcoming_dues": "Son tarihler",
     "ui.home.member_upcoming_empty": "Önümüzdeki 7 günde bir şey yok.",
     "ui.home.member_tag_due": "Son tarih"
   }

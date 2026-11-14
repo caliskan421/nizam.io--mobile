@@ -9,10 +9,12 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
+import '../../../../core/ui/widgets/nz_glyph.dart';
 import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
 import 'home_coordinator_sections.dart';
+import 'home_texts.dart';
 
 /// Odak kartı "sıradaki işin" (tasarım §4.1-2): kicker + koordinatörlük kodu, başlık (dokununca
 /// ayrıntı), bitiş rozeti + "Bitiş 15 Kas · Yüksek öncelik", alt görev ilerlemesi; eylemler
@@ -82,7 +84,8 @@ class HomeMemberFocusCard extends ConsumerWidget {
         children: [
           kicker,
           const Gap(NizamioSpacing.space2),
-          InkWell(
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: open,
             child: Text(
               task.title,
@@ -220,46 +223,72 @@ class HomeMemberReturnedCard extends ConsumerWidget {
   }
 }
 
-/// Görevlerim istatistik şeridi: toplam · geciken · onayda · biten; her biri görev listesini
-/// ilgili görünümle açar.
-class HomeMemberStats extends StatelessWidget {
-  const HomeMemberStats({
-    super.key,
-    required this.stats,
-    this.truncated = false,
-  });
-
-  final CoordinatorSummary stats;
-  final bool truncated;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final nav = context.appNav;
-    final more = truncated ? '≥' : '';
-    Widget chip(int n, String label, Color color, NzTaskView view) => NzDotChip(
-      color: color,
-      count: '$more$n',
-      label: label,
-      onTap: () => nav.openTasks(view: view),
-    );
-    return Wrap(
-      spacing: NizamioSpacing.space2,
-      runSpacing: NizamioSpacing.space2,
-      children: [
-        chip(stats.total, l.uiHomeMemberStatTotal, c.textMuted, NzTaskView.all),
-        chip(stats.late, l.uiHomeMemberStatLate, c.danger, NzTaskView.late),
-        chip(
-          stats.review,
-          l.uiHomeMemberStatReview,
-          c.warning,
-          NzTaskView.review,
-        ),
-        chip(stats.done, l.uiHomeMemberStatDone, c.taskDone, NzTaskView.done),
-      ],
-    );
-  }
+/// Üye özet kutuları (yönetici/koordinatör ana sayfasının dili): gecikme, onayda, iade,
+/// tamamlanma (yüzde); her biri görev listesini ilgili görünümle açar.
+List<Widget> homeMemberKpis(
+  BuildContext context, {
+  required CoordinatorSummary stats,
+  bool truncated = false,
+}) {
+  final l = context.l10n;
+  final c = context.colors;
+  final nav = context.appNav;
+  final more = truncated ? '≥' : '';
+  final open = stats.total - stats.done;
+  double ratio(int a, int b) => b == 0 ? 0 : a / b;
+  Widget tile(
+    NzGlyph glyph,
+    Color tone,
+    String label,
+    String value,
+    double progress,
+    NzTaskView view, {
+    bool danger = false,
+  }) => NzKpiTile(
+    glyph: glyph,
+    tone: tone,
+    label: label,
+    value: value,
+    valueColor: danger ? c.danger : null,
+    progress: progress,
+    onTap: () => nav.openTasks(view: view),
+    semanticLabel: '$label: $value. ${l.uiHomeOpenList}',
+  );
+  return [
+    tile(
+      NzGlyphs.late,
+      c.danger,
+      l.uiHomeKpiLate,
+      '$more${stats.late}',
+      ratio(stats.late, open),
+      NzTaskView.late,
+      danger: true,
+    ),
+    tile(
+      NzGlyphs.review,
+      c.warning,
+      l.uiHomeKpiReview,
+      '$more${stats.review}',
+      ratio(stats.review, open),
+      NzTaskView.review,
+    ),
+    tile(
+      NzGlyphs.returned,
+      c.danger,
+      l.uiTasksViewReturned,
+      '$more${stats.returned}',
+      ratio(stats.returned, open),
+      NzTaskView.returned,
+    ),
+    tile(
+      NzGlyphs.done,
+      c.taskDone,
+      l.uiHomeKpiDone,
+      l.percent(ratio(stats.done, stats.total)),
+      ratio(stats.done, stats.total),
+      NzTaskView.done,
+    ),
+  ];
 }
 
 /// Görevlerim satırı: durum noktası, başlık, "KOD · durum · Bitiş 15 Kas", sağda gecikme.
@@ -383,39 +412,45 @@ class _Row extends StatelessWidget {
     final trailing = this.trailing;
     return Semantics(
       button: true,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(NizamioSpacing.space4),
-          child: Row(
-            children: [
-              leading,
-              const Gap(NizamioSpacing.gapMd),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.bodyLg.copyWith(fontWeight: FontWeight.w500),
-                    ),
-                    const Gap(NizamioSpacing.space1),
-                    Text(
-                      meta,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.bodySm.copyWith(color: metaColor ?? c.textMuted),
-                    ),
-                  ],
+      // Basma vurgusu yok; geri bildirim küçülmedir.
+      child: NzPressable.card(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(NizamioSpacing.space4),
+            child: Row(
+              children: [
+                leading,
+                const Gap(NizamioSpacing.gapMd),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: t.bodyLg.copyWith(fontWeight: FontWeight.w500),
+                      ),
+                      const Gap(NizamioSpacing.space1),
+                      Text(
+                        meta,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: t.bodySm.copyWith(
+                          color: metaColor ?? c.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              if (trailing != null) ...[
-                const Gap(NizamioSpacing.space2),
-                trailing,
+                if (trailing != null) ...[
+                  const Gap(NizamioSpacing.space2),
+                  trailing,
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

@@ -51,7 +51,7 @@ final class ChatsControllerProvider
   ChatsController create() => ChatsController();
 }
 
-String _$chatsControllerHash() => r'c0a5a0ba54da8c504352e24a7ad22072e39c224e';
+String _$chatsControllerHash() => r'a686f9683cb3b0465131d1d76f80547a62748b31';
 
 /// Mesajlar kutusu (seçili programın sohbetleri). Hesap ya da program değişince yeniden okunur.
 /// Akış açılınca (yeniden bağlanma protokolü adım 2) hemen, olaylarda en az 1 sn birleştirilip

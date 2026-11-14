@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket v0.19.0-api (da5e1f98b4534b7ca6d8f298ef21308d39956aa9) — docs/api/error-codes.json
+// Kaynak: nizam.io--backend etiket v0.20.0-api (c577bdf33942036168ff5d0c3e025bbb35310f12) — docs/api/error-codes.json
 
 import '../api_meta.dart';
 
@@ -464,7 +464,7 @@ const errorCatalog = <String, ErrorCatalogEntry>{
   ),
   'organization.department_in_use': ErrorCatalogEntry(
     statuses: [409],
-    fields: [],
+    fields: ['organization.department_usage'],
     messageKey: 'errors.organization.department_in_use',
   ),
   'organization.department_not_found': ErrorCatalogEntry(
@@ -476,6 +476,11 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [422],
     fields: [],
     messageKey: 'errors.organization.department_not_linked',
+  ),
+  'organization.department_usage': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.organization.department_usage',
   ),
   'organization.existing_department': ErrorCatalogEntry(
     statuses: [409],

@@ -433,6 +433,39 @@ class _OrganizationClient implements OrganizationClient {
   }
 
   @override
+  Future<DepartmentDeleteImpact> departmentDeleteImpact({
+    required String id,
+    Map<String, dynamic>? extras =
+        OrganizationClient.departmentDeleteImpactOpenapiExtras,
+  }) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras ?? <String, dynamic>{});
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<DepartmentDeleteImpact>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/v1/departments/${id}/delete-impact',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late DepartmentDeleteImpact _value;
+    try {
+      _value = DepartmentDeleteImpact.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<TaskSummary> taskSummary({
     required String id,
     Map<String, dynamic>? extras = OrganizationClient.taskSummaryOpenapiExtras,

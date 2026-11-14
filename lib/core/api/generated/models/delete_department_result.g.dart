@@ -11,6 +11,7 @@ _DeleteDepartmentResult _$DeleteDepartmentResultFromJson(
 ) => _DeleteDepartmentResult(
   departmentId: json['department_id'] as String,
   deleted: json['deleted'] as bool,
+  workItemsDeleted: (json['work_items_deleted'] as num).toInt(),
 );
 
 Map<String, dynamic> _$DeleteDepartmentResultToJson(
@@ -18,4 +19,5 @@ Map<String, dynamic> _$DeleteDepartmentResultToJson(
 ) => <String, dynamic>{
   'department_id': instance.departmentId,
   'deleted': instance.deleted,
+  'work_items_deleted': instance.workItemsDeleted,
 };

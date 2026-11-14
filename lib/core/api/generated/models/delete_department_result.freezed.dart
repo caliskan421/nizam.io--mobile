@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeleteDepartmentResult {
 
-@JsonKey(name: 'department_id') String get departmentId; bool get deleted;
+@JsonKey(name: 'department_id') String get departmentId;/// Bu çağrıda departman silindi mi; `false` = zaten silinmişti (departman kaydı değişmez).
+ bool get deleted;/// Bu çağrıda departmanla birlikte "Silinenler"e taşınan görev sayısı (bütün programlar; ADR-0043). Zaten silinmiş departmanda ikinci çağrı canlı kalmış görevleri taşır, yoksa 0.
+@JsonKey(name: 'work_items_deleted') int get workItemsDeleted;
 /// Create a copy of DeleteDepartmentResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +32,20 @@ $DeleteDepartmentResultCopyWith<DeleteDepartmentResult> get copyWith => _$Delete
 @override
 bool operator ==(Object other) {
   final _this = this as DeleteDepartmentResult;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeleteDepartmentResult&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.deleted, _this.deleted) || other.deleted == _this.deleted));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeleteDepartmentResult&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.deleted, _this.deleted) || other.deleted == _this.deleted)&&(identical(other.workItemsDeleted, _this.workItemsDeleted) || other.workItemsDeleted == _this.workItemsDeleted));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as DeleteDepartmentResult;
-  return Object.hash(runtimeType,_this.departmentId,_this.deleted);
+  return Object.hash(runtimeType,_this.departmentId,_this.deleted,_this.workItemsDeleted);
 }
 
 @override
 String toString() {
   final _this = this as DeleteDepartmentResult;
-  return 'DeleteDepartmentResult(departmentId: ${_this.departmentId}, deleted: ${_this.deleted})';
+  return 'DeleteDepartmentResult(departmentId: ${_this.departmentId}, deleted: ${_this.deleted}, workItemsDeleted: ${_this.workItemsDeleted})';
 }
 
 
@@ -54,7 +56,7 @@ abstract mixin class $DeleteDepartmentResultCopyWith<$Res>  {
   factory $DeleteDepartmentResultCopyWith(DeleteDepartmentResult value, $Res Function(DeleteDepartmentResult) _then) = _$DeleteDepartmentResultCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'department_id') String departmentId, bool deleted
+@JsonKey(name: 'department_id') String departmentId, bool deleted,@JsonKey(name: 'work_items_deleted') int workItemsDeleted
 });
 
 
@@ -71,11 +73,12 @@ class _$DeleteDepartmentResultCopyWithImpl<$Res>
 
 /// Create a copy of DeleteDepartmentResult
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? departmentId = null,Object? deleted = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? departmentId = null,Object? deleted = null,Object? workItemsDeleted = null,}) {
   return _then(DeleteDepartmentResult(
 departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
 as String,deleted: null == deleted ? _self.deleted : deleted // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,workItemsDeleted: null == workItemsDeleted ? _self.workItemsDeleted : workItemsDeleted // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -160,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId,  bool deleted)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId,  bool deleted, @JsonKey(name: 'work_items_deleted')  int workItemsDeleted)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DeleteDepartmentResult() when $default != null:
-return $default(_that.departmentId,_that.deleted);case _:
+return $default(_that.departmentId,_that.deleted,_that.workItemsDeleted);case _:
   return orElse();
 
 }
@@ -181,10 +184,10 @@ return $default(_that.departmentId,_that.deleted);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId,  bool deleted)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'department_id')  String departmentId,  bool deleted, @JsonKey(name: 'work_items_deleted')  int workItemsDeleted)  $default,) {final _that = this;
 switch (_that) {
 case _DeleteDepartmentResult():
-return $default(_that.departmentId,_that.deleted);case _:
+return $default(_that.departmentId,_that.deleted,_that.workItemsDeleted);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +204,10 @@ return $default(_that.departmentId,_that.deleted);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'department_id')  String departmentId,  bool deleted)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'department_id')  String departmentId,  bool deleted, @JsonKey(name: 'work_items_deleted')  int workItemsDeleted)?  $default,) {final _that = this;
 switch (_that) {
 case _DeleteDepartmentResult() when $default != null:
-return $default(_that.departmentId,_that.deleted);case _:
+return $default(_that.departmentId,_that.deleted,_that.workItemsDeleted);case _:
   return null;
 
 }
@@ -216,11 +219,14 @@ return $default(_that.departmentId,_that.deleted);case _:
 @JsonSerializable()
 
 class _DeleteDepartmentResult implements DeleteDepartmentResult {
-  const _DeleteDepartmentResult({@JsonKey(name: 'department_id') required this.departmentId, required this.deleted});
+  const _DeleteDepartmentResult({@JsonKey(name: 'department_id') required this.departmentId, required this.deleted, @JsonKey(name: 'work_items_deleted') required this.workItemsDeleted});
   factory _DeleteDepartmentResult.fromJson(Map<String, dynamic> json) => _$DeleteDepartmentResultFromJson(json);
 
 @override@JsonKey(name: 'department_id') final  String departmentId;
+/// Bu çağrıda departman silindi mi; `false` = zaten silinmişti (departman kaydı değişmez).
 @override final  bool deleted;
+/// Bu çağrıda departmanla birlikte "Silinenler"e taşınan görev sayısı (bütün programlar; ADR-0043). Zaten silinmiş departmanda ikinci çağrı canlı kalmış görevleri taşır, yoksa 0.
+@override@JsonKey(name: 'work_items_deleted') final  int workItemsDeleted;
 
 /// Create a copy of DeleteDepartmentResult
 /// with the given fields replaced by the non-null parameter values.
@@ -235,18 +241,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeleteDepartmentResult&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.deleted, deleted) || other.deleted == deleted));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeleteDepartmentResult&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.deleted, deleted) || other.deleted == deleted)&&(identical(other.workItemsDeleted, workItemsDeleted) || other.workItemsDeleted == workItemsDeleted));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,departmentId,deleted);
+    return Object.hash(runtimeType,departmentId,deleted,workItemsDeleted);
 }
 
 @override
 String toString() {
-    return 'DeleteDepartmentResult(departmentId: $departmentId, deleted: $deleted)';
+    return 'DeleteDepartmentResult(departmentId: $departmentId, deleted: $deleted, workItemsDeleted: $workItemsDeleted)';
 }
 
 
@@ -257,7 +263,7 @@ abstract mixin class _$DeleteDepartmentResultCopyWith<$Res> implements $DeleteDe
   factory _$DeleteDepartmentResultCopyWith(_DeleteDepartmentResult value, $Res Function(_DeleteDepartmentResult) _then) = __$DeleteDepartmentResultCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'department_id') String departmentId, bool deleted
+@JsonKey(name: 'department_id') String departmentId, bool deleted,@JsonKey(name: 'work_items_deleted') int workItemsDeleted
 });
 
 
@@ -274,11 +280,12 @@ class __$DeleteDepartmentResultCopyWithImpl<$Res>
 
 /// Create a copy of DeleteDepartmentResult
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? departmentId = null,Object? deleted = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? departmentId = null,Object? deleted = null,Object? workItemsDeleted = null,}) {
   return _then(_DeleteDepartmentResult(
 departmentId: null == departmentId ? _self.departmentId : departmentId // ignore: cast_nullable_to_non_nullable
 as String,deleted: null == deleted ? _self.deleted : deleted // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,workItemsDeleted: null == workItemsDeleted ? _self.workItemsDeleted : workItemsDeleted // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

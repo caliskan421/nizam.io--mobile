@@ -1,6 +1,6 @@
 {
   "@@locale": "tr",
-  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit a8e79dd1ae07e19a32d81b69a5cea60546d61039 src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.19.0-api (da5e1f98b4534b7ca6d8f298ef21308d39956aa9); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
+  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit a8e79dd1ae07e19a32d81b69a5cea60546d61039 src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.20.0-api (c577bdf33942036168ff5d0c3e025bbb35310f12); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
   "errAssistantBusy": "Asistan şu anda meşgul; biraz sonra yeniden deneyin.",
   "@errAssistantBusy": {
     "description": "assistant.busy"
@@ -420,6 +420,10 @@
   "errOrganizationDepartmentNotLinked": "Departman bu programa bağlı değil.",
   "@errOrganizationDepartmentNotLinked": {
     "description": "organization.department_not_linked"
+  },
+  "errOrganizationDepartmentUsage": "Departman başka kayıtlarda kullanılıyor.",
+  "@errOrganizationDepartmentUsage": {
+    "description": "organization.department_usage"
   },
   "errOrganizationExistingDepartment": "Bu adda bir departman zaten var.",
   "@errOrganizationExistingDepartment": {

@@ -177,4 +177,25 @@ void main() {
       hasLength(TaskCatalogController.maxDepartmentProbes),
     );
   });
+
+  test(
+    '403 work.not_assigned kesin sonuçtur; diğer 403 hata durumudur',
+    () async {
+      final (c, details) = _open(2);
+      await c.read(taskCatalogControllerProvider.future);
+      details.outcomes.add(('d1', ApiError('work.not_assigned', status: 403)));
+      expect(await _detailsError(c, 'w9'), isNull);
+      c.invalidate(taskDetailsProvider('w9'));
+      expect(await _detailsError(c, 'w9'), isNull);
+      expect(details.probed, ['d1']);
+
+      details.outcomes.add((
+        'd1',
+        ApiError('work.not_authorized', status: 403),
+      ));
+      final e = await _detailsError(c, 'w8');
+      expect((e as ApiError?)?.code, 'work.not_authorized');
+      expect(details.probed, ['d1', 'd1']);
+    },
+  );
 }

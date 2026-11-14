@@ -45,6 +45,7 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
       _owner = owner;
       _touched.clear();
       _clearLookups();
+      _lookupInFlight.clear();
       _upserted.clear();
       _generation++;
       _namesAt = 0;
@@ -162,7 +163,7 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
   ///   satırları, sonra katalog departmanları; en çok [maxDepartmentProbes]) sırayla denenir.
   ///
   /// Sonuçlar: bulunursa kataloğa eklenir. KESİN "bulunamadı" (bütün adaylarda 404 ya da
-  /// 403 görünmüyor) kimlik başına kaydedilir ve tekrar aranmaz (katalog yenilemesi ve sahip
+  /// 403 `work.not_assigned`) kimlik başına kaydedilir ve tekrar aranmaz (katalog yenilemesi ve sahip
   /// değişimi kaydı siler). Aday sınırı dolarsa `client.task_lookup_limit` FIRLAR (kesin).
   /// Geçici hata (ağ, 5xx, 429) FIRLAR ve kaydedilmez: ayrıntı yenilemesi aramayı tekrarlar;
   /// 429'da `Retry-After` dolmadan istek atılmaz (aynı hata yeniden fırlar). Süzgeçli okumayla
@@ -177,10 +178,17 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
     if (held != null && held.$1.isAfter(DateTime.now())) {
       return Future.error(held.$2);
     }
-    // Gövde bloklu: `remove` geleceğin kendisini döndürür; whenComplete onu beklerse kilitlenir.
-    return _lookupInFlight[code] ??= _resolve(code).whenComplete(() {
-      _lookupInFlight.remove(code);
+    if (_lookupInFlight[code] case final running?) return running;
+    // Uçuştaki kayıt sahip değişiminde silinir ([build]); eski aramanın tamamlanması yalnız
+    // KENDİ kaydını siler (gelecek eşitliği), yeni sahibin aramasını değil. Gövde bloklu:
+    // `remove` geleceğin kendisini döndürür; whenComplete onu beklerse kilitlenir.
+    late final Future<void> lookup;
+    lookup = _resolve(code).whenComplete(() {
+      if (identical(_lookupInFlight[code], lookup)) {
+        _lookupInFlight.remove(code);
+      }
     });
+    return _lookupInFlight[code] = lookup;
   }
 
   /// Kesik katalogda görev başına denenecek en çok departman (her biri bir `getWorkItem`).
@@ -244,12 +252,13 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
         reportUnexpected(e, st, source: ReportSource.tasks);
         if (!ref.mounted || _owner != owner) return;
         if (e.status == 404) continue;
-        if (e.status == 403) {
-          // Görev bu departmanda var ama okuyana görünmüyor: kesin sonuç.
+        if (e.code == 'work.not_assigned') {
+          // Görev bu departmanda var ama okuyana atanmamış: kesin sonuç. Diğer 403'ler
+          // (yetki, üyelik, parola değişimi) genel hatadır: aşağıda fırlar.
           _lookupDone[code] = (limited: false);
           return;
         }
-        rethrow; // geçici: çağıran raporlar ve fırlatır
+        rethrow; // geçici ya da yetki: çağıran raporlar ve fırlatır
       }
       if (!ref.mounted || _owner != owner) return;
       upsert([item], since: since);

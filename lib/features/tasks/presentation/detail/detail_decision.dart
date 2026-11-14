@@ -15,10 +15,12 @@ import '../../application/task_lifecycle_controller.dart';
 import '../../domain/coordinator_board.dart';
 import '../../domain/task_catalog.dart';
 import '../decision/task_decision_flows.dart';
+import 'detail_member_band.dart';
 
 /// Görev ayrıntısının koordinatör bölümü: onay bekleyen görevde karar bloğu (prototip `kd`:
 /// özet, kanıt uyarısı, İade et / Onayla) ve bağımlılık kilit bandı (ön görev bitmeden
-/// başlatılamaz). Karar yetkisi yoksa ve kilit yoksa boş.
+/// başlatılamaz). Üye görünümünde karar yerine üye bandı ([DetailMemberBand]). Karar yetkisi,
+/// üye bandı ve kilit yoksa boş.
 class DetailDecisionSection extends ConsumerWidget {
   const DetailDecisionSection({
     super.key,
@@ -33,7 +35,7 @@ class DetailDecisionSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     // Etkin görünüm değişince yetkiler yeniden okunur.
-    ref.watch(effectiveAccessProvider);
+    final view = ref.watch(effectiveAccessProvider);
     final perms = ref
         .read(taskDetailControllerProvider(task.code).notifier)
         .permissions;
@@ -48,7 +50,8 @@ class DetailDecisionSection extends ConsumerWidget {
             return null;
           });
     final decide = perms.canDecide(task);
-    if (!decide && blocking.isEmpty) return const SizedBox.shrink();
+    final member = !decide && view.isMemberView && !task.isDone;
+    if (!decide && !member && blocking.isEmpty) return const SizedBox.shrink();
     final flows = TaskDecisionFlows(context, ref, task.code);
     // Kanıt sayısı yalnız ayrıntı okunduysa bilinir.
     final files = details.hasValue ? task.fileEntries.length : null;
@@ -59,6 +62,16 @@ class DetailDecisionSection extends ConsumerWidget {
         if (blocking.isNotEmpty) ...[
           const Gap(NizamioSpacing.space4),
           _LockBand(titles: [for (final t in blocking) t.title]),
+        ],
+        if (member) ...[
+          const Gap(NizamioSpacing.space4),
+          DetailMemberBand(
+            task: task,
+            catalog: catalog,
+            permissions: perms,
+            blocking: blocking.length,
+            files: files,
+          ),
         ],
         if (decide) ...[
           const Gap(NizamioSpacing.space4),

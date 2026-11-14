@@ -68,6 +68,26 @@ mixin _DecisionFlow on _$TaskDetailController {
     return r.ok ? _decisionNote(t, asNote(reason.trim())) : r;
   }
 
+  /// Onaya sun (üye; "Tamamlandı bildir"): `devam_ediyor → onaya_sunuldu`, aktörün ucu ve
+  /// matrisiyle ([TaskPermissions.statusEndpoint]). [note] verilirse geçişten sonra not olarak
+  /// yazılır. Kanıt şartı sunucuda (409 `work.completion_evidence_required`); istemci ön
+  /// denetimi akıştadır (`evidenceMissing`).
+  Future<WriteOutcome> submitForReview({String? note}) async {
+    final t = _task;
+    final via = permissions.statusEndpoint;
+    if (t == null ||
+        via == null ||
+        t.status != TaskStatus.inProgress ||
+        !permissions.statusTargets(t.status).contains(TaskStatus.review)) {
+      return WriteOutcome.invalid;
+    }
+    final r = await _write(
+      () => _writes.changeStatus(t, via, TaskStatus.review),
+      list: false,
+    );
+    return r.ok ? _decisionNote(t, note) : r;
+  }
+
   Future<WriteOutcome> _decisionNote(TaskItem t, String? note) async {
     final text = note?.trim() ?? '';
     if (text.isEmpty || !permissions.canAddNote) return WriteOutcome.done;

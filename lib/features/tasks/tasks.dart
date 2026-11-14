@@ -41,9 +41,12 @@ export 'domain/coordinator_board.dart'
         TeamLoad,
         isTaskLate,
         maxDirectExtendDays,
+        scopedTasks,
+        summarizeTasks,
         teamLoad;
 export 'domain/meeting_invitees.dart' show MeetingInvitees;
 export 'domain/meeting_planner.dart';
+export 'domain/member_flow.dart';
 export 'domain/task_access.dart';
 export 'domain/task_catalog.dart';
 export 'domain/task_permissions.dart' show TaskPermissions;
@@ -59,6 +62,7 @@ export 'presentation/decision/coordinator_sheets.dart'
         TaskUnassignedRow,
         showDateRequestsSheet,
         showReviewQueueSheet;
+export 'presentation/decision/task_decision_flows.dart' show TaskDecisionFlows;
 export 'presentation/detail/detail_actions.dart' show showUploadOriginSheet;
 export 'presentation/quick_action_sheets.dart'
     show showInviteSheet, showMeetingSheet, showNewTaskSheet;

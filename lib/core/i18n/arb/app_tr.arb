@@ -1361,9 +1361,325 @@
   "@uiActivityUnavailable": {
     "description": "ui.activity.unavailable"
   },
-  "uiActivityUnsupported": "Bu sunucu sürümü işlem geçmişi okumayı desteklemiyor.",
+  "uiActivityUnsupported": "İşlem geçmişini yalnız şirket yöneticisi görebilir.",
   "@uiActivityUnsupported": {
     "description": "ui.activity.unsupported"
+  },
+  "uiActivityNItem": "Görev",
+  "@uiActivityNItem": {
+    "description": "ui.activity.n_item"
+  },
+  "uiActivityNTask": "Görev",
+  "@uiActivityNTask": {
+    "description": "ui.activity.n_task"
+  },
+  "uiActivityNSubtask": "Alt görev",
+  "@uiActivityNSubtask": {
+    "description": "ui.activity.n_subtask"
+  },
+  "uiActivityNNote": "Not",
+  "@uiActivityNNote": {
+    "description": "ui.activity.n_note"
+  },
+  "uiActivityNDependency": "Bağımlılık",
+  "@uiActivityNDependency": {
+    "description": "ui.activity.n_dependency"
+  },
+  "uiActivityNDateChange": "Tarih talebi",
+  "@uiActivityNDateChange": {
+    "description": "ui.activity.n_date_change"
+  },
+  "uiActivityNCompletion": "Tamamlanma",
+  "@uiActivityNCompletion": {
+    "description": "ui.activity.n_completion"
+  },
+  "uiActivityNEndDate": "Bitiş tarihi",
+  "@uiActivityNEndDate": {
+    "description": "ui.activity.n_end_date"
+  },
+  "uiActivityNFile": "Dosya",
+  "@uiActivityNFile": {
+    "description": "ui.activity.n_file"
+  },
+  "uiActivityNMeeting": "Toplantı",
+  "@uiActivityNMeeting": {
+    "description": "ui.activity.n_meeting"
+  },
+  "uiActivityNAgenda": "Gündem maddesi",
+  "@uiActivityNAgenda": {
+    "description": "ui.activity.n_agenda"
+  },
+  "uiActivityNConference": "Konferans",
+  "@uiActivityNConference": {
+    "description": "ui.activity.n_conference"
+  },
+  "uiActivityNParticipant": "Katılımcı",
+  "@uiActivityNParticipant": {
+    "description": "ui.activity.n_participant"
+  },
+  "uiActivityNAccount": "Hesap",
+  "@uiActivityNAccount": {
+    "description": "ui.activity.n_account"
+  },
+  "uiActivityNUser": "Kullanıcı",
+  "@uiActivityNUser": {
+    "description": "ui.activity.n_user"
+  },
+  "uiActivityNSession": "Oturum",
+  "@uiActivityNSession": {
+    "description": "ui.activity.n_session"
+  },
+  "uiActivityNLogin": "Giriş",
+  "@uiActivityNLogin": {
+    "description": "ui.activity.n_login"
+  },
+  "uiActivityNPassword": "Şifre",
+  "@uiActivityNPassword": {
+    "description": "ui.activity.n_password"
+  },
+  "uiActivityNChat": "Sohbet",
+  "@uiActivityNChat": {
+    "description": "ui.activity.n_chat"
+  },
+  "uiActivityNMessage": "Mesaj",
+  "@uiActivityNMessage": {
+    "description": "ui.activity.n_message"
+  },
+  "uiActivityNMember": "Üye",
+  "@uiActivityNMember": {
+    "description": "ui.activity.n_member"
+  },
+  "uiActivityNGroup": "Grup",
+  "@uiActivityNGroup": {
+    "description": "ui.activity.n_group"
+  },
+  "uiActivityNAdmin": "Grup yöneticisi",
+  "@uiActivityNAdmin": {
+    "description": "ui.activity.n_admin"
+  },
+  "uiActivityNDepartment": "Koordinatörlük",
+  "@uiActivityNDepartment": {
+    "description": "ui.activity.n_department"
+  },
+  "uiActivityNMembership": "Üyelik",
+  "@uiActivityNMembership": {
+    "description": "ui.activity.n_membership"
+  },
+  "uiActivityNProgram": "Program",
+  "@uiActivityNProgram": {
+    "description": "ui.activity.n_program"
+  },
+  "uiActivityNTransfer": "Aktarım",
+  "@uiActivityNTransfer": {
+    "description": "ui.activity.n_transfer"
+  },
+  "uiActivityNCompanyAdmin": "Şirket yöneticiliği",
+  "@uiActivityNCompanyAdmin": {
+    "description": "ui.activity.n_company_admin"
+  },
+  "uiActivityVCreated": "oluşturuldu",
+  "@uiActivityVCreated": {
+    "description": "ui.activity.v_created"
+  },
+  "uiActivityVUpdated": "güncellendi",
+  "@uiActivityVUpdated": {
+    "description": "ui.activity.v_updated"
+  },
+  "uiActivityVDeleted": "silindi",
+  "@uiActivityVDeleted": {
+    "description": "ui.activity.v_deleted"
+  },
+  "uiActivityVRestored": "geri yüklendi",
+  "@uiActivityVRestored": {
+    "description": "ui.activity.v_restored"
+  },
+  "uiActivityVPurged": "kalıcı silindi",
+  "@uiActivityVPurged": {
+    "description": "ui.activity.v_purged"
+  },
+  "uiActivityVAdded": "eklendi",
+  "@uiActivityVAdded": {
+    "description": "ui.activity.v_added"
+  },
+  "uiActivityVRemoved": "çıkarıldı",
+  "@uiActivityVRemoved": {
+    "description": "ui.activity.v_removed"
+  },
+  "uiActivityVTransitioned": "durumu değişti",
+  "@uiActivityVTransitioned": {
+    "description": "ui.activity.v_transitioned"
+  },
+  "uiActivityVReverted": "geri alındı",
+  "@uiActivityVReverted": {
+    "description": "ui.activity.v_reverted"
+  },
+  "uiActivityVConverted": "göreve dönüştürüldü",
+  "@uiActivityVConverted": {
+    "description": "ui.activity.v_converted"
+  },
+  "uiActivityVSent": "gönderildi",
+  "@uiActivityVSent": {
+    "description": "ui.activity.v_sent"
+  },
+  "uiActivityVEdited": "düzenlendi",
+  "@uiActivityVEdited": {
+    "description": "ui.activity.v_edited"
+  },
+  "uiActivityVRenamed": "yeniden adlandırıldı",
+  "@uiActivityVRenamed": {
+    "description": "ui.activity.v_renamed"
+  },
+  "uiActivityVAttached": "yüklendi",
+  "@uiActivityVAttached": {
+    "description": "ui.activity.v_attached"
+  },
+  "uiActivityVTagChanged": "etiketi değiştirildi",
+  "@uiActivityVTagChanged": {
+    "description": "ui.activity.v_tag_changed"
+  },
+  "uiActivityVStarted": "başlatıldı",
+  "@uiActivityVStarted": {
+    "description": "ui.activity.v_started"
+  },
+  "uiActivityVEnded": "bitirildi",
+  "@uiActivityVEnded": {
+    "description": "ui.activity.v_ended"
+  },
+  "uiActivityVOpened": "açıldı",
+  "@uiActivityVOpened": {
+    "description": "ui.activity.v_opened"
+  },
+  "uiActivityVClosed": "kapatıldı",
+  "@uiActivityVClosed": {
+    "description": "ui.activity.v_closed"
+  },
+  "uiActivityVApproved": "onaylandı",
+  "@uiActivityVApproved": {
+    "description": "ui.activity.v_approved"
+  },
+  "uiActivityVRejected": "reddedildi",
+  "@uiActivityVRejected": {
+    "description": "ui.activity.v_rejected"
+  },
+  "uiActivityVRequested": "istendi",
+  "@uiActivityVRequested": {
+    "description": "ui.activity.v_requested"
+  },
+  "uiActivityVReviewed": "incelendi",
+  "@uiActivityVReviewed": {
+    "description": "ui.activity.v_reviewed"
+  },
+  "uiActivityVAssigned": "atandı",
+  "@uiActivityVAssigned": {
+    "description": "ui.activity.v_assigned"
+  },
+  "uiActivityVUnassigned": "ataması kaldırıldı",
+  "@uiActivityVUnassigned": {
+    "description": "ui.activity.v_unassigned"
+  },
+  "uiActivityVClaimed": "üstlenildi",
+  "@uiActivityVClaimed": {
+    "description": "ui.activity.v_claimed"
+  },
+  "uiActivityVUnclaimed": "bırakıldı",
+  "@uiActivityVUnclaimed": {
+    "description": "ui.activity.v_unclaimed"
+  },
+  "uiActivityVDone": "tamamlandı",
+  "@uiActivityVDone": {
+    "description": "ui.activity.v_done"
+  },
+  "uiActivityVReopened": "yeniden açıldı",
+  "@uiActivityVReopened": {
+    "description": "ui.activity.v_reopened"
+  },
+  "uiActivityVLocked": "kilitlendi",
+  "@uiActivityVLocked": {
+    "description": "ui.activity.v_locked"
+  },
+  "uiActivityVUnlocked": "kilidi açıldı",
+  "@uiActivityVUnlocked": {
+    "description": "ui.activity.v_unlocked"
+  },
+  "uiActivityVDisabled": "devre dışı bırakıldı",
+  "@uiActivityVDisabled": {
+    "description": "ui.activity.v_disabled"
+  },
+  "uiActivityVEnabled": "etkinleştirildi",
+  "@uiActivityVEnabled": {
+    "description": "ui.activity.v_enabled"
+  },
+  "uiActivityVPinned": "sabitlendi",
+  "@uiActivityVPinned": {
+    "description": "ui.activity.v_pinned"
+  },
+  "uiActivityVLeft": "ayrıldı",
+  "@uiActivityVLeft": {
+    "description": "ui.activity.v_left"
+  },
+  "uiActivityVGranted": "verildi",
+  "@uiActivityVGranted": {
+    "description": "ui.activity.v_granted"
+  },
+  "uiActivityVRevoked": "geri alındı",
+  "@uiActivityVRevoked": {
+    "description": "ui.activity.v_revoked"
+  },
+  "uiActivityVReminded": "hatırlatıldı",
+  "@uiActivityVReminded": {
+    "description": "ui.activity.v_reminded"
+  },
+  "uiActivityVRoleChanged": "rolü değişti",
+  "@uiActivityVRoleChanged": {
+    "description": "ui.activity.v_role_changed"
+  },
+  "uiActivityVSucceeded": "başarılı",
+  "@uiActivityVSucceeded": {
+    "description": "ui.activity.v_succeeded"
+  },
+  "uiActivityVDenied": "reddedildi",
+  "@uiActivityVDenied": {
+    "description": "ui.activity.v_denied"
+  },
+  "uiActivityVExtended": "uzatıldı",
+  "@uiActivityVExtended": {
+    "description": "ui.activity.v_extended"
+  },
+  "uiActivityVLinked": "bağlandı",
+  "@uiActivityVLinked": {
+    "description": "ui.activity.v_linked"
+  },
+  "uiActivityVUnlinked": "bağı kaldırıldı",
+  "@uiActivityVUnlinked": {
+    "description": "ui.activity.v_unlinked"
+  },
+  "uiActivityVPulled": "öne çekildi",
+  "@uiActivityVPulled": {
+    "description": "ui.activity.v_pulled"
+  },
+  "uiActivityVSetByAdmin": "yönetici olarak ayarlandı",
+  "@uiActivityVSetByAdmin": {
+    "description": "ui.activity.v_set_by_admin"
+  },
+  "uiActivityVCompleted": "tamamlandı",
+  "@uiActivityVCompleted": {
+    "description": "ui.activity.v_completed"
+  },
+  "uiActivityVTransferred": "aktarıldı",
+  "@uiActivityVTransferred": {
+    "description": "ui.activity.v_transferred"
+  },
+  "uiActivityVChanged": "değiştirildi",
+  "@uiActivityVChanged": {
+    "description": "ui.activity.v_changed"
+  },
+  "uiActivityFailed": "başarısız",
+  "@uiActivityFailed": {
+    "description": "ui.activity.failed"
+  },
+  "uiActivityPersonEmpty": "Bu kişinin işlem kaydı yok.",
+  "@uiActivityPersonEmpty": {
+    "description": "ui.activity.person_empty"
   },
   "uiArchivePdfPreviewError": "PDF önizlenemedi. Dosya bozuk veya parola korumalı olabilir.",
   "@uiArchivePdfPreviewError": {
@@ -7260,10 +7576,6 @@
   "uiUsersNoTasks": "Bu süzgeçte erişilebilir görev bulunamadı.",
   "@uiUsersNoTasks": {
     "description": "ui.users.no_tasks"
-  },
-  "uiUsersHistoryUnavailable": "Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.",
-  "@uiUsersHistoryUnavailable": {
-    "description": "ui.users.history_unavailable"
   },
   "uiUsersMembershipUnknown": "Üyelik bilgisi bilinmiyor",
   "@uiUsersMembershipUnknown": {

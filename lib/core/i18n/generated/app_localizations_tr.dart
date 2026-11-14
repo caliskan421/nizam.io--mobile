@@ -1175,7 +1175,244 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiActivityUnsupported =>
-      'Bu sunucu sürümü işlem geçmişi okumayı desteklemiyor.';
+      'İşlem geçmişini yalnız şirket yöneticisi görebilir.';
+
+  @override
+  String get uiActivityNItem => 'Görev';
+
+  @override
+  String get uiActivityNTask => 'Görev';
+
+  @override
+  String get uiActivityNSubtask => 'Alt görev';
+
+  @override
+  String get uiActivityNNote => 'Not';
+
+  @override
+  String get uiActivityNDependency => 'Bağımlılık';
+
+  @override
+  String get uiActivityNDateChange => 'Tarih talebi';
+
+  @override
+  String get uiActivityNCompletion => 'Tamamlanma';
+
+  @override
+  String get uiActivityNEndDate => 'Bitiş tarihi';
+
+  @override
+  String get uiActivityNFile => 'Dosya';
+
+  @override
+  String get uiActivityNMeeting => 'Toplantı';
+
+  @override
+  String get uiActivityNAgenda => 'Gündem maddesi';
+
+  @override
+  String get uiActivityNConference => 'Konferans';
+
+  @override
+  String get uiActivityNParticipant => 'Katılımcı';
+
+  @override
+  String get uiActivityNAccount => 'Hesap';
+
+  @override
+  String get uiActivityNUser => 'Kullanıcı';
+
+  @override
+  String get uiActivityNSession => 'Oturum';
+
+  @override
+  String get uiActivityNLogin => 'Giriş';
+
+  @override
+  String get uiActivityNPassword => 'Şifre';
+
+  @override
+  String get uiActivityNChat => 'Sohbet';
+
+  @override
+  String get uiActivityNMessage => 'Mesaj';
+
+  @override
+  String get uiActivityNMember => 'Üye';
+
+  @override
+  String get uiActivityNGroup => 'Grup';
+
+  @override
+  String get uiActivityNAdmin => 'Grup yöneticisi';
+
+  @override
+  String get uiActivityNDepartment => 'Koordinatörlük';
+
+  @override
+  String get uiActivityNMembership => 'Üyelik';
+
+  @override
+  String get uiActivityNProgram => 'Program';
+
+  @override
+  String get uiActivityNTransfer => 'Aktarım';
+
+  @override
+  String get uiActivityNCompanyAdmin => 'Şirket yöneticiliği';
+
+  @override
+  String get uiActivityVCreated => 'oluşturuldu';
+
+  @override
+  String get uiActivityVUpdated => 'güncellendi';
+
+  @override
+  String get uiActivityVDeleted => 'silindi';
+
+  @override
+  String get uiActivityVRestored => 'geri yüklendi';
+
+  @override
+  String get uiActivityVPurged => 'kalıcı silindi';
+
+  @override
+  String get uiActivityVAdded => 'eklendi';
+
+  @override
+  String get uiActivityVRemoved => 'çıkarıldı';
+
+  @override
+  String get uiActivityVTransitioned => 'durumu değişti';
+
+  @override
+  String get uiActivityVReverted => 'geri alındı';
+
+  @override
+  String get uiActivityVConverted => 'göreve dönüştürüldü';
+
+  @override
+  String get uiActivityVSent => 'gönderildi';
+
+  @override
+  String get uiActivityVEdited => 'düzenlendi';
+
+  @override
+  String get uiActivityVRenamed => 'yeniden adlandırıldı';
+
+  @override
+  String get uiActivityVAttached => 'yüklendi';
+
+  @override
+  String get uiActivityVTagChanged => 'etiketi değiştirildi';
+
+  @override
+  String get uiActivityVStarted => 'başlatıldı';
+
+  @override
+  String get uiActivityVEnded => 'bitirildi';
+
+  @override
+  String get uiActivityVOpened => 'açıldı';
+
+  @override
+  String get uiActivityVClosed => 'kapatıldı';
+
+  @override
+  String get uiActivityVApproved => 'onaylandı';
+
+  @override
+  String get uiActivityVRejected => 'reddedildi';
+
+  @override
+  String get uiActivityVRequested => 'istendi';
+
+  @override
+  String get uiActivityVReviewed => 'incelendi';
+
+  @override
+  String get uiActivityVAssigned => 'atandı';
+
+  @override
+  String get uiActivityVUnassigned => 'ataması kaldırıldı';
+
+  @override
+  String get uiActivityVClaimed => 'üstlenildi';
+
+  @override
+  String get uiActivityVUnclaimed => 'bırakıldı';
+
+  @override
+  String get uiActivityVDone => 'tamamlandı';
+
+  @override
+  String get uiActivityVReopened => 'yeniden açıldı';
+
+  @override
+  String get uiActivityVLocked => 'kilitlendi';
+
+  @override
+  String get uiActivityVUnlocked => 'kilidi açıldı';
+
+  @override
+  String get uiActivityVDisabled => 'devre dışı bırakıldı';
+
+  @override
+  String get uiActivityVEnabled => 'etkinleştirildi';
+
+  @override
+  String get uiActivityVPinned => 'sabitlendi';
+
+  @override
+  String get uiActivityVLeft => 'ayrıldı';
+
+  @override
+  String get uiActivityVGranted => 'verildi';
+
+  @override
+  String get uiActivityVRevoked => 'geri alındı';
+
+  @override
+  String get uiActivityVReminded => 'hatırlatıldı';
+
+  @override
+  String get uiActivityVRoleChanged => 'rolü değişti';
+
+  @override
+  String get uiActivityVSucceeded => 'başarılı';
+
+  @override
+  String get uiActivityVDenied => 'reddedildi';
+
+  @override
+  String get uiActivityVExtended => 'uzatıldı';
+
+  @override
+  String get uiActivityVLinked => 'bağlandı';
+
+  @override
+  String get uiActivityVUnlinked => 'bağı kaldırıldı';
+
+  @override
+  String get uiActivityVPulled => 'öne çekildi';
+
+  @override
+  String get uiActivityVSetByAdmin => 'yönetici olarak ayarlandı';
+
+  @override
+  String get uiActivityVCompleted => 'tamamlandı';
+
+  @override
+  String get uiActivityVTransferred => 'aktarıldı';
+
+  @override
+  String get uiActivityVChanged => 'değiştirildi';
+
+  @override
+  String get uiActivityFailed => 'başarısız';
+
+  @override
+  String get uiActivityPersonEmpty => 'Bu kişinin işlem kaydı yok.';
 
   @override
   String get uiArchivePdfPreviewError =>
@@ -5726,10 +5963,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiUsersNoTasks => 'Bu süzgeçte erişilebilir görev bulunamadı.';
-
-  @override
-  String get uiUsersHistoryUnavailable =>
-      'Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.';
 
   @override
   String get uiUsersMembershipUnknown => 'Üyelik bilgisi bilinmiyor';

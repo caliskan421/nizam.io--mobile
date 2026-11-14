@@ -5,7 +5,18 @@ import '../../../core/telemetry/expected_failure.dart';
 /// Kayıt türü (prototip tür filtresi: Görev, Dosya, Toplantı, Mesaj, Hesap).
 enum ActivityKind { task, file, meeting, message, account }
 
-/// İşlem geçmişi kaydı (değiştirilemez denetim kaydı).
+/// Eylem kodunun modül önekinden kayıt türü (`work.` görev, `records.` dosya, `collaboration.`
+/// toplantı, `messaging.` mesaj; kalan her şey hesap/sistem).
+ActivityKind activityKindOf(String actionCode) =>
+    switch (actionCode.split('.').first) {
+      'work' => ActivityKind.task,
+      'records' => ActivityKind.file,
+      'collaboration' => ActivityKind.meeting,
+      'messaging' => ActivityKind.message,
+      _ => ActivityKind.account,
+    };
+
+/// İşlem geçmişi kaydı (değiştirilemez denetim kaydı; sunucu `AuditEntry`).
 @immutable
 final class ActivityEntry {
   const ActivityEntry({
@@ -16,7 +27,42 @@ final class ActivityEntry {
     required this.target,
     required this.actorId,
     required this.actorName,
+    this.actionCode,
+    this.subjectKind,
+    this.subjectId,
+    this.departmentId,
+    this.failed = false,
   });
+
+  /// Kararlı eylem kodu (`action_code`, ör. `work.item.transitioned`); görünen ad istemci
+  /// sözlüğündedir (sunumda). null → [action] hazır metindir.
+  final String? actionCode;
+
+  /// Konu türü ve kimliği (`subject_kind`, `subject_id`; ör. `work_item`).
+  final String? subjectKind;
+  final String? subjectId;
+
+  /// Kaydın departman kapsamı (`department_id`; koordinatörlük süzgeci).
+  final String? departmentId;
+
+  /// Sonuç `failed` (reddedilen girişim).
+  final bool failed;
+
+  /// Hedefi [target] olan kopya (görev kimliği → "KOD · başlık" çözümü).
+  ActivityEntry withTarget(String target) => ActivityEntry(
+    at: at,
+    kind: kind,
+    action: action,
+    detail: detail,
+    target: target,
+    actorId: actorId,
+    actorName: actorName,
+    actionCode: actionCode,
+    subjectKind: subjectKind,
+    subjectId: subjectId,
+    departmentId: departmentId,
+    failed: failed,
+  );
 
   final DateTime at;
   final ActivityKind kind;
@@ -60,19 +106,13 @@ final class ActivityLog {
   final List<String> coordinatorships;
 }
 
-/// İşlem geçmişinin kaynağı (domain portu; gerçekleştirmeler `data/`).
+/// İşlem geçmişinin kaynağı (domain portu; gerçekleştirme `data/`, `GET /v1/audit/entries`).
 abstract interface class ActivityLogRepository {
-  Future<ActivityLog> load();
+  /// Son kayıtlar (yeniden eskiye); [actorAccountId] verilirse yalnız o kişinin işlemleri.
+  Future<ActivityLog> load({String? actorAccountId});
 }
 
-/// Pinli sözleşmede işlem geçmişini okuyan bir uç yoktur.
+/// İşlem geçmişi bu hesaba kapalı (yalnız şirket yöneticisi okur; 403 `audit.not_authorized`).
 final class ActivityUnavailable implements Exception, ExpectedFailure {
   const ActivityUnavailable();
-}
-
-final class UnavailableActivityLogRepository implements ActivityLogRepository {
-  const UnavailableActivityLogRepository();
-
-  @override
-  Future<ActivityLog> load() async => throw const ActivityUnavailable();
 }

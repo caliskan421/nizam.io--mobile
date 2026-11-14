@@ -2137,8 +2137,482 @@ abstract class AppLocalizations {
   /// ui.activity.unsupported
   ///
   /// In tr, this message translates to:
-  /// **'Bu sunucu sürümü işlem geçmişi okumayı desteklemiyor.'**
+  /// **'İşlem geçmişini yalnız şirket yöneticisi görebilir.'**
   String get uiActivityUnsupported;
+
+  /// ui.activity.n_item
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get uiActivityNItem;
+
+  /// ui.activity.n_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get uiActivityNTask;
+
+  /// ui.activity.n_subtask
+  ///
+  /// In tr, this message translates to:
+  /// **'Alt görev'**
+  String get uiActivityNSubtask;
+
+  /// ui.activity.n_note
+  ///
+  /// In tr, this message translates to:
+  /// **'Not'**
+  String get uiActivityNNote;
+
+  /// ui.activity.n_dependency
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağımlılık'**
+  String get uiActivityNDependency;
+
+  /// ui.activity.n_date_change
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talebi'**
+  String get uiActivityNDateChange;
+
+  /// ui.activity.n_completion
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanma'**
+  String get uiActivityNCompletion;
+
+  /// ui.activity.n_end_date
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş tarihi'**
+  String get uiActivityNEndDate;
+
+  /// ui.activity.n_file
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya'**
+  String get uiActivityNFile;
+
+  /// ui.activity.n_meeting
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı'**
+  String get uiActivityNMeeting;
+
+  /// ui.activity.n_agenda
+  ///
+  /// In tr, this message translates to:
+  /// **'Gündem maddesi'**
+  String get uiActivityNAgenda;
+
+  /// ui.activity.n_conference
+  ///
+  /// In tr, this message translates to:
+  /// **'Konferans'**
+  String get uiActivityNConference;
+
+  /// ui.activity.n_participant
+  ///
+  /// In tr, this message translates to:
+  /// **'Katılımcı'**
+  String get uiActivityNParticipant;
+
+  /// ui.activity.n_account
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap'**
+  String get uiActivityNAccount;
+
+  /// ui.activity.n_user
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı'**
+  String get uiActivityNUser;
+
+  /// ui.activity.n_session
+  ///
+  /// In tr, this message translates to:
+  /// **'Oturum'**
+  String get uiActivityNSession;
+
+  /// ui.activity.n_login
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş'**
+  String get uiActivityNLogin;
+
+  /// ui.activity.n_password
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre'**
+  String get uiActivityNPassword;
+
+  /// ui.activity.n_chat
+  ///
+  /// In tr, this message translates to:
+  /// **'Sohbet'**
+  String get uiActivityNChat;
+
+  /// ui.activity.n_message
+  ///
+  /// In tr, this message translates to:
+  /// **'Mesaj'**
+  String get uiActivityNMessage;
+
+  /// ui.activity.n_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye'**
+  String get uiActivityNMember;
+
+  /// ui.activity.n_group
+  ///
+  /// In tr, this message translates to:
+  /// **'Grup'**
+  String get uiActivityNGroup;
+
+  /// ui.activity.n_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Grup yöneticisi'**
+  String get uiActivityNAdmin;
+
+  /// ui.activity.n_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük'**
+  String get uiActivityNDepartment;
+
+  /// ui.activity.n_membership
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyelik'**
+  String get uiActivityNMembership;
+
+  /// ui.activity.n_program
+  ///
+  /// In tr, this message translates to:
+  /// **'Program'**
+  String get uiActivityNProgram;
+
+  /// ui.activity.n_transfer
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktarım'**
+  String get uiActivityNTransfer;
+
+  /// ui.activity.n_company_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'Şirket yöneticiliği'**
+  String get uiActivityNCompanyAdmin;
+
+  /// ui.activity.v_created
+  ///
+  /// In tr, this message translates to:
+  /// **'oluşturuldu'**
+  String get uiActivityVCreated;
+
+  /// ui.activity.v_updated
+  ///
+  /// In tr, this message translates to:
+  /// **'güncellendi'**
+  String get uiActivityVUpdated;
+
+  /// ui.activity.v_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'silindi'**
+  String get uiActivityVDeleted;
+
+  /// ui.activity.v_restored
+  ///
+  /// In tr, this message translates to:
+  /// **'geri yüklendi'**
+  String get uiActivityVRestored;
+
+  /// ui.activity.v_purged
+  ///
+  /// In tr, this message translates to:
+  /// **'kalıcı silindi'**
+  String get uiActivityVPurged;
+
+  /// ui.activity.v_added
+  ///
+  /// In tr, this message translates to:
+  /// **'eklendi'**
+  String get uiActivityVAdded;
+
+  /// ui.activity.v_removed
+  ///
+  /// In tr, this message translates to:
+  /// **'çıkarıldı'**
+  String get uiActivityVRemoved;
+
+  /// ui.activity.v_transitioned
+  ///
+  /// In tr, this message translates to:
+  /// **'durumu değişti'**
+  String get uiActivityVTransitioned;
+
+  /// ui.activity.v_reverted
+  ///
+  /// In tr, this message translates to:
+  /// **'geri alındı'**
+  String get uiActivityVReverted;
+
+  /// ui.activity.v_converted
+  ///
+  /// In tr, this message translates to:
+  /// **'göreve dönüştürüldü'**
+  String get uiActivityVConverted;
+
+  /// ui.activity.v_sent
+  ///
+  /// In tr, this message translates to:
+  /// **'gönderildi'**
+  String get uiActivityVSent;
+
+  /// ui.activity.v_edited
+  ///
+  /// In tr, this message translates to:
+  /// **'düzenlendi'**
+  String get uiActivityVEdited;
+
+  /// ui.activity.v_renamed
+  ///
+  /// In tr, this message translates to:
+  /// **'yeniden adlandırıldı'**
+  String get uiActivityVRenamed;
+
+  /// ui.activity.v_attached
+  ///
+  /// In tr, this message translates to:
+  /// **'yüklendi'**
+  String get uiActivityVAttached;
+
+  /// ui.activity.v_tag_changed
+  ///
+  /// In tr, this message translates to:
+  /// **'etiketi değiştirildi'**
+  String get uiActivityVTagChanged;
+
+  /// ui.activity.v_started
+  ///
+  /// In tr, this message translates to:
+  /// **'başlatıldı'**
+  String get uiActivityVStarted;
+
+  /// ui.activity.v_ended
+  ///
+  /// In tr, this message translates to:
+  /// **'bitirildi'**
+  String get uiActivityVEnded;
+
+  /// ui.activity.v_opened
+  ///
+  /// In tr, this message translates to:
+  /// **'açıldı'**
+  String get uiActivityVOpened;
+
+  /// ui.activity.v_closed
+  ///
+  /// In tr, this message translates to:
+  /// **'kapatıldı'**
+  String get uiActivityVClosed;
+
+  /// ui.activity.v_approved
+  ///
+  /// In tr, this message translates to:
+  /// **'onaylandı'**
+  String get uiActivityVApproved;
+
+  /// ui.activity.v_rejected
+  ///
+  /// In tr, this message translates to:
+  /// **'reddedildi'**
+  String get uiActivityVRejected;
+
+  /// ui.activity.v_requested
+  ///
+  /// In tr, this message translates to:
+  /// **'istendi'**
+  String get uiActivityVRequested;
+
+  /// ui.activity.v_reviewed
+  ///
+  /// In tr, this message translates to:
+  /// **'incelendi'**
+  String get uiActivityVReviewed;
+
+  /// ui.activity.v_assigned
+  ///
+  /// In tr, this message translates to:
+  /// **'atandı'**
+  String get uiActivityVAssigned;
+
+  /// ui.activity.v_unassigned
+  ///
+  /// In tr, this message translates to:
+  /// **'ataması kaldırıldı'**
+  String get uiActivityVUnassigned;
+
+  /// ui.activity.v_claimed
+  ///
+  /// In tr, this message translates to:
+  /// **'üstlenildi'**
+  String get uiActivityVClaimed;
+
+  /// ui.activity.v_unclaimed
+  ///
+  /// In tr, this message translates to:
+  /// **'bırakıldı'**
+  String get uiActivityVUnclaimed;
+
+  /// ui.activity.v_done
+  ///
+  /// In tr, this message translates to:
+  /// **'tamamlandı'**
+  String get uiActivityVDone;
+
+  /// ui.activity.v_reopened
+  ///
+  /// In tr, this message translates to:
+  /// **'yeniden açıldı'**
+  String get uiActivityVReopened;
+
+  /// ui.activity.v_locked
+  ///
+  /// In tr, this message translates to:
+  /// **'kilitlendi'**
+  String get uiActivityVLocked;
+
+  /// ui.activity.v_unlocked
+  ///
+  /// In tr, this message translates to:
+  /// **'kilidi açıldı'**
+  String get uiActivityVUnlocked;
+
+  /// ui.activity.v_disabled
+  ///
+  /// In tr, this message translates to:
+  /// **'devre dışı bırakıldı'**
+  String get uiActivityVDisabled;
+
+  /// ui.activity.v_enabled
+  ///
+  /// In tr, this message translates to:
+  /// **'etkinleştirildi'**
+  String get uiActivityVEnabled;
+
+  /// ui.activity.v_pinned
+  ///
+  /// In tr, this message translates to:
+  /// **'sabitlendi'**
+  String get uiActivityVPinned;
+
+  /// ui.activity.v_left
+  ///
+  /// In tr, this message translates to:
+  /// **'ayrıldı'**
+  String get uiActivityVLeft;
+
+  /// ui.activity.v_granted
+  ///
+  /// In tr, this message translates to:
+  /// **'verildi'**
+  String get uiActivityVGranted;
+
+  /// ui.activity.v_revoked
+  ///
+  /// In tr, this message translates to:
+  /// **'geri alındı'**
+  String get uiActivityVRevoked;
+
+  /// ui.activity.v_reminded
+  ///
+  /// In tr, this message translates to:
+  /// **'hatırlatıldı'**
+  String get uiActivityVReminded;
+
+  /// ui.activity.v_role_changed
+  ///
+  /// In tr, this message translates to:
+  /// **'rolü değişti'**
+  String get uiActivityVRoleChanged;
+
+  /// ui.activity.v_succeeded
+  ///
+  /// In tr, this message translates to:
+  /// **'başarılı'**
+  String get uiActivityVSucceeded;
+
+  /// ui.activity.v_denied
+  ///
+  /// In tr, this message translates to:
+  /// **'reddedildi'**
+  String get uiActivityVDenied;
+
+  /// ui.activity.v_extended
+  ///
+  /// In tr, this message translates to:
+  /// **'uzatıldı'**
+  String get uiActivityVExtended;
+
+  /// ui.activity.v_linked
+  ///
+  /// In tr, this message translates to:
+  /// **'bağlandı'**
+  String get uiActivityVLinked;
+
+  /// ui.activity.v_unlinked
+  ///
+  /// In tr, this message translates to:
+  /// **'bağı kaldırıldı'**
+  String get uiActivityVUnlinked;
+
+  /// ui.activity.v_pulled
+  ///
+  /// In tr, this message translates to:
+  /// **'öne çekildi'**
+  String get uiActivityVPulled;
+
+  /// ui.activity.v_set_by_admin
+  ///
+  /// In tr, this message translates to:
+  /// **'yönetici olarak ayarlandı'**
+  String get uiActivityVSetByAdmin;
+
+  /// ui.activity.v_completed
+  ///
+  /// In tr, this message translates to:
+  /// **'tamamlandı'**
+  String get uiActivityVCompleted;
+
+  /// ui.activity.v_transferred
+  ///
+  /// In tr, this message translates to:
+  /// **'aktarıldı'**
+  String get uiActivityVTransferred;
+
+  /// ui.activity.v_changed
+  ///
+  /// In tr, this message translates to:
+  /// **'değiştirildi'**
+  String get uiActivityVChanged;
+
+  /// ui.activity.failed
+  ///
+  /// In tr, this message translates to:
+  /// **'başarısız'**
+  String get uiActivityFailed;
+
+  /// ui.activity.person_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kişinin işlem kaydı yok.'**
+  String get uiActivityPersonEmpty;
 
   /// ui.archive.pdf_preview_error
   ///
@@ -10983,12 +11457,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu süzgeçte erişilebilir görev bulunamadı.'**
   String get uiUsersNoTasks;
-
-  /// ui.users.history_unavailable
-  ///
-  /// In tr, this message translates to:
-  /// **'Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.'**
-  String get uiUsersHistoryUnavailable;
 
   /// ui.users.membership_unknown
   ///

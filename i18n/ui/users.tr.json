@@ -43,7 +43,6 @@
     "ui.users.history": "Geçmiş",
     "ui.users.account": "Hesap",
     "ui.users.no_tasks": "Bu süzgeçte erişilebilir görev bulunamadı.",
-    "ui.users.history_unavailable": "Kullanıcıya özel işlem geçmişi bu sunucuda sunulmuyor.",
     "ui.users.membership_unknown": "Üyelik bilgisi bilinmiyor",
     "ui.users.other_department": "Diğer programdaki koordinatörlük",
     "ui.users.coordinator": "Koordinatör",

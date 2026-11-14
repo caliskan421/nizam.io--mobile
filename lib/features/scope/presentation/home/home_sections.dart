@@ -168,11 +168,12 @@ class HomeKpiGrid extends StatelessWidget {
 /// sayfasının "+" düğmesindedir; işlem geçmişi buradan açılır (ayrı kartı yok).
 enum HomeQuickAction { history, meeting, deleted, report }
 
-/// Rapor telefonda üretilmez: rapor oluşturucu gelene dek kısayolu gizlidir.
+/// Rapor telefonda üretilmez: rapor oluşturucu gelene dek kısayolu gizlidir. İşlem geçmişi ve
+/// silinenler yalnız şirket yöneticisine (AUDIT-K10).
 List<HomeQuickAction> homeQuickActions({required bool isAdmin}) => [
   for (final action in HomeQuickAction.values)
     if (action != HomeQuickAction.report &&
-        (action != HomeQuickAction.deleted || isAdmin))
+        (action == HomeQuickAction.meeting || isAdmin))
       action,
 ];
 

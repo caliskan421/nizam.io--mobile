@@ -93,7 +93,10 @@ class Composition {
       apiDio: () => container.read(apiDioProvider),
     );
     registerScopeModule(locator, apiDio: () => container.read(apiDioProvider));
-    registerActivityModule(locator);
+    registerActivityModule(
+      locator,
+      apiDio: () => container.read(apiDioProvider),
+    );
     registerReportsModule(
       locator,
       apiDio: () => container.read(apiDioProvider),

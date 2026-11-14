@@ -115,7 +115,26 @@ String? coordinatorshipOf(TaskCatalog catalog, String personId) => catalog
     .firstOrNull
     ?.code;
 
-/// [query]'yi [log]'a uygular (gün sırası kayıt sırasıdır).
+/// Görev konulu (`work_item`) ve hedefi boş kayıtlar katalogdan "KOD · başlık" hedefini alır
+/// (görev açma bağı [taskCodeOf] bununla çalışır); katalogda olmayan görevin hedefi boş kalır.
+List<ActivityEntry> resolveActivityTargets(
+  List<ActivityEntry> entries,
+  TaskCatalog catalog,
+) {
+  final byId = {for (final t in catalog.tasks) t.id: t};
+  return [
+    for (final e in entries)
+      switch (e.subjectKind == 'work_item' && e.target.isEmpty
+          ? byId[e.subjectId]
+          : null) {
+        final t? => e.withTarget('${t.code} · ${t.title}'),
+        null => e,
+      },
+  ];
+}
+
+/// [query]'yi [log]'a uygular (gün sırası kayıt sırasıdır). Koordinatörlük süzgeci kaydın
+/// departmanıyla (yoksa yapanın katalogdaki ilk koordinatörlüğüyle) eşleşir.
 ActivityView applyActivityQuery(
   ActivityLog log,
   TaskCatalog catalog,
@@ -125,7 +144,8 @@ ActivityView applyActivityQuery(
   bool extra(ActivityEntry e) =>
       (query.people.isEmpty || query.people.contains(e.actorId)) &&
       (query.coordinatorship == null ||
-          coordinatorshipOf(catalog, e.actorId) == query.coordinatorship) &&
+          (e.departmentId ?? coordinatorshipOf(catalog, e.actorId)) ==
+              query.coordinatorship) &&
       (needle.isEmpty ||
           [
             e.action,
@@ -133,7 +153,10 @@ ActivityView applyActivityQuery(
             e.target,
             e.actorName,
           ].any((s) => s.toLowerCase().contains(needle)));
-  final byExtra = log.entries.where(extra).toList();
+  final byExtra = resolveActivityTargets(
+    log.entries,
+    catalog,
+  ).where(extra).toList();
   final matched = [
     for (final e in byExtra)
       if (query.kind == null || e.kind == query.kind) e,

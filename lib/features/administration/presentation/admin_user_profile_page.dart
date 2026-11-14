@@ -14,6 +14,7 @@ import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/nz_top_bar.dart';
+import '../../activity/activity.dart';
 import '../../archive/archive.dart';
 import '../../tasks/tasks.dart';
 import '../application/admin_controller.dart';
@@ -279,18 +280,8 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
                   catalog: catalog!,
                 ),
               if (_tab == 1) PersonFiles(accountId: widget.accountId),
-              if (_tab == 2)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: NizamioSpacing.space4,
-                  ),
-                  child: Text(
-                    l.uiUsersHistoryUnavailable,
-                    style: context.text.caption.copyWith(
-                      color: context.colors.textMuted,
-                    ),
-                  ),
-                ),
+              // Kişinin işlem geçmişi (yalnız şirket yöneticisi; AUDIT-K10).
+              if (_tab == 2) PersonActivity(accountId: widget.accountId),
               if (_tab == 3)
                 AdminUserAccountPanel(
                   key: ValueKey(user.accountId),

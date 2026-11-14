@@ -3125,7 +3125,7 @@
   "@uiHomeOpenList": {
     "description": "ui.home.open_list"
   },
-  "uiHomeQuickActions": "hızlı işlemler",
+  "uiHomeQuickActions": "Hızlı işlemler",
   "@uiHomeQuickActions": {
     "description": "ui.home.quick_actions"
   },
@@ -3169,7 +3169,7 @@
   "@uiHomeFormSoon": {
     "description": "ui.home.form_soon"
   },
-  "uiHomeTeam": "ekip",
+  "uiHomeTeam": "Ekip",
   "@uiHomeTeam": {
     "description": "ui.home.team"
   },

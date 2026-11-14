@@ -190,8 +190,8 @@ class HomeKpiGrid extends StatelessWidget {
 /// görünümünde görev açma Görevler sayfasının "+" düğmesindedir).
 enum HomeQuickAction { history, meeting, deleted, report, newTask, member }
 
-/// Rapor telefonda üretilmez: rapor oluşturucu gelene dek yönetici/üye görünümünde gizlidir;
-/// koordinatör görünümünde kısayol vardır ve "yakında" bildirimi gösterir. İşlem geçmişi ve
+/// Rapor telefonda üretilmez: rapor oluşturucu gelene dek kısayol (yönetici ve koordinatör
+/// görünümü) "yakında" bildirimi gösterir; üye görünümünde yoktur. İşlem geçmişi ve
 /// silinenler yalnız şirket yöneticisine (AUDIT-K10); toplantı yalnız açabilen etkin role
 /// ([EffectiveAccess.canCreateMeeting]). [coordinator] (koordinatör görünümü) prototip sırasını
 /// kullanır: Yeni görev ([canCreateTask]), Toplantı, Üye ekle ([canManageTeam]), Rapor. Liste boşsa
@@ -213,11 +213,11 @@ List<HomeQuickAction> homeQuickActions({
     : [
         for (final action in HomeQuickAction.values)
           if (switch (action) {
-            HomeQuickAction.report ||
-            HomeQuickAction.newTask ||
-            HomeQuickAction.member => false,
+            HomeQuickAction.newTask || HomeQuickAction.member => false,
             HomeQuickAction.meeting => canMeet,
-            HomeQuickAction.history || HomeQuickAction.deleted => isAdmin,
+            HomeQuickAction.history ||
+            HomeQuickAction.deleted ||
+            HomeQuickAction.report => isAdmin,
           })
             action,
       ];
@@ -288,14 +288,8 @@ String quickActionLongLabel(AppLocalizations l, HomeQuickAction a) =>
 /// Ekip: rol başına [HomeTeamTile] (rol rengi işaret ve pay çubuğudur). Yalnız [team]
 /// bilinirken (yönetici özeti) kurulur.
 class HomeTeam extends StatelessWidget {
-  const HomeTeam({
-    super.key,
-    required this.dashboard,
-    required this.team,
-    required this.onOpen,
-  });
+  const HomeTeam({super.key, required this.team, required this.onOpen});
 
-  final HomeDashboard dashboard;
   final TeamTotals team;
 
   /// Kutuya dokunma → görev listesi o ekip rolündeki kişilerle süzülmüş (koordinatör/üye).
@@ -308,7 +302,7 @@ class HomeTeam extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        NzKicker(l.uiHomeTeam, trailing: l.teamSummary(dashboard, team)),
+        NzKicker(l.uiHomeTeam),
         const Gap(NizamioSpacing.gapMd),
         HomeGrid(
           columns: 3,

@@ -193,7 +193,7 @@ class _Feed extends ConsumerWidget {
               nav.openTasks(people: people?.of(role) ?? const []);
           return wide
               ? HomeWideTeam(team: team, onOpen: open)
-              : HomeTeam(dashboard: d, team: team, onOpen: open);
+              : HomeTeam(team: team, onOpen: open);
         },
       ),
     };
@@ -315,14 +315,9 @@ class _Feed extends ConsumerWidget {
                 children: [
                   if (bar != null)
                     Expanded(child: NzKicker(context.l10n.uiHomeQuickActions)),
-                  if (d.team case final t? when wideTeam != null) ...[
+                  if (wideTeam != null) ...[
                     if (bar != null) const Gap(homeWideGap),
-                    Expanded(
-                      child: NzKicker(
-                        context.l10n.uiHomeTeam,
-                        trailing: context.l10n.teamSummary(d, t),
-                      ),
-                    ),
+                    Expanded(child: NzKicker(context.l10n.uiHomeTeam)),
                   ],
                 ],
               ),

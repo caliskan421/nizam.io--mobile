@@ -20,10 +20,6 @@ extension HomeTexts on AppLocalizations {
   String dateKicker(DateTime day) =>
       DateFormat('d MMMM y, EEEE', 'tr').format(day).toLowerCase();
 
-  /// "18 kullanıcı · 11 koordinatörlük".
-  String teamSummary(HomeDashboard d, TeamTotals team) =>
-      '${team.users} $uiHomeUsers · ${d.coordinatorships.length} $uiHomeCoordinatorshipsLc';
-
   /// "11 koordinatörlük · 18 kullanıcı (2 admin, 15 koordinatör, 3 üye)".
   /// Ekip sayıları bilinmiyorsa (yönetici olmayan hesap) yalnız koordinatörlük sayısı.
   String footerSummary(HomeDashboard d) => switch (d.team) {

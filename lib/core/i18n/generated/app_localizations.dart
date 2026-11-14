@@ -4783,7 +4783,7 @@ abstract class AppLocalizations {
   /// ui.home.quick_actions
   ///
   /// In tr, this message translates to:
-  /// **'hızlı işlemler'**
+  /// **'Hızlı işlemler'**
   String get uiHomeQuickActions;
 
   /// ui.home.quick_actions_title
@@ -4849,7 +4849,7 @@ abstract class AppLocalizations {
   /// ui.home.team
   ///
   /// In tr, this message translates to:
-  /// **'ekip'**
+  /// **'Ekip'**
   String get uiHomeTeam;
 
   /// ui.home.users

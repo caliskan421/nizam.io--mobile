@@ -56,7 +56,7 @@ class HomeCoordinatorships extends ConsumerWidget {
       header: true,
       child: Text(
         l.uiHomeCoordinatorships,
-        style: wide ? context.text.titleLg : context.text.labelLg,
+        style: wide ? context.text.titleMd : context.text.labelLg,
       ),
     );
     final sort = NzSplitButton(

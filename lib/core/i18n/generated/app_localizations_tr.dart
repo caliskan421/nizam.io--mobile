@@ -2519,7 +2519,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeOpenList => 'listeyi aç';
 
   @override
-  String get uiHomeQuickActions => 'hızlı işlemler';
+  String get uiHomeQuickActions => 'Hızlı işlemler';
 
   @override
   String get uiHomeQuickActionsTitle => 'Hızlı işlemler';
@@ -2553,7 +2553,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu form mobilde sonraki adımda eklenecek; şimdilik web portalını kullanabilirsin.';
 
   @override
-  String get uiHomeTeam => 'ekip';
+  String get uiHomeTeam => 'Ekip';
 
   @override
   String get uiHomeUsers => 'kullanıcı';

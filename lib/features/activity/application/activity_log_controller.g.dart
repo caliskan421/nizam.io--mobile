@@ -37,7 +37,7 @@ final class ActivityLogControllerProvider
 }
 
 String _$activityLogControllerHash() =>
-    r'41ea44023f7f94c95fe2945c850d3b25c5f2f5b4';
+    r'd9c8abc50a02f433fb73b65837efaf313b9d4f7d';
 
 /// İşlem geçmişi kayıtları (yeniden yükleme yalnız dokunuşla).
 

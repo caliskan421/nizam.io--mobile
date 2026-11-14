@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket v0.19.0-api (7092e4f4a38eb9fd212de5cb65c5e7b277eacd16) — docs/api/openapi.yaml
+// Kaynak: nizam.io--backend etiket v0.19.0-api (da5e1f98b4534b7ca6d8f298ef21308d39956aa9) — docs/api/openapi.yaml
 
 import '../api_meta.dart';
 

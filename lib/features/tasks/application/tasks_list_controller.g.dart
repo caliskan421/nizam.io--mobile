@@ -283,7 +283,7 @@ final class TasksListResultProvider
   }
 }
 
-String _$tasksListResultHash() => r'6e0971b7a498b107c0ba2d06d5d4e47689009ece';
+String _$tasksListResultHash() => r'96feb52e6be99f5a574971756eee1f3fac9fc1a7';
 
 /// Seçili görünümün süzülmüş/sıralı listesi ve görünüm sayıları; yalnız sorguyu etkileyen
 /// alanlar (görünüm, sıralama, yön, süzgeç) ya da katalog değişince yeniden hesaplanır

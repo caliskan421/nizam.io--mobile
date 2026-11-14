@@ -97,20 +97,18 @@ final teamUserProfileProvider = FutureProvider.autoDispose
       );
     });
 
-/// Kişinin [department] koordinatörlüğündeki açık ve geciken görev sayısı (katalogdan).
+/// Kişinin [department] koordinatörlüğündeki açık ve geciken görev sayısı (katalogdan; sayım
+/// ana sayfanın ekip yükü şeridiyle aynı kuraldan, `teamLoad`).
 ({int open, int late}) teamLoadOf(
   TaskCatalog catalog,
   String department,
   String accountId,
 ) {
-  var open = 0;
-  var late = 0;
-  for (final t in catalog.tasksOf(department)) {
-    if (t.isDone || !t.assignees.contains(accountId)) continue;
-    open++;
-    if (t.isOverdue) late++;
-  }
-  return (open: open, late: late);
+  final load = teamLoad(
+    catalog.tasksOf(department),
+    team: [accountId],
+  ).firstWhere((l) => l.personId == accountId);
+  return (open: load.open, late: load.late);
 }
 
 /// Ekip komutları (koordinatör): "Ekipten çıkar". Durum = meşgul.

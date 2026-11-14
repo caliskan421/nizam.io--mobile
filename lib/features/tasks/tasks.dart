@@ -36,7 +36,7 @@ export 'application/tasks_providers.dart'
         uploadDigesterProvider;
 export 'domain/chat_task_planner.dart';
 export 'domain/coordinator_board.dart'
-    show CoordinatorSummary, TeamLoad, isTaskLate;
+    show CoordinatorSummary, TeamLoad, isTaskLate, teamLoad;
 export 'domain/meeting_invitees.dart' show MeetingInvitees;
 export 'domain/meeting_planner.dart';
 export 'domain/task_access.dart';

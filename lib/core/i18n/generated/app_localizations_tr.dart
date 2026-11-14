@@ -377,6 +377,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Departman bu programa bağlı değil.';
 
   @override
+  String get errOrganizationDepartmentUsage =>
+      'Koordinatörlüğe bağlı kayıtlar var; önce bunları kaldırın.';
+
+  @override
   String get errOrganizationExistingDepartment =>
       'Bu adda bir departman zaten var.';
 

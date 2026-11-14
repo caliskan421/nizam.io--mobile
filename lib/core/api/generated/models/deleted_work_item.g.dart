@@ -14,6 +14,7 @@ _DeletedWorkItem _$DeletedWorkItemFromJson(Map<String, dynamic> json) =>
       status: json['status'] as String,
       deletedAt: DateTime.parse(json['deleted_at'] as String),
       fileCount: (json['file_count'] as num).toInt(),
+      deletedByDepartment: json['deleted_by_department'] as bool,
     );
 
 Map<String, dynamic> _$DeletedWorkItemToJson(_DeletedWorkItem instance) =>
@@ -24,4 +25,5 @@ Map<String, dynamic> _$DeletedWorkItemToJson(_DeletedWorkItem instance) =>
       'status': instance.status,
       'deleted_at': instance.deletedAt.toIso8601String(),
       'file_count': instance.fileCount,
+      'deleted_by_department': instance.deletedByDepartment,
     };

@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeletedWorkItem {
 
-@JsonKey(name: 'work_item_id') String get workItemId; String get title;@JsonKey(name: 'department_id') String get departmentId; String get status;@JsonKey(name: 'deleted_at') DateTime get deletedAt;@JsonKey(name: 'file_count') int get fileCount;
+@JsonKey(name: 'work_item_id') String get workItemId; String get title;@JsonKey(name: 'department_id') String get departmentId; String get status;@JsonKey(name: 'deleted_at') DateTime get deletedAt;@JsonKey(name: 'file_count') int get fileCount;/// Görev departmanıyla birlikte silindi (ADR-0043): departman geri yüklenince geri gelir; departman silinmişken tek başına geri yüklenemez (409 `work.department_unavailable`).
+@JsonKey(name: 'deleted_by_department') bool get deletedByDepartment;
 /// Create a copy of DeletedWorkItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $DeletedWorkItemCopyWith<DeletedWorkItem> get copyWith => _$DeletedWorkItemCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as DeletedWorkItem;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeletedWorkItem&&(identical(other.workItemId, _this.workItemId) || other.workItemId == _this.workItemId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.deletedAt, _this.deletedAt) || other.deletedAt == _this.deletedAt)&&(identical(other.fileCount, _this.fileCount) || other.fileCount == _this.fileCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeletedWorkItem&&(identical(other.workItemId, _this.workItemId) || other.workItemId == _this.workItemId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.departmentId, _this.departmentId) || other.departmentId == _this.departmentId)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.deletedAt, _this.deletedAt) || other.deletedAt == _this.deletedAt)&&(identical(other.fileCount, _this.fileCount) || other.fileCount == _this.fileCount)&&(identical(other.deletedByDepartment, _this.deletedByDepartment) || other.deletedByDepartment == _this.deletedByDepartment));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as DeletedWorkItem;
-  return Object.hash(runtimeType,_this.workItemId,_this.title,_this.departmentId,_this.status,_this.deletedAt,_this.fileCount);
+  return Object.hash(runtimeType,_this.workItemId,_this.title,_this.departmentId,_this.status,_this.deletedAt,_this.fileCount,_this.deletedByDepartment);
 }
 
 @override
 String toString() {
   final _this = this as DeletedWorkItem;
-  return 'DeletedWorkItem(workItemId: ${_this.workItemId}, title: ${_this.title}, departmentId: ${_this.departmentId}, status: ${_this.status}, deletedAt: ${_this.deletedAt}, fileCount: ${_this.fileCount})';
+  return 'DeletedWorkItem(workItemId: ${_this.workItemId}, title: ${_this.title}, departmentId: ${_this.departmentId}, status: ${_this.status}, deletedAt: ${_this.deletedAt}, fileCount: ${_this.fileCount}, deletedByDepartment: ${_this.deletedByDepartment})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $DeletedWorkItemCopyWith<$Res>  {
   factory $DeletedWorkItemCopyWith(DeletedWorkItem value, $Res Function(DeletedWorkItem) _then) = _$DeletedWorkItemCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'work_item_id') String workItemId, String title,@JsonKey(name: 'department_id') String departmentId, String status,@JsonKey(name: 'deleted_at') DateTime deletedAt,@JsonKey(name: 'file_count') int fileCount
+@JsonKey(name: 'work_item_id') String workItemId, String title,@JsonKey(name: 'department_id') String departmentId, String status,@JsonKey(name: 'deleted_at') DateTime deletedAt,@JsonKey(name: 'file_count') int fileCount,@JsonKey(name: 'deleted_by_department') bool deletedByDepartment
 });
 
 
@@ -71,7 +72,7 @@ class _$DeletedWorkItemCopyWithImpl<$Res>
 
 /// Create a copy of DeletedWorkItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? workItemId = null,Object? title = null,Object? departmentId = null,Object? status = null,Object? deletedAt = null,Object? fileCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? workItemId = null,Object? title = null,Object? departmentId = null,Object? status = null,Object? deletedAt = null,Object? fileCount = null,Object? deletedByDepartment = null,}) {
   return _then(DeletedWorkItem(
 workItemId: null == workItemId ? _self.workItemId : workItemId // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -79,7 +80,8 @@ as String,departmentId: null == departmentId ? _self.departmentId : departmentId
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,deletedAt: null == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,fileCount: null == fileCount ? _self.fileCount : fileCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,deletedByDepartment: null == deletedByDepartment ? _self.deletedByDepartment : deletedByDepartment // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -164,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title, @JsonKey(name: 'department_id')  String departmentId,  String status, @JsonKey(name: 'deleted_at')  DateTime deletedAt, @JsonKey(name: 'file_count')  int fileCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title, @JsonKey(name: 'department_id')  String departmentId,  String status, @JsonKey(name: 'deleted_at')  DateTime deletedAt, @JsonKey(name: 'file_count')  int fileCount, @JsonKey(name: 'deleted_by_department')  bool deletedByDepartment)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DeletedWorkItem() when $default != null:
-return $default(_that.workItemId,_that.title,_that.departmentId,_that.status,_that.deletedAt,_that.fileCount);case _:
+return $default(_that.workItemId,_that.title,_that.departmentId,_that.status,_that.deletedAt,_that.fileCount,_that.deletedByDepartment);case _:
   return orElse();
 
 }
@@ -185,10 +187,10 @@ return $default(_that.workItemId,_that.title,_that.departmentId,_that.status,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title, @JsonKey(name: 'department_id')  String departmentId,  String status, @JsonKey(name: 'deleted_at')  DateTime deletedAt, @JsonKey(name: 'file_count')  int fileCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title, @JsonKey(name: 'department_id')  String departmentId,  String status, @JsonKey(name: 'deleted_at')  DateTime deletedAt, @JsonKey(name: 'file_count')  int fileCount, @JsonKey(name: 'deleted_by_department')  bool deletedByDepartment)  $default,) {final _that = this;
 switch (_that) {
 case _DeletedWorkItem():
-return $default(_that.workItemId,_that.title,_that.departmentId,_that.status,_that.deletedAt,_that.fileCount);case _:
+return $default(_that.workItemId,_that.title,_that.departmentId,_that.status,_that.deletedAt,_that.fileCount,_that.deletedByDepartment);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +207,10 @@ return $default(_that.workItemId,_that.title,_that.departmentId,_that.status,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title, @JsonKey(name: 'department_id')  String departmentId,  String status, @JsonKey(name: 'deleted_at')  DateTime deletedAt, @JsonKey(name: 'file_count')  int fileCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'work_item_id')  String workItemId,  String title, @JsonKey(name: 'department_id')  String departmentId,  String status, @JsonKey(name: 'deleted_at')  DateTime deletedAt, @JsonKey(name: 'file_count')  int fileCount, @JsonKey(name: 'deleted_by_department')  bool deletedByDepartment)?  $default,) {final _that = this;
 switch (_that) {
 case _DeletedWorkItem() when $default != null:
-return $default(_that.workItemId,_that.title,_that.departmentId,_that.status,_that.deletedAt,_that.fileCount);case _:
+return $default(_that.workItemId,_that.title,_that.departmentId,_that.status,_that.deletedAt,_that.fileCount,_that.deletedByDepartment);case _:
   return null;
 
 }
@@ -220,7 +222,7 @@ return $default(_that.workItemId,_that.title,_that.departmentId,_that.status,_th
 @JsonSerializable()
 
 class _DeletedWorkItem implements DeletedWorkItem {
-  const _DeletedWorkItem({@JsonKey(name: 'work_item_id') required this.workItemId, required this.title, @JsonKey(name: 'department_id') required this.departmentId, required this.status, @JsonKey(name: 'deleted_at') required this.deletedAt, @JsonKey(name: 'file_count') required this.fileCount});
+  const _DeletedWorkItem({@JsonKey(name: 'work_item_id') required this.workItemId, required this.title, @JsonKey(name: 'department_id') required this.departmentId, required this.status, @JsonKey(name: 'deleted_at') required this.deletedAt, @JsonKey(name: 'file_count') required this.fileCount, @JsonKey(name: 'deleted_by_department') required this.deletedByDepartment});
   factory _DeletedWorkItem.fromJson(Map<String, dynamic> json) => _$DeletedWorkItemFromJson(json);
 
 @override@JsonKey(name: 'work_item_id') final  String workItemId;
@@ -229,6 +231,8 @@ class _DeletedWorkItem implements DeletedWorkItem {
 @override final  String status;
 @override@JsonKey(name: 'deleted_at') final  DateTime deletedAt;
 @override@JsonKey(name: 'file_count') final  int fileCount;
+/// Görev departmanıyla birlikte silindi (ADR-0043): departman geri yüklenince geri gelir; departman silinmişken tek başına geri yüklenemez (409 `work.department_unavailable`).
+@override@JsonKey(name: 'deleted_by_department') final  bool deletedByDepartment;
 
 /// Create a copy of DeletedWorkItem
 /// with the given fields replaced by the non-null parameter values.
@@ -243,18 +247,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeletedWorkItem&&(identical(other.workItemId, workItemId) || other.workItemId == workItemId)&&(identical(other.title, title) || other.title == title)&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.status, status) || other.status == status)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.fileCount, fileCount) || other.fileCount == fileCount));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeletedWorkItem&&(identical(other.workItemId, workItemId) || other.workItemId == workItemId)&&(identical(other.title, title) || other.title == title)&&(identical(other.departmentId, departmentId) || other.departmentId == departmentId)&&(identical(other.status, status) || other.status == status)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.fileCount, fileCount) || other.fileCount == fileCount)&&(identical(other.deletedByDepartment, deletedByDepartment) || other.deletedByDepartment == deletedByDepartment));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,workItemId,title,departmentId,status,deletedAt,fileCount);
+    return Object.hash(runtimeType,workItemId,title,departmentId,status,deletedAt,fileCount,deletedByDepartment);
 }
 
 @override
 String toString() {
-    return 'DeletedWorkItem(workItemId: $workItemId, title: $title, departmentId: $departmentId, status: $status, deletedAt: $deletedAt, fileCount: $fileCount)';
+    return 'DeletedWorkItem(workItemId: $workItemId, title: $title, departmentId: $departmentId, status: $status, deletedAt: $deletedAt, fileCount: $fileCount, deletedByDepartment: $deletedByDepartment)';
 }
 
 
@@ -265,7 +269,7 @@ abstract mixin class _$DeletedWorkItemCopyWith<$Res> implements $DeletedWorkItem
   factory _$DeletedWorkItemCopyWith(_DeletedWorkItem value, $Res Function(_DeletedWorkItem) _then) = __$DeletedWorkItemCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'work_item_id') String workItemId, String title,@JsonKey(name: 'department_id') String departmentId, String status,@JsonKey(name: 'deleted_at') DateTime deletedAt,@JsonKey(name: 'file_count') int fileCount
+@JsonKey(name: 'work_item_id') String workItemId, String title,@JsonKey(name: 'department_id') String departmentId, String status,@JsonKey(name: 'deleted_at') DateTime deletedAt,@JsonKey(name: 'file_count') int fileCount,@JsonKey(name: 'deleted_by_department') bool deletedByDepartment
 });
 
 
@@ -282,7 +286,7 @@ class __$DeletedWorkItemCopyWithImpl<$Res>
 
 /// Create a copy of DeletedWorkItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? workItemId = null,Object? title = null,Object? departmentId = null,Object? status = null,Object? deletedAt = null,Object? fileCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? workItemId = null,Object? title = null,Object? departmentId = null,Object? status = null,Object? deletedAt = null,Object? fileCount = null,Object? deletedByDepartment = null,}) {
   return _then(_DeletedWorkItem(
 workItemId: null == workItemId ? _self.workItemId : workItemId // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -290,7 +294,8 @@ as String,departmentId: null == departmentId ? _self.departmentId : departmentId
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,deletedAt: null == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,fileCount: null == fileCount ? _self.fileCount : fileCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,deletedByDepartment: null == deletedByDepartment ? _self.deletedByDepartment : deletedByDepartment // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

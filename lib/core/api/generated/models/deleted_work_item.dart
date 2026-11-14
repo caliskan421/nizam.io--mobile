@@ -16,6 +16,9 @@ abstract class DeletedWorkItem with _$DeletedWorkItem {
     required String status,
     @JsonKey(name: 'deleted_at') required DateTime deletedAt,
     @JsonKey(name: 'file_count') required int fileCount,
+
+    /// Görev departmanıyla birlikte silindi (ADR-0043): departman geri yüklenince geri gelir; departman silinmişken tek başına geri yüklenemez (409 `work.department_unavailable`).
+    @JsonKey(name: 'deleted_by_department') required bool deletedByDepartment,
   }) = _DeletedWorkItem;
 
   factory DeletedWorkItem.fromJson(Map<String, Object?> json) =>

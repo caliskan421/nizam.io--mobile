@@ -724,6 +724,12 @@ abstract class AppLocalizations {
   /// **'Departman bu programa bağlı değil.'**
   String get errOrganizationDepartmentNotLinked;
 
+  /// organization.department_usage
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlüğe bağlı kayıtlar var; önce bunları kaldırın.'**
+  String get errOrganizationDepartmentUsage;
+
   /// organization.existing_department
   ///
   /// In tr, this message translates to:

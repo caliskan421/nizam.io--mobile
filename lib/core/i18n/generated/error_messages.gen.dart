@@ -110,6 +110,7 @@ const localizedErrorCodes = <String>{
   'organization.department_in_use',
   'organization.department_not_found',
   'organization.department_not_linked',
+  'organization.department_usage',
   'organization.existing_department',
   'organization.idempotency_key_reused',
   'organization.input_invalid',
@@ -518,6 +519,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errOrganizationDepartmentNotFound;
     case 'organization.department_not_linked':
       return l.errOrganizationDepartmentNotLinked;
+    case 'organization.department_usage':
+      return l.errOrganizationDepartmentUsage;
     case 'organization.existing_department':
       return l.errOrganizationExistingDepartment;
     case 'organization.idempotency_key_reused':

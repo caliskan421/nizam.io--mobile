@@ -20,6 +20,7 @@ import '../models/delete_department_result.dart';
 import '../models/deleted_account_list.dart';
 import '../models/deleted_department_list.dart';
 import '../models/department.dart';
+import '../models/department_delete_impact.dart';
 import '../models/department_lifecycle_result.dart';
 import '../models/department_list.dart';
 import '../models/known_user.dart';
@@ -135,6 +136,14 @@ abstract class OrganizationClient {
         'openapi': <String, dynamic>{
           'tags': <String>["organization"],
           'operationId': "removeCoordinator",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> departmentDeleteImpactOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["organization"],
+          'operationId': "departmentDeleteImpact",
           'externalDocsUrl': null,
         },
       };
@@ -342,6 +351,13 @@ abstract class OrganizationClient {
   });
 
   /// Departmanı siler (geri alınabilir silme).
+  ///
+  /// Departman bütün programlardan düşer; bütün programlardaki canlı.
+  /// görevleri aynı işlemde "Silinenler"e taşınır ve "departmanla.
+  /// silindi" işaretlenir (ADR-0043). Görevler departman geri yüklenince.
+  /// geri gelir; departman silinmişken tek tek geri yüklenemez.
+  /// (409 `work.department_unavailable`). Üyelik satırları korunur,.
+  /// yetkileri düşer. Etki önizlemesi: `GET /v1/departments/{id}/delete-impact`.
   @DELETE('/v1/departments/{id}')
   Future<DeleteDepartmentResult> deleteDepartment({
     @Path('id') required String id,
@@ -464,13 +480,27 @@ abstract class OrganizationClient {
         OrganizationClient.removeCoordinatorOpenapiExtras,
   });
 
+  /// Departman silme etki önizlemesi.
+  ///
+  /// Onay ekranı içindir: bütün programlarda program başına canlı ve.
+  /// silinmiş görev sayıları, dosya, üye ve toplantı sayıları ve kalıcı.
+  /// silmenin çözülemeyen engelleri. Silinmiş departmanda da çalışır.
+  /// (kalıcı silme onayı). Yalnız şirket yöneticisi.
+  @GET('/v1/departments/{id}/delete-impact')
+  Future<DepartmentDeleteImpact> departmentDeleteImpact({
+    @Path('id') required String id,
+    @Extras()
+    Map<String, dynamic>? extras =
+        OrganizationClient.departmentDeleteImpactOpenapiExtras,
+  });
+
   /// Departmanın seçili programdaki görev özeti.
   ///
   /// Sayım `(program, departman)` kapsamlıdır: yalnız `X-Nizamio-Program`.
   /// programının kalemleri sayılır. Departman programa bağlı değilse.
   /// (program yoksa da) 422 `organization.department_not_linked`.
-  /// Kalıcı departman silme engeli bu uçtan.
-  /// bağımsız, bütün programları sayan katalog geneli sayımdır.
+  /// Bütün programların etkisi (silme onayı):.
+  /// `GET /v1/departments/{id}/delete-impact`.
   @GET('/v1/departments/{id}/task-summary')
   Future<TaskSummary> taskSummary({
     @Path('id') required String id,
@@ -694,6 +724,10 @@ abstract class OrganizationClient {
   });
 
   /// Silinmiş departmanı geri yükler.
+  ///
+  /// Departmanla birlikte silinmiş görevler departmanın hâlâ bağlı olduğu.
+  /// programlarda aynı işlemde geri gelir (`work_items_restored`).
+  /// Departmandan önce ayrıca silinmiş görevler silinmiş kalır.
   @PATCH('/v1/admin/restore/departments/{id}')
   Future<DepartmentLifecycleResult> restoreDepartment({
     @Path('id') required String id,
@@ -703,6 +737,17 @@ abstract class OrganizationClient {
   });
 
   /// Silinmiş departmanı kalıcı siler.
+  ///
+  /// Departman önce geri alınabilir silinmiş olmalıdır (409.
+  /// `organization.permanent_requires_deleted`). Departmanın bütün.
+  /// görevleri (silinmişler ve alt görev, not, bağımlılık, atama dahil),.
+  /// dosyaları (nesneleriyle), program bağları, ekip satırları ve.
+  /// departman kaydı kalıcı silinir (ADR-0043). Tablo, proje ya da.
+  /// bekleyen tablo önerisi kapsamı varsa hiçbir şey silinmez: 409.
+  /// `organization.department_in_use`, `fields[]` engel türünü (`tables`,.
+  /// `projects`, `pending_proposals`) ve `message` sayısını taşır (kod.
+  /// `organization.department_usage`). Toplantılar departman adının.
+  /// kopyasıyla kalır. Audit kayıtları kalır.
   @DELETE('/v1/admin/permanent/departments/{id}')
   Future<DepartmentLifecycleResult> permanentDeleteDepartment({
     @Path('id') required String id,

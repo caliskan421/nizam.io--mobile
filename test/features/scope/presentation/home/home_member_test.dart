@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/core/ui/page/nz_app_nav.dart';
@@ -64,49 +65,57 @@ final _catalog = TaskCatalog(
 void main() {
   setUpFonts();
 
-  testScreens(
-    'üye ana sayfası taşmadan çizilir; özet kutusu listeyi açar',
-    (tester, screen) async {
-      final home = memberHome([
-        _task('a', TaskStatus.review),
-        _task('b', TaskStatus.inProgress),
-        _task('r', TaskStatus.returned),
-        _task('d', TaskStatus.done),
-      ]);
-      final nav = RecordingAppNav();
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            sessionGenerationProvider.overrideWithValue(1),
-            scopeStateProvider.overrideWith(
-              (ref) => const ScopeSelection(programId: 'p'),
-            ),
-            taskCatalogRepositoryProvider.overrideWithValue(_Catalog(_catalog)),
-            memberHomeProvider.overrideWith((ref) => home),
-            meetingsBoardControllerProvider.overrideWith(_NoMeetings.new),
-          ],
-          child: testApp(
-            NzAppNavScope(
-              nav: nav,
-              child: SingleChildScrollView(
-                child: HomeMemberFeed(
-                  wide: screen.size.width >= homeWideMinWidth,
-                ),
+  testScreens('üye ana sayfası taşmadan çizilir; özet kutusu listeyi açar', (
+    tester,
+    screen,
+  ) async {
+    final home = memberHome([
+      _task('a', TaskStatus.review),
+      _task('b', TaskStatus.inProgress),
+      _task('r', TaskStatus.returned),
+      _task('d', TaskStatus.done),
+    ]);
+    final nav = RecordingAppNav();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sessionGenerationProvider.overrideWithValue(1),
+          scopeStateProvider.overrideWith(
+            (ref) => const ScopeSelection(programId: 'p'),
+          ),
+          taskCatalogRepositoryProvider.overrideWithValue(_Catalog(_catalog)),
+          memberHomeProvider.overrideWith((ref) => home),
+          meetingsBoardControllerProvider.overrideWith(_NoMeetings.new),
+        ],
+        child: testApp(
+          NzAppNavScope(
+            nav: nav,
+            child: SingleChildScrollView(
+              child: HomeMemberFeed(
+                wide: screen.size.width >= homeWideMinWidth,
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    // Nokta çipleri yok; dört özet kutusu var.
+    final l = AppLocalizationsTr();
+    for (final (label, view) in [
+      (l.uiHomeKpiLate, 'late'),
+      (l.uiHomeKpiReview, 'review'),
+      (l.uiTasksViewReturned, 'returned'),
+      (l.uiHomeKpiDone, 'done'),
+    ]) {
+      final tile = find.bySemanticsLabel(RegExp('^${RegExp.escape(label)}:'));
+      expect(tile, findsOneWidget);
+      await tester.ensureVisible(tile);
       await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-      // Nokta çipleri yok; dört özet kutusu var.
-      final returned = find.bySemanticsLabel(RegExp('^İade: 1'));
-      expect(returned, findsOneWidget);
-      await tester.ensureVisible(returned);
-      await tester.pumpAndSettle();
-      await tester.tap(returned);
-      expect(nav.calls, ['tasks:returned']);
-      expect(tester.takeException(), isNull);
-    },
-  );
+      await tester.tap(tile);
+      expect(nav.calls.last, 'tasks:$view');
+    }
+    expect(tester.takeException(), isNull);
+  });
 }

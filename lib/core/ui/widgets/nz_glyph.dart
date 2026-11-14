@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../extensions/context_ext.dart';
+
 /// Tasarım çizgi ikonu (RoketPortal ana sayfa ikon seti): 24×24 görünüm kutusunda tek SVG yolu,
 /// çizgi 1.75, yuvarlak uç ve birleşim; dolgu yok. Yol verisi pakete bağlı kalmadan [NzGlyphIcon]
 /// içinde çizilir (M/L/H/V/C/S/A/Z, mutlak ve göreli).
@@ -91,7 +93,7 @@ class NzGlyphIcon extends StatelessWidget {
         size: Size.square(side),
         painter: _GlyphPainter(
           glyphPath(glyph.path),
-          color ?? theme.color ?? const Color(0xFF000000),
+          color ?? theme.color ?? context.colors.text,
         ),
       ),
     );

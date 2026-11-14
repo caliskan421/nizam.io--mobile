@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
@@ -512,97 +511,6 @@ class HomeUpcomingMeetings extends ConsumerWidget {
   /// Toplantıda canlı konferans var mı (üye yaklaşanlarıyla ortak).
   static bool isLive(Meeting m) =>
       m.summary?.conferenceStatus == SummaryConferenceStatus.live;
-}
-
-/// Toplantı satırı: tarih kutusu (gün / mono saat; bugün vurgulu), başlık, koordinatörlük
-/// kodları (ilki kalın) + katılımcı sayısı (veride varsa), canlıysa "● Canlı" hapı.
-class HomeMeetingRow extends StatelessWidget {
-  const HomeMeetingRow({
-    super.key,
-    required this.meeting,
-    required this.now,
-    required this.live,
-    required this.codes,
-    required this.onTap,
-  });
-
-  final Meeting meeting;
-  final DateTime now;
-  final bool live;
-  final List<String> codes;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final t = context.text;
-    final at = meeting.meetingDate.toLocal();
-    final today = DateUtils.isSameDay(at, now);
-    final people = meeting.summary?.participantCount ?? 0;
-    final meta = t.bodyMd.copyWith(color: c.textMuted);
-    return Semantics(
-      button: true,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(NizamioSpacing.space4),
-          child: Row(
-            children: [
-              HomeDateBox(
-                top: today
-                    ? l.uiMeetingsGroupToday
-                    : DateFormat('EEE d', 'tr').format(at),
-                bottom: DateFormat.Hm('tr').format(at),
-                highlight: today,
-              ),
-              const Gap(NizamioSpacing.gapMd),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      meeting.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.bodyLg.copyWith(fontWeight: FontWeight.w500),
-                    ),
-                    const Gap(NizamioSpacing.space1),
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          for (final (i, code) in codes.indexed)
-                            TextSpan(
-                              text: i == 0 ? code : ' $code',
-                              style: i == 0
-                                  ? t.bodyMd.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                    )
-                                  : meta,
-                            ),
-                          if (people > 0)
-                            TextSpan(
-                              text: ' · $people ${l.uiMeetingsPeopleTail}',
-                              style: meta,
-                            ),
-                        ],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              if (live) ...[
-                const Gap(NizamioSpacing.space2),
-                NzDotChip(color: c.success, label: l.uiMeetingsConfLive),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// Satır başı tarih kutusu: üstte gün ("Bugün" / "Per 14"), altta mono satır (saat ya da

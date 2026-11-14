@@ -41,7 +41,23 @@ class HomeMemberFocusCard extends ConsumerWidget {
     final c = context.colors;
     final t = context.text;
     final task = this.task;
-    final kicker = NzKicker(l.uiHomeMemberFocusKicker, trailing: code);
+    final kicker = Row(
+      children: [
+        NzGlyphIcon(
+          switch (task?.status) {
+            TaskStatus.inProgress => NzGlyphs.inProgress,
+            TaskStatus.review => NzGlyphs.review,
+            TaskStatus.done => NzGlyphs.done,
+            TaskStatus.returned => NzGlyphs.returned,
+            _ => NzGlyphs.notStarted,
+          },
+          size: NizamioSize.iconSizeSm,
+          color: c.textMuted,
+        ),
+        const Gap(NizamioSpacing.space2),
+        Expanded(child: NzKicker(l.uiHomeMemberFocusKicker, trailing: code)),
+      ],
+    );
     if (task == null) {
       return NzCard.filled(
         child: Column(
@@ -84,14 +100,16 @@ class HomeMemberFocusCard extends ConsumerWidget {
         children: [
           kicker,
           const Gap(NizamioSpacing.space2),
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: open,
-            child: Text(
-              task.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: t.titleSm,
+          NzPressable(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: open,
+              child: Text(
+                task.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: t.titleSm,
+              ),
             ),
           ),
           const Gap(NizamioSpacing.space3),
@@ -169,7 +187,11 @@ class HomeMemberReturnedCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              NzDot(color: c.danger),
+              NzGlyphIcon(
+                NzGlyphs.returned,
+                size: NizamioSize.iconSizeSm,
+                color: c.danger,
+              ),
               const Gap(NizamioSpacing.space2),
               Expanded(
                 child: Text(

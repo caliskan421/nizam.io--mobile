@@ -14,6 +14,7 @@ import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/nz_kicker.dart';
 import '../../coordinatorships/coordinatorships.dart';
+import '../../messages/messages.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
 import '../application/team_controller.dart';
@@ -26,7 +27,8 @@ import 'admin_user_list_row.dart';
 /// arama, üç öğeli
 /// rol bölücü (CSV ve koordinatörlük süzgeci yok), yönetici dizininin satır bileşeni
 /// ([AdminUserListRow]). On satırdan sonrası "Tümünü göster (n)". Üye görünümünde liste
-/// türetilmiştir ve salt okunurdur.
+/// türetilmiştir ve salt okunurdur; satır sonunda kişiyle sohbet açan mesaj düğmesi vardır
+/// (kendi satırı hariç).
 class TeamRosterView extends ConsumerStatefulWidget {
   const TeamRosterView({super.key, required this.onOpen});
 
@@ -214,6 +216,7 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
                       key: ValueKey(p.accountId),
                       person: p,
                       self: p.accountId == view.access?.accountId,
+                      message: view.isMemberView,
                       load: source.countsLoad && catalog != null
                           ? teamLoadOf(catalog, team.departmentId, p.accountId)
                           : null,
@@ -242,6 +245,7 @@ class _TeamRow extends StatelessWidget {
     super.key,
     required this.person,
     required this.self,
+    required this.message,
     required this.load,
     required this.first,
     required this.last,
@@ -250,6 +254,9 @@ class _TeamRow extends StatelessWidget {
 
   final TeamPerson person;
   final bool self;
+
+  /// Satır sonunda mesaj düğmesi (Üye görünümü; kendi satırında yok).
+  final bool message;
   final ({int open, int late})? load;
   final bool first;
   final bool last;
@@ -277,6 +284,13 @@ class _TeamRow extends StatelessWidget {
       last: last,
       onOpen: onOpen,
       onQuick: onOpen,
+      action: message && !self
+          ? (
+              icon: NzIcons.messages,
+              label: l.uiUsersMessage,
+              onPressed: () => openPersonChat(context, person.accountId),
+            )
+          : null,
     );
   }
 }

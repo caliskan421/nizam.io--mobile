@@ -134,7 +134,7 @@ final class TasksListControllerProvider
 }
 
 String _$tasksListControllerHash() =>
-    r'e6faae0f62c436cdac30bc0758a9e3dd61055912';
+    r'41e0b673e1db86fb96543a5914c4b30445042690';
 
 /// Görevler listesi denetleyicisi. [view] ve [people] (virgülle ayrılmış kişi kimlikleri)
 /// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: uygulama

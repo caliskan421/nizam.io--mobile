@@ -62,7 +62,8 @@ String _$archiveRepositoryHash() => r'5b952ae7568e20c4e616e6ec337c9ec5b15b0b77';
 
 /// Arşiv isteklerinin kapsamı: etkin görünümden (`effectiveAccessProvider`; rol ve
 /// koordinatörlük seçimi, yoksa varsayılanı). Departman: Koordinatör/Üye görünümünde seçili
-/// koordinatörlük; yönetici görünümünde (tüm koordinatörlükler) programın ilk departmanı. Hiçbiri
+/// koordinatörlük; yönetici görünümünde (tüm koordinatörlükler) programın ilk departmanı, yoksa
+/// yöneticinin bu programdaki ilk ekip satırı. Hiçbiri
 /// yoksa `client.scope_missing` (istek gönderilmez). Yalnız bu iki değer değişince yeniden
 /// hesaplanır (görev yazmaları arşivi yeniden okutmaz).
 
@@ -71,7 +72,8 @@ final archiveScopeProvider = ArchiveScopeProvider._();
 
 /// Arşiv isteklerinin kapsamı: etkin görünümden (`effectiveAccessProvider`; rol ve
 /// koordinatörlük seçimi, yoksa varsayılanı). Departman: Koordinatör/Üye görünümünde seçili
-/// koordinatörlük; yönetici görünümünde (tüm koordinatörlükler) programın ilk departmanı. Hiçbiri
+/// koordinatörlük; yönetici görünümünde (tüm koordinatörlükler) programın ilk departmanı, yoksa
+/// yöneticinin bu programdaki ilk ekip satırı. Hiçbiri
 /// yoksa `client.scope_missing` (istek gönderilmez). Yalnız bu iki değer değişince yeniden
 /// hesaplanır (görev yazmaları arşivi yeniden okutmaz).
 
@@ -85,7 +87,8 @@ final class ArchiveScopeProvider
     with $FutureModifier<ArchiveScope>, $FutureProvider<ArchiveScope> {
   /// Arşiv isteklerinin kapsamı: etkin görünümden (`effectiveAccessProvider`; rol ve
   /// koordinatörlük seçimi, yoksa varsayılanı). Departman: Koordinatör/Üye görünümünde seçili
-  /// koordinatörlük; yönetici görünümünde (tüm koordinatörlükler) programın ilk departmanı. Hiçbiri
+  /// koordinatörlük; yönetici görünümünde (tüm koordinatörlükler) programın ilk departmanı, yoksa
+  /// yöneticinin bu programdaki ilk ekip satırı. Hiçbiri
   /// yoksa `client.scope_missing` (istek gönderilmez). Yalnız bu iki değer değişince yeniden
   /// hesaplanır (görev yazmaları arşivi yeniden okutmaz).
   ArchiveScopeProvider._()
@@ -114,4 +117,4 @@ final class ArchiveScopeProvider
   }
 }
 
-String _$archiveScopeHash() => r'bbb5ad7cc6b2d09301d8bbb78fd1e6ded1cd97a2';
+String _$archiveScopeHash() => r'99ea5fdec8aafbda93849d372753291c2821a6ae';

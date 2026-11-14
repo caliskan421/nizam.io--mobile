@@ -13,6 +13,7 @@ import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../application/task_detail_controller.dart';
 import '../../application/tasks_providers.dart';
+import '../../domain/coordinator_board.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_writes.dart';
 import '../task_texts.dart';
@@ -285,6 +286,7 @@ class DateRequestForm extends ConsumerWidget {
     final t = context.text;
     final p = taskDetailControllerProvider(code);
     final d = ref.watch(p).dateDraft;
+    final showErrors = ref.watch(p.select((s) => s.showErrors));
     final ctl = ref.read(p.notifier);
     final task = ref.watch(taskCatalogControllerProvider).value?.task(code);
     if (d == null || task == null) return const SizedBox.shrink();
@@ -327,9 +329,16 @@ class DateRequestForm extends ConsumerWidget {
         NzTextField(
           label: l.uiTasksReason,
           hint: l.uiTasksReasonHint,
+          helper: l.uiTasksRequestGoesAdmin,
           initialValue: d.reason,
+          maxLength: decisionReasonMaxLength,
+          invalid: showErrors && !isValidDecisionReason(d.reason),
           onChanged: (v) => ctl.updateDateDraft(d.copyWith(reason: v)),
         ),
+        if (showErrors && !isValidDecisionReason(d.reason)) ...[
+          const Gap(NizamioSpacing.space1),
+          TaskFormError(l.uiTasksErrReasonRequired),
+        ],
       ],
     );
   }

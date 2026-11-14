@@ -3429,6 +3429,94 @@
   "@uiHomeAdminScopeNote": {
     "description": "ui.home.admin_scope_note"
   },
+  "uiHomeCoordDoneTail": "görev bitti",
+  "@uiHomeCoordDoneTail": {
+    "description": "ui.home.coord_done_tail"
+  },
+  "uiHomeChipLate": "geciken",
+  "@uiHomeChipLate": {
+    "description": "ui.home.chip_late"
+  },
+  "uiHomeChipReview": "onayında",
+  "@uiHomeChipReview": {
+    "description": "ui.home.chip_review"
+  },
+  "uiHomeChipReturned": "iade",
+  "@uiHomeChipReturned": {
+    "description": "ui.home.chip_returned"
+  },
+  "uiHomeChipUnassigned": "atanmamış",
+  "@uiHomeChipUnassigned": {
+    "description": "ui.home.chip_unassigned"
+  },
+  "uiHomeChipRequests": "tarih talebi yöneticide",
+  "@uiHomeChipRequests": {
+    "description": "ui.home.chip_requests"
+  },
+  "uiHomeQueueTitle": "Onay bekleyenler",
+  "@uiHomeQueueTitle": {
+    "description": "ui.home.queue_title"
+  },
+  "uiHomeSeeAll": "Tümü",
+  "@uiHomeSeeAll": {
+    "description": "ui.home.see_all"
+  },
+  "uiHomeQueueEmpty": "Onay bekleyen iş yok.",
+  "@uiHomeQueueEmpty": {
+    "description": "ui.home.queue_empty"
+  },
+  "uiHomeUnassignedTitle": "Atanmamış",
+  "@uiHomeUnassignedTitle": {
+    "description": "ui.home.unassigned_title"
+  },
+  "uiHomeLoadTitle": "Ekip yükü",
+  "@uiHomeLoadTitle": {
+    "description": "ui.home.load_title"
+  },
+  "uiHomeLoadOpenTail": "açık",
+  "@uiHomeLoadOpenTail": {
+    "description": "ui.home.load_open_tail"
+  },
+  "uiHomeLoadLateTail": "geç",
+  "@uiHomeLoadLateTail": {
+    "description": "ui.home.load_late_tail"
+  },
+  "uiHomeLoadDoing": "devam",
+  "@uiHomeLoadDoing": {
+    "description": "ui.home.load_doing"
+  },
+  "uiHomeLoadReview": "onayda",
+  "@uiHomeLoadReview": {
+    "description": "ui.home.load_review"
+  },
+  "uiHomeLoadLate": "geciken",
+  "@uiHomeLoadLate": {
+    "description": "ui.home.load_late"
+  },
+  "uiHomeLoadReturned": "iade",
+  "@uiHomeLoadReturned": {
+    "description": "ui.home.load_returned"
+  },
+  "uiHomeLoadEmpty": "Ekipte açık görev yok.",
+  "@uiHomeLoadEmpty": {
+    "description": "ui.home.load_empty"
+  },
+  "uiHomeMeetingsTitle": "Yaklaşan toplantılar",
+  "@uiHomeMeetingsTitle": {
+    "description": "ui.home.meetings_title"
+  },
+  "uiHomeMeetingsEmpty": "Yaklaşan toplantın yok.",
+  "@uiHomeMeetingsEmpty": {
+    "description": "ui.home.meetings_empty"
+  },
+  "uiHomeRequestsTitle": "Tarih taleplerim",
+  "@uiHomeRequestsTitle": {
+    "description": "ui.home.requests_title"
+  },
+  "uiHomeRequestsEmpty": "Tarih talebin yok.",
+  "@uiHomeRequestsEmpty": {
+    "description": "ui.home.requests_empty"
+  },
   "uiIdentityLoginTitle": "Giriş yap",
   "@uiIdentityLoginTitle": {
     "description": "ui.identity.login_title"
@@ -7036,6 +7124,342 @@
   "uiTasksTReminded": "Hatırlatma gönderildi",
   "@uiTasksTReminded": {
     "description": "ui.tasks.t_reminded"
+  },
+  "uiTasksViewUnassigned": "Atanmamış",
+  "@uiTasksViewUnassigned": {
+    "description": "ui.tasks.view_unassigned"
+  },
+  "uiTasksListUnassigned": "atanmamış görevler",
+  "@uiTasksListUnassigned": {
+    "description": "ui.tasks.list_unassigned"
+  },
+  "uiTasksSortStatus": "Duruma göre",
+  "@uiTasksSortStatus": {
+    "description": "ui.tasks.sort_status"
+  },
+  "uiTasksSortStatusShort": "Durum",
+  "@uiTasksSortStatusShort": {
+    "description": "ui.tasks.sort_status_short"
+  },
+  "uiTasksGroupReview": "Onay bekleyen",
+  "@uiTasksGroupReview": {
+    "description": "ui.tasks.group_review"
+  },
+  "uiTasksGroupReviewSub": "incele ve karar ver",
+  "@uiTasksGroupReviewSub": {
+    "description": "ui.tasks.group_review_sub"
+  },
+  "uiTasksGroupUnassigned": "Atanmamış",
+  "@uiTasksGroupUnassigned": {
+    "description": "ui.tasks.group_unassigned"
+  },
+  "uiTasksGroupUnassignedSub": "sorumlu bekliyor",
+  "@uiTasksGroupUnassignedSub": {
+    "description": "ui.tasks.group_unassigned_sub"
+  },
+  "uiTasksGroupDoing": "Devam ediyor",
+  "@uiTasksGroupDoing": {
+    "description": "ui.tasks.group_doing"
+  },
+  "uiTasksGroupReturned": "İade edildi",
+  "@uiTasksGroupReturned": {
+    "description": "ui.tasks.group_returned"
+  },
+  "uiTasksGroupReturnedSub": "atanan yeniden gönderecek",
+  "@uiTasksGroupReturnedSub": {
+    "description": "ui.tasks.group_returned_sub"
+  },
+  "uiTasksGroupTodo": "Başlamadı",
+  "@uiTasksGroupTodo": {
+    "description": "ui.tasks.group_todo"
+  },
+  "uiTasksGroupDone": "Tamamlandı",
+  "@uiTasksGroupDone": {
+    "description": "ui.tasks.group_done"
+  },
+  "uiTasksGroupOther": "Diğer",
+  "@uiTasksGroupOther": {
+    "description": "ui.tasks.group_other"
+  },
+  "uiTasksScopeOpenLc": "açık",
+  "@uiTasksScopeOpenLc": {
+    "description": "ui.tasks.scope_open_lc"
+  },
+  "uiTasksScopeOnlyHead": "yalnız",
+  "@uiTasksScopeOnlyHead": {
+    "description": "ui.tasks.scope_only_head"
+  },
+  "uiTasksScopeOnlyTail": "görevlerini görüyorsun",
+  "@uiTasksScopeOnlyTail": {
+    "description": "ui.tasks.scope_only_tail"
+  },
+  "uiTasksQueueTitle": "Onay bekleyenler",
+  "@uiTasksQueueTitle": {
+    "description": "ui.tasks.queue_title"
+  },
+  "uiTasksQueueBandTail": "görev onayını bekliyor",
+  "@uiTasksQueueBandTail": {
+    "description": "ui.tasks.queue_band_tail"
+  },
+  "uiTasksQueueReview": "İncele",
+  "@uiTasksQueueReview": {
+    "description": "ui.tasks.queue_review"
+  },
+  "uiTasksQueueEmpty": "Onay bekleyen görev kalmadı.",
+  "@uiTasksQueueEmpty": {
+    "description": "ui.tasks.queue_empty"
+  },
+  "uiTasksRequestsTitle": "Tarih talepleri",
+  "@uiTasksRequestsTitle": {
+    "description": "ui.tasks.requests_title"
+  },
+  "uiTasksRequestsActiveLc": "aktif",
+  "@uiTasksRequestsActiveLc": {
+    "description": "ui.tasks.requests_active_lc"
+  },
+  "uiTasksRequestsTotalLc": "talep",
+  "@uiTasksRequestsTotalLc": {
+    "description": "ui.tasks.requests_total_lc"
+  },
+  "uiTasksRequestsTabActive": "Aktif",
+  "@uiTasksRequestsTabActive": {
+    "description": "ui.tasks.requests_tab_active"
+  },
+  "uiTasksRequestsTabApproved": "Kabul edildi",
+  "@uiTasksRequestsTabApproved": {
+    "description": "ui.tasks.requests_tab_approved"
+  },
+  "uiTasksRequestsTabRejected": "Reddedildi",
+  "@uiTasksRequestsTabRejected": {
+    "description": "ui.tasks.requests_tab_rejected"
+  },
+  "uiTasksRequestsEmptyActive": "Aktif tarih talebin yok.",
+  "@uiTasksRequestsEmptyActive": {
+    "description": "ui.tasks.requests_empty_active"
+  },
+  "uiTasksRequestsEmptyApproved": "Kabul edilen tarih talebin yok.",
+  "@uiTasksRequestsEmptyApproved": {
+    "description": "ui.tasks.requests_empty_approved"
+  },
+  "uiTasksRequestsEmptyRejected": "Reddedilen tarih talebin yok.",
+  "@uiTasksRequestsEmptyRejected": {
+    "description": "ui.tasks.requests_empty_rejected"
+  },
+  "uiTasksRequestStatePending": "Bekliyor",
+  "@uiTasksRequestStatePending": {
+    "description": "ui.tasks.request_state_pending"
+  },
+  "uiTasksRequestWaitingAdmin": "Yöneticide bekliyor",
+  "@uiTasksRequestWaitingAdmin": {
+    "description": "ui.tasks.request_waiting_admin"
+  },
+  "uiTasksRequestWaitingNote": "Karar gelene kadar mevcut tarihler geçerli.",
+  "@uiTasksRequestWaitingNote": {
+    "description": "ui.tasks.request_waiting_note"
+  },
+  "uiTasksRequestGoesAdmin": "Talep yöneticiye gider; sebep zorunludur.",
+  "@uiTasksRequestGoesAdmin": {
+    "description": "ui.tasks.request_goes_admin"
+  },
+  "uiTasksErrReasonRequired": "Sebep gerekli.",
+  "@uiTasksErrReasonRequired": {
+    "description": "ui.tasks.err_reason_required"
+  },
+  "uiTasksUnassignedWaiting": "Sorumlu bekliyor",
+  "@uiTasksUnassignedWaiting": {
+    "description": "ui.tasks.unassigned_waiting"
+  },
+  "uiTasksUnassignedRule": "Atanmamış görevler sorumlu atanana kadar başlatılamaz.",
+  "@uiTasksUnassignedRule": {
+    "description": "ui.tasks.unassigned_rule"
+  },
+  "uiTasksAssign": "Ata",
+  "@uiTasksAssign": {
+    "description": "ui.tasks.assign"
+  },
+  "uiTasksAssignTitle": "Sorumlu ata",
+  "@uiTasksAssignTitle": {
+    "description": "ui.tasks.assign_title"
+  },
+  "uiTasksAssignNote": "Havuz bu koordinatörlüğün ekibidir; atanan kişiye bildirim gider.",
+  "@uiTasksAssignNote": {
+    "description": "ui.tasks.assign_note"
+  },
+  "uiTasksAssignEmpty": "Atanabilecek kişi yok.",
+  "@uiTasksAssignEmpty": {
+    "description": "ui.tasks.assign_empty"
+  },
+  "uiTasksTAssignedTail": "kişisine atandı",
+  "@uiTasksTAssignedTail": {
+    "description": "ui.tasks.t_assigned_tail"
+  },
+  "uiTasksDecisionKicker": "Karar bekliyor",
+  "@uiTasksDecisionKicker": {
+    "description": "ui.tasks.decision_kicker"
+  },
+  "uiTasksDecisionSubmitted": "Onaya sunuldu",
+  "@uiTasksDecisionSubmitted": {
+    "description": "ui.tasks.decision_submitted"
+  },
+  "uiTasksDecisionFilesTail": "kanıt dosyası",
+  "@uiTasksDecisionFilesTail": {
+    "description": "ui.tasks.decision_files_tail"
+  },
+  "uiTasksDecisionSubsHead": "alt görevler",
+  "@uiTasksDecisionSubsHead": {
+    "description": "ui.tasks.decision_subs_head"
+  },
+  "uiTasksDecisionNoEvidence": "Kanıt dosyası yüklenmemiş. Onaylamadan önce ekipten kanıt iste ya da iade et.",
+  "@uiTasksDecisionNoEvidence": {
+    "description": "ui.tasks.decision_no_evidence"
+  },
+  "uiTasksDecisionFoot": "Onaylanınca atananlar bilgilendirilir. İade için sebep yazman gerekir.",
+  "@uiTasksDecisionFoot": {
+    "description": "ui.tasks.decision_foot"
+  },
+  "uiTasksReturn": "İade et",
+  "@uiTasksReturn": {
+    "description": "ui.tasks.return"
+  },
+  "uiTasksReturnReasonLabel": "İade sebebi · zorunlu",
+  "@uiTasksReturnReasonLabel": {
+    "description": "ui.tasks.return_reason_label"
+  },
+  "uiTasksReturnReasonHint": "Neyin eksik olduğunu ve nasıl düzeltileceğini yaz…",
+  "@uiTasksReturnReasonHint": {
+    "description": "ui.tasks.return_reason_hint"
+  },
+  "uiTasksReturnInfo": "Atananlar düzeltip yeniden gönderir. Sebep görevde not olarak görünür.",
+  "@uiTasksReturnInfo": {
+    "description": "ui.tasks.return_info"
+  },
+  "uiTasksReturnNoteHead": "İade sebebi",
+  "@uiTasksReturnNoteHead": {
+    "description": "ui.tasks.return_note_head"
+  },
+  "uiTasksApproveNoteLabel": "Onay notu · isteğe bağlı",
+  "@uiTasksApproveNoteLabel": {
+    "description": "ui.tasks.approve_note_label"
+  },
+  "uiTasksApproveNoteHint": "Ekibe iletmek istediğin bir not…",
+  "@uiTasksApproveNoteHint": {
+    "description": "ui.tasks.approve_note_hint"
+  },
+  "uiTasksApproveNoteHead": "Onay notu",
+  "@uiTasksApproveNoteHead": {
+    "description": "ui.tasks.approve_note_head"
+  },
+  "uiTasksApproveNoEvidence": "Kanıt dosyası yok; onaylarsan görev kanıtsız kapanır.",
+  "@uiTasksApproveNoEvidence": {
+    "description": "ui.tasks.approve_no_evidence"
+  },
+  "uiTasksApproveInfo": "Onay görevi tamamlar; geri almak gerekçe ister.",
+  "@uiTasksApproveInfo": {
+    "description": "ui.tasks.approve_info"
+  },
+  "uiTasksApprovePull": "Bitiş tarihini bugüne çek",
+  "@uiTasksApprovePull": {
+    "description": "ui.tasks.approve_pull"
+  },
+  "uiTasksApprovePullDesc": "Görev erken bitti: bitiş bugüne çekilir, plan bitişi saklanır.",
+  "@uiTasksApprovePullDesc": {
+    "description": "ui.tasks.approve_pull_desc"
+  },
+  "uiTasksCmpPlan": "Plan",
+  "@uiTasksCmpPlan": {
+    "description": "ui.tasks.cmp_plan"
+  },
+  "uiTasksCmpEnd": "Bitiş",
+  "@uiTasksCmpEnd": {
+    "description": "ui.tasks.cmp_end"
+  },
+  "uiTasksCmpNow": "Şu an",
+  "@uiTasksCmpNow": {
+    "description": "ui.tasks.cmp_now"
+  },
+  "uiTasksCmpNewEnd": "Yeni bitiş",
+  "@uiTasksCmpNewEnd": {
+    "description": "ui.tasks.cmp_new_end"
+  },
+  "uiTasksCmpResult": "Sonuç",
+  "@uiTasksCmpResult": {
+    "description": "ui.tasks.cmp_result"
+  },
+  "uiTasksResultOnTime": "Zamanında",
+  "@uiTasksResultOnTime": {
+    "description": "ui.tasks.result_on_time"
+  },
+  "uiTasksResultLateTail": "gün geç",
+  "@uiTasksResultLateTail": {
+    "description": "ui.tasks.result_late_tail"
+  },
+  "uiTasksResultEarlyTail": "gün erken",
+  "@uiTasksResultEarlyTail": {
+    "description": "ui.tasks.result_early_tail"
+  },
+  "uiTasksInfoAssignees": "Sorumlu",
+  "@uiTasksInfoAssignees": {
+    "description": "ui.tasks.info_assignees"
+  },
+  "uiTasksInfoEvidence": "Kanıt",
+  "@uiTasksInfoEvidence": {
+    "description": "ui.tasks.info_evidence"
+  },
+  "uiTasksInfoSubtasks": "Alt görevler",
+  "@uiTasksInfoSubtasks": {
+    "description": "ui.tasks.info_subtasks"
+  },
+  "uiTasksFilesLc": "dosya",
+  "@uiTasksFilesLc": {
+    "description": "ui.tasks.files_lc"
+  },
+  "uiTasksTApprovedTail": "onaylandı",
+  "@uiTasksTApprovedTail": {
+    "description": "ui.tasks.t_approved_tail"
+  },
+  "uiTasksTReturnedTail": "iade edildi",
+  "@uiTasksTReturnedTail": {
+    "description": "ui.tasks.t_returned_tail"
+  },
+  "uiTasksExtend": "Süre uzat",
+  "@uiTasksExtend": {
+    "description": "ui.tasks.extend"
+  },
+  "uiTasksExtendCaption": "7 güne kadar · onay gerekmez",
+  "@uiTasksExtendCaption": {
+    "description": "ui.tasks.extend_caption"
+  },
+  "uiTasksExtendInfo": "Onay gerekmez; atananlar ve yönetici bilgilendirilir. Bir seferde en çok 7 gün uzatabilirsin.",
+  "@uiTasksExtendInfo": {
+    "description": "ui.tasks.extend_info"
+  },
+  "uiTasksExtendMore": "Daha fazlası için tarih talebi gönder",
+  "@uiTasksExtendMore": {
+    "description": "ui.tasks.extend_more"
+  },
+  "uiTasksExtendOk": "Uzat",
+  "@uiTasksExtendOk": {
+    "description": "ui.tasks.extend_ok"
+  },
+  "uiTasksTExtended": "Bitiş uzatıldı",
+  "@uiTasksTExtended": {
+    "description": "ui.tasks.t_extended"
+  },
+  "uiTasksLockTitle": "Bağımlılık bekleniyor",
+  "@uiTasksLockTitle": {
+    "description": "ui.tasks.lock_title"
+  },
+  "uiTasksLockTail": "bitmeden bu görev başlatılamaz.",
+  "@uiTasksLockTail": {
+    "description": "ui.tasks.lock_tail"
+  },
+  "uiTasksLockBadge": "Kilitli",
+  "@uiTasksLockBadge": {
+    "description": "ui.tasks.lock_badge"
+  },
+  "uiTasksDaysLeftTail": "gün kaldı",
+  "@uiTasksDaysLeftTail": {
+    "description": "ui.tasks.days_left_tail"
   },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {

@@ -16,11 +16,13 @@ import '../../application/tasks_providers.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_permissions.dart';
 import '../../domain/task_writes.dart';
+import '../decision/task_decision_flows.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 import 'detail_forms.dart';
 import 'subtask_create_sheet.dart';
 
+part 'detail_decision_actions.dart';
 part 'detail_list_option.dart';
 part 'detail_request_actions.dart';
 part 'upload_origin_sheet.dart';
@@ -99,7 +101,7 @@ class TaskDetailActions {
               selected: s == t.status,
               onTap: () {
                 Navigator.of(sheet).pop();
-                _setStatus(s);
+                _pickStatus(t, s);
               },
             ),
       ],
@@ -302,6 +304,16 @@ class TaskDetailActions {
             onTap: () async {
               Navigator.of(sheet).pop();
               _report(await _ctl.unclaim(), done: l.uiTasksTUnclaimed);
+            },
+          ),
+        if (p.canExtend(t))
+          _ListOption(
+            label: l.uiTasksExtend,
+            hint: l.uiTasksExtendCaption,
+            leading: const NzIcon(NzIcons.clock, size: NizamioSize.iconSizeSm),
+            onTap: () {
+              Navigator.of(sheet).pop();
+              openExtend();
             },
           ),
         if (p.canManageTask) ...[

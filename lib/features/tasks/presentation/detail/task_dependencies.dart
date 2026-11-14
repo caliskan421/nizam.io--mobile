@@ -11,6 +11,7 @@ import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/state/nz_async_view.dart';
 import '../../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../application/effective_access.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../application/task_lifecycle_controller.dart';
 import '../../domain/task_catalog.dart';
@@ -28,7 +29,11 @@ class TaskDependencies extends ConsumerWidget {
     final catalog = ref.watch(taskCatalogControllerProvider).value;
     final task = catalog?.task(code);
     if (task == null || catalog == null) return const SizedBox.shrink();
-    final canEdit = TaskPermissions.of(catalog.access, task).coordinator;
+    // Etkin görünümle (Üye görünümündeki koordinatör bağımlılık düzenlemez).
+    final canEdit = TaskPermissions.of(
+      ref.watch(effectiveAccessProvider).viewAccess,
+      task,
+    ).coordinator;
     TaskItem? byId(String id) =>
         catalog.tasks.where((t) => t.id == id).firstOrNull;
     String? coordName(TaskItem? t) =>

@@ -14,6 +14,8 @@ import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/tasks_list_controller.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_query.dart';
+import '../decision/coordinator_sheets.dart';
+import '../decision/coordinator_texts.dart';
 import '../task_texts.dart';
 import 'task_card_grid.dart';
 import 'task_filter_groups.dart';
@@ -35,13 +37,18 @@ List<Widget> tasksListChildren(
   required VoidCallback onClearAll,
   required void Function(TaskFilterGroup?) onFilter,
   required ValueChanged<String> onOpen,
+  TaskSort? sortOverride,
+  List<TaskView>? views,
+  bool coordinator = false,
   int columns = 1,
 }) {
   final l = context.l10n;
   final c = context.colors;
   final t = context.text;
   final r = result;
-  final byCoord = state.sort == TaskSort.coordinatorship;
+  // Geçerli ölçüt (etkin rolün varsayılanıyla çözülmüş); verilmezse durumdaki seçim.
+  final sort = sortOverride ?? state.sort;
+  final byCoord = sort.grouped;
   final list = r.tasks;
 
   final rows = <Widget>[];
@@ -79,13 +86,16 @@ List<Widget> tasksListChildren(
     ),
   );
   void card(TaskItem task, int index) {
-    final view = TaskCardView(
-      task: task,
-      catalog: catalog,
-      showGroup: !byCoord,
-      onTap: () => onOpen(task.code),
-      fill: columns > 1,
-    );
+    // Koordinatörde atanmamış görev Üstlen / Ata satırıdır (ana sayfayla aynı bileşen).
+    final view = coordinator && TaskView.unassigned.matches(task)
+        ? TaskUnassignedRow(task: task, today: catalog.today)
+        : TaskCardView(
+            task: task,
+            catalog: catalog,
+            showGroup: sort != TaskSort.coordinatorship,
+            onTap: () => onOpen(task.code),
+            fill: columns > 1,
+          );
     final key = ValueKey('task:${task.code}');
     final child = NzEntrance(
       replay: (order, task.code),
@@ -103,7 +113,11 @@ List<Widget> tasksListChildren(
   if (byCoord) {
     for (var gi = 0; gi < r.groups.length; gi++) {
       final g = r.groups[gi];
-      final open = state.isGroupOpen(g.coordinatorship);
+      // Durum grupları açık başlar (dokunuş kapatır); koordinatörlük grupları kapalı.
+      final status = TaskStatusGroup.fromKey(g.coordinatorship);
+      final open = status == null
+          ? state.isGroupOpen(g.coordinatorship)
+          : !state.isGroupOpen(g.coordinatorship);
       flush();
       rows.add(
         item(
@@ -111,10 +125,13 @@ List<Widget> tasksListChildren(
           _GroupHead(
             group: g,
             truncated: catalog.truncated,
-            name:
-                catalog.coordinatorship(g.coordinatorship)?.name ??
-                g.coordinatorship,
-            code: _groupCode(catalog, g.coordinatorship),
+            name: status != null
+                ? l.statusGroupLabel(status)
+                : catalog.coordinatorship(g.coordinatorship)?.name ??
+                      g.coordinatorship,
+            code: status != null
+                ? l.statusGroupHint(status) ?? ''
+                : _groupCode(catalog, g.coordinatorship),
             open: open,
             onTap: () => ctl.toggleGroup(g.coordinatorship),
           ),
@@ -140,6 +157,7 @@ List<Widget> tasksListChildren(
       truncated: catalog.truncated,
       selected: state.view,
       onSelected: ctl.selectView,
+      views: views,
     ),
     if (state.filter.hasExtra) ...[
       const Gap(20),
@@ -155,6 +173,8 @@ List<Widget> tasksListChildren(
       const Gap(20),
     TaskListToolbar(
       state: state,
+      sort: sort,
+      coordinator: coordinator,
       onFilter: () => onFilter(null),
       controller: ctl,
     ),
@@ -183,8 +203,16 @@ List<Widget> tasksListChildren(
       ),
     ],
     const Gap(NizamioSpacing.space3),
+    if (coordinator && r.counts[TaskView.unassigned] != 0) ...[
+      const Gap(NizamioSpacing.space2),
+      Text(
+        l.uiTasksUnassignedRule,
+        textAlign: TextAlign.center,
+        style: t.caption.copyWith(color: c.textMuted),
+      ),
+    ],
     Text(
-      byCoord
+      sort == TaskSort.coordinatorship
           ? l.groupedCountLine(list.length, r.groups.length)
           : l.countLine(
               state.limit < list.length ? state.limit : list.length,

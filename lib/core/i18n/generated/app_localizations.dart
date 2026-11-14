@@ -5350,6 +5350,24 @@ abstract class AppLocalizations {
   /// **'Onay bekleyenler'**
   String get uiHomeQueueTitle;
 
+  /// ui.home.pending_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen işler'**
+  String get uiHomePendingTitle;
+
+  /// ui.home.pending_review
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay'**
+  String get uiHomePendingReview;
+
+  /// ui.home.unassigned_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Atanmamış görev yok.'**
+  String get uiHomeUnassignedEmpty;
+
   /// ui.home.see_all
   ///
   /// In tr, this message translates to:

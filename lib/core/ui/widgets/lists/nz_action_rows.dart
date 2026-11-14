@@ -5,7 +5,6 @@ import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../buttons/nz_button.dart';
 import '../buttons/nz_icon_button.dart';
-import '../nz_icon.dart';
 import '../nz_icons.dart';
 import '../nz_size.dart';
 import '../surfaces/nz_card.dart';
@@ -25,7 +24,6 @@ class NzQueueRow extends StatelessWidget {
     this.dueDate,
     this.dueDanger = false,
     this.flat = false,
-    this.inline = false,
     this.onTap,
     this.onReturn,
     this.onApprove,
@@ -51,9 +49,6 @@ class NzQueueRow extends StatelessWidget {
   /// true → kartsız tablo satırı ([NzTableCard] içinde): düğmeler alt satırın sağında, dar.
   final bool flat;
 
-  /// [flat] ve geniş: tek çizgi (başlık solda, bitiş ortada, düğmeler sağda). false → dar:
-  /// başlık üstte, altta bitiş hapı solda ve düğmeler sağda.
-  final bool inline;
   final String returnLabel;
   final String approveLabel;
   final VoidCallback? onTap;
@@ -71,7 +66,6 @@ class NzQueueRow extends StatelessWidget {
         dueDate: dueDate,
         dueText: dueText,
         dueDanger: dueDanger,
-        inline: inline,
         onTap: onTap,
         buttons: [
           NzButton.secondary(
@@ -114,10 +108,9 @@ class NzQueueRow extends StatelessWidget {
   }
 }
 
-/// Onay kuyruğunun tablo (flat) satırı. [inline] (geniş): başlık + gri alt satır solda, bitiş
-/// tarihi ve kalan/geçen gün ortada (ortalı), düğmeler sağda; sol altta boşluk kalmaz. Dar:
-/// başlık tam genişlikte, altında bitiş hapı (tarih · kalan gün; gecikmede kırmızı zemin) solda
-/// ve düğmeler sağda.
+/// Onay kuyruğunun tablo (flat) satırı: üstte başlık (solda, kalın) ve bitiş tarihi (sağda,
+/// kalın), altında sağda kalan/geçen gün (gecikmede kırmızı); en altta solda gri alt satır,
+/// sağda düğmeler.
 class _QueueFlatRow extends StatelessWidget {
   const _QueueFlatRow({
     required this.title,
@@ -125,7 +118,6 @@ class _QueueFlatRow extends StatelessWidget {
     required this.dueDate,
     required this.dueText,
     required this.dueDanger,
-    required this.inline,
     required this.onTap,
     required this.buttons,
   });
@@ -135,7 +127,6 @@ class _QueueFlatRow extends StatelessWidget {
   final String? dueDate;
   final String? dueText;
   final bool dueDanger;
-  final bool inline;
   final VoidCallback? onTap;
   final List<Widget> buttons;
 
@@ -143,122 +134,71 @@ class _QueueFlatRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
-    final tone = dueDanger ? c.danger : c.textMuted;
-    final head = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: t.list.copyWith(fontWeight: FontWeight.w600),
-        ),
-        if (caption.isNotEmpty)
-          Text(
-            caption,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: t.caption.copyWith(color: c.textMuted),
-          ),
-      ],
-    );
-    final actions = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (final (i, b) in buttons.indexed) ...[
-          if (i > 0) const Gap(NizamioSpacing.space2),
-          b,
-        ],
-      ],
-    );
-    Widget tappable(Widget child) => Semantics(
+    final dueDate = this.dueDate;
+    final dueText = this.dueText;
+    final strong = t.list.copyWith(fontWeight: FontWeight.w600);
+    return Semantics(
       button: onTap != null,
       onTap: onTap,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: child,
-      ),
-    );
-    final pad = const EdgeInsets.symmetric(
-      horizontal: NizamioSpacing.space4,
-      vertical: NizamioSpacing.space3,
-    );
-    if (inline) {
-      return Padding(
-        padding: pad,
-        child: Row(
-          children: [
-            Expanded(flex: 5, child: tappable(head)),
-            Expanded(
-              flex: 3,
-              child: tappable(
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (dueDate != null)
-                      Text(
-                        dueDate!,
-                        style: t.list.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                    if (dueText != null)
-                      Text(dueText!, style: t.caption.copyWith(color: tone)),
-                  ],
-                ),
-              ),
-            ),
-            actions,
-          ],
-        ),
-      );
-    }
-    final pill = dueDate == null && dueText == null
-        ? null
-        : DecoratedBox(
-            decoration: BoxDecoration(
-              color: tone.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(NizamioRadius.pill),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: NizamioSpacing.space3,
-                vertical: NizamioSpacing.space1,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: NizamioSpacing.space4,
+            vertical: NizamioSpacing.space3,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  NzIcon(NzIcons.calendar, size: 14, color: tone),
-                  const Gap(NizamioSpacing.space2),
-                  Flexible(
+                  Expanded(
                     child: Text(
-                      [?dueDate, ?dueText].join(' · '),
-                      maxLines: 1,
+                      title,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: t.caption.copyWith(
-                        color: dueDanger ? c.danger : c.text,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: strong,
                     ),
+                  ),
+                  const Gap(NizamioSpacing.space3),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (dueDate != null) Text(dueDate, style: strong),
+                      if (dueText != null)
+                        Text(
+                          dueText,
+                          style: t.caption.copyWith(
+                            color: dueDanger ? c.danger : c.textMuted,
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),
-            ),
-          );
-    return Padding(
-      padding: pad,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          tappable(head),
-          const Gap(NizamioSpacing.space3),
-          Row(
-            children: [
-              Flexible(child: pill ?? const SizedBox.shrink()),
-              const Spacer(),
-              actions,
+              const Gap(NizamioSpacing.space2),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      caption,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: t.caption.copyWith(color: c.textMuted),
+                    ),
+                  ),
+                  const Gap(NizamioSpacing.space2),
+                  for (final (i, b) in buttons.indexed) ...[
+                    if (i > 0) const Gap(NizamioSpacing.space2),
+                    b,
+                  ],
+                ],
+              ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

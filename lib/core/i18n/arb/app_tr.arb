@@ -3505,6 +3505,18 @@
   "@uiHomeQueueTitle": {
     "description": "ui.home.queue_title"
   },
+  "uiHomePendingTitle": "Bekleyen işler",
+  "@uiHomePendingTitle": {
+    "description": "ui.home.pending_title"
+  },
+  "uiHomePendingReview": "Onay",
+  "@uiHomePendingReview": {
+    "description": "ui.home.pending_review"
+  },
+  "uiHomeUnassignedEmpty": "Atanmamış görev yok.",
+  "@uiHomeUnassignedEmpty": {
+    "description": "ui.home.unassigned_empty"
+  },
   "uiHomeSeeAll": "Tümü",
   "@uiHomeSeeAll": {
     "description": "ui.home.see_all"

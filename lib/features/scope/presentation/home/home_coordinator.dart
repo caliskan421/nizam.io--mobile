@@ -4,7 +4,6 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
-import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
@@ -15,11 +14,11 @@ import 'home_wide.dart';
 import 'module_menu_texts.dart';
 
 /// Ana sayfanın koordinatör bölümleri; yönetici ana sayfasının dili (genel durum halkası, özet
-/// kutuları, ekip kutuları) etkin koordinatörlüğün görevleriyle ([coordinatorBoardProvider]).
-/// Dar düzen tek sütun: genel durum (koordinatörlük adı), hızlı işlemler, 2×3 özet kutusu, onay
-/// bekleyenler, atanmamış, ekip yükü, yaklaşan toplantılar (toplantı kartları), tarih taleplerim.
-/// Geniş düzen: genel durum + 2×2 hızlı işlemler; dört özet kutusu; tamamlanma ve devam + ekip;
-/// onay bekleyenler; atanmamış + tarih taleplerim; ekip yükü; yaklaşan toplantılar.
+/// kutuları) etkin koordinatörlüğün görevleriyle ([coordinatorBoardProvider]). Dar düzen tek
+/// sütun: genel durum (koordinatörlük adı), hızlı işlemler, 2×2 özet kutusu, bekleyen işler
+/// (onay / atanmamış / tarih talebi sekmeleri), ekip yükü, yaklaşan toplantılar. Geniş düzen:
+/// genel durum + 2×2 hızlı işlemler; dört özet kutusu tek satır; bekleyen işler + ekip yükü
+/// (aynı yükseklik); yaklaşan toplantılar.
 class HomeCoordinatorFeed extends ConsumerWidget {
   const HomeCoordinatorFeed({super.key, required this.wide, this.quick});
 
@@ -37,58 +36,20 @@ class HomeCoordinatorFeed extends ConsumerWidget {
     final today = ref.watch(
       taskCatalogControllerProvider.select((s) => s.value?.today),
     );
-    final coord = ref.watch(
-      taskCatalogControllerProvider.select(
-        (s) =>
-            board == null ? null : s.value?.coordinatorship(board.departmentId),
-      ),
-    );
     if (board == null || today == null) {
       return const NzSkeleton.block(height: 190);
     }
-    final l = context.l10n;
-    final pending = (ref.watch(myDateRequestsProvider).value ?? const [])
-        .where((r) => r.isPending)
-        .length;
     final overview = HomeOverview(
       statuses: [for (final t in board.tasks) t.status],
       truncated: board.truncated,
       title: board.departmentName,
       legendGrid: wide && quick != null,
     );
-    final kpis = homeCoordinatorKpis(
-      context,
-      board: board,
-      pendingRequests: pending,
+    final kpis = HomeGrid(
+      columns: wide ? 4 : 2,
+      gap: NizamioSpacing.gapMd,
+      children: homeCoordinatorKpis(context, board: board),
     );
-    final queue = HomeSectionFrame(
-      title: l.uiHomeQueueTitle,
-      count: board.queue.length,
-      onAll: board.queue.length > rowsPerSection
-          ? () => showReviewQueueSheet(context)
-          : null,
-      empty: l.uiHomeQueueEmpty,
-      table: (l.uiHomeTableTask, l.uiHomeTableDue),
-      children: [
-        for (final t in board.queue.take(rowsPerSection))
-          TaskQueueRow(task: t, today: today, flat: true, inline: wide),
-      ],
-    );
-    Widget? unassigned({bool fill = false}) => board.unassigned.isEmpty
-        ? null
-        : HomeSectionFrame(
-            fill: fill,
-            title: l.uiHomeUnassignedTitle,
-            count: board.unassigned.length,
-            onAll: board.unassigned.length > rowsPerSection
-                ? () => context.appNav.openTasks(view: NzTaskView.unassigned)
-                : null,
-            table: const (null, null),
-            children: [
-              for (final t in board.unassigned.take(rowsPerSection))
-                TaskUnassignedRow(task: t, today: today, flat: true),
-            ],
-          );
     const meetings = HomeUpcomingMeetings();
     if (!wide) {
       return Column(
@@ -97,70 +58,26 @@ class HomeCoordinatorFeed extends ConsumerWidget {
           for (final (i, w) in [
             overview,
             ?quick,
-            HomeGrid(columns: 2, gap: NizamioSpacing.gapMd, children: kpis),
-            queue,
-            ?unassigned(),
+            kpis,
+            HomePendingWork(board: board, today: today),
             HomeTeamLoad(board: board),
             meetings,
-            const HomeMyDateRequests(),
           ].indexed) ...[if (i > 0) const Gap(NizamioSpacing.gapXl), w],
         ],
       );
     }
     // Yan yana iki öğe aynı yükseklikte (veri az/boş olsa da); kartlar `fill` ile uzar.
-    Widget pair(Widget a, Widget? b, {int flexA = 1, int flexB = 1}) =>
+    Widget pair(Widget a, Widget b, {int flexA = 1, int flexB = 1}) =>
         IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(flex: flexA, child: a),
               const Gap(homeWideGap),
-              Expanded(flex: flexB, child: b ?? const SizedBox.shrink()),
+              Expanded(flex: flexB, child: b),
             ],
           ),
         );
-    final team = homeCoordinatorTeamTiles(context, coord);
-    // Özet kutuları yöneticideki gibi 4 sütun: ilk dördü üst satır; tamamlanma ve devam alt
-    // satırın solunda, ekip sağda ("Ekip" başlığı + kutular kutularla aynı yükseklikte).
-    final lower = LayoutBuilder(
-      builder: (context, box) {
-        const g = NizamioSpacing.gapMd;
-        final col = (box.maxWidth - 3 * g) / 4;
-        return IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(width: col, child: kpis[4]),
-              const Gap(g),
-              SizedBox(width: col, child: kpis[5]),
-              const Gap(g),
-              SizedBox(
-                width: 2 * col + g,
-                child: team.isEmpty
-                    ? null
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          NzKicker(l.uiHomeTeam),
-                          const Gap(NizamioSpacing.gapMd),
-                          Expanded(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              spacing: g,
-                              children: [
-                                for (final w in team) Expanded(child: w),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-    final open = unassigned(fill: true);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -169,27 +86,14 @@ class HomeCoordinatorFeed extends ConsumerWidget {
         else
           overview,
         const Gap(NizamioSpacing.gapXl),
-        HomeGrid(
-          columns: 4,
-          gap: NizamioSpacing.gapMd,
-          children: kpis.take(4).toList(),
+        kpis,
+        const Gap(NizamioSpacing.gapXl),
+        pair(
+          HomePendingWork(board: board, today: today, fill: true),
+          HomeTeamLoad(board: board, fill: true),
+          flexA: 3,
+          flexB: 2,
         ),
-        const Gap(NizamioSpacing.gapXl),
-        lower,
-        const Gap(NizamioSpacing.gapXl),
-        queue,
-        const Gap(NizamioSpacing.gapXl),
-        // Atanmamış yoksa tarih talepleri ekip yüküyle yan yana.
-        if (open == null)
-          pair(
-            HomeTeamLoad(board: board, fill: true),
-            const HomeMyDateRequests(fill: true),
-          )
-        else ...[
-          pair(open, const HomeMyDateRequests(fill: true)),
-          const Gap(NizamioSpacing.gapXl),
-          HomeTeamLoad(board: board),
-        ],
         const Gap(NizamioSpacing.gapXl),
         meetings,
       ],

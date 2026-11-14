@@ -2805,6 +2805,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeQueueTitle => 'Onay bekleyenler';
 
   @override
+  String get uiHomePendingTitle => 'Bekleyen işler';
+
+  @override
+  String get uiHomePendingReview => 'Onay';
+
+  @override
+  String get uiHomeUnassignedEmpty => 'Atanmamış görev yok.';
+
+  @override
   String get uiHomeSeeAll => 'Tümü';
 
   @override

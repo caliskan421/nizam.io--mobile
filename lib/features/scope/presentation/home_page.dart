@@ -237,8 +237,6 @@ class _Feed extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               greeting,
-              const Gap(NizamioSpacing.space3),
-              HomeViewLine(view: access),
               const Gap(NizamioSpacing.gapXl),
               HomeCoordinatorFeed(
                 wide: wide,

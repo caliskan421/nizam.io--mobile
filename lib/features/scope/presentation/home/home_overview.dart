@@ -110,9 +110,10 @@ class _OverviewCard extends StatelessWidget {
     };
     int percent(TaskStatus status) =>
         total == 0 ? 0 : (counts[status]! * 100 / total).round();
+    // Ana dört durum (onay bekleyen dahil) sıfır olsa da görünür; bilinmeyen yalnız varsa.
     final visible = [
       for (final s in _order)
-        if (counts[s]! > 0) s,
+        if (s != TaskStatus.unknown || counts[s]! > 0) s,
     ];
     final semantics =
         '${truncated ? '≥' : ''}$total ${l.uiHomeTasksLc}: '

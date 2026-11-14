@@ -68,3 +68,17 @@ final archiveStatsProvider = FutureProvider.autoDispose<ArchiveStats>((
     partial: set.partial,
   );
 });
+
+/// Etiket süzgecinde seçili etiketli dosyası olan görevler (üye görev klasörleri); süzgeç
+/// boşsa null (hepsi).
+final archiveTaggedTasksProvider = FutureProvider.autoDispose<Set<String>?>((
+  ref,
+) async {
+  final tags = ref.watch(archiveControllerProvider.select((s) => s.tags));
+  if (tags.isEmpty) return null;
+  final set = await ref.watch(archiveFileSetProvider.future);
+  return {
+    for (final f in set.files)
+      if (tags.contains(f.tag)) f.workItemId,
+  };
+});

@@ -30,6 +30,7 @@ class ArchiveTaskFolderList extends ConsumerWidget {
     this.summary = true,
     this.hint,
     this.empty,
+    this.onlyTasks,
   });
 
   /// Koordinatörün koordinatörlük klasörü; üyede sanal "Görevlerim" klasörü.
@@ -43,6 +44,9 @@ class ArchiveTaskFolderList extends ConsumerWidget {
 
   /// Klasörde hiç görev yokken (arama yokken) gösterilen metin; yoksa arama boş metni.
   final String? empty;
+
+  /// Etiket süzgeci: yalnız bu görevler (seçili etiketli dosyası olanlar); null → hepsi.
+  final Set<String>? onlyTasks;
 
   /// Liste satırındaki küçük klasör çizimi.
   static const _art = Size(32, 27);
@@ -64,7 +68,9 @@ class ArchiveTaskFolderList extends ConsumerWidget {
         final q = trLower(query.trim());
         final list = [
           for (final t in all)
-            if (q.isEmpty || trLower(t.title).contains(q)) t,
+            if ((q.isEmpty || trLower(t.title).contains(q)) &&
+                (onlyTasks?.contains(t.workItemId) ?? true))
+              t,
         ];
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -131,14 +137,23 @@ class ArchiveMyFiles extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final me = ref.watch(effectiveAccessProvider).access?.accountId;
+    final view = ref.watch(effectiveAccessProvider);
+    final me = view.access?.accountId;
+    final filters = ref.watch(
+      archiveControllerProvider.select((s) => (s.tags, s.query)),
+    );
     if (me == null) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         NzKicker(context.l10n.uiArchiveMyFilesCaption),
         const Gap(NizamioSpacing.space3),
-        PersonFiles(accountId: me),
+        PersonFiles(
+          key: ValueKey((me, view.programId, view.departmentId, filters)),
+          accountId: me,
+          limit: 5,
+          filterArchive: true,
+        ),
       ],
     );
   }

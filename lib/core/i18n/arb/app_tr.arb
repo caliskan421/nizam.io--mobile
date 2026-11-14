@@ -1733,6 +1733,10 @@
   "@uiArchiveTags": {
     "description": "ui.archive.tags"
   },
+  "uiArchiveShowAll": "Tümünü göster",
+  "@uiArchiveShowAll": {
+    "description": "ui.archive.show_all"
+  },
   "uiArchiveTagsClear": "Temizle",
   "@uiArchiveTagsClear": {
     "description": "ui.archive.tags_clear"

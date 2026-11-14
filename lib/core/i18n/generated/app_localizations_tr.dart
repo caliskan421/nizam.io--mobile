@@ -1458,6 +1458,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveTags => 'Etiketler';
 
   @override
+  String get uiArchiveShowAll => 'Tümünü göster';
+
+  @override
   String get uiArchiveTagsClear => 'Temizle';
 
   @override

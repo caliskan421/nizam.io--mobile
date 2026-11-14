@@ -3,17 +3,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nizamio/core/domain/page_slice.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/core/ui/widgets/feedback/feedback.dart';
+import 'package:nizamio/features/archive/application/archive_controller.dart';
 import 'package:nizamio/features/archive/archive.dart';
 import 'package:nizamio/features/archive/domain/archive.dart';
+import 'package:nizamio/features/archive/domain/records.dart';
 import 'package:nizamio/features/archive/presentation/archive/archive_storage.dart';
 
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
+import '../../../support/screen_matrix.dart';
 import '../../pilot_support.dart';
 import '../archive_fixture.dart';
 
@@ -23,12 +27,16 @@ Future<(Harness, RecordingAppNav, RecordingSink)> _open(
   WidgetTester tester, {
   FakeArchiveRepository? repo,
   bool admin = false,
+  bool member = false,
   bool dark = false,
 }) async {
-  final h = await real(
-    tester,
-    () => pilotHarness(archiveBackend(admin: admin), signedIn: true),
-  );
+  final backend = archiveBackend(admin: admin);
+  if (member) {
+    backend.seats = [
+      for (final seat in backend.seats) {...seat, 'role': 'uye'},
+    ];
+  }
+  final h = await real(tester, () => pilotHarness(backend, signedIn: true));
   final sink = RecordingSink();
   useArchiveFakes(h, repo ?? FakeArchiveRepository(), sink: sink);
   h.read(scopeControllerProvider).selectProgram('prog-1');
@@ -47,6 +55,67 @@ Future<void> _tap(WidgetTester tester, Finder f) async {
 
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
+
+  testWidgets(
+    'üye: depolama, etiketler, ilk beş dosya ve tümü; etiket iki listeyi süzer',
+    (tester) async {
+      final repo = FakeArchiveRepository()
+        ..folders = const [
+          ArchiveFolder(
+            code: 'mine',
+            name: 'Görevlerim',
+            files: 7,
+            isVirtual: true,
+          ),
+        ]
+        ..pages = {
+          null: PageSlice(
+            items: [
+              for (var i = 0; i < 7; i++)
+                archiveFile(
+                  'belge$i',
+                  task: i == 0 ? 'w2' : 'w1',
+                  tag: i == 0 ? RecordTag.sonuc : RecordTag.plan,
+                ),
+            ],
+          ),
+        };
+      final (h, _, _) = await _open(tester, repo: repo, member: true);
+      expect(find.text(_l.uiArchiveStorage), findsOneWidget);
+      expect(find.text(_l.uiArchiveTags), findsOneWidget);
+      expect(find.text(_l.uiArchiveStatFolders), findsNothing);
+      expect(find.text(_l.uiArchiveAssignedOnly), findsNothing);
+      expect(find.text('belge4.pdf'), findsOneWidget);
+      expect(find.text('belge5.pdf'), findsNothing);
+      await _tap(tester, find.text(_l.uiArchiveShowAll));
+      expect(find.text('belge6.pdf'), findsOneWidget);
+      h.container.read(archiveControllerProvider.notifier).setTags({
+        RecordTag.sonuc,
+      });
+      await settle(tester);
+      expect(find.text('belge0.pdf'), findsOneWidget);
+      expect(find.text('belge1.pdf'), findsNothing);
+      expect(find.text('Saha keşfi'), findsNothing);
+      expect(find.text('Rapor'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testScreens('üye Dosyalarım taşmadan çizilir', (tester, screen) async {
+    final repo = FakeArchiveRepository()
+      ..folders = const [
+        ArchiveFolder(
+          code: 'mine',
+          name: 'Görevlerim',
+          files: 3,
+          isVirtual: true,
+        ),
+      ];
+    await _open(tester, repo: repo, member: true);
+    expect(find.text(_l.uiArchiveStorage), findsOneWidget);
+    expect(find.text(_l.uiArchiveTags), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   // Klasör ızgarası yönetici görünümündedir; koordinatör düz görev klasörü listesini görür.
   testWidgets('özet ve klasörler sunucudan; klasör açılır', (tester) async {

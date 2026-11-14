@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/cache_owner.dart';
@@ -7,6 +8,7 @@ import '../../../core/errors/api_error.dart';
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/records.dart';
+import 'archive_controller.dart';
 import 'archive_providers.dart';
 
 part 'person_files_controller.g.dart';
@@ -28,22 +30,65 @@ class PersonFilesState {
 @riverpod
 class PersonFilesController extends _$PersonFilesController {
   var _generation = 0;
+  Set<RecordTag> _tags = const {};
+  String _query = '';
   final _owner = CacheOwnership();
   AsyncValue<PersonFilesState> get visible => _owner.visible(ref, state);
 
   @override
-  Future<PersonFilesState> build(String accountId) async {
+  Future<PersonFilesState> build(
+    String accountId, {
+    bool filterArchive = false,
+  }) async {
     _generation++;
+    _tags = filterArchive
+        ? ref.watch(archiveControllerProvider.select((s) => s.tags))
+        : const {};
+    _query = filterArchive
+        ? ref.watch(archiveControllerProvider.select((s) => s.query)).trim()
+        : '';
+    final tags = _tags;
+    final query = _query;
     final owner = _owner.watch(ref);
     final scope = await ref.watch(archiveScopeProvider.future);
-    final repo = ref.read(archiveRepositoryProvider);
-    final files = await repo.archiveAttachments(
-      department: scope.department,
-      filter: ArchiveAttachmentFilter(uploaderId: accountId),
-      page: const PageRequest(limit: 20),
-    );
+    final files = await _loadPage(scope.department, tags: tags, query: query);
     if (ref.mounted) _owner.markLoaded(ref, owner);
     return PersonFilesState(files: files, department: scope.department);
+  }
+
+  // Tek etiket sunucuda süzülür. Çoklu seçim OR'dur; eşleşmeyen sayfaları atlar,
+  // en çok beş okumadan sonra devam imlecini korur (sınırsız tarama yok).
+  Future<PageSlice<RecordFile>> _loadPage(
+    String department, {
+    required Set<RecordTag> tags,
+    required String query,
+    String? cursor,
+  }) async {
+    final repo = ref.read(archiveRepositoryProvider);
+    for (var i = 0; i < 5; i++) {
+      final page = await repo.archiveAttachments(
+        department: department,
+        filter: ArchiveAttachmentFilter(
+          uploaderId: accountId,
+          tag: tags.length == 1 ? tags.single : null,
+          search: query.isEmpty ? null : query,
+        ),
+        page: PageRequest(limit: 20, cursor: cursor),
+      );
+      final files = [
+        for (final file in page.items)
+          if (tags.isEmpty || tags.contains(file.tag)) file,
+      ];
+      if (files.isNotEmpty || !page.hasMore || i == 4) {
+        return PageSlice(
+          items: files,
+          nextCursor: page.nextCursor,
+          truncated: page.truncated,
+        );
+      }
+      cursor = page.nextCursor;
+    }
+    throw StateError('unreachable');
   }
 
   Future<void> refresh() async {
@@ -65,13 +110,12 @@ class PersonFilesController extends _$PersonFilesController {
       ),
     );
     try {
-      final page = await ref
-          .read(archiveRepositoryProvider)
-          .archiveAttachments(
-            department: before.department,
-            filter: ArchiveAttachmentFilter(uploaderId: accountId),
-            page: PageRequest(limit: 20, cursor: cursor),
-          );
+      final page = await _loadPage(
+        before.department,
+        tags: _tags,
+        query: _query,
+        cursor: cursor,
+      );
       if (!ref.mounted || generation != _generation) return;
       state = AsyncData(
         PersonFilesState(

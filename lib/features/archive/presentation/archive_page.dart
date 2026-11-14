@@ -206,21 +206,34 @@ class _Folders extends ConsumerWidget {
       if (own != null) return ArchiveTaskFolderList(folder: own);
     }
     // Üye: önce kendi yüklediği dosyalar, sonra sanal "Görevlerim" klasörünün düz görev
-    // klasörü listesi (özet kartları ve klasör ızgarası yok).
+    // klasörü listesi; depolama kartı atanmış görevlerin bütün dosyalarını sayar.
     if (view.isMemberView) {
       final mine = all.where((f) => f.isVirtual).firstOrNull ?? all.firstOrNull;
       if (mine != null) {
         final l = context.l10n;
+        // Depolama kartı atandığı görevlerin bütün dosyalarını sayar (K4); "Dosyalarım"
+        // listesi yalnız kendi yükledikleri. Etiket süzgeci kartı ve görev klasörlerini süzer.
+        final stats = ref.watch(archiveStatsProvider).value;
+        final tagged = ref.watch(archiveTaggedTasksProvider);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const ArchiveTagChip(),
+            const Gap(NizamioSpacing.space5),
+            ArchiveStorageCard(stats: stats, folders: 1, showFolders: false),
+            const Gap(NizamioSpacing.space6),
             const ArchiveMyFiles(),
             const Gap(NizamioSpacing.space6),
-            ArchiveTaskFolderList(
-              folder: mine,
-              summary: false,
-              hint: l.uiArchiveAssignedOnly,
-              empty: l.uiArchiveEmptyAssigned,
+            NzAsyncView<Set<String>?>(
+              value: tagged,
+              skeletonOnReload: true,
+              onRetry: () => retryArchive(ref),
+              data: (ids) => ArchiveTaskFolderList(
+                folder: mine,
+                summary: false,
+                empty: l.uiArchiveEmptyAssigned,
+                onlyTasks: ids,
+              ),
             ),
           ],
         );

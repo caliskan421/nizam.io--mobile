@@ -2692,6 +2692,12 @@ abstract class AppLocalizations {
   /// **'Etiketler'**
   String get uiArchiveTags;
 
+  /// ui.archive.show_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü göster'**
+  String get uiArchiveShowAll;
+
   /// ui.archive.tags_clear
   ///
   /// In tr, this message translates to:

@@ -22,14 +22,24 @@ import '../domain/records.dart';
 /// Hesabın yüklediği, oturumun seçili programda okuyabildiği dosyalar. Kendi kaydırmasını
 /// açmaz; profil akışına yerleştirilir. Daha fazla imleci bitene dek korunur.
 class PersonFiles extends ConsumerStatefulWidget {
-  const PersonFiles({super.key, required this.accountId});
+  const PersonFiles({
+    super.key,
+    required this.accountId,
+    this.limit,
+    this.filterArchive = false,
+  });
   final String accountId;
+
+  /// İlk bu kadar dosya; fazlası "Tümünü göster" ile açılır (null → hepsi, sayfalı).
+  final int? limit;
+  final bool filterArchive;
   @override
   ConsumerState<PersonFiles> createState() => _PersonFilesState();
 }
 
 class _PersonFilesState extends ConsumerState<PersonFiles> {
   bool _downloading = false;
+  bool _expanded = false;
 
   Future<void> _download(RecordFile file, String department) async {
     if (_downloading) return;
@@ -62,7 +72,10 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = personFilesControllerProvider(widget.accountId);
+    final provider = personFilesControllerProvider(
+      widget.accountId,
+      filterArchive: widget.filterArchive,
+    );
     ref.watch(provider);
     final value = ref.read(provider.notifier).visible;
     final catalog = ref.watch(taskCatalogControllerProvider).value;
@@ -86,6 +99,13 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
         ],
       );
     }
+    final limit = widget.limit;
+    final collapsed = limit != null && !_expanded;
+    final items = collapsed
+        ? data.files.items.take(limit).toList()
+        : data.files.items;
+    final more =
+        collapsed && (data.files.items.length > limit || data.files.hasMore);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: NizamioSpacing.space2,
@@ -97,7 +117,7 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
-                for (var i = 0; i < data.files.items.length; i++) ...[
+                for (var i = 0; i < items.length; i++) ...[
                   if (i > 0)
                     Divider(
                       height: NizamioSize.borderWidth,
@@ -105,18 +125,18 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
                       indent: NizamioSpacing.space4,
                       color: context.colors.border,
                     ),
-                  _fileRow(
-                    context,
-                    data.files.items[i],
-                    data.department,
-                    catalog,
-                  ),
+                  _fileRow(context, items[i], data.department, catalog),
                 ],
               ],
             ),
           ),
         if (data.error != null) Text(errorText(l, data.error!)),
-        if (data.files.hasMore)
+        if (more)
+          NzButton.secondary(
+            label: l.uiArchiveShowAll,
+            onPressed: () => setState(() => _expanded = true),
+          )
+        else if (data.files.hasMore)
           NzButton.secondary(
             label: l.uiArchiveLoadMore,
             loading: data.loadingMore,

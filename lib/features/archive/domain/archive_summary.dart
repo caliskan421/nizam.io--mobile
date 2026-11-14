@@ -83,11 +83,12 @@ final class ArchiveStats {
   final Map<ArchiveFileKind, int> kindBytes;
 
   /// Klasör kimliği (departman) → özet; dosyası olmayan klasör yer almaz.
-  final Map<String, ArchiveFolderStats> folders;
+  final List<({String code, ArchiveFolderStats stats})> folders;
   final bool partial;
 
   ArchiveFolderStats folder(String code) =>
-      folders[code] ?? ArchiveFolderStats.empty;
+      folders.where((f) => f.code == code).firstOrNull?.stats ??
+      ArchiveFolderStats.empty;
 }
 
 /// [files]'tan istatistik; aynı kimlik bir kez sayılır. [tags] boş değilse yalnız o etiketli
@@ -103,9 +104,7 @@ ArchiveStats archiveStats(
   final taskIds = <String>{};
   var bytes = 0;
   final kindBytes = {for (final k in ArchiveFileKind.values) k: 0};
-  final folderFiles = <String, int>{};
-  final folderBytes = <String, int>{};
-  final folderTasks = <String, Set<String>>{};
+  final folders = <({String code, List<RecordFile> files})>[];
   for (final f in files) {
     if (tags.isNotEmpty && !tags.contains(f.tag)) continue;
     if (!seen.add(f.id)) continue;
@@ -114,23 +113,29 @@ ArchiveStats archiveStats(
     taskIds.add(f.workItemId);
     final folder = folderOf(f.workItemId);
     if (folder == null) continue;
-    folderFiles[folder] = (folderFiles[folder] ?? 0) + 1;
-    folderBytes[folder] = (folderBytes[folder] ?? 0) + f.sizeBytes;
-    (folderTasks[folder] ??= {}).add(f.workItemId);
+    final group = folders.where((g) => g.code == folder).firstOrNull;
+    if (group == null) {
+      folders.add((code: folder, files: [f]));
+    } else {
+      group.files.add(f);
+    }
   }
   return ArchiveStats(
     files: seen.length,
     bytes: bytes,
     tasks: taskIds.length,
     kindBytes: kindBytes,
-    folders: {
-      for (final code in folderFiles.keys)
-        code: ArchiveFolderStats(
-          files: folderFiles[code]!,
-          bytes: folderBytes[code]!,
-          tasks: folderTasks[code]!.length,
+    folders: [
+      for (final group in folders)
+        (
+          code: group.code,
+          stats: ArchiveFolderStats(
+            files: group.files.length,
+            bytes: group.files.fold(0, (sum, f) => sum + f.sizeBytes),
+            tasks: {for (final f in group.files) f.workItemId}.length,
+          ),
         ),
-    },
+    ],
     partial: partial,
   );
 }

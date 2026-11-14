@@ -80,16 +80,18 @@ class ArchiveTagChip extends ConsumerWidget {
                           for (final (i, tag) in shown.indexed)
                             Positioned(
                               left: 7.0 * i,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: c.tag(tag),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: c.surfaceRaised,
-                                    width: 1.5,
+                              child: SizedBox.square(
+                                dimension: 10,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: c.tag(tag),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: c.surfaceRaised,
+                                      width: 1.5,
+                                    ),
                                   ),
                                 ),
-                                child: const SizedBox.square(dimension: 10),
                               ),
                             ),
                         ],
@@ -157,10 +159,14 @@ class ArchiveStorageCard extends StatelessWidget {
     super.key,
     required this.stats,
     required this.folders,
+    this.showFolders = true,
   });
 
   final ArchiveStats? stats;
   final int folders;
+
+  /// Klasör sayısı (üyede tek sanal klasör, gösterilmez).
+  final bool showFolders;
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +217,7 @@ class ArchiveStorageCard extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         stat(l.uiArchiveSummaryFiles, s == null ? '—' : '${s.files}'),
-        stat(l.uiArchiveStatFolders, '$folders'),
+        if (showFolders) stat(l.uiArchiveStatFolders, '$folders'),
         stat(l.uiArchiveStatTasks, s == null ? '—' : '${s.tasks}'),
       ],
     );

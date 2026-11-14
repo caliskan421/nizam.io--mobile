@@ -9982,6 +9982,12 @@ abstract class AppLocalizations {
   /// **'Ret gerekçesi'**
   String get uiTasksRejectReasonLabel;
 
+  /// ui.tasks.sub_evidence_needed
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt gerekli'**
+  String get uiTasksSubEvidenceNeeded;
+
   /// ui.timeline.title
   ///
   /// In tr, this message translates to:

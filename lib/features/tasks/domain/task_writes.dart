@@ -11,7 +11,8 @@ export '../../../core/domain/upload_types.dart'
 /// Alt görev değişikliği (`PATCH …/subtasks/{id}`). null alan değişmez. [assignee] verilirse
 /// `id` null → atamayı kaldır; [dates] verilirse ikisi birlikte gider (ikisi null → kaldır).
 /// [expectedRevision]: okunan alt görev `edit_revision`'ı; başlık, atanan ya da tarih
-/// verilince zorunlu, yalnız [done]'da gerekmez (ADR-0027).
+/// verilince zorunlu, yalnız [done]'da gerekmez (ADR-0027). [evidenceRequired]: kanıt bayrağı
+/// (yönetim alanı; sürüm ister).
 @immutable
 final class SubtaskPatch {
   const SubtaskPatch({
@@ -19,8 +20,11 @@ final class SubtaskPatch {
     this.assignee,
     this.dates,
     this.done,
+    this.evidenceRequired,
     this.expectedRevision,
   });
+
+  final bool? evidenceRequired;
 
   final int? expectedRevision;
   final String? title;
@@ -296,10 +300,12 @@ abstract interface class TaskWriteRepository {
 
   Future<void> deleteNote(TaskItem task, String noteId);
 
+  /// [evidenceRequired]: alt görev bağlı dosya olmadan kapatılamaz (WORK-K70).
   Future<void> createSubtask(
     TaskItem task,
     String title, {
     required String requestKey,
+    bool evidenceRequired = false,
   });
 
   Future<void> updateSubtask(

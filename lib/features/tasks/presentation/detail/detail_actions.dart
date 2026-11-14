@@ -19,6 +19,7 @@ import '../../domain/task_writes.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 import 'detail_forms.dart';
+import 'subtask_create_sheet.dart';
 
 part 'detail_list_option.dart';
 part 'upload_origin_sheet.dart';
@@ -600,20 +601,23 @@ class TaskDetailActions {
   Future<void> toggleSubtask(String id) async =>
       _report(await _ctl.toggleSubtask(id));
 
-  /// Alt görev ekle: başlık alt sayfası → oluştur.
+  /// Alt görev ekle: başlık + kanıt radyosu → oluştur. S12: sonucu bilinmeyen eklemenin adı
+  /// geri gelir (aynı gövde → aynı anahtar).
   Future<void> addSubtask() async {
-    final l = context.l10n;
-    final title = await _askText(
-      title: l.uiTasksSubAdd,
-      description: l.uiTasksSubsHint,
-      label: l.uiTasksSubName,
-      ok: l.uiTasksCreate,
-      // S12: sonucu bilinmeyen/başarısız eklemenin adı geri gelir (aynı ad → aynı anahtar).
+    final r = await askNewSubtask(
+      context,
       initial: _ctl.pendingSubtaskTitle ?? '',
     );
-    if (title == null || !context.mounted) return;
-    _report(await _ctl.createSubtask(title), done: l.uiTasksTSubAdded);
+    if (r == null || !context.mounted) return;
+    final done = context.l10n.uiTasksTSubAdded;
+    _report(
+      await _ctl.createSubtask(r.title, evidenceRequired: r.evidenceRequired),
+      done: done,
+    );
   }
+
+  Future<void> setSubtaskEvidence(String id, bool v) async =>
+      _report(await _ctl.setSubtaskEvidence(id, value: v));
 
   /// Alt görev adı: gönderilemeyen ad state'te kalır ve diyalog onunla açılır (S12); 409
   /// `work.edit_conflict`'te sunucudaki ad ile sizinki arasında seçim (V3).

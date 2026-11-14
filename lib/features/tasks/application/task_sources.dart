@@ -131,7 +131,13 @@ final class TaskWriteSource implements TaskWriteRepository {
     TaskItem task,
     String title, {
     required String requestKey,
-  }) async => _s.createSubtask(task, title, requestKey: requestKey);
+    bool evidenceRequired = false,
+  }) async => _s.createSubtask(
+    task,
+    title,
+    requestKey: requestKey,
+    evidenceRequired: evidenceRequired,
+  );
 
   @override
   Future<void> updateSubtask(

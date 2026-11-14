@@ -5214,6 +5214,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksRejectReasonLabel => 'Ret gerekçesi';
 
   @override
+  String get uiTasksSubEvidenceNeeded => 'Kanıt gerekli';
+
+  @override
   String get uiTimelineTitle => 'Zaman çizelgesi';
 
   @override

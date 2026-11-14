@@ -215,7 +215,10 @@ class TaskDetailController extends _$TaskDetailController
   }
 
   /// Gönderilemeyen yeni alt görevin adı (sonuç bilinmiyor / hata; diyalog bununla açılır).
-  String? get pendingSubtaskTitle => state.keys.pendingBody(_subtask);
+  String? get pendingSubtaskTitle {
+    final b = state.keys.pendingBody(_subtask); // gövde: `ad|kanıt bayrağı`
+    return b?.replaceFirst(RegExp(r'\|(true|false)$'), '');
+  }
 
   /// Çok adımlı yazmanın başladığı bağlam: oturum nesli + seçili kapsam (program, departman).
   @override
@@ -531,7 +534,10 @@ class TaskDetailController extends _$TaskDetailController
     final u = _sub(id);
     if (t == null || u == null) return Future.value(WriteOutcome.invalid);
     final versioned =
-        patch.title != null || patch.assignee != null || patch.dates != null;
+        patch.title != null ||
+        patch.assignee != null ||
+        patch.dates != null ||
+        patch.evidenceRequired != null;
     final rev = u.editRevision;
     if (versioned && rev == null) {
       return Future.value(_rejected(ClientErrorCode.serverOutdated));
@@ -541,18 +547,33 @@ class TaskDetailController extends _$TaskDetailController
       assignee: patch.assignee,
       dates: patch.dates,
       done: patch.done,
+      evidenceRequired: patch.evidenceRequired,
       expectedRevision: versioned ? rev : null,
     );
     return _write(() => _writes.updateSubtask(t, id, body), list: false);
   }
 
-  /// İşaretler/kaldırır. Alt görevde kanıt bayrağı yok (ADR-0024): kanıt kapısı görev
-  /// seviyesindedir ([TaskItem.evidenceRequired]). Yetki [TaskPermissions.canToggleSubtask].
+  /// İşaretler/kaldırır. Yetki [TaskPermissions.canToggleSubtask]. Kanıt bayraklı alt görev
+  /// bağlı dosya olmadan kapatılmaz (yerel ön denetim; sunucu kodu WORK-K70).
   Future<WriteOutcome> toggleSubtask(String id) async {
     final u = _sub(id);
     if (u == null) return WriteOutcome.invalid;
     if (!permissions.canToggleSubtask(u)) return WriteOutcome.invalid;
+    if (!u.done && u.evidenceRequired && u.evidence == null) {
+      return _rejected('work.subtask_attachment_required');
+    }
     return _patchSub(id, SubtaskPatch(done: !u.done));
+  }
+
+  /// Kanıt bayrağını değiştirir (yönetici ya da koordinatör; sürümlü).
+  Future<WriteOutcome> setSubtaskEvidence(String id, {required bool value}) {
+    final u = _sub(id);
+    if (u == null || !permissions.canManageSubtasks) {
+      return Future.value(WriteOutcome.invalid);
+    }
+    return u.evidenceRequired == value
+        ? Future.value(WriteOutcome.unchanged)
+        : _patchSub(id, SubtaskPatch(evidenceRequired: value));
   }
 
   void toggleSubtaskOpen(String id) {
@@ -563,15 +584,23 @@ class TaskDetailController extends _$TaskDetailController
 
   /// [title] başlıklı alt görev açar (yönetici ya da koordinatör; tamamlanmış
   /// görevde 409 `work.item_completed`, tavan 50 → 409 `work.subtask_limit_reached`).
-  Future<WriteOutcome> createSubtask(String title) async {
+  Future<WriteOutcome> createSubtask(
+    String title, {
+    bool evidenceRequired = false,
+  }) async {
     final t = _task;
     final name = title.trim();
     if (t == null || name.isEmpty) return WriteOutcome.invalid;
     if (!permissions.canManageSubtasks) return WriteOutcome.invalid;
     return _writeKeyed(
       _subtask,
-      name,
-      (key) => _writes.createSubtask(t, name, requestKey: key),
+      '$name|$evidenceRequired',
+      (key) => _writes.createSubtask(
+        t,
+        name,
+        requestKey: key,
+        evidenceRequired: evidenceRequired,
+      ),
       list: false,
     );
   }

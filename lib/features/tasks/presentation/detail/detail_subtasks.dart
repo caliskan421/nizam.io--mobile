@@ -168,6 +168,7 @@ class _DetailSubtasksState extends ConsumerState<DetailSubtasks> {
                         onStart: (v) => actions.setSubtaskStart(u.id, v),
                         onEnd: (v) => actions.setSubtaskEnd(u.id, v),
                         onClearDates: () => actions.clearSubtaskDates(u.id),
+                        onEvidence: (v) => actions.setSubtaskEvidence(u.id, v),
                         onDelete: () => actions.removeSubtask(u.id),
                       ),
                     ),
@@ -210,6 +211,7 @@ class _SubtaskRow extends StatelessWidget {
     required this.onStart,
     required this.onEnd,
     required this.onClearDates,
+    required this.onEvidence,
     required this.onDelete,
   });
 
@@ -244,6 +246,9 @@ class _SubtaskRow extends StatelessWidget {
   final ValueChanged<DateTime?> onStart;
   final ValueChanged<DateTime?> onEnd;
   final VoidCallback onClearDates;
+
+  /// Kanıt bayrağı (zorunlu/opsiyonel; WORK-K70).
+  final ValueChanged<bool> onEvidence;
   final VoidCallback onDelete;
 
   @override
@@ -262,7 +267,10 @@ class _SubtaskRow extends StatelessWidget {
     final bits = [
       if (u.assignee case final a?) name(a).split(' ').first,
       if (dates.isNotEmpty) dates,
-      if (u.evidence != null) l.uiTasksOneEvidence,
+      if (u.evidence != null)
+        l.uiTasksOneEvidence
+      else if (u.evidenceRequired)
+        l.uiTasksSubEvidenceNeeded,
       if (u.missingAssignee) l.uiTasksNeedsPerson,
     ];
     final missing = u.missingAssignee;
@@ -452,6 +460,22 @@ class _SubtaskRow extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: t.mono,
                         ),
+                      ),
+                    ),
+                  if (manage)
+                    field(
+                      l.uiTasksEvidenceFile,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (final v in const [true, false])
+                            TaskCheckRow(
+                              label: v ? l.uiTasksRequired : l.uiTasksOptional,
+                              radio: true,
+                              selected: u.evidenceRequired == v,
+                              onTap: () => onEvidence(v),
+                            ),
+                        ],
                       ),
                     ),
                   if (manage)

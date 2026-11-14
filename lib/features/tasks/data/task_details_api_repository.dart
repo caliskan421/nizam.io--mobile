@@ -210,6 +210,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
     doneBy: s.doneByAccountId,
     createdBy: s.createdByAccountId,
     editRevision: s.editRevision,
+    evidenceRequired: s.evidenceRequired,
     start: s.startOn,
     end: s.endOn,
     evidence: files

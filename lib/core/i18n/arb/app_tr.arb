@@ -6593,6 +6593,10 @@
   "@uiTasksRejectReasonLabel": {
     "description": "ui.tasks.reject_reason_label"
   },
+  "uiTasksSubEvidenceNeeded": "Kanıt gerekli",
+  "@uiTasksSubEvidenceNeeded": {
+    "description": "ui.tasks.sub_evidence_needed"
+  },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {
     "description": "ui.timeline.title"

@@ -150,11 +150,15 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
     TaskItem task,
     String title, {
     required String requestKey,
+    bool evidenceRequired = false,
   }) => apiCall(
     () => _client.createWorkItemSubtask(
       id: task.id,
       idempotencyKey: requestKey,
-      body: CreateSubtaskRequest(title: title),
+      body: CreateSubtaskRequest(
+        title: title,
+        evidenceRequired: evidenceRequired ? true : null,
+      ),
       extras: withScope(
         WorkClient.createWorkItemSubtaskOpenapiExtras,
         _program(task),
@@ -179,6 +183,7 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
       startOn: dates == null ? null : _day(dates.start),
       endOn: dates == null ? null : _day(dates.end),
       done: patch.done,
+      evidenceRequired: patch.evidenceRequired,
       expectedRevision: patch.expectedRevision,
     );
     return apiCall(

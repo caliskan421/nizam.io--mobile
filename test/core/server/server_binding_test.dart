@@ -42,6 +42,7 @@ void main() {
         'http://nizam.example.test',
         'http://localhost:8080',
         'http://10.0.2.2',
+        'http://192.168.2.47:18140',
       ]) {
         expect(
           () => ServerAddress.parse(url, Flavor.prod),
@@ -72,6 +73,30 @@ void main() {
         ServerAddress.parse('http://10.0.2.2:8080', Flavor.dev).origin.port,
         8080,
       );
+      for (final lan in [
+        'http://192.168.2.47:18140',
+        'http://172.20.0.5',
+        'http://10.1.2.3',
+        'http://mac.local:18140',
+      ]) {
+        expect(
+          ServerAddress.parse(lan, Flavor.dev).isHttps,
+          isFalse,
+          reason: lan,
+        );
+      }
+      for (final url in [
+        'http://nizam.example.test',
+        'http://172.32.0.1',
+        'http://192.169.0.1',
+        'http://8.8.8.8',
+      ]) {
+        expect(
+          () => ServerAddress.parse(url, Flavor.dev),
+          throwsA(isA<ApiError>()),
+          reason: url,
+        );
+      }
       expect(
         () => ServerAddress.parse('http://nizam.example.test', Flavor.dev),
         throwsA(

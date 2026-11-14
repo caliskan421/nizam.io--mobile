@@ -47,7 +47,10 @@ class HomeGreeting extends StatelessWidget {
       children: [
         Text(
           l.dateKicker(today),
-          style: t.kicker.copyWith(color: context.colors.textMuted),
+          style: t.kicker.copyWith(
+            color: context.colors.text,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const Gap(NizamioSpacing.space1 + NizamioSpacing.space1 / 2),
         Semantics(

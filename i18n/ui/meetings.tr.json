@@ -152,6 +152,14 @@
     "ui.meetings.connected_was_tail": "kişi bağlıydı",
     "ui.meetings.copy_link": "Bağlantıyı kopyala",
     "ui.meetings.link_copied": "Bağlantı kopyalandı.",
-    "ui.meetings.agenda_edit": "Maddeyi düzenle"
+    "ui.meetings.agenda_edit": "Maddeyi düzenle",
+    "ui.meetings.scope_upcoming": "yaklaşan",
+    "ui.meetings.scope_past": "geçmiş",
+    "ui.meetings.scope_coord_note": "koordinatör olarak birimlerinin dahil olduğu toplantıları görüyorsun",
+    "ui.meetings.scope_member_note": "üye olarak birimlerinin dahil olduğu toplantıları görüyorsun",
+    "ui.meetings.unit_label": "Birim",
+    "ui.meetings.unit_all": "Tümü",
+    "ui.meetings.instant": "Anlık toplantı",
+    "ui.meetings.instant_title": "Anlık toplantı"
   }
 }

@@ -4205,6 +4205,38 @@
   "@uiMeetingsAgendaEdit": {
     "description": "ui.meetings.agenda_edit"
   },
+  "uiMeetingsScopeUpcoming": "yaklaşan",
+  "@uiMeetingsScopeUpcoming": {
+    "description": "ui.meetings.scope_upcoming"
+  },
+  "uiMeetingsScopePast": "geçmiş",
+  "@uiMeetingsScopePast": {
+    "description": "ui.meetings.scope_past"
+  },
+  "uiMeetingsScopeCoordNote": "koordinatör olarak birimlerinin dahil olduğu toplantıları görüyorsun",
+  "@uiMeetingsScopeCoordNote": {
+    "description": "ui.meetings.scope_coord_note"
+  },
+  "uiMeetingsScopeMemberNote": "üye olarak birimlerinin dahil olduğu toplantıları görüyorsun",
+  "@uiMeetingsScopeMemberNote": {
+    "description": "ui.meetings.scope_member_note"
+  },
+  "uiMeetingsUnitLabel": "Birim",
+  "@uiMeetingsUnitLabel": {
+    "description": "ui.meetings.unit_label"
+  },
+  "uiMeetingsUnitAll": "Tümü",
+  "@uiMeetingsUnitAll": {
+    "description": "ui.meetings.unit_all"
+  },
+  "uiMeetingsInstant": "Anlık toplantı",
+  "@uiMeetingsInstant": {
+    "description": "ui.meetings.instant"
+  },
+  "uiMeetingsInstantTitle": "Anlık toplantı",
+  "@uiMeetingsInstantTitle": {
+    "description": "ui.meetings.instant_title"
+  },
   "uiMessagesTitle": "Mesajlar",
   "@uiMessagesTitle": {
     "description": "ui.messages.title"

@@ -42,7 +42,7 @@ final class MeetingsViewControllerProvider
 }
 
 String _$meetingsViewControllerHash() =>
-    r'a084be8780ee79fc920fe98397a7e49d7a8edb14';
+    r'0662c71c7f0d96f15743679301712d7001b6ece7';
 
 abstract class _$MeetingsViewController extends $Notifier<MeetingsView> {
   MeetingsView build();
@@ -109,7 +109,7 @@ final class MeetingsBoardControllerProvider
 }
 
 String _$meetingsBoardControllerHash() =>
-    r'6b3faf96a5752e320f7c3c1f01a1d076995f899e';
+    r'1ceac6ecf7597cca5fc2367976dd5e415465e178';
 
 /// Toplantı listesi: görünür toplantılar (`listMeetings`) ve yöneticiye silinenler. Silinenler
 /// yönetici yaşam döngüsü yolundan okunur (`adminListDeletedMeetings`; geri yükleme ve kalıcı

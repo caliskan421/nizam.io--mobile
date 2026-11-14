@@ -3347,6 +3347,32 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMeetingsAgendaEdit => 'Maddeyi düzenle';
 
   @override
+  String get uiMeetingsScopeUpcoming => 'yaklaşan';
+
+  @override
+  String get uiMeetingsScopePast => 'geçmiş';
+
+  @override
+  String get uiMeetingsScopeCoordNote =>
+      'koordinatör olarak birimlerinin dahil olduğu toplantıları görüyorsun';
+
+  @override
+  String get uiMeetingsScopeMemberNote =>
+      'üye olarak birimlerinin dahil olduğu toplantıları görüyorsun';
+
+  @override
+  String get uiMeetingsUnitLabel => 'Birim';
+
+  @override
+  String get uiMeetingsUnitAll => 'Tümü';
+
+  @override
+  String get uiMeetingsInstant => 'Anlık toplantı';
+
+  @override
+  String get uiMeetingsInstantTitle => 'Anlık toplantı';
+
+  @override
   String get uiMessagesTitle => 'Mesajlar';
 
   @override

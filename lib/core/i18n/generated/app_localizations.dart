@@ -6400,6 +6400,54 @@ abstract class AppLocalizations {
   /// **'Maddeyi düzenle'**
   String get uiMeetingsAgendaEdit;
 
+  /// ui.meetings.scope_upcoming
+  ///
+  /// In tr, this message translates to:
+  /// **'yaklaşan'**
+  String get uiMeetingsScopeUpcoming;
+
+  /// ui.meetings.scope_past
+  ///
+  /// In tr, this message translates to:
+  /// **'geçmiş'**
+  String get uiMeetingsScopePast;
+
+  /// ui.meetings.scope_coord_note
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatör olarak birimlerinin dahil olduğu toplantıları görüyorsun'**
+  String get uiMeetingsScopeCoordNote;
+
+  /// ui.meetings.scope_member_note
+  ///
+  /// In tr, this message translates to:
+  /// **'üye olarak birimlerinin dahil olduğu toplantıları görüyorsun'**
+  String get uiMeetingsScopeMemberNote;
+
+  /// ui.meetings.unit_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Birim'**
+  String get uiMeetingsUnitLabel;
+
+  /// ui.meetings.unit_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get uiMeetingsUnitAll;
+
+  /// ui.meetings.instant
+  ///
+  /// In tr, this message translates to:
+  /// **'Anlık toplantı'**
+  String get uiMeetingsInstant;
+
+  /// ui.meetings.instant_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Anlık toplantı'**
+  String get uiMeetingsInstantTitle;
+
   /// ui.messages.title
   ///
   /// In tr, this message translates to:

@@ -219,6 +219,10 @@ class _Feed extends ConsumerWidget {
         final kpis = HomeKpiGrid(
           tasks: taskTotals,
           columns: wide ? 4 : 2,
+          showDateRequests: isAdmin,
+          dateRequests: pending.value?.items
+              .where((i) => i.kind == PendingKind.dateChange)
+              .length,
           onOpen: (view) => nav.openTasks(view: view),
         );
         final coords = HomeCoordinatorships(

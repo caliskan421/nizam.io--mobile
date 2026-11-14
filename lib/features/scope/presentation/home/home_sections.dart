@@ -72,18 +72,24 @@ class HomeGreeting extends StatelessWidget {
   }
 }
 
-/// Özet kutuları (tamamlanma, devam eden, gecikmede, onay bekleyen): 2×2, geniş ana sayfada
-/// tek satır ([columns] 4).
+/// Özet kutuları (tamamlanma, devam eden, gecikmede, onay bekleyen): dar ekranda 2×2, geniş ana
+/// sayfada tek satır ([columns] 4). [showDateRequests] (yönetici) bekleyen tarih talepleri kutusunu
+/// ekler: dar ekranda ızgaranın üstünde yatay şerit, geniş ekranda satırın beşinci kutusu.
+/// [dateRequests] yüklenirken null ("–").
 class HomeKpiGrid extends StatelessWidget {
   const HomeKpiGrid({
     super.key,
     required this.tasks,
     required this.onOpen,
     this.columns = 2,
+    this.showDateRequests = false,
+    this.dateRequests,
   });
 
   final TaskTotals tasks;
   final int columns;
+  final bool showDateRequests;
+  final int? dateRequests;
 
   /// Kutuya dokunma → görev listesi o kutunun görünümüyle (prototip `go.done/doing/late/review`).
   final ValueChanged<NzTaskView> onOpen;
@@ -93,6 +99,7 @@ class HomeKpiGrid extends StatelessWidget {
     final l = context.l10n;
     final c = context.colors;
     final t = tasks;
+    final wide = columns > 2;
     double ratio(int a, int b) => b == 0 ? 0 : a / b;
     NzKpiTile tile({
       required NzTaskView view,
@@ -101,8 +108,8 @@ class HomeKpiGrid extends StatelessWidget {
       required String label,
       required String value,
       required double progress,
-      required String caption,
       Color? valueColor,
+      bool horizontal = false,
     }) => NzKpiTile(
       icon: icon,
       tone: tone,
@@ -110,56 +117,70 @@ class HomeKpiGrid extends StatelessWidget {
       value: value,
       valueColor: valueColor,
       progress: progress,
-      caption: caption,
+      horizontal: horizontal,
       onTap: () => onOpen(view),
-      semanticLabel: '$label: $value. $caption. ${l.uiHomeOpenList}',
+      semanticLabel: '$label: $value. ${l.uiHomeOpenList}',
+    );
+    final requests = showDateRequests
+        ? tile(
+            view: NzTaskView.dateRequest,
+            icon: NzIcons.eventRepeat,
+            tone: c.info,
+            label: l.uiHomeKpiDateRequest,
+            value: dateRequests == null ? '–' : '${dateRequests!}',
+            progress: ratio(dateRequests ?? 0, t.open),
+            horizontal: !wide,
+          )
+        : null;
+    final grid = HomeGrid(
+      columns: wide && requests != null ? columns + 1 : columns,
+      gap: NizamioSpacing.gapMd,
+      children: [
+        tile(
+          view: NzTaskView.done,
+          icon: NzIcons.check,
+          tone: c.taskDone,
+          label: l.uiHomeKpiDone,
+          value: '${t.done}',
+          progress: ratio(t.done, t.total),
+        ),
+        tile(
+          view: NzTaskView.inProgress,
+          icon: NzIcons.bolt,
+          tone: c.inProgress,
+          label: l.uiHomeKpiDoing,
+          value: '${t.inProgress}',
+          progress: ratio(t.inProgress, t.total),
+        ),
+        tile(
+          view: NzTaskView.late,
+          icon: NzIcons.warning,
+          tone: c.danger,
+          label: l.uiHomeKpiLate,
+          value: '${t.late}',
+          valueColor: c.danger,
+          progress: ratio(t.late, t.open),
+        ),
+        tile(
+          view: NzTaskView.review,
+          icon: NzIcons.clock,
+          tone: c.warning,
+          label: l.uiHomeKpiReview,
+          value: '${t.awaitingApproval}',
+          progress: ratio(t.awaitingApproval, t.open),
+        ),
+        if (wide) ?requests,
+      ],
     );
     return Semantics(
       container: true,
       label: l.uiHomeSummaryLabel,
-      child: HomeGrid(
-        columns: columns,
-        gap: NizamioSpacing.gapMd,
-        children: [
-          tile(
-            view: NzTaskView.done,
-            icon: NzIcons.check,
-            tone: c.taskDone,
-            label: l.uiHomeKpiDone,
-            value: '${t.done}',
-            progress: ratio(t.done, t.total),
-            caption: l.kpiDoneCaption(t),
-          ),
-          tile(
-            view: NzTaskView.inProgress,
-            icon: NzIcons.bolt,
-            tone: c.inProgress,
-            label: l.uiHomeKpiDoing,
-            value: '${t.inProgress}',
-            progress: ratio(t.inProgress, t.total),
-            caption: l.kpiDoingCaption(t),
-          ),
-          tile(
-            view: NzTaskView.late,
-            icon: NzIcons.warning,
-            tone: c.danger,
-            label: l.uiHomeKpiLate,
-            value: '${t.late}',
-            valueColor: c.danger,
-            progress: ratio(t.late, t.open),
-            caption: l.kpiLateCaption(t),
-          ),
-          tile(
-            view: NzTaskView.review,
-            icon: NzIcons.clock,
-            tone: c.warning,
-            label: l.uiHomeKpiReview,
-            value: '${t.awaitingApproval}',
-            progress: ratio(t.awaitingApproval, t.open),
-            caption: l.uiHomeKpiReviewCaption,
-          ),
-        ],
-      ),
+      child: wide || requests == null
+          ? grid
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [requests, const Gap(NizamioSpacing.gapMd), grid],
+            ),
     );
   }
 }

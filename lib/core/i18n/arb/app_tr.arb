@@ -3117,25 +3117,9 @@
   "@uiHomeKpiReview": {
     "description": "ui.home.kpi_review"
   },
-  "uiHomeKpiDoneOf": "görevin",
-  "@uiHomeKpiDoneOf": {
-    "description": "ui.home.kpi_done_of"
-  },
-  "uiHomeKpiDoneTail": "bitti",
-  "@uiHomeKpiDoneTail": {
-    "description": "ui.home.kpi_done_tail"
-  },
-  "uiHomeKpiDoingTail": "tanesi zamanında",
-  "@uiHomeKpiDoingTail": {
-    "description": "ui.home.kpi_doing_tail"
-  },
-  "uiHomeKpiLateLead": "Açık görevlerin",
-  "@uiHomeKpiLateLead": {
-    "description": "ui.home.kpi_late_lead"
-  },
-  "uiHomeKpiReviewCaption": "Kanıt yüklendi, onayda",
-  "@uiHomeKpiReviewCaption": {
-    "description": "ui.home.kpi_review_caption"
+  "uiHomeKpiDateRequest": "Tarih talebi",
+  "@uiHomeKpiDateRequest": {
+    "description": "ui.home.kpi_date_request"
   },
   "uiHomeOpenList": "listeyi aç",
   "@uiHomeOpenList": {

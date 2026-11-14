@@ -2513,19 +2513,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeKpiReview => 'Onay bekleyen';
 
   @override
-  String get uiHomeKpiDoneOf => 'görevin';
-
-  @override
-  String get uiHomeKpiDoneTail => 'bitti';
-
-  @override
-  String get uiHomeKpiDoingTail => 'tanesi zamanında';
-
-  @override
-  String get uiHomeKpiLateLead => 'Açık görevlerin';
-
-  @override
-  String get uiHomeKpiReviewCaption => 'Kanıt yüklendi, onayda';
+  String get uiHomeKpiDateRequest => 'Tarih talebi';
 
   @override
   String get uiHomeOpenList => 'listeyi aç';

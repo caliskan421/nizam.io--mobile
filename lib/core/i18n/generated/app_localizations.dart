@@ -4768,35 +4768,11 @@ abstract class AppLocalizations {
   /// **'Onay bekleyen'**
   String get uiHomeKpiReview;
 
-  /// ui.home.kpi_done_of
+  /// ui.home.kpi_date_request
   ///
   /// In tr, this message translates to:
-  /// **'görevin'**
-  String get uiHomeKpiDoneOf;
-
-  /// ui.home.kpi_done_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'bitti'**
-  String get uiHomeKpiDoneTail;
-
-  /// ui.home.kpi_doing_tail
-  ///
-  /// In tr, this message translates to:
-  /// **'tanesi zamanında'**
-  String get uiHomeKpiDoingTail;
-
-  /// ui.home.kpi_late_lead
-  ///
-  /// In tr, this message translates to:
-  /// **'Açık görevlerin'**
-  String get uiHomeKpiLateLead;
-
-  /// ui.home.kpi_review_caption
-  ///
-  /// In tr, this message translates to:
-  /// **'Kanıt yüklendi, onayda'**
-  String get uiHomeKpiReviewCaption;
+  /// **'Tarih talebi'**
+  String get uiHomeKpiDateRequest;
 
   /// ui.home.open_list
   ///

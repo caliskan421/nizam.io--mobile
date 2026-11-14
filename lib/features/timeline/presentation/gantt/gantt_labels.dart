@@ -112,7 +112,7 @@ class _GroupLabel extends StatelessWidget {
       expanded: head.open,
       label: [
         if (head.label != head.name) head.label,
-        head.name,
+        l.groupTitle(head.code, head.name),
         ?late,
         '${head.count}',
       ].join(' '),
@@ -159,7 +159,7 @@ class _GroupLabel extends StatelessWidget {
                         ],
                         if (head.name.isNotEmpty) ...[
                           TextSpan(
-                            text: head.name,
+                            text: l.groupTitle(head.code, head.name),
                             style: t.labelMd.copyWith(
                               fontSize: GanttGeometry.groupNameSize,
                             ),

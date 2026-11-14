@@ -11320,6 +11320,120 @@ abstract class AppLocalizations {
   /// **'Görev ayrıntısını aç'**
   String get uiTimelineGanttOpenTask;
 
+  /// ui.timeline.tabs_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev kümesi'**
+  String get uiTimelineTabsLabel;
+
+  /// ui.timeline.tab_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlüğün görevleri'**
+  String get uiTimelineTabDepartment;
+
+  /// ui.timeline.tab_mine
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevlerim'**
+  String get uiTimelineTabMine;
+
+  /// ui.timeline.my_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman çizelgem'**
+  String get uiTimelineMyTitle;
+
+  /// ui.timeline.group_open
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık görevler'**
+  String get uiTimelineGroupOpen;
+
+  /// ui.timeline.group_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanan'**
+  String get uiTimelineGroupDone;
+
+  /// ui.timeline.rule_direct
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitişi en çok 7 gün ileri alırsın; hemen uygulanır, sorumlu üyeye bildirim gider.'**
+  String get uiTimelineRuleDirect;
+
+  /// ui.timeline.rule_request
+  ///
+  /// In tr, this message translates to:
+  /// **'7 günü aşan ya da başlangıcı değiştiren her değişiklik yönetici onayına gider; karar gelene kadar eski tarih geçerlidir.'**
+  String get uiTimelineRuleRequest;
+
+  /// ui.timeline.extend_seven
+  ///
+  /// In tr, this message translates to:
+  /// **'Süre uzat +7'**
+  String get uiTimelineExtendSeven;
+
+  /// ui.timeline.extend_go
+  ///
+  /// In tr, this message translates to:
+  /// **'Süre uzat ·'**
+  String get uiTimelineExtendGo;
+
+  /// ui.timeline.extend_done
+  ///
+  /// In tr, this message translates to:
+  /// **'Süre uzatıldı · sorumluya bildirim gitti'**
+  String get uiTimelineExtendDone;
+
+  /// ui.timeline.pull_today
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitişi bugüne çek'**
+  String get uiTimelinePullToday;
+
+  /// ui.timeline.pulled
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş bugüne çekildi · plan saklandı'**
+  String get uiTimelinePulled;
+
+  /// ui.timeline.request_go
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talebi gönder'**
+  String get uiTimelineRequestGo;
+
+  /// ui.timeline.reason_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Talep gerekçesi'**
+  String get uiTimelineReasonLabel;
+
+  /// ui.timeline.reason_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetici bu gerekçeyi görür; karar gelene kadar eski tarih geçerli.'**
+  String get uiTimelineReasonHint;
+
+  /// ui.timeline.reason_needed
+  ///
+  /// In tr, this message translates to:
+  /// **'Talep için gerekçe yaz (en az 3 karakter)'**
+  String get uiTimelineReasonNeeded;
+
+  /// ui.timeline.pending_head
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih talebi bekliyor · yeni bitiş'**
+  String get uiTimelinePendingHead;
+
+  /// ui.timeline.pending_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'yöneticide bekliyor'**
+  String get uiTimelinePendingTail;
+
   /// ui.user_account_fields.heading
   ///
   /// In tr, this message translates to:

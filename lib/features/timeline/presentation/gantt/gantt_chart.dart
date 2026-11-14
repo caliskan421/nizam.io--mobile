@@ -13,8 +13,10 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
-import '../../../tasks/tasks.dart' show Subtask;
+import '../../../tasks/tasks.dart' show Subtask, TaskDependency;
 import '../../domain/horizontal_timeline.dart';
+import '../chart/timeline_links_painter.dart';
+import '../timeline_texts.dart' show TimelineTexts;
 import 'gantt_geometry.dart';
 import 'gantt_painters.dart';
 import 'gantt_texts.dart';
@@ -63,9 +65,13 @@ class GanttChart extends StatefulWidget {
     this.onToggleLabels,
     this.expandedTasks = const {},
     this.onToggleSubtasks,
+    this.links = const [],
   });
 
   final GanttLayout layout;
+
+  /// Gantt bağımlılıkları; iki ucu da çizelgede olanlar ok olarak çizilir.
+  final List<TaskDependency> links;
   final GanttCenterRequest center;
   final ValueChanged<String> onToggleGroup;
   final ValueChanged<String> onPick;
@@ -202,6 +208,7 @@ class _GanttChartState extends State<GanttChart> {
                               h: _h,
                               v: _v,
                               onPick: widget.onPick,
+                              links: widget.links,
                             ),
                           ),
                         ),
@@ -262,9 +269,11 @@ class _Body extends StatelessWidget {
     required this.h,
     required this.v,
     required this.onPick,
+    required this.links,
   });
 
   final GanttLayout layout;
+  final List<TaskDependency> links;
   final double height;
 
   /// Görünür alan: yatay kaydırma genişliği × dikey kaydırma yüksekliği.
@@ -288,6 +297,21 @@ class _Body extends StatelessWidget {
             child: CustomPaint(
               key: GanttChart.bodyKey,
               painter: GanttBodyPainter(layout: layout, colors: c),
+            ),
+          ),
+        ),
+        Positioned(
+          left: layout.labelWidth,
+          top: 0,
+          width: layout.width,
+          height: height,
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: TimelineLinksPainter(
+                links: timelineLinkEnds(links, layout.barOf),
+                color: c.textMuted,
+                crossColor: c.textFaint,
+              ),
             ),
           ),
         ),

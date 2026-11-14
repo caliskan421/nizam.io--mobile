@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../../tasks/tasks.dart';
 import 'timeline.dart';
+import 'timeline_rules.dart';
 
 /// Kataloğun seçili koordinatörlükleri: durumdaki liste ya da (null) ilk koordinatörlük
 /// ([TimelineState.startAll] ise hepsi).
@@ -20,19 +21,28 @@ DayRange currentRange(TaskItem t, TimelineState s, int year) =>
     DayRange(seasonDay(t.start, year), seasonDay(t.due, year));
 
 /// Prototip `renderVals` mantığı: süzgeçler, şerit yerleşimi, sayılar, sezon şeridi, seçili kart.
+///
+/// [lens] kilitliyse ([TimelineLens.locked]: Koordinatör/Üye görünümü) seçili koordinatörlük
+/// etkin koordinatörlüktür (seçici yok) ve gruplar durum başlıklarıdır: açık görevler,
+/// tamamlananlar ([timelineOpenGroup], [timelineDoneGroup]).
 TimelineView buildTimelineView(
   TaskCatalog catalog,
   TimelineState s, {
   Set<String> dependent = const {},
+  TimelineLens lens = TimelineLens.admin,
 }) {
   final year = catalog.today.year;
   final today = seasonDay(catalog.today, year);
   final days = DateTime.utc(year + 1).difference(DateTime.utc(year)).inDays;
-  final coords = resolvedCoordinatorships(catalog, s);
-  final ordered = [
-    for (final c in catalog.coordinatorships)
-      if (coords.contains(c.code)) c.code,
-  ];
+  final coords = lens.locked
+      ? [lens.department!]
+      : resolvedCoordinatorships(catalog, s);
+  final ordered = lens.locked
+      ? coords
+      : [
+          for (final c in catalog.coordinatorships)
+            if (coords.contains(c.code)) c.code,
+        ];
 
   final tasks = [
     for (final item in catalog.tasks)
@@ -93,10 +103,14 @@ TimelineView buildTimelineView(
       if (statusOk(t, s.status)) t,
   ];
 
-  TimelineGroup group(CoordinatorshipRef c, List<TimelineTask> list) {
+  TimelineGroup group(
+    CoordinatorshipRef c,
+    List<TimelineTask> list, {
+    bool Function(TimelineTask t)? member,
+  }) {
     final all = [
       for (final t in base)
-        if (t.item.coordinatorship == c.code) t,
+        if (member?.call(t) ?? t.item.coordinatorship == c.code) t,
     ];
     final (lanes, placed) = packLanes(list);
     return TimelineGroup(
@@ -110,13 +124,33 @@ TimelineView buildTimelineView(
     );
   }
 
+  bool doneTask(TimelineTask t) => t.status == TaskStatus.done;
   final groups = [
-    for (final c in catalog.coordinatorships)
-      if (ordered.contains(c.code))
-        group(c, [
-          for (final t in shown)
-            if (t.item.coordinatorship == c.code) t,
-        ]),
+    if (lens.locked)
+      for (final (code, done) in [
+        (timelineOpenGroup, false),
+        (timelineDoneGroup, true),
+      ])
+        group(
+          CoordinatorshipRef(
+            code: code,
+            name: code,
+            leads: const [],
+            members: const [],
+          ),
+          [
+            for (final t in shown)
+              if (inGroup(t) && doneTask(t) == done) t,
+          ],
+          member: (t) => inGroup(t) && doneTask(t) == done,
+        )
+    else
+      for (final c in catalog.coordinatorships)
+        if (ordered.contains(c.code))
+          group(c, [
+            for (final t in shown)
+              if (t.item.coordinatorship == c.code) t,
+          ]),
   ].where((g) => g.lanes > 0).toList();
 
   final overviewGroups = s.overview
@@ -190,6 +224,7 @@ TimelineView buildTimelineView(
     weeks: weeks,
     selection: selection,
     overviewGroups: overviewGroups,
+    locked: lens.locked,
   );
 }
 

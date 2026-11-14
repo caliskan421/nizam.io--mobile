@@ -38,6 +38,7 @@ final ganttLayoutProvider = Provider.autoDispose<GanttLayout?>((ref) {
       state,
       dependent:
           ref.watch(ganttScheduleProvider).value?.dependentIds ?? const {},
+      byStatus: ref.watch(timelineLensProvider.select((l) => l.locked)),
       rangeOf: (code) =>
           (draft != null && code == selected && code == state.selected)
           ? draft

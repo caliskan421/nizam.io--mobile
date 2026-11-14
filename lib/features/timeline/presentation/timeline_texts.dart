@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../tasks/tasks.dart';
 import '../domain/timeline.dart';
+import '../domain/timeline_rules.dart';
 
 /// Zaman çizelgesinin sayılı cümleleri. UI metin kaynağı yer tutucu kabul etmediği için parçalar
 /// ARB'den gelir, burada birleşir; tarih biçimi `tr`.
@@ -142,6 +143,13 @@ extension TimelineTexts on AppLocalizations {
   /// "Bugün 21 Ekim".
   String todayLabel(DateTime today) =>
       '$uiTimelineToday ${DateFormat('d MMMM', 'tr').format(today)}';
+
+  /// Grup başlığı: durum grubu (kilitli görünüm) ya da koordinatörlük adı.
+  String groupTitle(String code, String name) => switch (code) {
+    timelineOpenGroup => uiTimelineGroupOpen,
+    timelineDoneGroup => uiTimelineGroupDone,
+    _ => name,
+  };
 
   /// "15 görevi göster".
   String showTasks(int n) => '$n $uiTimelineShowTasksTail';

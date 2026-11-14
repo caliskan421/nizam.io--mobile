@@ -33,53 +33,58 @@ class _Gantt implements GanttRepository {
 
 void main() {
   for (final flags in [(true, false), (false, true)]) {
-    test('iki koltuğun kesilmesi OR ile birleşir: $flags', () async {
-      final original = moduleCatalog();
-      final catalog = TaskCatalog(
-        today: original.today,
-        me: original.me,
-        tasks: original.tasks,
-        people: original.people,
-        coordinatorships: original.coordinatorships,
-        access: TaskAccess(
-          accountId: 'me',
-          companyAdmin: false,
-          seats: const [
-            TeamSeat(
-              programId: 'program',
-              departmentId: 'one',
-              departmentName: 'Bir',
-              role: SeatRole.coordinator,
-            ),
-            TeamSeat(
-              programId: 'program',
-              departmentId: 'two',
-              departmentName: 'İki',
-              role: SeatRole.member,
+    test(
+      'yalnız etkin koordinatörlüğün Gantt\'ı okunur (GAP-053): $flags',
+      () async {
+        final original = moduleCatalog();
+        final catalog = TaskCatalog(
+          today: original.today,
+          me: original.me,
+          tasks: original.tasks,
+          people: original.people,
+          coordinatorships: original.coordinatorships,
+          access: TaskAccess(
+            accountId: 'me',
+            companyAdmin: false,
+            seats: const [
+              TeamSeat(
+                programId: 'program',
+                departmentId: 'one',
+                departmentName: 'Bir',
+                role: SeatRole.coordinator,
+              ),
+              TeamSeat(
+                programId: 'program',
+                departmentId: 'two',
+                departmentName: 'İki',
+                role: SeatRole.member,
+              ),
+            ],
+          ),
+        );
+        final first = _Gantt(
+          GanttSchedule(tasks: const [], links: const [], truncated: flags.$1),
+        );
+        final second = _Gantt(
+          GanttSchedule(tasks: const [], links: const [], truncated: flags.$2),
+        );
+        final container = moduleContainer(
+          catalog: catalog,
+          overrides: [
+            ganttRepositoryProvider.overrideWith(
+              (ref, scope) => scope.department == 'one' ? first : second,
             ),
           ],
-        ),
-      );
-      final first = _Gantt(
-        GanttSchedule(tasks: const [], links: const [], truncated: flags.$1),
-      );
-      final second = _Gantt(
-        GanttSchedule(tasks: const [], links: const [], truncated: flags.$2),
-      );
-      final container = moduleContainer(
-        catalog: catalog,
-        overrides: [
-          ganttRepositoryProvider.overrideWith(
-            (ref, scope) => scope.department == 'one' ? first : second,
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
-      final result = await container.read(ganttScheduleProvider.future);
-      expect(result.truncated, isTrue);
-      expect(first.calls, 1);
-      expect(second.calls, 1);
-    });
+        );
+        addTearDown(container.dispose);
+        final result = await container.read(ganttScheduleProvider.future);
+        // Varsayılan görünüm koordinatör rolü + ilk koordinatör satırı ('one'); üye satırı
+        // ('two') ayrı görünümdür, birleşik okuma yok.
+        expect(result.truncated, flags.$1);
+        expect(first.calls, 1);
+        expect(second.calls, 0);
+      },
+    );
   }
   test('görünür küme Gantt yanıtıdır; eşleşen görev sürümleri ve bağlantılar korunur', () async {
     final original = moduleCatalog();

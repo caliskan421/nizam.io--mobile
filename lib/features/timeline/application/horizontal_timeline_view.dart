@@ -9,4 +9,11 @@ GanttView horizontalTimelineView(
   GanttState state, {
   Set<String> dependent = const {},
   DayRange? Function(String code)? rangeOf,
-}) => buildGanttView(catalog, state, dependent: dependent, rangeOf: rangeOf);
+  bool byStatus = false,
+}) => buildGanttView(
+  catalog,
+  state,
+  dependent: dependent,
+  rangeOf: rangeOf,
+  byStatus: byStatus,
+);

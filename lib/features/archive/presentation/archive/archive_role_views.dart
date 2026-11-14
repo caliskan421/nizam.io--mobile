@@ -24,10 +24,25 @@ import 'archive_texts.dart';
 /// çizimi, görev başlığı, "kod · n dosya", durum noktası. Satır klasör ayrıntısını o görevle
 /// süzülmüş Dosyalar sekmesinde açar. Kaynak `archiveTasks` (dosyası olan görevler).
 class ArchiveTaskFolderList extends ConsumerWidget {
-  const ArchiveTaskFolderList({super.key, required this.folder});
+  const ArchiveTaskFolderList({
+    super.key,
+    required this.folder,
+    this.summary = true,
+    this.hint,
+    this.empty,
+  });
 
-  /// Koordinatörün koordinatörlük klasörü.
+  /// Koordinatörün koordinatörlük klasörü; üyede sanal "Görevlerim" klasörü.
   final ArchiveFolder folder;
+
+  /// Üstte özet kartları çizilsin mi (üyede çizilmez).
+  final bool summary;
+
+  /// Başlığın sağındaki ipucu (üyede "yalnız sana atananlar").
+  final String? hint;
+
+  /// Klasörde hiç görev yokken (arama yokken) gösterilen metin; yoksa arama boş metni.
+  final String? empty;
 
   /// Liste satırındaki küçük klasör çizimi.
   static const _art = Size(32, 27);
@@ -54,9 +69,14 @@ class ArchiveTaskFolderList extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ArchiveSummaryCards(files: folder.files, folders: all.length),
-            const Gap(NizamioSpacing.space5),
-            NzKicker('${l.uiArchiveTaskFolders} · ${list.length}'),
+            if (summary) ...[
+              ArchiveSummaryCards(files: folder.files, folders: all.length),
+              const Gap(NizamioSpacing.space5),
+            ],
+            NzKicker(
+              '${l.uiArchiveTaskFolders} · ${list.length}',
+              trailing: hint,
+            ),
             const Gap(NizamioSpacing.space3),
             if (list.isEmpty)
               Padding(
@@ -64,7 +84,9 @@ class ArchiveTaskFolderList extends ConsumerWidget {
                   vertical: NizamioSpacing.space6,
                 ),
                 child: Text(
-                  l.uiArchiveEmptyTaskFolders,
+                  all.isEmpty
+                      ? (empty ?? l.uiArchiveEmptyTaskFolders)
+                      : l.uiArchiveEmptyTaskFolders,
                   textAlign: TextAlign.center,
                   style: context.text.caption.copyWith(color: c.textMuted),
                 ),

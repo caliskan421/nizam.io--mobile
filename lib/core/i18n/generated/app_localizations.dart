@@ -3214,6 +3214,18 @@ abstract class AppLocalizations {
   /// **'Bu aramayla eşleşen görev klasörü yok.'**
   String get uiArchiveEmptyTaskFolders;
 
+  /// ui.archive.assigned_only
+  ///
+  /// In tr, this message translates to:
+  /// **'yalnız sana atananlar'**
+  String get uiArchiveAssignedOnly;
+
+  /// ui.archive.empty_assigned
+  ///
+  /// In tr, this message translates to:
+  /// **'Sana atanan görevlerde henüz dosya yok.'**
+  String get uiArchiveEmptyAssigned;
+
   /// ui.buttons.busy
   ///
   /// In tr, this message translates to:

@@ -202,6 +202,27 @@ class _Folders extends ConsumerWidget {
           all.where((f) => !f.isVirtual).firstOrNull;
       if (own != null) return ArchiveTaskFolderList(folder: own);
     }
+    // Üye: önce kendi yüklediği dosyalar, sonra sanal "Görevlerim" klasörünün düz görev
+    // klasörü listesi (özet kartları ve klasör ızgarası yok).
+    if (view.isMemberView) {
+      final mine = all.where((f) => f.isVirtual).firstOrNull ?? all.firstOrNull;
+      if (mine != null) {
+        final l = context.l10n;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const ArchiveMyFiles(),
+            const Gap(NizamioSpacing.space6),
+            ArchiveTaskFolderList(
+              folder: mine,
+              summary: false,
+              hint: l.uiArchiveAssignedOnly,
+              empty: l.uiArchiveEmptyAssigned,
+            ),
+          ],
+        );
+      }
+    }
     final query = ref.watch(archiveControllerProvider.select((v) => v.query));
     final l = context.l10n;
     final c = context.colors;
@@ -211,11 +232,6 @@ class _Folders extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Üye: önce kendi yüklediği dosyalar, sonra görev klasörü (sanal "Görevlerim").
-        if (view.isMemberView) ...[
-          const ArchiveMyFiles(),
-          const Gap(NizamioSpacing.space6),
-        ],
         ArchiveSummaryCards(files: files, folders: all.length),
         const Gap(NizamioSpacing.space5),
         NzKicker('${l.uiArchiveFoldersTitle} · ${list.length}'),

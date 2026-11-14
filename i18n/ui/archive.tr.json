@@ -100,6 +100,8 @@
     "ui.archive.my_files": "Dosyalarım",
     "ui.archive.my_files_caption": "Yüklediğin dosyalar",
     "ui.archive.task_folders": "görev klasörleri",
-    "ui.archive.empty_task_folders": "Bu aramayla eşleşen görev klasörü yok."
+    "ui.archive.empty_task_folders": "Bu aramayla eşleşen görev klasörü yok.",
+    "ui.archive.assigned_only": "yalnız sana atananlar",
+    "ui.archive.empty_assigned": "Sana atanan görevlerde henüz dosya yok."
   }
 }

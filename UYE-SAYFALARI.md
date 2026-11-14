@@ -1,8 +1,8 @@
 # Üye sayfaları — standartlara uyum çalışması
 
 > Kapsam: `arayuz/koordinator-ve-uye-eksikleri` dalında yönetici ve koordinatör sayfaları için
-> kurulan arayüz standartlarının **üye görünümüne** nasıl uygulanacağı. Belge bir öneri ve iş
-> listesidir; burada önerilen kodun hiçbiri henüz yazılmadı. Tarih: 2026-11-14.
+> kurulan arayüz standartlarının **üye görünümüne** nasıl uygulanacağı. Belge uygulama öncesi envanteri ve iş
+> listesini korur; uygulama durumu ve doğrulama §8’dedir. İlk tarih: 2026-11-14.
 >
 > Kaynaklar: bu daldaki commit'ler (`d8470da` … `758bf2e`), mobil `CLAUDE.md` (mimari kabul,
 > test kapsamı), `lib/CLAUDE.md`, backend sözleşmesi `v0.20.0-api`.
@@ -202,3 +202,50 @@ geçerli (yapı değişikliğinde restart).
 - **K4** — Dosyalarım'da depolama kartı yalnız **kendi yüklediği** dosyaları mı, yoksa
   atandığı görevlerin **bütün** dosyalarını mı saysın? *Öneri: atandığı görevlerin bütün
   dosyaları (görev klasörleriyle tutarlı); "Dosyalarım" listesi kendi yükledikleri.*
+
+
+## 8. Uygulama kaydı — 2026-11-15
+
+Önceki oturumun ana sayfa (`af51317`) ve Görevlerim (`b852eb3`) teslimleri korunarak
+kalan paketler tamamlandı. Aşağıdaki kararlar §7’deki önerileri uygular:
+
+- K1: Yaklaşanlar, Toplantılar ve Son tarihler olarak iki alt bölüm; her biri en çok üç öğe.
+- K2: Genel durum halkası yalnız tablette, odak kartıyla aynı yükseklikte.
+- K3: Üye görünümünde Gecikmede → İade → Devam → Onayda → Başlamadı → Tamamlandı → Tümü.
+- K4: Depolama kartı atandığı görevlerin bütün dosyalarını; Dosyalarım listesi yalnız
+  kendisinin yüklediği dosyaları sayar. Üyeye kapalı bir uç çağrılmaz.
+
+| Paket | Uygulama |
+|---|---|
+| U1–U7 | Görünüm satırı ve tekrar eden nokta istatistikleri kaldırıldı; dört KPI, tablet halkası/odak çifti, ortak toplantı kartları, çizgi ikonları ve basma geri bildirimi kullanılıyor. |
+| G1–G4 | Üyede kişi/koordinatörlük sıralaması ve kişi süzgeci yok; görünüm sırası eyleme göre; kartta kendi adı gizli. |
+| A1–A4 | Etiket hapı, depolama kartı, ilk beş kişisel dosya ve Tümünü göster; etiket seçimi kişisel dosyaları ve görev klasörlerini birlikte süzer. Kişisel liste imlecini korur; profil Dosyalar sekmesi arşiv süzgecinden etkilenmez. |
+| E1–E3 | Başlık altı sayı satırı kalktı; üyede avatarsız/zeminsiz ad ve rol rozeti; yük sayısı yok. Sohbet grubu yokken kurulunca ekibin görüneceği açıklanır. Rol sekmeleri ve kişi/mesaj eylemleri korunur. |
+| D1–D2 | Üye bandı ortak çizgi ikonlarını kullanır. Fotoğraflar/Kamera/Dosyalar seçimi ortak cam menü; iptal null döner. Not ve doğrulama içeren onaya sunma/yükleme formları korunur. |
+
+Arşiv özeti mevcut sayfa sınırını korur (departman başına en çok beş × 200); eksik özet
+kartta kısmi olarak belirtilir. Çoklu etiket OR’dur; kişisel dosyalar eşleşmeyen sayfaları
+atlayarak, okuma başına en çok beş sayfa tarar ve kalan imleç için devam düğmesini korur.
+Üye ekip yükü, yükleme tarihi veya yönetici rapor verisi üretilmez.
+
+Teslim commit’leri: Dosyalarım `3df3ac68`, Ekibim + ayrıntı `34d9ba7f`, ana sayfa son
+uyum ve kabul testleri `fca1356e`. Tablet rol menüsü koordinat düzeltmesi `903ff2c`.
+
+Doğrulama:
+
+- Son hedefli koşum: **414 PASS, 0 FAIL**. Arşiv, yönetim, kapsam, üye sıralaması,
+  kanıt yükleme/kaynak seçimi, rol menüsü, dosya boyutu ve hata yolu testleri dahil.
+  Üye ana sayfasının dört KPI yönlendirmesi ve Dosyalarım dört ekran boyutunda sınandı.
+- `make format-check analyze`: temiz. Mimari sınır ve hata yolu denetimleri: 1878 dosya,
+  ihlal yok; hata yolu envanteri güncel. Kod üretimi `dart run tool/gen.dart` ile yapıldı.
+- Golden dışı tam kapsam koşumu: 3000 PASS, 2 FAIL. Eski kullanılmayan toplantı satırı
+  kaldırılarak 600 satır ihlali; `restoreLast` yakalamasına raporlama eklenerek hata yolu
+  ihlali giderildi. Bu iki test son 414 testlik koşumda yeşil; tam koşum tekrarlanmadı.
+- Genel teslim kapıları **henüz yeşil değil**: `test-presence`, önceden mevcut sekiz eksik
+  test dosyasını bildiriyor (`nz_active_filter`, `nz_date_sheet`, `nz_filter_choice`,
+  `nz_group_filter_chip`, `nz_dot_chip`, `nz_section_header`, `nz_table_card`,
+  `timeline_dates_api_repository`). Kapsam yüzdeleri eşiklerin üzerinde; Q1, yalnız enum
+  içeren `core/telemetry/report_source.dart` için lcov kaydı bulunmadığından kırmızı.
+  Bu kapıları susturmak için boş/görsel sabit testi ya da denetim istisnası eklenmedi.
+- Mobil CI tetiklenmedi; push yapılmadı. Linux golden macOS’ta atlandı; cihaz üstü görsel
+  kabul yapılmadı. Simülatörlere son kod hot restart ile aktarılır.

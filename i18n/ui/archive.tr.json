@@ -96,6 +96,10 @@
     "ui.archive.summary_no_files": "Henüz dosya yok",
     "ui.archive.upload_task_desc": "Dosya seçtiğiniz göreve yüklenir",
     "ui.archive.retag": "Etiketi değiştir",
-    "ui.archive.retagged": "Etiket değiştirildi"
+    "ui.archive.retagged": "Etiket değiştirildi",
+    "ui.archive.my_files": "Dosyalarım",
+    "ui.archive.my_files_caption": "Yüklediğin dosyalar",
+    "ui.archive.task_folders": "görev klasörleri",
+    "ui.archive.empty_task_folders": "Bu aramayla eşleşen görev klasörü yok."
   }
 }

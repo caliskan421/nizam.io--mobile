@@ -9,7 +9,6 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../activity/activity.dart';
-import '../../calendar/calendar.dart';
 import '../../tasks/tasks.dart';
 import '../application/coordinatorship_detail_controller.dart';
 import '../domain/coordinatorship_board.dart';
@@ -18,7 +17,8 @@ import 'coord_detail_texts.dart';
 import 'coord_general_cards.dart';
 import 'coord_parts.dart';
 
-/// Genel bölümü: eşit özet kartları, koordinatörlük takvimi, iş yükü ve işlem geçmişi.
+/// Genel bölümü: eşit özet kartları, iş yükü ve (yalnız yönetici görünümünde; işlem geçmişi
+/// koordinatöre kapalı, AUDIT-K10) son hareketler. Takvim kendi bölümündedir.
 class CoordGeneralTab extends ConsumerWidget {
   const CoordGeneralTab({
     super.key,
@@ -49,6 +49,7 @@ class CoordGeneralTab extends ConsumerWidget {
     final leads = people.where((p) => p.lead).toList();
     final bytes = files?.fold<int>(0, (a, f) => a + f.sizeBytes) ?? 0;
     void go(CoordinatorshipTab t) => commands.selectTab(t);
+    final manages = ref.watch(coordManagesTeamProvider(code));
 
     final cards = [
       NzKpiTile(
@@ -74,7 +75,7 @@ class CoordGeneralTab extends ConsumerWidget {
           leads.length,
           people.length - leads.length,
         ),
-        onTap: () => go(CoordinatorshipTab.members),
+        onTap: manages ? () => go(CoordinatorshipTab.members) : null,
       ),
       NzKpiTile(
         icon: NzIcons.folder,
@@ -94,7 +95,7 @@ class CoordGeneralTab extends ConsumerWidget {
       NzKpiTile(
         icon: NzIcons.event,
         tone: c.info,
-        label: l.uiCoordTabMeetings,
+        label: l.uiCoordTabCalendar,
         value: meetings == null ? '—' : '${upcoming.length}',
         segments: [
           NzBarSegment(upcoming.length, c.info),
@@ -103,10 +104,11 @@ class CoordGeneralTab extends ConsumerWidget {
         caption: meetings == null
             ? '—'
             : l.coordNextMeeting(upcoming.firstOrNull),
-        onTap: () => go(CoordinatorshipTab.meetings),
+        onTap: () => go(CoordinatorshipTab.calendar),
       ),
     ];
     final tasks = catalog.tasksOf(code);
+    final audit = ref.watch(effectiveAccessProvider).canAdminister;
     return LayoutBuilder(
       builder: (context, box) {
         final wide = box.maxWidth >= coordWideWidth;
@@ -126,11 +128,7 @@ class CoordGeneralTab extends ConsumerWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: NizamioSpacing.space3,
-              children: [
-                CoordinatorshipCalendar(code: code),
-                load,
-                const ActivityLogCard(),
-              ],
+              children: [load, if (audit) const ActivityLogCard()],
             ),
           ],
         );

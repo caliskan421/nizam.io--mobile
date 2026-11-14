@@ -55,14 +55,20 @@ class CoordinatorshipPage extends ConsumerWidget {
       final visible = ModalRoute.of(context)?.isCurrent ?? true;
       final d = ref.read(coordinatorshipDetailProvider(code)).value;
       if (next?.tab != shellTab || !visible || d == null) return;
+      // Koordinatörlükler listesi yalnız tüm koordinatörlükleri gören görünümde (yönetici);
+      // derin bağlantıyla gelen koordinatör/üyede kısayol menüsü yok.
+      if (!ref.read(effectiveAccessProvider).seesAllDepartments) return;
       _showShortcuts(context, d, ref.read(coordinatorshipsControllerProvider));
     });
     final l = context.l10n;
     final d = detail.value;
     final catalog = ref.watch(taskCatalogControllerProvider).value;
-    final tab = ref.watch(
+    final selectedTab = ref.watch(
       coordinatorshipDetailControllerProvider(code).select((v) => v.tab),
     );
+    final manages = ref.watch(coordManagesTeamProvider(code));
+    final tabs = coordinatorshipTabs(readsTeam: manages);
+    final tab = tabs.contains(selectedTab) ? selectedTab : tabs.first;
     final ready = d != null && catalog != null;
     final tasks = ready ? catalog.tasksOf(code) : const <TaskItem>[];
     final pulse = CoordPulse.of(tasks);
@@ -83,13 +89,14 @@ class CoordinatorshipPage extends ConsumerWidget {
         // Kullanıcıya kimlik (department_id) değil kısa etiket; kod yoksa yazı yok.
         code: d?.stats.shortCode,
         actions: [
-          NzIconButton(
-            icon: NzIcons.more,
-            semanticLabel: l.uiCoordMoreActions,
-            onPressed: d == null
-                ? null
-                : () => _showMoreActions(context, ref, d),
-          ),
+          if (ref.watch(canManageCoordinatorshipsProvider) || manages)
+            NzIconButton(
+              icon: NzIcons.more,
+              semanticLabel: l.uiCoordMoreActions,
+              onPressed: d == null
+                  ? null
+                  : () => _showMoreActions(context, ref, d),
+            ),
         ],
       ),
       pinned: !ready
@@ -98,15 +105,14 @@ class CoordinatorshipPage extends ConsumerWidget {
               padding: const EdgeInsets.only(top: 6, bottom: 8),
               child: NzPillTabs(
                 semanticLabel: l.uiCoordTabsLabel,
-                selected: tab.index,
+                selected: tabs.indexOf(tab),
                 onSelected: (i) => ref
                     .read(
                       coordinatorshipDetailControllerProvider(code).notifier,
                     )
-                    .selectTab(CoordinatorshipTab.values[i]),
+                    .selectTab(tabs[i]),
                 tabs: [
-                  for (final t in CoordinatorshipTab.values)
-                    NzPillTab(label: l.coordTabLabel(t)),
+                  for (final t in tabs) NzPillTab(label: l.coordTabLabel(t)),
                 ],
               ),
             ),
@@ -135,12 +141,12 @@ class CoordinatorshipPage extends ConsumerWidget {
                   code: code,
                   catalog: catalog,
                 ),
-                CoordinatorshipTab.meetings => CoordMeetingsTab(code: code),
+                CoordinatorshipTab.calendar => CoordCalendarTab(code: code),
               },
             ],
       children: [
         if (ready)
-          CoordHero(detail: d)
+          CoordHero(detail: d, canAssign: manages)
         else
           NzAsyncView<CoordinatorshipDetail?>(
             value: detail,
@@ -194,6 +200,7 @@ class CoordinatorshipPage extends ConsumerWidget {
     final l = context.l10n;
     final name = d.stats.name;
     final canManage = ref.read(canManageCoordinatorshipsProvider);
+    final managesTeam = ref.read(coordManagesTeamProvider(code));
 
     NzBottomSheet.show<void>(
       context,
@@ -223,11 +230,13 @@ class CoordinatorshipPage extends ConsumerWidget {
                       showCoordinatorshipForm(context, ref, detail: d);
                     }
                   }),
-                row(
-                  NzIcons.event,
-                  l.uiCoordMenuMeeting,
-                  () => showMeetingSheet(context, coordinatorship: code),
-                ),
+                // Toplantı planla: yönetici ya da bu birimin koordinatörü (MEETINGS README).
+                if (managesTeam)
+                  row(
+                    NzIcons.event,
+                    l.uiCoordMenuMeeting,
+                    () => showMeetingSheet(context, coordinatorship: code),
+                  ),
               ],
             ),
           ],

@@ -3190,6 +3190,30 @@ abstract class AppLocalizations {
   /// **'Etiket değiştirildi'**
   String get uiArchiveRetagged;
 
+  /// ui.archive.my_files
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosyalarım'**
+  String get uiArchiveMyFiles;
+
+  /// ui.archive.my_files_caption
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüklediğin dosyalar'**
+  String get uiArchiveMyFilesCaption;
+
+  /// ui.archive.task_folders
+  ///
+  /// In tr, this message translates to:
+  /// **'görev klasörleri'**
+  String get uiArchiveTaskFolders;
+
+  /// ui.archive.empty_task_folders
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu aramayla eşleşen görev klasörü yok.'**
+  String get uiArchiveEmptyTaskFolders;
+
   /// ui.buttons.busy
   ///
   /// In tr, this message translates to:
@@ -4378,12 +4402,6 @@ abstract class AppLocalizations {
   /// **'Arşiv'**
   String get uiCoordTabArchive;
 
-  /// ui.coord.tab_meetings
-  ///
-  /// In tr, this message translates to:
-  /// **'Toplantı'**
-  String get uiCoordTabMeetings;
-
   /// ui.coord.tab_members
   ///
   /// In tr, this message translates to:
@@ -4533,6 +4551,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Üye eklendi'**
   String get uiCoordMemberAdded;
+
+  /// ui.coord.tab_calendar
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvim'**
+  String get uiCoordTabCalendar;
 
   /// ui.feedback.loading
   ///
@@ -12831,6 +12855,114 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.'**
   String get uiUsersDraftSelfConflict;
+
+  /// ui.users.team_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekibim'**
+  String get uiUsersTeamTitle;
+
+  /// ui.users.team_people
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi'**
+  String get uiUsersTeamPeople;
+
+  /// ui.users.team_add
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekibe kişi ekle'**
+  String get uiUsersTeamAdd;
+
+  /// ui.users.team_search_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad ara'**
+  String get uiUsersTeamSearchHint;
+
+  /// ui.users.team_empty
+  ///
+  /// In tr, this message translates to:
+  /// **'Eşleşen kullanıcı yok.'**
+  String get uiUsersTeamEmpty;
+
+  /// ui.users.team_show_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü göster'**
+  String get uiUsersTeamShowAll;
+
+  /// ui.users.team_you
+  ///
+  /// In tr, this message translates to:
+  /// **'sen'**
+  String get uiUsersTeamYou;
+
+  /// ui.users.team_open
+  ///
+  /// In tr, this message translates to:
+  /// **'açık görev'**
+  String get uiUsersTeamOpen;
+
+  /// ui.users.team_late
+  ///
+  /// In tr, this message translates to:
+  /// **'gecikmede'**
+  String get uiUsersTeamLate;
+
+  /// ui.users.team_derived
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekip, koordinatörlüğün sohbet grubundan gösterilir; salt okunur.'**
+  String get uiUsersTeamDerived;
+
+  /// ui.users.team_unavailable_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekip listesi gösterilemiyor'**
+  String get uiUsersTeamUnavailableTitle;
+
+  /// ui.users.team_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyenin ekip listesini okuyabileceği bir sunucu kaynağı yok: backend bekliyor.'**
+  String get uiUsersTeamUnavailable;
+
+  /// ui.users.team_no_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu görünümde seçili koordinatörlük yok. Kenar çubuğundan koordinatörlük seç.'**
+  String get uiUsersTeamNoDepartment;
+
+  /// ui.users.team_remove
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekipten çıkar'**
+  String get uiUsersTeamRemove;
+
+  /// ui.users.team_remove_confirm
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı silinmez; diğer koordinatörlüklerdeki yeri değişmez.'**
+  String get uiUsersTeamRemoveConfirm;
+
+  /// ui.users.team_remove_effects
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişinin bu koordinatörlükteki görev atamaları kalkacak. Yine de ekipten çıkarılsın mı?'**
+  String get uiUsersTeamRemoveEffects;
+
+  /// ui.users.team_removed
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi ekipten çıkarıldı.'**
+  String get uiUsersTeamRemoved;
+
+  /// ui.users.team_lead_note
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatör ataması yönetici işidir; sen ve diğer koordinatörler bu listeden çıkarılamazsınız.'**
+  String get uiUsersTeamLeadNote;
 }
 
 class _AppLocalizationsDelegate

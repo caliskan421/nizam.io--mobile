@@ -48,9 +48,10 @@ Future<void> _tap(WidgetTester tester, Finder f) async {
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
+  // Klasör ızgarası yönetici görünümündedir; koordinatör düz görev klasörü listesini görür.
   testWidgets('özet ve klasörler sunucudan; klasör açılır', (tester) async {
     final repo = FakeArchiveRepository();
-    final (_, nav, _) = await _open(tester, repo: repo);
+    final (_, nav, _) = await _open(tester, repo: repo, admin: true);
     expect(find.text(_l.uiArchiveTitle), findsOneWidget);
     expect(find.text(_l.uiArchiveSummaryFiles), findsOneWidget);
     expect(find.text('2 ${_l.uiArchiveFoldersLc}'), findsOneWidget);
@@ -95,7 +96,7 @@ void main() {
               files: i,
             ),
         ];
-      await _open(tester, repo: repo);
+      await _open(tester, repo: repo, admin: true);
       final heading = find.text('${_l.uiArchiveFoldersTitle} · 7');
       final cards = find.byType(ArchiveFolderCard);
       final headingRect = tester.getRect(heading);
@@ -133,7 +134,7 @@ void main() {
   testWidgets('arama süzer; eşleşme yoksa boş metni; geri dönüşte korunur', (
     tester,
   ) async {
-    final (h, _, _) = await _open(tester);
+    final (h, _, _) = await _open(tester, admin: true);
     await _tap(tester, find.byIcon(Icons.search_rounded).first);
     await tester.enterText(find.byType(TextField).first, 'bili');
     await settle(tester);
@@ -157,12 +158,10 @@ void main() {
     expect(find.text(_l.uiArchiveUploadNoTask), findsOneWidget);
     h.read(shellReselectEventsProvider.notifier).fire(ArchivePage.shellTab);
     await settle(tester);
-    expect(find.text(_l.uiArchiveGoCoordinatorships), findsOneWidget);
-    // Tam arşiv yalnız şirket yöneticisine.
+    // Koordinatör menüsünde Koordinatörlükler listesi yok; tam arşiv yalnız yöneticiye.
+    expect(find.text(_l.uiArchiveGoCoordinatorships), findsNothing);
     expect(find.text(_l.uiArchiveDownloadAll), findsNothing);
-    await tester.tap(find.text(_l.uiArchiveGoCoordinatorships));
-    await settle(tester);
-    expect(nav.calls, ['coordinatorships']);
+    expect(nav.calls, isEmpty);
   });
 
   testWidgets('yönetici: tam arşiv indirilir ve kaydedilir', (tester) async {

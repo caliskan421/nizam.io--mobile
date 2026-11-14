@@ -2065,6 +2065,22 @@
   "@uiArchiveRetagged": {
     "description": "ui.archive.retagged"
   },
+  "uiArchiveMyFiles": "Dosyalarım",
+  "@uiArchiveMyFiles": {
+    "description": "ui.archive.my_files"
+  },
+  "uiArchiveMyFilesCaption": "Yüklediğin dosyalar",
+  "@uiArchiveMyFilesCaption": {
+    "description": "ui.archive.my_files_caption"
+  },
+  "uiArchiveTaskFolders": "görev klasörleri",
+  "@uiArchiveTaskFolders": {
+    "description": "ui.archive.task_folders"
+  },
+  "uiArchiveEmptyTaskFolders": "Bu aramayla eşleşen görev klasörü yok.",
+  "@uiArchiveEmptyTaskFolders": {
+    "description": "ui.archive.empty_task_folders"
+  },
   "uiButtonsBusy": "Meşgul",
   "@uiButtonsBusy": {
     "description": "ui.buttons.busy"
@@ -2857,10 +2873,6 @@
   "@uiCoordTabArchive": {
     "description": "ui.coord.tab_archive"
   },
-  "uiCoordTabMeetings": "Toplantı",
-  "@uiCoordTabMeetings": {
-    "description": "ui.coord.tab_meetings"
-  },
   "uiCoordTabMembers": "Üyeler",
   "@uiCoordTabMembers": {
     "description": "ui.coord.tab_members"
@@ -2960,6 +2972,10 @@
   "uiCoordMemberAdded": "Üye eklendi",
   "@uiCoordMemberAdded": {
     "description": "ui.coord.member_added"
+  },
+  "uiCoordTabCalendar": "Takvim",
+  "@uiCoordTabCalendar": {
+    "description": "ui.coord.tab_calendar"
   },
   "uiFeedbackLoading": "Yükleniyor",
   "@uiFeedbackLoading": {
@@ -8492,5 +8508,77 @@
   "uiUsersDraftSelfConflict": "Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.",
   "@uiUsersDraftSelfConflict": {
     "description": "ui.users.draft_self_conflict"
+  },
+  "uiUsersTeamTitle": "Ekibim",
+  "@uiUsersTeamTitle": {
+    "description": "ui.users.team_title"
+  },
+  "uiUsersTeamPeople": "kişi",
+  "@uiUsersTeamPeople": {
+    "description": "ui.users.team_people"
+  },
+  "uiUsersTeamAdd": "Ekibe kişi ekle",
+  "@uiUsersTeamAdd": {
+    "description": "ui.users.team_add"
+  },
+  "uiUsersTeamSearchHint": "Ad ara",
+  "@uiUsersTeamSearchHint": {
+    "description": "ui.users.team_search_hint"
+  },
+  "uiUsersTeamEmpty": "Eşleşen kullanıcı yok.",
+  "@uiUsersTeamEmpty": {
+    "description": "ui.users.team_empty"
+  },
+  "uiUsersTeamShowAll": "Tümünü göster",
+  "@uiUsersTeamShowAll": {
+    "description": "ui.users.team_show_all"
+  },
+  "uiUsersTeamYou": "sen",
+  "@uiUsersTeamYou": {
+    "description": "ui.users.team_you"
+  },
+  "uiUsersTeamOpen": "açık görev",
+  "@uiUsersTeamOpen": {
+    "description": "ui.users.team_open"
+  },
+  "uiUsersTeamLate": "gecikmede",
+  "@uiUsersTeamLate": {
+    "description": "ui.users.team_late"
+  },
+  "uiUsersTeamDerived": "Ekip, koordinatörlüğün sohbet grubundan gösterilir; salt okunur.",
+  "@uiUsersTeamDerived": {
+    "description": "ui.users.team_derived"
+  },
+  "uiUsersTeamUnavailableTitle": "Ekip listesi gösterilemiyor",
+  "@uiUsersTeamUnavailableTitle": {
+    "description": "ui.users.team_unavailable_title"
+  },
+  "uiUsersTeamUnavailable": "Üyenin ekip listesini okuyabileceği bir sunucu kaynağı yok: backend bekliyor.",
+  "@uiUsersTeamUnavailable": {
+    "description": "ui.users.team_unavailable"
+  },
+  "uiUsersTeamNoDepartment": "Bu görünümde seçili koordinatörlük yok. Kenar çubuğundan koordinatörlük seç.",
+  "@uiUsersTeamNoDepartment": {
+    "description": "ui.users.team_no_department"
+  },
+  "uiUsersTeamRemove": "Ekipten çıkar",
+  "@uiUsersTeamRemove": {
+    "description": "ui.users.team_remove"
+  },
+  "uiUsersTeamRemoveConfirm": "Hesabı silinmez; diğer koordinatörlüklerdeki yeri değişmez.",
+  "@uiUsersTeamRemoveConfirm": {
+    "description": "ui.users.team_remove_confirm"
+  },
+  "uiUsersTeamRemoveEffects": "Kişinin bu koordinatörlükteki görev atamaları kalkacak. Yine de ekipten çıkarılsın mı?",
+  "@uiUsersTeamRemoveEffects": {
+    "description": "ui.users.team_remove_effects"
+  },
+  "uiUsersTeamRemoved": "Kişi ekipten çıkarıldı.",
+  "@uiUsersTeamRemoved": {
+    "description": "ui.users.team_removed"
+  },
+  "uiUsersTeamLeadNote": "Koordinatör ataması yönetici işidir; sen ve diğer koordinatörler bu listeden çıkarılamazsınız.",
+  "@uiUsersTeamLeadNote": {
+    "description": "ui.users.team_lead_note"
   }
 }

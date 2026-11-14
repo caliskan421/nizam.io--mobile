@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/providers.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
@@ -224,9 +225,10 @@ class _PreviewState extends ConsumerState<_Preview> {
     }
 
     final mine = uploader != null && uploader == catalog?.me;
+    // Etkin görünümle (temel yüzey §1): Üye görünümündeki yönetici yönetici eylemi görmez.
     final perms = task == null
         ? null
-        : TaskPermissions.of(catalog?.access, task);
+        : catalog.permissionsIn(ref.watch(scopeStateProvider), task);
     final canRetag =
         mine || (perms?.admin ?? false) || (perms?.coordinator ?? false);
     final facts = <(String, String, Color?, VoidCallback?)>[

@@ -42,9 +42,10 @@ void main() {
           for (var i = 0; i < 12; i++)
             ArchiveFolder(code: 'd$i', name: 'Klasör $i', files: i),
         ];
+      // Klasör ızgarası yönetici görünümünde (koordinatör düz görev klasörü listesini görür).
       final harness = await real(
         tester,
-        () => pilotHarness(archiveBackend(), signedIn: true),
+        () => pilotHarness(archiveBackend(admin: true), signedIn: true),
       );
       // Port, get_it kaydından tembel okunur (archiveOverrides): ilk okumadan önce değiştirilir.
       useArchiveFakes(harness, repo);

@@ -16,7 +16,8 @@ ArchiveRepository archiveRepository(Ref ref) => throw UnimplementedError(
 
 /// Arşiv isteklerinin kapsamı: etkin görünümden (`effectiveAccessProvider`; rol ve
 /// koordinatörlük seçimi, yoksa varsayılanı). Departman: Koordinatör/Üye görünümünde seçili
-/// koordinatörlük; yönetici görünümünde (tüm koordinatörlükler) programın ilk departmanı. Hiçbiri
+/// koordinatörlük; yönetici görünümünde (tüm koordinatörlükler) programın ilk departmanı, yoksa
+/// yöneticinin bu programdaki ilk ekip satırı. Hiçbiri
 /// yoksa `client.scope_missing` (istek gönderilmez). Yalnız bu iki değer değişince yeniden
 /// hesaplanır (görev yazmaları arşivi yeniden okutmaz).
 @Riverpod(keepAlive: true)
@@ -26,9 +27,16 @@ Future<ArchiveScope> archiveScope(Ref ref) async {
     taskCatalogControllerProvider.selectAsync((c) {
       final view = c.viewIn(scope);
       final admin = view.isAdminView;
+      final program = scope.programId;
+      // Yönetici: programın ilk departmanı; liste boşsa (bağlı departman okunamadı) kendi
+      // ekip satırlarından ilki (başlık yalnız yetki çözümü içindir, liste dönem geneli).
+      final adminDepartment =
+          c.departments.firstOrNull?.id ??
+          (program == null
+              ? null
+              : c.access?.seatsIn(program).firstOrNull?.departmentId);
       return (
-        department:
-            view.departmentId ?? (admin ? c.departments.firstOrNull?.id : null),
+        department: view.departmentId ?? (admin ? adminDepartment : null),
         admin: admin,
       );
     }),

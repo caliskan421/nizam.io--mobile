@@ -14,6 +14,7 @@ import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../archive/archive.dart';
+import '../../calendar/calendar.dart';
 import '../../tasks/tasks.dart';
 import '../application/coordinatorship_detail_controller.dart';
 import '../domain/coordinatorship_board.dart';
@@ -182,6 +183,24 @@ class CoordArchiveTab extends ConsumerWidget {
   }
 }
 
+/// Takvim bölümü (prototip `cdetail` Takvim): koordinatörlüğün ay takvimi (görev bitişleri ve
+/// toplantılar) + toplantı listesi ve "Toplantı planla" ([CoordMeetingsTab]).
+class CoordCalendarTab extends StatelessWidget {
+  const CoordCalendarTab({super.key, required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    spacing: NizamioSpacing.gapXl,
+    children: [
+      CoordinatorshipCalendar(code: code),
+      CoordMeetingsTab(code: code),
+    ],
+  );
+}
+
 /// Toplantı bölümü (prototip `tMeet`): sayım + "Toplantı planla", sıradaki toplantı kartı,
 /// sonraki üç toplantı, açılır geçmiş toplantılar. Kaynak sunucu (`listMeetings`).
 class CoordMeetingsTab extends ConsumerWidget {
@@ -238,12 +257,13 @@ class CoordMeetingsTab extends ConsumerWidget {
                 style: t.bodySm.copyWith(color: c.textMuted),
               ),
               actions: [
-                NzIconButton.circle(
-                  icon: NzIcons.add,
-                  semanticLabel: l.uiCoordMenuMeeting,
-                  onPressed: () =>
-                      showMeetingSheet(context, coordinatorship: code),
-                ),
+                if (ref.watch(coordManagesTeamProvider(code)))
+                  NzIconButton.circle(
+                    icon: NzIcons.add,
+                    semanticLabel: l.uiCoordMenuMeeting,
+                    onPressed: () =>
+                        showMeetingSheet(context, coordinatorship: code),
+                  ),
               ],
             ),
             if (next != null) _NextMeeting(meeting: next, now: now),

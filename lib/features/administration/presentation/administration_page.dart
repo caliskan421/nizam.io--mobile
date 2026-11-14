@@ -22,8 +22,10 @@ import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
 import '../application/admin_controller.dart';
+import '../application/team_controller.dart';
 import '../domain/admin_user_directory.dart';
 import '../domain/organization_admin.dart';
+import '../domain/team_view.dart';
 import 'admin_management_tools.dart';
 import 'admin_user_actions.dart';
 import 'admin_user_identity.dart';
@@ -31,6 +33,7 @@ import 'admin_user_list_row.dart';
 import 'admin_user_memberships.dart';
 import 'admin_user_profile_page.dart';
 import 'admin_users_filter.dart';
+import 'team_roster_view.dart';
 
 class AdministrationPage extends ConsumerStatefulWidget {
   const AdministrationPage({super.key, this.onUserSelected});
@@ -112,6 +115,11 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Tek sayfa, etkin görünüme göre: yönetici dizini ya da koordinatör/üye "Ekibim".
+    // Yönetici olmayan görünümde dizin sağlayıcısı hiç kurulmaz (yetkisiz istek yok).
+    if (ref.watch(teamSourceProvider) != TeamSource.directory) {
+      return TeamRosterView(onOpen: _open);
+    }
     final l = context.l10n;
     ref.watch(adminUsersProvider);
     final ctl = ref.read(adminUsersProvider.notifier);

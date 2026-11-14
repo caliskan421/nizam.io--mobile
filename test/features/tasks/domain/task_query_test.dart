@@ -1,6 +1,7 @@
 // Ortak görev araması (liste, telefon ve tablet zaman çizelgesi): başlık, görev kodu ve
 // atanan adı, koordinatörlük adı; Türkçe küçük harf.
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/ui/page/nz_app_nav.dart';
 import 'package:nizamio/features/tasks/domain/task_catalog.dart';
 import 'package:nizamio/features/tasks/domain/task_query.dart';
 
@@ -54,4 +55,12 @@ void main() {
   test('koordinatörlük adı eşleşir', () => expect(_m('mekanik'), isTrue));
 
   test('eşleşmeyen sorgu görevi düşürür', () => expect(_m('boru'), isFalse));
+
+  // Gezinme niyeti görünümü adla taşır (`TaskView.values.byName`); eksik ad açılışta çöker.
+  test('her NzTaskView adının TaskView karşılığı var', () {
+    expect(
+      NzTaskView.values.map((v) => TaskView.values.byName(v.name).name),
+      NzTaskView.values.map((v) => v.name),
+    );
+  });
 }

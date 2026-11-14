@@ -579,8 +579,16 @@ class TaskDetailActions {
     final r = _task?.dateRequest;
     if (r == null) return;
     final l = context.l10n;
+    final reason = await _askText(
+      title: l.uiTasksReject,
+      description: l.uiTasksRejectReasonHint,
+      label: l.uiTasksRejectReasonLabel,
+      ok: l.uiTasksReject,
+      valid: (v) => v.length <= 500,
+    );
+    if (reason == null || !context.mounted) return;
     _report(
-      await _ctl.rejectRequest(),
+      await _ctl.rejectRequest(reason),
       done:
           '${l.uiTasksTRejected} · '
           '${r.by == null ? '' : _name(r.by!)} ${l.uiTasksTInformed}',

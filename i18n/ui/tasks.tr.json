@@ -348,6 +348,8 @@
     "ui.tasks.err_mt_place": "Yer en çok 200 karakter olabilir.",
     "ui.tasks.mt_pool_partial": "Liste eksik olabilir: yalnız erişebildiğin ekipler gösteriliyor.",
     "ui.tasks.t_people_failed": "kişi eklenemedi",
-    "ui.tasks.t_meeting_open": "Toplantıyı aç"
+    "ui.tasks.t_meeting_open": "Toplantıyı aç",
+    "ui.tasks.reject_reason_hint": "Ret gerekçesi talep edene bildirilir.",
+    "ui.tasks.reject_reason_label": "Ret gerekçesi"
   }
 }

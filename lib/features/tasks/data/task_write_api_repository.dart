@@ -397,17 +397,21 @@ class ApiTaskWriteRepository implements TaskWriteRepository {
   );
 
   @override
-  Future<void> reviewDateChange(String requestId, {required bool approve}) =>
-      apiCall(
-        () => _client.reviewDateChangeRequest(
-          id: requestId,
-          body: ReviewRequest(
-            decision: approve
-                ? ReviewRequestDecision.approved
-                : ReviewRequestDecision.rejected,
-          ),
-        ),
-      );
+  Future<void> reviewDateChange(
+    String requestId, {
+    required bool approve,
+    String? reason,
+  }) => apiCall(
+    () => _client.reviewDateChangeRequest(
+      id: requestId,
+      body: ReviewRequest(
+        decision: approve
+            ? ReviewRequestDecision.approved
+            : ReviewRequestDecision.rejected,
+        reason: reason,
+      ),
+    ),
+  );
 
   @override
   Future<void> deleteDateChange(String requestId) =>

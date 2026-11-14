@@ -356,8 +356,12 @@ abstract interface class TaskWriteRepository {
     String? reason,
   });
 
-  /// Şirket yöneticisi kararı (S1).
-  Future<void> reviewDateChange(String requestId, {required bool approve});
+  /// Şirket yöneticisi kararı (S1); [reason] karar gerekçesi (`review_reason` olarak döner).
+  Future<void> reviewDateChange(
+    String requestId, {
+    required bool approve,
+    String? reason,
+  });
 
   /// İncelenmiş talebi siler (şirket yöneticisi, S1).
   Future<void> deleteDateChange(String requestId);

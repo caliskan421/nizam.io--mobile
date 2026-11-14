@@ -156,6 +156,7 @@ class ApiTaskDetailsRepository implements TaskDetailsRepository {
               start: request.newStartOn,
               due: request.newEndOn,
               reason: request.reason ?? '',
+              reviewReason: request.reviewReason ?? '',
               state: dateRequestState(request.status.json),
             ),
     );

@@ -109,6 +109,7 @@ class TaskDetailController extends _$TaskDetailController
   /// Yeniden okuma varsayılan olarak YALNIZ kalemdir: ayrıntı (`getWorkItem` + alt görev / not /
   /// dosya) okunur ve katalogdaki kalemin yerine geçer ([TaskCatalogController.applyDetails]).
   /// [list]: görev kümesi değişti (oluşturma, silme, zincirli tarih onayı) → liste de okunur.
+  @override
   Future<WriteOutcome> _write(
     Future<void> Function() call, {
     required bool list,
@@ -301,38 +302,6 @@ class TaskDetailController extends _$TaskDetailController
       () => _writes.updateWorkItem(t, WorkItemPatch.diff(t, priority: p)),
       list: false,
     );
-  }
-
-  // ---- tarih talebi ---------------------------------------------------------------------
-
-  /// Bekleyen talebi onaylar (yalnız şirket yöneticisi). Onay bağımlı görevleri zincirle
-  /// öteleyebilir → liste de yeniden okunur; ret yalnız kalemi etkiler.
-  Future<WriteOutcome> approveRequest() => _review(approve: true);
-
-  Future<WriteOutcome> rejectRequest() => _review(approve: false);
-
-  Future<WriteOutcome> _review({required bool approve}) async {
-    final t = _task;
-    final r = t?.dateRequest;
-    if (t == null || r == null || !r.isPending) return WriteOutcome.invalid;
-    final id = r.id;
-    if (id == null || !permissions.canReviewDate) return WriteOutcome.invalid;
-    return _write(
-      () => _writes.reviewDateChange(id, approve: approve),
-      list: approve,
-    );
-  }
-
-  /// İncelenmiş talebi siler (yalnız şirket yöneticisi; bekleyen silinemez).
-  Future<WriteOutcome> deleteDateRequest() async {
-    final t = _task;
-    final r = t?.dateRequest;
-    if (t == null || r == null) return WriteOutcome.invalid;
-    final id = r.id;
-    if (id == null || !permissions.canDeleteDateRequest(r)) {
-      return WriteOutcome.invalid;
-    }
-    return _write(() => _writes.deleteDateChange(id), list: false);
   }
 
   // ---- düzenle --------------------------------------------------------------------------

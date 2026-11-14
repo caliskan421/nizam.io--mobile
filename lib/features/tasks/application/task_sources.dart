@@ -198,7 +198,8 @@ final class TaskWriteSource implements TaskWriteRepository {
   Future<void> reviewDateChange(
     String requestId, {
     required bool approve,
-  }) async => _s.reviewDateChange(requestId, approve: approve);
+    String? reason,
+  }) async => _s.reviewDateChange(requestId, approve: approve, reason: reason);
 
   @override
   Future<void> deleteDateChange(String requestId) async =>

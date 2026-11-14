@@ -5208,6 +5208,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksTMeetingOpen => 'Toplantıyı aç';
 
   @override
+  String get uiTasksRejectReasonHint => 'Ret gerekçesi talep edene bildirilir.';
+
+  @override
+  String get uiTasksRejectReasonLabel => 'Ret gerekçesi';
+
+  @override
   String get uiTimelineTitle => 'Zaman çizelgesi';
 
   @override

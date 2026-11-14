@@ -24,6 +24,7 @@ final class DateChangeRequest {
     required this.start,
     required this.due,
     this.reason = '',
+    this.reviewReason = '',
     this.state = DateRequestState.pending,
   });
 
@@ -47,6 +48,9 @@ final class DateChangeRequest {
 
   /// Gerekçe; sunucuda isteğe bağlı (yoksa boş).
   final String reason;
+
+  /// Karar gerekçesi (`review_reason`; ret formunda zorunlu, yoksa boş).
+  final String reviewReason;
   final DateRequestState state;
 
   bool get isPending => state == DateRequestState.pending;
@@ -61,6 +65,7 @@ final class DateChangeRequest {
     start: start,
     due: due,
     reason: reason,
+    reviewReason: reviewReason,
     state: s,
   );
 }

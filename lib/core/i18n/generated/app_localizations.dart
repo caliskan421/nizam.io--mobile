@@ -9970,6 +9970,18 @@ abstract class AppLocalizations {
   /// **'Toplantıyı aç'**
   String get uiTasksTMeetingOpen;
 
+  /// ui.tasks.reject_reason_hint
+  ///
+  /// In tr, this message translates to:
+  /// **'Ret gerekçesi talep edene bildirilir.'**
+  String get uiTasksRejectReasonHint;
+
+  /// ui.tasks.reject_reason_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Ret gerekçesi'**
+  String get uiTasksRejectReasonLabel;
+
   /// ui.timeline.title
   ///
   /// In tr, this message translates to:

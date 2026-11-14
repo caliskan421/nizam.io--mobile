@@ -295,15 +295,15 @@ void main() {
         ..role = 'yok'
         ..pendingRequest = _request();
       final (h, _, ctl) = await _open(s);
+      expect((await ctl.rejectRequest('  ')).kind, WriteKind.invalid);
       expect((await ctl.approveRequest()).ok, isTrue);
       final post = _only(h, 'POST', '/v1/date-change-requests/r1/review');
       expect(post.body, {'decision': 'approved'});
       expect(post.header('X-Nizamio-Department'), isNull);
       expect(_log(h), contains('GET /v1/program/work-items'));
-
       final k = _Server()..pendingRequest = _request();
       final (h2, _, ctl2) = await _open(k);
-      expect((await ctl2.rejectRequest()).kind, WriteKind.invalid);
+      expect((await ctl2.rejectRequest('Gerekçe')).kind, WriteKind.invalid);
       expect(h2.backend.requests, isEmpty);
     });
   });

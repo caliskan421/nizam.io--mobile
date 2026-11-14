@@ -6585,6 +6585,14 @@
   "@uiTasksTMeetingOpen": {
     "description": "ui.tasks.t_meeting_open"
   },
+  "uiTasksRejectReasonHint": "Ret gerekçesi talep edene bildirilir.",
+  "@uiTasksRejectReasonHint": {
+    "description": "ui.tasks.reject_reason_hint"
+  },
+  "uiTasksRejectReasonLabel": "Ret gerekçesi",
+  "@uiTasksRejectReasonLabel": {
+    "description": "ui.tasks.reject_reason_label"
+  },
   "uiTimelineTitle": "Zaman çizelgesi",
   "@uiTimelineTitle": {
     "description": "ui.timeline.title"

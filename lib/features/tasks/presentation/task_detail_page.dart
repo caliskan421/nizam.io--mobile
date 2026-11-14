@@ -320,15 +320,23 @@ class _Body extends StatelessWidget {
             ),
           ],
         ),
-        if (req != null && req.isPending) ...[
+        // Bekleyen talep kararıyla; reddedilen talep ret gerekçesiyle (salt okunur) görünür.
+        if (req != null &&
+            (req.isPending ||
+                (req.state == DateRequestState.rejected &&
+                    req.reviewReason.isNotEmpty))) ...[
           const Gap(NizamioSpacing.space5),
           _RequestCard(
             request: req,
             by: req.by == null
                 ? ''
                 : catalog.nameOf(req.by!) ?? l.uiTasksUnknownPerson,
-            onReject: actions.canReviewDate ? actions.rejectRequest : null,
-            onApprove: actions.canReviewDate ? actions.approveRequest : null,
+            onReject: actions.canReviewDate && req.isPending
+                ? actions.rejectRequest
+                : null,
+            onApprove: actions.canReviewDate && req.isPending
+                ? actions.approveRequest
+                : null,
           ),
         ],
         // Sekme şeridi kaynakta `gap 20` + `margin-top: -6px` (tablet).
@@ -520,6 +528,12 @@ class _RequestCard extends StatelessWidget {
                 '“${r.reason.isEmpty ? l.uiTasksNoReason : r.reason}”',
                 style: t.caption.copyWith(color: c.textMuted),
               ),
+              if (r.state == DateRequestState.rejected &&
+                  r.reviewReason.isNotEmpty)
+                Text(
+                  '${l.uiTasksRejectReasonLabel}: ${r.reviewReason}',
+                  style: t.caption.copyWith(color: c.danger),
+                ),
               if (onReject != null && onApprove != null)
                 Row(
                   spacing: NizamioSpacing.space2,

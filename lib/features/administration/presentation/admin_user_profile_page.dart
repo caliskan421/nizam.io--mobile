@@ -19,8 +19,10 @@ import '../../archive/archive.dart';
 import '../../tasks/tasks.dart';
 import '../application/admin_controller.dart';
 import '../application/admin_user_task_panel_controller.dart';
+import '../application/team_controller.dart';
 import '../application/user_account_draft_controller.dart';
 import '../domain/organization_admin.dart';
+import '../domain/team_view.dart';
 import '../domain/user_account_draft.dart';
 import 'admin_forms.dart';
 import 'admin_user_account_dock.dart';
@@ -30,6 +32,7 @@ import 'admin_user_hero.dart';
 import 'admin_user_identity.dart';
 import 'admin_user_related.dart';
 import 'admin_user_tasks_panel.dart';
+import 'team_member_actions.dart';
 
 class AdminUserProfilePage extends ConsumerStatefulWidget {
   const AdminUserProfilePage({super.key, required this.accountId, this.onBack});
@@ -150,9 +153,15 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     }
   }
 
+  bool get _directory => ref.read(teamSourceProvider) == TeamSource.directory;
+
   void _retry() {
     if (ref.read(taskCatalogControllerProvider).hasError) {
       ref.invalidate(taskCatalogControllerProvider);
+    }
+    if (!_directory) {
+      ref.invalidate(teamRosterProvider);
+      return;
     }
     ref.read(adminUsersProvider.notifier).invalidate();
     ref.invalidate(adminUserProfileProvider(widget.accountId));
@@ -169,21 +178,39 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
         session == ref.read(sessionGenerationProvider);
     await ref.read(taskCatalogControllerProvider.notifier).refresh();
     if (!current()) return;
-    await ref.read(adminUsersProvider.notifier).refresh();
+    if (_directory) {
+      await ref.read(adminUsersProvider.notifier).refresh();
+      if (!current()) return;
+      ref.invalidate(adminUserProfileProvider(id));
+      await ref.read(adminUserProfileProvider(id).future);
+    } else {
+      ref.invalidate(teamRosterProvider);
+      await ref.read(teamUserProfileProvider(id).future);
+    }
     if (!current()) return;
-    ref.invalidate(adminUserProfileProvider(id));
-    await ref.read(adminUserProfileProvider(id).future);
-    if (!current()) return;
-    if (_tab == 1) {
+    if (_current == UserProfileTab.files) {
       await ref.read(personFilesControllerProvider(id).notifier).refresh();
     }
     _scheduleGeometry();
   }
 
+  /// Seçili sekme (sekme kümesi etkin görünüme göre: [TeamSourceFacts.profileTabs]).
+  UserProfileTab get _current {
+    final tabs = ref.read(teamSourceProvider).profileTabs;
+    return _tab < tabs.length ? tabs[_tab] : UserProfileTab.tasks;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final profile = adminUserProfileProvider(widget.accountId);
+    // Yönetici: şirket dizini (`/v1/admin/users/{id}`); koordinatör/üye: ekip satırı.
+    final source = ref.watch(teamSourceProvider);
+    final directory = source == TeamSource.directory;
+    final tabSet = source.profileTabs;
+    final current = _current;
+    final profile = directory
+        ? adminUserProfileProvider(widget.accountId)
+        : teamUserProfileProvider(widget.accountId);
     ref.watch(adminUserTaskPanelProvider(widget.accountId));
     final value = ref.watch(profile);
     ref.listen(profile, (_, next) {
@@ -196,7 +223,9 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     final catalog = catalogState.value;
     final scope = ref.watch(scopeStateProvider);
     final allowed =
-        ref.watch(effectiveAccessProvider).canAdminister &&
+        (directory
+            ? ref.watch(effectiveAccessProvider).canAdminister
+            : source != TeamSource.none) &&
         !catalogState.hasError;
     final AsyncValue<KnownUser?> displayed = !allowed
         ? catalogState.isLoading
@@ -235,7 +264,7 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     // The tab count and the files panel share one first-page read for this person.
     final filesProvider = personFilesControllerProvider(widget.accountId);
     String filesCount = '—';
-    if (user != null) {
+    if (user != null && tabSet.contains(UserProfileTab.files)) {
       ref.watch(filesProvider);
       final files = ref.read(filesProvider.notifier).visible;
       if (files.hasValue && !files.hasError) {
@@ -249,7 +278,7 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     final page = NzPage.feed(
       bottomDock: AdminUserAccountDockSlot(
         accountId: widget.accountId,
-        active: _tab == 3 && user != null,
+        active: current == UserProfileTab.account && user != null,
         onSave: _saveAccount,
       ),
       bottomDockExtent: 64,
@@ -268,22 +297,24 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
       onRefresh: _refresh,
       onRevisit: () => unawaited(_clock.refreshIfStale(value, _refresh)),
       onRetry: _retry,
-      afterKey: ValueKey((widget.accountId, _tab)),
+      afterKey: ValueKey((widget.accountId, current)),
       after: user == null
           ? const []
           : [
               const Gap(_sectionGap - NizamioSpacing.space1),
-              if (_tab == 0)
+              if (current == UserProfileTab.tasks)
                 ...adminUserTaskPanelChildren(
                   context,
                   ref,
                   accountId: widget.accountId,
                   catalog: catalog!,
                 ),
-              if (_tab == 1) PersonFiles(accountId: widget.accountId),
+              if (current == UserProfileTab.files)
+                PersonFiles(accountId: widget.accountId),
               // Kişinin işlem geçmişi (yalnız şirket yöneticisi; AUDIT-K10).
-              if (_tab == 2) PersonActivity(accountId: widget.accountId),
-              if (_tab == 3)
+              if (current == UserProfileTab.history)
+                PersonActivity(accountId: widget.accountId),
+              if (current == UserProfileTab.account)
                 AdminUserAccountPanel(
                   key: ValueKey(user.accountId),
                   user: user,
@@ -310,6 +341,8 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
           ),
           const Gap(_sectionGap - NizamioSpacing.space1),
           AdminUserRelatedActions(accountId: widget.accountId),
+          // Koordinatör görünümü: üyeyi ekipten çıkar (yalnız `uye`, kendisi değil).
+          TeamRemoveAction(accountId: widget.accountId),
           const Gap(_sectionGap - NizamioSpacing.space1),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -317,12 +350,26 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
                 compact: true,
                 semanticLabel: l.uiUsersProfile,
                 tabs: [
-                  NzPillTab(label: l.uiUsersTasks, countText: taskCount),
-                  NzPillTab(label: l.uiUsersFiles, countText: filesCount),
-                  NzPillTab(label: l.uiUsersHistory, countText: '—'),
-                  NzPillTab(label: l.uiUsersAccount),
+                  for (final t in tabSet)
+                    switch (t) {
+                      UserProfileTab.tasks => NzPillTab(
+                        label: l.uiUsersTasks,
+                        countText: taskCount,
+                      ),
+                      UserProfileTab.files => NzPillTab(
+                        label: l.uiUsersFiles,
+                        countText: filesCount,
+                      ),
+                      UserProfileTab.history => NzPillTab(
+                        label: l.uiUsersHistory,
+                        countText: '—',
+                      ),
+                      UserProfileTab.account => NzPillTab(
+                        label: l.uiUsersAccount,
+                      ),
+                    },
                 ],
-                selected: _tab,
+                selected: _tab < tabSet.length ? _tab : 0,
                 onSelected: _selectTab,
               );
               final scale = MediaQuery.textScalerOf(context).scale(1);

@@ -1706,6 +1706,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveRetagged => 'Etiket değiştirildi';
 
   @override
+  String get uiArchiveMyFiles => 'Dosyalarım';
+
+  @override
+  String get uiArchiveMyFilesCaption => 'Yüklediğin dosyalar';
+
+  @override
+  String get uiArchiveTaskFolders => 'görev klasörleri';
+
+  @override
+  String get uiArchiveEmptyTaskFolders =>
+      'Bu aramayla eşleşen görev klasörü yok.';
+
+  @override
   String get uiButtonsBusy => 'Meşgul';
 
   @override
@@ -2306,9 +2319,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordTabArchive => 'Arşiv';
 
   @override
-  String get uiCoordTabMeetings => 'Toplantı';
-
-  @override
   String get uiCoordTabMembers => 'Üyeler';
 
   @override
@@ -2383,6 +2393,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiCoordMemberAdded => 'Üye eklendi';
+
+  @override
+  String get uiCoordTabCalendar => 'Takvim';
 
   @override
   String get uiFeedbackLoading => 'Yükleniyor';
@@ -6358,4 +6371,64 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get uiUsersDraftSelfConflict =>
       'Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.';
+
+  @override
+  String get uiUsersTeamTitle => 'Ekibim';
+
+  @override
+  String get uiUsersTeamPeople => 'kişi';
+
+  @override
+  String get uiUsersTeamAdd => 'Ekibe kişi ekle';
+
+  @override
+  String get uiUsersTeamSearchHint => 'Ad ara';
+
+  @override
+  String get uiUsersTeamEmpty => 'Eşleşen kullanıcı yok.';
+
+  @override
+  String get uiUsersTeamShowAll => 'Tümünü göster';
+
+  @override
+  String get uiUsersTeamYou => 'sen';
+
+  @override
+  String get uiUsersTeamOpen => 'açık görev';
+
+  @override
+  String get uiUsersTeamLate => 'gecikmede';
+
+  @override
+  String get uiUsersTeamDerived =>
+      'Ekip, koordinatörlüğün sohbet grubundan gösterilir; salt okunur.';
+
+  @override
+  String get uiUsersTeamUnavailableTitle => 'Ekip listesi gösterilemiyor';
+
+  @override
+  String get uiUsersTeamUnavailable =>
+      'Üyenin ekip listesini okuyabileceği bir sunucu kaynağı yok: backend bekliyor.';
+
+  @override
+  String get uiUsersTeamNoDepartment =>
+      'Bu görünümde seçili koordinatörlük yok. Kenar çubuğundan koordinatörlük seç.';
+
+  @override
+  String get uiUsersTeamRemove => 'Ekipten çıkar';
+
+  @override
+  String get uiUsersTeamRemoveConfirm =>
+      'Hesabı silinmez; diğer koordinatörlüklerdeki yeri değişmez.';
+
+  @override
+  String get uiUsersTeamRemoveEffects =>
+      'Kişinin bu koordinatörlükteki görev atamaları kalkacak. Yine de ekipten çıkarılsın mı?';
+
+  @override
+  String get uiUsersTeamRemoved => 'Kişi ekipten çıkarıldı.';
+
+  @override
+  String get uiUsersTeamLeadNote =>
+      'Koordinatör ataması yönetici işidir; sen ve diğer koordinatörler bu listeden çıkarılamazsınız.';
 }

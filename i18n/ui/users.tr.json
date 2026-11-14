@@ -138,6 +138,24 @@
     "ui.users.draft_no_role": "En az bir rol seçin: Admin ya da bir koordinatörlükte Koordinatör veya Üye.",
     "ui.users.draft_admin_unknown": "Yönetici yetkisi henüz doğrulanamadı.",
     "ui.users.draft_role_scope": "Admin şirket genelidir. Koordinatör ve Üye seçimi bu programdaki seçili koordinatörlüklere uygulanır.",
-    "ui.users.draft_self_conflict": "Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin."
+    "ui.users.draft_self_conflict": "Kendi yönetici yetkinizi kaldırma ve parola değişikliğini ayrı kaydedin.",
+    "ui.users.team_title": "Ekibim",
+    "ui.users.team_people": "kişi",
+    "ui.users.team_add": "Ekibe kişi ekle",
+    "ui.users.team_search_hint": "Ad ara",
+    "ui.users.team_empty": "Eşleşen kullanıcı yok.",
+    "ui.users.team_show_all": "Tümünü göster",
+    "ui.users.team_you": "sen",
+    "ui.users.team_open": "açık görev",
+    "ui.users.team_late": "gecikmede",
+    "ui.users.team_derived": "Ekip, koordinatörlüğün sohbet grubundan gösterilir; salt okunur.",
+    "ui.users.team_unavailable_title": "Ekip listesi gösterilemiyor",
+    "ui.users.team_unavailable": "Üyenin ekip listesini okuyabileceği bir sunucu kaynağı yok: backend bekliyor.",
+    "ui.users.team_no_department": "Bu görünümde seçili koordinatörlük yok. Kenar çubuğundan koordinatörlük seç.",
+    "ui.users.team_remove": "Ekipten çıkar",
+    "ui.users.team_remove_confirm": "Hesabı silinmez; diğer koordinatörlüklerdeki yeri değişmez.",
+    "ui.users.team_remove_effects": "Kişinin bu koordinatörlükteki görev atamaları kalkacak. Yine de ekipten çıkarılsın mı?",
+    "ui.users.team_removed": "Kişi ekipten çıkarıldı.",
+    "ui.users.team_lead_note": "Koordinatör ataması yönetici işidir; sen ve diğer koordinatörler bu listeden çıkarılamazsınız."
   }
 }

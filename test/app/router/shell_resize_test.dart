@@ -83,7 +83,7 @@ void main() {
       await settle(tester);
       final view = harness.read(archiveControllerProvider);
       expect(view.query, 'k');
-      final caption = inPage(find.textContaining(_l.uiArchiveFoldersTitle));
+      final caption = inPage(find.textContaining(_l.uiArchiveCoordinatorshipsLc));
       final captionText = tester.widget<Text>(caption).data;
 
       final state = tester.state(page);
@@ -111,6 +111,8 @@ void main() {
         Size(599, 700),
         Size(1180, 820),
         Size(820, 1180),
+        // 13 inç iPad yatay: en kısa içerik, konum sıkıştırılır.
+        Size(1376, 1032),
         Size(1180, 820),
         Size(375, 820),
         Size(1180, 820),

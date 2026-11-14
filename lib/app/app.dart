@@ -69,8 +69,11 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
         child: NzAppNavScope(
           nav: _nav,
           child: ForegroundRefresh(
+            // Maske etkin temanın zemin renginde: Kontrol/Bildirim Merkezi açıkken (inactive)
+            // tema değişirse arkadaki ekran da anında açık/koyu olur; içerik yine gizli.
             child: PrivacyMask(
               controller: _mask,
+              color: Theme.of(context).scaffoldBackgroundColor,
               child: NzTabletScale(
                 child: ReleasePolicyHost(
                   child: child ?? const SizedBox.shrink(),

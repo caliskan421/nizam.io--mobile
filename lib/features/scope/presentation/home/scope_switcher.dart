@@ -144,24 +144,15 @@ class ScopeSwitcher extends ConsumerWidget {
             ],
           ),
         ),
-        const Gap(NizamioSpacing.space2),
-        if (view.role == EffectiveRole.admin)
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: NizamioSpacing.space3,
-            ),
-            child: Text(
-              l.uiHomeAdminScopeNote,
-              style: context.text.caption.copyWith(color: c.textMuted),
-            ),
-          )
-        else if (seat != null)
+        if (view.role != EffectiveRole.admin && seat != null) ...[
+          const Gap(NizamioSpacing.space2),
           NzPickerCard(
             label: l.uiHomePickerDepartment,
             title: seat.departmentName,
             leading: NzMonoTag(_code(codes, seat)),
             onTap: pickDepartment,
           ),
+        ],
       ],
     );
   }

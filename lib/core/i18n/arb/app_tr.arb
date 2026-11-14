@@ -3493,10 +3493,6 @@
   "@uiHomePickDepartment": {
     "description": "ui.home.pick_department"
   },
-  "uiHomeAdminScopeNote": "Yönetici tüm koordinatörlükleri görür. Bir koordinatörlüğün gözünden bakmak için rolünü değiştir.",
-  "@uiHomeAdminScopeNote": {
-    "description": "ui.home.admin_scope_note"
-  },
   "uiHomeCoordDoneTail": "görev bitti",
   "@uiHomeCoordDoneTail": {
     "description": "ui.home.coord_done_tail"

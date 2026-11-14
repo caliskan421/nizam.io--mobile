@@ -5332,12 +5332,6 @@ abstract class AppLocalizations {
   /// **'Koordinatörlük seç'**
   String get uiHomePickDepartment;
 
-  /// ui.home.admin_scope_note
-  ///
-  /// In tr, this message translates to:
-  /// **'Yönetici tüm koordinatörlükleri görür. Bir koordinatörlüğün gözünden bakmak için rolünü değiştir.'**
-  String get uiHomeAdminScopeNote;
-
   /// ui.home.coord_done_tail
   ///
   /// In tr, this message translates to:

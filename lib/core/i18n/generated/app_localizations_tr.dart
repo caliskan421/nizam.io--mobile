@@ -2795,10 +2795,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomePickDepartment => 'Koordinatörlük seç';
 
   @override
-  String get uiHomeAdminScopeNote =>
-      'Yönetici tüm koordinatörlükleri görür. Bir koordinatörlüğün gözünden bakmak için rolünü değiştir.';
-
-  @override
   String get uiHomeCoordDoneTail => 'görev bitti';
 
   @override

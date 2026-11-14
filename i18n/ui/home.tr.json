@@ -110,7 +110,6 @@
     "ui.home.role_member_desc": "Yalnız atanan görevleri görür",
     "ui.home.pick_role": "Rolünü seç",
     "ui.home.pick_department": "Koordinatörlük seç",
-    "ui.home.admin_scope_note": "Yönetici tüm koordinatörlükleri görür. Bir koordinatörlüğün gözünden bakmak için rolünü değiştir.",
     "ui.home.coord_done_tail": "görev bitti",
     "ui.home.chip_late": "geciken",
     "ui.home.chip_review": "onayında",

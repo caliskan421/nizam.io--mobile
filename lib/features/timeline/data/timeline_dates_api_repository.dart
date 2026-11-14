@@ -14,10 +14,8 @@ class ApiTimelineDateRepository implements TimelineDateRepository {
 
   final WorkClient _client;
 
-  static Map<String, dynamic> _scoped(
-    Map<String, dynamic> extras,
-    TaskItem task,
-  ) => withScope(extras, task.programId ?? '', task.departmentId ?? '');
+  static String _program(TaskItem task) => task.programId ?? '';
+  static String _dept(TaskItem task) => task.departmentId ?? '';
 
   @override
   Future<void> extend(TaskItem task, int days, {required String requestKey}) =>
@@ -29,7 +27,11 @@ class ApiTimelineDateRepository implements TimelineDateRepository {
             expectedDatesRevision: task.datesRevision,
           ),
           idempotencyKey: requestKey,
-          extras: _scoped(WorkClient.extendWorkItemOpenapiExtras, task),
+          extras: withScope(
+            WorkClient.extendWorkItemOpenapiExtras,
+            _program(task),
+            _dept(task),
+          ),
         ),
       );
 
@@ -37,7 +39,11 @@ class ApiTimelineDateRepository implements TimelineDateRepository {
   Future<void> pullEndDate(TaskItem task) => apiCall(
     () => _client.pullEndDate(
       id: task.id,
-      extras: _scoped(WorkClient.pullEndDateOpenapiExtras, task),
+      extras: withScope(
+        WorkClient.pullEndDateOpenapiExtras,
+        _program(task),
+        _dept(task),
+      ),
     ),
   );
 }

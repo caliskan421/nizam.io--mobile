@@ -19,10 +19,14 @@ class TaskListToolbar extends StatelessWidget {
     required this.controller,
     required this.sort,
     this.coordinator = false,
+    this.member = false,
   });
 
   /// Koordinatör görünümü (sıralama seçenekleri ve varsayılanı).
   final bool coordinator;
+
+  /// Üye görünümü: sıralama seçenekleri yalnız tarihler.
+  final bool member;
   final TasksListState state;
 
   /// Geçerli ölçüt (etkin rolün varsayılanıyla çözülmüş).
@@ -115,13 +119,18 @@ class TaskListToolbar extends StatelessWidget {
               flexibleLabel: true,
               label: l.sortLabel(sort),
               semanticLabel: '${l.uiHomeSortChange}: ${l.sortLabel(sort)}',
-              onPressed: () => controller.cycleSort(coordinator: coordinator),
+              onPressed: () => controller.cycleSort(
+                coordinator: coordinator,
+                member: member,
+              ),
               icon: NzIcons.chevronDown,
               iconTurns: state.descending ? 0 : 0.5,
               iconSemanticLabel:
                   '${l.uiHomeSortFlip}: ${state.descending ? l.uiHomeSortDescending : l.uiHomeSortAscending}',
-              onIconPressed: () =>
-                  controller.flipDirection(coordinator: coordinator),
+              onIconPressed: () => controller.flipDirection(
+                coordinator: coordinator,
+                member: member,
+              ),
             ),
           ),
         ),

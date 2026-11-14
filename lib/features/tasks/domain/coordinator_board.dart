@@ -205,10 +205,11 @@ List<TaskView> taskViewsFor({required EffectiveRole? role}) => switch (role) {
     TaskView.notStarted,
     TaskView.done,
   ],
+  // Üye: iade en acil eylem olduğundan Tümü'nün hemen arkasında.
   EffectiveRole.member => const [
     TaskView.all,
-    TaskView.late,
     TaskView.returned,
+    TaskView.late,
     TaskView.inProgress,
     TaskView.review,
     TaskView.notStarted,
@@ -226,9 +227,13 @@ List<TaskView> taskViewsFor({required EffectiveRole? role}) => switch (role) {
 };
 
 /// Sıralama seçenekleri: koordinatörde kişiye göre (varsayılan) var, koordinatörlüğe göre
-/// yok (tek koordinatörlük görünür).
-List<TaskSort> taskSortsFor({required bool coordinator}) => coordinator
+/// yok (tek koordinatörlük görünür); üyede yalnız tarihler (tek koordinatörlük, tek kişi),
+/// bitiş önce.
+List<TaskSort> taskSortsFor({required bool coordinator, bool member = false}) =>
+    coordinator
     ? const [TaskSort.person, TaskSort.created, TaskSort.due, TaskSort.start]
+    : member
+    ? const [TaskSort.due, TaskSort.start, TaskSort.created]
     : const [
         TaskSort.created,
         TaskSort.due,
@@ -242,8 +247,9 @@ TaskSort resolveTaskSort(
   TaskSort chosen, {
   required bool picked,
   required bool coordinator,
+  bool member = false,
 }) {
-  final options = taskSortsFor(coordinator: coordinator);
+  final options = taskSortsFor(coordinator: coordinator, member: member);
   if (!picked) return coordinator ? TaskSort.person : TaskSort.due;
   return options.contains(chosen) ? chosen : options.first;
 }

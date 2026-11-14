@@ -177,6 +177,7 @@ List<Widget> tasksListChildren(
       state: state,
       sort: sort,
       coordinator: coordinator,
+      member: member,
       onFilter: () => onFilter(null),
       controller: ctl,
     ),

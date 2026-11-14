@@ -33,6 +33,7 @@ Future<void> showTasksShortcuts(
   if (r == null) return Future.value();
   final access = container.read(effectiveAccessProvider);
   final coordinator = access.isCoordinatorView;
+  final member = access.isMemberView;
   return NzFlyoutMenu.show(
     context,
     semanticLabel: l.uiTasksShortcuts,
@@ -47,12 +48,14 @@ Future<void> showTasksShortcuts(
           onSelected: () => ctl.selectView(v),
         ),
       NzFlyoutSection(l.uiTasksFlySort),
-      for (final s in taskSortsFor(coordinator: coordinator))
+      for (final s in taskSortsFor(coordinator: coordinator, member: member))
         NzFlyoutItem(
           label: l.sortShort(s),
           icon: NzIcons.swapVertical,
-          selected: s == ctl.currentSortFor(coordinator: coordinator),
-          onSelected: () => ctl.selectSort(s, coordinator: coordinator),
+          selected:
+              s == ctl.currentSortFor(coordinator: coordinator, member: member),
+          onSelected: () =>
+              ctl.selectSort(s, coordinator: coordinator, member: member),
         ),
       NzFlyoutSection(l.uiTasksFlyTasks),
       if (onNewTask != null)

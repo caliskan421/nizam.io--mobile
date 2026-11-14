@@ -312,6 +312,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
               state.sort,
               picked: state.sortPicked,
               coordinator: coordinator,
+              member: role == EffectiveRole.member,
             ),
           )
         else

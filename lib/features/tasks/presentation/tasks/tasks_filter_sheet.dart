@@ -11,6 +11,7 @@ import '../../../../core/ui/widgets/inputs/nz_filter_choice.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../application/effective_access.dart';
 import '../../application/task_list_filter.dart';
 import '../../application/tasks_list_controller.dart';
 import '../../domain/task_catalog.dart';
@@ -45,6 +46,8 @@ Future<void> showTasksFilterSheet(
         onPerson: ctl.togglePerson,
         onCoordinatorship: ctl.toggleCoordinatorship,
         onPriority: ctl.togglePriority,
+        // Üye görünümünde liste yalnız kendine atananlar: kişi süzgeci anlamsız.
+        showPeople: !ref.watch(effectiveAccessProvider).isMemberView,
       );
     },
   );
@@ -100,6 +103,7 @@ class TasksFilterSheetData {
     required this.onCoordinatorship,
     required this.onPriority,
     this.showCoordinatorship = true,
+    this.showPeople = true,
   });
   final TaskFilter filter;
   final TaskFilterOptions? options;
@@ -110,6 +114,7 @@ class TasksFilterSheetData {
   final ValueChanged<String> onCoordinatorship;
   final ValueChanged<TaskPriority> onPriority;
   final bool showCoordinatorship;
+  final bool showPeople;
 }
 
 class _FilterBody extends StatefulWidget {
@@ -125,9 +130,11 @@ class _FilterBodyState extends State<_FilterBody> {
   @override
   void initState() {
     super.initState();
+    // Kişi satırı gizliyse satır sırası bir kayar.
+    final people = widget.data.showPeople;
     _open = switch (widget.initialGroup) {
-      TaskFilterGroup.people => 0,
-      TaskFilterGroup.coordinatorship => 1,
+      TaskFilterGroup.people => people ? 0 : null,
+      TaskFilterGroup.coordinatorship => people ? 1 : 0,
       TaskFilterGroup.priority || null => null,
     };
   }
@@ -152,23 +159,24 @@ class _FilterBodyState extends State<_FilterBody> {
           onToggle: (index) =>
               setState(() => _open = _open == index ? null : index),
           rows: [
-            NzFormRow(
-              label: l.uiTasksGroupPeople,
-              icon: NzIcons.person,
-              value: selection(filter.people.length),
-              valueSet: filter.people.isNotEmpty,
-              content: NzFilterChoices(
-                children: [
-                  for (final (p, n) in options.people)
-                    NzFilterChoice(
-                      label: p.name,
-                      count: '${truncated ? '≥' : ''}$n',
-                      selected: filter.people.contains(p.id),
-                      onTap: () => widget.data.onPerson(p.id),
-                    ),
-                ],
+            if (widget.data.showPeople)
+              NzFormRow(
+                label: l.uiTasksGroupPeople,
+                icon: NzIcons.person,
+                value: selection(filter.people.length),
+                valueSet: filter.people.isNotEmpty,
+                content: NzFilterChoices(
+                  children: [
+                    for (final (p, n) in options.people)
+                      NzFilterChoice(
+                        label: p.name,
+                        count: '${truncated ? '≥' : ''}$n',
+                        selected: filter.people.contains(p.id),
+                        onTap: () => widget.data.onPerson(p.id),
+                      ),
+                  ],
+                ),
               ),
-            ),
             if (widget.data.showCoordinatorship &&
                 options.coordinatorships.isNotEmpty)
               NzFormRow(

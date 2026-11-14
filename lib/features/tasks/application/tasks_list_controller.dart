@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/domain/effective_role.dart';
 import '../domain/coordinator_board.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_query.dart';
@@ -153,31 +154,36 @@ class TasksListController extends _$TasksListController {
 
   /// Geçerli ölçüt: [coordinator] görünümünün seçenekleri ve varsayılanıyla
   /// ([resolveTaskSort]). Rol çağırandan gelir (denetleyici erişim okumaz).
-  TaskSort currentSortFor({required bool coordinator}) => resolveTaskSort(
-    state.sort,
-    picked: state.sortPicked,
-    coordinator: coordinator,
-  );
+  TaskSort currentSortFor({required bool coordinator, bool member = false}) =>
+      resolveTaskSort(
+        state.sort,
+        picked: state.sortPicked,
+        coordinator: coordinator,
+        member: member,
+      );
 
   /// Sıralama düğmesinin etiketi: rolün sıradaki ölçütüne geçer (varsayılan yön).
-  void cycleSort({bool coordinator = false}) {
-    final all = taskSortsFor(coordinator: coordinator);
-    final cur = currentSortFor(coordinator: coordinator);
+  void cycleSort({bool coordinator = false, bool member = false}) {
+    final all = taskSortsFor(coordinator: coordinator, member: member);
+    final cur = currentSortFor(coordinator: coordinator, member: member);
     selectSort(
       all[(all.indexOf(cur) + 1) % all.length],
       coordinator: coordinator,
+      member: member,
     );
   }
 
   /// Sıralama düğmesinin oku: tarihli ölçütte yönü çevirir; gruplu ölçüt yönsüzdür.
-  void flipDirection({bool coordinator = false}) => selectSort(
-    currentSortFor(coordinator: coordinator),
-    coordinator: coordinator,
-  );
+  void flipDirection({bool coordinator = false, bool member = false}) =>
+      selectSort(
+        currentSortFor(coordinator: coordinator, member: member),
+        coordinator: coordinator,
+        member: member,
+      );
 
   /// Seçili olmayan ölçüt → seçer (varsayılan yön); seçili tarihli ölçüt → yönü çevirir.
-  void selectSort(TaskSort s, {bool coordinator = false}) {
-    if (s == currentSortFor(coordinator: coordinator)) {
+  void selectSort(TaskSort s, {bool coordinator = false, bool member = false}) {
+    if (s == currentSortFor(coordinator: coordinator, member: member)) {
       if (!s.dated) return;
       state = state.copyWith(
         sort: s,
@@ -301,7 +307,12 @@ TaskQueryResult? tasksListResult(Ref ref, TaskView view, String people) {
   return queryTasks(
     catalog,
     view: q.$1,
-    sort: resolveTaskSort(q.$2, picked: q.$3, coordinator: coordinator),
+    sort: resolveTaskSort(
+      q.$2,
+      picked: q.$3,
+      coordinator: coordinator,
+      member: role == EffectiveRole.member,
+    ),
     descending: q.$4,
     filter: q.$5,
     role: role,

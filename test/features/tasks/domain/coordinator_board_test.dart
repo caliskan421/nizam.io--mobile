@@ -158,8 +158,8 @@ void main() {
     test('üyede İade ayrı; Tarih talebi ve Atanmamış yok', () {
       expect(taskViewsFor(role: EffectiveRole.member), [
         TaskView.all,
-        TaskView.late,
         TaskView.returned,
+        TaskView.late,
         TaskView.inProgress,
         TaskView.review,
         TaskView.notStarted,
@@ -191,6 +191,21 @@ void main() {
       expect(
         resolveTaskSort(TaskSort.person, picked: true, coordinator: false),
         TaskSort.created,
+      );
+      // Üye: yalnız tarihler; koordinatörlüğe göre yok, varsayılan bitiş.
+      expect(taskSortsFor(coordinator: false, member: true), [
+        TaskSort.due,
+        TaskSort.start,
+        TaskSort.created,
+      ]);
+      expect(
+        resolveTaskSort(
+          TaskSort.coordinatorship,
+          picked: true,
+          coordinator: false,
+          member: true,
+        ),
+        TaskSort.due,
       );
     });
     test('kişiye göre gruplu liste: kişiler ada göre, atanmamış sonda; içerde durum', () {

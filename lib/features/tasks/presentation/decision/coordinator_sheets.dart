@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
@@ -21,21 +22,33 @@ import 'coordinator_texts.dart';
 import 'task_decision_flows.dart';
 
 /// Onay kuyruğu satırı (ana sayfa, görev listesi bandı, kuyruk kaplaması aynı bileşen):
-/// [NzQueueRow] + karar akışları.
+/// [NzQueueRow] + karar akışları. [flat] (ana sayfa tablo kartı): alt satır görev kodu, sağda
+/// bitiş tarihi (teslim zamanı backend'de yok, gösterilmez).
 class TaskQueueRow extends ConsumerWidget {
-  const TaskQueueRow({super.key, required this.task, required this.today});
+  const TaskQueueRow({
+    super.key,
+    required this.task,
+    required this.today,
+    this.flat = false,
+  });
 
   final TaskItem task;
   final DateTime today;
+  final bool flat;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final flows = TaskDecisionFlows(context, ref, task.code);
     final subs = task.subtaskTotal;
+    final subLine = subs == 0
+        ? null
+        : l.subtaskLine(task.subtaskDoneTotal, subs);
     return NzQueueRow(
       title: task.title,
-      meta: subs == 0 ? null : l.subtaskLine(task.subtaskDoneTotal, subs),
+      meta: flat ? [task.code, ?subLine].join(' · ') : subLine,
+      flat: flat,
+      dueDate: flat ? DateFormat('d MMM', 'tr').format(task.due) : null,
       dueText: l.dueLine(task, today),
       dueDanger: isTaskLate(task),
       returnLabel: l.uiTasksReturn,
@@ -47,12 +60,19 @@ class TaskQueueRow extends ConsumerWidget {
   }
 }
 
-/// Atanmamış görev satırı: [NzUnassignedRow] + üstlen/ata akışları.
+/// Atanmamış görev satırı: [NzUnassignedRow] + üstlen/ata akışları. [flat] (ana sayfa tablo
+/// kartı): alt satır "KOD · 15 gün kaldı", sağda Üstlen + atama ikonu.
 class TaskUnassignedRow extends ConsumerWidget {
-  const TaskUnassignedRow({super.key, required this.task, required this.today});
+  const TaskUnassignedRow({
+    super.key,
+    required this.task,
+    required this.today,
+    this.flat = false,
+  });
 
   final TaskItem task;
   final DateTime today;
+  final bool flat;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -60,7 +80,10 @@ class TaskUnassignedRow extends ConsumerWidget {
     final flows = TaskDecisionFlows(context, ref, task.code);
     return NzUnassignedRow(
       title: task.title,
-      meta: '${l.priorityLabel(task.priority)} · ${l.dueLine(task, today)}',
+      meta: flat
+          ? '${task.code} · ${l.dueLine(task, today)}'
+          : '${l.priorityLabel(task.priority)} · ${l.dueLine(task, today)}',
+      flat: flat,
       waitingLabel: l.uiTasksUnassignedWaiting,
       claimLabel: l.uiTasksClaim,
       assignLabel: l.uiTasksAssign,

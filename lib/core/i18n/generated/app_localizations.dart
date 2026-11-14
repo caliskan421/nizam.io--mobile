@@ -5392,6 +5392,36 @@ abstract class AppLocalizations {
   /// **'Tarih talebin yok.'**
   String get uiHomeRequestsEmpty;
 
+  /// ui.home.qa_new_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni görev'**
+  String get uiHomeQaNewTask;
+
+  /// ui.home.qa_member
+  ///
+  /// In tr, this message translates to:
+  /// **'Üye ekle'**
+  String get uiHomeQaMember;
+
+  /// ui.home.qa_member_long
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekibe üye ekle'**
+  String get uiHomeQaMemberLong;
+
+  /// ui.home.table_task
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get uiHomeTableTask;
+
+  /// ui.home.table_due
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş'**
+  String get uiHomeTableDue;
+
   /// ui.identity.login_title
   ///
   /// In tr, this message translates to:

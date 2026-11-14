@@ -164,25 +164,40 @@ class HomeKpiGrid extends StatelessWidget {
   }
 }
 
-/// Hızlı işlem türü (kutucuk ve kısayol menüsü aynı listeyi kullanır). Görev açma Görevler
-/// sayfasının "+" düğmesindedir; işlem geçmişi buradan açılır (ayrı kartı yok).
-enum HomeQuickAction { history, meeting, deleted, report }
+/// Hızlı işlem türü (kutucuk ve kısayol menüsü aynı listeyi kullanır). İşlem geçmişi buradan
+/// açılır (ayrı kartı yok). Yeni görev ve üye ekle yalnız koordinatör görünümünde (yönetici
+/// görünümünde görev açma Görevler sayfasının "+" düğmesindedir).
+enum HomeQuickAction { history, meeting, deleted, report, newTask, member }
 
 /// Rapor telefonda üretilmez: rapor oluşturucu gelene dek kısayolu gizlidir. İşlem geçmişi ve
 /// silinenler yalnız şirket yöneticisine (AUDIT-K10); toplantı yalnız açabilen etkin role
-/// ([EffectiveAccess.canCreateMeeting]). Liste boşsa bölüm çizilmez.
+/// ([EffectiveAccess.canCreateMeeting]). [coordinator] (koordinatör görünümü) prototip sırasını
+/// kullanır: Yeni görev ([canCreateTask]), Toplantı, Üye ekle ([canManageTeam]). Liste boşsa
+/// bölüm çizilmez.
 List<HomeQuickAction> homeQuickActions({
   required bool isAdmin,
   required bool canMeet,
-}) => [
-  for (final action in HomeQuickAction.values)
-    if (switch (action) {
-      HomeQuickAction.report => false,
-      HomeQuickAction.meeting => canMeet,
-      HomeQuickAction.history || HomeQuickAction.deleted => isAdmin,
-    })
-      action,
-];
+  bool coordinator = false,
+  bool canCreateTask = false,
+  bool canManageTeam = false,
+}) => coordinator
+    ? [
+        if (canCreateTask) HomeQuickAction.newTask,
+        if (canMeet) HomeQuickAction.meeting,
+        if (canManageTeam) HomeQuickAction.member,
+        if (isAdmin) HomeQuickAction.history,
+      ]
+    : [
+        for (final action in HomeQuickAction.values)
+          if (switch (action) {
+            HomeQuickAction.report ||
+            HomeQuickAction.newTask ||
+            HomeQuickAction.member => false,
+            HomeQuickAction.meeting => canMeet,
+            HomeQuickAction.history || HomeQuickAction.deleted => isAdmin,
+          })
+            action,
+      ];
 
 /// Hızlı işlemler: başlık + ayraçlı tek kart ([HomeQuickActionsBar]).
 class HomeQuickActions extends StatelessWidget {
@@ -223,6 +238,8 @@ IconData quickActionIcon(HomeQuickAction a) => switch (a) {
   HomeQuickAction.meeting => NzIcons.video,
   HomeQuickAction.deleted => NzIcons.delete,
   HomeQuickAction.report => NzIcons.document,
+  HomeQuickAction.newTask => NzIcons.add,
+  HomeQuickAction.member => NzIcons.personAdd,
 };
 
 String quickActionLabel(AppLocalizations l, HomeQuickAction a) => switch (a) {
@@ -230,6 +247,8 @@ String quickActionLabel(AppLocalizations l, HomeQuickAction a) => switch (a) {
   HomeQuickAction.meeting => l.uiHomeQaMeeting,
   HomeQuickAction.deleted => l.uiHomeDeletedShortcut,
   HomeQuickAction.report => l.uiHomeQaReport,
+  HomeQuickAction.newTask => l.uiHomeQaNewTask,
+  HomeQuickAction.member => l.uiHomeQaMember,
 };
 
 /// Kısayol menüsündeki uzun ad ("Toplantı oluştur").
@@ -239,6 +258,8 @@ String quickActionLongLabel(AppLocalizations l, HomeQuickAction a) =>
       HomeQuickAction.meeting => l.uiHomeQaMeetingLong,
       HomeQuickAction.deleted => l.uiHomeDeletedRecords,
       HomeQuickAction.report => l.uiHomeQaReportLong,
+      HomeQuickAction.newTask => l.uiHomeQaNewTask,
+      HomeQuickAction.member => l.uiHomeQaMemberLong,
     };
 
 /// Ekip: rol başına [HomeTeamTile] (rol rengi işaret ve pay çubuğudur). Yalnız [team]

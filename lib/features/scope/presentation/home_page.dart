@@ -57,11 +57,7 @@ class HomePage extends ConsumerWidget {
         // Yalnız görünen sayfa (yığının tepesi) kendi kısayol menüsünü açar.
         final visible = ModalRoute.of(context)?.isCurrent ?? true;
         if (next?.tab != shellTab || dashboard == null || !visible) return;
-        final access = ref.read(effectiveAccessProvider);
-        final actions = homeQuickActions(
-          isAdmin: access.canAdminister,
-          canMeet: access.canCreateMeeting,
-        );
+        final actions = _actionsFor(ref.read(effectiveAccessProvider));
         if (actions.isEmpty) return;
         showHomeShortcuts(
           context,
@@ -130,8 +126,20 @@ class HomePage extends ConsumerWidget {
       context,
       quickActionLongLabel(context.l10n, a),
     ),
+    // Ana sayfa hızlı işlemi: taslak (koordinatörlük, atananlar) korunur.
+    HomeQuickAction.newTask => showNewTaskSheet(context),
+    HomeQuickAction.member => showInviteSheet(context),
   };
 }
+
+/// Etkin görünümün hızlı işlemleri (kutucuklar ve kısayol menüsü aynı liste).
+List<HomeQuickAction> _actionsFor(EffectiveAccess access) => homeQuickActions(
+  isAdmin: access.canAdminister,
+  canMeet: access.canCreateMeeting,
+  coordinator: access.isCoordinatorView,
+  canCreateTask: access.canCreateTask,
+  canManageTeam: access.canManageTeam,
+);
 
 class _Feed extends ConsumerWidget {
   const _Feed({required this.dashboard, required this.onQuickAction});
@@ -147,10 +155,7 @@ class _Feed extends ConsumerWidget {
     final access = ref.watch(effectiveAccessProvider);
     final isAdmin = access.canAdminister;
     // Etkin rolün açabildikleri; boşsa (üye görünümü) bölüm çizilmez.
-    final actions = homeQuickActions(
-      isAdmin: isAdmin,
-      canMeet: access.canCreateMeeting,
-    );
+    final actions = _actionsFor(access);
     final quick = [
       if (actions.isNotEmpty) ...[
         HomeQuickActions(onAction: onQuickAction, actions: actions),
@@ -226,12 +231,20 @@ class _Feed extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               greeting,
-              const Gap(NizamioSpacing.space2),
+              const Gap(NizamioSpacing.space3),
               HomeViewLine(view: access),
               const Gap(NizamioSpacing.gapXl),
-              HomeCoordinatorFeed(wide: wide),
+              HomeCoordinatorFeed(
+                wide: wide,
+                quick: actions.isEmpty
+                    ? null
+                    : HomeQuickActionsBar(
+                        onAction: onQuickAction,
+                        actions: actions,
+                        compact: !wide,
+                      ),
+              ),
               const Gap(NizamioSpacing.gapXl),
-              ...quick,
               footer,
             ],
           );

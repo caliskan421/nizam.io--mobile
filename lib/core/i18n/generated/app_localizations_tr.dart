@@ -2821,6 +2821,21 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeRequestsEmpty => 'Tarih talebin yok.';
 
   @override
+  String get uiHomeQaNewTask => 'Yeni görev';
+
+  @override
+  String get uiHomeQaMember => 'Üye ekle';
+
+  @override
+  String get uiHomeQaMemberLong => 'Ekibe üye ekle';
+
+  @override
+  String get uiHomeTableTask => 'Görev';
+
+  @override
+  String get uiHomeTableDue => 'Bitiş';
+
+  @override
   String get uiIdentityLoginTitle => 'Giriş yap';
 
   @override

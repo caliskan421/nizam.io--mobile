@@ -271,7 +271,9 @@ class NzPage extends ConsumerWidget {
           NzPaneScope.pageBottom(context) +
           (dock == null ? 0 : bottomDockExtent + dockGap);
       final top = switch (pane) {
-        NzPaneRole.master => safe.top + NzTabletMetrics.paneTop,
+        // Liste bölmesinde üst çubuk yok: kaydırma alanı durum çubuğunun altında başlar
+        // (içerik saatin altına kaymaz), dolgu yalnız bölme üst payıdır.
+        NzPaneRole.master => NzTabletMetrics.paneTop,
         NzPaneRole.detail => paneLead ?? NizamioSpacing.gapXl,
         null => NizamioSpacing.gapXl,
       };
@@ -286,7 +288,7 @@ class NzPage extends ConsumerWidget {
           body: LayoutBuilder(
             builder: (context, constraints) {
               final side = NzPaneScope.sideInset(context, constraints, width);
-              final scroll = CustomScrollView(
+              final scrollView = CustomScrollView(
                 // Kısa içerikte de çekilebilsin; iOS'ta esneyen kaydırma.
                 physics: refresh == null
                     ? null
@@ -350,6 +352,16 @@ class NzPage extends ConsumerWidget {
                   ),
                 ],
               );
+              final scroll = pane == NzPaneRole.master
+                  ? Padding(
+                      padding: EdgeInsets.only(top: safe.top),
+                      child: MediaQuery.removePadding(
+                        context: context,
+                        removeTop: true,
+                        child: ClipRect(child: scrollView),
+                      ),
+                    )
+                  : scrollView;
               // Material gösterge cam üst çubuğun altından iner (çubuk kaydırma görünümünün
               // içindedir; yüksekliği NzTopBar ile aynı: güvenli alan + space2 + appbar).
               final content = refresh == null || cupertino
@@ -357,7 +369,7 @@ class NzPage extends ConsumerWidget {
                   : RefreshIndicator(
                       onRefresh: refresh,
                       edgeOffset: pane == NzPaneRole.master
-                          ? safe.top
+                          ? 0
                           : safe.top +
                                 NizamioSpacing.space2 +
                                 NizamioSize.appbar,

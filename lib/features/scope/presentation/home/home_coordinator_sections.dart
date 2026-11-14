@@ -36,83 +36,74 @@ class HomeCoordinatorSummary extends ConsumerWidget {
         .length;
     final pct = s.total == 0 ? 0 : (s.done * 100 / s.total).round();
     final more = board.truncated ? '≥' : '';
-    Widget chip(
-      int n,
-      String label,
-      NzBadge Function(String) badge,
-      VoidCallback onTap,
-    ) => Semantics(
-      button: true,
-      label: '$n $label',
-      excludeSemantics: true,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: badge('$more$n $label'),
-      ),
-    );
+    Widget chip(int n, String label, Color color, VoidCallback onTap) =>
+        NzDotChip(color: color, count: '$more$n', label: label, onTap: onTap);
     final chips = [
       if (s.late > 0)
         chip(
           s.late,
           l.uiHomeChipLate,
-          (v) => NzBadge.danger(label: v),
+          c.danger,
           () => nav.openTasks(view: NzTaskView.late),
         ),
       if (s.review > 0)
         chip(
           s.review,
           l.uiHomeChipReview,
-          (v) => NzBadge.warning(label: v),
+          c.warning,
           () => nav.openTasks(view: NzTaskView.review),
         ),
       if (s.returned > 0)
         chip(
           s.returned,
           l.uiHomeChipReturned,
-          (v) => NzBadge.danger(label: v),
+          c.danger,
           () => nav.openTasks(view: NzTaskView.inProgress),
         ),
       if (s.unassigned > 0)
         chip(
           s.unassigned,
           l.uiHomeChipUnassigned,
-          (v) => NzBadge.info(label: v),
+          c.warning,
           () => nav.openTasks(view: NzTaskView.unassigned),
         ),
       if (pending > 0)
         chip(
           pending,
           l.uiHomeChipRequests,
-          (v) => NzBadge.neutral(label: v),
+          c.inProgress,
           () => showDateRequestsSheet(context),
         ),
     ];
     return NzCard.outlined(
+      size: NzSize.lg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  board.departmentName,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: t.bodyMd.copyWith(fontWeight: FontWeight.w600),
-                ),
-              ),
-              const Gap(NizamioSpacing.space2),
-              Text('%$pct', style: t.titleSm),
-            ],
-          ),
-          const Gap(NizamioSpacing.space1),
           Text(
-            '${s.done} / $more${s.total} ${l.uiHomeCoordDoneTail}',
-            style: t.caption.copyWith(color: c.textMuted),
+            board.departmentName,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: t.titleSm,
           ),
           const Gap(NizamioSpacing.space3),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text('%$pct', style: t.displayLg),
+              const Gap(NizamioSpacing.space3),
+              Expanded(
+                child: Text(
+                  '${s.done} / $more${s.total} ${l.uiHomeCoordDoneTail}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: t.bodySm.copyWith(color: c.textMuted),
+                ),
+              ),
+            ],
+          ),
+          const Gap(NizamioSpacing.space4),
           NzProgressBar.segments(
             segments: [
               NzBarSegment(s.done, c.taskDone),
@@ -123,7 +114,7 @@ class HomeCoordinatorSummary extends ConsumerWidget {
             ],
           ),
           if (chips.isNotEmpty) ...[
-            const Gap(NizamioSpacing.space3),
+            const Gap(NizamioSpacing.space4),
             Wrap(
               spacing: NizamioSpacing.space2,
               runSpacing: NizamioSpacing.space2,

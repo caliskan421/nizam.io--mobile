@@ -4,6 +4,8 @@ import 'package:gap/gap.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../buttons/nz_button.dart';
+import '../buttons/nz_icon_button.dart';
+import '../nz_icons.dart';
 import '../nz_size.dart';
 import '../surfaces/nz_card.dart';
 
@@ -18,7 +20,9 @@ class NzQueueRow extends StatelessWidget {
     required this.approveLabel,
     this.meta,
     this.dueText,
+    this.dueDate,
     this.dueDanger = false,
+    this.flat = false,
     this.onTap,
     this.onReturn,
     this.onApprove,
@@ -32,8 +36,14 @@ class NzQueueRow extends StatelessWidget {
   /// Sağdaki bitiş metni ("3 gün geç", "bugün").
   final String? dueText;
 
+  /// Sağ üstte kalın bitiş tarihi ("30 Eyl"; yalnız [flat]).
+  final String? dueDate;
+
   /// Bitiş metni gecikme rengiyle.
   final bool dueDanger;
+
+  /// true → kartsız tablo satırı ([NzTableCard] içinde): düğmeler alt satırın sağında, dar.
+  final bool flat;
   final String returnLabel;
   final String approveLabel;
   final VoidCallback? onTap;
@@ -47,18 +57,21 @@ class NzQueueRow extends StatelessWidget {
     title: title,
     meta: meta,
     trailing: dueText,
+    trailingTitle: flat ? dueDate : null,
     trailingDanger: dueDanger,
+    flat: flat,
     onTap: onTap,
     secondary: NzButton.secondary(
       label: returnLabel,
       size: NzSize.sm,
-      expand: true,
+      expand: !flat,
       onPressed: onReturn,
     ),
     primary: NzButton.primary(
       label: approveLabel,
       size: NzSize.sm,
-      expand: true,
+      icon: flat ? NzIcons.check : null,
+      expand: !flat,
       onPressed: onApprove,
     ),
   );
@@ -76,6 +89,7 @@ class NzUnassignedRow extends StatelessWidget {
     this.meta,
     this.waitingLabel,
     this.badge,
+    this.flat = false,
     this.onTap,
     this.onClaim,
     this.onAssign,
@@ -84,6 +98,9 @@ class NzUnassignedRow extends StatelessWidget {
   final String title;
   final String? meta;
   final String? waitingLabel;
+
+  /// true → kartsız tablo satırı: sağda **Üstlen** ve atama ikon düğmesi.
+  final bool flat;
   final Widget? badge;
   final String claimLabel;
   final String assignLabel;
@@ -94,29 +111,57 @@ class NzUnassignedRow extends StatelessWidget {
   final VoidCallback? onAssign;
 
   @override
-  Widget build(BuildContext context) => _ActionRow(
-    title: title,
-    meta: meta,
-    trailing: waitingLabel,
-    badge: badge,
-    onTap: onTap,
-    secondary: onAssign == null
-        ? null
-        : NzButton.secondary(
-            label: assignLabel,
-            size: NzSize.sm,
-            expand: true,
-            onPressed: onAssign,
-          ),
-    primary: onClaim == null
-        ? null
-        : NzButton.primary(
-            label: claimLabel,
-            size: NzSize.sm,
-            expand: true,
-            onPressed: onClaim,
-          ),
-  );
+  Widget build(BuildContext context) {
+    final claim = onClaim;
+    final assign = onAssign;
+    if (flat) {
+      return _ActionRow(
+        title: title,
+        meta: meta,
+        trailing: null,
+        badge: badge,
+        flat: true,
+        onTap: onTap,
+        secondary: claim == null
+            ? null
+            : NzButton.secondary(
+                label: claimLabel,
+                size: NzSize.sm,
+                onPressed: claim,
+              ),
+        primary: assign == null
+            ? null
+            : NzIconButton.circle(
+                icon: NzIcons.personAdd,
+                semanticLabel: assignLabel,
+                onPressed: assign,
+              ),
+      );
+    }
+    return _ActionRow(
+      title: title,
+      meta: meta,
+      trailing: waitingLabel,
+      badge: badge,
+      onTap: onTap,
+      secondary: assign == null
+          ? null
+          : NzButton.secondary(
+              label: assignLabel,
+              size: NzSize.sm,
+              expand: true,
+              onPressed: assign,
+            ),
+      primary: claim == null
+          ? null
+          : NzButton.primary(
+              label: claimLabel,
+              size: NzSize.sm,
+              expand: true,
+              onPressed: claim,
+            ),
+    );
+  }
 }
 
 class _ActionRow extends StatelessWidget {
@@ -127,14 +172,18 @@ class _ActionRow extends StatelessWidget {
     required this.onTap,
     required this.secondary,
     required this.primary,
+    this.trailingTitle,
     this.trailingDanger = false,
+    this.flat = false,
     this.badge,
   });
 
   final String title;
   final String? meta;
   final String? trailing;
+  final String? trailingTitle;
   final bool trailingDanger;
+  final bool flat;
   final Widget? badge;
   final VoidCallback? onTap;
   final Widget? secondary;
@@ -146,66 +195,109 @@ class _ActionRow extends StatelessWidget {
     final t = context.text;
     final meta = this.meta;
     final trailing = this.trailing;
+    final trailingTitle = this.trailingTitle;
     final badge = this.badge;
     final buttons = [?secondary, ?primary];
+    final metaRow = meta != null || badge != null
+        ? Row(
+            children: [
+              if (badge != null) ...[badge, const Gap(NizamioSpacing.space2)],
+              if (meta != null)
+                Expanded(
+                  child: Text(
+                    meta,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: (flat ? t.monoSm : t.caption).copyWith(
+                      color: c.textMuted,
+                    ),
+                  ),
+                ),
+            ],
+          )
+        : null;
+    final head = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: t.list.copyWith(fontWeight: FontWeight.w600),
+          ),
+        ),
+        if (trailing != null || trailingTitle != null) ...[
+          const Gap(NizamioSpacing.space2),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (trailingTitle != null)
+                Text(
+                  trailingTitle,
+                  style: t.list.copyWith(fontWeight: FontWeight.w600),
+                ),
+              if (trailing != null)
+                Text(
+                  trailing,
+                  style: t.caption.copyWith(
+                    color: trailingDanger ? c.danger : c.textMuted,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ],
+    );
+    Widget tappable(Widget child) => Semantics(
+      button: onTap != null,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: child,
+      ),
+    );
+    if (flat) {
+      // Tablo satırı: başlık + bitiş; alt satırda kod solda, düğmeler sağda.
+      return Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: NizamioSpacing.space4,
+          vertical: NizamioSpacing.space3,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            tappable(head),
+            const Gap(NizamioSpacing.space2),
+            Row(
+              children: [
+                Expanded(child: tappable(metaRow ?? const SizedBox.shrink())),
+                for (final b in buttons) ...[
+                  const Gap(NizamioSpacing.space2),
+                  b,
+                ],
+              ],
+            ),
+          ],
+        ),
+      );
+    }
     return NzCard.outlined(
       size: NzSize.sm,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Semantics(
-            button: onTap != null,
-            onTap: onTap,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onTap,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: t.list.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      if (trailing != null) ...[
-                        const Gap(NizamioSpacing.space2),
-                        Text(
-                          trailing,
-                          style: t.caption.copyWith(
-                            color: trailingDanger ? c.danger : c.textMuted,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  if (meta != null || badge != null) ...[
-                    const Gap(NizamioSpacing.space1),
-                    Row(
-                      children: [
-                        if (badge != null) ...[
-                          badge,
-                          const Gap(NizamioSpacing.space2),
-                        ],
-                        if (meta != null)
-                          Expanded(
-                            child: Text(
-                              meta,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: t.caption.copyWith(color: c.textMuted),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
+          tappable(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                head,
+                if (metaRow != null) ...[
+                  const Gap(NizamioSpacing.space1),
+                  metaRow,
                 ],
-              ),
+              ],
             ),
           ),
           if (buttons.isNotEmpty) ...[

@@ -131,6 +131,11 @@
     "ui.home.meetings_title": "Yaklaşan toplantılar",
     "ui.home.meetings_empty": "Yaklaşan toplantın yok.",
     "ui.home.requests_title": "Tarih taleplerim",
-    "ui.home.requests_empty": "Tarih talebin yok."
+    "ui.home.requests_empty": "Tarih talebin yok.",
+    "ui.home.qa_new_task": "Yeni görev",
+    "ui.home.qa_member": "Üye ekle",
+    "ui.home.qa_member_long": "Ekibe üye ekle",
+    "ui.home.table_task": "Görev",
+    "ui.home.table_due": "Bitiş"
   }
 }

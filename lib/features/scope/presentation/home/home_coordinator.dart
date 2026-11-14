@@ -5,9 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
-import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
-import '../../../../core/ui/widgets/nz_size.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
 import 'home_coordinator_sections.dart';
@@ -18,11 +16,15 @@ import 'module_menu_texts.dart';
 /// çipler, onay bekleyenler (İade / Onayla), atanmamış (Üstlen / Ata), ekip yükü, yaklaşan
 /// toplantılar, tarih taleplerim. Kaynak etkin koordinatörlüğün görevleri
 /// ([coordinatorBoardProvider]); ayrı sayfa değil, ana sayfanın koordinatör görünümüdür.
-/// Geniş düzende iki sütun (karar listeleri solda, ekip ve takvim sağda).
+/// Sıra prototip gibi: özet + hızlı işlemler ([quick]), onay bekleyenler + atanmamış, sonra
+/// ekip yükü, toplantılar, tarih talepleri. Geniş düzende her çift yan yana.
 class HomeCoordinatorFeed extends ConsumerWidget {
-  const HomeCoordinatorFeed({super.key, required this.wide});
+  const HomeCoordinatorFeed({super.key, required this.wide, this.quick});
 
   final bool wide;
+
+  /// Hızlı işlemler kartı (boşsa null; bölüm çizilmez).
+  final Widget? quick;
 
   /// Bölüm başına gösterilen satır.
   static const rowsPerSection = 3;
@@ -38,6 +40,17 @@ class HomeCoordinatorFeed extends ConsumerWidget {
     }
     final l = context.l10n;
     final summary = HomeCoordinatorSummary(board: board);
+    final quick = this.quick;
+    final quickSection = quick == null
+        ? null
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              NzSectionHeader(l.uiHomeQuickActions),
+              const Gap(NizamioSpacing.gapMd),
+              IntrinsicHeight(child: quick),
+            ],
+          );
     final queue = HomeSectionFrame(
       title: l.uiHomeQueueTitle,
       count: board.queue.length,
@@ -45,9 +58,10 @@ class HomeCoordinatorFeed extends ConsumerWidget {
           ? () => showReviewQueueSheet(context)
           : null,
       empty: l.uiHomeQueueEmpty,
+      table: (l.uiHomeTableTask, l.uiHomeTableDue),
       children: [
         for (final t in board.queue.take(rowsPerSection))
-          TaskQueueRow(task: t, today: today),
+          TaskQueueRow(task: t, today: today, flat: true),
       ],
     );
     final Widget? unassigned = board.unassigned.isEmpty
@@ -58,57 +72,60 @@ class HomeCoordinatorFeed extends ConsumerWidget {
             onAll: board.unassigned.length > rowsPerSection
                 ? () => context.appNav.openTasks(view: NzTaskView.unassigned)
                 : null,
+            table: const (null, null),
             children: [
               for (final t in board.unassigned.take(rowsPerSection))
-                TaskUnassignedRow(task: t, today: today),
+                TaskUnassignedRow(task: t, today: today, flat: true),
             ],
           );
-    final left = [
-      queue,
-      if (unassigned != null) ...[const Gap(NizamioSpacing.gapXl), unassigned],
-    ];
-    final right = [
+    final rest = [
       HomeTeamLoad(board: board),
-      const Gap(NizamioSpacing.gapXl),
       const HomeUpcomingMeetings(),
-      const Gap(NizamioSpacing.gapXl),
       const HomeMyDateRequests(),
     ];
+    if (!wide) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (i, w) in [
+            summary,
+            ?quickSection,
+            queue,
+            ?unassigned,
+            ...rest,
+          ].indexed) ...[if (i > 0) const Gap(NizamioSpacing.gapXl), w],
+        ],
+      );
+    }
+    Widget pair(Widget a, Widget? b, {int flexA = 1, int flexB = 1}) => Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(flex: flexA, child: a),
+        const Gap(homeWideGap),
+        Expanded(flex: flexB, child: b ?? const SizedBox.shrink()),
+      ],
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        summary,
+        // Özet geniş, hızlı işlemler dar (prototip ~ 3:2); ikisi üstten hizalı.
+        if (quickSection == null)
+          summary
+        else
+          pair(summary, quickSection, flexA: 3, flexB: 2),
         const Gap(NizamioSpacing.gapXl),
-        if (wide)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: left,
-                ),
-              ),
-              const Gap(homeWideGap),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: right,
-                ),
-              ),
-            ],
-          )
-        else ...[
-          ...left,
-          const Gap(NizamioSpacing.gapXl),
-          ...right,
-        ],
+        pair(queue, unassigned),
+        const Gap(NizamioSpacing.gapXl),
+        pair(rest[0], rest[1]),
+        const Gap(NizamioSpacing.gapXl),
+        pair(rest[2], null),
       ],
     );
   }
 }
 
-/// Bölüm iskeleti: kicker (sayaç ya da "Tümü"), satırlar arası boşluk, boş metni.
+/// Bölüm iskeleti: [NzSectionHeader] (başlık, sayı, "Tümü ›"), satırlar ve boş metni.
+/// [table] verilirse satırlar tek [NzTableCard] içinde (sütun adları; ikisi null → şeritsiz).
 class HomeSectionFrame extends StatelessWidget {
   const HomeSectionFrame({
     super.key,
@@ -117,6 +134,7 @@ class HomeSectionFrame extends StatelessWidget {
     this.count,
     this.onAll,
     this.empty,
+    this.table,
   });
 
   final String title;
@@ -124,30 +142,28 @@ class HomeSectionFrame extends StatelessWidget {
   final List<Widget> children;
   final VoidCallback? onAll;
   final String? empty;
+  final (String?, String?)? table;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    final onAll = this.onAll;
     final empty = this.empty;
+    final table = this.table;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (onAll != null)
-          NzKicker(
-            title,
-            action: NzButton.ghost(
-              label: l.uiHomeSeeAll,
-              size: NzSize.sm,
-              onPressed: onAll,
-            ),
-          )
-        else
-          NzKicker(title, trailing: count == null ? null : '$count'),
+        NzSectionHeader(
+          title,
+          count: count,
+          onAll: onAll,
+          allLabel: l.uiHomeSeeAll,
+        ),
         const Gap(NizamioSpacing.gapMd),
         if (children.isEmpty && empty != null)
           Text(empty, style: context.text.bodySm.copyWith(color: c.textMuted))
+        else if (table != null)
+          NzTableCard(leading: table.$1, trailing: table.$2, children: children)
         else
           for (final (i, w) in children.indexed) ...[
             if (i > 0) const Gap(NizamioSpacing.space2),
@@ -158,7 +174,7 @@ class HomeSectionFrame extends StatelessWidget {
   }
 }
 
-/// Karşılamanın altındaki etkin görünüm satırı: rol noktası + "Koordinatör · Altyapı ve
+/// Karşılamanın altındaki etkin görünüm kapsülü: rol noktası + "Koordinatör · Altyapı ve
 /// tesisat".
 class HomeViewLine extends StatelessWidget {
   const HomeViewLine({super.key, required this.view});
@@ -167,20 +183,12 @@ class HomeViewLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
-    return Row(
-      children: [
-        NzDot(color: effectiveRoleColor(c, view.role)),
-        const Gap(NizamioSpacing.space2),
-        Expanded(
-          child: Text(
-            context.l10n.viewCaption(view),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.text.bodySm.copyWith(color: c.textMuted),
-          ),
-        ),
-      ],
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: NzDotChip(
+        color: effectiveRoleColor(context.colors, view.role),
+        label: context.l10n.viewCaption(view),
+      ),
     );
   }
 }

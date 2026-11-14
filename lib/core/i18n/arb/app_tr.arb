@@ -3533,6 +3533,26 @@
   "@uiHomeRequestsEmpty": {
     "description": "ui.home.requests_empty"
   },
+  "uiHomeQaNewTask": "Yeni görev",
+  "@uiHomeQaNewTask": {
+    "description": "ui.home.qa_new_task"
+  },
+  "uiHomeQaMember": "Üye ekle",
+  "@uiHomeQaMember": {
+    "description": "ui.home.qa_member"
+  },
+  "uiHomeQaMemberLong": "Ekibe üye ekle",
+  "@uiHomeQaMemberLong": {
+    "description": "ui.home.qa_member_long"
+  },
+  "uiHomeTableTask": "Görev",
+  "@uiHomeTableTask": {
+    "description": "ui.home.table_task"
+  },
+  "uiHomeTableDue": "Bitiş",
+  "@uiHomeTableDue": {
+    "description": "ui.home.table_due"
+  },
   "uiIdentityLoginTitle": "Giriş yap",
   "@uiIdentityLoginTitle": {
     "description": "ui.identity.login_title"

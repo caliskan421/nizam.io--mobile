@@ -58,6 +58,7 @@ HomeDashboard teamDashboard(
           : count((t) => t.status == TaskStatus.inProgress && !late(t)),
       late: lateCount,
       awaitingApproval: review,
+      notStarted: count((t) => t.status == TaskStatus.todo),
     ),
     coordinatorships: [
       if (dept != null && deptName != null)

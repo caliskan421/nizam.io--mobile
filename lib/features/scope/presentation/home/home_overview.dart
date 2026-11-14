@@ -30,8 +30,13 @@ const _order = [
   TaskStatus.unknown,
 ];
 
+/// Genel durum kartı. [legendGrid] (yönetici tableti, hızlı işlemlerle aynı satır): halka ve
+/// 2×2 açıklama; düzen ölçüye bakmadan kurulur, satırın `IntrinsicHeight`'ında ölçülebilir.
+/// Verilmezse genişliğe göre seçilir (≥720 tek satır açıklama, dar ekranda liste).
 class HomeOverview extends ConsumerWidget {
-  const HomeOverview({super.key});
+  const HomeOverview({super.key, this.legendGrid = false});
+
+  final bool legendGrid;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => NzAsyncView<TaskCatalog>(
@@ -39,13 +44,14 @@ class HomeOverview extends ConsumerWidget {
     skeletonOnReload: true,
     loading: const NzSkeleton.block(height: 190),
     onRetry: () => ref.invalidate(taskCatalogControllerProvider),
-    data: (catalog) => _OverviewCard(catalog: catalog),
+    data: (catalog) => _OverviewCard(catalog: catalog, legendGrid: legendGrid),
   );
 }
 
 class _OverviewCard extends StatelessWidget {
-  const _OverviewCard({required this.catalog});
+  const _OverviewCard({required this.catalog, required this.legendGrid});
   final TaskCatalog catalog;
+  final bool legendGrid;
 
   @override
   Widget build(BuildContext context) {
@@ -80,225 +86,251 @@ class _OverviewCard extends StatelessWidget {
         '${catalog.truncated ? '≥' : ''}$total ${l.uiHomeTasksLc}: '
         '${[for (final s in visible) '${label(s)} ${counts[s]}, %${percent(s)}'].join('; ')}';
     final open = context.appNav.openTasks;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 720;
-        final ringSize = wide ? 140.0 : 132.0;
-        Widget legend(TaskStatus s) => Row(
+    Widget card(bool wide) {
+      final ringSize = wide ? 140.0 : 132.0;
+      Widget legend(TaskStatus s) => Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color(s), shape: BoxShape.circle),
+          ),
+          const Gap(8),
+          Expanded(
+            child: Text(
+              label(s),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: t.bodySm.copyWith(fontSize: 13, color: c.textMuted),
+            ),
+          ),
+          const Gap(8),
+          Text(
+            '%${percent(s)}',
+            style: t.monoSm.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: c.text,
+            ),
+          ),
+        ],
+      );
+      Widget wideLegend(TaskStatus s) => Container(
+        padding: const EdgeInsets.only(left: 18, top: 6, bottom: 6),
+        decoration: BoxDecoration(
+          border: Border(left: BorderSide(color: c.border)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: color(s),
-                shape: BoxShape.circle,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: color(s),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const Gap(8),
+                Flexible(
+                  child: Text(
+                    label(s),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: t.bodySm.copyWith(
+                      fontSize: 12,
+                      height: 16 / 12,
+                      color: c.textMuted,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const Gap(8),
-            Expanded(
+            const Gap(10),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
               child: Text(
-                label(s),
+                '%${percent(s)}',
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: t.bodySm.copyWith(fontSize: 13, color: c.textMuted),
-              ),
-            ),
-            const Gap(8),
-            Text(
-              '%${percent(s)}',
-              style: t.monoSm.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: c.text,
+                style: t.titleLg.copyWith(
+                  fontSize: 26,
+                  height: 30 / 26,
+                  letterSpacing: -.52,
+                  fontWeight: FontWeight.w600,
+                  color: c.text,
+                ),
               ),
             ),
           ],
-        );
-        Widget wideLegend(TaskStatus s) => Container(
-          padding: const EdgeInsets.only(left: 18, top: 6, bottom: 6),
-          decoration: BoxDecoration(
-            border: Border(left: BorderSide(color: c.border)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: color(s),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const Gap(8),
-                  Flexible(
-                    child: Text(
-                      label(s),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.bodySm.copyWith(
-                        fontSize: 12,
-                        height: 16 / 12,
-                        color: c.textMuted,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const Gap(10),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '%${percent(s)}',
-                  maxLines: 1,
-                  style: t.titleLg.copyWith(
-                    fontSize: 26,
-                    height: 30 / 26,
-                    letterSpacing: -.52,
-                    fontWeight: FontWeight.w600,
-                    color: c.text,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-        final items = wide
-            ? LayoutBuilder(
-                builder: (context, box) {
-                  if (visible.isEmpty) return const SizedBox.shrink();
-                  final minimum = MediaQuery.textScalerOf(context).scale(75);
-                  if (box.maxWidth / visible.length < minimum) {
-                    final columns = (box.maxWidth / minimum).floor().clamp(
-                      1,
-                      visible.length,
-                    );
-                    return Wrap(
-                      runSpacing: 14,
-                      children: [
-                        for (final s in visible)
-                          SizedBox(
-                            width: box.maxWidth / columns,
-                            child: wideLegend(s),
-                          ),
-                      ],
-                    );
-                  }
-                  return Row(
-                    children: [
-                      for (final s in visible) Expanded(child: wideLegend(s)),
-                    ],
-                  );
-                },
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (final (i, s) in visible.indexed) ...[
-                    if (i > 0) const Gap(8),
-                    legend(s),
-                  ],
-                ],
-              );
-        final ring = Semantics(
-          button: true,
-          label: semantics,
-          onTap: open,
-          excludeSemantics: true,
-          child: GestureDetector(
-            onTap: open,
-            child: SizedBox.square(
-              dimension: ringSize,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  CustomPaint(
-                    size: Size.square(ringSize),
-                    painter: _RingPainter(
-                      counts: counts,
-                      total: total,
-                      colors: {for (final s in _order) s: color(s)},
-                      track: c.surfaceRaised,
-                    ),
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${catalog.truncated ? '≥' : ''}$total',
-                        style: t.titleLg.copyWith(
-                          fontSize: 30,
-                          fontWeight: FontWeight.w600,
-                          color: c.text,
-                        ),
-                      ),
-                      Text(
-                        l.uiHomeTasksLc,
-                        style: t.caption.copyWith(
-                          fontSize: 12,
-                          color: c.textFaint,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: c.surface,
-            border: Border.all(color: c.border),
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(wide ? 22 : 18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        ),
+      );
+      final items = legendGrid
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  l.uiHomeOverviewTitle,
-                  style: t.bodyMd.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: c.text,
-                  ),
-                ),
-                const Gap(14),
-                Row(
-                  children: [
-                    if (wide)
+                for (var i = 0; i < visible.length; i += 2) ...[
+                  if (i > 0) const Gap(18),
+                  Row(
+                    children: [
+                      Expanded(child: wideLegend(visible[i])),
                       Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: ring,
-                        ),
-                      )
-                    else
-                      ring,
-                    if (!wide) const Gap(18),
-                    Expanded(flex: wide ? 4 : 1, child: items),
-                  ],
-                ),
-                if (catalog.truncated) ...[
-                  const Gap(12),
-                  Text(
-                    l.uiListsTruncated,
-                    style: t.caption.copyWith(color: c.textMuted),
+                        child: i + 1 < visible.length
+                            ? wideLegend(visible[i + 1])
+                            : const SizedBox.shrink(),
+                      ),
+                    ],
                   ),
                 ],
               ],
+            )
+          : wide
+          ? LayoutBuilder(
+              builder: (context, box) {
+                if (visible.isEmpty) return const SizedBox.shrink();
+                final minimum = MediaQuery.textScalerOf(context).scale(75);
+                if (box.maxWidth / visible.length < minimum) {
+                  final columns = (box.maxWidth / minimum).floor().clamp(
+                    1,
+                    visible.length,
+                  );
+                  return Wrap(
+                    runSpacing: 14,
+                    children: [
+                      for (final s in visible)
+                        SizedBox(
+                          width: box.maxWidth / columns,
+                          child: wideLegend(s),
+                        ),
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    for (final s in visible) Expanded(child: wideLegend(s)),
+                  ],
+                );
+              },
+            )
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final (i, s) in visible.indexed) ...[
+                  if (i > 0) const Gap(8),
+                  legend(s),
+                ],
+              ],
+            );
+      final ring = Semantics(
+        button: true,
+        label: semantics,
+        onTap: open,
+        excludeSemantics: true,
+        child: GestureDetector(
+          onTap: open,
+          child: SizedBox.square(
+            dimension: ringSize,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CustomPaint(
+                  size: Size.square(ringSize),
+                  painter: _RingPainter(
+                    counts: counts,
+                    total: total,
+                    colors: {for (final s in _order) s: color(s)},
+                    track: c.surfaceRaised,
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${catalog.truncated ? '≥' : ''}$total',
+                      style: t.titleLg.copyWith(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                        color: c.text,
+                      ),
+                    ),
+                    Text(
+                      l.uiHomeTasksLc,
+                      style: t.caption.copyWith(
+                        fontSize: 12,
+                        color: c.textFaint,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+      );
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: c.surface,
+          border: Border.all(color: c.border),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(wide ? 22 : 18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l.uiHomeOverviewTitle,
+                style: t.bodyMd.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: c.text,
+                ),
+              ),
+              const Gap(14),
+              Row(
+                children: [
+                  if (wide)
+                    Expanded(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: ring,
+                      ),
+                    )
+                  else
+                    ring,
+                  if (!wide) const Gap(18),
+                  if (legendGrid) const Gap(28),
+                  Expanded(
+                    flex: legendGrid
+                        ? 2
+                        : wide
+                        ? 4
+                        : 1,
+                    child: items,
+                  ),
+                ],
+              ),
+              if (catalog.truncated) ...[
+                const Gap(12),
+                Text(
+                  l.uiListsTruncated,
+                  style: t.caption.copyWith(color: c.textMuted),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (legendGrid) return card(true);
+    return LayoutBuilder(
+      builder: (context, constraints) => card(constraints.maxWidth >= 720),
     );
   }
 }

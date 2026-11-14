@@ -5,7 +5,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
-import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_glyph.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
 import 'home_sections.dart';
@@ -29,6 +29,7 @@ class HomeQuickActionsBar extends StatelessWidget {
     this.compact = false,
     this.title,
     this.columns = 0,
+    this.tileAspect = 1,
   });
 
   final ValueChanged<HomeQuickAction> onAction;
@@ -38,6 +39,9 @@ class HomeQuickActionsBar extends StatelessWidget {
 
   /// 0 → tek satırda eşit bölmeler; >0 → o kadar sütunlu ızgara (koordinatör: 2×2, kareye yakın).
   final int columns;
+
+  /// Izgara dokunacının en/boy oranı (1 = kare; yönetici tableti daha yatık).
+  final double tileAspect;
 
   /// [homeQuickActions] sonucu.
   final List<HomeQuickAction> actions;
@@ -53,8 +57,9 @@ class HomeQuickActionsBar extends StatelessWidget {
       Widget cell(int j) => Expanded(
         child: j < actions.length
             ? _QuickTile(
-                icon: quickActionIcon(actions[j]),
+                glyph: quickActionGlyph(actions[j]),
                 label: quickActionLabel(l, actions[j]),
+                aspect: tileAspect,
                 onPressed: () => onAction(actions[j]),
               )
             : const SizedBox.shrink(),
@@ -107,7 +112,7 @@ class HomeQuickActionsBar extends StatelessWidget {
               ),
             Expanded(
               child: _QuickAction(
-                icon: quickActionIcon(a),
+                glyph: quickActionGlyph(a),
                 label: quickActionLabel(l, a),
                 compact: compact,
                 onPressed: () => onAction(a),
@@ -127,12 +132,14 @@ class HomeQuickActionsBar extends StatelessWidget {
 /// Izgara dokunacı: kare, ince kenarlıklı; simge sol üstte, etiket sol altta (kalın).
 class _QuickTile extends StatelessWidget {
   const _QuickTile({
-    required this.icon,
+    required this.glyph,
     required this.label,
+    required this.aspect,
     required this.onPressed,
   });
 
-  final IconData icon;
+  final NzGlyph glyph;
+  final double aspect;
   final String label;
   final VoidCallback onPressed;
 
@@ -148,7 +155,7 @@ class _QuickTile extends StatelessWidget {
       excludeSemantics: true,
       child: NzPressable(
         child: AspectRatio(
-          aspectRatio: 1,
+          aspectRatio: aspect,
           child: Material(
             color: c.surfaceOverlay,
             shape: RoundedRectangleBorder(
@@ -165,9 +172,9 @@ class _QuickTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    NzIcon(
-                      icon,
-                      size: NizamioSize.iconSizeSm,
+                    NzGlyphIcon(
+                      glyph,
+                      size: NizamioSize.iconSize,
                       color: c.textMuted,
                     ),
                     Text(
@@ -191,13 +198,13 @@ class _QuickTile extends StatelessWidget {
 
 class _QuickAction extends StatelessWidget {
   const _QuickAction({
-    required this.icon,
+    required this.glyph,
     required this.label,
     required this.compact,
     required this.onPressed,
   });
 
-  final IconData icon;
+  final NzGlyph glyph;
   final String label;
   final bool compact;
   final VoidCallback onPressed;
@@ -234,10 +241,12 @@ class _QuickAction extends StatelessWidget {
                     ),
                     child: SizedBox.square(
                       dimension: NizamioSize.iconTileLg,
-                      child: NzIcon(
-                        icon,
-                        size: NizamioSize.iconSizeSm,
-                        color: c.text,
+                      child: Center(
+                        child: NzGlyphIcon(
+                          glyph,
+                          size: NizamioSize.iconSizeSm,
+                          color: c.text,
+                        ),
                       ),
                     ),
                   ),
@@ -314,40 +323,6 @@ class HomeTeamTile extends StatelessWidget {
           NzProgressBar(value: total == 0 ? 0 : count / total, color: bar),
         ],
       ),
-    );
-  }
-}
-
-/// Ekip, geniş düzen (başlık çağıranda, bkz. [HomeQuickActionsBar]): toplam üye + rol başına
-/// [HomeTeamTile]. Dokunma dar düzendeki gibi ([HomeTeam.onOpen]); toplam ve yönetici yalnız
-/// sayıdır.
-class HomeWideTeam extends StatelessWidget {
-  const HomeWideTeam({super.key, required this.team, required this.onOpen});
-
-  final TeamTotals team;
-  final ValueChanged<TeamRole> onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final total = team.users;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: NizamioSpacing.space2,
-      children: [
-        for (final w in [
-          HomeTeamTile(
-            dot: c.text,
-            bar: c.textMuted,
-            count: total,
-            total: total,
-            label: l.uiHomeTeamTotal,
-          ),
-          ...homeRoleTiles(context, team, onOpen),
-        ])
-          Expanded(child: w),
-      ],
     );
   }
 }

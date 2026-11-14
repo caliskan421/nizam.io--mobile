@@ -68,7 +68,7 @@ class RootTopBar extends ConsumerWidget {
 }
 
 /// Tablet liste bölmesinde kök üst çubuk gizlidir (`.tb-pane`); seçili program adı (S2) orada
-/// Ana sayfanın başında kalın ve büyük (`cardTitle`, `text-faint`) durur. Yükleme sırasında ve program kimliği seçimle uyuşmadığında etiket
+/// Ana sayfanın başında tarih satırının yazı ailesiyle (`kicker`), büyük ve kalın, `text-faint` durur. Yükleme sırasında ve program kimliği seçimle uyuşmadığında etiket
 /// gizlenir; ilk yüklemede satırın yeri ayrılır. Aynı programın yenilemesi hata verirse son
 /// bilinen ad kalabilir; bu gösterim yetki kanıtı değildir.
 class RootProgramLine extends ConsumerWidget {
@@ -99,7 +99,9 @@ class RootProgramLine extends ConsumerWidget {
         program ?? ' ',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: context.text.labelLg.copyWith(
+        // Tarih satırıyla aynı yazı ailesi (`kicker`), daha büyük ve kalın.
+        style: context.text.kicker.copyWith(
+          fontSize: context.text.labelLg.fontSize,
           color: context.colors.textFaint,
           fontWeight: FontWeight.w700,
         ),

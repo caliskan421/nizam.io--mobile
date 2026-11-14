@@ -74,6 +74,8 @@ class ApiHomeDashboardRepository implements HomeDashboardRepository {
         inProgressOnTime: null,
         late: t.late,
         awaitingApproval: t.awaitingApproval,
+        notStarted: t.notStarted,
+        dateRequests: t.dateRequests,
       ),
       team: report.team,
       coordinatorships: report.coordinatorships,

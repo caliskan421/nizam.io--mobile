@@ -6,6 +6,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/layout/nz_uniform_grid.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
+import '../../../../core/ui/widgets/nz_glyph.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
@@ -48,7 +49,7 @@ class HomeGreeting extends StatelessWidget {
         Text(
           l.dateKicker(today),
           style: t.kicker.copyWith(
-            color: context.colors.text,
+            color: context.colors.textMuted,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -75,117 +76,117 @@ class HomeGreeting extends StatelessWidget {
   }
 }
 
-/// Özet kutuları (tamamlanma, devam eden, gecikmede, onay bekleyen): dar ekranda 2×2, geniş ana
-/// sayfada tek satır ([columns] 4). [showDateRequests] (yönetici) bekleyen tarih talepleri kutusunu
-/// ekler: dar ekranda ızgaranın üstünde yatay şerit, geniş ekranda satırın beşinci kutusu.
-/// [dateRequests] yüklenirken null ("–").
+/// Ana sayfa özet kutusu türü.
+enum HomeKpi { done, inProgress, review, notStarted, late, dateRequest }
+
+/// Telefon sırası (2 sütun): gecikme ve tarih talebi üstte; tarih talebi yalnız sayı bilinirken
+/// (yönetici özeti).
+List<HomeKpi> homeKpisNarrow(TaskTotals t) => [
+  HomeKpi.late,
+  if (t.dateRequests != null) HomeKpi.dateRequest,
+  HomeKpi.notStarted,
+  HomeKpi.review,
+  HomeKpi.done,
+  HomeKpi.inProgress,
+];
+
+/// Tek özet kutusu; dokunma → görev listesi o kutunun görünümüyle.
+Widget homeKpiTile(
+  BuildContext context,
+  HomeKpi kpi,
+  TaskTotals t,
+  ValueChanged<NzTaskView> onOpen,
+) {
+  final l = context.l10n;
+  final c = context.colors;
+  double ratio(int a, int b) => b == 0 ? 0 : a / b;
+  final (view, glyph, tone, label, value, progress) = switch (kpi) {
+    HomeKpi.done => (
+      NzTaskView.done,
+      NzGlyphs.done,
+      c.taskDone,
+      l.uiHomeKpiDone,
+      l.percent(ratio(t.done, t.total)),
+      ratio(t.done, t.total),
+    ),
+    HomeKpi.inProgress => (
+      NzTaskView.inProgress,
+      NzGlyphs.inProgress,
+      c.inProgress,
+      l.uiHomeKpiDoing,
+      '${t.inProgress}',
+      ratio(t.inProgress, t.total),
+    ),
+    HomeKpi.review => (
+      NzTaskView.review,
+      NzGlyphs.review,
+      c.warning,
+      l.uiHomeKpiReview,
+      '${t.awaitingApproval}',
+      ratio(t.awaitingApproval, t.open),
+    ),
+    HomeKpi.notStarted => (
+      NzTaskView.notStarted,
+      NzGlyphs.notStarted,
+      c.textMuted,
+      l.uiTasksStatusTodo,
+      '${t.notStarted}',
+      ratio(t.notStarted, t.total),
+    ),
+    HomeKpi.late => (
+      NzTaskView.late,
+      NzGlyphs.late,
+      c.danger,
+      l.uiHomeKpiLate,
+      '${t.late}',
+      ratio(t.late, t.open),
+    ),
+    HomeKpi.dateRequest => (
+      NzTaskView.dateRequest,
+      NzGlyphs.dateRequest,
+      c.warning,
+      l.uiHomeKpiDateRequest,
+      '${t.dateRequests ?? 0}',
+      ratio(t.dateRequests ?? 0, t.open),
+    ),
+  };
+  return NzKpiTile(
+    glyph: glyph,
+    tone: tone,
+    label: label,
+    value: value,
+    valueColor: kpi == HomeKpi.late ? c.danger : null,
+    progress: progress,
+    onTap: () => onOpen(view),
+    semanticLabel: '$label: $value. ${l.uiHomeOpenList}',
+  );
+}
+
+/// Özet kutuları ızgarası ([kpis] sırasıyla, eşit yükseklikte).
 class HomeKpiGrid extends StatelessWidget {
   const HomeKpiGrid({
     super.key,
     required this.tasks,
+    required this.kpis,
     required this.onOpen,
     this.columns = 2,
-    this.showDateRequests = false,
-    this.dateRequests,
   });
 
   final TaskTotals tasks;
+  final List<HomeKpi> kpis;
   final int columns;
-  final bool showDateRequests;
-  final int? dateRequests;
-
-  /// Kutuya dokunma → görev listesi o kutunun görünümüyle (prototip `go.done/doing/late/review`).
   final ValueChanged<NzTaskView> onOpen;
 
   @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final t = tasks;
-    final wide = columns > 2;
-    double ratio(int a, int b) => b == 0 ? 0 : a / b;
-    NzKpiTile tile({
-      required NzTaskView view,
-      required IconData icon,
-      required Color tone,
-      required String label,
-      required String value,
-      required double progress,
-      Color? valueColor,
-      bool horizontal = false,
-    }) => NzKpiTile(
-      icon: icon,
-      tone: tone,
-      label: label,
-      value: value,
-      valueColor: valueColor,
-      progress: progress,
-      horizontal: horizontal,
-      onTap: () => onOpen(view),
-      semanticLabel: '$label: $value. ${l.uiHomeOpenList}',
-    );
-    final requests = showDateRequests
-        ? tile(
-            view: NzTaskView.dateRequest,
-            icon: NzIcons.eventRepeat,
-            tone: c.info,
-            label: l.uiHomeKpiDateRequest,
-            value: dateRequests == null ? '–' : '${dateRequests!}',
-            progress: ratio(dateRequests ?? 0, t.open),
-            horizontal: !wide,
-          )
-        : null;
-    final grid = HomeGrid(
-      columns: wide && requests != null ? columns + 1 : columns,
+  Widget build(BuildContext context) => Semantics(
+    container: true,
+    label: context.l10n.uiHomeSummaryLabel,
+    child: HomeGrid(
+      columns: columns,
       gap: NizamioSpacing.gapMd,
-      children: [
-        tile(
-          view: NzTaskView.done,
-          icon: NzIcons.check,
-          tone: c.taskDone,
-          label: l.uiHomeKpiDone,
-          value: '${t.done}',
-          progress: ratio(t.done, t.total),
-        ),
-        tile(
-          view: NzTaskView.inProgress,
-          icon: NzIcons.bolt,
-          tone: c.inProgress,
-          label: l.uiHomeKpiDoing,
-          value: '${t.inProgress}',
-          progress: ratio(t.inProgress, t.total),
-        ),
-        tile(
-          view: NzTaskView.late,
-          icon: NzIcons.warning,
-          tone: c.danger,
-          label: l.uiHomeKpiLate,
-          value: '${t.late}',
-          valueColor: c.danger,
-          progress: ratio(t.late, t.open),
-        ),
-        tile(
-          view: NzTaskView.review,
-          icon: NzIcons.clock,
-          tone: c.warning,
-          label: l.uiHomeKpiReview,
-          value: '${t.awaitingApproval}',
-          progress: ratio(t.awaitingApproval, t.open),
-        ),
-        if (wide) ?requests,
-      ],
-    );
-    return Semantics(
-      container: true,
-      label: l.uiHomeSummaryLabel,
-      child: wide || requests == null
-          ? grid
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [requests, const Gap(NizamioSpacing.gapMd), grid],
-            ),
-    );
-  }
+      children: [for (final k in kpis) homeKpiTile(context, k, tasks, onOpen)],
+    ),
+  );
 }
 
 /// Hızlı işlem türü (kutucuk ve kısayol menüsü aynı listeyi kullanır). İşlem geçmişi buradan
@@ -258,6 +259,16 @@ class HomeQuickActions extends StatelessWidget {
     );
   }
 }
+
+/// Dokunaç ikonu (tasarım çizgi ikonları); kısayol menüsü [quickActionIcon] kullanır.
+NzGlyph quickActionGlyph(HomeQuickAction a) => switch (a) {
+  HomeQuickAction.history => NzGlyphs.history,
+  HomeQuickAction.meeting => NzGlyphs.meeting,
+  HomeQuickAction.deleted => NzGlyphs.deleted,
+  HomeQuickAction.report => NzGlyphs.report,
+  HomeQuickAction.newTask => NzGlyphs.add,
+  HomeQuickAction.member => NzGlyphs.personAdd,
+};
 
 IconData quickActionIcon(HomeQuickAction a) => switch (a) {
   HomeQuickAction.history => NzIcons.history,

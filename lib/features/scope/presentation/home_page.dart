@@ -151,10 +151,8 @@ class _Feed extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final d = dashboard;
-    final pending = ref.watch(homePendingProvider);
     // Bölümler etkin görünümden seçilir (yönetici kuyrukları, koordinatör bölümleri).
     final access = ref.watch(effectiveAccessProvider);
-    final isAdmin = access.canAdminister;
     // Etkin rolün açabildikleri; boşsa (üye görünümü) bölüm çizilmez.
     final actions = _actionsFor(access);
     final quick = [
@@ -184,6 +182,7 @@ class _Feed extends ConsumerWidget {
     ];
     // Kişi kümeleri ortak katalogdan; yalnız ekip bölümü izler (katalog değişimi akışı kurmaz).
     // Ekip sayıları yalnız yönetici özetinde bilinir; yoksa kutu gizlenir.
+    // Geniş düzende yalnız rol kutuları (başlık ve hizalama çağıranda).
     Widget? team({required bool wide}) => switch (d.team) {
       null => null,
       final team => Consumer(
@@ -192,7 +191,14 @@ class _Feed extends ConsumerWidget {
           void open(TeamRole role) =>
               nav.openTasks(people: people?.of(role) ?? const []);
           return wide
-              ? HomeWideTeam(team: team, onOpen: open)
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: NizamioSpacing.gapMd,
+                  children: [
+                    for (final w in homeRoleTiles(context, team, open))
+                      Expanded(child: w),
+                  ],
+                )
               : HomeTeam(team: team, onOpen: open);
         },
       ),
@@ -205,26 +211,8 @@ class _Feed extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, box) {
         final wide = box.maxWidth >= homeWideMinWidth;
-        final counts = d.tasks;
-        final taskTotals = isAdmin && !pending.isLoading && !pending.hasError
-            ? TaskTotals(
-                total: counts.total,
-                done: counts.done,
-                inProgress: counts.inProgress,
-                late: counts.late,
-                awaitingApproval: counts.awaitingApproval,
-                inProgressOnTime: pending.value?.inProgressOnTime,
-              )
-            : counts;
-        final kpis = HomeKpiGrid(
-          tasks: taskTotals,
-          columns: wide ? 4 : 2,
-          showDateRequests: isAdmin,
-          dateRequests: pending.value?.items
-              .where((i) => i.kind == PendingKind.dateChange)
-              .length,
-          onOpen: (view) => nav.openTasks(view: view),
-        );
+        final taskTotals = d.tasks;
+        void openView(NzTaskView view) => nav.openTasks(view: view);
         final coords = HomeCoordinatorships(
           items: d.coordinatorships,
           truncated: d.truncated,
@@ -282,7 +270,11 @@ class _Feed extends ConsumerWidget {
               const Gap(NizamioSpacing.gapXl),
               const HomeOverview(),
               const Gap(NizamioSpacing.gapXl),
-              kpis,
+              HomeKpiGrid(
+                tasks: taskTotals,
+                kpis: homeKpisNarrow(taskTotals),
+                onOpen: openView,
+              ),
               ...truncated,
               const Gap(NizamioSpacing.gapXl),
               ...quick,
@@ -296,47 +288,92 @@ class _Feed extends ConsumerWidget {
             ],
           );
         }
-        final wideTeam = team(wide: true);
-        final bar = actions.isEmpty
+        // Tablet: genel durum + 2×2 hızlı işlemler (aynı yükseklik); tamamlanma, devam, onay,
+        // başlamadı; ekip rolleri + gecikme ve tarih talebi (üst satırın 3. ve 4. sütunu).
+        final quickCard = actions.isEmpty
             ? null
-            : HomeQuickActionsBar(onAction: onQuickAction, actions: actions);
+            : HomeQuickActionsBar(
+                onAction: onQuickAction,
+                actions: actions,
+                title: context.l10n.uiHomeQuickActionsTitle,
+                columns: 2,
+                tileAspect: 1.65,
+              );
+        final wideTeam = team(wide: true);
+        final lower = LayoutBuilder(
+          builder: (context, box) {
+            const g = NizamioSpacing.gapMd;
+            final col = (box.maxWidth - 3 * g) / 4;
+            final left = 2 * col + g;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (wideTeam != null) ...[
+                  SizedBox(
+                    width: left,
+                    child: NzKicker(context.l10n.uiHomeTeam),
+                  ),
+                  const Gap(NizamioSpacing.gapMd),
+                ],
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(width: left, child: wideTeam),
+                      for (final k in [
+                        HomeKpi.late,
+                        if (taskTotals.dateRequests != null)
+                          HomeKpi.dateRequest,
+                      ]) ...[
+                        const Gap(g),
+                        SizedBox(
+                          width: col,
+                          child: homeKpiTile(context, k, taskTotals, openView),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             greeting,
             const Gap(NizamioSpacing.gapXl),
-            const HomeOverview(),
-            const Gap(NizamioSpacing.gapXl),
-            kpis,
-            ...truncated,
-            const Gap(NizamioSpacing.gapXl),
-            if (bar != null || wideTeam != null) ...[
-              Row(
-                children: [
-                  if (bar != null)
-                    Expanded(child: NzKicker(context.l10n.uiHomeQuickActions)),
-                  if (wideTeam != null) ...[
-                    if (bar != null) const Gap(homeWideGap),
-                    Expanded(child: NzKicker(context.l10n.uiHomeTeam)),
-                  ],
-                ],
-              ),
-              const Gap(NizamioSpacing.gapMd),
-              // Hızlı işlemler ile ekip aynı boyda (kısa olan uzar).
+            if (quickCard == null)
+              const HomeOverview()
+            else
               IntrinsicHeight(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (bar != null) Expanded(child: bar),
-                    if (wideTeam != null) ...[
-                      if (bar != null) const Gap(homeWideGap),
-                      Expanded(child: wideTeam),
-                    ],
+                    const Expanded(
+                      flex: 5,
+                      child: HomeOverview(legendGrid: true),
+                    ),
+                    const Gap(homeWideGap),
+                    Expanded(flex: 3, child: quickCard),
                   ],
                 ),
               ),
-              const Gap(NizamioSpacing.gapXl),
-            ],
+            const Gap(NizamioSpacing.gapXl),
+            HomeKpiGrid(
+              tasks: taskTotals,
+              kpis: const [
+                HomeKpi.done,
+                HomeKpi.inProgress,
+                HomeKpi.review,
+                HomeKpi.notStarted,
+              ],
+              columns: 4,
+              onOpen: openView,
+            ),
+            ...truncated,
+            const Gap(NizamioSpacing.gapXl),
+            lower,
             const Gap(NizamioSpacing.gapXl),
             coords,
             const Gap(NizamioSpacing.gapXl),

@@ -10,7 +10,7 @@ import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/core/ui/widgets/feedback/feedback.dart';
 import 'package:nizamio/features/archive/archive.dart';
 import 'package:nizamio/features/archive/domain/archive.dart';
-import 'package:nizamio/features/archive/presentation/archive/archive_folder_card.dart';
+import 'package:nizamio/features/archive/presentation/archive/archive_storage.dart';
 
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
@@ -53,14 +53,12 @@ void main() {
     final repo = FakeArchiveRepository();
     final (_, nav, _) = await _open(tester, repo: repo, admin: true);
     expect(find.text(_l.uiArchiveTitle), findsOneWidget);
-    expect(find.text(_l.uiArchiveSummaryFiles), findsOneWidget);
-    expect(find.text('2 ${_l.uiArchiveFoldersLc}'), findsOneWidget);
-    expect(find.text('${_l.uiArchiveFoldersTitle} · 2'), findsOneWidget);
-    // Kartta yalnız klasör adı ve dosya sayısı (örnek veri yok); aynı metin özetteki boyut
-    // kutucuğunun alt yazısında da var (toplam 3 dosya).
-    expect(find.text('3 dosya'), findsNWidgets(2));
-    expect(find.text(_l.uiArchiveNoFiles), findsOneWidget);
-    expect(find.bySemanticsLabel('Altyapı, 3 dosya'), findsOneWidget);
+    // Depolama kartı (dosya, klasör, görev) ve koordinatörlük kartları.
+    expect(find.text(_l.uiArchiveStorage), findsOneWidget);
+    expect(find.text(_l.uiArchiveStatFolders), findsOneWidget);
+    expect(find.text(_l.uiArchiveTags), findsOneWidget);
+    expect(find.text('${_l.uiArchiveCoordinatorshipsLc} · 2'), findsOneWidget);
+    expect(find.byType(ArchiveStatFolderCard), findsNWidgets(2));
     expect(find.text('grup'), findsNothing);
     // Koordinatör satırının departmanı başlık olarak gider.
     expect(repo.calls.first, ('folders', 'd1', null));
@@ -97,14 +95,14 @@ void main() {
             ),
         ];
       await _open(tester, repo: repo, admin: true);
-      final heading = find.text('${_l.uiArchiveFoldersTitle} · 7');
-      final cards = find.byType(ArchiveFolderCard);
+      final heading = find.text('${_l.uiArchiveCoordinatorshipsLc} · 7');
+      final cards = find.byType(ArchiveStatFolderCard);
       final headingRect = tester.getRect(heading);
       final first = tester.getRect(cards.first);
       for (var i = 0; i < 7; i++) {
         final card = cards.at(i);
         final rect = tester.getRect(card);
-        final folder = tester.widget<ArchiveFolderCard>(card).folder;
+        final folder = tester.widget<ArchiveStatFolderCard>(card).folder;
         final title = find.descendant(
           of: card,
           matching: find.text(folder.name),
@@ -118,7 +116,7 @@ void main() {
         expect(rect.height, closeTo(first.height, .1));
         expect(
           tester.getTopLeft(meta).dy - tester.getRect(title).bottom,
-          inInclusiveRange(0, 3),
+          inInclusiveRange(0, 4),
         );
       }
       expect(first.left, closeTo(headingRect.left, .1));
@@ -138,7 +136,7 @@ void main() {
     await _tap(tester, find.byIcon(Icons.search_rounded).first);
     await tester.enterText(find.byType(TextField).first, 'bili');
     await settle(tester);
-    expect(find.text('${_l.uiArchiveFoldersTitle} · 1'), findsOneWidget);
+    expect(find.text('${_l.uiArchiveCoordinatorshipsLc} · 1'), findsOneWidget);
     await pumpScreen(tester, h, const SizedBox.shrink());
     await settle(tester);
     await pumpScreen(tester, h, const ArchivePage());

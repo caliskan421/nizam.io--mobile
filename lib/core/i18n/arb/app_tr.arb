@@ -1729,6 +1729,46 @@
   "@uiArchiveStorage": {
     "description": "ui.archive.storage"
   },
+  "uiArchiveTags": "Etiketler",
+  "@uiArchiveTags": {
+    "description": "ui.archive.tags"
+  },
+  "uiArchiveTagsClear": "Temizle",
+  "@uiArchiveTagsClear": {
+    "description": "ui.archive.tags_clear"
+  },
+  "uiArchiveStatFolders": "Klasör",
+  "@uiArchiveStatFolders": {
+    "description": "ui.archive.stat_folders"
+  },
+  "uiArchiveStatTasks": "Görev",
+  "@uiArchiveStatTasks": {
+    "description": "ui.archive.stat_tasks"
+  },
+  "uiArchiveTasksLc": "görev",
+  "@uiArchiveTasksLc": {
+    "description": "ui.archive.tasks_lc"
+  },
+  "uiArchiveCoordinatorshipsLc": "koordinatörlükler",
+  "@uiArchiveCoordinatorshipsLc": {
+    "description": "ui.archive.coordinatorships_lc"
+  },
+  "uiArchiveSortBySize": "Boyut",
+  "@uiArchiveSortBySize": {
+    "description": "ui.archive.sort_by_size"
+  },
+  "uiArchiveSortByFiles": "Dosya",
+  "@uiArchiveSortByFiles": {
+    "description": "ui.archive.sort_by_files"
+  },
+  "uiArchiveSortByName": "Ad",
+  "@uiArchiveSortByName": {
+    "description": "ui.archive.sort_by_name"
+  },
+  "uiArchiveSortFlip": "Sıra yönünü değiştir",
+  "@uiArchiveSortFlip": {
+    "description": "ui.archive.sort_flip"
+  },
   "uiArchiveMb": "MB",
   "@uiArchiveMb": {
     "description": "ui.archive.mb"

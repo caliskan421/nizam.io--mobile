@@ -5,6 +5,8 @@ import '../../../core/refresh.dart';
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import '../../tasks/tasks.dart';
+import '../domain/archive_summary.dart';
+import '../domain/records.dart';
 import 'archive_actions_controller.dart';
 import 'archive_files_controller.dart';
 import 'archive_folder_controller.dart';
@@ -14,27 +16,46 @@ import 'archive_providers.dart';
 
 part 'archive_controller.g.dart';
 
-/// Arşiv ekranının durumu: klasör araması ve süren indirme.
+/// Arşiv ekranının durumu: klasör araması, etiket süzgeci, kart sırası ve süren indirme.
 @immutable
 final class ArchiveViewState {
   const ArchiveViewState({
     this.searchOpen = false,
     this.query = '',
     this.busy = false,
+    this.tags = const {},
+    this.sort = ArchiveFolderSort.size,
+    this.descending = true,
   });
 
   final bool searchOpen;
   final String query;
 
+  /// Etiket süzgeci (yönetici ana sayfası); boş → bütün etiketler.
+  final Set<RecordTag> tags;
+
+  /// Koordinatörlük kartlarının sırası ve yönü.
+  final ArchiveFolderSort sort;
+  final bool descending;
+
   /// Tam arşiv indirmesi sürüyor (çift dokunuş tek istek).
   final bool busy;
 
-  ArchiveViewState copyWith({bool? searchOpen, String? query, bool? busy}) =>
-      ArchiveViewState(
-        searchOpen: searchOpen ?? this.searchOpen,
-        query: query ?? this.query,
-        busy: busy ?? this.busy,
-      );
+  ArchiveViewState copyWith({
+    bool? searchOpen,
+    String? query,
+    bool? busy,
+    Set<RecordTag>? tags,
+    ArchiveFolderSort? sort,
+    bool? descending,
+  }) => ArchiveViewState(
+    searchOpen: searchOpen ?? this.searchOpen,
+    query: query ?? this.query,
+    busy: busy ?? this.busy,
+    tags: tags ?? this.tags,
+    sort: sort ?? this.sort,
+    descending: descending ?? this.descending,
+  );
 }
 
 /// Arşiv ekranı komutları: yerel arama ve dönemin tam arşivi.
@@ -77,6 +98,18 @@ class ArchiveController extends _$ArchiveController {
   );
 
   void setQuery(String q) => state = state.copyWith(query: q);
+
+  /// Etiket süzgecini değiştirir (boş küme → bütün etiketler).
+  void setTags(Set<RecordTag> tags) =>
+      state = state.copyWith(tags: Set.unmodifiable(tags));
+
+  /// Sıralama ölçütünü sırayla değiştirir (boyut → dosya → ad).
+  void cycleSort() => state = state.copyWith(
+    sort: ArchiveFolderSort
+        .values[(state.sort.index + 1) % ArchiveFolderSort.values.length],
+  );
+
+  void flipDirection() => state = state.copyWith(descending: !state.descending);
 
   /// Dönemin tam arşivi (`archiveFullZip`; yalnız şirket yöneticisi — diğer rollerde istek
   /// gönderilmez, vazgeçme döner). [name] kayıt adı.

@@ -1455,6 +1455,36 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiArchiveStorage => 'Depolama';
 
   @override
+  String get uiArchiveTags => 'Etiketler';
+
+  @override
+  String get uiArchiveTagsClear => 'Temizle';
+
+  @override
+  String get uiArchiveStatFolders => 'Klasör';
+
+  @override
+  String get uiArchiveStatTasks => 'Görev';
+
+  @override
+  String get uiArchiveTasksLc => 'görev';
+
+  @override
+  String get uiArchiveCoordinatorshipsLc => 'koordinatörlükler';
+
+  @override
+  String get uiArchiveSortBySize => 'Boyut';
+
+  @override
+  String get uiArchiveSortByFiles => 'Dosya';
+
+  @override
+  String get uiArchiveSortByName => 'Ad';
+
+  @override
+  String get uiArchiveSortFlip => 'Sıra yönünü değiştir';
+
+  @override
   String get uiArchiveMb => 'MB';
 
   @override

@@ -4,30 +4,6 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/surfaces/nz_card.dart';
-import '../../domain/archive.dart';
-import 'archive_texts.dart';
-
-/// Arşiv klasörü kartı: yalnız klasör adı ve sunucudaki dosya sayısı.
-class ArchiveFolderCard extends StatelessWidget {
-  const ArchiveFolderCard({
-    super.key,
-    required this.folder,
-    required this.onTap,
-  });
-  final ArchiveFolder folder;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final files = folder.files > 0 ? l.files(folder.files) : l.uiArchiveNoFiles;
-    return ArchiveFolderCardSurface(
-      title: folder.name,
-      summary: files,
-      onTap: onTap,
-    );
-  }
-}
 
 /// Arşiv ve görev klasörleri için aynı görsel ve erişilebilir kart yüzü.
 class ArchiveFolderCardSurface extends StatelessWidget {
@@ -75,7 +51,7 @@ class ArchiveFolderCardSurface extends StatelessWidget {
           children: [
             Row(
               children: [
-                const ExcludeSemantics(child: _ArchiveFolderIcon()),
+                const ExcludeSemantics(child: ArchiveFolderIcon()),
                 const Spacer(),
                 if (badge != null)
                   DecoratedBox(
@@ -141,8 +117,8 @@ class ArchiveFolderCardSurface extends StatelessWidget {
 }
 
 /// Karttaki küçük klasörün arka sekmesi ve üst ışıklı ön yüzü.
-class _ArchiveFolderIcon extends StatelessWidget {
-  const _ArchiveFolderIcon();
+class ArchiveFolderIcon extends StatelessWidget {
+  const ArchiveFolderIcon({super.key});
 
   @override
   Widget build(BuildContext context) {

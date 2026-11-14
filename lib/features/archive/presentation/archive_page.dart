@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -20,16 +22,17 @@ import '../../tasks/tasks.dart' show effectiveAccessProvider;
 import '../application/archive_controller.dart';
 import '../application/archive_folders_controller.dart';
 import '../application/archive_providers.dart';
+import '../application/archive_summary_provider.dart';
 import '../domain/archive.dart';
-import 'archive/archive_folder_card.dart';
+import '../domain/archive_summary.dart';
 import 'archive/archive_folder_grid.dart';
 import 'archive/archive_outcome.dart';
 import 'archive/archive_role_views.dart';
-import 'archive/archive_summary_cards.dart';
+import 'archive/archive_storage.dart';
 import 'archive/archive_upload.dart';
 
-/// Arşiv (prototip `archive`): başlık + ara + yükle, dosya/klasör özeti, klasör kartları
-/// (sunucunun klasör özeti) → klasör ayrıntısı. Alt menüde modül sekmesine yeniden dokunmak
+/// Arşiv (prototip `archive`): başlık + ara + yükle; yöneticide etiket süzgeci, depolama kartı
+/// ve sıralanabilir koordinatörlük kartları → klasör ayrıntısı. Alt menüde modül sekmesine yeniden dokunmak
 /// kısayol menüsünü açar. Yükleme önce görev seçtirir, sonra dosya ([startArchiveRootUpload]).
 class ArchivePage extends ConsumerStatefulWidget {
   const ArchivePage({super.key});
@@ -224,23 +227,52 @@ class _Folders extends ConsumerWidget {
       }
     }
     final query = ref.watch(archiveControllerProvider.select((v) => v.query));
+    final (sort, descending) = ref.watch(
+      archiveControllerProvider.select((v) => (v.sort, v.descending)),
+    );
+    final tags = ref.watch(archiveControllerProvider.select((v) => v.tags));
+    // Yönetici: etiket süzgeci, depolama kartı, sıralanabilir koordinatörlük kartları.
+    final stats = ref.watch(archiveStatsProvider).value;
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final files = all.fold<int>(0, (s, f) => s + f.files);
-    final list = visibleFolders(all, query: query);
+    final list = sortArchiveFolders(
+      visibleFolders(all, query: query),
+      stats: stats,
+      sort: sort,
+      descending: descending,
+    );
+    final largest = all.fold(
+      0,
+      (m, f) => math.max(m, stats?.folder(f.code).bytes ?? 0),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ArchiveSummaryCards(files: files, folders: all.length),
+        const ArchiveTagChip(),
         const Gap(NizamioSpacing.space5),
-        NzKicker('${l.uiArchiveFoldersTitle} · ${list.length}'),
+        ArchiveStorageCard(stats: stats, folders: all.length),
         const Gap(NizamioSpacing.space6),
+        Row(
+          children: [
+            Expanded(
+              child: NzKicker(
+                '${l.uiArchiveCoordinatorshipsLc} · ${list.length}',
+              ),
+            ),
+            const ArchiveSortControl(),
+          ],
+        ),
+        const Gap(NizamioSpacing.space4),
         ArchiveFolderGrid(
           children: [
             for (final folder in list)
-              ArchiveFolderCard(
+              ArchiveStatFolderCard(
                 folder: folder,
+                stats: stats?.folder(folder.code),
+                total: stats?.bytes ?? 0,
+                largest: largest,
+                filtered: tags.isNotEmpty,
                 onTap: () => context.appNav.openArchiveFolder(folder.code),
               ),
           ],

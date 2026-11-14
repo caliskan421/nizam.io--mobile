@@ -2686,6 +2686,66 @@ abstract class AppLocalizations {
   /// **'Depolama'**
   String get uiArchiveStorage;
 
+  /// ui.archive.tags
+  ///
+  /// In tr, this message translates to:
+  /// **'Etiketler'**
+  String get uiArchiveTags;
+
+  /// ui.archive.tags_clear
+  ///
+  /// In tr, this message translates to:
+  /// **'Temizle'**
+  String get uiArchiveTagsClear;
+
+  /// ui.archive.stat_folders
+  ///
+  /// In tr, this message translates to:
+  /// **'Klasör'**
+  String get uiArchiveStatFolders;
+
+  /// ui.archive.stat_tasks
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get uiArchiveStatTasks;
+
+  /// ui.archive.tasks_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'görev'**
+  String get uiArchiveTasksLc;
+
+  /// ui.archive.coordinatorships_lc
+  ///
+  /// In tr, this message translates to:
+  /// **'koordinatörlükler'**
+  String get uiArchiveCoordinatorshipsLc;
+
+  /// ui.archive.sort_by_size
+  ///
+  /// In tr, this message translates to:
+  /// **'Boyut'**
+  String get uiArchiveSortBySize;
+
+  /// ui.archive.sort_by_files
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya'**
+  String get uiArchiveSortByFiles;
+
+  /// ui.archive.sort_by_name
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad'**
+  String get uiArchiveSortByName;
+
+  /// ui.archive.sort_flip
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıra yönünü değiştir'**
+  String get uiArchiveSortFlip;
+
   /// ui.archive.mb
   ///
   /// In tr, this message translates to:
